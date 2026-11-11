@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#62b4c2">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Hafenmeister</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/ui-pc.css">
+  <link rel="stylesheet" href="css/ui-tablet.css">
+  <link rel="stylesheet" href="css/ui-phone.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body class="hm" data-phase="tag">
+  <div id="game">
+    <canvas id="stage" aria-label="Hafen"></canvas>
+
+    <header id="hud-top" class="hud">
+      <span class="stat" id="money">0 €</span>
+      <span class="stat" id="rep">Ruf 3,0</span>
+      <span class="stat" id="day">Tag 1</span>
+      <span class="spacer"></span>
+      <button type="button" class="hud-btn" id="btn-overview" aria-label="Ganzen Hafen zeigen">Übersicht</button>
+      <button type="button" class="hud-btn" id="btn-pause" aria-label="Pause">Pause</button>
+    </header>
+
+    <footer id="hud-bottom" class="hud">
+      <div id="queue" aria-label="Wartende Boote"></div>
+      <span class="spacer"></span>
+      <button type="button" class="hud-btn" id="btn-build">Bauen</button>
+    </footer>
+
+    <section id="card" hidden></section>
+    <div id="boot" class="boot">Hafenmeister lädt …</div>
+  </div>
+</body>
+</html>

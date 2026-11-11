@@ -1,0 +1,111 @@
+/* Grundlayout fuer alle Geraete. Geraetespezifisches steht in ui-pc.css, ui-tablet.css, ui-phone.css
+   und wird dort per Media Query abgegrenzt:
+     PC:     (min-width: 1024px) and (pointer: fine)
+     Tablet: (min-width: 600px) and (min-height: 500px) and (pointer: coarse)
+     Handy:  alles darunter
+   body traegt class="hm", data-phase="tag|abend" und class "card-open", solange #card offen ist. */
+:root {
+  --water: #62b4c2;
+  --sand: #f7e4b6;
+  --ink: #283648;
+  --paper: #fffcf6;
+  --accent: #ee6454;
+  --hud-bg: rgba(255, 252, 246, 0.92);
+  --hud-gap: 8px;
+  --tap: 44px;               /* Mindestgroesse fuer alles, was man antippt */
+  --hm-safe-top: env(safe-area-inset-top, 0px);
+  --hm-safe-right: env(safe-area-inset-right, 0px);
+  --hm-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --hm-safe-left: env(safe-area-inset-left, 0px);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--water);
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#game {
+  position: fixed;
+  inset: 0;
+}
+
+#stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;        /* Browser soll nicht selbst scrollen oder zoomen */
+}
+
+.hud {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--hud-gap);
+  padding: var(--hud-gap) calc(var(--hud-gap) + var(--hm-safe-right)) var(--hud-gap) calc(var(--hud-gap) + var(--hm-safe-left));
+  background: var(--hud-bg);
+  pointer-events: auto;
+}
+
+#hud-top { top: 0; padding-top: calc(var(--hud-gap) + var(--hm-safe-top)); }
+#hud-bottom { bottom: 0; padding-bottom: calc(var(--hud-gap) + var(--hm-safe-bottom)); }
+
+.spacer { flex: 1; }
+
+.stat { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.hud-btn {
+  min-width: var(--tap);
+  min-height: var(--tap);
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--paper);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#queue { display: flex; gap: var(--hud-gap); overflow-x: auto; min-height: var(--tap); }
+
+#card {
+  position: absolute;
+  left: 50%;
+  bottom: 80px;
+  transform: translateX(-50%);
+  min-width: 240px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+}
+
+.boot {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  color: var(--paper);
+  background: var(--water);
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+.boot.done { opacity: 0; }
+.boot.error { color: var(--ink); background: var(--sand); padding: 24px; text-align: center; }

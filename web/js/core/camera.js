@@ -1,0 +1,95 @@
+// Kamera-Rig: orthografische Schraegsicht von Sueden auf den Hafen.
+// Welt-Koordinaten in Metern: x nach Osten, z nach Sueden (Norden ist -z), y nach oben.
+import * as THREE from 'three';
+
+const PITCH = THREE.MathUtils.degToRad(50);   // Neigung: 90 waere senkrecht von oben
+const YAW = 0;                                // gerade von Sueden; ein Winkel wie in den Stilbildern ist moeglich
+const DISTANCE = 600;
+
+export class CameraRig {
+  constructor({ bounds, minWidth = 30, maxWidth = 420 }) {
+    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 2000);
+    this.bounds = bounds;                     // { minX, maxX, minZ, maxZ } in Metern
+    this.minWidth = minWidth;                 // kleinster sichtbarer Ausschnitt in Metern (ganz hineingezoomt)
+    this.maxWidth = maxWidth;
+    this.target = new THREE.Vector3();
+    this.viewWidth = maxWidth;
+    this.aspect = 1;
+    this.home = { x: 0, z: 0, width: maxWidth };
+    this._plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    this._ray = new THREE.Raycaster();
+    this.onChange = null;
+  }
+
+  setHome(x, z, width) {
+    this.home = { x, z, width };
+  }
+
+  reset() {
+    this.target.set(this.home.x, 0, this.home.z);
+    this.viewWidth = this.home.width;
+    this._apply();
+  }
+
+  resize(width, height) {
+    this.screenW = width;
+    this.screenH = height;
+    this.aspect = width / Math.max(1, height);
+    this._apply();
+  }
+
+  // Bildschirmpunkt (CSS-Pixel) auf die Wasserflaeche y = 0 projizieren.
+  screenToWorld(sx, sy, out = new THREE.Vector3()) {
+    const ndc = new THREE.Vector2((sx / this.screenW) * 2 - 1, -(sy / this.screenH) * 2 + 1);
+    this._ray.setFromCamera(ndc, this.camera);
+    return this._ray.ray.intersectPlane(this._plane, out);
+  }
+
+  // Um einen Bildschirmpunkt zoomen. factor > 1 zoomt hinein.
+  zoomAt(factor, sx = this.screenW / 2, sy = this.screenH / 2) {
+    const before = this.screenToWorld(sx, sy);
+    this.viewWidth = THREE.MathUtils.clamp(this.viewWidth / factor, this.minWidth, this.maxWidth);
+    this._apply();
+    const after = this.screenToWorld(sx, sy);
+    if (before && after) {
+      this.target.x += before.x - after.x;
+      this.target.z += before.z - after.z;
+    }
+    this._apply();
+  }
+
+  // Um Bildschirm-Pixel verschieben (Finger zieht die Karte mit).
+  panBy(dx, dy) {
+    const a = this.screenToWorld(0, 0);
+    const b = this.screenToWorld(dx, dy);
+    if (!a || !b) return;
+    this.target.x -= b.x - a.x;
+    this.target.z -= b.z - a.z;
+    this._apply();
+  }
+
+  _clamp() {
+    const b = this.bounds;
+    this.target.x = THREE.MathUtils.clamp(this.target.x, b.minX, b.maxX);
+    this.target.z = THREE.MathUtils.clamp(this.target.z, b.minZ, b.maxZ);
+  }
+
+  _apply() {
+    this._clamp();
+    const w = this.viewWidth;
+    // Im Hochformat zaehlt die Breite, im Querformat soll die Hoehe nicht zu klein werden.
+    const halfW = w / 2;
+    const halfH = halfW / this.aspect;
+    const cam = this.camera;
+    cam.left = -halfW; cam.right = halfW; cam.top = halfH; cam.bottom = -halfH;
+    const dir = new THREE.Vector3(
+      Math.sin(YAW) * Math.cos(PITCH),
+      Math.sin(PITCH),
+      Math.cos(YAW) * Math.cos(PITCH)
+    );
+    cam.position.copy(this.target).addScaledVector(dir, DISTANCE);
+    cam.lookAt(this.target);
+    cam.updateProjectionMatrix();
+    if (this.onChange) this.onChange();
+  }
+}
