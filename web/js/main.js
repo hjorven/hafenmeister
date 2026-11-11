@@ -3,6 +3,7 @@
 import { createGame } from './core/game.js';
 import { initInput } from './core/input.js';
 import { addPlaceholderWorld } from './render/placeholder.js';
+import { plaetzeInStufe, platzInWelt } from './data/harbor.js';
 
 // Module der anderen Threads. Jedes exportiert eine Funktion init(game) (oder default),
 // die das Spielobjekt bekommt. Fehlt eine Datei noch, wird sie still uebersprungen.
@@ -54,7 +55,6 @@ function removePlaceholders(game) {
   const ph = game.placeholder;
   if (!ph) return;
   if (game.stege) { ph.group.remove(ph.deck, ph.piles); }
-  if (game.boatView || game.boatAnim) { ph.group.remove(ph.boat); }
   if (game.landscape) {
     ph.group.remove(ph.bands);
     for (const l of ph.lights) l.removeFromParent();
@@ -71,19 +71,39 @@ const WORLD = {
 WORLD.width = WORLD.maxX - WORLD.minX;
 WORLD.centerX = (WORLD.minX + WORLD.maxX) / 2;
 
+// Startansicht: alle Liegeplaetze einer Stufe, 10 m Rand, nach Norden 20 m mehr fuer die Wartebojen.
+function homeRect(stufe) {
+  try {
+    const pts = plaetzeInStufe(stufe).map((p) => platzInWelt(p, stufe));
+    if (!pts.length) throw new Error('keine Plaetze');
+    const xs = pts.map((p) => p.x);
+    const zs = pts.map((p) => p.z);
+    return {
+      minX: Math.min(...xs) - 12, maxX: Math.max(...xs) + 12,
+      minZ: Math.min(...zs) - 20, maxZ: Math.max(Math.max(...zs) + 8, 6),
+    };
+  } catch (err) {
+    console.warn('Startansicht aus harbor.js nicht ableitbar, nehme festen Wert', err);
+    return { minX: -76, maxX: -44, minZ: -40, maxZ: 6 };
+  }
+}
+
 function boot() {
   const canvas = document.getElementById('stage');
   const game = createGame({
     canvas,
     bounds: WORLD,
     // Startansicht: Stufe 1, Steg A am Suedufer des Sees
-    // Steg A mit etwas Wasser drumherum, passt im Hoch- und Querformat
-    home: { rect: { minX: -60 * U - 10, maxX: -60 * U + 12, minZ: -24, maxZ: 3 } },
+    // Liegeplaetze der Stufe 1 aus harbor.js plus Rand, dazu die Wartebojen davor
+    home: { rect: homeRect(1) },
   });
   window.hafenmeister = game;   // zum Ausprobieren in der Browser-Konsole
 
   game.placeholder = addPlaceholderWorld(game, WORLD);
   initInput(game);
+
+  // Neue Ausbaustufe: Knopf "Übersicht" zeigt danach den ganzen Hafen dieser Stufe
+  game.on('stufe', (n) => game.camera.setHomeRect(homeRect(n)));
 
   document.getElementById('btn-overview').addEventListener('click', () => game.camera.reset());
   const pauseBtn = document.getElementById('btn-pause');

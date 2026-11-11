@@ -57,9 +57,7 @@ export function createGame({ canvas, bounds, home }) {
     const h = canvas.clientHeight;
     renderer.setSize(w, h, false);
     rig.resize(w, h);
-    const top = document.getElementById('hud-top');
-    const bottom = document.getElementById('hud-bottom');
-    rig.setInsets(top ? top.offsetHeight : 0, bottom ? bottom.offsetHeight : 0);
+    rig.setInsets(...hudInsets(canvas, w, h));
     game.emit('resize', { width: w, height: h });
   };
   new ResizeObserver(resize).observe(canvas);
@@ -83,6 +81,23 @@ export function createGame({ canvas, bounds, home }) {
   });
 
   return game;
+}
+
+// Wie viel Bildschirm verdecken die Leisten oben und unten? Nur waagerechte Leisten zaehlen,
+// seitliche (Handy quer) nicht. Hoechstens ein Viertel der Hoehe je Seite.
+function hudInsets(canvas, w, h) {
+  const c = canvas.getBoundingClientRect();
+  let top = 0;
+  let bottom = 0;
+  for (const id of ['hud-top', 'hud-bottom']) {
+    const el = document.getElementById(id);
+    if (!el || el.hidden) continue;
+    const r = el.getBoundingClientRect();
+    if (r.width < w * 0.6 || r.height <= 0) continue;
+    if (r.top - c.top < h / 2) top = Math.max(top, r.bottom - c.top);
+    else bottom = Math.max(bottom, c.bottom - r.top);
+  }
+  return [Math.min(top, h / 4), Math.min(bottom, h / 4)];
 }
 
 const _ndc = new THREE.Vector2();

@@ -8,7 +8,7 @@ Stand: 11.11.2026. Das Spiel liegt in `web/` und wird ohne Build-Schritt auf Git
 |---|---|
 | `web/index.html`, `web/js/main.js`, `web/js/core/*`, `web/css/base.css` | Grundgerüst |
 | `web/css/ui-pc.css`, `web/css/ui-tablet.css`, `web/css/ui-phone.css` | je ein UI-Thread (Platzhalter komplett ersetzen) |
-| `web/js/render/placeholder.js` | Platzhalter. Nach dem Laden entfernt `main.js` die Bänder und Lichter, sobald es `game.landscape` gibt, den Steg bei `game.stege` und das Würfel-Boot bei `game.boatView` oder `game.boatAnim`. Die Module setzen diese Felder in `init(game)` |
+| `web/js/render/placeholder.js` | Platzhalter. Nach dem Laden entfernt `main.js` die Bänder und Lichter, sobald es `game.landscape` gibt, und den Steg bei `game.stege`. Ein Platzhalter-Boot gibt es nicht mehr. Die Module setzen diese Felder in `init(game)` |
 
 ## Neue Module einhängen
 
