@@ -10,6 +10,7 @@ import { addPlaceholderWorld } from './render/placeholder.js';
 const MODULES = [
   './world/region.js',
   './render/landscape.js',
+  './render/stege.js',
   './render/services.js',
   './render/buildings.js',
   './render/boats/s.js',
@@ -19,6 +20,7 @@ const MODULES = [
   './render/boats/xxl.js',
   './render/boat-anim.js',
   './render/boat-view.js',
+  './render/people.js',
   './ui/input-pc.js',
   './ui/input-touch.js',
   './ui/gesten.js',
@@ -42,7 +44,17 @@ async function loadModules(game) {
     if (typeof init !== 'function') return;
     try { init(game); } catch (err) { console.error('Fehler in', MODULES[i], err); }
   });
+  removePlaceholders(game);
   game.emit('ready');
+}
+
+// Platzhalter verschwinden, sobald die echten Module da sind
+function removePlaceholders(game) {
+  const ph = game.placeholder;
+  if (!ph) return;
+  if (game.stege) { ph.group.remove(ph.deck, ph.piles); }
+  if (game.boatView || game.boatAnim) { ph.group.remove(ph.boat); }
+  if (game.landscape) { ph.group.remove(ph.bands); }
 }
 
 const U = 0.62;   // Meter je Planeinheit aus hafen_von_oben.py
@@ -66,7 +78,7 @@ function boot() {
   });
   window.hafenmeister = game;   // zum Ausprobieren in der Browser-Konsole
 
-  addPlaceholderWorld(game, WORLD);
+  game.placeholder = addPlaceholderWorld(game, WORLD);
   initInput(game);
 
   document.getElementById('btn-overview').addEventListener('click', () => game.camera.reset());

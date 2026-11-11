@@ -10,12 +10,15 @@ export function addPlaceholderWorld(game, size) {
   const group = new THREE.Group();
   group.name = 'placeholder';
 
+  const bands = new THREE.Group();
+  const piles = new THREE.Group();
+  group.add(bands, piles);
   const band = (z0, z1, color, y = 0) => {
     const geo = new THREE.PlaneGeometry(size.width, Math.abs(z1 - z0));
     geo.rotateX(-Math.PI / 2);
     const m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color }));
     m.position.set(size.centerX, y, (z0 + z1) / 2);
-    group.add(m);
+    bands.add(m);
   };
   // Plan-y (Norden) -> Welt-z = -y * U
   band(0, 200, '#b8dca8', 0.3);                 // Festland
@@ -35,7 +38,7 @@ export function addPlaceholderWorld(game, size) {
     for (const side of [-0.9, 0.9]) {
       const p = new THREE.Mesh(pile, pileMat);
       p.position.set(-60 * U + side, 0.3, -1 - i * 3.3);
-      group.add(p);
+      piles.add(p);
     }
   }
 
@@ -54,5 +57,5 @@ export function addPlaceholderWorld(game, size) {
   sun.position.set(-80, 120, 60);
   scene.add(sun);
   scene.add(group);
-  return group;
+  return { group, bands, deck, piles, boat };
 }

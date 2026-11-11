@@ -187,6 +187,7 @@ Kleine Rückmeldungen: Haptik auf dem Handy (`navigator.vibrate`), wo verfügbar
 
 ## 9. Inhalt für lange Zeit
 
+- **Dauerlieger, Stammgäste und Tagesziele** (Abschnitt 9a) geben dem Alltag im Hafen Abwechslung.
 - **Logbuch:** Jede Schiffsart und jedes Modell wird beim ersten Anlegen eingetragen, mit Bild. Bei über 100 Modellen ein langes Sammelziel.
 - **Zwei Hafenregionen (Entscheidung Jorven, 11.11.2026):** Ostsee und Nordsee. Keine länderspezifischen Regionen. Gebäude und Stimmung sind ein Mix aus deutschen, dänischen und schwedischen Häfen (rote Holzhäuser, Reetdächer, Backstein, Fachwerk), weil sich die Hafenkulturen nicht stark genug unterscheiden, um eigene Regionen zu tragen. Der erste Durchgang spielt an der Ostsee, nach dessen Abschluss wird die Nordsee frei.
 
@@ -197,6 +198,21 @@ Kleine Rückmeldungen: Haptik auf dem Handy (`navigator.vibrate`), wo verfügbar
 
 - **Erfolge:** zum Beispiel „Alle drei Traditionssegler gleichzeitig im Hafen“, „Ein Abend mit 5,0 Ankern“.
 - **Endlosmodus** nach dem Spielziel, mit Bestenliste (Abschnitt 12).
+
+### 9a. Neue Features (Entscheidung Jorven, 11.11.2026)
+
+Der Thread „Fehlende Features und Qualität prüfen“ beschreibt sie in [neue-features.md](neue-features.md) und baut sie ein. Hier nur die Kurzfassung.
+
+| Feature | Was es ist |
+|---|---|
+| **Dauerlieger** | Ein Teil der Plätze wird fest vermietet. Dauerlieger zahlen pro Saison, fahren tagsüber hinaus zum Segeln oder Angeln und kommen abends zurück. Solange sie draußen sind, zeigt ihr Platz ein grünes Schild und darf für einen Gast genutzt werden (Rot-Grün-System echter Ostseehäfen). Kommt der Dauerlieger früher zurück, muss der Gast umgelegt werden. Das ist die zweite Einnahmequelle neben dem Hafengeld. |
+| **Stammgäste** | Gäste, die zufrieden waren, kommen wieder, erkennbar am Bootsnamen und einem kleinen Symbol. Sie bringen Ruf, wenn sie ihren alten Platz bekommen. |
+| **Wetter an der Flagge** | Die Flagge am Hafenbüro zeigt Wind und Wetter für morgen. Wer hinsieht, kann sich auf Sturm oder Regatta vorbereiten. |
+| **Fotomodus** | Leisten ausblenden, Kamera frei drehen, Bild speichern. |
+| **Hafen schauen** | Nichts tun und zusehen: Die Kamera fährt langsam durch den Hafen, Musik läuft, das Spiel geht weiter. |
+| **Tagesziele** | Jeden Tag ein kleines, freiwilliges Ziel (zum Beispiel „Drei Segelboote mit Dusche“), Belohnung in Geld oder Ruf. |
+
+Dauerlieger und Menschen im Hafen (Abschnitt 11a) hängen zusammen: Die Crew der Dauerlieger geht morgens an Bord und abends an Land.
 
 ## 10. Oberfläche
 
@@ -312,7 +328,8 @@ Nach Meilenstein 1 weiß man, ob Zuweisen und Kassieren Spaß macht. Wenn nicht,
 | Dritte Zahl für Tagesgäste | nein. Tagesgäste bringen mehr Einnahmen und sind als Menschen im Hafen zu sehen |
 | Tretboote und Kanus als Gäste | nur Kulisse am Strand |
 | Klappbrücke über den Durchstich | nicht in 1.0 |
-| Dauerlieger mit Rot-Grün-Schildern | nach 1.0 |
+| Dauerlieger | ja, schon in 1.0 (Abschnitt 9a) |
+| Stammgäste, Wetter an der Flagge, Fotomodus, Hafen schauen, Tagesziele | ja, alle fünf (Abschnitt 9a, Einzelheiten in [neue-features.md](neue-features.md)) |
 | Story und Figuren | keine, nur ein kurzer Einstieg |
 
 **Noch offen:** nichts.

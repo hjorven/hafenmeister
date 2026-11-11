@@ -97,13 +97,19 @@ function pickInfo(obj, types) {
   return null;
 }
 
+// Sichtbar nur, wenn das Objekt und alle Eltern sichtbar sind
+function isShown(o) {
+  for (; o; o = o.parent) if (!o.visible) return false;
+  return true;
+}
+
 function pickAt(game, x, y, tolerance, types) {
   const rig = game.camera;
   _ndc.set((x / rig.screenW) * 2 - 1, -(y / rig.screenH) * 2 + 1);
   _ray.setFromCamera(_ndc, rig.camera);
   // 1. Genauer Treffer per Strahl
   for (const hit of _ray.intersectObjects(game.scene.children, true)) {
-    if (!hit.object.visible) continue;
+    if (!isShown(hit.object)) continue;
     const info = pickInfo(hit.object, types);
     if (info) return { ...info, point: hit.point };
   }
