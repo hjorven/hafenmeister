@@ -15,6 +15,7 @@ Stand: 11.11.2026. Das Spiel liegt in `web/` und wird ohne Build-Schritt auf Git
 `main.js` lädt beim Start diese Dateien, falls es sie gibt. Fehlende Dateien werden übersprungen.
 
 ```
+web/js/world/region.js
 web/js/render/landscape.js
 web/js/render/services.js
 web/js/render/buildings.js
@@ -58,10 +59,11 @@ Jede Datei exportiert `init(game)` (oder `default`, oder eine Funktion, deren Na
 | Ereignis | Daten | Bedeutung |
 |---|---|---|
 | `stufe` | Zahl 1 bis 6 | Ausbaustufe hat sich geändert, auch einmal direkt nach dem Laden |
-| `region` | `'ostsee'`, `'daenemark'`, `'schweden'`, `'nordsee'` | Hafenregion, auch einmal direkt nach dem Laden |
+| `region` | `'ostsee'`, `'daenemark'`, `'schweden'`, `'nordsee'` | Hafenregion, gesendet von `world/region.js` bei `ready` und beim Wechsel (siehe [regionen.md](regionen.md)) |
+| `pegel` | Meter um die Wasserlinie | Wasserstand, nur in der Nordsee (Gezeiten), von `world/region.js` |
 | `phase` | `'tag'` oder `'abend'` | Tageszeit, setzt auch `body[data-phase]` |
 
-Der aktuelle Stand steht in `game.state.stufe` und `game.state.region` (Besitzer: Spielregeln-Thread). Module, die nach dem Laden starten, lesen diese Felder statt auf das Ereignis zu warten.
+Der aktuelle Stand steht in `game.state.stufe` und `game.state.region` (Besitzer: Spielregeln-Thread), die Regionsdaten in `game.region` (Besitzer: Regionen-Thread). Module, die nach dem Laden starten, lesen diese Felder statt auf das Ereignis zu warten.
 
 **Absichten aus den Eingabe-Modulen** (`input-pc.js`, `input-touch.js`). Sie werden per `game.emit` gesendet, `js/ui/hud.js` und die Spielregeln hören darauf:
 

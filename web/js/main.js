@@ -8,6 +8,7 @@ import { addPlaceholderWorld } from './render/placeholder.js';
 // die das Spielobjekt bekommt. Fehlt eine Datei noch, wird sie still uebersprungen.
 // Neue Module hier eintragen, dann muss niemand sonst main.js oder index.html anfassen.
 const MODULES = [
+  './world/region.js',
   './render/landscape.js',
   './render/services.js',
   './render/buildings.js',
