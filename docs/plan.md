@@ -335,12 +335,7 @@ Danach im Browser `http://localhost:8000` öffnen. Beenden mit Strg+C.
 
 **Auf GitHub veröffentlichen und GitHub Pages einschalten**
 
-```bash
-gh repo create hafenmeister --public --source=. --push
-gh api -X POST "repos/{owner}/{repo}/pages" -f "source[branch]=main" -f "source[path]=/"
-```
-
-Beide Befehle müssen im Ordner `hafenmeister` laufen, damit `{owner}` und `{repo}` automatisch eingesetzt werden. Die Seite liegt danach unter `https://hjorven.github.io/hafenmeister/`.
+Erledigt: Das Repo gibt es, veröffentlicht wird per GitHub Actions aus dem Ordner `web/`. Einrichtung und Regeln stehen in [veroeffentlichen.md](veroeffentlichen.md). Die Seite liegt unter `https://hjorven.github.io/hafenmeister/`.
 
 **Supabase verknüpfen** (erst für Meilenstein 7 nötig)
 
