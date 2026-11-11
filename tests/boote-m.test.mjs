@@ -20,6 +20,13 @@ test('vier Arten mit je fünf Modellen, Kennungen eindeutig', () => {
   for (const t of TYPES) assert.equal(MODELS.filter((m) => m.typeId === t.id).length, 5, t.id);
 });
 
+test('Menschen an Bord je Art im Rahmen von 2 bis 5 (Plan, Abschnitt 11a)', () => {
+  for (const t of TYPES) {
+    assert.ok(Array.isArray(t.crew) && t.crew.length === 2, `${t.id} braucht crew: [min, max]`);
+    assert.ok(t.crew[0] >= 2 && t.crew[1] <= 5 && t.crew[0] <= t.crew[1], `${t.id} crew=${t.crew}`);
+  }
+});
+
 test('Maße liegen in den Spannen der Art', () => {
   for (const m of MODELS) {
     const t = TYPES.find((tt) => tt.id === m.typeId);
