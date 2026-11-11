@@ -1,0 +1,166 @@
+# Spielregeln: Schnittstelle für alle Module
+
+Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node testbar. Alle Zahlen stehen in `web/js/data/rules.js`.
+
+## Dateien
+
+| Datei | Aufgabe |
+|---|---|
+| `web/js/sim.js` | Regeln: Ankunft, Warten an der Boje, Passregel, Zuweisen, Hafengeld, Ruf, Jahreslauf, Ausbau |
+| `web/js/state.js` | Spielstand als JSON, Zufall mit Seed, eigenes Speichern als Rückfall, `init(game)` |
+| `web/js/random.js` | Zufall mit Seed (mulberry32), Zustand liegt im Spielstand |
+| `web/js/bridge.js` | Verbindet die Regeln mit `game` (Ereignisse, Gesten, Speichermodul) |
+| `web/js/data/rules.js` | Alle Regelzahlen (Startwerte fürs Balancing) |
+| `web/js/data/boat-catalog.js` | Ersatzkatalog der Bootsarten, bis alle Schiffs-Threads liefern |
+| `web/js/ui/hud.js` | Geld, Ruf, Tag, Übersicht der Wartenden, Karten für Boot und Bauen, Knöpfe Kassieren und Spielstand |
+| `tests/sim.test.mjs`, `tests/state.test.mjs`, `tests/harbor-sim.test.mjs` | Tests |
+
+## Ablauf eines Tages
+
+1. Morgens würfelt `sim.js` die Ankünfte des Tages aus: Zahl = Boote pro Tag der Stufe × Ruf-Faktor × Modifikatoren. Im Winter (Tag 31 bis 33 jeder Saison) kommt niemand.
+2. Ein Boot kommt an und legt sich an eine freie **Warteboje** vor dem Hafen (`boat.waitSpot`, 0 = erste Boje). Sind alle Bojen belegt, fährt es weiter.
+3. Der Spieler zieht das Boot auf einen Platz oder tippt „Automatisch einfahren“. Nach 50 s Warten fährt es weiter.
+4. Abends (ab 90 s) zahlen alle liegenden Boote Hafengeld als Münze. Wer noch wartet, fährt weiter.
+5. Nachts (ab 120 s): nicht kassierte Münzen zählen zur Hälfte, Boote mit 0 Nächten reisen ab und bewerten den Hafen. Der Spielstand wird gespeichert.
+
+**Passregel:** Ein Boot passt an einen Platz, wenn es nicht länger und nicht breiter ist als der Platz und die Wassertiefe der aktuellen Stufe mindestens 0,3 m größer ist als sein Tiefgang. Fischerplätze sind fest vergeben, der Kai ist nur für XL.
+
+**Hafengeld:** Grundpreis der Größe × (1 + 0,25 × erfüllte Wünsche). **Ruf:** Schnitt der letzten 20 Bewertungen.
+
+## `game.sim` (im Browser)
+
+| Aufruf | Ergebnis |
+|---|---|
+| `game.sim.state` | Spielstand, dasselbe Objekt wie `game.state` |
+| `game.sim.ctx` | Regeln, Bootsarten und Liegeplätze |
+| `select(bootId)` | Boot auswählen, liefert passende freie Platz-ids, sendet `sim:select` |
+| `assign(bootId, platzId)` | zuweisen, `{ ok, reason }` |
+| `autoEnter(bootId)` | automatisch einfahren (bester freier Platz) |
+| `dismiss(bootId)` | wartendes Boot wegschicken |
+| `collect(bootId)`, `collectAll()` | Münze einstreichen |
+| `fastForward(sekunden)` | Spielzeit vorspulen, höchstens bis zum nächsten Abend oder Morgen |
+| `upgradeFacility(key)`, `upgradeOffice()`, `build(id, kosten, stufe)`, `advanceStage()` | Bauen |
+| `spend(betrag)`, `addIncome(betrag)` | Geld für andere Module |
+| `waitingBoats()`, `mooredBoats()`, `preview()`, `waitSpotCount()` | Lesen |
+| `boote` | alle wartenden und liegenden Boote im Format von `boot-kommt`, zum Aufbauen nach dem Laden |
+| `fittingBerths(bootId)`, `whyNotFit(bootId, platzId)`, `availableBerths()` | Plätze |
+| `reputation()`, `season()`, `canAdvanceStage()`, `facilityUpgrade(key)`, `modifiers()` | Lesen |
+| `wartet(bootId)`, `passendePlaetze(bootId)`, `tagesAnteil()` | für die Gesten (`tagesAnteil` 0 = Morgen, 1 = Nacht) |
+| `addHook(name, fn)`, `addService(key, def)` | Erweiterungen (unten) |
+| `newGame(seed)`, `setRegion(id)` | neues Spiel, Region |
+
+Boot-ids sind Zahlen. `'b17'` wird auch verstanden. Platz-ids sind die aus `web/js/data/harbor.js` (`'A01'`).
+
+## Spielstand `game.state`
+
+Einfaches JSON. Wichtige Felder: `day`, `phase` (`'day'` oder `'evening'`), `clock` (Sekunden im Tag), `stage`, `region`, `money`, `guests`, `ratings`, `facilities`, `office`, `buildings` (`{ id: stufe }`, zum Beispiel `mole`), `berths` (`{ platzId: bootId }`), `boats` (`{ id: boot }`), `queue`, `upcoming`, `logbook`, `stats`, `modules` (Platz für Spielstände anderer Module).
+
+Deutsche Namen als Verweise (nicht im JSON): `game.state.stufe`, `game.state.geld`, `game.state.tag`.
+
+Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, special, dayVisitors, stationed, wishes, nights, status: 'expected' | 'waiting' | 'moored', waitSpot, berthId, pendingFee, ... }`.
+
+## Ereignisse, die die Regeln senden
+
+| Ereignis | Daten |
+|---|---|
+| `sim:change` | etwas hat sich geändert, Oberfläche neu zeichnen |
+| `sim:arrived` | `{ boatId, waitSpot }`, Boot liegt an der Boje |
+| `sim:moored` | `{ boatId, berthId }` |
+| `sim:turnedAway` | `{ boatId, reason: 'queueFull' \| 'patience' \| 'evening', rated }` |
+| `sim:dismissed` | `{ boatId }` |
+| `sim:feeReady` | `{ boatId, amount, wishesMet }`, Münze erscheint |
+| `sim:collected` | `{ boatId, amount }` |
+| `sim:departed` | `{ boatId, berthId, typeId, rating }` |
+| `sim:dayStart`, `sim:evening`, `sim:dayEnd` | Tageslauf |
+| `sim:select` | `{ boatId, berths }` |
+| `sim:assignFailed` | `{ boatId, berthId, reason }` |
+| `sim:logbookNew`, `sim:built`, `sim:stageUp`, `sim:stageReady` | Fortschritt |
+| `boot-kommt` | `{ id, groesse, art, modell, palette, name, boje, zustand }`, Boot fährt zur Warteboje (`groesse` wie `'S'`) |
+| `boot-zugewiesen` | `{ id, platz }` |
+| `boot:angelegt` | wie `boot-kommt`, mit `platz` |
+| `boot-faehrt`, `boot:ablegen` | `{ id }`, Boot legt ab oder fährt weiter |
+| `stufe`, `region`, `phase` | wie in `docs/grundgeruest.md`, auch einmal nach dem Laden |
+| `day:start` | `{ day, stage, winter }` |
+| `tag:ende` | `{ tag, stufe, ruf, boote: [{ id, art, kind, klasse, antrieb }] }` am Abend |
+| `stage` | `{ stage }` |
+| `build` | `{ id, level }` |
+
+## Ereignisse, auf die die Regeln hören
+
+| Ereignis | Wirkung |
+|---|---|
+| `tap` mit `pick` | Boot antippen wählt es aus oder kassiert seine Münze, Platz antippen weist das gewählte Boot zu |
+| `ui:tow` | `{ boot }` Boot auswählen |
+| `ui:tow-end` | `{ boot, platz }` zuweisen |
+| `ui:auto-einfahren` | `{ boot }` automatisch einfahren |
+| `ui:collect` | `{ coin }` eine Münze, ohne Daten alle |
+| `ui:cancel` | Auswahl aufheben |
+| `services:abrechnung` | `{ summe }` wird gutgeschrieben |
+| `spielstand-geladen` | Spielstand neu übernehmen |
+
+## Erweiterungen für andere Module
+
+**Modifikatoren** (Ereignisse, Services): Die Regeln fragen jeden Morgen und Abend `game.events?.modifiers()` und `game.services?.effekte()` ab. Alternativ `game.sim.addHook('modifiers', fn)`. Alle Felder sind freiwillig:
+
+```js
+{
+  arrivalFactor: 1,                 // mehr oder weniger Boote
+  seaArrivals: true,                // false: niemand kommt über die Ostsee (Sturm)
+  extraNights: 0,                   // liegende Boote bleiben länger (Sturm)
+  sizeFactor: { L: 2 },             // mehr Boote einer Größe
+  kindFactor: { segelyacht: 3 },    // mehr Boote einer Art (type.kind oder type.id)
+  visitorFactor: 1,                 // Tagesgäste
+  serviceIncomeFactor: 1,           // Einnahmen der Tagesgäste
+  priceFactor: 1,                   // Hafengeld
+  satisfaction: { outer: 0, all: 0 }, // negativ: Zufriedenheit sinkt (outer = ungeschützte Plätze)
+  ratingBonus: 0,                   // auf jede Bewertung
+  unlock: { kreuzfahrt: true },     // schaltet Bootsarten mit type.unlock frei
+}
+```
+
+Faktoren mehrerer Module werden multipliziert, Zahlen addiert.
+
+**Hooks:** `game.sim.addHook(name, fn)` mit `arrival` (`{ state, ctx, boat }`, Boot ändern), `evening` (`{ state, ctx, boats, addIncome, events }`), `night` (`{ state, ctx, events }`). Rückgabe: Funktion zum Aushängen.
+
+**Neuer Wunsch:** `game.sim.addService(key, { levels, cost, fromStage, wishFromStage })`, oder mit `berthProp` für Wünsche, die der Liegeplatz erfüllt.
+
+## Bootsdaten
+
+`bridge.js` lädt `web/js/data/boats/s.js`, `m.js`, `l.js`, `xl.js`, falls vorhanden, und mischt sie über den Ersatzkatalog (gleiche id: die Datei gewinnt, fehlende Felder kommen aus dem Katalog). Erkannt wird das Format der Schiffs-Threads (`export const TYPES`, `export const MODELS` mit `typeId`, `fromStage`, `length`, `beam`, `draft`). Deutsche Feldnamen (`groesse`, `laenge`, `breite`, `tiefgang`, `abStufe`) gehen auch.
+
+Zusätzliche Felder einer Bootsart: `kind`, `motor`, `sail`, `weight`, `fee`, `nights`, `noWishes`, `special` (Sondergast, bessere Bewertung), `dayVisitors` (Tagesgäste), `stationed` (fest stationiert, zum Beispiel Fischer), `unlock`, `fromSea`.
+
+## Ohne Browser benutzen (Balancing, Tests)
+
+```js
+import { createState } from './web/js/state.js';
+import * as sim from './web/js/sim.js';
+import { HAFEN } from './web/js/data/harbor.js';
+import { BOAT_CATALOG } from './web/js/data/boat-catalog.js';
+
+const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN /*, rules: eigeneRegeln */ });
+const state = createState({ seed: 42 });
+state.office = 3;                 // Hafenbüro weist selbst zu
+for (let d = 0; d < 100; d++) {
+  sim.runDay(state, ctx);         // ein ganzer Tag
+  sim.collectAll(state, ctx, true);
+  sim.advanceStage(state, ctx);
+}
+console.log(state.day, state.stage, state.money, sim.reputation(state));
+```
+
+Gleicher Seed und gleiche Aktionen ergeben dasselbe Spiel.
+
+## Prüfen
+
+```bash
+node --test tests/*.test.mjs
+```
+
+Im Browser:
+
+```bash
+python3 -m http.server 8000 --directory web
+```
+
+`http://localhost:8000` öffnen, warten, bis unten ein Boot erscheint, es antippen, „Automatisch einfahren“, abwarten bis „Abend“ und „Kassieren“ antippen: das Geld oben steigt.
