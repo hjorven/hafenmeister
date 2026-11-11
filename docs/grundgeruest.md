@@ -8,7 +8,7 @@ Stand: 11.11.2026. Das Spiel liegt in `web/` und wird ohne Build-Schritt auf Git
 |---|---|
 | `web/index.html`, `web/js/main.js`, `web/js/core/*`, `web/css/base.css` | Grundgerüst |
 | `web/css/ui-pc.css`, `web/css/ui-tablet.css`, `web/css/ui-phone.css` | je ein UI-Thread (Platzhalter komplett ersetzen) |
-| `web/js/render/placeholder.js` | Platzhalter, wird durch `web/js/render/landscape.js` ersetzt |
+| `web/js/render/placeholder.js` | Platzhalter. Nach dem Laden entfernt `main.js` die Bänder, sobald es `game.landscape` gibt, den Steg bei `game.stege` und das Würfel-Boot bei `game.boatView` oder `game.boatAnim`. Die Module setzen diese Felder in `init(game)` |
 
 ## Neue Module einhängen
 
@@ -17,6 +17,7 @@ Stand: 11.11.2026. Das Spiel liegt in `web/` und wird ohne Build-Schritt auf Git
 ```
 web/js/world/region.js
 web/js/render/landscape.js
+web/js/render/stege.js
 web/js/render/services.js
 web/js/render/buildings.js
 web/js/render/boats/s.js
@@ -26,6 +27,7 @@ web/js/render/boats/xl.js
 web/js/render/boats/xxl.js
 web/js/render/boat-anim.js
 web/js/render/boat-view.js
+web/js/render/people.js
 web/js/ui/input-pc.js
 web/js/ui/input-touch.js
 web/js/ui/gesten.js
@@ -91,7 +93,7 @@ Jedes Modul, das etwas Antippbares in die Szene legt, setzt am obersten Objekt d
 mesh.userData.pick = { type: 'boat', id: 'b17' };
 ```
 
-Erlaubte Werte für `type`: `boat`, `berth`, `jetty`, `coin`, `building`, `buildsite`. Die `id` ist dieselbe wie in den Spielregeln (`sim.js`). Kinder-Objekte brauchen nichts, `game.pick` sucht vom getroffenen Teil nach oben. Trifft der Strahl nichts, nimmt `game.pick` das nächste antippbare Objekt innerhalb von 22 Pixeln auf dem Bildschirm, damit Finger auch kleine Boote treffen. Mit `types: ['boat']` lässt sich die Suche einschränken.
+Erlaubte Werte für `type`: `boat`, `berth`, `jetty`, `coin`, `building`, `buildsite`. Die `id` ist dieselbe wie in den Spielregeln (`sim.js`). Kinder-Objekte brauchen nichts, `game.pick` sucht vom getroffenen Teil nach oben. Ausgeblendete Objekte (`visible = false` am Objekt oder an einem Elternteil) werden nie getroffen. Trifft der Strahl nichts, nimmt `game.pick` das nächste antippbare Objekt innerhalb von 22 Pixeln auf dem Bildschirm, damit Finger auch kleine Boote treffen. Mit `types: ['boat']` lässt sich die Suche einschränken.
 
 ## Koordinaten
 
