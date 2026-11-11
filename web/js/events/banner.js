@@ -67,6 +67,8 @@ export function initBanner(game) {
     p.textContent = text;
     body.append(t, p);
     banner.append(body);
+    // Schild und Wetterbericht nie gleichzeitig: das neue Schild klappt den Bericht zu
+    if (!panel.hidden) toggle(false);
     banner.hidden = false;
     banner.classList.remove('leaving');
     clearTimeout(hideTimer);
@@ -139,7 +141,12 @@ export function initBanner(game) {
   function toggle(open = panel.hidden) {
     panel.hidden = !open;
     chip.setAttribute('aria-expanded', String(open));
-    if (open) renderPanel();
+    if (open) {
+      // Bericht geöffnet: Ankündigung ausblenden, ihr Inhalt steht im Bericht
+      clearTimeout(hideTimer);
+      banner.hidden = true;
+      renderPanel();
+    }
   }
   chip.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
   panel.addEventListener('click', () => toggle(false));

@@ -84,7 +84,9 @@ body.card-open #weather-panel { display: none; }
 
 /* Handy: Schild unter den Wetterknopf, damit beide sichtbar bleiben */
 @media not ((min-width: 600px) and (min-height: 500px)) {
-  #weather-chip { max-width: 60vw; }
+  /* rechts liegt auf dem Handy die Knopfleiste (Pause, Ton), deshalb links */
+  #weather-chip { max-width: 60vw; right: auto; left: calc(var(--hm-safe-left, 0px) + 12px); }
+  #weather-panel { right: auto; left: calc(var(--hm-safe-left, 0px) + 12px); width: min(320px, calc(100% - 24px - var(--hm-safe-left, 0px) - var(--hm-safe-right, 0px))); }
   #event-banner { top: calc(var(--hm-safe-top, 0px) + 116px); }
 }
 
