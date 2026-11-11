@@ -7,7 +7,7 @@ const YAW = 0;                                // gerade von Sueden; ein Winkel w
 const DISTANCE = 600;
 
 export class CameraRig {
-  constructor({ bounds, minWidth = 30, maxWidth = 420 }) {
+  constructor({ bounds, minWidth = 15, maxWidth = 420 }) {
     this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 2000);
     this.bounds = bounds;                     // { minX, maxX, minZ, maxZ } in Metern
     this.minWidth = minWidth;                 // kleinster sichtbarer Ausschnitt in Metern (ganz hineingezoomt)
@@ -21,14 +21,47 @@ export class CameraRig {
     this.onChange = null;
   }
 
+  // Startansicht als Mittelpunkt und Breite in Metern (einfach) ...
   setHome(x, z, width) {
     this.home = { x, z, width };
   }
 
+  // ... oder als Rechteck auf dem Wasser, das in jeder Ausrichtung ganz zu sehen sein soll.
+  // rect = { minX, maxX, minZ, maxZ } in Metern. Besser fuer Hoch- und Querformat.
+  setHomeRect(rect) {
+    this.home = { rect };
+  }
+
+  // Bildschirmraender in CSS-Pixeln, die von Leisten verdeckt sind (oben, unten).
+  // Die Startansicht passt das Rechteck in den freien Bereich dazwischen.
+  setInsets(top, bottom) {
+    this.insets = { top, bottom };
+  }
+
   reset() {
-    this.target.set(this.home.x, 0, this.home.z);
-    this.viewWidth = this.home.width;
+    const h = this.home;
+    const ins = this.insets || { top: 0, bottom: 0 };
+    if (h.rect) {
+      const r = h.rect;
+      const w = r.maxX - r.minX;
+      const sinP = Math.sin(PITCH);
+      const availH = Math.max(1, this.screenH - ins.top - ins.bottom);
+      const aspectAvail = this.screenW / availH;
+      this.viewWidth = THREE.MathUtils.clamp(Math.max(w, (r.maxZ - r.minZ) * sinP * aspectAvail), this.minWidth, this.maxWidth);
+      let cz = (r.minZ + r.maxZ) / 2;
+      // Ist mehr Tiefe frei als noetig (Hochformat), den Ausschnitt an die Suedkante (Ufer) legen,
+      // damit nicht der halbe Bildschirm Land zeigt.
+      const visibleDepth = (availH * this.viewWidth / this.screenW) / sinP;
+      if (visibleDepth > r.maxZ - r.minZ) cz = r.maxZ - visibleDepth / 2;
+      this.target.set((r.minX + r.maxX) / 2, 0, cz);
+    } else {
+      this.target.set(h.x, 0, h.z);
+      this.viewWidth = h.width;
+    }
     this._apply();
+    // Mitte des freien Bereichs liegt um (oben - unten) / 2 tiefer als die Bildschirmmitte
+    const shift = (ins.top - ins.bottom) / 2;
+    if (shift) this.panBy(0, shift);
   }
 
   resize(width, height) {
