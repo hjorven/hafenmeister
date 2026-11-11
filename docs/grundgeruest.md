@@ -22,6 +22,7 @@ web/js/render/boats/s.js
 web/js/render/boats/m.js
 web/js/render/boats/l.js
 web/js/render/boats/xl.js
+web/js/render/boats/xxl.js
 web/js/ui/input-pc.js
 web/js/ui/input-touch.js
 web/js/ui/hud.js
@@ -45,6 +46,7 @@ Jede Datei exportiert `init(game)` (oder `default`, oder eine Funktion, deren Na
 | `game.camera.screenToWorld(x, y)` | Bildschirmpunkt auf die Wasserfläche projizieren |
 | `game.camera.camera` | die `THREE.OrthographicCamera` |
 | `game.pick(x, y, { tolerance, types })` | was liegt unter einem Bildschirmpunkt, liefert `{ type, id, object, point }` oder `null` |
+| `game.boatTypes[größe]` | von den Schiffs-Modulen: `{ TYPES, MODELS, buildBoat, setSails, animateBoat }` je Größe `s`, `m`, `l`, `xl`, `xxl` |
 | `game.onTick(fn)` | `fn(dt, game)` jedes Bild, `dt` in Sekunden, 0 während der Pause |
 | `game.on(name, fn)`, `game.emit(name, daten)` | Ereignisse |
 | `game.setPaused(true/false)`, `game.paused`, `game.speed`, `game.time` | Pause, Vorspulen, Spielzeit |

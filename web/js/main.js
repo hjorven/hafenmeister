@@ -15,6 +15,7 @@ const MODULES = [
   './render/boats/m.js',
   './render/boats/l.js',
   './render/boats/xl.js',
+  './render/boats/xxl.js',
   './ui/input-pc.js',
   './ui/input-touch.js',
   './ui/hud.js',
