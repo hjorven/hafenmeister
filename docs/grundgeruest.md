@@ -32,6 +32,7 @@ web/js/ui/input-pc.js
 web/js/ui/input-touch.js
 web/js/ui/gesten.js
 web/js/ui/hud.js
+web/js/ui/fotomodus.js
 web/js/audio/audio.js
 web/js/state.js
 web/js/events/events.js

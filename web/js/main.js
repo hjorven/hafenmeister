@@ -25,6 +25,7 @@ const MODULES = [
   './ui/input-touch.js',
   './ui/gesten.js',
   './ui/hud.js',
+  './ui/fotomodus.js',
   './audio/audio.js',
   './state.js',
   './events/events.js',
