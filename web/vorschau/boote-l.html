@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Schiffe Größe L</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #62b4c2; font-family: system-ui, sans-serif; color: #24323f; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+    #bar { position: fixed; left: 8px; top: 8px; right: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    #bar button { font: inherit; padding: 8px 12px; border: 0; border-radius: 8px; background: #fff8ea; color: #24323f; cursor: pointer; }
+    #bar button.on { background: #2e4868; color: #fff8ea; }
+    #info { background: rgba(255, 248, 234, .9); padding: 6px 10px; border-radius: 8px; font-size: 14px; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="bar">
+    <button data-p="0" class="on">Farbe 1</button>
+    <button data-p="1">Farbe 2</button>
+    <button data-p="2">Farbe 3</button>
+    <button id="sails">Segel setzen</button>
+    <button id="spin">Drehen</button>
+    <span id="info">Antippen zeigt Name und Maße</span>
+  </div>
+  <script type="module">
+    import * as THREE from 'three';
+    import { MODELS, TYPES } from '../js/data/boats/l.js';
+    import { buildBoat, setSails, tickBoat } from '../js/render/boats/l.js';
+
+    const canvas = document.getElementById('c');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color('#62b4c2');
+
+    // Feste Schrägsicht ohne Perspektive wie im Spiel
+    const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 1000);
+    const params = new URLSearchParams(location.search);
+    const only = params.get('id');
+    const view = { x: 0, z: 0, w: 90 };
+    function place() {
+      const a = innerWidth / innerHeight;
+      const w = view.w, h = w / a;
+      Object.assign(cam, { left: -w / 2, right: w / 2, top: h / 2, bottom: -h / 2 });
+      cam.position.set(view.x + 60, 70, view.z + 80);
+      cam.lookAt(view.x, 0, view.z);
+      cam.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight, false);
+    }
+
+    scene.add(new THREE.HemisphereLight('#ffffff', '#5aa0b0', 1.6));
+    const sun = new THREE.DirectionalLight('#fff4e0', 2.2);
+    sun.position.set(-40, 80, 30);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    Object.assign(sun.shadow.camera, { left: -70, right: 70, top: 70, bottom: -70 });
+    sun.shadow.bias = -0.0005;
+    scene.add(sun);
+
+    const water = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshLambertMaterial({ color: '#76c4cc' }));
+    water.rotation.x = -Math.PI / 2;
+    water.receiveShadow = true;
+    scene.add(water);
+
+    let palette = 0, sailsUp = false, spin = false;
+    const boats = [];
+    function build() {
+      for (const b of boats) scene.remove(b);
+      boats.length = 0;
+      const list = only ? MODELS.filter((m) => m.id === only) : MODELS;
+      list.forEach((m, i) => {
+        const b = buildBoat(m, { palette, sails: sailsUp, id: m.id });
+        const row = TYPES.findIndex((t) => t.id === m.typeId);
+        const col = i % 5;
+        b.position.set(only ? 0 : (col - 2) * 17, 0, only ? 0 : (row - 1.5) * 12 - (m.mooring === 'stirn' ? 0 : 0));
+        if (only) view.w = 30;
+        scene.add(b);
+        boats.push(b);
+      });
+    }
+
+    document.querySelectorAll('[data-p]').forEach((btn) => btn.onclick = () => {
+      palette = +btn.dataset.p;
+      document.querySelectorAll('[data-p]').forEach((x) => x.classList.toggle('on', x === btn));
+      build();
+    });
+    document.getElementById('sails').onclick = (e) => {
+      sailsUp = !sailsUp;
+      e.target.classList.toggle('on', sailsUp);
+      e.target.textContent = sailsUp ? 'Segel bergen' : 'Segel setzen';
+      for (const b of boats) setSails(b, sailsUp);
+    };
+    document.getElementById('spin').onclick = (e) => { spin = !spin; e.target.classList.toggle('on', spin); };
+
+    const ray = new THREE.Raycaster();
+    canvas.addEventListener('pointerup', (e) => {
+      ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), cam);
+      const hit = ray.intersectObjects(boats, true)[0];
+      let o = hit && hit.object;
+      while (o && !o.userData.pick) o = o.parent;
+      if (!o) return;
+      const m = MODELS.find((x) => x.id === o.userData.id);
+      document.getElementById('info').textContent =
+        `${m.id} ${m.name}: ${m.length} m lang, ${m.beam} m breit, Tiefgang ${m.draft} m, ${m.mooring === 'stirn' ? 'nur Stirnplatz' : 'Box L'}`;
+    });
+    canvas.addEventListener('wheel', (e) => { view.w = Math.max(15, Math.min(160, view.w * (e.deltaY > 0 ? 1.1 : 0.9))); place(); }, { passive: true });
+
+    addEventListener('resize', place);
+    place();
+    build();
+    const clock = new THREE.Clock();
+    renderer.setAnimationLoop(() => {
+      const t = clock.getElapsedTime();
+      for (const b of boats) {
+        tickBoat(b, t, true);
+        if (spin) b.rotation.y = t * 0.3;
+      }
+      renderer.render(scene, cam);
+    });
+    window.vorschau = { boats, renderer, scene, cam, view, place, build, setPalette: (p) => { palette = p; build(); } };
+  </script>
+</body>
+</html>
