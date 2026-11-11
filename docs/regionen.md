@@ -139,7 +139,9 @@ Jedes Revier ist ein Objekt in `REVIERE` (`web/js/data/regions.js`). Alle Felder
 | `game.region.naechstesFenster(tiefgang, tiefe)` | in wie vielen Spieltagen genug Wasser da ist (0 = jetzt, `Infinity` = nie) |
 | `game.region.licht(phase)` | Lichtfarben für `tag` oder `abend` |
 
-Ereignisse: `region` beim Wechsel, `wasserstand` mit `{ hoehe, steigt }` etwa zweimal pro Sekunde, wenn das Revier eine Tide hat.
+Ereignisse: `region` mit der id als Text beim Start und beim Wechsel (wie in [grundgeruest.md](grundgeruest.md)), `pegel` mit Metern um die Wasserlinie für die Landschaft, `wasserstand` mit `{ hoehe, steigt }` etwa zweimal pro Sekunde, wenn das Revier eine Tide hat.
+
+Wechselt ein anderes Modul das Revier mit `game.emit('region', id)`, geht `game.region` mit. Beim Start gilt `game.state.region` aus dem Spielstand, falls vorhanden.
 
 Zum Ausprobieren: `index.html?revier=nordsee` startet in der Nordsee. Erlaubt sind `ostsee`, `daenemark`, `schweden`, `nordsee`.
 

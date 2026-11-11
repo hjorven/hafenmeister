@@ -131,7 +131,24 @@ export function init(game) {
     sendePegel();
   });
 
+  // Wechselt jemand anderes das Revier (z. B. Spielregeln oder Spielstand), mitgehen ohne erneut zu senden.
+  game.on('region', (id) => {
+    if (id === aktuell.id || !REVIERE[id]) return;
+    aktuell = REVIERE[id];
+    hubHafen = undefined;
+    anwenden();
+    sendePegel();
+  });
+  game.on('phase', () => anwenden());
+
   // Erst wenn alle Module geladen sind, das Startrevier melden, damit Landschaft und Gebaeude es hoeren.
-  game.on('ready', () => { anwenden(); game.emit('region', aktuell.id); sendePegel(); });
+  // Ein geladener Spielstand (game.state.region) hat Vorrang, ausser ?revier= steht in der Adresse.
+  game.on('ready', () => {
+    const gespeichert = game.state?.region;
+    if (!revierAusAdresse() && gespeichert && REVIERE[gespeichert]) aktuell = REVIERE[gespeichert];
+    anwenden();
+    game.emit('region', aktuell.id);
+    sendePegel();
+  });
   anwenden();
 }
