@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Hafenmeister: Tonprobe</title>
+  <link rel="stylesheet" href="audio.css">
+  <style>
+    :root { --ink: #283648; --paper: #fffcf6; --accent: #ee6454; --tap: 44px; }
+    body {
+      margin: 0;
+      padding: 16px;
+      background: #62b4c2;
+      color: var(--ink);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    main { max-width: 760px; margin: 0 auto; display: grid; gap: 16px; }
+    section { background: var(--paper); border-radius: 12px; padding: 12px 14px; }
+    h1 { margin: 0; font-size: 1.4rem; color: var(--paper); }
+    h2 { margin: 0 0 8px; font-size: 1rem; }
+    p { margin: 0 0 8px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+    button.s {
+      min-height: var(--tap);
+      border: 0;
+      border-radius: 10px;
+      background: var(--ink);
+      color: var(--paper);
+      font: inherit;
+      cursor: pointer;
+    }
+    button.s[aria-pressed="true"] { background: var(--accent); }
+    #status { font-weight: 600; }
+    .hm-audio-panel { box-shadow: none; padding: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Hafenmeister: Tonprobe</h1>
+
+    <section>
+      <p id="status">Ton ist noch aus. Irgendwo tippen oder klicken, dann startet er.</p>
+      <p>Alle Klänge werden im Browser erzeugt, es gibt keine Audiodateien.</p>
+      <div id="panel"></div>
+    </section>
+
+    <section>
+      <h2>Tageszeit</h2>
+      <div class="grid" data-group="phase">
+        <button class="s" data-v="tag">Tag</button>
+        <button class="s" data-v="abend">Abend</button>
+        <button class="s" data-v="nacht">Nacht</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Wetter</h2>
+      <div class="grid" data-group="wetter">
+        <button class="s" data-v="ruhig">Ruhig</button>
+        <button class="s" data-v="wind">Wind</button>
+        <button class="s" data-v="sturm">Sturm</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Hafengröße</h2>
+      <div class="grid" data-group="stufe">
+        <button class="s" data-v="1">Stufe 1, 3 Boote</button>
+        <button class="s" data-v="3">Stufe 3, 15 Boote</button>
+        <button class="s" data-v="5">Stufe 5, 60 Boote</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Schiffshörner</h2>
+      <div class="grid" id="horns"></div>
+    </section>
+
+    <section>
+      <h2>Effekte</h2>
+      <div class="grid" id="sfx"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { audio, SOUNDS } from './audio.js';
+
+    audio.init();
+    window.hmAudio = audio;   // zum Ausprobieren in der Konsole
+    document.getElementById('panel').appendChild(audio.createPanel());
+
+    const status = document.getElementById('status');
+    const groups = {};
+    const mark = (group, v) => {
+      for (const b of document.querySelectorAll(`[data-group="${group}"] button`)) {
+        b.setAttribute('aria-pressed', String(b.dataset.v === String(v)));
+      }
+    };
+    audio.onChange((s) => {
+      status.textContent = s.ready
+        ? (s.stumm ? 'Ton ist stummgeschaltet.' : 'Ton läuft.')
+        : 'Ton ist noch aus. Irgendwo tippen oder klicken, dann startet er.';
+      mark('phase', s.phase);
+      mark('wetter', s.wetter);
+    });
+    mark('phase', 'tag');
+    mark('wetter', 'ruhig');
+    mark('stufe', '1');
+
+    document.querySelector('[data-group="phase"]').addEventListener('click', (e) => {
+      if (e.target.dataset.v) audio.setPhase(e.target.dataset.v);
+    });
+    document.querySelector('[data-group="wetter"]').addEventListener('click', (e) => {
+      if (e.target.dataset.v) audio.setWeather(e.target.dataset.v);
+    });
+    document.querySelector('[data-group="stufe"]').addEventListener('click', (e) => {
+      const v = Number(e.target.dataset.v);
+      if (!v) return;
+      audio.setHarbor({ stufe: v, boote: v === 1 ? 3 : v === 3 ? 15 : 60 });
+      mark('stufe', v);
+    });
+
+    const horns = document.getElementById('horns');
+    for (const [g, text] of [['S', 'Jolle (S)'], ['M', 'Kajütboot (M)'], ['L', 'Yacht (L)'], ['XL', 'Traditionssegler (XL)'], ['XXL', 'Kreuzfahrtschiff']]) {
+      const b = document.createElement('button');
+      b.className = 's';
+      b.textContent = text;
+      b.addEventListener('click', () => audio.horn(g));
+      horns.appendChild(b);
+    }
+
+    const sfx = document.getElementById('sfx');
+    for (const [name, def] of Object.entries(SOUNDS)) {
+      if (name === 'horn') continue;
+      const b = document.createElement('button');
+      b.className = 's';
+      b.textContent = def.label;
+      b.addEventListener('click', () => audio.play(name, name === 'bewertung' ? { anker: 1 + Math.floor(Math.random() * 5) } : {}));
+      sfx.appendChild(b);
+    }
+  </script>
+</body>
+</html>
