@@ -40,6 +40,11 @@ export function createGame({ canvas, bounds, home }) {
       tickers.add(fn);
       return () => tickers.delete(fn);
     },
+    // Was liegt unter einem Bildschirmpunkt? Siehe docs/grundgeruest.md, Abschnitt "Antippbare Objekte".
+    // Liefert { type, id, object, point } oder null. tolerance in CSS-Pixeln fuer Finger.
+    pick(x, y, { tolerance = 22, types = null } = {}) {
+      return pickAt(game, x, y, tolerance, types);
+    },
     setPaused(p) {
       game.paused = p;
       document.body.classList.toggle('paused', p);
@@ -75,4 +80,41 @@ export function createGame({ canvas, bounds, home }) {
   });
 
   return game;
+}
+
+const _ndc = new THREE.Vector2();
+const _ray = new THREE.Raycaster();
+const _v = new THREE.Vector3();
+
+function pickInfo(obj, types) {
+  for (let o = obj; o; o = o.parent) {
+    const p = o.userData && o.userData.pick;
+    if (p && (!types || types.includes(p.type))) return { ...p, object: o };
+  }
+  return null;
+}
+
+function pickAt(game, x, y, tolerance, types) {
+  const rig = game.camera;
+  _ndc.set((x / rig.screenW) * 2 - 1, -(y / rig.screenH) * 2 + 1);
+  _ray.setFromCamera(_ndc, rig.camera);
+  // 1. Genauer Treffer per Strahl
+  for (const hit of _ray.intersectObjects(game.scene.children, true)) {
+    if (!hit.object.visible) continue;
+    const info = pickInfo(hit.object, types);
+    if (info) return { ...info, point: hit.point };
+  }
+  // 2. Fingertoleranz: naechstes antippbares Objekt in der Naehe auf dem Bildschirm
+  let best = null;
+  let bestD = tolerance;
+  game.scene.traverseVisible((o) => {
+    const p = o.userData && o.userData.pick;
+    if (!p || (types && !types.includes(p.type))) return;
+    o.getWorldPosition(_v).project(rig.camera);
+    const sx = (_v.x + 1) / 2 * rig.screenW;
+    const sy = (1 - _v.y) / 2 * rig.screenH;
+    const d = Math.hypot(sx - x, sy - y);
+    if (d < bestD) { bestD = d; best = { ...p, object: o, point: o.getWorldPosition(new THREE.Vector3()) }; }
+  });
+  return best;
 }

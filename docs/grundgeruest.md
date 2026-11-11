@@ -43,11 +43,33 @@ Jede Datei exportiert `init(game)` (oder `default`, oder eine Funktion, deren Na
 | `game.camera.setHome(x, z, breite)` | Startansicht ändern, z. B. beim Erweitern des Hafens |
 | `game.camera.screenToWorld(x, y)` | Bildschirmpunkt auf die Wasserfläche projizieren |
 | `game.camera.camera` | die `THREE.OrthographicCamera` |
+| `game.pick(x, y, { tolerance, types })` | was liegt unter einem Bildschirmpunkt, liefert `{ type, id, object, point }` oder `null` |
 | `game.onTick(fn)` | `fn(dt, game)` jedes Bild, `dt` in Sekunden, 0 während der Pause |
 | `game.on(name, fn)`, `game.emit(name, daten)` | Ereignisse |
 | `game.setPaused(true/false)`, `game.paused`, `game.speed`, `game.time` | Pause, Vorspulen, Spielzeit |
 
-**Ereignisse vom Grundgerüst:** `tap` mit `{ x, y, world }`, `pause`, `resize`, `ready` (alle Module geladen).
+**Ereignisse vom Grundgerüst:** `tap` mit `{ x, y, world, pick }`, `pause`, `resize`, `ready` (alle Module geladen).
+
+**Absichten aus den Eingabe-Modulen** (`input-pc.js`, `input-touch.js`). Sie werden per `game.emit` gesendet, `js/ui/hud.js` und die Spielregeln hören darauf:
+
+| Ereignis | Bedeutung |
+|---|---|
+| `ui:cancel` | Auswahl aufheben, Karte schließen |
+| `ui:collect` | abends kassieren (Hafenhorn, Münzen wischen) |
+| `ui:tow` | Schleppleine: Boot wird zu einem Ziel gezogen |
+| `ui:tow-end` | Schleppleine losgelassen |
+| `ui:mute` | Ton an oder aus |
+| `hover` | Zeiger liegt über einem Objekt (nur PC), Daten wie bei `pick` |
+
+## Antippbare Objekte
+
+Jedes Modul, das etwas Antippbares in die Szene legt, setzt am obersten Objekt dieser Sache:
+
+```js
+mesh.userData.pick = { type: 'boat', id: 'b17' };
+```
+
+Erlaubte Werte für `type`: `boat`, `berth`, `jetty`, `coin`, `building`, `buildsite`. Die `id` ist dieselbe wie in den Spielregeln (`sim.js`). Kinder-Objekte brauchen nichts, `game.pick` sucht vom getroffenen Teil nach oben. Trifft der Strahl nichts, nimmt `game.pick` das nächste antippbare Objekt innerhalb von 22 Pixeln auf dem Bildschirm, damit Finger auch kleine Boote treffen. Mit `types: ['boat']` lässt sich die Suche einschränken.
 
 ## Koordinaten
 
