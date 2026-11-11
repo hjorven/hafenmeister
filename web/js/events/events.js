@@ -1,0 +1,172 @@
+// Ereignisse im Spiel: verbindet den Planer (scheduler.js) mit dem Spielobjekt.
+// Wird von main.js geladen (Eintrag './events/events.js' in MODULES).
+//
+// Eingänge (von der Sim und vom Bauen):
+//   game.emit('day:start', { day, stage })   neuer Spieltag
+//   game.emit('stage', { stage })            neue Ausbaustufe
+//   game.emit('build', { id, level })        Bauwerk gebaut oder ausgebaut (z. B. 'mole', 'seenotretter')
+//   game.emit('phase', 'tag' | 'abend')      Tageszeit (alternativ body[data-phase])
+// Ausgänge:
+//   game.emit('event:announce', { event, day, startDay, endDay })
+//   game.emit('event:start', { event, day, endDay })
+//   game.emit('event:end', { event, day, reputationBonus })
+//   game.emit('sturm', { tag })                     am Sturmtag (Seenotretter rücken aus)
+//   game.emit('reputation:bonus', { amount, source })   nur wenn amount > 0
+//   game.emit('weather', { wind, fog, rain, snow, sun, event, part })   bei jedem Tageswechsel
+//   game.emit('wetter', { bewoelkung, wind })   dasselbe im Format von render/landscape.js
+//   game.emit('season', { year, seasonDay, winterDay, part, winter })  wenn die Jahreszeit wechselt
+// Abfrage:
+//   game.events.modifiers()  Wirkung heute für die Spielregeln
+//   game.events.season(day)  Jahreslauf: 30 Tage Saison, 3 Tage Winter
+//   game.events.forecast(n), game.events.weather(day), game.events.current, game.events.planned
+//   game.events.save(), game.events.load(daten)
+//
+// Solange niemand 'day:start' sendet, zählt eine Ersatzuhr die Tage (120 s pro Tag, letzte 30 s Abend).
+import { createScheduler } from './scheduler.js';
+import { initEffects } from './effects.js';
+import { initBanner } from './banner.js';
+
+const DAY_SECONDS = 120;
+const EVENING_SECONDS = 30;
+
+function loadCss() {
+  if (document.querySelector('link[data-hm="events"]')) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.dataset.hm = 'events';
+  link.href = new URL('../../css/events.css', import.meta.url).href;
+  document.head.appendChild(link);
+}
+
+export function init(game) {
+  const seed = (game.state?.seed ?? Math.floor(Math.random() * 2 ** 31)) >>> 0;
+  const scheduler = createScheduler({ seed });
+
+  let stage = game.state?.stage ?? 1;
+  const buildings = { ...(game.state?.buildings ?? {}) };
+  let external = false;     // true, sobald die Sim 'day:start' sendet
+  let today = 0;
+  let phase = document.body.dataset.phase ?? 'tag';
+  let lastPart = null;
+
+  // Bauwerke aus drei Quellen: 'build'-Ereignisse, game.state.buildings und das Services-Modul
+  function readBuildings() {
+    const fromState = game.state?.buildings;
+    const out = fromState && typeof fromState === 'object' ? { ...buildings, ...fromState } : { ...buildings };
+    let fx = null;
+    try { fx = game.services?.effekte?.(); } catch { fx = null; }
+    if (fx) {
+      const frei = fx.freischalten ?? [];
+      if (frei.includes?.('regatta')) out.segelclub = Math.max(out.segelclub ?? 0, 1);
+      if (typeof fx.sturmschutz === 'number') out.seenotretterSchutz = fx.sturmschutz;
+    }
+    return out;
+  }
+
+  // Faktoren aus dem Services-Modul verstärken Regatta und Hafenfest (z. B. Segelclub, Segelmacher)
+  function serviceBoost(mods) {
+    const id = scheduler.current?.id;
+    let f = 1;
+    try {
+      const fx = game.services?.effekte?.();
+      if (id === 'regatta' && typeof fx?.regatta === 'number') f = fx.regatta;
+      if (id === 'hafenfest' && typeof fx?.hafenfest === 'number') f = fx.hafenfest;
+    } catch { f = 1; }
+    if (f !== 1 && f > 0) {
+      mods.visitorFactor *= f;
+      mods.serviceIncomeFactor *= f;
+    }
+    return mods;
+  }
+
+  function newDay(day) {
+    if (!(day > today)) return;
+    today = day;
+    const changes = scheduler.advanceTo(day, { stage, buildings: readBuildings() });
+    for (const c of changes) {
+      if (c.type === 'announce') game.emit('event:announce', { event: c.event, day: c.day, startDay: c.startDay, endDay: c.endDay });
+      if (c.type === 'start') {
+        game.emit('event:start', { event: c.event, day: c.day, endDay: c.endDay });
+        // Seenotretter laufen aus (Services-Modul und Animationen hören darauf)
+        if (c.event.id === 'sturm') game.emit('sturm', { tag: c.day });
+      }
+      if (c.type === 'end') {
+        game.emit('event:end', { event: c.event, day: c.day, reputationBonus: c.reputationBonus });
+        if (c.reputationBonus > 0) game.emit('reputation:bonus', { amount: c.reputationBonus, source: c.event.id });
+      }
+    }
+    emitWeather(scheduler.weather(day));
+    const season = scheduler.season(day);
+    if (season.part !== lastPart) { lastPart = season.part; game.emit('season', season); }
+  }
+
+  // 'weather' für Effekte und Ton, dazu 'wetter' im Format des Landschaftsmoduls
+  function emitWeather(wx) {
+    game.emit('weather', wx);
+    const bewoelkung = Math.min(1, Math.max(0, 1 - (wx.sun ?? 0.7) + (wx.rain ?? 0) * 0.3 + (wx.fog ?? 0) * 0.3 + (wx.snow ?? 0) * 0.2));
+    game.emit('wetter', { bewoelkung, wind: wx.wind ?? 0.2 });
+  }
+
+  function setPhase(p) {
+    if (p === phase) return;
+    phase = p;
+    game.emit('event:phase', { phase, event: scheduler.current?.event ?? null });
+  }
+
+  game.events = {
+    scheduler,
+    modifiers: () => {
+      scheduler.advanceTo(today, { stage, buildings: readBuildings() });   // Schutzbauten aktuell halten
+      return serviceBoost(scheduler.modifiers());
+    },
+    weather: (day) => scheduler.weather(day),
+    forecast: (n) => scheduler.forecast(n),
+    season: (day) => scheduler.season(day),
+    get current() { return scheduler.current; },
+    get planned() { return scheduler.planned; },
+    get phase() { return phase; },
+    save: () => scheduler.save(),
+    load(data) {
+      scheduler.load(data);
+      today = scheduler.day;
+      lastPart = null;
+      emitWeather(scheduler.weather(today || 1));
+      const season = scheduler.season(today || 1);
+      lastPart = season.part;
+      game.emit('season', season);
+      game.emit('event:loaded', { current: scheduler.current, planned: scheduler.planned });
+    },
+  };
+
+  game.on('day:start', (d) => {
+    external = true;
+    if (d && typeof d.stage === 'number') stage = d.stage;
+    const day = typeof d === 'number' ? d : d?.day;
+    if (typeof day === 'number') newDay(day);
+  });
+  game.on('stage', (d) => {
+    const s = typeof d === 'number' ? d : d?.stage;
+    if (typeof s === 'number') { stage = s; scheduler.setStage(s); }
+  });
+  game.on('build', (d) => {
+    if (d?.id) { buildings[d.id] = d.level ?? 1; scheduler.setBuilding(d.id, buildings[d.id]); }
+  });
+  game.on('phase', (p) => setPhase(typeof p === 'string' ? p : p?.phase));
+  new MutationObserver(() => { if (document.body.dataset.phase) setPhase(document.body.dataset.phase); })
+    .observe(document.body, { attributes: true, attributeFilter: ['data-phase'] });
+
+  // Ersatzuhr, bis die Sim übernimmt
+  game.onTick(() => {
+    if (external) return;
+    const t = game.time;
+    newDay(Math.floor(t / DAY_SECONDS) + 1);
+    setPhase(t % DAY_SECONDS >= DAY_SECONDS - EVENING_SECONDS ? 'abend' : 'tag');
+  });
+
+  loadCss();
+  initEffects(game);
+  initBanner(game);
+
+  // Erster Tag sofort, damit Wetter und Wetterbericht stehen
+  game.on('ready', () => { if (!external && today === 0) newDay(1); });
+}
