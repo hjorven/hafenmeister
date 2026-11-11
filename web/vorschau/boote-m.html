@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Boote M – Vorschau</title>
+  <style>
+    :root { --bg: #62b4c2; --panel: #f4f1eaee; --text: #2e3f5c; }
+    html, body { margin: 0; height: 100%; background: var(--bg); font-family: system-ui, sans-serif; color: var(--text); }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+    .bar { position: fixed; left: 12px; top: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .bar button, .bar select { font: inherit; padding: 8px 12px; border: 0; border-radius: 8px; background: var(--panel); color: var(--text); }
+    .bar span { background: var(--panel); padding: 8px 12px; border-radius: 8px; }
+    .label { position: fixed; pointer-events: none; font-size: 12px; background: var(--panel); padding: 2px 6px; border-radius: 4px; transform: translate(-50%, 0); white-space: nowrap; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div class="bar">
+    <button id="sails">Segel setzen</button>
+    <button id="palette">Farbe wechseln</button>
+    <button id="names">Namen aus</button>
+    <span id="info">20 Modelle der Größe M</span>
+  </div>
+  <div id="labels"></div>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { MODELS, buildBoat, setSails } from '../js/render/boats/m.js';
+
+    const canvas = document.getElementById('c');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color('#62b4c2');
+
+    const camera = new THREE.PerspectiveCamera(30, 1, 0.5, 500);
+    camera.position.set(38, 42, 48);
+    const controls = new OrbitControls(camera, canvas);
+    controls.target.set(0, 0, 4);
+
+    scene.add(new THREE.HemisphereLight('#ffffff', '#5a8fa0', 1.6));
+    const sun = new THREE.DirectionalLight('#fff4e0', 2.2);
+    sun.position.set(-30, 50, 20);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.bias = -0.0004;
+    sun.shadow.normalBias = 0.04;
+    Object.assign(sun.shadow.camera, { left: -45, right: 45, top: 45, bottom: -45, far: 150 });
+    scene.add(sun);
+
+    const water = new THREE.Mesh(
+      new THREE.PlaneGeometry(400, 400),
+      new THREE.MeshLambertMaterial({ color: '#6fc0cc', transparent: true, opacity: 0.85 })
+    );
+    water.rotation.x = -Math.PI / 2;
+    water.receiveShadow = true;
+    scene.add(water);
+
+    // Reihen je Art, Spalten je Modell
+    const boats = [];
+    let palette = 0, sailsUp = false, showNames = true;
+    const labels = document.getElementById('labels');
+
+    // ?modell=M2-5 zeigt nur ein Modell, nah herangezoomt
+    const nur = new URLSearchParams(location.search).get('modell');
+    const auswahl = nur ? MODELS.filter((m) => m.id === nur) : MODELS;
+    if (nur && auswahl[0]) {
+      const m = auswahl[0];
+      const d = Math.max(m.length * 2.2, m.airDraft * 2.4);
+      camera.position.set(d * 0.7, d * 0.55, d * 0.85);
+      controls.target.set(0, m.airDraft * 0.35, 0);
+      document.getElementById('info').textContent = auswahl[0] ? `${auswahl[0].id} ${auswahl[0].name}: ${auswahl[0].form}` : 'Modell nicht gefunden';
+    }
+
+    function build() {
+      for (const b of boats) scene.remove(b.group);
+      boats.length = 0;
+      labels.innerHTML = '';
+      auswahl.forEach((m) => {
+        const row = Number(m.typeId.slice(1)) - 1;
+        const col = Number(m.id.split('-')[1]) - 1;
+        const g = buildBoat(m, { palette, sails: sailsUp });
+        if (!nur) g.position.set((col - 2) * 11, 0, (row - 1.5) * 9);
+        g.rotation.y = nur ? 0 : 0.35;
+        g.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+        scene.add(g);
+        const el = document.createElement('div');
+        el.className = 'label';
+        el.textContent = `${m.id} ${m.name}`;
+        labels.appendChild(el);
+        boats.push({ group: g, el, phase: Math.random() * 6 });
+      });
+    }
+    build();
+
+    document.getElementById('sails').onclick = (e) => {
+      sailsUp = !sailsUp;
+      for (const b of boats) setSails(b.group, sailsUp);
+      e.target.textContent = sailsUp ? 'Segel bergen' : 'Segel setzen';
+    };
+    document.getElementById('palette').onclick = () => { palette++; build(); };
+    document.getElementById('names').onclick = (e) => {
+      showNames = !showNames;
+      labels.style.display = showNames ? '' : 'none';
+      e.target.textContent = showNames ? 'Namen aus' : 'Namen an';
+    };
+
+    function resize() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    addEventListener('resize', resize);
+    resize();
+
+    const v = new THREE.Vector3();
+    const timer = new THREE.Timer();
+    renderer.setAnimationLoop(() => {
+      timer.update();
+      const t = timer.getElapsed();
+      controls.update();
+      for (const b of boats) {
+        // einfaches Schaukeln nur für die Vorschau, im Spiel macht das boat-anim.js
+        b.group.rotation.x = Math.sin(t * 1.2 + b.phase) * 0.03;
+        b.group.position.y = Math.sin(t * 0.9 + b.phase) * 0.04;
+        const flag = b.group.userData.anim.flag;
+        if (flag) flag.rotation.y = Math.sin(t * 4 + b.phase) * 0.3;
+        const radar = b.group.userData.anim.radar;
+        if (radar) radar.rotation.y = t * 2;
+        if (showNames) {
+          v.set(0, b.group.userData.iconHeight, 0).applyMatrix4(b.group.matrixWorld).project(camera);
+          b.el.style.left = `${(v.x * 0.5 + 0.5) * canvas.clientWidth}px`;
+          b.el.style.top = `${(-v.y * 0.5 + 0.5) * canvas.clientHeight}px`;
+        }
+      }
+      renderer.render(scene, camera);
+    });
+  </script>
+</body>
+</html>
