@@ -26,7 +26,7 @@ Danach `http://localhost:8000/vorschau/boote-l.html` öffnen. Knöpfe: Farbvaria
 ## Im Spiel verwenden
 
 ```js
-const L = game.boatTypes.L;                       // von init(game) angemeldet
+const L = game.boatTypes.l;                       // von init(game) angemeldet
 const boot = L.buildBoat('L1-3', { palette: 1, id: 'b17' });
 game.scene.add(boot);
 L.setSails(boot, true);                           // Segel setzen
