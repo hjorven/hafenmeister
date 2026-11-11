@@ -16,6 +16,7 @@ Stand: 11.11.2026. Das Spiel liegt in `web/` und wird ohne Build-Schritt auf Git
 
 ```
 web/js/render/landscape.js
+web/js/render/services.js
 web/js/render/boats/s.js
 web/js/render/boats/m.js
 web/js/render/boats/l.js
@@ -25,6 +26,7 @@ web/js/ui/input-touch.js
 web/js/ui/hud.js
 web/js/audio/audio.js
 web/js/state.js
+web/js/save/index.js
 ```
 
 Jede Datei exportiert `init(game)` (oder `default`, oder eine Funktion, deren Name mit `init` beginnt). Wer eine weitere Datei braucht, meldet sie beim Grundgerüst an, damit sie in die Liste `MODULES` in `main.js` kommt.

@@ -1,6 +1,6 @@
 # Hafen und Schiffe
 
-Stand: 11.11.2026. Dieses Dokument ersetzt im [Spielplan](plan.md) die Bootstabelle in Abschnitt 4, die Stege, die Mole und den Kai in Abschnitt 5, die Stufennamen in Abschnitt 6 und den Sturm in Abschnitt 7. Wünsche, Versorgung, Oberfläche und Technik bleiben, wie sie im Spielplan stehen.
+Stand: 11.11.2026. Dieses Dokument ist der **Katalog** zum [Spielplan](plan.md): Stufenbilder, Liegeplätze, Einlaufen und Schiffsmodelle. Regeln, Stufe 6, die Größe XXL, Services und Entscheidungen stehen im Spielplan. Wo sich beide widersprechen, gilt der Spielplan.
 
 **Was sich gegenüber dem Spielplan ändert**
 
