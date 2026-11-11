@@ -13,7 +13,7 @@
 //   gemeinsame Animationsmodul über die Namen: sail-main, sail-jib (furl 'x'), sail-mizzen,
 //   boom, boom-mizzen (Drehpunkt am Mast), cover-..., fender, flag, radar, cleat-bow, cleat-stern.
 // - tickBoat(group, time) dreht Windgenerator und lässt Blaulichter blinken (init hängt das an game.onTick).
-// - init(game) meldet die L-Boote unter game.boatTypes.L an.
+// - init(game) meldet die L-Boote unter game.boatTypes.l an.
 
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -1042,7 +1042,9 @@ const LIVE = new Set();
 export function init(game) {
   // Gleiche Anmeldung wie bei den M-Booten: game.boatTypes.<Größe>
   game.boatTypes = game.boatTypes ?? {};
-  game.boatTypes.L = { size: 'L', TYPES, MODELS, buildBoat, setSails };
+  // Schreibweise laut docs/grundgeruest.md: Kleinbuchstaben. Großbuchstabe als Alias fuer alten Code.
+  game.boatTypes.l = { size: 'L', TYPES, MODELS, buildBoat, setSails };
+  game.boatTypes.L = game.boatTypes.l;
   game.emit?.('boats:registered', { size: 'L' });
   let t = 0;
   game.onTick((dt) => {

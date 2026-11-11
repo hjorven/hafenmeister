@@ -3,7 +3,7 @@
 // Schnittstelle (gleich für S, M, L, XL):
 //   buildBoat(model, { palette = 0, sails = false, id })  -> THREE.Group (id = Boot-id aus sim.js für game.pick)
 //   setSails(group, on)                                 Segel setzen (true) oder bergen (false)
-//   init(game)                                          meldet die M-Boote unter game.boatTypes.M an
+//   init(game)                                          meldet die M-Boote unter game.boatTypes.m an
 //
 // Konvention: 1 Einheit = 1 m, Y oben, Bug +X, Steuerbord +Z, Ursprung Wasserlinie mittschiffs.
 // Im Hafen: group.rotation.y = richtung des Liegeplatzes (Grad in rad).
@@ -1118,7 +1118,9 @@ export function setSails(group, on) {
 /** Wird von main.js beim Start aufgerufen: meldet die M-Boote an. */
 export function init(game) {
   game.boatTypes = game.boatTypes ?? {};
-  game.boatTypes.M = { size: 'M', TYPES, MODELS, buildBoat, setSails };
+  // Schreibweise laut docs/grundgeruest.md: Kleinbuchstaben. Großbuchstabe als Alias fuer alten Code.
+  game.boatTypes.m = { size: 'M', TYPES, MODELS, buildBoat, setSails };
+  game.boatTypes.M = game.boatTypes.m;
   game.emit?.('boats:registered', { size: 'M' });
 }
 

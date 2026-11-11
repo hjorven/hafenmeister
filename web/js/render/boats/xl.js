@@ -471,6 +471,7 @@ export function startTraffic(game, { maxShips = 2, firstAt = 0.35 } = {}) {
 
 export function init(game) {
   game.boatTypes ??= {};
-  game.boatTypes.xl = { TYPES, MODELS, buildBoat, setSails, animateBoat };
+  game.boatTypes.xl = { size: 'XL', TYPES, MODELS, buildBoat, setSails, animateBoat };
+  game.boatTypes.XL = game.boatTypes.xl;   // Alias, Schreibweise ist klein
   startTraffic(game);
 }

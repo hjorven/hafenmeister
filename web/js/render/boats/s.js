@@ -1378,7 +1378,7 @@ export function init(game) {
   game.boatTypes = game.boatTypes || {};
   const entry = { size: SIZE, TYPES, MODELS, buildBoat, setSails, animateBoat };
   game.boatTypes.s = entry;
-  game.boatTypes.S = entry; // L und M melden sich mit Großbuchstaben an
+  game.boatTypes.S = entry; // Alias, Schreibweise ist klein (docs/grundgeruest.md)
   game.emit?.('boats:registered', { size: SIZE });
   // Zum Ansehen im Spiel: index.html?demo=boote-s stellt die S-Boote an die Plätze der Stufe 1
   if (typeof location !== 'undefined' && /[?&]demo=boote-s\b/.test(location.search)) placeDemo(game);
