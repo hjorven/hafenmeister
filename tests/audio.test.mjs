@@ -35,3 +35,26 @@ test('Lautstärke wird begrenzt', () => {
   audio.setVolume('gibtsnicht', 0.5);
   assert.equal(audio.getVolume('gibtsnicht'), undefined);
 });
+
+test('Münzen werden bei schnellem Strich nicht verworfen, sondern versetzt', () => {
+  // Minimaler Ersatz für den AudioContext, nur so viel, wie play() vor dem Erzeugen braucht
+  const scheduled = [];
+  const fake = Object.create(Object.getPrototypeOf(audio));
+  Object.assign(fake, {
+    settings: { master: 1, musik: 1, atmo: 1, effekte: 1, stumm: false },
+    _lastPlayed: new Map(),
+    _voiceEnds: [],
+    ctx: { state: 'running', currentTime: 10, createGain: () => ({ gain: {}, connect() {}, disconnect() {} }) },
+    bus: { effekte: { dry: {}, wet: {} } },
+    _panner: () => null,
+    _cleanup: () => {},
+    _sfx: { ...audio._sfx, muenze: (t) => { scheduled.push(t); return 0.4; }, klick: (t) => { scheduled.push(t); return 0.1; } },
+  });
+  for (let i = 1; i <= 10; i++) assert.equal(fake.play('muenze', { combo: i }), true, `Münze ${i}`);
+  assert.equal(scheduled.length, 10);
+  for (let i = 1; i < scheduled.length; i++) assert.ok(scheduled[i] - scheduled[i - 1] >= 0.0299, 'Abstand');
+  // Normale Klänge ohne queue bleiben gesperrt
+  scheduled.length = 0;
+  assert.equal(fake.play('klick'), true);
+  assert.equal(fake.play('klick'), false);
+});
