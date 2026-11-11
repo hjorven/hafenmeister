@@ -111,7 +111,8 @@ const SCHLUSS = [[[0, 6]], [[0, 3], [3, 3]]];
 // Effekte
 // ---------------------------------------------------------------------------
 
-// label: Anzeige in der Testseite, wet: Hallanteil, gap: Mindestabstand in s
+// label: Anzeige in der Testseite, wet: Hallanteil, gap: Mindestabstand in s,
+// queue: zu schnelle Aufrufe werden um gap versetzt nachgespielt statt verworfen
 export const SOUNDS = {
   klick: { label: 'Antippen', wet: 0, gap: 0.03 },
   auswahl: { label: 'Boot ausgewählt', wet: 0.1, gap: 0.05 },
@@ -120,10 +121,10 @@ export const SOUNDS = {
   anlegen: { label: 'Boot legt an', wet: 0.15, gap: 0.08 },
   ablegen: { label: 'Boot legt ab (Motor)', wet: 0.15, gap: 0.2 },
   platsch: { label: 'Platschen', wet: 0.1, gap: 0.05 },
-  muenze: { label: 'Münze kassieren', wet: 0.15, gap: 0.015 },
+  muenze: { label: 'Münze kassieren', wet: 0.15, gap: 0.03, queue: true },
   'strich-ende': { label: 'Münzstrich fertig', wet: 0.35, gap: 0.2 },
   'leine-greifen': { label: 'Leine greifen', wet: 0.1, gap: 0.1 },
-  'leine-einrasten': { label: 'Leine rastet ein', wet: 0.15, gap: 0.06 },
+  'leine-einrasten': { label: 'Leine rastet ein', wet: 0.15, gap: 0.06, queue: true },
   'vorspulen-start': { label: 'Vorspulen Start', wet: 0.3, gap: 0.3 },
   'vorspulen-ende': { label: 'Vorspulen Ende', wet: 0.3, gap: 0.3 },
   kasse: { label: 'Alles kassieren', wet: 0.2, gap: 0.3 },
@@ -229,13 +230,17 @@ class HafenAudio {
     if (!def || !this.ready || this.settings.stumm || this.settings.effekte <= 0 || this.settings.master <= 0) return false;
     const ctx = this.ctx;
     const now = ctx.currentTime;
-    const last = this._lastPlayed.get(name) || -1;
-    if (now - last < def.gap) return false;
-    this._voiceEnds = this._voiceEnds.filter((t) => t > now);
-    if (this._voiceEnds.length >= MAX_VOICES) return false;
-    this._lastPlayed.set(name, now);
+    let t = now + 0.01 + Math.max(0, opts.delay || 0);
+    const last = this._lastPlayed.get(name);
+    if (last != null && t - last < def.gap) {
+      // Schneller Münzstrich: jede Münze hörbar, nur leicht versetzt. Höchstens 0,6 s Rückstau.
+      if (!def.queue || last + def.gap - now > 0.6) return false;
+      t = last + def.gap;
+    }
+    this._voiceEnds = this._voiceEnds.filter((e) => e > now);
+    if (this._voiceEnds.length >= MAX_VOICES + (def.queue ? 12 : 0)) return false;
+    this._lastPlayed.set(name, t);
 
-    const t = now + 0.01 + Math.max(0, opts.delay || 0);
     const bus = this.bus.effekte;
     const out = ctx.createGain();
     out.gain.value = SFX_GAIN * clamp(opts.volume == null ? 1 : opts.volume, 0, 1.5);
