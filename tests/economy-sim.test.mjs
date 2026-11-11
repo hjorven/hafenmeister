@@ -1,0 +1,107 @@
+// Spielregeln mit den Zahlen aus web/js/data/economy.js (Balancing-Thread)
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createState, deserialize, serialize } from '../web/js/state.js';
+import { ECONOMY } from '../web/js/data/economy.js';
+import { HAFEN } from '../web/js/data/harbor.js';
+import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
+import * as sim from '../web/js/sim.js';
+
+const rules = sim.rulesFromEconomy(ECONOMY);
+const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules });
+
+test('Zahlen werden übernommen', () => {
+  assert.equal(rules.baseFee.M, ECONOMY.klassen.M.grundpreis);
+  assert.deepEqual(rules.nightsBySize.S, ECONOMY.klassen.S.naechte);
+  assert.equal(rules.arrivalsPerDay[2], ECONOMY.stufen[1].ankuenfte);
+  assert.equal(rules.stageGoals[1].cost, ECONOMY.stufen[0].ausbau.kosten);
+  assert.equal(rules.facilities.wc.cost[1], ECONOMY.bauwerke.wc.stufen[0].kosten);
+  assert.equal(rules.facilities.wc.levels[2], ECONOMY.bauwerke.wc.stufen[1].versorgt);
+  assert.equal(rules.office.cost[1], ECONOMY.hafenbuero.stufen[0].kosten);
+  assert.equal(rules.office.autoAssign, 2);
+  assert.ok(!rules.wishes[3].includes('diesel'));
+  assert.ok(rules.wishes[4].includes('diesel'));
+  assert.equal(rules.maxStage, 5);
+});
+
+test('Start: nur der alte Steg, Stegprojekt schaltet Plätze frei', () => {
+  const s = createState({ seed: 1, rules });
+  assert.deepEqual(sim.availableBerths(s, ctx).map((b) => b.id).sort(), ECONOMY.start.plaetze);
+  const open = sim.openJettyProjects(s, ctx).map((p) => p.id);
+  assert.deepEqual(open, ['a-haken']);
+  assert.equal(sim.buildJettyProject(s, ctx, 'a-haken').reason, 'money');
+  s.money = 1000;
+  assert.equal(sim.buildJettyProject(s, ctx, 'a-haken').ok, true);
+  assert.equal(sim.availableBerths(s, ctx).length, 6);
+  assert.equal(sim.buildJettyProject(s, ctx, 'b-steg').reason, 'stage');
+});
+
+test('Ausbaustufe zählt Gäste je Stufe und schaltet die Plätze des Ausbaus frei, Fischer kommt von selbst', () => {
+  const s = createState({ seed: 2, rules });
+  s.money = 10000;
+  s.stageGuests = ECONOMY.stufen[0].ziel.gaeste;
+  s.guests = 999;
+  const r = sim.advanceStage(s, ctx);
+  assert.equal(r.ok, true);
+  assert.equal(s.stage, 2);
+  assert.equal(s.stageGuests, 0);
+  assert.equal(s.buildings.dorfhafen, 1);
+  assert.ok(sim.availableBerths(s, ctx).some((b) => b.id === 'F01'));
+  assert.deepEqual(sim.canAdvanceStage(s, ctx).missing.includes('guests'), true);
+  sim.runDay(s, ctx);
+  const fisher = Object.values(s.boats).find((b) => b.stationed);
+  assert.ok(fisher, 'Fischer liegt am Fischersteg');
+  assert.equal(fisher.berthId, 'F01');
+  const before = s.stats.totalIncome;
+  sim.runDay(s, ctx);
+  assert.ok(s.stats.totalIncome >= before + ECONOMY.fischer.pachtProTag);
+});
+
+test('Strom an Steg B erst mit Stromsäulen', () => {
+  const s = createState({ seed: 3, rules });
+  s.stage = 3;
+  const b = ctx.berthById.B01;
+  assert.equal(sim.berthHas(s, ctx, b, 'power'), false);
+  assert.equal(sim.berthHas(s, ctx, ctx.berthById.C01, 'power'), true);
+  s.money = 1e5;
+  assert.equal(sim.upgradeFacility(s, ctx, 'strom').ok, true);
+  assert.equal(sim.berthHas(s, ctx, b, 'power'), true);
+});
+
+test('S-Boote wünschen keinen Strom', () => {
+  const s = createState({ seed: 4, rules });
+  s.stage = 4;
+  s.buildings = Object.fromEntries(Object.keys(rules.berthProjects).map((k) => [k, 1]));
+  for (let i = 0; i < 300; i++) {
+    const b = sim.rollBoat(s, ctx);
+    if (b.size === 'S') assert.ok(!b.wishes.includes('strom'));
+  }
+});
+
+test('Spieler baut alles Sinnvolle: kommt mit den Balancing-Zahlen voran', () => {
+  const s = createState({ seed: 21, rules });
+  for (let d = 0; d < 150; d++) {
+    for (let t = 0; t < 120; t += 10) {
+      sim.tick(s, ctx, 10);
+      sim.autoAssign(s, ctx);
+    }
+    sim.collectAll(s, ctx, true);
+    for (const p of sim.openJettyProjects(s, ctx)) sim.buildJettyProject(s, ctx, p.id);
+    for (const k of Object.keys(rules.facilities)) sim.upgradeFacility(s, ctx, k);
+    sim.upgradeOffice(s, ctx);
+    sim.advanceStage(s, ctx);
+    assert.ok(s.money >= 0);
+  }
+  assert.ok(s.stage >= 3, `Stufe ${s.stage} nach 150 Tagen`);
+  assert.doesNotThrow(() => deserialize(serialize(s)));
+});
+
+test('Alter Spielstand ohne neue Felder wird ergänzt statt verworfen', () => {
+  const s = createState({ seed: 5 });
+  const old = JSON.parse(serialize(s));
+  delete old.stageGuests;
+  delete old.modules;
+  const loaded = deserialize(JSON.stringify(old));
+  assert.equal(loaded.stageGuests, 0);
+  assert.deepEqual(loaded.modules, {});
+});

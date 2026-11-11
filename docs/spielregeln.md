@@ -1,6 +1,6 @@
 # Spielregeln: Schnittstelle für alle Module
 
-Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node testbar. Alle Zahlen stehen in `web/js/data/rules.js`.
+Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node testbar. Die Zahlen kommen aus `web/js/data/economy.js` (Balancing-Thread). `sim.rulesFromEconomy(ECONOMY)` bringt sie in das Format der Regeln, was dort fehlt, kommt aus `web/js/data/rules.js`.
 
 ## Dateien
 
@@ -10,7 +10,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 | `web/js/state.js` | Spielstand als JSON, Zufall mit Seed, eigenes Speichern als Rückfall, `init(game)` |
 | `web/js/random.js` | Zufall mit Seed (mulberry32), Zustand liegt im Spielstand |
 | `web/js/bridge.js` | Verbindet die Regeln mit `game` (Ereignisse, Gesten, Speichermodul) |
-| `web/js/data/rules.js` | Alle Regelzahlen (Startwerte fürs Balancing) |
+| `web/js/data/rules.js` | Grundwerte der Regeln, die economy.js nicht festlegt |
 | `web/js/data/boat-catalog.js` | Ersatzkatalog der Bootsarten, bis alle Schiffs-Threads liefern |
 | `web/js/ui/hud.js` | Geld, Ruf, Tag, Übersicht der Wartenden, Karten für Boot und Bauen, Knöpfe Kassieren und Spielstand |
 | `tests/sim.test.mjs`, `tests/state.test.mjs`, `tests/harbor-sim.test.mjs` | Tests |
@@ -22,6 +22,8 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 3. Der Spieler zieht das Boot auf einen Platz oder tippt „Automatisch einfahren“. Nach 50 s Warten fährt es weiter.
 4. Abends (ab 90 s) zahlen alle liegenden Boote Hafengeld als Münze. Wer noch wartet, fährt weiter.
 5. Nachts (ab 120 s): nicht kassierte Münzen zählen zur Hälfte, Boote mit 0 Nächten reisen ab und bewerten den Hafen. Der Spielstand wird gespeichert.
+
+**Liegeplätze:** Zu Beginn gibt es nur die Plätze aus `ECONOMY.start`. Jedes Stegprojekt (`ECONOMY.stegprojekte`, unter „Bauen“) und jeder Stufenausbau schaltet seine Plätze frei. Fischerplätze bekommen ihr Fischerboot von selbst, es zahlt Pacht. Für die nächste Ausbaustufe zählen die Gäste, die in der aktuellen Stufe abgereist sind.
 
 **Passregel:** Ein Boot passt an einen Platz, wenn es nicht länger und nicht breiter ist als der Platz und die Wassertiefe der aktuellen Stufe mindestens 0,3 m größer ist als sein Tiefgang. Fischerplätze sind fest vergeben, der Kai ist nur für XL.
 
@@ -40,6 +42,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 | `collect(bootId)`, `collectAll()` | Münze einstreichen |
 | `fastForward(sekunden)` | Spielzeit vorspulen, höchstens bis zum nächsten Abend oder Morgen |
 | `upgradeFacility(key)`, `upgradeOffice()`, `build(id, kosten, stufe)`, `advanceStage()` | Bauen |
+| `openJettyProjects()`, `buildJettyProject(id)` | Stegprojekte der aktuellen Stufe |
 | `spend(betrag)`, `addIncome(betrag)` | Geld für andere Module |
 | `waitingBoats()`, `mooredBoats()`, `preview()`, `waitSpotCount()` | Lesen |
 | `boote` | alle wartenden und liegenden Boote im Format von `boot-kommt`, zum Aufbauen nach dem Laden |
@@ -97,6 +100,10 @@ Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, 
 | `ui:cancel` | Auswahl aufheben |
 | `services:abrechnung` | `{ summe }` wird gutgeschrieben |
 | `spielstand-geladen` | Spielstand neu übernehmen |
+
+## Wartende Boote im HUD
+
+Solange niemand die Boote im Wasser zeigt, listet `#queue` die wartenden Boote als Knöpfe. Das Modul, das die Boote an den Wartebojen zeichnet, setzt `game.boatsVisible = true` und sendet danach `sim:change`; dann blendet das HUD die Leiste aus.
 
 ## Erweiterungen für andere Module
 

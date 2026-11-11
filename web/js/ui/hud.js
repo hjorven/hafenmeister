@@ -100,6 +100,9 @@ export function init(game) {
   }
 
   function renderQueue(sim) {
+    // Sobald die Boote im Wasser an den Bojen zu sehen sind (game.boatsVisible), entfällt die Leiste
+    queue.hidden = !!game.boatsVisible;
+    if (queue.hidden) return queue.replaceChildren();
     const waiting = sim.waitingBoats();
     const spots = sim.waitSpotCount();
     queue.setAttribute('aria-label', `Wartende Boote: ${waiting.length} von ${spots} Bojen belegt`);
@@ -157,10 +160,20 @@ export function init(game) {
 
   function buildCard(sim, st) {
     const rows = [];
-    for (const key of Object.keys(sim.ctx.rules.facilities)) {
+    const rules = sim.ctx.rules;
+    for (const p of sim.openJettyProjects()) {
+      rows.push(
+        el(
+          'button',
+          { type: 'button', class: 'hud-btn', disabled: st.money < p.cost, onclick: () => act(sim.buildJettyProject(p.id)) },
+          `${p.name} · ${euro(p.cost)}`,
+        ),
+      );
+    }
+    for (const key of Object.keys(rules.facilities)) {
       const u = sim.facilityUpgrade(key);
       if (!u || u.reason === 'max' || u.reason === 'stage') continue;
-      const label = `${FACILITY_LABEL[key] ?? key} Stufe ${u.level}`;
+      const label = rules.facilities[key].names?.[u.level] ?? `${rules.facilityNames?.[key] ?? FACILITY_LABEL[key] ?? key} Stufe ${u.level}`;
       rows.push(
         el(
           'button',
@@ -176,7 +189,7 @@ export function init(game) {
         el(
           'button',
           { type: 'button', class: 'hud-btn', disabled: st.money < office.cost[next], onclick: () => act(sim.upgradeOffice()) },
-          `Hafenbüro Stufe ${next} · ${euro(office.cost[next])}`,
+          `${office.names?.[next] ?? `Hafenbüro Stufe ${next}`} · ${euro(office.cost[next])}`,
         ),
       );
     }
@@ -189,7 +202,7 @@ export function init(game) {
         `Nächste Ausbaustufe: ${adv.guests} von ${adv.goal.guests} Gästen, Ruf ${num1(adv.reputation)} von ${num1(adv.goal.reputation)}, ${euro(adv.goal.cost)}`,
       );
       rows.push(
-        el('button', { type: 'button', class: 'hud-btn', disabled: !adv.ok, onclick: () => act(sim.advanceStage()) }, `Hafen erweitern · ${euro(adv.goal.cost)}`),
+        el('button', { type: 'button', class: 'hud-btn', disabled: !adv.ok, onclick: () => act(sim.advanceStage()) }, `${adv.goal.name ?? 'Hafen erweitern'} · ${euro(adv.goal.cost)}`),
       );
     }
     fill(card,
