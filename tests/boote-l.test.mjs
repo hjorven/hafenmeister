@@ -32,3 +32,30 @@ test('Passregel: Kielyacht in Box L, Katamaran nur am Stirnplatz', () => {
   assert.equal(fits(MODEL_BY_ID['L2-1'], stirn), true);
   for (const m of MODELS) assert.equal(fits(m, m.mooring === 'stirn' ? stirn : boxL), true, m.id);
 });
+
+// Gegen die echten Liegeplätze aus web/js/data/harbor.js
+import { HAFEN } from '../web/js/data/harbor.js';
+
+function passtPlatz(boot, platz, stufe) {
+  const tiefe = platz.tiefe?.[stufe];
+  if (boot.mooring === 'stirn' && platz.art !== 'stirn') return false;
+  return platz.stufen.includes(stufe) &&
+    boot.length <= platz.maxLaenge && boot.beam <= platz.maxBreite &&
+    tiefe !== undefined && tiefe >= boot.draft + 0.3;
+}
+
+test('jedes L-Modell findet ab seiner Stufe einen passenden Liegeplatz im Hafen', () => {
+  for (const m of MODELS) {
+    const plaetze = HAFEN.plaetze.filter((p) => ['box', 'finger', 'stirn'].includes(p.art) && passtPlatz(m, p, m.fromStage));
+    assert.ok(plaetze.length > 0, `${m.id} (${m.name}) hat in Stufe ${m.fromStage} keinen Platz`);
+  }
+});
+
+test('Menschen an Bord: 2 bis 8 laut Plan 11a', async () => {
+  const { crewOf } = await import('../web/js/data/boats/l.js');
+  for (const t of TYPES) assert.ok(Array.isArray(t.crew), t.id);
+  for (const m of MODELS) {
+    const [a, b] = crewOf(m);
+    assert.ok(a >= 2 && b <= 8 && a <= b, `${m.id} ${a}-${b}`);
+  }
+});

@@ -8,6 +8,8 @@
 // - mooring: "box" = Box L, Fingerplatz L oder Stirnplatz; "stirn" = nur Stirnplatz.
 // - parts: Baukastenteile aus Abschnitt 5, das Rendermodul baut daraus das Modell.
 // - palettes: Farbvarianten, Index 0 ist der Standard.
+// - crew: [min, max] Menschen an Bord (docs/plan.md 11a, L: 2 bis 8). Steht an der Art,
+//   einzelne Modelle können es überschreiben. crewOf(model) liefert den gültigen Wert.
 
 export const SIZE = 'L';
 
@@ -15,24 +17,28 @@ export const TYPES = [
   {
     id: 'L1', name: 'Fahrtenyacht', fromStage: 3,
     length: [9.5, 14], beam: [3.2, 4.3], draft: [1.6, 2.1],
+    crew: [2, 6],
     mooring: 'box',
     note: 'Kielyacht, braucht das ausgebaggerte Becken.',
   },
   {
     id: 'L2', name: 'Mehrrumpfboot', fromStage: 4,
     length: [10, 13], beam: [6, 7.5], draft: [1.0, 1.3],
+    crew: [2, 8],
     mooring: 'stirn',
     note: 'Passt nur an einen Stirnplatz.',
   },
   {
     id: 'L3', name: 'Motoryacht', fromStage: 3,
     length: [10, 14], beam: [3.6, 4.5], draft: [0.9, 1.3],
+    crew: [2, 6],
     mooring: 'box',
     note: '',
   },
   {
     id: 'L4', name: 'Arbeits- und Behördenboot', fromStage: 4,
     length: [10, 14], beam: [3.5, 4.5], draft: [1.0, 1.6],
+    crew: [2, 8],
     mooring: 'box',
     note: 'Sondergäste: zahlen wenig, heben aber den Ruf. Die Barkasse bringt Tagesgäste.',
   },
@@ -167,6 +173,7 @@ export const MODELS = [
   {
     id: 'L4-1', typeId: 'L4', name: 'Seenotrettungsboot', fromStage: 4,
     length: 10.5, beam: 3.8, draft: 1.0, airDraft: 5.8, mooring: 'box',
+    crew: [2, 4],
     shape: 'geschlossenes Steuerhaus, Signalfarben, umlaufende Scheuerleiste',
     special: 'station', role: 'seenotretter',
     parts: { hull: 'rettungsboot', deck: 'steuerhaus-geschlossen', rig: 'radarmast', extras: ['scheuerleiste', 'radar', 'blaulicht', 'rettungsinsel'] },
@@ -175,6 +182,7 @@ export const MODELS = [
   {
     id: 'L4-2', typeId: 'L4', name: 'Polizeiboot', fromStage: 4,
     length: 13.0, beam: 4.2, draft: 1.3, airDraft: 6.8, mooring: 'box',
+    crew: [2, 4],
     shape: 'graublauer Rumpf, Radarmast, Schlauchboot an Deck',
     special: 'sondergast', role: 'polizei',
     parts: { hull: 'behoerde', deck: 'steuerhaus-geschlossen', rig: 'radarmast', extras: ['radar', 'blaulicht', 'schlauchboot-deck', 'reling'] },
@@ -183,6 +191,7 @@ export const MODELS = [
   {
     id: 'L4-3', typeId: 'L4', name: 'Arbeitsboot', fromStage: 4,
     length: 11.0, beam: 4.3, draft: 1.5, airDraft: 5.6, mooring: 'box',
+    crew: [2, 3],
     shape: 'gedrungener Rumpf, Schleppbock, Reifen als Fender',
     special: 'sondergast', role: 'arbeit',
     parts: { hull: 'arbeit-gedrungen', deck: 'steuerhaus-vorn', rig: 'signalmast', extras: ['schleppbock', 'reifenfender', 'poller'] },
@@ -191,6 +200,7 @@ export const MODELS = [
   {
     id: 'L4-4', typeId: 'L4', name: 'Großer Fischkutter', fromStage: 4,
     length: 14.0, beam: 4.5, draft: 1.6, airDraft: 8.0, mooring: 'box',
+    crew: [3, 5],
     shape: 'Netztrommel am Heck, Ladebaum, hohes Steuerhaus',
     special: 'sondergast', role: 'fischer',
     parts: { hull: 'kutter', deck: 'steuerhaus-hoch', rig: 'mast-ladebaum', extras: ['netztrommel', 'fischkisten', 'reling'] },
@@ -199,6 +209,7 @@ export const MODELS = [
   {
     id: 'L4-5', typeId: 'L4', name: 'Hafenbarkasse', fromStage: 4,
     length: 14.0, beam: 4.0, draft: 1.0, airDraft: 3.4, mooring: 'box',
+    crew: [2, 8],
     shape: 'langer niedriger Aufbau mit Fensterreihe, Bänke für Rundfahrten',
     special: 'tagesgaeste', role: 'rundfahrt',
     parts: { hull: 'barkasse', deck: 'aufbau-lang-niedrig', rig: 'flaggenstock', extras: ['fensterreihe', 'baenke', 'flaggenstock'] },
@@ -214,4 +225,9 @@ export const MODEL_BY_ID = Object.fromEntries(MODELS.map((m) => [m.id, m]));
 export function fits(model, berth) {
   if (model.mooring === 'stirn' && berth.kind !== 'stirn') return false;
   return model.length <= berth.length && model.beam <= berth.beam && berth.depth >= model.draft + 0.3;
+}
+
+// Menschen an Bord: Wert des Modells, sonst der Art.
+export function crewOf(model) {
+  return model.crew ?? TYPES.find((t) => t.id === model.typeId).crew;
 }
