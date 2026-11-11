@@ -9,6 +9,7 @@ import { addPlaceholderWorld } from './render/placeholder.js';
 // Neue Module hier eintragen, dann muss niemand sonst main.js oder index.html anfassen.
 const MODULES = [
   './render/landscape.js',
+  './render/services.js',
   './render/boats/s.js',
   './render/boats/m.js',
   './render/boats/l.js',
