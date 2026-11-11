@@ -143,7 +143,7 @@ Was von oben und im 3D-Modell eine Gebäudeart erkennbar macht. Die Maße sind R
 ## Eingebaut
 
 - `web/js/render/buildings.js` baut die allgemeinen Gebäude als 3D-Modelle im Flat-Stil: Toilette, Hafenmeister mit Ausguck, Dusche, Kiosk, Hafenbüro, Sanitärgebäude, Restaurant, Hafenspeicher, Speicher und Fischbuden am Kai, eine Reihe Bootsschuppen und ein wachsendes Dorf aus Wohnhäusern. Dazu Molenfeuer (blinkend, Grün auf der Westmole, Rot auf der Ostmole), Strandkörbe, eine Seebrücke ab Stufe 3 und ab Stufe 4 einen Schwimmwellenbrecher im See, der nach Osten zum Fahrwasser offen ist.
-- Die Lagen stammen aus `hafen_von_oben.py`. Mit `game.buildings.setRegion('ostsee' | 'daenemark' | 'schweden' | 'nordsee')` oder dem Ereignis `region` färben sich Wände und Dächer nach der Bauweise der Region um. Zum Ansehen: `index.html?stufe=5&region=daenemark`.
+- Die Lagen stammen aus `hafen_von_oben.py`. Jedes Gebäude hat einen Stil aus den Vorbildern: Backstein, Holzhaus in Falunrot, gelb gekalkt, Reetdach oder weißer Putz. Ein Hafen mischt die Stile, wie es Jorven für die Ostsee festgelegt hat. Mit `game.buildings.setRegion('ostsee' | 'nordsee')` oder dem Ereignis `region` wechseln die Farben: an der Nordsee Klinker, Reet und weißer Putz statt Falunrot und Gelb. Zum Ansehen: `index.html?stufe=5&region=nordsee`.
 - Die Sonderanlagen (Bootsverleih, Slip, Segelclub, Mastenkran, Werft, Winterlager, Fischhalle, Tankstelle, Seenotretter, Fahrgastanleger, Kreuzfahrtterminal, Marine) baut der Thread „Services und Sonderanlagen“. Molen, Fahrrinne, Buhnen und Salzwiesen gehören zur Landschaft.
 
 ## Vorschläge, die das Layout ändern würden
