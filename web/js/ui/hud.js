@@ -19,6 +19,8 @@ const REASON_LABEL = {
   max: 'Schon voll ausgebaut.',
 };
 
+import { HAFEN, platzInWelt } from '../data/harbor.js';
+
 const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
 const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const meters = (n) => `${num1(n)} m`;
@@ -55,6 +57,8 @@ export function init(game) {
     #card .card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
     #card .card-note { font-weight: 600; }
     #queue .boat-chip[aria-pressed="true"] { outline: 3px solid #f2c14e; }
+    /* Handy: die Bootskarte zeigt nur Hinweis und Knöpfe, damit die Stege frei bleiben */
+    @media (max-width: 600px) { body.card-boat #card h2, body.card-boat #card p:not(.card-note):not(.card-hint) { display: none; } }
   `;
   document.head.append(style);
 
@@ -74,6 +78,8 @@ export function init(game) {
   let scheduled = false;
 
   function closeCard() {
+    if (cardMode === 'boat') clearRings();
+    document.body.classList.remove('card-boat');
     cardMode = null;
     note = '';
     card.hidden = true;
@@ -83,6 +89,7 @@ export function init(game) {
 
   function openCard(mode) {
     cardMode = mode;
+    document.body.classList.toggle('card-boat', mode === 'boat');
     card.hidden = false;
     document.body.classList.add('card-open');
     render();
@@ -92,8 +99,8 @@ export function init(game) {
     money.textContent = euro(st.money);
     rep.textContent = `Ruf ${num1(sim.reputation())}`;
     const season = sim.season();
-    const phase = season.winter ? 'Winter' : st.phase === 'evening' ? 'Abend' : 'Tag';
-    day.textContent = `Tag ${st.day} · ${phase}`;
+    const phase = season.winter ? ' · Winter' : st.phase === 'evening' ? ' · Abend' : '';
+    day.textContent = `Tag ${st.day}${phase}`;
     const pending = sim.mooredBoats().reduce((a, b) => a + (b.pendingFee || 0), 0);
     collectBtn.hidden = pending <= 0;
     collectBtn.textContent = `Kassieren ${euro(pending)}`;
@@ -135,7 +142,10 @@ export function init(game) {
 
   function boatCard(sim, st) {
     const b = st.boats[sim.selected];
-    if (!b || b.status !== 'waiting') return closeCard();
+    if (!b || b.status !== 'waiting') {
+      clearRings();
+      return closeCard();
+    }
     const fitting = sim.fittingBerths(b.id);
     const wishes = b.wishes.length ? b.wishes.map((w) => WISH_LABEL[w] ?? w).join(', ') : 'keine';
     fill(card,
@@ -146,7 +156,7 @@ export function init(game) {
         `Größe ${b.size} · ${meters(b.length)} lang, ${meters(b.beam)} breit, Tiefgang ${meters(b.draft)} · ${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}`,
       ),
       el('p', {}, `Wünsche: ${wishes}`),
-      el('p', {}, fitting.length ? `${fitting.length} passende Plätze frei. Platz antippen oder:` : 'Gerade ist kein passender Platz frei.'),
+      el('p', { class: 'card-hint' }, fitting.length ? `${b.name}: ${fitting.length} passende Plätze leuchten. Ring antippen oder:` : `${b.name}: gerade ist kein passender Platz frei.`),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
       el(
         'div',
@@ -199,7 +209,7 @@ export function init(game) {
       stageLine = el(
         'p',
         {},
-        `Nächste Ausbaustufe: ${adv.guests} von ${adv.goal.guests} Gästen, Ruf ${num1(adv.reputation)} von ${num1(adv.goal.reputation)}, ${euro(adv.goal.cost)}`,
+        `Nächste Ausbaustufe: Gäste ${adv.guests}, nötig ${adv.goal.guests} · Ruf ${num1(adv.reputation)}, nötig ${num1(adv.goal.reputation)} · Kosten ${euro(adv.goal.cost)}`,
       );
       rows.push(
         el('button', { type: 'button', class: 'hud-btn', disabled: !adv.ok, onclick: () => act(sim.advanceStage()) }, `${adv.goal.name ?? 'Hafen erweitern'} · ${euro(adv.goal.cost)}`),
@@ -239,15 +249,51 @@ export function init(game) {
     requestAnimationFrame(render);
   }
 
+  // Passende Plätze als Ringe im Wasser markieren, sobald ein Boot gewählt ist.
+  // Antippen eines Rings weist das Boot dort zu (pick type 'berth').
+  let ringGroup = null;
+  function showRings(ids) {
+    const THREE = game.THREE;
+    if (!THREE || !game.scene) return;
+    if (!ringGroup) {
+      ringGroup = new THREE.Group();
+      ringGroup.name = 'hud-ringe';
+      ringGroup.userData.geo = new THREE.RingGeometry(1.6, 2.4, 40).rotateX(-Math.PI / 2);
+      ringGroup.userData.mat = new THREE.MeshBasicMaterial({ color: '#2a9d8f', transparent: true, opacity: 0.85, depthTest: false });
+      game.scene.add(ringGroup);
+    }
+    ringGroup.clear();
+    const stufe = game.sim?.state?.stage ?? 1;
+    for (const id of ids) {
+      const platz = HAFEN.plaetze.find((p) => p.id === id);
+      const w = platz && platzInWelt(platz, stufe);
+      if (!w) continue;
+      const m = new THREE.Mesh(ringGroup.userData.geo, ringGroup.userData.mat);
+      m.position.set(w.x, 0.08, w.z);
+      m.renderOrder = 10;
+      m.userData.pick = { type: 'berth', id };
+      ringGroup.add(m);
+    }
+  }
+  const clearRings = () => ringGroup?.clear();
+  game.onTick(() => {
+    if (!ringGroup?.children.length) return;
+    const s = 1 + 0.08 * Math.sin(performance.now() / 250);
+    for (const m of ringGroup.children) m.scale.setScalar(s);
+  });
+
   buildBtn?.addEventListener('click', () => (cardMode === 'build' ? closeCard() : openCard('build')));
   game.on('sim:change', schedule);
-  game.on('sim:select', ({ boatId }) => {
+  game.on('sim:select', ({ boatId, berths }) => {
     note = '';
+    if (boatId != null) showRings(berths || []);
+    else clearRings();
     if (boatId != null) openCard('boat');
     else if (cardMode === 'boat') closeCard();
     schedule();
   });
   game.on('sim:moored', ({ boatId }) => {
+    if (game.sim?.selected == null) clearRings();
     if (cardMode === 'boat' && game.sim?.selected == null) closeCard();
     schedule();
     return boatId;
@@ -257,6 +303,7 @@ export function init(game) {
     if (cardMode === 'boat') schedule();
   });
   game.on('ui:cancel', () => {
+    clearRings();
     game.sim?.select(null);
     closeCard();
   });

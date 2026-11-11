@@ -200,7 +200,11 @@ export async function initBridge(game) {
       const end = state.phase === 'day' ? r.dayLength : r.dayLength + r.eveningLength;
       dispatch(sim.tick(state, ctx, Math.max(0, Math.min(seconds, end - state.clock))));
     },
-    dismiss: run((boatId) => sim.dismiss(state, ctx, boatIdOf(boatId))),
+    dismiss: run((boatId) => {
+      const id = boatIdOf(boatId);
+      if (selected === id) selected = null;
+      return sim.dismiss(state, ctx, id);
+    }),
     collect: run((boatId) => sim.collect(state, ctx, boatIdOf(boatId))),
     collectAll: run((force = true) => sim.collectAll(state, ctx, force)),
     upgradeFacility: run((key) => sim.upgradeFacility(state, ctx, key)),
