@@ -66,8 +66,8 @@ assert.ok(wasserstand(nord, 0.25, 1.0) < 1.3);
 
 // Freischalten
 assert.equal(istFrei(REVIERE.ostsee, {}), true);
-assert.equal(istFrei(REVIERE.daenemark, { ostsee: 4 }), false);
-assert.equal(istFrei(REVIERE.daenemark, { ostsee: 5 }), true);
-assert.equal(istFrei(REVIERE.nordsee, { ostsee: 6, daenemark: 6 }), false);
+assert.equal(istFrei(REVIERE.nordsee, { ostsee: 4 }), false);
+assert.equal(istFrei(REVIERE.nordsee, { ostsee: 5 }), true);
+assert.deepEqual(Object.keys(REVIERE), ['ostsee', 'nordsee']);
 
 console.log(`OK: ${Object.keys(REVIERE).length} Reviere, Niedrigwasser ${min.toFixed(2)} m, Hochwasser ${max.toFixed(2)} m`);

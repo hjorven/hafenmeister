@@ -1,21 +1,23 @@
-// Hafenmeister: die vier Reviere (Hafenregionen) als Spieldaten.
+// Hafenmeister: die zwei Reviere Ostsee und Nordsee (Hafenregionen) als Spieldaten.
 // Beschreibung der Felder und der Spielidee: docs/regionen.md
 // Farben sind Hex-Strings fuer Three.js. Schiffsarten wie im Katalog (S1 bis XL3), XXL mit Namen.
+// Gebaeude und Stimmung sind in beiden Revieren ein Mix aus deutschen, daenischen und schwedischen
+// Haefen (Entscheidung Jorven, 11.11.2026, docs/plan.md Abschnitt 9).
 // Neue Felder nur anhaengen. Aendert sich die Bedeutung eines Feldes, REVIER_FORMAT hochzaehlen.
 
 export const REVIER_FORMAT = 1;
 
-export const REVIER_REIHENFOLGE = ['ostsee', 'daenemark', 'schweden', 'nordsee'];
+export const REVIER_REIHENFOLGE = ['ostsee', 'nordsee'];
 
 export const REVIERE = {
   ostsee: {
     id: 'ostsee',
     name: 'Deutsche Ostsee',
     hafenname: 'Dünenhafen',
-    vorbilder: ['Burgtiefe (Fehmarn)', 'Kühlungsborn', 'Heiligenhafen'],
+    vorbilder: ['Burgtiefe (Fehmarn)', 'Heiligenhafen', 'Marstal (Ærø)', 'Svendborg', 'Smögen', 'Sandhamn'],
     freischalten: { start: true },
     karte: 'nehrung',
-    kueste: { typ: 'nehrung', text: 'Binnensee hinter einer Nehrung mit Dünen und Strand, dahinter die offene Ostsee' },
+    kueste: { typ: 'nehrung', text: 'Binnensee hinter einer Nehrung mit Dünen und Strand, Schärenfelsen am Rand, dahinter die offene Ostsee' },
     farben: {
       wasserTief: '#62b4c2', wasserFlach: '#9ccfc0', strand: '#f7e4b6', wiese: '#b8dca8',
       fels: '#a9a39a', himmel: '#8fd0dc', dunst: '#cfe8ec',
@@ -25,116 +27,32 @@ export const REVIERE = {
       abend: { himmel: '#ffd2a8', boden: '#4a5a7a', sonne: '#ff9a5c', staerke: 0.8, dunst: 600 },
     },
     bauweise: {
-      waende: ['#fbf7ef', '#f4ede0', '#b5533c'],
-      daecher: ['#a8443a', '#8f7a55', '#5b5f66'],
-      dachformen: ['satteldach', 'reetdach', 'walmdach'],
-      holz: '#e2b67e', akzent: '#3f7fb5', fensterAbend: '#ffd77a', fahne: ['#000000', '#dd0000', '#ffce00'],
-      typisch: ['Bäderarchitektur mit weißen Balkonen', 'Backstein mit roten Ziegeln', 'Fischerkate mit Reetdach'],
+      // weiss (Baeder), Backstein (DE), gelb und ocker (DK), falunrot (SE)
+      waende: ['#fbf7ef', '#b5533c', '#f2c94c', '#e3a857', '#8e2b22'],
+      daecher: ['#a8443a', '#8f7a55', '#3b3b3f'],
+      dachformen: ['satteldach', 'reetdach', 'walmdach', 'krueppelwalm'],
+      holz: '#e2b67e', akzent: '#3f7fb5', fensterAbend: '#ffd77a', fahne: ['#ffffff', '#3f7fb5'],
+      typisch: ['Bäderarchitektur mit weißen Balkonen', 'Backstein mit roten Ziegeln', 'Fischerkate mit Reetdach',
+        'gelbes Fachwerk mit schwarzen Balken', 'falunrote Holzhäuser mit weißen Ecken', 'Bootsschuppen in Reihe an einer Holzpromenade'],
     },
     natur: {
-      baeume: ['kiefer', 'birke'],
-      pflanzen: ['strandhafer', 'kartoffelrose'],
-      tiere: ['moewe', 'schwan'],
-      deko: ['strandkorb-blau', 'strandkorb-gruen', 'duenenzaun', 'rettungsring'],
+      baeume: ['kiefer', 'birke', 'buche'],
+      pflanzen: ['strandhafer', 'kartoffelrose', 'heckenrose', 'heidekraut'],
+      tiere: ['moewe', 'schwan', 'eiderente'],
+      deko: ['strandkorb-blau', 'strandkorb-gruen', 'duenenzaun', 'rettungsring', 'findling', 'fahrrad', 'fahnenmast', 'mittsommerbaum'],
     },
     wasser: { wellen: 0.3, farbeSchaum: '#ffffff', tide: null },
     wetter: { windMittel: 3, sturm: 0.03, nebel: 0.03, regen: 0.12 },
     schiffe: {
-      haeufigkeit: { S1: 1.3, S2: 1.5, S4: 1.2, S5: 1.2, M2: 0.8, XL1: 0.8 },
+      haeufigkeit: { S1: 1.3, S2: 1.5, S4: 1.2, S5: 1.2, M2: 1.2, XL1: 1.2 },
       abStufe: {},
     },
     spiel: { hafengeld: 1.0, ankuenfte: 1.0, naechte: [1, 3], abendAnteil: 0.25, startgeld: 500 },
-    platzarten: [],
-    dienste: ['strandkorbvermietung', 'eisdiele', 'fischbroetchen'],
-    bauprojekte: ['durchstich', 'seebruecke'],
-    ereignisse: ['segelwoche', 'hafenfest', 'sommergewitter', 'kreuzfahrttag'],
-    musik: { stimmung: 'sonnig, leicht', instrumente: ['akustikgitarre', 'glockenspiel', 'ukulele'], geraeusche: ['moewen', 'brandung-leise', 'fallen-klappern'] },
-  },
-
-  daenemark: {
-    id: 'daenemark',
-    name: 'Dänemark',
-    hafenname: 'Fjordhafen',
-    vorbilder: ['Svendborg', 'Faaborg', 'Marstal (Ærø)', 'Mariager'],
-    freischalten: { nach: 'ostsee', stufe: 5 },
-    karte: 'nehrung',
-    kueste: { typ: 'fjord', text: 'schmaler Fjord mit grünen Hängen und Buchenwald, Lehmkliffs, Steinmolen, kleine Inseln vor der Mündung' },
-    farben: {
-      wasserTief: '#4fa3b4', wasserFlach: '#a6d8c8', strand: '#f3e2b8', wiese: '#a9d39a',
-      fels: '#b7ad9c', himmel: '#9fd2e0', dunst: '#d9ecee',
-    },
-    licht: {
-      tag: { himmel: '#ffffff', boden: '#8aae9e', sonne: '#fff6e6', staerke: 1.35, dunst: 850 },
-      abend: { himmel: '#ffc9b0', boden: '#4b5876', sonne: '#ff8f6a', staerke: 0.75, dunst: 550 },
-    },
-    bauweise: {
-      waende: ['#f2c94c', '#e3a857', '#f7f3ea', '#e9b6a6'],
-      daecher: ['#b2473a', '#8f7a55', '#3a3a3a'],
-      dachformen: ['satteldach', 'reetdach', 'krueppelwalm'],
-      holz: '#2e2a28', akzent: '#c8102e', fensterAbend: '#ffd98a', fahne: ['#c8102e', '#ffffff'],
-      typisch: ['gelbes Fachwerk mit schwarzen Balken', 'rote Dachziegel', 'schwarz geteerte Bootsschuppen'],
-    },
-    natur: {
-      baeume: ['buche', 'weide', 'holunder'],
-      pflanzen: ['heckenrose', 'mohn'],
-      tiere: ['schwan', 'moewe', 'kuh-fern'],
-      deko: ['findling', 'fahrrad', 'fahnenmast', 'holzbank'],
-    },
-    wasser: { wellen: 0.25, farbeSchaum: '#ffffff', tide: null },
-    wetter: { windMittel: 4, sturm: 0.04, nebel: 0.05, regen: 0.15 },
-    schiffe: {
-      haeufigkeit: { S4: 1.3, M1: 1.4, M2: 1.8, L1: 1.4, S5: 0.7, L3: 0.6, XL1: 2.0, XL2: 0.5 },
-      abStufe: { XL1: 4 },
-    },
-    spiel: { hafengeld: 0.85, ankuenfte: 1.25, naechte: [1, 1], abendAnteil: 0.25, startgeld: 800 },
-    platzarten: [],
-    dienste: ['wuerstchenbude', 'fahrradverleih', 'raeucherei', 'inselfaehre'],
-    bauprojekte: ['steinmole', 'faehranleger'],
-    ereignisse: ['holzbootfestival', 'mittsommerfeuer', 'hafenfest', 'kreuzfahrttag'],
-    musik: { stimmung: 'gemütlich, hyggelig', instrumente: ['akkordeon', 'geige', 'klavier'], geraeusche: ['moewen', 'fahnenleine', 'fahrradklingel'] },
-  },
-
-  schweden: {
-    id: 'schweden',
-    name: 'Schwedische Schären',
-    hafenname: 'Felsenhafen',
-    vorbilder: ['Smögen', 'Marstrand', 'Sandhamn'],
-    freischalten: { nach: 'daenemark', stufe: 5 },
-    karte: 'nehrung',
-    kueste: { typ: 'schaeren', text: 'glatt geschliffener rosa-grauer Granit, Kiefern in Felsspalten, tiefes Wasser bis an den Fels' },
-    farben: {
-      wasserTief: '#3f8fb0', wasserFlach: '#6fb3c4', strand: '#e8d6b0', wiese: '#8fc08a',
-      fels: '#b9a39b', himmel: '#86c6e0', dunst: '#d3e6ef',
-    },
-    licht: {
-      tag: { himmel: '#ffffff', boden: '#7c9aa8', sonne: '#fff8ea', staerke: 1.45, dunst: 1100 },
-      abend: { himmel: '#ffd9a0', boden: '#55607e', sonne: '#ffb25c', staerke: 0.95, dunst: 800 },
-    },
-    bauweise: {
-      waende: ['#8e2b22', '#a33a2c', '#f4f1ea', '#e8c65a'],
-      daecher: ['#3b3b3f', '#8e2b22', '#4f5a4a'],
-      dachformen: ['satteldach', 'pultdach'],
-      holz: '#c79a6b', akzent: '#006aa7', fensterAbend: '#ffe3a0', fahne: ['#006aa7', '#fecc02'],
-      typisch: ['falunrote Holzhäuser mit weißen Ecken', 'Bootshäuser auf Pfählen', 'Stege direkt am Fels'],
-    },
-    natur: {
-      baeume: ['kiefer', 'birke', 'wacholder'],
-      pflanzen: ['moos', 'heidekraut', 'grasnelke'],
-      tiere: ['moewe', 'eiderente', 'seeadler-fern'],
-      deko: ['felsring', 'mittsommerbaum', 'ruderboot-kieloben', 'briefkasten-gelb'],
-    },
-    wasser: { wellen: 0.35, farbeSchaum: '#f4fbff', tide: null },
-    wetter: { windMittel: 4, sturm: 0.04, nebel: 0.08, regen: 0.12 },
-    schiffe: {
-      haeufigkeit: { S1: 1.2, S3: 1.3, M1: 1.2, L1: 1.5, L3: 1.2, S2: 0.6, M4: 0.7 },
-      abStufe: { L1: 2, L3: 2 },
-    },
-    spiel: { hafengeld: 1.1, ankuenfte: 0.9, naechte: [1, 4], abendAnteil: 0.35, startgeld: 1000 },
     platzarten: ['fels', 'boje'],
-    dienste: ['saunafloss', 'raeucherei', 'pontontankstelle'],
-    bauprojekte: ['felssprengung', 'bojenfeld'],
-    ereignisse: ['mittsommerfest', 'schaerenregatta', 'morgennebel', 'kreuzfahrttag'],
-    musik: { stimmung: 'weit, ruhig, golden', instrumente: ['nyckelharpa', 'harfe', 'klarinette'], geraeusche: ['moewen', 'wellen-am-fels', 'kiefernwind'] },
+    dienste: ['strandkorbvermietung', 'eisdiele', 'fischbroetchen', 'raeucherei', 'fahrradverleih', 'saunafloss'],
+    bauprojekte: ['durchstich', 'seebruecke', 'bojenfeld'],
+    ereignisse: ['segelwoche', 'hafenfest', 'holzbootfestival', 'mittsommerfest', 'sommergewitter', 'kreuzfahrttag'],
+    musik: { stimmung: 'sonnig, leicht, gemütlich', instrumente: ['akustikgitarre', 'akkordeon', 'glockenspiel', 'geige'], geraeusche: ['moewen', 'brandung-leise', 'fallen-klappern', 'fahnenleine'] },
   },
 
   nordsee: {
@@ -142,7 +60,7 @@ export const REVIERE = {
     name: 'Nordsee',
     hafenname: 'Sielhafen',
     vorbilder: ['Neuharlingersiel', 'Greetsiel', 'Büsum'],
-    freischalten: { nach: 'schweden', stufe: 5 },
+    freischalten: { nach: 'ostsee', stufe: 5 },
     karte: 'nehrung',
     kueste: { typ: 'deich-watt', text: 'grüner Deich mit Schafen, Salzwiesen, Watt mit Prielen, der Hafen liegt hinter dem Siel' },
     farben: {

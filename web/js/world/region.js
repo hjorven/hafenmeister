@@ -2,7 +2,7 @@
 // Daten: js/data/regions.js, Beschreibung: docs/regionen.md
 //
 // Ereignisse, die dieses Modul sendet:
-//   'region'  mit der id als Text ('ostsee', 'daenemark', 'schweden', 'nordsee')
+//   'region'  mit der id als Text ('ostsee' oder 'nordsee')
 //             -> Landschaft und Gebaeude faerben sich um
 //   'pegel'   mit Metern relativ zum mittleren Wasserstand (Wasserlinie der 3D-Szene, y = 0)
 //             -> Landschaft hebt und senkt die Wasserflaeche, nur in Revieren mit Tide
@@ -65,7 +65,8 @@ export function istFrei(r, stufen = {}) {
 
 function revierAusAdresse() {
   try {
-    const id = new URLSearchParams(window.location.search).get('revier');
+    const q = new URLSearchParams(window.location.search);
+    const id = q.get('revier') ?? q.get('region');
     return id && REVIERE[id] ? id : null;
   } catch { return null; }
 }
