@@ -11,6 +11,8 @@
 //   mooring                        "box" (Box M, Stichsteg, Stirnplatz) oder "fischer" (Fischersteg/Fischereikai)
 //   look                           Bauplan für das 3D-Modell (Rumpf, Aufbau, Rigg, Anbauten), x-Werte als Anteil der Länge
 //   palettes                       Farbvarianten, gleiche Form, andere Farben
+//
+// Felder je Art (TYPES): crew = [min, max] Menschen an Bord (docs/plan.md, Abschnitt 11a, M: 2 bis 5)
 
 // Grundfarben im Flat-Vector-Stil (aus docs/stile/bilder/02-flat-vector-max.png abgeleitet)
 const C = {
@@ -43,10 +45,10 @@ const C = {
 };
 
 export const TYPES = [
-  { id: 'M1', name: 'Kleinkreuzer', fromStage: 2, length: [6, 8.5], beam: [2.2, 2.8], draft: [0.3, 1.4] },
-  { id: 'M2', name: 'Klassiker aus Holz', fromStage: 3, length: [7, 9], beam: [2.0, 2.8], draft: [1.1, 1.5] },
-  { id: 'M3', name: 'Kajütmotorboot', fromStage: 2, length: [6.5, 9], beam: [2.5, 3.2], draft: [0.6, 0.9] },
-  { id: 'M4', name: 'Fischerboot', fromStage: 2, length: [6, 9], beam: [2.4, 3.2], draft: [0.6, 1.0] },
+  { id: 'M1', name: 'Kleinkreuzer', fromStage: 2, crew: [2, 4], length: [6, 8.5], beam: [2.2, 2.8], draft: [0.3, 1.4] },
+  { id: 'M2', name: 'Klassiker aus Holz', fromStage: 3, crew: [2, 4], length: [7, 9], beam: [2.0, 2.8], draft: [1.1, 1.5] },
+  { id: 'M3', name: 'Kajütmotorboot', fromStage: 2, crew: [2, 5], length: [6.5, 9], beam: [2.5, 3.2], draft: [0.6, 0.9] },
+  { id: 'M4', name: 'Fischerboot', fromStage: 2, crew: [2, 5], length: [6, 9], beam: [2.4, 3.2], draft: [0.6, 1.0] },
 ];
 
 export const MODELS = [
