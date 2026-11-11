@@ -1,0 +1,18 @@
+{
+  "name": "hafenmeister-tests",
+  "private": true,
+  "type": "module",
+  "description": "Automatische Browser-Tests für Hafenmeister auf Handy, Tablet und PC",
+  "scripts": {
+    "test": "playwright test",
+    "test:handy": "playwright test --project=handy --project=handy-quer",
+    "test:tablet": "playwright test --project=tablet --project=tablet-quer",
+    "test:pc": "playwright test --project=pc",
+    "bericht": "playwright show-report bericht"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "pngjs": "7.0.0",
+    "three": "0.187.0"
+  }
+}
