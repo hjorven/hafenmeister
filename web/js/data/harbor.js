@@ -21,6 +21,8 @@
 //   Dienststegen (Tankstelle, Seenotretter, Travellift). Kai und Fischereikai: bauart kai, die
 //   Linie ist die Kante, an der die Schiffe liegen.
 // stufen[n].dienste[]: Plaetze fuer Dienste (Tankstelle, Seenotretter), keine Liegeplaetze.
+// id, region: Kennung dieses Hafens. Weitere Haefen (andere Regionen) liefern dieselbe Form
+//   in eigenen Dateien mit eigener id.
 //
 // 3D: Die Daten liegen in der Wasserebene (Hoehe 0 = Wasserlinie). In der 3D-Szene des
 // Grundgeruests (Meter, y nach oben, Norden = -z) gilt: 3D-x = x * 0.62, 3D-z = -y * 0.62,
@@ -30,6 +32,9 @@
 
 export const HAFEN = {
  "format": 1,
+ "id": "nehrung",
+ "name": "Hafen an der Nehrung",
+ "region": "ostsee",
  "quelle": "skripte/konzeptbilder/hafen_von_oben.py",
  "einheiten": {
   "meterProEinheit": 0.62,
@@ -4623,5 +4628,26 @@ export const HAFEN = {
   }
  }
 };
+
+// Plan -> Spielwelt (Meter, x Osten, z Sueden, y oben), siehe docs/grundgeruest.md.
+export function inWelt(x, y) {
+  const m = HAFEN.einheiten.meterProEinheit;
+  return { x: x * m, z: -y * m };
+}
+
+// Lage eines Platzes in Stufe n in der Spielwelt. winkel in Bogenmass fuer
+// object.rotation.y, wenn das Bootsmodell mit dem Bug nach +x gebaut ist.
+// Gibt null zurueck, wenn es den Platz in dieser Stufe nicht gibt.
+export function platzInWelt(platz, stufe) {
+  const l = platz.lage[String(stufe)];
+  if (!l) return null;
+  const p = inWelt(l[0], l[1]);
+  return { x: p.x, z: p.z, winkel: l[2] * Math.PI / 180 };
+}
+
+// Alle Plaetze einer Stufe.
+export function plaetzeInStufe(stufe) {
+  return HAFEN.plaetze.filter((p) => p.stufen.includes(stufe));
+}
 
 export default HAFEN;

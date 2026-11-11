@@ -19,6 +19,8 @@ import hafen_von_oben as hv   # noqa: E402
 
 ZIEL = ROOT / 'web' / 'js' / 'data' / 'harbor.js'
 STUFEN = [1, 2, 3, 4, 5]
+# Mehrere Haefen: jeder Hafen bekommt eine eigene Datei mit eigener id. Dieser ist der erste.
+HAFEN_ID, HAFEN_NAME, REGION = 'nehrung', 'Hafen an der Nehrung', 'ostsee'
 K = hv.K                       # Faktor, mit dem die Zeichnung Meterangaben in Planeinheiten umrechnet
 M = 0.62                       # Meter je Planeinheit, wie Massstab der Zeichnung und web/js/main.js
 TOL = 0.5                      # rueckt ein Platz zwischen zwei Stufen um weniger als eine halbe Boxbreite, bleibt es derselbe Platz
@@ -184,6 +186,7 @@ def exportieren():
             dienste=d['dienste'])
     return dict(
         format=1,
+        id=HAFEN_ID, name=HAFEN_NAME, region=REGION,
         quelle='skripte/konzeptbilder/hafen_von_oben.py',
         einheiten=dict(meterProEinheit=M, x='nach Osten', y='nach Norden', wasserlinie=0,
                        richtung='Grad, 0 = Osten, 90 = Norden, zeigt wohin der Bug zeigt'),
@@ -215,6 +218,8 @@ KOPF = """// Hafenmeister: Liegeplaetze und Stege je Ausbaustufe.
 //   Dienststegen (Tankstelle, Seenotretter, Travellift). Kai und Fischereikai: bauart kai, die
 //   Linie ist die Kante, an der die Schiffe liegen.
 // stufen[n].dienste[]: Plaetze fuer Dienste (Tankstelle, Seenotretter), keine Liegeplaetze.
+// id, region: Kennung dieses Hafens. Weitere Haefen (andere Regionen) liefern dieselbe Form
+//   in eigenen Dateien mit eigener id.
 //
 // 3D: Die Daten liegen in der Wasserebene (Hoehe 0 = Wasserlinie). In der 3D-Szene des
 // Grundgeruests (Meter, y nach oben, Norden = -z) gilt: 3D-x = x * 0.62, 3D-z = -y * 0.62,
@@ -223,9 +228,32 @@ KOPF = """// Hafenmeister: Liegeplaetze und Stege je Ausbaustufe.
 // neue Felder werden nur angehaengt; format zaehlt hoch, wenn sich Bedeutungen aendern.
 """
 
+HILFEN = '''
+// Plan -> Spielwelt (Meter, x Osten, z Sueden, y oben), siehe docs/grundgeruest.md.
+export function inWelt(x, y) {
+  const m = HAFEN.einheiten.meterProEinheit;
+  return { x: x * m, z: -y * m };
+}
+
+// Lage eines Platzes in Stufe n in der Spielwelt. winkel in Bogenmass fuer
+// object.rotation.y, wenn das Bootsmodell mit dem Bug nach +x gebaut ist.
+// Gibt null zurueck, wenn es den Platz in dieser Stufe nicht gibt.
+export function platzInWelt(platz, stufe) {
+  const l = platz.lage[String(stufe)];
+  if (!l) return null;
+  const p = inWelt(l[0], l[1]);
+  return { x: p.x, z: p.z, winkel: l[2] * Math.PI / 180 };
+}
+
+// Alle Plaetze einer Stufe.
+export function plaetzeInStufe(stufe) {
+  return HAFEN.plaetze.filter((p) => p.stufen.includes(stufe));
+}
+'''
+
 
 def als_js(daten):
-    return KOPF + '\nexport const HAFEN = ' + json.dumps(daten, ensure_ascii=False, indent=1) + ';\n\nexport default HAFEN;\n'
+    return KOPF + '\nexport const HAFEN = ' + json.dumps(daten, ensure_ascii=False, indent=1) + ';\n' + HILFEN + '\nexport default HAFEN;\n'
 
 
 if __name__ == '__main__':
