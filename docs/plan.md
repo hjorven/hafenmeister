@@ -2,6 +2,8 @@
 
 Stand: 11.11.2026. Grundlage ist Idee Nr. 27 aus der 100er-Liste, umgebaut nach deinen Vorgaben: Marina am Meer, Start mit einem kleinen Steg, alles wird ausgebaut, sehr einfache Oberfläche, wenige Systeme, Mix aus 2D und 3D.
 
+> **Hinweis vom 11.11.2026:** Ein Teil dieses Plans ist überholt. Der Hafen beginnt jetzt an einem See und wird zur Küstenmarina, die Stege haben eigene Formen, der Leuchtturm entfällt und es gibt deutlich mehr Schiffsarten. Das steht in [hafen-und-schiffe.md](hafen-und-schiffe.md). Betroffen sind die Abschnitte 4, 5, 6, 7 und 9, dort steht jeweils ein Hinweis. Alles andere gilt weiter.
+
 **So habe ich deine Vorgaben gelesen**
 
 - Aus dem Logistik-Puzzle der Liste (Kräne, Züge, 50 Häfen) wird ein Aufbauspiel mit **einem** Hafen, der wächst.
@@ -45,6 +47,8 @@ Die kleine Entscheidung, die das Spiel trägt: Gebe ich den großen Platz mit St
 
 ## 4. Boote und Wünsche
 
+> Überholt: Bootstabelle und Logbuch. Neu sind 16 Arten mit 80 Modellen und die Passregel nach Länge, Breite und Tiefgang, siehe [hafen-und-schiffe.md](hafen-und-schiffe.md#4-schiffe). Die 5 Wünsche gelten weiter.
+
 | Größe | Beispiele | Grundpreis pro Nacht | Braucht |
 |---|---|---|---|
 | S | Jolle, Ruderboot, Angelboot | 10 € | jeden Steg |
@@ -67,6 +71,8 @@ Kleine Boote dürfen auch auf größere Plätze.
 **Logbuch:** Jede Bootsart, die zum ersten Mal anlegt, wird ins Logbuch eingetragen. Geplant sind 20 Arten (6 S, 6 M, 5 L, 3 XL). Das ist ein Sammelziel, das fast keinen Aufwand kostet.
 
 ## 5. Bauen und Ausbauen
+
+> Überholt: die Tabelle der Stege sowie Mole und Kai. Stege werden einzeln ausgebaut, Durchstich und Außenhafen ersetzen die Mole mit Leuchtfeuer, siehe [hafen-und-schiffe.md](hafen-und-schiffe.md#1-vom-bootssteg-am-see-zur-küstenmarina). Versorgung und Hafenbüro gelten weiter, die Preise müssen neu gerechnet werden.
 
 Alle Preise sind Startwerte fürs Balancing.
 
@@ -114,6 +120,8 @@ Das Hafenbüro ist wichtig für den Spielfluss: Am Anfang macht man alles von Ha
 
 ## 6. Fortschritt: fünf Ausbaustufen
 
+> Überholt: Namen und Inhalt der Stufen. Neu: Bootssteg am See, Dorfhafen am See, Durchstich zur Ostsee, Marina, Küstenmarina mit 6, 30, 54, 76 und 94 Liegeplätzen. Die Spielzeit unten wurde mit 54 Liegeplätzen gerechnet und muss neu simuliert werden.
+
 Für die nächste Stufe braucht man eine Gästezahl, einen Mindestruf und das Geld für die Hafenerweiterung. Beim Erweitern fährt die Kamera ein Stück heraus und neue Bauplätze erscheinen.
 
 | Stufe | Name | Neu | Ziel für die nächste Stufe | Erweiterung | Boote pro Tag bei Ruf 3 |
@@ -142,6 +150,8 @@ Einordnung: Das ist eine grobe Schätzung, kein Versprechen. Echte Spieler kaufe
 Stufe 4 ist mit 55 Tagen der längste Abschnitt und damit die Stelle, an der es am ehesten zäh wird. Dort liegt deshalb die Regatta, und dort wird beim Testen zuerst nachjustiert.
 
 ## 7. Ereignisse
+
+> Überholt: der Sturm. Der See ist geschützt, Sturm trifft nur Einfahrt und Außenhafen, siehe [hafen-und-schiffe.md](hafen-und-schiffe.md#3-einlaufen). Die Regatta gilt weiter.
 
 Nur zwei, beide werden einen Tag vorher angekündigt.
 
@@ -172,6 +182,8 @@ Nur zwei, beide werden einen Tag vorher angekündigt.
 - **Bedienung:** Maus und Touch gleich, ein Finger genügt, läuft auf PC, iPad und Handy.
 
 ## 9. Artstil: Modellhafen auf der Seekarte
+
+> Überholt: Der Stil ist Flat Vector, siehe [stile](stile/README.md). Statt des Leuchtfeuers blinken abends die Molenfeuer.
 
 - **2D-Teil:** Wasser und Land sind eine gezeichnete Seekarte. Flaches Wasser hellblau, tiefes Wasser weiß, Land sandgelb, dazu Tiefenlinien, Tiefenzahlen und eine Kompassrose. Die Oberfläche sieht aus wie Kartenlegende und Logbuch.
 - **3D-Teil:** Stege, Boote und Gebäude sind kleine, kantige Modelle mit weichem Schatten, wie Spielfiguren auf einem Brettspiel.
