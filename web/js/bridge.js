@@ -6,6 +6,7 @@ import * as sim from './sim.js';
 import { createState, deserialize, load as loadLocal, save as saveLocal } from './state.js';
 import { HAFEN } from './data/harbor.js';
 import { BOAT_CATALOG } from './data/boat-catalog.js';
+import { ECONOMY } from './data/economy.js';
 
 const BOAT_FILES = ['./data/boats/s.js', './data/boats/m.js', './data/boats/l.js', './data/boats/xl.js'];
 
@@ -75,7 +76,8 @@ function berthIdOf(v) {
 
 export async function initBridge(game) {
   const boatTypes = await loadBoatTypes();
-  const ctx = sim.createContext({ boatTypes, harbor: HAFEN });
+  // Zahlen aus dem Balancing (economy.js), was dort fehlt, aus rules.js
+  const ctx = sim.createContext({ boatTypes, harbor: HAFEN, rules: sim.rulesFromEconomy(ECONOMY) });
   let state = null;
   let selected = null; // ausgewähltes wartendes Boot
 
@@ -204,6 +206,8 @@ export async function initBridge(game) {
     upgradeFacility: run((key) => sim.upgradeFacility(state, ctx, key)),
     upgradeOffice: run(() => sim.upgradeOffice(state, ctx)),
     build: run((id, cost, level) => sim.build(state, id, cost, level)),
+    buildJettyProject: run((id) => sim.buildJettyProject(state, ctx, id)),
+    openJettyProjects: () => sim.openJettyProjects(state, ctx),
     advanceStage: run(() => sim.advanceStage(state, ctx)),
     stationBoat: run((typeId, berthId, modelId) => sim.stationBoat(state, ctx, typeId, berthId, modelId)),
     spend: (amount) => {

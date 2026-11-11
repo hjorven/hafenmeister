@@ -27,6 +27,7 @@ export function createState({ seed, rules = RULES } = {}) {
     region: 'ostsee', // 'ostsee', 'daenemark', 'schweden', 'nordsee'
     money: 0,
     guests: 0, // abgereiste Gäste insgesamt
+    stageGuests: 0, // abgereiste Gäste in der aktuellen Ausbaustufe
     ratings: Array(rep.startSamples).fill(rep.start), // letzte Bewertungen, neueste hinten
     facilities: Object.fromEntries(Object.keys(rules.facilities).map((k) => [k, 0])),
     office: 0,
@@ -80,8 +81,12 @@ function migrate(data) {
 
 function validate(data) {
   const fresh = createState({ seed: 0 });
-  for (const key of Object.keys(fresh)) {
+  // Felder, ohne die nichts geht. Alle anderen fehlenden Felder werden mit Startwerten ergänzt.
+  for (const key of ['day', 'stage', 'money', 'boats', 'berths', 'ratings']) {
     if (!(key in data)) throw new Error(`Spielstand unvollständig: ${key} fehlt`);
+  }
+  for (const key of Object.keys(fresh)) {
+    if (!(key in data)) data[key] = fresh[key];
     if (typeof data[key] !== typeof fresh[key] && fresh[key] !== null) {
       throw new Error(`Spielstand fehlerhaft: ${key} hat den falschen Typ`);
     }

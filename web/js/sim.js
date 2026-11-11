@@ -252,11 +252,22 @@ export function isFree(state, berthId) {
   return !state.berths[berthId];
 }
 
-function berthScore(ctx, boat, berth) {
+/** Hat der Platz diese Eigenschaft (zum Beispiel 'power')? Strom kann auch über ein Bauwerk kommen. */
+export function berthHas(state, ctx, berth, prop) {
+  if (!berth) return false;
+  if (berth[prop]) return true;
+  if (prop === 'power') {
+    const building = ctx.rules.jettyPowerBuildings?.[berth.jetty];
+    return !!(building && state.facilities[building] > 0);
+  }
+  return false;
+}
+
+function berthScore(state, ctx, boat, berth) {
   // Höher ist besser: erfüllte Platz-Wünsche zuerst, dann Komfort, dann möglichst knapper Platz,
   // damit große Plätze für große Boote frei bleiben.
   const bw = ctx.rules.berthWishes;
-  const wishHits = boat.wishes.filter((w) => bw[w] && berth[bw[w]]).length;
+  const wishHits = boat.wishes.filter((w) => bw[w] && berthHas(state, ctx, berth, bw[w])).length;
   const slack = berth.maxLength * berth.maxBeam - boat.length * boat.beam;
   return wishHits * 1000 + (berth.comfort || 0) * 100 - slack;
 }
@@ -267,7 +278,7 @@ export function fittingBerths(state, ctx, boatId) {
   if (!boat) return [];
   return availableBerths(state, ctx)
     .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage))
-    .sort((a, b) => berthScore(ctx, boat, b) - berthScore(ctx, boat, a))
+    .sort((a, b) => berthScore(state, ctx, boat, b) - berthScore(state, ctx, boat, a))
     .map((b) => b.id);
 }
 
@@ -299,9 +310,9 @@ function rollWishes(state, ctx, type) {
   const { rules } = ctx;
   if (type.noWishes) return [];
   const pool = (rules.wishes[state.stage] || []).filter(
-    (w) => type.motor || !rules.motorOnlyWishes.includes(w),
+    (w) => (type.motor || !rules.motorOnlyWishes.includes(w)) && (!rules.wishSizes?.[w] || rules.wishSizes[w].includes(type.size)),
   );
-  const [lo, hi] = rules.wishCount[state.stage] || [0, 0];
+  const [lo, hi] = rules.wishCountBySize?.[type.size] || rules.wishCount[state.stage] || [0, 0];
   const n = Math.min(pool.length, randomInt(state, lo, hi));
   const left = [...pool];
   const out = [];
@@ -340,7 +351,7 @@ export function rollBoat(state, ctx, mods = modifiers(state, ctx)) {
     const models = type.models.filter((m) => (m.minStage ?? type.minStage) <= state.stage);
     const model = models.length ? randomPick(state, models) : null;
     const dim = (key) => (model && model[key] != null ? model[key] : randomRange(state, ...type[key]));
-    const [nMin, nMax] = range(type.nights ?? ctx.rules.nights);
+    const [nMin, nMax] = range(type.nights ?? ctx.rules.nightsBySize?.[type.size] ?? ctx.rules.nights);
     boat = makeBoat({
       typeId: type.id,
       modelId: model ? model.id : null,
@@ -376,7 +387,19 @@ export function season(state, ctx) {
   return { year: Math.floor((state.day - 1) / len) + 1, day: i + 1, winter: i >= seasonDays };
 }
 
+/** Fest vergebene Plätze (Fischer) bekommen ihr Boot, sobald es den Platz gibt. */
+function fillReservedBerths(state, ctx, events) {
+  for (const berth of availableBerths(state, ctx)) {
+    if (!berth.reserved || !isFree(state, berth.id)) continue;
+    const type = ctx.types.find((t) => t.stationed && t.kind === berth.kind && t.minStage <= state.stage);
+    if (!type) continue;
+    const r = stationBoat(state, ctx, type.id, berth.id);
+    if (r.ok) events.push(...r.events);
+  }
+}
+
 function startDay(state, ctx, events) {
+  fillReservedBerths(state, ctx, events);
   const mods = modifiers(state, ctx);
   const sea = season(state, ctx);
   // Modifikatoren für Boote, die schon liegen (zum Beispiel Sturm)
@@ -614,7 +637,7 @@ function startEvening(state, ctx, events) {
     const berth = ctx.berthById[boat.berthId];
     visitors += boat.dayVisitors || 0;
     if (boat.stationed) {
-      const fee = Math.round(nightlyFee(state, ctx, boat, 0) * ctx.rules.stationedFeeShare);
+      const fee = ctx.rules.stationedFee ?? Math.round(nightlyFee(state, ctx, boat, 0) * ctx.rules.stationedFeeShare);
       addIncome(state, fee);
       events.push({ type: 'stationedFee', boatId: boat.id, amount: fee });
       continue;
@@ -623,7 +646,7 @@ function startEvening(state, ctx, events) {
     for (const w of boat.wishes) {
       const prop = ctx.rules.berthWishes[w];
       let ok;
-      if (prop) ok = !!berth?.[prop];
+      if (prop) ok = berthHas(state, ctx, berth, prop);
       else {
         ok = (left[w] || 0) > 0;
         if (ok) left[w]--;
@@ -701,6 +724,7 @@ function night(state, ctx, events) {
     const rating = rateBoat(ctx, boat, mods.ratingBonus);
     pushRating(state, ctx, rating);
     state.guests++;
+    state.stageGuests = (state.stageGuests || 0) + 1;
     delete state.berths[boat.berthId];
     delete state.boats[boat.id];
     events.push({ type: 'departed', boatId: boat.id, berthId: boat.berthId, typeId: boat.typeId, rating });
@@ -789,7 +813,7 @@ export function facilityUpgrade(state, ctx, key) {
   const f = ctx.rules.facilities[key];
   if (!f) return null;
   const next = (state.facilities[key] || 0) + 1;
-  if (!f.levels[next]) return { key, level: next, available: false, reason: 'max' };
+  if (f.cost[next] == null) return { key, level: next, available: false, reason: 'max' };
   const cost = f.cost[next];
   if (state.stage < f.fromStage[next]) return { key, level: next, cost, available: false, reason: 'stage' };
   if (state.money < cost) return { key, level: next, cost, available: false, reason: 'money' };
@@ -819,17 +843,164 @@ export function canAdvanceStage(state, ctx) {
   const goal = ctx.rules.stageGoals[state.stage];
   if (!goal || state.stage >= ctx.rules.maxStage) return { ok: false, missing: ['max'] };
   const rep = reputation(state);
+  const guests = goal.perStage ? state.stageGuests || 0 : state.guests;
   const missing = [];
-  if (state.guests < goal.guests) missing.push('guests');
+  if (guests < goal.guests) missing.push('guests');
   if (rep < goal.reputation) missing.push('reputation');
   if (state.money < goal.cost) missing.push('money');
-  return { ok: missing.length === 0, missing, goal, guests: state.guests, reputation: rep };
+  return { ok: missing.length === 0, missing, goal, guests, reputation: rep };
 }
 
 export function advanceStage(state, ctx) {
   const check = canAdvanceStage(state, ctx);
   if (!check.ok) return { ok: false, missing: check.missing };
   spend(state, check.goal.cost);
+  if (check.goal.project) state.buildings[check.goal.project] = 1;
   state.stage++;
+  state.stageGuests = 0;
   return { ok: true, events: [{ type: 'stageUp', stage: state.stage }] };
+}
+
+// ---------------------------------------------------------------------------
+// Zahlen aus data/economy.js (Balancing-Thread) in das Format der Regeln bringen
+
+/**
+ * Baut aus ECONOMY die Regeln. Was ECONOMY nicht festlegt, kommt aus base (data/rules.js).
+ * Liegeplätze werden über Projekte freigeschaltet: start.plaetze sind sofort da, jedes
+ * Stegprojekt und jeder Stufenausbau schaltet seine Plätze frei.
+ */
+export function rulesFromEconomy(E, base = RULES) {
+  const r = structuredClone(base);
+  const z = E.zeit || {};
+  if (z.tagSekunden) r.dayLength = z.tagSekunden;
+  if (z.abendSekunden) r.eveningLength = z.abendSekunden;
+  if (z.saisonTage) r.seasonDays = z.saisonTage;
+  if (z.winterTage != null) r.winterDays = z.winterTage;
+
+  if (E.klassen) {
+    r.baseFee = {};
+    r.nightsBySize = {};
+    for (const [size, k] of Object.entries(E.klassen)) {
+      r.baseFee[size] = k.grundpreis;
+      if (k.naechte) r.nightsBySize[size] = k.naechte;
+    }
+  }
+  if (E.wunschBonus != null) r.wishBonus = E.wunschBonus;
+
+  if (E.wuensche) {
+    const stages = (E.stufen || []).map((s) => s.stufe);
+    r.wishes = {};
+    r.wishSizes = {};
+    r.motorOnlyWishes = [];
+    for (const st of stages) {
+      r.wishes[st] = Object.entries(E.wuensche).filter(([, w]) => w.abStufe <= st).map(([k]) => k);
+    }
+    for (const [k, w] of Object.entries(E.wuensche)) {
+      if (w.klassen) r.wishSizes[k] = w.klassen;
+      if (w.nurMotor) r.motorOnlyWishes.push(k);
+    }
+  }
+  if (E.wunschAnzahl) r.wishCountBySize = E.wunschAnzahl;
+
+  if (E.platzarten) {
+    r.berthKinds = {};
+    for (const [kind, p] of Object.entries(E.platzarten)) {
+      const k = {};
+      if (p.strom) k.power = true;
+      if (p.rufBonus) k.comfort = p.rufBonus / (r.comfortBonus || 0.5);
+      if (p.gast === false) k.reserved = true;
+      if (kind === 'kai') Object.assign(k, { sizes: ['XL'], exposed: true });
+      r.berthKinds[kind] = k;
+    }
+  }
+  if (E.stromAnSteg) r.berthJetties = Object.fromEntries(Object.keys(E.stromAnSteg).filter((k) => E.stromAnSteg[k]).map((k) => [k, { power: true }]));
+  // Strom an weiteren Stegen über ein Bauwerk (zum Beispiel Stromsäulen an Steg B)
+  r.jettyPowerBuildings = {};
+  for (const st of E.bauwerke?.strom?.stufen || []) for (const steg of st.stege || []) r.jettyPowerBuildings[steg] = 'strom';
+
+  if (E.ruf) {
+    const f = E.ruf;
+    r.reputation = { ...r.reputation, start: f.start ?? r.reputation.start, window: f.fenster ?? r.reputation.window };
+    if (f.ohneWunsch != null) r.rating.noWishes = f.ohneWunsch;
+    if (f.ankunftBasis != null) r.arrivalFactorAtRep = { 1: f.ankunftBasis, 5: f.ankunftBasis + 4 * f.ankunftJeAnker };
+    if (f.abgewiesen) r.turnAway = { chance: f.abgewiesen.chance, rating: f.abgewiesen.wertung };
+  }
+
+  if (E.stufen) {
+    r.arrivalsPerDay = {};
+    r.sizeMix = {};
+    r.stageGoals = {};
+    r.wishCount = r.wishCount || {};
+    for (const s of E.stufen) {
+      r.arrivalsPerDay[s.stufe] = s.ankuenfte;
+      r.sizeMix[s.stufe] = s.mix;
+      if (s.ausbau) {
+        r.stageGoals[s.stufe] = { guests: s.ziel.gaeste, reputation: s.ziel.ruf, cost: s.ausbau.kosten, project: s.ausbau.id, name: s.ausbau.name, perStage: true };
+      }
+    }
+    r.maxStage = Math.max(...E.stufen.map((s) => s.stufe));
+  }
+
+  // Liegeplätze und Projekte
+  if (E.start || E.stegprojekte) {
+    r.startBerths = [...(E.start?.plaetze || [])];
+    r.berthProjects = {};
+    r.jettyProjects = [];
+    for (const p of E.stegprojekte || []) {
+      r.berthProjects[p.id] = [...p.plaetze];
+      r.jettyProjects.push({ id: p.id, name: p.name, stage: p.stufe, cost: p.kosten });
+    }
+    for (const s of E.stufen || []) if (s.ausbau) r.berthProjects[s.ausbau.id] = [...(s.ausbau.plaetze || [])];
+  }
+
+  if (E.bauwerke) {
+    r.facilities = {};
+    r.facilityNames = {};
+    for (const [key, b] of Object.entries(E.bauwerke)) {
+      if (key === 'strom') {
+        r.facilities.strom = { levels: {}, cost: {}, fromStage: {}, names: {} };
+      }
+      const f = r.facilities[key] || { levels: {}, cost: {}, fromStage: {}, names: {} };
+      b.stufen.forEach((st, i) => {
+        f.levels[i + 1] = st.versorgt ?? 0;
+        f.cost[i + 1] = st.kosten;
+        f.fromStage[i + 1] = st.abStufe;
+        f.names[i + 1] = st.name;
+      });
+      r.facilities[key] = f;
+      r.facilityNames[key] = b.name;
+    }
+  }
+
+  if (E.fischer?.pachtProTag != null) r.stationedFee = E.fischer.pachtProTag;
+
+  if (E.hafenbuero) {
+    const o = { ...r.office, cost: {}, fromStage: {}, names: {} };
+    E.hafenbuero.stufen.forEach((st, i) => {
+      o.cost[i + 1] = st.kosten;
+      o.fromStage[i + 1] = st.abStufe;
+      o.names[i + 1] = st.name;
+      if (st.schaltetFrei?.includes('allesKassieren')) o.collectAllButton = i + 1;
+      if (st.schaltetFrei?.includes('automatik')) {
+        o.autoAssign = i + 1;
+        o.autoCollect = i + 1;
+      }
+    });
+    r.office = o;
+  }
+  return r;
+}
+
+/** Stegprojekte, die in der aktuellen Stufe gebaut werden können und noch fehlen. */
+export function openJettyProjects(state, ctx) {
+  return (ctx.rules.jettyProjects || []).filter((p) => p.stage <= state.stage && !state.buildings[p.id]);
+}
+
+/** Stegprojekt bauen (Kosten aus den Regeln). */
+export function buildJettyProject(state, ctx, id) {
+  const p = (ctx.rules.jettyProjects || []).find((x) => x.id === id);
+  if (!p) return { ok: false, reason: 'unknown', events: [] };
+  if (p.stage > state.stage) return { ok: false, reason: 'stage', events: [] };
+  const r = build(state, id, p.cost);
+  return { ...r, events: r.events || [] };
 }
