@@ -1,0 +1,67 @@
+/* Ton-Bedienfeld. Gehört zum Ton-Modul (web/js/audio/). UI-Threads dürfen das überschreiben. */
+
+.hm-audio-btn.hm-audio-off {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+.hm-audio-float {
+  position: fixed;
+  top: calc(8px + env(safe-area-inset-top, 0px));
+  right: calc(8px + env(safe-area-inset-right, 0px));
+  z-index: 30;
+}
+
+.hm-audio-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 240px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--paper, #fffcf6);
+  color: var(--ink, #283648);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  font: inherit;
+}
+
+#hm-audio-popover {
+  position: absolute;
+  top: calc(64px + env(safe-area-inset-top, 0px));
+  right: calc(8px + env(safe-area-inset-right, 0px));
+  z-index: 40;
+  max-width: calc(100vw - 16px);
+}
+
+#hm-audio-popover[hidden] { display: none; }
+
+.hm-audio-mute {
+  min-height: var(--tap, 44px);
+  border: 0;
+  border-radius: 10px;
+  background: var(--ink, #283648);
+  color: var(--paper, #fffcf6);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hm-audio-stumm .hm-audio-mute { background: var(--accent, #ee6454); }
+
+.hm-audio-row {
+  display: grid;
+  grid-template-columns: 5.5em 1fr;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap, 44px);
+}
+
+.hm-audio-row input[type="range"] {
+  width: 100%;
+  min-height: var(--tap, 44px);
+  margin: 0;
+  accent-color: var(--accent, #ee6454);
+  touch-action: pan-x;
+}
+
+.hm-audio-stumm .hm-audio-row { opacity: 0.5; }
