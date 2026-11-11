@@ -50,3 +50,12 @@ test('jedes L-Modell findet ab seiner Stufe einen passenden Liegeplatz im Hafen'
     assert.ok(plaetze.length > 0, `${m.id} (${m.name}) hat in Stufe ${m.fromStage} keinen Platz`);
   }
 });
+
+test('Menschen an Bord: 2 bis 8 laut Plan 11a', async () => {
+  const { crewOf } = await import('../web/js/data/boats/l.js');
+  for (const t of TYPES) assert.ok(Array.isArray(t.crew), t.id);
+  for (const m of MODELS) {
+    const [a, b] = crewOf(m);
+    assert.ok(a >= 2 && b <= 8 && a <= b, `${m.id} ${a}-${b}`);
+  }
+});
