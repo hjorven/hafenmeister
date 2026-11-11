@@ -17,11 +17,14 @@ const MODULES = [
   './render/boats/l.js',
   './render/boats/xl.js',
   './render/boats/xxl.js',
+  './render/boat-anim.js',
+  './render/boat-view.js',
   './ui/input-pc.js',
   './ui/input-touch.js',
   './ui/hud.js',
   './audio/audio.js',
   './state.js',
+  './events/events.js',
   './save/index.js',
 ];
 
@@ -57,7 +60,8 @@ function boot() {
     canvas,
     bounds: WORLD,
     // Startansicht: Stufe 1, Steg A am Suedufer des Sees
-    home: { x: -60 * U, z: -12, width: 70 },
+    // Steg A mit etwas Wasser drumherum, passt im Hoch- und Querformat
+    home: { rect: { minX: -60 * U - 10, maxX: -60 * U + 12, minZ: -24, maxZ: 3 } },
   });
   window.hafenmeister = game;   // zum Ausprobieren in der Browser-Konsole
 

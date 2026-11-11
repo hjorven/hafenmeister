@@ -24,15 +24,18 @@ web/js/render/boats/m.js
 web/js/render/boats/l.js
 web/js/render/boats/xl.js
 web/js/render/boats/xxl.js
+web/js/render/boat-anim.js
+web/js/render/boat-view.js
 web/js/ui/input-pc.js
 web/js/ui/input-touch.js
 web/js/ui/hud.js
 web/js/audio/audio.js
 web/js/state.js
+web/js/events/events.js
 web/js/save/index.js
 ```
 
-Jede Datei exportiert `init(game)` (oder `default`, oder eine Funktion, deren Name mit `init` beginnt). Wer eine weitere Datei braucht, meldet sie beim Grundgerüst an, damit sie in die Liste `MODULES` in `main.js` kommt.
+Die Module werden parallel geladen, `init(game)` wird aber in der Reihenfolge der Liste aufgerufen. Jede Datei exportiert `init(game)` (oder `default`, oder eine Funktion, deren Name mit `init` beginnt). Wer eine weitere Datei braucht, meldet sie beim Grundgerüst an, damit sie in die Liste `MODULES` in `main.js` kommt.
 
 ## Das Spielobjekt `game`
 
@@ -43,7 +46,8 @@ Jede Datei exportiert `init(game)` (oder `default`, oder eine Funktion, deren Na
 | `game.camera.zoomAt(faktor, x, y)` | um einen Bildschirmpunkt zoomen, Faktor über 1 zoomt hinein |
 | `game.camera.panBy(dx, dy)` | um Bildschirm-Pixel verschieben |
 | `game.camera.reset()` | zurück zur Startansicht (Knopf „Übersicht“) |
-| `game.camera.setHome(x, z, breite)` | Startansicht ändern, z. B. beim Erweitern des Hafens |
+| `game.camera.setHomeRect({ minX, maxX, minZ, maxZ })` | Startansicht als Rechteck, passt sich Hoch- und Querformat an. Danach `reset()` |
+| `game.camera.setHome(x, z, breite)` | Startansicht als Mittelpunkt und Breite |
 | `game.camera.screenToWorld(x, y)` | Bildschirmpunkt auf die Wasserfläche projizieren |
 | `game.camera.camera` | die `THREE.OrthographicCamera` |
 | `game.pick(x, y, { tolerance, types })` | was liegt unter einem Bildschirmpunkt, liefert `{ type, id, object, point }` oder `null` |
@@ -89,6 +93,10 @@ Erlaubte Werte für `type`: `boat`, `berth`, `jetty`, `coin`, `building`, `build
 ## Koordinaten
 
 Welt in Metern. `x` nach Osten, `z` nach Süden (Norden ist `-z`), `y` nach oben, Wasserfläche bei `y = 0`. Umrechnung aus `skripte/konzeptbilder/hafen_von_oben.py`: `x_welt = x_plan * 0.62`, `z_welt = -y_plan * 0.62`.
+
+## Knöpfe, die erst später erscheinen
+
+`#btn-pause` und `#btn-build` sind in `index.html` mit `hidden` versteckt (Regel „Fertig heißt spielbar“, `docs/abnahme.md`). Das Modul, das sie mit Leben füllt, nimmt `hidden` weg: Pause der Spielregeln-Thread, sobald die Spielschleife läuft, Bauen der Bau-Thread.
 
 ## Steuerung im Grundgerüst
 

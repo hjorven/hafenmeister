@@ -24,7 +24,7 @@ Ein kleines, gemütliches Aufbauspiel in 3D. Du fängst mit einem Badesteg an ei
 - **Cozy:** kein Scheitern, kein Zeitdruck, keine Story, keine Figuren mit Namen. Höchstens ein kurzer Einstieg am Anfang („Der alte Steg gehört jetzt dir“).
 - **3D:** Der ganze Hafen ist eine echte 3D-Szene im Flat-Vector-Stil (flache Farben, weiche Schatten), drehbar in festen Schritten, frei zoombar. Die Draufsichten in `docs/hafen/` sind nur Bauplan, nicht das Aussehen.
 - **Genug Tiefe, dass es interessant bleibt:** Passregel nach Länge, Breite und Tiefgang, Wünsche der Gäste, Ruf, Ausbauentscheidungen, Ereignisse, Sammelziele.
-- **Genug Inhalt für lange Zeit:** sechs Ausbaustufen, über 20 Schiffsarten, viele Services, ein Logbuch zum Sammeln und mehrere Hafenregionen für neue Durchgänge.
+- **Genug Inhalt für lange Zeit:** sechs Ausbaustufen, über 20 Schiffsarten, viele Services, ein Logbuch zum Sammeln und eine zweite Hafenregion (Nordsee) für einen neuen Durchgang.
 - **Lebendig:** Schiffe laufen sichtbar ein, legen an, werfen Leinen, bergen Segel. Möwen, Wellen, Abendlicht, Fenster, die angehen. Soundeffekte und ruhige Hintergrundmusik.
 - **Überraschend gute Steuerung:** kleine Gesten, die sich gut anfühlen (Abschnitt 8).
 - **Überall spielbar:** PC, Tablet und Handy, hoch und quer, im Browser über GitHub Pages, installierbar als Web-App.
@@ -188,14 +188,12 @@ Kleine Rückmeldungen: Haptik auf dem Handy (`navigator.vibrate`), wo verfügbar
 ## 9. Inhalt für lange Zeit
 
 - **Logbuch:** Jede Schiffsart und jedes Modell wird beim ersten Anlegen eingetragen, mit Bild. Bei über 100 Modellen ein langes Sammelziel.
-- **Hafenregionen:** Nach dem Abschluss einer Region startet ein neuer Hafen in einer anderen Region, mit eigener Landschaft, eigenen Gebäuden und eigenen Schiffen. Der erste Durchgang spielt an der deutschen Ostsee.
+- **Zwei Hafenregionen (Entscheidung Jorven, 11.11.2026):** Ostsee und Nordsee. Keine länderspezifischen Regionen. Gebäude und Stimmung sind ein Mix aus deutschen, dänischen und schwedischen Häfen (rote Holzhäuser, Reetdächer, Backstein, Fachwerk), weil sich die Hafenkulturen nicht stark genug unterscheiden, um eigene Regionen zu tragen. Der erste Durchgang spielt an der Ostsee, nach dessen Abschluss wird die Nordsee frei.
 
 | Region | Landschaft | Besonderheit |
 |---|---|---|
-| Deutsche Ostsee | Binnensee hinter einer Nehrung, Dünen, Kiefern | Startregion, wie im Katalog |
-| Dänemark | Fjord, Fachwerk mit gelben Wänden, Reetdächer | Viele Segler, kleine Fähren |
-| Schweden | Schären, rote Holzhäuser, Felsen | Liegeplätze an Felsen mit Heckanker, wenig Stege |
-| Nordsee | Deich, Watt, Sielhafen | Gezeiten: bei Ebbe liegen Boote trocken, Tiefgang zählt doppelt |
+| Ostsee | Binnensee hinter einer Nehrung, Dünen, Kiefern, Schären-Felsen am Rand | Startregion, wie im Katalog, kaum Gezeiten |
+| Nordsee | Deich, Watt, Sielhafen, Priele | Gezeiten: bei Ebbe liegen Boote trocken, Tiefgang zählt doppelt |
 
 - **Erfolge:** zum Beispiel „Alle drei Traditionssegler gleichzeitig im Hafen“, „Ein Abend mit 5,0 Ankern“.
 - **Endlosmodus** nach dem Spielziel, mit Bestenliste (Abschnitt 12).
@@ -236,7 +234,30 @@ Die Einzelheiten je Gerät stehen in `web/css/ui-pc.css`, `ui-tablet.css` und `u
 | Segelboote | Segel werden vor dem Hafen geborgen und beim Auslaufen gesetzt |
 | Abend | Licht wird warm, Fenster gehen an, Molenfeuer blinken grün und rot |
 | Wetter | Wolkenschatten, Regen, bei Sturm Gischt an den Molen |
-| Leben | Möwen, Leihboote auf dem See, Menschen als kleine Figuren ohne Gesicht auf der Promenade |
+| Leben | Möwen, Leihboote auf dem See, Menschen als kleine Figuren ohne Gesicht (Abschnitt 11a) |
+
+### 11a. Menschen im Hafen (Entscheidung Jorven, 11.11.2026)
+
+Jedes Schiff bringt eine zufällige Zahl Menschen mit, die zu seiner Größe passt. Sie gehen an Land und laufen im Hafen herum. Keine Namen, keine Gesichter, keine Dialoge, nur kleine Figuren, die den Hafen lebendig machen.
+
+| Schiff | Menschen an Bord |
+|---|---|
+| S | 1 bis 3 |
+| M | 2 bis 5 |
+| L | 2 bis 8 |
+| XL | 6 bis 40 (Traditionssegler mit Gästen, Fahrgastschiff mehr) |
+| Kreuzfahrtschiff | 80 bis 200 (im Spiel gebündelt dargestellt) |
+| Marineschiff | 20 bis 60, gehen in Gruppen |
+
+Die genaue Obergrenze steht je Schiffsart in den Schiffsdaten (Feld `crew: [min, max]`).
+
+**Verhalten**
+
+- Menschen verlassen ihr Boot über den Steg und laufen auf einem Wegenetz (Stege, Promenade, Wege zwischen den Gebäuden). Der Weg wird mit A* auf diesem Netz gesucht.
+- Sie wählen zufällige Ziele: Toilette, Dusche, Kiosk, Restaurant, Läden, Aussichtspunkte, Bank an der Mole. Abends gehen die meisten zurück an Bord, ein paar sitzen noch im Restaurant.
+- Erfüllte Wünsche sind sichtbar: Wer zur Dusche will, geht zur Dusche.
+- Tagesgäste von Großschiffen laufen als Gruppe vom Anleger in den Ort und füllen Kiosk, Restaurant und Läden. Das bringt mehr Einnahmen, aber keine eigene Zahl in der Oberfläche.
+- Leistung: höchstens etwa 300 Figuren gleichzeitig sichtbar, als `InstancedMesh`. Bei mehr wird gebündelt (eine Figur steht für mehrere Menschen).
 
 **Ton:** Soundeffekte (Wellen, Möwen, Tauwerk, Glocke, Hafenhorn, Münzen, Motoren) und ruhige Hintergrundmusik, die sich mit Tag und Abend ändert. Musik und Effekte getrennt einstellbar. Ton startet erst nach dem ersten Antippen, sonst bleibt er auf iPhone und iPad stumm.
 
@@ -275,7 +296,7 @@ Jeder Meilenstein endet mit etwas, das man auf PC, Tablet und Handy (hoch und qu
 - [ ] **5. Stufen 4 bis 6:** Services, Außenhafen, Großschiffe, Ereignisse, Jahreslauf, Logbuch.
 - [ ] **6. Balancing:** `tools/balance.mjs` nutzt `sim.js`, dazu Testspielen. Ziel: 6 bis 8 Stunden bis zum Abschluss der ersten Region.
 - [ ] **7. Online:** Hafenname, Bestenliste, Gastboote.
-- [ ] **8. Weitere Regionen:** Dänemark, Schweden, Nordsee.
+- [ ] **8. Nordsee:** zweite Region mit Deich, Watt und Gezeiten.
 - [ ] **9. Feinschliff:** überraschende Gesten, Einstieg, Erfolge, Test auf echten Geräten.
 
 Nach Meilenstein 1 weiß man, ob Zuweisen und Kassieren Spaß macht. Wenn nicht, wird dort geändert, bevor irgendetwas hübsch gemacht wird.
@@ -287,16 +308,14 @@ Nach Meilenstein 1 weiß man, ob Zuweisen und Kassieren Spaß macht. Wenn nicht,
 | Stil | Flat Vector in 3D |
 | Zuweisen von Hand oder automatisch | von Hand, ab Hafenbüro Automatik nur für Standardfälle |
 | Vorspulen | 2x von Anfang an, 3x mit Hafenbüro |
-| Schauplatz | Startregion deutsche Ostsee, weitere Regionen nach Abschluss |
+| Schauplatz | Zwei Regionen: Ostsee (Start) und Nordsee (danach). Gebäude als Mix aus deutschen, dänischen und schwedischen Häfen |
+| Dritte Zahl für Tagesgäste | nein. Tagesgäste bringen mehr Einnahmen und sind als Menschen im Hafen zu sehen |
 | Tretboote und Kanus als Gäste | nur Kulisse am Strand |
 | Klappbrücke über den Durchstich | nicht in 1.0 |
 | Dauerlieger mit Rot-Grün-Schildern | nach 1.0 |
 | Story und Figuren | keine, nur ein kurzer Einstieg |
 
-**Noch offen**
-
-1. Soll die Hafenregion am Anfang wählbar sein oder nacheinander freigeschaltet werden? Vorschlag: nacheinander, damit jeder Durchgang neu wirkt.
-2. Soll es neben Geld und Ruf eine dritte Zahl für Tagesgäste geben (Stufe 6)? Vorschlag: nein, Tagesgäste zeigen sich nur als Einnahmen und als Menschen auf der Promenade.
+**Noch offen:** nichts.
 
 ## 15. Bewusst weggelassen
 

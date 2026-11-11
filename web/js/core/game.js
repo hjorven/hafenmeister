@@ -11,7 +11,7 @@ export function createGame({ canvas, bounds, home }) {
   scene.background = new THREE.Color('#62b4c2');
 
   const rig = new CameraRig({ bounds });
-  rig.setHome(home.x, home.z, home.width);
+  if (home.rect) rig.setHomeRect(home.rect); else rig.setHome(home.x, home.z, home.width);
 
   const listeners = new Map();
   const tickers = new Set();
@@ -57,6 +57,9 @@ export function createGame({ canvas, bounds, home }) {
     const h = canvas.clientHeight;
     renderer.setSize(w, h, false);
     rig.resize(w, h);
+    const top = document.getElementById('hud-top');
+    const bottom = document.getElementById('hud-bottom');
+    rig.setInsets(top ? top.offsetHeight : 0, bottom ? bottom.offsetHeight : 0);
     game.emit('resize', { width: w, height: h });
   };
   new ResizeObserver(resize).observe(canvas);
