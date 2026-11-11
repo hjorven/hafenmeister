@@ -28,6 +28,7 @@ web/js/render/boat-anim.js
 web/js/render/boat-view.js
 web/js/ui/input-pc.js
 web/js/ui/input-touch.js
+web/js/ui/gesten.js
 web/js/ui/hud.js
 web/js/audio/audio.js
 web/js/state.js
@@ -78,6 +79,8 @@ Der aktuelle Stand steht in `game.state.stufe` und `game.state.region` (Besitzer
 | `ui:tow` | Schleppleine: Boot wird zu einem Ziel gezogen |
 | `ui:tow-end` | Schleppleine losgelassen |
 | `ui:mute` | Ton an oder aus |
+| `ui:auto-einfahren` | wartendes Boot soll selbst den besten Platz nehmen (`{ boot }`), aus `gesten.js` |
+| `ui:vorspulen` | Sonne gezogen (`{ speed }`, 1 bis 8), `gesten.js` setzt dabei `game.speed` |
 | `hover` | Zeiger liegt über einem Objekt (nur PC), Daten wie bei `pick` |
 
 ## Antippbare Objekte

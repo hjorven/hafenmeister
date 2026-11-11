@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#a8dadc">
-<title>Hafenmeister: Tablet-Prototyp</title>
+<title>Prototyp (nicht das Spiel): Tablet-Oberfläche</title>
 <!--
   Klickbarer Prototyp der Tablet-Oberfläche.
   Nutzt dieselben IDs und Klassen wie das Spiel (web/index.html, web/css/base.css,
@@ -15,9 +15,11 @@
   3D-Szene mit orthografischer Kamera; view.zoom entspricht dann camera.zoom.
   Alle Zahlen sind Platzhalter, es gibt keine Spielregeln.
 
-  Lokal testen (im Ordner hafenmeister):
-    python3 -m http.server 8000 --directory web
-  dann http://localhost:8000/prototyp/tablet.html öffnen.
+  PROTOTYP, nicht Teil des Spiels und nicht veröffentlicht. Die drei Gesten stecken im echten
+  Spiel in web/js/ui/gesten.js.
+  Lokal ansehen (im Ordner hafenmeister):
+    python3 -m http.server 8000
+  dann http://localhost:8000/docs/ui/prototyp/tablet.html öffnen.
   Mit #abend am Ende der Adresse startet der Prototyp direkt am Abend (Kassierstrich testen).
 -->
 <style>
@@ -83,13 +85,13 @@
   @media (min-width: 600px) and (min-height: 500px) and (pointer: coarse),
          (min-width: 600px) and (max-width: 1023px) and (min-height: 500px) { #hint { display: none; } }
 </style>
-<link rel="stylesheet" href="../css/base.css">
-<link rel="stylesheet" href="../css/ui-tablet.css">
+<link rel="stylesheet" href="../../../web/css/base.css">
+<link rel="stylesheet" href="../../../web/css/ui-tablet.css">
 </head>
 <body class="hm" data-phase="tag">
 
 <div id="stage" aria-label="Hafenkarte">
-  <div id="world"><img src="hafen-stufe-2.png" alt="Dorfhafen am See, Stufe 2"></div>
+  <div id="world"><img src="../../hafen/stufe-2.png" alt="Dorfhafen am See, Stufe 2"></div>
   <canvas id="strich"></canvas>
   <div id="marks"></div>
 </div>
@@ -165,7 +167,7 @@ let money = 1240, selected = null, buildMode = false, docked = [], coins = [];
 // Das Gestenmodul liefert Ansicht {x, y, zoom}: Weltpunkt in Bildschirmmitte und Maßstab.
 let cam;
 try {
-  const m = await import('../js/ui/input-touch.js');
+  const m = await import('../../../web/js/ui/input-touch.js');
   cam = m.attachMapGestures(stage, {
     minZoom: 0.35, maxZoom: 4, bounds: { x: 0, y: 260, w: WORLD.w, h: WORLD.h - 260 },
     start: { x: HAFEN.x + HAFEN.w / 2, y: HAFEN.y + HAFEN.h / 2, zoom: 1 },

@@ -7,19 +7,26 @@ Stand: 11.11.2026. Gilt für iPad und Android-Tablets im Hoch- und Querformat. P
 | Datei | Inhalt |
 |---|---|
 | `web/css/ui-tablet.css` | Layout für Tablets, wird nur per Media Query aktiv |
-| `web/prototyp/tablet.html` | klickbarer Prototyp mit dem Hafen aus Stufe 2 |
+| `web/js/ui/gesten.js` | Schleppleine, Einfahren-Knopf, Kassierstrich, Sonne ziehen (alle Geräte) |
 | `web/js/core/input.js` | Ziehen, Pinch und Tipp im Spiel (Grundgerüst) |
-| `web/js/ui/input-touch.js` | zusätzliche Touch-Gesten (Handy-Thread), der Prototyp nutzt es, wenn es da ist |
+| `web/js/ui/input-touch.js` | Doppeltipp-Zoom, langes Drücken, Vibration (Handy-Thread) |
+| `docs/ui/prototyp/tablet.html` | früher 2D-Prototyp, **nicht Teil des Spiels** und nicht veröffentlicht |
 
-Nach dem Merge liegt der Prototyp auch unter `https://hjorven.github.io/hafenmeister/prototyp/tablet.html`.
-
-**Lokal ansehen** (im Ordner `hafenmeister`)
+**Spiel lokal ansehen** (im Ordner `hafenmeister`)
 
 ```bash
 python3 -m http.server 8000 --directory web
 ```
 
-Danach im Browser `http://localhost:8000/prototyp/tablet.html` öffnen, das Spiel selbst unter `http://localhost:8000`. Mit `http://localhost:8000/prototyp/tablet.html#abend` startet er direkt am Abend. Am PC in den Entwicklerwerkzeugen die Geräteansicht (iPad Air) einschalten, sonst greift das Tablet-Layout bei breitem Fenster mit Maus nicht.
+Danach im Browser `http://localhost:8000` öffnen.
+
+**Alten Prototyp ansehen** (im Ordner `hafenmeister`)
+
+```bash
+python3 -m http.server 8000
+```
+
+Danach `http://localhost:8000/docs/ui/prototyp/tablet.html` öffnen, mit `#abend` am Ende startet er am Abend. Am PC in den Entwicklerwerkzeugen die Geräteansicht (iPad Air) einschalten, sonst greift das Tablet-Layout bei breitem Fenster mit Maus nicht.
 
 ---
 
@@ -72,7 +79,7 @@ Ein iPad im Querformat ist 1024 bis 1366 px breit. Deshalb entscheidet ab 1024 p
 - Safe Areas (Home-Balken, abgerundete Ecken) über `env(safe-area-inset-*)`. Dafür braucht `index.html` `viewport-fit=cover`.
 - Kein Gummiband-Scrollen, kein Doppeltipp-Zoom der Seite, kein Kontextmenü bei langem Druck.
 - Wird das Tablet gedreht, rahmt die Kamera den Hafen neu ein.
-- Fährt die Kamera zu Liegeplätzen, rechnet sie die Leisten heraus (`hudPadding()` im Prototyp), damit nichts unter einer Leiste verschwindet.
+- Fährt die Kamera zu Liegeplätzen, rechnet sie die Leisten heraus (`hudPadding()` im alten Prototyp), damit nichts unter einer Leiste verschwindet.
 
 ## 3. Bedienung
 
@@ -80,7 +87,7 @@ Ein iPad im Querformat ist 1024 bis 1366 px breit. Deshalb entscheidet ab 1024 p
 |---|---|
 | Karte verschieben | ein Finger ziehen |
 | Zoomen | zwei Finger (Pinch), Doppeltipp |
-| Boot zuweisen | Boot antippen, dann Platz antippen **oder** Boot aus der Leiste auf den Platz ziehen |
+| Boot zuweisen | Boot an der Boje auf einen Platz ziehen **oder** antippen und Einfahren wählen |
 | Bauen | Bauen, Plus antippen, Bauwerk wählen |
 | Kassieren | Münze antippen **oder** mit einem Finger über mehrere Münzen streichen |
 | Vorspulen | Sonne im Tagesbalken nach rechts ziehen, loslassen = normal |
@@ -89,15 +96,15 @@ Tipps zählen mit Fingertoleranz: Auch wenn ein Liegeplatz bei herausgezoomter K
 
 ## 4. Positiv überraschende Steuerung
 
-Jorven wünscht sich ein cozy Tycoon in 3D mit Steuerung, die positiv überrascht. Die ersten drei Ideen stecken schon im Prototyp, der Rest ist für die 3D-Fassung gedacht. Das Tablet ist dafür das beste Gerät: großer Bildschirm, zwei Hände, Multitouch, oft Apple Pencil.
+Jorven wünscht sich ein cozy Tycoon in 3D mit Steuerung, die positiv überrascht. Die ersten drei Ideen hat Jorven am 11.11.2026 bestätigt, sie stecken im Spiel in `web/js/ui/gesten.js` und gelten auf allen Geräten. Der Rest ist für später gedacht.
 
-**Im Prototyp**
+**Im Spiel (bestätigt)**
 
-1. **Boot auf den Platz ziehen.** Das Boot aus der Einfahrt mit dem Finger greifen und auf einen leuchtenden Platz ziehen. Der Platz unter dem Finger wird größer und rastet ein, auf Android vibriert es kurz. Tippen und Tippen geht weiterhin.
-2. **Kassierstrich.** Abends mit einem Finger in einem Zug über die Münzen streichen. Eine goldene Spur folgt dem Finger, am Ende steht „8 Münzen in einem Strich". Das ist das Gefühl, wenn man in einem Spiel Münzen einsammelt, ohne 50-mal zu tippen.
+1. **Schleppleine.** Ankommende Boote warten draußen vor dem Hafen an einer Warteboje oder im Ankerfeld, wie in echt. Das Boot mit dem Finger greifen (ab 10 px Bewegung) und auf einen leuchtenden Platz ziehen. Eine Leine hängt zwischen Boot und Finger, über einem passenden Platz rastet sie straff ein, es klickt und vibriert kurz. Am Bildschirmrand läuft die Karte mit, weil die Bojen weit von den Stegen entfernt liegen. Kurz antippen zeigt stattdessen den Knopf **Einfahren**: Das Boot sucht sich selbst den besten Platz.
+2. **Kassierstrich.** Abends mit einem Finger in einem Zug über die Münzen streichen. Eine goldene Spur folgt dem Finger, jede Münze springt hoch und klingt einen Ton höher (Pentatonik), am Ende ein kleiner Akkord und „8 Münzen in einem Strich". Ein zweiter Finger bricht den Strich ab und zoomt.
 3. **Sonne ziehen.** Die Sonne im Tagesbalken ist ein Regler. Nach rechts ziehen spult schneller (bis 8-fach), loslassen läuft normal weiter. Kein Menü, kein Extra-Knopf.
 
-**Für die 3D-Fassung**
+**Für später**
 
 4. **Zwei Finger drehen dreht den Hafen.** Die Kamera kreist um die Hafenmitte und rastet in 45-Grad-Schritten ein, damit man nicht die Orientierung verliert. Zwei Finger gemeinsam nach oben oder unten schieben kippt die Kamera zwischen Draufsicht (gut zum Zuweisen) und Schrägsicht (schön zum Zuschauen).
 5. **Fernglas.** Langer Druck auf die Einfahrt hebt die Kamera und zeigt, welche Boote draußen schon unterwegs sind. Das ersetzt die Vorschau der nächsten 3 Boote durch einen Blick aufs Wasser.
