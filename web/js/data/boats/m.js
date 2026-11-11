@@ -342,7 +342,7 @@ export const MODELS = [
     ],
   },
   {
-    id: 'M4-3', typeId: 'M4', name: 'Stellnetzkutter', fromStage: 2,
+    id: 'M4-3', typeId: 'M4', name: 'Stellnetzkutter', fromStage: 3,
     length: 8.5, beam: 3.0, draft: 1.0, airDraft: 4.2, mooring: 'fischer',
     form: 'Steuerhaus achtern, Netzholer am Bug, Fähnchenbojen',
     look: {
@@ -358,7 +358,7 @@ export const MODELS = [
     ],
   },
   {
-    id: 'M4-4', typeId: 'M4', name: 'Angelkutter für Gäste', fromStage: 2,
+    id: 'M4-4', typeId: 'M4', name: 'Angelkutter für Gäste', fromStage: 3,
     length: 9.0, beam: 3.2, draft: 1.0, airDraft: 4.0, mooring: 'fischer',
     form: 'Reling rundum, Sitzbänke, viele Angelruten',
     look: {
@@ -373,7 +373,7 @@ export const MODELS = [
     ],
   },
   {
-    id: 'M4-5', typeId: 'M4', name: 'Kutter mit Fischverkauf', fromStage: 2,
+    id: 'M4-5', typeId: 'M4', name: 'Kutter mit Fischverkauf', fromStage: 3,
     length: 8.8, beam: 3.1, draft: 0.9, airDraft: 4.0, mooring: 'fischer',
     form: 'Verkaufstresen an der Reling, Schild, Kühlkisten',
     look: {
