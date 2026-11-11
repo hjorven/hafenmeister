@@ -1,55 +1,31 @@
 # Hafenregionen
 
-Stand: 11.11.2026. Ergänzt Abschnitt 9 im [Spielplan](plan.md). Dieses Dokument beschreibt die vier Reviere des Spiels: was sie im Aussehen und im Spielgefühl unterscheidet, wie man sie freischaltet und wie sie als Daten beschrieben sind. Die Daten liegen in `web/js/data/regions.js`, die Rechenfunktionen (Wasserstand, Tidenfenster, Farben) in `web/js/world/region.js`.
+Stand: 11.11.2026. Ergänzt Abschnitt 9 im [Spielplan](plan.md). Dieses Dokument beschreibt die zwei Reviere des Spiels, Ostsee und Nordsee: was sie im Aussehen und im Spielgefühl unterscheidet, wie man sie freischaltet und wie sie als Daten beschrieben sind. Die Daten liegen in `web/js/data/regions.js`, die Rechenfunktionen (Wasserstand, Tidenfenster) in `web/js/world/region.js`.
+
+**Entscheidung Jorven (11.11.2026):** nur zwei Regionen, keine länderspezifischen. Gebäude und Stimmung sind ein Mix aus deutschen, dänischen und schwedischen Häfen, weil sich die Hafenkulturen nicht stark genug unterscheiden, um eigene Regionen zu tragen.
 
 ## 1. Die Idee
 
-Jedes Revier ist ein eigener Hafen, den man vom Badesteg bis zur großen Marina ausbaut. Die sechs Ausbaustufen aus dem [Spielplan](plan.md#4-ausbaustufen) bleiben überall gleich, damit Spielregeln, Schiffe und Oberfläche nur einmal gebaut werden müssen. Die Reviere unterscheiden sich in vier Dingen:
+Jedes Revier ist ein eigener Hafen, den man vom Badesteg bis zur großen Marina ausbaut. Die sechs Ausbaustufen aus dem [Spielplan](plan.md#4-ausbaustufen) bleiben in beiden Revieren gleich, damit Spielregeln, Schiffe und Oberfläche nur einmal gebaut werden müssen. Die Reviere unterscheiden sich in Aussehen, Küste, Spielgefühl und einer großen Besonderheit: Die Nordsee hat Ebbe und Flut.
 
-1. **Aussehen:** Farben von Wasser, Strand und Himmel, Bauweise der Häuser, Bäume und Kleinkram am Ufer.
-2. **Küste:** Nehrung mit Dünen, flache Inselküste, Granitschären oder Deich mit Watt.
-3. **Spielgefühl:** welche Boote häufig kommen, wie lange sie bleiben, was Gäste sich wünschen, welche Ereignisse es gibt.
-4. **Eine Besonderheit je Revier**, die man spürt, ohne dass das Spiel kompliziert wird.
+| Revier | Vorbilder | Küste | Besonderheit |
+|---|---|---|---|
+| Ostsee (Dünenhafen) | Burgtiefe, Heiligenhafen, Marstal, Svendborg, Smögen, Sandhamn | Binnensee hinter Nehrung, Dünen, Strand, Schärenfelsen am Rand | Start, ruhiges Wasser, Mix aus drei Hafenkulturen |
+| Nordsee (Sielhafen) | Neuharlingersiel, Greetsiel, Büsum | Deich, Watt, Priele, Sielhafen | Ebbe und Flut, Boote kommen nur im Tidenfenster |
 
-| Revier | Vorbilder | Küste | Besonderheit | Schwierigkeit |
-|---|---|---|---|---|
-| Deutsche Ostsee | Burgtiefe (Fehmarn), Kühlungsborn, Heiligenhafen | Binnensee hinter Nehrung, Dünen, Strand | Badegäste und Seebrücke, viele kleine Boote | leicht, Start |
-| Dänemark | Svendborg, Faaborg, Marstal (Ærø), Mariager | Fjord mit grünen Hängen, Inseln davor, Lehmkliffs | viele Segler und kleine Fähren, Gäste bleiben oft nur eine Nacht; Traditionssegler schon ab Stufe 4 | leicht bis mittel |
-| Schwedische Schären | Smögen, Marstrand, Sandhamn | rosa-grauer Granit, Kiefern, tiefes Wasser bis an den Fels | wenig Bauland, dafür tiefes Wasser: Kielyachten schon ab Stufe 2, Liegen an Felsen und Bojen | mittel |
-| Nordsee | Neuharlingersiel, Greetsiel, Büsum | Deich, Watt, Priele, Sielhafen | Ebbe und Flut: Der Wasserstand steigt und fällt um bis zu 3 m, Boote kommen nur im Tidenfenster | anspruchsvoll, zuletzt |
-
-Die Vorbilder sind Anregungen. Die Häfen im Spiel bekommen erfundene Namen, damit niemand einen echten Ort nachgebaut erwartet.
+Die Vorbilder sind Anregungen. Die Häfen im Spiel bekommen erfundene Namen.
 
 ## 2. Die Reviere im Einzelnen
 
-### Deutsche Ostsee: Dünenhafen
+### Ostsee: Dünenhafen
 
-- **Küste:** Festland, Binnensee, Nehrung mit Dünen und Strandhafer, dahinter die offene Ostsee. Genau die Karte aus [Hafen und Schiffe](hafen-und-schiffe.md).
+- **Küste:** Festland, Binnensee, Nehrung mit Dünen und Strandhafer, dahinter die offene Ostsee. Genau die Karte aus [Hafen und Schiffe](hafen-und-schiffe.md). Am Rand glatt geschliffene Schärenfelsen.
 - **Farben:** helles Türkis, cremiger Sand, sattes Wiesengrün. Viel Sonne, wenig Nebel.
-- **Bauweise:** weiße Bäderarchitektur mit Balkonen, Backsteinhäuser mit roten Ziegeln, Fischerkaten mit Reetdach. Strandkörbe in Blau-Weiß und Grün-Weiß.
-- **Natur:** Kiefern auf der Nehrung, Kartoffelrosen, Strandhafer, Möwen.
-- **Spielgefühl:** gemütlicher Einstieg. Viele Ruderboote, Jollen und kleine Motorboote, Badegäste wollen Kiosk und Toilette. Seebrücke als besonderer Bau.
-- **Ereignisse:** Segelwoche (Regatta), Hafenfest mit Feuerwerk, Sommergewitter.
-
-### Dänemark: Fjordhafen
-
-- **Küste:** ein schmaler Fjord mit sanften grünen Hängen, Buchenwald, kurze Lehmkliffs, Steinmolen aus Findlingen, vor der Mündung kleine Inseln.
-- **Farben:** etwas grünlicheres Wasser, helle Wiesen, Häuser in Gelb, Ocker und Rosa.
-- **Bauweise:** gelbe und weiße Fachwerkhäuser, rote Dachziegel, schwarze Teerbuden am Hafen, Dannebrog-Fahnen an Masten.
-- **Natur:** Heckenrosen, Holunder, Weiden mit Kühen in der Ferne, Schwäne.
-- **Spielgefühl:** Viele Segler, die von Insel zu Insel fahren und meist nur eine Nacht bleiben. Mehr Ankünfte, weniger Hafengeld pro Boot. Holzklassiker und Traditionssegler sind häufig, Traditionssegler kommen schon ab Stufe 4 an den Stirnplatz. Eine kleine Inselfähre pendelt ab Stufe 3 (Kulisse und Tagesgäste).
-- **Besondere Dienste:** Würstchenbude, Fahrradverleih, Räucherei.
-- **Ereignisse:** Holzbootfestival, Mittsommer-Feuer am Strand.
-
-### Schwedische Schären: Felsenhafen
-
-- **Küste:** glatt geschliffener Granit in Rosa und Grau, kleine Buchten, Kiefern in Felsspalten, tiefes Wasser direkt am Ufer.
-- **Farben:** tiefes Blau, dunkle Kiefern, roter Fels, lange goldene Abende.
-- **Bauweise:** falunrote Holzhäuser mit weißen Ecken und Fensterrahmen, Bootshäuser auf Pfählen, gelb-blaue Fahnen.
-- **Natur:** Kiefern, Birken, Wacholder, Moos auf Felsen.
-- **Spielgefühl:** Bauland ist knapp, Stege werden an den Fels gebaut. Dafür ist das Wasser tief: Kielyachten können schon ab Stufe 2 anlegen. Neue Platzart „Felsplatz“ (Bug am Fels, Heckanker) und Bojenfeld als günstige Erweiterung. Der Abend ist länger als in den anderen Revieren (helle Nordsommernächte).
-- **Besondere Dienste:** Sauna-Floß, Räucherei, Bootstankstelle auf einem Ponton.
-- **Ereignisse:** Mittsommerfest, Regatta rund um die Schären, Nebel am Morgen.
+- **Bauweise als Mix:** weiße Bäderarchitektur und Backstein mit roten Ziegeln (Deutschland), gelbes Fachwerk und Reetdächer (Dänemark), falunrote Holzhäuser mit weißen Ecken und Bootsschuppen in Reihe an einer Holzpromenade (Schweden). Strandkörbe in Blau-Weiß und Grün-Weiß.
+- **Natur:** Kiefern, Birken und Buchen, Kartoffelrosen, Heckenrosen, Heidekraut, Möwen, Schwäne, Eiderenten.
+- **Spielgefühl:** gemütlicher Einstieg mit vielen kleinen Booten. Holzklassiker und Traditionssegler sind etwas häufiger. Liegeplätze am Fels mit Heckanker und ein Bojenfeld sind günstige Erweiterungen.
+- **Besondere Dienste:** Strandkorbvermietung, Eisdiele, Fischbrötchen, Räucherei, Fahrradverleih, Sauna-Floß.
+- **Ereignisse:** Segelwoche (Regatta), Hafenfest, Holzbootfestival, Mittsommerfest, Sommergewitter, Kreuzfahrttag.
 
 ### Nordsee: Sielhafen
 
@@ -57,13 +33,13 @@ Die Vorbilder sind Anregungen. Die Häfen im Spiel bekommen erfundene Namen, dam
 - **Farben:** graublaues Wasser, braungraues Watt bei Ebbe, weiter Himmel, häufiger Dunst.
 - **Bauweise:** dunkelroter Klinker, Giebelhäuser, rot-weißer Leuchtturm, Krabbenkutter in Grün und Blau.
 - **Natur:** Salzwiesen, Strandflieder, Schafe am Deich, Austernfischer.
-- **Spielgefühl:** Ebbe und Flut. Siehe Abschnitt 3. Krabbenkutter und Seenotretter gehören hier von Anfang an dazu, Inselfähren kommen ab Stufe 5.
-- **Besondere Dienste:** Fischbrötchenbude, Wattführung, Schleuse als großes Bauprojekt.
-- **Ereignisse:** Sturmflut, Kutterkorso, Krabbenfest.
+- **Spielgefühl:** Ebbe und Flut, siehe Abschnitt 3. Krabbenkutter und Seenotretter gehören von Anfang an dazu, Inselfähren kommen ab Stufe 5. Mehr Wind und öfter Sturm.
+- **Besondere Dienste:** Fischbrötchen, Krabbenverkauf, Wattführung, Inselfähre, Schleuse als großes Bauprojekt.
+- **Ereignisse:** Sturmflut, Kutterkorso, Krabbenfest, Kreuzfahrttag.
 
 ## 3. Ebbe und Flut in der Nordsee
 
-Nur die Nordsee hat einen spürbaren Tidenhub. In den Ostseerevieren schwankt der Wasserstand so wenig, dass das Spiel ihn ignoriert.
+Nur die Nordsee hat einen spürbaren Tidenhub. In der Ostsee schwankt der Wasserstand so wenig, dass das Spiel ihn ignoriert.
 
 **Wasserstand:** Die Tiefen in den Hafendaten (`harbor.js` und später `web/js/data/harbors/<id>.js`) gelten wie auf einer Seekarte bei mittlerem Niedrigwasser. In der Nordsee kommt der aktuelle Wasserstand dazu, er liegt zwischen 0 (Niedrigwasser) und dem Tidenhub (Hochwasser):
 
@@ -88,14 +64,7 @@ Bei Springtide fällt das Wasser etwas unter 0, bei Nipptide bleibt es darüber.
 
 ## 4. Freischalten
 
-Man beginnt in der Deutschen Ostsee. Wie im Spielplan steht, startet nach dem Abschluss eines Hafens ein neuer Hafen in der nächsten Region. Als Abschluss zählt Stufe 5 (Küstenmarina), damit die teure Stufe 6 freiwillig bleibt. Fertige Häfen bleiben spielbar, man kann zwischen ihnen wechseln, jeder hat seinen eigenen Spielstand. Der Ruf aller Häfen zusammen gibt in einem neuen Hafen ein kleines Startgeld.
-
-| Revier | Frei, wenn |
-|---|---|
-| Deutsche Ostsee | von Anfang an |
-| Dänemark | Deutsche Ostsee erreicht Stufe 5 |
-| Schwedische Schären | Dänemark erreicht Stufe 5 |
-| Nordsee | Schweden erreicht Stufe 5 |
+Man beginnt an der Ostsee. Sobald der Ostseehafen Stufe 5 (Küstenmarina) erreicht, wird die Nordsee frei. Stufe 6 bleibt damit freiwillig. Beide Häfen bleiben spielbar, jeder hat seinen eigenen Spielstand. Der Ruf des Ostseehafens gibt an der Nordsee ein kleines Startgeld.
 
 ## 5. Datenformat
 
@@ -108,7 +77,7 @@ Jedes Revier ist ein Objekt in `REVIERE` (`web/js/data/regions.js`). Alle Felder
 | `vorbilder` | echte Häfen als Anregung |
 | `freischalten` | `{ start: true }` oder `{ nach, stufe }`: das Revier `nach` muss diese Stufe erreicht haben |
 | `karte` | `id` der Hafendaten. Bis es eigene Karten gibt, nutzen alle `nehrung` aus `harbor.js` |
-| `kueste` | `typ` (`nehrung`, `inselkueste`, `schaeren`, `deich-watt`) und Kurzbeschreibung |
+| `kueste` | `typ` (`nehrung` oder `deich-watt`) und Kurzbeschreibung |
 | `farben` | `wasserTief`, `wasserFlach`, `strand`, `wiese`, `fels`, `watt` (optional), `himmel`, `dunst` |
 | `licht` | je Tagesphase `tag` und `abend`: `himmel`, `sonne`, `boden`, `staerke`, `dunst` (Sichtweite in Metern, optional) |
 | `bauweise` | `waende` (Liste), `daecher` (Liste), `dachformen`, `holz`, `akzent`, `fensterAbend`, `fahne` |
@@ -117,7 +86,7 @@ Jedes Revier ist ein Objekt in `REVIERE` (`web/js/data/regions.js`). Alle Felder
 | `wetter` | `windMittel` (Beaufort), `sturm`, `nebel`, `regen`: Wahrscheinlichkeit je Spieltag |
 | `schiffe` | `haeufigkeit`: Faktor je Schiffsart (`S1` bis `XL3`, XXL mit Namen, fehlt = 1), `abStufe`: Abweichungen vom Katalog |
 | `spiel` | `hafengeld` und `ankuenfte` (Faktor), `naechte` ([min, max]), `abendAnteil` (Anteil des Abends am Spieltag), `startgeld` |
-| `platzarten` | zusätzliche Platzarten dieses Reviers (z. B. `fels`, `boje`, `trockenfallen`) |
+| `platzarten` | zusätzliche Platzarten dieses Reviers (Ostsee `fels`, `boje`; Nordsee `trockenfallen`) |
 | `dienste` | besondere Dienste dieses Reviers (zusätzlich zu den allgemeinen) |
 | `bauprojekte` | besondere große Bauten (z. B. `seebruecke`, `schleuse`) |
 | `ereignisse` | Ereignisse, die es hier gibt |
@@ -132,7 +101,7 @@ Jedes Revier ist ein Objekt in `REVIERE` (`web/js/data/regions.js`). Alle Felder
 | Aufruf | Bedeutung |
 |---|---|
 | `game.region.daten` | das aktuelle Revier aus `REVIERE` |
-| `game.region.setzen(id)` | Revier wechseln, sendet das Ereignis `region` mit den Daten |
+| `game.region.setzen(id)` | Revier wechseln, sendet das Ereignis `region` mit der id |
 | `game.region.wasserstand()` | Wasserstand jetzt in Metern über mittlerem Niedrigwasser, ohne Tide immer 0 |
 | `game.region.tiefeJetzt(tiefe)` | Kartentiefe plus Wasserstand |
 | `game.region.passt(tiefgang, tiefe)` | passt das Boot gerade an diesen Platz |
@@ -143,7 +112,7 @@ Ereignisse: `region` mit der id als Text beim Start und beim Wechsel (wie in [gr
 
 Wechselt ein anderes Modul das Revier mit `game.emit('region', id)`, geht `game.region` mit. Beim Start gilt `game.state.region` aus dem Spielstand, falls vorhanden.
 
-Zum Ausprobieren: `index.html?revier=nordsee` startet in der Nordsee. Erlaubt sind `ostsee`, `daenemark`, `schweden`, `nordsee`.
+Zum Ausprobieren: `index.html?revier=nordsee` startet in der Nordsee. Erlaubt sind `ostsee` und `nordsee`, statt `revier` geht auch `region`.
 
 Die reinen Rechenfunktionen (`wasserstand(revier, tage)`, `passt(...)`, `naechstesFenster(...)`) sind auch einzeln exportiert, damit Spielregeln und Tests sie ohne 3D nutzen können:
 
