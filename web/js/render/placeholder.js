@@ -52,10 +52,11 @@ export function addPlaceholderWorld(game, size) {
     boat.rotation.y = Math.cos(game.time * 0.3) > 0 ? 0.15 : -0.15;
   });
 
-  scene.add(new THREE.HemisphereLight('#ffffff', '#88aabb', 1.6));
+  const sky = new THREE.HemisphereLight('#ffffff', '#88aabb', 1.6);
+  scene.add(sky);
   const sun = new THREE.DirectionalLight('#fff4e0', 1.4);
   sun.position.set(-80, 120, 60);
   scene.add(sun);
   scene.add(group);
-  return { group, bands, deck, piles, boat };
+  return { group, bands, deck, piles, boat, lights: [sky, sun] };
 }

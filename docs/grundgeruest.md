@@ -8,7 +8,7 @@ Stand: 11.11.2026. Das Spiel liegt in `web/` und wird ohne Build-Schritt auf Git
 |---|---|
 | `web/index.html`, `web/js/main.js`, `web/js/core/*`, `web/css/base.css` | Grundgerüst |
 | `web/css/ui-pc.css`, `web/css/ui-tablet.css`, `web/css/ui-phone.css` | je ein UI-Thread (Platzhalter komplett ersetzen) |
-| `web/js/render/placeholder.js` | Platzhalter. Nach dem Laden entfernt `main.js` die Bänder, sobald es `game.landscape` gibt, den Steg bei `game.stege` und das Würfel-Boot bei `game.boatView` oder `game.boatAnim`. Die Module setzen diese Felder in `init(game)` |
+| `web/js/render/placeholder.js` | Platzhalter. Nach dem Laden entfernt `main.js` die Bänder und Lichter, sobald es `game.landscape` gibt, den Steg bei `game.stege` und das Würfel-Boot bei `game.boatView` oder `game.boatAnim`. Die Module setzen diese Felder in `init(game)` |
 
 ## Neue Module einhängen
 
@@ -70,6 +70,9 @@ Die Module werden parallel geladen, `init(game)` wird aber in der Reihenfolge de
 | `region` | `'ostsee'` oder `'nordsee'` | Hafenregion, gesendet von `world/region.js` bei `ready` und beim Wechsel (siehe [regionen.md](regionen.md)) |
 | `pegel` | Meter um die Wasserlinie | Wasserstand, nur in der Nordsee (Gezeiten), von `world/region.js` |
 | `phase` | `'tag'` oder `'abend'` | Tageszeit, setzt auch `body[data-phase]` |
+| `uhrzeit` | Spielzeit des Tages | von den Spielregeln |
+| `wetter` | Wetterzustand | von den Ereignissen |
+| `licht` | `{ nacht: 0 bis 1, … }` | von `render/landscape.js`, für Fenster, Molenfeuer, Gebäude |
 
 Der aktuelle Stand steht in `game.state.stufe` und `game.state.region` (Besitzer: Spielregeln-Thread), die Regionsdaten in `game.region` (Besitzer: Regionen-Thread). Module, die nach dem Laden starten, lesen diese Felder statt auf das Ereignis zu warten.
 
@@ -94,7 +97,7 @@ Jedes Modul, das etwas Antippbares in die Szene legt, setzt am obersten Objekt d
 mesh.userData.pick = { type: 'boat', id: 'b17' };
 ```
 
-Erlaubte Werte für `type`: `boat`, `berth`, `jetty`, `coin`, `building`, `buildsite`. Die `id` ist dieselbe wie in den Spielregeln (`sim.js`). Kinder-Objekte brauchen nichts, `game.pick` sucht vom getroffenen Teil nach oben. Ausgeblendete Objekte (`visible = false` am Objekt oder an einem Elternteil) werden nie getroffen. Trifft der Strahl nichts, nimmt `game.pick` das nächste antippbare Objekt innerhalb von 22 Pixeln auf dem Bildschirm, damit Finger auch kleine Boote treffen. Mit `types: ['boat']` lässt sich die Suche einschränken.
+Erlaubte Werte für `type`: `boat`, `berth`, `jetty`, `coin`, `building`, `buildsite`, `waitbuoy` (Warteboje vor der Einfahrt), `anchorage` (Ankerbereich). Die `id` ist dieselbe wie in den Spielregeln (`sim.js`). Kinder-Objekte brauchen nichts, `game.pick` sucht vom getroffenen Teil nach oben. Ausgeblendete Objekte (`visible = false` am Objekt oder an einem Elternteil) werden nie getroffen. Trifft der Strahl nichts, nimmt `game.pick` das nächste antippbare Objekt innerhalb von 22 Pixeln auf dem Bildschirm, damit Finger auch kleine Boote treffen. Mit `types: ['boat']` lässt sich die Suche einschränken.
 
 ## Koordinaten
 

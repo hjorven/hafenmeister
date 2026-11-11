@@ -55,7 +55,10 @@ function removePlaceholders(game) {
   if (!ph) return;
   if (game.stege) { ph.group.remove(ph.deck, ph.piles); }
   if (game.boatView || game.boatAnim) { ph.group.remove(ph.boat); }
-  if (game.landscape) { ph.group.remove(ph.bands); }
+  if (game.landscape) {
+    ph.group.remove(ph.bands);
+    for (const l of ph.lights) l.removeFromParent();
+  }
 }
 
 const U = 0.62;   // Meter je Planeinheit aus hafen_von_oben.py
