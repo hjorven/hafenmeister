@@ -1,0 +1,104 @@
+/* Ereignisse: Wettereffekte, Ankündigungsschild und Wetterbericht.
+   Wird von js/events/events.js geladen. Farben aus base.css (--ink, --paper, --accent, --hud-bg). */
+
+#weather-fx {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+#event-banner {
+  position: absolute;
+  top: calc(var(--hm-safe-top, 0px) + 64px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, calc(100% - 32px));
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--hud-bg, rgba(255, 252, 246, 0.92));
+  color: var(--ink, #283648);
+  box-shadow: 0 6px 20px rgba(40, 54, 72, 0.18);
+  border-left: 4px solid var(--accent, #ee6454);
+  animation: hm-ev-in 0.35s ease-out;
+  z-index: 20;
+  cursor: pointer;
+}
+#event-banner[hidden] { display: none; }
+#event-banner.leaving { opacity: 0; transition: opacity 0.4s; }
+#event-banner svg { flex: none; width: 32px; height: 32px; }
+#event-banner strong { display: block; font-size: 1rem; }
+#event-banner span { display: block; font-size: 0.875rem; line-height: 1.35; opacity: 0.85; margin-top: 2px; }
+
+#weather-chip {
+  position: absolute;
+  top: calc(var(--hm-safe-top, 0px) + 64px);
+  right: calc(var(--hm-safe-right, 0px) + 12px);
+  min-height: var(--tap, 44px);
+  max-width: 50vw;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px 6px 8px;
+  border: none;
+  border-radius: 999px;
+  background: var(--hud-bg, rgba(255, 252, 246, 0.92));
+  color: var(--ink, #283648);
+  font: inherit;
+  font-size: 0.875rem;
+  box-shadow: 0 3px 10px rgba(40, 54, 72, 0.15);
+  cursor: pointer;
+  z-index: 15;
+}
+#weather-chip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#weather-chip.has-news { box-shadow: 0 0 0 2px var(--accent, #ee6454), 0 3px 10px rgba(40, 54, 72, 0.15); }
+#weather-chip.pulse { animation: hm-ev-pulse 1.2s ease-out 2; }
+
+#weather-panel {
+  position: absolute;
+  top: calc(var(--hm-safe-top, 0px) + 116px);
+  right: calc(var(--hm-safe-right, 0px) + 12px);
+  width: min(320px, calc(100% - 24px));
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--paper, #fffcf6);
+  color: var(--ink, #283648);
+  box-shadow: 0 8px 24px rgba(40, 54, 72, 0.22);
+  z-index: 16;
+  animation: hm-ev-in 0.25s ease-out;
+}
+#weather-panel[hidden] { display: none; }
+#weather-panel .wp-head { font-size: 0.8rem; opacity: 0.7; padding: 0 4px 6px; }
+#weather-panel .wp-row { display: flex; gap: 10px; align-items: flex-start; padding: 8px 4px; border-top: 1px solid rgba(40, 54, 72, 0.08); }
+#weather-panel .wp-row svg { flex: none; width: 28px; height: 28px; }
+#weather-panel .wp-row strong { display: block; font-size: 0.9rem; }
+#weather-panel .wp-row span { display: block; font-size: 0.8rem; line-height: 1.35; opacity: 0.8; margin-top: 2px; }
+#weather-panel .wp-row.event strong { color: var(--accent, #ee6454); }
+
+/* Wenn die Infokarte offen ist (Handy: Blatt von unten), Bericht zuklappen */
+body.card-open #weather-panel { display: none; }
+
+/* Handy: Schild unter den Wetterknopf, damit beide sichtbar bleiben */
+@media not ((min-width: 600px) and (min-height: 500px)) {
+  #weather-chip { max-width: 60vw; }
+  #event-banner { top: calc(var(--hm-safe-top, 0px) + 116px); }
+}
+
+@keyframes hm-ev-in {
+  from { opacity: 0; transform: translate(var(--hm-ev-x, 0), -8px); }
+  to { opacity: 1; transform: translate(var(--hm-ev-x, 0), 0); }
+}
+#event-banner { --hm-ev-x: -50%; }
+@keyframes hm-ev-pulse {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #event-banner, #weather-panel, #weather-chip.pulse { animation: none; }
+}
