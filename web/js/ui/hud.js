@@ -1,0 +1,264 @@
+// HUD: zeigt die Zahlen der Spielregeln an und bietet die Aktionen als echte Knöpfe an.
+// Die Boote warten draußen an Bojen (3D). #queue ist nur eine Übersicht der Wartenden,
+// ein Knopf je Boot (data-boat, aria-pressed), damit Tastatur und Bildschirmleser alles erreichen.
+// Daten kommen aus game.sim (web/js/bridge.js), siehe docs/spielregeln.md.
+
+const WISH_LABEL = { wc: 'WC', dusche: 'Dusche', essen: 'Essen', strom: 'Strom', diesel: 'Diesel' };
+const FACILITY_LABEL = { wc: 'Toilette', dusche: 'Dusche', essen: 'Kiosk', diesel: 'Tankstelle' };
+const REASON_LABEL = {
+  length: 'Das Boot ist zu lang für diesen Platz.',
+  beam: 'Das Boot ist zu breit für diesen Platz.',
+  draft: 'Hier ist das Wasser zu flach für dieses Boot.',
+  size: 'Dieser Platz ist für andere Schiffsgrößen.',
+  reserved: 'Dieser Platz ist fest vergeben.',
+  occupied: 'Der Platz ist schon belegt.',
+  noBerth: 'Diesen Platz gibt es noch nicht.',
+  noFreeBerth: 'Gerade ist kein passender Platz frei.',
+  money: 'Dafür reicht das Geld noch nicht.',
+  stage: 'Das gibt es erst in einer späteren Ausbaustufe.',
+  max: 'Schon voll ausgebaut.',
+};
+
+const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
+const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const meters = (n) => `${num1(n)} m`;
+
+function el(tag, attrs = {}, ...children) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'onclick') e.addEventListener('click', v);
+    else if (k === 'class') e.className = v;
+    else if (v !== false && v != null) e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of children.flat()) if (c != null && c !== false) e.append(c);
+  return e;
+}
+
+function fill(parent, ...children) {
+  parent.replaceChildren(...children.flat().filter((c) => c != null && c !== false));
+}
+
+export function init(game) {
+  const $ = (id) => document.getElementById(id);
+  const money = $('money');
+  const rep = $('rep');
+  const day = $('day');
+  const queue = $('queue');
+  const card = $('card');
+  const buildBtn = $('btn-build');
+  if (!money || !queue || !card) return;
+
+  // Kleine Ergänzung zu base.css: gesperrte Knöpfe sichtbar blasser, Kartenknöpfe umbrechen
+  const style = document.createElement('style');
+  style.textContent = `
+    .hud-btn:disabled { opacity: 0.45; cursor: default; }
+    #card .card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    #card .card-note { font-weight: 600; }
+    #queue .boat-chip[aria-pressed="true"] { outline: 3px solid #f2c14e; }
+  `;
+  document.head.append(style);
+
+  // Knopf "Kassieren" erscheint abends neben "Bauen", solange Münzen offen sind
+  const collectBtn = el('button', { type: 'button', class: 'hud-btn', id: 'btn-collect', hidden: true });
+  buildBtn?.before(collectBtn);
+  collectBtn.addEventListener('click', () => game.sim?.collectAll(true));
+
+  // Knopf "Spielstand" (Sichern, Laden, Installieren) aus dem Speichermodul
+  const saveBtn = el('button', { type: 'button', class: 'hud-btn', id: 'btn-save', 'aria-label': 'Spielstand sichern oder laden' }, 'Spielstand');
+  document.getElementById('btn-pause')?.before(saveBtn);
+  saveBtn.addEventListener('click', () => game.spielstand?.oeffnen?.());
+  const updateSaveBtn = () => (saveBtn.hidden = !game.spielstand?.oeffnen);
+
+  let cardMode = null; // 'boat' | 'build' | null
+  let note = '';
+  let scheduled = false;
+
+  function closeCard() {
+    cardMode = null;
+    note = '';
+    card.hidden = true;
+    fill(card);
+    document.body.classList.remove('card-open');
+  }
+
+  function openCard(mode) {
+    cardMode = mode;
+    card.hidden = false;
+    document.body.classList.add('card-open');
+    render();
+  }
+
+  function renderStats(sim, st) {
+    money.textContent = euro(st.money);
+    rep.textContent = `Ruf ${num1(sim.reputation())}`;
+    const season = sim.season();
+    const phase = season.winter ? 'Winter' : st.phase === 'evening' ? 'Abend' : 'Tag';
+    day.textContent = `Tag ${st.day} · ${phase}`;
+    const pending = sim.mooredBoats().reduce((a, b) => a + (b.pendingFee || 0), 0);
+    collectBtn.hidden = pending <= 0;
+    collectBtn.textContent = `Kassieren ${euro(pending)}`;
+  }
+
+  function renderQueue(sim) {
+    const waiting = sim.waitingBoats();
+    const spots = sim.waitSpotCount();
+    queue.setAttribute('aria-label', `Wartende Boote: ${waiting.length} von ${spots} Bojen belegt`);
+    queue.replaceChildren(
+      ...waiting.map((b) =>
+        el(
+          'button',
+          {
+            type: 'button',
+            class: 'hud-btn boat-chip',
+            'data-boat': String(b.id),
+            'data-size': b.size,
+            'aria-pressed': sim.selected === b.id ? 'true' : 'false',
+            title: `${b.name}, ${meters(b.length)} lang`,
+            onclick: () => {
+              if (sim.selected === b.id) {
+                sim.select(null);
+                closeCard();
+              } else {
+                sim.select(b.id);
+                openCard('boat');
+              }
+            },
+          },
+          `${b.size} ${b.name}`,
+        ),
+      ),
+    );
+  }
+
+  function boatCard(sim, st) {
+    const b = st.boats[sim.selected];
+    if (!b || b.status !== 'waiting') return closeCard();
+    const fitting = sim.fittingBerths(b.id);
+    const wishes = b.wishes.length ? b.wishes.map((w) => WISH_LABEL[w] ?? w).join(', ') : 'keine';
+    fill(card,
+      el('h2', {}, b.name),
+      el(
+        'p',
+        {},
+        `Größe ${b.size} · ${meters(b.length)} lang, ${meters(b.beam)} breit, Tiefgang ${meters(b.draft)} · ${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}`,
+      ),
+      el('p', {}, `Wünsche: ${wishes}`),
+      el('p', {}, fitting.length ? `${fitting.length} passende Plätze frei. Platz antippen oder:` : 'Gerade ist kein passender Platz frei.'),
+      note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
+      el(
+        'div',
+        { class: 'card-actions' },
+        el('button', { type: 'button', class: 'hud-btn', disabled: !fitting.length, onclick: () => sim.autoEnter(b.id) }, 'Automatisch einfahren'),
+        el('button', { type: 'button', class: 'hud-btn', onclick: () => { sim.dismiss(b.id); closeCard(); } }, 'Abweisen'),
+        el('button', { type: 'button', class: 'hud-btn', onclick: () => { sim.select(null); closeCard(); } }, 'Schließen'),
+      ),
+    );
+  }
+
+  function buildCard(sim, st) {
+    const rows = [];
+    for (const key of Object.keys(sim.ctx.rules.facilities)) {
+      const u = sim.facilityUpgrade(key);
+      if (!u || u.reason === 'max' || u.reason === 'stage') continue;
+      const label = `${FACILITY_LABEL[key] ?? key} Stufe ${u.level}`;
+      rows.push(
+        el(
+          'button',
+          { type: 'button', class: 'hud-btn', disabled: !u.available, title: u.available ? '' : REASON_LABEL[u.reason], onclick: () => act(sim.upgradeFacility(key)) },
+          `${label} · ${euro(u.cost)}`,
+        ),
+      );
+    }
+    const office = sim.ctx.rules.office;
+    const next = st.office + 1;
+    if (office.cost[next] && st.stage >= office.fromStage[next]) {
+      rows.push(
+        el(
+          'button',
+          { type: 'button', class: 'hud-btn', disabled: st.money < office.cost[next], onclick: () => act(sim.upgradeOffice()) },
+          `Hafenbüro Stufe ${next} · ${euro(office.cost[next])}`,
+        ),
+      );
+    }
+    const adv = sim.canAdvanceStage();
+    let stageLine = null;
+    if (adv.goal) {
+      stageLine = el(
+        'p',
+        {},
+        `Nächste Ausbaustufe: ${adv.guests} von ${adv.goal.guests} Gästen, Ruf ${num1(adv.reputation)} von ${num1(adv.goal.reputation)}, ${euro(adv.goal.cost)}`,
+      );
+      rows.push(
+        el('button', { type: 'button', class: 'hud-btn', disabled: !adv.ok, onclick: () => act(sim.advanceStage()) }, `Hafen erweitern · ${euro(adv.goal.cost)}`),
+      );
+    }
+    fill(card,
+      el('h2', {}, 'Bauen'),
+      stageLine,
+      note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
+      el('div', { class: 'card-actions' }, ...rows, el('button', { type: 'button', class: 'hud-btn', onclick: closeCard }, 'Schließen')),
+    );
+  }
+
+  function act(result) {
+    note = result?.ok ? '' : REASON_LABEL[result?.reason] ?? (result?.missing ? 'Ziel noch nicht erreicht.' : '');
+    render();
+  }
+
+  function render() {
+    scheduled = false;
+    const sim = game.sim;
+    const st = sim?.state;
+    if (!st) return;
+    // Bauen und Pause funktionieren, sobald die Regeln laufen
+    if (buildBtn) buildBtn.hidden = false;
+    const pauseBtn = document.getElementById('btn-pause');
+    if (pauseBtn) pauseBtn.hidden = false;
+    renderStats(sim, st);
+    renderQueue(sim);
+    if (cardMode === 'boat') boatCard(sim, st);
+    else if (cardMode === 'build') buildCard(sim, st);
+  }
+
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(render);
+  }
+
+  buildBtn?.addEventListener('click', () => (cardMode === 'build' ? closeCard() : openCard('build')));
+  game.on('sim:change', schedule);
+  game.on('sim:select', ({ boatId }) => {
+    note = '';
+    if (boatId != null) openCard('boat');
+    else if (cardMode === 'boat') closeCard();
+    schedule();
+  });
+  game.on('sim:moored', ({ boatId }) => {
+    if (cardMode === 'boat' && game.sim?.selected == null) closeCard();
+    schedule();
+    return boatId;
+  });
+  game.on('sim:assignFailed', ({ reason }) => {
+    note = REASON_LABEL[reason] ?? '';
+    if (cardMode === 'boat') schedule();
+  });
+  game.on('ui:cancel', () => {
+    game.sim?.select(null);
+    closeCard();
+  });
+  game.on('spielstand-geladen', () => {
+    closeCard();
+    schedule();
+  });
+  game.on('ready', () => {
+    updateSaveBtn();
+    schedule();
+  });
+  updateSaveBtn();
+  // Die Uhr läuft auch ohne Ereignis weiter (Tagesbalken)
+  game.onTick(() => {
+    if (game.sim?.state) day.dataset.progress = String(Math.round((game.sim.state.clock / (game.sim.ctx.rules.dayLength + game.sim.ctx.rules.eveningLength)) * 100));
+  });
+  schedule();
+}
