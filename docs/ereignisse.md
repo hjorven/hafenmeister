@@ -18,6 +18,10 @@ Kreuzfahrtschiffe, Marinebesuche und Ausflugsfahrten plant das Services-Modul al
 
 **Jahreslauf:** 30 Saisontage (1 bis 8 Frühling, 9 bis 22 Sommer, 23 bis 30 Herbst), danach 3 Tage Winter mit Schnee, ohne Ereignisse, mit wenig Ankünften (`winter: true` in den Modifikatoren).
 
+## Was schon wirkt
+
+Sichtbar sind Wetter, Ankündigungen, Wetterbericht und Winter, sobald `main.js` das Modul lädt (Ersatzuhr). Die Wirkung auf Ankünfte, Liegezeit und Einnahmen greift, sobald `sim.js` `game.events.modifiers()` abfragt.
+
 ## Dateien
 
 | Datei | Inhalt |
@@ -37,7 +41,7 @@ Kreuzfahrtschiffe, Marinebesuche und Ausflugsfahrten plant das Services-Modul al
 | Ereignis | Von | Bedeutung |
 |---|---|---|
 | `day:start` `{ day, stage }` | Sim | neuer Spieltag. Solange niemand das sendet, zählt eine Ersatzuhr (120 s pro Tag) |
-| `stage` `{ stage }` | Sim | neue Ausbaustufe |
+| `stufe` Zahl 1 bis 6 | Sim | neue Ausbaustufe, sonst wird `game.state.stufe` gelesen |
 | `build` `{ id, level }` | Bauen | z. B. `segelclub`, `seenotretter` |
 | `phase` `'tag' \| 'abend'` | Sim | Tageszeit, alternativ `body[data-phase]` |
 | `game.services.effekte()` | Services | `freischalten` mit `'regatta'`, `sturmschutz` 0 bis 1, `regatta`, `hafenfest` als Faktoren |

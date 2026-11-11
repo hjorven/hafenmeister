@@ -3,7 +3,7 @@
 //
 // Eingänge (von der Sim und vom Bauen):
 //   game.emit('day:start', { day, stage })   neuer Spieltag
-//   game.emit('stage', { stage })            neue Ausbaustufe
+//   game.emit('stufe', 1..6)                 neue Ausbaustufe (auch 'stage'), sonst game.state.stufe
 //   game.emit('build', { id, level })        Bauwerk gebaut oder ausgebaut (z. B. 'mole', 'seenotretter')
 //   game.emit('phase', 'tag' | 'abend')      Tageszeit (alternativ body[data-phase])
 // Ausgänge:
@@ -42,7 +42,7 @@ export function init(game) {
   const seed = (game.state?.seed ?? Math.floor(Math.random() * 2 ** 31)) >>> 0;
   const scheduler = createScheduler({ seed });
 
-  let stage = game.state?.stage ?? 1;
+  let stage = game.state?.stufe ?? game.state?.stage ?? 1;
   const buildings = { ...(game.state?.buildings ?? {}) };
   let external = false;     // true, sobald die Sim 'day:start' sendet
   let today = 0;
@@ -140,14 +140,17 @@ export function init(game) {
 
   game.on('day:start', (d) => {
     external = true;
-    if (d && typeof d.stage === 'number') stage = d.stage;
+    const s = d?.stufe ?? d?.stage;
+    if (typeof s === 'number') stage = s;
     const day = typeof d === 'number' ? d : d?.day;
     if (typeof day === 'number') newDay(day);
   });
-  game.on('stage', (d) => {
-    const s = typeof d === 'number' ? d : d?.stage;
+  const onStage = (d) => {
+    const s = typeof d === 'number' ? d : (d?.stufe ?? d?.stage);
     if (typeof s === 'number') { stage = s; scheduler.setStage(s); }
-  });
+  };
+  game.on('stufe', onStage);   // Name laut docs/grundgeruest.md
+  game.on('stage', onStage);
   game.on('build', (d) => {
     if (d?.id) { buildings[d.id] = d.level ?? 1; scheduler.setBuilding(d.id, buildings[d.id]); }
   });
