@@ -10,6 +10,7 @@ import { addPlaceholderWorld } from './render/placeholder.js';
 const MODULES = [
   './render/landscape.js',
   './render/services.js',
+  './render/buildings.js',
   './render/boats/s.js',
   './render/boats/m.js',
   './render/boats/l.js',

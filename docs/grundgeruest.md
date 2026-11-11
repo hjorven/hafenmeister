@@ -17,6 +17,7 @@ Stand: 11.11.2026. Das Spiel liegt in `web/` und wird ohne Build-Schritt auf Git
 ```
 web/js/render/landscape.js
 web/js/render/services.js
+web/js/render/buildings.js
 web/js/render/boats/s.js
 web/js/render/boats/m.js
 web/js/render/boats/l.js
@@ -49,6 +50,16 @@ Jede Datei exportiert `init(game)` (oder `default`, oder eine Funktion, deren Na
 | `game.setPaused(true/false)`, `game.paused`, `game.speed`, `game.time` | Pause, Vorspulen, Spielzeit |
 
 **Ereignisse vom Grundgerüst:** `tap` mit `{ x, y, world, pick }`, `pause`, `resize`, `ready` (alle Module geladen).
+
+**Spielereignisse** (gesendet von den Spielregeln, `state.js` und `sim.js`):
+
+| Ereignis | Daten | Bedeutung |
+|---|---|---|
+| `stufe` | Zahl 1 bis 6 | Ausbaustufe hat sich geändert, auch einmal direkt nach dem Laden |
+| `region` | `'ostsee'`, `'daenemark'`, `'schweden'`, `'nordsee'` | Hafenregion, auch einmal direkt nach dem Laden |
+| `phase` | `'tag'` oder `'abend'` | Tageszeit, setzt auch `body[data-phase]` |
+
+Der aktuelle Stand steht in `game.state.stufe` und `game.state.region` (Besitzer: Spielregeln-Thread). Module, die nach dem Laden starten, lesen diese Felder statt auf das Ereignis zu warten.
 
 **Absichten aus den Eingabe-Modulen** (`input-pc.js`, `input-touch.js`). Sie werden per `game.emit` gesendet, `js/ui/hud.js` und die Spielregeln hören darauf:
 
