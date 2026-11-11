@@ -18,58 +18,40 @@ Safari auf iPhone und iPad löscht alles, was eine Seite im Browser gespeichert 
 | `web/icons/` | `icon.svg` (Vorlage), PNG in 192 und 512, `icon-maskable-512.png` für Android, `apple-touch-icon.png` (180) für iOS |
 | `web/js/save/storage.js` | Speichern, Laden, Sicherung des vorigen Stands, Export und Import, Versionsnummer und Umbau alter Stände |
 | `web/js/save/pwa.js` | Service Worker anmelden, Update melden, Installation anbieten, Erkennung iOS und App-Modus |
+| `web/js/save/index.js` | Einstieg für den Modul-Lader, `game.spielstand` |
 | `web/js/save/save-panel.js` | Fertiges Fenster "Spielstand" (Sichern, Laden, Installieren) und Erinnerung für Safari |
 | `tests/speichern.test.mjs` | Tests für `storage.js` |
 
 ## Einbindung (für das Grundgerüst)
 
-In `web/index.html` im `<head>`:
+`web/js/save/index.js` ist ein Modul für den Modul-Lader. In `web/js/main.js` kommt in die Liste `MODULES` eine Zeile:
+
+```js
+  './save/index.js',
+```
+
+Das reicht. `init(game)` meldet den Service Worker an, ergänzt fehlende Manifest- und Icon-Links im `<head>` und hängt `game.spielstand` an:
+
+| Aufruf | Ergebnis |
+|---|---|
+| `game.spielstand.speichern(zustand)` | speichert, ohne Argument `game.state`; `true` oder `false` |
+| `game.spielstand.laden()` | `{ game, savedAt, ausSicherung }` oder `null` |
+| `game.spielstand.vorhanden()` | `true`, wenn ein Stand im Browser liegt |
+| `game.spielstand.loeschen()` | löscht Stand und Sicherung (neues Spiel) |
+| `game.spielstand.oeffnen()` | Fenster "Spielstand" (für einen Menüknopf der Oberfläche) |
+
+Ereignis: Nach einem Import wird `game.state` ersetzt und `spielstand-geladen` mit dem neuen Zustand gesendet. `state.js` und die Oberfläche bauen darauf neu auf.
+
+Automatisch gespeichert wird `game.state`, wenn die Seite verlassen oder das Handy gesperrt wird. Das Speichern nach jedem Abend ruft `state.js` selbst auf.
+
+Empfohlen in `web/index.html` im `<head>`, damit iOS die Angaben schon beim ersten Laden sieht (sonst ergänzt `index.js` sie):
 
 ```html
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#1f5f8b">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Hafenmeister">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 ```
-
-In `web/js/main.js`:
-
-```js
-import { startPwa } from './save/pwa.js';
-import { saveGame, loadGame, requestPersistentStorage } from './save/storage.js';
-import { openSavePanel, showExportReminderIfDue } from './save/save-panel.js';
-
-// Laden: geladen.game ist genau das Objekt, das vorher an saveGame ging.
-const geladen = loadGame();            // null, wenn es noch keinen Stand gibt
-let state = geladen ? geladen.game : neuesSpiel();
-
-// Nach jedem Abend (und beim Verlassen der Seite) speichern:
-saveGame(state);
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') saveGame(state);
-});
-
-// Service Worker und Updates. apply() lädt neu, darum vorher speichern.
-startPwa({
-  onUpdate: (apply) => zeigeHinweis('Neue Version verfügbar', () => { saveGame(state); apply(); }),
-});
-requestPersistentStorage();
-
-// Menüpunkt "Spielstand":
-menuSpielstand.onclick = () => openSavePanel({
-  getGame: () => state,
-  onImport: (game) => { state = game; neuZeichnen(); },
-});
-
-// Einmal nach dem Start: Erinnerung im Safari-Tab, wenn 5 Tage nicht gesichert.
-showExportReminderIfDue({ getGame: () => state });
-```
-
-`neuesSpiel`, `zeigeHinweis`, `menuSpielstand` und `neuZeichnen` sind Platzhalter für das, was Grundgerüst und Oberfläche bereitstellen.
 
 ## Regeln für den Spielzustand
 

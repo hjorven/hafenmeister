@@ -162,3 +162,20 @@ export function showExportReminderIfDue({ getGame, nachTagen = 5 }) {
   document.body.appendChild(bar);
   return true;
 }
+
+/**
+ * Hinweis "Neue Version verfügbar". apply() speichert und lädt neu.
+ * Wer klickt "Später", bekommt die neue Version beim nächsten Start.
+ */
+export function showUpdateBanner(apply) {
+  if (document.querySelector('.hm-banner[data-art="update"]')) return;
+  ensureStyle();
+  const bar = el('div', { className: 'hm-banner', role: 'status' });
+  bar.dataset.art = 'update';
+  const ok = el('button', { type: 'button' }, 'Neu laden');
+  const zu = el('button', { type: 'button', className: 'zu' }, 'Später');
+  ok.addEventListener('click', () => { bar.remove(); apply(); });
+  zu.addEventListener('click', () => bar.remove());
+  bar.append(el('span', {}, 'Eine neue Version des Spiels ist da.'), ok, zu);
+  document.body.appendChild(bar);
+}
