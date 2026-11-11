@@ -19,6 +19,7 @@ const MODULES = [
   './ui/hud.js',
   './audio/audio.js',
   './state.js',
+  './save/index.js',
 ];
 
 async function loadModules(game) {

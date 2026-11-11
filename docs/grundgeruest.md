@@ -26,6 +26,7 @@ web/js/ui/input-touch.js
 web/js/ui/hud.js
 web/js/audio/audio.js
 web/js/state.js
+web/js/save/index.js
 ```
 
 Jede Datei exportiert `init(game)` (oder `default`, oder eine Funktion, deren Name mit `init` beginnt). Wer eine weitere Datei braucht, meldet sie beim Grundgerüst an, damit sie in die Liste `MODULES` in `main.js` kommt.
