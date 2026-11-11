@@ -328,7 +328,7 @@ Ein Modell ist eine feste Kombination: ein Rumpf, ein Aufbau, ein Rigg, zwei bis
 
 - **Stege:** Die Tabelle mit vier Stegstufen entfällt. Jeder Ausbau ist ein eigenes Bauprojekt, zum Beispiel „Steg A verlängern", „T-Kopf an Steg B", „Stichsteg an C", „Gabelung an D".
 - **Große Bauprojekte:** Durchstich (Stufe 3) und Außenhafen (Stufe 5) ersetzen die Mole mit Leuchtfeuer. Sie sind teuer und schalten jeweils eine neue Bootsgröße frei.
-- **Wirtschaft:** 94 statt 54 Liegeplätze. Preise, Ziele und Besucherzahlen müssen neu durchgerechnet werden, `skripte/balance.py` passt noch zum alten Stand.
+- **Wirtschaft:** 94 statt 54 Liegeplätze. Preise, Ziele und Besucherzahlen stehen in `web/js/data/economy.js`, durchgerechnet mit `tools/balance.mjs` (siehe [balancing.md](balancing.md)).
 - **Kamera:** Der Ausschnitt wächst nach Norden: erst nur das Seeufer, dann See und Nehrung, am Ende bis zur Ostsee.
 - **Automatik:** Bei 94 Plätzen ist das Hafenbüro mit automatischer Zuweisung ab Stufe 3 Pflicht.
 
