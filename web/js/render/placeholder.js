@@ -27,6 +27,7 @@ export function addPlaceholderWorld(game, size) {
   const wood = new THREE.MeshLambertMaterial({ color: '#e2b67e' });
   const deck = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.25, 18), wood);
   deck.position.set(-60 * U, 0.6, -9);
+  deck.userData.pick = { type: 'jetty', id: 'A' };
   group.add(deck);
   const pile = new THREE.CylinderGeometry(0.15, 0.15, 1.6, 6);
   const pileMat = new THREE.MeshLambertMaterial({ color: '#5c5460' });
@@ -41,6 +42,7 @@ export function addPlaceholderWorld(game, size) {
   // Ein Boot als Wuerfel-Platzhalter, das langsam vor dem Steg kreuzt
   const boat = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.8, 4), new THREE.MeshLambertMaterial({ color: '#fffcf6' }));
   boat.position.set(-60 * U + 8, 0.4, -14);
+  boat.userData.pick = { type: 'boat', id: 'platzhalter' };
   group.add(boat);
   game.onTick((dt) => {
     boat.position.x = -60 * U + 8 + Math.sin(game.time * 0.3) * 6;

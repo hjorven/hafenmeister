@@ -1,6 +1,6 @@
 // Gemeinsame Zeiger-Steuerung fuer Maus, Touch und Stift (Pointer Events).
 // Ein Finger ziehen: Karte verschieben. Zwei Finger: zoomen und verschieben. Mausrad: zoomen.
-// Kurz antippen ohne Bewegung: game.emit('tap', { x, y, world }).
+// Kurz antippen ohne Bewegung: game.emit('tap', { x, y, world, pick }).
 // Geraetespezifisches (Tastatur, Rechtsklick usw.) kommt in eigene Module, z. B. js/ui/input-pc.js.
 
 const TAP_SLOP = 10;        // Pixel, ab denen aus einem Tipp ein Ziehen wird
@@ -60,7 +60,7 @@ export function initInput(game) {
     pointers.delete(e.pointerId);
     if (e.type === 'pointerup' && tapCandidate && tapCandidate.id === e.pointerId &&
         performance.now() - tapCandidate.t < TAP_TIME) {
-      game.emit('tap', { x: p.x, y: p.y, world: cam.screenToWorld(p.x, p.y) });
+      game.emit('tap', { x: p.x, y: p.y, world: cam.screenToWorld(p.x, p.y), pick: game.pick(p.x, p.y) });
     }
     tapCandidate = null;
     if (pointers.size < 2) { pinchDist = 0; pinchMid = null; }
