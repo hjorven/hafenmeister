@@ -24,7 +24,7 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     typeById: Object.fromEntries(types.map((t) => [t.id, t])),
     berths: list,
     berthById: Object.fromEntries(list.map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], evening: [], night: [] },
+    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [] },
   };
 }
 
@@ -34,6 +34,8 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
  *   arrival    fn({ state, ctx, boat }) darf das neue Boot ändern (zum Beispiel Wünsche)
  *   evening    fn({ state, ctx, boats, addIncome, events }) am Abend nach dem Hafengeld
  *   night      fn({ state, ctx, events }) nach der Abreise, vor dem neuen Tag
+ *   fit        fn({ state, ctx, boat, berth }) -> Grund (Text) oder null; zusätzliche Passregel
+ *              für freie Plätze (zum Beispiel Dauerplätze, deren Boot gerade draußen ist)
  * Gibt eine Funktion zum Aushängen zurück.
  */
 export function addHook(ctx, name, fn) {
@@ -263,6 +265,15 @@ export function berthHas(state, ctx, berth, prop) {
   return false;
 }
 
+/** Zusätzliche Passregeln aus dem Hook 'fit'. Gibt den ersten Grund zurück oder null. */
+export function hookWhyNotFit(state, ctx, boat, berth) {
+  for (const fn of ctx.hooks.fit || []) {
+    const why = fn({ state, ctx, boat, berth });
+    if (why) return why;
+  }
+  return null;
+}
+
 function berthScore(state, ctx, boat, berth) {
   // Höher ist besser: erfüllte Platz-Wünsche zuerst, dann Komfort, dann möglichst knapper Platz,
   // damit große Plätze für große Boote frei bleiben.
@@ -277,7 +288,7 @@ export function fittingBerths(state, ctx, boatId) {
   const boat = state.boats[boatId];
   if (!boat) return [];
   return availableBerths(state, ctx)
-    .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage))
+    .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
     .sort((a, b) => berthScore(state, ctx, boat, b) - berthScore(state, ctx, boat, a))
     .map((b) => b.id);
 }
@@ -462,7 +473,7 @@ export function assign(state, ctx, boatId, berthId) {
   if (!boat || boat.status !== 'waiting') return { ok: false, reason: 'notWaiting', events };
   if (!berth || !berthAvailable(state, berth)) return { ok: false, reason: 'noBerth', events };
   if (!isFree(state, berthId)) return { ok: false, reason: 'occupied', events };
-  const why = whyNotFit(boat, berth, ctx.rules, state.stage);
+  const why = whyNotFit(boat, berth, ctx.rules, state.stage) || hookWhyNotFit(state, ctx, boat, berth);
   if (why) return { ok: false, reason: why, events };
   moor(state, ctx, boat, berthId, events);
   return { ok: true, events };
