@@ -77,8 +77,8 @@ function boot() {
     canvas,
     bounds: WORLD,
     // Startansicht: Stufe 1, Steg A am Suedufer des Sees
-    // Steg A mit etwas Wasser drumherum, passt im Hoch- und Querformat
-    home: { rect: { minX: -60 * U - 10, maxX: -60 * U + 12, minZ: -24, maxZ: 3 } },
+    // Steg A (harbor.js: x um -62, z 0 bis -20) und die Wartebojen (z um -33), passt im Hoch- und Querformat
+    home: { rect: { minX: -76, maxX: -44, minZ: -40, maxZ: 6 } },
   });
   window.hafenmeister = game;   // zum Ausprobieren in der Browser-Konsole
 
