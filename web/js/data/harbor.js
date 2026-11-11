@@ -3,7 +3,8 @@
 // Nicht von Hand aendern, sondern das Layout in der Zeichnung aendern und neu exportieren:
 //   python3 skripte/liegeplaetze_export.py
 //
-// Koordinaten in Planeinheiten (1 Einheit = 0,625 m), x nach Osten, y nach Norden.
+// Koordinaten in Planeinheiten (1 Einheit = 0,62 m, wie in web/js/main.js), x nach Osten,
+// y nach Norden.
 // plaetze[]: ein Eintrag je Liegeplatz ueber alle Stufen. Liegt ein Platz in zwei Stufen an
 //   derselben Stelle, behaelt er seine id. stufen = in welchen Stufen es ihn gibt.
 //   lage[n]     [x, y, richtung] in Stufe n: Mitte des Platzes und Grad, wohin der Bug zeigt
@@ -21,8 +22,9 @@
 //   Linie ist die Kante, an der die Schiffe liegen.
 // stufen[n].dienste[]: Plaetze fuer Dienste (Tankstelle, Seenotretter), keine Liegeplaetze.
 //
-// 3D: Die Daten liegen in der Wasserebene (Hoehe 0 = Wasserlinie). In einer 3D-Szene mit
-// y nach oben gilt: 3D-x = x, 3D-z = -y, Drehung um die Hochachse = richtung.
+// 3D: Die Daten liegen in der Wasserebene (Hoehe 0 = Wasserlinie). In der 3D-Szene des
+// Grundgeruests (Meter, y nach oben, Norden = -z) gilt: 3D-x = x * 0.62, 3D-z = -y * 0.62,
+// Drehung um die Hochachse = richtung in Grad (gegen den Uhrzeigersinn von oben gesehen).
 // Erweiterbar: neue Platzarten (z. B. Kreuzfahrtanleger) bekommen eine neue art und Klasse,
 // neue Felder werden nur angehaengt; format zaehlt hoch, wenn sich Bedeutungen aendern.
 
@@ -30,7 +32,7 @@ export const HAFEN = {
  "format": 1,
  "quelle": "skripte/konzeptbilder/hafen_von_oben.py",
  "einheiten": {
-  "meterProEinheit": 0.625,
+  "meterProEinheit": 0.62,
   "x": "nach Osten",
   "y": "nach Norden",
   "wasserlinie": 0,
