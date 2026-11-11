@@ -18,6 +18,7 @@ Geplant für GitHub Pages, der kleine Online-Teil läuft über Supabase.
 | [docs/grundgeruest.md](docs/grundgeruest.md) | Technik: Spielobjekt, Module, Koordinaten, Dateibesitz |
 | [web](web) | Das Spiel, wird auf GitHub Pages veröffentlicht |
 | [docs/hafen-und-schiffe.md](docs/hafen-und-schiffe.md) | Katalog: Hafen von oben in fünf Stufen, Liegeplätze, Einlaufen, 16 Schiffsarten mit 80 Modellen |
+| [docs/vorbilder.md](docs/vorbilder.md) | Vergleich mit 15 echten Häfen an Ostsee und Nordsee anhand von Satellitenbildern, fehlende Elemente, Gebäudeformen |
 | [docs/stile](docs/stile/README.md) | Zehn Stile im Vergleich, je Stufe 1 und Maximalstufe |
 | [skripte](skripte) | Zeichenskripte für die Vorschauen und den Hafen von oben, dazu eine grobe Balancing-Simulation |
 
