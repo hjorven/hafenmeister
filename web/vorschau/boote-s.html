@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Boote S</title>
+  <style>
+    :root { --bg: #62b4c2; --panel: rgba(255, 255, 255, 0.92); --ink: #2f3e57; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, sans-serif; overflow: hidden; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+    #panel { position: fixed; left: 12px; top: 12px; background: var(--panel); border-radius: 10px; padding: 10px 12px; max-width: calc(100vw - 48px); box-shadow: 0 2px 10px rgba(0,0,0,.15); }
+    #panel h1 { font-size: 15px; margin: 0 0 6px; }
+    #panel label { display: inline-flex; gap: 4px; align-items: center; margin-right: 10px; white-space: nowrap; }
+    #panel button { font: inherit; padding: 4px 10px; border-radius: 6px; border: 1px solid #9fb3c8; background: #fff; color: var(--ink); cursor: pointer; }
+    #info { margin-top: 6px; min-height: 1.4em; }
+    .tag { position: fixed; transform: translate(-50%, 0); font-size: 11px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.6); pointer-events: none; white-space: nowrap; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="panel">
+    <h1>Schiffe der Größe S</h1>
+    <label><input type="checkbox" id="sails"> Segel gesetzt</label>
+    <label><input type="checkbox" id="moving"> In Fahrt</label>
+    <label><input type="checkbox" id="names" checked> Namen</label>
+    <button type="button" id="palette">Farbe wechseln</button>
+    <div id="info">Ziehen dreht, Mausrad oder zwei Finger zoomen. Boot antippen zeigt Daten.</div>
+  </div>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { MODELS, getType } from '../js/data/boats/s.js';
+    import { buildBoat, setSails, animateBoat } from '../js/render/boats/s.js';
+
+    const canvas = document.getElementById('c');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color('#62b4c2');
+
+    const water = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshLambertMaterial({ color: '#6cc0cc' }));
+    water.rotation.x = -Math.PI / 2;
+    water.receiveShadow = true;
+    scene.add(water);
+    scene.add(new THREE.HemisphereLight('#ffffff', '#5a8fa0', 1.6));
+    const sun = new THREE.DirectionalLight('#fff6e8', 2.2);
+    sun.position.set(-20, 40, 25);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 120 });
+    scene.add(sun);
+
+    // Raster: Zeilen = Arten, Spalten = Modelle
+    const boats = [];
+    let palette = 0;
+    const tags = [];
+    function build() {
+      for (const b of boats) scene.remove(b);
+      boats.length = 0;
+      tags.forEach((t) => t.remove());
+      tags.length = 0;
+      MODELS.forEach((m) => {
+        const row = Number(m.typeId.slice(1)) - 1;
+        const col = Number(m.id.split('-')[1]) - 1;
+        const g = buildBoat(m, { palette, sails: document.getElementById('sails').checked, id: m.id });
+        g.position.set(col * 8 - 16, 0, row * 6 - 12);
+        scene.add(g);
+        boats.push(g);
+        const tag = document.createElement('div');
+        tag.className = 'tag';
+        tag.textContent = m.name;
+        document.body.appendChild(tag);
+        tags.push(tag);
+      });
+    }
+    build();
+
+    const aspect = () => innerWidth / innerHeight;
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 500);
+    camera.position.set(-30, 38, 42);
+    const controls = new OrbitControls(camera, canvas);
+    controls.target.set(0, 0, 0);
+    controls.enableDamping = true;
+    let view = 17;
+    function resize() {
+      renderer.setSize(innerWidth, innerHeight, false);
+      const a = aspect();
+      const half = a < 1 ? view / a : view;
+      camera.left = -half * a; camera.right = half * a; camera.top = half; camera.bottom = -half;
+      camera.updateProjectionMatrix();
+    }
+    addEventListener('resize', resize);
+    resize();
+
+    document.getElementById('sails').addEventListener('change', (e) => boats.forEach((b) => setSails(b, e.target.checked)));
+    document.getElementById('palette').addEventListener('click', () => { palette++; build(); });
+    document.getElementById('names').addEventListener('change', (e) => tags.forEach((t) => (t.style.display = e.target.checked ? '' : 'none')));
+
+    const ray = new THREE.Raycaster();
+    canvas.addEventListener('click', (e) => {
+      ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1), camera);
+      const hit = ray.intersectObjects(boats, true)[0];
+      if (!hit) return;
+      let o = hit.object;
+      while (o && !o.userData.pick) o = o.parent;
+      if (!o) return;
+      const m = MODELS.find((x) => x.id === o.userData.id);
+      document.getElementById('info').textContent =
+        `${m.id} ${m.name} (${getType(m.typeId).name}): ${m.length} m lang, ${m.beam} m breit, Tiefgang ${m.draft} m. ${m.shape}`;
+    });
+
+    const clock = new THREE.Clock();
+    const v = new THREE.Vector3();
+    function frame() {
+      const t = clock.getElapsedTime();
+      const moving = document.getElementById('moving').checked;
+      boats.forEach((b, i) => {
+        animateBoat(b, t, { speed: moving ? 1.5 : 0, moored: !moving });
+        // einfaches Schaukeln nur für die Vorschau (im Spiel macht das boat-anim.js)
+        b.position.y = Math.sin(t * 1.3 + i) * 0.03;
+        b.rotation.x = Math.sin(t * 0.9 + i) * 0.03;
+        b.rotation.z = Math.sin(t * 1.1 + i * 1.7) * 0.015;
+        v.copy(b.position).setY(-0.6).project(camera);
+        const tag = tags[i];
+        tag.style.left = `${(v.x + 1) / 2 * innerWidth}px`;
+        tag.style.top = `${(1 - v.y) / 2 * innerHeight + 6}px`;
+      });
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(frame);
+    }
+    frame();
+    // Nahansicht einer Art oder eines Modells, z.B. vorschau.focus('S4') oder vorschau.focus('S4-2', 4)
+    function focus(id, size) {
+      const sel = boats.filter((b) => b.userData.id === id || b.userData.id.startsWith(id + '-'));
+      if (!sel.length) return;
+      const box = new THREE.Box3();
+      sel.forEach((b) => box.expandByPoint(b.position));
+      box.expandByScalar(sel[0].userData.length * 0.6);
+      const c = box.getCenter(new THREE.Vector3());
+      c.y = sel.length === 1 ? Math.min(1.5, sel[0].userData.airDraft * 0.3) : 0;
+      const off = camera.position.clone().sub(controls.target);
+      controls.target.copy(c);
+      camera.position.copy(c).add(off);
+      view = size ?? Math.max(3, box.getSize(new THREE.Vector3()).length() * 0.45);
+      resize();
+    }
+    const q = new URLSearchParams(location.search).get('nur');
+    if (q) focus(q);
+    window.vorschau = { boats, scene, camera, renderer, setSails, focus };
+  </script>
+</body>
+</html>
