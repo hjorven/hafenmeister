@@ -64,7 +64,7 @@ Die Module werden parallel geladen, `init(game)` wird aber in der Reihenfolge de
 | Ereignis | Daten | Bedeutung |
 |---|---|---|
 | `stufe` | Zahl 1 bis 6 | Ausbaustufe hat sich geändert, auch einmal direkt nach dem Laden |
-| `region` | `'ostsee'`, `'daenemark'`, `'schweden'`, `'nordsee'` | Hafenregion, gesendet von `world/region.js` bei `ready` und beim Wechsel (siehe [regionen.md](regionen.md)) |
+| `region` | `'ostsee'` oder `'nordsee'` | Hafenregion, gesendet von `world/region.js` bei `ready` und beim Wechsel (siehe [regionen.md](regionen.md)) |
 | `pegel` | Meter um die Wasserlinie | Wasserstand, nur in der Nordsee (Gezeiten), von `world/region.js` |
 | `phase` | `'tag'` oder `'abend'` | Tageszeit, setzt auch `body[data-phase]` |
 
