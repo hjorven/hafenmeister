@@ -44,7 +44,9 @@ test('Obere und untere Leiste überdecken sich nicht', async ({ game }) => {
   const top = await page.locator('#hud-top').boundingBox();
   const bottom = await page.locator('#hud-bottom').boundingBox();
   test.skip(!top || !bottom, 'Leisten nicht vorhanden');
-  expect(top.y + top.height, 'Leisten ueberlappen').toBeLessThanOrEqual(bottom.y + 0.5);
+  const overlapX = Math.min(top.x + top.width, bottom.x + bottom.width) - Math.max(top.x, bottom.x);
+  const overlapY = Math.min(top.y + top.height, bottom.y + bottom.height) - Math.max(top.y, bottom.y);
+  expect(overlapX > 0.5 && overlapY > 0.5, 'Leisten ueberlappen').toBe(false);
 });
 
 test('Richtige Geräte-Weiche (Media Queries aus base.css)', async ({ game }, testInfo) => {

@@ -37,6 +37,13 @@ jobs:
         working-directory: .
         run: bash tools/check-pages.sh web
 
+      - name: Tests ohne Browser (node --test)
+        working-directory: .
+        run: |
+          shopt -s nullglob
+          dateien=(tests/*.test.mjs)
+          if [ ${#dateien[@]} -gt 0 ]; then node --test "${dateien[@]}"; else echo "Keine tests/*.test.mjs vorhanden."; fi
+
       - name: Abhängigkeiten installieren
         run: npm ci --no-audit --no-fund
 

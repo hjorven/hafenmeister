@@ -102,14 +102,26 @@ export function cameraState(page) {
   });
 }
 
-// Mitte der Spielflaeche, zwischen oberer und unterer Leiste
+// Freier Punkt auf der Spielflaeche, moeglichst nah an der Bildschirmmitte, an dem keine
+// Leiste oder Karte liegt (elementFromPoint trifft #stage). Klappt mit jedem Layout.
 export async function stageCenter(page) {
   return page.evaluate(() => {
-    const top = document.getElementById('hud-top')?.getBoundingClientRect();
-    const bottom = document.getElementById('hud-bottom')?.getBoundingClientRect();
-    const y0 = top ? top.bottom : 0;
-    const y1 = bottom ? bottom.top : innerHeight;
-    return { x: Math.round(innerWidth / 2), y: Math.round((y0 + y1) / 2) };
+    const stage = document.getElementById('stage');
+    const cx = innerWidth / 2, cy = innerHeight / 2;
+    let best = null;
+    for (let gy = 0.1; gy <= 0.9; gy += 0.05) {
+      for (let gx = 0.1; gx <= 0.9; gx += 0.05) {
+        const x = Math.round(innerWidth * gx), y = Math.round(innerHeight * gy);
+        // Ringsum 60 px Platz, damit Gesten nicht in eine Leiste laufen
+        const free = [[0, 0], [-60, 0], [60, 0], [0, -60], [0, 60]]
+          .every(([dx, dy]) => document.elementFromPoint(x + dx, y + dy) === stage);
+        if (!free) continue;
+        const d = Math.hypot(x - cx, y - cy);
+        if (!best || d < best.d) best = { x, y, d };
+      }
+    }
+    if (!best) throw new Error('Kein freier Punkt auf der Spielflaeche gefunden');
+    return { x: best.x, y: best.y };
   });
 }
 
