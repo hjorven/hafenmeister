@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#a8dadc">
+<title>Hafenmeister: Tablet-Prototyp</title>
+<!--
+  Klickbarer Prototyp der Tablet-Oberfläche.
+  Nutzt dieselben IDs und Klassen wie das Spiel (web/index.html, web/css/base.css,
+  web/css/ui-tablet.css) und, falls vorhanden, das Gestenmodul web/js/ui/input-touch.js
+  aus dem Handy-Thread. Ohne das Modul ist die Karte fest, alles andere geht.
+  Die Hafenkarte ist hier noch das 2D-Bild von Stufe 2. Im Spiel liegt an dieser Stelle die
+  3D-Szene mit orthografischer Kamera; view.zoom entspricht dann camera.zoom.
+  Alle Zahlen sind Platzhalter, es gibt keine Spielregeln.
+
+  Lokal testen (im Ordner hafenmeister):
+    python3 -m http.server 8000 --directory web
+  dann http://localhost:8000/prototyp/tablet.html öffnen.
+  Mit #abend am Ende der Adresse startet der Prototyp direkt am Abend (Kassierstrich testen).
+-->
+<style>
+  /* Minimale Basis, solange die gemeinsame Basis-CSS noch fehlt */
+  :root {
+    --hm-ink: #1d3557; --hm-ink-soft: #5c6f86; --hm-accent: #e63946; --hm-sea: #8ecfc9; --hm-ok: #2a9d8f;
+    --hm-safe-top: env(safe-area-inset-top, 0px); --hm-safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body.hm { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--hm-sea); color: var(--hm-ink); }
+  button { background: none; border: 0; }
+
+  #world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+  #world img { display: block; width: 1600px; height: 1150px; pointer-events: none; -webkit-user-drag: none; }
+  #marks { position: absolute; inset: 0; pointer-events: none; }
+  .mark {
+    position: absolute; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 800; font-size: 13px; color: #fff;
+    transition: transform .15s ease;
+  }
+  .mark.frei { background: rgba(42,157,143,.92); box-shadow: 0 0 0 4px rgba(255,255,255,.75); animation: puls 1.2s ease-in-out infinite; }
+  .mark.ziel { transform: scale(1.35); background: var(--hm-accent); animation: none; }
+  .mark.plus { background: var(--hm-ink); width: 40px; height: 40px; margin: -20px 0 0 -20px; font-size: 26px; box-shadow: 0 0 0 4px rgba(255,255,255,.8); }
+  .mark.muenze { background: #f4c542; color: #6b4e00; width: 34px; height: 34px; margin: -17px 0 0 -17px; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+  .mark.muenze.weg { transform: translateY(-40px) scale(.4); opacity: 0; transition: transform .35s ease, opacity .35s ease; }
+  .mark.neu { background: #fff; color: var(--hm-ink); box-shadow: 0 0 0 3px var(--hm-ink); }
+  @keyframes puls { 50% { transform: scale(1.12); } }
+
+  /* Ziehen eines Bootes aus der Einfahrt */
+  #ghost { position: fixed; z-index: 50; left: 0; top: 0; pointer-events: none; width: 72px; height: 44px; margin: -22px 0 0 -36px; opacity: .9; display: none; }
+  /* Kassierstrich */
+  #strich { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+
+  /* Sonne ziehen: Tagesbalken als Regler */
+  #day { position: relative; }
+  #day .sun {
+    position: absolute; top: 50%; width: 30px; height: 30px; margin: -3px 0 0 -15px;
+    left: calc(12px + (100% - 24px) * var(--day-frac, 0));
+    border-radius: 50%; background: #f4c542; box-shadow: 0 0 0 4px rgba(244,197,66,.3);
+    touch-action: none;
+  }
+  .hm[data-phase="abend"] #day .sun { background: #f4a261; }
+  .hm[data-phase="abend"] #stage::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(40,30,90,.28), rgba(240,120,60,.18));
+  }
+  .speed { position: absolute; right: 12px; top: -2px; font-size: .75rem; font-weight: 700; color: var(--hm-accent); }
+
+  #toast {
+    position: fixed; z-index: 60; left: 50%; top: calc(var(--hm-safe-top) + 92px); transform: translateX(-50%);
+    background: var(--hm-ink); color: #fff; padding: 10px 16px; border-radius: 12px; font-weight: 600;
+    opacity: 0; transition: opacity .2s ease; pointer-events: none; white-space: nowrap;
+  }
+  #toast.an { opacity: 1; }
+  .wish { display: inline-block; padding: 2px 4px; border-radius: 4px; background: #eef2f6; font-weight: 700; }
+  .wish.ok { background: #d5f0eb; color: #1f6f65; }
+  .opt { display: flex; gap: 8px; align-items: center; margin: 12px 0 0; font-size: .95rem; }
+  .opt input { width: 28px; height: 28px; }
+
+  /* Ohne Tablet-CSS (z. B. am PC zum Ansehen) trotzdem bedienbar bleiben */
+  #hint { position: fixed; left: 8px; bottom: 8px; font-size: 12px; color: var(--hm-ink-soft); }
+  @media (min-width: 600px) and (min-height: 500px) and (pointer: coarse),
+         (min-width: 600px) and (max-width: 1023px) and (min-height: 500px) { #hint { display: none; } }
+</style>
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/ui-tablet.css">
+</head>
+<body class="hm" data-phase="tag">
+
+<div id="stage" aria-label="Hafenkarte">
+  <div id="world"><img src="hafen-stufe-2.png" alt="Dorfhafen am See, Stufe 2"></div>
+  <canvas id="strich"></canvas>
+  <div id="marks"></div>
+</div>
+
+<header id="hud-top">
+  <div id="money" aria-label="Geld"><span>1.240</span>&nbsp;€</div>
+  <div id="rep" aria-label="Ruf">Ruf&nbsp;<span>3,5</span></div>
+  <div id="day" aria-label="Tag, Sonne ziehen zum Vorspulen">
+    <span>Tag <b>12</b> <small class="phase"></small></span>
+    <span class="day-bar"><i></i></span>
+    <span class="sun" role="slider" aria-label="Vorspulen" aria-valuemin="0" aria-valuemax="100"></span>
+    <span class="speed"></span>
+  </div>
+  <button id="btn-pause" aria-label="Pause und Einstellungen">
+    <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="4" y="3" width="5" height="16" rx="1.5" fill="currentColor"/><rect x="13" y="3" width="5" height="16" rx="1.5" fill="currentColor"/></svg>
+  </button>
+</header>
+
+<nav id="hud-bottom">
+  <ul id="queue" aria-label="Boote an der Einfahrt"></ul>
+  <button id="btn-build" aria-pressed="false">
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M15 4v22M4 15h22" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>
+    <span class="lbl">Bauen</span>
+  </button>
+</nav>
+
+<section id="card" hidden role="dialog" aria-modal="false" aria-labelledby="card-title">
+  <button class="card-close" aria-label="Schließen">&times;</button>
+  <h2 id="card-title"></h2>
+  <div class="card-body"></div>
+</section>
+
+<svg id="ghost" viewBox="0 0 72 44" aria-hidden="true"></svg>
+<div id="toast" role="status"></div>
+<div id="hint">Tablet-Layout greift ab 600 px Breite mit Touch oder unter 1024 px Breite.</div>
+
+<script type="module">
+// ---------------------------------------------------------------- Daten (Platzhalter)
+// Liegeplätze aus skripte/konzeptbilder/hafen_von_oben.py, Stufe 2, in Bildpixeln.
+// [Größe, x, y, Winkel, belegt im Bild]
+const RAW = [["S",528.7,910.2,-5.6,1],["S",527.5,897.6,-5.6,1],["S",526.3,885.0,-5.6,1],["S",525.0,872.4,-5.6,1],["S",523.8,859.8,-5.6,1],["S",522.6,847.2,-5.6,0],["S",521.3,834.6,-5.6,0],["S",479.3,808.4,170.5,1],["S",477.3,795.9,170.5,1],["S",516.9,802.1,-9.5,1],["S",514.8,789.6,-9.5,1],["M",620.7,906.2,-180.0,1],["M",620.7,889.8,-180.0,0],["M",620.7,873.3,-180.0,1],["M",620.7,856.9,-180.0,1],["M",620.7,840.4,-180.0,0],["M",620.7,823.9,-180.0,0],["M",620.7,807.5,-180.0,1],["M",620.7,791.0,-180.0,0],["M",671.4,906.2,0.0,1],["M",671.4,889.8,0.0,1],["M",671.4,873.3,0.0,1],["M",671.4,856.9,0.0,1],["M",671.4,840.4,0.0,1],["M",671.4,823.9,0.0,1],["M",671.4,807.5,0.0,1],["M",671.4,791.0,0.0,1],["M",619.7,752.1,-90.0,1],["M",670.3,750.8,-90.0,0],["M",439.7,885.0,-182.8,1]];
+const BERTHS = RAW.map(([size, x, y, a, belegt], i) => ({ id: 'p' + i, size, x: x - 6, y: y - 6, w: 12, h: 12, cx: x, cy: y, belegt: !!belegt }));
+const PLOTS = [
+  { id: 'b1', x: 770, y: 985, w: 24, h: 24, cx: 782, cy: 997 },
+  { id: 'b2', x: 360, y: 1000, w: 24, h: 24, cx: 372, cy: 1012 },
+  { id: 'b3', x: 845, y: 1030, w: 24, h: 24, cx: 857, cy: 1042 },
+];
+const BUILDINGS = [
+  { id: 'hm', name: 'Hafenmeister', text: 'Kassiert abends per Knopf alle Boote.', next: 'Hafenbüro', preis: 2000, x: 588, y: 973, w: 24, h: 24, cx: 600, cy: 985 },
+  { id: 'du', name: 'Kaltwasserdusche', text: 'Versorgt 6 Boote mit Dusche.', next: 'Duschhaus mit Warmwasser', preis: 700, x: 468, y: 1010, w: 24, h: 24, cx: 480, cy: 1022 },
+  { id: 'ki', name: 'Kiosk', text: 'Versorgt 8 Boote mit Essen.', next: 'Imbiss', preis: 1500, x: 684, y: 978, w: 24, h: 24, cx: 696, cy: 990 },
+];
+const BAUOPTIONEN = [['Toilettenhäuschen', 80], ['Kaltwasserdusche', 200], ['Kiosk', 500]];
+const SIZE_FITS = { S: ['S', 'M'], M: ['M'] };   // kleine Boote dürfen auf größere Plätze
+let queue = [
+  { id: 'q1', size: 'M', name: 'Jollenkreuzer', wishes: ['WC', 'Dusche'], col: '#ffffff' },
+  { id: 'q2', size: 'S', name: 'Holzjolle', wishes: ['WC'], col: '#f6d36b' },
+  { id: 'q3', size: 'S', name: 'Ruderboot', wishes: [], col: '#e76f51' },
+  { id: 'q4', size: 'M', name: 'Kajütmotorboot', wishes: ['Essen'], col: '#ffffff' },
+  { id: 'q5', size: 'S', name: 'Kanadier', wishes: ['Essen', 'WC'], col: '#2a9d8f' },
+];
+const WORLD = { w: 1600, h: 1150 };
+const HAFEN = { x: 330, y: 700, w: 600, h: 380 };   // Ausschnitt mit Stegen und Ufer
+
+// ---------------------------------------------------------------- Elemente
+const $ = (s) => document.querySelector(s);
+const body = document.body, stage = $('#stage'), world = $('#world'), marks = $('#marks');
+const queueEl = $('#queue'), card = $('#card'), toast = $('#toast'), ghost = $('#ghost');
+const strich = $('#strich'), sctx = strich.getContext('2d');
+let money = 1240, selected = null, buildMode = false, docked = [], coins = [];
+
+// ---------------------------------------------------------------- Kamera
+// Das Gestenmodul liefert Ansicht {x, y, zoom}: Weltpunkt in Bildschirmmitte und Maßstab.
+let cam;
+try {
+  const m = await import('../js/ui/input-touch.js');
+  cam = m.attachMapGestures(stage, {
+    minZoom: 0.35, maxZoom: 4, bounds: { x: 0, y: 260, w: WORLD.w, h: WORLD.h - 260 },
+    start: { x: HAFEN.x + HAFEN.w / 2, y: HAFEN.y + HAFEN.h / 2, zoom: 1 },
+    onChange: render, onTap: tapMap,
+  });
+  cam.pick = m.pickNearest; cam.haptic = m.haptic;
+} catch (err) {
+  // Ersatz ohne Gesten, falls input-touch.js fehlt
+  console.warn('input-touch.js fehlt, Karte ist fest', err);
+  const v = { x: HAFEN.x + HAFEN.w / 2, y: HAFEN.y + HAFEN.h / 2, zoom: 1 };
+  const r = () => stage.getBoundingClientRect();
+  cam = {
+    get view() { return v; },
+    worldToScreen: (x, y) => ({ x: (x - v.x) * v.zoom + r().width / 2, y: (y - v.y) * v.zoom + r().height / 2 }),
+    screenToWorld: (x, y) => ({ x: v.x + (x - r().width / 2) / v.zoom, y: v.y + (y - r().height / 2) / v.zoom }),
+    fitRect(rect) { v.x = rect.x + rect.w / 2; v.y = rect.y + rect.h / 2; render(); },
+    pick: (t, w, z, rad) => t.find((o) => Math.hypot(o.cx - w.x, o.cy - w.y) < rad / z) || null,
+    haptic() {},
+  };
+  stage.addEventListener('click', (e) => tapMap(cam.screenToWorld(e.clientX, e.clientY)));
+  addEventListener('resize', render);
+}
+
+// Freier Bereich der Karte, der nicht unter den Leisten liegt
+function hudPadding() {
+  const quer = innerWidth > innerHeight;
+  const rail = 132 + 24, top = 64 + 24, dock = 112 + 24;
+  if (!matchMedia('(min-width:600px) and (min-height:500px)').matches) return 24;
+  if (quer) {
+    const links = body.classList.contains('hand-links');
+    return { top: top + 8, bottom: 24, left: links ? rail + 8 : 24, right: links ? 24 : rail + 8 };
+  }
+  return { top: top + 8, bottom: dock + 8, left: 24, right: 24 };
+}
+cam.fitRect(HAFEN, hudPadding(), { animate: false, maxZoom: 2 });
+
+function render() {
+  const v = cam.view, r = stage.getBoundingClientRect();
+  world.style.transform = `translate(${r.width / 2 - v.x * v.zoom}px, ${r.height / 2 - v.y * v.zoom}px) scale(${v.zoom})`;
+  drawMarks();
+}
+
+// ---------------------------------------------------------------- Markierungen (feste Pixelgröße)
+function drawMarks() {
+  const out = [];
+  const put = (o, cls, txt = '') => {
+    const p = cam.worldToScreen(o.cx, o.cy);
+    out.push(`<div class="mark ${cls}" data-id="${o.id}" style="left:${p.x}px;top:${p.y}px">${txt}</div>`);
+  };
+  if (selected) for (const b of freeFor(selected)) put(b, 'frei' + (b.id === dragTarget?.id ? ' ziel' : ''), selected.size);
+  if (buildMode) for (const p of PLOTS) put(p, 'plus', '+');
+  for (const d of docked) put(d.berth, 'neu', d.boat.size);
+  for (const c of coins) put(c.berth, 'muenze' + (c.weg ? ' weg' : ''), '€');
+  marks.innerHTML = out.join('');
+}
+const freeFor = (boat) => BERTHS.filter((b) => !b.belegt && SIZE_FITS[boat.size].includes(b.size));
+
+// ---------------------------------------------------------------- Einfahrt
+const boatSvg = (col) => `<svg class="boat-icon" viewBox="0 0 72 44" aria-hidden="true">
+  <path d="M6 22 C10 8 44 6 66 22 C44 38 10 36 6 22Z" fill="${col}" stroke="#1d3557" stroke-width="3"/>
+  <rect x="22" y="16" width="20" height="12" rx="3" fill="#1d3557" opacity=".75"/></svg>`;
+function renderQueue() {
+  queueEl.innerHTML = queue.map((b) => `<li><button class="boat" data-id="${b.id}" aria-pressed="${selected?.id === b.id}"
+      aria-label="${b.name}, Größe ${b.size}"><span class="boat-size">${b.size}</span>${boatSvg(b.col)}
+      <span class="boat-wishes">${b.wishes.map((w) => `<span class="wish">${w}</span>`).join('') || '&nbsp;'}</span></button></li>`).join('');
+}
+
+function selectBoat(b) {
+  selected = selected?.id === b?.id ? null : b;
+  if (buildMode) setBuild(false);
+  closeCard();
+  renderQueue(); drawMarks();
+  if (selected) {
+    const ziele = freeFor(selected);
+    if (!ziele.length) return say('Kein passender Platz frei');
+    const bb = bounds(ziele);
+    cam.fitRect({ x: bb.x - 40, y: bb.y - 40, w: bb.w + 80, h: bb.h + 80 }, hudPadding(), { maxZoom: 2.2 });
+  }
+}
+
+function dock(boat, berth) {
+  berth.belegt = true;
+  docked.push({ boat, berth });
+  queue = queue.filter((q) => q.id !== boat.id);
+  selected = null;
+  cam.haptic?.(15);
+  say(`${boat.name} liegt an Platz ${berth.size}`);
+  renderQueue(); drawMarks();
+}
+
+// Tipp auf den Bootsknopf wählt aus, Ziehen nimmt das Boot mit auf die Karte
+let drag = null, dragTarget = null;
+queueEl.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.boat'); if (!btn) return;
+  drag = { id: btn.dataset.id, x0: e.clientX, y0: e.clientY, active: false, pid: e.pointerId };
+});
+addEventListener('pointermove', (e) => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+  const quer = innerWidth > innerHeight;
+  // Ziehen beginnt erst, wenn die Bewegung von der Liste weg zeigt (sonst ist es Scrollen)
+  const weg = quer ? (body.classList.contains('hand-links') ? dx > 24 : dx < -24) : dy < -24;
+  if (!drag.active && weg) {
+    drag.active = true;
+    const b = queue.find((q) => q.id === drag.id);
+    if (selected?.id !== b.id) selectBoat(b);
+    ghost.innerHTML = boatSvg(b.col).replace('class="boat-icon" ', '');
+    ghost.style.display = 'block';
+  }
+  if (!drag.active) return;
+  ghost.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+  const r = stage.getBoundingClientRect();
+  const w = cam.screenToWorld(e.clientX - r.left, e.clientY - r.top);
+  const t = cam.pick(freeFor(selected), w, cam.view.zoom, 44);
+  if (t?.id !== dragTarget?.id) { dragTarget = t; if (t) cam.haptic?.(8); drawMarks(); }
+});
+addEventListener('pointerup', (e) => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  const d = drag; drag = null; ghost.style.display = 'none';
+  if (d.active) {
+    if (dragTarget && selected) dock(selected, dragTarget);
+    dragTarget = null; drawMarks();
+  } else if (Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 10) {
+    selectBoat(queue.find((q) => q.id === d.id));
+  }
+});
+addEventListener('pointercancel', () => { drag = null; dragTarget = null; ghost.style.display = 'none'; drawMarks(); });
+
+// ---------------------------------------------------------------- Tipp auf die Karte
+function tapMap(w) {
+  const z = cam.view.zoom;
+  if (selected) {
+    const t = cam.pick(freeFor(selected), w, z, 30);
+    if (t) return dock(selected, t);
+  }
+  if (buildMode) {
+    const p = cam.pick(PLOTS, w, z, 30);
+    if (p) return openBuildCard(p);
+  }
+  if (body.dataset.phase === 'abend') {
+    const c = cam.pick(coins.map((c) => c.berth), w, z, 30);
+    if (c) return collect(coins.find((x) => x.berth === c));
+  }
+  const g = cam.pick(BUILDINGS, w, z, 30);
+  if (g) return openCard(g.name, `<p>${g.text}</p><div class="card-actions">
+    <button data-kauf="${g.preis}" ${money < g.preis ? 'disabled' : ''}>Ausbauen ${fmt(g.preis)} €</button></div>`);
+  const d = cam.pick(docked.map((d) => d.berth), w, z, 30);
+  if (d) {
+    const { boat } = docked.find((x) => x.berth === d);
+    return openCard(boat.name, `<p>Größe ${boat.size}, bleibt 2 Nächte.</p>
+      <p>${boat.wishes.map((x) => `<span class="wish ok">${x}</span>`).join(' ') || 'Keine Wünsche'}</p>`);
+  }
+  closeCard();
+}
+
+// ---------------------------------------------------------------- Infokarte
+function openCard(title, html) {
+  $('#card-title').textContent = title;
+  card.querySelector('.card-body').innerHTML = html;
+  card.hidden = false;
+  body.classList.add('card-open');
+}
+function closeCard() { card.hidden = true; body.classList.remove('card-open'); }
+card.querySelector('.card-close').addEventListener('click', closeCard);
+card.addEventListener('click', (e) => {
+  const k = e.target.closest('[data-kauf]'); if (!k) return;
+  const preis = +k.dataset.kauf;
+  if (money < preis) return;
+  setMoney(money - preis);
+  if (k.dataset.plot) {
+    PLOTS.splice(PLOTS.findIndex((p) => p.id === k.dataset.plot), 1);
+    setBuild(false);
+  }
+  say(`${k.dataset.name || 'Ausbau'} gebaut`);
+  closeCard();
+});
+
+// ---------------------------------------------------------------- Bauen
+function setBuild(on) {
+  buildMode = on;
+  body.classList.toggle('build-mode', on);
+  $('#btn-build').setAttribute('aria-pressed', on);
+  $('#btn-build .lbl').textContent = on ? 'Fertig' : 'Bauen';
+  if (on) { selected = null; renderQueue(); closeCard(); cam.fitRect({ x: 330, y: 760, w: 600, h: 320 }, hudPadding(), { maxZoom: 1.8 }); }
+  drawMarks();
+}
+$('#btn-build').addEventListener('click', () => setBuild(!buildMode));
+function openBuildCard(p) {
+  openCard('Bauplatz', `<p>Was soll hier stehen?</p><div class="card-actions">${BAUOPTIONEN.map(([n, preis]) =>
+    `<button data-kauf="${preis}" data-plot="${p.id}" data-name="${n}" ${money < preis ? 'disabled' : ''}>${n}<br>${fmt(preis)} €</button>`).join('')}</div>`);
+}
+
+// ---------------------------------------------------------------- Tag, Abend, Sonne ziehen
+const DAY_MS = 90000, EVE_MS = 30000;
+let t = location.hash === '#abend' ? DAY_MS + 500 : 0.15 * DAY_MS, last = performance.now(), paused = false, boost = 1;
+const dayEl = $('#day'), sun = dayEl.querySelector('.sun'), bar = dayEl.querySelector('.day-bar > i');
+function tick(now) {
+  const dt = now - last; last = now;
+  if (!paused) t += dt * boost;
+  const total = DAY_MS + EVE_MS;
+  if (t >= total) { t -= total; newDay(); }
+  const frac = t / total;
+  dayEl.style.setProperty('--day-frac', frac);
+  bar.style.width = (frac * 100).toFixed(1) + '%';
+  sun.setAttribute('aria-valuenow', Math.round(frac * 100));
+  const abend = t >= DAY_MS;
+  if (abend !== (body.dataset.phase === 'abend')) setPhase(abend ? 'abend' : 'tag');
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+function setPhase(p) {
+  body.dataset.phase = p;
+  dayEl.querySelector('.phase').textContent = p === 'abend' ? 'Abend' : '';
+  if (p === 'abend') {
+    coins = BERTHS.filter((b) => b.belegt).map((berth) => ({ berth, betrag: berth.size === 'M' ? 20 : 10 }));
+    say('Abend: mit einem Finger über die Münzen streichen');
+  } else coins = [];
+  drawMarks();
+}
+function newDay() { const d = dayEl.querySelector('b'); d.textContent = +d.textContent + 1; }
+
+// Die Sonne lässt sich nach rechts ziehen: je weiter, desto schneller läuft die Zeit (bis 8-fach).
+// Loslassen = wieder normal. Nach links geht nichts, Zeit läuft nie zurück.
+sun.addEventListener('pointerdown', (e) => {
+  e.preventDefault(); sun.setPointerCapture(e.pointerId);
+  const x0 = e.clientX;
+  const move = (ev) => {
+    const d = Math.max(0, ev.clientX - x0);
+    boost = 1 + Math.min(7, d / 20);
+    dayEl.querySelector('.speed').textContent = boost > 1.2 ? Math.round(boost) + 'x' : '';
+  };
+  const up = () => { boost = 1; dayEl.querySelector('.speed').textContent = ''; sun.removeEventListener('pointermove', move); sun.removeEventListener('pointerup', up); sun.removeEventListener('pointercancel', up); };
+  sun.addEventListener('pointermove', move); sun.addEventListener('pointerup', up); sun.addEventListener('pointercancel', up);
+});
+
+// Kassierstrich: abends mit einem Finger über die Münzen wischen sammelt alle ein.
+// Ein Finger auf einer Münze startet den Strich, sonst bleibt es normales Verschieben der Karte.
+function resizeStrich() { const r = stage.getBoundingClientRect(); strich.width = r.width * devicePixelRatio; strich.height = r.height * devicePixelRatio; }
+resizeStrich(); addEventListener('resize', resizeStrich);
+let pfad = null;
+stage.addEventListener('pointerdown', (e) => {
+  if (body.dataset.phase !== 'abend' || !coins.length) return;
+  const r = stage.getBoundingClientRect();
+  const w = cam.screenToWorld(e.clientX - r.left, e.clientY - r.top);
+  const c = cam.pick(coins.filter((c) => !c.weg).map((c) => c.berth), w, cam.view.zoom, 30);
+  if (!c) return;
+  e.stopImmediatePropagation();       // Karte nicht verschieben
+  stage.setPointerCapture(e.pointerId);
+  pfad = { pid: e.pointerId, pts: [[e.clientX - r.left, e.clientY - r.top]] };
+  collect(coins.find((x) => x.berth === c));
+}, { capture: true });
+stage.addEventListener('pointermove', (e) => {
+  if (!pfad || e.pointerId !== pfad.pid) return;
+  e.stopImmediatePropagation();
+  const r = stage.getBoundingClientRect(), p = [e.clientX - r.left, e.clientY - r.top];
+  pfad.pts.push(p);
+  const w = cam.screenToWorld(p[0], p[1]);
+  const c = cam.pick(coins.filter((c) => !c.weg).map((c) => c.berth), w, cam.view.zoom, 26);
+  if (c) collect(coins.find((x) => x.berth === c));
+  zeichneStrich();
+}, { capture: true });
+const endeStrich = (e) => { if (pfad && e.pointerId === pfad.pid) { e.stopImmediatePropagation(); pfad = null; zeichneStrich(); } };
+stage.addEventListener('pointerup', endeStrich, { capture: true });
+stage.addEventListener('pointercancel', endeStrich, { capture: true });
+function zeichneStrich() {
+  sctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  sctx.clearRect(0, 0, strich.width, strich.height);
+  if (!pfad || pfad.pts.length < 2) return;
+  sctx.strokeStyle = 'rgba(244,197,66,.85)'; sctx.lineWidth = 10; sctx.lineCap = sctx.lineJoin = 'round';
+  sctx.beginPath(); pfad.pts.slice(-40).forEach(([x, y], i) => (i ? sctx.lineTo(x, y) : sctx.moveTo(x, y))); sctx.stroke();
+}
+let combo = 0, comboTimer;
+function collect(c) {
+  if (!c || c.weg) return;
+  c.weg = true; combo++;
+  setMoney(money + c.betrag);
+  cam.haptic?.(6);
+  clearTimeout(comboTimer);
+  comboTimer = setTimeout(() => { if (combo > 1) say(`${combo} Münzen in einem Strich`); combo = 0; }, 450);
+  drawMarks();
+  setTimeout(() => { coins = coins.filter((x) => x !== c); drawMarks(); }, 380);
+}
+
+// ---------------------------------------------------------------- Pause und Einstellungen
+$('#btn-pause').addEventListener('click', () => {
+  paused = true;
+  openCard('Pause', `<div class="card-actions"><button data-weiter>Weiter</button></div>
+    <label class="opt"><input type="checkbox" id="opt-links" ${body.classList.contains('hand-links') ? 'checked' : ''}> Leiste im Querformat links (Linkshänder)</label>`);
+});
+card.addEventListener('click', (e) => { if (e.target.closest('[data-weiter]')) { paused = false; closeCard(); } });
+card.addEventListener('change', (e) => {
+  if (e.target.id !== 'opt-links') return;
+  body.classList.toggle('hand-links', e.target.checked);
+  try { localStorage.setItem('hm-hand', e.target.checked ? 'links' : 'rechts'); } catch {}
+  render();
+});
+try { if (localStorage.getItem('hm-hand') === 'links') body.classList.add('hand-links'); } catch {}
+
+// ---------------------------------------------------------------- Kleinkram
+function setMoney(v) { money = v; $('#money span').textContent = fmt(v); }
+function fmt(n) { return n.toLocaleString('de-DE'); }
+let toastT;
+function say(s) { toast.textContent = s; toast.classList.add('an'); clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove('an'), 1800); }
+function bounds(list) {
+  const xs = list.map((b) => b.cx), ys = list.map((b) => b.cy);
+  return { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
+}
+// Beim Drehen des Tablets den Hafen wieder passend einrahmen
+matchMedia('(orientation: landscape)').addEventListener('change', () => setTimeout(() => { resizeStrich(); cam.fitRect(HAFEN, hudPadding(), { maxZoom: 2 }); }, 150));
+
+renderQueue(); render();
+</script>
+</body>
+</html>
