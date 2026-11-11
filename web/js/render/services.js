@@ -3,7 +3,7 @@
 // Modelle: js/render/services-models.js. Beschreibung: docs/services.md.
 //
 //   game.services.liste()            Services der aktuellen Hafenstufe mit Preis und Sperrgruenden
-//   game.services.bauen(id)          naechste Ausbaustufe bauen (zieht game.state.geld ab, falls vorhanden)
+//   game.services.bauen(id)          naechste Ausbaustufe bauen (bezahlt mit game.sim.spend)
 //   game.services.effekte()          Ruf-Bonus, Gaeste-Faktoren, Sturmschutz, Freischaltungen (fuer sim.js)
 //   game.services.abrechnen(tag)     Tagesabrechnung, siehe rules.js; passiert auch bei game.emit('tag:ende', tag)
 //   game.services.naechsteBesuche()  "Kreuzfahrtschiff in 3 Tagen" fuer die Oberflaeche
@@ -33,19 +33,25 @@ const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
 export function init(game) {
   const params = new URLSearchParams(location.search);
   const alleZeigen = params.get('services') === 'alle';
+  // Zum Ausprobieren mit ?stufe=n: diese Stufe gilt fest und Bauen kostet nichts.
+  const testStufe = Number(params.get('stufe')) || 0;
   let R = erstelleRegeln(SERVICES);
 
-  // Der Services-Zustand liegt im Spielstand (game.state.services), solange es keinen gibt, hier.
+  // Der Services-Zustand liegt im Spielstand unter game.state.modules.services (wird mitgespeichert),
+  // solange es keinen Spielstand gibt, hier.
   let eigenerZustand = neuerZustand();
   const zustand = () => {
-    if (game.state && typeof game.state === 'object') {
-      if (!game.state.services) game.state.services = eigenerZustand;
-      return game.state.services;
+    const st = game.state;
+    if (st && typeof st === 'object') {
+      if (!st.modules) st.modules = {};
+      if (!st.modules.services) st.modules.services = eigenerZustand;
+      return st.modules.services;
     }
     return eigenerZustand;
   };
-  let stufe = Number(params.get('stufe')) || game.state?.stufe || 1;
-  const kontext = () => ({ stufe, ruf: game.state?.ruf ?? 3, geld: Number.isFinite(game.state?.geld) ? game.state.geld : undefined,
+  let winter = false;
+  let stufe = testStufe || game.state?.stufe || 1;
+  const kontext = () => ({ stufe, ruf: game.sim?.reputation?.() ?? game.state?.ruf ?? 3, geld: !testStufe && Number.isFinite(game.state?.geld) ? game.state.geld : undefined,
     tag: game.state?.tag ?? 1 });
   const sichtbar = (id) => alleZeigen || !ZURUECKGESTELLT.has(id);
 
@@ -185,9 +191,16 @@ export function init(game) {
     const k = kontext();
     const r = R.bauen(zustand(), id, k);
     if (!r.ok) return r;
-    if (Number.isFinite(game.state?.geld)) {
+    if (testStufe) {
+      // kostenlos im Testmodus
+    } else if (game.sim?.spend) {
+      if (!game.sim.spend(r.kosten)) {             // Geld reicht doch nicht: Bau zuruecknehmen
+        const z = zustand();
+        if (r.stufe > 1) z.gebaut[id] = r.stufe - 1; else delete z.gebaut[id];
+        return { ...r, ok: false, geldFehlt: true };
+      }
+    } else if (Number.isFinite(game.state?.geld)) {
       game.state.geld -= r.kosten;
-      game.emit('geld', game.state.geld);
     }
     aktualisiere(id);
     const s = R.byId[id];
@@ -197,12 +210,10 @@ export function init(game) {
   }
 
   function abrechnen(tagDaten) {
-    const daten = { tag: tagDaten?.tag ?? game.state?.tag ?? 1, ...tagDaten };
+    const sturm = /sturm|storm/i.test(String(game.events?.current?.id ?? game.events?.current?.type ?? ''));
+    const daten = { tag: tagDaten?.tag ?? game.state?.tag ?? 1, winter, wetter: sturm ? 'sturm' : 'sonne', ...tagDaten };
     const r = R.tagesabschluss(zustand(), daten);
-    if (Number.isFinite(game.state?.geld) && r.summe) {
-      game.state.geld += r.summe;
-      game.emit('geld', game.state.geld);
-    }
+    // Gutgeschrieben wird summe von den Spielregeln (js/bridge.js hoert auf services:abrechnung).
     for (const a of r.angekuendigt) game.emit('services:besuch-angekuendigt', a);
     for (const b of r.besuche) game.emit('services:besuch', b);
     game.emit('services:abrechnung', r);
@@ -222,16 +233,17 @@ export function init(game) {
   game.on('ui:cancel', schliessen);
   game.on('stufe', (n) => {
     const v = Number(typeof n === 'object' ? n?.stufe : n);
-    if (v >= 1) { stufe = v; aktualisiere(); }
+    if (v >= 1 && !testStufe) { stufe = v; aktualisiere(); }
   });
   game.on('tag:ende', (d) => abrechnen(d));
+  game.on('day:start', (d) => { winter = !!d?.winter; });
   game.on('sturm', () => {
     const a = anlagen.get('seenotretter');
     if (a?.einsatz) { a.einsatz(game.time); game.emit('services:einsatz', { id: 'seenotretter' }); }
   });
   game.on('spielstand-geladen', (st) => {
-    if (st?.services) eigenerZustand = st.services;
-    if (st?.stufe) stufe = st.stufe;
+    if (st?.modules?.services) eigenerZustand = st.modules.services;
+    if (st?.stufe && !testStufe) stufe = st.stufe;
     aktualisiere();
   });
 
@@ -261,7 +273,7 @@ export function init(game) {
   }
   aktualisiere();
   game.on('ready', () => {
-    if (game.state?.stufe) stufe = Number(params.get('stufe')) || game.state.stufe;
+    if (game.state?.stufe) stufe = testStufe || game.state.stufe;
     // Gelaendehoehe steht erst jetzt fest: Modelle und Bauplaetze neu setzen
     for (const [id, a] of anlagen) { gruppe.remove(a.group); entsorge(a.group); anlagen.delete(id); }
     for (const [id, p] of plaetze) { gruppe.remove(p); entsorge(p); plaetze.delete(id); }
@@ -283,7 +295,7 @@ export function init(game) {
     pruefe: (id) => R.pruefe(zustand(), id, kontext()),
     stufeVon: (id) => R.stufeVon(zustand(), id),
     bauen,
-    effekte: () => R.effekte(zustand()),
+    effekte: () => fuerSpielregeln(R.effekte(zustand())),
     abrechnen,
     naechsteBesuche: () => R.naechsteBesuche(zustand(), kontext().tag),
     planeBesuch: (id, tag) => R.planeBesuch(zustand(), id, tag),
@@ -293,6 +305,26 @@ export function init(game) {
   };
   game.services = api;
   return api;
+}
+
+// Effekte zusaetzlich in den Feldnamen der Spielregeln (docs/spielregeln.md, Modifikatoren).
+// Die deutschen Felder bleiben fuer Ereignisse und Oberflaeche.
+const UNLOCK = { kreuzfahrtschiff: 'kreuzfahrt', marine: 'marine', traditionssegler: 'traditionssegler',
+  fahrgastschiff: 'fahrgastschiff', seenotkreuzer: 'seenotkreuzer', regatta: 'regatta' };
+export function fuerSpielregeln(e) {
+  const unlock = {};
+  for (const f of e.freischalten) unlock[UNLOCK[f] ?? f] = true;
+  const { XXL: _x, ...sizeFactor } = e.gaeste;
+  return {
+    ...e,
+    ratingBonus: e.ruf,
+    sizeFactor,
+    unlock,
+    // Segelmacher: Segelboote zahlen mehr. Die Regeln kennen nur einen Preisfaktor fuer alle,
+    // darum anteilig (etwa 60 % der Gaeste sind Segler).
+    priceFactor: 1 + (e.hafengeld.segel - 1) * 0.6,
+    visitorFactor: 1 + e.besucherFuerVersorgung / 100,
+  };
 }
 
 function entsorge(obj) {
