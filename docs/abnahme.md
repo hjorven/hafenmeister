@@ -11,7 +11,7 @@ Stand: 11.11.2026. Gilt f체r jeden Pull Request in diesem Repo. Grund: Jorven m�
 5. **Pr체fungen gr체n.** Vor dem Push:
 
 ```bash
-bash tools/check-pages.sh web && node --test tests/*.test.mjs*.test.mjs
+bash tools/check-pages.sh web && node --test tests/*.test.mjs
 ```
 
 Sobald der Rauchtest f체r die Spielschleife existiert (Boot kommt an, wird zugewiesen, abends steigt das Geld), muss auch er gr체n bleiben.
