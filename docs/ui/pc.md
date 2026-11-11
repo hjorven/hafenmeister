@@ -38,14 +38,15 @@ Die Gesten aus `gesten.js` gelten am PC genauso: wartendes Boot mit der Maus von
 | Mittlere Taste ziehen | Karte verschieben |
 | Mausrad | Zoomen zum Mauszeiger. Firefox liefert Zeilen statt Pixel, Trackpad-Pinch kommt als Rad mit Strg. Beides wird umgerechnet, sonst zoomt es dort kaum |
 | Mauszeiger | Greifhand über wartenden Booten, Kopierpfeil über Münzen, Zeigefinger über allem anderen Antippbaren |
-| Tooltip | Kurzer Text unter dem Zeiger, sobald die Spielregeln `game.describe(treffer)` liefern |
+| Tooltip | Kurzer Text unter dem Zeiger: Name, Größe, Länge, „Ziehen oder doppelklicken“ bei wartenden Booten, Restnächte bei liegenden, Betrag bei Münzen. Eigene Texte über `game.describe(treffer)` |
 
 ### Tastatur
 
 | Taste | Wirkung |
 |---|---|
-| `Enter` | Knopf „Einfahren“ am gewählten Boot, sonst erster Knopf der offenen Karte |
-| `1` bis `9` | Knopf der offenen Karte |
+| `1` bis `9` | Wartendes Boot wählen (Reihenfolge wie in der Einfahrt), bei offener Karte deren Knopf |
+| `Tab`, Umschalt + `Tab` | Nächstes, voriges wartendes Boot |
+| `Enter` | Gewähltes Boot einfahren lassen, bei offener Karte deren erster Knopf |
 | `F` | Vorspulen an und aus (4-fach, wie die Sonne) |
 | `Leertaste` | Pause |
 | `B` | Bauen, sobald der Knopf sichtbar ist |
@@ -87,7 +88,7 @@ Passen zum 3D-Hafen und bleiben bei höchstens zwei Klicks pro Aktion. Ein 3D-Pr
 | Was es nutzt | Pflicht |
 |---|---|
 | `game.canvas`, `game.camera.zoomAt/panBy/reset/screenToWorld`, `game.pick`, `game.on/emit`, `game.speed` | ja |
-| `game.setPaused`, `game.sim.wartet(id)`, `game.describe(treffer)`, `game.spielstand.oeffnen()`, `game.audio` | nein |
+| `game.setPaused`, `game.sim.wartet/waitingBoats/select/selected/state`, `game.describe(treffer)`, `game.spielstand.oeffnen()`, `game.audio` | nein |
 | `game.camera.rotateBy/rotateFree/snapRotation/flyTo` | nein |
 
 | Was es sendet | Wann |

@@ -17,7 +17,8 @@
 //   game.speed, game.on/emit
 //   game.camera.rotateBy?(rad), rotateFree?(rad), snapRotation?(), flyTo?(x, z)
 //   game.sim?.wartet?(bootId)        wartet das Boot vor dem Hafen?
-//   game.describe?(treffer)          -> Tooltip-Text oder null
+//   game.describe?(treffer)          -> Tooltip-Text oder null (sonst ein kurzer Text aus game.sim.state)
+//   game.sim?.waitingBoats?(), select?(id), selected   Boot per Taste wählen
 //   game.spielstand?.oeffnen?()      Fenster "Spielstand"
 //
 // Gesendete Ereignisse (docs/grundgeruest.md):
@@ -25,6 +26,8 @@
 //   ui:auto-einfahren {boot}  Doppelklick auf ein wartendes Boot
 //   ui:vorspulen {speed}      Taste F schaltet Vorspulen an und aus (wie die Sonne in gesten.js)
 //   ui:mute                   Taste M
+// Über das DOM: 1 bis 9 und Tab klicken die Boot-Knöpfe in #queue ([data-boat], aria-pressed),
+// bei offener Karte wählen 1 bis 9 die Knöpfe in #card.
 //   hover {x, y, world, hit}  Maus bewegt sich ohne gedrückte Taste
 
 const DRAG_PX = 6;
@@ -49,6 +52,20 @@ export function init(game) {
   const world = (p) => cam.screenToWorld(p.x, p.y);
   const waiting = (hit) => !!(hit && hit.type === 'boat' &&
     (game.sim?.wartet?.(hit.id) ?? hit.object?.userData?.wartet === true));
+  // Tooltip: eigener Text der Spielregeln (game.describe), sonst ein kurzer aus game.sim
+  const boatOf = (id) => game.sim?.state?.boats?.[Number(String(id).replace(/^b/, ''))];
+  const meters = (m) => (Number.isFinite(m) ? `${m.toLocaleString('de-DE', { maximumFractionDigits: 1 })} m` : '');
+  const describe = (hit) => {
+    if (!hit) return null;
+    if (game.describe) return game.describe(hit);
+    const b = (hit.type === 'boat' || hit.type === 'coin') ? boatOf(hit.id) : null;
+    if (!b) return null;
+    if (b.pendingFee > 0) return `${b.name}: ${Math.round(b.pendingFee)} € kassieren`;
+    const head = [b.name, b.size && `(${b.size})`, meters(b.length)].filter(Boolean).join(' ');
+    if (b.status === 'waiting') return `${head}. Ziehen oder doppelklicken`;
+    if (b.status === 'moored') return `${head}, noch ${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}`;
+    return head || null;
+  };
   const visible = (el) => !!el && !el.hidden && !el.disabled && el.offsetParent !== null;
   const byId = (id) => document.getElementById(id);
 
@@ -60,8 +77,9 @@ export function init(game) {
     ['Doppelklick auf wartendes Boot', 'Boot fährt selbst in den besten Platz', () => true],
     ['Maustaste halten und über Münzen streichen', 'Alles in einem Zug kassieren', () => true],
     ['Sonne im Tagesbalken ziehen, <kbd>F</kbd>', 'Vorspulen', () => true],
-    ['<kbd>Enter</kbd>', 'Knopf „Einfahren“ oder ersten Knopf der Karte drücken', () => true],
-    ['<kbd>1</kbd> bis <kbd>9</kbd>', 'Knopf der offenen Karte wählen', () => true],
+    ['<kbd>1</kbd> bis <kbd>9</kbd>', 'Wartendes Boot wählen, bei offener Karte deren Knopf', () => true],
+    ['<kbd>Tab</kbd>, Umschalt + <kbd>Tab</kbd>', 'Nächstes, voriges wartendes Boot', () => true],
+    ['<kbd>Enter</kbd>', 'Gewähltes Boot einfahren lassen, bei offener Karte deren ersten Knopf', () => true],
     ['<kbd>B</kbd>', 'Bauen', () => visible(byId('btn-build'))],
     ['<kbd>Leertaste</kbd>', 'Pause', () => !!game.setPaused],
     ['<kbd>Esc</kbd> oder Rechtsklick', 'Abbrechen', () => true],
@@ -174,7 +192,7 @@ export function init(game) {
     const p = local(e);
     const hit = pick(p);
     canvas.style.cursor = !hit ? '' : waiting(hit) ? 'grab' : hit.type === 'coin' ? 'copy' : 'pointer';
-    const text = hit && game.describe ? game.describe(hit) : null;
+    const text = describe(hit);
     if (text) showTooltip(text, e); else hideTooltip();
     game.emit('hover', { x: p.x, y: p.y, world: world(p), hit });
   }, true);
@@ -231,6 +249,26 @@ export function init(game) {
 
   // ---------- Tastatur ----------
   const held = new Set();
+  const queueButtons = () => [...document.querySelectorAll('#queue [data-boat]')].filter(visible);
+  // Wartende Boote per Taste: über die Knöpfe in #queue, sonst direkt über game.sim
+  const waitingIds = () => (game.sim?.waitingBoats?.() ?? []).map((b) => b.id);
+  function selectWaiting(index, dir) {
+    const btns = queueButtons();
+    if (btns.length) {
+      const cur = btns.findIndex((b) => b.getAttribute('aria-pressed') === 'true');
+      const i = index ?? (cur + dir + btns.length) % btns.length;
+      if (!btns[i]) return false;
+      btns[i].click();
+      return true;
+    }
+    const ids = waitingIds();
+    if (!ids.length || !game.sim?.select) return false;
+    const cur = ids.indexOf(game.sim.selected);
+    const i = index ?? (cur + dir + ids.length) % ids.length;
+    if (ids[i] == null) return false;
+    game.sim.select(game.sim.selected === ids[i] && index != null ? null : ids[i]);
+    return true;
+  }
   const cardButtons = () => [...document.querySelectorAll('#card button:not(:disabled)')]
     .filter((b) => !b.matches('.card-close, [aria-label="Schließen"]'));
   const center = () => ({ x: canvas.clientWidth / 2, y: canvas.clientHeight / 2 });
@@ -256,8 +294,8 @@ export function init(game) {
     const cardOpen = document.body.classList.contains('card-open');
     if (/^[1-9]$/.test(k)) {
       const el = cardOpen ? cardButtons()[Number(k) - 1] : null;
-      if (!el) return;
-      el.click();
+      if (el) el.click();
+      else if (!selectWaiting(Number(k) - 1)) return;
       e.preventDefault();
       return;
     }
@@ -272,11 +310,18 @@ export function init(game) {
       case 'Escape': game.emit('ui:cancel'); break;
       case 'Home': case 'Digit0': case 'Numpad0': cam.reset(); break;
       case 'F1': toggleHelp(); break;
+      case 'Tab': {
+        // Nur wenn kein Eingabefeld oder Knopf den Fokus hat, sonst bleibt Tab die normale Fokus-Taste
+        if (t !== document.body && !t.closest('#queue')) return;
+        if (!selectWaiting(null, e.shiftKey ? -1 : 1)) return;
+        break;
+      }
       case 'Enter': case 'NumpadEnter': {
         const chip = document.querySelector('.hm-einfahren');
         const target = chip || (cardOpen ? cardButtons()[0] : null);
-        if (!target) return;
-        target.click();
+        if (target) target.click();
+        else if (game.sim?.selected != null) game.emit('ui:auto-einfahren', { boot: game.sim.selected });
+        else return;
         break;
       }
       default: {
