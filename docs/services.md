@@ -9,7 +9,7 @@ Stand: 11.11.2026. Services sind Gebäude, die keinen Wunsch der Gäste erfülle
 3. Das Gebäude wächst mit einem kleinen Nachfedern aus dem Boden.
 4. Gebautes antippen: Die Karte zeigt die Einnahmen bisher, den nächsten Ausbau mit Preis oder was dafür noch fehlt.
 
-Solange es noch keinen Spielzustand gibt (`js/state.js`), kostet Bauen nichts. Sobald `game.state.geld` existiert, wird der Preis abgezogen und der Knopf ist bei zu wenig Geld gesperrt.
+Bezahlt wird mit `game.sim.spend`, bei zu wenig Geld ist der Knopf gesperrt. Die Einnahmen kommen am Abend: Die Spielregeln senden `tag:ende`, dieses Modul rechnet ab und sendet `services:abrechnung`, die Spielregeln buchen die Summe gut. Der Zustand liegt im Spielstand unter `game.state.modules.services`.
 
 ## Die Services
 
@@ -47,8 +47,8 @@ Zahlen aus dem Balancing (`web/js/data/economy.js`, `ECONOMY.services[id]`) übe
 
 | Aufruf oder Ereignis | Bedeutung |
 |---|---|
-| `game.services.effekte()` | `{ ruf, gaeste: { S, M, L, XL }, sturmschutz, regatta, hafenfest, hafengeld: { segel, motor }, besucherFuerVersorgung, freischalten: [...] }` |
-| `game.emit('tag:ende', { tag, wetter, winter, boote: [{ klasse, antrieb }] })` | Tagesabrechnung, Antwort `services:abrechnung` mit `{ einnahmen, summe, besuche }` |
+| `game.services.effekte()` | Modifikatoren für die Spielregeln (`ratingBonus`, `sizeFactor`, `unlock`, `priceFactor`, `visitorFactor`) und dieselben Werte auf Deutsch für Ereignisse und Oberfläche (`ruf`, `gaeste`, `sturmschutz`, `regatta`, `hafenfest`, `hafengeld`, `freischalten`) |
+| `tag:ende` mit `{ tag, boote: [{ klasse, antrieb }] }` | Tagesabrechnung, Antwort `services:abrechnung` mit `{ einnahmen, summe, besuche }`; Winter kommt aus `day:start`, Sturm aus `game.events.current` |
 | `game.emit('sturm', { tag })` | Seenotretter rücken aus, Antwort `services:einsatz` |
 | `services:gebaut`, `services:besuch-angekuendigt`, `services:besuch` | für Ton, Oberfläche und Schiffe |
 | `game.services.liste()` | alle Services der aktuellen Stufe mit Preis und Sperrgründen, z. B. für den Knopf „Bauen“ |
@@ -63,5 +63,6 @@ python3 -m http.server 8000 --directory web
 
 Dann im Browser öffnen:
 
-- `http://localhost:8000/?stufe=4`: Bauplätze am Ufer erscheinen, Schild antippen, bauen, Gebautes noch einmal antippen.
+- `http://localhost:8000/`: normales Spiel. In Stufe 1 steht der Bauplatz des Bootsverleihs westlich von Steg A.
+- `http://localhost:8000/?stufe=4`: Testmodus, Stufe 4 fest und Bauen kostenlos. Bauplätze am Ufer erscheinen, Schild antippen, bauen, Gebautes noch einmal antippen.
 - `http://localhost:8000/?stufe=5&services=alle`: alles voll ausgebaut, zum Ansehen der Modelle und Animationen.
