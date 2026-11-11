@@ -36,7 +36,7 @@ export const DEFAULT_MODS = Object.freeze({
   priceFactor: 1,            // Hafengeld mal Faktor
   satisfaction: Object.freeze({ outer: 0, all: 0 }),  // Anker Zufriedenheit dazu (negativ = weniger)
   winter: false,             // true in den Wintertagen (Boote im Winterlager)
-  reputationBonus: 0,        // Ruf, der am Ende des Ereignisses gutgeschrieben wird (in Ankern, klein halten)
+  ratingBonus: 0,            // Anker dazu auf jede Bewertung an diesem Tag (sim.js: rateBoat)
 });
 
 export const EVENTS = [
@@ -80,8 +80,6 @@ export const EVENTS = [
     mods: { seaArrivals: false, extraNights: 1, satisfaction: { outer: -1 } },
     // Seenotretter-Station mindert die Folgen: ohne voll, Station halb, ausgebaut keine
     protect: { building: 'seenotretter', factor: [1, 0.5, 0] },
-    // Nach dem Sturm: Wer eine Station hat, gewinnt etwas Ruf
-    after: { building: 'seenotretter', reputationBonus: 0.05 },
   },
   {
     id: 'regatta',
@@ -98,10 +96,11 @@ export const EVENTS = [
     weather: { wind: 0.6, fog: 0, rain: 0, sun: 0.8 },
     mods: {
       arrivalFactor: 1.6,
-      kindFactor: { segeljolle: 3, kleinkreuzer: 2.5, holzklassiker: 2, fahrtenyacht: 3, mehrrumpfboot: 2 },
+      // Schlüssel: kind der Bootsarten (web/js/data/boat-catalog.js)
+      kindFactor: { jolle: 3, segelyacht: 3, mehrrumpf: 2 },
       visitorFactor: 1.5,
       serviceIncomeFactor: 1.3,
-      reputationBonus: 0.1,
+      ratingBonus: 0.25,
     },
   },
   {
@@ -116,11 +115,13 @@ export const EVENTS = [
     season: [10, 24],
     weather: { wind: 0.3, fog: 0, rain: 0, sun: 0.9 },
     mods: {
-      kindFactor: { traditionssegler: 6, marineschiff: 6 },
+      // Traditionssegler (XL) kommen erst ab Stufe 5, vorher nur mehr Boote und Besucher
+      arrivalFactor: 1.3,
+      kindFactor: { traditionssegler: 6 },
       sizeFactor: { XL: 2 },
       visitorFactor: 2,
       serviceIncomeFactor: 1.5,
-      reputationBonus: 0.1,
+      ratingBonus: 0.25,
     },
     evening: 'feuerwerk',
   },

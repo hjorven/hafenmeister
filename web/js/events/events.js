@@ -9,9 +9,8 @@
 // Ausgänge:
 //   game.emit('event:announce', { event, day, startDay, endDay })
 //   game.emit('event:start', { event, day, endDay })
-//   game.emit('event:end', { event, day, reputationBonus })
+//   game.emit('event:end', { event, day })
 //   game.emit('sturm', { tag })                     am Sturmtag (Seenotretter rücken aus)
-//   game.emit('reputation:bonus', { amount, source })   nur wenn amount > 0
 //   game.emit('weather', { wind, fog, rain, snow, sun, event, part })   bei jedem Tageswechsel
 //   game.emit('wetter', { bewoelkung, wind })   dasselbe im Format von render/landscape.js
 //   game.emit('season', { year, seasonDay, winterDay, part, winter })  wenn die Jahreszeit wechselt
@@ -21,7 +20,9 @@
 //   game.events.forecast(n), game.events.weather(day), game.events.current, game.events.planned
 //   game.events.save(), game.events.load(daten)
 //
-// Solange niemand 'day:start' sendet, zählt eine Ersatzuhr die Tage (120 s pro Tag, letzte 30 s Abend).
+// Mit den Spielregeln (sim.js) folgt das Modul game.state.day und game.state.phase; der eigene
+// Stand liegt in game.state.modules.events und wird mit dem Spielstand gespeichert.
+// Ohne Spielregeln zählt eine Ersatzuhr die Tage (120 s pro Tag, letzte 30 s Abend).
 import { createScheduler } from './scheduler.js';
 import { initEffects } from './effects.js';
 import { initBanner } from './banner.js';
@@ -91,10 +92,10 @@ export function init(game) {
         if (c.event.id === 'sturm') game.emit('sturm', { tag: c.day });
       }
       if (c.type === 'end') {
-        game.emit('event:end', { event: c.event, day: c.day, reputationBonus: c.reputationBonus });
-        if (c.reputationBonus > 0) game.emit('reputation:bonus', { amount: c.reputationBonus, source: c.event.id });
+        game.emit('event:end', { event: c.event, day: c.day });
       }
     }
+    store();
     emitWeather(scheduler.weather(day));
     const season = scheduler.season(day);
     if (season.part !== lastPart) { lastPart = season.part; game.emit('season', season); }
@@ -113,9 +114,43 @@ export function init(game) {
     game.emit('event:phase', { phase, event: scheduler.current?.event ?? null });
   }
 
+  // Spielregeln vorhanden? Dann gilt deren Tag. sim.js zählt state.day nachts hoch und fragt
+  // morgens modifiers() ab, bevor es 'day:start' sendet; deshalb hier selbst nachziehen.
+  const simDay = () => (typeof game.state?.day === 'number' ? game.state.day : null);
+  function syncSim() {
+    const d = simDay();
+    if (d === null) return false;
+    external = true;
+    const s = game.state.stage ?? game.state.stufe;
+    if (typeof s === 'number' && s !== stage) { stage = s; scheduler.setStage(s); }
+    if (d > today) newDay(d);
+    return true;
+  }
+
+  // Eigenen Stand in den Spielstand legen (sim.js speichert game.state nachts)
+  function store() {
+    const st = game.state;
+    if (!st || typeof st !== 'object') return;
+    if (!st.modules || typeof st.modules !== 'object') st.modules = {};
+    st.modules.events = scheduler.save();
+  }
+
+  // Stand aus dem Spielstand übernehmen (nach dem Start und nach dem Laden eines Spielstands)
+  function restore() {
+    const saved = game.state?.modules?.events;
+    if (saved && typeof saved === 'object') game.events.load(saved);
+    else if (typeof game.state?.seed === 'number') {
+      scheduler.load({ seed: game.state.seed >>> 0, rng: game.state.seed >>> 0, day: 0, current: null, planned: null, nextDue: {}, count: {}, lastEndDay: null });
+      today = 0;
+    }
+    syncSim();
+    store();
+  }
+
   game.events = {
     scheduler,
     modifiers: () => {
+      syncSim();
       scheduler.advanceTo(today, { stage, buildings: readBuildings() });   // Schutzbauten aktuell halten
       return serviceBoost(scheduler.modifiers());
     },
@@ -158,8 +193,16 @@ export function init(game) {
   new MutationObserver(() => { if (document.body.dataset.phase) setPhase(document.body.dataset.phase); })
     .observe(document.body, { attributes: true, attributeFilter: ['data-phase'] });
 
-  // Ersatzuhr, bis die Sim übernimmt
+  // Tag und Tageszeit: von den Spielregeln, sonst Ersatzuhr.
+  // Die Spielregeln legen game.state asynchron an und ersetzen es beim Laden; ein neuer
+  // Spielstand wird deshalb hier im Takt erkannt und übernommen.
+  let knownState = null;
   game.onTick(() => {
+    if (game.state && game.state !== knownState) { knownState = game.state; restore(); }
+    if (syncSim()) {
+      setPhase(game.state.phase === 'evening' ? 'abend' : 'tag');
+      return;
+    }
     if (external) return;
     const t = game.time;
     newDay(Math.floor(t / DAY_SECONDS) + 1);
@@ -170,6 +213,6 @@ export function init(game) {
   initEffects(game);
   initBanner(game);
 
-  // Erster Tag sofort, damit Wetter und Wetterbericht stehen
-  game.on('ready', () => { if (!external && today === 0) newDay(1); });
+  // Spielstand laden (auch nach Import), erster Tag sofort, damit Wetter und Wetterbericht stehen
+  game.on('ready', () => { if (!external && today === 0 && !game.state) newDay(1); });
 }

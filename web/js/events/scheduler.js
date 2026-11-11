@@ -8,7 +8,7 @@
 //   s.save() / s.load(daten)
 //
 // advanceTo liefert die Änderungen dieses Tages in Reihenfolge:
-//   { type: 'end', event, day, reputationBonus }
+//   { type: 'end', event, day }
 //   { type: 'start', event, day, endDay }
 //   { type: 'announce', event, day, startDay, endDay }
 import { EVENTS, DEFAULT_MODS, SCHEDULE, YEAR } from '../data/events.js';
@@ -143,9 +143,7 @@ export function createScheduler({ seed = 1, defs = EVENTS, schedule = SCHEDULE, 
     unlock(day);
     if (st.current && day > st.current.endDay) {
       const def = byId.get(st.current.id);
-      let bonus = def.mods?.reputationBonus ?? 0;
-      if (def.after && (st.buildings?.[def.after.building] ?? 0) > 0) bonus += def.after.reputationBonus ?? 0;
-      changes.push({ type: 'end', event: def, day, reputationBonus: bonus });
+      changes.push({ type: 'end', event: def, day });
       st.lastEndDay = st.current.endDay;
       st.current = null;
     }
@@ -188,8 +186,7 @@ export function createScheduler({ seed = 1, defs = EVENTS, schedule = SCHEDULE, 
       if (seasonOf(st.day || 1, year).winter) return mergeMods(DEFAULT_MODS, year.winterMods);
       if (!st.current) return mergeMods(DEFAULT_MODS, null);
       const def = byId.get(st.current.id);
-      const { reputationBonus, ...mods } = def.mods ?? {};
-      return mergeMods(DEFAULT_MODS, mods, protection(def));
+      return mergeMods(DEFAULT_MODS, def.mods, protection(def));
     },
 
     // Wetter eines Tages: Ereigniswetter oder ruhiges Alltagswetter.

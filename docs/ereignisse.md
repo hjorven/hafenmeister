@@ -20,7 +20,7 @@ Kreuzfahrtschiffe, Marinebesuche und Ausflugsfahrten plant das Services-Modul al
 
 ## Was schon wirkt
 
-Sichtbar sind Wetter, Ankündigungen, Wetterbericht und Winter, sobald `main.js` das Modul lädt (Ersatzuhr). Die Wirkung auf Ankünfte, Liegezeit und Einnahmen greift, sobald `sim.js` `game.events.modifiers()` abfragt.
+`main.js` lädt das Modul, `sim.js` fragt `game.events.modifiers()` jeden Morgen und Abend ab (siehe [spielregeln.md](spielregeln.md)). Das Modul folgt `game.state.day` und `game.state.phase` und speichert seinen Stand unter `game.state.modules.events`. Ohne Spielregeln läuft eine Ersatzuhr.
 
 ## Dateien
 
@@ -40,7 +40,7 @@ Sichtbar sind Wetter, Ankündigungen, Wetterbericht und Winter, sobald `main.js`
 
 | Ereignis | Von | Bedeutung |
 |---|---|---|
-| `day:start` `{ day, stage }` | Sim | neuer Spieltag. Solange niemand das sendet, zählt eine Ersatzuhr (120 s pro Tag) |
+| `game.state.day`, `day:start` `{ day, stage }` | Sim | neuer Spieltag. Ohne Spielregeln zählt eine Ersatzuhr (120 s pro Tag) |
 | `stufe` Zahl 1 bis 6 | Sim | neue Ausbaustufe, sonst wird `game.state.stufe` gelesen |
 | `build` `{ id, level }` | Bauen | z. B. `segelclub`, `seenotretter` |
 | `phase` `'tag' \| 'abend'` | Sim | Tageszeit, alternativ `body[data-phase]` |
@@ -52,8 +52,7 @@ Sichtbar sind Wetter, Ankündigungen, Wetterbericht und Winter, sobald `main.js`
 |---|---|
 | `event:announce` | `{ event, day, startDay, endDay }` |
 | `event:start` | `{ event, day, endDay }` |
-| `event:end` | `{ event, day, reputationBonus }` |
-| `reputation:bonus` | `{ amount, source }`, kleiner Ruf-Bonus nach Regatta, Hafenfest, Sturm mit Station |
+| `event:end` | `{ event, day }` |
 | `sturm` | `{ tag }` am Sturmtag, Seenotretter laufen aus |
 | `weather` | `{ wind, fog, rain, snow, sun, event, part }` bei jedem Tageswechsel |
 | `wetter` | `{ bewoelkung, wind }` im Format von `render/landscape.js` |
@@ -65,7 +64,7 @@ Sichtbar sind Wetter, Ankündigungen, Wetterbericht und Winter, sobald `main.js`
 ```js
 game.events.modifiers()   // Wirkung heute, immer vollständig:
 // { arrivalFactor, seaArrivals, extraNights, sizeFactor: {S,M,L,XL}, kindFactor: {art: faktor},
-//   visitorFactor, serviceIncomeFactor, priceFactor, satisfaction: { outer, all }, winter, reputationBonus }
+//   visitorFactor, serviceIncomeFactor, priceFactor, satisfaction: { outer, all }, winter, ratingBonus }
 game.events.season(tag)   // { year, seasonDay, winterDay, part, winter }
 game.events.forecast(3)   // heute und die nächsten 3 Tage
 game.events.current       // { id, startDay, endDay, event } oder null
