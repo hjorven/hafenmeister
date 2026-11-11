@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#9fd3e6">
+  <title>Hafenmeister: Handy-Prototyp</title>
+  <link rel="stylesheet" href="../../../web/css/base.css">
+  <style>
+    /* Platzhalter fuer css/ui.css: Farben und Grundwerte */
+    :root {
+      --hm-ink: #1d3245;
+      --hm-paper: #fffaf0;
+      --hm-water: #9fd3e6;
+      --hm-accent: #e8a33d;
+      --hm-on-accent: #fff;
+      --hm-warn: #d9534f;
+      --hm-evening: #5a4fa8;
+    }
+    html, body { margin: 0; height: 100%; }
+    body.hm { overflow: hidden; background: var(--hm-water); font-family: system-ui, sans-serif; color: var(--hm-ink); }
+    #stage { position: fixed; inset: 0; touch-action: none; width: auto; height: auto; }
+    #stage canvas { width: 100%; height: 100%; display: block; }
+
+    /* Nur fuer den Prototyp: Hinweis am grossen Bildschirm */
+    .desk-hint { display: none; }
+    @media (min-width: 600px) and (min-height: 500px) {
+      .desk-hint { display: block; position: fixed; inset: auto 16px 16px auto; max-width: 280px; padding: 12px 14px;
+        background: var(--hm-paper); border-radius: 12px; font-size: 14px; box-shadow: 0 2px 10px rgb(0 0 0 / .2); }
+    }
+    /* Nordpfeil, erscheint nur, wenn die Karte gedreht ist */
+    #btn-north {
+      position: fixed; z-index: 11; width: 44px; height: 44px; border-radius: 50%; border: 0;
+      top: calc(env(safe-area-inset-top, 0px) + 54px); right: calc(env(safe-area-inset-right, 0px) + 10px);
+      background: var(--hm-paper); box-shadow: 0 2px 10px rgb(20 40 60 / .18);
+      display: grid; place-items: center; opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    #btn-north.show { opacity: 1; pointer-events: auto; }
+    .ghost { position: fixed; z-index: 40; pointer-events: none; transform: translate(-50%, -60%) scale(1.15);
+      filter: drop-shadow(0 6px 8px rgb(0 0 0 / .3)); }
+    /* Tagesbalken und Sonne im Prototyp (im Spiel kommen sie aus hud.js und gesten.js) */
+    .hm #day { position: relative; overflow: visible; }
+    .hm #day::after { content: ""; position: absolute; bottom: 0; height: 4px; background: var(--hm-accent); }
+  /* Tagesfortschritt als Balken am unteren Rand der Tag-Pille.
+     Der Prototyp setzt style="--day-progress: 0.42" auf #day. */
+  .hm #day::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: 0;
+    height: 4px;
+    width: calc(var(--day-progress, 0) * 100%);
+    background: var(--hm-accent, #e8a33d);
+    transition: width 0.25s linear;
+  }
+  .hm[data-phase="abend"] #day::after { background: var(--hm-evening, #5a4fa8); }
+
+  /* Sonne im Tagesbalken: nach rechts ziehen spult vor (js/ui/gesten.js).
+     Sichtbar 26 px, Tippflaeche 48 px. Mit Sonne darf die Pille nicht
+     abschneiden, der Fortschrittsbalken bleibt innerhalb der Rundung. */
+  .hm #day:has(.sun) { overflow: visible; }
+  .hm #day:has(.sun)::after { left: 14px; width: calc(var(--day-progress, 0) * (100% - 28px)); border-radius: 2px; }
+  .hm #day .sun {
+    position: absolute;
+    left: calc(14px + var(--day-progress, 0) * (100% - 28px) + var(--pull, 0px));
+    bottom: -9px;
+    width: 22px;
+    height: 22px;
+    margin-left: -11px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffd36b 55%, #f2a93b 56%);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+    touch-action: none;
+    cursor: ew-resize;
+  }
+  .hm #day .sun::before {              /* unsichtbare, groessere Tippflaeche */
+    content: "";
+    position: absolute;
+    inset: calc((22px - var(--hm-tap)) / 2);
+  }
+  .hm #day .sun[data-speed]:not([data-speed=""])::after {
+    content: attr(data-speed);
+    position: absolute;
+    top: 26px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 6px;
+    border-radius: 8px;
+    background: var(--hm-ink);
+    color: var(--hm-paper);
+    font-size: 12px;
+  }
+  .hm[data-phase="abend"] #day .sun { background: radial-gradient(circle, #f6efe0 55%, #b9b2d8 56%); }
+
+
+    /* Leiste im Prototyp: Zaehler der wartenden Boote, Automatisch einfahren */
+    .hm #queue .q-btn { flex: 0 0 auto; min-height: 60px; padding: 4px 14px; border: 0; border-radius: 14px;
+      background: var(--hm-paper); display: grid; place-items: center; align-content: center; gap: 1px; }
+    .hm #queue .q-btn.wide { flex: 1 1 auto; justify-items: start; text-align: left; }
+    .hm #queue .q-btn small { font-size: 11px; opacity: .7; }
+    .hm #queue .q-btn.primary { background: var(--hm-accent); color: var(--hm-on-accent); }
+    .hm #queue .q-btn.hurry b { color: var(--hm-warn); }
+    @media (max-height: 499px) and (orientation: landscape) {
+      .hm #queue .q-btn { min-height: 52px; padding: 4px 4px; font-size: 12px; }
+      .hm #queue .q-btn.wide small { display: none; }
+    }
+    .w { display: inline-block; padding: 1px 3px; border-radius: 4px; background: var(--hm-ink); color: var(--hm-paper);
+      font-size: 9px; font-weight: 800; letter-spacing: .02em; }
+  </style>
+  <link rel="stylesheet" href="../../../web/css/ui-phone.css">
+</head>
+<body class="hm" data-phase="tag">
+  <div id="stage"><canvas></canvas></div>
+
+  <header id="hud-top">
+    <div id="money"><span class="label">Geld</span> <b>0 €</b></div>
+    <div id="rep"><span class="label">Ruf</span> <b>3,0</b></div>
+    <div id="day"><span class="label">Tag</span> <b>1</b></div>
+    <span class="spacer"></span>
+    <button type="button" class="hud-btn" id="btn-overview" aria-label="Ganzen Hafen zeigen">Übersicht</button>
+    <button type="button" class="hud-btn" id="btn-pause" aria-label="Pause">Pause</button>
+  </header>
+
+  <button id="btn-north" aria-label="Norden oben">
+    <svg width="22" height="22" viewBox="0 0 22 22"><path d="M11 2 L16 18 L11 14 L6 18 Z" fill="#d9534f"/></svg>
+  </button>
+
+  <footer id="hud-bottom">
+    <div id="queue" data-empty="Keine Boote an der Einfahrt"></div>
+    <span class="spacer"></span>
+    <button id="btn-build" aria-label="Bauen">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M13 4v18M4 13h18"/></svg>
+      Bauen
+    </button>
+  </footer>
+
+  <section id="card" role="dialog" aria-modal="false" hidden></section>
+  <div id="toast" role="status"></div>
+
+  <div class="desk-hint">Handy-Prototyp. Am besten in den Entwicklertools die Handy-Ansicht einschalten oder auf dem Handy öffnen.</div>
+
+  <script type="module" src="./handy-demo.js"></script>
+</body>
+</html>

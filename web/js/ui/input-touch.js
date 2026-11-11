@@ -1,0 +1,121 @@
+// Touch-Ergaenzungen fuer Handy und Tablet. Wird von main.js geladen (init(game)).
+//
+// core/input.js macht schon das Grundlegende: ein Finger zieht, zwei Finger
+// zoomen, kurzer Tipp sendet 'tap'. Dieses Modul legt nur obendrauf, was auf
+// Touch-Geraeten fehlt, und sendet dafuer eigene Ereignisse. Spielregeln kennt
+// es nicht, die Module, die auf die Ereignisse hoeren, entscheiden, was passiert.
+//
+// Ereignisse (game.on(name, fn), pick = Ergebnis von game.pick oder null):
+//   'doubletap'    { x, y, world, pick }   zusaetzlich zoomt die Kamera weich hinein,
+//                                          ganz hineingezoomt geht es zur Uebersicht
+//   'longpress'    { x, y, world, pick }   Finger ruht 0,5 s; liegt er auf einem Boot,
+//                                          hupt es (Ereignis 'horn' an das Ton-Modul)
+//
+// Boot von der Warteboje ziehen, Kassierstrich und Sonne ziehen stehen
+// geraeteuebergreifend in js/ui/gesten.js (Tablet-Thread).
+//
+// Auf diese Spielereignisse gibt es ein kurzes Vibrieren (nur Android):
+//   'boat-docked', 'coin', 'built', 'no-berth'
+
+import { haptic } from './touch-view.js';
+
+export { createTouchView, attachMapGestures, pickNearest, boundsOf, haptic } from './touch-view.js';
+
+const DOUBLE_TAP_MS = 350;
+const DOUBLE_TAP_PX = 30;
+const LONG_PRESS_MS = 500;
+const MOVE_SLOP_PX = 10;
+
+const isTouchDevice = () => matchMedia('(pointer: coarse)').matches;
+
+export function init(game) {
+  const el = game.canvas;
+  const cam = game.camera;
+  const local = (e) => {
+    const r = el.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+  const pick = (p, types) => (typeof game.pick === 'function' ? game.pick(p.x, p.y, types ? { types } : {}) : null);
+  const at = (p, types) => ({ x: p.x, y: p.y, world: cam.screenToWorld(p.x, p.y), pick: pick(p, types) });
+
+  // ---------- Doppeltipp: weich hineinzoomen ----------
+  let lastTap = null;
+  game.on('tap', (t) => {
+    const now = performance.now();
+    if (lastTap && now - lastTap.t < DOUBLE_TAP_MS && Math.hypot(t.x - lastTap.x, t.y - lastTap.y) < DOUBLE_TAP_PX) {
+      lastTap = null;
+      game.emit('doubletap', { ...t, pick: t.pick ?? pick(t) });
+      // ganz hineingezoomt: zurueck zur Uebersicht, sonst doppelt so nah
+      if (cam.viewWidth !== undefined && cam.viewWidth <= cam.minWidth * 1.05) cam.reset();
+      else smoothZoom(cam, 2, t.x, t.y);
+      return;
+    }
+    lastTap = { t: now, x: t.x, y: t.y };
+  });
+
+  // ---------- Langes Druecken ----------
+  const down = new Map();
+  let press = null;
+  el.addEventListener('pointerdown', (e) => {
+    const p = local(e);
+    down.set(e.pointerId, p);
+    clearTimeout(press?.timer);
+    press = null;
+    if (down.size === 1) {
+      press = { id: e.pointerId, start: p, timer: setTimeout(() => {
+        if (!press) return;
+        haptic(30);
+        game.emit('longpress', at(press.start));
+        press = null;
+      }, LONG_PRESS_MS) };
+    }
+  });
+
+  el.addEventListener('pointermove', (e) => {
+    if (!down.has(e.pointerId)) return;
+    const p = local(e);
+    down.set(e.pointerId, p);
+    if (press && press.id === e.pointerId && Math.hypot(p.x - press.start.x, p.y - press.start.y) > MOVE_SLOP_PX) {
+      clearTimeout(press.timer);
+      press = null;
+    }
+  });
+
+  const up = (e) => {
+    down.delete(e.pointerId);
+    if (press && press.id === e.pointerId) { clearTimeout(press.timer); press = null; }
+  };
+  el.addEventListener('pointerup', up);
+  el.addEventListener('pointercancel', up);
+  // Kein Kontextmenue bei langem Druecken (Android, Desktop-Touchscreens)
+  el.addEventListener('contextmenu', (e) => { if (isTouchDevice()) e.preventDefault(); });
+
+  // Boot im Hafen gedrueckt halten: es antwortet mit seinem Horn
+  game.on('longpress', ({ pick: p }) => {
+    if (p?.type !== 'boat' || !game.sim) return;
+    const sim = game.sim;
+    const all = [...(sim.mooredBoats?.() ?? []), ...(sim.waitingBoats?.() ?? [])];
+    const boat = all.find((b) => String(b.id) === String(p.id));
+    if (boat) game.emit('horn', { groesse: boat.size, stoesse: 1 });
+  });
+
+  // ---------- Fuehlbare Rueckmeldung ----------
+  game.on('boat-docked', () => haptic(15));
+  game.on('coin', () => haptic(6));
+  game.on('built', () => haptic(20));
+  game.on('no-berth', () => haptic([20, 40, 20]));
+}
+
+// Mehrere kleine Zoomschritte statt eines Sprungs. Laeuft auch in der Pause.
+function smoothZoom(cam, factor, x, y, ms = 220) {
+  const t0 = performance.now();
+  let done = 0; // bereits angewendeter Anteil (logarithmisch)
+  const step = (now) => {
+    const k = Math.min(1, (now - t0) / ms);
+    const e = 1 - Math.pow(1 - k, 3);
+    cam.zoomAt(Math.pow(factor, e - done), x, y);
+    done = e;
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
