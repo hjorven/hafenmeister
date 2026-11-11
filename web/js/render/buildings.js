@@ -9,13 +9,14 @@
 //
 // Schnittstelle:
 //   game.buildings.setStage(n)      Ausbaustufe 1 bis 6, zeigt und verschiebt die Gebaeude (6 wie 5)
-//   game.buildings.setRegion(name)  'ostsee' | 'daenemark' | 'schweden' | 'nordsee'
+//   game.buildings.setRegion(name)  'ostsee' | 'nordsee' (Gebaeude mischen DE, DK, SE)
 //   game.buildings.group            THREE.Group mit allem
-//   game.buildings.items            Liste { id, name, art, ab, bis, mesh }
+//   game.buildings.items            Liste { id, name, art, ab, bis, stil, mesh }
+//   game.buildings.eingang(id)      { x, y, z, seite } 1 m vor der Tuer, null wenn nicht gebaut
 //   Ereignisse: game.on('stufe', n) und game.on('region', name) wirken wie die beiden Funktionen.
 //   Beim Start gelten game.state.stufe und game.state.region, falls vorhanden.
 //   Antippen: jedes Gebaeude traegt userData.pick = { type: 'building', id } mit der id aus PLAN.
-//   Zum Ausprobieren: index.html?stufe=5&region=daenemark
+//   Zum Ausprobieren: index.html?stufe=5&region=nordsee
 //
 // Lagen stammen aus skripte/konzeptbilder/hafen_von_oben.py (Planeinheiten, y nach Norden).
 // Welt: x = xPlan * 0.62, z = -yPlan * 0.62, y oben, Wasser bei 0.
@@ -24,14 +25,31 @@ import * as THREE from 'three';
 const U = 0.62;
 const W = (xp, yp) => [xp * U, -yp * U];
 
-// ------------------------------------------------------------------ Farben je Region
-// Rollen statt fester Farben, damit eine Region alle Gebaeude auf einmal umfaerben kann.
-export const REGIONEN = {
-  ostsee:      { wand: '#f2ede3', wand2: '#b4553f', dach: '#c2513b', dach2: '#55606e', holz: '#9a6a46', schuppen: '#8c3b2e', kante: '#ffffff', tuer: '#2f5d7c', sockel: '#8b8780' },
-  daenemark:   { wand: '#f1cf63', wand2: '#f4f1ea', dach: '#bf4e36', dach2: '#2e2f33', holz: '#3a3a3e', schuppen: '#2c2c30', kante: '#ffffff', tuer: '#2f6a4f', sockel: '#a19c92' },
-  schweden:    { wand: '#9a2f24', wand2: '#e9c46a', dach: '#4b4d55', dach2: '#a23a2a', holz: '#9a2f24', schuppen: '#a8352a', kante: '#f7f3ea', tuer: '#2f4f6f', sockel: '#c9a48f' },
-  nordsee:     { wand: '#7d3b2f', wand2: '#f0ebe0', dach: '#8a7550', dach2: '#3d424a', holz: '#6d5a48', schuppen: '#556b5a', kante: '#f4f1ea', tuer: '#2e5e3e', sockel: '#7d7a74' },
+// ------------------------------------------------------------------ Bauweisen und Regionen
+// Gebaeude mischen Vorbilder aus deutschen, daenischen und schwedischen Haefen (Plan: nur die
+// Regionen Ostsee und Nordsee). Jedes Gebaeude hat einen Stil, die Region waehlt die Farben dazu.
+// Rollen statt fester Farben: wand, wand2, dach, dach2, holz, schuppen, kante, tuer, sockel.
+const STILE = {
+  backstein: { wand: '#b4553f', wand2: '#f2ede3', dach: '#c2513b', dach2: '#55606e', holz: '#9a6a46', schuppen: '#8c3b2e', kante: '#ffffff', tuer: '#2f5d7c', sockel: '#8b8780' },
+  falurot:   { wand: '#9a2f24', wand2: '#e9c46a', dach: '#4b4d55', dach2: '#3f4248', holz: '#9a2f24', schuppen: '#a8352a', kante: '#f7f3ea', tuer: '#2f4f6f', sockel: '#a39a90' },
+  gelb:      { wand: '#f1cf63', wand2: '#f4f1ea', dach: '#bf4e36', dach2: '#2e2f33', holz: '#3a3a3e', schuppen: '#2c2c30', kante: '#ffffff', tuer: '#2f6a4f', sockel: '#a19c92' },
+  reet:      { wand: '#f4f1ea', wand2: '#e7dccb', dach: '#8a7550', dach2: '#6d5f45', holz: '#6d5a48', schuppen: '#556b5a', kante: '#f4f1ea', tuer: '#2e5e3e', sockel: '#7d7a74' },
+  weiss:     { wand: '#f2ede3', wand2: '#dfe6ea', dach: '#55606e', dach2: '#3d424a', holz: '#9a6a46', schuppen: '#4f7f9b', kante: '#ffffff', tuer: '#2f5d7c', sockel: '#8b8780' },
 };
+// Nordsee: Klinker, Reet und weisser Putz statt Holzhaeusern in Falunrot und gelb gekalkten Haeusern
+const NORDSEE = {
+  backstein: { wand: '#7d3b2f', dach: '#3d424a', schuppen: '#5a2e26' },
+  falurot:   { wand: '#7d3b2f', wand2: '#f0ebe0', dach: '#8a7550', holz: '#6d5a48', schuppen: '#556b5a' },
+  gelb:      { wand: '#f0ebe0', dach: '#3d424a', holz: '#556b5a', schuppen: '#556b5a' },
+  reet:      {},
+  weiss:     { dach: '#3d424a' },
+};
+export const REGIONEN = ['ostsee', 'nordsee'];
+const STIL_FOLGE = ['backstein', 'falurot', 'gelb', 'reet', 'weiss'];
+
+function farbenFuer(stil, region) {
+  return region === 'nordsee' ? { ...STILE[stil], ...NORDSEE[stil] } : STILE[stil];
+}
 
 const FEST = {
   glas: '#8fc3d6', glasNacht: '#ffd98a', markise1: '#e45b4f', markise2: '#ffffff', beton: '#cfcac0',
@@ -337,16 +355,16 @@ function rnd(seed) {
 // p: Lage in Planeinheiten, entweder fest [x, y] oder je Stufe { 1: [x, y], 3: [x, y] } (gilt ab dieser Stufe).
 // dreh: Drehung um die Hochachse in Grad, 0 = Wasserseite nach Norden.
 const PLAN = [
-  { id: 'toilette',      name: 'Toilette',          art: 'toilette',      ab: 1, p: { 1: [-95, -24], 3: [-95, -32] } },
-  { id: 'hafenmeister',  name: 'Hafenmeister',      art: 'hafenmeister',  ab: 2, p: { 2: [-72, -22], 3: [-72, -30] } },
-  { id: 'dusche',        name: 'Dusche',            art: 'dusche',        ab: 2, p: [-118, -36] },
-  { id: 'kiosk',         name: 'Kiosk',             art: 'kiosk',         ab: 2, p: { 2: [-36, -24], 3: [-36, -30] } },
-  { id: 'schuppen-w',    name: 'Bootsschuppen',     art: 'bootsschuppen', ab: 2, p: [-157, -22], opt: { anzahl: 3 } },
-  { id: 'hafenbuero',    name: 'Hafenbüro',         art: 'hafenbuero',    ab: 3, p: [6, -32] },
-  { id: 'sanitaer',      name: 'Sanitärgebäude',    art: 'sanitaer',      ab: 3, p: [-60, -54] },
-  { id: 'restaurant',    name: 'Restaurant',        art: 'restaurant',    ab: 4, p: [48, -34] },
-  { id: 'speicher',      name: 'Hafenspeicher',     art: 'speicher',      ab: 4, p: [112, -30] },
-  { id: 'speicher-kai',  name: 'Speicher am Kai',   art: 'speicher',      ab: 5, p: [56, 204], opt: { l: 8.6, b: 5.0 } },
+  { id: 'toilette',      name: 'Toilette',          art: 'toilette',      ab: 1, p: { 1: [-95, -24], 3: [-95, -32] }, stil: 'falurot' },
+  { id: 'hafenmeister',  name: 'Hafenmeister',      art: 'hafenmeister',  ab: 2, p: { 2: [-72, -22], 3: [-72, -30] }, stil: 'weiss' },
+  { id: 'dusche',        name: 'Dusche',            art: 'dusche',        ab: 2, p: [-118, -36], stil: 'falurot' },
+  { id: 'kiosk',         name: 'Kiosk',             art: 'kiosk',         ab: 2, p: { 2: [-36, -24], 3: [-36, -30] }, stil: 'gelb' },
+  { id: 'schuppen-w',    name: 'Bootsschuppen',     art: 'bootsschuppen', ab: 2, p: [-157, -22], opt: { anzahl: 3 }, stil: 'falurot' },
+  { id: 'hafenbuero',    name: 'Hafenbüro',         art: 'hafenbuero',    ab: 3, p: [6, -32], stil: 'backstein' },
+  { id: 'sanitaer',      name: 'Sanitärgebäude',    art: 'sanitaer',      ab: 3, p: [-60, -54], stil: 'falurot' },
+  { id: 'restaurant',    name: 'Restaurant',        art: 'restaurant',    ab: 4, p: [48, -34], stil: 'reet' },
+  { id: 'speicher',      name: 'Hafenspeicher',     art: 'speicher',      ab: 4, p: [112, -30], stil: 'backstein' },
+  { id: 'speicher-kai',  name: 'Speicher am Kai',   art: 'speicher',      ab: 5, p: [56, 204], opt: { l: 8.6, b: 5.0 }, stil: 'backstein' },
   { id: 'fischbuden',    name: 'Fischbuden',        art: 'kiosk',         ab: 5, p: [108, 204], opt: { breit: 3.4, tief: 2.8 } },
   { id: 'fischbuden2',   name: 'Fischbuden',        art: 'kiosk',         ab: 5, p: [117, 204], opt: { breit: 3.4, tief: 2.8 } },
   // Dorf hinter dem Hafen: waechst mit den Stufen
@@ -383,10 +401,12 @@ function lageInStufe(p, stufe) {
 // ------------------------------------------------------------------ Modul
 export function init(game) {
   const regionStart = new URLSearchParams(location.search).get('region');
-  const ALIAS = { 'ostsee-de': 'ostsee', deutschland: 'ostsee', dk: 'daenemark', se: 'schweden' };
-  const regionKey = (r) => (REGIONEN[r] ? r : ALIAS[r]);
+  // Fruehere Namen (daenemark, schweden) zaehlen zur Ostsee
+  const regionKey = (r) => (r === 'nordsee' ? 'nordsee' : r ? 'ostsee' : null);
   let regionName = regionKey(regionStart) ?? regionKey(game.state?.region) ?? 'ostsee';
-  const M = mats({ ...REGIONEN[regionName], ...FEST });
+  const F = mats(FEST);
+  const SM = Object.fromEntries(Object.keys(STILE).map((st) => [st, { ...F, ...mats(farbenFuer(st, regionName)) }]));
+  const M = SM.backstein;
 
   const group = new THREE.Group();
   group.name = 'gebaeude';
@@ -397,33 +417,36 @@ export function init(game) {
     return Number.isFinite(h) ? h : fallback;
   };
 
-  const items = PLAN.map((e) => {
-    const mesh = BAU[e.art](M, e.opt ?? {});
+  const items = PLAN.map((e, i) => {
+    const stil = e.stil ?? STIL_FOLGE[i % STIL_FOLGE.length];
+    const mesh = BAU[e.art](SM[stil], e.opt ?? {});
     mesh.name = e.id;
     mesh.userData.pick = { type: 'building', id: e.id };
-    mesh.visible = false;
-    group.add(mesh);
-    return { ...e, mesh };
+    return { ...e, stil, mesh };
   });
 
   const wb = wellenbrecher(M, WELLENBRECHER.map(([x, y]) => W(x, y)));
   wb.name = 'wellenbrecher';
-  wb.visible = false;
   wb.userData.pick = { type: 'building', id: 'wellenbrecher' };
-  group.add(wb);
   items.push({ id: 'wellenbrecher', name: 'Schwimmwellenbrecher', art: 'wellenbrecher', ab: 4, mesh: wb });
 
   const lichter = [];
-  group.traverse((o) => { if (o.userData.blink) lichter.push(o.userData.blink); });
   const flaggen = [];
-  group.traverse((o) => { if (o.userData.flagge) flaggen.push(o.userData.flagge); });
+  for (const it of items) {
+    it.mesh.traverse((o) => {
+      if (o.userData.blink) lichter.push(o.userData.blink);
+      if (o.userData.flagge) flaggen.push(o.userData.flagge);
+    });
+  }
 
   let stufe = 1;
   function setStage(n) {
     stufe = Math.max(1, Math.min(6, Math.round(Number(n) || 1)));
     for (const it of items) {
       const sichtbar = stufe >= it.ab && (it.bis == null || stufe <= it.bis);
-      it.mesh.visible = sichtbar;
+      // Unsichtbares aus der Szene nehmen statt visible = false, damit game.pick es nicht trifft
+      if (sichtbar && !it.mesh.parent) group.add(it.mesh);
+      if (!sichtbar && it.mesh.parent) group.remove(it.mesh);
       if (!sichtbar || !it.p) continue;
       const [xp, yp] = lageInStufe(it.p, stufe);
       const [x, z] = W(xp, yp);
@@ -436,10 +459,11 @@ export function init(game) {
 
   function setRegion(name) {
     const key = regionKey(name);
-    const farben = REGIONEN[key];
-    if (!farben) return false;
+    if (!key) return false;
     regionName = key;
-    for (const [k, c] of Object.entries(farben)) M[k].color.set(c);
+    for (const st of Object.keys(STILE)) {
+      for (const [k, c] of Object.entries(farbenFuer(st, key))) SM[st][k].color.set(c);
+    }
     api.region = key;
     return true;
   }
@@ -454,10 +478,21 @@ export function init(game) {
       b.mat.color.copy(an ? b.an : b.aus);
     }
     for (const f of flaggen) f.rotation.y = Math.sin(zeit * 2.2 + f.id) * 0.25;
-    M.glas.color.set(FEST.glas).lerp(new THREE.Color(FEST.glasNacht), nacht * 0.9);
+    F.glas.color.set(FEST.glas).lerp(new THREE.Color(FEST.glasNacht), nacht * 0.9);
   });
 
-  const api = { group, items, setStage, setRegion, stage: stufe, region: regionName, regionen: Object.keys(REGIONEN) };
+  // Eingang eines Gebaeudes als Weltpunkt 1 m vor der Tuer. Wohnhaeuser haben die Tuer nach Sueden
+  // (Strassenseite), alle anderen zur Wasserseite nach Norden. Liefert null, wenn es nicht steht.
+  const _box = new THREE.Box3();
+  function eingang(id) {
+    const it = items.find((i) => i.id === id);
+    if (!it || !it.mesh.parent || !it.p) return null;
+    _box.setFromObject(it.mesh);
+    const sued = it.art === 'wohnhaus';
+    return { x: it.mesh.position.x, y: it.mesh.position.y, z: sued ? _box.max.z + 1 : _box.min.z - 1, seite: sued ? 'sued' : 'nord' };
+  }
+
+  const api = { group, items, eingang, setStage, setRegion, stage: stufe, region: regionName, regionen: REGIONEN };
   game.buildings = api;
   game.on('stufe', (n) => setStage(typeof n === 'object' ? n?.stufe : n));
   game.on('region', (r) => setRegion(typeof r === 'object' ? r?.name ?? r?.region : r));
