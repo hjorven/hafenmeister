@@ -147,6 +147,8 @@ export function init(game) {
       return closeCard();
     }
     const fitting = sim.fittingBerths(b.id);
+    // Sitzt der Knopf "Einfahren" schon am Boot (ui/gesten.js), zeigt die Karte keinen zweiten.
+    const amBoot = game.gesten?.einfahrenAmBoot ?? Boolean(game.gesten && game.boatsVisible);
     const wishes = b.wishes.length ? b.wishes.map((w) => WISH_LABEL[w] ?? w).join(', ') : 'keine';
     fill(card,
       el('h2', {}, b.name),
@@ -158,12 +160,12 @@ export function init(game) {
         `Größe ${b.size} · ${meters(b.length)} lang, ${meters(b.beam)} breit, Tiefgang ${meters(b.draft)} · ${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}`,
       ),
       el('p', {}, `Wünsche: ${wishes}`),
-      el('p', { class: 'card-hint' }, fitting.length ? `${b.name}: ${fitting.length} passende Plätze leuchten. Ring antippen oder:` : `${b.name}: gerade ist kein passender Platz frei.`),
+      el('p', { class: 'card-hint' }, !fitting.length ? `${b.name}: gerade ist kein passender Platz frei.` : amBoot ? `${b.name}: ${fitting.length} passende Plätze leuchten. Boot auf einen Ring ziehen oder „Einfahren“ am Boot antippen.` : `${b.name}: ${fitting.length} passende Plätze leuchten. Ring antippen oder:`),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
       el(
         'div',
         { class: 'card-actions' },
-        el('button', { type: 'button', class: 'hud-btn', disabled: !fitting.length, onclick: () => sim.autoEnter(b.id) }, 'Automatisch einfahren'),
+        amBoot ? null : el('button', { type: 'button', class: 'hud-btn', disabled: !fitting.length, onclick: () => sim.autoEnter(b.id) }, 'Automatisch einfahren'),
         el('button', { type: 'button', class: 'hud-btn', onclick: () => { sim.dismiss(b.id); closeCard(); } }, 'Abweisen'),
         el('button', { type: 'button', class: 'hud-btn', onclick: () => { sim.select(null); closeCard(); } }, 'Schließen'),
       ),
