@@ -148,6 +148,46 @@ export function init(game) {
     api.netz = netz;
   }
 
+  // Nach dem Kauf eines Gebaeudes (Ereignis 'build') das Netz neu bauen, ohne dass jemand springt:
+  // alle Knoten-Verweise werden auf das neue Netz umgerechnet, Laufende gehen vom aktuellen Punkt weiter.
+  function netzErneuern() {
+    const alt = netz;
+    if (!alt) return neuesNetz();
+    neuesNetz();
+    const schluessel = (n) => `${n.art === 'boot' || n.art === 'wasser' ? n.art : ''}${n.x.toFixed(2)},${n.y.toFixed(2)}`;
+    const neu = new Map();
+    netz.nodes.forEach((n, i) => { const k = schluessel(n); if (!neu.has(k)) neu.set(k, i); });
+    const altPlatz = new Map();
+    for (const [id, p] of alt.plaetze) altPlatz.set(p.node, id);
+    const map = (i) => {
+      if (i == null || i < 0 || !alt.nodes[i]) return i;
+      if (altPlatz.has(i)) return netz.plaetze.get(altPlatz.get(i))?.node ?? -1;
+      const n = alt.nodes[i];
+      return neu.get(schluessel(n)) ?? netz.naechster(n.x, n.y, null);
+    };
+    for (const b of boote.values()) b.node = netz.plaetze.get(b.platz)?.node ?? map(b.node);
+    for (const a of agenten) {
+      if (a.zustand === 'entfernt') continue;
+      if (a.ziel) a.ziel = netz.ziele.find((z) => z.node === map(a.ziel.node)) ?? a.ziel;
+      if (a.befehl) a.befehl.node = map(a.befehl.node);
+      if (a.zustand === 'geht' && a.pfad) {
+        const ziel = map(a.zielNode);
+        const hier = netz.naechster(a.x / U, -a.z / U, null);
+        a.node = hier;
+        const w = knotenWelt(hier, a.klasse);
+        a.pfad = [{ n: hier, x: a.x, y: a.y, z: a.z }, { n: hier, ...w }];
+        a.i = 0; a.t = 0;
+        geheZu(a, ziel, a.danach);
+      } else {
+        a.node = map(a.node);
+      }
+    }
+    if (rundgang) {
+      rundgang.start = bueroKnoten();
+      for (const h of rundgang.halte) h.node = netz.plaetze.get(h.platz)?.einstieg ?? map(h.node);
+    }
+  }
+
   // ---------------------------------------------------------------- Figuren
   function neueFigur({ boot = null, node, klasse = 'M', sichtbar = true, buendel = 1, typ = boot == null ? 'ort' : 'crew' }) {
     if (agenten.length >= max) return null;
@@ -224,7 +264,8 @@ export function init(game) {
     if (a.typ === 'hafenmeister') return rundgangWeiter(a);
     const bootDaten = a.boot != null ? boote.get(a.boot) : null;
     if (bootDaten) {
-      if (bootDaten.ablegen || (abend && !a.bleibtAbends)) return heimAnBord(a, bootDaten);
+      // Wer abends erst ankommt, geht trotzdem einmal an Land (Dusche, Toilette, Restaurant)
+      if (bootDaten.ablegen || ((abend || bootDaten.abreise) && !a.bleibtAbends && !a.ersterGang)) return heimAnBord(a, bootDaten);
       if (a.zustand !== 'anbord' && Math.random() < P.ZURUECK_AN_BORD && a.ziel) return heimAnBord(a, bootDaten);
     } else if (a.besuche <= 0 || (abend && Math.random() < 0.5)) {
       // Spaziergaenger geht nach Hause oder aus dem Bild, Badegaeste ueber die Duenen
@@ -240,6 +281,7 @@ export function init(game) {
     if (!z) { a.zustand = 'steht'; a.uhr = zufall(5, 10); return; }
     a.ziel = z;
     a.besuche--;
+    a.ersterGang = false;
     befehl(a, z.node, 'ziel');
   }
 
@@ -301,6 +343,7 @@ export function init(game) {
   // noch nicht bezahlt hat, kurz an und sendet 'hafenmeister:halt' { boot, platz }. Die Spielregeln
   // koennen darauf kassieren. Danach geht er zurueck ins Buero.
   let rundgang = null;   // { agent, halte: [{ platz, boot, node }] }
+  let rundgangHeute = false;
 
   function bueroKnoten() {
     for (const art of ['hafenmeister', 'hafenbuero']) {
@@ -354,10 +397,11 @@ export function init(game) {
     const a = neueFigur({ node: start, typ: 'hafenmeister' });
     if (!a) return false;
     a.koerperFarbe = new THREE.Color('#2e3f5c');
-    a.tempo = 1.25;
+    a.tempo = P.RUNDGANG_TEMPO;   // der Abend ist kurz, er geht zuegig
     a.zustand = 'drinnen';
-    a.uhr = sofort ? 0.5 : zufall(4, 12);
+    a.uhr = sofort ? 0.5 : zufall(1, 3);
     rundgang = { agent: a, halte, start };
+    rundgangHeute = true;
     api.rundgang = rundgang;
     return true;
   }
@@ -366,6 +410,9 @@ export function init(game) {
     const r = rundgang;
     if (!r || r.agent !== a) return entfernen(a);
     // Nur dort halten, wo noch nicht bezahlt ist; an den anderen Plaetzen geht er vorbei
+    // Plaetze, deren Boot inzwischen abgelegt hat, laesst er aus
+    const belegt = belegtePlaetze();
+    while (r.halte.length && String(belegt.get(r.halte[0].platz)) !== String(r.halte[0].boot)) r.halte.shift();
     const naechster = r.halte.shift();
     if (!naechster) {
       if (a.node === r.start) return rundgangEnde(a);
@@ -390,6 +437,15 @@ export function init(game) {
     }
     // Bezahlstatus erst jetzt nochmal pruefen: vielleicht hat der Spieler schon kassiert
     if (istUnbezahlt(h.boot, h.platz)) game.emit('hafenmeister:halt', { boot: h.boot, platz: h.platz });
+  }
+
+  function rundgangAbbrechen() {
+    const r = rundgang;
+    if (!r) return;
+    r.halte.length = 0;
+    const a = r.agent;
+    if (a.zustand === 'drinnen') return rundgangEnde(a);
+    if (a.danach !== 'feierabend') befehl(a, r.start, 'feierabend');
   }
 
   function rundgangEnde(a) {
@@ -422,6 +478,7 @@ export function init(game) {
       a.zustand = 'anbord';
       a.uhr = 2 + k * zufall(1.2, 2.4);          // nacheinander von Bord
       a.bleibtAbends = Math.random() < P.ABENDS_AN_LAND;
+      a.ersterGang = true;
       b.agenten.push(a);
     }
     // Tagesgaeste grosser Schiffe gehen als Gruppe in den Ort
@@ -728,15 +785,19 @@ export function init(game) {
     bootAngelegt({ ...(w?.info ?? {}), ...info, platz: w?.info?.platz ?? info.berth, groesse: w?.info?.groesse ?? info.size });
   });
   game.on('boot:ablegen', (info) => { const id = info?.id ?? info; wartend.delete(String(id)); bootLegtAb(id); });
+  // Nachts abgerechnet, legt am Vormittag ab (Spielregeln: 'sim:departed', dann 'boot:ablegen')
+  game.on('sim:departed', (e) => { const b = boote.get(String(e?.boatId ?? e?.id)); if (b) b.abreise = true; });
   game.on('boat:cast-off', (info) => bootLegtAb(info?.id ?? info));
   game.on('boat:left', (info) => bootWeg(info?.id ?? info));
+  // Gekauftes Gebaeude: buildings.js stellt es im selben Ereignis auf, danach Netz erneuern
+  game.on('build', () => { if (netz) queueMicrotask(netzErneuern); });
+  game.on('sim:change', (e) => { if (netz && e?.reason === 'load') queueMicrotask(netzErneuern); });
   game.on('stufe', (n) => setStage(typeof n === 'object' ? n?.stufe ?? n?.stage : n));
   game.on('season', (s) => {
     const part = typeof s === 'object' ? s?.part : s;
     if (!part || part === jahreszeit) return;
     jahreszeit = part;
     if (netz) anpassen();
-    if (abend) rundgangStarten();
   });
   game.on('weather', (w) => {
     const neu = (w?.rain ?? 0) >= 0.3 || (w?.snow ?? 0) > 0.5;
@@ -749,12 +810,19 @@ export function init(game) {
     if (neu === abend) return;
     abend = neu;
     // Morgens gehen die Crews wieder an Land
-    if (!abend) for (const b of boote.values()) for (const a of b.agenten) if (a.zustand === 'anbord' && !b.ablegen) a.uhr = zufall(1, 30);
+    // (ausser bei Booten, die heute Vormittag ablegen: die Crew bleibt an Bord und macht klar)
+    if (!abend) for (const b of boote.values()) for (const a of b.agenten) {
+      // Wer abends im Restaurant sass, ist in der Nacht an Bord gegangen
+      if (a.zustand === 'drinnen' && a.uhr > 1e8) { a.zustand = 'anbord'; a.node = b.node; a.pfad = null; a.ziel = null; }
+      if (a.zustand === 'anbord' && !b.ablegen) a.uhr = b.abreise ? 1e9 : zufall(1, 30);
+    }
     // Abends: wer nicht im Restaurant bleibt, geht beim naechsten Halt an Bord
     if (abend) for (const a of agenten) if (a.zustand === 'verweilt' || a.zustand === 'drinnen') a.uhr = Math.min(a.uhr, zufall(1, 8));
     if (netz) anpassen();
-    // Abends geht der Hafenmeister ueber die Stege (docs/echter-hafen.md, A4)
+    // Abends geht der Hafenmeister ueber die Stege (docs/echter-hafen.md, A4), falls er nicht
+    // schon am spaeten Nachmittag losgegangen ist. Morgens bricht er ab und geht ins Buero.
     if (abend) rundgangStarten();
+    else { rundgangAbbrechen(); rundgangHeute = false; }
   });
   game.on('ready', () => {
     const tag = game.state?.day ?? game.state?.tag ?? 1;
@@ -768,13 +836,20 @@ export function init(game) {
 
   game.onTick((dt) => {
     if (!netz) return;
+    if (!abend && !rundgangHeute && !rundgang && (game.sim?.tagesAnteil?.() ?? 0) >= P.RUNDGANG_AB) rundgangStarten();
     if (dt > 0) {
-      const d = Math.min(dt, 0.25);
-      for (const [id, w] of wartend) {
-        w.frist -= d;
-        if (w.frist <= 0) { wartend.delete(id); bootAngelegt(w.info); }
+      // Bei Vorspulen oder langsamen Geraeten in Teilschritten rechnen, damit niemand langsamer
+      // laeuft als die Spieluhr (hoechstens 2 s Spielzeit je Bild)
+      let rest = Math.min(dt, 2);
+      while (rest > 1e-6) {
+        const d = Math.min(rest, 0.25);
+        rest -= d;
+        for (const [id, w] of wartend) {
+          w.frist -= d;
+          if (w.frist <= 0) { wartend.delete(id); bootAngelegt(w.info); }
+        }
+        schritt(d);
       }
-      schritt(d);
     }
     zeichnen();
   });
