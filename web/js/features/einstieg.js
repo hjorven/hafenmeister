@@ -36,6 +36,9 @@ const CSS = `
 .hm-tipp .zaehler { font-size: 12px; font-weight: 600; letter-spacing: .04em; color: #7a8796; margin-bottom: 4px; }
 .hm-tipp .titel { font-weight: 700; font-size: 16px; margin: 0 0 4px; }
 .hm-tipp p { margin: 0; }
+.hm-tipp .kurz { display: none; }
+.hm-tipp.eng .lang, .hm-tipp.eng .zaehler { display: none; }
+.hm-tipp.eng .kurz { display: block; }
 .hm-tipp .knoepfe { display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 10px; }
 .hm-tipp button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 20px; cursor: pointer;
   font: 600 14px system-ui, -apple-system, sans-serif; }
@@ -53,18 +56,21 @@ export const TEXTE = {
   willkommen: {
     titel: 'Willkommen im Hafen',
     text: 'Boote, die einen Liegeplatz suchen, kommen übers Wasser und warten an den gelben Bojen. Das erste ist schon unterwegs.',
+    kurz: 'Boote warten an den gelben Bojen. Das erste ist unterwegs.',
   },
   anlegen: {
     titel: 'Ein Boot wartet',
     text: TOUCH
       ? 'Zieh es mit dem Finger auf einen leuchtenden Platz (grünes Schild heißt frei). Oder tipp es an und lass es einfahren.'
       : 'Zieh es mit der Maus auf einen leuchtenden Platz (grünes Schild heißt frei). Oder klick es an und lass es einfahren.',
+    kurz: TOUCH ? 'Boot auf einen leuchtenden Platz ziehen oder antippen und einfahren lassen.' : 'Boot auf einen leuchtenden Platz ziehen oder anklicken und einfahren lassen.',
   },
   muenzen: {
     titel: 'Liegegeld kassieren',
     text: TOUCH
       ? 'Angelegt. Das Boot zahlt sein Liegegeld: Tipp auf die Münze am Boot. Liegen mehrere da, streich in einem Zug über alle. Oder unten „Kassieren“ drücken.'
       : 'Angelegt. Das Boot zahlt sein Liegegeld: Klick auf die Münze am Boot. Liegen mehrere da, fahr mit gedrückter Maustaste in einem Zug über alle. Oder unten „Kassieren“ drücken.',
+    kurz: TOUCH ? 'Tipp auf die Münze oder auf „Kassieren“.' : 'Klick auf die Münze oder auf „Kassieren“.',
   },
   sonne: {
     titel: 'Der Tag läuft',
@@ -331,7 +337,9 @@ export async function init(game) {
       w.addEventListener('click', () => schritt(id));
       k.append(w);
     }
-    tipp.append(z, h, p, k);
+    p.className = 'lang';
+    const pk = document.createElement('p'); pk.className = 'kurz'; pk.textContent = t.kurz ?? t.text;
+    tipp.append(z, h, p, pk, k);
     tipp.hidden = false;
     try { game.audio?.sfx?.('hinweis'); } catch { /* Ton ist nicht wichtig */ }
   }
@@ -359,12 +367,21 @@ export async function init(game) {
       if (r.left - h.left > h.width * 0.6 && r.top - h.top > 40) rechts = Math.min(rechts, r.left - h.left - 8);
     }
     tipp.style.width = `${Math.round(Math.min(360, rechts - 12))}px`;
-    const hoehe = tipp.offsetHeight;
+    // Kleines Handy: beim Anlegen gleich die Kurzfassung, damit der Steg mit den leuchtenden Plätzen frei bleibt
+    tipp.classList.toggle('eng', aktuell === 'anlegen' && h.height < 700);
+    let hoehe = tipp.offsetHeight;
     const trifft = (y) => k && k.y + k.h / 2 > y - 6 && k.y - k.h / 2 < y + hoehe + 6 && k.x - k.w / 2 < 12 + tipp.offsetWidth;
     const deckung = (y) => (k ? Math.max(0, Math.min(k.y + k.h / 2, y + hoehe) - Math.max(k.y - k.h / 2, y)) : 0);
     const yUnten = Math.max(oben, unten - hoehe);
     let y = oben;
     if (trifft(oben) && deckung(yUnten) < deckung(oben)) y = yUnten;
+    // Verdeckt die Blase oben wie unten das Ziel (kleines Handy), reicht die Kurzfassung
+    if (trifft(y)) {
+      tipp.classList.add('eng');
+      hoehe = tipp.offsetHeight;
+      const yU = Math.max(oben, unten - hoehe);
+      y = !trifft(oben) ? oben : !trifft(yU) ? yU : (deckung(yU) < deckung(oben) ? yU : oben);
+    }
     tipp.style.top = `${Math.round(y)}px`;
   }
 
