@@ -234,17 +234,20 @@ class BoatAnimManager {
       if (!mv || b.ghost > 0) {
         b.yieldF = 1;
         b.laneWant = 0;
+        b.room = Infinity;
         b.ghost = Math.max(0, b.ghost - dt);
         continue;
       }
-      let y = 1, lane = 0;
+      let y = 1, lane = 0, room = Infinity;
       for (const o of list) {
         if (o === b) continue;
         const hit = b.blockedBy(o);
         if (!hit) continue;
+        // nie in ein anderes Boot hineinfahren, auch mit Vorfahrt nicht (Platz bis zum anderen Rumpf)
+        room = Math.min(room, hit.gap);
         if (o.movingTask() && o.ghost <= 0 && o.blockedBy(b) && b.priorityOver(o)) {
-          // beide stehen sich im Weg: wer Vorfahrt hat, faehrt, weicht aber trotzdem etwas aus
-          if (hit.lane) lane = Math.abs(hit.lane) > Math.abs(lane) ? hit.lane * 0.5 : lane;
+          // beide stehen sich im Weg: wer Vorfahrt hat, faehrt und weicht dabei aus, das andere wartet
+          if (hit.lane && Math.abs(hit.lane) > Math.abs(lane)) lane = hit.lane;
           continue;
         }
         y = Math.min(y, hit.y);
@@ -252,8 +255,9 @@ class BoatAnimManager {
       }
       b.yieldF = y;
       b.laneWant = lane;
+      b.room = room;
       // nie ewig blockieren: nach 12 s stillstand kurz ohne Verkehrsregeln weiter
-      b.blockedFor = y < 0.08 && b.speed < 0.1 ? b.blockedFor + dt : 0;
+      b.blockedFor = (y < 0.08 || room < 0.6 || b.blocked) && b.speed < 0.1 ? b.blockedFor + dt : 0;
       if (b.blockedFor > 12) { b.ghost = 4; b.blockedFor = 0; }
     }
   }
@@ -326,6 +330,22 @@ export function addBoat(game, model, opts) {
 const _v = new THREE.Vector3();
 const _t = new THREE.Vector3();
 
+function hull(x, z, h, L, B) {
+  const fx = Math.cos(h), fz = -Math.sin(h), px = -fz, pz = fx, l = L / 2, w = B / 2;
+  return [[1, 1], [1, -1], [-1, -1], [-1, 1]].map(([i, j]) => [x + fx * l * i + px * w * j, z + fz * l * i + pz * w * j]);
+}
+function sat(A, B) {
+  for (const P of [A, B]) for (let i = 0; i < 4; i++) {
+    const [x1, y1] = P[i], [x2, y2] = P[(i + 1) % 4];
+    const nx = y2 - y1, ny = x1 - x2;
+    let a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity;
+    for (const [x, y] of A) { const d = x * nx + y * ny; a0 = Math.min(a0, d); a1 = Math.max(a1, d); }
+    for (const [x, y] of B) { const d = x * nx + y * ny; b0 = Math.min(b0, d); b1 = Math.max(b1, d); }
+    if (a1 < b0 || b1 < a0) return false;
+  }
+  return true;
+}
+
 class PathTask {
   constructor(points, opts) { this.points = points; this.opts = opts; }
   start(b) {
@@ -382,7 +402,12 @@ class PathTask {
     }
     b.setSpeed(target, dt, o.brake);
     if (b.yieldF < 0.05) b.speed = approach(b.speed, 0, b.cfg.accel * 2.5 * dt);
-    this.s = Math.min(this.len, this.s + b.speed * dt);
+    // Rumpf an Rumpf: nur so weit, wie vor dem Bug Platz ist (Seitenversatz darf weiterlaufen)
+    let weg = b.speed * dt;
+    const platz = (b.room ?? Infinity) - 0.4;
+    if (weg > platz) { weg = Math.max(0, platz); b.speed = Math.min(b.speed, weg / Math.max(dt, 1e-3)); }
+    const s0 = this.s;
+    this.s = Math.min(this.len, this.s + weg);
     const u = this.len > 0 ? this.s / this.len : 1;
     this.curve.getPointAt(u, _v);
     this.curve.getTangentAt(u, _t);
@@ -391,9 +416,28 @@ class PathTask {
     const L = b.info.length;
     const start = clamp(0.5 + this.s / L, 0, 1);
     const fade = o.stop === false ? start : clamp(remaining / (L * 2.5) - 0.2, 0, 1) * start;
+    const lane0 = b.lane;
     b.lane = approach(b.lane, b.laneWant * fade, (0.8 + b.info.beam * 0.3) * dt);
-    b.x = _v.x + Math.sin(hd) * b.lane;
-    b.z = _v.z + Math.cos(hd) * b.lane;
+    let nx = _v.x + Math.sin(hd) * b.lane, nz = _v.z + Math.cos(hd) * b.lane;
+    // harte Regel: ein fahrendes Boot schiebt sich nie in ein anderes hinein (nicht im Notfall-Durchlass)
+    if (b.ghost <= 0 && this.s > s0 + 1e-4 || b.ghost <= 0 && b.lane !== lane0) {
+      const vorher = b.hitsAt(b.x, b.z, b.heading);
+      const nachher = b.hitsAt(nx, nz, hd);
+      if (nachher && nachher !== vorher) {
+        b.lane = lane0;
+        nx = _v.x + Math.sin(hd) * b.lane; nz = _v.z + Math.cos(hd) * b.lane;
+        const n2 = b.hitsAt(nx, nz, hd);
+        if (n2 && n2 !== vorher) {
+          this.s = s0; b.speed = 0;
+          this.curve.getPointAt(this.len > 0 ? this.s / this.len : 1, _v);
+          b.blocked = true;
+          return false;
+        }
+      }
+    }
+    b.blocked = false;
+    b.x = nx;
+    b.z = nz;
     b.steer(hd, dt, 6);
     b.thrusters = o.thrusters ? clamp(1 - remaining / (b.info.length * 1.2), 0, 1) : 0;
     if (remaining < 0.02) {
@@ -989,15 +1033,29 @@ class BoatAnim {
     const oDir = p.h + (o.reverse ? Math.PI : 0);
     if (oMoving && Math.cos(oDir - dir) > 0.4) {
       // hinterherfahren: Abstand halten
-      return { y: clamp((gap - 1.2) / (1.5 + this.info.length * 0.4), 0, 1), lane: 0 };
+      return { y: clamp((gap - 1.2) / (1.5 + this.info.length * 0.4), 0, 1), lane: 0, gap };
     }
     const need = clear - Math.abs(lat) + 0.3;
     const side = oMoving ? 1 : lat > 0 ? -1 : 1;
     const cap = this.info.beam + o.info.beam + 2;
-    return { y: clamp(gap / (2 + this.info.length), 0, 1) * 0.8 + (gap > 0 ? 0.1 : 0), lane: clamp(this.lane + side * need, -cap, cap) };
+    return { y: clamp(gap / (2 + this.info.length), 0, 1) * 0.8 + (gap > 0 ? 0.1 : 0), lane: clamp(this.lane + side * need, -cap, cap), gap };
   }
 
   /** Liegt ein anderes Boot im Kreis, den Bug und Heck beim Drehen auf der Stelle ueberstreichen? */
+  /** Ueberlappt der Rumpf an (x, z, h) ein anderes sichtbares Boot? (gedrehte Rechtecke, leicht verkleinert) */
+  hitsAt(x, z, h) {
+    const A = hull(x, z, h, this.info.length * 0.92, this.info.beam * 0.92);
+    for (const o of this.mgr.boats) {
+      if (o === this || o.model.visible === false || o.ghost > 0) continue;
+      // in die eigene Box hinein: Nachbarn in ihren Boxen begrenzen die Box, nicht die Fahrt
+      if (o.moored && o.berth && o.berth.kind !== 'buoy' && (this.task?.remaining ?? 1e9) < this.info.length * 1.5) continue;
+      const p = o.pose();
+      if (Math.hypot(p.x - x, p.z - z) > (this.info.length + o.info.length) / 2) continue;
+      if (sat(A, hull(p.x, p.z, p.h, o.info.length * 0.92, o.info.beam * 0.92))) return o;
+    }
+    return null;
+  }
+
   sweepBlocked() {
     const r = this.info.length / 2;
     for (const o of this.mgr.boats) {
