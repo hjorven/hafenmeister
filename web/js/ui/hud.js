@@ -248,6 +248,14 @@ export function init(game) {
         {},
         `Nächste Ausbaustufe: Gäste ${adv.guests}, nötig ${adv.goal.guests} · Ruf ${num1(adv.reputation)}, nötig ${num1(adv.goal.reputation)} · Kosten ${euro(adv.goal.cost)}`,
       );
+      // Hinweis: Beim Umbau fallen Plätze weg, Gäste dort reisen ab, feste Boote ziehen um
+      const umbau = sim.stageUpPreview?.();
+      if (umbau && umbau.guests.length + umbau.fixed.length > 0) {
+        const teile = [];
+        if (umbau.guests.length) teile.push(`${umbau.guests.length} ${umbau.guests.length === 1 ? 'Gast reist' : 'Gäste reisen'} ab`);
+        if (umbau.fixed.length) teile.push(`${umbau.fixed.length} ${umbau.fixed.length === 1 ? 'festes Boot zieht' : 'feste Boote ziehen'} um`);
+        stageLine.append(el('br'), `Beim Umbau fallen ${umbau.gone.length} Plätze weg: ${teile.join(', ')}.`);
+      }
       rows.push(
         el('button', { type: 'button', class: 'hud-btn', disabled: !adv.ok, onclick: () => act(sim.advanceStage()) }, `${adv.goal.name ?? 'Hafen erweitern'} · ${euro(adv.goal.cost)}`),
       );
