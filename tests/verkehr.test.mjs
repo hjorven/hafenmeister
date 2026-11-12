@@ -3,10 +3,12 @@
 // Ausführen im Repo-Ordner:  node --test tests/verkehr.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { SEE as SEEBAHNEN, SEE_RUNDE, UFER, FLOTTE } from '../web/js/data/verkehr.js';
+import { SEE as SEEBAHNEN, SEE_RUNDE, FLOTTE, uferStrecke } from '../web/js/data/verkehr.js';
 import { gelaendeAbfrage, warteplaetze, molen, buhnen, PLAN_M } from '../web/js/render/landschaft/gelaende.js';
 import { region } from '../web/js/render/landschaft/regionen.js';
-import { plaetzeInStufe, platzInWelt } from '../web/js/data/harbor.js';
+import { HAFEN, plaetzeInStufe, platzInWelt } from '../web/js/data/harbor.js';
+import { STEGBILDER } from '../web/js/data/stegbilder.js';
+import { stegbildSetzen } from '../web/js/data/stegbild.js';
 import { MODELS as S } from '../web/js/data/boats/s.js';
 import { MODELS as M } from '../web/js/data/boats/m.js';
 import { MODELS as L } from '../web/js/data/boats/l.js';
@@ -14,6 +16,18 @@ import { MODELS as XL } from '../web/js/data/boats/xl.js';
 import { MODELS as XXL } from '../web/js/data/boats/xxl.js';
 
 const R = region('ostsee');
+// Alle Stegbilder prüfen (docs/stegbilder.md): 0 Grundbild, 1 bis 12 Varianten
+const GRUNDBILD = structuredClone(HAFEN);
+const STEGBILD_NR = [0, ...STEGBILDER.varianten.map((_, i) => i + 1)];
+function mitStegbild(nr, fn) {
+  for (const k of Object.keys(HAFEN)) delete HAFEN[k];
+  Object.assign(HAFEN, structuredClone(GRUNDBILD));
+  stegbildSetzen(HAFEN, nr);
+  try { fn(); } finally {
+    for (const k of Object.keys(HAFEN)) delete HAFEN[k];
+    Object.assign(HAFEN, structuredClone(GRUNDBILD));
+  }
+}
 const segAbstand = (px, py, [ax, ay], [bx, by]) => {
   const dx = bx - ax, dy = by - ay;
   const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)));
@@ -51,18 +65,22 @@ function pruefe(st, punkte, name, { tiefe = 1, boje = 14, anker = 6, mole = 6, p
   }
 }
 
-test('Seebahnen liegen im Wasser und halten Abstand, Stufe 1 bis 6', () => {
-  for (const st of [1, 2, 3, 4, 5, 6]) {
-    bahnenVon(st).forEach((b, i) => pruefe(st, punkteAuf(b.pts), `Seebahn ${i} (${b.art})`, { tiefe: b.art === 'gross' ? 3 : 1.5 }));
-  }
+test('Seebahnen liegen im Wasser und halten Abstand, Stufe 1 bis 6, alle Stegbilder', () => {
+  for (const nr of STEGBILD_NR) mitStegbild(nr, () => {
+    for (const st of [1, 2, 3, 4, 5, 6]) {
+      bahnenVon(st).forEach((b, i) => pruefe(st, punkteAuf(b.pts), `Stegbild ${nr} Seebahn ${i} (${b.art})`, { tiefe: b.art === 'gross' ? 3 : 1.5 }));
+    }
+  });
 });
 
-test('Runden auf dem Binnensee und Paddler am Ufer, Stufe 1 und 2', () => {
-  for (const st of [1, 2]) {
-    for (const inset of [0, 7, 14]) pruefe(st, superellipse(SEE_RUNDE[st], inset), `See-Runde ${inset}`, { tiefe: 0.8, platz: 25 });
-    const u = UFER[st];
-    pruefe(st, punkteAuf([[u.x0, u.y], [u.x1, u.y]]), 'Ufer', { tiefe: 0.6, boje: 14, platz: 6 });
-  }
+test('Runden auf dem Binnensee und Paddler am Ufer, Stufe 1 und 2, alle Stegbilder', () => {
+  for (const nr of STEGBILD_NR) mitStegbild(nr, () => {
+    for (const st of [1, 2]) {
+      for (const inset of [0, 7, 14]) pruefe(st, superellipse(SEE_RUNDE[st], inset), `Stegbild ${nr} See-Runde ${inset}`, { tiefe: 0.8, platz: 25 });
+      const u = uferStrecke(st);
+      pruefe(st, punkteAuf([[u.x0, u.y], [u.x1, u.y]]), `Stegbild ${nr} Ufer`, { tiefe: 0.6, boje: 14, platz: 9 });
+    }
+  });
 });
 
 test('Alle Modelle der Flotte gibt es in den Bootsdaten', () => {

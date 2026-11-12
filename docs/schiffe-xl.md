@@ -119,7 +119,7 @@ Abweichung vom Plan: Die Seenotrettungskreuzer sind kleiner als 50 m und stehen 
 
 Regeln:
 
-- Die Bahnen liegen im Wasser und halten Abstand zu Wartebojen, Ankerflächen, Molen, Buhnen und Liegeplätzen. `tests/verkehr.test.mjs` prüft das für Stufe 1 bis 6.
+- Die Bahnen liegen im Wasser und halten Abstand zu Wartebojen, Ankerflächen, Molen, Buhnen und Liegeplätzen. `tests/verkehr.test.mjs` prüft das für Stufe 1 bis 6 und alle Stegbilder (0 bis 12). Die Strecke des Paddlers rechnet `uferStrecke()` aus den Stegen des aktuellen Stegbilds.
 - Ab Stufe 3 biegen die kleinen Bahnen vor der Einfahrt nach Norden ab, damit Reede und Fahrrinne frei bleiben und die Boote trotzdem in der Startansicht zu sehen sind.
 - Liegt ein anderes Boot vor dem Bug (zum Beispiel ein Gast auf dem Weg zur Boje), hält das vorbeifahrende Boot an, höchstens 45 Sekunden.
 - Mit `?stufe=3` in der Adresse zeigt der Verkehr dieselbe Stufe wie die Landschaft.

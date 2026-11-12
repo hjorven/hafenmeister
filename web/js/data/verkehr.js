@@ -2,6 +2,8 @@
 // damit tests/verkehr.test.mjs sie ohne three.js prüfen kann. Koordinaten in Planeinheiten
 // (x nach Osten, y nach Norden) wie web/js/data/harbor.js.
 
+import { HAFEN } from './harbor.js';
+
 export const U = 0.62;                                    // Meter je Planeinheit (wie harbor.js)
 export const welt = (px, py) => ({ x: px * U, z: -py * U });
 
@@ -74,12 +76,26 @@ export const SEE_RUNDE = {
 };
 
 // Ein Kanu oder Ruderboot paddelt in Ufernähe östlich der Stege hin und her (in der Startansicht zu sehen).
-// Wassertiefe bei y 18 gut 1 m. Liegeplätze der Stufe 1 enden bei x -96, der Stufe 2 bei x -40;
-// Gäste fahren nördlich davon (Bojen ab y 50) zu den Plätzen.
+// Wassertiefe bei y 18 gut 1 m. Im Grundbild enden die Liegeplätze der Stufe 1 bei x -96, der Stufe 2
+// bei x -40. Das Stegbild (docs/stegbilder.md) kann die Stege verschieben, darum rechnet uferStrecke()
+// den Anfang aus den Stegen und Plätzen von HAFEN: mindestens 20 Planeinheiten (gut 12 m) Abstand.
 export const UFER = {
   1: { x0: -82, x1: -50, y: 18 },
   2: { x0: -26, x1: 60, y: 18 },
 };
+
+export function uferStrecke(stufe, hafen = HAFEN) {
+  const u = UFER[stufe];
+  if (!u) return null;
+  const nahe = [];
+  for (const l of hafen.stufen?.[String(stufe)]?.stege ?? []) for (const [x, y] of l.punkte) if (y < 70) nahe.push(x);
+  for (const p of hafen.plaetze ?? []) {
+    const l = p.stufen?.includes(stufe) ? p.lage?.[String(stufe)] : null;
+    if (l && l[1] < 70) nahe.push(l[0]);
+  }
+  const x0 = Math.max(u.x0, ...nahe.map((x) => x + 20));
+  return { x0, x1: x0 + (u.x1 - u.x0), y: u.y };
+}
 
 export const seeBahnen = (stufe) => SEE[stufe >= 6 ? 6 : stufe >= 5 ? 5 : stufe >= 3 ? 3 : 1];
 export const seeRunde = (stufe) => (stufe <= 2 ? SEE_RUNDE[Math.max(1, stufe)] : null);

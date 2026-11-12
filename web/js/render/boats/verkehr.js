@@ -14,7 +14,7 @@
 
 import { addBoat } from '../boat-anim.js';
 
-import { U, welt, SEE_X, SEE, SEE_RUNDE, UFER, FLOTTE, ANZAHL, aufBahn, seeBahnen, seeRunde, bisStufe } from '../../data/verkehr.js';
+import { U, welt, SEE_X, SEE, SEE_RUNDE, FLOTTE, ANZAHL, aufBahn, seeBahnen, seeRunde, bisStufe, uferStrecke } from '../../data/verkehr.js';
 
 // Reisegeschwindigkeit in m/s, gemütlich
 function tempo(info, id) {
@@ -130,7 +130,7 @@ export function init(game) {
 
   // --- Paddler am Ufer: hin und her, an den Enden kurz Pause
   function uferBoot() {
-    const u = UFER[stufeAktiv];
+    const u = uferStrecke(stufeAktiv);
     if (!u) return;
     const gebaut = baue(zufall(FLOTTE.ufer));
     if (!gebaut) return;
@@ -144,7 +144,7 @@ export function init(game) {
   }
 
   function pendeln(b, richtung) {
-    const u = UFER[stufeAktiv];
+    const u = uferStrecke(stufeAktiv);
     if (!u || !boote.has(b)) return;
     const ziel = welt(richtung > 0 ? u.x1 : u.x0, u.y + (Math.random() * 6 - 3));
     b.anim.sailTo([ziel], { stop: true }).then((ok) => {
@@ -211,7 +211,7 @@ export function init(game) {
     stufeAktiv = stufe();
     const nSee = ANZAHL.see[stufeAktiv] ?? 0;
     for (let i = 0; i < nSee; i++) seeBoot(i);
-    if (UFER[stufeAktiv]) uferBoot();
+    if (uferStrecke(stufeAktiv)) uferBoot();
     // Beim Start schon ein paar Boote unterwegs, verteilt auf der Bahn
     const nMeer = Math.min(3, ANZAHL.meer[stufeAktiv] ?? 3);
     for (let i = 0; i < nMeer; i++) meerBoot(0.15 + 0.7 * Math.random());
