@@ -15,6 +15,8 @@ Stand: 12.11.2026. Zwei Dateien:
 3. Abends schwebt über jedem Boot mit offenem Hafengeld eine Münze (`userData.pick = { type: 'coin', id: bootId }`), die sich mit dem Kassierstrich einstreichen lässt.
 4. Bei der Abreise holt das Boot die Leinen ein, setzt rückwärts aus der Box, dreht, setzt (Segelboot) die Segel und fährt aus dem Bild.
 
+Sobald ein Boot an der Boje fest ist, sendet `boat-view.js` `boot:an-boje` `{ id, boje }`; ab dann zählen die Spielregeln seine Geduld.
+
 Jedes Boot trägt `userData.pick = { type: 'boat', id }` mit der Boot-id aus `game.sim.boote`. `game.boatsVisible = true` blendet die Leiste der Wartenden im HUD aus.
 
 ## Ausprobieren
