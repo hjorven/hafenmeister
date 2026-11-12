@@ -424,6 +424,20 @@ export function init(game) {
     const k = w / rig.viewWidth;
     fahre(ort.x + (a.x - b.x) * k, ort.z + (a.z - b.z) * k, w);
   }
+  // Rechteck um alle freien Bauplaetze (Stege, Angebote, Versorgung), um es ins Bild zu holen
+  function bauplatzRahmen() {
+    const pkt = [];
+    for (const e of eintraege()) {
+      if (e.gesperrt || !e.ort) continue;
+      const o = e.ort();
+      if (o) pkt.push(o);
+    }
+    if (!pkt.length) return null;
+    const xs = pkt.map((o) => o.x), zs = pkt.map((o) => o.z);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), z0 = Math.min(...zs), z1 = Math.max(...zs);
+    return { x: (x0 + x1) / 2, z: (z0 + z1) / 2, b: x1 - x0 + 30, t: z1 - z0 + 30 };
+  }
+
   function uebersicht() {
     if (!rig?.reset) return;
     const alt = { x: rig.target.x, z: rig.target.z, w: rig.viewWidth, yaw: rig.yaw };
@@ -431,8 +445,22 @@ export function init(game) {
     const ins = { ...(rig.insets ?? { top: 0, bottom: 0 }) }, rechts = rig.insetRight ?? 0;
     const r = card.hidden ? null : card.getBoundingClientRect();
     const c = game.canvas.getBoundingClientRect();
-    // Handy hochkant: die Karte deckt viel ab, der ganze Hafen waere winzig. Dann bleibt die Kamera.
-    if (r && r.width >= rig.screenW * 0.6 && r.top - c.top < rig.screenH * 0.6) { rig.yaw = alt.yaw; return; }
+    // Handy hochkant: Die Liste ist kompakt (eine Zeile je Eintrag), darueber liegt der Hafen.
+    // Statt des ganzen Hafens (der waere winzig) nur die Bauplaetze einpassen.
+    if (r && r.width >= rig.screenW * 0.6) {
+      const ziel = bauplatzRahmen();
+      if (ziel) {
+        const freiH = Math.max(80, r.top - c.top - (ins.top || 0) - 16);
+        // Sichtbare Tiefe = freie Hoehe in Metern / sin(Neigung 50 Grad)
+        const breite = Math.max(ziel.b * 1.15, ziel.t * 1.15 * Math.sin(0.873) * rig.screenW / freiH, 60);
+        rig.yaw = alt.yaw;
+        const fy = (ins.top || 0) + freiH / 2 + 8;
+        const a = rig.screenToWorld(rig.screenW / 2, rig.screenH / 2), b = rig.screenToWorld(rig.screenW / 2, fy);
+        const k = breite / rig.viewWidth;
+        fahrt = { x: ziel.x + (a.x - b.x) * k, z: ziel.z + (a.z - b.z) * k, w: Math.min(rig.maxWidth ?? 420, breite) };
+        return;
+      }
+    }
     if (r && r.width < rig.screenW * 0.6) rig.insetRight = Math.max(rechts, c.right - r.left + 8);
     else if (r) rig.insets = { top: ins.top, bottom: Math.max(ins.bottom, c.bottom - r.top + 8) };
     rig.reset();
@@ -480,7 +508,7 @@ export function init(game) {
       const box = { l: sx - w / 2, t: sy - h, r: sx + w / 2, b: sy };
       const draussen = box.r < 0 || box.l > c.width || box.b < 0 || box.t > c.height;
       const ueber = belegt.some((o) => box.l < o.r && box.r > o.l && box.t < o.b && box.b > o.t);
-      x.s.style.visibility = draussen || ueber ? 'hidden' : 'visible';
+      x.s.style.display = draussen || ueber ? 'none' : '';
       if (!draussen && !ueber) belegt.push(box);
       x.s.style.transform = `translate(${Math.round(sx - w / 2)}px, ${Math.round(sy - h)}px)`;
     }
@@ -531,6 +559,14 @@ export function init(game) {
   let meldung = '';
   let fertig = null;          // gerade gebaut: { name, text }
   let warPausiert = false;
+  let suedGrenze = null;      // urspruengliche Suedgrenze der Kamera, solange der Baumodus sie erweitert
+  function grenzeZurueck() {
+    if (suedGrenze == null || !rig?.bounds) return;
+    rig.bounds.maxZ = suedGrenze;
+    suedGrenze = null;
+    if (fahrt) fahrt.z = Math.min(fahrt.z, rig.bounds.maxZ);
+    else if (rig.target.z > rig.bounds.maxZ) fahrt = { x: rig.target.x, z: rig.bounds.maxZ, w: rig.viewWidth };
+  }
 
   function oeffnen(r) {
     if (!game.sim?.state) return;
@@ -541,9 +577,13 @@ export function init(game) {
       if (!game.paused) game.setPaused?.(true);
       document.body.classList.add('building');
       buildBtn.setAttribute('aria-pressed', 'true');
+      // Die Karte deckt am Handy den Sueden ab: Kamera darf im Baumodus weiter nach Sueden, damit
+      // Bauplaetze am Ufer ueber der Karte liegen koennen (beim Schliessen zurueck)
+      if (rig?.bounds && suedGrenze == null) { suedGrenze = rig.bounds.maxZ; rig.bounds.maxZ += 140; }
       game.audio?.sfx?.('auswahl');
       game.emit('bauen:offen');
-      requestAnimationFrame(uebersicht);
+      // Erst wenn die Karte eingefahren ist (Handy: Bottom Sheet mit Uebergang), stimmt ihr Rahmen
+      setTimeout(() => { if (offen && !aktiv) uebersicht(); }, 380);
     }
     if (r) reiter = r;
     aktiv = null;
@@ -564,6 +604,7 @@ export function init(game) {
     schildListe = [];
     document.body.classList.remove('building');
     buildBtn.setAttribute('aria-pressed', 'false');
+    grenzeZurueck();
     if (card.classList.contains('bau-karte')) {
       card.classList.remove('bau-karte');
       card.hidden = true;
@@ -587,6 +628,7 @@ export function init(game) {
     const ort = e.ort?.();
     zeigeGeist(e, ort);
     requestAnimationFrame(() => zeigeOrt(ort));
+    setTimeout(() => { if (aktiv === key) zeigeOrt(ort); }, 380);
     game.audio?.sfx?.('klick');
     game.emit('bauen:vorschau', { key });
   }
@@ -642,7 +684,7 @@ export function init(game) {
         el('div', { class: 'bau-kopf' }, el('h2', {}, `${fertig.name} ist gebaut`), el('span', { class: 'bau-kasse' }, `Kasse ${euro(geld)}`)),
         fertig.text ? el('p', { class: 'bau-fertig' }, fertig.text) : null,
         el('div', { class: 'card-actions' },
-          el('button', { type: 'button', class: 'hud-btn bau-ja', onclick: () => { fertig = null; zeichne(); uebersicht(); } }, 'Weiter bauen'),
+          el('button', { type: 'button', class: 'hud-btn bau-ja', onclick: () => { fertig = null; zeichne(); requestAnimationFrame(uebersicht); } }, 'Weiter bauen'),
           el('button', { type: 'button', class: 'hud-btn', onclick: schliessen }, 'Fertig')),
       );
       return;
@@ -722,7 +764,7 @@ export function init(game) {
       meldung ? el('p', { class: 'card-note', role: 'status' }, meldung) : null,
       el('div', { class: 'card-actions' },
         knopf,
-        el('button', { type: 'button', class: 'hud-btn', onclick: () => { aktiv = null; meldung = ''; entferneGeist(); zeichne(); uebersicht(); game.audio?.sfx?.('abbrechen'); } }, 'Zurück')),
+        el('button', { type: 'button', class: 'hud-btn', onclick: () => { aktiv = null; meldung = ''; entferneGeist(); zeichne(); requestAnimationFrame(uebersicht); game.audio?.sfx?.('abbrechen'); } }, 'Zurück')),
     );
   }
 
@@ -734,7 +776,7 @@ export function init(game) {
     if (offen && pick?.type === 'buildsite' && String(pick.id).includes(':')) vorschau(pick.id);
   });
   game.on('ui:cancel', () => { if (offen) schliessen(); });
-  game.on('sim:select', ({ boatId } = {}) => { if (offen && boatId != null) { offen = false; aktiv = null; entferneGeist(); entferneUmrisse(); schilder.replaceChildren(); schildListe = []; card.classList.remove('bau-karte'); document.body.classList.remove('building'); buildBtn.setAttribute('aria-pressed', 'false'); if (!warPausiert) game.setPaused?.(false); } });
+  game.on('sim:select', ({ boatId } = {}) => { if (offen && boatId != null) { offen = false; aktiv = null; entferneGeist(); entferneUmrisse(); schilder.replaceChildren(); schildListe = []; card.classList.remove('bau-karte'); document.body.classList.remove('building'); grenzeZurueck(); buildBtn.setAttribute('aria-pressed', 'false'); if (!warPausiert) game.setPaused?.(false); } });
   game.on('services:karte', () => { if (offen) schliessen(); });
   game.on('spielstand-geladen', () => { if (offen) schliessen(); setzeTipp(); });
   let geplant = false;
@@ -792,6 +834,8 @@ export function init(game) {
       if (f.t > 2.2) { f.f.remove(); flieger.splice(i, 1); }
     }
     if (offen) setzeSchilder();
+    // Der Knopf rutscht mit der Leiste (Karte zu), der Hinweis folgt ihm
+    if (!tipp.hidden) platziereTipp();
   });
 
   const api = { oeffnen, schliessen, vorschau, eintraege, naechsterSchritt, bedarf, get offen() { return offen; } };
@@ -806,6 +850,8 @@ function stil() {
   s.id = 'bauen-stil';
   s.textContent = `
     #card.bau-karte { display: flex; flex-direction: column; gap: 8px; }
+    #card.bau-karte > * { flex-shrink: 0; }
+    #card.bau-karte > .bau-liste { flex: 0 1 auto; min-height: 0; }
     .bau-kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
     .bau-kopf h2 { margin: 0; min-width: 0; flex: 1 1 auto; overflow-wrap: anywhere; }
     .bau-kasse { flex: 0 0 auto; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; opacity: 0.8; }
@@ -868,7 +914,12 @@ function stil() {
     body.building.paused #stage { filter: none !important; }
     body.foto .bau-tipp, body.foto .bau-schilder { display: none; }
     @media (max-width: 599px), (max-height: 499px) {
-      .bau-liste { max-height: 26dvh; }
+      .bau-liste { max-height: 34dvh; gap: 4px; }
+      .bau-zeile { padding: 8px 10px; }
+      .bau-zeile:not(.gesperrt) .bau-zeile-text { display: none; }
+      .bau-zeile-text { font-size: 0.78rem; }
+      .bau-rat { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .bau-rat .bau-tipp-titel { display: none; }
       #card.bau-karte { gap: 6px; }
       .bau-nutzen, .bau-bedarf { font-size: 0.86rem; }
       .bau-rat { padding: 8px 10px; font-size: 0.86rem; }
@@ -876,8 +927,10 @@ function stil() {
     /* Handy quer: wenig Hoehe, der Hinweis steht schon ueber dem Knopf, die Liste bekommt den Platz */
     @media (max-height: 499px) {
       #card.bau-karte .bau-rat, .bau-zahl { display: none; }
-      .bau-liste { max-height: calc(100dvh - 160px); }
+      .bau-liste { max-height: calc(100dvh - 150px); }
       .bau-tab { min-height: 32px; }
+      .bau-zeile { padding: 6px 10px; }
+      #card.bau-karte .card-actions .hud-btn { min-height: 38px; }
     }
   `;
   document.head.append(s);
