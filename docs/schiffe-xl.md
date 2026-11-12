@@ -108,7 +108,7 @@ Abweichung vom Plan: Die Seenotrettungskreuzer sind kleiner als 50 m und stehen 
 
 # Vorbeifahrende Boote
 
-`web/js/render/boats/verkehr.js` lässt Boote aller Größen als Kulisse fahren, damit der Hafen von Anfang an belebt ist. Nicht antippbar, nicht in den Spielregeln. Bewegung, Kielwasser und Segel kommen aus `render/boat-anim.js`.
+`web/js/render/boats/verkehr.js` (Bahnen und Flotte in `web/js/data/verkehr.js`) lässt Boote aller Größen als Kulisse fahren, damit der Hafen von Anfang an belebt ist. Nicht antippbar, nicht in den Spielregeln. Bewegung, Kielwasser und Segel kommen aus `render/boat-anim.js`.
 
 | Wo | Stufe | Boote |
 |---|---|---|

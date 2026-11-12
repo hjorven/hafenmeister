@@ -1,9 +1,9 @@
-// Vorbeifahrende Boote (web/js/render/boats/verkehr.js): Bahnen liegen im Wasser und halten Abstand
+// Vorbeifahrende Boote (Bahnen in web/js/data/verkehr.js, Grafik in web/js/render/boats/verkehr.js): Bahnen liegen im Wasser und halten Abstand
 // zu Wartebojen, Ankerflächen, Molen, Buhnen und Liegeplätzen. Ohne Grafik.
 // Ausführen im Repo-Ordner:  node --test tests/verkehr.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { SEEBAHNEN, SEE_RUNDE, UFER, FLOTTE } from '../web/js/render/boats/verkehr.js';
+import { SEE as SEEBAHNEN, SEE_RUNDE, UFER, FLOTTE } from '../web/js/data/verkehr.js';
 import { gelaendeAbfrage, warteplaetze, molen, buhnen, PLAN_M } from '../web/js/render/landschaft/gelaende.js';
 import { region } from '../web/js/render/landschaft/regionen.js';
 import { plaetzeInStufe, platzInWelt } from '../web/js/data/harbor.js';
