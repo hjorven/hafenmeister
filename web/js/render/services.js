@@ -159,7 +159,15 @@ export function init(game) {
     }
   }
 
+  // Stufe 6: Kreuzfahrtschiff (bis y 517) und Windjammer-Reihe (bis y 473) liegen nördlich der Kartengrenze
+  // aus main.js (y 352). Die Kamera darf dann so weit nach Norden, dass man sie ganz sieht.
+  function kameraNachNorden() {
+    const b = game.camera?.bounds;
+    if (b && stufe >= 6) b.minZ = Math.min(b.minZ, -500 * U);
+  }
+
   function aktualisiere(mitAnimationFuer = null) {
+    kameraNachNorden();
     zeigePier();
     const z = zustand();
     for (const s of R.katalog) {
