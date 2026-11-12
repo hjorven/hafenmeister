@@ -21,7 +21,7 @@ test('Zahlen werden übernommen', () => {
   assert.equal(rules.office.autoAssign, 2);
   assert.ok(!rules.wishes[3].includes('diesel'));
   assert.ok(rules.wishes[4].includes('diesel'));
-  assert.equal(rules.maxStage, 5);
+  assert.equal(rules.maxStage, ECONOMY.stufen.length);
 });
 
 test('Start: nur der alte Steg, Stegprojekt schaltet Plätze frei', () => {

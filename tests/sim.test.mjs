@@ -136,6 +136,25 @@ test('Warten: wer zu lange wartet oder keinen Platz in der Schlange hat, fährt 
   assert.ok(ev2.some((e) => e.type === 'turnedAway' && e.boatId === 999 && e.reason === 'queueFull'));
 });
 
+test('Hafenbüro mit Automatik weist wartende Boote zu; volle Bojen kosten keinen Ruf', () => {
+  const s = quietState({ office: RULES.office.autoAssign });
+  const b = waitingBoat(s, { atBuoy: true, atBuoySince: s.clock });
+  assert.ok(sim.fittingBerths(s, ctx, b.id).length > 0);
+  sim.tick(s, ctx, 1);
+  assert.equal(s.boats[b.id].status, 'moored');
+  assert.equal(s.queue.length, 0);
+
+  const t = quietState();
+  for (let i = 0; i < RULES.queue.spots[1]; i++) waitingBoat(t, { waitSpot: i });
+  const ratings = JSON.stringify(t.ratings);
+  t.upcoming = Array.from({ length: 20 }, (_, i) => ({ ...waitingBoat(createState({ seed: 3 })), id: 900 + i, arriveAt: 0.5 }));
+  const ev = sim.tick(t, ctx, 1);
+  const weg = ev.filter((e) => e.type === 'turnedAway' && e.reason === 'queueFull');
+  assert.equal(weg.length, 20);
+  assert.ok(weg.every((e) => e.rated === false));
+  assert.equal(JSON.stringify(t.ratings), ratings);
+});
+
 test('Abend: Hafengeld mit Wünschen, Kapazität der Toilette, Strom vom Platz', () => {
   const s = quietState({ stage: 3, money: 0 });
   s.facilities.wc = 1; // versorgt 6 Boote
