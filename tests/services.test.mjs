@@ -149,3 +149,46 @@ test('Angebote an Land: Bäcker ab Stufe 1, Café ab 2, Eisdiele erst ab 4', () 
   const regen = R.tagesabschluss(z, { tag: 3, wetter: 'regen', boote }, () => 0).summe;
   assert.ok(sonne > regen, `${sonne} > ${regen}`);
 });
+
+test('Windjammertreffen: dritte Stufe des Museumshafens erst in Stufe 6, Besuch alle 12 Tage für zwei Tage', () => {
+  const z = neuerZustand();
+  const k5 = { stufe: 5, ruf: 5, tag: 1, geld: 1e9 };
+  R.bauen(z, 'museumshafen', k5);
+  R.bauen(z, 'museumshafen', k5);
+  assert.equal(z.gebaut.museumshafen, 2);
+  assert.equal(R.pruefe(z, 'museumshafen', k5).ok, false);              // Treffen erst ab Hafenstufe 6
+  const k6 = { stufe: 6, ruf: 5, tag: 10, geld: 1e9 };
+  assert.equal(R.bauen(z, 'museumshafen', k6).ok, true);
+  assert.equal(z.besuche.museumshafen, 14);
+  const r = R.tagesabschluss(z, { tag: 14, boote: [] }, () => 0);
+  const b = r.besuche.find((x) => x.art === 'windjammer');
+  assert.equal(b.dauer, 2);
+  assert.equal(z.besuche.museumshafen, 26);
+  assert.ok(R.effekte(z).freischalten.includes('traditionssegler'));
+});
+
+test('Barkasse: ab Stufe 6, braucht den Fahrgastanleger, verdient nicht bei Sturm', () => {
+  const z = neuerZustand();
+  const k = { stufe: 6, ruf: 5, tag: 1, geld: 1e9 };
+  assert.equal(R.liste(z, { stufe: 5 }).some((x) => x.id === 'barkasse'), false);
+  const ohne = R.pruefe(z, 'barkasse', k);
+  assert.equal(ohne.ok, false);
+  assert.match(ohne.fehlt.join(), /Fahrgastanleger/);
+  R.bauen(z, 'fahrgastanleger', k);
+  assert.equal(R.bauen(z, 'barkasse', k).ok, true);
+  const sonne = R.tagesabschluss(z, { tag: 2, boote: [] }, () => 0).einnahmen.find((e) => e.id === 'barkasse');
+  assert.equal(sonne.betrag, 220);
+  const sturm = R.tagesabschluss(z, { tag: 3, wetter: 'sturm', boote: [] }, () => 0).einnahmen.find((e) => e.id === 'barkasse');
+  assert.equal(sturm, undefined);
+});
+
+test('Liste der Großschiffbesuche fürs Abschlussziel passt zum Katalog', async () => {
+  const { GROSSSCHIFF_BESUCHE } = await import('../web/js/data/services.js');
+  const arten = new Set(SERVICES.flatMap((s) => s.stufen.map((st) => st.wirkung?.besuch?.art).filter(Boolean)));
+  for (const a of GROSSSCHIFF_BESUCHE) assert.ok(arten.has(a), `Besuchsart ${a} gibt es nicht`);
+  assert.ok(!GROSSSCHIFF_BESUCHE.includes('windjammer'));
+  // Der Marinestützpunkt bringt mehr zählende Besuche als der Anleger (Roadmap Svc F6)
+  const [anleger, stuetzpunkt] = SERVICE_BY_ID.marineanleger.stufen.map((st) => st.wirkung.besuch);
+  assert.ok(GROSSSCHIFF_BESUCHE.includes(stuetzpunkt.art));
+  assert.ok(stuetzpunkt.alleTage < anleger.alleTage);
+});

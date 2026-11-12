@@ -264,6 +264,21 @@ export const SERVICES = [
         wirkung: { proTag: 80, freischalten: ['traditionssegler'], ruf: 0.12, gaeste: { XL: 1.2 } } },
       { name: 'Museumshafen mit Speicher', kosten: 30000, ruf: 4.2,
         wirkung: { proTag: 160, freischalten: ['traditionssegler'], ruf: 0.18, gaeste: { XL: 1.3 }, hafenfest: 1.5 } },
+      // Stufe 6 (Jorven 2026-11-12): alle paar Wochen laufen mehrere Grosssegler gemeinsam ein und ankern
+      // zwei Tage vor der Grossschiffpier (Schiffe: js/render/services-besuch.js)
+      { name: 'Windjammertreffen', kosten: 26000, abStufe: 6,
+        wirkung: { proTag: 280, freischalten: ['traditionssegler'], ruf: 0.18, gaeste: { XL: 1.6 }, hafenfest: 1.5,
+          besuch: { art: 'windjammer', alleTage: 12, ersterNach: 4, dauer: 2, einnahme: 5000, gaeste: 1800, ruf: 0.03,
+            text: 'Windjammertreffen: Traditionssegler laufen ein' } } },
+    ],
+  },
+  {
+    id: 'barkasse', name: 'Barkasse', gruppe: 'grosse-schiffe', abStufe: 6,
+    kurz: 'Hafenrundfahrten: zweimal am Tag fährt die Barkasse mit Gästen durch den Binnenhafen und den Außenhafen.',
+    lage: { x: 192, y: 2, dreh: 0 }, radius: 8,
+    stufen: [
+      { name: 'Barkasse', kosten: 9000, braucht: [{ id: 'fahrgastanleger', stufe: 1 }],
+        wirkung: { proTag: 220, wetter: { regen: 0.5, sturm: 0 }, ruf: 0.03 } },
     ],
   },
   {
@@ -292,12 +307,20 @@ export const SERVICES = [
             text: 'Flottenbesuch: Marineschiffe machen fest' } } },
       { name: 'Marinestützpunkt', kosten: 100000, ruf: 4.6,
         wirkung: { proTag: 450, freischalten: ['marine'], sturmschutz: 0.2, ruf: 0.08,
-          besuch: { art: 'offene-tuer', alleTage: 14, ersterNach: 6, dauer: 1, einnahme: 2800, gaeste: 2200, ruf: 0.03,
-            text: 'Tag der offenen Tür am Stützpunkt' } } },
+          // Der Stuetzpunkt bringt mehr Besuche als der Anleger (Roadmap Svc F6): Flottenbesuch alle 6 statt
+          // 10 Tage, am zweiten Tag mit Tag der offenen Tuer
+          besuch: { art: 'flottenbesuch', alleTage: 6, ersterNach: 3, dauer: 2, einnahme: 4200, gaeste: 2200, ruf: 0.03,
+            text: 'Flottenbesuch mit Tag der offenen Tür' } } },
     ],
   },
 ];
 
 export const SERVICE_BY_ID = Object.fromEntries(SERVICES.map((s) => [s.id, s]));
+
+// Besuchsarten, die fuer das Abschlussziel von Stufe 6 als "Besuch eines grossen Schiffs" zaehlen
+// (economy.js ziel.grossschiffBesuche). Die einzige Liste: bridge.js zaehlt damit state.bigVisits.
+// Windjammertreffen und Ausflugsfahrt zaehlen bewusst nicht (Absprache Balancing 2026-11-12).
+// Der Tag der offenen Tuer gehoert seit Roadmap P04 zum Flottenbesuch des Marinestuetzpunkts.
+export const GROSSSCHIFF_BESUCHE = ['kreuzfahrt', 'flottenbesuch'];
 
 export default SERVICES;
