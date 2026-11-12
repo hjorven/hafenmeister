@@ -553,18 +553,24 @@ export function autoAssign(state, ctx) {
 }
 
 /**
- * Die Box, die sich ein Gast selbst sucht: passt, möglichst knapp (große Plätze bleiben für große
- * Boote frei). Wünsche wie Strom beachtet er nicht, das lohnt sich nur beim Zuweisen von Hand
- * oder mit dem Hafenbüro.
+ * Die Box, die sich ein Gast selbst sucht: die nächste freie Box, in die er passt, auch wenn sie
+ * zu groß für ihn ist. Wünsche wie Strom beachtet er nicht. Den Hafen gut zu belegen (kleine
+ * Boote in kleine Boxen, Strom für den, der ihn will) lohnt sich deshalb von Hand oder mit dem
+ * Hafenbüro. "Nächste" misst ctx.berthDistance(boat, berth, state) (die Brücke rechnet von der
+ * Warteboje zur Box); ohne diese Angabe gilt die Reihenfolge am Steg (A01, A02, ...).
  */
 export function selfBerth(state, ctx, boatId) {
   const boat = state.boats[boatId];
   if (!boat) return null;
-  const slack = (b) => b.maxLength * b.maxBeam - boat.length * boat.beam;
+  const dist = (b) => {
+    const d = ctx.berthDistance?.(boat, b, state);
+    return Number.isFinite(d) ? d : null;
+  };
   const list = availableBerths(state, ctx)
     .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
-    .sort((a, b) => slack(a) - slack(b) || String(a.id).localeCompare(String(b.id)));
-  return list[0]?.id ?? null;
+    .map((b) => ({ b, d: dist(b) }))
+    .sort((x, y) => (x.d ?? Infinity) - (y.d ?? Infinity) || String(x.b.id).localeCompare(String(y.b.id), 'de', { numeric: true }));
+  return list[0]?.b.id ?? null;
 }
 
 /**
@@ -590,6 +596,8 @@ export function selfEnter(state, ctx) {
       b.selfEntered = true;
       moor(state, ctx, b, best, events);
       events.push({ type: 'selfEntered', boatId: id, berthId: best });
+      // Nacheinander einfahren: pro Sekunde höchstens ein Boot, damit sie sich nicht in die Quere kommen
+      if (ctx.rules.queue.selfEnterOneByOne !== false) break;
     }
   }
   return events;
@@ -1215,6 +1223,22 @@ export function advanceStage(state, ctx) {
   const events = [{ type: 'stageUp', stage: state.stage }];
   clearVanishedBerths(state, ctx, from, events);
   return { ok: true, events };
+}
+
+/**
+ * Was der nächste Stufenausbau für liegende Boote bedeutet (Hinweis im Baumenü):
+ * gone = Plätze, die wegfallen, guests = Gäste, die dann abreisen, fixed = feste Boote, die umziehen.
+ */
+export function stageUpPreview(state, ctx) {
+  const next = state.stage + 1;
+  const inStage = (b, st) => (b.stages ? b.stages.includes(st) : b.stage <= st);
+  const gone = ctx.berths.filter((b) => berthAvailable(state, b) && !inStage(b, next)).map((b) => b.id);
+  const boats = gone.map((id) => state.boats[state.berths[id]]).filter(Boolean);
+  return {
+    gone,
+    guests: boats.filter((b) => !b.stationed).map((b) => b.id),
+    fixed: boats.filter((b) => b.stationed).map((b) => b.id),
+  };
 }
 
 /**
