@@ -402,6 +402,8 @@ export function init(game) {
   game.on('tap', (e) => {
     if (e?.pick?.type !== 'buildsite' || !api.bauplaetze().includes(e.pick.id)) return;
     game.emit('ui:bauplatz', { projekt: e.pick.id });
+    // Baumodus mit Vorschau (ui/bauen.js), sonst wie bisher die Bauen-Karte
+    if (game.bauen) { game.bauen.vorschau(`steg:${e.pick.id}`); return; }
     const body = document.body.classList;
     const bauenOffen = body.contains('card-open') && !body.contains('card-boat');
     if (!bauenOffen) document.getElementById('btn-build')?.click();
