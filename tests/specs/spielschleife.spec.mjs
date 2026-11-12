@@ -88,7 +88,7 @@ test('Boot kommt, wird zugewiesen, abends steigt das Geld', async ({ game }, tes
   // 3. Knopf zum Einfahren: am Boot (.hm-einfahren, game.gesten.einfahrenAmBoot) oder in der Karte
   //    "Automatisch einfahren" (#card). Beides weist den besten freien Platz zu.
   const amBoot = page.locator('.hm-einfahren');
-  const inKarte = page.locator('#card').getByRole('button', { name: 'Automatisch einfahren' });
+  const inKarte = page.locator('#card').getByRole('button', { name: /einfahren/i });
   const knopf = amBoot.or(inKarte).first();
   await expect(knopf, 'nach dem Antippen erscheint kein Knopf zum Einfahren (am Boot oder in der Karte)').toBeVisible();
   await expect(knopf).toBeEnabled();

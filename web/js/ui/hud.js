@@ -62,8 +62,6 @@ export function init(game) {
     @media (max-width: 600px) { #hud-goal { bottom: calc(env(safe-area-inset-bottom, 0px) + 124px); max-width: calc(100vw - 32px); font-size: 0.8rem; } }
     #hud-goal.done { pointer-events: auto; cursor: pointer; background: rgba(32, 110, 62, 0.92); font-weight: 600; }
     #queue .boat-chip[aria-pressed="true"] { outline: 3px solid #f2c14e; }
-    /* Handy: die Bootskarte zeigt nur Bootsname/Heimathafen, Hinweis und Knöpfe, damit die Stege frei bleiben */
-    @media (max-width: 600px) { body.card-boat #card h2, body.card-boat #card p:not(.card-note):not(.card-hint):not(.card-boatname) { display: none; } }
   `;
   document.head.append(style);
 
@@ -123,7 +121,10 @@ export function init(game) {
 
   function renderStats(sim, st) {
     money.textContent = euro(st.money);
-    rep.textContent = `Ruf ${num1(sim.reputation())}`;
+    // Der Stern davor steht für den Ruf (oberflaeche.css), die Zahl reicht
+    rep.textContent = num1(sim.reputation());
+    rep.title = `Ruf ${num1(sim.reputation())} von 5,0`;
+    rep.setAttribute('aria-label', rep.title);
     const season = sim.season();
     const phase = season.winter ? ' · Winter' : st.phase === 'evening' ? ' · Abend' : '';
     day.textContent = `Tag ${st.day}${phase}`;
@@ -174,27 +175,32 @@ export function init(game) {
       return closeCard();
     }
     const fitting = sim.fittingBerths(b.id);
-    // Sitzt der Knopf "Einfahren" schon am Boot (ui/gesten.js), zeigt die Karte keinen zweiten.
-    const amBoot = game.gesten?.einfahrenAmBoot ?? Boolean(game.gesten && game.boatsVisible);
-    const wishes = b.wishes.length ? b.wishes.map((w) => WISH_LABEL[w] ?? w).join(', ') : 'keine';
+    const schliessen = () => { sim.select(null); closeCard(); };
+    // Kurz und auf einen Blick: Name, Eckdaten als Schilder, ein Satz, zwei Knöpfe.
+    // "Einfahren" steht immer groß in der Karte, auf jedem Gerät an derselben Stelle.
+    const nacht = `${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}`;
     fill(card,
-      el('h2', {}, b.name),
-      // Name am Heck und Heimathafen (features/stammgaeste.js), falls vorhanden
-      b.bootsname ? el('p', { class: 'card-boatname' }, game.stammgaeste?.beschreibung(b) ?? `„${b.bootsname}“`) : null,
-      el(
-        'p',
-        {},
-        `Größe ${b.size} · ${meters(b.length)} lang, ${meters(b.beam)} breit, Tiefgang ${meters(b.draft)} · ${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}`,
-      ),
-      el('p', {}, `Wünsche: ${wishes}`),
-      el('p', { class: 'card-hint' }, !fitting.length ? `${b.name}: gerade ist kein passender Platz frei.` : amBoot ? `${b.name}: ${fitting.length} passende Plätze leuchten. Boot auf eine leuchtende Box ziehen oder „Einfahren“ am Boot antippen.` : `${b.name}: ${fitting.length} passende Plätze leuchten. Box antippen oder:`),
+      el('div', { class: 'hm-karte-kopf' },
+        el('div', {},
+          el('h2', {}, b.name),
+          // Name am Heck und Heimathafen (features/stammgaeste.js), falls vorhanden
+          b.bootsname ? el('p', { class: 'card-boatname' }, game.stammgaeste?.beschreibung(b) ?? `„${b.bootsname}“`) : null),
+        el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Schließen', title: 'Schließen', onclick: schliessen }, 'Schließen')),
+      el('ul', { class: 'hm-fakten', 'aria-label': 'Eckdaten' },
+        el('li', { class: 'groesse', title: 'Größenklasse' }, `Größe ${b.size}`),
+        el('li', { title: 'Länge und Breite' }, `${meters(b.length)} × ${meters(b.beam)}`),
+        el('li', { title: 'Tiefgang' }, `Tiefgang ${meters(b.draft)}`),
+        el('li', { title: 'Aufenthalt' }, nacht),
+        ...b.wishes.map((w) => el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`))),
+      el('p', { class: 'card-hint' }, !fitting.length
+        ? 'Gerade ist kein passender Platz frei.'
+        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}. Zieh das Boot hin oder lass es einfahren.`),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
       el(
         'div',
         { class: 'card-actions' },
-        amBoot ? null : el('button', { type: 'button', class: 'hud-btn', disabled: !fitting.length, onclick: () => sim.autoEnter(b.id) }, 'Automatisch einfahren'),
-        el('button', { type: 'button', class: 'hud-btn', onclick: () => { sim.dismiss(b.id); closeCard(); } }, 'Abweisen'),
-        el('button', { type: 'button', class: 'hud-btn', onclick: () => { sim.select(null); closeCard(); } }, 'Schließen'),
+        el('button', { type: 'button', class: 'hud-btn hm-primaer', 'aria-label': 'Automatisch einfahren', title: 'Das Boot sucht sich den besten freien Platz', disabled: !fitting.length, onclick: () => sim.autoEnter(b.id) }, 'Einfahren lassen'),
+        el('button', { type: 'button', class: 'hud-btn hm-gefahr', onclick: () => { sim.dismiss(b.id); closeCard(); } }, 'Abweisen'),
       ),
     );
   }

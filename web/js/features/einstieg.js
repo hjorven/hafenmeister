@@ -261,7 +261,7 @@ export async function init(game) {
       const r = el.getBoundingClientRect();
       return r.left - h.left < 380 ? r.bottom - h.top : 0;
     };
-    const oben = Math.max(unterkante('#hud-top'), unterkante('#weather-chip'), unterkante('.hm-tafel > button'), 8) + 10;
+    const oben = Math.max(unterkante('#hud-top'), unterkante('#weather-chip'), unterkante('.hm-tafel > button'), unterkante('#hm-seite'), 8) + 10;
     let unten = h.height - 12;
     for (const sel of ['#btn-build', '#btn-collect', '#hud-bottom', '#card']) {
       const el = document.querySelector(sel);
