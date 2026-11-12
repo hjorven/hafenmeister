@@ -227,12 +227,14 @@ export const SERVICES = [
   },
   {
     id: 'seenotretter', name: 'Seenotretter-Station', gruppe: 'sicherheit', abStufe: 4,
-    kurz: 'Ein Rettungsboot in der Kanalmündung. Weniger Sturmschäden, mehr Vertrauen.',
-    lage: { x: 200, y: 211, dreh: 0 }, radius: 16,
+    kurz: 'Ein Rettungsboot an der Ostmole. Weniger Sturmschäden, mehr Vertrauen.',
+    // Station am eigenen Boot: Stufe 1 am Dienststeg an der Ostmole (harbor.js dienste), der Kreuzer
+    // liegt an SK01 an der Westmole, dafuer zieht die Station an die Wurzel der Westmole.
+    lage: { x: 224, y: 211, dreh: 0 }, radius: 10,
     stufen: [
       { name: 'Seenotrettungsboot', kosten: 5000,
         wirkung: { sturmschutz: 0.3, ruf: 0.15 } },
-      { name: 'Seenotrettungskreuzer', kosten: 20000, abStufe: 6,
+      { name: 'Seenotrettungskreuzer', kosten: 20000, abStufe: 6, lage: { x: 6, y: 206, dreh: 0 },
         wirkung: { sturmschutz: 0.55, ruf: 0.25, freischalten: ['seenotkreuzer'],
           besuch: { art: 'tag-der-seenotretter', alleTage: 28, ersterNach: 5, dauer: 1, einnahme: 900, gaeste: 600, ruf: 0.02,
             text: 'Tag der Seenotretter: Besichtigung und Vorführung' } } },
@@ -284,7 +286,8 @@ export const SERVICES = [
   {
     id: 'kreuzfahrtterminal', name: 'Kreuzfahrtterminal', gruppe: 'grosse-schiffe', abStufe: 6,
     kurz: 'Terminal an der Großschiffpier. Einmal pro Woche legt ein Kreuzfahrtschiff an.',
-    lage: { x: -150, y: 198, dreh: 0 }, radius: 20,
+    // Terminal an der Wurzel der Kreuzfahrtpier (harbor.js Stufe 6, Steg P bei x -140), Busse an der Nehrungsstrasse
+    lage: { x: -140, y: 210, dreh: 0 }, radius: 18,
     stufen: [
       { name: 'Kreuzfahrtpier', kosten: 60000, ruf: 4.0, braucht: [{ id: 'fahrgastanleger', stufe: 1 }],
         wirkung: { freischalten: ['kreuzfahrtschiff'],
@@ -299,7 +302,8 @@ export const SERVICES = [
   {
     id: 'marineanleger', name: 'Marineanleger', gruppe: 'sicherheit', abStufe: 6,
     kurz: 'Liegeplatz für Marineschiffe. Flottenbesuche bringen Zuschauer.',
-    lage: { x: -300, y: 198, dreh: 0 }, radius: 20,
+    // Eingezaeunter Stuetzpunkt an der Wurzel der eigenen Marinepier (Steg MA bei x -330), Tor zur Nehrungsstrasse
+    lage: { x: -336, y: 210, dreh: 0 }, radius: 18,
     stufen: [
       { name: 'Marineanleger', kosten: 50000, ruf: 4.0, braucht: [{ id: 'seenotretter', stufe: 1 }],
         wirkung: { freischalten: ['marine'], sturmschutz: 0.1,

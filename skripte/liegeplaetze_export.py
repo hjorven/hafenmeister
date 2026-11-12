@@ -46,6 +46,7 @@ def steg_von(p0, p1):
     """Welcher Steg? Nach Lage der Segmentmitte, damit kleine Layoutaenderungen nichts kaputt machen."""
     mx, my = (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2
     waagerecht = abs(p1[0] - p0[0]) > abs(p1[1] - p0[1])
+    if my > 200 and mx < -300: return 'MA'      # Marinepier (Stufe 6)
     if my > 200 and mx < -60: return 'P'        # Grossschiffspier (Stufe 6)
     if my > 200 and mx > 160: return None      # Seenotretter
     if my > 200: return 'FK' if mx < 0 else 'K'
