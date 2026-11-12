@@ -20,6 +20,7 @@ const MODULES = [
   './render/boats/m.js',
   './render/boats/l.js',
   './render/boats/xl.js',
+  './render/boats/xxl.js',
   './render/boat-anim.js',
   './render/boat-view.js',
   './render/people.js',

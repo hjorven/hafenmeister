@@ -65,3 +65,43 @@ python3 -m http.server 8000
 ```
 
 Im Repo-Ordner starten, dann `http://localhost:8000/tools/vorschau-xl.html` öffnen. Einzelnes Modell: `http://localhost:8000/tools/vorschau-xl.html?model=XL1-2&sails=1&palette=2`.
+
+XXL-Schiffe: `http://localhost:8000/tools/vorschau-xl.html?size=xxl`, einzeln mit `&model=XXL1-3`.
+
+# Schiffe der Größe XXL (Stufe 6)
+
+| Datei | Inhalt |
+|---|---|
+| `web/js/data/boats/xxl.js` | Arten, Modelle, Liegeplatzarten `pier`, `marine`, `station` |
+| `web/js/render/boats/xxl.js` | 3D-Modelle (nutzt `xl-kit.js`), Durchfahrt draußen auf See |
+| `tests/boote-xxl.test.mjs` | Maße, Menschen an Bord, Liegeplatz, Spielregeln lesen die Arten |
+
+## Was im Spiel zu sehen ist
+
+- Ab Stufe 5 fährt alle 1 bis 2 Minuten ein Kreuzfahrt- oder Marineschiff weit draußen vorbei (Spur bei z = -246, hinter der XL-Spur). Nicht anklickbar, nur Vorgeschmack.
+- `game.boatTypes.xxl` ist registriert, die Spielregeln lesen die drei Arten über `web/js/bridge.js` mit `minStage` 6.
+- Anlegen kommt, sobald es Stufe 6 gibt: Liegeplätze in `harbor.js` (Liegeplätze-Thread), `berthKinds` und Stufenziel (Integrations-Thread), Zahlen in `economy.js` (Balancing). Platzarten heißen `pier`, `marine`, `seenotretter`.
+
+## Arten
+
+| Art | Name | Freischaltung | Menschen an Bord | Liegeplatz |
+|---|---|---|---|---|
+| XXL1 | Kreuzfahrtschiff | `kreuzfahrt` | 80 bis 200 | Pier 200 x 30 m, 8,5 m tief |
+| XXL2 | Marineschiff | `marine` | 20 bis 60 | Marineanleger 100 x 16 m, 6,0 m tief |
+| XXL3 | Seenotrettungskreuzer | `seenotkreuzer`, stationiert | 4 bis 10 | Station 50 x 12 m, 4,0 m tief |
+
+## Modelle
+
+| Id | Name | L x B x T (m) |
+|---|---|---|
+| XXL1-1 | Expeditionsschiff | 110 x 18 x 5,2 |
+| XXL1-2 | Flusskreuzer-Format | 110 x 11,4 x 1,6 |
+| XXL1-3 | Mittleres Kreuzfahrtschiff | 180 x 29 x 7,2 |
+| XXL2-1 | Minenjagdboot | 55 x 9,2 x 2,8 |
+| XXL2-2 | Korvette | 90 x 13 x 4,0 |
+| XXL2-3 | Segelschulschiff | 90 x 12 x 5,0 |
+| XXL3-1 | 20-m-Klasse | 20 x 5,2 x 1,5 |
+| XXL3-2 | 28-m-Klasse | 28 x 6,6 x 1,9 |
+| XXL3-3 | 46-m-Klasse | 46 x 10,8 x 2,8 |
+
+Abweichung vom Plan: Die Seenotrettungskreuzer sind kleiner als 50 m und stehen trotzdem bei XXL, weil sie erst in Stufe 6 mit eigener Station kommen und fest stationiert sind.

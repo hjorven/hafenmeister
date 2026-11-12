@@ -8,7 +8,7 @@ import { HAFEN } from './data/harbor.js';
 import { BOAT_CATALOG } from './data/boat-catalog.js';
 import { ECONOMY } from './data/economy.js';
 
-const BOAT_FILES = ['./data/boats/s.js', './data/boats/m.js', './data/boats/l.js', './data/boats/xl.js'];
+const BOAT_FILES = ['./data/boats/s.js', './data/boats/m.js', './data/boats/l.js', './data/boats/xl.js', './data/boats/xxl.js'];
 
 /** Bootsarten aus einem Datenmodul herausholen, egal ob als default, Liste oder Objekt mit Liste exportiert. */
 export function typesFromModule(mod) {
