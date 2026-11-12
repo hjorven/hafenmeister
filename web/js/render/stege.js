@@ -15,6 +15,10 @@
 //   Antippen: Steg-Teile tragen userData.pick = { type: 'jetty', id: 'A' }, Liegeplaetze
 //   userData.pick = { type: 'berth', id: 'A01' } (ids wie in harbor.js).
 //   Ereignis 'stufe' (Zahl) baut neu, beim Start gilt game.state.stufe oder ?stufe=n.
+//   Nur gebaute Plaetze stehen als Steg im Wasser (Start, gekaufte Stegprojekte, Stufenausbau aus
+//   game.sim). Kaufbare Stegprojekte erscheinen als heller Bauplatz mit pick { type: 'buildsite',
+//   id: projektId }; Antippen oeffnet die Bauen-Karte. Projekte spaeterer Stufen sind unsichtbar.
+//   game.stege.bauplaetze() liefert die ids der sichtbaren Bauplaetze.
 import * as THREE from 'three';
 import { HAFEN } from '../data/harbor.js';
 
@@ -31,6 +35,8 @@ function mat(c) { return new THREE.MeshLambertMaterial({ color: c, flatShading: 
 
 export function init(game) {
   const M = Object.fromEntries(Object.entries(FARBE).map(([k, c]) => [k, mat(c)]));
+  M.bauflaeche = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.3, depthWrite: false });
+  M.baurand = new THREE.LineBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.9 });
   const root = new THREE.Group();
   root.name = 'stege';
   game.scene.add(root);
@@ -116,14 +122,59 @@ export function init(game) {
     }
   }
 
+  // ---------------------------------------------------------------- Ausbauzustand aus den Spielregeln
+  // Ein Platz ist 'gebaut' (Start, gekauftes Stegprojekt oder Stufenausbau), 'bauplatz' (sein
+  // Stegprojekt kann jetzt gekauft werden) oder 'aus' (Projekt erst in einer spaeteren Stufe).
+  // Ohne Spielregeln (Ansicht mit ?stufe=n) gilt alles als gebaut.
+  let berthById = null;
+  function zustand() {
+    const sim = game.sim;
+    if (!sim?.state || !sim.ctx?.berths) return null;
+    if (!berthById) berthById = new Map(sim.ctx.berths.map((b) => [b.id, b]));
+    const offen = new Map((sim.openJettyProjects?.() ?? []).map((pr) => [pr.id, pr]));
+    return { state: sim.state, offen };
+  }
+  function platzStatus(id, z) {
+    if (!z) return { status: 'gebaut' };
+    const req = berthById.get(id)?.requires;
+    if (!req || z.state.buildings[req]) return { status: 'gebaut' };
+    const pr = z.offen.get(req);
+    return pr ? { status: 'bauplatz', projekt: pr } : { status: 'aus' };
+  }
+
   // ---------------------------------------------------------------- Liegeplaetze
-  function liegeplatz(p, g, nr) {
+  function ecken(p) {
+    const [x, y, richtung] = p.lage[stufe];
+    const r = THREE.MathUtils.degToRad(richtung);
+    const bx = Math.cos(r), by = Math.sin(r);
+    const sx = -by, sy = bx;
+    const l = p.laenge / 2, b = p.breite / 2;
+    return [[l, b], [l, -b], [-l, b], [-l, -b]].map(([u, v]) => [x + bx * u + sx * v, y + by * u + sy * v]);
+  }
+
+  function liegeplatz(p, g, nr, st) {
     const [x, y, richtung] = p.lage[stufe];
     const c = W(x, y);
     const rad = THREE.MathUtils.degToRad(richtung);
     const bug = new THREE.Vector3(Math.cos(rad), 0, -Math.sin(rad));   // zeigt zum Steg
     const seite = new THREE.Vector3(-bug.z, 0, bug.x);
     const L = p.laenge * U, B = p.breite * U;
+
+    if (st.status === 'bauplatz') {
+      // Bauplatz: gestrichelter Umriss im Wasser, antippen oeffnet das Bauen
+      const fl = new THREE.Mesh(new THREE.PlaneGeometry(L * 0.9, B * 0.84), M.bauflaeche);
+      fl.rotation.x = -Math.PI / 2;
+      fl.rotation.z = rad;
+      fl.position.set(c.x, 0.05, c.z);
+      fl.userData.pick = { type: 'buildsite', id: st.projekt.id };
+      fl.userData.bauplatz = st.projekt.id;
+      fl.renderOrder = 2;
+      const rand = new THREE.LineSegments(new THREE.EdgesGeometry(fl.geometry), M.baurand);
+      fl.add(rand);
+      g.add(fl);
+      bauplaetze.push(fl);
+      return;
+    }
 
     // Flaeche zum Antippen und Einfaerben
     const flMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0, depthWrite: false });
@@ -165,10 +216,68 @@ export function init(game) {
     plaetze.set(p.id, { id: p.id, x: c.x, z: c.z, richtung, laenge: L, breite: B, art: p.art, mesh: fl });
   }
 
-  // ---------------------------------------------------------------- Aufbau je Stufe
-  function setStage(n) {
-    const s = String(Math.max(1, Math.min(5, Math.round(Number(n) || 1))));
-    if (s === String(stufe) && gruppe) return;
+  // ---------------------------------------------------------------- Steglinien kuerzen
+  // Bogenlaenge des naechsten Punkts auf einer Linie (Planeinheiten)
+  function aufLinie(pts, x, y) {
+    let best = { d: Infinity, s: 0 };
+    let acc = 0;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [ax, ay] = pts[i], [bx, by] = pts[i + 1];
+      const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy) || 1;
+      const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (len * len)));
+      const d = Math.hypot(x - ax - t * dx, y - ay - t * dy);
+      if (d < best.d) best = { d, s: acc + t * len };
+      acc += len;
+    }
+    return { ...best, laenge: acc };
+  }
+  function teilLinie(pts, s0, s1) {
+    const out = [];
+    let acc = 0;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [ax, ay] = pts[i], [bx, by] = pts[i + 1];
+      const len = Math.hypot(bx - ax, by - ay) || 1;
+      const a = Math.max(s0, acc), e = Math.min(s1, acc + len);
+      if (e > a) {
+        const p0 = [ax + (bx - ax) * (a - acc) / len, ay + (by - ay) * (a - acc) / len];
+        const p1 = [ax + (bx - ax) * (e - acc) / len, ay + (by - ay) * (e - acc) / len];
+        if (!out.length) out.push(p0);
+        out.push(p1);
+      }
+      acc += len;
+    }
+    return out;
+  }
+  // Beginnt die Linie am Ufer oder an einer anderen Linie desselben Stegs? Sonst ist es ein T-Kopf.
+  function angebunden(linie, linien) {
+    const [x, y] = linie.punkte[0];
+    if (y <= 8) return true;
+    return linien.some((m) => m !== linie && m.steg === linie.steg && aufLinie(m.punkte, x, y).d < 2);
+  }
+
+  function baueLinie(linie, g, punkte) {
+    const l = { ...linie, punkte };
+    if (l.bauart === 'holz') holzsteg(l, g);
+    else if (l.bauart === 'schwimmsteg') schwimmsteg(l, g);
+    else if (l.bauart === 'kai') kai(l, g);
+  }
+
+  // ---------------------------------------------------------------- Aufbau
+  let bauplaetze = [];
+  let signatur = '';
+  let markiert = { ids: [], farbe: '#ffd23f' };
+
+  function aktuelleStufe(n) {
+    const v = n ?? game.sim?.state?.stage ?? game.state?.stufe ?? new URLSearchParams(location.search).get('stufe') ?? 1;
+    return String(Math.max(1, Math.min(5, Math.round(Number(v) || 1))));
+  }
+
+  function aufbauen(n) {
+    const s = aktuelleStufe(n);
+    const z = zustand();
+    const sig = s + '|' + (z ? Object.keys(z.state.buildings).filter((k) => z.state.buildings[k]).sort().join(',') + '|' + [...z.offen.keys()].sort().join(',') : 'alles');
+    if (sig === signatur && gruppe) return;
+    signatur = sig;
     stufe = s;
     if (gruppe) {
       root.remove(gruppe);
@@ -176,29 +285,96 @@ export function init(game) {
     }
     gruppe = new THREE.Group();
     plaetze = new Map();
-    const daten = HAFEN.stufen[stufe];
-    for (const linie of daten.stege) {
+    bauplaetze = [];
+    const linien = HAFEN.stufen[stufe].stege;
+
+    // Plaetze der Stufe mit Zustand, jeder Platz gehoert zur naechsten Linie seines Stegs
+    const liste = HAFEN.plaetze.filter((p) => p.lage[stufe]).map((p) => {
+      const st = platzStatus(p.id, z);
+      let li = -1, bd = Infinity;
+      linien.forEach((m, i) => {
+        if (m.steg !== p.steg) return;
+        const d = aufLinie(m.punkte, p.lage[stufe][0], p.lage[stufe][1]).d;
+        if (d < bd) { bd = d; li = i; }
+      });
+      return { p, st, li };
+    });
+
+    // 1. Durchgang: wie weit steht jede Linie (Bogenlaenge in Planeinheiten)
+    const bereich = linien.map((linie, i) => {
+      const eigene = liste.filter((e) => e.li === i);
+      const gebaut = eigene.filter((e) => e.st.status === 'gebaut');
+      const geplant = eigene.filter((e) => e.st.status === 'bauplatz');
+      const gesamt = aufLinie(linie.punkte, 0, 0).laenge;
+      const ende = (es) => Math.min(gesamt, Math.max(...es.flatMap((e) => ecken(e.p).map(([x, y]) => aufLinie(linie.punkte, x, y).s))) + 1.5);
+      const projekt = geplant[0]?.st.projekt.id ?? null;
+      if (!eigene.length || linie.bauart === 'kai') return { art: 'ganz', bis: gesamt, gesamt };   // Dienststege, Kai
+      if (!angebunden(linie, linien)) return { art: 'tkopf', bis: gebaut.length ? gesamt : 0, plan: !gebaut.length && projekt ? gesamt : 0, projekt, gesamt };
+      const bis = gebaut.length ? ende(gebaut) : 0;
+      return { art: 'stamm', bis, plan: geplant.length ? ende(geplant) : 0, projekt, gesamt };
+    });
+    // 2. Durchgang: ein Stamm reicht bis zu jedem stehenden Abzweig und T-Kopf desselben Stegs
+    linien.forEach((stamm, i) => {
+      const r = bereich[i];
+      if (r.art !== 'stamm') return;
+      linien.forEach((ast, j) => {
+        if (j === i || ast.steg !== stamm.steg || bereich[j].bis <= 0) return;
+        if (bereich[j].art === 'tkopf') {
+          let acc = 0;
+          stamm.punkte.forEach(([x, y], k) => {
+            if (k > 0) acc += Math.hypot(x - stamm.punkte[k - 1][0], y - stamm.punkte[k - 1][1]);
+            if (aufLinie(ast.punkte, x, y).d < 3) r.bis = Math.max(r.bis, acc);
+          });
+        } else {
+          const [x, y] = ast.punkte[0];
+          const h = aufLinie(stamm.punkte, x, y);
+          if (y > 8 && h.d < 2) r.bis = Math.max(r.bis, h.s);
+        }
+      });
+    });
+    // 3. Zeichnen: Gebautes als Steg, Kaufbares als heller Bauplatz dahinter
+    linien.forEach((linie, i) => {
       const g = new THREE.Group();
-      if (linie.bauart === 'holz') holzsteg(linie, g);
-      else if (linie.bauart === 'schwimmsteg') schwimmsteg(linie, g);
-      else if (linie.bauart === 'kai') kai(linie, g);
-      if (linie.steg) g.userData.pick = { type: 'jetty', id: linie.steg };
+      const r = bereich[i];
+      if (r.bis > 0) baueLinie(linie, g, r.bis >= r.gesamt - 0.01 ? linie.punkte : teilLinie(linie.punkte, 0, r.bis));
+      if (r.projekt && r.plan > r.bis + 0.5) geisterLinie(linie, teilLinie(linie.punkte, r.bis, r.plan), r.projekt, g);
+      if (linie.steg && g.children.some((o) => !o.userData.bauplatz)) g.userData.pick = { type: 'jetty', id: linie.steg };
       gruppe.add(g);
-    }
+    });
+
     let nr = 0;
     let letzterSteg = null;
-    for (const p of HAFEN.plaetze) {
-      if (!p.lage[stufe]) continue;
+    for (const { p, st } of liste) {
       if (p.steg !== letzterSteg) { nr = 0; letzterSteg = p.steg; }
-      liegeplatz(p, gruppe, nr++);
+      const n2 = nr++;
+      if (st.status !== 'aus') liegeplatz(p, gruppe, n2, st);
     }
     root.add(gruppe);
     api.stage = Number(stufe);
-    game.emit('stege', { stufe: Number(stufe), plaetze: plaetze.size });
+    highlight(markiert.ids, markiert.farbe);
+    game.emit('stege', { stufe: Number(stufe), plaetze: plaetze.size, bauplaetze: bauplaetze.length });
   }
 
+  // Noch nicht gekaufter Stegteil: heller, durchscheinender Umriss auf dem Wasser
+  function geisterLinie(linie, punkte, projektId, g) {
+    const b = Math.max(1.0, linie.breite * U);
+    const pts = punkte.map(([x, y]) => W(x, y));
+    for (let i = 0; i < pts.length - 1; i++) {
+      const m = segment(pts[i], pts[i + 1], b, 0.08, 0.06, M.bauflaeche);
+      m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry), M.baurand));
+      m.userData.pick = { type: 'buildsite', id: projektId };
+      m.userData.bauplatz = projektId;
+      m.renderOrder = 2;
+      g.add(m);
+      bauplaetze.push(m);
+    }
+  }
+
+  function setStage(n) { aufbauen(n == null ? undefined : n); }
+
   function highlight(ids, farbe = '#ffd23f') {
-    const set = new Set(ids ?? []);
+    markiert = { ids: [...(ids ?? [])], farbe };
+    const set = new Set(markiert.ids);
     for (const p of plaetze.values()) {
       const an = set.has(p.id);
       p.mesh.material.opacity = an ? 0.45 : 0;
@@ -210,12 +386,34 @@ export function init(game) {
   const DECK = { holz: 0.86, schwimmsteg: 0.46, kai: 1.3 };
   const deckHoehe = (bauart) => DECK[bauart] ?? DECK.holz;
 
-  const api = { group: root, setStage, highlight, deckHoehe, platz: (id) => plaetze.get(id) ?? null, stage: 0 };
+  const api = {
+    group: root, setStage, highlight, deckHoehe, stage: 0,
+    platz: (id) => plaetze.get(id) ?? null,
+    bauplaetze: () => [...new Set(bauplaetze.map((m) => m.userData.bauplatz))],
+  };
   game.stege = api;
-  game.on('stufe', (n) => setStage(typeof n === 'object' ? n?.stufe : n));
+  game.on('stufe', (n) => aufbauen(typeof n === 'object' ? n?.stufe : n));
+  // Gekaufte Stegprojekte, geladener Spielstand, neue Stufe: neu aufbauen, wenn sich etwas geaendert hat
+  game.on('build', () => aufbauen());
+  game.on('sim:change', () => aufbauen());
+  game.on('ready', () => aufbauen());
 
-  const start = new URLSearchParams(location.search).get('stufe');
-  setStage(start ?? game.state?.stufe ?? 1);
+  // Bauplatz antippen oeffnet die Bauen-Karte (dort steht das Stegprojekt mit Preis)
+  game.on('tap', (e) => {
+    if (e?.pick?.type !== 'buildsite' || !api.bauplaetze().includes(e.pick.id)) return;
+    game.emit('ui:bauplatz', { projekt: e.pick.id });
+    const body = document.body.classList;
+    const bauenOffen = body.contains('card-open') && !body.contains('card-boat');
+    if (!bauenOffen) document.getElementById('btn-build')?.click();
+  });
+
+  // Bauplaetze pulsieren leicht, damit man sie als antippbar erkennt
+  game.onTick(() => {
+    if (!bauplaetze.length) return;
+    M.bauflaeche.opacity = 0.28 + 0.12 * Math.sin(performance.now() / 400);
+  });
+
+  aufbauen();
   return api;
 }
 
