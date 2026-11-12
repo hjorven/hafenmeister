@@ -38,9 +38,10 @@ export const NAEHE = 110;
 // Wer wohin am liebsten geht: Faktor auf das Gewicht in ZIELE, fehlt er, gilt 1
 // (bei den Badegaesten 0.2: sie bleiben meist am Strand).
 export const VORLIEBE = {
-  crew:   { strand: 0.6, baden: 0.6 },
-  ort:    { strand: 1.2, baden: 0.8, aussicht: 2.5 },
-  strand: { strand: 8, baden: 6, strandkoerbe: 4, seebruecke: 3, kiosk: 2, aussicht: 1 },
+  // Angebote an Land: Crews holen morgens Broetchen und sitzen abends am Grill, Badegaeste holen Eis
+  crew:   { strand: 0.6, baden: 0.6, baecker: 3, grillplatz: 2.5, eisdiele: 1.5, hafencafe: 1.5 },
+  ort:    { strand: 1.2, baden: 0.8, aussicht: 2.5, baecker: 1.5, hafencafe: 2, eisdiele: 2.5 },
+  strand: { strand: 8, baden: 6, strandkoerbe: 4, seebruecke: 3, kiosk: 2, aussicht: 1, eisdiele: 4 },
 };
 
 // Gehgeschwindigkeit in m/s (Spielzeit), je Person zufaellig im Bereich.

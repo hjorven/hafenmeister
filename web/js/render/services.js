@@ -21,6 +21,7 @@ import * as THREE from 'three';
 import { SERVICES } from '../data/services.js';
 import { erstelleRegeln, neuerZustand, mitZahlen } from '../services/rules.js';
 import { baueModell, tPier, tankstelle, LAND_Y, mat, FARBE } from './services-models.js';
+import { buendeln } from './buendeln.js';
 import { HAFEN } from '../data/harbor.js';
 import { initBesuche } from './services-besuch.js';
 
@@ -89,6 +90,7 @@ export function init(game) {
 
   // ------------------------------------------------------------------ Modelle in der Szene
   const anlagen = new Map();     // id -> { stufe, group, update, einsatz, pop }
+  let probeUhr = null;           // Tageszeit waehrend buendeln() die Modelle probeweise bewegt
   function zeigeAnlage(id, mitAnimation) {
     const n = R.stufeVon(zustand(), id);
     const alt = anlagen.get(id);
@@ -96,10 +98,12 @@ export function init(game) {
     if (alt) { gruppe.remove(alt.group); entsorge(alt.group); anlagen.delete(id); }
     if (n <= 0) return;
     const w = welt(R.lage(zustand(), id));
-    const m = baueModell(id, n, { boden: boden(w.x, w.z), ufer: uferAbstand(w), uhr: () => game.sim?.tagesAnteil?.() ?? 0.5 });
+    const m = baueModell(id, n, { boden: boden(w.x, w.z), ufer: uferAbstand(w), uhr: () => probeUhr ?? game.sim?.tagesAnteil?.() ?? 0.5 });
     m.group.position.set(w.x, 0, w.z);
     m.group.rotation.y = w.ry;
     aufBoden(m.group);
+    // Unbewegte Teile zusammenfassen (weniger Zeichenaufrufe); Modelle mit Einsatz-Animation bleiben einzeln
+    if (!m.einsatz) buendeln(m.group, m.update, (u) => { probeUhr = u; });
     m.group.name = `service-${id}`;
     m.group.userData.pick = { type: 'building', id };
     gruppe.add(m.group);
@@ -146,6 +150,7 @@ export function init(game) {
     if (soll && !pier) {
       const aus = (HAFEN.stufen?.[6]?.stege ?? []).filter((l) => l.steg === 'P').map((l) => l.punkte);
       pier = tPier(aus.length ? aus : [[[-225, 214.3], [-225, 262]], [[-377, 262], [-77, 262]]]);
+      buendeln(pier, null);
       gruppe.add(pier);
     } else if (!soll && pier) {
       gruppe.remove(pier); entsorge(pier); pier = null;
@@ -303,6 +308,7 @@ export function init(game) {
     const lage = n > 0 ? tankLage() : null;
     if (!lage) return;
     const m = tankstelle(n);
+    buendeln(m.group, m.update);
     m.group.position.set(lage.x * U, 0, -lage.y * U);
     m.group.rotation.y = Math.PI;                  // Säulen zur Südkante, dort legen die Boote an
     m.group.name = 'service-tankstelle';
