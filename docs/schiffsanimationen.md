@@ -69,8 +69,8 @@ Seegang und Wind für Ereignisse: `game.boatAnim.setSea(0 bis 1)`, `game.boatAni
 
 ## Verkehr und Warteplätze
 
-- **Abstand halten:** Wer hinter einem anderen Boot in dieselbe Richtung fährt, bremst und hält Abstand. Liegt etwas im Weg (entgegenkommend, querend, an der Boje), weicht das Boot seitlich aus, entgegenkommende Boote beide nach Steuerbord. Stehen sich zwei Boote gegenseitig im Weg, fährt das, das näher am Ziel ist. Kurz vor dem Liegeplatz wird nicht mehr ausgewichen, nur gewartet. Nach 12 s Stillstand fährt ein Boot kurz ohne Regeln weiter, damit sich nichts festfährt (`traffic()` in `boat-anim.js`).
-- **Start:** Neue Boote beginnen am Revierrand an einer Stelle, an der gerade kein anderes Boot ist (`freierStart`).
+- **Abstand halten:** Wer hinter einem anderen Boot in dieselbe Richtung fährt, bremst und hält Abstand. Liegt etwas im Weg (entgegenkommend, querend, an der Boje), weicht das Boot seitlich aus, entgegenkommende Boote beide nach Steuerbord. Stehen sich zwei Boote gegenseitig im Weg, fährt das, das näher am Ziel ist. Kurz vor dem Liegeplatz wird nicht mehr ausgewichen, nur gewartet. Nur bei echter gegenseitiger Blockade (A wartet auf B wartet auf A) fährt ein Boot nach 12 s Stillstand kurz ohne Regeln weiter; wer nur in einer Schlange steht, wartet (`traffic()` und `festgefahren()` in `boat-anim.js`).
+- **Start:** Neue Boote beginnen außerhalb des Bildes am Rand des befahrbaren Wassers, verteilt auf mehrere Richtungen (siehe Fahrwasser), an einer Stelle, an der gerade kein anderes Boot ist (`freierStart`). Kommen mehrere zugleich, laufen sie im Abstand von 3 bis 9 s los.
 - **Eine Boje, ein Boot:** Ist die Boje der Spielregeln noch belegt, nimmt das Boot die nächste freie; sind alle belegt, ankert es luvseitig vor der Bojenreihe (`warteplatz`). Boote liegen quer zur Bojenreihe nebeneinander und schwojen nur so weit, wie Platz zur Nachbarboje ist.
 - **Box frei:** Ein zugewiesenes Boot bleibt an der Boje, bis das vorige Boot die Box verlassen hat (`dock(berth, { waitFor })`).
 - **Anlegen:** Kleine Boote brauchen von der Boje zur Box etwa 8 s, beschleunigen zügig und bremsen kräftig ab. Beim Ankommen taucht der Bug kurz ein, jede Leine klickt (`sound` `leine-einrasten`), die Box blitzt einmal hell auf.
@@ -91,9 +91,27 @@ Seegang und Wind für Ereignisse: `game.boatAnim.setSea(0 bis 1)`, `game.boatAni
 
 Ein einziger `onTick` für alle Boote, keine Speicheranforderungen pro Bild. Leinen liegender Boote werden auf Touch-Geräten nur jedes zweite Bild nachgeführt. Kielwasser und Schaum teilen sich Geometrie und Material.
 
+## Fahrwasser: Wege aus der Karte des Geländes
+
+Seit dem Gelände-Umbau (Thread "Boote ums Gelände herum führen") gibt es keine festen Wegpunkte mehr. Jede Fahrt wird beim Losfahren aus einer Karte berechnet (`web/js/world/fahrwasser.js`, reine Rechnung ohne Three.js):
+
+- **Karte:** Raster mit 1,5 m Zellen über x -300..320, z -340..140 (Weltmeter). Je Zelle Wassertiefe aus `game.landscape.tiefeBei` und Abstand zum nächsten Hindernis. Hindernisse sind Land, Strand, Molen (aus der Tiefe), alle Steglinien der Stufe mit Breite und Pfählen und alle Liegeplätze als Rechtecke (aus `HAFEN`, also mit Stegbild). Wartebojen und Ankerplätze sind weiche Zonen, die Wege nach Möglichkeit meiden. Außerhalb des Rasters gilt offenes Wasser.
+- **Neu bauen:** bei `stufe`, `stege` (Steg gekauft), `stegbild` und `landschaft:geaendert`, sofort. Laufende Fahrten planen dann ab ihrer Position neu.
+- **Weg:** A* für das jeweilige Boot. Abstand `r` = halbe Breite + Rand + 15 % der Länge (Bug und Heck schwenken in Kurven aus), Tiefe = Tiefgang + 0,3 m. Nur am Anfang und Ende (Gasse vor der Box, beim Ablegen) darf es bis auf Rumpf + 0,35 m eng werden, das kostet viel. Danach geglättet und, wo Platz ist, bis 3 m nach Steuerbord versetzt. Gibt es keinen Weg mit vollem Tiefgang, fährt das Boot lieber flach als über Land (`flach: true`).
+- **Anlegen:** Der Drehpunkt vor der Box (`approachPoints`) wird nur auf freiem, tiefem Wasser gewählt (`game.boatAnim.setFrei`), weit draußen und seitlich, sonst näher an der Box.
+- **Engstellen:** Wo zwei Boote nicht aneinander vorbeipassen, erkennt die Karte eine Engstelle mit Achse. Davor fragt das Boot eine Einbahn-Freigabe an (`boat-channel.js`, aus Jorvens Engpass-Patch): bis drei Boote gleicher Richtung als Konvoi, Gegenverkehr wartet in Reihenfolge davor. Die Freigabe gilt nur in der Engstelle, nach 45 s Warten fährt das Boot trotzdem.
+- **Richtungen:** Ankünfte und Abfahrten verteilen sich auf die Abschnitte des Kartenrands, die das Boot erreichen kann (Westen, Nordwesten, Norden, Nordosten, Osten), ohne zweimal hintereinander denselben. Trägt `boot-kommt` ein Feld `herkunft` (0 = Westen bis 1 = Osten, aus den Spielregeln), gilt das. Ist der See für die Größe nicht mit dem Meer verbunden, kommen die Boote von den entfernten Enden des Sees.
+- **Tagestörn:** Die Runde liegt auf dem freiesten Wasser in der Nähe des alten Punkts, der Kreis nur so groß, wie dort Platz ist.
+- **Für andere Module:** `game.fahrwasser.weg(von, nach, { breiteM, tiefgangM })` → `{ ok, punkte }`, `game.fahrwasser.befahrbar(x, z, radiusM, tiefgangM)`, `game.fahrwasser.karte`.
+
+### Prüfen
+
+- `node --test tests/fahrwasser.test.mjs`: jeder Liegeplatz in Stufe 1 bis 6 und allen 13 Stegbildern ist von der Warteboje erreichbar, kein Weg kommt Land, Steg oder Liegeplatz näher als Rumpf + 0,35 m, Bojen und Ankerplätze liegen frei, Engstellen und Freigabe. Plätze, die nur über zu flaches Wasser erreichbar sind, stehen als Hinweis in der Ausgabe.
+- `node tools/fahrwasser-pruefen.cjs --stufen 1-6 --stegbilder 0-12 --sekunden 40 [--geraet handy] [--bilder ordner]`: spielt jede Kombination mit Tempo 8x und vollem Hafen und zählt in jedem Bild Rümpfe auf Land, auf Stegplanken, Rumpf in Rumpf und Notfall-Durchlässe (Vorbeifahrer getrennt). Braucht `cd tests && npm ci`.
+
 ## Offen
 
-- Ab Stufe 3 fahren Boote von der Reede durch die Einfahrt (ab Stufe 5 um die Ostmole herum in den Außenhafen) und den Durchstich in den See und auf demselben Weg wieder hinaus, im Fahrwasser rechts haltend (`fahrweg` in `boat-view.js`). Bei sehr vielen Booten gleichzeitig (Stufe 5 und 6 mit Vorspulen) kommt es unterwegs noch zu Überlappungen, weil die Wege quer über Stege führen können; feste Fahrgassen folgen.
+- Vorbeifahrer (`render/boats/verkehr.js`) und Besuchsschiffe der Services fahren noch auf eigenen festen Bahnen; sie können auf `game.fahrwasser.weg` umgestellt werden.
 
 ## Dauerlieger
 
