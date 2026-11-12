@@ -34,6 +34,7 @@ const MODULES = [
   './features/stammgaeste.js',
   './features/tagesziele.js',
   './features/wetterflagge.js',
+  './features/hafen-schauen.js',
   './save/index.js',
 ];
 
