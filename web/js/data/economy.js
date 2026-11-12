@@ -21,7 +21,7 @@ export const ECONOMY = {
     winterBautempo: 2,
     // Tagesrhythmus wie im echten Hafen, als Anteile des Tages (0 = Morgen, 1 = Abend):
     // vormittags legen die Gäste ab, ab Mittag kommen die neuen, die meisten am Nachmittag.
-    ankunftVon: 0.3,        // etwa 11:00
+    ankunftVon: 0.35,       // etwa 11:00
     ankunftBis: 0.95,       // etwa 19:30
     ankunftSpitze: 0.62,    // Schwerpunkt am Nachmittag (etwa 15:30), breit verteilt
     abreiseVon: 0.07,       // etwa 7:30
