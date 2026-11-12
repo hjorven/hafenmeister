@@ -83,9 +83,25 @@ export function init(game) {
   const ringMat = new THREE.MeshBasicMaterial({ color: '#2a9d8f', transparent: true, opacity: 0.85, depthTest: false });
   const ringMatHot = new THREE.MeshBasicMaterial({ color: '#ee6454', transparent: true, opacity: 0.95, depthTest: false });
 
+  // Mit Stegen in 3D leuchtet die Box selbst (render/stege.js, gleiche Form und Drehung wie der
+  // Platz, nichts ragt darueber hinaus). Die Ringe bleiben unsichtbar als Fangpunkte zum Einrasten.
+  const boxen = () => !!game.stege?.highlight;
+  function faerbeBoxen() {
+    if (!boxen()) return;
+    const ids = ringGroup.children.map((m) => m.userData.platz);
+    game.stege.highlight(ids, '#2a9d8f');
+    for (const id of ids) {
+      const mat = game.stege.platz?.(id)?.mesh?.material;
+      if (!mat) continue;
+      const hot = id === tow?.ziel;
+      // eingerastet: kraeftiges Sonnengelb = "passt, hier loslassen" (Rot hiesse "belegt")
+      mat.color.set(hot ? '#ffd23f' : '#2a9d8f');
+      mat.opacity = hot ? 0.75 : 0.45;
+    }
+  }
   function showRings(ids) {
     ringGroup.clear();
-    const stufe = game.state?.stufe ?? 1;
+    const stufe = game.state?.stufe ?? game.sim?.state?.stage ?? 1;
     for (const id of ids) {
       const platz = HAFEN.plaetze.find((p) => p.id === id);
       const w = platz && platzInWelt(platz, stufe);
@@ -94,8 +110,13 @@ export function init(game) {
       m.position.set(w.x, 0.08, w.z);
       m.renderOrder = 10;
       m.userData.platz = id;
+      m.visible = !boxen();
+      // genau in die Mitte der gezeichneten Box
+      const sp = game.stege?.platz?.(id);
+      if (sp) m.position.set(sp.x, 0.08, sp.z);
       ringGroup.add(m);
     }
+    faerbeBoxen();
   }
 
   // ---------------------------------------------------------------- Zustand
@@ -188,6 +209,7 @@ export function init(game) {
     if (neu !== tow.ziel) {
       tow.ziel = neu;
       for (const m of ringGroup.children) m.material = m === best ? ringMatHot : ringMat;
+      faerbeBoxen();
       if (neu) { sound.play('leine-einrasten'); haptic(8); }
     }
     const w = game.camera.screenToWorld(tow.finger.x, tow.finger.y);
@@ -198,6 +220,7 @@ export function init(game) {
     const t = tow;
     tow = null;
     ringGroup.clear();
+    if (boxen()) game.stege.highlight([]);
     if (!t.moved) {
       // Nur angetippt: wie ein normaler Tipp behandeln und den Knopf "Einfahren" zeigen
       const pick = game.pick(t.start.x, t.start.y);
@@ -387,6 +410,14 @@ export function init(game) {
     // Ringe pulsieren
     const puls = 1 + Math.sin(now / 180) * 0.08;
     for (const m of ringGroup.children) m.scale.setScalar(m.userData.platz === tow?.ziel ? 1.15 : puls);
+    if (boxen() && ringGroup.children.length) {
+      const o = 0.36 + Math.sin(now / 180) * 0.12;
+      for (const m of ringGroup.children) {
+        if (m.userData.platz === tow?.ziel) continue;
+        const mat = game.stege.platz?.(m.userData.platz)?.mesh?.material;
+        if (mat) mat.opacity = o;
+      }
+    }
 
     // Eingestrichene Münzen fliegen hoch und verschwinden
     for (let i = fliegend.length - 1; i >= 0; i--) {

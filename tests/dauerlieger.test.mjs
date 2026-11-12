@@ -117,6 +117,31 @@ test('Kommt das Boot zurück und ein Gast liegt noch da, wartet es eine Nacht', 
   assert.equal(state.berths[platz], 999);
 });
 
+test('Gast wurde heute Nacht abgerechnet und legt erst morgens ab: Dauerboot kommt trotzdem zurück, Gast legt sofort ab', () => {
+  const { ctx, state } = neu(5);
+  const platz = freierPlatz(state, ctx);
+  const { boatId } = machDauerplatz(state, ctx, platz);
+  const p = dauerState(state).plaetze[platz];
+  const boot = state.boats[boatId];
+  delete state.berths[platz];
+  delete state.boats[boatId];
+  boot.status = 'away';
+  Object.assign(p, { boot, rueckNacht: state.day });
+  // Gast ist abgerechnet, hält die Box aber bis zum Ablegen am Vormittag
+  state.leaving = { [platz]: { boatId: 998, elapsed: 0, at: 30, off: false } };
+  const events = [];
+  const alt = { ...DAUER };
+  try {
+    DAUER.toernChance = 0; DAUER.tagestoernChance = 0;
+    ctx.hooks.night.forEach((fn) => fn({ state, ctx, events }));
+  } finally { Object.assign(DAUER, alt); }
+  assert.equal(state.berths[platz], boatId);
+  assert.ok(events.some((e) => e.type === 'dauerEinlaufen'));
+  // Am Morgen legt der Gast sofort ab, nicht erst zur geplanten Zeit
+  const ev = sim.tick(state, ctx, 1);
+  assert.ok(ev.some((e) => e.type === 'castOff' && e.berthId === platz));
+});
+
 test('Hafenbüro-Automatik beachtet die Dauerplätze (fittingBerths nutzt den Hook)', () => {
   const { ctx, state } = neu(9);
   const platz = freierPlatz(state, ctx);

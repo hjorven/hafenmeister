@@ -262,7 +262,11 @@ export function init(game) {
   game.on('tap', (e) => {
     const pick = e?.pick;
     const id = pick?.id;
-    if (pick && (pick.type === 'buildsite' || pick.type === 'building') && R.byId[id]) {
+    // Freier Bauplatz: Vorschau im Baumodus (ui/bauen.js), gebautes Gebaeude: eigene Karte
+    if (pick?.type === 'buildsite' && R.byId[id] && game.bauen) {
+      if (offeneKarte) schliessen();
+      game.bauen.vorschau(`angebot:${id}`);
+    } else if (pick && (pick.type === 'buildsite' || pick.type === 'building') && R.byId[id]) {
       if (offeneKarte === id) schliessen(); else oeffnen(id);
     } else if (offeneKarte) {
       schliessen();

@@ -62,6 +62,8 @@ export function createGame({ canvas, bounds, home }) {
   };
   new ResizeObserver(resize).observe(canvas);
   resize();
+  // Leisten erscheinen oft erst, wenn ihre Module geladen sind: Startansicht misst sie jedes Mal neu
+  rig.insetsFn = () => hudInsets(canvas, canvas.clientWidth, canvas.clientHeight);
   rig.reset();
 
   // Im Hintergrund pausieren (Tab gewechselt, Handy gesperrt)

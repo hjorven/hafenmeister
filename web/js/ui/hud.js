@@ -160,7 +160,7 @@ export function init(game) {
         `Größe ${b.size} · ${meters(b.length)} lang, ${meters(b.beam)} breit, Tiefgang ${meters(b.draft)} · ${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}`,
       ),
       el('p', {}, `Wünsche: ${wishes}`),
-      el('p', { class: 'card-hint' }, !fitting.length ? `${b.name}: gerade ist kein passender Platz frei.` : amBoot ? `${b.name}: ${fitting.length} passende Plätze leuchten. Boot auf einen Ring ziehen oder „Einfahren“ am Boot antippen.` : `${b.name}: ${fitting.length} passende Plätze leuchten. Ring antippen oder:`),
+      el('p', { class: 'card-hint' }, !fitting.length ? `${b.name}: gerade ist kein passender Platz frei.` : amBoot ? `${b.name}: ${fitting.length} passende Plätze leuchten. Boot auf eine leuchtende Box ziehen oder „Einfahren“ am Boot antippen.` : `${b.name}: ${fitting.length} passende Plätze leuchten. Box antippen oder:`),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
       el(
         'div',
@@ -255,8 +255,16 @@ export function init(game) {
 
   // Passende Plätze als Ringe im Wasser markieren, sobald ein Boot gewählt ist.
   // Antippen eines Rings weist das Boot dort zu (pick type 'berth').
+  // Mit Stegen in 3D leuchtet die Box selbst (gleiche Form und Drehung wie der Platz),
+  // die runden Ringe sind nur der Ersatz ohne render/stege.js.
   let ringGroup = null;
+  let leuchtend = [];
   function showRings(ids) {
+    if (game.stege?.highlight) {
+      leuchtend = [...ids];
+      game.stege.highlight(leuchtend, '#2a9d8f');
+      return;
+    }
     const THREE = game.THREE;
     if (!THREE || !game.scene) return;
     if (!ringGroup) {
@@ -279,14 +287,25 @@ export function init(game) {
       ringGroup.add(m);
     }
   }
-  const clearRings = () => ringGroup?.clear();
+  const clearRings = () => {
+    ringGroup?.clear();
+    if (leuchtend.length) { leuchtend = []; game.stege?.highlight?.([]); }
+  };
   game.onTick(() => {
+    if (leuchtend.length) {
+      const o = 0.38 + 0.14 * Math.sin(performance.now() / 250);
+      for (const id of leuchtend) {
+        const mat = game.stege?.platz?.(id)?.mesh?.material;
+        if (mat) mat.opacity = o;
+      }
+    }
     if (!ringGroup?.children.length) return;
     const s = 1 + 0.08 * Math.sin(performance.now() / 250);
     for (const m of ringGroup.children) m.scale.setScalar(s);
   });
 
-  buildBtn?.addEventListener('click', () => (cardMode === 'build' ? closeCard() : openCard('build')));
+  // Den Bauen-Knopf uebernimmt ui/bauen.js (Baumodus mit Vorschau); die Liste hier bleibt nur als Rueckfall
+  buildBtn?.addEventListener('click', () => { if (game.bauen) return; cardMode === 'build' ? closeCard() : openCard('build'); });
   game.on('sim:change', schedule);
   game.on('sim:select', ({ boatId, berths }) => {
     note = '';
