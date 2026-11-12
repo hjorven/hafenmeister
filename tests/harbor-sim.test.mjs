@@ -183,3 +183,14 @@ test('Anbindung: Modifikatoren aus game.events und game.services', async () => {
   assert.equal(m.arrivalFactor, 2);
   assert.equal(m.priceFactor, 1.5);
 });
+
+test('Abschlussziel: Kreuzfahrt, Flottenbesuch und Tag der offenen Tür zählen, Windjammer und Ausflug nicht', async () => {
+  const game = fakeGame();
+  await initBridge(game);
+  game.state.stage = game.sim.ctx.rules.maxStage;
+  for (const art of ['kreuzfahrt', 'flottenbesuch', 'offene-tuer', 'windjammer', 'ausflugsfahrt']) {
+    game.emit('services:besuch', { id: 'x', art, tag: 1, dauer: 1 });
+  }
+  assert.equal(game.state.bigVisits, 3);
+  assert.equal(sim.regionGoal(game.state, game.sim.ctx).visits, 3);
+});

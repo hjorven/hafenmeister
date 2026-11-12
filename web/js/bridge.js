@@ -7,6 +7,7 @@ import { createState, deserialize, load as loadLocal, save as saveLocal } from '
 import { HAFEN } from './data/harbor.js';
 import { BOAT_CATALOG } from './data/boat-catalog.js';
 import { ECONOMY } from './data/economy.js';
+import { GROSSSCHIFF_BESUCHE } from './data/services.js';
 
 const BOAT_FILES = ['./data/boats/s.js', './data/boats/m.js', './data/boats/l.js', './data/boats/xl.js'];
 
@@ -368,9 +369,10 @@ export async function initBridge(game) {
     const berthId = berthIdOf(d.platz ?? d.berth ?? d.berthId ?? (d.pick?.type === 'berth' ? d.pick.id : null) ?? d.target);
     if (boatId != null && berthId) api.assign(boatId, berthId);
   });
-  // Besuche großer Schiffe zählen für das Abschlussziel der Region
+  // Besuche großer Schiffe zählen für das Abschlussziel der Region (Liste in data/services.js,
+  // auch der Tag der offenen Tür des Marinestützpunkts zählt). Einziger Zähler: state.bigVisits.
   game.on('services:besuch', (b = {}) => {
-    if (['kreuzfahrt', 'flottenbesuch'].includes(b.art)) dispatch(sim.addBigVisit(state, ctx));
+    if (GROSSSCHIFF_BESUCHE.includes(b.art)) dispatch(sim.addBigVisit(state, ctx));
   });
   // Hafenmeister-Rundgang am Abend (render/people.js): Wer noch nicht bezahlt hat, zahlt jetzt die Hälfte
   game.on('hafenmeister:halt', (d = {}) => {

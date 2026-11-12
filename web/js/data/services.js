@@ -315,4 +315,9 @@ export const SERVICES = [
 
 export const SERVICE_BY_ID = Object.fromEntries(SERVICES.map((s) => [s.id, s]));
 
+// Besuchsarten, die fuer das Abschlussziel von Stufe 6 als "Besuch eines grossen Schiffs" zaehlen
+// (economy.js ziel.grossschiffBesuche). Die einzige Liste: bridge.js zaehlt damit state.bigVisits.
+// Windjammertreffen und Ausflugsfahrt zaehlen bewusst nicht (Absprache Balancing 2026-11-12).
+export const GROSSSCHIFF_BESUCHE = ['kreuzfahrt', 'flottenbesuch', 'offene-tuer'];
+
 export default SERVICES;

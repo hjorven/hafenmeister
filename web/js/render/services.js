@@ -18,7 +18,7 @@
 // Zum Ausprobieren: index.html?stufe=4 (Bauplaetze erscheinen, antippen, bauen) oder
 // index.html?stufe=5&services=alle (alles voll ausgebaut).
 import * as THREE from 'three';
-import { SERVICES } from '../data/services.js';
+import { SERVICES, GROSSSCHIFF_BESUCHE } from '../data/services.js';
 import { erstelleRegeln, neuerZustand, mitZahlen } from '../services/rules.js';
 import { baueModell, tPier, tankstelle, LAND_Y, mat, FARBE } from './services-models.js';
 import { buendeln } from './buendeln.js';
@@ -382,7 +382,6 @@ export function init(game) {
     })
     .catch(() => {});
 
-  const GROSSSCHIFF = ['kreuzfahrt', 'flottenbesuch', 'offene-tuer'];
   const api = {
     katalog: R.katalog,
     zustand,
@@ -396,8 +395,11 @@ export function init(game) {
     abrechnen,
     naechsteBesuche: () => R.naechsteBesuche(zustand(), kontext().tag),
     planeBesuch: (id, tag) => R.planeBesuch(zustand(), id, tag),
-    // Ziel Stufe 6 (economy.js ziel.grossschiffBesuche): Kreuzfahrtschiffe, Flottenbesuche, Tage der offenen Tür
-    grossschiffBesuche: () => GROSSSCHIFF.reduce((n, art) => n + (zustand().anzahl?.[art] ?? 0), 0),
+    // Ziel Stufe 6 (economy.js ziel.grossschiffBesuche): derselbe Zaehler wie im Abschlussziel
+    // (state.bigVisits, gezaehlt in bridge.js nach GROSSSCHIFF_BESUCHE, erst ab der letzten Stufe)
+    grossschiffBesuche: () => game.state?.bigVisits ?? 0,
+    grossschiffArten: GROSSSCHIFF_BESUCHE,
+    // Statistik je Besuchsart ueber das ganze Spiel (auch vor Stufe 6, auch Windjammer), zaehlt nicht fuers Ziel
     besucheJeArt: () => ({ ...(zustand().anzahl ?? {}) }),
     oeffnen,
     schliessen,

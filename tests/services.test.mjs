@@ -181,3 +181,11 @@ test('Barkasse: ab Stufe 6, braucht den Fahrgastanleger, verdient nicht bei Stur
   const sturm = R.tagesabschluss(z, { tag: 3, wetter: 'sturm', boote: [] }, () => 0).einnahmen.find((e) => e.id === 'barkasse');
   assert.equal(sturm, undefined);
 });
+
+test('Liste der Großschiffbesuche fürs Abschlussziel passt zum Katalog', async () => {
+  const { GROSSSCHIFF_BESUCHE } = await import('../web/js/data/services.js');
+  const arten = new Set(SERVICES.flatMap((s) => s.stufen.map((st) => st.wirkung?.besuch?.art).filter(Boolean)));
+  for (const a of GROSSSCHIFF_BESUCHE) assert.ok(arten.has(a), `Besuchsart ${a} gibt es nicht`);
+  assert.ok(GROSSSCHIFF_BESUCHE.includes('offene-tuer'));
+  assert.ok(!GROSSSCHIFF_BESUCHE.includes('windjammer'));
+});
