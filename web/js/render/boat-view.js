@@ -677,7 +677,10 @@ export function init(game) {
     const cv = document.createElement('canvas');
     const c2 = cv.getContext('2d');
     c2.font = font;
-    const breite = Math.ceil(teile.reduce((a, t) => a + c2.measureText(t.text).width, 0)) + 10;
+    const oben = Math.ceil(teile.reduce((a, t) => a + c2.measureText(t.text).width, 0));
+    c2.font = '600 10px "Pixelify Sans", system-ui, sans-serif';
+    const breite = Math.max(oben, unten ? Math.ceil(c2.measureText(unten).width) : 0) + 10;
+    c2.font = font;
     const hoch = unten ? 30 : 18;
     cv.width = breite * px; cv.height = hoch * px;
     c2.scale(px, px);
@@ -685,7 +688,7 @@ export function init(game) {
     c2.font = font;
     c2.textBaseline = 'middle';
     c2.lineJoin = 'round';
-    let x = 5;
+    let x = (breite - oben) / 2;
     for (const t of teile) {
       c2.lineWidth = 3; c2.strokeStyle = '#1d2733'; c2.strokeText(t.text, x, 9);
       c2.fillStyle = t.farbe; c2.fillText(t.text, x, 9);
@@ -702,12 +705,23 @@ export function init(game) {
     tex.minFilter = THREE.NearestFilter;
     tex.colorSpace = THREE.SRGBColorSpace;
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true, sizeAttenuation: false }));
-    // feste Größe auf dem Bildschirm (Anteil der Bildhöhe), am Handy etwas größer
-    const h = (window.innerWidth < 700 ? 0.05 : 0.036) * (hoch / 18);
-    sp.scale.set(h * (breite / hoch), h, 1);
+    // feste Größe auf dem Bildschirm (Anteil der Bildhöhe), am Handy etwas größer; groesseText()
+    // rechnet das jedes Bild in die Kamera um
+    sp.userData.h = (window.innerWidth < 700 ? 0.05 : 0.036) * (hoch / 18);
+    sp.userData.seiten = breite / hoch;
+    groesseText(sp);
     sp.center.set(0.5, 0);
     sp.renderOrder = 6;
     return sp;
+  }
+  // Orthografische Kamera: Sprites messen in Welt-Metern, also Bildhöhe in Metern einrechnen.
+  // Perspektive: sizeAttenuation false misst schon in Bildschirmanteilen.
+  function groesseText(sp) {
+    const cam = game.camera?.camera;
+    let h = sp.userData.h;
+    if (cam?.isOrthographicCamera) h *= (cam.top - cam.bottom) / (cam.zoom || 1);
+    else h *= 2;
+    sp.scale.set(h * sp.userData.seiten, h, 1);
   }
   function zeigeBetrag(id, d) {
     const m = muenzen.get(id);
@@ -747,7 +761,9 @@ export function init(game) {
       const b = betraege[i];
       b.t += dt;
       const k = b.t / b.dauer;
-      b.sprite.position.y = b.y0 + Math.min(1, k) * 2.2;
+      groesseText(b.sprite);
+      // steigt um etwa eine Texthöhe auf dem Bildschirm
+      b.sprite.position.y = b.y0 + Math.min(1, k) * b.sprite.scale.y * 1.5;
       b.sprite.material.opacity = k < 0.7 ? 1 : Math.max(0, 1 - (k - 0.7) / 0.3);
       if (k >= 1) {
         b.sprite.parent?.remove(b.sprite);
