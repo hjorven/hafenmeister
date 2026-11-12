@@ -164,7 +164,8 @@ const wehen = (fl, t, k = 0) => { if (fl) fl.rotation.y = Math.sin(t * 2.2 + k) 
 
 // ------------------------------------------------------------------ Modelle
 
-function bootsverleih(stufe) {
+function bootsverleih(stufe, { ufer = 14 } = {}) {
+  const see = -(ufer + 12);            // Mitte der Kreise auf dem See
   const g = new THREE.Group();
   haus(g, 4.2, 2.6, 3, FARBE.wood, FARBE.coral);
   box(g, 2.6, 1.1, 0.5, FARBE.white, 0, LAND_Y, -1.8);             // Tresen
@@ -175,11 +176,11 @@ function bootsverleih(stufe) {
   const leih = [];
   if (stufe >= 2) {
     // Tretboote auf dem Wasser
-    for (let i = 0; i < 2; i++) leih.push(rumpf(g, 2.4, 1.6, 0.6, farben[i + 1], 0, 0, -26, 0, FARBE.white));
+    for (let i = 0; i < 2; i++) leih.push(rumpf(g, 2.4, 1.6, 0.6, farben[i + 1], 0, 0, see, 0, FARBE.white));
   }
   if (stufe >= 3) {
     // Jolle mit Segel
-    const j = rumpf(g, 4.2, 1.6, 0.5, FARBE.white, 0, 0, -30);
+    const j = rumpf(g, 4.2, 1.6, 0.5, FARBE.white, 0, 0, see - 4);
     zyl(j, 0.06, 5, FARBE.white, 0.6, 0.3, 0, 4);
     const s = new THREE.Shape([new THREE.Vector2(0, 0.5), new THREE.Vector2(-2.2, 0.5), new THREE.Vector2(0, 5)]);
     const sm = add(j, new THREE.ShapeGeometry(s), FARBE.sail, 0.6, 0.3, 0);
@@ -192,7 +193,7 @@ function bootsverleih(stufe) {
       wehen(fl, t);
       leih.forEach((b, i) => {
         const r = 7 + i * 4, w = 0.12 / (1 + i * 0.3), a = t * w + i * 2;
-        b.position.set(Math.cos(a) * r, Math.sin(t * 1.3 + i) * 0.05, -26 - i * 3 + Math.sin(a) * r * 0.5);
+        b.position.set(Math.cos(a) * r, Math.sin(t * 1.3 + i) * 0.05, see - i * 3 + Math.sin(a) * r * 0.5);
         b.rotation.y = -a - Math.PI / 2;
       });
     },
@@ -201,16 +202,9 @@ function bootsverleih(stufe) {
 
 function slip(stufe, { boden = LAND_Y } = {}) {
   const g = new THREE.Group();
-  // Betonrampe vom Ufer (Bodenhoehe am Anker) bis 0,8 m unter Wasser, faellt nach Norden
-  const oben = Math.max(LAND_Y, Math.min(boden, 3)), unten = -0.8, laenge = 16;
-  const neigung = Math.atan2(oben - unten, laenge);
-  const r = new THREE.Group();
-  r.position.set(0, (oben + unten) / 2, -1);
-  r.rotation.x = -neigung;
-  r.userData.fest = true;
-  box(r, 4.5, 0.3, laenge / Math.cos(neigung), FARBE.road, 0, -0.3, 0);
-  for (let i = 0; i < 7; i++) box(r, 4.5, 0.06, 0.15, FARBE.rock, 0, 0, -laenge / 2 + 1 + i * 2.2);
-  g.add(r);
+  // Die Rampe selbst gehoert zur Landschaft (js/render/landschaft/gelaende.js, Slipanlage bei x -127).
+  // Hier stehen Trailer, Winde und ab Stufe 2 der Trailerparkplatz.
+  const oben = Math.max(LAND_Y, Math.min(boden, 3));
   // Trailer mit Boot
   const tr = new THREE.Group();
   box(tr, 0.15, 0.15, 5, FARBE.steel, -0.7, 0.45, 0);
@@ -233,8 +227,7 @@ function slip(stufe, { boden = LAND_Y } = {}) {
     update(dt, t) {
       // Der Trailer rollt langsam hinunter und wieder hoch
       k = (Math.sin(t * 0.25) + 1) / 2;
-      tr.position.z = 7 - k * 4;
-      tr.position.y = oben - k * Math.min(0.9, (oben - unten) * 0.25);
+      tr.position.z = 7 - k * 1.5;
     },
   };
 }
@@ -286,7 +279,7 @@ function fischhalle(stufe) {
   return { group: g, update: (dt, t) => { sch.rotation.y = Math.sin(t * 0.8) * 0.4; } };
 }
 
-function segelclub(stufe) {
+function segelclub(stufe, { ufer = 6 } = {}) {
   const g = new THREE.Group();
   haus(g, 13.6, 3.2, 6.8, FARBE.white, FARBE.coral);
   box(g, 13.6, 0.15, 2.5, FARBE.wood, 0, LAND_Y + 0.2, -4.6);        // Terrasse
@@ -295,7 +288,7 @@ function segelclub(stufe) {
   const farben = [FARBE.white, FARBE.red, FARBE.yellow, FARBE.navy, FARBE.white];
   for (let i = 0; i < 5; i++) rumpf(g, 2.4, 1.15, 0.4, farben[i], -9 + i * 2, LAND_Y + 0.35, -9, Math.PI / 2);
   // Jollensteg
-  steg(g, 4, -6, 4, -36, 1.4);
+  steg(g, 4, -6, 4, -(ufer + 16), 1.4);
   const optis = [];
   if (stufe >= 2) {
     // Optimisten der Segelschule im Kreis
@@ -326,7 +319,7 @@ function segelclub(stufe) {
         const trainer = i === 6;
         const a = t * 0.08 + (i / 6) * Math.PI * 2;
         const rx = trainer ? 10 : 14, rz = trainer ? 5 : 7;
-        o.position.set(Math.cos(a) * rx, Math.sin(t * 1.5 + i) * 0.05, -46 + Math.sin(a) * rz);
+        o.position.set(Math.cos(a) * rx, Math.sin(t * 1.5 + i) * 0.05, -(ufer + 26) + Math.sin(a) * rz);
         o.rotation.y = -a - Math.PI / 2;
       });
     },

@@ -65,6 +65,12 @@ export function init(game) {
   // Teile an Land auf den Boden setzen: Die Modelle sind fuer Land in LAND_Y gebaut, die Landschaft
   // ist an Ufer, Duenen und Nehrung hoeher. Wasserteile (Stege, Boote) bleiben, wo sie sind.
   // userData.land erzwingt das Anheben (z. B. Kranarm), userData.fest verbietet es (selbst gesetzt).
+  // Abstand vom Anker bis zum Wasser in Blickrichtung des Modells (lokal -z), hoechstens 60 m
+  function uferAbstand(w) {
+    const dx = -Math.sin(w.ry), dz = -Math.cos(w.ry);
+    for (let d = 0; d <= 60; d += 1) if (boden(w.x + dx * d, w.z + dz * d) < 0) return d;
+    return 8;
+  }
   const _b = new THREE.Box3(), _v = new THREE.Vector3();
   function aufBoden(gr) {
     gr.updateMatrixWorld(true);
@@ -89,7 +95,7 @@ export function init(game) {
     if (alt) { gruppe.remove(alt.group); entsorge(alt.group); anlagen.delete(id); }
     if (n <= 0) return;
     const w = welt(R.lage(zustand(), id));
-    const m = baueModell(id, n, { boden: boden(w.x, w.z) });
+    const m = baueModell(id, n, { boden: boden(w.x, w.z), ufer: uferAbstand(w) });
     m.group.position.set(w.x, 0, w.z);
     m.group.rotation.y = w.ry;
     aufBoden(m.group);
