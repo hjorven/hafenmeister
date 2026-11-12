@@ -86,6 +86,8 @@ Was beim Testen auf dem Handy aufgefallen ist und so gelöst wurde:
 - **Name und Heimathafen bleiben.** Auch die knappe Bootskarte zeigt in einer Zeile Name am Heck, Heimathafen und Stammgast, z. B. „Flaute“ aus Husum · Stammgast, 3. Besuch.
 - **Ein Einfahren-Knopf.** Wird ein wartendes Boot angetippt, steht "Automatisch einfahren" in der Karte. Der kleine Knopf "Einfahren" am Boot ist am Handy ausgeblendet, dafür meldet `input-touch.js` am Handy `game.gesten.einfahrenAmBoot = false`, damit `hud.js` den Kartenknopf zeigt. Am Tablet und PC ist es umgekehrt.
 - **Sonne auf eigener Spur.** Wie am PC und Tablet läuft die Sonne rechts in der Tag-Pille auf einer kurzen Spur neben "Tag 3 · Abend" und verdeckt den Text nicht. Im Querformat ist die Pille so breit wie Text plus Spur.
+- **Symbole genau mittig.** Die Knöpfe zeigen Linien-Symbole im 24er Raster (2 px Strich, runde Enden). Das Symbol sitzt absolut in der Mitte des Knopfs, der Abstand der Leiste (`gap`) schiebt es nicht mehr zur Seite. Hochkant sind die Knöpfe 48 px groß.
+- **Keine Boje unter den Knöpfen.** Hochkant lässt die Startansicht (und der Knopf Übersicht) den Streifen der Knopfspalte rechts frei (`camera.setInsetRight`, gesetzt in `input-touch.js`).
 - **Fünf Knöpfe im Hochformat.** Pause, Übersicht, Foto, Ton und Spielstand stehen rechts untereinander, das Wetter links unter den Zahlen. Die Maus-und-Tastatur-Hilfe ist auf dem Handy ausgeblendet.
 
 ## Ideen für die 3D-Fassung

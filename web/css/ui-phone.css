@@ -141,7 +141,8 @@
   }
   .hm #day .hm-sonne::before { inset: calc((24px - var(--hm-tap)) / 2); }
 
-  .hm #btn-pause, .hm #btn-overview, .hm #btn-save, .hm #btn-sound, .hm #btn-foto {
+  .hm #hud-top > #btn-pause, .hm #hud-top > #btn-overview, .hm #hud-top > #btn-save, .hm #hud-top > #btn-sound, .hm #hud-top > #btn-foto {
+    position: relative;
     flex: 0 0 auto;
     width: var(--hm-tap);
     min-width: 0;
@@ -149,46 +150,44 @@
     min-height: 0;
     margin: -4px 0;
     padding: 0;
+    gap: 0;
     justify-content: center;
     border: 0;
     color: var(--hm-ink);
     font-size: 0;                       /* Text bleibt fuer Screenreader, sichtbar ist das Symbol */
+    line-height: 0;
+    overflow: hidden;
   }
+  /* Symbol genau in der Mitte, unabhaengig von Text und Kindelementen im Knopf */
+  .hm #btn-pause > *, .hm #btn-overview > *, .hm #btn-save > *, .hm #btn-sound > *, .hm #btn-foto > * { display: none; }
   .hm #btn-pause::before, .hm #btn-overview::before, .hm #btn-save::before, .hm #btn-sound::before, .hm #btn-foto::before {
     content: "";
-    width: 20px;
-    height: 20px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
     background: currentColor;
-    -webkit-mask: var(--icon) center / contain no-repeat;
-    mask: var(--icon) center / contain no-repeat;
+    -webkit-mask: var(--icon) center / 24px 24px no-repeat;
+    mask: var(--icon) center / 24px 24px no-repeat;
   }
-  .hm #btn-pause {
-    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect x='4' y='3' width='4' height='14' rx='1'/%3E%3Crect x='12' y='3' width='4' height='14' rx='1'/%3E%3C/svg%3E");
-  }
-  .hm.paused #btn-pause {
-    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 3 L17 10 L5 17 Z'/%3E%3C/svg%3E");
-  }
+  /* Symbole: 24er Raster, 2 px Strich, runde Enden, wie eine Familie */
+  .hm #btn-pause { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='6.5' y='5' width='3.5' height='14' rx='1.2' fill='black' stroke='none'/%3E%3Crect x='14' y='5' width='3.5' height='14' rx='1.2' fill='black' stroke='none'/%3E%3C/svg%3E"); }
+  .hm.paused #btn-pause { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8.5 5.8v12.4a1 1 0 0 0 1.53.85l9.6-6.2a1 1 0 0 0 0-1.7l-9.6-6.2A1 1 0 0 0 8.5 5.8z' fill='black' stroke='none'/%3E%3C/svg%3E"); }
   /* Spielstand: Diskette */
-  .hm #btn-save {
-    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M3 3h11l3 3v11H3z M6 3v5h7V3 M6 12h8v5H6z' fill='black' fill-rule='evenodd'/%3E%3C/svg%3E");
-  }
-  /* Ton: Lautsprecher, durchgestrichen wenn stumm */
+  .hm #btn-save { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 4h11.2L20 7.8V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a1 1 0 0 1 1-1z'/%3E%3Cpath d='M8 4v4.5h7V4M8 20v-5.5h8V20'/%3E%3C/svg%3E"); }
+  /* Ton: Lautsprecher, mit Kreuz wenn stumm */
   .hm #btn-sound {
-    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M3 7h3l5-4v14l-5-4H3z'/%3E%3Cpath d='M13.5 6.5a5 5 0 0 1 0 7M15.5 4a8.5 8.5 0 0 1 0 12' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 9.5v5h3.2l4.8 4v-13l-4.8 4z' fill='black'/%3E%3Cpath d='M16 9.2a4 4 0 0 1 0 5.6M18.6 6.6a7.6 7.6 0 0 1 0 10.8'/%3E%3C/svg%3E");
     text-decoration: none;
     opacity: 1;
   }
-  .hm #btn-sound.hm-audio-off {
-    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M3 7h3l5-4v14l-5-4H3z'/%3E%3Cpath d='M13 7l5 6M18 7l-5 6' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
-  }
+  .hm #btn-sound.hm-audio-off { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 9.5v5h3.2l4.8 4v-13l-4.8 4z' fill='black'/%3E%3Cpath d='M16 9.5l5 5M21 9.5l-5 5'/%3E%3C/svg%3E"); }
   /* Fotomodus: Kamera */
-  .hm #btn-foto {
-    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M2 6h4l1.5-2h5L14 6h4v10H2z M10 8a3.2 3.2 0 1 0 0.01 0z' fill='black' fill-rule='evenodd'/%3E%3C/svg%3E");
-  }
-  /* Uebersicht: vier Ecken eines Rahmens */
-  .hm #btn-overview {
-    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4'/%3E%3C/svg%3E");
-  }
+  .hm #btn-foto { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 9a2 2 0 0 1 2-2h1.8l1.4-2h5.6l1.4 2H18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z'/%3E%3Ccircle cx='12' cy='13' r='3.3'/%3E%3C/svg%3E"); }
+  /* Uebersicht: Rahmen mit Mittelpunkt, ganzer Hafen ins Bild */
+  .hm #btn-overview { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 9V6.5A2.5 2.5 0 0 1 6.5 4H9M15 4h2.5A2.5 2.5 0 0 1 20 6.5V9M20 15v2.5a2.5 2.5 0 0 1-2.5 2.5H15M9 20H6.5A2.5 2.5 0 0 1 4 17.5V15'/%3E%3Ccircle cx='12' cy='12' r='2.2' fill='black' stroke='none'/%3E%3C/svg%3E"); }
 
   /* Sehr schmale Handys (z. B. iPhone SE, 320 px): Beschriftungen ausblenden,
      nur Symbol und Zahl bleiben. */
@@ -459,23 +458,23 @@
 @media (max-width: 599px) and (orientation: portrait) {
   .hm #hud-top { padding-right: calc(var(--hm-safe-right) + 8px); }
   .hm #money, .hm #rep { flex: 0 0 auto; }
-  .hm #btn-pause, .hm #btn-overview, .hm #btn-sound, .hm #btn-save, .hm #btn-foto {
+  .hm #hud-top > #btn-pause, .hm #hud-top > #btn-overview, .hm #hud-top > #btn-sound, .hm #hud-top > #btn-save, .hm #hud-top > #btn-foto {
     position: absolute;
     right: calc(var(--hm-safe-right) + 8px);
-    width: 44px;
-    height: 44px;
+    width: var(--hm-tap);
+    height: var(--hm-tap);
     margin: 0;
   }
-  .hm #btn-pause    { top: calc(var(--hm-safe-top) + 56px); }
-  .hm #btn-overview { top: calc(var(--hm-safe-top) + 106px); }
-  .hm #btn-foto     { top: calc(var(--hm-safe-top) + 156px); }
-  .hm #btn-sound    { top: calc(var(--hm-safe-top) + 206px); }
-  .hm #btn-save     { top: calc(var(--hm-safe-top) + 256px); }
+  .hm #btn-pause    { top: calc(var(--hm-safe-top) + 58px); }
+  .hm #btn-overview { top: calc(var(--hm-safe-top) + 114px); }
+  .hm #btn-foto     { top: calc(var(--hm-safe-top) + 170px); }
+  .hm #btn-sound    { top: calc(var(--hm-safe-top) + 226px); }
+  .hm #btn-save     { top: calc(var(--hm-safe-top) + 282px); }
 }
 @media (max-width: 599px) and (orientation: portrait) {
   /* Wetter (events.css) links unter die Zahlen, rechts steht die Knopfspalte */
   .hm #weather-chip { left: calc(var(--hm-safe-left) + 8px); right: auto; top: calc(var(--hm-safe-top) + 58px); }
-  .hm #weather-panel { left: calc(var(--hm-safe-left) + 8px); right: calc(var(--hm-safe-right) + 60px); top: calc(var(--hm-safe-top) + 108px); }
+  .hm #weather-panel { left: calc(var(--hm-safe-left) + 8px); right: calc(var(--hm-safe-right) + 64px); top: calc(var(--hm-safe-top) + 108px); }
 }
 @media (max-width: 359px) and (orientation: portrait) {
   .hm #hud-top > .stat { font-size: 13px; padding: 0 9px; }
@@ -493,7 +492,7 @@
   }
   .hm #hud-top > :not(.spacer) { height: 36px; }
   .hm #day { min-width: 0; flex: 0 0 auto; }
-  .hm #btn-pause { width: 44px; height: 44px; }
+  .hm #hud-top > #btn-pause, .hm #hud-top > #btn-overview, .hm #hud-top > #btn-save, .hm #hud-top > #btn-sound, .hm #hud-top > #btn-foto { width: 44px; height: 44px; margin: -4px 0; }
 
   /* Wartende Boote als Spalte rechts, Bauen darunter */
   .hm #hud-bottom {

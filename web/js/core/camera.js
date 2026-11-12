@@ -41,6 +41,12 @@ export class CameraRig {
     this.insets = { top, bottom };
   }
 
+  // Rechter Rand in CSS-Pixeln, den eine Knopfspalte verdeckt (Handy hochkant, ui/input-touch.js).
+  // Die Startansicht passt das Rechteck in den freien Bereich links davon.
+  setInsetRight(px) {
+    this.insetRight = Math.max(0, px || 0);
+  }
+
   // ---- Drehen ----
   // rotateFree: sofort um rad drehen (Ziehen mit Maus oder zwei Fingern), danach snapRotation()
   rotateFree(rad) {
@@ -91,13 +97,15 @@ export class CameraRig {
     this.yaw = 0;
     const h = this.home;
     const ins = this.insets || { top: 0, bottom: 0 };
+    const right = h.rect ? (this.insetRight || 0) : 0;
     if (h.rect) {
       const r = h.rect;
       const w = r.maxX - r.minX;
       const sinP = Math.sin(PITCH);
       const availH = Math.max(1, this.screenH - ins.top - ins.bottom);
+      const availW = Math.max(1, this.screenW - right);
       const aspectAvail = this.screenW / availH;
-      this.viewWidth = THREE.MathUtils.clamp(Math.max(w, (r.maxZ - r.minZ) * sinP * aspectAvail), this.minWidth, this.maxWidth);
+      this.viewWidth = THREE.MathUtils.clamp(Math.max(w * this.screenW / availW, (r.maxZ - r.minZ) * sinP * aspectAvail), this.minWidth, this.maxWidth);
       let cz = (r.minZ + r.maxZ) / 2;
       // Ist mehr Tiefe frei als noetig (Hochformat), den Ausschnitt an die Suedkante (Ufer) legen,
       // damit nicht der halbe Bildschirm Land zeigt.
@@ -110,8 +118,9 @@ export class CameraRig {
     }
     this._apply();
     // Mitte des freien Bereichs liegt um (oben - unten) / 2 tiefer als die Bildschirmmitte
+    // und um rechts / 2 weiter links (Knopfspalte am Handy)
     const shift = (ins.top - ins.bottom) / 2;
-    if (shift) this.panBy(0, shift);
+    if (shift || right) this.panBy(-right / 2, shift);
   }
 
   resize(width, height) {
