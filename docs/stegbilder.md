@@ -22,8 +22,9 @@ Die ids laufen in jeder Variante in derselben Reihenfolge vom Ufer nach außen w
 1. Jeder Steg wächst Segment für Segment vom Ufer aus. Nach jedem Segment wird gezählt, wie viele Boxen links und rechts passen, ohne etwas zu berühren. Die Seite endet an der ersten Box, die stören würde. Passt nichts, wird ein anderer Knick probiert.
 2. Die Variante merkt sich, welche Knicke schon benutzt wurden. Geradeaus nach geradeaus und derselbe Knick zweimal hintereinander werden seltener gewählt.
 3. Steg B bleibt gerade und zweiseitig, bis die Plätze der Stufe 2 stehen, weil davor die Wartebojen liegen.
-4. Jede Stufe nimmt so viele Plätze vom Ufer aus, wie das Grundbild in dieser Stufe hat. Einzelne Boxen ohne Nachbarn werden übersprungen, solange genug Plätze bleiben.
-5. Die fertige Variante muss alle Prüfungen in allen Stufen bestehen. Von den bestandenen kommen die zwölf in die Datei, die sich am stärksten unterscheiden.
+4. An der Gabel von Steg D liegen die Finger immer außen an den Ästen. Zwischen den Ästen läuft das Wasser zur Gabel hin spitz zu, dort könnte kein Boot eindrehen.
+5. Jede Stufe nimmt so viele Plätze vom Ufer aus, wie das Grundbild in dieser Stufe hat. Einzelne Boxen ohne Nachbarn werden übersprungen, solange genug Plätze bleiben.
+6. Die fertige Variante muss alle Prüfungen in allen Stufen bestehen. Von den bestandenen kommen die zwölf in die Datei, die sich am stärksten unterscheiden.
 
 ## Prüfungen (tools/stegbilder/pruefen.mjs)
 
