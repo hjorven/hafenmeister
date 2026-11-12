@@ -85,7 +85,7 @@ export function rulesFromEconomy(E = ECONOMY) {
   // Ruf und Bewertung
   const f = E.ruf || {};
   r.reputation = { window: f.fenster, start: f.start, startSamples: f.startBewertungen ?? 0, min: ANKER_MIN, max: ANKER_MAX };
-  r.rating = { noWishes: f.ohneWunsch, min: ANKER_MIN, max: ANKER_MAX };
+  r.rating = { noWishes: f.ohneWunsch, min: ANKER_MIN, max: ANKER_MAX, noneMet: f.wunschNote?.keiner ?? ANKER_MIN, allMet: f.wunschNote?.alle ?? ANKER_MAX };
   r.arrivalFactorAtRep = { 1: f.ankunftBasis, 5: f.ankunftBasis + 4 * f.ankunftJeAnker };
   r.turnAway = { chance: f.abgewiesen?.chance ?? 0, rating: f.abgewiesen?.wertung ?? ANKER_MIN };
   r.specialGuestRatingBonus = f.sondergastBonus ?? 0;
