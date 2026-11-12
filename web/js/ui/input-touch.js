@@ -138,6 +138,21 @@ export function init(game) {
     onSelect(game.sim?.selected ?? null);
   });
 
+  // Genau ein Einfahren-Knopf: Am Handy steht "Automatisch einfahren" gross in
+  // der Bootskarte (hud.js), der kleine Knopf am Boot (gesten.js) ist per CSS aus.
+  // hud.js fragt game.gesten.einfahrenAmBoot, das ist am Handy deshalb false.
+  game.on('ready', () => {
+    const g = game.gesten;
+    if (!g) return;
+    let amBoot = g.einfahrenAmBoot;
+    Object.defineProperty(g, 'einfahrenAmBoot', {
+      configurable: true,
+      enumerable: true,
+      get: () => (isPhone() ? false : amBoot),
+      set: (v) => { amBoot = v; },
+    });
+  });
+
   // Boot im Hafen gedrueckt halten: es antwortet mit seinem Horn
   game.on('longpress', ({ pick: p }) => {
     if (p?.type !== 'boat' || !game.sim) return;
