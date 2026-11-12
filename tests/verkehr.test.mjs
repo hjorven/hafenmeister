@@ -3,7 +3,7 @@
 // Ausführen im Repo-Ordner:  node --test tests/verkehr.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { SEE as SEEBAHNEN, SEE_RUNDE, FLOTTE, uferStrecke, versetzt, VERSATZ_MAX } from '../web/js/data/verkehr.js';
+import { SEE as SEEBAHNEN, SEE_RUNDE, FLOTTE, uferStrecke, versetzt, VERSATZ_MAX, GROSSE_GAESTE } from '../web/js/data/verkehr.js';
 import { gelaendeAbfrage, warteplaetze, molen, buhnen, PLAN_M } from '../web/js/render/landschaft/gelaende.js';
 import { region } from '../web/js/render/landschaft/regionen.js';
 import { HAFEN, plaetzeInStufe, platzInWelt } from '../web/js/data/harbor.js';
@@ -74,6 +74,27 @@ test('Seebahnen liegen im Wasser und halten Abstand, Stufe 1 bis 6, alle Stegbil
       });
     }
   });
+});
+
+test('Seebahnen meiden Kreuzfahrtschiff an P01 und Traditionssegler vor Anker, Stufe 5 und 6', () => {
+  const abstandM = 10;
+  for (const st of [5, 6]) {
+    bahnenVon(st).forEach((b, i) => {
+      for (const d of [-(b.versatz ?? VERSATZ_MAX), 0]) {
+        for (const [px, py] of punkteAuf(versetzt(b.pts, d))) {
+          for (const g of GROSSE_GAESTE) {
+            let ab;
+            if (g.kreis) ab = Math.hypot(px - g.kreis.x, py - g.kreis.y) - g.kreis.r;
+            else {
+              const r = g.rechteck;
+              ab = Math.hypot(Math.max(r.x0 - px, 0, px - r.x1), Math.max(r.y0 - py, 0, py - r.y1));
+            }
+            assert.ok(ab * PLAN_M >= abstandM, `Stufe ${st} Bahn ${i} bei (${px.toFixed(0)}, ${py.toFixed(0)}): zu nah an ${g.name}`);
+          }
+        }
+      }
+    });
+  }
 });
 
 test('Runden auf dem Binnensee und Paddler am Ufer, Stufe 1 und 2, alle Stegbilder', () => {

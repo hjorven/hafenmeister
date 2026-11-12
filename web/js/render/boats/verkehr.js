@@ -191,11 +191,11 @@ export function init(game) {
     return true;
   }
 
-  // Ist der Anfang der Bahn frei (kein anderes vorbeifahrendes Boot in 60 m)?
+  // Ist der Anfang der Bahn frei (kein anderes vorbeifahrendes Boot näher als 60 m plus seine Länge)?
   function bahnFrei(bahn, fortschritt) {
     const [px, py] = aufBahn(bahn.pts, fortschritt).p;
     const w = welt(px, py);
-    for (const b of boote) if (b.bahn === bahn && Math.hypot(b.anim.x - w.x, b.anim.z - w.z) < 60) return false;
+    for (const b of boote) if (b.bahn === bahn && Math.hypot(b.anim.x - w.x, b.anim.z - w.z) < 60 + b.anim.info.length) return false;
     return true;
   }
 
@@ -210,7 +210,8 @@ export function init(game) {
       const quer = Math.abs(dx * sh + dz * ch);
       const laenge = (a.info.length + o.info.length) / 2;
       const breite = (a.info.beam + o.info.beam) / 2 + 3;
-      if (vor > 0 && vor < laenge + 4 + a.speed * 4 && quer < breite) return true;
+      // Bremsweg wächst mit Tempo und Größe: große Schiffe brauchen länger zum Aufstoppen
+      if (vor > 0 && vor < laenge + 6 + a.speed * (4 + a.info.length / 25) && quer < breite) return true;
     }
     return false;
   }
