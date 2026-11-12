@@ -104,8 +104,10 @@ export function cameraState(page) {
 
 // Freier Punkt auf der Spielflaeche, moeglichst nah an der Bildschirmmitte, an dem keine
 // Leiste oder Karte liegt (elementFromPoint trifft #stage). Klappt mit jedem Layout.
-export async function stageCenter(page) {
-  return page.evaluate(() => {
+// Mit { leer: true } zusaetzlich nur Punkte, an denen nichts Antippbares liegt (game.pick ist null).
+export async function stageCenter(page, { leer = false } = {}) {
+  return page.evaluate((leer) => {
+    const g = window.hafenmeister;
     const stage = document.getElementById('stage');
     const cx = innerWidth / 2, cy = innerHeight / 2;
     let best = null;
@@ -116,13 +118,14 @@ export async function stageCenter(page) {
         const free = [[0, 0], [-60, 0], [60, 0], [0, -60], [0, 60]]
           .every(([dx, dy]) => document.elementFromPoint(x + dx, y + dy) === stage);
         if (!free) continue;
+        if (leer && typeof g?.pick === 'function' && g.pick(x, y, { tolerance: 40 })) continue;
         const d = Math.hypot(x - cx, y - cy);
         if (!best || d < best.d) best = { x, y, d };
       }
     }
     if (!best) throw new Error('Kein freier Punkt auf der Spielflaeche gefunden');
     return { x: best.x, y: best.y };
-  });
+  }, leer);
 }
 
 // Echte Touch-Gesten ueber das Chrome DevTools Protocol (ein oder zwei Finger)

@@ -87,7 +87,7 @@ test('Antippen der Karte meldet einen Punkt im Wasser oder an Land', async ({ ga
     window.__taps = [];
     window.hafenmeister.on('tap', (e) => window.__taps.push({ x: e.x, y: e.y, hasWorld: !!e.world }));
   });
-  const c = await stageCenter(page);
+  const c = await stageCenter(page, { leer: true });
   if (isTouchProject(testInfo)) await page.touchscreen.tap(c.x, c.y);
   else await page.mouse.click(c.x, c.y);
 

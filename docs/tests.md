@@ -8,7 +8,7 @@ Im Hauptordner des Repos:
 bash tests/pruefen.sh
 ```
 
-Er prüft nacheinander die Pfade für GitHub Pages, alle Tests ohne Browser (`tests/*.test.mjs`) und alle Browser-Tests auf Handy, Tablet und PC. Am Ende steht `Alles grün.`, sonst bricht er mit dem Fehler ab. Beim ersten Lauf installiert er die Abhängigkeiten in `tests/` selbst. Dauer etwa 4 bis 5 Minuten.
+Er prüft nacheinander die Pfade für GitHub Pages, alle Tests ohne Browser (`tests/*.test.mjs`) und alle Browser-Tests auf Handy, Tablet und PC. Am Ende steht `Alles grün.`, sonst bricht er mit dem Fehler ab. Beim ersten Lauf installiert er die Abhängigkeiten in `tests/` selbst. Dauer etwa 5 bis 10 Minuten.
 
 Nur die schnellen Prüfungen ohne Browser (etwa 5 Sekunden):
 
@@ -40,7 +40,7 @@ Stand: 11.11.2026. Bei jedem Pull Request und jedem Push auf `main` startet der 
 |---|---|
 | `tests/specs/start.spec.mjs` | Spiel startet ohne Skriptfehler, Konsolenfehler oder fehlende Dateien. Jedes Modul aus `MODULES` in `main.js`, das es als Datei gibt, lädt fehlerfrei. Die Spielfläche ist nicht leer oder schwarz. Bildschirmfotos (Startansicht und ganz herausgezoomt). |
 | `tests/specs/steuerung.spec.mjs` | Pause hält die Spielzeit an, Karte verschieben (Finger oder Maus), Zoomen (zwei Finger oder Mausrad), Übersicht setzt die Kamera zurück, Antippen löst `tap` aus. |
-| `tests/specs/spielschleife.spec.mjs` | Rauchtest der Spielschleife: Boot kommt an die Boje und erscheint unten in der Warteliste, Antippen öffnet die Karte, „Automatisch einfahren“ legt es an, abends erscheint „Kassieren“, danach steigt das Geld oben. Zeit wird mit `game.sim.fastForward` vorgespult, Seed 42. |
+| `tests/specs/spielschleife.spec.mjs` | Rauchtest der Spielschleife: Boot kommt an die Boje, wird in 3D angetippt (oder in der Warteliste, falls `game.boatsVisible` fehlt), die Karte geht auf, „Automatisch einfahren“ legt es an, abends erscheint „Kassieren“, danach steigt das Geld oben. Zeit wird mit `game.sim.fastForward` vorgespult, Seed 42. |
 | `tests/specs/layout.spec.mjs` | Seite scrollt nicht, Spielfläche füllt den Bildschirm, Knöpfe `#btn-pause`, `#btn-overview`, `#btn-build` sind sichtbar, im Bild und auf Touch-Geräten mindestens 40 x 40 Pixel groß (Handy quer 36), die Leisten überlappen nicht, die Media Queries treffen das richtige Gerät. |
 
 Zusätzlich läuft `tools/check-pages.sh web` (absolute Pfade, fehlende Dateien), denn der Pages-Workflow prüft das erst nach dem Merge.
@@ -65,7 +65,7 @@ Damit GitHub das auch erzwingt, einmal in GitHub einstellen (nur Jorven, erst we
 
 Ein Fehler, der auf `main` schon steckt und von einem anderen Thread behoben wird, steht in `tests/specs/layout.spec.mjs` in der Liste `BEKANNT`. Der Test läuft weiter, muss aber scheitern. Wer den Fehler behebt, sieht den Test rot mit „expected to fail“ und löscht den Eintrag im selben PR.
 
-Aktuell: Tablet hochkant, obere Leiste zu voll (Pause liegt rechts außerhalb des Bildes, Sonne verdeckt „Tag“), `web/css/ui-tablet.css`.
+Aktuell: keine.
 
 ## Einzelne Schritte von Hand
 

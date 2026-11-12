@@ -9,7 +9,7 @@ const MIN_TOUCH_FLACH = 36;  // Handy quer (unter 500 px hoch): ui-phone.css nim
 // muss scheitern (test.fail). Wird der Fehler behoben, wird der Test rot mit "expected to fail":
 // dann den Eintrag hier im selben PR loeschen.
 const BEKANNT = {
-  'tablet': 'Tablet hochkant: obere Leiste zu voll, Pause liegt rechts ausserhalb, Sonne verdeckt "Tag" (web/css/ui-tablet.css)',
+  // 'tablet': 'Beschreibung des Fehlers und der Datei',
 };
 
 test('Seite scrollt nicht und die Spielfläche füllt den Bildschirm', async ({ game }) => {
