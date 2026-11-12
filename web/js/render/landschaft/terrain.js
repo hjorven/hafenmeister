@@ -3,7 +3,7 @@
 // Alle wiederholten Dinge werden beim Bau zu wenigen festen Netzen gebacken, damit es auch auf schwachen Handys flüssig bleibt.
 import * as THREE from 'three';
 import { vereinfacheRaster } from './netz.js';
-import { punkt, BEREICH, PLAN_M, molen, buhnen, rauschen, hafenAbstand, suedufer, DURCHSTICH, SLIP } from './gelaende.js';
+import { punkt, BEREICH, PLAN_M, molen, buhnen, rauschen, hafenAbstand, suedufer, DURCHSTICH, SLIP, pricken } from './gelaende.js';
 
 const U = PLAN_M;
 
@@ -390,8 +390,8 @@ function baueKaimauern(region, stufe, gruppe, schatten) {
     // Promenade am See, mit Lücke für die Slipanlage
     mauern.push({ x0: -150, x1: SLIP.x0, y: 6, nach: 1, hoehe: 1.2 });
     mauern.push({ x0: SLIP.x1, x1: 202, y: 6, nach: 1, hoehe: 1.2 });
-    mauern.push({ xKante: DURCHSTICH[0], y0: 186, y1: 230, nach: 1, hoehe: 1.0 });                    // Durchstich West
-    mauern.push({ xKante: DURCHSTICH[1], y0: 186, y1: 230, nach: -1, hoehe: 1.0 });                   // Durchstich Ost
+    mauern.push({ xKante: DURCHSTICH[0], y0: 196, y1: 228, nach: 1, hoehe: 1.0 });                    // Durchstich West
+    mauern.push({ xKante: DURCHSTICH[1], y0: 196, y1: 228, nach: -1, hoehe: 1.0 });                   // Durchstich Ost
   }
   if (stufe >= 5) mauern.push({ x0: 2, x1: 150, y: 229, nach: 1, hoehe: 1.3 });                        // Kai im Außenhafen
   const mWand = new THREE.MeshLambertMaterial({ color: region.farben.steinschuettung, flatShading: true });
@@ -431,9 +431,21 @@ function baueBuhnen(region, stufe, gruppe) {
       pfaehle.push({ x: px * U, y: p.h - 0.3, z: -py * U, s: 1, sx: 0.32, sz: 0.32, sy: top - p.h + 0.3, farbe: '#9a8470' });
     }
   }
+  // Pricken: Reisigbesen auf Stangen markieren die Rinne durch das Seegatt (Stufe 1 und 2)
+  const besen = [];
+  for (const [px, py] of pricken(stufe)) {
+    const p = punkt(px, py, stufe, region);
+    const top = 1.9 + rnd() * 0.3;
+    pfaehle.push({ x: px * U, y: p.h - 0.2, z: -py * U, s: 1, sx: 0.16, sz: 0.16, sy: top - p.h + 0.2, farbe: '#6f5a46' });
+    besen.push({ x: px * U, y: top - 0.15, z: -py * U, s: 1, sx: 0.7, sz: 0.7, sy: 0.9, rot: rnd() * 6.3, farbe: '#5e4a38' });
+  }
   if (!pfaehle.length) return;
   const geo = new THREE.CylinderGeometry(0.5, 0.5, 1, 5).translate(0, 0.5, 0);
   gruppe.add(instanzen(geo, new THREE.MeshLambertMaterial({ flatShading: true }), pfaehle, 'buhnen'));
+  if (besen.length) {
+    const kegel = new THREE.ConeGeometry(0.5, 1, 5, 1, true).translate(0, 0.5, 0);
+    gruppe.add(instanzen(kegel, new THREE.MeshLambertMaterial({ flatShading: true, side: THREE.DoubleSide }), besen, 'pricken'));
+  }
 }
 
 // ------------------------------------------------------------------ Schatten ohne Schattenkarte

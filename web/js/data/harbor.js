@@ -4349,7 +4349,7 @@ export const HAFEN = {
     ]
    },
    "tiefe": {
-    "6": 8.5
+    "6": 2.2
    }
   },
   {
@@ -4946,11 +4946,11 @@ export const HAFEN = {
      "breite": 2.0,
      "punkte": [
       [
-       183.5,
+       201.0,
        232.0
       ],
       [
-       185.5,
+       203.0,
        254.0
       ]
      ]
@@ -4997,7 +4997,7 @@ export const HAFEN = {
     },
     {
      "art": "seenotretter",
-     "x": 179.1,
+     "x": 196.6,
      "y": 243.2,
      "richtung": 85,
      "laenge": 17.6,
@@ -5264,11 +5264,11 @@ export const HAFEN = {
      "breite": 2.0,
      "punkte": [
       [
-       183.5,
+       201.0,
        232.0
       ],
       [
-       185.5,
+       203.0,
        254.0
       ]
      ]
@@ -5375,7 +5375,7 @@ export const HAFEN = {
     },
     {
      "art": "seenotretter",
-     "x": 179.1,
+     "x": 196.6,
      "y": 243.2,
      "richtung": 85,
      "laenge": 17.6,
@@ -5647,11 +5647,11 @@ export const HAFEN = {
      "breite": 2.0,
      "punkte": [
       [
-       183.5,
+       201.0,
        232.0
       ],
       [
-       185.5,
+       203.0,
        254.0
       ]
      ]
@@ -5803,7 +5803,7 @@ export const HAFEN = {
     },
     {
      "art": "seenotretter",
-     "x": 179.1,
+     "x": 196.6,
      "y": 243.2,
      "richtung": 85,
      "laenge": 17.6,

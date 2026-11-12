@@ -379,8 +379,8 @@ const PLAN = [
   { id: 'haus-8', name: 'Wohnhaus', art: 'wohnhaus', ab: 4, p: [64, -66], opt: { wand: 'wand', l: 10, b: 7, h: 6, dachH: 3.2 } },
   { id: 'haus-9', name: 'Wohnhaus', art: 'wohnhaus', ab: 5, p: [-270, -36], opt: { wand: 'wand' } },
   // Molenfeuer auf den Molenkoepfen: einlaufend Gruen rechts (Westmole), Rot links (Ostmole)
-  { id: 'feuer-gruen', name: 'Molenfeuer Grün', art: 'molenfeuer', ab: 3, p: { 3: [149, 268], 5: [96, 320] }, opt: { farbe: 'gruen' }, mole: true },
-  { id: 'feuer-rot',   name: 'Molenfeuer Rot',  art: 'molenfeuer', ab: 3, p: { 3: [187, 258], 5: [170, 304] }, opt: { farbe: 'rot' }, mole: true },
+  { id: 'feuer-gruen', name: 'Molenfeuer Grün', art: 'molenfeuer', ab: 3, p: { 3: [142, 274], 5: [96, 320] }, opt: { farbe: 'gruen' }, mole: true },
+  { id: 'feuer-rot',   name: 'Molenfeuer Rot',  art: 'molenfeuer', ab: 3, p: { 3: [216, 268], 5: [196, 306] }, opt: { farbe: 'rot' }, mole: true },
   // Strand: Strandkoerbe am Ostseestrand der Nehrung, Seebruecke ab Stufe 3
   { id: 'koerbe-1', name: 'Strandkörbe', art: 'strandkoerbe', ab: 2, p: [-210, 218], opt: { anzahl: 8, seed: 3 } },
   { id: 'koerbe-2', name: 'Strandkörbe', art: 'strandkoerbe', ab: 3, p: [-120, 218], opt: { anzahl: 6, seed: 7 } },
