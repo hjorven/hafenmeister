@@ -20,18 +20,24 @@
   src: url("../fonts/pixelify-sans-latin-400-normal.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
+  /* Ziffern und Euro aus der Systemschrift: die Pixel-Ziffern 3, 5, 8 und das Euro-Zeichen sind klein kaum zu unterscheiden */
+  unicode-range: U+0000-002F, U+003A-20AB, U+20AD-FFFF;
 }
 @font-face {
   font-family: "Pixelify Sans";
   src: url("../fonts/pixelify-sans-latin-600-normal.woff2") format("woff2");
   font-weight: 600;
   font-display: swap;
+  /* Ziffern und Euro aus der Systemschrift: die Pixel-Ziffern 3, 5, 8 und das Euro-Zeichen sind klein kaum zu unterscheiden */
+  unicode-range: U+0000-002F, U+003A-20AB, U+20AD-FFFF;
 }
 @font-face {
   font-family: "Pixelify Sans";
   src: url("../fonts/pixelify-sans-latin-700-normal.woff2") format("woff2");
   font-weight: 700;
   font-display: swap;
+  /* Ziffern und Euro aus der Systemschrift: die Pixel-Ziffern 3, 5, 8 und das Euro-Zeichen sind klein kaum zu unterscheiden */
+  unicode-range: U+0000-002F, U+003A-20AB, U+20AD-FFFF;
 }
 
 :root {
@@ -42,7 +48,7 @@
   --hm-meer: #23897d;
   --hm-koralle: #ee6454;
   --hm-gold: #f2c14e;
-  --hm-pixel: "Pixelify Sans", ui-monospace, system-ui, sans-serif;
+  --hm-pixel: "Pixelify Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --hm-text: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   /* Größen: Geräte-Dateien überschreiben sie */
@@ -682,3 +688,8 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
 @media (prefers-reduced-motion: reduce) {
   .hm-neu #card, .hm-neu #hud-bottom, .hm-neu #hm-menue, .hm-neu .hm-tafel-px, .hm-neu #btn-collect, .hm-neu #btn-build.bau-punkt::after { transition: none !important; animation: none !important; }
 }
+
+/* Kompass aus ui/kamera.js: in den Werkzeugen, ausgeblendet ohne Lücke */
+.hm-neu #btn-kompass[hidden] { display: none; }
+.hm-neu #btn-kompass svg { width: 70%; height: 70%; }
+.hm-neu .hm-leise { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }

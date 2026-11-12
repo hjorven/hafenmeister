@@ -156,6 +156,8 @@ export function init(game) {
     b.hidden = false;
     b.textContent = '';
     symbol(b, t.id);
+    // Unsichtbare Beschriftung: Bildschirmleser und Tests lesen "Pause" / "Weiter" am Knopf
+    if (t.id === 'pause') b.append(el('span', { class: 'hm-leise' }, game.paused ? 'Weiter' : 'Pause'));
     // Pause: main.js schaltet bei Klick auf #btn-pause schon um; die anderen setzen das Tempo
     if (t.id !== 'pause') b.addEventListener('click', () => waehleTempo(t.speed));
     else if (!alt) b.addEventListener('click', () => game.setPaused?.(!game.paused));
@@ -183,6 +185,11 @@ export function init(game) {
     }
   }
   game.on('ui:vorspulen', zeigeTempo);
+  game.on('pause', (p) => {
+    const l = tempoKnopf.pause.querySelector('.hm-leise');
+    if (l) l.textContent = p ? 'Weiter' : 'Pause';
+    zeigeTempo();
+  });
 
   // Tagesbalken: Sonne wandert, abends färbt sich der Himmel und der Mond kommt
   let letzterAnteil = -1;
@@ -325,6 +332,10 @@ export function init(game) {
     if (ov && ov.parentNode !== werkzeuge) werkzeuge.prepend(ov);
     if (ov && !ov.classList.contains('hm-rund')) { ov.className = 'hm-px hm-rund'; symbol(ov, 'uebersicht'); }
     if (werkzeuge.lastElementChild !== menueBtn) werkzeuge.append(menueBtn);
+    // Kompass aus ui/kamera.js (nur sichtbar, wenn die Kamera gedreht oder geneigt ist)
+    const kompass = $('btn-kompass');
+    if (kompass && kompass.nextElementSibling !== menueBtn) werkzeuge.insertBefore(kompass, menueBtn);
+    if (kompass && !kompass.classList.contains('hm-px')) kompass.classList.add('hm-px', 'hm-rund');
     for (const [id, text, sym] of MENUE) {
       const x = $(id);
       if (!x) continue;
