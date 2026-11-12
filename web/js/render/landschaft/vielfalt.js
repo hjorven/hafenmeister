@@ -296,6 +296,8 @@ function dorfHoehe(h, dd) {
   return h;
 }
 
+const AUSSEN_FRUCHT = { raps: 'wiese', acker: 'weide', korn: 'wiese' };
+
 /** Fein gerechneter Bereich (wie BEREICH in gelaende.js). 0 innen, 1 ab 40 Einheiten außerhalb. */
 const FEIN = { x0: -420, x1: 430, y0: -200 };
 function aussenAnteil(px, py) {
@@ -492,6 +494,13 @@ export function land(px, py, h, typ, d, k = {}) {
   // Außerhalb des fein gerechneten Bereichs keine Felder: das grobe Netz würde Treppen zeigen.
   // Zum Rand hin werden Felder zu Wiesen und Weiden, große Flecken bleiben Wald.
   // Draußen: große Schläge ohne Wege und Raine, nur ruhige Farben (kein Raps)
+  // Gleich hinter dem feinen Bereich laufen die (achsparallelen) Felder weiter, ohne Wege; erst weiter draußen Flecken
+  const aussenD = Math.max(FEIN.x0 - px, px - FEIN.x1, FEIN.y0 - py);
+  if (art === 'feld' && aussenD > 0 && aussenD < 140) {
+    // ruhigere Farben, damit die groben Dreiecke dort keine harten Zacken zeigen
+    const f = feldBei(px, py);
+    return { h, typ: AUSSEN_FRUCHT[f.frucht] || f.frucht };
+  }
   if (art === 'feld' && aussenAnteil(px, py) > 0.5) {
     // Weiche Flecken in nah beieinander liegenden Farben: im groben Netz gäben Rechtecke Treppen
     const w = fbm(px / 160 + 4, py / 160 - 2, bild.seed + 29);
