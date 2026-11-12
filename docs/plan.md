@@ -8,6 +8,7 @@ Stand: 11.11.2026, Version 2. Dieses Dokument ist der einzige gültige Plan. Es 
 
 | Dokument | Inhalt |
 |---|---|
+| [roadmap.md](roadmap.md) | Arbeitsliste: was fehlt, was falsch ist, was weg soll, welches Paket es erledigt (Stand 12.11.2026) |
 | [hafen-und-schiffe.md](hafen-und-schiffe.md) | Katalog: Stufen, Liegeplätze, Schiffsarten und Modelle |
 | [grundgeruest.md](grundgeruest.md) | Technik: Spielobjekt, Module, Koordinaten, Dateibesitz |
 | [veroeffentlichen.md](veroeffentlichen.md) | GitHub Pages, Pfadregeln |
@@ -302,6 +303,8 @@ bash tools/check-pages.sh web
 
 ## 13. Meilensteine
 
+Der aktuelle Arbeitsstand und alle offenen Punkte stehen in [roadmap.md](roadmap.md). Die Haken unten werden mit Paket P08 der Roadmap nachgezogen.
+
 Jeder Meilenstein endet mit etwas, das man auf PC, Tablet und Handy (hoch und quer) ausprobieren kann.
 
 - [x] **0. Grundgerüst:** `web/`, 3D-Szene, Kamera, Zoom und Verschieben, Modul-Lader, Veröffentlichung.
@@ -332,7 +335,7 @@ Nach Meilenstein 1 weiß man, ob Zuweisen und Kassieren Spaß macht. Wenn nicht,
 | Stammgäste, Wetter an der Flagge, Fotomodus, Hafen schauen, Tagesziele | ja, alle fünf (Abschnitt 9a, Einzelheiten in [neue-features.md](neue-features.md)) |
 | Story und Figuren | keine, nur ein kurzer Einstieg |
 
-**Noch offen:** nichts.
+**Noch offen:** die Fragen am Ende von [roadmap.md](roadmap.md) (unter anderem Vorspulen und Tretboote). Bis zur Antwort gilt diese Tabelle.
 
 ## 15. Bewusst weggelassen
 
