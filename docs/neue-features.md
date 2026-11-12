@@ -7,7 +7,7 @@ Alle sechs bleiben im Rahmen des Plans: keine Story, keine Figuren mit Namen, ke
 | Feature | Braucht | Stand |
 |---|---|---|
 | Fotomodus mit Rundflug | nur Grundgerüst | gebaut: `web/js/ui/fotomodus.js` |
-| Hafen schauen | Fotomodus, Hafenbüro-Automatik aus `sim.js` | Rundflug fertig, Automatik wartet auf `sim.js` |
+| Hafen schauen | Fotomodus, Hafenbüro Stufe 3 | gebaut: `web/js/features/hafen-schauen.js` |
 | Dauerlieger | `sim.js`, Animationen für Aus- und Einlaufen | gebaut: `web/js/features/dauerlieger.js` |
 | Stammgäste | `sim.js` (Gäste, Bewertung) | gebaut: `web/js/features/stammgaeste.js` |
 | Wetter an der Flagge | `events/events.js` | gebaut: `web/js/features/wetterflagge.js` |
@@ -27,11 +27,14 @@ Später, wenn die Kamera drehen kann (Plan Abschnitt 8): Drehen auch im Fotomodu
 
 ## 2. Hafen schauen
 
-Ein Ruhemodus für ein Tablet auf dem Tisch: Rundflug plus Hafenbüro weist alle Boote selbst zu, auch die Sonderfälle, und Musik läuft. Freigeschaltet mit dem Hafenbüro (Stufe 3), weil es die Automatik braucht.
+Gebaut: `web/js/features/hafen-schauen.js`, Test in `tests/hafen-schauen.test.mjs`.
 
-- Einstieg: im Fotomodus ein vierter Knopf „Schauen“, erst sichtbar, wenn das Hafenbüro steht.
-- Kein Geld geht verloren: Kassieren passiert automatisch, Bewertungen zählen normal.
-- Schnittstelle an `sim.js`: `sim.setAutomatik('alle' | 'standard' | 'aus')`.
+Ein Ruhemodus für ein Tablet auf dem Tisch. Im Fotomodus erscheint der Knopf „Hafen schauen“, sobald das Hafenbüro selbst zuweist (Büro Stufe 3, `rules.office.autoAssign`). Vorher gibt es den Knopf nicht.
+
+- Die Kamera gleitet (Rundflug), das Büro weist alle zwei Sekunden alle wartenden Boote zu und kassiert. Musik und Geräusche laufen weiter, die Pause wird aufgehoben.
+- Der Bildschirm bleibt an (Wake Lock, wo der Browser es kann).
+- Antippen der Karte, Mausrad, Escape oder „Zurück“ beendet den Modus. Das Spiel läuft normal weiter.
+- Ereignisse `schauen:an`, `schauen:aus`. Schnittstelle `game.hafenSchauen.an()` und `.aus()`. Der Fotomodus bietet dafür `game.foto.rundflug(an)` und `game.foto.leiste`.
 
 ## 3. Dauerlieger
 
