@@ -96,6 +96,9 @@
   /* Offene Tafel: die Schilder darunter treten zurück, damit nichts auf der Zeitsteuerung liegt */
   .hm-neu #hm-seite:has(#weather-chip[aria-expanded="true"]) > :is(.hm-tafel, #hm-ziel),
   .hm-neu #hm-seite:has(.hm-tafel > button[aria-expanded="true"]) > #hm-ziel { display: none !important; }
+  /* Offene Tafel braucht die Höhe: die Zeitsteuerung tritt so lange zurück (Tipp daneben schließt die Tafel) */
+  .hm-neu:has(#hm-seite [aria-expanded="true"]) #hm-zeit { visibility: hidden; }
+  .hm-neu #hm-seite .hm-tafel-px { max-height: calc(100dvh - var(--hm-oben) - var(--hm-knopf) - 2 * var(--hm-chip) - 36px); }
   /* Quer ist zu niedrig für Schilder und Einstiegsblase übereinander: die Blase hat Vorrang */
   .hm-neu:has(.hm-tipp:not([hidden])) #hm-seite { visibility: hidden; }
 }
