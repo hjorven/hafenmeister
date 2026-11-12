@@ -146,18 +146,42 @@ export function rulesFromEconomy(E = ECONOMY) {
   const t = E.tagestoern;
   r.trips = t ? { chance: t.anteil, out: t.raus, back: t.zurueck } : null;
 
-  // Hafenbüro
-  const o = { collectAllButton: Infinity, autoCollect: Infinity, autoAssign: Infinity, cost: {}, fromStage: {}, names: {} };
-  (E.hafenbuero?.stufen || []).forEach((st, i) => {
+  // Hafenbüro (docs/spielregeln.md, Punkt 3b). Fehlt eine Wirkung in den Stufen, gibt es sie nie;
+  // nur der Knopf "Kassieren" ist dann von Anfang an da.
+  const stufen = E.hafenbuero?.stufen || [];
+  const hat = (k) => stufen.some((st) => st.schaltetFrei?.includes(k));
+  const o = { collectAllButton: Infinity, autoCollect: Infinity, autoAssign: Infinity, preview: Infinity, propose: Infinity, cost: {}, fromStage: {}, names: {} };
+  stufen.forEach((st, i) => {
     o.cost[i + 1] = st.kosten;
     o.fromStage[i + 1] = st.abStufe;
     o.names[i + 1] = st.name;
-    if (st.schaltetFrei?.includes('allesKassieren')) o.collectAllButton = i + 1;
-    if (st.schaltetFrei?.includes('sofortKassieren')) o.autoCollect = i + 1;
-    if (st.schaltetFrei?.includes('automatik')) o.autoAssign = i + 1;
+    const frei = st.schaltetFrei || [];
+    if (frei.includes('allesKassieren')) o.collectAllButton = i + 1;
+    if (frei.includes('sofortKassieren')) {
+      o.autoCollect = i + 1;
+      if (st.klassen) o.autoCollectSizes = [...st.klassen];
+    }
+    if (frei.includes('automatik')) o.autoAssign = i + 1;
+    if (frei.includes('vorschau')) o.preview = i + 1;
+    if (frei.includes('vorschlag')) o.propose = i + 1;
   });
-  // Ohne eigene Stufe für sofortKassieren kassiert die Automatik mit
-  if (!(E.hafenbuero?.stufen || []).some((st) => st.schaltetFrei?.includes('sofortKassieren'))) o.autoCollect = o.autoAssign;
+  // Ohne eigene Stufe für sofortKassieren kassiert die Automatik mit, ohne Vorschlagsstufe schlägt sie vor
+  if (!hat('sofortKassieren')) o.autoCollect = o.autoAssign;
+  if (!hat('vorschlag')) o.propose = o.autoAssign;
+  if (!hat('allesKassieren')) o.collectAllButton = 0;
+  const sf = E.hafenbuero?.sonderfaelle;
+  if (sf) {
+    o.special = {
+      kinds: sf.arten ?? [],
+      sizes: sf.klassen ?? [],
+      specialGuests: !!sf.sondergaeste,
+      onlyBerth: !!sf.einzigerPlatz,
+      selfEnterAfter: sf.selbstEinfahrenNach ?? null,
+    };
+  }
+  const tg = E.hafenbuero?.trinkgeld;
+  r.tip = tg ? { sizes: [...tg.klassen], share: tg.anteil } : null;
+  r.handAssignBonus = E.hafenbuero?.vonHandBonus ?? 0;
   r.office = o;
   return r;
 }

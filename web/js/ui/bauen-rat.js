@@ -5,9 +5,11 @@ export const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1,
 export const WUNSCH = { wc: 'ein WC', dusche: 'eine Dusche', essen: 'etwas zu essen', diesel: 'Diesel', strom: 'Strom am Platz' };
 export const WUNSCH_KURZ = { wc: 'WC', dusche: 'Dusche', essen: 'Essen', diesel: 'Diesel', strom: 'Strom' };
 export const FREI = {
-  allesKassieren: 'Ein Tipp auf „Kassieren“ streicht alle Münzen auf einmal ein.',
-  sofortKassieren: 'Der Automat kassiert das Liegegeld selbst, sobald ein Boot festgemacht hat.',
-  automatik: 'Ankommende Boote fahren sofort in die passende freie Box mit den meisten erfüllten Wünschen.',
+  allesKassieren: 'Der Knopf „Kassieren“ streicht alle Münzen auf einmal ein. Bis dahin streichst du jede Münze selbst.',
+  vorschau: 'Über Funk melden sich die nächsten Boote an: Du siehst Größe und Ankunftszeit vorher.',
+  sofortKassieren: 'Der Automat kassiert das Liegegeld kleiner und mittlerer Boote (S, M) selbst, sobald sie festgemacht haben. Große Boote zahlen persönlich: Holst du ihre Münze ab, gibt es Trinkgeld.',
+  vorschlag: 'Das Büro schlägt für jedes Boot die beste Box vor (goldene Raute). Ein Tipp auf „Vorschlag annehmen“ genügt.',
+  automatik: 'Das Büro weist Standardboote selbst zu, je Größe abschaltbar. Mehrrumpfboote, große Schiffe, Sondergäste und Boote, für die nur eine Box passt, bleiben bei dir: Über ihnen schwebt eine orange Raute.',
   vorspulen3: 'Dreifach vorspulen.',
 };
 

@@ -584,25 +584,96 @@ export function assign(state, ctx, boatId, berthId, { hand = true } = {}) {
   if (!isFree(state, berthId)) return { ok: false, reason: 'occupied', events };
   const why = whyNotFit(boat, berth, ctx.rules, state.stage) || hookWhyNotFit(state, ctx, boat, berth);
   if (why) return { ok: false, reason: why, events };
+  // Vom Spieler eingewiesen, auch über "Einfahren lassen" (Bewertungsbonus rules.handAssignBonus);
+  // Tagesziele zählen nur hand (selbst gewählte Box)
+  boat.byHand = true;
   moor(state, ctx, boat, berthId, events, hand);
   return { ok: true, events };
 }
 
-/** "Automatisch einfahren": ein wartendes Boot nimmt den besten freien Platz. */
+/**
+ * "Einfahren lassen": Ohne Hafenbüro nimmt das Boot dieselbe Box, die es sich selbst suchen
+ * würde (selfBerth, ohne Wünsche). Ab der Bürostufe mit 'vorschlag' nimmt es den Vorschlag des
+ * Büros (beste Box mit den meisten erfüllten Wünschen).
+ */
 export function autoEnter(state, ctx, boatId) {
   const boat = state.boats[boatId];
   if (!boat || boat.status !== 'waiting') return { ok: false, reason: 'notWaiting', events: [] };
-  const best = fittingBerths(state, ctx, boatId)[0];
+  const best = state.office >= (ctx.rules.office.propose ?? 0) ? fittingBerths(state, ctx, boatId)[0] : selfBerth(state, ctx, boatId);
   if (!best) return { ok: false, reason: 'noFreeBerth', events: [] };
   return assign(state, ctx, boatId, best, { hand: false });
 }
 
-/** Weist allen wartenden Booten den besten freien Platz zu (Hafenbüro Stufe 3). */
-export function autoAssign(state, ctx) {
+/**
+ * Vorschlag des Hafenbüros für ein wartendes Boot (ab der Bürostufe mit 'vorschlag'): die beste
+ * freie Box. Für Sonderfälle macht das Büro keinen Vorschlag. Liefert eine Platz-id oder null.
+ */
+export function officeProposal(state, ctx, boatId) {
+  if (state.office < (ctx.rules.office.propose ?? Infinity)) return null;
+  const boat = state.boats[boatId];
+  if (!boat || boat.status !== 'waiting') return null;
+  const fitting = fittingBerths(state, ctx, boatId);
+  if (!fitting.length || officeSpecialCase(state, ctx, boatId, fitting)) return null;
+  return fitting[0];
+}
+
+/** Automatik des Hafenbüros für eine Größenklasse an oder aus (state.officeAuto, Standard an). */
+export function setOfficeAuto(state, size, on) {
+  state.officeAuto = { ...(state.officeAuto || {}), [size]: !!on };
+  return { ok: true, events: [{ type: 'officeAuto', size, on: !!on }] };
+}
+
+/**
+ * Muss der Spieler Boote dieser Klasse selbst zuweisen (sonst fahren sie selbst ein)? Sonderfälle
+ * (officeSpecialCase) bleiben immer beim Spieler. Für Tagesziele und Hinweise.
+ */
+export function handAssignFor(state, ctx, size) {
+  return !officeAutoFor(state, ctx, size);
+}
+
+/** Muss der Spieler das Liegegeld von Booten dieser Klasse selbst einstreichen? */
+export function handCollectFor(state, ctx, size) {
+  const o = ctx.rules.office;
+  return !(state.office >= o.autoCollect && (!o.autoCollectSizes || o.autoCollectSizes.includes(size)));
+}
+
+/** Weist das Büro Boote dieser Größenklasse selbst zu? */
+export function officeAutoFor(state, ctx, size) {
+  return officeAutomatic(state, ctx) && state.officeAuto?.[size] !== false;
+}
+
+/**
+ * Sonderfall fürs Hafenbüro (plan.md Abschnitt 3): Die Automatik lässt diese Boote dem Spieler.
+ * Liefert den Grund oder null: 'mehrrumpf' | 'gross' | 'sondergast' | 'einzigerPlatz'.
+ * Welche Fälle zählen, steht in ECONOMY.hafenbuero.sonderfaelle (rules.office.special).
+ */
+export function officeSpecialCase(state, ctx, boatId, fitting = null) {
+  const sp = ctx.rules.office?.special;
+  const boat = state.boats[boatId];
+  if (!sp || !boat || boat.stationed) return null;
+  if (sp.kinds?.includes(boat.kind)) return 'mehrrumpf';
+  if (sp.sizes?.includes(boat.size)) return 'gross';
+  if (sp.specialGuests && boat.special) return 'sondergast';
+  if (sp.onlyBerth && (fitting ?? fittingBerths(state, ctx, boatId)).length === 1) return 'einzigerPlatz';
+  return null;
+}
+
+/** Hat das Hafenbüro die Automatik (Stufe mit 'automatik')? */
+export function officeAutomatic(state, ctx) {
+  return state.office >= ctx.rules.office.autoAssign;
+}
+
+/**
+ * Weist wartenden Booten den besten freien Platz zu. Das Hafenbüro (standardOnly) lässt dabei
+ * Sonderfälle aus; ohne Option (Hafen schauen, Tests) bekommt jedes Boot seinen Platz.
+ */
+export function autoAssign(state, ctx, { standardOnly = false } = {}) {
   const events = [];
   for (const id of [...state.queue]) {
-    const best = fittingBerths(state, ctx, id)[0];
-    if (best) moor(state, ctx, state.boats[id], best, events);
+    const fitting = fittingBerths(state, ctx, id);
+    if (!fitting.length) continue;
+    if (standardOnly && (state.officeAuto?.[state.boats[id].size] === false || officeSpecialCase(state, ctx, id, fitting))) continue;
+    moor(state, ctx, state.boats[id], fitting[0], events);
   }
   return events;
 }
@@ -640,9 +711,23 @@ export function selfEnter(state, ctx) {
   const after = ctx.rules.queue.selfEnterAfter;
   if (after == null) return events;
   const rush = state.queue.length > waitSpotCount(state, ctx) / 2;
+  const office = officeAutomatic(state, ctx);
   for (const id of [...state.queue]) {
     const b = state.boats[id];
     if (!b || b.held) continue;
+    // Mit Hafenbüro wartet ein Sonderfall länger auf den Spieler (ohne Andrang-Abkürzung)
+    if (office && state.officeAuto?.[b.size] !== false && officeSpecialCase(state, ctx, id)) {
+      const wait = ctx.rules.office.special?.selfEnterAfter;
+      if (wait == null || !b.atBuoy || state.clock - b.atBuoySince < wait) continue;
+      const best = selfBerth(state, ctx, id);
+      if (best) {
+        b.selfEntered = true;
+        moor(state, ctx, b, best, events);
+        events.push({ type: 'selfEntered', boatId: id, berthId: best });
+        if (ctx.rules.queue.selfEnterOneByOne !== false) break;
+      }
+      continue;
+    }
     // Ruhiger Betrieb: Das Boot liegt erst kurz an der Boje, Zeit für den Spieler, es zu lenken.
     // Andrang (mehr als die Hälfte der Bojen vergeben): Die Zeit zählt schon ab Ankunft im Revier,
     // das Boot hält von der Anfahrt aus direkt auf die Box zu und gibt seine Boje frei.
@@ -825,9 +910,11 @@ function arrive(state, ctx, boat, events) {
   boat.atBuoySince = null;
   state.queue.push(boat.id);
   events.push({ type: 'arrived', boatId: boat.id, waitSpot: spot });
-  if (state.office >= ctx.rules.office.autoAssign) {
-    const best = fittingBerths(state, ctx, boat.id)[0];
-    if (best) moor(state, ctx, boat, best, events);
+  if (officeAutoFor(state, ctx, boat.size)) {
+    const fitting = fittingBerths(state, ctx, boat.id);
+    const why = fitting.length ? officeSpecialCase(state, ctx, boat.id, fitting) : null;
+    if (why) events.push({ type: 'officeSpecial', boatId: boat.id, reason: why });
+    else if (fitting.length) moor(state, ctx, boat, fitting[0], events);
   }
 }
 
@@ -1040,18 +1127,28 @@ function chargeFee(state, ctx, boat, mods, events) {
   boat.feeDay = state.day;
   boat.paid = false;
   events.push({ type: 'feeReady', boatId: boat.id, amount: fee, wishesMet: metList });
-  if (state.office >= ctx.rules.office.autoCollect) events.push(...collect(state, ctx, boat.id).events);
+  const autoSizes = ctx.rules.office.autoCollectSizes;
+  if (state.office >= ctx.rules.office.autoCollect && (!autoSizes || autoSizes.includes(boat.size))) events.push(...collect(state, ctx, boat.id).events);
 }
 
-/** Münze über einem Boot antippen. hand: der Spieler streicht selbst ein (Antippen, Strich), nicht Automat oder Knopf. */
+/**
+ * Münze über einem Boot einstreichen. Mit { hand: true } holt der Spieler sie selbst ab (Tippen,
+ * Strich): Große Boote (rules.tip.sizes) geben dann Trinkgeld (rules.tip.share des Betrags).
+ */
 export function collect(state, ctx, boatId, { hand = false } = {}) {
   const boat = state.boats[boatId];
   if (!boat || boat.pendingFee <= 0) return { ok: false, events: [] };
-  const amount = boat.pendingFee;
+  const t = ctx.rules.tip;
+  const tip = hand && t?.sizes?.includes(boat.size) ? Math.round(boat.pendingFee * t.share) : 0;
+  const amount = boat.pendingFee + tip;
   boat.pendingFee = 0;
   boat.paid = true;
-  addIncome(state, amount, 'liegegeld', 'kassiert');
-  return { ok: true, events: [hand ? { type: 'collected', boatId, amount, hand: true } : { type: 'collected', boatId, amount }] };
+  addIncome(state, amount - tip, 'liegegeld', 'kassiert');
+  addIncome(state, tip, 'liegegeld', 'trinkgeld');
+  const ev = { type: 'collected', boatId, amount };
+  if (hand) ev.hand = true;
+  if (tip) ev.tip = tip;
+  return { ok: true, events: [ev] };
 }
 
 /**
@@ -1083,6 +1180,7 @@ export function rateBoat(ctx, boat, ratingBonus = 0) {
   const berth = ctx.berthById[boat.berthId];
   value += (berth?.comfort || 0) * r.comfortBonus;
   if (boat.special) value += r.specialGuestRatingBonus;
+  if (boat.byHand) value += r.handAssignBonus ?? 0;
   value += ratingBonus - boat.penalty;
   return Math.round(Math.min(r.rating.max, Math.max(r.rating.min, value)) * 10) / 10;
 }
@@ -1165,10 +1263,11 @@ function queueStep(state, ctx, events, countPatience) {
     }
     if (countPatience && b.atBuoy && state.clock - b.atBuoySince > queue.patience) turnAway(state, ctx, b, events, 'patience');
   }
-  // Hafenbüro mit Automatik: wartende Boote bekommen ihren Platz, sobald einer frei wird
-  if (state.queue.length && state.office >= ctx.rules.office.autoAssign) events.push(...autoAssign(state, ctx));
+  // Hafenbüro mit Automatik: wartende Standardfälle bekommen ihren Platz, sobald einer frei wird.
+  // Sonderfälle bleiben beim Spieler und fahren erst nach office.special.selfEnterAfter selbst ein.
+  if (state.queue.length && officeAutomatic(state, ctx)) events.push(...autoAssign(state, ctx, { standardOnly: true }));
   // Wie im echten Hafen: Wer kurz an der Boje gewartet hat, sucht sich selbst eine freie Box
-  else if (state.queue.length) events.push(...selfEnter(state, ctx));
+  if (state.queue.length) events.push(...selfEnter(state, ctx));
 }
 
 /**
