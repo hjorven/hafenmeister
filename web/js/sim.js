@@ -251,7 +251,29 @@ export function fits(boat, berth, rules = RULES, stage = 99) {
 }
 
 export function isFree(state, berthId) {
-  return !state.berths[berthId];
+  return !state.berths[berthId] && !state.leaving?.[berthId];
+}
+
+/**
+ * Ein abreisendes Boot hält seine Box, bis es wirklich heraus ist. Die 3D-Ansicht meldet das mit
+ * 'boot:aus-box'; meldet niemand etwas, wird die Box nach rules.leaveMax Sekunden frei.
+ */
+function startLeaving(state, boatId, berthId) {
+  if (berthId == null) return;
+  if (!state.leaving) state.leaving = {};
+  state.leaving[berthId] = { boatId, elapsed: 0 };
+}
+
+/** Box freigeben, sobald das abreisende Boot heraus ist (per Boot-id oder Platz-id). */
+export function berthCleared(state, ctx, { boatId = null, berthId = null } = {}) {
+  const events = [];
+  for (const [id, l] of Object.entries(state.leaving || {})) {
+    if (id === berthId || (boatId != null && String(l.boatId) === String(boatId))) {
+      delete state.leaving[id];
+      events.push({ type: 'berthFreed', berthId: id, boatId: l.boatId });
+    }
+  }
+  return { ok: events.length > 0, events };
 }
 
 /** Hat der Platz diese Eigenschaft (zum Beispiel 'power')? Strom kann auch über ein Bauwerk kommen. */
@@ -602,6 +624,8 @@ export function settleWaiting(state) {
   for (const b of Object.values(state.boats || {})) {
     if (b.status === 'waiting' && !b.atBuoy) { b.atBuoy = true; b.atBuoySince = state.clock; }
   }
+  // Abreisende Boote zeigt die 3D-Ansicht nach dem Laden nicht mehr, ihre Boxen sind frei.
+  state.leaving = {};
 }
 
 export function markAtBuoy(state, ctx, boatId) {
@@ -768,6 +792,7 @@ function night(state, ctx, events) {
     state.stageGuests = (state.stageGuests || 0) + 1;
     delete state.berths[boat.berthId];
     delete state.boats[boat.id];
+    startLeaving(state, boat.id, boat.berthId);
     events.push({ type: 'departed', boatId: boat.id, berthId: boat.berthId, typeId: boat.typeId, rating });
   }
   for (const fn of ctx.hooks.night) fn({ state, ctx, events });
@@ -801,6 +826,10 @@ export function tick(state, ctx, dt) {
     const step = Math.min(rest, 1);
     rest -= step;
     state.clock += step;
+    for (const [berthId, l] of Object.entries(state.leaving || {})) {
+      l.elapsed += step;
+      if (l.elapsed >= (ctx.rules.leaveMax ?? 0)) events.push(...berthCleared(state, ctx, { berthId }).events);
+    }
     if (state.phase === 'day') {
       while (state.upcoming.length && state.upcoming[0].arriveAt <= state.clock) {
         arrive(state, ctx, state.upcoming.shift(), events);
