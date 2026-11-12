@@ -85,6 +85,12 @@
   .hm-neu.card-open #hud-bottom > #hm-zeit { pointer-events: auto; }
   .hm-neu.card-open #hm-seite { opacity: 1; }
   .hm-neu.card-open #hm-seite * { pointer-events: auto !important; }
+  /* Bauliste quer: kompakte Zeilen, gesperrte nur mit Name und Preis, damit fünf Einträge sichtbar sind */
+  .hm-neu #card.bau-karte { gap: 6px; }
+  .hm-neu #card.bau-karte .bau-zeile { padding: 5px 10px; gap: 1px; }
+  .hm-neu #card.bau-karte .bau-zeile.gesperrt .bau-zeile-text { display: none; }
+  .hm-neu #card.bau-karte .bau-liste { gap: 4px; }
+  .hm-neu #card.bau-karte > .hud-btn:last-child { min-height: 38px; padding-block: 4px; }
   /* Quer ist zu niedrig für Schilder und Einstiegsblase übereinander: die Blase hat Vorrang */
   .hm-neu:has(.hm-tipp:not([hidden])) #hm-seite { visibility: hidden; }
 }
