@@ -82,7 +82,7 @@ const SEE_RUNDE = {
 // Wassertiefe bei y 18 gut 1 m. Liegeplätze der Stufe 1 enden bei x -96, der Stufe 2 bei x -40;
 // Gäste fahren nördlich davon (Bojen ab y 50) zu den Plätzen.
 const UFER = {
-  1: { x0: -84, x1: -12, y: 18 },
+  1: { x0: -82, x1: -50, y: 18 },
   2: { x0: -26, x1: 60, y: 18 },
 };
 
