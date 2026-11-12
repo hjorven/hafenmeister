@@ -15,7 +15,7 @@ Alle sechs bleiben im Rahmen des Plans: keine Story, keine Figuren mit Namen, ke
 
 ## 1. Fotomodus mit Rundflug
 
-Knopf „Foto“ oben (Taste `F`). Die Leisten verschwinden, unten bleibt eine kleine Leiste mit drei Knöpfen, die nach 3 Sekunden ohne Bewegung fast unsichtbar wird.
+Knopf „Foto“ oben (Taste `P`, `F` ist Vorspulen). Die Leisten verschwinden, unten bleibt eine kleine Leiste mit drei Knöpfen, die nach 3 Sekunden ohne Bewegung fast unsichtbar wird.
 
 - **Bild sichern:** speichert genau das Bild auf dem Schirm als PNG (`hafenmeister-JJJJ-MM-TT-HHMM.png`), kurzer weißer Blitz, auf dem Handy ein kurzes Vibrieren.
 - **Rundflug:** Die Kamera gleitet langsam seitlich über den Hafen und zoomt sanft ein und aus. Jede Berührung oder das Mausrad hält ihn an. Läuft auch in der Pause.

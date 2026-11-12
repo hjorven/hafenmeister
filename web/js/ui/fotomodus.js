@@ -3,7 +3,7 @@
 // "Rundflug" laesst die Kamera langsam ueber den Hafen gleiten (Grundlage fuer "Hafen schauen").
 //
 // Ereignisse: sendet 'foto:an', 'foto:aus', 'foto:bild' (fuer Ton, z. B. Ausloeser), hoert auf 'ui:cancel'.
-// Taste F schaltet den Fotomodus, Escape beendet ihn.
+// Taste P schaltet den Fotomodus, Escape beendet ihn (F ist Vorspulen, ui/input-pc.js).
 
 const CSS = `
 body.hm.foto .hud { display: none !important; }
@@ -164,7 +164,7 @@ export function init(game) {
 
   window.addEventListener('keydown', (e) => {
     if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
-    if (e.key === 'f' || e.key === 'F') { aktiv ? aus() : an(); }
+    if (e.code === 'KeyP' && !e.ctrlKey && !e.metaKey && !e.altKey) { aktiv ? aus() : an(); }
     else if (e.key === 'Escape') aus();
   });
 

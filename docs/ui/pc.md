@@ -56,6 +56,7 @@ Die Gesten aus `gesten.js` gelten am PC genauso: wartendes Boot mit der Maus von
 | `0`, `Pos1` | Ganzer Hafen, Norden wieder oben |
 | `Q` `E` | Um 45 Grad drehen |
 | `M` | Ton aus und an |
+| `P` | Fotomodus an und aus (`ui/fotomodus.js`) |
 | `L` | Spielstand sichern oder laden (`game.spielstand.oeffnen()`) |
 | `?`, `F1`, Knopf „?“ | Übersicht aller Kürzel |
 
