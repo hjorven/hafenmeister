@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createState, serialize, deserialize } from '../web/js/state.js';
-import { RULES, testBoot, ruhigerStand } from './regeln.mjs';
+import { RULES, ECONOMY, testBoot, ruhigerStand } from './regeln.mjs';
 import * as sim from '../web/js/sim.js';
 import { boatTypes, berths } from './fixtures.mjs';
 
@@ -222,9 +222,10 @@ test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gäste
 test('Ruf: Schnitt der letzten 20, Faktor für Ankünfte', () => {
   const s = createState({ seed: 1 });
   assert.equal(sim.reputation(s), 3);
-  assert.equal(sim.reputationFactor(1), 0.5);
+  const E = ECONOMY.ruf;
+  assert.equal(sim.reputationFactor(1), E.ankunftBasis);
   assert.equal(sim.reputationFactor(3), 1);
-  assert.equal(sim.reputationFactor(5), 1.5);
+  assert.equal(sim.reputationFactor(5), E.ankunftBasis + 4 * E.ankunftJeAnker);
 });
 
 test('Bewertung: Komfort, Sondergast und Sturmschaden, begrenzt auf 1 bis 5', () => {

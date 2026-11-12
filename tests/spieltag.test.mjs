@@ -53,3 +53,23 @@ test('Spieltag Stufe 6: Ankünfte passen zu den Zahlen in economy.js', () => {
   // Ruf 3 zum Start: Faktor 1, Zufall um die Erwartung herum
   assert.ok(neu >= soll * 0.4 && neu <= soll * 1.6, `${neu} Ankünfte, erwartet etwa ${soll}`);
 });
+
+test('Keine Wellen: in jeder Stufe, bei Ruf 5 und an Regattatagen mindestens der Mindestabstand', () => {
+  const gap = RULES.arrivalMinGap;
+  assert.ok(gap >= 3);
+  for (const faktor of [1, 1.6]) {
+    const c = echterHafen();
+    if (faktor !== 1) sim.addHook(c, 'modifiers', () => ({ arrivalFactor: faktor }));
+    for (let stufe = 1; stufe <= RULES.maxStage; stufe++) {
+      for (let seed = 1; seed <= 10; seed++) {
+        const s = createState({ seed });
+        s.stage = stufe;
+        s.ratings = Array(RULES.reputation.window).fill(5);
+        s.day = 2;
+        sim.tick(s, c, 0);
+        const t = s.upcoming.map((b) => b.arriveAt);
+        for (let i = 1; i < t.length; i++) assert.ok(t[i] - t[i - 1] >= gap - 0.05, `Stufe ${stufe}, Faktor ${faktor}: ${t[i - 1]} -> ${t[i]}`);
+      }
+    }
+  }
+});

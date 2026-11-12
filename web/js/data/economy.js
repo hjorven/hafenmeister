@@ -23,8 +23,10 @@ export const ECONOMY = {
     jahreszeiten: { fruehling: [1, 8], sommer: [9, 22], herbst: [23, 30] },
     erstesBootNach: 3,      // Sekunden: am ersten Tag eines neuen Spiels kommt gleich ein Boot
     // Tagesrhythmus wie im echten Hafen, als Anteile des Tages (0 = Morgen, 1 = Abend):
-    // vormittags legen die Gäste ab, ab Mittag kommen die neuen, die meisten am Nachmittag.
-    ankunftVon: 0.2,        // etwa 9:30, damit die Boote über den Tag verteilt kommen statt im Pulk
+    // vormittags legen die Gäste ab, neue kommen den ganzen Tag, die meisten am Nachmittag.
+    // Keine Wellen: zwischen zwei Ankünften liegen immer mindestens ankunftAbstand Sekunden. Es kommen
+    // nie mehr Boote, als so ins Fenster passen (81 s / 3 s = 27), auch nicht an Regattatagen.
+    ankunftVon: 0.05,       // etwa 7:15, damit nach dem ersten Boot kein Loch entsteht
     ankunftAbstand: 3,      // Sekunden Mindestabstand zwischen zwei Ankünften (kleiner, wenn der Tag sonst nicht reicht)
     ankunftBis: 0.95,       // etwa 19:30
     ankunftSpitze: 0.62,    // Schwerpunkt am Nachmittag (etwa 15:30), breit verteilt
@@ -56,11 +58,12 @@ export const ECONOMY = {
   // ---------------------------------------------------------------- Gäste
   klassen: {
     //      Grundpreis pro Nacht, Nächte [min, max]. Ob ein Boot Motor- oder Segelboot ist, steht im
-    //      Bootskatalog (data/boats).
-    S:   { grundpreis: 10,  naechte: [1, 2] },
-    M:   { grundpreis: 22,  naechte: [1, 3] },
-    L:   { grundpreis: 45,  naechte: [1, 3] },
-    XL:  { grundpreis: 120, naechte: [1, 2] },
+    //      Bootskatalog (data/boats). Gäste bleiben eher länger (Urlaubstörn), dafür kommen weniger
+    //      am Tag: so bleibt der Hafen voll, ohne dass Boote im Sekundentakt einlaufen.
+    S:   { grundpreis: 10,  naechte: [1, 3] },
+    M:   { grundpreis: 22,  naechte: [2, 4] },
+    L:   { grundpreis: 45,  naechte: [2, 5] },
+    XL:  { grundpreis: 120, naechte: [1, 3] },
     XXL: { grundpreis: 0,   naechte: [1, 1] },  // kein Liegegeld, Einnahmen je Besuch (services)
   },
   wunschBonus: 0.25,          // Hafengeld = Grundpreis * (1 + wunschBonus * erfüllte Wünsche)
@@ -103,9 +106,9 @@ export const ECONOMY = {
     fenster: 20,              // Schnitt der letzten 20 Bewertungen
     sondergastBonus: 1,       // Sondergäste (Marine, Behörden, Traditionssegler) geben so viel extra
     ohneWunsch: 4,
-    // Ankünfte = Grundzahl * (0.5 + 0.25 * (Ruf - 1)): 1 Anker 0.5x, 3 Anker 1x, 5 Anker 1.5x
-    ankunftBasis: 0.5,
-    ankunftJeAnker: 0.25,
+    // Ankünfte = Grundzahl * (0.75 + 0.125 * (Ruf - 1)): 1 Anker 0.75x, 3 Anker 1x, 5 Anker 1.25x
+    ankunftBasis: 0.75,
+    ankunftJeAnker: 0.125,
     abgewiesen: { chance: 0.25, wertung: 2.5 },  // wer keinen Platz bekommt, drückt den Ruf leicht
   },
 
@@ -142,20 +145,20 @@ export const ECONOMY = {
       ziel: { gaeste: 20, ruf: 2.5 },
       ausbau: { id: 'dorfhafen', name: 'Dorfhafen am See', kosten: 400, bautage: 0,
         plaetze: ['F01'] } },
-    { stufe: 2, name: 'Dorfhafen am See', ankuenfte: 13, mix: { S: 0.45, M: 0.55 },
-      ziel: { gaeste: 140, ruf: 3.0 },
+    { stufe: 2, name: 'Dorfhafen am See', ankuenfte: 11, mix: { S: 0.45, M: 0.55 },
+      ziel: { gaeste: 120, ruf: 3.0 },
       ausbau: { id: 'durchstich', name: 'Durchstich zur Ostsee', kosten: 5000, bautage: 2,
         plaetze: ['B23', 'B24', 'B25', 'B26', 'F02'] } },
-    { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 22, mix: { S: 0.32, M: 0.40, L: 0.28 },
-      ziel: { gaeste: 480, ruf: 3.5 },
+    { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 16, mix: { S: 0.32, M: 0.40, L: 0.28 },
+      ziel: { gaeste: 360, ruf: 3.5 },
       ausbau: { id: 'marina', name: 'Schwimmsteg D', kosten: 20000, bautage: 2,
         plaetze: ['D01', 'D02', 'D03', 'D04', 'D05', 'D06'] } },
-    { stufe: 4, name: 'Marina', ankuenfte: 30, mix: { S: 0.24, M: 0.34, L: 0.42 },
-      ziel: { gaeste: 800, ruf: 3.8 },
+    { stufe: 4, name: 'Marina', ankuenfte: 18, mix: { S: 0.24, M: 0.34, L: 0.42 },
+      ziel: { gaeste: 560, ruf: 3.8 },
       ausbau: { id: 'aussenhafen', name: 'Außenhafen mit Kai', kosten: 42000, bautage: 3,
         plaetze: ['K01', 'FK01', 'FK02'] } },
-    { stufe: 5, name: 'Küstenmarina', ankuenfte: 32, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
-      ziel: { gaeste: 1200, ruf: 4.2 },
+    { stufe: 5, name: 'Küstenmarina', ankuenfte: 20, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
+      ziel: { gaeste: 840, ruf: 4.2 },
       // Die Pier bringt die Plätze der Großschiffe: Kreuzfahrtpier, Marineanleger, Liegeplatz des
       // Seenotrettungskreuzers. Sie sind fest vergeben, Gastboote legen dort nicht an.
       ausbau: { id: 'grossschiffpier', name: 'Pier für Großschiffe', kosten: 70000, bautage: 4,
@@ -163,7 +166,7 @@ export const ECONOMY = {
     // Stufe 6: Großschiffe (XXL) zahlen kein Liegegeld, sie kommen als Besuche über die Services
     // kreuzfahrtterminal, marineanleger und seenotretter und bringen Geld je Besuch.
     // Keine eigene Zahl für Tagesgäste (Entscheidung Jorven, 11.11.2026).
-    { stufe: 6, name: 'Seehafen', ankuenfte: 32, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
+    { stufe: 6, name: 'Seehafen', ankuenfte: 20, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
       // Abschluss der Region: so viele Besuche großer Schiffe (Kreuzfahrtschiff, Flottenbesuch)
       // in Stufe 6, dieser Ruf und alle Plätze gebaut. Alles davon sieht der Spieler im Hafen.
       ziel: { grossschiffBesuche: 6, ruf: 4.5, allePlaetze: true },
