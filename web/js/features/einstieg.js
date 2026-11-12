@@ -14,7 +14,7 @@
 //
 // Spielstand: state.modules.einstieg = { fertig, erledigt: [id, ...] }. Ein neues Spiel hat keinen
 // Eintrag, also beginnt der Einstieg dort wieder. Mit ?einstieg=1 in der Adresse startet er neu.
-// Schnittstelle: game.einstieg = { start(), beenden(), schritt() }
+// Schnittstelle: game.einstieg = { start(), beenden(), schritt() }; meldet 'einstieg:schritt' { schritt } bei jedem Wechsel
 
 import { regelnBereit } from './regeln-bereit.js';
 
@@ -72,7 +72,9 @@ export const TEXTE = {
   },
   bauen: {
     titel: 'Hafen ausbauen',
-    text: 'Mit dem Geld baust du neue Liegeplätze und Anlagen. Wer gut versorgt ist, gibt dir einen besseren Ruf, und mit dem Ruf wächst der Hafen.',
+    text: TOUCH
+      ? 'Mit dem Geld baust du neue Liegeplätze und Anlagen. Tipp auf „Bauen“: Die Zeit hält an, und du siehst erst eine Vorschau. Gekauft wird erst mit „Bauen für …“. Mit dem Ruf deiner Gäste wächst der Hafen.'
+      : 'Mit dem Geld baust du neue Liegeplätze und Anlagen. Klick auf „Bauen“: Die Zeit hält an, und du siehst erst eine Vorschau. Gekauft wird erst mit „Bauen für …“. Mit dem Ruf deiner Gäste wächst der Hafen.',
   },
   ziele: {
     titel: 'Tagesziele',
@@ -237,7 +239,7 @@ export async function init(game) {
     const w = new Set(api.waitingBoats().map((b) => b.id));
     for (const o of objekte('boat', (pk) => w.has(Number(String(pk.id).replace(/^b/, ''))))) {
       const p = aufBildschirm(o);
-      if (imBild(p, f)) return p;
+      if (imBild(p, f)) return { ...p, obj: o };
     }
     return null;
   }
@@ -250,8 +252,9 @@ export async function init(game) {
         const bojen = game.landscape?.warteplaetze?.bojen ?? [];
         const anzahl = api.waitSpotCount?.() ?? bojen.length;
         for (const b of bojen.slice(0, anzahl)) {
-          const p = punktAufBildschirm(new THREE.Vector3(b.x, 0.4, b.z));
-          if (imBild(p, f)) return { ...p, w: 60, h: 60 };
+          const punkt = new THREE.Vector3(b.x, 0.4, b.z);
+          const p = punktAufBildschirm(punkt);
+          if (imBild(p, f)) return { ...p, w: 60, h: 60, punkt };
         }
         return null;
       }
@@ -266,7 +269,7 @@ export async function init(game) {
         let best = null;
         for (const m of muenzen()) {
           const p = aufBildschirm(m);
-          if (imBild(p, f) && (!best || Math.hypot(p.x - c.x, p.y - c.y) < Math.hypot(best.x - c.x, best.y - c.y))) best = p;
+          if (imBild(p, f) && (!best || Math.hypot(p.x - c.x, p.y - c.y) < Math.hypot(best.x - c.x, best.y - c.y))) best = { ...p, obj: m };
         }
         return best ? { ...best, w: 64, h: 64 } : null;
       }
@@ -282,19 +285,27 @@ export async function init(game) {
     const s = st();
     return {
       tag: s.day,
-      bootImBild: !!sichtbaresBoot(),
+      // Nur suchen, solange es gebraucht wird: die Suche geht über die ganze Szene
+      bootImBild: einstiegState(s).erledigt.includes('anlegen') ? false : !!sichtbaresBoot(),
       willkommenSek: aktuell === 'willkommen' ? (performance.now() - willkommenSeit) / 1000 : 0,
       abend: s.phase === 'evening',
       muenzen: Object.values(s.boats).some((b) => b.status === 'moored' && b.pendingFee > 0),
       bauenSichtbar: sichtbar(document.getElementById('btn-build')),
       tafelSichtbar: sichtbar(document.querySelector('.hm-tafel > button')),
-      karteOffen: document.body.classList.contains('card-open'),
+      // Karte oder Baumodus offen: keine neuen Hinweise darüberlegen
+      karteOffen: document.body.classList.contains('card-open') || document.body.classList.contains('building'),
     };
   }
 
   // ---------------------------------------------------------------- Sprechblase
   function zeige(id) {
+    const vorher = aktuell;
     aktuell = id;
+    // Andere Hinweise (z. B. "Als Nächstes" beim Bauen) warten auf das Ende des Einstiegs: Bescheid geben
+    if (vorher !== id) {
+      game.emit('einstieg:schritt', { schritt: id });
+      game.emit('sim:change', { reason: 'einstieg' });
+    }
     if (id === 'willkommen') willkommenSeit = performance.now();
     if (!id) { tipp.hidden = true; ring.hidden = true; return; }
     const t = TEXTE[id];
@@ -380,27 +391,50 @@ export async function init(game) {
     }
   }
 
-  function frame() {
-    requestAnimationFrame(frame);
+  // Entscheiden (Schritt, Ziel, Lage der Blase) fünfmal pro Sekunde; in jedem Bild nur den Kreis
+  // einem bewegten 3D-Ziel nachführen. So kostet der Einstieg auch auf langsamen Geräten kaum Zeit.
+  const TAKT_MS = 200;
+  let naechsteEntscheidung = 0;
+  let k = null;
+  let zuletztZiehen = false;
+
+  function setzeKreis() {
+    ring.style.width = `${Math.round(k.w)}px`;
+    ring.style.height = `${Math.round(k.h)}px`;
+    ring.style.borderRadius = k.rund ? `${Math.round(k.rund)}px` : '50%';
+    // left/top statt transform: die Puls-Animation (scale) würde sonst den Versatz mit vergrößern
+    ring.style.left = `${Math.round(k.x - k.w / 2)}px`;
+    ring.style.top = `${Math.round(k.y - k.h / 2)}px`;
+  }
+
+  function entscheide() {
     const e = st() && einstiegState(st());
-    if (!e || e.fertig) { halte(false); if (aktuell) zeige(null); return; }
+    if (!e || e.fertig) { halte(false); if (aktuell) zeige(null); k = null; return; }
     const id = naechsterSchritt(e, lage());
     halte(!e.erledigt.includes('anlegen'));
     if (id !== aktuell) zeige(id);
+    k = id ? ziel(id) : null;
     if (!id) return;
-    const k = ziel(id);
     // Ist die Bootskarte offen, sagt sie selbst, was zu tun ist; der Text würde nur die Stege verdecken
     tipp.hidden = ziehen || (id === 'anlegen' && document.body.classList.contains('card-open'));
     ring.hidden = !k || ziehen;
-    if (k) {
-      ring.style.width = `${Math.round(k.w)}px`;
-      ring.style.height = `${Math.round(k.h)}px`;
-      ring.style.borderRadius = k.rund ? `${Math.round(k.rund)}px` : '50%';
-      // left/top statt transform: die Puls-Animation (scale) würde sonst den Versatz mit vergrößern
-      ring.style.left = `${Math.round(k.x - k.w / 2)}px`;
-      ring.style.top = `${Math.round(k.y - k.h / 2)}px`;
-    }
+    if (k) setzeKreis();
     if (!tipp.hidden) lege(k);
+  }
+
+  function frame(t) {
+    requestAnimationFrame(frame);
+    if (t >= naechsteEntscheidung || ziehen !== zuletztZiehen) {
+      naechsteEntscheidung = t + TAKT_MS;
+      zuletztZiehen = ziehen;
+      entscheide();
+      return;
+    }
+    if (!k || ring.hidden || !(k.obj || k.punkt)) return;
+    const p = k.obj ? aufBildschirm(k.obj) : punktAufBildschirm(k.punkt);
+    if (!p) return;
+    k.x = p.x; k.y = p.y;
+    setzeKreis();
   }
 
   game.on('sim:moored', () => schritt('anlegen'));
