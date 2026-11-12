@@ -88,8 +88,10 @@ export const RULES = {
   // Wer keinen Platz bekommt, fährt weiter. Mit dieser Wahrscheinlichkeit gibt er eine schlechte Bewertung ab.
   turnAway: { rating: 2, chance: 0.3 },
   // Warten vor dem Hafen: Boote liegen an Wartebojen oder im Ankerfeld, bis sie einen Platz bekommen.
-  // spots = Zahl der Warteplätze je Stufe, patience = Sekunden, bis ein Boot weiterfährt.
-  queue: { spots: { 1: 3, 2: 4, 3: 6, 4: 6, 5: 8 }, patience: 50 },
+  // spots = Zahl der Warteplätze je Stufe, patience = Sekunden an der Boje, bis ein Boot weiterfährt.
+  // Die Geduld zählt erst, wenn das Boot an der Boje fest ist (Meldung der 3D-Ansicht).
+  // Meldet niemand etwas, gilt es nach approachMax Sekunden als angekommen.
+  queue: { spots: { 1: 3, 2: 4, 3: 6, 4: 6, 5: 8 }, patience: 50, approachMax: 35 },
   // Vorschau: so viele kommende Boote sind sichtbar
   previewCount: 3,
 

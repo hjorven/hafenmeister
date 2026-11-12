@@ -82,6 +82,8 @@ Was beim Testen auf dem Handy aufgefallen ist und so gelöst wurde:
 - **Ziel über dem Finger.** Die Schleppleine endet 28 px über der Fingerspitze, damit der Finger den Steg nicht verdeckt.
 - **Leisten herausrechnen.** Kamerafahrten lassen den Bereich unter den Leisten frei, auch im Querformat oben links.
 - **Stege über der Bootskarte.** Ist ein Boot gewählt, wird die Karte knapp (Name, Hinweis, drei Knöpfe in einer Zeile) und die Ansicht rückt um die halbe Kartenhöhe nach oben. So bleiben die leuchtenden Ringe antippbar. Nach dem Zuweisen oder Schließen rückt die Ansicht zurück. Im Querformat liegt die Karte rechts unter der oberen Leiste.
+- **Leine hält still.** Während ein Boot an der Schleppleine hängt, bleibt die Bootskarte verborgen und die Ansicht steht still, sonst wandern die Ringe unter dem Finger weg. Bricht man ab, erscheint die Karte danach.
+- **Ein Einfahren-Knopf.** Wird ein wartendes Boot angetippt, steht "Automatisch einfahren" in der Karte. Der kleine Knopf "Einfahren" am Boot ist am Handy ausgeblendet, dafür meldet `input-touch.js` am Handy `game.gesten.einfahrenAmBoot = false`, damit `hud.js` den Kartenknopf zeigt. Am Tablet und PC ist es umgekehrt.
 - **Sonne auf eigener Spur.** Wie am PC und Tablet läuft die Sonne rechts in der Tag-Pille auf einer kurzen Spur neben "Tag 3 · Abend" und verdeckt den Text nicht. Im Querformat ist die Pille so breit wie Text plus Spur.
 - **Fünf Knöpfe im Hochformat.** Pause, Übersicht, Foto, Ton und Spielstand stehen rechts untereinander, das Wetter links unter den Zahlen. Die Maus-und-Tastatur-Hilfe ist auf dem Handy ausgeblendet.
 

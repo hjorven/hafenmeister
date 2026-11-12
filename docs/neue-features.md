@@ -7,11 +7,11 @@ Alle sechs bleiben im Rahmen des Plans: keine Story, keine Figuren mit Namen, ke
 | Feature | Braucht | Stand |
 |---|---|---|
 | Fotomodus mit Rundflug | nur Grundgerüst | gebaut: `web/js/ui/fotomodus.js` |
-| Hafen schauen | Fotomodus, Hafenbüro-Automatik aus `sim.js` | Rundflug fertig, Automatik wartet auf `sim.js` |
+| Hafen schauen | Fotomodus, Hafenbüro Stufe 3 | gebaut: `web/js/features/hafen-schauen.js` |
 | Dauerlieger | `sim.js`, Animationen für Aus- und Einlaufen | gebaut: `web/js/features/dauerlieger.js` |
 | Stammgäste | `sim.js` (Gäste, Bewertung) | gebaut: `web/js/features/stammgaeste.js` |
-| Wetter an der Flagge | `events/events.js` (Ankündigung am Vortag) | beschrieben |
-| Tagesziele an der Tafel | `sim.js`, Hafenbüro als Gebäude | beschrieben |
+| Wetter an der Flagge | `events/events.js` | gebaut: `web/js/features/wetterflagge.js` |
+| Tagesziele an der Tafel | `sim.js` | gebaut: `web/js/features/tagesziele.js` |
 
 ## 1. Fotomodus mit Rundflug
 
@@ -27,11 +27,14 @@ Später, wenn die Kamera drehen kann (Plan Abschnitt 8): Drehen auch im Fotomodu
 
 ## 2. Hafen schauen
 
-Ein Ruhemodus für ein Tablet auf dem Tisch: Rundflug plus Hafenbüro weist alle Boote selbst zu, auch die Sonderfälle, und Musik läuft. Freigeschaltet mit dem Hafenbüro (Stufe 3), weil es die Automatik braucht.
+Gebaut: `web/js/features/hafen-schauen.js`, Test in `tests/hafen-schauen.test.mjs`.
 
-- Einstieg: im Fotomodus ein vierter Knopf „Schauen“, erst sichtbar, wenn das Hafenbüro steht.
-- Kein Geld geht verloren: Kassieren passiert automatisch, Bewertungen zählen normal.
-- Schnittstelle an `sim.js`: `sim.setAutomatik('alle' | 'standard' | 'aus')`.
+Ein Ruhemodus für ein Tablet auf dem Tisch. Im Fotomodus erscheint der Knopf „Hafen schauen“, sobald das Hafenbüro selbst zuweist (Büro Stufe 3, `rules.office.autoAssign`). Vorher gibt es den Knopf nicht.
+
+- Die Kamera gleitet (Rundflug), das Büro weist alle zwei Sekunden alle wartenden Boote zu und kassiert. Musik und Geräusche laufen weiter, die Pause wird aufgehoben.
+- Der Bildschirm bleibt an (Wake Lock, wo der Browser es kann).
+- Antippen der Karte, Mausrad, Escape oder „Zurück“ beendet den Modus. Das Spiel läuft normal weiter.
+- Ereignisse `schauen:an`, `schauen:aus`. Schnittstelle `game.hafenSchauen.an()` und `.aus()`. Der Fotomodus bietet dafür `game.foto.rundflug(an)` und `game.foto.leiste`.
 
 ## 3. Dauerlieger
 
@@ -62,23 +65,37 @@ Jedes Gastboot hat einen Namen am Heck und einen Heimathafen (echte Häfen an Os
 
 ## 5. Wetter an der Flagge
 
-Ereignisse werden einen Tag vorher angekündigt. Statt Text zeigt das der Hafen selbst:
+Gebaut: `web/js/features/wetterflagge.js`, Tests in `tests/wetterflagge.test.mjs`.
 
-| Morgen | Zeichen am Hafen |
+Neben der Wurzel von Steg A steht ein Flaggenmast mit Windsack. Er zeigt das Wetter, ohne Text:
+
+| Lage | Zeichen am Mast |
 |---|---|
-| Sturm | Windsack steht waagerecht, Flagge flattert schnell, Wolkenschatten werden dunkler |
-| Regatta | Bunte Signalflaggen-Leine am Mast des Segelclubs |
-| Ruhiger Tag | Flagge hängt locker, Windsack schlaff |
+| Wind heute | Windsack hängt bei Flaute, steht bei viel Wind waagerecht und zittert |
+| Sturm morgen | zwei rote Sturmwimpel |
+| Regatta heute oder morgen | bunte Signalflaggen-Leine vom Mast zum Boden |
 
-- Vor dem Hafenbüro (Stufe 1: ein Mast am Steg) steht ein Flaggenmast mit Windsack.
-- Antippen zeigt auf der Infokarte ein Symbol für das Wetter von morgen.
-- Hört auf `ereignis:angekuendigt` aus `events/events.js`.
+- Antippen des Masts öffnet den Wetterbericht (Knopf `#weather-chip` aus `events/banner.js`), dort stehen die Einzelheiten.
+- Daten aus `game.events.forecast()`. Ohne Ereignis-Modul erscheint kein Mast.
+- Später möglich: den Mast ans Hafenbüro versetzen, sobald es als Gebäude steht.
 
 ## 6. Tagesziele an der Tafel
 
-Am Hafenbüro (Stufe 1: ein Brett am Steg) hängt eine Tafel mit drei kleinen Zielen für den Tag, z. B. „Zwei Segelboote unterbringen“, „Ein Boot mit drei Wünschen ganz zufriedenstellen“, „Alle Plätze einmal belegt“.
+Gebaut: `web/js/features/tagesziele.js`, Tests in `tests/tagesziele.test.mjs`.
 
-- Ziele als Symbole plus Zahl, kein Fließtext.
-- Belohnung: ein kleiner Geldbetrag und ein Häkchen mit Ton. Kein Druck: Nicht erreichte Ziele verfallen still am Abend.
-- Die Ziele passen immer zur Stufe, nur Dinge, die man schon kann.
-- Daten: `web/js/data/tagesziele.js` mit Vorlagen je Stufe, Auswertung in `sim.js` über die Ereignisse, die es ohnehin sendet.
+Links unter der oberen Leiste steht „Tagesziele 0/3“. Antippen klappt die Tafel mit drei kleinen Zielen für den Tag auf, Antippen der Karte klappt sie wieder zu.
+
+| Ziel | Ab Stufe |
+|---|---|
+| N Boote unterbringen (etwa 60 Prozent der erwarteten Ankünfte) | 1 |
+| Alle Wünsche eines Boots erfüllen (ab 2 Wünschen) | 1 |
+| N € Hafengeld kassieren (etwa 60 Prozent des erwarteten Hafengelds) | 1 |
+| Alle Plätze gleichzeitig belegt (nur bis 12 Plätze) | 1 |
+| Einen Stammgast unterbringen (nur wenn es Stammgäste gibt) | 1 |
+| 2 oder 3 Segelboote unterbringen | 2 |
+| Ein L- oder XL-Schiff unterbringen | 3 |
+
+- Belohnung je Ziel: 10, 25, 50, 80, 120 € je nach Stufe, mit Haken, kurzem Hüpfen der Tafel, Vibration und Ereignis `ziel:erreicht` für den Ton.
+- Kein Druck: Was abends nicht geschafft ist, verfällt still. Im Winter gibt es keine Ziele und keine Tafel.
+- Spielstand in `state.modules.ziele`.
+- Später möglich: die Tafel als 3D-Brett am Hafenbüro.

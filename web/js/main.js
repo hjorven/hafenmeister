@@ -4,6 +4,7 @@ import { createGame } from './core/game.js';
 import { initInput } from './core/input.js';
 import { addPlaceholderWorld } from './render/placeholder.js';
 import { plaetzeInStufe, platzInWelt } from './data/harbor.js';
+import { warteplaetze } from './render/landschaft/gelaende.js';
 
 // Module der anderen Threads. Jedes exportiert eine Funktion init(game) (oder default),
 // die das Spielobjekt bekommt. Fehlt eine Datei noch, wird sie still uebersprungen.
@@ -31,6 +32,9 @@ const MODULES = [
   './events/events.js',
   './features/dauerlieger.js',
   './features/stammgaeste.js',
+  './features/tagesziele.js',
+  './features/wetterflagge.js',
+  './features/hafen-schauen.js',
   './save/index.js',
 ];
 
@@ -72,20 +76,30 @@ const WORLD = {
 WORLD.width = WORLD.maxX - WORLD.minX;
 WORLD.centerX = (WORLD.minX + WORLD.maxX) / 2;
 
-// Startansicht: alle Liegeplaetze einer Stufe, 10 m Rand, nach Norden 20 m mehr fuer die Wartebojen.
+// Startansicht: alle Liegeplaetze einer Stufe mit 12 m Rand, dazu die Wartebojen mit 8 m Rand
+// (die wartenden Boote liegen bis 6 m oestlich der Boje im Wind).
 function homeRect(stufe) {
   try {
     const pts = plaetzeInStufe(stufe).map((p) => platzInWelt(p, stufe));
     if (!pts.length) throw new Error('keine Plaetze');
     const xs = pts.map((p) => p.x);
     const zs = pts.map((p) => p.z);
-    return {
+    const r = {
       minX: Math.min(...xs) - 12, maxX: Math.max(...xs) + 12,
-      minZ: Math.min(...zs) - 20, maxZ: Math.max(Math.max(...zs) + 8, 6),
+      minZ: Math.min(...zs) - 12, maxZ: Math.max(Math.max(...zs) + 8, 6),
     };
+    let bojen = [];
+    try { bojen = warteplaetze(stufe).bojen; } catch (err) { console.warn('Wartebojen nicht lesbar', err); }
+    for (const b of bojen) {
+      r.minX = Math.min(r.minX, b.x - 8);
+      r.maxX = Math.max(r.maxX, b.x + 8);
+      r.minZ = Math.min(r.minZ, b.z - 8);
+      r.maxZ = Math.max(r.maxZ, b.z + 8);
+    }
+    return r;
   } catch (err) {
     console.warn('Startansicht aus harbor.js nicht ableitbar, nehme festen Wert', err);
-    return { minX: -76, maxX: -44, minZ: -40, maxZ: 6 };
+    return { minX: -76, maxX: -44, minZ: -45, maxZ: 6 };
   }
 }
 

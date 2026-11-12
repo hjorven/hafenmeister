@@ -94,8 +94,12 @@ export function init(game) {
   // Die Bootskarte liegt unten ueber der Karte. Damit man die Stege darueber
   // antippen kann, wird die Karte knapp (CSS) und die Ansicht um die halbe
   // Kartenhoehe nach oben geschoben; beim Abwaehlen geht sie zurueck.
+  // Waehrend einer Schleppleine (gesten.js: ui:tow ... ui:tow-end) bleibt die
+  // Ansicht stehen und die Karte verborgen (Klasse hm-leine), sonst wandern die
+  // Ringe unter dem Finger weg. Erst nach dem Loslassen geht es weiter.
   const isPhone = () => matchMedia('(max-width: 599px), (max-height: 499px)').matches;
   let shifted = 0;
+  let towing = false;
   const release = () => {
     document.body.classList.remove('hm-boot-gewaehlt');
     if (shifted) { cam.panBy(0, shifted); shifted = 0; }
@@ -104,7 +108,8 @@ export function init(game) {
   const cardEl = document.getElementById('card');
   if (cardEl) new MutationObserver(() => { if (cardEl.hidden) release(); })
     .observe(cardEl, { attributes: true, attributeFilter: ['hidden'] });
-  game.on('sim:select', ({ boatId } = {}) => {
+  const onSelect = (boatId) => {
+    if (towing) return;
     const on = boatId != null && isPhone();
     if (!on) { release(); return; }
     document.body.classList.add('hm-boot-gewaehlt');
@@ -112,12 +117,40 @@ export function init(game) {
     // Erst nach dem Rendern der Karte messen
     requestAnimationFrame(() => requestAnimationFrame(() => {
       const card = document.getElementById('card');
-      if (!card || card.hidden || !document.body.classList.contains('hm-boot-gewaehlt')) return;
+      if (towing || !card || card.hidden || !document.body.classList.contains('hm-boot-gewaehlt')) return;
       const portrait = innerHeight >= innerWidth;
       if (!portrait) return;   // quer liegt die Karte rechts daneben
       shifted = Math.round(card.getBoundingClientRect().height / 2);
       cam.panBy(0, -shifted);
     }));
+  };
+  game.on('sim:select', ({ boatId } = {}) => onSelect(boatId));
+  game.on('ui:tow', () => {
+    if (towing) return;
+    towing = true;
+    document.body.classList.add('hm-leine');
+  });
+  game.on('ui:tow-end', () => {
+    if (!towing) return;
+    towing = false;
+    document.body.classList.remove('hm-leine');
+    // Zugewiesen: Auswahl ist leer. Abgebrochen: Boot bleibt gewaehlt, Karte kommt jetzt.
+    onSelect(game.sim?.selected ?? null);
+  });
+
+  // Genau ein Einfahren-Knopf: Am Handy steht "Automatisch einfahren" gross in
+  // der Bootskarte (hud.js), der kleine Knopf am Boot (gesten.js) ist per CSS aus.
+  // hud.js fragt game.gesten.einfahrenAmBoot, das ist am Handy deshalb false.
+  game.on('ready', () => {
+    const g = game.gesten;
+    if (!g) return;
+    let amBoot = g.einfahrenAmBoot;
+    Object.defineProperty(g, 'einfahrenAmBoot', {
+      configurable: true,
+      enumerable: true,
+      get: () => (isPhone() ? false : amBoot),
+      set: (v) => { amBoot = v; },
+    });
   });
 
   // Boot im Hafen gedrueckt halten: es antwortet mit seinem Horn

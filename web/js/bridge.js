@@ -89,6 +89,7 @@ export async function initBridge(game) {
     state = addAliases(next);
     if (!state.region) state.region = HAFEN.region || 'ostsee';
     if (!state.modules) state.modules = {};
+    sim.settleWaiting(state);
     game.state = state;
     selected = null;
   }
@@ -256,6 +257,8 @@ export async function initBridge(game) {
     // Alle Boote, die gerade da sind (wartend oder liegend), zum Aufbauen nach dem Laden
     get boote() { return Object.values(state.boats).filter((b) => b.status !== 'expected').map(bootInfo); },
     // Anteil des Tages von 0 (Morgen) bis 1 (Nacht), für die Sonne im Tagesbalken
+    // Restliche Geduld eines wartenden Boots in Sekunden (für eine Anzeige an der Boje)
+    geduld: (boatId) => sim.patienceLeft(state, ctx, boatIdOf(boatId)),
     tagesAnteil: () => Math.min(1, state.clock / (ctx.rules.dayLength + ctx.rules.eveningLength)),
     wartet: (boatId) => state.boats[boatIdOf(boatId)]?.status === 'waiting',
     passendePlaetze: (boatId) => sim.fittingBerths(state, ctx, boatIdOf(boatId)),
@@ -296,6 +299,11 @@ export async function initBridge(game) {
     } else if (pick.type === 'berth' && selected != null) {
       api.assign(selected, pick.id);
     }
+  });
+  // 3D-Ansicht meldet: Boot ist an der Warteboje fest, ab jetzt zählt seine Geduld
+  game.on('boot:an-boje', (d = {}) => {
+    const id = boatIdOf(d.id ?? d.boot ?? d);
+    if (id != null) dispatch(sim.markAtBuoy(state, ctx, id).events);
   });
   game.on('ui:cancel', () => api.select(null));
   // Münzen einstreichen: mit { coin } nur diese Münze (coin = Boot-id), sonst alle (Hafenhorn)
