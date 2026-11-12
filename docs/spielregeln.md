@@ -20,7 +20,8 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 1. Morgens würfelt `sim.js` die Ankünfte des Tages aus: Zahl = Boote pro Tag der Stufe × Ruf-Faktor × Modifikatoren. Im Winter (Tag 31 bis 33 jeder Saison) kommt niemand.
 2. Ein Boot kommt an und legt sich an eine freie **Warteboje** vor dem Hafen (`boat.waitSpot`, 0 = erste Boje). Sind alle Bojen belegt, fährt es weiter. Die 3D-Ansicht meldet mit `game.emit('boot:an-boje', { id })`, wenn das Boot fest ist. Erst ab dann zählt seine Geduld. Meldet niemand etwas, gilt es nach 35 s als angekommen.
 3. Der Spieler zieht das Boot auf einen Platz oder tippt „Automatisch einfahren“, auch schon während der Anfahrt. Nach 50 s an der Boje fährt es weiter.
-4. Abends (ab 90 s) zahlen alle liegenden Boote Hafengeld als Münze. Wer noch wartet, fährt weiter.
+4. Sobald ein Boot angelegt hat, wird sein Liegegeld für die kommende Nacht fällig (Münze, `boat.paid = false`). Nach dem Kassieren gilt es als bezahlt (`boat.paid = true`, in `game.sim.boote` als `bezahlt`). Wer mehrere Nächte bleibt, zahlt jeden Morgen die nächste Nacht. Am ersten Tag eines neuen Spiels kommt das erste Boot schon nach 3 s (`rules.firstArrivalAt`).
+4a. Abends (ab 90 s) fährt weiter, wer noch wartet. Pacht der stationierten Einheiten, Tagesgäste und Services werden abgerechnet.
 5. Nachts (ab 120 s): nicht kassierte Münzen zählen zur Hälfte, Boote mit 0 Nächten reisen ab und bewerten den Hafen. Der Spielstand wird gespeichert.
 
 **Liegeplätze:** Zu Beginn gibt es nur die Plätze aus `ECONOMY.start`. Jedes Stegprojekt (`ECONOMY.stegprojekte`, unter „Bauen“) und jeder Stufenausbau schaltet seine Plätze frei. Fischerplätze bekommen ihr Fischerboot von selbst, es zahlt Pacht. Für die nächste Ausbaustufe zählen die Gäste, die in der aktuellen Stufe abgereist sind.
@@ -61,7 +62,7 @@ Einfaches JSON. Wichtige Felder: `day`, `phase` (`'day'` oder `'evening'`), `clo
 
 Deutsche Namen als Verweise (nicht im JSON): `game.state.stufe`, `game.state.geld`, `game.state.tag`.
 
-Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, special, dayVisitors, stationed, wishes, nights, status: 'expected' | 'waiting' | 'moored', waitSpot, berthId, pendingFee, ... }`.
+Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, special, dayVisitors, stationed, wishes, nights, status: 'expected' | 'waiting' | 'moored', waitSpot, berthId, pendingFee, paid, feeDay, ... }`.
 
 ## Ereignisse, die die Regeln senden
 
@@ -74,7 +75,7 @@ Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, 
 | `sim:dismissed` | `{ boatId }` |
 | `sim:atBuoy` | `{ boatId }`, Geduld läuft |
 | `sim:berthFreed` | `{ berthId, boatId }` Box nach der Abreise wieder frei (bis dahin gilt sie als belegt, `state.leaving`) |
-| `sim:feeReady` | `{ boatId, amount, wishesMet }`, Münze erscheint |
+| `sim:feeReady` | `{ boatId, amount, wishesMet }`, Liegegeld fällig: direkt beim Anlegen (im selben Schritt wie `sim:moored`) und für Bleibende am Morgen. Münze erscheint, Boot ist unbezahlt |
 | `sim:collected` | `{ boatId, amount }` |
 | `sim:departed` | `{ boatId, berthId, typeId, rating }` |
 | `sim:dayStart`, `sim:evening`, `sim:dayEnd` | Tageslauf |
@@ -175,4 +176,4 @@ Im Browser:
 python3 -m http.server 8000 --directory web
 ```
 
-`http://localhost:8000` öffnen, warten, bis unten ein Boot erscheint, es antippen, „Automatisch einfahren“, abwarten bis „Abend“ und „Kassieren“ antippen: das Geld oben steigt.
+`http://localhost:8000` öffnen, warten, bis unten ein Boot erscheint, es antippen, „Automatisch einfahren“, dann „Kassieren“ antippen oder über die Münze streichen: das Geld oben steigt sofort.

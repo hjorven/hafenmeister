@@ -155,20 +155,24 @@ test('Hafenbüro mit Automatik weist wartende Boote zu; volle Bojen kosten keine
   assert.equal(JSON.stringify(t.ratings), ratings);
 });
 
-test('Abend: Hafengeld mit Wünschen, Kapazität der Toilette, Strom vom Platz', () => {
+test('Hafengeld wird beim Anlegen fällig: Wünsche, Kapazität der Toilette, Strom vom Platz', () => {
   const s = quietState({ stage: 3, money: 0 });
-  s.facilities.wc = 1; // versorgt 6 Boote
+  s.facilities.wc = 1; // versorgt 6 Boote am Tag
   const boats = [];
+  const fees = [];
   for (let i = 0; i < 7; i++) {
     const b = waitingBoat(s, { wishes: ['wc'] });
-    assert.equal(sim.assign(s, ctx, b.id, i < 6 ? `A${i + 1}` : 'B1').ok, true);
+    const r = sim.assign(s, ctx, b.id, i < 6 ? `A${i + 1}` : 'B1');
+    assert.equal(r.ok, true);
+    fees.push(...r.events.filter((e) => e.type === 'feeReady'));
     boats.push(b);
   }
+  assert.equal(boats[0].paid, false);
   const yacht = waitingBoat(s, { typeId: 'L1', size: 'L', length: 11, beam: 3.8, draft: 1.9, wishes: ['strom', 'dusche'] });
-  sim.assign(s, ctx, yacht.id, 'C1');
+  fees.push(...sim.assign(s, ctx, yacht.id, 'C1').events.filter((e) => e.type === 'feeReady'));
   const ev = sim.tick(s, ctx, RULES.dayLength);
   assert.equal(s.phase, 'evening');
-  const fees = ev.filter((e) => e.type === 'feeReady');
+  assert.equal(ev.filter((e) => e.type === 'feeReady').length, 0, 'abends wird nichts mehr fällig');
   assert.equal(fees.length, 8);
   // 6 Boote mit WC: 10 × 1,25 = 12,5 -> 13; das siebte ohne WC: 10
   assert.deepEqual(fees.slice(0, 7).map((e) => e.amount), [13, 13, 13, 13, 13, 13, 10]);
@@ -178,7 +182,26 @@ test('Abend: Hafengeld mit Wünschen, Kapazität der Toilette, Strom vom Platz',
   const c = sim.collect(s, ctx, yacht.id);
   assert.equal(c.ok, true);
   assert.equal(s.money, 50);
+  assert.equal(yacht.paid, true);
   assert.equal(sim.collect(s, ctx, yacht.id).ok, false);
+});
+
+test('Wer bleibt, zahlt jeden Morgen die nächste Nacht und gilt bis dahin als unbezahlt', () => {
+  const s = quietState({ money: 0 });
+  const b = waitingBoat(s, { wishes: [], nights: 2 });
+  sim.assign(s, ctx, b.id, 'A1');
+  assert.equal(b.pendingFee, 10);
+  sim.collect(s, ctx, b.id);
+  assert.equal(b.paid, true);
+  const ev = sim.tick(s, ctx, RULES.dayLength + RULES.eveningLength);
+  assert.equal(s.day, 2);
+  assert.ok(ev.some((e) => e.type === 'feeReady' && e.boatId === b.id));
+  assert.equal(b.paid, false);
+  assert.equal(b.pendingFee, 10);
+  // Nicht kassiert: nachts landet die Hälfte in der Kasse des Vertrauens, dann reist das Boot ab
+  sim.tick(s, ctx, RULES.dayLength + RULES.eveningLength);
+  assert.equal(s.money, 15);
+  assert.equal(s.boats[b.id], undefined);
 });
 
 test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gästezahl', () => {
@@ -233,9 +256,8 @@ test('Hafenbüro: Stufe 1 Knopf, Stufe 2 kassiert selbst, Stufe 3 weist selbst z
 
   const t = quietState({ stage: 3, office: 2 });
   const b = waitingBoat(t);
-  sim.assign(t, ctx, b.id, 'A1');
-  const ev = sim.tick(t, ctx, RULES.dayLength);
-  assert.ok(ev.some((e) => e.type === 'collected'));
+  const ev = sim.assign(t, ctx, b.id, 'A1').events;
+  assert.ok(ev.some((e) => e.type === 'collected'), 'Büro kassiert gleich beim Anlegen');
   assert.equal(t.money, 10);
 
   const u = quietState({ stage: 3, office: 3 });
@@ -283,8 +305,7 @@ test('Tagesgäste bringen abends Geld, wenn es einen Kiosk gibt', () => {
 test('Sondergast mit eigenem Preis', () => {
   const s = quietState({ stage: 5 });
   const navy = waitingBoat(s, { typeId: 'XL4', size: 'XL', length: 35, beam: 7, draft: 3, special: true });
-  sim.assign(s, ctx, navy.id, 'K1');
-  const ev = sim.tick(s, ctx, RULES.dayLength);
+  const ev = sim.assign(s, ctx, navy.id, 'K1').events;
   assert.equal(ev.find((e) => e.type === 'feeReady').amount, 50);
 });
 
@@ -555,4 +576,12 @@ test('Box bleibt belegt, bis das abreisende Boot heraus ist (Meldung oder Rückf
   s.leaving = { A6: { boatId: 99, elapsed: 0 } };
   sim.settleWaiting(s);
   assert.ok(sim.isFree(s, 'A6'));
+});
+
+test('Erster Tag: das erste Boot kommt nach wenigen Sekunden', () => {
+  for (const seed of [1, 2, 3, 4, 5]) {
+    const s = createState({ seed });
+    const ev = sim.tick(s, ctx, RULES.firstArrivalAt + 1);
+    assert.ok(ev.some((e) => e.type === 'arrived'), `Seed ${seed}`);
+  }
 });

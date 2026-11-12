@@ -8,6 +8,8 @@ export const RULES = {
   eveningLength: 30,
   // Ankünfte verteilen sich auf diesen Anteil des Tages, damit niemand kurz vor Abend einläuft
   arrivalWindow: 0.8,
+  // Am ersten Tag eines neuen Spiels kommt das erste Boot schon nach so vielen Sekunden (und es kommt sicher eines)
+  firstArrivalAt: 3,
 
   // Hafengeld pro Nacht = Grundpreis × (1 + wishBonus × erfüllte Wünsche)
   baseFee: { S: 10, M: 20, L: 40, XL: 100 },
