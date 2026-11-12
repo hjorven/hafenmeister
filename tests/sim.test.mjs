@@ -473,3 +473,35 @@ test('Ohne Bootsdaten läuft der Tag trotzdem', () => {
 test('createContext lehnt Bootsart ohne id ab', () => {
   assert.throws(() => sim.createContext({ boatTypes: [{ name: 'x' }] }), /ohne id/);
 });
+
+test('Geduld zählt erst an der Boje: Meldung der 3D-Ansicht oder Rückfallzeit', () => {
+  const s = quietState();
+  const make = (id) => ({ ...waitingBoat(createState({ seed: id })), id, status: 'expected', arriveAt: 0.5, atBuoy: false, atBuoySince: null });
+  s.upcoming = [make(201), make(202)];
+  sim.tick(s, ctx, 1);
+  assert.equal(s.boats[201].atBuoy, false);
+  // 201 meldet die 3D-Ansicht nach 20 s an der Boje
+  sim.tick(s, ctx, 20);
+  const ev = sim.markAtBuoy(s, ctx, 201).events;
+  assert.equal(ev[0].type, 'atBuoy');
+  assert.equal(sim.markAtBuoy(s, ctx, 201).ok, false);
+  assert.equal(sim.patienceLeft(s, ctx, 202), RULES.queue.patience);
+  // 202 gilt nach approachMax als angekommen
+  const ev2 = sim.tick(s, ctx, RULES.queue.approachMax - 20);
+  assert.ok(ev2.some((e) => e.type === 'atBuoy' && e.boatId === 202));
+  // Nach der vollen Geduld ab der Boje fährt 201 weiter, nicht schon ab Ankunft
+  sim.tick(s, ctx, RULES.queue.patience - (RULES.queue.approachMax - 20) - 1);
+  assert.ok(s.boats[201], 'noch da: Geduld läuft erst seit der Boje');
+  const ev3 = sim.tick(s, ctx, 3);
+  assert.ok(ev3.some((e) => e.type === 'turnedAway' && e.boatId === 201 && e.reason === 'patience'));
+  assert.ok(s.boats[202], '202 kam später an der Boje an');
+});
+
+test('Nach dem Laden liegen wartende Boote an der Boje', async () => {
+  const sim = await import('../web/js/sim.js');
+  const state = { clock: 100, boats: { 1: { status: 'waiting', atBuoy: false, atBuoySince: null }, 2: { status: 'moored' } } };
+  sim.settleWaiting(state);
+  assert.equal(state.boats[1].atBuoy, true);
+  assert.equal(state.boats[1].atBuoySince, 100);
+  assert.equal(state.boats[2].atBuoy, undefined);
+});
