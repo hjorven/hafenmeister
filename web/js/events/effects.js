@@ -39,7 +39,7 @@ export function initEffects(game) {
   new ResizeObserver(resize).observe(canvas);
   resize();
 
-  for (let i = 0; i < 6; i++) wisps.push({ x: Math.random(), y: Math.random(), s: 0.6 + Math.random() * 0.8, v: 0.004 + Math.random() * 0.006 });
+  for (let i = 0; i < 4; i++) wisps.push({ x: Math.random(), y: Math.random(), s: 0.6 + Math.random() * 0.8, v: 0.004 + Math.random() * 0.006 });
 
   game.on('weather', (wx) => {
     if (!wx) return;
@@ -91,18 +91,28 @@ export function initEffects(game) {
       flash = Math.max(0, flash - dt * 4);
     }
 
-    // Nebel: helle Schleier, die langsam ziehen
+    // Nebel: Stimmung statt Wand. Leichter Schleier über allem, dichter am Bildrand,
+    // die Mitte (wo man spielt) bleibt klar. Ein paar zarte Schwaden ziehen langsam durch.
+    // Höchstwerte bewusst klein, damit Stege, Boote, Bojen und Oberfläche gut erkennbar bleiben.
     if (cur.fog > 0.02) {
-      ctx.fillStyle = `rgba(240, 244, 246, ${(cur.fog * 0.35).toFixed(3)})`;
+      ctx.fillStyle = `rgba(236, 242, 245, ${(cur.fog * 0.08).toFixed(3)})`;
+      ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      const inner = Math.min(w, h) * 0.32;
+      const outer = Math.hypot(w, h) * 0.6;
+      const v = ctx.createRadialGradient(cx, cy, inner, cx, cy, outer);
+      v.addColorStop(0, 'rgba(240, 245, 247, 0)');
+      v.addColorStop(1, `rgba(240, 245, 247, ${(cur.fog * 0.38).toFixed(3)})`);
+      ctx.fillStyle = v;
       ctx.fillRect(0, 0, w, h);
       for (const p of wisps) {
         if (dt > 0) p.x += p.v * dt * (1 + cur.wind);
         if (p.x > 1.3) { p.x = -0.3; p.y = Math.random(); }
-        const r = Math.max(w, h) * 0.35 * p.s;
+        const r = Math.max(w, h) * 0.22 * p.s;
         const gx = p.x * w, gy = p.y * h;
         const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, r);
-        g.addColorStop(0, `rgba(250, 252, 253, ${(cur.fog * 0.45).toFixed(3)})`);
-        g.addColorStop(1, 'rgba(250, 252, 253, 0)');
+        g.addColorStop(0, `rgba(248, 251, 252, ${(cur.fog * 0.1).toFixed(3)})`);
+        g.addColorStop(1, 'rgba(248, 251, 252, 0)');
         ctx.fillStyle = g;
         ctx.fillRect(gx - r, gy - r, r * 2, r * 2);
       }
