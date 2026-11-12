@@ -12,6 +12,8 @@ export const RULES = {
   arrivalFrom: 0.35,
   arrivalWindow: 0.95,
   arrivalPeak: 0.7,
+  // Mindestabstand zwischen zwei Ankünften in Sekunden (kleiner, wenn sonst nicht alle in den Tag passen)
+  arrivalMinGap: 3,
   // Abreise am nächsten Vormittag, je Boot zu einer eigenen Zeit in diesem Fenster (Anteile des Tages).
   // Bis dahin bleibt die Box belegt.
   departWindow: [0.07, 0.3],
