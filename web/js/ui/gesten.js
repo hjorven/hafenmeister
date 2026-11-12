@@ -443,7 +443,10 @@ export function init(game) {
       ctx.lineWidth = 5;
       ctx.strokeStyle = 'rgba(40,54,72,0.85)';
       ctx.fillStyle = '#f4c542';
-      const y = t.y - k * 30;
+      const y = Math.max(24, t.y - k * 30);
+      // Am Rand nicht abschneiden: Text ganz im Bild halten
+      const halb = ctx.measureText(t.text).width / 2 + 10;
+      t.x = Math.min(Math.max(t.x, halb), Math.max(halb, W - halb));
       ctx.strokeText(t.text, t.x, y);
       ctx.fillText(t.text, t.x, y);
       ctx.globalAlpha = 1;
