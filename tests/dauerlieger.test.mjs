@@ -48,6 +48,18 @@ test('Dauerplatz anlegen: Boot liegt fest und zahlt abends den festen Anteil', (
   assert.ok(state.money >= vorher + fee);
 });
 
+test('Dauerlieger haben einen Namen am Heck, aber keinen fremden Heimathafen', async () => {
+  const { beschreibung } = await import('../web/js/features/stammgaeste.js');
+  const { BOOTSNAMEN } = await import('../web/js/data/bootsnamen.js');
+  const { ctx, state } = neu();
+  const a = state.boats[machDauerplatz(state, ctx, freierPlatz(state, ctx)).boatId];
+  const b = state.boats[machDauerplatz(state, ctx, freierPlatz(state, ctx)).boatId];
+  assert.ok(BOOTSNAMEN.includes(a.bootsname));
+  assert.notEqual(a.bootsname, b.bootsname);
+  assert.equal(a.heimathafen, undefined);
+  assert.equal(beschreibung(a), `„${a.bootsname}“ · Dauerlieger`);
+});
+
 test('Dauerplatz aufheben gibt den Platz frei', () => {
   const { ctx, state } = neu();
   const platz = freierPlatz(state, ctx);
