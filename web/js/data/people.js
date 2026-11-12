@@ -18,9 +18,30 @@ export const BUENDEL = 5;
 // Hoechstzahl Figuren gleichzeitig (eine InstancedMesh), plan.md: etwa 300.
 export const MAX_FIGUREN = 300;
 
-// Spaziergaenger aus dem Ort und Badegaeste je Ausbaustufe (Index = Stufe), tagsueber.
-// Abends ist es die Haelfte.
-export const SPAZIERGAENGER = [0, 5, 9, 14, 20, 26, 26];
+// Menschen, die nicht mit Booten kommen (Jorven, 12.11.2026: der Hafen soll belebter sein).
+// Je Ausbaustufe (Index = Stufe) im Sommer am Tag. ort = Spaziergaenger aus dem Ort auf Uferweg,
+// Promenade und Stegen; strand = Badegaeste auf der Nehrung und am Seeufer.
+export const SPAZIERGAENGER = {
+  ort:    [0, 10, 14, 18, 24, 28, 28],
+  strand: [0, 14, 18, 24, 30, 34, 34],
+};
+// Faktoren je Jahreszeit (aus game.emit('season', { part })), abends und bei Regen
+export const JAHRESZEIT = {
+  ort:    { fruehling: 0.85, sommer: 1, herbst: 0.7, winter: 0.3 },
+  strand: { fruehling: 0.5, sommer: 1, herbst: 0.4, winter: 0.08 },
+};
+export const ABENDS = { ort: 0.45, strand: 0.2 };
+export const REGEN = 0.4;
+// Leute aus dem Ort halten sich bevorzugt bis etwa so weit (Planeinheiten) um die Stege auf.
+export const NAEHE = 110;
+
+// Wer wohin am liebsten geht: Faktor auf das Gewicht in ZIELE, fehlt er, gilt 1
+// (bei den Badegaesten 0.2: sie bleiben meist am Strand).
+export const VORLIEBE = {
+  crew:   { strand: 0.6, baden: 0.6 },
+  ort:    { strand: 1.2, baden: 0.8, aussicht: 2.5 },
+  strand: { strand: 8, baden: 6, strandkoerbe: 4, seebruecke: 3, kiosk: 2, aussicht: 1 },
+};
 
 // Gehgeschwindigkeit in m/s (Spielzeit), je Person zufaellig im Bereich.
 export const TEMPO = [1.0, 1.5];
@@ -39,6 +60,8 @@ export const ZIELE = {
   strandkoerbe: { gewicht: 4, dauer: [25, 60], drinnen: false },
   seebruecke:   { gewicht: 4, dauer: [10, 24], drinnen: false },
   aussicht:     { gewicht: 3, dauer: [8, 20],  drinnen: false },   // Stegkopf, Molenkopf
+  strand:       { gewicht: 2, dauer: [30, 90], drinnen: false, sitzen: true },   // im Sand sitzen
+  baden:        { gewicht: 1, dauer: [20, 60], drinnen: false, nurBadewetter: true },
 };
 
 // Wer von seinem Boot kommt: Anteil, der nach einem Ziel erst wieder an Bord geht.

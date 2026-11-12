@@ -63,3 +63,22 @@ test('große Schiffe werden gebündelt, nie mehr als die Höchstzahl', () => {
   assert.ok(figurenFuer(200) < 60);
   assert.ok(MAX_FIGUREN <= 300);
 });
+
+for (const stufe of [1, 3, 5]) {
+  test(`Stufe ${stufe}: Badegäste erreichen von den Dünen Strand und Badestelle`, () => {
+    const netz = baueNetz({ hafen: HAFEN, stufe, gebaeude: GEB });
+    assert.ok(netz.duenen.length > 10);
+    const nehrung = netz.flaechen.nehrung;
+    assert.notEqual(nehrung, netz.flaechen.festland);
+    const strand = netz.ziele.filter((z) => z.art === 'strand' && netz.komp[z.node] === nehrung);
+    const baden = netz.ziele.filter((z) => z.art === 'baden' && netz.komp[z.node] === nehrung);
+    assert.ok(strand.length >= 8, `nur ${strand.length} Strandplätze`);
+    assert.ok(baden.length >= 8);
+    for (const z of [...strand, ...baden]) assert.ok(netz.weg(netz.duenen[0], z.node), 'kein Weg zum Strand');
+    // Wasserknoten sind Sackgassen: kein Weg führt durchs Wasser
+    for (const z of strand.slice(0, 5)) {
+      const w = netz.weg(netz.duenen[3], z.node);
+      assert.ok(w.every((n) => netz.nodes[n].art !== 'wasser'));
+    }
+  });
+}
