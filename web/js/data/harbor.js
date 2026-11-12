@@ -32,6 +32,8 @@
 // Erweiterbar: neue Platzarten (z. B. Kreuzfahrtanleger) bekommen eine neue art und Klasse,
 // neue Felder werden nur angehaengt; format zaehlt hoch, wenn sich Bedeutungen aendern.
 
+import { stegbildAnwenden } from './stegbild.js';
+
 export const HAFEN = {
  "format": 1,
  "id": "nehrung",
@@ -5796,6 +5798,9 @@ export const HAFEN = {
   }
  }
 };
+
+// Stegbild dieses Spiels einsetzen (docs/stegbilder.md). Ohne Browser bleibt das Grundbild.
+stegbildAnwenden(HAFEN);
 
 // Plan -> Spielwelt (Meter, x Osten, z Sueden, y oben), siehe docs/grundgeruest.md.
 export function inWelt(x, y) {
