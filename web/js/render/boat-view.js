@@ -150,7 +150,7 @@ export function init(game) {
       const idx = plaetze.findIndex((q, i) => !anker.has(i) && (RANG[q.groesse] ?? 2) >= g);
       if (idx >= 0) {
         const q = plaetze[idx];
-        return reserviere({ id: `anker-${idx}`, x: q.x, z: q.z, heading: b.heading, kind: 'buoy', abstand: (q.schwoikreisM ?? 10) * 2 });
+        return reserviere({ id: `anker-${idx}`, x: q.x, z: q.z, heading: b.heading, kind: 'buoy', abstand: (q.schwoikreisM ?? 10) * 2, kreis: q.schwoikreisM ?? 10 });
       }
       k = Math.max(k, plaetze.length);
       while (anker.has(k)) k++;
@@ -163,7 +163,7 @@ export function init(game) {
       return { x: b.x + fx * 40, z: b.z + fz * 40 };
     })();
     const p = ankerSlot(k, gross ? 60 : 20);
-    return reserviere({ id: `anker-${k}`, x: mitte.x + p.x, z: mitte.z + p.z, heading: b.heading, kind: 'buoy', abstand: gross ? 60 : 20 });
+    return reserviere({ id: `anker-${k}`, x: mitte.x + p.x, z: mitte.z + p.z, heading: b.heading, kind: 'buoy', abstand: gross ? 60 : 20, kreis: gross ? 30 : 10 });
   }
 
   // k-ter Ankerplatz: Mitte, dann Ringe mit dem Abstand d (6, 12, 18 ... Plaetze je Ring)
@@ -284,8 +284,9 @@ export function init(game) {
   // Nur Gaeste; Dauerlieger haben ihren Platz fuer die Saison.
   // kein Rot und kein Gruen: die haben schon die Platzschilder (frei/belegt)
   const BAND_FARBEN = ['#ffbe0b', '#3a86ff', '#ff6fb5', '#fb8500', '#8338ec', '#00b4d8', '#f1fa3c'];
-  const bandMats = BAND_FARBEN.map((c) => new THREE.MeshLambertMaterial({ color: c, side: THREE.DoubleSide, emissive: c, emissiveIntensity: 0.25 }));
+  const bandMats = BAND_FARBEN.map((c) => new THREE.MeshLambertMaterial({ color: c, side: THREE.DoubleSide, emissive: c, emissiveIntensity: 0.45 }));
   const stangeMat = new THREE.MeshLambertMaterial({ color: '#d9dde2' });
+  const randWeiss = new THREE.MeshBasicMaterial({ color: '#ffffff', side: THREE.DoubleSide });
   const _bv = new THREE.Vector3();
   function bandFarbe() {
     const st = game.sim?.state ?? game.state;
@@ -293,7 +294,7 @@ export function init(game) {
     return bandMats[((tag % bandMats.length) + bandMats.length) % bandMats.length];
   }
   // Hoehe des Decks am Bug: hoechster Punkt im vorderen Zehntel des Rumpfs (ohne Mast und Aufbau)
-  function bugHoehe(group, L) {
+  function bugHoehe(group, L, von = 0.36, bis = 0.47, breit = 0.6, hoch = 3) {
     group.updateMatrixWorld(true);
     const inv = new THREE.Matrix4().copy(group.matrixWorld).invert();
     let y = 0;
@@ -303,7 +304,7 @@ export function init(game) {
       const m = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld);
       for (let i = 0; i < pos.count; i += Math.max(1, pos.count >> 9)) {
         _bv.fromBufferAttribute(pos, i).applyMatrix4(m);
-        if (_bv.x > L * 0.36 && _bv.x < L * 0.47 && Math.abs(_bv.z) < 0.6 && _bv.y < 3) y = Math.max(y, _bv.y);
+        if (_bv.x > L * von && _bv.x < L * bis && Math.abs(_bv.z) < breit && _bv.y < hoch) y = Math.max(y, _bv.y);
       }
     });
     return y || 0.8;
@@ -313,21 +314,31 @@ export function init(game) {
     const L = e.anim.info.length, B = e.anim.info.beam;
     const g = new THREE.Group();
     g.name = 'bezahlt-band';
-    // gross genug, dass man es von oben sieht: etwa ein Viertel der Bootsbreite
-    const k = clamp(B / 3.2, 0.7, 1.6);
-    const stange = new THREE.Mesh(new THREE.CylinderGeometry(0.03 * k, 0.03 * k, 0.75 * k, 5), stangeMat);
-    stange.position.y = 0.37 * k;
+    // Gross genug fuer die normale Ansicht: Wimpel etwa ein Viertel der Bootslaenge, und hoeher als
+    // alles auf dem Vorschiff (Persenning, Kajuete), damit nichts ihn verdeckt.
+    const lang = clamp(L * 0.28, 1.6, 4);
+    const deck = bugHoehe(e.group, L);
+    const oben = Math.max(deck + 0.5, bugHoehe(e.group, L, 0.05, 0.5, B / 2, 4.5) + 0.35);
+    const stab = oben - deck;
+    const stange = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, stab, 5), stangeMat);
+    stange.position.y = stab / 2;
     g.add(stange);
-    // Wimpel: Dreieck, das vom Stab nach achtern weht, fast waagerecht, damit man es von oben sieht
-    const wg = new THREE.BufferGeometry();
-    wg.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -0.22 * k, 0, 0, 0.22 * k, -1.15 * k, 0, 0], 3));
-    wg.computeVertexNormals();
-    const band = new THREE.Mesh(wg, bandFarbe());
-    band.position.y = 0.72 * k;
-    band.rotation.x = 0.25;
+    // Wimpel: Dreieck, das vom Stab nach achtern weht, fast waagerecht, damit man es von oben sieht;
+    // ein weisser Rand dahinter hebt ihn von Deck und Wasser ab
+    const dreieck = (l, b) => {
+      const wg = new THREE.BufferGeometry();
+      wg.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -b / 2, 0, 0, b / 2, -l, 0, 0], 3));
+      wg.computeVertexNormals();
+      return wg;
+    };
+    const band = new THREE.Mesh(dreieck(lang, lang * 0.45), bandFarbe());
+    band.position.y = stab;
+    band.rotation.x = 0.2;
+    const rand = new THREE.Mesh(dreieck(lang * 1.12, lang * 0.6).translate(lang * 0.06, -0.03, 0), randWeiss);
+    band.add(rand);
     g.add(band);
     g.userData.band = band;
-    g.position.set(L * 0.4, bugHoehe(e.group, L), 0);
+    g.position.set(L * 0.42, deck, 0);
     g.visible = false;
     e.group.add(g);
     e.band = g;
