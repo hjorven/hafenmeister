@@ -528,6 +528,7 @@ export function nehrung(px, py, h, typ, k = {}) {
   if (g.deich) return typ;                             // Nordsee: offene Dünen ohne Wald
   const hafen = k.hafenAbstand ?? 999;
   if (hafen < 20 || freiAbstand(px, py, k.stufe) < 6 || Math.abs(px - 178) < 55) return typ;   // nicht am Engpass
+  if (px > -285 && px < -180) return typ;   // Badestrand mit Seebrücke und Strandkörben (Stufe 6) bleibt offen
   const w = fbm(px / 60 + 7, py / 30, bild.seed + 61);
   if (w > 0.6) return 'waldboden';
   if (w < 0.36) return 'heide';
