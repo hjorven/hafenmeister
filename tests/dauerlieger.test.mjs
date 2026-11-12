@@ -87,8 +87,9 @@ test('Törn: Platz wird grün, nur Gäste, die rechtzeitig abreisen, passen, Boo
   const zuLang = { stationed: false, nights: bis - state.day + 2 };
   assert.equal(fitHook({ state, boat: passt, berth }), null);
   assert.equal(fitHook({ state, boat: zuLang, berth }), 'dauerZurueck');
-  // Zurück nach Ablauf
+  // Zurück nach Ablauf (liegt gerade ein Gast in der Box, der sich selbst eingefahren hat, wartet es noch)
   while (state.day <= bis) sim.runDay(state, ctx);
+  for (let i = 0; i < 4 && state.berths[platz] !== boatId; i++) sim.runDay(state, ctx);
   assert.equal(state.berths[platz], boatId);
   assert.equal(state.boats[boatId].status, 'moored');
 });
@@ -114,6 +115,31 @@ test('Kommt das Boot zurück und ein Gast liegt noch da, wartet es eine Nacht', 
   } finally { Object.assign(DAUER, alt); }
   assert.equal(p.rueckNacht, state.day + 1);
   assert.equal(state.berths[platz], 999);
+});
+
+test('Gast wurde heute Nacht abgerechnet und legt erst morgens ab: Dauerboot kommt trotzdem zurück, Gast legt sofort ab', () => {
+  const { ctx, state } = neu(5);
+  const platz = freierPlatz(state, ctx);
+  const { boatId } = machDauerplatz(state, ctx, platz);
+  const p = dauerState(state).plaetze[platz];
+  const boot = state.boats[boatId];
+  delete state.berths[platz];
+  delete state.boats[boatId];
+  boot.status = 'away';
+  Object.assign(p, { boot, rueckNacht: state.day });
+  // Gast ist abgerechnet, hält die Box aber bis zum Ablegen am Vormittag
+  state.leaving = { [platz]: { boatId: 998, elapsed: 0, at: 30, off: false } };
+  const events = [];
+  const alt = { ...DAUER };
+  try {
+    DAUER.toernChance = 0; DAUER.tagestoernChance = 0;
+    ctx.hooks.night.forEach((fn) => fn({ state, ctx, events }));
+  } finally { Object.assign(DAUER, alt); }
+  assert.equal(state.berths[platz], boatId);
+  assert.ok(events.some((e) => e.type === 'dauerEinlaufen'));
+  // Am Morgen legt der Gast sofort ab, nicht erst zur geplanten Zeit
+  const ev = sim.tick(state, ctx, 1);
+  assert.ok(ev.some((e) => e.type === 'castOff' && e.berthId === platz));
 });
 
 test('Hafenbüro-Automatik beachtet die Dauerplätze (fittingBerths nutzt den Hook)', () => {

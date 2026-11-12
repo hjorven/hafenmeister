@@ -20,12 +20,11 @@
 import * as THREE from 'three';
 import { SERVICES } from '../data/services.js';
 import { erstelleRegeln, neuerZustand, mitZahlen } from '../services/rules.js';
-import { baueModell, LAND_Y, mat, FARBE } from './services-models.js';
+import { baueModell, tPier, LAND_Y, mat, FARBE } from './services-models.js';
+import { HAFEN } from '../data/harbor.js';
+import { initBesuche } from './services-besuch.js';
 
 const U = 0.62;
-// Stufe 6 ist zurueckgestellt, bis der Umfang entschieden ist (docs/abnahme.md). Die Daten und
-// Modelle sind fertig; mit ?services=alle sind sie zu sehen.
-const ZURUECKGESTELLT = new Set(['kreuzfahrtterminal', 'marineanleger']);
 
 const welt = (lage) => ({ x: lage.x * U, z: -lage.y * U, ry: THREE.MathUtils.degToRad(lage.dreh ?? 0) });
 const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
@@ -33,7 +32,7 @@ const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
 export function init(game) {
   const params = new URLSearchParams(location.search);
   const alleZeigen = params.get('services') === 'alle';
-  // Zum Ausprobieren mit ?stufe=n: diese Stufe gilt fest und Bauen kostet nichts.
+  // Zum Ausprobieren mit ?stufe=n: diese Stufe gilt fest, Bauen kostet nichts, der Ruf zaehlt als 5.
   const testStufe = Number(params.get('stufe')) || 0;
   let R = erstelleRegeln(SERVICES);
 
@@ -51,18 +50,42 @@ export function init(game) {
   };
   let winter = false;
   let stufe = testStufe || game.state?.stufe || 1;
-  const kontext = () => ({ stufe, ruf: game.sim?.reputation?.() ?? game.state?.ruf ?? 3, geld: !testStufe && Number.isFinite(game.state?.geld) ? game.state.geld : undefined,
+  const kontext = () => ({ stufe, ruf: testStufe ? 5 : game.sim?.reputation?.() ?? game.state?.ruf ?? 3, geld: !testStufe && Number.isFinite(game.state?.geld) ? game.state.geld : undefined,
     tag: game.state?.tag ?? 1 });
-  const sichtbar = (id) => alleZeigen || !ZURUECKGESTELLT.has(id);
+  const sichtbar = () => true;
 
   const gruppe = new THREE.Group();
   gruppe.name = 'services';
   game.scene.add(gruppe);
 
-  const hoehe = (x, z) => {
+  // Bodenhoehe der Landschaft in Metern (unter Wasser negativ), ohne Landschaft LAND_Y
+  const boden = (x, z) => {
     const h = game.landschaft?.hoeheBei?.(x, z);
-    return Number.isFinite(h) ? Math.min(1, Math.max(0, h - LAND_Y)) : 0;
+    return Number.isFinite(h) ? h : LAND_Y;
   };
+  // Teile an Land auf den Boden setzen: Die Modelle sind fuer Land in LAND_Y gebaut, die Landschaft
+  // ist an Ufer, Duenen und Nehrung hoeher. Wasserteile (Stege, Boote) bleiben, wo sie sind.
+  // userData.land erzwingt das Anheben (z. B. Kranarm), userData.fest verbietet es (selbst gesetzt).
+  // Abstand vom Anker bis zum Wasser in Blickrichtung des Modells (lokal -z), hoechstens 60 m
+  function uferAbstand(w) {
+    const dx = -Math.sin(w.ry), dz = -Math.cos(w.ry);
+    for (let d = 0; d <= 60; d += 1) if (boden(w.x + dx * d, w.z + dz * d) < 0) return d;
+    return 8;
+  }
+  const _b = new THREE.Box3(), _v = new THREE.Vector3();
+  function aufBoden(gr) {
+    gr.updateMatrixWorld(true);
+    for (const c of gr.children) {
+      if (c.userData.fest) continue;
+      _b.setFromObject(c);
+      if (_b.isEmpty()) continue;
+      const minLokal = _b.min.y - gr.position.y;
+      if (!c.userData.land && minLokal < LAND_Y - 0.1) continue;
+      _b.getCenter(_v);
+      const dy = Math.min(4, Math.max(0, boden(_v.x, _v.z) - LAND_Y));
+      c.position.y += dy;
+    }
+  }
 
   // ------------------------------------------------------------------ Modelle in der Szene
   const anlagen = new Map();     // id -> { stufe, group, update, einsatz, pop }
@@ -72,10 +95,11 @@ export function init(game) {
     if (alt && alt.stufe === n) return;
     if (alt) { gruppe.remove(alt.group); entsorge(alt.group); anlagen.delete(id); }
     if (n <= 0) return;
-    const m = baueModell(id, n);
     const w = welt(R.lage(zustand(), id));
-    m.group.position.set(w.x, hoehe(w.x, w.z), w.z);
+    const m = baueModell(id, n, { boden: boden(w.x, w.z), ufer: uferAbstand(w) });
+    m.group.position.set(w.x, 0, w.z);
     m.group.rotation.y = w.ry;
+    aufBoden(m.group);
     m.group.name = `service-${id}`;
     m.group.userData.pick = { type: 'building', id };
     gruppe.add(m.group);
@@ -115,7 +139,21 @@ export function init(game) {
     return g;
   }
 
+  // Grossschiffpier ab Stufe 6 (Linien aus harbor.js, steg 'P'; stege.js zeichnet bauart 'pier' nicht)
+  let pier = null;
+  function zeigePier() {
+    const soll = stufe >= 6;
+    if (soll && !pier) {
+      const aus = (HAFEN.stufen?.[6]?.stege ?? []).filter((l) => l.steg === 'P').map((l) => l.punkte);
+      pier = tPier(aus.length ? aus : [[[-225, 214.3], [-225, 262]], [[-377, 262], [-77, 262]]]);
+      gruppe.add(pier);
+    } else if (!soll && pier) {
+      gruppe.remove(pier); entsorge(pier); pier = null;
+    }
+  }
+
   function aktualisiere(mitAnimationFuer = null) {
+    zeigePier();
     const z = zustand();
     for (const s of R.katalog) {
       if (!sichtbar(s.id)) continue;
@@ -125,7 +163,7 @@ export function init(game) {
       if (zeigePlatz && !vorhanden) {
         const g = bauplatz(s.id);
         const w = welt(s.stufen[0].lage ?? s.lage);
-        g.position.set(w.x, hoehe(w.x, w.z), w.z);
+        g.position.set(w.x, Math.max(0, boden(w.x, w.z) - LAND_Y), w.z);
         gruppe.add(g);
         plaetze.set(s.id, g);
       } else if (!zeigePlatz && vorhanden) {
@@ -288,6 +326,7 @@ export function init(game) {
     })
     .catch(() => {});
 
+  const GROSSSCHIFF = ['kreuzfahrt', 'flottenbesuch', 'offene-tuer'];
   const api = {
     katalog: R.katalog,
     zustand,
@@ -299,11 +338,15 @@ export function init(game) {
     abrechnen,
     naechsteBesuche: () => R.naechsteBesuche(zustand(), kontext().tag),
     planeBesuch: (id, tag) => R.planeBesuch(zustand(), id, tag),
+    // Ziel Stufe 6 (economy.js ziel.grossschiffBesuche): Kreuzfahrtschiffe, Flottenbesuche, Tage der offenen Tür
+    grossschiffBesuche: () => GROSSSCHIFF.reduce((n, art) => n + (zustand().anzahl?.[art] ?? 0), 0),
+    besucheJeArt: () => ({ ...(zustand().anzahl ?? {}) }),
     oeffnen,
     schliessen,
     gruppe,
   };
   game.services = api;
+  api.besuche = initBesuche(game, api);
   return api;
 }
 

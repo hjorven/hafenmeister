@@ -173,7 +173,9 @@ export function nachtHook({ state, events }) {
   for (const [platzId, p] of Object.entries(d.plaetze)) {
     if (p.boot) {
       if (p.rueckNacht > state.day) continue;
-      if (!sim.isFree(state, platzId)) { p.rueckNacht = state.day + 1; continue; }   // Gast liegt noch da
+      // Ein Gast, der noch bleibt, hält den Platz: dann eine Nacht später. Ein Gast, der heute Nacht
+      // abgerechnet wurde und erst morgens ablegen wollte (state.leaving), legt sofort ab (sim.js tick).
+      if (state.berths[platzId] != null) { p.rueckNacht = state.day + 1; continue; }
       const boot = p.boot;
       boot.status = 'moored';
       boot.berthId = platzId;
@@ -209,10 +211,7 @@ export function haengeEin(addHook) {
 }
 
 // ---------------------------------------------------------------------------
-// Im Browser: Schilder an den Plätzen und Infokarte beim Antippen eines Platzes
-
-const GRUEN = '#3fae5a';
-const ROT = '#d9534f';
+// Im Browser: Infokarte beim Antippen eines Platzes (Schilder: features/platzschilder.js)
 
 export async function init(game) {
   await regelnBereit(game);
@@ -228,56 +227,11 @@ export async function init(game) {
   game.on('sim:dauerAuslaufen', (e) => game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: e.tage }));
   game.on('sim:dauerEinlaufen', (e) => game.emit('dauer:einlaufen', { id: e.boatId, platzId: e.berthId }));
 
-  const { HAFEN, platzInWelt } = await import('../data/harbor.js');
-  const platzDaten = Object.fromEntries(HAFEN.plaetze.map((p) => [p.id, p]));
-  const THREE = game.THREE;
-
-  // Schild: Pfahl mit Tafel, die Tafel zeigt grün (frei für Gäste) oder rot (Boot ist da)
-  const gruppe = new THREE.Group();
-  gruppe.name = 'dauerlieger-schilder';
-  game.scene.add(gruppe);
-  const pfahlGeo = new THREE.CylinderGeometry(0.1, 0.1, 2.0, 6);
-  const tafelGeo = new THREE.BoxGeometry(1.1, 0.7, 0.08);
-  const pfahlMat = new THREE.MeshLambertMaterial({ color: '#f4efe4' });
-  const gruenMat = new THREE.MeshLambertMaterial({ color: GRUEN });
-  const rotMat = new THREE.MeshLambertMaterial({ color: ROT });
-  const schilder = new Map();
-
-  function schildFuer(platzId) {
-    let s = schilder.get(platzId);
-    if (s) return s;
-    const lage = platzDaten[platzId] && platzInWelt(platzDaten[platzId], api.state.stage);
-    if (!lage) return null;
-    s = new THREE.Group();
-    const pfahl = new THREE.Mesh(pfahlGeo, pfahlMat);
-    pfahl.position.y = 1.0;
-    const tafel = new THREE.Mesh(tafelGeo, rotMat);
-    tafel.position.y = 1.9;
-    s.add(pfahl, tafel);
-    s.userData.tafel = tafel;
-    // Am Kopfende des Platzes (Stegseite), leicht versetzt
-    const laenge = (platzDaten[platzId].laenge ?? 8) / 2;
-    s.position.set(lage.x - Math.cos(lage.winkel) * laenge, 0, lage.z + Math.sin(lage.winkel) * laenge);
-    s.rotation.y = lage.winkel;
-    s.userData.pick = { type: 'berth', id: platzId };
-    gruppe.add(s);
-    schilder.set(platzId, s);
-    return s;
-  }
-
+  // Die Grün-Rot-Schilder an den Plätzen zeichnet features/platzschilder.js für alle Boxen.
   function zeichne() {
-    const d = dauerState(api.state);
-    for (const [id, s] of schilder) {
-      if (!d.plaetze[id]) { gruppe.remove(s); schilder.delete(id); }
-    }
-    for (const [id, p] of Object.entries(d.plaetze)) {
-      const s = schildFuer(id);
-      if (s) s.userData.tafel.material = p.boot ? gruenMat : rotMat;
-    }
     if (offenerPlatz) karte(offenerPlatz);
   }
   game.on('sim:change', zeichne);
-  game.on('stufe', () => { for (const s of schilder.values()) gruppe.remove(s); schilder.clear(); zeichne(); });
 
   // Infokarte für einen Platz. Die Karte gehört hud.js; wir nutzen sie nur, wenn sie frei ist.
   const card = document.getElementById('card');
