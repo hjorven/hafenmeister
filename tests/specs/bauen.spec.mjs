@@ -40,6 +40,8 @@ test('Bauen: Vorschau, Bestätigen, Gebäude steht', async ({ game }, testInfo) 
 
   await press(page.locator('#card .hud-btn', { hasText: 'Fertig' }), testInfo);
   await expect(page.locator('#card')).toBeHidden();
+  // Während des Einstiegs bleibt der Hinweis weg; der Einstieg startet nach newGame evtl. neu
+  await page.evaluate(() => window.hafenmeister.einstieg?.beenden?.());
   await expect(page.locator('#bau-tipp')).toBeVisible();
   await expect(page.locator('#bau-tipp')).toContainText('Als Nächstes');
 });
