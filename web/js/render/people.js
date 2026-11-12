@@ -12,6 +12,10 @@
 //   game.people.netz             aktuelles Wegenetz (web/js/people/netz.js)
 //   game.people.bootAngelegt({ id, platz, groesse, art, modell })  von Hand, z. B. zum Testen
 //   game.people.bootLegtAb(id)
+//   game.people.rundgangStarten({ sofort })  Hafenmeister geht ueber die Stege (sonst abends von selbst)
+// Sendet: 'hafenmeister:halt' { boot, platz } an Booten ohne Bezahlt-Markierung, danach
+//   'hafenmeister:feierabend'. Bezahlt-Status: game.sim.istBezahlt(boot, platz), sonst
+//   game.state.boats[boot].bezahlt / paid / pendingFee > 0.
 // Hoert auf: boot:angelegt, boot:ablegen (Spielregeln), boat:moored, boat:cast-off, boat:left
 // (Schiffsanimationen), stufe, phase, season, weather, ready.
 // Zum Ausprobieren: index.html?stufe=4&leute=voll  (alle Plaetze der Stufe mit Crews belegt)
@@ -55,6 +59,18 @@ export function init(game) {
   group.name = 'menschen';
   group.add(koerper, kopf);
   game.scene.add(group);
+
+  // Schirmmuetze des Hafenmeisters (eine einzelne Figur, daher kein Instancing noetig)
+  const muetze = new THREE.Group();
+  const muetzeOben = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.27, 0.16, 10), new THREE.MeshLambertMaterial({ color: '#f4f1ea' }));
+  muetzeOben.position.y = 1.86;
+  const schirm = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.04, 0.34), new THREE.MeshLambertMaterial({ color: '#1f2a3d' }));
+  schirm.position.set(0.24, 1.79, 0);
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(0.275, 0.275, 0.06, 10), new THREE.MeshLambertMaterial({ color: '#1f2a3d' }));
+  band.position.y = 1.8;
+  muetze.add(muetzeOben, schirm, band);
+  muetze.visible = false;
+  group.add(muetze);
 
   const farbe = new THREE.Color();
   const mat = new THREE.Matrix4();
@@ -205,6 +221,7 @@ export function init(game) {
   // Naechster Schritt eines Menschen, der gerade irgendwo angekommen oder fertig ist
   function weiter(a) {
     if (a.folgt) return;   // Gruppenmitglieder machen, was die Gruppe macht
+    if (a.typ === 'hafenmeister') return rundgangWeiter(a);
     const bootDaten = a.boot != null ? boote.get(a.boot) : null;
     if (bootDaten) {
       if (bootDaten.ablegen || (abend && !a.bleibtAbends)) return heimAnBord(a, bootDaten);
@@ -262,6 +279,9 @@ export function init(game) {
       pruefeAnBord(a.boot);
       return;
     }
+    if (wenn === 'halt') return haltAmBoot(a);
+    if (wenn === 'vorbei') { a.zustand = 'steht'; a.uhr = 0; return; }
+    if (wenn === 'feierabend') { a.zustand = 'drinnen'; a.uhr = 1e9; rundgangEnde(a); return; }
     const z = a.ziel;
     const art = z ? P.ZIELE[z.art] : null;
     a.zustand = art?.drinnen ? 'drinnen' : 'verweilt';
@@ -274,6 +294,109 @@ export function init(game) {
 
   function entfernen(a) {
     a.zustand = 'entfernt';
+  }
+
+  // ---------------------------------------------------------------- Hafenmeister-Rundgang
+  // Abends geht der Hafenmeister ueber die Stege, haelt an jedem belegten Platz, an dem das Boot
+  // noch nicht bezahlt hat, kurz an und sendet 'hafenmeister:halt' { boot, platz }. Die Spielregeln
+  // koennen darauf kassieren. Danach geht er zurueck ins Buero.
+  let rundgang = null;   // { agent, halte: [{ platz, boot, node }] }
+
+  function bueroKnoten() {
+    for (const art of ['hafenmeister', 'hafenbuero']) {
+      const z = netz.ziele.find((t) => t.art === art && netz.komp[t.node] === netz.flaechen.festland);
+      if (z) return z.node;
+    }
+    // Stufe 1: es gibt noch kein Buero, er kommt vom Uferweg an der Wurzel der Stege
+    return netz.naechster(netz.zentrum.x, netz.zentrum.y - 10, netz.flaechen.festland);
+  }
+
+  // Belegte Plaetze: aus dem Spielstand, sonst aus den Booten, deren Crews hier laufen
+  function belegtePlaetze() {
+    const out = new Map();
+    const berths = game.state?.berths;
+    if (berths && typeof berths === 'object') for (const [platz, boot] of Object.entries(berths)) if (boot != null) out.set(platz, boot);
+    for (const b of boote.values()) if (!b.ablegen && !out.has(b.platz)) out.set(b.platz, b.id);
+    return out;
+  }
+
+  function istUnbezahlt(boot, platz) {
+    if (typeof game.sim?.istBezahlt === 'function') return !game.sim.istBezahlt(boot, platz);
+    const b = game.state?.boats?.[boot];
+    if (!b) return false;
+    if (b.bezahlt != null) return !b.bezahlt;
+    if (b.paid != null) return !b.paid;
+    return (b.pendingFee ?? 0) > 0;
+  }
+
+  // Reihenfolge: Steg fuer Steg (von West nach Ost), auf jedem Steg von der Wurzel nach aussen
+  function rundgangPlanen() {
+    const belegt = belegtePlaetze();
+    const halte = [];
+    for (const [platz, boot] of belegt) {
+      const pl = netz.plaetze.get(platz);
+      if (!pl || netz.komp[pl.einstieg] !== netz.flaechen.festland) continue;
+      const roh = HAFEN.plaetze.find((q) => q.id === platz);
+      halte.push({ platz, boot, node: pl.einstieg, steg: roh?.steg ?? '', x: pl.x, y: pl.y, zahlt: istUnbezahlt(boot, platz) });
+    }
+    const stegX = new Map();
+    for (const h of halte) stegX.set(h.steg, Math.min(stegX.get(h.steg) ?? Infinity, h.x));
+    halte.sort((a, b) => (stegX.get(a.steg) - stegX.get(b.steg)) || (a.y - b.y));
+    return halte;
+  }
+
+  function rundgangStarten({ sofort = false } = {}) {
+    if (!netz || rundgang) return false;
+    const halte = rundgangPlanen();
+    if (!halte.length) return false;
+    const start = bueroKnoten();
+    if (start == null || start < 0) return false;
+    const a = neueFigur({ node: start, typ: 'hafenmeister' });
+    if (!a) return false;
+    a.koerperFarbe = new THREE.Color('#2e3f5c');
+    a.tempo = 1.25;
+    a.zustand = 'drinnen';
+    a.uhr = sofort ? 0.5 : zufall(4, 12);
+    rundgang = { agent: a, halte, start };
+    api.rundgang = rundgang;
+    return true;
+  }
+
+  function rundgangWeiter(a) {
+    const r = rundgang;
+    if (!r || r.agent !== a) return entfernen(a);
+    // Nur dort halten, wo noch nicht bezahlt ist; an den anderen Plaetzen geht er vorbei
+    const naechster = r.halte.shift();
+    if (!naechster) {
+      if (a.node === r.start) return rundgangEnde(a);
+      return befehl(a, r.start, 'feierabend');
+    }
+    a.halt = naechster;
+    if (naechster.node === a.node) {
+      if (naechster.zahlt) return haltAmBoot(a);
+      a.zustand = 'steht'; a.uhr = 0; return;
+    }
+    befehl(a, naechster.node, naechster.zahlt ? 'halt' : 'vorbei');
+  }
+
+  function haltAmBoot(a) {
+    const h = a.halt;
+    a.zustand = 'verweilt';
+    a.uhr = 3.5;
+    const pl = netz.plaetze.get(h.platz);
+    if (pl) {
+      const n = netz.nodes[pl.einstieg];
+      a.blick = Math.atan2(pl.y - n.y, pl.x - n.x);   // zum Boot schauen (Plan-y = Welt -z)
+    }
+    // Bezahlstatus erst jetzt nochmal pruefen: vielleicht hat der Spieler schon kassiert
+    if (istUnbezahlt(h.boot, h.platz)) game.emit('hafenmeister:halt', { boot: h.boot, platz: h.platz });
+  }
+
+  function rundgangEnde(a) {
+    entfernen(a);
+    rundgang = null;
+    api.rundgang = null;
+    game.emit('hafenmeister:feierabend', {});
   }
 
   // ---------------------------------------------------------------- Boote
@@ -533,6 +656,14 @@ export function init(game) {
       kopf.setColorAt(n, a.kopfFarbe);
       n++;
     }
+    const hm = rundgang?.agent;
+    const hmSichtbar = hm && (hm.zustand === 'geht' || hm.zustand === 'verweilt' || hm.zustand === 'steht');
+    muetze.visible = !!hmSichtbar;
+    if (hmSichtbar) {
+      const geht = hm.zustand === 'geht';
+      muetze.position.set(hm.x, hm.y + (geht ? Math.abs(Math.sin(zeit * 7 * hm.tempo + hm.phase)) * 0.06 : 0), hm.z);
+      muetze.rotation.set(0, hm.blick, 0);
+    }
     koerper.count = n;
     kopf.count = n;
     koerper.instanceMatrix.needsUpdate = true;
@@ -552,6 +683,7 @@ export function init(game) {
       // Alles neu verteilen: Crews der Boote bleiben, wenn es ihren Platz noch gibt
       const alt = [...boote.values()].map((b) => ({ id: b.id, platz: b.platz, groesse: b.klasse, crew: b.menschen }));
       agenten.length = 0;
+      rundgang = null;
       boote.clear();
       for (const info of alt) bootAngelegt(info);
       for (const b of boote.values()) for (const a of b.agenten) a.uhr = zufall(0, 4);
@@ -604,6 +736,7 @@ export function init(game) {
     if (!part || part === jahreszeit) return;
     jahreszeit = part;
     if (netz) anpassen();
+    if (abend) rundgangStarten();
   });
   game.on('weather', (w) => {
     const neu = (w?.rain ?? 0) >= 0.3 || (w?.snow ?? 0) > 0.5;
@@ -650,6 +783,8 @@ export function init(game) {
     anBord,
     bootAngelegt,
     bootLegtAb,
+    rundgangStarten,
+    rundgang: null,
     anzahl: () => {
       const lebend = agenten.filter((a) => a.zustand !== 'entfernt');
       return { figuren: lebend.length, menschen: lebend.reduce((s, a) => s + a.buendel, 0), sichtbar: koerper.count };
