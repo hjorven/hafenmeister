@@ -1,7 +1,7 @@
 // Einstieg (web/js/features/einstieg.js): Reihenfolge der Hinweise ohne Browser prüfen.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { naechsterSchritt, erledige, einstiegState, REIHENFOLGE, TEXTE, WILLKOMMEN_SEK } from '../web/js/features/einstieg.js';
+import { naechsterSchritt, erledige, einstiegState, REIHENFOLGE, TEXTE, WILLKOMMEN_SEK, anteilText } from '../web/js/features/einstieg.js';
 
 const lage = (x = {}) => ({ bootImBild: false, willkommenSek: 0, abend: false, muenzen: false, bauenSichtbar: true, tafelSichtbar: true, karteOffen: false, ...x });
 
@@ -27,8 +27,8 @@ test('der ganze erste Tag in Reihenfolge, Liegegeld gleich nach dem Anlegen', ()
   assert.equal(naechsterSchritt(e, lage({ muenzen: true })), 'muenzen', 'tagsüber, nicht erst abends');
   erledige(e, 'muenzen');
   assert.equal(naechsterSchritt(e, lage({ karteOffen: true })), null, 'nicht über eine offene Karte');
-  assert.equal(naechsterSchritt(e, lage()), 'sonne');
-  erledige(e, 'sonne');
+  assert.equal(naechsterSchritt(e, lage()), 'tempo');
+  erledige(e, 'tempo');
   assert.equal(naechsterSchritt(e, lage()), 'bauen');
   erledige(e, 'bauen');
   assert.equal(naechsterSchritt(e, lage({ tafelSichtbar: false })), null, 'ohne Tafel kein Hinweis darauf');
@@ -43,6 +43,22 @@ test('alter Spielstand mit erstem Schritt "sonne" wird übernommen', () => {
   const e = einstiegState(state);
   assert.deepEqual([...e.erledigt].sort(), ['anlegen', 'willkommen']);
   assert.equal(naechsterSchritt(e, lage({ muenzen: true })), 'muenzen');
+});
+
+test('Spielstand v2 mit Vorspul-Schritt "sonne" heißt jetzt "tempo"', () => {
+  const state = { modules: { einstieg: { fertig: false, v2: true, erledigt: ['willkommen', 'anlegen', 'muenzen', 'sonne'] } } };
+  const e = einstiegState(state);
+  assert.deepEqual([...e.erledigt].sort(), ['anlegen', 'muenzen', 'tempo', 'willkommen']);
+  assert.equal(naechsterSchritt(e, lage()), 'bauen');
+});
+
+test('Liegegeld-Text nennt den Anteil, den der Hafenmeister abends holt', () => {
+  assert.match(TEXTE.muenzen.text, /abends der Hafenmeister, aber nur (die Hälfte|.* Fünftel|.* Viertel|\d+ Prozent)\./);
+  assert.match(TEXTE.muenzen.kurz, /abends nur /);
+  assert.equal(anteilText(0.5), 'die Hälfte');
+  assert.equal(anteilText(0.8), 'vier Fünftel');
+  assert.equal(anteilText(0.7), '70 Prozent');
+  for (const t of Object.values(TEXTE)) assert.doesNotMatch(t.text + t.kurz, /Sonne/);
 });
 
 test('beendet bleibt beendet und liegt im Spielstand', () => {

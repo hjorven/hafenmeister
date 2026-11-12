@@ -7,7 +7,7 @@
 //   1. willkommen  Boote warten an den Bojen (Kreis um eine Boje)   fertig: mind. 6 s gelesen und ein Boot wartet im Bild
 //   2. anlegen     Boot auf einen Platz ziehen oder Einfahren       fertig: sim:moored
 //   3. muenzen     Liegegeld gleich nach dem Anlegen einstreichen   fertig: sim:collected
-//   4. sonne       Vorspulen (Zeitsteuerung unten links)            fertig: vorgespult oder Weiter
+//   4. tempo       Vorspulen (Zeitsteuerung unten links)            fertig: vorgespult oder Weiter
 //   5. bauen       Mit dem Geld den Hafen ausbauen                  fertig: Bauen gedrückt oder Weiter
 //   6. ziele       Tagesziele                                       fertig: Los geht's
 // Ein Boot, das in der Sim schon wartet, aber in 3D noch von draußen anfährt, zählt erst, wenn es im Bild ist.
@@ -17,6 +17,16 @@
 // Schnittstelle: game.einstieg = { start(), beenden(), schritt() }; meldet 'einstieg:schritt' { schritt } bei jedem Wechsel und 'einstieg:ende' am Ende
 
 import { regelnBereit } from './regeln-bereit.js';
+import { rulesFromEconomy } from '../sim.js';
+import { ECONOMY } from '../data/economy.js';
+
+// Welchen Anteil der Rundgang am Abend von liegen gelassenen Münzen holt (Balancing, nicht fest im Text)
+const REGELN = rulesFromEconomy(ECONOMY);
+export function anteilText(a) {
+  const namen = { 0.5: 'die Hälfte', 0.25: 'ein Viertel', 0.75: 'drei Viertel', 0.8: 'vier Fünftel', 0.6: 'drei Fünftel', 0.4: 'zwei Fünftel' };
+  return namen[a] ?? `${Math.round(a * 100)} Prozent`;
+}
+const ANTEIL = anteilText(REGELN.roundShare ?? REGELN.uncollectedShare ?? 0.5);
 
 const CSS = `
 .hm-ring { position: absolute; left: 0; top: 0; z-index: 30; pointer-events: none; border-radius: 50%;
@@ -70,16 +80,18 @@ export const TEXTE = {
     kurz: TOUCH ? 'Boot auf einen leuchtenden Platz ziehen oder antippen und einfahren lassen.' : 'Boot auf einen leuchtenden Platz ziehen oder anklicken und einfahren lassen.',
   },
   muenzen: {
-    titel: 'Liegegeld kassieren',
+    titel: 'Liegegeld beim Anlegen',
     text: TOUCH
-      ? 'Angelegt. Das Boot zahlt sein Liegegeld: Tipp auf die Münze am Boot. Liegen mehrere da, streich in einem Zug über alle. Oder unten „Kassieren“ drücken. Wer bezahlt hat, zeigt einen Wimpel am Bug.'
-      : 'Angelegt. Das Boot zahlt sein Liegegeld: Klick auf die Münze am Boot. Liegen mehrere da, fahr mit gedrückter Maustaste in einem Zug über alle. Oder unten „Kassieren“ drücken. Wer bezahlt hat, zeigt einen Wimpel am Bug.',
-    kurz: TOUCH ? 'Tipp auf die Münze oder auf „Kassieren“. Bezahlt: Wimpel am Bug.' : 'Klick auf die Münze oder auf „Kassieren“. Bezahlt: Wimpel am Bug.',
+      ? `Angelegt. Das Boot zahlt gleich: Tipp auf die Münze am Boot, mehrere streichst du in einem Zug ein. Bezahlt zeigt einen Wimpel am Bug. Was liegen bleibt, holt abends der Hafenmeister, aber nur ${ANTEIL}.`
+      : `Angelegt. Das Boot zahlt gleich: Klick auf die Münze am Boot, mehrere fährst du mit gedrückter Maustaste in einem Zug ab. Bezahlt zeigt einen Wimpel am Bug. Was liegen bleibt, holt abends der Hafenmeister, aber nur ${ANTEIL}.`,
+    kurz: TOUCH ? `Tipp auf die Münze am Boot. Liegen gelassen gibt es abends nur ${ANTEIL}.` : `Klick auf die Münze am Boot. Liegen gelassen gibt es abends nur ${ANTEIL}.`,
   },
-  sonne: {
+  tempo: {
     titel: 'Der Tag läuft',
-    text: 'Bis zum Abend kommen weitere Boote. Wer länger wartet, fährt selbst ein, aber nur von Hand kannst du Wünsche erfüllen, und die bringen mehr. Soll es schneller gehen, spul mit der Zeitsteuerung vor, der Kreis zeigt darauf.',
-    kurz: 'Weitere Boote kommen. Vorspulen geht mit dem Doppelpfeil unten.',
+    text: TOUCH
+      ? 'Bis zum Abend kommen weitere Boote. Wer länger wartet, fährt selbst ein, aber nur von Hand kannst du Wünsche erfüllen, und die bringen mehr. Unten links hältst du die Zeit an oder spulst vor: 1x, 3x oder 8x.'
+      : 'Bis zum Abend kommen weitere Boote. Wer länger wartet, fährt selbst ein, aber nur von Hand kannst du Wünsche erfüllen, und die bringen mehr. Unten links hältst du die Zeit an oder spulst vor: 1x, 3x oder 8x. Taste F schaltet 3x ein und aus.',
+    kurz: 'Weitere Boote kommen. Vorspulen geht unten links mit dem Doppelpfeil.',
   },
   bauen: {
     titel: 'Hafen ausbauen',
@@ -95,7 +107,7 @@ export const TEXTE = {
   },
 };
 
-export const REIHENFOLGE = ['willkommen', 'anlegen', 'muenzen', 'sonne', 'bauen', 'ziele'];
+export const REIHENFOLGE = ['willkommen', 'anlegen', 'muenzen', 'tempo', 'bauen', 'ziele'];
 
 /** So lange bleibt "Willkommen" mindestens stehen, auch wenn das erste Boot schon da ist. */
 export const WILLKOMMEN_SEK = 6;
@@ -109,9 +121,15 @@ export function einstiegState(state) {
     const alt = e.erledigt || [];
     e.erledigt = alt.filter((id) => ['anlegen', 'muenzen', 'bauen', 'ziele'].includes(id));
     if (alt.includes('sonne')) e.erledigt.push('willkommen');
-    // Wer früher "Bauen" gesehen hat, kennt auch die Sonne schon
-    if (alt.includes('bauen')) e.erledigt.push('sonne');
+    // Wer früher "Bauen" gesehen hat, kennt auch das Vorspulen schon
+    if (alt.includes('bauen')) e.erledigt.push('tempo');
     e.v2 = true;
+    e.v3 = true;
+  }
+  // v2 hieß der Vorspul-Schritt noch "sonne"
+  if (!e.v3) {
+    e.erledigt = (e.erledigt || []).map((id) => (id === 'sonne' ? 'tempo' : id));
+    e.v3 = true;
   }
   return e;
 }
@@ -138,8 +156,8 @@ export function naechsterSchritt(e, lage) {
     willkommen: () => !lage.abend,
     anlegen: () => lage.bootImBild && !lage.abend,
     muenzen: () => lage.muenzen,
-    sonne: () => done.has('muenzen') && !lage.abend && ruhig,
-    bauen: () => done.has('sonne') && lage.bauenSichtbar && ruhig,
+    tempo: () => done.has('muenzen') && !lage.abend && ruhig,
+    bauen: () => done.has('tempo') && lage.bauenSichtbar && ruhig,
     ziele: () => done.has('bauen') && lage.tafelSichtbar && ruhig,
   };
   e.erledigt = [...done];
@@ -186,7 +204,7 @@ export async function init(game) {
   }
 
   let aktuell = null;     // id des gezeigten Schritts
-  let ziehen = false;     // während Schleppleine oder Sonne keinen Text über den Finger legen
+  let ziehen = false;     // während der Schleppleine keinen Text über den Finger legen
 
   const sichtbar = (el) => {
     if (!el || el.hidden) return false;
@@ -284,12 +302,11 @@ export async function init(game) {
           const p = aufBildschirm(m);
           if (imBild(p, f) && (!best || Math.hypot(p.x - c.x, p.y - c.y) < Math.hypot(best.x - c.x, best.y - c.y))) best = { ...p, obj: m };
         }
-        // Ist noch keine Münze im Bild (Boot fährt noch an den Platz), zeigt der Kreis auf „Kassieren“
-        return best ? { ...best, w: 64, h: 64 } : domKreis(document.getElementById('btn-collect'), 6);
+        // Ist noch keine Münze im Bild (Boot fährt noch an den Platz), bleibt nur der Text stehen
+        return best ? { ...best, w: 64, h: 64 } : null;
       }
-      // Vorspulen: neue Zeitsteuerung unten links (Doppelpfeil), sonst die alte Sonne im Tagesbalken
-      case 'sonne': return domKreis(document.querySelector('.hm-tempo-knopf[data-tempo="tempo2"]'), 6)
-        ?? domKreis(document.querySelector('.hm-sonne'), 6);
+      // Vorspulen: Zeitsteuerung unten links (Doppelpfeil)
+      case 'tempo': return domKreis(document.querySelector('.hm-tempo-knopf[data-tempo="tempo2"]'), 6);
       case 'bauen': return domKreis(document.getElementById('btn-build'), 6);
       case 'ziele': return domKreis(document.querySelector('.hm-tafel > button'), 6);
       default: return null;
@@ -326,7 +343,7 @@ export async function init(game) {
     if (!id) { tipp.hidden = true; ring.hidden = true; return; }
     const t = TEXTE[id];
     const nr = REIHENFOLGE.indexOf(id) + 1;
-    const info = id === 'sonne' || id === 'bauen' || id === 'ziele';
+    const info = id === 'tempo' || id === 'bauen' || id === 'ziele';
     tipp.replaceChildren();
     const z = document.createElement('div'); z.className = 'zaehler'; z.textContent = `Einstieg ${nr} von ${REIHENFOLGE.length}`;
     const h = document.createElement('p'); h.className = 'titel'; h.textContent = t.titel;
@@ -498,7 +515,7 @@ export async function init(game) {
   document.getElementById('btn-build')?.addEventListener('click', () => { if (aktuell === 'bauen') schritt('bauen'); });
   game.on('ui:tow', () => { ziehen = true; });
   game.on('ui:tow-end', () => { ziehen = false; });
-  game.on('ui:vorspulen', ({ speed } = {}) => { if (speed > 1 && aktuell === 'sonne') schritt('sonne'); });
+  game.on('ui:vorspulen', ({ speed } = {}) => { if (speed > 1 && aktuell === 'tempo') schritt('tempo'); });
   window.addEventListener('pointerup', () => { ziehen = false; }, true);
   window.addEventListener('pointercancel', () => { ziehen = false; }, true);
 
