@@ -177,7 +177,7 @@ export function baueNetz({ hafen, stufe, gebaeude = [] }) {
   const gebRoh = [];
   for (const g of gebaeude) {
     if (g.art === 'seebruecke') continue;
-    const tuer = g.tuer ?? { x: g.x, y: g.art === 'wohnhaus' ? g.y - 6 : g.y + 6 };
+    const tuer = g.tuer ?? { x: g.x, y: g.art === 'wohnhaus' ? g.y - 6 : g.art === 'strandkoerbe' ? g.y - 3 : g.y + 6 };
     const nehrung = g.y > 100;
     const filter = nehrung ? istNehrungsweg : (l) => l.gruppe === 'festland';
     const h = anschluss(tuer.x, tuer.y, filter);
