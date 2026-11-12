@@ -25,9 +25,9 @@ const BOJEN = {
 };
 // Hier kommen die Boote ins Bild und verschwinden wieder (ausserhalb der Startansicht)
 const REVIERRAND = {
-  1: [-48, 80],
-  2: [-20, 120],
-  3: [40, 140],
+  1: [-40, 100],     // nordoestlich im See, knapp ausserhalb der Startansicht
+  2: [0, 135],
+  3: [330, 380],     // draussen auf der Ostsee
 };
 
 const bySt = (table, stufe) => table[Math.min(3, Math.max(1, stufe | 0))];
@@ -43,7 +43,15 @@ export function init(game) {
   const stufe = () => game.state?.stage ?? game.state?.stufe ?? 1;
   const windFrom = () => ((game.boatAnim?.wind?.fromDeg ?? 250) * Math.PI) / 180;
 
+  // Wartebojen der Landschaft (render/landschaft) haben Vorrang, dann zeichnet dieses Modul keine eigenen
+  const landBojen = () => game.landscape?.warteplaetze?.bojen ?? null;
+
   function bojenPos() {
+    const lb = landBojen();
+    if (lb?.length) {
+      const n = game.sim?.waitSpotCount?.() ?? lb.length;
+      return lb.slice(0, Math.max(1, Math.min(n, lb.length))).map((b) => ({ x: b.x, z: b.z }));
+    }
     const list = bySt(BOJEN, stufe());
     const n = game.sim?.waitSpotCount?.() ?? list.length;
     return list.slice(0, Math.max(1, Math.min(n, list.length))).map(welt);
@@ -60,6 +68,7 @@ export function init(game) {
   function baueBojen() {
     bojenStufe = stufe();
     bojenGruppe.clear();
+    if (landBojen()?.length) return;
     bojenPos().forEach((p, i) => {
       const b = new THREE.Group();
       b.name = `boje-${i}`;

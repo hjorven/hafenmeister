@@ -605,8 +605,8 @@ class BoatAnim {
     const pts = this.approachPoints(b);
     if (opts.via) pts.unshift(...opts.via);
     const f = this.finalPose(b);
-    // zur Boje mit Marschfahrt (bremst am Ende von selbst), in den Hafen mit Hafenfahrt
-    const speed = opts.speed ?? (b.kind === 'buoy' ? this.cfg.cruise : this.cfg.harbor);
+    // Marschfahrt, das Bremsen vor dem Ziel macht PathTask (wird von selbst Hafenfahrt)
+    const speed = opts.speed ?? (big ? this.cfg.harbor : this.cfg.cruise);
     if (BOX_KINDS.has(b.kind) || b.kind === 'buoy' || !big) {
       this.push(new PathTask(pts, { speed, thrusters: b.kind !== 'buoy' && this.info.size !== 'S' && this.info.size !== 'M' }));
     } else {
