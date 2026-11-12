@@ -358,6 +358,9 @@ export function gelaendeAbfrage(stufe, region) {
  * bojen: feste Warteboje je Boot. ankerbereiche: Kreis, in dem frei geankert wird.
  * groesse: größte Bootsgröße, die dort warten kann.
  */
+/** Halber Abstand zwischen ankernden Booten in Metern (Boot schwoit um den Anker), je größter Bootsklasse. */
+export const SCHWOIKREIS_M = { S: 5, M: 6, L: 7.5, XL: 16 };
+
 export function warteplaetze(stufe) {
   const bojen = [], ankerbereiche = [];
   const reihe = (id, x0, y0, dx, dy, n, groesse) => {
@@ -370,17 +373,43 @@ export function warteplaetze(stufe) {
       ? [[-100, 56], [-86, 53], [-72, 50]]
       : [[-112, 86], [-94, 90], [-76, 88], [-58, 92], [-40, 89], [-22, 92]];
     lagen.forEach(([px, py], i) => bojen.push({ id: `see-${i + 1}`, px, py, groesse: 'M' }));
-    ankerbereiche.push({ id: 'see-anker', px: stufe === 1 ? -20 : 20, py: stufe === 1 ? 70 : 112, radius: 16, groesse: 'M' });
+    // Ankerfeld im See östlich der Bojen, abseits des Wegs vom Graben zu den Stegen
+    ankerbereiche.push(stufe === 1
+      ? { id: 'see-anker', px: -25, py: 102, radius: 44, groesse: 'M' }
+      : { id: 'see-anker', px: 42, py: 130, radius: 50, groesse: 'M' });
   } else if (stufe <= 4) {
     reihe('reede-', 228, 262, 14, 9, stufe === 3 ? 5 : 7, 'L');
-    ankerbereiche.push({ id: 'reede-anker', px: 300, py: 330, radius: 30, groesse: 'L' });
+    ankerbereiche.push({ id: 'reede-anker', px: 345, py: 385, radius: 62, groesse: 'L' });
   } else {
     reihe('reede-', 232, 300, 14, 9, 8, 'L');
-    ankerbereiche.push({ id: 'reede-anker', px: 300, py: 380, radius: 32, groesse: 'L' });
-    ankerbereiche.push({ id: 'reede-gross', px: 60, py: 420, radius: 40, groesse: 'XL' });
+    ankerbereiche.push({ id: 'reede-anker', px: 360, py: 440, radius: 60, groesse: 'L' });
+    ankerbereiche.push({ id: 'reede-gross', px: 30, py: 440, radius: 85, groesse: 'XL' });
   }
   const welt = (o) => ({ ...o, x: o.px * PLAN_M, z: -o.py * PLAN_M, ...(o.radius ? { radiusM: o.radius * PLAN_M } : {}) });
-  return { bojen: bojen.map(welt), ankerbereiche: ankerbereiche.map(welt) };
+  // Feste Ankerplätze im Ankerfeld: Sechseck-Raster mit Abstand nach Schwoikreis der größten Bootsklasse,
+  // sortiert nach Nähe zur Einfahrt, damit zuerst die nahen Plätze belegt werden.
+  const ankerplaetze = [];
+  const einfahrt = stufe <= 2 ? [-80, 60] : [167, 250];
+  for (const b of ankerbereiche) {
+    const abstand = SCHWOIKREIS_M[b.groesse] * 2 / PLAN_M;
+    const r = b.radius - abstand * 0.45;
+    const liste = [];
+    for (let j = -Math.ceil(r / abstand) - 1; j <= Math.ceil(r / abstand) + 1; j++) {
+      const dy = j * abstand * 0.866;
+      for (let i = -Math.ceil(r / abstand) - 1; i <= Math.ceil(r / abstand) + 1; i++) {
+        const dx = (i + (j & 1 ? 0.5 : 0)) * abstand;
+        const px = b.px + dx, py = b.py + dy;
+        // nicht auf Wartebojen und nicht in der Fahrrinne
+        const frei = bojen.every((o) => Math.hypot(o.px - px, o.py - py) > abstand * 0.8)
+          && polyAbstand(px, py, stufe >= 5 ? RINNE5 : RINNE34) > abstand * 0.6;
+        if (Math.hypot(dx, dy) <= r && frei) liste.push([px, py]);
+      }
+    }
+    if (!liste.length) liste.push([b.px, b.py]);
+    liste.sort((p, q) => Math.hypot(p[0] - einfahrt[0], p[1] - einfahrt[1]) - Math.hypot(q[0] - einfahrt[0], q[1] - einfahrt[1]));
+    liste.forEach(([px, py], i) => ankerplaetze.push({ id: `${b.id}-${i + 1}`, bereich: b.id, px, py, groesse: b.groesse, schwoikreisM: SCHWOIKREIS_M[b.groesse] }));
+  }
+  return { bojen: bojen.map(welt), ankerbereiche: ankerbereiche.map(welt), ankerplaetze: ankerplaetze.map(welt) };
 }
 
 /**

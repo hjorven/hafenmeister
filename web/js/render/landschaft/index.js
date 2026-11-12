@@ -21,7 +21,7 @@ export function autoQualitaet() {
 function baueWartebereich(stufe, region) {
   const gruppe = new THREE.Group();
   gruppe.name = 'wartebereich';
-  const { bojen, ankerbereiche } = warteplaetze(stufe);
+  const { bojen, ankerbereiche, ankerplaetze } = warteplaetze(stufe);
   const mBoje = new THREE.MeshLambertMaterial({ color: '#f6c445', flatShading: true });
   const mTopp = new THREE.MeshLambertMaterial({ color: '#f4f1ea', flatShading: true });
   // Gut sichtbare Warteboje: gelbe Kugel mit weißem Toppzeichen, etwas größer als echt
@@ -62,7 +62,16 @@ function baueWartebereich(stufe, region) {
     flaeche.userData.pick = { type: 'anchorage', id: a.id, groesse: a.groesse };
     gruppe.add(flaeche, ring);
   }
-  return { gruppe, daten: { bojen, ankerbereiche } };
+  // Jeder feste Ankerplatz als kleiner heller Punkt, damit man sieht, wie viele Boote das Feld fasst
+  if (ankerplaetze.length) {
+    const punkt = new THREE.CircleGeometry(0.9, 10).rotateX(-Math.PI / 2);
+    const marken = new THREE.InstancedMesh(punkt, new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.45, depthWrite: false }), ankerplaetze.length);
+    const m = new THREE.Matrix4();
+    ankerplaetze.forEach((a, i) => marken.setMatrixAt(i, m.makeTranslation(a.x, 0.05, a.z)));
+    marken.name = 'ankerplaetze';
+    gruppe.add(marken);
+  }
+  return { gruppe, daten: { bojen, ankerbereiche, ankerplaetze } };
 }
 
 /**

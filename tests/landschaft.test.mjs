@@ -32,9 +32,10 @@ test('Wartebojen und Ankerbereiche liegen in jedem Revier und jeder Stufe in tie
     const r = region(name);
     const ebbe = r.gelaende.gezeiten || 0;
     for (let stufe = 1; stufe <= 5; stufe++) {
-      const { bojen, ankerbereiche } = warteplaetze(stufe);
+      const { bojen, ankerbereiche, ankerplaetze } = warteplaetze(stufe);
       assert.ok(bojen.length >= 3, `Stufe ${stufe}: zu wenige Bojen`);
-      for (const b of [...bojen, ...ankerbereiche]) {
+      assert.ok(ankerplaetze.length >= 12, `Stufe ${stufe}: nur ${ankerplaetze.length} Ankerplätze`);
+      for (const b of [...bojen, ...ankerbereiche, ...ankerplaetze]) {
         const tiefe = -punkt(b.px, b.py, stufe, r).h - ebbe;
         assert.ok(tiefe >= 1.5, `${name} Stufe ${stufe} ${b.id}: nur ${tiefe.toFixed(2)} m bei Niedrigwasser`);
         assert.equal(b.x, b.px * PLAN_M);
@@ -83,5 +84,19 @@ test('Nordsee: Bauwerke liegen über dem höchsten Hochwasser', () => {
   for (const [px, py] of [[0, -3], [100, -3], [70, 222]]) {
     const p = punkt(px, py, 5, r);
     assert.ok(p.h > flut, `Fläche bei ${px},${py} nur ${p.h.toFixed(2)} m`);
+  }
+});
+
+test('Ankerplätze liegen im Ankerfeld, mit Abstand zueinander und zu den Bojen', () => {
+  for (let stufe = 1; stufe <= 5; stufe++) {
+    const { bojen, ankerbereiche, ankerplaetze } = warteplaetze(stufe);
+    for (const a of ankerplaetze) {
+      const feld = ankerbereiche.find((b) => b.id === a.bereich);
+      assert.ok(feld && Math.hypot(a.x - feld.x, a.z - feld.z) <= feld.radiusM + 0.01, `${a.id} außerhalb`);
+      for (const o of ankerplaetze) {
+        if (o !== a) assert.ok(Math.hypot(a.x - o.x, a.z - o.z) >= Math.min(a.schwoikreisM, o.schwoikreisM) * 1.9, `${a.id} zu nah an ${o.id}`);
+      }
+      for (const b of bojen) assert.ok(Math.hypot(a.x - b.x, a.z - b.z) > 8, `${a.id} zu nah an Boje ${b.id}`);
+    }
   }
 });
