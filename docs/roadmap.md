@@ -366,7 +366,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | D1 | Ausbau in Bauabschnitten (= Ü18) | offen | P18 |
 | D2 | Über Nacht gebaut: abends Baustelle, morgens fertig | offen | P18 |
 | D3 | Frühe Stufen kürzen (= Ü16) | offen | P17 |
-| D4 | Wegfallende Plätze regeln (= Ü5), Hinweis im Baumenü | offen | P05 |
+| D4 | Wegfallende Plätze regeln (= Ü5), Hinweis im Baumenü | Regel erledigt (PR 143), Hinweis im Baumenü offen | P05, P18 |
 | D5 | Zwei Varianten je Steg (viele schmale oder wenige breite Boxen) | offen | P59 |
 | D6 | Boxen umbauen (zwei schmale zu einer breiten) | offen | P59 |
 | D7 | Sparziel anheften, Balken neben dem Geld, Schild am Bauplatz | offen | P18 |
@@ -510,7 +510,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | O1 | Gemeinsamer Aufbau für Regeltests (= Ü6) | offen | P06 |
 | O2 | Ein Test je Fehler, vor der Reparatur | offen | jedes Fehler-Paket (P01 bis P05) |
 | O3 | Ein ganzer Spieltag als Test mit festem Startwert | offen | P06 |
-| O4 | Stufenwechsel als Test | offen | P05 |
+| O4 | Stufenwechsel als Test | teils erledigt (PR 143), voller Hafen über alle Stufen offen | P05 |
 | O5 | Dritter Spielertyp im Balancing (tut nichts) | offen | P06 |
 | O6 | Balancing meldet Leerlauf je Stufe | offen | P06 |
 | O7 | Test: jedes Hinweis-Ziel existiert, keine Texte zu Gelöschtem | offen | P03 |
