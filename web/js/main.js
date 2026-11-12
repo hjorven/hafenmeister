@@ -70,7 +70,7 @@ const U = 0.62;   // Meter je Planeinheit aus hafen_von_oben.py
 
 // Kartengrenzen in Metern, x nach Osten, z nach Sueden (Norden ist -z)
 const WORLD = {
-  minX: -300 * U, maxX: 306 * U,
+  minX: -420 * U, maxX: 306 * U, // West bis -420: Grossschiffpier und Marineanleger (Stufe 6)
   minZ: -352 * U, maxZ: 30 * U,
 };
 WORLD.width = WORLD.maxX - WORLD.minX;
