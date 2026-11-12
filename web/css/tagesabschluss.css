@@ -1,0 +1,262 @@
+/* Tagesabschluss (web/js/ui/tagesabschluss.js, docs/tagesabschluss.md)
+ * Karte am Tagesende im Pixel-Stil der Oberfläche (Rahmen und Farben aus oberflaeche.css),
+ * kleiner Zettel mit der Tagessumme und Münzen, die über den Services aufsteigen.
+ */
+
+.hm-ta {
+  position: absolute;
+  z-index: 32;
+  top: calc(var(--hm-oben, 12px) + var(--hm-knopf, 48px) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  width: min(380px, calc(100% - 2 * var(--hm-rand, 12px)));
+  max-height: calc(100% - var(--hm-oben, 12px) - var(--hm-knopf, 48px) - var(--hm-unten, 12px) - 90px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 14px 12px;
+  color: var(--hm-tinte, #24364a);
+  font-size: var(--hm-schrift, 15px);
+  line-height: 1.3;
+  pointer-events: auto;
+}
+.hm-ta[hidden], .hm-ta-zettel[hidden] { display: none !important; }
+.hm-ta.rein { animation: hm-ta-rein 0.28s steps(5, end); }
+@keyframes hm-ta-rein {
+  from { transform: translate(-50%, -14px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* Kopf: blättern, Titel mit Summe, schließen */
+.hm-ta-kopf { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+.hm-ta-kopftext { flex: 1 1 auto; min-width: 0; text-align: center; }
+.hm-ta-kopf h2 {
+  margin: 0;
+  font-family: var(--hm-pixel);
+  font-size: calc(var(--hm-schrift, 15px) + 3px);
+  font-weight: 700;
+  line-height: 1.15;
+}
+.hm-ta-summe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 2px 0 0;
+  color: var(--hm-meer, #23897d);
+  font-family: var(--hm-pixel);
+  font-size: calc(var(--hm-schrift, 15px) + 10px);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.hm-ta-summe.null { color: var(--hm-tinte-2, #5a6a7c); }
+.hm-ta-blaettern {
+  flex: none;
+  width: 36px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: var(--hm-mulde, #e9dfca);
+  color: var(--hm-tinte, #24364a);
+  font-family: var(--hm-pixel);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+.hm-ta-blaettern:disabled { opacity: 0.3; cursor: default; }
+.hm-ta .hm-zu { margin: 0 0 0 2px; }
+
+.hm-ta-muenze-sym {
+  display: inline-block;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  background: var(--px-muenze) center / contain no-repeat;
+  image-rendering: pixelated;
+}
+.hm-ta-rekord {
+  display: inline-block;
+  padding: 1px 7px 2px;
+  background: var(--hm-gold, #f2c14e);
+  color: var(--hm-tinte, #24364a);
+  font-family: var(--hm-pixel);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 0 #cf9a2c;
+}
+
+/* Einnahmen und Ausgaben */
+.hm-ta-unter {
+  margin: 8px 0 2px;
+  color: var(--hm-tinte-2, #5a6a7c);
+  font-family: var(--hm-pixel);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.hm-ta-block { display: grid; gap: 2px; }
+.hm-ta-zeile {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 2px dotted var(--hm-mulde, #e9dfca);
+}
+.hm-ta-name { flex: 1 1 auto; min-width: 0; font-weight: 650; }
+.hm-ta-name small { display: block; color: var(--hm-tinte-2, #5a6a7c); font-size: 12.5px; font-weight: 500; line-height: 1.25; }
+.hm-ta-zusatz { flex: none; color: var(--hm-tinte-2, #5a6a7c); font-size: 13px; }
+.hm-ta-betrag { flex: none; font-family: var(--hm-pixel); font-weight: 700; font-variant-numeric: tabular-nums; }
+.hm-ta-zeile.leise { opacity: 0.65; }
+.hm-ta-zeile.minus .hm-ta-betrag { color: #b8473a; }
+.hm-ta-zeile.saldo { border-bottom: 0; }
+.hm-ta-zeile.saldo .hm-ta-name { font-family: var(--hm-pixel); }
+.hm-ta-aus { margin-top: 6px; }
+.hm-ta-leer { margin: 4px 0; color: var(--hm-tinte-2, #5a6a7c); }
+
+/* Boote und Ruf */
+.hm-ta-boote {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin-top: 10px;
+}
+.hm-ta-boote > span {
+  padding: 3px 8px;
+  background: var(--hm-mulde, #e9dfca);
+  font-size: 13.5px;
+  line-height: 1.25;
+}
+.hm-ta-boote b { font-family: var(--hm-pixel); font-size: 15px; }
+.hm-ta-boote small { display: block; color: var(--hm-tinte-2, #5a6a7c); font-size: 12px; }
+.hm-ta-boote .warn { background: #fbe1dc; }
+.hm-ta-boote .auf { background: #d9efe9; }
+
+/* Die letzten Tage als Säulen */
+.hm-ta-balken {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 64px;
+  margin: 12px 0 2px;
+  padding: 0 2px;
+}
+.hm-ta-saeule {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  height: 100%;
+  min-width: 0;
+}
+.hm-ta-saeule i { display: block; background: #b9c7c4; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4); }
+.hm-ta-saeule.heute i { background: var(--hm-meer, #23897d); }
+.hm-ta-saeule.best i { background: var(--hm-gold, #f2c14e); box-shadow: inset 0 2px 0 #fbdc88; }
+.hm-ta-saeule.best.heute i { outline: 2px solid var(--hm-meer, #23897d); outline-offset: -2px; }
+.hm-ta-saeule span {
+  margin-top: 2px;
+  color: var(--hm-tinte-2, #5a6a7c);
+  font-family: var(--hm-pixel);
+  font-size: 11px;
+  text-align: center;
+}
+.hm-ta-saeule.heute span { color: var(--hm-tinte, #24364a); font-weight: 700; }
+
+.hm-ta-best { margin: 8px 0 0; color: var(--hm-tinte-2, #5a6a7c); font-size: 13.5px; }
+.hm-ta-best.rekord { color: #8a6412; font-weight: 700; }
+.hm-ta-tipp {
+  margin: 8px 0 0;
+  padding: 6px 8px;
+  background: #e2f1ee;
+  border-left: 4px solid var(--hm-meer, #23897d);
+  font-size: 13.5px;
+}
+
+/* Fuß: automatisch zeigen, Weiter */
+.hm-ta-fuss { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.hm-ta-auto { flex: 1 1 auto; display: flex; align-items: center; gap: 6px; font-size: 13.5px; cursor: pointer; }
+.hm-ta-auto input { width: 20px; height: 20px; margin: 0; accent-color: var(--hm-meer, #23897d); }
+.hm-ta .hm-ta-weiter { flex: 0 0 auto; min-width: 120px; }
+
+/* Rest der Anzeigezeit, solange niemand die Karte anfasst (klebt unten, auch wenn die Karte rollt) */
+.hm-ta-uhr { position: sticky; bottom: -12px; height: 3px; margin: 8px -6px -6px; opacity: 0; pointer-events: none; }
+.hm-ta.laeuft .hm-ta-uhr { opacity: 1; }
+.hm-ta-uhr i { display: block; height: 100%; background: var(--hm-meer, #23897d); transform-origin: left; }
+.hm-ta.laeuft .hm-ta-uhr i { animation: hm-ta-uhr var(--ta-dauer, 14s) linear forwards; }
+@keyframes hm-ta-uhr { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+/* Zettel, wenn die Karte nicht von selbst kommen soll */
+.hm-ta-zettel {
+  position: absolute;
+  z-index: 32;
+  top: calc(var(--hm-oben, 12px) + var(--hm-knopf, 48px) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px 14px;
+  color: var(--hm-tinte, #24364a);
+  font-family: var(--hm-pixel);
+  font-size: calc(var(--hm-schrift, 15px) + 2px);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.hm-ta-zettel.rein { animation: hm-ta-rein 0.28s steps(5, end); }
+
+/* Münzen über Gebäuden */
+.hm-ta-muenzen { position: fixed; inset: 0; z-index: 12; pointer-events: none; overflow: hidden; }
+.hm-ta-flug {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px 1px 2px;
+  background: rgba(255, 250, 240, 0.92);
+  box-shadow: 0 2px 0 rgba(20, 32, 48, 0.3);
+  color: var(--hm-tinte, #24364a);
+  font-family: var(--hm-pixel);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  will-change: transform, opacity;
+}
+.hm-ta-flug .hm-ta-muenze-sym { width: 18px; height: 18px; }
+
+/* Fotomodus: nichts davon im Bild */
+body.foto .hm-ta, body.foto .hm-ta-zettel, body.foto .hm-ta-muenzen { display: none !important; }
+
+/* Handy quer: wenig Höhe, Karte neben die Mitte und kompakter */
+@media (max-height: 499px) and (orientation: landscape) {
+  .hm-ta {
+    top: calc(var(--hm-oben, 8px) + 4px);
+    max-height: calc(100% - var(--hm-oben, 8px) - var(--hm-unten, 8px) - 8px);
+    width: min(560px, calc(100% - 2 * var(--hm-rand, 12px) - 2 * 170px));
+    padding: 6px 12px 8px;
+    font-size: 14px;
+  }
+  .hm-ta-spalten { display: grid; grid-template-columns: 1.1fr 1fr; gap: 0 14px; align-items: start; }
+  .hm-ta-boote { margin-top: 6px; }
+  .hm-ta-best { display: none; }
+  .hm-ta-balken { margin-top: 8px; }
+  .hm-ta-boote > span { font-size: 12.5px; padding: 2px 6px; }
+  .hm-ta-name small { font-size: 11.5px; }
+  .hm-ta-tipp { font-size: 12.5px; padding: 4px 6px; }
+  .hm-ta-fuss { margin-top: 6px; }
+  .hm-ta .hm-ta-weiter { min-height: 40px; }
+  .hm-ta-kopf h2 { font-size: var(--hm-schrift, 15px); }
+  .hm-ta-blaettern { height: 34px; }
+  .hm-ta-summe { font-size: calc(var(--hm-schrift, 15px) + 6px); }
+  .hm-ta-balken { height: 34px; }
+  .hm-ta-zettel { top: calc(var(--hm-oben, 8px) + 4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-ta.rein, .hm-ta-zettel.rein { animation: none; }
+}

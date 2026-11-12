@@ -257,6 +257,7 @@ export function init(game) {
 
   // ---------------------------------------------------------------- Menü
   const MENUE = [
+    ['btn-tagesabschluss', 'Tagesabschluss', 'abschluss'],   // ui/tagesabschluss.js
     ['btn-foto', 'Fotomodus', 'foto'],
     ['btn-sound', null, 'ton'],      // Text setzt das Ton-Modul (Ton / Stumm)
     ['btn-save', 'Spielstand', 'spielstand'],
