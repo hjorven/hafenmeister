@@ -78,7 +78,7 @@ export const SERVICES = [
   {
     id: 'raeucherei', name: 'Räucherei', gruppe: 'freizeit', abStufe: 2,
     kurz: 'Fischbrötchen am Steg. Gäste mögen das, der Ruf steigt.',
-    lage: { x: -176, y: -26, dreh: 0 }, radius: 7,
+    lage: { x: -184, y: -26, dreh: 0 }, radius: 7,
     stufen: [
       { name: 'Räucherkate', kosten: 700,
         wirkung: { proTag: 25, kunden: { anteil: 0.3, preis: 4 }, ruf: 0.05 } },
@@ -190,7 +190,7 @@ export const SERVICES = [
   {
     id: 'fahrgastanleger', name: 'Fahrgastanleger', gruppe: 'grosse-schiffe', abStufe: 5,
     kurz: 'Ausflugsschiffe fahren täglich raus. Bringt Gäste und Kleingeld.',
-    lage: { x: 13, y: 216, dreh: 0 }, radius: 10,
+    lage: { x: 32, y: 216, dreh: 0 }, radius: 10,
     stufen: [
       { name: 'Fahrgastanleger', kosten: 12000,
         wirkung: { freischalten: ['fahrgastschiff'], wetter: { regen: 0.6, sturm: 0 },
@@ -215,8 +215,8 @@ export const SERVICES = [
   },
   {
     id: 'kreuzfahrtterminal', name: 'Kreuzfahrtterminal', gruppe: 'grosse-schiffe', abStufe: 6,
-    kurz: 'Pier vor der Ostmole. Einmal pro Woche legt ein Kreuzfahrtschiff an.',
-    lage: { x: 268, y: 206, dreh: 0 }, radius: 24,
+    kurz: 'Terminal an der Großschiffpier. Einmal pro Woche legt ein Kreuzfahrtschiff an.',
+    lage: { x: -150, y: 198, dreh: 0 }, radius: 20,
     stufen: [
       { name: 'Kreuzfahrtpier', kosten: 60000, ruf: 4.0, braucht: [{ id: 'fahrgastanleger', stufe: 1 }],
         wirkung: { freischalten: ['kreuzfahrtschiff'],
@@ -231,7 +231,7 @@ export const SERVICES = [
   {
     id: 'marineanleger', name: 'Marineanleger', gruppe: 'sicherheit', abStufe: 6,
     kurz: 'Liegeplatz für Marineschiffe. Flottenbesuche bringen Zuschauer.',
-    lage: { x: -215, y: 206, dreh: 0 }, radius: 24,
+    lage: { x: -300, y: 198, dreh: 0 }, radius: 20,
     stufen: [
       { name: 'Marineanleger', kosten: 50000, ruf: 4.0, braucht: [{ id: 'seenotretter', stufe: 1 }],
         wirkung: { freischalten: ['marine'], sturmschutz: 0.1,

@@ -31,8 +31,10 @@ export class CameraRig {
 
   // ... oder als Rechteck auf dem Wasser, das in jeder Ausrichtung ganz zu sehen sein soll.
   // rect = { minX, maxX, minZ, maxZ } in Metern. Besser fuer Hoch- und Querformat.
+  // rect darf auch eine Funktion sein, die das Rechteck erst beim reset() liefert
+  // (z. B. damit Bauplaetze, die Module spaeter anlegen, mit ins Bild kommen).
   setHomeRect(rect) {
-    this.home = { rect };
+    this.home = typeof rect === 'function' ? { rectFn: rect } : { rect };
   }
 
   // Bildschirmraender in CSS-Pixeln, die von Leisten verdeckt sind (oben, unten).
@@ -96,16 +98,26 @@ export class CameraRig {
     this._fly = null;
     this.yaw = 0;
     const h = this.home;
+    if (this.insetsFn) {
+      try { const [top, bottom] = this.insetsFn(); this.insets = { top, bottom }; } catch (err) { /* alte Werte behalten */ }
+    }
     const ins = this.insets || { top: 0, bottom: 0 };
-    const right = h.rect ? (this.insetRight || 0) : 0;
-    if (h.rect) {
-      const r = h.rect;
+    let rect = h.rect;
+    if (h.rectFn) {
+      try { rect = h.rectFn(); } catch (err) { console.warn('Startansicht nicht berechenbar', err); }
+    }
+    const right = rect ? (this.insetRight || 0) : 0;
+    if (rect) {
+      const r = rect;
       const w = r.maxX - r.minX;
       const sinP = Math.sin(PITCH);
       const availH = Math.max(1, this.screenH - ins.top - ins.bottom);
       const availW = Math.max(1, this.screenW - right);
       const aspectAvail = this.screenW / availH;
-      this.viewWidth = THREE.MathUtils.clamp(Math.max(w * this.screenW / availW, (r.maxZ - r.minZ) * sinP * aspectAvail), this.minWidth, this.maxWidth);
+      // Auf flachen Bildschirmen (Handy quer) darf die Uebersicht weiter heraus als maxWidth,
+      // damit der ganze Hafen ins Bild passt; Herauszoomen reicht dann bis hierhin.
+      this.viewWidth = THREE.MathUtils.clamp(Math.max(w * this.screenW / availW, (r.maxZ - r.minZ) * sinP * aspectAvail), this.minWidth, this.maxWidth * 1.6);
+      this._homeWidth = this.viewWidth;
       let cz = (r.minZ + r.maxZ) / 2;
       // Ist mehr Tiefe frei als noetig (Hochformat), den Ausschnitt an die Suedkante (Ufer) legen,
       // damit nicht der halbe Bildschirm Land zeigt.
@@ -140,7 +152,7 @@ export class CameraRig {
   // Um einen Bildschirmpunkt zoomen. factor > 1 zoomt hinein.
   zoomAt(factor, sx = this.screenW / 2, sy = this.screenH / 2) {
     const before = this.screenToWorld(sx, sy);
-    this.viewWidth = THREE.MathUtils.clamp(this.viewWidth / factor, this.minWidth, this.maxWidth);
+    this.viewWidth = THREE.MathUtils.clamp(this.viewWidth / factor, this.minWidth, Math.max(this.maxWidth, this._homeWidth || 0));
     this._apply();
     const after = this.screenToWorld(sx, sy);
     if (before && after) {

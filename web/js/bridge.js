@@ -103,6 +103,7 @@ export async function initBridge(game) {
     game.emit('stufe', state.stage);
     game.emit('region', state.region);
     emitPhase();
+    game.emit('sim:berthState', { plaetze: sim.berthStates(state, ctx) });
     game.emit('sim:change', { reason: 'load' });
   }
 
@@ -121,6 +122,10 @@ export async function initBridge(game) {
     };
   }
 
+  // Nach diesen Ereignissen kann sich das Grün-Rot-Schild eines Platzes geändert haben
+  const BERTH_EVENTS = new Set(['moored', 'departed', 'castOff', 'berthFreed', 'tripOut', 'tripBack', 'built', 'stageUp', 'stationed', 'unstationed', 'dayStart']);
+  let berthsChanged = false;
+
   function dispatch(events) {
     if (!events || !events.length) return;
     for (const e of events) {
@@ -132,10 +137,16 @@ export async function initBridge(game) {
         game.emit('boot-zugewiesen', { id: info.id, platz: info.platz });
         game.emit('boot:angelegt', info);
       }
-      if (e.type === 'departed' || e.type === 'turnedAway' || e.type === 'dismissed' || e.type === 'unstationed') {
+      // Abreisende Gäste legen erst am Vormittag ab ('castOff'), abgerechnet sind sie schon nachts ('departed')
+      const gone = e.type === 'departed' ? !(e.leaveAt > 0) : e.type === 'castOff' || e.type === 'turnedAway' || e.type === 'dismissed' || e.type === 'unstationed';
+      if (gone) {
         game.emit('boot-faehrt', { id: e.boatId, platz: e.berthId ?? null });
         game.emit('boot:ablegen', { id: e.boatId });
       }
+      // Tagestörn eines Gastes: gleiche Ereignisse wie die Runde der Dauerlieger
+      if (e.type === 'tripOut') game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: 0, gast: true });
+      if (e.type === 'tripBack') game.emit('dauer:einlaufen', { id: e.boatId, platzId: e.berthId, gast: true });
+      if (BERTH_EVENTS.has(e.type)) berthsChanged = true;
       switch (e.type) {
         case 'dayStart':
           game.emit('day:start', { day: e.day, stage: e.stage, winter: e.winter });
@@ -165,6 +176,10 @@ export async function initBridge(game) {
         default:
       }
     }
+    if (berthsChanged) {
+      berthsChanged = false;
+      game.emit('sim:berthState', { plaetze: sim.berthStates(state, ctx) });
+    }
     game.emit('sim:change', { events });
   }
 
@@ -182,7 +197,10 @@ export async function initBridge(game) {
     get selected() { return selected; },
     select(boatId) {
       const id = boatIdOf(boatId);
+      // Ein ausgewähltes Boot fährt nicht von selbst ein, solange der Spieler es lenkt
+      if (selected != null) sim.holdBoat(state, selected, false);
       selected = state.boats[id]?.status === 'waiting' ? id : null;
+      if (selected != null) sim.holdBoat(state, selected, true);
       const berths = selected ? sim.fittingBerths(state, ctx, selected) : [];
       game.emit('sim:select', { boatId: selected, berths });
       return berths;
@@ -262,6 +280,12 @@ export async function initBridge(game) {
     geduld: (boatId) => sim.patienceLeft(state, ctx, boatIdOf(boatId)),
     tagesAnteil: () => Math.min(1, state.clock / (ctx.rules.dayLength + ctx.rules.eveningLength)),
     wartet: (boatId) => state.boats[boatIdOf(boatId)]?.status === 'waiting',
+    // Grün-Rot-Schild: 'frei' | 'belegt' | 'ausflug' | 'reserviert' | 'aus'
+    platzZustand: (berthId) => sim.berthState(state, ctx, berthIdOf(berthId)),
+    platzZustaende: () => sim.berthStates(state, ctx),
+    aufAusflug: (boatId) => !!state.boats[boatIdOf(boatId)]?.trip?.away,
+    regionGoal: () => sim.regionGoal(state, ctx),
+    holdBoat: (boatId, held = true) => sim.holdBoat(state, boatIdOf(boatId), held),
     // Hat das Boot sein Liegegeld für die kommende Nacht bezahlt? (Bändchen am Bug, Hafenmeister-Rundgang)
     istBezahlt: (boatId) => {
       const b = state.boats[boatIdOf(boatId)];
@@ -337,6 +361,15 @@ export async function initBridge(game) {
     const boatId = boatIdOf(d.boot ?? d.boat ?? d.boatId) ?? selected;
     const berthId = berthIdOf(d.platz ?? d.berth ?? d.berthId ?? (d.pick?.type === 'berth' ? d.pick.id : null) ?? d.target);
     if (boatId != null && berthId) api.assign(boatId, berthId);
+  });
+  // Besuche großer Schiffe zählen für das Abschlussziel der Region
+  game.on('services:besuch', (b = {}) => {
+    if (['kreuzfahrt', 'flottenbesuch'].includes(b.art)) dispatch(sim.addBigVisit(state, ctx));
+  });
+  // Hafenmeister-Rundgang am Abend (render/people.js): Wer noch nicht bezahlt hat, zahlt jetzt die Hälfte
+  game.on('hafenmeister:halt', (d = {}) => {
+    const id = boatIdOf(d.boot ?? d.id);
+    if (id != null) dispatch(sim.collectOnRound(state, ctx, id).events);
   });
   // Abrechnung des Services-Moduls am Tagesende
   game.on('services:abrechnung', (a = {}) => {

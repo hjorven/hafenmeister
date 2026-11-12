@@ -173,7 +173,9 @@ export function nachtHook({ state, events }) {
   for (const [platzId, p] of Object.entries(d.plaetze)) {
     if (p.boot) {
       if (p.rueckNacht > state.day) continue;
-      if (!sim.isFree(state, platzId)) { p.rueckNacht = state.day + 1; continue; }   // Gast liegt noch da
+      // Ein Gast, der noch bleibt, hält den Platz: dann eine Nacht später. Ein Gast, der heute Nacht
+      // abgerechnet wurde und erst morgens ablegen wollte (state.leaving), legt sofort ab (sim.js tick).
+      if (state.berths[platzId] != null) { p.rueckNacht = state.day + 1; continue; }
       const boot = p.boot;
       boot.status = 'moored';
       boot.berthId = platzId;

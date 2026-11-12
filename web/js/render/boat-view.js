@@ -97,8 +97,82 @@ export function init(game) {
   // --- Liegeplaetze -------------------------------------------------------------------------
   function bojeBerth(nr) {
     const list = bojenPos();
-    const p = list[Math.max(0, Math.min(list.length - 1, nr | 0))];
-    return { id: `boje-${nr}`, x: p.x, z: p.z, heading: windFrom(), kind: 'buoy' };
+    const i = Math.max(0, Math.min(list.length - 1, nr | 0));
+    const p = list[i];
+    let heading = windFrom(), abstand = Infinity;
+    if (list.length > 1) {
+      // Boote liegen quer zur Bojenreihe nebeneinander, nicht hintereinander, sonst stossen
+      // laengere Boote an das Boot an der Nachbarboje. Von beiden Querrichtungen die luvseitige.
+      const a = list[Math.max(0, i - 1)], c = list[Math.min(list.length - 1, i + 1)];
+      const rx = c.x - a.x, rz = c.z - a.z;
+      const reihe = Math.atan2(-rz, rx);
+      const quer = [reihe + Math.PI / 2, reihe - Math.PI / 2];
+      const w = windFrom();
+      heading = Math.cos(quer[0] - w) >= Math.cos(quer[1] - w) ? quer[0] : quer[1];
+      for (const q of list) if (q !== p) abstand = Math.min(abstand, Math.hypot(q.x - p.x, q.z - p.z));
+    }
+    return { id: `boje-${nr}`, x: p.x, z: p.z, heading, kind: 'buoy', abstand };
+  }
+
+  // Eine Boje nur fuer ein Boot. Ist die Boje der Spielregeln noch belegt (das vorige Boot legt
+  // gerade ab) oder gibt es weniger Bojen als Warteplaetze, nimmt das Boot die naechste freie Boje,
+  // sonst ankert es vor der Bojenreihe.
+  function warteplatz(nr, selbst) {
+    const list = bojenPos();
+    const belegt = new Set(), anker = new Set();
+    for (const o of game.boatAnim.boats) {
+      if (o === selbst) continue;
+      // berth: wo es liegt oder hinfaehrt; reserviert: gerade vergeben, Fahrt beginnt im naechsten Bild
+      for (const id of [String(o.berth?.id ?? ''), String(o.reserviert ?? '')]) {
+        if (id.startsWith('boje-')) belegt.add(Number(id.slice(5)));
+        if (id.startsWith('anker-')) anker.add(Number(id.slice(6)));
+      }
+    }
+    const reserviere = (b) => { if (selbst) selbst.reserviert = b.id; return b; };
+    const w = Math.max(0, Math.min(list.length - 1, nr | 0));
+    if (!belegt.has(w)) return reserviere(bojeBerth(w));
+    let best = -1;
+    for (let i = 0; i < list.length; i++) {
+      if (belegt.has(i)) continue;
+      if (best < 0 || Math.abs(i - w) < Math.abs(best - w)) best = i;
+    }
+    if (best >= 0) return reserviere(bojeBerth(best));
+    // Ankerplatz im Ankerbereich der Landschaft (Kreis, ab Stufe 5 ein eigener fuer XL),
+    // Raster mit 20 m Abstand, alle Boote liegen im selben Wind und damit parallel.
+    let k = 0;
+    while (anker.has(k)) k++;
+    const b = bojeBerth(Math.floor(list.length / 2));
+    // feste Ankerplaetze der Landschaft (PR 98), vorne zuerst, passend zur Bootsgroesse
+    const RANG = { S: 0, M: 1, L: 2, XL: 3, XXL: 4 };
+    const plaetze = game.landscape?.warteplaetze?.ankerplaetze;
+    if (plaetze?.length) {
+      const g = RANG[selbst?.info.size] ?? 1;
+      const idx = plaetze.findIndex((q, i) => !anker.has(i) && (RANG[q.groesse] ?? 2) >= g);
+      if (idx >= 0) {
+        const q = plaetze[idx];
+        return reserviere({ id: `anker-${idx}`, x: q.x, z: q.z, heading: b.heading, kind: 'buoy', abstand: (q.schwoikreisM ?? 10) * 2 });
+      }
+      k = Math.max(k, plaetze.length);
+      while (anker.has(k)) k++;
+    }
+    const gross = selbst && (selbst.info.size === 'XL' || selbst.info.size === 'XXL');
+    const bereiche = game.landscape?.warteplaetze?.ankerbereiche ?? [];
+    const bereich = bereiche.find((q) => (q.groesse === 'XL') === !!gross) ?? bereiche[0];
+    const mitte = bereich ? { x: bereich.x, z: bereich.z } : (() => {
+      const fx = Math.cos(b.heading), fz = -Math.sin(b.heading);
+      return { x: b.x + fx * 40, z: b.z + fz * 40 };
+    })();
+    const p = ankerSlot(k, gross ? 60 : 20);
+    return reserviere({ id: `anker-${k}`, x: mitte.x + p.x, z: mitte.z + p.z, heading: b.heading, kind: 'buoy', abstand: gross ? 60 : 20 });
+  }
+
+  // k-ter Ankerplatz: Mitte, dann Ringe mit dem Abstand d (6, 12, 18 ... Plaetze je Ring)
+  function ankerSlot(k, d) {
+    if (k === 0) return { x: 0, z: 0 };
+    let ring = 1, rest = k - 1;
+    while (rest >= ring * 6) { rest -= ring * 6; ring++; }
+    const a = (rest / (ring * 6)) * Math.PI * 2;
+    return { x: Math.cos(a) * ring * d, z: Math.sin(a) * ring * d };
   }
 
   function platzBerth(platzId) {
@@ -173,6 +247,16 @@ export function init(game) {
   }
 
   const rand = () => welt(bySt(REVIERRAND, stufe()));
+  // Startpunkt am Revierrand, an dem gerade kein anderes Boot ist (mehrere kommen oft zugleich)
+  function freierStart(laenge = 6) {
+    const r = rand();
+    for (const d of [0, 14, -14, 28, -28, 42, -42, 56]) {
+      const p = { x: r.x + d, z: r.z + Math.abs(d) * 0.3 };
+      const frei = game.boatAnim.boats.every((o) => Math.hypot(o.x - p.x, o.z - p.z) > laenge + o.info.length + 6);
+      if (frei) return p;
+    }
+    return { x: r.x + (Math.random() - 0.5) * 80, z: r.z + Math.random() * 20 };
+  }
 
   // --- Fahrwege ab Stufe 3: See und Binnensee verbindet nur der Durchstich ------------------
   // Planeinheiten wie render/landschaft/gelaende.js (DURCHSTICH x 152 bis 182, Nehrung y 186 bis 224,
@@ -194,9 +278,18 @@ export function init(game) {
     if (aSee && bSee) return [];
     const innen = seeTor();                  // vom See zur Ostsee
     const aussen = aussenTor();
-    if (aSee && !bSee) return [...innen, ...aussen];
-    if (!aSee && bSee) return [...aussen.slice().reverse(), ...innen.slice().reverse()];
+    if (aSee && !bSee) return rechts([...innen, ...aussen]);
+    if (!aSee && bSee) return rechts([...aussen.slice().reverse(), ...innen.slice().reverse()]);
     return [];                               // beide draussen
+  }
+  // Wie im echten Fahrwasser: rechts halten. Ein- und Ausfahrende begegnen sich so mit Abstand.
+  function rechts(pts, d = 3.5) {
+    return pts.map((p, i) => {
+      const a = pts[Math.max(0, i - 1)], c = pts[Math.min(pts.length - 1, i + 1)];
+      const dx = c.x - a.x, dz = c.z - a.z, l = Math.hypot(dx, dz) || 1;
+      // Steuerbord zur Fahrtrichtung (dx, dz) ist (-dz, dx) in x/z
+      return { x: p.x - (dz / l) * d, z: p.z + (dx / l) * d };
+    });
   }
 
   // --- Ereignisse der Spielregeln -----------------------------------------------------------
@@ -204,8 +297,11 @@ export function init(game) {
     if (!info || info.id == null) return;
     if (bojenStufe !== stufe()) baueBojen();
     const e = erzeuge(info);
-    const start = rand();
-    const ziel = bojeBerth(info.boje ?? 0);
+    const start = freierStart(e.anim.info.length);
+    const ziel = warteplatz(info.boje ?? 0, e.anim);
+    // Antippen und Ziehen erst, wenn das Boot an der Boje fest ist (siehe boat:moored unten)
+    e.pick = e.anim.model.userData.pick;
+    delete e.anim.model.userData.pick;
     e.anim.place(start.x, start.z, Math.atan2(-(ziel.z - start.z), ziel.x - start.x));
     if (e.anim.info.kind === 'sail') e.anim.setSails(true);
     // Segelboote bergen die Segel vor der Boje (dock() erledigt das), dann Leine an die Boje
@@ -213,14 +309,31 @@ export function init(game) {
   });
 
   game.on('boot-zugewiesen', ({ id, platz } = {}) => {
+    const neu = !boats.has(id);
     const e = boats.get(id) ?? (sucheInfo(id) && erzeuge(sucheInfo(id)));
     if (!e) return;
     const b = platzBerth(platz);
     if (!b) return;
-    if (!e.anim.moored && e.anim.state === 'idle') e.anim.moorAt(bojeBerth(e.info.boje ?? 0));
-    // ab Stufe 3 von der Reede durch Einfahrt und Durchstich in den See
-    e.anim.dock(b, { via: fahrweg({ x: e.anim.x, z: e.anim.z }, b) });
+    if (neu) {
+      // ohne vorheriges boot-kommt (z. B. Fischer nach dem Aufstieg, stationBoat): liegt gleich am Platz
+      e.anim.moorAt(b);
+      return;
+    }
+    if (!e.anim.moored && e.anim.state === 'idle') e.anim.moorAt(warteplatz(e.info.boje ?? 0, e.anim));
+    if (e.pick) { e.anim.model.userData.pick = e.pick; e.pick = null; }
+    // Ist die Box noch nicht frei und das Boot noch unterwegs zur Boje, faehrt es erst zur Boje
+    // und wartet dort (nicht mitten im Fahrwasser, wo es anderen im Weg laege).
+    if (!e.anim.moored && !platzFrei(platz, b, e.anim)) { e.spaeter = platz; return; }
+    fahreZu(e, platz, b);
   });
+
+  function fahreZu(e, platz, b) {
+    e.spaeter = null;
+    e.anim.reserviert = null;
+    // ab Stufe 3 von der Reede durch Einfahrt und Durchstich in den See.
+    // Liegt noch ein Boot in der Box (es faehrt heute ab), wartet das neue, bis die Box frei ist.
+    e.anim.dock(b, { via: fahrweg({ x: e.anim.x, z: e.anim.z }, b), waitFor: () => platzFrei(platz, b, e.anim) });
+  }
 
   game.on('boot-faehrt', ({ id } = {}) => {
     const e = boats.get(id);
@@ -285,18 +398,133 @@ export function init(game) {
       m.scale.setScalar(Math.max(0.01, k * (1 + Math.max(0, 0.25 - (t - m.userData.t0)) * 2)));
     }
   });
-  game.on('sim:feeReady', (d) => { if (d?.boatId != null) zeigeMuenze(d.boatId); });
+  // Liegegeld wird beim Anlegen faellig (PR 100): die Muenze erst zeigen, wenn das Boot in der Box fest ist
+  const amPlatz = (a) => a.moored && a.berth && a.berth.kind !== 'buoy';
+  game.on('sim:feeReady', (d) => {
+    const e = boats.get(d?.boatId);
+    if (!e) return;
+    if (amPlatz(e.anim)) zeigeMuenze(d.boatId);
+    else e.muenzeWartet = true;
+  });
+  game.on('boat:moored', (d) => {
+    const e = boats.get(d?.id);
+    if (e?.muenzeWartet && amPlatz(e.anim)) { e.muenzeWartet = false; zeigeMuenze(d.id); }
+  });
   game.on('sim:collected', (d) => {
-    if (d?.boatId != null) entferneMuenze(d.boatId, 700);
+    if (d?.boatId != null) { entferneMuenze(d.boatId, 700); const e = boats.get(d.boatId); if (e) e.muenzeWartet = false; }
     else for (const id of [...muenzen.keys()]) entferneMuenze(id, 700);
   });
   game.on('sim:departed', (d) => entferneMuenze(d?.boatId, 0));
 
+  // Boot ist am Platz fest: die Box blitzt einmal hell auf (Form und Drehung der Box aus render/stege.js)
+  const blitze = new Map();     // platzId -> Restzeit
+  game.on('boat:moored', (d) => {
+    const id = d?.berth;
+    if (!id || String(id).startsWith('boje-') || !game.stege?.platz?.(id)?.mesh) return;
+    blitze.set(id, 1);
+  });
+  game.onTick((dt) => {
+    for (const [id, t] of blitze) {
+      const mat = game.stege?.platz?.(id)?.mesh?.material;
+      const r = t - dt / 0.9;
+      if (!mat || r <= 0) {
+        blitze.delete(id);
+        if (mat) mat.opacity = 0;
+        continue;
+      }
+      blitze.set(id, r);
+      mat.color.set('#ffffff');
+      mat.opacity = 0.55 * r * r;
+    }
+  });
+
+  // Ablegendes Boot ist aus der Box heraus: die Spielregeln geben die Box frei (state.leaving, PR 93)
+  game.on('boat:clear', (d) => {
+    if (!d || !boats.has(d.id) || String(d.berth ?? '').startsWith('boje-') || String(d.berth ?? '').startsWith('anker-')) return;
+    game.emit('boot:aus-box', { id: d.id });
+  });
+
   // Boot ist sichtbar an der Boje fest: ab jetzt laeuft seine Geduld (Spielregeln)
   game.on('boat:moored', (d) => {
-    if (!d || !boats.has(d.id) || !String(d.berth ?? '').startsWith('boje-')) return;
-    game.emit('boot:an-boje', { id: d.id, boje: Number(String(d.berth).slice(5)) });
+    const e = boats.get(d?.id);
+    if (e) e.anim.reserviert = null;      // jetzt traegt berth den Platz
+    if (e?.pick) { e.anim.model.userData.pick = e.pick; e.pick = null; }
+    const art = String(d?.berth ?? '');
+    if (!d || !e || !(art.startsWith('boje-') || art.startsWith('anker-'))) return;
+    if (e.spaeter) {
+      // unterwegs schon zugewiesen: jetzt von der Boje aus zum Platz
+      const b = platzBerth(e.spaeter);
+      if (b) fahreZu(e, e.spaeter, b);
+      return;
+    }
+    // die Spielregeln kennen nur ihre eigene Bojennummer
+    game.emit('boot:an-boje', { id: d.id, boje: e.info.boje ?? 0 });
   });
+
+  // --- Dauerlieger: morgens eine Runde draussen, abends zurueck an denselben Platz ----------
+  // Ereignisse aus features/dauerlieger.js: 'dauer:auslaufen' { id, platzId, tage } (tage 0 = Tagestoern),
+  // 'dauer:einlaufen' { id, platzId }.
+  const RUNDE = {
+    1: [40, 120],      // Mitte des Binnensees
+    2: [40, 120],
+    3: [110, 300],     // Ostsee vor der Einfahrt
+    5: [60, 380],      // Ostsee vor dem Aussenhafen
+  };
+  const rundenMitte = () => {
+    const st = stufe();
+    return welt(st >= 5 ? RUNDE[5] : st >= 3 ? RUNDE[3] : RUNDE[st <= 1 ? 1 : 2]);
+  };
+
+  game.on('dauer:auslaufen', ({ id, tage } = {}) => {
+    const e = boats.get(id);
+    if (!e) return;
+    const ziel = tage > 0 ? rand() : rundenMitte();
+    const segel = e.anim.info.kind === 'sail';
+    const weg = [...fahrweg({ x: e.anim.x, z: e.anim.z }, ziel), ziel];
+    e.draussen = true;
+    entferneMuenze(id, 0);
+    e.anim.undock(weg, { sails: segel }).then((ok) => {
+      if (!ok || boats.get(id) !== e) return;
+      if (tage > 0) {
+        // mehrtaegiger Toern: aus dem Bild, kommt mit 'dauer:einlaufen' zurueck
+        e.faehrt = true;
+        entferne(id);
+        return;
+      }
+      // Tagestoern: grosse, gemuetliche Kreise unter Segeln oder Motor
+      // jedes Boot auf einem eigenen Kreis, damit sich die Runden nicht kreuzen
+      const n = draussenZahl++ % 4;
+      e.anim.hold(ziel, { radius: 18 + e.anim.info.length + n * 11, speed: e.anim.cfg.cruise * 0.7, sails: segel, state: 'sailing' });
+    });
+  });
+
+  let draussenZahl = 0;
+  game.on('dauer:einlaufen', ({ id, platzId } = {}) => {
+    let e = boats.get(id);
+    if (!e) {
+      const info = sucheInfo(id);
+      if (!info) return;
+      e = erzeuge(info);
+      const start = freierStart(e.anim.info.length);
+      e.anim.place(start.x, start.z, 0);
+    }
+    e.draussen = false;
+    e.faehrt = false;
+    const b = platzBerth(platzId ?? e.info.platz);
+    if (!b) return;
+    e.anim.dock(b, { via: fahrweg({ x: e.anim.x, z: e.anim.z }, b), seconds: 30 });
+  });
+
+  /** Ist die Box frei? Kein anderes Boot hat sie als Platz, und keins steht noch in ihr. */
+  function platzFrei(platzId, b, selbst) {
+    for (const o of game.boatAnim.boats) {
+      if (o === selbst) continue;
+      if (o.berth?.id === platzId) return false;
+      const r = Math.max(b.length, b.width) / 2 + o.info.length / 2;
+      if (Math.hypot(o.x - b.x, o.z - b.z) < r) return false;
+    }
+    return true;
+  }
 
   function sucheInfo(id) {
     return game.sim?.boote?.find?.((b) => b.id === id) ?? null;
@@ -308,13 +536,14 @@ export function init(game) {
     const liste = game.sim?.boote ?? [];
     const ids = new Set(liste.map((b) => b.id));
     // Boote, die gerade abfahren, fahren zu Ende (sie sind in den Regeln schon weg)
-    for (const [id, e] of [...boats]) if (!ids.has(id) && !e.faehrt) entferne(id);
+    for (const [id, e] of [...boats]) if (!ids.has(id) && !e.faehrt && !e.draussen) entferne(id);
     for (const info of liste) {
       const e = erzeuge(info);
       e.info = { ...e.info, ...info };
       e.faehrt = false;
       if (e.anim.state !== 'idle' && e.anim.state !== 'moored') continue;   // faehrt gerade
-      const b = info.platz ? platzBerth(info.platz) : bojeBerth(info.boje ?? 0);
+      if (e.draussen) continue;                                          // Dauerlieger auf Runde
+      const b = info.platz ? platzBerth(info.platz) : warteplatz(info.boje ?? 0, e.anim);
       if (b) e.anim.moorAt(b);
     }
     for (const id of [...muenzen.keys()]) if (!boats.has(id)) entferneMuenze(id);

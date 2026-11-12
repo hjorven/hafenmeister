@@ -25,6 +25,7 @@ test('freie Box grün, belegte rot, Kai und Fischer ohne Schild', () => {
   assert.ok(boxen.length > 3);
   for (const b of boxen) assert.equal(farbe(state, ctx, b), 'gruen');
   for (const b of ctx.berths.filter((x) => x.kind === 'fischer' || x.kind === 'kai')) assert.equal(farbe(state, ctx, b), null);
+  state.boats[999] = { id: 999, status: 'moored', berthId: boxen[0].id, wishes: [] };
   state.berths[boxen[0].id] = 999;
   assert.equal(farbe(state, ctx, boxen[0]), 'rot');
 });

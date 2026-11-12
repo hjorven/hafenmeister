@@ -103,6 +103,7 @@ test('Kreuzfahrtschiff kommt regelmaessig, wird angekuendigt und weicht dem Stur
   const b = da.besuche.find((x) => x.art === 'kreuzfahrt');
   assert.equal(b.einnahme, 6500);
   assert.equal(z.besuche.kreuzfahrtterminal, 21);
+  assert.equal(z.anzahl.kreuzfahrt, 1);            // Zähler für das Stufenziel, Sturmtag zählt nicht
   assert.equal(R.naechsteBesuche(z, 14).find((x) => x.id === 'kreuzfahrtterminal').inTagen, 7);
 });
 

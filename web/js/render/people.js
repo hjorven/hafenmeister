@@ -753,6 +753,8 @@ export function init(game) {
     // Abends: wer nicht im Restaurant bleibt, geht beim naechsten Halt an Bord
     if (abend) for (const a of agenten) if (a.zustand === 'verweilt' || a.zustand === 'drinnen') a.uhr = Math.min(a.uhr, zufall(1, 8));
     if (netz) anpassen();
+    // Abends geht der Hafenmeister ueber die Stege (docs/echter-hafen.md, A4)
+    if (abend) rundgangStarten();
   });
   game.on('ready', () => {
     const tag = game.state?.day ?? game.state?.tag ?? 1;

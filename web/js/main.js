@@ -27,6 +27,7 @@ const MODULES = [
   './ui/input-touch.js',
   './ui/gesten.js',
   './ui/hud.js',
+  './ui/bauen.js',
   './ui/fotomodus.js',
   './audio/audio.js',
   './state.js',
@@ -81,9 +82,12 @@ WORLD.centerX = (WORLD.minX + WORLD.maxX) / 2;
 
 // Startansicht: alle Liegeplaetze einer Stufe mit 12 m Rand, dazu die Wartebojen mit 8 m Rand
 // (die wartenden Boote liegen bis 6 m oestlich der Boje im Wind).
+// Hat eine Stufe keine eigenen Plaetze in harbor.js (Stufe 6), gelten die der Stufe davor.
 function homeRect(stufe) {
   try {
-    const pts = plaetzeInStufe(stufe).map((p) => platzInWelt(p, stufe));
+    let s = stufe;
+    let pts = [];
+    for (; s >= 1 && !pts.length; s--) pts = plaetzeInStufe(s).map((p) => platzInWelt(p, s));
     if (!pts.length) throw new Error('keine Plaetze');
     const xs = pts.map((p) => p.x);
     const zs = pts.map((p) => p.z);
@@ -91,19 +95,47 @@ function homeRect(stufe) {
       minX: Math.min(...xs) - 12, maxX: Math.max(...xs) + 12,
       minZ: Math.min(...zs) - 12, maxZ: Math.max(Math.max(...zs) + 8, 6),
     };
-    let bojen = [];
-    try { bojen = warteplaetze(stufe).bojen; } catch (err) { console.warn('Wartebojen nicht lesbar', err); }
-    for (const b of bojen) {
-      r.minX = Math.min(r.minX, b.x - 8);
-      r.maxX = Math.max(r.maxX, b.x + 8);
-      r.minZ = Math.min(r.minZ, b.z - 8);
-      r.maxZ = Math.max(r.maxZ, b.z + 8);
+    let wp = { bojen: [], ankerbereiche: [] };
+    try { wp = warteplaetze(stufe); } catch (err) { console.warn('Wartebojen nicht lesbar', err); }
+    const dazu = (x, z, rand) => {
+      r.minX = Math.min(r.minX, x - rand);
+      r.maxX = Math.max(r.maxX, x + rand);
+      r.minZ = Math.min(r.minZ, z - rand);
+      r.maxZ = Math.max(r.maxZ, z + rand);
+    };
+    for (const b of wp.bojen) dazu(b.x, b.z, 8);
+    // Ankerfelder nur, wenn sie nah am Rest liegen (weit draussen wuerde der Hafen zu klein)
+    for (const a of wp.ankerbereiche || []) {
+      const dx = Math.max(r.minX - a.x, 0, a.x - r.maxX);
+      const dz = Math.max(r.minZ - a.z, 0, a.z - r.maxZ);
+      if (Math.hypot(dx, dz) <= 30) dazu(a.x, a.z, 8);
     }
     return r;
   } catch (err) {
     console.warn('Startansicht aus harbor.js nicht ableitbar, nehme festen Wert', err);
     return { minX: -76, maxX: -44, minZ: -45, maxZ: 6 };
   }
+}
+
+// Dazu alle sichtbaren Bauplaetze (Stegprojekte und Services, pick buildsite) mit 6 m Rand.
+// Wird bei jedem reset() neu gerechnet, weil die Module Bauplaetze erst spaeter anlegen
+// und gebaute Plaetze wieder verschwinden.
+function startRect(game, stufe) {
+  const r = homeRect(stufe);
+  const box = new game.THREE.Box3();
+  const teil = new game.THREE.Box3();
+  game.scene.traverseVisible((o) => {
+    if (o.userData?.pick?.type !== 'buildsite') return;
+    teil.setFromObject(o);
+    if (!teil.isEmpty()) box.union(teil);
+  });
+  if (!box.isEmpty()) {
+    r.minX = Math.min(r.minX, box.min.x - 6);
+    r.maxX = Math.max(r.maxX, box.max.x + 6);
+    r.minZ = Math.min(r.minZ, box.min.z - 6);
+    r.maxZ = Math.max(r.maxZ, box.max.z + 6);
+  }
+  return r;
 }
 
 function boot() {
@@ -120,8 +152,10 @@ function boot() {
   game.placeholder = addPlaceholderWorld(game, WORLD);
   initInput(game);
 
-  // Neue Ausbaustufe: Knopf "Übersicht" zeigt danach den ganzen Hafen dieser Stufe
-  game.on('stufe', (n) => game.camera.setHomeRect(homeRect(n)));
+  // Knopf "Übersicht" zeigt den ganzen Hafen der aktuellen Stufe samt Bojen und Bauplaetzen
+  let stufe = 1;
+  game.on('stufe', (n) => { const v = Number(typeof n === 'object' ? n?.stufe : n); if (v >= 1) stufe = v; });
+  game.camera.setHomeRect(() => startRect(game, stufe));
 
   document.getElementById('btn-overview').addEventListener('click', () => game.camera.reset());
   const pauseBtn = document.getElementById('btn-pause');
@@ -138,6 +172,8 @@ function boot() {
 try {
   const game = boot();
   await loadModules(game);
+  // Erst jetzt stehen Stege, Bauplaetze und die geladene Stufe fest
+  game.camera.reset();
   document.getElementById('boot').classList.add('done');
 } catch (err) {
   const el = document.getElementById('boot');

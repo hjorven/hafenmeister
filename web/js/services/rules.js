@@ -159,6 +159,8 @@ export function erstelleRegeln(katalog = SERVICES) {
             out.besuche.push({ id, art: b.art, tag: tag.tag, dauer: b.dauer ?? 1, einnahme: ein,
               gaeste: Math.round((b.gaeste ?? 0) * f), ruf: b.ruf ?? 0, text: b.text });
             z.besuche[id] = tag.tag + b.alleTage;
+            z.anzahl ??= {};
+            z.anzahl[b.art] = (z.anzahl[b.art] ?? 0) + 1;     // Zähler je Besuchsart (Stufenziel)
           }
         }
         if (z.besuche[id] === tag.tag + 1 && b.alleTage > 1) {
