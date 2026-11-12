@@ -408,7 +408,7 @@ const KAUF = {
   kiosk: { art: 'essen', stufe: 1 },
   restaurant: { art: 'essen', stufe: 3 },
   hafenmeister: { art: 'office', stufe: 1 },
-  hafenbuero: { art: 'office', stufe: 2 },
+  hafenbuero: { art: 'office', stufe: 3 },
 };
 
 // ------------------------------------------------------------------ Modul
