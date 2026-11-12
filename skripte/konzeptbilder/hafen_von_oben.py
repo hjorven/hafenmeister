@@ -251,13 +251,13 @@ def lake_n(x): return 186 + 4 * math.sin(x / 55 + 2) + 2.5 * math.sin(x / 23)   
 def sea_s(x): return 224 + 4 * math.sin(x / 80 + 1) + 2 * math.sin(x / 27)      # Strand der Nehrung zur Ostsee
 
 LAKE = dict(d0=(204, 232, 212), d1=(174, 218, 200), d2=(148, 204, 190), d3=(126, 190, 182), deep=(108, 178, 176))
-CH = (152, 182)                                             # Durchstich: x von bis
-MOLE_W34 = [(150, 222), (149, 268)]; MOLE_E34 = [(184, 222), (187, 258)]
-MOLE_W5 = [(-2, 224), (-10, 282), (18, 312), (96, 320)]; MOLE_E5 = [(184, 222), (194, 278), (170, 304)]
+CH = (150, 206)                                             # Durchstich: x von bis (wie web/js/render/landschaft/gelaende.js)
+MOLE_W34 = [(146, 222), (142, 274)]; MOLE_E34 = [(210, 222), (216, 268)]
+MOLE_W5 = [(-2, 224), (-10, 282), (18, 312), (96, 320)]; MOLE_E5 = [(210, 222), (220, 280), (196, 306)]
 
-TITLES = {1: ('Stufe 1: Bootssteg am See', 'Ein kurzer Holzsteg am Binnensee. Ruderboote, Beiboote und Jollen. Zur Ostsee führt nur ein flacher Graben.'),
+TITLES = {1: ('Stufe 1: Bootssteg am See', 'Ein kurzer Holzsteg am Binnensee. Ruderboote, Beiboote und Jollen. Zur Ostsee führt ein natürliches Seegatt durch die Nehrung.'),
           2: ('Stufe 2: Dorfhafen am See', 'Steg A wird länger und knickt ab, Steg B bekommt einen T-Kopf. Slip, Fischersteg, Hafenmeister. Der See ist flach, also nur Boote mit wenig Tiefgang.'),
-          3: ('Stufe 3: Durchstich zur Ostsee', 'Der Graben wird zum Kanal mit zwei Molen und Molenfeuern. Jetzt kommen Yachten von See durch den Durchstich. Hauptsteg C, Promenade, ausgebaggertes Becken.'),
+          3: ('Stufe 3: Durchstich zur Ostsee', 'Das Seegatt wird zum breiten Durchstich mit Kaimauern, zwei Molen und Molenfeuern. Jetzt kommen Yachten von See durch den Durchstich. Hauptsteg C, Promenade, ausgebaggertes Becken.'),
           4: ('Stufe 4: Marina', 'Hauptsteg C wird länger und bekommt einen Stichsteg, dazu Schwimmsteg D mit Fingerstegen. Tankstelle am Durchstich, Seenotretter, Travellift und Winterlager.'),
           5: ('Stufe 5: Küstenmarina', 'Vor der Nehrung entsteht der Außenhafen: zwei lange Molen, Kai für große Schiffe, Fahrgastanleger und Fischereikai. Schwimmsteg D gabelt sich.'),
           6: ('Stufe 6: Seehafen', 'Westlich der Molen entsteht im tiefen Wasser eine lange T-Pier: außen legen Kreuzfahrtschiffe an, innen besuchen Marineschiffe den Hafen. An der Westmole liegt der Seenotrettungskreuzer.')}
@@ -291,19 +291,19 @@ def render(stage, seed=5):
         return np.asarray(m.filter(ImageFilter.GaussianBlur(3.2)), np.float32) / 255.0
     canal = [(CH[0], 176), (CH[1], 176), (CH[1], 234), (CH[0], 234)]
     if stage >= 3:
-        basin = [(-22, 6), (202, 6), (204, 96), (186, 176), (148, 176), (118, 150), (20, 152), (-22, 120)] if stage >= 4 else [(-12, 6), (150, 6), (190, 120), (186, 176), (148, 176), (112, 128), (40, 112), (-12, 96)]
+        basin = [(-22, 6), (202, 6), (212, 96), (210, 176), (146, 176), (118, 150), (20, 152), (-22, 120)] if stage >= 4 else [(-12, 6), (150, 6), (204, 120), (210, 176), (146, 176), (112, 128), (40, 112), (-12, 96)]
         dep = np.where(mask(basin) > .5, np.maximum(dep, 3.5 + .4 * wob), dep)
         if stage >= 4: dep = np.where(mask([(-84, 6), (-22, 6), (-22, 124), (-84, 112)]) > .5, np.maximum(dep, 2.6), dep)
         dep = np.where(mask(canal) > .5, 3.8, dep)
         if stage < 5:
-            dep = np.where(mask([(152, 236), (182, 236), (212, 356), (176, 356)]) > .5, np.maximum(dep, 4.4), dep)
+            dep = np.where(mask([(152, 232), (204, 232), (240, 360), (180, 360)]) > .5, np.maximum(dep, 4.4), dep)
         else:
-            dep = np.where(mask([(0, 226), (186, 226), (194, 278), (170, 304), (96, 320), (18, 312), (-8, 282)]) > .5, 5.0, dep)
-            dep = np.where(mask([(108, 300), (160, 300), (184, 356), (132, 356)]) > .5, np.maximum(dep, 4.6), dep)
+            dep = np.where(mask([(0, 226), (206, 226), (214, 280), (192, 302), (96, 320), (18, 312), (-8, 282)]) > .5, 5.0, dep)
+            dep = np.where(mask([(112, 304), (194, 300), (216, 360), (136, 360)]) > .5, np.maximum(dep, 4.6), dep)
         if stage >= 6:   # Liegewanne an der Grossschiffspier
-            dep = np.where(mask([(PIER_W - 40, 228), (PIER_E + 50, 228), (PIER_E + 60, 370), (PIER_W - 40, 370)]) > .5, np.maximum(dep, 8.5), dep)
+            dep = np.where(mask([(-365, 228), (20, 228), (20, 400), (-365, 400)]) > .5, np.maximum(dep, 8.5), dep)   # wie PIERWANNE6 in gelaende.js
     else:
-        dep = np.where(mask([(163, 180), (171, 180), (173, 232), (165, 232)]) > .5, .5, dep)
+        dep = np.where(mask([(166, 150), (190, 150), (198, 186), (192, 205), (198, 224), (190, 280), (166, 280), (158, 224), (164, 205), (158, 186)]) > .5, np.maximum(dep, 2.0), dep)   # Seegatt
     up = lambda arr: np.asarray(Image.fromarray(arr.astype(np.float32)).resize((gw * st, gh * st), Image.BICUBIC), np.float32)[:size[1], :size[0]]
     depI = up(dep); lakeI = up((GY < (ln_ + sn_) / 2).astype(np.float32)) > .5
     a = np.empty((size[1], size[0], 3), np.uint8); a[:] = C['deep']; a[lakeI] = LAKE['deep']
@@ -329,7 +329,7 @@ def render(stage, seed=5):
         d.polygon(PP([(CH[0], lake_n(CH[0]) - 3), (CH[1], lake_n(CH[1]) - 3), (CH[1], 205), (CH[0], 205)]), fill=LAKE['d3'])
         for xx in CH: d.line(PP([(xx, lake_n(xx) - 4), (xx, 224)]), fill=C['rock'], width=int(3.2 * S))
     else:
-        d.line(PP(curve([(166, 180), (169, 196), (164, 212), (169, 232)])), fill=C['d0'], width=int(6 * S), joint='curve')
+        d.polygon(PP([(156, 180), (198, 180), (198, 205), (204, 230), (152, 230), (158, 205)]), fill=C['d1'])   # Seegatt
     # Schilf am See
     rr_ = random.Random(31)
     for _ in range(520):
@@ -387,7 +387,7 @@ def render(stage, seed=5):
         if stage == 4:
             H_.line([(103, 62), (129, 58)], 'float', 3.0); H_.along((103, 62), (129, 58), 1, [('flybridge', 13, 4.4, 'white', True)], jw=3.0, start=2)
         H_.line([(112, 178), (142, 178)], 'float', 3.2); H_.along((112, 178), (142, 178), -1, [('motor', 9, 3.2, 'white', True)], jw=3.2, cls='T', start=6)
-        H_.line([(183.5, 232), (185.5, 254)], 'float', 2.0); H_.along((183.5, 232), (185.5, 254), 1, [('rescue', 11, 3.8, 'white', True)], jw=2.0, cls='T', start=2)
+        H_.line([(201, 232), (203, 254)], 'float', 2.0); H_.along((201, 232), (203, 254), 1, [('rescue', 11, 3.8, 'white', True)], jw=2.0, cls='T', start=2)
         H_.line([(149, 6), (149, 24)], 'float', 1.2); H_.line([(163, 6), (163, 24)], 'float', 1.2)
         H_.boats.append((156, 15, math.pi / 2, 'sail', 10.5 * K, 3.4 * K, 'white'))
     if stage >= 5:
@@ -484,11 +484,11 @@ def render(stage, seed=5):
     lb = lambda t_, x, y, new=False: label(d, t_, x, y, new)
     lb('Ostsee', 250 if stage < 5 else 264, 300 if stage < 5 else 314); lb('Binnensee', 222, 60); lb('Nehrung', -120 if stage < 5 else -150 if stage < 6 else -232, 205 if stage < 5 else 196)
     if stage == 1:
-        lb('Steg A', -126, 26, True); lb('Bootsverleih', -134, -36, True); lb('Toilette', -95, -38, True); lb('Schilf', 60, 12); lb('Graben, nur für Ruderboote', 108, 206); lb('Badeinsel', 24, 76)
+        lb('Steg A', -126, 26, True); lb('Bootsverleih', -134, -36, True); lb('Toilette', -95, -38, True); lb('Schilf', 60, 12); lb('Seegatt', 120, 206); lb('Badeinsel', 24, 76)
         lb('Leihboote', -70, -22)
     if stage == 2:
         lb('Steg A mit Knick', -134, 76, True); lb('Steg B mit T-Kopf', -55, top + 15, True); lb('Fischersteg', -168, 40, True)
-        lb('Slip', -127, -17, True); lb('Hafenmeister', -72, -37, True); lb('Dusche', -118, -50, True); lb('Kiosk', -36, -38, True); lb('Graben', 142, 206); lb('Flachwasser', 120, 22)
+        lb('Slip', -127, -17, True); lb('Hafenmeister', -72, -37, True); lb('Dusche', -118, -50, True); lb('Kiosk', -36, -38, True); lb('Seegatt', 130, 206); lb('Flachwasser', 120, 22)
     if stage >= 3:
         lb('Steg A', -121, 90); lb('Steg B', -55, top + 15, n_(5)); lb('Durchstich', 122 if stage < 5 else 214, 206, n_(3)); lb('Hauptsteg C', 56, 36, n_(3) or n_(4))
         lb('Hafenbüro', 6, -47, n_(3)); lb('Sanitär', -60, -68, n_(3)); lb('Segelclub', -196, -60, n_(3)); lb('Mastenkran', 70, -22, n_(3))

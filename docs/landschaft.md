@@ -5,7 +5,7 @@ Stand: 12.11.2026. Code: `web/js/render/landscape.js` (Einstieg, wird von `main.
 ## Was man sieht
 
 - **Gelände in 3D** im Flat-Vector-Stil: Festland mit Strand, Wiese, Wald und Straße, Binnensee, Nehrung mit Dünen, Salzwiesen und kleinen Lagunen, offene See. Die Uferlinien stammen aus `skripte/konzeptbilder/hafen_von_oben.py`, die Wassertiefe an jedem Liegeplatz stimmt mit `web/js/data/harbor.js` überein (Test).
-- **Ausbaustufen 1 bis 5** verändern die Landschaft: Graben (Stufe 1 und 2), Durchstich mit Kaimauern, kurzen Molen und ausgebaggertem Becken (Stufe 3), größeres Becken (Stufe 4), Außenhafen mit langen Molen und Kai (Stufe 5). Stufe 6 sieht aus wie Stufe 5.
+- **Ausbaustufen 1 bis 6** verändern die Landschaft: natürliches Seegatt mit Sandhaken und Pricken (Stufe 1 und 2), 35 m breiter Durchstich mit Kaimauern, Molen und ausgebaggertem Becken (Stufe 3), größeres Becken (Stufe 4), Außenhafen mit langen Molen und Kai (Stufe 5), dazu Liegewanne für Marine- und Kreuzfahrtpier und die Nehrungsstraße (Stufe 6). Einzelheiten im Abschnitt „Engpass und feste Punkte“.
 - **Molen** als Steinschüttung mit unregelmäßigem Rand, Weg auf der Krone und breitem runden Kopf. Molenfeuer stellt `buildings.js`.
 - **Buhnen** am Seestrand der Nehrung etwa alle 50 m.
 - **Wasser**: klare Tiefenbänder wie auf der Seekarte (Grenzen bei 1, 2, 3 und 4 m), die Fahrrinne ist als dunkleres Band zu sehen, kurze weiße Wellenstriche wandern mit dem Wind, am Ufer atmet ein Brandungssaum.
@@ -13,6 +13,35 @@ Stand: 12.11.2026. Code: `web/js/render/landscape.js` (Einstieg, wird von `main.
 - **Ankerfeld für die Nacht**: Im Ankerkreis liegen feste Ankerplätze (kleine helle Punkte) im Abstand des Schwoikreises, nicht auf den Bojen und nicht in der Fahrrinne. Boote, die abends keinen Platz bekommen, liegen dort über Nacht. Anzahl: Stufe 1: 13, Stufe 2: 19, Stufe 3 und 4: je 19, Stufe 5: 19 für L plus 7 für XL. Die Liste ist nach Nähe zur Einfahrt sortiert, also zuerst vorne belegen.
 - **Tageslicht** folgt der Spielzeit: Morgen, Mittag, Abendrot, Dämmerung, Nacht. Schatten werden abends lang.
 - **Zwei Reviere**: Ostsee (Kiefern, Birken, Buchen, Schilf, Schärenfelsen am Kartenrand) und Nordsee (Deich, hohe Dünen, Watt mit Priel vor der Einfahrt, Pappeln und windschiefe Bäume, graueres Wasser, Gezeiten).
+
+## Engpass und feste Punkte
+
+Die Nehrung trennt Binnensee und offene See. Es gibt genau einen Weg hindurch, den Engpass bei Plan-x 178:
+
+| Stufe | Engpass | nutzbare Breite | Tiefe | Molen |
+|---|---|---|---|---|
+| 1 und 2 | natürliches Seegatt, leichte S-Kurve, Sandhaken an beiden Enden, Pricken (Reisigbesen) an der Rinne | schmalste Stelle 25 m, davon gut 21 m mindestens 1,2 m tief | 2,2 m in der Mitte | keine |
+| 3 und 4 | gerader Durchstich mit Kaimauern, x 150 bis 206, innen abgeschrägte Ecken | 35 m | 4,0 m, Rinne nach See 4,4 m | Köpfe 46 m auseinander |
+| 5 und 6 | Durchstich wie oben, davor der Außenhafen | 35 m, Einfahrt Außenhafen etwa 61 m | 4,0 m, Außenhafen 5,0 m | Westmole bis (96, 320), Ostmole bis (196, 306) |
+
+So passen auch zwei L-Yachten aneinander vorbei (Gegenverkehr braucht etwa 18 m), im Seegatt zwei M-Boote. In der Nordsee sind Seegatt und Durchstich um den Tidenhub tiefer, damit sie bei Niedrigwasser befahrbar bleiben.
+
+`web/js/render/landschaft/karte.js` (ohne Three.js) beschreibt die Form für andere Module:
+
+| Funktion | Rückgabe |
+|---|---|
+| `festePunkte(stufe)` | Planeinheiten: `engpass` `{ art: 'seegatt'\|'durchstich', x0, x1, y0, y1, achse, breite, breiteM, tiefeM }`, `einfahrt` `{ aussen, innen }`, `fahrwasser` (Mittellinie von See bis ins Becken), `fahrwasserBreiteM`, `molenkoepfe`, `bauflaechen` |
+| `festePunkteWelt(stufe)` | dasselbe in Weltmetern (`{ x, z }`) |
+| `art(px, py, stufe, region)` | `'land'`, `'strand'`, `'flach'` (unter 1 m) oder `'wasser'` |
+| `karteRaster(stufe, region, schritt = 2)` | Raster mit `tiefe` (m), `art` (0 Land, 1 Strand, 2 flach, 3 Wasser), `ufer` (Meter zur Uferlinie, positiv an Land), `beiWelt(x, z)` |
+| `engpassBreiteM(stufe, region, tiefeMin)` | schmalste befahrbare Breite, für Tests |
+
+Im Spiel: `game.landscape.punkte` (feste Punkte der aktuellen Stufe in Metern), `game.landscape.karte()` (Raster, beim ersten Aufruf etwa 0,25 s), `game.landscape.uferAbstand(x, z)`. Nach jedem Neubau (Stufe oder Region) sendet die Landschaft `landschaft:geaendert` mit `{ stufe, region }`.
+
+Haken für andere Threads, damit niemand in `gelaende.js` schreiben muss:
+
+- `landschaft/vielfalt.js` (Abwechslung): `land(px, py, h, typ, d, kontext)` und `nehrung(px, py, h, typ, kontext)`, kontext `{ stufe, region, uferAbstandM, hafenAbstand, offeneSee, seeAbstandM }`.
+- `data/anlagen-flaechen.js` (Anlagen): `anlagenFlaechen(stufe)` liefert Flächen, die das Gelände auf `hoehe` planiert (auch als Aufschüttung).
 
 ## Ausprobieren
 

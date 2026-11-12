@@ -9,6 +9,9 @@
 // Weil das Modul kein Three.js kennt, kann auch die Spiellogik es nutzen,
 // zum Beispiel für die Regel "Wassertiefe mindestens 0,3 m größer als der Tiefgang".
 
+import * as vielfalt from './vielfalt.js';
+import { anlagenFlaechen } from '../../data/anlagen-flaechen.js';
+
 export const PLAN_M = 0.62;
 
 /** Bereich, für den das Gelände fein berechnet wird (Planeinheiten). */
@@ -59,21 +62,72 @@ export const seeNord = (x) => 186 + 4 * Math.sin(x / 55 + 2) + 2.5 * Math.sin(x 
 /** Strand der Nehrung zur offenen See. */
 export const meerSued = (x) => 224 + 4 * Math.sin(x / 80 + 1) + 2 * Math.sin(x / 27);
 
-/** Durchstich durch die Nehrung, x von bis. */
-export const DURCHSTICH = [152, 182];
+// ------------------------------------------------------------------ Abstand zur offenen See
+
+let _seeRaster = null;
+/**
+ * Abstand in Metern zum nächsten Wasser der offenen See (nicht Binnensee), stetig, aus einem Raster
+ * mit 4 Planeinheiten, das nur die Grundform kennt (ohne Molen und Engpass). 0 auf offener See.
+ */
+export function seeAbstandM(px, py) {
+  if (!_seeRaster) {
+    const S = 4, x0 = BEREICH.x0 - 40, y0 = BEREICH.y0 - 40;
+    const nx = Math.ceil((BEREICH.x1 + 40 - x0) / S) + 1, ny = Math.ceil((BEREICH.y1 + 40 - y0) / S) + 1;
+    const d = new Float32Array(nx * ny);
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+      const x = x0 + i * S, y = y0 + j * S;
+      d[j * nx + i] = y > meerSued(x) && y > suedufer(x) ? 0 : 1e9;
+    }
+    for (let pass = 0; pass < 2; pass++) {
+      const r = pass ? -1 : 1;
+      for (let jj = 0; jj < ny; jj++) for (let ii = 0; ii < nx; ii++) {
+        const i = pass ? nx - 1 - ii : ii, j = pass ? ny - 1 - jj : jj, k = j * nx + i;
+        let v = d[k];
+        const a = i - r, b = j - r;
+        if (a >= 0 && a < nx) v = Math.min(v, d[k - r] + 1);
+        if (b >= 0 && b < ny) {
+          v = Math.min(v, d[k - r * nx] + 1);
+          if (a >= 0 && a < nx) v = Math.min(v, d[k - r * nx - r] + 1.4142);
+          if (i + r >= 0 && i + r < nx) v = Math.min(v, d[k - r * nx + r] + 1.4142);
+        }
+        d[k] = v;
+      }
+    }
+    _seeRaster = { S, x0, y0, nx, ny, d };
+  }
+  const { S, x0, y0, nx, ny, d } = _seeRaster;
+  const fx = clamp((px - x0) / S, 0, nx - 1.001), fy = clamp((py - y0) / S, 0, ny - 1.001);
+  const i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j, k = j * nx + i;
+  const w = d[k] * (1 - u) * (1 - v) + d[k + 1] * u * (1 - v) + d[k + nx] * (1 - u) * v + d[k + nx + 1] * u * v;
+  return w * S * PLAN_M;
+}
+
+/**
+ * Engpass durch die Nehrung. Achse bei x 178 (Planeinheiten).
+ * Stufe 1 und 2: natürliches Seegatt mit Sandhaken (seegattHalb, seegattAchse).
+ * Ab Stufe 3: gerader Durchstich mit Kaimauern, x von bis (56 Planeinheiten = 35 m breit).
+ */
+export const ENGPASS_X = 178;
+export const DURCHSTICH = [150, 206];
+export const DURCHSTICH_TIEFE = 4.0;
+/** Seegatt Stufe 1 und 2: Mitte der Rinne (leichte S-Kurve, wie ein natürliches Tief). */
+export const seegattAchse = (py) => ENGPASS_X + 5 * Math.sin(clamp((py - 150) / 120, 0, 1) * Math.PI * 2) * 0.6;
+/** Halbe Breite des Seegatts in Planeinheiten: schmal in der Mitte der Nehrung, trichterförmig an beiden Enden. */
+export const seegattHalb = (py) => Math.min(34, 20 + 0.03 * (py - 205) ** 2);
+export const SEEGATT_TIEFE = 2.2;
 
 /** Molen je Stufe als Linienzüge in Planeinheiten, mit Breite. */
 export function molen(stufe) {
   if (stufe >= 5) {
     return [
       { name: 'Westmole', punkte: [[-2, 224], [-10, 282], [18, 312], [96, 320]], breite: 9 },
-      { name: 'Ostmole', punkte: [[184, 222], [194, 278], [170, 304]], breite: 9 },
+      { name: 'Ostmole', punkte: [[210, 222], [220, 280], [196, 306]], breite: 9 },
     ];
   }
   if (stufe >= 3) {
     return [
-      { name: 'Westmole', punkte: [[150, 222], [149, 268]], breite: 7 },
-      { name: 'Ostmole', punkte: [[184, 222], [187, 258]], breite: 7 },
+      { name: 'Westmole', punkte: [[146, 222], [142, 274]], breite: 8 },
+      { name: 'Ostmole', punkte: [[210, 222], [216, 268]], breite: 8 },
     ];
   }
   return [];
@@ -83,6 +137,27 @@ const _wege = new Map();
 function wegeCache(stufe) {
   if (!_wege.has(stufe)) _wege.set(stufe, wegePlan(stufe));
   return _wege.get(stufe);
+}
+
+const _flaechen = new Map();
+function flaechenCache(stufe) {
+  if (!_flaechen.has(stufe)) {
+    let liste = [];
+    try { liste = anlagenFlaechen(stufe) || []; } catch { liste = []; }
+    _flaechen.set(stufe, liste.filter((f) => f?.poly?.length >= 3).map((f) => {
+      const xs = f.poly.map((q) => q[0]), ys = f.poly.map((q) => q[1]);
+      return { ...f, bb: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] };
+    }));
+  }
+  return _flaechen.get(stufe);
+}
+
+/**
+ * Nehrungsstraße ab Stufe 6: vom Westland auf die Nehrung und auf der Seeseite des Binnensees nach Osten
+ * bis zum Kai des Außenhafens. Die Anlagen (Marine, Kreuzfahrt, Fischhalle) stehen nördlich davon.
+ */
+export function strasseNehrung() {
+  return { id: 'nehrungsstrasse', typ: 'strasse', punkte: [[-330, -88], [-366, -40], [-378, 100], [-370, 182], [-350, 192], [0, 192]], breite: 7 };
 }
 
 const _molen = new Map();
@@ -98,10 +173,25 @@ function molenCache(stufe) {
 export function buhnen(stufe) {
   const out = [];
   for (let x = -380; x <= 400; x += 80) {
-    if (x > 120 && x < 215) continue;                       // Durchstich und Einfahrt
-    if (stufe >= 5 && x > -40 && x < 215) continue;         // Außenhafen
+    if (x > 110 && x < 245) continue;                       // Engpass und Einfahrt
+    if (stufe >= 5 && x > -40 && x < 245) continue;         // Außenhafen
     const y0 = meerSued(x) - 5;
     out.push([[x, y0], [x + 2, y0 + 30]]);
+  }
+  return out;
+}
+
+/**
+ * Pricken (Reisigbesen auf Stangen) an beiden Rändern der Rinne durch das Seegatt, nur Stufe 1 und 2.
+ * Liegen knapp innerhalb des Rinnenrands, wo das Wasser noch etwa 0,8 m tief ist.
+ */
+export function pricken(stufe) {
+  if (stufe >= 3) return [];
+  const out = [];
+  for (let py = 160; py <= 276; py += 18) {
+    const nehrung = py > 180 && py < 230;
+    const hw = nehrung ? seegattHalb(py) : SEEGATT_RINNE.halb + 4;
+    for (const s of [-1, 1]) out.push([seegattAchse(py) + s * hw * 0.82, py]);
   }
   return out;
 }
@@ -120,6 +210,7 @@ export function wegePlan(stufe) {
     for (const x of [-120, 20, 160]) w.push({ id: `zugang-${x}`, typ: 'weg', punkte: [[x, -88], [x, -13]], breite: 3.5 });
   }
   if (stufe >= 5) w.push({ id: 'kai-aussenhafen', typ: 'promenade', punkte: [[2, 222], [150, 222]], breite: 13 });
+  if (stufe >= 6) w.push(strasseNehrung());
   return w;
 }
 
@@ -173,27 +264,17 @@ function abstandZuLinie(px, py, pts) {
   return best;
 }
 
-// Graben zur Ostsee vor dem Durchstich (Stufe 1 und 2), Mittellinie als x über y.
-function grabenX(py) {
-  const k = [[180, 166], [196, 169], [212, 164], [232, 169]];
-  if (py <= k[0][0]) return k[0][1];
-  for (let i = 0; i < k.length - 1; i++) {
-    if (py <= k[i + 1][0]) {
-      const t = (py - k[i][0]) / (k[i + 1][0] - k[i][0]);
-      return k[i][1] + (k[i + 1][1] - k[i][1]) * (t * t * (3 - 2 * t));
-    }
-  }
-  return k[k.length - 1][1];
-}
-
-const BECKEN3 = [[-12, 6], [150, 6], [190, 120], [186, 176], [148, 176], [112, 128], [40, 112], [-12, 96]];
-const BECKEN4 = [[-22, 6], [202, 6], [204, 96], [186, 176], [148, 176], [118, 150], [20, 152], [-22, 120]];
+// Becken: zum Durchstich hin so breit wie der Durchstich, damit kein Engpass hinter dem Engpass entsteht.
+const BECKEN3 = [[-12, 6], [150, 6], [204, 120], [210, 176], [146, 176], [112, 128], [40, 112], [-12, 96]];
+const BECKEN4 = [[-22, 6], [202, 6], [212, 96], [210, 176], [146, 176], [118, 150], [20, 152], [-22, 120]];
 const BECKEN4_WEST = [[-84, 6], [-22, 6], [-22, 124], [-84, 112]];
-const RINNE34 = [[152, 236], [182, 236], [212, 356], [176, 356]];
-const AUSSENHAFEN = [[0, 226], [186, 226], [194, 278], [170, 304], [96, 320], [18, 312], [-8, 282]];
-const RINNE5 = [[108, 300], [160, 300], [184, 356], [132, 356]];
+const RINNE34 = [[152, 232], [204, 232], [240, 360], [180, 360]];
+const AUSSENHAFEN = [[0, 226], [206, 226], [214, 280], [192, 302], [96, 320], [18, 312], [-8, 282]];
+const RINNE5 = [[112, 304], [194, 300], [216, 360], [136, 360]];
+// Stufe 1 und 2: natürliche Rinne im See vor und hinter dem Seegatt (Mittellinie, halbe Breite)
+const SEEGATT_RINNE = { y0: 110, y1: 300, halb: 14 };
 // Stufe 6: Liegewanne an der Grossschiffspier westlich der Westmole (wie skripte/konzeptbilder/hafen_von_oben.py)
-const PIERWANNE6 = [[-417, 228], [-27, 228], [-17, 370], [-417, 370]];
+const PIERWANNE6 = [[-365, 228], [20, 228], [20, 400], [-365, 400]];   // Marinepier und Kreuzfahrtpier, nach Norden auslaufend (Abstimmung Thread Anlagen)
 
 // ------------------------------------------------------------------ Punktabfrage
 
@@ -243,6 +324,10 @@ export function punkt(px, py, stufe, region) {
       if (deich > h) { h = deich; typ = k > 0.85 ? 'deichkrone' : 'deich'; }
       if (dy < -g.deich.breite) h = Math.min(h, 0.9);
     }
+    // Abwechslung an Land (Thread "Gelände abwechslungsreicher gestalten")
+    ({ h, typ } = vielfalt.land(px, py, h, typ, d, {
+      stufe, region, uferAbstandM: d * PLAN_M, hafenAbstand: hafenAbstand(px, py), offeneSee: seeAbstandM(px, py) < d * PLAN_M, seeAbstandM: seeAbstandM(px, py),
+    }));
     // Straße und Wege (Promenade ist schon Pflaster)
     if (py < 0 && py > -100) {
       for (const w of wegeCache(stufe)) {
@@ -269,9 +354,10 @@ export function punkt(px, py, stufe, region) {
       const welle = 0.6 + 0.4 * fbm(px / 30, py / 12, 17);
       h = 0.25 + profil * g.duenenHoehe * welle;
       typ = t < 0.08 || t > 0.86 ? 'sand' : t < 0.45 ? 'duenengras' : 'duene';
+      typ = vielfalt.nehrung(px, py, h, typ, { stufe, region, uferAbstandM: Math.min(py - ln, ms - py) * PLAN_M, hafenAbstand: hafenAbstand(px, py), offeneSee: t > 0.5, seeAbstandM: (ms - py) * PLAN_M });
       // Salzwiesen und kleine Lagunen auf der Seeseite des Binnensees (wie am Graswarder)
       const lag = fbm(px / 22, py / 9, 31);
-      const frei = (px < 110 || px > 225) && !(stufe >= 5 && px > -30 && px < 200);
+      const frei = (px < 100 || px > 255) && !(stufe >= 5 && px > -30 && px < 200);
       if (frei && t < 0.5 && lag > 0.56) {
         typ = 'salzwiese';
         h = Math.min(h, 0.15 + (0.7 - lag) * 2);
@@ -296,9 +382,15 @@ export function punkt(px, py, stufe, region) {
       if (stufe >= 4) h = baggern(h, px, py, BECKEN4_WEST, 2.6, 12);
       if (stufe < 5) h = baggern(h, px, py, RINNE34, 4.4, 6);
     }
-    if (px > DURCHSTICH[0] && px < DURCHSTICH[1] && py > ln - 3 && py < 236) {
-      h = -3.8; typ = 'wasser';
-    } else if (px > DURCHSTICH[0] - 3 && px < DURCHSTICH[1] + 3 && py > ln - 4 && py < 226) {
+    // Durchstich: gerade Kaimauern, innen zum Becken hin abgeschrägte Ecken (8 Planeinheiten)
+    const halb = (DURCHSTICH[1] - DURCHSTICH[0]) / 2;
+    const dx = Math.abs(px - ENGPASS_X);
+    const fase = Math.max(0, ln + 8 - py);
+    if (py > ln - 12 && py < 236 && dx < halb + fase) {
+      const ziel = DURCHSTICH_TIEFE + (g.gezeiten || 0);
+      if (h > -ziel) { h = -ziel + 0.4 * smooth(halb - 6, halb + fase, dx); }
+      typ = 'wasser';
+    } else if (py > ln - 4 && py < 226 && dx < halb + fase + 4) {
       h = 1.0; typ = 'steinschuettung';
     }
     if (stufe >= 5) {
@@ -306,10 +398,22 @@ export function punkt(px, py, stufe, region) {
       h = baggern(h, px, py, RINNE5, 4.6, 6);
       if (px > 2 && px < 150 && py > 214 && py <= 229) { h = 1.3; typ = 'pflaster'; }
     }
-    if (stufe >= 6) h = baggern(h, px, py, PIERWANNE6, 8.5, 10);
-  } else if (py > ln - 2 && py < ms + 8) {
-    // Flacher Graben durch die Nehrung, nur für Ruderboote
-    if (Math.abs(px - grabenX(py)) < 3) { h = -0.5; typ = 'wasser'; }
+    if (stufe >= 6) h = baggern(h, px, py, PIERWANNE6, 8.5, 40);
+  } else if (py > SEEGATT_RINNE.y0 && py < SEEGATT_RINNE.y1) {
+    // Natürliches Seegatt durch die Nehrung: Rinne mit flachen Rändern, an den Enden Sandhaken.
+    // Vor und hinter der Nehrung läuft die Rinne trichterförmig aus und geht in See und Binnensee über.
+    const d = Math.abs(px - seegattAchse(py));
+    const zone = py < ln - 6 ? ln - 6 - py : py > ms + 6 ? py - ms - 6 : 0;
+    const hw = SEEGATT_RINNE.halb + (seegattHalb(clamp(py, ln - 6, ms + 6)) - SEEGATT_RINNE.halb) * (1 - smooth(0, 30, zone));
+    // an beiden Enden läuft die Rinne weich aus, statt mit einer Kante zu enden
+    const enden = smooth(SEEGATT_RINNE.y0, SEEGATT_RINNE.y0 + 40, py) * (1 - smooth(SEEGATT_RINNE.y1 - 30, SEEGATT_RINNE.y1, py));
+    if (d < hw) {
+      const tief = -(0.25 + (SEEGATT_TIEFE - 0.25 + 0.15 * wob + (g.gezeiten || 0)) * enden * Math.sqrt(1 - (d / hw) ** 2));
+      if (tief < h) { h = tief; typ = 'wasser'; }
+    } else if (zone === 0 && d < hw + 14 && h >= 0) {
+      h = Math.min(h, 0.12 + (d - hw) * 0.07);
+      typ = 'sand';
+    }
   }
   for (const m of molenCache(stufe)) {
     if (abstandZuLinie(px, py, m.punkte) < m.breite / 2) { h = 1.4; typ = 'mole'; }
@@ -322,6 +426,18 @@ export function punkt(px, py, stufe, region) {
       const oben = stufe >= 3 ? 1.2 : 0.6;
       h = oben - ((py - y0) / (y1 - y0)) * (oben + 0.6);
       typ = 'pflaster';
+    }
+  }
+  // Planierte Flächen für Anlagen (data/anlagen-flaechen.js) und Straßen außerhalb des Festlands
+  for (const f of flaechenCache(stufe)) {
+    if (px < f.bb[0] || px > f.bb[2] || py < f.bb[1] || py > f.bb[3]) continue;
+    if (inPoly(px, py, f.poly)) { h = f.hoehe ?? 1.2; typ = f.typ ?? 'pflaster'; }
+  }
+  if (stufe >= 6 && px < 4 && (h >= 0 || py > 150)) {
+    const w = strasseNehrung();
+    if (abstandZuLinie(px, py, w.punkte) < w.breite / 2) {
+      typ = 'weg';
+      if (py > 150) h = Math.max(0.6, Math.min(h, 1.0));   // auf der Nehrung eben, am Seeufer aufgeschüttet
     }
   }
   // Reviere mit Gezeiten: Bauwerke und Hinterland liegen höher, der flache Strand nicht
@@ -378,10 +494,10 @@ export function warteplaetze(stufe) {
       ? { id: 'see-anker', px: -25, py: 102, radius: 44, groesse: 'M' }
       : { id: 'see-anker', px: 42, py: 130, radius: 50, groesse: 'M' });
   } else if (stufe <= 4) {
-    reihe('reede-', 228, 262, 14, 9, stufe === 3 ? 5 : 7, 'L');
-    ankerbereiche.push({ id: 'reede-anker', px: 345, py: 385, radius: 62, groesse: 'L' });
+    reihe('reede-', 240, 266, 14, 9, stufe === 3 ? 5 : 7, 'L');
+    ankerbereiche.push({ id: 'reede-anker', px: 355, py: 392, radius: 62, groesse: 'L' });
   } else {
-    reihe('reede-', 232, 300, 14, 9, 8, 'L');
+    reihe('reede-', 246, 304, 14, 9, 8, 'L');
     ankerbereiche.push({ id: 'reede-anker', px: 360, py: 440, radius: 60, groesse: 'L' });
     ankerbereiche.push({ id: 'reede-gross', px: 30, py: 440, radius: 85, groesse: 'XL' });
   }
@@ -389,7 +505,7 @@ export function warteplaetze(stufe) {
   // Feste Ankerplätze im Ankerfeld: Sechseck-Raster mit Abstand nach Schwoikreis der größten Bootsklasse,
   // sortiert nach Nähe zur Einfahrt, damit zuerst die nahen Plätze belegt werden.
   const ankerplaetze = [];
-  const einfahrt = stufe <= 2 ? [-80, 60] : [167, 250];
+  const einfahrt = stufe <= 2 ? [-80, 60] : [ENGPASS_X, 262];
   for (const b of ankerbereiche) {
     const abstand = SCHWOIKREIS_M[b.groesse] * 2 / PLAN_M;
     const r = b.radius - abstand * 0.45;
