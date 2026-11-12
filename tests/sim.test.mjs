@@ -136,6 +136,25 @@ test('Warten: wer zu lange wartet oder keinen Platz in der Schlange hat, fährt 
   assert.ok(ev2.some((e) => e.type === 'turnedAway' && e.boatId === 999 && e.reason === 'queueFull'));
 });
 
+test('Hafenbüro mit Automatik weist wartende Boote zu; volle Bojen kosten keinen Ruf', () => {
+  const s = quietState({ office: RULES.office.autoAssign });
+  const b = waitingBoat(s, { atBuoy: true, atBuoySince: s.clock });
+  assert.ok(sim.fittingBerths(s, ctx, b.id).length > 0);
+  sim.tick(s, ctx, 1);
+  assert.equal(s.boats[b.id].status, 'moored');
+  assert.equal(s.queue.length, 0);
+
+  const t = quietState();
+  for (let i = 0; i < RULES.queue.spots[1]; i++) waitingBoat(t, { waitSpot: i });
+  const ratings = JSON.stringify(t.ratings);
+  t.upcoming = Array.from({ length: 20 }, (_, i) => ({ ...waitingBoat(createState({ seed: 3 })), id: 900 + i, arriveAt: 0.5 }));
+  const ev = sim.tick(t, ctx, 1);
+  const weg = ev.filter((e) => e.type === 'turnedAway' && e.reason === 'queueFull');
+  assert.equal(weg.length, 20);
+  assert.ok(weg.every((e) => e.rated === false));
+  assert.equal(JSON.stringify(t.ratings), ratings);
+});
+
 test('Abend: Hafengeld mit Wünschen, Kapazität der Toilette, Strom vom Platz', () => {
   const s = quietState({ stage: 3, money: 0 });
   s.facilities.wc = 1; // versorgt 6 Boote
@@ -504,4 +523,36 @@ test('Nach dem Laden liegen wartende Boote an der Boje', async () => {
   assert.equal(state.boats[1].atBuoy, true);
   assert.equal(state.boats[1].atBuoySince, 100);
   assert.equal(state.boats[2].atBuoy, undefined);
+});
+
+test('Box bleibt belegt, bis das abreisende Boot heraus ist (Meldung oder Rückfallzeit)', () => {
+  const s = quietState();
+  const a = waitingBoat(s, { wishes: [], nights: 1 });
+  const b = waitingBoat(s, { wishes: [], nights: 1 });
+  sim.assign(s, ctx, a.id, 'A1');
+  sim.assign(s, ctx, b.id, 'A2');
+  sim.tick(s, ctx, RULES.dayLength + RULES.eveningLength); // Nacht: beide reisen ab
+  assert.equal(s.day, 2);
+  assert.equal(s.berths.A1, undefined);
+  assert.ok(!sim.isFree(s, 'A1') && !sim.isFree(s, 'A2'));
+  // Neues Boot darf nicht in die Box, aus der gerade jemand ablegt
+  const c = waitingBoat(s, { wishes: [], length: 4, beam: 1.5, draft: 0.3 });
+  assert.equal(sim.assign(s, ctx, c.id, 'A1').reason, 'occupied');
+  assert.ok(!sim.fittingBerths(s, ctx, c.id).some((x) => x.id === 'A1' || x.id === 'A2'));
+  const auto = sim.autoEnter(s, ctx, c.id);
+  assert.ok(auto.ok);
+  assert.ok(!['A1', 'A2'].includes(s.boats[c.id].berthId));
+  // 3D-Ansicht meldet: A1 ist frei
+  const ev = sim.berthCleared(s, ctx, { boatId: a.id }).events;
+  assert.deepEqual(ev.map((e) => [e.type, e.berthId]), [['berthFreed', 'A1']]);
+  assert.ok(sim.isFree(s, 'A1'));
+  assert.ok(!sim.isFree(s, 'A2'));
+  // Ohne Meldung wird A2 nach leaveMax frei
+  const ev2 = sim.tick(s, ctx, RULES.leaveMax);
+  assert.ok(ev2.some((e) => e.type === 'berthFreed' && e.berthId === 'A2'));
+  assert.ok(sim.isFree(s, 'A2'));
+  // Nach dem Laden ist nichts mehr im Ablegen
+  s.leaving = { A6: { boatId: 99, elapsed: 0 } };
+  sim.settleWaiting(s);
+  assert.ok(sim.isFree(s, 'A6'));
 });

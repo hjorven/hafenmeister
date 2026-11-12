@@ -1,4 +1,4 @@
-"""Draufsicht: Hafenentwicklung in fuenf Ausbaustufen, vom Bootssteg am Binnensee zur Kuestenmarina.
+"""Draufsicht: Hafenentwicklung in sechs Ausbaustufen, vom Bootssteg am Binnensee bis zum Seehafen.
 
 Aufruf: python3 hafen_von_oben.py [stufe ...]   Die Bilder landen in out/. Braucht Pillow und numpy.
 Eine Planeinheit entspricht 0,62 m, Norden ist oben.
@@ -91,6 +91,18 @@ def boat(d, cx, cy, ang, kind, L, B, col, rnd):
         pg(poly_uv(HULLS['pax'], L, B), hull); pg(poly_uv(HULLS['pax'], L, B, .92, .82), (236, 240, 244)); rect(-L * .4, L * .12, B * .34, (255, 255, 255))
         for i in range(7): ln((-L * .36 + i * L * .07, -B * .28), (-L * .36 + i * L * .07, B * .28), C['cover'], .35)
         rect(L * .16, L * .3, B * .3, C['glass'])
+    elif kind == 'cruise':   # Kreuzfahrtschiff
+        pg(poly_uv(HULLS['pax'], L, B), (250, 250, 250)); pg(poly_uv(HULLS['pax'], L, B, .92, .84), (228, 234, 240))
+        rect(-L * .44, L * .32, B * .38, (255, 255, 255)); rect(-L * .38, L * .26, B * .3, (236, 240, 244))
+        for i in range(12): ln((-L * .4 + i * L * .055, -B * .37), (-L * .4 + i * L * .055, B * .37), (198, 212, 224), .35)
+        rect(-L * .06, L * .06, B * .14, (96, 196, 222)); rect(-L * .3, -L * .2, B * .12, C['coral']); rect(L * .2, L * .28, B * .26, C['glass'])
+    elif kind == 'navy':     # Marineschiff (Korvette)
+        pg(poly_uv(HULLS['slim'], L, B), (126, 136, 148)); pg(poly_uv(HULLS['slim'], L, B, .9, .8), (150, 160, 170))
+        rect(-L * .14, L * .16, B * .3, (176, 184, 192)); rect(L * .06, L * .14, B * .24, C['glass']); dot(L * .3, 0, B * .09, (96, 104, 114))
+        rect(-L * .46, -L * .26, B * .36, (112, 120, 130)); dot(-L * .36, 0, B * .2, (150, 160, 170))
+    elif kind == 'srk':      # Seenotrettungskreuzer
+        pg(poly_uv(HULLS['cutter'], L, B), (255, 252, 246)); pg(poly_uv(HULLS['cutter'], L, B, .88, .8), (230, 234, 238))
+        rect(-L * .2, L * .2, B * .34, C['orange']); rect(L * .1, L * .2, B * .3, C['glass']); rect(-L * .48, -L * .3, B * .3, (210, 214, 220))
     elif kind == 'zees':
         pg(poly_uv(HULLS['cutter'], L, B), (58, 62, 74)); pg(poly_uv(HULLS['cutter'], L, B, .86, .78), C['teak']); ln((L * .18, 0), (-L * .2, 0), (150, 84, 60), .6); dot(L * .18, 0, .32, C['ink']); dot(-L * .3, 0, .28, C['ink'])
 
@@ -106,7 +118,7 @@ COLS = ['white'] * 8 + ['navy'] * 2 + ['red', 'yellow', 'green']
 
 class Harbor:
     def __init__(self, d, rnd, occ=.74):
-        self.d, self.rnd, self.occ = d, rnd, occ; self.count = dict(S=0, M=0, L=0, XL=0, T=0); self.piles = []; self.boats = []; self.lines = []
+        self.d, self.rnd, self.occ = d, rnd, occ; self.count = dict(S=0, M=0, L=0, XL=0, XXL=0, T=0); self.piles = []; self.boats = []; self.lines = []
     def line(self, pts, kind, wm):
         self.lines.append((pts, kind, wm * K))
     def boxes(self, p0, p1, side, cls, a0=5.0, a1=3.0, jw=2.4, fingers=False):
@@ -144,10 +156,12 @@ class Harbor:
     def render(self):
         d = self.d
         for pts, kind, wm in self.lines:
-            col = C['wood'] if kind == 'wood' else C['pont']
+            col = C['wood'] if kind == 'wood' else C['pave'] if kind == 'pier' else C['pont']
             w = max(2, int(wm * S)); sp = PP(pts)
             if kind in ('float', 'finger'):
                 d.line(sp, fill=C['pont2'], width=w + 2 * SS, joint='curve')
+            elif kind == 'pier':
+                d.line(sp, fill=C['rock'], width=w + 2 * SS, joint='curve')
             else:
                 d.line(sp, fill=C['wood2'], width=w + 2 * SS, joint='curve')
             d.line(sp, fill=col, width=w, joint='curve')
@@ -245,18 +259,29 @@ TITLES = {1: ('Stufe 1: Bootssteg am See', 'Ein kurzer Holzsteg am Binnensee. Ru
           2: ('Stufe 2: Dorfhafen am See', 'Steg A wird länger und knickt ab, Steg B bekommt einen T-Kopf. Slip, Fischersteg, Hafenmeister. Der See ist flach, also nur Boote mit wenig Tiefgang.'),
           3: ('Stufe 3: Durchstich zur Ostsee', 'Der Graben wird zum Kanal mit zwei Molen und Molenfeuern. Jetzt kommen Yachten von See durch den Durchstich. Hauptsteg C, Promenade, ausgebaggertes Becken.'),
           4: ('Stufe 4: Marina', 'Hauptsteg C wird länger und bekommt einen Stichsteg, dazu Schwimmsteg D mit Fingerstegen. Tankstelle am Durchstich, Seenotretter, Travellift und Winterlager.'),
-          5: ('Stufe 5: Küstenmarina', 'Vor der Nehrung entsteht der Außenhafen: zwei lange Molen, Kai für große Schiffe, Fahrgastanleger und Fischereikai. Schwimmsteg D gabelt sich.')}
+          5: ('Stufe 5: Küstenmarina', 'Vor der Nehrung entsteht der Außenhafen: zwei lange Molen, Kai für große Schiffe, Fahrgastanleger und Fischereikai. Schwimmsteg D gabelt sich.'),
+          6: ('Stufe 6: Seehafen', 'Westlich der Molen entsteht im tiefen Wasser eine lange T-Pier: außen legen Kreuzfahrtschiffe an, innen besuchen Marineschiffe den Hafen. An der Westmole liegt der Seenotrettungskreuzer.')}
+
+# Stufe 6: Grossschiffspier westlich der Westmole (T-Form), Steg vom Strand bei x = -225
+PIER_X, PIER_Y, PIER_W, PIER_E = -225, 262, -377, -77
 
 def render(stage, seed=5):
+    global X0, W
+    # Stufe 6 reicht weiter nach Westen. Die Verschiebung ist ein ganzes Vielfaches des Tiefenrasters
+    # (119 Zellen), damit die Tiefen dort, wo sich die Bilder ueberdecken, genau wie in Stufe 5 bleiben.
+    off = 119 if stage >= 6 else 0
+    X0, W = -300.0 - off * 4 / S, 1600 + off * 4 // SS
     size = (W * SS, H * SS); rnd = random.Random(seed)
-    shore = lambda x: (6.0 if (stage >= 3 and -150 <= x <= 202) else south(x))
+    shore = lambda x: (6.0 if (stage >= 3 and -150 <= x <= 202) else min(south(x), lake_n(x)))
     xs = [X0 - 12 + i * 4 for i in range(int((W / (S / SS)) / 4) + 8)]
     # ---------------- Wassertiefe (Raster)
     st = 4; gw, gh = size[0] // st + 2, size[1] // st + 2
     GX, GY = np.meshgrid(X0 + (np.arange(gw) * st) / S, Y1 - (np.arange(gh) * st) / S)
     so = 5 * np.sin(GX / 70) + 3 * np.sin(GX / 31 + 1) + .02 * np.maximum(0, -235 - GX) ** 2
     ln_ = 186 + 4 * np.sin(GX / 55 + 2) + 2.5 * np.sin(GX / 23); sn_ = 224 + 4 * np.sin(GX / 80 + 1) + 2 * np.sin(GX / 27)
-    wob = np.asarray(Image.fromarray((np.random.RandomState(12).rand(8, 10) * 255).astype(np.uint8)).resize((gw, gh), Image.BICUBIC), np.float32) / 255.0 - .5
+    gw0 = (1600 * SS) // st + 2   # Rauschen immer auf dem Raster der Stufen 1 bis 5, links am Rand fortgesetzt
+    wob = np.asarray(Image.fromarray((np.random.RandomState(12).rand(8, 10) * 255).astype(np.uint8)).resize((gw0, gh), Image.BICUBIC), np.float32) / 255.0 - .5
+    wob = wob[:, np.clip(np.arange(gw) - off, 0, gw0 - 1)]
     is_lake = (GY > so) & (GY < ln_); is_sea = GY >= sn_
     dl = 2.5 * (1 - np.exp(-np.maximum(0, np.minimum(GY - so, ln_ - GY)) / 26.0)) + .5 * wob
     ds = 5.0 * (1 - np.exp(-np.maximum(0, GY - sn_) / 42.0)) + .6 * wob
@@ -275,6 +300,8 @@ def render(stage, seed=5):
         else:
             dep = np.where(mask([(0, 226), (186, 226), (194, 278), (170, 304), (96, 320), (18, 312), (-8, 282)]) > .5, 5.0, dep)
             dep = np.where(mask([(108, 300), (160, 300), (184, 356), (132, 356)]) > .5, np.maximum(dep, 4.6), dep)
+        if stage >= 6:   # Liegewanne an der Grossschiffspier
+            dep = np.where(mask([(PIER_W - 40, 228), (PIER_E + 50, 228), (PIER_E + 60, 370), (PIER_W - 40, 370)]) > .5, np.maximum(dep, 8.5), dep)
     else:
         dep = np.where(mask([(163, 180), (171, 180), (173, 232), (165, 232)]) > .5, .5, dep)
     up = lambda arr: np.asarray(Image.fromarray(arr.astype(np.float32)).resize((gw * st, gh * st), Image.BICUBIC), np.float32)[:size[1], :size[0]]
@@ -285,14 +312,14 @@ def render(stage, seed=5):
     img = Image.fromarray(a).convert('RGBA'); d = ImageDraw.Draw(img, 'RGBA')
     # ---------------- Land: Festland und Nehrung
     d.polygon(PP([(x, shore(x)) for x in xs] + [(xs[-1], -200), (xs[0], -200)]), fill=C['sand'])
-    d.polygon(PP([(x, south(x) - 13 - 4 * math.sin(x / 23)) for x in xs] + [(xs[-1], -200), (xs[0], -200)]), fill=C['grass'])
-    d.polygon(PP([(-320, -84), (330, -84), (330, -93), (-320, -93)]), fill=C['road'])
+    d.polygon(PP([(x, min(south(x), lake_n(x)) - 13 - 4 * math.sin(x / 23)) for x in xs] + [(xs[-1], -200), (xs[0], -200)]), fill=C['grass'])
+    d.polygon(PP([(min(-320, X0 - 12), -84), (330, -84), (330, -93), (min(-320, X0 - 12), -93)]), fill=C['road'])
     spit = [(x, lake_n(x)) for x in xs] + [(x, sea_s(x)) for x in reversed(xs)]
     d.polygon(PP(spit), fill=C['sand'])
     d.polygon(PP([(x, lake_n(x) + 1) for x in xs] + [(x, lake_n(x) + 17 + 4 * math.sin(x / 17)) for x in reversed(xs)]), fill=(206, 222, 170))
     dr = random.Random(21)
     for _ in range(170):   # Duenengras
-        x = dr.uniform(X0, X0 + 620); y = lake_n(x) + dr.uniform(16, sea_s(x) - lake_n(x) - 9)
+        x = dr.uniform(X0, X0 + (620 if stage < 6 else 696)); y = lake_n(x) + dr.uniform(16, sea_s(x) - lake_n(x) - 9)
         q = P(x, y); r = dr.uniform(1.2, 2.4) * S; d.ellipse([q[0] - r, q[1] - r * .7, q[0] + r, q[1] + r * .7], fill=(196, 208, 150, 255))
     if stage >= 3:
         d.polygon(PP([(-150, -13), (202, -13), (202, 6), (-150, 6)]), fill=C['pave'])
@@ -307,6 +334,7 @@ def render(stage, seed=5):
     rr_ = random.Random(31)
     for _ in range(520):
         x = rr_.uniform(X0, X0 + 620); north = rr_.random() < .5
+        if south(x) > lake_n(x) - 8: continue
         if not north and stage >= 3 and -156 < x < 208: continue
         if stage >= 3 and north and CH[0] - 6 < x < CH[1] + 6: continue
         if stage < 3 and north and 158 < x < 176: continue
@@ -323,7 +351,7 @@ def render(stage, seed=5):
         d.line(PP(pts), fill=C['rock2'], width=int((w - 3.8) * S), joint='curve')
         q = P(*pts[-1]); r = (w - 3.8) * S / 2; d.ellipse([q[0] - r, q[1] - r, q[0] + r, q[1] + r], fill=C['rock2'])
     if stage in (3, 4): mole(MOLE_W34, 7.0); mole(MOLE_E34, 7.0)
-    if stage == 5:
+    if stage >= 5:
         mole(MOLE_W5, 9.0); mole(MOLE_E5, 9.0)
         d.polygon(PP([(2, 216), (150, 216), (150, 229), (2, 229)]), fill=C['pave'])
         for xx in range(10, 150, 14):
@@ -338,7 +366,7 @@ def render(stage, seed=5):
         A = [r0, (-110, 40), (-113, 58)] if stage == 2 else [r0, (-110, 40), (-117, 74)]
         H_.line(A + [(A[2][0] + 17, A[2][1] + 4)], 'wood', 2.4)
         H_.boxes(A[0], A[1], -1, 'S', a0=13, a1=1); H_.boxes(A[1], A[2], 1, 'S', a0=2, a1=2); H_.boxes(A[1], A[2], -1, 'S', a0=2, a1=2)
-        top = {2: 62, 3: 84, 4: 84, 5: 100}[stage]
+        top = {2: 62, 3: 84, 4: 84, 5: 100, 6: 100}[stage]
         B = [(-55, shore(-55) - 4), (-55, top)]; H_.line(B, 'wood', 2.4); H_.line([(-74, top), (-36, top)], 'wood', 2.4)
         H_.boxes(B[0], B[1], 1, 'M', a0=12, a1=4); H_.boxes(B[0], B[1], -1, 'M', a0=12, a1=4)
         H_.along((-74, top), (-36, top), 1, [('klassik', 10, 2.6, 'navy', True), ('motor', 9, 3.2, 'white', stage > 2)], cls='M', start=1)
@@ -362,12 +390,20 @@ def render(stage, seed=5):
         H_.line([(183.5, 232), (185.5, 254)], 'float', 2.0); H_.along((183.5, 232), (185.5, 254), 1, [('rescue', 11, 3.8, 'white', True)], jw=2.0, cls='T', start=2)
         H_.line([(149, 6), (149, 24)], 'float', 1.2); H_.line([(163, 6), (163, 24)], 'float', 1.2)
         H_.boats.append((156, 15, math.pi / 2, 'sail', 10.5 * K, 3.4 * K, 'white'))
-    if stage == 5:
+    if stage >= 5:
         f1 = [(116, 60), (102, 112)]; f2 = [(116, 60), (145, 104)]; H_.line(f1, 'float', 2.8); H_.line(f2, 'float', 2.8)
         H_.boxes(f1[0], f1[1], 1, 'L', a0=7, a1=2, jw=2.8, fingers=True); H_.boxes(f2[0], f2[1], 1, 'L', a0=31, a1=1, jw=2.8, fingers=True)
         H_.along((131, 83), (145, 104), -1, [('cat', 11.5, 6.2, 'white', True)], jw=4.4, start=2)
         H_.along((2, 229), (150, 229), 1, [('pax', 22, 5.8, 'white', True), ('tall', 36, 7.6, 'navy', True), ('super', 26, 6.2, 'white', True)], jw=0, cls='XL', start=2, gap=4)
         H_.along((-3, 232), (-9, 280), -1, [('cutter', 11, 3.9, 'navy', True), ('trawler', 10, 3.7, 'red', True)], jw=9, cls='L', start=3, gap=3, scale_jw=False)
+    if stage >= 6:
+        # Grossschiffspier: Steg vom Strand, Kopf parallel zur Kueste. Aussen Kreuzfahrt, innen zwei Marineplaetze.
+        H_.line([(PIER_X, sea_s(PIER_X) - 4), (PIER_X, PIER_Y)], 'pier', 5.0); H_.line([(PIER_W, PIER_Y), (PIER_E, PIER_Y)], 'pier', 5.0)
+        H_.along((PIER_W, PIER_Y), (PIER_E, PIER_Y), 1, [('cruise', 180, 29, 'white', True)], jw=5.0, cls='XXL', start=6)
+        H_.along((PIER_X + 4, PIER_Y), (PIER_E, PIER_Y), -1, [('navy', 90, 13, 'grey', True)], jw=5.0, cls='XXL', start=3)
+        H_.along((PIER_W, PIER_Y), (PIER_X - 4, PIER_Y), -1, [('tall', 88, 12, 'white', True)], jw=5.0, cls='XXL', start=3)
+        # Seenotrettungskreuzer an der Innenseite der Westmole, nahe der Einfahrt
+        H_.along((18, 312), (96, 320), -1, [('srk', 46, 10, 'white', True)], jw=9, cls='XXL', start=1, gap=0, scale_jw=False)
     H_.render()
     berths = {k: v for k, v in H_.count.items() if k != 'T'}
     # ---------------- Land-Objekte
@@ -381,6 +417,8 @@ def render(stage, seed=5):
         B_(6, -32, 14, 10, 'grey', hgt=7); B_(-60, -54, 26, 10, 'coral'); B_(-196, -44, 22, 11, 'coral')
     if stage >= 4:
         B_(48, -34, 26, 13, 'coral', hgt=5); B_(112, -30, 16, 9, 'coral'); B_(182, -56, 46, 26, (206, 216, 224), hgt=9)
+    if stage >= 6:
+        B_(-150, 198, 34, 10, (206, 216, 224), hgt=6); B_(-300, 198, 24, 9, 'grey', hgt=5)
     if stage >= 5:
         B_(-30, 204, 20, 10, (250, 212, 120), hgt=5); B_(56, 204, 16, 8, 'grey', hgt=5); B_(112, 204, 14, 8, 'coral', hgt=4)
     tr = random.Random(77); pts = []
@@ -404,8 +442,8 @@ def render(stage, seed=5):
             if cr.random() < .25: continue
             col = cr.choice([C['white'], C['navy'], C['red'], C['grey'], (250, 208, 96), (200, 206, 212)])
             d.polygon(PP([(x - 1.7, y - 3.6), (x + 1.7, y - 3.6), (x + 1.7, y + 3.6), (x - 1.7, y + 3.6)]), fill=col)
-    if stage == 5:
-        d.polygon(PP([(-320, 207), (-44, 207), (-44, 211), (-320, 211)]), fill=C['road'])
+    if stage >= 5:
+        d.polygon(PP([(min(-320, X0 - 12), 207), (-44, 207), (-44, 211), (min(-320, X0 - 12), 211)]), fill=C['road'])
     if stage >= 2:
         d.polygon(PP([(-131, shore(-128) - 10), (-123, shore(-128) - 10), (-123, shore(-128) + 9), (-131, shore(-128) + 9)]), fill=(206, 204, 198))
     jr = random.Random(9)
@@ -431,7 +469,7 @@ def render(stage, seed=5):
         beacon(d, *MOLE_W34[-1], G); beacon(d, *MOLE_E34[-1], R)
         for t_ in (30, 62): pair((168 + .3 * t_, 268 + .95 * t_), (-.3, -.95))
         route = curve([(196, 356), (176, 296), (168, 262), (167, 222), (167, 184), (128, 162), (74, 128) if stage == 3 else (70, 146)])
-    elif stage == 5:
+    elif stage >= 5:
         beacon(d, *MOLE_W5[-1], G); beacon(d, *MOLE_E5[-1], R)
         pair((146, 334), (-.5, -.866), 15); buoy(d, 166, 348, None, 'safe')
         route = curve([(158, 356), (134, 312), (150, 268), (166, 236), (167, 184), (128, 162), (70, 146)])
@@ -440,10 +478,11 @@ def render(stage, seed=5):
     if stage >= 3:
         pair((140, 167), (-.92, -.39), 9); pair((104, 150), (-.92, -.39), 9)
     dashed(d, route, (255, 255, 255, 235), 1.6)
+    if stage >= 6: dashed(d, curve([(-40, 356), (-120, 336), (-200, 326)]), (255, 255, 255, 235), 1.6)   # Grossschiffe
     # ---------------- Beschriftung
     n_ = lambda s_: stage == s_
     lb = lambda t_, x, y, new=False: label(d, t_, x, y, new)
-    lb('Ostsee', 250 if stage < 5 else 264, 300 if stage < 5 else 314); lb('Binnensee', 222, 60); lb('Nehrung', -120 if stage < 5 else -150, 205 if stage < 5 else 196)
+    lb('Ostsee', 250 if stage < 5 else 264, 300 if stage < 5 else 314); lb('Binnensee', 222, 60); lb('Nehrung', -120 if stage < 5 else -150 if stage < 6 else -232, 205 if stage < 5 else 196)
     if stage == 1:
         lb('Steg A', -126, 26, True); lb('Bootsverleih', -134, -36, True); lb('Toilette', -95, -38, True); lb('Schilf', 60, 12); lb('Graben, nur für Ruderboote', 108, 206); lb('Badeinsel', 24, 76)
         lb('Leihboote', -70, -22)
@@ -459,16 +498,33 @@ def render(stage, seed=5):
         lb('Stichsteg', 52, 108, n_(4)); lb('Schwimmsteg D', 160, 52, n_(4)); lb('Tankstelle', 84, 180, n_(4)); lb('Seenotretter', 222, 246, n_(4)); lb('Travellift', 156, 36, n_(4))
         lb('Winterlager', 182, -56, n_(4)); lb('Restaurant', 48, -34, n_(4))
     if stage == 4: lb('Fahrrinne', 232, 318); lb('Molenfeuer', 110, 270)
-    if stage == 5:
-        lb('Außenhafen', 96, 276, True); lb('Kai', 76, 208, True); lb('Fischereikai', -52, 262, True); lb('Fahrgastanleger', 62, 256, True); lb('Westmole', -34, 318, True); lb('Ostmole', 226, 284, True)
-        lb('Ansteuerungstonne', 226, 344, True); lb('Gabelung', 150, 118, True); lb('Fischhalle', -30, 190, True)
+    if stage >= 5:
+        lb('Außenhafen', 96, 276, n_(5)); lb('Kai', 76, 208, n_(5)); lb('Fahrgastanleger', 62, 256, n_(5)); lb('Ostmole', 226, 284, n_(5))
+        lb('Fischereikai', -52 if stage < 6 else 26, 262 if stage < 6 else 270, n_(5)); lb('Westmole', -34 if stage < 6 else -40, 318 if stage < 6 else 336, n_(5))
+        lb('Ansteuerungstonne', 226, 344, n_(5)); lb('Gabelung', 150, 118, n_(5)); lb('Fischhalle', -30, 190, n_(5))
+    if stage == 6:
+        lb('Kreuzfahrtpier', -227, 322, True); lb('Marineanleger', -300, 216, True); lb('Kreuzfahrtterminal', -150, 216, True); lb('Seenotkreuzer', 46, 290, True)
     # Wassertiefen aus dem Tiefenfeld
     f_ = font(int(11.5 * SS), 'italic')
     def dep_at(x, y):
         q = P(x, y); return float(depI[min(size[1] - 1, max(0, int(q[1]))), min(size[0] - 1, max(0, int(q[0])))])
-    spots = [(-190, 110), (10, 150), (240, 130), (60, 330)] if stage < 3 else [(-190, 110), (-84, 124), (62, 160), (240, 130)] + ([(60, 300)] if stage == 5 else [(60, 330)])
+    spots = [(-190, 110), (10, 150), (240, 130), (60, 330)] if stage < 3 else [(-190, 110), (-84, 124), (62, 160), (240, 130)] + ([(60, 300)] if stage >= 5 else [(60, 330)])
     for (tx, ty) in spots:
         d.text(P(tx, ty), f'{dep_at(tx, ty):.1f} m'.replace('.', ','), font=f_, fill=(34, 86, 108, 255), anchor='mm')
+    # ---------------- Wind, Nordpfeil, Massstab (im See, westlich der Stege)
+    wq = P(-282, 150); d.line([wq, (wq[0] + 54 * SS, wq[1])], fill=(255, 255, 255, 240), width=4 * SS)
+    d.polygon([(wq[0] + 66 * SS, wq[1]), (wq[0] + 50 * SS, wq[1] - 9 * SS), (wq[0] + 50 * SS, wq[1] + 9 * SS)], fill=(255, 255, 255, 240))
+    d.text((wq[0], wq[1] - 18 * SS), 'Wind meist aus West', font=font(int(12 * SS), 'sans'), fill=(34, 86, 108, 255), anchor='lm')
+    q = P(-278, 116); d.polygon([(q[0], q[1] - 20 * SS), (q[0] + 8 * SS, q[1] + 10 * SS), (q[0], q[1] + 4 * SS), (q[0] - 8 * SS, q[1] + 10 * SS)], fill=C['ink'] + (255,))
+    d.text((q[0] + 18 * SS, q[1] - 4 * SS), 'N', font=font(int(15 * SS), 'bold'), fill=C['ink'] + (255,), anchor='lm')
+    a_, b_ = P(-284, 84), P(-284 + 25 / .62, 84); d.line([a_, b_], fill=C['ink'] + (255,), width=3 * SS)
+    for e in (a_, b_): d.line([(e[0], e[1] - 5 * SS), (e[0], e[1] + 5 * SS)], fill=C['ink'] + (255,), width=3 * SS)
+    d.text(((a_[0] + b_[0]) / 2, a_[1] - 13 * SS), '25 m', font=font(int(12 * SS), 'sans'), fill=C['ink'] + (255,), anchor='mm')
+    # Ab Stufe 6 liegen Titel und Legende in einem Band ueber der Karte, damit sie die Pier nicht verdecken
+    BAND = 236 if stage >= 6 else 0
+    if BAND:
+        voll = Image.new('RGBA', (size[0], size[1] + BAND * SS), (247, 244, 236, 255)); voll.paste(img, (0, BAND * SS)); img = voll; d = ImageDraw.Draw(img, 'RGBA')
+    LX, LY = (660, 22) if BAND else (26, 164)
     # ---------------- Titel
     n = sum(berths.values()); t, sub = TITLES[stage]
     d.rounded_rectangle([26 * SS, 22 * SS, 640 * SS, 152 * SS], radius=14 * SS, fill=(255, 255, 255, 238))
@@ -483,7 +539,7 @@ def render(stage, seed=5):
     # ---------------- Legende
     rows = [('pile', 'Box mit Heckpfählen, Bug zum Steg')] + ([('finger', 'Schwimmsteg mit Fingerstegen')] if stage >= 4 else []) + \
            ([('beacon', 'Molenfeuer: einlaufend Grün rechts, Rot links'), ('buoy', 'Fahrwassertonnen')] if stage >= 3 else []) + [('route', 'Ansteuerung'), ('new', 'neu in dieser Stufe')]
-    lx, ly = 26 * SS, 164 * SS
+    lx, ly = LX * SS, LY * SS
     d.rounded_rectangle([lx, ly, lx + 372 * SS, ly + (len(rows) * 25 + 14) * SS], radius=12 * SS, fill=(255, 255, 255, 228))
     fl = font(int(12.5 * SS), 'sans')
     for i, (k_, text) in enumerate(rows):
@@ -503,18 +559,9 @@ def render(stage, seed=5):
         elif k_ == 'new':
             d.rounded_rectangle([cx_ - 16 * SS, cy_ - 8 * SS, cx_ + 16 * SS, cy_ + 8 * SS], radius=5 * SS, fill=C['navy'] + (255,))
         d.text((lx + 58 * SS, cy_), text, font=fl, fill=C['ink'] + (255,), anchor='lm')
-    # ---------------- Wind, Nordpfeil, Massstab (im See, westlich der Stege)
-    wq = P(-282, 150); d.line([wq, (wq[0] + 54 * SS, wq[1])], fill=(255, 255, 255, 240), width=4 * SS)
-    d.polygon([(wq[0] + 66 * SS, wq[1]), (wq[0] + 50 * SS, wq[1] - 9 * SS), (wq[0] + 50 * SS, wq[1] + 9 * SS)], fill=(255, 255, 255, 240))
-    d.text((wq[0], wq[1] - 18 * SS), 'Wind meist aus West', font=font(int(12 * SS), 'sans'), fill=(34, 86, 108, 255), anchor='lm')
-    q = P(-278, 116); d.polygon([(q[0], q[1] - 20 * SS), (q[0] + 8 * SS, q[1] + 10 * SS), (q[0], q[1] + 4 * SS), (q[0] - 8 * SS, q[1] + 10 * SS)], fill=C['ink'] + (255,))
-    d.text((q[0] + 18 * SS, q[1] - 4 * SS), 'N', font=font(int(15 * SS), 'bold'), fill=C['ink'] + (255,), anchor='lm')
-    a_, b_ = P(-284, 84), P(-284 + 25 / .62, 84); d.line([a_, b_], fill=C['ink'] + (255,), width=3 * SS)
-    for e in (a_, b_): d.line([(e[0], e[1] - 5 * SS), (e[0], e[1] + 5 * SS)], fill=C['ink'] + (255,), width=3 * SS)
-    d.text(((a_[0] + b_[0]) / 2, a_[1] - 13 * SS), '25 m', font=font(int(12 * SS), 'sans'), fill=C['ink'] + (255,), anchor='mm')
-    return img.convert('RGB').resize((W, H), Image.LANCZOS), berths
+    return img.convert('RGB').resize((W, H + BAND), Image.LANCZOS), berths
 
 if __name__ == '__main__':
     out = HERE / 'out'; out.mkdir(exist_ok=True)
-    for s_ in ([int(a) for a in sys.argv[1:]] or [1, 2, 3, 4, 5]):
+    for s_ in ([int(a) for a in sys.argv[1:]] or [1, 2, 3, 4, 5, 6]):
         im, b = render(s_); im.save(out / f'hafen_stufe{s_}.png'); print(s_, b, sum(b.values()))

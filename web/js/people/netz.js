@@ -7,20 +7,24 @@
 // 1 Einheit = 0,62 m). Die Gelaendeformen stammen aus skripte/konzeptbilder/hafen_von_oben.py.
 //
 //   const netz = baueNetz({ hafen, stufe, gebaeude })
-//   netz.nodes[i]        { x, y, art }  art: land, holz, schwimmsteg, kai, mole, bruecke, boot
+//   netz.nodes[i]        { x, y, art }  art: land, strand, sand, wasser, holz, schwimmsteg, kai, mole, bruecke, boot
 //   netz.komp[i]         Nummer der zusammenhaengenden Flaeche (Festland, Nehrung)
 //   netz.weg(a, b)       Liste von Knoten-Indizes von a nach b (A*), oder null
 //   netz.plaetze         Map Platz-id -> { x, y, node } (Boot und Einstieg am Steg)
 //   netz.ziele           [{ node, art, id, drinnen }] Ziele zum Hingehen
 //   netz.zuhause         [node] Haustueren und Kartenraender, hier kommen Spaziergaenger her
+//   netz.duenen          [node] Nehrungsweg hinter den Duenen, hier kommen Badegaeste her
+//   netz.flaechen        { festland, nehrung } Nummern der beiden Flaechen
+//   netz.zentrum         { x, y } Mitte der Stegwurzeln, dort ist am meisten los
 //   netz.naechster(x, y, komp)  naechster Knoten (optional nur in einer Flaeche)
 
 const coast = (x) => 5 * Math.sin(x / 70) + 3 * Math.sin(x / 31 + 1);
 export const suedufer = (x) => coast(x) + 0.02 * Math.max(0, -235 - x) ** 2;
+export const meerSued = (x) => 224 + 4 * Math.sin(x / 80 + 1) + 2 * Math.sin(x / 27);   // Ostseestrand der Nehrung
 export const ufer = (x, stufe) => (stufe >= 3 && x >= -150 && x <= 202 ? 6 : suedufer(x));
 
 const STRASSE_Y = -88;       // Dorfstrasse hinter dem Hafen
-const NEHRUNG_Y = 213;       // Weg auf der Nehrung zwischen See und Strand
+const NEHRUNG_Y = 209;       // Weg auf der Nehrung zwischen See und Strand (hinter den Duenen)
 const FEST_X = [-240, 236];  // Uferweg und Strasse, an den Enden geht es aus dem Bild
 const NEHRUNG_X0 = -290;
 const DURCHSTICH_X = 146;    // ab Stufe 3 endet der Nehrungsweg am Durchstich
@@ -103,8 +107,21 @@ export function baueNetz({ hafen, stufe, gebaeude = [] }) {
   const nPts = [];
   for (let x = NEHRUNG_X0; x <= nEnde; x += 10) nPts.push([x, NEHRUNG_Y]);
   if (nPts[nPts.length - 1][0] !== nEnde) nPts.push([nEnde, NEHRUNG_Y]);
-  linie(nPts, 'land', 'nehrung');
+  const nehrungsweg = linie(nPts, 'land', 'nehrung');
   const istNehrungsweg = (l) => l.gruppe === 'nehrung' && l.art === 'land';
+
+  // Strandweg am Ostseestrand (ab Stufe 5 nur westlich des Aussenhafens) mit Duenenuebergaengen
+  const sEnde = stufe >= 5 ? -14 : nEnde;
+  const sPts = [];
+  for (let x = NEHRUNG_X0; x <= sEnde; x += 10) sPts.push([x, meerSued(x) - 4]);
+  const strandweg = linie(sPts, 'strand', 'nehrung');
+  for (let x = NEHRUNG_X0 + 25; x <= sEnde - 10; x += 55) {
+    if (Math.abs(x + 170) < 10) continue;   // nicht unter der Seebruecke
+    const y1 = meerSued(x) - 4;
+    const q = linie([[x, NEHRUNG_Y], [x, y1]], 'land', 'nehrung');
+    paare.push([anschlussEnde(q, 0), anschluss(x, NEHRUNG_Y, (l) => l === nehrungsweg).h]);
+    paare.push([anschlussEnde(q, 1), anschluss(x, y1, (l) => l === strandweg).h]);
+  }
 
   const aussicht = [];       // Handles fuer Steg- und Molenkoepfe
   for (const pts of MOLEN[Math.min(5, stufe)] ?? []) {
@@ -159,6 +176,22 @@ export function baueNetz({ hafen, stufe, gebaeude = [] }) {
     if (i === 0) l.att.push({ seg: 0, t: 0, h });
     else l.att.push({ seg: i - 1, t: 1, h });
     return h;
+  }
+
+  // ---------------------------------------------------------------- Strand und Badestellen
+  // Plaetze zum Sitzen im Sand, davor eine Stelle im flachen Wasser zum Baden.
+  const spotsRoh = [];
+  for (let x = NEHRUNG_X0 + 12; x <= sEnde - 6; x += 22) {
+    if (Math.abs(x + 170) < 8) continue;
+    const h = anschluss(x, meerSued(x) - 4, (l) => l === strandweg);
+    spotsRoh.push({ x, y: meerSued(x) - 1.5, wasser: meerSued(x) + 6, h: h.h });
+  }
+  const stegWurzeln = (st?.stege ?? []).filter((s) => s.steg && s.bauart !== 'kai').map((s) => s.punkte[0][0]);
+  for (const x of [-230, -205, -180, -85, -72, -28, 40, 70, 95, 214, 228]) {
+    if (stufe >= 3 && x >= -156 && x <= 206) continue;          // dort ist Kaimauer und Promenade
+    if (stegWurzeln.some((sx) => Math.abs(sx - x) < 12)) continue;
+    const h = anschluss(x, uferwegY(x, stufe), (l) => l === uferweg);
+    spotsRoh.push({ x, y: suedufer(x) - 3, wasser: suedufer(x) + 5, h: h.h });
   }
 
   // ---------------------------------------------------------------- Liegeplaetze
@@ -230,6 +263,14 @@ export function baueNetz({ hafen, stufe, gebaeude = [] }) {
     else ziele.push({ node: n, art: g.art, id: g.id });
   }
   for (const h of aussicht) ziele.push({ node: haken[h], art: 'aussicht', id: null });
+  for (const sp of spotsRoh) {
+    const sand = add(sp.x, sp.y, 'sand');
+    link(sand, haken[sp.h]);
+    ziele.push({ node: sand, art: 'strand', id: null });
+    const bad = add(sp.x, sp.wasser, 'wasser');
+    link(bad, sand);
+    ziele.push({ node: bad, art: 'baden', id: null });
+  }
   for (let i = 0; i < nodes.length; i++) {
     if (nodes[i].art === 'bruecke' && adj[i].length === 1 && nodes[i].y > NEHRUNG_Y + 20) {
       // Kopf der Seebruecke
@@ -289,7 +330,7 @@ export function baueNetz({ hafen, stufe, gebaeude = [] }) {
       zu.add(a);
       for (const b of adj[a]) {
         if (zu.has(b)) continue;
-        if (nodes[b].art === 'boot' && b !== ziel) continue;
+        if ((nodes[b].art === 'boot' || nodes[b].art === 'wasser') && b !== ziel) continue;
         const ng = g.get(a) + dist(a, b);
         if (ng < (g.get(b) ?? Infinity)) {
           von.set(b, a);
@@ -312,5 +353,15 @@ export function baueNetz({ hafen, stufe, gebaeude = [] }) {
     return best;
   }
 
-  return { stufe, nodes, adj, komp, weg, naechster, plaetze, ziele, zuhause: zuhause.filter((n) => n >= 0) };
+  // Mitte des Hafens (Wurzeln der Stege): Spaziergaenger halten sich gern in der Naehe auf
+  const wurzeln = (st?.stege ?? []).filter((s) => s.steg && s.bauart !== 'kai').map((s) => s.punkte[0]);
+  const zentrum = wurzeln.length
+    ? { x: wurzeln.reduce((a, p) => a + p[0], 0) / wurzeln.length, y: wurzeln.reduce((a, p) => a + p[1], 0) / wurzeln.length }
+    : { x: 0, y: 0 };
+
+  // Duenenuebergaenge: hier kommen Badegaeste auf die Nehrung und gehen wieder
+  const duenen = nodes.map((n, i) => i).filter((i) => nodes[i].art === 'land' && nodes[i].y === NEHRUNG_Y);
+  const flaechen = { festland: komp[nodes.findIndex((n) => n.y < 0 && n.art === 'land')], nehrung: komp[duenen[0]] };
+
+  return { stufe, nodes, adj, komp, weg, naechster, plaetze, ziele, duenen, flaechen, zentrum, zuhause: zuhause.filter((n) => n >= 0) };
 }

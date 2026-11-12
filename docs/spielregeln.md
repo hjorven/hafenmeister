@@ -73,6 +73,7 @@ Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, 
 | `sim:turnedAway` | `{ boatId, reason: 'queueFull' \| 'patience' \| 'evening', rated }` |
 | `sim:dismissed` | `{ boatId }` |
 | `sim:atBuoy` | `{ boatId }`, Geduld läuft |
+| `sim:berthFreed` | `{ berthId, boatId }` Box nach der Abreise wieder frei (bis dahin gilt sie als belegt, `state.leaving`) |
 | `sim:feeReady` | `{ boatId, amount, wishesMet }`, Münze erscheint |
 | `sim:collected` | `{ boatId, amount }` |
 | `sim:departed` | `{ boatId, berthId, typeId, rating }` |
@@ -101,6 +102,7 @@ Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, 
 | `ui:collect` | `{ coin }` eine Münze, ohne Daten alle |
 | `ui:cancel` | Auswahl aufheben |
 | `boot:an-boje` | `{ id }` Boot ist an der Warteboje fest, ab jetzt zählt seine Geduld |
+| `boot:aus-box` | `{ id }` oder `{ platz }` abreisendes Boot ist aus der Box heraus, der Platz ist wieder frei. Ohne Meldung nach 20 s (`rules.leaveMax`) |
 | `services:abrechnung` | `{ summe }` wird gutgeschrieben |
 | `spielstand-geladen` | Spielstand neu übernehmen |
 

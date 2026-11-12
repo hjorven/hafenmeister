@@ -305,6 +305,13 @@ export async function initBridge(game) {
     const id = boatIdOf(d.id ?? d.boot ?? d);
     if (id != null) dispatch(sim.markAtBuoy(state, ctx, id).events);
   });
+  // 3D-Ansicht meldet: abreisendes Boot ist aus der Box heraus, der Platz ist wieder frei
+  game.on('boot:aus-box', (d = {}) => {
+    const boatId = boatIdOf(d.id ?? d.boot ?? null);
+    const berthId = d.platz ?? null;
+    if (boatId == null && berthId == null) return;
+    dispatch(sim.berthCleared(state, ctx, { boatId, berthId }).events);
+  });
   game.on('ui:cancel', () => api.select(null));
   // Münzen einstreichen: mit { coin } nur diese Münze (coin = Boot-id), sonst alle (Hafenhorn)
   game.on('ui:collect', (d = {}) => {

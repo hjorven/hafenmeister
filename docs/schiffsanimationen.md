@@ -73,5 +73,5 @@ Ein einziger `onTick` für alle Boote, keine Speicheranforderungen pro Bild. Lei
 
 ## Offen
 
-- Wartebojen und Revierrand stehen in `boat-view.js` (`BOJEN`, `REVIERRAND`), bis `harbor.js` eigene Positionen hat. Ab Stufe 3 kommen Boote noch über den See statt durch den Durchstich.
+- Ab Stufe 3 fahren Boote von der Reede durch die Einfahrt (ab Stufe 5 um die Ostmole herum in den Außenhafen) und den Durchstich in den See und auf demselben Weg wieder hinaus (`fahrweg` in `boat-view.js`). Boote weichen einander noch nicht aus.
 - Dauerlieger-Runde (`dauer:auslaufen`, `dauer:einlaufen`) und Bootsnamen am Heck folgen im nächsten Schritt.

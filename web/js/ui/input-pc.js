@@ -89,6 +89,7 @@ export function init(game) {
     ['Rechte Maustaste ziehen, Umschalt + Mausrad, <kbd>Q</kbd> <kbd>E</kbd>', 'Hafen drehen, rastet in 45-Grad-Schritten ein', () => !!cam.rotateBy],
     ['<kbd>0</kbd> oder <kbd>Pos1</kbd>', 'Ganzen Hafen zeigen, Norden wieder oben', () => true],
     ['<kbd>M</kbd>', 'Ton aus und an', () => !!game.audio],
+    ['<kbd>P</kbd>', 'Fotomodus', () => !!game.foto],
     ['<kbd>L</kbd>', 'Spielstand sichern oder laden', () => !!game.spielstand?.oeffnen],
     ['<kbd>?</kbd> oder <kbd>F1</kbd>', 'Diese Übersicht', () => true],
   ];

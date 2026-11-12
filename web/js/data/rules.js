@@ -92,6 +92,9 @@ export const RULES = {
   // Die Geduld zählt erst, wenn das Boot an der Boje fest ist (Meldung der 3D-Ansicht).
   // Meldet niemand etwas, gilt es nach approachMax Sekunden als angekommen.
   queue: { spots: { 1: 3, 2: 4, 3: 6, 4: 6, 5: 8 }, patience: 50, approachMax: 35 },
+  // Ein abreisendes Boot hält seine Box, bis die 3D-Ansicht 'boot:aus-box' meldet,
+  // spätestens leaveMax Sekunden nach dem Ablegen.
+  leaveMax: 20,
   // Vorschau: so viele kommende Boote sind sichtbar
   previewCount: 3,
 

@@ -251,7 +251,29 @@ export function fits(boat, berth, rules = RULES, stage = 99) {
 }
 
 export function isFree(state, berthId) {
-  return !state.berths[berthId];
+  return !state.berths[berthId] && !state.leaving?.[berthId];
+}
+
+/**
+ * Ein abreisendes Boot hält seine Box, bis es wirklich heraus ist. Die 3D-Ansicht meldet das mit
+ * 'boot:aus-box'; meldet niemand etwas, wird die Box nach rules.leaveMax Sekunden frei.
+ */
+function startLeaving(state, boatId, berthId) {
+  if (berthId == null) return;
+  if (!state.leaving) state.leaving = {};
+  state.leaving[berthId] = { boatId, elapsed: 0 };
+}
+
+/** Box freigeben, sobald das abreisende Boot heraus ist (per Boot-id oder Platz-id). */
+export function berthCleared(state, ctx, { boatId = null, berthId = null } = {}) {
+  const events = [];
+  for (const [id, l] of Object.entries(state.leaving || {})) {
+    if (id === berthId || (boatId != null && String(l.boatId) === String(boatId))) {
+      delete state.leaving[id];
+      events.push({ type: 'berthFreed', berthId: id, boatId: l.boatId });
+    }
+  }
+  return { ok: events.length > 0, events };
 }
 
 /** Hat der Platz diese Eigenschaft (zum Beispiel 'power')? Strom kann auch über ein Bauwerk kommen. */
@@ -554,7 +576,8 @@ function turnAway(state, ctx, boat, events, why) {
   state.stats.turnedAway++;
   state.stats.turnedAwayToday++;
   const ta = ctx.rules.turnAway;
-  const rated = random(state) < ta.chance;
+  // Sind alle Wartebojen belegt, dreht ein Boot ab, ohne gewartet zu haben: keine Bewertung.
+  const rated = why !== 'queueFull' && random(state) < ta.chance;
   if (rated) pushRating(state, ctx, ta.rating);
   events.push({ type: 'turnedAway', boatId: boat.id, reason: why, rated });
 }
@@ -602,6 +625,8 @@ export function settleWaiting(state) {
   for (const b of Object.values(state.boats || {})) {
     if (b.status === 'waiting' && !b.atBuoy) { b.atBuoy = true; b.atBuoySince = state.clock; }
   }
+  // Abreisende Boote zeigt die 3D-Ansicht nach dem Laden nicht mehr, ihre Boxen sind frei.
+  state.leaving = {};
 }
 
 export function markAtBuoy(state, ctx, boatId) {
@@ -768,6 +793,7 @@ function night(state, ctx, events) {
     state.stageGuests = (state.stageGuests || 0) + 1;
     delete state.berths[boat.berthId];
     delete state.boats[boat.id];
+    startLeaving(state, boat.id, boat.berthId);
     events.push({ type: 'departed', boatId: boat.id, berthId: boat.berthId, typeId: boat.typeId, rating });
   }
   for (const fn of ctx.hooks.night) fn({ state, ctx, events });
@@ -801,6 +827,10 @@ export function tick(state, ctx, dt) {
     const step = Math.min(rest, 1);
     rest -= step;
     state.clock += step;
+    for (const [berthId, l] of Object.entries(state.leaving || {})) {
+      l.elapsed += step;
+      if (l.elapsed >= (ctx.rules.leaveMax ?? 0)) events.push(...berthCleared(state, ctx, { berthId }).events);
+    }
     if (state.phase === 'day') {
       while (state.upcoming.length && state.upcoming[0].arriveAt <= state.clock) {
         arrive(state, ctx, state.upcoming.shift(), events);
@@ -817,6 +847,8 @@ export function tick(state, ctx, dt) {
         }
         if (b.atBuoy && state.clock - b.atBuoySince > queue.patience) turnAway(state, ctx, b, events, 'patience');
       }
+      // Hafenbüro mit Automatik: wartende Boote bekommen ihren Platz, sobald einer frei wird
+      if (state.queue.length && state.office >= ctx.rules.office.autoAssign) events.push(...autoAssign(state, ctx));
       if (state.clock >= dayLength) {
         state.upcoming = []; // wer heute nicht mehr eingelaufen ist, kommt nicht
         startEvening(state, ctx, events);
@@ -1022,6 +1054,13 @@ export function rulesFromEconomy(E, base = RULES) {
   }
 
   if (E.fischer?.pachtProTag != null) r.stationedFee = E.fischer.pachtProTag;
+
+  // Warten vor dem Hafen: Geduld an der Boje (Sekunden) und Warteplätze je Stufe
+  if (E.warten) {
+    r.queue = { ...r.queue };
+    if (E.warten.geduld != null) r.queue.patience = E.warten.geduld;
+    if (E.warten.plaetze) r.queue.spots = { ...r.queue.spots, ...E.warten.plaetze };
+  }
 
   if (E.hafenbuero) {
     const o = { ...r.office, cost: {}, fromStage: {}, names: {} };

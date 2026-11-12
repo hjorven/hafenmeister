@@ -19,12 +19,27 @@
 
 import { pathToFileURL } from 'node:url';
 import { ECONOMY as E } from '../web/js/data/economy.js';
-import { HAFEN } from '../web/js/data/harbor.js';
+import { HAFEN as HAFEN_DATEI } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
 import { SERVICES } from '../web/js/data/services.js';
 import { createState } from '../web/js/state.js';
 import * as sim from '../web/js/sim.js';
 import { erstelleRegeln, mitZahlen, neuerZustand } from '../web/js/services/rules.js';
+import { createScheduler } from '../web/js/events/scheduler.js';
+
+// Hat harbor.js für eine Stufe aus economy.js noch keine Plätze (Stufe 6 vor dem Export der
+// Pier), rechnet das Werkzeug mit den Plätzen der letzten Hafenstufe weiter und sagt das.
+const HAFEN_STUFEN = Math.max(...HAFEN_DATEI.plaetze.flatMap((p) => p.stufen));
+const ECO_STUFEN = Math.max(...E.stufen.map((x) => x.stufe));
+export const HAFEN_ERGAENZT = ECO_STUFEN > HAFEN_STUFEN;
+const HAFEN = HAFEN_ERGAENZT ? {
+  ...HAFEN_DATEI,
+  plaetze: HAFEN_DATEI.plaetze.map((p) => p.stufen.includes(HAFEN_STUFEN)
+    ? { ...p, stufen: [...p.stufen, ...Array.from({ length: ECO_STUFEN - HAFEN_STUFEN }, (_, i) => HAFEN_STUFEN + 1 + i)],
+      tiefe: { ...p.tiefe, ...Object.fromEntries(Array.from({ length: ECO_STUFEN - HAFEN_STUFEN }, (_, i) => [HAFEN_STUFEN + 1 + i, p.tiefe[HAFEN_STUFEN]])) },
+      lage: { ...p.lage, ...Object.fromEntries(Array.from({ length: ECO_STUFEN - HAFEN_STUFEN }, (_, i) => [HAFEN_STUFEN + 1 + i, p.lage[HAFEN_STUFEN]])) } }
+    : p),
+} : HAFEN_DATEI;
 
 // ------------------------------------------------------------------ Zufall (deterministisch)
 function rng(seed) {
@@ -38,13 +53,20 @@ function rng(seed) {
 }
 
 // ------------------------------------------------------------------ Daten prüfen
+export const hinweise = [];
 export function pruefen() {
   const fehler = [];
+  hinweise.length = 0;
   const plaetze = new Map(HAFEN.plaetze.map((p) => [p.id, p]));
   const besitz = new Map(); // id -> { quelle, stufe }
   const nimm = (id, quelle, stufe) => {
-    if (!plaetze.has(id)) fehler.push(`${quelle}: Platz ${id} gibt es nicht in harbor.js`);
-    else if (!plaetze.get(id).stufen.some((n) => n >= stufe))
+    if (!plaetze.has(id)) {
+      // Stufe, die harbor.js noch nicht kennt (Export folgt): nur Hinweis, kein Fehler
+      if (stufe > HAFEN_STUFEN) hinweise.push(`${quelle}: Platz ${id} fehlt noch in harbor.js (Stufe ${stufe})`);
+      else fehler.push(`${quelle}: Platz ${id} gibt es nicht in harbor.js`);
+      return;
+    }
+    if (!plaetze.get(id).stufen.some((n) => n >= stufe))
       fehler.push(`${quelle}: Platz ${id} gibt es ab Stufe ${stufe} nicht (nur ${plaetze.get(id).stufen.join(',')})`);
     if (besitz.has(id)) fehler.push(`Platz ${id} doppelt: ${besitz.get(id).quelle} und ${quelle}`);
     besitz.set(id, { quelle, stufe });
@@ -59,7 +81,7 @@ export function pruefen() {
     p.plaetze.forEach((id) => nimm(id, `stegprojekt ${p.id}`, p.stufe));
     // Gekaufte Plätze dürfen beim Umbau nicht verschwinden: je Stufe nie weniger als beim Kauf
     const anzahl = (n) => p.plaetze.filter((id) => plaetze.get(id)?.stufen.includes(n)).length;
-    const maxStufe = Math.max(...E.stufen.map((x) => x.stufe));
+    const maxStufe = Math.min(HAFEN_STUFEN, Math.max(...E.stufen.map((x) => x.stufe)));
     for (let n = p.stufe + 1; n <= maxStufe; n++) {
       if (anzahl(n) < anzahl(n - 1)) fehler.push(`Stegprojekt ${p.id}: in Stufe ${n} ${anzahl(n)} statt ${anzahl(n - 1)} Plätze (Ersatz fehlt)`);
     }
@@ -99,6 +121,8 @@ export function pruefen() {
 // (web/js/services/rules.js). Ein Bot spielt: weist Boote zu, kassiert, baut.
 const RULES = sim.rulesFromEconomy(E);
 const SVC = erstelleRegeln(mitZahlen(SERVICES, E.services));
+// Besuche, die als Besuch eines großen Schiffs (XXL) zählen (art aus web/js/data/services.js)
+const GROSSSCHIFF_BESUCHE = ['kreuzfahrt', 'flottenbesuch'];
 const PLATZ = new Map(HAFEN.plaetze.map((p) => [p.id, p]));
 
 const PROFILE = {
@@ -109,7 +133,7 @@ const PROFILE = {
   gemuetlich: { zuweisenAlle: 20, kaufAlleTage: 2, auslassen: 0.35, fehlZuweisung: 0.25 },
 };
 
-export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null } = {}) {
+export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true } = {}) {
   const prof = PROFILE[profilName];
   const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: RULES });
   const state = createState({ seed, rules: RULES });
@@ -117,9 +141,25 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   const svc = neuerZustand();
   let effekte = SVC.effekte(svc);
   sim.addHook(ctx, 'modifiers', () => ({ sizeFactor: effekte.gaeste, ratingBonus: effekte.ruf }));
+  // Ereignisse (Nebel, Sommertag, Sturm, Regatta, Hafenfest, Winter) wie im Spiel
+  const plan = mitEreignissen ? createScheduler({ seed }) : null;
+  const gebaeude = () => {
+    const b = { ...state.buildings, ...svc.gebaut };
+    if (effekte.freischalten.includes('regatta') || svc.gebaut.segelclub) b.segelclub = Math.max(b.segelclub ?? 0, 1);
+    b.seenotretterSchutz = effekte.sturmschutz;
+    return b;
+  };
+  if (plan) sim.addHook(ctx, 'modifiers', () => {
+    plan.advanceTo(state.day, { stage: state.stage, buildings: gebaeude() });
+    const m = plan.modifiers();
+    const id = plan.current?.id;
+    const f = id === 'regatta' ? effekte.regatta : id === 'hafenfest' ? effekte.hafenfest : 1;
+    if (f !== 1) { m.visitorFactor *= f; m.serviceIncomeFactor *= f; }
+    return m;
+  });
 
   const lauf = { stufeTag: { 1: 1 }, zielTag: {}, sparTage: {}, pausen: [], letzterKauf: 1, kaeufe: 0,
-    einStufe: {}, ende: null };
+    einStufe: {}, ende: null, grossschiffBesuche: 0 };
   let abgewiesen = {}; let unerfuellt = {};
   const rufWert = () => sim.reputation(state);
 
@@ -161,7 +201,10 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     for (const s of SERVICES) {
       const pr = SVC.pruefe(svc, s.id, { stufe: state.stage, ruf: rufWert() });
       if (!pr.freigeschaltet) continue;
-      o.push({ art: 'service', id: s.id, kosten: pr.kosten, prio: 3, tu: () => {
+      // In der letzten Stufe zählen Besuche großer Schiffe: Anleger mit Besuchen zuerst
+      // (auf sie wird gespart wie auf einen fehlenden Steg)
+      const besuch = !E.stufen[state.stage - 1].ausbau && GROSSSCHIFF_BESUCHE.includes(pr.def?.wirkung?.besuch?.art);
+      o.push({ art: 'service', id: s.id, kosten: pr.kosten, prio: besuch ? 1 : 3, tu: () => {
         if (!sim.spend(state, pr.kosten)) return false;
         SVC.bauen(svc, s.id, { stufe: state.stage, ruf: rufWert(), tag: state.day });
         effekte = SVC.effekte(svc);
@@ -206,7 +249,9 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   const zielErreicht = () => {
     const z = E.stufen[state.stage - 1].ziel;
     if (E.stufen[state.stage - 1].ausbau) return false;
-    if (rufWert() < z.ruf || (state.stageGuests || 0) < z.gaeste) return false;
+    if (rufWert() < z.ruf) return false;
+    if (z.gaeste != null && (state.stageGuests || 0) < z.gaeste) return false;
+    if (z.grossschiffBesuche != null && lauf.grossschiffBesuche < z.grossschiffBesuche) return false;
     if (z.allePlaetze && sim.openJettyProjects(state, ctx).some((p) =>
       (RULES.berthProjects[p.id] || []).some((id) => PLATZ.get(id)?.stufen.includes(state.stage)))) return false;
     return true;
@@ -248,8 +293,13 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
       for (const k of ['S', 'M', 'L', 'XL']) if (!frei.some((b) => b.size === k || PLATZ.get(b.id)?.klasse === k)) abgewiesen[k] = 1;
       if (!frei.some((b) => PLATZ.get(b.id)?.art === 'stirn')) abgewiesen.stirn = 1;
     }
-    const abschluss = SVC.tagesabschluss(svc, { tag, winter, wetter: 'sonne', boote: liegend }, r);
+    const wetter = plan?.current?.id === 'sturm' ? 'sturm' : (plan && (plan.weather(tag).rain ?? 0) > 0.3) ? 'regen' : 'sonne';
+    const abschluss = SVC.tagesabschluss(svc, { tag, winter, wetter, boote: liegend }, r);
     sim.addIncome(state, abschluss.summe);
+    // Besuche großer Schiffe (Kreuzfahrtschiff, Flottenbesuch) zählen in der letzten Stufe
+    if (!E.stufen[state.stage - 1].ausbau) {
+      lauf.grossschiffBesuche += abschluss.besuche.filter((b) => GROSSSCHIFF_BESUCHE.includes(b.art)).length;
+    }
     lauf.einStufe[stufe] = (lauf.einStufe[stufe] || 0) + state.stats.totalIncome - geldVorher;
 
     if (zielErreicht()) { lauf.ende = state.day; break; }
@@ -321,6 +371,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     console.error('Datenfehler:\n- ' + fehler.join('\n- '));
     process.exit(1);
   }
+  if (hinweise.length) console.warn('Hinweis:\n- ' + hinweise.join('\n- '));
+  if (HAFEN_ERGAENZT) console.warn(`Hinweis: harbor.js kennt nur Stufen bis ${HAFEN_STUFEN}, gerechnet wird dort mit den Plätzen der Stufe ${HAFEN_STUFEN}.`);
   if (args.includes('--pruefen')) {
     console.log(`Daten in Ordnung: ${HAFEN.plaetze.length} Plätze, ${E.stegprojekte.length} Stegprojekte, ${Object.keys(E.bauwerke).length} Bauwerke, ${Object.keys(E.services).length} Services.`);
   } else if (args.includes('--verlauf')) {

@@ -27,6 +27,7 @@ const LONG_PRESS_MS = 500;
 const MOVE_SLOP_PX = 10;
 
 const isTouchDevice = () => matchMedia('(pointer: coarse)').matches;
+const isPhone = () => matchMedia('(max-width: 599px), (max-height: 499px)').matches;
 
 export function init(game) {
   const el = game.canvas;
@@ -90,6 +91,33 @@ export function init(game) {
   // Kein Kontextmenue bei langem Druecken (Android, Desktop-Touchscreens)
   el.addEventListener('contextmenu', (e) => { if (isTouchDevice()) e.preventDefault(); });
 
+  // ---------- Knopfspalte rechts (Handy hochkant) ----------
+  // Pause, Uebersicht, Foto, Ton und Spielstand stehen rechts untereinander.
+  // Die Startansicht und der Knopf "Uebersicht" lassen diesen Streifen frei,
+  // damit keine Warteboje unter einem Knopf liegt.
+  const rightColumn = () => {
+    if (!isPhone() || innerWidth > innerHeight) return 0;
+    const btn = document.getElementById('btn-pause');
+    if (!btn) return 0;
+    // Aus den CSS-Werten statt aus dem Layout: beim Start ist die Leiste evtl. noch nicht gezeichnet
+    const cs = getComputedStyle(btn);
+    if (cs.position !== 'absolute') return 0;
+    const px = (v) => parseFloat(v) || 0;
+    return px(cs.right) + px(cs.width) + 4;
+  };
+  if (typeof cam.setInsetRight === 'function') {
+    const update = () => cam.setInsetRight(rightColumn());
+    // Erst wenn alle Module geladen sind, steht die Knopfspalte. Die Kamera zeigt
+    // dann noch die Startansicht, also einmal neu einpassen.
+    game.on('ready', () => requestAnimationFrame(() => {
+      const before = cam.insetRight || 0;
+      update();
+      if ((cam.insetRight || 0) !== before) cam.reset();
+    }));
+    game.on('resize', update);
+    addEventListener('orientationchange', () => setTimeout(update, 300));
+  }
+
   // ---------- Boot gewaehlt: Stege frei halten (nur Handy) ----------
   // Die Bootskarte liegt unten ueber der Karte. Damit man die Stege darueber
   // antippen kann, wird die Karte knapp (CSS) und die Ansicht um die halbe
@@ -97,7 +125,6 @@ export function init(game) {
   // Waehrend einer Schleppleine (gesten.js: ui:tow ... ui:tow-end) bleibt die
   // Ansicht stehen und die Karte verborgen (Klasse hm-leine), sonst wandern die
   // Ringe unter dem Finger weg. Erst nach dem Loslassen geht es weiter.
-  const isPhone = () => matchMedia('(max-width: 599px), (max-height: 499px)').matches;
   let shifted = 0;
   let towing = false;
   const release = () => {

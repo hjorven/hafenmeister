@@ -1,7 +1,8 @@
 // Menschen im Hafen (docs/plan.md, Abschnitt 11a): kleine Figuren ohne Gesicht, die von ihren
 // Booten an Land gehen und mit Wegfindung (A*) ueber Stege, Uferweg, Promenade, Molen und
 // Nehrung zu Toilette, Dusche, Kiosk, Restaurant, Strandkoerben und Aussichtspunkten laufen.
-// Dazu Spaziergaenger aus dem Ort und Badegaeste. Reine Belebung, keine Story.
+// Dazu Spaziergaenger aus dem Ort und Badegaeste am Strand, je nach Stufe, Jahreszeit,
+// Tageszeit und Wetter. Reine Belebung, keine Story, keine eigene Zahl in der Oberflaeche.
 // Gehoert dem Thread "Menschen im Hafen herumlaufen lassen".
 //
 // Schnittstelle:
@@ -12,7 +13,7 @@
 //   game.people.bootAngelegt({ id, platz, groesse, art, modell })  von Hand, z. B. zum Testen
 //   game.people.bootLegtAb(id)
 // Hoert auf: boot:angelegt, boot:ablegen (Spielregeln), boat:moored, boat:cast-off, boat:left
-// (Schiffsanimationen), stufe, phase, ready.
+// (Schiffsanimationen), stufe, phase, season, weather, ready.
 // Zum Ausprobieren: index.html?stufe=4&leute=voll  (alle Plaetze der Stufe mit Crews belegt)
 import * as THREE from 'three';
 import { HAFEN } from '../data/harbor.js';
@@ -71,6 +72,8 @@ export function init(game) {
   let netz = null;
   let stufe = 1;
   let abend = false;
+  let jahreszeit = 'sommer';
+  let regen = false;
   let animGesehen = false;     // Schiffsanimationen senden boat:moored
   let spawnUhr = 0;
 
@@ -96,6 +99,7 @@ export function init(game) {
       case 'mole': y = Math.max(1.4, hoeheLand(x, z)); break;
       case 'bruecke': y = 1.9; break;
       case 'boot': y = BORD_HOEHE[klasse] ?? 0.8; break;
+      case 'wasser': y = -1.0; break;   // badet: nur Kopf und Schultern schauen heraus
       default: y = hoeheLand(x, z);
     }
     return { x, y, z };
@@ -129,10 +133,10 @@ export function init(game) {
   }
 
   // ---------------------------------------------------------------- Figuren
-  function neueFigur({ boot = null, node, klasse = 'M', sichtbar = true, buendel = 1 }) {
+  function neueFigur({ boot = null, node, klasse = 'M', sichtbar = true, buendel = 1, typ = boot == null ? 'ort' : 'crew' }) {
     if (agenten.length >= max) return null;
     const a = {
-      boot, klasse, buendel,
+      boot, klasse, buendel, typ, sitzt: false,
       node,                  // letzter erreichter Knoten
       pfad: null, i: 0, t: 0, // Punkte in Welt, Segment, Strecke im Segment
       zustand: sichtbar ? 'steht' : 'anbord',
@@ -175,13 +179,27 @@ export function init(game) {
 
   function zielWaehlen(a) {
     const komp = netz.komp[a.node];
-    const moeglich = netz.ziele.filter((z) => netz.komp[z.node] === komp && P.ZIELE[z.art]);
-    if (!moeglich.length) return null;
+    const vorliebe = P.VORLIEBE[a.typ] ?? {};
+    const standard = a.typ === 'strand' ? 0.2 : 1;
+    const gewicht = (z) => {
+      const def = P.ZIELE[z.art];
+      if (!def || netz.komp[z.node] !== komp) return 0;
+      if (def.nurBadewetter && !badewetter()) return 0;
+      if (z.node === a.node) return 0;
+      let g = def.gewicht * (vorliebe[z.art] ?? standard);
+      // Leute aus dem Ort bleiben meist in der Naehe des Hafens (dort, wo man hinschaut)
+      if (a.typ === 'ort') {
+        const n = netz.nodes[z.node];
+        g *= 0.15 + Math.exp(-Math.hypot(n.x - netz.zentrum.x, n.y - netz.zentrum.y) / P.NAEHE);
+      }
+      return g;
+    };
     let summe = 0;
-    for (const z of moeglich) summe += P.ZIELE[z.art].gewicht;
+    const w = netz.ziele.map((z) => { const g = gewicht(z); summe += g; return g; });
+    if (summe <= 0) return null;
     let r = Math.random() * summe;
-    for (const z of moeglich) { r -= P.ZIELE[z.art].gewicht; if (r <= 0) return z; }
-    return moeglich[moeglich.length - 1];
+    for (let i = 0; i < w.length; i++) { r -= w[i]; if (w[i] > 0 && r <= 0) return netz.ziele[i]; }
+    return null;
   }
 
   // Naechster Schritt eines Menschen, der gerade irgendwo angekommen oder fertig ist
@@ -192,8 +210,8 @@ export function init(game) {
       if (bootDaten.ablegen || (abend && !a.bleibtAbends)) return heimAnBord(a, bootDaten);
       if (a.zustand !== 'anbord' && Math.random() < P.ZURUECK_AN_BORD && a.ziel) return heimAnBord(a, bootDaten);
     } else if (a.besuche <= 0 || (abend && Math.random() < 0.5)) {
-      // Spaziergaenger geht nach Hause oder aus dem Bild
-      const heim = netz.zuhause.filter((n) => netz.komp[n] === netz.komp[a.node]);
+      // Spaziergaenger geht nach Hause oder aus dem Bild, Badegaeste ueber die Duenen
+      const heim = (a.typ === 'strand' ? netz.duenen : netz.zuhause).filter((n) => netz.komp[n] === netz.komp[a.node]);
       if (heim.length) return befehl(a, wahl(heim), 'weg');
       return entfernen(a);
     }
@@ -229,6 +247,7 @@ export function init(game) {
   }
 
   function sichtbarMachen(a) {
+    a.sitzt = false;
     if (a.zustand === 'drinnen' || a.zustand === 'anbord') a.zustand = 'steht';
   }
 
@@ -246,6 +265,7 @@ export function init(game) {
     const z = a.ziel;
     const art = z ? P.ZIELE[z.art] : null;
     a.zustand = art?.drinnen ? 'drinnen' : 'verweilt';
+    a.sitzt = !!art?.sitzen;
     a.uhr = art ? zufall(...art.dauer) : zufall(4, 8);
     if (abend && a.bleibtAbends && z?.art === 'restaurant') a.uhr = 1e9;
     // zum Wasser schauen (Norden ist -z)
@@ -414,30 +434,79 @@ export function init(game) {
     spaziergaenger(dt);
   }
 
-  // Spaziergaenger aus dem Ort und Badegaeste, damit der Hafen auch ohne Gaeste lebt
-  function spaziergaenger(dt) {
-    spawnUhr -= dt;
-    if (spawnUhr > 0 || !netz || !netz.zuhause.length) return;
-    spawnUhr = zufall(2, 5);
-    const soll = Math.round((P.SPAZIERGAENGER[stufe] ?? 0) * (abend ? 0.5 : 1));
-    const ist = agenten.filter((a) => a.boot == null).length;
-    if (ist >= soll) return;
-    const start = wahl(netz.zuhause);
-    const a = neueFigur({ node: start, klasse: 'M' });
-    if (!a) return;
-    a.zustand = 'steht';
-    a.uhr = 0;
+  // Menschen ohne Boot: Spaziergaenger aus dem Ort und Badegaeste. Wie viele, haengt von Stufe,
+  // Jahreszeit, Tageszeit und Regen ab (Zahlen in data/people.js).
+  function soll(typ) {
+    const basis = P.SPAZIERGAENGER[typ]?.[stufe] ?? 0;
+    const f = (P.JAHRESZEIT[typ]?.[jahreszeit] ?? 1) * (abend ? P.ABENDS[typ] : 1) * (regen ? P.REGEN : 1);
+    return Math.round(basis * f);
   }
 
-  // Beim Start und nach Stufenwechsel ein paar Spaziergaenger schon unterwegs verteilen
-  function vorverteilen() {
-    const soll = Math.round((P.SPAZIERGAENGER[stufe] ?? 0) * (abend ? 0.5 : 1));
-    const knoten = netz.nodes.map((n, i) => i).filter((i) => netz.nodes[i].art === 'land');
-    for (let k = 0; k < soll && knoten.length; k++) {
-      const a = neueFigur({ node: wahl(knoten), klasse: 'M' });
-      if (!a) break;
+  function badewetter() {
+    return jahreszeit === 'sommer' && !abend && !regen;
+  }
+
+  function startKnoten(typ) {
+    if (typ === 'strand') return netz.duenen.length ? wahl(netz.duenen) : null;
+    const heim = netz.zuhause.filter((n) => netz.komp[n] === netz.flaechen.festland);
+    return heim.length ? wahl(heim) : null;
+  }
+
+  function spaziergaenger(dt) {
+    spawnUhr -= dt;
+    if (spawnUhr > 0 || !netz) return;
+    spawnUhr = zufall(1.5, 4);
+    for (const typ of ['ort', 'strand']) {
+      const ist = agenten.reduce((n, a) => n + (a.typ === typ && a.zustand !== 'entfernt' ? 1 : 0), 0);
+      if (ist >= soll(typ)) continue;
+      const start = startKnoten(typ);
+      if (start == null) continue;
+      const a = neueFigur({ node: start, typ });
+      if (!a) return;
       a.zustand = 'steht';
-      a.uhr = zufall(0, 3);
+      a.uhr = 0;
+    }
+  }
+
+  // Beim Start und nach Stufenwechsel die Menschen ohne Boot schon verteilen, damit der Hafen
+  // nicht erst minutenlang leer ist. Badegaeste sitzen dann schon am Strand.
+  function vorverteilen() {
+    for (const typ of ['ort', 'strand']) {
+      const flaeche = typ === 'strand' ? netz.flaechen.nehrung : netz.flaechen.festland;
+      const orte = typ === 'strand'
+        ? netz.ziele.filter((z) => z.art === 'strand' && netz.komp[z.node] === flaeche).map((z) => z.node)
+        : netz.nodes.map((n, i) => i).filter((i) => netz.nodes[i].art === 'land' && netz.komp[i] === flaeche &&
+            Math.hypot(netz.nodes[i].x - netz.zentrum.x, netz.nodes[i].y - netz.zentrum.y) < P.NAEHE * 1.5);
+      const n = soll(typ);
+      for (let k = 0; k < n && orte.length; k++) {
+        const a = neueFigur({ node: wahl(orte), typ });
+        if (!a) return;
+        if (typ === 'strand' && Math.random() < 0.6) {
+          a.zustand = 'verweilt';
+          a.sitzt = true;
+          a.blick = Math.PI / 2 + zufall(-0.8, 0.8);
+          a.uhr = zufall(5, 60);
+        } else {
+          a.zustand = 'steht';
+          a.uhr = zufall(0, 3);
+        }
+      }
+    }
+  }
+
+  // Wenn Jahreszeit, Tageszeit oder Wetter wechseln: ueberzaehlige gehen nach und nach heim
+  function anpassen() {
+    for (const typ of ['ort', 'strand']) {
+      const liste = agenten.filter((a) => a.typ === typ && a.zustand !== 'entfernt');
+      let zuviel = liste.length - soll(typ);
+      for (const a of liste) {
+        if (zuviel <= 0) break;
+        a.besuche = 0;
+        if (a.zustand === 'verweilt' || a.zustand === 'steht') a.uhr = Math.min(a.uhr, zufall(1, 15));
+        zuviel--;
+      }
+      // Badende kommen aus dem Wasser, wenn kein Badewetter ist
+      if (!badewetter()) for (const a of liste) if (a.ziel?.art === 'baden' && a.zustand === 'verweilt') a.uhr = Math.min(a.uhr, zufall(1, 6));
     }
   }
 
@@ -456,7 +525,7 @@ export function init(game) {
       quat.multiply(kipp);
       const s = a.buendel > 1 ? 1.15 : 1;
       skala.set(s, s, s);
-      pos.set(a.x, a.y + hub, a.z);
+      pos.set(a.x, a.y + hub - (a.sitzt ? 0.6 : 0), a.z);
       mat.compose(pos, quat, skala);
       koerper.setMatrixAt(n, mat);
       kopf.setMatrixAt(n, mat);
@@ -530,6 +599,18 @@ export function init(game) {
   game.on('boat:cast-off', (info) => bootLegtAb(info?.id ?? info));
   game.on('boat:left', (info) => bootWeg(info?.id ?? info));
   game.on('stufe', (n) => setStage(typeof n === 'object' ? n?.stufe ?? n?.stage : n));
+  game.on('season', (s) => {
+    const part = typeof s === 'object' ? s?.part : s;
+    if (!part || part === jahreszeit) return;
+    jahreszeit = part;
+    if (netz) anpassen();
+  });
+  game.on('weather', (w) => {
+    const neu = (w?.rain ?? 0) >= 0.3 || (w?.snow ?? 0) > 0.5;
+    if (neu === regen) return;
+    regen = neu;
+    if (netz) anpassen();
+  });
   game.on('phase', (p) => {
     const neu = (typeof p === 'object' ? p?.phase : p) === 'abend';
     if (neu === abend) return;
@@ -538,8 +619,12 @@ export function init(game) {
     if (!abend) for (const b of boote.values()) for (const a of b.agenten) if (a.zustand === 'anbord' && !b.ablegen) a.uhr = zufall(1, 30);
     // Abends: wer nicht im Restaurant bleibt, geht beim naechsten Halt an Bord
     if (abend) for (const a of agenten) if (a.zustand === 'verweilt' || a.zustand === 'drinnen') a.uhr = Math.min(a.uhr, zufall(1, 8));
+    if (netz) anpassen();
   });
   game.on('ready', () => {
+    const tag = game.state?.day ?? game.state?.tag ?? 1;
+    jahreszeit = game.events?.season?.(tag)?.part ?? jahreszeit;
+    abend = (game.state?.phase ?? 'day') === 'evening';
     const s = params.get('stufe') ?? game.state?.stufe ?? game.state?.stage ?? stufe;
     stufe = 0;
     setStage(s);
