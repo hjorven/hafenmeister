@@ -58,3 +58,9 @@ Auf Handy oder Tablet im selben WLAN testen: statt `localhost` die IP-Adresse de
 - `tools/check-pages.sh`: sucht absolute Pfade und Verweise auf Dateien, die es nicht gibt.
 
 Nur `web/` wird veröffentlicht. Konzepte (`docs/`) und Skripte (`skripte/`) bleiben im Repo, landen aber nicht auf der Seite.
+
+## Wenn nichts veröffentlicht wird
+
+- **Läufe stehen ewig auf "Queued", Jobs starten nicht:** Meist liegt es an der Abrechnung des Accounts, nicht am Repo. Unter https://github.com/settings/billing/budgets prüfen, ob ein Actions-Budget von 0 Dollar alles stoppt, und unter https://github.com/settings/billing/usage nachsehen, welches (private) Repo den Actions-Speicher füllt. Dort alte Artefakte und Caches löschen.
+- **"pages build and deployment" bricht mit startup_failure ab:** Die Pages-Quelle steht noch auf "Deploy from a branch". Auf **GitHub Actions** umstellen (siehe oben).
+- Der Workflow läuft nur, wenn sich `web/`, die beiden Skripte in `tools/` oder der Workflow selbst ändern. Bei vielen Merges kurz hintereinander wird nur der neueste Stand veröffentlicht, ältere Läufe werden abgebrochen.
