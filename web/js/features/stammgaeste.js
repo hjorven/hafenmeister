@@ -15,7 +15,7 @@
 import * as sim from '../sim.js';
 import { regelnBereit } from './regeln-bereit.js';
 import { random } from '../random.js';
-import { BOOTSNAMEN, HEIMATHAEFEN } from '../data/bootsnamen.js';
+import { BOOTSNAMEN, heimathaefen } from '../data/bootsnamen.js';
 
 export const STAMM = {
   chance: 0.15,       // Anteil der neuen Boote, die Stammgäste sind (wenn es welche gibt)
@@ -63,7 +63,7 @@ export function ankunftHook({ state, ctx, boat }) {
     }
   }
   boat.bootsname = pick(state, BOOTSNAMEN);
-  boat.heimathafen = pick(state, HEIMATHAEFEN);
+  boat.heimathafen = pick(state, heimathaefen(state.region, boat.size));
   boat.besuche = 1;
 }
 

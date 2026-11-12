@@ -38,6 +38,23 @@ test('jedes Gastboot hat Namen am Heck und Heimathafen', () => {
   }
 });
 
+test('kleine Boote kommen aus der Nähe, große auch von weiter her, je nach Region', async () => {
+  const { HEIMAT_NACH_REGION, heimathaefen } = await import('../web/js/data/bootsnamen.js');
+  const o = HEIMAT_NACH_REGION.ostsee;
+  assert.deepEqual(heimathaefen('ostsee', 'S'), o.nah);
+  assert.ok(!heimathaefen('ostsee', 'S').includes('Husum'));
+  assert.ok(heimathaefen('ostsee', 'XL').includes('Visby'));
+  assert.ok(heimathaefen('nordsee', 'S').includes('Husum'));
+  // Im Spiel: jedes S-Boot an der Ostsee hat einen nahen Heimathafen
+  const { ctx, state } = neu(3, 1);
+  state.region = 'ostsee';
+  for (let i = 0; i < 4; i++) {
+    sim.tick(state, ctx, 0);
+    for (const b of state.upcoming) if (b.size === 'S' && b.besuche === 1) assert.ok(o.nah.includes(b.heimathafen), b.heimathafen);
+    sim.runDay(state, ctx);
+  }
+});
+
 test('zufriedene Gäste werden Stammgäste und kommen wieder', () => {
   const { ctx, state } = neu(21);
   spiele(state, ctx, 40);
