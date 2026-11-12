@@ -34,7 +34,7 @@ Die Gesten aus `gesten.js` gelten am PC genauso: wartendes Boot mit der Maus von
 | Doppelklick auf ein wartendes Boot | Boot fährt selbst in den besten Platz (`ui:auto-einfahren`) |
 | Doppelklick auf Wasser oder Land | Näher heran |
 | Rechtsklick | Abbrechen (`ui:cancel`) |
-| Rechte Taste ziehen | Hafen drehen, rastet in 45-Grad-Schritten ein. Solange die Kamera kein Drehen anbietet: Karte verschieben |
+| Rechte Taste ziehen, Umschalt + Mausrad | Hafen drehen, rastet beim Loslassen in 45-Grad-Schritten ein |
 | Mittlere Taste ziehen | Karte verschieben |
 | Mausrad | Zoomen zum Mauszeiger. Firefox liefert Zeilen statt Pixel, Trackpad-Pinch kommt als Rad mit Strg. Beides wird umgerechnet, sonst zoomt es dort kaum |
 | Mauszeiger | Greifhand über wartenden Booten, Kopierpfeil über Münzen, Zeigefinger über allem anderen Antippbaren |
@@ -53,8 +53,8 @@ Die Gesten aus `gesten.js` gelten am PC genauso: wartendes Boot mit der Maus von
 | `Esc` | Abbrechen |
 | `W` `A` `S` `D`, Pfeiltasten | Karte verschieben, auch in der Pause |
 | `+` `-` | Zoomen |
-| `0`, `Pos1` | Ganzer Hafen |
-| `Q` `E` | Drehen, sobald die Kamera es kann |
+| `0`, `Pos1` | Ganzer Hafen, Norden wieder oben |
+| `Q` `E` | Um 45 Grad drehen |
 | `M` | Ton aus und an |
 | `L` | Spielstand sichern oder laden (`game.spielstand.oeffnen()`) |
 | `?`, `F1`, Knopf „?“ | Übersicht aller Kürzel |
@@ -74,12 +74,10 @@ Die Übersicht zeigt nur Kürzel, deren Funktion es gerade gibt. Tastenschilder 
 
 Passen zum 3D-Hafen und bleiben bei höchstens zwei Klicks pro Aktion. Ein 3D-Prototyp mit Drehen, Hinfliegen und Wartebojen lag kurz unter `web/prototyp/pc/`, die Erkenntnisse stehen hier.
 
-1. **Hafen drehen:** `game.camera.rotateBy`, `rotateFree`, `snapRotation` und `flyTo` in `core/camera.js`. `input-pc.js` nutzt sie sofort, sobald es sie gibt. Im Prototyp hat Drehen in 45-Grad-Schritten am meisten Spaß gemacht, freies Drehen wirkte unruhig.
-2. **Fernglas:** Maus auf ein Boot und Taste `Z` halten: weiche Vergrößerung mit runder Maske, Name, Heimathafen und Wünsche daneben. Loslassen, und die Kamera springt zurück.
-3. **Hafenhorn:** Klick auf das Hafenmeisterhaus lässt das Horn tuten, alle wartenden Boote mit freiem Platz fahren nacheinander ein.
-4. **Ausbau-Vorschau mit dem Mausrad:** Maus über ein Gebäude, Umschalt halten und scrollen: Die nächste Ausbaustufe erscheint durchsichtig, Preis und Wirkung daneben. Klick baut.
-5. **Kräuselringe:** Auf freiem Wasser ziehen kleine Ringe hinter dem Mauszeiger her. Im Prototyp unauffällig und gemütlich.
-6. **Fotomodus:** Taste `P` blendet die Oberfläche aus, Klick speichert ein Bild des Hafens.
+1. **Fernglas:** Maus auf ein Boot und Taste `Z` halten: weiche Vergrößerung mit runder Maske, Name, Heimathafen und Wünsche daneben. Loslassen, und die Kamera springt zurück.
+2. **Hafenhorn:** Klick auf das Hafenmeisterhaus lässt das Horn tuten, alle wartenden Boote mit freiem Platz fahren nacheinander ein.
+3. **Ausbau-Vorschau mit dem Mausrad:** Maus über ein Gebäude, Alt halten und scrollen: Die nächste Ausbaustufe erscheint durchsichtig, Preis und Wirkung daneben. Klick baut.
+4. **Kräuselringe:** Auf freiem Wasser ziehen kleine Ringe hinter dem Mauszeiger her. Im Prototyp unauffällig und gemütlich.
 
 ## Schnittstelle
 

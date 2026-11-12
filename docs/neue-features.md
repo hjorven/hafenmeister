@@ -8,7 +8,7 @@ Alle sechs bleiben im Rahmen des Plans: keine Story, keine Figuren mit Namen, ke
 |---|---|---|
 | Fotomodus mit Rundflug | nur Grundgerüst | gebaut: `web/js/ui/fotomodus.js` |
 | Hafen schauen | Fotomodus, Hafenbüro-Automatik aus `sim.js` | Rundflug fertig, Automatik wartet auf `sim.js` |
-| Dauerlieger | `sim.js` (Liegeplätze, Tageslauf), Bootsmodelle, Animationen | beschrieben |
+| Dauerlieger | `sim.js`, Animationen für Aus- und Einlaufen | gebaut: `web/js/features/dauerlieger.js` |
 | Stammgäste | `sim.js` (Gäste, Bewertung), Logbuch | beschrieben |
 | Wetter an der Flagge | `events/events.js` (Ankündigung am Vortag) | beschrieben |
 | Tagesziele an der Tafel | `sim.js`, Hafenbüro als Gebäude | beschrieben |
@@ -35,14 +35,17 @@ Ein Ruhemodus für ein Tablet auf dem Tisch: Rundflug plus Hafenbüro weist alle
 
 ## 3. Dauerlieger
 
+Gebaut: `web/js/features/dauerlieger.js`, Tests in `tests/dauerlieger.test.mjs`.
+
 Eine echte Marina hat nicht nur Gastplätze, sondern feste Plätze mit Dauerliegern, die tagsüber raussegeln und abends wiederkommen.
 
-- Ab Stufe 2 kann man einen Liegeplatz auf der Infokarte zum **Dauerplatz** machen. Ein Dauerplatz bringt jeden Abend ein festes, kleineres Liegegeld (Startwert 60 Prozent des Grundpreises), ohne dass man etwas tun muss. Gastplätze bringen mehr, brauchen aber Zuweisen.
-- Das ist die neue kleine Entscheidung: sichere Einnahme oder mehr Platz für Gäste.
-- Am Dauerplatz steht ein kleines grün-rotes Schild: grün = Boot ist draußen, der Platz ist bis zum Abend frei für einen Gast mit einer Nacht. Rot = Boot ist da. Das ist das Rot-Grün-System echter Ostseehäfen.
-- **Tageslauf:** morgens laufen einige Dauerlieger aus (Segel werden vor dem Hafen gesetzt), abends kommen sie zurück und legen an. Bei Sturm bleiben alle im Hafen.
-- Wer einem Gast einen grünen Platz gibt, muss ihn bis zum Abend räumen: Der Gast reist am nächsten Morgen ab, bevor der Dauerlieger wieder raus will. Gäste mit mehr als einer Nacht passen nicht auf grüne Plätze (sie leuchten nicht auf).
-- Daten in `sim.js`: Liegeplatz `{ dauer: true, dauerBootId, draussen: true/false }`, Ereignisse `dauer:auslaufen`, `dauer:einlaufen` für die Animationen.
+- Ab Stufe 2 einen freien Liegeplatz antippen (ohne ausgewähltes Boot). Die Infokarte bietet „Zum Dauerplatz machen“. Dort liegt dann ein eigenes Boot, am liebsten ein Segelboot.
+- Ein Dauerplatz bringt jeden Abend einen festen Anteil des Gastpreises (`rules.stationedFeeShare`, heute 50 Prozent), ohne Zuweisen. Gastplätze bringen mehr, brauchen aber Arbeit. Das ist die neue kleine Entscheidung.
+- **Tagestörn:** An etwa 4 von 10 Tagen läuft das Boot morgens aus und kommt abends zurück. Der Platz bleibt in der Zeit belegt (rotes Schild).
+- **Mehrtägiger Törn:** An etwa 1 von 8 Tagen geht es für 1 bis 3 Tage weg. Dann ist das Schild grün, und der Platz leuchtet für Gäste auf, die spätestens in der Nacht abreisen, in der das Boot zurückkommt. Liegt dann noch ein Gast dort (zum Beispiel nach einem Sturm), wartet das Boot eine Nacht.
+- Antippen eines Dauerplatzes zeigt Boot, Rot oder Grün, Rückkehrtag und den Knopf „Dauerplatz aufheben“.
+- Das Hafenbüro beachtet die Regel beim automatischen Zuweisen.
+- Schnittstelle: Hook `fit` in `sim.js` (zusätzliche Passregel), `game.sim.dispatch(events)` in `bridge.js`. Spielstand in `state.modules.dauer`. Ereignisse `dauer:auslaufen { id, platzId, tage }` (tage 0 = Tagestörn) und `dauer:einlaufen { id, platzId }` für Animation und Ton.
 
 ## 4. Stammgäste
 

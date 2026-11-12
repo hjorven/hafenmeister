@@ -232,6 +232,8 @@ export async function initBridge(game) {
       announce();
     },
     addHook: (name, fn) => sim.addHook(ctx, name, fn),
+    // Ereignisse anderer Module so melden wie die der Regeln (sim:<type>, sim:change)
+    dispatch: (events) => dispatch(events),
     addService: (key, def) => sim.addService(ctx, key, def),
     // Lesen
     reputation: () => sim.reputation(state),

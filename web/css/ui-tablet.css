@@ -125,8 +125,7 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
-  .hm #money { min-width: 7.5em; }
-  .hm #rep { min-width: 5.5em; }
+  .hm #money, .hm #rep { flex: none; }
   .hm #day {
     flex: 0 1 260px;
     display: flex;
@@ -139,6 +138,44 @@
     color: var(--t-ink-soft);
     white-space: nowrap;
   }
+  /* Sonne aus gesten.js: läuft auf einer eigenen Spur rechts neben "Tag 3 · Abend",
+     damit sie den Text nie verdeckt (wie am PC). */
+  .hm #day {
+    --t-track: 150px;
+    flex: 0 0 auto;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    min-height: 44px;
+    padding-right: calc(var(--t-track) + 20px);
+    position: relative;
+  }
+  .hm #day::after {
+    content: "";
+    position: absolute;
+    right: 4px;
+    width: var(--t-track);
+    top: 50%;
+    height: 8px;
+    margin-top: -4px;
+    border-radius: 4px;
+    background: rgba(40, 54, 72, 0.12);
+    pointer-events: none;
+  }
+  .hm #day .hm-sonne {
+    left: calc(100% - 4px - var(--t-track) + var(--anteil) * (var(--t-track) - 28px) + 14px);
+  }
+  @media (orientation: portrait) { .hm #day { --t-track: 100px; } }
+  /* Kleine Tablets hochkant (iPad mini, 7-Zoll-Android): obere Leiste enger packen */
+  @media (orientation: portrait) and (max-width: 800px) {
+    .hm #day { --t-track: 64px; padding-left: 4px; padding-right: calc(var(--t-track) + 12px); }
+    .hm #hud-top { gap: 4px; padding-left: 12px; }
+    .hm #hud-top .hud-btn { padding: 0 9px; font-size: 14px; }
+  }
+  @media (orientation: portrait) and (max-width: 700px) { .hm #day { --t-track: 48px; } }
+  /* Notfall: passt die obere Leiste nicht, lässt sie sich wischen statt abzuschneiden */
+  .hm #hud-top { overflow-x: auto; overflow-y: visible; scrollbar-width: none; }
+  .hm #hud-top::-webkit-scrollbar { display: none; }
   .hm #day .day-bar {
     display: block;
     height: 8px;
@@ -157,8 +194,10 @@
   .hm[data-phase="abend"] #day .day-bar > i { background: #f4a261; }
   .hm #hud-top .hud-btn {
     flex: none;
-    min-width: var(--t-touch);
+    min-width: 48px;
     min-height: 48px;
+    padding: 0 12px;
+    font-size: 15px;
     border: 0;
     border-radius: 12px;
     background: rgba(40, 54, 72, 0.08);
@@ -375,9 +414,8 @@
 
   /* Kleine Tablets im Hochformat (z. B. 600 bis 700 px): Leiste etwas schmaler */
   @media (orientation: portrait) and (max-width: 700px) {
-    .hm #money { min-width: 6.5em; }
-    .hm #rep { min-width: 4.5em; }
     .hm #btn-build { width: 84px; }
+    .hm #hud-top { gap: 4px; padding-left: 12px; }
   }
 
   /* Große Tablets (iPad Pro 12,9 Zoll und größer): mehr Luft */
