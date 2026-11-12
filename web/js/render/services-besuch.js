@@ -87,14 +87,16 @@ const AUFTRITTE = {
   },
   kreuzfahrtterminal: {
     art: 'kreuzfahrt',
-    schiffe: [{ modell: 'kreuzfahrtschiff', weg: [[275, 293], [275, 360], [262, 440]], liegeKurs: 270 }],
+    // Liegeplatz P01 an der Aussenseite des Pierkopfs (harbor.js Stufe 6)
+    schiffe: [{ modell: 'kreuzfahrtschiff', weg: [[-227, 290], [-150, 296], [-90, 340], [-60, 440]], liegeKurs: 180 }],
     plan: { an: 0.03, ab: 0.68 },
   },
   marineanleger: {
     art: 'flottenbesuch',
     schiffe: [
-      { modell: 'korvette', weg: [[-241, 280], [-241, 350], [-230, 440]], liegeKurs: 270 },
-      { modell: 'minenjagdboot', weg: [[-257, 290], [-257, 360], [-248, 450]], liegeKurs: 270 },
+      // MA01 und MA02 an der Innenseite des Pierkopfs
+      { modell: 'korvette', weg: [[-146, 247], [-70, 248], [-50, 300], [-40, 440]], liegeKurs: 180 },
+      { modell: 'minenjagdboot', weg: [[-304, 248], [-395, 252], [-410, 320], [-400, 440]], liegeKurs: 0 },
     ],
     plan: { an: 0.05, ab: 0.7 },
   },

@@ -481,11 +481,12 @@ function seenotretter(stufe) {
   box(g, 3.2, 0.3, 3.2, FARBE.red, 5.2, LAND_Y + 7.4, 0.5);
   const fl = flagge(g, -5, -3.6, 7, FARBE.orange);
   // Eigener Steg zum Dienstplatz aus js/data/harbor.js (179,1 / 243,2, Richtung 85 Grad)
-  const [dx, dz] = P(179.1 - 200, 243.2 - 211);
-  // Schwimmsteg laengsseits an der Ostseite des Liegeplatzes, zur Ostmole hin
-  steg(g, dx + 3.6, dz + 8, dx + 3.6, dz - 10, 1.8, FARBE.pont, 0.5);
-  const boot = new THREE.Group();
+  // Stufe 1: Dienstplatz in der Kanalmuendung (harbor.js), Kreuzer: SK01 an der Westmole (57/303)
   const gross = stufe >= 2;
+  const [dx, dz] = gross ? P(57 - 200, 303 - 211) : P(179.1 - 200, 243.2 - 211);
+  // Schwimmsteg laengsseits an der Ostseite des Liegeplatzes, zur Ostmole hin
+  if (!gross) steg(g, dx + 3.6, dz + 8, dx + 3.6, dz - 10, 1.8, FARBE.pont, 0.5);
+  const boot = new THREE.Group();
   const L = gross ? 20 : 10.5, B = gross ? 5 : 3.6;
   rumpf(boot, L, B, gross ? 2.6 : 1.6, FARBE.white, 0, 0, 0, 0, FARBE.white);
   box(boot, L * 0.32, gross ? 2.6 : 1.8, B * 0.62, FARBE.orange, L * 0.05, gross ? 1.8 : 1, 0);
@@ -496,7 +497,7 @@ function seenotretter(stufe) {
     zyl(boot, 0.18, 7, FARBE.white, L * 0.05, 4.4, 0, 6);
     rumpf(boot, 7, 2.4, 1.2, FARBE.orange, -L * 0.35, 1.8, 0);          // Tochterboot in der Heckwanne
   }
-  const ruhe = { x: dx, z: dz, ry: (85 * Math.PI) / 180 };
+  const ruhe = { x: dx, z: dz, ry: gross ? 0 : (85 * Math.PI) / 180 };
   boot.position.set(ruhe.x, 0, ruhe.z);
   boot.rotation.y = ruhe.ry;
   g.add(boot);
@@ -588,17 +589,13 @@ function kreuzfahrtterminal(stufe) {
   dach.rotation.z = Math.PI / 2;
   dach.rotation.x = Math.PI / 2;
   dach.scale.set(1, 1, 0.25);
-  // Lange Pier ins tiefe Wasser vor der Ostmole, Nord-Sued
-  const [px] = P(258 - 268, 0);
-  const [, pz0] = P(0, 222 - 206), [, pz1] = P(0, 320 - 206);
-  steg(g, px, pz0, px, pz1, 8, FARBE.road, 1.6);
-  for (let i = 0; i < 8; i++) poller(g, px + 3.6, pz0 + (pz1 - pz0) * (i + 0.5) / 8, 1.6);
-  // Gangway-Turm an der Pier
+  // Gangway-Turm am Kopf der T-Pier (Liegeplatz P01 bei -227/290, Pierkopf auf y 262)
+  const [px, pz] = P(-227 - -150, 262 - 198);
   const turm = new THREE.Group();
-  turm.position.set(px + 2.4, 1.6, pz0 + (pz1 - pz0) * 0.45);
+  turm.position.set(px, 1.3, pz - 1.5);
   box(turm, 2, 9, 2, FARBE.steel);
-  const gw = box(turm, 1.4, 1.4, 5, FARBE.white, 2.8, 7, 0);
-  gw.rotation.y = Math.PI / 2;
+  const gw = box(turm, 1.4, 1.4, 5, FARBE.white, 0, 7, -2.8);
+  turm.userData.fest = true;
   g.add(turm);
   // Busse vor dem Terminal
   const busse = stufe >= 2 ? 3 : 1;
@@ -607,7 +604,8 @@ function kreuzfahrtterminal(stufe) {
   const fl = [flagge(g, -lang / 2 - 1.5, -5.5, 9, FARBE.blue), flagge(g, -lang / 2 + 0.5, -5.5, 9, FARBE.red)];
   if (stufe >= 2) {
     const turm2 = turm.clone();
-    turm2.position.z = pz0 + (pz1 - pz0) * 0.75;
+    turm2.position.x = px + 30;
+    turm2.userData.fest = true;
     g.add(turm2);
   }
   return { group: g, update: (dt, t) => fl.forEach((f, i) => wehen(f, t, i)) };
@@ -615,16 +613,12 @@ function kreuzfahrtterminal(stufe) {
 
 function marineanleger(stufe) {
   const g = new THREE.Group();
-  // Breite Betonpier senkrecht zum Ufer (Vorbild Kiel)
-  const [px] = P(-225 - -215, 0);
-  const [, pz0] = P(0, 222 - 206), [, pz1] = P(0, 300 - 206);
-  steg(g, px, pz0, px, pz1, 10, FARBE.rock, 1.6);
-  for (let i = 0; i < 6; i++) for (const s of [-4.6, 4.6]) poller(g, px + s, pz0 + (pz1 - pz0) * (i + 0.5) / 6, 1.6);
-  // Wachhaus, Schranke und Zaun
-  box(g, 3, 2.6, 3, FARBE.navyGrey, px + 7, LAND_Y, pz0 + 6);
-  box(g, 3.2, 0.3, 3.2, FARBE.ink, px + 7, LAND_Y + 2.6, pz0 + 6);
-  const schranke = box(g, 6, 0.15, 0.15, FARBE.red, px + 3, LAND_Y + 1, pz0 + 4);
-  for (let i = 0; i < 12; i++) box(g, 0.08, 2, 2.4, FARBE.steel, -18 + i * 0.01, LAND_Y, -2 + i * 2.5);
+  // Wache und Schranke an der Wurzel der T-Pier (Plan x -225), Zaun zum Strand
+  const [px, pz0] = P(-225 - -300, 214 - 198);
+  box(g, 3, 2.6, 3, FARBE.navyGrey, px - 7, LAND_Y, pz0 + 2);
+  box(g, 3.2, 0.3, 3.2, FARBE.ink, px - 7, LAND_Y + 2.6, pz0 + 2);
+  const schranke = box(g, 6, 0.15, 0.15, FARBE.red, px - 3, LAND_Y + 1, pz0 + 4);
+  for (let i = 0; i < 12; i++) box(g, 2.4, 2, 0.08, FARBE.steel, px - 10 - i * 2.5, LAND_Y, pz0);
   // Backsteinbau mit Fahnenmast
   haus(g, 16, 6, 8, FARBE.brick, FARBE.ink, -6, 4);
   const fl = flagge(g, 4, -3, 10, FARBE.navy);
@@ -651,6 +645,27 @@ function marineanleger(stufe) {
       schranke.rotation.z = Math.max(0, Math.sin(t * 0.2)) * 1.2;
     },
   };
+}
+
+// T-Pier fuer Grossschiffe (Stufe 6): Betonpier mit Pollern, Deck 1,3 m wie der Kai.
+// linien: Linienzuege in Planeinheiten (HAFEN.stufen[6].stege mit steg 'P').
+export function tPier(linien, breite = 5) {
+  const g = new THREE.Group();
+  g.name = 'pier-grossschiffe';
+  for (const l of linien) {
+    for (let i = 1; i < l.length; i++) {
+      const a = new THREE.Vector3(l[i - 1][0] * U, 0, -l[i - 1][1] * U);
+      const b = new THREE.Vector3(l[i][0] * U, 0, -l[i][1] * U);
+      steg(g, a.x, a.z, b.x, b.z, breite, FARBE.road, 1.3);
+      const len = a.distanceTo(b), n = Math.floor(len / 12);
+      const d = b.clone().sub(a).normalize(), q = new THREE.Vector3(-d.z, 0, d.x);
+      for (let k = 1; k < n; k++) for (const s of [-1, 1]) {
+        const p = a.clone().addScaledVector(d, (k * len) / n).addScaledVector(q, s * (breite / 2 - 0.4));
+        poller(g, p.x, p.z, 1.3);
+      }
+    }
+  }
+  return g;
 }
 
 export const MODELLE = {

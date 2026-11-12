@@ -20,7 +20,8 @@
 import * as THREE from 'three';
 import { SERVICES } from '../data/services.js';
 import { erstelleRegeln, neuerZustand, mitZahlen } from '../services/rules.js';
-import { baueModell, LAND_Y, mat, FARBE } from './services-models.js';
+import { baueModell, tPier, LAND_Y, mat, FARBE } from './services-models.js';
+import { HAFEN } from '../data/harbor.js';
 import { initBesuche } from './services-besuch.js';
 
 const U = 0.62;
@@ -138,7 +139,21 @@ export function init(game) {
     return g;
   }
 
+  // Grossschiffpier ab Stufe 6 (Linien aus harbor.js, steg 'P'; stege.js zeichnet bauart 'pier' nicht)
+  let pier = null;
+  function zeigePier() {
+    const soll = stufe >= 6;
+    if (soll && !pier) {
+      const aus = (HAFEN.stufen?.[6]?.stege ?? []).filter((l) => l.steg === 'P').map((l) => l.punkte);
+      pier = tPier(aus.length ? aus : [[[-225, 216], [-225, 262]], [[-377, 262], [-77, 262]]]);
+      gruppe.add(pier);
+    } else if (!soll && pier) {
+      gruppe.remove(pier); entsorge(pier); pier = null;
+    }
+  }
+
   function aktualisiere(mitAnimationFuer = null) {
+    zeigePier();
     const z = zustand();
     for (const s of R.katalog) {
       if (!sichtbar(s.id)) continue;

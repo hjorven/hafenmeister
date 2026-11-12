@@ -215,8 +215,8 @@ export const SERVICES = [
   },
   {
     id: 'kreuzfahrtterminal', name: 'Kreuzfahrtterminal', gruppe: 'grosse-schiffe', abStufe: 6,
-    kurz: 'Pier vor der Ostmole. Einmal pro Woche legt ein Kreuzfahrtschiff an.',
-    lage: { x: 268, y: 206, dreh: 0 }, radius: 24,
+    kurz: 'Terminal an der Großschiffpier. Einmal pro Woche legt ein Kreuzfahrtschiff an.',
+    lage: { x: -150, y: 198, dreh: 0 }, radius: 20,
     stufen: [
       { name: 'Kreuzfahrtpier', kosten: 60000, ruf: 4.0, braucht: [{ id: 'fahrgastanleger', stufe: 1 }],
         wirkung: { freischalten: ['kreuzfahrtschiff'],
@@ -231,7 +231,7 @@ export const SERVICES = [
   {
     id: 'marineanleger', name: 'Marineanleger', gruppe: 'sicherheit', abStufe: 6,
     kurz: 'Liegeplatz für Marineschiffe. Flottenbesuche bringen Zuschauer.',
-    lage: { x: -215, y: 206, dreh: 0 }, radius: 24,
+    lage: { x: -300, y: 198, dreh: 0 }, radius: 20,
     stufen: [
       { name: 'Marineanleger', kosten: 50000, ruf: 4.0, braucht: [{ id: 'seenotretter', stufe: 1 }],
         wirkung: { freischalten: ['marine'], sturmschutz: 0.1,
