@@ -304,7 +304,8 @@ export function init(game) {
     for (const m of ringGroup.children) m.scale.setScalar(s);
   });
 
-  buildBtn?.addEventListener('click', () => (cardMode === 'build' ? closeCard() : openCard('build')));
+  // Den Bauen-Knopf uebernimmt ui/bauen.js (Baumodus mit Vorschau); die Liste hier bleibt nur als Rueckfall
+  buildBtn?.addEventListener('click', () => { if (game.bauen) return; cardMode === 'build' ? closeCard() : openCard('build'); });
   game.on('sim:change', schedule);
   game.on('sim:select', ({ boatId, berths }) => {
     note = '';
