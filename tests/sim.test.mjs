@@ -724,11 +724,19 @@ test('Volle Bojen: Boot mit freier passender Box fährt direkt ein statt abzudre
   assert.equal(ev.filter((e) => e.type === 'turnedAway').length, 0);
   assert.equal(ev.filter((e) => e.type === 'selfEntered' && e.direct).length, 12);
   assert.equal(new Set(s.upcoming.concat(Object.values(s.boats)).filter((b) => b.id >= 700).map((b) => b.berthId)).size, 12);
-  // Die Zeit zum Selbstlenken zählt ab Ankunft, nicht erst ab der Boje
+  // Bei Andrang (mehr als die Hälfte der Bojen vergeben) zählt die Zeit schon ab Ankunft
   const t = quietState({ stage: 3 });
-  t.upcoming = [make(800)];
+  t.upcoming = [make(800), make(801), make(802), make(803)];
   sim.tick(t, ctxLive, 1);
   assert.equal(t.boats[800].status, 'waiting');
   sim.tick(t, ctxLive, RULES.queue.selfEnterAfter);
   assert.equal(t.boats[800].status, 'moored');
+  // Ruhiger Betrieb: ein einzelnes Boot fährt erst zur Boje und wartet dort kurz
+  const u = quietState({ stage: 3 });
+  u.upcoming = [make(900)];
+  sim.tick(u, ctxLive, 1 + RULES.queue.selfEnterAfter + 5);
+  assert.equal(u.boats[900].status, 'waiting');
+  sim.markAtBuoy(u, ctxLive, 900);
+  sim.tick(u, ctxLive, RULES.queue.selfEnterAfter);
+  assert.equal(u.boats[900].status, 'moored');
 });

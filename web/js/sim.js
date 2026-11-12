@@ -573,11 +573,15 @@ export function selfEnter(state, ctx) {
   const events = [];
   const after = ctx.rules.queue.selfEnterAfter;
   if (after == null) return events;
+  const rush = state.queue.length > waitSpotCount(state, ctx) / 2;
   for (const id of [...state.queue]) {
     const b = state.boats[id];
-    // Die Zeit zum Selbstlenken zählt ab Ankunft im Revier, nicht erst ab der Boje: Das Boot hält
-    // dann von der Anfahrt aus direkt auf die Box zu und gibt seine Boje frei.
-    if (!b || b.held || state.clock - b.waitingSince < after) continue;
+    if (!b || b.held) continue;
+    // Ruhiger Betrieb: Das Boot liegt erst kurz an der Boje, Zeit für den Spieler, es zu lenken.
+    // Andrang (mehr als die Hälfte der Bojen vergeben): Die Zeit zählt schon ab Ankunft im Revier,
+    // das Boot hält von der Anfahrt aus direkt auf die Box zu und gibt seine Boje frei.
+    const since = b.atBuoy ? Math.min(b.atBuoySince, rush ? b.waitingSince : b.atBuoySince) : rush ? b.waitingSince : null;
+    if (since == null || state.clock - since < after) continue;
     const best = selfBerth(state, ctx, id);
     if (best) {
       b.selfEntered = true;
