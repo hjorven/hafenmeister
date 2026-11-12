@@ -49,8 +49,8 @@
 
 /* Hochkant: Statusleiste über die ganze Breite, Knöpfe als Spalte rechts darunter */
 @media (max-width: 599px) and (orientation: portrait) {
-  .hm-neu .hm-status { flex: 1 1 auto; justify-content: space-between; }
-  .hm-neu #day { margin-left: auto; }
+  /* Statusleiste nur so breit wie nötig: die Sonne bleibt weg von der Knopfspalte rechts */
+  .hm-neu .hm-status { flex: 0 1 auto; }
   .hm-neu .hm-werkzeuge {
     position: absolute;
     top: calc(100% + 10px);
