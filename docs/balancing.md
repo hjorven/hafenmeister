@@ -26,26 +26,26 @@ node --test tests/*.test.mjs
 
 `--pruefen` meldet jeden Liegeplatz aus `harbor.js`, der keinem Projekt gehört oder doppelt vergeben ist. `--verlauf` zeigt Tag für Tag, was ein Spieler kauft und wie Geld und Ruf laufen.
 
-## Ergebnis (100 Läufe je Spielertyp)
+## Ergebnis (100 Läufe je Spielertyp, mit den echten Spielregeln)
 
-Ein Spieltag dauert bei 1x 2 Minuten. „Mit Vorspulen“ nimmt an, dass die Hälfte der Zeit auf der höchsten Stufe läuft (2x, ab Hafenbüro 3x).
+`tools/balance.mjs` spielt mit `web/js/sim.js` (über `sim.rulesFromEconomy(ECONOMY)`), dem Bootskatalog und den Services (`web/js/services/rules.js`). Ein Spieltag dauert bei 1x 2 Minuten. „Mit Vorspulen“ nimmt an, dass die Hälfte der Zeit auf der höchsten Stufe läuft (2x, ab Hafenbüro 3x).
 
-**Geschickter Spieler** (kauft sofort das Sinnvollste, weist immer optimal zu)
+**Geschickter Spieler** (weist alle 5 Sekunden zu, nimmt immer den besten Platz, kauft jeden Tag)
 
 | Stufe | Name | Spieltage | 10 % bis 90 % | davon Sparen auf den Ausbau | Echtzeit 1x | mit Vorspulen |
 |---|---|---|---|---|---|---|
-| 1 | Bootssteg am See | 15 | 14 bis 16 | 5 | 30 min | 23 min |
-| 2 | Dorfhafen am See | 43 | 41 bis 46 | 10 | 1 h 26 min | 1 h 05 min |
-| 3 | Durchstich zur Ostsee | 55 | 52 bis 59 | 19 | 1 h 50 min | 1 h 13 min |
-| 4 | Marina | 56 | 51 bis 60 | 17 | 1 h 52 min | 1 h 15 min |
-| 5 | Küstenmarina bis zum Abschluss | 60 | 57 bis 63 | | 2 h 00 min | 1 h 20 min |
-| | **Gesamt** | **228** | 222 bis 239 | | **7 h 36 min** | **5 h 15 min** |
+| 1 | Bootssteg am See | 14 | 13 bis 14 | 6 | 28 min | 21 min |
+| 2 | Dorfhafen am See | 49 | 47 bis 55 | 10 | 1 h 38 min | 1 h 14 min |
+| 3 | Durchstich zur Ostsee | 52 | 49 bis 54 | 14 | 1 h 44 min | 1 h 09 min |
+| 4 | Marina | 54 | 51 bis 56 | 15 | 1 h 48 min | 1 h 12 min |
+| 5 | Küstenmarina bis zum Abschluss | 69 | 59 bis 78 | | 2 h 18 min | 1 h 32 min |
+| | **Gesamt** | **239** | 227 bis 248 | | **7 h 58 min** | **5 h 28 min** |
 
-**Gemütlicher Spieler** (schaut nur jeden zweiten Tag in den Bauplan, lässt ein Drittel der Käufe aus, weist jedes vierte Boot irgendwo hin): 238 Tage, 7 h 56 min bei 1x, 5 h 29 min mit Vorspulen.
+**Gemütlicher Spieler** (schaut nur alle 20 Sekunden auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz, kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus): 226 Tage, 7 h 32 min bei 1x, 5 h 13 min mit Vorspulen. Er ist sogar etwas schneller fertig, weil er weniger Services kauft und sein Geld eher in Stege steckt.
 
-Damit liegt die erste Region im Ziel aus dem Plan (6 bis 8 Stunden). Der Unterschied zwischen den Spielertypen ist klein: Ungeschicktes Spielen bremst etwas, blockiert aber nie. Das passt zu „kein Scheitern“.
+Damit liegt die erste Region im Ziel aus dem Plan (6 bis 8 Stunden). Ungeschicktes Spielen bremst nie stark und blockiert nie. Das passt zu „kein Scheitern“.
 
-**Einnahmen pro Tag** (Median): Stufe 1 rund 50 €, Stufe 2 rund 210 €, Stufe 3 rund 760 €, Stufe 4 rund 1.800 €, Stufe 5 rund 3.300 €.
+**Einnahmen pro Tag** (Median, geschickter Spieler): Stufe 1 rund 50 €, Stufe 2 rund 200 €, Stufe 3 rund 940 €, Stufe 4 rund 2.100 €, Stufe 5 rund 5.300 €.
 
 ## Die wichtigsten Zahlen
 
@@ -59,7 +59,7 @@ Damit liegt die erste Region im Ziel aus dem Plan (6 bis 8 Stunden). Der Untersc
 | 2 Dorfhafen am See | 13 | 160 Gäste, Ruf 3,0 | Durchstich zur Ostsee | 5.000 € |
 | 3 Durchstich zur Ostsee | 22 | 550 Gäste, Ruf 3,5 | Schwimmsteg D | 20.000 € |
 | 4 Marina | 30 | 900 Gäste, Ruf 3,8 | Außenhafen mit Kai | 42.000 € |
-| 5 Küstenmarina | 37 | Abschluss: 2.300 Gäste, Ruf 4,3, alle 94 Plätze gebaut | | |
+| 5 Küstenmarina | 37 | Abschluss: 1.900 Gäste, Ruf 4,3, alle 94 Plätze gebaut | | |
 
 Jedes große Bauprojekt enthält die Plätze, die beim Umbau wegfallen (zum Beispiel wird der Haken an Steg A in Stufe 3 durch neue Boxen ersetzt). Ein Ausbau kostet also nie Liegeplätze.
 
@@ -69,20 +69,15 @@ Jedes große Bauprojekt enthält die Plätze, die beim Umbau wegfallen (zum Beis
 
 **Services:** 13 Services mit 1 bis 2 Stufen, Format mit dem Services-Thread abgestimmt (`ECONOMY.services[id].stufen[n].wirkung`). Kein Service hat laufende Kosten.
 
-## Annahmen im Modell
+## Was die Simulation abdeckt
 
-Solange `web/js/sim.js` fehlt, rechnet `tools/balance.mjs` mit einem eigenen, schlanken Modell der Regeln aus `docs/plan.md`:
-
-- Boote kommen zufällig (Poisson) nach Stufe, Ruf und Services. Wünsche nach Klasse und Stufe.
-- Passregel vereinfacht nach Klasse: ein Boot passt an jeden Platz seiner Klasse oder größer, XL nur an den Kai, Mehrrumpfboote nur an Stirnplätze. Länge, Breite und Tiefgang sind über die Klassen abgedeckt.
-- Saison 30 Tage, Winter 3 Tage ohne Gäste.
-- Sturm (ab Stufe 3) und Regatta (mit Segelclub) und Hafenfest (ab Stufe 4) sind eingerechnet.
-- Abends wird alles kassiert, auch ohne Hafenbüro.
-
-Sobald `sim.js` ohne Grafik läuft, ersetzt es dieses Modell; die Zahlen werden dann noch einmal nachgerechnet.
+- Ankünfte, Bootsarten mit Maßen und Passregel, Wünsche, Warteschlange, Abweisen, Ruf, Kassieren, Stufenziele und Stegprojekte kommen aus `sim.js`.
+- Services bringen Tageseinnahmen, Kunden und Winter-Einnahmen über `services/rules.js` (Wetter immer Sonne), ihre Wirkung auf Ankünfte und Ruf geht über einen Modifikator in `sim.js` ein.
+- Ereignisse (Sturm, Regatta, Hafenfest, Nebel) sind nicht eingerechnet. Sie gleichen sich grob aus: Sturm kostet Ankünfte, Regatta und Hafenfest bringen mehr.
+- Der Bot kassiert abends immer alles, auch ohne Hafenbüro.
 
 ## Was noch auffällt
 
-- **Sparphasen am Ende jeder Stufe:** Die längste Zeit ohne Kauf liegt bei 15 bis 25 Spieltagen, jeweils während man auf das große Bauprojekt spart. Ereignisse füllen diese Zeit, trotzdem empfehle ich für die Oberfläche einen Sparbalken am Bauprojekt, der sich sichtbar füllt (Geld wird automatisch zurückgelegt). Dann fühlt sich Sparen wie Fortschritt an.
-- **Ruf ist für gute Spieler leicht:** Wer seine Versorgung ausbaut, liegt fast immer über 4,5 Anker. Die Ruf-Ziele bremsen vor allem Spieler, die Versorgung vernachlässigen. Das ist gewollt (cozy).
+- **Sparphasen am Ende jeder Stufe:** Die längste Zeit ohne Kauf liegt bei 12 bis 22 Spieltagen, jeweils während man auf das große Bauprojekt spart. Ereignisse füllen diese Zeit, trotzdem empfehle ich für die Oberfläche einen Sparbalken am Bauprojekt, der sich sichtbar füllt (Geld wird automatisch zurückgelegt). Dann fühlt sich Sparen wie Fortschritt an.
+- **Ruf ist für gute Spieler leicht:** Wer seine Versorgung ausbaut, liegt fast immer bei 4,9 bis 5 Ankern. Die Ruf-Ziele bremsen vor allem Spieler, die Versorgung vernachlässigen. Das ist gewollt (cozy).
 - **Nach dem Abschluss** bleiben einige Services übrig (große Winterhalle, Museumshafen und andere). Sie sind Inhalt für den Endlosmodus.
