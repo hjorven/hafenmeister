@@ -87,8 +87,9 @@ test('Törn: Platz wird grün, nur Gäste, die rechtzeitig abreisen, passen, Boo
   const zuLang = { stationed: false, nights: bis - state.day + 2 };
   assert.equal(fitHook({ state, boat: passt, berth }), null);
   assert.equal(fitHook({ state, boat: zuLang, berth }), 'dauerZurueck');
-  // Zurück nach Ablauf
+  // Zurück nach Ablauf (liegt gerade ein Gast in der Box, der sich selbst eingefahren hat, wartet es noch)
   while (state.day <= bis) sim.runDay(state, ctx);
+  for (let i = 0; i < 4 && state.berths[platz] !== boatId; i++) sim.runDay(state, ctx);
   assert.equal(state.berths[platz], boatId);
   assert.equal(state.boats[boatId].status, 'moored');
 });
