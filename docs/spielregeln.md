@@ -18,8 +18,8 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 ## Ablauf eines Tages
 
 1. Morgens würfelt `sim.js` die Ankünfte des Tages aus: Zahl = Boote pro Tag der Stufe × Ruf-Faktor × Modifikatoren. Im Winter (Tag 31 bis 33 jeder Saison) kommt niemand.
-2. Ein Boot kommt an und legt sich an eine freie **Warteboje** vor dem Hafen (`boat.waitSpot`, 0 = erste Boje). Sind alle Bojen belegt, fährt es weiter.
-3. Der Spieler zieht das Boot auf einen Platz oder tippt „Automatisch einfahren“. Nach 50 s Warten fährt es weiter.
+2. Ein Boot kommt an und legt sich an eine freie **Warteboje** vor dem Hafen (`boat.waitSpot`, 0 = erste Boje). Sind alle Bojen belegt, fährt es weiter. Die 3D-Ansicht meldet mit `game.emit('boot:an-boje', { id })`, wenn das Boot fest ist. Erst ab dann zählt seine Geduld. Meldet niemand etwas, gilt es nach 35 s als angekommen.
+3. Der Spieler zieht das Boot auf einen Platz oder tippt „Automatisch einfahren“, auch schon während der Anfahrt. Nach 50 s an der Boje fährt es weiter.
 4. Abends (ab 90 s) zahlen alle liegenden Boote Hafengeld als Münze. Wer noch wartet, fährt weiter.
 5. Nachts (ab 120 s): nicht kassierte Münzen zählen zur Hälfte, Boote mit 0 Nächten reisen ab und bewerten den Hafen. Der Spielstand wird gespeichert.
 
@@ -48,6 +48,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 | `boote` | alle wartenden und liegenden Boote im Format von `boot-kommt`, zum Aufbauen nach dem Laden |
 | `fittingBerths(bootId)`, `whyNotFit(bootId, platzId)`, `availableBerths()` | Plätze |
 | `reputation()`, `season()`, `canAdvanceStage()`, `facilityUpgrade(key)`, `modifiers()` | Lesen |
+| `geduld(bootId)` | restliche Sekunden an der Boje |
 | `wartet(bootId)`, `passendePlaetze(bootId)`, `tagesAnteil()` | für die Gesten (`tagesAnteil` 0 = Morgen, 1 = Nacht) |
 | `addHook(name, fn)`, `addService(key, def)` | Erweiterungen (unten) |
 | `newGame(seed)`, `setRegion(id)` | neues Spiel, Region |
@@ -71,6 +72,7 @@ Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, 
 | `sim:moored` | `{ boatId, berthId }` |
 | `sim:turnedAway` | `{ boatId, reason: 'queueFull' \| 'patience' \| 'evening', rated }` |
 | `sim:dismissed` | `{ boatId }` |
+| `sim:atBuoy` | `{ boatId }`, Geduld läuft |
 | `sim:feeReady` | `{ boatId, amount, wishesMet }`, Münze erscheint |
 | `sim:collected` | `{ boatId, amount }` |
 | `sim:departed` | `{ boatId, berthId, typeId, rating }` |
@@ -98,6 +100,7 @@ Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, 
 | `ui:auto-einfahren` | `{ boot }` automatisch einfahren |
 | `ui:collect` | `{ coin }` eine Münze, ohne Daten alle |
 | `ui:cancel` | Auswahl aufheben |
+| `boot:an-boje` | `{ id }` Boot ist an der Warteboje fest, ab jetzt zählt seine Geduld |
 | `services:abrechnung` | `{ summe }` wird gutgeschrieben |
 | `spielstand-geladen` | Spielstand neu übernehmen |
 

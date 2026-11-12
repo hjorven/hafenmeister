@@ -335,7 +335,7 @@ function makeBoat(fields) {
   return {
     id: 0, typeId: null, modelId: null, name: '', size: 'S', kind: null,
     length: 0, beam: 0, draft: 0, motor: false, special: false, dayVisitors: 0, stationed: false,
-    wishes: [], nights: 1, status: 'expected', arriveAt: 0, waitingSince: null, waitSpot: null, berthId: null,
+    wishes: [], nights: 1, status: 'expected', arriveAt: 0, waitingSince: null, waitSpot: null, atBuoy: false, atBuoySince: null, berthId: null,
     wishesMet: 0, wishesTotal: 0, pendingFee: 0, penalty: 0,
     ...fields,
   };
@@ -581,13 +581,43 @@ function arrive(state, ctx, boat, events) {
   }
   boat.status = 'waiting';
   boat.waitSpot = spot;
-  boat.waitingSince = state.clock;
+  boat.waitingSince = state.clock; // Beginn der Anfahrt zur Boje
+  boat.atBuoy = false;
+  boat.atBuoySince = null;
   state.queue.push(boat.id);
   events.push({ type: 'arrived', boatId: boat.id, waitSpot: spot });
   if (state.office >= ctx.rules.office.autoAssign) {
     const best = fittingBerths(state, ctx, boat.id)[0];
     if (best) moor(state, ctx, boat, best, events);
   }
+}
+
+/**
+ * Boot ist an der Warteboje fest (meldet die 3D-Ansicht). Erst ab jetzt zählt seine Geduld.
+ * Zuweisen geht schon während der Anfahrt.
+ */
+// Nach dem Laden eines Spielstands liegen alle wartenden Boote sofort an ihrer Boje.
+// Die Geduld zählt dann ab dem Ladezeitpunkt, falls das Boot noch auf der Anfahrt war.
+export function settleWaiting(state) {
+  for (const b of Object.values(state.boats || {})) {
+    if (b.status === 'waiting' && !b.atBuoy) { b.atBuoy = true; b.atBuoySince = state.clock; }
+  }
+}
+
+export function markAtBuoy(state, ctx, boatId) {
+  const boat = state.boats[boatId];
+  if (!boat || boat.status !== 'waiting' || boat.atBuoy) return { ok: false, events: [] };
+  boat.atBuoy = true;
+  boat.atBuoySince = state.clock;
+  return { ok: true, events: [{ type: 'atBuoy', boatId }] };
+}
+
+/** Sekunden, die ein wartendes Boot noch an der Boje bleibt (während der Anfahrt die volle Geduld). */
+export function patienceLeft(state, ctx, boatId) {
+  const b = state.boats[boatId];
+  if (!b || b.status !== 'waiting') return 0;
+  if (!b.atBuoy) return ctx.rules.queue.patience;
+  return Math.max(0, ctx.rules.queue.patience - (state.clock - b.atBuoySince));
 }
 
 /** Ein wartendes Boot wegschicken (Spieler tippt "Abweisen"). Gilt nicht als schlechte Bewertung. */
@@ -777,7 +807,15 @@ export function tick(state, ctx, dt) {
       }
       for (const id of [...state.queue]) {
         const b = state.boats[id];
-        if (state.clock - b.waitingSince > queue.patience) turnAway(state, ctx, b, events, 'patience');
+        // Alte Spielstände kennen atBuoy nicht: dann gilt die Wartezeit ab Ankunft
+        if (b.atBuoy === undefined) {
+          b.atBuoy = true;
+          b.atBuoySince = b.waitingSince;
+        }
+        if (!b.atBuoy && state.clock - b.waitingSince >= (queue.approachMax ?? 0)) {
+          events.push(...markAtBuoy(state, ctx, id).events);
+        }
+        if (b.atBuoy && state.clock - b.atBuoySince > queue.patience) turnAway(state, ctx, b, events, 'patience');
       }
       if (state.clock >= dayLength) {
         state.upcoming = []; // wer heute nicht mehr eingelaufen ist, kommt nicht
