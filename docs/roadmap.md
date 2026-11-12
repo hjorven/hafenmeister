@@ -50,7 +50,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Ü3 | Einstieg neu abstimmen: Schritt 1 ohne Sonne, Schritt 3 "Liegegeld beim Anlegen" | in Arbeit (PR 112, Teil) | P03 |
 | Ü4 | Ein Zähler für das Abschlussziel Stufe 6 (Tag der offenen Tür zählt mit) | erledigt (PR 139): eine Liste `GROSSSCHIFF_BESUCHE` in `data/services.js`, ein Zähler `state.bigVisits`; der Tag der offenen Tür gehört zum Flottenbesuch des Stützpunkts | P04 |
 | Ü5 | Boote auf wegfallenden Plätzen beim Stufenausbau regeln (B01, B02 in Stufe 3, T-Kopf Steg B): Gäste reisen erst ab, Dauerlieger ziehen samt Dauerplatz um | erledigt (`sim.js` `advanceStage`, Hook `stageUp`, Test in `tests/dauerlieger.test.mjs`) | P05 |
-| Ü6 | Regeltests gegen die echten Zahlen: gemeinsamer Helfer mit `rulesFromEconomy(ECONOMY)` | offen | P06 |
+| Ü6 | Regeltests gegen die echten Zahlen: gemeinsamer Helfer mit `rulesFromEconomy(ECONOMY)` | erledigt | P06 |
 | Ü7 | Tempo und Hilfetexte vereinheitlichen (Knöpfe, Taste F, Plan, PC-Hilfe) | erledigt, Jorven bestätigt "Tempo so bleiben" (Taste F = 3x über die Tempo-Knöpfe, PC-Hilfe, Kommentare und Doku ohne Sonne, plan.md 3 und 14); Einstieg-Texte in P03 | P07 |
 
 ## 3. Kernschleife (Ü8 bis Ü14)
@@ -88,7 +88,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 
 | Nr | Punkt | Status | Paket |
 |---|---|---|---|
-| Ü24 | Eine Quelle für alle Zahlen: alles nach `economy.js`, Rest löschen (`data/rules.js` alte Werte, `services.js`-Mischung, `events.js` gegen `ECONOMY.ereignisse`, Feature-Dateien). Fehler `sturmschutz: true` trifft auf Code, der eine Zahl erwartet | offen | P06 |
+| Ü24 | Eine Quelle für alle Zahlen: alles nach `economy.js`, Rest löschen (`data/rules.js` alte Werte, `services.js`-Mischung, `events.js` gegen `ECONOMY.ereignisse`, Feature-Dateien). Fehler `sturmschutz: true` trifft auf Code, der eine Zahl erwartet | erledigt | P06 |
 | Ü25 | Ein Speicherweg und "Neues Spiel" (`newGame()` gibt es), mehrere Speicherplätze | offen | P09 |
 
 ---
@@ -153,7 +153,7 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Nordsee mit Gezeiten, Schleuse, Trockenfallplätzen | plan.md 9, regionen.md | bauen, nach der Ostsee | P57 |
 | Revierfaktoren in `regions.js` (Hafengeld, Ankünfte, Startgeld, Schiffshäufigkeit) | regions.js | mit Nordsee bauen | P57 |
 | Bauzeit der Ausbauten, Winter-Bautempo (`bautage`, `winterBautempo`) | economy.js | in P18 nutzen oder löschen | P18 |
-| `ECONOMY.ereignisse` (Sturm alle 10 Tage, Hafenfest 1.500 €) | economy.js | eine Quelle, Rest löschen | P06 |
+| `ECONOMY.ereignisse` (Sturm alle 10 Tage, Hafenfest 1.500 €) | economy.js | eine Quelle, Rest löschen | P06 (erledigt) |
 | Gruppen-Ankunft, Wünsche je Bootsart, `feeFactor`, `arrivalWeight` | data/boats/*.js | in die Regeln holen | P19, P32 (Gruppen) |
 | Stammgast bringt Ruf am alten Platz | plan.md 9a | bauen | P25 |
 | Dauerlieger zahlen pro Saison, Gast wird umgelegt | plan.md 9a | bauen | P01 |
@@ -171,8 +171,8 @@ Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätz
 | Abweisen von Hand kostet nichts, Wegfahren aus Ungeduld kann eine 2,5 bringen | `sim.js` (`dismiss`, `turnAway`) | P10 |
 | Rundgang startet bei 68 % des Tages, 8 Sekunden vor dem Abend | `data/people.js` (`RUNDGANG_AB`) | P12 |
 | Start mit 0 € und fünf Startbewertungen von 3 Ankern | `state.js`, `economy.js` (`ruf`) | P17 |
-| Service-Werte als Mischung aus zwei Dateien | `services/rules.js` (`mische`) | P06 |
-| Dritte Service-Stufen und abweichende Stufennamen (Travellift) | `data/services.js`, `economy.js` | P06, P08 |
+| Service-Werte als Mischung aus zwei Dateien | `services/rules.js` (`mische`) | P06 (erledigt) |
+| Dritte Service-Stufen und abweichende Stufennamen (Travellift) | `data/services.js`, `economy.js` | P06 (erledigt: Stufenzahl und Namen aus einer Liste), P08 |
 | Mindestruf je Service-Stufe (Regattaverein, Werfthalle 3,8; Museumshafen 4,0; Kreuzfahrtterminal 4,5; Marinestützpunkt 4,6) | `data/services.js` | P08 |
 | Deckel: Ruf-Bonus aller Services höchstens +0,75, Sturmschutz höchstens 0,8 | `data/services.js` | P08 |
 | Marinestützpunkt ersetzt Flottenbesuch (alle 10 Tage) durch Tag der offenen Tür (alle 14 Tage) | `data/services.js` | P04 (behoben: Stützpunkt bringt Flottenbesuch alle 6 Tage mit Tag der offenen Tür) |
@@ -300,9 +300,9 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 
 | Was | Wo | Paket |
 |---|---|---|
-| Alte Ersatzregeln mit eigenen Zahlen | `web/js/data/rules.js` | P06 |
-| Tote Zahlen `ECONOMY.ereignisse` oder die doppelten in `data/events.js` (eine Quelle bleibt) | `economy.js`, `data/events.js` | P06 |
-| Zweiter Satz Service-Zahlen (Mischung `mische`) | `data/services.js`, `services/rules.js` | P06 |
+| Alte Ersatzregeln mit eigenen Zahlen | `web/js/data/rules.js` | P06 (erledigt) |
+| Tote Zahlen `ECONOMY.ereignisse` oder die doppelten in `data/events.js` (eine Quelle bleibt) | `economy.js`, `data/events.js` | P06 (erledigt) |
+| Zweiter Satz Service-Zahlen (Mischung `mische`) | `data/services.js`, `services/rules.js` | P06 (erledigt) |
 | Alter Rückfall-Speicherweg `hafenmeister.save` mit eigenem Exportformat (alte Stände werden beim Laden einmal übernommen) | `state.js`, `save/storage.js` | P09 |
 | Alle Texte zur Sonne als Vorspul-Griff | `features/einstieg.js` (offen, P03), `ui/input-pc.js`, `ui/input-touch.js`, `ui/gesten.js`, Doku (erledigt, P07) | P03, P07 |
 | Ungenutzte Felder `bautage`, `winterBautempo`, falls P18 sie nicht nutzt | `economy.js` | P18 |
@@ -391,7 +391,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| Svc F1 | Eine Liste, klare Stufennamen | offen | P06 |
+| Svc F1 | Eine Liste, klare Stufennamen | erledigt | P06 |
 | Svc F2 | Jeder Service ändert das Spiel (Slip, Mastenkran, Fahrradverleih, Räucherei, Werft) | offen | P23 |
 | Svc F3 | Entweder-oder-Bauplätze (Café oder Eisdiele, Werfthalle oder Winterhalle) | offen | P23 |
 | Svc F4 | Einnahmen zeigen: Münzen über Gebäuden, Tagesabschluss je Quelle | offen | P15 |
@@ -412,7 +412,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | G5 | Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind) | offen | P20 |
 | G6 | Ergebnis eines Ereignisses am Abend zeigen | offen | P24 |
 | G7 | Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand) | offen | P24 |
-| G8 | Eine Zahlenliste für Ereignisse | offen | P06 |
+| G8 | Eine Zahlenliste für Ereignisse | erledigt | P06 |
 | G9 | Seltene große Tage, z. B. Hanse-Woche, zehn Tage vorher angekündigt | offen | P24 |
 
 ### H Dauerlieger, Stammgäste und Tagestörn
@@ -485,13 +485,13 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| M1 | Eine führende Zahlendatei | offen | P06 |
-| M2 | Ersatzregeln abschaffen; prüfen, ob ein neues Spiel heute mit den Ersatzregeln startet | offen | P06 |
-| M3 | Tote Daten anschließen (Gruppen, Wünsche je Art) oder löschen (Bauzeiten, Sonderboote, zweite Ereignisliste) | offen | P06, P19, P32 |
-| M4 | Zahlenübersicht aus den Daten erzeugen | offen | P06 |
-| M5 | Prüfwerkzeug: ungelesene Felder, Ja/Nein statt Zahl, Stufe billiger als davor | offen | P06 |
-| M6 | Eine Sprache für Feldnamen | offen | P06 (schrittweise) |
-| M7 | Ein gemeinsamer Zufall mit Startwert für alle Module | offen | P06 |
+| M1 | Eine führende Zahlendatei | erledigt | P06 |
+| M2 | Ersatzregeln abschaffen; prüfen, ob ein neues Spiel heute mit den Ersatzregeln startet | erledigt | P06 |
+| M3 | Tote Daten anschließen (Gruppen, Wünsche je Art) oder löschen (Bauzeiten, Sonderboote, zweite Ereignisliste) | teils erledigt: Sonderboote, Antriebsanteile je Klasse und zweite Ereignisliste gelöscht; Bauzeiten bleiben für P18, Gruppen und Wünsche je Art für P19, P32 | P06, P19, P32 |
+| M4 | Zahlenübersicht aus den Daten erzeugen | erledigt | P06 |
+| M5 | Prüfwerkzeug: ungelesene Felder, Ja/Nein statt Zahl, Stufe billiger als davor | erledigt | P06 |
+| M6 | Eine Sprache für Feldnamen | teils erledigt: Regel in `docs/balancing.md` (Daten deutsch, `sim.js` englisch, Übersetzung nur in `data/rules.js`) | P06 (schrittweise) |
+| M7 | Ein gemeinsamer Zufall mit Startwert für alle Module | erledigt | P06 |
 
 ### N Speichern und Web-App
 
@@ -507,14 +507,14 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| O1 | Gemeinsamer Aufbau für Regeltests (= Ü6) | offen | P06 |
+| O1 | Gemeinsamer Aufbau für Regeltests (= Ü6) | erledigt | P06 |
 | O2 | Ein Test je Fehler, vor der Reparatur | offen | jedes Fehler-Paket (P01 bis P05) |
-| O3 | Ein ganzer Spieltag als Test mit festem Startwert | offen | P06 |
+| O3 | Ein ganzer Spieltag als Test mit festem Startwert | erledigt | P06 |
 | O4 | Stufenwechsel als Test | teils erledigt (PR 143), voller Hafen über alle Stufen offen | P05 |
-| O5 | Dritter Spielertyp im Balancing (tut nichts) | offen | P06 |
-| O6 | Balancing meldet Leerlauf je Stufe | offen | P06 |
+| O5 | Dritter Spielertyp im Balancing (tut nichts) | erledigt | P06 |
+| O6 | Balancing meldet Leerlauf je Stufe | erledigt | P06 |
 | O7 | Test: jedes Hinweis-Ziel existiert, keine Texte zu Gelöschtem | offen | P03 |
-| O8 | Doku-Zahlen aus den Daten prüfen | offen | P06 |
+| O8 | Doku-Zahlen aus den Daten prüfen | erledigt | P06 |
 | (Befund) | Prüfskript der Reviere läuft nicht im normalen Testlauf | offen | P57 |
 
 ### P Bedienung (hier "Bed")
@@ -539,7 +539,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Q1 | README als Startseite mit Stand | offen | P08 |
 | Q2 | Plan dreiteilen: Gebaut, Als Nächstes, Nach 1.0 | offen | P08 |
 | Q3 | Statuszeile in jedem Dokument | offen | P08 |
-| Q4 | Zahlentabellen aus den Daten (M4) | offen | P06 |
+| Q4 | Zahlentabellen aus den Daten (M4) | erledigt | P06 |
 | Q5 | Ist-Tabelle der Abnahme neu | offen | P08 |
 | Q6 | Erledigtes in echter-hafen.md abhaken | offen | P08 |
 | Q7 | Geräte-Dokumente in oberflaeche.md zusammenlegen | offen | P08 |
@@ -564,7 +564,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen" (PR 112) |
 | P04 | Abschlussziel Stufe 6 richtig zählen | Ü4 | `bridge.js`, `render/services.js`, `docs/services.md` | bestehend: "Services und Sonderanlagen einbauen" |
 | P05 | Boote auf wegfallenden Plätzen regeln | Ü5 | `sim.js` (Stufenausbau), `tests/` | bestehend: "Spielregeln ohne Grafik umsetzen" |
-| P06 | Eine Quelle für alle Zahlen und echte Regeltests | Ü6, Ü24 | `economy.js`, `data/rules.js`, `data/services.js`, `services/rules.js`, `data/events.js`, `tests/helpers.mjs`, alle Regeltests, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" |
+| P06 | Eine Quelle für alle Zahlen und echte Regeltests (erledigt) | Ü6, Ü24 | `economy.js`, `data/rules.js`, `data/services.js`, `services/rules.js`, `data/events.js`, `tests/regeln.mjs` (statt `tests/helpers.mjs`, das ist der Browser-Helfer), alle Regeltests, `tools/zahlen.mjs`, `docs/zahlen.md`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" |
 | P07 | Tempo einheitlich regeln | Ü7, Hilfetexte, `docs/schiffsanimationen.md` | `ui/oberflaeche.js`, `ui/input-pc.js`, `ui/input-touch.js`, `ui/gesten.js`, `plan.md` 14 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
 | P08 | Doku auf den Stand bringen | Abschnitte 9 und 10, Liste aller Adresszusätze, `plan.md` Meilensteine und Pixel-Oberfläche | `README.md`, `docs/*.md` (außer den Paket-eigenen) | bestehend: "Bestandsaufnahme Repo und Plan erstellen" |
 | P54 | Ausfahrende Boote weichen wartenden Booten aus | Neuer Fehler (Jorven, 12.11.2026): Beim Rausfahren kollidieren Boote mit Booten an der Warteboje und zittern beide, als wollten sie aneinander vorbei. Ausweichen ohne Berührung und ohne Zittern, an Handy und PC prüfen | `render/boat-anim.js`, `render/boat-view.js`, `world/fahrwege.js` | bestehend: "Schiffsanimationen umsetzen" |
