@@ -36,6 +36,9 @@ web/js/ui/fotomodus.js
 web/js/audio/audio.js
 web/js/state.js
 web/js/events/events.js
+web/js/features/dauerlieger.js
+web/js/features/stammgaeste.js
+web/js/features/tagesziele.js
 web/js/save/index.js
 ```
 

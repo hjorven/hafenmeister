@@ -30,6 +30,9 @@ const MODULES = [
   './audio/audio.js',
   './state.js',
   './events/events.js',
+  './features/dauerlieger.js',
+  './features/stammgaeste.js',
+  './features/tagesziele.js',
   './save/index.js',
 ];
 
