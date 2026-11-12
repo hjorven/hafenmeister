@@ -26,8 +26,8 @@ const BOJEN = {
 };
 // Hier kommen die Boote ins Bild und verschwinden wieder (ausserhalb der Startansicht)
 const REVIERRAND = {
-  1: [-40, 100],     // nordoestlich im See, knapp ausserhalb der Startansicht
-  2: [0, 135],
+  1: [-58, 90],      // nordoestlich der Bojen, knapp ausserhalb der Startansicht
+  2: [-30, 120],
   3: [330, 380],     // draussen auf der Ostsee
 };
 
