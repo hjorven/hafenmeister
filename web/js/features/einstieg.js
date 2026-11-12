@@ -7,7 +7,7 @@
 //   1. willkommen  Boote warten an den Bojen (Kreis um eine Boje)   fertig: mind. 6 s gelesen und ein Boot wartet im Bild
 //   2. anlegen     Boot auf einen Platz ziehen oder Einfahren       fertig: sim:moored
 //   3. muenzen     Liegegeld gleich nach dem Anlegen einstreichen   fertig: sim:collected
-//   4. sonne       Sonne ziehen spult vor                           fertig: Sonne gezogen oder Weiter
+//   4. sonne       Vorspulen (Zeitsteuerung unten links)            fertig: vorgespult oder Weiter
 //   5. bauen       Mit dem Geld den Hafen ausbauen                  fertig: Bauen gedrückt oder Weiter
 //   6. ziele       Tagesziele                                       fertig: Los geht's
 // Ein Boot, das in der Sim schon wartet, aber in 3D noch von draußen anfährt, zählt erst, wenn es im Bild ist.
@@ -39,6 +39,10 @@ const CSS = `
 .hm-tipp .kurz { display: none; }
 .hm-tipp.eng .lang, .hm-tipp.eng .zaehler { display: none; }
 .hm-tipp.eng .kurz { display: block; }
+.hm-tipp.eng { padding: 8px 12px 6px; font-size: 14px; }
+.hm-tipp.eng .titel { font-size: 15px; margin-bottom: 2px; }
+.hm-tipp.eng .knoepfe { margin-top: 4px; }
+.hm-tipp.eng button { min-height: 36px; }
 .hm-tipp .knoepfe { display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 10px; }
 .hm-tipp button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 20px; cursor: pointer;
   font: 600 14px system-ui, -apple-system, sans-serif; }
@@ -75,16 +79,19 @@ export const TEXTE = {
   sonne: {
     titel: 'Der Tag läuft',
     text: 'Bis zum Abend kommen weitere Boote. Wer länger wartet, fährt selbst ein, aber nur von Hand kannst du Wünsche erfüllen, und die bringen mehr. Soll es schneller gehen, spul mit der Zeitsteuerung vor, der Kreis zeigt darauf.',
+    kurz: 'Weitere Boote kommen. Vorspulen geht mit dem Doppelpfeil unten.',
   },
   bauen: {
     titel: 'Hafen ausbauen',
     text: TOUCH
       ? 'Mit dem Geld baust du neue Liegeplätze und Anlagen. Tipp auf „Bauen“: Die Zeit hält an, und du siehst erst eine Vorschau. Gekauft wird erst mit „Bauen für …“. Mit dem Ruf deiner Gäste wächst der Hafen.'
       : 'Mit dem Geld baust du neue Liegeplätze und Anlagen. Klick auf „Bauen“: Die Zeit hält an, und du siehst erst eine Vorschau. Gekauft wird erst mit „Bauen für …“. Mit dem Ruf deiner Gäste wächst der Hafen.',
+    kurz: 'Mit dem Geld baust du aus. Erst Vorschau, gekauft wird mit „Bauen für …“.',
   },
   ziele: {
     titel: 'Tagesziele',
     text: 'Jeden Tag gibt es drei kleine Ziele. Wer sie schafft, bekommt etwas Geld dazu. Das war es schon. Viel Freude im Hafen.',
+    kurz: 'Drei kleine Ziele am Tag bringen etwas Geld dazu. Viel Freude im Hafen.',
   },
 };
 
@@ -367,8 +374,8 @@ export async function init(game) {
       if (r.left - h.left > h.width * 0.6 && r.top - h.top > 40) rechts = Math.min(rechts, r.left - h.left - 8);
     }
     tipp.style.width = `${Math.round(Math.min(360, rechts - 12))}px`;
-    // Kleines Handy: beim Anlegen gleich die Kurzfassung, damit der Steg mit den leuchtenden Plätzen frei bleibt
-    tipp.classList.toggle('eng', aktuell === 'anlegen' && h.height < 700);
+    // Handy: immer die Kurzfassung, damit der Hafen frei bleibt
+    tipp.classList.toggle('eng', h.width < 600 || h.height < 560);
     let hoehe = tipp.offsetHeight;
     const trifft = (y) => k && k.y + k.h / 2 > y - 6 && k.y - k.h / 2 < y + hoehe + 6 && k.x - k.w / 2 < 12 + tipp.offsetWidth;
     const deckung = (y) => (k ? Math.max(0, Math.min(k.y + k.h / 2, y + hoehe) - Math.max(k.y - k.h / 2, y)) : 0);
