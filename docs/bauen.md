@@ -16,7 +16,7 @@ Stand 12.11.2026. Code: `web/js/ui/bauen.js` (Oberfläche, 3D) und `web/js/ui/ba
 
 1. Ausbaustufe bereit (Gäste, Ruf und Geld reichen).
 2. Platzmangel: mindestens zwei Boote weitergefahren oder abends 85 % der Gastplätze belegt. Vorschlag ist der bezahlbare Steg mit den meisten Plätzen.
-3. Offene Wünsche: mindestens zwei Gäste haben am letzten Abend etwas vermisst, dann die passende Versorgung.
+3. Offene Wünsche: mindestens zwei Gäste haben zuletzt etwas vermisst, dann die passende Versorgung.
 4. Fehlende Grundversorgung (zum Beispiel noch gar kein WC).
 5. Ziel der Ausbaustufe: wie viele Gäste, welcher Ruf oder wie viel Geld noch fehlt.
 6. Etwas Neues, das sich bezahlen lässt.

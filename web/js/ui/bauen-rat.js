@@ -6,7 +6,7 @@ export const WUNSCH = { wc: 'ein WC', dusche: 'eine Dusche', essen: 'etwas zu es
 export const WUNSCH_KURZ = { wc: 'WC', dusche: 'Dusche', essen: 'Essen', diesel: 'Diesel', strom: 'Strom' };
 export const FREI = {
   allesKassieren: 'Ein Tipp auf „Kassieren“ streicht alle Münzen auf einmal ein.',
-  automatik: 'Ankommende Boote werden automatisch auf einen passenden Platz gelotst und abends kassiert.',
+  automatik: 'Ankommende Boote werden automatisch auf einen passenden Platz gelotst, das Büro kassiert selbst.',
   vorspulen3: 'Dreifach vorspulen.',
 };
 

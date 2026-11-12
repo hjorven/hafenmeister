@@ -66,7 +66,10 @@ export function init(game) {
     if (!s) return leer();
     // Abends gilt schon der heutige Tag, tagsueber der gestrige (plus was heute schon weiterfuhr)
     const b = s.heute.abend ? s.heute : s.gestern;
-    return { ...b, weg: Math.max(b.weg, s.heute.weg), offen: { ...b.offen } };
+    // Wuensche werden beim Anlegen und jeden Morgen geprueft (sim.js chargeFee): heute zaehlt mit
+    const offen = { ...b.offen };
+    for (const [w, n] of Object.entries(s.heute.offen)) offen[w] = Math.max(offen[w] ?? 0, n);
+    return { ...b, weg: Math.max(b.weg, s.heute.weg), offen };
   }
   game.on('sim:turnedAway', (e) => {
     const s = speicher();
@@ -201,7 +204,7 @@ export function init(game) {
             breite: Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs), 20), plaetze: ids };
         };
       } else {
-        nutzen.push(jetzt ? `Versorgt ${neu} Boote pro Abend statt ${jetzt}.` : `Versorgt ${neu} Boote pro Abend.`);
+        nutzen.push(jetzt ? `Versorgt ${neu} Boote am Tag statt ${jetzt}.` : `Versorgt ${neu} Boote am Tag.`);
         nutzen.push(`Jeder erfüllte Wunsch bringt ${Math.round((ECONOMY.wunschBonus ?? 0.25) * 100)} % mehr Hafengeld und bessere Bewertungen.`);
         const g = versorgungGebaeude(key, u.level);
         if (g.id) ort = () => ({ ...gebaeudeOrt(g.id), neu: g.neu });
@@ -695,9 +698,9 @@ export function init(game) {
     if (e.art === 'steg' && (b.weg || b.plaetze)) {
       bedarfText = b.weg ? `Zuletzt sind ${b.weg} Boote weitergefahren, ohne anzulegen.` : `Abends waren ${b.belegt} von ${b.plaetze} Gastplätzen belegt.`;
     } else if (e.wunsch && b.offen[e.wunsch]) {
-      bedarfText = `Am letzten Abend wollten ${b.offen[e.wunsch]} Gäste ${WUNSCH[e.wunsch]} und bekamen es nicht.`;
+      bedarfText = `Zuletzt wollten ${b.offen[e.wunsch]} Gäste ${WUNSCH[e.wunsch]} und bekamen es nicht.`;
     } else if (e.wunsch && e.art === 'versorgung' && b.abend) {
-      bedarfText = 'Am letzten Abend fehlte dazu niemandem etwas.';
+      bedarfText = 'Zuletzt hat das hier niemandem gefehlt.';
     }
     const teuer = e.kosten > geld;
     const knopf = e.gesperrt
@@ -804,8 +807,8 @@ function stil() {
   s.textContent = `
     #card.bau-karte { display: flex; flex-direction: column; gap: 8px; }
     .bau-kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-    .bau-kopf h2 { margin: 0; }
-    .bau-kasse { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; opacity: 0.8; }
+    .bau-kopf h2 { margin: 0; min-width: 0; flex: 1 1 auto; overflow-wrap: anywhere; }
+    .bau-kasse { flex: 0 0 auto; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; opacity: 0.8; }
     .bau-rat { display: grid; gap: 2px; text-align: left; border: 0; border-radius: 12px; padding: 10px 12px;
       background: #e8f4ee; color: #1d3245; font: inherit; font-size: 0.92rem; line-height: 1.3; cursor: pointer; }
     .bau-tipp-titel { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #2a7d63; }
