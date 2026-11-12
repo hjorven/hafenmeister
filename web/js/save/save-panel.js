@@ -70,7 +70,7 @@ img.hm-sp-bild{box-shadow:0 0 0 var(--sp-px) rgba(36,54,74,.35)}
 .hm-sp-marke{display:inline-block;margin:0 0 4px;padding:1px 6px;background:var(--sp-meer);color:#fff;
   font:600 12px/1.4 var(--hm-pixel,system-ui,sans-serif)}
 .hm-sp-marke.probe{background:#f2c14e;color:var(--sp-tinte)}
-.hm-sp-mehr{min-width:44px}
+.hm-sp .hm-sp-reihe>.hm-sp-mehr{flex:0 0 auto;min-width:88px}
 .hm-sp-probe{margin:8px 0 0;padding:8px 10px;background:#fff6dc;box-shadow:inset 0 0 0 var(--sp-px) #cf9a2c}
 .hm-sp-frage{margin-top:8px;padding:8px 10px;background:#fdecea}
 .hm-sp-frage p{margin:0 0 4px}
@@ -343,9 +343,9 @@ export function openSavePanel(opts) {
               el('div', { class: 'hm-sp-platz-text' },
                 el('span', { class: 'hm-sp-name' }, p.name),
                 el('span', { class: 'hm-sp-zeile' }, infoText(p.info)),
-                el('span', { class: 'hm-sp-zeile' }, zuletzt(p.geloescht).replace('gespielt', 'gelöscht'))),
-              wieder,
-              knopf('Weg', sicher(() => { P.endgueltigLoeschen(p.id); zeichne(); say(`"${p.name}" ist endgültig gelöscht.`); }), 'hm-gefahr'))));
+                el('span', { class: 'hm-sp-zeile' }, zuletzt(p.geloescht).replace('gespielt', 'gelöscht')))),
+            el('div', { class: 'hm-sp-reihe' }, wieder,
+              knopf('Endgültig löschen', sicher(() => { P.endgueltigLoeschen(p.id); zeichne(); say(`"${p.name}" ist endgültig gelöscht.`); }), 'hm-gefahr'))));
         }
         inhalt.append(el('p', { class: 'hm-sp-info' }, `Im Papierkorb bleiben die letzten ${P.PAPIERKORB_MAX} gelöschten Häfen, bis der Speicher gebraucht wird.`));
       }
@@ -403,13 +403,12 @@ export function openSavePanel(opts) {
     const kopfZeile = el('div', { class: 'hm-sp-platz-kopf' },
       bild ? el('img', { class: 'hm-sp-bild', src: bild, alt: '' }) : el('span', { class: 'hm-sp-bild leer', 'aria-hidden': 'true' }),
       kopfText);
+    karte.append(kopfZeile);
     if (!laeuft) {
-      kopfZeile.append(knopf('Spielen', sicher(() => opts.wechseln(p.id)), 'hm-primaer'));
       const mehr = knopf(offenId === p.id ? 'Weniger' : 'Mehr', () => { offenId = offenId === p.id ? null : p.id; frage = null; zeichne(); }, 'hm-sp-mehr');
       mehr.setAttribute('aria-expanded', String(offenId === p.id));
-      kopfZeile.append(mehr);
+      karte.append(el('div', { class: 'hm-sp-reihe' }, knopf('Spielen', sicher(() => opts.wechseln(p.id)), 'hm-primaer'), mehr));
     }
-    karte.append(kopfZeile);
 
     // Probe-Kopie läuft: übernehmen oder verwerfen
     if (laeuft && p.probeVon && !test) {
