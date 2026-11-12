@@ -1,0 +1,202 @@
+/* Aufstieg und Abschluss feiern, Saisonbilanz (web/js/features/aufstieg.js, docs/aufstieg.md)
+ *
+ * Die Karte sitzt im unteren Teil des Bildschirms, damit die Kamerafahrt über den Hafen oben
+ * frei sichtbar bleibt. Pixel-Rahmen und Farben aus web/css/oberflaeche.css.
+ */
+
+.hm-feier {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding: calc(var(--hm-safe-top, 0px) + 12px) calc(var(--hm-safe-right, 0px) + 12px) calc(var(--hm-safe-bottom, 0px) + 16px) calc(var(--hm-safe-left, 0px) + 12px);
+  box-sizing: border-box;
+  pointer-events: auto;
+  background: linear-gradient(to bottom, rgba(16, 28, 42, 0) 35%, rgba(16, 28, 42, 0.45) 100%);
+  font-family: var(--hm-text, system-ui, sans-serif);
+  color: var(--hm-tinte, #24364a);
+  animation: hm-feier-ein 0.3s steps(4);
+}
+.hm-feier[hidden] { display: none; }
+.hm-feier.zu { animation: hm-feier-aus 0.26s steps(3) forwards; }
+
+/* Während der Feier tritt die Oberfläche zurück, nur der Hafen und die Karte bleiben */
+body.hm-feier-an #hud-top,
+body.hm-feier-an #hud-bottom,
+body.hm-feier-an #hm-seite,
+body.hm-feier-an #hm-zeit,
+body.hm-feier-an #btn-build,
+body.hm-feier-an #btn-collect,
+body.hm-feier-an .hm-tipp,
+body.hm-feier-an .bau-tipp,
+body.hm-feier-an #event-banner { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.2s steps(3); }
+
+/* Die alte Erfolgszeile aus ui/hud.js ersetzt die Feier */
+body #hud-goal.done { display: none !important; }
+
+.hm-feier-karte {
+  position: relative;
+  box-sizing: border-box;
+  width: min(440px, 100%);
+  max-height: min(64vh, 560px);
+  overflow-y: auto;
+  padding: 14px 18px 16px;
+  text-align: center;
+  animation: hm-feier-karte 0.5s steps(6) 0.9s both;
+}
+.hm-neu .hm-feier-karte { border-image-source: var(--rahmen-papier); }
+.hm-neu .hm-feier-karte.region { border-image-source: var(--rahmen-gold); }
+.hm-feier-karte.region { background: none; }
+.hm-feier-karte.saison { animation-delay: 0.1s; }
+
+.hm-feier-ober {
+  margin: 0;
+  font-family: var(--hm-pixel, system-ui);
+  font-weight: 600;
+  font-size: 0.85em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hm-meer, #23897d);
+}
+.hm-feier-karte.region .hm-feier-ober { color: var(--hm-tinte, #24364a); }
+.hm-feier-titel {
+  margin: 2px 0 2px;
+  font-family: var(--hm-pixel, system-ui);
+  font-weight: 700;
+  font-size: clamp(22px, 6vw, 30px);
+  line-height: 1.15;
+}
+.hm-feier-unter { margin: 4px 0 8px; color: var(--hm-tinte-2, #5a6a7c); font-size: 0.92em; }
+.hm-feier-karte.region .hm-feier-unter { color: var(--hm-tinte, #24364a); }
+.hm-feier-kopf { margin: 10px 0 4px; font-family: var(--hm-pixel, system-ui); font-weight: 600; text-align: left; }
+
+.hm-feier-zahlen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 6px;
+  margin: 6px 0 4px;
+}
+.hm-feier-zahl {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 4px;
+  background: var(--hm-mulde, #e9dfca);
+  box-shadow: inset 0 0 0 var(--hm-px, 2px) rgba(36, 54, 74, 0.18);
+  animation: hm-feier-zahl 0.3s steps(3) both;
+}
+.hm-feier-zahl:nth-child(2) { animation-delay: 1.15s; }
+.hm-feier-zahl:nth-child(3) { animation-delay: 1.3s; }
+.hm-feier-zahl:nth-child(4) { animation-delay: 1.45s; }
+.hm-feier-zahl:nth-child(5) { animation-delay: 1.6s; }
+.hm-feier-zahl:nth-child(6) { animation-delay: 1.75s; }
+.hm-feier-zahl:nth-child(7) { animation-delay: 1.9s; }
+.hm-feier-zahl:first-child { animation-delay: 1s; }
+.hm-feier-karte.region .hm-feier-zahl { background: rgba(255, 250, 240, 0.7); }
+.hm-feier-zahl b { font-size: 1.1em; font-variant-numeric: tabular-nums; }
+.hm-feier-zahl span { font-size: 0.78em; color: var(--hm-tinte-2, #5a6a7c); }
+
+.hm-feier-neu ul, .hm-feier-chronik ol, .hm-feier-ziele { margin: 0; padding: 0; list-style: none; text-align: left; }
+.hm-feier-neu li { padding: 4px 0 4px 18px; position: relative; border-top: var(--hm-px, 2px) dotted rgba(36, 54, 74, 0.2); }
+.hm-feier-neu li:first-child { border-top: 0; }
+.hm-feier-neu li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.75em;
+  width: 8px;
+  height: 8px;
+  background: var(--hm-gold, #f2c14e);
+  box-shadow: 0 0 0 var(--hm-px, 2px) var(--hm-tinte, #24364a);
+}
+.hm-feier-chronik li, .hm-feier-ziele li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: baseline;
+  padding: 3px 0;
+  border-top: var(--hm-px, 2px) dotted rgba(36, 54, 74, 0.2);
+  font-size: 0.92em;
+}
+.hm-feier-chronik li:first-child, .hm-feier-ziele li:first-child { border-top: 0; }
+.hm-feier-wert { font-variant-numeric: tabular-nums; color: var(--hm-tinte-2, #5a6a7c); text-align: right; }
+.hm-feier-ziele li { grid-template-columns: 18px 1fr auto; }
+.hm-feier-ziele li .hm-leise { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.hm-feier-haken { width: 12px; height: 12px; box-shadow: 0 0 0 var(--hm-px, 2px) var(--hm-tinte, #24364a); background: var(--hm-mulde, #e9dfca); }
+.hm-feier-ziele li.ok .hm-feier-haken { background: var(--hm-meer, #23897d); }
+.hm-feier-ziele li.ok .hm-feier-wert { color: var(--hm-meer, #23897d); font-weight: 700; }
+.hm-feier-ziele li.nein { color: var(--hm-tinte-2, #5a6a7c); }
+
+.hm-feier-ziel { margin: 10px 0 2px; font-size: 0.9em; text-align: left; }
+.hm-feier-weiter { width: 100%; margin-top: 12px; min-height: 48px; font-family: var(--hm-pixel, system-ui); font-weight: 600; font-size: 1.05em; }
+
+/* Wimpelkette quer über den Bildschirm */
+.hm-feier-wimpel {
+  position: absolute;
+  top: calc(var(--hm-safe-top, 0px) + 6px);
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4%;
+  pointer-events: none;
+  border-top: 2px solid rgba(36, 54, 74, 0.7);
+  animation: hm-feier-kette 0.6s steps(6) both;
+}
+.hm-feier-wimpel i {
+  width: 18px;
+  height: 22px;
+  background: var(--f);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0;
+  margin-top: 0;
+  animation: hm-feier-flattern 1.2s steps(4) infinite;
+  animation-delay: calc(var(--i) * -0.13s);
+  filter: drop-shadow(0 2px 0 rgba(36, 54, 74, 0.35));
+}
+
+/* Feuerwerk beim Abschluss der Region: Pixel-Funken */
+.hm-feier-feuerwerk { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.hm-funke { position: absolute; left: var(--x); top: var(--y); width: 0; height: 0; }
+.hm-funke i {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--f);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+  transform: rotate(calc(var(--k) * 45deg)) translateY(0);
+  opacity: 0;
+  animation: hm-funke 2.4s steps(8) infinite;
+  animation-delay: var(--d);
+}
+
+@keyframes hm-feier-ein { from { opacity: 0; } }
+@keyframes hm-feier-aus { to { opacity: 0; } }
+@keyframes hm-feier-karte { from { opacity: 0; transform: translateY(24px); } }
+@keyframes hm-feier-zahl { from { opacity: 0; transform: translateY(6px); } }
+@keyframes hm-feier-kette { from { transform: translateY(-40px); } }
+@keyframes hm-feier-flattern { 50% { transform: skewX(8deg) scaleY(0.92); } }
+@keyframes hm-funke {
+  0% { opacity: 0; transform: rotate(calc(var(--k) * 45deg)) translateY(0); }
+  10% { opacity: 1; }
+  60% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(calc(var(--k) * 45deg)) translateY(-70px); }
+}
+
+@media (max-width: 600px) {
+  .hm-feier-karte { padding: 12px 14px 14px; max-height: 68vh; }
+  .hm-feier-zahlen { grid-template-columns: repeat(3, 1fr); }
+}
+/* Handy quer: wenig Höhe, Karte rechts statt unten, damit der Hafen links sichtbar bleibt */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hm-feier { align-items: flex-end; justify-content: center; }
+  .hm-feier-karte { width: min(400px, 56vw); max-height: calc(100vh - 32px); }
+  .hm-feier-zahlen { grid-template-columns: repeat(3, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hm-feier, .hm-feier-karte, .hm-feier-zahl, .hm-feier-wimpel, .hm-feier-wimpel i, .hm-funke i { animation: none !important; }
+  .hm-funke i { opacity: 0.8; }
+}
