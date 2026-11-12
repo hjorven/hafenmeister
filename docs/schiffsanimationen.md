@@ -76,6 +76,11 @@ Seegang und Wind für Ereignisse: `game.boatAnim.setSea(0 bis 1)`, `game.boatAni
 - **Anlegen:** Kleine Boote brauchen von der Boje zur Box etwa 8 s, beschleunigen zügig und bremsen kräftig ab. Beim Ankommen taucht der Bug kurz ein, jede Leine klickt (`sound` `leine-einrasten`), die Box blitzt einmal hell auf.
 - **Zuweisen:** Passende Plätze leuchten in der Form der Box selbst (`game.stege.highlight`), der eingerastete Platz sonnengelb. Boote lassen sich erst antippen und ziehen, wenn sie an der Boje fest sind.
 
+## Nacht und Abreise
+
+- Nachts brennt an Booten an Boje oder Anker ein weißes Ankerlicht oben am Mast (`game.landscape.licht.zustand.nacht` über 0,35).
+- Nachts abgerechnete Gäste (`sim:departed`) bleiben sichtbar in der Box, bis am Vormittag `boot-faehrt` kommt. Nach dem Laden eines Spielstands sind sie weg.
+
 ## Leistung
 
 Ein einziger `onTick` für alle Boote, keine Speicheranforderungen pro Bild. Leinen liegender Boote werden auf Touch-Geräten nur jedes zweite Bild nachgeführt. Kielwasser und Schaum teilen sich Geometrie und Material.

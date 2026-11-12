@@ -239,6 +239,33 @@ export function init(game) {
     return e;
   }
 
+  // --- Ankerlicht: nachts brennt an Booten an Boje oder Anker ein weisses Licht oben am Mast --------
+  const lichtGeo = new THREE.SphereGeometry(0.16, 8, 6);
+  const lichtMat = new THREE.MeshBasicMaterial({ color: '#fff6d8' });
+  const glanzMat = new THREE.MeshBasicMaterial({ color: '#fff3c4', transparent: true, opacity: 0.35, depthWrite: false });
+  const glanzGeo = new THREE.SphereGeometry(0.5, 10, 8);
+  function ankerlicht(e) {
+    if (e.licht) return e.licht;
+    const box = new THREE.Box3().setFromObject(e.group);
+    const l = new THREE.Mesh(lichtGeo, lichtMat);
+    l.add(new THREE.Mesh(glanzGeo, glanzMat));
+    l.name = 'ankerlicht';
+    // lokal ueber der Mitte (Mast), knapp unter der hoechsten Stelle
+    l.position.set(0, Math.max(0.8, box.max.y - e.group.position.y - 0.1), 0);
+    l.visible = false;
+    e.group.add(l);
+    e.licht = l;
+    return l;
+  }
+  game.onTick(() => {
+    const nacht = game.landscape?.licht?.zustand?.nacht ?? 0;
+    for (const e of boats.values()) {
+      const an = nacht > 0.35 && e.anim.moored && e.anim.berth?.kind === 'buoy';
+      if (an) ankerlicht(e).visible = true;
+      else if (e.licht) e.licht.visible = false;
+    }
+  });
+
   function entferne(id) {
     const e = boats.get(id);
     if (!e) return;
@@ -414,7 +441,11 @@ export function init(game) {
     if (d?.boatId != null) { entferneMuenze(d.boatId, 700); const e = boats.get(d.boatId); if (e) e.muenzeWartet = false; }
     else for (const id of [...muenzen.keys()]) entferneMuenze(id, 700);
   });
-  game.on('sim:departed', (d) => entferneMuenze(d?.boatId, 0));
+  game.on('sim:departed', (d) => {
+    entferneMuenze(d?.boatId, 0);
+    const e = boats.get(d?.boatId);
+    if (e) e.abgerechnet = true;     // bleibt sichtbar, bis 'boot-faehrt' am Vormittag kommt
+  });
 
   // Boot ist am Platz fest: die Box blitzt einmal hell auf (Form und Drehung der Box aus render/stege.js)
   const blitze = new Map();     // platzId -> Restzeit
@@ -531,12 +562,14 @@ export function init(game) {
   }
 
   // Alle Boote aus dem Spielstand sofort an ihre Plaetze legen (Start, Laden, neues Spiel)
-  function abgleich() {
+  function abgleich(laden = false) {
     baueBojen();
     const liste = game.sim?.boote ?? [];
     const ids = new Set(liste.map((b) => b.id));
     // Boote, die gerade abfahren, fahren zu Ende (sie sind in den Regeln schon weg)
-    for (const [id, e] of [...boats]) if (!ids.has(id) && !e.faehrt && !e.draussen) entferne(id);
+    // Nachts abgerechnete Gaeste (sim:departed) liegen bis zum Ablegen am Vormittag noch in der Box,
+    // nach dem Laden eines Spielstands sind sie weg (PR 108).
+    for (const [id, e] of [...boats]) if (!ids.has(id) && !e.faehrt && !e.draussen && (laden || !e.abgerechnet)) entferne(id);
     for (const info of liste) {
       const e = erzeuge(info);
       e.info = { ...e.info, ...info };
@@ -557,8 +590,8 @@ export function init(game) {
     game.boatsVisible = true;
     game.emit('sim:change', {});
   });
-  game.on('spielstand-geladen', () => setTimeout(abgleich, 0));
-  game.on('sim:change', (d) => { if (d?.reason === 'load' || d?.reason === 'new') abgleich(); });
+  game.on('spielstand-geladen', () => setTimeout(() => abgleich(true), 0));
+  game.on('sim:change', (d) => { if (d?.reason === 'load' || d?.reason === 'new') abgleich(true); });
   game.on('stufe', () => { if (bojenStufe) abgleich(); });
 
   game.boatView = {
