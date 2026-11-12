@@ -509,7 +509,7 @@ export function init(game) {
     const unten = document.getElementById('hud-bottom');
     const ur = unten?.getBoundingClientRect();
     if (ur && ur.height && ur.width > c.width * 0.6 && getComputedStyle(unten).backgroundColor !== 'rgba(0, 0, 0, 0)') f.b = Math.min(f.b, ur.top - c.top - 6);
-    const hindernisse = [...root.querySelectorAll('button, .stat, .hm-tafel, .hm-px')]
+    const hindernisse = [...root.querySelectorAll('button, .stat, .hm-tafel, .hm-px, .hm-tipp')]
       .filter((e) => !card.contains(e) && !schilder.contains(e) && e !== tipp && e.offsetParent)
       .map((e) => { const r = e.getBoundingClientRect(); return { l: r.left - c.left - 4, t: r.top - c.top - 4, r: r.right - c.left + 4, b: r.bottom - c.top + 4 }; })
       .filter((r) => r.r > r.l);
