@@ -204,7 +204,10 @@ export function init(game) {
     zeigeProbe();
     if (erinnert) return;
     erinnert = true;
-    if (!showExportReminderIfDue({ getGame: aktuell })) startFrage(st);
+    // Safari-Erinnerung erst, wenn es den Hafen schon ein paar Tage gibt (nicht beim ersten Start)
+    const seit = Date.parse(plaetze.aktiverPlatz()?.erstellt ?? '');
+    const alt = !Number.isNaN(seit) && Date.now() - seit > 3 * 86400000;
+    if (!(alt && showExportReminderIfDue({ getGame: aktuell }))) startFrage(st);
     if (!plaetze.bildLesen(plaetze.aktiverPlatz()?.id ?? '')) setTimeout(bildMachen, 4000);
   }
   // Start mit "Weiter": nur wenn es mehrere Häfen gibt und die Seite normal geöffnet wurde
