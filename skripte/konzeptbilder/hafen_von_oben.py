@@ -403,7 +403,7 @@ def render(stage, seed=5):
         # Kreuzfahrtpier: Steg vom Strand weit hinaus, das Schiff liegt an der Ostseite (ragt ueber das Pierende hinaus)
         PW = (PIER_X, sea_s(PIER_X) - 4)
         H_.line([PW, (PIER_X, PIER_Y)], 'pier', 5.0)
-        H_.along(PW, (PIER_X, PIER_Y), -1, [('cruise', 180, 29, 'white', True)], jw=5.0, cls='XXL', start=8)
+        H_.along(PW, (PIER_X, PIER_Y), -1, [('cruise', 180, 29, 'white', True)], jw=5.0, cls='XXL', start=18)
         # Marinepier: Korvette an der Ostseite, Minenjagdboot oder Segelschulschiff an der Westseite
         MW = (MARINE_X, sea_s(MARINE_X) - 4)
         H_.line([MW, (MARINE_X, MARINE_Y)], 'pier', 5.0)

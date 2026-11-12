@@ -56,7 +56,7 @@ SEE[6] = SEE[5];
  */
 export const GROSSE_GAESTE = [
   // Lagen aus data/besuchswege.js (AUFTRITTE) und harbor.js Stufe 6, Rumpf mit Länge und Breite
-  { name: 'Kreuzfahrtschiff an P01', rechteck: { x0: -146, x1: -98, y0: 224, y1: 517 } },
+  { name: 'Kreuzfahrtschiff an P01', rechteck: { x0: -146, x1: -98, y0: 234, y1: 527 } },
   { name: 'Korvette und Minenjagdboot an MA01/MA02', rechteck: { x0: -336, x1: -284, y0: 224, y1: 372 } },
   { name: 'Traditionssegler vor Anker', rechteck: { x0: -202, x1: -188, y0: 270, y1: 474 } },
 ];

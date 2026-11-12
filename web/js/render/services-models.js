@@ -707,7 +707,7 @@ function kreuzfahrtterminal(stufe, { lage = { x: -150, y: 212 } } = {}) {
   const fl = [flagge(g, -lang / 2 - 1.2, -tief / 2 - 1, 9, FARBE.blue), flagge(g, -lang / 2 + 1, -tief / 2 - 1, 9, FARBE.red)];
   // Gangway-Tuerme an der Ostkante der Kreuzfahrtpier, das Schiff (P01) liegt oestlich daneben
   const [pwx] = pierWurzel('P', [-150, 219]);
-  const p01 = HAFEN.plaetze?.find((q) => q.id === 'P01')?.lage?.[6] ?? [-122, 371];
+  const p01 = HAFEN.plaetze?.find((q) => q.id === 'P01')?.lage?.[6] ?? [-122, 380];
   const tuerme = stufe >= 2 ? [-40, 0] : [-20];
   for (const off of tuerme) {
     const [px, pz] = P(pwx + 1.6 - lage.x, p01[1] + off - lage.y);

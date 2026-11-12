@@ -37,7 +37,7 @@ export const AUFTRITTE = {
   kreuzfahrtterminal: {
     art: 'kreuzfahrt',
     schiffe: [{ modell: 'kreuzfahrtschiff', platz: 'P01', liegeKurs: -90, masse: [180, 29], raus: 'rueckwaerts',
-      weg: [[-122, 371], [-122, 760]] }],
+      weg: [[-122, 380], [-122, 760]] }],
     plan: { an: 0.03, ab: 0.68 },
   },
   marineanleger: {
