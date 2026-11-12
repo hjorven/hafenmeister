@@ -14,7 +14,7 @@
 //
 // Spielstand: state.modules.einstieg = { fertig, erledigt: [id, ...] }. Ein neues Spiel hat keinen
 // Eintrag, also beginnt der Einstieg dort wieder. Mit ?einstieg=1 in der Adresse startet er neu.
-// Schnittstelle: game.einstieg = { start(), beenden(), schritt() }; meldet 'einstieg:schritt' { schritt } bei jedem Wechsel
+// Schnittstelle: game.einstieg = { start(), beenden(), schritt() }; meldet 'einstieg:schritt' { schritt } bei jedem Wechsel und 'einstieg:ende' am Ende
 
 import { regelnBereit } from './regeln-bereit.js';
 
@@ -372,6 +372,7 @@ export async function init(game) {
     const e = einstiegState(st());
     erledige(e, id);
     if (id === aktuell) zeige(null);
+    if (e.fertig) game.emit('einstieg:ende', {});
   }
   function beenden() {
     const e = einstiegState(st());
@@ -411,7 +412,12 @@ export async function init(game) {
 
   function entscheide() {
     const e = st() && einstiegState(st());
-    if (!e || e.fertig) { halte(false); if (aktuell) zeige(null); k = null; return; }
+    if (!e || e.fertig) {
+      halte(false);
+      if (aktuell) { zeige(null); game.emit('einstieg:ende', {}); }   // auch beim Ende nach Tagesziele oder nach einem Spieltag
+      k = null;
+      return;
+    }
     const id = naechsterSchritt(e, lage());
     halte(!e.erledigt.includes('anlegen'));
     if (id !== aktuell) zeige(id);
