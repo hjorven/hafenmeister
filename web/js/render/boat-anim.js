@@ -108,6 +108,7 @@ function normBerth(b) {
     side: b.side === -1 || b.side === 'port' ? -1 : 1,
     deck: b.deck ?? (b.kind === 'kai' || b.kind === 'pier' ? 1.5 : b.kind === 'buoy' ? 0.25 : 0.86),
     bollards: b.bollards,
+    abstand: b.abstand,
   };
 }
 
@@ -202,6 +203,44 @@ class BoatAnimManager {
     game.onTick((dt) => this.tick(dt));
   }
 
+  // Verkehr: Boote halten Abstand. Wer hinter einem anderen in dieselbe Richtung faehrt, bremst.
+  // Liegt etwas im Weg (entgegenkommend, querend oder still), weicht das Boot seitlich aus
+  // (entgegen: beide nach Steuerbord) und wird langsamer. Wer naeher am Ziel ist, hat Vorfahrt.
+  traffic(dt) {
+    const list = [];
+    for (const b of this.boats) {
+      if (b.model.visible === false) continue;
+      list.push(b);
+    }
+    for (const b of list) {
+      const mv = b.movingTask();
+      if (!mv || b.ghost > 0) {
+        b.yieldF = 1;
+        b.laneWant = 0;
+        b.ghost = Math.max(0, b.ghost - dt);
+        continue;
+      }
+      let y = 1, lane = 0;
+      for (const o of list) {
+        if (o === b) continue;
+        const hit = b.blockedBy(o);
+        if (!hit) continue;
+        if (o.movingTask() && o.ghost <= 0 && o.blockedBy(b) && b.priorityOver(o)) {
+          // beide stehen sich im Weg: wer Vorfahrt hat, faehrt, weicht aber trotzdem etwas aus
+          if (hit.lane) lane = Math.abs(hit.lane) > Math.abs(lane) ? hit.lane * 0.5 : lane;
+          continue;
+        }
+        y = Math.min(y, hit.y);
+        if (hit.lane && Math.abs(hit.lane) > Math.abs(lane)) lane = hit.lane;
+      }
+      b.yieldF = y;
+      b.laneWant = lane;
+      // nie ewig blockieren: nach 12 s stillstand kurz ohne Verkehrsregeln weiter
+      b.blockedFor = y < 0.08 && b.speed < 0.1 ? b.blockedFor + dt : 0;
+      if (b.blockedFor > 12) { b.ghost = 4; b.blockedFor = 0; }
+    }
+  }
+
   add(model, opts) {
     const b = new BoatAnim(this, model, opts);
     this.boats.add(b);
@@ -220,7 +259,9 @@ class BoatAnimManager {
   tick(dt) {
     this.frame++;
     const t = this.game.time;
+    if (dt > 0) this.traffic(dt);
     for (const b of this.boats) b.update(dt, t);
+
   }
 }
 
@@ -298,9 +339,13 @@ class PathTask {
   step(b, dt) {
     const o = this.opts;
     if (this.pivot) {
+      // nicht in ein Nachbarboot hineindrehen: warten, bis es weg ist (hoechstens 8 s)
+      this.pivotWait = (this.pivotWait ?? 0) + dt;
+      if (this.pivotWait < 8 && b.sweepBlocked()) { b.setSpeed(0, dt); return false; }
       const diff = wrapAngle(this.pivotTo - b.heading);
       b.steer(this.pivotTo, dt, 1.4);
-      b.setSpeed(0.25 * b.cfg.harbor, dt);
+      // fast auf der Stelle drehen, damit Bug und Heck nicht in die Nachbarboxen schwenken
+      b.setSpeed(0.08 * b.cfg.harbor, dt);
       b.advance(b.speed * dt);
       if (Math.abs(diff) < 0.35) { this.pivot = false; this.build(b); }
       return false;
@@ -308,22 +353,32 @@ class PathTask {
     if (!this.curve) return true;
     const cruise = o.speed ?? (o.harbor ? b.cfg.harbor : b.cfg.cruise);
     const remaining = this.len - this.s;
-    let target = cruise;
+    this.remaining = remaining;
+    let target = cruise * b.yieldF;
     if (o.stop !== false) {
-      const brake = Math.max(0.05, b.cfg.accel * 0.6);
-      target = Math.min(cruise, Math.sqrt(2 * brake * remaining) + 0.12);
+      const brake = Math.max(0.05, b.cfg.accel * 0.6 * (o.brake ?? 1));
+      target = Math.min(target, Math.sqrt(2 * brake * remaining) + 0.12);
     }
-    b.setSpeed(target, dt);
+    b.setSpeed(target, dt, o.brake);
+    if (b.yieldF < 0.05) b.speed = approach(b.speed, 0, b.cfg.accel * 2.5 * dt);
     this.s = Math.min(this.len, this.s + b.speed * dt);
     const u = this.len > 0 ? this.s / this.len : 1;
     this.curve.getPointAt(u, _v);
     this.curve.getTangentAt(u, _t);
-    b.x = _v.x; b.z = _v.z;
-    b.steer(Math.atan2(-_t.z, _t.x), dt, 6);
+    const hd = Math.atan2(-_t.z, _t.x);
+    // Ausweichen: seitlicher Versatz zur Bahn, am Anfang und vor dem Ziel wieder null
+    const L = b.info.length;
+    const start = clamp(0.5 + this.s / L, 0, 1);
+    const fade = o.stop === false ? start : clamp(remaining / (L * 2.5) - 0.2, 0, 1) * start;
+    b.lane = approach(b.lane, b.laneWant * fade, (0.8 + b.info.beam * 0.3) * dt);
+    b.x = _v.x + Math.sin(hd) * b.lane;
+    b.z = _v.z + Math.cos(hd) * b.lane;
+    b.steer(hd, dt, 6);
     b.thrusters = o.thrusters ? clamp(1 - remaining / (b.info.length * 1.2), 0, 1) : 0;
     if (remaining < 0.02) {
       if (o.stop !== false) b.speed = 0;
       b.thrusters = 0;
+      b.lane = 0;
       return true;
     }
     return false;
@@ -340,8 +395,9 @@ class StraightTask {
     b.reverse = !!this.opts.reverse;
   }
   step(b, dt) {
-    const max = this.opts.speed ?? b.cfg.harbor * 0.45;
+    const max = (this.opts.speed ?? b.cfg.harbor * 0.45) * (this.opts.sideways ? 1 : b.yieldF);
     const remaining = this.len - this.s;
+    this.remaining = remaining;
     const target = Math.min(max, Math.sqrt(2 * b.cfg.accel * 0.4 * remaining) + 0.05);
     this.v = approach(this.v, target, b.cfg.accel * 0.6 * dt);
     this.s = Math.min(this.len, this.s + this.v * dt);
@@ -376,6 +432,20 @@ class AwaitTask {
   step(b, dt) { this.t += dt; b.setSpeed(0, dt); return this.done || this.t >= this.timeout; }
 }
 
+// Warten, bis fn() true liefert (z. B. bis die Box frei ist), hoechstens timeout Sekunden.
+class UntilTask {
+  constructor(fn, timeout) { this.fn = fn; this.timeout = timeout; }
+  start() { this.t = 0; }
+  step(b, dt) {
+    this.t += dt;
+    b.setSpeed(0, dt);
+    b.advance(b.speed * dt);
+    let ok = true;
+    try { ok = !!this.fn(b); } catch { ok = true; }
+    return ok || this.t >= this.timeout;
+  }
+}
+
 class CallTask {
   constructor(fn) { this.fn = fn; }
   start() {}
@@ -396,12 +466,16 @@ class LinesTask {
       if (!this.on) b.lines.length = 0;
       return true;
     }
-    const dur = this.on ? 0.7 : 0.45;
+    const dur = this.on ? 0.5 : 0.35;
     const line = b.lines[this.order[this.i]];
     if (this.told !== this.i) { this.told = this.i; b.emit('boat:line', { on: this.on, index: this.order[this.i] }); }
     this.t += dt;
     line.p = this.on ? clamp(this.t / dur, 0, 1) : clamp(1 - this.t / dur, 0, 1);
-    if (this.t >= dur) { this.i++; this.t = 0; }
+    if (this.t >= dur) {
+      // Leine fest: Klick (Modul audio.js), nur beim Festmachen im Spiel, nicht beim Laden
+      if (this.on && b.berth?.kind !== 'buoy') b.game.emit('sound', { name: 'leine-einrasten', volume: 0.6 });
+      this.i++; this.t = 0;
+    }
     b.setSpeed(0, dt);
     return false;
   }
@@ -478,6 +552,12 @@ class BoatAnim {
     this.turnRate = 0;
     this.reverse = false;
     this.thrusters = 0;
+    this.yieldF = 1;          // Verkehr: 0 = anhalten, 1 = freie Fahrt
+    this.lane = 0;            // seitlicher Versatz zur Bahn (m, + = Steuerbord)
+    this.laneWant = 0;
+    this.blockedFor = 0;
+    this.ghost = 0;
+    this.bump = 0;            // kleines Nicken beim Festmachen
     this.state = 'idle';
     this.tasks = [];
     this.task = null;
@@ -593,6 +673,8 @@ class BoatAnim {
   /** Anlegen an einen Liegeplatz ({ x, z, heading, kind, length, width, side } oder berthFromPlatz()). */
   dock(berth, opts = {}) {
     const p = this.begin();
+    // opts.waitFor: () => true, sobald der Platz frei ist (das vorige Boot hat ihn verlassen)
+    if (opts.waitFor) this.push(new UntilTask(opts.waitFor, 120));
     if (this.moored) this.pushUndock({});
     const b = normBerth(berth);
     const big = this.info.size === 'XL' || this.info.size === 'XXL';
@@ -606,16 +688,31 @@ class BoatAnim {
     const pts = this.approachPoints(b);
     if (opts.via) pts.unshift(...opts.via);
     const f = this.finalPose(b);
-    // Marschfahrt, das Bremsen vor dem Ziel macht PathTask (wird von selbst Hafenfahrt)
-    const speed = opts.speed ?? (big ? this.cfg.harbor : this.cfg.cruise);
+    // Marschfahrt, das Bremsen vor dem Ziel macht PathTask (wird von selbst Hafenfahrt).
+    // Kleine Boote sollen nach dem Zuweisen in wenigen Sekunden am Platz sein: Tempo nach Weglaenge,
+    // zuegig beschleunigen und kraeftig abbremsen.
+    let speed = opts.speed, brake = 1;
+    if (speed === undefined) {
+      if (big) speed = this.cfg.harbor;
+      else {
+        let len = 0, px = this.x, pz = this.z;
+        for (const q of pts) { len += Math.hypot(q.x - px, q.z - pz); px = q.x; pz = q.z; }
+        speed = clamp(len / (opts.seconds ?? 8), this.cfg.cruise, this.cfg.cruise * 2.4);
+        brake = 2.2;
+      }
+    }
     if (BOX_KINDS.has(b.kind) || b.kind === 'buoy' || !big) {
-      this.push(new PathTask(pts, { speed, thrusters: b.kind !== 'buoy' && this.info.size !== 'S' && this.info.size !== 'M' }));
+      this.push(new PathTask(pts, { speed, brake, thrusters: b.kind !== 'buoy' && this.info.size !== 'S' && this.info.size !== 'M' }));
     } else {
       // Grosse Schiffe: parallel zur Kante stoppen, dann mit Querstrahlrudern seitlich heran
       this.push(new PathTask(pts, { harbor: true }));
       this.push(new StraightTask(f, { sideways: true, thrusters: true, speed: 0.35, heading: b.heading }));
     }
-    this.push(new CallTask((bt) => { bt.heading = wrapAngle(bt.heading); }));
+    this.push(new CallTask((bt) => {
+      bt.heading = wrapAngle(bt.heading);
+      // Ankommen: Bug taucht kurz ein und wippt nach
+      bt.bump = 1;
+    }));
     this.push(new LinesTask(true));
     this.push(new CallTask((bt) => {
       bt.moored = true;
@@ -696,10 +793,13 @@ class BoatAnim {
     const px = Math.sin(b.heading), pz = Math.cos(b.heading);
     if (b.kind === 'buoy') {
       // Leine von der Boje los, das Boot treibt kurz zurueck
-      this.push(new StraightTask({ x: this.x - dx * L * 0.4, z: this.z - dz * L * 0.4 }, { reverse: true, speed: 0.4 }));
+      this.push(new StraightTask({ x: this.x - dx * L * 0.25, z: this.z - dz * L * 0.25 }, { reverse: true, speed: 0.9 }));
     } else if (BOX_KINDS.has(b.kind)) {
       // rueckwaerts aus der Box
-      const back = b.length / 2 + L * 0.7;
+      // so weit zurueck, dass das Boot beim Drehen die Nachbarn nicht beruehrt
+      // Mitte eine halbe Bootslaenge plus Luft vor dem Boxende: beim Drehen auf der Stelle
+      // bleiben Bug und Heck vor den Nachbarboxen und vor der gegenueberliegenden Reihe
+      const back = b.length / 2 + L * 0.5 + 0.7;
       this.push(new StraightTask({ x: b.x - dx * back, z: b.z - dz * back }, { reverse: true }));
     } else {
       // seitlich frei kommen, dann voraus
@@ -711,7 +811,7 @@ class BoatAnim {
         { sideways: true, thrusters: big, speed: big ? 0.35 : 0.3, heading: b.heading },
       ));
     }
-    this.push(new CallTask((bt) => { bt.fenderTarget = 0; bt.berth = null; }));
+    this.push(new CallTask((bt) => { bt.fenderTarget = 0; bt.berth = null; bt.emit('boat:clear', { berth: b.id }); }));
   }
 
   finalPose(b) {
@@ -822,8 +922,76 @@ class BoatAnim {
 
   // --- intern: Bewegung -----------------------------------------------------------------------
 
-  setSpeed(target, dt) {
-    this.speed = approach(this.speed, target, this.cfg.accel * dt);
+  setSpeed(target, dt, boost = 1) {
+    this.speed = approach(this.speed, target, this.cfg.accel * (boost || 1) * dt);
+  }
+
+  // --- intern: Verkehr --------------------------------------------------------------------------
+
+  /** Faehrt das Boot gerade selbst (Kurs oder gerade Fahrt, nicht seitlich an die Kante)? */
+  movingTask() {
+    const t = this.task;
+    if (t instanceof PathTask) return t.pivot ? null : t;
+    if (t instanceof StraightTask && !t.opts.sideways) return t;
+    return null;
+  }
+
+  /** Wo das Boot gerade wirklich liegt (an der Boje schwojt es um die Boje). */
+  pose() {
+    return this.moored && this.berth?.kind === 'buoy'
+      ? { x: this.model.position.x, z: this.model.position.z, h: this.model.rotation.y }
+      : { x: this.x, z: this.z, h: this.heading };
+  }
+
+  /** Steht o im Weg? Liefert { y: Tempofaktor, lane: Ausweichversatz } oder null. */
+  blockedBy(o) {
+    // fest an Steg, Kai oder in der Box: die Anfahrwege sind dafuer gebaut
+    if (o.berth && o.berth.kind !== 'buoy' && (o.moored || o.state === 'casting-off')) return null;
+    const dir = this.heading + (this.reverse ? Math.PI : 0);
+    const fx = Math.cos(dir), fz = -Math.sin(dir);
+    const p = o.pose();
+    const rx = p.x - this.x, rz = p.z - this.z;
+    const ahead = rx * fx + rz * fz;
+    if (ahead <= 0) return null;
+    const lat = rx * Math.sin(dir) + rz * Math.cos(dir);      // + = an Steuerbord
+    const dh = p.h - this.heading;
+    const oL = o.info.length / 2, oB = o.info.beam / 2;
+    const oAhead = oL * Math.abs(Math.cos(dh)) + oB * Math.abs(Math.sin(dh));
+    const oLat = oL * Math.abs(Math.sin(dh)) + oB * Math.abs(Math.cos(dh));
+    const L = this.info.length / 2, B = this.info.beam / 2;
+    const gap = ahead - oAhead - L;
+    const look = 1.5 + this.speed * 1.6 + (this.speed * this.speed) / (2 * this.cfg.accel);
+    if (gap > look) return null;
+    const clear = B + oLat + 0.5;
+    if (Math.abs(lat) > clear) return null;
+    const oMoving = o.speed > 0.15 || !!o.movingTask();
+    const oDir = p.h + (o.reverse ? Math.PI : 0);
+    if (oMoving && Math.cos(oDir - dir) > 0.4) {
+      // hinterherfahren: Abstand halten
+      return { y: clamp((gap - 1.2) / (1.5 + this.info.length * 0.4), 0, 1), lane: 0 };
+    }
+    const need = clear - Math.abs(lat) + 0.3;
+    const side = oMoving ? 1 : lat > 0 ? -1 : 1;
+    const cap = this.info.beam + o.info.beam + 2;
+    return { y: clamp(gap / (2 + this.info.length), 0, 1) * 0.8 + (gap > 0 ? 0.1 : 0), lane: clamp(this.lane + side * need, -cap, cap) };
+  }
+
+  /** Liegt ein anderes Boot im Kreis, den Bug und Heck beim Drehen auf der Stelle ueberstreichen? */
+  sweepBlocked() {
+    const r = this.info.length / 2;
+    for (const o of this.mgr.boats) {
+      if (o === this || o.model.visible === false) continue;
+      if (o.berth && o.berth.kind !== 'buoy' && o.moored) continue;
+      const p = o.pose();
+      if (Math.hypot(p.x - this.x, p.z - this.z) < r + o.info.beam / 2 + 0.4) return true;
+    }
+    return false;
+  }
+
+  priorityOver(o) {
+    const a = this.movingTask()?.remaining ?? 1e9, c = o.movingTask()?.remaining ?? 1e9;
+    if (Math.abs(a - c) > 1) return a < c;
+    return String(this.id) < String(o.id);
   }
 
   advance(dist) {
@@ -900,13 +1068,22 @@ class BoatAnim {
     roll -= clamp(this.turnRate * this.speed * 0.08, -0.12, 0.12);
     const acc = step > 0 ? (this.speed - this.prevSpeed) / step : 0;
     if (info.kind === 'motor') pitch += cfg.trim * clamp(this.speed / cfg.cruise, 0, 1) + clamp(acc, -1, 1) * cfg.trim * 0.4;
+    if (this.bump > 0) {
+      // beim Ankommen: Bug taucht kurz ein und wippt nach
+      this.bump = Math.max(0, this.bump - step / 1.4);
+      const k = this.bump * this.bump;
+      pitch -= Math.sin((1 - this.bump) * 14) * 0.05 * k * (info.size === 'S' ? 1.4 : 1);
+      heave -= Math.sin((1 - this.bump) * 11) * 0.06 * k;
+    }
 
     // kleines Einruecken an den Leinen, an der Boje langsames Schwojen um die Boje
     let sx = 0;
     let px = this.x, pz = this.z, yaw = this.heading;
     const bb = this.berth;
     if (this.moored && bb?.kind === 'buoy') {
-      yaw = bb.heading + Math.sin(t * 0.12 + this.ph[0]) * 0.25;
+      // Schwojen nur so weit, wie Platz zur Nachbarboje ist
+      const swing = Number.isFinite(bb.abstand) ? clamp((bb.abstand - info.beam - 1.2) / (info.length + 3) - 0.1, 0.02, 0.25) : 0.25;
+      yaw = bb.heading + Math.sin(t * 0.12 + this.ph[0]) * swing;
       const r = this.info.length / 2 + 1.5 + Math.sin(t * 0.3 + this.ph[1]) * 0.3;
       px = bb.x - Math.cos(yaw) * r;
       pz = bb.z + Math.sin(yaw) * r;

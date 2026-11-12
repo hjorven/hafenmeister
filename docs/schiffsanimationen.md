@@ -65,7 +65,16 @@ Platzarten: `box`, `finger` (Bug zum Steg, rückwärts raus), `stirn`, `kai`, `f
 
 Seegang und Wind für Ereignisse: `game.boatAnim.setSea(0 bis 1)`, `game.boatAnim.setWind(ausGrad, stärke)`, geschützte Bereiche über `game.boatAnim.setShelter((x, z) => 0 bis 1)`. Hat die Landschaft `game.water.heightAt(x, z, t)`, schaukeln die Boote mit diesen Wellen.
 
-**Ereignisse** (für Ton und Figuren): `boat:line` `{ on }`, `boat:sails` `{ up }`, `boat:moored` `{ berth }`, `boat:cast-off`, `boat:left`, `boat:horn` (XL, XXL), `boat:hold`. Alle mit `{ id, size, kind, x, z }`. Vor dem Loswerfen wartet das Boot auf `game.people.anBord(id)`, höchstens 20 s.
+**Ereignisse** (für Ton und Figuren): `boat:line` `{ on }`, `boat:sails` `{ up }`, `boat:moored` `{ berth }`, `boat:cast-off`, `boat:left`, `boat:horn` (XL, XXL), `boat:hold`, `boat:clear` `{ berth }` (Boot ist aus seinem Platz heraus; `boat-view.js` meldet es den Spielregeln als `boot:aus-box` `{ id }`). Alle mit `{ id, size, kind, x, z }`. Vor dem Loswerfen wartet das Boot auf `game.people.anBord(id)`, höchstens 20 s.
+
+## Verkehr und Warteplätze
+
+- **Abstand halten:** Wer hinter einem anderen Boot in dieselbe Richtung fährt, bremst und hält Abstand. Liegt etwas im Weg (entgegenkommend, querend, an der Boje), weicht das Boot seitlich aus, entgegenkommende Boote beide nach Steuerbord. Stehen sich zwei Boote gegenseitig im Weg, fährt das, das näher am Ziel ist. Kurz vor dem Liegeplatz wird nicht mehr ausgewichen, nur gewartet. Nach 12 s Stillstand fährt ein Boot kurz ohne Regeln weiter, damit sich nichts festfährt (`traffic()` in `boat-anim.js`).
+- **Start:** Neue Boote beginnen am Revierrand an einer Stelle, an der gerade kein anderes Boot ist (`freierStart`).
+- **Eine Boje, ein Boot:** Ist die Boje der Spielregeln noch belegt, nimmt das Boot die nächste freie; sind alle belegt, ankert es luvseitig vor der Bojenreihe (`warteplatz`). Boote liegen quer zur Bojenreihe nebeneinander und schwojen nur so weit, wie Platz zur Nachbarboje ist.
+- **Box frei:** Ein zugewiesenes Boot bleibt an der Boje, bis das vorige Boot die Box verlassen hat (`dock(berth, { waitFor })`).
+- **Anlegen:** Kleine Boote brauchen von der Boje zur Box etwa 8 s, beschleunigen zügig und bremsen kräftig ab. Beim Ankommen taucht der Bug kurz ein, jede Leine klickt (`sound` `leine-einrasten`), die Box blitzt einmal hell auf.
+- **Zuweisen:** Passende Plätze leuchten in der Form der Box selbst (`game.stege.highlight`), der eingerastete Platz sonnengelb. Boote lassen sich erst antippen und ziehen, wenn sie an der Boje fest sind.
 
 ## Leistung
 
