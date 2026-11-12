@@ -76,6 +76,12 @@ Seegang und Wind für Ereignisse: `game.boatAnim.setSea(0 bis 1)`, `game.boatAni
 - **Anlegen:** Kleine Boote brauchen von der Boje zur Box etwa 8 s, beschleunigen zügig und bremsen kräftig ab. Beim Ankommen taucht der Bug kurz ein, jede Leine klickt (`sound` `leine-einrasten`), die Box blitzt einmal hell auf.
 - **Zuweisen:** Passende Plätze leuchten in der Form der Box selbst (`game.stege.highlight`), der eingerastete Platz sonnengelb. Boote lassen sich erst antippen und ziehen, wenn sie an der Boje fest sind.
 
+## Von See und wieder hinaus
+
+- Neue Boote beginnen außerhalb des Bildes (auch am Handy hochkant und in der Übersicht) und laufen sichtbar zur Boje ein.
+- Abfahrende Boote verschwinden erst, wenn sie aus dem Bild sind; wer beim Ablegen gar nicht zu sehen ist, ist sofort fort.
+- Zeitraffer: Außerhalb des Bildes fahren Boote auf freier Strecke viermal so schnell (`boat.zeitraffer`), damit An- und Abfahrt nicht Stunden der Spieluhr dauern.
+
 ## Nacht und Abreise
 
 - Nachts brennt an Booten an Boje oder Anker ein weißes Ankerlicht oben am Mast (`game.landscape.licht.zustand.nacht` über 0,35).
