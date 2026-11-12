@@ -46,7 +46,7 @@ def steg_von(p0, p1):
     """Welcher Steg? Nach Lage der Segmentmitte, damit kleine Layoutaenderungen nichts kaputt machen."""
     mx, my = (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2
     waagerecht = abs(p1[0] - p0[0]) > abs(p1[1] - p0[1])
-    if my > 200 and mx < -300: return 'MA'      # Marinepier (Stufe 6)
+    if my > 200 and mx < -250: return 'MA'      # Marinepier (Stufe 6)
     if my > 200 and mx < -60: return 'P'        # Grossschiffspier (Stufe 6)
     if my > 200 and mx > 160: return None      # Seenotretter
     if my > 200: return 'FK' if mx < 0 else 'K'
@@ -158,7 +158,7 @@ def exportieren():
         for pts, kind, wm in H.lines:
             if kind == 'finger': continue
             st = steg_von(pts[0], pts[-1])
-            if pts[0][1] > 170 and st != 'P': st = None                 # Tankstelle, Seenotretter
+            if pts[0][1] > 170 and st not in ('P', 'MA'): st = None                # Tankstelle, Seenotretter
             if 140 < pts[0][0] < 170 and pts[0][1] < 30: st = None     # Travellift-Becken
             stege.append(dict(steg=st, bauart={'float': 'schwimmsteg', 'pier': 'pier'}.get(kind, 'holz'),
                               breite=r1(wm / K), punkte=[[r1(x), r1(y)] for x, y in pts]))

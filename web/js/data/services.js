@@ -79,7 +79,7 @@ export const SERVICES = [
   {
     id: 'raeucherei', name: 'Räucherei', gruppe: 'freizeit', abStufe: 2,
     kurz: 'Fischbrötchen am Steg. Gäste mögen das, der Ruf steigt.',
-    lage: { x: -184, y: -26, dreh: 0 }, radius: 7,
+    lage: { x: -228, y: -21, dreh: 0 }, radius: 7,
     stufen: [
       { name: 'Räucherkate', kosten: 700,
         wirkung: { proTag: 25, kunden: { anteil: 0.3, preis: 4 }, ruf: 0.05 } },
@@ -91,7 +91,7 @@ export const SERVICES = [
   {
     id: 'fischhalle', name: 'Fischhalle', gruppe: 'freizeit', abStufe: 5,
     kurz: 'Frischer Fang am Fischereikai. Fischerboote bringen Besucher an Kiosk und Restaurant.',
-    lage: { x: -30, y: 204, dreh: 180 }, radius: 10,
+    lage: { x: -30, y: 210, dreh: 180 }, radius: 10,
     stufen: [
       { name: 'Fischhalle', kosten: 7000, braucht: [{ id: 'raeucherei', stufe: 1 }],
         wirkung: { proTag: 120, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.08, besucherFuerVersorgung: 40 } },
@@ -277,7 +277,8 @@ export const SERVICES = [
   {
     id: 'barkasse', name: 'Barkasse', gruppe: 'grosse-schiffe', abStufe: 6,
     kurz: 'Hafenrundfahrten: zweimal am Tag fährt die Barkasse mit Gästen durch den Binnenhafen und den Außenhafen.',
-    lage: { x: 192, y: 2, dreh: 0 }, radius: 8,
+    // Bude am Ostufer des Sees, oestlich von Travellift und Werfthalle
+    lage: { x: 216, y: -6, dreh: 0 }, radius: 8,
     stufen: [
       { name: 'Barkasse', kosten: 9000, braucht: [{ id: 'fahrgastanleger', stufe: 1 }],
         wirkung: { proTag: 220, wetter: { regen: 0.5, sturm: 0 }, ruf: 0.03 } },
@@ -286,8 +287,8 @@ export const SERVICES = [
   {
     id: 'kreuzfahrtterminal', name: 'Kreuzfahrtterminal', gruppe: 'grosse-schiffe', abStufe: 6,
     kurz: 'Terminal an der Großschiffpier. Einmal pro Woche legt ein Kreuzfahrtschiff an.',
-    // Terminal an der Wurzel der Kreuzfahrtpier (harbor.js Stufe 6, Steg P bei x -140), Busse an der Nehrungsstrasse
-    lage: { x: -140, y: 210, dreh: 0 }, radius: 18,
+    // Terminal an der Wurzel der Kreuzfahrtpier (harbor.js Stufe 6, Steg P bei x -140, Nord-Sued), Busse an der Nehrungsstrasse
+    lage: { x: -140, y: 212, dreh: 0 }, radius: 18,
     stufen: [
       { name: 'Kreuzfahrtpier', kosten: 60000, ruf: 4.0, braucht: [{ id: 'fahrgastanleger', stufe: 1 }],
         wirkung: { freischalten: ['kreuzfahrtschiff'],
@@ -302,8 +303,8 @@ export const SERVICES = [
   {
     id: 'marineanleger', name: 'Marineanleger', gruppe: 'sicherheit', abStufe: 6,
     kurz: 'Liegeplatz für Marineschiffe. Flottenbesuche bringen Zuschauer.',
-    // Eingezaeunter Stuetzpunkt an der Wurzel der eigenen Marinepier (Steg MA bei x -330), Tor zur Nehrungsstrasse
-    lage: { x: -336, y: 210, dreh: 0 }, radius: 18,
+    // Eingezaeunter Stuetzpunkt an der Wurzel der eigenen Marinepier (Steg MA bei x -310), Tor zur Nehrungsstrasse
+    lage: { x: -316, y: 210, dreh: 0 }, radius: 18,
     stufen: [
       { name: 'Marineanleger', kosten: 50000, ruf: 4.0, braucht: [{ id: 'seenotretter', stufe: 1 }],
         wirkung: { freischalten: ['marine'], sturmschutz: 0.1,

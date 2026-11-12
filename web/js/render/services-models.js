@@ -7,6 +7,7 @@
 // Werft mit grosser Halle am Becken (Heiligenhafen, Marstal), Seenotretter am eigenen Steg (Laboe).
 import * as THREE from 'three';
 import { HAFEN } from '../data/harbor.js';
+import { seenotPlatz, seenotEinsatzWeg } from '../data/besuchswege.js';
 
 export const LAND_Y = 0.3;
 const U = 0.62;                       // Meter je Planeinheit
@@ -475,24 +476,7 @@ function segelmacher(stufe) {
   return { group: g, update: (dt, t) => { segel.rotation.y = Math.sin(t * 0.9) * 0.25; } };
 }
 
-// Liegeplatz des Rettungsboots in Planeinheiten: Stufe 1 der Dienstplatz aus harbor.js (dienste, art
-// 'seenotretter', an der Innenseite der Ostmole), der Kreuzer liegt an SK01 an der Westmole.
-export function seenotPlatz(gross) {
-  if (gross) {
-    const l = HAFEN.plaetze?.find((q) => q.id === 'SK01')?.lage?.[6];
-    return l ? { x: l[0], y: l[1], dreh: l[2] } : { x: 57, y: 302.6, dreh: 6 };
-  }
-  const d = (HAFEN.stufen?.[4]?.dienste ?? []).find((q) => q.art === 'seenotretter');
-  return d ? { x: d.x, y: d.y, dreh: d.richtung ?? 85 } : { x: 202, y: 243, dreh: 85 };
-}
-// Weg zum Einsatz (Planeinheiten), vom Liegeplatz durch die Hafeneinfahrt nach See
-export function seenotEinsatzWeg(gross) {
-  const p = seenotPlatz(gross);
-  return gross
-    ? [[p.x, p.y], [110, 298], [140, 330], [146, 420]]
-    : [[p.x, p.y], [p.x - 4, p.y + 40], [176, 300], [146, 330], [146, 420]];
-}
-
+// Liegeplatz und Einsatzweg des Rettungsboots: js/data/besuchswege.js (seenotPlatz, seenotEinsatzWeg)
 function seenotretter(stufe, { lage = { x: 224, y: 211 } } = {}) {
   const g = new THREE.Group();
   // Stationsgebaeude mit Ausguck
@@ -717,21 +701,20 @@ function kreuzfahrtterminal(stufe, { lage = { x: -140, y: 210 } } = {}) {
   box(g, 4, 0.25, 3, FARBE.blue, wx, LAND_Y + 3.2, -tief / 2 - 1.5);
   box(g, 6, 0.25, 3, FARBE.blue, 0, LAND_Y + 3.2, tief / 2 + 1.5);
   // Busplatz zwischen Halle und Nehrungsstrasse, Busse laengs zur Strasse
-  flaeche(g, lang + 8, 6.5, FARBE.road, 0, tief / 2 + 3.6);
+  flaeche(g, lang + 8, 5.5, FARBE.road, 0, tief / 2 + 3);
   const busse = stufe >= 2 ? 3 : 1;
-  for (let i = 0; i < busse; i++) box(g, 11, 3, 2.5, [FARBE.blue, FARBE.yellow, FARBE.white][i], -lang / 2 + 6 + i * 12, LAND_Y, tief / 2 + 4.2);
+  for (let i = 0; i < busse; i++) box(g, 11, 3, 2.5, [FARBE.blue, FARBE.yellow, FARBE.white][i], -lang / 2 + 6 + i * 12, LAND_Y, tief / 2 + 3.2);
   const fl = [flagge(g, -lang / 2 - 1.2, -tief / 2 - 1, 9, FARBE.blue), flagge(g, -lang / 2 + 1, -tief / 2 - 1, 9, FARBE.red)];
-  // Gangway-Tuerme an der Aussenseite des Pierkopfs (P01 liegt noerdlich davor)
-  const p01 = HAFEN.plaetze?.find((q) => q.id === 'P01')?.lage?.[6] ?? [-142, 358];
-  const kopf = pierLinien('P').find((l) => Math.abs(l[0][1] - l[l.length - 1][1]) < 1);
-  const kopfY = kopf ? kopf[0][1] : 330;
-  const tuerme = stufe >= 2 ? [-24, 24] : [0];
+  // Gangway-Tuerme an der Ostkante der Kreuzfahrtpier, das Schiff (P01) liegt oestlich daneben
+  const [pwx] = pierWurzel('P', [-140, 219]);
+  const p01 = HAFEN.plaetze?.find((q) => q.id === 'P01')?.lage?.[6] ?? [-112, 371];
+  const tuerme = stufe >= 2 ? [-40, 0] : [-20];
   for (const off of tuerme) {
-    const [px, pz] = P(p01[0] - lage.x, kopfY - lage.y);
+    const [px, pz] = P(pwx + 1.6 - lage.x, p01[1] + off - lage.y);
     const turm = new THREE.Group();
-    turm.position.set(px + off, 1.3, pz - 1.2);
+    turm.position.set(px, 1.3, pz);
     box(turm, 2, 9, 2, FARBE.steel);
-    box(turm, 1.4, 1.4, 4, FARBE.white, 0, 7, -2.6);
+    box(turm, 4, 1.4, 1.4, FARBE.white, 2.6, 7, 0);
     turm.userData.fest = true;
     g.add(turm);
   }

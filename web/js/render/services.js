@@ -412,6 +412,17 @@ export function init(game) {
     schliessen,
     gruppe,
   };
+  // Kai K01 gehoert dem Ausflugsschiff, sobald der Fahrgastanleger steht: Gastboote legen dort nicht mehr an
+  // (Passregel 'fit' der Spielregeln). Liegt noch ein Gast dort, faehrt das Ausflugsschiff erst nach dessen Abfahrt.
+  let k01Gesperrt = false;
+  function k01Sperren() {
+    if (k01Gesperrt || !game.sim?.addHook) return;
+    game.sim.addHook('fit', ({ berth }) => (berth?.id === 'K01' && R.stufeVon(zustand(), 'fahrgastanleger') > 0 ? 'reserved' : null));
+    k01Gesperrt = true;
+  }
+  k01Sperren();
+  game.on('ready', k01Sperren);
+
   game.services = api;
   api.besuche = initBesuche(game, api);
   return api;

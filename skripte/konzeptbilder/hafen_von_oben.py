@@ -262,11 +262,11 @@ TITLES = {1: ('Stufe 1: Bootssteg am See', 'Ein kurzer Holzsteg am Binnensee. Ru
           5: ('Stufe 5: Küstenmarina', 'Vor der Nehrung entsteht der Außenhafen: zwei lange Molen, Kai für große Schiffe, Fahrgastanleger und Fischereikai. Schwimmsteg D gabelt sich.'),
           6: ('Stufe 6: Seehafen', 'Westlich der Molen entsteht im tiefen Wasser eine lange T-Pier: außen legen Kreuzfahrtschiffe an, innen besuchen Marineschiffe den Hafen. An der Westmole liegt der Seenotrettungskreuzer.')}
 
-# Stufe 6: Grossschiffspier westlich der Westmole (T-Form), Steg vom Strand bei x = -140. Der Kopf liegt so
-# weit draussen (y 330), dass das Kreuzfahrtschiff noerdlich der Westmole frei nach Osten ablegen kann.
-PIER_X, PIER_Y, PIER_W, PIER_E = -140, 330, -270, -10
-# Eigene Marinepier ganz im Westen (Nord-Sued), Schiffe an beiden Seiten, Ausfahrt gerade nach Norden
-MARINE_X, MARINE_Y = -330, 380
+# Stufe 6: zwei Piers Nord-Sued westlich der Westmole, damit die grossen Schiffe gerade ein- und auslaufen
+# koennen, ohne zu drehen: Kreuzfahrtpier bei x -140 (Schiff an der Ostseite), Marinepier bei x -310
+# (Schiffe an beiden Seiten). Beide reichen ueber den Kartenrand der Zeichnung hinaus.
+PIER_X, PIER_Y = -140, 430
+MARINE_X, MARINE_Y = -310, 390
 
 def render(stage, seed=5):
     global X0, W
@@ -400,11 +400,11 @@ def render(stage, seed=5):
         H_.along((2, 229), (150, 229), 1, [('pax', 22, 5.8, 'white', True), ('tall', 36, 7.6, 'navy', True), ('super', 26, 6.2, 'white', True)], jw=0, cls='XL', start=2, gap=4)
         H_.along((-3, 232), (-9, 280), -1, [('cutter', 11, 3.9, 'navy', True), ('trawler', 10, 3.7, 'red', True)], jw=9, cls='L', start=3, gap=3, scale_jw=False)
     if stage >= 6:
-        # Kreuzfahrtpier: Steg vom Strand, Kopf parallel zur Kueste, das Schiff liegt aussen (Bug nach Westen,
-        # ragt an beiden Enden etwas ueber den Kopf hinaus wie an Dalben).
-        H_.line([(PIER_X, sea_s(PIER_X) - 4), (PIER_X, PIER_Y)], 'pier', 5.0); H_.line([(PIER_W, PIER_Y), (PIER_E, PIER_Y)], 'pier', 5.0)
-        H_.along((PIER_W - 16, PIER_Y), (PIER_E + 16, PIER_Y), 1, [('cruise', 180, 29, 'white', True)], jw=5.0, cls='XXL', start=0)
-        # Marinepier: Korvette an der Ostseite, Minenjagdboot oder Segelschulschiff an der Westseite, Bug nach Norden
+        # Kreuzfahrtpier: Steg vom Strand weit hinaus, das Schiff liegt an der Ostseite (ragt ueber das Pierende hinaus)
+        PW = (PIER_X, sea_s(PIER_X) - 4)
+        H_.line([PW, (PIER_X, PIER_Y)], 'pier', 5.0)
+        H_.along(PW, (PIER_X, PIER_Y), -1, [('cruise', 180, 29, 'white', True)], jw=5.0, cls='XXL', start=8)
+        # Marinepier: Korvette an der Ostseite, Minenjagdboot oder Segelschulschiff an der Westseite
         MW = (MARINE_X, sea_s(MARINE_X) - 4)
         H_.line([MW, (MARINE_X, MARINE_Y)], 'pier', 5.0)
         H_.along(MW, (MARINE_X, MARINE_Y), -1, [('navy', 90, 13, 'grey', True)], jw=5.0, cls='XXL', start=6)
@@ -425,7 +425,7 @@ def render(stage, seed=5):
     if stage >= 4:
         B_(48, -34, 26, 13, 'coral', hgt=5); B_(112, -30, 16, 9, 'coral'); B_(182, -56, 46, 26, (206, 216, 224), hgt=9)
     if stage >= 6:
-        B_(-140, 208, 34, 10, (206, 216, 224), hgt=6); B_(-346, 208, 24, 9, 'grey', hgt=5)
+        B_(-140, 208, 34, 10, (206, 216, 224), hgt=6); B_(-316, 208, 24, 9, 'grey', hgt=5)
     if stage >= 5:
         B_(-30, 204, 20, 10, (250, 212, 120), hgt=5); B_(56, 204, 16, 8, 'grey', hgt=5); B_(112, 204, 14, 8, 'coral', hgt=4)
     tr = random.Random(77); pts = []
@@ -510,7 +510,7 @@ def render(stage, seed=5):
         lb('Fischereikai', -52 if stage < 6 else 26, 262 if stage < 6 else 270, n_(5)); lb('Westmole', -34 if stage < 6 else -40, 318 if stage < 6 else 336, n_(5))
         lb('Ansteuerungstonne', 226, 344, n_(5)); lb('Gabelung', 150, 118, n_(5)); lb('Fischhalle', -30, 190, n_(5))
     if stage == 6:
-        lb('Kreuzfahrtpier', -140, 300, True); lb('Marinepier', -300, 300, True); lb('Kreuzfahrtterminal', -140, 216, True); lb('Seenotkreuzer', 46, 290, True)
+        lb('Kreuzfahrtpier', -170, 300, True); lb('Marinepier', -270, 300, True); lb('Kreuzfahrtterminal', -140, 216, True); lb('Seenotkreuzer', 46, 290, True)
     # Wassertiefen aus dem Tiefenfeld
     f_ = font(int(11.5 * SS), 'italic')
     def dep_at(x, y):
