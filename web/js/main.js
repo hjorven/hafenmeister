@@ -18,7 +18,6 @@ const MODULES = [
   './render/boats/m.js',
   './render/boats/l.js',
   './render/boats/xl.js',
-  './render/boats/xxl.js',
   './render/boat-anim.js',
   './render/boat-view.js',
   './render/people.js',
@@ -32,7 +31,6 @@ const MODULES = [
   './events/events.js',
   './features/dauerlieger.js',
   './features/stammgaeste.js',
-  './features/tagesziele.js',
   './save/index.js',
 ];
 
