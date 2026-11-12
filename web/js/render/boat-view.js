@@ -5,6 +5,7 @@
 //                     macht an der Warteboje fest (boje = Nummer ab 0)
 //   'boot-zugewiesen' { id, platz }   Boot legt von der Boje ab und laeuft in die Box ein
 //   'boot-faehrt'     { id, platz }   Boot legt ab (oder verlaesst die Boje) und faehrt weg
+// Sendet 'boot:an-boje' { id, boje }, sobald ein Boot sichtbar an der Warteboje fest ist.
 // Beim Start und nach dem Laden eines Spielstands baut es alle Boote aus game.sim.boote auf.
 //
 // Modelle kommen aus game.boatTypes.<s|m|l|xl|xxl>.buildBoat, die Bewegung aus render/boat-anim.js.
@@ -258,6 +259,12 @@ export function init(game) {
     else for (const id of [...muenzen.keys()]) entferneMuenze(id, 700);
   });
   game.on('sim:departed', (d) => entferneMuenze(d?.boatId, 0));
+
+  // Boot ist sichtbar an der Boje fest: ab jetzt laeuft seine Geduld (Spielregeln)
+  game.on('boat:moored', (d) => {
+    if (!d || !boats.has(d.id) || !String(d.berth ?? '').startsWith('boje-')) return;
+    game.emit('boot:an-boje', { id: d.id, boje: Number(String(d.berth).slice(5)) });
+  });
 
   function sucheInfo(id) {
     return game.sim?.boote?.find?.((b) => b.id === id) ?? null;
