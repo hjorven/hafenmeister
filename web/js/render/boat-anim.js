@@ -182,6 +182,7 @@ class BoatAnimManager {
   constructor(game) {
     this.game = game;
     this.boats = new Set();
+    this.hindernisse = new Set();                     // fremde Schiffe (Besuchsschiffe der Services)
     this.sea = 0.25;                                  // 0 = glatt, 1 = Sturm
     this.wind = { from: (250 * Math.PI) / 180, strength: 0.5 };  // aus Westsuedwest
     this.shelter = defaultShelter;                    // (x, z) => 0..1, Landschaft darf ersetzen
@@ -229,6 +230,7 @@ class BoatAnimManager {
       if (b.model.visible === false) continue;
       list.push(b);
     }
+    const andere = list.concat([...this.hindernisse].filter((h) => h.aktuell()));
     for (const b of list) {
       const mv = b.movingTask();
       if (!mv || b.ghost > 0) {
@@ -239,7 +241,7 @@ class BoatAnimManager {
         continue;
       }
       let y = 1, lane = 0, room = Infinity;
-      for (const o of list) {
+      for (const o of andere) {
         if (o === b) continue;
         const hit = b.blockedBy(o);
         if (!hit) continue;
@@ -260,6 +262,12 @@ class BoatAnimManager {
       b.blockedFor = (y < 0.08 || room < 0.6 || b.blocked) && b.speed < 0.1 ? b.blockedFor + dt : 0;
       if (b.blockedFor > 12) { b.ghost = 4; b.blockedFor = 0; }
     }
+  }
+
+  /** Boote und angemeldete Hindernisse, die gerade im Wasser sind */
+  alle() {
+    if (!this.hindernisse.size) return this.boats;
+    return [...this.boats, ...[...this.hindernisse].filter((h) => h.aktuell())];
   }
 
   add(model, opts) {
@@ -301,6 +309,13 @@ function manager(game) {
       setWind: (d, s) => m.setWind(d, s),
       setShelter: (fn) => { m.shelter = fn || defaultShelter; },
       berthFromPlatz,
+      // Fremdes Schiff (z. B. Kreuzfahrtschiff der Services) als Hindernis anmelden: Boote weichen aus,
+      // warten davor und fahren nie hinein. Gibt eine Funktion zum Abmelden zurueck.
+      hindernis: (group, opts) => {
+        const h = new Hindernis(m, group, opts);
+        m.hindernisse.add(h);
+        return () => m.hindernisse.delete(h);
+      },
       imBild: (x, z, r) => m.inView(x, z, r),
       get boats() { return [...m.boats]; },
       get sea() { return m.sea; },
@@ -329,6 +344,62 @@ export function addBoat(game, model, opts) {
 
 const _v = new THREE.Vector3();
 const _t = new THREE.Vector3();
+
+// Fremdes Schiff, das ein anderes Modul bewegt. Verhaelt sich fuer den Verkehr wie ein Boot ohne Auftrag.
+let hindernisNr = 0;
+const _hp = new THREE.Vector3();
+const _hq = new THREE.Quaternion();
+const _he = new THREE.Euler();
+class Hindernis {
+  constructor(mgr, group, opts = {}) {
+    this.mgr = mgr;
+    this.group = group;
+    this.model = group;
+    this.id = `hindernis-${++hindernisNr}`;
+    let L = opts.laenge, B = opts.breite;
+    if (!L || !B) {
+      // Masse aus dem Modell (Bug nach lokal +x), ohne Drehung gemessen
+      const r = group.rotation.y;
+      group.rotation.y = 0;
+      group.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(group);
+      group.rotation.y = r;
+      group.updateMatrixWorld(true);
+      L ||= box.max.x - box.min.x;
+      B ||= box.max.z - box.min.z;
+    }
+    this.info = { length: Math.max(1, L), beam: Math.max(0.5, B), size: 'XXL' };
+    this.ghost = 0;
+    this.reverse = false;
+    this.berth = null;
+    this.moored = false;
+    this.speed = 0;
+    this.x = 0; this.z = 0; this.heading = 0;
+    this.frame = -1;
+    this.t = 0;
+  }
+  /** sichtbar und im Wasser? Aktualisiert dabei Lage und Fahrt einmal je Bild. */
+  aktuell() {
+    let o = this.group;
+    while (o) { if (o.visible === false) return false; o = o.parent; }
+    if (!this.group.parent) return false;
+    if (this.frame !== this.mgr.frame) {
+      const now = performance.now();
+      this.group.getWorldPosition(_hp);
+      this.group.getWorldQuaternion(_hq);
+      _he.setFromQuaternion(_hq, 'YXZ');
+      const dt = this.t > 0 ? (now - this.t) / 1000 : 0;
+      const d = Math.hypot(_hp.x - this.x, _hp.z - this.z);
+      this.speed = dt > 0 && dt < 1 ? d / dt : 0;
+      this.x = _hp.x; this.z = _hp.z; this.heading = _he.y;
+      this.frame = this.mgr.frame;
+      this.t = now;
+    }
+    return true;
+  }
+  pose() { return { x: this.x, z: this.z, h: this.heading }; }
+  movingTask() { return null; }
+}
 
 function hull(x, z, h, L, B) {
   const fx = Math.cos(h), fz = -Math.sin(h), px = -fz, pz = fx, l = L / 2, w = B / 2;
@@ -420,7 +491,7 @@ class PathTask {
     b.lane = approach(b.lane, b.laneWant * fade, (0.8 + b.info.beam * 0.3) * dt);
     let nx = _v.x + Math.sin(hd) * b.lane, nz = _v.z + Math.cos(hd) * b.lane;
     // harte Regel: ein fahrendes Boot schiebt sich nie in ein anderes hinein (nicht im Notfall-Durchlass)
-    if (b.ghost <= 0 && this.s > s0 + 1e-4 || b.ghost <= 0 && b.lane !== lane0) {
+    if (this.s > s0 + 1e-4 || b.lane !== lane0) {
       const vorher = b.hitsAt(b.x, b.z, b.heading);
       const nachher = b.hitsAt(nx, nz, hd);
       if (nachher && nachher !== vorher) {
@@ -1045,8 +1116,10 @@ class BoatAnim {
   /** Ueberlappt der Rumpf an (x, z, h) ein anderes sichtbares Boot? (gedrehte Rechtecke, leicht verkleinert) */
   hitsAt(x, z, h) {
     const A = hull(x, z, h, this.info.length * 0.92, this.info.beam * 0.92);
-    for (const o of this.mgr.boats) {
+    for (const o of this.mgr.alle()) {
       if (o === this || o.model.visible === false || o.ghost > 0) continue;
+      // im Notfall-Durchlass nur durch Boote, nie durch ein grosses fremdes Schiff
+      if (this.ghost > 0 && !(o instanceof Hindernis)) continue;
       // in die eigene Box hinein: Nachbarn in ihren Boxen begrenzen die Box, nicht die Fahrt
       if (o.moored && o.berth && o.berth.kind !== 'buoy' && (this.task?.remaining ?? 1e9) < this.info.length * 1.5) continue;
       const p = o.pose();
@@ -1058,7 +1131,7 @@ class BoatAnim {
 
   sweepBlocked() {
     const r = this.info.length / 2;
-    for (const o of this.mgr.boats) {
+    for (const o of this.mgr.alle()) {
       if (o === this || o.model.visible === false) continue;
       if (o.berth && o.berth.kind !== 'buoy' && o.moored) continue;
       const p = o.pose();
