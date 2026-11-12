@@ -123,7 +123,7 @@ export async function initBridge(game) {
   }
 
   // Nach diesen Ereignissen kann sich das Grün-Rot-Schild eines Platzes geändert haben
-  const BERTH_EVENTS = new Set(['moored', 'departed', 'berthFreed', 'tripOut', 'tripBack', 'built', 'stageUp', 'stationed', 'unstationed', 'dayStart']);
+  const BERTH_EVENTS = new Set(['moored', 'departed', 'castOff', 'berthFreed', 'tripOut', 'tripBack', 'built', 'stageUp', 'stationed', 'unstationed', 'dayStart']);
   let berthsChanged = false;
 
   function dispatch(events) {
@@ -137,7 +137,9 @@ export async function initBridge(game) {
         game.emit('boot-zugewiesen', { id: info.id, platz: info.platz });
         game.emit('boot:angelegt', info);
       }
-      if (e.type === 'departed' || e.type === 'turnedAway' || e.type === 'dismissed' || e.type === 'unstationed') {
+      // Abreisende Gäste legen erst am Vormittag ab ('castOff'), abgerechnet sind sie schon nachts ('departed')
+      const gone = e.type === 'departed' ? !(e.leaveAt > 0) : e.type === 'castOff' || e.type === 'turnedAway' || e.type === 'dismissed' || e.type === 'unstationed';
+      if (gone) {
         game.emit('boot-faehrt', { id: e.boatId, platz: e.berthId ?? null });
         game.emit('boot:ablegen', { id: e.boatId });
       }
