@@ -373,11 +373,15 @@ export async function init(game) {
       const r = el.getBoundingClientRect();
       if (r.left - h.left > h.width * 0.6 && r.top - h.top > 40) rechts = Math.min(rechts, r.left - h.left - 8);
     }
-    tipp.style.width = `${Math.round(Math.min(360, rechts - 12))}px`;
+    // Querformat (flaches Handy): liegt das Ziel links, steht die Blase rechts, sonst links
+    const rechtsStehen = h.height < 500 && k && k.x < h.width / 2;
+    const breite = rechtsStehen ? Math.min(300, rechts - 12) : Math.min(360, rechts - 12);
+    tipp.style.width = `${Math.round(breite)}px`;
+    tipp.style.left = rechtsStehen ? `${Math.round(rechts - breite)}px` : '';
     // Handy: immer die Kurzfassung, damit der Hafen frei bleibt
     tipp.classList.toggle('eng', h.width < 600 || h.height < 560);
     let hoehe = tipp.offsetHeight;
-    const trifft = (y) => k && k.y + k.h / 2 > y - 6 && k.y - k.h / 2 < y + hoehe + 6 && k.x - k.w / 2 < 12 + tipp.offsetWidth;
+    const trifft = (y) => k && k.y + k.h / 2 > y - 6 && k.y - k.h / 2 < y + hoehe + 6 && (rechtsStehen ? k.x + k.w / 2 > rechts - tipp.offsetWidth : k.x - k.w / 2 < 12 + tipp.offsetWidth);
     const deckung = (y) => (k ? Math.max(0, Math.min(k.y + k.h / 2, y + hoehe) - Math.max(k.y - k.h / 2, y)) : 0);
     const yUnten = Math.max(oben, unten - hoehe);
     let y = oben;
@@ -426,6 +430,23 @@ export async function init(game) {
   let k = null;
   let zuletztZiehen = false;
 
+  // Liegt das wartende Boot außerhalb des Bildes (Handy quer, PC), fährt die Kamera einmal hin,
+  // damit Schritt 2 beginnen kann. Höchstens dreimal, damit sie dem Spieler nicht hinterherzieht.
+  let fluege = 0;
+  let letzterFlug = -Infinity;
+  function zumBoot() {
+    if (ziehen || fluege >= 3 || !game.camera?.flyTo) return;
+    const jetzt = performance.now();
+    if (jetzt - letzterFlug < 5000) return;
+    const w = new Set(api.waitingBoats().map((b) => b.id));
+    const o = objekte('boat', (pk) => w.has(Number(String(pk.id).replace(/^b/, ''))))[0];
+    if (!o) return;
+    const pos = o.getWorldPosition(new THREE.Vector3());
+    game.camera.flyTo(pos.x, pos.z);
+    fluege += 1;
+    letzterFlug = jetzt;
+  }
+
   function setzeKreis() {
     ring.style.width = `${Math.round(k.w)}px`;
     ring.style.height = `${Math.round(k.h)}px`;
@@ -443,8 +464,10 @@ export async function init(game) {
       k = null;
       return;
     }
-    const id = naechsterSchritt(e, lage());
+    const l = lage();
+    const id = naechsterSchritt(e, l);
     halte(!e.erledigt.includes('anlegen'));
+    if (id === 'willkommen' && l.willkommenSek >= WILLKOMMEN_SEK && !l.bootImBild) zumBoot();
     if (id !== aktuell) zeige(id);
     k = id ? ziel(id) : null;
     if (!id) return;
