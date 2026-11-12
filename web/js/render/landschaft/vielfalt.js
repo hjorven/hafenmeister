@@ -5,8 +5,9 @@
 // Dieses Modul ändert nur das Land dahinter: Art des Bodens und, mit Abstand zum Ufer und zum
 // Hafen, die Höhe. Befahrbares Wasser, Strand, Wege und Bauflächen bleiben unverändert.
 //
-// Jedes Spiel hat ein eigenes "Geländebild" (Nummer, aus dem Seed des Spielstands). Nummer 0 ist
-// das Grundbild für Tests. Das aktive Bild setzt die Landschaft mit setzeBild(nr).
+// Jedes Spiel hat ein eigenes "Landbild" (Nummer, aus dem Seed des Spielstands, zum Testen ?landbild=N).
+// Nummer 0 ist das Grundbild für Tests. Das aktive Bild setzt die Landschaft mit setzeBild(nr).
+// Unabhängig davon wählt die Grundform (formen.js, ?gelaende=N) Küste und Inseln.
 //
 // Planeinheiten wie in gelaende.js: 1 Einheit = 0,62 m, py zeigt nach Norden.
 
@@ -80,7 +81,7 @@ export function bildAus(nr = 0) {
       kueste: { west: 'kliff', ost: 'wald' },
       kliffHoehe: 7.5,
       dorf: DORF_LAGEN[0], dorfRadius: 58,
-      feld: { dreh: 0.18, breite: 30, laenge: 46, mix: [0.26, 0.28, 0.14, 0.2, 0.12] },
+      feld: { dreh: 0, breite: 30, laenge: 46, mix: [0.26, 0.28, 0.14, 0.2, 0.12] },
       wald: { skala: 85, schwelle: 0.6, kiefer: 0.45 },
       huegel: { hoehe: 3.5, skala: 120 },
       soelle: 3, hoefe: 3,
@@ -101,7 +102,8 @@ export function bildAus(nr = 0) {
     kliffHoehe: 6 + r() * 4,
     dorf: wahl(DORF_LAGEN),
     dorfRadius: 50 + r() * 18,
-    feld: { dreh: (r() - 0.5) * 0.9, breite: 24 + r() * 16, laenge: 36 + r() * 26, mix: mix.map((m) => m / summe) },
+    // Felder achsparallel: schräge Kanten gäben im Geländeraster Treppen
+    feld: { dreh: r() < 0.5 ? 0 : Math.PI / 2, breite: 24 + r() * 16, laenge: 36 + r() * 26, mix: mix.map((m) => m / summe) },
     wald: { skala: 65 + r() * 50, schwelle: 0.54 + r() * 0.1, kiefer: 0.2 + r() * 0.6 },
     huegel: { hoehe: 1.5 + r() * 3.5, skala: 90 + r() * 70 },
     soelle: Math.floor(r() * 5),
@@ -406,7 +408,8 @@ export function land(px, py, h, typ, d, k = {}) {
   // Strand, Wege, Pflaster, Felsen, Deich bleiben, wie die Grundform sie setzt
   if (typ !== 'gras') return { h, typ };
   const g = k.region?.gelaende || {};
-  const uferM = k.uferAbstandM ?? d * PLAN_M;
+  // Der Abstand zur offenen See kann kleiner sein als der Uferabstand der Grundform (Ecken der Karte)
+  const uferM = Math.min(k.uferAbstandM ?? d * PLAN_M, k.seeAbstandM ?? Infinity);
   const hafen = k.hafenAbstand ?? 999;               // Planeinheiten außerhalb der Hafenfläche
   const frei = freiAbstand(px, py, k.stufe);
   if (hafen < 8 || frei < 4) return { h, typ };
@@ -418,13 +421,26 @@ export function land(px, py, h, typ, d, k = {}) {
   const nordsee = !!g.deich;
   let art = 'feld';
 
+  // Inseln (Grundform): keine Felder, kein Dorf, nur Heide, Gras und ein paar Kiefern
+  if (k.insel) {
+    const w = fbm(px / 40 + 2, py / 40, bild.seed + 71);
+    return { h, typ: w > 0.62 && !nordsee ? 'waldboden' : w < 0.42 ? 'heide' : 'gras' };
+  }
+
+  // ---- Hügel (Endmoräne): sanft, nur im freien Land
+  if (!nordsee) {
+    const hu = bild.huegel;
+    const n = fbm(px / hu.skala + 11, py / hu.skala + 5, bild.seed + 23);
+    h += hu.hoehe * innen * Math.max(0, n - 0.32) * 1.6;
+  }
+
   // ---- Steilufer: nur an der offenen See, mindestens 40 m vom Hafen und der Einfahrt.
   // Alles hängt stetig vom Abstand zur offenen See ab, damit nirgends eine Stufe im Land entsteht:
   // an der See eine steile Kante, zum Binnensee hin ein sanfter Hang, landeinwärts flacht es ab.
   const kSeite = bild.kueste[seite(px)];
   const hafenM = hafen * PLAN_M;
   const seeM = k.seeAbstandM ?? (k.offeneSee ? uferM : uferM + 300);
-  if (!nordsee && kSeite === 'kliff' && seeM < 200) {
+  if (!nordsee && kSeite === 'kliff' && seeM < 200 && !k.formSteilufer && !k.form?.steilufer) {
     const s = smooth(40, 75, hafenM) * smooth(10, 30, frei) * (1 - smooth(50, 110, seeM - uferM));
     if (s > 0) {
       const fuss = 9;                                  // m: Strand vor der Kante
@@ -435,13 +451,6 @@ export function land(px, py, h, typ, d, k = {}) {
       // Oben an der Kante ein Streifen Gras ohne Bäume, damit man die Abbruchkante sieht
       if (s > 0.35 && breite < 15 && uferM < fuss + breite + 7) return { h, typ: 'gras' };
     }
-  }
-
-  // ---- Hügel (Endmoräne): sanft, nur im freien Land
-  if (!nordsee) {
-    const hu = bild.huegel;
-    const n = fbm(px / hu.skala + 11, py / hu.skala + 5, bild.seed + 23);
-    h += hu.hoehe * innen * Math.max(0, n - 0.32) * 1.6;
   }
 
   // ---- Küstenstreifen nach Art der Seite

@@ -14,11 +14,11 @@ import { uhrzeitAusSpielzeit } from './landschaft/zeit.js';
 import { bildAusSeed } from './landschaft/vielfalt.js';
 
 /**
- * Geländebild für dieses Spiel: aus der Adresse (?gelaende=N, nur Ansicht), sonst aus dem Seed des Spielstands.
+ * Landbild (Felder, Wald, Dorf) für dieses Spiel: aus der Adresse (?landbild=N, nur Ansicht), sonst aus dem Seed des Spielstands.
  * Automatische Tests (navigator.webdriver) bekommen das Grundbild 0, damit Bildschirmfotos gleich bleiben.
  */
 function bildFuer(game, url) {
-  if (url.gelaende != null && Number.isFinite(url.gelaende)) return url.gelaende;
+  if (url.landbild != null && Number.isFinite(url.landbild)) return url.landbild;
   if (globalThis.navigator?.webdriver === true) return 0;
   const seed = game.state?.seed;
   return seed == null ? 0 : bildAusSeed(seed);
@@ -31,7 +31,7 @@ function parameter() {
     region: p.get('region'),
     stufe: p.get('stufe') ? Number(p.get('stufe')) : null,
     uhrzeit: p.get('uhrzeit') ? Number(p.get('uhrzeit')) : null,
-    gelaende: p.get('gelaende') != null ? Number(p.get('gelaende')) : null,
+    landbild: p.get('landbild') != null ? Number(p.get('landbild')) : null,
   };
 }
 
@@ -75,7 +75,7 @@ export function init(game) {
   game.on('wetter', (w) => land.setzeWetter(w || {}));
   game.on('season', (s) => land.setzeJahreszeit(typeof s === 'object' ? s?.part : s));
   // Anderer Spielstand (Laden, Neues Spiel): eigenes Geländebild
-  const neuesBild = () => { if (url.gelaende == null) land.setzeBild(bildFuer(game, url)); };
+  const neuesBild = () => { if (url.landbild == null) land.setzeBild(bildFuer(game, url)); };
   game.on('spielstand-geladen', () => queueMicrotask(neuesBild));
   game.on('sim:change', (e) => { if (e?.reason === 'load' || e?.reason === 'new') queueMicrotask(neuesBild); });
   game.on('ready', () => {
