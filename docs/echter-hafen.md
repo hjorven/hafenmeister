@@ -1,6 +1,6 @@
 # So läuft ein echter Hafen, und was das Spiel davon übernimmt
 
-Stand: 12.11.2026 (ergänzt um Selbst-Einfahren, Tagesausflug, Angebote an Land). Grundlage für die Frage „ergibt das im Spiel Sinn?“. Teil A beschreibt, wie ein Gästehafen an der Ostsee (Deutschland, Dänemark, Schweden) und an der Nordsee wirklich funktioniert. Teil B prüft jeden Ablauf im Spiel dagegen. Teil C ist die priorisierte Mängelliste mit Bildern.
+Stand: 12.11.2026, abgeglichen mit `main` nach PR 144. Status: Teil A gilt, Teil B ist ein Messprotokoll vom Vormittag des 12.11. (vor PR 93), Teil C ist größtenteils erledigt, siehe Tabelle am Anfang von Teil C. Grundlage für die Frage „ergibt das im Spiel Sinn?“. Teil A beschreibt, wie ein Gästehafen an der Ostsee (Deutschland, Dänemark, Schweden) und an der Nordsee wirklich funktioniert. Teil B prüft jeden Ablauf im Spiel dagegen. Teil C ist die priorisierte Mängelliste mit Bildern.
 
 Leitlinie bleibt [plan.md](plan.md): **cozy vor Simulation.** Übernommen wird, was man sieht und was sich richtig anfühlt, nicht was Arbeit macht. Kein Vorschlag hier fügt dem Spieler einen Schritt hinzu.
 
@@ -123,6 +123,8 @@ Was ein typischer Ostsee-Gästehafen an Land hat, grob nach Größe sortiert. Fe
 
 ## Teil B: Abgleich mit dem Spiel
 
+**Achtung, überholt:** Die Spalte "Spiel heute" zeigt den Stand vor den Korrekturen aus Teil C. Was seitdem gilt, steht in der Tabelle "Stand der Mängel" in Teil C.
+
 Geprüft am 12.11.2026 auf `main` (Stand nach PR 80 und 86) im Browser, Stufe 1, 3 und 5 am PC und Stufe 1 am Handy, mit Ereignisprotokoll und Spieluhr. Spieluhr: 90 s Tag = 6:30 bis 19:00, 30 s Abend = 19:00 bis 22:00, danach springt es auf 6:30 des nächsten Tages (`render/landschaft/zeit.js`). Eine Spielsekunde sind tagsüber etwa 8 Minuten.
 
 | Ablauf | Echt | Spiel heute | Urteil |
@@ -154,6 +156,24 @@ Geprüft am 12.11.2026 auf `main` (Stand nach PR 80 und 86) im Browser, Stufe 1,
 ## Teil C: Priorisierte Mängel
 
 Reihenfolge nach: wie oft sieht man es, wie stark stört es das Gefühl „das ist ein echter Hafen“.
+
+**Stand der Mängel (12.11.2026, nach PR 144)**
+
+| Nr | Mangel | Stand |
+|---|---|---|
+| C1 | Box gilt als frei, während das alte Boot noch drin liegt | erledigt (PR 93, 109) |
+| C2 | Tagesrhythmus: morgens Abschied, nachmittags Ankunft, über Nacht an der Boje | erledigt (PR 108, 110) |
+| C3 | Liegegeld bei Ankunft, Bezahlt-Markierung, Rundgang | erledigt (PR 100, 97, 107, 131) |
+| C4 | Boote tauchen auf und verschwinden | teilweise (PR 110: Start und Ende außerhalb des Bildes); Revierrand am Handy hochkant offen (Schiffsanimationen, P48) |
+| C5 | Fischerboote starten an der Warteboje der Gäste | offen (Schiffsanimationen, P48) |
+| C6 | Fahrten dauern auf der Spieluhr Stunden | offen (Schiffsanimationen, P48) |
+| C7 | Heimathäfen passen nicht zum Boot | erledigt (PR 95) |
+| C8 | Grün-Rot-Schilder an allen Boxen | erledigt (PR 101, 105) |
+| C9 | Boote fahren selbst in eine freie grüne Box | erledigt (PR 103, 110); Feinschliff "nächste freie Box, auch zu große" ist Roadmap P10 (A1) |
+| C10 | Tagesausflüge mit reservierter Box | erledigt (PR 103) |
+| C11 | Mehr Angebote an Land | erledigt (PR 111: Bäcker, Hafencafé, Grillplatz, Fahrradverleih, Eisdiele); Waschhaus, Spielplatz, Kaufmann nicht gebaut |
+
+Die Abschnitte unten bleiben als Begründung stehen. Achtung: Die Roadmap nutzt C1 bis C14 für andere Punkte (Ruf und Bewertung). C4 bis C6 von hier gehören zum Paket P48 (Schiffsanimationen).
 
 ### C1. Box gilt als frei, während das alte Boot noch drin liegt (hoch, schon bekannt)
 

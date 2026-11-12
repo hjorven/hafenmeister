@@ -127,6 +127,22 @@ Das Abschlussziel benutzt nur Dinge, die der Spieler im Hafen sieht: Geld, Ruf u
 
 Mit den Angeboten wird die Region drei Spieltage schneller fertig, die Spielzeit bleibt im Korridor. Alle Zahlen im Überblick: `docs/zahlen.md`.
 
+## Regeln im Spiel, die sonst nirgends stehen
+
+Stand `main` nach PR 160 (P06), nachgeprüft im Code. Die Pakete in der rechten Spalte ändern die Regel noch; dann wird auch diese Tabelle angepasst ([Roadmap](roadmap.md), Abschnitt 9).
+
+| Regel | Wert heute | Wo im Code | Paket |
+|---|---|---|---|
+| Start | 0 €, fünf Startbewertungen mit 3 Ankern, Ruf ist der Schnitt der letzten 20 | `state.js`, `economy.js` (`ruf.start`), `data/rules.js` (`startSamples`) | P17 |
+| Dauerlieger | zahlen pauschal 15 € pro Abend (`fischer.pachtProTag`), Dauerplätze kosten nichts und haben keine Obergrenze | `sim.js` (`startEvening`, `rulesFromEconomy`), `features/dauerlieger.js` | P01 |
+| Abweisen von Hand | kostet nichts und bringt keine Bewertung | `sim.js` (`dismiss`) | P10 |
+| Wegfahren ohne Platz | mit 25 % Wahrscheinlichkeit eine Bewertung von 2,5 (`ruf.abgewiesen`); dreht ein Boot ab, weil alle Wartebojen belegt sind, gibt es keine Bewertung | `sim.js` (`turnAway`) | P10 |
+| Hafenmeister-Rundgang | startet bei 68 % des Tages (`RUNDGANG_AB`), etwa 8 Sekunden vor dem Abend | `data/people.js` | P12 |
+| Mindestruf für Service-Stufen | Segelclub Stufe 3 (Regattaverein) 3,8; Travellift Stufe 3 (Werfthalle) 3,8; Fahrgastanleger Stufe 2 4,0; Museumshafen 4,0 und 4,2; Kreuzfahrtterminal 4,0 und 4,5; Marineanleger 4,0 und 4,6 | `economy.js` (`services[id].stufen[n].ruf`) | P06 (erledigt) |
+| Deckel der Services | Ruf-Bonus aller Services zusammen höchstens +0,75 (`RUF_BONUS_MAX`), Sturmschutz höchstens 0,8 (`STURMSCHUTZ_MAX`) | `data/services.js` | P06 (erledigt) |
+| Marineanleger Stufe 2 (Stützpunkt) | Flottenbesuch alle 6 statt alle 10 Tage (je 2 Tage), dazu Tag der offenen Tür | `economy.js` (`services.marineanleger`) | P04 (erledigt) |
+| Stufennamen der Services | Travellift heißt in Stufe 1 "Bootsschuppen mit Werkstatt", Stufe 2 "Travellift", Stufe 3 "Werfthalle mit Slipwagen"; die Namen in [services.md](services.md) folgen `data/services.js` | `data/services.js` | P04, P06 (erledigt) |
+
 ## Was die Simulation abdeckt
 
 - Ankünfte, Bootsarten mit Maßen und Passregel, Wünsche, Warteschlange, Abweisen, Ruf, Kassieren, Stufenziele und Stegprojekte kommen aus `sim.js`.

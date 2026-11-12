@@ -1,6 +1,6 @@
 # Oberfläche für alle Geräte
 
-Stand: 12.11.2026 (zweite Runde: Pixel-Stil, neue Zeitsteuerung). Ersetzt die getrennten Leisten aus `pc.md`, `tablet.md` und `handy.md` (die Gesten dort gelten weiter).
+Stand: 12.11.2026 (zweite Runde: Pixel-Stil, neue Zeitsteuerung; Geräte-Dokumente eingearbeitet). Status: gebaut. Einziges Dokument zur Oberfläche: Die früheren `pc.md`, `tablet.md` und `handy.md` liegen in [archiv/ui/](../archiv/ui/), was davon noch gilt, steht unten unter [Bedienung je Gerät](#bedienung-je-gerät).
 
 ## Grundsatz
 
@@ -45,6 +45,82 @@ Die alte Sonne zum Ziehen in `gesten.js` ist gelöscht. Was sie konnte und wo es
 | Ton beim Vorspulen, `body.vorspulen`, `'ui:vorspulen'` | unverändert |
 
 Schnittstelle: `game.oberflaeche.tempo(speed)` (0 = Pause, 1, 3, 8); `game.gesten.setSpeed` leitet dorthin weiter.
+
+## Bedienung je Gerät
+
+Aus den früheren Geräte-Dokumenten (11.11.2026), auf den Stand vom 12.11.2026 gebracht. Kamera-Gesten (frei neigen und drehen) beschreibt der Kamera-Thread, sobald sein PR auf `main` ist.
+
+**Welches Gerät gilt** (Media Queries in den drei Gerätedateien)
+
+| Gerät | Bedingung | Datei |
+|---|---|---|
+| Handy | `(max-width: 599px)` oder `(max-height: 499px)` | `ui-phone.css` |
+| Tablet | ab 600 px Breite und 500 px Höhe, wenn der Zeiger grob ist (Touch) oder die Breite unter 1024 px liegt | `ui-tablet.css` |
+| PC | `(min-width: 1024px) and (pointer: fine)` | `ui-pc.css` |
+
+Ein iPad mit Trackpad-Tastatur bekommt im Querformat das PC-Layout, das ist gewollt.
+
+**Auf allen Geräten** (`web/js/ui/gesten.js`, `web/js/core/input.js`)
+
+| Aktion | Geste | Weg ohne Geste |
+|---|---|---|
+| Karte verschieben | ein Finger oder linke Maustaste ziehen | Knopf Übersicht |
+| Zoomen | zwei Finger, Mausrad, Doppeltipp | Knopf Übersicht |
+| Boot zuweisen | Boot an der Boje greifen und an der Schleppleine auf einen leuchtenden Platz ziehen | Boot antippen, dann Platz antippen, oder "Automatisch einfahren" |
+| Kassieren | abends auf einer Münze ansetzen und in einem Strich über alle streichen | Münze antippen |
+| Tempo | Knöpfe Pause, 1x, 3x, 8x unten links | |
+| Bauen | Knopf Bauen, Bauplatz wählen, Vorschau, bestätigen ([bauen.md](../bauen.md)) | |
+
+Tipps zählen mit Fingertoleranz (22 bis 30 px), damit auch eine weit herausgezoomte Box zu treffen ist. Die Schleppleine endet 28 px über der Fingerspitze, damit der Finger das Ziel nicht verdeckt. Beginnt ein Finger auf einer Münze oder einem wartenden Boot, gehört er der Geste und verschiebt die Karte nicht.
+
+**PC: Maus** (`web/js/ui/input-pc.js`)
+
+| Eingabe | Wirkung |
+|---|---|
+| Doppelklick auf ein wartendes Boot | Boot fährt selbst in einen passenden Platz |
+| Doppelklick auf Wasser oder Land | näher heran |
+| Rechtsklick | Abbrechen |
+| Rechte Taste ziehen, Umschalt + Mausrad | Hafen drehen |
+| Mittlere Taste ziehen | Karte verschieben |
+| Mausrad | Zoomen zum Mauszeiger (auch Trackpad-Pinch) |
+| Zeiger und Tooltip | Greifhand über wartenden Booten, Name, Größe und Betrag unter dem Zeiger |
+
+**PC: Tastatur** (Übersicht mit `?` oder `F1`, zeigt nur Kürzel, deren Funktion es gerade gibt)
+
+| Taste | Wirkung |
+|---|---|
+| `1` bis `9`, `Tab` | wartendes Boot wählen, bei offener Karte deren Knopf |
+| `Enter` | gewähltes Boot einfahren lassen |
+| `F` | 3x an und aus |
+| `Leertaste` | Pause |
+| `B` | Bauen |
+| `Esc` | Abbrechen |
+| `W` `A` `S` `D`, Pfeiltasten | Karte verschieben |
+| `+` `-` | Zoomen |
+| `0`, `Pos1` | ganzer Hafen, Norden oben |
+| `Q` `E` | um 45 Grad drehen |
+| `M` | Ton aus und an |
+| `P` | Fotomodus |
+| `L` | Spielstand |
+
+**Handy und Tablet** (`web/js/ui/input-touch.js`)
+
+| Eingabe | Wirkung |
+|---|---|
+| Doppeltipp | doppelt so nah, ganz hineingezoomt zurück zur Übersicht |
+| Boot im Hafen gedrückt halten | Boot hupt |
+| Zwei Finger drehen | Hafen drehen |
+| Vibration | kurz beim Einrasten der Leine und bei Münzen (nur Android, iOS kann das im Browser nicht) |
+
+Gelöste Fälle aus den Handy-Tests, die beim Umbau erhalten bleiben müssen:
+
+- Keine Kamerafahrt beim Ziehen, sonst rutscht das Ziel unter dem Finger weg.
+- Ist ein Boot gewählt, rückt die Ansicht um die halbe Kartenhöhe nach oben, damit die leuchtenden Plätze antippbar bleiben.
+- Kamerafahrten und die Startansicht rechnen die Schilder oben und unten heraus (`hudInsets` in `core/game.js`, [grundgeruest.md](../grundgeruest.md)).
+- Der kleine Knopf "Einfahren" am Boot ist am Handy aus (`game.gesten.einfahrenAmBoot = false`), dort steht "Automatisch einfahren" in der Karte.
+- Kein Seitenzoom, kein Gummiband, kein Pull-to-Refresh, keine Textauswahl, kein Kontextmenü bei langem Druck. Ränder von Notch und Home-Leiste über `env(safe-area-inset-*)`.
+
+Ideen aus den alten Dokumenten (Fernglas, Hafenhorn, Wellenring, Möwen, Hupe und Glocke je Art, Abendrunde) sind Paket P26 und P46 bis P48 der [Roadmap](../roadmap.md). Noch nicht auf einem echten iPad mit Safari geprüft; Jorven testet am iPhone über die Pages-Seite.
 
 ## Farben
 

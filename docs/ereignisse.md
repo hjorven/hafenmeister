@@ -1,6 +1,6 @@
 # Ereignisse und Jahreslauf
 
-Stand: 11.11.2026. Umsetzung von [Plan Abschnitt 7](plan.md#7-ereignisse-und-jahreslauf).
+Stand: 11.11.2026. Status: gebaut; weitere Ereignisse P24, Winter mit Aufgaben P20 ([Roadmap](roadmap.md)). Umsetzung von [Plan Abschnitt 7](plan.md#7-ereignisse-und-jahreslauf).
 
 ## Was es gibt
 

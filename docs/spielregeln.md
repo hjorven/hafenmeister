@@ -1,6 +1,6 @@
 # Spielregeln: Schnittstelle für alle Module
 
-Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node testbar. Die Zahlen kommen aus `web/js/data/economy.js` (Balancing-Thread). `sim.rulesFromEconomy(ECONOMY)` bringt sie in das Format der Regeln, was dort fehlt, kommt aus `web/js/data/rules.js`.
+Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node testbar. Status: gebaut; offene Änderungen stehen bei den Paketen P01, P05, P10 und P12 der [Roadmap](roadmap.md). Die Zahlen kommen aus `web/js/data/economy.js` (Balancing-Thread). `sim.rulesFromEconomy(ECONOMY)` bringt sie in das Format der Regeln, was dort fehlt, kommt aus `web/js/data/rules.js`.
 
 ## Dateien
 

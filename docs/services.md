@@ -1,6 +1,6 @@
 # Services und Sonderanlagen
 
-Stand: 11.11.2026. Services sind Gebäude, die keinen Wunsch der Gäste erfüllen, sondern etwas Neues ins Spiel bringen (plan.md, Abschnitt 6). Jeder Service hat feste Bauplätze, 1 bis 3 Ausbaustufen, ein eigenes 3D-Modell im Flat-Stil und eine kleine Animation.
+Stand: 11.11.2026. Status: gebaut (20 Services); Mindestruf je Stufe und Deckel der Wirkungen stehen in [balancing.md](balancing.md#regeln-im-spiel-die-sonst-nirgends-stehen). Services sind Gebäude, die keinen Wunsch der Gäste erfüllen, sondern etwas Neues ins Spiel bringen (plan.md, Abschnitt 6). Jeder Service hat feste Bauplätze, 1 bis 3 Ausbaustufen, ein eigenes 3D-Modell im Flat-Stil und eine kleine Animation.
 
 ## So funktioniert es im Spiel
 

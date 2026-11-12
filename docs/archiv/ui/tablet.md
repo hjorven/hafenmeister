@@ -1,5 +1,7 @@
 # Tablet-Oberfläche
 
+**Archiv (12.11.2026):** ersetzt durch [docs/ui/oberflaeche.md](../../ui/oberflaeche.md). Was hier noch gilt (Gesten, Maus, Tastatur, Touch-Lösungen), steht dort im Abschnitt "Bedienung je Gerät". Die Sonne zum Ziehen und die alten Leisten gibt es nicht mehr.
+
 Stand: 11.11.2026. Gilt für iPad und Android-Tablets im Hoch- und Querformat. PC und Handy haben eigene Dateien, die Aufteilung ist unten beschrieben.
 
 **Dateien**

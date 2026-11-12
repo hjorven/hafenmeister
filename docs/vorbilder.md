@@ -1,6 +1,6 @@
 # Vorbilder: echte Häfen im Vergleich mit dem Spiel
 
-Stand: 11.11.2026. Grundlage sind Satellitenbilder (Esri World Imagery) von 15 Häfen an Ostsee und Nordsee. Die Bilder selbst liegen nicht im Repo, weil ihre Lizenz das nicht erlaubt. Jeder Hafen hat unten einen Link zur Karte, dort lässt sich die Satellitenansicht einschalten.
+Stand: 11.11.2026. Grundlage sind Satellitenbilder (Esri World Imagery) von 15 Häfen an Ostsee und Nordsee. Status: Recherche, die Gebäude daraus sind gebaut (`render/buildings.js`). Die Bilder selbst liegen nicht im Repo, weil ihre Lizenz das nicht erlaubt. Jeder Hafen hat unten einen Link zur Karte, dort lässt sich die Satellitenansicht einschalten.
 
 Verglichen wurde mit den fünf Draufsichten in [docs/hafen](hafen) und dem Zeichenskript `skripte/konzeptbilder/hafen_von_oben.py`.
 

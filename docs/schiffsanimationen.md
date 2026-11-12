@@ -1,6 +1,6 @@
 # Schiffsanimationen und Boote im Spiel
 
-Stand: 12.11.2026. Zwei Dateien:
+Stand: 12.11.2026. Status: gebaut; offen sind C4 bis C6 aus [echter-hafen.md](echter-hafen.md) und P54. Zwei Dateien:
 
 | Datei | Aufgabe |
 |---|---|
