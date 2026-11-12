@@ -9,7 +9,7 @@ Alle sechs bleiben im Rahmen des Plans: keine Story, keine Figuren mit Namen, ke
 | Fotomodus mit Rundflug | nur Grundgerüst | gebaut: `web/js/ui/fotomodus.js` |
 | Hafen schauen | Fotomodus, Hafenbüro-Automatik aus `sim.js` | Rundflug fertig, Automatik wartet auf `sim.js` |
 | Dauerlieger | `sim.js`, Animationen für Aus- und Einlaufen | gebaut: `web/js/features/dauerlieger.js` |
-| Stammgäste | `sim.js` (Gäste, Bewertung), Logbuch | beschrieben |
+| Stammgäste | `sim.js` (Gäste, Bewertung) | gebaut: `web/js/features/stammgaeste.js` |
 | Wetter an der Flagge | `events/events.js` (Ankündigung am Vortag) | beschrieben |
 | Tagesziele an der Tafel | `sim.js`, Hafenbüro als Gebäude | beschrieben |
 
@@ -49,14 +49,16 @@ Eine echte Marina hat nicht nur Gastplätze, sondern feste Plätze mit Dauerlieg
 
 ## 4. Stammgäste
 
-Jedes Boot hat einen Namen am Heck und einen Heimathafen. Gäste, die gut bewertet haben (4 oder 5 Anker), können wiederkommen.
+Gebaut: `web/js/features/stammgaeste.js`, Namen in `web/js/data/bootsnamen.js`, Tests in `tests/stammgaeste.test.mjs`.
 
-- Wahrscheinlichkeit, dass ein neues Boot ein Stammgast ist: 15 Prozent, wenn es Stammgäste gibt.
-- Ein Stammgast erscheint in der Warteschlange mit einem kleinen Anker-Symbol. Er bringt dieselben Wünsche mit wie beim letzten Mal, so dass man sich vorbereiten kann.
-- Ab dem 5. Besuch kann man ihn zum Dauerlieger machen, wenn ein Dauerplatz frei ist.
-- Das Logbuch merkt sich je Boot die Zahl der Besuche („zum 5. Mal zu Gast“). Keine Gesichter, keine Texte, nur Bootsname, Modell, Farbe.
-- Namen kommen aus einer Liste typischer Bootsnamen (`web/js/data/bootsnamen.js`), Heimathäfen aus echten Ostsee- und Nordseehäfen.
-- Daten in `sim.js`: Boot `{ name, heimathafen, stammId?, besuche }`, Spielstand speichert `stammgaeste: [{ stammId, name, modell, farbe, wuensche, besuche }]`, höchstens 40.
+Jedes Gastboot hat einen Namen am Heck und einen Heimathafen (echte Häfen an Ostsee und Nordsee). Gäste, die mit 4 oder 5 Ankern bewerten, werden Stammgäste.
+
+- Ein neues Boot ist mit 15 Prozent Wahrscheinlichkeit ein Stammgast: gleiche Art, gleiches Modell, gleicher Name und dieselben Wünsche wie beim letzten Mal, so dass man sich vorbereiten kann.
+- In der Warteleiste steht „Stammgast“ am Boot, auf der Bootskarte „„Möwe“ aus Kappeln · Stammgast, 3. Besuch“.
+- Wer zweimal unzufrieden abreist, kommt nicht mehr. Die Liste hat höchstens 40 Boote, die am längsten nicht mehr da waren, fallen raus.
+- Ab dem 5. Besuch (und ab Stufe 2): den liegenden Stammgast antippen, „Als Dauerlieger behalten“. Er bleibt an seinem Platz.
+- Keine Gesichter, keine Texte, nur Bootsname, Modell und Heimathafen.
+- Daten: Boot `{ bootsname, heimathafen, stammId, besuche }`, Spielstand `state.modules.stamm`. Ereignis `stammgast:neu` (für Ton oder Logbuch).
 
 ## 5. Wetter an der Flagge
 
