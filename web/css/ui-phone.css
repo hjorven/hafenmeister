@@ -119,10 +119,26 @@
     justify-content: center;
     overflow: visible;                  /* die Sonne (gesten.js) ragt nach unten heraus */
   }
-  /* Sonne zum Vorspulen: Aussehen aus gesten.js. Auf dem Handy sitzt sie am
-     unteren Rand der Pille, damit sie die Schrift nicht verdeckt, und hat eine
-     Tippflaeche von 48 px. */
-  .hm #day .hm-sonne { top: 100%; width: 24px; height: 24px; margin: -14px 0 0 -12px; }
+  /* Sonne zum Vorspulen: Aussehen aus gesten.js. Wie am PC und Tablet laeuft sie
+     auf einer eigenen Spur rechts in der Tag-Pille, neben "Tag 3 · Abend", und
+     hat eine Tippflaeche von 48 px. */
+  .hm #hud-top > #day { --h-track: 56px; padding-right: calc(var(--h-track) + 18px); }
+  .hm #day::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    width: var(--h-track);
+    top: 50%;
+    height: 6px;
+    margin-top: -3px;
+    border-radius: 3px;
+    background: rgba(40, 54, 72, 0.14);
+    pointer-events: none;
+  }
+  .hm #day .hm-sonne {
+    top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px;
+    left: calc(100% - 10px - var(--h-track) + var(--anteil) * (var(--h-track) - 24px) + 12px);
+  }
   .hm #day .hm-sonne::before { inset: calc((24px - var(--hm-tap)) / 2); }
 
   .hm #btn-pause, .hm #btn-overview, .hm #btn-save, .hm #btn-sound, .hm #btn-foto {
@@ -448,6 +464,7 @@
 }
 @media (max-width: 359px) and (orientation: portrait) {
   .hm #hud-top > .stat { font-size: 13px; padding: 0 9px; }
+  .hm #hud-top > #day { --h-track: 40px; padding-right: calc(var(--h-track) + 16px); }
 }
 
 /* ---------- Querformat: Leisten an die Seiten ---------- */
@@ -460,7 +477,7 @@
     padding-top: calc(var(--hm-safe-top) + 6px);
   }
   .hm #hud-top > :not(.spacer) { height: 36px; }
-  .hm #day { min-width: 120px; }
+  .hm #day { min-width: 0; flex: 0 0 auto; }
   .hm #btn-pause { width: 44px; height: 44px; }
 
   /* Wartende Boote als Spalte rechts, Bauen darunter */
