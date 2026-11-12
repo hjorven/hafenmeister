@@ -714,3 +714,29 @@ test('Abreise gestaffelt am Vormittag: Box bleibt bis zum Ablegen belegt', () =>
   sim.berthCleared(s, c, { boatId: a.id });
   assert.equal(sim.isFree(s, 'A1'), true);
 });
+
+test('Volle Bojen: Boot mit freier passender Box fährt direkt ein statt abzudrehen', () => {
+  const s = quietState({ stage: 3 });
+  for (let i = 0; i < RULES.queue.spots[3]; i++) waitingBoat(s, { waitSpot: i, held: true });
+  const make = (id) => ({ ...waitingBoat(createState({ seed: id })), id, status: 'expected', arriveAt: 0.5 });
+  s.upcoming = Array.from({ length: 12 }, (_, i) => make(700 + i));
+  const ev = sim.tick(s, ctxLive, 1);
+  assert.equal(ev.filter((e) => e.type === 'turnedAway').length, 0);
+  assert.equal(ev.filter((e) => e.type === 'selfEntered' && e.direct).length, 12);
+  assert.equal(new Set(s.upcoming.concat(Object.values(s.boats)).filter((b) => b.id >= 700).map((b) => b.berthId)).size, 12);
+  // Bei Andrang (mehr als die Hälfte der Bojen vergeben) zählt die Zeit schon ab Ankunft
+  const t = quietState({ stage: 3 });
+  t.upcoming = [make(800), make(801), make(802), make(803)];
+  sim.tick(t, ctxLive, 1);
+  assert.equal(t.boats[800].status, 'waiting');
+  sim.tick(t, ctxLive, RULES.queue.selfEnterAfter);
+  assert.equal(t.boats[800].status, 'moored');
+  // Ruhiger Betrieb: ein einzelnes Boot fährt erst zur Boje und wartet dort kurz
+  const u = quietState({ stage: 3 });
+  u.upcoming = [make(900)];
+  sim.tick(u, ctxLive, 1 + RULES.queue.selfEnterAfter + 5);
+  assert.equal(u.boats[900].status, 'waiting');
+  sim.markAtBuoy(u, ctxLive, 900);
+  sim.tick(u, ctxLive, RULES.queue.selfEnterAfter);
+  assert.equal(u.boats[900].status, 'moored');
+});
