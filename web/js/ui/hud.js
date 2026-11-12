@@ -56,6 +56,11 @@ export function init(game) {
     .hud-btn:disabled { opacity: 0.45; cursor: default; }
     #card .card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
     #card .card-note { font-weight: 600; }
+    #hud-goal { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); z-index: 5;
+      max-width: min(520px, calc(100vw - 250px)); width: max-content; margin: 0; padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; text-align: center;
+      background: rgba(16, 42, 60, 0.82); color: #fff; pointer-events: none; }
+    @media (max-width: 600px) { #hud-goal { bottom: calc(env(safe-area-inset-bottom, 0px) + 124px); max-width: calc(100vw - 32px); font-size: 0.8rem; } }
+    #hud-goal.done { pointer-events: auto; cursor: pointer; background: rgba(32, 110, 62, 0.92); font-weight: 600; }
     #queue .boat-chip[aria-pressed="true"] { outline: 3px solid #f2c14e; }
     /* Handy: die Bootskarte zeigt nur Bootsname/Heimathafen, Hinweis und Knöpfe, damit die Stege frei bleiben */
     @media (max-width: 600px) { body.card-boat #card h2, body.card-boat #card p:not(.card-note):not(.card-hint):not(.card-boatname) { display: none; } }
@@ -72,6 +77,27 @@ export function init(game) {
   document.getElementById('btn-pause')?.before(saveBtn);
   saveBtn.addEventListener('click', () => game.spielstand?.oeffnen?.());
   const updateSaveBtn = () => (saveBtn.hidden = !game.spielstand?.oeffnen);
+
+  // Abschlussziel der letzten Ausbaustufe: kleine Zeile unter der oberen Leiste
+  const goalLine = el('p', { id: 'hud-goal', role: 'status', hidden: true });
+  document.body.append(goalLine);
+  let doneShown = false;
+  goalLine.addEventListener('click', () => { if (doneShown) { doneShown = false; goalLine.hidden = true; goalLine.classList.remove('done'); } });
+
+  /** Text zum Abschlussziel, zum Beispiel "Großschiffbesuche 4/8 · Ruf 4,3 von 4,5 · noch 3 Plätze bauen". */
+  function goalText(g) {
+    const parts = [`Großschiffbesuche ${Math.min(g.visits, g.goal.bigVisits)}/${g.goal.bigVisits}`, `Ruf ${num1(g.reputation)} von ${num1(g.goal.reputation)}`];
+    if (g.goal.allBerths) parts.push(g.openBerths > 0 ? `noch ${g.openBerths} ${g.openBerths === 1 ? 'Platz' : 'Plätze'} bauen` : 'alle Plätze gebaut');
+    return parts.join(' · ');
+  }
+
+  function renderGoal(sim) {
+    if (doneShown) return;
+    const g = sim.regionGoal?.();
+    const show = !!g?.active && !g.done && !g.ok;
+    goalLine.hidden = !show;
+    if (show) goalLine.textContent = `Ziel: ${goalText(g)}`;
+  }
 
   let cardMode = null; // 'boat' | 'build' | null
   let note = '';
@@ -104,6 +130,7 @@ export function init(game) {
     const pending = sim.mooredBoats().reduce((a, b) => a + (b.pendingFee || 0), 0);
     collectBtn.hidden = pending <= 0;
     collectBtn.textContent = `Kassieren ${euro(pending)}`;
+    renderGoal(sim);
   }
 
   function renderQueue(sim) {
@@ -219,6 +246,10 @@ export function init(game) {
         el('button', { type: 'button', class: 'hud-btn', disabled: !adv.ok, onclick: () => act(sim.advanceStage()) }, `${adv.goal.name ?? 'Hafen erweitern'} · ${euro(adv.goal.cost)}`),
       );
     }
+    const rg = sim.regionGoal?.();
+    if (!stageLine && rg?.active) {
+      stageLine = el('p', {}, rg.done || rg.ok ? 'Region abgeschlossen: Dein Seehafen ist fertig.' : `Abschlussziel: ${goalText(rg)}`);
+    }
     fill(card,
       el('h2', {}, 'Bauen'),
       stageLine,
@@ -307,6 +338,12 @@ export function init(game) {
   // Den Bauen-Knopf uebernimmt ui/bauen.js (Baumodus mit Vorschau); die Liste hier bleibt nur als Rueckfall
   buildBtn?.addEventListener('click', () => { if (game.bauen) return; cardMode === 'build' ? closeCard() : openCard('build'); });
   game.on('sim:change', schedule);
+  game.on('sim:regionDone', () => {
+    doneShown = true;
+    goalLine.hidden = false;
+    goalLine.classList.add('done');
+    goalLine.textContent = 'Geschafft: Dein Seehafen ist fertig ausgebaut. Antippen zum Schließen.';
+  });
   game.on('sim:select', ({ boatId, berths }) => {
     note = '';
     if (boatId != null) showRings(berths || []);
