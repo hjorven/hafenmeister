@@ -574,7 +574,7 @@ Jorven (12.11.2026, Spieltest am Gaming-PC): Das Gelände wird komplett überarb
 | T6 | Marinebasis hat auf einer Seite keinen Eingang | nein | Grundproblem | P63 |
 | T7 | Marinebasis ist falsch platziert | nein | Grundproblem | P63 |
 | T8 | Boote machen im Gelände fest (Liegeplatz oder Ankerplatz an Land) | nein | Grundproblem | P66, P62 |
-| T9 | Ankünfte kommen in Wellen statt einzeln aus zufälligen Richtungen | teils: PR 81 würfelt nur die Vorbeifahrer | Grundproblem | P66 |
+| T9 | Ankünfte kommen in Wellen statt einzeln aus zufälligen Richtungen | teils: PR 81 würfelt nur die Vorbeifahrer; Regeln erledigt (Mindestabstand, breiteres Fenster, `herkunft` in `boot-kommt`), Ansicht offen | Grundproblem | P66 |
 | T10 | Engpass durch die Dünen ist viel zu eng und unschön | nein | Grundproblem | P62 |
 | T11 | Zu wenig Abwechslung im Gelände | nein | Extra (nach T1 bis T10) | P64 |
 | T12 | Komische Effekte (Flackern, Artefakte) | nein | Grundproblem | P65 |

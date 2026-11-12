@@ -476,6 +476,7 @@ function startDay(state, ctx, events) {
     list.push(boat);
   }
   list.sort((a, b) => a.arriveAt - b.arriveAt || a.id - b.id);
+  spreadArrivals(list, from, from + window, ctx.rules.arrivalMinGap);
   // Erster Tag eines neuen Spiels: Das erste Boot kommt gleich, damit niemand auf leeres Wasser schaut.
   const first = ctx.rules.firstArrivalAt;
   if (state.day === 1 && first != null) {
@@ -485,9 +486,40 @@ function startDay(state, ctx, events) {
     }
     if (list.length) list[0].arriveAt = Math.min(list[0].arriveAt ?? first, first);
   }
+  // Herkunft in der Reihenfolge der Ankunft, damit zwei Boote hintereinander nie aus derselben Ecke kommen
+  list.forEach((boat, i) => { boat.origin = boatOrigin(state, state.day * 7 + i); });
   state.upcoming = list;
   state.scheduledDay = state.day;
   events.push({ type: 'dayStart', day: state.day, stage: state.stage, expected: list.length, winter: sea.winter, year: sea.year });
+}
+
+/**
+ * Herkunft eines Boots als Zahl von 0 bis unter 1 (Stelle entlang des Revierrands, die Ansicht
+ * legt fest, wo das liegt). Aufeinanderfolgende Boote kommen aus deutlich verschiedenen Richtungen
+ * (goldener Schnitt), je Spiel anders (Seed). Verbraucht keinen Zufall, damit Spielstände gleich bleiben.
+ */
+export function boatOrigin(state, n) {
+  const x = n * 0.6180339887498949 + ((state.seed >>> 0) % 9973) / 9973;
+  return Math.round((x - Math.floor(x)) * 1000) / 1000;
+}
+
+/**
+ * Zieht sortierte Ankunftszeiten auseinander, damit Boote nicht im Pulk erscheinen: zwischen zwei
+ * Ankünften liegen mindestens minGap Sekunden. Passen nicht alle mit diesem Abstand ins Fenster,
+ * wird der Abstand so weit verkleinert, dass sie sich gleichmäßig verteilen.
+ */
+export function spreadArrivals(list, from, to, minGap) {
+  if (!(minGap > 0) || list.length < 2) return list;
+  const gap = Math.min(minGap, (to - from) / list.length);
+  for (let i = 1; i < list.length; i++) list[i].arriveAt = Math.max(list[i].arriveAt, list[i - 1].arriveAt + gap);
+  // Was hinten über das Fenster hinausragt, rückt von hinten nach vorn auf
+  let limit = to;
+  for (let i = list.length - 1; i >= 0 && list[i].arriveAt > limit; i--) {
+    list[i].arriveAt = limit;
+    limit -= gap;
+  }
+  for (const b of list) b.arriveAt = Math.round(b.arriveAt * 10) / 10;
+  return list;
 }
 
 /** Die nächsten Boote, die heute noch kommen (für die Vorschau). */
@@ -1314,6 +1346,7 @@ export function rulesFromEconomy(E, base = RULES) {
   if (z.ankunftVon != null) r.arrivalFrom = z.ankunftVon;
   if (z.ankunftBis != null) r.arrivalWindow = z.ankunftBis;
   if (z.ankunftSpitze != null) r.arrivalPeak = z.ankunftSpitze;
+  if (z.ankunftAbstand != null) r.arrivalMinGap = z.ankunftAbstand;
   if (z.abreiseVon != null && z.abreiseBis != null) r.departWindow = [z.abreiseVon, z.abreiseBis];
   if (z.saisonTage) r.seasonDays = z.saisonTage;
   if (z.winterTage != null) r.winterDays = z.winterTage;
