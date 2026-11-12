@@ -174,6 +174,31 @@ export function init(game) {
 
   const rand = () => welt(bySt(REVIERRAND, stufe()));
 
+  // --- Fahrwege ab Stufe 3: See und Binnensee verbindet nur der Durchstich ------------------
+  // Planeinheiten wie render/landschaft/gelaende.js (DURCHSTICH x 152 bis 182, Nehrung y 186 bis 224,
+  // ab Stufe 5 Aussenhafen zwischen West- und Ostmole mit Einfahrt bei etwa x 133, y 315).
+  const DURCH_X = 167;
+  const imSee = (p) => -p.z / U < 200;                       // suedlich der Nehrung = Binnensee
+  function seeTor() {
+    return [{ x: DURCH_X * U, z: -176 * U }, { x: DURCH_X * U, z: -200 * U }, { x: DURCH_X * U, z: -238 * U }];
+  }
+  function aussenTor() {
+    // ab Stufe 5 um die Ostmole herum durch die Einfahrt des Aussenhafens
+    if (stufe() >= 5) return [{ x: 150 * U, z: -270 * U }, { x: 138 * U, z: -305 * U }, { x: 134 * U, z: -334 * U }];
+    return [{ x: DURCH_X * U, z: -258 * U }];
+  }
+  /** Wegpunkte von a nach b (Welt), ohne a und b selbst. */
+  function fahrweg(a, b) {
+    if (stufe() < 3) return [];
+    const aSee = imSee(a), bSee = imSee(b);
+    if (aSee && bSee) return [];
+    const innen = seeTor();                  // vom See zur Ostsee
+    const aussen = aussenTor();
+    if (aSee && !bSee) return [...innen, ...aussen];
+    if (!aSee && bSee) return [...aussen.slice().reverse(), ...innen.slice().reverse()];
+    return [];                               // beide draussen
+  }
+
   // --- Ereignisse der Spielregeln -----------------------------------------------------------
   game.on('boot-kommt', (info) => {
     if (!info || info.id == null) return;
@@ -193,7 +218,8 @@ export function init(game) {
     const b = platzBerth(platz);
     if (!b) return;
     if (!e.anim.moored && e.anim.state === 'idle') e.anim.moorAt(bojeBerth(e.info.boje ?? 0));
-    e.anim.dock(b);
+    // ab Stufe 3 von der Reede durch Einfahrt und Durchstich in den See
+    e.anim.dock(b, { via: fahrweg({ x: e.anim.x, z: e.anim.z }, b) });
   });
 
   game.on('boot-faehrt', ({ id } = {}) => {
@@ -201,10 +227,16 @@ export function init(game) {
     if (!e) return;
     const ziel = rand();
     const weg = [];
-    // zuerst ein Stueck in den freien See, dann zum Revierrand
-    const bojen = bojenPos();
-    const mitte = bojen[Math.floor(bojen.length / 2)];
-    if (mitte) weg.push({ x: mitte.x + 6, z: mitte.z + 4 });
+    const von = { x: e.anim.x, z: e.anim.z };
+    if (stufe() >= 3) {
+      // durch Durchstich und Einfahrt hinaus, dann zum Revierrand auf See
+      weg.push(...fahrweg(von, ziel));
+    } else {
+      // zuerst ein Stueck in den freien See, dann zum Revierrand
+      const bojen = bojenPos();
+      const mitte = bojen[Math.floor(bojen.length / 2)];
+      if (mitte) weg.push({ x: mitte.x + 6, z: mitte.z + 4 });
+    }
     weg.push(ziel);
     e.faehrt = true;
     entferneMuenze(id, 0);
