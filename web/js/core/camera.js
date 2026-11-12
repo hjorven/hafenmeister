@@ -281,7 +281,7 @@ export class CameraRig {
     this.viewWidth = THREE.MathUtils.clamp(Math.max((r.maxX - r.minX) * this.screenW / availW, (r.maxZ - r.minZ) * sinP * this.screenW / availH), this.minWidth, maxW);
     this.target.set((r.minX + r.maxX) / 2, 0, (r.minZ + r.maxZ) / 2);
     const _v = new THREE.Vector3();
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 24; i++) {
       this._apply();
       let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
       for (const e of ecken) {
@@ -302,7 +302,7 @@ export class CameraRig {
         this.target.x += a.x - this.target.x - (b.x - c.x);
         this.target.z += a.z - this.target.z - (b.z - c.z);
       }
-      if (Math.abs(s - 1) < 0.002 && i > 1) break;
+      if (Math.abs(s - 1) < 1e-6 && i > 1) break;   // ganz auskonvergieren, sonst springt das Ergebnis je nach Abbruchschritt
     }
     this._homeWidth = this.viewWidth;
     this._apply();
