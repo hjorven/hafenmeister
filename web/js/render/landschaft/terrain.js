@@ -2,7 +2,7 @@
 // dazu Molen, Kaimauern, Buhnen und Pflanzen (Kiefern, Laubbäume, Dünengras, Schilf, Felsen).
 // Alle wiederholten Dinge sind InstancedMesh, damit es auch auf schwachen Handys flüssig bleibt.
 import * as THREE from 'three';
-import { punkt, BEREICH, PLAN_M, molen, buhnen, rauschen, hafenAbstand, suedufer, DURCHSTICH } from './gelaende.js';
+import { punkt, BEREICH, PLAN_M, molen, buhnen, rauschen, hafenAbstand, suedufer, DURCHSTICH, SLIP } from './gelaende.js';
 
 const U = PLAN_M;
 
@@ -343,7 +343,9 @@ function baueKaimauern(region, stufe, gruppe, schatten) {
   // Senkrechte Kanten, wo das Gelände sonst schräg ins Wasser liefe
   const mauern = [];
   if (stufe >= 3) {
-    mauern.push({ x0: -150, x1: 202, y: 6, nach: 1, hoehe: 1.2 });                                   // Promenade am See
+    // Promenade am See, mit Lücke für die Slipanlage
+    mauern.push({ x0: -150, x1: SLIP.x0, y: 6, nach: 1, hoehe: 1.2 });
+    mauern.push({ x0: SLIP.x1, x1: 202, y: 6, nach: 1, hoehe: 1.2 });
     mauern.push({ xKante: DURCHSTICH[0], y0: 186, y1: 230, nach: 1, hoehe: 1.0 });                    // Durchstich West
     mauern.push({ xKante: DURCHSTICH[1], y0: 186, y1: 230, nach: -1, hoehe: 1.0 });                   // Durchstich Ost
   }
