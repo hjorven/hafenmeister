@@ -10,6 +10,7 @@ import { warteplaetze } from './render/landschaft/gelaende.js';
 // die das Spielobjekt bekommt. Fehlt eine Datei noch, wird sie still uebersprungen.
 // Neue Module hier eintragen, dann muss niemand sonst main.js oder index.html anfassen.
 const MODULES = [
+  './data/stegbild.js',
   './world/region.js',
   './render/landscape.js',
   './render/stege.js',

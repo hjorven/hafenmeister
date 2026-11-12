@@ -262,8 +262,18 @@ export function plaetzeInStufe(stufe) {
 '''
 
 
+# Stegbild dieses Spiels (Variante der Stege A, B, C, CS, D) einsetzen, bevor ein Modul HAFEN liest.
+# Siehe docs/stegbilder.md. Ohne Browser (Node, Tests) bleibt das Grundbild.
+STEGBILD = '''
+// Stegbild dieses Spiels einsetzen (docs/stegbilder.md). Ohne Browser bleibt das Grundbild.
+stegbildAnwenden(HAFEN);
+'''
+
+
 def als_js(daten):
-    return KOPF + '\nexport const HAFEN = ' + json.dumps(daten, ensure_ascii=False, indent=1) + ';\n' + HILFEN + '\nexport default HAFEN;\n'
+    return (KOPF + "\nimport { stegbildAnwenden } from './stegbild.js';\n"
+            + '\nexport const HAFEN = ' + json.dumps(daten, ensure_ascii=False, indent=1) + ';\n'
+            + STEGBILD + HILFEN + '\nexport default HAFEN;\n')
 
 
 if __name__ == '__main__':
