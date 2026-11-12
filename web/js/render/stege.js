@@ -268,7 +268,8 @@ export function init(game) {
   let markiert = { ids: [], farbe: '#ffd23f' };
 
   function aktuelleStufe(n) {
-    const v = n ?? game.sim?.state?.stage ?? game.state?.stufe ?? new URLSearchParams(location.search).get('stufe') ?? 1;
+    // Testmodus ?stufe=n gilt beim Start vor dem Spielstand (wie Gebaeude, Landschaft und Services)
+    const v = n ?? new URLSearchParams(location.search).get('stufe') ?? game.sim?.state?.stage ?? game.state?.stufe ?? 1;
     return String(Math.max(1, Math.min(5, Math.round(Number(v) || 1))));
   }
 

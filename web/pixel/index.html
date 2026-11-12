@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Hafenmeister Pixel</title>
+  <style>html, body { margin: 0; background: #5eb0bd; }</style>
+</head>
+<body>
+<script>
+// Pixel-Fassung: laedt die normale Spielseite (../index.html) unveraendert, setzt die Basisadresse
+// auf den Spielordner und haengt nur den Pixel-Zeichner und das Pixel-Aussehen der Leisten an.
+// So bleibt diese Fassung automatisch auf dem Stand des Spiels.
+(async () => {
+  const hier = new URL('./', location.href);
+  const spiel = new URL('../', hier);
+  const antwort = await fetch(new URL('index.html', spiel), { cache: 'no-cache' });
+  let html = await antwort.text();
+  const zusatz =
+    "<base href='" + spiel.href + "'>" +
+    "<link rel='preconnect' href='https://fonts.googleapis.com'>" +
+    "<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&display=swap'>" +
+    "<link rel='stylesheet' href='" + new URL('css/pixel.css', hier).href + "'>";
+  html = html.replace(/<head>/i, '<head>' + zusatz);
+  html = html.replace(/<title>[^<]*<\/title>/i, '<title>Hafenmeister Pixel</title>');
+  html = html.replace(/<\/body>/i,
+    "<script type='module' src='" + new URL('js/pixel.js', hier).href + "'><\/script></body>");
+  document.open();
+  document.write(html);
+  document.close();
+})();
+</script>
+</body>
+</html>
