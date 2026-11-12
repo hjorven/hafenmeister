@@ -117,6 +117,7 @@ export async function initBridge(game) {
     return {
       id: b.id, groesse: b.size, art: b.typeId, modell: b.modelId, palette: b.id % 4, name: b.name,
       platz: b.berthId, boje: b.waitSpot, zustand: b.status === 'moored' ? 'liegt' : b.status === 'waiting' ? 'wartet' : 'kommt',
+      bezahlt: b.status === 'moored' ? (b.stationed ? true : b.paid !== false && !(b.pendingFee > 0)) : false, offen: b.pendingFee || 0,
     };
   }
 
@@ -261,6 +262,11 @@ export async function initBridge(game) {
     geduld: (boatId) => sim.patienceLeft(state, ctx, boatIdOf(boatId)),
     tagesAnteil: () => Math.min(1, state.clock / (ctx.rules.dayLength + ctx.rules.eveningLength)),
     wartet: (boatId) => state.boats[boatIdOf(boatId)]?.status === 'waiting',
+    // Hat das Boot sein Liegegeld für die kommende Nacht bezahlt? (Bändchen am Bug, Hafenmeister-Rundgang)
+    istBezahlt: (boatId) => {
+      const b = state.boats[boatIdOf(boatId)];
+      return !!b && b.status === 'moored' && (b.stationed || (b.paid !== false && !(b.pendingFee > 0)));
+    },
     passendePlaetze: (boatId) => sim.fittingBerths(state, ctx, boatIdOf(boatId)),
   };
   game.sim = api;

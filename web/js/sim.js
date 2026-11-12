@@ -358,7 +358,7 @@ function makeBoat(fields) {
     id: 0, typeId: null, modelId: null, name: '', size: 'S', kind: null,
     length: 0, beam: 0, draft: 0, motor: false, special: false, dayVisitors: 0, stationed: false,
     wishes: [], nights: 1, status: 'expected', arriveAt: 0, waitingSince: null, waitSpot: null, atBuoy: false, atBuoySince: null, berthId: null,
-    wishesMet: 0, wishesTotal: 0, pendingFee: 0, penalty: 0,
+    wishesMet: 0, wishesTotal: 0, pendingFee: 0, paid: false, feeDay: null, penalty: 0,
     ...fields,
   };
 }
@@ -443,6 +443,11 @@ function startDay(state, ctx, events) {
     if (ctx.berthById[boat.berthId]?.exposed) delta += mods.satisfaction.outer;
     if (delta) boat.penalty -= delta;
   }
+  // Morgenrunde: Die Versorgung zählt neu, wer noch bleibt, zahlt die nächste Nacht.
+  state.served = {};
+  for (const boat of mooredBoats(state)) {
+    if (!boat.stationed) chargeFee(state, ctx, boat, mods, events);
+  }
   const rate = sea.winter ? 0 : arrivalRate(state, ctx, mods);
   const n = Math.floor(rate) + (random(state) < rate - Math.floor(rate) ? 1 : 0);
   const window = ctx.rules.dayLength * ctx.rules.arrivalWindow;
@@ -455,6 +460,15 @@ function startDay(state, ctx, events) {
     list.push(boat);
   }
   list.sort((a, b) => a.arriveAt - b.arriveAt || a.id - b.id);
+  // Erster Tag eines neuen Spiels: Das erste Boot kommt gleich, damit niemand auf leeres Wasser schaut.
+  const first = ctx.rules.firstArrivalAt;
+  if (state.day === 1 && first != null) {
+    if (!list.length && !sea.winter) {
+      const boat = rollBoat(state, ctx, mods);
+      if (boat) { boat.id = state.nextId++; list.push(boat); }
+    }
+    if (list.length) list[0].arriveAt = Math.min(list[0].arriveAt ?? first, first);
+  }
   state.upcoming = list;
   state.scheduledDay = state.day;
   events.push({ type: 'dayStart', day: state.day, stage: state.stage, expected: list.length, winter: sea.winter, year: sea.year });
@@ -482,6 +496,8 @@ function moor(state, ctx, boat, berthId, events) {
     seen.push(key);
     events.push({ type: 'logbookNew', typeId: boat.typeId, modelId: boat.modelId });
   }
+  // Wie im echten Hafen: Das Liegegeld für die kommende Nacht wird gleich nach dem Anlegen fällig.
+  if (!boat.stationed) chargeFee(state, ctx, boat, modifiers(state, ctx), events);
 }
 
 /**
@@ -655,7 +671,7 @@ export function dismiss(state, ctx, boatId) {
 }
 
 // ---------------------------------------------------------------------------
-// Abend: Wünsche prüfen, Hafengeld
+// Hafengeld (fällig beim Anlegen und jeden Morgen) und Abend
 
 /** Hafengeld für eine Nacht bei n erfüllten Wünschen. */
 export function nightlyFee(state, ctx, boat, wishesMet, priceFactor = 1) {
@@ -664,7 +680,7 @@ export function nightlyFee(state, ctx, boat, wishesMet, priceFactor = 1) {
   return Math.round(base * (1 + ctx.rules.wishBonus * wishesMet) * priceFactor);
 }
 
-/** Wie viele Boote ein Service heute Abend versorgen kann. */
+/** Wie viele Boote ein Service pro Tag versorgen kann. */
 export function facilityCapacity(state, ctx, key) {
   const f = ctx.rules.facilities[key];
   return f ? f.levels[state.facilities[key] || 0] || 0 : 0;
@@ -696,34 +712,14 @@ function startEvening(state, ctx, events) {
   // Wer noch wartet, fährt weiter
   for (const id of [...state.queue]) turnAway(state, ctx, state.boats[id], events, 'evening');
 
-  const left = {};
-  for (const k of Object.keys(ctx.rules.facilities)) left[k] = facilityCapacity(state, ctx, k);
   let visitors = 0;
   for (const boat of mooredBoats(state)) {
-    const berth = ctx.berthById[boat.berthId];
     visitors += boat.dayVisitors || 0;
     if (boat.stationed) {
       const fee = ctx.rules.stationedFee ?? Math.round(nightlyFee(state, ctx, boat, 0) * ctx.rules.stationedFeeShare);
       addIncome(state, fee);
       events.push({ type: 'stationedFee', boatId: boat.id, amount: fee });
-      continue;
     }
-    const metList = [];
-    for (const w of boat.wishes) {
-      const prop = ctx.rules.berthWishes[w];
-      let ok;
-      if (prop) ok = berthHas(state, ctx, berth, prop);
-      else {
-        ok = (left[w] || 0) > 0;
-        if (ok) left[w]--;
-      }
-      if (ok) metList.push(w);
-    }
-    boat.wishesMet += metList.length;
-    boat.wishesTotal += boat.wishes.length;
-    const fee = nightlyFee(state, ctx, boat, metList.length, mods.priceFactor);
-    boat.pendingFee += fee;
-    events.push({ type: 'feeReady', boatId: boat.id, amount: fee, wishesMet: metList });
   }
   visitors = Math.round(visitors * mods.visitorFactor);
   if (visitors > 0) {
@@ -736,7 +732,37 @@ function startEvening(state, ctx, events) {
   const boats = mooredBoats(state);
   for (const fn of ctx.hooks.evening) fn({ state, ctx, boats, events, addIncome: (a) => addIncome(state, a) });
   events.push({ type: 'evening', day: state.day });
-  if (state.office >= ctx.rules.office.autoCollect) events.push(...collectAll(state, ctx, true));
+}
+
+/**
+ * Liegegeld für die kommende Nacht fällig stellen: beim Anlegen und für Bleibende jeden Morgen.
+ * Dabei wird geprüft, welche Wünsche der Hafen heute erfüllt (Versorgung reicht je Tag für
+ * eine feste Zahl Boote, state.served zählt mit). Das Boot gilt als unbezahlt (boat.paid = false),
+ * bis kassiert ist. Mit Hafenbüro Stufe 2 kassiert das Büro sofort selbst.
+ */
+function chargeFee(state, ctx, boat, mods, events) {
+  if (boat.feeDay === state.day) return; // heute schon abgerechnet
+  const berth = ctx.berthById[boat.berthId];
+  const served = (state.served ||= {});
+  const metList = [];
+  for (const w of boat.wishes) {
+    const prop = ctx.rules.berthWishes[w];
+    let ok;
+    if (prop) ok = berthHas(state, ctx, berth, prop);
+    else {
+      ok = (served[w] || 0) < facilityCapacity(state, ctx, w);
+      if (ok) served[w] = (served[w] || 0) + 1;
+    }
+    if (ok) metList.push(w);
+  }
+  boat.wishesMet += metList.length;
+  boat.wishesTotal += boat.wishes.length;
+  const fee = nightlyFee(state, ctx, boat, metList.length, mods.priceFactor);
+  boat.pendingFee += fee;
+  boat.feeDay = state.day;
+  boat.paid = false;
+  events.push({ type: 'feeReady', boatId: boat.id, amount: fee, wishesMet: metList });
+  if (state.office >= ctx.rules.office.autoCollect) events.push(...collect(state, ctx, boat.id).events);
 }
 
 /** Münze über einem Boot antippen. */
@@ -745,6 +771,7 @@ export function collect(state, ctx, boatId) {
   if (!boat || boat.pendingFee <= 0) return { ok: false, events: [] };
   const amount = boat.pendingFee;
   boat.pendingFee = 0;
+  boat.paid = true;
   addIncome(state, amount);
   return { ok: true, events: [{ type: 'collected', boatId, amount }] };
 }
@@ -776,6 +803,7 @@ function night(state, ctx, events) {
     if (boat.pendingFee > 0) {
       honesty += Math.round(boat.pendingFee * ctx.rules.uncollectedShare);
       boat.pendingFee = 0;
+      boat.paid = true;
     }
   }
   if (honesty > 0) {
