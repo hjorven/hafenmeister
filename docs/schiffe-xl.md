@@ -122,5 +122,7 @@ Regeln:
 - Die Bahnen liegen im Wasser und halten Abstand zu Wartebojen, Ankerflächen, Molen, Buhnen und Liegeplätzen. `tests/verkehr.test.mjs` prüft das für Stufe 1 bis 6 und alle Stegbilder (0 bis 12). Die Strecke des Paddlers rechnet `uferStrecke()` aus den Stegen des aktuellen Stegbilds.
 - Ab Stufe 3 biegen die kleinen Bahnen vor der Einfahrt nach Norden ab, damit Reede und Fahrrinne frei bleiben und die Boote trotzdem in der Startansicht zu sehen sind.
 - Liegt ein anderes Boot vor dem Bug (zum Beispiel ein Gast auf dem Weg zur Boje), hält das vorbeifahrende Boot an, höchstens 45 Sekunden.
+- Die Seebahnen beginnen und enden bei y 760 auf freiem Wasser, weit außerhalb jeder Ansicht: Die Boote kommen längs der West- und Ostküste von Norden. Der Test prüft das.
+- Abwechslung: Jedes Boot fährt mit eigenem Tempo (plus/minus 18 Prozent) und eigenem seitlichem Versatz zur Bahn, Bootstyp, Bahn und Zeitpunkt werden ausgewürfelt. Auf dem See wechselt jede Runde Abstand und Tempo, der Drehsinn ist je Spiel zufällig, ab und zu treibt ein Boot eine Weile.
 - Mit `?stufe=3` in der Adresse zeigt der Verkehr dieselbe Stufe wie die Landschaft.
 - In der Konsole: `hafenmeister.verkehr.boote` listet die Boote mit Lage und Tempo.

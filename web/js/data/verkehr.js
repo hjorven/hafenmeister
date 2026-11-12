@@ -13,17 +13,19 @@ export const welt = (px, py) => ({ x: px * U, z: -py * U });
 // außerhalb der Karte. Rechtsverkehr: ostwärts auf der Landseite, westwärts weiter draußen.
 // Ab Stufe 3 biegen die kleinen Bahnen vor der Einfahrt nach Norden ab, damit sie in der Startansicht
 // zu sehen sind und trotzdem Reede, Ankerflächen und Fahrrinne im Osten frei lassen.
-export const SEE_X = 440;            // Ostende, außerhalb der Karte (Karte bis x 306)
-// Im Westen liegt ab x -360 Land, die Küste zieht nach Norden. Dort kommen und gehen die Boote
-// längs der Küste von Norden; innere (südliche) Bahnen biegen weiter westlich ab, damit sich nichts kreuzt.
+export const SEE_X = 440;            // nur noch für Prüfungen: so weit reicht die Karte höchstens nach Osten
+// Beide Küsten ziehen nach Norden (Westen ab x -360 Land, Osten ab x 460). Die Boote kommen und gehen
+// darum längs der Küsten von Norden, bei y 760 weit außerhalb jeder Ansicht und auf freiem Wasser.
+// Damit sich nichts kreuzt, biegen die landnahen (südlichen) Bahnen weiter außen ab.
 const westen = (y, xKurve) => [[xKurve - 14, 760], [xKurve, y + 50], [xKurve + 40, y]];
-const ostwaerts = (y, xKurve, rest = [[SEE_X, y]]) => [...westen(y, xKurve), ...rest];
-const westwaerts = (y, xKurve, vorher = [[SEE_X, y]]) => [...vorher, ...westen(y, xKurve).reverse()];
+const osten = (y, xKurve = 420 - (y - 264)) => [[xKurve - 40, y], [xKurve, y + 50], [xKurve + 14, 760]];
+const ostwaerts = (y, xKurve, rest = osten(y)) => [...westen(y, xKurve), ...rest];
+const westwaerts = (y, xKurve, vorher = osten(y).reverse()) => [...vorher, ...westen(y, xKurve).reverse()];
 export const SEE = {
-  // Noch kein Durchstich: die See ist frei, Bahnen gut 6 m vor den Buhnenköpfen (y bis 254)
+  // Noch kein Durchstich: die See ist frei, Bahnen gut 8 m vor den Buhnenköpfen (y bis 254)
   1: [
-    { pts: ostwaerts(264, -340), art: 'klein' }, { pts: westwaerts(278, -326), art: 'klein' },
-    { pts: ostwaerts(306, -298), art: 'gross' }, { pts: westwaerts(326, -278), art: 'gross' },
+    { pts: ostwaerts(268, -340), art: 'klein' }, { pts: westwaerts(282, -326), art: 'klein' },
+    { pts: ostwaerts(310, -298), art: 'gross' }, { pts: westwaerts(330, -278), art: 'gross' },
   ],
   // Stufe 3 und 4: Molenköpfe bis y 268 (x 149 bis 187), Rinne bis y 356 (x 152 bis 212),
   // Reede ab x 222, Ankerfeld um (345, 385) mit Radius 62. Die kleinen Bahnen biegen vor der Einfahrt nach Norden ab.
@@ -32,21 +34,35 @@ export const SEE = {
     { pts: westwaerts(306, -326, [[192, 760], [162, 474], [100, 340], [46, 306]]), art: 'klein' },
     { pts: ostwaerts(472, -300), art: 'gross' }, { pts: westwaerts(492, -280), art: 'gross' },
   ],
+  // Ab Stufe 5 ist zwischen Außenhafen und großem Ankerfeld wenig Platz, dort nur 1,5 Planeinheiten Versatz.
   // Ab Stufe 5: Außenhafen mit Westmole bis (96, 320), Rinne bis y 356 (x 108 bis 184),
   // Ankerfeld für Große um (30, 440) mit Radius 85, Reede ab x 226, Ankerfeld um (360, 440). XXL (bis 29 m breit) nur auf der äußersten Bahn.
   5: [
-    { pts: ostwaerts(268, -340, [[-112, 268], [-52, 294], [-34, 330], [30, 333], [86, 337], [118, 352], [140, 420], [170, 520], [196, 760]]), art: 'klein' },
-    { pts: westwaerts(282, -326, [[182, 760], [154, 520], [124, 420], [104, 364], [78, 348], [30, 345], [-46, 342], [-66, 300], [-116, 282]]), art: 'klein' },
+    { pts: ostwaerts(268, -340, [[-112, 268], [-52, 294], [-34, 330], [30, 333], [86, 337], [118, 352], [140, 420], [170, 520], [196, 760]]), art: 'klein', versatz: 1.5 },
+    { pts: westwaerts(282, -326, [[184, 760], [160, 520], [131, 420], [111, 366], [78, 344], [30, 341], [-46, 339], [-66, 300], [-116, 282]]), art: 'klein', versatz: 1.5 },
     { pts: ostwaerts(562, -300), art: 'gross' }, { pts: westwaerts(600, -250), art: 'gross', xxl: true },
   ],
   // Stufe 6: Großschiffspier P01 (x -371 bis -83, y 290, Schiff liegt nördlich davor) und
   // Marineanleger MA01/MA02 (y 247). Die kleinen Bahnen kommen im Westen nördlich davon herein.
   6: [
-    { pts: ostwaerts(380, -340, [[-110, 380], [-56, 352], [-34, 330], [30, 333], [86, 337], [118, 352], [140, 420], [170, 520], [196, 760]]), art: 'klein' },
-    { pts: westwaerts(394, -326, [[182, 760], [154, 520], [124, 420], [104, 364], [78, 348], [30, 345], [-46, 343], [-72, 370], [-116, 394]]), art: 'klein' },
+    { pts: ostwaerts(380, -340, [[-110, 380], [-56, 352], [-34, 330], [30, 333], [86, 337], [118, 352], [140, 420], [170, 520], [196, 760]]), art: 'klein', versatz: 1.5 },
+    { pts: westwaerts(394, -326, [[184, 760], [160, 520], [131, 420], [111, 366], [78, 344], [30, 341], [-46, 339], [-72, 370], [-116, 394]]), art: 'klein', versatz: 1.5 },
     { pts: ostwaerts(562, -300), art: 'gross' }, { pts: westwaerts(600, -250), art: 'gross', xxl: true },
   ],
 };
+
+// Bahn seitlich versetzt (d in Planeinheiten, positiv = links in Fahrtrichtung), damit nicht jedes Boot
+// genau dieselbe Linie fährt. render/boats/verkehr.js versetzt nur nach rechts (d zwischen -VERSATZ_MAX und 0),
+// also weg von der Gegenbahn. tests/verkehr.test.mjs prüft beide Grenzen.
+export const VERSATZ_MAX = 4;
+export function versetzt(pts, d) {
+  if (!d) return pts.map((q) => [...q]);
+  return pts.map((q, i) => {
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)];
+    const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1;
+    return [q[0] - (dy / l) * d, q[1] + (dx / l) * d];
+  });
+}
 
 // Punkt auf einer Bahn bei Anteil f (0 bis 1) und die restlichen Eckpunkte danach
 export function aufBahn(pts, f) {

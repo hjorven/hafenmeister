@@ -3,7 +3,7 @@
 // Ausführen im Repo-Ordner:  node --test tests/verkehr.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { SEE as SEEBAHNEN, SEE_RUNDE, FLOTTE, uferStrecke } from '../web/js/data/verkehr.js';
+import { SEE as SEEBAHNEN, SEE_RUNDE, FLOTTE, uferStrecke, versetzt, VERSATZ_MAX } from '../web/js/data/verkehr.js';
 import { gelaendeAbfrage, warteplaetze, molen, buhnen, PLAN_M } from '../web/js/render/landschaft/gelaende.js';
 import { region } from '../web/js/render/landschaft/regionen.js';
 import { HAFEN, plaetzeInStufe, platzInWelt } from '../web/js/data/harbor.js';
@@ -54,7 +54,6 @@ function pruefe(st, punkte, name, { tiefe = 1, boje = 14, anker = 6, mole = 6, p
   const plaetze = plaetzeInStufe(st).map((p) => platzInWelt(p, st));
   const linien = [...molen(st).map((m) => m.punkte), ...buhnen(st)];
   for (const [px, py] of punkte) {
-    if (py > 640) continue;                           // weit draußen, außerhalb jeder Ansicht
     const x = px * PLAN_M, z = -py * PLAN_M;
     const wo = `${name} Stufe ${st} bei (${px.toFixed(0)}, ${py.toFixed(0)})`;
     assert.ok(g.tiefeBei(x, z) >= tiefe, `${wo}: zu flach`);
@@ -68,7 +67,11 @@ function pruefe(st, punkte, name, { tiefe = 1, boje = 14, anker = 6, mole = 6, p
 test('Seebahnen liegen im Wasser und halten Abstand, Stufe 1 bis 6, alle Stegbilder', () => {
   for (const nr of STEGBILD_NR) mitStegbild(nr, () => {
     for (const st of [1, 2, 3, 4, 5, 6]) {
-      bahnenVon(st).forEach((b, i) => pruefe(st, punkteAuf(b.pts), `Stegbild ${nr} Seebahn ${i} (${b.art})`, { tiefe: b.art === 'gross' ? 3 : 1.5 }));
+      bahnenVon(st).forEach((b, i) => {
+        for (const d of [-(b.versatz ?? VERSATZ_MAX), 0]) {
+          pruefe(st, punkteAuf(versetzt(b.pts, d)), `Stegbild ${nr} Seebahn ${i} (${b.art}, Versatz ${d})`, { tiefe: b.art === 'gross' ? 3 : 1.5 });
+        }
+      });
     }
   });
 });
@@ -76,11 +79,24 @@ test('Seebahnen liegen im Wasser und halten Abstand, Stufe 1 bis 6, alle Stegbil
 test('Runden auf dem Binnensee und Paddler am Ufer, Stufe 1 und 2, alle Stegbilder', () => {
   for (const nr of STEGBILD_NR) mitStegbild(nr, () => {
     for (const st of [1, 2]) {
-      for (const inset of [0, 7, 14]) pruefe(st, superellipse(SEE_RUNDE[st], inset), `Stegbild ${nr} See-Runde ${inset}`, { tiefe: 0.8, platz: 25 });
+      for (const inset of [0, 2, 8, 10, 16, 18]) pruefe(st, superellipse(SEE_RUNDE[st], inset), `Stegbild ${nr} See-Runde ${inset}`, { tiefe: 0.8, platz: 25 });
       const u = uferStrecke(st);
       pruefe(st, punkteAuf([[u.x0, u.y], [u.x1, u.y]]), `Stegbild ${nr} Ufer`, { tiefe: 0.6, boje: 14, platz: 9 });
     }
   });
+});
+
+test('Seebahnen beginnen und enden weit außerhalb jeder Ansicht auf freiem Wasser', () => {
+  // Kamera reicht höchstens bis y 352 (main.js WORLD) plus Blick nach oben; 700 liegt sicher draußen
+  for (const st of [1, 2, 3, 4, 5, 6]) {
+    const g = gelaendeAbfrage(st, R);
+    bahnenVon(st).forEach((b, i) => {
+      for (const [px, py] of [b.pts[0], b.pts.at(-1)]) {
+        assert.ok(py >= 700, `Stufe ${st} Bahn ${i}: Ende (${px}, ${py}) liegt im Sichtbereich`);
+        assert.ok(g.tiefeBei(px * PLAN_M, -py * PLAN_M) >= 3, `Stufe ${st} Bahn ${i}: Ende (${px}, ${py}) nicht auf freiem Wasser`);
+      }
+    });
+  }
 });
 
 test('Alle Modelle der Flotte gibt es in den Bootsdaten', () => {

@@ -14,7 +14,7 @@
 
 import { addBoat } from '../boat-anim.js';
 
-import { U, welt, SEE_X, SEE, SEE_RUNDE, FLOTTE, ANZAHL, aufBahn, seeBahnen, seeRunde, bisStufe, uferStrecke } from '../../data/verkehr.js';
+import { U, welt, SEE_X, SEE, SEE_RUNDE, FLOTTE, ANZAHL, aufBahn, seeBahnen, seeRunde, bisStufe, uferStrecke, versetzt, VERSATZ_MAX } from '../../data/verkehr.js';
 
 // Reisegeschwindigkeit in m/s, gemütlich
 function tempo(info, id) {
@@ -74,9 +74,9 @@ export function init(game) {
       setSails: gebaut.types.setSails,
       sails: false,
     });
-    const v = tempo(anim.info, gebaut.id);
+    const v = tempo(anim.info, gebaut.id) * (0.82 + Math.random() * 0.36);   // jedes Boot etwas anders schnell
     anim.cfg.cruise = v;
-    return { anim, v, wartet: 0, dispose: gebaut.groesse === 'XL' || gebaut.groesse === 'XXL' };
+    return { anim, v, modell: gebaut.id, wartet: 0, dispose: gebaut.groesse === 'XL' || gebaut.groesse === 'XXL' };
   }
 
   function entferne(b) {
@@ -87,12 +87,15 @@ export function init(game) {
   }
 
   // --- Runde auf dem Binnensee
+  // Runden auf dem See: Drehsinn wird je Spiel ausgewürfelt, alle Boote fahren gleich herum
+  const drehsinn = Math.random() < 0.5 ? 1 : -1;
+
   function rundenPunkte(r, inset, startWinkel) {
     const pts = [];
     const n = 40;
     const f = (c) => Math.sign(c) * Math.abs(c) ** 0.5;      // Superellipse n = 4: lange gerade Seiten
     for (let i = 1; i <= n; i++) {
-      const a = startWinkel + (i / n) * Math.PI * 2;         // gegen den Uhrzeigersinn im Plan
+      const a = startWinkel + drehsinn * (i / n) * Math.PI * 2;
       pts.push(welt(r.cx + (r.rx - inset) * f(Math.cos(a)), r.cy + (r.ry - inset) * f(Math.sin(a))));
     }
     return pts;
@@ -110,11 +113,11 @@ export function init(game) {
     if (!gebaut) return;
     const b = anmelden(gebaut);
     b.typ = 'see';
-    b.inset = index * 7;                         // 7 Planeinheiten = gut 4 m Abstand zwischen den Runden
+    b.inset = index * 8;                         // 8 Planeinheiten = 5 m Abstand zwischen den Runden
     const a0 = Math.random() * Math.PI * 2;
     const f = (c) => Math.sign(c) * Math.abs(c) ** 0.5;
     const p = welt(r.cx + (r.rx - b.inset) * f(Math.cos(a0)), r.cy + (r.ry - b.inset) * f(Math.sin(a0)));
-    const q = welt(r.cx + (r.rx - b.inset) * f(Math.cos(a0 + 0.05)), r.cy + (r.ry - b.inset) * f(Math.sin(a0 + 0.05)));
+    const q = welt(r.cx + (r.rx - b.inset) * f(Math.cos(a0 + drehsinn * 0.05)), r.cy + (r.ry - b.inset) * f(Math.sin(a0 + drehsinn * 0.05)));
     b.anim.place(p.x, p.z, Math.atan2(-(q.z - p.z), q.x - p.x));
     boote.add(b);
     weiterRunde(b);
@@ -123,9 +126,17 @@ export function init(game) {
   function weiterRunde(b) {
     const r = seeRunde(stufeAktiv);
     if (!r || !boote.has(b)) return;
-    const pts = rundenPunkte(r, b.inset, winkelAuf(r, b.anim.x, b.anim.z));
-    b.anim.sailTo(pts, { sails: b.anim.info.kind === 'sail', stop: false })
-      .then((ok) => { if (ok) weiterRunde(b); });
+    // Jede Runde etwas anders: Abstand zur Mitte (0 bis 2 Planeinheiten) und Tempo wechseln,
+    // ab und zu bleibt ein Boot eine Weile treiben (Pause zum Baden, Angeln, Segel trimmen)
+    const pts = rundenPunkte(r, b.inset + Math.random() * 2, winkelAuf(r, b.anim.x, b.anim.z));
+    b.v = tempo(b.anim.info, b.modell) * (0.82 + Math.random() * 0.36);
+    const n = 8 + Math.floor(Math.random() * (pts.length - 8));     // nur ein Stück der Runde, dann neu würfeln
+    b.anim.sailTo(pts.slice(0, n), { sails: b.anim.info.kind === 'sail', stop: false })
+      .then((ok) => {
+        if (!ok) return;
+        if (Math.random() < 0.25) { b.treibtBis = laufzeit + 8 + Math.random() * 20; b.anim.cfg.cruise = 0; }
+        else weiterRunde(b);
+      });
   }
 
   // --- Paddler am Ufer: hin und her, an den Enden kurz Pause
@@ -168,7 +179,9 @@ export function init(game) {
     const b = anmelden(gebaut);
     b.typ = 'meer';
     b.bahn = bahn;
-    const { p, dir, weiter } = aufBahn(bahn.pts, fortschritt);
+    // Jedes Boot fährt die Bahn mit eigenem seitlichem Versatz, nicht alle auf derselben Linie
+    const pts = versetzt(bahn.pts, -Math.random() * (bahn.versatz ?? VERSATZ_MAX));   // nach rechts, weg von der Gegenbahn
+    const { p, dir, weiter } = aufBahn(pts, fortschritt);
     const start = welt(p[0], p[1]);
     b.anim.place(start.x, start.z, Math.atan2(dir[1], dir[0]));   // Plan y nach Norden = Welt -z
     b.anim.speed = b.v;
@@ -224,6 +237,10 @@ export function init(game) {
     if (stufe() !== stufeAktiv) aufbauen();
     for (const b of boote) {
       if (b.pauseBis && laufzeit >= b.pauseBis) { b.pauseBis = 0; pendeln(b, b.richtung); }
+      if (b.treibtBis) {
+        if (laufzeit < b.treibtBis) { b.anim.cfg.cruise = 0; continue; }
+        b.treibtBis = 0; weiterRunde(b);
+      }
       const halt = b.wartet < 45 && vorDemBug(b);
       b.wartet = halt ? b.wartet + dt : Math.max(0, b.wartet - dt * 0.5);
       b.anim.cfg.cruise = halt ? 0 : b.v;
