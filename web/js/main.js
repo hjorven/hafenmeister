@@ -33,6 +33,7 @@ const MODULES = [
   './features/dauerlieger.js',
   './features/stammgaeste.js',
   './features/tagesziele.js',
+  './features/wetterflagge.js',
   './save/index.js',
 ];
 
