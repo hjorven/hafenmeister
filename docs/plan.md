@@ -48,7 +48,7 @@ Ein kleines, gemütliches Aufbauspiel in 3D. Du fängst mit einem Badesteg an ei
 
 ## 3. Spielablauf
 
-Ein Spieltag dauert 2 Minuten bei normaler Geschwindigkeit: 90 Sekunden Tag, 30 Sekunden Abend. Tempo von Anfang an mit vier Knöpfen unten links: Pause, 1x, 3x, 8x; am PC schaltet Taste F 3x an und aus (Vorschlag aus roadmap.md Frage 2, Antwort von Jorven steht aus).
+Ein Spieltag dauert 2 Minuten bei normaler Geschwindigkeit: 90 Sekunden Tag, 30 Sekunden Abend. Tempo von Anfang an mit vier Knöpfen unten links: Pause, 1x, 3x, 8x; am PC schaltet Taste F 3x an und aus (Jorven, 12.11.2026: "Tempo so bleiben").
 
 1. **Tagsüber** laufen Boote ein und warten vor den Stegen. Du tippst ein Boot an, die passenden Stege leuchten auf, du tippst einen Steg an. Das Spiel wählt die beste freie Box an diesem Steg. Wer hineinzoomt, kann auch eine bestimmte Box antippen.
 2. **Abends** kassierst du das Hafengeld. In Stufe 1 mit einer Münze über jedem Boot, ab Stufe 2 mit dem Hafenhorn (Abschnitt 8) für alle auf einmal.
@@ -326,7 +326,7 @@ Nach Meilenstein 1 weiß man, ob Zuweisen und Kassieren Spaß macht. Wenn nicht,
 |---|---|
 | Stil | Flat Vector in 3D |
 | Zuweisen von Hand oder automatisch | von Hand, ab Hafenbüro Automatik nur für Standardfälle |
-| Vorspulen | Pause, 1x, 3x, 8x von Anfang an, Taste F für 3x (Frage 2 in roadmap.md, Antwort steht aus) |
+| Vorspulen | Pause, 1x, 3x, 8x von Anfang an, Taste F für 3x (Jorven, 12.11.2026) |
 | Schauplatz | Zwei Regionen: Ostsee (Start) und Nordsee (danach). Gebäude als Mix aus deutschen, dänischen und schwedischen Häfen |
 | Dritte Zahl für Tagesgäste | nein. Tagesgäste bringen mehr Einnahmen und sind als Menschen im Hafen zu sehen |
 | Tretboote und Kanus als Gäste | nur Kulisse am Strand |
