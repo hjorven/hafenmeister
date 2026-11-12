@@ -298,6 +298,57 @@ export function init(game) {
     game.emit('boot:an-boje', { id: d.id, boje: Number(String(d.berth).slice(5)) });
   });
 
+  // --- Dauerlieger: morgens eine Runde draussen, abends zurueck an denselben Platz ----------
+  // Ereignisse aus features/dauerlieger.js: 'dauer:auslaufen' { id, platzId, tage } (tage 0 = Tagestoern),
+  // 'dauer:einlaufen' { id, platzId }.
+  const RUNDE = {
+    1: [40, 120],      // Mitte des Binnensees
+    2: [40, 120],
+    3: [110, 300],     // Ostsee vor der Einfahrt
+    5: [60, 380],      // Ostsee vor dem Aussenhafen
+  };
+  const rundenMitte = () => {
+    const st = stufe();
+    return welt(st >= 5 ? RUNDE[5] : st >= 3 ? RUNDE[3] : RUNDE[st <= 1 ? 1 : 2]);
+  };
+
+  game.on('dauer:auslaufen', ({ id, tage } = {}) => {
+    const e = boats.get(id);
+    if (!e) return;
+    const ziel = tage > 0 ? rand() : rundenMitte();
+    const segel = e.anim.info.kind === 'sail';
+    const weg = [...fahrweg({ x: e.anim.x, z: e.anim.z }, ziel), ziel];
+    e.draussen = true;
+    entferneMuenze(id, 0);
+    e.anim.undock(weg, { sails: segel }).then((ok) => {
+      if (!ok || boats.get(id) !== e) return;
+      if (tage > 0) {
+        // mehrtaegiger Toern: aus dem Bild, kommt mit 'dauer:einlaufen' zurueck
+        e.faehrt = true;
+        entferne(id);
+        return;
+      }
+      // Tagestoern: grosse, gemuetliche Kreise unter Segeln oder Motor
+      e.anim.hold(ziel, { radius: 22 + e.anim.info.length, speed: e.anim.cfg.cruise * 0.7, sails: segel, state: 'sailing' });
+    });
+  });
+
+  game.on('dauer:einlaufen', ({ id, platzId } = {}) => {
+    let e = boats.get(id);
+    if (!e) {
+      const info = sucheInfo(id);
+      if (!info) return;
+      e = erzeuge(info);
+      const start = rand();
+      e.anim.place(start.x, start.z, 0);
+    }
+    e.draussen = false;
+    e.faehrt = false;
+    const b = platzBerth(platzId ?? e.info.platz);
+    if (!b) return;
+    e.anim.dock(b, { via: fahrweg({ x: e.anim.x, z: e.anim.z }, b) });
+  });
+
   function sucheInfo(id) {
     return game.sim?.boote?.find?.((b) => b.id === id) ?? null;
   }
@@ -308,12 +359,13 @@ export function init(game) {
     const liste = game.sim?.boote ?? [];
     const ids = new Set(liste.map((b) => b.id));
     // Boote, die gerade abfahren, fahren zu Ende (sie sind in den Regeln schon weg)
-    for (const [id, e] of [...boats]) if (!ids.has(id) && !e.faehrt) entferne(id);
+    for (const [id, e] of [...boats]) if (!ids.has(id) && !e.faehrt && !e.draussen) entferne(id);
     for (const info of liste) {
       const e = erzeuge(info);
       e.info = { ...e.info, ...info };
       e.faehrt = false;
       if (e.anim.state !== 'idle' && e.anim.state !== 'moored') continue;   // faehrt gerade
+      if (e.draussen) continue;                                          // Dauerlieger auf Runde
       const b = info.platz ? platzBerth(info.platz) : bojeBerth(info.boje ?? 0);
       if (b) e.anim.moorAt(b);
     }

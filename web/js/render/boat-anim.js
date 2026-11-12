@@ -409,11 +409,11 @@ class LinesTask {
 
 // Vor den Stegen warten: langsame Kreise (kleine Boote) oder treiben (grosse Schiffe).
 class HoldTask {
-  constructor(center, radius) { this.c = center; this.r = radius; }
+  constructor(center, radius, speed) { this.c = center; this.r = radius; this.v = speed; }
   start(b) {
     this.a = Math.atan2(b.z - this.c.z, b.x - this.c.x);
     this.dir = Math.random() < 0.5 ? 1 : -1;
-    this.drift = b.info.size === 'XL' || b.info.size === 'XXL';
+    this.drift = !this.v && (b.info.size === 'XL' || b.info.size === 'XXL');
   }
   step(b, dt) {
     if (this.drift) {
@@ -421,7 +421,7 @@ class HoldTask {
       b.advance(b.speed * dt);
       return false;
     }
-    const v = Math.min(0.6, b.cfg.harbor * 0.5);
+    const v = this.v ?? Math.min(0.6, b.cfg.harbor * 0.5);
     b.setSpeed(v, dt);
     this.a += (this.dir * b.speed * dt) / this.r;
     const tx = this.c.x + Math.cos(this.a) * this.r;
@@ -584,8 +584,9 @@ class BoatAnim {
   /** Vor den Stegen warten, bis ein Platz zugewiesen wird. */
   hold(point = { x: this.x, z: this.z }, opts = {}) {
     const p = this.begin();
-    this.push(new CallTask((b) => { b.state = 'waiting'; b.emit('boat:hold'); b.finish(true); }));
-    this.push(new HoldTask(point, opts.radius ?? Math.max(3, this.info.length * 1.1)));
+    if (opts.sails !== undefined) this.push(new CallTask((b) => b.setSails(opts.sails)));
+    this.push(new CallTask((b) => { b.state = opts.state ?? 'waiting'; b.emit('boat:hold'); b.finish(true); }));
+    this.push(new HoldTask(point, opts.radius ?? Math.max(3, this.info.length * 1.1), opts.speed));
     return p;
   }
 
