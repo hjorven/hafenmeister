@@ -27,6 +27,7 @@ import * as sim from '../web/js/sim.js';
 import { erstelleRegeln, mitZahlen, neuerZustand } from '../web/js/services/rules.js';
 import { createScheduler } from '../web/js/events/scheduler.js';
 import { pruefeZahlen } from './zahlen.mjs';
+import { zufallAus } from '../web/js/random.js';
 
 // Hat harbor.js für eine Stufe aus economy.js noch keine Plätze (Stufe 6 vor dem Export der
 // Pier), rechnet das Werkzeug mit den Plätzen der letzten Hafenstufe weiter und sagt das.
@@ -43,15 +44,8 @@ const HAFEN = HAFEN_ERGAENZT ? {
 } : HAFEN_DATEI;
 
 // ------------------------------------------------------------------ Zufall (deterministisch)
-function rng(seed) {
-  let a = (seed * 2654435761) >>> 0 || 1;
-  return () => {
-    a |= 0; a = (a + 0x6D2B79F5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+// Gemeinsamer Zufall des Spiels (web/js/random.js)
+const rng = (seed) => zufallAus((seed * 2654435761) >>> 0 || 1);
 
 // ------------------------------------------------------------------ Daten prüfen
 export const hinweise = [];

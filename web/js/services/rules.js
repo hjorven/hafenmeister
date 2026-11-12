@@ -11,6 +11,7 @@
 // Tagesdaten fuer die Abrechnung:
 //   { tag, wetter: 'sonne'|'regen'|'sturm', winter: false, boote: [{ klasse: 'S', antrieb: 'segel' }] }
 import { SERVICES, RUF_BONUS_MAX, STURMSCHUTZ_MAX } from '../data/services.js';
+import { zufallAus } from '../random.js';
 
 export function neuerZustand() {
   return { gebaut: {}, besuche: {}, summe: {} };
@@ -108,7 +109,8 @@ export function erstelleRegeln(katalog = SERVICES) {
   // Abrechnung am Ende eines Spieltags. rng = Zufallszahl 0..1 (fuer Spielstaende mit festem Samen).
   // Liefert { tag, einnahmen: [{ id, betrag, text }], summe, besuche: [...], angekuendigt: [...] }
   // Keine laufenden Kosten (plan.md, Leitlinien): Services bringen nur etwas ein.
-  function tagesabschluss(z, tag, rng = Math.random) {
+  // Ohne rng: fester Zufall aus Spieltag und z.seed, damit dieselbe Abrechnung gleich ausfällt.
+  function tagesabschluss(z, tag, rng = zufallAus(((z.seed ?? 0) * 7919 + (tag.tag ?? 0) * 104729) >>> 0)) {
     const wetter = tag.wetter ?? 'sonne';
     const boote = tag.boote ?? [];
     const out = { tag: tag.tag, einnahmen: [], summe: 0, besuche: [], angekuendigt: [] };
