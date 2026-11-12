@@ -73,6 +73,9 @@
   }
   .hm #stage > canvas { display: block; width: 100%; height: 100%; }
   .hm .spacer { display: none; }
+  /* Hilfe zu Maus und Tastatur (input-pc.js) hat auf dem Handy keinen Zweck */
+  .hm #btn-help { display: none !important; }
+  .hm #hud-top > .hud-btn { color: var(--hm-ink); }
   /* Was hud.js ausblendet, bleibt ausgeblendet, auch wenn hier display gesetzt ist */
   .hm #hud-top [hidden], .hm #hud-bottom [hidden] { display: none !important; }
   .hm #hud-top, .hm #hud-bottom { background: none; }
@@ -116,13 +119,29 @@
     justify-content: center;
     overflow: visible;                  /* die Sonne (gesten.js) ragt nach unten heraus */
   }
-  /* Sonne zum Vorspulen: Aussehen aus gesten.js. Auf dem Handy sitzt sie am
-     unteren Rand der Pille, damit sie die Schrift nicht verdeckt, und hat eine
-     Tippflaeche von 48 px. */
-  .hm #day .hm-sonne { top: 100%; width: 24px; height: 24px; margin: -14px 0 0 -12px; }
+  /* Sonne zum Vorspulen: Aussehen aus gesten.js. Wie am PC und Tablet laeuft sie
+     auf einer eigenen Spur rechts in der Tag-Pille, neben "Tag 3 · Abend", und
+     hat eine Tippflaeche von 48 px. */
+  .hm #hud-top > #day { --h-track: 56px; padding-right: calc(var(--h-track) + 18px); }
+  .hm #day::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    width: var(--h-track);
+    top: 50%;
+    height: 6px;
+    margin-top: -3px;
+    border-radius: 3px;
+    background: rgba(40, 54, 72, 0.14);
+    pointer-events: none;
+  }
+  .hm #day .hm-sonne {
+    top: 50%; width: 24px; height: 24px; margin: -12px 0 0 -12px;
+    left: calc(100% - 10px - var(--h-track) + var(--anteil) * (var(--h-track) - 24px) + 12px);
+  }
   .hm #day .hm-sonne::before { inset: calc((24px - var(--hm-tap)) / 2); }
 
-  .hm #btn-pause, .hm #btn-overview, .hm #btn-save, .hm #btn-sound {
+  .hm #btn-pause, .hm #btn-overview, .hm #btn-save, .hm #btn-sound, .hm #btn-foto {
     flex: 0 0 auto;
     width: var(--hm-tap);
     min-width: 0;
@@ -135,7 +154,7 @@
     color: var(--hm-ink);
     font-size: 0;                       /* Text bleibt fuer Screenreader, sichtbar ist das Symbol */
   }
-  .hm #btn-pause::before, .hm #btn-overview::before, .hm #btn-save::before, .hm #btn-sound::before {
+  .hm #btn-pause::before, .hm #btn-overview::before, .hm #btn-save::before, .hm #btn-sound::before, .hm #btn-foto::before {
     content: "";
     width: 20px;
     height: 20px;
@@ -161,6 +180,10 @@
   }
   .hm #btn-sound.hm-audio-off {
     --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M3 7h3l5-4v14l-5-4H3z'/%3E%3Cpath d='M13 7l5 6M18 7l-5 6' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+  /* Fotomodus: Kamera */
+  .hm #btn-foto {
+    --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M2 6h4l1.5-2h5L14 6h4v10H2z M10 8a3.2 3.2 0 1 0 0.01 0z' fill='black' fill-rule='evenodd'/%3E%3C/svg%3E");
   }
   /* Uebersicht: vier Ecken eines Rahmens */
   .hm #btn-overview {
@@ -379,6 +402,16 @@
   }
   .hm #card .options button small { font-variant-numeric: tabular-nums; opacity: 0.7; }
 
+  /* Boot gewaehlt (input-touch.js setzt .hm-boot-gewaehlt): Die Karte wird
+     knapp, damit die Stege darueber sichtbar und antippbar bleiben. Es
+     bleiben Name, Hinweis und die Knoepfe in einer Zeile. */
+  .hm.hm-boot-gewaehlt #card { max-height: 34dvh; padding-top: 18px; }
+  .hm.hm-boot-gewaehlt #card h2 { font-size: 16px; }
+  .hm.hm-boot-gewaehlt #card p:not(:last-of-type):not(.card-note) { display: none; }
+  .hm.hm-boot-gewaehlt #card p { margin-bottom: 8px; font-size: 14px; }
+  .hm.hm-boot-gewaehlt #card .card-actions { flex-wrap: nowrap; }
+  .hm.hm-boot-gewaehlt #card .card-actions .hud-btn { flex: 1 1 0; min-width: 0; padding: 0 6px; font-size: 14px; line-height: 1.15; }
+
   /* Waehrend die Karte offen ist, rutscht die untere Leiste weg */
   .hm.card-open #hud-bottom { transform: translateY(110%); }
 
@@ -411,7 +444,7 @@
 @media (max-width: 599px) and (orientation: portrait) {
   .hm #hud-top { padding-right: calc(var(--hm-safe-right) + 8px); }
   .hm #money, .hm #rep { flex: 0 0 auto; }
-  .hm #btn-pause, .hm #btn-overview, .hm #btn-sound, .hm #btn-save {
+  .hm #btn-pause, .hm #btn-overview, .hm #btn-sound, .hm #btn-save, .hm #btn-foto {
     position: absolute;
     right: calc(var(--hm-safe-right) + 8px);
     width: 44px;
@@ -420,11 +453,18 @@
   }
   .hm #btn-pause    { top: calc(var(--hm-safe-top) + 56px); }
   .hm #btn-overview { top: calc(var(--hm-safe-top) + 106px); }
-  .hm #btn-sound    { top: calc(var(--hm-safe-top) + 156px); }
-  .hm #btn-save     { top: calc(var(--hm-safe-top) + 206px); }
+  .hm #btn-foto     { top: calc(var(--hm-safe-top) + 156px); }
+  .hm #btn-sound    { top: calc(var(--hm-safe-top) + 206px); }
+  .hm #btn-save     { top: calc(var(--hm-safe-top) + 256px); }
+}
+@media (max-width: 599px) and (orientation: portrait) {
+  /* Wetter (events.css) links unter die Zahlen, rechts steht die Knopfspalte */
+  .hm #weather-chip { left: calc(var(--hm-safe-left) + 8px); right: auto; top: calc(var(--hm-safe-top) + 58px); }
+  .hm #weather-panel { left: calc(var(--hm-safe-left) + 8px); right: calc(var(--hm-safe-right) + 60px); top: calc(var(--hm-safe-top) + 108px); }
 }
 @media (max-width: 359px) and (orientation: portrait) {
   .hm #hud-top > .stat { font-size: 13px; padding: 0 9px; }
+  .hm #hud-top > #day { --h-track: 40px; padding-right: calc(var(--h-track) + 16px); }
 }
 
 /* ---------- Querformat: Leisten an die Seiten ---------- */
@@ -437,7 +477,7 @@
     padding-top: calc(var(--hm-safe-top) + 6px);
   }
   .hm #hud-top > :not(.spacer) { height: 36px; }
-  .hm #day { min-width: 120px; }
+  .hm #day { min-width: 0; flex: 0 0 auto; }
   .hm #btn-pause { width: 44px; height: 44px; }
 
   /* Wartende Boote als Spalte rechts, Bauen darunter */
@@ -464,11 +504,11 @@
   /* Karte als Seitenblatt rechts statt von unten */
   .hm #card {
     left: auto;
-    top: 0;
+    top: calc(var(--hm-safe-top) + 56px);   /* unter der oberen Leiste, damit Pause erreichbar bleibt */
     width: min(340px, 60vw);
     max-height: none;
     border-radius: 20px 0 0 20px;
-    padding: calc(var(--hm-safe-top) + 16px) calc(var(--hm-safe-right) + 16px) calc(var(--hm-safe-bottom) + 16px) 18px;
+    padding: 16px calc(var(--hm-safe-right) + 16px) calc(var(--hm-safe-bottom) + 16px) 18px;
     transform: translateX(105%);
     box-shadow: -6px 0 24px rgb(20 40 60 / 0.25);
   }

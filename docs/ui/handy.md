@@ -37,7 +37,7 @@ Danach `http://localhost:8000` im Handy-Modus öffnen.
 
 ```
 +----------------------------------+
-| (0 €) (Ruf 3,0) (  Tag 1 · Tag  )|   Zahlen, Sonne am Tagesbalken
+| (0 €) (Ruf 3,0) ( Tag 1  o----- )|   Zahlen, Sonne auf eigener Spur
 |                             (II) |   Pause
 |                             [  ] |   Übersicht
 |     Reede: Boote an Bojen   (<)) |   Ton
@@ -71,7 +71,7 @@ Eine Box ist auf dem Handy bei ganz herausgezoomter Karte nur etwa 5 px breit. D
 | Zoomen | zwei Finger, Doppeltipp | Knopf Übersicht |
 | Boot zuweisen | Boot an der Boje greifen und an der Schleppleine auf einen Steg ziehen | Boot antippen, dann Steg antippen, oder „Automatisch einfahren“ |
 | Kassieren | abends auf einer Münze ansetzen und in einem Strich über alle streichen | Münze antippen |
-| Vorspulen | Sonne im Tagesbalken nach rechts ziehen, bis 8-fach, loslassen = normal | |
+| Vorspulen | Sonne auf ihrer Spur in der Tag-Pille nach rechts ziehen, bis 8-fach, loslassen = normal | |
 | Hupen | Boot im Hafen gedrückt halten | |
 | Bauen | Bauen, Plus antippen, Bauwerk wählen | |
 
@@ -81,6 +81,9 @@ Was beim Testen auf dem Handy aufgefallen ist und so gelöst wurde:
 - **Keine Kamerafahrt beim Ziehen.** Wird ein Boot angetippt, fährt die Kamera zu den passenden Stegen. Beim Ziehen nicht, sonst rutscht das Ziel unter dem Finger weg.
 - **Ziel über dem Finger.** Die Schleppleine endet 28 px über der Fingerspitze, damit der Finger den Steg nicht verdeckt.
 - **Leisten herausrechnen.** Kamerafahrten lassen den Bereich unter den Leisten frei, auch im Querformat oben links.
+- **Stege über der Bootskarte.** Ist ein Boot gewählt, wird die Karte knapp (Name, Hinweis, drei Knöpfe in einer Zeile) und die Ansicht rückt um die halbe Kartenhöhe nach oben. So bleiben die leuchtenden Ringe antippbar. Nach dem Zuweisen oder Schließen rückt die Ansicht zurück. Im Querformat liegt die Karte rechts unter der oberen Leiste.
+- **Sonne auf eigener Spur.** Wie am PC und Tablet läuft die Sonne rechts in der Tag-Pille auf einer kurzen Spur neben "Tag 3 · Abend" und verdeckt den Text nicht. Im Querformat ist die Pille so breit wie Text plus Spur.
+- **Fünf Knöpfe im Hochformat.** Pause, Übersicht, Foto, Ton und Spielstand stehen rechts untereinander, das Wetter links unter den Zahlen. Die Maus-und-Tastatur-Hilfe ist auf dem Handy ausgeblendet.
 
 ## Ideen für die 3D-Fassung
 

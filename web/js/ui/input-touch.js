@@ -90,6 +90,36 @@ export function init(game) {
   // Kein Kontextmenue bei langem Druecken (Android, Desktop-Touchscreens)
   el.addEventListener('contextmenu', (e) => { if (isTouchDevice()) e.preventDefault(); });
 
+  // ---------- Boot gewaehlt: Stege frei halten (nur Handy) ----------
+  // Die Bootskarte liegt unten ueber der Karte. Damit man die Stege darueber
+  // antippen kann, wird die Karte knapp (CSS) und die Ansicht um die halbe
+  // Kartenhoehe nach oben geschoben; beim Abwaehlen geht sie zurueck.
+  const isPhone = () => matchMedia('(max-width: 599px), (max-height: 499px)').matches;
+  let shifted = 0;
+  const release = () => {
+    document.body.classList.remove('hm-boot-gewaehlt');
+    if (shifted) { cam.panBy(0, shifted); shifted = 0; }
+  };
+  // Nach dem Zuweisen kommt kein sim:select mehr, die Karte schliesst sich aber
+  const cardEl = document.getElementById('card');
+  if (cardEl) new MutationObserver(() => { if (cardEl.hidden) release(); })
+    .observe(cardEl, { attributes: true, attributeFilter: ['hidden'] });
+  game.on('sim:select', ({ boatId } = {}) => {
+    const on = boatId != null && isPhone();
+    if (!on) { release(); return; }
+    document.body.classList.add('hm-boot-gewaehlt');
+    if (shifted) return;
+    // Erst nach dem Rendern der Karte messen
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const card = document.getElementById('card');
+      if (!card || card.hidden || !document.body.classList.contains('hm-boot-gewaehlt')) return;
+      const portrait = innerHeight >= innerWidth;
+      if (!portrait) return;   // quer liegt die Karte rechts daneben
+      shifted = Math.round(card.getBoundingClientRect().height / 2);
+      cam.panBy(0, -shifted);
+    }));
+  });
+
   // Boot im Hafen gedrueckt halten: es antwortet mit seinem Horn
   game.on('longpress', ({ pick: p }) => {
     if (p?.type !== 'boat' || !game.sim) return;
