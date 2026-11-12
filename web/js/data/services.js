@@ -128,7 +128,7 @@ export const SERVICES = [
   {
     id: 'grillplatz', name: 'Grillplatz', gruppe: 'an-land', abStufe: 2,
     kurz: 'Grill und Bänke am Strand. Abends sitzen die Crews zusammen. Bringt kein Geld, nur Ruf.',
-    lage: { x: -222, y: -8, dreh: 0 }, radius: 7,
+    lage: { x: -163, y: -7, dreh: 0 }, radius: 7,
     stufen: [
       { name: 'Grillplatz', kosten: 400, wirkung: { ruf: 0.05 } },
     ],
