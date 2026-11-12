@@ -371,7 +371,10 @@ export function init(game) {
       e.anim.moorAt(b);
       return;
     }
-    if (!e.anim.moored && e.anim.state === 'idle') e.anim.moorAt(warteplatz(e.info.boje ?? 0, e.anim));
+    // Ein Boot ohne Auftrag (nach dem Laden) liegt an der Boje. Kam es gerade erst (boot-kommt im
+    // selben Schritt, Spielregel 'direkt einfahren bei vollen Bojen'), hat es schon seine Anfahrt
+    // und faehrt von See direkt in die Box.
+    if (!e.anim.moored && e.anim.state === 'idle' && !e.anim.task && !e.anim.tasks.length) e.anim.moorAt(warteplatz(e.info.boje ?? 0, e.anim));
     if (e.pick) { e.anim.model.userData.pick = e.pick; e.pick = null; }
     // Ist die Box noch nicht frei und das Boot noch unterwegs zur Boje, faehrt es erst zur Boje
     // und wartet dort (nicht mitten im Fahrwasser, wo es anderen im Weg laege).
