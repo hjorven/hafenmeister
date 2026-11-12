@@ -6,6 +6,11 @@ import * as sim from '../web/js/sim.js';
 import { boatTypes, berths } from './fixtures.mjs';
 
 const ctx = sim.createContext({ boatTypes, berths });
+// Die meisten Tests prüfen einzelne Regeln von Hand: Selbst-Einfahren und Tagestörns sind dort aus
+// und werden weiter unten eigens geprüft.
+ctx.rules.queue.selfEnterAfter = null;
+ctx.rules.trips = null;
+const ctxLive = sim.createContext({ boatTypes, berths });
 
 /** Testboot direkt in die Warteschlange legen. */
 function waitingBoat(state, props = {}) {
@@ -374,6 +379,7 @@ test('addService: neuer Wunsch mit Gebäude oder vom Liegeplatz', () => {
 
 test('Hooks am Abend, in der Nacht und bei Ankunft', () => {
   const c = sim.createContext({ boatTypes, berths });
+  c.rules.queue.selfEnterAfter = null;
   const calls = [];
   sim.addHook(c, 'arrival', ({ boat }) => { boat.wishes = ['wc']; calls.push('arrival'); });
   sim.addHook(c, 'evening', ({ addIncome, boats }) => { addIncome(7); calls.push(`evening:${boats.length}`); });
@@ -584,4 +590,79 @@ test('Erster Tag: das erste Boot kommt nach wenigen Sekunden', () => {
     const ev = sim.tick(s, ctx, RULES.firstArrivalAt + 1);
     assert.ok(ev.some((e) => e.type === 'arrived'), `Seed ${seed}`);
   }
+});
+
+test('Wartende Boote fahren nach kurzer Zeit selbst in eine passende freie Box', () => {
+  const s = quietState({ stage: 3 });
+  const after = RULES.queue.selfEnterAfter;
+  const b = waitingBoat(s, { wishes: ['strom'], atBuoy: true, atBuoySince: 0 });
+  const held = waitingBoat(s, { atBuoy: true, atBuoySince: 0 });
+  const big = waitingBoat(s, { typeId: 'XL3', size: 'XL', length: 30, beam: 7, draft: 2, atBuoy: true, atBuoySince: 0 });
+  sim.holdBoat(s, held.id);
+  sim.tick(s, ctxLive, after - 1);
+  assert.equal(b.status, 'waiting', 'erst kurz warten, Zeit zum Lenken');
+  const ev = sim.tick(s, ctxLive, 2);
+  assert.equal(b.status, 'moored');
+  // nimmt die knappste passende Box, nicht die mit Strom (das lohnt sich nur von Hand)
+  assert.equal(b.berthId, 'A1');
+  assert.ok(ev.some((e) => e.type === 'selfEntered' && e.boatId === b.id));
+  assert.ok(ev.some((e) => e.type === 'feeReady' && e.boatId === b.id));
+  assert.equal(held.status, 'waiting', 'gehaltenes Boot bleibt an der Boje');
+  assert.equal(big.status, 'waiting', 'ohne passende Box wartet das Boot weiter');
+  sim.holdBoat(s, held.id, false);
+  sim.tick(s, ctxLive, 1);
+  assert.equal(held.status, 'moored');
+  assert.notEqual(held.berthId, 'A1', 'nie in eine belegte Box');
+});
+
+test('Tagestörn: nur mit mehreren Nächten, Box bleibt belegt, abends zurück', () => {
+  const c = sim.createContext({ boatTypes, berths });
+  c.rules.queue.selfEnterAfter = null;
+  c.rules.trips = { chance: 1, out: [0.2, 0.2], back: [0.7, 0.7] };
+  const s = quietState({ money: 0 });
+  const stays = waitingBoat(s, { nights: 3 });
+  const goes = waitingBoat(s, { nights: 1 });
+  sim.assign(s, c, stays.id, 'A1');
+  sim.assign(s, c, goes.id, 'A2');
+  const D = c.rules.dayLength;
+  sim.tick(s, c, D + c.rules.eveningLength); // Tag 2 beginnt
+  assert.equal(s.boats[goes.id], undefined);
+  assert.ok(stays.trip && !stays.trip.away);
+  assert.equal(sim.berthState(s, c, 'A1'), 'belegt');
+  const out = sim.tick(s, c, 0.2 * D + 1);
+  assert.ok(out.some((e) => e.type === 'tripOut' && e.boatId === stays.id && e.berthId === 'A1'));
+  assert.equal(sim.berthState(s, c, 'A1'), 'ausflug');
+  assert.equal(sim.isFree(s, 'A1'), false);
+  const guest = waitingBoat(s);
+  assert.equal(sim.assign(s, c, guest.id, 'A1').reason, 'occupied');
+  assert.ok(!sim.fittingBerths(s, c, guest.id).includes('A1'));
+  assert.equal(sim.selfBerth(s, c, guest.id) !== 'A1', true);
+  const back = sim.tick(s, c, 0.5 * D);
+  assert.ok(back.some((e) => e.type === 'tripBack' && e.boatId === stays.id));
+  assert.equal(sim.berthState(s, c, 'A1'), 'belegt');
+  assert.equal(sim.berthState(s, c, 'A3'), 'frei');
+  assert.equal(sim.berthState(s, c, 'R1'), 'aus');
+  // Sturm (keine Ankünfte über See): kein Törn
+  sim.addHook(c, 'modifiers', () => ({ seaArrivals: false }));
+  sim.tick(s, c, D + c.rules.eveningLength);
+  assert.equal(stays.trip, null);
+});
+
+test('Abschlussziel der Region: Besuche großer Schiffe, Ruf, alle Plätze', () => {
+  const c = sim.createContext({ boatTypes, berths });
+  c.rules.maxStage = 5;
+  c.rules.regionGoal = { bigVisits: 2, reputation: 4, allBerths: true };
+  const s = quietState({ stage: 4 });
+  assert.equal(sim.regionGoal(s, c).active, false);
+  assert.deepEqual(sim.addBigVisit(s, c), []);
+  s.stage = 5;
+  s.ratings = Array(20).fill(5);
+  let g = sim.regionGoal(s, c);
+  assert.deepEqual(g.missing, ['bigVisits', 'berths']); // Steg D (requires steg-d) fehlt noch
+  s.buildings['steg-d'] = 1;
+  assert.deepEqual(sim.addBigVisit(s, c), []);
+  const ev = sim.addBigVisit(s, c);
+  assert.equal(ev[0].type, 'regionDone');
+  assert.deepEqual(sim.addBigVisit(s, c), [], 'nur einmal melden');
+  assert.equal(sim.regionGoal(s, c).ok, true);
 });

@@ -93,7 +93,12 @@ export const RULES = {
   // spots = Zahl der Warteplätze je Stufe, patience = Sekunden an der Boje, bis ein Boot weiterfährt.
   // Die Geduld zählt erst, wenn das Boot an der Boje fest ist (Meldung der 3D-Ansicht).
   // Meldet niemand etwas, gilt es nach approachMax Sekunden als angekommen.
-  queue: { spots: { 1: 3, 2: 4, 3: 6, 4: 6, 5: 8 }, patience: 50, approachMax: 35 },
+  queue: { spots: { 1: 3, 2: 4, 3: 6, 4: 6, 5: 8 }, patience: 50, approachMax: 35, selfEnterAfter: 8 },
+  // selfEnterAfter: so lange liegt ein Boot an der Boje, bevor es sich selbst eine freie Box sucht
+  // (Zeit für den Spieler, es selbst zu lenken). null schaltet das ab.
+  // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber hinaus.
+  // out und back sind Anteile des Tages. Die Box bleibt reserviert.
+  trips: { chance: 0.35, out: [0.12, 0.3], back: [0.6, 0.85] },
   // Ein abreisendes Boot hält seine Box, bis die 3D-Ansicht 'boot:aus-box' meldet,
   // spätestens leaveMax Sekunden nach dem Ablegen.
   leaveMax: 20,

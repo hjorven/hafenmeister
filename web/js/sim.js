@@ -448,6 +448,7 @@ function startDay(state, ctx, events) {
   for (const boat of mooredBoats(state)) {
     if (!boat.stationed) chargeFee(state, ctx, boat, mods, events);
   }
+  planTrips(state, ctx, mods, sea.winter);
   const rate = sea.winter ? 0 : arrivalRate(state, ctx, mods);
   const n = Math.floor(rate) + (random(state) < rate - Math.floor(rate) ? 1 : 0);
   const window = ctx.rules.dayLength * ctx.rules.arrivalWindow;
@@ -534,6 +535,103 @@ export function autoAssign(state, ctx) {
     if (best) moor(state, ctx, state.boats[id], best, events);
   }
   return events;
+}
+
+/**
+ * Die Box, die sich ein Gast selbst sucht: passt, möglichst knapp (große Plätze bleiben für große
+ * Boote frei). Wünsche wie Strom beachtet er nicht, das lohnt sich nur beim Zuweisen von Hand
+ * oder mit dem Hafenbüro.
+ */
+export function selfBerth(state, ctx, boatId) {
+  const boat = state.boats[boatId];
+  if (!boat) return null;
+  const slack = (b) => b.maxLength * b.maxBeam - boat.length * boat.beam;
+  const list = availableBerths(state, ctx)
+    .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
+    .sort((a, b) => slack(a) - slack(b) || String(a.id).localeCompare(String(b.id)));
+  return list[0]?.id ?? null;
+}
+
+/**
+ * Wartende Boote fahren von selbst ein: Wer queue.selfEnterAfter Sekunden an der Boje liegt und
+ * nicht vom Spieler gehalten wird (boat.held, zum Beispiel ausgewählt oder im Schlepp), nimmt
+ * die nächste passende freie Box. Passt keine, wartet das Boot weiter.
+ */
+export function selfEnter(state, ctx) {
+  const events = [];
+  const after = ctx.rules.queue.selfEnterAfter;
+  if (after == null) return events;
+  for (const id of [...state.queue]) {
+    const b = state.boats[id];
+    if (!b || !b.atBuoy || b.held || state.clock - b.atBuoySince < after) continue;
+    const best = selfBerth(state, ctx, id);
+    if (best) {
+      b.selfEntered = true;
+      moor(state, ctx, b, best, events);
+      events.push({ type: 'selfEntered', boatId: id, berthId: best });
+    }
+  }
+  return events;
+}
+
+/** Spieler hält ein wartendes Boot fest (ausgewählt, im Schlepp): es fährt nicht von selbst ein. */
+export function holdBoat(state, boatId, held = true) {
+  const b = state.boats[boatId];
+  if (b && b.status === 'waiting') b.held = !!held;
+}
+
+// ---------------------------------------------------------------------------
+// Tagestörn: Gäste mit mehreren Nächten fahren tagsüber hinaus, die Box bleibt reserviert
+
+function planTrips(state, ctx, mods, winter) {
+  const t = ctx.rules.trips;
+  for (const boat of mooredBoats(state)) if (boat.trip) boat.trip = null;
+  if (!t || winter || mods.seaArrivals === false) return;
+  for (const boat of mooredBoats(state)) {
+    if (boat.stationed || boat.nights < 2 || boat.special) continue;
+    if (random(state) >= t.chance) continue;
+    const at = (range) => Math.round((range[0] + random(state) * (range[1] - range[0])) * ctx.rules.dayLength);
+    boat.trip = { out: at(t.out), back: at(t.back), away: false };
+  }
+}
+
+function tripStep(state, ctx, events) {
+  for (const boat of mooredBoats(state)) {
+    const t = boat.trip;
+    if (!t) continue;
+    if (!t.away && !t.done && state.clock >= t.out && state.clock < t.back) {
+      t.away = true;
+      events.push({ type: 'tripOut', boatId: boat.id, berthId: boat.berthId });
+    } else if (t.away && state.clock >= t.back) endTrip(boat, events);
+  }
+}
+
+function endTrip(boat, events) {
+  if (!boat.trip?.away) return;
+  boat.trip.away = false;
+  boat.trip.done = true;
+  events.push({ type: 'tripBack', boatId: boat.id, berthId: boat.berthId });
+}
+
+/**
+ * Zustand eines Liegeplatzes für das Grün-Rot-Schild:
+ * 'frei' (grün), 'belegt', 'ausflug' (Gast auf Tagestörn, Box reserviert), 'reserviert'
+ * (fest vergeben, legt gerade ab oder von einem Modul gesperrt), 'aus' (in dieser Stufe nicht da).
+ */
+export function berthState(state, ctx, berthId) {
+  const berth = ctx.berthById[berthId];
+  if (!berth || !berthAvailable(state, berth)) return 'aus';
+  const boat = state.boats[state.berths[berthId]];
+  if (boat) return boat.trip?.away ? 'ausflug' : 'belegt';
+  if (state.leaving?.[berthId]) return 'belegt';
+  if (berth.reserved) return 'reserviert';
+  if (hookWhyNotFit(state, ctx, { stationed: false, nights: 1, wishes: [], probe: true }, berth)) return 'reserviert';
+  return 'frei';
+}
+
+/** Zustände aller Plätze der aktuellen Stufe: { A01: 'frei', ... } */
+export function berthStates(state, ctx) {
+  return Object.fromEntries(availableBerths(state, ctx).map((b) => [b.id, berthState(state, ctx, b.id)]));
 }
 
 /**
@@ -640,6 +738,7 @@ function arrive(state, ctx, boat, events) {
 export function settleWaiting(state) {
   for (const b of Object.values(state.boats || {})) {
     if (b.status === 'waiting' && !b.atBuoy) { b.atBuoy = true; b.atBuoySince = state.clock; }
+    if (b.held) b.held = false; // nach dem Laden ist nichts ausgewählt
   }
   // Abreisende Boote zeigt die 3D-Ansicht nach dem Laden nicht mehr, ihre Boxen sind frei.
   state.leaving = {};
@@ -714,6 +813,7 @@ function startEvening(state, ctx, events) {
 
   let visitors = 0;
   for (const boat of mooredBoats(state)) {
+    endTrip(boat, events); // spätestens abends sind alle Ausflügler zurück
     visitors += boat.dayVisitors || 0;
     if (boat.stationed) {
       const fee = ctx.rules.stationedFee ?? Math.round(nightlyFee(state, ctx, boat, 0) * ctx.rules.stationedFeeShare);
@@ -774,6 +874,20 @@ export function collect(state, ctx, boatId) {
   boat.paid = true;
   addIncome(state, amount);
   return { ok: true, events: [{ type: 'collected', boatId, amount }] };
+}
+
+/**
+ * Hafenmeister-Rundgang am Abend: Wer seine Münze liegen ließ, zahlt dem Hafenmeister nur den
+ * Anteil rules.uncollectedShare. Ohne Rundgang (keine Figuren) passiert dasselbe in der Nacht.
+ */
+export function collectOnRound(state, ctx, boatId) {
+  const boat = state.boats[boatId];
+  if (!boat || boat.pendingFee <= 0) return { ok: false, events: [] };
+  const amount = Math.round(boat.pendingFee * ctx.rules.uncollectedShare);
+  boat.pendingFee = 0;
+  boat.paid = true;
+  addIncome(state, amount);
+  return { ok: true, events: [{ type: 'collected', boatId, amount, round: true }] };
 }
 
 /** Alles kassieren. Ohne Hafenbüro nur mit force (Automatik, Tests). */
@@ -877,6 +991,9 @@ export function tick(state, ctx, dt) {
       }
       // Hafenbüro mit Automatik: wartende Boote bekommen ihren Platz, sobald einer frei wird
       if (state.queue.length && state.office >= ctx.rules.office.autoAssign) events.push(...autoAssign(state, ctx));
+      // Wie im echten Hafen: Wer kurz an der Boje gewartet hat, sucht sich selbst eine freie Box
+      else if (state.queue.length) events.push(...selfEnter(state, ctx));
+      tripStep(state, ctx, events);
       if (state.clock >= dayLength) {
         state.upcoming = []; // wer heute nicht mehr eingelaufen ist, kommt nicht
         startEvening(state, ctx, events);
@@ -958,6 +1075,36 @@ export function canAdvanceStage(state, ctx) {
   if (rep < goal.reputation) missing.push('reputation');
   if (state.money < goal.cost) missing.push('money');
   return { ok: missing.length === 0, missing, goal, guests, reputation: rep };
+}
+
+/**
+ * Abschlussziel der Region in der letzten Stufe: Besuche großer Schiffe (zählt state.bigVisits),
+ * Ruf und alle Plätze gebaut. Vorher { active: false }.
+ */
+export function regionGoal(state, ctx) {
+  const goal = ctx.rules.regionGoal;
+  if (!goal || state.stage < ctx.rules.maxStage) return { active: false, ok: false, missing: ['stage'] };
+  const rep = reputation(state);
+  const visits = state.bigVisits || 0;
+  const open = ctx.berths.filter((b) => (b.stages ? b.stages.includes(state.stage) : b.stage <= state.stage) && !berthAvailable(state, b)).length;
+  const missing = [];
+  if (visits < (goal.bigVisits || 0)) missing.push('bigVisits');
+  if (rep < (goal.reputation || 0)) missing.push('reputation');
+  if (goal.allBerths && open > 0) missing.push('berths');
+  return { active: true, ok: missing.length === 0, missing, goal, visits, reputation: rep, openBerths: open, done: !!state.regionDone };
+}
+
+/** Besuch eines großen Schiffs zählen (Services-Modul). Meldet einmal 'regionDone', wenn das Ziel steht. */
+export function addBigVisit(state, ctx, n = 1) {
+  if (state.stage < ctx.rules.maxStage) return [];
+  state.bigVisits = (state.bigVisits || 0) + n;
+  return checkRegionGoal(state, ctx);
+}
+
+function checkRegionGoal(state, ctx) {
+  if (state.regionDone || !regionGoal(state, ctx).ok) return [];
+  state.regionDone = true;
+  return [{ type: 'regionDone', region: state.region, day: state.day }];
 }
 
 export function advanceStage(state, ctx) {
@@ -1043,6 +1190,9 @@ export function rulesFromEconomy(E, base = RULES) {
     for (const s of E.stufen) {
       r.arrivalsPerDay[s.stufe] = s.ankuenfte;
       r.sizeMix[s.stufe] = s.mix;
+      if (!s.ausbau && s.ziel?.grossschiffBesuche != null) {
+        r.regionGoal = { bigVisits: s.ziel.grossschiffBesuche, reputation: s.ziel.ruf, allBerths: !!s.ziel.allePlaetze };
+      }
       if (s.ausbau) {
         r.stageGoals[s.stufe] = { guests: s.ziel.gaeste, reputation: s.ziel.ruf, cost: s.ausbau.kosten, project: s.ausbau.id, name: s.ausbau.name, perStage: true };
       }
@@ -1087,6 +1237,7 @@ export function rulesFromEconomy(E, base = RULES) {
   if (E.warten) {
     r.queue = { ...r.queue };
     if (E.warten.geduld != null) r.queue.patience = E.warten.geduld;
+    if (E.warten.selbstEinfahrenNach != null) r.queue.selfEnterAfter = E.warten.selbstEinfahrenNach;
     if (E.warten.plaetze) r.queue.spots = { ...r.queue.spots, ...E.warten.plaetze };
   }
 
