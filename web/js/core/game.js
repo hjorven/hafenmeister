@@ -21,7 +21,7 @@ export function createGame({ canvas, bounds, home }) {
     canvas,
     renderer,
     scene,
-    camera: rig,              // zoomAt(factor, sx, sy), panBy(dx, dy), reset(), screenToWorld(sx, sy)
+    camera: rig,              // zoomAt, panBy, reset, screenToWorld, rotateBy, rotateFree, snapRotation, flyTo
     paused: false,
     time: 0,                  // Spielzeit in Sekunden, laeuft nur ohne Pause
     speed: 1,
@@ -76,6 +76,7 @@ export function createGame({ canvas, bounds, home }) {
     const raw = Math.min(clock.getDelta(), 0.1);
     const dt = game.paused ? 0 : raw * game.speed;
     game.time += dt;
+    rig.update(raw);
     for (const fn of tickers) fn(dt, game);
     renderer.render(scene, rig.camera);
   });

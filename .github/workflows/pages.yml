@@ -6,6 +6,12 @@ name: GitHub Pages
 on:
   push:
     branches: [main]
+    # Nur wenn sich etwas an der Seite ändert, nicht bei reinen Doku- oder Skript-Änderungen.
+    paths:
+      - "web/**"
+      - "tools/build-pages.sh"
+      - "tools/check-pages.sh"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
@@ -13,9 +19,11 @@ permissions:
   pages: write
   id-token: write
 
+# Bei vielen Merges kurz hintereinander zählt nur der neueste Stand:
+# ältere wartende oder laufende Läufe werden abgebrochen.
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:

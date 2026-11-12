@@ -36,6 +36,9 @@ web/js/ui/fotomodus.js
 web/js/audio/audio.js
 web/js/state.js
 web/js/events/events.js
+web/js/features/dauerlieger.js
+web/js/features/stammgaeste.js
+web/js/features/tagesziele.js
 web/js/save/index.js
 ```
 
@@ -53,6 +56,11 @@ Die Module werden parallel geladen, `init(game)` wird aber in der Reihenfolge de
 | `game.camera.setHomeRect({ minX, maxX, minZ, maxZ })` | Startansicht als Rechteck, passt sich Hoch- und Querformat an. Danach `reset()` |
 | `game.camera.setHome(x, z, breite)` | Startansicht als Mittelpunkt und Breite |
 | `game.camera.screenToWorld(x, y)` | Bildschirmpunkt auf die Wasserfläche projizieren |
+| `game.camera.rotateBy(rad)` | weich um `rad` drehen, ab dem nächsten 45-Grad-Rastpunkt (Tasten Q und E) |
+| `game.camera.rotateFree(rad)` | sofort drehen (Ziehen), danach `snapRotation()` |
+| `game.camera.snapRotation()` | weich auf den nächsten 45-Grad-Schritt einrasten |
+| `game.camera.flyTo(x, z)` | Blickpunkt weich verschieben |
+| `game.camera.yaw` | aktuelle Drehung in Radiant, 0 = Norden oben. `reset()` dreht zurück auf 0 |
 | `game.camera.camera` | die `THREE.OrthographicCamera` |
 | `game.pick(x, y, { tolerance, types })` | was liegt unter einem Bildschirmpunkt, liefert `{ type, id, object, point }` oder `null` |
 | `game.boatTypes[größe]` | von den Schiffs-Modulen: `{ TYPES, MODELS, buildBoat, setSails, animateBoat }` je Größe `s`, `m`, `l`, `xl`, `xxl` |
@@ -109,7 +117,7 @@ Welt in Metern. `x` nach Osten, `z` nach Süden (Norden ist `-z`), `y` nach oben
 
 ## Steuerung im Grundgerüst
 
-`web/js/core/input.js` deckt Maus, Touch und Stift mit Pointer Events ab: ein Finger zieht die Karte, zwei Finger zoomen, Mausrad zoomt, kurzes Antippen sendet `tap`. Gerätespezifische Module (`input-pc.js`, `input-touch.js`) können das ergänzen.
+`web/js/core/input.js` deckt Maus, Touch und Stift mit Pointer Events ab: ein Finger zieht die Karte, zwei Finger zoomen und drehen (ab etwa 10 Grad, rastet beim Loslassen auf 45 Grad ein), Mausrad zoomt, kurzes Antippen sendet `tap`. Gerätespezifische Module (`input-pc.js`, `input-touch.js`) können das ergänzen.
 
 ## Lokal testen
 

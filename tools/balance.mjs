@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Hafenmeister: Balancing ohne Grafik.
 //
-// Spielt die Regeln aus docs/plan.md mit den Zahlen aus web/js/data/economy.js und den
+// Spielt die echten Spielregeln (web/js/sim.js) mit den Zahlen aus web/js/data/economy.js und den
 // Liegeplätzen aus web/js/data/harbor.js viele Male durch und meldet, wie lange jede
 // Ausbaustufe dauert. Zwei Spielertypen: "geschickt" (kauft sofort das Sinnvollste) und
 // "gemütlich" (schaut nur jeden zweiten Tag in den Bauplan, lässt Käufe aus, weist Boote
@@ -14,16 +14,17 @@
 //   node tools/balance.mjs --json          Ergebnis als JSON (für CI oder Diagramme)
 //   node tools/balance.mjs --verlauf 1     Tagesprotokoll eines Laufs (Seed 1, geschickt)
 //
-// Solange web/js/sim.js noch fehlt, rechnet dieses Werkzeug mit einem eigenen, schlanken
-// Modell der Regeln. Sobald sim.js ohne Grafik läuft, wird das Modell hier durch sim.js
-// ersetzt (siehe docs/balancing.md).
+// Services kommen aus web/js/services/rules.js, Ereignisse sind nicht eingerechnet
+// (siehe docs/balancing.md).
 
 import { pathToFileURL } from 'node:url';
 import { ECONOMY as E } from '../web/js/data/economy.js';
 import { HAFEN } from '../web/js/data/harbor.js';
-
-const KLASSEN = ['S', 'M', 'L', 'XL'];
-const RANG = { S: 0, M: 1, L: 2, XL: 3 };
+import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
+import { SERVICES } from '../web/js/data/services.js';
+import { createState } from '../web/js/state.js';
+import * as sim from '../web/js/sim.js';
+import { erstelleRegeln, mitZahlen, neuerZustand } from '../web/js/services/rules.js';
 
 // ------------------------------------------------------------------ Zufall (deterministisch)
 function rng(seed) {
@@ -34,22 +35,6 @@ function rng(seed) {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-}
-const ganz = (r, lo, hi) => lo + Math.floor(r() * (hi - lo + 1));
-function poisson(r, l) {
-  if (l <= 0) return 0;
-  if (l > 30) return Math.max(0, Math.round(l + Math.sqrt(l) * gauss(r)));
-  const L = Math.exp(-l); let k = 0, p = 1;
-  do { k++; p *= r(); } while (p > L);
-  return k - 1;
-}
-function gauss(r) { return Math.sqrt(-2 * Math.log(r() || 1e-9)) * Math.cos(2 * Math.PI * r()); }
-function waehle(r, gewichte) {
-  const keys = Object.keys(gewichte); let s = 0;
-  for (const k of keys) s += gewichte[k];
-  let x = r() * s;
-  for (const k of keys) { x -= gewichte[k]; if (x <= 0) return k; }
-  return keys[keys.length - 1];
 }
 
 // ------------------------------------------------------------------ Daten prüfen
@@ -103,298 +88,173 @@ export function pruefen() {
   return fehler;
 }
 
-// ------------------------------------------------------------------ Modell
-const HAFEN_STUFEN = Math.max(...HAFEN.plaetze.flatMap((p) => p.stufen));
+// ------------------------------------------------------------------ Spiel mit sim.js
+// Die echten Spielregeln (web/js/sim.js) mit den Zahlen aus economy.js, dazu die Services
+// (web/js/services/rules.js). Ein Bot spielt: weist Boote zu, kassiert, baut.
+const RULES = sim.rulesFromEconomy(E);
+const SVC = erstelleRegeln(mitZahlen(SERVICES, E.services));
 const PLATZ = new Map(HAFEN.plaetze.map((p) => [p.id, p]));
-const BESITZER = new Map(); // Platz -> Projekt-id
-E.start.plaetze.forEach((id) => BESITZER.set(id, 'start'));
-E.stufen.forEach((s) => s.ausbau && s.ausbau.plaetze.forEach((id) => BESITZER.set(id, 'ausbau:' + s.ausbau.id)));
-E.stegprojekte.forEach((p) => p.plaetze.forEach((id) => BESITZER.set(id, p.id)));
 
 const PROFILE = {
-  geschickt: { kaufAlleTage: 1, auslassen: 0, fehlZuweisung: 0, reserve: 0 },
-  gemuetlich: { kaufAlleTage: 2, auslassen: 0.35, fehlZuweisung: 0.25, reserve: 0 },
+  // weist alle 5 s zu, wählt den besten Platz, kauft jeden Tag
+  geschickt: { zuweisenAlle: 5, kaufAlleTage: 1, auslassen: 0, fehlZuweisung: 0 },
+  // schaut nur alle 20 s auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz,
+  // kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus
+  gemuetlich: { zuweisenAlle: 20, kaufAlleTage: 2, auslassen: 0.35, fehlZuweisung: 0.25 },
 };
 
-function svcWirkung(st, id) { const l = st.services[id] || 0; return l ? E.services[id].stufen[l - 1].wirkung : null; }
-
-export function spiel(seed, profilName = 'geschickt', { maxTage = 900, protokoll = null } = {}) {
-  const r = rng(seed);
+export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null } = {}) {
   const prof = PROFILE[profilName];
-  const st = {
-    tag: 0, stufe: 1, geld: 0, gebaut: new Set(['start']), bauwerke: {}, services: {}, buero: 0,
-    ruf: Array(E.ruf.fenster).fill(E.ruf.start), boote: [], gaesteStufe: 0, tagesgaesteStufe: 0,
-    ausbauFertigAm: null, stufeTag: { 1: 0 }, abgewiesen: {}, unerfuellt: {}, letzterKauf: 0,
-    pausen: [], einnahmenTag: 0, kaeufe: 0, sturmBis: -1, regattaBis: -1, naechst: {},
-    ende: null, gesamtGaeste: 0, zielTag: {}, sparTage: {}, einStufe: {}, ausStufe: {},
-  };
-  for (const k of Object.keys(E.bauwerke)) st.bauwerke[k] = 0;
-  const rufWert = () => st.ruf.reduce((a, b) => a + b, 0) / st.ruf.length;
-  const bewerte = (w) => { st.ruf.push(Math.max(1, Math.min(5, w))); st.ruf.shift(); };
-  const stufenDaten = () => E.stufen[st.stufe - 1];
-  const hs = () => Math.min(st.stufe, HAFEN_STUFEN);  // spätere Stufen nutzen die Plätze der letzten Hafenstufe
-  const saisonLaenge = E.zeit.saisonTage + E.zeit.winterTage;
-  const naechsterTermin = (alle) => Math.max(1, Math.round(alle * (0.7 + 0.6 * r())));
+  const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: RULES });
+  const state = createState({ seed, rules: RULES });
+  const r = rng(seed + 7919);
+  const svc = neuerZustand();
+  let effekte = SVC.effekte(svc);
+  sim.addHook(ctx, 'modifiers', () => ({ sizeFactor: effekte.gaeste, ratingBonus: effekte.ruf }));
 
-  const freiePlaetze = () => {
-    const belegt = new Set(st.boote.map((b) => b.platz));
-    return HAFEN.plaetze.filter((p) => p.stufen.includes(hs()) && st.gebaut.has(BESITZER.get(p.id))
-      && p.art !== 'fischer' && !belegt.has(p.id));
-  };
-  const hatStrom = (p) => {
-    if (E.platzarten[p.art]?.strom) return true;
-    if (E.stromAnSteg[p.steg]) return true;
-    const lv = st.bauwerke.strom || 0;
-    return E.bauwerke.strom.stufen.slice(0, lv).some((s) => s.stege.includes(p.steg));
-  };
-  const passt = (b, p) => {
-    if (b.sonder === 'mehrrumpf') return p.art === 'stirn' && p.klasse !== 'S';
-    if (b.klasse === 'XL') return p.art === 'kai';
-    if (p.art === 'kai') return false;
-    return RANG[p.klasse] >= RANG[b.klasse];
-  };
-  const zuweisen = (b, frei) => {
-    const kand = frei.filter((p) => passt(b, p));
-    if (!kand.length) return null;
-    if (r() < prof.fehlZuweisung) return kand[Math.floor(r() * kand.length)];
-    const willStrom = b.wuensche.includes('strom');
-    const punkte = (p) => (RANG[p.klasse] - RANG[b.klasse]) * 10 + (p.art === 'stirn' && b.sonder !== 'mehrrumpf' ? 5 : 0)
-      - (p.art === 'finger' ? 1 : 0) - (willStrom && hatStrom(p) ? 3 : 0);
-    kand.sort((a, c) => punkte(a) - punkte(c));
-    return kand[0];
-  };
+  const lauf = { stufeTag: { 1: 1 }, zielTag: {}, sparTage: {}, pausen: [], letzterKauf: 1, kaeufe: 0,
+    einStufe: {}, ende: null };
+  let abgewiesen = {}; let unerfuellt = {};
+  const rufWert = () => sim.reputation(state);
 
-  const kaufOptionen = () => {
-    const o = [];
-    const n = st.stufe;
-    for (const p of E.stegprojekte) {
-      if (p.stufe > n || st.gebaut.has(p.id)) continue;
-      if (!p.plaetze.some((id) => PLATZ.get(id).stufen.includes(hs()))) continue; // veraltet
-      const klassen = new Set(p.plaetze.map((id) => PLATZ.get(id).klasse));
-      const bedarf = [...klassen].some((k) => KLASSEN.slice(0, RANG[k] + 1).some((kk) => st.abgewiesen[kk] > 0))
-        || (p.plaetze.some((id) => PLATZ.get(id).art === 'stirn') && st.abgewiesen.mehrrumpf > 0);
-      o.push({ art: 'steg', id: p.id, kosten: p.kosten, prio: bedarf ? 1 : 3 });
-    }
-    for (const [k, b] of Object.entries(E.bauwerke)) {
-      const lv = st.bauwerke[k]; const next = b.stufen[lv];
-      if (!next || next.abStufe > n) continue;
-      const wunsch = k === 'strom' ? 'strom' : k;
-      o.push({ art: 'bauwerk', id: k, kosten: next.kosten, prio: st.unerfuellt[wunsch] > 0 ? 1 : 4 });
-    }
-    const bnext = E.hafenbuero.stufen[st.buero];
-    if (bnext && bnext.abStufe <= n) o.push({ art: 'buero', id: 'hafenbuero', kosten: bnext.kosten, prio: 2 });
-    for (const [k, s] of Object.entries(E.services)) {
-      const lv = st.services[k] || 0; const next = s.stufen[lv];
-      if (!next || (next.abStufe ?? s.abStufe) > n) continue;
-      o.push({ art: 'service', id: k, kosten: next.kosten, prio: 3 });
-    }
-    return o;
-  };
-  const kaufe = (opt) => {
-    st.geld -= opt.kosten; st.kaeufe++;
-    st.ausStufe[st.stufe] = (st.ausStufe[st.stufe] || 0) + opt.kosten;
-    if (st.tag - st.letzterKauf > 0) st.pausen.push([st.tag - st.letzterKauf, st.stufe]);
-    st.letzterKauf = st.tag;
-    if (opt.art === 'steg') st.gebaut.add(opt.id);
-    else if (opt.art === 'bauwerk') st.bauwerke[opt.id]++;
-    else if (opt.art === 'buero') st.buero++;
-    else if (opt.art === 'service') st.services[opt.id] = (st.services[opt.id] || 0) + 1;
-    protokoll?.push(`Tag ${st.tag}: kauft ${opt.art} ${opt.id} für ${opt.kosten} €`);
-  };
-
-  const zielErreicht = () => {
-    const z = stufenDaten().ziel;
-    if (rufWert() < z.ruf) return false;
-    if (z.gaeste != null && st.gaesteStufe < z.gaeste) return false;
-    if (z.tagesgaeste != null && st.tagesgaesteStufe < z.tagesgaeste) return false;
-    if (z.allePlaetze && E.stegprojekte.some((p) => p.stufe <= st.stufe && !st.gebaut.has(p.id)
-      && p.plaetze.some((id) => PLATZ.get(id).stufen.includes(hs())))) return false;
+  const kaufe = (art, id, kosten, ok) => {
+    if (!ok) return false;
+    lauf.kaeufe++;
+    if (state.day - lauf.letzterKauf > 0) lauf.pausen.push([state.day - lauf.letzterKauf, state.stage]);
+    lauf.letzterKauf = state.day;
+    protokoll?.push(`Tag ${state.day}: kauft ${art} ${id} für ${kosten} €`);
     return true;
   };
 
-  const abreise = (b) => {
-    let w = b.gesamt === 0 ? E.ruf.ohneWunsch : 1 + 4 * b.erfuellt / b.gesamt;
-    w += E.platzarten[PLATZ.get(b.platz).art]?.rufBonus || 0;
-    if (b.sonder === 'behoerde') w += E.sonderboote.behoerde.rufBonus;
-    if (b.sturm) w -= st.services.seenotretter ? E.ereignisse.sturm.rufMalusMitSeenotretter : E.ereignisse.sturm.rufMalus;
-    bewerte(w); st.gaesteStufe++; st.gesamtGaeste++;
+  const optionen = () => {
+    const o = [];
+    for (const p of sim.openJettyProjects(state, ctx)) {
+      const plaetze = RULES.berthProjects[p.id] || [];
+      if (!plaetze.some((id) => PLATZ.get(id)?.stufen.includes(state.stage))) continue; // veraltet
+      const klassen = new Set(plaetze.map((id) => PLATZ.get(id).klasse));
+      const stirn = plaetze.some((id) => PLATZ.get(id).art === 'stirn');
+      // Bedarf: Boote dieser Klasse wurden abgewiesen, oder es gibt für die Klasse noch gar keinen
+      // Platz (dann kommen ihre Boote gar nicht erst, der Spieler sieht aber den neuen Steg)
+      const vorhanden = new Set(sim.availableBerths(state, ctx).map((b) => PLATZ.get(b.id)?.klasse));
+      const bedarf = [...klassen].some((k) => abgewiesen[k] > 0 || !vorhanden.has(k)) || (stirn && abgewiesen.stirn > 0);
+      const letzteStufe = !E.stufen[state.stage - 1].ausbau;  // Abschluss braucht alle Plätze
+      o.push({ art: 'steg', id: p.id, kosten: p.cost, prio: bedarf ? 1 : letzteStufe ? 2 : 3,
+        tu: () => sim.buildJettyProject(state, ctx, p.id).ok });
+    }
+    for (const k of Object.keys(RULES.facilities)) {
+      const u = sim.facilityUpgrade(state, ctx, k);
+      if (!u || u.reason === 'max' || u.reason === 'stage') continue;
+      o.push({ art: 'bauwerk', id: k, kosten: u.cost, prio: unerfuellt[k] > 0 ? 1 : 4,
+        tu: () => sim.upgradeFacility(state, ctx, k).ok });
+    }
+    const on = state.office + 1;
+    if (RULES.office.cost[on] && state.stage >= RULES.office.fromStage[on]) {
+      o.push({ art: 'buero', id: 'hafenbuero', kosten: RULES.office.cost[on], prio: 2,
+        tu: () => sim.upgradeOffice(state, ctx).ok });
+    }
+    for (const s of SERVICES) {
+      const pr = SVC.pruefe(svc, s.id, { stufe: state.stage, ruf: rufWert() });
+      if (!pr.freigeschaltet) continue;
+      o.push({ art: 'service', id: s.id, kosten: pr.kosten, prio: 3, tu: () => {
+        if (!sim.spend(state, pr.kosten)) return false;
+        SVC.bauen(svc, s.id, { stufe: state.stage, ruf: rufWert(), tag: state.day });
+        effekte = SVC.effekte(svc);
+        return true;
+      } });
+    }
+    return o;
   };
 
-  while (st.tag < maxTage) {
-    st.tag++;
-    const tagImJahr = (st.tag - 1) % saisonLaenge;
-    const winter = tagImJahr >= E.zeit.saisonTage;
-    st.einnahmenTag = 0;
-    const s = stufenDaten();
-
-    // Ausbau fertig?
-    if (st.ausbauFertigAm != null && st.tag >= st.ausbauFertigAm) {
-      st.gebaut.add('ausbau:' + s.ausbau.id);
-      st.stufe++; st.stufeTag[st.stufe] = st.tag; st.gaesteStufe = 0; st.tagesgaesteStufe = 0;
-      st.ausbauFertigAm = null;
-      // Boote auf weggefallenen Plätzen reisen ab
-      for (const b of st.boote.filter((b) => !PLATZ.get(b.platz).stufen.includes(hs()))) abreise(b);
-      st.boote = st.boote.filter((b) => PLATZ.get(b.platz).stufen.includes(hs()));
-      protokoll?.push(`Tag ${st.tag}: Stufe ${st.stufe} erreicht`);
-    }
-
-    if (winter) {
-      if (tagImJahr === E.zeit.saisonTage) { st.boote.forEach(abreise); st.boote = []; }
-      for (const k of Object.keys(st.services)) st.einnahmenTag += svcWirkung(st, k)?.winter?.proTag || 0;
-    } else {
-      // Ereignisse
-      const n = st.stufe;
-      const ev = E.ereignisse;
-      const sturm = n >= ev.sturm.abStufe && st.tag >= (st.naechst.sturm ??= st.tag + naechsterTermin(ev.sturm.alleTage));
-      if (sturm) st.naechst.sturm = st.tag + naechsterTermin(ev.sturm.alleTage);
-      const regattaMoeglich = Object.keys(st.services).some((k) => svcWirkung(st, k)?.regatta);
-      let regatta = false;
-      if (regattaMoeglich && n >= ev.regatta.abStufe) {
-        if (st.tag >= (st.naechst.regatta ??= st.tag + naechsterTermin(ev.regatta.alleTage))) {
-          st.regattaBis = st.tag + ev.regatta.dauer - 1; st.naechst.regatta = st.tag + naechsterTermin(ev.regatta.alleTage);
-        }
-        regatta = st.tag <= st.regattaBis;
-      }
-      let extraXL = 0;
-      if (n >= ev.hafenfest.abStufe && st.tag >= (st.naechst.hafenfest ??= st.tag + naechsterTermin(ev.hafenfest.alleTage))) {
-        st.naechst.hafenfest = st.tag + naechsterTermin(ev.hafenfest.alleTage);
-        st.tagesgaesteStufe += ev.hafenfest.tagesgaeste; st.einnahmenTag += ev.hafenfest.einnahme;
-        if (n >= 5) extraXL = ev.hafenfest.extraXL;
-      }
-
-      // Ankünfte
-      const faktor = E.ruf.ankunftBasis + E.ruf.ankunftJeAnker * (rufWert() - 1);
-      const bonus = { S: 1, M: 1, L: 1, XL: 1 };
-      for (const k of Object.keys(st.services)) {
-        const g = svcWirkung(st, k)?.gaeste; if (g) for (const kl in g) bonus[kl] *= g[kl];
-      }
-      const neu = [];
-      for (const kl of KLASSEN) {
-        const anteil = s.mix[kl] || 0; if (!anteil) continue;
-        let lam = s.ankuenfte * anteil * faktor * bonus[kl];
-        if (regatta) lam *= 1 + (ev.regatta.ankunftFaktorSegel - 1) * E.klassen[kl].segel;
-        if (sturm) lam *= ev.sturm.ankunftFaktor[kl] ?? 1;
-        let anzahl = poisson(r, lam) + (kl === 'XL' ? extraXL : 0);
-        for (let i = 0; i < anzahl; i++) neu.push(kl);
-      }
-      st.abgewiesen = {};
-      let frei = freiePlaetze();
-      for (const kl of neu) {
-        const k = E.klassen[kl];
-        const b = { klasse: kl, motor: r() < k.motor, segel: false, sonder: null, wuensche: [],
-          naechte: ganz(r, k.naechte[0], k.naechte[1]), erfuellt: 0, gesamt: 0, sturm: false };
-        b.segel = !b.motor && r() < k.segel / (1 - k.motor);
-        for (const [sid, sb] of Object.entries(E.sonderboote)) {
-          if (sb.klasse === kl && st.stufe >= sb.abStufe && !b.sonder && r() < sb.anteil) b.sonder = sid;
-        }
-        const moeglich = Object.entries(E.wuensche).filter(([, w]) => w.abStufe <= st.stufe
-          && w.klassen.includes(kl) && (!w.nurMotor || b.motor)).map(([id]) => id);
-        const [lo, hi] = E.wunschAnzahl[kl];
-        const zahl = Math.min(ganz(r, lo, hi), moeglich.length);
-        while (b.wuensche.length < zahl) {
-          const w = moeglich[Math.floor(r() * moeglich.length)];
-          if (!b.wuensche.includes(w)) b.wuensche.push(w);
-        }
-        const p = zuweisen(b, frei);
-        if (!p) {
-          const key = b.sonder === 'mehrrumpf' ? 'mehrrumpf' : kl;
-          st.abgewiesen[key] = (st.abgewiesen[key] || 0) + 1;
-          if (r() < E.ruf.abgewiesen.chance) bewerte(E.ruf.abgewiesen.wertung);
+  const einkaufen = () => {
+    for (let runde = 0; runde < 12; runde++) {
+      const check = sim.canAdvanceStage(state, ctx);
+      const nurGeld = check.missing.length === 1 && check.missing[0] === 'money';
+      if (check.ok || nurGeld) {
+        lauf.zielTag[state.stage] ??= state.day;
+        if (check.ok) {
+          lauf.sparTage[state.stage] = state.day - lauf.zielTag[state.stage];
+          sim.advanceStage(state, ctx);
+          lauf.kaeufe++;
+          lauf.stufeTag[state.stage] = state.day;
+          protokoll?.push(`Tag ${state.day}: Stufe ${state.stage} erreicht`);
           continue;
         }
-        b.platz = p.id; frei = frei.filter((q) => q !== p);
-        st.boote.push(b);
+        // sparen: nur noch Dringendes, das wenig kostet
+        const dring = optionen().filter((o) => o.prio === 1 && o.kosten <= 0.1 * check.goal.cost && o.kosten <= state.money);
+        if (!dring.length) break;
+        const d = dring.sort((a, b) => a.kosten - b.kosten)[0];
+        kaufe(d.art, d.id, d.kosten, d.tu());
+        continue;
       }
-
-      // Abend: Wünsche erfüllen, kassieren
-      const rest = {};
-      for (const [k, b] of Object.entries(E.bauwerke)) {
-        rest[k] = st.bauwerke[k] ? (b.stufen[st.bauwerke[k] - 1].versorgt ?? 0) : 0;
-      }
-      st.unerfuellt = {};
-      const segelFaktor = Object.keys(st.services).reduce((f, k) => f * (svcWirkung(st, k)?.hafengeld?.segel || 1), 1);
-      const kunden = Object.keys(st.services).map((k) => svcWirkung(st, k)?.kunden).filter(Boolean);
-      for (const b of [...st.boote].sort(() => r() - 0.5)) {
-        let ok = 0;
-        for (const w of b.wuensche) {
-          let gut;
-          if (w === 'strom') gut = hatStrom(PLATZ.get(b.platz));
-          else { gut = rest[w] > 0; if (gut) rest[w]--; }
-          if (gut) ok++; else st.unerfuellt[w] = (st.unerfuellt[w] || 0) + 1;
-        }
-        b.erfuellt += ok; b.gesamt += b.wuensche.length;
-        let preis = E.klassen[b.klasse].grundpreis * (1 + E.wunschBonus * ok);
-        if (b.segel) preis *= segelFaktor;
-        if (b.sonder === 'behoerde') preis *= E.sonderboote.behoerde.preisFaktor;
-        for (const kd of kunden) if (r() < kd.anteil) preis += kd.preis;
-        st.einnahmenTag += preis;
-        if (sturm) { b.sturm = true; b.naechte += E.ereignisse.sturm.extraNacht; }
-        b.naechte--;
-      }
-      // Fischer, Services, Tagesgäste
-      const fischer = HAFEN.plaetze.filter((p) => p.art === 'fischer' && p.stufen.includes(hs()) && st.gebaut.has(BESITZER.get(p.id))).length;
-      st.einnahmenTag += fischer * E.fischer.pachtProTag;
-      st.tagesgaesteStufe += E.promenade[n] || 0;
-      for (const k of Object.keys(st.services)) {
-        const w = svcWirkung(st, k);
-        st.einnahmenTag += w.proTag || 0;
-        st.tagesgaesteStufe += w.tagesgaeste || 0;
-        if (w.besuch) {
-          const key = 'besuch:' + k;
-          if (st.naechst[key] == null) st.naechst[key] = st.tag + (w.besuch.ersterNach ?? w.besuch.alleTage);
-          if (st.tag >= st.naechst[key]) {
-            st.naechst[key] = st.tag + w.besuch.alleTage;
-            st.einnahmenTag += w.besuch.einnahme || 0;
-            st.tagesgaesteStufe += w.besuch.gaeste || 0;
-            for (let i = 0; i < (w.besuch.ruf || 0); i++) bewerte(5);
-          }
-        }
-      }
-      for (const b of st.boote.filter((b) => b.naechte <= 0)) abreise(b);
-      st.boote = st.boote.filter((b) => b.naechte > 0);
+      const alle = optionen();
+      const dringend = alle.filter((o) => o.prio === 1).sort((a, b) => a.kosten - b.kosten)[0];
+      if (dringend && dringend.kosten > state.money) break;
+      const opts = alle.filter((o) => o.kosten <= state.money);
+      if (!opts.length) break;
+      opts.sort((a, b) => a.prio - b.prio || a.kosten - b.kosten);
+      if (r() < prof.auslassen) break;
+      if (!kaufe(opts[0].art, opts[0].id, opts[0].kosten, opts[0].tu())) break;
     }
-    st.geld += st.einnahmenTag;
-    st.einStufe[st.stufe] = (st.einStufe[st.stufe] || 0) + st.einnahmenTag;
+  };
 
-    // Ziel der letzten Stufe
-    if (!s.ausbau && zielErreicht()) { st.ende = st.tag; break; }
+  const zielErreicht = () => {
+    const z = E.stufen[state.stage - 1].ziel;
+    if (E.stufen[state.stage - 1].ausbau) return false;
+    if (rufWert() < z.ruf || (state.stageGuests || 0) < z.gaeste) return false;
+    if (z.allePlaetze && sim.openJettyProjects(state, ctx).some((p) =>
+      (RULES.berthProjects[p.id] || []).some((id) => PLATZ.get(id)?.stufen.includes(state.stage)))) return false;
+    return true;
+  };
 
-    // Einkaufen
-    if (st.tag % prof.kaufAlleTage === 0) {
-      for (let runde = 0; runde < 12; runde++) {
-        if (s.ausbau && st.ausbauFertigAm == null && zielErreicht()) {
-          st.zielTag[st.stufe] ??= st.tag;
-          if (st.geld >= s.ausbau.kosten) {
-            st.sparTage[st.stufe] = st.tag - st.zielTag[st.stufe];
-            st.geld -= s.ausbau.kosten; st.kaeufe++;
-            const tempo = winter ? E.zeit.winterBautempo : 1;
-            st.ausbauFertigAm = st.tag + 1 + Math.ceil(s.ausbau.bautage / tempo);
-            protokoll?.push(`Tag ${st.tag}: startet Ausbau ${s.ausbau.id}`);
-            continue;
-          }
-          // sparen: nur noch Dringendes, das wenig kostet
-          const dring = kaufOptionen().filter((o) => o.prio === 1 && o.kosten <= 0.1 * s.ausbau.kosten && o.kosten <= st.geld);
-          if (!dring.length) break;
-          kaufe(dring.sort((a, b) => a.kosten - b.kosten)[0]); continue;
+  while (state.day < maxTage) {
+    const tag = state.day;
+    const stufe = state.stage;
+    const geldVorher = state.stats.totalIncome;
+    abgewiesen = {}; unerfuellt = {};
+    const winter = sim.season(state, ctx).winter;
+    let liegend = [];
+    while (state.day === tag) {
+      const events = sim.tick(state, ctx, prof.zuweisenAlle);
+      if (state.phase === 'day' && state.office < RULES.office.autoAssign) {
+        for (const id of [...state.queue]) {
+          const passend = sim.fittingBerths(state, ctx, id);
+          if (!passend.length) continue;
+          const platz = r() < prof.fehlZuweisung ? passend[Math.floor(r() * passend.length)] : passend[0];
+          sim.assign(state, ctx, id, platz);
         }
-        const alle = kaufOptionen();
-        // Auf das wichtigste Ziel sparen: das günstigste dringende Projekt (prio 1)
-        const dringend = alle.filter((o) => o.prio === 1).sort((a, b) => a.kosten - b.kosten)[0];
-        if (dringend && dringend.kosten > st.geld) break;
-        const opts = alle.filter((o) => o.kosten <= st.geld - prof.reserve);
-        if (!opts.length) break;
-        opts.sort((a, b) => a.prio - b.prio || a.kosten - b.kosten);
-        if (r() < prof.auslassen) break;
-        kaufe(opts[0]);
+      }
+      for (const ev of events) {
+        if (ev.type === 'turnedAway') {
+          abgewiesen.alle = (abgewiesen.alle || 0) + 1;
+        } else if (ev.type === 'feeReady') {
+          const b = state.boats[ev.boatId];
+          for (const w of b.wishes) if (!ev.wishesMet.includes(w)) unerfuellt[w] = (unerfuellt[w] || 0) + 1;
+        } else if (ev.type === 'evening') {
+          liegend = sim.mooredBoats(state).filter((b) => !b.stationed)
+            .map((b) => ({ klasse: b.size, antrieb: b.motor ? 'motor' : 'segel' }));
+          sim.collectAll(state, ctx, true);
+        }
       }
     }
-    protokoll?.push(`Tag ${st.tag}${winter ? ' (Winter)' : ''}: Stufe ${st.stufe}, Geld ${Math.round(st.geld)}, +${Math.round(st.einnahmenTag)}, Ruf ${rufWert().toFixed(2)}, Gäste ${st.gaesteStufe}, Tagesgäste ${st.tagesgaesteStufe}, Boote ${st.boote.length}`);
+    // Abgewiesen: welche Klassen fehlen? Freie Plätze je Klasse prüfen
+    if (abgewiesen.alle) {
+      const frei = sim.availableBerths(state, ctx).filter((b) => sim.isFree(state, b.id));
+      for (const k of ['S', 'M', 'L', 'XL']) if (!frei.some((b) => b.size === k || PLATZ.get(b.id)?.klasse === k)) abgewiesen[k] = 1;
+      if (!frei.some((b) => PLATZ.get(b.id)?.art === 'stirn')) abgewiesen.stirn = 1;
+    }
+    const abschluss = SVC.tagesabschluss(svc, { tag, winter, wetter: 'sonne', boote: liegend }, r);
+    sim.addIncome(state, abschluss.summe);
+    lauf.einStufe[stufe] = (lauf.einStufe[stufe] || 0) + state.stats.totalIncome - geldVorher;
+
+    if (zielErreicht()) { lauf.ende = state.day; break; }
+    if (state.day % prof.kaufAlleTage === 0) einkaufen();
+    protokoll?.push(`Tag ${state.day}${winter ? ' (Winter)' : ''}: Stufe ${state.stage}, Geld ${Math.round(state.money)}, Ruf ${rufWert().toFixed(2)}, Gäste ${state.stageGuests}, Boote ${sim.mooredBoats(state).length}, abgewiesen ${state.stats.turnedAway}`);
   }
   return {
-    seed, profil: profilName, stufeTag: st.stufeTag, ende: st.ende, stufe: st.stufe, ruf: rufWert(),
-    kaeufe: st.kaeufe, laengstePause: Math.max(0, ...st.pausen.map((x) => x[0])),
-    pauseJeStufe: Object.fromEntries(E.stufen.map((x) => x.stufe).map((n) => [n, Math.max(0, ...st.pausen.filter((x) => x[1] === n).map((x) => x[0]))])), gaeste: st.gesamtGaeste,
-    offen: kaufOptionen().length, sparTage: st.sparTage, einStufe: st.einStufe, ausStufe: st.ausStufe,
+    seed, profil: profilName, stufeTag: lauf.stufeTag, ende: lauf.ende, stufe: state.stage, ruf: rufWert(),
+    kaeufe: lauf.kaeufe, laengstePause: Math.max(0, ...lauf.pausen.map((x) => x[0])),
+    pauseJeStufe: Object.fromEntries(E.stufen.map((x) => [x.stufe, Math.max(0, ...lauf.pausen.filter((p) => p[1] === x.stufe).map((p) => p[0]))])),
+    gaeste: state.guests, sparTage: lauf.sparTage, einStufe: lauf.einStufe, abgewiesen: state.stats.turnedAway,
   };
 }
 
