@@ -352,8 +352,13 @@ export function warteplaetze(stufe) {
     for (let i = 0; i < n; i++) bojen.push({ id: `${id}${i + 1}`, px: x0 + dx * i, py: y0 + dy * i, groesse });
   };
   if (stufe <= 2) {
-    reihe('see-', -30, 132, 16, 2, stufe === 1 ? 3 : 6, 'M');
-    ankerbereiche.push({ id: 'see-anker', px: 70, py: 140, radius: 20, groesse: 'M' });
+    // Nahe vor Steg A, damit die wartenden Boote in der Startansicht zu sehen sind.
+    // Boote liegen mit dem Bug an der Boje, nach Osten bleibt gut 4 m Platz.
+    const lagen = stufe === 1
+      ? [[-100, 56], [-86, 53], [-72, 50]]
+      : [[-112, 86], [-94, 90], [-76, 88], [-58, 92], [-40, 89], [-22, 92]];
+    lagen.forEach(([px, py], i) => bojen.push({ id: `see-${i + 1}`, px, py, groesse: 'M' }));
+    ankerbereiche.push({ id: 'see-anker', px: stufe === 1 ? -20 : 20, py: stufe === 1 ? 70 : 112, radius: 16, groesse: 'M' });
   } else if (stufe <= 4) {
     reihe('reede-', 228, 262, 14, 9, stufe === 3 ? 5 : 7, 'L');
     ankerbereiche.push({ id: 'reede-anker', px: 300, py: 330, radius: 30, groesse: 'L' });
