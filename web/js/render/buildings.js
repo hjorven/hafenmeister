@@ -382,12 +382,12 @@ const PLAN = [
   { id: 'feuer-gruen', name: 'Molenfeuer Grün', art: 'molenfeuer', ab: 3, p: { 3: [142, 274], 5: [96, 320] }, opt: { farbe: 'gruen' }, mole: true },
   { id: 'feuer-rot',   name: 'Molenfeuer Rot',  art: 'molenfeuer', ab: 3, p: { 3: [216, 268], 5: [196, 306] }, opt: { farbe: 'rot' }, mole: true },
   // Strand: Strandkoerbe am Ostseestrand der Nehrung, Seebruecke ab Stufe 3. In Stufe 6 ruecken Koerbe und Seebruecke
-  // zur Seite: Kreuzfahrtterminal (x -175..-105) und Marinebasis (x -352..-280) brauchen die Nehrung (data/anlagen-flaechen.js).
+  // zur Seite: Kreuzfahrtterminal (x -185..-115) und Marinebasis (x -352..-280) brauchen die Nehrung (data/anlagen-flaechen.js).
   { id: 'koerbe-1', name: 'Strandkörbe', art: 'strandkoerbe', ab: 2, p: { 2: [-210, 214], 6: [-224, 210] }, opt: { anzahl: 8, seed: 3 } },
   { id: 'koerbe-2', name: 'Strandkörbe', art: 'strandkoerbe', ab: 3, p: { 3: [-120, 218], 6: [-84, 212] }, opt: { anzahl: 6, seed: 7 } },
   { id: 'koerbe-3', name: 'Strandkörbe', art: 'strandkoerbe', ab: 3, p: [228, 218], opt: { anzahl: 7, seed: 11 } },
   { id: 'koerbe-4', name: 'Strandkörbe', art: 'strandkoerbe', ab: 1, p: [-14, -8], opt: { anzahl: 3, seed: 5 } },
-  { id: 'seebruecke', name: 'Seebrücke', art: 'seebruecke', ab: 3, p: { 3: [-170, 216], 6: [-192, 214] }, opt: { laenge: 44 } },
+  { id: 'seebruecke', name: 'Seebrücke', art: 'seebruecke', ab: 3, p: { 3: [-170, 216], 6: [-262, 214] }, opt: { laenge: 44 } },
 ];
 
 // Schwimmwellenbrecher im See ab Stufe 4, Oeffnung nach Osten zum Fahrwasser

@@ -683,7 +683,7 @@ function pierWurzel(steg, rueck) {
   return best ?? rueck;
 }
 
-function kreuzfahrtterminal(stufe, { lage = { x: -140, y: 210 } } = {}) {
+function kreuzfahrtterminal(stufe, { lage = { x: -150, y: 212 } } = {}) {
   const g = new THREE.Group();
   // Lange weisse Terminalhalle mit Glasband und geschwungenem Dach (Vorbild Warnemuende), quer ueber der
   // Wurzel der Kreuzfahrtpier: Die Gaeste gehen nach Norden auf die Pier, nach Sueden zu den Bussen.
@@ -697,7 +697,7 @@ function kreuzfahrtterminal(stufe, { lage = { x: -140, y: 210 } } = {}) {
   dach.rotation.x = Math.PI / 2;
   dach.scale.set(1, 1, 0.25);
   // Ausgang zur Pier (Nordseite) und Eingang zum Busplatz (Suedseite): Vordaecher
-  const [wx] = P(pierWurzel('P', [-140, 219])[0] - lage.x, 0);
+  const [wx] = P(pierWurzel('P', [-150, 219])[0] - lage.x, 0);
   box(g, 4, 0.25, 3, FARBE.blue, wx, LAND_Y + 3.2, -tief / 2 - 1.5);
   box(g, 6, 0.25, 3, FARBE.blue, 0, LAND_Y + 3.2, tief / 2 + 1.5);
   // Busplatz zwischen Halle und Nehrungsstrasse, Busse laengs zur Strasse
@@ -706,8 +706,8 @@ function kreuzfahrtterminal(stufe, { lage = { x: -140, y: 210 } } = {}) {
   for (let i = 0; i < busse; i++) box(g, 11, 3, 2.5, [FARBE.blue, FARBE.yellow, FARBE.white][i], -lang / 2 + 6 + i * 12, LAND_Y, tief / 2 + 3.2);
   const fl = [flagge(g, -lang / 2 - 1.2, -tief / 2 - 1, 9, FARBE.blue), flagge(g, -lang / 2 + 1, -tief / 2 - 1, 9, FARBE.red)];
   // Gangway-Tuerme an der Ostkante der Kreuzfahrtpier, das Schiff (P01) liegt oestlich daneben
-  const [pwx] = pierWurzel('P', [-140, 219]);
-  const p01 = HAFEN.plaetze?.find((q) => q.id === 'P01')?.lage?.[6] ?? [-112, 371];
+  const [pwx] = pierWurzel('P', [-150, 219]);
+  const p01 = HAFEN.plaetze?.find((q) => q.id === 'P01')?.lage?.[6] ?? [-122, 371];
   const tuerme = stufe >= 2 ? [-40, 0] : [-20];
   for (const off of tuerme) {
     const [px, pz] = P(pwx + 1.6 - lage.x, p01[1] + off - lage.y);

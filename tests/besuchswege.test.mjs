@@ -206,3 +206,20 @@ test('Anlagenflächen sind auf der Höhe planiert, die gelaende.js daraus macht'
     assert.ok(Math.abs(h - (f.hoehe ?? 1.2)) < 0.25, `${f.id} Stufe ${stufe}: Mitte auf ${h.toFixed(2)} m statt ${f.hoehe}`);
   }
 });
+
+// Seebrücke in Stufe 6 (render/buildings.js PLAN, p { 6: [-262, 214] }, 44 m Steg plus Kopf mit 9 m Plattform)
+const SEEBRUECKE_6 = { x0: -262 - 7.3, x1: -262 + 7.3, y0: 214, y1: 214 + (44 + 7) / U };
+
+test('Besuchsschiffe in Stufe 6 bleiben mindestens 5 m von der Seebrücke weg', () => {
+  const rand = 5 / U, s = SEEBRUECKE_6, fehler = [];
+  for (const [id, a] of Object.entries(AUFTRITTE)) for (const d of a.schiffe) {
+    if ((d.stufe ?? 6) !== 6) continue;
+    const lage = d.platz ? HAFEN.plaetze.find((q) => q.id === d.platz)?.lage?.[6] : null;
+    const f = fahrten(d, lage);
+    for (const q of [f.liegen, ...f.raus, ...f.rein]) {
+      const hit = rumpf(q.x, q.y, q.kurs, d.masse).find(([x, y]) => x > s.x0 - rand && x < s.x1 + rand && y > s.y0 - rand && y < s.y1 + rand);
+      if (hit) { fehler.push(`${id} ${d.modell} bei (${q.x.toFixed(0)}, ${q.y.toFixed(0)})`); break; }
+    }
+  }
+  assert.deepEqual(fehler, []);
+});

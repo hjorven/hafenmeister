@@ -19,7 +19,7 @@ import { HAFEN } from './harbor.js';
 //   masse        [Länge, Breite] in Metern, für Hindernis und Prüfung
 //   liegeVersatz [dx, dy] in Planeinheiten: so weit liegt das Schiff neben der Mitte seines Platzes
 
-// Stufe 6 hat zwei Piers Nord-Sued (harbor.js): Kreuzfahrtpier bei x -140 (Schiff an der Ostseite) und
+// Stufe 6 hat zwei Piers Nord-Sued (harbor.js): Kreuzfahrtpier bei x -150 (Schiff an der Ostseite) und
 // Marinepier bei x -310. Die grossen Schiffe laufen gerade von Norden mit dem Bug voraus ein und legen abends
 // achteraus wieder ab (mit Schleppern), ganz ohne zu drehen: Zwischen den Piers ist kein Platz zum Wenden.
 
@@ -37,7 +37,7 @@ export const AUFTRITTE = {
   kreuzfahrtterminal: {
     art: 'kreuzfahrt',
     schiffe: [{ modell: 'kreuzfahrtschiff', platz: 'P01', liegeKurs: -90, masse: [180, 29], raus: 'rueckwaerts',
-      weg: [[-112, 371], [-112, 760]] }],
+      weg: [[-122, 371], [-122, 760]] }],
     plan: { an: 0.03, ab: 0.68 },
   },
   marineanleger: {
@@ -53,12 +53,12 @@ export const AUFTRITTE = {
   museumshafen: {
     art: 'windjammer', abStufe: 3,
     // Drei Traditionssegler ankern in einer Reihe zwischen Marinepier und Kreuzfahrtpier, Bug nach Norden
-    // (in den Wind). Sie kommen nacheinander ueber eine eigene Fahrspur (x -240) und laufen auch so wieder aus,
-    // ohne an den anderen vorbeizumuessen.
+    // (in den Wind). Sie kommen nacheinander ueber eine eigene Fahrspur (x -225) und laufen auch so wieder aus,
+    // ohne an den anderen vorbeizumuessen. Westlich der Fahrspur steht ab Stufe 6 die Seebruecke (x -262).
     schiffe: [
-      { modell: 'xl:XL1-4', liegeKurs: 90, masse: [36, 8], versatz: 0, weg: [[-200, 300], [-238, 316], [-240, 470], [-240, 640]] },
-      { modell: 'xl:XL1-2', liegeKurs: 90, masse: [36, 8], versatz: 0.035, weg: [[-200, 372], [-238, 388], [-240, 470], [-240, 640]] },
-      { modell: 'xl:XL1-1', liegeKurs: 90, masse: [36, 8], versatz: 0.07, weg: [[-200, 444], [-240, 470], [-240, 640]] },
+      { modell: 'xl:XL1-4', liegeKurs: 90, masse: [36, 8], versatz: 0, weg: [[-195, 300], [-223, 316], [-225, 470], [-225, 640]] },
+      { modell: 'xl:XL1-2', liegeKurs: 90, masse: [36, 8], versatz: 0.035, weg: [[-195, 372], [-223, 388], [-225, 470], [-225, 640]] },
+      { modell: 'xl:XL1-1', liegeKurs: 90, masse: [36, 8], versatz: 0.07, weg: [[-195, 444], [-225, 470], [-225, 640]] },
     ],
     plan: { an: 0.12, ab: 0.58 },
     fahrt: 0.2,

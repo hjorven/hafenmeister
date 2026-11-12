@@ -287,8 +287,8 @@ export const SERVICES = [
   {
     id: 'kreuzfahrtterminal', name: 'Kreuzfahrtterminal', gruppe: 'grosse-schiffe', abStufe: 6,
     kurz: 'Terminal an der Großschiffpier. Einmal pro Woche legt ein Kreuzfahrtschiff an.',
-    // Terminal an der Wurzel der Kreuzfahrtpier (harbor.js Stufe 6, Steg P bei x -140, Nord-Sued), Busse an der Nehrungsstrasse
-    lage: { x: -140, y: 212, dreh: 0 }, radius: 18,
+    // Terminal an der Wurzel der Kreuzfahrtpier (harbor.js Stufe 6, Steg P bei x -150, Nord-Sued), Busse an der Nehrungsstrasse
+    lage: { x: -150, y: 212, dreh: 0 }, radius: 18,
     stufen: [
       { name: 'Kreuzfahrtpier', kosten: 60000, ruf: 4.0, braucht: [{ id: 'fahrgastanleger', stufe: 1 }],
         wirkung: { freischalten: ['kreuzfahrtschiff'],

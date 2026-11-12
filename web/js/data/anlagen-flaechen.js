@@ -24,7 +24,7 @@ const FLAECHEN = [
   // Stufe 6: Seenotretter-Station an der Westmole (Kreuzer an SK01), Kreuzfahrtterminal an der Wurzel
   // der Kreuzfahrtpier, eingezäunter Marinestützpunkt an der Wurzel der Marinepier
   { ab: 6, ...rechteck('seenotretter-west', -2, 198, 14, 214) },
-  { ab: 6, ...rechteck('kreuzfahrt', -175, 196, -105, 226) },
+  { ab: 6, ...rechteck('kreuzfahrt', -185, 196, -115, 226) },
   { ab: 6, ...rechteck('marine', -352, 196, -280, 226) },
 ];
 

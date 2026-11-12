@@ -263,9 +263,9 @@ TITLES = {1: ('Stufe 1: Bootssteg am See', 'Ein kurzer Holzsteg am Binnensee. Ru
           6: ('Stufe 6: Seehafen', 'Westlich der Molen entsteht im tiefen Wasser eine lange T-Pier: außen legen Kreuzfahrtschiffe an, innen besuchen Marineschiffe den Hafen. An der Westmole liegt der Seenotrettungskreuzer.')}
 
 # Stufe 6: zwei Piers Nord-Sued westlich der Westmole, damit die grossen Schiffe gerade ein- und auslaufen
-# koennen, ohne zu drehen: Kreuzfahrtpier bei x -140 (Schiff an der Ostseite), Marinepier bei x -310
+# koennen, ohne zu drehen: Kreuzfahrtpier bei x -150 (Schiff an der Ostseite), Marinepier bei x -310
 # (Schiffe an beiden Seiten). Beide reichen ueber den Kartenrand der Zeichnung hinaus.
-PIER_X, PIER_Y = -140, 430
+PIER_X, PIER_Y = -150, 430
 MARINE_X, MARINE_Y = -310, 390
 
 def render(stage, seed=5):
@@ -425,7 +425,7 @@ def render(stage, seed=5):
     if stage >= 4:
         B_(48, -34, 26, 13, 'coral', hgt=5); B_(112, -30, 16, 9, 'coral'); B_(182, -56, 46, 26, (206, 216, 224), hgt=9)
     if stage >= 6:
-        B_(-140, 208, 34, 10, (206, 216, 224), hgt=6); B_(-316, 208, 24, 9, 'grey', hgt=5)
+        B_(-150, 208, 34, 10, (206, 216, 224), hgt=6); B_(-316, 208, 24, 9, 'grey', hgt=5)
     if stage >= 5:
         B_(-30, 204, 20, 10, (250, 212, 120), hgt=5); B_(56, 204, 16, 8, 'grey', hgt=5); B_(112, 204, 14, 8, 'coral', hgt=4)
     tr = random.Random(77); pts = []
@@ -510,7 +510,7 @@ def render(stage, seed=5):
         lb('Fischereikai', -52 if stage < 6 else 26, 262 if stage < 6 else 270, n_(5)); lb('Westmole', -34 if stage < 6 else -40, 318 if stage < 6 else 336, n_(5))
         lb('Ansteuerungstonne', 226, 344, n_(5)); lb('Gabelung', 150, 118, n_(5)); lb('Fischhalle', -30, 190, n_(5))
     if stage == 6:
-        lb('Kreuzfahrtpier', -170, 300, True); lb('Marinepier', -270, 300, True); lb('Kreuzfahrtterminal', -140, 216, True); lb('Seenotkreuzer', 46, 290, True)
+        lb('Kreuzfahrtpier', -180, 300, True); lb('Marinepier', -270, 300, True); lb('Kreuzfahrtterminal', -150, 216, True); lb('Seenotkreuzer', 46, 290, True)
     # Wassertiefen aus dem Tiefenfeld
     f_ = font(int(11.5 * SS), 'italic')
     def dep_at(x, y):

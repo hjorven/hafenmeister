@@ -30,23 +30,23 @@ export const SEE = {
   // Stufe 3 und 4: Molenköpfe bis y 268 (x 149 bis 187), Rinne bis y 356 (x 152 bis 212),
   // Reede ab x 222, Ankerfeld um (345, 385) mit Radius 62. Die kleinen Bahnen biegen vor der Einfahrt nach Norden ab.
   3: [
-    { pts: ostwaerts(292, -340, [[50, 292], [112, 326], [176, 470], [206, 760]]), art: 'klein' },
-    { pts: westwaerts(306, -326, [[192, 760], [162, 474], [100, 340], [46, 306]]), art: 'klein' },
-    { pts: ostwaerts(472, -300), art: 'gross' }, { pts: westwaerts(492, -280), art: 'gross' },
+    { pts: ostwaerts(292, -150, [[50, 292], [112, 326], [176, 470], [206, 760]]), art: 'klein' },
+    { pts: westwaerts(306, -136, [[192, 760], [162, 474], [100, 340], [46, 306]]), art: 'klein' },
+    { pts: ostwaerts(500, -300), art: 'gross' }, { pts: westwaerts(520, -280), art: 'gross' },
   ],
   // Ab Stufe 5 ist zwischen Außenhafen und großem Ankerfeld wenig Platz, dort nur 1,5 Planeinheiten Versatz.
   // Ab Stufe 5: Außenhafen mit Westmole bis (96, 320), Rinne bis y 356 (x 108 bis 184),
   // Ankerfeld für Große um (30, 440) mit Radius 85, Reede ab x 226, Ankerfeld um (360, 440). XXL (bis 29 m breit) nur auf der äußersten Bahn.
-  // Die kleinen Bahnen kommen im Westen erst nördlich von y 410 herein (GROSSE_GAESTE: Kreuzfahrtschiff an P01,
-  // Traditionssegler vor Anker beim Windjammertreffen) und biegen erst östlich von x -60 in die Lücke vor dem Außenhafen.
+  // Die kleinen Bahnen kommen von Norden zwischen Kreuzfahrtschiff an P01 (Stufe 6, Ostkante x -99) und dem
+  // Ankerfeld für Große herunter (GROSSE_GAESTE) und biegen bei x -56 in die Lücke vor dem Außenhafen.
   5: [
-    { pts: ostwaerts(410, -340, [[-110, 410], [-56, 352], [-34, 330], [30, 333], [86, 337], [118, 352], [140, 420], [170, 520], [196, 760]]), art: 'klein', versatz: 1.5 },
-    { pts: westwaerts(424, -326, [[184, 760], [160, 520], [131, 420], [111, 366], [78, 344], [30, 341], [-30, 342], [-48, 362], [-100, 420], [-116, 424]]), art: 'klein', versatz: 1.5 },
+    { pts: [[-88, 760], [-79, 540], [-78, 470], [-72, 384], [-56, 352], [-34, 330], [30, 333], [86, 337], [118, 352], [140, 420], [170, 520], [196, 760]], art: 'klein', versatz: 1.5 },
+    { pts: [[184, 760], [160, 520], [131, 420], [111, 366], [78, 344], [30, 341], [-30, 342], [-48, 362], [-66, 400], [-68, 470], [-76, 760]], art: 'klein', versatz: 1.5 },
     { pts: ostwaerts(562, -300), art: 'gross' }, { pts: westwaerts(600, -250), art: 'gross', xxl: true },
   ],
 };
-// Stufe 6: Großschiffspier P01 (x -371 bis -83, y 290, Schiff liegt nördlich davor) und
-// Marineanleger MA01/MA02 (y 247). Gleiche Bahnen wie Stufe 5.
+// Stufe 6: Kreuzfahrtpier P (x -150, Nord-Süd) und Marinepier MA (x -310, Nord-Süd), harbor.js.
+// Gleiche Bahnen wie Stufe 5.
 SEE[6] = SEE[5];
 
 /**
@@ -55,10 +55,10 @@ SEE[6] = SEE[5];
  * dann halten die Vorbeifahrer davor an (vorDemBug in render/boats/verkehr.js).
  */
 export const GROSSE_GAESTE = [
-  { name: 'Kreuzfahrtschiff an P01', rechteck: { x0: -371, x1: -83, y0: 262, y1: 340 } },
-  { name: 'Traditionssegler West', kreis: { x: -330, y: 336, r: 50 } },
-  { name: 'Traditionssegler Mitte', kreis: { x: -258, y: 336, r: 50 } },
-  { name: 'Traditionssegler Ost', kreis: { x: -186, y: 336, r: 50 } },
+  // Lagen aus data/besuchswege.js (AUFTRITTE) und harbor.js Stufe 6, Rumpf mit Länge und Breite
+  { name: 'Kreuzfahrtschiff an P01', rechteck: { x0: -146, x1: -98, y0: 224, y1: 517 } },
+  { name: 'Korvette und Minenjagdboot an MA01/MA02', rechteck: { x0: -336, x1: -284, y0: 224, y1: 372 } },
+  { name: 'Traditionssegler vor Anker', rechteck: { x0: -202, x1: -188, y0: 270, y1: 474 } },
 ];
 
 // Bahn seitlich versetzt (d in Planeinheiten, positiv = links in Fahrtrichtung), damit nicht jedes Boot
