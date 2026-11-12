@@ -40,12 +40,6 @@ export const ECONOMY = {
     selbstEinfahrenNach: 8,   // Sekunden zum Selbstlenken, dann sucht sich das Boot selbst eine freie Box
     ueberNacht: true,         // wer abends noch wartet, bleibt über Nacht an der Boje (ohne Bewertung)
     bojengeld: 0.2,           // Anteil des Grundpreises, den ein Boot für die Nacht an der Boje zahlt
-    // Selbst-Einfahren (Jorven 12.11.2026): eine der nächsten freien Boxen von der Einfahrt aus,
-    // auch zu große. selbstWahl = Gewichte für die nächste, zweitnächste und drittnächste Box.
-    // einfahrt[ab Stufe] = [x, y] in Planeinheiten wie data/harbor.js (gleiche Punkte wie die
-    // Ankerplätze in render/landschaft/gelaende.js).
-    einfahrt: { 1: [-80, 60], 3: [167, 250], 5: [133, 315] },
-    selbstWahl: [0.6, 0.25, 0.15],
   },
 
   // Passgenau zuweisen (Review A6): Box höchstens ein Fünftel größer als die kleinste Box, an die

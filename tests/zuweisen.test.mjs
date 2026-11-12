@@ -1,4 +1,4 @@
-// P10 "Zuweisen wieder zur Entscheidung machen": Selbst-Einfahren in die nächste Box, Wunschplätze,
+// P10 "Zuweisen wieder zur Entscheidung machen": Wunschplätze,
 // Platzwert, passgenau, Abweisen mit derselben Folge wie Ungeduld, Bojengeld über Nacht.
 // Mit den echten Zahlen (economy.js) und Liegeplätzen (harbor.js, Grundbild).
 import test from 'node:test';
@@ -36,47 +36,10 @@ function waitingBoat(s, props = {}) {
   return boat;
 }
 
-const dist = (s, id) => {
-  const e = sim.entrance(s, ctx);
-  const l = ctx.berthById[id].lage[String(s.stage)];
-  return Math.hypot(l[0] - e[0], l[1] - e[1]);
-};
-
-test('Zahlen aus economy.js: Einfahrt, Auswahl, Bojengeld, passgenau', () => {
-  assert.deepEqual(rules.queue.entrance[3], ECONOMY.warten.einfahrt[3]);
-  assert.deepEqual(rules.queue.selfPick, ECONOMY.warten.selbstWahl);
+test('Zahlen aus economy.js: Bojengeld, passgenau', () => {
   assert.equal(rules.queue.buoyFee, ECONOMY.warten.bojengeld);
   assert.equal(rules.snug.share, ECONOMY.passgenau.hoechstensGroesser);
   assert.equal(rules.snug.rating, ECONOMY.passgenau.ruf);
-});
-
-test('Selbst-Einfahren nimmt eine der drei nächsten freien Boxen ab Einfahrt, auch eine zu große', () => {
-  const s = quietState(3);
-  const boat = waitingBoat(s);
-  const passend = sim.fittingBerths(s, ctx, boat.id);
-  const naechste = [...passend].sort((a, b) => dist(s, a) - dist(s, b)).slice(0, 3);
-  const gewaehlt = new Set();
-  for (let seed = 1; seed <= 40; seed++) {
-    s.rng = seed * 7919;
-    const id = sim.selfBerth(s, ctx, boat.id);
-    assert.ok(naechste.includes(id), `${id} gehört zu den drei nächsten`);
-    gewaehlt.add(id);
-  }
-  assert.ok(gewaehlt.size >= 2, 'nicht immer dieselbe Box');
-  // Ein kleines Boot nimmt auch Boxen für größere Boote, wenn sie näher liegen
-  const klassen = new Set(naechste.map((id) => ctx.berthById[id].size));
-  const kleinste = [...passend].sort((a, b) => ctx.berthById[a].maxLength - ctx.berthById[b].maxLength)[0];
-  assert.ok(klassen.size > 1 || ctx.berthById[naechste[0]].maxLength > ctx.berthById[kleinste].maxLength || naechste.includes(kleinste));
-});
-
-test('Selbst-Einfahren nach 8 s: Boot liegt danach in einer der nächsten Boxen', () => {
-  const s = quietState(2);
-  const boat = waitingBoat(s, { size: 'S', length: 3.5 });
-  const passend = sim.fittingBerths(s, ctx, boat.id);
-  const naechste = [...passend].sort((a, b) => dist(s, a) - dist(s, b)).slice(0, 3);
-  sim.tick(s, ctx, rules.queue.selfEnterAfter + 1);
-  assert.equal(s.boats[boat.id].status, 'moored');
-  assert.ok(naechste.includes(s.boats[boat.id].berthId));
 });
 
 test('Wunschplätze: nur Plätze mit Strom leuchten gold, Platzwert rechnet den Wunschbonus', () => {

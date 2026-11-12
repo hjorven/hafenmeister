@@ -135,7 +135,6 @@ export function berthsFromHarbor(harbor, rules = RULES) {
       maxLength: p.maxLaenge,
       maxBeam: p.maxBreite,
       depth,
-      lage: p.lage, // [x, y, richtung] je Stufe in Planeinheiten (für "nächste freie Box")
       ...kind,
       ...steg,
       ...(requires[p.id] ? { requires: requires[p.id] } : {}),
@@ -616,50 +615,31 @@ export function autoAssign(state, ctx) {
   return events;
 }
 
-/** Einfahrt des Hafens in der aktuellen Stufe (Planeinheiten), von hier aus sucht ein Gast seine Box. */
-export function entrance(state, ctx) {
-  const e = ctx.rules.queue.entrance || {};
-  const keys = Object.keys(e).map(Number).filter((k) => k <= state.stage).sort((a, b) => b - a);
-  return e[keys[0]] ?? null;
-}
-
-/** Abstand eines Platzes zur Einfahrt (Planeinheiten), ohne Lage unendlich. */
-function distanceFromEntrance(state, ctx, berth) {
-  const e = entrance(state, ctx);
-  const l = berth.lage?.[String(state.stage)] ?? berth.lage?.[state.stage];
-  if (!e || !l) return Infinity;
-  return Math.hypot(l[0] - e[0], l[1] - e[1]);
-}
-
 /**
- * Die Box, die sich ein Gast selbst sucht (Jorven, 12.11.2026): die nächste oder eine der nächsten
- * freien Boxen von der Einfahrt aus, an die er passt, auch wenn sie viel zu groß ist. Wünsche wie
- * Strom beachtet er nicht. Den passenden Platz findet nur der Spieler (Ziehen) oder das Hafenbüro,
- * deshalb lohnt es sich, Boote umzulenken. Gewählt wird unter den drei nächsten freien Boxen
- * (rules.queue.selfPick, Gewichte), damit nicht alle Gäste dieselbe Ecke füllen.
+ * Die Box, die sich ein Gast selbst sucht: die nächste freie Box, in die er passt, auch wenn sie
+ * zu groß für ihn ist. Wünsche wie Strom beachtet er nicht. Den Hafen gut zu belegen (kleine
+ * Boote in kleine Boxen, Strom für den, der ihn will) lohnt sich deshalb von Hand oder mit dem
+ * Hafenbüro. "Nächste" misst ctx.berthDistance(boat, berth, state) (die Brücke rechnet von der
+ * Warteboje zur Box); ohne diese Angabe gilt die Reihenfolge am Steg (A01, A02, ...).
  */
 export function selfBerth(state, ctx, boatId) {
   const boat = state.boats[boatId];
   if (!boat) return null;
+  const dist = (b) => {
+    const d = ctx.berthDistance?.(boat, b, state);
+    return Number.isFinite(d) ? d : null;
+  };
   const list = availableBerths(state, ctx)
     .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
-    .map((b) => ({ id: b.id, d: distanceFromEntrance(state, ctx, b) }))
-    .sort((a, b) => a.d - b.d || String(a.id).localeCompare(String(b.id)));
-  if (!list.length) return null;
-  const weights = (ctx.rules.queue.selfPick ?? [1]).slice(0, list.length);
-  const sum = weights.reduce((a, w) => a + w, 0);
-  let x = random(state) * sum;
-  for (let i = 0; i < weights.length; i++) {
-    x -= weights[i];
-    if (x < 0) return list[i].id;
-  }
-  return list[0].id;
+    .map((b) => ({ b, d: dist(b) }))
+    .sort((x, y) => (x.d ?? Infinity) - (y.d ?? Infinity) || String(x.b.id).localeCompare(String(y.b.id), 'de', { numeric: true }));
+  return list[0]?.b.id ?? null;
 }
 
 /**
  * Wartende Boote fahren von selbst ein: Wer seit queue.selfEnterAfter Sekunden im Revier ist und
  * nicht vom Spieler gehalten wird (boat.held, zum Beispiel ausgewählt oder im Schlepp), nimmt
- * eine der nächsten freien Boxen, an die es passt (selfBerth). Passt keine, wartet das Boot weiter.
+ * die nächste passende freie Box. Passt keine, wartet das Boot weiter.
  */
 export function selfEnter(state, ctx) {
   const events = [];
@@ -681,6 +661,8 @@ export function selfEnter(state, ctx) {
       b.selfEntered = true;
       moor(state, ctx, b, best, events);
       events.push({ type: 'selfEntered', boatId: id, berthId: best });
+      // Nacheinander einfahren: pro Sekunde höchstens ein Boot, damit sie sich nicht in die Quere kommen
+      if (ctx.rules.queue.selfEnterOneByOne !== false) break;
     }
   }
   return events;
@@ -1111,7 +1093,7 @@ function night(state, ctx, events) {
   state.day++;
   state.phase = 'day';
   state.clock = 0;
-  // Wer über Nacht an der Boje lag, macht morgens mit frischer Geduld weiter und wird zuerst bedient
+  // Wer über Nacht an der Boje lag, macht morgens mit frischer Geduld weiter
   for (const id of state.queue) {
     const b = state.boats[id];
     if (!b) continue;
@@ -1341,6 +1323,22 @@ export function advanceStage(state, ctx) {
 }
 
 /**
+ * Was der nächste Stufenausbau für liegende Boote bedeutet (Hinweis im Baumenü):
+ * gone = Plätze, die wegfallen, guests = Gäste, die dann abreisen, fixed = feste Boote, die umziehen.
+ */
+export function stageUpPreview(state, ctx) {
+  const next = state.stage + 1;
+  const inStage = (b, st) => (b.stages ? b.stages.includes(st) : b.stage <= st);
+  const gone = ctx.berths.filter((b) => berthAvailable(state, b) && !inStage(b, next)).map((b) => b.id);
+  const boats = gone.map((id) => state.boats[state.berths[id]]).filter(Boolean);
+  return {
+    gone,
+    guests: boats.filter((b) => !b.stationed).map((b) => b.id),
+    fixed: boats.filter((b) => b.stationed).map((b) => b.id),
+  };
+}
+
+/**
  * Beim Stufenausbau werden manche Stege umgebaut, ihre alten Plätze gibt es dann nicht mehr
  * (zum Beispiel B01, B02 und der T-Kopf an Steg B ab Stufe 3). Damit dort kein Boot im Leeren liegt:
  * - Gäste reisen ab, bevor gebaut wird: abgerechnet, bewertet und gezählt wie bei jeder Abreise,
@@ -1524,8 +1522,6 @@ export function rulesFromEconomy(E, base = RULES) {
     if (E.warten.selbstEinfahrenNach != null) r.queue.selfEnterAfter = E.warten.selbstEinfahrenNach;
     if (E.warten.ueberNacht != null) r.queue.overnight = !!E.warten.ueberNacht;
     if (E.warten.plaetze) r.queue.spots = { ...r.queue.spots, ...E.warten.plaetze };
-    if (E.warten.einfahrt) r.queue.entrance = { ...E.warten.einfahrt };
-    if (E.warten.selbstWahl) r.queue.selfPick = [...E.warten.selbstWahl];
     if (E.warten.bojengeld != null) r.queue.buoyFee = E.warten.bojengeld;
   }
   if (E.passgenau) r.snug = { share: E.passgenau.hoechstensGroesser, rating: E.passgenau.ruf };

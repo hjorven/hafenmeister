@@ -740,3 +740,23 @@ test('Volle Bojen: Boot mit freier passender Box fährt direkt ein statt abzudre
   sim.tick(u, ctxLive, RULES.queue.selfEnterAfter);
   assert.equal(u.boats[900].status, 'moored');
 });
+
+test('Selbst-Einfahren nimmt die nächste freie passende Box, auch eine zu große, und eins nach dem anderen', () => {
+  const c = sim.createContext({ boatTypes, berths });
+  // Entfernung wie von der Brücke geliefert: hier liegt C3 am nächsten, dann A2
+  const nah = { C3: 1, A2: 2, A1: 3 };
+  c.berthDistance = (boat, berth) => nah[berth.id] ?? 100;
+  const s = quietState({ stage: 3 });
+  const a = waitingBoat(s, { atBuoy: true, atBuoySince: 0 });
+  const b = waitingBoat(s, { atBuoy: true, atBuoySince: 0 });
+  sim.tick(s, c, c.rules.queue.selfEnterAfter);
+  assert.equal(a.berthId, 'C3', 'kleines Boot nimmt die nahe große Box');
+  assert.equal(b.status, 'waiting', 'das zweite Boot fährt erst danach');
+  sim.tick(s, c, 1);
+  assert.equal(b.berthId, 'A2');
+  // Ohne Entfernungsangabe gilt die Reihenfolge am Steg
+  const d = sim.createContext({ boatTypes, berths });
+  const t = quietState({ stage: 3 });
+  const x = waitingBoat(t, { atBuoy: true, atBuoySince: 0 });
+  assert.equal(sim.selfBerth(t, d, x.id), 'A1');
+});
