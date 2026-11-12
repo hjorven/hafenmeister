@@ -264,6 +264,21 @@ export const SERVICES = [
         wirkung: { proTag: 80, freischalten: ['traditionssegler'], ruf: 0.12, gaeste: { XL: 1.2 } } },
       { name: 'Museumshafen mit Speicher', kosten: 30000, ruf: 4.2,
         wirkung: { proTag: 160, freischalten: ['traditionssegler'], ruf: 0.18, gaeste: { XL: 1.3 }, hafenfest: 1.5 } },
+      // Stufe 6 (Jorven 2026-11-12): alle paar Wochen laufen mehrere Grosssegler gemeinsam ein und ankern
+      // zwei Tage vor der Grossschiffpier (Schiffe: js/render/services-besuch.js)
+      { name: 'Windjammertreffen', kosten: 26000, abStufe: 6,
+        wirkung: { proTag: 280, freischalten: ['traditionssegler'], ruf: 0.18, gaeste: { XL: 1.6 }, hafenfest: 1.5,
+          besuch: { art: 'windjammer', alleTage: 12, ersterNach: 4, dauer: 2, einnahme: 5000, gaeste: 1800, ruf: 0.03,
+            text: 'Windjammertreffen: Traditionssegler laufen ein' } } },
+    ],
+  },
+  {
+    id: 'barkasse', name: 'Barkasse', gruppe: 'grosse-schiffe', abStufe: 6,
+    kurz: 'Hafenrundfahrten: zweimal am Tag fährt die Barkasse mit Gästen durch den Binnenhafen und den Außenhafen.',
+    lage: { x: 192, y: 2, dreh: 0 }, radius: 8,
+    stufen: [
+      { name: 'Barkasse', kosten: 9000, braucht: [{ id: 'fahrgastanleger', stufe: 1 }],
+        wirkung: { proTag: 220, wetter: { regen: 0.5, sturm: 0 }, ruf: 0.03 } },
     ],
   },
   {

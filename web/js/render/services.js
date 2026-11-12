@@ -389,6 +389,8 @@ export function init(game) {
     liste: () => R.liste(zustand(), kontext()).filter((x) => sichtbar(x.id)),
     pruefe: (id) => R.pruefe(zustand(), id, kontext()),
     stufeVon: (id) => R.stufeVon(zustand(), id),
+    // Regelmaessiger Besuch der gebauten Stufe ({ art, alleTage, dauer, ... }) oder null
+    besuchVon: (id) => R.aktiveStufe(zustand(), id)?.wirkung?.besuch ?? null,
     bauen,
     effekte: () => fuerSpielregeln(R.effekte(zustand())),
     abrechnen,

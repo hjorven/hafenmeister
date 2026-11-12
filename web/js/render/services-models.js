@@ -576,7 +576,71 @@ function museumshafen(stufe) {
       w.rotation.x = Math.PI / 4;
     }
   }
-  return { group: g, update: (dt, t) => { kran.rotation.y = Math.sin(t * 0.12) * 0.5; } };
+  const wehen = [];
+  if (stufe >= 3) {
+    // Windjammertreffen: Flaggenreihe an der Kaikante und zwei weisse Marktzelte auf dem Pflaster
+    const farben = [FARBE.red, FARBE.blue, FARBE.yellow, FARBE.green, FARBE.coral, FARBE.navy];
+    for (let i = 0; i < 6; i++) wehen.push(flagge(g, -12 + i * 4.8, kz + 1.2, 6.5, farben[i]));
+    for (const x of [-21, -15]) {
+      box(g, 3.6, 2, 3, FARBE.white, x, LAND_Y, kz + 5);
+      const dach = add(g, new THREE.ConeGeometry(2.7, 1.4, 4), FARBE.white, x, LAND_Y + 2.7, kz + 5);
+      dach.rotation.y = Math.PI / 4;
+      box(g, 3.4, 0.4, 0.06, x < 0 ? FARBE.red : FARBE.blue, x, LAND_Y + 1.5, kz + 3.48);
+    }
+  }
+  return { group: g, update: (dt, t) => {
+    kran.rotation.y = Math.sin(t * 0.12) * 0.5;
+    wehen.forEach((f, i) => { f.rotation.y = Math.sin(t * 2.1 + i) * 0.4; });
+  } };
+}
+
+// Barkasse fuer Hafenrundfahrten: Fahrkartenbude am Ufer, Gangway und Ponton. Die Barkasse selbst
+// faehrt in js/render/services-besuch.js und liegt am Objekt 'liegeplatz' (Bug nach +x).
+function barkasse(stufe, { ufer = 6 } = {}) {
+  const g = new THREE.Group();
+  // Bude mit rot-weissem Schild "Hafenrundfahrt"
+  box(g, 3.2, 2.4, 2.4, FARBE.white, 0, LAND_Y, 1.2);
+  box(g, 3.6, 0.2, 2.8, FARBE.red, 0, LAND_Y + 2.4, 1.2);
+  box(g, 1.4, 0.8, 0.06, FARBE.glass, 0, LAND_Y + 1.2, -0.03);
+  for (let i = 0; i < 4; i++) box(g, 0.8, 0.5, 0.08, i % 2 ? FARBE.white : FARBE.red, -1.2 + i * 0.8, LAND_Y + 2.7, -0.05);
+  const fl = flagge(g, 2.4, -0.6, 5, FARBE.red);
+  box(g, 2.4, 0.45, 0.5, FARBE.wood, -3.4, LAND_Y, -0.6);            // Wartebank
+  // Gangway zum Ponton, Ponton parallel zum Ufer
+  const pz = -(ufer + 3.2);
+  steg(g, 0, -0.4, 0, pz + 1.3, 1.4);
+  const ponton = new THREE.Group();
+  ponton.position.set(0, 0, pz);
+  box(ponton, 12, 0.5, 2.6, FARBE.pont, 0, 0.05, 0);
+  for (const x of [-5, 0, 5]) poller(ponton, x, -1.1, 0.55);
+  ponton.userData.fest = true;
+  g.add(ponton);
+  const liege = new THREE.Object3D();
+  liege.name = 'liegeplatz';
+  liege.position.set(0, 0, pz - 3.6);
+  g.add(liege);
+  return { group: g, update: (dt, t) => { fl.rotation.y = Math.sin(t * 2.3) * 0.35; } };
+}
+
+// Die Barkasse: langer niedriger Rumpf, Kajuete mit Fensterband, offenes Achterdeck unter rotem Sonnendach
+export function barkasseBoot() {
+  const g = new THREE.Group();
+  rumpf(g, 16, 4.2, 1.8, FARBE.ink, 0, 0, 0, 0, FARBE.wood);
+  box(g, 15, 0.25, 4.25, FARBE.red, -0.4, 0.55, 0);                  // roter Streifen
+  box(g, 7.5, 1.4, 3.2, FARBE.white, 0.6, 0.8, 0);                  // Kajuete
+  for (const z of [-1.62, 1.62]) box(g, 6.6, 0.55, 0.06, FARBE.glass, 0.6, 1.5, z);
+  box(g, 7.7, 0.12, 3.4, FARBE.wood2, 0.6, 2.2, 0);                  // Kajuetdach
+  box(g, 1.8, 1.3, 2.4, FARBE.white, 5, 0.8, 0);                     // Steuerstand vorn
+  box(g, 0.06, 0.5, 2, FARBE.glass, 5.92, 1.6, 0);
+  box(g, 2, 0.1, 2.6, FARBE.red, 5, 2.1, 0);
+  // Achterdeck mit Baenken und Sonnendach
+  for (const z of [-1.3, 1.3]) box(g, 4, 0.4, 0.6, FARBE.wood, -5, 0.8, z);
+  for (const [x, z] of [[-7, -1.5], [-7, 1.5], [-3.2, -1.5], [-3.2, 1.5]]) zyl(g, 0.05, 1.6, FARBE.white, x, 0.8, z, 4);
+  box(g, 4.2, 0.1, 3.4, FARBE.red, -5.1, 2.4, 0);
+  // Fahrgaeste
+  const farben = [FARBE.yellow, FARBE.navy, FARBE.coral, FARBE.green, FARBE.blue, FARBE.white];
+  for (let i = 0; i < 6; i++) zyl(g, 0.22, 0.8, farben[i], -6.4 + (i % 3) * 1.4, 1.1, i < 3 ? -1.3 : 1.3, 6);
+  const fl = flagge(g, -7.8, 0, 1.8, FARBE.red, 0.8);
+  return { group: g, laenge: 16, breite: 4.2, fl };
 }
 
 function kreuzfahrtterminal(stufe) {
@@ -905,7 +969,7 @@ export function tankstelle(stufe) {
 export const MODELLE = {
   bootsverleih, slip, raeucherei, fischhalle, segelclub, mastenkran, ausruester, travellift, winterlager,
   segelmacher, seenotretter, fahrgastanleger, museumshafen, kreuzfahrtterminal, marineanleger,
-  baecker, hafencafe, grillplatz, fahrradverleih, eisdiele,
+  baecker, hafencafe, grillplatz, fahrradverleih, eisdiele, barkasse,
 };
 
 // Baut ein Modell. Unbekannte ids bekommen ein schlichtes Haus, damit nichts unsichtbar bleibt.

@@ -1,12 +1,14 @@
 // Besuchsschiffe der Services: Ausflugsschiff am Fahrgastanleger (taeglich), Kreuzfahrtschiff an der
-// Kreuzfahrtpier und Marineschiffe am Marineanleger (regelmaessige Besuche aus js/services/rules.js).
-// Die Schiffe laufen morgens ein, liegen tagsueber an ihrem Platz und laufen abends wieder aus.
+// Kreuzfahrtpier, Marineschiffe am Marineanleger und Windjammer vor der Grossschiffpier (regelmaessige
+// Besuche aus js/services/rules.js), dazu die Barkasse mit zwei Hafenrundfahrten am Tag.
+// Die Schiffe laufen morgens ein, liegen an ihrem Platz und laufen am letzten Besuchstag abends wieder aus.
+// Alle melden sich bei game.boatAnim.hindernis an (falls vorhanden), damit Gastboote ausweichen.
 // Wird von js/render/services.js gestartet, kein eigener Eintrag in MODULES.
 //
 // Falls der Schiffs-Thread spaeter eigene XXL-Modelle anbietet (game.boatTypes.xxl), werden
 // diese genommen; bis dahin zeichnet dieses Modul schlichte Flat-Modelle.
 import * as THREE from 'three';
-import { FARBE, box, zyl, flagge, rumpf, mat } from './services-models.js';
+import { FARBE, box, zyl, flagge, rumpf, mat, barkasseBoot } from './services-models.js';
 import { HAFEN } from '../data/harbor.js';
 
 const U = 0.62;
@@ -101,9 +103,35 @@ const AUFTRITTE = {
     ],
     plan: { an: 0.05, ab: 0.7 },
   },
+  museumshafen: {
+    art: 'windjammer', abStufe: 3,
+    // Drei Traditionssegler (XL1 vom Schiffs-Thread) ankern in einer Reihe noerdlich der Grossschiffpier,
+    // abseits vom Weg des Kreuzfahrtschiffs. Einlaufparade von Norden, unter Segeln, mit Abstand.
+    schiffe: [
+      { modell: 'xl:XL1-4', weg: [[-330, 330], [-280, 344], [-150, 372], [-112, 410], [-108, 560]], liegeKurs: 180, versatz: 0 },
+      { modell: 'xl:XL1-2', weg: [[-258, 334], [-208, 350], [-140, 376], [-112, 410], [-108, 560]], liegeKurs: 180, versatz: 0.035 },
+      { modell: 'xl:XL1-1', weg: [[-186, 338], [-150, 356], [-128, 384], [-112, 410], [-108, 560]], liegeKurs: 180, versatz: 0.07 },
+    ],
+    plan: { an: 0.12, ab: 0.58 },
+    fahrt: 0.2,
+  },
 };
 
-const DAUER = 0.12;     // Anteil des Tages fuer eine Fahrt vom Liegeplatz nach See
+const DAUER = 0.12;     // Anteil des Tages fuer eine Fahrt vom Liegeplatz nach See (ohne eigene 'fahrt')
+
+// Barkasse: zwei Hafenrundfahrten am Tag (Anteil des Spieltags), Wege in Planeinheiten ab dem Ponton
+// (Liegeplatz etwa 192/18, Bug nach Osten: erst nach Osten ablegen, zuletzt von Westen anlegen).
+// Zeiten so gelegt, dass sie das Ausflugsschiff im Aussenhafen nicht trifft (raus 0,22, zurueck 0,5 bis 0,62).
+const RUNDFAHRTEN = [
+  { ab: 0.3, dauer: 0.28, name: 'binnen',
+    // nördlich am Schwimmwellenbrecher (buildings.js, bis Plan-y 154) entlang, Wende bei x -60
+    weg: [[218, 24], [205, 60], [200, 90], [180, 150], [95, 168], [-40, 174], [-62, 168], [-40, 163], [150, 161],
+      [196, 100], [178, 40], [175, 30]] },
+  { ab: 0.64, dauer: 0.28, name: 'aussen',
+    // durch den Durchstich (x 152 bis 182) in den Aussenhafen, am Museumshafen und an der Westmole vorbei
+    weg: [[218, 24], [205, 60], [196, 100], [168, 170], [162, 205], [162, 240], [140, 262], [25, 268], [12, 282],
+      [60, 292], [140, 287], [164, 255], [164, 205], [172, 170], [198, 100], [178, 40], [175, 30]] },
+];
 
 function wegLaenge(pts) {
   let s = 0;
@@ -142,17 +170,31 @@ export function initBesuche(game, services) {
   let heute = { tag: -1, besuch: new Set() };
 
   // Welche Besuche finden heute statt? (nach dem Plan in rules.js, Sturm verschiebt)
+  // Mehrtaegige Besuche (Windjammer, Flottenbesuch) merken sich ihren letzten Tag im Spielstand:
+  // z.laufend[id] = { von, bis }. rules.js rechnet den Besuch am Abend des ersten Tages ab.
   function besucheHeute() {
     const tag = game.state?.tag ?? 1;
     const z = services.zustand();
     const s = new Set();
+    const nr = new Map();
     for (const id of Object.keys(AUFTRITTE)) {
-      if (!(services.stufeVon(id) > 0)) continue;
       const a = AUFTRITTE[id];
-      if (a.jedenTag || (z.besuche[id] != null && z.besuche[id] <= tag)) s.add(id);
+      if (!(services.stufeVon(id) >= (a.abStufe ?? 1))) continue;
+      const l = z.laufend?.[id];
+      if (a.jedenTag) s.add(id);
+      else if (l && tag > l.von && tag <= l.bis) { s.add(id); nr.set(id, { tagNr: tag - l.von, tage: l.bis - l.von + 1 }); }
+      else if (z.besuche[id] != null && z.besuche[id] <= tag) { s.add(id); nr.set(id, { tagNr: 0, tage: dauerVon(id) }); }
     }
-    return { tag, besuch: s };
+    return { tag, besuch: s, nr };
   }
+  const dauerVon = (id) => services.besuchVon?.(id)?.dauer ?? 1;
+
+  game.on('services:besuch', (b) => {
+    if (!(b.dauer > 1)) return;
+    const z = services.zustand();
+    z.laufend ??= {};
+    z.laufend[b.id] = { von: b.tag, bis: b.tag + b.dauer - 1 };
+  });
 
   // XXL-Modelle des Schiffs-Threads (render/boats/xxl.js: game.boatTypes.xxl), sonst eigene Modelle
   const XXL_ID = { kreuzfahrtschiff: 'XXL1-3', korvette: 'XXL2-2', minenjagdboot: 'XXL2-1' };
@@ -169,37 +211,66 @@ export function initBesuche(game, services) {
     }
   }
 
+  // XL-Modelle (Traditionssegler) aus render/boats/xl.js, mit Segeln
+  function xlModell(id) {
+    try {
+      const xl = game.boatTypes?.xl;
+      const m = xl?.MODELS?.find?.((q) => q.id === id);
+      return m ? xl.buildBoat(m, { palette: 0, sails: false }) : null;
+    } catch (err) {
+      console.warn('XL-Modell nicht baubar', id, err);
+      return null;
+    }
+  }
+
+  // Bei der Bootsanimation als Hindernis anmelden (Schnittstelle des Thread Schiffsanimationen)
+  function alsHindernis(group, laenge, breite) {
+    try { return game.boatAnim?.hindernis?.(group, { laenge, breite }) ?? null; } catch { return null; }
+  }
+  const MASSE = { ausflugsschiff: [24, 6.4], kreuzfahrtschiff: [72, 13], korvette: [64, 9.5], minenjagdboot: [42, 9] };
+
   function schiffeFuer(id) {
     if (aktiv.has(id)) return aktiv.get(id);
     const liste = AUFTRITTE[id].schiffe.map((d) => {
-      const extern = xxlModell(d.modell);
-      const m = extern ? { group: extern, laenge: 0 } : MODELL[d.modell]();
+      const xlId = d.modell.startsWith('xl:') ? d.modell.slice(3) : null;
+      const extern = xlId ? xlModell(xlId) : xxlModell(d.modell);
+      if (xlId && !extern) return null;
+      const m = extern ? { group: extern, laenge: 0, xl: !!xlId } : MODELL[d.modell]();
       m.group.name = `besuch-${d.modell}`;
       m.group.visible = false;
       gruppe.add(m.group);
       // Liegeplatz aus harbor.js, sobald Stufe 6 dort steht; der Weg im Katalog ist der Rückfall
       const lage = d.platz ? HAFEN.plaetze?.find((q) => q.id === d.platz)?.lage?.[6] : null;
       const weg = lage ? [[lage[0], lage[1]], ...d.weg.slice(1)] : d.weg;
-      return { ...m, weg: weg.map(([x, y]) => W(x, y)), liegeKurs: THREE.MathUtils.degToRad(d.liegeKurs), kurs: 0, t: 1 };
-    });
+      const [l, b] = MASSE[d.modell] ?? [extern?.userData?.length ?? 30, extern?.userData?.beam ?? 8];
+      alsHindernis(m.group, l, b);
+      return { ...m, weg: weg.map(([x, y]) => W(x, y)), liegeKurs: THREE.MathUtils.degToRad(d.liegeKurs), kurs: 0, t: 1,
+        versatz: d.versatz ?? 0 };
+    }).filter(Boolean);
     aktiv.set(id, liste);
     return liste;
   }
 
-  // Anteil der Fahrt nach See (0 = am Platz, 1 = draussen) fuer einen Tagesanteil
-  function seeAnteil(a, tag) {
+  // Anteil der Fahrt nach See (0 = am Platz, 1 = draussen) fuer einen Tagesanteil.
+  // tagNr/tage: der wievielte Tag eines mehrtaegigen Besuchs (0 = Ankunft, tage - 1 = Abfahrt).
+  function seeAnteil(a, tag, versatz = 0, tagNr = 0, tage = 1) {
     const p = a.plan;
+    const D = a.fahrt ?? DAUER;
     if (a.jedenTag) {
       if (tag < p.ab) return 0;
-      if (tag < p.ab + DAUER) return (tag - p.ab) / DAUER;
+      if (tag < p.ab + D) return (tag - p.ab) / D;
       if (tag < p.zurueck) return 1;
-      if (tag < p.zurueck + DAUER) return 1 - (tag - p.zurueck) / DAUER;
+      if (tag < p.zurueck + D) return 1 - (tag - p.zurueck) / D;
       return 0;
     }
-    if (tag < p.an) return 1;
-    if (tag < p.an + DAUER) return 1 - (tag - p.an) / DAUER;
-    if (tag < p.ab) return 0;
-    if (tag < p.ab + DAUER) return (tag - p.ab) / DAUER;
+    const an = p.an + versatz, ab = p.ab + versatz;
+    if (tagNr === 0) {
+      if (tag < an) return 1;
+      if (tag < an + D) return 1 - (tag - an) / D;
+      if (tage > 1 || tag < ab) return 0;
+    }
+    if (tagNr < tage - 1 || tag < ab) return 0;
+    if (tag < ab + D) return (tag - ab) / D;
     return 1;
   }
 
@@ -212,10 +283,12 @@ export function initBesuche(game, services) {
   // Ankuendigung am Vorabend im Schild der Ereignisse (js/events/banner.js)
   game.on('services:besuch-angekuendigt', (b) => {
     if (b.art === 'ausflugsfahrt') return;
-    const titel = b.art === 'kreuzfahrt' ? 'Kreuzfahrttag' : b.art === 'flottenbesuch' ? 'Flottenbesuch' : 'Besuch';
+    const titel = { kreuzfahrt: 'Kreuzfahrttag', flottenbesuch: 'Flottenbesuch', windjammer: 'Windjammertreffen' }[b.art] ?? 'Besuch';
+    const text = { kreuzfahrt: 'Viele Tagesgäste kommen in den Ort.',
+      windjammer: 'Drei Großsegler laufen unter Segeln ein und ankern zwei Tage vor der Pier.' }[b.art] ?? 'Zuschauer kommen an die Pier.';
     game.emit('event:announce', {
       event: { id: b.art === 'kreuzfahrt' ? 'kreuzfahrttag' : 'hafenfest', title: titel,
-        teaser: `Morgen: ${b.text}`, text: b.art === 'kreuzfahrt' ? 'Viele Tagesgäste kommen in den Ort.' : 'Zuschauer kommen an die Pier.' },
+        teaser: `Morgen: ${b.text}`, text },
       startDay: b.tag, day: b.tag - 1,
     });
   });
@@ -229,8 +302,9 @@ export function initBesuche(game, services) {
       const da = heute.besuch.has(id) && !winter && !(sturm() && !a.jedenTag);
       if (!da && !aktiv.has(id)) continue;
       const schiffe = schiffeFuer(id);
-      const t = da ? (sturm() ? 0 : seeAnteil(a, tagAnteil)) : 1;
+      const nr = heute.nr?.get(id) ?? { tagNr: 0, tage: 1 };
       for (const s of schiffe) {
+        const t = da ? (sturm() ? 0 : seeAnteil(a, tagAnteil, s.versatz, nr.tagNr, nr.tage)) : 1;
         const ziel = glatt(Math.max(0, Math.min(1, t)));
         const zurSee = ziel > s.t;
         s.t = ziel;
@@ -245,9 +319,54 @@ export function initBesuche(game, services) {
         s.group.rotation.y = s.kurs;
         if (s.radar) s.radar.rotation.y = game.time * 1.5;
         if (s.fl) s.fl.rotation.y = Math.sin(game.time * 2.2) * 0.35;
+        if (s.xl) {
+          // Unter Segeln fahren, vor Anker Segel bergen
+          const segel = s.t > 0.03;
+          if (s.group.userData.sailsUp !== segel) game.boatTypes.xl.setSails(s.group, segel);
+          game.boatTypes.xl.animateBoat?.(s.group, game.time, { speed: segel ? 3 : 0 });
+        }
       }
     }
+    barkasseTick(dt, tagAnteil, winter);
   });
 
-  return { gruppe, besucheHeute: () => [...heute.besuch] };
+  // ------------------------------------------------------------------ Barkasse
+  let bark = null;
+  function barkasseTick(dt, tagAnteil, winter) {
+    const gebaut = services.stufeVon('barkasse') > 0;
+    if (!gebaut) { if (bark) bark.group.visible = false; return; }
+    const anlage = services.gruppe?.getObjectByName?.('service-barkasse');
+    const liege = anlage?.getObjectByName?.('liegeplatz');
+    if (!liege) return;
+    if (!bark) {
+      bark = barkasseBoot();
+      bark.group.name = 'besuch-barkasse';
+      gruppe.add(bark.group);
+      alsHindernis(bark.group, bark.laenge, bark.breite);
+      bark.kurs = 0;
+    }
+    bark.group.visible = true;
+    liege.updateMatrixWorld(true);
+    const L = liege.getWorldPosition(new THREE.Vector3());
+    // Welche Rundfahrt laeuft gerade? Im Winter und bei Sturm bleibt sie am Ponton.
+    const r = winter || sturm() ? null : RUNDFAHRTEN.find((q) => tagAnteil >= q.ab && tagAnteil < q.ab + q.dauer);
+    let p = L, soll = 0;
+    if (r) {
+      const pts = [L, ...r.weg.map(([x, y]) => W(x, y)), L];
+      const u = (tagAnteil - r.ab) / r.dauer;
+      // langsam ablegen und anlegen, dazwischen gleichmaessig
+      const a = 0.06, vmax = 1 / (1 - a);
+      const f = u < a ? vmax * u * u / (2 * a) : u > 1 - a ? 1 - vmax * (1 - u) * (1 - u) / (2 * a) : vmax * (u - a / 2);
+      const w = aufWeg(pts, Math.max(0, Math.min(1, f)));
+      p = w.p;
+      soll = u < 0.01 || u > 0.99 ? 0 : w.kurs;
+    }
+    bark.kurs = winkelZu(bark.kurs, soll, Math.min(1, dt * 2.2));
+    bark.group.position.set(p.x, Math.sin(game.time * 1.3 + p.x) * 0.05, p.z);
+    bark.group.rotation.y = bark.kurs;
+    bark.group.rotation.z = r ? Math.sin(game.time * 1.7) * 0.015 : 0;
+    if (bark.fl) bark.fl.rotation.y = Math.sin(game.time * 2.6) * 0.4;
+  }
+
+  return { gruppe, besucheHeute: () => [...heute.besuch], barkasse: () => bark?.group ?? null };
 }
