@@ -36,18 +36,18 @@ const SEE = {
     { pts: ostwaerts(306, -298), art: 'gross' }, { pts: westwaerts(326, -278), art: 'gross' },
   ],
   // Stufe 3 und 4: Molenköpfe bis y 268 (x 149 bis 187), Rinne bis y 356 (x 152 bis 212),
-  // Reede ab x 222, Ankerfläche um (300, 330). Die kleinen Bahnen biegen vor der Einfahrt nach Norden ab.
+  // Reede ab x 222, Ankerfeld um (345, 385) mit Radius 62. Die kleinen Bahnen biegen vor der Einfahrt nach Norden ab.
   3: [
     { pts: ostwaerts(292, -340, [[50, 292], [112, 326], [176, 470], [206, 760]]), art: 'klein' },
     { pts: westwaerts(306, -326, [[192, 760], [162, 474], [100, 340], [46, 306]]), art: 'klein' },
-    { pts: ostwaerts(436, -300), art: 'gross' }, { pts: westwaerts(456, -280), art: 'gross' },
+    { pts: ostwaerts(472, -300), art: 'gross' }, { pts: westwaerts(492, -280), art: 'gross' },
   ],
   // Ab Stufe 5: Außenhafen mit Westmole bis (96, 320), Rinne bis y 356 (x 108 bis 184),
-  // große Ankerfläche um (60, 420), Reede ab x 226. XXL (bis 29 m breit) nur auf der äußersten Bahn.
+  // Ankerfeld für Große um (30, 440) mit Radius 85, Reede ab x 226, Ankerfeld um (360, 440). XXL (bis 29 m breit) nur auf der äußersten Bahn.
   5: [
-    { pts: ostwaerts(268, -340, [[-112, 268], [-46, 298], [-28, 342], [40, 352], [104, 358], [166, 476], [196, 760]]), art: 'klein' },
-    { pts: westwaerts(282, -326, [[182, 760], [152, 480], [94, 370], [38, 366], [-42, 356], [-60, 310], [-116, 282]]), art: 'klein' },
-    { pts: ostwaerts(526, -300), art: 'gross' }, { pts: westwaerts(562, -250), art: 'gross', xxl: true },
+    { pts: ostwaerts(268, -340, [[-112, 268], [-52, 294], [-34, 326], [30, 328], [86, 334], [118, 352], [140, 420], [170, 520], [196, 760]]), art: 'klein' },
+    { pts: westwaerts(282, -326, [[182, 760], [154, 520], [124, 420], [104, 364], [78, 346], [30, 342], [-46, 340], [-66, 300], [-116, 282]]), art: 'klein' },
+    { pts: ostwaerts(562, -300), art: 'gross' }, { pts: westwaerts(600, -250), art: 'gross', xxl: true },
   ],
 };
 
@@ -74,8 +74,8 @@ function aufBahn(pts, f) {
 // Runden auf dem Binnensee (nur solange der See noch kein Hafenbecken ist).
 // Superellipse: Mitte, Halbachsen; die Boote fahren mit seitlichem Versatz, damit sie sich nicht treffen.
 const SEE_RUNDE = {
-  1: { cx: 40, cy: 136, rx: 195, ry: 30 },   // nördlich der Bojen (y bis 56), Ankerfläche bis y 86, Einfahrt der Gäste bei (-58, 90)
-  2: { cx: 180, cy: 142, rx: 125, ry: 22 },  // östlich der Ankerfläche (x bis 36), Liegeplätze bis y 67
+  1: { cx: 172, cy: 132, rx: 120, ry: 28 },  // östlich des Ankerfelds (um -25, 102, Radius 44)
+  2: { cx: 218, cy: 140, rx: 104, ry: 22 },  // östlich des Ankerfelds (um 42, 130, Radius 50)
 };
 
 // Ein Kanu oder Ruderboot paddelt in Ufernähe östlich der Stege hin und her (in der Startansicht zu sehen).
