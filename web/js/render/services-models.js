@@ -850,6 +850,58 @@ function eisdiele(stufe, { uhr } = {}) {
   };
 }
 
+// ------------------------------------------------------------------ Tankstelle
+// Versorgung "diesel" der Spielregeln (sim.js facilities): Stufe 1 eine Zapfsäule, Stufe 2 zwei
+// Säulen unter einem Dach mit Tankwarthäuschen. Steht auf dem Dienststeg aus harbor.js
+// (Schwimmsteg, Deck 0,46 m), Wasserseite = lokal -z. Alle Teile sind fest (nicht aufs Gelände heben).
+export function tankstelle(stufe) {
+  const g = new THREE.Group();
+  const DECK = 0.46;
+  const lichter = [], schlaeuche = [];
+  const saeule = (x) => {
+    box(g, 0.7, 1.5, 0.5, FARBE.red, x, DECK, -0.5);
+    box(g, 0.74, 0.25, 0.54, FARBE.white, x, DECK + 1.5, -0.5);
+    box(g, 0.5, 0.4, 0.04, FARBE.yellow, x, DECK + 0.9, -0.77);              // Schild "D"
+    const l = add(g, new THREE.SphereGeometry(0.09, 6, 4), FARBE.green, x + 0.25, DECK + 1.82, -0.5);
+    l.material = new THREE.MeshBasicMaterial({ color: '#6fe08a' });
+    lichter.push(l);
+    // Schlauch: hängt in einem Bogen zur Wasserkante und pendelt leicht
+    const s = new THREE.Group();
+    s.position.set(x - 0.3, DECK + 1.2, -0.75);
+    const bogen = add(s, new THREE.TorusGeometry(0.42, 0.05, 4, 10, Math.PI), FARBE.ink, 0, -0.42, 0);
+    bogen.rotation.z = Math.PI;
+    g.add(s);
+    schlaeuche.push(s);
+  };
+  saeule(-1.6);
+  // Ölfass und Rettungsring
+  zyl(g, 0.3, 0.8, FARBE.blue, 2.6, DECK, 0.2, 8);
+  add(g, new THREE.TorusGeometry(0.32, 0.09, 6, 12), FARBE.orange, 3.4, DECK + 0.9, 0.55);
+  // Schild "DIESEL" am Mast
+  zyl(g, 0.06, 3.4, FARBE.white, -3.6, DECK, 0.3, 5);
+  box(g, 1.6, 0.6, 0.08, FARBE.yellow, -3.6, DECK + 2.9, 0.3);
+  box(g, 1.2, 0.18, 0.1, FARBE.red, -3.6, DECK + 3.1, 0.3);
+  if (stufe >= 2) {
+    saeule(0.2);
+    // Dach über den Säulen
+    for (const [x, z] of [[-2.4, -1], [1, -1], [-2.4, 0.8], [1, 0.8]]) box(g, 0.12, 2.6, 0.12, FARBE.white, x, DECK, z);
+    box(g, 4, 0.25, 2.3, FARBE.red, -0.7, DECK + 2.6, -0.1);
+    box(g, 4.1, 0.12, 2.4, FARBE.white, -0.7, DECK + 2.85, -0.1);
+    // Tankwarthäuschen
+    box(g, 1.8, 2.1, 1.5, FARBE.white, 3.4, DECK, 0.35);
+    box(g, 2, 0.2, 1.7, FARBE.red, 3.4, DECK + 2.1, 0.35);
+    box(g, 0.9, 0.7, 0.04, FARBE.glass, 3.4, DECK + 1.1, -0.42);
+  }
+  g.traverse((o) => { if (o !== g) o.userData.fest = true; });
+  return {
+    group: g,
+    update(dt, t) {
+      lichter.forEach((l, i) => { l.visible = Math.sin(t * 2.4 + i * 1.7) > -0.3; });
+      schlaeuche.forEach((s, i) => { s.rotation.x = Math.sin(t * 0.9 + i) * 0.12; });
+    },
+  };
+}
+
 export const MODELLE = {
   bootsverleih, slip, raeucherei, fischhalle, segelclub, mastenkran, ausruester, travellift, winterlager,
   segelmacher, seenotretter, fahrgastanleger, museumshafen, kreuzfahrtterminal, marineanleger,
