@@ -18,6 +18,7 @@
 //   dauer:einlaufen { id, platzId }
 
 import * as sim from '../sim.js';
+import { regelnBereit } from './regeln-bereit.js';
 import { random, randomInt } from '../random.js';
 import { STAMM } from './stammgaeste.js';
 
@@ -199,13 +200,7 @@ const GRUEN = '#3fae5a';
 const ROT = '#d9534f';
 
 export async function init(game) {
-  if (!game.sim) {
-    // bridge.js lädt die Bootsdaten asynchron; auf die Regeln warten
-    await new Promise((resolve) => {
-      const off = game.on('sim:change', () => { off(); resolve(); });
-      if (game.sim) { off(); resolve(); }
-    });
-  }
+  await regelnBereit(game);
   const api = game.sim;
   haengeEin(api.addHook);
 

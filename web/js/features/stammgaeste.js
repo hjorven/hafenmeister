@@ -13,6 +13,7 @@
 // Die Logik läuft ohne Browser (tests/stammgaeste.test.mjs).
 
 import * as sim from '../sim.js';
+import { regelnBereit } from './regeln-bereit.js';
 import { random } from '../random.js';
 import { BOOTSNAMEN, HEIMATHAEFEN } from '../data/bootsnamen.js';
 
@@ -126,12 +127,7 @@ export function beschreibung(boat) {
 }
 
 export async function init(game) {
-  if (!game.sim) {
-    await new Promise((resolve) => {
-      const off = game.on('sim:change', () => { off(); resolve(); });
-      if (game.sim) { off(); resolve(); }
-    });
-  }
+  await regelnBereit(game);
   haengeEin(game.sim.addHook);
   game.on('sim:stammgastNeu', (e) => game.emit('stammgast:neu', e));
   game.stammgaeste = { liste: () => stammState(game.sim.state).liste, beschreibung, kannBleiben: (b) => kannBleiben(game.sim.state, b) };
