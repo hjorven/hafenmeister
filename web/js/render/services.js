@@ -326,6 +326,7 @@ export function init(game) {
     })
     .catch(() => {});
 
+  const GROSSSCHIFF = ['kreuzfahrt', 'flottenbesuch', 'offene-tuer'];
   const api = {
     katalog: R.katalog,
     zustand,
@@ -337,6 +338,9 @@ export function init(game) {
     abrechnen,
     naechsteBesuche: () => R.naechsteBesuche(zustand(), kontext().tag),
     planeBesuch: (id, tag) => R.planeBesuch(zustand(), id, tag),
+    // Ziel Stufe 6 (economy.js ziel.grossschiffBesuche): Kreuzfahrtschiffe, Flottenbesuche, Tage der offenen Tür
+    grossschiffBesuche: () => GROSSSCHIFF.reduce((n, art) => n + (zustand().anzahl?.[art] ?? 0), 0),
+    besucheJeArt: () => ({ ...(zustand().anzahl ?? {}) }),
     oeffnen,
     schliessen,
     gruppe,

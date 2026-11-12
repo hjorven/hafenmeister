@@ -57,6 +57,7 @@ Zahlen aus dem Balancing (`web/js/data/economy.js`, `ECONOMY.services[id]`) übe
 | `tag:ende` mit `{ tag, boote: [{ klasse, antrieb }] }` | Tagesabrechnung, Antwort `services:abrechnung` mit `{ einnahmen, summe, besuche }`; Winter kommt aus `day:start`, Sturm aus `game.events.current` |
 | `game.emit('sturm', { tag })` | Seenotretter rücken aus, Antwort `services:einsatz` |
 | `services:gebaut`, `services:besuch-angekuendigt`, `services:besuch` | für Ton, Oberfläche und Schiffe |
+| `game.services.grossschiffBesuche()` | Zahl der bisherigen Besuche großer Schiffe (Kreuzfahrt, Flottenbesuch, Tag der offenen Tür) für das Ziel von Stufe 6 (`ziel.grossschiffBesuche` in `economy.js`); `besucheJeArt()` zählt je Art |
 | `game.services.liste()` | alle Services der aktuellen Stufe mit Preis und Sperrgründen, z. B. für den Knopf „Bauen“ |
 
 Keine laufenden Kosten (plan.md, Leitlinien): Services bringen nur etwas ein.
