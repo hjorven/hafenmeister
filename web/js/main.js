@@ -11,6 +11,7 @@ import { warteplaetze } from './render/landschaft/gelaende.js';
 // Neue Module hier eintragen, dann muss niemand sonst main.js oder index.html anfassen.
 const MODULES = [
   './data/stegbild.js',
+  './render/landschaft/formen.js',      // Geländeform des Spiels (Thread Geländeform), vor der Landschaft
   './world/region.js',
   './render/landscape.js',
   './render/stege.js',

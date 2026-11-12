@@ -3,7 +3,8 @@
 // Alle wiederholten Dinge werden beim Bau zu wenigen festen Netzen gebacken, damit es auch auf schwachen Handys flüssig bleibt.
 import * as THREE from 'three';
 import { vereinfacheRaster } from './netz.js';
-import { punkt, BEREICH, PLAN_M, molen, buhnen, rauschen, hafenAbstand, suedufer, DURCHSTICH, SLIP, pricken } from './gelaende.js';
+import { punkt, BEREICH, PLAN_M, molen, buhnen, rauschen, hafenAbstand, suedufer, DURCHSTICH, SLIP, pricken, leuchttuerme } from './gelaende.js';
+import { erzeugeLeuchtfeuer } from './tageslicht.js';
 
 const U = PLAN_M;
 
@@ -417,6 +418,48 @@ function baueKaimauern(region, stufe, gruppe, schatten) {
   }
 }
 
+// ------------------------------------------------------------------ Leuchttürme der Geländeform
+
+function baueLeuchttuerme(region, stufe, gruppe, schatten) {
+  const feuer = [];
+  const mWeiss = new THREE.MeshLambertMaterial({ color: '#f4f1ea', flatShading: true });
+  const mRot = new THREE.MeshLambertMaterial({ color: '#c8524a', flatShading: true });
+  const mDunkel = new THREE.MeshLambertMaterial({ color: '#3e4a52', flatShading: true });
+  const mGlas = new THREE.MeshBasicMaterial({ color: '#fff3c4' });
+  for (const [px, py] of leuchttuerme()) {
+    const boden = Math.max(0.3, punkt(px, py, stufe, region).h);
+    const turm = new THREE.Group();
+    turm.name = 'leuchtturm';
+    // Sockel, Turm in roten und weißen Bändern, Galerie, Laterne, Haube
+    const sockel = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 3.0, 1.2, 8), mWeiss);
+    sockel.position.y = 0.2;
+    turm.add(sockel);
+    const hoehe = 14, baender = 5;
+    for (let i = 0; i < baender; i++) {
+      const r0 = 2.1 - (i / baender) * 0.7, r1 = 2.1 - ((i + 1) / baender) * 0.7;
+      const band = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, hoehe / baender, 10), i % 2 ? mWeiss : mRot);
+      band.position.y = 0.8 + (i + 0.5) * (hoehe / baender);
+      band.castShadow = schatten;
+      turm.add(band);
+    }
+    const galerie = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 1.9, 0.25, 10), mDunkel);
+    galerie.position.y = 0.8 + hoehe + 0.1;
+    const laterne = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 1.4, 8), mGlas);
+    laterne.position.y = 0.8 + hoehe + 0.95;
+    const haube = new THREE.Mesh(new THREE.ConeGeometry(1.15, 1.1, 8), mRot);
+    haube.position.y = 0.8 + hoehe + 2.2;
+    turm.add(galerie, laterne, haube);
+    turm.position.set(px * U, boden - 0.3, -py * U);
+    turm.userData.pick = { type: 'leuchtturm' };
+    gruppe.add(turm);
+    const licht = erzeugeLeuchtfeuer({ farbe: '#fff1b0', kennung: 'Fl', periode: 6, groesse: 10 });
+    licht.position.set(px * U, boden - 0.3 + 0.8 + hoehe + 0.95, -py * U);
+    gruppe.add(licht);
+    feuer.push(licht);
+  }
+  return feuer;
+}
+
 function baueBuhnen(region, stufe, gruppe) {
   const pfaehle = [];
   const rnd = zufall(5);
@@ -549,6 +592,7 @@ export function baueGelaende(region, stufe, qualitaet, { tiefsterPegel = 0 } = {
   baueMolen(region, stufe, gruppe, q.schatten);
   baueKaimauern(region, stufe, gruppe, q.schatten);
   baueBuhnen(region, stufe, gruppe);
+  const feuer = baueLeuchttuerme(region, stufe, gruppe, q.schatten);
   const { baeume } = setzePflanzen(region, stufe, q, gruppe, q.schatten);
 
   let flach = null;
@@ -559,6 +603,8 @@ export function baueGelaende(region, stufe, qualitaet, { tiefsterPegel = 0 } = {
 
   return {
     gruppe,
+    /** Leuchtfeuer der Leuchttürme blinken lassen (jedes Bild). */
+    aktualisiereFeuer(zeit, nacht) { for (const f of feuer) f.userData.aktualisiere(zeit, nacht); },
     aktualisiereSchatten(richtung, laenge, nacht) {
       if (flach) flach.userData.aktualisiere(richtung, laenge, nacht);
     },
