@@ -165,3 +165,66 @@ test('Spielstand bleibt JSON (Speichern und Laden)', () => {
   const kopie = JSON.parse(JSON.stringify(state));
   assert.deepEqual(kopie.modules.dauer, state.modules.dauer);
 });
+
+test('Stufenausbau: Gäste auf wegfallenden Plätzen reisen ab, Dauerlieger ziehen samt Dauerplatz um', async () => {
+  const { ECONOMY } = await import('../web/js/data/economy.js');
+  const rules = sim.rulesFromEconomy(ECONOMY);
+  const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules });
+  ctx.rules.queue.selfEnterAfter = null;
+  haengeEin((name, fn) => sim.addHook(ctx, name, fn));
+  const state = sim.applyTestStage(createState({ seed: 3, rules }), ctx, 2);
+  state.testmodus = false;
+  sim.tick(state, ctx, 0);
+  // B01 und B17 gibt es ab Stufe 3 nicht mehr
+  assert.ok(ctx.berthById.B01.stages.includes(2) && !ctx.berthById.B01.stages.includes(3));
+  const dauer = machDauerplatz(state, ctx, 'B01');
+  assert.ok(dauer.ok);
+  const weg = machDauerplatz(state, ctx, 'B02'); // dieses Boot ist beim Ausbau auf Törn
+  const p2 = dauerState(state).plaetze.B02;
+  const boot2 = state.boats[weg.boatId];
+  delete state.berths.B02; delete state.boats[boot2.id];
+  boot2.status = 'away'; p2.boot = boot2; p2.rueckNacht = state.day + 2;
+  // Gast auf B17 (T-Kopf) mit offenem Liegegeld, Gast auf A03 bleibt
+  const gast = (id, platz) => {
+    const b = { id, typeId: 'S1', modelId: null, name: 'Gast', size: 'S', length: 4, beam: 1.4, draft: 0.2, motor: false, special: false,
+      dayVisitors: 0, stationed: false, wishes: [], nights: 3, status: 'waiting', waitingSince: 0, atBuoy: true, atBuoySince: 0,
+      berthId: null, wishesMet: 0, wishesTotal: 0, pendingFee: 0, penalty: 0 };
+    state.boats[id] = b; state.queue.push(id);
+    assert.ok(sim.assign(state, ctx, id, platz).ok, platz);
+    return b;
+  };
+  const g1 = gast(9001, 'B17');
+  const g2 = gast(9002, 'A03');
+  assert.ok(g1.pendingFee > 0);
+  const offen = g1.pendingFee;
+  state.money = 1e6; state.guests = 1e4; state.stageGuests = 1e4; state.ratings = Array(20).fill(5);
+  const geld = state.money - sim.canAdvanceStage(state, ctx).goal.cost;
+  const gaeste = state.guests;
+  const r = sim.advanceStage(state, ctx);
+  assert.ok(r.ok);
+  assert.equal(state.stage, 3);
+  // Gast vom T-Kopf: abgerechnet, gezählt, legt sofort ab
+  const dep = r.events.find((e) => e.type === 'departed' && e.boatId === 9001);
+  assert.ok(dep && dep.leaveAt === 0 && dep.reason === 'rebuild');
+  assert.equal(state.boats[9001], undefined);
+  assert.equal(state.money, geld + offen);
+  assert.equal(state.guests, gaeste + 1);
+  assert.equal(state.boats[9002].berthId, 'A03', 'Gast auf bleibendem Platz bleibt');
+  // Dauerlieger im Hafen: umgezogen, Dauerplatz mit
+  const zug = r.events.find((e) => e.type === 'relocated' && e.boatId === dauer.boatId);
+  assert.ok(zug, 'Dauerlieger zieht um');
+  assert.equal(state.berths[zug.to], dauer.boatId);
+  assert.equal(state.boats[dauer.boatId].berthId, zug.to);
+  assert.ok(ctx.berthById[zug.to].stages.includes(3));
+  const d = dauerState(state).plaetze;
+  assert.equal(d.B01, undefined);
+  assert.equal(d[zug.to].bootId, dauer.boatId);
+  // Dauerlieger auf Törn: Dauerplatz zieht um, das Boot kommt dort zurück
+  assert.equal(d.B02, undefined);
+  const [neu2] = Object.entries(d).find(([, p]) => p.bootId === boot2.id);
+  assert.ok(ctx.berthById[neu2].stages.includes(3) && neu2 !== zug.to);
+  for (let i = 0; i < 6 && state.berths[neu2] !== boot2.id; i++) sim.runDay(state, ctx);
+  assert.equal(state.berths[neu2], boot2.id);
+  // Kein Boot liegt mehr auf einem Platz, den es nicht gibt
+  for (const [platz] of Object.entries(state.berths)) assert.ok(ctx.berthById[platz].stages.includes(state.stage), platz);
+});

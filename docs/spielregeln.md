@@ -126,6 +126,8 @@ Solange niemand die Boote im Wasser zeigt, listet `#queue` die wartenden Boote a
 
 ## Erweiterungen für andere Module
 
+**Stufenausbau und wegfallende Plätze:** Manche Plätze gibt es nach einem Ausbau nicht mehr (zum Beispiel B01, B02 und der T-Kopf an Steg B ab Stufe 3). `advanceStage` räumt sie: Gäste reisen ab (`sim:departed` mit `reason: 'rebuild'`, `leaveAt: 0`; offenes Liegegeld wird kassiert, sie werden bewertet und gezählt). Fest liegende Boote ziehen auf einen freien passenden Platz um (`sim:relocated { boatId, from, to }`, für die Grafik `boot-zugewiesen { id, platz, umzug: true }`); findet sich keiner, verlassen sie den Hafen (`sim:unstationed` mit `reason: 'rebuild'`). Module mit Zustand je Platz hängen sich an den Hook `stageUp` (`{ state, ctx, from, to, gone, moves, findBerth, events }`); die Dauerlieger ziehen so samt Dauerplatz um (`sim:dauerUmzug { boatId, from, berthId }`), auch wenn das Boot gerade auf Törn ist.
+
 **Testmodus `?stufe=n`:** Mit `index.html?stufe=4` legt die Brücke einen frischen Spielstand der Stufe 4 an (`sim.applyTestStage`): alle Ausbauten bis dahin und alle Stegprojekte der Stufe gebaut, Versorgung der früheren Stufen, Startgeld, Ruf 4. `state.testmodus` ist gesetzt; der echte gespeicherte Spielstand wird weder geladen noch überschrieben. Ohne Parameter ändert sich nichts.
 
 **Modifikatoren** (Ereignisse, Services): Die Regeln fragen jeden Morgen und Abend `game.events?.modifiers()` und `game.services?.effekte()` ab. Alternativ `game.sim.addHook('modifiers', fn)`. Alle Felder sind freiwillig:

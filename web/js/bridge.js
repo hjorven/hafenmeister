@@ -124,7 +124,7 @@ export async function initBridge(game) {
   }
 
   // Nach diesen Ereignissen kann sich das Grün-Rot-Schild eines Platzes geändert haben
-  const BERTH_EVENTS = new Set(['moored', 'departed', 'castOff', 'berthFreed', 'tripOut', 'tripBack', 'built', 'stageUp', 'stationed', 'unstationed', 'dayStart']);
+  const BERTH_EVENTS = new Set(['relocated', 'moored', 'departed', 'castOff', 'berthFreed', 'tripOut', 'tripBack', 'built', 'stageUp', 'stationed', 'unstationed', 'dayStart']);
   let berthsChanged = false;
 
   function dispatch(events) {
@@ -144,6 +144,8 @@ export async function initBridge(game) {
         game.emit('boot-faehrt', { id: e.boatId, platz: e.berthId ?? null });
         game.emit('boot:ablegen', { id: e.boatId });
       }
+      // Stufenausbau: ein fest liegendes Boot zieht auf einen neuen Platz um
+      if (e.type === 'relocated') game.emit('boot-zugewiesen', { id: e.boatId, platz: e.to, umzug: true });
       // Tagestörn eines Gastes: gleiche Ereignisse wie die Runde der Dauerlieger
       if (e.type === 'tripOut') game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: 0, gast: true });
       if (e.type === 'tripBack') game.emit('dauer:einlaufen', { id: e.boatId, platzId: e.berthId, gast: true });
