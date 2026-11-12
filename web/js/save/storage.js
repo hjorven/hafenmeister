@@ -11,8 +11,10 @@
 export const SAVE_FORMAT = 'hafenmeister-spielstand';
 export const SAVE_VERSION = 1;
 
-const KEY_SAVE = 'hafenmeister.spielstand';
-const KEY_BACKUP = 'hafenmeister.spielstand.vorher';
+// Der Spielstand des gerade aktiven Speicherplatzes liegt immer unter KEY_SAVE (auch
+// data/stegbild.js liest ihn dort vor dem Start). Die anderen Plätze: save/plaetze.js.
+export const KEY_SAVE = 'hafenmeister.spielstand';
+export const KEY_BACKUP = 'hafenmeister.spielstand.vorher';
 const KEY_META = 'hafenmeister.meta';
 
 const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
@@ -51,6 +53,11 @@ function defaultStore() {
 function getStore() {
   if (store === null) store = defaultStore();
   return store;
+}
+
+/** Der Browserspeicher (localStorage) oder null. Für save/plaetze.js. */
+export function speicher() {
+  return getStore();
 }
 
 /** Nur für Tests: anderen Speicher mit getItem/setItem/removeItem setzen. */
@@ -212,10 +219,22 @@ export function daysSinceExport(now = new Date()) {
 // ---------------------------------------------------------------------------
 // Export und Import als Datei
 
-/** Dateiname wie hafenmeister-2026-11-11.json (lokales Datum). */
-export function exportFileName(now = new Date()) {
+/** Hafenname als Teil eines Dateinamens: "Möwenhafen Süd" -> "moewenhafen-sued". */
+export function dateiTeil(name) {
+  return String(name ?? '').toLowerCase()
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+}
+
+/**
+ * Dateiname wie hafenmeister-2026-11-11.json (lokales Datum),
+ * mit Hafenname hafenmeister-moewenhafen-2026-11-11.json.
+ */
+export function exportFileName(now = new Date(), name = '') {
   const p = (n) => String(n).padStart(2, '0');
-  return `hafenmeister-${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}.json`;
+  const teil = dateiTeil(name);
+  return `hafenmeister-${teil ? `${teil}-` : ''}${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}.json`;
 }
 
 /** Spielstand als Text, z.B. zum Kopieren. */
@@ -223,7 +242,11 @@ export function exportText(game) {
   return JSON.stringify(wrap(game), null, 1);
 }
 
-/** Text aus einer Datei oder Zwischenablage zurück in einen Spielzustand. */
+/**
+ * Text aus einer Datei oder Zwischenablage zurück in einen Spielzustand.
+ * Versteht auch den alten Kurztext "HM1:..." (Base64 des reinen Spielzustands), den
+ * state.js früher erzeugt hat, damit solche Sicherungen nicht verloren sind.
+ */
 export function importText(text) {
   if (typeof text !== 'string' || text.trim() === '') {
     throw new SaveError('ungueltig', 'Die Datei ist leer.');
@@ -231,7 +254,35 @@ export function importText(text) {
   if (text.length > MAX_IMPORT_BYTES) {
     throw new SaveError('ungueltig', 'Die Datei ist zu groß für einen Spielstand.');
   }
-  return unwrap(parse(text.replace(/^﻿/, ''))).game;
+  const t = text.replace(/^\ufeff/, '').trim();
+  if (t.startsWith(ALT_EXPORT_PREFIX)) return altenStandLesen(alterKurztext(t));
+  return unwrap(parse(t)).game;
+}
+
+// ---------------------------------------------------------------------------
+// Alter zweiter Speicherweg aus state.js (bis November 2026): reiner Spielzustand mit
+// eigenem Feld "version" unter 'hafenmeister.save', Export als "HM1:" + Base64.
+
+const ALT_EXPORT_PREFIX = 'HM1:';
+
+function alterKurztext(text) {
+  let bin;
+  try {
+    bin = atob(text.slice(ALT_EXPORT_PREFIX.length).replace(/\s+/g, ''));
+  } catch {
+    throw new SaveError('ungueltig', 'Der Spielstand ist beschädigt.');
+  }
+  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  return parse(new TextDecoder().decode(bytes));
+}
+
+/** Prüft einen reinen Spielzustand aus dem alten Speicherweg grob und gibt ihn zurück. */
+export function altenStandLesen(data) {
+  if (data === null || typeof data !== 'object' || Array.isArray(data)
+    || typeof data.version !== 'number' || !('day' in data) || !('boats' in data)) {
+    throw new SaveError('ungueltig', 'Das ist kein Hafenmeister-Spielstand.');
+  }
+  return data;
 }
 
 /**
@@ -240,8 +291,8 @@ export function importText(text) {
  * (In Dateien sichern, per Nachricht schicken). Sonst normaler Download.
  * Gibt 'geteilt', 'heruntergeladen' oder 'abgebrochen' zurück.
  */
-export async function exportGame(game, { preferShare = isTouchDevice() } = {}) {
-  const name = exportFileName();
+export async function exportGame(game, { preferShare = isTouchDevice(), hafenName = game?.harborName } = {}) {
+  const name = exportFileName(new Date(), hafenName);
   const text = exportText(game);
   const blob = new Blob([text], { type: 'application/json' });
 
@@ -273,17 +324,83 @@ export async function exportGame(game, { preferShare = isTouchDevice() } = {}) {
   return 'heruntergeladen';
 }
 
-/** Liest eine gewählte Datei (File) und gibt den Spielzustand zurück. */
+/** Liest eine gewählte Datei (File) und gibt eine Liste { name, spiel } zurück (siehe importInhalt). */
 export async function importFile(file) {
   if (!file) throw new SaveError('abgebrochen', 'Keine Datei gewählt.');
-  if (file.size > MAX_IMPORT_BYTES) {
+  if (file.size > MAX_IMPORT_BYTES * 8) {
     throw new SaveError('ungueltig', 'Die Datei ist zu groß für einen Spielstand.');
   }
-  return importText(await file.text());
+  return importInhalt(await file.text());
+}
+
+// ---------------------------------------------------------------------------
+// Alle Häfen in einer Datei (Gesamt-Export)
+
+export const SAMMLUNG_FORMAT = 'hafenmeister-sammlung';
+
+/** Text einer Datei mit allen Häfen. plaetze = [{ name, spiel }]. */
+export function sammlungText(plaetze, now = new Date()) {
+  return JSON.stringify({
+    format: SAMMLUNG_FORMAT,
+    version: 1,
+    gespeichert: now.toISOString(),
+    plaetze: plaetze.map(({ name, spiel }) => ({ name, ...wrap(spiel, now) })),
+  }, null, 1);
 }
 
 /**
- * Öffnet die Dateiauswahl und gibt den Spielzustand der gewählten Datei zurück.
+ * Liest eine Datei mit einem Hafen (Umschlag oder alter HM1-Text) oder mit allen Häfen.
+ * Gibt immer eine Liste [{ name, spiel }] zurück.
+ */
+export function importInhalt(text) {
+  if (typeof text !== 'string' || text.trim() === '') {
+    throw new SaveError('ungueltig', 'Die Datei ist leer.');
+  }
+  const t = text.replace(/^\ufeff/, '').trim();
+  if (t.startsWith('{') && t.includes(SAMMLUNG_FORMAT)) {
+    const data = parse(t);
+    if (data?.format === SAMMLUNG_FORMAT) {
+      if (!Array.isArray(data.plaetze)) throw new SaveError('ungueltig', 'Die Datei ist beschädigt.');
+      const liste = data.plaetze.map((p) => ({ name: typeof p?.name === 'string' ? p.name : '', spiel: unwrap(p).game }));
+      if (!liste.length) throw new SaveError('ungueltig', 'In der Datei ist kein Hafen.');
+      return liste;
+    }
+  }
+  const spiel = importText(t);
+  return [{ name: typeof spiel.harborName === 'string' ? spiel.harborName : '', spiel }];
+}
+
+/** Bietet einen fertigen Text als Datei an (Teilen-Menü oder Download), wie exportGame. */
+export async function exportDatei(text, name, { preferShare = isTouchDevice() } = {}) {
+  const blob = new Blob([text], { type: 'application/json' });
+  if (preferShare && typeof File === 'function' && navigator.canShare) {
+    const file = new File([blob], name, { type: 'application/json' });
+    if (navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'Hafenmeister Spielstände' });
+        updateMeta({ zuletztExportiert: new Date().toISOString() });
+        return 'geteilt';
+      } catch (err) {
+        if (err && err.name === 'AbortError') return 'abgebrochen';
+      }
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.rel = 'noopener';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+  updateMeta({ zuletztExportiert: new Date().toISOString() });
+  return 'heruntergeladen';
+}
+
+/**
+ * Öffnet die Dateiauswahl und gibt die Häfen der gewählten Datei zurück ([{ name, spiel }]).
  * Muss direkt aus einem Klick oder Tipp heraus aufgerufen werden.
  * Ohne accept-Filter, weil iOS .json-Dateien sonst teils ausgraut.
  */

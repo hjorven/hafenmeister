@@ -1,11 +1,9 @@
-// Spielstand: Anlegen, Zufall mit Seed, Speichern, Laden, Export.
+// Spielstand: Anlegen, Zufall mit Seed, Prüfen und Umbauen beim Laden.
 // Kennt weder Three.js noch das DOM. Der Spielstand ist reines JSON.
 
 import { RULES } from './data/rules.js';
 
 export const SAVE_VERSION = 1;
-export const SAVE_KEY = 'hafenmeister.save';
-const EXPORT_PREFIX = 'HM1:';
 
 /**
  * Legt einen neuen Spielstand an.
@@ -20,6 +18,7 @@ export function createState({ seed, rules = RULES } = {}) {
     version: SAVE_VERSION,
     seed: s,
     rng: s,
+    harborName: '', // Name des Hafens, setzt der Speicherplatz (save/plaetze.js)
     day: 1,
     phase: 'day', // 'day' oder 'evening'
     clock: 0, // Sekunden seit Tagesbeginn, Abend beginnt bei rules.dayLength
@@ -101,69 +100,9 @@ function validate(data) {
   return data;
 }
 
-function defaultStorage() {
-  try {
-    return globalThis.localStorage ?? null;
-  } catch {
-    return null; // privater Modus oder gesperrter Speicher
-  }
-}
-
-/** Speichert den Spielstand. Gibt false zurück, wenn kein Speicher verfügbar ist. */
-export function save(state, storage = defaultStorage()) {
-  if (!storage) return false;
-  try {
-    storage.setItem(SAVE_KEY, serialize(state));
-    return true;
-  } catch {
-    return false; // Speicher voll oder gesperrt
-  }
-}
-
-/** Lädt den Spielstand. Gibt null zurück, wenn keiner da oder er unlesbar ist. */
-export function load(storage = defaultStorage()) {
-  if (!storage) return null;
-  try {
-    const text = storage.getItem(SAVE_KEY);
-    return text ? deserialize(text) : null;
-  } catch {
-    return null;
-  }
-}
-
-/** Löscht den gespeicherten Spielstand. */
-export function clearSave(storage = defaultStorage()) {
-  try {
-    storage?.removeItem(SAVE_KEY);
-  } catch {
-    // nichts zu tun
-  }
-}
-
-/**
- * Spielstand als kurzer Text zum Kopieren (Sicherung, Umzug auf ein anderes Gerät).
- * iOS löscht localStorage von Webseiten nach 7 Tagen ohne Besuch, deshalb braucht es diesen Weg.
- */
-export function exportSave(state) {
-  const bytes = new TextEncoder().encode(serialize(state));
-  let bin = '';
-  for (const b of bytes) bin += String.fromCharCode(b);
-  return EXPORT_PREFIX + btoa(bin);
-}
-
-/** Gegenstück zu exportSave. Wirft bei falschem Text einen Fehler mit verständlicher Meldung. */
-export function importSave(code) {
-  const text = String(code).trim();
-  if (!text.startsWith(EXPORT_PREFIX)) throw new Error('Das ist kein Hafenmeister-Spielstand');
-  let bin;
-  try {
-    bin = atob(text.slice(EXPORT_PREFIX.length));
-  } catch {
-    throw new Error('Spielstand ist beschädigt');
-  }
-  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
-  return deserialize(new TextDecoder().decode(bytes));
-}
+// Speichern im Browser, Speicherplätze, Export und Import: web/js/save/ (ein Speicherweg,
+// docs/speichern.md). Der frühere Rückfall unter 'hafenmeister.save' mit Kurztext "HM1:"
+// wird von save/plaetze.js beim ersten Start übernommen, "HM1:"-Texte liest save/storage.js.
 
 // ---------------------------------------------------------------------------
 // Start im Browser: main.js ruft init(game) auf. Die Anbindung liegt in bridge.js,

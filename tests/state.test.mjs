@@ -1,19 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  createState, random, randomInt, serialize, deserialize, save, load, clearSave,
-  exportSave, importSave, SAVE_KEY, SAVE_VERSION,
+  createState, random, randomInt, serialize, deserialize, SAVE_VERSION,
 } from '../web/js/state.js';
-
-function memoryStorage() {
-  const m = new Map();
-  return {
-    getItem: (k) => (m.has(k) ? m.get(k) : null),
-    setItem: (k, v) => m.set(k, String(v)),
-    removeItem: (k) => m.delete(k),
-    _map: m,
-  };
-}
+import * as stateModul from '../web/js/state.js';
 
 test('neuer Spielstand: Startwerte', () => {
   const s = createState({ seed: 42 });
@@ -63,29 +53,17 @@ test('kaputte Spielstände werden abgelehnt', () => {
   assert.throws(() => deserialize(JSON.stringify(t)), /falschen Typ|Listen/);
 });
 
-test('save und load mit Speicher, auch ohne Speicher', () => {
-  const st = memoryStorage();
-  const s = createState({ seed: 9 });
-  assert.equal(save(s, st), true);
-  assert.ok(st._map.has(SAVE_KEY));
-  assert.deepEqual(load(st), s);
-  st.setItem(SAVE_KEY, '{kaputt');
-  assert.equal(load(st), null);
-  clearSave(st);
-  assert.equal(load(st), null);
-  assert.equal(save(s, null), false);
-  assert.equal(load(null), null);
-  const full = { setItem() { throw new Error('voll'); }, getItem() { return null; } };
-  assert.equal(save(s, full), false);
+test('ein Speicherweg: state.js speichert nicht mehr selbst', () => {
+  // Speichern, Plätze, Export und Import liegen nur noch in web/js/save/ (docs/speichern.md)
+  for (const name of ['save', 'load', 'clearSave', 'exportSave', 'importSave', 'SAVE_KEY']) {
+    assert.equal(name in stateModul, false, `${name} gehört nach web/js/save/`);
+  }
 });
 
-test('Export und Import, auch mit Umlauten', () => {
-  const s = createState({ seed: 11 });
-  s.harborName = 'Hafen Großenbrode Süd';
-  const code = exportSave(s);
-  assert.match(code, /^HM1:[A-Za-z0-9+/=]+$/);
-  assert.deepEqual(importSave(code), s);
-  assert.deepEqual(importSave(`  ${code}\n`), s);
-  assert.throws(() => importSave('hallo'), /kein Hafenmeister-Spielstand/);
-  assert.throws(() => importSave('HM1:%%%'), /beschädigt/);
+test('neuer Spielstand hat einen Hafennamen (leer) und alte Stände bekommen ihn beim Laden', () => {
+  const s = createState({ seed: 4 });
+  assert.equal(s.harborName, '');
+  const alt = createState({ seed: 4 });
+  delete alt.harborName;
+  assert.equal(deserialize(JSON.stringify(alt)).harborName, '');
 });
