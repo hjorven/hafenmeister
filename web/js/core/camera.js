@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 
 const PITCH = THREE.MathUtils.degToRad(50);   // Neigung: 90 waere senkrecht von oben
-const YAW = 0;                                // gerade von Sueden; ein Winkel wie in den Stilbildern ist moeglich
+const STEP = Math.PI / 4;                     // Drehen rastet in 45-Grad-Schritten ein
 const DISTANCE = 600;
 
 export class CameraRig {
@@ -18,6 +18,9 @@ export class CameraRig {
     this.home = { x: 0, z: 0, width: maxWidth };
     this._plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     this._ray = new THREE.Raycaster();
+    this.yaw = 0;                             // Drehung um den Blickpunkt, 0 = Norden oben
+    this._yawTarget = null;
+    this._fly = null;
     this.onChange = null;
   }
 
@@ -38,7 +41,54 @@ export class CameraRig {
     this.insets = { top, bottom };
   }
 
+  // ---- Drehen ----
+  // rotateFree: sofort um rad drehen (Ziehen mit Maus oder zwei Fingern), danach snapRotation()
+  rotateFree(rad) {
+    this._yawTarget = null;
+    this.yaw += rad;
+    this._apply();
+  }
+
+  // rotateBy: weich um rad drehen, ausgehend vom naechsten Rastpunkt (Tasten Q und E)
+  rotateBy(rad) {
+    const base = this._yawTarget ?? Math.round(this.yaw / STEP) * STEP;
+    this._yawTarget = base + rad;
+  }
+
+  // snapRotation: weich auf den naechsten 45-Grad-Schritt einrasten
+  snapRotation() {
+    this._yawTarget = Math.round(this.yaw / STEP) * STEP;
+  }
+
+  // flyTo: Blickpunkt weich zu (x, z) fahren
+  flyTo(x, z) {
+    this._fly = { x, z };
+  }
+
+  // Jedes Bild aus der Spielschleife, dt in Sekunden (laeuft auch in der Pause)
+  update(dt) {
+    const k = 1 - Math.exp(-dt * 10);
+    let changed = false;
+    if (this._yawTarget !== null) {
+      const d = this._yawTarget - this.yaw;
+      if (Math.abs(d) < 0.001) { this.yaw = this._yawTarget; this._yawTarget = null; }
+      else this.yaw += d * k;
+      changed = true;
+    }
+    if (this._fly) {
+      const dx = this._fly.x - this.target.x;
+      const dz = this._fly.z - this.target.z;
+      if (Math.hypot(dx, dz) < 0.05) { this.target.x = this._fly.x; this.target.z = this._fly.z; this._fly = null; }
+      else { this.target.x += dx * k; this.target.z += dz * k; }
+      changed = true;
+    }
+    if (changed) this._apply();
+  }
+
   reset() {
+    this._yawTarget = null;
+    this._fly = null;
+    this.yaw = 0;
     const h = this.home;
     const ins = this.insets || { top: 0, bottom: 0 };
     if (h.rect) {
@@ -116,13 +166,14 @@ export class CameraRig {
     const cam = this.camera;
     cam.left = -halfW; cam.right = halfW; cam.top = halfH; cam.bottom = -halfH;
     const dir = new THREE.Vector3(
-      Math.sin(YAW) * Math.cos(PITCH),
+      Math.sin(this.yaw) * Math.cos(PITCH),
       Math.sin(PITCH),
-      Math.cos(YAW) * Math.cos(PITCH)
+      Math.cos(this.yaw) * Math.cos(PITCH)
     );
     cam.position.copy(this.target).addScaledVector(dir, DISTANCE);
     cam.lookAt(this.target);
     cam.updateProjectionMatrix();
+    cam.updateMatrixWorld();   // sonst rechnen screenToWorld und panBy bis zum naechsten Bild mit der alten Lage
     if (this.onChange) this.onChange();
   }
 }
