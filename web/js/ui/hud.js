@@ -134,7 +134,7 @@ export function init(game) {
               }
             },
           },
-          `${b.size} ${b.name}`,
+          b.besuche > 1 ? `${b.size} ${b.name} · Stammgast` : `${b.size} ${b.name}`,
         ),
       ),
     );
@@ -150,6 +150,8 @@ export function init(game) {
     const wishes = b.wishes.length ? b.wishes.map((w) => WISH_LABEL[w] ?? w).join(', ') : 'keine';
     fill(card,
       el('h2', {}, b.name),
+      // Name am Heck und Heimathafen (features/stammgaeste.js), falls vorhanden
+      b.bootsname ? el('p', { class: 'card-boatname' }, game.stammgaeste?.beschreibung(b) ?? `„${b.bootsname}“`) : null,
       el(
         'p',
         {},

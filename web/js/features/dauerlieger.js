@@ -19,6 +19,7 @@
 
 import * as sim from '../sim.js';
 import { random, randomInt } from '../random.js';
+import { STAMM } from './stammgaeste.js';
 
 export const DAUER = {
   abStufe: 2,
@@ -81,6 +82,25 @@ export function machDauerplatz(state, ctx, platzId) {
   boot.dauer = true;
   dauerState(state).plaetze[platzId] = { bootId: r.boatId, rueckNacht: null, boot: null, tagestoern: false };
   return { ok: true, boatId: r.boatId, events: [...r.events, { type: 'dauerNeu', boatId: r.boatId, berthId: platzId }] };
+}
+
+/**
+ * Stammgast ab dem 5. Besuch, der gerade hier liegt, als Dauerlieger behalten.
+ * Er bleibt an seinem Platz und zahlt ab jetzt den festen Anteil.
+ */
+export function kannBehalten(state, ctx, platzId) {
+  const boot = state.boats[state.berths[platzId]];
+  if (!boot || boot.stationed || boot.status !== 'moored') return false;
+  if (state.stage < DAUER.abStufe || istDauerplatz(state, platzId)) return false;
+  return (boot.besuche ?? 0) >= STAMM.dauerAbBesuch;
+}
+
+export function behalte(state, ctx, platzId) {
+  if (!kannBehalten(state, ctx, platzId)) return { ok: false, events: [] };
+  const boot = state.boats[state.berths[platzId]];
+  Object.assign(boot, { stationed: true, dauer: true, nights: null, wishes: [], pendingFee: boot.pendingFee || 0 });
+  dauerState(state).plaetze[platzId] = { bootId: boot.id, rueckNacht: null, boot: null, tagestoern: false };
+  return { ok: true, boatId: boot.id, events: [{ type: 'dauerNeu', boatId: boot.id, berthId: platzId, stammgast: true }] };
 }
 
 /** Dauerplatz wieder zum Gastplatz machen. Das Boot verlässt den Hafen. */
@@ -277,14 +297,15 @@ export async function init(game) {
     const p = dauerState(st).plaetze[platzId];
     const k = kannDauerplatz(st, api.ctx, platzId);
     // Nur Plätze mit etwas zu tun bekommen eine Karte: kein toter Inhalt
-    if (!p && !k.ok) { schliessen(); return false; }
+    const behalten = !p && kannBehalten(st, api.ctx, platzId);
+    if (!p && !k.ok && !behalten) { schliessen(); return false; }
     offenerPlatz = platzId;
     const teile = [zeile(`Liegeplatz ${platzId}`, 'card-title')];
     const aktionen = document.createElement('div');
     aktionen.className = 'card-actions';
     if (p) {
       const boot = p.boot || st.boats[p.bootId];
-      teile.push(zeile(`Dauerplatz: ${boot?.name ?? 'Boot'}`));
+      teile.push(zeile(`Dauerplatz: ${boot?.bootsname ? `„${boot.bootsname}“, ${boot.name}` : boot?.name ?? 'Boot'}`));
       if (p.boot) {
         const bisTag = p.rueckNacht + 1;
         teile.push(zeile(`Grün: auf Törn, zurück an Tag ${bisTag}. Frei für Gäste, die vorher abreisen.`, 'card-note'));
@@ -295,6 +316,14 @@ export async function init(game) {
         const r = hebeAuf(st, api.ctx, platzId);
         api.dispatch(r.events);
         schliessen();
+      }));
+    } else if (behalten) {
+      const boot = st.boats[st.berths[platzId]];
+      teile.push(zeile(`${boot.bootsname ? `„${boot.bootsname}“` : boot.name} ist zum ${boot.besuche}. Mal hier.`));
+      teile.push(zeile(`Als Dauerlieger bleibt das Boot hier und zahlt jeden Abend ${anteil} % des Gastpreises.`, 'card-note'));
+      aktionen.append(knopf('Als Dauerlieger behalten', () => {
+        const r = behalte(st, api.ctx, platzId);
+        api.dispatch(r.events);
       }));
     } else {
       teile.push(zeile(`Dauerplatz: ein festes Boot zahlt jeden Abend ${anteil} % des Gastpreises, ohne Zuweisen. Ist es auf Törn, dürfen Gäste hier liegen.`));
