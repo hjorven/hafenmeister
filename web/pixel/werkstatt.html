@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pixel-Werkstatt</title>
+  <style>
+    :root { --bg: #e2e5d8; --ink: #21343f; --panel: #fbf8f1; --line: #7f8a88; }
+    html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, sans-serif; }
+    header { position: relative; z-index: 2; background: var(--panel); border-bottom: 2px solid var(--line); padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+    header h1 { font-size: 16px; margin: 0 8px 0 0; }
+    label { display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+    select, button { font: inherit; padding: 4px 8px; border: 2px solid var(--ink); background: #fff; color: var(--ink); border-radius: 0; }
+    button { cursor: pointer; }
+    main { padding: 16px; }
+    #info { margin: 0 0 12px; max-width: 70ch; }
+    .bogen { display: inline-block; background: #5eb0bd; padding: 8px; margin: 0 16px 16px 0; vertical-align: top; }
+    .bogen.hell { background: #fbf8f1; }
+    .bogen h2 { font-size: 13px; margin: 0 0 6px; color: #fff; text-shadow: 0 1px 0 #21343f; }
+    .bogen.hell h2 { color: var(--ink); text-shadow: none; }
+    canvas.sheet { display: block; image-rendering: pixelated; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Pixel-Werkstatt</h1>
+    <label>Größe <select id="groesse"><option>S</option><option selected>M</option><option>L</option><option>XL</option></select></label>
+    <label>Modell <select id="modell"></select></label>
+    <label>Richtungen <select id="richtungen"><option>8</option><option selected>16</option><option>32</option></select></label>
+    <label><input type="checkbox" id="segel" checked> Segel</label>
+    <label><input type="checkbox" id="wasser" checked> Wasser</label>
+    <label>Lupe <select id="lupe"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label>
+    <button type="button" id="speichern">Bogen als PNG</button>
+  </header>
+  <main>
+    <p id="info">Jede Zeile ist eine Kamerahöhe, jede Spalte eine Drehrichtung. Mit Wasser sieht man das Boot wie im Spiel, ohne Wasser entsteht ein Spritebogen mit durchsichtigem Hintergrund.</p>
+    <div id="boegen"></div>
+  </main>
+  <script type="module">
+    import * as THREE from 'three';
+    import { createPixelPass } from './js/pixel-pass.js';
+
+    // Kamerahoehen: Neigung in Grad (90 waere senkrecht von oben). Das Spiel nutzt 50.
+    export const HOEHEN = [
+      { name: 'flach', grad: 30 },
+      { name: 'Spiel', grad: 50 },
+      { name: 'hoch', grad: 70 },
+    ];
+    const TEXEL = 0.125;   // Meter je Kunstpixel, wie im Spiel bei Startansicht ungefaehr
+
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(1);
+    renderer.setSize(4, 4);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.setClearColor(0x000000, 0);
+    const pass = createPixelPass(THREE, renderer, {});
+
+    const scene = new THREE.Scene();
+    scene.add(new THREE.HemisphereLight('#ffffff', '#5a8fa0', 1.6));
+    const sonne = new THREE.DirectionalLight('#fff6e8', 2.2);
+    sonne.castShadow = true;
+    sonne.shadow.mapSize.set(2048, 2048);
+    sonne.shadow.bias = -0.0006;
+    sonne.shadow.normalBias = 0.03;
+    Object.assign(sonne.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 200 });
+    scene.add(sonne, sonne.target);
+    const wasser = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshLambertMaterial({ color: '#7fb5ab' }));
+    wasser.rotation.x = -Math.PI / 2;
+    wasser.receiveShadow = true;
+    scene.add(wasser);
+
+    const GROESSEN = {
+      S: () => Promise.all([import('../js/data/boats/s.js'), import('../js/render/boats/s.js')]),
+      M: () => Promise.all([import('../js/data/boats/m.js'), import('../js/render/boats/m.js')]),
+      L: () => Promise.all([import('../js/data/boats/l.js'), import('../js/render/boats/l.js')]),
+      XL: () => Promise.all([import('../js/data/boats/xl.js'), import('../js/render/boats/xl.js')]),
+    };
+    const $ = (id) => document.getElementById(id);
+    let api = null;
+    let modelle = [];
+
+    async function ladeGroesse() {
+      const [daten, render] = await GROESSEN[$('groesse').value]();
+      api = render;
+      modelle = daten.MODELS || render.MODELS || [];
+      $('modell').innerHTML = modelle.map((m) => `<option value="${m.id}">${m.id} ${m.name}</option>`).join('');
+      const wunsch = new URLSearchParams(location.search).get('modell');
+      if (wunsch && modelle.some((m) => m.id === wunsch)) $('modell').value = wunsch;
+    }
+
+    // Ein Bild: Boot mit Bugrichtung "drehung" (rad), Kamera mit Neigung "grad" von Sueden
+    function zelle(boot, radius, drehung, grad, groesse) {
+      boot.rotation.y = drehung;
+      boot.updateMatrixWorld(true);
+      const pitch = THREE.MathUtils.degToRad(grad);
+      const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 400);
+      const halb = groesse * TEXEL / 2;
+      cam.left = -halb; cam.right = halb; cam.top = halb; cam.bottom = -halb;
+      cam.position.set(0, Math.sin(pitch) * 150, Math.cos(pitch) * 150).add(new THREE.Vector3(0, radius * 0.25, 0));
+      cam.lookAt(0, radius * 0.25, 0);
+      cam.updateProjectionMatrix();
+      cam.updateMatrixWorld();
+      // Sonne steht fest in der Welt (Suedwest, wie im Spiel), wandert also nicht mit der Kamera
+      sonne.position.set(-20, 40, 25);
+      const ziel = new THREE.WebGLRenderTarget(groesse, groesse);
+      pass.renderSmall(scene, cam, groesse, groesse, ziel);
+      const px = new Uint8Array(groesse * groesse * 4);
+      renderer.readRenderTargetPixels(ziel, 0, 0, groesse, groesse, px);
+      ziel.dispose();
+      // Zeilen umdrehen (WebGL zaehlt von unten)
+      const bild = new ImageData(groesse, groesse);
+      for (let y = 0; y < groesse; y++) {
+        bild.data.set(px.subarray((groesse - 1 - y) * groesse * 4, (groesse - y) * groesse * 4), y * groesse * 4);
+      }
+      return bild;
+    }
+
+    async function zeichne() {
+      if (!api) return;
+      const m = modelle.find((x) => x.id === $('modell').value) || modelle[0];
+      const boot = api.buildBoat(m, { sails: $('segel').checked, id: m.id });
+      if ($('segel').checked && api.setSails) api.setSails(boot, true);
+      boot.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      scene.add(boot);
+      wasser.visible = $('wasser').checked;
+      const box = new THREE.Box3().setFromObject(boot);
+      const kugel = box.getBoundingSphere(new THREE.Sphere());
+      const radius = kugel.radius;
+      const groesse = Math.ceil((radius * 2.1) / TEXEL / 2) * 2 + 4;
+      const n = Number($('richtungen').value);
+      const lupe = Number($('lupe').value);
+
+      const sheet = document.createElement('canvas');
+      sheet.width = n * groesse;
+      sheet.height = HOEHEN.length * groesse;
+      const ctx = sheet.getContext('2d');
+      HOEHEN.forEach((h, zeile) => {
+        for (let i = 0; i < n; i++) {
+          const bild = zelle(boot, radius, (i / n) * Math.PI * 2, h.grad, groesse);
+          ctx.putImageData(bild, i * groesse, zeile * groesse);
+        }
+      });
+      scene.remove(boot);
+
+      const gross = document.createElement('canvas');
+      gross.className = 'sheet';
+      gross.width = sheet.width * lupe;
+      gross.height = sheet.height * lupe;
+      const g = gross.getContext('2d');
+      g.imageSmoothingEnabled = false;
+      g.drawImage(sheet, 0, 0, gross.width, gross.height);
+      gross.dataset.roh = sheet.toDataURL('image/png');
+      gross.dataset.name = `sprite-${m.id}-${n}x${HOEHEN.length}.png`;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'bogen' + ($('wasser').checked ? '' : ' hell');
+      wrap.innerHTML = `<h2>${m.id} ${m.name}: ${n} Richtungen x ${HOEHEN.length} Höhen (${HOEHEN.map((h) => h.grad + '°').join(', ')}), ${groesse} px je Bild</h2>`;
+      wrap.appendChild(gross);
+      $('boegen').prepend(wrap);
+      document.body.dataset.fertig = String(Number(document.body.dataset.fertig || 0) + 1);
+    }
+
+    $('groesse').addEventListener('change', async () => { await ladeGroesse(); zeichne(); });
+    for (const id of ['modell', 'richtungen', 'segel', 'wasser', 'lupe']) $(id).addEventListener('change', zeichne);
+    $('speichern').addEventListener('click', () => {
+      const c = document.querySelector('canvas.sheet');
+      if (!c) return;
+      const a = document.createElement('a');
+      a.href = c.dataset.roh; a.download = c.dataset.name; a.click();
+    });
+
+    const q = new URLSearchParams(location.search);
+    if (q.get('groesse')) $('groesse').value = q.get('groesse');
+    if (q.get('wasser') === '0') $('wasser').checked = false;
+    if (q.get('richtungen')) $('richtungen').value = q.get('richtungen');
+    await ladeGroesse();
+    await zeichne();
+    window.werkstatt = { zeichne, scene, pass };
+  </script>
+</body>
+</html>

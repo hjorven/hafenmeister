@@ -1,0 +1,2 @@
+/* Pixel-Fassung: Leinwand ohne Glaettung, Leisten mit harten Kanten. Wird nur von pixel/index.html geladen. */
+html.pixel #stage { image-rendering: pixelated; }
