@@ -140,6 +140,14 @@ export function init(game) {
         tuer: e && it.art !== 'strandkoerbe' ? { x: e.x / U, y: -e.z / U } : null,
       });
     }
+    // Angebote an Land aus den Services (Bäcker, Café, Eisdiele ...), sobald gebaut
+    for (const c of game.services?.gruppe?.children ?? []) {
+      const id = c.name?.startsWith('service-') ? c.name.slice(8) : null;
+      if (!id || !P.SERVICE_ZIELE.includes(id) || !c.visible) continue;
+      box.setFromObject(c);
+      out.push({ id: `service-${id}`, art: id, x: c.position.x / U, y: -c.position.z / U,
+        halbBreite: (box.max.x - box.min.x) / 2 / U, tuer: null });
+    }
     return out;
   }
 
@@ -233,6 +241,8 @@ export function init(game) {
     return true;
   }
 
+  const tagesAnteil = () => game.sim?.tagesAnteil?.() ?? 0.5;
+
   function zielWaehlen(a) {
     const komp = netz.komp[a.node];
     const vorliebe = P.VORLIEBE[a.typ] ?? {};
@@ -241,6 +251,7 @@ export function init(game) {
       const def = P.ZIELE[z.art];
       if (!def || netz.komp[z.node] !== komp) return 0;
       if (def.nurBadewetter && !badewetter()) return 0;
+      if (def.zeit) { const u = tagesAnteil(); if (u < def.zeit[0] || u >= def.zeit[1]) return 0; }
       if (z.node === a.node) return 0;
       let g = def.gewicht * (vorliebe[z.art] ?? standard);
       // Leute aus dem Ort bleiben meist in der Naehe des Hafens (dort, wo man hinschaut)
@@ -275,7 +286,9 @@ export function init(game) {
     }
     let z = zielWaehlen(a);
     if (abend && bootDaten && a.bleibtAbends) {
-      z = netz.ziele.find((t) => t.art === 'restaurant' && netz.komp[t.node] === netz.komp[a.node]) ?? null;
+      // abends ins Restaurant oder an den Grillplatz
+      const abends = netz.ziele.filter((t) => (t.art === 'restaurant' || t.art === 'grillplatz') && netz.komp[t.node] === netz.komp[a.node]);
+      z = abends.length ? wahl(abends) : null;
       if (!z) return heimAnBord(a, bootDaten);
     }
     if (!z) { a.zustand = 'steht'; a.uhr = zufall(5, 10); return; }
@@ -329,7 +342,7 @@ export function init(game) {
     a.zustand = art?.drinnen ? 'drinnen' : 'verweilt';
     a.sitzt = !!art?.sitzen;
     a.uhr = art ? zufall(...art.dauer) : zufall(4, 8);
-    if (abend && a.bleibtAbends && z?.art === 'restaurant') a.uhr = 1e9;
+    if (abend && a.bleibtAbends && (z?.art === 'restaurant' || z?.art === 'grillplatz')) a.uhr = 1e9;
     // zum Wasser schauen (Norden ist -z)
     if (!art?.drinnen) a.blick = Math.PI / 2 + zufall(-0.8, 0.8);
   }
@@ -793,6 +806,10 @@ export function init(game) {
   game.on('build', () => { if (netz) queueMicrotask(netzErneuern); });
   game.on('sim:change', (e) => { if (netz && e?.reason === 'load') queueMicrotask(netzErneuern); });
   game.on('stufe', (n) => setStage(typeof n === 'object' ? n?.stufe ?? n?.stage : n));
+  // Neues Angebot an Land (services.js stellt das Modell im selben Ereignis auf): Netz erneuern wie bei 'build'
+  game.on('services:gebaut', ({ id } = {}) => {
+    if (P.SERVICE_ZIELE.includes(id) && netz) queueMicrotask(netzErneuern);
+  });
   game.on('season', (s) => {
     const part = typeof s === 'object' ? s?.part : s;
     if (!part || part === jahreszeit) return;

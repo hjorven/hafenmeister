@@ -20,7 +20,7 @@
 import * as THREE from 'three';
 import { SERVICES } from '../data/services.js';
 import { erstelleRegeln, neuerZustand, mitZahlen } from '../services/rules.js';
-import { baueModell, tPier, LAND_Y, mat, FARBE } from './services-models.js';
+import { baueModell, tPier, tankstelle, LAND_Y, mat, FARBE } from './services-models.js';
 import { HAFEN } from '../data/harbor.js';
 import { initBesuche } from './services-besuch.js';
 
@@ -96,7 +96,7 @@ export function init(game) {
     if (alt) { gruppe.remove(alt.group); entsorge(alt.group); anlagen.delete(id); }
     if (n <= 0) return;
     const w = welt(R.lage(zustand(), id));
-    const m = baueModell(id, n, { boden: boden(w.x, w.z), ufer: uferAbstand(w) });
+    const m = baueModell(id, n, { boden: boden(w.x, w.z), ufer: uferAbstand(w), uhr: () => game.sim?.tagesAnteil?.() ?? 0.5 });
     m.group.position.set(w.x, 0, w.z);
     m.group.rotation.y = w.ry;
     aufBoden(m.group);
@@ -277,6 +277,44 @@ export function init(game) {
     const v = Number(typeof n === 'object' ? n?.stufe : n);
     if (v >= 1 && !testStufe) { stufe = v; aktualisiere(); }
   });
+  // ------------------------------------------------------------------ Tankstelle (Versorgung "diesel")
+  // Gekauft wird sie über die Spielregeln (Bauen, sim.js facilities.diesel), hier steht das Modell
+  // auf dem Dienststeg aus harbor.js. Im Testmodus ?stufe=n wie die Gebäude: alles der Stufe.
+  const TANK_STUFE = { 1: 4, 2: 5 };            // ab welcher Hafenstufe die Testansicht Stufe 1 und 2 zeigt
+  let tank = null;
+  function tankStufe() {
+    if (testStufe) return testStufe >= TANK_STUFE[2] ? 2 : testStufe >= TANK_STUFE[1] ? 1 : 0;
+    return Number(game.sim?.state?.facilities?.diesel) || 0;
+  }
+  function tankLage() {
+    const st = HAFEN.stufen?.[Math.min(6, Math.max(4, stufe))] ?? {};
+    const d = (st.dienste ?? []).find((x) => x.art === 'tankstelle');
+    // Dienststeg der Tankstelle (steg null, an der Lage des Dienstes vorbei), sonst die Lage selbst
+    const l = (st.stege ?? []).find((x) => x.steg == null && x.punkte?.length === 2 && d &&
+      Math.abs(x.punkte[0][1] - x.punkte[1][1]) < 1 && Math.abs(x.punkte[0][1] - d.y) < 10);
+    if (!d) return null;
+    const y = l ? l.punkte[0][1] : d.y;
+    return { x: d.x + 2, y };
+  }
+  function zeigeTankstelle(mitAnimation) {
+    const n = tankStufe();
+    if (tank && tank.stufe === n) return;
+    if (tank) { gruppe.remove(tank.group); entsorge(tank.group); tank = null; }
+    const lage = n > 0 ? tankLage() : null;
+    if (!lage) return;
+    const m = tankstelle(n);
+    m.group.position.set(lage.x * U, 0, -lage.y * U);
+    m.group.rotation.y = Math.PI;                  // Säulen zur Südkante, dort legen die Boote an
+    m.group.name = 'service-tankstelle';
+    gruppe.add(m.group);
+    tank = { stufe: n, group: m.group, update: m.update, pop: mitAnimation ? 0 : 1 };
+    if (mitAnimation) m.group.scale.set(1, 0.01, 1);
+  }
+  game.on('build', (e) => { if (!e || e.id === 'diesel' || e.key === 'diesel') zeigeTankstelle(true); });
+  game.on('sim:change', () => zeigeTankstelle(false));
+  game.on('stufe', () => queueMicrotask(() => zeigeTankstelle(false)));
+  game.on('ready', () => zeigeTankstelle(false));
+
   game.on('tag:ende', (d) => abrechnen(d));
   game.on('day:start', (d) => { winter = !!d?.winter; });
   game.on('sturm', () => {
@@ -292,6 +330,14 @@ export function init(game) {
   // ------------------------------------------------------------------ Animation
   game.onTick((dt, g) => {
     const t = g.time;
+    if (tank) {
+      tank.update(dt, t);
+      if (tank.pop < 1) {
+        tank.pop = Math.min(1, tank.pop + dt / 0.9);
+        const p = tank.pop;
+        tank.group.scale.set(1, Math.max(0.01, 1 + 2.2 * Math.pow(p - 1, 3) + 1.2 * Math.pow(p - 1, 2)), 1);
+      }
+    }
     for (const a of anlagen.values()) {
       if (a.pop < 1) {
         // Wachsen mit kleinem Nachfedern

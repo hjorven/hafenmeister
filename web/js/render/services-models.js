@@ -15,7 +15,7 @@ export const FARBE = {
   wood: '#e2b67e', wood2: '#c49866', white: '#fffcf6', navy: '#2e4868', red: '#ee6454', yellow: '#fad060',
   green: '#509e80', coral: '#f2745c', grey: '#52647a', glass: '#3e5e7a', teak: '#d6aa78', orange: '#f0883e',
   ink: '#283648', pave: '#eeeae0', road: '#e2ded6', rock: '#92a4b0', pile: '#5c5460', pont: '#d6dee6',
-  brick: '#b8604c', steel: '#8a98a8', navyGrey: '#7c8894', blue: '#4878c0', sail: '#f6f2ea', smoke: '#e8e4de',
+  brick: '#b8604c', rosa: '#f2a7b4', mint: '#9ed8c4', creme: '#f6e6c4', brot: '#c98a4a', steel: '#8a98a8', navyGrey: '#7c8894', blue: '#4878c0', sail: '#f6f2ea', smoke: '#e8e4de',
 };
 
 // ------------------------------------------------------------------ Bausteine
@@ -668,9 +668,244 @@ export function tPier(linien, breite = 5) {
   return g;
 }
 
+// ------------------------------------------------------------------ Angebote an Land
+// opts.uhr(): Anteil des Spieltags 0..1 (0,75 = Abend). Offen oder zu sieht man am Modell.
+const offen = (uhr, von, bis) => { const u = uhr?.() ?? 0.5; return u >= von && u < bis; };
+// weich auf Ziel zugehen (fuer Klappen, Schirme)
+const hin = (ist, soll, dt, k = 3) => ist + (soll - ist) * Math.min(1, dt * k);
+
+// Sonnenschirm: Mast und Schirm, der Schirm klappt ueber scale.y auf und zu
+function schirm(g, x, z, c, r = 1.3) {
+  zyl(g, 0.05, 2.1, FARBE.white, x, LAND_Y, z, 4);
+  const dach = add(g, new THREE.ConeGeometry(r, 0.55, 8), c, x, LAND_Y + 2.3, z);
+  return dach;
+}
+// Tisch mit zwei Hockern
+function tisch(g, x, z, c = FARBE.white) {
+  zyl(g, 0.45, 0.75, c, x, LAND_Y, z, 8, 0.15);
+  zyl(g, 0.18, 0.45, FARBE.wood, x - 0.8, LAND_Y, z, 6);
+  zyl(g, 0.18, 0.45, FARBE.wood, x + 0.8, LAND_Y, z, 6);
+}
+// Fahrrad, Rahmen entlang x
+function fahrrad(g, x, z, c) {
+  const f = new THREE.Group();
+  f.position.set(x, LAND_Y, z);
+  for (const dx of [-0.55, 0.55]) {
+    const r = add(f, new THREE.TorusGeometry(0.33, 0.05, 4, 10), FARBE.ink, dx, 0.35, 0);
+    r.rotation.y = 0;
+  }
+  box(f, 1.1, 0.08, 0.08, c, 0, 0.55, 0);
+  box(f, 0.08, 0.4, 0.08, c, -0.15, 0.55, 0);
+  box(f, 0.3, 0.06, 0.12, FARBE.ink, -0.15, 0.95, 0);          // Sattel
+  box(f, 0.08, 0.08, 0.5, FARBE.ink, 0.45, 0.95, 0);           // Lenker
+  g.add(f);
+  return f;
+}
+
+function baecker(stufe, { uhr } = {}) {
+  const g = new THREE.Group();
+  let klappe, rauchen = null, brezel;
+  if (stufe <= 1) {
+    // Brötchenwagen mit Klappe zur Wasserseite
+    box(g, 3, 2, 1.8, FARBE.creme, 0, LAND_Y + 0.3, 0);
+    for (const dx of [-1, 1]) add(g, new THREE.CylinderGeometry(0.3, 0.3, 0.2, 10), FARBE.ink, dx, LAND_Y + 0.3, 1).rotation.x = Math.PI / 2;
+    box(g, 3, 0.12, 0.7, FARBE.wood, 0, LAND_Y + 1.25, -1.2);                 // Theke
+    for (let i = 0; i < 6; i++) {
+      const b = add(g, new THREE.SphereGeometry(0.17, 6, 4), FARBE.brot, -1.1 + i * 0.44, LAND_Y + 1.45, -1.2);
+      b.scale.set(1.3, 0.7, 0.9);
+    }
+    klappe = new THREE.Group();
+    klappe.position.set(0, LAND_Y + 2.3, -0.9);
+    box(klappe, 3, 0.08, 1.2, FARBE.brot, 0, 0, -0.6);
+    g.add(klappe);
+    flagge(g, 1.9, -0.6, 3.2, FARBE.yellow);
+  } else {
+    haus(g, 6, 3, 5, FARBE.creme, FARBE.brot);
+    box(g, 0.8, 1.6, 0.8, FARBE.brick, 1.8, LAND_Y + 4, 0.6);
+    const vor = g.children.length;
+    rauchen = rauch(g, 1.8, LAND_Y + 5.8, 0.6, 4);
+    rauchen.huelle = g.children[vor];
+    // Markise und Auslage
+    for (let i = 0; i < 6; i++) box(g, 0.98, 0.1, 1.4, i % 2 ? FARBE.white : FARBE.brot, -2.45 + i * 0.98, LAND_Y + 2.3, -3.1).rotation.x = 0.25;
+    box(g, 2.4, 0.9, 0.6, FARBE.wood, -1.2, LAND_Y, -3);
+    klappe = new THREE.Group();
+    klappe.position.set(-1.2, LAND_Y + 0.9, -3);
+    for (let i = 0; i < 4; i++) add(klappe, new THREE.SphereGeometry(0.2, 6, 4), FARBE.brot, -0.8 + i * 0.5, 0.12, 0).scale.set(1.3, 0.7, 0.9);
+    g.add(klappe);
+    box(g, 1.6, 0.45, 0.5, FARBE.wood, 2, LAND_Y, -3.6);                     // Bank
+    // Brezel am Ausleger
+    box(g, 0.08, 0.08, 1.2, FARBE.ink, 2.6, LAND_Y + 2.6, -3);
+    brezel = add(g, new THREE.TorusGeometry(0.42, 0.12, 5, 12), FARBE.brot, 2.6, LAND_Y + 2.05, -3.5);
+  }
+  return {
+    group: g,
+    update(dt, t) {
+      const auf = offen(uhr, 0, 0.32);
+      if (stufe <= 1) klappe.rotation.x = hin(klappe.rotation.x, auf ? -1.2 : 0, dt);
+      else klappe.visible = auf;
+      if (rauchen) { rauchen(t); rauchen.huelle.visible = offen(uhr, 0, 0.4); }
+      if (brezel) brezel.rotation.y = Math.sin(t * 1.3) * 0.25;
+    },
+  };
+}
+
+function hafencafe(stufe, { uhr } = {}) {
+  const g = new THREE.Group();
+  haus(g, stufe >= 2 ? 7 : 5, 2.8, 4.4, FARBE.white, FARBE.green);
+  box(g, 0.1, 0.9, 1.4, FARBE.ink, (stufe >= 2 ? 3.6 : 2.6), LAND_Y + 0.4, -2.4);   // Kreidetafel
+  const schirme = [];
+  const farben = [FARBE.coral, FARBE.mint, FARBE.yellow, FARBE.coral];
+  const plaetze = stufe >= 2 ? [[-4.5, -5], [-1.5, -5.6], [1.5, -5.6], [4.5, -5]] : [[-1.5, -4.2], [1.6, -4.2]];
+  if (stufe >= 2) {
+    flaeche(g, 12, 5, FARBE.teak, 0, -5.2);                                         // Holzterrasse
+    // Lichterkette
+    for (let i = 0; i < 9; i++) add(g, new THREE.SphereGeometry(0.1, 5, 3), FARBE.yellow, -5.6 + i * 1.4, LAND_Y + 2.6 - Math.sin((i / 8) * Math.PI) * 0.4, -7.6);
+    box(g, 0.08, 2.7, 0.08, FARBE.wood2, -5.8, LAND_Y, -7.6);
+    box(g, 0.08, 2.7, 0.08, FARBE.wood2, 5.8, LAND_Y, -7.6);
+  }
+  plaetze.forEach(([x, z], i) => { tisch(g, x, z); schirme.push(schirm(g, x, z, farben[i % farben.length])); });
+  const fl = flagge(g, stufe >= 2 ? -3.9 : -2.9, 1.6, 4.2, FARBE.mint);
+  return {
+    group: g,
+    update(dt, t) {
+      const auf = offen(uhr, 0.25, 0.8) ? 1 : 0.15;
+      for (const s of schirme) { s.scale.x = s.scale.z = hin(s.scale.x, auf, dt, 2); s.scale.y = 1; }
+      wehen(fl, t);
+    },
+  };
+}
+
+function grillplatz(stufe, { uhr } = {}) {
+  const g = new THREE.Group();
+  flaeche(g, 9, 7, FARBE.pave, 0, -1);
+  // gemauerter Grill
+  box(g, 1.8, 0.9, 1.1, FARBE.rock, 0, LAND_Y, 0.6);
+  box(g, 1.6, 0.06, 0.9, FARBE.ink, 0, LAND_Y + 0.92, 0.6);
+  const glut = add(g, new THREE.ConeGeometry(0.45, 0.7, 5), FARBE.orange, 0, LAND_Y + 1.3, 0.6);
+  const vor = g.children.length;
+  const r = rauch(g, 0, LAND_Y + 1.6, 0.6, 4);
+  const huelle = g.children[vor];
+  // Picknicktische mit Bänken
+  for (const [x, z] of [[-2.6, -2.2], [2.6, -2.2]]) {
+    box(g, 2, 0.75, 0.8, FARBE.wood, x, LAND_Y, z);
+    box(g, 2, 0.45, 0.3, FARBE.wood2, x, LAND_Y, z - 0.75);
+    box(g, 2, 0.45, 0.3, FARBE.wood2, x, LAND_Y, z + 0.75);
+  }
+  baum(g, -4, 2.2, 2);
+  baum(g, 4.2, 1.6, 1.6);
+  return {
+    group: g,
+    update(dt, t) {
+      const an = offen(uhr, 0.68, 1.01);
+      glut.visible = an;
+      huelle.visible = an;
+      if (an) { r(t); glut.scale.y = 0.8 + Math.sin(t * 9) * 0.2; }
+    },
+  };
+}
+
+function fahrradverleih(stufe, { uhr } = {}) {
+  const g = new THREE.Group();
+  haus(g, 4.4, 2.6, 3.2, FARBE.blue, FARBE.ink, 2.4, 0.4);
+  // Ständer mit sechs Rädern, tagsüber sind die meisten unterwegs
+  // Ständer quer zum Haus, die Räder stehen im Profil zur Promenade
+  box(g, 0.1, 0.1, 5.4, FARBE.steel, -1.4, LAND_Y + 0.5, -1.2);
+  const farben = [FARBE.red, FARBE.yellow, FARBE.green, FARBE.coral, FARBE.blue, FARBE.mint];
+  const raeder = farben.map((c, i) => fahrrad(g, -1.4, -3.6 + i * 0.95, c));
+  const fl = flagge(g, 4.8, -1.4, 3.4, FARBE.yellow);
+  return {
+    group: g,
+    update(dt, t) {
+      const u = uhr?.() ?? 0.5;
+      // morgens alle da, zwischen 0,2 und 0,6 nach und nach weg, abends wieder zurück
+      const weg = u < 0.15 || u > 0.7 ? 0 : u < 0.35 ? Math.round((u - 0.15) / 0.2 * 4) : u < 0.55 ? 4 : Math.round((0.7 - u) / 0.15 * 4);
+      raeder.forEach((r, i) => { r.visible = i >= weg; });
+      wehen(fl, t);
+    },
+  };
+}
+
+function eisdiele(stufe, { uhr } = {}) {
+  const g = new THREE.Group();
+  haus(g, 4.6, 2.8, 3.6, FARBE.rosa, FARBE.white);
+  for (let i = 0; i < 6; i++) box(g, 0.8, 0.1, 1.3, i % 2 ? FARBE.white : FARBE.rosa, -2 + i * 0.8, LAND_Y + 2.2, -2.4).rotation.x = 0.25;
+  // großes Eis als Schild
+  const eis = new THREE.Group();
+  eis.position.set(-2.8, LAND_Y, -2.2);
+  zyl(eis, 0.06, 2.4, FARBE.white, 0, 0, 0, 4);
+  const tuete = add(eis, new THREE.ConeGeometry(0.42, 1.1, 8), FARBE.brot, 0, 2.6, 0);
+  tuete.rotation.x = Math.PI;
+  add(eis, new THREE.SphereGeometry(0.42, 8, 6), FARBE.rosa, 0, 3.3, 0);
+  add(eis, new THREE.SphereGeometry(0.36, 8, 6), FARBE.mint, 0, 3.8, 0);
+  g.add(eis);
+  const schirme = [];
+  for (const [x, z, c] of [[0.2, -4.4, FARBE.mint], [2.8, -4.4, FARBE.rosa]]) { tisch(g, x, z); schirme.push(schirm(g, x, z, c, 1.1)); }
+  return {
+    group: g,
+    update(dt, t) {
+      eis.rotation.y = t * 0.6;
+      const auf = offen(uhr, 0.3, 0.78) ? 1 : 0.15;
+      for (const s of schirme) s.scale.x = s.scale.z = hin(s.scale.x, auf, dt, 2);
+    },
+  };
+}
+
+// ------------------------------------------------------------------ Tankstelle
+// Versorgung "diesel" der Spielregeln (sim.js facilities): Stufe 1 eine Zapfsäule, Stufe 2 zwei
+// Säulen unter einem Dach mit Tankwarthäuschen. Steht auf dem Dienststeg aus harbor.js
+// (Schwimmsteg, Deck 0,46 m), Wasserseite = lokal -z. Alle Teile sind fest (nicht aufs Gelände heben).
+export function tankstelle(stufe) {
+  const g = new THREE.Group();
+  const DECK = 0.46;
+  const lichter = [], schlaeuche = [];
+  const saeule = (x) => {
+    box(g, 0.7, 1.5, 0.5, FARBE.red, x, DECK, -0.5);
+    box(g, 0.74, 0.25, 0.54, FARBE.white, x, DECK + 1.5, -0.5);
+    box(g, 0.5, 0.4, 0.04, FARBE.yellow, x, DECK + 0.9, -0.77);              // Schild "D"
+    const l = add(g, new THREE.SphereGeometry(0.09, 6, 4), FARBE.green, x + 0.25, DECK + 1.82, -0.5);
+    l.material = new THREE.MeshBasicMaterial({ color: '#6fe08a' });
+    lichter.push(l);
+    // Schlauch: hängt in einem Bogen zur Wasserkante und pendelt leicht
+    const s = new THREE.Group();
+    s.position.set(x - 0.3, DECK + 1.2, -0.75);
+    const bogen = add(s, new THREE.TorusGeometry(0.42, 0.05, 4, 10, Math.PI), FARBE.ink, 0, -0.42, 0);
+    bogen.rotation.z = Math.PI;
+    g.add(s);
+    schlaeuche.push(s);
+  };
+  saeule(-1.6);
+  // Ölfass und Rettungsring
+  zyl(g, 0.3, 0.8, FARBE.blue, 2.6, DECK, 0.2, 8);
+  add(g, new THREE.TorusGeometry(0.32, 0.09, 6, 12), FARBE.orange, 3.4, DECK + 0.9, 0.55);
+  // Schild "DIESEL" am Mast
+  zyl(g, 0.06, 3.4, FARBE.white, -3.6, DECK, 0.3, 5);
+  box(g, 1.6, 0.6, 0.08, FARBE.yellow, -3.6, DECK + 2.9, 0.3);
+  box(g, 1.2, 0.18, 0.1, FARBE.red, -3.6, DECK + 3.1, 0.3);
+  if (stufe >= 2) {
+    saeule(0.2);
+    // Dach über den Säulen
+    for (const [x, z] of [[-2.4, -1], [1, -1], [-2.4, 0.8], [1, 0.8]]) box(g, 0.12, 2.6, 0.12, FARBE.white, x, DECK, z);
+    box(g, 4, 0.25, 2.3, FARBE.red, -0.7, DECK + 2.6, -0.1);
+    box(g, 4.1, 0.12, 2.4, FARBE.white, -0.7, DECK + 2.85, -0.1);
+    // Tankwarthäuschen
+    box(g, 1.8, 2.1, 1.5, FARBE.white, 3.4, DECK, 0.35);
+    box(g, 2, 0.2, 1.7, FARBE.red, 3.4, DECK + 2.1, 0.35);
+    box(g, 0.9, 0.7, 0.04, FARBE.glass, 3.4, DECK + 1.1, -0.42);
+  }
+  g.traverse((o) => { if (o !== g) o.userData.fest = true; });
+  return {
+    group: g,
+    update(dt, t) {
+      lichter.forEach((l, i) => { l.visible = Math.sin(t * 2.4 + i * 1.7) > -0.3; });
+      schlaeuche.forEach((s, i) => { s.rotation.x = Math.sin(t * 0.9 + i) * 0.12; });
+    },
+  };
+}
+
 export const MODELLE = {
   bootsverleih, slip, raeucherei, fischhalle, segelclub, mastenkran, ausruester, travellift, winterlager,
   segelmacher, seenotretter, fahrgastanleger, museumshafen, kreuzfahrtterminal, marineanleger,
+  baecker, hafencafe, grillplatz, fahrradverleih, eisdiele,
 };
 
 // Baut ein Modell. Unbekannte ids bekommen ein schlichtes Haus, damit nichts unsichtbar bleibt.
