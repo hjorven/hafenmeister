@@ -186,6 +186,9 @@ test('Liste der Großschiffbesuche fürs Abschlussziel passt zum Katalog', async
   const { GROSSSCHIFF_BESUCHE } = await import('../web/js/data/services.js');
   const arten = new Set(SERVICES.flatMap((s) => s.stufen.map((st) => st.wirkung?.besuch?.art).filter(Boolean)));
   for (const a of GROSSSCHIFF_BESUCHE) assert.ok(arten.has(a), `Besuchsart ${a} gibt es nicht`);
-  assert.ok(GROSSSCHIFF_BESUCHE.includes('offene-tuer'));
   assert.ok(!GROSSSCHIFF_BESUCHE.includes('windjammer'));
+  // Der Marinestützpunkt bringt mehr zählende Besuche als der Anleger (Roadmap Svc F6)
+  const [anleger, stuetzpunkt] = SERVICE_BY_ID.marineanleger.stufen.map((st) => st.wirkung.besuch);
+  assert.ok(GROSSSCHIFF_BESUCHE.includes(stuetzpunkt.art));
+  assert.ok(stuetzpunkt.alleTage < anleger.alleTage);
 });

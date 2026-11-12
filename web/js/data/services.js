@@ -307,8 +307,10 @@ export const SERVICES = [
             text: 'Flottenbesuch: Marineschiffe machen fest' } } },
       { name: 'Marinestützpunkt', kosten: 100000, ruf: 4.6,
         wirkung: { proTag: 450, freischalten: ['marine'], sturmschutz: 0.2, ruf: 0.08,
-          besuch: { art: 'offene-tuer', alleTage: 14, ersterNach: 6, dauer: 1, einnahme: 2800, gaeste: 2200, ruf: 0.03,
-            text: 'Tag der offenen Tür am Stützpunkt' } } },
+          // Der Stuetzpunkt bringt mehr Besuche als der Anleger (Roadmap Svc F6): Flottenbesuch alle 6 statt
+          // 10 Tage, am zweiten Tag mit Tag der offenen Tuer
+          besuch: { art: 'flottenbesuch', alleTage: 6, ersterNach: 3, dauer: 2, einnahme: 4200, gaeste: 2200, ruf: 0.03,
+            text: 'Flottenbesuch mit Tag der offenen Tür' } } },
     ],
   },
 ];
@@ -318,6 +320,7 @@ export const SERVICE_BY_ID = Object.fromEntries(SERVICES.map((s) => [s.id, s]));
 // Besuchsarten, die fuer das Abschlussziel von Stufe 6 als "Besuch eines grossen Schiffs" zaehlen
 // (economy.js ziel.grossschiffBesuche). Die einzige Liste: bridge.js zaehlt damit state.bigVisits.
 // Windjammertreffen und Ausflugsfahrt zaehlen bewusst nicht (Absprache Balancing 2026-11-12).
-export const GROSSSCHIFF_BESUCHE = ['kreuzfahrt', 'flottenbesuch', 'offene-tuer'];
+// Der Tag der offenen Tuer gehoert seit Roadmap P04 zum Flottenbesuch des Marinestuetzpunkts.
+export const GROSSSCHIFF_BESUCHE = ['kreuzfahrt', 'flottenbesuch'];
 
 export default SERVICES;

@@ -48,7 +48,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Ü1 | Dauerlieger-Pacht reparieren: Fischer 15 €, Dauerlieger 50 % ihres Gastpreises, wie die Karte verspricht | offen | P01 |
 | Ü2 | Hafenbüro Stufe 1 einen Nutzen geben (Knopf "Kassieren" erst mit Stufe 1 oder andere Wirkung) | offen (entschieden: "Alle kassieren" erst nach Kauf) | P02 |
 | Ü3 | Einstieg neu abstimmen: Schritt 1 ohne Sonne, Schritt 3 "Liegegeld beim Anlegen" | in Arbeit (PR 112, Teil) | P03 |
-| Ü4 | Ein Zähler für das Abschlussziel Stufe 6 (Tag der offenen Tür zählt mit) | offen | P04 |
+| Ü4 | Ein Zähler für das Abschlussziel Stufe 6 (Tag der offenen Tür zählt mit) | erledigt (PR 139): eine Liste `GROSSSCHIFF_BESUCHE` in `data/services.js`, ein Zähler `state.bigVisits`; der Tag der offenen Tür gehört zum Flottenbesuch des Stützpunkts | P04 |
 | Ü5 | Boote auf wegfallenden Plätzen beim Stufenausbau regeln (B01, B02 in Stufe 3, T-Kopf Steg B): Gäste reisen erst ab, Dauerlieger ziehen samt Dauerplatz um | erledigt (`sim.js` `advanceStage`, Hook `stageUp`, Test in `tests/dauerlieger.test.mjs`) | P05 |
 | Ü6 | Regeltests gegen die echten Zahlen: gemeinsamer Helfer mit `rulesFromEconomy(ECONOMY)` | offen | P06 |
 | Ü7 | Tempo und Hilfetexte vereinheitlichen (Knöpfe, Taste F, Plan, PC-Hilfe) | erledigt, Jorven bestätigt "Tempo so bleiben" (Taste F = 3x über die Tempo-Knöpfe, PC-Hilfe, Kommentare und Doku ohne Sonne, plan.md 3 und 14); Einstieg-Texte in P03 | P07 |
@@ -175,7 +175,7 @@ Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätz
 | Dritte Service-Stufen und abweichende Stufennamen (Travellift) | `data/services.js`, `economy.js` | P06, P08 |
 | Mindestruf je Service-Stufe (Regattaverein, Werfthalle 3,8; Museumshafen 4,0; Kreuzfahrtterminal 4,5; Marinestützpunkt 4,6) | `data/services.js` | P08 |
 | Deckel: Ruf-Bonus aller Services höchstens +0,75, Sturmschutz höchstens 0,8 | `data/services.js` | P08 |
-| Marinestützpunkt ersetzt Flottenbesuch (alle 10 Tage) durch Tag der offenen Tür (alle 14 Tage) | `data/services.js` | P04, P08 |
+| Marinestützpunkt ersetzt Flottenbesuch (alle 10 Tage) durch Tag der offenen Tür (alle 14 Tage) | `data/services.js` | P04 (behoben: Stützpunkt bringt Flottenbesuch alle 6 Tage mit Tag der offenen Tür) |
 | Rückfall-Speichern unter `hafenmeister.save` neben `hafenmeister.spielstand` | `state.js`, `save/storage.js` | P09 |
 | Adresszusätze `?stufe=`, `?services=alle`, `?uhrzeit=`, `?revier=nordsee`, `?einstieg=1`, `?demo=boote`, `?stegbild=` verstreut | mehrere Module | P08 (eine Liste in `docs/tests.md`) |
 
@@ -192,7 +192,7 @@ Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätz
 | `docs/balancing.md` | "4x, Sonne ziehen", "18 Services" | P08 |
 | `docs/neue-features.md` | Dauerlieger "50 Prozent" | P01 |
 | `docs/spielregeln.md` | Pacht der Dauerlieger, Start des Rundgangs fehlen | P01, P12 |
-| `docs/services.md` | Stufennamen, Zählung der Großschiffbesuche | P04, P08 |
+| `docs/services.md` | Stufennamen, Zählung der Großschiffbesuche (Zählung erledigt, P04) | P04, P08 |
 | `docs/ereignisse.md` | Winter "mit wenig Ankünften" | P20 |
 | `docs/speichern.md` | Exportformat HM1 fehlt | P09 |
 | `web/js/audio/README.md` | nennt Hafenhorn-Ereignis, das kein Modul sendet | P26 |
@@ -396,7 +396,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Svc F3 | Entweder-oder-Bauplätze (Café oder Eisdiele, Werfthalle oder Winterhalle) | offen | P23 |
 | Svc F4 | Einnahmen zeigen: Münzen über Gebäuden, Tagesabschluss je Quelle | offen | P15 |
 | Svc F5 | Auslastung statt Festbetrag | offen | P23 |
-| Svc F6 | Abschlussziel reparieren, Stützpunkt bringt mehr Besuche (= Ü4) | offen | P04 |
+| Svc F6 | Abschlussziel reparieren, Stützpunkt bringt mehr Besuche (= Ü4) | erledigt (PR 139): ein Zähler; Stützpunkt Flottenbesuch alle 6 statt 10 Tage, mit Tag der offenen Tür | P04 |
 | Svc F7 | Große Schiffe als Ereignis mit Tagesgästen | offen | P23 |
 | Svc F8 | Mindestruf mit Sinn oder weg | offen | P19 |
 | Svc F9 | Service-Karte mit Bilanz (verdient, bezahlt sich in n Tagen) | offen | P23 |
