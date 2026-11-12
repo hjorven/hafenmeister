@@ -1,0 +1,74 @@
+# Automatische Tests: startet das Spiel in Handy-, Tablet- und PC-Groesse (Playwright, Chromium)
+# und prueft Laden, Grundbedienung und Layout. Bildschirmfotos gibt es als Download im Lauf.
+# Anleitung: docs/tests.md
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  spiel:
+    name: Spiel testen (Handy, Tablet, PC)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Pfade wie für GitHub Pages prüfen
+        working-directory: .
+        run: bash tools/check-pages.sh web
+
+      - name: Tests ohne Browser (node --test)
+        working-directory: .
+        run: |
+          shopt -s nullglob
+          dateien=(tests/*.test.mjs)
+          if [ ${#dateien[@]} -gt 0 ]; then node --test "${dateien[@]}"; else echo "Keine tests/*.test.mjs vorhanden."; fi
+
+      - name: Abhängigkeiten installieren
+        run: npm ci --no-audit --no-fund
+
+      - name: Chromium installieren
+        run: npx playwright install --with-deps chromium
+
+      - name: Tests ausführen
+        run: npx playwright test
+
+      - name: Bildschirmfotos hochladen
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: bildschirmfotos
+          path: tests/bildschirmfotos/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Testbericht hochladen
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: testbericht
+          path: |
+            tests/bericht/
+            tests/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
