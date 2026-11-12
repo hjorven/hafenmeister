@@ -127,7 +127,7 @@ export function erzeugeLandschaft(szene, { region = REGION_STANDARD, stufe = 1, 
     tiefeBei: (x, z) => Math.max(0, abfrage.tiefeBei(x, z) + pegel),
     istWasser: (x, z) => abfrage.hoeheBei(x, z) < pegel,
     setzeStufe(n) {
-      n = Math.max(1, Math.min(5, Math.round(n)));   // Stufe 6 sieht landschaftlich aus wie 5
+      n = Math.max(1, Math.min(6, Math.round(n)));   // Stufe 6: wie 5, dazu die Liegewanne an der Grossschiffspier
       if (n === aktStufe) return;
       aktStufe = n;
       baue();
