@@ -38,6 +38,9 @@ test('Spielflaeche zeigt ein Bild (nicht leer, nicht schwarz)', async ({ game })
 });
 
 test('Bildschirmfotos', async ({ game }, testInfo) => {
+  // Zwei Vollbilder vom ganzen Hafen: auf Tablets mit Software-Grafik (CI) laeuft das
+  // inzwischen mit rund 3 Bildern pro Sekunde, daher die dreifache Zeit
+  test.slow();
   const { page } = game;
   const dir = path.join(testInfo.config.rootDir, '..', 'bildschirmfotos');
   fs.mkdirSync(dir, { recursive: true });

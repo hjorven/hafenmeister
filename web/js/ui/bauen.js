@@ -787,6 +787,7 @@ export function init(game) {
   });
   game.on('resize', () => { platziereTipp(); if (offen && aktiv) zeigeOrt(eintraege().find((x) => x.key === aktiv)?.ort?.()); });
   game.on('ready', setzeTipp);
+  game.on('einstieg:ende', setzeTipp);   // Hinweis gleich zeigen, sobald der Einstieg vorbei ist
   new MutationObserver(() => setzeTipp()).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
   // Animationen laufen auch in der Pause (Baumodus pausiert die Spielzeit)

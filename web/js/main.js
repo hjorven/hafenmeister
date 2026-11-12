@@ -104,12 +104,7 @@ function homeRect(stufe) {
       r.maxZ = Math.max(r.maxZ, z + rand);
     };
     for (const b of wp.bojen) dazu(b.x, b.z, 8);
-    // Ankerfelder nur, wenn sie nah am Rest liegen (weit draussen wuerde der Hafen zu klein)
-    for (const a of wp.ankerbereiche || []) {
-      const dx = Math.max(r.minX - a.x, 0, a.x - r.maxX);
-      const dz = Math.max(r.minZ - a.z, 0, a.z - r.maxZ);
-      if (Math.hypot(dx, dz) <= 30) dazu(a.x, a.z, 8);
-    }
+    // Ankerfelder zaehlen nicht: sie sind gross, nur Ausweichplatz und zogen am Handy den Steg aus dem Bild.
     return r;
   } catch (err) {
     console.warn('Startansicht aus harbor.js nicht ableitbar, nehme festen Wert', err);

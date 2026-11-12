@@ -293,6 +293,7 @@ export async function init(game) {
     const e = einstiegState(st());
     e.fertig = true;
     zeige(null);
+    game.emit('einstieg:ende', {});
   }
 
   function frame() {
