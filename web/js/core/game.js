@@ -11,8 +11,13 @@ export function createGame({ canvas, bounds, home }) {
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#62b4c2');
+  // Dunst zum Horizont: bei flachem Blick verschwimmen Landschaftsrand und Wasserkante im Himmel.
+  // Farbe folgt dem Himmel (scene.background), Abstand der Kamera (siehe dunst() unten).
+  scene.fog = new THREE.Fog(scene.background.clone(), 1e5, 2e5);
 
   const rig = new CameraRig({ bounds });
+  // Bodenhoehe fuer die Kamera: sie bleibt ueber Gelaende und Wasser (Landschaft setzt game.landschaft)
+  rig.boden = (x, z) => game.landschaft?.hoeheBei?.(x, z) ?? 0;
   if (home.rect) rig.setHomeRect(home.rect); else rig.setHome(home.x, home.z, home.width);
 
   const listeners = new Map();
@@ -111,10 +116,23 @@ export function createGame({ canvas, bounds, home }) {
     game.time += dt;
     rig.update(raw);
     for (const fn of tickers) fn(dt, game);
+    dunst(scene, rig);
     renderer.render(scene, rig.camera);
   });
 
   return game;
+}
+
+// Dunst nur in der Perspektive und erst weit hinter dem Blickpunkt: von oben sieht man ihn nicht,
+// bei flachem Blick blendet er den Rand der Landschaft und die Kante der Wasserflaeche aus.
+function dunst(scene, rig) {
+  const fog = scene.fog;
+  if (!fog || !fog.isFog) return;
+  if (scene.background?.isColor) fog.color.copy(scene.background);
+  if (rig.projektion === 'ortho') { fog.near = 1e5; fog.far = 2e5; return; }
+  const d = rig.distance;
+  fog.near = Math.max(d * 1.7, 420);
+  fog.far = Math.max(d * 4.5, 1400);
 }
 
 // Wie viel Bildschirm verdecken die Leisten oben und unten? Nur waagerechte Leisten zaehlen,

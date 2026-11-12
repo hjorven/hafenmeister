@@ -42,78 +42,17 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-// ---- Kamerahoehe ----
-// Das Spiel schaut immer mit 50 Grad Neigung. In der Pixel-Fassung laesst sich die Hoehe in drei
-// Stufen verstellen (flach 30, Spiel 50, hoch 70 Grad), weich uebergeblendet.
-// Tasten: Bild auf / Bild ab. Knopf "Höhe" in der oberen Leiste schaltet reihum.
-export const HOEHEN = [30, 50, 70];
-const THREE = game.THREE;
+// ---- Kamera ----
+// Die Pixel-Fassung zeichnet orthografisch (ohne Fluchtpunkt), damit Pixel auf dem Raster bleiben.
+// Neigen und Drehen gehen wie im Spiel frei (core/camera.js, docs/kamera.md): zwei Finger gemeinsam
+// hoch/runter, rechte Maustaste ziehen, Alt + Mausrad, Tasten R/V und Bild auf/ab; der Kompass
+// oben rechts richtet wieder aus. Darum gibt es keinen eigenen Hoehen-Knopf mehr.
+// ?hoehe=30 startet mit dieser Neigung (Grad); Uebersicht und Kompass kehren dorthin zurueck.
 const rig = game.camera;
-const DISTANCE = 600;
-let stufe = 1;
-rig.pitch = THREE.MathUtils.degToRad(HOEHEN[stufe]);
-let pitchZiel = rig.pitch;
-const altesApply = rig._apply.bind(rig);
-rig._apply = function apply() {
-  altesApply();   // Ausschnitt, Grenzen, onChange wie gehabt
-  const cam = this.camera;
-  const dir = new THREE.Vector3(
-    Math.sin(this.yaw) * Math.cos(this.pitch),
-    Math.sin(this.pitch),
-    Math.cos(this.yaw) * Math.cos(this.pitch),
-  );
-  cam.position.copy(this.target).addScaledVector(dir, DISTANCE);
-  cam.lookAt(this.target);
-  cam.updateMatrixWorld();
-};
-function setzeHoehe(n) {
-  stufe = Math.max(0, Math.min(HOEHEN.length - 1, n));
-  pitchZiel = THREE.MathUtils.degToRad(HOEHEN[stufe]);
-  knopf.textContent = `${HOEHEN[stufe]}°`;
-  knopf.title = `Kamerahöhe ${HOEHEN[stufe]}° (Bild auf, Bild ab)`;
-  game.emit('pixel:hoehe', HOEHEN[stufe]);
-}
-game.onTick(() => {
-  const d = pitchZiel - rig.pitch;
-  if (Math.abs(d) < 0.0005) { if (d) { rig.pitch = pitchZiel; rig._apply(); } return; }
-  rig.pitch += d * 0.18;
-  rig._apply();
-});
-
-const knopf = document.createElement('button');
-knopf.type = 'button';
-knopf.className = 'hud-btn';
-knopf.id = 'btn-hoehe';
-knopf.setAttribute('aria-label', 'Kamerahöhe wechseln');
-// Neue Oberflaeche (body.hm-neu): Knopf zu den Werkzeugen vor das Menue, sonst wie frueher in die obere Leiste
-function haengeKnopf() {
-  const werkzeuge = document.querySelector('.hm-werkzeuge');
-  if (werkzeuge) {
-    knopf.className = 'hm-px hm-rund';
-    const menue = document.getElementById('btn-menu');
-    if (menue && menue.parentElement === werkzeuge) werkzeuge.insertBefore(knopf, menue);
-    else werkzeuge.appendChild(knopf);
-    return;
-  }
-  const leiste = document.getElementById('hud-top');
-  const vor = document.getElementById('btn-overview');
-  if (leiste && vor && vor.parentElement === leiste) leiste.insertBefore(knopf, vor);
-  else (leiste || document.getElementById('game') || document.body).appendChild(knopf);
-}
-haengeKnopf();
-// Die Oberflaeche kann sich nach uns aufbauen: einige Sekunden lang nachsehen und umhaengen
-let versuche = 0;
-const umhaengen = setInterval(() => {
-  if (!knopf.closest('.hm-werkzeuge') && document.querySelector('.hm-werkzeuge')) haengeKnopf();
-  if (knopf.closest('.hm-werkzeuge') || ++versuche > 40) clearInterval(umhaengen);
-}, 250);
-knopf.addEventListener('click', () => setzeHoehe((stufe + 1) % HOEHEN.length));
-window.addEventListener('keydown', (e) => {
-  if (e.target?.closest?.('input, textarea, select')) return;
-  if (e.code === 'PageUp') { setzeHoehe(stufe + 1); e.preventDefault(); }
-  if (e.code === 'PageDown') { setzeHoehe(stufe - 1); e.preventDefault(); }
-});
+rig.setProjektion?.('ortho');
+rig.reset?.();
 const qHoehe = Number(q.get('hoehe'));
-setzeHoehe(HOEHEN.includes(qHoehe) ? HOEHEN.indexOf(qHoehe) : 1);
-rig.pitch = pitchZiel;
-rig._apply();
+if (qHoehe >= 20 && qHoehe <= 86 && 'pitchStandard' in rig) {
+  rig.pitchStandard = qHoehe * Math.PI / 180;
+  rig.setPitch(qHoehe, { sofort: true });
+}

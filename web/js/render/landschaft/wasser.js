@@ -52,10 +52,13 @@ export function baueTiefentextur(region, stufe, schritt) {
 
 const VERTEX = /* glsl */ `
   varying vec3 vWelt;
+  #include <fog_pars_vertex>
   void main() {
     vec4 w = modelMatrix * vec4(position, 1.0);
     vWelt = w.xyz;
-    gl_Position = projectionMatrix * viewMatrix * w;
+    vec4 mvPosition = viewMatrix * w;
+    gl_Position = projectionMatrix * mvPosition;
+    #include <fog_vertex>
   }
 `;
 
@@ -72,6 +75,7 @@ const FRAGMENT = /* glsl */ `
   uniform vec3 uTint;
   uniform float uNacht;
   varying vec3 vWelt;
+  #include <fog_pars_fragment>
 
   // Hash ohne sin(): auf schwachen Grafikchips und in Software-Grafik deutlich billiger
   float hash(vec2 p) {
@@ -149,6 +153,7 @@ const FRAGMENT = /* glsl */ `
     col += vec3(0.02, 0.03, 0.06) * uNacht;
     gl_FragColor = vec4(col, 1.0);
     #include <colorspace_fragment>
+    #include <fog_fragment>
   }
 `;
 
@@ -161,6 +166,7 @@ export function erzeugeWasser(region) {
   const zSued = -BEREICH.y0 * U, zNord = -BEREICH.y1 * U;
   const farben = (liste) => liste.map((c) => new THREE.Color(c));
   const uniforms = {
+    ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),   // Dunst zum Horizont (scene.fog, core/game.js)
     uTiefe: { value: null },
     uBereich: { value: new THREE.Vector4(x0, zSued, 1 / (x1 - x0), 1 / (zSued - zNord)) },
     uZeit: { value: 0 },
@@ -173,7 +179,7 @@ export function erzeugeWasser(region) {
     uTint: { value: new THREE.Color('#ffffff') },
     uNacht: { value: 0 },
   };
-  const mat = new THREE.ShaderMaterial({ uniforms, vertexShader: VERTEX, fragmentShader: FRAGMENT });
+  const mat = new THREE.ShaderMaterial({ uniforms, vertexShader: VERTEX, fragmentShader: FRAGMENT, fog: true });
   mat.name = 'wasser';
   const geo = new THREE.PlaneGeometry(6000, 6000);
   geo.rotateX(-Math.PI / 2);

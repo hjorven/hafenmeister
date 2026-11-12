@@ -29,6 +29,7 @@ const MODULES = [
   './ui/input-pc.js',
   './ui/input-touch.js',
   './ui/gesten.js',
+  './ui/kamera.js',
   './ui/hud.js',
   './ui/bauen.js',
   './ui/fotomodus.js',
