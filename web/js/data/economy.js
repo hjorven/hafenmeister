@@ -223,6 +223,24 @@ export const ECONOMY = {
   // Kein Service hat laufende Kosten (plan.md, Leitlinien: keine laufenden Kosten), unterhalt
   // ist deshalb immer 0.
   services: {
+    // Angebote an Land (docs/echter-hafen.md, C11): bezahlt sich in rund 25 bis 45 Spieltagen
+    baecker: { abStufe: 1, stufen: [
+      { name: 'Brötchenservice', kosten: 80, wirkung: { kunden: { anteil: 0.3, preis: 3 }, ruf: 0.03 } },
+      { name: 'Hafenbäcker', kosten: 3200, abStufe: 3, wirkung: { proTag: 30, kunden: { anteil: 0.4, preis: 3 }, ruf: 0.06 } },
+    ] },
+    hafencafe: { abStufe: 2, stufen: [
+      { name: 'Hafencafé', kosten: 800, wirkung: { proTag: 18, wetter: { regen: 0.5, sturm: 0.3 }, kunden: { anteil: 0.2, preis: 4 }, ruf: 0.03 } },
+      { name: 'Café mit Terrasse', kosten: 4800, abStufe: 3, wirkung: { proTag: 70, wetter: { regen: 0.4, sturm: 0.2 }, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.06 } },
+    ] },
+    grillplatz: { abStufe: 2, stufen: [
+      { name: 'Grillplatz', kosten: 400, wirkung: { ruf: 0.05 } },
+    ] },
+    fahrradverleih: { abStufe: 3, stufen: [
+      { name: 'Fahrradverleih', kosten: 2000, wirkung: { proTag: 25, wetter: { regen: 0.3, sturm: 0 }, kunden: { anteil: 0.15, preis: 8 } } },
+    ] },
+    eisdiele: { abStufe: 4, stufen: [
+      { name: 'Eisdiele', kosten: 5000, wirkung: { proTag: 90, wetter: { regen: 0.2, sturm: 0 }, kunden: { anteil: 0.25, preis: 3 }, ruf: 0.03 } },
+    ] },
     bootsverleih: { abStufe: 1, stufen: [
       { name: 'Bootsverleih',            kosten: 150,  wirkung: { proTag: 8 } },
       { name: 'Bootsverleih mit Kanus',  kosten: 900,  abStufe: 2, wirkung: { proTag: 25 } },

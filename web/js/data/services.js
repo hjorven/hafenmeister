@@ -6,7 +6,7 @@
 //
 // Felder je Service
 //   id, name, kurz         Kennung, Anzeigename, eine Zeile fuer die Baukarte
-//   gruppe                 freizeit | handwerk | sicherheit | grosse-schiffe
+//   gruppe                 freizeit | an-land | handwerk | sicherheit | grosse-schiffe
 //   abStufe                ab welcher Ausbaustufe des Hafens (1 bis 6, plan.md Abschnitt 4) die erste Stufe baubar ist
 //   lage                   { x, y, dreh } in Planeinheiten wie js/data/harbor.js (1 Einheit = 0,62 m,
 //                          x nach Osten, y nach Norden), dreh in Grad gegen den Uhrzeigersinn.
@@ -44,6 +44,7 @@ export const STURMSCHUTZ_MAX = 0.8;
 
 export const GRUPPEN = {
   'freizeit': 'Freizeit',
+  'an-land': 'Angebote an Land',
   'handwerk': 'Handwerk und Technik',
   'sicherheit': 'Sicherheit',
   'grosse-schiffe': 'Große Schiffe',
@@ -96,6 +97,58 @@ export const SERVICES = [
         wirkung: { proTag: 120, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.08, besucherFuerVersorgung: 40 } },
       { name: 'Fischhalle mit Fischmarkt', kosten: 16000,
         wirkung: { proTag: 260, kunden: { anteil: 0.4, preis: 6 }, ruf: 0.12, besucherFuerVersorgung: 90 } },
+    ],
+  },
+
+  // ------------------------------------------------------------------ Angebote an Land (docs/echter-hafen.md, C11)
+  // Jedes Angebot hat seine Tageszeit: Die Menschen im Hafen gehen dann hin (js/data/people.js, ZIELE),
+  // das Modell zeigt, ob offen ist (Klappe, Schirme, Fahrräder im Ständer, Feuer).
+  {
+    id: 'baecker', name: 'Bäcker', gruppe: 'an-land', abStufe: 1,
+    kurz: 'Frische Brötchen am Morgen. Die Crews holen sie, die Gäste bewerten besser.',
+    lage: { x: -56, y: -22, dreh: 0 }, radius: 6,
+    stufen: [
+      { name: 'Brötchenservice', kosten: 80,
+        wirkung: { kunden: { anteil: 0.3, preis: 3 }, ruf: 0.03 } },
+      { name: 'Hafenbäcker', kosten: 3200, abStufe: 3,
+        wirkung: { proTag: 30, kunden: { anteil: 0.4, preis: 3 }, ruf: 0.06 } },
+    ],
+  },
+  {
+    id: 'hafencafe', name: 'Hafencafé', gruppe: 'an-land', abStufe: 2,
+    kurz: 'Kaffee und Kuchen am Nachmittag, mit Blick aufs Wasser.',
+    lage: { x: 22, y: -14, dreh: 0 }, radius: 8,
+    stufen: [
+      { name: 'Hafencafé', kosten: 800,
+        wirkung: { proTag: 18, wetter: { regen: 0.5, sturm: 0.3 }, kunden: { anteil: 0.2, preis: 4 }, ruf: 0.03 } },
+      { name: 'Café mit Terrasse', kosten: 4800, abStufe: 3,
+        wirkung: { proTag: 70, wetter: { regen: 0.4, sturm: 0.2 }, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.06 } },
+    ],
+  },
+  {
+    id: 'grillplatz', name: 'Grillplatz', gruppe: 'an-land', abStufe: 2,
+    kurz: 'Grill und Bänke am Strand. Abends sitzen die Crews zusammen.',
+    lage: { x: -222, y: -8, dreh: 0 }, radius: 7,
+    stufen: [
+      { name: 'Grillplatz', kosten: 400, wirkung: { ruf: 0.05 } },
+    ],
+  },
+  {
+    id: 'fahrradverleih', name: 'Fahrradverleih', gruppe: 'an-land', abStufe: 3,
+    kurz: 'Räder für Landausflüge. Tagsüber ist der Ständer leer.',
+    lage: { x: -18, y: -32, dreh: 0 }, radius: 6,
+    stufen: [
+      { name: 'Fahrradverleih', kosten: 2000,
+        wirkung: { proTag: 25, wetter: { regen: 0.3, sturm: 0 }, kunden: { anteil: 0.15, preis: 8 } } },
+    ],
+  },
+  {
+    id: 'eisdiele', name: 'Eisdiele', gruppe: 'an-land', abStufe: 4,
+    kurz: 'Eis am Nachmittag. Bei Sonne ist richtig was los.',
+    lage: { x: 96, y: -12, dreh: 0 }, radius: 6,
+    stufen: [
+      { name: 'Eisdiele', kosten: 5000,
+        wirkung: { proTag: 90, wetter: { regen: 0.2, sturm: 0 }, kunden: { anteil: 0.25, preis: 3 }, ruf: 0.03 } },
     ],
   },
 

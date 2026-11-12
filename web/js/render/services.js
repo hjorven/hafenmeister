@@ -96,7 +96,7 @@ export function init(game) {
     if (alt) { gruppe.remove(alt.group); entsorge(alt.group); anlagen.delete(id); }
     if (n <= 0) return;
     const w = welt(R.lage(zustand(), id));
-    const m = baueModell(id, n, { boden: boden(w.x, w.z), ufer: uferAbstand(w) });
+    const m = baueModell(id, n, { boden: boden(w.x, w.z), ufer: uferAbstand(w), uhr: () => game.sim?.tagesAnteil?.() ?? 0.5 });
     m.group.position.set(w.x, 0, w.z);
     m.group.rotation.y = w.ry;
     aufBoden(m.group);

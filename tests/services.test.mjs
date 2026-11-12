@@ -46,7 +46,7 @@ test('Voll ausgebaut', () => {
 
 test('Liste zeigt nur Services der erreichten Hafenstufe', () => {
   const ids = R.liste(neuerZustand(), { stufe: 1 }).map((x) => x.id);
-  assert.deepEqual(ids, ['bootsverleih']);
+  assert.deepEqual(ids, ['bootsverleih', 'baecker']);
   assert.ok(R.liste(neuerZustand(), { stufe: 6 }).length === SERVICES.length);
 });
 
@@ -132,4 +132,20 @@ test('Zustand bleibt JSON', () => {
   R.bauen(z, 'bootsverleih', { stufe: 1, tag: 1 });
   R.tagesabschluss(z, { tag: 1, boote: [] });
   assert.deepEqual(JSON.parse(JSON.stringify(z)), z);
+});
+
+test('Angebote an Land: Bäcker ab Stufe 1, Café ab 2, Eisdiele erst ab 4', () => {
+  const ids = (stufe) => R.liste(neuerZustand(), { stufe }).map((x) => x.id);
+  assert.ok(ids(1).includes('baecker'));
+  assert.ok(!ids(1).includes('hafencafe'));
+  assert.ok(ids(2).includes('hafencafe') && ids(2).includes('grillplatz'));
+  assert.ok(!ids(3).includes('eisdiele') && ids(3).includes('fahrradverleih'));
+  assert.ok(ids(4).includes('eisdiele'));
+  // Eisdiele verdient bei Regen weniger als bei Sonne
+  const z = neuerZustand();
+  R.bauen(z, 'eisdiele', { stufe: 4, ruf: 5, tag: 1 });
+  const boote = Array.from({ length: 20 }, () => ({ klasse: 'M', antrieb: 'segel' }));
+  const sonne = R.tagesabschluss(z, { tag: 2, wetter: 'sonne', boote }, () => 0).summe;
+  const regen = R.tagesabschluss(z, { tag: 3, wetter: 'regen', boote }, () => 0).summe;
+  assert.ok(sonne > regen, `${sonne} > ${regen}`);
 });
