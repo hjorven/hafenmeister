@@ -81,6 +81,8 @@ Was beim Testen auf dem Handy aufgefallen ist und so gelöst wurde:
 - **Keine Kamerafahrt beim Ziehen.** Wird ein Boot angetippt, fährt die Kamera zu den passenden Stegen. Beim Ziehen nicht, sonst rutscht das Ziel unter dem Finger weg.
 - **Ziel über dem Finger.** Die Schleppleine endet 28 px über der Fingerspitze, damit der Finger den Steg nicht verdeckt.
 - **Leisten herausrechnen.** Kamerafahrten lassen den Bereich unter den Leisten frei, auch im Querformat oben links.
+- **Stege über der Bootskarte.** Ist ein Boot gewählt, wird die Karte knapp (Name, Hinweis, drei Knöpfe in einer Zeile) und die Ansicht rückt um die halbe Kartenhöhe nach oben. So bleiben die leuchtenden Ringe antippbar. Nach dem Zuweisen oder Schließen rückt die Ansicht zurück. Im Querformat liegt die Karte rechts unter der oberen Leiste.
+- **Fünf Knöpfe im Hochformat.** Pause, Übersicht, Foto, Ton und Spielstand stehen rechts untereinander, das Wetter links unter den Zahlen. Die Maus-und-Tastatur-Hilfe ist auf dem Handy ausgeblendet.
 
 ## Ideen für die 3D-Fassung
 
