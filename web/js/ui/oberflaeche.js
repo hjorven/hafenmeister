@@ -5,7 +5,7 @@
 //   oben links    .hm-status    Kasse und Ruf (nur ansehen)
 //   oben rechts   .hm-werkzeuge Übersicht, Menü (selten gebraucht)
 //   links         #hm-seite     Wetter, Tagesziele, Ziel der nächsten Stufe (aufklappbar)
-//   unten links   #hm-zeit      Tag, Tagesbalken mit Sonne, Tempo: Pause, 1x, 3x, 8x (linker Daumen)
+//   unten links   #hm-zeit      Tag, Tagesbalken mit Sonne/Mond als Anzeige, Tempo: Pause, 1x, 3x, 8x (linker Daumen), Taste F = 3x
 //   unten Mitte   #btn-collect  Kassieren (abends)
 //   unten rechts  #btn-build    Bauen (rechter Daumen, Hauptaktion)
 //
@@ -152,7 +152,7 @@ export function init(game) {
     b.className = 'hm-tempo-knopf';
     b.dataset.tempo = t.id;
     b.setAttribute('aria-label', t.label);
-    b.title = t.label;
+    b.title = t.id === 'tempo2' ? `${t.label} (Taste F)` : t.label;
     b.hidden = false;
     b.textContent = '';
     symbol(b, t.id);

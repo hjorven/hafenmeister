@@ -11,7 +11,7 @@
 //   'longpress'    { x, y, world, pick }   Finger ruht 0,5 s; liegt er auf einem Boot,
 //                                          hupt es (Ereignis 'horn' an das Ton-Modul)
 //
-// Boot von der Warteboje ziehen, Kassierstrich und Sonne ziehen stehen
+// Boot von der Warteboje ziehen und Kassierstrich stehen
 // geraeteuebergreifend in js/ui/gesten.js (Tablet-Thread).
 //
 // Auf diese Spielereignisse gibt es ein kurzes Vibrieren (nur Android):

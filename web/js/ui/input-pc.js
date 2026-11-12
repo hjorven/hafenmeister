@@ -2,7 +2,8 @@
 //
 // Arbeitsteilung mit den anderen Eingabe-Modulen:
 //   core/input.js  linke Taste ziehen = Karte verschieben, Mausrad, Tipp (tap)        für alle Geräte
-//   ui/gesten.js   Schleppleine von der Warteboje, Kassierstrich, Sonne ziehen          für alle Geräte
+//   ui/gesten.js   Schleppleine von der Warteboje, Kassierstrich                       für alle Geräte
+//   ui/oberflaeche.js  Tempo-Knöpfe unten links (Pause, 1x, 3x, 8x)                     für alle Geräte
 //   ui/input-pc.js (diese Datei) alles, was nur Maus und Tastatur können:
 //     - rechte Maustaste: Klick = Abbrechen, Ziehen = Hafen drehen (wenn die Kamera das kann), sonst verschieben
 //     - mittlere Maustaste ziehen = verschieben
@@ -24,7 +25,7 @@
 // Gesendete Ereignisse (docs/grundgeruest.md):
 //   ui:cancel                 Esc oder Rechtsklick
 //   ui:auto-einfahren {boot}  Doppelklick auf ein wartendes Boot
-//   ui:vorspulen {speed}      Taste F schaltet Vorspulen an und aus (wie die Sonne in gesten.js)
+//   ui:vorspulen {speed}      Taste F schaltet 3x an und aus, über game.oberflaeche.tempo (wie die Tempo-Knöpfe unten links)
 //   ui:mute                   Taste M
 // Über das DOM: 1 bis 9 und Tab klicken die Boot-Knöpfe in #queue ([data-boat], aria-pressed),
 // bei offener Karte wählen 1 bis 9 die Knöpfe in #card.
@@ -32,7 +33,7 @@
 
 const DRAG_PX = 6;
 const PAN_SPEED = 900;          // Pixel pro Sekunde bei gehaltener Taste
-const FAST = 4;                 // Vorspulen mit Taste F
+const FAST = 3;                 // Vorspulen mit Taste F, wie der Knopf 3x
 const PAN_KEYS = {
   KeyW: [0, 1], ArrowUp: [0, 1], KeyS: [0, -1], ArrowDown: [0, -1],
   KeyA: [1, 0], ArrowLeft: [1, 0], KeyD: [-1, 0], ArrowRight: [-1, 0],
@@ -76,7 +77,7 @@ export function init(game) {
     ['Wartendes Boot ziehen', 'An der Schleppleine in einen leuchtenden Platz ziehen', () => true],
     ['Doppelklick auf wartendes Boot', 'Boot fährt selbst in den besten Platz', () => true],
     ['Maustaste halten und über Münzen streichen', 'Alles in einem Zug kassieren', () => true],
-    ['Sonne im Tagesbalken ziehen, <kbd>F</kbd>', 'Vorspulen', () => true],
+    ['Tempo-Knöpfe unten links, <kbd>F</kbd>', 'Vorspulen: 1x, 3x, 8x; F schaltet 3x an und aus', () => true],
     ['<kbd>1</kbd> bis <kbd>9</kbd>', 'Wartendes Boot wählen, bei offener Karte deren Knopf', () => true],
     ['<kbd>Tab</kbd>, Umschalt + <kbd>Tab</kbd>', 'Nächstes, voriges wartendes Boot', () => true],
     ['<kbd>Enter</kbd>', 'Gewähltes Boot einfahren lassen, bei offener Karte deren ersten Knopf', () => true],
@@ -275,6 +276,8 @@ export function init(game) {
   const center = () => ({ x: canvas.clientWidth / 2, y: canvas.clientHeight / 2 });
 
   function setFast(on) {
+    // Über die Oberfläche, damit Knöpfe, Ton und Pause mitgehen
+    if (game.oberflaeche?.tempo) { game.oberflaeche.tempo(on ? FAST : 1); return; }
     game.speed = on ? FAST : 1;
     document.body.classList.toggle('vorspulen', on);
     game.emit('ui:vorspulen', { speed: game.speed });

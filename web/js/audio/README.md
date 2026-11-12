@@ -79,7 +79,7 @@ Optionen für jeden Effekt: `pan` (-1 links bis 1 rechts), `volume` (0 bis 1,5),
 | `hinweis` | Tutorial-Hinweis | |
 | `glocke` | Schiffsglocke | `schlaege`: 1 bis 8 |
 | `horn` | Schiffshorn | `groesse`, `stoesse`, `kurz` |
-| `vorspulen-start`, `vorspulen-ende` | Zeit vorspulen über die Sonne | |
+| `vorspulen-start`, `vorspulen-ende` | Zeit vorspulen über die Tempo-Knöpfe (3x, 8x) oder Taste F | |
 | `sturmwarnung` | Sturm angekündigt | |
 | `regatta` | Startschuss | |
 | `seenot` | Seenotretter läuft aus | |
