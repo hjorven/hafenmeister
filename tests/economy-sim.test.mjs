@@ -165,3 +165,21 @@ test('Gekaufte Plätze bleiben beim Stufenwechsel erhalten (Umbau ersetzt sie)',
     }
   }
 });
+
+test('Testmodus ?stufe=n: Spielstand der Stufe mit allen Plätzen, Geld und Ruf', () => {
+  const zahl = {};
+  for (let n = 1; n <= rules.maxStage; n++) {
+    const s = sim.applyTestStage(createState({ seed: 1, rules }), ctx, n);
+    assert.equal(s.stage, n);
+    assert.equal(s.testmodus, true);
+    zahl[n] = sim.availableBerths(s, ctx).length;
+    assert.equal(sim.openJettyProjects(s, ctx).length, 0, `Stufe ${n}: alle Stegprojekte gebaut`);
+    assert.ok(s.money >= 500);
+    assert.equal(sim.reputation(s), 4);
+    // Die Regeln laufen in dieser Stufe: ein Tag ohne Fehler, Boote kommen
+    const ev = sim.runDay(s, ctx);
+    assert.ok(ev.some((e) => e.type === 'arrived'), `Stufe ${n}: es kommen Boote`);
+  }
+  assert.ok(zahl[2] > zahl[1] && zahl[5] > zahl[3]);
+  assert.equal(sim.applyTestStage(createState({ seed: 1, rules }), ctx, 99).stage, rules.maxStage);
+});

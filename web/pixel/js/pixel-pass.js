@@ -8,6 +8,7 @@
 //   const pass = createPixelPass(THREE, renderer, { pixel: 3 });
 //   pass.render(scene, camera);          // statt renderer.render(scene, camera)
 import { PALETTE, buildLut, LUT_SIZE } from './palette.js';
+import { RAMPE_GLSL } from './gezeichnet.js';
 
 const VERT = /* glsl */`
   varying vec2 vUv;
@@ -29,12 +30,14 @@ const FRAG_PALETTE = /* glsl */`
   uniform float uDither;       // Staerke der geordneten Rasterung
   uniform vec2 uOrigin;        // Rasterursprung, damit die Rasterung mit der Kamera mitwandert
   uniform float uAlpha;        // 1 = Hintergrund durchsichtig lassen (Spritebogen), 0 = immer deckend
+  uniform float uQuant;        // 1 = auf die Palette runden (Filter), 0 = Farben sind schon gezeichnet
   varying vec2 vUv;
 
   float lin(vec2 uv) {
     float d = texture2D(tDepth, uv).x;
     return uNear + d * (uFar - uNear);     // orthografisch: Tiefe ist linear
   }
+  ${RAMPE_GLSL}
   vec3 toSrgb(vec3 c) {
     c = clamp(c, 0.0, 1.0);
     return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c));
@@ -54,6 +57,21 @@ const FRAG_PALETTE = /* glsl */`
     vec2 px = 1.0 / uSize;
     vec4 roh = texture2D(tColor, vUv);
     vec3 c = toSrgb(roh.rgb / max(roh.a, 0.001) * mix(roh.a, 1.0, 1.0 - uAlpha));
+    // Aufraeumen: ein Einzelpixel, dessen vier Nachbarn (mindestens drei davon gleich) anders sind,
+    // uebernimmt die Nachbarfarbe. So bleiben Flaechen ruhig wie von Hand gesetzt.
+    if (uQuant < 0.5) {
+      vec2 p1 = 1.0 / uSize;
+      vec3 n0 = toSrgb(texture2D(tColor, vUv - vec2(p1.x, 0.0)).rgb);
+      vec3 n1 = toSrgb(texture2D(tColor, vUv + vec2(p1.x, 0.0)).rgb);
+      vec3 n2 = toSrgb(texture2D(tColor, vUv - vec2(0.0, p1.y)).rgb);
+      vec3 n3 = toSrgb(texture2D(tColor, vUv + vec2(0.0, p1.y)).rgb);
+      float t = 0.01;
+      bool allein = distance(c, n0) > t && distance(c, n1) > t && distance(c, n2) > t && distance(c, n3) > t;
+      if (allein) {
+        if (distance(n0, n1) < t && (distance(n0, n2) < t || distance(n0, n3) < t)) c = n0;
+        else if (distance(n2, n3) < t && (distance(n2, n0) < t || distance(n2, n1) < t)) c = n2;
+      }
+    }
     float d = lin(vUv);
     float dl = lin(vUv - vec2(px.x, 0.0));
     float dr = lin(vUv + vec2(px.x, 0.0));
@@ -66,15 +84,16 @@ const FRAG_PALETTE = /* glsl */`
     // Innenkanten (Knick zwischen zwei Flaechen): zweite Ableitung der Tiefe
     float knick = abs(dl + dr - 2.0 * d) + abs(du + dd - 2.0 * d);
     float innen = step(uTexel * 1.6 + 0.05, knick) * (1.0 - rand) * uOutline;
-    c *= mix(1.0, 0.5, rand);
-    c *= mix(1.0, 0.86, innen);
+    vec3 umriss = uQuant > 0.5 ? c * 0.5 : pxSrgb(pxRampe(pxLin(c), 0));
+    c = mix(c, umriss, rand);
+    c *= mix(1.0, mix(0.9, 0.86, uQuant), innen);
     // Himmel/Hintergrund (Tiefe = far) bekommt keinen Rand
     c += bayer4(gl_FragCoord.xy + uOrigin) * uDither;
     c = clamp(c, 0.0, 1.0);
     float s = float(${LUT_SIZE});
     vec3 l = (c * (s - 1.0) + 0.5) / s;
     float a = mix(1.0, step(0.5, roh.a), uAlpha);
-    gl_FragColor = vec4(texture(tLut, l).rgb, a);
+    gl_FragColor = vec4(mix(c, texture(tLut, l).rgb, uQuant), a);
   }
 `;
 
@@ -109,6 +128,7 @@ export function createPixelPass(THREE, renderer, opts = {}) {
     outline: opts.outline ?? true,
     dither: opts.dither ?? 0,
     enabled: true,
+    gezeichnet: opts.gezeichnet ?? true,   // false = alter Filter-Weg zum Vergleich
   };
 
   const lut = buildLut(PALETTE);
@@ -140,6 +160,9 @@ export function createPixelPass(THREE, renderer, opts = {}) {
     });
   };
   let overRT = null;
+  // Erweiterungen: vorher/nachher(info) um den Hauptdurchgang, extra = Szene, die nach der Palette
+  // pixelgenau auf die Markierungsebene kommt (schiff-sprites.js)
+  const hooks = { vorher: new Set(), nachher: new Set(), extra: null };
 
   // Durchsichtige Flaechen ohne Tiefenschreiben (Ankerfeld, Box-Leuchten, Bauplaetze, Schatten)
   // wuerden auf der Palette verschwinden. Sie kommen auf eine eigene Ebene und werden danach
@@ -163,7 +186,7 @@ export function createPixelPass(THREE, renderer, opts = {}) {
       tColor: { value: null }, tDepth: { value: null }, tLut: { value: lutTex },
       uSize: { value: new THREE.Vector2() }, uNear: { value: 1 }, uFar: { value: 2000 },
       uTexel: { value: 0.1 }, uOutline: { value: 1 }, uDither: { value: state.dither },
-      uOrigin: { value: new THREE.Vector2() }, uAlpha: { value: 0 },
+      uOrigin: { value: new THREE.Vector2() }, uAlpha: { value: 0 }, uQuant: { value: 1 },
     },
     depthTest: false, depthWrite: false,
   });
@@ -226,6 +249,8 @@ export function createPixelPass(THREE, renderer, opts = {}) {
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
 
+    const info = { camera, texel, w, h, scene };
+    for (const fn of hooks.vorher) fn(info);
     sammleOverlays(scene);
     const masken = overlays.map((o) => o.layers.mask);
     for (const o of overlays) o.layers.set(OVERLAY_LAYER);
@@ -241,6 +266,12 @@ export function createPixelPass(THREE, renderer, opts = {}) {
     renderer.setRenderTarget(overRT);
     renderer.setClearColor(0x000000, 0);
     renderer.clear(true, false, false);
+    // Gezeichnete Sprites (Schiffe), gegen die Tiefe der Szene, ohne selbst Tiefe zu schreiben
+    if (hooks.extra && hooks.extra.children.length) {
+      renderer.autoClear = false;
+      original(hooks.extra, camera);
+      renderer.autoClear = autoClear;
+    }
     if (overlays.length) {
       renderer.autoClear = false;
       scene.background = null;
@@ -252,6 +283,7 @@ export function createPixelPass(THREE, renderer, opts = {}) {
     renderer.setClearColor(clear, clearA);
     camera.layers.mask = camMaske;
     overlays.forEach((o, i) => { o.layers.mask = masken[i]; });
+    for (const fn of hooks.nachher) fn(info);
 
     // Kamera wiederherstellen (Antippen und Verschieben rechnen mit der echten Lage)
     camera.position.copy(_pos);
@@ -269,6 +301,7 @@ export function createPixelPass(THREE, renderer, opts = {}) {
     u.uDither.value = state.dither;
     u.uOrigin.value.set(Math.round(pr) % 4096, Math.round(pu) % 4096);
     u.uAlpha.value = 0;
+    u.uQuant.value = state.gezeichnet ? 0 : 1;
     renderer.setRenderTarget(pixRT);
     original(palScene, quadCam);
 
@@ -305,5 +338,5 @@ export function createPixelPass(THREE, renderer, opts = {}) {
     return target ?? pixRT;
   }
 
-  return { state, render, renderSmall, original, palette: PALETTE };
+  return { state, render, renderSmall, original, palette: PALETTE, hooks };
 }

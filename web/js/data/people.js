@@ -60,16 +60,17 @@ export const ZIELE = {
   speicher:     { gewicht: 3, dauer: [16, 34], drinnen: true },
   strandkoerbe: { gewicht: 4, dauer: [25, 60], drinnen: false },
   seebruecke:   { gewicht: 4, dauer: [10, 24], drinnen: false },
-  aussicht:     { gewicht: 3, dauer: [8, 20],  drinnen: false },   // Stegkopf, Molenkopf
-  strand:       { gewicht: 2, dauer: [30, 90], drinnen: false, sitzen: true },   // im Sand sitzen
-  baden:        { gewicht: 1, dauer: [20, 60], drinnen: false, nurBadewetter: true },
+  aussicht:     { gewicht: 3, dauer: [8, 20],  drinnen: false, viele: true },   // Stegkopf, Molenkopf
+  strand:       { gewicht: 2, dauer: [30, 90], drinnen: false, sitzen: true, viele: true },   // im Sand sitzen
+  baden:        { gewicht: 1, dauer: [20, 60], drinnen: false, nurBadewetter: true, viele: true },
   // Angebote an Land aus den Services (js/data/services.js). zeit = [von, bis] als Anteil des Spieltags
-  // (0 Morgen, 0,75 Abendbeginn, 1 Nacht): nur dann geht jemand hin.
-  baecker:        { gewicht: 6, dauer: [6, 14],  drinnen: false, zeit: [0, 0.3] },
+  // (0 Morgen, 0,75 Abendbeginn, 1 Nacht): nur wer in diesem Fenster ankommt, geht hin (people.js
+  // schaetzt die Ankunft aus Weg und Tempo, ein Spieltag dauert nur zwei Minuten).
+  baecker:        { gewicht: 6, dauer: [6, 14],  drinnen: false, zeit: [0, 0.45] },
   hafencafe:      { gewicht: 5, dauer: [25, 60], drinnen: false, zeit: [0.25, 0.8], sitzen: true },
   eisdiele:       { gewicht: 5, dauer: [8, 20],  drinnen: false, zeit: [0.3, 0.78] },
   fahrradverleih: { gewicht: 3, dauer: [6, 12],  drinnen: false, zeit: [0.12, 0.55] },
-  grillplatz:     { gewicht: 6, dauer: [30, 80], drinnen: false, zeit: [0.68, 1.01], sitzen: true },
+  grillplatz:     { gewicht: 6, dauer: [30, 80], drinnen: false, zeit: [0.6, 1.01], sitzen: true },
   raeucherei:     { gewicht: 4, dauer: [8, 18],  drinnen: false, zeit: [0.3, 0.7] },
 };
 

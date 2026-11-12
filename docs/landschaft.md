@@ -1,6 +1,6 @@
 # Landschaft, Wasser und Licht
 
-Stand: 11.11.2026. Code: `web/js/render/landscape.js` (Einstieg, wird von `main.js` geladen) und `web/js/render/landschaft/`.
+Stand: 12.11.2026. Code: `web/js/render/landscape.js` (Einstieg, wird von `main.js` geladen) und `web/js/render/landschaft/`.
 
 ## Was man sieht
 
@@ -67,11 +67,19 @@ Höhen für Bauten: Promenade 1,2 m, Kai Außenhafen 1,3 m, Molenkrone 1,4 m. In
 
 | Qualität | Wann | Gelände-Raster | Schatten | Dreiecke (Stufe 3) |
 |---|---|---|---|---|
-| hoch | PC mit mehr als 4 Kernen | 2,0 m | echte Schattenkarte | etwa 200.000 |
-| mittel | Tablet, kleinere PCs | 2,6 m | flache Schatten unter Bäumen | etwa 150.000 |
-| niedrig | Handy | 3,2 m | flache Schatten unter Bäumen | etwa 76.000 |
+| hoch | PC mit mehr als 4 Kernen | 2,0 m | echte Schattenkarte | etwa 167.000 |
+| mittel | Tablet, kleinere PCs | 2,6 m | flache Schatten unter Bäumen | etwa 99.000 |
+| niedrig | Handy | 3,2 m | flache Schatten unter Bäumen | etwa 54.000 |
 
-Das Wasser ist eine einzige Fläche mit einem kurzen Shader ohne Spiegelung. Bäume, Gras, Schilf, Steine und Buhnen sind Instanzen, also wenige Zeichenaufrufe. Ein Stufenwechsel baut das Gelände in etwa 0,2 s neu (PC).
+So bleibt es schnell (Stand 12.11.2026):
+
+- **Gelände** (`landschaft/netz.js`): Ebene Flächen gleicher Art werden zu großen Dreiecken zusammengefasst. Am Hafen weicht das Netz höchstens 3 cm vom Raster ab, nach außen wächst die Toleranz bis 1,2 m. Kein Riss zwischen groben und feinen Stücken, das prüft `tests/gelaendenetz.test.mjs`.
+- **Bäume, Stämme, Gras, Schilf, Felsen, Molensteine und Buhnen** werden beim Bau einmal zu je einem festen Netz gebacken, statt Tausende Instanzen zu zeichnen. Ecken werden geteilt (Index), Böden von Kegeln, die man nie sieht, fehlen.
+- **Baumschatten** sind ein festes Netz; Sonnenrichtung und Länge rechnet der Vertex-Shader, ein neuer Sonnenstand kostet also nichts.
+- **Molen** sind zwei Netze (Schüttung und Weg) statt einzelner Teile je Abschnitt.
+- **Wasser** ist eine einzige Fläche mit kurzem Shader ohne Spiegelung, Zufall ohne `sin()`, Tiefenbänder nur einmal gerechnet.
+
+Gemessen mit Software-Grafik (relativ zu lesen), Stufe 6 mittags, nur Zeichnen: PC Weitansicht 256 auf 148 ms, Nahansicht 169 auf 82 ms; Handy Weitansicht 128 auf 67 ms, Nahansicht 78 auf 44 ms. Ein Stufenwechsel baut die Landschaft in etwa 0,2 s neu (PC).
 
 ## Tests
 
@@ -79,4 +87,8 @@ Das Wasser ist eine einzige Fläche mit einem kurzen Shader ohne Spiegelung. Bä
 node --test tests/landschaft.test.mjs
 ```
 
-Prüft unter anderem: Wassertiefe an allen Liegeplätzen passt zu den Hafendaten, Wartebojen liegen in jedem Revier auch bei Niedrigwasser tief genug, Wege liegen an Land, die Uhrzeit läuft über den Spieltag ohne Sprung zurück.
+```bash
+node --test tests/gelaendenetz.test.mjs
+```
+
+Prüft unter anderem: Wassertiefe an allen Liegeplätzen passt zu den Hafendaten, Wartebojen liegen in jedem Revier auch bei Niedrigwasser tief genug, Wege liegen an Land, die Uhrzeit läuft über den Spieltag ohne Sprung zurück, das vereinfachte Geländenetz hat keine Risse und deckt die ganze Fläche.

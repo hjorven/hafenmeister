@@ -3,8 +3,12 @@
 //
 // Adresszusaetze:  ?px=3        feste Pixelgroesse in CSS-Pixeln (Standard: passend zum Geraet)
 //                  ?umriss=0    ohne Umrisse
+//                  ?schiffe=filter  Schiffe wie bisher gefiltert statt gezeichnet
+//                  ?stil=filter     alles wie bisher gefiltert (Vergleich)
 // Tasten (PC):     F8 Pixel an/aus zum Vergleichen
 import { createPixelPass } from './pixel-pass.js';
+import { installiereSchiffSprites } from './schiff-sprites.js';
+import { installiereGezeichnet } from './gezeichnet.js';
 
 function warteAufSpiel() {
   return new Promise((resolve) => {
@@ -18,14 +22,24 @@ const q = new URLSearchParams(location.search);
 const pass = createPixelPass(game.THREE, game.renderer, {
   pixel: q.get('px') || 'auto',
   outline: q.get('umriss') !== '0',
+  gezeichnet: q.get('stil') !== 'filter',
 });
 game.renderer.render = (scene, camera) => pass.render(scene, camera);
 game.pixel = pass;
+// Schiffe gezeichnet statt gefiltert (?schiffe=filter zeigt zum Vergleich den alten Weg)
+pass.schiffe = installiereSchiffSprites(game, pass);
+if (q.get('schiffe') === 'filter' || q.get('stil') === 'filter') pass.schiffe.aus = true;
+// Alles andere live gezeichnet (?stil=filter zeigt zum Vergleich den alten Filter-Weg)
+const gez = installiereGezeichnet(game, pass, { an: pass.state.gezeichnet });
 document.documentElement.classList.add('pixel');
 document.body.classList.add('pixel');
 
 window.addEventListener('keydown', (e) => {
-  if (e.key === 'F8') { pass.state.enabled = !pass.state.enabled; e.preventDefault(); }
+  if (e.key === 'F8') {
+    pass.state.enabled = !pass.state.enabled;
+    gez.uPxAn.value = pass.state.enabled && pass.state.gezeichnet ? 1 : 0;
+    e.preventDefault();
+  }
 });
 
 // ---- Kamerahoehe ----
@@ -55,7 +69,8 @@ rig._apply = function apply() {
 function setzeHoehe(n) {
   stufe = Math.max(0, Math.min(HOEHEN.length - 1, n));
   pitchZiel = THREE.MathUtils.degToRad(HOEHEN[stufe]);
-  knopf.textContent = `Höhe ${HOEHEN[stufe]}°`;
+  knopf.textContent = `${HOEHEN[stufe]}°`;
+  knopf.title = `Kamerahöhe ${HOEHEN[stufe]}° (Bild auf, Bild ab)`;
   game.emit('pixel:hoehe', HOEHEN[stufe]);
 }
 game.onTick(() => {
@@ -70,10 +85,28 @@ knopf.type = 'button';
 knopf.className = 'hud-btn';
 knopf.id = 'btn-hoehe';
 knopf.setAttribute('aria-label', 'Kamerahöhe wechseln');
-const leiste = document.getElementById('hud-top');
-const vor = document.getElementById('btn-overview');
-if (leiste && vor && vor.parentElement === leiste) leiste.insertBefore(knopf, vor);
-else (leiste || document.getElementById('game') || document.body).appendChild(knopf);
+// Neue Oberflaeche (body.hm-neu): Knopf zu den Werkzeugen vor das Menue, sonst wie frueher in die obere Leiste
+function haengeKnopf() {
+  const werkzeuge = document.querySelector('.hm-werkzeuge');
+  if (werkzeuge) {
+    knopf.className = 'hm-px hm-rund';
+    const menue = document.getElementById('btn-menu');
+    if (menue && menue.parentElement === werkzeuge) werkzeuge.insertBefore(knopf, menue);
+    else werkzeuge.appendChild(knopf);
+    return;
+  }
+  const leiste = document.getElementById('hud-top');
+  const vor = document.getElementById('btn-overview');
+  if (leiste && vor && vor.parentElement === leiste) leiste.insertBefore(knopf, vor);
+  else (leiste || document.getElementById('game') || document.body).appendChild(knopf);
+}
+haengeKnopf();
+// Die Oberflaeche kann sich nach uns aufbauen: einige Sekunden lang nachsehen und umhaengen
+let versuche = 0;
+const umhaengen = setInterval(() => {
+  if (!knopf.closest('.hm-werkzeuge') && document.querySelector('.hm-werkzeuge')) haengeKnopf();
+  if (knopf.closest('.hm-werkzeuge') || ++versuche > 40) clearInterval(umhaengen);
+}, 250);
 knopf.addEventListener('click', () => setzeHoehe((stufe + 1) % HOEHEN.length));
 window.addEventListener('keydown', (e) => {
   if (e.target?.closest?.('input, textarea, select')) return;

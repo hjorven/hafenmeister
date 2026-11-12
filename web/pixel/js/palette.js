@@ -21,7 +21,7 @@ export const PALETTE = [
 function srgbToLinear(v) {
   return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
 }
-function oklab(r, g, b) {
+export function oklab(r, g, b) {
   r = srgbToLinear(r); g = srgbToLinear(g); b = srgbToLinear(b);
   const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
   const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);

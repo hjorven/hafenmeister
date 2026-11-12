@@ -1,0 +1,695 @@
+/* Hafenmeister: Oberfläche im Pixel-Stil, für alle Geräte gleich
+ *
+ * Von Grund auf neu (12.11.2026). Gerüst und Pixel-Grafiken baut web/js/ui/oberflaeche.js,
+ * hier stehen Aussehen und Anordnung. ui-pc.css, ui-tablet.css, ui-phone.css stellen nur Größen ein.
+ * Konzept, Daumenzonen und Quellen: docs/ui/oberflaeche.md.
+ *
+ *   oben links    .hm-status     Kasse, Ruf
+ *   oben rechts   .hm-werkzeuge  Übersicht, Menü
+ *   links         #hm-seite      Wetter, Tagesziele, Ziel der nächsten Stufe
+ *   unten links   #hm-zeit       Tag, Tagesbalken, Tempo (Pause, 1x, 3x, 8x)
+ *   unten Mitte   #btn-collect   Kassieren
+ *   unten rechts  #btn-build     Bauen
+ *
+ * Alle Regeln beginnen mit .hm-neu (Klasse am body), damit sie die Stile schlagen, die einzelne
+ * Module zur Laufzeit in den <head> schreiben.
+ */
+
+@font-face {
+  font-family: "Pixelify Sans";
+  src: url("../fonts/pixelify-sans-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  /* Ziffern und Euro aus der Systemschrift: die Pixel-Ziffern 3, 5, 8 und das Euro-Zeichen sind klein kaum zu unterscheiden */
+  unicode-range: U+0000-002F, U+003A-20AB, U+20AD-FFFF;
+}
+@font-face {
+  font-family: "Pixelify Sans";
+  src: url("../fonts/pixelify-sans-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+  /* Ziffern und Euro aus der Systemschrift: die Pixel-Ziffern 3, 5, 8 und das Euro-Zeichen sind klein kaum zu unterscheiden */
+  unicode-range: U+0000-002F, U+003A-20AB, U+20AD-FFFF;
+}
+@font-face {
+  font-family: "Pixelify Sans";
+  src: url("../fonts/pixelify-sans-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  /* Ziffern und Euro aus der Systemschrift: die Pixel-Ziffern 3, 5, 8 und das Euro-Zeichen sind klein kaum zu unterscheiden */
+  unicode-range: U+0000-002F, U+003A-20AB, U+20AD-FFFF;
+}
+
+:root {
+  --hm-tinte: #24364a;
+  --hm-tinte-2: #5a6a7c;
+  --hm-papier: #fffaf0;
+  --hm-mulde: #e9dfca;
+  --hm-meer: #23897d;
+  --hm-koralle: #ee6454;
+  --hm-gold: #f2c14e;
+  --hm-pixel: "Pixelify Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --hm-text: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Größen: Geräte-Dateien überschreiben sie */
+  --hm-px: 2px;               /* ein Pixel der Rahmen */
+  --hm-knopf: 48px;           /* Knöpfe oben, Statusleiste */
+  --hm-tempo: 44px;           /* Tempo-Knöpfe */
+  --hm-chip: 40px;
+  --hm-bauen: 60px;
+  --hm-schrift: 15px;
+  --hm-rand: 12px;
+  --hm-luecke: 8px;
+  --hm-symbol: 24px;          /* Vielfaches von 12 bleibt scharf */
+  --hm-karte-breite: 380px;
+  --hm-oben: calc(var(--hm-safe-top) + var(--hm-rand));
+  --hm-links: calc(var(--hm-safe-left) + var(--hm-rand));
+  --hm-rechts: calc(var(--hm-safe-right) + var(--hm-rand));
+  --hm-unten: calc(var(--hm-safe-bottom) + var(--hm-rand));
+  --hm-rahmen-breite: calc(var(--hm-px) * 3) calc(var(--hm-px) * 3) calc(var(--hm-px) * 4);
+}
+
+body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-tinte); }
+.hm-neu button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.hm-neu button:focus-visible { outline: 3px dashed var(--hm-gold); outline-offset: 3px; }
+.hm-neu .spacer { display: none; }
+
+/* ------------------------------------------------------------ Pixel-Rahmen */
+.hm-neu .hm-px,
+.hm-neu #hm-seite .hm-px,
+.hm-neu #card,
+.hm-neu .hm-tipp,
+.hm-neu #event-banner,
+.hm-neu #hud-goal.done,
+.hm-neu .hm-einfahren,
+.hm-neu .bau-schild,
+.hm-neu .bau-tipp,
+.hm-neu #hm-audio-popover .hm-audio-panel,
+.hm-neu #card .hud-btn,
+.hm-neu .hm-knopf,
+.hm-neu .hm-tempo-knopf {
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--hm-rahmen-breite);
+  border-image-source: var(--rahmen-papier);
+  border-image-slice: 3 3 4 3 fill;
+  border-image-width: var(--hm-rahmen-breite);
+  border-image-repeat: stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.hm-neu button.hm-px:active, .hm-neu #card .hud-btn:active:not(:disabled), .hm-neu .hm-knopf:active, .hm-neu .hm-tempo-knopf:active { transform: translateY(var(--hm-px)); }
+.hm-neu button.hm-px { cursor: pointer; }
+
+/* Pixel-Symbol: Maske in der Textfarbe */
+.hm-neu .hm-sym {
+  display: inline-block;
+  flex: none;
+  width: var(--hm-symbol);
+  height: var(--hm-symbol);
+  background: currentColor;
+  -webkit-mask: var(--sym) center / contain no-repeat;
+  mask: var(--sym) center / contain no-repeat;
+  font-style: normal;
+}
+
+/* ------------------------------------------------------------ Oben */
+.hm-neu #hud-top {
+  position: absolute;
+  z-index: 20;
+  top: var(--hm-oben);
+  left: var(--hm-links);
+  right: var(--hm-rechts);
+  bottom: auto;
+  width: auto;
+  height: auto;
+  transform: none;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hm-luecke);
+  padding: 0;
+  margin: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  overflow: visible;
+  pointer-events: none;
+}
+.hm-neu #hud-top > * { pointer-events: auto; }
+
+.hm-neu .hm-status {
+  display: flex;
+  align-items: center;
+  height: var(--hm-knopf);
+  padding: 0 2px;
+  font-family: var(--hm-pixel);
+}
+.hm-neu .hm-status .stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  font-size: calc(var(--hm-schrift) + 4px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--hm-tinte);
+  background: none;
+  box-shadow: none;
+}
+.hm-neu .hm-status .stat + .stat { border-left: var(--hm-px) dotted rgba(36, 54, 74, 0.35); }
+.hm-neu #money::before, .hm-neu #rep::before {
+  content: "";
+  width: var(--hm-symbol);
+  height: var(--hm-symbol);
+  background: var(--px-muenze) center / contain no-repeat;
+}
+.hm-neu #rep::before { background-image: var(--px-stern); }
+
+.hm-neu .hm-werkzeuge { display: flex; gap: var(--hm-luecke); margin-left: auto; }
+.hm-neu .hm-rund {
+  display: grid;
+  place-items: center;
+  width: var(--hm-knopf);
+  height: var(--hm-knopf);
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  color: var(--hm-tinte);
+  font-size: 0;
+  line-height: 0;
+  overflow: hidden;
+}
+.hm-neu .hm-rund::after { content: none !important; }
+.hm-neu #btn-menu[aria-expanded="true"] { border-image-source: var(--rahmen-tinte); color: var(--hm-papier); }
+
+/* ------------------------------------------------------------ Menü */
+.hm-neu #hm-menue {
+  position: absolute;
+  z-index: 40;
+  top: calc(var(--hm-oben) + var(--hm-knopf) + 6px);
+  right: var(--hm-rechts);
+  display: grid;
+  gap: 2px;
+  min-width: 240px;
+  padding: 4px;
+  animation: hm-auf 0.12s steps(3);
+}
+.hm-neu #hm-menue[hidden] { display: none; }
+.hm-neu .hm-zeile {
+  position: static;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  height: auto;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--hm-tinte);
+  font-family: var(--hm-pixel);
+  font-size: calc(var(--hm-schrift) + 2px);
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  opacity: 1;
+  box-shadow: none;
+  cursor: pointer;
+}
+.hm-neu .hm-zeile::after { content: none !important; }
+.hm-neu .hm-zeile:hover, .hm-neu .hm-zeile:active { background: var(--hm-mulde); }
+.hm-neu #btn-sound.hm-audio-off .hm-sym { --sym: var(--px-stumm) !important; }
+
+.hm-neu #hm-audio-popover {
+  position: absolute;
+  z-index: 40;
+  top: calc(var(--hm-oben) + var(--hm-knopf) + 6px);
+  right: var(--hm-rechts);
+  max-width: calc(100vw - 2 * var(--hm-rand));
+}
+.hm-neu .hm-audio-panel { padding: 10px 12px; }
+.hm-neu .hm-audio-mute { border-radius: 0; background: var(--hm-mulde); color: var(--hm-tinte); font-family: var(--hm-pixel); font-weight: 600; }
+.hm-neu .hm-audio-stumm .hm-audio-mute { background: var(--hm-koralle); color: #fff; }
+.hm-neu .hm-audio-row input[type="range"] { accent-color: var(--hm-meer); }
+
+/* ------------------------------------------------------------ Links: Wetter, Tagesziele, Ziel */
+.hm-neu #hm-seite {
+  position: absolute;
+  z-index: 15;
+  top: calc(var(--hm-oben) + var(--hm-knopf) + 8px);
+  left: var(--hm-links);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: min(300px, calc(100vw - 2 * var(--hm-rand) - var(--hm-safe-left) - var(--hm-safe-right)));
+  pointer-events: none;
+}
+.hm-neu #hm-seite > * { pointer-events: auto; }
+.hm-neu #hm-seite > .hm-tafel,
+.hm-neu #hm-seite > .hm-ziel { position: static; inset: auto; margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; font: inherit; }
+.hm-neu #hm-seite [hidden] { display: none !important; }
+
+.hm-neu .hm-chip,
+.hm-neu #hm-seite .hm-chip {
+  position: static;
+  inset: auto;
+  transform: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+  min-height: var(--hm-chip);
+  height: var(--hm-chip);
+  margin: 0;
+  padding: 0 10px 0 6px;
+  color: var(--hm-tinte);
+  font-family: var(--hm-pixel);
+  font-size: calc(var(--hm-schrift) + 1px);
+  font-weight: 600;
+  white-space: nowrap;
+  --hm-symbol: 18px;
+}
+.hm-neu #weather-chip svg { width: 22px; height: 22px; flex: none; }
+.hm-neu #hm-seite #weather-chip.has-news { border-image-source: var(--rahmen-gold); }
+.hm-neu .hm-tafel-knopf::before {
+  content: "";
+  flex: none;
+  width: 18px;
+  height: 18px;
+  background: var(--hm-meer);
+  -webkit-mask: var(--px-ziele) center / contain no-repeat;
+  mask: var(--px-ziele) center / contain no-repeat;
+}
+.hm-neu .hm-ziel-knopf .hm-sym { color: var(--hm-koralle); }
+.hm-neu #hm-seite .hm-chip[aria-expanded="true"] { border-image-source: var(--rahmen-tinte); color: var(--hm-papier); }
+.hm-neu .hm-chip[aria-expanded="true"] .hm-sym { color: inherit; }
+.hm-neu .hm-chip[aria-expanded="true"]::before { background: currentColor; }
+.hm-neu .hm-chip-zahl { padding: 0 6px; background: var(--hm-mulde); color: var(--hm-tinte); font-size: 0.9em; }
+.hm-neu .hm-ziel.fertig .hm-ziel-knopf { border-image-source: var(--rahmen-gold); }
+.hm-neu .hm-tafel.jubel > button { animation: hm-hupf 0.5s steps(4); }
+
+/* Aufgeklappte Tafeln */
+.hm-neu .hm-tafel-px,
+.hm-neu #hm-seite .hm-tafel-px {
+  position: static;
+  inset: auto;
+  transform: none;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  max-height: 46vh;
+  overflow-y: auto;
+  margin: 0;
+  padding: 8px 10px;
+  color: var(--hm-tinte);
+  font-size: var(--hm-schrift);
+  animation: hm-auf 0.12s steps(3);
+}
+.hm-neu #hm-menue.hm-tafel-px { position: absolute; width: auto; max-height: none; overflow: visible; padding: 4px; }
+.hm-neu #hm-seite .hm-tafel li { padding: 6px 0; border-top: var(--hm-px) dotted rgba(36, 54, 74, 0.25); }
+.hm-neu #hm-seite .hm-tafel li:first-child { border-top: 0; }
+.hm-neu #hm-seite .hm-tafel li.erledigt { color: var(--hm-meer); }
+.hm-neu #weather-panel .wp-row { border-top: var(--hm-px) dotted rgba(36, 54, 74, 0.25); }
+.hm-neu .hm-klapp-kopf { margin: 0 0 6px; font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-schrift) + 1px); }
+.hm-neu .hm-balken-zeile { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 4px 0; }
+.hm-neu .hm-balken-wert { font-variant-numeric: tabular-nums; color: var(--hm-tinte-2); }
+.hm-neu .hm-balken-zeile.ok .hm-balken-wert { color: var(--hm-meer); font-weight: 700; }
+.hm-neu .hm-balken { grid-column: 1 / -1; height: calc(var(--hm-px) * 4); background: var(--hm-mulde); box-shadow: inset 0 0 0 var(--hm-px) rgba(36, 54, 74, 0.3); }
+.hm-neu .hm-balken > i { display: block; height: 100%; background: var(--hm-gold); box-shadow: inset 0 calc(var(--hm-px) * -1) 0 rgba(0, 0, 0, 0.15); }
+.hm-neu .hm-balken-zeile.ok .hm-balken > i { background: var(--hm-meer); }
+.hm-neu .hm-tafel-px .hm-knopf { width: 100%; margin-top: 6px; }
+
+/* Abschlussziel aus hud.js: die Zeile steckt im Ziel-Schild, nur die Erfolgsmeldung bleibt */
+.hm-neu #hud-goal:not(.done) { display: none !important; }
+.hm-neu #hud-goal.done {
+  top: calc(var(--hm-oben) + var(--hm-knopf) + 12px);
+  bottom: auto;
+  padding: 8px 16px;
+  border-image-source: var(--rahmen-meer);
+  color: #fff;
+  font-family: var(--hm-pixel);
+  font-size: calc(var(--hm-schrift) + 2px);
+  z-index: 35;
+}
+
+.hm-neu #event-banner { top: calc(var(--hm-oben) + var(--hm-knopf) + 8px); z-index: 25; }
+.hm-neu #event-banner strong { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-schrift) + 2px); }
+
+/* ------------------------------------------------------------ Unten: Zeit, Kassieren, Bauen */
+.hm-neu #hud-bottom {
+  position: absolute;
+  z-index: 20;
+  top: auto;
+  left: var(--hm-links);
+  right: var(--hm-rechts);
+  bottom: var(--hm-unten);
+  width: auto;
+  height: auto;
+  transform: none;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: var(--hm-luecke);
+  padding: 0;
+  margin: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: none;
+  transition: transform 0.2s steps(4), opacity 0.2s;
+}
+.hm-neu #hud-bottom > * { pointer-events: auto; }
+.hm-neu #hud-bottom > #queue { display: none; }
+.hm-neu #hm-zeit { grid-column: 1; grid-row: 1; justify-self: start; }
+.hm-neu #btn-collect { grid-column: 2; grid-row: 1; justify-self: center; }
+.hm-neu #btn-build { grid-column: 3; grid-row: 1; justify-self: end; }
+
+/* Zeit */
+.hm-neu #hm-zeit { display: grid; gap: 4px; padding: 2px 3px 1px; }
+.hm-neu .hm-zeit-kopf { display: flex; align-items: center; gap: 8px; padding: 0 3px; min-height: 26px; }
+.hm-neu #hm-zeit #day {
+  flex: none;
+  padding: 0;
+  height: auto;
+  background: none;
+  box-shadow: none;
+  font-family: var(--hm-pixel);
+  font-size: calc(var(--hm-schrift) + 1px);
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--hm-tinte);
+}
+.hm-neu #hm-zeit #day::after, .hm-neu #hm-zeit #day::before { content: none; }
+.hm-neu .hm-himmel {
+  --anteil: 0;
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 48px;
+  height: calc(var(--hm-px) * 7);
+  background: #9fd6e8;
+  box-shadow: inset 0 0 0 var(--hm-px) var(--hm-tinte), inset 0 calc(var(--hm-px) * -3) 0 #7cc0d8;
+}
+.hm-neu .hm-abendteil {
+  position: absolute;
+  top: var(--hm-px);
+  bottom: var(--hm-px);
+  right: var(--hm-px);
+  background: #f2a46a;
+  box-shadow: inset 0 calc(var(--hm-px) * -2) 0 #de8350;
+}
+.hm-neu .hm-himmel.abend { background: #6f86b5; box-shadow: inset 0 0 0 var(--hm-px) var(--hm-tinte), inset 0 calc(var(--hm-px) * -3) 0 #5a6f9c; }
+.hm-neu .hm-gestirn {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--anteil) * (100% - 24px));
+  width: 24px;
+  height: 24px;
+  margin-top: -12px;
+  background: var(--px-sonne) center / contain no-repeat;
+}
+.hm-neu .hm-gestirn.mond { background-image: var(--px-mond); }
+
+.hm-neu .hm-tempo { display: flex; gap: 3px; }
+.hm-neu .hm-tempo-knopf {
+  display: grid;
+  place-items: center;
+  width: var(--hm-tempo);
+  height: var(--hm-tempo);
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border-image-source: var(--rahmen-mulde);
+  color: var(--hm-tinte-2);
+  font-size: 0;
+  line-height: 0;
+  cursor: pointer;
+  --hm-symbol: 18px;
+}
+.hm-neu .hm-tempo-knopf::after { content: none !important; }
+.hm-neu .hm-tempo-knopf:hover { color: var(--hm-tinte); }
+.hm-neu .hm-tempo-knopf[aria-pressed="true"] { border-image-source: var(--rahmen-meer); color: #fff; }
+.hm-neu .hm-tempo-knopf[data-tempo="pause"][aria-pressed="true"] { border-image-source: var(--rahmen-koralle); }
+.hm-neu.paused:not(.building) #stage { filter: saturate(0.65) brightness(0.96); }
+
+/* Kassieren */
+.hm-neu #btn-collect {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--hm-bauen);
+  min-height: 0;
+  padding: 0 14px 0 10px;
+  border-image-source: var(--rahmen-gold);
+  color: #3b2a07;
+  font-family: var(--hm-pixel);
+  font-size: calc(var(--hm-schrift) + 4px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  animation: hm-hupf 2.4s steps(1) infinite;
+}
+.hm-neu #btn-collect::before {
+  content: "";
+  flex: none;
+  width: var(--hm-symbol);
+  height: var(--hm-symbol);
+  background: var(--px-muenze) center / contain no-repeat;
+}
+.hm-neu #btn-collect::after { content: none !important; }
+
+/* Bauen */
+.hm-neu #btn-build {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: auto;
+  min-width: 0;
+  height: var(--hm-bauen);
+  min-height: 0;
+  padding: 0 18px 0 14px;
+  border-image-source: var(--rahmen-koralle);
+  color: #fff;
+  font-family: var(--hm-pixel);
+  font-size: calc(var(--hm-schrift) + 5px);
+  font-weight: 700;
+  text-shadow: 0 var(--hm-px) 0 rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}
+.hm-neu.building #btn-build,
+.hm-neu #btn-build[aria-pressed="true"] { border-image-source: var(--rahmen-tinte); }
+.hm-neu.building #btn-build .hm-sym { --sym: var(--px-zu) !important; }
+.hm-neu #btn-build.bau-punkt::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--hm-px) * -6);
+  right: calc(var(--hm-px) * -6);
+  width: calc(var(--hm-px) * 7);
+  height: calc(var(--hm-px) * 7);
+  margin: 0;
+  padding: 0;
+  border: var(--hm-px) solid var(--hm-tinte);
+  border-radius: 0;
+  background: var(--hm-gold);
+  box-sizing: border-box;
+  animation: hm-blink 1.2s steps(1) infinite;
+}
+.hm-neu #btn-build:not(.bau-punkt)::after { content: none; }
+
+/* "Als Nächstes" (bauen.js) */
+.hm-neu .bau-tipp { padding: 6px 12px; }
+.hm-neu .bau-tipp::after { display: none; }
+.hm-neu .bau-tipp-titel { color: var(--hm-meer); font-family: var(--hm-pixel); letter-spacing: 0.04em; }
+.hm-neu.card-open .bau-tipp { display: none; }
+
+/* Knopf "Einfahren" am Boot (gesten.js) */
+.hm-neu .hm-einfahren { border-image-source: var(--rahmen-meer); color: #fff; font-family: var(--hm-pixel); font-size: calc(var(--hm-schrift) + 2px); padding: 0 14px; min-height: 44px; }
+
+/* Preisschilder über Bauplätzen (bauen.js) */
+.hm-neu .bau-schild { padding: 2px 8px; font-family: var(--hm-pixel); font-size: 13px; }
+.hm-neu .bau-schild::after { display: none; }
+.hm-neu .bau-schild.empfohlen { outline: 0; border-image-source: var(--rahmen-gold); }
+.hm-neu .bau-schild-preis { color: var(--hm-meer); }
+
+/* ------------------------------------------------------------ Karte */
+.hm-neu #card {
+  position: absolute;
+  z-index: 30;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 12px 14px 10px;
+  color: var(--hm-tinte);
+  font-size: var(--hm-schrift);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.hm-neu #card h2 { margin: 0 0 2px; font-family: var(--hm-pixel); font-size: calc(var(--hm-schrift) + 7px); font-weight: 700; line-height: 1.15; }
+.hm-neu #card p { margin: 0 0 10px; color: var(--hm-tinte-2); opacity: 1; }
+.hm-neu #card .card-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.hm-neu #card .card-actions .hud-btn { flex: 1 1 120px; }
+.hm-neu #card .hud-btn,
+.hm-neu .hm-knopf {
+  min-width: 0;
+  min-height: 48px;
+  padding: 4px 10px;
+  color: var(--hm-tinte);
+  font-family: var(--hm-pixel);
+  font-size: calc(var(--hm-schrift) + 2px);
+  font-weight: 600;
+  line-height: 1.15;
+  cursor: pointer;
+}
+.hm-neu #card .hud-btn::after { content: none !important; }
+.hm-neu #card .hud-btn:disabled { opacity: 0.5; cursor: default; }
+.hm-neu #card .hm-primaer:not(:disabled),
+.hm-neu .hm-knopf.hm-primaer,
+.hm-neu #card .bau-ja:not(:disabled) { border-image-source: var(--rahmen-meer) !important; background: none !important; color: #fff !important; }
+.hm-neu #card .hm-gefahr { border-image-source: var(--rahmen-hell); color: #b8473a; }
+.hm-neu #card .card-note { color: #b8473a; font-weight: 650; }
+
+/* Bootskarte */
+.hm-neu .hm-karte-kopf { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+.hm-neu .hm-karte-kopf > div { flex: 1 1 auto; min-width: 0; }
+.hm-neu .hm-karte-kopf .card-boatname { margin: 2px 0 0; }
+.hm-neu .hm-zu {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  min-width: 0;
+  min-height: 0;
+  margin: -4px -4px 0 0;
+  padding: 0;
+  border: 0;
+  background: var(--hm-mulde);
+  color: var(--hm-tinte);
+  font-size: 0;
+  cursor: pointer;
+}
+.hm-neu .hm-zu::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask: var(--px-zu) center / contain no-repeat;
+  mask: var(--px-zu) center / contain no-repeat;
+}
+.hm-neu .hm-fakten { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 10px; padding: 0; list-style: none; }
+.hm-neu .hm-fakten li {
+  padding: 2px 8px;
+  background: var(--hm-mulde);
+  font-family: var(--hm-pixel);
+  font-size: var(--hm-schrift);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.hm-neu .hm-fakten li.groesse { background: var(--hm-tinte); color: var(--hm-papier); }
+.hm-neu .hm-fakten li.wunsch { background: #fde8b0; }
+.hm-neu #card .card-hint { color: var(--hm-tinte); }
+
+/* Bauen-Karte (bauen.js) */
+.hm-neu #card.bau-karte { display: flex; flex-direction: column; gap: 8px; }
+.hm-neu #card.bau-karte > * { flex-shrink: 0; }
+.hm-neu #card.bau-karte > .bau-liste { flex-shrink: 1; }
+.hm-neu .bau-kasse { font-family: var(--hm-pixel); color: var(--hm-tinte-2); opacity: 1; }
+.hm-neu .bau-rat { border-radius: 0; background: #e2f2ee; box-shadow: inset 0 0 0 var(--hm-px) rgba(35, 137, 125, 0.4); }
+.hm-neu .bau-reiter { border-radius: 0; padding: 3px; gap: 3px; background: var(--hm-mulde); overflow-x: auto; scrollbar-width: none; }
+.hm-neu .bau-reiter::-webkit-scrollbar { display: none; }
+.hm-neu .bau-tab { flex: 1 1 auto; min-width: 0; border-radius: 0; padding: 4px 6px; gap: 5px; font-family: var(--hm-pixel); font-size: var(--hm-schrift); color: var(--hm-tinte); }
+.hm-neu .bau-tab[aria-selected="true"] { background: var(--hm-papier); box-shadow: inset 0 calc(var(--hm-px) * -2) 0 var(--hm-meer); }
+.hm-neu .bau-zahl { border-radius: 0; background: var(--hm-meer); flex: none; }
+.hm-neu .bau-zeile { border-radius: 0; border: var(--hm-px) solid rgba(36, 54, 74, 0.22); background: #fff; }
+.hm-neu .bau-zeile:hover { border-color: var(--hm-meer); }
+.hm-neu .bau-zeile-kopf { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-schrift) + 1px); }
+.hm-neu .bau-zeile-preis { color: var(--hm-meer); }
+.hm-neu .bau-zeile.teuer .bau-zeile-preis { color: #b8473a; }
+.hm-neu .bau-zeile.gesperrt { border-style: dashed; }
+.hm-neu .bau-marke, .hm-neu .bau-balken, .hm-neu .bau-bedarf { border-radius: 0; }
+.hm-neu .bau-balken > span { border-radius: 0; background: var(--hm-meer); }
+
+/* Breit (PC, Tablet quer): Seitenkarte rechts unter den Knöpfen */
+@media (min-width: 900px) and (min-height: 500px) {
+  .hm-neu #card {
+    left: auto;
+    right: var(--hm-rechts);
+    top: calc(var(--hm-oben) + var(--hm-knopf) + 8px);
+    bottom: auto;
+    width: var(--hm-karte-breite);
+    max-height: calc(100% - var(--hm-oben) - var(--hm-knopf) - var(--hm-unten) - var(--hm-bauen) - 28px);
+    transform: none;
+    animation: hm-auf 0.15s steps(3);
+  }
+  .hm-neu #card[hidden] { display: none; }
+  .hm-neu #card::before { content: none; }
+  .hm-neu #card.bau-karte .bau-liste { max-height: none; flex: 1 1 auto; min-height: 120px; }
+}
+
+/* Schmal (Handy, Tablet hochkant): Blatt von unten */
+@media not ((min-width: 900px) and (min-height: 500px)) {
+  .hm-neu #card {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: auto;
+    max-width: none;
+    max-height: 62dvh;
+    padding: 14px calc(var(--hm-safe-right) + 14px) calc(var(--hm-safe-bottom) + 10px) calc(var(--hm-safe-left) + 14px);
+    border-bottom-width: 0;
+    transform: translateY(105%);
+    visibility: hidden;
+    animation: none;
+    transition: transform 0.2s steps(5), visibility 0s linear 0.2s;
+  }
+  .hm-neu #card[hidden] { display: block; }
+  .hm-neu #card:not([hidden]) { transform: none; visibility: visible; transition: transform 0.2s steps(5); }
+  .hm-neu #card::before { content: none; }
+  .hm-neu #card.bau-karte .bau-liste { max-height: none; flex: 1 1 auto; min-height: 0; }
+  .hm-neu.card-open #hud-bottom { transform: translateY(150%); opacity: 0; pointer-events: none; }
+  .hm-neu.card-open #hm-seite { opacity: 0; }
+  .hm-neu.card-open #hm-seite * { pointer-events: none !important; }
+  .hm-neu.card-open .hm-tipp { display: none; }
+}
+
+/* Schleppleine: Karte aus dem Weg */
+.hm-neu.hm-leine #card { visibility: hidden; pointer-events: none; }
+/* Einfahren steht groß in der Bootskarte */
+.hm-neu.card-boat .hm-einfahren { display: none !important; }
+
+/* Einstieg-Blase */
+.hm-neu .hm-tipp { padding: 10px 14px 8px; z-index: 18; }
+.hm-neu .hm-tipp .titel { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-schrift) + 3px); }
+.hm-neu .hm-tipp .zaehler { font-family: var(--hm-pixel); font-weight: 400; }
+.hm-neu .hm-tipp button { border-radius: 0; font-family: var(--hm-pixel); font-size: var(--hm-schrift); }
+.hm-neu .hm-tipp .weiter { background: var(--hm-meer); box-shadow: inset 0 calc(var(--hm-px) * -2) 0 rgba(0, 0, 0, 0.2); }
+
+/* Fotomodus: alles weg außer der Fotoleiste */
+.hm-neu.foto #hm-seite, .hm-neu.foto #hm-menue, .hm-neu.foto #hud-bottom { display: none !important; }
+
+@keyframes hm-auf { from { opacity: 0; transform: translateY(-4px); } }
+@keyframes hm-hupf { 0%, 85%, 100% { transform: none; } 90% { transform: translateY(calc(var(--hm-px) * -2)); } }
+@keyframes hm-blink { 50% { background: #fff3cf; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-neu #card, .hm-neu #hud-bottom, .hm-neu #hm-menue, .hm-neu .hm-tafel-px, .hm-neu #btn-collect, .hm-neu #btn-build.bau-punkt::after { transition: none !important; animation: none !important; }
+}
+
+/* Kompass aus ui/kamera.js: in den Werkzeugen, ausgeblendet ohne Lücke */
+.hm-neu #btn-kompass[hidden] { display: none; }
+.hm-neu #btn-kompass svg { width: 70%; height: 70%; }
+.hm-neu .hm-leise { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }

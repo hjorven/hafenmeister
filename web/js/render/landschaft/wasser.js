@@ -57,14 +57,25 @@ const FRAGMENT = /* glsl */ `
   uniform float uNacht;
   varying vec3 vWelt;
 
-  float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  // Hash ohne sin(): auf schwachen Grafikchips und in Software-Grafik deutlich billiger
+  float hash(vec2 p) {
+    vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+  }
+  vec3 hash3(vec2 p) {
+    vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+    p3 += dot(p3, p3.yxz + 33.33);
+    return fract((p3.xxy + p3.yzz) * p3.zyx);
+  }
 
-  vec3 band(vec3 a[5], float d, float aa) {
-    vec3 c = a[0];
-    c = mix(c, a[1], smoothstep(1.0 - aa, 1.0 + aa, d));
-    c = mix(c, a[2], smoothstep(2.0 - aa, 2.0 + aa, d));
-    c = mix(c, a[3], smoothstep(3.0 - aa, 3.0 + aa, d));
-    c = mix(c, a[4], smoothstep(4.0 - aa, 4.0 + aa, d));
+  // Tiefenband: Binnensee- und Seefarbe erst mischen, dann nur einmal die Bänder rechnen
+  vec3 band(float see, float d, float aa) {
+    vec3 c = mix(uBinnen[0], uSee[0], see);
+    c = mix(c, mix(uBinnen[1], uSee[1], see), smoothstep(1.0 - aa, 1.0 + aa, d));
+    c = mix(c, mix(uBinnen[2], uSee[2], see), smoothstep(2.0 - aa, 2.0 + aa, d));
+    c = mix(c, mix(uBinnen[3], uSee[3], see), smoothstep(3.0 - aa, 3.0 + aa, d));
+    c = mix(c, mix(uBinnen[4], uSee[4], see), smoothstep(4.0 - aa, 4.0 + aa, d));
     return c;
   }
 
@@ -79,7 +90,7 @@ const FRAGMENT = /* glsl */ `
 
     float px = length(vec2(dFdx(vWelt.x), dFdy(vWelt.x))) + length(vec2(dFdx(vWelt.z), dFdy(vWelt.z)));
     float aa = max(fwidth(d) * 0.8, 0.002);
-    vec3 col = mix(band(uBinnen, d, aa), band(uSee, d, aa), see);
+    vec3 col = band(see, d, aa);
 
     // Feine Tiefenlinie wie auf der Seekarte an der 2-m-Grenze
     float linie = 1.0 - smoothstep(0.0, aa * 1.6, abs(d - 2.0));
@@ -93,13 +104,16 @@ const FRAGMENT = /* glsl */ `
     p.x += hash(vec2(reihe, 3.1)) * zelle.x;
     vec2 id = floor(p / zelle);
     vec2 f = (fract(p / zelle) - 0.5) * zelle;
-    float h1 = hash(id), h2 = hash(id + 7.3), h3 = hash(id + 19.1);
+    vec3 h = hash3(id);
+    float h1 = h.x, h2 = h.y, h3 = h.z;
     float halb = 0.7 + 1.2 * h2 + wind * 0.6;
     vec2 m = vec2(f.x - (h1 - 0.5) * 2.5, f.y - (h3 - 0.5) * 1.2);
     float dicke = max(0.14, px * 0.7);
     float abst = length(vec2(max(abs(m.x) - halb, 0.0), m.y)) - dicke;
     float strich = 1.0 - smoothstep(-px * 0.5, px * 0.5, abst);
-    float blink = smoothstep(0.35, 0.85, 0.5 + 0.5 * sin(uZeit * (0.6 + h2 * 0.5) + h1 * 6.283));
+    // Auf- und Abblenden als Dreieckswelle statt sin(), sieht nach smoothstep gleich aus
+    float phase = fract(uZeit * (0.6 + h2 * 0.5) * 0.15915 + h1);
+    float blink = smoothstep(0.35, 0.85, 1.0 - abs(phase * 2.0 - 1.0));
     float dichte = step(h3, 0.3 + 0.55 * wind) * mix(0.5, 1.0, see) * mix(1.0, 0.45, smoothstep(0.2, 0.55, px));
     float wellen = strich * blink * dichte * smoothstep(0.7, 1.6, d) * (1.0 - smoothstep(1.2, 3.0, px));
     col = mix(col, uStrich, wellen * (0.55 + 0.3 * wind));

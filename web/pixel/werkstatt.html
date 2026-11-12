@@ -35,6 +35,7 @@
     <label>Größe <select id="groesse"><option>S</option><option selected>M</option><option>L</option><option>XL</option></select></label>
     <label>Modell <select id="modell"></select></label>
     <label>Richtungen <select id="richtungen"><option>8</option><option selected>16</option><option>32</option></select></label>
+    <label>Stil <select id="stil"><option value="gezeichnet" selected>gezeichnet</option><option value="filter">Filter</option></select></label>
     <label><input type="checkbox" id="segel" checked> Segel</label>
     <label><input type="checkbox" id="wasser" checked> Wasser</label>
     <label>Lupe <select id="lupe"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label>
@@ -47,6 +48,7 @@
   <script type="module">
     import * as THREE from 'three';
     import { createPixelPass } from './js/pixel-pass.js';
+    import { createSpriteZeichner } from './js/sprite-zeichner.js';
 
     // Kamerahoehen: Neigung in Grad (90 waere senkrecht von oben). Das Spiel nutzt 50.
     export const HOEHEN = [
@@ -63,6 +65,7 @@
     renderer.shadowMap.enabled = true;
     renderer.setClearColor(0x000000, 0);
     const pass = createPixelPass(THREE, renderer, {});
+    const zeichner = createSpriteZeichner(THREE, renderer);
 
     const scene = new THREE.Scene();
     scene.add(new THREE.HemisphereLight('#ffffff', '#5a8fa0', 1.6));
@@ -111,6 +114,7 @@
       cam.updateMatrixWorld();
       // Sonne steht fest in der Welt (Suedwest, wie im Spiel), wandert also nicht mit der Kamera
       sonne.position.set(-20, 40, 25);
+      if ($('stil').value === 'gezeichnet') return zeichner.zeichne(boot, cam, groesse, groesse);
       const ziel = new THREE.WebGLRenderTarget(groesse, groesse);
       pass.renderSmall(scene, cam, groesse, groesse, ziel);
       const px = new Uint8Array(groesse * groesse * 4);
@@ -163,14 +167,15 @@
 
       const wrap = document.createElement('div');
       wrap.className = 'bogen' + ($('wasser').checked ? '' : ' hell');
-      wrap.innerHTML = `<h2>${m.id} ${m.name}: ${n} Richtungen x ${HOEHEN.length} Höhen (${HOEHEN.map((h) => h.grad + '°').join(', ')}), ${groesse} px je Bild</h2>`;
+      if ($('stil').value === 'gezeichnet' && $('wasser').checked) wrap.style.background = '#80b4af';
+      wrap.innerHTML = `<h2>${$('stil').value === 'gezeichnet' ? 'Gezeichnet' : 'Filter'}: ${m.id} ${m.name}: ${n} Richtungen x ${HOEHEN.length} Höhen (${HOEHEN.map((h) => h.grad + '°').join(', ')}), ${groesse} px je Bild</h2>`;
       wrap.appendChild(gross);
       $('boegen').prepend(wrap);
       document.body.dataset.fertig = String(Number(document.body.dataset.fertig || 0) + 1);
     }
 
     $('groesse').addEventListener('change', async () => { await ladeGroesse(); zeichne(); });
-    for (const id of ['modell', 'richtungen', 'segel', 'wasser', 'lupe']) $(id).addEventListener('change', zeichne);
+    for (const id of ['stil', 'modell', 'richtungen', 'segel', 'wasser', 'lupe']) $(id).addEventListener('change', zeichne);
     $('speichern').addEventListener('click', () => {
       const c = document.querySelector('canvas.sheet');
       if (!c) return;
@@ -182,6 +187,8 @@
     if (q.get('groesse')) $('groesse').value = q.get('groesse');
     if (q.get('wasser') === '0') $('wasser').checked = false;
     if (q.get('richtungen')) $('richtungen').value = q.get('richtungen');
+    if (q.get('stil')) $('stil').value = q.get('stil');
+    if (q.get('lupe')) $('lupe').value = q.get('lupe');
     await ladeGroesse();
     await zeichne();
     window.werkstatt = { zeichne, scene, pass };
