@@ -150,7 +150,7 @@ export function init(game) {
       const idx = plaetze.findIndex((q, i) => !anker.has(i) && (RANG[q.groesse] ?? 2) >= g);
       if (idx >= 0) {
         const q = plaetze[idx];
-        return reserviere({ id: `anker-${idx}`, x: q.x, z: q.z, heading: b.heading, kind: 'buoy', abstand: (q.schwoikreisM ?? 10) * 2 });
+        return reserviere({ id: `anker-${idx}`, x: q.x, z: q.z, heading: b.heading, kind: 'buoy', abstand: (q.schwoikreisM ?? 10) * 2, kreis: q.schwoikreisM ?? 10 });
       }
       k = Math.max(k, plaetze.length);
       while (anker.has(k)) k++;
@@ -163,7 +163,7 @@ export function init(game) {
       return { x: b.x + fx * 40, z: b.z + fz * 40 };
     })();
     const p = ankerSlot(k, gross ? 60 : 20);
-    return reserviere({ id: `anker-${k}`, x: mitte.x + p.x, z: mitte.z + p.z, heading: b.heading, kind: 'buoy', abstand: gross ? 60 : 20 });
+    return reserviere({ id: `anker-${k}`, x: mitte.x + p.x, z: mitte.z + p.z, heading: b.heading, kind: 'buoy', abstand: gross ? 60 : 20, kreis: gross ? 30 : 10 });
   }
 
   // k-ter Ankerplatz: Mitte, dann Ringe mit dem Abstand d (6, 12, 18 ... Plaetze je Ring)
