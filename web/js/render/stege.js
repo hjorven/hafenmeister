@@ -127,7 +127,10 @@ export function init(game) {
   // Stegprojekt kann jetzt gekauft werden) oder 'aus' (Projekt erst in einer spaeteren Stufe).
   // Ohne Spielregeln (Ansicht mit ?stufe=n) gilt alles als gebaut.
   let berthById = null;
+  const ansichtStufe = new URLSearchParams(location.search).get('stufe');
   function zustand() {
+    // Testmodus ?stufe=n: Ansicht ohne Kaufen, alle Stege der Stufe stehen (wie Gebaeude und Services)
+    if (ansichtStufe) return null;
     const sim = game.sim;
     if (!sim?.state || !sim.ctx?.berths) return null;
     if (!berthById) berthById = new Map(sim.ctx.berths.map((b) => [b.id, b]));
@@ -270,7 +273,7 @@ export function init(game) {
   function aktuelleStufe(n) {
     // Testmodus ?stufe=n gilt beim Start vor dem Spielstand (wie Gebaeude, Landschaft und Services)
     const v = n ?? new URLSearchParams(location.search).get('stufe') ?? game.sim?.state?.stage ?? game.state?.stufe ?? 1;
-    return String(Math.max(1, Math.min(5, Math.round(Number(v) || 1))));
+    return String(Math.max(1, Math.min(6, Math.round(Number(v) || 1))));
   }
 
   function aufbauen(n) {
