@@ -1,7 +1,8 @@
 // Gelände als 3D-Netz im Flat-Vector-Stil: flache Dreiecke mit Pastellfarben,
 // dazu Molen, Kaimauern, Buhnen und Pflanzen (Kiefern, Laubbäume, Dünengras, Schilf, Felsen).
-// Alle wiederholten Dinge sind InstancedMesh, damit es auch auf schwachen Handys flüssig bleibt.
+// Alle wiederholten Dinge werden beim Bau zu wenigen festen Netzen gebacken, damit es auch auf schwachen Handys flüssig bleibt.
 import * as THREE from 'three';
+import { vereinfacheRaster } from './netz.js';
 import { punkt, BEREICH, PLAN_M, molen, buhnen, rauschen, hafenAbstand, suedufer, DURCHSTICH, SLIP } from './gelaende.js';
 
 const U = PLAN_M;
@@ -27,7 +28,7 @@ export const QUALITAET = {
 
 // ------------------------------------------------------------------ Geländenetz
 
-function baueNetz(region, stufe, x0, x1, y0, y1, schritt, loch, absenken, unterGrenze = -0.15) {
+function baueNetz(region, stufe, x0, x1, y0, y1, schritt, loch, absenken, unterGrenze = -0.15, toleranz = () => 0.03) {
   // schritt in Planeinheiten. loch: innerer Bereich, der ausgelassen wird (für den äußeren Ring).
   const nx = Math.ceil((x1 - x0) / schritt), ny = Math.ceil((y1 - y0) / schritt);
   const H = new Float32Array((nx + 1) * (ny + 1));
@@ -41,44 +42,37 @@ function baueNetz(region, stufe, x0, x1, y0, y1, schritt, loch, absenken, unterG
       }
       const p = punkt(px, py, stufe, region);
       H[j * (nx + 1) + i] = p.h;
-      T[j * (nx + 1) + i] = p.typ;
+      T[j * (nx + 1) + i] = p.typ === 'wasser' ? 'watt' : p.typ;
     }
   }
+  // Ebene Flächen gleicher Art zusammenfassen; die Toleranz wächst mit dem Abstand zum Hafen
+  const dreiecke = vereinfacheRaster(H, T, nx, ny, {
+    unten: unterGrenze,
+    toleranz: (i, j, n) => toleranz(x0 + i * schritt, y0 + j * schritt, n * schritt),
+  });
   const farben = {};
   for (const [k, v] of Object.entries(region.farben)) farben[k] = new THREE.Color(v);
-  const pos = [], col = [];
+  // Nur benutzte Rasterpunkte als Ecken, geteilt zwischen Dreiecken (flatShading braucht keine eigenen Normalen)
+  const neu = new Int32Array(H.length).fill(-1);
+  const pos = [], col = [], index = [];
   const c = new THREE.Color();
-  for (let j = 0; j < ny; j++) {
-    for (let i = 0; i < nx; i++) {
-      const a = j * (nx + 1) + i, b = a + 1, d = a + nx + 1, e = d + 1;
-      const ha = H[a], hb = H[b], hd = H[d], he = H[e];
-      if (Number.isNaN(ha) || Number.isNaN(hb) || Number.isNaN(hd) || Number.isNaN(he)) continue;
-      if (Math.max(ha, hb, hd, he) < unterGrenze) continue;     // ganz unter Wasser: deckt die Wasserfläche ab
-      const X = (q) => q * U;
-      const verts = [
-        [X(x0 + i * schritt), ha, -X(y0 + j * schritt)],
-        [X(x0 + (i + 1) * schritt), hb, -X(y0 + j * schritt)],
-        [X(x0 + i * schritt), hd, -X(y0 + (j + 1) * schritt)],
-        [X(x0 + (i + 1) * schritt), he, -X(y0 + (j + 1) * schritt)],
-      ];
-      // Diagonale so wählen, dass Kanten an Ufern sauberer werden
-      const tris = Math.abs(ha - he) < Math.abs(hb - hd) ? [[0, 1, 3], [0, 3, 2]] : [[0, 1, 2], [1, 3, 2]];
-      const idx = [a, b, d, e];
-      for (const t of tris) {
-        for (const k of t) {
-          pos.push(verts[k][0], verts[k][1] - absenken, verts[k][2]);
-          const typ = T[idx[k]];
-          c.copy(farben[typ === 'wasser' ? 'watt' : typ] || farben.sand);
-          // leichte Farbstreuung, damit große Flächen nicht tot wirken
-          c.multiplyScalar(0.97 + 0.05 * rauschen(verts[k][0] / 6, verts[k][2] / 6, 77));
-          col.push(c.r, c.g, c.b);
-        }
-      }
+  for (const k of dreiecke) {
+    if (neu[k] < 0) {
+      neu[k] = pos.length / 3;
+      const i = k % (nx + 1), j = (k - i) / (nx + 1);
+      const x = (x0 + i * schritt) * U, z = -(y0 + j * schritt) * U;
+      pos.push(x, H[k] - absenken, z);
+      c.copy(farben[T[k]] || farben.sand);
+      // leichte Farbstreuung, damit große Flächen nicht tot wirken
+      c.multiplyScalar(0.97 + 0.05 * rauschen(x / 6, z / 6, 77));
+      col.push(c.r, c.g, c.b);
     }
+    index.push(neu[k]);
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  geo.setIndex(index);
   geo.computeVertexNormals();
   return geo;
 }
@@ -87,55 +81,94 @@ function baueNetz(region, stufe, x0, x1, y0, y1, schritt, loch, absenken, unterG
 
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _s = new THREE.Vector3(), _p = new THREE.Vector3(), _e = new THREE.Euler();
 
+// Viele gleiche Dinge (Bäume, Steine, Pfähle) werden einmal beim Bau zu einem festen Netz
+// gebacken. Das kostet etwas mehr Speicher als InstancedMesh, ist aber beim Zeichnen deutlich
+// schneller: Tausende Instanzen waren der größte Posten der Bildzeit.
 function instanzen(geo, mat, liste, name) {
-  const mesh = new THREE.InstancedMesh(geo, mat, Math.max(1, liste.length));
-  mesh.name = name;
-  mesh.count = liste.length;
-  const c = new THREE.Color();
-  liste.forEach((it, i) => {
+  const P = geo.attributes.position, idx = geo.index.array, nv = P.count;
+  const pos = new Float32Array(liste.length * nv * 3);
+  const col = new Float32Array(liste.length * nv * 3);
+  const ind = new (liste.length * nv > 65535 ? Uint32Array : Uint16Array)(liste.length * idx.length);
+  const c = new THREE.Color(), v = new THREE.Vector3();
+  liste.forEach((it, k) => {
     _e.set(it.kx || 0, it.rot || 0, it.kz || 0);
     _q.setFromEuler(_e);
     _p.set(it.x, it.y, it.z);
     _s.set(it.sx ?? it.s, it.sy ?? it.s, it.sz ?? it.s);
     _m.compose(_p, _q, _s);
-    mesh.setMatrixAt(i, _m);
-    if (it.farbe) mesh.setColorAt(i, c.set(it.farbe));
+    c.set(it.farbe || '#ffffff');
+    for (let i = 0; i < nv; i++) {
+      v.fromBufferAttribute(P, i).applyMatrix4(_m);
+      const o = (k * nv + i) * 3;
+      pos[o] = v.x; pos[o + 1] = v.y; pos[o + 2] = v.z;
+      col[o] = c.r; col[o + 1] = c.g; col[o + 2] = c.b;
+    }
+    for (let i = 0; i < idx.length; i++) ind[k * idx.length + i] = idx[i] + k * nv;
   });
-  mesh.instanceMatrix.needsUpdate = true;
-  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  mesh.computeBoundingSphere();
+  const out = new THREE.BufferGeometry();
+  out.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  out.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  out.setIndex(new THREE.BufferAttribute(ind, 1));
+  out.computeVertexNormals();
+  out.computeBoundingSphere();
+  geo.dispose();
+  mat.vertexColors = true;
+  const mesh = new THREE.Mesh(out, mat);
+  mesh.name = name;
+  mesh.userData.anzahl = liste.length;
   return mesh;
 }
 
-function verschmelze(geos) {
-  // Kleine Eigenbau-Variante von mergeGeometries (ohne Index), damit keine Zusatzdatei nötig ist
-  const pos = [], nor = [];
-  for (const g0 of geos) {
-    const g = g0.index ? g0.toNonIndexed() : g0;
-    pos.push(...g.attributes.position.array);
-    nor.push(...g.attributes.normal.array);
+/**
+ * Fasst Geometrien zu einer zusammen, mit Index und geteilten Ecken (gleiche Position = eine Ecke).
+ * Bei flatShading kommt die Flächennormale aus dem Shader, also braucht keine Fläche eigene Ecken.
+ * Spart bei Instanzen viel Arbeit: ein Dodekaeder hat 20 statt 108 Ecken.
+ */
+export function verschmelze(geos) {
+  const pos = [], index = [], karte = new Map();
+  const v = new THREE.Vector3();
+  for (const g of geos) {
+    const p = g.attributes.position;
+    const n = g.index ? g.index.count : p.count;
+    for (let k = 0; k < n; k++) {
+      v.fromBufferAttribute(p, g.index ? g.index.getX(k) : k);
+      const schluessel = `${Math.round(v.x * 1000)},${Math.round(v.y * 1000)},${Math.round(v.z * 1000)}`;
+      let i = karte.get(schluessel);
+      if (i === undefined) { i = pos.length / 3; karte.set(schluessel, i); pos.push(v.x, v.y, v.z); }
+      index.push(i);
+    }
+  }
+  // Dreiecke, die durch das Zusammenlegen keine Fläche mehr haben (Kegelspitzen), fallen weg
+  const ohne = [];
+  for (let k = 0; k < index.length; k += 3) {
+    const [a, b, c] = [index[k], index[k + 1], index[k + 2]];
+    if (a !== b && b !== c && a !== c) ohne.push(a, b, c);
   }
   const out = new THREE.BufferGeometry();
   out.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  out.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  out.setIndex(ohne);
+  out.computeVertexNormals();
   return out;
 }
 
 function kronenKiefer() {
-  const a = new THREE.ConeGeometry(1, 1.25, 6); a.translate(0, 1.0, 0);
-  const b = new THREE.ConeGeometry(0.72, 1.0, 6); b.translate(0, 1.7, 0);
+  // Ohne Bodenfläche: die sieht man von oben nie
+  const a = new THREE.ConeGeometry(1, 1.25, 6, 1, true); a.translate(0, 1.0, 0);
+  const b = new THREE.ConeGeometry(0.72, 1.0, 6, 1, true); b.translate(0, 1.7, 0);
   return verschmelze([a, b]);
 }
 function kronenLaub() {
   const g = new THREE.IcosahedronGeometry(1, 0);
   g.translate(0, 1.55, 0);
-  return g.toNonIndexed();
+  return verschmelze([g]);
 }
 function stamm() {
-  const g = new THREE.CylinderGeometry(0.12, 0.16, 1, 4, 1, true);
+  const g = new THREE.CylinderGeometry(0.12, 0.16, 1, 3, 1, true);
   g.translate(0, 0.5, 0);
-  return g;
+  return verschmelze([g]);
 }
+const stein = () => verschmelze([new THREE.DodecahedronGeometry(1, 0)]);
+const blockstein = () => verschmelze([new THREE.IcosahedronGeometry(1, 0)]);   // 20 statt 36 Dreiecke, für die vielen Molensteine
 
 // ------------------------------------------------------------------ Pflanzen und Felsen setzen
 
@@ -247,9 +280,9 @@ function setzePflanzen(region, stufe, q, gruppe, schatten) {
     instanzen(kronenKiefer(), mKrone, kiefern, 'kiefern'),
     instanzen(kronenLaub(), mKrone, laub, 'laubbaeume'),
     instanzen(stamm(), mStamm, staemme, 'staemme'),
-    instanzen(new THREE.ConeGeometry(0.5, 1, 4).translate(0, 0.5, 0), new THREE.MeshLambertMaterial(flach), gras, 'duenengras'),
-    instanzen(new THREE.ConeGeometry(0.12, 1, 3).translate(0, 0.5, 0), new THREE.MeshLambertMaterial(flach), schilf, 'schilf'),
-    instanzen(new THREE.DodecahedronGeometry(1, 0), new THREE.MeshLambertMaterial(flach), felsen, 'felsen'),
+    instanzen(verschmelze([new THREE.ConeGeometry(0.5, 1, 4, 1, true).translate(0, 0.5, 0)]), new THREE.MeshLambertMaterial(flach), gras, 'duenengras'),
+    instanzen(verschmelze([new THREE.ConeGeometry(0.12, 1, 3, 1, true).translate(0, 0.5, 0)]), new THREE.MeshLambertMaterial(flach), schilf, 'schilf'),
+    instanzen(stein(), new THREE.MeshLambertMaterial(flach), felsen, 'felsen'),
   ];
   for (const t of teile) {
     t.castShadow = schatten && (t.name !== 'schilf' && t.name !== 'duenengras');
@@ -265,7 +298,7 @@ function baueMolen(region, stufe, gruppe, schatten) {
   const plus = region.gelaende.landPlus || 0;
   const rnd = zufall(99 + stufe);
   const steine = [];
-  const krone = [];
+  const krone = [], kerne = [];
   const mKern = new THREE.MeshLambertMaterial({ color: region.farben.mole, flatShading: true });
   const mWeg = new THREE.MeshLambertMaterial({ color: region.farben.pflaster, flatShading: true });
   for (const m of molen(stufe)) {
@@ -283,7 +316,7 @@ function baueMolen(region, stufe, gruppe, schatten) {
       mk.position.set((a.x + b.x) / 2, 0.1, (a.z + b.z) / 2);
       mk.rotation.y = ang;
       mk.castShadow = schatten; mk.receiveShadow = schatten;
-      gruppe.add(mk);
+      kerne.push(mk);
       const weg = new THREE.Mesh(new THREE.BoxGeometry(w * 0.36, 0.1, len + w * 0.2), mWeg);
       weg.position.set((a.x + b.x) / 2, 1.42 + plus, (a.z + b.z) / 2);
       weg.rotation.y = ang;
@@ -310,7 +343,7 @@ function baueMolen(region, stufe, gruppe, schatten) {
     for (let i = 1; i < pts.length - 1; i++) {
       const gm = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.34, w * 0.45, 2.6 + 2 * plus, 8), mKern);
       gm.position.set(pts[i].x, 0.1, pts[i].z);
-      gruppe.add(gm);
+      kerne.push(gm);
       const gw = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.18, w * 0.18, 0.1, 8), mWeg);
       gw.position.set(pts[i].x, 1.42 + plus, pts[i].z);
       krone.push(gw);
@@ -321,7 +354,7 @@ function baueMolen(region, stufe, gruppe, schatten) {
     const km = new THREE.Mesh(kg, mKern);
     km.position.set(kopf.x, 0.1, kopf.z);
     km.castShadow = schatten; km.receiveShadow = schatten;
-    gruppe.add(km);
+    kerne.push(km);
     const kw = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.42, w * 0.42, 0.1, 12), mWeg);
     kw.position.set(kopf.x, 1.42 + plus, kopf.z);
     krone.push(kw);
@@ -330,9 +363,20 @@ function baueMolen(region, stufe, gruppe, schatten) {
       steine.push({ x: kopf.x + Math.cos(a) * r, y: 0.2 + plus + rnd() * 0.4, z: kopf.z + Math.sin(a) * r, s, sy: s * 0.7, rot: rnd() * 6.3, farbe: region.farben.steinschuettung });
     }
   }
-  for (const k of krone) gruppe.add(k);
+  // Alle Teile zu je einem Netz backen: zwei Zeichenaufrufe statt mehrerer Dutzend
+  const backe = (liste, mat, name) => {
+    if (!liste.length) return;
+    const geos = liste.map((o) => { o.updateMatrix(); return o.geometry.applyMatrix4(o.matrix); });
+    const mesh = new THREE.Mesh(verschmelze(geos), mat);
+    geos.forEach((g) => g.dispose());
+    mesh.name = name;
+    mesh.castShadow = schatten; mesh.receiveShadow = schatten;
+    gruppe.add(mesh);
+  };
+  backe(kerne, mKern, 'molen');
+  backe(krone, mWeg, 'molenwege');
   if (steine.length) {
-    const st = instanzen(new THREE.DodecahedronGeometry(1, 0), new THREE.MeshLambertMaterial({ flatShading: true }), steine, 'molensteine');
+    const st = instanzen(blockstein(), new THREE.MeshLambertMaterial({ flatShading: true }), steine, 'molensteine');
     st.castShadow = schatten;
     gruppe.add(st);
   }
@@ -394,33 +438,82 @@ function baueBuhnen(region, stufe, gruppe) {
 
 // ------------------------------------------------------------------ Schatten ohne Schattenkarte
 
+// Ein festes Netz für alle Baumschatten. Richtung und Länge kommen als Uniform in den
+// Vertex-Shader, so kostet ein Sonnenstand-Wechsel nichts.
+const SCHATTEN_VERTEX = /* glsl */ `
+  attribute vec3 mitte;
+  attribute vec2 groesse;   // Baumhöhe, Kronenbreite
+  uniform vec2 uRichtung;   // cos, sin des Winkels um die Hochachse
+  uniform float uLaenge;
+  void main() {
+    float sx = max(groesse.y * 0.8, groesse.x * uLaenge * 0.55);
+    vec2 l = vec2(position.x * sx, position.z * groesse.y * 0.75);
+    vec3 w = mitte + vec3(uRichtung.x * l.x + uRichtung.y * l.y, 0.0, -uRichtung.y * l.x + uRichtung.x * l.y);
+    gl_Position = projectionMatrix * viewMatrix * vec4(w, 1.0);
+  }
+`;
+const SCHATTEN_FRAGMENT = /* glsl */ `
+  uniform vec3 uFarbe;
+  uniform float uDeckung;
+  void main() {
+    gl_FragColor = vec4(uFarbe, uDeckung);
+    #include <colorspace_fragment>
+  }
+`;
+
 function baueFlachSchatten(liste) {
-  const geo = new THREE.CircleGeometry(1, 7);
-  geo.rotateX(-Math.PI / 2);
-  geo.translate(0.5, 0, 0);   // Schatten beginnt am Stamm und läuft in eine Richtung
-  const mat = new THREE.MeshBasicMaterial({ color: '#1f3a4a', transparent: true, opacity: 0.16, depthWrite: false });
-  const mesh = new THREE.InstancedMesh(geo, mat, Math.max(1, liste.length));
-  mesh.count = liste.length;
+  const kreis = new THREE.CircleGeometry(1, 6);
+  kreis.rotateX(-Math.PI / 2);
+  kreis.translate(0.5, 0, 0);   // Schatten beginnt am Stamm und läuft in eine Richtung
+  const P = kreis.attributes.position, idx = kreis.index.array, nv = P.count;
+  const pos = new Float32Array(liste.length * nv * 3), mitte = new Float32Array(liste.length * nv * 3), gr = new Float32Array(liste.length * nv * 2);
+  const ind = new Uint32Array(liste.length * idx.length);
+  liste.forEach((b, k) => {
+    const h = (b.sy || b.s) * 2;
+    for (let i = 0; i < nv; i++) {
+      const o = k * nv + i;
+      pos[o * 3] = P.getX(i); pos[o * 3 + 1] = 0; pos[o * 3 + 2] = P.getZ(i);
+      mitte[o * 3] = b.x; mitte[o * 3 + 1] = b.y + 0.15; mitte[o * 3 + 2] = b.z;
+      gr[o * 2] = h; gr[o * 2 + 1] = b.s;
+    }
+    for (let i = 0; i < idx.length; i++) ind[k * idx.length + i] = idx[i] + k * nv;
+  });
+  kreis.dispose();
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('mitte', new THREE.BufferAttribute(mitte, 3));
+  geo.setAttribute('groesse', new THREE.BufferAttribute(gr, 2));
+  geo.setIndex(new THREE.BufferAttribute(ind, 1));
+  const uniforms = {
+    uRichtung: { value: new THREE.Vector2(1, 0) },
+    uLaenge: { value: 1 },
+    uFarbe: { value: new THREE.Color('#1f3a4a') },
+    uDeckung: { value: 0.16 },
+  };
+  const mat = new THREE.ShaderMaterial({ uniforms, vertexShader: SCHATTEN_VERTEX, fragmentShader: SCHATTEN_FRAGMENT, transparent: true, depthWrite: false });
+  const mesh = new THREE.Mesh(geo, mat);
   mesh.name = 'baumschatten';
   mesh.renderOrder = 1;
   mesh.frustumCulled = false;
+  mesh.userData.anzahl = liste.length;
   mesh.userData.aktualisiere = (richtung, laenge, nacht) => {
     const ang = Math.atan2(-richtung.y, richtung.x);
-    liste.forEach((b, i) => {
-      const h = (b.sy || b.s) * 2;
-      _e.set(0, ang, 0); _q.setFromEuler(_e);
-      _p.set(b.x, b.y + 0.15, b.z);
-      _s.set(Math.max(b.s * 0.8, h * laenge * 0.55), 1, b.s * 0.75);
-      _m.compose(_p, _q, _s);
-      mesh.setMatrixAt(i, _m);
-    });
-    mesh.instanceMatrix.needsUpdate = true;
-    mat.opacity = 0.16 * (1 - 0.75 * nacht);
+    uniforms.uRichtung.value.set(Math.cos(ang), Math.sin(ang));
+    uniforms.uLaenge.value = laenge;
+    uniforms.uDeckung.value = 0.16 * (1 - 0.75 * nacht);
   };
   return mesh;
 }
 
 // ------------------------------------------------------------------ Gesamtes Gelände
+
+// Wie genau das Gelände sein muss: am Hafen fast exakt (3 cm), mit dem Abstand gröber.
+// Hügel weit draußen sieht man nur klein, dort reichen große, flache Dreiecke.
+const HAFEN_KERN = { x0: -170, x1: 230, y0: -60, y1: 320 };
+function toleranzNach(px, py) {
+  const d = Math.max(HAFEN_KERN.x0 - px, px - HAFEN_KERN.x1, HAFEN_KERN.y0 - py, py - HAFEN_KERN.y1, 0);
+  return Math.min(1.2, 0.03 + 0.35 * Math.max(0, d - 30) / 100);
+}
 
 /**
  * Baut das Gelände für eine Stufe und Region.
@@ -432,12 +525,12 @@ export function baueGelaende(region, stufe, qualitaet, { tiefsterPegel = 0 } = {
   gruppe.name = 'gelaende';
 
   const mat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
-  const innen = new THREE.Mesh(baueNetz(region, stufe, BEREICH.x0, BEREICH.x1, BEREICH.y0, BEREICH.y1, q.raster / U, null, 0, -0.15 + Math.min(0, tiefsterPegel)), mat);
+  const innen = new THREE.Mesh(baueNetz(region, stufe, BEREICH.x0, BEREICH.x1, BEREICH.y0, BEREICH.y1, q.raster / U, null, 0, -0.15 + Math.min(0, tiefsterPegel), toleranzNach), mat);
   innen.name = 'gelaende-innen';
   innen.receiveShadow = q.schatten;
   gruppe.add(innen);
   const s2 = q.aussen / U;
-  const aussen = new THREE.Mesh(baueNetz(region, stufe, -1600, 1600, -1600, 470, s2, BEREICH, 0.05, -0.15 + Math.min(0, tiefsterPegel)), mat);
+  const aussen = new THREE.Mesh(baueNetz(region, stufe, -1600, 1600, -1600, 470, s2, BEREICH, 0.05, -0.15 + Math.min(0, tiefsterPegel), toleranzNach), mat);
   aussen.name = 'gelaende-aussen';
   gruppe.add(aussen);
 
