@@ -18,6 +18,8 @@
   let html = await antwort.text();
   const zusatz =
     "<base href='" + spiel.href + "'>" +
+    "<link rel='preconnect' href='https://fonts.googleapis.com'>" +
+    "<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&display=swap'>" +
     "<link rel='stylesheet' href='" + new URL('css/pixel.css', hier).href + "'>";
   html = html.replace(/<head>/i, '<head>' + zusatz);
   html = html.replace(/<title>[^<]*<\/title>/i, '<title>Hafenmeister Pixel</title>');

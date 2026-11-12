@@ -66,7 +66,7 @@ const FRAG_PALETTE = /* glsl */`
     // Innenkanten (Knick zwischen zwei Flaechen): zweite Ableitung der Tiefe
     float knick = abs(dl + dr - 2.0 * d) + abs(du + dd - 2.0 * d);
     float innen = step(uTexel * 1.6 + 0.05, knick) * (1.0 - rand) * uOutline;
-    c *= mix(1.0, 0.62, rand);
+    c *= mix(1.0, 0.5, rand);
     c *= mix(1.0, 0.86, innen);
     // Himmel/Hintergrund (Tiefe = far) bekommt keinen Rand
     c += bayer4(gl_FragCoord.xy + uOrigin) * uDither;
@@ -82,6 +82,7 @@ const FRAG_PALETTE = /* glsl */`
 const FRAG_UPSCALE = /* glsl */`
   precision highp float;
   uniform sampler2D tPix;
+  uniform sampler2D tOver;   // durchsichtige Markierungen, nicht auf die Palette gebracht
   uniform vec2 uSize;        // kleines Bild inkl. Rand
   uniform vec2 uScreen;      // Ausgabe in Geraetepixeln
   uniform float uScale;      // Geraetepixel je Kunstpixel
@@ -91,7 +92,14 @@ const FRAG_UPSCALE = /* glsl */`
     vec2 p = vec2(gl_FragCoord.x, uScreen.y - gl_FragCoord.y) / uScale;  // von oben links
     p += vec2(1.0) + uShift;                                             // 1 Pixel Rand
     vec2 uv = vec2(floor(p.x) + 0.5, uSize.y - floor(p.y) - 0.5) / uSize;
-    gl_FragColor = vec4(texture2D(tPix, uv).rgb, 1.0);
+    vec3 c = texture2D(tPix, uv).rgb;
+    vec4 o = texture2D(tOver, uv);
+    if (o.a > 0.002) {
+      vec3 oc = clamp(o.rgb / o.a, 0.0, 1.0);
+      oc = mix(oc * 12.92, 1.055 * pow(oc, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, oc));
+      c = mix(c, oc, clamp(o.a, 0.0, 1.0));
+    }
+    gl_FragColor = vec4(c, 1.0);
   }
 `;
 
@@ -124,7 +132,28 @@ export function createPixelPass(THREE, renderer, opts = {}) {
     sceneRT.depthTexture.minFilter = THREE.NearestFilter;
     sceneRT.depthTexture.magFilter = THREE.NearestFilter;
     pixRT = new THREE.WebGLRenderTarget(w, h, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthBuffer: false });
+    overRT?.dispose();
+    overRT = new THREE.WebGLRenderTarget(w, h, {
+      type: THREE.HalfFloatType,
+      minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter,
+      depthTexture: sceneRT.depthTexture,   // dieselbe Tiefe: Markierungen verschwinden hinter Booten
+    });
   };
+  let overRT = null;
+
+  // Durchsichtige Flaechen ohne Tiefenschreiben (Ankerfeld, Box-Leuchten, Bauplaetze, Schatten)
+  // wuerden auf der Palette verschwinden. Sie kommen auf eine eigene Ebene und werden danach
+  // pixelgenau, aber mit ihrer echten Farbe und Deckkraft darueber gelegt.
+  const OVERLAY_LAYER = 29;
+  const overlays = [];
+  function sammleOverlays(scene) {
+    overlays.length = 0;
+    scene.traverseVisible((o) => {
+      if (!o.material || !(o.isMesh || o.isLine || o.isSprite || o.isPoints)) return;
+      const m = Array.isArray(o.material) ? o.material[0] : o.material;
+      if (m && m.transparent && !m.depthWrite) overlays.push(o);
+    });
+  }
 
   const quadCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   const quadGeo = new THREE.PlaneGeometry(2, 2);
@@ -141,7 +170,7 @@ export function createPixelPass(THREE, renderer, opts = {}) {
   const upMat = new THREE.ShaderMaterial({
     vertexShader: VERT, fragmentShader: FRAG_UPSCALE,
     uniforms: {
-      tPix: { value: null }, uSize: { value: new THREE.Vector2() }, uScreen: { value: new THREE.Vector2() },
+      tPix: { value: null }, tOver: { value: null }, uSize: { value: new THREE.Vector2() }, uScreen: { value: new THREE.Vector2() },
       uScale: { value: 3 }, uShift: { value: new THREE.Vector2() },
     },
     depthTest: false, depthWrite: false,
@@ -197,8 +226,32 @@ export function createPixelPass(THREE, renderer, opts = {}) {
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
 
+    sammleOverlays(scene);
+    const masken = overlays.map((o) => o.layers.mask);
+    for (const o of overlays) o.layers.set(OVERLAY_LAYER);
+    const camMaske = camera.layers.mask;
     renderer.setRenderTarget(sceneRT);
     original(scene, camera);
+
+    // Markierungen auf eigener Ebene, gegen die Tiefe der Szene
+    const autoClear = renderer.autoClear;
+    const clear = renderer.getClearColor(new THREE.Color());
+    const clearA = renderer.getClearAlpha();
+    const bg = scene.background;
+    renderer.setRenderTarget(overRT);
+    renderer.setClearColor(0x000000, 0);
+    renderer.clear(true, false, false);
+    if (overlays.length) {
+      renderer.autoClear = false;
+      scene.background = null;
+      camera.layers.set(OVERLAY_LAYER);
+      original(scene, camera);
+      scene.background = bg;
+      renderer.autoClear = autoClear;
+    }
+    renderer.setClearColor(clear, clearA);
+    camera.layers.mask = camMaske;
+    overlays.forEach((o, i) => { o.layers.mask = masken[i]; });
 
     // Kamera wiederherstellen (Antippen und Verschieben rechnen mit der echten Lage)
     camera.position.copy(_pos);
@@ -222,6 +275,7 @@ export function createPixelPass(THREE, renderer, opts = {}) {
     renderer.setRenderTarget(null);
     const uu = upMat.uniforms;
     uu.tPix.value = pixRT.texture;
+    uu.tOver.value = overRT.texture;
     uu.uSize.value.set(w, h);
     uu.uScreen.value.set(cssW * dpr, cssH * dpr);
     uu.uScale.value = px * dpr;

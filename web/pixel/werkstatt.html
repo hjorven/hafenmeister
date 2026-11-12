@@ -70,7 +70,7 @@
     sonne.castShadow = true;
     sonne.shadow.mapSize.set(2048, 2048);
     sonne.shadow.bias = -0.0006;
-    sonne.shadow.normalBias = 0.03;
+    sonne.shadow.normalBias = 0.4;   // wie im Spiel (landschaft/tageslicht.js)
     Object.assign(sonne.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 200 });
     scene.add(sonne, sonne.target);
     const wasser = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshLambertMaterial({ color: '#7fb5ab' }));
@@ -129,7 +129,7 @@
       const m = modelle.find((x) => x.id === $('modell').value) || modelle[0];
       const boot = api.buildBoat(m, { sails: $('segel').checked, id: m.id });
       if ($('segel').checked && api.setSails) api.setSails(boot, true);
-      boot.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      boot.traverse((o) => { if (o.isMesh) o.castShadow = true; });
       scene.add(boot);
       wasser.visible = $('wasser').checked;
       const box = new THREE.Box3().setFromObject(boot);

@@ -1,18 +1,20 @@
-// Die feste Hafen-Palette (71 Farben).
+// Die feste Hafen-Palette (84 Farben).
 // Entstanden aus den Farben des 3D-Spiels (k-Means ueber Tag, Abend, Nacht, alle Stufen, beide Reviere),
 // etwas kraeftiger gemacht und je Farbe um eine kuehlere Schattenstufe ergaenzt, dazu Umriss-Dunkel,
 // Lichtspitzen, Fensterlicht und Signalfarben. Sortiert nach Farbton, innerhalb von dunkel nach hell.
 // Wer Farben aendert: werkstatt.html zeigt sofort, wie alles damit aussieht.
 export const PALETTE = [
-  '#2b2329', '#343d42', '#4f5b5e', '#556762', '#6a7066', '#757873', '#7f8a88', '#cfcab9',
-  '#d7d7ca', '#e2e5d8', '#fbf8f1', '#056568', '#2b6e73', '#327976', '#4c837b', '#609899',
-  '#67a59d', '#80b4af', '#12212e', '#21343f', '#1a2948', '#2b3753', '#003d6d', '#2a4774',
-  '#424c63', '#396395', '#426c93', '#5c6376', '#527499', '#657da2', '#120f1d', '#3a000a',
-  '#5f0003', '#5b1b17', '#721408', '#912918', '#3e2a1c', '#ab492e', '#e23b2e', '#703e13',
-  '#6a4e35', '#7a5d34', '#786552', '#b07541', '#bc9369', '#c7a26d', '#c8ad8e', '#ffb347',
-  '#40402b', '#816505', '#535637', '#847a57', '#969166', '#d9ac2a', '#9ea270', '#bdbba6',
-  '#c9c697', '#e0ce9d', '#ffd27a', '#56623b', '#066734', '#577246', '#6e876b', '#a1ac9c',
-  '#a8bb81', '#aac691', '#305141', '#2e9d4a', '#3fad51', '#8dc5b6', '#a8d5c1',
+  '#2a2830', '#4a463f', '#4d5a5f', '#6c6f67', '#7a817f', '#7f8a89', '#8c949b', '#a3a0a7',
+  '#cfc9b9', '#d8d7ca', '#e2e5d9', '#f2f0e6', '#fbf8f1', '#015554', '#38645e', '#516762',
+  '#1c5a5f', '#006a71', '#327977', '#4d837b', '#679590', '#6aada9', '#7fb4b3', '#14253d',
+  '#1f3341', '#2b3753', '#003d6d', '#3a4555', '#274776', '#396296', '#426c93', '#5c6376',
+  '#527498', '#101322', '#637da3', '#340d14', '#5b0308', '#552724', '#760404', '#493426',
+  '#63331c', '#743a07', '#67493f', '#8a3221', '#6f544b', '#af412a', '#e23b2e', '#754f29',
+  '#7c5f46', '#9d6441', '#b5723a', '#aa836e', '#bd8e5c', '#b89480', '#847967', '#c7a26f',
+  '#ccac8f', '#7e6308', '#ffb347', '#ffd27a', '#555732', '#58623a', '#989261', '#d5a92c',
+  '#727755', '#88895d', '#a0a36e', '#597247', '#b0b3a1', '#c0bba7', '#a9bb82', '#c9c697',
+  '#dfce9d', '#006832', '#42ac53', '#a8c894', '#164329', '#2e9d4a', '#849d8e', '#9dac9c',
+  '#528c80', '#8dc5b7', '#a9d5c1', '#bfd9c7',
 ];
 
 // ---- Umrechnung nach OKLab, damit "naechste Farbe" so aussieht, wie das Auge es sieht ----
