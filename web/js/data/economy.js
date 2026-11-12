@@ -16,21 +16,35 @@ export const ECONOMY = {
   zeit: {
     tagSekunden: 90,        // Tag, Boote laufen ein
     abendSekunden: 30,      // Abend, Kassieren
-    vorspulen: [1, 2, 3],   // 3x erst mit Hafenbüro (hafenbuero, Stufe 2)
     saisonTage: 30,         // danach Winter
     winterTage: 3,          // keine Gäste, Bauprojekte doppelt so schnell
     winterBautempo: 2,
+    // Tagesrhythmus wie im echten Hafen, als Anteile des Tages (0 = Morgen, 1 = Abend):
+    // vormittags legen die Gäste ab, ab Mittag kommen die neuen, die meisten am Nachmittag.
+    ankunftVon: 0.35,       // etwa 11:00
+    ankunftBis: 0.95,       // etwa 19:30
+    ankunftSpitze: 0.62,    // Schwerpunkt am Nachmittag (etwa 15:30), breit verteilt
+    abreiseVon: 0.07,       // etwa 7:30
+    abreiseBis: 0.3,        // etwa 11:00
   },
 
   // Warten vor dem Hafen (Wartebojen). geduld = Sekunden an der Boje, bis ein Boot weiterfährt.
   // plaetze = Warteplätze je Stufe; nicht mehr, als die Landschaft Bojen zeichnet
   // (render/landschaft/gelaende.js warteplaetze: Stufe 1 drei, Stufe 2 sechs, Stufe 3 fünf,
   // Stufe 4 sieben, ab Stufe 5 acht).
-  // Ab Hafenbüro (Automatik) weist das Spiel wartende Boote selbst zu, sobald ein Platz frei wird.
+  // Ohne Hafenbüro fährt ein Boot nach selbstEinfahrenNach Sekunden in eine passende freie Box,
+  // mit Hafenbüro sofort in die mit den meisten erfüllten Wünschen.
   warten: {
-    geduld: 80,
+    geduld: 30,
     plaetze: { 1: 3, 2: 6, 3: 5, 4: 7, 5: 8, 6: 8 },
+    selbstEinfahrenNach: 8,   // Sekunden zum Selbstlenken, dann sucht sich das Boot selbst eine freie Box
+    ueberNacht: true,         // wer abends noch wartet, bleibt über Nacht an der Boje (ohne Bewertung)
   },
+
+  // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber
+  // hinaus und kommen in dieselbe Box zurück (Box bleibt reserviert, Liegegeld zählt weiter).
+  // raus und zurueck sind Anteile des Tages.
+  tagestoern: { anteil: 0.35, raus: [0.12, 0.3], zurueck: [0.6, 0.85] },
 
   // ---------------------------------------------------------------- Gäste
   klassen: {
@@ -112,7 +126,7 @@ export const ECONOMY = {
       ziel: { gaeste: 800, ruf: 3.8 },
       ausbau: { id: 'aussenhafen', name: 'Außenhafen mit Kai', kosten: 42000, bautage: 3,
         plaetze: ['K01', 'FK01', 'FK02'] } },
-    { stufe: 5, name: 'Küstenmarina', ankuenfte: 37, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
+    { stufe: 5, name: 'Küstenmarina', ankuenfte: 32, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
       ziel: { gaeste: 1200, ruf: 4.2 },
       // Die Pier bringt die Plätze der Großschiffe: Kreuzfahrtpier, Marineanleger, Liegeplatz des
       // Seenotrettungskreuzers. Sie sind fest vergeben, Gastboote legen dort nicht an.
@@ -121,10 +135,10 @@ export const ECONOMY = {
     // Stufe 6: Großschiffe (XXL) zahlen kein Liegegeld, sie kommen als Besuche über die Services
     // kreuzfahrtterminal, marineanleger und seenotretter und bringen Geld je Besuch.
     // Keine eigene Zahl für Tagesgäste (Entscheidung Jorven, 11.11.2026).
-    { stufe: 6, name: 'Seehafen', ankuenfte: 42, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
+    { stufe: 6, name: 'Seehafen', ankuenfte: 32, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
       // Abschluss der Region: so viele Besuche großer Schiffe (Kreuzfahrtschiff, Flottenbesuch)
       // in Stufe 6, dieser Ruf und alle Plätze gebaut. Alles davon sieht der Spieler im Hafen.
-      ziel: { grossschiffBesuche: 8, ruf: 4.5, allePlaetze: true },
+      ziel: { grossschiffBesuche: 6, ruf: 4.5, allePlaetze: true },
       ausbau: null },
   ],
 
@@ -203,9 +217,14 @@ export const ECONOMY = {
 
   // ---------------------------------------------------------------- Hafenbüro
   // Komfort, keine Einnahmen. Logik bei den Spielregeln (sim.js).
+  // allesKassieren: Knopf "Alles kassieren". sofortKassieren: Liegegeld kommt beim Anlegen von
+  // selbst in die Kasse. automatik: wartende Boote bekommen sofort die Box mit den meisten
+  // erfüllten Wünschen (ohne Hafenbüro fahren sie nach warten.selbstEinfahrenNach Sekunden in
+  // irgendeine passende freie Box).
   hafenbuero: { stufen: [
-    { name: 'Hafenmeister', abStufe: 2, kosten: 800,  schaltetFrei: ['allesKassieren'] },
-    { name: 'Hafenbüro',    abStufe: 3, kosten: 3800, schaltetFrei: ['automatik', 'vorspulen3'] },
+    { name: 'Hafenmeister',  abStufe: 2, kosten: 600,  schaltetFrei: ['allesKassieren'] },
+    { name: 'Kassenautomat', abStufe: 2, kosten: 1800, schaltetFrei: ['sofortKassieren'] },
+    { name: 'Hafenbüro',     abStufe: 3, kosten: 3800, schaltetFrei: ['automatik'] },
   ] },
 
   // ---------------------------------------------------------------- Services
@@ -223,6 +242,24 @@ export const ECONOMY = {
   // Kein Service hat laufende Kosten (plan.md, Leitlinien: keine laufenden Kosten), unterhalt
   // ist deshalb immer 0.
   services: {
+    // Angebote an Land (docs/echter-hafen.md, C11): bezahlt sich in rund 25 bis 45 Spieltagen
+    baecker: { abStufe: 1, stufen: [
+      { name: 'Brötchenservice', kosten: 80, wirkung: { kunden: { anteil: 0.3, preis: 3 }, ruf: 0.03 } },
+      { name: 'Hafenbäcker', kosten: 3200, abStufe: 3, wirkung: { proTag: 30, kunden: { anteil: 0.4, preis: 3 }, ruf: 0.06 } },
+    ] },
+    hafencafe: { abStufe: 2, stufen: [
+      { name: 'Hafencafé', kosten: 800, wirkung: { proTag: 18, wetter: { regen: 0.5, sturm: 0.3 }, kunden: { anteil: 0.2, preis: 4 }, ruf: 0.03 } },
+      { name: 'Café mit Terrasse', kosten: 4800, abStufe: 3, wirkung: { proTag: 70, wetter: { regen: 0.4, sturm: 0.2 }, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.06 } },
+    ] },
+    grillplatz: { abStufe: 2, stufen: [
+      { name: 'Grillplatz', kosten: 400, wirkung: { ruf: 0.05 } },
+    ] },
+    fahrradverleih: { abStufe: 3, stufen: [
+      { name: 'Fahrradverleih', kosten: 2000, wirkung: { proTag: 25, wetter: { regen: 0.3, sturm: 0 }, kunden: { anteil: 0.15, preis: 8 } } },
+    ] },
+    eisdiele: { abStufe: 4, stufen: [
+      { name: 'Eisdiele', kosten: 5000, wirkung: { proTag: 90, wetter: { regen: 0.2, sturm: 0 }, kunden: { anteil: 0.25, preis: 3 }, ruf: 0.03 } },
+    ] },
     bootsverleih: { abStufe: 1, stufen: [
       { name: 'Bootsverleih',            kosten: 150,  wirkung: { proTag: 8 } },
       { name: 'Bootsverleih mit Kanus',  kosten: 900,  abStufe: 2, wirkung: { proTag: 25 } },

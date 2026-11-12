@@ -33,7 +33,8 @@ export function init(game) {
   ensureHeadLinks();
 
   const aktuell = () => game.state;
-  const speichern = (zustand = aktuell()) => (zustand ? saveGame(zustand) : false);
+  // Testmodus ?stufe=n (state.testmodus, js/bridge.js) überschreibt den echten Spielstand nicht
+  const speichern = (zustand = aktuell()) => (zustand && !zustand.testmodus ? saveGame(zustand) : false);
 
   game.spielstand = {
     speichern,

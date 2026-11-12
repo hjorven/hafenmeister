@@ -15,6 +15,11 @@ Bezahlt wird mit `game.sim.spend`, bei zu wenig Geld ist der Knopf gesperrt. Die
 
 | Service | Ab Stufe | Ausbaustufen | Wirkung | Animation |
 |---|---|---|---|---|
+| Bäcker | 1 | Brötchenservice, Hafenbäcker (ab 3) | Kunden am Morgen, Ruf | Klappe morgens offen, Rauch aus dem Schornstein, Brezel schwingt |
+| Hafencafé | 2 | Hafencafé, Café mit Terrasse (ab 3) | Geld pro Tag und Kunden, bei Regen weniger, Ruf | Schirme tagsüber auf, abends zu; Lichterkette |
+| Grillplatz | 2 | eine Stufe | Ruf | abends Feuer und Rauch, Crews sitzen dort |
+| Fahrradverleih | 3 | eine Stufe | Geld pro Tag und Kunden | tagsüber ist der Ständer leer, abends kommen die Räder zurück |
+| Eisdiele | 4 | eine Stufe | Geld pro Tag und Kunden, bei Regen kaum etwas | Eis-Schild dreht sich, Schirme am Nachmittag |
 | Bootsverleih | 1 | Ruderboote, Tretboote und Kanus, SUP und Jollen | Geld pro Tag, bei Regen weniger | Leihboote fahren Kreise |
 | Slipanlage | 2 | Slip, Slip mit Trailerparkplatz | Trailerboote ohne Liegeplatz | Trailer rollt zum Wasser |
 | Räucherei | 2 | Räucherkate, mit Fischladen | Geld pro Tag und Kunden, Ruf | Rauch steigt auf |
@@ -31,6 +36,10 @@ Bezahlt wird mit `game.sim.spend`, bei zu wenig Geld ist der Knopf gesperrt. Die
 
 | Kreuzfahrtterminal | 6 | Terminal an der T-Pier, großes Terminal | Kreuzfahrtschiff alle 7, später alle 4 Tage | Schiff läuft morgens ein und abends aus |
 | Marineanleger | 6 | Anleger, Stützpunkt | Flottenbesuch alle 10 Tage, später Tag der offenen Tür | Korvette und Minenjagdboot machen fest, Radar dreht |
+
+**Angebote an Land** (Bäcker, Hafencafé, Grillplatz, Fahrradverleih, Eisdiele, dazu die Räucherei): Die Menschen im Hafen gehen zur passenden Tageszeit hin (`ZIELE` und `SERVICE_ZIELE` in `web/js/data/people.js`), morgens zum Bäcker, nachmittags ins Café und zur Eisdiele, abends an den Grill. Nach dem Bau baut `people.js` das Wegenetz mit dem neuen Ziel neu. Zahlen kommen vom Balancing (`ECONOMY.services`), Gruppe `an-land`.
+
+**Tankstelle** (Versorgung `diesel` der Spielregeln, gekauft über „Bauen“): `services.js` stellt das Modell auf den Dienststeg aus `harbor.js` (Stufe 4 bis 6, Steg ohne Namen bei y 178). Stufe 1 eine Zapfsäule mit Dieselschild, Stufe 2 zwei Säulen unter einem Dach und ein Tankwarthäuschen. Das Licht an der Säule blinkt, der Schlauch pendelt.
 
 **Großschiffpier** (Stufe 6): Die T-Pier westlich der Westmole kommt aus `harbor.js` (Stufe 6, steg `P`) und wird von `services.js` gezeichnet. Kreuzfahrtschiffe liegen außen am Pierkopf (P01), Marineschiffe innen (MA01, MA02), der Seenotrettungskreuzer an der Westmole (SK01).
 

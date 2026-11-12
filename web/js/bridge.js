@@ -95,6 +95,7 @@ export async function initBridge(game) {
   }
 
   function persist() {
+    if (state.testmodus) return; // Testmodus ?stufe=n lässt den echten Spielstand in Ruhe
     if (game.spielstand?.speichern) game.spielstand.speichern(state);
     else saveLocal(state);
   }
@@ -248,7 +249,7 @@ export async function initBridge(game) {
       game.emit('region', region);
     },
     newGame(seed) {
-      setState(createState({ seed }));
+      setState(testStufe >= 1 ? sim.applyTestStage(createState({ seed, rules: ctx.rules }), ctx, testStufe) : createState({ seed }));
       announce();
     },
     addHook: (name, fn) => sim.addHook(ctx, name, fn),
@@ -305,7 +306,12 @@ export async function initBridge(game) {
     }
     return loadLocal();
   }
-  setState(loadSaved() ?? createState());
+  // Testmodus ?stufe=n: frischer Spielstand dieser Stufe (alles bis dahin gebaut), der echte
+  // gespeicherte Spielstand wird weder geladen noch überschrieben. Ohne Parameter wie gehabt.
+  const testStufe = typeof location !== 'undefined' ? Number(new URLSearchParams(location.search).get('stufe')) : 0;
+  const testState = () => sim.applyTestStage(createState({ rules: ctx.rules }), ctx, testStufe);
+  if (testStufe >= 1) setState(testState());
+  else setState(loadSaved() ?? createState());
 
   game.on('spielstand-geladen', (next) => {
     try {

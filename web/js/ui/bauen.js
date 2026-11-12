@@ -495,22 +495,71 @@ export function init(game) {
     }
   }
   const _v = new THREE.Vector3();
+  // Freier Bildbereich (ohne Karte und obere Leiste) und Knoepfe, denen Schilder ausweichen
+  function freierBereich(c) {
+    const f = { l: 8, t: 8, r: c.width - 8, b: c.height - 8 };
+    const top = document.getElementById('hud-top')?.getBoundingClientRect();
+    if (top && top.height) f.t = Math.max(f.t, top.bottom - c.top + 6);
+    if (!card.hidden) {
+      const k = card.getBoundingClientRect();
+      if (k.width < c.width * 0.6) f.r = Math.min(f.r, k.left - c.left - 8);
+      else f.b = Math.min(f.b, k.top - c.top - 8);
+    }
+    // Untere Leiste mit Hintergrund (PC): Schilder bleiben darueber
+    const unten = document.getElementById('hud-bottom');
+    const ur = unten?.getBoundingClientRect();
+    if (ur && ur.height && ur.width > c.width * 0.6 && getComputedStyle(unten).backgroundColor !== 'rgba(0, 0, 0, 0)') f.b = Math.min(f.b, ur.top - c.top - 6);
+    const hindernisse = [...root.querySelectorAll('button, .stat, .hm-tafel, .hm-px, .hm-tipp')]
+      .filter((e) => !card.contains(e) && !schilder.contains(e) && e !== tipp && e.offsetParent)
+      .map((e) => { const r = e.getBoundingClientRect(); return { l: r.left - c.left - 4, t: r.top - c.top - 4, r: r.right - c.left + 4, b: r.bottom - c.top + 4 }; })
+      .filter((r) => r.r > r.l);
+    return { f, hindernisse };
+  }
+
+  const schneidet = (a, o) => a.l < o.r && a.r > o.l && a.t < o.b && a.b > o.t;
+
   function setzeSchilder() {
     if (!schildListe.length || schilder.hidden) return;
     const cam = rig.camera;
     const c = game.canvas.getBoundingClientRect();
+    const { f, hindernisse } = freierBereich(c);
     const belegt = [];
     const sortiert = [...schildListe].sort((a, b) => b.prio - a.prio);
     for (const x of sortiert) {
       _v.copy(x.p).project(cam);
       const sx = (_v.x + 1) / 2 * c.width, sy = (1 - _v.y) / 2 * c.height;
+      x.s.style.display = '';
       const w = x.s.offsetWidth || 90, h = x.s.offsetHeight || 30;
-      const box = { l: sx - w / 2, t: sy - h, r: sx + w / 2, b: sy };
-      const draussen = box.r < 0 || box.l > c.width || box.b < 0 || box.t > c.height;
-      const ueber = belegt.some((o) => box.l < o.r && box.r > o.l && box.t < o.b && box.b > o.t);
-      x.s.style.display = draussen || ueber ? 'none' : '';
-      if (!draussen && !ueber) belegt.push(box);
-      x.s.style.transform = `translate(${Math.round(sx - w / 2)}px, ${Math.round(sy - h)}px)`;
+      let l = sx - w / 2, t = sy - h;
+      // Ausserhalb des freien Bereichs: Schild an den Rand, ein Pfeil zeigt die Richtung
+      let pfeil = '';
+      if (sx < f.l) pfeil = '←'; else if (sx > f.r) pfeil = '→';
+      if (sy < f.t) pfeil = '↑' + pfeil; else if (sy > f.b) pfeil = '↓' + pfeil;
+      l = Math.max(f.l, Math.min(f.r - w, l));
+      t = Math.max(f.t, Math.min(f.b - h, t));
+      // Runden Knoepfen seitlich ausweichen
+      for (const o of hindernisse) {
+        const box = { l, t, r: l + w, b: t + h };
+        if (!schneidet(box, o)) continue;
+        const links = o.l - w, rechts = o.r;
+        l = (sx < (o.l + o.r) / 2 && links >= f.l) || rechts + w > f.r ? links : rechts;
+      }
+      // Liegt schon ein Schild dort: daneben (links, rechts) oder unter den Bauplatz ausweichen
+      const frei = (bx) => bx.l >= f.l - 1 && bx.r <= f.r + 1 && bx.t >= f.t - 1 && bx.b <= f.b + 1
+        && !hindernisse.some((o) => schneidet(bx, o)) && !belegt.some((o) => schneidet(bx, o));
+      const kandidaten = [{ l, t }];
+      for (const o of belegt) kandidaten.push({ l: o.l - w - 4, t }, { l: o.r + 4, t });
+      kandidaten.push({ l, t: Math.min(f.b - h, sy + 6) });
+      const wahl = kandidaten.map((k) => ({ l: k.l, t: k.t, r: k.l + w, b: k.t + h })).find(frei);
+      const weg = !wahl;
+      const box = wahl ?? { l, t, r: l + w, b: t + h };
+      l = box.l; t = box.t;
+      x.s.classList.toggle('unten', !pfeil && t > sy);
+      x.s.classList.toggle('rand', !!pfeil);
+      x.s.dataset.pfeil = pfeil;
+      x.s.style.display = weg ? 'none' : '';
+      if (!weg) belegt.push(box);
+      x.s.style.transform = `translate(${Math.round(l)}px, ${Math.round(t)}px)`;
     }
   }
 
@@ -787,6 +836,7 @@ export function init(game) {
   });
   game.on('resize', () => { platziereTipp(); if (offen && aktiv) zeigeOrt(eintraege().find((x) => x.key === aktiv)?.ort?.()); });
   game.on('ready', setzeTipp);
+  game.on('einstieg:ende', setzeTipp);   // Hinweis gleich zeigen, sobald der Einstieg vorbei ist
   new MutationObserver(() => setzeTipp()).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
   // Animationen laufen auch in der Pause (Baumodus pausiert die Spielzeit)
@@ -899,6 +949,10 @@ function stil() {
     .bau-schild-preis { font-variant-numeric: tabular-nums; color: #2a7d63; font-weight: 700; }
     .bau-schild.teuer .bau-schild-preis { color: #9a4a3c; }
     .bau-schild.empfohlen { outline: 3px solid #f2c14e; }
+    .bau-schild.rand::after { display: none; }
+    .bau-schild.unten::after { bottom: auto; top: -5px; border-top: 0; border-bottom: 5px solid rgba(255, 252, 246, 0.95); }
+    .bau-schild.rand::before { content: attr(data-pfeil); position: absolute; left: -6px; top: -8px; width: 20px; height: 20px;
+      border-radius: 50%; background: #1d3245; color: #fff; font-size: 12px; line-height: 20px; text-align: center; }
     .bau-flieger { position: absolute; left: 0; top: 0; z-index: 6; pointer-events: none; font-weight: 800; font-size: 18px; color: #fff;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 0 10px rgba(42, 157, 143, 0.9); white-space: nowrap; }
     .bau-tipp { position: absolute; z-index: 5; max-width: min(320px, calc(100vw - 32px)); display: grid; gap: 1px; text-align: left;

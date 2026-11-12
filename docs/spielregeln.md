@@ -126,6 +126,8 @@ Solange niemand die Boote im Wasser zeigt, listet `#queue` die wartenden Boote a
 
 ## Erweiterungen für andere Module
 
+**Testmodus `?stufe=n`:** Mit `index.html?stufe=4` legt die Brücke einen frischen Spielstand der Stufe 4 an (`sim.applyTestStage`): alle Ausbauten bis dahin und alle Stegprojekte der Stufe gebaut, Versorgung der früheren Stufen, Startgeld, Ruf 4. `state.testmodus` ist gesetzt; der echte gespeicherte Spielstand wird weder geladen noch überschrieben. Ohne Parameter ändert sich nichts.
+
 **Modifikatoren** (Ereignisse, Services): Die Regeln fragen jeden Morgen und Abend `game.events?.modifiers()` und `game.services?.effekte()` ab. Alternativ `game.sim.addHook('modifiers', fn)`. Alle Felder sind freiwillig:
 
 ```js

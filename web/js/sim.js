@@ -1168,6 +1168,39 @@ function checkRegionGoal(state, ctx) {
   return [{ type: 'regionDone', region: state.region, day: state.day }];
 }
 
+/**
+ * Bringt einen frischen Spielstand auf eine Ausbaustufe, zum Ausprobieren mit ?stufe=n:
+ * alle Ausbauten bis dahin und alle Stegprojekte der Stufe sind gebaut, dazu die Versorgung
+ * der früheren Stufen, passendes Startgeld, ein guter Ruf und die Gästezahl der früheren Stufen. Markiert den Stand als
+ * Testmodus (state.testmodus), damit er den echten Spielstand nicht überschreibt.
+ */
+export function applyTestStage(state, ctx, stage) {
+  const r = ctx.rules;
+  const n = Math.max(1, Math.min(r.maxStage, Math.floor(Number(stage)) || 1));
+  state.stage = n;
+  state.testmodus = true;
+  let guests = 0;
+  for (let k = 1; k < n; k++) {
+    const g = r.stageGoals[k];
+    if (g?.project) state.buildings[g.project] = 1;
+    guests += g?.guests || 0;
+  }
+  for (const p of r.jettyProjects || []) if (p.stage <= n) state.buildings[p.id] = 1;
+  // Versorgung wie bei einem Spieler, der so weit gekommen ist: alles, was es schon in den
+  // früheren Stufen gab (in Stufe 1 nichts), damit der Ruf nicht gleich abstürzt.
+  for (const [key, f] of Object.entries(r.facilities)) {
+    const levels = Object.keys(f.cost || {}).map(Number).filter((lvl) => (f.fromStage?.[lvl] ?? 1) < n);
+    if (levels.length) state.facilities[key] = Math.max(...levels);
+  }
+  state.guests = guests;
+  state.stageGuests = 0;
+  state.ratings = Array(r.reputation.window).fill(4);
+  const next = r.stageGoals[n];
+  const facilityCosts = Object.values(r.facilities).flatMap((f) => Object.entries(f.cost || {}).filter(([lvl]) => (f.fromStage?.[lvl] ?? 1) <= n).map(([, c]) => c));
+  state.money = Math.max(500, Math.round((next?.cost || 0) * 0.5), Math.max(0, ...facilityCosts));
+  return state;
+}
+
 export function advanceStage(state, ctx) {
   const check = canAdvanceStage(state, ctx);
   if (!check.ok) return { ok: false, missing: check.missing };
@@ -1308,6 +1341,14 @@ export function rulesFromEconomy(E, base = RULES) {
     if (E.warten.plaetze) r.queue.spots = { ...r.queue.spots, ...E.warten.plaetze };
   }
 
+  if (E.tagestoern) {
+    const t = E.tagestoern;
+    r.trips = { ...r.trips };
+    if (t.anteil != null) r.trips.chance = t.anteil;
+    if (t.raus) r.trips.out = t.raus;
+    if (t.zurueck) r.trips.back = t.zurueck;
+  }
+
   if (E.hafenbuero) {
     const o = { ...r.office, cost: {}, fromStage: {}, names: {} };
     E.hafenbuero.stufen.forEach((st, i) => {
@@ -1315,11 +1356,11 @@ export function rulesFromEconomy(E, base = RULES) {
       o.fromStage[i + 1] = st.abStufe;
       o.names[i + 1] = st.name;
       if (st.schaltetFrei?.includes('allesKassieren')) o.collectAllButton = i + 1;
-      if (st.schaltetFrei?.includes('automatik')) {
-        o.autoAssign = i + 1;
-        o.autoCollect = i + 1;
-      }
+      if (st.schaltetFrei?.includes('sofortKassieren')) o.autoCollect = i + 1;
+      if (st.schaltetFrei?.includes('automatik')) o.autoAssign = i + 1;
     });
+    // Ohne eigene Stufe für sofortKassieren kassiert die Automatik mit
+    if (!E.hafenbuero.stufen.some((st) => st.schaltetFrei?.includes('sofortKassieren'))) o.autoCollect = o.autoAssign;
     r.office = o;
   }
   return r;

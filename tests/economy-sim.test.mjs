@@ -18,7 +18,12 @@ test('Zahlen werden übernommen', () => {
   assert.equal(rules.facilities.wc.cost[1], ECONOMY.bauwerke.wc.stufen[0].kosten);
   assert.equal(rules.facilities.wc.levels[2], ECONOMY.bauwerke.wc.stufen[1].versorgt);
   assert.equal(rules.office.cost[1], ECONOMY.hafenbuero.stufen[0].kosten);
-  assert.equal(rules.office.autoAssign, 2);
+  assert.equal(rules.office.collectAllButton, 1);
+  assert.equal(rules.office.autoCollect, 2);
+  assert.equal(rules.office.autoAssign, 3);
+  assert.equal(rules.trips.chance, ECONOMY.tagestoern.anteil);
+  assert.deepEqual(rules.trips.back, ECONOMY.tagestoern.zurueck);
+  assert.equal(rules.queue.selfEnterAfter, ECONOMY.warten.selbstEinfahrenNach);
   assert.ok(!rules.wishes[3].includes('diesel'));
   assert.ok(rules.wishes[4].includes('diesel'));
   assert.equal(rules.maxStage, ECONOMY.stufen.length);
@@ -159,4 +164,22 @@ test('Gekaufte Plätze bleiben beim Stufenwechsel erhalten (Umbau ersetzt sie)',
       assert.ok(count() >= bought, `${p.id}: in Stufe ${st} ${count()} statt ${bought} Plätze`);
     }
   }
+});
+
+test('Testmodus ?stufe=n: Spielstand der Stufe mit allen Plätzen, Geld und Ruf', () => {
+  const zahl = {};
+  for (let n = 1; n <= rules.maxStage; n++) {
+    const s = sim.applyTestStage(createState({ seed: 1, rules }), ctx, n);
+    assert.equal(s.stage, n);
+    assert.equal(s.testmodus, true);
+    zahl[n] = sim.availableBerths(s, ctx).length;
+    assert.equal(sim.openJettyProjects(s, ctx).length, 0, `Stufe ${n}: alle Stegprojekte gebaut`);
+    assert.ok(s.money >= 500);
+    assert.equal(sim.reputation(s), 4);
+    // Die Regeln laufen in dieser Stufe: ein Tag ohne Fehler, Boote kommen
+    const ev = sim.runDay(s, ctx);
+    assert.ok(ev.some((e) => e.type === 'arrived'), `Stufe ${n}: es kommen Boote`);
+  }
+  assert.ok(zahl[2] > zahl[1] && zahl[5] > zahl[3]);
+  assert.equal(sim.applyTestStage(createState({ seed: 1, rules }), ctx, 99).stage, rules.maxStage);
 });
