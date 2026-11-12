@@ -11,7 +11,7 @@ Alle sechs bleiben im Rahmen des Plans: keine Story, keine Figuren mit Namen, ke
 | Dauerlieger | `sim.js`, Animationen für Aus- und Einlaufen | gebaut: `web/js/features/dauerlieger.js` |
 | Stammgäste | `sim.js` (Gäste, Bewertung) | gebaut: `web/js/features/stammgaeste.js` |
 | Wetter an der Flagge | `events/events.js` (Ankündigung am Vortag) | beschrieben |
-| Tagesziele an der Tafel | `sim.js`, Hafenbüro als Gebäude | beschrieben |
+| Tagesziele an der Tafel | `sim.js` | gebaut: `web/js/features/tagesziele.js` |
 
 ## 1. Fotomodus mit Rundflug
 
@@ -76,9 +76,21 @@ Ereignisse werden einen Tag vorher angekündigt. Statt Text zeigt das der Hafen 
 
 ## 6. Tagesziele an der Tafel
 
-Am Hafenbüro (Stufe 1: ein Brett am Steg) hängt eine Tafel mit drei kleinen Zielen für den Tag, z. B. „Zwei Segelboote unterbringen“, „Ein Boot mit drei Wünschen ganz zufriedenstellen“, „Alle Plätze einmal belegt“.
+Gebaut: `web/js/features/tagesziele.js`, Tests in `tests/tagesziele.test.mjs`.
 
-- Ziele als Symbole plus Zahl, kein Fließtext.
-- Belohnung: ein kleiner Geldbetrag und ein Häkchen mit Ton. Kein Druck: Nicht erreichte Ziele verfallen still am Abend.
-- Die Ziele passen immer zur Stufe, nur Dinge, die man schon kann.
-- Daten: `web/js/data/tagesziele.js` mit Vorlagen je Stufe, Auswertung in `sim.js` über die Ereignisse, die es ohnehin sendet.
+Links unter der oberen Leiste steht „Tagesziele 0/3“. Antippen klappt die Tafel mit drei kleinen Zielen für den Tag auf, Antippen der Karte klappt sie wieder zu.
+
+| Ziel | Ab Stufe |
+|---|---|
+| N Boote unterbringen (etwa 60 Prozent der erwarteten Ankünfte) | 1 |
+| Alle Wünsche eines Boots erfüllen (ab 2 Wünschen) | 1 |
+| N € Hafengeld kassieren (etwa 60 Prozent des erwarteten Hafengelds) | 1 |
+| Alle Plätze gleichzeitig belegt (nur bis 12 Plätze) | 1 |
+| Einen Stammgast unterbringen (nur wenn es Stammgäste gibt) | 1 |
+| 2 oder 3 Segelboote unterbringen | 2 |
+| Ein L- oder XL-Schiff unterbringen | 3 |
+
+- Belohnung je Ziel: 10, 25, 50, 80, 120 € je nach Stufe, mit Haken, kurzem Hüpfen der Tafel, Vibration und Ereignis `ziel:erreicht` für den Ton.
+- Kein Druck: Was abends nicht geschafft ist, verfällt still. Im Winter gibt es keine Ziele und keine Tafel.
+- Spielstand in `state.modules.ziele`.
+- Später möglich: die Tafel als 3D-Brett am Hafenbüro.
