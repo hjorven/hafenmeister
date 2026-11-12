@@ -3,7 +3,7 @@
 // Die Schiffe laufen morgens ein, liegen tagsueber an ihrem Platz und laufen abends wieder aus.
 // Wird von js/render/services.js gestartet, kein eigener Eintrag in MODULES.
 //
-// Falls der Schiffs-Thread spaeter eigene XXL-Modelle anbietet (game.boats?.xxl?.modell(art)), werden
+// Falls der Schiffs-Thread spaeter eigene XXL-Modelle anbietet (game.boatTypes.xxl), werden
 // diese genommen; bis dahin zeichnet dieses Modul schlichte Flat-Modelle.
 import * as THREE from 'three';
 import { FARBE, box, zyl, flagge, rumpf, mat } from './services-models.js';
@@ -154,10 +154,25 @@ export function initBesuche(game, services) {
     return { tag, besuch: s };
   }
 
+  // XXL-Modelle des Schiffs-Threads (render/boats/xxl.js: game.boatTypes.xxl), sonst eigene Modelle
+  const XXL_ID = { kreuzfahrtschiff: 'XXL1-3', korvette: 'XXL2-2', minenjagdboot: 'XXL2-1' };
+  function xxlModell(name) {
+    try {
+      const alt = game.boats?.xxl?.modell?.(name);
+      if (alt) return alt;
+      const xxl = game.boatTypes?.xxl;
+      const m = XXL_ID[name] && xxl?.MODELS?.find?.((q) => q.id === XXL_ID[name]);
+      return m ? xxl.buildBoat(m, { palette: 0 }) : null;
+    } catch (err) {
+      console.warn('XXL-Modell nicht baubar, nehme eigenes', name, err);
+      return null;
+    }
+  }
+
   function schiffeFuer(id) {
     if (aktiv.has(id)) return aktiv.get(id);
     const liste = AUFTRITTE[id].schiffe.map((d) => {
-      const extern = game.boats?.xxl?.modell?.(d.modell);
+      const extern = xxlModell(d.modell);
       const m = extern ? { group: extern, laenge: 0 } : MODELL[d.modell]();
       m.group.name = `besuch-${d.modell}`;
       m.group.visible = false;

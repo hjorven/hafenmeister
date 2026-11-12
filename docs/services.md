@@ -34,7 +34,7 @@ Bezahlt wird mit `game.sim.spend`, bei zu wenig Geld ist der Knopf gesperrt. Die
 
 **Großschiffpier** (Stufe 6): Die T-Pier westlich der Westmole kommt aus `harbor.js` (Stufe 6, steg `P`) und wird von `services.js` gezeichnet. Kreuzfahrtschiffe liegen außen am Pierkopf (P01), Marineschiffe innen (MA01, MA02), der Seenotrettungskreuzer an der Westmole (SK01).
 
-**Besuchsschiffe** (`web/js/render/services-besuch.js`): Das Ausflugsschiff liegt morgens am Kai, fährt mittags durch die Molen hinaus und kommt nachmittags zurück. Kreuzfahrtschiff und Marineschiffe kommen nur an Besuchstagen. Am Vorabend kündigt das Schild unter der oberen Leiste den Besuch an. Bei Sturm bleibt der Besuch aus und kommt einen Tag später. Sobald der Schiffs-Thread XXL-Modelle anbietet (`game.boats.xxl.modell(art)`), werden diese genommen.
+**Besuchsschiffe** (`web/js/render/services-besuch.js`): Das Ausflugsschiff liegt morgens am Kai, fährt mittags durch die Molen hinaus und kommt nachmittags zurück. Kreuzfahrtschiff und Marineschiffe kommen nur an Besuchstagen. Am Vorabend kündigt das Schild unter der oberen Leiste den Besuch an. Bei Sturm bleibt der Besuch aus und kommt einen Tag später. Sobald der Schiffs-Thread XXL-Modelle anbietet (`game.boatTypes.xxl`, Kreuzfahrtschiff XXL1-3, Korvette XXL2-2, Minenjagdboot XXL2-1), werden diese genommen.
 
 ## Dateien
 
