@@ -203,6 +203,23 @@ class BoatAnimManager {
     game.onTick((dt) => this.tick(dt));
   }
 
+  // Sichtbarer Ausschnitt der Kamera, fuer Start und Ziel ausserhalb des Bildes und den Zeitraffer
+  updateView() {
+    const cam = this.game.camera?.camera;
+    if (!cam) { this.view = null; return; }
+    cam.updateMatrixWorld();
+    _pm.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse);
+    (this.view ||= new THREE.Frustum()).setFromProjectionMatrix(_pm);
+  }
+
+  /** Liegt ein Kreis (x, z, r) ganz oder teilweise im Bild? Ohne Kamera immer true. */
+  inView(x, z, r = 5) {
+    if (!this.view) return true;
+    _sph.center.set(x, 1, z);
+    _sph.radius = r + 2;
+    return this.view.intersectsSphere(_sph);
+  }
+
   // Verkehr: Boote halten Abstand. Wer hinter einem anderen in dieselbe Richtung faehrt, bremst.
   // Liegt etwas im Weg (entgegenkommend, querend oder still), weicht das Boot seitlich aus
   // (entgegen: beide nach Steuerbord) und wird langsamer. Wer naeher am Ziel ist, hat Vorfahrt.
@@ -259,12 +276,15 @@ class BoatAnimManager {
   tick(dt) {
     this.frame++;
     const t = this.game.time;
+    this.updateView();
     if (dt > 0) this.traffic(dt);
     for (const b of this.boats) b.update(dt, t);
 
   }
 }
 
+const _pm = new THREE.Matrix4();
+const _sph = new THREE.Sphere();
 const managers = new WeakMap();
 function manager(game) {
   let m = managers.get(game);
@@ -277,6 +297,7 @@ function manager(game) {
       setWind: (d, s) => m.setWind(d, s),
       setShelter: (fn) => { m.shelter = fn || defaultShelter; },
       berthFromPlatz,
+      imBild: (x, z, r) => m.inView(x, z, r),
       get boats() { return [...m.boats]; },
       get sea() { return m.sea; },
       get wind() { return { fromDeg: (m.wind.from * 180) / Math.PI, strength: m.wind.strength }; },
@@ -1011,6 +1032,11 @@ class BoatAnim {
   update(dt, t) {
     this.prevSpeed = this.speed;
     this.turnRate *= 0.9;
+    // Zeitraffer: ausserhalb des Bildes faehrt ein Boot auf freier Strecke viermal so schnell,
+    // damit An- und Abfahrt auf der Spieluhr nicht Stunden dauern
+    const offen = this.task instanceof PathTask && !this.task.pivot && !this.mgr.inView(this.x, this.z, this.info.length);
+    this.zeitraffer = offen;
+    if (offen) dt *= 4;
     if (dt > 0) {
       let guard = 8;
       while (guard-- > 0) {

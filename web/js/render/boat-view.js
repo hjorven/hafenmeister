@@ -239,6 +239,46 @@ export function init(game) {
     return e;
   }
 
+  // Abfahrende Boote, die aus dem Bild sind, sind fort: nicht erst bis zum Revierrand fahren.
+  // So staut sich auch bei schnellem Vorspulen ueber viele Tage nichts vor der Einfahrt.
+  let fortT = 0;
+  game.onTick((dt) => {
+    fortT += dt;
+    if (fortT < 0.5) return;
+    fortT = 0;
+    for (const [id, e] of [...boats]) {
+      if (!e.faehrt || e.anim.berth || e.anim.state !== 'leaving') continue;
+      if (!game.boatAnim.imBild?.(e.anim.x, e.anim.z, e.anim.info.length)) entferne(id);
+    }
+  });
+
+  // --- Ankerlicht: nachts brennt an Booten an Boje oder Anker ein weisses Licht oben am Mast --------
+  const lichtGeo = new THREE.SphereGeometry(0.16, 8, 6);
+  const lichtMat = new THREE.MeshBasicMaterial({ color: '#fff6d8' });
+  const glanzMat = new THREE.MeshBasicMaterial({ color: '#fff3c4', transparent: true, opacity: 0.35, depthWrite: false });
+  const glanzGeo = new THREE.SphereGeometry(0.5, 10, 8);
+  function ankerlicht(e) {
+    if (e.licht) return e.licht;
+    const box = new THREE.Box3().setFromObject(e.group);
+    const l = new THREE.Mesh(lichtGeo, lichtMat);
+    l.add(new THREE.Mesh(glanzGeo, glanzMat));
+    l.name = 'ankerlicht';
+    // lokal ueber der Mitte (Mast), knapp unter der hoechsten Stelle
+    l.position.set(0, Math.max(0.8, box.max.y - e.group.position.y - 0.1), 0);
+    l.visible = false;
+    e.group.add(l);
+    e.licht = l;
+    return l;
+  }
+  game.onTick(() => {
+    const nacht = game.landscape?.licht?.zustand?.nacht ?? 0;
+    for (const e of boats.values()) {
+      const an = nacht > 0.35 && e.anim.moored && e.anim.berth?.kind === 'buoy';
+      if (an) ankerlicht(e).visible = true;
+      else if (e.licht) e.licht.visible = false;
+    }
+  });
+
   function entferne(id) {
     const e = boats.get(id);
     if (!e) return;
@@ -248,8 +288,20 @@ export function init(game) {
 
   const rand = () => welt(bySt(REVIERRAND, stufe()));
   // Startpunkt am Revierrand, an dem gerade kein anderes Boot ist (mehrere kommen oft zugleich)
+  // Revierrand, aber sicher ausserhalb des Bildes (auch am Handy hochkant und in der Uebersicht):
+  // vom Hafen aus so weit nach aussen schieben, bis der Punkt nicht mehr zu sehen ist.
+  function ausserSicht(p, laenge = 8) {
+    const bj = bojenPos();
+    const m = bj.length ? bj[Math.floor(bj.length / 2)] : { x: 0, z: 0 };
+    let dx = p.x - m.x, dz = p.z - m.z;
+    const l = Math.hypot(dx, dz) || 1;
+    dx /= l; dz /= l;
+    const q = { x: p.x, z: p.z };
+    for (let i = 0; i < 60 && game.boatAnim.imBild?.(q.x, q.z, laenge + 4); i++) { q.x += dx * 15; q.z += dz * 15; }
+    return q;
+  }
   function freierStart(laenge = 6) {
-    const r = rand();
+    const r = ausserSicht(rand(), laenge);
     for (const d of [0, 14, -14, 28, -28, 42, -42, 56]) {
       const p = { x: r.x + d, z: r.z + Math.abs(d) * 0.3 };
       const frei = game.boatAnim.boats.every((o) => Math.hypot(o.x - p.x, o.z - p.z) > laenge + o.info.length + 6);
@@ -319,7 +371,10 @@ export function init(game) {
       e.anim.moorAt(b);
       return;
     }
-    if (!e.anim.moored && e.anim.state === 'idle') e.anim.moorAt(warteplatz(e.info.boje ?? 0, e.anim));
+    // Ein Boot ohne Auftrag (nach dem Laden) liegt an der Boje. Kam es gerade erst (boot-kommt im
+    // selben Schritt, Spielregel 'direkt einfahren bei vollen Bojen'), hat es schon seine Anfahrt
+    // und faehrt von See direkt in die Box.
+    if (!e.anim.moored && e.anim.state === 'idle' && !e.anim.task && !e.anim.tasks.length) e.anim.moorAt(warteplatz(e.info.boje ?? 0, e.anim));
     if (e.pick) { e.anim.model.userData.pick = e.pick; e.pick = null; }
     // Ist die Box noch nicht frei und das Boot noch unterwegs zur Boje, faehrt es erst zur Boje
     // und wartet dort (nicht mitten im Fahrwasser, wo es anderen im Weg laege).
@@ -338,7 +393,9 @@ export function init(game) {
   game.on('boot-faehrt', ({ id } = {}) => {
     const e = boats.get(id);
     if (!e) return;
-    const ziel = rand();
+    // niemand sieht es: gleich weg (spart Rueckstau beim schnellen Vorspulen)
+    if (!game.boatAnim.imBild?.(e.anim.x, e.anim.z, e.anim.info.length)) { entferne(id); return; }
+    const ziel = ausserSicht(rand(), e.anim.info.length);
     const weg = [];
     const von = { x: e.anim.x, z: e.anim.z };
     if (stufe() >= 3) {
@@ -414,7 +471,11 @@ export function init(game) {
     if (d?.boatId != null) { entferneMuenze(d.boatId, 700); const e = boats.get(d.boatId); if (e) e.muenzeWartet = false; }
     else for (const id of [...muenzen.keys()]) entferneMuenze(id, 700);
   });
-  game.on('sim:departed', (d) => entferneMuenze(d?.boatId, 0));
+  game.on('sim:departed', (d) => {
+    entferneMuenze(d?.boatId, 0);
+    const e = boats.get(d?.boatId);
+    if (e) e.abgerechnet = true;     // bleibt sichtbar, bis 'boot-faehrt' am Vormittag kommt
+  });
 
   // Boot ist am Platz fest: die Box blitzt einmal hell auf (Form und Drehung der Box aus render/stege.js)
   const blitze = new Map();     // platzId -> Restzeit
@@ -478,7 +539,7 @@ export function init(game) {
   game.on('dauer:auslaufen', ({ id, tage } = {}) => {
     const e = boats.get(id);
     if (!e) return;
-    const ziel = tage > 0 ? rand() : rundenMitte();
+    const ziel = tage > 0 ? ausserSicht(rand(), e.anim.info.length) : rundenMitte();
     const segel = e.anim.info.kind === 'sail';
     const weg = [...fahrweg({ x: e.anim.x, z: e.anim.z }, ziel), ziel];
     e.draussen = true;
@@ -517,11 +578,16 @@ export function init(game) {
 
   /** Ist die Box frei? Kein anderes Boot hat sie als Platz, und keins steht noch in ihr. */
   function platzFrei(platzId, b, selbst) {
+    const fx = Math.cos(b.heading), fz = -Math.sin(b.heading);
     for (const o of game.boatAnim.boats) {
       if (o === selbst) continue;
       if (o.berth?.id === platzId) return false;
-      const r = Math.max(b.length, b.width) / 2 + o.info.length / 2;
-      if (Math.hypot(o.x - b.x, o.z - b.z) < r) return false;
+      // fest an einem anderen Platz (Nachbarbox): stoert nicht
+      if (o.moored && o.berth) continue;
+      // nur Boote, deren Mitte im Rechteck der Box liegt (Boxachsen), mit etwas Rand fuer den Rumpf
+      const rx = o.x - b.x, rz = o.z - b.z;
+      const laengs = rx * fx + rz * fz, quer = rx * -fz + rz * fx;
+      if (Math.abs(laengs) < b.length / 2 + o.info.length * 0.3 && Math.abs(quer) < b.width / 2) return false;
     }
     return true;
   }
@@ -531,12 +597,14 @@ export function init(game) {
   }
 
   // Alle Boote aus dem Spielstand sofort an ihre Plaetze legen (Start, Laden, neues Spiel)
-  function abgleich() {
+  function abgleich(laden = false) {
     baueBojen();
     const liste = game.sim?.boote ?? [];
     const ids = new Set(liste.map((b) => b.id));
     // Boote, die gerade abfahren, fahren zu Ende (sie sind in den Regeln schon weg)
-    for (const [id, e] of [...boats]) if (!ids.has(id) && !e.faehrt && !e.draussen) entferne(id);
+    // Nachts abgerechnete Gaeste (sim:departed) liegen bis zum Ablegen am Vormittag noch in der Box,
+    // nach dem Laden eines Spielstands sind sie weg (PR 108).
+    for (const [id, e] of [...boats]) if (!ids.has(id) && !e.faehrt && !e.draussen && (laden || !e.abgerechnet)) entferne(id);
     for (const info of liste) {
       const e = erzeuge(info);
       e.info = { ...e.info, ...info };
@@ -557,8 +625,8 @@ export function init(game) {
     game.boatsVisible = true;
     game.emit('sim:change', {});
   });
-  game.on('spielstand-geladen', () => setTimeout(abgleich, 0));
-  game.on('sim:change', (d) => { if (d?.reason === 'load' || d?.reason === 'new') abgleich(); });
+  game.on('spielstand-geladen', () => setTimeout(() => abgleich(true), 0));
+  game.on('sim:change', (d) => { if (d?.reason === 'load' || d?.reason === 'new') abgleich(true); });
   game.on('stufe', () => { if (bojenStufe) abgleich(); });
 
   game.boatView = {
