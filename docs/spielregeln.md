@@ -50,6 +50,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 | `fittingBerths(bootId)`, `whyNotFit(bootId, platzId)`, `availableBerths()` | Plätze |
 | `reputation()`, `season()`, `canAdvanceStage()`, `facilityUpgrade(key)`, `modifiers()` | Lesen |
 | `geduld(bootId)` | restliche Sekunden an der Boje |
+| `istBezahlt(bootId)` | Liegegeld für die kommende Nacht kassiert (für Bändchen am Bug und Rundgang) |
 | `wartet(bootId)`, `passendePlaetze(bootId)`, `tagesAnteil()` | für die Gesten (`tagesAnteil` 0 = Morgen, 1 = Nacht) |
 | `addHook(name, fn)`, `addService(key, def)` | Erweiterungen (unten) |
 | `newGame(seed)`, `setRegion(id)` | neues Spiel, Region |
