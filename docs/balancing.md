@@ -4,13 +4,25 @@ Stand: 12.11.2026, nach „Boote fahren selbst ein“ (PR 103), „Tagesrhythmus
 
 ## Wo die Zahlen liegen
 
+**Eine Quelle:** Jede Zahl, die das Spiel braucht, steht in `web/js/data/economy.js` (`ECONOMY`). Andere Dateien haben keine eigenen Zahlen mehr (Paket P06):
+
 | Datei | Inhalt | Gehört |
 |---|---|---|
-| `web/js/data/economy.js` | alle Spielzahlen: Grundpreise, Wünsche, Ruf, Stufen und Ziele, Stegprojekte mit Platz-ids, Bauwerke, Hafenbüro, Services, Ereignisse | Balancing |
+| `web/js/data/economy.js` | alle Spielzahlen: Zeit, Preise, Wünsche, Ruf, Stufen und Ziele, Stegprojekte, Bauwerke, Hafenbüro, Services, Ereignisse, Warten, Tagestörn, Stammgäste, Dauerlieger, Tagesziele | Balancing |
+| `web/js/data/rules.js` | `rulesFromEconomy(E)`: baut aus `ECONOMY` die Regeln für `sim.js`, ohne eigene Zahlen. `RULES = rulesFromEconomy(ECONOMY)` | Balancing |
+| `web/js/data/services.js` | nur Namen, Texte und Lage der Services; `SERVICES` fügt sie mit `ECONOMY.services` zusammen | Services |
+| `web/js/data/events.js` | nur Texte und Wetterbild der Ereignisse; `EVENTS`, `YEAR`, `SCHEDULE` kommen aus `ECONOMY.ereignisse` und `ECONOMY.zeit` | Ereignisse |
+| `docs/zahlen.md` | Übersicht aller Zahlen, erzeugt mit `node tools/zahlen.mjs --schreiben` | erzeugt |
+| `tools/zahlen.mjs` | prüft die Zahlen: Felder, die kein Spielcode liest, Ja/Nein statt Zahl, Ausbaustufen, die nicht teurer werden | Balancing |
 | `tools/balance.mjs` | spielt die Regeln ohne Grafik viele Male durch und meldet die Spielzeit | Balancing |
-| `tests/balance.test.mjs` | prüft, dass die Daten zu `harbor.js` passen und die Spielzeit im Zielkorridor bleibt | Balancing |
+| `tests/regeln.mjs` | gemeinsamer Aufbau für alle Regeltests: echter Hafen, `RULES` aus `ECONOMY`, Testboote | Balancing |
+| `tests/balance.test.mjs`, `tests/zahlen.test.mjs`, `tests/spieltag.test.mjs` | Daten passen zu `harbor.js`, Spielzeit im Zielkorridor, `docs/zahlen.md` aktuell, ein ganzer Spieltag mit festem Startwert | Balancing |
 
-`web/js/sim.js` (Spielregeln) und die Services lesen ihre Zahlen nur aus `ECONOMY`. Wer eine Zahl braucht, die noch fehlt, trägt sie in `economy.js` ein, statt sie im Code festzulegen. Die höchste Stufe im Spiel (`rules.maxStage`) ist die höchste Stufe in `ECONOMY.stufen`, derzeit 6.
+Wer eine Zahl braucht, die noch fehlt, trägt sie in `economy.js` ein und liest sie über `rulesFromEconomy` (Spielregeln) oder direkt aus `ECONOMY` (Module), statt sie im Code festzulegen. Danach `node tools/zahlen.mjs --schreiben`. Die höchste Stufe im Spiel (`rules.maxStage`) ist die höchste Stufe in `ECONOMY.stufen`, derzeit 6.
+
+**Feldnamen:** In `economy.js` deutsch (`kosten`, `abStufe`, `wirkung`), in `sim.js` englisch (`cost`, `fromStage`). Die Übersetzung steht an genau einer Stelle, in `data/rules.js`. Ausnahme: die Wirkung der Ereignisse (`arrivalFactor` und so weiter) heißt wie die Felder, die `sim.js` liest.
+
+**Zufall:** Alles, was Geld, Gäste oder Ruf ändert, nimmt den Zufall aus `web/js/random.js` (`random(state)` im Spielstand oder `zufallAus(seed)`), nie `Math.random`. Gleicher Startwert, gleiches Spiel. `tests/zahlen.test.mjs` prüft das für die Regelmodule.
 
 ## Benutzen
 
@@ -21,10 +33,12 @@ node tools/balance.mjs --laeufe 200
 node tools/balance.mjs --verlauf 3
 node tools/balance.mjs --verlauf 3 --gemuetlich
 node tools/balance.mjs --json
+node tools/zahlen.mjs --pruefen
+node tools/zahlen.mjs --schreiben
 node --test tests/*.test.mjs
 ```
 
-`--pruefen` meldet jeden Liegeplatz aus `harbor.js`, der keinem Projekt gehört oder doppelt vergeben ist, und jedes Projekt, das in einer späteren Stufe Plätze verlieren würde. `--verlauf` zeigt Tag für Tag, was ein Spieler kauft und wie Geld und Ruf laufen. Hat `economy.js` mehr Stufen als `harbor.js`, rechnet das Werkzeug trotzdem und meldet die fehlenden Platz-ids als Hinweis.
+`--pruefen` ruft auch `tools/zahlen.mjs` auf und meldet jeden Liegeplatz aus `harbor.js`, der keinem Projekt gehört oder doppelt vergeben ist, und jedes Projekt, das in einer späteren Stufe Plätze verlieren würde. `--verlauf` zeigt Tag für Tag, was ein Spieler kauft und wie Geld und Ruf laufen. Hat `economy.js` mehr Stufen als `harbor.js`, rechnet das Werkzeug trotzdem und meldet die fehlenden Platz-ids als Hinweis.
 
 ## Ergebnis (100 Läufe je Spielertyp, mit den echten Spielregeln)
 
