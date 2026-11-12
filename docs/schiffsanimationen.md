@@ -83,8 +83,12 @@ Ein einziger `onTick` für alle Boote, keine Speicheranforderungen pro Bild. Lei
 ## Offen
 
 - Ab Stufe 3 fahren Boote von der Reede durch die Einfahrt (ab Stufe 5 um die Ostmole herum in den Außenhafen) und den Durchstich in den See und auf demselben Weg wieder hinaus (`fahrweg` in `boat-view.js`). Boote weichen einander noch nicht aus.
+<<<<<<< HEAD
 - Bootsnamen am Heck folgen im nächsten Schritt.
 
 ## Dauerlieger
 
 Bei `dauer:auslaufen` `{ id, platzId, tage }` legt der Dauerlieger ab und fährt (ab Stufe 3 durch den Durchstich) aufs Revier. Bei `tage = 0` dreht er dort unter Segeln oder Motor Runden, bei mehrtägigen Törns fährt er aus dem Bild. Bei `dauer:einlaufen` `{ id, platzId }` kommt er zurück (oder vom Rand herein) und legt wieder an seinem Platz an.
+=======
+- Dauerlieger-Runde (`dauer:auslaufen`, `dauer:einlaufen`) und Bootsnamen am Heck folgen im nächsten Schritt.
+>>>>>>> origin/claude/project-thread-7zl0zf
