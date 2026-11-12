@@ -7,7 +7,7 @@ const STEP = Math.PI / 4;                     // Drehen rastet in 45-Grad-Schrit
 const DISTANCE = 600;
 
 export class CameraRig {
-  constructor({ bounds, minWidth = 15, maxWidth = 480 }) {
+  constructor({ bounds, minWidth = 15, maxWidth = 420 }) {
     this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 2000);
     this.bounds = bounds;                     // { minX, maxX, minZ, maxZ } in Metern
     this.minWidth = minWidth;                 // kleinster sichtbarer Ausschnitt in Metern (ganz hineingezoomt)
