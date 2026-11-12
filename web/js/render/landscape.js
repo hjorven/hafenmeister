@@ -11,6 +11,18 @@
 //         game.emit('landschaft:geaendert', { stufe, region }) nach jedem Neubau des Geländes.
 import { erzeugeLandschaft, autoQualitaet } from './landschaft/index.js';
 import { uhrzeitAusSpielzeit } from './landschaft/zeit.js';
+import { bildAusSeed } from './landschaft/vielfalt.js';
+
+/**
+ * Geländebild für dieses Spiel: aus der Adresse (?gelaende=N, nur Ansicht), sonst aus dem Seed des Spielstands.
+ * Automatische Tests (navigator.webdriver) bekommen das Grundbild 0, damit Bildschirmfotos gleich bleiben.
+ */
+function bildFuer(game, url) {
+  if (url.gelaende != null && Number.isFinite(url.gelaende)) return url.gelaende;
+  if (globalThis.navigator?.webdriver === true) return 0;
+  const seed = game.state?.seed;
+  return seed == null ? 0 : bildAusSeed(seed);
+}
 
 function parameter() {
   const p = new URLSearchParams(location.search);
@@ -19,6 +31,7 @@ function parameter() {
     region: p.get('region'),
     stufe: p.get('stufe') ? Number(p.get('stufe')) : null,
     uhrzeit: p.get('uhrzeit') ? Number(p.get('uhrzeit')) : null,
+    gelaende: p.get('gelaende') != null ? Number(p.get('gelaende')) : null,
   };
 }
 
@@ -43,6 +56,8 @@ export function init(game) {
     region: url.region || game.state?.region || game.region?.id || 'ostsee',
     stufe: url.stufe || game.state?.stufe || 1,
     qualitaet,
+    bild: bildFuer(game, url),
+    jahreszeit: game.events?.season?.(game.state?.day ?? 1)?.part ?? null,
   });
   game.landschaft = land;
   game.landscape = land;   // Grundgerüst erkennt daran, dass die Platzhalter-Bänder weg können
@@ -58,6 +73,16 @@ export function init(game) {
   game.on('region', (id) => { if (!url.region) land.setzeRegion(typeof id === 'string' ? id : id?.id); });
   game.on('pegel', (m) => land.setzePegel(Number(m) || 0));
   game.on('wetter', (w) => land.setzeWetter(w || {}));
+  game.on('season', (s) => land.setzeJahreszeit(typeof s === 'object' ? s?.part : s));
+  // Anderer Spielstand (Laden, Neues Spiel): eigenes Geländebild
+  const neuesBild = () => { if (url.gelaende == null) land.setzeBild(bildFuer(game, url)); };
+  game.on('spielstand-geladen', () => queueMicrotask(neuesBild));
+  game.on('sim:change', (e) => { if (e?.reason === 'load' || e?.reason === 'new') queueMicrotask(neuesBild); });
+  game.on('ready', () => {
+    neuesBild();
+    const j = game.events?.season?.(game.state?.day ?? 1)?.part;
+    if (j) land.setzeJahreszeit(j);
+  });
   game.on('uhrzeit', (h) => { feste = h == null ? null : Number(h); if (feste != null) land.setzeUhrzeit(feste); });
   land.licht.beiAenderung((z) => game.emit('licht', z));
   // Nach jedem Neubau (Stufe oder Region): Fahrwege, Anlagen und Bewuchs können neu rechnen
