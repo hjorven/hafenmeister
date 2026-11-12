@@ -18,7 +18,7 @@ sys.path.insert(0, str(ROOT / 'skripte' / 'konzeptbilder'))
 import hafen_von_oben as hv   # noqa: E402
 
 ZIEL = ROOT / 'web' / 'js' / 'data' / 'harbor.js'
-STUFEN = [1, 2, 3, 4, 5]
+STUFEN = [1, 2, 3, 4, 5, 6]
 # Mehrere Haefen: jeder Hafen bekommt eine eigene Datei mit eigener id. Dieser ist der erste.
 HAFEN_ID, HAFEN_NAME, REGION = 'nehrung', 'Hafen an der Nehrung', 'ostsee'
 K = hv.K                       # Faktor, mit dem die Zeichnung Meterangaben in Planeinheiten umrechnet
@@ -28,12 +28,17 @@ TOL = 0.5                      # rueckt ein Platz zwischen zwei Stufen um wenige
 STEGE = {
     'A': 'Steg A', 'B': 'Steg B', 'C': 'Hauptsteg C', 'CS': 'Stichsteg', 'D': 'Schwimmsteg D',
     'F': 'Fischersteg', 'K': 'Kai', 'FK': 'Fischereikai',
+    'P': 'Kreuzfahrtpier', 'MA': 'Marineanleger', 'SK': 'Seenotkreuzer',
 }
+# Stufe 6: Grossschiffe (Klasse XXL). Art und Steg haengen am gezeichneten Schiff.
+XXL_ART = {'cruise': ('pier', 'P'), 'navy': ('marine', 'MA'), 'tall': ('marine', 'MA'), 'srk': ('seenotretter', 'SK')}
 # Hoechstmasse je Platzart laut docs/hafen-und-schiffe.md, Abschnitt 2 (Laenge, Breite in m)
 MAXMASS = {
     ('box', 'S'): (6.0, 2.4), ('box', 'M'): (9.0, 3.2), ('box', 'L'): (14.0, 4.5),
     ('finger', 'L'): (14.0, 4.5), ('stirn', 'M'): (14.0, 7.5), ('stirn', 'L'): (14.0, 7.5),
     ('kai', 'XL'): (40.0, 8.0), ('fischer', 'M'): (9.0, 3.2), ('fischer', 'L'): (14.0, 4.5),
+    # Stufe 6, abgestimmt mit dem XL/XXL-Thread (web/js/data/boats/xxl.js)
+    ('pier', 'XXL'): (182.0, 30.0), ('marine', 'XXL'): (92.0, 14.0), ('seenotretter', 'XXL'): (48.0, 11.0),
 }
 
 
@@ -41,6 +46,7 @@ def steg_von(p0, p1):
     """Welcher Steg? Nach Lage der Segmentmitte, damit kleine Layoutaenderungen nichts kaputt machen."""
     mx, my = (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2
     waagerecht = abs(p1[0] - p0[0]) > abs(p1[1] - p0[1])
+    if my > 200 and mx < -60: return 'P'        # Grossschiffspier (Stufe 6)
     if my > 200 and mx > 160: return None      # Seenotretter
     if my > 200: return 'FK' if mx < 0 else 'K'
     if mx < -125: return 'F'
@@ -78,12 +84,14 @@ class Mitschnitt(hv.Harbor):
         if cls != 'T':   # Tankstelle und Seenotretter sind keine Liegeplaetze
             L, t, n = hv.frame(p0, p1); a = start; jwk = jw * K if scale_jw else jw
             steg = steg_von(p0, p1)
+            if cls == 'XXL': steg = None
             if steg in ('K', 'FK'):   # Kai und Fischereikai haben keine Steglinie in der Zeichnung
                 self.kaikanten.append(dict(steg=steg, bauart='kai', breite=0.0, punkte=[list(p0), list(p1)]))
-            for (_kind, Lb, Bb, _col, _present) in items:
+            for (kind, Lb, Bb, _col, _present) in items:
                 Lb, Bb = Lb * K, Bb * K; r = jwk / 2 + .8 + Bb / 2
                 c = (p0[0] + t[0] * (a + Lb / 2) + side * n[0] * r, p0[1] + t[1] * (a + Lb / 2) + side * n[1] * r)
-                self.plaetze.append(dict(steg=steg, klasse=cls, art=art_von(steg), c=c, bug=t,
+                art, st = XXL_ART[kind] if cls == 'XXL' else (art_von(steg), steg)
+                self.plaetze.append(dict(steg=st, klasse=cls, art=art, c=c, bug=t,
                                          laenge=Lb, breite=Bb))
                 a += Lb + gap
         else:            # Dienstplaetze: Tankstelle, Seenotretter
@@ -149,9 +157,9 @@ def exportieren():
         for pts, kind, wm in H.lines:
             if kind == 'finger': continue
             st = steg_von(pts[0], pts[-1])
-            if pts[0][1] > 170: st = None                               # Tankstelle, Seenotretter
+            if pts[0][1] > 170 and st != 'P': st = None                 # Tankstelle, Seenotretter
             if 140 < pts[0][0] < 170 and pts[0][1] < 30: st = None     # Travellift-Becken
-            stege.append(dict(steg=st, bauart='schwimmsteg' if kind == 'float' else 'holz',
+            stege.append(dict(steg=st, bauart={'float': 'schwimmsteg', 'pier': 'pier'}.get(kind, 'holz'),
                               breite=r1(wm / K), punkte=[[r1(x), r1(y)] for x, y in pts]))
         for kk in H.kaikanten:
             stege.append(dict(kk, punkte=[[r1(x), r1(y)] for x, y in kk['punkte']]))
@@ -213,7 +221,9 @@ KOPF = """// Hafenmeister: Liegeplaetze und Stege je Ausbaustufe.
 //   maxBreite
 //   tiefe       Wassertiefe in Metern je Stufe (kleinster Wert auf der Mittellinie)
 //   art         box (Heckpfaehle), finger (Schwimmsteg mit Fingern), stirn (laengsseits am
-//               T-Kopf oder Stegende), kai (XL im Aussenhafen), fischer (fest vergeben)
+//               T-Kopf oder Stegende), kai (XL im Aussenhafen), fischer (fest vergeben),
+//               ab Stufe 6 (Klasse XXL): pier (Kreuzfahrtpier), marine (Marineanleger),
+//               seenotretter (fester Platz des stationierten Seenotrettungskreuzers)
 // stufen[n].stege[]: Steglinien zum Zeichnen und Antippen (ohne Fingerstege). steg = null bei
 //   Dienststegen (Tankstelle, Seenotretter, Travellift). Kai und Fischereikai: bauart kai, die
 //   Linie ist die Kante, an der die Schiffe liegen.
