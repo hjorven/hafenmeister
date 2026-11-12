@@ -303,6 +303,8 @@ bash tools/check-pages.sh web
 
 ## 13. Meilensteine
 
+**Reihenfolge seit 12.11.2026 abends (Jorven):** Zuerst wird das Gelände mit den Bootswegen komplett überarbeitet (Welle 0 in [roadmap.md](roadmap.md), fünf Threads), alle anderen Arbeiten ruhen so lange. Danach die Grundprobleme, dann die Kernschleife, zuletzt die Extras. Jeder Thread prüft sein Feature vor dem Weiterbauen sehr oft und mit Randfällen und schreibt auf, wo es mit anderen kollidieren kann.
+
 Der aktuelle Arbeitsstand und alle offenen Punkte stehen in [roadmap.md](roadmap.md). Die Haken unten werden mit Paket P08 der Roadmap nachgezogen.
 
 Jeder Meilenstein endet mit etwas, das man auf PC, Tablet und Handy (hoch und quer) ausprobieren kann.
