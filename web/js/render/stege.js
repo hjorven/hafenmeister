@@ -20,6 +20,7 @@
 //   id: projektId }; Antippen oeffnet die Bauen-Karte. Projekte spaeterer Stufen sind unsichtbar.
 //   game.stege.bauplaetze() liefert die ids der sichtbaren Bauplaetze.
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { HAFEN } from '../data/harbor.js';
 
 const U = HAFEN.einheiten?.meterProEinheit ?? 0.62;
@@ -50,6 +51,45 @@ export function init(game) {
   let stufe = 0;
   let plaetze = new Map();
   let gruppe = null;
+
+  // ---------------------------------------------------------------- Zusammenfassen
+  // Feste Teile (Planken, Pfaehle, Poller, Finger) einer Gruppe werden je Material zu einem Mesh
+  // zusammengelegt: hunderte Einzel-Meshes kosten sonst spuerbar Bildzeit. Antippbare Teile
+  // (userData.pick, Bauplaetze) bleiben einzeln.
+  const fest = new Set(Object.keys(FARBE).map((k) => M[k]));
+  function zusammenfassen(g) {
+    const jeMat = new Map();
+    for (const o of [...g.children]) {
+      if (!o.isMesh || !fest.has(o.material) || o.userData.pick || o.userData.bauplatz || o.children.length) continue;
+      o.updateMatrix();
+      const geo = o.geometry.clone().applyMatrix4(o.matrix);
+      if (!geo.index) continue;
+      if (!jeMat.has(o.material)) jeMat.set(o.material, []);
+      jeMat.get(o.material).push(geo);
+      g.remove(o);
+      if (![pfahlGeo, dalbeGeo, kappeGeo, pollerGeo].includes(o.geometry)) o.geometry.dispose();
+    }
+    for (const [material, geos] of jeMat) {
+      const m = new THREE.Mesh(geos.length > 1 ? mergeGeometries(geos) : geos[0], material);
+      if (geos.length > 1) geos.forEach((x) => x.dispose());
+      m.userData.zusammengefasst = geos.length;
+      g.add(m);
+    }
+  }
+
+  // Unsichtbare Platzflaeche: wird erst gezeichnet, wenn jemand sie einfaerbt (opacity > 0).
+  // Andere Module setzen nur opacity, deshalb schaltet der Setter die Sichtbarkeit mit.
+  function platzMaterial() {
+    const m = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0, depthWrite: false });
+    let wert = 0;
+    Object.defineProperty(m, 'opacity', {
+      get: () => wert,
+      set: (v) => { wert = v; m.visible = v > 0.001; },
+      configurable: true,
+    });
+    m.opacity = 0;
+    return m;
+  }
 
   // ---------------------------------------------------------------- Stegteile
   function segment(a, b, breite, hoehe, dicke, material) {
@@ -177,7 +217,7 @@ export function init(game) {
     }
 
     // Flaeche zum Antippen und Einfaerben
-    const flMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0, depthWrite: false });
+    const flMat = platzMaterial();
     const fl = new THREE.Mesh(new THREE.PlaneGeometry(L * 0.96, B * 0.92), flMat);
     fl.rotation.x = -Math.PI / 2;
     fl.rotation.z = rad;
@@ -340,6 +380,7 @@ export function init(game) {
       if (r.bis > 0) baueLinie(linie, g, r.bis >= r.gesamt - 0.01 ? linie.punkte : teilLinie(linie.punkte, 0, r.bis));
       if (r.projekt && r.plan > r.bis + 0.5) geisterLinie(linie, teilLinie(linie.punkte, r.bis, r.plan), r.projekt, g);
       if (linie.steg && g.children.some((o) => !o.userData.bauplatz)) g.userData.pick = { type: 'jetty', id: linie.steg };
+      zusammenfassen(g);
       gruppe.add(g);
     });
 
@@ -350,6 +391,7 @@ export function init(game) {
       const n2 = nr++;
       if (st.status !== 'aus') liegeplatz(p, gruppe, n2, st);
     }
+    zusammenfassen(gruppe);
     root.add(gruppe);
     api.stage = Number(stufe);
     highlight(markiert.ids, markiert.farbe);
