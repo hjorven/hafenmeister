@@ -302,13 +302,22 @@ export function init(game) {
   }
   function freierStart(laenge = 6) {
     const r = ausserSicht(rand(), laenge);
-    for (const d of [0, 14, -14, 28, -28, 42, -42, 56]) {
-      const p = { x: r.x + d, z: r.z + Math.abs(d) * 0.3 };
-      const frei = game.boatAnim.boats.every((o) => Math.hypot(o.x - p.x, o.z - p.z) > laenge + o.info.length + 6);
-      if (frei) return p;
+    const bj = bojenPos();
+    const m = bj.length ? bj[Math.floor(bj.length / 2)] : { x: 0, z: 0 };
+    let dx = r.x - m.x, dz = r.z - m.z;
+    const l = Math.hypot(dx, dz) || 1;
+    dx /= l; dz /= l;
+    // Kommen viele zugleich: nebeneinander in Reihen quer zur Anfahrt, weitere Reihen weiter draussen
+    const frei = (p) => game.boatAnim.boats.every((o) => Math.hypot(o.x - p.x, o.z - p.z) > (laenge + o.info.length) / 2 + 8);
+    for (let reihe = 0; reihe < 12; reihe++) {
+      for (const k of [0, 1, -1, 2, -2, 3, -3, 4, -4]) {
+        const p = { x: r.x + dx * reihe * 24 - dz * k * 16, z: r.z + dz * reihe * 24 + dx * k * 16 };
+        if (frei(p)) return p;
+      }
     }
-    return { x: r.x + (Math.random() - 0.5) * 80, z: r.z + Math.random() * 20 };
+    return { x: r.x + dx * 300, z: r.z + dz * 300 };
   }
+
 
   // --- Fahrwege ab Stufe 3: See und Binnensee verbindet nur der Durchstich ------------------
   // Planeinheiten wie render/landschaft/gelaende.js (DURCHSTICH x 152 bis 182, Nehrung y 186 bis 224,
