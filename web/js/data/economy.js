@@ -18,6 +18,8 @@ export const ECONOMY = {
     abendSekunden: 30,      // Abend, Kassieren
     saisonTage: 30,         // danach Winter
     winterTage: 3,          // keine Gäste
+    // Saisontage je Jahreszeit [von, bis]
+    jahreszeiten: { fruehling: [1, 8], sommer: [9, 22], herbst: [23, 30] },
     erstesBootNach: 3,      // Sekunden: am ersten Tag eines neuen Spiels kommt gleich ein Boot
     // Tagesrhythmus wie im echten Hafen, als Anteile des Tages (0 = Morgen, 1 = Abend):
     // vormittags legen die Gäste ab, ab Mittag kommen die neuen, die meisten am Nachmittag.
@@ -344,9 +346,9 @@ export const ECONOMY = {
     ] },
     seenotretter: { abStufe: 4, stufen: [   // Seenotretter-Station
       // Seenotrettungsboot
-      { kosten: 8000, wirkung: { sturmschutz: 0.3, ruf: 0.15 } },
+      { kosten: 8000, wirkung: { sturmschutz: 0.5, ruf: 0.15 } },
       // Seenotrettungskreuzer
-      { kosten: 20000, abStufe: 6, wirkung: { sturmschutz: 0.55, ruf: 0.25, freischalten: ['seenotkreuzer'], besuch: { art: 'tag-der-seenotretter', alleTage: 28, ersterNach: 5, dauer: 1, einnahme: 900, gaeste: 600, ruf: 0.02 } } },
+      { kosten: 20000, abStufe: 6, wirkung: { sturmschutz: 0.8, ruf: 0.25, freischalten: ['seenotkreuzer'], besuch: { art: 'tag-der-seenotretter', alleTage: 28, ersterNach: 5, dauer: 1, einnahme: 900, gaeste: 600, ruf: 0.02 } } },
     ] },
     fahrgastanleger: { abStufe: 5, stufen: [   // Fahrgastanleger
       // Fahrgastanleger
@@ -382,17 +384,39 @@ export const ECONOMY = {
 
 
   // ---------------------------------------------------------------- Ereignisse
-  // Vorschlag aus dem Balancing; die Logik gehört dem Ereignis-Thread.
-  // alleTage = mittlerer Abstand in Saisontagen (zufällig +-30 %), angekündigt 1 Tag vorher.
+  // Alle Zahlen der Ereignisse (Texte und Wetterbild in data/events.js, Logik in events/scheduler.js).
+  //   abStufe     ab dieser Ausbaustufe möglich
+  //   alleTage    mittlerer Abstand in Tagen (Zufall streut um +- ablauf.streuung)
+  //   dauer       Länge in Tagen
+  //   vorrang     wenn mehrere fällig sind, gewinnt der größere Wert
+  //   braucht     optional: Service, der gebaut sein muss
+  //   saison      Saisontage [von, bis], an denen das Ereignis liegen darf
+  //   ankuendigen Tage vorher angekündigt (Standard 1)
+  //   wirkung     auf die Spielregeln, Felder wie DEFAULT_MODS in data/events.js
+  //   schutz      Service, der die schlechten Folgen mindert: faktor je Ausbaustufe (1 = volle Folgen).
+  //               Gibt es den stufenlosen Sturmschutz der Services (services.*.wirkung.sturmschutz),
+  //               gilt der: Folgen = 1 - Sturmschutz.
   ereignisse: {
-    // ankunftFaktor: von See läuft niemand ein, nur Boote aus dem See (vor allem S) kommen
-    sturm:         { abStufe: 3, alleTage: 10, ankunftFaktor: { S: 0.6, M: 0.1, L: 0.1, XL: 0 }, extraNacht: 1,
-                     rufMalus: 0.5, rufMalusMitSeenotretter: 0 },
-    regatta:       { abStufe: 3, braucht: 'segelclub', alleTage: 12, dauer: 2,
-                     ankunftFaktorSegel: 2 },
-    hafenfest:     { abStufe: 4, alleTage: 15, dauer: 1, einnahme: 1500,
-                     extraXL: 2 },
+    ablauf: { ruhigeTage: 2, ersterTag: 3, streuung: 0.3 },
+    nebel:     { abStufe: 1, alleTage: 13, dauer: 1, vorrang: 1, saison: [1, 30],
+                 wirkung: { arrivalFactor: 0.7, extraNights: 1 } },
+    sommertag: { abStufe: 1, alleTage: 11, dauer: 1, vorrang: 1, saison: [7, 24],
+                 wirkung: { arrivalFactor: 1.25, sizeFactor: { S: 2, M: 1.2 }, visitorFactor: 1.5, serviceIncomeFactor: 1.3 } },
+    sturm:     { abStufe: 3, alleTage: 12, dauer: 1, vorrang: 4, saison: [3, 30],
+                 wirkung: { seaArrivals: false, extraNights: 1, satisfaction: { outer: -1 } },
+                 schutz: { durch: 'seenotretter', faktor: [1, 0.5, 0] } },
+    regatta:   { abStufe: 3, braucht: 'segelclub', alleTage: 14, dauer: 2, vorrang: 5, ankuendigen: 2, saison: [6, 26],
+                 // kindFactor: Schlüssel sind die Bootsarten (kind) aus data/boat-catalog.js
+                 wirkung: { arrivalFactor: 1.6, kindFactor: { jolle: 3, segelyacht: 3, mehrrumpf: 2 },
+                   visitorFactor: 1.5, serviceIncomeFactor: 1.3, ratingBonus: 0.25 } },
+    hafenfest: { abStufe: 4, alleTage: 20, dauer: 1, vorrang: 4, saison: [10, 24],
+                 // Traditionssegler (XL) kommen erst ab Stufe 5, vorher nur mehr Boote und Besucher
+                 wirkung: { arrivalFactor: 1.3, kindFactor: { traditionssegler: 6 }, sizeFactor: { XL: 2 },
+                   visitorFactor: 2, serviceIncomeFactor: 1.5, ratingBonus: 0.25 } },
+    // Wintertage: Boote im Winterlager, kaum Gäste
+    winter:    { wirkung: { winter: true, arrivalFactor: 0.15, visitorFactor: 0.3, serviceIncomeFactor: 0.5 } },
   },
+
 };
 
 export default ECONOMY;
