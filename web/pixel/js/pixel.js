@@ -69,7 +69,8 @@ rig._apply = function apply() {
 function setzeHoehe(n) {
   stufe = Math.max(0, Math.min(HOEHEN.length - 1, n));
   pitchZiel = THREE.MathUtils.degToRad(HOEHEN[stufe]);
-  knopf.textContent = `Höhe ${HOEHEN[stufe]}°`;
+  knopf.textContent = `${HOEHEN[stufe]}°`;
+  knopf.title = `Kamerahöhe ${HOEHEN[stufe]}° (Bild auf, Bild ab)`;
   game.emit('pixel:hoehe', HOEHEN[stufe]);
 }
 game.onTick(() => {
