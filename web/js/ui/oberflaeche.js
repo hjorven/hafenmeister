@@ -41,6 +41,7 @@ const PIXEL = {
   muenze: ['...oooooo...', '..ohhhhhhoo.', '.ohhggggggdo', '.ohggoooggdo', 'ohggoggggggo', 'ohgoooooggdo', 'ohggoggggggo', 'ohgoooooggdo', '.ohggoooggdo', '.oggggggggdo', '..oddddddoo.', '...oooooo...'],
   stern: ['.....oo.....', '....oyyo....', '....oyyo....', 'oooooyyooooo', 'oyyyyyyyyyyo', '.osyyyyyyso.', '..osyyyyso..', '..osyyyyso..', '.osyysssyso.', '.osso..osso.', 'oso......oso', 'oo........oo'],
   sonne: ['.....yy.....', '..y..yy..y..', '...y....y...', '....rrrr....', '.y.ryyyyr.y.', 'yy.ryyyyr.yy', 'yy.ryyyyr.yy', '.y.ryyyyr.y.', '....rrrr....', '...y....y...', '..y..yy..y..', '.....yy.....'],
+  zahnrad: ['............', '.....##.....', '..#.####.#..', '..########..', '...##..##...', '.###....###.', '.###....###.', '...##..##...', '..########..', '..#.####.#..', '.....##.....', '............'],
   mond: ['............', '....nnnn....', '...nmmmmn...', '..nmmmmnn...', '..nmmmn.....', '..nmmmn.....', '..nmmmn.....', '..nmmmmn....', '..nmmmmmnn..', '...nmmmmmn..', '....nnnnn...', '............'],
 };
 
@@ -83,6 +84,8 @@ const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximu
 const ganz = (n) => Math.round(n).toLocaleString('de-DE');
 const euro = (n) => `${ganz(n)} €`;
 
+import { initEinstellungen, SCHALTER, WAHLEN } from './einstellungen.js';
+
 function el(tag, attrs = {}, ...kids) {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -99,7 +102,7 @@ const TEMPO = [
   { id: 'pause', label: 'Pause', speed: 0 },
   { id: 'tempo1', label: 'Normale Geschwindigkeit', speed: 1 },
   { id: 'tempo2', label: 'Dreifach vorspulen', speed: 3 },
-  { id: 'tempo3', label: 'Achtfach vorspulen', speed: 8 },
+  { id: 'tempo3', label: 'Achtfach vorspulen bis zum nächsten Boot', speed: 8 },
 ];
 
 export function init(game) {
@@ -152,7 +155,7 @@ export function init(game) {
     b.className = 'hm-tempo-knopf';
     b.dataset.tempo = t.id;
     b.setAttribute('aria-label', t.label);
-    b.title = t.id === 'tempo2' ? `${t.label} (Taste F)` : t.label;
+    b.title = t.id === 'tempo2' ? `${t.label} (Taste F)` : t.id === 'tempo3' ? `${t.label} (Taste G)` : t.label;
     b.hidden = false;
     b.textContent = '';
     symbol(b, t.id);
@@ -177,6 +180,12 @@ export function init(game) {
     game.emit('ui:vorspulen', { speed });
     zeigeTempo();
   }
+  // Tempo, das mitdenkt (roadmap Bed P4): Bei einem Sonderfall geht es zurück auf 1x, damit man ihn nicht verpasst.
+  // 8x läuft nur bis zum nächsten Boot an der Boje.
+  const zurueck = () => { if ((game.speed || 1) > 1 && !game.paused) waehleTempo(1); };
+  for (const ereignis of ['event:announce', 'event:start', 'sim:stageReady', 'sim:regionDone']) game.on(ereignis, zurueck);
+  game.on('sim:atBuoy', () => { if ((game.speed || 1) >= 8) zurueck(); });
+
   function zeigeTempo() {
     const s = game.speed || 1;
     for (const t of TEMPO) {
@@ -292,7 +301,51 @@ export function init(game) {
     ['btn-sound', null, 'ton'],      // Text setzt das Ton-Modul (Ton / Stumm)
     ['btn-save', 'Spielstand', 'spielstand'],
     ['btn-help', 'Maus und Tastatur', 'tasten'],
+    ['btn-einstellungen', 'Einstellungen', 'zahnrad'],
   ];
+
+  // ---------------------------------------------------------------- Einstellungen (P50)
+  const einst = initEinstellungen(game);
+  const einstBtn = el('button', { type: 'button', id: 'btn-einstellungen', 'aria-haspopup': 'dialog', 'aria-controls': 'hm-einstellungen' }, 'Einstellungen');
+  top.append(einstBtn);
+  const einstTafel = el('div', { id: 'hm-einstellungen', class: 'hm-px hm-tafel-px', role: 'dialog', 'aria-label': 'Einstellungen', hidden: true });
+  const einstZu = el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Einstellungen schließen', onclick: () => einstAuf(false) });
+  const touch = globalThis.matchMedia?.('(pointer: coarse)').matches ?? false;
+  const schalterKnopf = {};
+  einstTafel.append(el('div', { class: 'hm-karte-kopf' }, el('p', { class: 'hm-klapp-kopf' }, 'Einstellungen'), einstZu));
+  for (const sch of SCHALTER) {
+    if (sch.nurTouch && !touch) continue;
+    const k = el('button', {
+      type: 'button', role: 'switch', class: 'hm-schalter', 'aria-checked': String(einst.wert(sch.name)),
+      onclick: () => einst.setze(sch.name, !einst.wert(sch.name)),
+    }, el('span', { class: 'hm-schalter-text' }, el('strong', {}, sch.titel), el('span', {}, sch.text)), el('i', { class: 'hm-schalter-griff', 'aria-hidden': 'true' }));
+    schalterKnopf[sch.name] = k;
+    einstTafel.append(k);
+  }
+  const wahlKnoepfe = [];
+  for (const w of WAHLEN) {
+    const gruppe = el('div', { class: 'hm-wahl-stufen', role: 'radiogroup', 'aria-label': w.titel });
+    for (const [id, name] of w.stufen) {
+      const k = el('button', { type: 'button', role: 'radio', 'aria-checked': String(einst.wert(w.name) === id), onclick: () => einst.setze(w.name, id) }, name);
+      wahlKnoepfe.push([w.name, id, k]);
+      gruppe.append(k);
+    }
+    einstTafel.append(el('div', { class: 'hm-wahl' }, el('span', { class: 'hm-schalter-text' }, el('strong', {}, w.titel), el('span', {}, w.text)), gruppe));
+  }
+  // Ton und Musik haben eigene Regler im Ton-Fenster (audio.js): von hier aus dorthin
+  const tonKnopf = el('button', { type: 'button', class: 'hud-btn hm-knopf', onclick: (e) => { e.stopPropagation(); einstAuf(false); $('btn-sound')?.click(); } }, 'Ton und Musik einstellen');
+  einstTafel.append(tonKnopf);
+  root.append(einstTafel);
+  game.on('einstellungen', () => {
+    for (const [n, k] of Object.entries(schalterKnopf)) k.setAttribute('aria-checked', String(einst.wert(n)));
+    for (const [n, id, k] of wahlKnoepfe) k.setAttribute('aria-checked', String(einst.wert(n) === id));
+  });
+  function einstAuf(auf) {
+    einstTafel.hidden = !auf;
+    einstBtn.setAttribute('aria-expanded', String(auf));
+    if (auf) einstTafel.querySelector('.hm-schalter')?.focus({ preventScroll: true });
+  }
+  einstBtn.addEventListener('click', (e) => { e.stopPropagation(); klappeAndereZu('einstellungen'); einstAuf(einstTafel.hidden); });
   function menueAuf(auf) {
     menue.hidden = !auf;
     menueBtn.setAttribute('aria-expanded', String(auf));
@@ -303,6 +356,7 @@ export function init(game) {
   // Immer nur ein Aufklapper offen: Menü, Wetter, Tagesziele, Ziel
   function klappeAndereZu(ausser) {
     if (ausser !== 'menue') menueAuf(false);
+    if (ausser !== 'einstellungen') einstAuf(false);
     if (ausser !== 'ziel') { zielPanel.hidden = true; zielKnopf.setAttribute('aria-expanded', 'false'); }
     const liste = document.querySelector('.hm-tafel ul');
     if (ausser !== 'tafel' && liste && !liste.hidden) { liste.hidden = true; liste.parentNode.querySelector('button')?.setAttribute('aria-expanded', 'false'); }
@@ -311,8 +365,9 @@ export function init(game) {
   }
   const klappeZu = () => klappeAndereZu(null);
   document.addEventListener('pointerdown', (e) => {
-    if (e.target.closest?.('#hm-menue, #btn-menu, #hm-seite, #hm-audio-popover, .hm-save-backdrop')) return;
+    if (e.target.closest?.('#hm-menue, #btn-menu, #hm-seite, #hm-audio-popover, .hm-save-backdrop, #hm-einstellungen')) return;
     menueAuf(false);
+    einstAuf(false);
     zielPanel.hidden = true;
     zielKnopf.setAttribute('aria-expanded', 'false');
   }, true);

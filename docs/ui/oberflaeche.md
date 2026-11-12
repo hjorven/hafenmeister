@@ -69,3 +69,25 @@ Schnittstelle: `game.oberflaeche.tempo(speed)` (0 = Pause, 1, 3, 8); `game.geste
 - In der Karte: Hauptaktion `hud-btn hm-primaer`, gefährliche Aktion `hud-btn hm-gefahr`, sonst `hud-btn`. Schließen oben rechts mit `hm-zu`.
 - Keine Positionen für `#card`, `#btn-build`, `#hud-top`, `#hud-bottom` in Modul-Stilen festschreiben.
 - Ein Rahmen im Pixel-Stil: Klasse `hm-px` geben.
+
+## Einstellungen (P50)
+
+Menü, Eintrag "Einstellungen" (`#btn-einstellungen`), Tafel `#hm-einstellungen`. Gilt je Gerät (`localStorage`, Schlüssel `hafenmeister:einstellungen`), nicht je Spielstand. Code: `web/js/ui/einstellungen.js`, Schnittstelle `game.einstellungen.wert(name)`, `game.einstellungen.setze(name, wert)`, Ereignis `'einstellungen'`.
+
+| Einstellung | Klasse am `body` | Wirkung |
+|---|---|---|
+| Schilder mit Form | `hm-formen` | Rote Platzschilder bekommen einen weißen Querbalken; empfohlene Preisschilder einen Stern, Wetter-Neuigkeit ein Ausrufezeichen |
+| Weniger Bewegung | `hm-ruhig` | Keine Animationen und Übergänge in der Oberfläche, weniger Regen, Schnee und Funken; Standard folgt `prefers-reduced-motion` |
+| Größere Schrift | `hm-gross` | Schrift der Oberfläche mal 1,2 (`--hm-s`), `rem` mal 1,18 |
+| Linkshänder (nur Touch) | `hand-links` | Bauen unten links, Zeit unten rechts |
+| Boote fahren selbst ein | (keine) | Normal (8 s), Langsam (20 s), Nie; setzt `game.sim.ctx.rules.queue.selfEnterAfter` |
+
+Dazu ein Knopf "Ton und Musik einstellen", der das Ton-Fenster mit getrennten Reglern öffnet.
+
+## Tempo, das mitdenkt (P07, Bed P4 und P8)
+
+- Bei Ankündigung oder Beginn eines Ereignisses, wenn ein Ausbau möglich wird und beim Abschluss der Region geht das Tempo zurück auf 1x.
+- 8x läuft bis zum nächsten Boot an der Boje.
+- PC: <kbd>F</kbd> 3x an und aus, <kbd>G</kbd> 8x an und aus, <kbd>K</kbd> Kassieren, <kbd>Leertaste</kbd> Pause.
+
+Schriftgrößen in Regeln immer als `var(--hm-s)` schreiben, nicht `var(--hm-schrift)`, sonst wirkt "Größere Schrift" nicht.
