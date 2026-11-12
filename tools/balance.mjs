@@ -44,8 +44,8 @@ export function pruefen() {
   const besitz = new Map(); // id -> { quelle, stufe }
   const nimm = (id, quelle, stufe) => {
     if (!plaetze.has(id)) fehler.push(`${quelle}: Platz ${id} gibt es nicht in harbor.js`);
-    else if (!plaetze.get(id).stufen.includes(stufe))
-      fehler.push(`${quelle}: Platz ${id} gibt es in Stufe ${stufe} nicht (nur ${plaetze.get(id).stufen.join(',')})`);
+    else if (!plaetze.get(id).stufen.some((n) => n >= stufe))
+      fehler.push(`${quelle}: Platz ${id} gibt es ab Stufe ${stufe} nicht (nur ${plaetze.get(id).stufen.join(',')})`);
     if (besitz.has(id)) fehler.push(`Platz ${id} doppelt: ${besitz.get(id).quelle} und ${quelle}`);
     besitz.set(id, { quelle, stufe });
   };
@@ -57,6 +57,12 @@ export function pruefen() {
     ids.add(p.id);
     if (!(p.kosten > 0)) fehler.push(`Stegprojekt ${p.id}: kosten fehlt`);
     p.plaetze.forEach((id) => nimm(id, `stegprojekt ${p.id}`, p.stufe));
+    // Gekaufte Plätze dürfen beim Umbau nicht verschwinden: je Stufe nie weniger als beim Kauf
+    const anzahl = (n) => p.plaetze.filter((id) => plaetze.get(id)?.stufen.includes(n)).length;
+    const maxStufe = Math.max(...E.stufen.map((x) => x.stufe));
+    for (let n = p.stufe + 1; n <= maxStufe; n++) {
+      if (anzahl(n) < anzahl(n - 1)) fehler.push(`Stegprojekt ${p.id}: in Stufe ${n} ${anzahl(n)} statt ${anzahl(n - 1)} Plätze (Ersatz fehlt)`);
+    }
   }
   for (const p of HAFEN.plaetze) {
     if (!besitz.has(p.id)) fehler.push(`Platz ${p.id} (Stufen ${p.stufen.join(',')}) gehört zu keinem Projekt`);

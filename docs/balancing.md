@@ -35,13 +35,13 @@ node --test tests/*.test.mjs
 | Stufe | Name | Spieltage | 10 % bis 90 % | davon Sparen auf den Ausbau | Echtzeit 1x | mit Vorspulen |
 |---|---|---|---|---|---|---|
 | 1 | Bootssteg am See | 14 | 13 bis 14 | 6 | 28 min | 21 min |
-| 2 | Dorfhafen am See | 49 | 47 bis 55 | 10 | 1 h 38 min | 1 h 14 min |
-| 3 | Durchstich zur Ostsee | 52 | 49 bis 54 | 14 | 1 h 44 min | 1 h 09 min |
-| 4 | Marina | 54 | 51 bis 56 | 15 | 1 h 48 min | 1 h 12 min |
-| 5 | Küstenmarina bis zum Abschluss | 69 | 59 bis 78 | | 2 h 18 min | 1 h 32 min |
-| | **Gesamt** | **239** | 227 bis 248 | | **7 h 58 min** | **5 h 28 min** |
+| 2 | Dorfhafen am See | 50 | 47 bis 56 | 11 | 1 h 40 min | 1 h 15 min |
+| 3 | Durchstich zur Ostsee | 52 | 50 bis 56 | 14 | 1 h 44 min | 1 h 09 min |
+| 4 | Marina | 55 | 53 bis 58 | 15 | 1 h 50 min | 1 h 13 min |
+| 5 | Küstenmarina bis zum Abschluss | 69 | 58 bis 78 | | 2 h 18 min | 1 h 32 min |
+| | **Gesamt** | **242** | 230 bis 251 | | **8 h 04 min** | **5 h 31 min** |
 
-**Gemütlicher Spieler** (schaut nur alle 20 Sekunden auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz, kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus): 226 Tage, 7 h 32 min bei 1x, 5 h 13 min mit Vorspulen. Er ist sogar etwas schneller fertig, weil er weniger Services kauft und sein Geld eher in Stege steckt.
+**Gemütlicher Spieler** (schaut nur alle 20 Sekunden auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz, kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus): 231 Tage, 7 h 42 min bei 1x, 5 h 16 min mit Vorspulen. Er ist sogar etwas schneller fertig, weil er weniger Services kauft und sein Geld eher in Stege steckt.
 
 Damit liegt die erste Region im Ziel aus dem Plan (6 bis 8 Stunden). Ungeschicktes Spielen bremst nie stark und blockiert nie. Das passt zu „kein Scheitern“.
 
@@ -61,9 +61,9 @@ Damit liegt die erste Region im Ziel aus dem Plan (6 bis 8 Stunden). Ungeschickt
 | 4 Marina | 30 | 900 Gäste, Ruf 3,8 | Außenhafen mit Kai | 42.000 € |
 | 5 Küstenmarina | 37 | Abschluss: 1.900 Gäste, Ruf 4,3, alle 94 Plätze gebaut | | |
 
-Jedes große Bauprojekt enthält die Plätze, die beim Umbau wegfallen (zum Beispiel wird der Haken an Steg A in Stufe 3 durch neue Boxen ersetzt). Ein Ausbau kostet also nie Liegeplätze.
+**Gekaufte Plätze bleiben erhalten.** Baut eine spätere Stufe einen Steg um, gehören die Ersatzplätze zum selben Stegprojekt. Beispiel: „Steg B“ bringt in Stufe 2 die Boxen B01 bis B08; in Stufe 3 fallen B01 und B02 weg, dafür gehören B19 und B20 dazu. Jedes Projekt hat in jeder späteren Stufe mindestens so viele Plätze wie beim Kauf, und wer es erst später kauft, bekommt gleich die neue Form. `--pruefen` und `tests/economy-sim.test.mjs` stellen das sicher. Betroffen sind Haken an Steg A, Steg B, Steg B verlängern, T-Kopf an Steg B (Stufe 2, 3 und 5 jeweils neu geformt), Hauptsteg C verlängern, T-Kopf an Steg C und Stirnplatz an D.
 
-**Stegprojekte:** 17 Stück von 180 € (Haken an Steg A) bis 33.000 € (Kai verlängern). Jeder der 109 Plätze aus `harbor.js` gehört genau einem Projekt.
+**Stegprojekte:** 16 Stück von 180 € (Haken an Steg A) bis 33.000 € (Kai verlängern). Jeder der 109 Plätze aus `harbor.js` gehört genau einem Projekt.
 
 **Versorgung:** Toilette, Dusche, Gastronomie je 4 Stufen, Tankstelle 2 Stufen, Stromsäulen an Steg B. Kapazitäten sind so gewählt, dass die größte Stufe einen vollen Hafen (91 Gastplätze) versorgt.
 
