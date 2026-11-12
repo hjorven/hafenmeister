@@ -45,8 +45,15 @@ const SEE = {
   // Ab Stufe 5: Außenhafen mit Westmole bis (96, 320), Rinne bis y 356 (x 108 bis 184),
   // Ankerfeld für Große um (30, 440) mit Radius 85, Reede ab x 226, Ankerfeld um (360, 440). XXL (bis 29 m breit) nur auf der äußersten Bahn.
   5: [
-    { pts: ostwaerts(268, -340, [[-112, 268], [-52, 294], [-34, 326], [30, 328], [86, 334], [118, 352], [140, 420], [170, 520], [196, 760]]), art: 'klein' },
-    { pts: westwaerts(282, -326, [[182, 760], [154, 520], [124, 420], [104, 364], [78, 346], [30, 342], [-46, 340], [-66, 300], [-116, 282]]), art: 'klein' },
+    { pts: ostwaerts(268, -340, [[-112, 268], [-52, 294], [-34, 330], [30, 333], [86, 337], [118, 352], [140, 420], [170, 520], [196, 760]]), art: 'klein' },
+    { pts: westwaerts(282, -326, [[182, 760], [154, 520], [124, 420], [104, 364], [78, 348], [30, 345], [-46, 342], [-66, 300], [-116, 282]]), art: 'klein' },
+    { pts: ostwaerts(562, -300), art: 'gross' }, { pts: westwaerts(600, -250), art: 'gross', xxl: true },
+  ],
+  // Stufe 6: Großschiffspier P01 (x -371 bis -83, y 290, Schiff liegt nördlich davor) und
+  // Marineanleger MA01/MA02 (y 247). Die kleinen Bahnen kommen im Westen nördlich davon herein.
+  6: [
+    { pts: ostwaerts(380, -340, [[-110, 380], [-56, 352], [-34, 330], [30, 333], [86, 337], [118, 352], [140, 420], [170, 520], [196, 760]]), art: 'klein' },
+    { pts: westwaerts(394, -326, [[182, 760], [154, 520], [124, 420], [104, 364], [78, 348], [30, 345], [-46, 343], [-72, 370], [-116, 394]]), art: 'klein' },
     { pts: ostwaerts(562, -300), art: 'gross' }, { pts: westwaerts(600, -250), art: 'gross', xxl: true },
   ],
 };
@@ -86,7 +93,7 @@ const UFER = {
   2: { x0: -26, x1: 60, y: 18 },
 };
 
-const seeBahnen = (stufe) => SEE[stufe >= 5 ? 5 : stufe >= 3 ? 3 : 1];
+const seeBahnen = (stufe) => SEE[stufe >= 6 ? 6 : stufe >= 5 ? 5 : stufe >= 3 ? 3 : 1];
 const seeRunde = (stufe) => (stufe <= 2 ? SEE_RUNDE[Math.max(1, stufe)] : null);
 
 // --- Welche Boote wo fahren ---------------------------------------------------------------------

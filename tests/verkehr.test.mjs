@@ -19,7 +19,7 @@ const segAbstand = (px, py, [ax, ay], [bx, by]) => {
   const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)));
   return Math.hypot(px - ax - t * dx, py - ay - t * dy);
 };
-const bahnenVon = (st) => SEEBAHNEN[st >= 5 ? 5 : st >= 3 ? 3 : 1];
+const bahnenVon = (st) => SEEBAHNEN[st >= 6 ? 6 : st >= 5 ? 5 : st >= 3 ? 3 : 1];
 const superellipse = (r, inset, n = 240) => Array.from({ length: n }, (_, i) => {
   const a = (i / n) * 2 * Math.PI, f = (c) => Math.sign(c) * Math.abs(c) ** 0.5;
   return [r.cx + (r.rx - inset) * f(Math.cos(a)), r.cy + (r.ry - inset) * f(Math.sin(a))];
@@ -47,12 +47,12 @@ function pruefe(st, punkte, name, { tiefe = 1, boje = 14, anker = 6, mole = 6, p
     for (const b of w.bojen) assert.ok(Math.hypot(b.x - x, b.z - z) >= boje, `${wo}: zu nah an Boje ${b.id}`);
     for (const a of w.ankerbereiche) assert.ok(Math.hypot(a.x - x, a.z - z) - a.radiusM >= anker, `${wo}: in Ankerfläche ${a.id}`);
     for (const l of linien) for (let i = 1; i < l.length; i++) assert.ok(segAbstand(px, py, l[i - 1], l[i]) * PLAN_M >= mole, `${wo}: zu nah an Mole oder Buhne`);
-    for (const p of plaetze) assert.ok(Math.hypot(p.x - x, p.z - z) >= platz, `${wo}: zu nah an Liegeplatz ${p.id}`);
+    for (const p of plaetze) assert.ok(Math.hypot(p.x - x, p.z - z) >= platz, `${wo}: zu nah an einem Liegeplatz`);
   }
 }
 
-test('Seebahnen liegen im Wasser und halten Abstand, Stufe 1 bis 5', () => {
-  for (const st of [1, 2, 3, 4, 5]) {
+test('Seebahnen liegen im Wasser und halten Abstand, Stufe 1 bis 6', () => {
+  for (const st of [1, 2, 3, 4, 5, 6]) {
     bahnenVon(st).forEach((b, i) => pruefe(st, punkteAuf(b.pts), `Seebahn ${i} (${b.art})`, { tiefe: b.art === 'gross' ? 3 : 1.5 }));
   }
 });
