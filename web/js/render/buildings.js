@@ -398,6 +398,19 @@ function lageInStufe(p, stufe) {
   return best ?? Object.values(p)[0];
 }
 
+// Gebaeude, die erst mit dem Kauf einer Versorgungsstufe (sim.js facilities, office) entstehen.
+// Stufen und Namen aus data/economy.js: wc 1 Toilettenhaeuschen, 3 Sanitaergebaeude; dusche 1;
+// essen 1 Kiosk, 3 Hafenrestaurant; Hafenbuero 1 Hafenmeister, 2 Hafenbuero.
+const KAUF = {
+  toilette: { art: 'wc', stufe: 1 },
+  sanitaer: { art: 'wc', stufe: 3 },
+  dusche: { art: 'dusche', stufe: 1 },
+  kiosk: { art: 'essen', stufe: 1 },
+  restaurant: { art: 'essen', stufe: 3 },
+  hafenmeister: { art: 'office', stufe: 1 },
+  hafenbuero: { art: 'office', stufe: 2 },
+};
+
 // ------------------------------------------------------------------ Modul
 export function init(game) {
   const regionStart = new URLSearchParams(location.search).get('region');
@@ -439,11 +452,22 @@ export function init(game) {
     });
   }
 
+  // Versorgungsgebaeude stehen erst, wenn der Spieler sie gekauft hat (Bauen, ui/bauen.js).
+  // Ansicht mit ?stufe=n (ohne Kaufen) zeigt alles, was zur Stufe gehoert.
+  const ansicht = new URLSearchParams(location.search).has('stufe');
+  function gekauft(it) {
+    const k = KAUF[it.id];
+    const st = game.sim?.state;
+    if (!k || ansicht || !st) return true;
+    const stand = k.art === 'office' ? st.office : st.facilities?.[k.art];
+    return (stand || 0) >= k.stufe;
+  }
+
   let stufe = 1;
   function setStage(n) {
     stufe = Math.max(1, Math.min(6, Math.round(Number(n) || 1)));
     for (const it of items) {
-      const sichtbar = stufe >= it.ab && (it.bis == null || stufe <= it.bis);
+      const sichtbar = stufe >= it.ab && (it.bis == null || stufe <= it.bis) && gekauft(it);
       // Unsichtbares aus der Szene nehmen statt visible = false, damit game.pick es nicht trifft
       if (sichtbar && !it.mesh.parent) group.add(it.mesh);
       if (!sichtbar && it.mesh.parent) group.remove(it.mesh);
@@ -492,8 +516,22 @@ export function init(game) {
     return { x: it.mesh.position.x, y: it.mesh.position.y, z: sued ? _box.max.z + 1 : _box.min.z - 1, seite: sued ? 'sued' : 'nord' };
   }
 
-  const api = { group, items, eingang, setStage, setRegion, stage: stufe, region: regionName, regionen: REGIONEN };
+  // Wo ein Gebaeude in einer Stufe steht (auch wenn es noch nicht gebaut ist), fuer die Bau-Vorschau
+  function lage(id, n = stufe) {
+    const it = items.find((i) => i.id === id);
+    if (!it?.p) return null;
+    const [xp, yp] = lageInStufe(it.p, n);
+    const [x, z] = W(xp, yp);
+    return { x, z, y: it.mole ? hoehe(x, z, 1.4) : hoehe(x, z, 0.3), dreh: THREE.MathUtils.degToRad(it.dreh ?? 0), mesh: it.mesh };
+  }
+  // Welches Gebaeude zu welcher gekauften Versorgung gehoert: { gebaeudeId: { art, stufe } }
+  const fuerKauf = (art, n) => Object.entries(KAUF).filter(([, k]) => k.art === art && k.stufe === n).map(([id]) => id);
+
+  const api = { group, items, eingang, setStage, setRegion, lage, fuerKauf, stage: stufe, region: regionName, regionen: REGIONEN };
   game.buildings = api;
+  // Gekaufte Versorgung (Toilette, Dusche, Kiosk, Hafenbuero) erscheint sofort
+  game.on('build', () => setStage(stufe));
+  game.on('sim:change', (e) => { if (e?.reason === 'load') setStage(stufe); });
   game.on('stufe', (n) => setStage(typeof n === 'object' ? n?.stufe : n));
   game.on('region', (r) => setRegion(typeof r === 'object' ? r?.name ?? r?.region : r));
   // Gelaendehoehe steht erst fest, wenn alle Module geladen sind
