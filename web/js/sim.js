@@ -24,7 +24,7 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     typeById: Object.fromEntries(types.map((t) => [t.id, t])),
     berths: list,
     berthById: Object.fromEntries(list.map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [] },
+    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [], stageUp: [] },
   };
 }
 
@@ -36,6 +36,9 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
  *   night      fn({ state, ctx, events }) nach der Abreise, vor dem neuen Tag
  *   fit        fn({ state, ctx, boat, berth }) -> Grund (Text) oder null; zusätzliche Passregel
  *              für freie Plätze (zum Beispiel Dauerplätze, deren Boot gerade draußen ist)
+ *   stageUp    fn({ state, ctx, from, to, gone, moves, findBerth, events }) nach einem Stufenausbau:
+ *              gone = Plätze, die es in der neuen Stufe nicht mehr gibt, moves = umgezogene feste
+ *              Boote [{ boatId, from, to }], findBerth(boot) sucht einen freien passenden Platz
  * Gibt eine Funktion zum Aushängen zurück.
  */
 export function addHook(ctx, name, fn) {
@@ -1206,9 +1209,68 @@ export function advanceStage(state, ctx) {
   if (!check.ok) return { ok: false, missing: check.missing };
   spend(state, check.goal.cost);
   if (check.goal.project) state.buildings[check.goal.project] = 1;
+  const from = state.stage;
   state.stage++;
   state.stageGuests = 0;
-  return { ok: true, events: [{ type: 'stageUp', stage: state.stage }] };
+  const events = [{ type: 'stageUp', stage: state.stage }];
+  clearVanishedBerths(state, ctx, from, events);
+  return { ok: true, events };
+}
+
+/**
+ * Beim Stufenausbau werden manche Stege umgebaut, ihre alten Plätze gibt es dann nicht mehr
+ * (zum Beispiel B01, B02 und der T-Kopf an Steg B ab Stufe 3). Damit dort kein Boot im Leeren liegt:
+ * - Gäste reisen ab, bevor gebaut wird: abgerechnet, bewertet und gezählt wie bei jeder Abreise,
+ *   offenes Liegegeld wird noch kassiert, sie legen sofort ab.
+ * - Fest liegende Boote (Dauerlieger, Seenotretter, Fischer) ziehen auf einen freien passenden Platz
+ *   um ('relocated'). Findet sich keiner, verlassen sie den Hafen ('unstationed').
+ * Module mit eigenem Zustand je Platz (Dauerplätze) ziehen über den Hook 'stageUp' mit um.
+ */
+function clearVanishedBerths(state, ctx, from, events) {
+  const exists = (b) => (b.stages ? b.stages.includes(state.stage) : b.stage <= state.stage);
+  const gone = ctx.berths.filter((b) => (b.stages ? b.stages.includes(from) : b.stage <= from) && !exists(b)).map((b) => b.id);
+  const goneSet = new Set(gone);
+  const mods = modifiers(state, ctx);
+  // like: der alte Platz. War er fest vergeben (Fischer, Retter), kommt nur ein Platz derselben Art in Frage.
+  const findBerth = (boat, like = null) => {
+    const slack = (b) => b.maxLength * b.maxBeam - boat.length * boat.beam;
+    const probe = { ...boat, stationed: true };
+    const list = availableBerths(state, ctx)
+      .filter((b) => isFree(state, b.id) && fits(probe, b, ctx.rules, state.stage))
+      .filter((b) => (like?.reserved ? b.reserved && b.kind === like.kind : !b.reserved))
+      .sort((a, b) => slack(a) - slack(b) || String(a.id).localeCompare(String(b.id)));
+    return list[0]?.id ?? null;
+  };
+  const moves = [];
+  for (const boat of mooredBoats(state)) {
+    if (!goneSet.has(boat.berthId)) continue;
+    const old = boat.berthId;
+    if (!boat.stationed) {
+      if (boat.pendingFee > 0) events.push(...collect(state, ctx, boat.id).events);
+      endTrip(boat, events);
+      const rating = rateBoat(ctx, boat, mods.ratingBonus);
+      pushRating(state, ctx, rating);
+      state.guests++;
+      state.stageGuests = (state.stageGuests || 0) + 1;
+      delete state.berths[old];
+      delete state.boats[boat.id];
+      events.push({ type: 'departed', boatId: boat.id, berthId: old, typeId: boat.typeId, rating, leaveAt: 0, reason: 'rebuild' });
+      continue;
+    }
+    delete state.berths[old];
+    const to = findBerth(boat, ctx.berthById[old]);
+    if (to) {
+      boat.berthId = to;
+      state.berths[to] = boat.id;
+      moves.push({ boatId: boat.id, from: old, to });
+      events.push({ type: 'relocated', boatId: boat.id, from: old, to });
+    } else {
+      delete state.boats[boat.id];
+      events.push({ type: 'unstationed', boatId: boat.id, berthId: old, reason: 'rebuild' });
+    }
+  }
+  for (const id of gone) if (state.leaving?.[id]) delete state.leaving[id];
+  for (const fn of ctx.hooks.stageUp) fn({ state, ctx, from, to: state.stage, gone, moves, findBerth, events });
 }
 
 // ---------------------------------------------------------------------------
