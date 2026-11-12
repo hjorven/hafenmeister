@@ -68,7 +68,7 @@ export const TEXTE = {
   },
   sonne: {
     titel: 'Der Tag läuft',
-    text: 'Bis zum Abend kommen weitere Boote. Wer länger wartet, fährt selbst ein, aber nur von Hand kannst du Wünsche erfüllen, und die bringen mehr. Soll es schneller gehen, zieh die Sonne oben nach rechts.',
+    text: 'Bis zum Abend kommen weitere Boote. Wer länger wartet, fährt selbst ein, aber nur von Hand kannst du Wünsche erfüllen, und die bringen mehr. Soll es schneller gehen, spul mit der Zeitsteuerung vor, der Kreis zeigt darauf.',
   },
   bauen: {
     titel: 'Hafen ausbauen',
@@ -273,7 +273,9 @@ export async function init(game) {
         }
         return best ? { ...best, w: 64, h: 64 } : null;
       }
-      case 'sonne': return domKreis(document.querySelector('.hm-sonne'), 6);
+      // Vorspulen: neue Zeitsteuerung unten links (Doppelpfeil), sonst die alte Sonne im Tagesbalken
+      case 'sonne': return domKreis(document.querySelector('.hm-tempo-knopf[data-tempo="tempo2"]'), 6)
+        ?? domKreis(document.querySelector('.hm-sonne'), 6);
       case 'bauen': return domKreis(document.getElementById('btn-build'), 6);
       case 'ziele': return domKreis(document.querySelector('.hm-tafel > button'), 6);
       default: return null;

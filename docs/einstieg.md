@@ -9,7 +9,7 @@ Kein Tutorial mit Story, sondern Hinweis-Kreise: Ein leuchtender Kreis zeigt auf
 | 1 | Willkommen | eine Warteboje | mindestens 6 s zu sehen und ein wartendes Boot liegt im Bild |
 | 2 | Ein Boot wartet | das wartende Boot | ein Boot angelegt hat |
 | 3 | Liegegeld kassieren | die Münze am Boot (gleich nach dem Anlegen) | eine Münze eingestrichen ist (Antippen, Strich oder „Kassieren“) |
-| 4 | Der Tag läuft | Sonne im Tagesbalken | Sonne gezogen oder „Weiter“ |
+| 4 | Der Tag läuft | Vorspul-Knopf (Doppelpfeil, sonst Sonne im Tagesbalken) | vorgespult oder „Weiter“ |
 | 5 | Hafen ausbauen | Knopf „Bauen“ | „Bauen“ gedrückt oder „Weiter“ |
 | 6 | Tagesziele | Knopf „Tagesziele“ | „Los geht’s“ |
 
