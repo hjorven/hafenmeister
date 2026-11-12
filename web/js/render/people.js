@@ -881,9 +881,9 @@ export function init(game) {
     // Abends: wer nicht im Restaurant bleibt, geht beim naechsten Halt an Bord
     if (abend) for (const a of agenten) if (a.zustand === 'verweilt' || a.zustand === 'drinnen') a.uhr = Math.min(a.uhr, zufall(1, 8));
     if (netz) anpassen();
-    // Abends geht der Hafenmeister ueber die Stege (docs/echter-hafen.md, A4), falls er nicht
-    // schon am spaeten Nachmittag losgegangen ist. Morgens bricht er ab und geht ins Buero.
-    if (abend) rundgangStarten();
+    // Abends geht der Hafenmeister ueber die Stege (docs/echter-hafen.md, A4), erst mit dem Abend
+    // (Review Ue12). Morgens bricht er ab und geht ins Buero.
+    if (abend) { rundgangHeute = true; rundgangStarten(); }
     else { rundgangAbbrechen(); rundgangHeute = false; }
   });
   game.on('ready', () => {
@@ -898,7 +898,8 @@ export function init(game) {
 
   game.onTick((dt) => {
     if (!netz) return;
-    if (!abend && !rundgangHeute && !rundgang && (game.sim?.tagesAnteil?.() ?? 0) >= P.RUNDGANG_AB) rundgangStarten();
+    // Abend schon da (Spielstand am Abend geladen, Stufenwechsel): Rundgang einmal nachholen
+    if (abend && !rundgangHeute && !rundgang) { rundgangHeute = true; rundgangStarten(); }
     if (dt > 0) {
       // Bei Vorspulen oder langsamen Geraeten in Teilschritten rechnen, damit niemand langsamer
       // laeuft als die Spieluhr (hoechstens 2 s Spielzeit je Bild)
