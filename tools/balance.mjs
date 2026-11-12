@@ -26,6 +26,7 @@ import { createState } from '../web/js/state.js';
 import * as sim from '../web/js/sim.js';
 import { erstelleRegeln, mitZahlen, neuerZustand } from '../web/js/services/rules.js';
 import { createScheduler } from '../web/js/events/scheduler.js';
+import { pruefeZahlen } from './zahlen.mjs';
 
 // Hat harbor.js für eine Stufe aus economy.js noch keine Plätze (Stufe 6 vor dem Export der
 // Pier), rechnet das Werkzeug mit den Plätzen der letzten Hafenstufe weiter und sagt das.
@@ -113,6 +114,8 @@ export function pruefen() {
       if (st.unterhalt) fehler.push(`services.${k}[${i}]: unterhalt ist verboten (keine laufenden Kosten)`);
     });
   }
+  // Ungelesene Felder, Ja/Nein statt Zahl, Stufen billiger als davor (tools/zahlen.mjs)
+  fehler.push(...pruefeZahlen());
   return fehler;
 }
 
