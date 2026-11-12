@@ -3,8 +3,12 @@
 //
 // Adresszusaetze:  ?px=3        feste Pixelgroesse in CSS-Pixeln (Standard: passend zum Geraet)
 //                  ?umriss=0    ohne Umrisse
+//                  ?schiffe=filter  Schiffe wie bisher gefiltert statt gezeichnet
+//                  ?stil=filter     alles wie bisher gefiltert (Vergleich)
 // Tasten (PC):     F8 Pixel an/aus zum Vergleichen
 import { createPixelPass } from './pixel-pass.js';
+import { installiereSchiffSprites } from './schiff-sprites.js';
+import { installiereGezeichnet } from './gezeichnet.js';
 
 function warteAufSpiel() {
   return new Promise((resolve) => {
@@ -18,14 +22,24 @@ const q = new URLSearchParams(location.search);
 const pass = createPixelPass(game.THREE, game.renderer, {
   pixel: q.get('px') || 'auto',
   outline: q.get('umriss') !== '0',
+  gezeichnet: q.get('stil') !== 'filter',
 });
 game.renderer.render = (scene, camera) => pass.render(scene, camera);
 game.pixel = pass;
+// Schiffe gezeichnet statt gefiltert (?schiffe=filter zeigt zum Vergleich den alten Weg)
+pass.schiffe = installiereSchiffSprites(game, pass);
+if (q.get('schiffe') === 'filter' || q.get('stil') === 'filter') pass.schiffe.aus = true;
+// Alles andere live gezeichnet (?stil=filter zeigt zum Vergleich den alten Filter-Weg)
+const gez = installiereGezeichnet(game, pass, { an: pass.state.gezeichnet });
 document.documentElement.classList.add('pixel');
 document.body.classList.add('pixel');
 
 window.addEventListener('keydown', (e) => {
-  if (e.key === 'F8') { pass.state.enabled = !pass.state.enabled; e.preventDefault(); }
+  if (e.key === 'F8') {
+    pass.state.enabled = !pass.state.enabled;
+    gez.uPxAn.value = pass.state.enabled && pass.state.gezeichnet ? 1 : 0;
+    e.preventDefault();
+  }
 });
 
 // ---- Kamerahoehe ----

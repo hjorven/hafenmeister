@@ -9,22 +9,28 @@ Die Pixel-Fassung ist dasselbe Spiel in Pixel-Art. Sie liegt ganz in `web/pixel/
 
 ## Wie es funktioniert
 
-Statt jedes Objekt in jeder Drehung und Höhe von Hand zu zeichnen, zeichnet ein Pixel-Zeichner die vorhandenen 3D-Modelle in jedem Bild neu als Pixel-Art. Damit gibt es automatisch **jede Drehrichtung und jede Kamerahöhe für jedes Objekt**: Schiffe S bis XL (und XXL, sobald es auf main ist), Stege und Boxen aller Stufen und Stegbild-Varianten, Landschaft und Wasser, Gebäude und Services, Menschen, Bojen, Schilder, Wetter, Tag und Nacht. Neue Modelle anderer Threads sind sofort mit dabei.
+Seit 12.11.2026 (Jorvens Wahl "alles gezeichnet") wird nichts mehr gefiltert. Statt ein fertig beleuchtetes 3D-Bild auf eine Palette zu runden, werden die Pixel nach festen Regeln gesetzt, wie man sie von Hand setzen würde. Die 3D-Modelle liefern dafür nur Form, Modellfarbe und Licht. Damit gibt es **jede Drehrichtung und jede Kamerahöhe für jedes Objekt**, und neue Modelle anderer Threads sind sofort dabei.
 
-Schritte je Bild (`web/pixel/js/pixel-pass.js`):
+Gemeinsame Regeln (`web/pixel/js/gezeichnet.js`, `sprite-zeichner.js`):
 
-1. Die Szene wird in niedriger Auflösung gerendert (Kurze Bildschirmseite etwa 200 bis 300 Kunstpixel, ein Kunstpixel sind 2 bis 4 CSS-Pixel).
-2. Die Kamera rastet dabei auf das Pixelraster ein. Der Rest der Verschiebung wird beim Hochskalieren ausgeglichen, darum flimmert beim Verschieben nichts und das Bild gleitet trotzdem weich.
-3. Jede Farbe wird auf die feste Hafen-Palette gebracht (`web/pixel/js/palette.js`, 84 Farben, Nachschlagetabelle in OKLab).
-4. Umrisse: Ein Pixel am Rand eines Objekts (Nachbar deutlich weiter weg) bekommt die dunklere Stufe seiner eigenen Farbe, Knicke zwischen Flächen eine leichte Abdunklung.
-5. Durchsichtige Markierungen ohne Tiefenschreiben (Ankerfeld, Box-Leuchten, Bauplätze, Baumschatten) kommen auf eine eigene Ebene und werden danach pixelgenau, aber in ihrer echten Farbe und Deckkraft darübergelegt. Sonst würden sie auf der Palette verschwinden.
-6. Das kleine Bild wird pixelgenau auf den Bildschirm vergrößert.
+- Jede Modellfarbe bekommt eine eigene Rampe mit vier Tönen: Umriss, Schatten (dunkler, kühler), Grund, Licht (heller, wärmer). Gleiche Farbe ergibt überall dieselbe Rampe.
+- Licht kommt in genau drei Stufen an, ohne Verläufe. Schlagschatten werden zu harten Flächen.
+- Außen ein geschlossener 1-Pixel-Umriss in der dunkelsten Farbe des Teils, innen eine leichte Kante, wo ein Teil vor einem anderen liegt.
+- Einzelpixel werden entfernt, Flächen bleiben ruhig.
+- Leuchtende Teile (Fenster nachts) behalten ihr Leuchten. Nachts färbt das Licht der Tageszeit alles ein.
 
-Weil weniger Pixel gerendert werden, ist die Pixel-Fassung eher schneller als das normale Spiel.
+**Schiffe** (`schiff-sprites.js`): Für jedes Boot entsteht bei Bedarf ein gezeichnetes Sprite für die aktuelle Blickrichtung (32 Richtungen), Kameraneigung (5-Grad-Stufen) und Zoomstufe, mit Masten als sauberen Linien und einem Schatten auf dem Wasser. Das Sprite ersetzt im Bild das 3D-Boot, jedes Sprite-Pixel trägt seine eigene Tiefe, darum verdecken Stege und andere Boote richtig. Höchstens drei neue Sprites je Bild; bis eines fertig ist, steht dort das live gezeichnete 3D-Boot.
 
-## Die Palette
+**Alles andere** (Stege, Gebäude, Services, Menschen, Landschaft): Die beleuchteten Materialien bekommen im Pixel-Spiel einen anderen Shader-Abschluss, der statt weicher Beleuchtung die Rampenfarbe der Lichtstufe ausgibt. Das läuft live, also auch bei jeder Drehung, Höhe und Tageszeit.
 
-Entstanden aus den Farben des 3D-Spiels: k-Means über Bilder von Tag, Abend, Nacht, Morgen, allen Stufen und beiden Revieren, etwas kräftiger gemacht und je Farbe um eine kühlere Schattenstufe ergänzt, dazu Umriss-Dunkel, Lichtspitzen, Fensterlicht und Signalfarben. Wer Farben ändert, sieht das Ergebnis sofort in der Werkstatt.
+Ablauf je Bild (`pixel-pass.js`):
+
+1. Szene in niedriger Auflösung rendern (kurze Bildschirmseite etwa 200 bis 300 Kunstpixel, ein Kunstpixel sind 2 bis 4 CSS-Pixel), Kamera rastet aufs Pixelraster, der Rest wird beim Hochskalieren ausgeglichen (kein Flimmern beim Verschieben).
+2. Umrisse aus Tiefensprüngen, Einzelpixel aufräumen.
+3. Schiff-Sprites und durchsichtige Markierungen (Ankerfeld, Box-Leuchten, Bauplätze) kommen pixelgenau auf eine eigene Ebene darüber.
+4. Pixelgenau auf den Bildschirm vergrößern.
+
+Zum Vergleich gibt es den alten Filter-Weg weiter: `?stil=filter` (feste Palette `palette.js`, 84 Farben).
 
 ## Kamerahöhe
 
@@ -43,6 +49,8 @@ Drehen geht wie im Spiel (8 Rastrichtungen, frei beim Ziehen). Boote drehen sich
 | `?px=3` | feste Pixelgröße in CSS-Pixeln (Standard: passend zum Gerät, 2 bis 4) |
 | `?umriss=0` | ohne Umrisse |
 | `?hoehe=70` | Kamerahöhe beim Start |
+| `?stil=filter` | alles wie früher gefiltert (Vergleich) |
+| `?schiffe=filter` | nur die Schiffe gefiltert |
 | F8 | Pixel-Zeichner an/aus zum Vergleichen |
 
 Alle Zusätze des Spiels gelten weiter, zum Beispiel `pixel/?stufe=6&services=alle&uhrzeit=19.5`.
@@ -53,7 +61,7 @@ Alle Zusätze des Spiels gelten weiter, zum Beispiel `pixel/?stufe=6&services=al
 
 ## Werkstatt und Spritebögen
 
-`pixel/werkstatt.html` zeichnet ein Boot mit demselben Zeichner in 8, 16 oder 32 Richtungen und den drei Höhen. Mit "Wasser" sieht man es wie im Spiel, ohne Wasser entsteht ein Bogen mit durchsichtigem Hintergrund, der sich als PNG speichern lässt (zum Beispiel zum Nachzeichnen von Hand). Adresse: `werkstatt.html?groesse=M&modell=M2-5&richtungen=16&wasser=0`.
+`pixel/werkstatt.html` zeichnet ein Boot (Stil gezeichnet oder Filter) in 8, 16 oder 32 Richtungen und den drei Höhen. Mit "Wasser" sieht man es wie im Spiel, ohne Wasser entsteht ein Bogen mit durchsichtigem Hintergrund, der sich als PNG speichern lässt (zum Beispiel zum Nachzeichnen von Hand). Adresse: `werkstatt.html?groesse=M&modell=M2-5&richtungen=16&wasser=0`.
 
 ## Wie die Pixel-Fassung lädt
 

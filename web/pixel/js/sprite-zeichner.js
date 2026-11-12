@@ -95,6 +95,7 @@ export function createSpriteZeichner(THREE, renderer) {
       const ids = mats.map((m) => {
         const c = m?.color ? '#' + m.color.getHexString(THREE.SRGBColorSpace) : '#888888';
         if (m && (m.opacity ?? 1) < 0.05) return null;   // unsichtbare Hilfsflaechen
+        if (m && m.transparent && m.depthWrite === false) return null;   // Leuchtschein, Markierungen
         if (!nachFarbe.has(c)) { nachFarbe.set(c, nachFarbe.size + 1); }
         return nachFarbe.get(c);
       });
@@ -232,6 +233,19 @@ export function createSpriteZeichner(THREE, renderer) {
     }
 
     const out = new Uint8ClampedArray(N * 4);
+    const tiefeOut = new Float32Array(N).fill(2);   // 2 = leer
+    // Wasserebene je Pixel (fuer Schattenpixel): Strahl der Ortho-Kamera mit y = 0 schneiden
+    kamera.updateMatrixWorld();
+    const R = new THREE.Vector3().setFromMatrixColumn(kamera.matrixWorld, 0);
+    const U = new THREE.Vector3().setFromMatrixColumn(kamera.matrixWorld, 1);
+    const tx = (kamera.right - kamera.left) / w, ty = (kamera.top - kamera.bottom) / h;
+    const wasserTiefe = (x, y) => {
+      const ox = kamera.position.x + R.x * (kamera.left + (x + 0.5) * tx) + U.x * (kamera.top - (y + 0.5) * ty);
+      const oy = kamera.position.y + R.y * (kamera.left + (x + 0.5) * tx) + U.y * (kamera.top - (y + 0.5) * ty);
+      void ox;
+      const t = (0.005 - oy) / blick.y;
+      return (t - kamera.near) / (kamera.far - kamera.near);
+    };
     const setze = (i, c) => { out[i * 4] = c[0]; out[i * 4 + 1] = c[1]; out[i * 4 + 2] = c[2]; out[i * 4 + 3] = 255; };
     const schwelle = 0.0025;   // Tiefensprung fuer Innenkanten (Tiefenpuffer 0..1)
     for (let y = 0; y < h; y++) {
@@ -249,6 +263,7 @@ export function createSpriteZeichner(THREE, renderer) {
             if (teil[j] && teil[j] !== teil[i] && tiefe[j] < tiefe[i] - schwelle && !linie[j]) kante = true;
           }
           setze(i, kante ? r[Math.max(0, s - 1)] : r[s]);
+          tiefeOut[i] = tiefe[i];
           continue;
         }
         // Aussenumriss: leeres Pixel neben einem Teil
@@ -259,14 +274,17 @@ export function createSpriteZeichner(THREE, renderer) {
           const j = yy * w + xx;
           if (teil[j] && !linie[j] && tiefe[j] < bt) { bt = tiefe[j]; best = teil[j]; }
         }
-        if (best) { setze(i, rampe(...farben[best])[0]); continue; }
+        if (best) { setze(i, rampe(...farben[best])[0]); tiefeOut[i] = bt; continue; }
         // Schatten: eine dunkle, halb durchsichtige Wasserfarbe, ohne Verlauf
         if (schattenMaske[((h - 1 - y) * w + x) * 4 + 3] > 0) {
           out[i * 4] = 18; out[i * 4 + 1] = 52; out[i * 4 + 2] = 66; out[i * 4 + 3] = 110;
+          tiefeOut[i] = wasserTiefe(x, y);
         }
       }
     }
-    return new ImageData(out, w, h);
+    const bild = new ImageData(out, w, h);
+    bild.tiefe = tiefeOut;    // Tiefe 0..1 der Zeichenkamera je Pixel, 2 = leer
+    return bild;
   }
 
   return { zeichne };
