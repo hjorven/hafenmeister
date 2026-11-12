@@ -1,23 +1,22 @@
 /* Hafenmeister: Handy-Oberfläche
  *
  * Aussehen und Anordnung für alle Geräte stehen in oberflaeche.css. Hier nur, was das Handy
- * anders braucht: Hochkant passen Zahlen und Knöpfe nicht in eine Zeile, deshalb stehen die
- * runden Knöpfe als Spalte rechts unter der Statusleiste. Quer ist wenig Höhe, alles wird flacher.
+ * anders braucht: Hochkant ist die untere Reihe zu schmal für Zeit, Kassieren und Bauen,
+ * deshalb steht Kassieren dort über der Reihe. Quer ist wenig Höhe, alles wird flacher.
  *
  * Gilt für Handys im Hochformat (bis 599 px breit) und im Querformat (bis 499 px hoch).
  */
 
 @media (max-width: 599px), (max-height: 499px) {
   :root {
-    --hm-knopf: 46px;
+    --hm-knopf: 48px;
+    --hm-tempo: 46px;
     --hm-chip: 40px;
     --hm-bauen: 64px;
     --hm-schrift: 15px;
     --hm-rand: 10px;
-    --hm-spur: 56px;
-    --hm-luecke: 8px;
+    --hm-luecke: 6px;
   }
-
   html, body.hm { overflow: hidden; overscroll-behavior: none; }
   body.hm {
     position: fixed;
@@ -34,37 +33,24 @@
   /* Bauen als großer Daumenknopf: Symbol über dem Wort */
   .hm-neu #btn-build {
     flex-direction: column;
-    gap: 2px;
-    width: var(--hm-bauen);
+    gap: 0;
+    width: calc(var(--hm-bauen) + 8px);
     padding: 0;
-    border-radius: 20px;
-    font-size: 12px;
+    font-size: 14px;
   }
-  .hm-neu #btn-build::before { width: 24px; height: 24px; }
-
-  .hm-neu .hm-status .stat { padding: 0 8px 0 4px; }
-  .hm-neu .hm-status .stat + .stat { padding-left: 8px; }
-  .hm-neu #money::before, .hm-neu #rep::before { width: 20px; height: 20px; }
+  .hm-neu .hm-status .stat { padding: 0 6px; font-size: calc(var(--hm-schrift) + 3px); }
 }
 
-/* Hochkant: Statusleiste über die ganze Breite, Knöpfe als Spalte rechts darunter */
+/* Hochkant: Kassieren über der unteren Reihe */
 @media (max-width: 599px) and (orientation: portrait) {
-  /* Statusleiste nur so breit wie nötig: die Sonne bleibt weg von der Knopfspalte rechts */
-  .hm-neu .hm-status { flex: 0 1 auto; }
-  .hm-neu .hm-werkzeuge {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    flex-direction: column;
-  }
-  .hm-neu #hm-menue { top: calc(var(--hm-oben) + var(--hm-knopf) + 10px); right: calc(var(--hm-rechts) + var(--hm-knopf) + 8px); }
-  .hm-neu #hm-audio-popover { top: calc(var(--hm-oben) + var(--hm-knopf) + 10px); right: calc(var(--hm-rechts) + var(--hm-knopf) + 8px); }
-  /* Seitenleiste endet vor der Knopfspalte */
-  .hm-neu #hm-seite { width: calc(100vw - 2 * var(--hm-rand) - var(--hm-knopf) - 10px - var(--hm-safe-left) - var(--hm-safe-right)); }
-  .hm-neu #event-banner { top: calc(var(--hm-oben) + var(--hm-knopf) + 10px); width: calc(100% - 2 * var(--hm-rand) - var(--hm-knopf) - 10px); left: var(--hm-links); transform: none; --hm-ev-x: 0; }
+  .hm-neu #hud-bottom { grid-template-columns: 1fr auto; }
+  .hm-neu #btn-build { grid-column: 2; grid-row: 2; }
+  .hm-neu #hm-zeit { grid-column: 1; grid-row: 2; }
+  .hm-neu #btn-collect { grid-column: 1 / -1; grid-row: 1; }
+  .hm-neu .hm-himmel { min-width: 40px; }
 }
 @media (max-width: 359px) and (orientation: portrait) {
-  :root { --hm-spur: 40px; --hm-schrift: 14px; }
+  :root { --hm-tempo: 40px; --hm-schrift: 14px; }
   .hm-neu #money::before, .hm-neu #rep::before { display: none; }
 }
 
@@ -72,12 +58,13 @@
 @media (max-height: 499px) and (orientation: landscape) {
   :root {
     --hm-knopf: 42px;
+    --hm-tempo: 40px;
     --hm-chip: 36px;
-    --hm-bauen: 58px;
-    --hm-spur: 80px;
+    --hm-bauen: 56px;
     --hm-rand: 8px;
     --hm-karte-breite: min(360px, 52vw);
   }
+  .hm-neu .hm-zeit-kopf { min-height: 20px; }
   .hm-neu #hm-seite { width: min(280px, 40vw); }
   .hm-neu #card {
     left: auto;
@@ -86,18 +73,20 @@
     bottom: 0;
     width: var(--hm-karte-breite);
     max-height: none;
-    padding: calc(var(--hm-safe-top) + 14px) calc(var(--hm-safe-right) + 16px) calc(var(--hm-safe-bottom) + 12px) 16px;
-    border-radius: 22px 0 0 22px;
+    padding: calc(var(--hm-safe-top) + 12px) calc(var(--hm-safe-right) + 14px) calc(var(--hm-safe-bottom) + 10px) 14px;
+    border-bottom-width: calc(var(--hm-px) * 4);
+    border-right-width: 0;
     transform: translateX(105%);
   }
   .hm-neu #card[hidden] { transform: translateX(105%); }
   .hm-neu #card:not([hidden]) { transform: none; }
-  .hm-neu #card::before { content: none; }
-  .hm-neu.card-open #hud-bottom { transform: translateX(140%); }
-  /* Neben dem Seitenblatt bleibt links Platz: Seitenleiste und Einstieg dürfen sichtbar bleiben */
+  .hm-neu.card-open #hud-bottom { transform: none; opacity: 1; pointer-events: none; }
+  .hm-neu.card-open #hud-bottom > :not(#hm-zeit) { visibility: hidden; }
+  .hm-neu.card-open #hud-bottom > #hm-zeit { pointer-events: auto; }
   .hm-neu.card-open #hm-seite { opacity: 1; }
   .hm-neu.card-open #hm-seite * { pointer-events: auto !important; }
-  .hm-neu.card-open .hm-werkzeuge { visibility: hidden; }
+  /* Quer ist zu niedrig für Schilder und Einstiegsblase übereinander: die Blase hat Vorrang */
+  .hm-neu:has(.hm-tipp:not([hidden])) #hm-seite { visibility: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {

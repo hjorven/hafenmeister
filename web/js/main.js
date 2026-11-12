@@ -156,7 +156,8 @@ function boot() {
   document.getElementById('btn-overview').addEventListener('click', () => game.camera.reset());
   const pauseBtn = document.getElementById('btn-pause');
   pauseBtn.addEventListener('click', () => game.setPaused(!game.paused));
-  game.on('pause', (p) => { pauseBtn.textContent = p ? 'Weiter' : 'Pause'; });
+  // Beschriftung nur für Bildschirmleser und Maus-Hinweis: das Symbol zeichnet ui/oberflaeche.js
+  game.on('pause', (p) => { pauseBtn.setAttribute('aria-label', p ? 'Weiter' : 'Pause'); pauseBtn.title = p ? 'Weiter (Leertaste)' : 'Pause (Leertaste)'; });
 
   game.on('tap', ({ world }) => {
     if (world) console.debug('Tipp bei', world.x.toFixed(1), world.z.toFixed(1));

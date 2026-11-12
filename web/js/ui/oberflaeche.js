@@ -1,41 +1,84 @@
-// Oberfläche: ordnet alle Bedienelemente einheitlich für PC, Tablet und Handy.
-// Das Aussehen steht in web/css/oberflaeche.css, die Geräte-Dateien (ui-pc/-tablet/-phone.css)
-// passen nur noch Größen an. Konzept: docs/ui/oberflaeche.md.
+// Oberfläche: von Grund auf neu, ein Pixel-Stil für PC, Tablet und Handy.
+// Aussehen: web/css/oberflaeche.css. Konzept und Begründung: docs/ui/oberflaeche.md.
 //
-// Bereiche (gleich auf allen Geräten):
-//   oben links   .hm-status       Geld, Ruf, Tag mit Sonne (Ziehen spult vor)
-//   oben rechts  .hm-werkzeuge    Übersicht, Pause, Menü (#btn-menu)
-//   Menü         #hm-menue        Foto, Ton, Spielstand, Maus und Tastatur (PC)
-//   links        #hm-seite        Wetter, Tagesziele, Ausbauziel (#hm-ziel), jeweils aufklappbar
-//   unten rechts #hud-bottom      Kassieren, Bauen
-//   #card                         rechts als Seitenkarte (breit) oder unten als Blatt (schmal)
+// Anordnung nach Daumenzonen (Recherche in docs/ui/oberflaeche.md):
+//   oben links    .hm-status    Kasse und Ruf (nur ansehen)
+//   oben rechts   .hm-werkzeuge Übersicht, Menü (selten gebraucht)
+//   links         #hm-seite     Wetter, Tagesziele, Ziel der nächsten Stufe (aufklappbar)
+//   unten links   #hm-zeit      Tag, Tagesbalken mit Sonne, Tempo: Pause, 1x, 3x, 8x (linker Daumen)
+//   unten Mitte   #btn-collect  Kassieren (abends)
+//   unten rechts  #btn-build    Bauen (rechter Daumen, Hauptaktion)
 //
-// Andere Module hängen ihre Knöpfe weiter dort ein, wo sie es immer getan haben (#hud-top, #game).
-// Dieses Modul räumt sie danach an ihren Platz; IDs und Klassen bleiben unverändert.
+// Die Knöpfe anderer Module (Foto, Ton, Spielstand, Tastenhilfe, Wetter, Tagesziele) werden in
+// diese Bereiche eingeräumt, ihre IDs bleiben. Die alte Sonne aus ui/gesten.js gibt es nicht mehr;
+// das Tempo setzt dieses Modul (game.speed, Ereignis 'ui:vorspulen', wie bisher).
 
-// Symbole: 24er Raster, 2 px Strich, runde Enden. Einfarbig (Maske) außer Münze und Stern.
-const S = (inner, extra = '') =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"${extra}>${inner}</svg>`;
-const ICON = {
-  pause: S('<rect x="6.5" y="5" width="3.6" height="14" rx="1.2" fill="black" stroke="none"/><rect x="13.9" y="5" width="3.6" height="14" rx="1.2" fill="black" stroke="none"/>'),
-  weiter: S('<path d="M8.5 5.8v12.4a1 1 0 0 0 1.53.85l9.6-6.2a1 1 0 0 0 0-1.7l-9.6-6.2A1 1 0 0 0 8.5 5.8z" fill="black" stroke="none"/>'),
-  uebersicht: S('<path d="M4 9V6.5A2.5 2.5 0 0 1 6.5 4H9M15 4h2.5A2.5 2.5 0 0 1 20 6.5V9M20 15v2.5a2.5 2.5 0 0 1-2.5 2.5H15M9 20H6.5A2.5 2.5 0 0 1 4 17.5V15"/><circle cx="12" cy="12" r="2.2" fill="black" stroke="none"/>'),
-  menue: S('<path d="M5 7h14M5 12h14M5 17h14"/>'),
-  foto: S('<path d="M4 9a2 2 0 0 1 2-2h1.8l1.4-2h5.6l1.4 2H18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.3"/>'),
-  ton: S('<path d="M4.5 9.5v5h3.2l4.8 4v-13l-4.8 4z" fill="black"/><path d="M16 9.2a4 4 0 0 1 0 5.6M18.6 6.6a7.6 7.6 0 0 1 0 10.8"/>'),
-  stumm: S('<path d="M4.5 9.5v5h3.2l4.8 4v-13l-4.8 4z" fill="black"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>'),
-  spielstand: S('<path d="M5 4h11.2L20 7.8V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a1 1 0 0 1 1-1z"/><path d="M8 4v4.5h7V4M8 20v-5.5h8V20"/>'),
-  tasten: S('<rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>'),
-  bauen: S('<path d="M13.2 3.6l7.2 7.2-2.6 2.6-7.2-7.2z" fill="black"/><path d="M11.9 9.3L4.2 17a2 2 0 0 0 2.8 2.8l7.7-7.7"/>'),
-  ziele: S('<path d="M9 6h11M9 12h11M9 18h11"/><path d="M3.5 6l1.2 1.2L7 4.8M3.5 12l1.2 1.2L7 10.8M3.5 18l1.2 1.2L7 16.8"/>'),
-  flagge: S('<path d="M5 21V4"/><path d="M5 4.5c4-2 7 2 13 0v9c-6 2-9-2-13 0z" fill="black"/>'),
-  zu: S('<path d="M6 6l12 12M18 6L6 18"/>'),
-  muenze: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="#f2c14e"/><circle cx="12" cy="12" r="9.5" fill="none" stroke="#c9952a" stroke-width="1.6"/><circle cx="12" cy="12" r="6.2" fill="none" stroke="#e0ab3a" stroke-width="1.2"/><path d="M14.6 9.2a3.4 3.4 0 1 0 0 5.6M8 11h5M8 13h5" fill="none" stroke="#8a5f12" stroke-width="1.5" stroke-linecap="round"/></svg>',
-  stern: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3-4.6-4.4 6.3-.9z" fill="#f2c14e" stroke="#c9952a" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+// ------------------------------------------------------------------ Pixel-Grafik
+// Jede Grafik ist ein Raster aus Zeichen. '#' ist die Vordergrundfarbe (als Maske, CSS färbt),
+// andere Buchstaben sind feste Farben aus FARBE.
+const FARBE = {
+  o: '#7a5212', g: '#f2c14e', h: '#fde49a', d: '#d39b2c',     // Münze
+  s: '#e0962a', y: '#ffd95a', r: '#f0a03a',                    // Stern, Sonne
+  m: '#eef2f8', n: '#aeb9cc',                                   // Mond
+};
+
+const PIXEL = {
+  pause: ['............', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '............'],
+  tempo1: ['............', '...#........', '...##.......', '...###......', '...####.....', '...#####....', '...#####....', '...####.....', '...###......', '...##.......', '...#........', '............'],
+  tempo2: ['............', '.#.....#....', '.##....##...', '.###...###..', '.####..####.', '.#####.#####', '.#####.#####', '.####..####.', '.###...###..', '.##....##...', '.#.....#....', '............'],
+  tempo3: ['............', '............', '#...#...#...', '##..##..##..', '###.###.###.', '############', '############', '###.###.###.', '##..##..##..', '#...#...#...', '............', '............'],
+  menue: ['............', '............', '.##########.', '.##########.', '............', '.##########.', '.##########.', '............', '.##########.', '.##########.', '............', '............'],
+  uebersicht: ['###......###', '#..........#', '#..........#', '............', '............', '.....##.....', '.....##.....', '............', '............', '#..........#', '#..........#', '###......###'],
+  foto: ['............', '....####....', '.##########.', '.#........#.', '.#...##...#.', '.#..#..#..#.', '.#..#..#..#.', '.#...##...#.', '.#........#.', '.##########.', '............', '............'],
+  ton: ['............', '.....#......', '....##...#..', '.####..#..#.', '.####...#.#.', '.####...#.#.', '.####...#.#.', '.####..#..#.', '....##...#..', '.....#......', '............', '............'],
+  stumm: ['............', '.....#......', '....##......', '.####..#...#', '.####...#.#.', '.####....#..', '.####...#.#.', '.####..#...#', '....##......', '.....#......', '............', '............'],
+  spielstand: ['............', '.#########..', '.#.#####.##.', '.#.#####..#.', '.#........#.', '.#........#.', '.#.######.#.', '.#.#....#.#.', '.#.#....#.#.', '.##########.', '............', '............'],
+  tasten: ['............', '............', '############', '#.#.#.#.#.##', '#..........#', '##.#.#.#.#.#', '#..........#', '#..######..#', '#..........#', '############', '............', '............'],
+  bauen: ['............', '.#######....', '.########...', '.#######....', '....##......', '....##......', '....##......', '....##......', '....##......', '....##......', '....##......', '............'],
+  ziele: ['............', '..#.........', '.#..#######.', '#...........', '............', '..#.........', '.#..#######.', '#...........', '............', '..#.........', '.#..#######.', '#...........'],
+  flagge: ['............', '.#####......', '.#########..', '.#########..', '.#########..', '.#..######..', '.#..........', '.#..........', '.#..........', '.#..........', '.#..........', '............'],
+  zu: ['............', '.##......##.', '.###....###.', '..###..###..', '...######...', '....####....', '....####....', '...######...', '..###..###..', '.###....###.', '.##......##.', '............'],
+  muenze: ['...oooooo...', '..ohhhhhhoo.', '.ohhggggggdo', '.ohggoooggdo', 'ohggoggggggo', 'ohgoooooggdo', 'ohggoggggggo', 'ohgoooooggdo', '.ohggoooggdo', '.oggggggggdo', '..oddddddoo.', '...oooooo...'],
+  stern: ['.....oo.....', '....oyyo....', '....oyyo....', 'oooooyyooooo', 'oyyyyyyyyyyo', '.osyyyyyyso.', '..osyyyyso..', '..osyyyyso..', '.osyysssyso.', '.osso..osso.', 'oso......oso', 'oo........oo'],
+  sonne: ['.....yy.....', '..y..yy..y..', '...y....y...', '....rrrr....', '.y.ryyyyr.y.', 'yy.ryyyyr.yy', 'yy.ryyyyr.yy', '.y.ryyyyr.y.', '....rrrr....', '...y....y...', '..y..yy..y..', '.....yy.....'],
+  mond: ['............', '....nnnn....', '...nmmmmn...', '..nmmmmnn...', '..nmmmn.....', '..nmmmn.....', '..nmmmn.....', '..nmmmmn....', '..nmmmmmnn..', '...nmmmmmn..', '....nnnnn...', '............'],
+};
+
+function pixelSvg(raster) {
+  const h = raster.length;
+  const w = raster[0].length;
+  let r = '';
+  raster.forEach((zeile, y) => {
+    [...zeile].forEach((c, x) => {
+      if (c === '.' || c === ' ') return;
+      r += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${c === '#' ? 'black' : FARBE[c] ?? 'black'}"/>`;
+    });
+  });
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges">${r}</svg>`;
+}
+
+// Rahmen als 9-Teile-Bild: Umriss, Licht oben, Schatten unten, Pixel-Ecken, harter Schlagschatten.
+// 8 breit, 9 hoch; in CSS border-image-slice 3 3 4 3.
+function rahmenSvg(fuell, licht, schatten, umriss = '#24364a') {
+  const R = ['.kkkkkk.', 'kllllllk', 'kffffffk', 'kffffffk', 'kffffffk', 'kffffffk', 'kssssssk', '.kkkkkk.', '..xxxx..'];
+  const F = { k: umriss, l: licht, f: fuell, s: schatten, x: 'rgba(20,32,48,0.3)' };
+  let r = '';
+  R.forEach((z, y) => [...z].forEach((c, x) => {
+    if (c !== '.') r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${F[c]}"/>`;
+  }));
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="8" height="9" viewBox="0 0 8 9" shape-rendering="crispEdges">${r}</svg>`;
+}
+const RAHMEN = {
+  papier: rahmenSvg('#fffaf0', '#ffffff', '#e6dcc6'),
+  mulde: rahmenSvg('#e9dfca', '#ddd0b6', '#f3ebdb'),
+  koralle: rahmenSvg('#ee6454', '#f79486', '#c4483a'),
+  gold: rahmenSvg('#f2c14e', '#fbdc88', '#cf9a2c'),
+  meer: rahmenSvg('#23897d', '#3fae9f', '#186a61'),
+  tinte: rahmenSvg('#2e4560', '#47627f', '#1c2c3e'),
+  hell: rahmenSvg('#fdecea', '#fff6f4', '#f0cfca'),
 };
 
 const url = (svg) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
-
 const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const ganz = (n) => Math.round(n).toLocaleString('de-DE');
 const euro = (n) => `${ganz(n)} €`;
@@ -51,34 +94,119 @@ function el(tag, attrs = {}, ...kids) {
   return e;
 }
 
+// Tempo: Pause, normal, schnell, sehr schnell (vorher: Sonne ziehen bis 8-fach)
+const TEMPO = [
+  { id: 'pause', label: 'Pause', speed: 0 },
+  { id: 'tempo1', label: 'Normale Geschwindigkeit', speed: 1 },
+  { id: 'tempo2', label: 'Dreifach vorspulen', speed: 3 },
+  { id: 'tempo3', label: 'Achtfach vorspulen', speed: 8 },
+];
+
 export function init(game) {
   const $ = (id) => document.getElementById(id);
   const top = $('hud-top');
+  const bottom = $('hud-bottom');
   const root = $('game') || document.body;
-  if (!top) return;
+  if (!top || !bottom) return;
 
-  // Symbole als CSS-Variablen, damit oberflaeche.css sie per Maske einfärben kann
-  const vars = Object.entries(ICON).map(([k, v]) => `--i-${k}: ${url(v)};`).join('\n  ');
-  document.head.append(el('style', { id: 'hm-oberflaeche-symbole' }, `:root {\n  ${vars}\n}`));
+  // Grafiken als CSS-Variablen
+  const vars = [
+    ...Object.entries(PIXEL).map(([k, v]) => `--px-${k}: ${url(pixelSvg(v))};`),
+    ...Object.entries(RAHMEN).map(([k, v]) => `--rahmen-${k}: ${url(v)};`),
+  ].join('\n  ');
+  document.head.append(el('style', { id: 'hm-oberflaeche-grafik' }, `:root {\n  ${vars}\n}`));
   document.body.classList.add('hm-neu');
 
+  // Symbol vor den Text eines Knopfs setzen (Text bleibt für Bildschirmleser und PC-Beschriftung)
+  const symbol = (knopf, name) => {
+    if (!knopf || knopf.querySelector(':scope > .hm-sym')) return;
+    knopf.prepend(el('i', { class: 'hm-sym', 'aria-hidden': 'true', style: `--sym: var(--px-${name})` }));
+  };
+
   // ---------------------------------------------------------------- Gerüst
-  const status = el('div', { class: 'hm-status', role: 'group', 'aria-label': 'Hafenkasse und Tag' });
+  const status = el('div', { class: 'hm-status hm-px', role: 'group', 'aria-label': 'Kasse und Ruf' });
   const werkzeuge = el('div', { class: 'hm-werkzeuge' });
-  const menueBtn = el('button', {
-    type: 'button', class: 'hud-btn hm-rund', id: 'btn-menu', 'aria-label': 'Menü', title: 'Menü',
-    'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'hm-menue',
-  }, 'Menü');
-  const menue = el('div', { id: 'hm-menue', class: 'hm-menue', role: 'menu', hidden: true });
-  const seite = el('div', { id: 'hm-seite', class: 'hm-seite' });
   top.prepend(status);
   top.append(werkzeuge);
+  const menueBtn = el('button', {
+    type: 'button', class: 'hm-px hm-rund', id: 'btn-menu', 'aria-label': 'Menü', title: 'Menü',
+    'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'hm-menue',
+  });
+  symbol(menueBtn, 'menue');
+  werkzeuge.append(menueBtn);
+  const menue = el('div', { id: 'hm-menue', class: 'hm-px hm-tafel-px', role: 'menu', hidden: true });
+  const seite = el('div', { id: 'hm-seite', class: 'hm-seite' });
   root.append(seite, menue);
 
-  // ---------------------------------------------------------------- Ausbauziel
-  // Zeigt, was bis zur nächsten Ausbaustufe fehlt; in der letzten Stufe das Abschlussziel der Region.
-  const zielKnopf = el('button', { type: 'button', class: 'hm-chip hm-ziel-knopf', 'aria-expanded': 'false' });
-  const zielPanel = el('div', { class: 'hm-klapp hm-ziel-panel', hidden: true });
+  // ---------------------------------------------------------------- Zeit: Tag, Balken, Tempo
+  const zeit = el('div', { id: 'hm-zeit', class: 'hm-px' });
+  const day = $('day');
+  const gestirn = el('i', { class: 'hm-gestirn' });
+  const abendteil = el('i', { class: 'hm-abendteil' });
+  const himmel = el('div', { class: 'hm-himmel', 'aria-hidden': 'true' }, abendteil, gestirn);
+  const tempoLeiste = el('div', { class: 'hm-tempo', role: 'group', 'aria-label': 'Zeit' });
+  const tempoKnopf = {};
+  for (const t of TEMPO) {
+    const alt = t.id === 'pause' ? $('btn-pause') : null;
+    const b = alt ?? el('button', { type: 'button' });
+    b.className = 'hm-tempo-knopf';
+    b.dataset.tempo = t.id;
+    b.setAttribute('aria-label', t.label);
+    b.title = t.label;
+    b.hidden = false;
+    b.textContent = '';
+    symbol(b, t.id);
+    // Pause: main.js schaltet bei Klick auf #btn-pause schon um; die anderen setzen das Tempo
+    if (t.id !== 'pause') b.addEventListener('click', () => waehleTempo(t.speed));
+    else if (!alt) b.addEventListener('click', () => game.setPaused?.(!game.paused));
+    tempoKnopf[t.id] = b;
+    tempoLeiste.append(b);
+  }
+  zeit.append(el('div', { class: 'hm-zeit-kopf' }, day ?? el('span'), himmel), tempoLeiste);
+  bottom.prepend(zeit);
+
+  function waehleTempo(speed) {
+    if (game.paused) game.setPaused?.(false);
+    const vorher = game.speed || 1;
+    game.speed = speed;
+    document.body.classList.toggle('vorspulen', speed > 1);
+    if (speed > 1 && vorher <= 1) game.audio?.sfx?.('vorspulen-start');
+    if (speed <= 1 && vorher > 1) game.audio?.sfx?.('vorspulen-ende');
+    game.emit('ui:vorspulen', { speed });
+    zeigeTempo();
+  }
+  function zeigeTempo() {
+    const s = game.speed || 1;
+    for (const t of TEMPO) {
+      const an = t.id === 'pause' ? !!game.paused : !game.paused && (s === t.speed || (t.speed === 3 && s > 1 && s < 8));
+      tempoKnopf[t.id].setAttribute('aria-pressed', String(an));
+    }
+  }
+  game.on('ui:vorspulen', zeigeTempo);
+
+  // Tagesbalken: Sonne wandert, abends färbt sich der Himmel und der Mond kommt
+  let letzterAnteil = -1;
+  let warPause = null;
+  game.onTick?.(() => {
+    if (warPause !== !!game.paused) { warPause = !!game.paused; zeigeTempo(); }
+    const sim = game.sim;
+    if (!sim?.ctx || !sim.state) return;
+    const r = sim.ctx.rules;
+    const ganzerTag = (r.dayLength || 1) + (r.eveningLength || 0);
+    const a = Math.min(1, Math.max(0, sim.tagesAnteil?.() ?? sim.state.clock / ganzerTag));
+    if (Math.abs(a - letzterAnteil) < 0.002) return;
+    letzterAnteil = a;
+    const abendAb = (r.dayLength || 1) / ganzerTag;
+    himmel.style.setProperty('--anteil', a.toFixed(4));
+    abendteil.style.left = `${(abendAb * 100).toFixed(2)}%`;
+    const abend = a >= abendAb;
+    gestirn.classList.toggle('mond', abend);
+    himmel.classList.toggle('abend', abend);
+  });
+
+  // ---------------------------------------------------------------- Ziel der nächsten Stufe
+  const zielKnopf = el('button', { type: 'button', class: 'hm-px hm-chip hm-ziel-knopf', 'aria-expanded': 'false' });
+  const zielPanel = el('div', { class: 'hm-px hm-tafel-px hm-ziel-panel', hidden: true });
   const ziel = el('div', { id: 'hm-ziel', class: 'hm-ziel', hidden: true }, zielKnopf, zielPanel);
 
   function zielDaten() {
@@ -88,12 +216,12 @@ export function init(game) {
     if (rg?.active) {
       const g = rg.goal;
       const zeilen = [
-        { name: 'Besuche großer Schiffe', ist: Math.min(rg.visits, g.bigVisits), soll: g.bigVisits, text: `${Math.min(rg.visits, g.bigVisits)} von ${g.bigVisits}` },
+        { name: 'Große Schiffe zu Besuch', ist: Math.min(rg.visits, g.bigVisits), soll: g.bigVisits, text: `${Math.min(rg.visits, g.bigVisits)} von ${g.bigVisits}` },
         { name: 'Ruf', ist: rg.reputation, soll: g.reputation, text: `${num1(rg.reputation)} von ${num1(g.reputation)}` },
       ];
       if (g.allBerths) zeilen.push({ name: 'Alle Plätze gebaut', ist: rg.openBerths ? 0 : 1, soll: 1, text: rg.openBerths ? `noch ${rg.openBerths}` : 'fertig' });
       const fertig = rg.done || rg.ok;
-      return { titel: fertig ? 'Seehafen fertig' : 'Hafenziel', kopf: fertig ? 'Region geschafft: Dein Seehafen ist fertig ausgebaut.' : 'Abschlussziel der Region', zeilen, fertig, aktion: null };
+      return { titel: fertig ? 'Geschafft' : 'Hafenziel', kopf: fertig ? 'Dein Seehafen ist fertig ausgebaut.' : 'Letztes Ziel der Region', zeilen, fertig, aktion: null };
     }
     const adv = sim.canAdvanceStage?.();
     if (!adv?.goal) return null;
@@ -105,8 +233,8 @@ export function init(game) {
       { name: 'Kasse', ist: Math.min(geld, g.cost), soll: g.cost, text: `${euro(Math.min(geld, g.cost))} von ${euro(g.cost)}` },
     ];
     return {
-      titel: `Ziel Stufe ${sim.state.stage + 1}`,
-      kopf: `Nächste Ausbaustufe: ${g.name ?? 'Hafen erweitern'}`,
+      titel: `Stufe ${sim.state.stage + 1}`,
+      kopf: `Nächster Ausbau: ${g.name ?? 'Hafen erweitern'}`,
       zeilen, fertig: adv.ok,
       aktion: game.bauen?.oeffnen ? { text: adv.ok ? 'Jetzt ausbauen' : 'Im Baumenü ansehen', tun: () => game.bauen.oeffnen('hafen') } : null,
     };
@@ -123,6 +251,7 @@ export function init(game) {
     zielSchluessel = schluessel;
     ziel.classList.toggle('fertig', d.fertig);
     zielKnopf.replaceChildren(
+      el('i', { class: 'hm-sym', 'aria-hidden': 'true', style: '--sym: var(--px-flagge)' }),
       el('span', { class: 'hm-chip-text' }, d.titel),
       el('span', { class: 'hm-chip-zahl' }, d.fertig ? 'bereit' : `${erfuellt}/${d.zeilen.length}`),
     );
@@ -137,13 +266,13 @@ export function init(game) {
           el('span', { class: 'hm-balken-wert' }, z.text),
           el('span', { class: 'hm-balken' }, el('i', { style: `width:${Math.round(anteil * 100)}%` })));
       }),
-      d.aktion ? el('button', { type: 'button', class: 'hud-btn hm-primaer', onclick: () => { klappeZu(); d.aktion.tun(); } }, d.aktion.text) : null,
+      d.aktion ? el('button', { type: 'button', class: 'hm-px hm-knopf hm-primaer', onclick: () => { klappeZu(); d.aktion.tun(); } }, d.aktion.text) : null,
     );
   }
   zielKnopf.addEventListener('click', (e) => {
     e.stopPropagation();
     const auf = zielPanel.hidden;
-    klappeZu();
+    klappeAndereZu('ziel');
     zielPanel.hidden = !auf;
     zielKnopf.setAttribute('aria-expanded', String(auf));
     zielSchluessel = '';
@@ -152,105 +281,102 @@ export function init(game) {
 
   // ---------------------------------------------------------------- Menü
   const MENUE = [
-    ['btn-foto', 'Fotomodus'],
-    ['btn-sound', null],     // Text setzt das Ton-Modul (Ton / Stumm)
-    ['btn-save', 'Spielstand'],
-    ['btn-help', 'Maus und Tastatur'],
+    ['btn-foto', 'Fotomodus', 'foto'],
+    ['btn-sound', null, 'ton'],      // Text setzt das Ton-Modul (Ton / Stumm)
+    ['btn-save', 'Spielstand', 'spielstand'],
+    ['btn-help', 'Maus und Tastatur', 'tasten'],
   ];
   function menueAuf(auf) {
     menue.hidden = !auf;
     menueBtn.setAttribute('aria-expanded', String(auf));
-    document.body.classList.toggle('hm-menue-offen', auf);
   }
-  menueBtn.addEventListener('click', (e) => { e.stopPropagation(); const auf = menue.hidden; klappeZu(); menueAuf(auf); });
-  menue.addEventListener('click', (e) => {
-    // Ein Eintrag öffnet sein eigenes Fenster, das Menü klappt danach zu
-    if (e.target.closest('button')) setTimeout(() => menueAuf(false), 0);
-  });
+  menueBtn.addEventListener('click', (e) => { e.stopPropagation(); const auf = menue.hidden; klappeAndereZu('menue'); menueAuf(auf); });
+  menue.addEventListener('click', (e) => { if (e.target.closest('button')) setTimeout(() => menueAuf(false), 0); });
 
-  // Alle Aufklapper (Menü, Wetter, Tagesziele, Ausbauziel): immer nur einer offen
-  function klappeZu() {
-    menueAuf(false);
-    zielPanel.hidden = true;
-    zielKnopf.setAttribute('aria-expanded', 'false');
-    const tafel = document.querySelector('.hm-tafel');
-    const liste = tafel?.querySelector('ul');
-    if (liste && !liste.hidden) { liste.hidden = true; tafel.querySelector('button')?.setAttribute('aria-expanded', 'false'); }
-    const wetter = $('weather-chip');
-    if (wetter?.getAttribute('aria-expanded') === 'true') wetter.click();
+  // Immer nur ein Aufklapper offen: Menü, Wetter, Tagesziele, Ziel
+  function klappeAndereZu(ausser) {
+    if (ausser !== 'menue') menueAuf(false);
+    if (ausser !== 'ziel') { zielPanel.hidden = true; zielKnopf.setAttribute('aria-expanded', 'false'); }
+    const liste = document.querySelector('.hm-tafel ul');
+    if (ausser !== 'tafel' && liste && !liste.hidden) { liste.hidden = true; liste.parentNode.querySelector('button')?.setAttribute('aria-expanded', 'false'); }
+    const w = $('weather-chip');
+    if (ausser !== 'wetter' && w?.getAttribute('aria-expanded') === 'true') w.click();
   }
+  const klappeZu = () => klappeAndereZu(null);
   document.addEventListener('pointerdown', (e) => {
     if (e.target.closest?.('#hm-menue, #btn-menu, #hm-seite, #hm-audio-popover, .hm-save-backdrop')) return;
-    if (!menue.hidden || !zielPanel.hidden) { menueAuf(false); zielPanel.hidden = true; zielKnopf.setAttribute('aria-expanded', 'false'); }
-  }, true);
-  // Öffnet der Spieler einen Aufklapper der anderen Module, gehen die übrigen zu
-  seite.addEventListener('click', (e) => {
-    const b = e.target.closest('#weather-chip, .hm-tafel > button');
-    if (!b) return;
     menueAuf(false);
     zielPanel.hidden = true;
     zielKnopf.setAttribute('aria-expanded', 'false');
-    const tafel = document.querySelector('.hm-tafel');
-    if (b.id === 'weather-chip') {
-      const liste = tafel?.querySelector('ul');
-      if (liste && !liste.hidden) { liste.hidden = true; tafel.querySelector('button')?.setAttribute('aria-expanded', 'false'); }
-    } else {
-      const w = $('weather-chip');
-      if (w?.getAttribute('aria-expanded') === 'true' && b !== w) setTimeout(() => { if (b.getAttribute('aria-expanded') === 'true') w.click(); }, 0);
-    }
+  }, true);
+  seite.addEventListener('click', (e) => {
+    const b = e.target.closest('#weather-chip, .hm-tafel > button');
+    if (b) setTimeout(() => klappeAndereZu(b.id === 'weather-chip' ? 'wetter' : 'tafel'), 0);
   }, true);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') klappeZu(); });
 
   // ---------------------------------------------------------------- Einräumen
-  let ordnet = false;
   function ordnen() {
-    if (ordnet) return;
-    ordnet = true;
-    try {
-      for (const id of ['money', 'rep', 'day']) {
-        const x = $(id);
-        if (x && x.parentNode !== status) status.append(x);
-      }
-      for (const id of ['btn-overview', 'btn-pause']) {
-        const x = $(id);
-        if (x && x.parentNode !== werkzeuge) werkzeuge.append(x);
-        x?.classList.add('hm-rund');
-      }
-      if (menueBtn.parentNode !== werkzeuge || werkzeuge.lastElementChild !== menueBtn) werkzeuge.append(menueBtn);
-      for (const [id, text] of MENUE) {
-        const x = $(id);
-        if (!x) continue;
-        if (x.parentNode !== menue) {
-          menue.append(x);
-          x.classList.add('hm-zeile');
-          x.setAttribute('role', 'menuitem');
-          if (text) x.textContent = text;
-        }
-      }
-      // Reihenfolge im Menü fest, egal wann die Module ihre Knöpfe anlegen
-      const soll = MENUE.map(([id]) => $(id)).filter((x) => x && x.parentNode === menue);
-      if (soll.some((x, i) => menue.children[i] !== x)) soll.forEach((x) => menue.append(x));
-      const wetter = $('weather-chip');
-      const wetterPanel = $('weather-panel');
-      const tafel = document.querySelector('.hm-tafel');
-      const reihe = [wetter, wetterPanel, tafel, ziel].filter(Boolean);
-      if (reihe.some((x, i) => seite.children[i] !== x)) reihe.forEach((x) => seite.append(x));
-      wetter?.classList.add('hm-chip');
-      wetterPanel?.classList.add('hm-klapp');
-      tafel?.querySelector('button')?.classList.add('hm-chip', 'hm-tafel-knopf');
-      tafel?.querySelector('ul')?.classList.add('hm-klapp');
-      // Leere Leisten-Teile bleiben unsichtbar
-      const leer = !menue.querySelector('button:not([hidden])');
-      if (menueBtn.hidden !== leer) menueBtn.hidden = leer;
-    } finally {
-      ordnet = false;
+    for (const id of ['money', 'rep']) {
+      const x = $(id);
+      if (x && x.parentNode !== status) status.append(x);
     }
+    const ov = $('btn-overview');
+    if (ov && ov.parentNode !== werkzeuge) werkzeuge.prepend(ov);
+    if (ov && !ov.classList.contains('hm-rund')) { ov.className = 'hm-px hm-rund'; symbol(ov, 'uebersicht'); }
+    if (werkzeuge.lastElementChild !== menueBtn) werkzeuge.append(menueBtn);
+    for (const [id, text, sym] of MENUE) {
+      const x = $(id);
+      if (!x) continue;
+      if (x.parentNode !== menue) {
+        menue.append(x);
+        x.classList.remove('hud-btn', 'hm-audio-btn');
+        x.classList.add('hm-zeile');
+        x.setAttribute('role', 'menuitem');
+        if (text) x.textContent = text;
+      }
+      // Das Ton-Modul schreibt seinen Text neu (Ton / Stumm) und löscht dabei das Symbol
+      const name = id === 'btn-sound' && x.classList.contains('hm-audio-off') ? 'stumm' : sym;
+      const da = x.querySelector(':scope > .hm-sym');
+      if (da && da.dataset.sym !== name) da.remove();
+      if (!x.querySelector(':scope > .hm-sym')) { symbol(x, name); x.querySelector(':scope > .hm-sym').dataset.sym = name; }
+      if (id === 'btn-sound' && !x.dataset.hmBeobachtet) { x.dataset.hmBeobachtet = '1'; beobachter.observe(x, { childList: true, attributes: true, attributeFilter: ['class'] }); }
+    }
+    const soll = MENUE.map(([id]) => $(id)).filter((x) => x && x.parentNode === menue);
+    if (soll.some((x, i) => menue.children[i] !== x)) soll.forEach((x) => menue.append(x));
+    const leer = !menue.querySelector('button:not([hidden])');
+    if (menueBtn.hidden !== leer) menueBtn.hidden = leer;
+
+    const wetter = $('weather-chip');
+    const wetterPanel = $('weather-panel');
+    const tafel = document.querySelector('.hm-tafel');
+    const reihe = [wetter, wetterPanel, tafel, ziel].filter(Boolean);
+    if (reihe.some((x, i) => seite.children[i] !== x)) reihe.forEach((x) => seite.append(x));
+    if (wetter && !wetter.classList.contains('hm-chip')) wetter.classList.add('hm-px', 'hm-chip');
+    if (wetterPanel && !wetterPanel.classList.contains('hm-tafel-px')) wetterPanel.classList.add('hm-px', 'hm-tafel-px');
+    const tk = tafel?.querySelector(':scope > button');
+    if (tk && !tk.classList.contains('hm-chip')) tk.classList.add('hm-px', 'hm-chip', 'hm-tafel-knopf');
+    const tl = tafel?.querySelector('ul');
+    if (tl && !tl.classList.contains('hm-tafel-px')) tl.classList.add('hm-px', 'hm-tafel-px');
+
+    // Kassieren und Bauen: Pixel-Knöpfe
+    const kassieren = $('btn-collect');
+    if (kassieren && !kassieren.classList.contains('hm-px')) { kassieren.classList.add('hm-px'); kassieren.classList.remove('hud-btn'); }
+    const bauen = $('btn-build');
+    if (bauen && !bauen.classList.contains('hm-px')) { bauen.classList.add('hm-px'); bauen.classList.remove('hud-btn'); }
+    if (bauen && !bauen.querySelector(':scope > .hm-sym')) symbol(bauen, 'bauen');
+    if (bottom.firstElementChild !== zeit) bottom.prepend(zeit);
   }
-  ordnen();
-  const beobachter = new MutationObserver(() => { if (!ordnet) queueMicrotask(ordnen); });
+  let wartet = false;
+  const beobachter = new MutationObserver(() => {
+    if (wartet) return;
+    wartet = true;
+    queueMicrotask(() => { wartet = false; ordnen(); });
+  });
   beobachter.observe(top, { childList: true });
+  beobachter.observe(bottom, { childList: true });
   beobachter.observe(root, { childList: true });
-  beobachter.observe(menue, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
+  ordnen();
 
   // ---------------------------------------------------------------- Laufend
   let geplant = false;
@@ -263,9 +389,10 @@ export function init(game) {
   game.on('sim:stageUp', () => { zielSchluessel = ''; plane(); });
   game.on('sim:regionDone', () => { zielSchluessel = ''; plane(); });
   game.on('spielstand-geladen', plane);
-  game.on('ready', () => { ordnen(); plane(); setTimeout(ordnen, 600); });
-  game.on('tap', () => { klappeZu(); });
+  game.on('ready', () => { ordnen(); plane(); zeigeTempo(); setTimeout(ordnen, 600); });
+  game.on('tap', () => klappeZu());
   plane();
+  zeigeTempo();
 
-  game.oberflaeche = { ordnen, klappeZu, menue: (auf) => menueAuf(auf !== false) };
+  game.oberflaeche = { ordnen, klappeZu, tempo: waehleTempo, menue: (auf) => menueAuf(auf !== false) };
 }

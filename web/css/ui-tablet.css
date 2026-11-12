@@ -11,45 +11,37 @@
             ist ODER die Breite unter 1024 px liegt                -> diese Datei
     PC      (min-width: 1024px) and (pointer: fine)               -> ui-pc.css
 
-  body.hand-links: Bauen und Seitenkarte links statt rechts (Linkshänder, Tablet quer).
+  body.hand-links: Zeit rechts, Bauen links (Linkshänder).
 */
 
 @media (min-width: 600px) and (min-height: 500px) and (pointer: coarse),
        (min-width: 600px) and (max-width: 1023px) and (min-height: 500px) {
-
   :root {
-    --hm-knopf: 52px;
-    --hm-chip: 44px;
-    --hm-bauen: 64px;
+    --hm-knopf: 56px;
+    --hm-tempo: 52px;
+    --hm-chip: 46px;
+    --hm-bauen: 68px;
     --hm-schrift: 16px;
-    --hm-rand: 14px;
-    --hm-spur: 150px;
-    --hm-karte-breite: 390px;
-    --hm-symbol: 24px;
+    --hm-rand: 16px;
+    --hm-karte-breite: 410px;
   }
-
   html, body.hm { overscroll-behavior: none; }
   .hm {
     -webkit-user-select: none;
     user-select: none;
-    -webkit-touch-callout: none;        /* kein Kontextmenü bei langem Druck (iPadOS) */
+    -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
   }
-  .hm-neu .hm-zeile { min-height: 52px; }
-  .hm-neu #card .hud-btn { min-height: 52px; }
+  .hm-neu .hm-zeile { min-height: 54px; }
+  .hm-neu #card .hud-btn { min-height: 54px; }
+  .hm-neu .hm-himmel { min-width: 90px; }
 
-  /* Hochkant ist weniger Platz für die Sonnenspur */
-  @media (orientation: portrait) { :root { --hm-spur: 110px; } }
-  @media (orientation: portrait) and (max-width: 700px) { :root { --hm-spur: 70px; } }
+  /* Linkshänder: Bauen links, Zeit rechts */
+  .hm-neu.hand-links #hm-zeit { grid-column: 3; justify-self: end; }
+  .hm-neu.hand-links #btn-build { grid-column: 1; justify-self: start; }
 
-  /* Linkshänder: Bauen und Karte auf die linke Seite */
-  @media (orientation: landscape) {
-    .hm-neu.hand-links #hud-bottom { right: auto; left: var(--hm-links); flex-direction: row-reverse; }
-    .hm-neu.hand-links #card { right: auto; left: var(--hm-links); }
-  }
-
-  /* Große Tablets (iPad Pro 12,9 Zoll und größer): mehr Luft */
+  /* Große Tablets (iPad Pro 12,9 Zoll und größer) */
   @media (min-width: 1024px) and (min-height: 1024px) {
-    :root { --hm-knopf: 58px; --hm-bauen: 70px; --hm-schrift: 18px; --hm-karte-breite: 440px; }
+    :root { --hm-px: 3px; --hm-knopf: 64px; --hm-tempo: 58px; --hm-bauen: 78px; --hm-schrift: 18px; --hm-karte-breite: 460px; --hm-symbol: 30px; }
   }
 }

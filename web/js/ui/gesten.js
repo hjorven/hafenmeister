@@ -5,8 +5,8 @@
 //      Kurz antippen zeigt den Knopf "Einfahren": das Boot sucht sich selbst den besten Platz.
 //   2. Kassierstrich: abends mit einem Finger in einem Zug über die Münzen streichen.
 //      Jede Münze klingt einen Ton höher, am Ende ein kleiner Akkord.
-//   3. Sonne ziehen: die Sonne im Tagesbalken nach rechts ziehen spult vor (bis 8-fach),
-//      loslassen läuft normal weiter.
+//   3. (entfallen) Vorspulen steuern jetzt die Tempo-Knöpfe in ui/oberflaeche.js,
+//      (Pause, 1x, 3x, 8x).
 //
 // Dieses Modul entscheidet nichts über Spielregeln. Es sendet Absichten als Ereignisse
 // (docs/grundgeruest.md) und fragt die Spielregeln über game.sim, falls vorhanden:
@@ -17,7 +17,7 @@
 //   ui:tow-end    { boot, platz }         losgelassen, platz = null heißt abgebrochen
 //   ui:auto-einfahren { boot }            Knopf "Einfahren"
 //   ui:collect    { coin, combo }         eine Münze eingestrichen
-//   ui:vorspulen  { speed }               Sonne gezogen oder losgelassen
+//   ui:vorspulen  { speed }               (sendet jetzt ui/oberflaeche.js)
 //   tap           wie core/input.js, wenn ein Boot nur angetippt wurde
 // Klänge: game.audio.sfx(name, optionen), sonst ein kleiner eingebauter WebAudio-Ersatz.
 
@@ -27,7 +27,6 @@ const TAP_SLOP = 10;          // px, ab hier wird aus einem Tipp ein Ziehen
 const SNAP_PX = 56;           // so nah muss der Finger am Platz sein, damit die Leine einrastet
 const EDGE_PX = 64;           // Randzone, in der die Karte beim Ziehen mitläuft
 const EDGE_SPEED = 520;       // px pro Sekunde am äußersten Rand
-const MAX_SPEED = 8;          // Vorspulen höchstens 8-fach
 
 export function init(game) {
   const { THREE } = game;
@@ -322,72 +321,8 @@ export function init(game) {
     }
   }
 
-  // ---------------------------------------------------------------- 3. Sonne ziehen
-  const sonne = document.createElement('span');
-  sonne.className = 'hm-sonne sun';   // .sun: Handy-Thread stylt die Tippfläche in ui-phone.css
-  sonne.setAttribute('role', 'slider');
-  sonne.setAttribute('aria-label', 'Sonne nach rechts ziehen zum Vorspulen');
-  sonne.setAttribute('aria-valuemin', '1');
-  sonne.setAttribute('aria-valuemax', String(MAX_SPEED));
-  sonne.setAttribute('aria-valuenow', '1');
-  const speedLabel = document.createElement('span');
-  speedLabel.className = 'hm-speed';
-  sonne.appendChild(speedLabel);
-
-  const mountSonne = () => {
-    const day = document.getElementById('day');
-    if (day && sonne.parentElement !== day) day.appendChild(sonne);
-  };
-  mountSonne();
-  // Das HUD darf #day neu schreiben, die Sonne hängt sich dann wieder an
-  const dayHost = document.getElementById('hud-top');
-  if (dayHost) new MutationObserver(mountSonne).observe(dayHost, { childList: true, subtree: true });
-
-  let sonnenZug = null;
-  sonne.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    sound.unlock();
-    sonne.setPointerCapture(e.pointerId);
-    sonnenZug = { pid: e.pointerId, x0: e.clientX, speed: 1 };
-    sonne.classList.add('aktiv');
-  });
-  sonne.addEventListener('pointermove', (e) => {
-    if (!sonnenZug || e.pointerId !== sonnenZug.pid) return;
-    const dx = Math.max(0, e.clientX - sonnenZug.x0);
-    const speed = Math.round(Math.min(MAX_SPEED, 1 + dx / 22));
-    sonne.style.setProperty('--zug', `${Math.min(dx, 160)}px`);
-    if (speed !== sonnenZug.speed) {
-      if (sonnenZug.speed === 1) sound.play('vorspulen-start');
-      sonnenZug.speed = speed;
-      setSpeed(speed);
-      haptic(4);
-    }
-  });
-  const sonneLos = (e) => {
-    if (!sonnenZug || e.pointerId !== sonnenZug.pid) return;
-    if (sonnenZug.speed > 1) sound.play('vorspulen-ende');
-    sonnenZug = null;
-    sonne.classList.remove('aktiv');
-    sonne.style.setProperty('--zug', '0px');
-    setSpeed(1);
-  };
-  sonne.addEventListener('pointerup', sonneLos);
-  sonne.addEventListener('pointercancel', sonneLos);
-
-  function setSpeed(speed) {
-    game.speed = speed;
-    speedLabel.textContent = speed > 1 ? `${speed}x` : '';
-    sonne.setAttribute('aria-valuenow', String(speed));
-    document.body.classList.toggle('vorspulen', speed > 1);
-    game.emit('ui:vorspulen', { speed });
-  }
-
-  // Tagesfortschritt: von den Spielregeln, sonst bleibt die Sonne am Anfang des Balkens
-  const tagesAnteil = () => {
-    const a = game.sim?.tagesAnteil?.() ?? game.state?.tagesAnteil;
-    return typeof a === 'number' ? Math.min(1, Math.max(0, a)) : null;
-  };
+  // 3. Vorspulen: früher die Sonne im Tagesbalken, jetzt die Tempo-Knöpfe in ui/oberflaeche.js
+  const setSpeed = (speed) => game.oberflaeche?.tempo?.(speed);
 
   // ---------------------------------------------------------------- Jedes Bild
   let lastT = performance.now();
@@ -429,9 +364,6 @@ export function init(game) {
       if (k >= 1) { f.o.visible = false; f.o.scale.setScalar(f.s0); f.o.position.y = f.y0; fliegend.splice(i, 1); }
     }
 
-    // Sonne auf dem Tagesbalken
-    const a = tagesAnteil();
-    if (a !== null) sonne.style.setProperty('--anteil', a.toFixed(4));
 
     if (chip) { if (now > chip.bis) hideChip(); else placeChip(); }
     draw(dt);
@@ -619,26 +551,7 @@ function injectStyles() {
   animation: hm-pop .18s ease-out;
 }
 @keyframes hm-pop { from { opacity: 0; scale: .8; } to { opacity: 1; scale: 1; } }
-#day { position: relative; }
-.hm-sonne {
-  --anteil: 0; --zug: 0px;
-  position: absolute; top: 50%; left: calc(var(--anteil) * (100% - 28px) + 14px);
-  width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%;
-  background: radial-gradient(circle at 40% 40%, #ffe48a, #f4b942);
-  box-shadow: 0 0 0 4px rgba(244,185,66,.28), 0 2px 6px rgba(0,0,0,.2);
-  touch-action: none; cursor: ew-resize; z-index: 2;
-  transform: translateX(var(--zug)); transition: transform .25s cubic-bezier(.3,1.6,.5,1);
-}
-.hm-sonne::before { content: ""; position: absolute; inset: -14px; }  /* größere Tippfläche */
-.hm-sonne.aktiv { transition: none; box-shadow: 0 0 0 8px rgba(244,185,66,.35), 0 0 22px rgba(244,185,66,.8); }
-[data-phase="abend"] .hm-sonne { background: radial-gradient(circle at 40% 40%, #ffc58a, #e9733f); }
-.hm-speed:empty { display: none; }
-.hm-speed {
-  position: absolute; left: 50%; top: 100%; transform: translate(-50%, 6px);
-  padding: 1px 6px; border-radius: 8px; background: rgba(255,252,246,.95);
-  font: 800 14px system-ui, sans-serif; color: #ee6454; white-space: nowrap; pointer-events: none;
-}
-@media (prefers-reduced-motion: reduce) { .hm-einfahren { animation: none; } .hm-sonne { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .hm-einfahren { animation: none; } }
 `;
   document.head.appendChild(s);
 }
