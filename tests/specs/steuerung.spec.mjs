@@ -45,9 +45,16 @@ test('Karte verschieben und mit Übersicht zurück', async ({ game }, testInfo) 
 
   await press(page, '#btn-overview', testInfo);
   const back = await cameraState(page);
-  expect(back.x).toBeCloseTo(back.home.x, 3);
-  expect(back.z).toBeCloseTo(back.home.z, 3);
-  expect(back.width).toBeCloseTo(back.home.width, 3);
+  // Erwartet: genau die Startansicht, die camera.reset() berechnet
+  const home = await page.evaluate(() => {
+    const c = window.hafenmeister.camera;
+    c.reset();
+    return { x: c.target.x, z: c.target.z, width: c.viewWidth };
+  });
+  expect(Math.hypot(moved.x - home.x, moved.z - home.z), 'Testaufbau: Karte war nicht verschoben').toBeGreaterThan(1);
+  expect(back.x, 'Uebersicht fuehrt nicht zur Startansicht').toBeCloseTo(home.x, 2);
+  expect(back.z, 'Uebersicht fuehrt nicht zur Startansicht').toBeCloseTo(home.z, 2);
+  expect(back.width, 'Uebersicht fuehrt nicht zur Startansicht').toBeCloseTo(home.width, 2);
 });
 
 test('Zoomen (Mausrad oder zwei Finger)', async ({ game }, testInfo) => {

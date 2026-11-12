@@ -98,7 +98,7 @@ export { expect };
 export function cameraState(page) {
   return page.evaluate(() => {
     const c = window.hafenmeister.camera;
-    return { x: c.target.x, z: c.target.z, width: c.viewWidth, home: { ...c.home } };
+    return { x: c.target.x, z: c.target.z, width: c.viewWidth };
   });
 }
 

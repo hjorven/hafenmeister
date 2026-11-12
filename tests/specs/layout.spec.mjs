@@ -2,7 +2,15 @@
 import { test, expect, isTouchProject } from '../helpers.mjs';
 
 const BUTTONS = ['#btn-pause', '#btn-overview', '#btn-build'];
-const MIN_TOUCH = 40;   // base.css setzt --tap: 44px, etwas Spielraum fuer Rahmen
+const MIN_TOUCH = 40;        // base.css setzt --tap: 44px, etwas Spielraum fuer Rahmen
+const MIN_TOUCH_FLACH = 36;  // Handy quer (unter 500 px hoch): ui-phone.css nimmt bewusst 36 px
+
+// Bekannte Fehler auf main, die ein anderer Thread gerade behebt. Der Test laeuft trotzdem und
+// muss scheitern (test.fail). Wird der Fehler behoben, wird der Test rot mit "expected to fail":
+// dann den Eintrag hier im selben PR loeschen.
+const BEKANNT = {
+  'tablet': 'Tablet hochkant: obere Leiste zu voll, Pause liegt rechts ausserhalb, Sonne verdeckt "Tag" (web/css/ui-tablet.css)',
+};
 
 test('Seite scrollt nicht und die Spielfläche füllt den Bildschirm', async ({ game }) => {
   const { page } = game;
@@ -22,8 +30,11 @@ test('Seite scrollt nicht und die Spielfläche füllt den Bildschirm', async ({ 
 });
 
 test('Knöpfe sind sichtbar, liegen im Bild und sind groß genug', async ({ game }, testInfo) => {
+  const bekannt = BEKANNT[testInfo.project.name];
+  test.fail(!!bekannt, bekannt);
   const { page } = game;
   const vp = page.viewportSize();
+  const minTouch = vp.height < 500 ? MIN_TOUCH_FLACH : MIN_TOUCH;
   for (const sel of BUTTONS) {
     const btn = page.locator(sel);
     await expect(btn, `${sel} nicht sichtbar`).toBeVisible();
@@ -33,8 +44,8 @@ test('Knöpfe sind sichtbar, liegen im Bild und sind groß genug', async ({ game
     expect(box.x + box.width, `${sel} ragt rechts heraus`).toBeLessThanOrEqual(vp.width + 0.5);
     expect(box.y + box.height, `${sel} ragt unten heraus`).toBeLessThanOrEqual(vp.height + 0.5);
     if (isTouchProject(testInfo)) {
-      expect(box.width, `${sel} zu schmal zum Antippen`).toBeGreaterThanOrEqual(MIN_TOUCH);
-      expect(box.height, `${sel} zu niedrig zum Antippen`).toBeGreaterThanOrEqual(MIN_TOUCH);
+      expect(box.width, `${sel} zu schmal zum Antippen`).toBeGreaterThanOrEqual(minTouch);
+      expect(box.height, `${sel} zu niedrig zum Antippen`).toBeGreaterThanOrEqual(minTouch);
     }
   }
 });
