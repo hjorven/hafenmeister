@@ -599,6 +599,15 @@ export function init(game) {
     tipp.style.left = links ? `${Math.max(8, Math.round(b.left - r.left))}px` : '';
     tipp.style.right = links ? '' : `${Math.max(8, Math.round(r.right - b.right))}px`;
     tipp.style.bottom = `${Math.round(r.bottom - b.top + 10)}px`;
+    // Nicht auf andere Felder der unteren Leiste legen (Zeit am Handy): sonst darueber
+    const t = tipp.getBoundingClientRect();
+    let oben = b.top;
+    for (const e of document.querySelectorAll('#hud-bottom .hm-px, #hud-bottom button')) {
+      if (e === buildBtn || buildBtn.contains(e) || !e.offsetParent) continue;
+      const o = e.getBoundingClientRect();
+      if (o.width && o.left < t.right && o.right > t.left) oben = Math.min(oben, o.top);
+    }
+    if (oben < b.top) tipp.style.bottom = `${Math.round(r.bottom - oben + 10)}px`;
   }
 
   // ------------------------------------------------------------------ Karte
@@ -966,6 +975,8 @@ function stil() {
     #btn-build.bau-punkt::after { content: ''; position: absolute; top: -4px; right: -4px; width: 12px; height: 12px; border-radius: 50%;
       background: #f2c14e; border: 2px solid #fff; }
     body.building.paused #stage { filter: none !important; }
+    /* Baumodus: Seitenleiste (Wetter, Tagesziele, Stufenziel) weg, die Karte zeigt den Rat selbst */
+    body.building #hm-seite { display: none !important; }
     body.foto .bau-tipp, body.foto .bau-schilder { display: none; }
     @media (max-width: 599px), (max-height: 499px) {
       .bau-liste { max-height: 34dvh; gap: 4px; }
