@@ -144,7 +144,7 @@ Ein Bauwerk „versorgt n Boote“ heißt: pro Abend bekommen n Boote diesen Wun
 |---|---|---|
 | Bootsverleih | 1 | kleines Einkommen pro Tag, Leihboote fahren über den See |
 | Slip | 2 | Trailerboote kommen über Land, zusätzliche S-Gäste ohne Liegeplatz |
-| Hafenmeisterbüro | 2 bis 3 | Alles kassieren, später Automatik |
+| Hafenmeisterbüro | 2 bis 3 | Stufe 1: Knopf "Alle kassieren" (vorher streicht man Münzen einzeln), später Automatik für Standardfälle |
 | Mastenkran | 3 | Segelboote aus dem Binnenland kommen, mehr M-Gäste |
 | Segelclub | 3 | Regatten möglich, mehr Jollen |
 | Seenotretter-Station | 4 | Sturm richtet weniger Schaden an, Rettungsboot rückt sichtbar aus |
@@ -329,13 +329,18 @@ Nach Meilenstein 1 weiß man, ob Zuweisen und Kassieren Spaß macht. Wenn nicht,
 | Vorspulen | Pause, 1x, 3x, 8x von Anfang an, Taste F für 3x (Jorven, 12.11.2026) |
 | Schauplatz | Zwei Regionen: Ostsee (Start) und Nordsee (danach). Gebäude als Mix aus deutschen, dänischen und schwedischen Häfen |
 | Dritte Zahl für Tagesgäste | nein. Tagesgäste bringen mehr Einnahmen und sind als Menschen im Hafen zu sehen |
-| Tretboote und Kanus als Gäste | nur Kulisse am Strand |
+| Tretboote und Kanus als Gäste | in Stufe 1 zahlende Gäste (Paddel- und Tretboot S2), sonst Kulisse (12.11.2026) |
 | Klappbrücke über den Durchstich | nicht in 1.0 |
 | Dauerlieger | ja, schon in 1.0 (Abschnitt 9a) |
 | Stammgäste, Wetter an der Flagge, Fotomodus, Hafen schauen, Tagesziele | ja, alle fünf (Abschnitt 9a, Einzelheiten in [neue-features.md](neue-features.md)) |
 | Story und Figuren | keine, nur ein kurzer Einstieg |
 
-**Noch offen:** die Fragen am Ende von [roadmap.md](roadmap.md) (unter anderem Vorspulen und Tretboote). Bis zur Antwort gilt diese Tabelle.
+| Selbst-Einfahren | nach 8 s in die nächste oder eine der freien Boxen am Steg, nicht mehr in die knappste; Boote berühren sich dabei nie (12.11.2026) |
+| Dauerlieger | Spieler legt fest, welche Boxen Dauerplätze sind, höchstens ein Viertel der Gastboxen, Saisonpacht im Voraus (12.11.2026, Einzelheiten Roadmap P01) |
+| Feature-Vorschläge aus dem Überblick | alle 42 werden gebaut ([roadmap.md](roadmap.md)) |
+| Online | als letzter Schritt, erst alles lokal |
+
+**Noch offen:** nichts. Die Arbeitsliste steht in [roadmap.md](roadmap.md).
 
 ## 15. Bewusst weggelassen
 
