@@ -265,7 +265,7 @@ TITLES = {1: ('Stufe 1: Bootssteg am See', 'Ein kurzer Holzsteg am Binnensee. Ru
 # Stufe 6: zwei Piers Nord-Sued westlich der Westmole, damit die grossen Schiffe gerade ein- und auslaufen
 # koennen, ohne zu drehen: Kreuzfahrtpier bei x -150 (Schiff an der Ostseite), Marinepier bei x -310
 # (Schiffe an beiden Seiten). Beide reichen ueber den Kartenrand der Zeichnung hinaus.
-PIER_X, PIER_Y = -150, 430
+PIER_X, PIER_Y = -150, 500
 MARINE_X, MARINE_Y = -310, 390
 
 def render(stage, seed=5):
