@@ -21,6 +21,7 @@
 // Lagen stammen aus skripte/konzeptbilder/hafen_von_oben.py (Planeinheiten, y nach Norden).
 // Welt: x = xPlan * 0.62, z = -yPlan * 0.62, y oben, Wasser bei 0.
 import * as THREE from 'three';
+import { buendeln } from './buendeln.js';
 
 const U = 0.62;
 const W = (xp, yp) => [xp * U, -yp * U];
@@ -451,6 +452,10 @@ export function init(game) {
       if (o.userData.flagge) flaggen.push(o.userData.flagge);
     });
   }
+  // Unbewegte Teile je Gebaeude und Material zu einem Mesh zusammenfassen (weniger Zeichenaufrufe).
+  // Wehende Flaggen bleiben einzeln; Farben haengen am Material und wechseln weiter mit Region und Nacht.
+  const wehend = new Set(flaggen);
+  for (const it of items) buendeln(it.mesh, null, undefined, { ausnehmen: (o) => wehend.has(o) });
 
   // Versorgungsgebaeude stehen erst, wenn der Spieler sie gekauft hat (Bauen, ui/bauen.js).
   // Ansicht mit ?stufe=n (ohne Kaufen) zeigt alles, was zur Stufe gehoert.
