@@ -38,7 +38,7 @@
     padding: 0;
     font-size: 14px;
   }
-  .hm-neu .hm-status .stat { padding: 0 6px; font-size: calc(var(--hm-schrift) + 3px); }
+  .hm-neu .hm-status .stat { padding: 0 6px; font-size: calc(var(--hm-s) + 3px); }
 }
 
 /* Hochkant: Kassieren über der unteren Reihe */
@@ -47,6 +47,9 @@
   .hm-neu #btn-build { grid-column: 2; grid-row: 2; }
   .hm-neu #hm-zeit { grid-column: 1; grid-row: 2; }
   .hm-neu #btn-collect { grid-column: 1 / -1; grid-row: 1; }
+  .hm-neu.hand-links #hud-bottom { grid-template-columns: auto 1fr; }
+  .hm-neu.hand-links #btn-build { grid-column: 1; grid-row: 2; justify-self: start; }
+  .hm-neu.hand-links #hm-zeit { grid-column: 2; grid-row: 2; justify-self: end; }
   .hm-neu .hm-himmel { min-width: 40px; }
 }
 @media (max-width: 359px) and (orientation: portrait) {

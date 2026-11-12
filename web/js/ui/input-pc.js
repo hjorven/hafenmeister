@@ -38,7 +38,7 @@ const PAN_KEYS = {
   KeyW: [0, 1], ArrowUp: [0, 1], KeyS: [0, -1], ArrowDown: [0, -1],
   KeyA: [1, 0], ArrowLeft: [1, 0], KeyD: [-1, 0], ArrowRight: [-1, 0],
 };
-const KEY_BADGES = { 'btn-pause': 'Leertaste', 'btn-build': 'B', 'btn-overview': '0' };
+const KEY_BADGES = { 'btn-pause': 'Leertaste', 'btn-build': 'B', 'btn-overview': '0', 'btn-collect': 'K' };
 
 export function init(game) {
   const canvas = game.canvas;
@@ -77,7 +77,10 @@ export function init(game) {
     ['Wartendes Boot ziehen', 'An der Schleppleine in einen leuchtenden Platz ziehen', () => true],
     ['Doppelklick auf wartendes Boot', 'Boot fährt selbst in den besten Platz', () => true],
     ['Maustaste halten und über Münzen streichen', 'Alles in einem Zug kassieren', () => true],
-    ['Tempo-Knöpfe unten links, <kbd>F</kbd>', 'Vorspulen: 1x, 3x, 8x; F schaltet 3x an und aus', () => true],
+    ['Tempo-Knöpfe unten links', 'Pause, 1x, 3x, 8x (8x bis zum nächsten Boot)', () => true],
+    ['<kbd>F</kbd>', '3x an und aus', () => true],
+    ['<kbd>G</kbd>', '8x an und aus', () => !!game.oberflaeche?.tempo],
+    ['<kbd>K</kbd>', 'Kassieren (abends)', () => true],
     ['<kbd>1</kbd> bis <kbd>9</kbd>', 'Wartendes Boot wählen, bei offener Karte deren Knopf', () => true],
     ['<kbd>Tab</kbd>, Umschalt + <kbd>Tab</kbd>', 'Nächstes, voriges wartendes Boot', () => true],
     ['<kbd>Enter</kbd>', 'Gewähltes Boot einfahren lassen, bei offener Karte deren ersten Knopf', () => true],
@@ -310,6 +313,8 @@ export function init(game) {
       case 'KeyE': if (!cam.rotateBy) return; cam.rotateBy(-Math.PI / 4); break;
       case 'KeyM': game.emit('ui:mute'); break;
       case 'KeyF': setFast(!(game.speed > 1)); break;
+      case 'KeyG': if (game.oberflaeche?.tempo) game.oberflaeche.tempo(game.speed >= 8 ? 1 : 8); break;
+      case 'KeyK': { const c = byId('btn-collect'); if (!visible(c)) return; c.click(); break; }
       case 'KeyL': if (!game.spielstand?.oeffnen) return; game.spielstand.oeffnen(); break;
       case 'Escape': game.emit('ui:cancel'); break;
       case 'Home': case 'Digit0': case 'Numpad0': cam.reset(); break;

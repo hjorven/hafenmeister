@@ -104,7 +104,7 @@ Note 1 bis 5 aus dem Überblick. "nein" heißt: bleibt, wie es ist.
 | Passregel | 4 | nein | (P29 Baggern gibt ihr einen Hebel) |
 | Stegprojekte | 4 | teilweise | P05 |
 | Tagestörn der Gäste | 4 | nein | |
-| Grün-Rot-Schilder | 4 | nein | (P50 Form zusätzlich zur Farbe) |
+| Grün-Rot-Schilder | 4 | nein | (P50 Form zusätzlich zur Farbe, erledigt) |
 | Wetterflagge | 4 | nein | |
 | Fotomodus und Hafen schauen | 4 | nein | |
 | Menschen im Hafen | 4 | nein | |
@@ -245,7 +245,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F22 | Fotoaufträge und Postkarte | offen | P43 |
 | F23 | Hafenname und Flagge, sichtbar an Einfahrt und Mast | offen | P44 |
 | F24 | Kreativmodus als eigener Spielstand | offen | P45 |
-| F25 | Einstellungen: Schilder auch über die Form, weniger Bewegung, größere Schrift, Linkshänder am Handy | offen | P50 |
+| F25 | Einstellungen: Schilder auch über die Form, weniger Bewegung, größere Schrift, Linkshänder am Handy | erledigt (Menü, Einstellungen; docs/ui/oberflaeche.md) | P50 |
 
 ### Spielstände
 
@@ -324,7 +324,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | A4 | Geduld sichtbar: Ring an der Boje, im letzten Drittel Flagge oder kurzes Tuten | offen | P55 |
 | A5 | Vorschau: drei Bootsumrisse mit Größe und Uhrzeit, als "Funkgerät" Wirkung der ersten Bürostufe | offen | P11, P02 |
 | A6 | Passgenau belohnen: Bonus, wenn die Box höchstens ein Fünftel größer ist | offen | P10 |
-| A7 | Selbst-Einfahren einstellbar: schnell, langsam, aus | offen | P50 |
+| A7 | Selbst-Einfahren einstellbar: schnell, langsam, aus | erledigt (Einstellungen: Normal 8 s, Langsam 20 s, Nie) | P50 |
 | A8 | Abweisen und Wegfahren angleichen (= Ü13) | offen | P10 |
 | A9 | Bojenlieger über Nacht zahlen wenig und werden morgens zuerst bedient | offen | P10 |
 | A10 | Größenmischung je Stufe: an vollen Tagen ein bis zwei große Boote zu viel | offen | P17 |
@@ -524,11 +524,11 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Bed P1 | Die fünf fehlenden Anzeigen (A4, B1, B2, B11, C1) | B11 erledigt, Rest offen | P55, P11, P14 |
 | Bed P2 | Bootskarte mit "zahlt etwa 33 € pro Nacht" und Zahl der Wunschplätze | offen | P10 |
 | Bed P3 | Zeiger am Bildrand für wartende Boote | offen | P55 |
-| Bed P4 | Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf "bis zum nächsten Boot" | offen | P07 |
-| Bed P5 | Einstellungen-Seite (Ton und Musik getrennt, Selbst-Einfahren, Bewegung, Schrift, Linkshänder) | offen | P50 |
-| Bed P6 | Farbe nie allein: Form zu Grün-Rot und Gold | offen | P50 |
+| Bed P4 | Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf "bis zum nächsten Boot" | erledigt (1x bei Ereignis, Ausbau möglich, Regionsziel; 8x läuft bis zum nächsten Boot) | P07 |
+| Bed P5 | Einstellungen-Seite (Ton und Musik getrennt, Selbst-Einfahren, Bewegung, Schrift, Linkshänder) | erledigt (Ton und Musik über Knopf ins Ton-Fenster mit getrennten Reglern) | P50 |
+| Bed P6 | Farbe nie allein: Form zu Grün-Rot und Gold | erledigt mit Einstellung "Schilder mit Form" (Balken, Stern, Ausrufezeichen) | P50 |
 | Bed P7 | Letzten Kauf zehn Sekunden lang zurücknehmen | offen | P18 |
-| Bed P8 | PC-Tasten für Kassieren und drei Tempostufen, Hilfe zeigt genau die echten Tasten | offen | P07 |
+| Bed P8 | PC-Tasten für Kassieren und drei Tempostufen, Hilfe zeigt genau die echten Tasten | erledigt (K, F, G, Leertaste; Hilfe angepasst) | P07 |
 | Bed P9 | Stil im Plan festhalten; Rolle der Pixel-Fassung klären | Frage 9 | P08 |
 | Bed P10 | Zeichen am Rand für "hier ist etwas zu tun" | offen | P55 |
 
