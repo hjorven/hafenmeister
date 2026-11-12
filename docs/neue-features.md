@@ -10,7 +10,7 @@ Alle sechs bleiben im Rahmen des Plans: keine Story, keine Figuren mit Namen, ke
 | Hafen schauen | Fotomodus, Hafenbüro-Automatik aus `sim.js` | Rundflug fertig, Automatik wartet auf `sim.js` |
 | Dauerlieger | `sim.js`, Animationen für Aus- und Einlaufen | gebaut: `web/js/features/dauerlieger.js` |
 | Stammgäste | `sim.js` (Gäste, Bewertung) | gebaut: `web/js/features/stammgaeste.js` |
-| Wetter an der Flagge | `events/events.js` (Ankündigung am Vortag) | beschrieben |
+| Wetter an der Flagge | `events/events.js` | gebaut: `web/js/features/wetterflagge.js` |
 | Tagesziele an der Tafel | `sim.js` | gebaut: `web/js/features/tagesziele.js` |
 
 ## 1. Fotomodus mit Rundflug
@@ -62,17 +62,19 @@ Jedes Gastboot hat einen Namen am Heck und einen Heimathafen (echte Häfen an Os
 
 ## 5. Wetter an der Flagge
 
-Ereignisse werden einen Tag vorher angekündigt. Statt Text zeigt das der Hafen selbst:
+Gebaut: `web/js/features/wetterflagge.js`, Tests in `tests/wetterflagge.test.mjs`.
 
-| Morgen | Zeichen am Hafen |
+Neben der Wurzel von Steg A steht ein Flaggenmast mit Windsack. Er zeigt das Wetter, ohne Text:
+
+| Lage | Zeichen am Mast |
 |---|---|
-| Sturm | Windsack steht waagerecht, Flagge flattert schnell, Wolkenschatten werden dunkler |
-| Regatta | Bunte Signalflaggen-Leine am Mast des Segelclubs |
-| Ruhiger Tag | Flagge hängt locker, Windsack schlaff |
+| Wind heute | Windsack hängt bei Flaute, steht bei viel Wind waagerecht und zittert |
+| Sturm morgen | zwei rote Sturmwimpel |
+| Regatta heute oder morgen | bunte Signalflaggen-Leine vom Mast zum Boden |
 
-- Vor dem Hafenbüro (Stufe 1: ein Mast am Steg) steht ein Flaggenmast mit Windsack.
-- Antippen zeigt auf der Infokarte ein Symbol für das Wetter von morgen.
-- Hört auf `ereignis:angekuendigt` aus `events/events.js`.
+- Antippen des Masts öffnet den Wetterbericht (Knopf `#weather-chip` aus `events/banner.js`), dort stehen die Einzelheiten.
+- Daten aus `game.events.forecast()`. Ohne Ereignis-Modul erscheint kein Mast.
+- Später möglich: den Mast ans Hafenbüro versetzen, sobald es als Gebäude steht.
 
 ## 6. Tagesziele an der Tafel
 
