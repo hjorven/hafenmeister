@@ -16,7 +16,6 @@ export const ECONOMY = {
   zeit: {
     tagSekunden: 90,        // Tag, Boote laufen ein
     abendSekunden: 30,      // Abend, Kassieren
-    vorspulen: [1, 2, 3],   // 3x erst mit Hafenbüro (hafenbuero, Stufe 2)
     saisonTage: 30,         // danach Winter
     winterTage: 3,          // keine Gäste, Bauprojekte doppelt so schnell
     winterBautempo: 2,
@@ -30,7 +29,13 @@ export const ECONOMY = {
   warten: {
     geduld: 80,
     plaetze: { 1: 3, 2: 6, 3: 5, 4: 7, 5: 8, 6: 8 },
+    selbstEinfahrenNach: 8,   // Sekunden an der Boje, dann sucht sich das Boot selbst eine Box
   },
+
+  // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber
+  // hinaus und kommen in dieselbe Box zurück (Box bleibt reserviert, Liegegeld zählt weiter).
+  // raus und zurueck sind Anteile des Tages.
+  tagestoern: { anteil: 0.35, raus: [0.12, 0.3], zurueck: [0.6, 0.85] },
 
   // ---------------------------------------------------------------- Gäste
   klassen: {
@@ -203,9 +208,14 @@ export const ECONOMY = {
 
   // ---------------------------------------------------------------- Hafenbüro
   // Komfort, keine Einnahmen. Logik bei den Spielregeln (sim.js).
+  // allesKassieren: Knopf "Alles kassieren". sofortKassieren: Liegegeld kommt beim Anlegen von
+  // selbst in die Kasse. automatik: wartende Boote bekommen sofort die Box mit den meisten
+  // erfüllten Wünschen (ohne Hafenbüro fahren sie nach warten.selbstEinfahrenNach Sekunden in
+  // irgendeine passende freie Box).
   hafenbuero: { stufen: [
-    { name: 'Hafenmeister', abStufe: 2, kosten: 800,  schaltetFrei: ['allesKassieren'] },
-    { name: 'Hafenbüro',    abStufe: 3, kosten: 3800, schaltetFrei: ['automatik', 'vorspulen3'] },
+    { name: 'Hafenmeister',  abStufe: 2, kosten: 600,  schaltetFrei: ['allesKassieren'] },
+    { name: 'Kassenautomat', abStufe: 2, kosten: 1800, schaltetFrei: ['sofortKassieren'] },
+    { name: 'Hafenbüro',     abStufe: 3, kosten: 3800, schaltetFrei: ['automatik'] },
   ] },
 
   // ---------------------------------------------------------------- Services

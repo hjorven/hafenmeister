@@ -318,7 +318,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
 function quantil(a, q) { const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(q * s.length))]; }
 // Annahme für "mit Vorspulen": die Hälfte der Spielzeit läuft auf der höchsten Stufe
 // (2x bis zum Hafenbüro in Stufe 3, danach 3x), die andere Hälfte auf 1x.
-const typisch = (n) => 0.5 + 0.5 / (n >= 3 ? 3 : 2);
+const typisch = () => 0.5 + 0.5 / 4;   // halbe Zeit mit Vorspulen 4x (Taste F, Sonne ziehen)
 const fmtZeit = (min) => `${Math.floor(min / 60)} h ${String(Math.round(min % 60)).padStart(2, '0')} min`;
 
 function bericht(laeufe, json) {

@@ -18,7 +18,12 @@ test('Zahlen werden übernommen', () => {
   assert.equal(rules.facilities.wc.cost[1], ECONOMY.bauwerke.wc.stufen[0].kosten);
   assert.equal(rules.facilities.wc.levels[2], ECONOMY.bauwerke.wc.stufen[1].versorgt);
   assert.equal(rules.office.cost[1], ECONOMY.hafenbuero.stufen[0].kosten);
-  assert.equal(rules.office.autoAssign, 2);
+  assert.equal(rules.office.collectAllButton, 1);
+  assert.equal(rules.office.autoCollect, 2);
+  assert.equal(rules.office.autoAssign, 3);
+  assert.equal(rules.trips.chance, ECONOMY.tagestoern.anteil);
+  assert.deepEqual(rules.trips.back, ECONOMY.tagestoern.zurueck);
+  assert.equal(rules.queue.selfEnterAfter, ECONOMY.warten.selbstEinfahrenNach);
   assert.ok(!rules.wishes[3].includes('diesel'));
   assert.ok(rules.wishes[4].includes('diesel'));
   assert.equal(rules.maxStage, ECONOMY.stufen.length);
