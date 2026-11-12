@@ -59,6 +59,18 @@ Alle Zusätze des Spiels gelten weiter, zum Beispiel `pixel/?stufe=6&services=al
 
 `web/pixel/css/pixel.css` gibt der Oberfläche den Pixel-Look: Schrift Pixelify Sans (Google Fonts, mit Umlauten; ohne Netz Systemschrift), harte Kanten, Knöpfe mit Pixelschatten. Die Regeln gelten nur unter `html.pixel`, also nie im normalen Spiel.
 
+## Alle Boote nebeneinander
+
+`pixel/boote.html` zeigt jedes Bootsmodell (S, M, L, XL) als 3D-Bild und daneben das gezeichnete Sprite weit, mittel und nah, in Bildschirmgröße wie im Spiel. Wählbar sind Größe, Kamerahöhe, Richtung und Segel, auch per Adresse: `boote.html?groesse=M&hoehe=50&richtung=8&segel=0`.
+
+Zeichenregeln, die dabei nachgeschärft wurden (12.11.2026):
+
+- Eigenschatten: Was aus Sicht der Sonne verdeckt ist (Deck hinter dem Aufbau, Rumpf unter dem Segel), bekommt die Schattenstufe.
+- Innenräume: Flächen zwischen höheren Kanten (Ruderboot, Cockpit) bekommen eine Stufe weniger Licht, Duchten und Bänke heben sich ab.
+- Innenkanten schon ab etwa 10 cm Höhenunterschied; zwischen gleich hellen Teilen (Segel vor weißem Rumpf) eine echte Umrisslinie.
+- Weiß hat eine eigene, nach unten verschobene Rampe, damit Licht, Grund und Schatten unterscheidbar bleiben.
+- Wanten und Leinen werfen keinen Schatten mehr aufs Wasser.
+
 ## Werkstatt und Spritebögen
 
 `pixel/werkstatt.html` zeichnet ein Boot (Stil gezeichnet oder Filter) in 8, 16 oder 32 Richtungen und den drei Höhen. Mit "Wasser" sieht man es wie im Spiel, ohne Wasser entsteht ein Bogen mit durchsichtigem Hintergrund, der sich als PNG speichern lässt (zum Beispiel zum Nachzeichnen von Hand). Adresse: `werkstatt.html?groesse=M&modell=M2-5&richtungen=16&wasser=0`.

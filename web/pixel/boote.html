@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pixel-Boote</title>
+  <style>
+    :root { --bg: #e2e5d8; --ink: #21343f; --panel: #fbf8f1; --line: #7f8a88; --wasser: #80b4af; }
+    html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, sans-serif; }
+    header { position: sticky; top: 0; z-index: 2; background: var(--panel); border-bottom: 2px solid var(--line); padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+    header h1 { font-size: 16px; margin: 0 8px 0 0; }
+    label { display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+    select { font: inherit; padding: 4px 8px; border: 2px solid var(--ink); background: #fff; color: var(--ink); border-radius: 0; }
+    main { padding: 12px 16px 40px; }
+    #info { margin: 0 0 12px; max-width: 75ch; }
+    h2 { font-size: 15px; margin: 18px 0 8px; }
+    .reihe { display: flex; flex-wrap: wrap; gap: 10px; }
+    figure { margin: 0; background: var(--wasser); padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+    figcaption { font-size: 12px; color: #12212e; max-width: 46ch; }
+    .bilder { display: flex; gap: 6px; align-items: flex-end; }
+    .bilder canvas { image-rendering: pixelated; display: block; }
+    .bilder span { display: block; font-size: 10px; color: #12212e; text-align: center; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Pixel-Boote</h1>
+    <label>Größe <select id="groesse"><option value="alle">alle</option><option>S</option><option>M</option><option>L</option><option>XL</option></select></label>
+    <label>Kamerahöhe <select id="hoehe"><option>30</option><option selected>50</option><option>70</option></select></label>
+    <label>Richtung <select id="richtung"><option value="0">Bug nach unten</option><option value="4">schräg</option><option value="8" selected>quer</option><option value="12">schräg hinten</option></select></label>
+    <label>Segel <select id="segel"><option value="1">gesetzt</option><option value="0">eingeholt</option></select></label>
+  </header>
+  <main>
+    <p id="info">Jedes Boot zum Vergleich: links das 3D-Modell, daneben das gezeichnete Pixel-Sprite weit, mittel und nah, jeweils so groß, wie es im Spiel auf dem Bildschirm erscheint. So lässt sich prüfen, ob Deck, Aufbauten, Mast und Baum erkennbar bleiben.</p>
+    <div id="liste"></div>
+  </main>
+  <script type="module">
+    import * as THREE from 'three';
+    import { createSpriteZeichner } from './js/sprite-zeichner.js';
+
+    // Meter je Kunstpixel und Kunstpixel-Groesse auf dem Bildschirm (CSS-Pixel), etwa wie im Spiel
+    const STUFEN = [
+      { name: 'weit', texel: 0.25, px: 3 },
+      { name: 'mittel', texel: 0.125, px: 3 },
+      { name: 'nah', texel: 0.0625, px: 3 },
+    ];
+    const REF_TEXEL = 0.0625 / 2;   // 3D-Bild in feiner Aufloesung
+    const RICHTUNGEN = 16;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(1);
+    renderer.setSize(4, 4);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.setClearColor(0x000000, 0);
+    const zeichner = createSpriteZeichner(THREE, renderer);
+
+    const scene = new THREE.Scene();
+    scene.add(new THREE.HemisphereLight('#ffffff', '#5a8fa0', 1.6));
+    const sonne = new THREE.DirectionalLight('#fff6e8', 2.2);
+    sonne.position.set(-20, 40, 25);
+    sonne.castShadow = true;
+    sonne.shadow.mapSize.set(2048, 2048);
+    sonne.shadow.bias = -0.0006;
+    sonne.shadow.normalBias = 0.4;
+    Object.assign(sonne.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 200 });
+    scene.add(sonne, sonne.target);
+
+    const GROESSEN = {
+      S: () => Promise.all([import('../js/data/boats/s.js'), import('../js/render/boats/s.js')]),
+      M: () => Promise.all([import('../js/data/boats/m.js'), import('../js/render/boats/m.js')]),
+      L: () => Promise.all([import('../js/data/boats/l.js'), import('../js/render/boats/l.js')]),
+      XL: () => Promise.all([import('../js/data/boats/xl.js'), import('../js/render/boats/xl.js')]),
+    };
+    const $ = (id) => document.getElementById(id);
+
+    function kamera(radius, grad, texel, groesse) {
+      const p = THREE.MathUtils.degToRad(grad);
+      const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 400);
+      const halb = (groesse * texel) / 2;
+      cam.left = -halb; cam.right = halb; cam.top = halb; cam.bottom = -halb;
+      cam.position.set(0, Math.sin(p) * 150 + radius * 0.25, Math.cos(p) * 150);
+      cam.lookAt(0, radius * 0.25, 0);
+      cam.updateProjectionMatrix();
+      cam.updateMatrixWorld();
+      return cam;
+    }
+
+    function leinwand(bild, px) {
+      const klein = document.createElement('canvas');
+      klein.width = bild.width; klein.height = bild.height;
+      klein.getContext('2d').putImageData(bild, 0, 0);
+      const c = document.createElement('canvas');
+      c.width = bild.width * px; c.height = bild.height * px;
+      const g = c.getContext('2d');
+      g.imageSmoothingEnabled = false;
+      g.drawImage(klein, 0, 0, c.width, c.height);
+      return c;
+    }
+
+    function referenz(boot, radius, grad, anzeigeBreite) {
+      const groesse = Math.ceil((radius * 2.1) / REF_TEXEL);
+      const cam = kamera(radius, grad, REF_TEXEL, groesse);
+      scene.add(boot);
+      renderer.setSize(groesse, groesse);
+      renderer.render(scene, cam);
+      scene.remove(boot);
+      const c = document.createElement('canvas');
+      c.width = anzeigeBreite; c.height = anzeigeBreite;
+      c.getContext('2d').drawImage(renderer.domElement, 0, 0, c.width, c.height);
+      c.style.imageRendering = 'auto';
+      return c;
+    }
+
+    function zelle(api, m) {
+      const segel = $('segel').value === '1';
+      const boot = api.buildBoat(m, { sails: segel, id: m.id });
+      if (segel && api.setSails) api.setSails(boot, true);
+      boot.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+      boot.rotation.y = (Number($('richtung').value) / RICHTUNGEN) * Math.PI * 2;
+      boot.updateMatrixWorld(true);
+      const radius = Math.max(0.5, new THREE.Box3().setFromObject(boot).getBoundingSphere(new THREE.Sphere()).radius);
+      const grad = Number($('hoehe').value);
+
+      const fig = document.createElement('figure');
+      const bilder = document.createElement('div');
+      bilder.className = 'bilder';
+      const nahBreite = (Math.ceil((radius * 2.1) / STUFEN[2].texel / 2) * 2 + 4) * STUFEN[2].px;
+      const ref = document.createElement('div');
+      ref.append(referenz(boot, radius, grad, nahBreite), Object.assign(document.createElement('span'), { textContent: '3D' }));
+      bilder.append(ref);
+      for (const s of STUFEN) {
+        const groesse = Math.ceil((radius * 2.1) / s.texel / 2) * 2 + 4;
+        const bild = zeichner.zeichne(boot, kamera(radius, grad, s.texel, groesse), groesse, groesse);
+        const d = document.createElement('div');
+        d.append(leinwand(bild, s.px), Object.assign(document.createElement('span'), { textContent: s.name }));
+        bilder.append(d);
+      }
+      const cap = document.createElement('figcaption');
+      cap.textContent = `${m.id} ${m.name || ''}${m.length ? `, ${m.length} m` : ''}`;
+      fig.append(bilder, cap);
+      return fig;
+    }
+
+    async function zeichneAlle() {
+      const liste = $('liste');
+      liste.textContent = '';
+      document.body.dataset.fertig = '0';
+      const wahl = $('groesse').value === 'alle' ? Object.keys(GROESSEN) : [$('groesse').value];
+      for (const g of wahl) {
+        const [daten, api] = await GROESSEN[g]();
+        const modelle = daten.MODELS || api.MODELS || [];
+        const h = document.createElement('h2');
+        h.textContent = `Größe ${g} (${modelle.length} Modelle)`;
+        const reihe = document.createElement('div');
+        reihe.className = 'reihe';
+        liste.append(h, reihe);
+        for (const m of modelle) {
+          try { reihe.append(zelle(api, m)); } catch (err) { console.warn('Boot nicht gezeichnet', m.id, err); }
+          await new Promise((r) => setTimeout(r, 0));
+        }
+      }
+      document.body.dataset.fertig = '1';
+    }
+
+    const q = new URLSearchParams(location.search);
+    for (const k of ['groesse', 'hoehe', 'richtung', 'segel']) if (q.get(k) && [...$(k).options].some((o) => o.value === q.get(k) || o.text === q.get(k))) $(k).value = q.get(k);
+    for (const k of ['groesse', 'hoehe', 'richtung', 'segel']) $(k).addEventListener('change', zeichneAlle);
+    await zeichneAlle();
+  </script>
+</body>
+</html>

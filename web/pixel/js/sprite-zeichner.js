@@ -33,15 +33,26 @@ function zuRgb([L, a, b]) {
   });
 }
 const rampenCache = new Map();
+const helleCache = new Map();
+function helligkeit([r, g, b]) {
+  const key = (r << 16) | (g << 8) | b;
+  let L = helleCache.get(key);
+  if (L === undefined) { L = oklab(r / 255, g / 255, b / 255)[0]; helleCache.set(key, L); }
+  return L;
+}
+
 export function rampe(r, g, b) {
   const key = (r << 16) | (g << 8) | b;
   if (rampenCache.has(key)) return rampenCache.get(key);
   const [L, A, B] = oklab(r / 255, g / 255, b / 255);
   const c = Math.hypot(A, B);
   const sat = c > 0.02 ? 1.12 : 1;     // Farbiges etwas kraeftiger, Grau bleibt grau
-  const grund = [L, A * sat, B * sat];
-  const licht = [Math.min(0.99, L + 0.085), A * sat * 0.95, B * sat * 0.95 + 0.012];
-  const schatten = [Math.max(0.16, L - 0.13), A * sat * 1.05 - 0.004, B * sat * 1.05 - 0.032];
+  // Sehr helle Farben (Weiss, Segel) haben nach oben keinen Platz: Rampe nach unten verschieben,
+  // damit Licht, Grund und Schatten trotzdem unterscheidbar bleiben (wie bei gemaltem Weiss)
+  const hell = L > 0.86;
+  const grund = [hell ? L - 0.06 : L, A * sat, B * sat];
+  const licht = [hell ? Math.min(0.985, L + 0.02) : Math.min(0.99, L + 0.085), A * sat * 0.95, B * sat * 0.95 + 0.012];
+  const schatten = [Math.max(0.16, L - (hell ? 0.2 : 0.13)), A * sat * 1.05 - 0.004, B * sat * 1.05 - 0.032];
   const umriss = [Math.max(0.13, Math.min(0.27, L * 0.35)), A * 0.45 + 0.004, B * 0.45 - 0.03];
   const out = [umriss, schatten, grund, licht].map(zuRgb);
   rampenCache.set(key, out);
@@ -75,6 +86,17 @@ const FRAG_N = /* glsl */`
 
 export function createSpriteZeichner(THREE, renderer) {
   let rtId = null, rtN = null;
+  // Lichttiefe fuer Eigenschatten: etwa doppelte Sprite-Aufloesung, 128 bis 512
+  let SCHATTEN_AUFL = 0, rtL = null, lichtTiefe = null;
+  const lichtZiel = (w, h) => {
+    const n = Math.min(512, Math.max(128, 2 ** Math.ceil(Math.log2(Math.max(w, h) * 2))));
+    if (n === SCHATTEN_AUFL) return;
+    rtL?.dispose();
+    SCHATTEN_AUFL = n;
+    rtL = new THREE.WebGLRenderTarget(n, n, { type: THREE.FloatType, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter });
+    lichtTiefe = new Float32Array(n * n * 4);
+  };
+  const lichtKam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
   const ziele = (w, h) => {
     if (rtId && rtId.width === w && rtId.height === h) return;
     rtId?.dispose(); rtN?.dispose();
@@ -118,7 +140,7 @@ export function createSpriteZeichner(THREE, renderer) {
     }
     try { fn(); } finally {
       liste.forEach((t, i) => { t.o.material = alt[i]; });
-      for (const m of cache.values()) m.dispose();
+      for (const m of cache.values()) if (m !== hidden) m.dispose();
     }
   }
   const hidden = new THREE.MeshBasicMaterial({ visible: false });
@@ -169,10 +191,11 @@ export function createSpriteZeichner(THREE, renderer) {
       szene.add(huelle);
       huelle.add(obj);
       huelle.updateMatrixWorld(true);
-      mitMaterial(liste, () => new THREE.ShaderMaterial({
+      // Duenne Linien (Wanten, Leinen) werfen keinen Schatten: der Faecher waere nur Unruhe auf dem Wasser
+      mitMaterial(liste, (n, linie) => (linie ? hidden : new THREE.ShaderMaterial({
         vertexShader: VERT, fragmentShader: FRAG_ID, side: THREE.DoubleSide,
         uniforms: { uId: { value: new THREE.Vector3(1, 1, 1) } },
-      }), () => {
+      })), () => {
         renderer.setRenderTarget(rtId);
         renderer.clear();
         renderer.render(szene, kamera);
@@ -190,11 +213,64 @@ export function createSpriteZeichner(THREE, renderer) {
     const blick = new THREE.Vector3();
     kamera.getWorldDirection(blick);
 
+    // Eigenschatten: Tiefe aus Sicht der Sonne. Was dort verdeckt ist (Innenraum eines Ruderboots,
+    // Deck hinter dem Aufbau, Rumpf unter dem Segel), bekommt die Schattenstufe, wie im 3D-Bild.
+    lichtZiel(w, h);
+    const kugel = new THREE.Box3().setFromObject(obj).getBoundingSphere(new THREE.Sphere());
+    const rad = Math.max(0.5, kugel.radius) * 1.05;
+    lichtKam.left = -rad; lichtKam.right = rad; lichtKam.top = rad; lichtKam.bottom = -rad;
+    lichtKam.near = 0.1; lichtKam.far = rad * 4;
+    lichtKam.position.set(kugel.center.x + LICHT[0] * rad * 2, kugel.center.y + LICHT[1] * rad * 2, kugel.center.z + LICHT[2] * rad * 2);
+    lichtKam.up.set(0, 0, -1);
+    lichtKam.lookAt(kugel.center);
+    lichtKam.updateProjectionMatrix();
+    lichtKam.updateMatrixWorld();
+    mitMaterial(liste, (n, linie) => (linie ? hidden : new THREE.ShaderMaterial({
+      vertexShader: VERT, fragmentShader: FRAG_N, side: THREE.DoubleSide,
+      uniforms: { uLinie: { value: 0 } },
+    })), () => {
+      renderer.setRenderTarget(rtL);
+      renderer.setClearColor(0xffffff, 1);
+      renderer.clear();
+      renderer.render(szene, lichtKam);
+      renderer.readRenderTargetPixels(rtL, 0, 0, SCHATTEN_AUFL, SCHATTEN_AUFL, lichtTiefe);
+      renderer.setClearColor(0x000000, 0);
+    });
+    renderer.setRenderTarget(null);
+    const lichtMat = new THREE.Matrix4().multiplyMatrices(lichtKam.projectionMatrix, lichtKam.matrixWorldInverse);
+    const lichtBias = 0.12 / (lichtKam.far - lichtKam.near);   // etwa 12 cm
+    const KR = new THREE.Vector3().setFromMatrixColumn(kamera.matrixWorld, 0);
+    const KU = new THREE.Vector3().setFromMatrixColumn(kamera.matrixWorld, 1);
+    const ktx = (kamera.right - kamera.left) / w, kty = (kamera.top - kamera.bottom) / h;
+    const _w = new THREE.Vector3();
+    const imSchatten = (x, y, z) => {
+      const d = kamera.near + z * (kamera.far - kamera.near);
+      _w.copy(kamera.position)
+        .addScaledVector(KR, kamera.left + (x + 0.5) * ktx)
+        .addScaledVector(KU, kamera.top - (y + 0.5) * kty)
+        .addScaledVector(blick, d)
+        .applyMatrix4(lichtMat);
+      const u = (_w.x * 0.5 + 0.5) * SCHATTEN_AUFL, v = (_w.y * 0.5 + 0.5) * SCHATTEN_AUFL;
+      const zl = _w.z * 0.5 + 0.5;
+      const ui = Math.floor(u), vi = Math.floor(v);
+      // drei von vier Nachbarn muessen verdecken, sonst flimmern Kanten
+      let verdeckt = 0;
+      for (const [du, dv] of [[0, 0], [1, 0], [0, 1], [-1, 0]]) {
+        const uu = ui + du, vv = vi + dv;
+        if (uu < 0 || vv < 0 || uu >= SCHATTEN_AUFL || vv >= SCHATTEN_AUFL) continue;
+        if (lichtTiefe[(vv * SCHATTEN_AUFL + uu) * 4 + 3] < zl - lichtBias) verdeckt++;
+      }
+      return verdeckt >= 3;
+    };
+    const weltY = (x, y, z) => kamera.position.y + KR.y * (kamera.left + (x + 0.5) * ktx)
+      + KU.y * (kamera.top - (y + 0.5) * kty) + blick.y * (kamera.near + z * (kamera.far - kamera.near));
+
     const N = w * h;
     const teil = new Int32Array(N);     // 0 = leer
     const linie = new Uint8Array(N);
     const stufe = new Int8Array(N);     // 1 Schatten, 2 Grund, 3 Licht
     const tiefe = new Float32Array(N);
+    const hoehe = new Float32Array(N);   // Welt-Hoehe je Pixel
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
         const src = (h - 1 - y) * w + x;     // WebGL zaehlt von unten
@@ -208,8 +284,35 @@ export function createSpriteZeichner(THREE, renderer) {
         tiefe[i] = nd[src * 4 + 3];
         const l = nx * LICHT[0] + ny * LICHT[1] + nz * LICHT[2];
         stufe[i] = linie[i] ? 2 : l > 0.72 ? 3 : l > 0.2 ? 2 : 1;
+        if (!linie[i] && stufe[i] > 1 && imSchatten(x, y, tiefe[i])) stufe[i] = 1;
+        hoehe[i] = weltY(x, y, tiefe[i]);
       }
     }
+
+    // Innenraeume (Ruderboot, Cockpit, Laderaum): Flaechen, die zwischen hoeheren Kanten liegen,
+    // bekommen eine Stufe weniger Licht. So liest sich ein offenes Boot als Schale und nicht als Fladen.
+    const reichweite = Math.max(2, Math.ceil(0.9 / ktx));
+    const KANTE = 0.12;   // Meter, die eine Kante hoeher liegen muss
+    const hoeherIn = (x, y, dx, dy, h0) => {
+      for (let k = 1; k <= reichweite; k++) {
+        const xx = x + dx * k, yy = y + dy * k;
+        if (xx < 0 || yy < 0 || xx >= w || yy >= h) return false;
+        const j = yy * w + xx;
+        if (!teil[j]) return false;
+        if (!linie[j] && hoehe[j] > h0 + KANTE) return true;
+      }
+      return false;
+    };
+    const innen = new Uint8Array(N);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = y * w + x;
+        if (!teil[i] || linie[i] || stufe[i] <= 1) continue;
+        const h0 = hoehe[i];
+        if ((hoeherIn(x, y, -1, 0, h0) && hoeherIn(x, y, 1, 0, h0)) || (hoeherIn(x, y, 0, -1, h0) && hoeherIn(x, y, 0, 1, h0))) innen[i] = 1;
+      }
+    }
+    for (let i = 0; i < N; i++) if (innen[i]) stufe[i] = Math.max(1, stufe[i] - 1);
 
     // Aufraeumen: ein Pixel, dessen Stufe keiner seiner gleichen Teil-Nachbarn hat, uebernimmt die haeufigste
     for (let runde = 0; runde < 2; runde++) {
@@ -247,7 +350,7 @@ export function createSpriteZeichner(THREE, renderer) {
       return (t - kamera.near) / (kamera.far - kamera.near);
     };
     const setze = (i, c) => { out[i * 4] = c[0]; out[i * 4 + 1] = c[1]; out[i * 4 + 2] = c[2]; out[i * 4 + 3] = 255; };
-    const schwelle = 0.0025;   // Tiefensprung fuer Innenkanten (Tiefenpuffer 0..1)
+    const schwelle = 0.00025;   // Tiefensprung fuer Innenkanten (Tiefenpuffer 0..1, etwa 10 cm): auch Duchten und flache Aufbauten
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
         const i = y * w + x;
@@ -255,14 +358,18 @@ export function createSpriteZeichner(THREE, renderer) {
           const r = rampe(...farben[teil[i]]);
           let s = stufe[i];
           // Innenkante: ein anderes Teil liegt direkt davor (naeher) -> dieses Pixel wird Kante
-          let kante = false;
+          let kante = 0;
           for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
             const xx = x + dx, yy = y + dy;
             if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
             const j = yy * w + xx;
-            if (teil[j] && teil[j] !== teil[i] && tiefe[j] < tiefe[i] - schwelle && !linie[j]) kante = true;
+            if (teil[j] && teil[j] !== teil[i] && tiefe[j] < tiefe[i] - schwelle && !linie[j]) {
+              // Gleich helle Teile (Segel vor weissem Rumpf) brauchen eine echte Linie, sonst verschwimmen sie
+              const lj = helligkeit(farben[teil[j]]), li = helligkeit(farben[teil[i]]);
+              kante = Math.max(kante, Math.abs(lj - li) < 0.12 ? 2 : 1);
+            }
           }
-          setze(i, kante ? r[Math.max(0, s - 1)] : r[s]);
+          setze(i, kante === 2 ? r[0] : kante === 1 ? r[Math.max(0, s - 1)] : r[s]);
           tiefeOut[i] = tiefe[i];
           continue;
         }
