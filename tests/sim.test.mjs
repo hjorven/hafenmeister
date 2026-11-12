@@ -182,12 +182,13 @@ test('Hafengeld wird beim Anlegen fällig: Wünsche, Kapazität der Toilette, St
   assert.equal(fees.length, 8);
   // 6 Boote mit WC: 10 × 1,25 = 12,5 -> 13; das siebte ohne WC: 10
   assert.deepEqual(fees.slice(0, 7).map((e) => e.amount), [13, 13, 13, 13, 13, 13, 10]);
-  // Yacht: Strom ja, Dusche nein -> 40 × 1,25 = 50
-  assert.equal(fees[7].amount, 50);
+  // Yacht: Strom ja, Dusche nein -> Grundpreis L × 1,25
+  const yachtFee = Math.round(RULES.baseFee.L * (1 + RULES.wishBonus));
+  assert.equal(fees[7].amount, yachtFee);
   assert.equal(s.money, 0);
   const c = sim.collect(s, ctx, yacht.id);
   assert.equal(c.ok, true);
-  assert.equal(s.money, 50);
+  assert.equal(s.money, yachtFee);
   assert.equal(yacht.paid, true);
   assert.equal(sim.collect(s, ctx, yacht.id).ok, false);
 });
@@ -246,7 +247,8 @@ test('Ruf: Schnitt der letzten 20, Faktor für Ankünfte', () => {
 });
 
 test('Bewertung: Komfort, Sondergast und Sturmschaden, begrenzt auf 1 bis 5', () => {
-  assert.equal(sim.rateBoat(ctx, { wishesMet: 1, wishesTotal: 2, berthId: 'D1', special: false, penalty: 0 }), 3.5);
+  // Hälfte der Wünsche: 3 Anker, dazu der Komfort des Platzes
+  assert.equal(sim.rateBoat(ctx, { wishesMet: 1, wishesTotal: 2, berthId: 'D1', special: false, penalty: 0 }), Math.min(5, 3 + berth('D1').comfort * RULES.comfortBonus));
   assert.equal(sim.rateBoat(ctx, { wishesMet: 0, wishesTotal: 0, berthId: 'K1', special: true, penalty: 0 }), 5);
   assert.equal(sim.rateBoat(ctx, { wishesMet: 0, wishesTotal: 3, berthId: 'A1', special: false, penalty: 1 }), 1);
 });
@@ -294,7 +296,7 @@ test('Stationierte Einheit: fester Platz, Pacht, reist nicht ab', () => {
   assert.equal(sim.stationBoat(s, ctx, 'L4', 'R1').reason, 'occupied');
   for (let d = 0; d < 3; d++) sim.tick(s, ctx, RULES.dayLength + RULES.eveningLength);
   assert.equal(s.berths.R1, r.boatId);
-  assert.ok(s.money >= 3 * 20); // 40 × 0,5 pro Nacht
+  assert.ok(s.money >= 3 * RULES.stationedFee); // feste Pacht pro Nacht
 });
 
 test('Tagesgäste bringen abends Geld, wenn es einen Kiosk gibt', () => {
@@ -446,14 +448,15 @@ test('Ausbaustufe: Ziel prüfen und aufsteigen', () => {
   const s = createState({ seed: 1 });
   let c = sim.canAdvanceStage(s, ctx);
   assert.deepEqual(c.missing, ['guests', 'money']);
-  s.guests = 25;
-  s.money = 500;
+  const goal = RULES.stageGoals[1];
+  s.stageGuests = goal.guests;   // Gäste zählen je Stufe
+  s.money = goal.cost + 100;
   c = sim.canAdvanceStage(s, ctx);
   assert.equal(c.ok, true);
   assert.equal(sim.advanceStage(s, ctx).ok, true);
   assert.equal(s.stage, 2);
   assert.equal(s.money, 100);
-  s.stage = 5;
+  s.stage = RULES.maxStage;
   assert.deepEqual(sim.canAdvanceStage(s, ctx).missing, ['max']);
 });
 

@@ -17,8 +17,8 @@ export const ECONOMY = {
     tagSekunden: 90,        // Tag, Boote laufen ein
     abendSekunden: 30,      // Abend, Kassieren
     saisonTage: 30,         // danach Winter
-    winterTage: 3,          // keine Gäste, Bauprojekte doppelt so schnell
-    winterBautempo: 2,
+    winterTage: 3,          // keine Gäste
+    erstesBootNach: 3,      // Sekunden: am ersten Tag eines neuen Spiels kommt gleich ein Boot
     // Tagesrhythmus wie im echten Hafen, als Anteile des Tages (0 = Morgen, 1 = Abend):
     // vormittags legen die Gäste ab, ab Mittag kommen die neuen, die meisten am Nachmittag.
     ankunftVon: 0.35,       // etwa 11:00
@@ -39,6 +39,9 @@ export const ECONOMY = {
     plaetze: { 1: 3, 2: 6, 3: 5, 4: 7, 5: 8, 6: 8 },
     selbstEinfahrenNach: 8,   // Sekunden zum Selbstlenken, dann sucht sich das Boot selbst eine freie Box
     ueberNacht: true,         // wer abends noch wartet, bleibt über Nacht an der Boje (ohne Bewertung)
+    anfahrtMax: 35,           // meldet die 3D-Ansicht nichts, gilt ein Boot danach als an der Boje
+    ausBoxMax: 20,            // ein abreisendes Boot gibt seine Box spätestens nach so vielen Sekunden frei
+    vorschau: 3,              // so viele kommende Boote zeigt die Vorschau
   },
 
   // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber
@@ -48,21 +51,21 @@ export const ECONOMY = {
 
   // ---------------------------------------------------------------- Gäste
   klassen: {
-    //      Grundpreis pro Nacht, Nächte [min, max], Anteil Motorboote (nur die wünschen Diesel),
-    //      Anteil Segelboote (Segelmacher, Regatta)
-    S:   { grundpreis: 10,  naechte: [1, 2], motor: 0.35, segel: 0.40 },
-    M:   { grundpreis: 22,  naechte: [1, 3], motor: 0.40, segel: 0.55 },
-    L:   { grundpreis: 45,  naechte: [1, 3], motor: 0.40, segel: 0.55 },
-    XL:  { grundpreis: 120, naechte: [1, 2], motor: 0.50, segel: 0.40 },
-    XXL: { grundpreis: 0,   naechte: [1, 1], motor: 1.00, segel: 0.00 },  // kein Liegegeld, Einnahmen je Besuch (services)
+    //      Grundpreis pro Nacht, Nächte [min, max]. Ob ein Boot Motor- oder Segelboot ist, steht im
+    //      Bootskatalog (data/boats).
+    S:   { grundpreis: 10,  naechte: [1, 2] },
+    M:   { grundpreis: 22,  naechte: [1, 3] },
+    L:   { grundpreis: 45,  naechte: [1, 3] },
+    XL:  { grundpreis: 120, naechte: [1, 2] },
+    XXL: { grundpreis: 0,   naechte: [1, 1] },  // kein Liegegeld, Einnahmen je Besuch (services)
   },
   wunschBonus: 0.25,          // Hafengeld = Grundpreis * (1 + wunschBonus * erfüllte Wünsche)
 
-  // Sonderfälle innerhalb einer Klasse (Anteil an den Ankünften dieser Klasse)
-  sonderboote: {
-    mehrrumpf: { klasse: 'L', abStufe: 4, anteil: 0.12, braucht: 'stirn' },
-    behoerde:  { klasse: 'L', abStufe: 4, anteil: 0.05, preisFaktor: 0.5, rufBonus: 1 },
-  },
+  // Nicht kassierte Münzen: dieser Anteil landet nachts trotzdem in der Kasse (Kasse des Vertrauens,
+  // abends sammelt der Hafenmeister-Rundgang ihn ein)
+  kassieren: { nachtsAnteil: 0.5 },
+  // Passregel: so viel Wasser muss unter dem Kiel bleiben (Meter)
+  passregel: { wasserUnterKiel: 0.3 },
 
   wuensche: {
     //      ab Stufe, welche Klassen ihn haben können, Bauwerk, das ihn erfüllt
@@ -73,14 +76,14 @@ export const ECONOMY = {
     diesel: { abStufe: 4, klassen: ['S', 'M', 'L', 'XL'], durch: 'diesel', nurMotor: true },
   },
   // Wie viele Wünsche ein Boot hat: [min, max] je Klasse (gekappt auf verfügbare Wünsche)
-  wunschAnzahl: { S: [0, 2], M: [1, 2], L: [1, 3], XL: [2, 3] },
+  wunschAnzahl: { S: [0, 2], M: [1, 2], L: [1, 3], XL: [2, 3], XXL: [0, 0] },
 
   // Platzarten: Strom und Zufriedenheit. Stege ohne Strom bekommen ihn über bauwerke.strom.
   platzarten: {
     box:     { strom: false },
     finger:  { strom: true, rufBonus: 0.5 },   // halber Anker extra
     stirn:   { strom: false },
-    kai:     { strom: true },
+    kai:     { strom: true, nurKlassen: ['XL'], offen: true },   // offen: Sturm trifft ihn
     fischer: { gast: false },                  // fest vergeben, bringt Pacht
     // Stufe 6, Klasse XXL: fest vergeben, Besuche über services (kreuzfahrtterminal,
     // marineanleger, seenotretter), kein Liegegeld
@@ -92,7 +95,9 @@ export const ECONOMY = {
 
   ruf: {
     start: 3,
+    startBewertungen: 5,      // so viele Bewertungen mit start liegen zum Spielbeginn vor
     fenster: 20,              // Schnitt der letzten 20 Bewertungen
+    sondergastBonus: 1,       // Sondergäste (Marine, Behörden, Traditionssegler) geben so viel extra
     ohneWunsch: 4,
     // Ankünfte = Grundzahl * (0.5 + 0.25 * (Ruf - 1)): 1 Anker 0.5x, 3 Anker 1x, 5 Anker 1.5x
     ankunftBasis: 0.5,
@@ -101,6 +106,9 @@ export const ECONOMY = {
   },
 
   fischer: { pachtProTag: 15 },
+  dauerlieger: { anteilGastpreis: 0.5 },   // Pacht je Abend als Anteil des Gastpreises (Paket P01)
+  // Besucher an Land (Fahrgastschiff, Kreuzfahrt) geben abends je Stufe von Kiosk/Restaurant so viel aus
+  besucher: { ausgabeJeKioskStufe: 2 },
 
 
   // ---------------------------------------------------------------- Ausbaustufen
