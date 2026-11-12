@@ -106,8 +106,6 @@ body.hm-neu {
   border-radius: 999px;
   background: var(--hm-glas);
   box-shadow: var(--hm-schatten);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 .hm-neu .hm-status .stat {
   position: relative;
@@ -191,8 +189,6 @@ body.hm-neu {
   cursor: pointer;
   transition: transform 0.1s ease-out, background-color 0.15s, color 0.15s;
   color: var(--hm-tinte);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 .hm-neu .hm-rund > * { display: none; }
 /* Symbol genau in der Mitte, egal welcher Text im Knopf steht */
@@ -312,8 +308,6 @@ body.hm-neu {
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
 }
 .hm-neu #hm-seite #weather-chip svg { width: 22px; height: 22px; flex: none; }
 .hm-neu #hm-seite #weather-chip.has-news { box-shadow: 0 0 0 2px var(--hm-koralle), var(--hm-schatten); }
