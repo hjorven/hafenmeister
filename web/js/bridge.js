@@ -4,7 +4,7 @@
 
 import * as sim from './sim.js';
 import { createState, deserialize, load as loadLocal, save as saveLocal } from './state.js';
-import { HAFEN } from './data/harbor.js';
+import { HAFEN, platzInWelt } from './data/harbor.js';
 import { BOAT_CATALOG } from './data/boat-catalog.js';
 import { ECONOMY } from './data/economy.js';
 import { GROSSSCHIFF_BESUCHE } from './data/services.js';
@@ -81,6 +81,17 @@ export async function initBridge(game) {
   const ctx = sim.createContext({ boatTypes, harbor: HAFEN, rules: sim.rulesFromEconomy(ECONOMY) });
   let state = null;
   let selected = null; // ausgewähltes wartendes Boot
+
+  // Entfernung von der Warteboje eines Boots zu einem Liegeplatz (Weltkoordinaten), damit sich
+  // Gäste beim Selbst-Einfahren die nächste freie Box suchen. Ohne Landschaft: Reihenfolge am Steg.
+  const platzById = Object.fromEntries(HAFEN.plaetze.map((p) => [p.id, p]));
+  ctx.berthDistance = (boat, berth, st) => {
+    const boje = game.landscape?.warteplaetze?.bojen?.[boat.waitSpot ?? 0];
+    const p = platzById[berth.id];
+    if (!boje || !p) return null;
+    const w = platzInWelt(p, st.stage);
+    return w ? Math.hypot(w.x - boje.x, w.z - boje.z) : null;
+  };
 
   // Modifikatoren der Module Ereignisse und Services abfragen, falls es sie gibt
   sim.addHook(ctx, 'modifiers', () => game.events?.modifiers?.());
@@ -289,6 +300,7 @@ export async function initBridge(game) {
     platzZustaende: () => sim.berthStates(state, ctx),
     aufAusflug: (boatId) => !!state.boats[boatIdOf(boatId)]?.trip?.away,
     regionGoal: () => sim.regionGoal(state, ctx),
+    stageUpPreview: () => sim.stageUpPreview(state, ctx),
     holdBoat: (boatId, held = true) => sim.holdBoat(state, boatIdOf(boatId), held),
     // Hat das Boot sein Liegegeld für die kommende Nacht bezahlt? (Bändchen am Bug, Hafenmeister-Rundgang)
     istBezahlt: (boatId) => {
