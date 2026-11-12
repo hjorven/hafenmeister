@@ -279,6 +279,90 @@ export function init(game) {
     }
   });
 
+  // --- Bezahlt-Baendchen: wie im echten Hafen haengt nach dem Bezahlen ein farbiges Band am Bugkorb.
+  // Die Farbe wechselt jeden Tag (so sieht der Hafenmeister auf dem Rundgang, wer fuer heute bezahlt hat).
+  // Nur Gaeste; Dauerlieger haben ihren Platz fuer die Saison.
+  // kein Rot und kein Gruen: die haben schon die Platzschilder (frei/belegt)
+  const BAND_FARBEN = ['#ffbe0b', '#3a86ff', '#ff6fb5', '#fb8500', '#8338ec', '#00b4d8', '#f1fa3c'];
+  const bandMats = BAND_FARBEN.map((c) => new THREE.MeshLambertMaterial({ color: c, side: THREE.DoubleSide, emissive: c, emissiveIntensity: 0.25 }));
+  const stangeMat = new THREE.MeshLambertMaterial({ color: '#d9dde2' });
+  const _bv = new THREE.Vector3();
+  function bandFarbe() {
+    const st = game.sim?.state ?? game.state;
+    const tag = st?.day ?? 1;
+    return bandMats[((tag % bandMats.length) + bandMats.length) % bandMats.length];
+  }
+  // Hoehe des Decks am Bug: hoechster Punkt im vorderen Zehntel des Rumpfs (ohne Mast und Aufbau)
+  function bugHoehe(group, L) {
+    group.updateMatrixWorld(true);
+    const inv = new THREE.Matrix4().copy(group.matrixWorld).invert();
+    let y = 0;
+    group.traverse((o) => {
+      const pos = o.geometry?.attributes?.position;
+      if (!pos || !o.isMesh) return;
+      const m = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld);
+      for (let i = 0; i < pos.count; i += Math.max(1, pos.count >> 9)) {
+        _bv.fromBufferAttribute(pos, i).applyMatrix4(m);
+        if (_bv.x > L * 0.36 && _bv.x < L * 0.47 && Math.abs(_bv.z) < 0.6 && _bv.y < 3) y = Math.max(y, _bv.y);
+      }
+    });
+    return y || 0.8;
+  }
+  function baendchen(e) {
+    if (e.band) return e.band;
+    const L = e.anim.info.length, B = e.anim.info.beam;
+    const g = new THREE.Group();
+    g.name = 'bezahlt-band';
+    // gross genug, dass man es von oben sieht: etwa ein Viertel der Bootsbreite
+    const k = clamp(B / 3.2, 0.7, 1.6);
+    const stange = new THREE.Mesh(new THREE.CylinderGeometry(0.03 * k, 0.03 * k, 0.75 * k, 5), stangeMat);
+    stange.position.y = 0.37 * k;
+    g.add(stange);
+    // Wimpel: Dreieck, das vom Stab nach achtern weht, fast waagerecht, damit man es von oben sieht
+    const wg = new THREE.BufferGeometry();
+    wg.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, -0.22 * k, 0, 0, 0.22 * k, -1.15 * k, 0, 0], 3));
+    wg.computeVertexNormals();
+    const band = new THREE.Mesh(wg, bandFarbe());
+    band.position.y = 0.72 * k;
+    band.rotation.x = 0.25;
+    g.add(band);
+    g.userData.band = band;
+    g.position.set(L * 0.4, bugHoehe(e.group, L), 0);
+    g.visible = false;
+    e.group.add(g);
+    e.band = g;
+    return g;
+  }
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  let bandT = 0;
+  game.onTick((dt) => {
+    const t = game.time;
+    bandT += dt;
+    const pruefen = bandT > 0.4;
+    if (pruefen) bandT = 0;
+    const st = game.sim?.state ?? game.state;
+    for (const [id, e] of boats) {
+      if (pruefen) {
+        const sb = st?.boats?.[id];
+        const an = !!sb && !sb.stationed && !e.faehrt && e.anim.berth?.kind !== 'buoy' &&
+          (e.anim.moored || e.anim.state === 'casting-off') && !!game.sim?.istBezahlt?.(id);
+        if (an) {
+          const g = baendchen(e);
+          if (!g.visible) { g.visible = true; g.userData.t0 = t; g.userData.band.material = bandFarbe(); }
+        } else if (e.band) e.band.visible = false;
+      }
+      // im Wind flattern, beim Erscheinen kurz aufspringen
+      const g = e.band;
+      if (g?.visible) {
+        const b = g.userData.band;
+        b.rotation.y = Math.sin(t * 5 + id) * 0.25;
+        b.rotation.z = -0.15 + Math.sin(t * 7.3 + id * 2) * 0.08;
+        const k = Math.min(1, (t - (g.userData.t0 ?? 0)) * 4);
+        g.scale.setScalar(Math.max(0.01, k * (1 + Math.max(0, 0.25 - (t - (g.userData.t0 ?? 0))) * 1.6)));
+      }
+    }
+  });
+
   function entferne(id) {
     const e = boats.get(id);
     if (!e) return;

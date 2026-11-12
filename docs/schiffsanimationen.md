@@ -98,3 +98,7 @@ Ein einziger `onTick` für alle Boote, keine Speicheranforderungen pro Bild. Lei
 ## Dauerlieger
 
 Bei `dauer:auslaufen` `{ id, platzId, tage }` legt der Dauerlieger ab und fährt (ab Stufe 3 durch den Durchstich) aufs Revier. Bei `tage = 0` dreht er dort unter Segeln oder Motor Runden, bei mehrtägigen Törns fährt er aus dem Bild. Bei `dauer:einlaufen` `{ id, platzId }` kommt er zurück (oder vom Rand herein) und legt wieder an seinem Platz an.
+
+## Bezahlt-Wimpel
+
+Hat ein Gast sein Liegegeld bezahlt (`game.sim.istBezahlt(id)`), weht am Bug ein kleiner Wimpel an einem Stab, wie das Band oder der Aufkleber, den man im echten Hafen nach dem Bezahlen an den Bugkorb hängt. Die Farbe wechselt jeden Spieltag (Gelb, Blau, Rosa, Orange, Lila, Türkis, Zitronengelb), so sieht man auf einen Blick, wer für heute bezahlt hat. Rot und Grün sind ausgespart, die gehören den Platzschildern. Dauerlieger und Boote an der Boje bekommen keinen Wimpel. Der Wimpel springt beim Bezahlen kurz auf und flattert im Wind (`boat-view.js`, Gruppe `bezahlt-band` am Bootsmodell).
