@@ -1,0 +1,28 @@
+/* Pixel-Fassung: Aussehen der Leisten und Karten. Wird nur von pixel/index.html geladen
+   und gilt nur, wenn pixel.js html.pixel gesetzt hat. Keine Regel greift ins normale Spiel. */
+html.pixel #stage { image-rendering: pixelated; }
+
+/* Schrift: Pixelify Sans (frei, mit Umlauten), sonst Systemschrift */
+html.pixel body,
+html.pixel body * { font-family: 'Pixelify Sans', ui-monospace, system-ui, sans-serif !important; }
+
+/* Harte Kanten statt Rundungen, Schatten als volle Pixelstufe */
+html.pixel body *:not(#stage) {
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html.pixel #game button {
+  box-shadow: 0 3px 0 0 #12212e !important;
+  border: 2px solid #12212e !important;
+  transition: transform 60ms steps(1), box-shadow 60ms steps(1) !important;
+}
+html.pixel #game button:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 0 #12212e !important;
+}
+html.pixel #game .hud,
+html.pixel #card {
+  border: 2px solid #12212e !important;
+  box-shadow: 0 4px 0 0 rgba(18, 33, 46, 0.55) !important;
+}
