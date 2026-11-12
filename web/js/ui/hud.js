@@ -175,6 +175,11 @@ export function init(game) {
       return closeCard();
     }
     const fitting = sim.fittingBerths(b.id);
+    // Zuweisen als Entscheidung (P10, Review Bed P2): was das Boot zahlt und wie viele Plätze
+    // seinen Platz-Wunsch erfüllen (die leuchten gold)
+    const gold = sim.wunschPlaetze?.(b.id) ?? [];
+    const wert = sim.platzWert?.(b.id) ?? null;
+    const platzWunsch = b.wishes.filter((w) => sim.ctx.rules.berthWishes?.[w]).map((w) => WISH_LABEL[w] ?? w);
     const schliessen = () => { sim.select(null); closeCard(); };
     // Kurz und auf einen Blick: Name, Eckdaten als Schilder, ein Satz, zwei Knöpfe.
     // "Einfahren" steht immer groß in der Karte, auf jedem Gerät an derselben Stelle.
@@ -192,9 +197,10 @@ export function init(game) {
         el('li', { title: 'Tiefgang' }, `Tiefgang ${meters(b.draft)}`),
         el('li', { title: 'Aufenthalt' }, nacht),
         ...b.wishes.map((w) => el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`))),
+      wert ? el('p', { class: 'card-zahlt' }, `Zahlt etwa ${wert.fee} € pro Nacht${gold.length ? `, am Wunschplatz ${sim.platzWert(b.id, gold[0])?.fee ?? wert.fee} €` : ''}.`) : null,
       el('p', { class: 'card-hint' }, !fitting.length
         ? 'Gerade ist kein passender Platz frei.'
-        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}. Zieh das Boot hin oder lass es einfahren.`),
+        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}. Zieh das Boot hin, sonst nimmt es eine Box nahe der Einfahrt.`),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
       el(
         'div',
@@ -296,10 +302,13 @@ export function init(game) {
   // die runden Ringe sind nur der Ersatz ohne render/stege.js.
   let ringGroup = null;
   let leuchtend = [];
-  function showRings(ids) {
+  function showRings(ids, boatId = null) {
+    const gold = new Set(boatId != null ? game.sim?.wunschPlaetze?.(boatId) ?? [] : []);
     if (game.stege?.highlight) {
       leuchtend = [...ids];
       game.stege.highlight(leuchtend, '#2a9d8f');
+      // Gold: Platz erfüllt einen Wunsch des Boots (Strom), wie beim Ziehen in ui/gesten.js
+      for (const id of gold) game.stege.platz?.(id)?.mesh?.material?.color?.set('#f2b01e');
       return;
     }
     const THREE = game.THREE;
@@ -352,7 +361,7 @@ export function init(game) {
   });
   game.on('sim:select', ({ boatId, berths }) => {
     note = '';
-    if (boatId != null) showRings(berths || []);
+    if (boatId != null) showRings(berths || [], boatId);
     else clearRings();
     if (boatId != null) openCard('boat');
     else if (cardMode === 'boat') closeCard();

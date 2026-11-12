@@ -19,12 +19,20 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 
 1. Morgens würfelt `sim.js` die Ankünfte des Tages aus: Zahl = Boote pro Tag der Stufe × Ruf-Faktor × Modifikatoren. Im Winter (Tag 31 bis 33 jeder Saison) kommt niemand.
 2. Ein Boot kommt an und legt sich an eine freie **Warteboje** vor dem Hafen (`boat.waitSpot`, 0 = erste Boje). Sind alle Bojen belegt, fährt es weiter. Die 3D-Ansicht meldet mit `game.emit('boot:an-boje', { id })`, wenn das Boot fest ist. Erst ab dann zählt seine Geduld. Meldet niemand etwas, gilt es nach 35 s als angekommen.
-3. Der Spieler zieht das Boot auf einen Platz oder tippt „Einfahren“, auch schon während der Anfahrt. Tut er nichts, sucht sich das Boot nach 8 s an der Boje (`queue.selfEnterAfter`; bei Andrang, wenn mehr als die Hälfte der Bojen vergeben ist, schon 8 s nach der Ankunft im Revier) selbst die knappste passende freie Box (`sim:selfEntered`). Wünsche wie Strom beachtet es dabei nicht, das lohnt sich nur von Hand oder mit dem Hafenbüro. Ein ausgewähltes Boot (`boat.held`) wartet. Passt keine Box, fährt es nach Ablauf der Geduld weiter. Sind alle Bojen belegt und eine passende Box ist frei, fährt ein neues Boot direkt ein (`sim:arrived` und `sim:selfEntered` mit `direct: true`) statt abzudrehen.
+3. Der Spieler zieht das Boot auf einen Platz oder tippt „Einfahren“, auch schon während der Anfahrt. Tut er nichts, sucht sich das Boot nach 8 s an der Boje (`queue.selfEnterAfter`; bei Andrang, wenn mehr als die Hälfte der Bojen vergeben ist, schon 8 s nach der Ankunft im Revier) selbst eine Box (`sim:selfEntered`): eine der drei nächsten freien Boxen von der Einfahrt aus, an die es passt, auch wenn sie viel zu groß ist (Jorven, 12.11.2026; `selfBerth`, Einfahrt `ECONOMY.warten.einfahrt`, Gewichte `ECONOMY.warten.selbstWahl`). Wünsche wie Strom beachtet es dabei nicht. Den guten Platz findet nur der Spieler oder das Hafenbüro, deshalb lohnt sich Umlenken. Ein ausgewähltes Boot (`boat.held`) wartet. Passt keine Box, fährt es nach Ablauf der Geduld weiter. Sind alle Bojen belegt und eine passende Box ist frei, fährt ein neues Boot direkt ein (`sim:arrived` und `sim:selfEntered` mit `direct: true`) statt abzudrehen.
 3a. Tagestörn: Gäste mit 2 oder mehr Nächten fahren an manchen Tagen hinaus (`sim:tripOut`, `sim:tripBack`, `boat.trip.away`). Die Box bleibt belegt. Kein Törn bei Sturm und im Winter.
 4. Sobald ein Boot angelegt hat, wird sein Liegegeld für die kommende Nacht fällig (Münze, `boat.paid = false`). Nach dem Kassieren gilt es als bezahlt (`boat.paid = true`, in `game.sim.boote` als `bezahlt`). Wer mehrere Nächte bleibt, zahlt jeden Morgen die nächste Nacht. Am ersten Tag eines neuen Spiels kommt das erste Boot schon nach 3 s (`rules.firstArrivalAt`).
-4a. Tagesrhythmus: Boote kommen zwischen 35 % und 95 % des Tages, am häufigsten um 70 % (`arrivalFrom`, `arrivalWindow`, `arrivalPeak`; aus `ECONOMY.zeit.ankunftVon/ankunftBis/ankunftSpitze`). Wer abends noch an der Boje liegt, bleibt über Nacht und hat morgens wieder volle Geduld (`queue.overnight`, `ECONOMY.warten.ueberNacht`).
+4a. Tagesrhythmus: Boote kommen zwischen 35 % und 95 % des Tages, am häufigsten um 70 % (`arrivalFrom`, `arrivalWindow`, `arrivalPeak`; aus `ECONOMY.zeit.ankunftVon/ankunftBis/ankunftSpitze`). Wer abends noch an der Boje liegt, bleibt über Nacht und hat morgens wieder volle Geduld (`queue.overnight`, `ECONOMY.warten.ueberNacht`). Dafür zahlt er nachts Bojengeld, einen Anteil seines Grundpreises (`ECONOMY.warten.bojengeld`, Ereignis `sim:buoyFee`), und wird morgens vor den neuen Gästen bedient (`boat.overnight`).
 4b. Abends (ab 90 s): Pacht der stationierten Einheiten, Tagesgäste und Services werden abgerechnet.
 5. Nachts (ab 120 s): nicht kassierte Münzen zählen zur Hälfte, Boote mit 0 Nächten werden abgerechnet und bewerten den Hafen (`sim:departed` mit `leaveAt`). Sie legen aber erst am nächsten Vormittag ab, jedes zu seiner Zeit zwischen 7 % und 30 % des Tages (`departWindow`, `ECONOMY.zeit.abreiseVon/abreiseBis`): dann kommt `sim:castOff` und für die Grafik `boot-faehrt`. Bis das Boot heraus ist, bleibt die Box belegt. Der Spielstand wird gespeichert.
+
+**Zuweisen als Entscheidung (P10):**
+
+- Beim Antippen oder Ziehen leuchten passende freie Boxen türkis, Boxen, die einen Platz-Wunsch des Boots erfüllen (Strom), gold (`game.sim.wunschPlaetze`). Rastet die Leine ein, steht über der Box, was sie bringt: Liegegeld der ersten Nacht mit Wunschbonus, erwartete Anker, erfüllte Wünsche und „passgenau“ (`game.sim.platzWert(boot, platz)`).
+- Die Bootskarte nennt „zahlt etwa … € pro Nacht“ und wie viele gold leuchtende Plätze frei sind.
+- Passgenau: Die Box ist höchstens ein Fünftel größer als die kleinste Box des Hafens, an die das Boot passt (`ECONOMY.passgenau`). Das bringt bei der Abreise einen Viertelanker mehr. In Stufe 1 gibt es nur eine Boxgröße, dort zählt es nicht.
+- Abweisen von Hand hat dieselbe Folge wie Wegfahren aus Ungeduld: mit `ECONOMY.ruf.abgewiesen.chance` eine Bewertung `abgewiesen.wertung`. Keine Bewertung, wenn das Boot an keinen Platz des Hafens passt oder gar nicht warten konnte (alle Bojen belegt). In `stats.turnedAway` zählt nur, wer von selbst weiterfährt.
+- `sim:moored` trägt `hand: true`, wenn der Spieler die Box gewählt hat (Ziehen, Ring), und `passgenau: true`. „Einfahren lassen“, Selbst-Einfahren und Hafenbüro setzen kein `hand`.
 
 **Liegeplätze:** Zu Beginn gibt es nur die Plätze aus `ECONOMY.start`. Jedes Stegprojekt (`ECONOMY.stegprojekte`, unter „Bauen“) und jeder Stufenausbau schaltet seine Plätze frei. Fischerplätze bekommen ihr Fischerboot von selbst, es zahlt Pacht. Für die nächste Ausbaustufe zählen die Gäste, die in der aktuellen Stufe abgereist sind.
 
@@ -41,7 +49,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 | `select(bootId)` | Boot auswählen, liefert passende freie Platz-ids, sendet `sim:select` |
 | `assign(bootId, platzId)` | zuweisen, `{ ok, reason }` |
 | `autoEnter(bootId)` | automatisch einfahren (bester freier Platz) |
-| `dismiss(bootId)` | wartendes Boot wegschicken |
+| `dismiss(bootId)` | wartendes Boot wegschicken, gleiche Folge wie Wegfahren aus Ungeduld |
 | `collect(bootId)`, `collectAll()` | Münze einstreichen |
 | `fastForward(sekunden)` | Spielzeit vorspulen, höchstens bis zum nächsten Abend oder Morgen |
 | `upgradeFacility(key)`, `upgradeOffice()`, `build(id, kosten, stufe)`, `advanceStage()` | Bauen |
@@ -57,6 +65,8 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 | `regionGoal()` | Abschlussziel der letzten Stufe: `{ active, ok, missing, visits, reputation, openBerths, goal }` |
 | `istBezahlt(bootId)` | Liegegeld für die kommende Nacht kassiert (für Bändchen am Bug und Rundgang) |
 | `wartet(bootId)`, `passendePlaetze(bootId)`, `tagesAnteil()` | für die Gesten (`tagesAnteil` 0 = Morgen, 1 = Nacht) |
+| `wunschPlaetze(bootId)` | freie passende Plätze, die einen Platz-Wunsch erfüllen (leuchten gold) |
+| `platzWert(bootId, platzId?)` | `{ fee, wishesMet, wishes, anchors, snug }`: Liegegeld der ersten Nacht, erwartete Anker, passgenau; ohne Platz der Grundwert |
 | `addHook(name, fn)`, `addService(key, def)` | Erweiterungen (unten) |
 | `newGame(seed)`, `setRegion(id)` | neues Spiel, Region |
 
@@ -76,9 +86,10 @@ Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, 
 |---|---|
 | `sim:change` | etwas hat sich geändert, Oberfläche neu zeichnen |
 | `sim:arrived` | `{ boatId, waitSpot }`, Boot liegt an der Boje |
-| `sim:moored` | `{ boatId, berthId }` |
+| `sim:moored` | `{ boatId, berthId, hand?, passgenau? }` |
 | `sim:turnedAway` | `{ boatId, reason: 'queueFull' \| 'patience' \| 'evening', rated }` |
-| `sim:dismissed` | `{ boatId }` |
+| `sim:dismissed` | `{ boatId, rated }` (rated: Gast hat schlecht bewertet) |
+| `sim:buoyFee` | `{ amount, boats }` Bojengeld der Boote, die über Nacht an der Boje liegen |
 | `sim:atBuoy` | `{ boatId }`, Geduld läuft |
 | `sim:selfEntered` | `{ boatId, berthId }` Boot hat sich selbst eine Box gesucht (zusätzlich zu `sim:moored`) |
 | `sim:tripOut`, `sim:tripBack` | `{ boatId, berthId }` Tagestörn eines Gastes. Für die Grafik zusätzlich `dauer:auslaufen { id, platzId, tage: 0, gast: true }` und `dauer:einlaufen { id, platzId, gast: true }` |
