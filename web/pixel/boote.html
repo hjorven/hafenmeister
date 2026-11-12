@@ -15,10 +15,13 @@
     #info { margin: 0 0 12px; max-width: 75ch; }
     h2 { font-size: 15px; margin: 18px 0 8px; }
     .reihe { display: flex; flex-wrap: wrap; gap: 10px; }
-    figure { margin: 0; background: var(--wasser); padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+    figure { margin: 0; background: var(--wasser); padding: 6px; display: flex; flex-direction: column; gap: 4px; max-width: 100%; box-sizing: border-box; }
     figcaption { font-size: 12px; color: #12212e; max-width: 46ch; }
-    .bilder { display: flex; gap: 6px; align-items: flex-end; }
-    .bilder canvas { image-rendering: pixelated; display: block; }
+    .bilder { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; }
+    .bilder > div { max-width: 100%; }
+    /* Am Handy schrumpfen grosse Bilder auf Bildschirmbreite (bei grossen Schiffen ist "nah" breiter als ein Handy) */
+    .bilder canvas { image-rendering: pixelated; display: block; max-width: 100%; height: auto; }
+    @media (max-width: 700px) { header { position: static; } main { padding: 10px; } }
     .bilder span { display: block; font-size: 10px; color: #12212e; text-align: center; }
   </style>
   <script type="importmap">
@@ -52,7 +55,7 @@
       { name: 'mittel', texel: 0.125, px: 3 },
       { name: 'nah', texel: 0.0625, px: 3 },
     ];
-    const REF_TEXEL = 0.0625 / 2;   // 3D-Bild in feiner Aufloesung
+    const REF_MAX = 768;            // 3D-Bild: hoechstens so viele Pixel breit zeichnen
     const RICHTUNGEN = 16;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
@@ -107,14 +110,14 @@
     }
 
     function referenz(boot, radius, grad, anzeigeBreite) {
-      const groesse = Math.ceil((radius * 2.1) / REF_TEXEL);
-      const cam = kamera(radius, grad, REF_TEXEL, groesse);
+      const groesse = Math.min(REF_MAX, Math.ceil((radius * 2.1) / (0.0625 / 2)));
+      const cam = kamera(radius, grad, (radius * 2.1) / groesse, groesse);
       scene.add(boot);
       renderer.setSize(groesse, groesse);
       renderer.render(scene, cam);
       scene.remove(boot);
       const c = document.createElement('canvas');
-      c.width = anzeigeBreite; c.height = anzeigeBreite;
+      c.width = groesse; c.height = groesse;
       c.getContext('2d').drawImage(renderer.domElement, 0, 0, c.width, c.height);
       c.style.imageRendering = 'auto';
       return c;
@@ -144,6 +147,15 @@
         d.append(leinwand(bild, s.px), Object.assign(document.createElement('span'), { textContent: s.name }));
         bilder.append(d);
       }
+      // Schmaler Bildschirm: alle Bilder eines Boots mit demselben Faktor verkleinern,
+      // damit weit, mittel und nah im richtigen Groessenverhaeltnis bleiben
+      const verfuegbar = Math.max(200, ($('liste').clientWidth || window.innerWidth) - 24);
+      const leinwaende = [...bilder.querySelectorAll('canvas')];
+      const breitestes = Math.max(...leinwaende.slice(1).map((c) => c.width));
+      const faktor = Math.min(1, verfuegbar / breitestes);
+      for (const c of leinwaende.slice(1)) c.style.width = `${Math.floor(c.width * faktor)}px`;
+      // 3D-Bild so gross wie das nahe Sprite, damit man Details vergleichen kann
+      leinwaende[0].style.width = `${Math.floor(leinwaende[leinwaende.length - 1].width * faktor)}px`;
       const cap = document.createElement('figcaption');
       cap.textContent = `${m.id} ${m.name || ''}${m.length ? `, ${m.length} m` : ''}`;
       fig.append(bilder, cap);
@@ -172,6 +184,8 @@
     }
 
     const q = new URLSearchParams(location.search);
+    // Am Handy erst nur Groesse S zeichnen (alle Groessen dauern dort lange)
+    if (!q.get('groesse') && window.matchMedia('(max-width: 700px)').matches) $('groesse').value = 'S';
     for (const k of ['groesse', 'hoehe', 'richtung', 'segel']) if (q.get(k) && [...$(k).options].some((o) => o.value === q.get(k) || o.text === q.get(k))) $(k).value = q.get(k);
     for (const k of ['groesse', 'hoehe', 'richtung', 'segel']) $(k).addEventListener('change', zeichneAlle);
     await zeichneAlle();

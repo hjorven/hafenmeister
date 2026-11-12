@@ -204,9 +204,31 @@ export function nachtHook({ state, events }) {
   }
 }
 
+/**
+ * Stufenausbau (Hook 'stageUp'): Fällt ein Dauerplatz weg, zieht er mit seinem Boot um.
+ * Liegt das Boot im Hafen, haben die Regeln es schon umgelegt (moves); ist es auf Törn, bekommt es
+ * hier einen neuen freien Platz, an den es zurückkommt. Gibt es keinen, endet der Dauerplatz.
+ */
+export function stufenHook({ state, gone, moves, findBerth, events }) {
+  const d = dauerState(state);
+  for (const alt of gone) {
+    const p = d.plaetze[alt];
+    if (!p) continue;
+    delete d.plaetze[alt];
+    const umzug = moves.find((m) => m.from === alt && m.boatId === p.bootId);
+    const neu = umzug?.to ?? (p.boot ? findBerth(p.boot) : null);
+    if (neu && !d.plaetze[neu]) {
+      d.plaetze[neu] = p;
+      events.push({ type: 'dauerUmzug', boatId: p.bootId, from: alt, berthId: neu });
+    } else {
+      events.push({ type: 'dauerAufgehoben', boatId: p.bootId, berthId: alt, grund: 'umbau' });
+    }
+  }
+}
+
 /** Hooks in einen Regel-Kontext hängen (Browser über game.sim.addHook, Tests über sim.addHook). */
 export function haengeEin(addHook) {
-  const ab = [addHook('fit', fitHook), addHook('evening', abendHook), addHook('night', nachtHook)];
+  const ab = [addHook('fit', fitHook), addHook('evening', abendHook), addHook('night', nachtHook), addHook('stageUp', stufenHook)];
   return () => ab.forEach((f) => f());
 }
 

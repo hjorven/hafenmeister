@@ -299,6 +299,14 @@ export const ECONOMY = {
     ] },
     museumshafen: { abStufe: 5, stufen: [
       { name: 'Museumshafen',            kosten: 22000, wirkung: { gaeste: { XL: 1.5 }, proTag: 80 } },
+      { name: 'Museumshafen mit Speicher', kosten: 30000, wirkung: { gaeste: { XL: 1.5 }, proTag: 160 } },
+      // Stufe 6. Stufen addieren sich nicht: proTag 160 aus Stufe 2 plus 120 fuer das Treffen
+      { name: 'Windjammertreffen',       kosten: 26000, abStufe: 6, wirkung: { gaeste: { XL: 1.6 }, proTag: 280,
+        besuch: { art: 'windjammer', alleTage: 12, ersterNach: 4, dauer: 2, einnahme: 5000, gaeste: 1800, ruf: 0.03,
+          text: 'Windjammertreffen: Traditionssegler laufen ein' } } },
+    ] },
+    barkasse: { abStufe: 6, stufen: [
+      { name: 'Barkasse',                kosten: 9000, wirkung: { proTag: 220, wetter: { regen: 0.5, sturm: 0 }, ruf: 0.03 } },
     ] },
     fahrgastanleger: { abStufe: 5, stufen: [
       { name: 'Fahrgastanleger',         kosten: 21000, wirkung: { proTag: 150 } },

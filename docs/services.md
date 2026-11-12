@@ -32,10 +32,11 @@ Bezahlt wird mit `game.sim.spend`, bei zu wenig Geld ist der Knopf gesperrt. Die
 | Seenotretter-Station | 4 | Rettungsboot, Rettungskreuzer (Stufe 6) | weniger Sturmschaden, Ruf | Boot rückt bei Sturm aus |
 | Fischhalle | 5 | Fischhalle, mit Fischmarkt | Besucher für Kiosk und Restaurant | Fisch-Schild dreht sich |
 | Fahrgastanleger | 5 | Anleger, Ausflugsflotte | tägliche Ausflugsfahrt | Flagge |
-| Museumshafen | 5 | Kai vor Speicher, zweiter Speicher | Traditionssegler kommen, Hafenfest größer | Holzkran schwenkt |
+| Museumshafen | 5 | Kai vor Speicher, zweiter Speicher, Windjammertreffen (ab 6) | Traditionssegler kommen, Hafenfest größer; mit Treffen alle 12 Tage zwei Tage Windjammer | Holzkran schwenkt; zum Treffen Flaggenreihe und Marktzelte, drei Großsegler ankern vor der Pier |
+| Barkasse | 6 | eine Stufe, braucht den Fahrgastanleger | Geld pro Tag (bei Regen die Hälfte, bei Sturm nichts), Ruf | Bude und Ponton am Ostufer des Sees; die Barkasse fährt zweimal am Tag eine Rundfahrt |
 
 | Kreuzfahrtterminal | 6 | Terminal an der T-Pier, großes Terminal | Kreuzfahrtschiff alle 7, später alle 4 Tage | Schiff läuft morgens ein und abends aus |
-| Marineanleger | 6 | Anleger, Stützpunkt | Flottenbesuch alle 10 Tage, später Tag der offenen Tür | Korvette und Minenjagdboot machen fest, Radar dreht |
+| Marineanleger | 6 | Anleger, Stützpunkt | Flottenbesuch alle 10 Tage, mit Stützpunkt alle 6 Tage und Tag der offenen Tür | Korvette und Minenjagdboot machen fest, Radar dreht |
 
 **Angebote an Land** (Bäcker, Hafencafé, Grillplatz, Fahrradverleih, Eisdiele, dazu die Räucherei): Die Menschen im Hafen gehen zur passenden Tageszeit hin (`ZIELE` und `SERVICE_ZIELE` in `web/js/data/people.js`), morgens zum Bäcker, nachmittags ins Café und zur Eisdiele, abends an den Grill. Nach dem Bau baut `people.js` das Wegenetz mit dem neuen Ziel neu. Zahlen kommen vom Balancing (`ECONOMY.services`), Gruppe `an-land`.
 
@@ -43,7 +44,17 @@ Bezahlt wird mit `game.sim.spend`, bei zu wenig Geld ist der Knopf gesperrt. Die
 
 **Großschiffpier** (Stufe 6): Die T-Pier westlich der Westmole kommt aus `harbor.js` (Stufe 6, steg `P`) und wird von `services.js` gezeichnet. Kreuzfahrtschiffe liegen außen am Pierkopf (P01), Marineschiffe innen (MA01, MA02), der Seenotrettungskreuzer an der Westmole (SK01).
 
-**Besuchsschiffe** (`web/js/render/services-besuch.js`): Das Ausflugsschiff liegt morgens am Kai, fährt mittags durch die Molen hinaus und kommt nachmittags zurück. Kreuzfahrtschiff und Marineschiffe kommen nur an Besuchstagen. Am Vorabend kündigt das Schild unter der oberen Leiste den Besuch an. Bei Sturm bleibt der Besuch aus und kommt einen Tag später. Sobald der Schiffs-Thread XXL-Modelle anbietet (`game.boatTypes.xxl`, Kreuzfahrtschiff XXL1-3, Korvette XXL2-2, Minenjagdboot XXL2-1), werden diese genommen.
+**Besuchsschiffe** (`web/js/render/services-besuch.js`): Das Ausflugsschiff liegt morgens am Kai, fährt mittags durch die Molen hinaus und kommt nachmittags zurück. Kreuzfahrtschiff und Marineschiffe kommen nur an Besuchstagen. Am Vorabend kündigt das Schild unter der oberen Leiste den Besuch an. Bei Sturm bleibt der Besuch aus und kommt einen Tag später. Der Marinestützpunkt (zweite Stufe des Marineanlegers) bringt mehr Besuche als der Anleger: Flottenbesuch alle 6 statt alle 10 Tage, zwei Tage lang, am zweiten Tag mit Tag der offenen Tür. Jeder zählt für das Abschlussziel.
+
+Mehrtägige Besuche (Windjammertreffen, Flottenbesuch) bleiben über Nacht liegen und laufen am letzten Tag abends aus; den letzten Tag merkt sich der Spielstand unter `laufend`.
+
+**Windjammertreffen**: drei Traditionssegler (Modelle XL1-4 Kogge, XL1-2 Brigg, XL1-1 Gaffelschoner aus `game.boatTypes.xl`) laufen am ersten Besuchstag nacheinander unter Segeln von Norden ein und ankern in einer Reihe nördlich der Großschiffpier (Plan-y 330 bis 338, abseits vom Weg des Kreuzfahrtschiffs). Vor Anker sind die Segel geborgen.
+
+**Barkasse**: liegt am Ponton am Ostufer des Sees (Plan 192/2). Rundfahrt 1 (Spieltag 0,3 bis 0,58) fährt nördlich am Schwimmwellenbrecher entlang durch den See, Rundfahrt 2 (0,64 bis 0,92) durch den Durchstich in den Außenhafen, am Museumshafen und an der Westmole vorbei. Die Zeiten liegen so, dass sie das Ausflugsschiff im Außenhafen nicht trifft. Im Winter und bei Sturm bleibt sie am Ponton.
+
+Alle Besuchsschiffe und die Barkasse melden sich bei `game.boatAnim.hindernis(group, { laenge, breite })` an (Thread Schiffsanimationen), damit Gastboote ausweichen.
+
+Sobald der Schiffs-Thread XXL-Modelle anbietet (`game.boatTypes.xxl`, Kreuzfahrtschiff XXL1-3, Korvette XXL2-2, Minenjagdboot XXL2-1), werden diese genommen.
 
 ## Dateien
 
@@ -52,7 +63,7 @@ Bezahlt wird mit `game.sim.spend`, bei zu wenig Geld ist der Knopf gesperrt. Die
 | `web/js/data/services.js` | Katalog: Lage, Preise, Wirkungen. Feldbeschreibung steht oben in der Datei. |
 | `web/js/services/rules.js` | Regeln ohne Grafik: freischalten, bauen, Effekte, Tagesabrechnung, regelmäßige Besuche |
 | `web/js/render/services-models.js` | 15 Modelle aus einfachen Körpern |
-| `web/js/render/services-besuch.js` | Besuchsschiffe: Ausflugsschiff, Kreuzfahrtschiff, Marineschiffe mit Ein- und Auslaufen |
+| `web/js/render/services-besuch.js` | Besuchsschiffe: Ausflugsschiff, Kreuzfahrtschiff, Marineschiffe, Windjammer mit Ein- und Auslaufen; Barkasse mit zwei Rundfahrten |
 | `web/js/render/services.js` | Einstieg `init(game)`: Bauplätze, Karte, Modelle, Ereignisse, `game.services` |
 | `tests/services.test.mjs` | Tests für die Regeln |
 
@@ -66,7 +77,7 @@ Zahlen aus dem Balancing (`web/js/data/economy.js`, `ECONOMY.services[id]`) übe
 | `tag:ende` mit `{ tag, boote: [{ klasse, antrieb }] }` | Tagesabrechnung, Antwort `services:abrechnung` mit `{ einnahmen, summe, besuche }`; Winter kommt aus `day:start`, Sturm aus `game.events.current` |
 | `game.emit('sturm', { tag })` | Seenotretter rücken aus, Antwort `services:einsatz` |
 | `services:gebaut`, `services:besuch-angekuendigt`, `services:besuch` | für Ton, Oberfläche und Schiffe |
-| `game.services.grossschiffBesuche()` | Zahl der bisherigen Besuche großer Schiffe (Kreuzfahrt, Flottenbesuch, Tag der offenen Tür) für das Ziel von Stufe 6 (`ziel.grossschiffBesuche` in `economy.js`); `besucheJeArt()` zählt je Art |
+| `game.services.grossschiffBesuche()` | Zahl der Besuche großer Schiffe für das Ziel von Stufe 6 (`ziel.grossschiffBesuche` in `economy.js`). Es gibt nur einen Zähler: `state.bigVisits` in `sim.js`, den `bridge.js` bei `services:besuch` erhöht, wenn die Art in `GROSSSCHIFF_BESUCHE` (`web/js/data/services.js`) steht: Kreuzfahrt und Flottenbesuch (beim Marinestützpunkt mit Tag der offenen Tür). Windjammertreffen und Ausflugsfahrten zählen nicht. Gezählt wird erst in der letzten Stufe. `besucheJeArt()` ist nur Statistik über das ganze Spiel |
 | `game.services.liste()` | alle Services der aktuellen Stufe mit Preis und Sperrgründen, z. B. für den Knopf „Bauen“ |
 
 Keine laufenden Kosten (plan.md, Leitlinien): Services bringen nur etwas ein.

@@ -25,7 +25,7 @@ Jedes Boot trägt `userData.pick = { type: 'boat', id }` mit der Boot-id aus `ga
 python3 -m http.server 8000 --directory web
 ```
 
-Dann `http://localhost:8000` öffnen. Nach einigen Sekunden kommt das erste Boot an die Boje. Boot antippen oder mit dem Finger zu Steg A ziehen, es legt an. Mit der Sonne vorspulen bis zum Abend, Münzen einstreichen. Die Vorführung aller Größen: `http://localhost:8000/?demo=boote`.
+Dann `http://localhost:8000` öffnen. Nach einigen Sekunden kommt das erste Boot an die Boje. Boot antippen oder mit dem Finger zu Steg A ziehen, es legt an. Mit den Tempo-Knöpfen unten links (3x, 8x) vorspulen bis zum Abend, Münzen einstreichen. Die Vorführung aller Größen: `http://localhost:8000/?demo=boote`.
 
 ## Schnittstelle für Bootsmodelle
 

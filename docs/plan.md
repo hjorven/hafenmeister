@@ -48,7 +48,7 @@ Ein kleines, gemütliches Aufbauspiel in 3D. Du fängst mit einem Badesteg an ei
 
 ## 3. Spielablauf
 
-Ein Spieltag dauert 2 Minuten bei normaler Geschwindigkeit: 90 Sekunden Tag, 30 Sekunden Abend. Vorspulen mit 2x gibt es von Anfang an, 3x ab dem Hafenbüro.
+Ein Spieltag dauert 2 Minuten bei normaler Geschwindigkeit: 90 Sekunden Tag, 30 Sekunden Abend. Tempo von Anfang an mit vier Knöpfen unten links: Pause, 1x, 3x, 8x; am PC schaltet Taste F 3x an und aus (Jorven, 12.11.2026: "Tempo so bleiben").
 
 1. **Tagsüber** laufen Boote ein und warten vor den Stegen. Du tippst ein Boot an, die passenden Stege leuchten auf, du tippst einen Steg an. Das Spiel wählt die beste freie Box an diesem Steg. Wer hineinzoomt, kann auch eine bestimmte Box antippen.
 2. **Abends** kassierst du das Hafengeld. In Stufe 1 mit einer Münze über jedem Boot, ab Stufe 2 mit dem Hafenhorn (Abschnitt 8) für alle auf einmal.
@@ -144,7 +144,7 @@ Ein Bauwerk „versorgt n Boote“ heißt: pro Abend bekommen n Boote diesen Wun
 |---|---|---|
 | Bootsverleih | 1 | kleines Einkommen pro Tag, Leihboote fahren über den See |
 | Slip | 2 | Trailerboote kommen über Land, zusätzliche S-Gäste ohne Liegeplatz |
-| Hafenmeisterbüro | 2 bis 3 | Alles kassieren, später Automatik und 3x Vorspulen |
+| Hafenmeisterbüro | 2 bis 3 | Stufe 1: Knopf "Alle kassieren" (vorher streicht man Münzen einzeln), später Automatik für Standardfälle |
 | Mastenkran | 3 | Segelboote aus dem Binnenland kommen, mehr M-Gäste |
 | Segelclub | 3 | Regatten möglich, mehr Jollen |
 | Seenotretter-Station | 4 | Sturm richtet weniger Schaden an, Rettungsboot rückt sichtbar aus |
@@ -303,6 +303,8 @@ bash tools/check-pages.sh web
 
 ## 13. Meilensteine
 
+**Reihenfolge seit 12.11.2026 abends (Jorven):** Zuerst wird das Gelände mit den Bootswegen komplett überarbeitet (Welle 0 in [roadmap.md](roadmap.md), fünf Threads), alle anderen Arbeiten ruhen so lange. Danach die Grundprobleme, dann die Kernschleife, zuletzt die Extras. Jeder Thread prüft sein Feature vor dem Weiterbauen sehr oft und mit Randfällen und schreibt auf, wo es mit anderen kollidieren kann.
+
 Der aktuelle Arbeitsstand und alle offenen Punkte stehen in [roadmap.md](roadmap.md). Die Haken unten werden mit Paket P08 der Roadmap nachgezogen.
 
 Jeder Meilenstein endet mit etwas, das man auf PC, Tablet und Handy (hoch und quer) ausprobieren kann.
@@ -326,16 +328,21 @@ Nach Meilenstein 1 weiß man, ob Zuweisen und Kassieren Spaß macht. Wenn nicht,
 |---|---|
 | Stil | Flat Vector in 3D |
 | Zuweisen von Hand oder automatisch | von Hand, ab Hafenbüro Automatik nur für Standardfälle |
-| Vorspulen | 2x von Anfang an, 3x mit Hafenbüro |
+| Vorspulen | Pause, 1x, 3x, 8x von Anfang an, Taste F für 3x (Jorven, 12.11.2026) |
 | Schauplatz | Zwei Regionen: Ostsee (Start) und Nordsee (danach). Gebäude als Mix aus deutschen, dänischen und schwedischen Häfen |
 | Dritte Zahl für Tagesgäste | nein. Tagesgäste bringen mehr Einnahmen und sind als Menschen im Hafen zu sehen |
-| Tretboote und Kanus als Gäste | nur Kulisse am Strand |
+| Tretboote und Kanus als Gäste | in Stufe 1 zahlende Gäste (Paddel- und Tretboot S2), sonst Kulisse (12.11.2026) |
 | Klappbrücke über den Durchstich | nicht in 1.0 |
 | Dauerlieger | ja, schon in 1.0 (Abschnitt 9a) |
 | Stammgäste, Wetter an der Flagge, Fotomodus, Hafen schauen, Tagesziele | ja, alle fünf (Abschnitt 9a, Einzelheiten in [neue-features.md](neue-features.md)) |
 | Story und Figuren | keine, nur ein kurzer Einstieg |
 
-**Noch offen:** die Fragen am Ende von [roadmap.md](roadmap.md) (unter anderem Vorspulen und Tretboote). Bis zur Antwort gilt diese Tabelle.
+| Selbst-Einfahren | nach 8 s in die nächste oder eine der freien Boxen am Steg, nicht mehr in die knappste; Boote berühren sich dabei nie (12.11.2026) |
+| Dauerlieger | Spieler legt fest, welche Boxen Dauerplätze sind, höchstens ein Viertel der Gastboxen, Saisonpacht im Voraus (12.11.2026, Einzelheiten Roadmap P01) |
+| Feature-Vorschläge aus dem Überblick | alle 42 werden gebaut ([roadmap.md](roadmap.md)) |
+| Online | als letzter Schritt, erst alles lokal |
+
+**Noch offen:** nichts. Die Arbeitsliste steht in [roadmap.md](roadmap.md).
 
 ## 15. Bewusst weggelassen
 

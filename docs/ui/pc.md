@@ -19,11 +19,11 @@ Am PC hat man Maus, Tastatur und viel Platz. Das Spiel soll sich dort nicht wie 
 | Datei | Aufgabe | Geräte |
 |---|---|---|
 | `web/js/core/input.js` | Linke Taste ziehen verschiebt die Karte, Tippen | alle |
-| `web/js/ui/gesten.js` | Schleppleine von der Warteboje, Knopf „Einfahren“, Kassierstrich über die Münzen, Sonne im Tagesbalken zum Vorspulen | alle |
+| `web/js/ui/gesten.js` | Schleppleine von der Warteboje, Knopf „Einfahren“, Kassierstrich über die Münzen | alle |
 | `web/js/ui/input-pc.js` | alles, was nur Maus und Tastatur können (unten) | PC |
 | `web/css/ui-pc.css` | Layout für große Bildschirme | PC |
 
-Die Gesten aus `gesten.js` gelten am PC genauso: wartendes Boot mit der Maus von der Boje ziehen, Maustaste gedrückt halten und über die Münzen streichen, die Sonne nach rechts ziehen. `input-pc.js` baut sie nicht nach, sondern ergänzt sie.
+Die Gesten aus `gesten.js` gelten am PC genauso: wartendes Boot mit der Maus von der Boje ziehen, Maustaste gedrückt halten und über die Münzen streichen, vorspulen mit den Tempo-Knöpfen unten links (`ui/oberflaeche.js`). `input-pc.js` baut sie nicht nach, sondern ergänzt sie.
 
 ## Was input-pc.js ergänzt
 
@@ -47,7 +47,7 @@ Die Gesten aus `gesten.js` gelten am PC genauso: wartendes Boot mit der Maus von
 | `1` bis `9` | Wartendes Boot wählen (Reihenfolge wie in der Einfahrt), bei offener Karte deren Knopf |
 | `Tab`, Umschalt + `Tab` | Nächstes, voriges wartendes Boot |
 | `Enter` | Gewähltes Boot einfahren lassen, bei offener Karte deren erster Knopf |
-| `F` | Vorspulen an und aus (4-fach, wie die Sonne) |
+| `F` | Vorspulen an und aus (3-fach, wie der Knopf 3x) |
 | `Leertaste` | Pause |
 | `B` | Bauen, sobald der Knopf sichtbar ist |
 | `Esc` | Abbrechen |
@@ -66,7 +66,7 @@ Die Übersicht zeigt nur Kürzel, deren Funktion es gerade gibt. Tastenschilder 
 
 - Die Leisten schweben als Panels mit fester Höchstbreite in der Mitte, statt über die ganze Breite zu laufen. So bleibt mehr Hafen sichtbar.
 - Die Infokarte steht rechts oben und lässt die Hafenmitte frei.
-- Der Tagesbalken hat eine eigene Spur rechts neben „Tag 1“, die Sonne wandert nicht mehr über den Text.
+- Die Sonne im Tagesbalken ist nur noch Anzeige; vorgespult wird mit den Tempo-Knöpfen (siehe `docs/ui/oberflaeche.md`).
 - Eine leere untere Leiste wird ausgeblendet.
 - Ab 1920 px und ab 2560 px wachsen Schrift und Knöpfe mit.
 - Knöpfe reagieren auf Überfahren, der Tastaturfokus ist deutlich sichtbar.
