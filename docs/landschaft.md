@@ -43,6 +43,27 @@ Haken für andere Threads, damit niemand in `gelaende.js` schreiben muss:
 - `landschaft/vielfalt.js` (Abwechslung): `land(px, py, h, typ, d, kontext)` und `nehrung(px, py, h, typ, kontext)`, kontext `{ stufe, region, uferAbstandM, hafenAbstand, offeneSee, seeAbstandM }`.
 - `data/anlagen-flaechen.js` (Anlagen): `anlagenFlaechen(stufe)` liefert Flächen, die das Gelände auf `hoehe` planiert (auch als Aufschüttung).
 
+## Geländeformen
+
+Jedes neue Spiel bekommt eine von zehn Geländeformen (`web/js/render/landschaft/formen.js`). Die Formen sind frei nach Landschaften an Ost- und Nordsee gebaut und fürs Spiel geformt (breite Durchfahrten, freies Wasser, lesbare Einfahrt); keine bildet einen echten Ort ab.
+
+| Nr. | Name | Was anders ist |
+|---|---|---|
+| 1 | Nehrung | Grundform: Nehrung mit Dünen und Salzwiesen |
+| 2 | Lotseninsel | flacher Priel trennt östlich des Engpasses eine Insel mit Leuchtturm ab |
+| 3 | Sandbank | im Osten nur Sandbank knapp über Wasser, Riff vor dem Weststrand, Leuchtturm an der Nehrungsspitze |
+| 4 | Bodden | Nehrung endet im Osten, flaches Boddenwasser mit drei Inseln |
+| 5 | Inselkette | Nehrung zerfällt östlich in kleine Inseln, hohe Dünen, Leuchtturm |
+| 6 | Offene Küste | niedrige, schmale Nehrung mit Haken im Osten |
+| 7 | Steilküste | hohe Steilufer mit Felsbändern am Festland, kleine Waldinsel im Westen |
+| 8 | Watt | breites Watt vor dem Strand, nur der Priel vor der Einfahrt bleibt tief, Leuchtturm |
+| 9 | Dünenspitze | hohe Dünen, breite Nehrung, Spitze mit Leuchtturm und Haken |
+| 10 | Doppelinsel | bewaldete Insel im See westlich des Hafens, Insel mit Leuchtturm östlich des Engpasses |
+
+In jeder Form gleich: Festlandufer und Becken am Hafen, Engpass bei x 178 mit Molen und Fahrwasser, westliche Nehrung (Anlagen der Stufe 6), Wartebojen, Ankerfelder und offenes Wasser im Norden. Darum passen Liegeplätze, Stegbilder, Bauen und Spielstände in jeder Form. `tests/gelaendeform.test.mjs` prüft das für alle Formen.
+
+Welche Form gilt: `?gelaende=N` in der Adresse (nur ansehen), sonst die im Spielstand (`modules.gelaende.nr`), in Tests und ohne Browser Form 1, in einem neuen Spiel eine zufällige. Im Spiel: `game.gelaende.aktuell()`, `game.gelaende.formen`. Eine Form entfernen: ihren Eintrag aus `FORMEN` löschen; Spielstände mit dieser Nummer bekommen Form 1.
+
 ## Ausprobieren
 
 ```bash

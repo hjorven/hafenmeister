@@ -301,7 +301,7 @@ def render(stage, seed=5):
             dep = np.where(mask([(0, 226), (206, 226), (214, 280), (192, 302), (96, 320), (18, 312), (-8, 282)]) > .5, 5.0, dep)
             dep = np.where(mask([(112, 304), (194, 300), (216, 360), (136, 360)]) > .5, np.maximum(dep, 4.6), dep)
         if stage >= 6:   # Liegewanne an der Grossschiffspier
-            dep = np.where(mask([(-365, 228), (20, 228), (20, 400), (-365, 400)]) > .5, np.maximum(dep, 8.5), dep)   # wie PIERWANNE6 in gelaende.js
+            dep = np.where(mask([(-365, 228), (20, 228), (20, 520), (-365, 520)]) > .5, np.maximum(dep, 8.5), dep)   # wie PIERWANNE6 in gelaende.js
     else:
         dep = np.where(mask([(166, 150), (190, 150), (198, 186), (192, 205), (198, 224), (190, 280), (166, 280), (158, 224), (164, 205), (158, 186)]) > .5, np.maximum(dep, 2.0), dep)   # Seegatt
     up = lambda arr: np.asarray(Image.fromarray(arr.astype(np.float32)).resize((gw * st, gh * st), Image.BICUBIC), np.float32)[:size[1], :size[0]]

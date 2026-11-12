@@ -171,6 +171,7 @@ export function erzeugeLandschaft(szene, { region = REGION_STANDARD, stufe = 1, 
     /** Jedes Bild aufrufen. dt in Sekunden (echte Zeit, damit das Wasser auch in der Pause lebt). */
     aktualisiere(dt, zeit) {
       wasser.aktualisiere(dt);
+      gelaende?.aktualisiereFeuer(zeit, licht.zustand.nacht ?? 0);
       if (warte) {
         for (const b of warte.gruppe.children) {
           if (b.userData.pick?.type !== 'waitbuoy') continue;
