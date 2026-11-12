@@ -10,6 +10,7 @@ Stand: 11.11.2026. Code: `web/js/render/landscape.js` (Einstieg, wird von `main.
 - **Buhnen** am Seestrand der Nehrung etwa alle 50 m.
 - **Wasser**: klare Tiefenbänder wie auf der Seekarte (Grenzen bei 1, 2, 3 und 4 m), die Fahrrinne ist als dunkleres Band zu sehen, kurze weiße Wellenstriche wandern mit dem Wind, am Ufer atmet ein Brandungssaum.
 - **Wartebereich vor der Einfahrt**: gelbe Wartebojen und ein gestrichelter Ankerkreis. Stufe 1 und 2 im Binnensee vor den Stegen, ab Stufe 3 draußen östlich der Fahrrinne, ab Stufe 5 zusätzlich eine Reede für große Schiffe.
+- **Ankerfeld für die Nacht**: Im Ankerkreis liegen feste Ankerplätze (kleine helle Punkte) im Abstand des Schwoikreises, nicht auf den Bojen und nicht in der Fahrrinne. Boote, die abends keinen Platz bekommen, liegen dort über Nacht. Anzahl: Stufe 1: 13, Stufe 2: 19, Stufe 3 und 4: je 19, Stufe 5: 19 für L plus 7 für XL. Die Liste ist nach Nähe zur Einfahrt sortiert, also zuerst vorne belegen.
 - **Tageslicht** folgt der Spielzeit: Morgen, Mittag, Abendrot, Dämmerung, Nacht. Schatten werden abends lang.
 - **Zwei Reviere**: Ostsee (Kiefern, Birken, Buchen, Schilf, Schärenfelsen am Kartenrand) und Nordsee (Deich, hohe Dünen, Watt mit Priel vor der Einfahrt, Pappeln und windschiefe Bäume, graueres Wasser, Gezeiten).
 
@@ -49,7 +50,7 @@ hafenmeister.emit('wetter', { bewoelkung: 0.9, wind: 1 })
 | `hoeheBei(x, z)` | Bodenhöhe in Metern, unter Wasser negativ (bezogen auf mittleren Wasserstand) |
 | `tiefeBei(x, z)` | Wassertiefe in Metern beim aktuellen Pegel, 0 an Land |
 | `istWasser(x, z)` | liegt der Punkt beim aktuellen Pegel im Wasser |
-| `warteplaetze` | `{ bojen: [{ id, x, z, groesse }], ankerbereiche: [{ id, x, z, radiusM, groesse }] }` |
+| `warteplaetze` | `{ bojen: [{ id, x, z, groesse }], ankerbereiche: [{ id, x, z, radiusM, groesse }], ankerplaetze: [{ id, bereich, x, z, groesse, schwoikreisM }] }` |
 | `wege` | begehbare Wege an Land: `[{ id, typ, breite, punkte: [{ x, y, z }] }]`, Typen `strasse`, `weg`, `promenade`, `mole` |
 | `licht.zustand` | `nacht` 0..1, `tint`, `schattenRichtung`, `schattenLaenge`, `sonnenHoehe` |
 | `setzeStufe(n)`, `setzeRegion(id)`, `setzePegel(m)`, `setzeUhrzeit(h)`, `setzeWetter({ bewoelkung, wind })` | direkt steuern |
