@@ -145,7 +145,7 @@ export function init(game) {
     const soll = stufe >= 6;
     if (soll && !pier) {
       const aus = (HAFEN.stufen?.[6]?.stege ?? []).filter((l) => l.steg === 'P').map((l) => l.punkte);
-      pier = tPier(aus.length ? aus : [[[-225, 216], [-225, 262]], [[-377, 262], [-77, 262]]]);
+      pier = tPier(aus.length ? aus : [[[-225, 214.3], [-225, 262]], [[-377, 262], [-77, 262]]]);
       gruppe.add(pier);
     } else if (!soll && pier) {
       gruppe.remove(pier); entsorge(pier); pier = null;

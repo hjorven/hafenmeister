@@ -481,9 +481,9 @@ function seenotretter(stufe) {
   box(g, 3.2, 0.3, 3.2, FARBE.red, 5.2, LAND_Y + 7.4, 0.5);
   const fl = flagge(g, -5, -3.6, 7, FARBE.orange);
   // Eigener Steg zum Dienstplatz aus js/data/harbor.js (179,1 / 243,2, Richtung 85 Grad)
-  // Stufe 1: Dienstplatz in der Kanalmuendung (harbor.js), Kreuzer: SK01 an der Westmole (57/303)
+  // Stufe 1: Dienstplatz in der Kanalmuendung (harbor.js), Kreuzer: SK01 an der Westmole (57/302,6)
   const gross = stufe >= 2;
-  const [dx, dz] = gross ? P(57 - 200, 303 - 211) : P(179.1 - 200, 243.2 - 211);
+  const [dx, dz] = gross ? P(57 - 200, 302.6 - 211) : P(179.1 - 200, 243.2 - 211);
   // Schwimmsteg laengsseits an der Ostseite des Liegeplatzes, zur Ostmole hin
   if (!gross) steg(g, dx + 3.6, dz + 8, dx + 3.6, dz - 10, 1.8, FARBE.pont, 0.5);
   const boot = new THREE.Group();
@@ -497,7 +497,7 @@ function seenotretter(stufe) {
     zyl(boot, 0.18, 7, FARBE.white, L * 0.05, 4.4, 0, 6);
     rumpf(boot, 7, 2.4, 1.2, FARBE.orange, -L * 0.35, 1.8, 0);          // Tochterboot in der Heckwanne
   }
-  const ruhe = { x: dx, z: dz, ry: gross ? 0 : (85 * Math.PI) / 180 };
+  const ruhe = { x: dx, z: dz, ry: ((gross ? 6 : 85) * Math.PI) / 180 };   // SK01 liegt mit 6 Grad (harbor.js)
   boot.position.set(ruhe.x, 0, ruhe.z);
   boot.rotation.y = ruhe.ry;
   g.add(boot);

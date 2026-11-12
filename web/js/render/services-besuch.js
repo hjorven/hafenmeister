@@ -7,6 +7,7 @@
 // diese genommen; bis dahin zeichnet dieses Modul schlichte Flat-Modelle.
 import * as THREE from 'three';
 import { FARBE, box, zyl, flagge, rumpf, mat } from './services-models.js';
+import { HAFEN } from '../data/harbor.js';
 
 const U = 0.62;
 const W = (x, y) => new THREE.Vector3(x * U, 0, -y * U);
@@ -88,15 +89,15 @@ const AUFTRITTE = {
   kreuzfahrtterminal: {
     art: 'kreuzfahrt',
     // Liegeplatz P01 an der Aussenseite des Pierkopfs (harbor.js Stufe 6)
-    schiffe: [{ modell: 'kreuzfahrtschiff', weg: [[-227, 290], [-150, 296], [-90, 340], [-60, 440]], liegeKurs: 180 }],
+    schiffe: [{ modell: 'kreuzfahrtschiff', platz: 'P01', weg: [[-227, 290], [-150, 296], [-90, 340], [-60, 440]], liegeKurs: 180 }],
     plan: { an: 0.03, ab: 0.68 },
   },
   marineanleger: {
     art: 'flottenbesuch',
     schiffe: [
       // MA01 und MA02 an der Innenseite des Pierkopfs
-      { modell: 'korvette', weg: [[-146, 247], [-70, 248], [-50, 300], [-40, 440]], liegeKurs: 180 },
-      { modell: 'minenjagdboot', weg: [[-304, 248], [-395, 252], [-410, 320], [-400, 440]], liegeKurs: 0 },
+      { modell: 'korvette', platz: 'MA01', weg: [[-146, 247], [-70, 248], [-50, 300], [-40, 440]], liegeKurs: 180 },
+      { modell: 'minenjagdboot', platz: 'MA02', weg: [[-304, 248], [-395, 252], [-410, 320], [-400, 440]], liegeKurs: 0 },
     ],
     plan: { an: 0.05, ab: 0.7 },
   },
@@ -161,7 +162,10 @@ export function initBesuche(game, services) {
       m.group.name = `besuch-${d.modell}`;
       m.group.visible = false;
       gruppe.add(m.group);
-      return { ...m, weg: d.weg.map(([x, y]) => W(x, y)), liegeKurs: THREE.MathUtils.degToRad(d.liegeKurs), kurs: 0, t: 1 };
+      // Liegeplatz aus harbor.js, sobald Stufe 6 dort steht; der Weg im Katalog ist der Rückfall
+      const lage = d.platz ? HAFEN.plaetze?.find((q) => q.id === d.platz)?.lage?.[6] : null;
+      const weg = lage ? [[lage[0], lage[1]], ...d.weg.slice(1)] : d.weg;
+      return { ...m, weg: weg.map(([x, y]) => W(x, y)), liegeKurs: THREE.MathUtils.degToRad(d.liegeKurs), kurs: 0, t: 1 };
     });
     aktiv.set(id, liste);
     return liste;
