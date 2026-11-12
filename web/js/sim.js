@@ -565,7 +565,7 @@ export function selfBerth(state, ctx, boatId) {
 }
 
 /**
- * Wartende Boote fahren von selbst ein: Wer queue.selfEnterAfter Sekunden an der Boje liegt und
+ * Wartende Boote fahren von selbst ein: Wer seit queue.selfEnterAfter Sekunden im Revier ist und
  * nicht vom Spieler gehalten wird (boat.held, zum Beispiel ausgewählt oder im Schlepp), nimmt
  * die nächste passende freie Box. Passt keine, wartet das Boot weiter.
  */
@@ -575,7 +575,9 @@ export function selfEnter(state, ctx) {
   if (after == null) return events;
   for (const id of [...state.queue]) {
     const b = state.boats[id];
-    if (!b || !b.atBuoy || b.held || state.clock - b.atBuoySince < after) continue;
+    // Die Zeit zum Selbstlenken zählt ab Ankunft im Revier, nicht erst ab der Boje: Das Boot hält
+    // dann von der Anfahrt aus direkt auf die Box zu und gibt seine Boje frei.
+    if (!b || b.held || state.clock - b.waitingSince < after) continue;
     const best = selfBerth(state, ctx, id);
     if (best) {
       b.selfEntered = true;
@@ -725,7 +727,21 @@ function arrive(state, ctx, boat, events) {
   state.boats[boat.id] = boat;
   const spot = freeWaitSpot(state, ctx);
   if (spot == null) {
-    turnAway(state, ctx, boat, events, 'queueFull');
+    // Alle Bojen belegt: Wer eine passende freie Box sieht, hält direkt darauf zu statt abzudrehen
+    const direct = ctx.rules.queue.selfEnterAfter != null ? selfBerth(state, ctx, boat.id) : null;
+    if (direct == null) {
+      turnAway(state, ctx, boat, events, 'queueFull');
+      return;
+    }
+    boat.status = 'waiting';
+    boat.waitSpot = state.queue.length % Math.max(1, waitSpotCount(state, ctx));
+    boat.waitingSince = state.clock;
+    boat.atBuoy = false;
+    boat.atBuoySince = null;
+    boat.selfEntered = true;
+    events.push({ type: 'arrived', boatId: boat.id, waitSpot: boat.waitSpot, direct: true });
+    moor(state, ctx, boat, direct, events);
+    events.push({ type: 'selfEntered', boatId: boat.id, berthId: direct, direct: true });
     return;
   }
   boat.status = 'waiting';

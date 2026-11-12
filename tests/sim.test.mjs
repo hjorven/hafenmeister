@@ -714,3 +714,21 @@ test('Abreise gestaffelt am Vormittag: Box bleibt bis zum Ablegen belegt', () =>
   sim.berthCleared(s, c, { boatId: a.id });
   assert.equal(sim.isFree(s, 'A1'), true);
 });
+
+test('Volle Bojen: Boot mit freier passender Box fährt direkt ein statt abzudrehen', () => {
+  const s = quietState({ stage: 3 });
+  for (let i = 0; i < RULES.queue.spots[3]; i++) waitingBoat(s, { waitSpot: i, held: true });
+  const make = (id) => ({ ...waitingBoat(createState({ seed: id })), id, status: 'expected', arriveAt: 0.5 });
+  s.upcoming = Array.from({ length: 12 }, (_, i) => make(700 + i));
+  const ev = sim.tick(s, ctxLive, 1);
+  assert.equal(ev.filter((e) => e.type === 'turnedAway').length, 0);
+  assert.equal(ev.filter((e) => e.type === 'selfEntered' && e.direct).length, 12);
+  assert.equal(new Set(s.upcoming.concat(Object.values(s.boats)).filter((b) => b.id >= 700).map((b) => b.berthId)).size, 12);
+  // Die Zeit zum Selbstlenken zählt ab Ankunft, nicht erst ab der Boje
+  const t = quietState({ stage: 3 });
+  t.upcoming = [make(800)];
+  sim.tick(t, ctxLive, 1);
+  assert.equal(t.boats[800].status, 'waiting');
+  sim.tick(t, ctxLive, RULES.queue.selfEnterAfter);
+  assert.equal(t.boats[800].status, 'moored');
+});
