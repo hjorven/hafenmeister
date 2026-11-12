@@ -72,9 +72,9 @@ export const TEXTE = {
   muenzen: {
     titel: 'Liegegeld kassieren',
     text: TOUCH
-      ? 'Angelegt. Das Boot zahlt sein Liegegeld: Tipp auf die Münze am Boot. Liegen mehrere da, streich in einem Zug über alle. Oder unten „Kassieren“ drücken.'
-      : 'Angelegt. Das Boot zahlt sein Liegegeld: Klick auf die Münze am Boot. Liegen mehrere da, fahr mit gedrückter Maustaste in einem Zug über alle. Oder unten „Kassieren“ drücken.',
-    kurz: TOUCH ? 'Tipp auf die Münze oder auf „Kassieren“.' : 'Klick auf die Münze oder auf „Kassieren“.',
+      ? 'Angelegt. Das Boot zahlt sein Liegegeld: Tipp auf die Münze am Boot. Liegen mehrere da, streich in einem Zug über alle. Oder unten „Kassieren“ drücken. Wer bezahlt hat, zeigt einen Wimpel am Bug.'
+      : 'Angelegt. Das Boot zahlt sein Liegegeld: Klick auf die Münze am Boot. Liegen mehrere da, fahr mit gedrückter Maustaste in einem Zug über alle. Oder unten „Kassieren“ drücken. Wer bezahlt hat, zeigt einen Wimpel am Bug.',
+    kurz: TOUCH ? 'Tipp auf die Münze oder auf „Kassieren“. Bezahlt: Wimpel am Bug.' : 'Klick auf die Münze oder auf „Kassieren“. Bezahlt: Wimpel am Bug.',
   },
   sonne: {
     titel: 'Der Tag läuft',
