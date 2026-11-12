@@ -2,8 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createState, serialize } from '../web/js/state.js';
-import { RULES } from '../web/js/data/rules.js';
-import { ECONOMY } from '../web/js/data/economy.js';
+import { RULES, ECONOMY, allesGebaut } from './regeln.mjs';
 import { HAFEN } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
 import * as sim from '../web/js/sim.js';
@@ -11,12 +10,7 @@ import { initBridge, typesFromModule, mergeTypes } from '../web/js/bridge.js';
 
 const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN });
 
-/** Spielstand, in dem alle Stegprojekte und Ausbauten gebaut sind (alle Plätze des Katalogs). */
-function allBuilt(seed) {
-  const s = createState({ seed });
-  for (const p of Object.keys(RULES.berthProjects)) s.buildings[p] = 1;
-  return s;
-}
+const allBuilt = (seed) => allesGebaut(seed);
 
 test('Liegeplätze je Stufe wie im Katalog: 6, 30, 54, 76, 94', () => {
   const s = allBuilt(1);

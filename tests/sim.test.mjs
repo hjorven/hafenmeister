@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createState, serialize, deserialize } from '../web/js/state.js';
-import { RULES } from '../web/js/data/rules.js';
+import { RULES, testBoot, ruhigerStand } from './regeln.mjs';
 import * as sim from '../web/js/sim.js';
 import { boatTypes, berths } from './fixtures.mjs';
 
@@ -13,27 +13,8 @@ ctx.rules.trips = null;
 ctx.rules.departWindow = null;
 const ctxLive = sim.createContext({ boatTypes, berths });
 
-/** Testboot direkt in die Warteschlange legen. */
-function waitingBoat(state, props = {}) {
-  const boat = {
-    id: state.nextId++, typeId: 'S1', modelId: null, name: 'Test', size: 'S',
-    length: 4, beam: 1.4, draft: 0.2, motor: false, special: false, dayVisitors: 0, stationed: false,
-    wishes: [], nights: 1, status: 'waiting', arriveAt: 0, waitingSince: state.clock, berthId: null,
-    wishesMet: 0, wishesTotal: 0, pendingFee: 0, penalty: 0, ...props,
-  };
-  state.boats[boat.id] = boat;
-  state.queue.push(boat.id);
-  return boat;
-}
-
-/** Spielstand, bei dem heute niemand mehr von selbst kommt. */
-function quietState(props = {}) {
-  const s = createState({ seed: 1 });
-  Object.assign(s, props);
-  s.scheduledDay = s.day;
-  s.upcoming = [];
-  return s;
-}
+const waitingBoat = testBoot;
+const quietState = ruhigerStand;
 
 const berth = (id) => ctx.berthById[id];
 

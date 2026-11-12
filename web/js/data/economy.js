@@ -18,6 +18,7 @@ export const ECONOMY = {
     abendSekunden: 30,      // Abend, Kassieren
     saisonTage: 30,         // danach Winter
     winterTage: 3,          // keine Gäste
+    winterBautempo: 2,      // noch ungenutzt, wie stufen[].ausbau.bautage: Paket P18 nutzt oder löscht beides
     // Saisontage je Jahreszeit [von, bis]
     jahreszeiten: { fruehling: [1, 8], sommer: [9, 22], herbst: [23, 30] },
     erstesBootNach: 3,      // Sekunden: am ersten Tag eines neuen Spiels kommt gleich ein Boot
@@ -108,7 +109,23 @@ export const ECONOMY = {
   },
 
   fischer: { pachtProTag: 15 },
-  dauerlieger: { anteilGastpreis: 0.5 },   // Pacht je Abend als Anteil des Gastpreises (Paket P01)
+  // Dauerlieger (features/dauerlieger.js): Pacht je Abend als Anteil des Gastpreises (Paket P01),
+  // ab welcher Stufe, wie oft sie hinausfahren (je Tag), Törn über mehrere Tage [min, max]
+  dauerlieger: { anteilGastpreis: 0.5, abStufe: 2, tagestoernChance: 0.4, toernChance: 0.12, toernTage: [1, 3] },
+  // Stammgäste (features/stammgaeste.js): Anteil der neuen Boote, die Stammgäste sind; ab so vielen
+  // Ankern kommt ein Gast wieder; Länge der Liste; ab diesem Besuch als Dauerlieger zu behalten
+  stammgaeste: { chance: 0.15, abBewertung: 4, maxListe: 40, dauerAbBesuch: 5 },
+  // Tagesziele (features/tagesziele.js): Belohnung je Ziel nach Stufe; Anteil der erwarteten Ankünfte
+  // bzw. des erwarteten Hafengelds als Ziel; "Alle Plätze belegt" nur bis zu so vielen Plätzen;
+  // Größe für "ein großes Schiff unterbringen" je Stufe
+  tagesziele: {
+    belohnung: { 1: 10, 2: 25, 3: 50, 4: 80, 5: 120, 6: 150 },
+    unterbringenAnteil: 0.6, unterbringenMin: 2,
+    kassierenAnteil: 0.6,
+    seglerSoll: { 2: 2, 4: 3 },
+    vollBisPlaetze: 12,
+    groesse: { 3: 'L', 4: 'L', 5: 'XL', 6: 'XL' },
+  },
   // Besucher an Land (Fahrgastschiff, Kreuzfahrt) geben abends je Stufe von Kiosk/Restaurant so viel aus
   besucher: { ausgabeJeKioskStufe: 2 },
 
