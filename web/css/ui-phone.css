@@ -407,7 +407,17 @@
      bleiben Name, Hinweis und die Knoepfe in einer Zeile. */
   .hm.hm-boot-gewaehlt #card { max-height: 34dvh; padding-top: 18px; }
   .hm.hm-boot-gewaehlt #card h2 { font-size: 16px; }
-  .hm.hm-boot-gewaehlt #card p:not(:last-of-type):not(.card-note) { display: none; }
+  .hm.hm-boot-gewaehlt #card p:not(:last-of-type):not(.card-note):not(.card-boatname) { display: none; }
+  /* Name am Heck, Heimathafen und Stammgast (features/stammgaeste.js) bleiben, in einer Zeile */
+  .hm.hm-boot-gewaehlt #card .card-boatname {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    opacity: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .hm.hm-boot-gewaehlt #card p { margin-bottom: 8px; font-size: 14px; }
   .hm.hm-boot-gewaehlt #card .card-actions { flex-wrap: nowrap; }
   .hm.hm-boot-gewaehlt #card .card-actions .hud-btn { flex: 1 1 0; min-width: 0; padding: 0 6px; font-size: 14px; line-height: 1.15; }

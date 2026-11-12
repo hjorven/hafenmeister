@@ -1042,7 +1042,18 @@ export function rulesFromEconomy(E, base = RULES) {
 
 /** Stegprojekte, die in der aktuellen Stufe gebaut werden können und noch fehlen. */
 export function openJettyProjects(state, ctx) {
-  return (ctx.rules.jettyProjects || []).filter((p) => p.stage <= state.stage && !state.buildings[p.id]);
+  return (ctx.rules.jettyProjects || []).filter((p) => p.stage <= state.stage && !state.buildings[p.id] && projectHasBerths(state, ctx, p.id));
+}
+
+/**
+ * Hat ein Projekt in der aktuellen Stufe mindestens einen Liegeplatz? Manche Stege werden beim Ausbau
+ * umgebaut, ihre alten Plätze gibt es dann nicht mehr (z. B. T-Kopf an Steg B nur in Stufe 2).
+ * Projekte ohne zugeordnete Plätze (reine Bauprojekte) gelten als sinnvoll.
+ */
+export function projectHasBerths(state, ctx, id) {
+  const own = ctx.berths.filter((b) => b.requires === id);
+  if (!own.length) return true;
+  return own.some((b) => (b.stages ? b.stages.includes(state.stage) : b.stage <= state.stage));
 }
 
 /** Stegprojekt bauen (Kosten aus den Regeln). */
@@ -1050,6 +1061,7 @@ export function buildJettyProject(state, ctx, id) {
   const p = (ctx.rules.jettyProjects || []).find((x) => x.id === id);
   if (!p) return { ok: false, reason: 'unknown', events: [] };
   if (p.stage > state.stage) return { ok: false, reason: 'stage', events: [] };
+  if (!projectHasBerths(state, ctx, id)) return { ok: false, reason: 'noBerths', events: [] };
   const r = build(state, id, p.cost);
   return { ...r, events: r.events || [] };
 }

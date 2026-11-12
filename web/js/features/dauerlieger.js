@@ -21,6 +21,7 @@ import * as sim from '../sim.js';
 import { regelnBereit } from './regeln-bereit.js';
 import { random, randomInt } from '../random.js';
 import { STAMM } from './stammgaeste.js';
+import { BOOTSNAMEN } from '../data/bootsnamen.js';
 
 export const DAUER = {
   abStufe: 2,
@@ -66,6 +67,19 @@ export function kannDauerplatz(state, ctx, platzId) {
   return { ok: true };
 }
 
+/**
+ * Gibt einem Dauerlieger einen Namen am Heck, wie ihn Gastboote auch haben (stammgaeste.js).
+ * Heimathafen ist dieser Hafen, darum keiner. Möglichst ein Name, den gerade kein anderes Boot trägt.
+ */
+export function benenne(state, boot) {
+  if (!boot || boot.bootsname) return;
+  const vergeben = new Set(Object.values(state.boats).map((b) => b.bootsname).filter(Boolean));
+  for (const p of Object.values(dauerState(state).plaetze)) if (p.boot?.bootsname) vergeben.add(p.boot.bootsname);
+  const frei = BOOTSNAMEN.filter((n) => !vergeben.has(n));
+  const liste = frei.length ? frei : BOOTSNAMEN;
+  boot.bootsname = liste[Math.floor(random(state) * liste.length)];
+}
+
 /** Macht den Platz zum Dauerplatz. Am liebsten ein Segelboot, das kann rausfahren und segeln. */
 export function machDauerplatz(state, ctx, platzId) {
   const k = kannDauerplatz(state, ctx, platzId);
@@ -81,6 +95,7 @@ export function machDauerplatz(state, ctx, platzId) {
   if (!r.ok) return { ok: false, reason: r.reason, events: [] };
   const boot = state.boats[r.boatId];
   boot.dauer = true;
+  benenne(state, boot);
   dauerState(state).plaetze[platzId] = { bootId: r.boatId, rueckNacht: null, boot: null, tagestoern: false };
   return { ok: true, boatId: r.boatId, events: [...r.events, { type: 'dauerNeu', boatId: r.boatId, berthId: platzId }] };
 }
@@ -203,6 +218,11 @@ export async function init(game) {
   await regelnBereit(game);
   const api = game.sim;
   haengeEin(api.addHook);
+  // Ältere Spielstände: Dauerlieger ohne Namen bekommen jetzt einen
+  const alteBenennen = () => {
+    for (const p of Object.values(dauerState(api.state).plaetze)) benenne(api.state, p.boot || api.state.boats[p.bootId]);
+  };
+  alteBenennen();
 
   // Deutsche Ereignisse für Grafik und Ton
   game.on('sim:dauerAuslaufen', (e) => game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: e.tage }));
@@ -343,7 +363,7 @@ export async function init(game) {
   });
   game.on('sim:select', ({ boatId }) => { if (boatId != null) offenerPlatz = null; });
   game.on('ui:cancel', schliessen);
-  game.on('spielstand-geladen', () => { schliessen(); zeichne(); });
+  game.on('spielstand-geladen', () => { alteBenennen(); schliessen(); zeichne(); });
   zeichne();
 
   game.dauerlieger = { machDauerplatz: (id) => api.dispatch(machDauerplatz(api.state, api.ctx, id).events), hebeAuf: (id) => api.dispatch(hebeAuf(api.state, api.ctx, id).events), karte };

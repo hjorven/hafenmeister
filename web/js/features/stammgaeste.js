@@ -122,7 +122,9 @@ export function kannBleiben(state, boat) {
 /** Text für Karten und Leiste, zum Beispiel „Möwe aus Kappeln · Stammgast, 3. Besuch“. */
 export function beschreibung(boat) {
   if (!boat?.bootsname) return '';
-  const teil = `„${boat.bootsname}“ aus ${boat.heimathafen}`;
+  const name = `„${boat.bootsname}“`;
+  const teil = boat.heimathafen ? `${name} aus ${boat.heimathafen}` : name;
+  if (boat.dauer) return `${teil} · Dauerlieger`;
   return boat.besuche > 1 ? `${teil} · Stammgast, ${boat.besuche}. Besuch` : teil;
 }
 

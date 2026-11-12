@@ -57,8 +57,8 @@ export function init(game) {
     #card .card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
     #card .card-note { font-weight: 600; }
     #queue .boat-chip[aria-pressed="true"] { outline: 3px solid #f2c14e; }
-    /* Handy: die Bootskarte zeigt nur Hinweis und Knöpfe, damit die Stege frei bleiben */
-    @media (max-width: 600px) { body.card-boat #card h2, body.card-boat #card p:not(.card-note):not(.card-hint) { display: none; } }
+    /* Handy: die Bootskarte zeigt nur Bootsname/Heimathafen, Hinweis und Knöpfe, damit die Stege frei bleiben */
+    @media (max-width: 600px) { body.card-boat #card h2, body.card-boat #card p:not(.card-note):not(.card-hint):not(.card-boatname) { display: none; } }
   `;
   document.head.append(style);
 

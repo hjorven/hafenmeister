@@ -105,3 +105,58 @@ test('Alter Spielstand ohne neue Felder wird ergänzt statt verworfen', () => {
   assert.equal(loaded.stageGuests, 0);
   assert.deepEqual(loaded.modules, {});
 });
+
+test('Jedes kaufbare Stegprojekt bringt in der aktuellen Stufe Liegeplätze', async () => {
+  const { ECONOMY: E } = await import('../web/js/data/economy.js');
+  const { HAFEN: H } = await import('../web/js/data/harbor.js');
+  const { BOAT_CATALOG: C } = await import('../web/js/data/boat-catalog.js');
+  const S = await import('../web/js/sim.js');
+  const { createState: cs } = await import('../web/js/state.js');
+  const c = S.createContext({ boatTypes: C, harbor: H, rules: S.rulesFromEconomy(E) });
+  // Jedes Projekt ist in mindestens einer Stufe kaufbar
+  for (const p of c.rules.jettyProjects) {
+    const stages = [1, 2, 3, 4, 5].filter((st) => st >= p.stage && S.projectHasBerths({ stage: st }, c, p.id));
+    assert.ok(stages.length, `${p.id} hat in keiner Stufe Plätze`);
+  }
+  for (let st = 1; st <= 5; st++) {
+    const s = cs({ seed: 1, rules: c.rules });
+    s.stage = st;
+    s.money = 1e7;
+    for (const p of S.openJettyProjects(s, c)) {
+      const before = S.availableBerths(s, c).length;
+      assert.ok(S.buildJettyProject(s, c, p.id).ok, `${p.id} in Stufe ${st}`);
+      assert.ok(S.availableBerths(s, c).length > before, `${p.id} bringt in Stufe ${st} keinen Platz`);
+    }
+  }
+  // Der gemeldete Fall: Der T-Kopf an Steg B wird in Stufe 3 umgebaut. Das Projekt bringt dann
+  // den neuen T-Kopf (Ersatzplätze), statt leer zu sein.
+  const s3 = cs({ seed: 1, rules: c.rules });
+  s3.stage = 3;
+  s3.money = 1e7;
+  assert.ok(S.openJettyProjects(s3, c).some((p) => p.id === 'b-tkopf'));
+  assert.ok(S.buildJettyProject(s3, c, 'b-tkopf').ok);
+  const ids = S.availableBerths(s3, c).map((b) => b.id);
+  assert.ok(ids.includes('B27') && ids.includes('B28'));
+});
+
+test('Gekaufte Plätze bleiben beim Stufenwechsel erhalten (Umbau ersetzt sie)', async () => {
+  const { ECONOMY: E } = await import('../web/js/data/economy.js');
+  const { HAFEN: H } = await import('../web/js/data/harbor.js');
+  const { BOAT_CATALOG: C } = await import('../web/js/data/boat-catalog.js');
+  const S = await import('../web/js/sim.js');
+  const { createState: cs } = await import('../web/js/state.js');
+  const c = S.createContext({ boatTypes: C, harbor: H, rules: S.rulesFromEconomy(E) });
+  for (const p of c.rules.jettyProjects) {
+    const s = cs({ seed: 1, rules: c.rules });
+    s.stage = p.stage;
+    s.money = 1e7;
+    if (!S.buildJettyProject(s, c, p.id).ok) continue;
+    const mine = new Set(c.rules.berthProjects[p.id]);
+    const count = () => S.availableBerths(s, c).filter((b) => mine.has(b.id)).length;
+    const bought = count();
+    for (let st = p.stage + 1; st <= 5; st++) {
+      s.stage = st;
+      assert.ok(count() >= bought, `${p.id}: in Stufe ${st} ${count()} statt ${bought} Plätze`);
+    }
+  }
+});
