@@ -1,6 +1,6 @@
 # So läuft ein echter Hafen, und was das Spiel davon übernimmt
 
-Stand: 12.11.2026. Grundlage für die Frage „ergibt das im Spiel Sinn?“. Teil A beschreibt, wie ein Gästehafen an der Ostsee (Deutschland, Dänemark, Schweden) und an der Nordsee wirklich funktioniert. Teil B prüft jeden Ablauf im Spiel dagegen. Teil C ist die priorisierte Mängelliste mit Bildern.
+Stand: 12.11.2026 (ergänzt um Selbst-Einfahren, Tagesausflug, Angebote an Land). Grundlage für die Frage „ergibt das im Spiel Sinn?“. Teil A beschreibt, wie ein Gästehafen an der Ostsee (Deutschland, Dänemark, Schweden) und an der Nordsee wirklich funktioniert. Teil B prüft jeden Ablauf im Spiel dagegen. Teil C ist die priorisierte Mängelliste mit Bildern.
 
 Leitlinie bleibt [plan.md](plan.md): **cozy vor Simulation.** Übernommen wird, was man sieht und was sich richtig anfühlt, nicht was Arbeit macht. Kein Vorschlag hier fügt dem Spieler einen Schritt hinzu.
 
@@ -77,6 +77,48 @@ Ein Anleger dauert wenige Minuten.
 - Saison: Mai und Juni ruhig, Juli und August voll (Ferien in Dänemark, Schweden und Deutschland), September ruhig.
 - Herbst: Boote kommen per Kran an Land ins Winterlager, im Frühjahr wieder ins Wasser. Im Winter liegen fast keine Gäste im Hafen.
 
+### 9. Selbst einen Platz suchen (kleine und mittlere Häfen)
+
+So läuft es in fast allen Gästehäfen in Dänemark, an der deutschen Ostsee und in Schweden ohne Platzanweisung:
+
+1. Das Boot fährt langsam die Stege entlang. Die Crew schaut auf die **Schilder an den Heckpfählen oder am Steg**.
+2. **Grün** = frei. Oft steht darauf mit Kreide oder einem Schieber ein Datum: „frei bis 14.7.“. Dann darf ein Gast bis zu diesem Tag liegen.
+3. **Rot** = belegt (Dauerlieger ist da oder kommt heute zurück). Rot wird nicht angefahren.
+4. Daneben steht oft die **Boxbreite** (zum Beispiel „3,5 m“) oder die Box ist nach Breite gestaffelt: schmale Boxen vorn am Steg, breite hinten oder am Kopf. Die Crew nimmt die erste grüne Box, die breit genug ist, am liebsten nah am Ufer (kurzer Weg zu Dusche und Bäcker).
+5. Wer nichts findet, fragt per Telefon oder Funk beim Hafenmeister oder legt sich ins Päckchen.
+6. Der Hafenmeister greift nur ein, wenn es eng wird oder ein großes Boot kommt. Große Marinas weisen jeden Gast per Funk oder App zu.
+
+**Fürs Spiel heißt das:** Selbst einfahren ist der Normalfall. Zuweisen durch den Spieler ist das Besondere (der Hafenmeister hat einen besseren Platz im Kopf, zum Beispiel einen mit Strom für ein Boot, das Strom wünscht).
+
+### 10. Tagesausflug und Hafentag
+
+1. Viele Gäste bleiben zwei Nächte und machen am Tag dazwischen einen **Ausflug ohne Boot**: Fahrrad, Bus in die Stadt, Strand. Das Boot bleibt in der Box.
+2. Manche machen einen **Tagestörn**: morgens zwischen 9 und 11 Uhr raus, ohne Gepäck, nachmittags zwischen 15 und 18 Uhr zurück in **dieselbe Box**. Sie haben für die Nacht bezahlt, die Box gehört ihnen. Das Schild bleibt rot; manche legen eine Leine oder einen Fender auf den Steg als Zeichen „wir kommen wieder“.
+3. Bei Starkwind bleibt man ganz im Hafen (Hafentag).
+
+### 11. Angebote an Land
+
+Was ein typischer Ostsee-Gästehafen an Land hat, grob nach Größe sortiert. Fett: gibt es im Spiel noch nicht.
+
+| Angebot | Wann besucht | Kleiner Hafen | Großer Hafen |
+|---|---|---|---|
+| WC und Duschen (Sanitärhaus) | morgens und abends | ja | ja |
+| Strom- und Wassersäulen am Steg | beim Anlegen | ja | ja |
+| **Brötchenservice oder Bäcker** | morgens 7 bis 9 Uhr | Brötchen beim Hafenmeister vorbestellen | Bäckerei am Hafen |
+| Kiosk mit Eis | nachmittags | ja | ja |
+| **Café** (Kuchen, Kaffee, Terrasse mit Blick aufs Wasser) | nachmittags 14 bis 17 Uhr | oft im Hafenhaus | mehrere |
+| **Fischbrötchenbude** | mittags | oft beim Fischer | ja |
+| Räucherei, Fischladen | mittags | manchmal | ja |
+| Restaurant oder Hafenkneipe | abends | eins | mehrere |
+| **Grillplatz** mit Bänken | abends | ja, sehr typisch in DK und SE | ja |
+| **Waschhaus** (Waschmaschine, Trockner) | tagsüber | ja | ja |
+| **Fahrradverleih** | morgens für Ausflüge | manchmal | ja |
+| **Spielplatz** und Krebsangeln vom Steg | tagsüber | ja | ja |
+| **Kaufmann** (kleiner Laden für Proviant) | vormittags | oft | Supermarkt in der Nähe |
+| Tankstelle (Diesel, Benzin) | beim Ein- oder Auslaufen | selten | ja |
+| Bootsausrüster, Segelmacher, Werft | tagsüber | selten | ja |
+| **Eisdiele** | nachmittags | im Ort | ja |
+
 ---
 
 ## Teil B: Abgleich mit dem Spiel
@@ -101,7 +143,10 @@ Geprüft am 12.11.2026 auf `main` (Stand nach PR 80 und 86) im Browser, Stufe 1,
 | Warten, wenn voll | Päckchen oder ankern | Boot wartet bis zu 50 s (etwa 7 Stunden Spieluhr) an der Boje | zu lang, siehe C2 |
 | Heimathafen | aus der Region, passt zur Bootsart | „Holzruderboot ‚Schäre‘ aus Husum“ übernachtet im Ostsee-Dünensee | **unecht**, siehe C7 |
 | Liegedauer | meist 1 Nacht, Hafentag bei Wetter | 1 bis 3 Nächte, Sturm verlängert | passt |
-| Grün-Rot-Schild | an jeder Box | nur an Dauerliegerplätzen | Idee, siehe C8 |
+| Grün-Rot-Schild | an jeder Box | nur an Dauerliegerplätzen | freigegeben, siehe C8 und C9 |
+| Platz selbst suchen | Normalfall in kleinen Häfen | Boot wartet, bis der Spieler zuweist (ab Hafenbüro Stufe 3 automatisch) | siehe C9 |
+| Tagesausflug | Box bleibt reserviert | gibt es nur für Dauerlieger | siehe C10 |
+| Angebote an Land | Bäcker, Café, Grillplatz, Waschhaus, Fahrräder | WC, Dusche, Kiosk/Restaurant, Diesel, 13 Services | ausbaufähig, siehe C11 |
 | Leben an Land | Duschen, Bäcker, Grill, Restaurant | Leute laufen zu WC, Dusche, Kiosk, Restaurant, Strandkörben | passt |
 
 ---
@@ -175,7 +220,7 @@ Zuständig: Schiffsanimationen (`boat-view.js`), eventuell Spielregeln (Ereignis
 
 Zuständig: Schiffsanimationen.
 
-### C7. Heimathäfen passen nicht zum Boot (niedrig, neu)
+### C7. Heimathäfen passen nicht zum Boot (niedrig, behoben in PR 95, nachprüfen)
 
 **Bild:** `echter-hafen/5-ruderboot-aus-husum.jpg`: „Holzruderboot ‚Schäre‘ aus Husum“ übernachtet im Dünensee an der Ostsee. Ein 4-m-Ruderboot kommt nicht 150 km über Land von der Nordsee.
 
@@ -183,7 +228,7 @@ Zuständig: Schiffsanimationen.
 
 Zuständig: Stammgäste oder wer `bootsnamen.js` und die Bootskarte pflegt.
 
-### C8. Grün-Rot-Schilder an allen Boxen (Idee, niedrig)
+### C8. Grün-Rot-Schilder an allen Boxen (freigegeben von Jorven am 12.11., Umsetzung in C9)
 
 **Echt:** Jede Box hat ein Schild, grün frei, rot belegt. Für Ostsee-Segler ist das das bekannteste Bild eines Hafens.
 
@@ -193,9 +238,61 @@ Zuständig: Stege oder Dauerlieger-Thread, nach Rückfrage bei Jorven.
 
 ---
 
+### C9. Boote fahren selbst in eine freie grüne Box (hoch, Wunsch von Jorven)
+
+**Echt:** siehe A9. Gäste suchen sich selbst eine grüne Box, die breit genug ist.
+
+**Spiel soll:**
+- Jede Gastbox hat ein kleines **Schild am Heckpfahl**: grün = frei, rot = belegt oder reserviert (Tagestörn, Dauerlieger). Das Schild der Dauerlieger (`features/dauerlieger.js`) ist das Vorbild; Jorven hat es für alle Boxen freigegeben.
+- Ein ankommendes Boot wartet kurz an der Boje (wenige Sekunden, Zeit für den Spieler, es selbst zu lenken). Tut der Spieler nichts, **fährt es selbst** in die erste passende grüne Box, die am nächsten am Ufer liegt, und das Schild springt auf rot.
+- Passt keine grüne Box, wartet es an der Boje wie bisher (Spieler kann bauen oder wegschicken), abends bleibt es über Nacht dort (C2).
+- Zuweisen von Hand bleibt und lohnt sich: Ein Boot, das der Spieler in eine Box mit erfülltem Wunsch (Strom, nah an Dusche) lenkt, gibt eine bessere Bewertung. Das automatische Einfahren nimmt nur „passt“, nicht „Wunsch erfüllt“.
+- Das Hafenbüro (heute Stufe 3: weist selbst zu) wird damit nicht überflüssig: Es wählt wie der Spieler die Box mit den meisten erfüllten Wünschen.
+
+Prüfen nach dem Merge: Boot fährt ohne Eingriff ein; nie in eine rote Box; Schild wechselt sichtbar beim Anlegen und Ablegen (erst wenn das Boot draußen ist, C1); passende Größe (S nicht in XL-Box, wenn eine S-Box frei ist).
+
+Zuständig: Spielregeln (Regel), Schiffsanimationen (Fahrt), Stege oder Dauerlieger (Schilder).
+
+### C10. Tagesausflüge mit reservierter Box (mittel, Wunsch von Jorven)
+
+**Echt:** siehe A10. Gäste mit zwei oder mehr Nächten fahren tagsüber raus und kommen in dieselbe Box zurück.
+
+**Spiel soll:**
+- Gäste mit mindestens zwei Nächten machen am Tag dazwischen manchmal einen Tagestörn: zwischen 9 und 11 Uhr raus (Segel erst draußen), zwischen 15 und 18 Uhr zurück in dieselbe Box. Die Dauerlieger-Runde (`dauer:auslaufen`, `dauer:einlaufen`) ist dafür schon da.
+- Die Box bleibt in den Regeln belegt, das Schild bleibt rot. Ein ankommendes Boot fährt nie hinein, der Spieler kann sie nicht zuweisen. Die Münze des Tages gibt es trotzdem.
+- Andere Gäste machen einen Landausflug: Die Crew läuft mit Fahrrädern oder zum Bus vom Hafen weg und kommt nachmittags zurück (Menschen-Thread, freiwillig).
+
+Prüfen nach dem Merge: Box während des Ausflugs nicht zuweisbar, nicht im automatischen Einfahren; Boot kommt in dieselbe Box zurück; Ausflug nur bei Gästen mit mehreren Nächten; kein Ausflug bei Sturm.
+
+Zuständig: Spielregeln, Schiffsanimationen, Menschen.
+
+### C11. Mehr Angebote an Land: Café, Bäcker, Grillplatz und Co. (mittel, Wunsch von Jorven)
+
+**Echt:** siehe A11.
+
+**Spiel soll:** Neue Angebote als Bauplätze, je mit sichtbarem Leben zur passenden Tageszeit, ohne neue Zahlen für den Spieler. Vorschlag in dieser Reihenfolge, weil man sie sofort sieht und sie zu Stufe 1 bis 3 passen:
+
+| Angebot | Ab Stufe | Was man sieht | Wirkung (Vorschlag) |
+|---|---|---|---|
+| Brötchenservice am Hafenhaus, später Bäcker | 1 | morgens laufen Leute mit Tüten zurück zum Boot | Gäste bewerten besser, Bäcker zahlt kleine Pacht |
+| Café mit Terrasse am Wasser | 2 | nachmittags sitzen Leute draußen mit Sonnenschirmen | Einnahme von Tagesgästen und Crews, Ruf |
+| Grillplatz mit Bänken | 2 | abends Rauch und Leute, die zusammensitzen | bessere Bewertung, kostet wenig |
+| Fischbrötchenbude | 2 | mittags Schlange | Einnahme, braucht Fischer oder Räucherei |
+| Fahrradverleih | 3 | morgens fahren Crews mit Rädern los (Landausflug C10) | Einnahme, mehr Gäste bleiben zwei Nächte |
+| Waschhaus | 3 | Wäsche an der Leine | erfüllt neuen Wunsch nicht nötig, nur Bewertung |
+| Spielplatz und Krebsangel-Steg | 3 | Kinder mit Eimern am Steg | Ruf |
+| Eisdiele | 4 | nachmittags Leute mit Eis | Einnahme |
+| Kaufmann | 4 | Leute mit Einkaufstaschen | Bewertung |
+
+Jedes Angebot muss nach `docs/abnahme.md` im Spiel sichtbar etwas tun. Lieber vier davon gut als neun halb. Neue Wünsche über Gastboote („will Brötchen“) nur, wenn sie ohne neues Menü auskommen.
+
+Zuständig: Services (Gebäude und Wirkung), Menschen (Laufziele `people.js`), Gebäude (`buildings.js`).
+
 ## Nach den laufenden Merges nachprüfen
 
 - C1 (Spielregeln-Thread): Zuweisung in eine Box, in der noch ein Boot liegt.
 - C4 (Schiffsanimationen): Auftauchen und Verschwinden, auch am Handy hochkant.
+- C7 (PR 95): Heimathäfen kleiner Boote aus der Nähe.
+- C9 und C10: siehe dort.
 - Überlappende Boote, runde Zuweisungsanimation über eckiger Box, Boote vor der Boje anklickbar, vorbeifahrende Boote, Spaziergänger am Strand, Nebel.
 - Stufe 6 (PR 81, 82, 85, 87): Kreuzfahrtschiff morgens ein, abends aus; Marine mehrere Tage; Seenotkreuzer fest an der Einfahrt.
