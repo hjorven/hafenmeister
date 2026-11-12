@@ -34,15 +34,15 @@ node --test tests/*.test.mjs
 
 | Stufe | Name | Spieltage | 10 % bis 90 % | davon Sparen auf den Ausbau | Echtzeit 1x | mit Vorspulen |
 |---|---|---|---|---|---|---|
-| 1 | Bootssteg am See | 13 | 12 bis 14 | 5 | 26 min | 16 min |
-| 2 | Dorfhafen am See | 46 | 36 bis 50 | 20 | 1 h 32 min | 58 min |
-| 3 | Durchstich zur Ostsee | 41 | 38 bis 43 | 13 | 1 h 22 min | 51 min |
-| 4 | Marina | 46 | 44 bis 48 | 16 | 1 h 32 min | 58 min |
-| 5 | Küstenmarina | 47 | 43 bis 51 | 13 | 1 h 34 min | 59 min |
-| 6 | Seehafen bis zum Abschluss | 69 | 64 bis 73 | | 2 h 18 min | 1 h 26 min |
-| | **Gesamt** | **259** | 251 bis 268 | | **8 h 38 min** | **5 h 28 min** |
+| 1 | Bootssteg am See | 13 | 13 bis 14 | 6 | 26 min | 16 min |
+| 2 | Dorfhafen am See | 47 | 37 bis 50 | 19 | 1 h 34 min | 59 min |
+| 3 | Durchstich zur Ostsee | 40 | 37 bis 43 | 12 | 1 h 20 min | 50 min |
+| 4 | Marina | 45 | 43 bis 47 | 15 | 1 h 30 min | 56 min |
+| 5 | Küstenmarina | 46 | 43 bis 50 | 12 | 1 h 32 min | 58 min |
+| 6 | Seehafen bis zum Abschluss | 67 | 61 bis 72 | | 2 h 14 min | 1 h 24 min |
+| | **Gesamt** | **257** | 245 bis 266 | | **8 h 34 min** | **5 h 23 min** |
 
-**Gemütlicher Spieler** (schaut nur alle 20 Sekunden auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz, kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus): 276 Tage, 9 h 12 min bei 1x, 5 h 45 min mit Vorspulen. Am meisten Zeit verliert er in Stufe 2, weil er dort spät in Versorgung investiert.
+**Gemütlicher Spieler** (schaut nur alle 20 Sekunden auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz, kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus): 273 Tage, 9 h 06 min bei 1x, 5 h 35 min mit Vorspulen. Am meisten Zeit verliert er in Stufe 2, weil er dort spät in Versorgung investiert.
 
 Ungeschicktes Spielen bremst nie stark und blockiert nie. Das passt zu „kein Scheitern“.
 
@@ -95,7 +95,19 @@ Das Abschlussziel benutzt nur Dinge, die der Spieler im Hafen sieht: Geld, Ruf u
 
 **Versorgung:** Toilette, Dusche, Gastronomie je 4 Stufen, Tankstelle 2 Stufen, Stromsäulen an Steg B. Kapazitäten sind so gewählt, dass die größte Stufe einen vollen Hafen (91 Gastplätze) versorgt.
 
-**Services:** 13 Services mit 1 bis 2 Stufen, Format mit dem Services-Thread abgestimmt (`ECONOMY.services[id].stufen[n].wirkung`). Kein Service hat laufende Kosten.
+**Services:** 18 Services mit 1 bis 2 Stufen, Format mit dem Services-Thread abgestimmt (`ECONOMY.services[id].stufen[n].wirkung`). Kein Service hat laufende Kosten.
+
+**Angebote an Land** (echter-hafen.md C11, PR 111). Jedes hat sich nach rund 25 bis 45 Spieltagen bezahlt gemacht, also innerhalb seiner Stufe. Grillplatz und Brötchenservice sind fast nur Ruf und dafür billig.
+
+| Angebot | Ab Stufe | Kosten | Wirkung |
+|---|---|---|---|
+| Brötchenservice, später Hafenbäcker | 1, Ausbau ab 3 | 80 €, 3.200 € | Kunden am Morgen, etwas Ruf |
+| Hafencafé, später Café mit Terrasse | 2, Ausbau ab 3 | 800 €, 4.800 € | Tageseinnahme (bei Regen weniger), Kunden, Ruf |
+| Grillplatz | 2 | 400 € | Ruf |
+| Fahrradverleih | 3 | 2.000 € | Tageseinnahme bei gutem Wetter, Kunden |
+| Eisdiele | 4 | 5.000 € | Tageseinnahme bei gutem Wetter, Kunden, etwas Ruf |
+
+Mit den Angeboten wird die Region drei Spieltage schneller fertig (257 statt 259), die Spielzeit bleibt im Korridor.
 
 ## Was die Simulation abdeckt
 
