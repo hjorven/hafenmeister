@@ -36,7 +36,7 @@ function add(parent, geo, c, x = 0, y = 0, z = 0) {
 }
 
 // Quader, y = Unterkante
-function box(g, w, h, d, c, x = 0, y = 0, z = 0, ry = 0) {
+export function box(g, w, h, d, c, x = 0, y = 0, z = 0, ry = 0) {
   const m = add(g, new THREE.BoxGeometry(w, h, d), c, x, y + h / 2, z);
   m.rotation.y = ry;
   return m;
@@ -67,7 +67,7 @@ function haus(g, w, h, d, wand, dach, x = 0, z = 0, ry = 0, dachH = null) {
   return o;
 }
 
-function zyl(g, r, h, c, x = 0, y = 0, z = 0, seg = 8, r2 = r) {
+export function zyl(g, r, h, c, x = 0, y = 0, z = 0, seg = 8, r2 = r) {
   return add(g, new THREE.CylinderGeometry(r, r2, h, seg), c, x, y + h / 2, z);
 }
 
@@ -76,7 +76,7 @@ function pfahl(g, x, z, h = 2.2, c = FARBE.pile) {
 }
 
 // Flagge an einem Mast, gibt die Flagge zurueck (fuer das Wehen)
-function flagge(g, x, z, h, c, y0 = LAND_Y) {
+export function flagge(g, x, z, h, c, y0 = LAND_Y) {
   zyl(g, 0.07, h, FARBE.white, x, y0, z, 5);
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 1.6, -0.4, 0, 0, -0.8, 0], 3));
@@ -88,7 +88,7 @@ function flagge(g, x, z, h, c, y0 = LAND_Y) {
 }
 
 // Kleiner Bootsrumpf, Bug nach +x, y = Wasserlinie
-function rumpf(g, len, breite, hoehe, c, x = 0, y = 0, z = 0, ry = 0, deck = FARBE.white) {
+export function rumpf(g, len, breite, hoehe, c, x = 0, y = 0, z = 0, ry = 0, deck = FARBE.white) {
   const o = new THREE.Group();
   const s = new THREE.Shape();
   s.moveTo(-len / 2, -breite / 2);
@@ -141,10 +141,13 @@ function baum(g, x, z, r = 2.2) {
 // Rauch, der aufsteigt und vergeht
 function rauch(g, x, y, z, menge = 5) {
   const teile = [];
+  const huelle = new THREE.Group();
+  huelle.userData.land = true;           // wird mit dem Haus auf den Boden gehoben
+  g.add(huelle);
   for (let i = 0; i < menge; i++) {
     const m = new THREE.Mesh(new THREE.IcosahedronGeometry(0.45, 0),
       new THREE.MeshLambertMaterial({ color: FARBE.smoke, transparent: true, opacity: 0.8 }));
-    g.add(m);
+    huelle.add(m);
     teile.push(m);
   }
   return (t) => {
@@ -196,19 +199,26 @@ function bootsverleih(stufe) {
   };
 }
 
-function slip(stufe) {
+function slip(stufe, { boden = LAND_Y } = {}) {
   const g = new THREE.Group();
-  // Betonrampe, faellt nach Norden ins Wasser
-  const r = box(g, 4.5, 0.3, 14, FARBE.road, 0, -0.75, -2);
-  r.rotation.x = -0.1;
-  for (let i = 0; i < 6; i++) box(g, 4.5, 0.06, 0.15, FARBE.rock, 0, LAND_Y - 0.05 - i * 0.22, 2 - i * 2.2);
+  // Betonrampe vom Ufer (Bodenhoehe am Anker) bis 0,8 m unter Wasser, faellt nach Norden
+  const oben = Math.max(LAND_Y, Math.min(boden, 3)), unten = -0.8, laenge = 16;
+  const neigung = Math.atan2(oben - unten, laenge);
+  const r = new THREE.Group();
+  r.position.set(0, (oben + unten) / 2, -1);
+  r.rotation.x = -neigung;
+  r.userData.fest = true;
+  box(r, 4.5, 0.3, laenge / Math.cos(neigung), FARBE.road, 0, -0.3, 0);
+  for (let i = 0; i < 7; i++) box(r, 4.5, 0.06, 0.15, FARBE.rock, 0, 0, -laenge / 2 + 1 + i * 2.2);
+  g.add(r);
   // Trailer mit Boot
   const tr = new THREE.Group();
   box(tr, 0.15, 0.15, 5, FARBE.steel, -0.7, 0.45, 0);
   box(tr, 0.15, 0.15, 5, FARBE.steel, 0.7, 0.45, 0);
   for (const s of [-0.9, 0.9]) { const w = zyl(tr, 0.35, 0.25, FARBE.ink, s, 0.35, 0.8, 10); w.rotation.z = Math.PI / 2; }
   rumpf(tr, 5, 2, 0.8, FARBE.navy, 0, 0.9, 0, Math.PI / 2);
-  tr.position.set(0, LAND_Y, 7);
+  tr.position.set(0, oben, 7);
+  tr.userData.fest = true;
   g.add(tr);
   zyl(g, 0.2, 1.2, FARBE.yellow, 2.8, LAND_Y, 4, 6);                 // Winde
   if (stufe >= 2) {
@@ -224,7 +234,7 @@ function slip(stufe) {
       // Der Trailer rollt langsam hinunter und wieder hoch
       k = (Math.sin(t * 0.25) + 1) / 2;
       tr.position.z = 7 - k * 4;
-      tr.position.y = LAND_Y - k * 0.4;
+      tr.position.y = oben - k * Math.min(0.9, (oben - unten) * 0.25);
     },
   };
 }
@@ -329,6 +339,7 @@ function mastenkran() {
   zyl(g, 0.35, 10, FARBE.yellow, 0, LAND_Y + 0.5, 0, 8);
   const arm = new THREE.Group();
   arm.position.set(0, LAND_Y + 10.2, 0);
+  arm.userData.land = true;
   const ausleger = box(arm, 0.4, 0.4, 7, FARBE.yellow, 0, 0, -3);
   ausleger.rotation.x = -0.12;
   box(arm, 0.8, 0.8, 1.2, FARBE.ink, 0, -0.1, 1.2);                  // Gegengewicht
@@ -400,11 +411,10 @@ function travellift(stufe) {
   }
   if (stufe >= 3) {
     // Grosse Werfthalle mit Slipwagen am Becken
-    haus(g, 20, 8, 12, FARBE.white, FARBE.grey, -20, 10, 0, 3);
-    box(g, 7, 6.5, 0.1, FARBE.steel, -20, LAND_Y, 3.95);
-    box(g, 7, 6.5, 0.1, FARBE.steel, -20, LAND_Y, 3.95).position.z = 3.95 - 12.05;
-    flaeche(g, 6, 14, FARBE.road, -20, -8);
-    for (const s of [-1.2, 1.2]) box(g, 0.2, 0.15, 14, FARBE.steel, -20 + s, LAND_Y, -8);
+    haus(g, 20, 8, 12, FARBE.white, FARBE.grey, 22, 10, 0, 3);
+    box(g, 7, 6.5, 0.1, FARBE.steel, 22, LAND_Y, 3.95);
+    flaeche(g, 6, 12, FARBE.road, 22, -2);
+    for (const s of [-1.2, 1.2]) box(g, 0.2, 0.15, 12, FARBE.steel, 22 + s, LAND_Y, -2);
   }
   return {
     group: g,
@@ -479,7 +489,8 @@ function seenotretter(stufe) {
   const fl = flagge(g, -5, -3.6, 7, FARBE.orange);
   // Eigener Steg zum Dienstplatz aus js/data/harbor.js (179,1 / 243,2, Richtung 85 Grad)
   const [dx, dz] = P(179.1 - 200, 243.2 - 211);
-  steg(g, -2, -4, dx + 3, dz + 6, 1.8, FARBE.pont, 0.5);
+  // Schwimmsteg laengsseits an der Ostseite des Liegeplatzes, zur Ostmole hin
+  steg(g, dx + 3.6, dz + 8, dx + 3.6, dz - 10, 1.8, FARBE.pont, 0.5);
   const boot = new THREE.Group();
   const gross = stufe >= 2;
   const L = gross ? 20 : 10.5, B = gross ? 5 : 3.6;
@@ -523,12 +534,11 @@ function fahrgastanleger(stufe) {
   haus(g, 4.4, 2.6, 3, FARBE.white, FARBE.blue);
   box(g, 4, 0.5, 0.6, FARBE.wood, -5, LAND_Y, -2);
   const fl = flagge(g, 3.4, -2, 5.5, FARBE.blue);
-  // Schwimmender Anleger mit Gangway
+  // Gangway an der Kaikante (Kai bei Plan-y 229); das Ausflugsschiff liegt am Kai davor
   const [, kz] = P(0, 229 - 216);
-  box(g, 18, 0.5, 3, FARBE.pont, 0, 0.1, kz - 3);
-  for (let i = 0; i < 5; i++) pfahl(g, -8 + i * 4, kz - 4.8, 4);
-  const gw = box(g, 1.4, 0.15, 3.6, FARBE.steel, 0, 0.7, kz - 0.4);
-  gw.rotation.x = 0.12;
+  box(g, 1.6, 3.2, 1.6, FARBE.steel, 0, LAND_Y, kz + 1.6);
+  const gw = box(g, 1.4, 0.15, 3.2, FARBE.white, 0, LAND_Y + 2.9, kz - 0.3);
+  gw.rotation.x = 0.18;
   // Schild "Ausflugsfahrten": gelbe Tafel
   box(g, 0.1, 1.6, 2.4, FARBE.yellow, -2.4, LAND_Y + 1, kz + 2);
   if (stufe >= 2) {
@@ -656,9 +666,10 @@ export const MODELLE = {
 };
 
 // Baut ein Modell. Unbekannte ids bekommen ein schlichtes Haus, damit nichts unsichtbar bleibt.
-export function baueModell(id, stufe = 1) {
+// opts.boden: Bodenhoehe am Ankerpunkt in Metern (fuer Teile vom Ufer ins Wasser, z. B. die Sliprampe)
+export function baueModell(id, stufe = 1, opts = {}) {
   const f = MODELLE[id];
-  if (f) return f(stufe);
+  if (f) return f(stufe, opts);
   const g = new THREE.Group();
   haus(g, 6, 3, 5, FARBE.white, FARBE.coral);
   return { group: g, update: null };

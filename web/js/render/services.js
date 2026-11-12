@@ -21,11 +21,9 @@ import * as THREE from 'three';
 import { SERVICES } from '../data/services.js';
 import { erstelleRegeln, neuerZustand, mitZahlen } from '../services/rules.js';
 import { baueModell, LAND_Y, mat, FARBE } from './services-models.js';
+import { initBesuche } from './services-besuch.js';
 
 const U = 0.62;
-// Stufe 6 ist zurueckgestellt, bis der Umfang entschieden ist (docs/abnahme.md). Die Daten und
-// Modelle sind fertig; mit ?services=alle sind sie zu sehen.
-const ZURUECKGESTELLT = new Set(['kreuzfahrtterminal', 'marineanleger']);
 
 const welt = (lage) => ({ x: lage.x * U, z: -lage.y * U, ry: THREE.MathUtils.degToRad(lage.dreh ?? 0) });
 const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
@@ -33,7 +31,7 @@ const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
 export function init(game) {
   const params = new URLSearchParams(location.search);
   const alleZeigen = params.get('services') === 'alle';
-  // Zum Ausprobieren mit ?stufe=n: diese Stufe gilt fest und Bauen kostet nichts.
+  // Zum Ausprobieren mit ?stufe=n: diese Stufe gilt fest, Bauen kostet nichts, der Ruf zaehlt als 5.
   const testStufe = Number(params.get('stufe')) || 0;
   let R = erstelleRegeln(SERVICES);
 
@@ -51,18 +49,36 @@ export function init(game) {
   };
   let winter = false;
   let stufe = testStufe || game.state?.stufe || 1;
-  const kontext = () => ({ stufe, ruf: game.sim?.reputation?.() ?? game.state?.ruf ?? 3, geld: !testStufe && Number.isFinite(game.state?.geld) ? game.state.geld : undefined,
+  const kontext = () => ({ stufe, ruf: testStufe ? 5 : game.sim?.reputation?.() ?? game.state?.ruf ?? 3, geld: !testStufe && Number.isFinite(game.state?.geld) ? game.state.geld : undefined,
     tag: game.state?.tag ?? 1 });
-  const sichtbar = (id) => alleZeigen || !ZURUECKGESTELLT.has(id);
+  const sichtbar = () => true;
 
   const gruppe = new THREE.Group();
   gruppe.name = 'services';
   game.scene.add(gruppe);
 
-  const hoehe = (x, z) => {
+  // Bodenhoehe der Landschaft in Metern (unter Wasser negativ), ohne Landschaft LAND_Y
+  const boden = (x, z) => {
     const h = game.landschaft?.hoeheBei?.(x, z);
-    return Number.isFinite(h) ? Math.min(1, Math.max(0, h - LAND_Y)) : 0;
+    return Number.isFinite(h) ? h : LAND_Y;
   };
+  // Teile an Land auf den Boden setzen: Die Modelle sind fuer Land in LAND_Y gebaut, die Landschaft
+  // ist an Ufer, Duenen und Nehrung hoeher. Wasserteile (Stege, Boote) bleiben, wo sie sind.
+  // userData.land erzwingt das Anheben (z. B. Kranarm), userData.fest verbietet es (selbst gesetzt).
+  const _b = new THREE.Box3(), _v = new THREE.Vector3();
+  function aufBoden(gr) {
+    gr.updateMatrixWorld(true);
+    for (const c of gr.children) {
+      if (c.userData.fest) continue;
+      _b.setFromObject(c);
+      if (_b.isEmpty()) continue;
+      const minLokal = _b.min.y - gr.position.y;
+      if (!c.userData.land && minLokal < LAND_Y - 0.1) continue;
+      _b.getCenter(_v);
+      const dy = Math.min(4, Math.max(0, boden(_v.x, _v.z) - LAND_Y));
+      c.position.y += dy;
+    }
+  }
 
   // ------------------------------------------------------------------ Modelle in der Szene
   const anlagen = new Map();     // id -> { stufe, group, update, einsatz, pop }
@@ -72,10 +88,11 @@ export function init(game) {
     if (alt && alt.stufe === n) return;
     if (alt) { gruppe.remove(alt.group); entsorge(alt.group); anlagen.delete(id); }
     if (n <= 0) return;
-    const m = baueModell(id, n);
     const w = welt(R.lage(zustand(), id));
-    m.group.position.set(w.x, hoehe(w.x, w.z), w.z);
+    const m = baueModell(id, n, { boden: boden(w.x, w.z) });
+    m.group.position.set(w.x, 0, w.z);
     m.group.rotation.y = w.ry;
+    aufBoden(m.group);
     m.group.name = `service-${id}`;
     m.group.userData.pick = { type: 'building', id };
     gruppe.add(m.group);
@@ -125,7 +142,7 @@ export function init(game) {
       if (zeigePlatz && !vorhanden) {
         const g = bauplatz(s.id);
         const w = welt(s.stufen[0].lage ?? s.lage);
-        g.position.set(w.x, hoehe(w.x, w.z), w.z);
+        g.position.set(w.x, Math.max(0, boden(w.x, w.z) - LAND_Y), w.z);
         gruppe.add(g);
         plaetze.set(s.id, g);
       } else if (!zeigePlatz && vorhanden) {
@@ -304,6 +321,7 @@ export function init(game) {
     gruppe,
   };
   game.services = api;
+  api.besuche = initBesuche(game, api);
   return api;
 }
 

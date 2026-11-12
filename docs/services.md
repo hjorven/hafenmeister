@@ -29,7 +29,10 @@ Bezahlt wird mit `game.sim.spend`, bei zu wenig Geld ist der Knopf gesperrt. Die
 | Fahrgastanleger | 5 | Anleger, Ausflugsflotte | tägliche Ausflugsfahrt | Flagge |
 | Museumshafen | 5 | Kai vor Speicher, zweiter Speicher | Traditionssegler kommen, Hafenfest größer | Holzkran schwenkt |
 
-Kreuzfahrtterminal und Marineanleger (Stufe 6) sind als Daten und Modelle fertig, aber zurückgestellt, bis der Umfang von Stufe 6 entschieden ist. Mit `?services=alle` sind sie zu sehen.
+| Kreuzfahrtterminal | 6 | Kreuzfahrtpier, Terminal | Kreuzfahrtschiff alle 7, später alle 4 Tage | Schiff läuft morgens ein und abends aus |
+| Marineanleger | 6 | Anleger, Stützpunkt | Flottenbesuch alle 10 Tage, später Tag der offenen Tür | Korvette und Minenjagdboot machen fest, Radar dreht |
+
+**Besuchsschiffe** (`web/js/render/services-besuch.js`): Das Ausflugsschiff liegt morgens am Kai, fährt mittags durch die Molen hinaus und kommt nachmittags zurück. Kreuzfahrtschiff und Marineschiffe kommen nur an Besuchstagen. Am Vorabend kündigt das Schild unter der oberen Leiste den Besuch an. Bei Sturm bleibt der Besuch aus und kommt einen Tag später. Sobald der Schiffs-Thread XXL-Modelle anbietet (`game.boats.xxl.modell(art)`), werden diese genommen.
 
 ## Dateien
 
@@ -38,6 +41,7 @@ Kreuzfahrtterminal und Marineanleger (Stufe 6) sind als Daten und Modelle fertig
 | `web/js/data/services.js` | Katalog: Lage, Preise, Wirkungen. Feldbeschreibung steht oben in der Datei. |
 | `web/js/services/rules.js` | Regeln ohne Grafik: freischalten, bauen, Effekte, Tagesabrechnung, regelmäßige Besuche |
 | `web/js/render/services-models.js` | 15 Modelle aus einfachen Körpern |
+| `web/js/render/services-besuch.js` | Besuchsschiffe: Ausflugsschiff, Kreuzfahrtschiff, Marineschiffe mit Ein- und Auslaufen |
 | `web/js/render/services.js` | Einstieg `init(game)`: Bauplätze, Karte, Modelle, Ereignisse, `game.services` |
 | `tests/services.test.mjs` | Tests für die Regeln |
 
@@ -64,5 +68,5 @@ python3 -m http.server 8000 --directory web
 Dann im Browser öffnen:
 
 - `http://localhost:8000/`: normales Spiel. In Stufe 1 steht der Bauplatz des Bootsverleihs westlich von Steg A.
-- `http://localhost:8000/?stufe=4`: Testmodus, Stufe 4 fest und Bauen kostenlos. Bauplätze am Ufer erscheinen, Schild antippen, bauen, Gebautes noch einmal antippen.
-- `http://localhost:8000/?stufe=5&services=alle`: alles voll ausgebaut, zum Ansehen der Modelle und Animationen.
+- `http://localhost:8000/?stufe=4`: Testmodus, Stufe 4 fest, Bauen kostenlos, Ruf zählt als 5. Bauplätze am Ufer erscheinen, Schild antippen, bauen, Gebautes noch einmal antippen.
+- `http://localhost:8000/?stufe=6&services=alle`: alles voll ausgebaut, zum Ansehen der Modelle und Animationen. Das Ausflugsschiff fährt jeden Tag, Kreuzfahrtschiff und Marine kommen nach 2 bis 4 Spieltagen.

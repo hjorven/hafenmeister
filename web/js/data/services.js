@@ -78,7 +78,7 @@ export const SERVICES = [
   {
     id: 'raeucherei', name: 'Räucherei', gruppe: 'freizeit', abStufe: 2,
     kurz: 'Fischbrötchen am Steg. Gäste mögen das, der Ruf steigt.',
-    lage: { x: -176, y: -26, dreh: 0 }, radius: 7,
+    lage: { x: -184, y: -26, dreh: 0 }, radius: 7,
     stufen: [
       { name: 'Räucherkate', kosten: 700,
         wirkung: { proTag: 25, kunden: { anteil: 0.3, preis: 4 }, ruf: 0.05 } },
@@ -190,7 +190,7 @@ export const SERVICES = [
   {
     id: 'fahrgastanleger', name: 'Fahrgastanleger', gruppe: 'grosse-schiffe', abStufe: 5,
     kurz: 'Ausflugsschiffe fahren täglich raus. Bringt Gäste und Kleingeld.',
-    lage: { x: 13, y: 216, dreh: 0 }, radius: 10,
+    lage: { x: 32, y: 216, dreh: 0 }, radius: 10,
     stufen: [
       { name: 'Fahrgastanleger', kosten: 12000,
         wirkung: { freischalten: ['fahrgastschiff'], wetter: { regen: 0.6, sturm: 0 },
