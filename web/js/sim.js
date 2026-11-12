@@ -258,10 +258,12 @@ export function isFree(state, berthId) {
  * Ein abreisendes Boot hält seine Box, bis es wirklich heraus ist. Die 3D-Ansicht meldet das mit
  * 'boot:aus-box'; meldet niemand etwas, wird die Box nach rules.leaveMax Sekunden frei.
  */
-function startLeaving(state, boatId, berthId) {
+function startLeaving(state, boatId, berthId, at = 0) {
   if (berthId == null) return;
   if (!state.leaving) state.leaving = {};
-  state.leaving[berthId] = { boatId, elapsed: 0 };
+  // at: Spieluhr des neuen Tages, zu der das Boot ablegt (gestaffelte Abreise am Vormittag).
+  // Bis dahin liegt es noch in der Box (off: false), danach läuft die Rückfallzeit.
+  state.leaving[berthId] = { boatId, elapsed: 0, at, off: !(at > 0) };
 }
 
 /** Box freigeben, sobald das abreisende Boot heraus ist (per Boot-id oder Platz-id). */
@@ -451,13 +453,23 @@ function startDay(state, ctx, events) {
   planTrips(state, ctx, mods, sea.winter);
   const rate = sea.winter ? 0 : arrivalRate(state, ctx, mods);
   const n = Math.floor(rate) + (random(state) < rate - Math.floor(rate) ? 1 : 0);
-  const window = ctx.rules.dayLength * ctx.rules.arrivalWindow;
+  // Ankünfte wie im echten Hafen eher nachmittags: zwischen arrivalFrom und arrivalWindow
+  // (Anteile des Tages), am häufigsten um arrivalPeak.
+  const from = ctx.rules.dayLength * (ctx.rules.arrivalFrom ?? 0);
+  const window = ctx.rules.dayLength * ctx.rules.arrivalWindow - from;
+  const peak = ctx.rules.arrivalPeak != null ? ctx.rules.dayLength * ctx.rules.arrivalPeak - from : null;
   const list = [];
   for (let i = 0; i < n; i++) {
     const boat = rollBoat(state, ctx, mods);
     if (!boat) break;
     boat.id = state.nextId++;
-    boat.arriveAt = Math.round(random(state) * window * 10) / 10;
+    const u = random(state);
+    // Dreiecksverteilung mit Spitze bei arrivalPeak, sonst gleichmäßig
+    let t = u * window;
+    if (peak != null && peak > 0 && peak < window) {
+      t = u < peak / window ? Math.sqrt(u * window * peak) : window - Math.sqrt((1 - u) * window * (window - peak));
+    }
+    boat.arriveAt = Math.round((from + t) * 10) / 10;
     list.push(boat);
   }
   list.sort((a, b) => a.arriveAt - b.arriveAt || a.id - b.id);
@@ -809,7 +821,10 @@ function startEvening(state, ctx, events) {
   state.phase = 'evening';
   const mods = modifiers(state, ctx);
   // Wer noch wartet, fährt weiter
-  for (const id of [...state.queue]) turnAway(state, ctx, state.boats[id], events, 'evening');
+  // (außer sie dürfen über Nacht an der Boje bleiben und morgens weitermachen)
+  if (!ctx.rules.queue.overnight) {
+    for (const id of [...state.queue]) turnAway(state, ctx, state.boats[id], events, 'evening');
+  }
 
   let visitors = 0;
   for (const boat of mooredBoats(state)) {
@@ -935,8 +950,11 @@ function night(state, ctx, events) {
     state.stageGuests = (state.stageGuests || 0) + 1;
     delete state.berths[boat.berthId];
     delete state.boats[boat.id];
-    startLeaving(state, boat.id, boat.berthId);
-    events.push({ type: 'departed', boatId: boat.id, berthId: boat.berthId, typeId: boat.typeId, rating });
+    // Abgerechnet wird nachts, abgelegt am nächsten Vormittag zu einer eigenen Zeit je Boot
+    const w = ctx.rules.departWindow;
+    const leaveAt = w ? Math.round((w[0] + random(state) * (w[1] - w[0])) * ctx.rules.dayLength * 10) / 10 : 0;
+    startLeaving(state, boat.id, boat.berthId, leaveAt);
+    events.push({ type: 'departed', boatId: boat.id, berthId: boat.berthId, typeId: boat.typeId, rating, leaveAt });
   }
   for (const fn of ctx.hooks.night) fn({ state, ctx, events });
   const s = state.stats;
@@ -948,12 +966,41 @@ function night(state, ctx, events) {
   state.day++;
   state.phase = 'day';
   state.clock = 0;
+  // Wer über Nacht an der Boje lag, macht morgens mit frischer Geduld weiter
+  for (const id of state.queue) {
+    const b = state.boats[id];
+    if (!b) continue;
+    b.waitingSince = 0;
+    if (b.atBuoy) b.atBuoySince = 0;
+    b.overnight = (b.overnight || 0) + 1;
+  }
   startDay(state, ctx, events);
   if (canAdvanceStage(state, ctx).ok) events.push({ type: 'stageReady', stage: state.stage + 1 });
 }
 
 // ---------------------------------------------------------------------------
 // Zeit
+
+/** Wartende Boote: Ankunft an der Boje, Geduld (nur tagsüber), Einfahren von selbst oder durchs Hafenbüro. */
+function queueStep(state, ctx, events, countPatience) {
+  const { queue } = ctx.rules;
+  for (const id of [...state.queue]) {
+    const b = state.boats[id];
+    // Alte Spielstände kennen atBuoy nicht: dann gilt die Wartezeit ab Ankunft
+    if (b.atBuoy === undefined) {
+      b.atBuoy = true;
+      b.atBuoySince = b.waitingSince;
+    }
+    if (!b.atBuoy && state.clock - b.waitingSince >= (queue.approachMax ?? 0)) {
+      events.push(...markAtBuoy(state, ctx, id).events);
+    }
+    if (countPatience && b.atBuoy && state.clock - b.atBuoySince > queue.patience) turnAway(state, ctx, b, events, 'patience');
+  }
+  // Hafenbüro mit Automatik: wartende Boote bekommen ihren Platz, sobald einer frei wird
+  if (state.queue.length && state.office >= ctx.rules.office.autoAssign) events.push(...autoAssign(state, ctx));
+  // Wie im echten Hafen: Wer kurz an der Boje gewartet hat, sucht sich selbst eine freie Box
+  else if (state.queue.length) events.push(...selfEnter(state, ctx));
+}
 
 /**
  * Lässt dt Sekunden Spielzeit vergehen. Vorspulen ist einfach ein größeres dt.
@@ -970,6 +1017,12 @@ export function tick(state, ctx, dt) {
     rest -= step;
     state.clock += step;
     for (const [berthId, l] of Object.entries(state.leaving || {})) {
+      if (l.off === false) {
+        // Abreise am Vormittag: erst zur geplanten Zeit ablegen (oder sofort, falls die Box schon neu vergeben ist)
+        if (state.clock < l.at && !state.berths[berthId]) continue;
+        l.off = true;
+        events.push({ type: 'castOff', boatId: l.boatId, berthId });
+      }
       l.elapsed += step;
       if (l.elapsed >= (ctx.rules.leaveMax ?? 0)) events.push(...berthCleared(state, ctx, { berthId }).events);
     }
@@ -977,22 +1030,7 @@ export function tick(state, ctx, dt) {
       while (state.upcoming.length && state.upcoming[0].arriveAt <= state.clock) {
         arrive(state, ctx, state.upcoming.shift(), events);
       }
-      for (const id of [...state.queue]) {
-        const b = state.boats[id];
-        // Alte Spielstände kennen atBuoy nicht: dann gilt die Wartezeit ab Ankunft
-        if (b.atBuoy === undefined) {
-          b.atBuoy = true;
-          b.atBuoySince = b.waitingSince;
-        }
-        if (!b.atBuoy && state.clock - b.waitingSince >= (queue.approachMax ?? 0)) {
-          events.push(...markAtBuoy(state, ctx, id).events);
-        }
-        if (b.atBuoy && state.clock - b.atBuoySince > queue.patience) turnAway(state, ctx, b, events, 'patience');
-      }
-      // Hafenbüro mit Automatik: wartende Boote bekommen ihren Platz, sobald einer frei wird
-      if (state.queue.length && state.office >= ctx.rules.office.autoAssign) events.push(...autoAssign(state, ctx));
-      // Wie im echten Hafen: Wer kurz an der Boje gewartet hat, sucht sich selbst eine freie Box
-      else if (state.queue.length) events.push(...selfEnter(state, ctx));
+      queueStep(state, ctx, events, true);
       tripStep(state, ctx, events);
       if (state.clock >= dayLength) {
         state.upcoming = []; // wer heute nicht mehr eingelaufen ist, kommt nicht
@@ -1000,6 +1038,9 @@ export function tick(state, ctx, dt) {
       }
     } else if (state.clock >= dayLength + eveningLength) {
       night(state, ctx, events);
+    } else if (queue.overnight) {
+      // Abends läuft keine Geduld ab, aber wer noch an der Boje liegt, kann weiter einfahren
+      queueStep(state, ctx, events, false);
     }
   }
   return events;
@@ -1130,6 +1171,11 @@ export function rulesFromEconomy(E, base = RULES) {
   const z = E.zeit || {};
   if (z.tagSekunden) r.dayLength = z.tagSekunden;
   if (z.abendSekunden) r.eveningLength = z.abendSekunden;
+  // Ankunftsfenster als Anteile des Tages (0 bis 1) und Schwerpunkt am Nachmittag (0 bis 1)
+  if (z.ankunftVon != null) r.arrivalFrom = z.ankunftVon;
+  if (z.ankunftBis != null) r.arrivalWindow = z.ankunftBis;
+  if (z.ankunftSpitze != null) r.arrivalPeak = z.ankunftSpitze;
+  if (z.abreiseVon != null && z.abreiseBis != null) r.departWindow = [z.abreiseVon, z.abreiseBis];
   if (z.saisonTage) r.seasonDays = z.saisonTage;
   if (z.winterTage != null) r.winterDays = z.winterTage;
 
@@ -1238,6 +1284,7 @@ export function rulesFromEconomy(E, base = RULES) {
     r.queue = { ...r.queue };
     if (E.warten.geduld != null) r.queue.patience = E.warten.geduld;
     if (E.warten.selbstEinfahrenNach != null) r.queue.selfEnterAfter = E.warten.selbstEinfahrenNach;
+    if (E.warten.ueberNacht != null) r.queue.overnight = !!E.warten.ueberNacht;
     if (E.warten.plaetze) r.queue.spots = { ...r.queue.spots, ...E.warten.plaetze };
   }
 

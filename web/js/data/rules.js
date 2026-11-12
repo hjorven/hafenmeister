@@ -7,7 +7,14 @@ export const RULES = {
   dayLength: 90,
   eveningLength: 30,
   // Ankünfte verteilen sich auf diesen Anteil des Tages, damit niemand kurz vor Abend einläuft
-  arrivalWindow: 0.8,
+  // Ankünfte liegen zwischen arrivalFrom und arrivalWindow (Anteile des Tages), wie im echten
+  // Hafen eher nachmittags, am häufigsten um arrivalPeak.
+  arrivalFrom: 0.35,
+  arrivalWindow: 0.95,
+  arrivalPeak: 0.7,
+  // Abreise am nächsten Vormittag, je Boot zu einer eigenen Zeit in diesem Fenster (Anteile des Tages).
+  // Bis dahin bleibt die Box belegt.
+  departWindow: [0.07, 0.3],
   // Am ersten Tag eines neuen Spiels kommt das erste Boot schon nach so vielen Sekunden (und es kommt sicher eines)
   firstArrivalAt: 3,
 
@@ -93,7 +100,8 @@ export const RULES = {
   // spots = Zahl der Warteplätze je Stufe, patience = Sekunden an der Boje, bis ein Boot weiterfährt.
   // Die Geduld zählt erst, wenn das Boot an der Boje fest ist (Meldung der 3D-Ansicht).
   // Meldet niemand etwas, gilt es nach approachMax Sekunden als angekommen.
-  queue: { spots: { 1: 3, 2: 4, 3: 6, 4: 6, 5: 8 }, patience: 50, approachMax: 35, selfEnterAfter: 8 },
+  queue: { spots: { 1: 3, 2: 4, 3: 6, 4: 6, 5: 8 }, patience: 50, approachMax: 35, selfEnterAfter: 8, overnight: true },
+  // overnight: Wer abends noch an der Boje liegt, bleibt über Nacht und macht morgens weiter.
   // selfEnterAfter: so lange liegt ein Boot an der Boje, bevor es sich selbst eine freie Box sucht
   // (Zeit für den Spieler, es selbst zu lenken). null schaltet das ab.
   // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber hinaus.

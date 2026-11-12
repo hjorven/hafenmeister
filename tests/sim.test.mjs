@@ -10,6 +10,7 @@ const ctx = sim.createContext({ boatTypes, berths });
 // und werden weiter unten eigens geprüft.
 ctx.rules.queue.selfEnterAfter = null;
 ctx.rules.trips = null;
+ctx.rules.departWindow = null;
 const ctxLive = sim.createContext({ boatTypes, berths });
 
 /** Testboot direkt in die Warteschlange legen. */
@@ -665,4 +666,51 @@ test('Abschlussziel der Region: Besuche großer Schiffe, Ruf, alle Plätze', () 
   assert.equal(ev[0].type, 'regionDone');
   assert.deepEqual(sim.addBigVisit(s, c), [], 'nur einmal melden');
   assert.equal(sim.regionGoal(s, c).ok, true);
+});
+
+test('Tagesrhythmus: Ankünfte ab dem späten Vormittag, Wartende bleiben über Nacht an der Boje', () => {
+  const c = sim.createContext({ boatTypes, berths });
+  const D = c.rules.dayLength;
+  // Ankunftsfenster (Tag 2, damit das frühe erste Boot von Tag 1 nicht stört)
+  const s = createState({ seed: 11 });
+  s.stage = 3;
+  s.day = 2;
+  sim.tick(s, c, 0);
+  assert.ok(s.upcoming.length > 0);
+  assert.ok(s.upcoming.every((b) => b.arriveAt >= c.rules.arrivalFrom * D && b.arriveAt <= c.rules.arrivalWindow * D));
+  // Ein Boot, das nirgends passt, bleibt abends an der Boje und hat morgens wieder volle Geduld
+  const t = quietState({ stage: 1 });
+  const big = waitingBoat(t, { typeId: 'L1', size: 'L', length: 11, beam: 3.8, draft: 1.9, atBuoy: true, atBuoySince: D - 5 });
+  const ratings = JSON.stringify(t.ratings);
+  const ev = sim.tick(t, c, D + c.rules.eveningLength);
+  assert.equal(t.day, 2);
+  assert.ok(!ev.some((e) => e.type === 'turnedAway'));
+  assert.equal(t.boats[big.id].status, 'waiting');
+  assert.equal(sim.patienceLeft(t, c, big.id), c.rules.queue.patience);
+  assert.equal(JSON.stringify(t.ratings), ratings);
+  // Am nächsten Tag läuft die Geduld ab
+  const ev2 = sim.tick(t, c, c.rules.queue.patience + 2);
+  assert.ok(ev2.some((e) => e.type === 'turnedAway' && e.reason === 'patience'));
+});
+
+test('Abreise gestaffelt am Vormittag: Box bleibt bis zum Ablegen belegt', () => {
+  const c = sim.createContext({ boatTypes, berths });
+  c.rules.queue.selfEnterAfter = null;
+  c.rules.departWindow = [0.2, 0.2];
+  const D = c.rules.dayLength;
+  const s = quietState();
+  const a = waitingBoat(s, { nights: 1 });
+  sim.assign(s, c, a.id, 'A1');
+  const night = sim.tick(s, c, D + c.rules.eveningLength);
+  const dep = night.find((e) => e.type === 'departed');
+  assert.equal(dep.leaveAt, 0.2 * D);
+  assert.equal(s.guests, 1, 'abgerechnet wird nachts');
+  assert.equal(sim.berthState(s, c, 'A1'), 'belegt');
+  assert.ok(!sim.tick(s, c, 0.2 * D - 2).some((e) => e.type === 'castOff'));
+  assert.equal(sim.isFree(s, 'A1'), false);
+  const ev = sim.tick(s, c, 3);
+  assert.ok(ev.some((e) => e.type === 'castOff' && e.boatId === a.id && e.berthId === 'A1'));
+  assert.equal(sim.isFree(s, 'A1'), false, 'noch in der Box, bis es heraus ist');
+  sim.berthCleared(s, c, { boatId: a.id });
+  assert.equal(sim.isFree(s, 'A1'), true);
 });

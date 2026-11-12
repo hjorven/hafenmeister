@@ -13,16 +13,15 @@ import { regelnBereit } from './regeln-bereit.js';
 
 export const BOX_ARTEN = new Set(['box', 'finger']);
 
-/** Farbe eines Platzes nach den Regeln: 'gruen', 'rot', oder null (kein Schild). */
+/**
+ * Farbe eines Platzes nach den Regeln: 'gruen', 'rot', oder null (kein Schild).
+ * Zustand aus sim.berthState ('frei' | 'belegt' | 'ausflug' | 'reserviert' | 'aus'), im Spiel game.sim.platzZustand.
+ */
 export function farbe(state, ctx, berth) {
   if (!berth || !BOX_ARTEN.has(berth.kind)) return null;
-  if (!sim.berthAvailable(state, berth)) return null;
-  if (berth.reserved) return 'rot';
-  if (!sim.isFree(state, berth.id)) return 'rot';
-  // Dauerplatz: frei nur, wenn das Boot auf mehrtägigem Törn ist (features/dauerlieger.js)
-  const dauer = state.modules?.dauer?.plaetze?.[berth.id];
-  if (dauer && !dauer.boot) return 'rot';
-  return 'gruen';
+  const z = sim.berthState(state, ctx, berth.id);
+  if (z === 'aus') return null;
+  return z === 'frei' ? 'gruen' : 'rot';
 }
 
 /**
@@ -123,6 +122,7 @@ export async function init(game) {
     for (const [id, s] of schilder) if (!da.has(id)) { gruppe.remove(s); schilder.delete(id); }
   }
 
+  game.on('sim:berthState', zeichne);
   game.on('sim:change', zeichne);
   game.on('stufe', zeichne);
   game.on('spielstand-geladen', () => { alleWeg(); stufe = null; zeichne(); });
