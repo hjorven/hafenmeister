@@ -271,7 +271,8 @@ export async function init(game) {
           const p = aufBildschirm(m);
           if (imBild(p, f) && (!best || Math.hypot(p.x - c.x, p.y - c.y) < Math.hypot(best.x - c.x, best.y - c.y))) best = { ...p, obj: m };
         }
-        return best ? { ...best, w: 64, h: 64 } : null;
+        // Ist noch keine Münze im Bild (Boot fährt noch an den Platz), zeigt der Kreis auf „Kassieren“
+        return best ? { ...best, w: 64, h: 64 } : domKreis(document.getElementById('btn-collect'), 6);
       }
       // Vorspulen: neue Zeitsteuerung unten links (Doppelpfeil), sonst die alte Sonne im Tagesbalken
       case 'sonne': return domKreis(document.querySelector('.hm-tempo-knopf[data-tempo="tempo2"]'), 6)
