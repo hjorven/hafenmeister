@@ -166,7 +166,7 @@ Ereignisse werden einen Tag vorher angekündigt. Keines bestraft hart.
 | Hafenfest | 4 | Traditionssegler und ein Marinebesuch, viele Tagesgäste |
 | Kreuzfahrttag | 6 | Ein Kreuzfahrtschiff kommt, der Ort ist voll |
 
-**Jahreslauf (neu):** Eine Saison hat 30 Spieltage. Danach kommt ein kurzer Winter von 3 Tagen, in dem Boote im Winterlager stehen, Schnee auf den Stegen liegt und Bauprojekte schneller fertig werden. Das gibt dem langen Spiel einen Rhythmus und Abwechslung im Bild.
+**Jahreslauf (neu):** Eine Saison hat 30 Spieltage. Danach kommt ein kurzer Winter von 3 Tagen, in dem Boote im Winterlager stehen, Schnee auf den Stegen liegt und keine Gäste kommen; ein gebautes Winterlager verdient in dieser Zeit Geld. Das gibt dem langen Spiel einen Rhythmus und Abwechslung im Bild.
 
 ## 8. Steuerung, die positiv überrascht
 

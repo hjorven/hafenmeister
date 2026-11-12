@@ -123,6 +123,9 @@ export function wegePlan(stufe) {
   return w;
 }
 
+/** Slipanlage am Südufer, x von bis (Planeinheiten). */
+export const SLIP = { x0: -131, x1: -123 };
+
 /** Bereich hinter dem Ufer, den der Hafen bebaut. Dort bleibt das Gelände eben und baumfrei. */
 export const HAFENFLAECHE = { x0: -165, x1: 215, y0: -92 };
 
@@ -308,9 +311,15 @@ export function punkt(px, py, stufe, region) {
   for (const m of molenCache(stufe)) {
     if (abstandZuLinie(px, py, m.punkte) < m.breite / 2) { h = 1.4; typ = 'mole'; }
   }
-  if (stufe >= 2 && px > -131 && px < -123 && py > suedufer(-128) - 10 && py < suedufer(-128) + 9) {
-    // Slipanlage
-    h = Math.max(h, -0.4 + (suedufer(-128) + 9 - py) * 0.05); typ = 'pflaster';
+  if (stufe >= 2 && px > SLIP.x0 && px < SLIP.x1) {
+    // Slipanlage: Rampe vom Land bis 0,6 m unter Wasser, ab Stufe 3 durch die Kaimauer hindurch
+    const y0 = stufe >= 3 ? -13 : suedufer(-128) - 10;
+    const y1 = stufe >= 3 ? 16 : suedufer(-128) + 9;
+    if (py > y0 && py < y1) {
+      const oben = stufe >= 3 ? 1.2 : 0.6;
+      h = oben - ((py - y0) / (y1 - y0)) * (oben + 0.6);
+      typ = 'pflaster';
+    }
   }
   // Reviere mit Gezeiten: Bauwerke und Hinterland liegen höher, der flache Strand nicht
   const basis = g.landPlus || 0;
