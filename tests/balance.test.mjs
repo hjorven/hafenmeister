@@ -15,12 +15,12 @@ test('keine laufenden Kosten', () => {
   }
 });
 
-test('Region ist in 180 bis 300 Spieltagen abschließbar', () => {
+test('Region ist in 200 bis 360 Spieltagen abschließbar', () => {
   for (const profil of ['geschickt', 'gemuetlich']) {
     const tage = [1, 2, 3, 4, 5, 6, 7, 8].map((seed) => spiel(seed, profil).ende);
     for (const t of tage) assert.ok(t != null, `${profil}: Region nicht abgeschlossen`);
     const median = [...tage].sort((a, b) => a - b)[4];
-    assert.ok(median >= 180 && median <= 300, `${profil}: Median ${median} Tage`);
+    assert.ok(median >= 200 && median <= 360, `${profil}: Median ${median} Tage`);
   }
 });
 

@@ -576,7 +576,8 @@ function turnAway(state, ctx, boat, events, why) {
   state.stats.turnedAway++;
   state.stats.turnedAwayToday++;
   const ta = ctx.rules.turnAway;
-  const rated = random(state) < ta.chance;
+  // Sind alle Wartebojen belegt, dreht ein Boot ab, ohne gewartet zu haben: keine Bewertung.
+  const rated = why !== 'queueFull' && random(state) < ta.chance;
   if (rated) pushRating(state, ctx, ta.rating);
   events.push({ type: 'turnedAway', boatId: boat.id, reason: why, rated });
 }
@@ -846,6 +847,8 @@ export function tick(state, ctx, dt) {
         }
         if (b.atBuoy && state.clock - b.atBuoySince > queue.patience) turnAway(state, ctx, b, events, 'patience');
       }
+      // Hafenbüro mit Automatik: wartende Boote bekommen ihren Platz, sobald einer frei wird
+      if (state.queue.length && state.office >= ctx.rules.office.autoAssign) events.push(...autoAssign(state, ctx));
       if (state.clock >= dayLength) {
         state.upcoming = []; // wer heute nicht mehr eingelaufen ist, kommt nicht
         startEvening(state, ctx, events);
@@ -1051,6 +1054,13 @@ export function rulesFromEconomy(E, base = RULES) {
   }
 
   if (E.fischer?.pachtProTag != null) r.stationedFee = E.fischer.pachtProTag;
+
+  // Warten vor dem Hafen: Geduld an der Boje (Sekunden) und Warteplätze je Stufe
+  if (E.warten) {
+    r.queue = { ...r.queue };
+    if (E.warten.geduld != null) r.queue.patience = E.warten.geduld;
+    if (E.warten.plaetze) r.queue.spots = { ...r.queue.spots, ...E.warten.plaetze };
+  }
 
   if (E.hafenbuero) {
     const o = { ...r.office, cost: {}, fromStage: {}, names: {} };

@@ -22,6 +22,16 @@ export const ECONOMY = {
     winterBautempo: 2,
   },
 
+  // Warten vor dem Hafen (Wartebojen). geduld = Sekunden an der Boje, bis ein Boot weiterfährt.
+  // plaetze = Warteplätze je Stufe; nicht mehr, als die Landschaft Bojen zeichnet
+  // (render/landschaft/gelaende.js warteplaetze: Stufe 1 drei, Stufe 2 sechs, Stufe 3 fünf,
+  // Stufe 4 sieben, ab Stufe 5 acht).
+  // Ab Hafenbüro (Automatik) weist das Spiel wartende Boote selbst zu, sobald ein Platz frei wird.
+  warten: {
+    geduld: 80,
+    plaetze: { 1: 3, 2: 6, 3: 5, 4: 7, 5: 8, 6: 8 },
+  },
+
   // ---------------------------------------------------------------- Gäste
   klassen: {
     //      Grundpreis pro Nacht, Nächte [min, max], Anteil Motorboote (nur die wünschen Diesel),
@@ -30,6 +40,7 @@ export const ECONOMY = {
     M:   { grundpreis: 22,  naechte: [1, 3], motor: 0.40, segel: 0.55 },
     L:   { grundpreis: 45,  naechte: [1, 3], motor: 0.40, segel: 0.55 },
     XL:  { grundpreis: 120, naechte: [1, 2], motor: 0.50, segel: 0.40 },
+    XXL: { grundpreis: 0,   naechte: [1, 1], motor: 1.00, segel: 0.00 },  // kein Liegegeld, Einnahmen je Besuch (services)
   },
   wunschBonus: 0.25,          // Hafengeld = Grundpreis * (1 + wunschBonus * erfüllte Wünsche)
 
@@ -57,6 +68,11 @@ export const ECONOMY = {
     stirn:   { strom: false },
     kai:     { strom: true },
     fischer: { gast: false },                  // fest vergeben, bringt Pacht
+    // Stufe 6, Klasse XXL: fest vergeben, Besuche über services (kreuzfahrtterminal,
+    // marineanleger, seenotretter), kein Liegegeld
+    pier:         { gast: false },
+    marine:       { gast: false },
+    seenotretter: { gast: false },
   },
   stromAnSteg: { C: true, CS: true, D: true, K: true },  // A und B erst mit bauwerke.strom
 
@@ -72,8 +88,6 @@ export const ECONOMY = {
 
   fischer: { pachtProTag: 15 },
 
-  // Tagesgäste auf der Promenade pro Saisontag je Stufe (nur Anzeige und Stimmung)
-  promenade: { 3: 10, 4: 25, 5: 50 },  // je belegtem Fischerplatz (F01, F02, FK01, FK02)
 
   // ---------------------------------------------------------------- Ausbaustufen
   // ankuenfte: Boote pro Saisontag bei Ruf 3. mix: Anteil je Klasse.
@@ -87,22 +101,31 @@ export const ECONOMY = {
       ausbau: { id: 'dorfhafen', name: 'Dorfhafen am See', kosten: 400, bautage: 0,
         plaetze: ['F01'] } },
     { stufe: 2, name: 'Dorfhafen am See', ankuenfte: 13, mix: { S: 0.45, M: 0.55 },
-      ziel: { gaeste: 160, ruf: 3.0 },
+      ziel: { gaeste: 140, ruf: 3.0 },
       ausbau: { id: 'durchstich', name: 'Durchstich zur Ostsee', kosten: 5000, bautage: 2,
         plaetze: ['B23', 'B24', 'B25', 'B26', 'F02'] } },
     { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 22, mix: { S: 0.32, M: 0.40, L: 0.28 },
-      ziel: { gaeste: 550, ruf: 3.5 },
+      ziel: { gaeste: 480, ruf: 3.5 },
       ausbau: { id: 'marina', name: 'Schwimmsteg D', kosten: 20000, bautage: 2,
         plaetze: ['D01', 'D02', 'D03', 'D04', 'D05', 'D06'] } },
     { stufe: 4, name: 'Marina', ankuenfte: 30, mix: { S: 0.24, M: 0.34, L: 0.42 },
-      ziel: { gaeste: 900, ruf: 3.8 },
+      ziel: { gaeste: 800, ruf: 3.8 },
       ausbau: { id: 'aussenhafen', name: 'Außenhafen mit Kai', kosten: 42000, bautage: 3,
         plaetze: ['K01', 'FK01', 'FK02'] } },
     { stufe: 5, name: 'Küstenmarina', ankuenfte: 37, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
-      // Abschluss der Region: so viele Gäste in Stufe 5, dieser Ruf und alle 94 Plätze gebaut
-      ziel: { gaeste: 1900, ruf: 4.3, allePlaetze: true },
+      ziel: { gaeste: 1200, ruf: 4.2 },
+      // Die Pier bringt die Plätze der Großschiffe: Kreuzfahrtpier, Marineanleger, Liegeplatz des
+      // Seenotrettungskreuzers. Sie sind fest vergeben, Gastboote legen dort nicht an.
+      ausbau: { id: 'grossschiffpier', name: 'Pier für Großschiffe', kosten: 70000, bautage: 4,
+        plaetze: ['P01', 'MA01', 'MA02', 'SK01'] } },
+    // Stufe 6: Großschiffe (XXL) zahlen kein Liegegeld, sie kommen als Besuche über die Services
+    // kreuzfahrtterminal, marineanleger und seenotretter und bringen Geld je Besuch.
+    // Keine eigene Zahl für Tagesgäste (Entscheidung Jorven, 11.11.2026).
+    { stufe: 6, name: 'Seehafen', ankuenfte: 42, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
+      // Abschluss der Region: so viele Besuche großer Schiffe (Kreuzfahrtschiff, Flottenbesuch)
+      // in Stufe 6, dieser Ruf und alle Plätze gebaut. Alles davon sieht der Spieler im Hafen.
+      ziel: { grossschiffBesuche: 8, ruf: 4.5, allePlaetze: true },
       ausbau: null },
-    // Stufe 6 (Seehafen, XXL) ist zurückgestellt, bis der Umfang entschieden ist.
   ],
 
   // ---------------------------------------------------------------- Stegausbauten
@@ -194,7 +217,6 @@ export const ECONOMY = {
   //   gaeste: { S, M, ... }  Faktor auf die Ankünfte dieser Klasse
   //   kunden: { anteil, preis }  Anteil der Gastboote, die abends zusätzlich preis € zahlen
   //   hafengeld: { segel }   Faktor auf das Hafengeld von Segelbooten
-  //   tagesgaeste            Tagesgäste pro Saisontag (Promenade, Kiosk; nur Anzeige)
   //   besuch: { alleTage, ersterNach, dauer, einnahme, gaeste, ruf }  wiederkehrender Besuch
   //                          (gaeste = Tagesgäste, ruf = Anzahl 5-Anker-Bewertungen)
   //   sturmschutz, regatta, hafenfest   schaltet frei bzw. wirkt bei Ereignissen
@@ -239,7 +261,7 @@ export const ECONOMY = {
       { name: 'Fischhalle',              kosten: 13500, wirkung: { proTag: 60 } },
     ] },
     museumshafen: { abStufe: 5, stufen: [
-      { name: 'Museumshafen',            kosten: 22000, wirkung: { gaeste: { XL: 1.5 }, tagesgaeste: 80, proTag: 80 } },
+      { name: 'Museumshafen',            kosten: 22000, wirkung: { gaeste: { XL: 1.5 }, proTag: 80 } },
     ] },
     fahrgastanleger: { abStufe: 5, stufen: [
       { name: 'Fahrgastanleger',         kosten: 21000, wirkung: { proTag: 150 } },
@@ -255,7 +277,7 @@ export const ECONOMY = {
                      rufMalus: 0.5, rufMalusMitSeenotretter: 0 },
     regatta:       { abStufe: 3, braucht: 'segelclub', alleTage: 12, dauer: 2,
                      ankunftFaktorSegel: 2 },
-    hafenfest:     { abStufe: 4, alleTage: 15, dauer: 1, tagesgaeste: 300, einnahme: 1500,
+    hafenfest:     { abStufe: 4, alleTage: 15, dauer: 1, einnahme: 1500,
                      extraXL: 2 },
   },
 };

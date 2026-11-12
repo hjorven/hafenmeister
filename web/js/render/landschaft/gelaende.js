@@ -192,6 +192,8 @@ const BECKEN4_WEST = [[-84, 6], [-22, 6], [-22, 124], [-84, 112]];
 const RINNE34 = [[152, 236], [182, 236], [212, 356], [176, 356]];
 const AUSSENHAFEN = [[0, 226], [186, 226], [194, 278], [170, 304], [96, 320], [18, 312], [-8, 282]];
 const RINNE5 = [[108, 300], [160, 300], [184, 356], [132, 356]];
+// Stufe 6: Liegewanne an der Grossschiffspier westlich der Westmole (wie skripte/konzeptbilder/hafen_von_oben.py)
+const PIERWANNE6 = [[-417, 228], [-27, 228], [-17, 370], [-417, 370]];
 
 // ------------------------------------------------------------------ Punktabfrage
 
@@ -200,7 +202,7 @@ const RINNE5 = [[108, 300], [160, 300], [184, 356], [132, 356]];
  * Rückgabe: h = Höhe in Metern (negativ = Wassertiefe), typ = Oberfläche, see = 0 Binnensee bis 1 offene See.
  * @param {number} px
  * @param {number} py
- * @param {number} stufe 1..5
+ * @param {number} stufe 1..6
  * @param {object} region Eintrag aus regionen.js (gelaende-Teil)
  */
 export function punkt(px, py, stufe, region) {
@@ -304,6 +306,7 @@ export function punkt(px, py, stufe, region) {
       h = baggern(h, px, py, RINNE5, 4.6, 6);
       if (px > 2 && px < 150 && py > 214 && py <= 229) { h = 1.3; typ = 'pflaster'; }
     }
+    if (stufe >= 6) h = baggern(h, px, py, PIERWANNE6, 8.5, 10);
   } else if (py > ln - 2 && py < ms + 8) {
     // Flacher Graben durch die Nehrung, nur für Ruderboote
     if (Math.abs(px - grabenX(py)) < 3) { h = -0.5; typ = 'wasser'; }
