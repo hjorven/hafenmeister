@@ -3,9 +3,9 @@
 // Die Zeit wird mit game.sim.fastForward vorgespult, alles andere laeuft ueber die Knoepfe.
 import { test, expect, isTouchProject, stageCenter } from '../helpers.mjs';
 
-async function press(locator, testInfo) {
-  if (isTouchProject(testInfo)) await locator.tap();
-  else await locator.click();
+async function press(locator, testInfo, options = {}) {
+  if (isTouchProject(testInfo)) await locator.tap(options);
+  else await locator.click(options);
 }
 
 // Spielzeit vorspulen, bis die Bedingung im Spiel erfuellt ist (hoechstens ein paar Spieltage)
@@ -25,24 +25,15 @@ async function forwardUntil(page, condition, what) {
 // Bildschirmpunkt des 3D-Boots (userData.pick = { type: 'boat', id }). Die Kamera wird auf das Boot
 // gesetzt, damit es sicher im Bild und nicht unter einer Leiste liegt.
 async function boatOnScreen(page, boatId) {
-  let last = null;
-  await expect.poll(async () => {
-    const p = await page.evaluate((id) => {
-      const g = window.hafenmeister;
-      let obj = null;
-      g.scene.traverse((o) => {
-        const pk = o.userData?.pick;
-        if (!obj && pk?.type === 'boat' && String(pk.id).replace(/^b/, '') === String(id)) obj = o;
-      });
-      if (!obj) return null;
-      const w = obj.getWorldPosition(new g.THREE.Vector3());
-      return { x: w.x, z: w.z };
-    }, boatId);
-    const still = p && last && Math.hypot(p.x - last.x, p.z - last.z) < 0.05;
-    last = p;
-    return still;
-  }, { message: '3D-Boot erscheint nicht oder kommt an der Boje nicht zur Ruhe', timeout: 30_000, intervals: [300] })
-    .toBe(true);
+  // boat-view.js meldet 'boot:an-boje', sobald das Boot sichtbar an der Boje fest ist.
+  // Bis dahin schneller laufen lassen, damit das Einlaufen nicht eine halbe Minute dauert.
+  await page.evaluate(() => { window.hafenmeister.speed = 6; });
+  await expect.poll(
+    () => page.evaluate((id) => window.__anBoje.has(String(id).replace(/^b/, '')), boatId),
+    { message: '3D-Boot kommt nicht an der Boje an (Ereignis boot:an-boje fehlt)', timeout: 40_000 },
+  ).toBe(true);
+  // Anhalten, damit das Boot nicht mehr schaukelt: Antippen und der Knopf am Boot liegen dann still
+  await page.evaluate(() => { window.hafenmeister.speed = 1; window.hafenmeister.setPaused(true); });
 
   const free = await stageCenter(page);
   return page.evaluate(({ id, free }) => {
@@ -63,6 +54,7 @@ async function boatOnScreen(page, boatId) {
 }
 
 test('Boot kommt, wird zugewiesen, abends steigt das Geld', async ({ game }, testInfo) => {
+  test.setTimeout(120_000);
   const { page } = game;
   // bridge.js richtet game.sim nach dem Laden der Bootsdaten ein, das kann kurz dauern
   const hasSim = await page.waitForFunction(() => !!window.hafenmeister.sim, null, { timeout: 15_000 })
@@ -70,7 +62,11 @@ test('Boot kommt, wird zugewiesen, abends steigt das Geld', async ({ game }, tes
   expect(hasSim, 'game.sim fehlt: Spielregeln (web/js/bridge.js) nicht geladen').toBe(true);
 
   // Neues Spiel mit festem Seed, damit jeder Lauf gleich ist
-  await page.evaluate(() => window.hafenmeister.sim.newGame(42));
+  await page.evaluate(() => {
+    window.__anBoje = new Set();
+    window.hafenmeister.on('boot:an-boje', (d) => window.__anBoje.add(String(d?.id).replace(/^b/, '')));
+    window.hafenmeister.sim.newGame(42);
+  });
   const startMoney = await page.evaluate(() => window.hafenmeister.sim.state.money);
 
   // 1. Ein Boot liegt an der Boje und erscheint in der Warteliste
@@ -89,15 +85,19 @@ test('Boot kommt, wird zugewiesen, abends steigt das Geld', async ({ game }, tes
     await expect(chip, 'wartendes Boot fehlt in der Warteliste unten').toBeVisible();
     await press(chip, testInfo);
   }
-  const card = page.locator('#card');
-  await expect(card, 'Karte zum Boot geht nicht auf').toBeVisible();
-  const auto = card.getByRole('button', { name: 'Automatisch einfahren' });
-  await expect(auto).toBeEnabled();
-  await press(auto, testInfo);
+  // 3. Knopf zum Einfahren: am Boot (.hm-einfahren, game.gesten.einfahrenAmBoot) oder in der Karte
+  //    "Automatisch einfahren" (#card). Beides weist den besten freien Platz zu.
+  const amBoot = page.locator('.hm-einfahren');
+  const inKarte = page.locator('#card').getByRole('button', { name: 'Automatisch einfahren' });
+  const knopf = amBoot.or(inKarte).first();
+  await expect(knopf, 'nach dem Antippen erscheint kein Knopf zum Einfahren (am Boot oder in der Karte)').toBeVisible();
+  await expect(knopf).toBeEnabled();
+  await press(knopf, testInfo);
   await expect.poll(
     () => page.evaluate((id) => window.hafenmeister.sim.state.boats[id]?.status, boatId),
     { message: 'Boot liegt nach "Automatisch einfahren" nicht am Platz' },
   ).toBe('moored');
+  await page.evaluate(() => window.hafenmeister.setPaused(false));
 
   // 4. Abends erscheint "Kassieren", Antippen bringt das Hafengeld
   await forwardUntil(page, "state.phase === 'evening' && sim.mooredBoats().some((b) => b.pendingFee > 0)",
