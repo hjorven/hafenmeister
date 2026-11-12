@@ -101,7 +101,7 @@ export const ECONOMY = {
         plaetze: ['K01', 'D19', 'FK01', 'FK02'] } },
     { stufe: 5, name: 'Küstenmarina', ankuenfte: 37, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
       // Abschluss der Region: so viele Gäste in Stufe 5, dieser Ruf und alle 94 Plätze gebaut
-      ziel: { gaeste: 2300, ruf: 4.3, allePlaetze: true },
+      ziel: { gaeste: 1900, ruf: 4.3, allePlaetze: true },
       ausbau: null },
     // Stufe 6 (Seehafen, XXL) ist zurückgestellt, bis der Umfang entschieden ist.
   ],
