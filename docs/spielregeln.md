@@ -42,7 +42,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 | `collect(bootId)`, `collectAll()` | Münze einstreichen |
 | `fastForward(sekunden)` | Spielzeit vorspulen, höchstens bis zum nächsten Abend oder Morgen |
 | `upgradeFacility(key)`, `upgradeOffice()`, `build(id, kosten, stufe)`, `advanceStage()` | Bauen |
-| `openJettyProjects()`, `buildJettyProject(id)` | Stegprojekte der aktuellen Stufe |
+| `openJettyProjects()`, `buildJettyProject(id)` | Stegprojekte der aktuellen Stufe. Angeboten wird nur, was in dieser Stufe Liegeplätze bringt; sonst `reason: 'noBerths'` |
 | `spend(betrag)`, `addIncome(betrag)` | Geld für andere Module |
 | `waitingBoats()`, `mooredBoats()`, `preview()`, `waitSpotCount()` | Lesen |
 | `boote` | alle wartenden und liegenden Boote im Format von `boot-kommt`, zum Aufbauen nach dem Laden |
