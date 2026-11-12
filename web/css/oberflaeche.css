@@ -1,0 +1,686 @@
+/* Hafenmeister: eine Oberfläche für alle Geräte
+ *
+ * Diese Datei legt Farben, Formen und die Anordnung fest. ui-pc.css, ui-tablet.css und
+ * ui-phone.css stellen nur noch Größen ein (--hm-knopf, --hm-schrift, --hm-rand ...) und
+ * verschieben, wo auf einem Gerät der Platz fehlt. Das Gerüst baut web/js/ui/oberflaeche.js.
+ *
+ *   .hm-status    oben links: Geld, Ruf, Tag mit Sonne
+ *   .hm-werkzeuge oben rechts: Übersicht, Pause, Menü
+ *   #hm-menue     Foto, Ton, Spielstand, Tastenhilfe
+ *   #hm-seite     links: Wetter, Tagesziele, Ausbauziel (aufklappbar)
+ *   #hud-bottom   unten rechts: Kassieren, Bauen
+ *   #card         Seitenkarte (breit) oder Blatt von unten (schmal)
+ *
+ * Alle Regeln beginnen mit .hm-neu (Klasse am body, setzt oberflaeche.js), damit sie die
+ * Stile gewinnen, die einzelne Module zur Laufzeit in den <head> schreiben.
+ */
+
+:root {
+  --hm-papier: #fffcf6;
+  --hm-glas: rgba(255, 252, 246, 0.94);
+  --hm-tinte: #24364a;
+  --hm-tinte-2: #5d6d7f;
+  --hm-linie: rgba(36, 54, 74, 0.12);
+  --hm-flaeche: rgba(36, 54, 74, 0.07);
+  --hm-meer: #23897d;          /* Hauptaktion: Einfahren, Bauen bestätigen */
+  --hm-meer-hell: #e3f3ef;
+  --hm-koralle: #ee6454;       /* Bauen, Pause aktiv */
+  --hm-koralle-dunkel: #d9503f;
+  --hm-gold: #f2c14e;          /* Geld, Kassieren */
+  --hm-gold-dunkel: #c9952a;
+  --hm-schatten: 0 4px 16px rgba(20, 40, 60, 0.16), 0 1px 3px rgba(20, 40, 60, 0.1);
+  --hm-schatten-gross: 0 12px 36px rgba(20, 40, 60, 0.24);
+
+  /* Größen: Geräte-Dateien überschreiben sie */
+  --hm-knopf: 44px;            /* runde Knöpfe und Statusleiste */
+  --hm-chip: 38px;             /* Wetter, Tagesziele, Ausbauziel */
+  --hm-bauen: 56px;            /* Höhe des Bauen-Knopfs */
+  --hm-schrift: 15px;
+  --hm-rand: 12px;             /* Abstand zum Bildschirmrand */
+  --hm-luecke: 8px;
+  --hm-karte-breite: 360px;
+  --hm-symbol: 22px;
+  --hm-spur: 140px;            /* Spur der Sonne im Tagesbalken */
+  --hm-oben: calc(var(--hm-safe-top) + var(--hm-rand));
+  --hm-links: calc(var(--hm-safe-left) + var(--hm-rand));
+  --hm-rechts: calc(var(--hm-safe-right) + var(--hm-rand));
+  --hm-unten: calc(var(--hm-safe-bottom) + var(--hm-rand));
+}
+
+body.hm-neu {
+  font: 500 var(--hm-schrift)/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--hm-tinte);
+}
+.hm-neu button { font: inherit; color: inherit; touch-action: manipulation; }
+.hm-neu button:focus-visible { outline: 3px solid var(--hm-gold); outline-offset: 2px; }
+.hm-neu .spacer { display: none; }
+
+/* ------------------------------------------------------------ Symbol per Maske */
+.hm-neu .hm-rund::before,
+.hm-neu .hm-zeile::before,
+.hm-neu #btn-build::before,
+.hm-neu .hm-ziel-knopf::before,
+.hm-neu .hm-tafel-knopf::before,
+.hm-neu .hm-zu::before {
+  content: "";
+  flex: none;
+  width: var(--hm-symbol);
+  height: var(--hm-symbol);
+  background: currentColor;
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+}
+
+/* ------------------------------------------------------------ Obere Zeile */
+.hm-neu #hud-top {
+  position: absolute;
+  z-index: 20;
+  top: var(--hm-oben);
+  left: var(--hm-links);
+  right: var(--hm-rechts);
+  bottom: auto;
+  width: auto;
+  height: auto;
+  transform: none;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hm-luecke);
+  padding: 0;
+  margin: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  overflow: visible;
+  pointer-events: none;
+}
+.hm-neu #hud-top > * { pointer-events: auto; }
+
+.hm-neu .hm-status {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: var(--hm-knopf);
+  padding: 0 4px 0 6px;
+  border-radius: 999px;
+  background: var(--hm-glas);
+  box-shadow: var(--hm-schatten);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.hm-neu .hm-status .stat {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0 10px 0 6px;
+  font-size: calc(var(--hm-schrift) + 1px);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  color: var(--hm-tinte);
+}
+.hm-neu .hm-status .stat + .stat { border-left: 1px solid var(--hm-linie); padding-left: 10px; }
+.hm-neu #money::before,
+.hm-neu #rep::before {
+  content: "";
+  flex: none;
+  width: 22px;
+  height: 22px;
+  background: var(--i-muenze) center / contain no-repeat;
+}
+.hm-neu #rep::before { background-image: var(--i-stern); }
+.hm-neu #money.hm-plus { animation: hm-geld 0.6s ease-out; }
+@keyframes hm-geld { 30% { color: var(--hm-meer); transform: scale(1.08); } }
+
+/* Tag mit Sonne: Text links, die Sonne (gesten.js) läuft rechts auf einer Spur */
+.hm-neu #day {
+  padding-right: calc(var(--hm-spur) + 16px);
+  font-weight: 700;
+  color: var(--hm-tinte);
+}
+.hm-neu #day::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  width: var(--hm-spur);
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, rgba(242, 193, 78, 0.35), rgba(242, 193, 78, 0.35) 78%, rgba(233, 115, 63, 0.35) 78%);
+  pointer-events: none;
+}
+.hm-neu #day .hm-sonne {
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  left: calc(100% - 8px - var(--hm-spur) + var(--anteil) * (var(--hm-spur) - 26px) + 13px);
+}
+.hm-neu #day .hm-sonne::before { inset: calc((26px - var(--hm-knopf)) / 2); }
+
+/* Runde Knöpfe oben rechts */
+.hm-neu .hm-werkzeuge {
+  display: flex;
+  gap: var(--hm-luecke);
+  margin-left: auto;
+  flex: none;
+}
+.hm-neu .hm-rund {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--hm-knopf);
+  height: var(--hm-knopf);
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--hm-glas);
+  color: var(--hm-tinte);
+  box-shadow: var(--hm-schatten);
+  font-size: 0;
+  line-height: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.1s ease-out, background-color 0.15s, color 0.15s;
+  color: var(--hm-tinte);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.hm-neu .hm-rund > * { display: none; }
+/* Symbol genau in der Mitte, egal welcher Text im Knopf steht */
+.hm-neu .hm-rund::before { position: absolute; left: 50%; top: 50%; margin: calc(var(--hm-symbol) / -2) 0 0 calc(var(--hm-symbol) / -2); }
+.hm-neu .hm-rund::after { content: none !important; }
+.hm-neu .hm-rund:active { transform: scale(0.92); }
+.hm-neu #btn-pause { --icon: var(--i-pause); }
+.hm-neu.paused #btn-pause { --icon: var(--i-weiter); background: var(--hm-koralle); color: #fff; }
+.hm-neu #btn-overview { --icon: var(--i-uebersicht); }
+.hm-neu #btn-menu { --icon: var(--i-menue); }
+.hm-neu #btn-menu[aria-expanded="true"] { background: var(--hm-tinte); color: var(--hm-papier); }
+
+/* ------------------------------------------------------------ Menü */
+.hm-neu #hm-menue {
+  position: absolute;
+  z-index: 40;
+  top: calc(var(--hm-oben) + var(--hm-knopf) + 8px);
+  right: var(--hm-rechts);
+  display: grid;
+  gap: 2px;
+  min-width: 230px;
+  padding: 6px;
+  border-radius: 18px;
+  background: var(--hm-papier);
+  box-shadow: var(--hm-schatten-gross);
+  transform-origin: top right;
+  animation: hm-auf 0.16s ease-out;
+}
+.hm-neu #hm-menue[hidden] { display: none; }
+.hm-neu .hm-zeile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  height: auto;
+  margin: 0;
+  padding: 0 14px 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--hm-tinte);
+  font-size: var(--hm-schrift);
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: left;
+  text-decoration: none;
+  opacity: 1;
+  box-shadow: none;
+  cursor: pointer;
+  position: static;
+}
+.hm-neu .hm-zeile::after { content: none !important; }
+.hm-neu .hm-zeile:hover, .hm-neu .hm-zeile:active { background: var(--hm-flaeche); }
+.hm-neu #btn-foto { --icon: var(--i-foto); }
+.hm-neu #btn-sound { --icon: var(--i-ton); }
+.hm-neu #btn-sound.hm-audio-off { --icon: var(--i-stumm); }
+.hm-neu #btn-save { --icon: var(--i-spielstand); }
+.hm-neu #btn-help { --icon: var(--i-tasten); }
+
+/* Ton-Einstellungen öffnen dort, wo das Menü war */
+.hm-neu #hm-audio-popover {
+  position: absolute;
+  z-index: 40;
+  top: calc(var(--hm-oben) + var(--hm-knopf) + 8px);
+  right: var(--hm-rechts);
+  max-width: calc(100vw - 2 * var(--hm-rand));
+}
+.hm-neu .hm-audio-panel { border-radius: 18px; box-shadow: var(--hm-schatten-gross); padding: 14px 16px; }
+.hm-neu .hm-audio-mute { border-radius: 12px; background: var(--hm-flaeche); color: var(--hm-tinte); font-weight: 700; }
+.hm-neu .hm-audio-stumm .hm-audio-mute { background: var(--hm-koralle); color: #fff; }
+.hm-neu .hm-audio-row input[type="range"] { accent-color: var(--hm-meer); }
+
+/* ------------------------------------------------------------ Seitenleiste links */
+.hm-neu #hm-seite {
+  position: absolute;
+  z-index: 15;
+  top: calc(var(--hm-oben) + var(--hm-knopf) + 10px);
+  left: var(--hm-links);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: min(300px, calc(100vw - 2 * var(--hm-rand) - var(--hm-safe-left) - var(--hm-safe-right)));
+  max-height: calc(100% - var(--hm-oben) - var(--hm-knopf) - var(--hm-bauen) - 2 * var(--hm-rand) - 24px);
+  overflow: visible;
+  pointer-events: none;
+}
+.hm-neu #hm-seite > * { pointer-events: auto; }
+.hm-neu #hm-seite > .hm-tafel,
+.hm-neu #hm-seite > .hm-ziel { position: static; inset: auto; margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; width: 100%; }
+.hm-neu #hm-seite > [hidden], .hm-neu #hm-seite [hidden] { display: none !important; }
+
+/* Chips: alle drei sehen gleich aus */
+.hm-neu .hm-chip,
+.hm-neu #hm-seite #weather-chip,
+.hm-neu #hm-seite .hm-tafel > button {
+  position: static;
+  inset: auto;
+  transform: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+  min-height: var(--hm-chip);
+  height: var(--hm-chip);
+  margin: 0;
+  padding: 0 12px 0 9px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--hm-glas);
+  color: var(--hm-tinte);
+  box-shadow: var(--hm-schatten);
+  font-size: calc(var(--hm-schrift) - 1px);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.hm-neu #hm-seite #weather-chip svg { width: 22px; height: 22px; flex: none; }
+.hm-neu #hm-seite #weather-chip.has-news { box-shadow: 0 0 0 2px var(--hm-koralle), var(--hm-schatten); }
+.hm-neu #hm-seite .hm-tafel-knopf { --icon: var(--i-ziele); --hm-symbol: 18px; }
+.hm-neu #hm-seite .hm-tafel-knopf::before { color: var(--hm-meer); }
+.hm-neu .hm-ziel-knopf { --icon: var(--i-flagge); --hm-symbol: 18px; }
+.hm-neu .hm-ziel-knopf::before { color: var(--hm-koralle); }
+.hm-neu .hm-chip[aria-expanded="true"],
+.hm-neu #hm-seite #weather-chip[aria-expanded="true"] { background: var(--hm-tinte); color: var(--hm-papier); }
+.hm-neu .hm-chip[aria-expanded="true"]::before { color: inherit; }
+.hm-neu .hm-chip-zahl {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--hm-flaeche);
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+}
+.hm-neu .hm-chip[aria-expanded="true"] .hm-chip-zahl { background: rgba(255, 255, 255, 0.18); }
+.hm-neu .hm-ziel.fertig .hm-ziel-knopf { background: var(--hm-gold); }
+.hm-neu .hm-ziel.fertig .hm-chip-zahl { background: rgba(255, 255, 255, 0.5); }
+.hm-neu .hm-tafel.jubel > button { animation: hm-tafel-jubel 0.8s ease-out; }
+
+/* Aufgeklappt: gleiche Tafel für Wetter, Tagesziele und Ausbauziel */
+.hm-neu .hm-klapp,
+.hm-neu #hm-seite #weather-panel,
+.hm-neu #hm-seite .hm-tafel ul {
+  position: static;
+  inset: auto;
+  transform: none;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--hm-papier);
+  color: var(--hm-tinte);
+  box-shadow: var(--hm-schatten-gross);
+  font-size: calc(var(--hm-schrift) - 1px);
+  animation: hm-auf 0.16s ease-out;
+  overflow-y: auto;
+  max-height: 46vh;
+}
+.hm-neu #hm-seite .hm-tafel li { padding: 6px 0; border-top: 1px solid var(--hm-linie); }
+.hm-neu #hm-seite .hm-tafel li:first-child { border-top: 0; }
+.hm-neu #hm-seite .hm-tafel li.erledigt { color: var(--hm-meer); }
+.hm-neu .hm-klapp-kopf { margin: 0 0 8px; font-weight: 750; }
+.hm-neu .hm-balken-zeile {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3px 10px;
+  padding: 5px 0;
+}
+.hm-neu .hm-balken-name { font-weight: 600; }
+.hm-neu .hm-balken-wert { font-variant-numeric: tabular-nums; color: var(--hm-tinte-2); }
+.hm-neu .hm-balken-zeile.ok .hm-balken-wert { color: var(--hm-meer); font-weight: 700; }
+.hm-neu .hm-balken { grid-column: 1 / -1; height: 7px; border-radius: 4px; background: var(--hm-flaeche); overflow: hidden; }
+.hm-neu .hm-balken > i { display: block; height: 100%; border-radius: 4px; background: var(--hm-gold); transition: width 0.4s; }
+.hm-neu .hm-balken-zeile.ok .hm-balken > i { background: var(--hm-meer); }
+.hm-neu .hm-klapp .hud-btn { width: 100%; min-height: 42px; margin-top: 8px; border: 0; border-radius: 12px; font-weight: 750; cursor: pointer; }
+
+/* Die Zeile zum Abschlussziel aus hud.js steckt jetzt im Ausbauziel; nur die Erfolgsmeldung bleibt */
+.hm-neu #hud-goal:not(.done) { display: none !important; }
+.hm-neu #hud-goal.done {
+  top: calc(var(--hm-oben) + var(--hm-knopf) + 12px);
+  bottom: auto;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--hm-meer);
+  box-shadow: var(--hm-schatten-gross);
+  font-size: var(--hm-schrift);
+  z-index: 35;
+}
+
+/* Ereignisschild mittig unter der oberen Zeile */
+.hm-neu #event-banner {
+  top: calc(var(--hm-oben) + var(--hm-knopf) + 10px);
+  border-radius: 18px;
+  background: var(--hm-papier);
+  box-shadow: var(--hm-schatten-gross);
+  z-index: 25;
+}
+
+/* ------------------------------------------------------------ Unten rechts: Kassieren und Bauen */
+.hm-neu #hud-bottom {
+  position: absolute;
+  z-index: 20;
+  top: auto;
+  left: auto;
+  right: var(--hm-rechts);
+  bottom: var(--hm-unten);
+  width: auto;
+  height: auto;
+  transform: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: none;
+  transition: transform 0.22s ease, opacity 0.22s;
+}
+.hm-neu #hud-bottom > * { pointer-events: auto; }
+.hm-neu #hud-bottom > #queue:empty, .hm-neu #hud-bottom > #queue[hidden] { display: none; }
+
+.hm-neu #btn-build {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: auto;
+  min-width: 0;
+  height: var(--hm-bauen);
+  min-height: 0;
+  padding: 0 22px 0 18px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--hm-koralle);
+  color: #fff;
+  font-size: calc(var(--hm-schrift) + 2px);
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(217, 80, 63, 0.38), 0 1px 3px rgba(20, 40, 60, 0.2);
+  cursor: pointer;
+  transition: transform 0.1s ease-out, background-color 0.15s;
+  --icon: var(--i-bauen);
+}
+.hm-neu #btn-build:hover { background: var(--hm-koralle-dunkel); }
+.hm-neu #btn-build:active { transform: scale(0.95); }
+.hm-neu.building #btn-build,
+.hm-neu #btn-build[aria-pressed="true"] { background: var(--hm-tinte); box-shadow: var(--hm-schatten); --icon: var(--i-zu); }
+/* Punkt "Es gibt etwas Sinnvolles zu bauen" (bauen.js) */
+.hm-neu #btn-build.bau-punkt::after {
+  content: "";
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--hm-gold);
+  border: 3px solid var(--hm-papier);
+  box-sizing: border-box;
+}
+.hm-neu #btn-build:not(.bau-punkt)::after { content: none; }
+
+.hm-neu #btn-collect {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: calc(var(--hm-bauen) - 6px);
+  min-height: 0;
+  padding: 0 18px 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--hm-gold);
+  color: #3b2a07;
+  font-size: calc(var(--hm-schrift) + 1px);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 6px 18px rgba(201, 149, 42, 0.4), 0 1px 3px rgba(20, 40, 60, 0.2);
+  cursor: pointer;
+  animation: hm-kassieren 2.4s ease-in-out infinite;
+}
+.hm-neu #btn-collect::before {
+  content: "";
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--i-muenze) center / contain no-repeat, #fff3cf;
+}
+.hm-neu #btn-collect::after { content: none !important; }
+.hm-neu #btn-collect:active { transform: scale(0.95); }
+@keyframes hm-kassieren { 0%, 80%, 100% { transform: none; } 88% { transform: translateY(-3px); } }
+
+/* "Als Nächstes" über dem Bauen-Knopf (bauen.js) */
+.hm-neu .bau-tipp { border-radius: 16px; padding: 9px 14px; background: var(--hm-papier); box-shadow: var(--hm-schatten-gross); }
+.hm-neu .bau-tipp::after { border-top-color: var(--hm-papier); }
+.hm-neu .bau-tipp-titel { color: var(--hm-meer); }
+.hm-neu.card-open .bau-tipp { display: none; }
+
+/* ------------------------------------------------------------ Infokarte */
+.hm-neu #card {
+  position: absolute;
+  z-index: 30;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 18px 18px 16px;
+  border-radius: 22px;
+  background: var(--hm-papier);
+  color: var(--hm-tinte);
+  box-shadow: var(--hm-schatten-gross);
+  font-size: var(--hm-schrift);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.hm-neu #card h2 { margin: 0 0 2px; font-size: calc(var(--hm-schrift) + 4px); line-height: 1.2; font-weight: 800; }
+.hm-neu #card p { margin: 0 0 10px; color: var(--hm-tinte-2); opacity: 1; }
+.hm-neu #card .card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.hm-neu #card .card-actions .hud-btn { flex: 1 1 120px; }
+.hm-neu #card .hud-btn {
+  min-width: 0;
+  min-height: 46px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--hm-flaeche);
+  color: var(--hm-tinte);
+  font-weight: 750;
+  line-height: 1.2;
+  box-shadow: none;
+  cursor: pointer;
+}
+.hm-neu #card .hud-btn::after { content: none !important; }
+.hm-neu #card .hud-btn:hover:not(:disabled) { background: rgba(36, 54, 74, 0.13); }
+.hm-neu #card .hud-btn:disabled { opacity: 0.45; cursor: default; }
+.hm-neu #card .hm-primaer:not(:disabled),
+.hm-neu .hm-klapp .hm-primaer,
+.hm-neu #card .bau-ja:not(:disabled) { background: var(--hm-meer) !important; color: #fff !important; }
+.hm-neu #card .hm-primaer:hover:not(:disabled),
+.hm-neu #card .bau-ja:hover:not(:disabled) { background: #1d7369 !important; }
+.hm-neu #card .hm-gefahr { color: var(--hm-koralle-dunkel); background: rgba(238, 100, 84, 0.1); }
+.hm-neu #card .card-note { color: var(--hm-koralle-dunkel); font-weight: 650; }
+
+/* Kopf der Bootskarte: Name und Schließen */
+.hm-neu .hm-karte-kopf { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+.hm-neu .hm-karte-kopf > div { flex: 1 1 auto; min-width: 0; }
+.hm-neu .hm-karte-kopf .card-boatname { margin: 2px 0 0; font-size: calc(var(--hm-schrift) - 1px); }
+.hm-neu .hm-zu {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  min-width: 0;
+  min-height: 0;
+  margin: -6px -6px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--hm-flaeche);
+  color: var(--hm-tinte);
+  font-size: 0;
+  cursor: pointer;
+  --icon: var(--i-zu);
+  --hm-symbol: 18px;
+}
+.hm-neu .hm-fakten { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; padding: 0; list-style: none; }
+.hm-neu .hm-fakten li {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--hm-flaeche);
+  font-size: calc(var(--hm-schrift) - 2px);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.hm-neu .hm-fakten li.wunsch { background: #fff1cc; }
+.hm-neu .hm-fakten li.wunsch.ok { background: var(--hm-meer-hell); color: #17675d; }
+.hm-neu .hm-fakten li.groesse { background: var(--hm-tinte); color: var(--hm-papier); }
+.hm-neu #card .card-hint { color: var(--hm-tinte); font-weight: 550; }
+
+/* Bauen-Karte (bauen.js): an die Formen angleichen */
+.hm-neu #card.bau-karte { gap: 10px; }
+.hm-neu #card.bau-karte > * { flex-shrink: 0; }
+.hm-neu #card.bau-karte > .bau-liste { flex-shrink: 1; }
+.hm-neu .bau-kopf h2 { font-size: calc(var(--hm-schrift) + 4px); }
+.hm-neu .bau-kasse { color: var(--hm-tinte-2); opacity: 1; }
+.hm-neu .bau-rat { border-radius: 14px; background: var(--hm-meer-hell); }
+.hm-neu .bau-tipp-titel, .hm-neu .bau-rat .bau-tipp-titel { color: var(--hm-meer); }
+.hm-neu .bau-reiter { border-radius: 14px; padding: 4px; gap: 4px; background: var(--hm-flaeche); overflow-x: auto; scrollbar-width: none; }
+.hm-neu .bau-reiter::-webkit-scrollbar { display: none; }
+.hm-neu .bau-tab { flex: 1 1 auto; min-width: 0; border-radius: 10px; padding: 4px 6px; gap: 5px; font-size: calc(var(--hm-schrift) - 2px); color: var(--hm-tinte); }
+.hm-neu .bau-tab[aria-selected="true"] { background: var(--hm-papier); box-shadow: 0 1px 4px rgba(20, 40, 60, 0.15); }
+.hm-neu .bau-zahl { background: var(--hm-meer); flex: none; }
+.hm-neu .bau-zeile { border-radius: 14px; border-color: var(--hm-linie); background: #fff; }
+.hm-neu .bau-zeile:hover { border-color: var(--hm-meer); }
+.hm-neu .bau-zeile-preis { color: var(--hm-meer); }
+.hm-neu .bau-zeile.teuer .bau-zeile-preis { color: var(--hm-koralle-dunkel); }
+.hm-neu .bau-balken > span { background: var(--hm-meer); }
+.hm-neu .bau-schild { border-radius: 12px; box-shadow: var(--hm-schatten); }
+.hm-neu .bau-schild-preis { color: var(--hm-meer); }
+
+/* Breit (PC, Tablet quer): Seitenkarte rechts unter den Knöpfen */
+@media (min-width: 900px) and (min-height: 500px) {
+  .hm-neu #card {
+    left: auto;
+    right: var(--hm-rechts);
+    top: calc(var(--hm-oben) + var(--hm-knopf) + 10px);
+    bottom: auto;
+    width: var(--hm-karte-breite);
+    max-height: calc(100% - var(--hm-oben) - var(--hm-knopf) - var(--hm-unten) - var(--hm-bauen) - 30px);
+    transform: none;
+    animation: hm-seitlich 0.2s ease-out;
+  }
+  .hm-neu #card[hidden] { display: none; }
+  .hm-neu #card::before { content: none; }
+  .hm-neu #card.bau-karte { display: flex; flex-direction: column; }
+  .hm-neu #card.bau-karte .bau-liste { max-height: none; flex: 1 1 auto; min-height: 120px; }
+}
+
+/* Schmal hochkant (Handy, Tablet hochkant): Blatt von unten, mit Griff */
+@media not ((min-width: 900px) and (min-height: 500px)) {
+  .hm-neu #card {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: auto;
+    max-width: none;
+    max-height: 62dvh;
+    padding: 22px calc(var(--hm-safe-right) + 18px) calc(var(--hm-safe-bottom) + 16px) calc(var(--hm-safe-left) + 18px);
+    border-radius: 24px 24px 0 0;
+    transform: translateY(105%);
+    visibility: hidden;
+    animation: none;
+    transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s linear 0.26s;
+  }
+  .hm-neu #card[hidden] { display: block; }
+  .hm-neu #card:not([hidden]) { transform: none; visibility: visible; transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .hm-neu #card::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    width: 40px;
+    height: 5px;
+    margin-left: -20px;
+    border-radius: 3px;
+    background: var(--hm-tinte);
+    opacity: 0.18;
+  }
+  .hm-neu #card.bau-karte { display: flex; flex-direction: column; }
+  .hm-neu #card.bau-karte .bau-liste { max-height: none; flex: 1 1 auto; min-height: 0; }
+  .hm-neu.card-open #hud-bottom { transform: translateY(140%); opacity: 0; pointer-events: none; }
+  .hm-neu.card-open #hm-seite { opacity: 0; pointer-events: none; }
+  .hm-neu.card-open #hm-seite * { pointer-events: none !important; }
+  /* Einstieg-Blase nicht über dem Blatt */
+  .hm-neu.card-open .hm-tipp { display: none; }
+}
+
+/* Während die Schleppleine gezogen wird, bleibt die Karte aus dem Weg */
+.hm-neu.hm-leine #card { visibility: hidden; pointer-events: none; }
+/* Einfahren steht groß in der Bootskarte; ein zweiter Knopf am Boot wäre doppelt */
+.hm-neu.card-boat .hm-einfahren { display: none !important; }
+
+/* Einstieg-Blase im gleichen Stil */
+.hm-neu .hm-tipp { border-radius: 18px; background: var(--hm-papier); box-shadow: var(--hm-schatten-gross); z-index: 18; }
+.hm-neu .hm-tipp .weiter { background: var(--hm-meer); }
+
+/* Pause sichtbar machen, ohne das Bild zu verdecken */
+.hm-neu.paused:not(.building) #stage { filter: saturate(0.7) brightness(0.97); }
+
+/* Fotomodus: alles weg außer der Fotoleiste */
+.hm-neu.foto #hm-seite, .hm-neu.foto #hm-menue, .hm-neu.foto #hud-bottom { display: none !important; }
+
+@keyframes hm-auf { from { opacity: 0; transform: translateY(-6px) scale(0.98); } }
+@keyframes hm-seitlich { from { opacity: 0; transform: translateX(12px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-neu #card, .hm-neu #hud-bottom, .hm-neu #hm-menue, .hm-neu .hm-klapp, .hm-neu #btn-collect { transition: none !important; animation: none !important; }
+}

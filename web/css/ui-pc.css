@@ -1,4 +1,5 @@
-/* PC-Oberfläche: Maus, Trackpad, Tastatur, große Bildschirme. Gehört dem PC-UI-Thread.
+/* PC-Oberfläche: Maus, Trackpad, Tastatur, große Bildschirme.
+   Aussehen und Anordnung für alle Geräte stehen in oberflaeche.css; hier nur PC-Größen und Maus.
    Gilt nur für (min-width: 1024px) and (pointer: fine), siehe base.css.
    Ausnahme: Tooltip und Tastenhilfe stammen aus js/ui/input-pc.js und sind deshalb immer gestylt. */
 
@@ -60,143 +61,38 @@
   font: 700 12px/1.5 ui-monospace, "SF Mono", Consolas, monospace;
   text-align: center;
 }
-.pc-help-btn { display: none; }
+.pc-help-btn { display: none !important; }
 
-/* ---------- PC-Layout ---------- */
+/* ---------- PC: Größen und Maus ---------- */
 @media (min-width: 1024px) and (pointer: fine) {
   :root {
-    --hud-gap: 10px;
-    --pc-panel-width: 1180px;
-    --pc-radius: 16px;
-    --pc-shadow: 0 6px 22px rgba(40, 54, 72, 0.18);
-    font-size: 16px;
+    --hm-knopf: 46px;
+    --hm-chip: 38px;
+    --hm-bauen: 58px;
+    --hm-schrift: 15px;
+    --hm-rand: 16px;
+    --hm-spur: 180px;
+    --hm-karte-breite: 390px;
   }
-
-  /* Leisten schweben als Panels, statt über die ganze Breite zu laufen.
-     So bleibt auf breiten Bildschirmen mehr Hafen sichtbar. */
-  .hud {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    width: min(var(--pc-panel-width), calc(100vw - 32px));
-    padding: 8px 10px 8px 16px;
-    border-radius: var(--pc-radius);
-    box-shadow: var(--pc-shadow);
-    backdrop-filter: blur(6px);
-  }
-  #hud-top { top: calc(14px + var(--hm-safe-top)); padding-top: 8px; }
-  #hud-bottom { bottom: calc(14px + var(--hm-safe-bottom)); padding-bottom: 8px; }
-  /* Leere untere Leiste ausblenden: nichts Sichtbares ohne Funktion */
-  #hud-bottom:has(#queue:empty):has(#btn-build[hidden]) { display: none; }
-
-  .stat { font-size: 18px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
-
-  /* Tagesbalken: Text links, die Sonne aus gesten.js läuft rechts daneben auf einer Spur,
-     statt über den Text zu wandern. Ziehen nach rechts spult vor. */
-  #day {
-    --pc-track: 220px;
-    position: relative;
-    height: 34px;
-    display: inline-flex;
-    align-items: center;
-    padding-right: calc(var(--pc-track) + 18px);
-  }
-  #day::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    width: var(--pc-track);
-    top: 50%;
-    height: 8px;
-    margin-top: -4px;
-    border-radius: 4px;
-    background: rgba(40, 54, 72, 0.12);
-    pointer-events: none;
-  }
-  #day .hm-sonne {
-    left: calc(100% - var(--pc-track) + var(--anteil) * (var(--pc-track) - 28px) + 14px);
-  }
-  #day .hm-sonne:hover { box-shadow: 0 0 0 7px rgba(244, 185, 66, 0.35), 0 2px 8px rgba(0, 0, 0, 0.25); }
-
-  /* Knopf "Einfahren" am Boot aus gesten.js */
-  .hm-einfahren:hover { background: #3b4d66; }
-
-  /* Maus: Rückmeldung beim Überfahren, Tastaturfokus klar sichtbar */
-  .hud-btn {
-    position: relative;
-    min-height: 42px;
-    transition: transform 0.08s ease-out, background-color 0.15s, box-shadow 0.15s;
-  }
-  .hud-btn:hover:not(:disabled) { background: #3b4d66; box-shadow: 0 3px 10px rgba(40, 54, 72, 0.25); }
-  .hud-btn:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
-  .hud-btn:focus-visible,
-  #queue [data-boat]:focus-visible,
-  #card button:focus-visible { outline: 3px solid #f5c04a; outline-offset: 2px; }
-  .hud-btn[aria-pressed="true"] { background: var(--accent); }
-
-  #btn-build { background: var(--accent); padding: 0 20px; }
-  #btn-build:hover { background: #d95444; }
-  #btn-build[aria-pressed="true"] { background: var(--ink); }
-
-  /* Tastenkürzel als kleines Schild am Knopf (Werte setzt input-pc.js) */
-  .hud-btn[data-key]::after {
-    content: attr(data-key);
-    margin-left: 8px;
-    padding: 0 5px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.18);
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 18px;
-    opacity: 0.8;
-  }
-  .pc-help-btn { display: inline-block; min-width: 42px; padding: 0; font-size: 18px; }
-
-  /* Einfahrt: Boote sind Karten, die man anfassen und ziehen kann */
-  #queue { flex: 1; min-width: 0; scrollbar-width: thin; }
-  #queue [data-boat] { cursor: grab; transition: transform 0.12s ease-out, box-shadow 0.12s, border-color 0.12s; }
-  #queue [data-boat]:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(40, 54, 72, 0.2); }
-  #queue [data-boat]:active { cursor: grabbing; }
-  body.towing, body.towing * { cursor: grabbing !important; }
-
-  /* Infokarte rechts oben statt mittig: auf dem PC bleibt die Hafenmitte frei */
-  #card {
-    left: auto;
-    right: max(16px, calc((100vw - var(--pc-panel-width)) / 2));
-    top: calc(84px + var(--hm-safe-top));
-    bottom: auto;
-    transform: none;
-    width: 320px;
-    border-radius: var(--pc-radius);
-    animation: pc-card-in 0.16s ease-out;
-  }
-  #card button:not(:disabled) { cursor: pointer; }
-  @keyframes pc-card-in { from { opacity: 0; transform: translateY(-6px); } }
-
-  /* Karte: Hand zum Greifen */
+  /* Tastenhilfe gibt es nur mit Tastatur */
+  .hm-neu #btn-help { display: flex !important; }
+  .hm-neu .hm-rund:hover { background: var(--hm-papier); color: var(--hm-meer); }
+  .hm-neu.paused #btn-pause:hover { background: var(--hm-koralle-dunkel); color: #fff; }
+  .hm-neu .hm-chip:hover:not([aria-expanded="true"]),
+  .hm-neu #hm-seite #weather-chip:hover:not([aria-expanded="true"]),
+  .hm-neu #hm-seite .hm-tafel > button:hover:not([aria-expanded="true"]) { background: var(--hm-papier); }
+  .hm-neu #day .hm-sonne:hover { box-shadow: 0 0 0 7px rgba(244, 185, 66, 0.35), 0 2px 8px rgba(0, 0, 0, 0.25); }
+  .hm-neu #card button:not(:disabled) { cursor: pointer; }
   #stage { cursor: grab; }
   #stage:active { cursor: grabbing; }
-
-  /* Pause sichtbar machen, ohne das Bild zu verdecken */
-  body.paused #stage { filter: saturate(0.6) brightness(0.95); }
-  body.paused #btn-pause { background: var(--accent); }
+  body.towing, body.towing * { cursor: grabbing !important; }
 }
 
 /* Große Bildschirme: Oberfläche wächst mit, damit sie auf 27 Zoll und 4K nicht winzig wird */
 @media (min-width: 1920px) and (pointer: fine) {
-  :root { --pc-panel-width: 1320px; font-size: 18px; }
-  .stat { font-size: 20px; }
-  .hud-btn { min-height: 48px; font-size: 17px; }
-  #card { width: 360px; }
+  :root { --hm-knopf: 52px; --hm-chip: 42px; --hm-bauen: 64px; --hm-schrift: 17px; --hm-spur: 220px; --hm-karte-breite: 420px; --hm-symbol: 24px; }
 }
 @media (min-width: 2560px) and (pointer: fine) {
-  :root { --pc-panel-width: 1600px; font-size: 22px; }
-  .stat { font-size: 24px; }
-  .hud-btn { min-height: 58px; font-size: 21px; padding: 0 20px; }
-  #card { width: 440px; }
+  :root { --hm-knopf: 64px; --hm-chip: 52px; --hm-bauen: 78px; --hm-schrift: 21px; --hm-spur: 280px; --hm-karte-breite: 520px; --hm-symbol: 30px; --hm-rand: 24px; }
   .pc-tooltip { font-size: 18px; max-width: 360px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hud-btn, #queue [data-boat], #card { transition: none !important; animation: none !important; }
 }

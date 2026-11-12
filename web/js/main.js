@@ -40,6 +40,7 @@ const MODULES = [
   './features/hafen-schauen.js',
   './features/einstieg.js',
   './save/index.js',
+  './ui/oberflaeche.js',
 ];
 
 async function loadModules(game) {
