@@ -192,5 +192,11 @@ export function init(game) {
     rig.zoomAt(1 + welle * 0.0015);
   });
 
-  game.foto = { an, aus, bildSichern, get aktiv() { return aktiv; } };
+  game.foto = {
+    an, aus, bildSichern,
+    get aktiv() { return aktiv; },
+    get rundflugAktiv() { return flug; },
+    rundflug: (ein) => setFlug(!!ein),
+    leiste,   // andere Module (hafen-schauen.js) hängen hier eigene Knöpfe an
+  };
 }
