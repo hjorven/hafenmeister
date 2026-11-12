@@ -36,7 +36,7 @@ Zum Vergleich gibt es den alten Filter-Weg weiter: `?stil=filter` (feste Palette
 
 Das normale Spiel schaut immer mit 50 Grad Neigung. In der Pixel-Fassung gibt es drei Höhen: flach 30°, Spiel 50°, hoch 70°.
 
-- Knopf "Höhe" in der oberen Leiste schaltet reihum
+- Knopf "50°" oben rechts neben dem Menü schaltet reihum
 - Tasten: Bild auf, Bild ab
 - Adresse: `?hoehe=30`, `?hoehe=50`, `?hoehe=70`
 
@@ -67,7 +67,7 @@ Alle Zusätze des Spiels gelten weiter, zum Beispiel `pixel/?stufe=6&services=al
 
 `pixel/index.html` holt die normale Spielseite `../index.html`, setzt `<base>` auf den Spielordner und hängt nur `pixel/js/pixel.js` und `pixel/css/pixel.css` an. Dadurch bleibt die Pixel-Fassung automatisch auf dem Stand des Spiels, egal was andere Threads an `index.html` ändern. Spielstand und Einstellungen teilt sie mit dem normalen Spiel.
 
-`pixel.js` ersetzt `game.renderer.render` durch den Pixel-Zeichner und überschreibt am Kamera-Objekt nur `_apply` (für die Höhe). Im normalen Spiel passiert davon nichts.
+`pixel.js` ersetzt `game.renderer.render` durch den Pixel-Zeichner und setzt die Kameraneigung über `rig.pitch`. Die Oberfläche des Spiels (seit PR 119 selbst im Pixel-Stil) bleibt unverändert, `pixel.css` gilt nur für die alte Oberfläche. Im normalen Spiel passiert davon nichts.
 
 ## Grenzen
 

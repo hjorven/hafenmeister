@@ -85,10 +85,28 @@ knopf.type = 'button';
 knopf.className = 'hud-btn';
 knopf.id = 'btn-hoehe';
 knopf.setAttribute('aria-label', 'Kamerahöhe wechseln');
-const leiste = document.getElementById('hud-top');
-const vor = document.getElementById('btn-overview');
-if (leiste && vor && vor.parentElement === leiste) leiste.insertBefore(knopf, vor);
-else (leiste || document.getElementById('game') || document.body).appendChild(knopf);
+// Neue Oberflaeche (body.hm-neu): Knopf zu den Werkzeugen vor das Menue, sonst wie frueher in die obere Leiste
+function haengeKnopf() {
+  const werkzeuge = document.querySelector('.hm-werkzeuge');
+  if (werkzeuge) {
+    knopf.className = 'hm-px hm-rund';
+    const menue = document.getElementById('btn-menu');
+    if (menue && menue.parentElement === werkzeuge) werkzeuge.insertBefore(knopf, menue);
+    else werkzeuge.appendChild(knopf);
+    return;
+  }
+  const leiste = document.getElementById('hud-top');
+  const vor = document.getElementById('btn-overview');
+  if (leiste && vor && vor.parentElement === leiste) leiste.insertBefore(knopf, vor);
+  else (leiste || document.getElementById('game') || document.body).appendChild(knopf);
+}
+haengeKnopf();
+// Die Oberflaeche kann sich nach uns aufbauen: einige Sekunden lang nachsehen und umhaengen
+let versuche = 0;
+const umhaengen = setInterval(() => {
+  if (!knopf.closest('.hm-werkzeuge') && document.querySelector('.hm-werkzeuge')) haengeKnopf();
+  if (knopf.closest('.hm-werkzeuge') || ++versuche > 40) clearInterval(umhaengen);
+}, 250);
 knopf.addEventListener('click', () => setzeHoehe((stufe + 1) % HOEHEN.length));
 window.addEventListener('keydown', (e) => {
   if (e.target?.closest?.('input, textarea, select')) return;
