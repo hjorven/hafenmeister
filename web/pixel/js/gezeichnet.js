@@ -30,9 +30,10 @@ export const RAMPE_GLSL = /* glsl */`
     vec3 k = pxOklab(lin);
     float sat = length(k.yz) > 0.02 ? 1.12 : 1.0;
     vec3 r;
-    if (stufe == 3) r = vec3(min(0.99, k.x + 0.085), k.y * sat * 0.95, k.z * sat * 0.95 + 0.012);
-    else if (stufe == 2) r = vec3(k.x, k.y * sat, k.z * sat);
-    else if (stufe == 1) r = vec3(max(0.16, k.x - 0.13), k.y * sat * 1.05 - 0.004, k.z * sat * 1.05 - 0.032);
+    bool hell = k.x > 0.86;   // sehr helle Farben: Rampe nach unten verschieben (wie sprite-zeichner.js)
+    if (stufe == 3) r = vec3(hell ? min(0.985, k.x + 0.02) : min(0.99, k.x + 0.085), k.y * sat * 0.95, k.z * sat * 0.95 + 0.012);
+    else if (stufe == 2) r = vec3(hell ? k.x - 0.06 : k.x, k.y * sat, k.z * sat);
+    else if (stufe == 1) r = vec3(max(0.16, k.x - (hell ? 0.2 : 0.13)), k.y * sat * 1.05 - 0.004, k.z * sat * 1.05 - 0.032);
     else r = vec3(max(0.13, min(0.27, k.x * 0.35)), k.y * 0.45 + 0.004, k.z * 0.45 - 0.03);
     return pxAusOklab(r);
   }
