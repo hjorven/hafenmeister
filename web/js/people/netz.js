@@ -354,7 +354,7 @@ export function baueNetz({ hafen, stufe, gebaeude = [] }) {
   }
 
   // Mitte des Hafens (Wurzeln der Stege): Spaziergaenger halten sich gern in der Naehe auf
-  const wurzeln = (st?.stege ?? []).filter((s) => s.steg && s.bauart !== 'kai').map((s) => s.punkte[0]);
+  const wurzeln = (st?.stege ?? []).filter((s) => s.steg && s.bauart !== 'kai' && aufFestland(s.punkte[0][0], s.punkte[0][1], stufe)).map((s) => s.punkte[0]);
   const zentrum = wurzeln.length
     ? { x: wurzeln.reduce((a, p) => a + p[0], 0) / wurzeln.length, y: wurzeln.reduce((a, p) => a + p[1], 0) / wurzeln.length }
     : { x: 0, y: 0 };

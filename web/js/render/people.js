@@ -242,8 +242,41 @@ export function init(game) {
   }
 
   const tagesAnteil = () => game.sim?.tagesAnteil?.() ?? 0.5;
+  // Laenge eines ganzen Spieltags (Tag und Abend) in Sekunden Spielzeit
+  const tagLaenge = () => {
+    const r = game.sim?.ctx?.rules;
+    return r ? (r.dayLength ?? 90) + (r.eveningLength ?? 30) : 120;
+  };
+  // Liegt die Ankunft im Zeitfenster des Ziels? Der Weg dauert bei einem Spieltag von zwei Minuten
+  // spuerbar lange, deshalb zaehlt die geschaetzte Ankunft, nicht der Moment der Entscheidung.
+  // Laenge des echten Wegs ueber das Netz in Metern (zwischengespeichert je Netz)
+  let wegCache = new Map(), wegCacheNetz = null;
+  function weglaenge(von, nach) {
+    if (wegCacheNetz !== netz) { wegCache = new Map(); wegCacheNetz = netz; }
+    const k = von * 100000 + nach;
+    if (wegCache.has(k)) return wegCache.get(k);
+    const pfad = netz.weg(von, nach);
+    let m = Infinity;
+    if (pfad) {
+      m = 0;
+      for (let i = 1; i < pfad.length; i++) {
+        const p = netz.nodes[pfad[i - 1]], q = netz.nodes[pfad[i]];
+        m += Math.hypot(q.x - p.x, q.y - p.y) * U;
+      }
+    }
+    wegCache.set(k, m);
+    return m;
+  }
 
-  function zielWaehlen(a) {
+  function imZeitfenster(def, a, z, u = tagesAnteil()) {
+    if (!def.zeit) return true;
+    const weg = weglaenge(a.node, z.node);
+    if (!Number.isFinite(weg)) return false;
+    const an = u + weg / Math.max(0.5, a.tempo * (a.eile ?? 1)) / tagLaenge();
+    return an >= def.zeit[0] && an < def.zeit[1];
+  }
+
+  function zielWaehlen(a, u) {
     const komp = netz.komp[a.node];
     const vorliebe = P.VORLIEBE[a.typ] ?? {};
     const standard = a.typ === 'strand' ? 0.2 : 1;
@@ -251,7 +284,7 @@ export function init(game) {
       const def = P.ZIELE[z.art];
       if (!def || netz.komp[z.node] !== komp) return 0;
       if (def.nurBadewetter && !badewetter()) return 0;
-      if (def.zeit) { const u = tagesAnteil(); if (u < def.zeit[0] || u >= def.zeit[1]) return 0; }
+      if (!imZeitfenster(def, a, z, u)) return 0;
       if (z.node === a.node) return 0;
       let g = def.gewicht * (vorliebe[z.art] ?? standard);
       // Leute aus dem Ort bleiben meist in der Naehe des Hafens (dort, wo man hinschaut)
@@ -261,8 +294,17 @@ export function init(game) {
       }
       return g;
     };
+    // Viele gleiche Punkte (Stegkoepfe, Strandplaetze, Badestellen) sollen zusammen nicht mehr
+    // ziehen als ein einzelnes Gebaeude: ihr Gewicht wird durch ihre Anzahl geteilt (hoechstens 4)
+    const anzahl = {};
+    for (const z of netz.ziele) if (P.ZIELE[z.art]?.viele && netz.komp[z.node] === komp) anzahl[z.art] = (anzahl[z.art] ?? 0) + 1;
     let summe = 0;
-    const w = netz.ziele.map((z) => { const g = gewicht(z); summe += g; return g; });
+    const w = netz.ziele.map((z) => {
+      let g = gewicht(z);
+      if (g > 0 && anzahl[z.art] > 1) g *= 4 / Math.max(4, anzahl[z.art]);
+      summe += g;
+      return g;
+    });
     if (summe <= 0) return null;
     let r = Math.random() * summe;
     for (let i = 0; i < w.length; i++) { r -= w[i]; if (w[i] > 0 && r <= 0) return netz.ziele[i]; }
@@ -287,11 +329,12 @@ export function init(game) {
     let z = zielWaehlen(a);
     if (abend && bootDaten && a.bleibtAbends) {
       // abends ins Restaurant oder an den Grillplatz
-      const abends = netz.ziele.filter((t) => (t.art === 'restaurant' || t.art === 'grillplatz') && netz.komp[t.node] === netz.komp[a.node]);
+      const abends = netz.ziele.filter((t) => (t.art === 'restaurant' || t.art === 'grillplatz') && netz.komp[t.node] === netz.komp[a.node] &&
+        imZeitfenster(P.ZIELE[t.art] ?? {}, a, t));
       z = abends.length ? wahl(abends) : null;
       if (!z) return heimAnBord(a, bootDaten);
     }
-    if (!z) { a.zustand = 'steht'; a.uhr = zufall(5, 10); return; }
+    if (!z) { a.ziel = null; a.zustand = 'steht'; a.uhr = zufall(5, 10); return; }
     a.ziel = z;
     a.besuche--;
     a.ersterGang = false;
@@ -342,6 +385,8 @@ export function init(game) {
     a.zustand = art?.drinnen ? 'drinnen' : 'verweilt';
     a.sitzt = !!art?.sitzen;
     a.uhr = art ? zufall(...art.dauer) : zufall(4, 8);
+    // Angebot hat inzwischen zu (Weg war laenger als gedacht): kurz schauen, weitergehen
+    if (art?.zeit) { const u = tagesAnteil(); if (u < art.zeit[0] || u >= art.zeit[1]) { a.uhr = zufall(2, 4); a.sitzt = false; } }
     if (abend && a.bleibtAbends && (z?.art === 'restaurant' || z?.art === 'grillplatz')) a.uhr = 1e9;
     // zum Wasser schauen (Norden ist -z)
     if (!art?.drinnen) a.blick = Math.PI / 2 + zufall(-0.8, 0.8);
@@ -884,6 +929,17 @@ export function init(game) {
       return { figuren: lebend.length, menschen: lebend.reduce((s, a) => s + a.buendel, 0), sichtbar: koerper.count };
     },
     _agenten: agenten,
+    // Zum Pruefen: wie oft welches Ziel gewaehlt wird (typ 'crew' | 'ort' | 'strand', Tagesanteil u)
+    _wahlStatistik(typ = 'crew', u = tagesAnteil(), n = 2000) {
+      const flaeche = typ === 'strand' ? netz.flaechen.nehrung : netz.flaechen.festland;
+      const start = typ === 'strand' ? netz.duenen[0] : netz.naechster(netz.zentrum.x, netz.zentrum.y - 6, flaeche);
+      const zaehler = {};
+      for (let k = 0; k < n; k++) {
+        const z = zielWaehlen({ typ, node: start, tempo: 1.25, eile: 1 }, u);
+        if (z) zaehler[z.art] = (zaehler[z.art] ?? 0) + 1;
+      }
+      return zaehler;
+    },
   };
   game.people = api;
   return api;
