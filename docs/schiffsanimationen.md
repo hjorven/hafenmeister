@@ -102,3 +102,11 @@ Bei `dauer:auslaufen` `{ id, platzId, tage }` legt der Dauerlieger ab und fährt
 ## Bezahlt-Wimpel
 
 Hat ein Gast sein Liegegeld bezahlt (`game.sim.istBezahlt(id)`), weht am Bug ein kleiner Wimpel an einem Stab, wie das Band oder der Aufkleber, den man im echten Hafen nach dem Bezahlen an den Bugkorb hängt. Die Farbe wechselt jeden Spieltag (Gelb, Blau, Rosa, Orange, Lila, Türkis, Zitronengelb), so sieht man auf einen Blick, wer für heute bezahlt hat. Rot und Grün sind ausgespart, die gehören den Platzschildern. Dauerlieger und Boote an der Boje bekommen keinen Wimpel. Der Wimpel springt beim Bezahlen kurz auf und flattert im Wind (`boat-view.js`, Gruppe `bezahlt-band` am Bootsmodell).
+
+## Fremde Schiffe als Hindernis
+
+Schiffe, die ein anderes Modul bewegt (Besuchsschiffe der Services), melden sich mit `game.boatAnim.hindernis(group, { laenge, breite })` an. Der Aufruf gibt eine Funktion zum Abmelden zurück.
+
+- boat-anim liest jedes Bild die Weltlage und `rotation.y` der Gruppe. Der Bug liegt lokal bei +x, Länge und Breite sind in Metern. Fehlen sie, misst boat-anim das Modell selbst.
+- Eine Gruppe mit `visible === false` (auch über einen Elternknoten) oder ohne Elternknoten zählt nicht.
+- Boote weichen dem Schiff aus, halten Abstand und warten davor. Sie fahren nie hinein, auch nicht im Notfall-Durchlass nach langem Stillstand.
