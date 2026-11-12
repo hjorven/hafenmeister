@@ -34,6 +34,7 @@ export function createState({ seed, rules = RULES } = {}) {
     buildings: {}, // Bauprojekte und Anlagen mit Stufe, zum Beispiel { 'steg-d': 1, mole: 2 }
     berths: {}, // Liegeplatz-ID -> Boot-ID oder null (nur belegte Plätze stehen hier)
     boats: {}, // Boot-ID -> Boot, alle Boote, die da sind (wartend oder liegend)
+    leaving: {}, // Liegeplatz-ID -> { boatId, elapsed }: Boot legt gerade ab, Box noch belegt
     queue: [], // Boot-IDs an der Einfahrt, älteste zuerst
     upcoming: [], // heute noch erwartete Boote, sortiert nach arriveAt
     scheduledDay: 0, // für welchen Tag die Ankünfte schon ausgewürfelt sind
