@@ -476,6 +476,7 @@ function startDay(state, ctx, events) {
     list.push(boat);
   }
   list.sort((a, b) => a.arriveAt - b.arriveAt || a.id - b.id);
+  spreadArrivals(list, from, from + window, ctx.rules.arrivalMinGap);
   // Erster Tag eines neuen Spiels: Das erste Boot kommt gleich, damit niemand auf leeres Wasser schaut.
   const first = ctx.rules.firstArrivalAt;
   if (state.day === 1 && first != null) {
@@ -485,9 +486,40 @@ function startDay(state, ctx, events) {
     }
     if (list.length) list[0].arriveAt = Math.min(list[0].arriveAt ?? first, first);
   }
+  // Herkunft in der Reihenfolge der Ankunft, damit zwei Boote hintereinander nie aus derselben Ecke kommen
+  list.forEach((boat, i) => { boat.origin = boatOrigin(state, state.day * 7 + i); });
   state.upcoming = list;
   state.scheduledDay = state.day;
   events.push({ type: 'dayStart', day: state.day, stage: state.stage, expected: list.length, winter: sea.winter, year: sea.year });
+}
+
+/**
+ * Herkunft eines Boots als Zahl von 0 bis unter 1 (Stelle entlang des Revierrands, die Ansicht
+ * legt fest, wo das liegt). Aufeinanderfolgende Boote kommen aus deutlich verschiedenen Richtungen
+ * (goldener Schnitt), je Spiel anders (Seed). Verbraucht keinen Zufall, damit Spielstände gleich bleiben.
+ */
+export function boatOrigin(state, n) {
+  const x = n * 0.6180339887498949 + ((state.seed >>> 0) % 9973) / 9973;
+  return Math.round((x - Math.floor(x)) * 1000) / 1000;
+}
+
+/**
+ * Zieht sortierte Ankunftszeiten auseinander, damit Boote nicht im Pulk erscheinen: zwischen zwei
+ * Ankünften liegen mindestens minGap Sekunden. Passen nicht alle mit diesem Abstand ins Fenster,
+ * wird der Abstand so weit verkleinert, dass sie sich gleichmäßig verteilen.
+ */
+export function spreadArrivals(list, from, to, minGap) {
+  if (!(minGap > 0) || list.length < 2) return list;
+  const gap = Math.min(minGap, (to - from) / list.length);
+  for (let i = 1; i < list.length; i++) list[i].arriveAt = Math.max(list[i].arriveAt, list[i - 1].arriveAt + gap);
+  // Was hinten über das Fenster hinausragt, rückt von hinten nach vorn auf
+  let limit = to;
+  for (let i = list.length - 1; i >= 0 && list[i].arriveAt > limit; i--) {
+    list[i].arriveAt = limit;
+    limit -= gap;
+  }
+  for (const b of list) b.arriveAt = Math.round(b.arriveAt * 10) / 10;
+  return list;
 }
 
 /** Die nächsten Boote, die heute noch kommen (für die Vorschau). */
@@ -553,18 +585,24 @@ export function autoAssign(state, ctx) {
 }
 
 /**
- * Die Box, die sich ein Gast selbst sucht: passt, möglichst knapp (große Plätze bleiben für große
- * Boote frei). Wünsche wie Strom beachtet er nicht, das lohnt sich nur beim Zuweisen von Hand
- * oder mit dem Hafenbüro.
+ * Die Box, die sich ein Gast selbst sucht: die nächste freie Box, in die er passt, auch wenn sie
+ * zu groß für ihn ist. Wünsche wie Strom beachtet er nicht. Den Hafen gut zu belegen (kleine
+ * Boote in kleine Boxen, Strom für den, der ihn will) lohnt sich deshalb von Hand oder mit dem
+ * Hafenbüro. "Nächste" misst ctx.berthDistance(boat, berth, state) (die Brücke rechnet von der
+ * Warteboje zur Box); ohne diese Angabe gilt die Reihenfolge am Steg (A01, A02, ...).
  */
 export function selfBerth(state, ctx, boatId) {
   const boat = state.boats[boatId];
   if (!boat) return null;
-  const slack = (b) => b.maxLength * b.maxBeam - boat.length * boat.beam;
+  const dist = (b) => {
+    const d = ctx.berthDistance?.(boat, b, state);
+    return Number.isFinite(d) ? d : null;
+  };
   const list = availableBerths(state, ctx)
     .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
-    .sort((a, b) => slack(a) - slack(b) || String(a.id).localeCompare(String(b.id)));
-  return list[0]?.id ?? null;
+    .map((b) => ({ b, d: dist(b) }))
+    .sort((x, y) => (x.d ?? Infinity) - (y.d ?? Infinity) || String(x.b.id).localeCompare(String(y.b.id), 'de', { numeric: true }));
+  return list[0]?.b.id ?? null;
 }
 
 /**
@@ -590,6 +628,8 @@ export function selfEnter(state, ctx) {
       b.selfEntered = true;
       moor(state, ctx, b, best, events);
       events.push({ type: 'selfEntered', boatId: id, berthId: best });
+      // Nacheinander einfahren: pro Sekunde höchstens ein Boot, damit sie sich nicht in die Quere kommen
+      if (ctx.rules.queue.selfEnterOneByOne !== false) break;
     }
   }
   return events;
@@ -1215,6 +1255,22 @@ export function advanceStage(state, ctx) {
   const events = [{ type: 'stageUp', stage: state.stage }];
   clearVanishedBerths(state, ctx, from, events);
   return { ok: true, events };
+}
+
+/**
+ * Was der nächste Stufenausbau für liegende Boote bedeutet (Hinweis im Baumenü):
+ * gone = Plätze, die wegfallen, guests = Gäste, die dann abreisen, fixed = feste Boote, die umziehen.
+ */
+export function stageUpPreview(state, ctx) {
+  const next = state.stage + 1;
+  const inStage = (b, st) => (b.stages ? b.stages.includes(st) : b.stage <= st);
+  const gone = ctx.berths.filter((b) => berthAvailable(state, b) && !inStage(b, next)).map((b) => b.id);
+  const boats = gone.map((id) => state.boats[state.berths[id]]).filter(Boolean);
+  return {
+    gone,
+    guests: boats.filter((b) => !b.stationed).map((b) => b.id),
+    fixed: boats.filter((b) => b.stationed).map((b) => b.id),
+  };
 }
 
 /**

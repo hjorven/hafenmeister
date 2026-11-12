@@ -1,6 +1,6 @@
 # Hafenmeister: Roadmap
 
-Stand: 12.11.2026, abgeglichen mit `main` bei Commit `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
+Stand: 12.11.2026 abends, abgeglichen mit `main` bei Commit `937ca3c` (PR 144). Erste Fassung abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
 
 **Verhältnis zu [plan.md](plan.md):** `plan.md` bleibt der einzige gültige Plan für Vision, Regeln und Entscheidungen. Diese Roadmap ist die **Arbeitsliste**: Sie sagt, was noch fehlt, was falsch ist, was weg soll, und welches Paket (welcher Thread) es erledigt. Wo die Roadmap eine Entscheidung aus `plan.md` ändern würde, steht das unter [Offene Fragen an Jorven](#offene-fragen-an-jorven) und gilt erst nach seiner Antwort; danach wird `plan.md` im selben PR angepasst.
 
@@ -15,9 +15,18 @@ Stand: 12.11.2026, abgeglichen mit `main` bei Commit `95aee94` (PR 138). Quelle:
 bash tests/pruefen.sh
 ```
 
+**Reihenfolge seit 12.11.2026 abends (Jorven):**
+
+1. **Welle 0, Gelände:** Zuerst überarbeiten fünf Threads gemeinsam Gelände, Anlagen und Bootswege (Abschnitt 14, Pakete P62 bis P66). Sie stimmen sich untereinander ab. **Alle anderen Pakete ruhen, bis Welle 0 fertig ist.**
+2. **Grundprobleme:** Danach Welle 1 (Fehler und Fundament) und die Technik-Befunde aus Abschnitt 15.
+3. **Kernschleife und Sichtbarkeit:** Welle 2.
+4. **Extras:** Welle 3 bis 5 (neue Features, Nordsee, Online).
+
+**Selbstprüfung vor jedem Weiterbauen (Jorven, 12.11.2026):** Bevor ein Thread weiterbaut oder merged, prüft er sein eigenes Feature sehr oft im laufenden Spiel (Handy und PC, alle Stufen, mehrere Stegbilder, alle Wetter, Tag und Nacht, Vorspulen 8x) und mit Randfällen (voller Hafen, leere Bojen, Stufenwechsel mitten im Manöver, Laden eines alten Spielstands). Er schreibt in seinen PR unter **"Randfälle und Berührungspunkte"**, was er geprüft hat und wo sein Feature mit anderen kollidieren kann (Beispiel: neues Stegbild gegen Bootswege, Marinebasis gegen Einfahrt). Berührungspunkte trägt er zusätzlich in die Tabelle in Abschnitt 14 ein.
+
 **Status:** `offen` · `in Arbeit (PR n)` · `erledigt (PR n)` · `Frage` (wartet auf Jorven) · `entfällt`
 
-**Kürzel:** Ü1 bis Ü25 = "25 Vorschläge zur Überarbeitung", F1 bis F42 = "Vorschläge für neue Features" aus dem Überblick. P01 bis P61 = Pakete dieser Roadmap (siehe [Pakete und Reihenfolge](#pakete-und-reihenfolge)). A1 bis Q10 = Detailpunkte aus den Tabs "Mechaniken im Detail" und "Technik und Bedienung" des vollständigen Reviews (Abschnitt 13).
+**Kürzel:** Ü1 bis Ü25 = "25 Vorschläge zur Überarbeitung", F1 bis F42 = "Vorschläge für neue Features" aus dem Überblick. P01 bis P66 = Pakete dieser Roadmap (siehe [Pakete und Reihenfolge](#pakete-und-reihenfolge)). A1 bis Q10 = Detailpunkte aus den Tabs "Mechaniken im Detail" und "Technik und Bedienung" des vollständigen Reviews (Abschnitt 13).
 
 ---
 
@@ -57,7 +66,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 
 | Nr | Punkt | Status | Paket |
 |---|---|---|---|
-| Ü8 | Selbst-Einfahren weniger klug: die nächste oder eine der freien Boxen am Steg, auch eine zu große, damit Umlenken lohnt; Boote berühren sich dabei nie | offen (entschieden) | P10 |
+| Ü8 | Selbst-Einfahren weniger klug: die nächste oder eine der freien Boxen am Steg, auch eine zu große, damit Umlenken lohnt; Boote berühren sich dabei nie | Regel erledigt (`sim.js` `selfBerth`: nächste Box ab Warteboje, eins nach dem anderen); Abstand und Ausweichen bei den Schiffsanimationen offen | P10 |
 | Ü9 | Wunschplätze beim Zuweisen in Gold zeigen (Strom, Fingersteg) | offen | P10 |
 | Ü10 | Wünsche als Symbole über wartenden Booten, drei Umrisse für die nächsten Ankünfte (`sim.preview()`) | offen | P11 |
 | Ü11 | Hafenbüro lässt Sonderfälle beim Spieler (Mehrrumpf, XL, Sondergäste, nur ein passender Platz), wie `plan.md` Abschnitt 3 und 14 | offen | P02 |
@@ -366,7 +375,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | D1 | Ausbau in Bauabschnitten (= Ü18) | offen | P18 |
 | D2 | Über Nacht gebaut: abends Baustelle, morgens fertig | offen | P18 |
 | D3 | Frühe Stufen kürzen (= Ü16) | offen | P17 |
-| D4 | Wegfallende Plätze regeln (= Ü5), Hinweis im Baumenü | Regel erledigt (PR 143), Hinweis im Baumenü offen | P05, P18 |
+| D4 | Wegfallende Plätze regeln (= Ü5), Hinweis im Baumenü | Regel erledigt (PR 143); Daten für den Hinweis liefert `game.sim.stageUpPreview()`, Anzeige im Baumenü offen | P05, P18 |
 | D5 | Zwei Varianten je Steg (viele schmale oder wenige breite Boxen) | offen | P59 |
 | D6 | Boxen umbauen (zwei schmale zu einer breiten) | offen | P59 |
 | D7 | Sparziel anheften, Balken neben dem Geld, Schild am Bauplatz | offen | P18 |
@@ -510,7 +519,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | O1 | Gemeinsamer Aufbau für Regeltests (= Ü6) | erledigt | P06 |
 | O2 | Ein Test je Fehler, vor der Reparatur | offen | jedes Fehler-Paket (P01 bis P05) |
 | O3 | Ein ganzer Spieltag als Test mit festem Startwert | erledigt | P06 |
-| O4 | Stufenwechsel als Test | teils erledigt (PR 143), voller Hafen über alle Stufen offen | P05 |
+| O4 | Stufenwechsel als Test | erledigt (PR 143 und Test "voller Hafen über alle Stufen" in `tests/economy-sim.test.mjs`) | P05 |
 | O5 | Dritter Spielertyp im Balancing (tut nichts) | erledigt | P06 |
 | O6 | Balancing meldet Leerlauf je Stufe | erledigt | P06 |
 | O7 | Test: jedes Hinweis-Ziel existiert, keine Texte zu Gelöschtem | offen | P03 |
@@ -549,13 +558,78 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 ---
 
+## 14. Gelände und Bootswege (Welle 0)
+
+Jorven (12.11.2026, Spieltest am Gaming-PC): Das Gelände wird komplett überarbeitet, bevor irgendetwas anderes weitergeht. Fünf Threads arbeiten gleichzeitig und stimmen sich ab. Erst die Grundprobleme, dann die Extras.
+
+### Funde aus Jorvens Spieltest
+
+| Nr | Fund | Schon in der Roadmap? | Art | Paket |
+|---|---|---|---|---|
+| T1 | Jedes Wetter außer dem Standard ruckelt stark, auch am Gaming-PC | nein | Grundproblem | P65 |
+| T2 | Boote fahren durch Stege | nein (P54 nennt nur Bojenlieger) | Grundproblem | P66 |
+| T3 | Boote fahren am Anfang durch den Strand | nein | Grundproblem | P66, P62 |
+| T4 | Boote kollidieren, bleiben ineinander stecken und zittern | ja, P54 (nur beim Ausfahren); jetzt allgemein | Grundproblem | P66 |
+| T5 | Wasserspur (Heckwelle) nur auf der rechten Seite | nein | Grundproblem | P65 |
+| T6 | Marinebasis hat auf einer Seite keinen Eingang | nein | Grundproblem | P63 |
+| T7 | Marinebasis ist falsch platziert | nein | Grundproblem | P63 |
+| T8 | Boote machen im Gelände fest (Liegeplatz oder Ankerplatz an Land) | nein | Grundproblem | P66, P62 |
+| T9 | Ankünfte kommen in Wellen statt einzeln aus zufälligen Richtungen | teils: PR 81 würfelt nur die Vorbeifahrer; Regeln erledigt (Mindestabstand, breiteres Fenster, `herkunft` in `boot-kommt`), Ansicht offen | Grundproblem | P66 |
+| T10 | Engpass durch die Dünen ist viel zu eng und unschön | nein | Grundproblem | P62 |
+| T11 | Zu wenig Abwechslung im Gelände | nein | Extra (nach T1 bis T10) | P64 |
+| T12 | Komische Effekte (Flackern, Artefakte) | nein | Grundproblem | P65 |
+| T13 | Bauplätze und Anlagen müssen zum neuen Gelände passen (Stegbilder, Services, Großschiffpier) | nein | Grundproblem | P63 |
+
+### Pakete der Welle 0
+
+| Paket | Titel (Thread) | Inhalt | Dateien | Thread |
+|---|---|---|---|---|
+| P62 | Geländeform und Engpass neu bauen | T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66 | `web/js/render/landscape.js`, `web/js/render/landschaft/*.js`, `web/js/data/harbor.js` (nur Wasserkanten) | neu |
+| P63 | Marinebasis und Anlagen neu platzieren | T6, T7, T13: Marinebasis mit Zufahrt von See, Großschiffpier, Services und Bauplätze passend zum neuen Gelände, jede Anlage von Wasser oder Land erreichbar | `web/js/render/services.js`, `web/js/data/services.js`, `web/js/data/harbor.js` | neu (stimmt sich mit "Services und Sonderanlagen einbauen" und "Stegbild pro Spiel variieren" ab) |
+| P64 | Gelände abwechslungsreicher gestalten | T11: Wald, Wiesen, Schilf, Felsen, Höhen, Dorfrand, je nach Stufe und Stegbild; erst nach P62-Grundform | `web/js/render/landschaft/*.js` | neu |
+| P65 | Wetter und Effekte flüssig machen | T1, T5, T12: Wetter (Regen, Nebel, Sturm, Schnee) ohne Ruckeln, Heckwelle auf beiden Seiten, Effekte ohne Artefakte; Messung je Wetter mit `feature-tests/leistung.cjs` | `web/js/render/landschaft/wasser.js`, Wetter- und Effektmodule, `web/js/render/boat-anim.js` (nur Heckwelle) | neu |
+| P66 | Boote ums Gelände herum führen | T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch "hafenmeister-engpass-fix" (`boat-channel.js`, `boat-routes.js`, Tests `boot-engpass`, `boot-routen`) | `web/js/render/boat-view.js`, `boat-anim.js`, neue `boat-channel.js`, `boat-routes.js`, `web/js/world/fahrwege.js`, `tests/` | neu (übernimmt P54 vom Thread "Schiffsanimationen umsetzen") |
+
+Abstimmung: P62 legt zuerst die Wasserfläche fest; P63 und P66 bauen darauf. P65 misst die Leistung nach jeder Geländeänderung neu. Welle 0 ist fertig, wenn alle fünf Pakete auf `main` sind und auf allen Stufen und Stegbildern kein Boot Land, Stege oder andere Boote berührt.
+
+### Berührungspunkte zwischen Paketen
+
+Jeder Thread trägt hier ein, wo sein Paket mit anderen kollidieren kann (siehe "Selbstprüfung" oben).
+
+| Paket | Berührt | Was passieren kann | Geprüft in PR |
+|---|---|---|---|
+| P62 | P63, P66, Stegbilder | Neue Uferlinie schneidet Stege, Bauplätze oder Bootswege | |
+| P63 | P66, P04 | Anlage ohne Zufahrt, Großschiffe kommen nicht an den Pier | |
+| P66 | Stegbilder (12 Varianten), XXL und Vorbeifahrer (PR 81) | Bootsweg durch eine Variante, Großschiff blockiert die Einfahrt | |
+
+---
+
+## 15. Technische Befunde aus dem Audit (12.11.2026)
+
+Ein Audit von außerhalb (`AUDIT-ISTSTAND.md`, ZIP-Stand mit PR 143) hat die Roadmap bestätigt und Ergänzungen vorgeschlagen. Am Stand `937ca3c` nachgeprüft: Alle Befunde gelten noch. Sie gehören zu den Grundproblemen (nach Welle 0), außer C08.
+
+| Nr | Befund | Am Stand geprüft | Paket |
+|---|---|---|---|
+| C01 | Dauerlieger-Gebühr übernimmt die Fischerpacht (= Ü1) | ja, `sim.js:1395` | P01 |
+| C02 | Alter Speicherweg `hafenmeister.save` neben dem neuen; alter Weg nur noch für eine einmalige, getestete Übernahme lesen, dann Schreibpfad entfernen (= N14) | ja, `state.js:7` | P09 |
+| C03 | Spielstand-Import prüft verschachtelte Daten kaum: ein Schema für den ganzen Spielstand, IDs gegen Boots- und Platzdaten, Zahlen begrenzen, unbekannte Felder kontrolliert behandeln, erst nach vollständiger Prüfung übernehmen, Tests mit falschen Typen und Extremwerten | ja, `state.js` `validate` | P09 |
+| C04 | Abnahmekriterium für P06: neue Spielstände, alle Regeltests und das Balancing nutzen dieselbe Regelkonfiguration | ja, `data/rules.js` besteht | P06 |
+| C05 | HTML per `innerHTML` (`render/services.js`, `ui/input-pc.js`): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, `textContent` oder Escapen, dazu Test mit präparierten Namen | ja | P08 (Sicherheit), Pflicht für P44 (Hafenname) und P09 (Import) |
+| C06 | Three.js kommt von jsDelivr, Erststart hängt am CDN (= N15, N16) | ja, `web/index.html` | P61 |
+| C07 | GitHub Actions: Rechte je Job statt für den ganzen Workflow (`pages.yml` gibt `pages: write` und `id-token: write` auch dem Build), Actions auf Commit-SHAs pinnen, Dependabot prüfen | ja | P08 (mit Thread "Spiel über GitHub Pages veröffentlichen") |
+| C08 | Kein Supabase-Code vorhanden; vor dem Online-Start eigenes Sicherheitsreview (RLS je Tabelle, Rechte anonymer Nutzer, Rate Limits, serverseitige Prüfung) | ja | P58 |
+
+Weitere Ergänzungen aus Abschnitt 6 des Audits, alle P08 (Release-Vorbereitung): Secret-Scan in CI, CSP und Sicherheits-Header der veröffentlichten Seite prüfen, Browser-Tests in CI als Pflicht vor jedem Release nachweisen, `SECURITY.md` mit Meldeweg, sobald das Spiel öffentlich genutzt wird.
+
+---
+
 ## Pakete und Reihenfolge
 
 Je Paket ein Thread. "bestehend" heißt: der genannte laufende Thread übernimmt es, weil er die Dateien besitzt. Höchstens etwa 20 Threads arbeiten gleichzeitig; die Wellen geben die Reihenfolge. Eine Welle muss nicht ganz fertig sein, bevor die nächste startet; ein Paket der nächsten Welle startet, sobald ein Platz frei wird.
 
 Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor dem Merge auf aktuellen `main` rebasen, neue Regeln mit eigenem Test in `tests/`.
 
-### Welle 1: Fehler und Fundament (sofort)
+### Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)
 
 | Paket | Titel (Thread) | Inhalt | Dateien | Thread |
 |---|---|---|---|---|
@@ -567,10 +641,10 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P06 | Eine Quelle für alle Zahlen und echte Regeltests (erledigt) | Ü6, Ü24 | `economy.js`, `data/rules.js`, `data/services.js`, `services/rules.js`, `data/events.js`, `tests/regeln.mjs` (statt `tests/helpers.mjs`, das ist der Browser-Helfer), alle Regeltests, `tools/zahlen.mjs`, `docs/zahlen.md`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" |
 | P07 | Tempo einheitlich regeln | Ü7, Hilfetexte, `docs/schiffsanimationen.md` | `ui/oberflaeche.js`, `ui/input-pc.js`, `ui/input-touch.js`, `ui/gesten.js`, `plan.md` 14 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
 | P08 | Doku auf den Stand bringen | Abschnitte 9 und 10, Liste aller Adresszusätze, `plan.md` Meilensteine und Pixel-Oberfläche | `README.md`, `docs/*.md` (außer den Paket-eigenen) | bestehend: "Bestandsaufnahme Repo und Plan erstellen" |
-| P54 | Ausfahrende Boote weichen wartenden Booten aus | Neuer Fehler (Jorven, 12.11.2026): Beim Rausfahren kollidieren Boote mit Booten an der Warteboje und zittern beide, als wollten sie aneinander vorbei. Ausweichen ohne Berührung und ohne Zittern, an Handy und PC prüfen | `render/boat-anim.js`, `render/boat-view.js`, `world/fahrwege.js` | bestehend: "Schiffsanimationen umsetzen" |
+| P54 | Ausfahrende Boote weichen wartenden Booten aus (aufgegangen in P66) | Neuer Fehler (Jorven, 12.11.2026): Beim Rausfahren kollidieren Boote mit Booten an der Warteboje und zittern beide, als wollten sie aneinander vorbei. Ausweichen ohne Berührung und ohne Zittern, an Handy und PC prüfen | `render/boat-anim.js`, `render/boat-view.js`, `world/fahrwege.js` | bestehend: "Schiffsanimationen umsetzen" |
 | P09 | Speicherplätze und Neues Spiel | Ü25, F26, F27 (Grundgerüst), F28, `docs/speichern.md` | `save/*.js`, `state.js`, `save/save-panel.js` | neu |
 
-### Welle 2: Kernschleife und Rückmeldung
+### Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)
 
 | Paket | Titel (Thread) | Inhalt | Dateien | Thread |
 |---|---|---|---|---|
@@ -588,7 +662,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P21 | Logbuch und Hafenchronik zeigen | Logbuch (Note 1), F36, `sim:logbookNew` | neues Modul `web/js/ui/logbuch.js`, `state.js` | neu |
 | P22 | Erfolge einbauen | plan.md 9 | neues Feature-Modul | neu |
 
-### Welle 3: Tiefe und Hafenleben
+### Welle 3: Tiefe und Hafenleben (Extras)
 
 | Paket | Titel (Thread) | Inhalt | Thread |
 |---|---|---|---|
@@ -611,7 +685,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P39 | Jugendtraining am Segelclub | F13 | neu |
 | P40 | Seltene Besucher | F16 (nach P21) | neu |
 
-### Welle 4: Langzeit, Spielgefühl, Welt
+### Welle 4: Langzeit, Spielgefühl, Welt (Extras)
 
 | Paket | Titel (Thread) | Inhalt | Thread |
 |---|---|---|---|
@@ -629,7 +703,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P52 | Naturecke am Schilf | F39 | bestehend: "Landschaft und Wasser gestalten" |
 | P53 | Spätankömmling in der Nacht | F40 | neu |
 
-### Welle 5: Regionen und Online
+### Welle 5: Regionen und Online (Extras)
 
 | Paket | Titel (Thread) | Inhalt | Thread |
 |---|---|---|---|

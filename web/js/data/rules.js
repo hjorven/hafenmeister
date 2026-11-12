@@ -23,6 +23,8 @@ export function rulesFromEconomy(E = ECONOMY) {
   r.arrivalPeak = z.ankunftSpitze ?? null;
   r.departWindow = [z.abreiseVon ?? 0, z.abreiseBis ?? 0];
   r.firstArrivalAt = z.erstesBootNach ?? null;
+  // Mindestabstand zwischen zwei Ankünften in Sekunden (kleiner, wenn sonst nicht alle in den Tag passen)
+  r.arrivalMinGap = z.ankunftAbstand ?? 0;
   r.seasonDays = z.saisonTage;
   r.winterDays = z.winterTage ?? 0;
 
@@ -154,6 +156,8 @@ export function rulesFromEconomy(E = ECONOMY) {
     if (st.schaltetFrei?.includes('sofortKassieren')) o.autoCollect = i + 1;
     if (st.schaltetFrei?.includes('automatik')) o.autoAssign = i + 1;
   });
+  // Ohne eigene Stufe für sofortKassieren kassiert die Automatik mit
+  if (!(E.hafenbuero?.stufen || []).some((st) => st.schaltetFrei?.includes('sofortKassieren'))) o.autoCollect = o.autoAssign;
   r.office = o;
   return r;
 }

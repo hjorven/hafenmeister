@@ -184,3 +184,38 @@ test('Testmodus ?stufe=n: Spielstand der Stufe mit allen Plätzen, Geld und Ruf'
   assert.ok(zahl[2] > zahl[1] && zahl[5] > zahl[3]);
   assert.equal(sim.applyTestStage(createState({ seed: 1, rules }), ctx, 99).stage, rules.maxStage);
 });
+
+test('Stufenwechsel mit vollem Hafen: nach jedem Ausbau liegt kein Boot auf einem Platz, den es nicht gibt', () => {
+  const c = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: sim.rulesFromEconomy(ECONOMY) });
+  c.rules.queue.selfEnterAfter = null;
+  for (let n = 1; n < c.rules.maxStage; n++) {
+    if (!c.rules.stageGoals[n]) continue;
+    const s = sim.applyTestStage(createState({ seed: n, rules: c.rules }), c, n);
+    sim.tick(s, c, 0);
+    // jede freie Gastbox mit einem kleinen Boot belegen
+    let id = 5000;
+    for (const b of sim.availableBerths(s, c)) {
+      if (!sim.isFree(s, b.id) || b.reserved) continue;
+      const boat = { id: ++id, typeId: 'S1', modelId: null, name: 'Gast', size: b.sizes?.[0] ?? 'S', length: 3, beam: 1.2, draft: 0.2, motor: false,
+        special: false, dayVisitors: 0, stationed: false, wishes: [], nights: 3, status: 'waiting', waitingSince: 0, atBuoy: true, atBuoySince: 0,
+        berthId: null, wishesMet: 0, wishesTotal: 0, pendingFee: 0, penalty: 0 };
+      s.boats[boat.id] = boat;
+      s.queue.push(boat.id);
+      assert.ok(sim.assign(s, c, boat.id, b.id).ok, `${b.id} in Stufe ${n}`);
+    }
+    const vorschau = sim.stageUpPreview(s, c);
+    const vorher = sim.mooredBoats(s).length;
+    s.money = 1e7; s.stageGuests = 1e5; s.guests = 1e5; s.ratings = Array(20).fill(5);
+    const r = sim.advanceStage(s, c);
+    assert.ok(r.ok, `Ausbau ${n} nach ${n + 1}`);
+    for (const [platz, bootId] of Object.entries(s.berths)) {
+      assert.ok(c.berthById[platz].stages.includes(s.stage), `${platz} gibt es in Stufe ${s.stage} nicht`);
+      assert.equal(s.boats[bootId].berthId, platz);
+    }
+    for (const b of sim.mooredBoats(s)) assert.equal(s.berths[b.berthId], b.id);
+    const weg = r.events.filter((e) => e.type === 'departed' && e.reason === 'rebuild').length;
+    assert.equal(weg, vorschau.guests.length, `Stufe ${n}: Vorschau stimmt`);
+    assert.equal(sim.mooredBoats(s).length, vorher - weg - r.events.filter((e) => e.type === 'unstationed').length);
+    sim.runDay(s, c); // läuft danach normal weiter
+  }
+});
