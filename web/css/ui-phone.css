@@ -59,7 +59,7 @@
   :root {
     --hm-knopf: 42px;
     --hm-tempo: 40px;
-    --hm-chip: 36px;
+    --hm-chip: 40px;
     --hm-bauen: 56px;
     --hm-rand: 8px;
     --hm-karte-breite: min(360px, 52vw);
@@ -91,6 +91,11 @@
   .hm-neu #card.bau-karte .bau-zeile.gesperrt .bau-zeile-text { display: none; }
   .hm-neu #card.bau-karte .bau-liste { gap: 4px; }
   .hm-neu #card.bau-karte > .hud-btn:last-child { min-height: 38px; padding-block: 4px; }
+  /* Tafel links: höchstens bis kurz über den unteren Rand, Rest scrollt */
+  .hm-neu #hm-seite .hm-tafel-px { max-height: calc(100dvh - var(--hm-oben) - var(--hm-knopf) - 3 * var(--hm-chip) - 40px); min-height: 80px; }
+  /* Offene Tafel: die Schilder darunter treten zurück, damit nichts auf der Zeitsteuerung liegt */
+  .hm-neu #hm-seite:has(#weather-chip[aria-expanded="true"]) > :is(.hm-tafel, #hm-ziel),
+  .hm-neu #hm-seite:has(.hm-tafel > button[aria-expanded="true"]) > #hm-ziel { display: none !important; }
   /* Quer ist zu niedrig für Schilder und Einstiegsblase übereinander: die Blase hat Vorrang */
   .hm-neu:has(.hm-tipp:not([hidden])) #hm-seite { visibility: hidden; }
 }

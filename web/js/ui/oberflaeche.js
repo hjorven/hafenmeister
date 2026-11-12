@@ -240,7 +240,7 @@ export function init(game) {
       { name: 'Kasse', ist: Math.min(geld, g.cost), soll: g.cost, text: `${euro(Math.min(geld, g.cost))} von ${euro(g.cost)}` },
     ];
     return {
-      titel: `Stufe ${sim.state.stage + 1}`,
+      titel: 'Ausbau',   // "Stufe 2" in Stufe 1 las sich wie die aktuelle Stufe
       kopf: `Nächster Ausbau: ${g.name ?? 'Hafen erweitern'}`,
       zeilen, fertig: adv.ok,
       aktion: game.bauen?.oeffnen ? { text: adv.ok ? 'Jetzt ausbauen' : 'Im Baumenü ansehen', tun: () => game.bauen.oeffnen('hafen') } : null,

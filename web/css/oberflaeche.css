@@ -521,7 +521,23 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
 
 /* Preisschilder über Bauplätzen (bauen.js) */
 .hm-neu .bau-schild { padding: 2px 8px; font-family: var(--hm-pixel); font-size: 13px; }
-.hm-neu .bau-schild::after { display: none; }
+/* Zeiger im Pixel-Stil: Treppendreieck in Tinte, zeigt auf den Bauplatz (--zeiger-x setzt bauen.js) */
+.hm-neu .bau-schild::after {
+  content: '';
+  position: absolute;
+  left: var(--zeiger-x, 50%);
+  top: calc(100% + var(--hm-px) * 2);
+  bottom: auto;
+  width: 14px;
+  height: 8px;
+  margin-left: -7px;
+  border: 0;
+  background: var(--hm-tinte);
+  clip-path: polygon(0 0, 14px 0, 14px 2px, 12px 2px, 12px 4px, 10px 4px, 10px 6px, 8px 6px, 8px 8px, 6px 8px, 6px 6px, 4px 6px, 4px 4px, 2px 4px, 2px 2px, 0 2px);
+}
+.hm-neu .bau-schild.empfohlen::after { background: #b8862a; }
+.hm-neu .bau-schild.unten::after { top: calc(-8px - var(--hm-px) * 3); transform: rotate(180deg); border: 0; }
+.hm-neu .bau-schild.rand::after { display: none; }
 .hm-neu .bau-schild.empfohlen { outline: 0; border-image-source: var(--rahmen-gold); }
 .hm-neu .bau-schild-preis { color: var(--hm-meer); }
 
@@ -693,3 +709,9 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
 .hm-neu #btn-kompass[hidden] { display: none; }
 .hm-neu #btn-kompass svg { width: 70%; height: 70%; }
 .hm-neu .hm-leise { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+
+/* Aufgeklappte Tafel links liegt über Zeit, Kassieren und Bauen */
+.hm-neu #hm-seite:has([aria-expanded="true"]) { z-index: 36; }
+/* "Als Nächstes" (bauen.js) ruht, solange der Einstieg spricht oder abends Kassieren unten steht */
+.hm-neu:has(.hm-tipp:not([hidden])) .bau-tipp,
+.hm-neu:has(#btn-collect:not([hidden])) .bau-tipp { display: none; }

@@ -560,6 +560,8 @@ export function init(game) {
       x.s.style.display = weg ? 'none' : '';
       if (!weg) belegt.push(box);
       x.s.style.transform = `translate(${Math.round(l)}px, ${Math.round(t)}px)`;
+      // Zeiger zeigt auf den Bauplatz, auch wenn das Schild seitlich ausgewichen ist
+      x.s.style.setProperty('--zeiger-x', `${Math.round(Math.max(10, Math.min(w - 10, sx - l)))}px`);
     }
   }
 
@@ -952,7 +954,7 @@ function stil() {
     .bau-schild { position: absolute; left: 0; top: 0; pointer-events: auto; display: grid; gap: 0; text-align: center; border: 0;
       border-radius: 10px; padding: 4px 9px; background: rgba(255, 252, 246, 0.95); color: #1d3245; font: inherit; font-size: 12px;
       line-height: 1.2; box-shadow: 0 2px 8px rgba(20, 40, 60, 0.25); cursor: pointer; white-space: nowrap; }
-    .bau-schild::after { content: ''; position: absolute; left: 50%; bottom: -5px; margin-left: -5px; border: 5px solid transparent;
+    .bau-schild::after { content: ''; position: absolute; left: var(--zeiger-x, 50%); bottom: -5px; margin-left: -5px; border: 5px solid transparent;
       border-bottom: 0; border-top-color: rgba(255, 252, 246, 0.95); }
     .bau-schild-name { font-weight: 700; }
     .bau-schild-preis { font-variant-numeric: tabular-nums; color: #2a7d63; font-weight: 700; }
