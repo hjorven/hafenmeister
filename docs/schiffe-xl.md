@@ -5,14 +5,14 @@ Stand: 11.11.2026. 3 Arten mit je 5 Modellen, je 3 Farbvarianten, als 3D-Modelle
 | Datei | Inhalt |
 |---|---|
 | `web/js/data/boats/xl.js` | Arten, Modelle, Maße, Menschen an Bord (`crew`), Farben, Passregel `fitsBerth` |
-| `web/js/render/boats/xl.js` | Bauanleitungen der 15 Modelle, vorbeifahrende Schiffe auf der Ostsee, `init(game)` |
+| `web/js/render/boats/xl.js` | Bauanleitungen der 15 Modelle, `init(game)` |
 | `web/js/render/boats/xl-kit.js` | Baukasten: Rumpf aus Spanten, Aufbauten, Takelage, Radar, Kran, Schaufelrad, Schnittstelle |
 | `tools/vorschau-xl.html` | Vorschau aller Modelle, nicht Teil des Spiels |
 | `tests/boote-xl.test.mjs` | Prüft Maße, Bereiche, Kai-Passung und `crew` |
 
 ## Was im Spiel zu sehen ist
 
-Draußen auf der Ostsee, nördlich der Nehrung, ziehen ab dem Spielstart XL-Schiffe vorbei: höchstens zwei gleichzeitig, auf zwei Bahnen in beide Richtungen, Segler mit gesetzten Segeln, Motorschiffe mit Rauch, drehendem Radar und Schaufelrädern. Sie sind Kulisse und zeigen, was später in den Außenhafen kommt. Sie sind nicht antippbar, weil sie noch keine Gäste sind. Sobald die Spielregeln XL-Gäste schicken, bauen sie die Schiffe über `game.boatTypes.xl.buildBoat`.
+XL-Gäste legen in Stufe 5 an den langen Kajen K01 bis K03 an (Spielregeln über `game.boatTypes.xl.buildBoat`). Vorher ziehen XL-Schiffe ab Stufe 4 draußen auf der Ostsee vorbei, siehe "Vorbeifahrende Boote" unten.
 
 ## Modelle
 
@@ -73,14 +73,14 @@ XXL-Schiffe: `http://localhost:8000/tools/vorschau-xl.html?size=xxl`, einzeln mi
 | Datei | Inhalt |
 |---|---|
 | `web/js/data/boats/xxl.js` | Arten, Modelle, Liegeplatzarten `pier`, `marine`, `station` |
-| `web/js/render/boats/xxl.js` | 3D-Modelle (nutzt `xl-kit.js`), Durchfahrt draußen auf See |
+| `web/js/render/boats/xxl.js` | 3D-Modelle (nutzt `xl-kit.js`) |
 | `tests/boote-xxl.test.mjs` | Maße, Menschen an Bord, Liegeplatz, Spielregeln lesen die Arten |
 
 ## Was im Spiel zu sehen ist
 
-- Ab Stufe 5 fährt alle 1 bis 2 Minuten ein Kreuzfahrt- oder Marineschiff weit draußen vorbei (Spur bei z = -246, hinter der XL-Spur). Nicht anklickbar, nur Vorgeschmack.
+- Ab Stufe 5 fahren Kreuzfahrt- und Marineschiffe auf der äußersten Seebahn vorbei (siehe unten). Nicht anklickbar, nur Vorgeschmack.
 - `game.boatTypes.xxl` ist registriert, die Spielregeln lesen die drei Arten über `web/js/bridge.js` mit `minStage` 6.
-- Anlegen kommt, sobald es Stufe 6 gibt: Liegeplätze in `harbor.js` (Liegeplätze-Thread), `berthKinds` und Stufenziel (Integrations-Thread), Zahlen in `economy.js` (Balancing). Platzarten heißen `pier`, `marine`, `seenotretter`.
+- Anlegen in Stufe 6 an P01 (`pier`), MA01/MA02 (`marine`) und SK01 (`seenotretter`): Diese Plätze sind reserviert, die Schiffe kommen über die Services-Besuche (`render/services.js`), nicht als normale Ankünfte der Simulation. Deshalb ist XXL3 nicht `stationed`.
 
 ## Arten
 
@@ -105,3 +105,22 @@ XXL-Schiffe: `http://localhost:8000/tools/vorschau-xl.html?size=xxl`, einzeln mi
 | XXL3-3 | 46-m-Klasse | 46 x 10,8 x 2,8 |
 
 Abweichung vom Plan: Die Seenotrettungskreuzer sind kleiner als 50 m und stehen trotzdem bei XXL, weil sie erst in Stufe 6 mit eigener Station kommen und fest stationiert sind.
+
+# Vorbeifahrende Boote
+
+`web/js/render/boats/verkehr.js` lässt Boote aller Größen als Kulisse fahren, damit der Hafen von Anfang an belebt ist. Nicht antippbar, nicht in den Spielregeln. Bewegung, Kielwasser und Segel kommen aus `render/boat-anim.js`.
+
+| Wo | Stufe | Boote |
+|---|---|---|
+| Am Ufer östlich der Stege, hin und her | 1, 2 | ein Kanu, Kajak oder Ruderboot (in der Startansicht zu sehen) |
+| Runden auf dem Binnensee | 1, 2 | drei Jollen, Kanus, Tuckerboot, Jollenkreuzer |
+| Ostsee, Bahnen "klein" | alle | Motorboote, Folkeboot, Kutter; ab Stufe 2 Kajütkreuzer; ab 3 Yachten |
+| Ostsee, Bahnen "gross" | alle | Kutter und Yachten; ab Stufe 2 und 3 mehr L; ab 4 XL; ab 5 XXL auf der äußersten Bahn |
+
+Regeln:
+
+- Die Bahnen liegen im Wasser und halten Abstand zu Wartebojen, Ankerflächen, Molen, Buhnen und Liegeplätzen. `tests/verkehr.test.mjs` prüft das für Stufe 1 bis 5.
+- Ab Stufe 3 biegen die kleinen Bahnen vor der Einfahrt nach Norden ab, damit Reede und Fahrrinne frei bleiben und die Boote trotzdem in der Startansicht zu sehen sind.
+- Liegt ein anderes Boot vor dem Bug (zum Beispiel ein Gast auf dem Weg zur Boje), hält das vorbeifahrende Boot an, höchstens 45 Sekunden.
+- Mit `?stufe=3` in der Adresse zeigt der Verkehr dieselbe Stufe wie die Landschaft.
+- In der Konsole: `hafenmeister.verkehr.boote` listet die Boote mit Lage und Tempo.

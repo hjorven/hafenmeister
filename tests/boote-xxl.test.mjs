@@ -39,7 +39,7 @@ test('Menschen an Bord wie im Plan: Kreuzfahrt 80 bis 200, Marine 20 bis 60', ()
   assert.deepEqual(TYPES[1].crew, [20, 60]);
 });
 
-test('die Spielregeln lesen die Arten: Stufe 6, Freischaltung, Seenotkreuzer stationiert', () => {
+test('die Spielregeln lesen die Arten: Stufe 6, Freischaltung, Seenotkreuzer nicht stationiert', () => {
   const types = typesFromModule(xxl);
   const ctx = sim.createContext({ boatTypes: types, berths: [] });
   const byId = Object.fromEntries(ctx.types.map((t) => [t.id, t]));
@@ -47,7 +47,7 @@ test('die Spielregeln lesen die Arten: Stufe 6, Freischaltung, Seenotkreuzer sta
   assert.equal(byId.XXL1.minStage, 6);
   assert.equal(byId.XXL1.unlock, 'kreuzfahrt');
   assert.equal(byId.XXL2.unlock, 'marine');
-  assert.equal(byId.XXL3.stationed, true);
+  assert.ok(!byId.XXL3.stationed, 'Seenotkreuzer kommt über services, nicht als stationiertes Boot der Simulation');
   assert.equal(byId.XXL3.kind, 'seenotretter');
   assert.equal(byId.XXL1.models.length, 3);
   assert.equal(byId.XXL1.models[0].minStage, 6);

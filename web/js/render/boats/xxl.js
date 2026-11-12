@@ -277,51 +277,8 @@ function kindOf(model) {
 export const { buildBoat, setSails, animateBoat } = makeBoatApi('XXL', BUILDERS, kindOf);
 export { TYPES, MODELS };
 
-// Vorbeifahrende Großschiffe weit draußen auf der Ostsee, ab Stufe 5 als Vorschau auf den
-// Seehafen. Nicht antippbar, sie sind Kulisse. Als Gäste kommen sie über die Spielregeln
-// (Stufe 6, Kreuzfahrtterminal und Marineanleger) und render/boat-view.js.
-const LANE_Z = -246;        // weiter draußen als die XL-Bahnen (-203 und -184)
-const X_FAR = 330;
-
-export function startTraffic(game) {
-  const root = new THREE.Group();
-  root.name = 'xxl-traffic';
-  game.scene.add(root);
-  const guests = MODELS.filter((m) => m.typeId !== 'XXL3');
-  let ship = null;
-  let next = 20;
-  const stufe = () => game.state?.stage ?? game.state?.stufe ?? 1;
-  game.onTick((dt) => {
-    if (!dt) return;
-    if (ship) {
-      ship.group.position.x += ship.dir * ship.speed * dt;
-      ship.group.rotation.z = Math.sin(game.time * 0.4) * 0.004;
-      animateBoat(ship.group, game.time, { speed: ship.speed });
-      if (Math.abs(ship.group.position.x) > X_FAR + 5) {
-        root.remove(ship.group);
-        ship.group.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
-        ship = null;
-        next = 60 + Math.random() * 60;
-      }
-      return;
-    }
-    if (stufe() < 5) return;
-    next -= dt;
-    if (next > 0) return;
-    const model = guests[Math.floor(Math.random() * guests.length)];
-    const dir = Math.random() < 0.5 ? 1 : -1;
-    const group = buildBoat(model, { palette: Math.floor(Math.random() * 3), sails: model.propulsion === 'sail' });
-    group.position.set(-dir * X_FAR, 0, LANE_Z);
-    group.rotation.y = dir > 0 ? 0 : Math.PI;
-    root.add(group);
-    ship = { group, dir, speed: 5 };
-  });
-  return root;
-}
-
 export function init(game) {
   game.boatTypes ??= {};
   game.boatTypes.xxl = { size: 'XXL', TYPES, MODELS, buildBoat, setSails, animateBoat };
   game.boatTypes.XXL = game.boatTypes.xxl;   // Alias, Schreibweise ist klein
-  startTraffic(game);
 }

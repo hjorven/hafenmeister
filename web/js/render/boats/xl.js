@@ -403,75 +403,8 @@ function kindOf(model) {
 export const { buildBoat, setSails, animateBoat } = makeBoatApi('XL', BUILDERS, kindOf);
 export { TYPES, MODELS };
 
-/**
- * Vorbeifahrende XL-Schiffe auf der Ostsee, nördlich der Nehrung.
- * Sie sind Kulisse: Sie zeigen schon in den ersten Stufen, welche Schiffe später
- * in den Außenhafen kommen. Sie sind nicht antippbar, weil sie (noch) keine Gäste sind.
- * Sobald die Spielregeln XL-Gäste schicken, laufen diese über buildBoat und boat-anim.js.
- */
-const LANES = [
-  { z: -203, dir: 1 },   // ostwärts, weiter draußen
-  { z: -184, dir: -1 },  // westwärts, näher an der Nehrung
-];
-const X_FAR = 230;       // Start und Ende außerhalb der Karte (Karte reicht etwa von -186 bis 190 m)
-
-function disposeGroup(group) {
-  group.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
-}
-
-export function startTraffic(game, { maxShips = 2, firstAt = 0.35 } = {}) {
-  const root = new game.THREE.Group();
-  root.name = 'xl-traffic';
-  game.scene.add(root);
-  const ships = [];
-  let next = 8;
-
-  const spawn = (progress = 0) => {
-    const used = new Set(ships.map((s) => s.lane));
-    const free = LANES.map((l, i) => i).filter((i) => !used.has(i));
-    if (!free.length) return;
-    const lane = free[Math.floor(Math.random() * free.length)];
-    const { z, dir } = LANES[lane];
-    const model = MODELS[Math.floor(Math.random() * MODELS.length)];
-    const sail = model.propulsion === 'sail';
-    const group = buildBoat(model, { palette: Math.floor(Math.random() * 3), sails: sail });
-    const speed = sail ? 3.2 : 4.2;                  // m/s, gemütlich
-    const x0 = -dir * X_FAR;
-    group.position.set(x0 + dir * 2 * X_FAR * progress, 0, z);
-    group.rotation.y = dir > 0 ? 0 : Math.PI;
-    root.add(group);
-    ships.push({ group, lane, dir, speed, phase: Math.random() * 6 });
-  };
-
-  spawn(firstAt);
-  game.onTick((dt) => {
-    if (!dt) return;
-    const t = game.time;
-    for (let i = ships.length - 1; i >= 0; i--) {
-      const s = ships[i];
-      s.group.position.x += s.dir * s.speed * dt;
-      // leichtes Stampfen und Rollen nur hier draußen, die Modelle selbst schaukeln nicht
-      s.group.rotation.z = Math.sin(t * 0.7 + s.phase) * 0.012;
-      s.group.rotation.x = Math.sin(t * 0.5 + s.phase) * 0.01;
-      animateBoat(s.group, t, { speed: s.speed });
-      if (Math.abs(s.group.position.x) > X_FAR + 5) {
-        root.remove(s.group);
-        disposeGroup(s.group);
-        ships.splice(i, 1);
-      }
-    }
-    next -= dt;
-    if (next <= 0) {
-      if (ships.length < maxShips) spawn(0);
-      next = 25 + Math.random() * 35;
-    }
-  });
-  return root;
-}
-
 export function init(game) {
   game.boatTypes ??= {};
   game.boatTypes.xl = { size: 'XL', TYPES, MODELS, buildBoat, setSails, animateBoat };
   game.boatTypes.XL = game.boatTypes.xl;   // Alias, Schreibweise ist klein
-  startTraffic(game);
 }

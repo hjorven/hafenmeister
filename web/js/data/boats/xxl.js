@@ -65,8 +65,8 @@ export const TYPES = [
     propulsion: 'motor',
     role: 'station',
     mooring: 'station',
-    // Stationiert: liegt fest an einem reservierten Platz der Art 'seenotretter', kommt nicht als Gast
-    size: 'XXL', kind: 'seenotretter', unlock: 'seenotkreuzer', stationed: true, motor: true, special: true,
+    // Liegt an SK01, kommt aber über die Services-Besuche (render/services.js), nicht über die Simulation
+    size: 'XXL', kind: 'seenotretter', unlock: 'seenotkreuzer', motor: true, special: true,
     noWishes: true, weight: 1, crew: [4, 10],
     note: 'Wird stationiert, läuft bei Sturm aus und kommt zurück. Kein Gast, zahlt nichts.',
   },
