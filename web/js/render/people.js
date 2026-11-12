@@ -806,10 +806,9 @@ export function init(game) {
   game.on('build', () => { if (netz) queueMicrotask(netzErneuern); });
   game.on('sim:change', (e) => { if (netz && e?.reason === 'load') queueMicrotask(netzErneuern); });
   game.on('stufe', (n) => setStage(typeof n === 'object' ? n?.stufe ?? n?.stage : n));
-  // Neues Angebot an Land: Wegenetz mit dem neuen Ziel neu aufbauen (wie beim Stufenwechsel)
+  // Neues Angebot an Land (services.js stellt das Modell im selben Ereignis auf): Netz erneuern wie bei 'build'
   game.on('services:gebaut', ({ id } = {}) => {
-    if (!P.SERVICE_ZIELE.includes(id) || !netz) return;
-    setTimeout(() => { const s = stufe; stufe = 0; setStage(s); }, 50);   // nach dem Aufploppen des Modells
+    if (P.SERVICE_ZIELE.includes(id) && netz) queueMicrotask(netzErneuern);
   });
   game.on('season', (s) => {
     const part = typeof s === 'object' ? s?.part : s;
