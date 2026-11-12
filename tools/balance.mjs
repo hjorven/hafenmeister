@@ -21,7 +21,7 @@ import { pathToFileURL } from 'node:url';
 import { ECONOMY as E } from '../web/js/data/economy.js';
 import { HAFEN as HAFEN_DATEI } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
-import { SERVICES } from '../web/js/data/services.js';
+import { SERVICES, GROSSSCHIFF_BESUCHE } from '../web/js/data/services.js';
 import { createState } from '../web/js/state.js';
 import * as sim from '../web/js/sim.js';
 import { erstelleRegeln, mitZahlen, neuerZustand } from '../web/js/services/rules.js';
@@ -118,8 +118,6 @@ export function pruefen() {
 // (web/js/services/rules.js). Ein Bot spielt: weist Boote zu, kassiert, baut.
 const RULES = sim.rulesFromEconomy(E);
 const SVC = erstelleRegeln(mitZahlen(SERVICES, E.services));
-// Besuche, die als Besuch eines großen Schiffs (XXL) zählen (art aus web/js/data/services.js)
-const GROSSSCHIFF_BESUCHE = ['kreuzfahrt', 'flottenbesuch'];
 const PLATZ = new Map(HAFEN.plaetze.map((p) => [p.id, p]));
 
 const PROFILE = {

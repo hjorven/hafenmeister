@@ -124,11 +124,13 @@ Je erfülltem Wunsch +25 %.
 | Fahrgastanleger | 1 | Fahrgastanleger | 5 | 21.000 € | - | freischalten [fahrgastschiff]; wetter {regen:0.6, sturm:0}; proTag 150; Besuch alle 1 Tage, 160 € |
 |  | 2 | Ausflugsflotte | 5 | 26.000 € | 4 | freischalten [fahrgastschiff]; wetter {regen:0.6, sturm:0}; ruf 0,05; Besuch alle 1 Tage, 360 € |
 | Museumshafen | 1 | Museumshafen | 5 | 22.000 € | 4 | proTag 80; freischalten [traditionssegler]; ruf 0,12; gaeste {XL:1.5} |
-|  | 2 | Museumshafen mit Speicher | 5 | 30.000 € | 4,2 | proTag 160; freischalten [traditionssegler]; ruf 0,18; gaeste {XL:1.3}; hafenfest 1,5 |
+|  | 2 | Museumshafen mit Speicher | 5 | 30.000 € | 4,2 | proTag 160; freischalten [traditionssegler]; ruf 0,18; gaeste {XL:1.5}; hafenfest 1,5 |
+|  | 3 | Windjammertreffen | 6 | 34.000 € | - | proTag 280; freischalten [traditionssegler]; ruf 0,18; gaeste {XL:1.6}; hafenfest 1,5; Besuch alle 12 Tage, 5.000 € |
+| Barkasse | 1 | Barkasse | 6 | 9.000 € | - | proTag 220; wetter {regen:0.5, sturm:0}; ruf 0,03 |
 | Kreuzfahrtterminal | 1 | Kreuzfahrtpier | 6 | 60.000 € | 4 | freischalten [kreuzfahrtschiff]; Besuch alle 7 Tage, 6.500 € |
 |  | 2 | Kreuzfahrtterminal | 6 | 120.000 € | 4,5 | freischalten [kreuzfahrtschiff]; ruf 0,1; Besuch alle 4 Tage, 9.500 € |
 | Marineanleger | 1 | Marineanleger | 6 | 50.000 € | 4 | freischalten [marine]; sturmschutz 0,1; Besuch alle 10 Tage, 3.600 € |
-|  | 2 | Marinestützpunkt | 6 | 100.000 € | 4,6 | proTag 450; freischalten [marine]; sturmschutz 0,2; ruf 0,08; Besuch alle 14 Tage, 2.800 € |
+|  | 2 | Marinestützpunkt | 6 | 100.000 € | 4,6 | proTag 450; freischalten [marine]; sturmschutz 0,2; ruf 0,08; Besuch alle 6 Tage, 4.200 € |
 
 ## Ereignisse
 
