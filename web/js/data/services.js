@@ -117,7 +117,7 @@ export const SERVICES = [
   {
     id: 'hafencafe', name: 'Hafencafé', gruppe: 'an-land', abStufe: 2,
     kurz: 'Kaffee und Kuchen am Nachmittag, mit Blick aufs Wasser.',
-    lage: { x: 22, y: -14, dreh: 0 }, radius: 8,
+    lage: { x: -24, y: -14, dreh: 0 }, radius: 8,
     stufen: [
       { name: 'Hafencafé', kosten: 800,
         wirkung: { proTag: 18, wetter: { regen: 0.5, sturm: 0.3 }, kunden: { anteil: 0.2, preis: 4 }, ruf: 0.03 } },
@@ -127,7 +127,7 @@ export const SERVICES = [
   },
   {
     id: 'grillplatz', name: 'Grillplatz', gruppe: 'an-land', abStufe: 2,
-    kurz: 'Grill und Bänke am Strand. Abends sitzen die Crews zusammen.',
+    kurz: 'Grill und Bänke am Strand. Abends sitzen die Crews zusammen. Bringt kein Geld, nur Ruf.',
     lage: { x: -222, y: -8, dreh: 0 }, radius: 7,
     stufen: [
       { name: 'Grillplatz', kosten: 400, wirkung: { ruf: 0.05 } },
