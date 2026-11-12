@@ -4,7 +4,9 @@ import { CameraRig } from './camera.js';
 
 export function createGame({ canvas, bounds, home }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  // Hoechstens 1,5 Bildpunkte je CSS-Pixel: Handys haben oft 3, das waeren 4-mal so viele
+  // Pixel wie bei 1,5 fuer kaum sichtbaren Unterschied (die Oberflaeche ist HTML und bleibt scharf)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const scene = new THREE.Scene();
