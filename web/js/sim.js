@@ -1308,6 +1308,14 @@ export function rulesFromEconomy(E, base = RULES) {
     if (E.warten.plaetze) r.queue.spots = { ...r.queue.spots, ...E.warten.plaetze };
   }
 
+  if (E.tagestoern) {
+    const t = E.tagestoern;
+    r.trips = { ...r.trips };
+    if (t.anteil != null) r.trips.chance = t.anteil;
+    if (t.raus) r.trips.out = t.raus;
+    if (t.zurueck) r.trips.back = t.zurueck;
+  }
+
   if (E.hafenbuero) {
     const o = { ...r.office, cost: {}, fromStage: {}, names: {} };
     E.hafenbuero.stufen.forEach((st, i) => {
@@ -1315,11 +1323,11 @@ export function rulesFromEconomy(E, base = RULES) {
       o.fromStage[i + 1] = st.abStufe;
       o.names[i + 1] = st.name;
       if (st.schaltetFrei?.includes('allesKassieren')) o.collectAllButton = i + 1;
-      if (st.schaltetFrei?.includes('automatik')) {
-        o.autoAssign = i + 1;
-        o.autoCollect = i + 1;
-      }
+      if (st.schaltetFrei?.includes('sofortKassieren')) o.autoCollect = i + 1;
+      if (st.schaltetFrei?.includes('automatik')) o.autoAssign = i + 1;
     });
+    // Ohne eigene Stufe für sofortKassieren kassiert die Automatik mit
+    if (!E.hafenbuero.stufen.some((st) => st.schaltetFrei?.includes('sofortKassieren'))) o.autoCollect = o.autoAssign;
     r.office = o;
   }
   return r;
