@@ -96,7 +96,7 @@ Der aktuelle Stand steht in `game.state.stufe` und `game.state.region` (Besitzer
 | `ui:tow-end` | Schleppleine losgelassen |
 | `ui:mute` | Ton an oder aus |
 | `ui:auto-einfahren` | wartendes Boot soll selbst den besten Platz nehmen (`{ boot }`), aus `gesten.js` |
-| `ui:vorspulen` | Sonne gezogen (`{ speed }`, 1 bis 8), `gesten.js` setzt dabei `game.speed` |
+| `ui:vorspulen` | Tempo gewählt (`{ speed }`: 1, 3 oder 8), `ui/oberflaeche.js` setzt dabei `game.speed`; Knöpfe unten links oder Taste F |
 | `hover` | Zeiger liegt über einem Objekt (nur PC), Daten wie bei `pick` |
 
 ## Antippbare Objekte
