@@ -411,6 +411,11 @@
   .hm.hm-boot-gewaehlt #card p { margin-bottom: 8px; font-size: 14px; }
   .hm.hm-boot-gewaehlt #card .card-actions { flex-wrap: nowrap; }
   .hm.hm-boot-gewaehlt #card .card-actions .hud-btn { flex: 1 1 0; min-width: 0; padding: 0 6px; font-size: 14px; line-height: 1.15; }
+  /* Waehrend der Schleppleine (gesten.js) bleibt die Karte weg, die Ringe sind frei */
+  .hm.hm-leine #card { visibility: hidden; pointer-events: none; }
+  /* Angetipptes Boot: "Automatisch einfahren" steht gross in der Karte,
+     der kleine Knopf "Einfahren" am Boot waere doppelt */
+  .hm .hm-einfahren { display: none !important; }
 
   /* Waehrend die Karte offen ist, rutscht die untere Leiste weg */
   .hm.card-open #hud-bottom { transform: translateY(110%); }
