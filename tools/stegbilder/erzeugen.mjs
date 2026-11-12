@@ -567,9 +567,10 @@ export class Bauplatz {
       for (const [nr, w] of [[0, -gabel.w], [1, gabel.w2]]) {
         const t = dirV(kurs + w);
         const anzahl = nr === 0 ? teilung : rest.length;
-        // Finger aussen (zur Seite, zu der der Arm abknickt) oder innen zwischen den Armen
+        // Finger immer aussen (zur Seite, zu der der Arm abknickt). Zwischen den Armen laeuft das Wasser
+        // zur Gabel hin spitz zu, dort legt keine echte Marina Plaetze an (keine Gasse zum Eindrehen).
         const aussen = w < 0 ? 'links' : 'rechts', innenS = w < 0 ? 'rechts' : 'links';
-        const seiten = gabel.seiten === 'beide' && anzahl > 3 && nr === 0 ? 'beide' : (gabel.lage[nr] === 'innen' ? innenS : aussen);
+        const seiten = aussen;
         const proSeite = seiten === 'beide' ? Math.ceil(anzahl / 2) : anzahl;
         // Finger auf der Seite, zu der der Arm abknickt, brauchen Abstand zu den Boxen am Stamm
         const tiefeInnen = STEG.D.breite * K / 2 + BOX.L.bl + PFAHL + gassenTiefe('L');
@@ -607,7 +608,7 @@ export class Bauplatz {
         ],
         lagen,
       };
-      this.merkmale.gabel = [gabel.w, gabel.w2, teilung, gabel.lage[0] === 'innen' ? 1 : 0, gabel.lage[1] === 'innen' ? 1 : 0];
+      this.merkmale.gabel = [gabel.w, gabel.w2, teilung, 0, 0];
     }
 
     // Eintragen und den Steg allein pruefen (ohne Einfahrt, die kommt am Ende fuer alles)
