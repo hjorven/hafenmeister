@@ -23,7 +23,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 3a. Tagestörn: Gäste mit 2 oder mehr Nächten fahren an manchen Tagen hinaus (`sim:tripOut`, `sim:tripBack`, `boat.trip.away`). Die Box bleibt belegt. Kein Törn bei Sturm und im Winter.
 4. Sobald ein Boot angelegt hat, wird sein Liegegeld für die kommende Nacht fällig (Münze, `boat.paid = false`). Nach dem Kassieren gilt es als bezahlt (`boat.paid = true`, in `game.sim.boote` als `bezahlt`). Wer mehrere Nächte bleibt, zahlt jeden Morgen die nächste Nacht. Am ersten Tag eines neuen Spiels kommt das erste Boot schon nach 3 s (`rules.firstArrivalAt`).
 4a. Tagesrhythmus: Boote kommen zwischen 35 % und 95 % des Tages, am häufigsten um 70 % (`arrivalFrom`, `arrivalWindow`, `arrivalPeak`; aus `ECONOMY.zeit.ankunftVon/ankunftBis/ankunftSpitze`). Wer abends noch an der Boje liegt, bleibt über Nacht und hat morgens wieder volle Geduld (`queue.overnight`, `ECONOMY.warten.ueberNacht`).
-4b. Abends (ab 90 s): Pacht der stationierten Einheiten, Tagesgäste und Services werden abgerechnet.
+4b. Abends (ab 90 s): Pacht der Fischer (fest `ECONOMY.fischer.pachtProTag`, 15 €), Tagesgäste und Services werden abgerechnet. Dauerlieger zahlen ihre Saisonpacht im Voraus und abends nichts (`rules.dauer.vorauskasse`; ohne Vorauskasse 50 % ihres Gastpreises je Abend, `rules.stationedFeeShare`). Einzelheiten in `docs/neue-features.md`, Abschnitt 3.
 5. Nachts (ab 120 s): nicht kassierte Münzen zählen zur Hälfte, Boote mit 0 Nächten werden abgerechnet und bewerten den Hafen (`sim:departed` mit `leaveAt`). Sie legen aber erst am nächsten Vormittag ab, jedes zu seiner Zeit zwischen 7 % und 30 % des Tages (`departWindow`, `ECONOMY.zeit.abreiseVon/abreiseBis`): dann kommt `sim:castOff` und für die Grafik `boot-faehrt`. Bis das Boot heraus ist, bleibt die Box belegt. Der Spielstand wird gespeichert.
 
 **Liegeplätze:** Zu Beginn gibt es nur die Plätze aus `ECONOMY.start`. Jedes Stegprojekt (`ECONOMY.stegprojekte`, unter „Bauen“) und jeder Stufenausbau schaltet seine Plätze frei. Fischerplätze bekommen ihr Fischerboot von selbst, es zahlt Pacht. Für die nächste Ausbaustufe zählen die Gäste, die in der aktuellen Stufe abgereist sind.
@@ -150,7 +150,7 @@ Solange niemand die Boote im Wasser zeigt, listet `#queue` die wartenden Boote a
 
 Faktoren mehrerer Module werden multipliziert, Zahlen addiert.
 
-**Hooks:** `game.sim.addHook(name, fn)` mit `arrival` (`{ state, ctx, boat }`, Boot ändern), `evening` (`{ state, ctx, boats, addIncome, events }`), `night` (`{ state, ctx, events }`). Rückgabe: Funktion zum Aushängen.
+**Hooks:** `game.sim.addHook(name, fn)` mit `arrival` (`{ state, ctx, boat }`, Boot ändern), `evening` (`{ state, ctx, boats, addIncome, events }`), `night` (`{ state, ctx, events }`), `fit` (`{ state, ctx, boat, berth }`, Grund oder null) und `tick` (`{ state, ctx, events }`, jede Spielsekunde tagsüber). Rückgabe: Funktion zum Aushängen.
 
 **Neuer Wunsch:** `game.sim.addService(key, { levels, cost, fromStage, wishFromStage })`, oder mit `berthProp` für Wünsche, die der Liegeplatz erfüllt.
 

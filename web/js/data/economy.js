@@ -100,7 +100,28 @@ export const ECONOMY = {
     abgewiesen: { chance: 0.25, wertung: 2.5 },  // wer keinen Platz bekommt, drückt den Ruf leicht
   },
 
-  fischer: { pachtProTag: 15 },
+  fischer: { pachtProTag: 15 },   // feste Pacht je Abend, nur für Fischer und andere fest vergebene Plätze
+
+  // Dauerlieger (features/dauerlieger.js, docs/neue-features.md Abschnitt 3): ein Platz wird für die
+  // ganze Saison vermietet. Sichere Einnahme, auch bei Sturm, dafür kein Gast, kein Ruf und keine
+  // Gäste fürs Stufenziel.
+  dauerlieger: {
+    abStufe: 2,
+    pachtAnteil: 0.5,          // Pacht je Saisontag = Anteil des Gastpreises (ohne Wunschbonus)
+    vorauskasse: true,         // true: Saisonpacht im Voraus (Rest der Saison, dann jede Saison neu);
+                               // false: jeden Abend pachtAnteil des Gastpreises
+    hoechstAnteil: 0.25,       // höchstens ein Viertel der Plätze (fest vergebene zählen nicht)
+    tagestoernChance: 0.4,     // je Tag: morgens raus, abends zurück
+    toernChance: 0.12,         // je Tag: Törn über mehrere Tage, Platz frei für Gäste
+    toernTage: [1, 3],
+    frueherZurueck: 0.35,      // Anteil der Törns, von denen das Boot schon am Nachmittag des letzten Tages zurückkommt
+    zurueckUm: [0.45, 0.62],   // dann zu diesem Anteil des Tages; liegt dort noch ein Gast, muss er umgelegt werden
+    bewerberStart: 2,          // so viele Einheimische fragen gleich an, sobald Dauerplätze möglich sind
+    bewerberMax: 3,            // höchstens so viele offene Anfragen
+    bewerberChance: 0.35,      // je Nacht in der Saison: neue Anfrage
+    bewerberTage: 10,          // so lange wartet ein Bewerber auf eine Box
+    kuendigungsZuschlag: 0.2,  // sofort kündigen: Pacht der restlichen Tage zurück plus dieser Anteil der Saisonpacht
+  },
 
 
   // ---------------------------------------------------------------- Ausbaustufen

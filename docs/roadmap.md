@@ -45,7 +45,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 
 | Nr | Punkt | Status | Paket |
 |---|---|---|---|
-| Ü1 | Dauerlieger-Pacht reparieren: Fischer 15 €, Dauerlieger 50 % ihres Gastpreises, wie die Karte verspricht | offen | P01 |
+| Ü1 | Dauerlieger-Pacht reparieren: Fischer 15 €, Dauerlieger 50 % ihres Gastpreises, wie die Karte verspricht | gebaut, PR offen (wartet auf Freigabe) | P01 |
 | Ü2 | Hafenbüro Stufe 1 einen Nutzen geben (Knopf "Kassieren" erst mit Stufe 1 oder andere Wirkung) | offen (entschieden: "Alle kassieren" erst nach Kauf) | P02 |
 | Ü3 | Einstieg neu abstimmen: Schritt 1 ohne Sonne, Schritt 3 "Liegegeld beim Anlegen" | in Arbeit (PR 112, Teil) | P03 |
 | Ü4 | Ein Zähler für das Abschlussziel Stufe 6 (Tag der offenen Tür zählt mit) | offen | P04 |
@@ -74,7 +74,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Ü17 | Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus `data/boats`, spürbare Kapazität | offen | P19 |
 | Ü18 | Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend | offen | P18 |
 | Ü19 | Winter nutzen: Zeitraffer vor Stufe 4 oder Winterarbeiten (F14) | offen | P20 |
-| Ü20 | Dauerlieger als Entscheidung: Spieler legt fest, welche Boxen Dauerplätze sind (höchstens ein Viertel der Gastboxen), Saisonpacht im Voraus, sichere Einnahme bei Sturm | offen (entschieden, P01 darf Einzelheiten festlegen) | P01 |
+| Ü20 | Dauerlieger als Entscheidung: Spieler legt fest, welche Boxen Dauerplätze sind (höchstens ein Viertel der Gastboxen), Saisonpacht im Voraus, sichere Einnahme bei Sturm | gebaut, PR offen (wartet auf Freigabe) | P01 |
 
 ## 5. Rückmeldung (Ü21 bis Ü23)
 
@@ -419,16 +419,16 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| H1 | Pacht nach Bootsgröße (= Ü1) | offen | P01 |
-| H2 | Saisonvertrag im Voraus | offen (entschieden) | P01 |
-| H3 | Bewerber statt Verwandlung: Stammgäste und Einheimische fragen an | offen | P01 |
-| H4 | Obergrenze ein Viertel der Plätze | offen (entschieden) | P01 |
+| H1 | Pacht nach Bootsgröße (= Ü1) | gebaut, PR offen | P01 |
+| H2 | Saisonvertrag im Voraus | gebaut, PR offen | P01 |
+| H3 | Bewerber statt Verwandlung: Stammgäste und Einheimische fragen an | gebaut, PR offen | P01 |
+| H4 | Obergrenze ein Viertel der Plätze | gebaut, PR offen | P01 |
 | H5 | Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land | offen | P20 |
 | H6 | Lieblingsplatz eines Stammgasts | offen | P25 |
 | H7 | Sichtbare Treue: Wimpel je fünf Besuche | offen | P25 |
 | H8 | Stammgäste wachsen mit (Wünsche, größeres Boot) | offen | P25 |
 | H9 | Leere Box während eines Tagestörns für einen Tagesgast | offen | P25 |
-| H10 | Dauerlieger vor Vertragsende kündigen kostet | offen | P01 |
+| H10 | Dauerlieger vor Vertragsende kündigen kostet | gebaut, PR offen | P01 |
 
 ### I Tagesziele, Logbuch, Abschluss und Endlosspiel
 
@@ -674,7 +674,7 @@ Achtung: Im Überblick heißen manche Tab-Kürzel ebenfalls F2, F3. Wo in dieser
 3. Paddel- und Tretboote bleiben in Stufe 1 zahlende Gäste.
 4. Der Knopf "Alle kassieren" kommt erst mit Hafenbüro Stufe 1 (P02).
 5. Selbst-Einfahren nach 8 Sekunden in die nächste oder eine der freien Boxen am Steg, nicht mehr in die knappste. Boote berühren sich dabei nie (P10).
-6. Dauerlieger: Jorven überlässt die Regel dem Paket. Festgelegt: Der Spieler bestimmt, welche Boxen Dauerplätze sind, höchstens ein Viertel der Gastboxen, Saisonpacht im Voraus (P01).
+6. Dauerlieger: Jorven überlässt die Regel dem Paket. Festgelegt (P01): Der Spieler bestimmt, welche Boxen Dauerplätze sind, indem er eine freie Box einem Bewerber gibt (Einheimische fragen an, Stammgäste ab dem 5. Besuch auch). Höchstens ein Viertel der Gastboxen. Saisonpacht im Voraus (50 % des Gastpreises je Saisontag), sicher auch bei Sturm, dafür kein Gast, kein Ruf, nichts fürs Stufenziel. Kündigen zum Saisonende kostenlos, sofort gegen Rückzahlung der restlichen Tage plus 20 %. Kommt ein Dauerlieger früher zurück und liegt ein Gast in seiner Box, legt der Spieler den Gast um, sonst kündigt der Dauerlieger. Einzelheiten in `docs/neue-features.md`, Abschnitt 3.
 7. Alle 42 Feature-Vorschläge kommen.
 8. Online kommt als letzter Schritt, erst wird alles lokal fertig.
 
