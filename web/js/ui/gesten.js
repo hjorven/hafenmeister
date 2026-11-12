@@ -66,8 +66,20 @@ export function init(game) {
   const ringGroup = new THREE.Group();
   ringGroup.name = 'gesten-ringe';
   game.scene.add(ringGroup);
-  const ringGeo = new THREE.RingGeometry(1.6, 2.4, 40);
-  ringGeo.rotateX(-Math.PI / 2);
+  // Ringgröße folgt der Platzbreite, damit sich Nachbarplätze nicht überlappen
+  // (Box S ist 3 m breit -> Außenradius 1,35 m). Geometrien je Radius zwischenspeichern.
+  const ringGeos = new Map();
+  const ringGeo = (platz) => {
+    const m = HAFEN.einheiten?.meterProEinheit ?? 0.62;
+    const quer = Math.min(platz.breite ?? 5, platz.laenge ?? 5) * m;
+    const r = Math.round(Math.min(2.4, Math.max(0.9, quer * 0.45)) * 20) / 20;
+    if (!ringGeos.has(r)) {
+      const g = new THREE.RingGeometry(r * 0.62, r, 40);
+      g.rotateX(-Math.PI / 2);
+      ringGeos.set(r, g);
+    }
+    return ringGeos.get(r);
+  };
   const ringMat = new THREE.MeshBasicMaterial({ color: '#2a9d8f', transparent: true, opacity: 0.85, depthTest: false });
   const ringMatHot = new THREE.MeshBasicMaterial({ color: '#ee6454', transparent: true, opacity: 0.95, depthTest: false });
 
@@ -78,7 +90,7 @@ export function init(game) {
       const platz = HAFEN.plaetze.find((p) => p.id === id);
       const w = platz && platzInWelt(platz, stufe);
       if (!w) continue;
-      const m = new THREE.Mesh(ringGeo, ringMat);
+      const m = new THREE.Mesh(ringGeo(platz), ringMat);
       m.position.set(w.x, 0.08, w.z);
       m.renderOrder = 10;
       m.userData.platz = id;
@@ -374,7 +386,7 @@ export function init(game) {
 
     // Ringe pulsieren
     const puls = 1 + Math.sin(now / 180) * 0.08;
-    for (const m of ringGroup.children) m.scale.setScalar(m.userData.platz === tow?.ziel ? 1.35 : puls);
+    for (const m of ringGroup.children) m.scale.setScalar(m.userData.platz === tow?.ziel ? 1.15 : puls);
 
     // Eingestrichene Münzen fliegen hoch und verschwinden
     for (let i = fliegend.length - 1; i >= 0; i--) {
@@ -472,7 +484,7 @@ export function init(game) {
     ctx.setLineDash([]);
   }
 
-  game.gesten = { sound, setSpeed };
+  game.gesten = { sound, setSpeed, einfahrenAmBoot: true };
 }
 
 export default init;
