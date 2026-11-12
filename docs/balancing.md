@@ -1,6 +1,6 @@
 # Balancing
 
-Stand: 12.11.2026, nach „Boote fahren selbst ein“ (PR 103). Gilt für die erste Region (deutsche Ostsee, Stufen 1 bis 6, 94 Gastplätze plus die festen Plätze der Großschiffe in Stufe 6).
+Stand: 12.11.2026, nach „Boote fahren selbst ein“ (PR 103) und „Tagesrhythmus“ (PR 108). Gilt für die erste Region (deutsche Ostsee, Stufen 1 bis 6, 94 Gastplätze plus die festen Plätze der Großschiffe in Stufe 6).
 
 ## Wo die Zahlen liegen
 
@@ -34,13 +34,13 @@ node --test tests/*.test.mjs
 
 | Stufe | Name | Spieltage | 10 % bis 90 % | davon Sparen auf den Ausbau | Echtzeit 1x | mit Vorspulen |
 |---|---|---|---|---|---|---|
-| 1 | Bootssteg am See | 13 | 12 bis 14 | 5 | 26 min | 16 min |
-| 2 | Dorfhafen am See | 39 | 37 bis 56 | 11 | 1 h 18 min | 49 min |
-| 3 | Durchstich zur Ostsee | 45 | 41 bis 51 | 11 | 1 h 30 min | 56 min |
-| 4 | Marina | 47 | 43 bis 50 | 16 | 1 h 34 min | 59 min |
-| 5 | Küstenmarina | 46 | 43 bis 51 | 13 | 1 h 32 min | 58 min |
-| 6 | Seehafen bis zum Abschluss | 73 | 68 bis 79 | | 2 h 26 min | 1 h 31 min |
-| | **Gesamt** | **266** | 257 bis 284 | | **8 h 52 min** | **5 h 29 min** |
+| 1 | Bootssteg am See | 13 | 12 bis 14 | 6 | 26 min | 16 min |
+| 2 | Dorfhafen am See | 40 | 37 bis 56 | 11 | 1 h 20 min | 50 min |
+| 3 | Durchstich zur Ostsee | 44 | 42 bis 50 | 11 | 1 h 28 min | 55 min |
+| 4 | Marina | 46 | 43 bis 49 | 15 | 1 h 32 min | 58 min |
+| 5 | Küstenmarina | 46 | 43 bis 50 | 13 | 1 h 32 min | 58 min |
+| 6 | Seehafen bis zum Abschluss | 71 | 64 bis 78 | | 2 h 22 min | 1 h 29 min |
+| | **Gesamt** | **266** | 253 bis 282 | | **8 h 52 min** | **5 h 25 min** |
 
 **Gemütlicher Spieler** (schaut nur alle 20 Sekunden auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz, kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus): 299 Tage, 9 h 58 min bei 1x, 6 h 08 min mit Vorspulen. Am meisten Zeit verliert er in Stufe 2, weil er dort spät in Versorgung investiert.
 
@@ -71,11 +71,13 @@ Ungeschicktes Spielen bremst nie stark und blockiert nie. Das passt zu „kein S
 | 3 Durchstich zur Ostsee | 22 | 480 Gäste, Ruf 3,5 | Schwimmsteg D | 20.000 € |
 | 4 Marina | 30 | 800 Gäste, Ruf 3,8 | Außenhafen mit Kai | 42.000 € |
 | 5 Küstenmarina | 37 | 1.200 Gäste, Ruf 4,2 | Pier für Großschiffe (P01, MA01, MA02, SK01) | 70.000 € |
-| 6 Seehafen | 42 | Abschluss: 8 Besuche großer Schiffe, Ruf 4,5, alle Plätze gebaut | | |
+| 6 Seehafen | 37 (keine neuen Gastplätze) | Abschluss: 8 Besuche großer Schiffe, Ruf 4,5, alle Plätze gebaut | | |
 
 Das Abschlussziel benutzt nur Dinge, die der Spieler im Hafen sieht: Geld, Ruf und die großen Schiffe, die einlaufen. Eine eigene Zahl für Tagesgäste gibt es nicht (Entscheidung Jorven, 11.11.2026). Gezählt werden Besuche von Kreuzfahrtschiffen und Flottenbesuche in Stufe 6.
 
-**Einfahren und Warten** (`ECONOMY.warten`): Ein ankommendes Boot liegt `selbstEinfahrenNach` = 8 Sekunden an der Boje. Lenkt der Spieler es nicht, fährt es selbst in eine passende freie Box. Wer selbst zuweist, kann eine Box mit erfüllten Wünschen wählen und bekommt dafür die bessere Bewertung. Passt keine freie Box, wartet das Boot bis zu 80 Sekunden (`geduld`). Warteplätze je Stufe: 3, 6, 5, 7, 8, 8, so viele, wie die Landschaft Bojen zeichnet. Dreht ein Boot ab, weil alle Bojen belegt sind, gibt es keine schlechte Bewertung.
+**Einfahren und Warten** (`ECONOMY.warten`): Ein ankommendes Boot liegt `selbstEinfahrenNach` = 8 Sekunden an der Boje. Lenkt der Spieler es nicht, fährt es selbst in eine passende freie Box. Wer selbst zuweist, kann eine Box mit erfüllten Wünschen wählen und bekommt dafür die bessere Bewertung. Passt keine freie Box, wartet das Boot bis zu 30 Sekunden (`geduld`), etwa drei bis vier Stunden auf der Spieluhr. Wer abends noch an der Boje liegt, bleibt über Nacht dort und fährt morgens weiter, ohne schlechte Bewertung (`ueberNacht`). Warteplätze je Stufe: 3, 6, 5, 7, 8, 8, so viele, wie die Landschaft Bojen zeichnet. Dreht ein Boot ab, weil alle Bojen belegt sind, gibt es keine schlechte Bewertung.
+
+**Tagesrhythmus** (`ECONOMY.zeit`, Anteile des 90-Sekunden-Tags): Gäste legen zwischen 0,07 und 0,3 ab (etwa 7:30 bis 11:00), neue kommen zwischen 0,35 und 0,95 (etwa 11:00 bis 19:30), die meisten um 0,7 (Nachmittag).
 
 **Hafenbüro** (`ECONOMY.hafenbuero`), reiner Komfort, keine Einnahmen:
 

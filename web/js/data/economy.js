@@ -19,6 +19,13 @@ export const ECONOMY = {
     saisonTage: 30,         // danach Winter
     winterTage: 3,          // keine Gäste, Bauprojekte doppelt so schnell
     winterBautempo: 2,
+    // Tagesrhythmus wie im echten Hafen, als Anteile des Tages (0 = Morgen, 1 = Abend):
+    // vormittags legen die Gäste ab, ab Mittag kommen die neuen, die meisten am Nachmittag.
+    ankunftVon: 0.35,       // etwa 11:00
+    ankunftBis: 0.95,       // etwa 19:30
+    ankunftSpitze: 0.7,     // Schwerpunkt am Nachmittag
+    abreiseVon: 0.07,       // etwa 7:30
+    abreiseBis: 0.3,        // etwa 11:00
   },
 
   // Warten vor dem Hafen (Wartebojen). geduld = Sekunden an der Boje, bis ein Boot weiterfährt.
@@ -27,9 +34,10 @@ export const ECONOMY = {
   // Stufe 4 sieben, ab Stufe 5 acht).
   // Ab Hafenbüro (Automatik) weist das Spiel wartende Boote selbst zu, sobald ein Platz frei wird.
   warten: {
-    geduld: 80,
+    geduld: 30,
     plaetze: { 1: 3, 2: 6, 3: 5, 4: 7, 5: 8, 6: 8 },
-    selbstEinfahrenNach: 8,   // Sekunden an der Boje, dann sucht sich das Boot selbst eine Box
+    selbstEinfahrenNach: 8,
+    ueberNacht: true,         // wer abends noch wartet, bleibt über Nacht an der Boje (ohne Bewertung)   // Sekunden an der Boje, dann sucht sich das Boot selbst eine Box
   },
 
   // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber
@@ -126,7 +134,7 @@ export const ECONOMY = {
     // Stufe 6: Großschiffe (XXL) zahlen kein Liegegeld, sie kommen als Besuche über die Services
     // kreuzfahrtterminal, marineanleger und seenotretter und bringen Geld je Besuch.
     // Keine eigene Zahl für Tagesgäste (Entscheidung Jorven, 11.11.2026).
-    { stufe: 6, name: 'Seehafen', ankuenfte: 42, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
+    { stufe: 6, name: 'Seehafen', ankuenfte: 37, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
       // Abschluss der Region: so viele Besuche großer Schiffe (Kreuzfahrtschiff, Flottenbesuch)
       // in Stufe 6, dieser Ruf und alle Plätze gebaut. Alles davon sieht der Spieler im Hafen.
       ziel: { grossschiffBesuche: 8, ruf: 4.5, allePlaetze: true },
