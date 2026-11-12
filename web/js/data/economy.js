@@ -249,77 +249,137 @@ export const ECONOMY = {
   //   sturmschutz, regatta, hafenfest   schaltet frei bzw. wirkt bei Ereignissen
   // Kein Service hat laufende Kosten (plan.md, Leitlinien: keine laufenden Kosten), unterhalt
   // ist deshalb immer 0.
+  // Services und Sonderanlagen: alle Zahlen hier, Namen, Texte und Lage in data/services.js.
+  // Je Service: abStufe (ab welcher Hafenstufe baubar) und die Ausbaustufen in Reihenfolge, je Stufe
+  // kosten, optional abStufe, ruf (Mindestruf), braucht ([{ id, stufe }]) und wirkung (Felder siehe
+  // data/services.js). sturmschutz ist ein Anteil 0 bis 1.
   services: {
-    // Angebote an Land (docs/echter-hafen.md, C11): bezahlt sich in rund 25 bis 45 Spieltagen
-    baecker: { abStufe: 1, stufen: [
-      { name: 'Brötchenservice', kosten: 80, wirkung: { kunden: { anteil: 0.3, preis: 3 }, ruf: 0.03 } },
-      { name: 'Hafenbäcker', kosten: 3200, abStufe: 3, wirkung: { proTag: 30, kunden: { anteil: 0.4, preis: 3 }, ruf: 0.06 } },
+    bootsverleih: { abStufe: 1, stufen: [   // Bootsverleih
+      // Ruderboote am Strand
+      { kosten: 150, wirkung: { proTag: 8, wetter: { regen: 0.3, sturm: 0 } } },
+      // Tretboote und Kanus
+      { kosten: 900, abStufe: 2, wirkung: { proTag: 25, wetter: { regen: 0.3, sturm: 0 }, ruf: 0.03 } },
+      // SUP- und Jollenverleih
+      { kosten: 2600, abStufe: 3, wirkung: { proTag: 95, wetter: { regen: 0.25, sturm: 0 }, ruf: 0.06, gaeste: { S: 1.05 } } },
     ] },
-    hafencafe: { abStufe: 2, stufen: [
-      { name: 'Hafencafé', kosten: 800, wirkung: { proTag: 18, wetter: { regen: 0.5, sturm: 0.3 }, kunden: { anteil: 0.2, preis: 4 }, ruf: 0.03 } },
-      { name: 'Café mit Terrasse', kosten: 4800, abStufe: 3, wirkung: { proTag: 70, wetter: { regen: 0.4, sturm: 0.2 }, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.06 } },
+    slip: { abStufe: 2, stufen: [   // Slipanlage
+      // Slipanlage
+      { kosten: 700, wirkung: { proTag: 16, wetter: { regen: 0.4, sturm: 0 }, kunden: { anteil: 0.1, preis: 6, nur: { klasse: ['S', 'M'] } }, gaeste: { S: 1.1 } } },
+      // Slip mit Trailerparkplatz
+      { kosten: 1600, abStufe: 3, wirkung: { proTag: 60, wetter: { regen: 0.4, sturm: 0 }, kunden: { anteil: 0.12, preis: 10, nur: { klasse: ['S', 'M'] } }, gaeste: { S: 1.05 } } },
     ] },
-    grillplatz: { abStufe: 2, stufen: [
-      { name: 'Grillplatz', kosten: 400, wirkung: { ruf: 0.05 } },
+    raeucherei: { abStufe: 2, stufen: [   // Räucherei
+      // Räucherkate
+      { kosten: 1200, wirkung: { proTag: 20, kunden: { anteil: 0.15, preis: 4 }, ruf: 0.05 } },
+      // Räucherei mit Fischladen
+      { kosten: 8000, abStufe: 4, wirkung: { proTag: 60, kunden: { anteil: 0.2, preis: 6 }, ruf: 0.08 } },
     ] },
-    fahrradverleih: { abStufe: 3, stufen: [
-      { name: 'Fahrradverleih', kosten: 2000, wirkung: { proTag: 25, wetter: { regen: 0.3, sturm: 0 }, kunden: { anteil: 0.15, preis: 8 } } },
+    fischhalle: { abStufe: 5, stufen: [   // Fischhalle
+      // Fischhalle
+      { kosten: 13500, braucht: [{ id: 'raeucherei', stufe: 1 }], wirkung: { proTag: 60, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.08, besucherFuerVersorgung: 40 } },
+      // Fischhalle mit Fischmarkt
+      { kosten: 16000, wirkung: { proTag: 260, kunden: { anteil: 0.4, preis: 6 }, ruf: 0.12, besucherFuerVersorgung: 90 } },
     ] },
-    eisdiele: { abStufe: 4, stufen: [
-      { name: 'Eisdiele', kosten: 5000, wirkung: { proTag: 90, wetter: { regen: 0.2, sturm: 0 }, kunden: { anteil: 0.25, preis: 3 }, ruf: 0.03 } },
+    baecker: { abStufe: 1, stufen: [   // Bäcker
+      // Brötchenservice
+      { kosten: 80, wirkung: { kunden: { anteil: 0.3, preis: 3 }, ruf: 0.03 } },
+      // Hafenbäcker
+      { kosten: 3200, abStufe: 3, wirkung: { proTag: 30, kunden: { anteil: 0.4, preis: 3 }, ruf: 0.06 } },
     ] },
-    bootsverleih: { abStufe: 1, stufen: [
-      { name: 'Bootsverleih',            kosten: 150,  wirkung: { proTag: 8 } },
-      { name: 'Bootsverleih mit Kanus',  kosten: 900,  abStufe: 2, wirkung: { proTag: 25 } },
+    hafencafe: { abStufe: 2, stufen: [   // Hafencafé
+      // Hafencafé
+      { kosten: 800, wirkung: { proTag: 18, wetter: { regen: 0.5, sturm: 0.3 }, kunden: { anteil: 0.2, preis: 4 }, ruf: 0.03 } },
+      // Café mit Terrasse
+      { kosten: 4800, abStufe: 3, wirkung: { proTag: 70, wetter: { regen: 0.4, sturm: 0.2 }, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.06 } },
     ] },
-    raeucherei: { abStufe: 2, stufen: [
-      { name: 'Räucherkate',             kosten: 1200, wirkung: { proTag: 20, kunden: { anteil: 0.15, preis: 4 } } },
-      { name: 'Fischräucherei',          kosten: 8000, abStufe: 4, wirkung: { proTag: 60, kunden: { anteil: 0.2, preis: 6 } } },
+    grillplatz: { abStufe: 2, stufen: [   // Grillplatz
+      // Grillplatz
+      { kosten: 400, wirkung: { ruf: 0.05 } },
     ] },
-    slip: { abStufe: 2, stufen: [
-      { name: 'Slip',                    kosten: 700,  wirkung: { gaeste: { S: 1.1 }, proTag: 16 } },
+    fahrradverleih: { abStufe: 3, stufen: [   // Fahrradverleih
+      // Fahrradverleih
+      { kosten: 2000, wirkung: { proTag: 25, wetter: { regen: 0.3, sturm: 0 }, kunden: { anteil: 0.15, preis: 8 } } },
     ] },
-    mastenkran: { abStufe: 3, stufen: [
-      { name: 'Mastenkran',              kosten: 4000, wirkung: { gaeste: { M: 1.2 } } },
+    eisdiele: { abStufe: 4, stufen: [   // Eisdiele
+      // Eisdiele
+      { kosten: 5000, wirkung: { proTag: 90, wetter: { regen: 0.2, sturm: 0 }, kunden: { anteil: 0.25, preis: 3 }, ruf: 0.03 } },
     ] },
-    segelclub: { abStufe: 3, stufen: [
-      { name: 'Segelclub',               kosten: 5000, wirkung: { gaeste: { S: 1.2 }, regatta: true } },
-      { name: 'Segelclub mit Jugendabteilung', kosten: 14500, abStufe: 4, wirkung: { gaeste: { S: 1.3, M: 1.05 }, regatta: true } },
+    segelclub: { abStufe: 3, stufen: [   // Segelclub
+      // Segelclub
+      { kosten: 5000, wirkung: { proTag: 20, ruf: 0.08, gaeste: { S: 1.2 }, freischalten: ['regatta'], regatta: true } },
+      // Segelschule
+      { kosten: 14500, abStufe: 4, wirkung: { proTag: 120, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.12, gaeste: { S: 1.3, M: 1.05 }, freischalten: ['regatta'], regatta: true } },
+      // Regattaverein
+      { kosten: 15000, abStufe: 4, ruf: 3.8, wirkung: { proTag: 150, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.16, gaeste: { S: 1.15, M: 1.1, L: 1.05 }, freischalten: ['regatta'], regatta: 1.3 } },
     ] },
-    ausruester: { abStufe: 3, stufen: [
-      { name: 'Bootsausrüster',          kosten: 4500, wirkung: { kunden: { anteil: 0.25, preis: 8 } } },
+    mastenkran: { abStufe: 3, stufen: [   // Mastenkran
+      // Mastenkran
+      { kosten: 4000, wirkung: { kunden: { anteil: 0.08, preis: 35, nur: { antrieb: 'segel' } }, gaeste: { M: 1.2 } } },
     ] },
-    seenotretter: { abStufe: 4, stufen: [
-      { name: 'Seenotretter-Station',    kosten: 8000, wirkung: { sturmschutz: true } },
+    ausruester: { abStufe: 3, stufen: [   // Bootsausrüster
+      // Bootsausrüster
+      { kosten: 4500, wirkung: { kunden: { anteil: 0.25, preis: 8 } } },
+      // Yachtausrüster mit Motorenwerkstatt
+      { kosten: 9000, abStufe: 4, wirkung: { kunden: { anteil: 0.25, preis: 24 }, synergie: [{ id: 'travellift', faktor: 1.15 }], ruf: 0.04 } },
     ] },
-    travellift: { abStufe: 4, stufen: [
-      { name: 'Travellift und Werft',    kosten: 12500, wirkung: { proTag: 40, winter: { proTag: 400 } } },
+    travellift: { abStufe: 4, stufen: [   // Travellift und Werft
+      // Bootsschuppen mit Werkstatt
+      { kosten: 12500, braucht: [{ id: 'mastenkran', stufe: 1 }], wirkung: { kunden: { anteil: 0.06, preis: 120 }, winter: { proTag: 400 }, proTag: 40 } },
+      // Travellift
+      { kosten: 14000, wirkung: { kunden: { anteil: 0.08, preis: 170 }, gaeste: { L: 1.1 }, winter: { proTag: 600 } } },
+      // Werfthalle mit Slipwagen
+      { kosten: 26000, ruf: 3.8, wirkung: { kunden: { anteil: 0.1, preis: 190 }, gaeste: { L: 1.12 }, ruf: 0.08, winter: { proTag: 1100 } } },
     ] },
-    winterlager: { abStufe: 4, stufen: [
-      { name: 'Winterlager',             kosten: 10000,  wirkung: { winter: { proTag: 900 } } },
-      { name: 'Große Winterhalle',       kosten: 27000, abStufe: 5, wirkung: { winter: { proTag: 2200 } } },
+    winterlager: { abStufe: 4, stufen: [   // Winterlager
+      // Freilager mit Böcken
+      { kosten: 10000, braucht: [{ id: 'travellift', stufe: 2 }], wirkung: { winter: { proTag: 900 } } },
+      // Winterlagerhalle
+      { kosten: 27000, abStufe: 5, wirkung: { winter: { proTag: 2200 }, ruf: 0.06, gaeste: { L: 1.05 } } },
     ] },
-    segelmacher: { abStufe: 4, stufen: [
-      { name: 'Segelmacher',             kosten: 7500, wirkung: { hafengeld: { segel: 1.15 } } },
+    segelmacher: { abStufe: 4, stufen: [   // Segelmacher
+      // Segelmacherei
+      { kosten: 7500, braucht: [{ id: 'segelclub', stufe: 1 }], wirkung: { kunden: { anteil: 0.07, preis: 90, nur: { antrieb: 'segel' } }, hafengeld: { segel: 1.15 }, synergie: [{ id: 'mastenkran', faktor: 1.2 }] } },
+      // Segelloft
+      { kosten: 11000, abStufe: 5, wirkung: { kunden: { anteil: 0.1, preis: 120, nur: { antrieb: 'segel' } }, hafengeld: { segel: 1.2 }, synergie: [{ id: 'mastenkran', faktor: 1.2 }, { id: 'segelclub', faktor: 1.1 }], ruf: 0.05 } },
     ] },
-    fischhalle: { abStufe: 5, stufen: [
-      { name: 'Fischhalle',              kosten: 13500, wirkung: { proTag: 60 } },
+    seenotretter: { abStufe: 4, stufen: [   // Seenotretter-Station
+      // Seenotrettungsboot
+      { kosten: 8000, wirkung: { sturmschutz: 0.3, ruf: 0.15 } },
+      // Seenotrettungskreuzer
+      { kosten: 20000, abStufe: 6, wirkung: { sturmschutz: 0.55, ruf: 0.25, freischalten: ['seenotkreuzer'], besuch: { art: 'tag-der-seenotretter', alleTage: 28, ersterNach: 5, dauer: 1, einnahme: 900, gaeste: 600, ruf: 0.02 } } },
     ] },
-    museumshafen: { abStufe: 5, stufen: [
-      { name: 'Museumshafen',            kosten: 22000, wirkung: { gaeste: { XL: 1.5 }, proTag: 80 } },
-      { name: 'Museumshafen mit Speicher', kosten: 30000, wirkung: { gaeste: { XL: 1.5 }, proTag: 160 } },
-      // Stufe 6. Stufen addieren sich nicht: proTag 160 aus Stufe 2 plus 120 fuer das Treffen
-      { name: 'Windjammertreffen',       kosten: 26000, abStufe: 6, wirkung: { gaeste: { XL: 1.6 }, proTag: 280,
-        besuch: { art: 'windjammer', alleTage: 12, ersterNach: 4, dauer: 2, einnahme: 5000, gaeste: 1800, ruf: 0.03,
-          text: 'Windjammertreffen: Traditionssegler laufen ein' } } },
+    fahrgastanleger: { abStufe: 5, stufen: [   // Fahrgastanleger
+      // Fahrgastanleger
+      { kosten: 21000, wirkung: { freischalten: ['fahrgastschiff'], wetter: { regen: 0.6, sturm: 0 }, besuch: { art: 'ausflugsfahrt', alleTage: 1, ersterNach: 1, dauer: 1, einnahme: 160, gaeste: 60 }, proTag: 150 } },
+      // Ausflugsflotte
+      { kosten: 26000, ruf: 4, wirkung: { freischalten: ['fahrgastschiff'], wetter: { regen: 0.6, sturm: 0 }, ruf: 0.05, besuch: { art: 'ausflugsfahrt', alleTage: 1, ersterNach: 1, dauer: 1, einnahme: 360, gaeste: 140 } } },
     ] },
-    barkasse: { abStufe: 6, stufen: [
-      { name: 'Barkasse',                kosten: 9000, wirkung: { proTag: 220, wetter: { regen: 0.5, sturm: 0 }, ruf: 0.03 } },
+    museumshafen: { abStufe: 5, stufen: [   // Museumshafen
+      // Museumshafen
+      { kosten: 22000, ruf: 4, wirkung: { proTag: 80, freischalten: ['traditionssegler'], ruf: 0.12, gaeste: { XL: 1.5 } } },
+      // Museumshafen mit Speicher
+      { kosten: 30000, ruf: 4.2, wirkung: { proTag: 160, freischalten: ['traditionssegler'], ruf: 0.18, gaeste: { XL: 1.5 }, hafenfest: 1.5 } },
+      // Windjammertreffen (Stufe 6). Stufen addieren sich nicht: proTag 160 aus Stufe 2 plus 120 für das Treffen
+      { kosten: 34000, abStufe: 6, wirkung: { proTag: 280, freischalten: ['traditionssegler'], ruf: 0.18, gaeste: { XL: 1.6 }, hafenfest: 1.5, besuch: { art: 'windjammer', alleTage: 12, ersterNach: 4, dauer: 2, einnahme: 5000, gaeste: 1800, ruf: 0.03 } } },
     ] },
-    fahrgastanleger: { abStufe: 5, stufen: [
-      { name: 'Fahrgastanleger',         kosten: 21000, wirkung: { proTag: 150 } },
+    barkasse: { abStufe: 6, stufen: [   // Barkasse
+      // Barkasse
+      { kosten: 9000, braucht: [{ id: 'fahrgastanleger', stufe: 1 }], wirkung: { proTag: 220, wetter: { regen: 0.5, sturm: 0 }, ruf: 0.03 } },
+    ] },
+    kreuzfahrtterminal: { abStufe: 6, stufen: [   // Kreuzfahrtterminal
+      // Kreuzfahrtpier
+      { kosten: 60000, ruf: 4, braucht: [{ id: 'fahrgastanleger', stufe: 1 }], wirkung: { freischalten: ['kreuzfahrtschiff'], besuch: { art: 'kreuzfahrt', alleTage: 7, ersterNach: 3, dauer: 1, einnahme: 6500, gaeste: 1500 } } },
+      // Kreuzfahrtterminal
+      { kosten: 120000, ruf: 4.5, wirkung: { freischalten: ['kreuzfahrtschiff'], ruf: 0.1, besuch: { art: 'kreuzfahrt', alleTage: 4, ersterNach: 2, dauer: 1, einnahme: 9500, gaeste: 2600 } } },
+    ] },
+    marineanleger: { abStufe: 6, stufen: [   // Marineanleger
+      // Marineanleger
+      { kosten: 50000, ruf: 4, braucht: [{ id: 'seenotretter', stufe: 1 }], wirkung: { freischalten: ['marine'], sturmschutz: 0.1, besuch: { art: 'flottenbesuch', alleTage: 10, ersterNach: 4, dauer: 2, einnahme: 3600, gaeste: 500, ruf: 0.02 } } },
+      // Marinestützpunkt
+      { kosten: 100000, ruf: 4.6, wirkung: { proTag: 450, freischalten: ['marine'], sturmschutz: 0.2, ruf: 0.08, besuch: { art: 'flottenbesuch', alleTage: 6, ersterNach: 3, dauer: 2, einnahme: 4200, gaeste: 2200, ruf: 0.03 } } },
     ] },
   },
+
 
   // ---------------------------------------------------------------- Ereignisse
   // Vorschlag aus dem Balancing; die Logik gehört dem Ereignis-Thread.

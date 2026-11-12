@@ -16,25 +16,22 @@ export function neuerZustand() {
   return { gebaut: {}, besuche: {}, summe: {} };
 }
 
-// Zahlen aus dem Balancing (js/data/economy.js, ECONOMY.services) ueber die Startwerte legen.
-// Alles ist optional: Was dort fehlt, bleibt wie in js/data/services.js.
+// Andere Zahlen über den Katalog legen (Tests, Balancing-Versuche): je Service ersetzt eine Stufe aus
+// ueberschreiben ihre Felder, wirkung wird als Ganzes ersetzt. Ohne Angabe bleibt der Katalog, wie er ist.
+// Die Spielzahlen selbst stehen in js/data/economy.js und sind in SERVICES schon enthalten.
 export function mitZahlen(katalog, ueberschreiben) {
   if (!ueberschreiben) return katalog;
   return katalog.map((s) => {
     const o = ueberschreiben[s.id];
     if (!o) return s;
-    const stufen = s.stufen.map((st, i) => mische(st, o.stufen?.[i]));
-    const { stufen: _x, ...rest } = o;
-    return { ...mische(s, rest), stufen };
+    const stufen = s.stufen.map((st, i) => {
+      const n = o.stufen?.[i];
+      if (!n) return st;
+      const wirkung = n.wirkung ? { ...n.wirkung, ...(st.wirkung?.besuch && n.wirkung.besuch ? { besuch: { ...n.wirkung.besuch, text: n.wirkung.besuch.text ?? st.wirkung.besuch.text } } : {}) } : st.wirkung;
+      return { ...st, ...n, name: st.name, wirkung };
+    });
+    return { ...s, ...(o.abStufe != null ? { abStufe: o.abStufe } : {}), stufen };
   });
-}
-
-function mische(a, b) {
-  if (b == null) return a;
-  if (typeof a !== 'object' || a === null || Array.isArray(a) || typeof b !== 'object' || Array.isArray(b)) return b;
-  const out = { ...a };
-  for (const [k, v] of Object.entries(b)) out[k] = mische(a[k], v);
-  return out;
 }
 
 export function erstelleRegeln(katalog = SERVICES) {
