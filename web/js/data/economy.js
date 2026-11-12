@@ -79,8 +79,8 @@ export const ECONOMY = {
   // ankuenfte: Boote pro Saisontag bei Ruf 3. mix: Anteil je Klasse.
   // ziel: was man in dieser Stufe erreichen muss, um das Bauprojekt der nächsten Stufe zu
   // kaufen (gaeste = abgereiste Gäste in dieser Stufe, ruf = Mindestruf).
-  // ausbau: das große Bauprojekt, das zur nächsten Stufe führt. Es enthält die Plätze, die
-  // beim Umbau wegfallende Plätze ersetzen, damit ein Ausbau nie Plätze kostet.
+  // ausbau: das große Bauprojekt, das zur nächsten Stufe führt, mit den Plätzen, die es selbst
+  // bringt. Ersatz für umgebaute Plätze steckt im jeweiligen Stegprojekt (siehe unten).
   stufen: [
     { stufe: 1, name: 'Bootssteg am See', ankuenfte: 4, mix: { S: 1 },
       ziel: { gaeste: 20, ruf: 2.5 },
@@ -89,16 +89,15 @@ export const ECONOMY = {
     { stufe: 2, name: 'Dorfhafen am See', ankuenfte: 13, mix: { S: 0.45, M: 0.55 },
       ziel: { gaeste: 160, ruf: 3.0 },
       ausbau: { id: 'durchstich', name: 'Durchstich zur Ostsee', kosten: 5000, bautage: 2,
-        plaetze: ['A12', 'A13', 'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26',
-          'B27', 'B28', 'F02'] } },
+        plaetze: ['B23', 'B24', 'B25', 'B26', 'F02'] } },
     { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 22, mix: { S: 0.32, M: 0.40, L: 0.28 },
       ziel: { gaeste: 550, ruf: 3.5 },
       ausbau: { id: 'marina', name: 'Schwimmsteg D', kosten: 20000, bautage: 2,
-        plaetze: ['C15', 'C23', 'C24', 'D01', 'D02', 'D03', 'D04', 'D05', 'D06'] } },
+        plaetze: ['D01', 'D02', 'D03', 'D04', 'D05', 'D06'] } },
     { stufe: 4, name: 'Marina', ankuenfte: 30, mix: { S: 0.24, M: 0.34, L: 0.42 },
       ziel: { gaeste: 900, ruf: 3.8 },
       ausbau: { id: 'aussenhafen', name: 'Außenhafen mit Kai', kosten: 42000, bautage: 3,
-        plaetze: ['K01', 'D19', 'FK01', 'FK02'] } },
+        plaetze: ['K01', 'FK01', 'FK02'] } },
     { stufe: 5, name: 'Küstenmarina', ankuenfte: 37, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
       // Abschluss der Region: so viele Gäste in Stufe 5, dieser Ruf und alle 94 Plätze gebaut
       ziel: { gaeste: 1900, ruf: 4.3, allePlaetze: true },
@@ -107,29 +106,31 @@ export const ECONOMY = {
   ],
 
   // ---------------------------------------------------------------- Stegausbauten
-  // Jeder Liegeplatz einer Stufe gehört genau einem Projekt (Start, Ausbau einer Stufe oder
-  // einem Projekt hier). Plätze, die es in einer Stufe nicht mehr gibt (Umbau), fallen weg.
+  // Jeder Liegeplatz gehört genau einem Projekt (Start, Ausbau einer Stufe oder einem Projekt
+  // hier). Gekaufte Plätze bleiben erhalten: Baut eine spätere Stufe einen Steg um, gehören die
+  // Ersatzplätze zum selben Projekt (zum Beispiel b-steg: B01, B02 in Stufe 2, ab Stufe 3 B19,
+  // B20). Ein Projekt hat deshalb in jeder Stufe mindestens so viele Plätze wie beim Kauf.
   // tools/balance.mjs --pruefen prüft das gegen harbor.js.
   start: { plaetze: ['A03', 'A04', 'A05', 'A06'] },   // der alte Steg, gratis
   stegprojekte: [
     { id: 'a-haken',      stufe: 1, name: 'Haken an Steg A',          kosten: 180,
-      plaetze: ['A01', 'A02'] },
+      plaetze: ['A01', 'A02', 'A12', 'A13'] },
     { id: 'a-knick',      stufe: 2, name: 'Steg A verlängern',        kosten: 500,
       plaetze: ['A07', 'A08', 'A09', 'A10', 'A11'] },
     { id: 'b-steg',       stufe: 2, name: 'Steg B',                   kosten: 700,
-      plaetze: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08'] },
+      plaetze: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B19', 'B20'] },
     { id: 'b-lang',       stufe: 2, name: 'Steg B verlängern',        kosten: 1400,
-      plaetze: ['B09', 'B10', 'B11', 'B12', 'B13', 'B14', 'B15', 'B16'] },
+      plaetze: ['B09', 'B10', 'B11', 'B12', 'B13', 'B14', 'B15', 'B16', 'B21', 'B22'] },
     { id: 'b-tkopf',      stufe: 2, name: 'T-Kopf an Steg B',         kosten: 600,
-      plaetze: ['B17', 'B18'] },
+      plaetze: ['B17', 'B18', 'B27', 'B28', 'B35', 'B36'] },
     { id: 'a-ausbau',     stufe: 3, name: 'Steg A ausbauen',          kosten: 2200,
       plaetze: ['A14', 'A15', 'A16', 'A17', 'A18', 'A19'] },
     { id: 'c-steg',       stufe: 3, name: 'Hauptsteg C',              kosten: 5000,
       plaetze: ['C01', 'C02', 'C03', 'C04', 'C05', 'C06'] },
     { id: 'c-lang',       stufe: 3, name: 'Hauptsteg C verlängern',   kosten: 7000,
-      plaetze: ['C07', 'C08', 'C09', 'C10', 'C11', 'C12'] },
+      plaetze: ['C07', 'C08', 'C09', 'C10', 'C11', 'C12', 'C15'] },
     { id: 'c-tkopf',      stufe: 3, name: 'T-Kopf an Steg C',         kosten: 3300,
-      plaetze: ['C13', 'C14'] },
+      plaetze: ['C13', 'C14', 'C23', 'C24'] },
     { id: 'c-knick',      stufe: 4, name: 'Hauptsteg C mit Knick',    kosten: 12000,
       plaetze: ['C16', 'C17', 'C18', 'C19', 'C20', 'C21', 'C22'] },
     { id: 'c-stich',      stufe: 4, name: 'Stichsteg an C',           kosten: 6000,
@@ -137,15 +138,13 @@ export const ECONOMY = {
     { id: 'd-lang',       stufe: 4, name: 'Schwimmsteg D verlängern', kosten: 10500,
       plaetze: ['D07', 'D08', 'D09', 'D10'] },
     { id: 'd-stirn',      stufe: 4, name: 'Stirnplatz an D',          kosten: 4000,
-      plaetze: ['D11'] },
+      plaetze: ['D11', 'D19'] },
     { id: 'kai-lang',     stufe: 5, name: 'Kai verlängern',           kosten: 33000,
       plaetze: ['K02', 'K03'] },
     { id: 'd-gabel',      stufe: 5, name: 'Gabelung an Steg D',       kosten: 24000,
       plaetze: ['D12', 'D13', 'D14', 'D15', 'D16', 'D17', 'D18'] },
     { id: 'b-neu',        stufe: 5, name: 'Steg B verlängern',        kosten: 9000,
       plaetze: ['B29', 'B30', 'B31', 'B32', 'B33', 'B34'] },
-    { id: 'b-tkopf-neu',  stufe: 5, name: 'Neuer T-Kopf an Steg B',   kosten: 4500,
-      plaetze: ['B35', 'B36'] },
   ],
 
   // ---------------------------------------------------------------- Versorgung
