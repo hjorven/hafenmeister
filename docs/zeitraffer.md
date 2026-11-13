@@ -24,6 +24,14 @@ Der Bericht steht dann in `/tmp/zeitraffer/bericht.md` und `/tmp/zeitraffer/beri
 
 Die Läufe können gleichzeitig laufen, werden dann aber jeder langsamer.
 
+Mehrere Läufe, zum Beispiel je Geländeform ein Unterordner (`--out /tmp/zr-serie/gelaende-3` mit `--gelaende 3 --landbild 3`), fasst eine Tabelle zusammen:
+
+```bash
+node tools/zeitraffer/uebersicht.cjs /tmp/zr-serie
+```
+
+Sie steht dann in `/tmp/zr-serie/uebersicht.md`.
+
 ## Optionen von lauf.cjs
 
 | Option | Standard | Bedeutung |
