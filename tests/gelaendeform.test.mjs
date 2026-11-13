@@ -169,3 +169,12 @@ test('Überblick je Form: enthält Hafen, Einfahrt und alle Landmarken, passt in
     assert.ok(r.maxX - r.minX <= 420, `Form ${F.nr}: Überblick breiter als die Kamera erlaubt`);
   }
 });
+
+test('Schmaler Überblick (Handy hochkant): Einfahrt drin, nächste Landmarke wenn sie passt, Breite eingehalten', async () => {
+  const { blickRect } = await import('../web/js/render/landschaft/formen.js');
+  for (const F of FORMEN) {
+    const r = blickRect(F, { maxBreiteM: 200 });
+    assert.ok(r.maxX - r.minX <= 200 + 1e-6, `Form ${F.nr}: zu breit`);
+    assert.ok(178 * 0.62 >= r.minX && 178 * 0.62 <= r.maxX && -268 * 0.62 >= r.minZ, `Form ${F.nr}: Einfahrt fehlt`);
+  }
+});
