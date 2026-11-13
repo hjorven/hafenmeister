@@ -28,5 +28,12 @@ Stand: 13.11.2026, Paket P15 (Ü22, Svc F4). Status: erledigt (PR 159).
 - Das Spiel läuft weiter, die Karte hält es nicht an. Bei 2 Minuten je Spieltag wäre ein Halt jeden Tag lästig. Wer sie nicht will, schaltet sie ab.
 - "Rekord" erst ab Tag 2, wenn es einen Tag davor zu schlagen gab.
 - Dauerlieger (P01): Saisonpacht im Voraus bucht `'pacht'` mit detail `'saison'`, die Rückzahlung beim Kündigen als Ausgabe `'pacht'`.
-- Handy quer: zwei Spalten, "Weiter" bleibt unten fest sichtbar.
 - Kassieren (P12): Nachtkasse bucht `'liegegeld'`/`'nacht'`, Rundgang `'rundgang'`, Trinkgeld `'strichtrinkgeld'`. Der Anteil beim Rundgang kommt aus `rules.uncollectedShare`, darum steht "halb" nicht mehr im Text.
+
+## Handy (Nachbesserung nach dem Feature-Test, 13.11.2026)
+
+- Am Handy (Breite unter 600 px oder Höhe unter 500 px) kommt von selbst nur der Zettel mit der Tagessumme. Die Karte öffnet sich erst auf Tippen und schließt nicht von selbst. So verdeckt sie nie Zeit, Kassieren oder Bauen, während das Spiel läuft.
+- Der Zettel sitzt unter Statusleiste und Ereignis-Banner.
+- Die Karte misst beim Öffnen den freien Platz: hochkant zwischen Statusleiste und Zeit/Kassieren/Bauen, quer zwischen Kasse/Zeit links, Bauen rechts und Kassieren unten. Die Schilder links (Wetter, Tagesziele, Ausbau) darf die offene Karte überdecken, sie zeigen nur etwas an.
+- Reicht die Höhe nicht, wird die Karte kompakter (Klasse `eng`, dann `sehr-eng` ohne Säulen und Unterzeilen, zuletzt `ohne-tipp`), statt innen zu rollen.
+- Blätterpfeile kommen aus `ui/pixel-symbole.js` (`pfeil`).
