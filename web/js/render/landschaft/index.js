@@ -5,7 +5,7 @@ import { region as regionNach, REGION_STANDARD } from './regionen.js';
 import { gelaendeAbfrage, warteplaetze, wegeNetz } from './gelaende.js';
 import { festePunkteWelt, karteRaster, bauflaechen } from './karte.js';
 import { baueGelaende, QUALITAET } from './terrain.js';
-import { erzeugeWasser, baueTiefentextur } from './wasser.js';
+import { erzeugeWasser, baueTiefentextur, FERN } from './wasser.js';
 import { erzeugeTageslicht } from './tageslicht.js';
 import { setzeBild, aktuellesBild, setzeFreiQuellen } from './vielfalt.js';
 
@@ -109,6 +109,7 @@ export function erzeugeLandschaft(szene, { region = REGION_STANDARD, stufe = 1, 
     gruppe.add(gelaende.gruppe);
     wasser.setzeRegion(reg);
     wasser.setzeTiefe(baueTiefentextur(reg, aktStufe, QUALITAET[q].tiefeRaster));
+    wasser.setzeTiefeFern(baueTiefentextur(reg, aktStufe, 16, FERN));
     warte = baueWartebereich(aktStufe, reg);
     warte.gruppe.position.y = pegel;
     gruppe.add(warte.gruppe);
