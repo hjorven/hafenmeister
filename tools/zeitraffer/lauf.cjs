@@ -75,42 +75,49 @@ function serve(root) {
 }
 
 // ------------------------------------------------------------------ im Browser: Bot
-// Ein Schritt: Münzen einsammeln, einmal je Spieltag einkaufen und aufsteigen.
+// Installiert den Bot als Ticker (kassiert, kauft jeden Spieltag, steigt auf) und liefert den Stand.
 const BOT = () => {
   const G = window.hafenmeister; const S = G.sim; if (!S) return null;
-  const st = S.state; const W = window.__zr ||= { tag: -1, log: [] };
-  for (const b of Object.values(st.boats)) if (b.pendingFee > 0) S.collect(b.id);
-  if (st.phase !== 'day') S.collectAll(true);
-  const r = S.ctx.rules;
-  const kaeufe = [];
-  if (st.day !== W.tag && st.phase === 'day') {
-    W.tag = st.day;
-    for (let runde = 0; runde < 15; runde++) {
-      const check = S.canAdvanceStage();
-      if (check.ok) { const a = S.advanceStage(); kaeufe.push({ art: 'stufe', id: st.stage, ok: !!a.ok }); continue; }
-      const nurGeld = check.missing?.length === 1 && check.missing[0] === 'money';
-      const o = [];
-      for (const p of S.openJettyProjects()) o.push({ art: 'steg', id: p.id, kosten: p.cost, prio: 1, tu: () => S.buildJettyProject(p.id).ok });
-      const on = st.office + 1;
-      if (r.office.cost[on] && st.stage >= r.office.fromStage[on]) o.push({ art: 'buero', id: on, kosten: r.office.cost[on], prio: 2, tu: () => S.upgradeOffice().ok });
-      for (const k of Object.keys(r.facilities || {})) {
-        const u = S.facilityUpgrade(k);
-        if (u && u.available) o.push({ art: 'bauwerk', id: k, kosten: u.cost, prio: 3, tu: () => S.upgradeFacility(k).ok });
+  const W = window.__zr ||= { tag: -1, kaeufe: [], schritte: 0 };
+  // Der Bot läuft als Ticker im Spiel, also in Spielzeit: jeden Schritt kassieren, jeden Spieltag einkaufen.
+  // So spielt er bei jedem Tempo gleich (tools/balance.mjs kauft ebenfalls jeden Tag).
+  if (!W.ticker) W.ticker = G.onTick((dt) => {
+    if (!dt) return;
+    W.schritte++;
+    const st = S.state; const r = S.ctx.rules;
+    for (const b of Object.values(st.boats)) if (b.pendingFee > 0) S.collect(b.id);
+    if (st.phase !== 'day') S.collectAll(true);
+    if (st.day !== W.tag && st.phase === 'day') {
+      W.tag = st.day;
+      for (let runde = 0; runde < 15; runde++) {
+        const check = S.canAdvanceStage();
+        if (check.ok) { const a = S.advanceStage(); W.kaeufe.push({ art: 'stufe', id: st.stage, ok: !!a.ok, tag: st.day }); continue; }
+        const nurGeld = check.missing?.length === 1 && check.missing[0] === 'money';
+        const o = [];
+        for (const p of S.openJettyProjects()) o.push({ art: 'steg', id: p.id, kosten: p.cost, prio: 1, tu: () => S.buildJettyProject(p.id).ok });
+        const on = st.office + 1;
+        if (r.office.cost[on] && st.stage >= r.office.fromStage[on]) o.push({ art: 'buero', id: on, kosten: r.office.cost[on], prio: 2, tu: () => S.upgradeOffice().ok });
+        for (const k of Object.keys(r.facilities || {})) {
+          const u = S.facilityUpgrade(k);
+          if (u && u.available) o.push({ art: 'bauwerk', id: k, kosten: u.cost, prio: 3, tu: () => S.upgradeFacility(k).ok });
+        }
+        for (const x of G.services?.liste?.() ?? []) {
+          const p = G.services.pruefe(x.id);
+          if (p && p.freigeschaltet && !p.fertig) o.push({ art: 'service', id: x.id, kosten: p.kosten, prio: st.stage >= r.maxStage ? 1 : 3, tu: () => !!G.services.bauen(x.id)?.ok });
+        }
+        let kauf = o.filter((x) => x.kosten <= st.money);
+        if (nurGeld) kauf = kauf.filter((x) => x.prio === 1 && x.kosten <= 0.1 * check.goal.cost);
+        if (!kauf.length) break;
+        kauf.sort((a, b) => a.prio - b.prio || a.kosten - b.kosten);
+        const k = kauf[0];
+        const ok = k.tu();
+        W.kaeufe.push({ art: k.art, id: k.id, kosten: k.kosten, ok, tag: st.day, stufe: st.stage });
+        if (!ok) break;
       }
-      for (const x of G.services?.liste?.() ?? []) {
-        const p = G.services.pruefe(x.id);
-        if (p && p.freigeschaltet && !p.fertig) o.push({ art: 'service', id: x.id, kosten: p.kosten, prio: st.stage >= r.maxStage ? 1 : 3, tu: () => !!G.services.bauen(x.id)?.ok });
-      }
-      let kauf = o.filter((x) => x.kosten <= st.money);
-      if (nurGeld) kauf = kauf.filter((x) => x.prio === 1 && x.kosten <= 0.1 * check.goal.cost);
-      if (!kauf.length) break;
-      kauf.sort((a, b) => a.prio - b.prio || a.kosten - b.kosten);
-      const k = kauf[0];
-      const ok = k.tu();
-      kaeufe.push({ art: k.art, id: k.id, kosten: k.kosten, ok });
-      if (!ok) break;
     }
-  }
+  });
+  const st = S.state;
+  const kaeufe = W.kaeufe.splice(0);
   const rg = S.regionGoal();
   const ev = G.events?.current;
   return {
@@ -120,7 +127,7 @@ const BOT = () => {
     aufstieg: S.canAdvanceStage().missing ?? [],
     ereignis: ev?.id ?? null, winter: !!S.season()?.winter,
     abgewiesen: st.stats?.turnedAway ?? 0, einnahmen: st.stats?.totalIncome ?? 0,
-    kaeufe,
+    botSchritte: W.schritte, kaeufe,
   };
 };
 
@@ -278,7 +285,7 @@ const SNAP = () => {
     try { zustand = await page.evaluate(`(${BOT})()`); } catch (e) { fehler.push({ wann: ort(), text: 'Bot: ' + e.message.slice(0, 200) }); break; }
     if (!zustand) break;
     zustand.w = Math.round(w / 1000);
-    for (const k of zustand.kaeufe) R.kaeufe.push({ ...k, tag: zustand.tag, stufe: zustand.stufe });
+    for (const k of zustand.kaeufe) R.kaeufe.push({ stufe: zustand.stufe, ...k });
     delete zustand.kaeufe;
     R.verlauf.push(zustand);
     if (zustand.ereignis) R.wetter[zustand.ereignis] = (R.wetter[zustand.ereignis] || 0) + 1;
