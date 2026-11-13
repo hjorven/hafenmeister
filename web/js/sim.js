@@ -301,11 +301,16 @@ export function hookWhyNotFit(state, ctx, boat, berth) {
   return null;
 }
 
+/** Wie viele Wünsche des Boots dieser Platz selbst erfüllt (Strom, ruhige Lage und so weiter). */
+export function berthWishHits(state, ctx, boat, berth) {
+  const bw = ctx.rules.berthWishes;
+  return (boat.wishes || []).filter((w) => bw[w] && berthHas(state, ctx, berth, bw[w])).length;
+}
+
 function berthScore(state, ctx, boat, berth) {
   // Höher ist besser: erfüllte Platz-Wünsche zuerst, dann Komfort, dann möglichst knapper Platz,
   // damit große Plätze für große Boote frei bleiben.
-  const bw = ctx.rules.berthWishes;
-  const wishHits = boat.wishes.filter((w) => bw[w] && berthHas(state, ctx, berth, bw[w])).length;
+  const wishHits = berthWishHits(state, ctx, boat, berth);
   const slack = berth.maxLength * berth.maxBeam - boat.length * boat.beam;
   return wishHits * 1000 + (berth.comfort || 0) * 100 - slack;
 }
@@ -600,11 +605,12 @@ export function autoAssign(state, ctx) {
 }
 
 /**
- * Die Box, die sich ein Gast selbst sucht: die nächste freie Box, in die er passt, auch wenn sie
- * zu groß für ihn ist. Wünsche wie Strom beachtet er nicht. Den Hafen gut zu belegen (kleine
- * Boote in kleine Boxen, Strom für den, der ihn will) lohnt sich deshalb von Hand oder mit dem
- * Hafenbüro. "Nächste" misst ctx.berthDistance(boat, berth, state) (die Brücke rechnet von der
- * Warteboje zur Box); ohne diese Angabe gilt die Reihenfolge am Steg (A01, A02, ...).
+ * Die Box, die sich ein Gast selbst sucht: unter den freien Boxen, in die er passt, die mit den
+ * meisten erfüllten Platz-Wünschen (zum Beispiel Strom), bei Gleichstand die nächste, auch wenn
+ * sie zu groß für ihn ist. Den Hafen gut zu belegen (kleine Boote in kleine Boxen, Komfort)
+ * lohnt sich deshalb weiter von Hand oder mit dem Hafenbüro. "Nächste" misst
+ * ctx.berthDistance(boat, berth, state) (die Brücke rechnet von der Warteboje zur Box); ohne
+ * diese Angabe gilt die Reihenfolge am Steg (A01, A02, ...).
  */
 export function selfBerth(state, ctx, boatId) {
   const boat = state.boats[boatId];
@@ -615,8 +621,9 @@ export function selfBerth(state, ctx, boatId) {
   };
   const list = availableBerths(state, ctx)
     .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
-    .map((b) => ({ b, d: dist(b) }))
-    .sort((x, y) => (x.d ?? Infinity) - (y.d ?? Infinity) || String(x.b.id).localeCompare(String(y.b.id), 'de', { numeric: true }));
+    .map((b) => ({ b, d: dist(b), w: berthWishHits(state, ctx, boat, b) }))
+    // Die Crew sucht sich den Platz, der ihre Wünsche erfüllt; unter gleich guten den nächsten
+    .sort((x, y) => y.w - x.w || (x.d ?? Infinity) - (y.d ?? Infinity) || String(x.b.id).localeCompare(String(y.b.id), 'de', { numeric: true }));
   return list[0]?.b.id ?? null;
 }
 
@@ -909,7 +916,9 @@ function startEvening(state, ctx, events) {
     endTrip(boat, events); // spätestens abends sind alle Ausflügler zurück
     visitors += boat.dayVisitors || 0;
     if (boat.stationed) {
-      const fee = ctx.rules.stationedFee ?? Math.round(nightlyFee(state, ctx, boat, 0) * ctx.rules.stationedFeeShare);
+      // Dauerlieger zahlen einen Anteil ihres Gastpreises, Fischer und Dienste (Retter, Polizei) die feste Pacht
+      const share = Math.round(nightlyFee(state, ctx, boat, 0) * ctx.rules.stationedFeeShare);
+      const fee = boat.dauer ? share : ctx.rules.stationedFee ?? share;
       addIncome(state, fee);
       events.push({ type: 'stationedFee', boatId: boat.id, amount: fee });
     }
