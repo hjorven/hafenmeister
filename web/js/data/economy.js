@@ -132,6 +132,8 @@ export const ECONOMY = {
     bewerberMax: 3,            // höchstens so viele offene Anfragen
     bewerberChance: 0.35,      // je Nacht in der Saison: neue Anfrage
     bewerberTage: 10,          // so lange wartet ein Bewerber auf eine Box
+    passtFreieBox: 0.85,       // Anteil der Bewerber, deren Boot in eine gerade freie Gastbox passt
+    seglerAnteil: 0.7,         // Anteil Segler unter den Bewerbern (wenn möglich)
     kuendigungsZuschlag: 0.2,  // sofort kündigen: Pacht der restlichen Tage zurück plus dieser Anteil der Saisonpacht
   },
   // Stammgäste (features/stammgaeste.js): Anteil der neuen Boote, die Stammgäste sind; ab so vielen

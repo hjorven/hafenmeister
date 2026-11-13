@@ -43,6 +43,7 @@ import { regelnBereit } from './regeln-bereit.js';
 import { random, randomInt } from '../random.js';
 import { STAMM } from './stammgaeste.js';
 import { BOOTSNAMEN } from '../data/bootsnamen.js';
+import { pixelBild } from '../ui/pixel-symbole.js';
 import { ECONOMY } from '../data/economy.js';
 
 // Zahlen aus data/economy.js (ECONOMY.dauerlieger); die Werte hier gelten nur, wo dort etwas fehlt.
@@ -188,14 +189,19 @@ export function neuerBewerber(state, ctx) {
   const d = dauerState(state);
   const R = regeln(ctx);
   const plaetze = gastPlaetze(state, ctx).map((b) => b.id);
-  const arten = ctx.types.filter((t) => !t.stationed && !t.special && !t.unlock && !t.dayVisitors && t.minStage <= state.stage
-    && plaetze.some((id) => sim.fits(probeVon(t), ctx.berthById[id], ctx.rules, state.stage)));
-  if (!arten.length) return null;
+  const passt = (t, ids, m) => ids.some((id) => sim.fits(probeVon(t, m), ctx.berthById[id], ctx.rules, state.stage));
+  const alle = ctx.types.filter((t) => !t.stationed && !t.special && !t.unlock && !t.dayVisitors && t.minStage <= state.stage
+    && passt(t, plaetze));
+  if (!alle.length) return null;
+  // Meist fragt jemand an, dessen Boot in eine gerade freie Box passt (sonst kann der Spieler nichts tun)
+  const frei = plaetze.filter((id) => sim.isFree(state, id) && !d.plaetze[id]);
+  const fuerFreie = alle.filter((t) => passt(t, frei));
+  const arten = fuerFreie.length && random(state) < R.passtFreieBox ? fuerFreie : alle;
+  const zielPlaetze = arten === fuerFreie ? frei : plaetze;
   const segler = arten.filter((t) => t.sail);
-  const pool = segler.length && random(state) < 0.7 ? segler : arten;
+  const pool = segler.length && random(state) < R.seglerAnteil ? segler : arten;
   const art = pool[Math.floor(random(state) * pool.length)];
-  const modelle = (art.models || []).filter((m) => (m.minStage ?? art.minStage) <= state.stage
-    && plaetze.some((id) => sim.fits(probeVon(art, m), ctx.berthById[id], ctx.rules, state.stage)));
+  const modelle = (art.models || []).filter((m) => (m.minStage ?? art.minStage) <= state.stage && passt(art, zielPlaetze, m));
   const modell = modelle.length ? modelle[Math.floor(random(state) * modelle.length)] : null;
   d.naechsterBewerber = (d.naechsterBewerber ?? 0) + 1;
   const b = {
@@ -616,44 +622,106 @@ export async function init(game) {
   const bootsname = (b) => (b?.bootsname ? `„${b.bootsname}“` : b?.name ?? 'Boot');
   const info = (b, platz) => ({ id: b.id, groesse: b.size, art: b.typeId, modell: b.modelId, palette: b.id % 4, name: b.name, platz, zustand: 'kommt', bezahlt: true, offen: 0 });
 
-  // Hinweis oben, wie das Ereignisschild (events/banner.js), aber eigenes Element
+  // Hinweis oben im Pixel-Rahmen wie das Ereignisschild (events/banner.js), aber eigenes Element.
+  // Wartet ein Dauerlieger, bleibt der Hinweis stehen, bis alle umgelegt sind (oder der Abend kommt).
+  // Andere Meldungen stehen in einer Schlange und kommen nacheinander.
   const host = document.getElementById('game') ?? document.body;
   const hinweis = document.createElement('div');
   hinweis.id = 'dauer-hinweis';
+  hinweis.className = 'hm-px';
   hinweis.setAttribute('role', 'status');
   hinweis.setAttribute('aria-live', 'polite');
   hinweis.hidden = true;
   host.appendChild(hinweis);
   const stil = document.createElement('style');
   stil.textContent = `
-    #dauer-hinweis { position: absolute; left: 50%; transform: translateX(-50%); z-index: 30;
-      top: calc(env(safe-area-inset-top, 0px) + 58px); max-width: min(440px, calc(100vw - 32px));
-      background: #fffcf6; color: #283648; border: 2px solid #283648; box-shadow: 3px 3px 0 rgba(40,54,72,.35);
-      padding: 8px 12px; font: 600 14px/1.35 system-ui, sans-serif; cursor: pointer; }
-    #dauer-hinweis strong { display: block; font-size: 15px; }
-    #dauer-hinweis span { font-weight: 500; }
+    #dauer-hinweis { position: absolute; left: 50%; transform: translateX(-50%); z-index: 25;
+      top: calc(var(--hm-oben, env(safe-area-inset-top, 0px)) + var(--hm-knopf, 44px) + 8px);
+      width: min(420px, calc(100% - 32px)); display: flex; gap: 10px; align-items: flex-start;
+      padding: 10px 12px; color: var(--hm-tinte, #283648); cursor: pointer; line-height: 1.35; }
+    #dauer-hinweis:not(.hm-px) { background: #fffcf6; border: 2px solid #283648; }
+    #dauer-hinweis[hidden] { display: none; }
+    #dauer-hinweis img, #dauer-hinweis svg { flex: none; width: 24px; height: 24px; image-rendering: pixelated; }
+    #dauer-hinweis strong { display: block; font-weight: 600; }
+    #dauer-hinweis span { display: block; font-size: max(13px, 0.875rem); }
     #card .dauer-liste { flex-direction: column; align-items: stretch; }
     .hm-neu #card .dauer-liste .hud-btn, #card .dauer-liste .hud-btn { flex: 0 0 auto; min-height: 44px; text-align: left; white-space: normal; }
   `;
   document.head.appendChild(stil);
   let hinweisTimer = 0;
-  function zeigeHinweis(titel, text, sekunden = 7) {
+  let hinweisArt = null;          // 'wartet' oder null
+  const schlange = [];
+  function fuelle(symbol, titel, text) {
     hinweis.replaceChildren();
+    try { const b = pixelBild(symbol, 24); if (b) hinweis.append(b); } catch { /* ohne Symbol */ }
+    const body = document.createElement('div');
     const t = document.createElement('strong');
     t.textContent = titel;
     const p = document.createElement('span');
     p.textContent = text;
-    hinweis.append(t, p);
+    body.append(t, p);
+    hinweis.append(body);
+    // Steht das Ereignisschild gerade da, darunter
+    const ev = document.getElementById('event-banner');
+    hinweis.style.top = ev && !ev.hidden ? `${ev.getBoundingClientRect().bottom - host.getBoundingClientRect().top + 8}px` : '';
     hinweis.hidden = false;
+  }
+  function naechster() {
     clearTimeout(hinweisTimer);
-    hinweisTimer = setTimeout(() => { hinweis.hidden = true; }, sekunden * 1000);
+    if (wartende().length) { zeigeWartende(); return; }
+    hinweisArt = null;
+    const m = schlange.shift();
+    if (!m) { hinweis.hidden = true; return; }
+    fuelle(m.symbol, m.titel, m.text);
+    hinweisTimer = setTimeout(naechster, m.sekunden * 1000);
+  }
+  function zeigeHinweis(titel, text, sekunden = 7, symbol = 'hinweis') {
+    // gleiche Meldung nicht doppelt in die Schlange
+    if (schlange.some((m) => m.titel === titel && m.text === text)) return;
+    schlange.push({ titel, text, sekunden, symbol });
+    if (schlange.length > 4) schlange.shift();
+    if (hinweis.hidden) naechster();
+  }
+  const wartende = () => Object.entries(dauerState(api.state).plaetze)
+    .filter(([, p]) => p.wartet && api.state.boats[p.gastId]).map(([platzId, p]) => ({ platzId, p }));
+  function zeigeWartende() {
+    const w = wartende();
+    if (!w.length) { if (hinweisArt === 'wartet') naechster(); return; }
+    clearTimeout(hinweisTimer);
+    hinweisArt = 'wartet';
+    const erster = w[0];
+    if (w.length === 1) {
+      fuelle('warnung', `${bootsname(erster.p.boot)} ist früher zurück`,
+        `Auf Platz ${erster.platzId} liegt noch ${bootsname(api.state.boats[erster.p.gastId])}. Hier tippen und den Gast bis heute Abend umlegen, sonst kündigt der Dauerlieger zum Saisonende.`);
+    } else {
+      fuelle('warnung', `${w.length} Dauerlieger sind früher zurück`,
+        `Gäste liegen noch auf ${w.map((x) => x.platzId).join(', ')}. Hier tippen und einen nach dem anderen bis heute Abend umlegen.`);
+    }
+  }
+  /** Kamera zum Platz fliegen lassen (wenn die Kamera das kann). */
+  function zeigePlatz(platzId) {
+    const pl = game.stege?.platz?.(platzId);
+    const x = pl?.x ?? pl?.mesh?.position?.x, z = pl?.z ?? pl?.mesh?.position?.z;
+    if (x != null && z != null) game.camera?.flyTo?.(x, z);
   }
   hinweis.addEventListener('click', () => {
-    hinweis.hidden = true;
-    // Antippen des Hinweises öffnet die Karte des Gastes, der umgelegt werden muss
-    const w = Object.values(dauerState(api.state).plaetze).find((p) => p.wartet && api.state.boats[p.gastId]);
-    if (w) gastKarte(w.gastId);
+    const w = wartende();
+    if (w.length) {
+      // Antippen öffnet die Karte des (ersten) Gastes, der umgelegt werden muss, und zeigt seinen Platz
+      zeigePlatz(w[0].platzId);
+      gastKarte(w[0].p.gastId);
+      return;
+    }
+    naechster();
   });
+  // Ein wartender Dauerlieger ist nach dem Laden wieder vor dem Hafen zu sehen (nach dem Abgleich der Ansicht)
+  function wartendeZeigen() {
+    for (const [platzId, p] of Object.entries(dauerState(api.state).plaetze)) {
+      if (p.wartet && p.boot) game.emit('dauer:einlaufen', { id: p.boot.id, platzId, warten: true, info: info(p.boot, platzId) });
+    }
+    zeigeWartende();
+  }
+  setTimeout(wartendeZeigen, 300);
 
   // Deutsche Ereignisse für Grafik und Ton, Hinweise für den Spieler
   game.on('sim:dauerAuslaufen', (e) => game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: e.tage }));
@@ -676,12 +744,13 @@ export async function init(game) {
     const p = dauerState(api.state).plaetze[e.berthId];
     const boot = p?.boot;
     if (boot) game.emit('dauer:einlaufen', { id: boot.id, platzId: e.berthId, warten: true, info: info(boot, e.berthId) });
-    const gast = api.state.boats[e.gastId];
-    zeigeHinweis(`${bootsname(boot)} ist früher zurück`,
-      `Auf Platz ${e.berthId} liegt noch ${bootsname(gast)}. Tippe den Gast an und lege ihn um, sonst kündigt der Dauerlieger zum Saisonende.`, 12);
+    // Beim Vorspulen bliebe kaum Zeit zum Umlegen: Tempo zurück auf normal
+    if ((game.speed ?? 1) > 1) game.oberflaeche?.tempo?.(1) ?? (game.speed = 1);
+    zeigeWartende();
     game.emit('hinweis', { art: 'dauer-wartet', platz: e.berthId });
   });
   game.on('sim:dauerUmgelegt', (e) => {
+    setTimeout(zeigeWartende, 0);
     if (!e.unterwegs) {
       // Rückfall: Ohne Meldung der 3D-Ansicht fährt der Dauerlieger nach 20 Sekunden herein
       nachGast.set(e.boatId, { id: e.dauerId, platzId: e.from, zeit: setTimeout(() => lassEin(e.boatId), 20000) });
@@ -690,7 +759,7 @@ export async function init(game) {
     game.emit('sim:berthState', { plaetze: sim.berthStates(api.state, api.ctx) });
   });
   game.on('sim:dauerPacht', (e) => {
-    if (e.saison) zeigeHinweis('Neue Saison: Pacht bezahlt', `${e.anzahl} ${e.anzahl === 1 ? 'Dauerlieger zahlt' : 'Dauerlieger zahlen'} ${euro(e.amount)} im Voraus.`);
+    if (e.saison) zeigeHinweis('Neue Saison: Pacht bezahlt', `${e.anzahl} ${e.anzahl === 1 ? 'Dauerlieger zahlt' : 'Dauerlieger zahlen'} ${euro(e.amount)} im Voraus.`, 7, 'muenze');
   });
   game.on('sim:dauerBewerber', (e) => {
     if (sim.season(api.state, api.ctx).winter) return;
@@ -701,7 +770,9 @@ export async function init(game) {
   });
   game.on('sim:dauerKuendigung', (e) => {
     if (e.von !== 'lieger') return;
-    zeigeHinweis('Dauerlieger verärgert', `Der Gast auf Platz ${e.berthId} wurde nicht umgelegt. Der Dauerlieger kündigt zum Saisonende.`, 9);
+    hinweisArt = null;
+    zeigeHinweis('Dauerlieger verärgert', `Der Gast auf Platz ${e.berthId} wurde nicht umgelegt. Der Dauerlieger kündigt zum Saisonende.`, 9, 'warnung');
+    setTimeout(zeigeWartende, 0);
   });
   game.on('sim:dauerAufgehoben', (e) => {
     if (e.grund === 'umbau') zeigeHinweis('Umbau', `Für den Dauerlieger von Platz ${e.berthId} war beim Ausbau kein passender Platz frei. Er verlässt den Hafen.`);
@@ -888,7 +959,7 @@ export async function init(game) {
   });
   game.on('sim:select', ({ boatId }) => { if (boatId != null) { umlegen = null; offen = null; leuchtet = false; } });
   game.on('ui:cancel', schliessen);
-  game.on('spielstand-geladen', () => { alteErgaenzen(); schliessen(); });
+  game.on('spielstand-geladen', () => { alteErgaenzen(); schliessen(); schlange.length = 0; hinweisArt = null; hinweis.hidden = true; setTimeout(wartendeZeigen, 300); });
 
   game.dauerlieger = {
     machDauerplatz: (id) => api.dispatch(machDauerplatz(api.state, api.ctx, id).events),
