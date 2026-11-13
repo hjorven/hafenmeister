@@ -241,7 +241,8 @@ export function wegePlan(stufe) {
 export const SLIP = { x0: -131, x1: -123 };
 
 /** Bereich hinter dem Ufer, den der Hafen bebaut. Dort bleibt das Gelände eben und baumfrei. */
-export const HAFENFLAECHE = { x0: -165, x1: 215, y0: -92 };
+// y1: nördlich der Pflicht-See (SEE_NORD) gehört das Land wieder der Natur, sonst bliebe dort ein kahler Streifen
+export const HAFENFLAECHE = { x0: -165, x1: 215, y0: -92, y1: 600 };
 
 /**
  * Ufer je Küstentyp (natur.js stil.ufer) an Land in den ersten Metern hinter der Wasserlinie.
@@ -291,7 +292,7 @@ function uferArt(art, px, py, h, typ, d, hafenAb) {
 export function hafenAbstand(px, py, stufe = 6) {
   // Stufe 1 und 2 bebauen nur den Westteil (Steg A und B); östlich davon reicht die Natur bis an den Ort
   const x1 = stufe <= 2 ? HAFENFLAECHE_KLEIN_X1 : HAFENFLAECHE.x1;
-  return Math.max(HAFENFLAECHE.x0 - px, px - x1, HAFENFLAECHE.y0 - py);
+  return Math.max(HAFENFLAECHE.x0 - px, px - x1, HAFENFLAECHE.y0 - py, py - HAFENFLAECHE.y1);
 }
 const HAFENFLAECHE_KLEIN_X1 = 0;
 

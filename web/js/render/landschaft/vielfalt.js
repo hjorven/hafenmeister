@@ -312,9 +312,9 @@ function dorfHoehe(h, dd) {
 const AUSSEN_FRUCHT = { raps: 'wiese', acker: 'weide', korn: 'wiese' };
 
 /** Fein gerechneter Bereich (wie BEREICH in gelaende.js). 0 innen, 1 ab 40 Einheiten außerhalb. */
-const FEIN = { x0: -420, x1: 430, y0: -200 };
+const FEIN = { x0: -420, x1: 430, y0: -200, y1: 470 };
 function aussenAnteil(px, py) {
-  const d = Math.max(FEIN.x0 - px, px - FEIN.x1, FEIN.y0 - py);
+  const d = Math.max(FEIN.x0 - px, px - FEIN.x1, FEIN.y0 - py, py - FEIN.y1);
   return smooth(-10, 10, d);
 }
 
@@ -540,11 +540,11 @@ export function land(px, py, h, typ, d, k = {}) {
   // Außerhalb des fein gerechneten Bereichs (FEIN = KERN in gelaende.js) ist das Netz grob.
   // Dort nur zwei Grüntöne mit wenigen Prozent Unterschied (gras, wiese), kein Wald-, Acker- oder
   // Kornboden: jeder Kontrast zeigt sonst die Rasterquadrate. Wald bleibt als Bäume (bewuchs.js, waldBei).
-  const aussenD = Math.max(FEIN.x0 - px, px - FEIN.x1, FEIN.y0 - py);
+  const aussenD = Math.max(FEIN.x0 - px, px - FEIN.x1, FEIN.y0 - py, py - FEIN.y1);
   if (aussenD > 0 && (art === 'feld' || art === 'wald' || art === 'heide')) {
     // Im Rand mit halber Auflösung (BEREICH) laufen die achsparallelen Felder ohne Wege weiter und
     // dünnen Feld für Feld zur Außenkante hin aus, in ruhigen Farben (kein Raps, Korn, Acker).
-    const randD = Math.min(px - BEREICH.x0, BEREICH.x1 - px, py - BEREICH.y0);
+    const randD = Math.min(px - BEREICH.x0, BEREICH.x1 - px, py - BEREICH.y0, BEREICH.y1 - py);
     if (art === 'feld' && randD > 0) {
       const f = feldBei(px, py);
       if (hash2(f.spalte, f.zeile, bild.seed + 13) < randD / (randD + aussenD) * 1.2 - 0.2) return { h, typ: AUSSEN_FRUCHT[f.frucht] || f.frucht };
