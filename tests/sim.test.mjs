@@ -589,8 +589,8 @@ test('Wartende Boote fahren nach kurzer Zeit selbst in eine passende freie Box',
   assert.equal(b.status, 'waiting', 'erst kurz warten, Zeit zum Lenken');
   const ev = sim.tick(s, ctxLive, 2);
   assert.equal(b.status, 'moored');
-  // nimmt die knappste passende Box, nicht die mit Strom (das lohnt sich nur von Hand)
-  assert.equal(b.berthId, 'A1');
+  // nimmt die Box mit Strom, weil es den Wunsch danach hat (ohne Entfernungsangabe die erste am Steg)
+  assert.equal(b.berthId, 'C1');
   assert.ok(ev.some((e) => e.type === 'selfEntered' && e.boatId === b.id));
   assert.ok(ev.some((e) => e.type === 'feeReady' && e.boatId === b.id));
   assert.equal(held.status, 'waiting', 'gehaltenes Boot bleibt an der Boje');
@@ -598,7 +598,7 @@ test('Wartende Boote fahren nach kurzer Zeit selbst in eine passende freie Box',
   sim.holdBoat(s, held.id, false);
   sim.tick(s, ctxLive, 1);
   assert.equal(held.status, 'moored');
-  assert.notEqual(held.berthId, 'A1', 'nie in eine belegte Box');
+  assert.notEqual(held.berthId, b.berthId, 'nie in eine belegte Box');
 });
 
 test('Tagestörn: nur mit mehreren Nächten, Box bleibt belegt, abends zurück', () => {
@@ -775,4 +775,22 @@ test('Ein ganzer Tag: kein Boot kommt weniger als 1 Sekunde nach dem vorigen, He
     assert.ok(Math.min(d, 1 - d) > 0.2, 'aufeinanderfolgende Boote kommen aus verschiedenen Richtungen');
   }
   assert.equal(sim.boatOrigin(s, 5), sim.boatOrigin(s, 5));
+});
+
+test('Selbst-Einfahren: Box mit erfülltem Wunsch vor der nächsten, bei Gleichstand die nächste', () => {
+  const c = sim.createContext({ boatTypes, berths });
+  // A-Boxen ohne Strom liegen am nächsten, C-Boxen haben Strom
+  const nah = { A1: 1, A2: 2, C1: 5, C2: 4 };
+  c.berthDistance = (boat, b) => nah[b.id] ?? 100;
+  const s = quietState({ stage: 3 });
+  const mitWunsch = waitingBoat(s, { wishes: ['strom'], atBuoy: true, atBuoySince: 0 });
+  const ohne = waitingBoat(s, { atBuoy: true, atBuoySince: 0 });
+  assert.equal(sim.berthWishHits(s, c, mitWunsch, c.berthById.C2), 1);
+  assert.equal(sim.berthWishHits(s, c, mitWunsch, c.berthById.A1), 0);
+  assert.equal(sim.selfBerth(s, c, mitWunsch.id), 'C2', 'Strom zählt mehr als der kürzere Weg, unter den Strom-Boxen die nächste');
+  assert.equal(sim.selfBerth(s, c, ohne.id), 'A1', 'ohne Wunsch bleibt es die nächste Box');
+  sim.tick(s, c, c.rules.queue.selfEnterAfter);
+  sim.tick(s, c, 1);
+  assert.equal(mitWunsch.berthId, 'C2');
+  assert.equal(ohne.berthId, 'A1');
 });

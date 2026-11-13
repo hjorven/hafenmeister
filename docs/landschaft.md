@@ -1,6 +1,6 @@
 # Landschaft, Wasser und Licht
 
-Stand: 12.11.2026. Code: `web/js/render/landscape.js` (Einstieg, wird von `main.js` geladen) und `web/js/render/landschaft/`.
+Stand: 12.11.2026. Status: gebaut (Ostsee Stufe 1 bis 6; Nordsee nur als Bild, siehe [regionen.md](regionen.md)). Code: `web/js/render/landscape.js` (Einstieg, wird von `main.js` geladen) und `web/js/render/landschaft/`.
 
 ## Was man sieht
 
@@ -80,6 +80,7 @@ Code: `landschaft/vielfalt.js` (reine Rechenfunktionen, Haken `land()` und `nehr
 
 - **Felder** in langen Schlägen mit Raps, Korn, Acker, Weide und Wiese, getrennt durch **Knicks** (Wallhecken mit einzelnen Eichen) und Feldwege. Felder liegen achsparallel, damit das Geländeraster keine Treppen zeigt. Außerhalb des fein gerechneten Bereichs nur weiche Flecken in ruhigen Grüntönen.
 - **Wald** in Flecken (Buchen, Birken, Kiefern; nahe der See mehr Kiefern), auf der Nehrung stellenweise Kiefernwald und **Heide**.
+- **Außen kontrastarm:** Außerhalb des fein gerechneten Kerns (`KERN` in `gelaende.js`) ist der Boden nur Gras und Wiese, zwei Grüntöne mit wenigen Prozent Unterschied. Wald zeigen dort nur die Bäume (`waldBei`), nicht die Bodenfarbe. Im Rand mit halber Auflösung (`BEREICH`) laufen die Felder ohne Wege weiter und dünnen nach außen Feld für Feld aus. So sieht man ganz herausgezoomt keine Rasterquadrate.
 - **Allee** an der Landstraße direkt hinter dem Hafen (südliche Seite; die nördliche ist Baufläche). Sie ist der untere Rand der Startansicht.
 - **Dorf** mit Dorfstraße zur Landstraße, Häusern (Reetdach, Backstein, weiß mit rotem Dach), Backsteinkirche mit Turm und einer **Windmühle**, deren Flügel sich drehen. Das Dorf liegt immer gleich hinter der Landstraße (Nordrand y -100), nur die Ost-West-Lage wechselt; Kirche und Mühle stehen vorn zur Straße hin, damit man sie vom Hafen aus sieht. Dazu zwei bis vier **Einzelhöfe** mit Scheune.
 - **Sölle**: kleine Teiche mit Schilfrand in den Feldern, nur im Hinterland.
