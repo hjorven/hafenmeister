@@ -60,7 +60,7 @@ for (const R of laeufe) {
   const ersterKauf = R.kaeufe.find((k) => k.ok && k.art !== 'stufe');
   const wc = R.kaeufe.find((k) => k.ok && k.id === 'wc');
   const kaufTage = new Set(R.kaeufe.filter((k) => k.ok).map((k) => k.tag)).size;
-  md.push(`Erster Kauf an Tag ${ersterKauf?.tag ?? '-'} (${ersterKauf ? ersterKauf.art + ' ' + ersterKauf.id : 'keiner'}), WC ab Tag ${wc?.tag ?? '-'}. Der Bot prüft jeden Spieltag, ob er etwa kaufen kann, und hat an ${kaufTage} Tagen gekauft.`, '');
+  md.push(`Erster Kauf an Tag ${ersterKauf?.tag ?? '-'} (${ersterKauf ? ersterKauf.art + ' ' + ersterKauf.id : 'keiner'}), WC ab Tag ${wc?.tag ?? '-'}. Der Bot prüft jeden Spieltag, ob er etwas kaufen kann, und hat an ${kaufTage} Tagen gekauft.`, '');
   md.push('| Stufe | Käufe | davon Stege | Bauwerke | Hafenbüro | Services |', '|---|---|---|---|---|---|');
   for (let st = 1; st <= 6; st++) {
     const k = R.kaeufe.filter((x) => x.ok && x.stufe === st && x.art !== 'stufe');
