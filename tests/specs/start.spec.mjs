@@ -64,6 +64,8 @@ test('Erstes Spiel ohne Speicherplatzwahl hat Küste und Stegbild im Spielstand'
   // Der Spielstand entsteht erst nach 'ready'; Küste {nr, seed} und Stegbild müssen trotzdem drinstehen,
   // sonst bekommt ein exportierter Stand auf einem anderen Gerät eine andere Küste.
   const { page } = game;
+  // Der Spielstand entsteht erst nach dem Laden aller Module (js/bridge.js)
+  await page.waitForFunction(() => !!window.hafenmeister?.state?.modules, null, { timeout: 20000 });
   const r = await page.evaluate(() => {
     const G = window.hafenmeister;
     G.spielstand?.speichern?.();
