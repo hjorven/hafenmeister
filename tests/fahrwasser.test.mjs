@@ -47,8 +47,16 @@ function zielVor(p, st, info, t = 0) {
   const L = Math.min(info.length, p.maxLaenge ?? info.length);
   const bx = x * PLAN_M, bz = -y * PLAN_M, len = p.laenge * PLAN_M;
   if (p.art === 'box' || p.art === 'finger') {
-    // wie approachPoints: erster freier Drehpunkt in der Gasse (Seite egal, beide probieren)
+    // wie approachPoints: erster freier Drehpunkt in der Gasse mit freier Geraden bis vor die Box (Seite egal, beide probieren)
     const px = Math.sin(h), pz = Math.cos(h), r = info.beam / 2 + 0.4;
+    for (const [kk, qq] of [[1.1, 0.9], [1.1, 0.5], [0.9, 0.6], [1.1, 0], [0.8, 0.3], [0.7, 0], [0.55, 0]]) {
+      for (const sd of [1, -1]) {
+        const q = { x: bx - dx * (len / 2 + L * kk) + px * sd * L * qq, z: bz - dz * (len / 2 + L * kk) + pz * sd * L * qq };
+        const vor = { x: bx - dx * (len / 2 + L * 0.25), z: bz - dz * (len / 2 + L * 0.25) };
+        if (befahrbar(KARTE, q.x, q.z, r, t) && sichtlinie(KARTE, q, vor, info.beam / 2 + 0.2, t)) return q;
+      }
+    }
+    // enge Gasse: wie approachPoints wenigstens ein freier Drehpunkt
     for (const [kk, qq] of [[1.1, 0.9], [1.1, 0.5], [0.9, 0.6], [1.1, 0], [0.8, 0.3], [0.7, 0], [0.55, 0]]) {
       for (const sd of [1, -1]) {
         const q = { x: bx - dx * (len / 2 + L * kk) + px * sd * L * qq, z: bz - dz * (len / 2 + L * kk) + pz * sd * L * qq };

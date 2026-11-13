@@ -1,6 +1,6 @@
 // Prueft im laufenden Spiel jede Bootsfahrt gegen Land, Stege und andere Boote.
 //
-//   node tools/fahrwasser-pruefen.cjs [--stufen 1-6] [--stegbilder 0-12] [--sekunden 40] [--geraet pc|handy] [--bilder ordner]
+//   node tools/fahrwasser-pruefen.cjs [--stufen 1-6] [--stegbilder 0-12 oder 0,7,12] [--sekunden 40] [--geraet pc|handy] [--bilder ordner]
 //
 // Startet das Spiel mit ?stufe=n&stegbild=m (Testmodus: alles der Stufe gebaut), stellt Tempo 8x ein,
 // laesst wartende Boote laufend selbst einfahren und kassiert. In jedem Bild prueft es alle sichtbaren Boote:
@@ -23,7 +23,8 @@ const { chromium, devices } = pw;
 const ROOT = path.resolve(__dirname, '../web');
 const THREE = path.resolve(__dirname, '../tests/node_modules/three');
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > 0 ? process.argv[i + 1] : d; };
-const bereich = (s) => { const [a, b] = s.split('-').map(Number); return Array.from({ length: (b ?? a) - a + 1 }, (_, i) => a + i); };
+// '1-6', '0,7,12' oder gemischt '0-2,7'
+const bereich = (s) => s.split(',').flatMap((t) => { const [a, b] = t.split('-').map(Number); return Array.from({ length: (b ?? a) - a + 1 }, (_, i) => a + i); });
 const STUFEN = bereich(arg('stufen', '1-6'));
 const STEGBILDER = bereich(arg('stegbilder', '0'));
 const SEKUNDEN = Number(arg('sekunden', '40'));

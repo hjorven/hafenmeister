@@ -14,7 +14,7 @@
 import * as THREE from 'three';
 import { addBoat, berthFromPlatz } from './boat-anim.js';
 import { HAFEN } from '../data/harbor.js';
-import { baueKarte, route, hindernisseAusHafen, bootMass, erreichbar, befahrbar, zellMitte } from '../world/fahrwasser.js';
+import { baueKarte, route, hindernisseAusHafen, bootMass, erreichbar, befahrbar, sichtlinie, zellMitte } from '../world/fahrwasser.js';
 
 const U = HAFEN.einheiten?.meterProEinheit ?? 0.62;
 
@@ -523,6 +523,7 @@ export function init(game) {
 
   // Weg fuer boat-anim: wird erst beim Losfahren berechnet (PathTask mit route)
   game.boatAnim.setFrei?.((x, z, r, t = 0) => befahrbar(karteJetzt(), x, z, r, t));
+  game.boatAnim.setSicht?.((a, b, r, t = 0) => sichtlinie(karteJetzt(), a, b, r, t));
   game.boatAnim.setRouter?.((boot, ziel, opts) => {
     const k = karteJetzt();
     const { r, t } = bootMass(boot.info);

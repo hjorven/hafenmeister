@@ -190,6 +190,7 @@ class BoatAnimManager {
     this.hindernisse = new Set();                     // fremde Schiffe (Besuchsschiffe der Services)
     this.router = null;                               // (boat, ziel) => { punkte, engstellen }, setzt boat-view.js
     this.frei = null;                                 // (x, z, r) => true, wenn dort freies Wasser ist
+    this.sicht = null;                                // (a, b, r, t) => true, wenn die Strecke a-b frei ist
     this.engstellen = new Engstellen(3);              // Einbahn-Freigabe in engen Durchfahrten
     this.sea = 0.25;                                  // 0 = glatt, 1 = Sturm
     this.wind = { from: (250 * Math.PI) / 180, strength: 0.5 };  // aus Westsuedwest
@@ -348,6 +349,7 @@ function manager(game) {
       // Fahrwege aus der Karte: fn(boat, ziel, opts) => { punkte, engstellen }. Neue Karte: engstellenNeu().
       setRouter: (fn) => { m.router = fn || null; },
       setFrei: (fn) => { m.frei = fn || null; },
+      setSicht: (fn) => { m.sicht = fn || null; },
       engstellenNeu: () => m.engstellen.reset(),
       get engstellen() { return m.engstellen; },
       get boats() { return [...m.boats]; },
@@ -1106,10 +1108,20 @@ class BoatAnim {
       if (frei) {
         const r = B / 2 + 0.4;
         const t = Math.min((this.info.draft ?? 1) + 0.3, b.depth ?? 9);
-        const ok = (kk, qq) => frei(b.x - dx * (out + L * kk) + px * side * L * qq, b.z - dz * (out + L * kk) + pz * side * L * qq, r, t);
+        // Vom Drehpunkt muss die Gerade bis vor die Box frei sein (sonst schneidet der Rumpf einen
+        // Nachbarsteg, der zwischen Box und Gasse liegt)
+        const vor = { x: b.x - dx * (out + L * 0.25), z: b.z - dz * (out + L * 0.25) };
+        const sicht = this.mgr.sicht;
+        const ok = (kk, qq) => {
+          const p = { x: b.x - dx * (out + L * kk) + px * side * L * qq, z: b.z - dz * (out + L * kk) + pz * side * L * qq };
+          return frei(p.x, p.z, r, t) && (!sicht || sicht(p, vor, B / 2 + 0.2, t));
+        };
         // erst die Seite, von der das Boot kommt, dann die andere
         let wahl = [[1.1, 0.9], [1.1, 0.5], [0.9, 0.6], [1.1, 0], [0.8, 0.3], [0.7, 0], [0.55, 0]].find(([kk, qq]) => ok(kk, qq));
         if (!wahl) wahl = [[1.1, -0.9], [1.1, -0.5], [0.9, -0.6]].find(([kk, qq]) => ok(kk, qq));
+        // enge Gasse ohne freie Gerade: wenigstens ein freier Drehpunkt (wie vor der Sichtpruefung)
+        const nurFrei = (kk, qq) => frei(b.x - dx * (out + L * kk) + px * side * L * qq, b.z - dz * (out + L * kk) + pz * side * L * qq, r, t);
+        if (!wahl) wahl = [[1.1, 0.9], [1.1, 0.5], [0.9, 0.6], [1.1, 0], [0.8, 0.3], [0.7, 0], [0.55, 0], [1.1, -0.9], [1.1, -0.5], [0.9, -0.6]].find(([kk, qq]) => nurFrei(kk, qq));
         if (wahl) [k, q] = wahl;
       }
       return [
