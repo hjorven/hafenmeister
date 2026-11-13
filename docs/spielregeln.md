@@ -25,9 +25,17 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 4. Sobald ein Boot angelegt hat, wird sein Liegegeld für die kommende Nacht fällig (Münze, `boat.paid = false`). Nach dem Kassieren gilt es als bezahlt (`boat.paid = true`, in `game.sim.boote` als `bezahlt`). Gäste zahlen beim Anlegen alle geplanten Nächte auf einmal (`ECONOMY.kassieren.vorausNaechte`, `boat.paidThrough` = letzter bezahlter Tag), eine Münze je Aufenthalt; sie ist größer, je mehr Nächte sie deckt. An den Morgen danach werden nur die Wünsche neu geprüft (zählt für die Bewertung und die Kapazität der Versorgung). Bleibt ein Gast länger als geplant (Sturm), wird jede weitere Nacht einzeln fällig. Beim Einstreichen fliegt der Betrag hoch, Grundpreis und Wunschbonus getrennt („22 € + 11 €“, bei mehreren Nächten darunter „3 Nächte“).
 
    **Kassieren:** Der Spieler streicht Münzen selbst ein (Antippen oder Kassierstrich) und bekommt den vollen Betrag. Ab 3 Münzen in einem Strich gibt es Trinkgeld: je Münze ab der dritten 4 % der eingestrichenen Summe, höchstens 20 % (`ECONOMY.kassieren.strichTrinkgeld`, `sim:strokeTip { amount, coins }`). Was liegen bleibt, holt der Hafenmeister auf seinem Rundgang: Er startet mit dem Abend (ab 90 s, nicht früher), hält nur an unbezahlten Booten, und in die Kasse kommen vier Fünftel (`ECONOMY.kassieren.rundgangAnteil` = 0,8, `game.sim.rundgangAnteil()`). Die Münze wird dabei silbern und kleiner, daneben steht „18 € statt 22 €“. Erreicht er ein Boot nicht mehr, holt er die Münze nachts mit demselben Anteil. Am ersten Tag eines neuen Spiels kommt das erste Boot schon nach 3 s (`rules.firstArrivalAt`).
-4a. Tagesrhythmus: Boote kommen zwischen 5 % und 95 % des Tages (`arrivalFrom`, `arrivalWindow`; aus `ECONOMY.zeit.ankunftVon/ankunftBis`), über das ganze Fenster verteilt. Sie kommen einzeln und unregelmäßig, nicht im Pulk und nicht im Takt: Jeder Abstand wird zwischen 3 und 8 Sekunden gewürfelt, kurze häufiger als lange (`arrivalMinGap`, `arrivalMaxGap`, `ECONOMY.zeit.ankunftAbstand/ankunftAbstandMax`, `sim.placeArrivals`). Bei wenigen Booten werden die Abstände gestreckt, damit sie über den ganzen Tag kommen. Es kommen nie mehr Boote, als mit 4 Sekunden im Mittel ins Fenster passen (`arrivalDenseGap`, `ECONOMY.zeit.ankunftDichte`, 20 je Tag). Jedes Boot trägt eine Herkunft `origin` von 0 bis unter 1 (Stelle entlang des Revierrands, `sim.boatOrigin`); zwei Boote hintereinander kommen nie aus derselben Ecke. Die Ansicht bekommt sie als `herkunft` in `boot-kommt` und legt fest, wo am Rand das liegt. Wer abends noch an der Boje liegt, bleibt über Nacht und hat morgens wieder volle Geduld (`queue.overnight`, `ECONOMY.warten.ueberNacht`).
+4a. Tagesrhythmus: Boote kommen zwischen 5 % und 95 % des Tages (`arrivalFrom`, `arrivalWindow`; aus `ECONOMY.zeit.ankunftVon/ankunftBis`), über das ganze Fenster verteilt. Sie kommen einzeln und unregelmäßig, nicht im Pulk und nicht im Takt: Jeder Abstand wird zwischen 3 und 8 Sekunden gewürfelt, kurze häufiger als lange (`arrivalMinGap`, `arrivalMaxGap`, `ECONOMY.zeit.ankunftAbstand/ankunftAbstandMax`, `sim.placeArrivals`). Bei wenigen Booten werden die Abstände gestreckt, damit sie über den ganzen Tag kommen. Es kommen nie mehr Boote, als mit 4 Sekunden im Mittel ins Fenster passen (`arrivalDenseGap`, `ECONOMY.zeit.ankunftDichte`, 20 je Tag). Jedes Boot trägt eine Herkunft `origin` von 0 bis unter 1 (Stelle entlang des Revierrands, `sim.boatOrigin`); zwei Boote hintereinander kommen nie aus derselben Ecke. Die Ansicht bekommt sie als `herkunft` in `boot-kommt` und legt fest, wo am Rand das liegt. Wer abends noch an der Boje liegt, bleibt über Nacht und hat morgens wieder volle Geduld (`queue.overnight`, `ECONOMY.warten.ueberNacht`). Dafür zahlt er nachts Bojengeld, einen Anteil seines Grundpreises (`ECONOMY.warten.bojengeld`, Ereignis `sim:buoyFee`), und wird morgens vor den neuen Gästen bedient (`boat.overnight`).
 4b. Abends (ab 90 s): Pacht der stationierten Einheiten, Tagesgäste und Services werden abgerechnet. Fischer und Dienste (Retter, Polizei) zahlen die feste Pacht (`stationedFee`, `ECONOMY.fischer.pachtProTag`, 15 €). Dauerlieger (`boat.dauer`) zahlen ihre Saisonpacht im Voraus und abends nichts (`rules.dauer.vorauskasse`; ohne Vorauskasse den Anteil ihres Gastpreises je Abend, `stationedFeeShare`, `ECONOMY.dauerlieger.anteilGastpreis`). Einzelheiten in `docs/neue-features.md`, Abschnitt 3.
 5. Nachts (ab 120 s): nicht kassierte Münzen bringen vier Fünftel (`sim:collected` mit `round: true, night: true` je Boot, Summe in `sim:honestyBox`), Boote mit 0 Nächten werden abgerechnet und bewerten den Hafen (`sim:departed` mit `leaveAt`). Sie legen aber erst am nächsten Vormittag ab, jedes zu seiner Zeit zwischen 7 % und 30 % des Tages (`departWindow`, `ECONOMY.zeit.abreiseVon/abreiseBis`): dann kommt `sim:castOff` und für die Grafik `boot-faehrt`. Bis das Boot heraus ist, bleibt die Box belegt. Der Spielstand wird gespeichert.
+
+**Zuweisen als Entscheidung (P10):**
+
+- Beim Antippen oder Ziehen leuchten passende freie Boxen türkis, Boxen, die einen Platz-Wunsch des Boots erfüllen (Strom), gold (`game.sim.wunschPlaetze`). Rastet die Leine ein, steht über der Box, was sie bringt: Liegegeld der ersten Nacht mit Wunschbonus, erwartete Anker, erfüllte Wünsche und „passgenau“ (`game.sim.platzWert(boot, platz)`).
+- Die Bootskarte nennt „zahlt etwa … € pro Nacht“ und wie viele gold leuchtende Plätze frei sind.
+- Passgenau: Die Box ist höchstens ein Fünftel größer als die kleinste Box des Hafens, an die das Boot passt (`ECONOMY.passgenau`). Das bringt bei der Abreise einen Viertelanker mehr. In Stufe 1 gibt es nur eine Boxgröße, dort zählt es nicht.
+- Abweisen von Hand hat dieselbe Folge wie Wegfahren aus Ungeduld: mit `ECONOMY.ruf.abgewiesen.chance` eine Bewertung `abgewiesen.wertung`. Keine Bewertung, wenn das Boot an keinen Platz des Hafens passt oder gar nicht warten konnte (alle Bojen belegt). In `stats.turnedAway` zählt nur, wer von selbst weiterfährt.
+- `sim:moored` trägt `hand: true`, wenn der Spieler die Box gewählt hat (Ziehen, Ring), und `passgenau: true`. „Einfahren lassen“, Selbst-Einfahren und Hafenbüro setzen kein `hand`.
 
 **Liegeplätze:** Zu Beginn gibt es nur die Plätze aus `ECONOMY.start`. Jedes Stegprojekt (`ECONOMY.stegprojekte`, unter „Bauen“) und jeder Stufenausbau schaltet seine Plätze frei. Fischerplätze bekommen ihr Fischerboot von selbst, es zahlt Pacht. Für die nächste Ausbaustufe zählen die Gäste, die in der aktuellen Stufe abgereist sind.
 
@@ -44,7 +52,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 | `select(bootId)` | Boot auswählen, liefert passende freie Platz-ids, sendet `sim:select` |
 | `assign(bootId, platzId)` | zuweisen, `{ ok, reason }` |
 | `autoEnter(bootId)` | automatisch einfahren (bester freier Platz) |
-| `dismiss(bootId)` | wartendes Boot wegschicken |
+| `dismiss(bootId)` | wartendes Boot wegschicken, gleiche Folge wie Wegfahren aus Ungeduld |
 | `collect(bootId)`, `collectAll()` | Münze einstreichen |
 | `fastForward(sekunden)` | Spielzeit vorspulen, höchstens bis zum nächsten Abend oder Morgen |
 | `upgradeFacility(key)`, `upgradeOffice()`, `build(id, kosten, stufe)`, `advanceStage()` | Bauen |
@@ -60,6 +68,8 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 | `regionGoal()` | Abschlussziel der letzten Stufe: `{ active, ok, missing, visits, reputation, openBerths, goal }` |
 | `istBezahlt(bootId)` | Liegegeld für die kommende Nacht kassiert (für Bändchen am Bug und Rundgang) |
 | `wartet(bootId)`, `passendePlaetze(bootId)`, `tagesAnteil()` | für die Gesten (`tagesAnteil` 0 = Morgen, 1 = Nacht) |
+| `wunschPlaetze(bootId)` | freie passende Plätze, die einen Platz-Wunsch erfüllen (leuchten gold) |
+| `platzWert(bootId, platzId?)` | `{ fee, wishesMet, wishes, anchors, snug }`: Liegegeld der ersten Nacht, erwartete Anker, passgenau; ohne Platz der Grundwert |
 | `addHook(name, fn)`, `addService(key, def)` | Erweiterungen (unten) |
 | `newGame(seed)`, `setRegion(id)` | neues Spiel, Region |
 
@@ -79,9 +89,10 @@ Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, 
 |---|---|
 | `sim:change` | etwas hat sich geändert, Oberfläche neu zeichnen |
 | `sim:arrived` | `{ boatId, waitSpot }`, Boot liegt an der Boje |
-| `sim:moored` | `{ boatId, berthId }` |
+| `sim:moored` | `{ boatId, berthId, hand?, passgenau? }` |
 | `sim:turnedAway` | `{ boatId, reason: 'queueFull' \| 'patience' \| 'evening', rated }` |
-| `sim:dismissed` | `{ boatId }` |
+| `sim:dismissed` | `{ boatId, rated }` (rated: Gast hat schlecht bewertet) |
+| `sim:buoyFee` | `{ amount, boats }` Bojengeld der Boote, die über Nacht an der Boje liegen |
 | `sim:atBuoy` | `{ boatId }`, Geduld läuft |
 | `sim:selfEntered` | `{ boatId, berthId }` Boot hat sich selbst eine Box gesucht (zusätzlich zu `sim:moored`) |
 | `sim:tripOut`, `sim:tripBack` | `{ boatId, berthId }` Tagestörn eines Gastes. Für die Grafik zusätzlich `dauer:auslaufen { id, platzId, tage: 0, gast: true }` und `dauer:einlaufen { id, platzId, gast: true }` |

@@ -51,7 +51,12 @@ export const ECONOMY = {
     anfahrtMax: 35,           // meldet die 3D-Ansicht nichts, gilt ein Boot danach als an der Boje
     ausBoxMax: 20,            // ein abreisendes Boot gibt seine Box spätestens nach so vielen Sekunden frei
     vorschau: 3,              // so viele kommende Boote zeigt die Vorschau
+    bojengeld: 0.2,           // Anteil des Grundpreises, den ein Boot für die Nacht an der Boje zahlt
   },
+
+  // Passgenau zuweisen (Review A6): Box höchstens ein Fünftel größer als die kleinste Box, an die
+  // das Boot passt, bringt einen Viertelanker mehr. Gilt nur, wenn es verschieden große Boxen gibt.
+  passgenau: { hoechstensGroesser: 0.2, ruf: 0.25 },
 
   // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber
   // hinaus und kommen in dieselbe Box zurück (Box bleibt reserviert, Liegegeld zählt weiter).

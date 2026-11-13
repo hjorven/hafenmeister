@@ -336,6 +336,10 @@ export async function initBridge(game) {
       return b.status === 'moored' && (b.stationed || (b.paid !== false && !(b.pendingFee > 0)));
     },
     passendePlaetze: (boatId) => sim.fittingBerths(state, ctx, boatIdOf(boatId)),
+    // Zuweisen als Entscheidung (P10): Plätze, die einen Platz-Wunsch erfüllen (leuchten gold),
+    // und was ein Platz bringt: { fee, wishesMet, wishes, anchors, snug } (ohne Platz: Grundwert)
+    wunschPlaetze: (boatId) => sim.wishBerths(state, ctx, boatIdOf(boatId)),
+    platzWert: (boatId, berthId = null) => sim.berthValue(state, ctx, boatIdOf(boatId), berthId == null ? null : berthIdOf(berthId)),
   };
   game.sim = api;
 
