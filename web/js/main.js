@@ -33,6 +33,7 @@ const MODULES = [
   './ui/hud.js',
   './ui/bauen.js',
   './ui/fotomodus.js',
+  './ui/vorschau.js',
   './audio/audio.js',
   './state.js',
   './events/events.js',
