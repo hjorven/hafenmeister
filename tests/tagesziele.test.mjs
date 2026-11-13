@@ -251,8 +251,13 @@ test('Kassierziele richten sich nach den echten Einnahmen der letzten Tage, auch
   state.stats ||= {};
   state.stats.verlauf = [{ tag: 1, stufe: 2, einnahmen: { liegegeld: 180 } }, { tag: 2, stufe: 2, einnahmen: { liegegeld: 220 } }];
   const h = lage(state, ctx);
-  assert.ok(h.geld <= 200 + 1e-9, `höchstens der Schnitt: ${h.geld}`);
-  assert.ok(h.geld <= ohne);
-  const leicht = VORLAGEN.kassieren.soll(h, 'leicht');
-  assert.ok(leicht <= 70, `leicht bei 200 € am Tag: ${leicht} €`);
+  const rechnung = ohne / ECONOMY.tagesziele.ziele.kassieren.ohneVerlauf;
+  const boden = rechnung * ECONOMY.tagesziele.ziele.kassieren.untergrenze;
+  assert.ok(Math.abs(h.geld - Math.max(200, boden)) < 1e-6, `Schnitt, aber nicht unter der Untergrenze: ${h.geld}`);
+  const [l, m, sch] = ['leicht', 'mittel', 'schwer'].map((x) => VORLAGEN.kassieren.soll(h, x));
+  assert.ok(l <= h.geld * 0.4 && l >= 10, `leicht etwa ein Drittel: ${l} € bei ${h.geld} €`);
+  assert.ok(l < m && m < sch, `Stufen heben sich ab: ${l}/${m}/${sch}`);
+  // Mit gutem Verlauf zählt der Verlauf, höchstens die Rechnung
+  state.stats.verlauf = [{ tag: 3, stufe: 3, einnahmen: { liegegeld: 1e6 } }];
+  assert.ok(Math.abs(lage(state, ctx).geld - rechnung) < 1e-6);
 });
