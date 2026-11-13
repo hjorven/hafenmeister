@@ -22,13 +22,11 @@ import { regelnBereit } from './regeln-bereit.js';
 import { random, randomInt } from '../random.js';
 import { STAMM } from './stammgaeste.js';
 import { BOOTSNAMEN } from '../data/bootsnamen.js';
+import { ECONOMY } from '../data/economy.js';
 
-export const DAUER = {
-  abStufe: 2,
-  tagestoernChance: 0.4,   // Wahrscheinlichkeit pro Tag für eine Runde draußen (morgens raus, abends zurück)
-  toernChance: 0.12,       // Wahrscheinlichkeit pro Tag für einen Törn über mehrere Tage
-  toernTage: [1, 3],
-};
+// Zahlen in data/economy.js (ECONOMY.dauerlieger)
+const D = ECONOMY.dauerlieger;
+export const DAUER = { abStufe: D.abStufe, tagestoernChance: D.tagestoernChance, toernChance: D.toernChance, toernTage: D.toernTage };
 
 export function dauerState(state) {
   state.modules ||= {};
@@ -258,7 +256,7 @@ export async function init(game) {
   // Infokarte für einen Platz. Die Karte gehört hud.js; wir nutzen sie nur, wenn sie frei ist.
   const card = document.getElementById('card');
   let offenerPlatz = null;
-  const anteil = Math.round((api.ctx.rules.stationedFeeShare ?? 0.5) * 100);
+  const anteil = Math.round((api.ctx.rules.stationedFeeShare ?? D.anteilGastpreis) * 100);
 
   function knopf(text, fn) {
     const b = document.createElement('button');

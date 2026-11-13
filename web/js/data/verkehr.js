@@ -22,31 +22,32 @@ const osten = (y, xKurve = 420 - (y - 264)) => [[xKurve - 40, y], [xKurve, y + 5
 const ostwaerts = (y, xKurve, rest = osten(y)) => [...westen(y, xKurve), ...rest];
 const westwaerts = (y, xKurve, vorher = osten(y).reverse()) => [...vorher, ...westen(y, xKurve).reverse()];
 export const SEE = {
-  // Noch kein Durchstich: die See ist frei, Bahnen gut 8 m vor den Buhnenköpfen (y bis 254)
+  // Noch kein Durchstich: die See ist frei, Bahnen gut 24 m vor den Buhnenköpfen (y bis 254),
+  // weit genug draußen, dass über Watt (Form 8), Sandplaten (Form 3) und Felsen (Form 6, 7) 1,2 m Wasser stehen
   1: [
-    { pts: ostwaerts(268, -340), art: 'klein' }, { pts: westwaerts(282, -326), art: 'klein' },
-    { pts: ostwaerts(310, -298), art: 'gross' }, { pts: westwaerts(330, -278), art: 'gross' },
+    { pts: ostwaerts(294, -340), art: 'klein' }, { pts: westwaerts(308, -326), art: 'klein' },
+    { pts: ostwaerts(328, -298), art: 'gross' }, { pts: westwaerts(346, -278), art: 'gross' },
   ],
   // Stufe 3 und 4: Molenköpfe bis y 268 (x 149 bis 187), Rinne bis y 356 (x 152 bis 212),
   // Reede ab x 222, Ankerfeld um (345, 385) mit Radius 62. Die kleinen Bahnen biegen vor der Einfahrt nach Norden ab.
   3: [
-    { pts: ostwaerts(292, -340, [[50, 292], [112, 326], [176, 470], [206, 760]]), art: 'klein' },
-    { pts: westwaerts(306, -326, [[192, 760], [162, 474], [100, 340], [46, 306]]), art: 'klein' },
-    { pts: ostwaerts(472, -300), art: 'gross' }, { pts: westwaerts(492, -280), art: 'gross' },
+    { pts: ostwaerts(292, -150, [[50, 292], [112, 326], [176, 470], [206, 760]]), art: 'klein' },
+    { pts: westwaerts(306, -136, [[192, 760], [162, 474], [100, 340], [46, 306]]), art: 'klein' },
+    { pts: ostwaerts(500, -300), art: 'gross' }, { pts: westwaerts(520, -280), art: 'gross' },
   ],
   // Ab Stufe 5 ist zwischen Außenhafen und großem Ankerfeld wenig Platz, dort nur 1,5 Planeinheiten Versatz.
   // Ab Stufe 5: Außenhafen mit Westmole bis (96, 320), Rinne bis y 356 (x 108 bis 184),
   // Ankerfeld für Große um (30, 440) mit Radius 85, Reede ab x 226, Ankerfeld um (360, 440). XXL (bis 29 m breit) nur auf der äußersten Bahn.
-  // Die kleinen Bahnen kommen im Westen erst nördlich von y 410 herein (GROSSE_GAESTE: Kreuzfahrtschiff an P01,
-  // Traditionssegler vor Anker beim Windjammertreffen) und biegen erst östlich von x -60 in die Lücke vor dem Außenhafen.
+  // Die kleinen Bahnen kommen von Norden zwischen Kreuzfahrtschiff an P01 (Stufe 6, Ostkante x -99) und dem
+  // Ankerfeld für Große herunter (GROSSE_GAESTE) und biegen bei x -56 in die Lücke vor dem Außenhafen.
   5: [
-    { pts: ostwaerts(410, -340, [[-110, 410], [-56, 352], [-34, 330], [30, 333], [86, 337], [118, 352], [140, 420], [170, 520], [196, 760]]), art: 'klein', versatz: 1.5 },
-    { pts: westwaerts(424, -326, [[184, 760], [160, 520], [131, 420], [111, 366], [78, 344], [30, 341], [-30, 342], [-48, 362], [-100, 420], [-116, 424]]), art: 'klein', versatz: 1.5 },
+    { pts: [[-88, 760], [-79, 540], [-78, 470], [-72, 384], [-56, 352], [-34, 330], [30, 333], [86, 337], [118, 352], [140, 420], [170, 520], [196, 760]], art: 'klein', versatz: 1.5 },
+    { pts: [[184, 760], [160, 520], [131, 420], [111, 366], [78, 344], [30, 341], [-30, 342], [-48, 362], [-66, 400], [-68, 470], [-76, 760]], art: 'klein', versatz: 1.5 },
     { pts: ostwaerts(562, -300), art: 'gross' }, { pts: westwaerts(600, -250), art: 'gross', xxl: true },
   ],
 };
-// Stufe 6: Großschiffspier P01 (x -371 bis -83, y 290, Schiff liegt nördlich davor) und
-// Marineanleger MA01/MA02 (y 247). Gleiche Bahnen wie Stufe 5.
+// Stufe 6: Kreuzfahrtpier P (x -150, Nord-Süd) und Marinepier MA (x -310, Nord-Süd), harbor.js.
+// Gleiche Bahnen wie Stufe 5.
 SEE[6] = SEE[5];
 
 /**
@@ -55,10 +56,10 @@ SEE[6] = SEE[5];
  * dann halten die Vorbeifahrer davor an (vorDemBug in render/boats/verkehr.js).
  */
 export const GROSSE_GAESTE = [
-  { name: 'Kreuzfahrtschiff an P01', rechteck: { x0: -371, x1: -83, y0: 262, y1: 340 } },
-  { name: 'Traditionssegler West', kreis: { x: -330, y: 336, r: 50 } },
-  { name: 'Traditionssegler Mitte', kreis: { x: -258, y: 336, r: 50 } },
-  { name: 'Traditionssegler Ost', kreis: { x: -186, y: 336, r: 50 } },
+  // Lagen aus data/besuchswege.js (AUFTRITTE) und harbor.js Stufe 6, Rumpf mit Länge und Breite
+  { name: 'Kreuzfahrtschiff an P01', rechteck: { x0: -146, x1: -98, y0: 234, y1: 527 } },
+  { name: 'Korvette und Minenjagdboot an MA01/MA02', rechteck: { x0: -336, x1: -284, y0: 224, y1: 372 } },
+  { name: 'Traditionssegler vor Anker', rechteck: { x0: -202, x1: -188, y0: 270, y1: 474 } },
 ];
 
 // Bahn seitlich versetzt (d in Planeinheiten, positiv = links in Fahrtrichtung), damit nicht jedes Boot
@@ -152,3 +153,35 @@ export const ANZAHL = {
   meer: { 1: 3, 2: 3, 3: 4, 4: 4, 5: 5, 6: 5 },
 };
 
+
+// --- Runde passend zum Gelaende (Thread Boote ums Gelaende) ----------------------------------------
+// Die Geländeformen (render/landschaft/formen.js) legen Inseln in den Binnensee. Die Runde wird so
+// verkleinert oder verschoben, dass alle Bahnen (inset 0 bis innen) auf Wasser mit mindestens minTiefe
+// liegen und Bojen und Ankerfelder (meide: [{ x, z, r }] in Weltmetern) frei bleiben.
+// tiefeBei(x, z) in Weltmetern. Gibt die Runde zurück oder null, wenn keine passt.
+export function rundeImWasser(r, tiefeBei, { innen = 18, minTiefe = 1.2, meide = [] } = {}) {
+  if (!r) return null;
+  const f = (c) => Math.sign(c) * Math.abs(c) ** 0.5;
+  const passt = (q) => {
+    if (q.rx - innen < 6 || q.ry - innen < 3) return false;
+    for (const inset of [0, innen / 2, innen]) {
+      for (let i = 0; i < 64; i++) {
+        const a = (i / 64) * Math.PI * 2;
+        const ry = q.ry - inset;
+        const p = welt(q.cx + (q.rx - inset) * f(Math.cos(a)), q.cy + ry * f(Math.sin(a)));
+        if (!(tiefeBei(p.x, p.z) >= minTiefe)) return false;
+        for (const m of meide) if (Math.hypot(p.x - m.x, p.z - m.z) < m.r) return false;
+      }
+    }
+    return true;
+  };
+  for (const dx of [0, 30, -30, 60, -60]) {
+    for (const s of [1, 0.85, 0.7, 0.55]) {
+      for (const dy of [0, 8, -8]) {
+        const q = { ...r, cx: r.cx + dx, cy: r.cy + dy, rx: r.rx * s, ry: Math.max(innen + 3, r.ry * s) };
+        if (passt(q)) return q;
+      }
+    }
+  }
+  return null;
+}

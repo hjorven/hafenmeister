@@ -97,8 +97,9 @@ export function init(game) {
     if (alt && alt.stufe === n) return;
     if (alt) { gruppe.remove(alt.group); entsorge(alt.group); anlagen.delete(id); }
     if (n <= 0) return;
-    const w = welt(R.lage(zustand(), id));
-    const m = baueModell(id, n, { boden: boden(w.x, w.z), ufer: uferAbstand(w), uhr: () => probeUhr ?? game.sim?.tagesAnteil?.() ?? 0.5 });
+    const lage = R.lage(zustand(), id);
+    const w = welt(lage);
+    const m = baueModell(id, n, { lage, boden: boden(w.x, w.z), ufer: uferAbstand(w), uhr: () => probeUhr ?? game.sim?.tagesAnteil?.() ?? 0.5 });
     m.group.position.set(w.x, 0, w.z);
     m.group.rotation.y = w.ry;
     aufBoden(m.group);
@@ -143,13 +144,14 @@ export function init(game) {
     return g;
   }
 
-  // Grossschiffpier ab Stufe 6 (Linien aus harbor.js, steg 'P'; stege.js zeichnet bauart 'pier' nicht)
+  // Grossschiffpiers ab Stufe 6: Kreuzfahrtpier (steg 'P') und Marinepier (steg 'MA'), Linien aus harbor.js;
+  // stege.js zeichnet bauart 'pier' nicht
   let pier = null;
   function zeigePier() {
     const soll = stufe >= 6;
     if (soll && !pier) {
-      const aus = (HAFEN.stufen?.[6]?.stege ?? []).filter((l) => l.steg === 'P').map((l) => l.punkte);
-      pier = tPier(aus.length ? aus : [[[-225, 214.3], [-225, 262]], [[-377, 262], [-77, 262]]]);
+      const aus = (HAFEN.stufen?.[6]?.stege ?? []).filter((l) => l.bauart === 'pier').map((l) => l.punkte);
+      pier = tPier(aus);
       buendeln(pier, null);
       gruppe.add(pier);
     } else if (!soll && pier) {
@@ -157,7 +159,15 @@ export function init(game) {
     }
   }
 
+  // Stufe 6: Kreuzfahrtschiff (bis y 517) und Windjammer-Reihe (bis y 473) liegen nördlich der Kartengrenze
+  // aus main.js (y 352). Die Kamera darf dann so weit nach Norden, dass man sie ganz sieht.
+  function kameraNachNorden() {
+    const b = game.camera?.bounds;
+    if (b && stufe >= 6) b.minZ = Math.min(b.minZ, -500 * U);
+  }
+
   function aktualisiere(mitAnimationFuer = null) {
+    kameraNachNorden();
     zeigePier();
     const z = zustand();
     for (const s of R.katalog) {
@@ -192,24 +202,29 @@ export function init(game) {
     const p = R.pruefe(z, id, kontext());
     const aktuell = n > 0 ? s.stufen[n - 1] : null;
     const besuch = R.naechsteBesuche(z, kontext().tag).find((b) => b.id === id);
-    const zeilen = [];
-    zeilen.push(`<h3 class="svc-titel">${aktuell ? aktuell.name : s.name}</h3>`);
-    zeilen.push(`<p class="svc-text">${s.kurz}</p>`);
-    if (n > 0 && s.stufen.length > 1) zeilen.push(`<p class="svc-stufe">Ausbau ${n} von ${s.stufen.length}</p>`);
-    if (z.summe[id]) zeilen.push(`<p class="svc-text">Bisher eingenommen: ${euro(z.summe[id])}</p>`);
-    if (besuch) zeilen.push(`<p class="svc-text">${besuch.text}: ${besuch.inTagen === 0 ? 'heute' : besuch.inTagen === 1 ? 'morgen' : `in ${besuch.inTagen} Tagen`}</p>`);
+    // Karte aus Elementen bauen (textContent statt innerHTML)
+    const box = document.createElement('div');
+    box.className = 'svc-karte';
+    const zeile = (tag, cls, text) => { const e = document.createElement(tag); e.className = cls; e.textContent = text; box.appendChild(e); return e; };
+    zeile('h3', 'svc-titel', aktuell ? aktuell.name : s.name);
+    zeile('p', 'svc-text', s.kurz);
+    if (n > 0 && s.stufen.length > 1) zeile('p', 'svc-stufe', `Ausbau ${n} von ${s.stufen.length}`);
+    if (z.summe[id]) zeile('p', 'svc-text', `Bisher eingenommen: ${euro(z.summe[id])}`);
+    if (besuch) zeile('p', 'svc-text', `${besuch.text}: ${besuch.inTagen === 0 ? 'heute' : besuch.inTagen === 1 ? 'morgen' : `in ${besuch.inTagen} Tagen`}`);
     if (!p.fertig) {
       const label = n === 0 ? `Bauen ${euro(p.kosten)}` : `${p.def.name} ${euro(p.kosten)}`;
       if (p.freigeschaltet) {
-        zeilen.push(`<button type="button" class="svc-bauen" ${p.geldFehlt ? 'disabled' : ''}>${label}</button>`);
-        if (p.geldFehlt) zeilen.push(`<p class="svc-hinweis">Noch nicht genug Geld.</p>`);
+        const knopf = zeile('button', 'svc-bauen', label);
+        knopf.type = 'button';
+        knopf.disabled = !!p.geldFehlt;
+        if (p.geldFehlt) zeile('p', 'svc-hinweis', 'Noch nicht genug Geld.');
       } else if (n > 0) {
-        zeilen.push(`<p class="svc-hinweis">Nächster Ausbau „${p.def.name}“ braucht: ${p.fehlt.join(', ')}</p>`);
+        zeile('p', 'svc-hinweis', `Nächster Ausbau „${p.def.name}“ braucht: ${p.fehlt.join(', ')}`);
       } else {
-        zeilen.push(`<p class="svc-hinweis">Braucht: ${p.fehlt.join(', ')}</p>`);
+        zeile('p', 'svc-hinweis', `Braucht: ${p.fehlt.join(', ')}`);
       }
     }
-    karte.innerHTML = `<div class="svc-karte">${zeilen.join('')}</div>`;
+    karte.replaceChildren(box);
     karte.hidden = false;
     document.body.classList.add('card-open');
     offeneKarte = id;
@@ -224,7 +239,7 @@ export function init(game) {
   function schliessen() {
     if (!offeneKarte || !karte) return;
     karte.hidden = true;
-    karte.innerHTML = '';
+    karte.replaceChildren();
     document.body.classList.remove('card-open');
     offeneKarte = null;
   }
@@ -280,7 +295,8 @@ export function init(game) {
   game.on('ui:cancel', schliessen);
   game.on('stufe', (n) => {
     const v = Number(typeof n === 'object' ? n?.stufe : n);
-    if (v >= 1 && !testStufe) { stufe = v; aktualisiere(); }
+    // Im Testmodus (?stufe=n) nur die Startstufe aus der Adresse, ein Ausbau gilt danach auch hier
+    if (v >= 1 && (!testStufe || v !== stufe)) { stufe = v; aktualisiere(); }
   });
   // ------------------------------------------------------------------ Tankstelle (Versorgung "diesel")
   // Gekauft wird sie über die Spielregeln (Bauen, sim.js facilities.diesel), hier steht das Modell
@@ -405,6 +421,17 @@ export function init(game) {
     schliessen,
     gruppe,
   };
+  // Kai K01 gehoert dem Ausflugsschiff, sobald der Fahrgastanleger steht: Gastboote legen dort nicht mehr an
+  // (Passregel 'fit' der Spielregeln). Liegt noch ein Gast dort, faehrt das Ausflugsschiff erst nach dessen Abfahrt.
+  let k01Gesperrt = false;
+  function k01Sperren() {
+    if (k01Gesperrt || !game.sim?.addHook) return;
+    game.sim.addHook('fit', ({ berth }) => (berth?.id === 'K01' && R.stufeVon(zustand(), 'fahrgastanleger') > 0 ? 'reserved' : null));
+    k01Gesperrt = true;
+  }
+  k01Sperren();
+  game.on('ready', k01Sperren);
+
   game.services = api;
   api.besuche = initBesuche(game, api);
   return api;

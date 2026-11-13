@@ -116,6 +116,8 @@ export function startPwa({ onUpdate = null, swUrl = 'sw.js' } = {}) {
   const register = async () => {
     try {
       const reg = await navigator.serviceWorker.register(url.href, { scope });
+      // Manche Umgebungen (gesperrte Service Worker, Tests) liefern keine Anmeldung zurück
+      if (!reg) return;
       watchForUpdate(reg, onUpdate);
       // Bei längeren Sitzungen stündlich nach Updates sehen.
       setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);

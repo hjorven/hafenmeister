@@ -1,6 +1,6 @@
 # Services und Sonderanlagen
 
-Stand: 11.11.2026. Services sind Gebäude, die keinen Wunsch der Gäste erfüllen, sondern etwas Neues ins Spiel bringen (plan.md, Abschnitt 6). Jeder Service hat feste Bauplätze, 1 bis 3 Ausbaustufen, ein eigenes 3D-Modell im Flat-Stil und eine kleine Animation.
+Stand: 11.11.2026. Status: gebaut (20 Services); Mindestruf je Stufe und Deckel der Wirkungen stehen in [balancing.md](balancing.md#regeln-im-spiel-die-sonst-nirgends-stehen). Services sind Gebäude, die keinen Wunsch der Gäste erfüllen, sondern etwas Neues ins Spiel bringen (plan.md, Abschnitt 6). Jeder Service hat feste Bauplätze, 1 bis 3 Ausbaustufen, ein eigenes 3D-Modell im Flat-Stil und eine kleine Animation.
 
 ## So funktioniert es im Spiel
 
@@ -65,9 +65,30 @@ Sobald der Schiffs-Thread XXL-Modelle anbietet (`game.boatTypes.xxl`, Kreuzfahrt
 | `web/js/render/services-models.js` | 15 Modelle aus einfachen Körpern |
 | `web/js/render/services-besuch.js` | Besuchsschiffe: Ausflugsschiff, Kreuzfahrtschiff, Marineschiffe, Windjammer mit Ein- und Auslaufen; Barkasse mit zwei Rundfahrten |
 | `web/js/render/services.js` | Einstieg `init(game)`: Bauplätze, Karte, Modelle, Ereignisse, `game.services` |
+| `web/js/data/besuchswege.js` | Wege der Besuchsschiffe und der Barkasse (Planeinheiten), Liegeplatz, Liegekurs, Maße |
+| `web/js/data/anlagen-flaechen.js` | Flächen, die das Gelände für Anlagen planiert (Kai, Terminal, Marinebasis, Seenotretter) |
+| `tests/besuchswege.test.mjs` | Prüft alle Wege gegen Tiefe, Stege, belegte Liegeplätze und die Seebrücke in allen 13 Stegbildern |
 | `tests/services.test.mjs` | Tests für die Regeln |
 
 Zahlen aus dem Balancing (`web/js/data/economy.js`, `ECONOMY.services[id]`) überschreiben die Startwerte, sobald die Datei existiert.
+
+## Lage der Anlagen (Stufe 6, Paket P63)
+
+Wie in einem echten Seehafen liegen die großen Anlagen auf der Nehrung zwischen Binnensee und Ostsee, jede mit Zufahrt von Land (Nehrungsstraße bei y 192) und vom Wasser:
+
+| Anlage | Lage (Plan) | Zufahrt vom Wasser |
+|---|---|---|
+| Marinestützpunkt | Fläche x -352..-280, eigene Pier MA bei x -310 (Nord-Süd) | Korvette (MA01, Ostseite) und Minenjagdboot (MA02, Westseite) laufen gerade von Norden ein und legen achteraus ab. Tor mit Wache im Süden zur Straße, Torposten an der Pierwurzel |
+| Seebrücke | x -262, 51 m nach Norden | nur Fußgänger |
+| Windjammertreffen | drei Segler vor Anker bei x -195, y 300/372/444 | eigene Fahrspur x -225 |
+| Kreuzfahrtterminal | Fläche x -185..-115, Pier P bei x -150 bis y 500 | Schiff an P01 (x -122) läuft von Norden ein, legt achteraus mit Schleppern ab, ohne zu drehen |
+| Seenotretter | Station an der Ostmole, Kreuzer ab Stufe 6 an SK01 | Einsatz durch die Einfahrt (`seenotEinsatzWeg`) |
+| Ausflugsschiff | Kai K01, 18 m, liegt frei von FK01 und K02 | durch den Außenhafen |
+| Barkasse | Ponton am Ostufer (216, -6) | Binnenrunde am Ostufer und vor dem Durchstich, Außenrunde durch den Durchstich. Westlich ist der See zu flach und die Stegköpfe reichen je nach Stegbild bis y 160 |
+
+Vorbeifahrer meiden diese Rümpfe (`GROSSE_GAESTE` in `web/js/data/verkehr.js`, `tests/verkehr.test.mjs`). In Stufe 6 rücken Strandkörbe und Seebrücke zur Seite (`render/buildings.js`), die Kamera darf bis y 500 nach Norden.
+
+Wo es mit anderen Teilen kollidieren kann: neue Geländeform ohne Liegewanne bis y 520 (Kreuzfahrtschiff auf Grund), neue Stegbilder mit Stegköpfen nördlich von y 160 oder östlich von x 205 (Barkasse), neue Vorbeifahrer-Bahnen zwischen x -340 und -88 nördlich von y 224, Bauten auf den Anlagenflächen. `tests/besuchswege.test.mjs` meldet jeden dieser Fälle.
 
 ## Schnittstelle für andere Module
 

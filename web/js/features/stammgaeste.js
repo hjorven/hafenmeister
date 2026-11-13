@@ -16,13 +16,10 @@ import * as sim from '../sim.js';
 import { regelnBereit } from './regeln-bereit.js';
 import { random } from '../random.js';
 import { BOOTSNAMEN, heimathaefen } from '../data/bootsnamen.js';
+import { ECONOMY } from '../data/economy.js';
 
-export const STAMM = {
-  chance: 0.15,       // Anteil der neuen Boote, die Stammgäste sind (wenn es welche gibt)
-  abBewertung: 4,     // ab so vielen Ankern kommt ein Gast wieder
-  maxListe: 40,
-  dauerAbBesuch: 5,   // ab diesem Besuch als Dauerlieger behalten
-};
+// Zahlen in data/economy.js (ECONOMY.stammgaeste)
+export const STAMM = ECONOMY.stammgaeste;
 
 export function stammState(state) {
   state.modules ||= {};

@@ -1,6 +1,6 @@
 # Spielstand und Web-App
 
-Stand: 11.11.2026
+Stand: 11.11.2026. Status: gebaut (ein Speicherplatz); mehrere Speicherplätze und Neues Spiel kommen mit Paket P09.
 
 ## Warum
 

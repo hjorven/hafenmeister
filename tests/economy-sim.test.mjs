@@ -5,10 +5,11 @@ import { createState, deserialize, serialize } from '../web/js/state.js';
 import { ECONOMY } from '../web/js/data/economy.js';
 import { HAFEN } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
+import { echterHafen } from './regeln.mjs';
 import * as sim from '../web/js/sim.js';
 
-const rules = sim.rulesFromEconomy(ECONOMY);
-const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules });
+const ctx = echterHafen();
+const rules = ctx.rules;
 
 test('Zahlen werden übernommen', () => {
   assert.equal(rules.baseFee.M, ECONOMY.klassen.M.grundpreis);
@@ -217,4 +218,73 @@ test('Stufenwechsel mit vollem Hafen: nach jedem Ausbau liegt kein Boot auf eine
     assert.equal(sim.mooredBoats(s).length, vorher - weg - r.events.filter((e) => e.type === 'unstationed').length);
     sim.runDay(s, c); // läuft danach normal weiter
   }
+});
+
+test('Stufenwechsel: Gast in einer Box, die flacher wird, legt in eine passende freie Box um', () => {
+  const c = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: sim.rulesFromEconomy(ECONOMY) });
+  c.rules.queue.selfEnterAfter = null;
+  const s = sim.applyTestStage(createState({ seed: 3, rules: c.rules }), c, 2);
+  sim.tick(s, c, 0);
+  // B03 ist in Stufe 2 1,5 m tief, in Stufe 3 nur noch 1,4 m
+  const b03 = c.berthById.B03;
+  assert.ok(sim.berthDepth(b03, 2) > sim.berthDepth(b03, 3));
+  const gast = (id, draft) => ({ id, typeId: 'M1', modelId: null, name: 'Gast', size: 'M', length: 8, beam: 2.8, draft, motor: false,
+    special: false, dayVisitors: 0, stationed: false, wishes: [], nights: 3, status: 'waiting', waitingSince: 0, atBuoy: true, atBuoySince: 0,
+    berthId: null, wishesMet: 0, wishesTotal: 0, pendingFee: 0, penalty: 0 });
+  const tief = sim.berthDepth(b03, 2) - c.rules.underKeelClearance;
+  const boot = gast(7001, Math.round((tief - 0.02) * 100) / 100);
+  s.boats[boot.id] = boot; s.queue.push(boot.id);
+  assert.ok(sim.assign(s, c, boot.id, 'B03').ok, 'passt in Stufe 2');
+  assert.equal(sim.fits(boot, b03, c.rules, 3), false, 'passt in Stufe 3 nicht mehr');
+  assert.deepEqual(sim.stageUpPreview(s, c).moving, [7001]);
+  s.money = 1e7; s.stageGuests = 1e5; s.guests = 1e5; s.ratings = Array(20).fill(5);
+  const r = sim.advanceStage(s, c);
+  assert.ok(r.ok);
+  const um = r.events.find((e) => e.type === 'relocated' && e.boatId === 7001);
+  assert.ok(um && um.guest && um.from === 'B03', 'Gast wird umgelegt');
+  assert.equal(s.berths.B03, undefined);
+  assert.equal(s.berths[um.to], 7001);
+  assert.equal(s.boats[7001].nights, 3, 'Aufenthalt bleibt');
+  for (const b of sim.mooredBoats(s)) {
+    if (!b.stationed) assert.ok(sim.fits(b, c.berthById[b.berthId], c.rules, s.stage), `${b.id} passt in ${b.berthId}`);
+  }
+});
+
+test('Stufenwechsel: Stufe 3 hat weniger Bojen als Stufe 2, niemand wartet an einer Boje, die es nicht gibt', () => {
+  const c = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: sim.rulesFromEconomy(ECONOMY) });
+  c.rules.queue.selfEnterAfter = null;
+  const spots = c.rules.queue.spots;
+  assert.ok(spots[2] > spots[3], 'Voraussetzung: Stufe 3 hat weniger Bojen');
+  const warte = (s, id, spot) => {
+    s.boats[id] = { id, typeId: 'XX', modelId: null, name: 'Wartet', size: 'XXL', length: 90, beam: 20, draft: 9, motor: true, special: false,
+      dayVisitors: 0, stationed: false, wishes: [], nights: 1, status: 'waiting', waitSpot: spot, waitingSince: 0, atBuoy: true, atBuoySince: 0,
+      berthId: null, wishesMet: 0, wishesTotal: 0, pendingFee: 0, penalty: 0 };
+    s.queue.push(id);
+  };
+  const stufeHoch = (s) => {
+    s.money = 1e7; s.stageGuests = 1e5; s.guests = 1e5; s.ratings = Array(20).fill(5);
+    const r = sim.advanceStage(s, c);
+    assert.ok(r.ok);
+    return r.events;
+  };
+  // 1. nur die letzte Boje belegt: Boot verholt an die kleinste freie
+  let s = sim.applyTestStage(createState({ seed: 4, rules: c.rules }), c, 2);
+  sim.tick(s, c, 0);
+  warte(s, 8001, spots[2] - 1);
+  let ev = stufeHoch(s);
+  assert.deepEqual(ev.find((e) => e.type === 'waitSpotChanged'), { type: 'waitSpotChanged', boatId: 8001, from: spots[2] - 1, waitSpot: 0 });
+  assert.equal(s.boats[8001].waitSpot, 0);
+  // 2. alle Bojen belegt: das überzählige Boot fährt ohne Bewertung weiter, die anderen bleiben
+  s = sim.applyTestStage(createState({ seed: 5, rules: c.rules }), c, 2);
+  sim.tick(s, c, 0);
+  for (let i = 0; i < spots[2]; i++) warte(s, 8100 + i, i);
+  const ruf = [...s.ratings];
+  ev = stufeHoch(s);
+  const weg = ev.filter((e) => e.type === 'turnedAway');
+  assert.equal(weg.length, spots[2] - spots[3]);
+  assert.ok(weg.every((e) => e.reason === 'rebuild' && e.rated === false));
+  const wartend = sim.waitingBoats(s);
+  assert.equal(wartend.length, spots[3]);
+  assert.equal(new Set(wartend.map((b) => b.waitSpot)).size, spots[3]);
+  assert.ok(wartend.every((b) => b.waitSpot < spots[3]));
 });

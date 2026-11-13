@@ -77,6 +77,11 @@ export async function init(game) {
   const pfahlMat = new THREE.MeshLambertMaterial({ color: '#eee8dc' });
   // Unbeleuchtet, damit die Farbe auch abends und bei Regen klar bleibt
   const mats = { gruen: new THREE.MeshBasicMaterial({ color: GRUEN }), rot: new THREE.MeshBasicMaterial({ color: ROT }) };
+  // Einstellung "Schilder mit Form" (P50): Rot bekommt einen weißen Querbalken wie ein Einfahrt-verboten-Schild,
+  // so ist der Zustand auch ohne Farbsehen klar. Der Balken liegt auf beiden Seiten der Tafel.
+  const balkenGeo = new THREE.BoxGeometry(0.78, 0.18, 0.08);
+  const balkenMat = new THREE.MeshBasicMaterial({ color: '#ffffff' });
+  const mitForm = () => !!game.einstellungen?.wert?.('formen');
   const schilder = new Map();
   let stufe = null;
 
@@ -91,8 +96,12 @@ export async function init(game) {
     pfahl.position.y = 0.75;
     const tafel = new THREE.Mesh(tafelGeo, mats.rot);
     tafel.position.y = 1.7;
-    s.add(pfahl, tafel);
+    const balken = new THREE.Mesh(balkenGeo, balkenMat);
+    balken.position.y = 1.7;
+    balken.visible = false;
+    s.add(pfahl, tafel, balken);
     s.userData.tafel = tafel;
+    s.userData.balken = balken;
     s.userData.pick = { type: 'berth', id: berth.id };
     s.position.set(w.x, 0, w.z);
     s.rotation.y = game.camera?.yaw ?? 0;
@@ -117,6 +126,7 @@ export async function init(game) {
       let s = schilder.get(berth.id);
       if (!s) { s = baue(berth); if (!s) continue; schilder.set(berth.id, s); }
       s.userData.tafel.material = mats[f];
+      s.userData.balken.visible = f === 'rot' && mitForm();
       s.userData.farbe = f;
     }
     for (const [id, s] of schilder) if (!da.has(id)) { gruppe.remove(s); schilder.delete(id); }
@@ -125,6 +135,7 @@ export async function init(game) {
   game.on('sim:berthState', zeichne);
   game.on('sim:change', zeichne);
   game.on('stufe', zeichne);
+  game.on('einstellungen', zeichne);
   game.on('spielstand-geladen', () => { alleWeg(); stufe = null; zeichne(); });
 
   // Tafeln zur Kamera drehen

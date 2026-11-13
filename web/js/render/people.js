@@ -890,7 +890,7 @@ export function init(game) {
     const tag = game.state?.day ?? game.state?.tag ?? 1;
     jahreszeit = game.events?.season?.(tag)?.part ?? jahreszeit;
     abend = (game.state?.phase ?? 'day') === 'evening';
-    const s = params.get('stufe') ?? game.state?.stufe ?? game.state?.stage ?? stufe;
+    const s = game.state?.stufe ?? game.state?.stage ?? params.get('stufe') ?? stufe;
     stufe = 0;
     setStage(s);
     queueMicrotask(() => queueMicrotask(vorhandeneBoote));
