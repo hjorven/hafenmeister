@@ -599,22 +599,38 @@ export function assign(state, ctx, boatId, berthId, { hand = true } = {}) {
 export function autoEnter(state, ctx, boatId) {
   const boat = state.boats[boatId];
   if (!boat || boat.status !== 'waiting') return { ok: false, reason: 'notWaiting', events: [] };
-  const best = state.office >= (ctx.rules.office.propose ?? 0) ? fittingBerths(state, ctx, boatId)[0] : selfBerth(state, ctx, boatId);
+  const best = state.office >= (ctx.rules.office.propose ?? 0)
+    ? officeProposal(state, ctx, boatId) ?? fittingBerths(state, ctx, boatId)[0]
+    : selfBerth(state, ctx, boatId);
   if (!best) return { ok: false, reason: 'noFreeBerth', events: [] };
   return assign(state, ctx, boatId, best, { hand: false });
 }
 
 /**
- * Vorschlag des Hafenbüros für ein wartendes Boot (ab der Bürostufe mit 'vorschlag'): die beste
- * freie Box. Für Sonderfälle macht das Büro keinen Vorschlag. Liefert eine Platz-id oder null.
+ * Vorschläge des Hafenbüros für alle Wartenden (ab der Bürostufe mit 'vorschlag'): Wer zuerst
+ * kam, bekommt die beste freie Box; jede Box wird nur einmal vorgeschlagen. Für Sonderfälle macht
+ * das Büro keinen Vorschlag und hält ihnen auch keine Box frei. Liefert { bootId: platzId }.
  */
+export function officeProposals(state, ctx) {
+  const out = {};
+  if (state.office < (ctx.rules.office.propose ?? Infinity)) return out;
+  const vergeben = new Set();
+  for (const id of state.queue) {
+    const boat = state.boats[id];
+    if (!boat || boat.status !== 'waiting') continue;
+    const fitting = fittingBerths(state, ctx, id);
+    if (!fitting.length || officeSpecialCase(state, ctx, id, fitting)) continue;
+    const frei = fitting.find((p) => !vergeben.has(p));
+    if (!frei) continue;
+    out[id] = frei;
+    vergeben.add(frei);
+  }
+  return out;
+}
+
+/** Vorschlag des Hafenbüros für ein wartendes Boot (officeProposals) oder null. */
 export function officeProposal(state, ctx, boatId) {
-  if (state.office < (ctx.rules.office.propose ?? Infinity)) return null;
-  const boat = state.boats[boatId];
-  if (!boat || boat.status !== 'waiting') return null;
-  const fitting = fittingBerths(state, ctx, boatId);
-  if (!fitting.length || officeSpecialCase(state, ctx, boatId, fitting)) return null;
-  return fitting[0];
+  return officeProposals(state, ctx)[boatId] ?? null;
 }
 
 /** Automatik des Hafenbüros für eine Größenklasse an oder aus (state.officeAuto, Standard an). */
@@ -651,11 +667,11 @@ export function officeSpecialCase(state, ctx, boatId, fitting = null) {
   const sp = ctx.rules.office?.special;
   const boat = state.boats[boatId];
   if (!sp || !boat || boat.stationed) return null;
-  // Einmal Sonderfall, immer Sonderfall: sonst käme und ginge die Raute, wenn Boxen frei werden
-  if (boat.officeCase) return boat.officeCase;
   if (sp.kinds?.includes(boat.kind)) return 'mehrrumpf';
   if (sp.sizes?.includes(boat.size)) return 'gross';
   if (sp.specialGuests && boat.special) return 'sondergast';
+  // Nur noch eine passende Box: jedes Mal neu bewertet. Ist sie belegt, gibt es nichts zu
+  // entscheiden; werden mehr frei, ist das Boot wieder ein Standardfall für die Leitstelle.
   if (sp.onlyBerth && (fitting ?? fittingBerths(state, ctx, boatId)).length === 1) return 'einzigerPlatz';
   return null;
 }
@@ -678,7 +694,7 @@ export function autoAssign(state, ctx, { standardOnly = false } = {}) {
       const b = state.boats[id];
       if (state.officeAuto?.[b.size] === false) continue;
       const why = officeSpecialCase(state, ctx, id, fitting);
-      if (why) { b.officeCase = why; continue; }
+      if (why) continue;
     }
     moor(state, ctx, state.boats[id], fitting[0], events);
   }
@@ -921,7 +937,6 @@ function arrive(state, ctx, boat, events) {
     const fitting = fittingBerths(state, ctx, boat.id);
     const why = fitting.length ? officeSpecialCase(state, ctx, boat.id, fitting) : null;
     if (why) {
-      boat.officeCase = why;
       events.push({ type: 'officeSpecial', boatId: boat.id, reason: why });
     }
     else if (fitting.length) moor(state, ctx, boat, fitting[0], events);

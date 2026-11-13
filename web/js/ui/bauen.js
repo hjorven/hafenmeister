@@ -938,8 +938,8 @@ function stil() {
       background: #e8f4ee; color: #1d3245; font: inherit; font-size: 0.92rem; line-height: 1.3; cursor: pointer; }
     .bau-tipp-titel { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #2a7d63; }
     .bau-automatik { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
-    .bau-automatik-titel { font-weight: 600; margin-right: 4px; }
-    .bau-automatik .bau-schalter { flex: 0 0 auto; min-width: 64px; min-height: 40px; padding: 6px 10px; border: 2px solid #1d3245;
+    .bau-automatik-titel { flex: 1 0 100%; font-weight: 600; }
+    .bau-automatik .bau-schalter { flex: 1 1 0; min-width: 0; max-width: 120px; white-space: nowrap; min-height: 40px; padding: 6px 10px; border: 2px solid #1d3245;
       border-radius: 6px; background: #2a9d8f; color: #fff; font-weight: 600; }
     .bau-automatik .bau-schalter[aria-pressed="false"] { background: #eee6d2; color: #5b6670; }
     .bau-reiter { display: flex; gap: 2px; background: rgba(29, 50, 69, 0.07); border-radius: 12px; padding: 4px; }
