@@ -27,6 +27,7 @@ function wunsch(p, stufe) {
   return best ?? Object.values(p)[0];
 }
 
+const OHNE_STRAND = new Set(['fels', 'kliff', 'wald']);
 let _lagen = null, _lagenN = null;
 
 /**
@@ -39,6 +40,8 @@ export function strandLagen(stufe, region = 'ostsee') {
   if (!N?.landig) return {};
   if (_lagenN !== N) { _lagen = new Map(); _lagenN = N; }
   const key = `${stufe}|${region}`;
+  // Fels-, Kliff- und Waldküsten haben keinen Badestrand, auch wenn irgendwo ein Fleck Sand liegt
+  if (OHNE_STRAND.has(N.stil?.ufer)) return {};
   if (!_lagen.has(key)) {
     const reg = REGIONEN[region] ?? REGIONEN.ostsee;
     const boden = (x, y) => punkt(x, y, stufe, reg);
@@ -47,10 +50,10 @@ export function strandLagen(stufe, region = 'ostsee') {
     // Erst die Stelle des größten Ausbaus versuchen: Was dort stehen bleiben kann, zieht beim Ausbau nicht um
     const spaeter = stufe < 6 ? strandLagen(6, region) : {};
     for (const [id, e] of Object.entries(STRAND_PLAN)) {
-      const opt = { seebruecke: id === 'seebruecke', laenge: (e.laenge ?? 44) / PLAN_M + 14, meiden: vergeben, boden, stufe,
+      const opt = { seebruecke: id === 'seebruecke', weit: id === 'seebruecke' ? 600 : 420, laenge: (e.laenge ?? 44) / PLAN_M + 14, meiden: vergeben, boden, stufe,
         sperren: stufe >= 6 ? GROSSE_GAESTE.map((g) => g.rechteck).filter(Boolean) : [] };
       const [x, y] = wunsch(e.p, stufe);
-      const s = (spaeter[id] && strandStelle(N, spaeter[id][0], spaeter[id][1], { ...opt, weit: 0 })) || strandStelle(N, x, y, opt);
+      const s = (spaeter[id] && strandStelle(N, spaeter[id][0], spaeter[id][1], { ...opt, weit: 0, zuerst: spaeter[id][2] })) || strandStelle(N, x, y, opt);
       out[id] = s;
       if (s) vergeben.push(s);
     }
