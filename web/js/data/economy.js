@@ -119,10 +119,30 @@ export const ECONOMY = {
     abgewiesen: { chance: 0.25, wertung: 2.5 },  // wer keinen Platz bekommt, drückt den Ruf leicht
   },
 
-  fischer: { pachtProTag: 15 },
-  // Dauerlieger (features/dauerlieger.js): Pacht je Abend als Anteil des Gastpreises (Paket P01),
-  // ab welcher Stufe, wie oft sie hinausfahren (je Tag), Törn über mehrere Tage [min, max]
-  dauerlieger: { anteilGastpreis: 0.5, abStufe: 2, tagestoernChance: 0.4, toernChance: 0.12, toernTage: [1, 3] },
+  fischer: { pachtProTag: 15 },   // feste Pacht je Abend, nur für Fischer und andere fest vergebene Plätze
+
+  // Dauerlieger (features/dauerlieger.js, docs/neue-features.md Abschnitt 3): ein Platz wird für die
+  // ganze Saison vermietet. Sichere Einnahme, auch bei Sturm, dafür kein Gast, kein Ruf und keine
+  // Gäste fürs Stufenziel.
+  dauerlieger: {
+    abStufe: 2,
+    anteilGastpreis: 0.5,      // Pacht je Saisontag = Anteil des Gastpreises (ohne Wunschbonus)
+    vorauskasse: true,         // true: Saisonpacht im Voraus (Rest der Saison, dann jede Saison neu);
+                               // false: jeden Abend anteilGastpreis des Gastpreises
+    hoechstAnteil: 0.25,       // höchstens ein Viertel der Plätze (fest vergebene zählen nicht)
+    tagestoernChance: 0.4,     // je Tag: morgens raus, abends zurück
+    toernChance: 0.12,         // je Tag: Törn über mehrere Tage, Platz frei für Gäste
+    toernTage: [1, 3],
+    frueherZurueck: 0.35,      // Anteil der Törns, von denen das Boot schon am Nachmittag des letzten Tages zurückkommt
+    zurueckUm: [0.45, 0.62],   // dann zu diesem Anteil des Tages; liegt dort noch ein Gast, muss er umgelegt werden
+    bewerberStart: 2,          // so viele Einheimische fragen gleich an, sobald Dauerplätze möglich sind
+    bewerberMax: 3,            // höchstens so viele offene Anfragen
+    bewerberChance: 0.35,      // je Nacht in der Saison: neue Anfrage
+    bewerberTage: 10,          // so lange wartet ein Bewerber auf eine Box
+    passtFreieBox: 0.85,       // Anteil der Bewerber, deren Boot in eine gerade freie Gastbox passt
+    seglerAnteil: 0.7,         // Anteil Segler unter den Bewerbern (wenn möglich)
+    kuendigungsZuschlag: 0.2,  // sofort kündigen: Pacht der restlichen Tage zurück plus dieser Anteil der Saisonpacht
+  },
   // Stammgäste (features/stammgaeste.js): Anteil der neuen Boote, die Stammgäste sind; ab so vielen
   // Ankern kommt ein Gast wieder; Länge der Liste; ab diesem Besuch als Dauerlieger zu behalten
   stammgaeste: { chance: 0.15, abBewertung: 4, maxListe: 40, dauerAbBesuch: 5 },
