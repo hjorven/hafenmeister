@@ -858,7 +858,8 @@ export async function init(game) {
   }
   game.on('tagesabschluss:fertig', nachAbschluss);
   // Abends klappt die Tafel zu: eine offen gelassene Wahl liegt sonst morgens über dem Abschluss
-  game.on('sim:dayEnd', () => auf(false));
+  let abendGewesen = false;   // von selbst nur nach einem echten Abend, nicht beim Laden oder neuen Spiel
+  game.on('sim:dayEnd', () => { abendGewesen = true; auf(false); });
   game.on('tagesabschluss:zu', () => setTimeout(() => { if (!abschlussOffen()) nachAbschluss(); }, 0));
 
   function pruefeTag() {
@@ -868,7 +869,8 @@ export async function init(game) {
   function neuerMorgen() {
     pruefeTag();
     const z = zielState(st());
-    if (wahlTag === st().day || z.tag !== st().day || !z.karten.length || gewaehlt(st())) return;
+    if (!abendGewesen || wahlTag === st().day || z.tag !== st().day || !z.karten.length || gewaehlt(st())) return;
+    abendGewesen = false;
     wahlTag = st().day;
     wahlWartet = true;
     if (!abschlussOffen()) morgenWahl();
