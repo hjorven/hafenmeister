@@ -11,6 +11,7 @@ import { boatTypes, berths } from './fixtures.mjs';
 function context() {
   const ctx = sim.createContext({ boatTypes, berths, rules: sim.rulesFromEconomy(ECONOMY) });
   ctx.rules.queue.selfEnterAfter = null;
+  ctx.rules.queue.buoyFee = 0; // Bojengeld (P10) prüft tests/zuweisen.test.mjs
   ctx.rules.trips = null;
   ctx.rules.departWindow = null;
   return ctx;

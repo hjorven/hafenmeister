@@ -11,6 +11,7 @@ const ctx = sim.createContext({ boatTypes, berths });
 ctx.rules.queue.selfEnterAfter = null;
 ctx.rules.trips = null;
 ctx.rules.departWindow = null;
+ctx.rules.queue.buoyFee = 0; // Bojengeld (P10) prüft tests/zuweisen.test.mjs
 const ctxLive = sim.createContext({ boatTypes, berths });
 
 const waitingBoat = testBoot;

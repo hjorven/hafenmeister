@@ -148,7 +148,10 @@ export function rulesFromEconomy(E = ECONOMY) {
     approachMax: w.anfahrtMax ?? 0,
     selfEnterAfter: w.selbstEinfahrenNach ?? null,
     overnight: !!w.ueberNacht,
+    buoyFee: w.bojengeld ?? 0,   // Bojengeld über Nacht (P10)
   };
+  // Passgenau zuweisen (P10)
+  r.snug = E.passgenau ? { share: E.passgenau.hoechstensGroesser, rating: E.passgenau.ruf } : null;
   r.leaveMax = w.ausBoxMax ?? 0;
   r.previewCount = w.vorschau ?? 0;
 

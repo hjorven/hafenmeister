@@ -33,12 +33,25 @@ export function initInput(game) {
 
   el.addEventListener('pointerdown', (e) => {
     try { el.setPointerCapture(e.pointerId); } catch { /* z. B. synthetische Ereignisse */ }
-    const p = pos(e);
-    pointers.set(e.pointerId, p);
+    finger(e.pointerId, pos(e));
+  });
+
+  // Ein Finger, den ui/gesten.js gehalten hat (Schleppleine, Münzstrich), kommt beim zweiten Finger
+  // hierher zurück, damit die Zwei-Finger-Geste ihn mitzählt. p in Pixeln relativ zur Leinwand.
+  game.input = {
+    uebernehmen(id, p) {
+      if (pointers.has(id) || !p || !Number.isFinite(p.x + p.y)) return;
+      finger(id, { x: p.x, y: p.y });
+      tapCandidate = null;   // kein Tipp aus einem übernommenen Finger
+    },
+  };
+
+  function finger(id, p) {
+    pointers.set(id, p);
     cam.stop?.();
     velo = { x: 0, y: 0, t: performance.now() };
     if (pointers.size === 1) {
-      tapCandidate = { ...p, t: performance.now(), id: e.pointerId };
+      tapCandidate = { ...p, t: performance.now(), id };
     } else {
       tapCandidate = null;
       const [a, b] = [...pointers.values()];
@@ -48,9 +61,9 @@ export function initInput(game) {
       twist = 0;
       rotating = false;
       mode = null;
-      start2 = { a: { ...a }, b: { ...b }, dist: pinchDist, angle: pinchAngle };
+      start2 = { a: { ...a }, b: { ...b }, dist: pinchDist, angle: pinchAngle, bewegt: new Set() };
     }
-  });
+  }
 
   // Zwei Finger: Neigen, wenn beide etwa gleich weit senkrecht in dieselbe Richtung laufen
   function decide(a, b) {
@@ -59,15 +72,21 @@ export function initInput(game) {
     const ax = a.x - s.a.x, bx = b.x - s.b.x;
     const weg = Math.max(Math.hypot(ax, ay), Math.hypot(bx, by));
     if (weg < DECIDE_PX) return null;
+    // Erst entscheiden, wenn beide Finger sich gemeldet haben: bei schnellem Wischen kommt sonst das
+    // Ereignis des ersten Fingers allein schon über die Schwelle und es wird fälschlich "pinch".
+    // Bewegt sich wirklich nur ein Finger (Zoom mit festem Daumen), reicht ein längerer Weg.
+    if (s.bewegt.size < 2 && weg < DECIDE_PX * 3) return null;
     const my = (ay + by) / 2, mx = (ax + bx) / 2;
     const spread = Math.abs(Math.hypot(a.x - b.x, a.y - b.y) - s.dist);
     let turn = Math.atan2(b.y - a.y, b.x - a.x) - s.angle;
     if (turn > Math.PI) turn -= 2 * Math.PI;
     if (turn < -Math.PI) turn += 2 * Math.PI;
+    // Drehen heisst: Finger laufen gegeneinander (das faengt "gleich" ab). Der Winkel darf etwas
+    // wackeln, weil die Finger ihre Bewegung nacheinander melden und einer kurz hinterherhinkt.
     const gleich = ay * by > 0 && Math.min(Math.abs(ay), Math.abs(by)) > Math.max(Math.abs(ay), Math.abs(by)) * 0.4;
     // Finger nebeneinander (eher waagerecht), sonst ist "gemeinsam senkrecht" ein Zoom
     const nebeneinander = Math.abs(s.b.x - s.a.x) > Math.abs(s.b.y - s.a.y) * 0.8;
-    if (gleich && nebeneinander && Math.abs(my) > Math.abs(mx) * 1.6 && spread < Math.abs(my) * 0.6 && Math.abs(turn) < 0.12) return 'tilt';
+    if (gleich && nebeneinander && Math.abs(my) > Math.abs(mx) * 1.6 && spread < Math.abs(my) * 0.6 && Math.abs(turn) < 0.35) return 'tilt';
     return 'pinch';
   }
 
@@ -90,6 +109,7 @@ export function initInput(game) {
       const [a, b] = [...pointers.values()];
       const dist = Math.hypot(a.x - b.x, a.y - b.y);
       const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      if (start2 && (Math.abs(p.x - prev.x) + Math.abs(p.y - prev.y)) > 0) start2.bewegt.add(e.pointerId);
       if (!mode && start2) mode = decide(a, b);
       if (mode === 'tilt') {
         // Finger nach oben: flacher (mehr Horizont), nach unten: steiler (mehr von oben)
