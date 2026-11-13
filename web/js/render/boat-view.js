@@ -711,7 +711,7 @@ export function init(game) {
   }
 
   // --- Ereignisse der Spielregeln -----------------------------------------------------------
-  let ankunftT = -1e9;
+  let ankunftT = -1e9, abfahrtT = -1e9;
   game.on('boot-kommt', (info) => {
     if (!info || info.id == null) return;
     if (bojenStufe !== stufe()) baueBojen();
@@ -781,7 +781,11 @@ export function init(game) {
     const weg = [ziel];
     e.faehrt = true;
     entferneMuenze(id, 0);
-    e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true }).then((ok) => {
+    // Abends legen viele zugleich ab: gestaffelt, 3 bis 6 s Abstand, damit es wie geordneter
+    // Verkehr aussieht und nicht wie ein Pulk an der Einfahrt (hoechstens 30 s Warten)
+    const jetzt = game.time ?? 0;
+    abfahrtT = Math.min(jetzt + 30, Math.max(jetzt, abfahrtT + 3 + Math.random() * 3));
+    e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true, verzoegerung: abfahrtT - jetzt }).then((ok) => {
       if (ok && boats.get(id) === e) entferne(id);
     });
   });
