@@ -306,3 +306,5 @@ body.foto .hm-ta, body.foto .hm-ta-zettel, body.foto .hm-ta-muenzen { display: n
 .hm-ta.sehr-eng .hm-ta-rechts .hm-ta-tipp { display: none; }
 .hm-ta.ohne-tipp .hm-ta-tipp { display: none !important; }
 .hm-ta.sehr-eng .hm-ta-zusatz { order: 0; flex-basis: auto; }
+.hm-ta-zettel.kurz .hm-ta-zettel-tag { display: none; }
+.hm-ta-zettel[style*="right: 8px"].rein { animation: none; }

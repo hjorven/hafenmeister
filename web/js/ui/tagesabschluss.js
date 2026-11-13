@@ -357,24 +357,56 @@ export function init(game) {
   game.on('resize', () => platziere());
 
   function zeigeZettel(b) {
-    zettel.replaceChildren(
+    const rekord = b.rekord && b.besterTag?.summe > 0;
+    zettel.replaceChildren(...[
       el('i', { class: 'hm-ta-muenze-sym', 'aria-hidden': 'true' }),
-      el('span', {}, `Tag ${b.tag}: + ${euro(b.summe)}`),
-      b.rekord && b.besterTag?.summe > 0 ? el('span', { class: 'hm-ta-rekord' }, 'Rekord') : null);
+      el('span', { class: 'hm-ta-zettel-tag' }, `Tag ${b.tag}: `),
+      el('span', {}, `+ ${euro(b.summe)}`),
+      rekord ? el('span', { class: 'hm-ta-rekord' }, 'Rekord') : null,
+    ].filter(Boolean));
     zettel.setAttribute('aria-label', `Tag ${b.tag}: ${euro(b.summe)} eingenommen. Tagesabschluss öffnen`);
     zettel.dataset.tag = String(b.tag);
     zettel.hidden = false;
-    // Unter Statusleiste und Ereignis-Banner, damit sich nichts überdeckt
-    const huelle = (zettel.offsetParent ?? root).getBoundingClientRect();
-    let oben = 0;
-    for (const sel of ['.hm-status', '.hm-werkzeuge', '#event-banner', '.hm-tipp']) {
-      const r = rechteck(sel);
-      if (r && r.left < huelle.left + huelle.width * 0.75 && r.right > huelle.left + huelle.width * 0.25) oben = Math.max(oben, r.bottom - huelle.top + 8);
-    }
-    zettel.style.top = oben ? `${Math.round(oben)}px` : '';
+    platziereZettel();
     zettel.classList.remove('rein'); void zettel.offsetWidth; zettel.classList.add('rein');
     zettelZeit = ZETTEL_SEKUNDEN;
   }
+  // Freie Stelle für den Zettel: nichts von Statusleiste, Schildern, Banner, Hinweisen und Knöpfen verdecken.
+  // Versucht oben Mitte, dann rechts unter den Knöpfen oben, jeweils erst lang ("Tag 3: + 40 €"), dann kurz ("+ 40 €").
+  const ZETTEL_MEIDEN = ['.hm-status', '.hm-werkzeuge', '#event-banner', '.hm-tipp', '#weather-chip', '#weather-panel', '.hm-tafel > button', '.hm-tafel ul', '#hm-ziel > *', '#hm-zeit', '#btn-collect', '#btn-build'];
+  function platziereZettel() {
+    const huelle = (zettel.offsetParent ?? root).getBoundingClientRect();
+    const hindernisse = ZETTEL_MEIDEN.flatMap((sel) => [...document.querySelectorAll(sel)].map(rechteck)).filter(Boolean);
+    const unterkante = (r) => r.bottom - huelle.top + 8;
+    // Oberkante: unter allem, was oben in der Mitte liegt
+    let obenMitte = rand0();
+    for (const sel of ['.hm-status', '.hm-werkzeuge', '#event-banner', '.hm-tipp']) {
+      const r = rechteck(sel);
+      if (r && r.left < huelle.left + huelle.width * 0.75 && r.right > huelle.left + huelle.width * 0.25) obenMitte = Math.max(obenMitte, unterkante(r));
+    }
+    const werkzeuge = rechteck('.hm-werkzeuge');
+    let obenRechts = werkzeuge ? unterkante(werkzeuge) : rand0();
+    const banner = rechteck('#event-banner');
+    if (banner && banner.right > huelle.right - 120) obenRechts = Math.max(obenRechts, unterkante(banner));
+    const frei = () => {
+      const z = zettel.getBoundingClientRect();
+      return z.right <= huelle.right && z.left >= huelle.left &&
+        !hindernisse.some((r) => Math.min(z.right, r.right) - Math.max(z.left, r.left) > 0 && Math.min(z.bottom, r.bottom) - Math.max(z.top, r.top) > 0);
+    };
+    const lagen = [];
+    for (const kurz of [false, true]) {
+      lagen.push({ kurz, stil: { top: `${Math.round(obenMitte)}px`, left: '', right: '', transform: '' } });
+      lagen.push({ kurz, stil: { top: `${Math.round(obenRechts)}px`, left: 'auto', right: '8px', transform: 'none' } });
+    }
+    for (const l of lagen) {
+      zettel.classList.toggle('kurz', l.kurz);
+      Object.assign(zettel.style, l.stil);
+      if (frei()) return;
+    }
+    // Nirgends ganz frei: kurz rechts unter den Knöpfen (deckt am wenigsten zu)
+    Object.assign(zettel.style, lagen[3].stil);
+  }
+  function rand0() { return 8; }
   zettel.addEventListener('click', () => zeige(Number(zettel.dataset.tag)));
   menueKnopf.addEventListener('click', () => {
     if (!karte.hidden) { schliesse(); return; }
