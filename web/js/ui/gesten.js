@@ -369,10 +369,16 @@ export function init(game) {
     draw(dt);
   });
 
+  // Nur zeichnen, wenn etwas zu sehen ist oder gerade verschwindet: Eine Leinwand, die jedes Bild
+  // geleert wird, muss der Browser jedes Bild neu über das Spiel legen (kostet spürbar Bildrate).
+  let leer = true;
   function draw(dt) {
     const W = canvas.clientWidth;
     const H = canvas.clientHeight;
+    const etwas = !!tow?.moved || (strich && strich.pts.length > 1) || texte.length > 0;
+    if (!etwas && leer) return;
     ctx.clearRect(0, 0, W, H);
+    leer = !etwas;
 
     if (tow?.moved) {
       const from = toScreen(tow.object.getWorldPosition(new THREE.Vector3()));

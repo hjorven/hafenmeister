@@ -5,7 +5,7 @@
 // kein InstancedMesh. Laub und Felder färben sich mit der Jahreszeit um, ohne Neubau:
 // nur die Farbwerte im Puffer werden neu geschrieben.
 import * as THREE from 'three';
-import { punkt, BEREICH, PLAN_M, hafenAbstand, suedufer, seeNord } from './gelaende.js';
+import { punkt, KERN, PLAN_M, hafenAbstand, suedufer, seeNord } from './gelaende.js';
 import { festePunkte } from './karte.js';
 import { verschmelze } from './terrain.js';
 import { aktuellesBild, feldZeile, knickAn, dorfPlan, hoefe, freiAbstand, soelle, zufallAus, JAHRESZEIT_FARBEN } from './vielfalt.js';
@@ -221,10 +221,10 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
       }
     }
   };
-  baumBereich(BEREICH.x0, BEREICH.x1, BEREICH.y0, BEREICH.y1, zelle, 1);
+  baumBereich(KERN.x0, KERN.x1, KERN.y0, KERN.y1, zelle, 1);
   // Äußerer Ring dünner, damit der Horizont nicht leer ist
   const weit = zelle * (2.4 / Math.max(0.3, menge));
-  for (const [x0, x1, y0, y1] of [[-1500, BEREICH.x0, -1500, 470], [BEREICH.x1, 1500, -1500, 470], [BEREICH.x0, BEREICH.x1, -1500, BEREICH.y0]]) {
+  for (const [x0, x1, y0, y1] of [[-1500, KERN.x0, -1500, 1400], [KERN.x1, 1500, -1500, 1400], [KERN.x0, KERN.x1, -1500, KERN.y0]]) {
     baumBereich(x0, x1, y0, y1, weit, 1.15, true);
   }
 
@@ -233,7 +233,7 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
     const f = bild.feld, c = Math.cos(f.dreh), s = Math.sin(f.dreh);
     const abstand = 3.2 / Math.sqrt(Math.max(0.35, menge));
     const passt = (px, py) => {
-      if (px < BEREICH.x0 || px > BEREICH.x1 || py < BEREICH.y0 || py > 40) return null;
+      if (px < KERN.x0 || px > KERN.x1 || py < KERN.y0 || py > 40) return null;
       if (hafenAbstand(px, py) < 10 || freiAbstand(px, py, stufe) < 4) return null;
       const p = punkt(px, py, stufe, region);
       return p.h >= 0.3 && FELDARTEN.has(p.typ) ? p : null;
@@ -280,7 +280,7 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
   // ---- Dünengras, Salzwiese, Heide
   const nGras = Math.round(1400 * menge * pf.duenengras);
   for (let k = 0; k < nGras; k++) {
-    const px = BEREICH.x0 + rnd() * (BEREICH.x1 - BEREICH.x0);
+    const px = KERN.x0 + rnd() * (KERN.x1 - KERN.x0);
     const py = 150 + rnd() * 100;
     const p = punkt(px, py, stufe, region);
     if (!(p.typ === 'duene' || p.typ === 'duenengras' || p.typ === 'salzwiese') || p.h < 0.15) continue;
@@ -290,8 +290,8 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
   // Heide: niedrige Polster mit Besenheide, auf Nehrung und an der Küste
   const nHeide = Math.round(900 * menge);
   for (let k = 0; k < nHeide; k++) {
-    const px = BEREICH.x0 + rnd() * (BEREICH.x1 - BEREICH.x0);
-    const py = BEREICH.y0 + rnd() * (300 - BEREICH.y0);
+    const px = KERN.x0 + rnd() * (KERN.x1 - KERN.x0);
+    const py = KERN.y0 + rnd() * (300 - KERN.y0);
     const p = punkt(px, py, stufe, region);
     if (p.typ !== 'heide' || p.h < 0.2) continue;
     const s = 0.6 + rnd() * 0.5;
@@ -303,7 +303,7 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
   const eng = festePunkte(stufe).engpass;
   const hafenFrei = (px) => !(stufe >= 2 && px > -170 && px < 225) && !(stufe >= 1 && px > -125 && px < -80);
   for (let k = 0; k < nSchilf; k++) {
-    const px = BEREICH.x0 + rnd() * (BEREICH.x1 - BEREICH.x0);
+    const px = KERN.x0 + rnd() * (KERN.x1 - KERN.x0);
     const nord = rnd() < 0.5;
     const py = nord ? seeNord(px) - rnd() * 14 : suedufer(px) + rnd() * 14;
     if (rauschenSchilf(px, py) < 0.48) continue;
@@ -331,8 +331,8 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
   // ---- Findlinge: am Ufer, am Fuß der Steilküste und einzeln auf Feldrainen
   const nFels = Math.round(500 * menge * pf.findlinge);
   for (let k = 0; k < nFels; k++) {
-    const px = BEREICH.x0 + rnd() * (BEREICH.x1 - BEREICH.x0);
-    const py = BEREICH.y0 + rnd() * (300 - BEREICH.y0);
+    const px = KERN.x0 + rnd() * (KERN.x1 - KERN.x0);
+    const py = KERN.y0 + rnd() * (300 - KERN.y0);
     const p = punkt(px, py, stufe, region);
     const amUfer = p.h > -0.6 && p.h < 0.8 && p.typ !== 'pflaster' && p.typ !== 'mole' && p.typ !== 'steinschuettung';
     const kliff = p.typ === 'kliff';

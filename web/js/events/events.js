@@ -11,7 +11,7 @@
 //   game.emit('event:start', { event, day, endDay })
 //   game.emit('event:end', { event, day })
 //   game.emit('sturm', { tag })                     am Sturmtag (Seenotretter rücken aus)
-//   game.emit('weather', { wind, fog, rain, snow, sun, event, part })   bei jedem Tageswechsel
+//   game.emit('weather', { wind, fog, rain, snow, sun, event, part, wetter })   bei jedem Tageswechsel
 //   game.emit('wetter', { bewoelkung, wind })   dasselbe im Format von render/landscape.js
 //   game.emit('season', { year, seasonDay, winterDay, part, winter })  wenn die Jahreszeit wechselt
 // Abfrage:
@@ -103,6 +103,9 @@ export function init(game) {
 
   // 'weather' für Effekte und Ton, dazu 'wetter' im Format des Landschaftsmoduls
   function emitWeather(wx) {
+    // wetter: Kurzform für den Ton (audio.js kennt 'ruhig', 'wind', 'sturm')
+    const wind = wx.wind ?? 0.2;
+    wx = { ...wx, wetter: wx.event === 'sturm' || wind >= 0.8 ? 'sturm' : wind >= 0.5 ? 'wind' : 'ruhig' };
     game.emit('weather', wx);
     const bewoelkung = Math.min(1, Math.max(0, 1 - (wx.sun ?? 0.7) + (wx.rain ?? 0) * 0.3 + (wx.fog ?? 0) * 0.3 + (wx.snow ?? 0) * 0.2));
     game.emit('wetter', { bewoelkung, wind: wx.wind ?? 0.2 });

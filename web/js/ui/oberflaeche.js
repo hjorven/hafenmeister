@@ -294,7 +294,8 @@ export function init(game) {
   }
   // Ton und Musik haben eigene Regler im Ton-Fenster (audio.js): von hier aus dorthin
   const tonKnopf = el('button', { type: 'button', class: 'hud-btn hm-knopf', onclick: (e) => { e.stopPropagation(); einstAuf(false); $('btn-sound')?.click(); } }, 'Ton und Musik einstellen');
-  einstTafel.append(tonKnopf);
+  // Gleich unter die Überschrift: am Handy hochkant passt die Tafel nicht ganz auf den Bildschirm, der Knopf läge sonst unter dem Rand
+  einstTafel.firstElementChild.after(tonKnopf);
   root.append(einstTafel);
   game.on('einstellungen', () => {
     for (const [n, k] of Object.entries(schalterKnopf)) k.setAttribute('aria-checked', String(einst.wert(n)));
@@ -311,7 +312,8 @@ export function init(game) {
     menueBtn.setAttribute('aria-expanded', String(auf));
   }
   menueBtn.addEventListener('click', (e) => { e.stopPropagation(); const auf = menue.hidden; klappeAndereZu('menue'); menueAuf(auf); });
-  menue.addEventListener('click', (e) => { if (e.target.closest('button')) setTimeout(() => menueAuf(false), 0); });
+  // Capture: Knöpfe anderer Module (Ton) stoppen ihren Klick, das Menü soll trotzdem zuklappen und nichts verdecken
+  menue.addEventListener('click', (e) => { if (e.target.closest('button')) setTimeout(() => menueAuf(false), 0); }, true);
 
   // Immer nur ein Aufklapper offen: Menü, Wetter, Tagesziele, Ziel
   function klappeAndereZu(ausser) {

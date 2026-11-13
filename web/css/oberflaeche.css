@@ -73,7 +73,10 @@
 body.hm-neu { --hm-s: calc(var(--hm-schrift) * var(--hm-gross, 1)); }
 body.hm-neu.hm-gross { --hm-gross: 1.2; }
 html:has(body.hm-gross) { font-size: 118%; }
-body.hm-neu { font: 500 var(--hm-s)/1.35 var(--hm-text); color: var(--hm-tinte); }
+body.hm-neu { font: 400 var(--hm-s)/1.4 var(--hm-pixel); color: var(--hm-tinte); letter-spacing: 0.01em; }
+/* Alles in Pixelschrift, auch Fließtext und was Module mit system-ui in den <head> schreiben.
+ * Ziffern und Euro kommen über unicode-range weiter aus der Systemschrift (lesbar, siehe @font-face). */
+.hm-neu, .hm-neu *:not(canvas) { font-family: var(--hm-pixel) !important; }
 .hm-neu button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .hm-neu button:focus-visible { outline: 3px dashed var(--hm-gold); outline-offset: 3px; }
 .hm-neu .spacer { display: none; }
@@ -89,6 +92,7 @@ body.hm-neu { font: 500 var(--hm-s)/1.35 var(--hm-text); color: var(--hm-tinte);
 .hm-neu .bau-schild,
 .hm-neu .bau-tipp,
 .hm-neu #hm-audio-popover .hm-audio-panel,
+.hm-neu #hm-audio-popover.hm-audio-panel,
 .hm-neu #card .hud-btn,
 .hm-neu .hm-knopf,
 .hm-neu .hm-tempo-knopf {
@@ -239,6 +243,8 @@ body.hm-neu { font: 500 var(--hm-s)/1.35 var(--hm-text); color: var(--hm-tinte);
   top: calc(var(--hm-oben) + var(--hm-knopf) + 6px);
   right: var(--hm-rechts);
   max-width: calc(100vw - 2 * var(--hm-rand));
+  border-radius: 0;
+  box-shadow: none;
 }
 .hm-neu .hm-audio-panel { padding: 10px 12px; }
 .hm-neu .hm-audio-mute { border-radius: 0; background: var(--hm-mulde); color: var(--hm-tinte); font-family: var(--hm-pixel); font-weight: 600; }
@@ -750,7 +756,7 @@ body.hm-neu { font: 500 var(--hm-s)/1.35 var(--hm-text); color: var(--hm-tinte);
 .hm-neu .hm-schalter:hover { border-color: var(--hm-meer); }
 .hm-neu .hm-schalter-text { flex: 1; display: grid; gap: 1px; }
 .hm-neu .hm-schalter-text strong { font-family: var(--hm-pixel); font-weight: 600; }
-.hm-neu .hm-schalter-text span { color: var(--hm-tinte-2); font-size: 0.88em; line-height: 1.3; }
+.hm-neu .hm-schalter-text span { color: var(--hm-tinte-2); font-size: 0.94em; line-height: 1.3; }
 /* Schiebeschalter im Pixel-Stil: Mulde mit Klotz, an = Meer und Klotz rechts */
 .hm-neu .hm-schalter-griff {
   position: relative;
@@ -965,3 +971,11 @@ body.hm-neu { font: 500 var(--hm-s)/1.35 var(--hm-text); color: var(--hm-tinte);
   width: 14px; height: 20px; border: var(--hm-px) solid var(--hm-tinte); border-radius: 0;
   background: var(--hm-gold); box-shadow: 0 var(--hm-px) 0 var(--hm-tinte);
 }
+
+/* Pixelschrift auch im Fließtext (Nachprüfung PR 157): kleine Texte etwas größer, damit Pixelify am Handy lesbar bleibt.
+ * Untergrenze etwa 13 px; vorher standen dort bis zu 0,68 rem (11 px) in der Systemschrift. */
+.hm-neu :is(.bau-tipp-titel, .bau-marke, .bau-zahl) { font-size: 0.8rem; letter-spacing: 0.02em; }
+.hm-neu :is(.bau-zeile-text, .bau-fortschritt, .bau-tab) { font-size: 0.9rem; }
+.hm-neu .hm-tipp .zaehler { font-size: 13px; }
+.hm-neu :is(#weather-panel, #event-banner) :is(small, .wp-sub, p) { font-size: max(13px, 0.875rem); }
+.hm-neu kbd, .hm-neu .pc-help-box kbd { font-size: max(13px, 0.9em); padding: 1px 6px; line-height: 1.3; }

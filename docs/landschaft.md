@@ -64,6 +64,12 @@ In jeder Form gleich: Festlandufer und Becken am Hafen, Engpass bei x 178 mit Mo
 
 Welche Form gilt: `?gelaende=N` in der Adresse (nur ansehen), sonst die im Spielstand (`modules.gelaende.nr`), in Tests und ohne Browser Form 1, in einem neuen Spiel eine zufällige. Im Spiel: `game.gelaende.aktuell()`, `game.gelaende.formen`. Eine Form entfernen: ihren Eintrag aus `FORMEN` löschen; Spielstände mit dieser Nummer bekommen Form 1.
 
+### Rand der Karte und Watt
+
+- `KERN` (x -420..430, y -200..470) ist fein gerechnet und dicht bepflanzt; `karteRaster` deckt genau diesen Bereich ab.
+- `BEREICH` (x -640..660, y -200..640) ist der Rand mit halber Auflösung, damit bei größter Kamerabreite keine harte Kante zum groben Außenring zu sehen ist. Die Tiefentextur rechnet dort nur jedes zweite Texel.
+- Watt (Nordsee und Form 8): Sandplaten knapp über Wasser, dazwischen Priele über 0,9 m tief. Kein flacher Dauersaum, der im Wasser-Shader überall schäumt. Ab Stufe 5 vor dem Außenhafen und ab Stufe 6 in der Liegewanne weggebaggert.
+
 ## Abwechslung an Land (Landbild)
 
 Code: `landschaft/vielfalt.js` (reine Rechenfunktionen, Haken `land()` und `nehrung()` in `punkt()`) und `landschaft/bewuchs.js` (Bäume, Knicks, Dorf, Höfe als feste Netze). Die Grundform (Ufer, Fahrwasser, Bauflächen) bleibt unverändert, nur das Land dahinter wechselt.

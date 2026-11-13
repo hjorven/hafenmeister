@@ -3,7 +3,7 @@
 // Alle wiederholten Dinge werden beim Bau zu wenigen festen Netzen gebacken, damit es auch auf schwachen Handys flüssig bleibt.
 import * as THREE from 'three';
 import { vereinfacheRaster } from './netz.js';
-import { punkt, BEREICH, PLAN_M, molen, buhnen, rauschen, DURCHSTICH, SLIP, pricken, leuchttuerme } from './gelaende.js';
+import { punkt, BEREICH, KERN, PLAN_M, molen, buhnen, rauschen, DURCHSTICH, SLIP, pricken, leuchttuerme } from './gelaende.js';
 import { erzeugeLeuchtfeuer } from './tageslicht.js';
 import { setzeBewuchs } from './bewuchs.js';
 import { JAHRESZEIT_FARBEN, JAHRESZEIT_TYPEN } from './vielfalt.js';
@@ -469,12 +469,16 @@ export function baueGelaende(region, stufe, qualitaet, { tiefsterPegel = 0 } = {
   gruppe.name = 'gelaende';
 
   const mat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
-  const innen = new THREE.Mesh(baueNetz(region, stufe, BEREICH.x0, BEREICH.x1, BEREICH.y0, BEREICH.y1, q.raster / U, null, 0, -0.15 + Math.min(0, tiefsterPegel), toleranzNach), mat);
+  const innen = new THREE.Mesh(baueNetz(region, stufe, KERN.x0, KERN.x1, KERN.y0, KERN.y1, q.raster / U, null, 0, -0.15 + Math.min(0, tiefsterPegel), toleranzNach), mat);
   innen.name = 'gelaende-innen';
   innen.receiveShadow = q.schatten;
   gruppe.add(innen);
+  // Rand um den Kern mit halber Auflösung: Küsten und Nehrungsenden bleiben sauber, kostet wenig
+  const rand = new THREE.Mesh(baueNetz(region, stufe, BEREICH.x0, BEREICH.x1, BEREICH.y0, BEREICH.y1, 2 * q.raster / U, KERN, 0.02, -0.15 + Math.min(0, tiefsterPegel), toleranzNach), mat);
+  rand.name = 'gelaende-rand';
+  gruppe.add(rand);
   const s2 = q.aussen / U;
-  const aussen = new THREE.Mesh(baueNetz(region, stufe, -1600, 1600, -1600, 470, s2, BEREICH, 0.05, -0.15 + Math.min(0, tiefsterPegel), toleranzNach), mat);
+  const aussen = new THREE.Mesh(baueNetz(region, stufe, -1600, 1600, -1600, 1400, s2, BEREICH, 0.05, -0.15 + Math.min(0, tiefsterPegel), toleranzNach), mat);
   aussen.name = 'gelaende-aussen';
   gruppe.add(aussen);
 
