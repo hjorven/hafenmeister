@@ -387,7 +387,7 @@ export function init(game) {
   function karteJetzt() {
     const st = stufe();
     const ls = game.landscape;
-    const sig = `${st}|${ls?.stufe ?? ''}|${ls?.region ?? ''}|${game.stegbild?.aktuell?.()?.nr ?? HAFEN.stegbild?.nr ?? 0}`;
+    const sig = `${st}|${ls?.stufe ?? ''}|${ls?.region ?? ''}|${game.stegbild?.aktuell?.()?.nr ?? HAFEN.stegbild?.nr ?? 0}|${game.gelaende?.aktuell?.()?.nr ?? 1}`;
     if (karte && !karteAlt && sig === karteSig) return karte;
     const tiefe = ls?.tiefeBei ? (x, z) => ls.tiefeBei(x, z) : () => 3;
     const w = ls?.warteplaetze ?? {};
@@ -492,7 +492,8 @@ export function init(game) {
       const p0 = liste[anteil != null && versuch === 0 ? Math.floor(anteil * liste.length) : Math.floor(Math.random() * liste.length)];
       const q = { x: p0.x, z: p0.z, sektor: name };
       if (p0.nx || p0.nz) {
-        for (let i = 0; i < 80 && game.boatAnim.imBild?.(q.x, q.z, L + 6); i++) { q.x += p0.nx * 15; q.z += p0.nz * 15; }
+        // hoechstens 120 m hinaus: weit herausgezoomt sieht man den Rand, dafuer kommt das Boot in vertretbarer Zeit an
+        for (let i = 0; i < 8 && game.boatAnim.imBild?.(q.x, q.z, L + 6); i++) { q.x += p0.nx * 15; q.z += p0.nz * 15; }
         return q;
       }
       if (!game.boatAnim.imBild?.(q.x, q.z, L + 6)) return q;

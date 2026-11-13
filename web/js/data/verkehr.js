@@ -22,10 +22,11 @@ const osten = (y, xKurve = 420 - (y - 264)) => [[xKurve - 40, y], [xKurve, y + 5
 const ostwaerts = (y, xKurve, rest = osten(y)) => [...westen(y, xKurve), ...rest];
 const westwaerts = (y, xKurve, vorher = osten(y).reverse()) => [...vorher, ...westen(y, xKurve).reverse()];
 export const SEE = {
-  // Noch kein Durchstich: die See ist frei, Bahnen gut 8 m vor den Buhnenköpfen (y bis 254)
+  // Noch kein Durchstich: die See ist frei, Bahnen gut 14 m vor den Buhnenköpfen (y bis 254),
+  // weit genug draußen, dass auch über dem Watt (Geländeform 8) noch 1,2 m Wasser stehen
   1: [
-    { pts: ostwaerts(268, -340), art: 'klein' }, { pts: westwaerts(282, -326), art: 'klein' },
-    { pts: ostwaerts(310, -298), art: 'gross' }, { pts: westwaerts(330, -278), art: 'gross' },
+    { pts: ostwaerts(278, -340), art: 'klein' }, { pts: westwaerts(292, -326), art: 'klein' },
+    { pts: ostwaerts(316, -298), art: 'gross' }, { pts: westwaerts(334, -278), art: 'gross' },
   ],
   // Stufe 3 und 4: Molenköpfe bis y 268 (x 149 bis 187), Rinne bis y 356 (x 152 bis 212),
   // Reede ab x 222, Ankerfeld um (345, 385) mit Radius 62. Die kleinen Bahnen biegen vor der Einfahrt nach Norden ab.
@@ -152,3 +153,35 @@ export const ANZAHL = {
   meer: { 1: 3, 2: 3, 3: 4, 4: 4, 5: 5, 6: 5 },
 };
 
+
+// --- Runde passend zum Gelaende (Thread Boote ums Gelaende) ----------------------------------------
+// Die Geländeformen (render/landschaft/formen.js) legen Inseln in den Binnensee. Die Runde wird so
+// verkleinert oder verschoben, dass alle Bahnen (inset 0 bis innen) auf Wasser mit mindestens minTiefe
+// liegen und Bojen und Ankerfelder (meide: [{ x, z, r }] in Weltmetern) frei bleiben.
+// tiefeBei(x, z) in Weltmetern. Gibt die Runde zurück oder null, wenn keine passt.
+export function rundeImWasser(r, tiefeBei, { innen = 18, minTiefe = 1.2, meide = [] } = {}) {
+  if (!r) return null;
+  const f = (c) => Math.sign(c) * Math.abs(c) ** 0.5;
+  const passt = (q) => {
+    if (q.rx - innen < 6 || q.ry - innen < 3) return false;
+    for (const inset of [0, innen / 2, innen]) {
+      for (let i = 0; i < 64; i++) {
+        const a = (i / 64) * Math.PI * 2;
+        const ry = q.ry - inset;
+        const p = welt(q.cx + (q.rx - inset) * f(Math.cos(a)), q.cy + ry * f(Math.sin(a)));
+        if (!(tiefeBei(p.x, p.z) >= minTiefe)) return false;
+        for (const m of meide) if (Math.hypot(p.x - m.x, p.z - m.z) < m.r) return false;
+      }
+    }
+    return true;
+  };
+  for (const dx of [0, 30, -30, 60, -60]) {
+    for (const s of [1, 0.85, 0.7, 0.55]) {
+      for (const dy of [0, 8, -8]) {
+        const q = { ...r, cx: r.cx + dx, cy: r.cy + dy, rx: r.rx * s, ry: Math.max(innen + 3, r.ry * s) };
+        if (passt(q)) return q;
+      }
+    }
+  }
+  return null;
+}

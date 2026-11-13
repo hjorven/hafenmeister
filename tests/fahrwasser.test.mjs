@@ -1,5 +1,5 @@
 // Fahrwasser (web/js/world/fahrwasser.js): Wege aus der Karte des Gelaendes.
-// Prueft fuer alle Stufen 1 bis 6 und alle 13 Stegbilder (0 Grundbild, 1 bis 12 Varianten):
+// Prueft fuer alle Stufen 1 bis 6, alle 13 Stegbilder (0 Grundbild, 1 bis 12 Varianten) und alle 10 Gelaendeformen:
 // - jeder Liegeplatz ist von See (oder im Binnensee ohne Zufahrt vom anderen Seeende) erreichbar,
 // - kein Punkt eines Wegs liegt an Land, auf flachem Wasser, auf einem Steg oder in einem Liegeplatz,
 // - Wege halten den Abstand der Bootsgroesse zu allem ein,
@@ -13,6 +13,8 @@ import { STEGBILDER } from '../web/js/data/stegbilder.js';
 import { stegbildSetzen } from '../web/js/data/stegbild.js';
 import { baueKarte, route, hindernisseAusHafen, bootMass, erreichbar, befahrbar, freiBei, sichtlinie } from '../web/js/world/fahrwasser.js';
 import { ChannelLock, Engstellen } from '../web/js/render/boat-channel.js';
+import { FORMEN, formSetzen } from '../web/js/render/landschaft/formen.js';
+import { seeBahnen, seeRunde, rundeImWasser, versetzt, VERSATZ_MAX } from '../web/js/data/verkehr.js';
 
 const R = region('ostsee');
 const BEREICH = { x0: -300, x1: 320, z0: -340, z1: 140 };
@@ -117,6 +119,40 @@ test('Fahrwasser: jeder Liegeplatz ist erreichbar, Wege meiden Land und Stege, S
   if (flach.size) console.log(`Hinweis Fahrwasser: ${flach.size} Plaetze nur ueber flaches Wasser erreichbar:`, [...flach].slice(0, 30).join(', '));
 });
 
+test('Fahrwasser: alle 10 Gelaendeformen, jeder Platz erreichbar, Bojen frei, Rand von See erreichbar', () => {
+  try {
+    for (const { nr } of FORMEN) {
+      formSetzen(nr);
+      for (let st = 1; st <= 6; st++) {
+        const k = karteFuer(st);
+        KARTE = k;
+        const w = warteplaetze(st);
+        const boje = w.bojen[Math.floor(w.bojen.length / 2)];
+        for (const b of w.bojen) assert.ok(befahrbar(k, b.x, b.z, 2.5, 1.5), `Form ${nr} Stufe ${st}: Boje ${b.id} nicht in freiem Wasser`);
+        // Ankunft: von der Boje aus muss der Kartenrand erreichbar sein (Boote kommen von dort)
+        const mL = bootMass(st >= 3 ? GROESSE.L : GROESSE.M);
+        const ok = erreichbar(k, boje.x, boje.z, mL.r, mL.t);
+        let rand = 0;
+        for (let i = 0; i < k.nx; i++) if (ok[i]) rand++;
+        for (let j = 0; j < k.nz; j++) { if (ok[j * k.nx]) rand++; if (ok[j * k.nx + k.nx - 1]) rand++; }
+        assert.ok(rand > 20, `Form ${nr} Stufe ${st}: Kartenrand von der Boje nicht erreichbar (${rand} Zellen)`);
+        for (const p of HAFEN.plaetze) {
+          if (!p.lage[st] || ['pier', 'marine', 'seenotretter'].includes(p.art)) continue;
+          const info = GROESSE[p.klasse] ?? GROESSE.M;
+          const m = bootMass({ ...info, beam: Math.min(info.beam, p.maxBreite ?? info.beam), draft: Math.min(info.draft, (p.tiefe?.[st] ?? 9) - 0.3) });
+          const ziel = zielVor(p, st, info, m.t);
+          const weg = route(k, boje, ziel, { ...m, rechts: Math.min(3, m.r) });
+          const wo = `Form ${nr} Stufe ${st} Platz ${p.id}`;
+          if (process.env.SAMMELN && !(weg.ok && weg.amZiel)) { FEHLER.push(`${wo}: kein Weg`); continue; }
+          assert.ok(weg.ok && weg.amZiel, `${wo}: kein Weg von der Warteboje`);
+          pruefeWeg(k, boje, weg, m, wo);
+        }
+      }
+    }
+  } finally { formSetzen(1); }
+  if (FEHLER.length) console.log(FEHLER.length, FEHLER.join('\n'));
+});
+
 test('Fahrwasser: ab Stufe 3 erreichen Boote bis L die Bojen von See, aus mehreren Richtungen', () => {
   for (let st = 3; st <= 6; st++) {
     const k = karteFuer(st);
@@ -190,4 +226,36 @@ test('Engstelle: Konvoi bis drei, Gegenverkehr wartet, Reihenfolge bleibt', () =
   assert.equal(e.lock(1).leer, true);
   e.reset();
   assert.equal(e.locks.size, 0);
+});
+
+test('Vorbeifahrer: Bahnen und Runde auf dem Binnensee liegen in jeder Gelaendeform auf Wasser', () => {
+  try {
+    for (const { nr } of FORMEN) {
+      formSetzen(nr);
+      for (let st = 1; st <= 6; st++) {
+        const g = gelaendeAbfrage(st, R);
+        for (const [bi, b] of seeBahnen(st).entries()) {
+          const soll = b.art === 'gross' ? 3 : 1.2;
+          for (const d of [0, -VERSATZ_MAX]) {
+            const pts = versetzt(b.pts, d);
+            for (let i = 1; i < pts.length; i++) {
+              const [ax, ay] = pts[i - 1], [bx, by] = pts[i];
+              const n = Math.ceil(Math.hypot(bx - ax, by - ay) / 2);
+              for (let j = 0; j <= n; j++) {
+                const px = ax + ((bx - ax) * j) / n, py = ay + ((by - ay) * j) / n;
+                const t = g.tiefeBei(px * PLAN_M, -py * PLAN_M);
+                assert.ok(t >= soll, `Form ${nr} Stufe ${st} Bahn ${bi} (${b.art}): zu flach bei (${px.toFixed(0)}, ${py.toFixed(0)}), ${t.toFixed(1)} m`);
+              }
+            }
+          }
+        }
+        const r = seeRunde(st);
+        if (r) {
+          const w = warteplaetze(st);
+          const meide = [...w.bojen.map((b) => ({ x: b.x, z: b.z, r: 10 })), ...w.ankerplaetze.map((a) => ({ x: a.x, z: a.z, r: (a.schwoikreisM ?? 8) + 4 }))];
+          assert.ok(rundeImWasser(r, g.tiefeBei, { meide }), `Form ${nr} Stufe ${st}: keine Runde auf dem Binnensee passt`);
+        }
+      }
+    }
+  } finally { formSetzen(1); }
 });

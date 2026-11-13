@@ -449,11 +449,31 @@ function astern(k, s, g, r, t, mitteGewicht, rMin = r) {
 
 // Ist die Strecke p-q fuer Radius r frei? Probe alle halbe Zelle.
 export function sichtlinie(k, p, q, r, t = 0) {
-  const d = Math.hypot(q.x - p.x, q.z - p.z);
-  const n = Math.max(1, Math.ceil(d / (k.zelle * 0.5)));
-  for (let s = 0; s <= n; s++) {
-    const x = p.x + ((q.x - p.x) * s) / n, z = p.z + ((q.z - p.z) * s) / n;
-    if (!befahrbar(k, x, z, r, t)) return false;
+  // Jede Zelle, die die Strecke beruehrt (Zellen-Durchlauf nach Amanatides/Woo), nicht nur
+  // Stichproben: sonst schneidet die Gerade unbemerkt die Ecke einer zu engen Zelle.
+  const ok = (i, j) => {
+    if (i < 0 || j < 0 || i >= k.nx || j >= k.nz) return true;
+    const c = j * k.nx + i;
+    return k.frei[c] >= r && k.tiefe[c] >= t;
+  };
+  const fx = (p.x - k.x0) / k.zelle, fz = (p.z - k.z0) / k.zelle;
+  const gx = (q.x - k.x0) / k.zelle, gz = (q.z - k.z0) / k.zelle;
+  let i = Math.floor(fx), j = Math.floor(fz);
+  const iEnd = Math.floor(gx), jEnd = Math.floor(gz);
+  const dx = gx - fx, dz = gz - fz;
+  const si = dx > 0 ? 1 : dx < 0 ? -1 : 0, sj = dz > 0 ? 1 : dz < 0 ? -1 : 0;
+  const tdx = si ? Math.abs(1 / dx) : Infinity, tdz = sj ? Math.abs(1 / dz) : Infinity;
+  let tx = si > 0 ? (i + 1 - fx) * tdx : si < 0 ? (fx - i) * tdx : Infinity;
+  let tz = sj > 0 ? (j + 1 - fz) * tdz : sj < 0 ? (fz - j) * tdz : Infinity;
+  if (!ok(i, j)) return false;
+  for (let n = 0; n < 100000 && (i !== iEnd || j !== jEnd); n++) {
+    if (Math.abs(tx - tz) < 1e-9) {
+      // genau durch eine Ecke: beide Nachbarn pruefen
+      if (!ok(i + si, j) || !ok(i, j + sj)) return false;
+      i += si; j += sj; tx += tdx; tz += tdz;
+    } else if (tx < tz) { i += si; tx += tdx; } else { j += sj; tz += tdz; }
+    if (tx > 1 + tdx && tz > 1 + tdz) break;
+    if (!ok(i, j)) return false;
   }
   return true;
 }
