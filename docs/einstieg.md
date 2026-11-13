@@ -26,3 +26,22 @@ Kein Tutorial mit Story, sondern Hinweis-Kreise: Ein leuchtender Kreis zeigt auf
 - Texte unterscheiden Finger (Handy, Tablet) und Maus (PC).
 - Gespeichert in `state.modules.einstieg` (`{ fertig, erledigt, v2, v3, startTag }`; v3 hat den Vorspul-Schritt von `sonne` in `tempo` umbenannt). Ein neues Spiel beginnt den Einstieg wieder, ältere Spielstände ohne Eintrag bekommen ihn auch.
 - Zum Ansehen neu starten: `?einstieg=1` an die Adresse hängen, zum Beispiel `https://hjorven.github.io/hafenmeister/?einstieg=1`.
+
+## Hinweise beim ersten Mal
+
+Nach dem Einstieg erscheint jeder dieser Hinweise einmal pro Spielstand (gemerkt in `state.modules.einstieg.hinweise`), in derselben Blase mit dem Knopf „Verstanden“. Nach 20 s schließt er von selbst. Solange eine Karte, das Bauen oder der Fotomodus offen ist, wartet er.
+
+| Hinweis | Auslöser | Kreis |
+|---|---|---|
+| Ein Boot ist weitergefahren | `sim:turnedAway` mit `reason: 'patience'` | keiner |
+| Kein Platz an den Bojen | `sim:turnedAway` mit `reason: 'queueFull'` | keiner |
+| Der Hafen kann wachsen | `sim:stageReady` | Knopf „Bauen“ |
+| Ein neuer Stammgast | `stammgast:neu` | keiner |
+
+Sturm und Winter stehen nicht in der Liste: Beide erklärt das Ereignisschild (`events/banner.js`) bei jedem Auftreten.
+
+## Hilfe im Menü
+
+`web/js/features/hilfe.js`: Menüpunkt „Hilfe“ (`#btn-hilfe`, Symbol `hilfe` aus `ui/pixel-symbole.js`). Die Tafel `#hm-hilfe` zeigt die sechs Grundgriffe mit Pixelbild (Boote an den Bojen, Einweisen, Liegegeld, Zeit, Bauen, Tagesziele und Ausbau), Texte getrennt für Finger und Maus. Der Knopf „Einstieg wiederholen“ startet den Einstieg neu (`game.einstieg.start()`); schon gesehene Hinweise bleiben gesehen.
+
+Test: `tests/specs/einstieg.spec.mjs` prüft auf allen Geräten, dass jedes Hinweisziel existiert, kein Text Gelöschtes nennt (Sonne, Leiste), die Hilfe sechs Bilder zeigt und „Einstieg wiederholen“ wirkt, und dass ein Hinweis nur einmal kommt.

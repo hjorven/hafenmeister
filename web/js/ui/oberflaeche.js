@@ -264,6 +264,7 @@ export function init(game) {
     ['btn-foto', 'Fotomodus', 'foto'],
     ['btn-sound', null, 'ton'],      // Text setzt das Ton-Modul (Ton / Stumm)
     ['btn-save', 'Spielstand', 'spielstand'],
+    ['btn-hilfe', 'Hilfe', 'hilfe'],
     ['btn-help', 'Maus und Tastatur', 'tasten'],
     ['btn-einstellungen', 'Einstellungen', 'zahnrad'],
   ];

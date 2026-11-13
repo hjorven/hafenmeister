@@ -109,6 +109,49 @@ export const TEXTE = {
   },
 };
 
+/**
+ * Hinweise beim ersten Mal (nach dem Einstieg, je einmal pro Spielstand). Sturm und Winter erklärt
+ * schon das Ereignisschild (events/banner.js) bei jedem Auftreten, darum stehen sie hier nicht.
+ */
+export const HINWEISE = {
+  geduld: {
+    titel: 'Ein Boot ist weitergefahren',
+    text: 'Es hat zu lange an der Boje gewartet. Weise wartende Boote schneller zu oder bau mehr passende Plätze.',
+    kurz: 'Es hat zu lange gewartet. Schneller zuweisen oder mehr Plätze bauen.',
+  },
+  voll: {
+    titel: 'Kein Platz an den Bojen',
+    text: 'Alle Wartebojen waren besetzt, darum ist ein Boot gleich weitergefahren. Mehr Liegeplätze machen die Bojen schneller frei.',
+    kurz: 'Alle Bojen waren besetzt. Mehr Liegeplätze helfen.',
+  },
+  stufe: {
+    titel: 'Der Hafen kann wachsen',
+    text: 'Das Ziel dieser Stufe ist geschafft. Unter „Bauen“, Reiter „Hafen“, baust du die nächste Ausbaustufe, sobald das Geld reicht.',
+    kurz: 'Ziel geschafft. Unter „Bauen“, Reiter „Hafen“, geht es zur nächsten Stufe.',
+  },
+  stammgast: {
+    titel: 'Ein neuer Stammgast',
+    text: 'Ein Gast war sehr zufrieden und kommt wieder: gleiches Boot, gleicher Name, gleiche Wünsche. Ab dem fünften Besuch kannst du ihn als Dauerlieger behalten.',
+    kurz: 'Ein zufriedener Gast kommt wieder. Ab dem fünften Besuch kann er Dauerlieger werden.',
+  },
+};
+
+/** Ereignis aus der Simulation -> Hinweis (oder null). */
+export function hinweisFuer(name, d = {}) {
+  if (name === 'sim:turnedAway') return d.reason === 'patience' ? 'geduld' : d.reason === 'queueFull' ? 'voll' : null;
+  if (name === 'sim:stageReady') return 'stufe';
+  if (name === 'stammgast:neu') return 'stammgast';
+  return null;
+}
+
+/** Merkt einen Hinweis vor, wenn er in diesem Spielstand noch nicht kam. true = neu. */
+export function merkeHinweis(e, id, offen) {
+  e.hinweise ||= [];
+  if (!id || e.hinweise.includes(id) || offen.includes(id)) return false;
+  offen.push(id);
+  return true;
+}
+
 export const REIHENFOLGE = ['willkommen', 'anlegen', 'muenzen', 'tempo', 'bauen', 'ziele'];
 
 /** So lange bleibt "Willkommen" mindestens stehen, auch wenn das erste Boot schon da ist. */
@@ -495,12 +538,62 @@ export async function init(game) {
     ring.style.top = `${Math.round(k.y - k.h / 2)}px`;
   }
 
+  // ------------------------------------------------------------ Hinweise beim ersten Mal (J6)
+  const offeneHinweise = [];
+  let hinweisBis = 0;
+  for (const name of ['sim:turnedAway', 'sim:stageReady', 'stammgast:neu']) {
+    game.on(name, (d) => { const e = st() && einstiegState(st()); if (e) merkeHinweis(e, hinweisFuer(name, d), offeneHinweise); });
+  }
+  function schliesseHinweis() {
+    if (!aktuell?.startsWith('hinweis:')) return;
+    zeige(null);
+    game.emit('einstieg:ende', {});
+  }
+  function hinweisTakt(e) {
+    const ruhig = !document.body.classList.contains('card-open') && !document.body.classList.contains('building') && !document.body.classList.contains('foto');
+    if (aktuell?.startsWith('hinweis:')) {
+      if (performance.now() > hinweisBis) { schliesseHinweis(); return; }
+      tipp.hidden = !ruhig;
+      const id = aktuell.slice(8);
+      k = id === 'stufe' ? domKreis(document.getElementById('btn-build'), 6) : null;
+      ring.hidden = !k || !ruhig;
+      if (k) setzeKreis();
+      if (!tipp.hidden) lege(k);
+      return;
+    }
+    if (aktuell || !offeneHinweise.length || !ruhig) return;
+    const id = offeneHinweise.shift();
+    e.hinweise ||= [];
+    e.hinweise.push(id);   // gilt als gesehen, auch wenn der Spieler gleich neu lädt
+    zeigeHinweis(id);
+    hinweisBis = performance.now() + 20000;
+  }
+  function zeigeHinweis(id) {
+    const t = HINWEISE[id];
+    aktuell = `hinweis:${id}`;
+    game.emit('einstieg:schritt', { schritt: aktuell });
+    tipp.replaceChildren();
+    const z = document.createElement('div'); z.className = 'zaehler'; z.textContent = 'Tipp';
+    const h = document.createElement('p'); h.className = 'titel'; h.textContent = t.titel;
+    const p = document.createElement('p'); p.className = 'lang'; p.textContent = t.text;
+    const pk = document.createElement('p'); pk.className = 'kurz'; pk.textContent = t.kurz;
+    const kn = document.createElement('div'); kn.className = 'knoepfe';
+    const w = document.createElement('button');
+    w.type = 'button'; w.className = 'weiter'; w.textContent = 'Verstanden';
+    w.addEventListener('click', schliesseHinweis);
+    kn.append(w);
+    tipp.append(z, h, p, pk, kn);
+    tipp.hidden = false;
+    try { game.audio?.sfx?.('hinweis'); } catch { /* Ton ist nicht wichtig */ }
+  }
+
   function entscheide() {
     const e = st() && einstiegState(st());
     if (!e || e.fertig) {
       halte(false);
-      if (aktuell) { zeige(null); game.emit('einstieg:ende', {}); }   // auch beim Ende nach Tagesziele oder nach einem Spieltag
+      if (aktuell && !aktuell.startsWith('hinweis:')) { zeige(null); game.emit('einstieg:ende', {}); }   // auch beim Ende nach Tagesziele oder nach einem Spieltag
       k = null;
+      if (e) hinweisTakt(e);
       return;
     }
     const l = lage();
@@ -545,7 +638,7 @@ export async function init(game) {
   window.addEventListener('pointercancel', () => { ziehen = false; }, true);
 
   game.einstieg = {
-    start() { st().modules ||= {}; st().modules.einstieg = { fertig: false, erledigt: [] }; zeige(null); },
+    start() { st().modules ||= {}; const alt = st().modules.einstieg?.hinweise ?? []; st().modules.einstieg = { fertig: false, erledigt: [], hinweise: alt }; zeige(null); },
     beenden,
     schritt: () => aktuell,
   };
