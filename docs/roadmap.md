@@ -54,7 +54,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 
 | Nr | Punkt | Status | Paket |
 |---|---|---|---|
-| Ü1 | Dauerlieger-Pacht reparieren: Fischer 15 €, Dauerlieger 50 % ihres Gastpreises, wie die Karte verspricht | gebaut, PR offen (wartet auf Freigabe) | P01 |
+| Ü1 | Dauerlieger-Pacht reparieren: Fischer 15 €, Dauerlieger 50 % ihres Gastpreises, wie die Karte verspricht | erledigt (PR 149) | P01 |
 | Ü2 | Hafenbüro Stufe 1 einen Nutzen geben (Knopf "Kassieren" erst mit Stufe 1 oder andere Wirkung) | offen (entschieden: "Alle kassieren" erst nach Kauf) | P02 |
 | Ü3 | Einstieg neu abstimmen: Schritt 1 ohne Sonne, Schritt 3 "Liegegeld beim Anlegen" | erledigt (PR 112) | P03 |
 | Ü4 | Ein Zähler für das Abschlussziel Stufe 6 (Tag der offenen Tür zählt mit) | erledigt (PR 139): eine Liste `GROSSSCHIFF_BESUCHE` in `data/services.js`, ein Zähler `state.bigVisits`; der Tag der offenen Tür gehört zum Flottenbesuch des Stützpunkts | P04 |
@@ -83,7 +83,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Ü17 | Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus `data/boats`, spürbare Kapazität | offen | P19 |
 | Ü18 | Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend | offen | P18 |
 | Ü19 | Winter nutzen: Zeitraffer vor Stufe 4 oder Winterarbeiten (F14) | offen | P20 |
-| Ü20 | Dauerlieger als Entscheidung: Spieler legt fest, welche Boxen Dauerplätze sind (höchstens ein Viertel der Gastboxen), Saisonpacht im Voraus, sichere Einnahme bei Sturm | gebaut, PR offen (wartet auf Freigabe) | P01 |
+| Ü20 | Dauerlieger als Entscheidung: Spieler legt fest, welche Boxen Dauerplätze sind (höchstens ein Viertel der Gastboxen), Saisonpacht im Voraus, sichere Einnahme bei Sturm | erledigt (PR 149) | P01 |
 
 ## 5. Rückmeldung (Ü21 bis Ü23)
 
@@ -428,16 +428,16 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| H1 | Pacht nach Bootsgröße (= Ü1) | gebaut, PR offen | P01 |
-| H2 | Saisonvertrag im Voraus | gebaut, PR offen | P01 |
-| H3 | Bewerber statt Verwandlung: Stammgäste und Einheimische fragen an | gebaut, PR offen | P01 |
-| H4 | Obergrenze ein Viertel der Plätze | gebaut, PR offen | P01 |
+| H1 | Pacht nach Bootsgröße (= Ü1) | erledigt (PR 149) | P01 |
+| H2 | Saisonvertrag im Voraus | erledigt (PR 149) | P01 |
+| H3 | Bewerber statt Verwandlung: Stammgäste und Einheimische fragen an | erledigt (PR 149) | P01 |
+| H4 | Obergrenze ein Viertel der Plätze | erledigt (PR 149) | P01 |
 | H5 | Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land | offen | P20 |
 | H6 | Lieblingsplatz eines Stammgasts | offen | P25 |
 | H7 | Sichtbare Treue: Wimpel je fünf Besuche | offen | P25 |
 | H8 | Stammgäste wachsen mit (Wünsche, größeres Boot) | offen | P25 |
 | H9 | Leere Box während eines Tagestörns für einen Tagesgast | offen | P25 |
-| H10 | Dauerlieger vor Vertragsende kündigen kostet | gebaut, PR offen | P01 |
+| H10 | Dauerlieger vor Vertragsende kündigen kostet | erledigt (PR 149) | P01 |
 
 ### I Tagesziele, Logbuch, Abschluss und Endlosspiel
 
@@ -610,7 +610,7 @@ Ein Audit von außerhalb (`AUDIT-ISTSTAND.md`, ZIP-Stand mit PR 143) hat die Roa
 
 | Nr | Befund | Am Stand geprüft | Paket |
 |---|---|---|---|
-| C01 | Dauerlieger-Gebühr übernimmt die Fischerpacht (= Ü1) | ja, `sim.js:1395` | P01 |
+| C01 | Dauerlieger-Gebühr übernimmt die Fischerpacht (= Ü1) | ja, `sim.js:1395`; behoben in PR 149 | P01 |
 | C02 | Alter Speicherweg `hafenmeister.save` neben dem neuen; alter Weg nur noch für eine einmalige, getestete Übernahme lesen, dann Schreibpfad entfernen (= N14) | ja, `state.js:7` | P09 |
 | C03 | Spielstand-Import prüft verschachtelte Daten kaum: ein Schema für den ganzen Spielstand, IDs gegen Boots- und Platzdaten, Zahlen begrenzen, unbekannte Felder kontrolliert behandeln, erst nach vollständiger Prüfung übernehmen, Tests mit falschen Typen und Extremwerten | ja, `state.js` `validate` | P09 |
 | C04 | Abnahmekriterium für P06: neue Spielstände, alle Regeltests und das Balancing nutzen dieselbe Regelkonfiguration | ja, `data/rules.js` besteht | P06 |
@@ -633,7 +633,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 
 | Paket | Titel (Thread) | Inhalt | Dateien | Thread |
 |---|---|---|---|---|
-| P01 | Dauerlieger zur echten Entscheidung machen | Ü1, Ü20, Doku Dauerlieger, Gast wird umgelegt (plan 9a) | `sim.js`, `features/dauerlieger.js`, `economy.js`, `tests/dauerlieger.test.mjs`, `docs/neue-features.md`, `docs/spielregeln.md` | neu |
+| P01 | Dauerlieger zur echten Entscheidung machen | Ü1, Ü20, Doku Dauerlieger, Gast wird umgelegt (plan 9a) | `sim.js`, `features/dauerlieger.js`, `economy.js`, `tests/dauerlieger.test.mjs`, `docs/neue-features.md`, `docs/spielregeln.md` | erledigt (PR 149) |
 | P02 | Hafenbüro mit eigenen Aufgaben ausbauen | Ü2, Ü11 | `ui/hud.js`, `sim.js` (Automatik), `economy.js`, `ui/bauen.js` (Texte) | neu |
 | P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 folgen im nächsten PR, J4 mit P17, J5 nach P14 |
 | P04 | Abschlussziel Stufe 6 richtig zählen | Ü4 | `bridge.js`, `render/services.js`, `docs/services.md` | bestehend: "Services und Sonderanlagen einbauen" |
