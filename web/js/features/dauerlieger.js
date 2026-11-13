@@ -649,7 +649,7 @@ export async function init(game) {
       width: min(420px, calc(100% - 32px)); display: flex; gap: 10px; align-items: flex-start;
       padding: 10px 12px; color: var(--hm-tinte, #283648); cursor: pointer; line-height: 1.35; }
     #dauer-hinweis:not(.hm-px) { background: #fffcf6; border: 2px solid #283648; }
-    #dauer-hinweis[hidden], body.card-open #dauer-hinweis { display: none; }
+    #dauer-hinweis[hidden], body.card-open #dauer-hinweis, #dauer-hinweis.zurueck { display: none; }
     #dauer-hinweis img, #dauer-hinweis svg { flex: none; width: 24px; height: 24px; image-rendering: pixelated; }
     #dauer-hinweis strong { display: block; font-weight: 600; }
     #dauer-hinweis span { display: block; font-size: max(13px, 0.875rem); }
@@ -675,18 +675,34 @@ export async function init(game) {
   }
   // Der Hinweis liegt nicht über der linken Spalte, dem Funk oder dem Ereignisschild:
   // oben in der Lücke dazwischen (PC, Querformat), sonst darunter (Handy hochkant).
-  const sichtbar = (e) => e && !e.hidden && e.offsetParent !== null && getComputedStyle(e).visibility !== 'hidden';
+  // (nicht offsetParent: das ist bei position: fixed immer null, etwa bei der Kartenwahl der Tagesziele)
+  const sichtbar = (e) => {
+    if (!e || e.hidden || e.closest('[hidden]') || getComputedStyle(e).visibility === 'hidden') return false;
+    const r = e.getBoundingClientRect();
+    return r.width > 0 && r.height > 0;
+  };
+  // Offene Karten und Fenster: solange steht der Hinweis zurück (ausgeblendet, seine Zeit läuft nicht ab)
+  const FENSTER = '.hm-ta, .tz-wahl, #hm-feier, #hm-menue, #hm-einstellungen, .hm-ziel-panel, #weather-panel';
+  const fensterOffen = () => document.body.classList.contains('card-open') || [...document.querySelectorAll(FENSTER)].some(sichtbar);
   function platziereHinweis() {
     if (hinweis.hidden) return;
+    hinweis.classList.toggle('zurueck', fensterOffen());
+    if (hinweis.classList.contains('zurueck')) return;
     const h = host.getBoundingClientRect();
     const rand = 8;
     const kopf = document.getElementById('hud-top');
     let oben = (sichtbar(kopf) ? kopf.getBoundingClientRect().bottom - h.top : 56) + rand;
     const ev = document.getElementById('event-banner');
     if (sichtbar(ev)) oben = Math.max(oben, ev.getBoundingClientRect().bottom - h.top + rand);
-    const hinder = [...document.querySelectorAll('#hm-seite > *, #hm-seite > * > *, #hm-funk, .hm-tipp')]
-      .filter(sichtbar).map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0)
-      .map((r) => ({ l: r.left - h.left, r: r.right - h.left, o: r.top - h.top, u: r.bottom - h.top }));
+    const rechteck = (e, tipp = false) => {
+      const r = e.getBoundingClientRect();
+      return { l: r.left - h.left, r: r.right - h.left, o: r.top - h.top, u: r.bottom - h.top, tipp };
+    };
+    const hinder = [
+      ...[...document.querySelectorAll('#hm-seite > *, #hm-seite > * > *, #hm-funk')].filter(sichtbar).map((e) => rechteck(e)),
+      // Tipps (Einstieg, "Als Nächstes" beim Bauen): möglichst frei lassen
+      ...[...document.querySelectorAll('.hm-tipp, #bau-tipp')].filter(sichtbar).map((e) => rechteck(e, true)),
+    ];
     const breit = Math.min(420, h.width - 32);
     const hoehe = 120;
     const imBand = hinder.filter((r) => r.o < oben + hoehe && r.u > oben);
@@ -694,25 +710,37 @@ export async function init(game) {
     const L = Math.max(0, ...imBand.filter((r) => (r.l + r.r) / 2 < mitte).map((r) => r.r));
     const R = Math.min(h.width, ...imBand.filter((r) => (r.l + r.r) / 2 >= mitte).map((r) => r.l));
     const luecke = R - L - 2 * rand;
-    let links, w;
+    const setze = (links, w, top) => Object.assign(hinweis.style, { left: `${Math.round(links)}px`, width: `${Math.round(w)}px`, transform: 'none', top: `${Math.round(top)}px` });
+    // Unten nie über Zeit, Kassieren oder Bauen
+    const grenze = (links, w) => Math.min(h.height, ...[...document.querySelectorAll('#hm-zeit, #btn-collect, #btn-build')].filter(sichtbar)
+      .map((e) => rechteck(e)).filter((r) => r.r > links && r.l < links + w).map((r) => r.o - rand));
+    const passt = (top, links, w) => top + hinweis.offsetHeight <= grenze(links, w);
     if (luecke >= Math.min(260, breit)) {
-      w = Math.min(breit, luecke);
-      links = L + rand + (luecke - w) / 2;
-    } else {
-      w = breit;
-      links = (h.width - w) / 2;
-      oben = Math.max(oben, ...hinder.filter((r) => r.l < links + w && r.r > links).map((r) => r.u + rand));
+      // Oben in der Lücke zwischen linker Spalte und Funk (PC, Querformat)
+      const w = Math.min(breit, luecke);
+      setze(L + rand + (luecke - w) / 2, w, oben);
+      return;
     }
-    hinweis.style.left = `${Math.round(links)}px`;
-    hinweis.style.width = `${Math.round(w)}px`;
-    hinweis.style.transform = 'none';
-    hinweis.style.top = `${Math.round(oben)}px`;
+    // Handy hochkant: unter der linken Spalte, möglichst nicht über einem Tipp
+    const w = breit;
+    const links = (h.width - w) / 2;
+    const unter = (liste) => Math.max(oben, ...liste.filter((r) => r.l < links + w && r.r > links).map((r) => r.u + rand));
+    const untenAlles = unter(hinder);
+    const untenSpalte = unter(hinder.filter((r) => !r.tipp));
+    setze(links, w, untenAlles);
+    if (passt(untenAlles, links, w)) return;
+    const ueberTipp = hinder.some((r) => r.tipp && r.l < links + w && r.r > links && r.o < untenSpalte + hinweis.offsetHeight && r.u > untenSpalte);
+    // Ein wartender Dauerlieger hat eine Frist bis zum Abend: dann notfalls über den Einstiegstipp oder
+    // eine aufgeklappte Tafel, aber nie über Spalte und Knöpfe. Andere Hinweise warten, bis Platz ist.
+    if (passt(untenSpalte, links, w) && (!ueberTipp || hinweisArt === 'wartet')) { setze(links, w, untenSpalte); return; }
+    if (hinweisArt === 'wartet') { setze(links, w, Math.max(rand, grenze(links, w) - hinweis.offsetHeight)); return; }
+    hinweis.classList.add('zurueck');
   }
   setInterval(platziereHinweis, 1000);
   window.addEventListener('resize', platziereHinweis);
   // Solange eine Karte offen ist, ist der Hinweis ausgeblendet und seine Zeit läuft nicht ab
   function weiter() {
-    if (document.body.classList.contains('card-open')) { hinweisTimer = setTimeout(weiter, 1000); return; }
+    if (fensterOffen() || hinweis.classList.contains('zurueck')) { hinweisTimer = setTimeout(weiter, 1000); return; }
     naechster();
   }
   function naechster() {
