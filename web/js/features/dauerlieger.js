@@ -264,7 +264,7 @@ function kassierePacht(state, ctx, platzId, boot) {
   if (!regeln(ctx).vorauskasse) { p.pacht = 0; return null; }
   const summe = pachtJeTag(state, ctx, boot) * tage;
   p.pacht = summe;
-  sim.addIncome(state, summe);
+  sim.addIncome(state, summe, 'pacht', 'saison');
   return { type: 'dauerPacht', berthId: platzId, boatId: boot.id, amount: summe, tage, jahr };
 }
 
@@ -358,7 +358,7 @@ export function kuendigeSofort(state, ctx, platzId) {
   if (!k) return { ok: false, reason: 'keinPlatz', events: [] };
   if (dauerState(state).plaetze[platzId].wartet) return { ok: false, reason: 'wartet', events: [] };
   if (state.money < k.summe) return { ok: false, reason: 'money', events: [] };
-  if (k.summe > 0 && !sim.spend(state, k.summe)) return { ok: false, reason: 'money', events: [] };
+  if (k.summe > 0 && !sim.spend(state, k.summe, 'pacht')) return { ok: false, reason: 'money', events: [] };
   const r = hebeAuf(state, ctx, platzId);
   return { ok: true, kosten: k.summe, events: [{ type: 'dauerAbfindung', berthId: platzId, amount: k.summe }, ...r.events] };
 }
@@ -513,7 +513,7 @@ export function nachtHook({ state, ctx, events }) {
       if (!boot) continue;
       const betrag = pachtJeTag(state, ctx, boot) * ctx.rules.seasonDays;
       Object.assign(p, { jahr: morgen.year, pacht: betrag });
-      sim.addIncome(state, betrag);
+      sim.addIncome(state, betrag, 'pacht', 'saison');
       summe += betrag; n++;
     }
     if (n) events.push({ type: 'dauerPacht', amount: summe, anzahl: n, jahr: morgen.year, saison: true });
