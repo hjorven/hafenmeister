@@ -725,8 +725,11 @@ export async function init(game) {
       // Oben in der Lücke zwischen linker Spalte und Funk (PC, Querformat)
       const w = Math.min(breit, luecke);
       setze(L + rand + (luecke - w) / 2, w, oben);
-      // Unter dem Zettel zu wenig Höhe (Handy quer): warten, außer ein Dauerlieger wartet schon
-      if (!passt(oben, L + rand + (luecke - w) / 2, w) && hinweisArt !== 'wartet') hinweis.classList.add('zurueck');
+      // Unter dem Zettel zu wenig Höhe oder dort ein Tipp (Handy quer): warten, außer ein Dauerlieger wartet schon
+      const l = L + rand + (luecke - w) / 2;
+      const t = unterZettel(l, w, oben);
+      const aufTipp = hinder.some((r) => r.tipp && r.l < l + w && r.r > l && r.o < t + hinweis.offsetHeight && r.u > t);
+      if ((!passt(oben, l, w) || aufTipp) && hinweisArt !== 'wartet') hinweis.classList.add('zurueck');
       return;
     }
     // Handy hochkant: unter der linken Spalte, möglichst nicht über einem Tipp
