@@ -208,6 +208,10 @@ test('Hafenbüro (Stufe 3) rechnet Strom, Wasser und Duschen ab, vorher nicht', 
   assert.equal(ev.extras, Math.round(fee * anteil));
   assert.equal(ev.amount, fee + ev.tip + ev.extras);
   assert.equal(s.money - vorher, ev.amount);
+  // Tagesabschluss (P15): Liegegeld, Trinkgeld und Nebenkosten getrennt
+  const d = sim.heute(s).details.liegegeld;
+  assert.equal(d.trinkgeld, ev.tip);
+  assert.ok(d.nebenkosten >= ev.extras);
   // Auch der Automat rechnet sie mit ab (S und M beim Festmachen)
   const m = liegend(s, ctx, { size: 'M', length: 8, beam: 2.6, draft: 1 });
   assert.equal(m.pendingFee, 0);

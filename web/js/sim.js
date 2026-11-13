@@ -1156,8 +1156,9 @@ export function collect(state, ctx, boatId, { hand = false } = {}) {
   const amount = boat.pendingFee + tip + extras;
   boat.pendingFee = 0;
   boat.paid = true;
-  addIncome(state, amount - tip, 'liegegeld', 'kassiert');
+  addIncome(state, amount - tip - extras, 'liegegeld', 'kassiert');
   addIncome(state, tip, 'liegegeld', 'trinkgeld');
+  addIncome(state, extras, 'liegegeld', 'nebenkosten');
   const ev = { type: 'collected', boatId, amount };
   if (hand) ev.hand = true;
   if (tip) ev.tip = tip;
