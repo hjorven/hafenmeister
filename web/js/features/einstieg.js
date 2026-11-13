@@ -588,6 +588,12 @@ export async function init(game) {
   }
 
   function entscheide() {
+    // Überblicksflug beim Laden (main.js, body.hm-ueberblick): nichts zeigen, Willkommen zählt erst danach
+    if (document.body.classList.contains('hm-ueberblick')) {
+      tipp.hidden = true; ring.hidden = true; k = null;
+      willkommenSeit = performance.now();
+      return;
+    }
     const e = st() && einstiegState(st());
     if (!e || e.fertig) {
       halte(false);

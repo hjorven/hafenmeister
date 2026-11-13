@@ -23,6 +23,7 @@ Kein Tutorial mit Story, sondern Hinweis-Kreise: Ein leuchtender Kreis zeigt auf
 - Der Text lässt Tipps auf das Spiel durch, nur seine Knöpfe fangen sie ab. Ist die Bootskarte offen, ist der Text ausgeblendet.
 - „Einstieg beenden“ beendet ihn jederzeit. Nach einem ganzen Spieltag schließt er von selbst.
 - Während das Boot an der Leine gezogen wird, sind Kreis und Text ausgeblendet.
+- Während des Überblicksflugs beim Laden (`body.hm-ueberblick`, main.js) sind Kreis und Text ausgeblendet; die 6 s von Willkommen zählen erst danach.
 - Texte unterscheiden Finger (Handy, Tablet) und Maus (PC).
 - Gespeichert in `state.modules.einstieg` (`{ fertig, erledigt, v2, v3, startTag }`; v3 hat den Vorspul-Schritt von `sonne` in `tempo` umbenannt). Ein neues Spiel beginnt den Einstieg wieder, ältere Spielstände ohne Eintrag bekommen ihn auch.
 - Zum Ansehen neu starten: `?einstieg=1` an die Adresse hängen, zum Beispiel `https://hjorven.github.io/hafenmeister/?einstieg=1`.
