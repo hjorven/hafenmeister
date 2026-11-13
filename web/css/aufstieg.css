@@ -31,6 +31,8 @@ body.hm-feier-an #btn-build,
 body.hm-feier-an #btn-collect,
 body.hm-feier-an .hm-tipp,
 body.hm-feier-an .bau-tipp,
+body.hm-feier-an .hm-ta,
+body.hm-feier-an .hm-ta-zettel,
 body.hm-feier-an #event-banner { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.2s steps(3); }
 
 /* Die alte Erfolgszeile aus ui/hud.js ersetzt die Feier */
