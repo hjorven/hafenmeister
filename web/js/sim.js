@@ -24,7 +24,7 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     typeById: Object.fromEntries(types.map((t) => [t.id, t])),
     berths: list,
     berthById: Object.fromEntries(list.map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [], stageUp: [] },
+    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [], stageUp: [], tick: [] },
   };
 }
 
@@ -34,6 +34,8 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
  *   arrival    fn({ state, ctx, boat }) darf das neue Boot ändern (zum Beispiel Wünsche)
  *   evening    fn({ state, ctx, boats, addIncome, events }) am Abend nach dem Hafengeld
  *   night      fn({ state, ctx, events }) nach der Abreise, vor dem neuen Tag
+ *   tick       fn({ state, ctx, events }) jede Spielsekunde tagsüber (zum Beispiel ein Dauerlieger,
+ *              der am Nachmittag früher zurückkommt)
  *   fit        fn({ state, ctx, boat, berth }) -> Grund (Text) oder null; zusätzliche Passregel
  *              für freie Plätze (zum Beispiel Dauerplätze, deren Boot gerade draußen ist)
  *   stageUp    fn({ state, ctx, from, to, gone, moves, findBerth, events }) nach einem Stufenausbau:
@@ -1186,11 +1188,15 @@ function startEvening(state, ctx, events) {
     endTrip(boat, events); // spätestens abends sind alle Ausflügler zurück
     visitors += boat.dayVisitors || 0;
     if (boat.stationed) {
-      // Dauerlieger zahlen einen Anteil ihres Gastpreises, Fischer und Dienste (Retter, Polizei) die feste Pacht
+      // Fischer und andere fest vergebene Plätze: feste Pacht je Abend (rules.stationedFee).
+      // Dauerlieger: Anteil ihres Gastpreises, mit Vorauskasse (rules.dauer.vorauskasse) gar nichts
+      // am Abend, weil die Saisonpacht schon bezahlt ist (features/dauerlieger.js).
       const share = Math.round(nightlyFee(state, ctx, boat, 0) * ctx.rules.stationedFeeShare);
-      const fee = boat.dauer ? share : ctx.rules.stationedFee ?? share;
-      addIncome(state, fee, 'pacht');
-      events.push({ type: 'stationedFee', boatId: boat.id, amount: fee });
+      const fee = boat.dauer ? (ctx.rules.dauer?.vorauskasse ? 0 : share) : ctx.rules.stationedFee ?? share;
+      if (fee > 0) {
+        addIncome(state, fee, 'pacht');
+        events.push({ type: 'stationedFee', boatId: boat.id, amount: fee });
+      }
     }
   }
   visitors = Math.round(visitors * mods.visitorFactor);
@@ -1468,6 +1474,7 @@ export function tick(state, ctx, dt) {
       }
       queueStep(state, ctx, events, true);
       tripStep(state, ctx, events);
+      for (const fn of ctx.hooks.tick) fn({ state, ctx, events });
       if (state.clock >= dayLength) {
         state.upcoming = []; // wer heute nicht mehr eingelaufen ist, kommt nicht
         startEvening(state, ctx, events);
