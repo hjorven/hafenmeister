@@ -27,6 +27,7 @@ const REASON_LABEL = {
 };
 
 import { HAFEN, platzInWelt } from '../data/harbor.js';
+import { pixelBild } from './pixel-symbole.js';
 
 const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
 const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -71,10 +72,12 @@ export function init(game) {
     #queue .boat-chip[aria-pressed="true"] { outline: 3px solid #f2c14e; }
     #card .hm-sonderfall { color: #8a4206; font-weight: 600; }
     #card .hm-vorschlag { color: #6b4e00; font-weight: 600; }
-    #card .hm-vorschlag::before { content: ''; display: inline-block; width: 0.6em; height: 0.6em; margin-right: 0.45em;
-      background: #f5c542; border: 2px solid #8a6300; transform: rotate(45deg); vertical-align: 0.05em; }
-    #card .hm-sonderfall::before { content: ''; display: inline-block; width: 0.6em; height: 0.6em; margin-right: 0.45em;
-      background: #f08a24; border: 2px solid #7a3a08; transform: rotate(45deg); vertical-align: 0.05em; }
+    #card .hm-sonderfall .hm-pixelbild, #card .hm-vorschlag .hm-pixelbild { vertical-align: -2px; margin-right: 6px; }
+    .hm-flugtext { position: fixed; z-index: 6; pointer-events: none; transform: translate(-50%, -100%); white-space: nowrap;
+      padding: 2px 8px; border: 2px solid #24364a; background: #fffcf6; color: #24364a; font: 600 14px var(--hm-pixel, sans-serif);
+      animation: hm-flug 1.6s ease-out forwards; }
+    .hm-flugtext.gold { background: #fde49a; }
+    @keyframes hm-flug { 0% { opacity: 0; margin-top: 0; } 15% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; margin-top: -36px; } }
   `;
   document.head.append(style);
 
@@ -210,8 +213,8 @@ export function init(game) {
         el('li', { title: 'Tiefgang' }, `Tiefgang ${meters(b.draft)}`),
         el('li', { title: 'Aufenthalt' }, nacht),
         ...b.wishes.map((w) => el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`))),
-      sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length),
-      vorschlag ? el('p', { class: 'card-hint hm-vorschlag' }, vorschlagText(b, vorschlag)) : null,
+      sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length, sim.bueroAutomatik?.(b.size)),
+      vorschlag ? el('p', { class: 'card-hint hm-vorschlag' }, pixelBild('rauteGold', 14), vorschlagText(b, vorschlag)) : null,
       el('p', { class: 'card-hint' }, !fitting.length
         ? 'Gerade ist kein passender Platz frei.'
         : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}. Zieh das Boot hin oder ${vorschlag ? 'nimm den Vorschlag an' : 'lass es einfahren'}.`),
@@ -235,13 +238,52 @@ export function init(game) {
   const sim0 = () => game.sim;
 
   // Hafenbüro mit Automatik: Sonderfälle bleiben beim Spieler (plan.md Abschnitt 3)
-  function sonderfallHinweis(grund, frei) {
+  // Ab Bürostufe 3 (Vorschläge) gilt es schon: Für Sonderfälle schlägt das Büro nichts vor.
+  function sonderfallHinweis(grund, frei, automatisch) {
     if (!grund) return null;
     const warum = grund === 'einzigerPlatz' ? 'Nur noch eine Box passt' : SONDERFALL_LABEL[grund] ?? 'Sonderfall';
+    if (!automatisch) {
+      return el('p', { class: 'card-hint hm-sonderfall' }, pixelBild('raute', 14), `${warum}: Dafür macht das Büro keinen Vorschlag, du entscheidest.`);
+    }
     const sek = game.sim?.ctx?.rules?.office?.special?.selfEnterAfter;
     const sonst = frei && sek ? ` Sonst fährt es nach ${sek} s selbst ein.` : '';
-    return el('p', { class: 'card-hint hm-sonderfall' }, `${warum}: Das Hafenbüro lässt dir die Wahl.${sonst}`);
+    return el('p', { class: 'card-hint hm-sonderfall' }, pixelBild('raute', 14), `${warum}: Die Leitstelle lässt dir die Wahl.${sonst}`);
   }
+
+  // Kurzer Text, der über einem Boot aufsteigt (Trinkgeld, Bonus fürs Einweisen)
+  function flugtext(boatId, text, gold = false) {
+    const a = game.boatView?.boot(boatId);
+    const cam = game.camera;
+    if (!a?.model || !cam?.camera || !game.THREE) return;
+    const v = a.model.position.clone();
+    v.y += 2;
+    v.project(cam.camera);
+    if (v.z > 1) return;
+    const x = (v.x + 1) / 2 * (cam.screenW ?? innerWidth);
+    const y = (1 - v.y) / 2 * (cam.screenH ?? innerHeight);
+    // Mehrere Texte am selben Boot stapeln statt übereinander
+    const n = flugAktiv.get(boatId) ?? 0;
+    flugAktiv.set(boatId, n + 1);
+    const t = el('div', { class: `hm-flugtext hm-px${gold ? ' gold' : ''}`, role: 'status' }, text);
+    t.style.left = `${Math.round(x)}px`;
+    t.style.top = `${Math.round(y - n * 30)}px`;
+    document.body.append(t);
+    setTimeout(() => {
+      t.remove();
+      const m = (flugAktiv.get(boatId) ?? 1) - 1;
+      if (m > 0) flugAktiv.set(boatId, m); else flugAktiv.delete(boatId);
+    }, 1700);
+  }
+  const flugAktiv = new Map();
+  game.on('sim:collected', (e) => { if (e?.tip) flugtext(e.boatId, `Trinkgeld +${euro(e.tip)}`, true); });
+  game.on('sim:moored', (e) => {
+    const sim = game.sim;
+    const b = sim?.state?.boats?.[e?.boatId];
+    // Der Bonus fürs Einweisen zählt immer; gezeigt wird er, sobald das Büro es auch könnte
+    if (b?.byHand && sim.state.office >= (sim.ctx.rules.office.propose ?? Infinity) && sim.ctx.rules.handAssignBonus) {
+      setTimeout(() => flugtext(b.id, 'Selbst eingewiesen: +¼ Anker'), 600);
+    }
+  });
 
   function buildCard(sim, st) {
     const rows = [];
@@ -379,7 +421,8 @@ export function init(game) {
   }
   function rautenAbgleich(sim) {
     if (!game.THREE || !game.scene || !game.boatView) return;
-    const soll = new Set(sim.waitingBoats().filter((b) => sim.sonderfall?.(b.id)).map((b) => b.id));
+    // Raute nur mit Leitstelle: vorher weist ohnehin niemand außer dem Spieler zu
+    const soll = new Set(sim.waitingBoats().filter((b) => sim.sonderfall?.(b.id) && sim.bueroAutomatik?.(b.size)).map((b) => b.id));
     for (const [id, g] of rauten) if (!soll.has(id)) { g.parent?.remove(g); rauten.delete(id); }
     for (const id of soll) {
       if (rauten.has(id)) continue;
@@ -401,8 +444,9 @@ export function init(game) {
       vorschlagMarke.name = 'hafenbuero-vorschlag';
       game.scene.add(vorschlagMarke);
     }
+    // Lage aus den gezeichneten Stegen (render/stege.js), sonst aus den Platzdaten
     const platz = HAFEN.plaetze.find((p) => p.id === platzId);
-    const w = platz && platzInWelt(platz, game.sim?.state?.stage ?? 1);
+    const w = game.stege?.platz?.(platzId) ?? (platz && platzInWelt(platz, game.sim?.state?.stage ?? 1));
     vorschlagMarke.visible = !!w;
     if (w) vorschlagMarke.userData.ort = w;
   }
@@ -425,7 +469,12 @@ export function init(game) {
       const a = game.boatView?.boot(id);
       if (!a?.model) { g.visible = false; continue; }
       g.visible = true;
-      const h = Math.max(2.4, a.model.userData.iconHeight ?? 0, (a.info?.length ?? 8) * 0.45) + 1.0;
+      // Über der Mastspitze: Höhe des Modells einmal messen (Segel und Takelage eingeschlossen)
+      if (g.userData.hoehe == null && game.THREE) {
+        const box = new game.THREE.Box3().setFromObject(a.model);
+        g.userData.hoehe = Number.isFinite(box.max.y) ? box.max.y - a.model.position.y : 0;
+      }
+      const h = Math.max(2.4, a.model.userData.iconHeight ?? 0, g.userData.hoehe ?? 0) + 1.0;
       g.position.set(a.model.position.x, h + Math.sin(t * 1.6 + id) * 0.12, a.model.position.z);
       // Immer quer zur Kamera, damit die Raute von jeder Seite gleich gut zu sehen ist
       if (blick) g.rotation.y = Math.atan2(blick.position.x - g.position.x, blick.position.z - g.position.z);

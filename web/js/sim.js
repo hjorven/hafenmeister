@@ -651,6 +651,8 @@ export function officeSpecialCase(state, ctx, boatId, fitting = null) {
   const sp = ctx.rules.office?.special;
   const boat = state.boats[boatId];
   if (!sp || !boat || boat.stationed) return null;
+  // Einmal Sonderfall, immer Sonderfall: sonst käme und ginge die Raute, wenn Boxen frei werden
+  if (boat.officeCase) return boat.officeCase;
   if (sp.kinds?.includes(boat.kind)) return 'mehrrumpf';
   if (sp.sizes?.includes(boat.size)) return 'gross';
   if (sp.specialGuests && boat.special) return 'sondergast';
@@ -672,7 +674,12 @@ export function autoAssign(state, ctx, { standardOnly = false } = {}) {
   for (const id of [...state.queue]) {
     const fitting = fittingBerths(state, ctx, id);
     if (!fitting.length) continue;
-    if (standardOnly && (state.officeAuto?.[state.boats[id].size] === false || officeSpecialCase(state, ctx, id, fitting))) continue;
+    if (standardOnly) {
+      const b = state.boats[id];
+      if (state.officeAuto?.[b.size] === false) continue;
+      const why = officeSpecialCase(state, ctx, id, fitting);
+      if (why) { b.officeCase = why; continue; }
+    }
     moor(state, ctx, state.boats[id], fitting[0], events);
   }
   return events;
@@ -913,7 +920,10 @@ function arrive(state, ctx, boat, events) {
   if (officeAutoFor(state, ctx, boat.size)) {
     const fitting = fittingBerths(state, ctx, boat.id);
     const why = fitting.length ? officeSpecialCase(state, ctx, boat.id, fitting) : null;
-    if (why) events.push({ type: 'officeSpecial', boatId: boat.id, reason: why });
+    if (why) {
+      boat.officeCase = why;
+      events.push({ type: 'officeSpecial', boatId: boat.id, reason: why });
+    }
     else if (fitting.length) moor(state, ctx, boat, fitting[0], events);
   }
 }

@@ -279,7 +279,10 @@ export async function initBridge(game) {
     // Hafenbüro: Grund, warum die Automatik dieses Boot dem Spieler lässt, oder null
     sonderfall: (boatId) => {
       const b = state.boats[boatIdOf(boatId)];
-      return b && sim.officeAutoFor(state, ctx, b.size) ? sim.officeSpecialCase(state, ctx, b.id) : null;
+      // Ab den Vorschlägen des Büros (Stufe 3); mit Leitstelle nur in Klassen, die sie zuweist
+      if (!b || state.office < (ctx.rules.office.propose ?? Infinity)) return null;
+      if (sim.officeAutomatic(state, ctx) && !sim.officeAutoFor(state, ctx, b.size)) return null;
+      return sim.officeSpecialCase(state, ctx, b.id);
     },
     // Vorschlag des Büros (Platz-id) für ein wartendes Boot oder null
     vorschlag: (boatId) => sim.officeProposal(state, ctx, boatIdOf(boatId)),

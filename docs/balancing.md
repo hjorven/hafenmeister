@@ -108,7 +108,7 @@ Das Abschlussziel benutzt nur Dinge, die der Spieler im Hafen sieht: Geld, Ruf u
 
 Von Hand eingewiesene Gäste (Ziehen, Ring, „Einfahren lassen“, „Vorschlag annehmen“) bewerten um `vonHandBonus` = 0,25 Anker besser; selbst eingefahrene und von der Leitstelle zugewiesene nicht.
 
-**Sonderfälle** (`ECONOMY.hafenbuero.sonderfaelle`, Roadmap P02): Mehrrumpfboote, Schiffe der Klassen XL und XXL, Sondergäste und Boote, für die nur noch genau eine Box frei ist, weist die Automatik nicht zu. Sie tragen eine orange Raute und fahren erst nach 25 s an der Boje selbst ein (statt 8 s), dann ohne auf Wünsche zu achten. Der Bot weist sie mit Leitstelle selbst zu. Ergebnis (`node tools/balance.mjs --laeufe 8`): geschickt 266, gemütlich 280 Spieltage bis zum Abschluss, im Korridor 200 bis 360.
+**Sonderfälle** (`ECONOMY.hafenbuero.sonderfaelle`, Roadmap P02): Mehrrumpfboote, Schiffe der Klassen XL und XXL, Sondergäste und Boote, für die nur noch genau eine Box frei ist, weist die Automatik nicht zu. Wer einmal Sonderfall ist, bleibt es (`boat.officeCase`). Sie tragen eine orange Raute und fahren erst nach 25 s an der Boje selbst ein (statt 8 s), dann ohne auf Wünsche zu achten. Der Bot weist sie mit Leitstelle selbst zu. Ergebnis nach PR 160 (`node tools/balance.mjs --laeufe 8`): geschickt 251, gemütlich 266 Spieltage bis zum Abschluss, im Korridor 200 bis 360.
 
 **Tagestörn** (`ECONOMY.tagestoern`): Gäste mit zwei oder mehr Nächten fahren mit 35 % Wahrscheinlichkeit tagsüber hinaus (zwischen 12 % und 30 % des Tages) und kommen zwischen 60 % und 85 % des Tages in dieselbe Box zurück. Die Box bleibt reserviert.
 

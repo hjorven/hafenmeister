@@ -75,7 +75,7 @@ test('Ohne Hafenmeister kein Alles-Kassieren, mit Stufe 1 schon', () => {
 
 test('Sonderfälle: Mehrrumpf, große Schiffe, Sondergäste, nur eine passende Box', () => {
   const ctx = context();
-  const s = quietState({ stage: 5, office: 3 });
+  const s = quietState({ stage: 5, office: 4 });
   const kat = waitingBoat(s, { typeId: 'L2', size: 'L', kind: 'mehrrumpf', length: 11, beam: 6.5, draft: 1.1 });
   const xl = waitingBoat(s, { typeId: 'XL3', size: 'XL', length: 25, beam: 7, draft: 2 });
   const gast = waitingBoat(s, { typeId: 'L1', size: 'L', length: 12, beam: 4, draft: 1.8, special: true });
@@ -86,7 +86,7 @@ test('Sonderfälle: Mehrrumpf, große Schiffe, Sondergäste, nur eine passende B
   assert.equal(sim.officeSpecialCase(s, ctx, normal.id), null);
 
   // Nur noch eine Box frei, in die das Boot passt
-  const t = quietState({ stage: 1, office: 3 });
+  const t = quietState({ stage: 1, office: 4 });
   for (let i = 1; i <= 5; i++) t.berths[`A${i}`] = 1000 + i;
   const knapp = waitingBoat(t);
   assert.deepEqual(sim.fittingBerths(t, ctx, knapp.id), ['A6']);
@@ -95,7 +95,7 @@ test('Sonderfälle: Mehrrumpf, große Schiffe, Sondergäste, nur eine passende B
 
 test('Hafenbüro weist Standardfälle zu, Sonderfälle warten auf den Spieler', () => {
   const ctx = context();
-  const s = quietState({ stage: 5, office: 3 });
+  const s = quietState({ stage: 5, office: 4 });
   const xl = waitingBoat(s, { typeId: 'XL3', size: 'XL', length: 25, beam: 7, draft: 2 });
   const normal = waitingBoat(s, { size: 'M', length: 8, beam: 2.6, draft: 1 });
   sim.tick(s, ctx, 1);
@@ -111,7 +111,7 @@ test('Hafenbüro weist Standardfälle zu, Sonderfälle warten auf den Spieler', 
 
 test('Spieler weist einen Sonderfall selbst zu', () => {
   const ctx = context();
-  const s = quietState({ stage: 5, office: 3 });
+  const s = quietState({ stage: 5, office: 4 });
   const kat = waitingBoat(s, { typeId: 'L2', size: 'L', kind: 'mehrrumpf', length: 11, beam: 6.5, draft: 1.1 });
   sim.tick(s, ctx, 1);
   assert.equal(s.boats[kat.id].status, 'waiting');
@@ -122,7 +122,7 @@ test('Spieler weist einen Sonderfall selbst zu', () => {
 
 test('Ankunft eines Sonderfalls meldet officeSpecial, Standardboot legt sofort an', () => {
   const ctx = context();
-  const s = quietState({ stage: 5, office: 3 });
+  const s = quietState({ stage: 5, office: 4 });
   const ankunft = (props) => ({
     id: s.nextId++, typeId: 'S1', name: 'Test', size: 'S', kind: null, length: 4, beam: 1.4, draft: 0.2,
     motor: false, special: false, dayVisitors: 0, stationed: false, wishes: [], nights: 1,
@@ -139,16 +139,16 @@ test('Ankunft eines Sonderfalls meldet officeSpecial, Standardboot legt sofort a
 
 test('Hafen schauen weist auch Sonderfälle zu', () => {
   const ctx = context();
-  const s = quietState({ stage: 5, office: 3 });
+  const s = quietState({ stage: 5, office: 4 });
   const xl = waitingBoat(s, { typeId: 'XL3', size: 'XL', length: 25, beam: 7, draft: 2 });
   assert.deepEqual(sim.autoAssign(s, ctx, { standardOnly: true }).filter((e) => e.boatId === xl.id), []);
   sim.autoAssign(s, ctx);
   assert.equal(s.boats[xl.id].status, 'moored');
 });
 
-test('Ohne Hafenbüro-Automatik gibt es keine Sonderfälle, alle fahren nach 8 s selbst ein', () => {
+test('Ohne Leitstelle gibt es keine Sonderfälle, alle fahren nach 8 s selbst ein', () => {
   const ctx = context();
-  const s = quietState({ stage: 5, office: 2 });
+  const s = quietState({ stage: 5, office: 3 });
   const xl = waitingBoat(s, { typeId: 'XL3', size: 'XL', length: 25, beam: 7, draft: 2 });
   assert.equal(sim.officeAutomatic(s, ctx), false);
   sim.tick(s, ctx, 9);
@@ -214,7 +214,7 @@ test('A2 und E3: Einfahren lassen ohne Büro nimmt die knappste Box, mit Büro d
 
 test('E5: Automatik je Größenklasse abschaltbar', () => {
   const ctx = context();
-  const s = quietState({ stage: 3, office: 3 });
+  const s = quietState({ stage: 3, office: 4 });
   sim.setOfficeAuto(s, 'M', false);
   assert.equal(sim.handAssignFor(s, ctx, 'M'), true);
   assert.equal(sim.handAssignFor(s, ctx, 'S'), false);
@@ -237,4 +237,18 @@ test('E6: Von Hand eingewiesene Gäste bewerten einen Viertelanker besser', () =
   assert.equal(hand.byHand, true);
   const d = sim.rateBoat(ctx, hand) - sim.rateBoat(ctx, auto);
   assert.ok(Math.abs(d - ECONOMY.hafenbuero.vonHandBonus) < 0.051, `Unterschied ${d}`);
+});
+
+test('Einmal Sonderfall, immer Sonderfall: "nur eine Box" bleibt, auch wenn Boxen frei werden', () => {
+  const ctx = context();
+  const s = quietState({ stage: 1, office: 4 });
+  for (let i = 1; i <= 5; i++) s.berths[`A${i}`] = 1000 + i;
+  const knapp = waitingBoat(s);
+  sim.tick(s, ctx, 1);
+  assert.equal(s.boats[knapp.id].status, 'waiting');
+  assert.equal(s.boats[knapp.id].officeCase, 'einzigerPlatz');
+  for (let i = 1; i <= 5; i++) delete s.berths[`A${i}`];
+  sim.tick(s, ctx, 1);
+  assert.equal(s.boats[knapp.id].status, 'waiting', 'die Leitstelle nimmt ihn nicht doch noch');
+  assert.equal(sim.officeSpecialCase(s, ctx, knapp.id), 'einzigerPlatz');
 });

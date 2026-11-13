@@ -174,8 +174,8 @@ export function rulesFromEconomy(E = ECONOMY) {
     o.special = {
       kinds: sf.arten ?? [],
       sizes: sf.klassen ?? [],
-      specialGuests: !!sf.sondergaeste,
-      onlyBerth: !!sf.einzigerPlatz,
+      specialGuests: (sf.auch ?? []).includes('sondergast'),
+      onlyBerth: (sf.auch ?? []).includes('einzigerPlatz'),
       selfEnterAfter: sf.selbstEinfahrenNach ?? null,
     };
   }

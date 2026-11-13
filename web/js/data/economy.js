@@ -289,8 +289,9 @@ export const ECONOMY = {
   sonderfaelle: {
     arten: ['mehrrumpf'],        // Mehrrumpfboote
     klassen: ['XL', 'XXL'],      // große Schiffe
-    sondergaeste: true,          // Traditionssegler, Behördenboote (sondergast in den Bootsdaten)
-    einzigerPlatz: true,         // nur noch genau eine passende freie Box
+    // weitere Fälle: 'sondergast' (Traditionssegler, Behördenboote, sondergast in den Bootsdaten)
+    // und 'einzigerPlatz' (nur noch genau eine passende freie Box)
+    auch: ['sondergast', 'einzigerPlatz'],
     selbstEinfahrenNach: 25,
   } },
 
