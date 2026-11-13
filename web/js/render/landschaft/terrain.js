@@ -487,7 +487,7 @@ export function baueGelaende(region, stufe, qualitaet, { tiefsterPegel = 0 } = {
 
   let flach = null;
   if (!q.schatten) {
-    flach = baueFlachSchatten(baeume);
+    flach = baueFlachSchatten(baeume.filter((b) => !b.fern));
     gruppe.add(flach);
   }
 
