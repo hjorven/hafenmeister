@@ -40,6 +40,7 @@ test('nicht gekaufte Box hat kein Schild', () => {
 
 test('Dauerplatz: rot, solange das Boot da ist oder nur auf Tagesausflug, grün auf mehrtägigem Törn', () => {
   const { ctx, state } = neu();
+  for (let i = 0; i < 4; i++) dauer.neuerBewerber(state, ctx);   // Bewerber mit Booten verschiedener Größe
   const platz = sim.availableBerths(state, ctx).find((b) => b.kind === 'box' && dauer.kannDauerplatz(state, ctx, b.id).ok);
   const r = dauer.machDauerplatz(state, ctx, platz.id);
   assert.ok(r.ok);

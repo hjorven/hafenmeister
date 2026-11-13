@@ -8,7 +8,7 @@ Im Hauptordner des Repos:
 bash tests/pruefen.sh
 ```
 
-Er prüft nacheinander die Pfade für GitHub Pages, alle Tests ohne Browser (`tests/*.test.mjs`) und alle Browser-Tests auf Handy, Tablet und PC. Am Ende steht `Alles grün.`, sonst bricht er mit dem Fehler ab. Beim ersten Lauf installiert er die Abhängigkeiten in `tests/` selbst. Dauer etwa 5 bis 10 Minuten.
+Er prüft nacheinander die Pfade für GitHub Pages, alle Tests ohne Browser (`tests/*.test.mjs`) und alle Browser-Tests auf Handy, Tablet und PC. Am Ende steht `Alles grün.`, sonst bricht er mit dem Fehler ab. Beim ersten Lauf installiert er die Abhängigkeiten in `tests/` selbst. Dauer etwa 10 bis 15 Minuten.
 
 Nur die schnellen Prüfungen ohne Browser (etwa 5 Sekunden):
 
@@ -50,7 +50,7 @@ Three.js wird in den Tests aus `tests/node_modules/three` geliefert statt vom CD
 
 ## Regel für alle Threads
 
-Vor dem Mergen eines PRs muss `bash tests/pruefen.sh` lokal grün sein, dazu der Check **Spiel testen (Handy, Tablet, PC)** im PR. Ist er rot, steht im Lauf unter **Annotations**, welcher Test auf welchem Gerät scheitert. Unter **Artifacts** liegen `bildschirmfotos` (alle Geräte) und `testbericht` (HTML-Bericht und Fotos der Fehlschläge).
+Vor dem Mergen eines PRs muss `bash tests/pruefen.sh` lokal grün sein, dazu der Check **Spiel testen (Handy, Tablet, PC)** im PR. Ist er rot, steht im Lauf unter **Annotations**, welcher Test auf welchem Gerät scheitert. Jedes Gerät läuft als eigener, paralleler Job (`Spiel testen (handy)` usw.), der Sammel-Check `Spiel testen (Handy, Tablet, PC)` ist grün, wenn alle Geräte und die Tests ohne Browser grün sind. Unter **Artifacts** liegen je Gerät `bildschirmfotos-<gerät>` und `testbericht-<gerät>` (HTML-Bericht und Fotos der Fehlschläge).
 
 Damit GitHub das auch erzwingt, kann Jorven es einmal in GitHub einstellen (freiwillig):
 
@@ -100,7 +100,7 @@ Bericht mit Bildschirmfotos im Browser öffnen:
 cd tests && npm run bericht; cd ..
 ```
 
-Die Fotos liegen danach auch in `tests/bildschirmfotos/` (z. B. `handy-start.png`, `pc-weit.png`). Der Testserver baut vorher mit `tools/build-pages.sh` die Seite und liefert sie unter `http://localhost:4173/hafenmeister/` aus, genau wie GitHub Pages im Unterordner.
+Die Fotos liegen danach auch in `tests/bildschirmfotos/` (z. B. `handy-start.png`, `pc-weit.png`). Der Testserver baut vorher mit `tools/build-pages.sh` die Seite und liefert sie unter `http://localhost:<Port>/hafenmeister/` aus, genau wie GitHub Pages im Unterordner. `bash tests/pruefen.sh` nimmt jedes Mal einen freien Port und startet den Server neu, damit nie ein alter Server mit altem Stand geprüft wird. Direkt mit `npx playwright test` ist der Port 4173; ist er belegt, bricht Playwright mit einer Meldung ab (dann `pkill -f server.mjs`).
 
 ## Testmodus und Adresszusätze
 

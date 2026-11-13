@@ -64,6 +64,13 @@ test('Was die neue Stufe bringt, kommt aus den Spielzahlen', () => {
   const { ctx } = neu();
   const zwei = neuInStufe(ctx, 1, 2);
   assert.ok(zwei.some((t) => /Liegepl/.test(t)), zwei.join(' | '));
+  // Stufe 2 bringt genau einen Platz (F01): Einzahl
+  if (ctx.rules.berthProjects[ctx.rules.stageGoals[1].project].length === 1) {
+    assert.ok(zwei.includes('Ein neuer Liegeplatz mit dem Ausbau'), zwei.join(' | '));
+  }
+  for (let n = 2; n <= ctx.rules.maxStage; n++) {
+    for (const t of neuInStufe(ctx, n - 1, n)) assert.doesNotMatch(t, /^1 neue/);
+  }
   assert.ok(zwei.some((t) => /\(M\)/.test(t)), 'M-Boote kommen ab Stufe 2');
   assert.ok(zwei.some((t) => /Stegprojekte/.test(t)));
   const drei = neuInStufe(ctx, 2, 3);

@@ -123,11 +123,24 @@ export function lage(state, ctx) {
     return sim.facilityCapacity(state, ctx, w) > 0;
   });
   const gross = stufenWert(ZAHLEN.grossAb, state.stage);
+  // Geldziele nach dem, was wirklich hereinkam: höchstens der Schnitt der letzten Tage. Ohne
+  // Verlauf (erster Tag, Spielstand ohne Statistik) nur ein Teil der Rechnung, nach einem
+  // Aufstieg zählen die Tage der alten Stufe, damit "leicht" auch dann leicht bleibt.
+  const K = Z.kassieren;
+  const tage = (state.stats?.verlauf || []).slice(-(K.verlaufTage || 3)).filter((t) => t && t.einnahmen);
+  let geldTag = rate * geld;
+  if (tage.length) {
+    // Liegegeld plus das, was ungezahlt davonfuhr: so viel hätte man einstreichen können
+    const echt = tage.reduce((x, t) => x + (t.einnahmen.liegegeld || 0) + (t.weggefahrenSumme || 0), 0) / tage.length;
+    geldTag = Math.min(geldTag, echt);
+  } else {
+    geldTag *= K.ohneVerlauf ?? 0.5;
+  }
   return {
     boote: rate * anteilZuweisen,
     zuweisen: anteilZuweisen > 0 && rate > 0,
     kassieren: geld > 0 && rate > 0,
-    geld: rate * geld,
+    geld: geldTag,
     segler: arten.some((t) => t.sail && handZuweisen(state, ctx, t.size)),
     strom,
     wuensche,
@@ -586,6 +599,33 @@ const CSS = `
 .hm-neu .hm-tafel > button.tz-neu { border-image-source: var(--rahmen-gold); }
 @media (prefers-reduced-motion: reduce) { .hm-tafel.jubel > button { animation: none; } }
 body.hm.foto .hm-tafel { display: none; }
+/* Solange die Wahl offen ist, wartet der Bau-Tipp "Als Nächstes" (sonst läge die Wahl darüber) */
+.hm-neu:has(.hm-tafel > ul.tz-wahl:not([hidden])) #bau-tipp { visibility: hidden; }
+/* Abends hat der Tagesabschluss Vorrang: die Tafel tritt zurück, bis er zu ist */
+body.ta-offen .hm-tafel { visibility: hidden; }
+/* Handy: Kopfzeile weg (der Einstieg erklärt sie), Ausbau-Schild tritt zurück, solange die Wahl offen ist */
+@media (max-width: 599px), (max-height: 499px) {
+  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl > li.tz-kopf-kurz { display: none; }
+  .hm-neu #hm-seite:has(.hm-tafel > ul.tz-wahl:not([hidden])) > #hm-ziel { display: none !important; }
+}
+/* Handy quer: Kartenwahl als Blatt rechts neben der linken Spalte, drei Karten nebeneinander,
+   die Zeitsteuerung unten links bleibt frei und sichtbar */
+@media (max-height: 499px) and (orientation: landscape) {
+  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl {
+    position: fixed; z-index: 16; width: auto; max-width: 640px;
+    left: calc(var(--hm-links) + min(280px, 40vw) + 8px);
+    right: calc(var(--hm-rand) + var(--hm-safe-right) + var(--hm-bauen) + 16px);   /* Bauen unten rechts bleibt frei */
+    top: calc(var(--hm-oben) + var(--hm-knopf) + 8px);
+    max-height: calc(100dvh - var(--hm-oben) - var(--hm-knopf) - var(--hm-bauen) - var(--hm-safe-bottom) - 28px);
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 10px; align-content: start;
+  }
+  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl > li.tz-klein { grid-column: 1 / -1; }
+  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl > li.tz-kopf-kurz { display: none; }
+  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl > li.tz-karte { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto auto; border-top: 0; }
+  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl .tz-nehmen { grid-column: 1; grid-row: auto; width: 100%; margin-top: 4px; min-height: 36px; }
+  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl { padding-block: 4px 6px; }
+  .hm-neu:has(#hm-seite .hm-tafel > ul.tz-wahl:not([hidden])) #hm-zeit { visibility: visible; }
+}
 `;
 
 function el(tag, attrs = {}, ...kinder) {
@@ -643,17 +683,40 @@ export async function init(game) {
   lageAlt();
   setTimeout(lageAlt, 500);
 
+  // Tagesabschluss (P15) offen? Dann wartet die Kartenwahl, bis er zu ist.
+  const abschlussOffen = () => document.body.classList.contains('ta-offen') || !!game.tagesabschluss?.beschaeftigt?.();
   function auf(offen) {
+    if (offen && abschlussOffen()) game.tagesabschluss?.schliesse?.();
     liste.hidden = !offen;
     knopf.setAttribute('aria-expanded', String(offen));
     if (offen) zeichne();
+    passeHoehe();
   }
+  // Die offene Tafel endet über Zeitsteuerung, Kassieren und Bauen, statt sie zu verdecken
+  function passeHoehe() {
+    if (liste.hidden) return;
+    liste.style.maxHeight = '';
+    const r = liste.getBoundingClientRect();
+    if (!r.width) return;
+    let unten = window.innerHeight - 8;
+    for (const id of ['hm-zeit', 'btn-collect', 'btn-build']) {
+      const n = document.getElementById(id);
+      const q = n?.getBoundingClientRect();
+      if (!q || !q.width || n.hidden || getComputedStyle(n).visibility === 'hidden') continue;
+      if (q.right <= r.left || q.left >= r.right || q.top <= r.top) continue;
+      unten = Math.min(unten, q.top - 8);
+    }
+    liste.style.maxHeight = `${Math.max(120, Math.floor(unten - r.top))}px`;
+  }
+  window.addEventListener('resize', () => requestAnimationFrame(passeHoehe));
   knopf.addEventListener('click', () => auf(liste.hidden));
   // Antippen der Karte klappt die Tafel wieder zu, damit sie keine Bojen verdeckt
   game.on('tap', () => auf(false));
 
   let notizTimer = 0;
+  let aufgeschoben = null;
   function melde(textInhalt) {
+    if (abschlussOffen()) { aufgeschoben = textInhalt; return; }
     notiz.textContent = textInhalt;
     notiz.hidden = false;
     clearTimeout(notizTimer);
@@ -712,9 +775,12 @@ export async function init(game) {
           el('span', { class: 'tz-stand', text: stand(z.woche) }), `Woche: ${wocheText(z.woche)}`));
       }
       z.karten.forEach((k, i) => zeilen.push(karteLi(k, i)));
+      liste.classList.add('tz-wahl');
       liste.replaceChildren(...zeilen);
+      passeHoehe();
       return;
     }
+    liste.classList.remove('tz-wahl');
     if (ziel) {
       const h = hinweis(ziel);
       zeilen.push(el('li', { class: `tz-ziel${ziel.erledigt ? ' erledigt' : ''}` },
@@ -740,6 +806,7 @@ export async function init(game) {
     if (z.deko.length) extras.push(`Deko im Hafen: ${z.deko.length} von ${DEKO.length}`);
     if (extras.length) zeilen.push(el('li', { class: 'tz-klein' }, ...extras.map((t) => el('span', { class: 'tz-klein', text: t }))));
     liste.replaceChildren(...zeilen);
+    passeHoehe();
   }
 
   function nimm(i) {
@@ -773,8 +840,40 @@ export async function init(game) {
     jubel();
   }
 
+  // Morgens: erst der Tagesabschluss, dann die Kartenwahl (einmal pro Tag von selbst)
+  let wahlWartet = false;
+  function morgenWahl() {
+    wahlWartet = false;
+    if (gewaehlt(st()) || !zielState(st()).karten.length) return;
+    const b = document.body.classList;
+    const besetzt = b.contains('card-open') || b.contains('foto') || game.bauen?.offen
+      || document.querySelector('.hm-tipp:not([hidden])') || game.einstieg?.schritt?.();
+    if (besetzt) { zeichne(); jubel(); return; }
+    auf(true);
+    jubel();
+  }
+  function nachAbschluss() {
+    if (aufgeschoben) { const t = aufgeschoben; aufgeschoben = null; melde(t); }
+    if (wahlWartet) morgenWahl();
+  }
+  game.on('tagesabschluss:fertig', nachAbschluss);
+  // Abends klappt die Tafel zu: eine offen gelassene Wahl liegt sonst morgens über dem Abschluss
+  let abendGewesen = false;   // von selbst nur nach einem echten Abend, nicht beim Laden oder neuen Spiel
+  game.on('sim:dayEnd', () => { abendGewesen = true; auf(false); });
+  game.on('tagesabschluss:zu', () => setTimeout(() => { if (!abschlussOffen()) nachAbschluss(); }, 0));
+
   function pruefeTag() {
     if (tageswechsel(st(), api.ctx)) zeichne();
+  }
+  let wahlTag = 0;
+  function neuerMorgen() {
+    pruefeTag();
+    const z = zielState(st());
+    if (!abendGewesen || wahlTag === st().day || z.tag !== st().day || !z.karten.length || gewaehlt(st())) return;
+    abendGewesen = false;
+    wahlTag = st().day;
+    wahlWartet = true;
+    if (!abschlussOffen()) morgenWahl();
   }
 
   for (const typ of ['moored', 'feeReady', 'collected', 'departed']) {
@@ -806,7 +905,7 @@ export async function init(game) {
   game.on('sim:built', (e) => gebaut(e?.cost));
   game.on('services:gebaut', (e) => gebaut(e?.kosten));
 
-  game.on('sim:dayStart', pruefeTag);
+  game.on('sim:dayStart', neuerMorgen);
   game.on('spielstand-geladen', () => { pruefeTag(); zeichne(); });
   game.on('sim:change', (e) => { if (e?.reason !== 'ziel') { pruefeTag(); zeichne(); } });
   pruefeTag();

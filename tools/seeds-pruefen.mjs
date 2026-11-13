@@ -1,0 +1,36 @@
+// Prüft viele Seeds je Küstentyp: Fahrwasser, Wartebojen, Ankerplätze, Liegeplatztiefen, Leuchttürme an Land.
+// Aufruf: node tools/seeds-pruefen.mjs [Seeds je Typ, Standard 50] [erster Seed, Standard 1]
+// Gibt jeden Seed aus, der durchfällt, und endet dann mit Fehlercode 1.
+import { FORMEN, formSetzen } from '../web/js/render/landschaft/formen.js';
+import { punkt, warteplaetze, leuchttuerme } from '../web/js/render/landschaft/gelaende.js';
+import { festePunkte } from '../web/js/render/landschaft/karte.js';
+import { REGIONEN } from '../web/js/render/landschaft/regionen.js';
+import { HAFEN } from '../web/js/data/harbor.js';
+
+const anzahl = Number(process.argv[2] || 50), ab = Number(process.argv[3] || 1);
+const fehler = [];
+const t0 = Date.now();
+for (const F of FORMEN) {
+  for (let seed = ab; seed < ab + anzahl; seed++) {
+    formSetzen(F.nr, seed);
+    const f = [];
+    for (const R of ['ostsee', 'nordsee']) {
+      const reg = REGIONEN[R];
+      for (const st of [1, 2, 3, 4, 5, 6]) {
+        for (const [px, py] of festePunkte(st).fahrwasser) if (-punkt(px, py, st, reg).h < (st <= 2 ? 1.6 : 3)) f.push(`${R} Stufe ${st} Fahrwasser ${px},${py}`);
+        const w = warteplaetze(st);
+        for (const b of w.bojen) if (-punkt(b.px, b.py, st, reg).h <= 1.2) f.push(`${R} Stufe ${st} Boje ${b.id}`);
+        for (const a of w.ankerplaetze) if (-punkt(a.px, a.py, st, reg).h <= 1.0) f.push(`${R} Stufe ${st} Anker ${a.id}`);
+      }
+      for (const p of HAFEN.plaetze) for (const [st, l] of Object.entries(p.lage)) {
+        const soll = p.tiefe?.[st];
+        if (soll != null && -punkt(l[0], l[1], Number(st), reg).h < soll - 0.4) f.push(`${R} ${p.id} Stufe ${st} zu flach`);
+      }
+      for (const [x, y] of leuchttuerme()) if (punkt(x, y, 3, reg).h <= 0.3) f.push(`${R} Leuchtturm ${x},${y} im Wasser`);
+    }
+    if (f.length) { fehler.push(`Typ ${F.nr} Seed ${seed}: ${f.slice(0, 4).join('; ')}${f.length > 4 ? ` (+${f.length - 4})` : ''}`); console.log(fehler[fehler.length - 1]); }
+  }
+  console.log(`Typ ${F.nr} (${F.name}): ${anzahl} Seeds geprüft`);
+}
+console.log(`${FORMEN.length * anzahl} Seeds in ${((Date.now() - t0) / 1000).toFixed(0)} s, ${fehler.length} durchgefallen.`);
+process.exit(fehler.length ? 1 : 0);

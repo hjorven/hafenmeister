@@ -15,12 +15,13 @@
 //
 // Wechsel, Neues Spiel und Probe laden die Seite neu, damit jedes Modul sauber neu startet.
 
-import { hasSave, loadGame, rohText, requestPersistentStorage, storageAvailable } from './storage.js';
+import { hasSave, loadGame, rohText, SAVE_VERSION, requestPersistentStorage, storageAvailable } from './storage.js';
 import { startPwa } from './pwa.js';
 import {
-  openSavePanel, openStart, showExportReminderIfDue, showUpdateBanner, showKaputtBanner, showOhneSpeicherBanner,
+  openSavePanel, openStart, showExportReminderIfDue, showUpdateBanner, showKaputtMeldung, showOhneSpeicherMeldung,
 } from './save-panel.js';
 import * as plaetze from './plaetze.js';
+import { neuerSeed } from '../render/landschaft/formen.js';
 import { createState, deserialize } from '../state.js';
 
 // Für den Fall, dass index.html die Zeilen noch nicht hat. Doppelt schadet nicht.
@@ -69,6 +70,15 @@ export function init(game) {
   const aktuell = () => game.state;
   // Testmodus ?stufe=n (state.testmodus, js/bridge.js) überschreibt den echten Spielstand nicht
   const testmodus = () => !!aktuell()?.testmodus;
+  // Spiel anhalten, solange eine Meldung offen ist, danach wie vorher weiter (wie der Pause-Knopf)
+  function anhalten() {
+    let warPausiert = true;
+    return {
+      pause: () => { warPausiert = !!game.paused; if (!warPausiert) game.setPaused?.(true); },
+      weiter: () => { if (!warPausiert) game.setPaused?.(false); },
+    };
+  }
+
   // Merkt sich, ob das letzte Speichern geklappt hat (Privatmodus, Speicher voll oder gesperrt)
   let speichernGeht = storageAvailable();
   let ohneSpeicherGemeldet = false;
@@ -79,7 +89,7 @@ export function init(game) {
     speichernGeht = ok;
     if (!ok && !ohneSpeicherGemeldet && document.readyState !== 'loading') {
       ohneSpeicherGemeldet = true;
-      showOhneSpeicherBanner({ getGame: aktuell, oeffnen: () => panel('liste') });
+      showOhneSpeicherMeldung({ getGame: aktuell, ...anhalten() });
     }
     return ok;
   };
@@ -96,7 +106,13 @@ export function init(game) {
       const ausText = /"harborName":"((?:[^"\\]|\\.){1,64})"/.exec(roh)?.[1];
       const name = e?.info ? e.name : (ausText ? plaetze.nameSauber(ausText.replace(/\\(.)/g, '$1')) : null);
       plaetze.kaputtMerken(roh, name);
-      ladeMeldung = { art: r ? 'sicherung' : 'verloren', name, savedAt: r?.savedAt ?? null };
+      let version = 0;
+      try { version = JSON.parse(roh)?.version; } catch { /* Müll */ }
+      const zuNeu = Number.isInteger(version) && version > SAVE_VERSION;
+      // Stand aus einer neueren Version (anderer Tab mit neuem Spiel): hier nichts überschreiben,
+      // nach dem Neuladen lädt die neue Version ihn wieder
+      if (zuNeu) plaetze.sperren();
+      ladeMeldung = { art: zuNeu ? 'zu-neu' : r ? 'sicherung' : 'verloren', name, savedAt: r?.savedAt ?? null };
     }
     return r;
   }
@@ -131,7 +147,7 @@ export function init(game) {
     st.harborName = name;
     st.modules = st.modules ?? {};
     if (Number.isInteger(stegbild) && stegbild >= 1) st.modules.stegbild = { nr: stegbild };
-    if (Number.isInteger(gelaende) && gelaende >= 1) st.modules.gelaende = { nr: gelaende };
+    if (Number.isInteger(gelaende) && gelaende >= 1) st.modules.gelaende = { nr: gelaende, seed: neuerSeed(Math.random, gelaende) };
     if (!einstieg) st.modules.einstieg = { fertig: true, erledigt: [] };
     const id = plaetze.platzAnlegen(st, { name });
     bildMachen();
@@ -256,12 +272,12 @@ export function init(game) {
     erinnert = true;
     // Beschädigter Stand oder Browser ohne Speicher geht vor jeder anderen Frage
     if (ladeMeldung && !st.testmodus) {
-      showKaputtBanner({ ...ladeMeldung, kaputt: plaetze.kaputtLesen });
+      showKaputtMeldung({ ...ladeMeldung, kaputt: plaetze.kaputtLesen, ...anhalten() });
       return;
     }
     if (!storageAvailable() && !st.testmodus && !ohneSpeicherGemeldet) {
       ohneSpeicherGemeldet = true;
-      showOhneSpeicherBanner({ getGame: aktuell, oeffnen: () => panel('liste') });
+      showOhneSpeicherMeldung({ getGame: aktuell, ...anhalten() });
       return;
     }
     // Safari-Erinnerung erst, wenn es den Hafen schon ein paar Tage gibt (nicht beim ersten Start)

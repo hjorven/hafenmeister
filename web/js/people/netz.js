@@ -6,7 +6,9 @@
 // Alle Koordinaten in Planeinheiten wie in web/js/data/harbor.js (x nach Osten, y nach Norden,
 // 1 Einheit = 0,62 m). Die Gelaendeformen stammen aus skripte/konzeptbilder/hafen_von_oben.py.
 //
-//   const netz = baueNetz({ hafen, stufe, gebaeude })
+//   const netz = baueNetz({ hafen, stufe, gebaeude, istLand })
+//   istLand(x, y) optional: Nehrungsweg, Strand und Badestellen nur dort, wo das Gelaende Land ist
+//   (die Kueste ist je Gelaendeform und Seed anders, render/landschaft/natur.js)
 //   netz.nodes[i]        { x, y, art }  art: land, strand, sand, wasser, holz, schwimmsteg, kai, mole, bruecke, boot
 //   netz.komp[i]         Nummer der zusammenhaengenden Flaeche (Festland, Nehrung)
 //   netz.weg(a, b)       Liste von Knoten-Indizes von a nach b (A*), oder null
@@ -52,7 +54,19 @@ function naechsterAufStrecke(px, py, ax, ay, bx, by) {
   return { t, x, y, d: Math.hypot(px - x, py - y) };
 }
 
-export function baueNetz({ hafen, stufe, gebaeude = [] }) {
+export function baueNetz({ hafen, stufe, gebaeude = [], istLand = null }) {
+  const land = (x, y) => !istLand || istLand(x, y);
+  // Linienzug in Stuecke teilen, die ganz an Land liegen (mindestens zwei Punkte)
+  const anLand = (pts) => {
+    const out = [];
+    let cur = [];
+    for (const q of pts) {
+      if (land(q[0], q[1])) cur.push(q);
+      else { if (cur.length >= 2) out.push(cur); cur = []; }
+    }
+    if (cur.length >= 2) out.push(cur);
+    return out;
+  };
   const st = hafen.stufen[String(stufe)] ?? hafen.stufen[String(Math.min(5, stufe))];
   const linien = [];         // { pts, art, gruppe, steg, att: [{ seg, t, h }] }
   const haken = [];          // Handle -> Knoten (nach dem Zusammenbau)
@@ -107,20 +121,23 @@ export function baueNetz({ hafen, stufe, gebaeude = [] }) {
   const nPts = [];
   for (let x = NEHRUNG_X0; x <= nEnde; x += 10) nPts.push([x, NEHRUNG_Y]);
   if (nPts[nPts.length - 1][0] !== nEnde) nPts.push([nEnde, NEHRUNG_Y]);
-  const nehrungsweg = linie(nPts, 'land', 'nehrung');
-  const istNehrungsweg = (l) => l.gruppe === 'nehrung' && l.art === 'land';
+  for (const teil of anLand(nPts)) linie(teil, 'land', 'nehrung');
+  const istNehrungsweg = (l) => l.gruppe === 'nehrung' && l.art === 'land' && l.pts.every((q) => q[1] === NEHRUNG_Y);
 
   // Strandweg am Ostseestrand (ab Stufe 5 nur westlich des Aussenhafens) mit Duenenuebergaengen
   const sEnde = stufe >= 5 ? -14 : nEnde;
   const sPts = [];
   for (let x = NEHRUNG_X0; x <= sEnde; x += 10) sPts.push([x, meerSued(x) - 4]);
-  const strandweg = linie(sPts, 'strand', 'nehrung');
+  for (const teil of anLand(sPts)) linie(teil, 'strand', 'nehrung');
+  const istStrandweg = (l) => l.gruppe === 'nehrung' && l.art === 'strand';
+  const hatNehrung = linien.some(istNehrungsweg), hatStrand = linien.some(istStrandweg);
   for (let x = NEHRUNG_X0 + 25; x <= sEnde - 10; x += 55) {
     if (Math.abs(x + 170) < 10) continue;   // nicht unter der Seebruecke
     const y1 = meerSued(x) - 4;
+    if (!hatNehrung || !hatStrand || !land(x, NEHRUNG_Y) || !land(x, y1) || !land(x, (NEHRUNG_Y + y1) / 2)) continue;
     const q = linie([[x, NEHRUNG_Y], [x, y1]], 'land', 'nehrung');
-    paare.push([anschlussEnde(q, 0), anschluss(x, NEHRUNG_Y, (l) => l === nehrungsweg).h]);
-    paare.push([anschlussEnde(q, 1), anschluss(x, y1, (l) => l === strandweg).h]);
+    paare.push([anschlussEnde(q, 0), anschluss(x, NEHRUNG_Y, istNehrungsweg).h]);
+    paare.push([anschlussEnde(q, 1), anschluss(x, y1, istStrandweg).h]);
   }
 
   const aussicht = [];       // Handles fuer Steg- und Molenkoepfe
@@ -183,13 +200,16 @@ export function baueNetz({ hafen, stufe, gebaeude = [] }) {
   const spotsRoh = [];
   for (let x = NEHRUNG_X0 + 12; x <= sEnde - 6; x += 22) {
     if (Math.abs(x + 170) < 8) continue;
-    const h = anschluss(x, meerSued(x) - 4, (l) => l === strandweg);
+    if (istLand && (!land(x, meerSued(x) - 1.5) || land(x, meerSued(x) + 6) || !land(x, meerSued(x) - 4))) continue;
+    const h = anschluss(x, meerSued(x) - 4, istStrandweg);
+    if (!h || h.d > 6) continue;
     spotsRoh.push({ x, y: meerSued(x) - 1.5, wasser: meerSued(x) + 6, h: h.h });
   }
   const stegWurzeln = (st?.stege ?? []).filter((s) => s.steg && s.bauart !== 'kai').map((s) => s.punkte[0][0]);
   for (const x of [-230, -205, -180, -85, -72, -28, 40, 70, 95, 214, 228]) {
     if (stufe >= 3 && x >= -156 && x <= 206) continue;          // dort ist Kaimauer und Promenade
     if (stegWurzeln.some((sx) => Math.abs(sx - x) < 12)) continue;
+    if (istLand && (!land(x, suedufer(x) - 3) || land(x, suedufer(x) + 5))) continue;
     const h = anschluss(x, uferwegY(x, stufe), (l) => l === uferweg);
     spotsRoh.push({ x, y: suedufer(x) - 3, wasser: suedufer(x) + 5, h: h.h });
   }

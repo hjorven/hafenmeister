@@ -48,7 +48,8 @@ test('Ab Stufe 3 warten Boote draußen vor der Einfahrt, vorher im Binnensee', (
   for (let stufe = 1; stufe <= 5; stufe++) {
     for (const b of warteplaetze(stufe).bojen) {
       const p = punkt(b.px, b.py, stufe, ostsee);
-      if (stufe <= 2) assert.ok(p.see < 0.5, `Stufe ${stufe} ${b.id} sollte im See liegen`);
+      // Stufe 1 und 2: im Wasser vor den Stegen (die Küste davor kann je Geländeform offen oder geschützt sein)
+      if (stufe <= 2) assert.ok(p.h < 0 && b.py < 190, `Stufe ${stufe} ${b.id} sollte vor den Stegen liegen`);
       else assert.ok(p.see > 0.5, `Stufe ${stufe} ${b.id} sollte auf See liegen`);
     }
   }

@@ -194,6 +194,11 @@ export function init(game) {
       return closeCard();
     }
     const fitting = sim.fittingBerths(b.id);
+    // Zuweisen als Entscheidung (P10, Review Bed P2): was das Boot zahlt und wie viele Plätze
+    // seinen Platz-Wunsch erfüllen (die leuchten gold)
+    const gold = sim.wunschPlaetze?.(b.id) ?? [];
+    const wert = sim.platzWert?.(b.id) ?? null;
+    const platzWunsch = b.wishes.filter((w) => sim.ctx.rules.berthWishes?.[w]).map((w) => WISH_LABEL[w] ?? w);
     const vorschlag = sim.vorschlag?.(b.id) ?? null;
     vorschlagZeigen(vorschlag);
     const schliessen = () => { sim.select(null); closeCard(); };
@@ -215,9 +220,10 @@ export function init(game) {
         ...b.wishes.map((w) => el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`))),
       sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length, sim.bueroAutomatik?.(b.size)),
       vorschlag ? el('p', { class: 'card-hint hm-vorschlag' }, pixelBild('rauteGold', 14), vorschlagText(b, vorschlag)) : null,
+      wert ? el('p', { class: 'card-zahlt' }, `Zahlt etwa ${wert.fee} € pro Nacht${gold.length ? `, am Wunschplatz ${sim.platzWert(b.id, gold[0])?.fee ?? wert.fee} €` : ''}.`) : null,
       el('p', { class: 'card-hint' }, !fitting.length
         ? 'Gerade ist kein passender Platz frei.'
-        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}. Zieh das Boot hin oder ${vorschlag ? 'nimm den Vorschlag an' : 'lass es einfahren'}.`),
+        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}. Zieh das Boot hin oder ${vorschlag ? 'nimm den Vorschlag an' : 'lass es einfahren'}.`),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
       el(
         'div',
@@ -275,17 +281,28 @@ export function init(game) {
     }, 1700);
   }
   const flugAktiv = new Map();
-  game.on('sim:collected', (e) => {
-    if (e?.tip) flugtext(e.boatId, `Trinkgeld +${euro(e.tip)}`, true);
-    if (e?.extras) flugtext(e.boatId, `Strom, Wasser, Duschen +${euro(e.extras)}`);
-  });
+  // Trinkgeld und Nebenkosten beim Kassieren zeigt die Münzanzeige in render/boat-view.js (P12)
   game.on('sim:moored', (e) => {
     const sim = game.sim;
     const b = sim?.state?.boats?.[e?.boatId];
     // Der Bonus fürs Einweisen zählt immer; gezeigt wird er, sobald das Büro es auch könnte
     if (b?.byHand && sim.state.office >= (sim.ctx.rules.office.propose ?? Infinity) && sim.ctx.rules.handAssignBonus) {
-      setTimeout(() => flugtext(b.id, 'Selbst eingewiesen: +¼ Anker'), 600);
+      // Erst zeigen, wenn das Boot in der Box fest ist (vorher ist es oft noch weit draußen)
+      clearTimeout(bonusOffen.get(b.id));
+      bonusOffen.set(b.id, setTimeout(() => zeigeBonus(b.id), 30000));
     }
+  });
+  const bonusOffen = new Map();
+  function zeigeBonus(id) {
+    if (!bonusOffen.has(id)) return;
+    clearTimeout(bonusOffen.get(id));
+    bonusOffen.delete(id);
+    flugtext(id, 'Selbst eingewiesen: +¼ Anker');
+  }
+  // boat:moored kommt auch an Boje und Ankerplatz; zählen soll nur die Box
+  game.on('boat:moored', (e) => {
+    if (e?.id == null || !bonusOffen.has(e.id) || /^(boje|anker)-/.test(String(e.berth ?? ''))) return;
+    setTimeout(() => zeigeBonus(e.id), 300);
   });
 
   function buildCard(sim, st) {
@@ -496,10 +513,14 @@ export function init(game) {
   // die runden Ringe sind nur der Ersatz ohne render/stege.js.
   let ringGroup = null;
   let leuchtend = [];
-  function showRings(ids) {
+  let gold = new Set();
+  function showRings(ids, boatId = null) {
+    gold = new Set(boatId != null ? game.sim?.wunschPlaetze?.(boatId) ?? [] : []);
     if (game.stege?.highlight) {
       leuchtend = [...ids];
       game.stege.highlight(leuchtend, '#2a9d8f');
+      // Gold: Platz erfüllt einen Wunsch des Boots (Strom), wie beim Ziehen in ui/gesten.js
+      for (const id of gold) game.stege.platz?.(id)?.mesh?.material?.color?.set('#f2b01e');
       return;
     }
     const THREE = game.THREE;
@@ -534,7 +555,7 @@ export function init(game) {
       const o = 0.38 + 0.14 * Math.sin(performance.now() / 250);
       for (const id of leuchtend) {
         const mat = game.stege?.platz?.(id)?.mesh?.material;
-        if (mat) mat.opacity = o;
+        if (mat) mat.opacity = gold.has(id) ? o + 0.3 : o;
       }
     }
     if (!ringGroup?.children.length) return;
@@ -553,7 +574,7 @@ export function init(game) {
   });
   game.on('sim:select', ({ boatId, berths }) => {
     note = '';
-    if (boatId != null) showRings(berths || []);
+    if (boatId != null) showRings(berths || [], boatId);
     else clearRings();
     if (boatId != null) openCard('boat');
     else if (cardMode === 'boat') closeCard();

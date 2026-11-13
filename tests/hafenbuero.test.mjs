@@ -273,16 +273,64 @@ test('E6: Von Hand eingewiesene Gäste bewerten einen Viertelanker besser', () =
   assert.ok(Math.abs(d - ECONOMY.hafenbuero.vonHandBonus) < 0.051, `Unterschied ${d}`);
 });
 
-test('Einmal Sonderfall, immer Sonderfall: "nur eine Box" bleibt, auch wenn Boxen frei werden', () => {
+test('"Nur eine Box" wird jedes Mal neu bewertet: belegt, dann kein Sonderfall; mehr frei, dann weist die Leitstelle zu', () => {
   const ctx = context();
   const s = quietState({ stage: 1, office: 4 });
-  for (let i = 1; i <= 5; i++) s.berths[`A${i}`] = 1000 + i;
+  const alle = sim.fittingBerths(s, ctx, waitingBoat(s, { status: 'expected' }).id);
+  s.queue = [];
+  const [einzige, ...rest] = alle;
+  for (const p of rest) s.berths[p] = 9000;
   const knapp = waitingBoat(s);
   sim.tick(s, ctx, 1);
   assert.equal(s.boats[knapp.id].status, 'waiting');
-  assert.equal(s.boats[knapp.id].officeCase, 'einzigerPlatz');
-  for (let i = 1; i <= 5; i++) delete s.berths[`A${i}`];
-  sim.tick(s, ctx, 1);
-  assert.equal(s.boats[knapp.id].status, 'waiting', 'die Leitstelle nimmt ihn nicht doch noch');
   assert.equal(sim.officeSpecialCase(s, ctx, knapp.id), 'einzigerPlatz');
+  // Die eine Box wird belegt: nichts mehr zu entscheiden, also auch kein Sonderfall
+  s.berths[einzige] = 9001;
+  assert.equal(sim.officeSpecialCase(s, ctx, knapp.id), null);
+  // Boxen werden frei: Standardfall, die Leitstelle weist zu
+  for (const p of [einzige, ...rest]) delete s.berths[p];
+  sim.tick(s, ctx, 1);
+  assert.equal(s.boats[knapp.id].status, 'moored', 'die Leitstelle nimmt ihn jetzt');
+});
+
+test('Warten mehrere Boote auf die letzte freie Box, gibt die Leitstelle sie dem, der am längsten wartet', () => {
+  const ctx = context();
+  const s = quietState({ stage: 1, office: 4 });
+  const probe = waitingBoat(s, { status: 'expected' });
+  const [letzte, ...rest] = sim.fittingBerths(s, ctx, probe.id);
+  s.queue = [];
+  delete s.boats[probe.id];
+  for (const p of rest) s.berths[p] = 9000;
+  // Erstes Boot allein: echter Sonderfall, der Spieler entscheidet
+  const erster = waitingBoat(s);
+  assert.equal(sim.officeSpecialCase(s, ctx, erster.id), 'einzigerPlatz');
+  sim.tick(s, ctx, 1);
+  assert.equal(s.boats[erster.id].status, 'waiting');
+  // Ein zweites kommt dazu: kein Sonderfall mehr, die Box bleibt nicht leer
+  const zweiter = waitingBoat(s);
+  assert.equal(sim.officeSpecialCase(s, ctx, erster.id), null);
+  assert.equal(sim.officeSpecialCase(s, ctx, zweiter.id), null);
+  sim.tick(s, ctx, 1);
+  assert.equal(s.boats[erster.id].status, 'moored', 'der länger Wartende bekommt die Box');
+  assert.equal(s.boats[erster.id].berthId, letzte);
+  assert.equal(s.boats[zweiter.id].status, 'waiting');
+  assert.equal(sim.officeSpecialCase(s, ctx, zweiter.id), null, 'ohne freie Box keine Raute');
+});
+
+test('Stufe 3: Jede Box wird nur einmal vorgeschlagen, wer zuerst kam, bekommt die beste', () => {
+  const ctx = context();
+  const s = quietState({ stage: 1, office: 3 });
+  const a = waitingBoat(s);
+  const b = waitingBoat(s);
+  const c = waitingBoat(s);
+  const v = sim.officeProposals(s, ctx);
+  const plaetze = [v[a.id], v[b.id], v[c.id]];
+  assert.ok(plaetze.every(Boolean), JSON.stringify(v));
+  assert.equal(new Set(plaetze).size, 3, 'drei verschiedene Boxen');
+  assert.equal(v[a.id], sim.fittingBerths(s, ctx, a.id)[0], 'der Erste bekommt die beste');
+  assert.equal(sim.officeProposal(s, ctx, b.id), v[b.id]);
+  // "Einfahren lassen" nimmt den eigenen Vorschlag, nicht die Box eines anderen
+  sim.autoEnter(s, ctx, b.id);
+  assert.equal(s.boats[b.id].berthId, plaetze[1]);
+  assert.equal(sim.officeProposal(s, ctx, a.id), plaetze[0]);
 });

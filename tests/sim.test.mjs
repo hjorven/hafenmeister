@@ -11,6 +11,7 @@ const ctx = sim.createContext({ boatTypes, berths });
 ctx.rules.queue.selfEnterAfter = null;
 ctx.rules.trips = null;
 ctx.rules.departWindow = null;
+ctx.rules.queue.buoyFee = 0; // Bojengeld (P10) prüft tests/zuweisen.test.mjs
 const ctxLive = sim.createContext({ boatTypes, berths });
 
 const waitingBoat = testBoot;
@@ -174,25 +175,24 @@ test('Hafengeld wird beim Anlegen fällig: Wünsche, Kapazität der Toilette, St
   assert.equal(sim.collect(s, ctx, yacht.id).ok, false);
 });
 
-test('Wer bleibt, zahlt jeden Morgen die nächste Nacht und gilt bis dahin als unbezahlt', () => {
+test('Wer bleibt, zahlt beim Anlegen alle Nächte; morgens kommt keine neue Münze', () => {
   const s = quietState({ money: 0 });
   const b = waitingBoat(s, { wishes: [], nights: 2 });
   sim.assign(s, ctx, b.id, 'A1');
-  assert.equal(b.pendingFee, 10);
+  assert.equal(b.pendingFee, 20);
   sim.collect(s, ctx, b.id);
   assert.equal(b.paid, true);
   const ev = sim.tick(s, ctx, RULES.dayLength + RULES.eveningLength);
   assert.equal(s.day, 2);
-  assert.ok(ev.some((e) => e.type === 'feeReady' && e.boatId === b.id));
-  assert.equal(b.paid, false);
-  assert.equal(b.pendingFee, 10);
-  // Nicht kassiert: nachts landet die Hälfte in der Kasse des Vertrauens, dann reist das Boot ab
+  assert.ok(!ev.some((e) => e.type === 'feeReady' && e.boatId === b.id));
+  assert.equal(b.paid, true);
+  assert.equal(b.pendingFee, 0);
   sim.tick(s, ctx, RULES.dayLength + RULES.eveningLength);
-  assert.equal(s.money, 15);
+  assert.equal(s.money, 20);
   assert.equal(s.boats[b.id], undefined);
 });
 
-test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gästezahl', () => {
+test('Nacht: liegengebliebene Münzen bringen vier Fünftel, Abreise mit Bewertung, Ruf und Gästezahl', () => {
   const s = quietState({ money: 0 });
   s.facilities.wc = 1;
   const happy = waitingBoat(s, { wishes: ['wc'] });
@@ -206,8 +206,8 @@ test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gäste
   sim.tick(s, ctx, RULES.dayLength);
   sim.collect(s, ctx, happy.id); // 13
   const ev = sim.tick(s, ctx, RULES.eveningLength);
-  // plain und stays je 10, nicht kassiert -> je 5
-  assert.equal(s.money, 13 + 5 + 5);
+  // plain 10, stays 20 (zwei Nächte im Voraus), nicht kassiert -> vier Fünftel: 8 und 16
+  assert.equal(s.money, 13 + 8 + 16);
   const dep = ev.filter((e) => e.type === 'departed');
   assert.deepEqual(dep.map((e) => e.rating), [5, 4]);
   assert.equal(s.guests, 2);
@@ -217,8 +217,8 @@ test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gäste
   assert.equal(s.berths.A3, stays.id);
   assert.equal(s.berths.A1, undefined);
   assert.equal(s.ratings.slice(-2).join(), '5,4');
-  assert.ok(ev.some((e) => e.type === 'dayEnd' && e.income === 23));
-  assert.equal(s.stats.bestDayIncome, 23);
+  assert.ok(ev.some((e) => e.type === 'dayEnd' && e.income === 37));
+  assert.equal(s.stats.bestDayIncome, 37);
 });
 
 test('Ruf: Schnitt der letzten 20, Faktor für Ankünfte', () => {
@@ -748,20 +748,24 @@ test('Selbst-Einfahren nimmt die nächste freie passende Box, auch eine zu groß
   assert.equal(sim.selfBerth(t, d, x.id), 'A1');
 });
 
-test('Ankünfte kommen verteilt: Mindestabstand, im Fenster, sortiert', () => {
-  const mk = (ts) => ts.map((t, i) => ({ id: i + 1, arriveAt: t }));
-  // genug Platz: voller Mindestabstand
-  const a = sim.spreadArrivals(mk([10, 10.2, 10.4, 30]), 10, 60, 3);
-  assert.deepEqual(a.map((b) => b.arriveAt), [10, 13, 16, 30]);
-  // Pulk am Ende rückt nach vorn auf, nichts liegt hinter dem Fenster
-  const b = sim.spreadArrivals(mk([58, 59, 59.5, 60]), 10, 60, 3);
-  assert.deepEqual(b.map((x) => x.arriveAt), [51, 54, 57, 60]);
-  // zu viele Boote für den Abstand: gleichmäßig kleiner, weiter im Fenster
-  const c = sim.spreadArrivals(mk(Array(40).fill(20)), 10, 60, 3);
-  for (let i = 1; i < c.length; i++) assert.ok(c[i].arriveAt - c[i - 1].arriveAt >= 1.1);
-  assert.ok(c[0].arriveAt >= 10 && c.at(-1).arriveAt <= 60);
-  // ohne Mindestabstand bleibt alles, wie es ist
-  assert.deepEqual(sim.spreadArrivals(mk([5, 5]), 0, 10, 0).map((x) => x.arriveAt), [5, 5]);
+test('Ankünfte unregelmäßig im Fenster: Mindestabstand, kein Takt, ganzes Fenster', () => {
+  const mk = (n) => Array.from({ length: n }, (_, i) => ({ id: i + 1 }));
+  const r = { arrivalMinGap: 3, arrivalMaxGap: 8 };
+  let x = 12345;
+  const rnd = () => ((x = (x * 1103515245 + 12345) >>> 0) / 4294967296);
+  // viele Boote: Abstände zwischen 3 und 8 s, verschieden, im Fenster
+  const a = sim.placeArrivals(mk(17), 4.5, 85.5, r, rnd).map((b) => b.arriveAt);
+  const d = a.slice(1).map((t, i) => t - a[i]);
+  assert.ok(d.every((g) => g >= 2.95 && g <= 8.05), `Abstände ${d}`);
+  assert.ok(new Set(d.map((g) => Math.round(g))).size >= 3, `zu gleichmäßig: ${d}`);
+  assert.ok(a[0] >= 4.5 && a[0] <= 12.5 && a.at(-1) <= 85.5, `Fenster ${a}`);
+  // wenige Boote: gestreckt über den Tag, kein Loch nur am Ende
+  const b = sim.placeArrivals(mk(4), 4.5, 85.5, r, rnd).map((y) => y.arriveAt);
+  assert.ok(b.at(-1) - b[0] >= 30, `zu eng: ${b}`);
+  // zu viele Boote für den Mindestabstand: gleichmäßig kleiner, im Fenster
+  const c = sim.placeArrivals(mk(40), 10, 60, r, rnd).map((y) => y.arriveAt);
+  for (let i = 1; i < c.length; i++) assert.ok(c[i] - c[i - 1] >= 1.1);
+  assert.ok(c[0] >= 10 && c.at(-1) <= 60);
 });
 
 test('Ein ganzer Tag: kein Boot kommt weniger als 1 Sekunde nach dem vorigen, Herkunft je Boot verschieden', () => {

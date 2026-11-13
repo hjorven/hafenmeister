@@ -316,6 +316,8 @@ export async function initBridge(game) {
     // Anteil des Tages von 0 (Morgen) bis 1 (Nacht), für die Sonne im Tagesbalken
     // Restliche Geduld eines wartenden Boots in Sekunden (für eine Anzeige an der Boje)
     geduld: (boatId) => sim.patienceLeft(state, ctx, boatIdOf(boatId)),
+    /** Anteil, den der Hafenmeister für liegengebliebene Münzen abliefert (0,8 = vier Fünftel). */
+    rundgangAnteil: () => sim.roundShare(ctx),
     tagesAnteil: () => Math.min(1, state.clock / (ctx.rules.dayLength + ctx.rules.eveningLength)),
     wartet: (boatId) => state.boats[boatIdOf(boatId)]?.status === 'waiting',
     // Grün-Rot-Schild: 'frei' | 'belegt' | 'ausflug' | 'reserviert' | 'aus'
@@ -327,10 +329,17 @@ export async function initBridge(game) {
     holdBoat: (boatId, held = true) => sim.holdBoat(state, boatIdOf(boatId), held),
     // Hat das Boot sein Liegegeld für die kommende Nacht bezahlt? (Bändchen am Bug, Hafenmeister-Rundgang)
     istBezahlt: (boatId) => {
-      const b = state.boats[boatIdOf(boatId)];
-      return !!b && b.status === 'moored' && (b.stationed || (b.paid !== false && !(b.pendingFee > 0)));
+      const id = boatIdOf(boatId);
+      const b = state.boats[id];
+      // Abgerechnete Gäste (nachts) liegen bis zum Ablegen am Vormittag noch in der Box: bezahlt
+      if (!b) return Object.values(state.leaving || {}).some((l) => String(l.boatId) === String(id));
+      return b.status === 'moored' && (b.stationed || (b.paid !== false && !(b.pendingFee > 0)));
     },
     passendePlaetze: (boatId) => sim.fittingBerths(state, ctx, boatIdOf(boatId)),
+    // Zuweisen als Entscheidung (P10): Plätze, die einen Platz-Wunsch erfüllen (leuchten gold),
+    // und was ein Platz bringt: { fee, wishesMet, wishes, anchors, snug } (ohne Platz: Grundwert)
+    wunschPlaetze: (boatId) => sim.wishBerths(state, ctx, boatIdOf(boatId)),
+    platzWert: (boatId, berthId = null) => sim.berthValue(state, ctx, boatIdOf(boatId), berthId == null ? null : berthIdOf(berthId)),
   };
   game.sim = api;
 
@@ -394,10 +403,23 @@ export async function initBridge(game) {
   });
   game.on('ui:cancel', () => api.select(null));
   // Münzen einstreichen: mit { coin } nur diese Münze (coin = Boot-id), sonst alle (Hafenhorn)
+  // Kassierstrich (ui/gesten.js): combo zählt die Münzen im Zug, am Ende 'ui:strich-ende'.
+  // Ab rules.strokeTip.from Münzen gibt es Trinkgeld auf die eingestrichene Summe (sim:strokeTip).
+  let strich = { n: 0, sum: 0 };
   game.on('ui:collect', (d = {}) => {
     const id = boatIdOf(d?.coin ?? d?.boat ?? null);
-    if (id != null) api.collect(id);
-    else api.collectAll(true);
+    if (id == null) { api.collectAll(true); return; }
+    if (!(d.combo > 1)) strich = { n: 0, sum: 0 };
+    const r = api.collect(id);
+    // Trinkgeld auf das Liegegeld, nicht auf Zuschläge des Hafenbüros (tip, extras)
+    const c = r?.events?.find((e) => e.type === 'collected');
+    const amount = c ? c.amount - (c.tip || 0) - (c.extras || 0) : 0;
+    if (r?.ok && d.combo) { strich.n++; strich.sum += amount; }
+  });
+  game.on('ui:strich-ende', () => {
+    const s = strich;
+    strich = { n: 0, sum: 0 };
+    if (s.n > 0) dispatch(sim.strokeTip(state, ctx, s.n, s.sum).events);
   });
   game.on('ui:auto-einfahren', (d = {}) => {
     const id = boatIdOf(d.boot ?? d.boat ?? d.boatId) ?? selected;
@@ -417,7 +439,7 @@ export async function initBridge(game) {
   game.on('services:besuch', (b = {}) => {
     if (GROSSSCHIFF_BESUCHE.includes(b.art)) dispatch(sim.addBigVisit(state, ctx));
   });
-  // Hafenmeister-Rundgang am Abend (render/people.js): Wer noch nicht bezahlt hat, zahlt jetzt die Hälfte
+  // Hafenmeister-Rundgang am Abend (render/people.js): Wer noch nicht bezahlt hat, zahlt jetzt (vier Fünftel kommen an)
   game.on('hafenmeister:halt', (d = {}) => {
     const id = boatIdOf(d.boot ?? d.id);
     if (id != null) dispatch(sim.collectOnRound(state, ctx, id).events);

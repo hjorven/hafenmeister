@@ -24,12 +24,15 @@ export const ECONOMY = {
     erstesBootNach: 3,      // Sekunden: am ersten Tag eines neuen Spiels kommt gleich ein Boot
     // Tagesrhythmus wie im echten Hafen, als Anteile des Tages (0 = Morgen, 1 = Abend):
     // vormittags legen die Gäste ab, neue kommen den ganzen Tag, die meisten am Nachmittag.
-    // Keine Wellen: zwischen zwei Ankünften liegen immer mindestens ankunftAbstand Sekunden. Es kommen
-    // nie mehr Boote, als so ins Fenster passen (81 s / 3 s = 27), auch nicht an Regattatagen.
+    // Keine Wellen und kein Fließband: zwischen zwei Ankünften liegen zufällig ankunftAbstand bis
+    // ankunftAbstandMax Sekunden, kurze häufiger als lange, über das ganze Fenster verteilt. Es kommen
+    // nie mehr Boote, als mit ankunftDichte im Mittel ins Fenster passen (81 s / 4 s = 20), auch nicht
+    // an Regattatagen.
     ankunftVon: 0.05,      // etwa 7:15, damit nach dem ersten Boot kein Loch entsteht
     ankunftAbstand: 3,      // Sekunden Mindestabstand zwischen zwei Ankünften (kleiner, wenn der Tag sonst nicht reicht)
+    ankunftAbstandMax: 8,   // Sekunden, längster gewürfelter Abstand (bei wenigen Booten wird gestreckt)
+    ankunftDichte: 4,       // Sekunden je Boot im Mittel an den vollsten Tagen
     ankunftBis: 0.95,       // etwa 19:30
-    ankunftSpitze: 0.62,    // Schwerpunkt am Nachmittag (etwa 15:30), breit verteilt
     abreiseVon: 0.07,       // etwa 7:30
     abreiseBis: 0.3,        // etwa 11:00
   },
@@ -48,7 +51,12 @@ export const ECONOMY = {
     anfahrtMax: 35,           // meldet die 3D-Ansicht nichts, gilt ein Boot danach als an der Boje
     ausBoxMax: 20,            // ein abreisendes Boot gibt seine Box spätestens nach so vielen Sekunden frei
     vorschau: 3,              // so viele kommende Boote zeigt die Vorschau
+    bojengeld: 0.2,           // Anteil des Grundpreises, den ein Boot für die Nacht an der Boje zahlt
   },
+
+  // Passgenau zuweisen (Review A6): Box höchstens ein Fünftel größer als die kleinste Box, an die
+  // das Boot passt, bringt einen Viertelanker mehr. Gilt nur, wenn es verschieden große Boxen gibt.
+  passgenau: { hoechstensGroesser: 0.2, ruf: 0.25 },
 
   // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber
   // hinaus und kommen in dieselbe Box zurück (Box bleibt reserviert, Liegegeld zählt weiter).
@@ -68,9 +76,16 @@ export const ECONOMY = {
   },
   wunschBonus: 0.25,          // Hafengeld = Grundpreis * (1 + wunschBonus * erfüllte Wünsche)
 
-  // Nicht kassierte Münzen: dieser Anteil landet nachts trotzdem in der Kasse (Kasse des Vertrauens,
-  // abends sammelt der Hafenmeister-Rundgang ihn ein)
-  kassieren: { nachtsAnteil: 0.5 },
+  // Kassieren (P12). Liegegeld wird beim Anlegen fällig. vorausNaechte: Gäste zahlen bis zu so viele
+  // geplante Nächte auf einmal (eine Münze je Aufenthalt, 1 = jede Nacht einzeln). Was der Spieler nicht selbst einstreicht, holt
+  // abends der Hafenmeister auf seinem Rundgang (oder nachts): in die Kasse kommt rundgangAnteil.
+  // strichTrinkgeld: ab abMuenzen Münzen in einem Kassierstrich je Münze ab der Grenze jeMuenze
+  // Trinkgeld auf die eingestrichene Summe, höchstens hoechstens.
+  kassieren: {
+    rundgangAnteil: 0.8,
+    vorausNaechte: 7,
+    strichTrinkgeld: { abMuenzen: 3, jeMuenze: 0.04, hoechstens: 0.2 },
+  },
   // Passregel: so viel Wasser muss unter dem Kiel bleiben (Meter)
   passregel: { wasserUnterKiel: 0.3 },
 
@@ -112,10 +127,30 @@ export const ECONOMY = {
     abgewiesen: { chance: 0.25, wertung: 2.5 },  // wer keinen Platz bekommt, drückt den Ruf leicht
   },
 
-  fischer: { pachtProTag: 15 },
-  // Dauerlieger (features/dauerlieger.js): Pacht je Abend als Anteil des Gastpreises (Paket P01),
-  // ab welcher Stufe, wie oft sie hinausfahren (je Tag), Törn über mehrere Tage [min, max]
-  dauerlieger: { anteilGastpreis: 0.5, abStufe: 2, tagestoernChance: 0.4, toernChance: 0.12, toernTage: [1, 3] },
+  fischer: { pachtProTag: 15 },   // feste Pacht je Abend, nur für Fischer und andere fest vergebene Plätze
+
+  // Dauerlieger (features/dauerlieger.js, docs/neue-features.md Abschnitt 3): ein Platz wird für die
+  // ganze Saison vermietet. Sichere Einnahme, auch bei Sturm, dafür kein Gast, kein Ruf und keine
+  // Gäste fürs Stufenziel.
+  dauerlieger: {
+    abStufe: 2,
+    anteilGastpreis: 0.5,      // Pacht je Saisontag = Anteil des Gastpreises (ohne Wunschbonus)
+    vorauskasse: true,         // true: Saisonpacht im Voraus (Rest der Saison, dann jede Saison neu);
+                               // false: jeden Abend anteilGastpreis des Gastpreises
+    hoechstAnteil: 0.25,       // höchstens ein Viertel der Plätze (fest vergebene zählen nicht)
+    tagestoernChance: 0.4,     // je Tag: morgens raus, abends zurück
+    toernChance: 0.12,         // je Tag: Törn über mehrere Tage, Platz frei für Gäste
+    toernTage: [1, 3],
+    frueherZurueck: 0.35,      // Anteil der Törns, von denen das Boot schon am Nachmittag des letzten Tages zurückkommt
+    zurueckUm: [0.45, 0.62],   // dann zu diesem Anteil des Tages; liegt dort noch ein Gast, muss er umgelegt werden
+    bewerberStart: 2,          // so viele Einheimische fragen gleich an, sobald Dauerplätze möglich sind
+    bewerberMax: 3,            // höchstens so viele offene Anfragen
+    bewerberChance: 0.35,      // je Nacht in der Saison: neue Anfrage
+    bewerberTage: 10,          // so lange wartet ein Bewerber auf eine Box
+    passtFreieBox: 0.85,       // Anteil der Bewerber, deren Boot in eine gerade freie Gastbox passt
+    seglerAnteil: 0.7,         // Anteil Segler unter den Bewerbern (wenn möglich)
+    kuendigungsZuschlag: 0.2,  // sofort kündigen: Pacht der restlichen Tage zurück plus dieser Anteil der Saisonpacht
+  },
   // Stammgäste (features/stammgaeste.js): Anteil der neuen Boote, die Stammgäste sind; ab so vielen
   // Ankern kommt ein Gast wieder; Länge der Liste; ab diesem Besuch als Dauerlieger zu behalten
   stammgaeste: { chance: 0.15, abBewertung: 4, maxListe: 40, dauerAbBesuch: 5 },
@@ -140,12 +175,12 @@ export const ECONOMY = {
       seglerStrom: { basis: 1.6, maxAnteil: 0.4, abBooten: 3 },
       rundum:      { abBooten: 2, mindestWuensche: 2 },
       letzter:     { bisPlaetze: 12 },
-      kassieren:   { anteil: 0.3, maxAnteil: 0.8 },
+      kassieren:   { anteil: 0.3, maxAnteil: 0.8, verlaufTage: 3, ohneVerlauf: 0.5 },   // Geld nach den echten Liegegeld-Einnahmen der letzten Tage
     },
     grossAb: { 3: 'L', 5: 'XL' },                 // "ein großes Schiff einweisen": Klasse ab Stufe
     halberAnker: 0.5,                             // so viel besser bewerten alle Gäste, die gerade liegen
     gutschein: { prozent: 10, hoechstens: 15 },
-    woche: { tage: 7, geld: 12, gaeste: 0.25, zufrieden: 0.15, segler: 0.1, liegegeld: 0.55 },
+    woche: { tage: 7, geld: 12, gaeste: 0.5, zufrieden: 0.3, segler: 0.15, liegegeld: 0.7 },   // Anteil der Woche: nicht in zwei Tagen zu schaffen
   },
   // Besucher an Land (Fahrgastschiff, Kreuzfahrt) geben abends je Stufe von Kiosk/Restaurant so viel aus
   besucher: { ausgabeJeKioskStufe: 2 },
@@ -263,6 +298,7 @@ export const ECONOMY = {
     ] },
   },
 
+  // ---------------------------------------------------------------- Kassieren
   // ---------------------------------------------------------------- Hafenbüro
   // Komfort, keine Einnahmen. Logik bei den Spielregeln (sim.js).
   // allesKassieren: Knopf "Alles kassieren". sofortKassieren: Liegegeld kommt beim Anlegen von
