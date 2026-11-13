@@ -250,7 +250,9 @@ const SNAP = () => {
     const vorher = await page.evaluate(`(${SNAP})()`);
     const ok = await page.evaluate(() => window.hafenmeister.spielstand?.speichern?.());
     await page.goto(url + (EXTRA ? '?' + EXTRA.slice(1) : ''));
-    await page.waitForFunction(() => window.hafenmeister?.sim && document.getElementById('boot')?.classList.contains('done'), null, { timeout: 60000 });
+    // So früh wie möglich anhalten, sonst laufen Hafenbüro und Services schon weiter
+    await page.waitForFunction(() => { const G = window.hafenmeister; if (G?.sim && G.setPaused) { G.setPaused(true); return true; } return false; }, null, { timeout: 60000, polling: 5 });
+    await page.waitForFunction(() => document.getElementById('boot')?.classList.contains('done'), null, { timeout: 60000 });
     await page.evaluate(() => window.hafenmeister.setPaused(true));
     const nachher = await page.evaluate(`(${SNAP})()`);
     const abw = [];
