@@ -143,8 +143,8 @@ export function init(game) {
       const g = RANG[selbst?.info.size] ?? 1;
       // nur Ankerplaetze in freiem, tiefem Wasser (nie im Gelaende oder an einem Steg)
       const mass = selbst ? bootMass(selbst.info) : { r: 3, t: 1 };
-      const k = karteJetzt();
-      const idx = plaetze.findIndex((q, i) => !anker.has(i) && (RANG[q.groesse] ?? 2) >= g && befahrbar(k, q.x, q.z, mass.r * 0.8, mass.t));
+      const karteA = karteJetzt();
+      const idx = plaetze.findIndex((q, i) => !anker.has(i) && (RANG[q.groesse] ?? 2) >= g && befahrbar(karteA, q.x, q.z, mass.r * 0.8, mass.t));
       if (idx >= 0) {
         const q = plaetze[idx];
         return reserviere({ id: `anker-${idx}`, x: q.x, z: q.z, heading: b.heading, kind: 'buoy', abstand: (q.schwoikreisM ?? 10) * 2, kreis: q.schwoikreisM ?? 10 });
