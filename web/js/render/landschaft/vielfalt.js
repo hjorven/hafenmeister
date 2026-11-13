@@ -59,13 +59,12 @@ const smooth = (a, b, v) => { const t = clamp((v - a) / (b - a), 0, 1); return t
 const FRUECHTE = ['raps', 'korn', 'acker', 'weide', 'wiese'];
 
 /** Mögliche Lagen des Dorfes im Hinterland (Planeinheiten), jede mit Abstand zum Hafen. */
-const DORF_LAGEN = [
-  { px: -290, py: -150 },
-  { px: 285, py: -150 },
-  { px: -60, py: -165 },
-  { px: 360, py: -60 },
-  { px: -365, py: -40 },
-];
+// Das Dorf liegt direkt hinter dem Hafen, gleich südlich der Landstraße (y -88), damit man es
+// in der Startansicht sieht. Nur die Ost-West-Lage wechselt; der Nordrand bleibt bei y -100,
+// also hinter allen Bauflächen (karte.bauflaechen enden bei y -92).
+const DORF_X = [-150, -60, 30, -200, 90];
+const DORF_NORDRAND = -100;
+const dorfLage = (x, radius) => ({ px: x, py: DORF_NORDRAND - radius });
 
 /** Art der Küste links (Westen) und rechts (Osten) des Hafens, dort wo Land an die offene See grenzt. */
 const KUESTEN = ['kliff', 'wald', 'heide', 'feld'];
@@ -81,7 +80,7 @@ export function bildAus(nr = 0) {
       nr: 0, seed: 101,
       kueste: { west: 'kliff', ost: 'wald' },
       kliffHoehe: 7.5,
-      dorf: DORF_LAGEN[0], dorfRadius: 58,
+      dorf: dorfLage(DORF_X[0], 58), dorfRadius: 58,
       feld: { dreh: 0, breite: 30, laenge: 46, mix: [0.26, 0.28, 0.14, 0.2, 0.12] },
       wald: { skala: 85, schwelle: 0.6, kiefer: 0.45 },
       huegel: { hoehe: 3.5, skala: 120 },
@@ -96,12 +95,12 @@ export function bildAus(nr = 0) {
   if (ost === west && r() < 0.6) ost = wahl(KUESTEN);
   const mix = FRUECHTE.map(() => 0.3 + r());
   const summe = mix.reduce((a, b) => a + b, 0);
-  return {
+  const b = {
     nr,
     seed: 200 + Math.floor(r() * 50000),
     kueste: { west, ost },
     kliffHoehe: 6 + r() * 4,
-    dorf: wahl(DORF_LAGEN),
+    dorfX: wahl(DORF_X),
     dorfRadius: 50 + r() * 18,
     // Felder achsparallel: schräge Kanten gäben im Geländeraster Treppen
     feld: { dreh: r() < 0.5 ? 0 : Math.PI / 2, breite: 24 + r() * 16, laenge: 36 + r() * 26, mix: mix.map((m) => m / summe) },
@@ -111,6 +110,8 @@ export function bildAus(nr = 0) {
     hoefe: 2 + Math.floor(r() * 3),
     knickAnteil: 0.4 + r() * 0.4,
   };
+  b.dorf = dorfLage(b.dorfX, b.dorfRadius);
+  return b;
 }
 
 let bild = bildAus(0);
@@ -373,9 +374,11 @@ export function dorfPlan() {
     }
   }
   // Kirche am Anger, etwas neben der Kreuzung
-  const kirche = { px: cx - dy * 14 + dx * 10, py: cy + dx * 14 + dy * 10, dreh: winkel };
-  // Windmühle am Dorfrand auf der Seite, die weiter weg von der Landstraße liegt
-  const muehle = { px: cx + dx * (R + 6) + dy * 10, py: cy + dy * (R + 6) - dx * 10 };
+  // Kirche und Mühle stehen vorn an der Landstraße, damit man sie vom Hafen aus sieht
+  // (Startansicht am PC reicht bis etwa y -110). Kirche geostet: lange Achse Ost-West, Turm im Westen.
+  const seiteK = r() < 0.5 ? -1 : 1;
+  const kirche = { px: cx + seiteK * 20, py: DORF_NORDRAND - 9, dreh: Math.PI / 2 };
+  const muehle = { px: cx - seiteK * R * 0.72, py: DORF_NORDRAND - 10 };
   _dorf = { mitte: [cx, cy], radius: R, strassen, haeuser, kirche, muehle };
   _dorfV = version;
   return _dorf;

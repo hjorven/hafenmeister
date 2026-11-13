@@ -59,8 +59,30 @@ export function backe(geo, mat, liste, name) {
   return mesh;
 }
 
-/** Schreibt die Farben eines gebackenen Netzes neu. farbeVon(item) -> sRGB-Hex. */
+/**
+ * Wie backe(), aber in Kacheln (Weltmeter) geteilt: eine Gruppe mit einem Netz je Kachel.
+ * So wirft Three.js alles außerhalb des Bildes weg (Frustum Culling) und das Handy zeichnet
+ * in der Startansicht nur die Bäume, die man sieht. Kleine Listen bleiben ein Netz.
+ */
+export function backeKacheln(machGeo, mat, liste, name, kachel = 180) {
+  if (liste.length < 400) return backe(machGeo(), mat, liste, name);
+  const toepfe = new Map();
+  for (const it of liste) {
+    const key = `${Math.floor(it.x / kachel)},${Math.floor(it.z / kachel)}`;
+    if (!toepfe.has(key)) toepfe.set(key, []);
+    toepfe.get(key).push(it);
+  }
+  const gruppe = new THREE.Group();
+  gruppe.name = name;
+  for (const teil of toepfe.values()) gruppe.add(backe(machGeo(), mat, teil, name));
+  gruppe.userData.anzahl = liste.length;
+  gruppe.userData.kacheln = true;
+  return gruppe;
+}
+
+/** Schreibt die Farben eines gebackenen Netzes (oder aller Kacheln) neu. farbeVon(item) -> sRGB-Hex. */
 function faerbeNeu(mesh, farbeVon) {
+  if (mesh.userData.kacheln) { for (const k of mesh.children) faerbeNeu(k, farbeVon); return; }
   const { liste, ecken } = mesh.userData;
   const col = mesh.geometry.attributes.color;
   const c = new THREE.Color();
@@ -157,28 +179,30 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
   const wahl = (liste) => liste[Math.floor(rnd() * liste.length)];
   const nordsee = !!region.gelaende.deich;
 
-  const baum = (px, py, p, { gross = 1, kiefer = pf.kiefer } = {}) => {
+  // fern: weit draußen ohne Stamm und ohne flachen Schatten (sieht man dort nicht, spart Dreiecke)
+  const baum = (px, py, p, { gross = 1, kiefer = pf.kiefer, fern = false } = {}) => {
     const x = px * U, z = -py * U, s = (2.2 + rnd() * 1.6) * gross;
     const y = p.h - 0.1;
+    const st = fern ? [] : staemme;
     if (rnd() < kiefer) {
-      kiefern.push({ x, y, z, s, sy: s * (1.1 + rnd() * 0.5), rot: rnd() * 6.3, farbe: wahl(region.baumfarben) });
-      staemme.push({ x, y, z, s: s * 0.9, sy: s * 0.9, farbe: '#8a6a54' });
+      kiefern.push({ x, y, z, s, sy: s * (1.1 + rnd() * 0.5), rot: rnd() * 6.3, farbe: wahl(region.baumfarben), fern });
+      st.push({ x, y, z, s: s * 0.9, sy: s * 0.9, farbe: '#8a6a54' });
       return;
     }
     if (pf.pappel && rnd() < pf.pappel) {
-      laub.push({ x, y: y + s * 0.4, z, s: s * 0.45, sy: s * 1.6, rot: rnd() * 6.3, farbe: wahl(region.laubfarben), art: 'eiche' });
-      staemme.push({ x, y, z, s: s * 0.7, sy: s * 1.0, farbe: '#7c6656' });
+      laub.push({ x, y: y + s * 0.4, z, s: s * 0.45, sy: s * 1.6, rot: rnd() * 6.3, farbe: wahl(region.laubfarben), art: 'eiche', fern });
+      st.push({ x, y, z, s: s * 0.7, sy: s * 1.0, farbe: '#7c6656' });
       return;
     }
     const birke = rnd() < (pf.birke || 0);
     const schief = pf.windschief ? { kz: -0.35, sy: s * 0.6 } : {};
-    laub.push({ x, y, z, s: s * 0.95, sy: s * (0.85 + rnd() * 0.3), rot: pf.windschief ? 0 : rnd() * 6.3, farbe: wahl(region.laubfarben), art: birke ? 'birke' : 'buche', ...schief });
-    staemme.push({ x, y, z, s: s * 0.9, sy: s * 1.2, farbe: birke ? '#efece4' : '#8a6a54', ...(pf.windschief ? { kz: -0.25 } : {}) });
+    laub.push({ x, y, z, s: s * 0.95, sy: s * (0.85 + rnd() * 0.3), rot: pf.windschief ? 0 : rnd() * 6.3, farbe: wahl(region.laubfarben), art: birke ? 'birke' : 'buche', fern, ...schief });
+    st.push({ x, y, z, s: s * 0.9, sy: s * 1.2, farbe: birke ? '#efece4' : '#8a6a54', ...(pf.windschief ? { kz: -0.25 } : {}) });
   };
 
   // ---- Bäume: dicht im Wald, vereinzelt auf Wiesen und Weiden, nie auf Feldern, Wegen, Hafenflächen
   const zelle = 6.8 / Math.sqrt(menge * pf.dichte + 0.01);
-  const baumBereich = (x0, x1, y0, y1, weite, gross) => {
+  const baumBereich = (x0, x1, y0, y1, weite, gross, fern = false) => {
     for (let gy = y0; gy < y1; gy += weite) {
       for (let gx = x0; gx < x1; gx += weite) {
         const px = gx + rnd() * weite, py = gy + rnd() * weite;
@@ -193,7 +217,7 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
         else if (p.typ === 'duenengras') chance = 0.03;
         if (rnd() > chance) continue;
         const nahSee = py > -30 || p.typ === 'waldboden' && py > 150;
-        baum(px, py, p, { gross, kiefer: nahSee ? Math.max(pf.kiefer, bild.wald.kiefer + 0.2) : (pf.kiefer ? bild.wald.kiefer : 0) });
+        baum(px, py, p, { gross, fern, kiefer: nahSee ? Math.max(pf.kiefer, bild.wald.kiefer + 0.2) : (pf.kiefer ? bild.wald.kiefer : 0) });
       }
     }
   };
@@ -201,7 +225,7 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
   // Äußerer Ring dünner, damit der Horizont nicht leer ist
   const weit = zelle * (2.4 / Math.max(0.3, menge));
   for (const [x0, x1, y0, y1] of [[-1500, KERN.x0, -1500, 1400], [KERN.x1, 1500, -1500, 1400], [KERN.x0, KERN.x1, -1500, KERN.y0]]) {
-    baumBereich(x0, x1, y0, y1, weit, 1.15);
+    baumBereich(x0, x1, y0, y1, weit, 1.15, true);
   }
 
   // ---- Knicks: Wallhecken an den Feldgrenzen, Büsche mit einzelnen Überhältern (Eichen)
@@ -368,16 +392,6 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
       waende.push({ x: tx, y, z: tz, s: 1, sx: 3.8, sy: 11, sz: 3.8, rot: k.dreh, farbe: '#ad5c48' });
       spitzen.push({ x: tx, y: y + 10.95, z: tz, s: 1, sx: 4, sy: 5.5, sz: 4, rot: k.dreh, farbe: '#5d7d76' });
     }
-    for (const h of plan.haeuser) {
-      haus(h.px, h.py, h.dreh, h.art, h.breite * U, h.laenge * U);
-      // Gartenbaum hinter dem Haus
-      if (rnd() < 0.6) {
-        const w = h.dreh + Math.PI / 2 * (rnd() < 0.5 ? 1 : -1);
-        const qx = h.px + Math.sin(w) * 11, qy = h.py + Math.cos(w) * 11;
-        const p = punkt(qx, qy, stufe, region);
-        if (p.typ === 'dorf' && p.h > 0.3 && freiAbstand(qx, qy, stufe) > 3) baum(qx, qy, p, { kiefer: 0 });
-      }
-    }
     // Galerieholländer-Windmühle am Dorfrand, die Flügel drehen sich
     const m = plan.muehle;
     if (!nordsee || true) {
@@ -390,6 +404,31 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
         daecher.push({ x, y: y + 9.6, z, s: 1, sx: 2.8, sy: 1.4, sz: 3.2, farbe: '#5a5048' });           // Kappe
         fluegel = baueFluegel(x, y + 10.1, z, -Math.PI / 2 + (m.px < 20 ? 0.6 : -0.6));
       }
+    }
+    for (const h of plan.haeuser) {
+      haus(h.px, h.py, h.dreh, h.art, h.breite * U, h.laenge * U);
+      // Gartenbaum hinter dem Haus
+      if (rnd() < 0.6) {
+        const w = h.dreh + Math.PI / 2 * (rnd() < 0.5 ? 1 : -1);
+        const qx = h.px + Math.sin(w) * 11, qy = h.py + Math.cos(w) * 11;
+        const p = punkt(qx, qy, stufe, region);
+        if (p.typ === 'dorf' && p.h > 0.3 && freiAbstand(qx, qy, stufe) > 3) baum(qx, qy, p, { kiefer: 0 });
+      }
+    }
+  }
+  // ---- Allee an der Landstraße hinter dem Hafen (südliche Seite, die nördliche ist Baufläche).
+  // Liegt am unteren Rand der Startansicht und zeigt dort schon, dass dahinter Land mit Bäumen beginnt.
+  if (pf.knicks || plan) {
+    const ALLEE_Y = -97;
+    for (let px = -326 + rnd() * 4; px < 338; px += 7.5 + rnd() * 1.5) {
+      if (rnd() < 0.08) continue;   // Lücken wie in echten Alleen
+      const py = ALLEE_Y + (rnd() - 0.5) * 1.2;
+      if (punkt(px, -89, stufe, region).typ !== 'weg') continue;   // nur wo die Straße wirklich liegt
+      if (hafenAbstand(px, py) < 4 || freiAbstand(px, py, stufe) < 3 || !frei(px, py, 2.5)) continue;
+      const p = punkt(px, py, stufe, region);
+      if (p.h < 0.3 || ['weg', 'feldweg', 'wasser', 'sand', 'strand'].includes(p.typ)) continue;
+      belegt.push([px, py, 2.5]);
+      baum(px, py, p, { kiefer: 0, gross: 1.15 });
     }
   }
   for (const hof of hoefe()) {
@@ -408,22 +447,22 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
   const flach = { flatShading: true };
   const mKrone = new THREE.MeshLambertMaterial(flach);
   const teile = [
-    backe(kronenKiefer(), mKrone, kiefern, 'kiefern'),
-    backe(kronenLaub(), new THREE.MeshLambertMaterial(flach), laub, 'laubbaeume'),
-    backe(busch(), new THREE.MeshLambertMaterial(flach), buesche, 'knicks'),
-    backe(stamm(), new THREE.MeshLambertMaterial(flach), staemme, 'staemme'),
-    backe(verschmelze([new THREE.ConeGeometry(0.5, 1, 4, 1, true).translate(0, 0.5, 0)]), new THREE.MeshLambertMaterial(flach), gras, 'duenengras'),
-    backe(busch(), new THREE.MeshLambertMaterial(flach), heide, 'heide'),
-    backe(verschmelze([new THREE.ConeGeometry(0.12, 1, 3, 1, true).translate(0, 0.5, 0)]), new THREE.MeshLambertMaterial(flach), schilf, 'schilf'),
+    backeKacheln(kronenKiefer, mKrone, kiefern, 'kiefern'),
+    backeKacheln(kronenLaub, new THREE.MeshLambertMaterial(flach), laub, 'laubbaeume'),
+    backeKacheln(busch, new THREE.MeshLambertMaterial(flach), buesche, 'knicks'),
+    backeKacheln(stamm, new THREE.MeshLambertMaterial(flach), staemme, 'staemme'),
+    backeKacheln(() => verschmelze([new THREE.ConeGeometry(0.5, 1, 4, 1, true).translate(0, 0.5, 0)]), new THREE.MeshLambertMaterial(flach), gras, 'duenengras'),
+    backeKacheln(busch, new THREE.MeshLambertMaterial(flach), heide, 'heide'),
+    backeKacheln(() => verschmelze([new THREE.ConeGeometry(0.12, 1, 3, 1, true).translate(0, 0.5, 0)]), new THREE.MeshLambertMaterial(flach), schilf, 'schilf'),
     backe(stein(), new THREE.MeshLambertMaterial(flach), felsen, 'felsen'),
   ];
-  if (waende.length) teile.push(backe(wandKoerper(), new THREE.MeshLambertMaterial(flach), waende, 'dorf-waende'));
-  if (daecher.length) teile.push(backe(satteldach(), new THREE.MeshLambertMaterial({ ...flach, side: THREE.DoubleSide }), daecher, 'dorf-daecher'));
-  if (spitzen.length) teile.push(backe(pyramide(), new THREE.MeshLambertMaterial(flach), spitzen, 'dorf-spitzen'));
+  if (waende.length) teile.push(backeKacheln(wandKoerper, new THREE.MeshLambertMaterial(flach), waende, 'dorf-waende'));
+  if (daecher.length) teile.push(backeKacheln(satteldach, new THREE.MeshLambertMaterial({ ...flach, side: THREE.DoubleSide }), daecher, 'dorf-daecher'));
+  if (spitzen.length) teile.push(backeKacheln(pyramide, new THREE.MeshLambertMaterial(flach), spitzen, 'dorf-spitzen'));
   for (const t of teile) {
-    if (!t.userData.anzahl) { t.geometry.dispose(); continue; }
-    t.castShadow = schatten && !['schilf', 'duenengras', 'heide'].includes(t.name);
-    t.receiveShadow = false;
+    if (!t.userData.anzahl) { t.geometry?.dispose(); continue; }
+    const wirft = schatten && !['schilf', 'duenengras', 'heide'].includes(t.name);
+    t.traverse((o) => { if (o.isMesh) { o.castShadow = wirft; o.receiveShadow = false; } });
     gruppe.add(t);
   }
   if (fluegel) gruppe.add(fluegel);
