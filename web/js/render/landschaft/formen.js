@@ -181,6 +181,8 @@ export function init(game) {
   };
   merken();
   game.on?.('ready', merken);
+  // Der Spielstand entsteht erst nach 'ready' (js/bridge.js); jeder neue Stand meldet zuerst 'stufe'
+  game.on?.('stufe', merken);
   game.on?.('spielstand-geladen', (neu) => {
     const nr = neu?.modules?.gelaende?.nr, gseed = seedGueltig(neu?.modules?.gelaende?.seed) ? neu.modules.gelaende.seed : 1;
     if (aktiv.quelle === 'url' || !gueltig(nr) || (nr === form.nr && gseed === form.seed)) { merken(); return; }
