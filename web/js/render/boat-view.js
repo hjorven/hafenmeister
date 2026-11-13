@@ -14,6 +14,7 @@
 import * as THREE from 'three';
 import { addBoat, berthFromPlatz } from './boat-anim.js';
 import { HAFEN } from '../data/harbor.js';
+import { wimpelAn } from './wimpel-regel.js';
 import { baueKarte, route, hindernisseAusHafen, bootMass, erreichbar, befahrbar, sichtlinie, zellMitte } from '../world/fahrwasser.js';
 
 const U = HAFEN.einheiten?.meterProEinheit ?? 0.62;
@@ -354,12 +355,11 @@ export function init(game) {
     for (const [id, e] of boats) {
       if (pruefen) {
         const sb = st?.boats?.[id];
-        // Nachts abgerechnete Gaeste sind nicht mehr in den Spielregeln, liegen aber bis zum Ablegen am
-        // Vormittag in der Box: fuer sie gilt, ob sie zuletzt bezahlt hatten.
-        if (sb) e.bezahlt = !!game.sim?.istBezahlt?.(id);
-        const bezahlt = sb ? e.bezahlt : !!(e.abgerechnet && e.bezahlt);
-        const an = !sb?.stationed && !e.faehrt && e.anim.berth?.kind !== 'buoy' &&
-          (e.anim.moored || e.anim.state === 'casting-off') && bezahlt;
+        const an = wimpelAn({
+          imSpiel: !!sb, dauerlieger: !!sb?.stationed, bezahlt: !!sb && !!game.sim?.istBezahlt?.(id),
+          abgerechnet: !!e.abgerechnet, faehrt: !!e.faehrt, anBoje: e.anim.berth?.kind === 'buoy',
+          fest: !!e.anim.moored, legtAb: e.anim.state === 'casting-off',
+        });
         if (an) {
           const g = baendchen(e);
           if (!g.visible) { g.visible = true; g.userData.t0 = t; g.userData.band.material = bandFarbe(); }
@@ -701,7 +701,7 @@ export function init(game) {
   game.on('sim:departed', (d) => {
     entferneMuenze(d?.boatId, 0);
     const e = boats.get(d?.boatId);
-    if (e) e.abgerechnet = true;     // bleibt sichtbar, bis 'boot-faehrt' am Vormittag kommt
+    if (e) e.abgerechnet = true;     // abgerechnet = bezahlt: Wimpel bleibt, bis 'boot-faehrt' am Vormittag kommt
   });
 
   // Boot ist am Platz fest: die Box blitzt einmal hell auf (Form und Drehung der Box aus render/stege.js)
