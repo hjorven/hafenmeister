@@ -575,7 +575,8 @@ const CSS = `
 .hm-tafel.jubel > button { animation: hm-tafel-jubel .8s ease-out; }
 @keyframes hm-tafel-jubel { 0% { transform: scale(1); } 30% { transform: scale(1.15); background: #f2c14e; } 100% { transform: scale(1); } }
 .hm-neu #hm-seite .hm-tafel .tz-nehmen { width: auto; margin: 0; min-height: 40px; padding: 2px 8px; font-size: var(--hm-schrift); }
-.hm-neu #hm-seite .hm-tafel li.tz-karte { padding: 4px 0; }
+.hm-neu #hm-seite .hm-tafel li.tz-karte { padding: 3px 0; gap: 0 8px; }
+.hm-neu #hm-seite .hm-tafel li.tz-klein { padding: 3px 0; margin: 0; }
 .hm-neu .hm-tafel .tz-notiz { border-image-source: var(--rahmen-gold); background: none; padding: 6px 10px; }
 .hm-neu .hm-tafel .tz-balken { height: calc(var(--hm-px, 2px) * 3); background: var(--hm-mulde); box-shadow: inset 0 0 0 var(--hm-px, 2px) rgba(36,54,74,.3); }
 .hm-neu .hm-tafel .tz-balken > i { background: var(--hm-gold); }
@@ -705,8 +706,7 @@ export async function init(game) {
     const waehlen = !ziel && z.karten.length > 0;
     if (waehlen) {
       // Kompakt, damit am Handy alles ohne Scrollen passt: Kopf, Wochenziel in einer Zeile, drei Karten
-      zeilen.push(el('li', { class: 'tz-kopf' }, 'Nimm dir ein Ziel für heute.',
-        el('span', { class: 'tz-klein', text: 'Es zählt nur, was du selbst tust.' })));
+      zeilen.push(el('li', { class: 'tz-klein tz-kopf-kurz', text: 'Nimm ein Ziel. Es zählt nur, was du selbst tust.' }));
       if (z.woche) {
         zeilen.push(el('li', { class: 'tz-klein tz-woche-kurz' },
           el('span', { class: 'tz-stand', text: stand(z.woche) }), `Woche: ${wocheText(z.woche)}`));

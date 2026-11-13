@@ -156,7 +156,7 @@ export function init(game) {
       m.updateMatrixWorld(true);
       _b.setFromObject(m);
       if (l && !m.parent) m.position.copy(alt);
-      if (!_b.isEmpty()) kasten.push({ x0: _b.min.x - 1.2, x1: _b.max.x + 1.2, z0: _b.min.z - 1.2, z1: _b.max.z + 1.2 });
+      if (!_b.isEmpty()) kasten.push({ x0: _b.min.x - 2, x1: _b.max.x + 2, z0: _b.min.z - 2, z1: _b.max.z + 2 });
     }
     const kreise = [];
     for (const sv of SERVICES) {
