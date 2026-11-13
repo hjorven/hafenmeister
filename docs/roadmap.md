@@ -599,7 +599,7 @@ Jeder Thread trägt hier ein, wo sein Paket mit anderen kollidieren kann (siehe 
 | Paket | Berührt | Was passieren kann | Geprüft in PR |
 |---|---|---|---|
 | P62 | P63, P66, Stegbilder | Neue Uferlinie schneidet Stege, Bauplätze oder Bootswege | |
-| P63 | P66, P04 | Anlage ohne Zufahrt, Großschiffe kommen nicht an den Pier | |
+| P63 | P66, P04, P62, Stegbilder, Vorbeifahrer | Anlage ohne Zufahrt, Großschiffe kommen nicht an den Pier; Kreuzfahrtschiff braucht Liegewanne bis y 520; Stegköpfe nördlich y 160 sperren die Barkasse; Bahnen im Westen kreuzen Großschiffe. Alles in `tests/besuchswege.test.mjs` und `tests/verkehr.test.mjs` | P63-PR |
 | P66 | Stegbilder (12 Varianten), XXL und Vorbeifahrer (PR 81) | Bootsweg durch eine Variante, Großschiff blockiert die Einfahrt | |
 
 ---
