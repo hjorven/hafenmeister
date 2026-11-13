@@ -104,8 +104,8 @@ export const TEXTE = {
   },
   ziele: {
     titel: 'Tagesziele',
-    text: 'Jeden Tag gibt es drei kleine Ziele. Wer sie schafft, bekommt etwas Geld dazu. Das war es schon. Viel Freude im Hafen.',
-    kurz: 'Drei kleine Ziele am Tag bringen etwas Geld dazu. Viel Freude im Hafen.',
+    text: 'Jeden Morgen liegen hier drei Ziele zur Wahl, leicht, mittel und schwer. Nimm eins, es zählt nur, was du selbst tust. Das war es schon. Viel Freude im Hafen.',
+    kurz: 'Jeden Morgen ein Ziel zur Wahl, es zählt nur, was du selbst tust. Viel Freude im Hafen.',
   },
 };
 
