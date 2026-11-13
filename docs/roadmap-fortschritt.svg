@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="760" height="324" viewBox="0 0 760 324" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
-<rect width="760" height="324" rx="10" fill="#f4efe3" stroke="#d8cdb4"/>
-<text x="20" y="32" font-size="19" font-weight="700" fill="#16324a">Roadmap: 14 von 64 Paketen erledigt</text>
-<text x="20" y="54" font-size="13" fill="#4a5d6c">8 teilweise, 4 in Arbeit, 38 offen, 1 zusammengelegt · Stand 13.11.2026</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="358" viewBox="0 0 760 358" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="760" height="358" rx="10" fill="#f4efe3" stroke="#d8cdb4"/>
+<text x="20" y="32" font-size="19" font-weight="700" fill="#16324a">Roadmap: 14 von 80 Paketen erledigt</text>
+<text x="20" y="54" font-size="13" fill="#4a5d6c">8 teilweise, 4 in Arbeit, 54 offen, 1 zusammengelegt · Stand 13.11.2026</text>
 <text x="20" y="91" font-size="13" fill="#16324a">Welle 0: Gelände und Bootswege</text>
 <rect x="330" y="78" width="340" height="18" rx="4" fill="#e3dccb"/>
 <rect x="330.0" y="78" width="272.0" height="18" fill="#3a7cc4"/>
@@ -29,14 +29,17 @@
 <text x="20" y="261" font-size="13" fill="#16324a">Welle 5: Regionen und Online</text>
 <rect x="330" y="248" width="340" height="18" rx="4" fill="#e3dccb"/>
 <text x="682" y="261" font-size="13" fill="#16324a">0/2</text>
-<rect x="20" y="288" width="12" height="12" rx="2" fill="#23897d"/>
-<text x="37" y="298" font-size="12" fill="#4a5d6c">erledigt</text>
-<rect x="110" y="288" width="12" height="12" rx="2" fill="#e8b23a"/>
-<text x="127" y="298" font-size="12" fill="#4a5d6c">teilweise</text>
-<rect x="207" y="288" width="12" height="12" rx="2" fill="#3a7cc4"/>
-<text x="224" y="298" font-size="12" fill="#4a5d6c">in Arbeit</text>
-<rect x="304" y="288" width="12" height="12" rx="2" fill="#e3dccb" stroke="#b9ad92"/>
-<text x="321" y="298" font-size="12" fill="#4a5d6c">offen</text>
-<rect x="373" y="288" width="12" height="12" rx="2" fill="#c9cfd4"/>
-<text x="390" y="298" font-size="12" fill="#4a5d6c">entfällt</text>
+<text x="20" y="295" font-size="13" fill="#16324a">Welle 6: Ausbau Stufe 7 bis 20</text>
+<rect x="330" y="282" width="340" height="18" rx="4" fill="#e3dccb"/>
+<text x="682" y="295" font-size="13" fill="#16324a">0/16</text>
+<rect x="20" y="322" width="12" height="12" rx="2" fill="#23897d"/>
+<text x="37" y="332" font-size="12" fill="#4a5d6c">erledigt</text>
+<rect x="110" y="322" width="12" height="12" rx="2" fill="#e8b23a"/>
+<text x="127" y="332" font-size="12" fill="#4a5d6c">teilweise</text>
+<rect x="207" y="322" width="12" height="12" rx="2" fill="#3a7cc4"/>
+<text x="224" y="332" font-size="12" fill="#4a5d6c">in Arbeit</text>
+<rect x="304" y="322" width="12" height="12" rx="2" fill="#e3dccb" stroke="#b9ad92"/>
+<text x="321" y="332" font-size="12" fill="#4a5d6c">offen</text>
+<rect x="373" y="322" width="12" height="12" rx="2" fill="#c9cfd4"/>
+<text x="390" y="332" font-size="12" fill="#4a5d6c">entfällt</text>
 </svg>

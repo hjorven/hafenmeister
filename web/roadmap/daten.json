@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "13.11.2026",
-  "commit": "b1e4100"
+  "commit": "97fe934"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1112,6 +1112,182 @@
     "T9"
    ],
    "status": "arbeit"
+  },
+  {
+   "id": "P67",
+   "titel": "Stufe-6-Annahmen lösen",
+   "inhalt": "regionDone an verbund.abschlussStufe statt maxStage, Grenzen in vielfalt.js, Schlüssel 7 bis 9 in economy.js, Tests mit Test-Stufe 7; nichts Sichtbares",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P68",
+   "titel": "Leistung für große Häfen",
+   "inhalt": "Detailstufen für liegende Boote, gesammeltes Zeichnen, Leistungsbudget je Szene (Abschnitt 6.6 des Plans)",
+   "thread": "neu (mit Kamera-Thread)",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P69",
+   "titel": "Bedienung großer Häfen",
+   "inhalt": "Zeiger zu wartenden Booten, Sprung zu Stegen",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P70",
+   "titel": "Stufe 7 Hafenstadt",
+   "inhalt": "Yachthafen Ost (Steg E), Promenade, Belegungsplan je Steg; harbor.js Stufe 7, Gelände und Seeds geprüft",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P71",
+   "titel": "Stufe 8 Fährhafen",
+   "inhalt": "Fähranleger, Inselfähre nach Fahrplan",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P72",
+   "titel": "Stufe 9 Werfthafen",
+   "inhalt": "Werft mit Schiffslift, großes Winterlager",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P73",
+   "titel": "Stufe 10 Hafenverbund und Hafenkarten",
+   "inhalt": "modules.verbund, SAVE_VERSION 3 mit Migration, Übernahme alter Häfen, Kurzrechnung mit Abgleichstest, Standortwechsel",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P74",
+   "titel": "Stufe 11 Gästeweitergabe und Törngäste",
+   "inhalt": "volle Häfen schicken weiter, Törngäste von Hafen zu Hafen",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P75",
+   "titel": "Stufe 12 Hafenprofile",
+   "inhalt": "Yacht-, Traditions-, Fischerei-, Familienhafen",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P76",
+   "titel": "Stufe 13 Regattawoche",
+   "inhalt": "Regattawoche über den Verbund",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P77",
+   "titel": "Stufe 14 Nordseehafen",
+   "inhalt": "Nordsee-Standort mit Tide aus P57",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P78",
+   "titel": "Stufe 15 Offshore-Hafen",
+   "inhalt": "Windpark, Crew-Transfer-Katamarane, Serviceschiff",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P79",
+   "titel": "Stufe 16 Kreuzfahrthafen",
+   "inhalt": "zweite Pier, Wechselhafen",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P80",
+   "titel": "Stufe 17 und 18 Marinehafen und Großseglertreffen",
+   "inhalt": "Marinestützpunkt groß, jährliches Großseglertreffen",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P81",
+   "titel": "Stufe 19 Kanalhafen",
+   "inhalt": "Küstentyp 11 Kanal, Schleuse, Kanalverkehr",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
+  },
+  {
+   "id": "P82",
+   "titel": "Stufe 20 Hafenimperium",
+   "inhalt": "Abschlussfeier, Endlosspiel über den Verbund, Schlussabgleich tools/balance.mjs --bis 20",
+   "thread": "neu",
+   "welle": 6,
+   "prs": [],
+   "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen"
   }
  ],
  "punkte": [
@@ -3983,6 +4159,37 @@
     "entfaellt": 0,
     "alle": 2
    }
+  },
+  {
+   "nr": 6,
+   "titel": "Ausbau Stufe 7 bis 20",
+   "pakete": [
+    "P67",
+    "P68",
+    "P69",
+    "P70",
+    "P71",
+    "P72",
+    "P73",
+    "P74",
+    "P75",
+    "P76",
+    "P77",
+    "P78",
+    "P79",
+    "P80",
+    "P81",
+    "P82"
+   ],
+   "zaehler": {
+    "erledigt": 0,
+    "teilweise": 0,
+    "arbeit": 0,
+    "frage": 0,
+    "offen": 16,
+    "entfaellt": 0,
+    "alle": 16
+   }
   }
  ],
  "gesamt": {
@@ -3990,9 +4197,9 @@
   "teilweise": 8,
   "arbeit": 4,
   "frage": 0,
-  "offen": 38,
+  "offen": 54,
   "entfaellt": 1,
-  "alle": 65
+  "alle": 81
  },
  "punkteGesamt": {
   "erledigt": 95,

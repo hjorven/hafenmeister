@@ -25,7 +25,7 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 
 **[Roadmap interaktiv ansehen](https://hjorven.github.io/hafenmeister/roadmap/)**: alle Pakete mit Filter nach Welle und Status, Suche und den Einzelpunkten je Paket. Quelle ist [docs/roadmap.md](docs/roadmap.md).
 
-<a href="https://hjorven.github.io/hafenmeister/roadmap/"><img src="docs/roadmap-fortschritt.svg" alt="Fortschritt der Roadmap: 14 von 64 Paketen erledigt" width="100%"></a>
+<a href="https://hjorven.github.io/hafenmeister/roadmap/"><img src="docs/roadmap-fortschritt.svg" alt="Fortschritt der Roadmap: 14 von 80 Paketen erledigt" width="100%"></a>
 
 | Welle | Thema | Fortschritt | erledigt | angefangen | offen |
 |---|---|---|---|---|---|
@@ -35,6 +35,7 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 | [3](https://hjorven.github.io/hafenmeister/roadmap/#welle=3) | Tiefe und Hafenleben | `░░░░░░░░░░` 3 % | 0 | 1 | 18 |
 | [4](https://hjorven.github.io/hafenmeister/roadmap/#welle=4) | Langzeit, Spielgefühl, Welt | `█░░░░░░░░░` 11 % | 1 | 1 | 12 |
 | [5](https://hjorven.github.io/hafenmeister/roadmap/#welle=5) | Regionen und Online | `░░░░░░░░░░` 0 % | 0 | 0 | 2 |
+| [6](https://hjorven.github.io/hafenmeister/roadmap/#welle=6) | Ausbau Stufe 7 bis 20 | `░░░░░░░░░░` 0 % | 0 | 0 | 16 |
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (0 von 5 erledigt)</summary>
 
@@ -140,6 +141,29 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 |---|---|---|---|
 | [P57](https://hjorven.github.io/hafenmeister/roadmap/#paket=P57) | Nordsee mit Gezeiten spielbar machen | offen | [#177](https://github.com/hjorven/hafenmeister/pull/177) |
 | [P58](https://hjorven.github.io/hafenmeister/roadmap/#paket=P58) | Online mit Supabase | offen |  |
+
+</details>
+
+<details><summary><b>Welle 6: Ausbau Stufe 7 bis 20</b> (0 von 16 erledigt)</summary>
+
+| Paket | Titel | Status | PRs |
+|---|---|---|---|
+| [P67](https://hjorven.github.io/hafenmeister/roadmap/#paket=P67) | Stufe-6-Annahmen lösen | offen |  |
+| [P68](https://hjorven.github.io/hafenmeister/roadmap/#paket=P68) | Leistung für große Häfen | offen |  |
+| [P69](https://hjorven.github.io/hafenmeister/roadmap/#paket=P69) | Bedienung großer Häfen | offen |  |
+| [P70](https://hjorven.github.io/hafenmeister/roadmap/#paket=P70) | Stufe 7 Hafenstadt | offen |  |
+| [P71](https://hjorven.github.io/hafenmeister/roadmap/#paket=P71) | Stufe 8 Fährhafen | offen |  |
+| [P72](https://hjorven.github.io/hafenmeister/roadmap/#paket=P72) | Stufe 9 Werfthafen | offen |  |
+| [P73](https://hjorven.github.io/hafenmeister/roadmap/#paket=P73) | Stufe 10 Hafenverbund und Hafenkarten | offen |  |
+| [P74](https://hjorven.github.io/hafenmeister/roadmap/#paket=P74) | Stufe 11 Gästeweitergabe und Törngäste | offen |  |
+| [P75](https://hjorven.github.io/hafenmeister/roadmap/#paket=P75) | Stufe 12 Hafenprofile | offen |  |
+| [P76](https://hjorven.github.io/hafenmeister/roadmap/#paket=P76) | Stufe 13 Regattawoche | offen |  |
+| [P77](https://hjorven.github.io/hafenmeister/roadmap/#paket=P77) | Stufe 14 Nordseehafen | offen |  |
+| [P78](https://hjorven.github.io/hafenmeister/roadmap/#paket=P78) | Stufe 15 Offshore-Hafen | offen |  |
+| [P79](https://hjorven.github.io/hafenmeister/roadmap/#paket=P79) | Stufe 16 Kreuzfahrthafen | offen |  |
+| [P80](https://hjorven.github.io/hafenmeister/roadmap/#paket=P80) | Stufe 17 und 18 Marinehafen und Großseglertreffen | offen |  |
+| [P81](https://hjorven.github.io/hafenmeister/roadmap/#paket=P81) | Stufe 19 Kanalhafen | offen |  |
+| [P82](https://hjorven.github.io/hafenmeister/roadmap/#paket=P82) | Stufe 20 Hafenimperium | offen |  |
 
 </details>
 
