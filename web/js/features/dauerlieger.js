@@ -644,7 +644,7 @@ export async function init(game) {
   host.appendChild(hinweis);
   const stil = document.createElement('style');
   stil.textContent = `
-    #dauer-hinweis { position: absolute; left: 50%; transform: translateX(-50%); z-index: 25;
+    #dauer-hinweis { position: absolute; left: 16px; z-index: 25; box-sizing: border-box;
       top: calc(var(--hm-oben, env(safe-area-inset-top, 0px)) + var(--hm-knopf, 44px) + 8px);
       width: min(420px, calc(100% - 32px)); display: flex; gap: 10px; align-items: flex-start;
       padding: 10px 12px; color: var(--hm-tinte, #283648); cursor: pointer; line-height: 1.35; }
@@ -657,10 +657,12 @@ export async function init(game) {
     .hm-neu #card .dauer-liste .hud-btn, #card .dauer-liste .hud-btn { flex: 0 0 auto; min-height: 44px; text-align: left; white-space: normal; }
   `;
   document.head.appendChild(stil);
-  let hinweisTimer = 0;
+  // Was gerade gezeigt werden soll: { symbol, titel, text, rest } (rest in echten Sekunden, null = bleibt stehen)
+  let aktuell = null;
   let hinweisArt = null;          // 'wartet' oder null
   const schlange = [];
-  function fuelle(symbol, titel, text) {
+  function fuelle(symbol, titel, text, rest = null) {
+    aktuell = { symbol, titel, text, rest };
     hinweis.replaceChildren();
     try { const b = pixelBild(symbol, 24); if (b) hinweis.append(b); } catch { /* ohne Symbol */ }
     const body = document.createElement('div');
@@ -670,33 +672,96 @@ export async function init(game) {
     p.textContent = text;
     body.append(t, p);
     hinweis.append(body);
-    // Steht das Ereignisschild gerade da, darunter
-    const ev = document.getElementById('event-banner');
-    hinweis.style.top = ev && !ev.hidden ? `${ev.getBoundingClientRect().bottom - host.getBoundingClientRect().top + 8}px` : '';
-    hinweis.hidden = false;
+    takt(0);
   }
   function naechster() {
-    clearTimeout(hinweisTimer);
+    aktuell = null;
     if (wartende().length) { zeigeWartende(); return; }
     hinweisArt = null;
     const m = schlange.shift();
     if (!m) { hinweis.hidden = true; return; }
-    fuelle(m.symbol, m.titel, m.text);
-    hinweisTimer = setTimeout(naechster, m.sekunden * 1000);
+    fuelle(m.symbol, m.titel, m.text, m.sekunden);
   }
   function zeigeHinweis(titel, text, sekunden = 7, symbol = 'hinweis') {
     // gleiche Meldung nicht doppelt in die Schlange
+    if (aktuell?.titel === titel && aktuell?.text === text) return;
     if (schlange.some((m) => m.titel === titel && m.text === text)) return;
     schlange.push({ titel, text, sekunden, symbol });
     if (schlange.length > 4) schlange.shift();
-    if (hinweis.hidden) naechster();
+    if (!aktuell) naechster();
   }
+
+  // Der Hinweis wartet, solange eine Karte oder ein Fenster offen ist (Tagesabschluss, Kartenwahl, Feier,
+  // Menü ...), und zählt dann auch nicht herunter. Er legt sich nie über die linke Spalte (Wetter,
+  // Tagesziele, Ausbau), den Einstiegstipp, die Knöpfe oder den Tageszettel.
+  const sichtbar = (x) => {
+    // (nicht offsetParent: das ist bei position: fixed immer null)
+    if (!x || x.hidden || x.closest('[hidden]') || getComputedStyle(x).visibility === 'hidden') return null;
+    const r = x.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 ? r : null;
+  };
+  const alle = (sel) => [...document.querySelectorAll(sel)].map(sichtbar).filter(Boolean);
+  const SPERREN = ['.hm-ta', '.tz-wahl', '#hm-feier', '#hm-menue', '#hm-einstellungen', '.hm-ziel-panel', '#weather-panel', '.hm-speicher', '[role="dialog"]:not(#dauer-hinweis)'];
+  function blockiert() {
+    if (document.body.classList.contains('card-open') || document.body.classList.contains('foto')) return true;
+    return SPERREN.some((sel) => alle(sel).length);
+  }
+  // Linke Spalte und was dort sonst steht (Einstiegstipp): nicht verdecken, daneben oder darunter
+  const SPALTE = ['#weather-chip', '.hm-tafel > button', '.hm-tafel ul', '.hm-tafel-px', '#hm-ziel > *', '.hm-tipp'];
+  const OBEN = ['.hm-status', '.hm-werkzeuge', '#event-banner', '.hm-ta-zettel'];
+  const ueber = (a, b) => Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0;
+  function platziere(mitTipp = true) {
+    const h = host.getBoundingClientRect();
+    const rand = 16;
+    const spalte = SPALTE.filter((q) => mitTipp || q !== '.hm-tipp').flatMap(alle);
+    const oben = OBEN.flatMap(alle);
+    const knoepfe = ['#hm-zeit', '#btn-collect', '#btn-build'].flatMap(alle);
+    const setze = (links, top, breite) => {
+      Object.assign(hinweis.style, { left: `${Math.round(links)}px`, top: `${Math.round(top)}px`, width: `${Math.round(breite)}px`, transform: 'none' });
+      return hinweis.getBoundingClientRect();
+    };
+    // 1. Neben der linken Spalte, unter Statusleiste, Knöpfen oben, Ereignisschild und Zettel
+    let links = rand;
+    for (const r of spalte) links = Math.max(links, r.right - h.left + 8);
+    const rechts = h.width - rand;
+    let top = rand;
+    for (const r of oben) if (r.right - h.left > links && r.left - h.left < rechts) top = Math.max(top, r.bottom - h.top + 8);
+    const frei = (r) => r.bottom <= h.bottom - 4 && ![...spalte, ...oben, ...knoepfe].some((x) => ueber(r, x));
+    let breite = Math.min(420, rechts - links);
+    if (breite >= 240) {
+      const r = setze(links + (rechts - links - breite) / 2, top, breite);
+      if (frei(r)) return true;
+    }
+    // 2. Unter der linken Spalte über die ganze Breite (Handy hochkant)
+    top = rand;
+    for (const r of [...spalte, ...oben]) top = Math.max(top, r.bottom - h.top + 8);
+    breite = Math.min(420, h.width - 2 * rand);
+    const r = setze((h.width - breite) / 2, top, breite);
+    return frei(r);
+  }
+  let zuletzt = performance.now();
+  function takt() {
+    const jetzt = performance.now();
+    const dt = (jetzt - zuletzt) / 1000;
+    zuletzt = jetzt;
+    if (!aktuell) { hinweis.hidden = true; return; }
+    if (blockiert()) { hinweis.hidden = true; return; }
+    hinweis.hidden = false;
+    // Kein Platz neben dem Einstiegstipp (Handy hochkant): dann darf er den Tipp verdecken, nie aber die
+    // Spalte oder Knöpfe. Findet sich gar keine freie Stelle, wartet er lieber.
+    if (!platziere() && !platziere(false)) { hinweis.hidden = true; return; }
+    if (aktuell.rest != null) {
+      aktuell.rest -= dt;
+      if (aktuell.rest <= 0) naechster();
+    }
+  }
+  setInterval(takt, 400);
+  window.addEventListener('resize', () => takt());
   const wartende = () => Object.entries(dauerState(api.state).plaetze)
     .filter(([, p]) => p.wartet && api.state.boats[p.gastId]).map(([platzId, p]) => ({ platzId, p }));
   function zeigeWartende() {
     const w = wartende();
     if (!w.length) { if (hinweisArt === 'wartet') naechster(); return; }
-    clearTimeout(hinweisTimer);
     hinweisArt = 'wartet';
     const erster = w[0];
     if (w.length === 1) {
@@ -986,7 +1051,7 @@ export async function init(game) {
   });
   game.on('sim:select', ({ boatId }) => { if (boatId != null) { umlegen = null; offen = null; leuchtet = false; } });
   game.on('ui:cancel', schliessen);
-  game.on('spielstand-geladen', () => { alteErgaenzen(); schliessen(); schlange.length = 0; hinweisArt = null; hinweis.hidden = true; setTimeout(wartendeZeigen, 300); });
+  game.on('spielstand-geladen', () => { alteErgaenzen(); schliessen(); schlange.length = 0; hinweisArt = null; aktuell = null; hinweis.hidden = true; setTimeout(wartendeZeigen, 300); });
 
   game.dauerlieger = {
     machDauerplatz: (id) => api.dispatch(machDauerplatz(api.state, api.ctx, id).events),
