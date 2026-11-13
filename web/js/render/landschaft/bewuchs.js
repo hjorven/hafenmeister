@@ -5,8 +5,9 @@
 // kein InstancedMesh. Laub und Felder färben sich mit der Jahreszeit um, ohne Neubau:
 // nur die Farbwerte im Puffer werden neu geschrieben.
 import * as THREE from 'three';
-import { punkt, KERN, PLAN_M, hafenAbstand, suedufer, seeNord } from './gelaende.js';
-import { festePunkte } from './karte.js';
+import { punkt, KERN, PLAN_M, hafenAbstand } from './gelaende.js';
+import { natur } from './formen.js';
+import { strandLagen } from './strand.js';
 import { verschmelze } from './terrain.js';
 import { aktuellesBild, waldBei, feldZeile, knickAn, dorfPlan, hoefe, freiAbstand, soelle, zufallAus, JAHRESZEIT_FARBEN } from './vielfalt.js';
 
@@ -200,13 +201,18 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
     st.push({ x, y, z, s: s * 0.9, sy: s * 1.2, farbe: birke ? '#efece4' : '#8a6a54', ...(pf.windschief ? { kz: -0.25 } : {}) });
   };
 
+  // Strandkörbe und der Fuß der Seebrücke (strand.js) bleiben frei von Bäumen
+  const strand = Object.entries(strandLagen(stufe, region.id)).filter(([, l]) => l).map(([id, [x, y, w]]) => (id === 'seebruecke'
+    ? [x, y, 16] : [x + 7 * Math.cos(w) + 3 * Math.sin(w), y + 7 * Math.sin(w) - 3 * Math.cos(w), 20]));
+  const amStrand = (px, py) => strand.some(([x, y, r]) => Math.hypot(px - x, py - y) < r);
+
   // ---- Bäume: dicht im Wald, vereinzelt auf Wiesen und Weiden, nie auf Feldern, Wegen, Hafenflächen
   const zelle = 6.8 / Math.sqrt(menge * pf.dichte + 0.01);
   const baumBereich = (x0, x1, y0, y1, weite, gross, fern = false) => {
     for (let gy = y0; gy < y1; gy += weite) {
       for (let gx = x0; gx < x1; gx += weite) {
         const px = gx + rnd() * weite, py = gy + rnd() * weite;
-        if (hafenAbstand(px, py) < 6 || freiAbstand(px, py, stufe) < 3) continue;
+        if (hafenAbstand(px, py, stufe) < 6 || freiAbstand(px, py, stufe) < 3 || amStrand(px, py)) continue;
         const p = punkt(px, py, stufe, region);
         if (p.h < 0.3) continue;
         let chance = 0;
@@ -236,7 +242,7 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
     const abstand = 3.2 / Math.sqrt(Math.max(0.35, menge));
     const passt = (px, py) => {
       if (px < KERN.x0 || px > KERN.x1 || py < KERN.y0 || py > 40) return null;
-      if (hafenAbstand(px, py) < 10 || freiAbstand(px, py, stufe) < 4) return null;
+      if (hafenAbstand(px, py, stufe) < 10 || freiAbstand(px, py, stufe) < 4) return null;
       const p = punkt(px, py, stufe, region);
       return p.h >= 0.3 && FELDARTEN.has(p.typ) ? p : null;
     };
@@ -300,20 +306,24 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
     heide.push({ x: px * U, y: p.h - 0.1, z: -py * U, s, sy: s * 0.45, rot: rnd() * 6.3, farbe: wahl(['#a98aa8', '#b897b2', '#8f8a6a', '#9c7f9a']), art: 'heide' });
   }
 
-  // ---- Schilf am Binnensee und an den Söllen
-  const nSchilf = Math.round(1800 * menge * pf.schilf);
-  const eng = festePunkte(stufe).engpass;
-  const hafenFrei = (px) => !(stufe >= 2 && px > -170 && px < 225) && !(stufe >= 1 && px > -125 && px < -80);
-  for (let k = 0; k < nSchilf; k++) {
+  // ---- Schilf an den echten Ufern der Natur (Lagune, Bodden, Fluss), nicht an offener See und nicht in der Hafenzufahrt
+  const N = natur();
+  const art = N.stil?.ufer;
+  const anteil = art === 'schilf' ? 1.6 : art === 'salzwiese' || art === 'watt' ? 0.8 : art === 'sand' || art === 'wald' ? 0.35 : 0.1;
+  const nSchilf = Math.round(1800 * menge * pf.schilf * anteil);
+  // Am Steg nur der Saum direkt an der Wasserlinie (py < 4), davor liegen und fahren Boote
+  const hafenFrei = (px, py) => !(px > -165 && px < -10 && py > 4 && py < 110) && !(Math.abs(px + 105) < 7 || Math.abs(px + 55) < 7 || (px > -134 && px < -120))
+    && !(stufe >= 3 && px > -160 && px < 225 && py > -20 && py < 240);
+  for (let k = 0, versuche = 0; k < nSchilf && versuche < nSchilf * 30; versuche++) {
     const px = KERN.x0 + rnd() * (KERN.x1 - KERN.x0);
-    const nord = rnd() < 0.5;
-    const py = nord ? seeNord(px) - rnd() * 14 : suedufer(px) + rnd() * 14;
-    if (rauschenSchilf(px, py) < 0.48) continue;
-    if (!nord && !hafenFrei(px)) continue;
-    if (px > eng.x0 - 12 && px < eng.x1 + 12) continue;   // Engpass frei lassen (Grundform)
+    const py = KERN.y0 + rnd() * (KERN.y1 - KERN.y0);
+    const q = N.probe(px, py);
+    if (q.d > 3 || q.d < -9 || q.offenAbstand < 30) continue;
+    if (rauschenSchilf(px, py) < 0.48 || !hafenFrei(px, py)) continue;
     const p = punkt(px, py, stufe, region);
-    if (p.see > 0.5 || p.h > 0.25 || p.h < -0.7) continue;
+    if (p.h > 0.3 || p.h < -0.7 || p.typ === 'pflaster' || p.typ === 'mole' || p.typ === 'steinschuettung') continue;
     schilf.push(schilfHalm(px, py, p));
+    k++;
   }
   for (const so of soelle()) {
     const n = Math.round(40 * menge * pf.schilf);
@@ -330,6 +340,22 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
     return { x: px * U, y: Math.min(0, p.h), z: -py * U, s, sy: s * (3.4 + rnd() * 1.6), rot: rnd() * 6.3, kx: (rnd() - 0.5) * 0.2, farbe: rnd() < 0.3 ? '#c8bc78' : rnd() < 0.5 ? '#8eb46e' : '#a2c07a' };
   }
 
+  // ---- Steine am Ufer bei Fels-, Kliff- und Steinküsten, auch neben den Stegen (dort erkennt man den Küstentyp)
+  if (art === 'fels' || art === 'kliff' || art === 'steine') {
+    const nStein = Math.round((art === 'steine' ? 260 : 420) * menge);
+    for (let k = 0, versuche = 0; k < nStein && versuche < nStein * 30; versuche++) {
+      const px = KERN.x0 + rnd() * (KERN.x1 - KERN.x0);
+      const py = KERN.y0 + rnd() * (KERN.y1 - KERN.y0);
+      const q = N.probe(px, py);
+      if (q.d > 7 || q.d < -5 || !hafenFrei(px, py)) continue;
+      const p = punkt(px, py, stufe, region);
+      if (p.h > 1.6 || p.h < -0.6 || p.typ === 'pflaster' || p.typ === 'mole' || p.typ === 'steinschuettung' || p.typ === 'weg') continue;
+      const s = 0.35 + rnd() * (art === 'fels' ? 1.1 : 0.7);
+      felsen.push({ x: px * U, y: p.h - s * 0.25, z: -py * U, s, sy: s * (0.5 + rnd() * 0.3), rot: rnd() * 6.3, kx: rnd() * 0.4, farbe: rnd() < 0.5 ? region.farben.fels : '#b0bcc4' });
+      k++;
+    }
+  }
+
   // ---- Findlinge: am Ufer, am Fuß der Steilküste und einzeln auf Feldrainen
   const nFels = Math.round(500 * menge * pf.findlinge);
   for (let k = 0; k < nFels; k++) {
@@ -339,7 +365,7 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
     const amUfer = p.h > -0.6 && p.h < 0.8 && p.typ !== 'pflaster' && p.typ !== 'mole' && p.typ !== 'steinschuettung';
     const kliff = p.typ === 'kliff';
     if (!((amUfer && rnd() < 0.25) || (kliff && rnd() < 0.5) || (p.typ === 'gras' && rnd() < 0.02))) continue;
-    if (hafenAbstand(px, py) < 0 && stufe >= 2) continue;
+    if (hafenAbstand(px, py, stufe) < 0 && stufe >= 2) continue;
     if (freiAbstand(px, py, stufe) < 3) continue;
     const s = 0.4 + rnd() * (kliff ? 1.4 : 0.8);
     felsen.push({ x: px * U, y: p.h - s * 0.25, z: -py * U, s, sy: s * (0.5 + rnd() * 0.3), rot: rnd() * 6.3, kx: rnd() * 0.4, farbe: rnd() < 0.5 ? region.farben.fels : '#b0bcc4' });
@@ -355,7 +381,7 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
     let min = Infinity, max = -Infinity;
     for (const [u, v] of [[0, 0], [-rx, -ry], [rx, -ry], [-rx, ry], [rx, ry]]) {
       const qx = px + u * c + v * s, qy = py - u * s + v * c;
-      if (hafenAbstand(qx, qy) < 4 || freiAbstand(qx, qy, stufe) < 2) return null;
+      if (hafenAbstand(qx, qy, stufe) < 4 || freiAbstand(qx, qy, stufe) < 2) return null;
       const p = punkt(qx, qy, stufe, region);
       if (p.h < 0.4 || p.typ === 'feldweg' || p.typ === 'weg' || p.typ === 'wasser' || p.typ === 'sand' || p.typ === 'kliff') return null;
       min = Math.min(min, p.h); max = Math.max(max, p.h);
@@ -426,7 +452,7 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
       if (rnd() < 0.08) continue;   // Lücken wie in echten Alleen
       const py = ALLEE_Y + (rnd() - 0.5) * 1.2;
       if (punkt(px, -89, stufe, region).typ !== 'weg') continue;   // nur wo die Straße wirklich liegt
-      if (hafenAbstand(px, py) < 4 || freiAbstand(px, py, stufe) < 3 || !frei(px, py, 2.5)) continue;
+      if (hafenAbstand(px, py, stufe) < 4 || freiAbstand(px, py, stufe) < 3 || !frei(px, py, 2.5)) continue;
       const p = punkt(px, py, stufe, region);
       if (p.h < 0.3 || ['weg', 'feldweg', 'wasser', 'sand', 'strand'].includes(p.typ)) continue;
       belegt.push([px, py, 2.5]);

@@ -5,12 +5,13 @@
 // Daraus entsteht eine "Landigkeit" L (Planeinheiten, ungefähr Abstand zur Uferlinie): L > 0 Land,
 // L < 0 Wasser. Höhen, Tiefen und Oberflächen rechnet gelaende.js daraus.
 //
-// Fest in jedem Typ (PFLICHT), damit Stege, Liegeplätze, Bojen und Anlagen überall passen:
-//   - der Uferstreifen, an dem die Stege hängen (x -210..70, Ufer wie suedufer),
-//   - Wasser vor den Stegen der Stufen 1 und 2 (x -170..95 bis y 175),
-//   - offenes Wasser nördlich der Einfahrt (x -400..460, y 245..540: Reede, Ankerfelder, Piers),
-//   - eine natürliche Zufahrt von dort zum Hafen (Stufe 1 und 2, ab Stufe 3 gibt es den Durchstich),
-//   - Land für Ort, Straße und Dorf südlich des Hafens (y < -30, |x| < 420).
+// Fest in jedem Typ (BEDARF), damit Stege, Liegeplätze, Bojen und Anlagen überall passen; Pflicht ist nur,
+// was das Spiel wirklich braucht:
+//   - der Uferstreifen, an dem die Stege hängen (STEGSTREIFEN, Ufer wie stegUfer),
+//   - Wasser vor den Stegen und für die Runde der Boote (BEDARF.wasser),
+//   - Land unter Gebäuden, Diensten, Straße und Stegzugängen der Stufen 1 und 2 (BEDARF.land),
+//   - offenes Wasser nördlich der Einfahrt (SEE_NORD: Reede, Ankerfelder, Piers) und die Zufahrt von dort.
+// Neben dem Hafen gestaltet jeder Typ selbst (nah(q), stil.ufer), damit man die Küste schon am Steg erkennt.
 // Alles andere ist frei: der Hafenausbau (gelaende.js) baggert und schüttet in höheren Stufen nach.
 //
 // Reines JavaScript ohne Three.js, damit Tests und Werkzeuge es in Node nutzen können.
@@ -282,7 +283,7 @@ function nehrung(r) {
         leuchttuerme: [[tor + 90, ny(tor + 90)]],
       };
     },
-    stil: { marsch: 0.7 },
+    stil: { marsch: 0.7, ufer: 'salzwiese' },
     leuchttuerme: gates.slice(0, 2).map((x) => [x + 80, kn(x + 80)]),
   };
 }
@@ -317,7 +318,7 @@ function offeneBucht(r) {
         ],
       };
     },
-    stil: { steil: zw(r, 9, 14), wald: 0.5 },
+    stil: { steil: zw(r, 9, 14), wald: 0.5, ufer: 'sand' },
     leuchttuerme: [[-tw + 40, tief], [to - 40, tief]],
   };
 }
@@ -346,7 +347,7 @@ function flussmuendung(r) {
         platen: [{ x: fx * 0.6, y: zw(q, 205, 225), rx: zw(q, 120, 180), ry: zw(q, 12, 18), dreh: zw(q, -0.15, 0.15) }],
       };
     },
-    stil: { marsch: 1 },
+    stil: { marsch: 1, ufer: 'schilf' },
     leuchttuerme: [[seite * -420, 220]],
   };
 }
@@ -387,7 +388,7 @@ function bodden(r) {
         ],
       };
     },
-    stil: { marsch: 0.8 },
+    stil: { marsch: 0.8, ufer: 'schilf', tiefe: 0.8 },
     leuchttuerme: [[gx * 0.5 + 90, 1000]],
   };
 }
@@ -419,7 +420,7 @@ function schaeren(r) {
       }
       return { inseln };
     },
-    stil: { felsufer: 26, steil: 5, wald: 0.6 },
+    stil: { felsufer: 26, steil: 5, wald: 0.6, ufer: 'fels' },
     leuchttuerme: [],
     leuchtturmInsel: true,
   };
@@ -447,7 +448,7 @@ function steilkueste(r) {
         inseln: Array.from({ length: 8 }, () => ({ x: vz(q) * zw(q, 200, 600), y: zw(q, 120, 230), rx: zw(q, 4, 9), ry: zw(q, 3, 7), art: 'fels', rau: 0.3 })),
       };
     },
-    stil: { steil: zw(r, 16, 24) },
+    stil: { steil: zw(r, 16, 24), ufer: 'kliff' },
     leuchttuerme: [[-bachX * 0.7, 40]],
   };
 }
@@ -474,7 +475,7 @@ function watt(r) {
         kanaele: [{ punkte: gewunden([[-s * 300, 30], [-s * 260, 120], [-s * 120, 200], [60, 240]], 30, 30, 92), halb: zw(q, 10, 16) }],
       };
     },
-    stil: { watt: zw(r, 220, 360), marsch: 1, deich: true },
+    stil: { watt: zw(r, 220, 360), marsch: 1, deich: true, ufer: 'watt' },
     leuchttuerme: halligen.length ? [[halligen[0].x, halligen[0].y]] : [],
   };
 }
@@ -502,7 +503,7 @@ function foerde(r) {
         ],
       };
     },
-    stil: { steil: zw(r, 8, 12), wald: 1 },
+    stil: { steil: zw(r, 8, 12), wald: 1, ufer: 'wald', tiefe: 1.5 },
     leuchttuerme: [[mitte[mitte.length - 4][0] + 300, mitte[mitte.length - 4][1]]],
   };
 }
@@ -530,7 +531,7 @@ function haken(r) {
         leuchttuerme: [[ende, 200]],
       };
     },
-    stil: { marsch: 0.5 },
+    stil: { marsch: 0.5, ufer: 'sand' },
     leuchttuerme: [[sx * s, yH - 220]],
   };
 }
@@ -549,7 +550,7 @@ function inselhafen(r) {
       { x: -nx * 0.6, y: zw(r, 500, 800), rx: zw(r, 30, 60), ry: zw(r, 20, 40), art: 'fels' },
     ],
     hafen: { x: zw(r, -60, 60), y: 0, dreh: zw(r, -0.5, 0.5) },
-    stil: { steil: 5 },
+    stil: { steil: 5, ufer: 'steine' },
     leuchttuerme: [[rx * 0.85 * (nx > 0 ? 1 : -1), -ry * 0.6]],
   };
 }
@@ -774,32 +775,71 @@ export function bauen(nr, seed = 1) {
 
 /**
  * Eine Stelle am Strand nahe (px, py) für Strandkörbe und Seebrücke: knapp über der Wasserlinie, nicht im
- * Hafen (samt Becken, Durchstich und Außenhafen späterer Stufen) und nicht an der Liegewanne der Großschiffe. seebruecke: davor nach Norden mindestens laenge
- * Planeinheiten freies Wasser. meiden: schon vergebene Stellen [[x, y], ...], mindestens 50 Einheiten Abstand.
- * Gibt [x, y] oder null zurück.
+ * Hafen (samt Becken, Durchstich und Außenhafen späterer Stufen) und nicht an der Liegewanne der Großschiffe.
+ * boden(x, y) liefert { h, typ } des fertigen Geländes (gelaende.js punkt). Damit stehen Körbe nur auf
+ * ebenem, trockenem Sand (alle Ecken der Gruppe), und die Seebrücke führt genau einmal vom Sandufer ins
+ * Wasser: auf ganzer Länge und Breite Wasser, kein Land, keine Mole. An Fels-, Kliff-, Schilf- und
+ * Waldküsten gibt es so von selbst keine Stelle. Ohne boden wird nur die Natur geprüft.
+ * meiden: schon vergebene Stellen [[x, y], ...], mindestens 50 Einheiten Abstand.
+ * Gibt [x, y, dreh] zurück (dreh in Bogenmaß um die Hochachse, 0 = Seebrücke zeigt nach Norden) oder null.
  */
-export function strandStelle(N, px, py, { seebruecke = false, laenge = 72, meiden = [] } = {}) {
+export function strandStelle(N, px, py, { seebruecke = false, laenge = 72, meiden = [], sperren = [], boden = null, stufe = 6, weit = 420 } = {}) {
   const L = N.landig;
-  const frei = (x, y) => !(x > -200 && x < 270 && y > -110 && y < 250) && !(x > -380 && x < 40 && y > 190 && y < 270)
-    && !(y > 236 && x > -460 && x < 500) && meiden.every(([mx, my]) => Math.hypot(mx - x, my - y) > 50);
+  const abseits = (x, y) => meiden.every(([mx, my]) => Math.hypot(mx - x, my - y) > 50);
+  // Strandkörbe: nicht zwischen Gebäuden, Diensten und Wegen des Hafens und nicht auf der Kaifläche (ab Stufe 3)
+  const korbFrei = (x, y) => abseits(x, y) && landBedarf(x, y) < -8
+    && !(stufe >= 3 && x > KAIFLAECHE.x0 - 8 && x < KAIFLAECHE.x1 + 8 && y > KAIFLAECHE.y0 - 8 && y < KAIFLAECHE.y1 + 8);
+  // Seebrücke: an keiner Stelle im Hafenwasser (Stege, Becken, Runde der Boote) und in keiner Sperrfläche
+  // (sperren: Rechtecke { x0, x1, y0, y1 }, etwa die Liegeplätze der großen Gäste)
+  const hx1 = stufe <= 2 ? 0 : 302, hy1 = stufe <= 2 ? 120 : 250;
+  const brueckeFrei = (x, y) => !(x > -230 && x < hx1 && y > -110 && y < hy1) && wasserBedarf(x, y) > 20
+    && sperren.every((r) => x < r.x0 - 18 || x > r.x1 + 18 || y < r.y0 - 18 || y > r.y1 + 18);
+  const sand = (x, y) => { if (!boden) return L(x, y) > 1; const b = boden(x, y); return b.typ === 'sand' && b.h > 0.2 && b.h < 1.3 ? b.h : null; };
+  const nass = (x, y) => { if (!boden) return L(x, y) < -3; const b = boden(x, y); return (b.typ === 'wasser' || b.typ === 'watt') && b.h < -0.25; };
+  // Strandkörbe: Gruppe von etwa 9 x 4 m (14 x 6 Planeinheiten), gedreht um w; vorn (Kante 0..14) echter Sand
+  const NICHT = ['wasser', 'watt', 'fels', 'kliff', 'schilfrand', 'salzwiese', 'mole', 'pflaster', 'weg', 'steinschuettung', 'waldboden', 'dorf', 'feldweg'];
+  const korbPlatz = (x, y, w = 0) => {
+    const c = Math.cos(w), sn = Math.sin(w);
+    const an = (dx, dy) => [x + dx * c - dy * sn, y + dx * sn + dy * c];
+    if (!korbFrei(...an(7, -3))) return false;
+    if (!boden) return sand(x, y);
+    if (sand(x, y) == null || sand(...an(12, 0)) == null) return false;
+    let lo = Infinity, hi = -Infinity;
+    for (const [dx, dy] of [[0, 0], [14, 0], [0, -6], [14, -6], [7, -3]]) {
+      const q = boden(...an(dx, dy));
+      if (NICHT.includes(q.typ) || q.h < 0.2 || q.h > 2.2) return false;
+      lo = Math.min(lo, q.h); hi = Math.max(hi, q.h);
+    }
+    return hi - lo < 0.8;
+  };
+  // Seebrücke in Richtung (ex, ey): Fuß auf Sand, davor auf ganzer Länge (drei Spuren) Wasser
+  const brueckePlatz = (x, y, ex, ey) => {
+    if (!sand(x, y) || !sand(x - ex * 5, y - ey * 5)) return false;
+    for (let t = 0; t <= laenge; t += 5) if (!brueckeFrei(x + ex * t, y + ey * t)) return false;
+    for (let t = 8; t <= laenge; t += 5) {
+      for (const q of [-5, 0, 5]) if (!nass(x + ex * t - ey * q, y + ey * t + ex * q)) return false;
+    }
+    return true;
+  };
+  const RICHT = [0, 0.5, -0.5, 1, -1, 1.57, -1.57, 2.36, -2.36, 3.14];
   const passt = (x, y) => {
     const l = L(x, y);
-    if (l < 2 || l > 9 || !frei(x, y)) return false;
-    if (L(x, y + 14) > -1 && L(x + 14, y) > -1 && L(x - 14, y) > -1) return false;   // Wasser muss nah sein
-    if (!seebruecke) return true;
-    for (let t = 10; t <= laenge; t += 8) if (L(x, y + t) > -3) return false;
-    return L(x, y - 10) > 4;
+    if (l < 1.5 || l > 12) return null;
+    if (!seebruecke) { for (const w of [0, 1.5708, -1.5708, 3.1416]) if (korbPlatz(x, y, w)) return [x, y, w]; return null; }
+    if (!abseits(x, y)) return null;
+    if (l > 6) return null;
+    for (const w of RICHT) if (brueckePlatz(x, y, -Math.sin(w), Math.cos(w))) return [x, y, w];
+    return null;
   };
-  if (passt(px, py)) return [px, py];
-  for (let r = 8; r <= 700; r += 8) {
+  let treffer = passt(px, py);
+  for (let r = 8; r <= weit && !treffer; r += 8) {
     const n = Math.max(12, Math.round(r / 6));
-    for (let k = 0; k < n; k++) {
+    for (let k = 0; k < n && !treffer; k++) {
       const a = (k / n) * Math.PI * 2;
-      const x = px + r * Math.cos(a), y = py + r * Math.sin(a);
-      if (passt(x, y)) return [x, y];
+      treffer = passt(px + r * Math.cos(a), py + r * Math.sin(a));
     }
   }
-  return null;
+  return treffer;
 }
 
 /** Chamfer-Abstand (Rasterzellen) zu den Zellen mit maske[k] !== ziel... genauer: zu Zellen mit maske[k] === quelle. */

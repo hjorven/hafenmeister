@@ -62,15 +62,19 @@ Jedes Spiel bekommt einen von zehn Küstentypen und dazu einen eigenen Zufallswe
 
 **So entsteht eine Landschaft.** Jeder Typ beschreibt seine Natur in eigenen Koordinaten (See grob im Norden) aus wenigen Bausteinen: Küstenlinie, Bänder (Nehrung, Haken), Buchten und Inseln (Ellipsen mit rauem Rand), Wasserläufe (Fluss, Priel, Sund) und Platen. Der Seed verschiebt, biegt und verteilt sie. Dann legt `bauen()` den Hafen hinein: Der Typ nennt einen Ankerpunkt und einen Drehwinkel, `bauen()` sucht dort das echte Ufer und dreht und verschiebt die Natur so, dass der Hafen dort sitzt. Die Spielkoordinaten bleiben dabei, wie sie sind: Hafen bei (0, 0), See vorne in +y. Daraus entsteht die Landigkeit L (über 0 Land, darunter Wasser), dazu ein Raster mit Abstand zum Ufer, Abstand zur offenen See und Masken für Düne, Fels, Hallig, Wald, Platen und Wasserläufe (5 Planeinheiten, dazwischen weich interpoliert). Eine Landschaft zu bauen dauert etwa 0,2 bis 0,4 s, einmal je Spiel.
 
-**Fest in jedem Typ** (`natur.js`, Pflichtbereiche), damit Stege, Liegeplätze, Bojen, Anlagen und Spielstände überall passen:
+**Fest in jedem Typ** (`natur.js`, `BEDARF`), damit Stege, Liegeplätze, Bojen, Anlagen und Spielstände überall passen. Pflicht ist nur, was das Spiel wirklich braucht, alles daneben gehört dem Küstentyp:
 
-- der Uferstreifen der Stege und der Hafenfläche (x -215 bis 232, Ufer wie bisher),
-- Wasser vor den Stegen (x -170 bis 250, bis y 185) und östlich davon für die Runde der Vorbeifahrer,
+- der Uferstreifen der Stege (x -150 bis -20), das Ufer folgt dort `stegUfer(px)`,
+- Wasser vor den Stegen und für die Runde der Boote (Kästen und Kreise in `BEDARF.wasser`, Abstand mit `wasserBedarf(px, py)`),
+- Land unter Gebäuden, Diensten, Straße und Stegzugängen der Stufen 1 und 2 (Kreise und Linien in `BEDARF.land`),
 - die Zufahrt durch das Seegatt bei x 178,
-- offenes, mindestens 4,6 m tiefes Wasser vor der Einfahrt (x -440 bis 480, y 245 bis 820): Reede, Ankerfelder, Piers, Bahnen der Vorbeifahrer und Besuchsschiffe,
-- Land für den Ort hinter dem Hafen (rund, mit welligem Rand).
+- offenes, mindestens 4,6 m tiefes Wasser vor der Einfahrt (`SEE_NORD`, x -440 bis 480, y 245 bis 820): Reede, Ankerfelder, Piers. Dieser Bereich soll kleiner werden, seit Vorbeifahrer und Besuchsschiffe über die Fahrwasserkarte fahren.
 
-Alle Pflichtbereiche gehen weich in die Natur über (kein Kasten). Watt hält Abstand zu ihnen.
+Die Kaifläche (`KAIFLAECHE`, x -150 bis 202, y -92 bis 6) schüttet der Ausbau erst ab Stufe 3 auf. Alle Pflichtbereiche gehen weich in die Natur über (kein Kasten). Watt hält Abstand zu ihnen.
+
+**Der Küstentyp direkt am Hafen.** Jeder Typ setzt mit `nah(q)` eigene Formen neben den Hafen (Bänder, Buchten, Inseln, Wasserläufe, Platen, Leuchttürme, in Spielkoordinaten) und nennt mit `stil.ufer` sein Ufer: Salzwiese (Nehrung), Sand (Offene Bucht, Strandhaken), Schilf (Flussmündung, Bodden), Fels (Schären), Kliff (Steilküste), Watt, Waldsaum (Förde), Steine (Inselhafen). `gelaende.js` (`uferArt`) macht daraus Boden und Höhe bis an die Stege, `bewuchs.js` setzt Schilf und Ufersteine entlang der echten Uferlinie. `game.gelaende.startRect(stufe)` nennt der Kamera den Ausschnitt, in dem man den Typ erkennt.
+
+**Strandkörbe und Seebrücke** (`landschaft/strand.js`, ohne three.js): `strandLagen(stufe, region)` sucht von der Wunschlage aus die nächste passende Stelle und gibt je Teil `[x, y, dreh]` oder `null` zurück. Körbe stehen nur auf ebenem, trockenem Sand (alle Ecken, Höhenunterschied unter 0,8 m), nicht zwischen Gebäuden und nicht auf der Kaifläche. Die Seebrücke beginnt auf Sand, hat auf ganzer Länge und Breite Wasser vor sich, meidet Hafenwasser und ab Stufe 6 die Liegeplätze der großen Gäste; `seebrueckeStrecke(stufe)` liefert Fuß und Kopf. Was an der Stelle des größten Ausbaus stehen kann, steht schon vorher dort und zieht nicht um. An Küsten ohne Sand fehlen sie, `game.buildings.lage(id)` ist dann `null`.
 
 **Der Hafen wächst ins Gelände.** Ab Stufe 3 gräbt der Ausbau Becken, Rinne, Außenhafen und Liegewanne aus, auch dort, wo vorher Land war (mit befestigter Kante statt langem Hang). Wo die Natur den Hafen nicht schützt, baut er ab Stufe 3 Wellenbrecher (`wellenbrecher(stufe)`, in `molen(stufe)` enthalten): von den Molenwurzeln bei y 212 nach Westen und Osten, über Inseln und Landzungen hinweg unterbrochen. Ab Stufe 5 trägt ein Kai zwischen Becken und Außenhafen (x -4 bis 150, y 196 bis 229) Seenotretter und Museumshafen, ab Stufe 6 reicht der westliche Wellenbrecher bis zu den Pieranlagen. Buhnen gibt es nur an offenen Sandstränden.
 
