@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "13.11.2026",
-  "commit": "c4ffad3"
+  "datum": "14.11.2026",
+  "commit": "512dd44"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -146,7 +146,8 @@
    "thread": "bestehend: \"Spielregeln ohne Grafik umsetzen\"",
    "welle": 1,
    "prs": [
-    143
+    143,
+    232
    ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
    "punkte": [
@@ -154,7 +155,7 @@
     "D4",
     "O4"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -446,7 +447,8 @@
    "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"",
    "welle": 2,
    "prs": [
-    143
+    143,
+    232
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -457,7 +459,7 @@
     "D7",
     "Bed P7"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": [
     18,
     19
@@ -1626,12 +1628,14 @@
   {
    "code": "Ü18",
    "text": "Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 232)",
    "pakete": [
     "P18"
    ],
-   "prs": [],
+   "prs": [
+    232
+   ],
    "abschnitt": "Balancing (Ü15 bis Ü20)"
   },
   {
@@ -2536,23 +2540,27 @@
   {
    "code": "D1",
    "text": "Ausbau in Bauabschnitten (= Ü18)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 232)",
    "pakete": [
     "P18"
    ],
-   "prs": [],
+   "prs": [
+    232
+   ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
   {
    "code": "D2",
    "text": "Über Nacht gebaut: abends Baustelle, morgens fertig",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 232, für die Bauabschnitte des Stufenausbaus)",
    "pakete": [
     "P18"
    ],
-   "prs": [],
+   "prs": [
+    232
+   ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
   {
@@ -2569,14 +2577,15 @@
   {
    "code": "D4",
    "text": "Wegfallende Plätze regeln (= Ü5), Hinweis im Baumenü",
-   "status": "teilweise",
-   "statusText": "Regel erledigt (PR 143); Daten für den Hinweis liefert game.sim.stageUpPreview(), Anzeige im Baumenü offen",
+   "status": "erledigt",
+   "statusText": "Regel erledigt (PR 143), Hinweis im Baumenü erledigt (PR 232)",
    "pakete": [
     "P05",
     "P18"
    ],
    "prs": [
-    143
+    143,
+    232
    ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
@@ -2605,12 +2614,14 @@
   {
    "code": "D7",
    "text": "Sparziel anheften, Balken neben dem Geld, Schild am Bauplatz",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 232)",
    "pakete": [
     "P18"
    ],
-   "prs": [],
+   "prs": [
+    232
+   ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
   {
@@ -3719,12 +3730,14 @@
   {
    "code": "Bed P7",
    "text": "Letzten Kauf zehn Sekunden lang zurücknehmen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 232)",
    "pakete": [
     "P18"
    ],
-   "prs": [],
+   "prs": [
+    232
+   ],
    "abschnitt": "P Bedienung (hier \"Bed\")"
   },
   {
@@ -4168,8 +4181,8 @@
     "P54"
    ],
    "zaehler": {
-    "erledigt": 7,
-    "teilweise": 2,
+    "erledigt": 8,
+    "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
     "offen": 0,
@@ -4198,8 +4211,8 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 6,
-    "teilweise": 4,
+    "erledigt": 7,
+    "teilweise": 3,
     "arbeit": 0,
     "frage": 0,
     "offen": 5,
@@ -4320,8 +4333,8 @@
   }
  ],
  "gesamt": {
-  "erledigt": 14,
-  "teilweise": 8,
+  "erledigt": 16,
+  "teilweise": 6,
   "arbeit": 4,
   "frage": 0,
   "offen": 54,
@@ -4329,11 +4342,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 95,
-  "teilweise": 8,
+  "erledigt": 101,
+  "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 113,
+  "offen": 108,
   "entfaellt": 0,
   "alle": 217
  },
@@ -4689,6 +4702,24 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 224 bis 227 eingetragen, vier neue Bilder",
+   "pr": 230,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Land nördlich der Reede: kein kahler Block mehr, ruhige Farben im groben Netz",
+   "pr": 229,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Wunsch-Schilder nach Bildbreite in Metern: am Handy wieder in der Startansicht",
+   "pr": 231,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "Dauerlieger-Hinweis wartet, solange ein Tipp sichtbar ist",
    "pr": 226,
    "pakete": [
@@ -4747,27 +4778,6 @@
    "datum": "2026-11-13",
    "titel": "Dauerlieger-Hinweis: Reste nach PR 214 (Kartenwahl, Knöpfe unten)",
    "pr": 218,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Nehrung bekommt verlässlich Strandkörbe und Seebrücke",
-   "pr": 216,
-   "pakete": [
-    "P62",
-    "P64"
-   ]
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Verärgert-Text nur für Boote im Bild",
-   "pr": 215,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Tagesabschluss: \"Abends zeigen\" am iPhone quer nicht mehr abgeschnitten",
-   "pr": 217,
    "pakete": []
   }
  ]

@@ -1659,11 +1659,18 @@ export function applyTestStage(state, ctx, stage) {
   return state;
 }
 
-export function advanceStage(state, ctx) {
-  const check = canAdvanceStage(state, ctx);
-  if (!check.ok) return { ok: false, missing: check.missing };
-  spend(state, check.goal.cost, 'ausbau');
-  if (check.goal.project) state.buildings[check.goal.project] = 1;
+export function advanceStage(state, ctx, opts = {}) {
+  // prepaid: Ausbau in Bauabschnitten (ui/bauen.js, Roadmap P18) ist schon abschnittsweise bezahlt
+  // und begonnen; der letzte Abschnitt schliesst ihn ab, ohne Ziel und Kasse erneut zu pruefen.
+  const goal = ctx.rules.stageGoals[state.stage];
+  if (opts.prepaid) {
+    if (!goal || state.stage >= ctx.rules.maxStage) return { ok: false, missing: ['max'] };
+  } else {
+    const check = canAdvanceStage(state, ctx);
+    if (!check.ok) return { ok: false, missing: check.missing };
+    spend(state, goal.cost, 'ausbau');
+  }
+  if (goal.project) state.buildings[goal.project] = 1;
   const from = state.stage;
   state.stage++;
   state.stageGuests = 0;

@@ -407,6 +407,8 @@ export function init(game) {
     // Regelmaessiger Besuch der gebauten Stufe ({ art, alleTage, dauer, ... }) oder null
     besuchVon: (id) => R.aktiveStufe(zustand(), id)?.wirkung?.besuch ?? null,
     bauen,
+    // Nach Rücknahme eines Kaufs im Baumenü (ui/bauen.js stellt den Zustand wieder her, Roadmap P18)
+    neuZeichnen: () => { aktualisiere(); game.emit('services:effekte', R.effekte(zustand())); },
     effekte: () => fuerSpielregeln(R.effekte(zustand())),
     abrechnen,
     naechsteBesuche: () => R.naechsteBesuche(zustand(), kontext().tag),

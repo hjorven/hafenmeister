@@ -48,10 +48,11 @@ export function waehleSchritt({ geld, eintraege, bedarf, stufe }) {
   const meistePlaetze = (liste) => [...liste].sort((a, b) => (leistbar(b) - leistbar(a)) || (leistbar(a) ? b.plaetzeNeu - a.plaetzeNeu : 0) || a.kosten - b.kosten)[0];
   const mit = (e, text) => ({ text: leistbar(e) ? text : `${text} Noch ${euro(e.kosten - geld)} sparen.`, ziel: e.key, leistbar: leistbar(e) });
 
-  // 1. Ausbaustufe bereit
-  if (stufe?.ok) {
-    const e = eintraege.find((x) => x.key === 'hafen:stufe');
-    if (e) return { text: `Alles bereit: ${stufe.goal.name ?? 'nächste Ausbaustufe'} bauen.`, ziel: e.key, leistbar: true };
+  // 1. Ausbaustufe bereit (bei Bauabschnitten reicht das Geld fuer den naechsten Abschnitt)
+  const ausbau = eintraege.find((x) => x.key === 'hafen:stufe');
+  const zielErreicht = stufe?.ok || ausbau?.begonnen || (ausbau?.gesamt && (stufe?.missing ?? []).every((m) => m === 'money'));
+  if (ausbau && !ausbau.gesperrt && zielErreicht && leistbar(ausbau)) {
+    return { text: `Alles bereit: ${ausbau.gesamt ? ausbau.name : stufe?.goal?.name ?? 'nächste Ausbaustufe'} bauen.`, ziel: ausbau.key, leistbar: true };
   }
   // 2. Kein Platz: Boote weggeschickt oder Hafen fast voll
   const stege = offen.filter((e) => e.art === 'steg');
@@ -74,12 +75,15 @@ export function waehleSchritt({ geld, eintraege, bedarf, stufe }) {
   if (stufe?.goal) {
     const e = eintraege.find((x) => x.key === 'hafen:stufe');
     const name = stufe.goal.name ?? 'nächsten Ausbaustufe';
+    if (e?.gesperrt?.startsWith('Baustelle')) return { text: `Baustelle: ${e.name} wird über Nacht gebaut.`, ziel: e.key, leistbar: false };
+    if (e?.begonnen) return { text: `Noch ${euro(e.kosten - geld)} sparen für ${e.name}.`, ziel: e.key, leistbar: false };
     if (stufe.missing.includes('guests')) return { text: `Noch ${stufe.goal.guests - stufe.guests} zufriedene Gäste bis zum ${name}.`, ziel: e?.key ?? null, leistbar: false };
     if (stufe.missing.includes('reputation')) {
       const w = wuensche[0];
       const tipp = w ? ` Gäste vermissen ${WUNSCH[w[0]]}.` : ' Wünsche der Gäste erfüllen hilft.';
       return { text: `Ruf ${num1(stufe.goal.reputation)} nötig für ${name}.${tipp}`, ziel: e?.key ?? null, leistbar: false };
     }
+    if (e?.gesamt && zielErreicht) return { text: `Noch ${euro(e.kosten - geld)} sparen für ${e.name}.`, ziel: e.key, leistbar: false };
     if (stufe.missing.includes('money')) return { text: `Noch ${euro(stufe.goal.cost - geld)} sparen für ${name}.`, ziel: e?.key ?? null, leistbar: false };
   }
   // 6. Etwas Neues, das sich leisten laesst
@@ -88,4 +92,35 @@ export function waehleSchritt({ geld, eintraege, bedarf, stufe }) {
   const spar = guenstigste(offen);
   if (spar) return mit(spar, `Als Nächstes: ${spar.name}.`);
   return null;
+}
+
+// Letzte Stufe, nichts mehr zu bauen: das Abschlussziel der Region (sim.regionGoal) als Hinweis
+export function regionsSchritt(rg) {
+  if (!rg?.active) return null;
+  if (rg.done || rg.ok) return { text: 'Dein Seehafen ist fertig ausgebaut. Genieß den Trubel.', ziel: null, leistbar: false };
+  const g = rg.goal ?? {};
+  if (rg.missing.includes('berths')) return { text: `Noch ${rg.openBerths} ${rg.openBerths === 1 ? 'Platz' : 'Plätze'} bauen, dann ist der Hafen komplett.`, ziel: null, leistbar: false };
+  if (rg.missing.includes('bigVisits')) {
+    const n = (g.bigVisits || 0) - (rg.visits || 0);
+    return { text: `Noch ${n} ${n === 1 ? 'Besuch' : 'Besuche'} großer Schiffe bis zum Abschluss. Kreuzfahrtschiffe und Flottenbesuche zählen.`, ziel: null, leistbar: false };
+  }
+  if (rg.missing.includes('reputation')) return { text: `Ruf ${num1(g.reputation)} erreichen: Wünsche der Gäste erfüllen.`, ziel: null, leistbar: false };
+  return null;
+}
+
+// Hinweis im Baumenü vor dem Stufenausbau (Roadmap D4): was mit Booten auf umgebauten Plätzen passiert
+export function umbauText(p) {
+  if (!p) return null;
+  const gone = p.gone?.length || 0;
+  const gaeste = p.guests?.length || 0;
+  const fest = p.fixed?.length || 0;
+  const umlegen = p.moving?.length || 0;
+  if (!gone && !umlegen) return null;
+  const t = [];
+  if (gone) t.push(`Beim Umbau fallen ${gone === 1 ? 'ein Platz' : `${gone} Plätze`} weg.`);
+  if (gaeste) t.push(`${gaeste === 1 ? 'Ein Gast reist' : `${gaeste} Gäste reisen`} vorher ab und ${gaeste === 1 ? 'zahlt' : 'zahlen'} noch.`);
+  if (fest) t.push(`${fest === 1 ? 'Ein Dauerlieger zieht' : `${fest} feste Boote ziehen`} auf einen freien Platz um.`);
+  if (umlegen) t.push(`${umlegen === 1 ? 'Ein Boot legt' : `${umlegen} Boote legen`} in eine passende Box um.`);
+  if (gone && !gaeste && !fest) t.push('Gerade liegt dort niemand.');
+  return t.join(' ');
 }

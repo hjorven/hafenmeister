@@ -249,7 +249,7 @@ export async function initBridge(game) {
     build: run((id, cost, level) => sim.build(state, id, cost, level)),
     buildJettyProject: run((id) => sim.buildJettyProject(state, ctx, id)),
     openJettyProjects: () => sim.openJettyProjects(state, ctx),
-    advanceStage: run(() => sim.advanceStage(state, ctx)),
+    advanceStage: run((opts) => sim.advanceStage(state, ctx, opts)),
     stationBoat: run((typeId, berthId, modelId) => sim.stationBoat(state, ctx, typeId, berthId, modelId)),
     // zweck und quelle ordnen Beträge im Tagesabschluss ein (sim.QUELLEN, docs/tagesabschluss.md)
     spend: (amount, zweck = 'bau') => {
