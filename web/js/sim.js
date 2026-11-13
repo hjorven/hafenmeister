@@ -1110,13 +1110,10 @@ function startEvening(state, ctx, events) {
 }
 
 /**
- * Liegegeld für die kommende Nacht fällig stellen: beim Anlegen und für Bleibende jeden Morgen.
- * Dabei wird geprüft, welche Wünsche der Hafen heute erfüllt (Versorgung reicht je Tag für
- * eine feste Zahl Boote, state.served zählt mit). Das Boot gilt als unbezahlt (boat.paid = false),
- * bis kassiert ist. Mit Hafenbüro Stufe 2 kassiert das Büro sofort selbst.
+ * Wünsche eines liegenden Bootes für heute prüfen (beim Anlegen und an jedem Morgen). Die Versorgung
+ * reicht je Tag für eine feste Zahl Boote, state.served zählt mit. Zählt für die Bewertung.
  */
-function chargeFee(state, ctx, boat, mods, events) {
-  if (boat.feeDay === state.day) return; // heute schon abgerechnet
+function checkWishes(state, ctx, boat) {
   const berth = ctx.berthById[boat.berthId];
   const served = (state.served ||= {});
   const metList = [];
@@ -1132,11 +1129,30 @@ function chargeFee(state, ctx, boat, mods, events) {
   }
   boat.wishesMet += metList.length;
   boat.wishesTotal += boat.wishes.length;
-  const fee = nightlyFee(state, ctx, boat, metList.length, mods.priceFactor);
-  boat.pendingFee += fee;
+  return metList;
+}
+
+/**
+ * Liegegeld fällig stellen: beim Anlegen und für Bleibende jeden Morgen. Mit rules.prepay (Zahl) zahlt
+ * ein Gast beim Anlegen bis zu so viele geplante Nächte auf einmal (boat.paidThrough = letzter bezahlter Tag);
+ * an den Morgen danach werden nur noch die Wünsche geprüft. Bleibt er länger (Sturm), wird jede
+ * weitere Nacht wieder einzeln fällig. Das Boot gilt als unbezahlt (boat.paid = false), bis
+ * kassiert ist. Mit dem Kassenautomaten kassiert das Büro sofort selbst.
+ * feeReady trägt amount, base (Grundpreis aller Nächte), bonus (Wunschbonus), nights.
+ */
+function chargeFee(state, ctx, boat, mods, events) {
+  if (boat.feeDay === state.day) return; // heute schon abgerechnet
+  const metList = checkWishes(state, ctx, boat);
   boat.feeDay = state.day;
+  if (boat.paidThrough != null && state.day <= boat.paidThrough) return; // schon im Voraus bezahlt
+  const nights = boat.paidThrough == null ? Math.max(1, Math.min(ctx.rules.prepay || 1, boat.nights || 1)) : 1;
+  const perNight = nightlyFee(state, ctx, boat, metList.length, mods.priceFactor);
+  const basePerNight = Math.min(perNight, nightlyFee(state, ctx, boat, 0, mods.priceFactor));
+  const fee = perNight * nights;
+  boat.paidThrough = state.day + nights - 1;
+  boat.pendingFee += fee;
   boat.paid = false;
-  events.push({ type: 'feeReady', boatId: boat.id, amount: fee, wishesMet: metList });
+  events.push({ type: 'feeReady', boatId: boat.id, amount: fee, base: basePerNight * nights, bonus: (perNight - basePerNight) * nights, nights, wishesMet: metList });
   const autoSizes = ctx.rules.office.autoCollectSizes;
   if (state.office >= ctx.rules.office.autoCollect && (!autoSizes || autoSizes.includes(boat.size))) events.push(...collect(state, ctx, boat.id).events);
 }
@@ -1166,18 +1182,42 @@ export function collect(state, ctx, boatId, { hand = false } = {}) {
   return { ok: true, events: [ev] };
 }
 
+/** Anteil, den der Hafenmeister für liegengebliebene Münzen abliefert (Rundgang und Nacht). */
+export function roundShare(ctx) {
+  return ctx.rules.roundShare ?? ctx.rules.uncollectedShare;
+}
+
 /**
- * Hafenmeister-Rundgang am Abend: Wer seine Münze liegen ließ, zahlt dem Hafenmeister nur den
- * Anteil rules.uncollectedShare. Ohne Rundgang (keine Figuren) passiert dasselbe in der Nacht.
+ * Hafenmeister-Rundgang am Abend: Wer seine Münze liegen ließ, zahlt dem Hafenmeister. Er ist ein
+ * Helfer, kein Ersatz: in die Kasse kommt nur der Anteil rules.roundShare (vier Fünftel).
+ * Ohne Rundgang (keine Figuren, oder er kam nicht mehr vorbei) passiert dasselbe in der Nacht.
+ * collected trägt full (was die Münze wert war) und round: true.
  */
-export function collectOnRound(state, ctx, boatId) {
+export function collectOnRound(state, ctx, boatId, { night = false } = {}) {
   const boat = state.boats[boatId];
   if (!boat || boat.pendingFee <= 0) return { ok: false, events: [] };
-  const amount = Math.round(boat.pendingFee * ctx.rules.uncollectedShare);
+  const full = boat.pendingFee;
+  const amount = Math.round(full * roundShare(ctx));
   boat.pendingFee = 0;
   boat.paid = true;
-  addIncome(state, amount, 'liegegeld', 'rundgang');
-  return { ok: true, events: [{ type: 'collected', boatId, amount, round: true }] };
+  addIncome(state, amount, 'liegegeld', night ? 'nacht' : 'rundgang');
+  const ev = { type: 'collected', boatId, amount, full, round: true };
+  if (night) ev.night = true;
+  return { ok: true, events: [ev] };
+}
+
+/**
+ * Trinkgeld für einen langen Kassierstrich: ab rules.strokeTip.from Münzen in einem Zug gibt es
+ * je weitere Münze den Anteil perCoin auf die eingestrichene Summe, höchstens max.
+ * coins: Zahl der Münzen, sum: ihr Wert zusammen.
+ */
+export function strokeTip(state, ctx, coins, sum) {
+  const t = ctx.rules.strokeTip;
+  if (!t || coins < t.from || !(sum > 0)) return { ok: false, amount: 0, events: [] };
+  const share = Math.min(t.max, t.perCoin * (coins - t.from + 1));
+  const amount = Math.max(1, Math.round(sum * share));
+  addIncome(state, amount, 'liegegeld', 'strichtrinkgeld');
+  return { ok: true, amount, events: [{ type: 'strokeTip', amount, coins, share }] };
 }
 
 /** Alles kassieren. Ohne Hafenbüro nur mit force (Automatik, Tests). */
@@ -1202,19 +1242,17 @@ export function rateBoat(ctx, boat, ratingBonus = 0) {
 
 function night(state, ctx, events) {
   const mods = modifiers(state, ctx);
-  // Liegengebliebene Münzen: ein Teil landet trotzdem in der Kasse
+  // Liegengebliebene Münzen (der Rundgang kam nicht mehr vorbei): der Hafenmeister holt sie
+  // nachts, mit demselben Anteil wie beim Rundgang
   let honesty = 0;
   for (const boat of mooredBoats(state)) {
     if (boat.pendingFee > 0) {
-      honesty += Math.round(boat.pendingFee * ctx.rules.uncollectedShare);
-      boat.pendingFee = 0;
-      boat.paid = true;
+      const r = collectOnRound(state, ctx, boat.id, { night: true });
+      honesty += r.events[0]?.amount || 0;
+      events.push(...r.events);
     }
   }
-  if (honesty > 0) {
-    addIncome(state, honesty, 'liegegeld', 'nacht');
-    events.push({ type: 'honestyBox', amount: honesty });
-  }
+  if (honesty > 0) events.push({ type: 'honestyBox', amount: honesty });
   // Abreise
   for (const boat of mooredBoats(state)) {
     if (boat.stationed) continue;
