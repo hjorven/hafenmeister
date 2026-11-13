@@ -21,6 +21,8 @@ export const PLAN_M = 0.62;
 // auch bei größter Kamerabreite am Ost- und Westrand nicht als harte Kante zu sehen ist.
 export { BEREICH } from './natur.js';
 /** Kernbereich für dichte Bepflanzung (wie vor der Verbreiterung, damit nicht mehr Bäume gezeichnet werden). */
+/** Außenring bis zum Kartenrand (äußeres Geländenetz, grobe Tiefentextur). */
+export const AUSSEN = { x0: -1600, x1: 1600, y0: -1600, y1: 1400 };
 export const KERN = { x0: -420, x1: 430, y0: -200, y1: 470 };
 
 /** Planeinheiten -> Weltmeter. */
@@ -612,6 +614,22 @@ export function punkt(px, py, stufe, region) {
   if (basis) {
     if (typ === 'pflaster' || typ === 'mole' || typ === 'steinschuettung') h += basis;
     else if (h > 0) h += basis * smooth(0.1, 1.0, h);
+  }
+  // Rand der Karte: Land läuft in den letzten rund 300 Einheiten mit unruhiger Küste ins Meer aus, damit es
+  // nirgends an der geraden Kante des Außenrings abgeschnitten endet (man sieht flach und gedreht bis dorthin)
+  const zumRand = Math.min(px - AUSSEN.x0, AUSSEN.x1 - px, py - AUSSEN.y0, AUSSEN.y1 - py);
+  if (zumRand < 420) {
+    let k = 1 - smooth(60, 300, zumRand + 120 * (fbm(px / 150, py / 150, 71) - 0.5));
+    // Leuchttürme im Randbereich behalten ihre Landzunge
+    for (const [lx, ly] of F.leuchttuerme || []) k *= smooth(50, 140, Math.hypot(px - lx, py - ly));
+    if (k > 0) {
+      const ziel = -5;
+      const vorher = h;
+      h = h + (ziel - h) * k * k * (3 - 2 * k);
+      if (vorher >= 0 && h < 0) return { h, typ: 'wasser', see: 1 };
+      if (h < 0) return { h, typ, see: Math.max(see, k) };
+      if (h < 0.6 && typ !== 'sand') typ = 'sand';
+    }
   }
   return { h, typ, see };
 }

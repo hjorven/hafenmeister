@@ -3,13 +3,13 @@
 // Eine einzige große Fläche mit einem schlanken Shader, dazu eine kleine Tiefentextur.
 // Kein Spiegeln, keine Brechung: läuft auch auf schwachen Handys.
 import * as THREE from 'three';
-import { punkt, BEREICH, KERN, PLAN_M } from './gelaende.js';
+import { punkt, BEREICH, KERN, PLAN_M, AUSSEN } from './gelaende.js';
 
 const U = PLAN_M;
 const TIEFE_MAX = 8;   // Meter, die in der Textur abgebildet werden
 
 /** Außenring bis zum Kartenrand (wie das äußere Geländenetz in terrain.js), grob gerechnet. */
-export const FERN = { x0: -1600, x1: 1600, y0: -1600, y1: 1400 };
+export const FERN = AUSSEN;
 
 /** Tiefentextur: R = Wassertiefe (0..8 m), G = 0 Binnensee bis 1 offene See. B: Bereich in Planeinheiten. */
 export function baueTiefentextur(region, stufe, schritt, B = BEREICH) {
@@ -113,6 +113,10 @@ const FRAGMENT = /* glsl */ `
     vec4 tf = texture2D(uTiefeFern, clamp(uf, 0.0, 1.0));
     float d = mix(tf.r, t.r, innen) * ${TIEFE_MAX.toFixed(1)} + uPegel;
     float see = mix(tf.g, t.g, innen);
+    // Jenseits des Außenrings: offenes, tiefes Meer
+    float draussen = 1.0 - smoothstep(0.0, 0.03, min(min(uf.x, 1.0 - uf.x), min(uf.y, 1.0 - uf.y)));
+    d = mix(d, max(d, 4.5), draussen);
+    see = mix(see, 1.0, draussen);
 
     float px = length(vec2(dFdx(vWelt.x), dFdy(vWelt.x))) + length(vec2(dFdx(vWelt.z), dFdy(vWelt.z)));
     float aa = max(fwidth(d) * 0.8, 0.002);
