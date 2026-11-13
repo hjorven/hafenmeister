@@ -75,9 +75,12 @@ export function createGame({ canvas, bounds, home }) {
     else if (!document.hidden && pausedByVisibility) { pausedByVisibility = false; game.setPaused(false); }
   });
 
-  const clock = new THREE.Clock();
-  renderer.setAnimationLoop(() => {
-    const raw = Math.min(clock.getDelta(), 0.1);
+  // Zeit aus dem Zeitstempel der Bildschleife (THREE.Clock ist in Three.js 0.187 veraltet und warnt)
+  let zuletzt = null;
+  renderer.setAnimationLoop((zeit) => {
+    const jetzt = Number.isFinite(zeit) ? zeit : performance.now();
+    const raw = zuletzt === null ? 0 : Math.min(Math.max(0, (jetzt - zuletzt) / 1000), 0.1);
+    zuletzt = jetzt;
     const dt = game.paused ? 0 : raw * game.speed;
     game.time += dt;
     rig.update(raw);

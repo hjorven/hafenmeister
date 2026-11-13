@@ -43,7 +43,7 @@ export function init(game) {
   // ?stufe=3 in der Adresse zeigt die Landschaft einer Stufe (render/landscape.js), dann auch hier
   const q = typeof location !== 'undefined' ? new URLSearchParams(location.search) : null;
   const urlStufe = Number(q?.get('stufe')) || null;
-  const stufe = () => urlStufe ?? game.state?.stage ?? game.state?.stufe ?? 1;
+  const stufe = () => game.state?.stage ?? game.state?.stufe ?? urlStufe ?? 1;
   const zufall = (list) => list[Math.floor(Math.random() * list.length)];
 
   function baue(id) {
