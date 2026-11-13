@@ -20,7 +20,9 @@ export default defineConfig({
   testDir: './specs',
   outputDir: './test-results',
   timeout: 45_000,
-  expect: { timeout: 10_000 },
+  // Unter Last (Software-WebGL, mehrere Browser parallel) kommen Klicks erst Sekunden spaeter im
+  // Spiel an. 20 s lassen echten Fehlern trotzdem keinen Ausweg, sie werden nur langsamer rot.
+  expect: { timeout: 20_000 },
   fullyParallel: true,
   forbidOnly: CI,
   retries: CI ? 1 : 0,

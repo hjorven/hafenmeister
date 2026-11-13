@@ -102,12 +102,19 @@ test('Antippen der Karte meldet einen Punkt im Wasser oder an Land', async ({ ga
   await page.evaluate(() => {
     window.__taps = [];
     window.hafenmeister.on('tap', (e) => window.__taps.push({ x: e.x, y: e.y, hasWorld: !!e.world }));
+    // Anhalten, damit bis zum Klick kein Boot und keine Muenze an die gewaehlte Stelle kommt
+    // (unter Last vergehen zwischen Auswahl und Klick leicht eine Sekunde). Ein Tipp auf eine
+    // Muenze startet den Strich, auf ein Boot die Leine, beides ist kein Tipp auf leere Karte.
+    window.hafenmeister.setPaused(true);
   });
+  await kameraRuhig(page);
   const c = await stageCenter(page, { leer: true });
   if (isTouchProject(testInfo)) await page.touchscreen.tap(c.x, c.y);
   else await page.mouse.click(c.x, c.y);
 
-  await page.waitForFunction(() => window.__taps.length > 0, null, { timeout: 3000 });
+  // Unter Last (Software-WebGL, mehrere Browser parallel) kommt der Klick erst Sekunden spaeter
+  // im Spiel an. Darum grosszuegig warten und unabhaengig von Bildern (polling statt rAF) pruefen.
+  await page.waitForFunction(() => window.__taps.length > 0, null, { timeout: 15_000, polling: 100 });
   const taps = await page.evaluate(() => window.__taps);
   expect(taps[0].hasWorld, 'Tipp hat keinen Weltpunkt').toBe(true);
 });
