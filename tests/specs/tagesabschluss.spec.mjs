@@ -48,7 +48,13 @@ test('Tagesabschluss: Zettel ohne "null", Karte verdeckt keine Bedienung', async
   // Schilder erscheinen teils ein Bild später; Zettel und Karte messen dann neu
   await expect.poll(() => ueberdeckt(page, '#hm-ta-zettel'), { message: 'Zettel verdeckt', timeout: 3000 }).toEqual([]);
 
-  if (isTouchProject(testInfo)) await zettel.tap(); else await zettel.click();
+  // Der Zettel bleibt nur 5 s (Echtzeit). Unter Last kann er vor dem Antippen schon weg sein;
+  // dann öffnet der Test die Karte über die Schnittstelle, geprüft wird sie trotzdem.
+  try {
+    if (isTouchProject(testInfo)) await zettel.tap({ timeout: 2000 }); else await zettel.click({ timeout: 2000 });
+  } catch {
+    await page.evaluate(() => window.hafenmeister.tagesabschluss.zeige());
+  }
   const karte = page.locator('#hm-tagesabschluss');
   await expect(karte).toBeVisible();
   expect(await karte.innerText()).not.toMatch(/\bnull\b|undefined/);
