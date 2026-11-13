@@ -12,7 +12,7 @@ Stand: 12.11.2026. Code: `web/js/render/landscape.js` (Einstieg, wird von `main.
 - **Wartebereich vor der Einfahrt**: gelbe Wartebojen und ein gestrichelter Ankerkreis. Stufe 1 und 2 im Binnensee vor den Stegen, ab Stufe 3 draußen östlich der Fahrrinne, ab Stufe 5 zusätzlich eine Reede für große Schiffe.
 - **Ankerfeld für die Nacht**: Im Ankerkreis liegen feste Ankerplätze (kleine helle Punkte) im Abstand des Schwoikreises, nicht auf den Bojen und nicht in der Fahrrinne. Boote, die abends keinen Platz bekommen, liegen dort über Nacht. Anzahl: Stufe 1: 13, Stufe 2: 19, Stufe 3 und 4: je 19, Stufe 5: 19 für L plus 7 für XL. Die Liste ist nach Nähe zur Einfahrt sortiert, also zuerst vorne belegen.
 - **Tageslicht** folgt der Spielzeit: Morgen, Mittag, Abendrot, Dämmerung, Nacht. Schatten werden abends lang.
-- **Zwei Reviere**: Ostsee (Kiefern, Birken, Buchen, Schilf, Schärenfelsen am Kartenrand) und Nordsee (Deich, hohe Dünen, Watt mit Priel vor der Einfahrt, Pappeln und windschiefe Bäume, graueres Wasser, Gezeiten).
+- **Zwei Reviere**: Ostsee (Hügelland mit Feldern, Knicks, Wald, Dorf und Steilufer, Schilf) und Nordsee (Deich, hohe Dünen, Watt mit Priel vor der Einfahrt, Pappeln und windschiefe Bäume, graueres Wasser, Gezeiten).
 
 ## Engpass und feste Punkte
 
@@ -63,6 +63,30 @@ Jedes neue Spiel bekommt eine von zehn Geländeformen (`web/js/render/landschaft
 In jeder Form gleich: Festlandufer und Becken am Hafen, Engpass bei x 178 mit Molen und Fahrwasser, westliche Nehrung (Anlagen der Stufe 6), Wartebojen, Ankerfelder und offenes Wasser im Norden. Darum passen Liegeplätze, Stegbilder, Bauen und Spielstände in jeder Form. `tests/gelaendeform.test.mjs` prüft das für alle Formen.
 
 Welche Form gilt: `?gelaende=N` in der Adresse (nur ansehen), sonst die im Spielstand (`modules.gelaende.nr`), in Tests und ohne Browser Form 1, in einem neuen Spiel eine zufällige. Im Spiel: `game.gelaende.aktuell()`, `game.gelaende.formen`. Eine Form entfernen: ihren Eintrag aus `FORMEN` löschen; Spielstände mit dieser Nummer bekommen Form 1.
+
+## Abwechslung an Land (Landbild)
+
+Code: `landschaft/vielfalt.js` (reine Rechenfunktionen, Haken `land()` und `nehrung()` in `punkt()`) und `landschaft/bewuchs.js` (Bäume, Knicks, Dorf, Höfe als feste Netze). Die Grundform (Ufer, Fahrwasser, Bauflächen) bleibt unverändert, nur das Land dahinter wechselt.
+
+- **Felder** in langen Schlägen mit Raps, Korn, Acker, Weide und Wiese, getrennt durch **Knicks** (Wallhecken mit einzelnen Eichen) und Feldwege. Felder liegen achsparallel, damit das Geländeraster keine Treppen zeigt. Außerhalb des fein gerechneten Bereichs nur weiche Flecken in ruhigen Grüntönen.
+- **Wald** in Flecken (Buchen, Birken, Kiefern; nahe der See mehr Kiefern), auf der Nehrung stellenweise Kiefernwald und **Heide**.
+- **Dorf** mit Dorfstraße zur Landstraße, Häusern (Reetdach, Backstein, weiß mit rotem Dach), Backsteinkirche mit Turm und einer **Windmühle**, deren Flügel sich drehen. Dazu zwei bis vier **Einzelhöfe** mit Scheune.
+- **Sölle**: kleine Teiche mit Schilfrand in den Feldern, nur im Hinterland.
+- **Steilufer** an der offenen See (nicht im Hafen, mindestens 40 m von Hafen und Einfahrt), mit Buchenwald auf der Kante und Findlingen am Fuß. Hat die Grundform an einer Stelle selbst Steilufer (`kontext.formSteilufer`), entfällt es.
+- **Hügel** (Endmoräne) im freien Land, nie auf Hafen- und Bauflächen.
+- **Jahreszeiten**: Raps blüht im Frühling gelb, Korn ist im Sommer golden, im Herbst färben sich Laub, Knicks und Felder, im Winter ist alles graubraun. Es werden nur Farben im Puffer getauscht, kein Neubau (`game.landscape.setzeJahreszeit(j)`, folgt dem Ereignis `season`).
+
+**Landbild je Spiel:** Die Nummer kommt aus dem Seed des Spielstands (`bildAusSeed`). Sie bestimmt die Küstenart links und rechts (Steilufer, Wald, Heide, Felder), die Lage des Dorfes, Feldgrößen und Fruchtfolge, Waldanteil, Hügel, Sölle und Höfe. Zum Ansehen `?landbild=N` (nur Ansicht, wird nicht gespeichert). Automatische Tests bekommen das Grundbild 0. Die Grundform wählt unabhängig davon `?gelaende=N`.
+
+**Frei bleiben** (eben, ohne Bäume, Häuser, Hügel): Hafenfläche, `karte.bauflaechen(stufe)`, Flächen aus `data/anlagen-flaechen.js` und ein Kreis mit `radius + 4 m` um jeden Service-Bauplatz aus `data/services.js`.
+
+| Adresse | Was man sieht |
+|---|---|
+| `?landbild=0` | Grundbild: Steilufer im Westen, Dorf im Südwesten |
+| `?landbild=7` | anderes Dorf, andere Felder und Küsten |
+| `?stufe=3&landbild=12` | Stufe 3 mit Landbild 12 |
+
+In der Konsole: `hafenmeister.landscape.setzeBild(25)`, `hafenmeister.landscape.bild`, `hafenmeister.emit('season', { part: 'herbst' })`.
 
 ## Ausprobieren
 
@@ -139,6 +163,10 @@ node --test tests/landschaft.test.mjs
 
 ```bash
 node --test tests/gelaendenetz.test.mjs
+```
+
+```bash
+node --test tests/gelaende-vielfalt.test.mjs
 ```
 
 Prüft unter anderem: Wassertiefe an allen Liegeplätzen passt zu den Hafendaten, Wartebojen liegen in jedem Revier auch bei Niedrigwasser tief genug, Wege liegen an Land, die Uhrzeit läuft über den Spieltag ohne Sprung zurück, das vereinfachte Geländenetz hat keine Risse und deckt die ganze Fläche.

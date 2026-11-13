@@ -3,10 +3,11 @@
 import * as THREE from 'three';
 import { region as regionNach, REGION_STANDARD } from './regionen.js';
 import { gelaendeAbfrage, warteplaetze, wegeNetz } from './gelaende.js';
-import { festePunkteWelt, karteRaster } from './karte.js';
+import { festePunkteWelt, karteRaster, bauflaechen } from './karte.js';
 import { baueGelaende, QUALITAET } from './terrain.js';
 import { erzeugeWasser, baueTiefentextur } from './wasser.js';
 import { erzeugeTageslicht } from './tageslicht.js';
+import { setzeBild, aktuellesBild, setzeFreiQuellen } from './vielfalt.js';
 
 /** Schätzt die passende Qualitätsstufe für das Gerät. */
 export function autoQualitaet() {
@@ -80,7 +81,11 @@ function baueWartebereich(stufe, region) {
  * @param {THREE.Scene} szene
  * @param {{region?: string, stufe?: number, qualitaet?: 'hoch'|'mittel'|'niedrig'}} optionen
  */
-export function erzeugeLandschaft(szene, { region = REGION_STANDARD, stufe = 1, qualitaet = 'mittel' } = {}) {
+export function erzeugeLandschaft(szene, { region = REGION_STANDARD, stufe = 1, qualitaet = 'mittel', bild = 0, jahreszeit = null } = {}) {
+  setzeBild(bild);
+  // Bauflächen der Grundform bleiben eben und frei (Services und Anlagen liest vielfalt.js selbst)
+  setzeFreiQuellen({ polygone: (st) => bauflaechen(st).map((f) => f.poly) });
+  let aktJahreszeit = jahreszeit;
   const q = QUALITAET[qualitaet] ? qualitaet : 'mittel';
   const gruppe = new THREE.Group();
   gruppe.name = 'landschaft';
@@ -113,6 +118,7 @@ export function erzeugeLandschaft(szene, { region = REGION_STANDARD, stufe = 1, 
     raster = null;
     const z = licht.zustand;
     gelaende.aktualisiereSchatten(z.schattenRichtung, z.schattenLaenge, z.nacht);
+    if (aktJahreszeit) gelaende.setzeJahreszeit(aktJahreszeit);
     api.bauzeitMs = Math.round(performance.now() - t0);
     for (const f of beiNeubau) { try { f({ stufe: aktStufe, region: regionName }); } catch (err) { console.warn(err); } }
   }
@@ -132,6 +138,20 @@ export function erzeugeLandschaft(szene, { region = REGION_STANDARD, stufe = 1, 
     get region() { return regionName; },
     get qualitaet() { return q; },
     get pegel() { return pegel; },
+    /** Geländebild dieses Spiels: { nr, kueste, dorf, ... } (vielfalt.js). */
+    get bild() { return aktuellesBild(); },
+    get jahreszeit() { return aktJahreszeit; },
+    /** Anderes Geländebild (z. B. neues Spiel): baut das Land neu. */
+    setzeBild(nr) {
+      const alt = aktuellesBild().nr;
+      if (setzeBild(nr).nr !== alt) baue();
+    },
+    /** Felder, Wiesen und Laub umfärben: 'fruehling' | 'sommer' | 'herbst' | 'winter'. Kein Neubau. */
+    setzeJahreszeit(j) {
+      if (!j || j === aktJahreszeit) return;
+      aktJahreszeit = j;
+      gelaende?.setzeJahreszeit(j);
+    },
     /** Begehbare Wege an Land (Straße, Zugänge, Promenade, Kai, Molenwege) in Weltmetern. */
     get wege() { return wege; },
     /** Wartebojen und Ankerbereiche der aktuellen Stufe in Weltmetern. */
@@ -172,6 +192,7 @@ export function erzeugeLandschaft(szene, { region = REGION_STANDARD, stufe = 1, 
     aktualisiere(dt, zeit) {
       wasser.aktualisiere(dt);
       gelaende?.aktualisiereFeuer(zeit, licht.zustand.nacht ?? 0);
+      gelaende?.aktualisiere(dt);
       if (warte) {
         for (const b of warte.gruppe.children) {
           if (b.userData.pick?.type !== 'waitbuoy') continue;
