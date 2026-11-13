@@ -262,6 +262,7 @@ function polstern(cam, r) {
 // Waehrend des Flugs traegt body die Klasse hm-ueberblick, am Ende meldet game 'ueberblick:ende' { abgebrochen }.
 // Nicht in Tests (navigator.webdriver) und nicht in der Pixel-Fassung, ausser mit ?ueberblick=1;
 // ?ueberblick=0 schaltet ihn ab. Der Knopf "Uebersicht" fliegt nie.
+// Fuer Tests: ?ueberblickhalten=30 haelt den Ueberblick 30 s, bevor der Flug beginnt.
 const UEBERBLICK = { halten: 2.5, flug: 1.5 };   // Sekunden
 
 function ueberblick(game) {
@@ -269,6 +270,8 @@ function ueberblick(game) {
   const wahl = new URLSearchParams(location.search).get('ueberblick');
   if (wahl === '0') return;
   if (wahl !== '1' && (navigator.webdriver || /\/pixel\//.test(location.pathname))) return;
+  const halten = Number(new URLSearchParams(location.search).get('ueberblickhalten'));
+  if (Number.isFinite(halten) && halten > 0 && halten <= 120) UEBERBLICK.halten = halten;
   let blick = null;
   try { blick = game.gelaende?.blickRect?.(); } catch (err) { console.warn('Blick auf die Gelaendeform nicht lesbar', err); }
   if (!blick || !Number.isFinite(blick.minX + blick.maxX + blick.minZ + blick.maxZ)) return;
