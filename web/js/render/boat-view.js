@@ -393,7 +393,7 @@ export function init(game) {
   function karteJetzt() {
     const st = stufe();
     const ls = game.landscape;
-    const sig = `${st}|${ls?.stufe ?? ''}|${ls?.region ?? ''}|${game.stegbild?.aktuell?.()?.nr ?? HAFEN.stegbild?.nr ?? 0}|${game.gelaende?.aktuell?.()?.nr ?? 1}`;
+    const sig = `${st}|${ls?.stufe ?? ''}|${ls?.region ?? ''}|${game.stegbild?.aktuell?.()?.nr ?? HAFEN.stegbild?.nr ?? 0}|${game.gelaende?.aktuell?.()?.nr ?? 1}|${game.gelaende?.aktuell?.()?.seed ?? 1}`;
     if (karte && !karteAlt && sig === karteSig) return karte;
     const tiefe = ls?.tiefeBei ? (x, z) => ls.tiefeBei(x, z) : () => 3;
     const w = ls?.warteplaetze ?? {};
@@ -547,7 +547,126 @@ export function init(game) {
     },
     befahrbar: (x, z, radiusM = 2, tiefgangM = 0) => befahrbar(karteJetzt(), x, z, radiusM, tiefgangM),
     randPunkt: (info) => randPunkt(info),
+    seeWeg: (von, o) => seeWeg(von, o),
+    vorbeiWeg: (info) => vorbeiWeg(info),
   };
+
+  // --- Wege fuer Kulisse und Besuchsschiffe (render/boats/verkehr.js, render/services-besuch.js) ---
+  // Alles aus der Karte: kein fester Punkt auf See, damit jede Gelaendeform (auch aus Seed) passt.
+  // Masse: hart = Rumpf plus Rand (darf nie unterschritten werden), weich = Wunschabstand (bootMass).
+  function masse(info) {
+    const m = bootMass(info);
+    const B = info.beam ?? (info.length ?? 6) * 0.33;
+    return { r: m.r, hart: Math.min(m.r, B / 2 + ({ S: 1, M: 1.2, L: 1.5, XL: 2.5, XXL: 3.5 }[info.size] ?? 1.5)), t: m.t };
+  }
+  // Randzellen der Karte in einer befahrbaren Flaeche, mit Richtung nach draussen
+  function randZellen(k, ok) {
+    const out = [];
+    for (let i = 0; i < k.nx; i += 2) {
+      if (ok[i]) out.push({ c: i, nx: 0, nz: -1 });
+      const u = (k.nz - 1) * k.nx + i;
+      if (ok[u]) out.push({ c: u, nx: 0, nz: 1 });
+    }
+    for (let j = 0; j < k.nz; j += 2) {
+      if (ok[j * k.nx]) out.push({ c: j * k.nx, nx: -1, nz: 0 });
+      if (ok[j * k.nx + k.nx - 1]) out.push({ c: j * k.nx + k.nx - 1, nx: 1, nz: 0 });
+    }
+    return out.map((e) => ({ ...zellMitte(k, e.c), nx: e.nx, nz: e.nz }));
+  }
+  // Vom Kartenrand weiter hinaus, bis man es nicht mehr sieht (hoechstens 150 m)
+  // Nur ueber Wasser mit mindestens t Tiefe (ausserhalb der Karte kennt nur das Gelaende die Tiefe).
+  function hinaus(p, L, t = 1) {
+    const tief = (x, z) => (game.landscape?.tiefeBei?.(x, z) ?? 99) >= t;
+    const q = { x: p.x, z: p.z };
+    const weiter = () => tief(q.x + p.nx * 15, q.z + p.nz * 15) && tief(q.x + p.nx * 7.5, q.z + p.nz * 7.5);
+    for (let i = 0; i < 10 && game.boatAnim.imBild?.(q.x, q.z, L + 6) && weiter(); i++) { q.x += p.nx * 15; q.z += p.nz * 15; }
+    if (q.x !== p.x || q.z !== p.z || !(p.nx || p.nz) || !weiter()) return q;
+    return { x: p.x + p.nx * 15, z: p.z + p.nz * 15 };
+  }
+  // Liegeplaetze der Stufe in Weltmetern (Vorbeifahrer bleiben davon weg)
+  function plaetzeWelt() {
+    const st = String(stufe());
+    const U = HAFEN.einheiten?.meterProEinheit ?? 0.62;
+    const out = [];
+    for (const p of HAFEN.plaetze ?? []) {
+      const l = p.lage?.[st];
+      if (l) out.push({ x: l[0] * U, z: -l[1] * U });
+    }
+    return out;
+  }
+
+  /**
+   * Weg von einem Punkt im Revier hinaus auf See, ausserhalb des Bildes.
+   * o: { breiteM, laengeM, tiefgangM, groesse, nahBei: {x, z} (bevorzugter Ausgang, z. B. der alte Seepunkt) }
+   * Ergebnis: Punkte ab von (ohne von) bis draussen, oder null, wenn kein Rand erreichbar ist.
+   */
+  const seeWegCache = new Map();
+  function seeWeg(von, o = {}) {
+    const k = karteJetzt();
+    const info = { size: o.groesse ?? 'XL', beam: o.breiteM ?? 8, length: o.laengeM ?? 30, draft: o.tiefgangM ?? 2 };
+    const key = `${karteSig}|${von.x.toFixed(1)}|${von.z.toFixed(1)}|${info.size}|${info.beam}|${info.length}|${info.draft}|${o.nahBei ? `${o.nahBei.x.toFixed(0)},${o.nahBei.z.toFixed(0)}` : ''}`;
+    if (seeWegCache.has(key)) return seeWegCache.get(key)?.map((p) => ({ ...p })) ?? null;
+    if (seeWegCache.size > 64) seeWegCache.clear();
+    const m = masse(info);
+    let erg = null;
+    for (const t of [m.t, Math.min(m.t, 2.5)]) {
+      const ok = erreichbar(k, von.x, von.z, m.hart, t);
+      const rand = randZellen(k, ok);
+      if (!rand.length) continue;
+      const ziel = o.nahBei ?? von;
+      rand.sort((a, b) => Math.hypot(a.x - ziel.x, a.z - ziel.z) - Math.hypot(b.x - ziel.x, b.z - ziel.z));
+      for (const p of rand.slice(0, 3)) {
+        const w = route(k, von, p, { r: m.r, rMin: m.hart, t, rechts: 0, flachErlaubt: false });
+        if (!w.ok || !w.amZiel) continue;
+        erg = [...w.punkte, hinaus(p, info.length, t)];
+        break;
+      }
+      if (erg) break;
+    }
+    seeWegCache.set(key, erg);
+    return erg?.map((p) => ({ ...p })) ?? null;
+  }
+
+  /**
+   * Weg eines Vorbeifahrers: von einem Rand der Karte zu einem anderen, ueber offenes Wasser,
+   * mit Abstand zu allen Liegeplaetzen. Ergebnis { start, punkte } oder null.
+   */
+  function vorbeiWeg(info) {
+    const k = karteJetzt();
+    // Randabschnitte, die mit dem Hafen verbunden sind (fuer ein kleines Boot); ob das grosse Schiff
+    // durchpasst, entscheidet die Wegsuche mit seinem eigenen Mass
+    const f = flaeche({ size: 'S', length: 7, beam: 2.5, draft: 1 });
+    // Die See im Spiel ist am Kartenrand 5 bis 7 m tief: grosse Schiffe rechnen hoechstens mit 4,5 m
+    const m0 = masse(info), m = { ...m0, t: Math.min(m0.t, 4.5) };
+    const sek = f.sektoren.filter(([n]) => !n.startsWith('see-'));
+    if (sek.length < 2) return null;
+    const plaetze = plaetzeWelt();
+    const nah = (p, d) => plaetze.some((q) => Math.hypot(q.x - p.x, q.z - p.z) < d);
+    const L = info.length ?? 8;
+    for (let versuch = 0; versuch < 10; versuch++) {
+      const i = Math.floor(Math.random() * sek.length);
+      let j = Math.floor(Math.random() * (sek.length - 1));
+      if (j >= i) j++;
+      const a = sek[i][1][Math.floor(Math.random() * sek[i][1].length)];
+      const b = sek[j][1][Math.floor(Math.random() * sek[j][1].length)];
+      if (Math.hypot(a.x - b.x, a.z - b.z) < 150) continue;
+      if (!befahrbar(k, a.x, a.z, m.hart, m.t) || !befahrbar(k, b.x, b.z, m.hart, m.t)) continue;
+      const w = route(k, a, b, { r: m.r + 4, rMin: m.hart, t: m.t, rechts: Math.min(4, m.r), flachErlaubt: false });
+      if (!w.ok || !w.amZiel) continue;
+      // Abstand zu den Liegeplaetzen: Vorbeifahrer fahren nicht durch den Hafen
+      const abstand = 25 + L * 0.3;
+      if (w.punkte.some((p) => nah(p, abstand))) continue;
+      const pts = [];
+      for (let n = 1; n < w.punkte.length; n++) {
+        const p = w.punkte[n - 1], q = w.punkte[n];
+        const d = Math.hypot(q.x - p.x, q.z - p.z), st = Math.ceil(d / 6);
+        for (let s = 1; s <= st; s++) pts.push({ x: p.x + (q.x - p.x) * s / st, z: p.z + (q.z - p.z) * s / st });
+      }
+      if (pts.some((p) => nah(p, abstand))) continue;
+      return { start: hinaus(a, L, m.t), punkte: [{ x: a.x, z: a.z }, ...w.punkte, hinaus(b, L, m.t)] };
+    }
+    return null;
+  }
 
   // Punkt fuer einen Tagestoern: freies, tiefes Wasser mit Platz fuer einen grossen Kreis
   function rundePunkt(info, wunsch, radius) {
@@ -565,14 +684,40 @@ export function init(game) {
     return best ?? { ...wunsch, frei: radius + f.r };
   }
 
+  // Anfahrt kuerzen: Der Start am Kartenrand liegt oft weit ausserhalb des Bildes. Das Boot beginnt
+  // stattdessen auf seinem Weg kurz bevor es ins Bild kommt; was niemand sieht, muss es nicht fahren.
+  // So dauert die Anfahrt zur Boje bei jeder Kameraeinstellung etwa gleich lang.
+  function naeherStart(info, start, ziel) {
+    if (!game.boatAnim.imBild || !ziel) return start;
+    const L = info.length ?? 8;
+    const { r, t } = bootMass(info);
+    const w = route(karteJetzt(), start, ziel, { r, rMin: (info.beam ?? 3) / 2 + 0.35, t });
+    if (!w.ok) return start;
+    const frei = (p) => game.boatAnim.boats.every((o) => Math.hypot(o.x - p.x, o.z - p.z) > (L + o.info.length) / 2 + 8);
+    let vorher = start;
+    let px = start.x, pz = start.z;
+    for (const q of w.punkte) {
+      const d = Math.hypot(q.x - px, q.z - pz), n = Math.max(1, Math.ceil(d / 5));
+      for (let i = 1; i <= n; i++) {
+        const p = { x: px + (q.x - px) * i / n, z: pz + (q.z - pz) * i / n };
+        if (game.boatAnim.imBild(p.x, p.z, L + 6)) return vorher;
+        // hoechstens bis 40 m vor das Ziel (dort soll man es noch heranfahren sehen)
+        if (Math.hypot(ziel.x - p.x, ziel.z - p.z) < 40 + L) return vorher;
+        if (frei(p) && befahrbar(karteJetzt(), p.x, p.z, r * 0.8, t)) vorher = p;
+      }
+      px = q.x; pz = q.z;
+    }
+    return vorher;
+  }
+
   // --- Ereignisse der Spielregeln -----------------------------------------------------------
   let ankunftT = -1e9;
   game.on('boot-kommt', (info) => {
     if (!info || info.id == null) return;
     if (bojenStufe !== stufe()) baueBojen();
     const e = erzeuge(info);
-    const start = freierStart(e.anim.info, info.herkunft);
     const ziel = warteplatz(info.boje ?? 0, e.anim);
+    const start = naeherStart(e.anim.info, freierStart(e.anim.info, info.herkunft), ziel);
     // Antippen und Ziehen erst, wenn das Boot an der Boje fest ist (siehe boat:moored unten)
     e.pick = e.anim.model.userData.pick;
     delete e.anim.model.userData.pick;

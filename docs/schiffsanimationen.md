@@ -70,7 +70,7 @@ Seegang und Wind für Ereignisse: `game.boatAnim.setSea(0 bis 1)`, `game.boatAni
 ## Verkehr und Warteplätze
 
 - **Abstand halten:** Wer hinter einem anderen Boot in dieselbe Richtung fährt, bremst und hält Abstand. Liegt etwas im Weg (entgegenkommend, querend, an der Boje), weicht das Boot seitlich aus, entgegenkommende Boote beide nach Steuerbord. Stehen sich zwei Boote gegenseitig im Weg, fährt das, das näher am Ziel ist. Kurz vor dem Liegeplatz wird nicht mehr ausgewichen, nur gewartet. Nur bei echter gegenseitiger Blockade (A wartet auf B wartet auf A) fährt ein Boot nach 12 s Stillstand kurz ohne Regeln weiter; wer nur in einer Schlange steht, wartet (`traffic()` und `festgefahren()` in `boat-anim.js`).
-- **Start:** Neue Boote beginnen außerhalb des Bildes am Rand des befahrbaren Wassers, verteilt auf mehrere Richtungen (siehe Fahrwasser), an einer Stelle, an der gerade kein anderes Boot ist (`freierStart`). Kommen mehrere zugleich, laufen sie im Abstand von 3 bis 9 s los.
+- **Start:** Neue Boote beginnen außerhalb des Bildes am Rand des befahrbaren Wassers, verteilt auf mehrere Richtungen (siehe Fahrwasser), an einer Stelle, an der gerade kein anderes Boot ist (`freierStart`). Danach rückt der Start auf dem Weg vor bis kurz vor den Bildrand (`naeherStart`, höchstens bis 40 m vor die Boje): Was niemand sieht, fährt das Boot nicht, die Anfahrt dauert bei jeder Kamera etwa gleich lang. Kommen mehrere zugleich, laufen sie im Abstand von 3 bis 9 s los.
 - **Eine Boje, ein Boot:** Ist die Boje der Spielregeln noch belegt, nimmt das Boot die nächste freie; sind alle belegt, ankert es luvseitig vor der Bojenreihe (`warteplatz`). Boote liegen quer zur Bojenreihe nebeneinander und schwojen nur so weit, wie Platz zur Nachbarboje ist.
 - **Box frei:** Ein zugewiesenes Boot bleibt an der Boje, bis das vorige Boot die Box verlassen hat (`dock(berth, { waitFor })`).
 - **Anlegen:** Kleine Boote brauchen von der Boje zur Box etwa 8 s, beschleunigen zügig und bremsen kräftig ab. Beim Ankommen taucht der Bug kurz ein, jede Leine klickt (`sound` `leine-einrasten`), die Box blitzt einmal hell auf (0,9 s in echter Zeit, damit man ihn auch bei 3x und 8x sieht).
@@ -112,7 +112,9 @@ Seit dem Gelände-Umbau (Thread "Boote ums Gelände herum führen") gibt es kein
 
 ## Offen
 
-- Vorbeifahrer (`render/boats/verkehr.js`) und Besuchsschiffe der Services fahren noch auf eigenen festen Bahnen (geprüft gegen alle Geländeformen); sie können auf `game.fahrwasser.weg` umgestellt werden. Die Binnensee-Runde weicht Inseln schon aus (`rundeImWasser`).
+- Vorbeifahrer auf See (`render/boats/verkehr.js`) fahren auf `game.fahrwasser.vorbeiWeg(info)`: von einem Randabschnitt der Karte zu einem anderen, mindestens 25 m + 0,3 Länge von jedem Liegeplatz, große Schiffe mit höchstens 4,5 m Tiefgang (die See ist am Rand 5 bis 7 m tief). Die festen Bahnen in `data/verkehr.js` gelten nur noch ohne Karte (Testseiten). Die Binnensee-Runde weicht Inseln aus (`rundeImWasser`).
+- Besuchsschiffe (`render/services-besuch.js`): Der Teil im Hafen kommt aus `data/besuchswege.js`, der Teil draußen aus `game.fahrwasser.seeWeg(von, { breiteM, laengeM, tiefgangM, groesse, nahBei })` bis hinter den Kartenrand, Ausgang nahe dem alten Seepunkt. Achteraus (`raus: 'rueckwaerts'`) nur im Hafenteil, draußen Bug voraus. Neue Karte: Wege neu, sobald das Schiff am Platz oder draußen ist. Zum Prüfen: `game.besuchsWege()`.
+- Die Kartensignatur enthält Geländeform und Seed (`game.gelaende.aktuell()`), keine festen Punkte auf See.
 - Restliche Berührungen beim Anlegen in Stufe 4 (Stege C und B, Handy) und vereinzelt Rumpf an Rumpf in vollen Gassen.
 
 ## Dauerlieger
