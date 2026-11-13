@@ -251,6 +251,8 @@ const SNAP = () => {
     await page.evaluate(() => window.hafenmeister.setPaused(true));
     const vorher = await page.evaluate(`(${SNAP})()`);
     const ok = await page.evaluate(() => window.hafenmeister.spielstand?.speichern?.());
+    // Was steht wirklich im Speicher? (zeigt, ob eine Abweichung beim Speichern oder beim Laden entsteht)
+    const gespeichert = await page.evaluate(() => { try { const r = JSON.parse(localStorage.getItem('hafenmeister.spielstand')); const g = r.spiel ?? r.game ?? r; return { geld: Math.round(g.money), tag: g.day, phase: g.phase, uhr: g.clock }; } catch (e) { return { fehler: e.message }; } });
     // Fast angehaltene Zeit (testtempo=0.001), damit zwischen Laden und Vergleich nichts passiert
     await page.goto(url + '?testtempo=0.001' + EXTRA);
     // So früh wie möglich anhalten, sonst laufen Hafenbüro und Services schon weiter
@@ -261,11 +263,12 @@ const SNAP = () => {
     const abw = [];
     for (const k of Object.keys(vorher)) {
       if (k === 'liegend' || k === 'boote') continue;
-      if (k === 'geld' ? Math.abs(vorher.geld - nachher.geld) > 1 : vorher[k] !== nachher[k]) abw.push(k);
+      // Mehr Geld ist kein Fehler: Boote auf dem Weg in ihre Box liegen nach dem Laden sofort fest und zahlen
+      if (k === 'geld' ? nachher.geld < vorher.geld - 1 : vorher[k] !== nachher[k]) abw.push(k);
     }
     // Liegende Boote dürfen nicht verschwinden
     if (nachher.liegend < vorher.liegend) abw.push('liegend');
-    R.speichern.push({ warum, gespeichert: !!ok, vorher, nachher, abweichungen: abw });
+    R.speichern.push({ warum, gespeichert: !!ok, imSpeicher: gespeichert, vorher, nachher, abweichungen: abw });
     await laden(`?testtempo=${TEMPO}${EXTRA}`);
   };
 
