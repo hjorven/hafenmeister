@@ -245,13 +245,14 @@ const SNAP = () => {
     return { datei, label };
   };
 
-  // Speichern und Laden: speichern, ohne Zeitraffer neu laden und sofort anhalten, vergleichen,
+  // Speichern und Laden: speichern, mit fast angehaltener Zeit neu laden, vergleichen,
   // dann mit Zeitraffer weiter (lädt denselben Spielstand noch einmal).
   const speichernPruefen = async (warum) => {
     await page.evaluate(() => window.hafenmeister.setPaused(true));
     const vorher = await page.evaluate(`(${SNAP})()`);
     const ok = await page.evaluate(() => window.hafenmeister.spielstand?.speichern?.());
-    await page.goto(url + (EXTRA ? '?' + EXTRA.slice(1) : ''));
+    // Fast angehaltene Zeit (testtempo=0.001), damit zwischen Laden und Vergleich nichts passiert
+    await page.goto(url + '?testtempo=0.001' + EXTRA);
     // So früh wie möglich anhalten, sonst laufen Hafenbüro und Services schon weiter
     await page.waitForFunction(() => { const G = window.hafenmeister; if (G?.sim && G.setPaused) { G.setPaused(true); return true; } return false; }, null, { timeout: 60000, polling: 5 });
     await page.waitForFunction(() => document.getElementById('boot')?.classList.contains('done'), null, { timeout: 60000 });

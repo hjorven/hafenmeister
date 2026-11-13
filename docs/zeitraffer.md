@@ -58,7 +58,7 @@ Ein einfacher Bot über `game.sim` und `game.services`, wie der Spielertyp "gesc
 | Boot hängt | Boot ist in Fahrt, bewegt sich aber seit 5 Spielminuten nicht |
 | Spielregeln | Boot wartet, kommt aber 400 Spielsekunden lang nicht an der Boje an; Box bleibt nach der Abfahrt 400 Spielsekunden belegt; Geld keine Zahl oder negativ |
 | Aufstieg und Geld | Tag jedes Aufstiegs gegen die Erwartung aus `tools/balance.mjs`, fehlgeschlagene Käufe, Geldverlauf |
-| Speichern und Laden | Nach jedem Aufstieg und alle 40 Spieltage: speichern, ohne Zeitraffer neu laden, Stufe, Tag, Geld, Gäste, Hafenbüro, Bauwerke, Stege, Services, Ereignis und liegende Boote vergleichen |
+| Speichern und Laden | Nach jedem Aufstieg und alle 40 Spieltage: speichern, mit fast angehaltener Zeit (`?testtempo=0.001`) neu laden, Stufe, Tag, Geld, Gäste, Hafenbüro, Bauwerke, Stege, Services, Ereignis und liegende Boote vergleichen |
 | Wetter | Welche Ereignisse vorkamen (Nebel, Sturm, Regatta, Winter ...) und die Bildrate je Ereignis |
 
 Jeder Fund bekommt beim ersten Mal ein Nahbild mit rotem Kreis (höchstens zwei je Art und Stufe). Die Prüfungen für Land, Steg und Ineinander stammen aus der Messlatte des Threads "Jedes neue Feature einzeln testen" (`/mnt/project-files/feature-tests/messlatte/`); dort gibt es auch Einzelprüfungen je Stegbild und für feste Wege.
