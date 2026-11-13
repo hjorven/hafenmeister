@@ -982,9 +982,11 @@ class BoatAnim {
     return p;
   }
 
-  /** Ablegen und einem Kurs folgen. opts: sails (Segel setzen, sobald frei), remove (am Ende entfernen). */
+  /** Ablegen und einem Kurs folgen. opts: sails (Segel setzen, sobald frei), remove (am Ende entfernen), verzoegerung (s). */
   undock(points = [], opts = {}) {
     const p = this.begin();
+    // opts.verzoegerung: erst nach so vielen Sekunden ablegen (abends nicht alle zugleich)
+    if (opts.verzoegerung > 0) this.push(new WaitTask(opts.verzoegerung));
     if (this.moored) this.pushUndock(opts);
     if (points.length) {
       if (opts.sails) this.push(new CallTask((b) => b.setSails(true)));

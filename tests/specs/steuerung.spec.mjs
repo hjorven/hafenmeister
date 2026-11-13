@@ -113,6 +113,9 @@ test('Antippen der Karte meldet einen Punkt im Wasser oder an Land', async ({ ga
 });
 
 test('Kamera neigen (zwei Finger hoch oder rechte Maustaste) und Kompass richtet aus', async ({ game }, testInfo) => {
+  // Neigen ist auf allen Geräten dieselbe Logik: Finger am Handy, Maus am PC. Spart am Tablet im
+  // CI-Lauf je etwa 40 s (dort nur wenige Bilder je Sekunde).
+  test.skip(!['handy', 'pc'].includes(testInfo.project.name), 'Neigen wird am Handy und am PC geprüft');
   const { page } = game;
   const pitch = () => page.evaluate(() => window.hafenmeister.camera.pitchGrad);
   await page.evaluate(() => window.hafenmeister.camera.zoomAt(2));

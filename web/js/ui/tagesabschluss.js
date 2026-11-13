@@ -7,7 +7,7 @@
 //   Boote (angelegt, abgereist mit Bewertung, weitergefahren), Ruf vorher und nachher, bester Tag,
 //   die letzten sieben Tage als Balken und ein Hinweis, was morgen mehr bringt.
 // - Sie erscheint von selbst und schließt nach einer Weile wieder, solange niemand sie anfasst.
-//   Wer das nicht will, schaltet "Jeden Abend zeigen" aus; dann kommt nur ein kleiner Zettel mit der Summe.
+//   Wer das nicht will, schaltet "Abends zeigen" aus; dann kommt nur ein kleiner Zettel mit der Summe.
 // - Menü: "Tagesabschluss" öffnet die Karte jederzeit, mit Blättern durch die letzten Tage.
 // - Münzen über Gebäuden: Bei der Abrechnung der Services steigt über jeder Anlage eine Münze mit dem Betrag auf.
 //
@@ -235,7 +235,7 @@ export function init(game) {
     const fuss = el('footer', { class: 'hm-ta-fuss' },
       el('label', { class: 'hm-ta-auto' },
         el('input', { type: 'checkbox', checked: auto, onclick: (e) => { schreibeAuto(e.target.checked); } }),
-        el('span', {}, ' Jeden Abend zeigen')),
+        el('span', {}, ' Abends zeigen')),
       el('button', { type: 'button', class: 'hm-knopf hm-primaer hm-px hm-ta-weiter', onclick: () => schliesse() }, 'Weiter'));
 
     // Zwei Spalten (Handy quer): links das Geld, rechts Boote, Verlauf und Hinweis
@@ -269,6 +269,7 @@ export function init(game) {
     zettel.hidden = true;
     karte.hidden = false;
     platziere();
+    requestAnimationFrame(() => platziere());
     karte.classList.remove('rein'); void karte.offsetWidth; karte.classList.add('rein');
     angefasst = !auto;
     restzeit = auto ? AUTO_SCHLIESSEN : 0;
@@ -336,8 +337,10 @@ export function init(game) {
       const kassieren = rechteck('#btn-collect');
       if (kassieren && kassieren.right - huelle.left > links && kassieren.left - huelle.left < rechts) unten = Math.min(unten, kassieren.top - huelle.top - rand);
     } else {
-      // Unter die Statusleiste und über Zeit, Kassieren und Bauen
-      for (const r of [status, werkzeuge]) if (r) oben = Math.max(oben, r.bottom - huelle.top + rand);
+      // Unter die Statusleiste und über Zeit, Kassieren und Bauen. Hochkant und am Handy auch unter die linke
+      // Spalte (Wetter, Tagesziele, Ausbau): sie ist bedienbar und darf nicht verdeckt werden.
+      const spalte = istHandy() || !quer ? ['#weather-chip', '#weather-panel', '.hm-tafel > button', '.hm-tafel ul', '#hm-ziel > *'].flatMap((x) => [...document.querySelectorAll(x)].map(rechteck)) : [];
+      for (const r of [status, werkzeuge, ...spalte]) if (r) oben = Math.max(oben, r.bottom - huelle.top + rand);
       for (const r of unteres) unten = Math.min(unten, r.top - huelle.top - rand);
     }
     const breite = Math.max(220, Math.min(quer && istHandy() ? 560 : 380, rechts - links));
@@ -354,27 +357,66 @@ export function init(game) {
     if (karte.scrollHeight > karte.clientHeight + 4) karte.classList.add('ohne-tipp');
   }
   window.addEventListener('resize', () => platziere());
+  // Schilder und Knöpfe erscheinen oft ein Bild später (Ziel, Kassieren): dann neu messen
+  let neuGeplant = false;
+  game.on('sim:change', () => {
+    if (karte.hidden || neuGeplant) return;
+    neuGeplant = true;
+    requestAnimationFrame(() => { neuGeplant = false; platziere(); });
+  });
   game.on('resize', () => platziere());
 
   function zeigeZettel(b) {
-    zettel.replaceChildren(
+    const rekord = b.rekord && b.besterTag?.summe > 0;
+    zettel.replaceChildren(...[
       el('i', { class: 'hm-ta-muenze-sym', 'aria-hidden': 'true' }),
-      el('span', {}, `Tag ${b.tag}: + ${euro(b.summe)}`),
-      b.rekord && b.besterTag?.summe > 0 ? el('span', { class: 'hm-ta-rekord' }, 'Rekord') : null);
+      el('span', { class: 'hm-ta-zettel-tag' }, `Tag ${b.tag}: `),
+      el('span', {}, `+ ${euro(b.summe)}`),
+      rekord ? el('span', { class: 'hm-ta-rekord' }, 'Rekord') : null,
+    ].filter(Boolean));
     zettel.setAttribute('aria-label', `Tag ${b.tag}: ${euro(b.summe)} eingenommen. Tagesabschluss öffnen`);
     zettel.dataset.tag = String(b.tag);
     zettel.hidden = false;
-    // Unter Statusleiste und Ereignis-Banner, damit sich nichts überdeckt
-    const huelle = (zettel.offsetParent ?? root).getBoundingClientRect();
-    let oben = 0;
-    for (const sel of ['.hm-status', '.hm-werkzeuge', '#event-banner', '.hm-tipp']) {
-      const r = rechteck(sel);
-      if (r && r.left < huelle.left + huelle.width * 0.75 && r.right > huelle.left + huelle.width * 0.25) oben = Math.max(oben, r.bottom - huelle.top + 8);
-    }
-    zettel.style.top = oben ? `${Math.round(oben)}px` : '';
+    platziereZettel();
     zettel.classList.remove('rein'); void zettel.offsetWidth; zettel.classList.add('rein');
     zettelZeit = ZETTEL_SEKUNDEN;
   }
+  // Freie Stelle für den Zettel: nichts von Statusleiste, Schildern, Banner, Hinweisen und Knöpfen verdecken.
+  // Versucht oben Mitte, dann rechts unter den Knöpfen oben, jeweils erst lang ("Tag 3: + 40 €"), dann kurz ("+ 40 €").
+  const ZETTEL_MEIDEN = ['.hm-status', '.hm-werkzeuge', '#event-banner', '.hm-tipp', '#weather-chip', '#weather-panel', '.hm-tafel > button', '.hm-tafel ul', '#hm-ziel > *', '#hm-zeit', '#btn-collect', '#btn-build'];
+  function platziereZettel() {
+    const huelle = (zettel.offsetParent ?? root).getBoundingClientRect();
+    const hindernisse = ZETTEL_MEIDEN.flatMap((sel) => [...document.querySelectorAll(sel)].map(rechteck)).filter(Boolean);
+    const unterkante = (r) => r.bottom - huelle.top + 8;
+    // Oberkante: unter allem, was oben in der Mitte liegt
+    let obenMitte = rand0();
+    for (const sel of ['.hm-status', '.hm-werkzeuge', '#event-banner', '.hm-tipp']) {
+      const r = rechteck(sel);
+      if (r && r.left < huelle.left + huelle.width * 0.75 && r.right > huelle.left + huelle.width * 0.25) obenMitte = Math.max(obenMitte, unterkante(r));
+    }
+    const werkzeuge = rechteck('.hm-werkzeuge');
+    let obenRechts = werkzeuge ? unterkante(werkzeuge) : rand0();
+    const banner = rechteck('#event-banner');
+    if (banner && banner.right > huelle.right - 120) obenRechts = Math.max(obenRechts, unterkante(banner));
+    const frei = () => {
+      const z = zettel.getBoundingClientRect();
+      return z.right <= huelle.right && z.left >= huelle.left &&
+        !hindernisse.some((r) => Math.min(z.right, r.right) - Math.max(z.left, r.left) > 0 && Math.min(z.bottom, r.bottom) - Math.max(z.top, r.top) > 0);
+    };
+    const lagen = [];
+    for (const kurz of [false, true]) {
+      lagen.push({ kurz, stil: { top: `${Math.round(obenMitte)}px`, left: '', right: '', transform: '' } });
+      lagen.push({ kurz, stil: { top: `${Math.round(obenRechts)}px`, left: 'auto', right: '8px', transform: 'none' } });
+    }
+    for (const l of lagen) {
+      zettel.classList.toggle('kurz', l.kurz);
+      Object.assign(zettel.style, l.stil);
+      if (frei()) return;
+    }
+    // Nirgends ganz frei: kurz rechts unter den Knöpfen (deckt am wenigsten zu)
+    Object.assign(zettel.style, lagen[3].stil);
+  }
+  function rand0() { return 8; }
   zettel.addEventListener('click', () => zeige(Number(zettel.dataset.tag)));
   menueKnopf.addEventListener('click', () => {
     if (!karte.hidden) { schliesse(); return; }
@@ -398,6 +440,7 @@ export function init(game) {
 
   // Uhr: echte Zeit, damit die Karte auch bei Pause und Vorspulen gleich lange bleibt
   let letzte = performance.now();
+  let messUhr = 0;
   function uhr(t) {
     const dt = Math.min(0.25, (t - letzte) / 1000);
     letzte = t;
@@ -408,6 +451,13 @@ export function init(game) {
     if (zettelZeit > 0) {
       zettelZeit -= dt;
       if (zettelZeit <= 0) { zettel.hidden = true; meldeFertig(); }
+    }
+    // Schilder links klappen auf und zu, Kassieren erscheint und geht: Lage regelmäßig nachmessen
+    messUhr += dt;
+    if (messUhr > 0.3) {
+      messUhr = 0;
+      if (!karte.hidden) platziere();
+      if (!zettel.hidden) platziereZettel();
     }
     bewegeMuenzen(dt);
     requestAnimationFrame(uhr);

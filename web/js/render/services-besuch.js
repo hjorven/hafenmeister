@@ -181,6 +181,49 @@ export function initBesuche(game, services) {
     try { return game.boatAnim?.hindernis?.(group, { laenge, breite }) ?? null; } catch { return null; }
   }
 
+  // Wege eines Besuchsschiffs. Der Teil im Hafen kommt aus data/besuchswege.js, der Teil draussen
+  // aus der Fahrwasserkarte (game.fahrwasser.seeWeg): vom letzten Punkt im Hafen bis hinter den
+  // Kartenrand, Ausgang nahe dem alten Seepunkt. So passt der Weg zu jeder Gelaendeform.
+  // nachSee: so viele Wegstuecke gehoeren zum festen Teil (dort faehrt 'rueckwaerts' achteraus).
+  function wege(d, laenge, breite) {
+    const platz = liegePunkt(d);
+    const fest = [platz, ...d.weg.slice(1)].map(([x, y]) => W(x, y));
+    let weg = fest, nachSee = fest.length - 1;
+    const fw = game.fahrwasser;
+    if (fw?.seeWeg && fest.length >= 2) {
+      const see = fest[fest.length - 1];
+      const kern = fest.slice(0, -1);
+      const tief = Math.min(3, 1 + breite * 0.2);
+      const r = breite / 2 + 1;
+      // Vom letzten Hafenpunkt Richtung See, bis das Schiff frei liegt (eigenes Rechteck, Pier)
+      let von = kern[kern.length - 1].clone();
+      const schritt = see.clone().sub(von);
+      const n = Math.max(1, Math.ceil(schritt.length() / 5));
+      let frei = fw.befahrbar(von.x, von.z, r, tief);
+      for (let i = 1; i <= n && !frei; i++) {
+        von = kern[kern.length - 1].clone().addScaledVector(schritt, i / n);
+        frei = fw.befahrbar(von.x, von.z, r, tief);
+      }
+      const draussen = frei && fw.seeWeg({ x: von.x, z: von.z }, {
+        breiteM: breite, laengeM: laenge, tiefgangM: tief, groesse: laenge > 60 ? 'XXL' : laenge > 24 ? 'XL' : 'L',
+        nahBei: { x: see.x, z: see.z } });
+      if (draussen?.length) {
+        const vor = von.distanceTo(kern[kern.length - 1]) > 0.5 ? [...kern, von] : kern;
+        nachSee = vor.length - 1;
+        weg = [...vor, ...draussen.map((p) => new THREE.Vector3(p.x, 0, p.z))];
+      }
+    }
+    const ankunft = d.ankunft
+      ? [...d.ankunft.slice(0, -1).map(([x, y]) => W(x, y)), weg[0]]
+      : [...weg].reverse();
+    return { weg, ankunft, nachSee, wegAlt: false };
+  }
+  // Zum Pruefen (Konsole, Tests): alle Wege nach See, je Auftritt und Schiff, in Weltmetern
+  game.besuchsWege = () => Object.fromEntries(Object.entries(AUFTRITTE).map(([id, a]) => [id,
+    a.schiffe.map((d) => wege(d, ...(d.masse ?? [30, 8])).weg.map((p) => ({ x: p.x, z: p.z })))]));
+  // Neue Karte (Stufe, Gelaende, Stegbild): Wege neu, sobald das Schiff am Platz oder draussen ist
+  game.on('fahrwasser:karte', () => { for (const l of aktiv.values()) for (const s of l) s.wegAlt = true; });
+
   function schiffeFuer(id) {
     if (aktiv.has(id)) return aktiv.get(id);
     const liste = AUFTRITTE[id].schiffe.map((d) => {
@@ -192,12 +235,9 @@ export function initBesuche(game, services) {
       m.group.visible = false;
       gruppe.add(m.group);
       // Liegeplatz aus harbor.js; der erste Wegpunkt im Katalog ist der Rückfall
-      const platz = liegePunkt(d);
-      const weg = [platz, ...d.weg.slice(1)];
-      const ankunft = d.ankunft ? [...d.ankunft.slice(0, -1), platz] : [...weg].reverse();
       const [l, b] = extern?.userData?.length ? [extern.userData.length, extern.userData.beam ?? d.masse?.[1] ?? 8] : d.masse ?? [30, 8];
       alsHindernis(m.group, l, b);
-      return { ...m, weg: weg.map(([x, y]) => W(x, y)), ankunft: ankunft.map(([x, y]) => W(x, y)),
+      return { ...m, d, l, b, ...wege(d, l, b),
         raus: d.raus ?? 'vorwaerts', rein: d.rein ?? 'vorwaerts', modus: 'raus',
         liegeKurs: THREE.MathUtils.degToRad(d.liegeKurs), kurs: THREE.MathUtils.degToRad(d.liegeKurs), t: 1,
         versatz: d.versatz ?? 0 };
@@ -264,6 +304,7 @@ export function initBesuche(game, services) {
         if (ziel > s.t + 1e-6) s.modus = 'raus';
         else if (ziel < s.t - 1e-6) s.modus = 'rein';
         s.t = ziel;
+        if (s.wegAlt && (s.t < 0.001 || s.t > 0.999)) Object.assign(s, wege(s.d, s.l, s.b));
         s.group.visible = s.t < 0.999;
         if (!s.group.visible) continue;
         let p, soll;
@@ -276,7 +317,8 @@ export function initBesuche(game, services) {
           // Ablegen: im ersten Wegstueck mit dem Liegekurs, danach Bug voraus (oder ganz achteraus)
           const w = aufWeg(s.weg, s.t);
           p = w.p;
-          soll = s.raus === 'rueckwaerts' || w.segment === 0 ? s.liegeKurs : w.kurs;
+          // achteraus nur im festen Teil im Hafen, draussen Bug voraus
+          soll = (s.raus === 'rueckwaerts' && w.segment < s.nachSee) || w.segment === 0 ? s.liegeKurs : w.kurs;
         }
         if (s.t < 0.002) soll = s.liegeKurs;
         s.kurs = winkelZu(s.kurs, soll, Math.min(1, dt * 0.8));
