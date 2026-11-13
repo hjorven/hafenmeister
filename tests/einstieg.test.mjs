@@ -1,7 +1,7 @@
 // Einstieg (web/js/features/einstieg.js): Reihenfolge der Hinweise ohne Browser prüfen.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { naechsterSchritt, erledige, einstiegState, REIHENFOLGE, TEXTE, WILLKOMMEN_SEK, anteilText } from '../web/js/features/einstieg.js';
+import { naechsterSchritt, erledige, einstiegState, REIHENFOLGE, TEXTE, WILLKOMMEN_SEK, anteilText, HINWEISE, hinweisFuer, merkeHinweis } from '../web/js/features/einstieg.js';
 
 const lage = (x = {}) => ({ bootImBild: false, willkommenSek: 0, abend: false, muenzen: false, bauenSichtbar: true, tafelSichtbar: true, karteOffen: false, ...x });
 
@@ -84,4 +84,22 @@ test('nach einem Spieltag schließt der Einstieg von selbst', () => {
   assert.equal(naechsterSchritt(e, lage({ tag: 14, bootImBild: true, willkommenSek: 9 })), 'anlegen');
   assert.equal(naechsterSchritt(e, lage({ tag: 15, bootImBild: true })), null);
   assert.equal(e.fertig, true);
+});
+
+test('Hinweise beim ersten Mal: Zuordnung und nur einmal je Spielstand', () => {
+  assert.equal(hinweisFuer('sim:turnedAway', { reason: 'patience' }), 'geduld');
+  assert.equal(hinweisFuer('sim:turnedAway', { reason: 'queueFull' }), 'voll');
+  assert.equal(hinweisFuer('sim:turnedAway', { reason: 'rebuild' }), null, 'Umbau ist kein Fehler des Spielers');
+  assert.equal(hinweisFuer('sim:stageReady', { stage: 2 }), 'stufe');
+  assert.equal(hinweisFuer('stammgast:neu', {}), 'stammgast');
+  for (const id of ['geduld', 'voll', 'stufe', 'stammgast']) {
+    assert.ok(HINWEISE[id].titel && HINWEISE[id].text && HINWEISE[id].kurz, id);
+  }
+  const e = einstiegState({});
+  const offen = [];
+  assert.equal(merkeHinweis(e, 'geduld', offen), true);
+  assert.equal(merkeHinweis(e, 'geduld', offen), false, 'nicht doppelt in der Schlange');
+  e.hinweise.push(offen.shift());
+  assert.equal(merkeHinweis(e, 'geduld', offen), false, 'schon gesehen');
+  assert.equal(merkeHinweis(e, null, offen), false);
 });
