@@ -52,6 +52,9 @@ test('Tagesabschluss: Zettel ohne "null", Karte verdeckt keine Bedienung', async
   const karte = page.locator('#hm-tagesabschluss');
   await expect(karte).toBeVisible();
   expect(await karte.innerText()).not.toMatch(/\bnull\b|undefined/);
+  // Schalter "Abends zeigen" wird nicht abgeschnitten (iPhone quer: Fuß nur etwa 200 px breit)
+  const schalter = karte.locator('.hm-ta-auto span');
+  expect(await schalter.evaluate((e) => e.scrollWidth - e.clientWidth)).toBeLessThanOrEqual(0);
   await expect.poll(() => ueberdeckt(page, '#hm-tagesabschluss'), { message: 'Karte verdeckt', timeout: 3000 }).toEqual([]);
   const weiter = karte.locator('.hm-ta-weiter');
   await expect(weiter).toBeInViewport({ ratio: 1 });
