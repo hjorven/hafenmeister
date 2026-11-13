@@ -35,3 +35,14 @@ export function randomWeighted(state, weights) {
 export function randomPick(state, list) {
   return list[Math.floor(random(state) * list.length)];
 }
+
+/**
+ * Eigener Zufall mit Startwert für Module ohne Spielstand (Services-Abrechnung, Ereignis-Planer,
+ * Balancing). Gleicher Startwert, gleiche Folge. Liefert eine Funktion wie Math.random.
+ * Regel: Alles, was Geld, Gäste oder Ruf ändert, nimmt random(state) oder zufallAus(seed),
+ * nie Math.random (das bleibt der Optik vorbehalten: Menschen, Wellen, Funken).
+ */
+export function zufallAus(seed) {
+  const st = { rng: seed >>> 0 };
+  return () => random(st);
+}

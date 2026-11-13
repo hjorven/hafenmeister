@@ -3,7 +3,7 @@
 // und geben Ereignisse zurück, auf die Grafik, Ton und Oberfläche reagieren.
 // Schnittstelle und Datenformate: docs/spielregeln.md
 
-import { RULES } from './data/rules.js';
+import { RULES, rulesFromEconomy } from './data/rules.js';
 import { random, randomInt, randomRange, randomWeighted, randomPick } from './random.js';
 
 // ---------------------------------------------------------------------------
@@ -455,11 +455,14 @@ function startDay(state, ctx, events) {
   }
   planTrips(state, ctx, mods, sea.winter);
   const rate = sea.winter ? 0 : arrivalRate(state, ctx, mods);
-  const n = Math.floor(rate) + (random(state) < rate - Math.floor(rate) ? 1 : 0);
   // Ankünfte wie im echten Hafen eher nachmittags: zwischen arrivalFrom und arrivalWindow
   // (Anteile des Tages), am häufigsten um arrivalPeak.
   const from = ctx.rules.dayLength * (ctx.rules.arrivalFrom ?? 0);
   const window = ctx.rules.dayLength * ctx.rules.arrivalWindow - from;
+  // Nie mehr Boote, als mit dem Mindestabstand in das Fenster passen (auch an Regatta- und Festtagen):
+  // keine Wellen, wer nicht mehr passt, kommt an diesem Tag nicht.
+  const maxN = ctx.rules.arrivalMinGap > 0 ? Math.max(1, Math.floor(window / ctx.rules.arrivalMinGap)) : Infinity;
+  const n = Math.min(maxN, Math.floor(rate) + (random(state) < rate - Math.floor(rate) ? 1 : 0));
   const peak = ctx.rules.arrivalPeak != null ? ctx.rules.dayLength * ctx.rules.arrivalPeak - from : null;
   const list = [];
   for (let i = 0; i < n; i++) {
@@ -485,6 +488,18 @@ function startDay(state, ctx, events) {
       if (boat) { boat.id = state.nextId++; list.push(boat); }
     }
     if (list.length) list[0].arriveAt = Math.min(list[0].arriveAt ?? first, first);
+    // Ruhiger Start: Die übrigen Boote des ersten Tags rücken gleichmäßig in die Zeit ab calm (fünf
+    // Mindestabstände nach dem ersten Boot), damit man das erste in Ruhe zuweisen kann und danach
+    // keine Gruppe auf einmal kommt.
+    const calm = (list[0]?.arriveAt ?? first) + 5 * (ctx.rules.arrivalMinGap || 0);
+    const end = from + window;
+    if (calm < end) {
+      for (let i = 1; i < list.length; i++) {
+        const t = list[i].arriveAt;
+        list[i].arriveAt = Math.round((calm + (Math.max(t, from) - from) * (end - calm) / (end - from)) * 10) / 10;
+      }
+      spreadArrivals(list.slice(1), calm, end, ctx.rules.arrivalMinGap);
+    }
   }
   // Herkunft in der Reihenfolge der Ankunft, damit zwei Boote hintereinander nie aus derselben Ecke kommen
   list.forEach((boat, i) => { boat.origin = boatOrigin(state, state.day * 7 + i); });
@@ -1387,158 +1402,8 @@ function settleWaitSpots(state, ctx, events) {
 // ---------------------------------------------------------------------------
 // Zahlen aus data/economy.js (Balancing-Thread) in das Format der Regeln bringen
 
-/**
- * Baut aus ECONOMY die Regeln. Was ECONOMY nicht festlegt, kommt aus base (data/rules.js).
- * Liegeplätze werden über Projekte freigeschaltet: start.plaetze sind sofort da, jedes
- * Stegprojekt und jeder Stufenausbau schaltet seine Plätze frei.
- */
-export function rulesFromEconomy(E, base = RULES) {
-  const r = structuredClone(base);
-  const z = E.zeit || {};
-  if (z.tagSekunden) r.dayLength = z.tagSekunden;
-  if (z.abendSekunden) r.eveningLength = z.abendSekunden;
-  // Ankunftsfenster als Anteile des Tages (0 bis 1) und Schwerpunkt am Nachmittag (0 bis 1)
-  if (z.ankunftVon != null) r.arrivalFrom = z.ankunftVon;
-  if (z.ankunftBis != null) r.arrivalWindow = z.ankunftBis;
-  if (z.ankunftSpitze != null) r.arrivalPeak = z.ankunftSpitze;
-  if (z.ankunftAbstand != null) r.arrivalMinGap = z.ankunftAbstand;
-  if (z.abreiseVon != null && z.abreiseBis != null) r.departWindow = [z.abreiseVon, z.abreiseBis];
-  if (z.saisonTage) r.seasonDays = z.saisonTage;
-  if (z.winterTage != null) r.winterDays = z.winterTage;
-
-  if (E.klassen) {
-    r.baseFee = {};
-    r.nightsBySize = {};
-    for (const [size, k] of Object.entries(E.klassen)) {
-      r.baseFee[size] = k.grundpreis;
-      if (k.naechte) r.nightsBySize[size] = k.naechte;
-    }
-  }
-  if (E.wunschBonus != null) r.wishBonus = E.wunschBonus;
-
-  if (E.wuensche) {
-    const stages = (E.stufen || []).map((s) => s.stufe);
-    r.wishes = {};
-    r.wishSizes = {};
-    r.motorOnlyWishes = [];
-    for (const st of stages) {
-      r.wishes[st] = Object.entries(E.wuensche).filter(([, w]) => w.abStufe <= st).map(([k]) => k);
-    }
-    for (const [k, w] of Object.entries(E.wuensche)) {
-      if (w.klassen) r.wishSizes[k] = w.klassen;
-      if (w.nurMotor) r.motorOnlyWishes.push(k);
-    }
-  }
-  if (E.wunschAnzahl) r.wishCountBySize = E.wunschAnzahl;
-
-  if (E.platzarten) {
-    r.berthKinds = {};
-    for (const [kind, p] of Object.entries(E.platzarten)) {
-      const k = {};
-      if (p.strom) k.power = true;
-      if (p.rufBonus) k.comfort = p.rufBonus / (r.comfortBonus || 0.5);
-      if (p.gast === false) k.reserved = true;
-      if (kind === 'kai') Object.assign(k, { sizes: ['XL'], exposed: true });
-      r.berthKinds[kind] = k;
-    }
-  }
-  if (E.stromAnSteg) r.berthJetties = Object.fromEntries(Object.keys(E.stromAnSteg).filter((k) => E.stromAnSteg[k]).map((k) => [k, { power: true }]));
-  // Strom an weiteren Stegen über ein Bauwerk (zum Beispiel Stromsäulen an Steg B)
-  r.jettyPowerBuildings = {};
-  for (const st of E.bauwerke?.strom?.stufen || []) for (const steg of st.stege || []) r.jettyPowerBuildings[steg] = 'strom';
-
-  if (E.ruf) {
-    const f = E.ruf;
-    r.reputation = { ...r.reputation, start: f.start ?? r.reputation.start, window: f.fenster ?? r.reputation.window };
-    if (f.ohneWunsch != null) r.rating.noWishes = f.ohneWunsch;
-    if (f.ankunftBasis != null) r.arrivalFactorAtRep = { 1: f.ankunftBasis, 5: f.ankunftBasis + 4 * f.ankunftJeAnker };
-    if (f.abgewiesen) r.turnAway = { chance: f.abgewiesen.chance, rating: f.abgewiesen.wertung };
-  }
-
-  if (E.stufen) {
-    r.arrivalsPerDay = {};
-    r.sizeMix = {};
-    r.stageGoals = {};
-    r.wishCount = r.wishCount || {};
-    for (const s of E.stufen) {
-      r.arrivalsPerDay[s.stufe] = s.ankuenfte;
-      r.sizeMix[s.stufe] = s.mix;
-      if (!s.ausbau && s.ziel?.grossschiffBesuche != null) {
-        r.regionGoal = { bigVisits: s.ziel.grossschiffBesuche, reputation: s.ziel.ruf, allBerths: !!s.ziel.allePlaetze };
-      }
-      if (s.ausbau) {
-        r.stageGoals[s.stufe] = { guests: s.ziel.gaeste, reputation: s.ziel.ruf, cost: s.ausbau.kosten, project: s.ausbau.id, name: s.ausbau.name, perStage: true };
-      }
-    }
-    r.maxStage = Math.max(...E.stufen.map((s) => s.stufe));
-  }
-
-  // Liegeplätze und Projekte
-  if (E.start || E.stegprojekte) {
-    r.startBerths = [...(E.start?.plaetze || [])];
-    r.berthProjects = {};
-    r.jettyProjects = [];
-    for (const p of E.stegprojekte || []) {
-      r.berthProjects[p.id] = [...p.plaetze];
-      r.jettyProjects.push({ id: p.id, name: p.name, stage: p.stufe, cost: p.kosten });
-    }
-    for (const s of E.stufen || []) if (s.ausbau) r.berthProjects[s.ausbau.id] = [...(s.ausbau.plaetze || [])];
-  }
-
-  if (E.bauwerke) {
-    r.facilities = {};
-    r.facilityNames = {};
-    for (const [key, b] of Object.entries(E.bauwerke)) {
-      if (key === 'strom') {
-        r.facilities.strom = { levels: {}, cost: {}, fromStage: {}, names: {} };
-      }
-      const f = r.facilities[key] || { levels: {}, cost: {}, fromStage: {}, names: {} };
-      b.stufen.forEach((st, i) => {
-        f.levels[i + 1] = st.versorgt ?? 0;
-        f.cost[i + 1] = st.kosten;
-        f.fromStage[i + 1] = st.abStufe;
-        f.names[i + 1] = st.name;
-      });
-      r.facilities[key] = f;
-      r.facilityNames[key] = b.name;
-    }
-  }
-
-  if (E.fischer?.pachtProTag != null) r.stationedFee = E.fischer.pachtProTag;
-
-  // Warten vor dem Hafen: Geduld an der Boje (Sekunden) und Warteplätze je Stufe
-  if (E.warten) {
-    r.queue = { ...r.queue };
-    if (E.warten.geduld != null) r.queue.patience = E.warten.geduld;
-    if (E.warten.selbstEinfahrenNach != null) r.queue.selfEnterAfter = E.warten.selbstEinfahrenNach;
-    if (E.warten.ueberNacht != null) r.queue.overnight = !!E.warten.ueberNacht;
-    if (E.warten.plaetze) r.queue.spots = { ...r.queue.spots, ...E.warten.plaetze };
-  }
-
-  if (E.tagestoern) {
-    const t = E.tagestoern;
-    r.trips = { ...r.trips };
-    if (t.anteil != null) r.trips.chance = t.anteil;
-    if (t.raus) r.trips.out = t.raus;
-    if (t.zurueck) r.trips.back = t.zurueck;
-  }
-
-  if (E.hafenbuero) {
-    const o = { ...r.office, cost: {}, fromStage: {}, names: {} };
-    E.hafenbuero.stufen.forEach((st, i) => {
-      o.cost[i + 1] = st.kosten;
-      o.fromStage[i + 1] = st.abStufe;
-      o.names[i + 1] = st.name;
-      if (st.schaltetFrei?.includes('allesKassieren')) o.collectAllButton = i + 1;
-      if (st.schaltetFrei?.includes('sofortKassieren')) o.autoCollect = i + 1;
-      if (st.schaltetFrei?.includes('automatik')) o.autoAssign = i + 1;
-    });
-    // Ohne eigene Stufe für sofortKassieren kassiert die Automatik mit
-    if (!E.hafenbuero.stufen.some((st) => st.schaltetFrei?.includes('sofortKassieren'))) o.autoCollect = o.autoAssign;
-    r.office = o;
-  }
-  return r;
-}
+// Regeln aus den Spielzahlen: data/rules.js (rulesFromEconomy), hier weitergereicht.
+export { rulesFromEconomy };
 
 /** Stegprojekte, die in der aktuellen Stufe gebaut werden können und noch fehlen. */
 export function openJettyProjects(state, ctx) {
