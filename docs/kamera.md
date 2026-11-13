@@ -28,10 +28,12 @@ starten nur auf einem wartenden Boot oder einer Münze.
   sonst wird sie steiler.
 - Dunst zum Horizont (`scene.fog` in `core/game.js`, Farbe folgt dem Himmel): erst weit hinter dem
   Blickpunkt, von oben nicht zu sehen. Das Wasser rechnet ihn im Shader mit.
-- Der Blickpunkt bleibt im Spielbereich (`rig.bounds`, `WORLD` in `js/main.js`). Er richtet sich nach der
-  Geländeform: Leuchttürme und Inseln der Form sind mit 40 m Rand erreichbar, höchstens bis
-  x -340 bis 300 m, z -270 bis 60 m (`SICHER`). Bis dorthin ist geprüft, dass auch ganz herausgezoomt
-  und flach nach außen kein Rand des Geländes zu sehen ist.
+- Der Blickpunkt bleibt im Spielbereich (`rig.bounds`, `WORLD` in `js/main.js`). `weltAnForm` setzt
+  ihn aus `game.gelaende.spielRect()`: Hafen, Einfahrt, Leuchttürme und nahe Inseln.
+- Weiteste Zoomstufe `rig.maxWidth` = Breite von `spielRect()`, 800 bis 1000 m. Ganz herausgezoomt
+  ist der Küstentyp zu erkennen; die Bildzeit am Handy ist dabei wie bei 420 m.
+- `rig.rand` = `game.gelaende.aussenRect()`: Der Blickpunkt hält seitlich mindestens 0,55
+  Ausschnittbreiten Abstand zum Rand der Landschaft, so kommt deren Kante nie ins Bild.
 
 ## Schnittstelle für Module
 
