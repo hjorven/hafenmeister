@@ -5,10 +5,11 @@ import { createState, deserialize, serialize } from '../web/js/state.js';
 import { ECONOMY } from '../web/js/data/economy.js';
 import { HAFEN } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
+import { echterHafen } from './regeln.mjs';
 import * as sim from '../web/js/sim.js';
 
-const rules = sim.rulesFromEconomy(ECONOMY);
-const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules });
+const ctx = echterHafen();
+const rules = ctx.rules;
 
 test('Zahlen werden übernommen', () => {
   assert.equal(rules.baseFee.M, ECONOMY.klassen.M.grundpreis);

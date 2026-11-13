@@ -11,30 +11,28 @@
 // Tagesdaten fuer die Abrechnung:
 //   { tag, wetter: 'sonne'|'regen'|'sturm', winter: false, boote: [{ klasse: 'S', antrieb: 'segel' }] }
 import { SERVICES, RUF_BONUS_MAX, STURMSCHUTZ_MAX } from '../data/services.js';
+import { zufallAus } from '../random.js';
 
 export function neuerZustand() {
   return { gebaut: {}, besuche: {}, summe: {} };
 }
 
-// Zahlen aus dem Balancing (js/data/economy.js, ECONOMY.services) ueber die Startwerte legen.
-// Alles ist optional: Was dort fehlt, bleibt wie in js/data/services.js.
+// Andere Zahlen über den Katalog legen (Tests, Balancing-Versuche): je Service ersetzt eine Stufe aus
+// ueberschreiben ihre Felder, wirkung wird als Ganzes ersetzt. Ohne Angabe bleibt der Katalog, wie er ist.
+// Die Spielzahlen selbst stehen in js/data/economy.js und sind in SERVICES schon enthalten.
 export function mitZahlen(katalog, ueberschreiben) {
   if (!ueberschreiben) return katalog;
   return katalog.map((s) => {
     const o = ueberschreiben[s.id];
     if (!o) return s;
-    const stufen = s.stufen.map((st, i) => mische(st, o.stufen?.[i]));
-    const { stufen: _x, ...rest } = o;
-    return { ...mische(s, rest), stufen };
+    const stufen = s.stufen.map((st, i) => {
+      const n = o.stufen?.[i];
+      if (!n) return st;
+      const wirkung = n.wirkung ? { ...n.wirkung, ...(st.wirkung?.besuch && n.wirkung.besuch ? { besuch: { ...n.wirkung.besuch, text: n.wirkung.besuch.text ?? st.wirkung.besuch.text } } : {}) } : st.wirkung;
+      return { ...st, ...n, name: st.name, wirkung };
+    });
+    return { ...s, ...(o.abStufe != null ? { abStufe: o.abStufe } : {}), stufen };
   });
-}
-
-function mische(a, b) {
-  if (b == null) return a;
-  if (typeof a !== 'object' || a === null || Array.isArray(a) || typeof b !== 'object' || Array.isArray(b)) return b;
-  const out = { ...a };
-  for (const [k, v] of Object.entries(b)) out[k] = mische(a[k], v);
-  return out;
 }
 
 export function erstelleRegeln(katalog = SERVICES) {
@@ -111,7 +109,8 @@ export function erstelleRegeln(katalog = SERVICES) {
   // Abrechnung am Ende eines Spieltags. rng = Zufallszahl 0..1 (fuer Spielstaende mit festem Samen).
   // Liefert { tag, einnahmen: [{ id, betrag, text }], summe, besuche: [...], angekuendigt: [...] }
   // Keine laufenden Kosten (plan.md, Leitlinien): Services bringen nur etwas ein.
-  function tagesabschluss(z, tag, rng = Math.random) {
+  // Ohne rng: fester Zufall aus Spieltag und z.seed, damit dieselbe Abrechnung gleich ausfällt.
+  function tagesabschluss(z, tag, rng = zufallAus(((z.seed ?? 0) * 7919 + (tag.tag ?? 0) * 104729) >>> 0)) {
     const wetter = tag.wetter ?? 'sonne';
     const boote = tag.boote ?? [];
     const out = { tag: tag.tag, einnahmen: [], summe: 0, besuche: [], angekuendigt: [] };

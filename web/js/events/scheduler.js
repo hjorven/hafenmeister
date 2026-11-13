@@ -12,6 +12,7 @@
 //   { type: 'start', event, day, endDay }
 //   { type: 'announce', event, day, startDay, endDay }
 import { EVENTS, DEFAULT_MODS, SCHEDULE, YEAR } from '../data/events.js';
+import { random } from '../random.js';
 
 // Jahreslauf: aus der Tagesnummer (ab 1) Jahr, Saisontag und Jahreszeit berechnen.
 export function seasonOf(day, year = YEAR) {
@@ -27,14 +28,8 @@ export function seasonOf(day, year = YEAR) {
   return { year: yearNo, seasonDay, winterDay: null, part, winter: false };
 }
 
-// Kleiner Zufallsgenerator mit Zustand als Zahl, damit der Spielstand ihn speichern kann.
-function nextRandom(st) {
-  st.rng = (st.rng + 0x6d2b79f5) >>> 0;
-  let t = st.rng;
-  t = Math.imul(t ^ (t >>> 15), t | 1);
-  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-}
+// Zufall mit Zustand als Zahl (st.rng), damit der Spielstand ihn speichern kann: gemeinsamer Zufall aus random.js.
+const nextRandom = random;
 
 // Fester Zufallswert je Tag (für das Alltagswetter), ändert den Zustand nicht.
 function hashDay(seed, day) {
