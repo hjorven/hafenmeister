@@ -10,21 +10,31 @@
 import * as sim from '../sim.js';
 import { random } from '../random.js';
 import { regelnBereit } from './regeln-bereit.js';
+import { ECONOMY } from '../data/economy.js';
 
-export const BELOHNUNG = { 1: 10, 2: 25, 3: 50, 4: 80, 5: 120, 6: 150 };
+// Zahlen in data/economy.js (ECONOMY.tagesziele)
+const T = ECONOMY.tagesziele;
+export const BELOHNUNG = T.belohnung;
 
 // Vorlagen: ab welcher Stufe, wie viel verlangt wird, und woran man es erkennt
 export const VORLAGEN = {
-  unterbringen: { abStufe: 1, soll: (st, ctx) => Math.max(2, Math.round((ctx.rules.arrivalsPerDay[st.stage] || 3) * 0.6)) },
-  segler: { abStufe: 2, soll: (st) => (st.stage >= 4 ? 3 : 2) },
+  unterbringen: { abStufe: 1, soll: (st, ctx) => Math.max(T.unterbringenMin, Math.round((ctx.rules.arrivalsPerDay[st.stage] || 3) * T.unterbringenAnteil)) },
+  segler: { abStufe: 2, soll: (st) => stufenWert(T.seglerSoll, st.stage) },
   zufrieden: { abStufe: 1, soll: () => 1 },
-  kassieren: { abStufe: 1, soll: (st, ctx) => runde5(erwartetesGeld(st, ctx) * 0.6) },
+  kassieren: { abStufe: 1, soll: (st, ctx) => runde5(erwartetesGeld(st, ctx) * T.kassierenAnteil) },
   groesse: { abStufe: 3, soll: () => 1 },
   stammgast: { abStufe: 1, soll: () => 1, nur: (st) => (st.modules?.stamm?.liste?.length ?? 0) > 0 },
-  voll: { abStufe: 1, soll: () => 1, nur: (st, ctx) => sim.availableBerths(st, ctx).length <= 12 },
+  voll: { abStufe: 1, soll: () => 1, nur: (st, ctx) => sim.availableBerths(st, ctx).length <= T.vollBisPlaetze },
 };
 
-const GROESSE_ZIEL = { 3: 'L', 4: 'L', 5: 'XL', 6: 'XL' };
+const GROESSE_ZIEL = T.groesse;
+
+/** Wert für eine Stufe aus { ab Stufe: Wert }: der Eintrag der höchsten erreichten Stufe. */
+function stufenWert(tabelle, stufe) {
+  let wert;
+  for (const [ab, w] of Object.entries(tabelle)) if (stufe >= Number(ab)) wert = w;
+  return wert;
+}
 
 function runde5(x) { return Math.max(5, Math.round(x / 5) * 5); }
 

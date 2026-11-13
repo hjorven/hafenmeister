@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createState, serialize } from '../web/js/state.js';
-import { RULES } from '../web/js/data/rules.js';
+import { RULES, ECONOMY, allesGebaut } from './regeln.mjs';
 import { HAFEN } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
 import * as sim from '../web/js/sim.js';
@@ -10,8 +10,10 @@ import { initBridge, typesFromModule, mergeTypes } from '../web/js/bridge.js';
 
 const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN });
 
+const allBuilt = (seed) => allesGebaut(seed);
+
 test('Liegeplätze je Stufe wie im Katalog: 6, 30, 54, 76, 94', () => {
-  const s = createState({ seed: 1 });
+  const s = allBuilt(1);
   const counts = [1, 2, 3, 4, 5].map((st) => {
     s.stage = st;
     return sim.availableBerths(s, ctx).length;
@@ -22,7 +24,7 @@ test('Liegeplätze je Stufe wie im Katalog: 6, 30, 54, 76, 94', () => {
 test('Platzarten: Strom, Komfort, Kai nur XL, Fischerplätze gesperrt', () => {
   const byKind = (k) => ctx.berths.find((b) => b.kind === k);
   assert.equal(byKind('finger').power, true);
-  assert.equal(byKind('finger').comfort, 1);
+  assert.equal(byKind('finger').comfort, ECONOMY.platzarten.finger.rufBonus);
   assert.deepEqual(byKind('kai').sizes, ['XL']);
   assert.equal(byKind('kai').exposed, true);
   assert.equal(byKind('fischer').reserved, true);
@@ -46,7 +48,7 @@ test('Stufe 1: nur Boote, die in den flachen See passen', () => {
 
 test('Jede Stufe: alle angebotenen Bootsarten passen an mindestens einen Platz', () => {
   for (let st = 1; st <= 5; st++) {
-    const s = createState({ seed: st });
+    const s = allBuilt(st);
     s.stage = st;
     for (let i = 0; i < 200; i++) {
       const b = sim.rollBoat(s, ctx);
@@ -115,7 +117,7 @@ test('Echte M-Daten des Schiffs-Threads (TYPES und MODELS) werden übernommen', 
   assert.ok(c.typeById.M1.models.length >= 2);
   assert.equal(c.typeById.M1.minStage, 2);
   assert.equal(c.typeById.M4.stationed, true); // aus dem Katalog
-  const s = createState({ seed: 3 });
+  const s = allBuilt(3);
   s.stage = 2;
   const boats = Array.from({ length: 100 }, () => sim.rollBoat(s, c)).filter((b) => b.size === 'M');
   assert.ok(boats.length > 10);

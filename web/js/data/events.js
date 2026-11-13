@@ -10,21 +10,21 @@
 //   Kreuzfahrtschiffe, Marinebesuche und Ausflugsfahrten plant das Services-Modul als
 //   regelmäßige Besuche (game.services), deshalb gibt es hier keinen eigenen Kreuzfahrttag.
 //
-// Felder:
-//   stage       ab dieser Ausbaustufe möglich
-//   every       mittlerer Abstand in Tagen (Zufall streut um +-30 %)
-//   duration    Länge in Tagen
-//   weight      Vorrang, wenn mehrere fällig sind (größer gewinnt)
-//   requires    optional: Bauwerk, das vorhanden sein muss (z. B. 'segelclub')
-//   season      Saisontage [von, bis], an denen das Ereignis liegen darf (1 bis 30)
-//   announceDays  optional: so viele Tage vorher ankündigen (Standard 1)
+// Alle Zahlen (Stufe, Abstand, Dauer, Vorrang, Saison, Wirkung, Schutz, Ablauf, Winter) stehen in
+// js/data/economy.js unter ECONOMY.ereignisse, die Länge von Saison und Winter unter ECONOMY.zeit.
+// Hier stehen nur Texte, Wetterbild und Abendeffekt. EVENTS, YEAR und SCHEDULE fügen beides zusammen.
+//
+// Felder hier:
 //   weather     Wetter für Landschaft, Ton und Effekte: wind, fog, rain, snow, sun je 0 bis 1
-//   mods        Wirkung auf die Spielregeln, siehe DEFAULT_MODS
-//   protect     optional: Bauwerk, das schlechte Folgen mindert, mit Faktor je Ausbaustufe
 //   evening     optional: Abendeffekt (z. B. 'feuerwerk')
 //   title, teaser, text   Texte für die Ankündigung (kurz, ohne Story)
+//
+// Felder in EVENTS (für events/scheduler.js):
+//   stage, every, duration, weight, requires, season, announceDays, mods, protect { building, factor }
 
 // Standardwerte, wenn nichts los ist. Die Sim liest diese Felder, alle sind optional.
+import { ECONOMY } from './economy.js';
+
 export const DEFAULT_MODS = Object.freeze({
   arrivalFactor: 1,          // Boote pro Tag mal Faktor
   seaArrivals: true,         // false: niemand läuft von See ein (nur Boote aus dem See)
@@ -39,112 +39,84 @@ export const DEFAULT_MODS = Object.freeze({
   ratingBonus: 0,            // Anker dazu auf jede Bewertung an diesem Tag (sim.js: rateBoat)
 });
 
-export const EVENTS = [
+const TEXTE = [
   {
     id: 'nebel',
     title: 'Nebel',
     teaser: 'Morgen Nebel über dem Wasser',
     text: 'Es laufen weniger Boote ein. Wer schon da ist, bleibt gern eine Nacht länger.',
-    stage: 1,
-    every: 13,
-    duration: 1,
-    weight: 1,
-    season: [1, 30],
     weather: { wind: 0.1, fog: 1, rain: 0, sun: 0.2 },
-    mods: { arrivalFactor: 0.7, extraNights: 1 },
   },
   {
     id: 'sommertag',
     title: 'Sommertag',
     teaser: 'Morgen wird es heiß',
     text: 'Viele kleine Boote und Badegäste. Der Kiosk hat gut zu tun.',
-    stage: 1,
-    every: 11,
-    duration: 1,
-    weight: 1,
-    season: [7, 24],
     weather: { wind: 0.2, fog: 0, rain: 0, sun: 1 },
-    mods: { arrivalFactor: 1.25, sizeFactor: { S: 2, M: 1.2 }, visitorFactor: 1.5, serviceIncomeFactor: 1.3 },
   },
   {
     id: 'sturm',
     title: 'Sturm',
     teaser: 'Morgen zieht ein Sturm auf',
     text: 'Von See läuft niemand ein, Gäste im Hafen bleiben eine Nacht länger. Die Seenotretter halten Wache.',
-    stage: 3,
-    every: 12,
-    duration: 1,
-    weight: 4,
-    season: [3, 30],
     weather: { wind: 1, fog: 0.2, rain: 1, sun: 0 },
-    mods: { seaArrivals: false, extraNights: 1, satisfaction: { outer: -1 } },
-    // Seenotretter-Station mindert die Folgen: ohne voll, Station halb, ausgebaut keine
-    protect: { building: 'seenotretter', factor: [1, 0.5, 0] },
   },
   {
     id: 'regatta',
     title: 'Regatta',
     teaser: 'Übermorgen beginnt die Regatta',
     text: 'Zwei Tage lang doppelt so viele Segelboote. Plätze freihalten lohnt sich.',
-    stage: 3,
-    requires: 'segelclub',
-    every: 14,
-    duration: 2,
-    weight: 5,
-    announceDays: 2,
-    season: [6, 26],
     weather: { wind: 0.6, fog: 0, rain: 0, sun: 0.8 },
-    mods: {
-      arrivalFactor: 1.6,
-      // Schlüssel: kind der Bootsarten (web/js/data/boat-catalog.js)
-      kindFactor: { jolle: 3, segelyacht: 3, mehrrumpf: 2 },
-      visitorFactor: 1.5,
-      serviceIncomeFactor: 1.3,
-      ratingBonus: 0.25,
-    },
   },
   {
     id: 'hafenfest',
     title: 'Hafenfest',
     teaser: 'Morgen ist Hafenfest',
     text: 'Traditionssegler laufen ein, viele Tagesgäste an Land. Abends Feuerwerk.',
-    stage: 4,
-    every: 20,
-    duration: 1,
-    weight: 4,
-    season: [10, 24],
     weather: { wind: 0.3, fog: 0, rain: 0, sun: 0.9 },
-    mods: {
-      // Traditionssegler (XL) kommen erst ab Stufe 5, vorher nur mehr Boote und Besucher
-      arrivalFactor: 1.3,
-      kindFactor: { traditionssegler: 6 },
-      sizeFactor: { XL: 2 },
-      visitorFactor: 2,
-      serviceIncomeFactor: 1.5,
-      ratingBonus: 0.25,
-    },
     evening: 'feuerwerk',
   },
 ];
 
-// Jahreslauf (Plan Abschnitt 7): 30 Tage Saison, danach 3 Tage Winter.
-// In der Saison: Tag 1 bis 8 Frühling, 9 bis 22 Sommer, 23 bis 30 Herbst.
-// Im Winter gibt es keine Ereignisse, die Boote stehen im Winterlager.
+// Jahreslauf: Saison und Winter aus ECONOMY.zeit. Im Winter gibt es keine Ereignisse,
+// die Boote stehen im Winterlager.
+const Z = ECONOMY.zeit;
+const E = ECONOMY.ereignisse;
+
 export const YEAR = {
-  seasonDays: 30,
-  winterDays: 3,
-  parts: [
-    { id: 'fruehling', from: 1, to: 8 },
-    { id: 'sommer', from: 9, to: 22 },
-    { id: 'herbst', from: 23, to: 30 },
-  ],
-  winterMods: { winter: true, arrivalFactor: 0.15, visitorFactor: 0.3, serviceIncomeFactor: 0.5 },
+  seasonDays: Z.saisonTage,
+  winterDays: Z.winterTage,
+  parts: Object.entries(Z.jahreszeiten).map(([id, [from, to]]) => ({ id, from, to })),
+  winterMods: E.winter.wirkung,
   winterWeather: { wind: 0.3, fog: 0.2, rain: 0, snow: 1, sun: 0.3 },
 };
 
 // Abstände und Zufall
 export const SCHEDULE = {
-  minGapDays: 2,       // ruhige Tage zwischen zwei Ereignissen
-  firstDay: 3,         // vor diesem Tag passiert nichts (Ankommen im Spiel)
-  jitter: 0.3,         // Streuung des Abstands, +-30 %
+  minGapDays: E.ablauf.ruhigeTage,   // ruhige Tage zwischen zwei Ereignissen
+  firstDay: E.ablauf.ersterTag,      // vor diesem Tag passiert nichts (Ankommen im Spiel)
+  jitter: E.ablauf.streuung,         // Streuung des Abstands
 };
+
+/** Texte und Zahlen zusammenfügen. Ein Ereignis ohne Zahlen in ECONOMY.ereignisse kommt nicht vor. */
+export function mitZahlen(texte, zahlen) {
+  return texte.filter((t) => zahlen?.[t.id]).map((t) => {
+    const z = zahlen[t.id];
+    const def = {
+      ...t,
+      stage: z.abStufe,
+      every: z.alleTage,
+      duration: z.dauer,
+      weight: z.vorrang ?? 1,
+      season: z.saison,
+      mods: z.wirkung ?? {},
+    };
+    if (z.braucht) def.requires = z.braucht;
+    if (z.ankuendigen != null) def.announceDays = z.ankuendigen;
+    if (z.schutz) def.protect = { building: z.schutz.durch, factor: z.schutz.faktor };
+    return def;
+  });
+}
+
+export const EVENT_TEXTE = TEXTE;
+export const EVENTS = mitZahlen(TEXTE, E);

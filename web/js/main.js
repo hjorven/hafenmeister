@@ -84,56 +84,136 @@ const WORLD = {
 WORLD.width = WORLD.maxX - WORLD.minX;
 WORLD.centerX = (WORLD.minX + WORLD.maxX) / 2;
 
-// Startansicht: alle Liegeplaetze einer Stufe mit 12 m Rand, dazu die Wartebojen mit 8 m Rand
-// (die wartenden Boote liegen bis 6 m oestlich der Boje im Wind).
-// Hat eine Stufe keine eigenen Plaetze in harbor.js (Stufe 6), gelten die der Stufe davor.
+// Startansicht in zwei Teilen:
+// 1. Kern: alle Liegeplaetze der Stufe mit 12 m Rand (Stufe ohne eigene Plaetze nimmt die davor).
+// 2. Extras: Wartebojen (8 m Rand, die Boote liegen bis 6 m oestlich im Wind) und sichtbare
+//    Bauplaetze (6 m Rand). Sie kommen nacheinander dazu, die naechsten zuerst, solange der
+//    Ausschnitt dadurch nicht zu weit herausgezoomt werden muss (siehe startRect).
+// Ankerfelder zaehlen nicht: gross, nur Ausweichplatz.
 function homeRect(stufe) {
   try {
     let s = stufe;
     let pts = [];
     for (; s >= 1 && !pts.length; s--) pts = plaetzeInStufe(s).map((p) => platzInWelt(p, s));
     if (!pts.length) throw new Error('keine Plaetze');
-    const xs = pts.map((p) => p.x);
-    const zs = pts.map((p) => p.z);
-    const r = {
-      minX: Math.min(...xs) - 12, maxX: Math.max(...xs) + 12,
-      minZ: Math.min(...zs) - 12, maxZ: Math.max(Math.max(...zs) + 8, 6),
+    // Ab 20 Plaetzen bleiben die aeussersten 10 % je Richtung draussen (z. B. die Grossschiffpier
+    // weit im Westen), sonst waere der Hafen am Handy hochkant nur ein schmaler Streifen.
+    const schnitt = (werte) => {
+      const v = [...werte].sort((a, b) => a - b);
+      const k = v.length >= 20 ? Math.floor(v.length * 0.1) : 0;
+      return [v[k], v[v.length - 1 - k]];
     };
-    let wp = { bojen: [], ankerbereiche: [] };
-    try { wp = warteplaetze(stufe); } catch (err) { console.warn('Wartebojen nicht lesbar', err); }
-    const dazu = (x, z, rand) => {
-      r.minX = Math.min(r.minX, x - rand);
-      r.maxX = Math.max(r.maxX, x + rand);
-      r.minZ = Math.min(r.minZ, z - rand);
-      r.maxZ = Math.max(r.maxZ, z + rand);
-    };
-    for (const b of wp.bojen) dazu(b.x, b.z, 8);
-    // Ankerfelder zaehlen nicht: sie sind gross, nur Ausweichplatz und zogen am Handy den Steg aus dem Bild.
-    return r;
+    const [x0, x1] = schnitt(pts.map((p) => p.x));
+    const [z0, z1] = schnitt(pts.map((p) => p.z));
+    return { minX: x0 - 12, maxX: x1 + 12, minZ: z0 - 12, maxZ: z1 + 10 };
   } catch (err) {
     console.warn('Startansicht aus harbor.js nicht ableitbar, nehme festen Wert', err);
     return { minX: -76, maxX: -44, minZ: -45, maxZ: 6 };
   }
 }
 
-// Dazu alle sichtbaren Bauplaetze (Stegprojekte und Services, pick buildsite) mit 6 m Rand.
-// Wird bei jedem reset() neu gerechnet, weil die Module Bauplaetze erst spaeter anlegen
-// und gebaute Plaetze wieder verschwinden.
-function startRect(game, stufe) {
-  const r = homeRect(stufe);
-  const box = new game.THREE.Box3();
+const bauplatzMass = new Map();
+
+function extras(game, stufe) {
+  const liste = [];
+  try {
+    for (const b of warteplaetze(stufe).bojen) {
+      liste.push({ minX: b.x - 8, maxX: b.x + 8, minZ: b.z - 8, maxZ: b.z + 8 });
+    }
+  } catch (err) { console.warn('Wartebojen nicht lesbar', err); }
+  // Bauplaetze pulsieren: jede Flaeche wird einmal gemessen und auf ganze Meter gerundet gemerkt,
+  // damit reset() immer genau denselben Ausschnitt liefert.
   const teil = new game.THREE.Box3();
   game.scene.traverseVisible((o) => {
-    if (o.userData?.pick?.type !== 'buildsite') return;
-    teil.setFromObject(o);
-    if (!teil.isEmpty()) box.union(teil);
+    const pick = o.userData?.pick;
+    if (pick?.type !== 'buildsite') return;
+    const key = `${pick.id}|${o.uuid}`;
+    let e = bauplatzMass.get(key);
+    if (!e) {
+      teil.setFromObject(o);
+      if (teil.isEmpty()) return;
+      e = { minX: Math.floor(teil.min.x) - 6, maxX: Math.ceil(teil.max.x) + 6,
+            minZ: Math.floor(teil.min.z) - 6, maxZ: Math.ceil(teil.max.z) + 6 };
+      bauplatzMass.set(key, e);
+    }
+    liste.push(e);
   });
-  if (!box.isEmpty()) {
-    r.minX = Math.min(r.minX, box.min.x - 6);
-    r.maxX = Math.max(r.maxX, box.max.x + 6);
-    r.minZ = Math.min(r.minZ, box.min.z - 6);
-    r.maxZ = Math.max(r.maxZ, box.max.z + 6);
+  // Landmarken der Gelaendeform (Leuchttuerme, Inseln im See): nur, wenn sie nah genug liegen,
+  // dass der Hafen trotzdem gross bleibt (gleiche Grenze wie Bojen und Bauplaetze).
+  try {
+    const form = game.gelaende?.aktuell?.();
+    for (const [x, y] of form?.leuchttuerme || []) {
+      liste.push({ minX: x * U - 10, maxX: x * U + 10, minZ: -y * U - 10, maxZ: -y * U + 10 });
+    }
+    for (const i of form?.seeInseln || []) {
+      liste.push({ minX: (i.x - i.rx) * U, maxX: (i.x + i.rx) * U, minZ: -(i.y + i.ry) * U, maxZ: -(i.y - i.ry) * U });
+    }
+  } catch (err) { console.warn('Geländeform nicht lesbar', err); }
+  return liste;
+}
+
+// Schilderspalte links (Wetter, Tagesziele, Ausbau, Zeit): Im Querformat deckt sie einen Streifen
+// ueber die ganze Hoehe ab und zaehlt wie eine Leiste. Im Hochformat liegen die Schilder ueber dem
+// Land oben, dort zaehlen sie nicht (sonst wird der Hafen zu schmal).
+function linkeSpalte(cam) {
+  if (cam.screenW <= cam.screenH) return 0;
+  const ins = cam.insets || { top: 0, bottom: 0 };
+  const canvas = document.getElementById('stage');
+  const c = canvas ? canvas.getBoundingClientRect() : { left: 0, top: 0 };
+  let rechts = 0;
+  for (const id of ['hm-seite', 'hm-zeit']) {
+    const el = document.getElementById(id);
+    if (!el || el.hidden) continue;
+    for (const k of (el.children.length ? [el, ...el.children] : [el])) {
+      const r = k.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0) continue;
+      if (r.left - c.left > cam.screenW * 0.4) continue;
+      // nur, was im freien Band zwischen den Leisten liegt
+      if (r.bottom - c.top <= ins.top || r.top - c.top >= cam.screenH - ins.bottom) continue;
+      rechts = Math.max(rechts, r.right - c.left);
+    }
   }
+  return Math.min(rechts + 8, cam.screenW * 0.3);
+}
+
+const vereinige = (a, b) => ({
+  minX: Math.min(a.minX, b.minX), maxX: Math.max(a.maxX, b.maxX),
+  minZ: Math.min(a.minZ, b.minZ), maxZ: Math.max(a.maxZ, b.maxZ),
+});
+
+// Noetige Bildbreite in Metern, damit das Rechteck in den freien Bereich passt
+// (Schraegsicht 50 Grad: Tiefe erscheint um sin 50 verkuerzt).
+function breiteFuer(r, cam) {
+  const ins = cam.insets || { top: 0, bottom: 0 };
+  const w = Math.max(1, cam.screenW - (cam.insetRight || 0) - (cam.insetLeft || 0));
+  const h = Math.max(1, cam.screenH - ins.top - ins.bottom);
+  return Math.max(r.maxX - r.minX, (r.maxZ - r.minZ) * Math.sin(50 * Math.PI / 180) * (w / h));
+}
+
+// Der Hafen soll gross im Bild sein: Extras kommen nur dazu, solange die Breite hoechstens
+// 1,5-mal so gross wird wie fuer die Liegeplaetze allein (mindestens 50 m).
+function startRect(game, stufe) {
+  const cam = game.camera;
+  try { if (cam.insetsFn) { const [top, bottom] = cam.insetsFn(); cam.insets = { top, bottom }; } } catch (err) { /* alte Werte */ }
+  try { cam.insetLeft = linkeSpalte(cam); } catch (err) { cam.insetLeft = 0; }
+  let r = homeRect(stufe);
+  const grenze = Math.max(breiteFuer(r, cam) * 1.5, 50);
+  const mx = (r.minX + r.maxX) / 2;
+  const mz = (r.minZ + r.maxZ) / 2;
+  const abstand = (e) => Math.hypot((e.minX + e.maxX) / 2 - mx, (e.minZ + e.maxZ) / 2 - mz);
+  for (const e of extras(game, stufe).sort((a, b) => abstand(a) - abstand(b))) {
+    const neu = vereinige(r, e);
+    if (breiteFuer(neu, cam) <= grenze) r = neu;
+  }
+  // Bleibt Tiefe uebrig (Hochformat), legt die Kamera das Suedufer an den unteren Rand und zeigt
+  // oben viel leeres Wasser; mittig zeigt es unten viel Land. Der Ueberschuss kommt deshalb zu
+  // 70 % nach Norden (Wasser, Einfahrt, ankommende Boote) und zu 30 % nach Sueden (Ufer).
+  const ins = cam.insets || { top: 0, bottom: 0 };
+  const w = Math.max(1, cam.screenW - (cam.insetRight || 0) - (cam.insetLeft || 0));
+  const h = Math.max(1, cam.screenH - ins.top - ins.bottom);
+  const sichtbar = breiteFuer(r, cam) / Math.sin(50 * Math.PI / 180) * (h / w);
+  const rest = sichtbar - (r.maxZ - r.minZ);
+  if (rest > 0) r = { ...r, minZ: r.minZ - rest * 0.7, maxZ: r.maxZ + rest * 0.3 };
   return r;
 }
 
