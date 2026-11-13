@@ -15,6 +15,7 @@
 // 3. engstellen: Bereiche, in denen zwei Boote der Referenzgroesse nicht aneinander vorbei passen.
 //    route() meldet, welche Engstellen ein Weg durchfaehrt (Einbahn-Freigabe in boat-anim.js).
 
+import { GROSSE_GAESTE } from '../data/verkehr.js';
 const SQRT2 = Math.SQRT2;
 
 /**
@@ -611,5 +612,20 @@ export function hindernisseAusHafen(hafen, stufe, o = {}) {
     const [x, y, richtung] = lage;
     rechtecke.push({ id: p.id, x: x * U, z: -y * U, h: (richtung * Math.PI) / 180, l: p.laenge * U, b: p.breite * U, art: p.art });
   }
+  // Liegewannen der grossen Gaeste (Kreuzfahrtschiff, Marine, Windjammer vor Anker) ab Stufe 6 und die
+  // Seebruecke ab Stufe 3: dort plant kein Gastboot seinen Weg, auch wenn gerade kein Schiff da ist.
+  const flaechen = [...(stufe >= 6 ? (o.grosseGaeste ?? GROSSE_GAESTE) : []), ...(stufe >= 3 ? [seebruecke(stufe)] : [])];
+  for (const g of flaechen) {
+    const r = g.rechteck;
+    if (!r) continue;
+    rechtecke.push({ id: g.name, x: ((r.x0 + r.x1) / 2) * U, z: (-(r.y0 + r.y1) / 2) * U, h: Math.PI / 2, l: (r.y1 - r.y0) * U, b: (r.x1 - r.x0) * U, art: 'gast' });
+  }
   return { linien, rechtecke };
+}
+
+// Seebruecke (render/buildings.js, id 'seebruecke'): Stufe 3 bis 5 bei x -170, ab Stufe 6 bei x -262,
+// jeweils von y 214 gut 50 m nach Norden, mit Pfaehlen etwa 14 Planeinheiten breit.
+function seebruecke(stufe) {
+  const x = stufe >= 6 ? -262 : -170;
+  return { name: 'Seebruecke', rechteck: { x0: x - 7, x1: x + 7, y0: 214, y1: 296 } };
 }
