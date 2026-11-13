@@ -24,12 +24,15 @@ export const ECONOMY = {
     erstesBootNach: 3,      // Sekunden: am ersten Tag eines neuen Spiels kommt gleich ein Boot
     // Tagesrhythmus wie im echten Hafen, als Anteile des Tages (0 = Morgen, 1 = Abend):
     // vormittags legen die Gäste ab, neue kommen den ganzen Tag, die meisten am Nachmittag.
-    // Keine Wellen: zwischen zwei Ankünften liegen immer mindestens ankunftAbstand Sekunden. Es kommen
-    // nie mehr Boote, als so ins Fenster passen (81 s / 3 s = 27), auch nicht an Regattatagen.
+    // Keine Wellen und kein Fließband: zwischen zwei Ankünften liegen zufällig ankunftAbstand bis
+    // ankunftAbstandMax Sekunden, kurze häufiger als lange, über das ganze Fenster verteilt. Es kommen
+    // nie mehr Boote, als mit ankunftDichte im Mittel ins Fenster passen (81 s / 4 s = 20), auch nicht
+    // an Regattatagen.
     ankunftVon: 0.05,      // etwa 7:15, damit nach dem ersten Boot kein Loch entsteht
     ankunftAbstand: 3,      // Sekunden Mindestabstand zwischen zwei Ankünften (kleiner, wenn der Tag sonst nicht reicht)
+    ankunftAbstandMax: 8,   // Sekunden, längster gewürfelter Abstand (bei wenigen Booten wird gestreckt)
+    ankunftDichte: 4,       // Sekunden je Boot im Mittel an den vollsten Tagen
     ankunftBis: 0.95,       // etwa 19:30
-    ankunftSpitze: 0.62,    // Schwerpunkt am Nachmittag (etwa 15:30), breit verteilt
     abreiseVon: 0.07,       // etwa 7:30
     abreiseBis: 0.3,        // etwa 11:00
   },
@@ -172,7 +175,7 @@ export const ECONOMY = {
       seglerStrom: { basis: 1.6, maxAnteil: 0.4, abBooten: 3 },
       rundum:      { abBooten: 2, mindestWuensche: 2 },
       letzter:     { bisPlaetze: 12 },
-      kassieren:   { anteil: 0.3, maxAnteil: 0.8 },
+      kassieren:   { anteil: 0.3, maxAnteil: 0.8, verlaufTage: 3, ohneVerlauf: 0.5 },   // Geld nach den echten Liegegeld-Einnahmen der letzten Tage
     },
     grossAb: { 3: 'L', 5: 'XL' },                 // "ein großes Schiff einweisen": Klasse ab Stufe
     halberAnker: 0.5,                             // so viel besser bewerten alle Gäste, die gerade liegen

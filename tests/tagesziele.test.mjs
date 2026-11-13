@@ -244,3 +244,15 @@ test('Wochenziele sind nicht in zwei Tagen zu schaffen (Prüfbefund: Blumenkübe
     if (h.geld >= 5) assert.ok(WOCHE.geld.soll(h) > 2 * h.geld, `Stufe ${stufe}: Liegegeld`);
   }
 });
+
+test('Kassierziele richten sich nach den echten Einnahmen der letzten Tage, auch nach einem Aufstieg', () => {
+  const { ctx, state } = neu(5, 3);
+  const ohne = lage(state, ctx).geld;
+  state.stats ||= {};
+  state.stats.verlauf = [{ tag: 1, stufe: 2, einnahmen: { liegegeld: 180 } }, { tag: 2, stufe: 2, einnahmen: { liegegeld: 220 } }];
+  const h = lage(state, ctx);
+  assert.ok(h.geld <= 200 + 1e-9, `höchstens der Schnitt: ${h.geld}`);
+  assert.ok(h.geld <= ohne);
+  const leicht = VORLAGEN.kassieren.soll(h, 'leicht');
+  assert.ok(leicht <= 70, `leicht bei 200 € am Tag: ${leicht} €`);
+});

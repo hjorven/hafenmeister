@@ -293,6 +293,30 @@ test('"Nur eine Box" wird jedes Mal neu bewertet: belegt, dann kein Sonderfall; 
   assert.equal(s.boats[knapp.id].status, 'moored', 'die Leitstelle nimmt ihn jetzt');
 });
 
+test('Warten mehrere Boote auf die letzte freie Box, gibt die Leitstelle sie dem, der am längsten wartet', () => {
+  const ctx = context();
+  const s = quietState({ stage: 1, office: 4 });
+  const probe = waitingBoat(s, { status: 'expected' });
+  const [letzte, ...rest] = sim.fittingBerths(s, ctx, probe.id);
+  s.queue = [];
+  delete s.boats[probe.id];
+  for (const p of rest) s.berths[p] = 9000;
+  // Erstes Boot allein: echter Sonderfall, der Spieler entscheidet
+  const erster = waitingBoat(s);
+  assert.equal(sim.officeSpecialCase(s, ctx, erster.id), 'einzigerPlatz');
+  sim.tick(s, ctx, 1);
+  assert.equal(s.boats[erster.id].status, 'waiting');
+  // Ein zweites kommt dazu: kein Sonderfall mehr, die Box bleibt nicht leer
+  const zweiter = waitingBoat(s);
+  assert.equal(sim.officeSpecialCase(s, ctx, erster.id), null);
+  assert.equal(sim.officeSpecialCase(s, ctx, zweiter.id), null);
+  sim.tick(s, ctx, 1);
+  assert.equal(s.boats[erster.id].status, 'moored', 'der länger Wartende bekommt die Box');
+  assert.equal(s.boats[erster.id].berthId, letzte);
+  assert.equal(s.boats[zweiter.id].status, 'waiting');
+  assert.equal(sim.officeSpecialCase(s, ctx, zweiter.id), null, 'ohne freie Box keine Raute');
+});
+
 test('Stufe 3: Jede Box wird nur einmal vorgeschlagen, wer zuerst kam, bekommt die beste', () => {
   const ctx = context();
   const s = quietState({ stage: 1, office: 3 });
