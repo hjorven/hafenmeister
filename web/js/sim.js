@@ -462,31 +462,22 @@ function startDay(state, ctx, events) {
   }
   planTrips(state, ctx, mods, sea.winter);
   const rate = sea.winter ? 0 : arrivalRate(state, ctx, mods);
-  // Ankünfte wie im echten Hafen eher nachmittags: zwischen arrivalFrom und arrivalWindow
-  // (Anteile des Tages), am häufigsten um arrivalPeak.
+  // Ankünfte über den ganzen Tag: zwischen arrivalFrom und arrivalWindow (Anteile des Tages).
   const from = ctx.rules.dayLength * (ctx.rules.arrivalFrom ?? 0);
   const window = ctx.rules.dayLength * ctx.rules.arrivalWindow - from;
-  // Nie mehr Boote, als mit dem Mindestabstand in das Fenster passen (auch an Regatta- und Festtagen):
-  // keine Wellen, wer nicht mehr passt, kommt an diesem Tag nicht.
-  const maxN = ctx.rules.arrivalMinGap > 0 ? Math.max(1, Math.floor(window / ctx.rules.arrivalMinGap)) : Infinity;
+  // Nie mehr Boote, als mit dem dichtesten mittleren Abstand in das Fenster passen (auch an Regatta- und
+  // Festtagen): keine Wellen und kein Fließband, wer nicht mehr passt, kommt an diesem Tag nicht.
+  const dense = ctx.rules.arrivalDenseGap || ctx.rules.arrivalMinGap || 0;
+  const maxN = dense > 0 ? Math.max(1, Math.floor(window / dense)) : Infinity;
   const n = Math.min(maxN, Math.floor(rate) + (random(state) < rate - Math.floor(rate) ? 1 : 0));
-  const peak = ctx.rules.arrivalPeak != null ? ctx.rules.dayLength * ctx.rules.arrivalPeak - from : null;
   const list = [];
   for (let i = 0; i < n; i++) {
     const boat = rollBoat(state, ctx, mods);
     if (!boat) break;
     boat.id = state.nextId++;
-    const u = random(state);
-    // Dreiecksverteilung mit Spitze bei arrivalPeak, sonst gleichmäßig
-    let t = u * window;
-    if (peak != null && peak > 0 && peak < window) {
-      t = u < peak / window ? Math.sqrt(u * window * peak) : window - Math.sqrt((1 - u) * window * (window - peak));
-    }
-    boat.arriveAt = Math.round((from + t) * 10) / 10;
     list.push(boat);
   }
-  list.sort((a, b) => a.arriveAt - b.arriveAt || a.id - b.id);
-  spreadArrivals(list, from, from + window, ctx.rules.arrivalMinGap);
+  const end = from + window;
   // Erster Tag eines neuen Spiels: Das erste Boot kommt gleich, damit niemand auf leeres Wasser schaut.
   const first = ctx.rules.firstArrivalAt;
   if (state.day === 1 && first != null) {
@@ -494,19 +485,13 @@ function startDay(state, ctx, events) {
       const boat = rollBoat(state, ctx, mods);
       if (boat) { boat.id = state.nextId++; list.push(boat); }
     }
-    if (list.length) list[0].arriveAt = Math.min(list[0].arriveAt ?? first, first);
-    // Ruhiger Start: Die übrigen Boote des ersten Tags rücken gleichmäßig in die Zeit ab calm (fünf
-    // Mindestabstände nach dem ersten Boot), damit man das erste in Ruhe zuweisen kann und danach
-    // keine Gruppe auf einmal kommt.
-    const calm = (list[0]?.arriveAt ?? first) + 5 * (ctx.rules.arrivalMinGap || 0);
-    const end = from + window;
-    if (calm < end) {
-      for (let i = 1; i < list.length; i++) {
-        const t = list[i].arriveAt;
-        list[i].arriveAt = Math.round((calm + (Math.max(t, from) - from) * (end - calm) / (end - from)) * 10) / 10;
-      }
-      spreadArrivals(list.slice(1), calm, end, ctx.rules.arrivalMinGap);
-    }
+    if (list.length) list[0].arriveAt = first;
+    // Ruhiger Start: Die übrigen Boote des ersten Tags kommen frühestens fünf Mindestabstände nach dem
+    // ersten, damit man das erste in Ruhe zuweisen kann.
+    const calm = first + 5 * (ctx.rules.arrivalMinGap || 0);
+    placeArrivals(list.slice(1), Math.min(calm, end), end, ctx.rules, () => random(state));
+  } else {
+    placeArrivals(list, from, end, ctx.rules, () => random(state));
   }
   // Herkunft in der Reihenfolge der Ankunft, damit zwei Boote hintereinander nie aus derselben Ecke kommen
   list.forEach((boat, i) => { boat.origin = boatOrigin(state, state.day * 7 + i); });
@@ -526,21 +511,42 @@ export function boatOrigin(state, n) {
 }
 
 /**
- * Zieht sortierte Ankunftszeiten auseinander, damit Boote nicht im Pulk erscheinen: zwischen zwei
- * Ankünften liegen mindestens minGap Sekunden. Passen nicht alle mit diesem Abstand ins Fenster,
- * wird der Abstand so weit verkleinert, dass sie sich gleichmäßig verteilen.
+ * Verteilt Ankünfte unregelmäßig über das ganze Fenster [from, to]: kein Pulk, kein Fließband, kein
+ * langes Loch am Anfang. Jeder Abstand wird zwischen arrivalMinGap und arrivalMaxGap gewürfelt, dazu
+ * ein Vorlauf vor dem ersten und ein Rest nach dem letzten Boot. Ist die Summe länger als das Fenster,
+ * schrumpft nur der Teil über dem Mindestabstand; ist sie kürzer (wenige Boote), wird alles gestreckt,
+ * damit die Boote über den ganzen Tag kommen. Passen nicht alle mit dem Mindestabstand hinein, kommen
+ * sie gleichmäßig mit kleinerem Abstand. rnd liefert Zahlen von 0 bis unter 1 (Spielzufall).
  */
-export function spreadArrivals(list, from, to, minGap) {
-  if (!(minGap > 0) || list.length < 2) return list;
-  const gap = Math.min(minGap, (to - from) / list.length);
-  for (let i = 1; i < list.length; i++) list[i].arriveAt = Math.max(list[i].arriveAt, list[i - 1].arriveAt + gap);
-  // Was hinten über das Fenster hinausragt, rückt von hinten nach vorn auf
-  let limit = to;
-  for (let i = list.length - 1; i >= 0 && list[i].arriveAt > limit; i--) {
-    list[i].arriveAt = limit;
-    limit -= gap;
+export function placeArrivals(list, from, to, rules, rnd) {
+  const n = list.length;
+  if (!n) return list;
+  const span = Math.max(0, to - from);
+  const min = rules.arrivalMinGap || 0;
+  const max = Math.max(min, rules.arrivalMaxGap ?? min);
+  const zug = () => { const u = rnd(); return u * u; };
+  // Teile: Vorlauf, n - 1 Abstände, Rest. Vorlauf und Rest haben keinen Mindestabstand.
+  const slack = [zug() * max];
+  for (let i = 1; i < n; i++) slack.push(zug() * (max - min));
+  slack.push(zug() * max);
+  const fest = (n - 1) * min;
+  const summe = fest + slack.reduce((a, b) => a + b, 0);
+  let gaps;
+  if (fest > span) {
+    const g = span / n;
+    gaps = [g / 2, ...Array(n - 1).fill(g)];
+  } else if (summe > span) {
+    const k = (span - fest) / (summe - fest || 1);
+    gaps = slack.slice(0, n).map((x, i) => (i ? min : 0) + x * k);
+  } else {
+    const k = span / (summe || 1);
+    gaps = slack.slice(0, n).map((x, i) => ((i ? min : 0) + x) * k);
   }
-  for (const b of list) b.arriveAt = Math.round(b.arriveAt * 10) / 10;
+  let t = from;
+  for (let i = 0; i < n; i++) {
+    t += gaps[i];
+    list[i].arriveAt = Math.round(Math.min(t, to) * 10) / 10;
+  }
   return list;
 }
 
@@ -674,8 +680,21 @@ export function officeSpecialCase(state, ctx, boatId, fitting = null) {
   if (sp.specialGuests && boat.special) return 'sondergast';
   // Nur noch eine passende Box: jedes Mal neu bewertet. Ist sie belegt, gibt es nichts zu
   // entscheiden; werden mehr frei, ist das Boot wieder ein Standardfall für die Leitstelle.
-  if (sp.onlyBerth && (fitting ?? fittingBerths(state, ctx, boatId)).length === 1) return 'einzigerPlatz';
+  // Warten mehrere Boote auf dieselbe Box, gibt die Leitstelle sie dem, der am längsten wartet
+  // (Entscheidung 13.11.: keine leere Box, während Boote warten).
+  const f = sp.onlyBerth ? (fitting ?? fittingBerths(state, ctx, boatId)) : null;
+  if (f?.length === 1 && wartendeAufBox(state, ctx, f[0], boatId) === 0) return 'einzigerPlatz';
   return null;
+}
+
+/** Wie viele andere wartende Boote passen in diese Box? */
+function wartendeAufBox(state, ctx, berthId, ausser) {
+  let n = 0;
+  for (const id of state.queue) {
+    if (id === ausser || state.boats[id]?.status !== 'waiting') continue;
+    if (fittingBerths(state, ctx, id).includes(berthId)) n++;
+  }
+  return n;
 }
 
 /** Hat das Hafenbüro die Automatik (Stufe mit 'automatik')? */
@@ -941,7 +960,8 @@ function arrive(state, ctx, boat, events) {
     if (why) {
       events.push({ type: 'officeSpecial', boatId: boat.id, reason: why });
     }
-    else if (fitting.length) moor(state, ctx, boat, fitting[0], events);
+    // Wartet schon jemand auf die einzige Box, bekommt der sie (autoAssign in Reihenfolge)
+    else if (fitting.length > 1 || (fitting.length === 1 && !wartendeAufBox(state, ctx, fitting[0], boat.id))) moor(state, ctx, boat, fitting[0], events);
   }
 }
 

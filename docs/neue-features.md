@@ -126,6 +126,8 @@ Mengen richten sich nach den Booten, die der Spieler heute selbst einweisen kann
 
 **Morgens.** Erst kommt der Tagesabschluss, danach öffnet sich die Kartenwahl einmal von selbst (nicht während Einstieg, Bauen oder offener Karte; dann leuchtet nur das Schild). Solange der Abschluss offen ist, tritt die Tafel zurück und Meldungen warten. Am Handy quer liegen die drei Karten nebeneinander rechts neben der linken Spalte; die Tafel endet immer über Zeitsteuerung, Kassieren und Bauen.
 
+**Geldziele.** Kassierziele und das Liegegeld-Wochenziel richten sich nach dem, was in den letzten drei Tagen wirklich an Liegegeld hereinkam (plus was ungezahlt davonfuhr), höchstens nach der Rechnung der Stufe. Ohne Verlauf zählt die halbe Rechnung. Nach einem Aufstieg zählen die Tage der alten Stufe, so bleibt "leicht" leicht. Eine offen gelassene Kartenwahl klappt abends zu und kommt erst nach dem Tagesabschluss wieder; solange sie offen ist, wartet der Bau-Tipp "Als Nächstes".
+
 **Deko-Plätze.** Die Stücke suchen ihren Platz relativ zum Hafenmeisterhaus und meiden alles, was an Land steht (Gebäude mit 3 m Abstand, Dorf, Anlagen, Flaggenmast, Wege). Sie hängen an keinen festen Koordinaten und passen sich jeder Hafenlage an.
 
 **Winter:** keine Tageskarten (Winterarbeiten bringt P20).
