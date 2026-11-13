@@ -752,7 +752,7 @@ function turnAway(state, ctx, boat, events, why) {
   state.stats.turnedAwayToday++;
   const ta = ctx.rules.turnAway;
   // Sind alle Wartebojen belegt, dreht ein Boot ab, ohne gewartet zu haben: keine Bewertung.
-  const rated = why !== 'queueFull' && random(state) < ta.chance;
+  const rated = why !== 'queueFull' && why !== 'rebuild' && random(state) < ta.chance;
   if (rated) pushRating(state, ctx, ta.rating);
   events.push({ type: 'turnedAway', boatId: boat.id, reason: why, rated });
 }
@@ -1266,8 +1266,13 @@ export function stageUpPreview(state, ctx) {
   const inStage = (b, st) => (b.stages ? b.stages.includes(st) : b.stage <= st);
   const gone = ctx.berths.filter((b) => berthAvailable(state, b) && !inStage(b, next)).map((b) => b.id);
   const boats = gone.map((id) => state.boats[state.berths[id]]).filter(Boolean);
+  // Boote, deren Box bleibt, aber in der nächsten Stufe nicht mehr passt (flacher): sie legen um
+  const moving = mooredBoats(state)
+    .filter((b) => !gone.includes(b.berthId) && ctx.berthById[b.berthId] && fits(b, ctx.berthById[b.berthId], ctx.rules, state.stage) && !fits(b, ctx.berthById[b.berthId], ctx.rules, next))
+    .map((b) => b.id);
   return {
     gone,
+    moving,
     guests: boats.filter((b) => !b.stationed).map((b) => b.id),
     fixed: boats.filter((b) => b.stationed).map((b) => b.id),
   };
@@ -1297,10 +1302,30 @@ function clearVanishedBerths(state, ctx, from, events) {
       .sort((a, b) => slack(a) - slack(b) || String(a.id).localeCompare(String(b.id)));
     return list[0]?.id ?? null;
   };
+  // Freier Platz für einen Gast, dessen Box es noch gibt, die aber nach dem Umbau nicht mehr passt
+  const findGuestBerth = (boat) => availableBerths(state, ctx)
+    .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
+    .sort((a, b) => (a.maxLength * a.maxBeam) - (b.maxLength * b.maxBeam) || String(a.id).localeCompare(String(b.id)))[0]?.id ?? null;
   const moves = [];
   for (const boat of mooredBoats(state)) {
-    if (!goneSet.has(boat.berthId)) continue;
+    const berth = ctx.berthById[boat.berthId];
+    const vanished = goneSet.has(boat.berthId);
+    // Platz bleibt, passt aber nicht mehr (zum Beispiel flacher nach dem Umbau)
+    const unfit = !vanished && berth && fits(boat, berth, ctx.rules, from) && !fits(boat, berth, ctx.rules, state.stage);
+    if (!vanished && !unfit) continue;
     const old = boat.berthId;
+    if (!boat.stationed && unfit) {
+      delete state.berths[old];
+      const to = findGuestBerth(boat);
+      if (to) {
+        // Der Hafenmeister bittet den Gast umzulegen: gleiche Nächte, gleiche Rechnung, neue Box
+        boat.berthId = to;
+        state.berths[to] = boat.id;
+        events.push({ type: 'relocated', boatId: boat.id, from: old, to, guest: true });
+        continue;
+      }
+      state.berths[old] = boat.id; // kein Platz frei: reist ab wie bei einem Platz, der wegfällt
+    }
     if (!boat.stationed) {
       if (boat.pendingFee > 0) events.push(...collect(state, ctx, boat.id).events);
       endTrip(boat, events);
@@ -1326,7 +1351,37 @@ function clearVanishedBerths(state, ctx, from, events) {
     }
   }
   for (const id of gone) if (state.leaving?.[id]) delete state.leaving[id];
+  settleWaitSpots(state, ctx, events);
   for (const fn of ctx.hooks.stageUp) fn({ state, ctx, from, to: state.stage, gone, moves, findBerth, events });
+}
+
+/**
+ * Hat die neue Stufe weniger Wartebojen, liegen Boote mit zu hoher Bojennummer an einer Boje, die es
+ * nicht mehr gibt. Sie verholen an die kleinste freie Boje ('waitSpotChanged'). Ist keine frei, fahren
+ * sie in eine passende freie Box oder, wenn es auch die nicht gibt, ohne Bewertung weiter.
+ */
+function settleWaitSpots(state, ctx, events) {
+  const count = waitSpotCount(state, ctx);
+  for (const boat of waitingBoats(state)) {
+    if (boat.waitSpot < count) continue;
+    const from = boat.waitSpot;
+    boat.waitSpot = null;
+    const spot = freeWaitSpot(state, ctx);
+    if (spot != null) {
+      boat.waitSpot = spot;
+      events.push({ type: 'waitSpotChanged', boatId: boat.id, from, waitSpot: spot });
+      continue;
+    }
+    boat.waitSpot = from;
+    const berth = selfBerth(state, ctx, boat.id);
+    if (berth != null) {
+      boat.selfEntered = true;
+      moor(state, ctx, boat, berth, events);
+      events.push({ type: 'selfEntered', boatId: boat.id, berthId: berth, direct: true });
+    } else {
+      turnAway(state, ctx, boat, events, 'rebuild');
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------

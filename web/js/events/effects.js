@@ -15,7 +15,10 @@ export function initEffects(game) {
   if (stage && stage.parentNode === host) stage.after(canvas); else host.appendChild(canvas);
   const ctx = canvas.getContext('2d');
 
-  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  const systemRuhig = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  // Einstellung "Weniger Bewegung" (ui/einstellungen.js) gilt sofort, ohne Neuladen
+  let reduced = game.einstellungen ? game.einstellungen.wert('ruhig') : systemRuhig;
+  game.on?.('einstellungen', ({ alle } = {}) => { if (alle) reduced = !!alle.ruhig; });
 
   // Zielwerte (aus 'weather') und aktuelle, weich überblendete Werte
   const target = { wind: 0.2, fog: 0, rain: 0, snow: 0, sun: 0.7 };

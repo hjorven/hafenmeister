@@ -362,10 +362,8 @@ export function punkt(px, py, stufe, region) {
   const F = gelaendeform();
   const ln = seeNord(px);
   // Die Form darf den Binnensee verkleinern, aber das Festland nie über die Nehrung hinaus in die See schieben
-  // Seitliche Küsten mit Buchten und Landzungen statt einer glatten Parabel (verschiebt nur nach außen, Hafen x -165..215 bleibt)
-  const bucht = 18 * fbm(py / 60, 3.7, 73) + 8 * fbm(py / 19, 8.1, 74);
-  const uferForm = kueste(px) + 0.02 * Math.max(0, (F.seeWest ?? -235) - bucht - px) ** 2
-    + (F.seeOstOffen ? 0.05 * Math.max(0, px - 395 - bucht) ** 2 : 0.02 * Math.max(0, px - (F.seeOst ?? 345) - bucht) ** 2);
+  const uferForm = kueste(px) + 0.02 * Math.max(0, (F.seeWest ?? -235) - px) ** 2
+    + (F.seeOstOffen ? 0.05 * Math.max(0, px - 395) ** 2 : 0.02 * Math.max(0, px - (F.seeOst ?? 345)) ** 2);
   const ufer = ausgebaut ? 6 : Math.min(uferForm, Math.max(suedufer(px), ln + 2));
   const ms = meerSued(px) + (F.breiteSee || 0) * smooth(228, 262, px);   // nur östlich des Engpasses (westlich liegen Außenhafen und Piers)
   const see = clamp((py - (ln + ms) / 2) / 8 + 0.5, 0, 1);
@@ -498,10 +496,15 @@ export function punkt(px, py, stufe, region) {
     const halb = (DURCHSTICH[1] - DURCHSTICH[0]) / 2;
     const dx = Math.abs(px - ENGPASS_X);
     const fase = Math.max(0, ln + 8 - py);
+    // Zur Beckenseite läuft die Rinne als runde Zunge aus (Höhenlinien sind Bögen), statt mit einer Kante quer zur Fahrt zu enden
+    const zunge = smooth(ln - 50, ln, py + 34 * (dx / (halb + 10)) ** 2);
+    const ziel = DURCHSTICH_TIEFE + (g.gezeiten || 0);
     if (py > ln - 12 && py < 236 && dx < halb + fase) {
-      const ziel = DURCHSTICH_TIEFE + (g.gezeiten || 0);
-      if (h > -ziel) { h = -ziel + 0.4 * smooth(halb - 6, halb + fase, dx); }
+      const tief = -ziel + 0.4 * smooth(halb - 6, halb + fase, dx);
+      if (h > tief) h = h >= 0 || py > ln ? tief : h + (tief - h) * zunge;
       typ = 'wasser';
+    } else if (py > ln - 50 && py <= ln - 12 && h < 0 && h > -ziel) {
+      h += (-ziel - h) * zunge;
     } else if (py > ln - 4 && py < 226 && dx < halb + fase + 4 && h > -0.5) {
       h = 1.0; typ = 'steinschuettung';
     }
