@@ -32,13 +32,17 @@ test('Dauerlieger: wartender Dauerlieger ist nach dem Neuladen wieder da', async
     const boot = st.boats[p.bootId];
     // Der Dauerlieger ist auf Törn ...
     delete st.berths[platz]; delete st.boats[boot.id]; boot.status = 'away';
-    Object.assign(p, { boot, rueckNacht: st.day, frueherUm: (st.clock + 1) / ctx.rules.dayLength });
+    // Schon jetzt zurück (nicht von der Spielzeit abhängig: unter Last läuft sie in CI kaum)
+    Object.assign(p, { boot, rueckNacht: st.day, frueherUm: Math.max(0, st.clock - 0.01) / ctx.rules.dayLength });
     // ... und ein Gast liegt auf seinem Platz
     const gast = st.nextId++;
     st.boats[gast] = { ...boot, id: gast, stationed: false, dauer: false, bootsname: 'Testgast', nights: 1, wishes: [], status: 'waiting', penalty: 0, besuche: 0 };
     st.queue.push(gast);
     g.sim.dispatch(sim.assign(st, ctx, gast, platz).events);
+    // Ein kleiner Regelschritt von Hand: der Dauerlieger merkt, dass sein Platz belegt ist, und wartet
+    g.sim.dispatch(sim.tick(st, ctx, 0.05));
     g.setPaused(false);
+    if (!d.dauerState(st).plaetze[platz].wartet) throw new Error('Dauerlieger wartet nicht');
     return { platz, dauer: boot.id };
   });
   // (keine async-Funktion: ein Promise wäre immer "wahr")

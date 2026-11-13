@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Hafenmeister Roadmap</title>
+  <meta name="description" content="Alle Pakete der Hafenmeister-Roadmap mit Stand, nach Welle und Status filterbar.">
+  <link rel="icon" href="../icons/icon-192.png">
+  <link rel="stylesheet" href="roadmap.css">
+</head>
+<body>
+  <header class="kopf">
+    <div class="kopf-zeile">
+      <h1>Hafenmeister <span>Roadmap</span></h1>
+      <nav class="kopf-links">
+        <a href="../">Zum Spiel</a>
+        <a id="quelle" href="https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md">Quelle</a>
+      </nav>
+    </div>
+    <p class="stand" id="stand">Lädt ...</p>
+    <div class="gesamt" id="gesamt" aria-label="Fortschritt aller Pakete"></div>
+    <div class="legende" id="legende"></div>
+  </header>
+
+  <main>
+    <section class="wellen" id="wellen" aria-label="Wellen"></section>
+
+    <div class="werkzeug">
+      <div class="schalter" role="tablist" aria-label="Ansicht">
+        <button type="button" data-ansicht="pakete" class="an">Pakete</button>
+        <button type="button" data-ansicht="punkte">Einzelpunkte</button>
+      </div>
+      <div class="chips" id="chips" aria-label="Status"></div>
+      <label class="suche">
+        <span class="unsichtbar">Suchen</span>
+        <input id="suche" type="search" placeholder="Suchen: P14, Winter, Ü21 ..." autocomplete="off">
+      </label>
+    </div>
+
+    <p class="treffer" id="treffer"></p>
+    <section id="liste" class="liste" aria-live="polite"></section>
+  </main>
+
+  <footer class="fuss">
+    Erzeugt aus <code>docs/roadmap.md</code> mit <code>node tools/roadmap.mjs</code>. Änderungen bitte dort eintragen.
+  </footer>
+
+  <script type="module" src="roadmap.js"></script>
+</body>
+</html>

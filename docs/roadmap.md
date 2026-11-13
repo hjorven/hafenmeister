@@ -1,6 +1,6 @@
 # Hafenmeister: Roadmap
 
-Stand: 12.11.2026 abends, abgeglichen mit `main` bei Commit `937ca3c` (PR 144). Erste Fassung abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
+Stand: 12.11.2026 abends (Welle-0-Status 13.11. nachgetragen), abgeglichen mit `main` bei Commit `937ca3c` (PR 144). Erste Fassung abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
 
 **Verhältnis zu [plan.md](plan.md):** `plan.md` bleibt der einzige gültige Plan für Vision, Regeln und Entscheidungen. Diese Roadmap ist die **Arbeitsliste**: Sie sagt, was noch fehlt, was falsch ist, was weg soll, und welches Paket (welcher Thread) es erledigt. Wo die Roadmap eine Entscheidung aus `plan.md` ändern würde, steht das unter [Offene Fragen an Jorven](#offene-fragen-an-jorven) und gilt erst nach seiner Antwort; danach wird `plan.md` im selben PR angepasst.
 
@@ -8,6 +8,7 @@ Stand: 12.11.2026 abends, abgeglichen mit `main` bei Commit `937ca3c` (PR 144). 
 
 - "Fertig heißt spielbar" ([abnahme.md](abnahme.md)): Ein Punkt ist erst erledigt, wenn er im laufenden Spiel am Handy und am PC sichtbar funktioniert. Nichts in Doku, Einstieg oder Karte, das nichts tut.
 - Jedes Paket aktualisiert beim Merge seine Zeilen hier (Status und PR-Nummer) und die betroffene Doku.
+- Aus dieser Datei entstehen automatisch die Übersicht in der README und die Seite https://hjorven.github.io/hafenmeister/roadmap/ (`tools/roadmap.mjs`, Action "Roadmap-Übersicht"). Damit sie stimmen: Status in der Statusspalte mit den Wörtern `offen`, `in Arbeit (PR n)`, `erledigt (PR n)`, `teilweise`, `entfällt`; neue Pakete als Zeile `| Pnn | Titel | Inhalt | ... |` in einer Tabelle unter einer Überschrift `### Welle n: Thema`.
 - Zahlen nur in `web/js/data/economy.js` (siehe Paket P06).
 - Vor jedem Merge im Hauptordner:
 
@@ -21,12 +22,13 @@ bash tests/pruefen.sh
 2. **Grundprobleme:** Danach Welle 1 (Fehler und Fundament) und die Technik-Befunde aus Abschnitt 15.
 3. **Kernschleife und Sichtbarkeit:** Welle 2.
 4. **Extras:** Welle 3 bis 5 (neue Features, Nordsee, Online).
+5. **Ausbau Stufe 7 bis 20:** Welle 6 nach Welle 4 und P57, geplant in [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md); Online bleibt zuletzt.
 
 **Selbstprüfung vor jedem Weiterbauen (Jorven, 12.11.2026):** Bevor ein Thread weiterbaut oder merged, prüft er sein eigenes Feature sehr oft im laufenden Spiel (Handy und PC, alle Stufen, mehrere Stegbilder, alle Wetter, Tag und Nacht, Vorspulen 8x) und mit Randfällen (voller Hafen, leere Bojen, Stufenwechsel mitten im Manöver, Laden eines alten Spielstands). Er schreibt in seinen PR unter **"Randfälle und Berührungspunkte"**, was er geprüft hat und wo sein Feature mit anderen kollidieren kann (Beispiel: neues Stegbild gegen Bootswege, Marinebasis gegen Einfahrt). Berührungspunkte trägt er zusätzlich in die Tabelle in Abschnitt 14 ein.
 
 **Status:** `offen` · `in Arbeit (PR n)` · `erledigt (PR n)` · `Frage` (wartet auf Jorven) · `entfällt`
 
-**Kürzel:** Ü1 bis Ü25 = "25 Vorschläge zur Überarbeitung", F1 bis F42 = "Vorschläge für neue Features" aus dem Überblick. P01 bis P66 = Pakete dieser Roadmap (siehe [Pakete und Reihenfolge](#pakete-und-reihenfolge)). A1 bis Q10 = Detailpunkte aus den Tabs "Mechaniken im Detail" und "Technik und Bedienung" des vollständigen Reviews (Abschnitt 13).
+**Kürzel:** Ü1 bis Ü25 = "25 Vorschläge zur Überarbeitung", F1 bis F42 = "Vorschläge für neue Features" aus dem Überblick. P01 bis P82 = Pakete dieser Roadmap (siehe [Pakete und Reihenfolge](#pakete-und-reihenfolge)). A1 bis Q10 = Detailpunkte aus den Tabs "Mechaniken im Detail" und "Technik und Bedienung" des vollständigen Reviews (Abschnitt 13).
 
 ---
 
@@ -584,11 +586,11 @@ Jorven (12.11.2026, Spieltest am Gaming-PC): Das Gelände wird komplett überarb
 
 | Paket | Titel (Thread) | Inhalt | Dateien | Thread |
 |---|---|---|---|---|
-| P62 | Geländeform und Engpass neu bauen | T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66 | `web/js/render/landscape.js`, `web/js/render/landschaft/*.js`, `web/js/data/harbor.js` (nur Wasserkanten) | neu |
-| P63 | Marinebasis und Anlagen neu platzieren | T6, T7, T13: Marinebasis mit Zufahrt von See, Großschiffpier, Services und Bauplätze passend zum neuen Gelände, jede Anlage von Wasser oder Land erreichbar | `web/js/render/services.js`, `web/js/data/services.js`, `web/js/data/harbor.js` | neu (stimmt sich mit "Services und Sonderanlagen einbauen" und "Stegbild pro Spiel variieren" ab) |
-| P64 | Gelände abwechslungsreicher gestalten | T11: Wald, Wiesen, Schilf, Felsen, Höhen, Dorfrand, je nach Stufe und Stegbild; erst nach P62-Grundform | `web/js/render/landschaft/*.js` | neu |
+| P62 | Geländeform und Engpass neu bauen | T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66 | `web/js/render/landscape.js`, `web/js/render/landschaft/*.js`, `web/js/data/harbor.js` (nur Wasserkanten) | in Arbeit (PR 179, 184, 195, 204, 210, 211, 216): zehn Küstentypen aus Seed; offen: Pflicht-See im Norden verkleinern |
+| P63 | Marinebasis und Anlagen neu platzieren | T6, T7, T13: Marinebasis mit Zufahrt von See, Großschiffpier, Services und Bauplätze passend zum neuen Gelände, jede Anlage von Wasser oder Land erreichbar | `web/js/render/services.js`, `web/js/data/services.js`, `web/js/data/harbor.js` | in Arbeit (PR 172): Lage der Anlagen in `docs/services.md`; Abgleich mit dem Seed-Gelände offen; stimmt sich mit "Services und Sonderanlagen einbauen" und "Stegbild pro Spiel variieren" ab |
+| P64 | Gelände abwechslungsreicher gestalten | T11: Wald, Wiesen, Schilf, Felsen, Höhen, Dorfrand, je nach Stufe und Stegbild; erst nach P62-Grundform | `web/js/render/landschaft/*.js` | in Arbeit (PR 204, 211, 216): Umgebung und Ufer je Küstentyp |
 | P65 | Wetter und Effekte flüssig machen | T1, T5, T12: Wetter (Regen, Nebel, Sturm, Schnee) ohne Ruckeln, Heckwelle auf beiden Seiten, Effekte ohne Artefakte; Messung je Wetter mit `feature-tests/leistung.cjs` | `web/js/render/landschaft/wasser.js`, Wetter- und Effektmodule, `web/js/render/boat-anim.js` (nur Heckwelle) | neu |
-| P66 | Boote ums Gelände herum führen | T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch "hafenmeister-engpass-fix" (`boat-channel.js`, `boat-routes.js`, Tests `boot-engpass`, `boot-routen`) | `web/js/render/boat-view.js`, `boat-anim.js`, neue `boat-channel.js`, `boat-routes.js`, `web/js/world/fahrwege.js`, `tests/` | neu (übernimmt P54 vom Thread "Schiffsanimationen umsetzen") |
+| P66 | Boote ums Gelände herum führen | T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch "hafenmeister-engpass-fix" (`boat-channel.js`, `boat-routes.js`, Tests `boot-engpass`, `boot-routen`) | `web/js/render/boat-view.js`, `boat-anim.js`, neue `boat-channel.js`, `boat-routes.js`, `web/js/world/fahrwege.js`, `tests/` | in Arbeit (PR 180, 181, 199): Ausweichen über freies Wasser, Fahrwasserkarte; Stau an der Einfahrt offen; übernimmt P54 vom Thread "Schiffsanimationen umsetzen" |
 
 Abstimmung: P62 legt zuerst die Wasserfläche fest; P63 und P66 bauen darauf. P65 misst die Leistung nach jeder Geländeänderung neu. Welle 0 ist fertig, wenn alle fünf Pakete auf `main` sind und auf allen Stufen und Stegbildern kein Boot Land, Stege oder andere Boote berührt.
 
@@ -709,6 +711,29 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|
 | P57 | Nordsee mit Gezeiten spielbar machen | Revierfaktoren, Gezeiten, Schleuse, Trockenfallplätze, `docs/regionen.md` | bestehend: "Hafenregionen Ostsee und Nordsee gestalten" |
 | P58 | Online mit Supabase | Hafenname, Bestenliste, Gastboote; erst wenn alles lokal fertig ist | neu, zuletzt |
+
+### Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)
+
+Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen wächst bis Ausbaustufe 9, danach übernimmt der Spieler weitere Häfen und baut einen Hafenverbund bis Stufe 20 auf. Nur Planung: Keine dieser Stufen erscheint in Spiel, Einstieg oder Doku für Spieler, bevor ihr Paket gemergt und am Handy und PC spielbar ist. Online (P58) bleibt trotzdem der letzte Schritt.
+
+| Paket | Titel (Thread) | Inhalt | Startet nach | Thread |
+|---|---|---|---|---|
+| P67 | Stufe-6-Annahmen lösen | `regionDone` an `verbund.abschlussStufe` statt `maxStage`, Grenzen in `vielfalt.js`, Schlüssel 7 bis 9 in `economy.js`, Tests mit Test-Stufe 7; nichts Sichtbares | Welle 2 | neu |
+| P68 | Leistung für große Häfen | Detailstufen für liegende Boote, gesammeltes Zeichnen, Leistungsbudget je Szene (Abschnitt 6.6 des Plans) | P67 | neu (mit Kamera-Thread) |
+| P69 | Bedienung großer Häfen | Zeiger zu wartenden Booten, Sprung zu Stegen | P55, P67 | neu |
+| P70 | Stufe 7 Hafenstadt | Yachthafen Ost (Steg E), Promenade, Belegungsplan je Steg; `harbor.js` Stufe 7, Gelände und Seeds geprüft | P67, P68, P69 | neu |
+| P71 | Stufe 8 Fährhafen | Fähranleger, Inselfähre nach Fahrplan | P70, P66 | neu |
+| P72 | Stufe 9 Werfthafen | Werft mit Schiffslift, großes Winterlager | P71, P20 | neu |
+| P73 | Stufe 10 Hafenverbund und Hafenkarten | `modules.verbund`, `SAVE_VERSION` 3 mit Migration, Übernahme alter Häfen, Kurzrechnung mit Abgleichstest, Standortwechsel | P72, P09 | neu |
+| P74 | Stufe 11 Gästeweitergabe und Törngäste | volle Häfen schicken weiter, Törngäste von Hafen zu Hafen | P73, P32 | neu |
+| P75 | Stufe 12 Hafenprofile | Yacht-, Traditions-, Fischerei-, Familienhafen | P73 | neu |
+| P76 | Stufe 13 Regattawoche | Regattawoche über den Verbund | P75, P24, P39 | neu |
+| P77 | Stufe 14 Nordseehafen | Nordsee-Standort mit Tide aus P57 | P73, P57 | neu |
+| P78 | Stufe 15 Offshore-Hafen | Windpark, Crew-Transfer-Katamarane, Serviceschiff | P77 | neu |
+| P79 | Stufe 16 Kreuzfahrthafen | zweite Pier, Wechselhafen | P73 | neu |
+| P80 | Stufe 17 und 18 Marinehafen und Großseglertreffen | Marinestützpunkt groß, jährliches Großseglertreffen | P79, P75 | neu |
+| P81 | Stufe 19 Kanalhafen | Küstentyp 11 Kanal, Schleuse, Kanalverkehr | P77, P80 | neu |
+| P82 | Stufe 20 Hafenimperium | Abschlussfeier, Endlosspiel über den Verbund, Schlussabgleich `tools/balance.mjs --bis 20` | P81 | neu |
 
 ### Zusätzliche Pakete aus den Detailpunkten
 

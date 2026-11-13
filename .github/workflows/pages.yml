@@ -9,6 +9,8 @@ on:
     # Nur wenn sich etwas an der Seite ändert, nicht bei reinen Doku- oder Skript-Änderungen.
     paths:
       - "web/**"
+      - "docs/roadmap.md"
+      - "tools/roadmap.mjs"
       - "tools/build-pages.sh"
       - "tools/check-pages.sh"
       - ".github/workflows/pages.yml"
