@@ -100,7 +100,8 @@ body:not(.hm-neu) .hm-sp-kueste .hm-sp-k[aria-checked=true]{background:var(--sp-
 .hm-banner{position:fixed;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom));
   width:calc(100% - 32px);max-width:520px;background:#16324a;color:#fff;border-radius:12px;padding:12px 14px;
   display:flex;gap:10px;align-items:center;z-index:999;font:15px/1.4 system-ui,sans-serif}
-.hm-banner span{flex:1}
+.hm-banner{flex-wrap:wrap;justify-content:flex-end}
+.hm-banner span{flex:1 1 260px}
 .hm-banner button{min-height:44px;border:0;border-radius:8px;padding:0 14px;font:600 15px system-ui,sans-serif;
   background:#f2b705;color:#16324a;cursor:pointer}
 .hm-banner button.zu{background:transparent;color:#fff}
@@ -135,6 +136,21 @@ const knopf = (text, onclick, art = '') => el('button', { type: 'button', class:
 
 // ---------------------------------------------------------------------------
 // Texte
+
+const OHNE_SPEICHER_TEXT = 'Dieser Browser speichert gerade nichts (privates Fenster oder Speicher gesperrt). '
+  + 'Wenn du die Seite schließt, ist der Hafen weg. Sichere ihn mit "Als Datei sichern".';
+
+function datumText(iso) {
+  const d = new Date(iso ?? '');
+  if (Number.isNaN(d.getTime())) return '';
+  return `am ${d.toLocaleDateString('de-DE')} um ${d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`;
+}
+
+/** Beschädigten Stand unverändert als Datei anbieten. */
+function kaputtSichern(k) {
+  const name = exportFileName(new Date(k?.zeit ?? Date.now()), `${k?.name ?? 'hafen'} beschaedigt`);
+  return exportDatei(k.text, name, { merken: false });
+}
 
 function exportInfo() {
   const t = daysSinceExport();
@@ -292,6 +308,10 @@ export function openSavePanel(opts) {
 
     inhalt.append(msg);
     if (test) inhalt.append(el('p', { class: 'hm-sp-msg' }, 'Testansicht: Dieser Hafen wird nicht gespeichert. Ein Wechsel öffnet das normale Spiel.'));
+    const ohneSpeicher = !test && opts.speichernGeht && !opts.speichernGeht();
+    if (ohneSpeicher) inhalt.append(el('p', { class: 'hm-sp-msg fehler', 'data-art': 'ohne-speicher' }, OHNE_SPEICHER_TEXT));
+    const kaputt = P.kaputtLesen?.();
+    if (kaputt) inhalt.append(kaputtKarte(kaputt));
 
     if (aktiv) inhalt.append(platzKarte(aktiv, { laeuft: true, test, voll, v }));
     if (andere.length) {
@@ -371,7 +391,8 @@ export function openSavePanel(opts) {
     unsubInstall = onInstallStateChange(renderInstall);
     inhalt.append(btnInstall, installHint,
       el('p', { class: 'hm-sp-info', style: 'margin-top:10px' },
-        'Alles wird automatisch gespeichert, aber nur in diesem Browser auf diesem Gerät. ',
+        ohneSpeicher ? 'Solange der Browser das Speichern sperrt, sichert nur "Als Datei sichern" deinen Hafen. '
+          : 'Alles wird automatisch gespeichert, aber nur in diesem Browser auf diesem Gerät. ',
         'Ein anderes Gerät oder ein anderer Browser sieht deine Häfen nicht, und wer die Website-Daten löscht, löscht sie mit. ',
         exportInfo(), ' Sichere deine Häfen ab und zu als Datei, dann geht nichts verloren.'),
       speicherInfo());
@@ -479,6 +500,28 @@ export function openSavePanel(opts) {
           knopf('Löschen', () => { frage = { id: p.id, art: 'loeschen' }; zeichne(); }, 'hm-gefahr'),
         ));
       }
+    }
+    return karte;
+  }
+
+  // Ein Spielstand ließ sich nicht laden: als Datei sichern oder verwerfen
+  function kaputtKarte(k) {
+    const karte = el('div', { class: 'hm-sp-platz hm-sp-kaputt', 'data-art': 'kaputt' });
+    const wann = datumText(k.zeit);
+    karte.append(el('div', { class: 'hm-sp-platz-text' },
+      el('strong', {}, k.name ? `"${k.name}" ließ sich nicht laden` : 'Ein Hafen ließ sich nicht laden'),
+      el('p', { class: 'hm-sp-info', style: 'margin:4px 0 8px' },
+        `Der Spielstand war beschädigt${wann ? ` (bemerkt ${wann})` : ''}. Sichere ihn als Datei, bevor du ihn wegwirfst. Vielleicht lässt er sich später noch retten.`)));
+    if (frage?.art === 'kaputt') {
+      karte.append(frageBox('Beschädigten Spielstand endgültig wegwerfen?', 'Ja, wegwerfen',
+        () => { P.kaputtVerwerfen(); frage = null; zeichne(); say('Weggeworfen.'); }));
+    } else {
+      karte.append(el('div', { class: 'hm-sp-reihe' },
+        knopf('Als Datei sichern', sicher(async () => {
+          const r = await kaputtSichern(k);
+          if (r !== 'abgebrochen') say('Gesichert. Die Datei enthält den beschädigten Stand, so wie er war.');
+        }, 'Sichern hat nicht geklappt.'), 'hm-primaer'),
+        knopf('Wegwerfen', () => { frage = { art: 'kaputt' }; zeichne(); })));
     }
     return karte;
   }
@@ -685,5 +728,52 @@ export function showUpdateBanner(apply) {
   ok.addEventListener('click', () => { bar.remove(); apply(); });
   zu.addEventListener('click', () => bar.remove());
   bar.append(el('span', {}, 'Eine neue Version des Spiels ist da.'), ok, zu);
+  document.body.appendChild(bar);
+}
+
+/**
+ * Meldung nach dem Start, wenn der gespeicherte Hafen beschädigt war.
+ * art 'verloren': es läuft ein neues Spiel; art 'sicherung': der vorige Stand wurde geladen.
+ * Der beschädigte Text liegt in plaetze.kaputtLesen() und lässt sich als Datei sichern.
+ */
+export function showKaputtBanner({ art, name, savedAt, kaputt }) {
+  if (document.querySelector('.hm-banner[data-art="kaputt"]')) return;
+  ensureStyle();
+  const bar = el('div', { class: 'hm-banner', role: 'alert' });
+  bar.dataset.art = 'kaputt';
+  const wann = datumText(savedAt);
+  const text = art === 'verloren'
+    ? `${name ? `Dein Hafen "${name}"` : 'Dein gespeicherter Hafen'} ist beschädigt und ließ sich nicht laden. Es läuft ein neues Spiel. Sichere den alten Stand als Datei, dann geht er nicht verloren.`
+    : `Der letzte Spielstand war beschädigt. Geladen ist der Stand davor${wann ? ` (${wann})` : ''}. Den beschädigten kannst du als Datei sichern.`;
+  const ok = el('button', { type: 'button' }, 'Als Datei sichern');
+  const zu = el('button', { type: 'button', class: 'zu' }, 'Später');
+  ok.addEventListener('click', async () => {
+    const k = kaputt?.();
+    if (!k) { bar.remove(); return; }
+    try {
+      if (await kaputtSichern(k) !== 'abgebrochen') bar.remove();
+    } catch { /* Hinweis bleibt */ }
+  });
+  // "Später": der Stand bleibt im Fenster "Spielstände", bis er gesichert oder weggeworfen ist
+  zu.addEventListener('click', () => bar.remove());
+  bar.append(el('span', {}, text), ok, zu);
+  document.body.appendChild(bar);
+}
+
+/** Meldung, wenn der Browser nichts speichern lässt (privates Fenster, gesperrt, voll). */
+export function showOhneSpeicherBanner({ getGame, oeffnen }) {
+  if (document.querySelector('.hm-banner[data-art="ohne-speicher"]')) return;
+  ensureStyle();
+  const bar = el('div', { class: 'hm-banner', role: 'alert' });
+  bar.dataset.art = 'ohne-speicher';
+  const ok = el('button', { type: 'button' }, 'Als Datei sichern');
+  const zu = el('button', { type: 'button', class: 'zu' }, 'OK');
+  ok.addEventListener('click', async () => {
+    try {
+      if (await exportGame(getGame()) !== 'abgebrochen') bar.remove();
+    } catch { oeffnen?.(); }
+  });
+  zu.addEventListener('click', () => bar.remove());
+  bar.append(el('span', {}, OHNE_SPEICHER_TEXT), ok, zu);
   document.body.appendChild(bar);
 }

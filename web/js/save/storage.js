@@ -161,9 +161,10 @@ export function saveGame(game) {
 
 /**
  * Lädt den letzten Spielstand. Ist er beschädigt, wird die Sicherung versucht.
+ * pruefen(game) darf werfen, dann gilt der Stand als beschädigt (strenge Prüfung aus state.js).
  * Gibt { game, savedAt, ausSicherung } oder null zurück.
  */
-export function loadGame() {
+export function loadGame({ pruefen = null } = {}) {
   const s = getStore();
   if (!s) return null;
   for (const [key, ausSicherung] of [[KEY_SAVE, false], [KEY_BACKUP, true]]) {
@@ -172,6 +173,7 @@ export function loadGame() {
     if (text === null) continue;
     try {
       const { game, savedAt } = unwrap(parse(text));
+      if (pruefen) pruefen(game); // wirft, wenn state.js den Stand nicht annimmt
       return { game, savedAt, ausSicherung };
     } catch {
       // beschädigt oder unbekannt: nächsten Versuch
@@ -292,7 +294,18 @@ export function altenStandLesen(data) {
     || typeof data.version !== 'number' || !('day' in data) || !('boats' in data)) {
     throw new SaveError('ungueltig', 'Das ist kein Hafenmeister-Spielstand.');
   }
-  return data;
+  // Ein alter Stand hat keinen Umschlag und damit keine Version: wie Version 1 umbauen,
+  // sonst fehlen später Felder wie modules.stegbild.nr (MIGRATIONS füllen nur Fehlendes).
+  let game = data;
+  for (let v = 1; v < SAVE_VERSION; v++) game = MIGRATIONS[v](game);
+  return game;
+}
+
+/** Roher Text des aktiven Spielstands (auch wenn er beschädigt ist) oder null. */
+export function rohText() {
+  const s = getStore();
+  if (!s) return null;
+  try { return s.getItem(KEY_SAVE); } catch { return null; }
 }
 
 /**
@@ -381,14 +394,14 @@ export function importInhalt(text) {
 }
 
 /** Bietet einen fertigen Text als Datei an (Teilen-Menü oder Download), wie exportGame. */
-export async function exportDatei(text, name, { preferShare = isTouchDevice() } = {}) {
+export async function exportDatei(text, name, { preferShare = isTouchDevice(), merken = true } = {}) {
   const blob = new Blob([text], { type: 'application/json' });
   if (preferShare && typeof File === 'function' && navigator.canShare) {
     const file = new File([blob], name, { type: 'application/json' });
     if (navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({ files: [file], title: 'Hafenmeister Spielstände' });
-        updateMeta({ zuletztExportiert: new Date().toISOString() });
+        if (merken) updateMeta({ zuletztExportiert: new Date().toISOString() });
         return 'geteilt';
       } catch (err) {
         if (err && err.name === 'AbortError') return 'abgebrochen';
@@ -405,7 +418,7 @@ export async function exportDatei(text, name, { preferShare = isTouchDevice() } 
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
-  updateMeta({ zuletztExportiert: new Date().toISOString() });
+  if (merken) updateMeta({ zuletztExportiert: new Date().toISOString() });
   return 'heruntergeladen';
 }
 
