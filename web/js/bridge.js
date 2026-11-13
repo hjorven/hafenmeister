@@ -241,7 +241,7 @@ export async function initBridge(game) {
       if (selected === id) selected = null;
       return sim.dismiss(state, ctx, id);
     }),
-    // Einzelne Münze: immer eine Handlung des Spielers (Antippen oder Strich)
+    // Münze vom Spieler selbst eingestrichen (Tippen, Strich): zählt für Tagesziele, große Boote geben Trinkgeld
     collect: run((boatId) => sim.collect(state, ctx, boatIdOf(boatId), { hand: true })),
     collectAll: run((force = true) => sim.collectAll(state, ctx, force)),
     upgradeFacility: run((key) => sim.upgradeFacility(state, ctx, key)),
@@ -276,6 +276,26 @@ export async function initBridge(game) {
     // Lesen
     reputation: () => sim.reputation(state),
     fittingBerths: (boatId) => sim.fittingBerths(state, ctx, boatIdOf(boatId)),
+    // Hafenbüro: Grund, warum die Automatik dieses Boot dem Spieler lässt, oder null
+    sonderfall: (boatId) => {
+      const b = state.boats[boatIdOf(boatId)];
+      // Ab den Vorschlägen des Büros (Stufe 3); mit Leitstelle nur in Klassen, die sie zuweist
+      if (!b || state.office < (ctx.rules.office.propose ?? Infinity)) return null;
+      if (sim.officeAutomatic(state, ctx) && !sim.officeAutoFor(state, ctx, b.size)) return null;
+      return sim.officeSpecialCase(state, ctx, b.id);
+    },
+    // Vorschlag des Büros (Platz-id) für ein wartendes Boot oder null
+    vorschlag: (boatId) => sim.officeProposal(state, ctx, boatIdOf(boatId)),
+    // Welche Platz-Wünsche des Boots (Strom ...) diese Box erfüllt
+    platzWuensche: (boatId, berthId) => {
+      const b = state.boats[boatIdOf(boatId)];
+      const p = ctx.berthById[berthIdOf(berthId)];
+      if (!b || !p) return [];
+      return b.wishes.filter((w) => ctx.rules.berthWishes[w] && sim.berthHas(state, ctx, p, ctx.rules.berthWishes[w]));
+    },
+    // Automatik des Büros je Größenklasse
+    bueroAutomatik: (size) => sim.officeAutoFor(state, ctx, size),
+    setBueroAutomatik: run((size, on) => sim.setOfficeAuto(state, size, on)),
     whyNotFit: (boatId, berthId) => {
       const b = state.boats[boatIdOf(boatId)];
       const p = ctx.berthById[berthIdOf(berthId)];

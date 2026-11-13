@@ -732,48 +732,79 @@ export function showUpdateBanner(apply) {
 }
 
 /**
+ * Kleines Fenster für eine wichtige Meldung (beschädigter Stand, kein Speicher). Es liegt über allem,
+ * auch über der Einführung, damit nichts verdeckt wird; pause()/weiter() halten das Spiel so lange an.
+ * knoepfe: [{ text, fn, primaer }]; fn darf async sein und false liefern, dann bleibt das Fenster offen.
+ */
+function openHinweis({ art, titel, text, knoepfe, pause, weiter }) {
+  if (document.querySelector(`.hm-save-backdrop[data-art="${art}"]`)) return;
+  ensureStyle();
+  pause?.();
+  const backdrop = el('div', { class: 'hm-save-backdrop hm-sp-start', 'data-art': art });
+  const zu = () => { backdrop.remove(); document.removeEventListener('keydown', onKey, true); weiter?.(); };
+  const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); zu(); } };
+  const reihe = el('div', { class: 'hm-sp-reihe' });
+  for (const k of knoepfe) {
+    reihe.append(knopf(k.text, async () => {
+      let bleibt = false;
+      try { bleibt = (await k.fn?.()) === false; } catch { bleibt = true; }
+      if (!bleibt) zu();
+    }, k.primaer ? 'hm-primaer' : ''));
+  }
+  const box = el('div', { class: 'hm-sp hm-px', role: 'alertdialog', 'aria-modal': 'true', 'aria-labelledby': `hm-hinweis-${art}` },
+    el('div', { class: 'hm-sp-kopf' }, el('h2', { id: `hm-hinweis-${art}` }, titel)),
+    el('div', { class: 'hm-sp-inhalt' }, el('p', {}, text), reihe));
+  backdrop.append(box);
+  document.addEventListener('keydown', onKey, true);
+  // Liegt schon ein anderes Fenster (Spielstände) offen, kommt dieses darüber
+  document.body.append(backdrop);
+  reihe.querySelector('button')?.focus();
+}
+
+/**
  * Meldung nach dem Start, wenn der gespeicherte Hafen beschädigt war.
- * art 'verloren': es läuft ein neues Spiel; art 'sicherung': der vorige Stand wurde geladen.
+ * art 'verloren': es läuft ein neues Spiel; 'sicherung': der vorige Stand wurde geladen;
+ * 'zu-neu': der Stand stammt aus einer neueren Version des Spiels.
  * Der beschädigte Text liegt in plaetze.kaputtLesen() und lässt sich als Datei sichern.
  */
-export function showKaputtBanner({ art, name, savedAt, kaputt }) {
-  if (document.querySelector('.hm-banner[data-art="kaputt"]')) return;
-  ensureStyle();
-  const bar = el('div', { class: 'hm-banner', role: 'alert' });
-  bar.dataset.art = 'kaputt';
+export function showKaputtMeldung({ art, name, savedAt, kaputt, pause, weiter }) {
   const wann = datumText(savedAt);
-  const text = art === 'verloren'
-    ? `${name ? `Dein Hafen "${name}"` : 'Dein gespeicherter Hafen'} ist beschädigt und ließ sich nicht laden. Es läuft ein neues Spiel. Sichere den alten Stand als Datei, dann geht er nicht verloren.`
-    : `Der letzte Spielstand war beschädigt. Geladen ist der Stand davor${wann ? ` (${wann})` : ''}. Den beschädigten kannst du als Datei sichern.`;
-  const ok = el('button', { type: 'button' }, 'Als Datei sichern');
-  const zu = el('button', { type: 'button', class: 'zu' }, 'Später');
-  ok.addEventListener('click', async () => {
-    const k = kaputt?.();
-    if (!k) { bar.remove(); return; }
-    try {
-      if (await kaputtSichern(k) !== 'abgebrochen') bar.remove();
-    } catch { /* Hinweis bleibt */ }
+  const hafen = name ? `Dein Hafen "${name}"` : 'Dein gespeicherter Hafen';
+  const folge = savedAt ? `Geladen ist der Stand davor${wann ? ` (${wann})` : ''}.` : 'Es läuft ein neues Spiel.';
+  const text = art === 'zu-neu'
+    ? `${hafen} stammt aus einer neueren Version des Spiels. ${folge} Lade die Seite neu, dann ist er wieder da. Zur Sicherheit kannst du ihn als Datei sichern.`
+    : art === 'verloren'
+      ? `${hafen} ist beschädigt und ließ sich nicht laden. Es läuft ein neues Spiel. Sichere den alten Stand als Datei, dann geht er nicht verloren.`
+      : `Der letzte Spielstand war beschädigt. ${folge} Den beschädigten kannst du als Datei sichern.`;
+  openHinweis({
+    art: 'kaputt',
+    titel: art === 'zu-neu' ? 'Neuere Version' : 'Spielstand beschädigt',
+    text,
+    pause,
+    weiter,
+    knoepfe: [
+      { text: 'Als Datei sichern', primaer: true, fn: async () => {
+        const k = kaputt?.();
+        if (!k) return true;
+        return (await kaputtSichern(k)) !== 'abgebrochen' ? true : false;
+      } },
+      // "Später": der Stand bleibt im Fenster "Spielstände", bis er gesichert oder weggeworfen ist
+      { text: 'Später', fn: () => true },
+    ],
   });
-  // "Später": der Stand bleibt im Fenster "Spielstände", bis er gesichert oder weggeworfen ist
-  zu.addEventListener('click', () => bar.remove());
-  bar.append(el('span', {}, text), ok, zu);
-  document.body.appendChild(bar);
 }
 
 /** Meldung, wenn der Browser nichts speichern lässt (privates Fenster, gesperrt, voll). */
-export function showOhneSpeicherBanner({ getGame, oeffnen }) {
-  if (document.querySelector('.hm-banner[data-art="ohne-speicher"]')) return;
-  ensureStyle();
-  const bar = el('div', { class: 'hm-banner', role: 'alert' });
-  bar.dataset.art = 'ohne-speicher';
-  const ok = el('button', { type: 'button' }, 'Als Datei sichern');
-  const zu = el('button', { type: 'button', class: 'zu' }, 'OK');
-  ok.addEventListener('click', async () => {
-    try {
-      if (await exportGame(getGame()) !== 'abgebrochen') bar.remove();
-    } catch { oeffnen?.(); }
+export function showOhneSpeicherMeldung({ getGame, pause, weiter }) {
+  openHinweis({
+    art: 'ohne-speicher',
+    titel: 'Kein Speichern möglich',
+    text: OHNE_SPEICHER_TEXT,
+    pause,
+    weiter,
+    knoepfe: [
+      { text: 'Als Datei sichern', primaer: true, fn: async () => (await exportGame(getGame())) !== 'abgebrochen' },
+      { text: 'Verstanden', fn: () => true },
+    ],
   });
-  zu.addEventListener('click', () => bar.remove());
-  bar.append(el('span', {}, OHNE_SPEICHER_TEXT), ok, zu);
-  document.body.appendChild(bar);
 }

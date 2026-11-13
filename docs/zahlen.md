@@ -82,9 +82,12 @@ Je erfülltem Wunsch +25 %.
 
 | Stufe | Name | ab Hafenstufe | Kosten | schaltet frei |
 |---|---|---|---|---|
-| 1 | Hafenmeister | 2 | 600 € | allesKassieren |
+| 1 | Hafenmeister mit Funk | 2 | 600 € | allesKassieren, vorschau |
 | 2 | Kassenautomat | 2 | 1.800 € | sofortKassieren |
-| 3 | Hafenbüro | 3 | 3.800 € | automatik |
+| 3 | Hafenbüro | 3 | 3.800 € | vorschlag, nebenkosten |
+| 4 | Hafenleitstelle | 4 | 9.500 € | automatik |
+
+Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab der Stufe mit nebenkosten: 10 % auf jedes kassierte Liegegeld. Von Hand eingewiesen: +0,25 Anker. Sonderfälle fahren nach 25 s selbst ein.
 
 ## Services
 

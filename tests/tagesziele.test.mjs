@@ -141,6 +141,10 @@ test('kombiniertes Ziel: Segelboote an Plätze mit Strom', () => {
 test('Ziele, die nicht machbar sind, kommen nicht: volle Automatik ohne Zuweis- und Kassierziele', () => {
   const { ctx, state } = neu(3, 4);
   state.office = 99;
+  // Große Boote (L und größer) zahlen auch mit Kassenautomat persönlich (Hafenbüro P02, Trinkgeld)
+  assert.equal(lage(state, ctx).kassieren, true);
+  // Nur S und M im Hafen: dann bleibt mit voller Automatik nichts zum Zuweisen und Kassieren
+  ctx.rules.sizeMix = { ...ctx.rules.sizeMix, [state.stage]: { S: 1, M: 1 } };
   const h = lage(state, ctx);
   assert.equal(h.zuweisen, false);
   assert.equal(h.kassieren, false);

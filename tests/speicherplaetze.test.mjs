@@ -477,3 +477,12 @@ test('Speicher voll: die Kopie eines beschädigten Stands weicht dem laufenden S
   assert.equal(P.speichernAktiv(gross), true);
   assert.equal(s.getItem(P.KEY_KAPUTT), null);
 });
+
+test('gesperrter Tab (Stand aus neuerer Version) überschreibt nichts', () => {
+  const s = frisch();
+  P.einrichten();
+  s.setItem('hafenmeister.spielstand', JSON.stringify({ format: 'hafenmeister-spielstand', version: 99, spiel: {} }));
+  P.sperren();
+  assert.equal(P.speichernAktiv(stand(2)), false);
+  assert.equal(JSON.parse(s.getItem('hafenmeister.spielstand')).version, 99);
+});
