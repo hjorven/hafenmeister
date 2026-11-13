@@ -6,6 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 13.11.2026
 
+- Tagesziele: Geldziele richten sich nach den echten Einnahmen der letzten Tage, eine offen gelassene Kartenwahl liegt morgens nicht mehr über dem Tagesabschluss.
 - Tagesziele: morgens erst der Tagesabschluss, dann die Kartenwahl; am Handy quer liegen die drei Karten nebeneinander. Wochenziele dauern wirklich eine Woche, Deko-Stücke halten Abstand zu Häusern.
 - Ein beschädigter Spielstand wird gemeldet und lässt sich als Datei sichern; im privaten Fenster sagt das Spiel deutlich, dass nichts gespeichert wird.
 - Bis zu 8 Häfen nebeneinander, Neues Spiel mit Name, Stegbild und Küste, Probe-Kopie, Papierkorb und alle Häfen in einer Datei (150).

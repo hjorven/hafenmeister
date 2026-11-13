@@ -747,20 +747,24 @@ test('Selbst-Einfahren nimmt die nächste freie passende Box, auch eine zu groß
   assert.equal(sim.selfBerth(t, d, x.id), 'A1');
 });
 
-test('Ankünfte kommen verteilt: Mindestabstand, im Fenster, sortiert', () => {
-  const mk = (ts) => ts.map((t, i) => ({ id: i + 1, arriveAt: t }));
-  // genug Platz: voller Mindestabstand
-  const a = sim.spreadArrivals(mk([10, 10.2, 10.4, 30]), 10, 60, 3);
-  assert.deepEqual(a.map((b) => b.arriveAt), [10, 13, 16, 30]);
-  // Pulk am Ende rückt nach vorn auf, nichts liegt hinter dem Fenster
-  const b = sim.spreadArrivals(mk([58, 59, 59.5, 60]), 10, 60, 3);
-  assert.deepEqual(b.map((x) => x.arriveAt), [51, 54, 57, 60]);
-  // zu viele Boote für den Abstand: gleichmäßig kleiner, weiter im Fenster
-  const c = sim.spreadArrivals(mk(Array(40).fill(20)), 10, 60, 3);
-  for (let i = 1; i < c.length; i++) assert.ok(c[i].arriveAt - c[i - 1].arriveAt >= 1.1);
-  assert.ok(c[0].arriveAt >= 10 && c.at(-1).arriveAt <= 60);
-  // ohne Mindestabstand bleibt alles, wie es ist
-  assert.deepEqual(sim.spreadArrivals(mk([5, 5]), 0, 10, 0).map((x) => x.arriveAt), [5, 5]);
+test('Ankünfte unregelmäßig im Fenster: Mindestabstand, kein Takt, ganzes Fenster', () => {
+  const mk = (n) => Array.from({ length: n }, (_, i) => ({ id: i + 1 }));
+  const r = { arrivalMinGap: 3, arrivalMaxGap: 8 };
+  let x = 12345;
+  const rnd = () => ((x = (x * 1103515245 + 12345) >>> 0) / 4294967296);
+  // viele Boote: Abstände zwischen 3 und 8 s, verschieden, im Fenster
+  const a = sim.placeArrivals(mk(17), 4.5, 85.5, r, rnd).map((b) => b.arriveAt);
+  const d = a.slice(1).map((t, i) => t - a[i]);
+  assert.ok(d.every((g) => g >= 2.95 && g <= 8.05), `Abstände ${d}`);
+  assert.ok(new Set(d.map((g) => Math.round(g))).size >= 3, `zu gleichmäßig: ${d}`);
+  assert.ok(a[0] >= 4.5 && a[0] <= 12.5 && a.at(-1) <= 85.5, `Fenster ${a}`);
+  // wenige Boote: gestreckt über den Tag, kein Loch nur am Ende
+  const b = sim.placeArrivals(mk(4), 4.5, 85.5, r, rnd).map((y) => y.arriveAt);
+  assert.ok(b.at(-1) - b[0] >= 30, `zu eng: ${b}`);
+  // zu viele Boote für den Mindestabstand: gleichmäßig kleiner, im Fenster
+  const c = sim.placeArrivals(mk(40), 10, 60, r, rnd).map((y) => y.arriveAt);
+  for (let i = 1; i < c.length; i++) assert.ok(c[i] - c[i - 1] >= 1.1);
+  assert.ok(c[0] >= 10 && c.at(-1) <= 60);
 });
 
 test('Ein ganzer Tag: kein Boot kommt weniger als 1 Sekunde nach dem vorigen, Herkunft je Boot verschieden', () => {
