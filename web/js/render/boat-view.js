@@ -720,7 +720,8 @@ export function init(game) {
     const cam = game.camera?.camera;
     let h = sp.userData.h;
     if (cam?.isOrthographicCamera) h *= (cam.top - cam.bottom) / (cam.zoom || 1);
-    else h *= 2;
+    // Perspektive mit sizeAttenuation false: Bildhöhe (NDC 2) entspricht 2 / projectionMatrix[5]
+    else if (cam) h *= 2 / (cam.projectionMatrix.elements[5] || 1);
     sp.scale.set(h * sp.userData.seiten, h, 1);
   }
   function zeigeBetrag(id, d) {
@@ -750,12 +751,14 @@ export function init(game) {
     sp.position.copy(pos).add(new THREE.Vector3(0, 0.9, 0));
     // Nicht über einen anderen Betrag legen: so lange eine Zeile höher, bis auf dem Bildschirm Platz ist
     const cam = game.camera?.camera;
-    if (cam?.isOrthographicCamera) {
+    if (cam) {
       // Lage und Größe in Bildschirmkoordinaten (-1 bis 1); Sprites sind unten mittig verankert
-      const z = cam.zoom || 1;
+      const z = cam.zoom || 1, pm = cam.projectionMatrix.elements;
       const box = (b) => {
         const v = b.position.clone().project(cam);
-        return { x: v.x, y: v.y, w: (b.scale.x * 2 * z) / (cam.right - cam.left), h: (b.scale.y * 2 * z) / (cam.top - cam.bottom) };
+        return cam.isOrthographicCamera
+          ? { x: v.x, y: v.y, w: (b.scale.x * 2 * z) / (cam.right - cam.left), h: (b.scale.y * 2 * z) / (cam.top - cam.bottom) }
+          : { x: v.x, y: v.y, w: b.scale.x * pm[0], h: b.scale.y * pm[5] };
       };
       for (let k = 0; k < 8; k++) {
         const a = box(sp);
