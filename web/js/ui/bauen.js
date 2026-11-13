@@ -790,8 +790,26 @@ export function init(game) {
       meldung ? el('p', { class: 'card-note', role: 'status' }, meldung) : null,
       tabs,
       el('div', { class: 'bau-liste' }, zeilen.length ? zeilen : el('p', { class: 'bau-leer' }, reiter === 'steg' ? 'Gerade gibt es keinen freien Bauplatz für Stege. Die nächste Ausbaustufe bringt neue.' : 'Hier ist gerade nichts zu bauen.')),
+      reiter === 'hafen' ? automatikSchalter() : null,
       el('div', { class: 'card-actions' }, el('button', { type: 'button', class: 'hud-btn', onclick: schliessen }, 'Schließen')),
     );
+  }
+
+  // Hafenleitstelle (Roadmap P02, E5): Automatik je Größenklasse an oder aus. XL und größer sind
+  // immer Sonderfälle und bleiben ohnehin beim Spieler.
+  function automatikSchalter() {
+    const sim = game.sim;
+    const st = sim?.state;
+    if (!st) return null;
+    if (!sim.setBueroAutomatik || st.office < sim.ctx.rules.office.autoAssign) return null;
+    return el('div', { class: 'bau-automatik', role: 'group', 'aria-label': 'Automatik der Hafenleitstelle je Größe' },
+      el('span', { class: 'bau-automatik-titel' }, 'Leitstelle weist zu'),
+      ...['S', 'M', 'L'].map((k) => {
+        const an = sim.bueroAutomatik(k);
+        return el('button', { type: 'button', class: 'bau-schalter', 'aria-pressed': an ? 'true' : 'false',
+          title: an ? `Größe ${k}: Das Büro weist zu. Tippen: selbst zuweisen` : `Größe ${k}: Du weist selbst zu. Tippen: Büro übernimmt`,
+          onclick: () => { sim.setBueroAutomatik(k, !an); zeichne(); } }, `${k} ${an ? 'an' : 'aus'}`);
+      }));
   }
 
   function zeichneVorschau(e, geld) {
@@ -919,6 +937,11 @@ function stil() {
     .bau-rat { display: grid; gap: 2px; text-align: left; border: 0; border-radius: 12px; padding: 10px 12px;
       background: #e8f4ee; color: #1d3245; font: inherit; font-size: 0.92rem; line-height: 1.3; cursor: pointer; }
     .bau-tipp-titel { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #2a7d63; }
+    .bau-automatik { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+    .bau-automatik-titel { font-weight: 600; margin-right: 4px; }
+    .bau-automatik .bau-schalter { flex: 0 0 auto; min-width: 64px; min-height: 40px; padding: 6px 10px; border: 2px solid #1d3245;
+      border-radius: 6px; background: #2a9d8f; color: #fff; font-weight: 600; }
+    .bau-automatik .bau-schalter[aria-pressed="false"] { background: #eee6d2; color: #5b6670; }
     .bau-reiter { display: flex; gap: 2px; background: rgba(29, 50, 69, 0.07); border-radius: 12px; padding: 4px; }
     .bau-tab { flex: 1 1 auto; min-width: 0; white-space: nowrap; border: 0; border-radius: 9px; background: none; font: inherit; font-size: 0.8rem; font-weight: 600; color: #1d3245;
       min-height: 38px; padding: 4px 6px; display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
