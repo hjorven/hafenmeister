@@ -3,7 +3,7 @@
 // Eine einzige große Fläche mit einem schlanken Shader, dazu eine kleine Tiefentextur.
 // Kein Spiegeln, keine Brechung: läuft auch auf schwachen Handys.
 import * as THREE from 'three';
-import { punkt, BEREICH, PLAN_M } from './gelaende.js';
+import { punkt, BEREICH, KERN, PLAN_M } from './gelaende.js';
 
 const U = PLAN_M;
 const TIEFE_MAX = 8;   // Meter, die in der Textur abgebildet werden
@@ -13,17 +13,33 @@ export function baueTiefentextur(region, stufe, schritt) {
   const nx = Math.ceil((BEREICH.x1 - BEREICH.x0) / schritt) + 1;
   const ny = Math.ceil((BEREICH.y1 - BEREICH.y0) / schritt) + 1;
   const daten = new Uint8Array(nx * ny * 4);
+  // Außerhalb des Kerns nur jedes zweite Texel rechnen, die übrigen danach aus den Nachbarn mitteln
+  const imKern = (px, py) => px >= KERN.x0 - schritt && px <= KERN.x1 + schritt && py >= KERN.y0 - schritt && py <= KERN.y1 + schritt;
+  const offen = [];
   for (let j = 0; j < ny; j++) {
     // Zeile 0 liegt im Süden (kleines py), passend zu uv.y = (z0 - z) / Tiefe der Fläche
     const py = BEREICH.y0 + j * schritt;
     for (let i = 0; i < nx; i++) {
       const px = BEREICH.x0 + i * schritt;
-      const p = punkt(px, py, stufe, region);
       const k = (j * nx + i) * 4;
-      daten[k] = Math.round(Math.min(1, Math.max(0, -p.h) / TIEFE_MAX) * 255);
-      daten[k + 1] = Math.round(p.see * 255);
-      daten[k + 2] = 0;
       daten[k + 3] = 255;
+      if ((i & 1 || j & 1) && i < nx - 1 && j < ny - 1 && !imKern(px, py)) { offen.push(i, j); continue; }
+      const p = punkt(px, py, stufe, region);
+      // Im Binnensee zeigt die Farbe höchstens das Band unter 3 m: ausgebaggerte Becken und Rinnen
+      // sollen nicht als dunkle Rechtecke quer über den See stehen (die echte Tiefe bleibt in punkt())
+      const t = Math.max(0, Math.min(1, (p.see - 0.3) / 0.6));
+      const deckel = 2.95 + 10 * t * t * (3 - 2 * t);
+      daten[k] = Math.round(Math.min(1, Math.min(deckel, Math.max(0, -p.h)) / TIEFE_MAX) * 255);
+      daten[k + 1] = Math.round(p.see * 255);
+    }
+  }
+  for (let n = 0; n < offen.length; n += 2) {
+    const i = offen[n], j = offen[n + 1];
+    // gerade Nachbarn: links/rechts bzw. unten/oben bzw. die vier Ecken
+    const i0 = i & 1 ? i - 1 : i, i1 = i & 1 ? i + 1 : i, j0 = j & 1 ? j - 1 : j, j1 = j & 1 ? j + 1 : j;
+    const k = (j * nx + i) * 4;
+    for (const c of [0, 1]) {
+      daten[k + c] = (daten[(j0 * nx + i0) * 4 + c] + daten[(j0 * nx + i1) * 4 + c] + daten[(j1 * nx + i0) * 4 + c] + daten[(j1 * nx + i1) * 4 + c] + 2) >> 2;
     }
   }
   const tex = new THREE.DataTexture(daten, nx, ny, THREE.RGBAFormat);

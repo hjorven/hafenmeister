@@ -16,7 +16,11 @@ import { anlagenFlaechen } from '../../data/anlagen-flaechen.js';
 export const PLAN_M = 0.62;
 
 /** Bereich, für den das Gelände fein berechnet wird (Planeinheiten). */
-export const BEREICH = { x0: -420, x1: 430, y0: -200, y1: 470 };
+// Fein gerechnetes Gelände und Tiefentextur. Breit genug, dass der Übergang zum groben Außenring
+// auch bei größter Kamerabreite am Ost- und Westrand nicht als harte Kante zu sehen ist.
+export const BEREICH = { x0: -640, x1: 660, y0: -440, y1: 640 };
+/** Kernbereich für dichte Bepflanzung (wie vor der Verbreiterung, damit nicht mehr Bäume gezeichnet werden). */
+export const KERN = { x0: -420, x1: 430, y0: -200, y1: 470 };
 
 /** Planeinheiten -> Weltmeter. */
 export function ausPlan(px, py) {
@@ -336,6 +340,33 @@ function seeInsel(F, px, py, h, typ, stufe, region) {
   return { h, typ };
 }
 
+/**
+ * Inseln, Sandplaten und Felsen der Form vor der Küste (in der offenen See, im Blick vom Hafen).
+ * Ab Stufe 5 baggert der Ausbau alles weg, was in Außenhafen, Rinne oder Liegewanne liegt.
+ */
+function seeAussen(F, px, py, h, typ, stufe) {
+  for (const i of F.seeAussen || []) {
+    const dx = (px - i.x) / i.rx, dy = (py - i.y) / i.ry;
+    const e = Math.sqrt(dx * dx + dy * dy) * (0.9 + 0.2 * rauschen(px / 10, py / 10, 91));
+    if (e >= 1.7) continue;
+    let frei = 1;
+    if (stufe >= 5) frei = smooth(0, 20, Math.min(polyAbstand(px, py, AUSSENHAFEN), polyAbstand(px, py, RINNE5)));
+    if (stufe >= 6) frei = Math.min(frei, smooth(0, 40, polyAbstand(px, py, PIERWANNE6)));
+    if (frei <= 0) continue;
+    if (e < 1) {
+      const innen = 1 - e;
+      const hh = i.art === 'sandplate' ? 0.08 + innen * 0.5 : i.art === 'fels' ? 0.3 + innen * 4.5 : 0.15 + innen * 2.2;
+      const t = i.art === 'fels' ? (e > 0.75 ? 'steinschuettung' : 'fels') : e > 0.7 || i.art === 'sandplate' ? 'sand' : innen > 0.55 ? 'duenengras' : 'sand';
+      const ziel = frei >= 1 ? hh : h + (hh - h) * frei;
+      if (ziel > h) { h = ziel; typ = ziel > 0 ? t : 'wasser'; }
+    } else if (h < 0) {
+      // flacher, heller Saum um Insel und Platen
+      h = Math.max(h, h + (-0.3 - (e - 1) * 2.4 - h) * frei);
+    }
+  }
+  return { h, typ };
+}
+
 /** Leuchttürme der Form in Planeinheiten (auf Land, vom Gelände getragen). */
 export function leuchttuerme() {
   return (gelaendeform().leuchttuerme || []).map(([x, y]) => [x, y]);
@@ -459,10 +490,16 @@ export function punkt(px, py, stufe, region) {
     // Watt vor der Küste, aber ein tiefer Priel vor der Einfahrt und der Reede (um x = 230)
     const watt = Math.max((g.wattBreite || 0) * smooth(95, 135, Math.abs(px - 230)), (F.watt || 0) * smooth(36, 70, Math.abs(px - ENGPASS_X)));
     h = -Math.max(0.2, 5 * (1 - Math.exp(-Math.max(0, dist - watt) / 42)) + 0.6 * wob + (watt ? 0.25 : 0));
-    if (F.watt && dist < watt + 6) {
-      // Watt der Form: flach, fällt bei Niedrigwasser trocken, Rand mit kleinen Prielen
-      const w = -0.15 - 0.35 * fbm(px / 18, py / 10, 51) - 0.6 * smooth(watt - 8, watt + 6, dist);
-      if (watt > 4) { h = Math.max(h, w); typ = 'watt'; }
+    if (watt > 4 && dist < watt + 6) {
+      // Watt (Nordsee oder Form 8): Platen fallen bei Niedrigwasser trocken, dazwischen Priele
+      // Sandplaten liegen knapp über Wasser, Priele klar darunter: kein flacher Dauersaum, der überall schäumt
+      const n = fbm(px / 22, py / 9, 51);
+      const w = 0.12 - 1.1 * smooth(0.5, 0.58, n) - 1.3 * smooth(watt - 10, watt + 4, dist);
+      // ab Stufe 5 ist das Watt vor dem Außenhafen weggebaggert, ab Stufe 6 auch in der Liegewanne
+      let frei = 1;
+      if (stufe >= 5) frei = smooth(0, 24, Math.min(polyAbstand(px, py, AUSSENHAFEN), polyAbstand(px, py, RINNE5)));
+      if (stufe >= 6) frei = Math.min(frei, smooth(0, 40, polyAbstand(px, py, PIERWANNE6)));
+      if (watt > 4 && frei > 0) { h = Math.max(h, h + (w - h) * frei); typ = 'watt'; }
     }
     if (F.riff && px > F.riff.x0 && px < F.riff.x1) {
       const k = 1 - smooth(0, F.riff.breite, Math.abs(py - F.riff.y)) ;
@@ -471,6 +508,7 @@ export function punkt(px, py, stufe, region) {
     // Der Priel vor der Einfahrt ist auch bei Ebbe befahrbar
     if (g.gezeiten) h -= g.gezeiten * (1 - smooth(70, 110, Math.abs(px - 230))) * smooth(0, 25, dist);
     if (typ !== 'watt' || h < -0.6) typ = 'wasser';
+    ({ h, typ } = seeAussen(F, px, py, h, typ, stufe));
   }
 
   // ---------------- Bauprojekte, die Wasser und Land verändern
@@ -486,10 +524,15 @@ export function punkt(px, py, stufe, region) {
     const halb = (DURCHSTICH[1] - DURCHSTICH[0]) / 2;
     const dx = Math.abs(px - ENGPASS_X);
     const fase = Math.max(0, ln + 8 - py);
+    // Zur Beckenseite läuft die Rinne als runde Zunge aus (Höhenlinien sind Bögen), statt mit einer Kante quer zur Fahrt zu enden
+    const zunge = smooth(ln - 50, ln, py + 50 - 50 * Math.min(1, dx / (halb + 24)) ** 2 - 38);
+    const ziel = DURCHSTICH_TIEFE + (g.gezeiten || 0);
     if (py > ln - 12 && py < 236 && dx < halb + fase) {
-      const ziel = DURCHSTICH_TIEFE + (g.gezeiten || 0);
-      if (h > -ziel) { h = -ziel + 0.4 * smooth(halb - 6, halb + fase, dx); }
+      const tief = -ziel + 0.4 * smooth(halb - 6, halb + fase, dx);
+      if (h > tief) h = tief;
       typ = 'wasser';
+    } else if (py > ln - 50 && py <= ln - 12 && dx < halb + 24 && h < 0 && h > -ziel) {
+      h += (-ziel - h) * zunge;
     } else if (py > ln - 4 && py < 226 && dx < halb + fase + 4 && h > -0.5) {
       h = 1.0; typ = 'steinschuettung';
     }

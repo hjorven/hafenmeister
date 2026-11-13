@@ -64,13 +64,20 @@ In jeder Form gleich: Festlandufer und Becken am Hafen, Engpass bei x 178 mit Mo
 
 Welche Form gilt: `?gelaende=N` in der Adresse (nur ansehen), sonst die im Spielstand (`modules.gelaende.nr`), in Tests und ohne Browser Form 1, in einem neuen Spiel eine zufällige. Im Spiel: `game.gelaende.aktuell()`, `game.gelaende.formen`. Eine Form entfernen: ihren Eintrag aus `FORMEN` löschen; Spielstände mit dieser Nummer bekommen Form 1.
 
+### Rand der Karte und Watt
+
+- `KERN` (x -420..430, y -200..470) ist fein gerechnet und dicht bepflanzt; `karteRaster` deckt genau diesen Bereich ab.
+- `BEREICH` (x -640..660, y -440..640) ist der Rand mit halber Auflösung, damit bei größter Kamerabreite keine harte Kante zum groben Außenring zu sehen ist. Die Tiefentextur rechnet dort nur jedes zweite Texel.
+- Watt (Nordsee und Form 8): Sandplaten knapp über Wasser, dazwischen Priele über 0,9 m tief. Kein flacher Dauersaum, der im Wasser-Shader überall schäumt. Ab Stufe 5 vor dem Außenhafen und ab Stufe 6 in der Liegewanne weggebaggert.
+
 ## Abwechslung an Land (Landbild)
 
 Code: `landschaft/vielfalt.js` (reine Rechenfunktionen, Haken `land()` und `nehrung()` in `punkt()`) und `landschaft/bewuchs.js` (Bäume, Knicks, Dorf, Höfe als feste Netze). Die Grundform (Ufer, Fahrwasser, Bauflächen) bleibt unverändert, nur das Land dahinter wechselt.
 
 - **Felder** in langen Schlägen mit Raps, Korn, Acker, Weide und Wiese, getrennt durch **Knicks** (Wallhecken mit einzelnen Eichen) und Feldwege. Felder liegen achsparallel, damit das Geländeraster keine Treppen zeigt. Außerhalb des fein gerechneten Bereichs nur weiche Flecken in ruhigen Grüntönen.
 - **Wald** in Flecken (Buchen, Birken, Kiefern; nahe der See mehr Kiefern), auf der Nehrung stellenweise Kiefernwald und **Heide**.
-- **Dorf** mit Dorfstraße zur Landstraße, Häusern (Reetdach, Backstein, weiß mit rotem Dach), Backsteinkirche mit Turm und einer **Windmühle**, deren Flügel sich drehen. Dazu zwei bis vier **Einzelhöfe** mit Scheune.
+- **Allee** an der Landstraße direkt hinter dem Hafen (südliche Seite; die nördliche ist Baufläche). Sie ist der untere Rand der Startansicht.
+- **Dorf** mit Dorfstraße zur Landstraße, Häusern (Reetdach, Backstein, weiß mit rotem Dach), Backsteinkirche mit Turm und einer **Windmühle**, deren Flügel sich drehen. Das Dorf liegt immer gleich hinter der Landstraße (Nordrand y -100), nur die Ost-West-Lage wechselt; Kirche und Mühle stehen vorn zur Straße hin, damit man sie vom Hafen aus sieht. Dazu zwei bis vier **Einzelhöfe** mit Scheune.
 - **Sölle**: kleine Teiche mit Schilfrand in den Feldern, nur im Hinterland.
 - **Steilufer** an der offenen See (nicht im Hafen, mindestens 40 m von Hafen und Einfahrt), mit Buchenwald auf der Kante und Findlingen am Fuß. Hat die Grundform an einer Stelle selbst Steilufer (`kontext.formSteilufer`), entfällt es.
 - **Hügel** (Endmoräne) im freien Land, nie auf Hafen- und Bauflächen.
@@ -82,7 +89,7 @@ Code: `landschaft/vielfalt.js` (reine Rechenfunktionen, Haken `land()` und `nehr
 
 | Adresse | Was man sieht |
 |---|---|
-| `?landbild=0` | Grundbild: Steilufer im Westen, Dorf im Südwesten |
+| `?landbild=0` | Grundbild: Steilufer im Westen, Dorf links hinter dem Hafen |
 | `?landbild=7` | anderes Dorf, andere Felder und Küsten |
 | `?stufe=3&landbild=12` | Stufe 3 mit Landbild 12 |
 
@@ -149,6 +156,7 @@ So bleibt es schnell (Stand 12.11.2026):
 
 - **Gelände** (`landschaft/netz.js`): Ebene Flächen gleicher Art werden zu großen Dreiecken zusammengefasst. Am Hafen weicht das Netz höchstens 3 cm vom Raster ab, nach außen wächst die Toleranz bis 1,2 m. Kein Riss zwischen groben und feinen Stücken, das prüft `tests/gelaendenetz.test.mjs`.
 - **Bäume, Stämme, Gras, Schilf, Felsen, Molensteine und Buhnen** werden beim Bau einmal zu je einem festen Netz gebacken, statt Tausende Instanzen zu zeichnen. Ecken werden geteilt (Index), Böden von Kegeln, die man nie sieht, fehlen.
+- **Bäume, Knicks, Heide, Gras, Schilf und Dorf** sind zusätzlich in Kacheln von 180 m geteilt (`backeKacheln` in `bewuchs.js`). Three.js lässt so alles außerhalb des Bildes weg; in der Startansicht zeichnet das Handy nur die Bäume, die man sieht. Bäume im groben Außenring haben keinen Stamm und keinen flachen Schatten. Startansicht Stufe 3 (Stand 13.11.2026): Handy etwa 64.000 statt 68.000 Dreiecke, PC 85.000 statt 111.000, Zeichenzeit gleich wie vor dem Landbild.
 - **Baumschatten** sind ein festes Netz; Sonnenrichtung und Länge rechnet der Vertex-Shader, ein neuer Sonnenstand kostet also nichts.
 - **Molen** sind zwei Netze (Schüttung und Weg) statt einzelner Teile je Abschnitt.
 - **Wasser** ist eine einzige Fläche mit kurzem Shader ohne Spiegelung, Zufall ohne `sin()`, Tiefenbänder nur einmal gerechnet.
