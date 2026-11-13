@@ -75,12 +75,38 @@ export function createGame({ canvas, bounds, home }) {
     else if (!document.hidden && pausedByVisibility) { pausedByVisibility = false; game.setPaused(false); }
   });
 
+  // Nur für den Zeitraffer-Test (tools/zeitraffer, docs/zeitraffer.md): ?testtempo=500 läuft
+  // 500-mal so schnell wie 1x. Die Spielzeit eines Bildes wird in Schritte von höchstens
+  // TEST_SCHRITT Sekunden geteilt (so groß wie ein Bild bei 8x), damit Boote und Regeln
+  // dasselbe sehen wie im normalen Spiel. Höchstens TEST_MAX Schritte je Bild, damit die Seite
+  // bedienbar bleibt; reicht die Rechenzeit nicht, läuft das Spiel langsamer als verlangt.
+  // Ohne Parameter ändert sich nichts.
+  const testTempo = Math.min(2000, Math.max(0, Number(new URLSearchParams(location.search).get('testtempo')) || 0));
+  const TEST_SCHRITT = 0.8;
+  const TEST_MAX = 120;
+  game.testTempo = testTempo;
+
   // Zeit aus dem Zeitstempel der Bildschleife (THREE.Clock ist in Three.js 0.187 veraltet und warnt)
   let zuletzt = null;
   renderer.setAnimationLoop((zeit) => {
     const jetzt = Number.isFinite(zeit) ? zeit : performance.now();
-    const raw = zuletzt === null ? 0 : Math.min(Math.max(0, (jetzt - zuletzt) / 1000), 0.1);
+    const delta = zuletzt === null ? 0 : Math.max(0, (jetzt - zuletzt) / 1000);
     zuletzt = jetzt;
+    if (testTempo > 0) {
+      const echt = Math.min(delta, 0.5);
+      let rest = game.paused ? 0 : Math.min(echt * testTempo * game.speed, TEST_SCHRITT * TEST_MAX);
+      const n = Math.max(1, Math.ceil(rest / TEST_SCHRITT));
+      for (let i = 0; i < n; i++) {
+        const dt = rest / (n - i);
+        rest -= dt;
+        game.time += dt;
+        for (const fn of tickers) fn(dt, game);
+      }
+      rig.update(Math.min(echt, 0.1));
+      renderer.render(scene, rig.camera);
+      return;
+    }
+    const raw = Math.min(delta, 0.1);
     const dt = game.paused ? 0 : raw * game.speed;
     game.time += dt;
     rig.update(raw);

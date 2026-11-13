@@ -1380,6 +1380,42 @@ function clearVanishedBerths(state, ctx, from, events) {
 }
 
 /**
+ * Prüfung beim Laden eines Spielstands (save/, bridge.js): Liegt ein Gast in einer Box, die es in
+ * der aktuellen Stufe nicht gibt oder die für ihn zu flach, zu kurz oder zu schmal ist (alter Stand
+ * aus einer Zeit mit anderen Tiefen, Stegbildern oder Regeln), legt er in eine freie passende Box um.
+ * Findet sich keine, reist er ohne Rechnung und ohne Bewertung ab (er hätte nie dort liegen dürfen).
+ * Fest liegende Boote (Dauerlieger, Fischer, Retter) bleiben unberührt, ihre Plätze verwalten die Module.
+ * Gibt die Liste der Änderungen zurück: [{ boatId, from, to }] (to = null: abgereist).
+ */
+export function repairBerths(state, ctx) {
+  const changes = [];
+  const exists = (b) => b && berthAvailable(state, b);
+  for (const boat of mooredBoats(state)) {
+    if (boat.stationed) continue;
+    const berth = ctx.berthById[boat.berthId];
+    if (exists(berth) && fits(boat, berth, ctx.rules, state.stage)) continue;
+    const old = boat.berthId;
+    if (state.berths[old] === boat.id) delete state.berths[old];
+    const to = availableBerths(state, ctx)
+      .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
+      .sort((a, b) => (a.maxLength * a.maxBeam) - (b.maxLength * b.maxBeam) || String(a.id).localeCompare(String(b.id)))[0]?.id ?? null;
+    if (to) {
+      boat.berthId = to;
+      state.berths[to] = boat.id;
+    } else {
+      delete state.boats[boat.id];
+    }
+    changes.push({ boatId: boat.id, from: old, to });
+  }
+  // Einträge in berths, die auf kein liegendes Boot mehr zeigen
+  for (const [id, boatId] of Object.entries(state.berths)) {
+    const b = state.boats[boatId];
+    if (!b || b.berthId !== id) delete state.berths[id];
+  }
+  return changes;
+}
+
+/**
  * Hat die neue Stufe weniger Wartebojen, liegen Boote mit zu hoher Bojennummer an einer Boje, die es
  * nicht mehr gibt. Sie verholen an die kleinste freie Boje ('waitSpotChanged'). Ist keine frei, fahren
  * sie in eine passende freie Box oder, wenn es auch die nicht gibt, ohne Bewertung weiter.
