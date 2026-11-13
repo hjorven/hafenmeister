@@ -74,6 +74,29 @@ test('Keine Wellen: in jeder Stufe, bei Ruf 5 und an Regattatagen mindestens der
   }
 });
 
+test('Kein Fließband: Abstände unregelmäßig, keine lange Lücke bei vollem Tag, kein Loch am Anfang', () => {
+  for (let stufe = 3; stufe <= RULES.maxStage; stufe++) {
+    for (let seed = 1; seed <= 10; seed++) {
+      const s = createState({ seed });
+      s.stage = stufe;
+      s.ratings = Array(RULES.reputation.window).fill(5);
+      s.day = 2;
+      sim.tick(s, ctx, 0);
+      const t = s.upcoming.map((b) => b.arriveAt);
+      if (t.length < 12) continue;
+      const d = t.slice(1).map((x, i) => Math.round((x - t[i]) * 10) / 10);
+      const from = RULES.dayLength * RULES.arrivalFrom;
+      const bis = RULES.dayLength * RULES.arrivalWindow;
+      assert.ok(t[0] - from <= RULES.arrivalMaxGap + 0.05, `Stufe ${stufe}: Loch am Anfang ${t[0]}`);
+      assert.ok(bis - t.at(-1) <= 2 * RULES.arrivalMaxGap, `Stufe ${stufe}: Loch am Ende ${t.at(-1)}`);
+      // Bei weniger Booten als dem Höchstwert werden die Abstände etwas gestreckt
+      assert.ok(Math.max(...d) <= 1.5 * RULES.arrivalMaxGap, `Stufe ${stufe}: Lücke ${d}`);
+      // nicht im Takt: mindestens drei verschiedene Abstände (auf ganze Sekunden) und nicht alle gleich lang
+      assert.ok(new Set(d.map(Math.round)).size >= 3, `Stufe ${stufe}, Seed ${seed}: Takt ${d}`);
+    }
+  }
+});
+
 test('Erster Tag: erstes Boot gleich, die übrigen mit ruhigem Abstand und ohne Gruppe', () => {
   for (let seed = 1; seed <= 20; seed++) {
     const s = createState({ seed });

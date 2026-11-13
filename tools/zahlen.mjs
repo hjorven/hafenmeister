@@ -112,7 +112,7 @@ export function tabellen() {
   t.push('## Zeit', '', tabelle(['Was', 'Wert'], [
     ['Tag / Abend', `${z.tagSekunden} s / ${z.abendSekunden} s`],
     ['Saison / Winter', `${z.saisonTage} / ${z.winterTage} Tage`],
-    ['Ankünfte', `${zahl(z.ankunftVon)} bis ${zahl(z.ankunftBis)} des Tages, Spitze ${zahl(z.ankunftSpitze)}`],
+    ['Ankünfte', `${zahl(z.ankunftVon)} bis ${zahl(z.ankunftBis)} des Tages, Abstand ${zahl(z.ankunftAbstand)} bis ${zahl(z.ankunftAbstandMax)} s, an vollen Tagen ${zahl(z.ankunftDichte)} s im Mittel`],
     ['Abreise', `${zahl(z.abreiseVon)} bis ${zahl(z.abreiseBis)} des Tages`],
     ['Erstes Boot', `nach ${z.erstesBootNach} s`],
     ['Geduld an der Boje', `${E.warten.geduld} s, selbst einfahren nach ${E.warten.selbstEinfahrenNach} s`],

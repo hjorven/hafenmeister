@@ -48,15 +48,17 @@ node --test tests/*.test.mjs
 
 | Stufe | Name | Spieltage | 10 % bis 90 % | davon Sparen auf den Ausbau | Echtzeit 1x | mit Vorspulen |
 |---|---|---|---|---|---|---|
-| 1 | Bootssteg am See | 13 | 13 bis 14 | 6 | 26 min | 16 min |
-| 2 | Dorfhafen am See | 47 | 37 bis 50 | 19 | 1 h 34 min | 59 min |
-| 3 | Durchstich zur Ostsee | 41 | 38 bis 44 | 12 | 1 h 22 min | 51 min |
-| 4 | Marina | 45 | 43 bis 47 | 15 | 1 h 30 min | 56 min |
-| 5 | Küstenmarina | 46 | 43 bis 49 | 12 | 1 h 32 min | 58 min |
-| 6 | Seehafen bis zum Abschluss | 65 | 60 bis 69 | | 2 h 10 min | 1 h 21 min |
-| | **Gesamt** | **256** | 245 bis 266 | | **8 h 32 min** | **5 h 21 min** |
+| 1 | Bootssteg am See | 14 | 12 bis 15 | 4 | 28 min | 18 min |
+| 2 | Dorfhafen am See | 38 | 35 bis 41 | 10 | 1 h 16 min | 48 min |
+| 3 | Durchstich zur Ostsee | 42 | 40 bis 45 | 10 | 1 h 24 min | 53 min |
+| 4 | Marina | 51 | 49 bis 53 | 13 | 1 h 42 min | 1 h 04 min |
+| 5 | Küstenmarina | 61 | 59 bis 63 | 12 | 2 h 02 min | 1 h 16 min |
+| 6 | Seehafen bis zum Abschluss | 52 | 44 bis 56 | | 1 h 44 min | 1 h 05 min |
+| | **Gesamt** | **258** | 249 bis 262 | | **8 h 36 min** | **5 h 23 min** |
 
-**Gemütlicher Spieler** (schaut nur alle 20 Sekunden auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz, kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus): 273 Tage, 9 h 06 min bei 1x, 5 h 40 min mit Vorspulen. Am meisten Zeit verliert er in Stufe 2, weil er dort spät in Versorgung investiert.
+Stand mit unregelmäßigen Ankünften (Abstände 3 bis 8 s, höchstens 20 Boote je Tag): Ab Stufe 4 kommen an vollen Tagen etwas weniger Boote als vorher (bis 27), darum dauern Stufe 4 und 5 je etwa eine Woche länger.
+
+**Gemütlicher Spieler** (schaut nur alle 20 Sekunden auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz, kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus): 266 Tage, 8 h 52 min bei 1x, 5 h 29 min mit Vorspulen. Am meisten Zeit verliert er in Stufe 2, weil er dort spät in Versorgung investiert.
 
 Ungeschicktes Spielen bremst nie stark und blockiert nie. Das passt zu „kein Scheitern“.
 
