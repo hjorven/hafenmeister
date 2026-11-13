@@ -3,7 +3,7 @@
 // Alle wiederholten Dinge werden beim Bau zu wenigen festen Netzen gebacken, damit es auch auf schwachen Handys flüssig bleibt.
 import * as THREE from 'three';
 import { vereinfacheRaster } from './netz.js';
-import { punkt, BEREICH, PLAN_M, molen, buhnen, rauschen, hafenAbstand, suedufer, DURCHSTICH, SLIP, pricken, leuchttuerme } from './gelaende.js';
+import { punkt, BEREICH, KERN, PLAN_M, molen, buhnen, rauschen, hafenAbstand, suedufer, DURCHSTICH, SLIP, pricken, leuchttuerme } from './gelaende.js';
 import { erzeugeLeuchtfeuer } from './tageslicht.js';
 
 const U = PLAN_M;
@@ -217,10 +217,10 @@ function setzePflanzen(region, stufe, q, gruppe, schatten) {
       }
     }
   };
-  baumBereich(BEREICH.x0, BEREICH.x1, BEREICH.y0, BEREICH.y1, 1);
+  baumBereich(KERN.x0, KERN.x1, KERN.y0, KERN.y1, 1);
   // Äußerer Ring nur dünn, damit der Horizont nicht leer ist
   const zelleAlt = zelle;
-  const aussen = [[-1500, BEREICH.x0, -1500, 470], [BEREICH.x1, 1500, -1500, 470], [BEREICH.x0, BEREICH.x1, -1500, BEREICH.y0]];
+  const aussen = [[-1500, KERN.x0, -1500, 1400], [KERN.x1, 1500, -1500, 1400], [KERN.x0, KERN.x1, -1500, KERN.y0]];
   for (const [x0, x1, y0, y1] of aussen) {
     const weit = zelleAlt * (3.2 / Math.max(0.3, menge));
     for (let gy = y0; gy < y1; gy += weit) {
@@ -236,7 +236,7 @@ function setzePflanzen(region, stufe, q, gruppe, schatten) {
   // Dünengras, Salzwiese und Strandhafer als kleine Büschel
   const nGras = Math.round(1400 * menge * pf.duenengras);
   for (let k = 0; k < nGras; k++) {
-    const px = BEREICH.x0 + rnd() * (BEREICH.x1 - BEREICH.x0);
+    const px = KERN.x0 + rnd() * (KERN.x1 - KERN.x0);
     const py = 150 + rnd() * 100;
     const p = punkt(px, py, stufe, region);
     if (!(p.typ === 'duene' || p.typ === 'duenengras' || p.typ === 'salzwiese') || p.h < 0.15) continue;
@@ -248,7 +248,7 @@ function setzePflanzen(region, stufe, q, gruppe, schatten) {
   const nSchilf = Math.round(1800 * menge * pf.schilf);
   const hafenFrei = (px) => !(stufe >= 2 && px > -170 && px < 225) && !(stufe >= 1 && px > -125 && px < -80);
   for (let k = 0; k < nSchilf; k++) {
-    const px = BEREICH.x0 + rnd() * (BEREICH.x1 - BEREICH.x0);
+    const px = KERN.x0 + rnd() * (KERN.x1 - KERN.x0);
     const nord = rnd() < 0.5;
     const py = nord ? 186 - rnd() * 14 : suedufer(px) + rnd() * 14;
     if (rauschen(px / 14, py / 14, 55) < 0.48) continue;
@@ -263,8 +263,8 @@ function setzePflanzen(region, stufe, q, gruppe, schatten) {
   // Felsen und Findlinge
   const nFels = Math.round(500 * menge * pf.findlinge);
   for (let k = 0; k < nFels; k++) {
-    const px = BEREICH.x0 + rnd() * (BEREICH.x1 - BEREICH.x0);
-    const py = BEREICH.y0 + rnd() * (300 - BEREICH.y0);
+    const px = KERN.x0 + rnd() * (KERN.x1 - KERN.x0);
+    const py = KERN.y0 + rnd() * (300 - KERN.y0);
     const p = punkt(px, py, stufe, region);
     const amUfer = p.h > -0.6 && p.h < 0.8;
     if (!(p.typ === 'fels' || (amUfer && rnd() < 0.25))) continue;
@@ -580,12 +580,16 @@ export function baueGelaende(region, stufe, qualitaet, { tiefsterPegel = 0 } = {
   gruppe.name = 'gelaende';
 
   const mat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
-  const innen = new THREE.Mesh(baueNetz(region, stufe, BEREICH.x0, BEREICH.x1, BEREICH.y0, BEREICH.y1, q.raster / U, null, 0, -0.15 + Math.min(0, tiefsterPegel), toleranzNach), mat);
+  const innen = new THREE.Mesh(baueNetz(region, stufe, KERN.x0, KERN.x1, KERN.y0, KERN.y1, q.raster / U, null, 0, -0.15 + Math.min(0, tiefsterPegel), toleranzNach), mat);
   innen.name = 'gelaende-innen';
   innen.receiveShadow = q.schatten;
   gruppe.add(innen);
+  // Rand um den Kern mit halber Auflösung: Küsten und Nehrungsenden bleiben sauber, kostet wenig
+  const rand = new THREE.Mesh(baueNetz(region, stufe, BEREICH.x0, BEREICH.x1, BEREICH.y0, BEREICH.y1, 2 * q.raster / U, KERN, 0.02, -0.15 + Math.min(0, tiefsterPegel), toleranzNach), mat);
+  rand.name = 'gelaende-rand';
+  gruppe.add(rand);
   const s2 = q.aussen / U;
-  const aussen = new THREE.Mesh(baueNetz(region, stufe, -1600, 1600, -1600, 470, s2, BEREICH, 0.05, -0.15 + Math.min(0, tiefsterPegel), toleranzNach), mat);
+  const aussen = new THREE.Mesh(baueNetz(region, stufe, -1600, 1600, -1600, 1400, s2, BEREICH, 0.05, -0.15 + Math.min(0, tiefsterPegel), toleranzNach), mat);
   aussen.name = 'gelaende-aussen';
   gruppe.add(aussen);
 
