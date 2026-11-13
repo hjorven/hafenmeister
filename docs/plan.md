@@ -9,6 +9,7 @@ Stand: 12.11.2026, Version 3, abgeglichen mit `main` nach PR 144. Status: Abschn
 | Dokument | Inhalt |
 |---|---|
 | [roadmap.md](roadmap.md) | Arbeitsliste: was fehlt, was falsch ist, was weg soll, welches Paket es erledigt (Stand 12.11.2026) |
+| [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) | Planung: Stufe 7 bis 20, vom Seehafen zum Hafenverbund (noch nicht im Spiel) |
 | [aenderungen.md](aenderungen.md) | Was ist neu im Spiel, für Spieler |
 | [ui/oberflaeche.md](ui/oberflaeche.md) | Oberfläche und Bedienung auf allen Geräten |
 | [tests.md](tests.md) | Tests, Testmodus und alle Adresszusätze |
@@ -342,6 +343,7 @@ Die Arbeitsliste mit allen Punkten, Paketen und Threads ist die [Roadmap](roadma
 ### Nach 1.0 (Welle 5)
 
 - **Nordsee** mit Deich, Watt und Gezeiten (P57).
+- **Ausbau Stufe 7 bis 20** (Welle 6, P67 bis P82, geplant in [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md)): Der Heimathafen wächst bis Ausbaustufe 9 (Hafenstadt, Fährhafen, Werfthafen), danach übernimmt der Spieler weitere Häfen an Ost- und Nordsee und baut einen Hafenverbund mit Spezialhäfen, Offshore-Hafen, Kreuzfahrthafen, Großseglertreffen und Kanalhafen bis Stufe 20. Nichts davon ist im Spiel.
 - **Online** mit Hafenname, Bestenliste und Gastbooten anderer Spieler (P58), als letzter Schritt, erst alles lokal.
 
 ## 14. Entscheidungen

@@ -21,12 +21,13 @@ bash tests/pruefen.sh
 2. **Grundprobleme:** Danach Welle 1 (Fehler und Fundament) und die Technik-Befunde aus Abschnitt 15.
 3. **Kernschleife und Sichtbarkeit:** Welle 2.
 4. **Extras:** Welle 3 bis 5 (neue Features, Nordsee, Online).
+5. **Ausbau Stufe 7 bis 20:** Welle 6 nach Welle 4 und P57, geplant in [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md); Online bleibt zuletzt.
 
 **Selbstprüfung vor jedem Weiterbauen (Jorven, 12.11.2026):** Bevor ein Thread weiterbaut oder merged, prüft er sein eigenes Feature sehr oft im laufenden Spiel (Handy und PC, alle Stufen, mehrere Stegbilder, alle Wetter, Tag und Nacht, Vorspulen 8x) und mit Randfällen (voller Hafen, leere Bojen, Stufenwechsel mitten im Manöver, Laden eines alten Spielstands). Er schreibt in seinen PR unter **"Randfälle und Berührungspunkte"**, was er geprüft hat und wo sein Feature mit anderen kollidieren kann (Beispiel: neues Stegbild gegen Bootswege, Marinebasis gegen Einfahrt). Berührungspunkte trägt er zusätzlich in die Tabelle in Abschnitt 14 ein.
 
 **Status:** `offen` · `in Arbeit (PR n)` · `erledigt (PR n)` · `Frage` (wartet auf Jorven) · `entfällt`
 
-**Kürzel:** Ü1 bis Ü25 = "25 Vorschläge zur Überarbeitung", F1 bis F42 = "Vorschläge für neue Features" aus dem Überblick. P01 bis P66 = Pakete dieser Roadmap (siehe [Pakete und Reihenfolge](#pakete-und-reihenfolge)). A1 bis Q10 = Detailpunkte aus den Tabs "Mechaniken im Detail" und "Technik und Bedienung" des vollständigen Reviews (Abschnitt 13).
+**Kürzel:** Ü1 bis Ü25 = "25 Vorschläge zur Überarbeitung", F1 bis F42 = "Vorschläge für neue Features" aus dem Überblick. P01 bis P82 = Pakete dieser Roadmap (siehe [Pakete und Reihenfolge](#pakete-und-reihenfolge)). A1 bis Q10 = Detailpunkte aus den Tabs "Mechaniken im Detail" und "Technik und Bedienung" des vollständigen Reviews (Abschnitt 13).
 
 ---
 
@@ -709,6 +710,29 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|
 | P57 | Nordsee mit Gezeiten spielbar machen | Revierfaktoren, Gezeiten, Schleuse, Trockenfallplätze, `docs/regionen.md` | bestehend: "Hafenregionen Ostsee und Nordsee gestalten" |
 | P58 | Online mit Supabase | Hafenname, Bestenliste, Gastboote; erst wenn alles lokal fertig ist | neu, zuletzt |
+
+### Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)
+
+Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen wächst bis Ausbaustufe 9, danach übernimmt der Spieler weitere Häfen und baut einen Hafenverbund bis Stufe 20 auf. Nur Planung: Keine dieser Stufen erscheint in Spiel, Einstieg oder Doku für Spieler, bevor ihr Paket gemergt und am Handy und PC spielbar ist. Online (P58) bleibt trotzdem der letzte Schritt.
+
+| Paket | Titel (Thread) | Inhalt | Startet nach | Thread |
+|---|---|---|---|---|
+| P67 | Stufe-6-Annahmen lösen | `regionDone` an `verbund.abschlussStufe` statt `maxStage`, Grenzen in `vielfalt.js`, Schlüssel 7 bis 9 in `economy.js`, Tests mit Test-Stufe 7; nichts Sichtbares | Welle 2 | neu |
+| P68 | Leistung für große Häfen | Detailstufen für liegende Boote, gesammeltes Zeichnen, Leistungsbudget je Szene (Abschnitt 6.6 des Plans) | P67 | neu (mit Kamera-Thread) |
+| P69 | Bedienung großer Häfen | Zeiger zu wartenden Booten, Sprung zu Stegen | P55, P67 | neu |
+| P70 | Stufe 7 Hafenstadt | Yachthafen Ost (Steg E), Promenade, Belegungsplan je Steg; `harbor.js` Stufe 7, Gelände und Seeds geprüft | P67, P68, P69 | neu |
+| P71 | Stufe 8 Fährhafen | Fähranleger, Inselfähre nach Fahrplan | P70, P66 | neu |
+| P72 | Stufe 9 Werfthafen | Werft mit Schiffslift, großes Winterlager | P71, P20 | neu |
+| P73 | Stufe 10 Hafenverbund und Hafenkarten | `modules.verbund`, `SAVE_VERSION` 3 mit Migration, Übernahme alter Häfen, Kurzrechnung mit Abgleichstest, Standortwechsel | P72, P09 | neu |
+| P74 | Stufe 11 Gästeweitergabe und Törngäste | volle Häfen schicken weiter, Törngäste von Hafen zu Hafen | P73, P32 | neu |
+| P75 | Stufe 12 Hafenprofile | Yacht-, Traditions-, Fischerei-, Familienhafen | P73 | neu |
+| P76 | Stufe 13 Regattawoche | Regattawoche über den Verbund | P75, P24, P39 | neu |
+| P77 | Stufe 14 Nordseehafen | Nordsee-Standort mit Tide aus P57 | P73, P57 | neu |
+| P78 | Stufe 15 Offshore-Hafen | Windpark, Crew-Transfer-Katamarane, Serviceschiff | P77 | neu |
+| P79 | Stufe 16 Kreuzfahrthafen | zweite Pier, Wechselhafen | P73 | neu |
+| P80 | Stufe 17 und 18 Marinehafen und Großseglertreffen | Marinestützpunkt groß, jährliches Großseglertreffen | P79, P75 | neu |
+| P81 | Stufe 19 Kanalhafen | Küstentyp 11 Kanal, Schleuse, Kanalverkehr | P77, P80 | neu |
+| P82 | Stufe 20 Hafenimperium | Abschlussfeier, Endlosspiel über den Verbund, Schlussabgleich `tools/balance.mjs --bis 20` | P81 | neu |
 
 ### Zusätzliche Pakete aus den Detailpunkten
 
