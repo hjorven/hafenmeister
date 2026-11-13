@@ -158,6 +158,8 @@ export async function initBridge(game) {
       }
       // Stufenausbau: ein fest liegendes Boot zieht auf einen neuen Platz um
       if (e.type === 'relocated') game.emit('boot-zugewiesen', { id: e.boatId, platz: e.to, umzug: true });
+      // Stufenausbau mit weniger Bojen: ein wartendes Boot verholt an eine andere Boje
+      if (e.type === 'waitSpotChanged') game.emit('boot:boje', { id: e.boatId, boje: e.waitSpot });
       // Tagestörn eines Gastes: gleiche Ereignisse wie die Runde der Dauerlieger
       if (e.type === 'tripOut') game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: 0, gast: true });
       if (e.type === 'tripBack') game.emit('dauer:einlaufen', { id: e.boatId, platzId: e.berthId, gast: true });
