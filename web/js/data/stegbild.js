@@ -124,6 +124,8 @@ export function init(game) {
   };
   merken();
   game.on?.('ready', merken);
+  // Der Spielstand entsteht erst nach 'ready' (js/bridge.js); jeder neue Stand meldet zuerst 'stufe'
+  game.on?.('stufe', merken);
   game.on?.('spielstand-geladen', (neu) => {
     const nr = neu?.modules?.stegbild?.nr;
     if (aktiv.quelle === 'url' || !gueltig(nr) || nr === aktiv.nr) { merken(); return; }

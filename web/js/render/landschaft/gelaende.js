@@ -11,7 +11,7 @@
 
 import * as vielfalt from './vielfalt.js';
 import { gelaendeform, natur, beiFormwechsel } from './formen.js';
-import { SEE_NORD, WELT, BEREICH, HAFENWASSER12, RUNDE12 } from './natur.js';
+import { SEE_NORD, WELT, BEREICH, KAIFLAECHE, wasserBedarf, stegUfer } from './natur.js';
 import { anlagenFlaechen } from '../../data/anlagen-flaechen.js';
 
 export const PLAN_M = 0.62;
@@ -211,7 +211,7 @@ export function pricken(stufe) {
       const px = seegattAchse(py) + s * hw * 0.82;
       // Pricken nur, wo das Wasser flach ist (in tiefem, offenem Wasser braucht die Rinne keine Markierung)
       const q = N.probe(px, py);
-      if (q.L < 0 && q.d > -60 && !(q.offenAbstand < 1 && q.d < -30)) out.push([px, py]);
+      if (q.L < 0 && q.d > -36 && !(q.offenAbstand < 1 && q.d < -30)) out.push([px, py]);
     }
   }
   return out;
@@ -278,11 +278,11 @@ function baggern(h, px, py, poly, tiefe, rand = 10) {
  * Wie baggern, gräbt aber auch Land ab: Der Hafen wächst ins Gelände. Wo vorher Land war,
  * entsteht innen eine steile, befestigte Kante (Steinschüttung) statt eines langen Hangs.
  */
-function graben(h, px, py, poly, tiefe, rand = 10) {
+function graben(h, px, py, poly, tiefe, rand = 10, kante = 7) {
   if (h < 0) return baggern(h, px, py, poly, tiefe, rand);
   const d = polyAbstand(px, py, poly);
   if (d >= 0) return h;
-  return Math.min(h, -tiefe * smooth(0, 7, -d) - 0.3);
+  return Math.min(h, -tiefe * smooth(0, kante, -d) - 0.3);
 }
 
 /** Abstand zu einem achsparallelen Rechteck { x0, x1, y0, y1 } (negativ innen). */
@@ -293,7 +293,7 @@ function kastenAbstand(px, py, k) {
 
 /** Abstand zum Pflichtwasser der Landschaft (vor den Stegen, Zufahrt, vor der Einfahrt), negativ darin. */
 function pflichtAbstand(px, py, N) {
-  return Math.min(kastenAbstand(px, py, { ...HAFENWASSER12, y0: 0 }), kastenAbstand(px, py, RUNDE12), kastenAbstand(px, py, SEE_NORD), abstandZuLinie(px, py, N.route.punkte) - N.route.halb);
+  return Math.min(wasserBedarf(px, py), kastenAbstand(px, py, SEE_NORD), abstandZuLinie(px, py, N.route.punkte) - N.route.halb);
 }
 
 function abstandZuLinie(px, py, pts) {
@@ -308,16 +308,18 @@ function abstandZuLinie(px, py, pts) {
 }
 
 // Becken: zum Durchstich hin so breit wie der Durchstich, damit kein Engpass hinter dem Engpass entsteht.
-const BECKEN3 = [[-12, 6], [150, 6], [204, 120], [210, 176], [146, 176], [112, 128], [40, 112], [-12, 96]];
-const BECKEN4 = [[-22, 6], [202, 6], [212, 96], [210, 176], [146, 176], [118, 150], [20, 152], [-22, 120]];
-const BECKEN4_WEST = [[-84, 6], [-22, 6], [-22, 124], [-84, 112]];
+const BECKEN3 = [[-12, 0], [150, 0], [204, 120], [210, 176], [146, 176], [112, 128], [40, 112], [-12, 96]];
+const BECKEN4 = [[-22, 0], [202, 0], [212, 96], [210, 176], [146, 176], [118, 174], [20, 178], [-22, 168]];
+const BECKEN4_WEST = [[-84, 0], [-22, 0], [-22, 124], [-84, 112]];
 const RINNE34 = [[152, 232], [204, 232], [240, 360], [180, 360]];
 const AUSSENHAFEN = [[0, 226], [206, 226], [214, 280], [192, 302], [96, 320], [18, 312], [-8, 282]];
 const RINNE5 = [[112, 304], [194, 300], [216, 360], [136, 360]];
 // Hafenbecken: überall zwischen den Stegen mindestens so tief, dass die größte Klasse der Stufe
 // von der Rinne bis vor jede Box kommt (Stufe 1-2: M 1,7 m, ab Stufe 3: L 2,4 m, jeweils mit Reserve).
 const HAFENBECKEN12 = [[-160, 14], [60, 14], [60, 150], [-160, 150]];
-const HAFENBECKEN3 = [[-150, 9], [208, 9], [214, 100], [204, 172], [60, 180], [-80, 168], [-150, 120]];
+const HAFENBECKEN3 = [[-150, 0], [208, 0], [214, 100], [204, 172], [60, 180], [-80, 168], [-150, 120]];
+// Stufe 6: Liegeplatz der Barkasse östlich der Kaifläche (services.js barkasse, Wege in besuchswege.js)
+const BARKASSE6 = [[200, 0], [252, 0], [252, 150], [226, 178], [200, 178]];
 // Stufe 1 und 2: natürliche Rinne im See vor und hinter dem Seegatt (Mittellinie, halbe Breite)
 const SEEGATT_RINNE = { y0: 110, y1: 300, halb: 14 };
 // Stufe 6: Liegewanne an der Grossschiffspier westlich der Westmole (wie skripte/konzeptbilder/hafen_von_oben.py)
@@ -351,15 +353,17 @@ export function punkt(px, py, stufe, region) {
   const seeOffen = q.L < 0 ? 1 - smooth(0, 60, q.offenAbstand) : 0;
   const see = seeOffen;
   const hafenAb = hafenAbstand(px, py);
+  // Ab Stufe 3 wird die Kaifläche aufgeschüttet, auch wo die Natur dort eine Bucht hatte
+  const kai = stufe >= 3 && px >= KAIFLAECHE.x0 && px <= KAIFLAECHE.x1 && py <= Math.min(KAIFLAECHE.y1, stegUfer(px)) && py > KAIFLAECHE.y0;
   let h, typ;
 
-  if (q.L >= 0) {
+  if (q.L >= 0 || kai) {
     // ---------------- Land
     const d = Math.max(0, q.d);
     // offene Küsten haben breite Sandstrände, Lagunen und Flüsse schmale
     const offenNah = 1 - smooth(20, 90, q.offenAbstand);
     const sandBreite = (g.strandBreite + 4 * Math.sin(px / 23)) * (0.55 + 0.75 * offenNah);
-    if (stufe >= 3 && px >= -150 && px <= 202 && py <= 6 && py > -92) {
+    if (kai) {
       h = 1.2; typ = 'pflaster';
       if (py < -13) typ = 'gras';
     } else {
@@ -464,7 +468,7 @@ export function punkt(px, py, stufe, region) {
   if (stufe <= 2 && h < 0 && py < 160) h = baggern(h, px, py, HAFENBECKEN12, 1.9, 8);
   if (stufe >= 3) {
     const vorher = h;
-    if (py > 6 || h < 0) {
+    if (py > 6 || h < 0 || (py > stegUfer(px) && px >= -150 && px <= 208)) {
       h = graben(h, px, py, HAFENBECKEN3, 2.6, 30);
       h = graben(h, px, py, stufe >= 4 ? BECKEN4 : BECKEN3, 3.5 + 0.4 * wob, 14);
       if (stufe >= 4) h = graben(h, px, py, BECKEN4_WEST, 2.6, 12);
@@ -495,7 +499,12 @@ export function punkt(px, py, stufe, region) {
       // Kai zwischen Hafenbecken und Außenhafen (trägt Seenotretter und Museumshafen)
       if (px > -4 && px <= 150.5 && py > 196 && py <= 229) { h = 1.3; typ = 'pflaster'; }
     }
-    if (stufe >= 6) { const v6 = h; h = graben(h, px, py, PIERWANNE6, 8.5, 40); if (v6 >= 0 && h < 0) typ = 'wasser'; }
+    if (stufe >= 6) {
+      const v6 = h;
+      h = graben(h, px, py, PIERWANNE6, 8.5, 40, 2);
+      if (py > 6) h = graben(h, px, py, BARKASSE6, 2.4, 10);
+      if (v6 >= 0 && h < 0) typ = 'wasser';
+    }
   } else if (py > SEEGATT_RINNE.y0 && py < SEEGATT_RINNE.y1) {
     // Natürliches Seegatt durch die Nehrung: Rinne mit flachen Rändern, an den Enden Sandhaken.
     // Vor und hinter der Nehrung läuft die Rinne trichterförmig aus und geht in See und Binnensee über.

@@ -170,6 +170,25 @@ export function spielRect(f = gelaendeform()) {
   return rechteckM({ x0: Math.max(x0, WELT.x0), x1: Math.min(x1, WELT.x1), y0: Math.max(y0, WELT.y0), y1: Math.min(y1, WELT.y1) });
 }
 
+/**
+ * Startansicht in Weltmetern: Stege der Stufe und das Ufer links und rechts davon, so weit, dass man den
+ * Küstentyp erkennt (Landzungen, Fluss, Nehrung, Kliffs gleich neben dem Hafen). Beim Inselhafen bis
+ * hinter den Sund, damit man sieht, dass der Ort auf einer Insel liegt. Die Kamera passt ihn ein.
+ */
+export function startRect(stufe = 1, f = gelaendeform()) {
+  const x0 = stufe >= 5 ? -420 : -330, x1 = stufe >= 5 ? 420 : stufe >= 3 ? 380 : 330;
+  const y1 = stufe >= 5 ? 380 : stufe >= 3 ? 320 : 260;
+  let y0 = -120;
+  // Wasser hinter dem Ort (Sund, Fluss, Bodden): bis dahin zeigen, höchstens 450 Planeinheiten weit
+  const L = f.natur?.landig;
+  if (L) {
+    for (let y = -130; y >= -450; y -= 10) {
+      if ([-120, 0, 120].every((x) => L(x, y) < 0)) { y0 = y - 50; break; }
+    }
+  }
+  return rechteckM({ x0, x1, y0, y1 });
+}
+
 /** Modul für js/main.js (MODULES): Nummer im Spielstand festhalten, game.gelaende bereitstellen. */
 export function init(game) {
   const merken = () => {
@@ -181,6 +200,8 @@ export function init(game) {
   };
   merken();
   game.on?.('ready', merken);
+  // Der Spielstand entsteht erst nach 'ready' (js/bridge.js); jeder neue Stand meldet zuerst 'stufe'
+  game.on?.('stufe', merken);
   game.on?.('spielstand-geladen', (neu) => {
     const nr = neu?.modules?.gelaende?.nr, gseed = seedGueltig(neu?.modules?.gelaende?.seed) ? neu.modules.gelaende.seed : 1;
     if (aktiv.quelle === 'url' || !gueltig(nr) || (nr === form.nr && gseed === form.seed)) { merken(); return; }
@@ -197,5 +218,6 @@ export function init(game) {
     spielRect: () => spielRect(form),
     anzahl: FORMEN.length, formen: FORMEN.map(({ nr, name, idee }) => ({ nr, name, idee })),
     blickRect: (opt) => blickRect(form, opt),
+    startRect: (stufe = game.state?.stage ?? 1) => startRect(stufe, form),
   };
 }

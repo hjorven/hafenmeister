@@ -337,6 +337,31 @@ function abstandStrecke(px, py, a, b) {
   return Math.hypot(px - qx, py - qy);
 }
 
+/**
+ * Wo das Dorf in dieser Landschaft wirklich liegt: an der Wunschstelle des Geländebilds, wenn dort Land ist,
+ * sonst an der nächsten Stelle hinter dem Hafen mit genug festem Boden (Fluss, Bodden, Sund und Lagune
+ * gehen vor). Findet sich keine, gibt es kein Dorf (weit weg), nur Höfe.
+ */
+let _ort = null, _ortK = 0, _ortV = -1, _ortF = null;
+function dorfOrt() {
+  const f = gelaendeform();
+  if (_ortV === version && _ortF === f) return _ort;
+  _ortV = version; _ortF = f; _ortK++;
+  const R = bild.dorfRadius;
+  const L = f.natur?.landig;
+  const fest = (x, y) => !L || (L(x, y) > R * 0.6 + 12 && [0, 1, 2, 3, 4, 5, 6, 7].every((i) => L(x + R * Math.cos(i * Math.PI / 4), y + R * Math.sin(i * Math.PI / 4)) > 6));
+  const wunsch = bild.dorf.px;
+  const xs = [wunsch, ...DORF_X.filter((x) => x !== wunsch).sort((a, b) => Math.abs(a - wunsch) - Math.abs(b - wunsch))];
+  _ort = { px: 1e6, py: 1e6, nordrand: DORF_NORDRAND };
+  suche: for (const extra of [0, 50, 110]) {
+    for (const x of xs) {
+      const y = DORF_NORDRAND - extra - R;
+      if (fest(x, y)) { _ort = { px: x, py: y, nordrand: DORF_NORDRAND - extra }; break suche; }
+    }
+  }
+  return _ort;
+}
+
 let _dorf = null, _dorfV = -1;
 /**
  * Plan des Dorfes: Dorfstraße zur Landstraße, Kirche am Anger, Häuser beidseits der Straße.
@@ -344,9 +369,10 @@ let _dorf = null, _dorfV = -1;
  * Ob ein Haus wirklich steht (Land, nicht auf Wegen), prüft bewuchs.js mit dem fertigen Gelände.
  */
 export function dorfPlan() {
-  if (_dorfV === version) return _dorf;
+  const ort = dorfOrt();
+  if (_dorfV === _ortK) return _dorf;
   const r = zufallAus(bild.seed + 77);
-  const { px: cx, py: cy } = bild.dorf;
+  const { px: cx, py: cy } = ort;
   const R = bild.dorfRadius;
   // Dorfstraße: von der Landstraße durch die Mitte des Dorfes hindurch
   const [qx, qy] = naechsterPunktAufStrecke(cx, cy, LANDSTRASSE);
@@ -384,28 +410,31 @@ export function dorfPlan() {
   // Kirche und Mühle stehen vorn an der Landstraße, damit man sie vom Hafen aus sieht
   // (Startansicht am PC reicht bis etwa y -110). Kirche geostet: lange Achse Ost-West, Turm im Westen.
   const seiteK = r() < 0.5 ? -1 : 1;
-  const kirche = { px: cx + seiteK * 20, py: DORF_NORDRAND - 9, dreh: Math.PI / 2 };
-  const muehle = { px: cx - seiteK * R * 0.72, py: DORF_NORDRAND - 10 };
+  const kirche = { px: cx + seiteK * 20, py: ort.nordrand - 9, dreh: Math.PI / 2 };
+  const muehle = { px: cx - seiteK * R * 0.72, py: ort.nordrand - 10 };
   _dorf = { mitte: [cx, cy], radius: R, strassen, haeuser, kirche, muehle };
-  _dorfV = version;
+  _dorfV = _ortK;
   return _dorf;
 }
 
 let _hoefe = null, _hoefeV = -1;
 /** Einzelhöfe in den Feldern: Wohnhaus, Scheune, ein paar Bäume. Planeinheiten. */
 export function hoefe() {
-  if (_hoefeV === version) return _hoefe;
+  const ort = dorfOrt();
+  if (_hoefeV === _ortK) return _hoefe;
   const r = zufallAus(bild.seed + 91);
+  const L = gelaendeform().natur?.landig;
   const out = [];
   for (let i = 0; i < 60 && out.length < bild.hoefe; i++) {
     const px = -400 + r() * 800, py = -195 + r() * 90;
-    if (Math.hypot(px - bild.dorf.px, py - bild.dorf.py) < bild.dorfRadius + 40) continue;
+    if (Math.hypot(px - ort.px, py - ort.py) < bild.dorfRadius + 40) continue;
+    if (L && L(px, py) < 24) continue;   // nicht am Wasser (Fluss, Bodden, Sund)
     if (out.some((h) => Math.hypot(h.px - px, h.py - py) < 90)) continue;
     if (abstandStrecke(px, py, ...LANDSTRASSE) < 14) continue;
     out.push({ px, py, dreh: bild.feld.dreh + (r() < 0.5 ? 0 : Math.PI / 2), art: r() < 0.5 ? 'reet' : 'backstein' });
   }
   _hoefe = out;
-  _hoefeV = version;
+  _hoefeV = _ortK;
   return out;
 }
 
@@ -477,7 +506,8 @@ export function land(px, py, h, typ, d, k = {}) {
   if (seeM < 45 && kSeite === 'kliff') art = 'wald';   // Buchenwald auf der Kliffkante
 
   // ---- Dorf und Höfe (ebener Boden, Dorfstraßen als Weg)
-  const dd = Math.hypot(px - bild.dorf.px, py - bild.dorf.py);
+  const ort = dorfOrt();
+  const dd = Math.hypot(px - ort.px, py - ort.py);
   if (dd < bild.dorfRadius + 14) {
     const plan = dorfPlan();
     for (const [a, b] of plan.strassen) {

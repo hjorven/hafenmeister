@@ -59,3 +59,24 @@ test('Bildschirmfotos', async ({ game }, testInfo) => {
   fs.writeFileSync(path.join(dir, `${name}-weit.png`), weit);
   await testInfo.attach(`${name}-weit`, { body: weit, contentType: 'image/png' });
 });
+
+test('Erstes Spiel ohne Speicherplatzwahl hat Küste und Stegbild im Spielstand', async ({ game }) => {
+  // Der Spielstand entsteht erst nach 'ready'; Küste {nr, seed} und Stegbild müssen trotzdem drinstehen,
+  // sonst bekommt ein exportierter Stand auf einem anderen Gerät eine andere Küste.
+  const { page } = game;
+  // Der Spielstand entsteht erst nach dem Laden aller Module (js/bridge.js)
+  await page.waitForFunction(() => !!window.hafenmeister?.state?.modules, null, { timeout: 20000 });
+  const r = await page.evaluate(() => {
+    const G = window.hafenmeister;
+    G.spielstand?.speichern?.();
+    const gespeichert = Object.keys(localStorage).map((k) => localStorage.getItem(k) ?? '')
+      .filter((v) => v.includes('"modules"'));
+    return { gel: G.state.modules?.gelaende, sb: G.state.modules?.stegbild, aktuell: G.gelaende.aktuell(), gespeichert };
+  });
+  expect(Number.isInteger(r.gel?.nr), 'state.modules.gelaende.nr fehlt').toBe(true);
+  expect(Number.isInteger(r.gel?.seed), 'state.modules.gelaende.seed fehlt').toBe(true);
+  expect(r.gel).toEqual({ nr: r.aktuell.nr, seed: r.aktuell.seed });
+  expect(Number.isInteger(r.sb?.nr), 'state.modules.stegbild.nr fehlt').toBe(true);
+  expect(r.gespeichert.length, 'kein gespeicherter Stand').toBeGreaterThan(0);
+  expect(r.gespeichert.some((v) => /"gelaende":\{"nr":\d+,"seed":\d+\}/.test(v)), 'gespeicherter Stand ohne Küste').toBe(true);
+});
