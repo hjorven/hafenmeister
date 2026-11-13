@@ -217,11 +217,20 @@ test('Im Winter vermietet: bezahlt die ganze nächste Saison und zahlt sie nicht
   const a = bewerberPacht(state, ctx, b);
   assert.equal(a.tage, ctx.rules.seasonDays);
   machDauerplatz(state, ctx, platz, b.id);
-  const geld = state.money;
-  while (sim.season(state, ctx).winter) sim.runDay(state, ctx);
+  // Nur die Saisonpacht zählen: Gästegeld (auch Bojengeld über Nacht) hängt vom Zufall der Ankünfte ab.
+  // Die Pacht beim Vermieten steht schon im heutigen Bericht, sie zählt nicht als zweite Zahlung.
+  let pacht = -(sim.heute(state).details?.pacht?.saison ?? 0);
+  while (sim.season(state, ctx).winter) {
+    sim.runDay(state, ctx);
+    pacht += state.stats.verlauf?.at(-1)?.details?.pacht?.saison ?? 0;
+  }
   assert.equal(dauerState(state).plaetze[platz].pacht, a.summe);
-  // In der Nacht zur neuen Saison keine zweite Pacht für diesen Platz
-  assert.ok(state.money - geld < a.summe);
+  // In der Nacht zur neuen Saison keine zweite Pacht für diesen Platz.
+  // Die anderen Dauerlieger zahlen zum Saisonstart ihre Pacht, dieser Platz nicht noch einmal
+  const andere = Object.entries(dauerState(state).plaetze)
+    .filter(([id, p]) => id !== String(platz) && p.jahr === dauerState(state).plaetze[platz].jahr)
+    .reduce((sum, [, p]) => sum + (p.pacht || 0), 0);
+  assert.equal(pacht - andere, 0, `${pacht} Saisonpacht im Winter, davon ${andere} von anderen Plätzen`);
 });
 
 test('Törn: Platz wird grün, nur Gäste, die rechtzeitig abreisen, passen, Boot kommt zurück', () => {

@@ -220,10 +220,10 @@ export function init(game) {
         ...b.wishes.map((w) => el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`))),
       sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length, sim.bueroAutomatik?.(b.size)),
       vorschlag ? el('p', { class: 'card-hint hm-vorschlag' }, pixelBild('rauteGold', 14), vorschlagText(b, vorschlag)) : null,
-      wert ? el('p', { class: 'card-zahlt' }, `Zahlt etwa ${wert.fee} € pro Nacht${gold.length ? `, am Wunschplatz ${sim.platzWert(b.id, gold[0])?.fee ?? wert.fee} €` : ''}.`) : null,
+      wert ? el('p', { class: 'card-zahlt' }, zahltText(wert.fee, gold.length ? sim.platzWert(b.id, gold[0])?.fee ?? wert.fee : null, gold.length > 0 && gold.length >= fitting.length)) : null,
       el('p', { class: 'card-hint' }, !fitting.length
         ? 'Gerade ist kein passender Platz frei.'
-        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}. Zieh das Boot hin oder ${vorschlag ? 'nimm den Vorschlag an' : 'lass es einfahren'}.`),
+        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length && gold.length >= fitting.length ? 'alle' : gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}. Zieh das Boot hin oder ${vorschlag ? 'nimm den Vorschlag an' : 'lass es einfahren'}.`),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
       el(
         'div',
@@ -609,4 +609,14 @@ export function init(game) {
     if (game.sim?.state) day.dataset.progress = String(Math.round((game.sim.state.clock / (game.sim.ctx.rules.dayLength + game.sim.ctx.rules.eveningLength)) * 100));
   });
   schedule();
+}
+
+/**
+ * Preiszeile der Bootskarte (P10): Grundpreis und Preis am Wunschplatz. Erfüllen alle passenden
+ * freien Plätze den Wunsch, gibt es den Grundpreis gerade nicht, dann steht nur der Wunschpreis da.
+ */
+function zahltText(fee, wunschFee, alleGold) {
+  if (wunschFee == null) return `Zahlt etwa ${fee} € pro Nacht.`;
+  if (alleGold) return `Zahlt ${wunschFee} € pro Nacht.`;
+  return `Zahlt etwa ${fee} € pro Nacht, am Wunschplatz ${wunschFee} €.`;
 }

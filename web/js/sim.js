@@ -604,20 +604,17 @@ export function assign(state, ctx, boatId, berthId, { hand = true } = {}) {
 }
 
 /**
- * Passgenau (Review A6): Die Box ist höchstens rules.snug.share (ein Fünftel) größer als die
- * kleinste Box des Hafens, an die das Boot überhaupt passt. Zählt nur, wenn es in der Stufe
- * verschieden große passende Boxen gibt, sonst gibt es nichts zu entscheiden.
+ * Passgenau (Review A6): Die Box ist höchstens rules.snug.share (ein Fünftel) länger als das
+ * Boot selbst, wie beim Tagesziel "passgenau einweisen". Zählt nur, wenn es im Hafen auch
+ * passende Boxen gibt, die zu groß wären, sonst gibt es nichts zu entscheiden. So ist nicht jede
+ * Box der kleinsten Klasse passgenau: Ein 6,5-m-Boot in der 9-m-Box ist es nicht, ein 8,5-m-Boot schon.
  */
 export function isSnug(state, ctx, boat, berth) {
   const snug = ctx.rules.snug;
-  if (!snug || !berth || !boat) return false;
-  const lengths = availableBerths(state, ctx)
-    .filter((b) => fits(boat, b, ctx.rules, state.stage) && !b.reserved)
-    .map((b) => b.maxLength);
-  if (!lengths.length) return false;
-  const min = Math.min(...lengths);
-  if (Math.max(...lengths) <= min * (1 + snug.share) + 1e-9) return false;
-  return berth.maxLength <= min * (1 + snug.share) + 1e-9;
+  if (!snug || !berth || !boat || !(boat.length > 0)) return false;
+  const limit = boat.length * (1 + snug.share) + 1e-9;
+  if (berth.maxLength > limit) return false;
+  return availableBerths(state, ctx).some((b) => !b.reserved && b.maxLength > limit && fits(boat, b, ctx.rules, state.stage));
 }
 
 /** Platz-Wünsche (zum Beispiel Strom), die dieser Platz für das Boot erfüllt. */
@@ -1070,7 +1067,21 @@ export function patienceLeft(state, ctx, boatId) {
   const b = state.boats[boatId];
   if (!b || b.status !== 'waiting') return 0;
   if (!b.atBuoy) return ctx.rules.queue.patience;
-  return Math.max(0, ctx.rules.queue.patience - (state.clock - b.atBuoySince));
+  return Math.max(0, Math.min(ctx.rules.queue.patience, ctx.rules.queue.patience - (state.clock - patienceFrom(state, ctx, b))));
+}
+
+/**
+ * Ab wann die Geduld eines Boots an der Boje zählt. Wer über Nacht gewartet hat, weiß, dass
+ * morgens Gäste abreisen: Seine Geduld beginnt erst, wenn die Abreisezeit vorbei ist und die
+ * letzten Boote ihre Box freigegeben haben (departWindow, leaveMax). Bis dahin bekommt es
+ * frei werdende Boxen zuerst (selfEnter, autoAssign).
+ */
+export function patienceFrom(state, ctx, b) {
+  const since = b.atBuoySince ?? 0;
+  if (!b.overnight) return since;
+  const r = ctx.rules;
+  const morning = Math.round((r.departWindow?.[1] ?? 0) * r.dayLength + (r.leaveMax ?? 0));
+  return Math.max(since, morning);
 }
 
 /**
@@ -1455,7 +1466,7 @@ function queueStep(state, ctx, events, countPatience) {
     if (!b.atBuoy && state.clock - b.waitingSince >= (queue.approachMax ?? 0)) {
       events.push(...markAtBuoy(state, ctx, id).events);
     }
-    if (countPatience && b.atBuoy && state.clock - b.atBuoySince > queue.patience) turnAway(state, ctx, b, events, 'patience');
+    if (countPatience && b.atBuoy && state.clock - patienceFrom(state, ctx, b) > queue.patience) turnAway(state, ctx, b, events, 'patience');
   }
   // Hafenbüro mit Automatik: wartende Standardfälle bekommen ihren Platz, sobald einer frei wird.
   // Sonderfälle bleiben beim Spieler und fahren erst nach office.special.selfEnterAfter selbst ein.

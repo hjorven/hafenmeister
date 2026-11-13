@@ -675,8 +675,9 @@ test('Tagesrhythmus: Ankünfte ab dem späten Vormittag, Wartende bleiben über 
   assert.equal(t.boats[big.id].status, 'waiting');
   assert.equal(sim.patienceLeft(t, c, big.id), c.rules.queue.patience);
   assert.equal(JSON.stringify(t.ratings), ratings);
-  // Am nächsten Tag läuft die Geduld ab
-  const ev2 = sim.tick(t, c, c.rules.queue.patience + 2);
+  // Am nächsten Tag läuft die Geduld ab, für Bojenlieger erst nach den morgendlichen Abreisen (P10)
+  const ab = sim.patienceFrom(t, c, t.boats[big.id]);
+  const ev2 = sim.tick(t, c, ab + c.rules.queue.patience + 2 - t.clock);
   assert.ok(ev2.some((e) => e.type === 'turnedAway' && e.reason === 'patience'));
 });
 
