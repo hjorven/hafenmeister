@@ -211,7 +211,8 @@ export function werteSaison(state, ctx, events = []) {
   const vorher = rang(e.sterne || 0).titel;
   e.sterne = (e.sterne || 0) + erreicht;
   const nachher = rang(e.sterne).titel;
-  if (belohnung) state.money += belohnung;
+  // Über addIncome, damit die Belohnung im Tagesabschluss als eigene Zeile steht (docs/tagesabschluss.md)
+  if (belohnung) sim.addIncome(state, belohnung, 'saisonziele');
   const eintrag = {
     type: 'seasonEnd', jahr: e.jahr, saison: e.saison, ziele: st.ziele, erreicht, sterne: e.sterne,
     belohnung, rang: nachher, neuerRang: nachher !== vorher ? nachher : null,
