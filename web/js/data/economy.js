@@ -460,6 +460,33 @@ export const ECONOMY = {
     winter:    { wirkung: { winter: true, arrivalFactor: 0.15, visitorFactor: 0.3, serviceIncomeFactor: 0.5 } },
   },
 
+  // ---------------------------------------------------------------- Endlosspiel (P16)
+  // Nach dem Abschluss der Region geht das Spiel weiter: jede Saison neue Saisonziele.
+  // Logik in web/js/features/aufstieg.js, Beschreibung in docs/aufstieg.md.
+  // Gemessen mit tools/balance.mjs --verlauf (geschickter Spieler, Stufe 6 voll ausgebaut):
+  // etwa 45 Gäste und 8.000 € am Tag, Ruf nahe 5, 7 bis 9 Besuche großer Schiffe je Saison.
+  // start = Ziel der ersten Saison, jeSaison = Zuwachs je weitere Saison, max = Obergrenze.
+  // Beginnt das Endlosspiel mitten in der Saison, gelten die Zählziele anteilig für die
+  // restlichen Tage; sind es weniger als mindestTage, beginnen die Ziele mit der nächsten Saison.
+  endlos: {
+    mindestTage: 8,
+    ziele: {
+      gaeste:       { start: 900,    jeSaison: 60,    max: 1300 },
+      ruf:          { start: 4.4,    jeSaison: 0.05,  max: 4.8 },
+      grossschiffe: { start: 5,      jeSaison: 1,     max: 9 },
+      einnahmen:    { start: 150000, jeSaison: 10000, max: 230000 },   // in ungeraden Saisons
+      xl:           { start: 40,     jeSaison: 5,     max: 80 },       // in geraden Saisons
+    },
+    belohnung: { jeZiel: 5000, alleZiele: 10000 },
+    // Rang nach gesammelten Sternen (ein Stern je erreichtem Saisonziel)
+    raenge: [
+      { sterne: 0,  titel: 'Hafenmeister' },
+      { sterne: 4,  titel: 'Leitender Hafenmeister' },
+      { sterne: 10, titel: 'Hafenkapitän' },
+      { sterne: 18, titel: 'Hafendirektor' },
+      { sterne: 28, titel: 'Ehrenhafenmeister' },
+    ],
+  },
 };
 
 export default ECONOMY;
