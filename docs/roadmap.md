@@ -84,7 +84,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Ü15 | Weicher Start: 100 € Startgeld oder geschenktes WC | offen | P17 |
 | Ü16 | Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken | offen | P17 |
 | Ü17 | Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus `data/boats`, spürbare Kapazität | offen | P19 |
-| Ü18 | Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend | offen | P18 |
+| Ü18 | Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend | erledigt (PR 232) | P18 |
 | Ü19 | Winter nutzen: Zeitraffer vor Stufe 4 oder Winterarbeiten (F14) | offen | P20 |
 | Ü20 | Dauerlieger als Entscheidung: Spieler legt fest, welche Boxen Dauerplätze sind (höchstens ein Viertel der Gastboxen), Saisonpacht im Voraus, sichere Einnahme bei Sturm | erledigt (PR 149) | P01 |
 
@@ -164,7 +164,7 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Bestenliste, Online mit Supabase | plan.md 12, README | bauen, als letzter Schritt | P58 |
 | Nordsee mit Gezeiten, Schleuse, Trockenfallplätzen | plan.md 9, regionen.md | bauen, nach der Ostsee | P57 |
 | Revierfaktoren in `regions.js` (Hafengeld, Ankünfte, Startgeld, Schiffshäufigkeit) | regions.js | mit Nordsee bauen | P57 |
-| Bauzeit der Ausbauten, Winter-Bautempo (`bautage`, `winterBautempo`) | economy.js | in P18 nutzen oder löschen | P18 |
+| Bauzeit der Ausbauten, Winter-Bautempo (`bautage`, `winterBautempo`) | economy.js | erledigt (PR 232): `bautage` = Bauabschnitte, `winterBautempo` gelöscht | P18 |
 | `ECONOMY.ereignisse` (Sturm alle 10 Tage, Hafenfest 1.500 €) | economy.js | eine Quelle, Rest löschen | P06 (erledigt) |
 | Gruppen-Ankunft, Wünsche je Bootsart, `feeFactor`, `arrivalWeight` | data/boats/*.js | in die Regeln holen | P19, P32 (Gruppen) |
 | Stammgast bringt Ruf am alten Platz | plan.md 9a | bauen | P25 |
@@ -317,7 +317,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | Zweiter Satz Service-Zahlen (Mischung `mische`) | `data/services.js`, `services/rules.js` | P06 (erledigt) |
 | Alter Rückfall-Speicherweg `hafenmeister.save` mit eigenem Exportformat (alte Stände werden beim Laden einmal übernommen) | `state.js`, `save/storage.js` | P09 (erledigt) |
 | Alle Texte zur Sonne als Vorspul-Griff | `features/einstieg.js` (erledigt, PR 112, P03), `ui/input-pc.js`, `ui/input-touch.js`, `ui/gesten.js`, Doku (erledigt, P07) | P03, P07 |
-| Ungenutzte Felder `bautage`, `winterBautempo`, falls P18 sie nicht nutzt | `economy.js` | P18 |
+| Ungenutzte Felder `bautage`, `winterBautempo`, falls P18 sie nicht nutzt (erledigt, PR 232) | `economy.js` | P18 |
 | Versprechen in Plan und Doku ohne Gegenstück im Spiel (Abschnitt 8) | `plan.md`, `regionen.md`, `README.md` | P08, erledigt (PR 177): als "geplant" mit Paket markiert |
 
 ---
@@ -375,13 +375,13 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| D1 | Ausbau in Bauabschnitten (= Ü18) | offen | P18 |
-| D2 | Über Nacht gebaut: abends Baustelle, morgens fertig | offen | P18 |
+| D1 | Ausbau in Bauabschnitten (= Ü18) | erledigt (PR 232) | P18 |
+| D2 | Über Nacht gebaut: abends Baustelle, morgens fertig | erledigt (PR 232, für die Bauabschnitte des Stufenausbaus) | P18 |
 | D3 | Frühe Stufen kürzen (= Ü16) | offen | P17 |
-| D4 | Wegfallende Plätze regeln (= Ü5), Hinweis im Baumenü | Regel erledigt (PR 143); Daten für den Hinweis liefert `game.sim.stageUpPreview()`, Anzeige im Baumenü offen | P05, P18 |
+| D4 | Wegfallende Plätze regeln (= Ü5), Hinweis im Baumenü | Regel erledigt (PR 143), Hinweis im Baumenü erledigt (PR 232) | P05, P18 |
 | D5 | Zwei Varianten je Steg (viele schmale oder wenige breite Boxen) | offen | P59 |
 | D6 | Boxen umbauen (zwei schmale zu einer breiten) | offen | P59 |
-| D7 | Sparziel anheften, Balken neben dem Geld, Schild am Bauplatz | offen | P18 |
+| D7 | Sparziel anheften, Balken neben dem Geld, Schild am Bauplatz | erledigt (PR 232) | P18 |
 | D8 | Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe | offen | P60 |
 | D9 | Neue Gastplätze in Stufe 6 (Superyacht-Steg oder Stadtkai) | offen | P59 |
 | D10 | Stufenaufstieg feiern (= Ü23) | erledigt (PR 156) | P16 |
@@ -539,7 +539,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Bed P4 | Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf "bis zum nächsten Boot" | erledigt (1x bei Ereignis, Ausbau möglich, Regionsziel; 8x läuft bis zum nächsten Boot) | P07 |
 | Bed P5 | Einstellungen-Seite (Ton und Musik getrennt, Selbst-Einfahren, Bewegung, Schrift, Linkshänder) | erledigt (Ton und Musik über Knopf ins Ton-Fenster mit getrennten Reglern) | P50 |
 | Bed P6 | Farbe nie allein: Form zu Grün-Rot und Gold | erledigt mit Einstellung "Schilder mit Form" (Balken, Stern, Ausrufezeichen) | P50 |
-| Bed P7 | Letzten Kauf zehn Sekunden lang zurücknehmen | offen | P18 |
+| Bed P7 | Letzten Kauf zehn Sekunden lang zurücknehmen | erledigt (PR 232) | P18 |
 | Bed P8 | PC-Tasten für Kassieren und drei Tempostufen, Hilfe zeigt genau die echten Tasten | erledigt (K, F, G, Leertaste; Hilfe angepasst) | P07 |
 | Bed P9 | Stil im Plan festhalten; Rolle der Pixel-Fassung klären | Frage 9; Ist-Stand im Plan festgehalten (PR 177), Entscheidung offen | P08 |
 | Bed P10 | Zeichen am Rand für "hier ist etwas zu tun" | offen | P55 |
