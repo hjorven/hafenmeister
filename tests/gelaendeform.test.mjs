@@ -310,3 +310,39 @@ test('Am Hafen ist der Küstentyp zu sehen: neben den Stegen und in der Nähe un
     assert.ok(sund, `Inselhafen Seed ${seed}: kein Wasser hinter dem Ort`);
   }
 });
+
+test('Reede liegt an der offenen See: wo die Natur sie einschließt, führt ein tiefer Seeweg hinaus', async () => {
+  const { SEE_NORD } = await import('../web/js/render/landschaft/natur.js');
+  const { natur } = await import('../web/js/render/landschaft/formen.js');
+  let mitSeeweg = 0;
+  try {
+    for (const f of FORMEN) {
+      for (const seed of [1, 7, 99]) {
+        formSetzen(f.nr, seed);
+        const N = natur();
+        const wo = `Form ${f.nr} Seed ${seed}`;
+        // Reedebojen und Ankerfelder liegen in der Pflicht-See; deren Mitte gehört zur offenen See
+        const cx = (SEE_NORD.x0 + SEE_NORD.x1) / 2, cy = SEE_NORD.y1 - 80;
+        assert.ok(N.landig(cx, cy) < -50, `${wo}: Reede liegt nicht in weitem Wasser`);
+        // Ein ganz geschlossener Bodden ohne offene See in der Nähe bleibt für sich (Schiffe kommen über den Bodden);
+        // sonst gehört die Reede zur offenen See, nötigenfalls über den Seeweg
+        if (!N.seeweg) continue;
+        assert.equal(N.probe(cx, cy).offenAbstand, 0, `${wo}: Reede ist trotz Seeweg von der offenen See abgeschnitten`);
+        mitSeeweg++;
+        const [[ax, ay], [bx, by]] = N.seeweg.punkte, lang = Math.hypot(bx - ax, by - ay);
+        for (let t = 0; t <= lang - 60; t += 20) {
+          const px = ax + ((bx - ax) * t) / lang, py = ay + ((by - ay) * t) / lang;
+          for (const q of [-40, 0, 40]) {
+            const x = px - ((by - ay) / lang) * q, y = py + ((bx - ax) / lang) * q;
+            assert.ok(N.landig(x, y) < 0, `${wo}: Land im Seeweg bei (${x.toFixed(0)}, ${y.toFixed(0)})`);
+            if (y < 880 && Math.abs(x) < 880) {
+              const h = punkt(x, y, 3, REGIONEN.ostsee).h;
+              assert.ok(h <= -4.2, `${wo}: Seeweg bei (${x.toFixed(0)}, ${y.toFixed(0)}) nur ${(-h).toFixed(1)} m tief`);
+            }
+          }
+        }
+      }
+    }
+  } finally { formSetzen(1, 1); }
+  assert.ok(mitSeeweg >= 2, 'kein Küstentyp mit Seeweg geprüft');
+});

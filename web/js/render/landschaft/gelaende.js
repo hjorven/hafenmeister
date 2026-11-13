@@ -338,9 +338,15 @@ function kastenAbstand(px, py, k) {
   return dx > 0 && dy > 0 ? Math.hypot(dx, dy) : Math.max(dx, dy);
 }
 
+/** Abstand zur Pflicht-See vor der Einfahrt samt Seeweg in die offene See (negativ darin). */
+function seeAbstand(px, py, N) {
+  const k = kastenAbstand(px, py, SEE_NORD);
+  return N.seeweg ? Math.min(k, abstandZuLinie(px, py, N.seeweg.punkte) - N.seeweg.halb) : k;
+}
+
 /** Abstand zum Pflichtwasser der Landschaft (vor den Stegen, Zufahrt, vor der Einfahrt), negativ darin. */
 function pflichtAbstand(px, py, N) {
-  return Math.min(wasserBedarf(px, py), kastenAbstand(px, py, SEE_NORD), abstandZuLinie(px, py, N.route.punkte) - N.route.halb);
+  return Math.min(wasserBedarf(px, py), seeAbstand(px, py, N), abstandZuLinie(px, py, N.route.punkte) - N.route.halb);
 }
 
 function abstandZuLinie(px, py, pts) {
@@ -512,7 +518,7 @@ export function punkt(px, py, stufe, region) {
     // Schilfufer: flacher Saum vor dem Land, in dem das Schilf steht
     if (q.stil.ufer === 'schilf' && dw < 7 && pflichtAbstand(px, py, N) > 4) h = Math.max(h, -0.25 - 0.06 * dw);
     // Mindesttiefe vor der Einfahrt (Reede, Ankerfelder) und in der Zufahrt
-    const reede = smooth(0, -50, kastenAbstand(px, py, SEE_NORD));
+    const reede = smooth(0, -50, seeAbstand(px, py, N));
     if (reede > 0) h = Math.min(h, h + (-4.6 - (g.gezeiten || 0) - h) * reede);
     if (typ !== 'watt' || h < -0.6) typ = h >= 0 ? typ : 'wasser';
   }

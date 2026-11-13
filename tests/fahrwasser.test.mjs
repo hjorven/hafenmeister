@@ -236,6 +236,8 @@ test('Engstelle: Konvoi bis drei, Gegenverkehr wartet, Reihenfolge bleibt', () =
   assert.equal(e.locks.size, 0);
 });
 
+const BAHN_Y_MAX = 560;   // Pflicht-See vor der Einfahrt (natur.js SEE_NORD bis y 600) mit Abstand zum Rand
+
 test('Vorbeifahrer: Bahnen und Runde auf dem Binnensee liegen in jeder Gelaendeform auf Wasser', () => {
   try {
     for (const { nr } of FORMEN) {
@@ -251,6 +253,8 @@ test('Vorbeifahrer: Bahnen und Runde auf dem Binnensee liegen in jeder Gelaendef
               const n = Math.ceil(Math.hypot(bx - ax, by - ay) / 2);
               for (let j = 0; j <= n; j++) {
                 const px = ax + ((bx - ax) * j) / n, py = ay + ((by - ay) * j) / n;
+                // Die alten Bahnen sind nur noch Rückfall ohne Fahrwasserkarte; hinter der Reede ist die See je Küste anders
+                if (py > BAHN_Y_MAX) continue;
                 const t = g.tiefeBei(px * PLAN_M, -py * PLAN_M);
                 assert.ok(t >= soll, `Form ${nr} Stufe ${st} Bahn ${bi} (${b.art}): zu flach bei (${px.toFixed(0)}, ${py.toFixed(0)}), ${t.toFixed(1)} m`);
               }
