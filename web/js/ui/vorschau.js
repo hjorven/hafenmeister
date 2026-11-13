@@ -219,7 +219,8 @@ const CSS = `
 
 #hm-funk { position: absolute; z-index: 14; right: var(--hm-rechts, 12px); top: calc(var(--hm-oben, 12px) + var(--hm-knopf, 48px) + 8px);
   display: flex; flex-direction: column; align-items: stretch; gap: 4px; width: 124px; font-family: var(--hm-pixel); pointer-events: auto; }
-#hm-funk[hidden], body.foto #hm-funk, body.building #hm-funk, body.card-open.hm-schmal #hm-funk { display: none !important; }
+#hm-funk[hidden], body.foto #hm-funk, body.building #hm-funk, body.card-open #hm-funk { display: none !important; }
+#hm-funk.verdeckt { visibility: hidden; pointer-events: none; }
 #hm-funk .hm-funk-kopf { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 30px; padding: 0 6px; font-weight: 600; font-size: 13px; cursor: pointer; }
 #hm-funk .hm-funk-kopf .hm-sym { width: 18px; height: 18px; }
 #hm-funk.zu .hm-funk-liste { display: none; }
@@ -239,7 +240,8 @@ const CSS = `
 @keyframes hm-funk-neu { from { transform: translateX(14px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (max-width: 540px), (max-height: 420px) {
   #hm-funk { width: 84px; }
-  #hm-funk .hm-funk-kopf { min-height: 26px; font-size: 12px; }
+  #hm-funk.verdeckt { visibility: hidden; pointer-events: none; }
+#hm-funk .hm-funk-kopf { min-height: 26px; font-size: 12px; }
   #hm-funk .hm-funk-boot { padding: 4px 3px 3px; gap: 2px; }
   #hm-funk .hm-funk-laenge { display: none; }
 }
@@ -327,7 +329,10 @@ export function init(game) {
 
   // Anlegen: die Spielregeln melden 'moored' und gleich danach 'feeReady' mit den erfüllten Wünschen.
   // Das Boot fährt dann erst noch zur Box; gezeigt wird beim sichtbaren Festmachen ('boat:moored').
-  game.on('sim:moored', (e) => { if (e?.boatId != null) frischAngelegt.add(e.boatId); });
+  game.on('sim:moored', (e) => { if (e?.boatId != null) { frischAngelegt.add(e.boatId); wartereiheWeg(e.boatId); } });
+  // Abgewiesen, weggefahren, an einen anderen Platz geschickt: Wartereihe sofort weg
+  for (const ev of ['sim:turnedAway', 'sim:dismissed', 'sim:selfEntered']) game.on(ev, (e) => wartereiheWeg(e?.boatId));
+  function wartereiheWeg(id) { if (id != null && reihen.get(id)?.art === 'warten') entferneReihe(id); }
   game.on('sim:feeReady', (e) => {
     const id = e?.boatId;
     if (id == null || !frischAngelegt.has(id)) return;   // morgendliches Liegegeld der Bleibenden: keine Anzeige
@@ -348,7 +353,8 @@ export function init(game) {
   function zeigeErgebnis(id) {
     const e = ergebnisse.get(id);
     ergebnisse.delete(id);
-    if (!e) return;
+    // schon abgerechnet (bei hohem Tempo erreicht ein Boot die Box manchmal erst danach): keine Haken mehr
+    if (!e || st()?.boats?.[id]?.status !== 'moored') return;
     entferneReihe(id);
     const node = baueReihe(id, e.wuensche, e.erfuellt);
     node.classList.add('ergebnis');
@@ -386,7 +392,10 @@ export function init(game) {
     const rc = canvas.getBoundingClientRect();
     const rr = ebene.getBoundingClientRect();
     const jetzt = performance.now();
-    for (const [id, r] of reihen) {
+    const belegt = [];      // Rechtecke der schon gesetzten Reihen: keine Reihe deckt eine andere zu
+    // das gewählte Boot zuerst, damit seine Reihe nie verdeckt wird
+    const folge = [...reihen].sort(([a], [b]) => (b === gewaehlt) - (a === gewaehlt));
+    for (const [id, r] of folge) {
       if (r.art === 'ergebnis' && jetzt > r.bis) {
         if (!r.node.classList.contains('weg')) { r.node.classList.add('weg'); r.bis = jetzt + 400; continue; }
         entferneReihe(id);
@@ -396,14 +405,20 @@ export function init(game) {
       if (!a) { entferneReihe(id); continue; }
       const h = Math.max(1.4, (a.model?.userData?.iconHeight ?? (a.info?.length ?? 6) * 0.35) + (r.art === 'ergebnis' ? 1.2 : 0.3));
       const p = projiziere(a, h);
-      const sichtbar = !!p && p.z * rc.width / 2 >= 14 && Math.abs(p.x) < 1.2 && Math.abs(p.y) < 1.2;
+      let sichtbar = !!p && p.z * rc.width / 2 >= 20 && Math.abs(p.x) < 1.2 && Math.abs(p.y) < 1.2;
+      const x = sichtbar ? Math.round(rc.left - rr.left + (p.x + 1) / 2 * rc.width) : 0;
+      const y = sichtbar ? Math.round(rc.top - rr.top + (1 - p.y) / 2 * rc.height) - (r.art === 'ergebnis' ? 22 : 6) : 0;
+      if (sichtbar) {
+        const w = (r.breite ??= r.node.children.length * 30 + 8), h = 34;
+        const box = [x - w / 2, y - h, x + w / 2, y];
+        if (belegt.some((b) => box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1])) sichtbar = false;
+        else belegt.push(box);
+      }
+      r.node.classList.toggle('gewaehlt', id === gewaehlt);
       r.node.style.visibility = sichtbar ? '' : 'hidden';
       if (!sichtbar) continue;
-      const x = Math.round(rc.left - rr.left + (p.x + 1) / 2 * rc.width);
-      const y = Math.round(rc.top - rr.top + (1 - p.y) / 2 * rc.height) - (r.art === 'ergebnis' ? 22 : 6);
       const tr = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
       if (r.pos !== tr) { r.node.style.transform = tr; r.pos = tr; }
-      r.node.classList.toggle('gewaehlt', id === gewaehlt);
     }
   });
 
@@ -472,7 +487,7 @@ export function init(game) {
     funk.hidden = !frei || !!winter;
     if (funk.hidden) { funkSchluessel = ''; return; }
     const daten = funkDaten(s, ctx, sim()?.preview?.() ?? []);
-    const schluessel = JSON.stringify(daten.map((d) => [d.id, d.zeit, d.wuensche]));
+    const schluessel = JSON.stringify([s?.phase, daten.map((d) => [d.id, d.zeit, d.wuensche])]);
     if (schluessel === funkSchluessel) return;
     funkSchluessel = schluessel;
     const vorher = bekannt;
@@ -511,10 +526,22 @@ export function init(game) {
     geplant = true;
     requestAnimationFrame(() => { geplant = false; zeichneFunk(); });
   };
-  for (const ev of ['sim:change', 'sim:arrived', 'sim:dayStart', 'sim:built', 'stufe', 'spielstand-geladen', 'ready', 'resize']) game.on(ev, plane);
+  game.on('sim:arrived', () => zeichneFunk());
+  for (const ev of ['sim:change', 'sim:dayStart', 'sim:built', 'stufe', 'spielstand-geladen', 'ready', 'resize']) game.on(ev, plane);
   // "gleich" und Uhrzeit ändern sich mit der Zeit, auch ohne Ereignis
   let funkT = 0;
-  game.onTick?.((dt) => { funkT += dt; if (funkT > 1) { funkT = 0; plane(); } });
+  game.onTick?.((dt) => { funkT += dt; if (funkT > 1) { funkT = 0; plane(); pruefeVerdeckt(); } });
+  // Einstiegs-Hinweis oder Ereignis-Banner liegen am Handy oft über der Funkspalte: dann tritt der Funk zurück
+  function pruefeVerdeckt() {
+    if (funk.hidden) return;
+    const f = funk.getBoundingClientRect();
+    const ueber = [...document.querySelectorAll('.hm-tipp, #event-banner')].some((x) => {
+      if (x.hidden || getComputedStyle(x).display === 'none' || getComputedStyle(x).visibility === 'hidden') return false;
+      const r = x.getBoundingClientRect();
+      return r.width > 0 && r.left < f.right && r.right > f.left && r.top < f.bottom && r.bottom > f.top;
+    });
+    funk.classList.toggle('verdeckt', ueber);
+  }
   // Handy hochkant: Bootskarte offen -> Funk ausblenden (Klasse hm-schmal)
   const schmal = () => document.body.classList.toggle('hm-schmal', window.innerWidth < 600);
   window.addEventListener('resize', schmal);

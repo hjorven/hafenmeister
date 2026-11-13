@@ -61,13 +61,13 @@ Ein Spieltag dauert 2 Minuten bei normaler Geschwindigkeit: 90 Sekunden Tag, 30 
 **Regeln**
 
 - Ein Boot passt an einen Platz, wenn es nicht länger und nicht breiter ist als der Platz und die Wassertiefe mindestens 0,3 m größer ist als sein Tiefgang. Rechnen muss niemand, es leuchten nur passende Stege.
-- Jedes Boot hat bis zu 3 Wünsche. Heute stehen sie in der Bootskarte; als Symbole über dem Boot sind sie geplant (P11).
+- Jedes Boot hat bis zu 3 Wünsche, als Symbole über dem wartenden Boot; beim Anlegen bekommt jeder erfüllte Wunsch einen Haken, jeder unerfüllte wird grau ([vorschau.md](vorschau.md)).
 - Hafengeld pro Nacht = Grundpreis der Art × (1 + 0,25 × erfüllte Wünsche). Die Zahlen stehen in `web/js/data/economy.js`, Erklärung in [balancing.md](balancing.md).
 - Boote bleiben 1 bis 3 Nächte.
 - Bei der Abreise bewertet jeder Gast mit 1 bis 5 Ankern: alle Wünsche erfüllt ergibt 5, keiner erfüllt ergibt 1, ein Boot ohne Wünsche gibt 4. Fingerplätze geben einen halben Anker extra.
 - **Ruf** ist der Schnitt der letzten 20 Gäste. Bei 1 Anker kommen halb so viele Boote, bei 3 normal viele, bei 5 anderthalbmal so viele.
 - Wer keinen Platz bekommt, fährt weiter und drückt den Ruf leicht.
-- Eine Vorschau zeigt die nächsten 3 Boote (geplant, P11).
+- Ab Hafenbüro Stufe 1 zeigt der Funk die nächsten 3 Boote mit Umriss, Uhrzeit, Länge und Wünschen ([vorschau.md](vorschau.md)).
 
 Die kleine Entscheidung, die das Spiel trägt: Gebe ich den Stirnplatz jetzt der Motoryacht, oder halte ich ihn für den Katamaran frei, der gleich kommt?
 
