@@ -73,7 +73,7 @@ Seegang und Wind für Ereignisse: `game.boatAnim.setSea(0 bis 1)`, `game.boatAni
 - **Start:** Neue Boote beginnen außerhalb des Bildes am Rand des befahrbaren Wassers, verteilt auf mehrere Richtungen (siehe Fahrwasser), an einer Stelle, an der gerade kein anderes Boot ist (`freierStart`). Kommen mehrere zugleich, laufen sie im Abstand von 3 bis 9 s los.
 - **Eine Boje, ein Boot:** Ist die Boje der Spielregeln noch belegt, nimmt das Boot die nächste freie; sind alle belegt, ankert es luvseitig vor der Bojenreihe (`warteplatz`). Boote liegen quer zur Bojenreihe nebeneinander und schwojen nur so weit, wie Platz zur Nachbarboje ist.
 - **Box frei:** Ein zugewiesenes Boot bleibt an der Boje, bis das vorige Boot die Box verlassen hat (`dock(berth, { waitFor })`).
-- **Anlegen:** Kleine Boote brauchen von der Boje zur Box etwa 8 s, beschleunigen zügig und bremsen kräftig ab. Beim Ankommen taucht der Bug kurz ein, jede Leine klickt (`sound` `leine-einrasten`), die Box blitzt einmal hell auf.
+- **Anlegen:** Kleine Boote brauchen von der Boje zur Box etwa 8 s, beschleunigen zügig und bremsen kräftig ab. Beim Ankommen taucht der Bug kurz ein, jede Leine klickt (`sound` `leine-einrasten`), die Box blitzt einmal hell auf (0,9 s in echter Zeit, damit man ihn auch bei 3x und 8x sieht).
 - **Zuweisen:** Passende Plätze leuchten in der Form der Box selbst (`game.stege.highlight`), der eingerastete Platz sonnengelb. Boote lassen sich erst antippen und ziehen, wenn sie an der Boje fest sind.
 
 ## Von See und wieder hinaus
@@ -121,7 +121,7 @@ Bei `dauer:auslaufen` `{ id, platzId, tage }` legt der Dauerlieger ab und fährt
 
 ## Bezahlt-Wimpel
 
-Hat ein Gast sein Liegegeld bezahlt (`game.sim.istBezahlt(id)`), weht am Bug ein Wimpel (gut ein Viertel der Bootslänge, weiß umrandet, über Persenning und Kajüte) an einem Stab, wie das Band oder der Aufkleber, den man im echten Hafen nach dem Bezahlen an den Bugkorb hängt. Die Farbe wechselt jeden Spieltag (Gelb, Blau, Rosa, Orange, Lila, Türkis, Zitronengelb), so sieht man auf einen Blick, wer für heute bezahlt hat. Rot und Grün sind ausgespart, die gehören den Platzschildern. Dauerlieger und Boote an der Boje bekommen keinen Wimpel. Der Wimpel springt beim Bezahlen kurz auf und flattert im Wind (`boat-view.js`, Gruppe `bezahlt-band` am Bootsmodell).
+Hat ein Gast sein Liegegeld bezahlt (`game.sim.istBezahlt(id)`), weht am Bug ein Wimpel (gut ein Viertel der Bootslänge, weiß umrandet, über Persenning und Kajüte) an einem Stab, wie das Band oder der Aufkleber, den man im echten Hafen nach dem Bezahlen an den Bugkorb hängt. Die Farbe wechselt jeden Spieltag (Gelb, Blau, Rosa, Orange, Lila, Türkis, Zitronengelb), so sieht man auf einen Blick, wer für heute bezahlt hat. Rot und Grün sind ausgespart, die gehören den Platzschildern. Dauerlieger und Boote an der Boje bekommen keinen Wimpel. Der Wimpel springt beim Bezahlen kurz auf und flattert im Wind (`boat-view.js`, Gruppe `bezahlt-band` am Bootsmodell). Er erscheint im selben Bild wie das Kassieren. Gäste, die nachts abgerechnet wurden, liegen bis zum Ablegen am Vormittag noch in der Box und behalten ihren Wimpel, wenn sie bezahlt hatten.
 
 ## Fremde Schiffe als Hindernis
 
