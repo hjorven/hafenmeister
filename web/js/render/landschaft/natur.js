@@ -5,12 +5,13 @@
 // Daraus entsteht eine "Landigkeit" L (Planeinheiten, ungefähr Abstand zur Uferlinie): L > 0 Land,
 // L < 0 Wasser. Höhen, Tiefen und Oberflächen rechnet gelaende.js daraus.
 //
-// Fest in jedem Typ (PFLICHT), damit Stege, Liegeplätze, Bojen und Anlagen überall passen:
-//   - der Uferstreifen, an dem die Stege hängen (x -210..70, Ufer wie suedufer),
-//   - Wasser vor den Stegen der Stufen 1 und 2 (x -170..95 bis y 175),
-//   - offenes Wasser nördlich der Einfahrt (x -400..460, y 245..540: Reede, Ankerfelder, Piers),
-//   - eine natürliche Zufahrt von dort zum Hafen (Stufe 1 und 2, ab Stufe 3 gibt es den Durchstich),
-//   - Land für Ort, Straße und Dorf südlich des Hafens (y < -30, |x| < 420).
+// Fest in jedem Typ (BEDARF), damit Stege, Liegeplätze, Bojen und Anlagen überall passen; Pflicht ist nur,
+// was das Spiel wirklich braucht:
+//   - der Uferstreifen, an dem die Stege hängen (STEGSTREIFEN, Ufer wie stegUfer),
+//   - Wasser vor den Stegen und für die Runde der Boote (BEDARF.wasser),
+//   - Land unter Gebäuden, Diensten, Straße und Stegzugängen der Stufen 1 und 2 (BEDARF.land),
+//   - offenes Wasser nördlich der Einfahrt (SEE_NORD: Reede, Ankerfelder, Piers) und die Zufahrt von dort.
+// Neben dem Hafen gestaltet jeder Typ selbst (nah(q), stil.ufer), damit man die Küste schon am Steg erkennt.
 // Alles andere ist frei: der Hafenausbau (gelaende.js) baggert und schüttet in höheren Stufen nach.
 //
 // Reines JavaScript ohne Three.js, damit Tests und Werkzeuge es in Node nutzen können.
