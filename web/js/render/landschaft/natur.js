@@ -282,7 +282,7 @@ function nehrung(r) {
         leuchttuerme: [[tor + 90, ny(tor + 90)]],
       };
     },
-    stil: { marsch: 0.7 },
+    stil: { marsch: 0.7, ufer: 'salzwiese' },
     leuchttuerme: gates.slice(0, 2).map((x) => [x + 80, kn(x + 80)]),
   };
 }
@@ -317,7 +317,7 @@ function offeneBucht(r) {
         ],
       };
     },
-    stil: { steil: zw(r, 9, 14), wald: 0.5 },
+    stil: { steil: zw(r, 9, 14), wald: 0.5, ufer: 'sand' },
     leuchttuerme: [[-tw + 40, tief], [to - 40, tief]],
   };
 }
@@ -346,7 +346,7 @@ function flussmuendung(r) {
         platen: [{ x: fx * 0.6, y: zw(q, 205, 225), rx: zw(q, 120, 180), ry: zw(q, 12, 18), dreh: zw(q, -0.15, 0.15) }],
       };
     },
-    stil: { marsch: 1 },
+    stil: { marsch: 1, ufer: 'schilf' },
     leuchttuerme: [[seite * -420, 220]],
   };
 }
@@ -387,7 +387,7 @@ function bodden(r) {
         ],
       };
     },
-    stil: { marsch: 0.8 },
+    stil: { marsch: 0.8, ufer: 'schilf', tiefe: 0.8 },
     leuchttuerme: [[gx * 0.5 + 90, 1000]],
   };
 }
@@ -419,7 +419,7 @@ function schaeren(r) {
       }
       return { inseln };
     },
-    stil: { felsufer: 26, steil: 5, wald: 0.6 },
+    stil: { felsufer: 26, steil: 5, wald: 0.6, ufer: 'fels' },
     leuchttuerme: [],
     leuchtturmInsel: true,
   };
@@ -447,7 +447,7 @@ function steilkueste(r) {
         inseln: Array.from({ length: 8 }, () => ({ x: vz(q) * zw(q, 200, 600), y: zw(q, 120, 230), rx: zw(q, 4, 9), ry: zw(q, 3, 7), art: 'fels', rau: 0.3 })),
       };
     },
-    stil: { steil: zw(r, 16, 24) },
+    stil: { steil: zw(r, 16, 24), ufer: 'kliff' },
     leuchttuerme: [[-bachX * 0.7, 40]],
   };
 }
@@ -474,7 +474,7 @@ function watt(r) {
         kanaele: [{ punkte: gewunden([[-s * 300, 30], [-s * 260, 120], [-s * 120, 200], [60, 240]], 30, 30, 92), halb: zw(q, 10, 16) }],
       };
     },
-    stil: { watt: zw(r, 220, 360), marsch: 1, deich: true },
+    stil: { watt: zw(r, 220, 360), marsch: 1, deich: true, ufer: 'watt' },
     leuchttuerme: halligen.length ? [[halligen[0].x, halligen[0].y]] : [],
   };
 }
@@ -502,7 +502,7 @@ function foerde(r) {
         ],
       };
     },
-    stil: { steil: zw(r, 8, 12), wald: 1 },
+    stil: { steil: zw(r, 8, 12), wald: 1, ufer: 'wald', tiefe: 1.5 },
     leuchttuerme: [[mitte[mitte.length - 4][0] + 300, mitte[mitte.length - 4][1]]],
   };
 }
@@ -530,7 +530,7 @@ function haken(r) {
         leuchttuerme: [[ende, 200]],
       };
     },
-    stil: { marsch: 0.5 },
+    stil: { marsch: 0.5, ufer: 'sand' },
     leuchttuerme: [[sx * s, yH - 220]],
   };
 }
@@ -549,7 +549,7 @@ function inselhafen(r) {
       { x: -nx * 0.6, y: zw(r, 500, 800), rx: zw(r, 30, 60), ry: zw(r, 20, 40), art: 'fels' },
     ],
     hafen: { x: zw(r, -60, 60), y: 0, dreh: zw(r, -0.5, 0.5) },
-    stil: { steil: 5 },
+    stil: { steil: 5, ufer: 'steine' },
     leuchttuerme: [[rx * 0.85 * (nx > 0 ? 1 : -1), -ry * 0.6]],
   };
 }
