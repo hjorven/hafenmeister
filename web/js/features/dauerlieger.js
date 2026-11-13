@@ -710,15 +710,26 @@ export async function init(game) {
     const L = Math.max(0, ...imBand.filter((r) => (r.l + r.r) / 2 < mitte).map((r) => r.r));
     const R = Math.min(h.width, ...imBand.filter((r) => (r.l + r.r) / 2 >= mitte).map((r) => r.l));
     const luecke = R - L - 2 * rand;
-    const setze = (links, w, top) => Object.assign(hinweis.style, { left: `${Math.round(links)}px`, width: `${Math.round(w)}px`, transform: 'none', top: `${Math.round(top)}px` });
+    // Der Morgen-Zettel des Tagesabschlusses ("Tag 1: + 478 €") bleibt frei: liegt er im Weg, darunter
+    const zettel = [...document.querySelectorAll('.hm-ta-zettel')].filter(sichtbar).map((e) => rechteck(e));
+    const unterZettel = (links, w, top) => {
+      for (const z of zettel) if (z.l < links + w && z.r > links && z.o < top + hinweis.offsetHeight && z.u > top) top = z.u + rand;
+      return top;
+    };
+    const setze = (links, w, top) => Object.assign(hinweis.style, { left: `${Math.round(links)}px`, width: `${Math.round(w)}px`, transform: 'none', top: `${Math.round(unterZettel(links, w, top))}px` });
     // Unten nie über Zeit, Kassieren oder Bauen
     const grenze = (links, w) => Math.min(h.height, ...[...document.querySelectorAll('#hm-zeit, #btn-collect, #btn-build')].filter(sichtbar)
       .map((e) => rechteck(e)).filter((r) => r.r > links && r.l < links + w).map((r) => r.o - rand));
-    const passt = (top, links, w) => top + hinweis.offsetHeight <= grenze(links, w);
+    const passt = (top, links, w) => unterZettel(links, w, top) + hinweis.offsetHeight <= grenze(links, w);
     if (luecke >= Math.min(260, breit)) {
       // Oben in der Lücke zwischen linker Spalte und Funk (PC, Querformat)
       const w = Math.min(breit, luecke);
       setze(L + rand + (luecke - w) / 2, w, oben);
+      // Unter dem Zettel zu wenig Höhe oder dort ein Tipp (Handy quer): warten, außer ein Dauerlieger wartet schon
+      const l = L + rand + (luecke - w) / 2;
+      const t = unterZettel(l, w, oben);
+      const aufTipp = hinder.some((r) => r.tipp && r.l < l + w && r.r > l && r.o < t + hinweis.offsetHeight && r.u > t);
+      if ((!passt(oben, l, w) || aufTipp) && hinweisArt !== 'wartet') hinweis.classList.add('zurueck');
       return;
     }
     // Handy hochkant: unter der linken Spalte, möglichst nicht über einem Tipp
