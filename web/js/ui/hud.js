@@ -281,10 +281,7 @@ export function init(game) {
     }, 1700);
   }
   const flugAktiv = new Map();
-  game.on('sim:collected', (e) => {
-    if (e?.tip) flugtext(e.boatId, `Trinkgeld +${euro(e.tip)}`, true);
-    if (e?.extras) flugtext(e.boatId, `Strom, Wasser, Duschen +${euro(e.extras)}`);
-  });
+  // Trinkgeld und Nebenkosten beim Kassieren zeigt die Münzanzeige in render/boat-view.js (P12)
   game.on('sim:moored', (e) => {
     const sim = game.sim;
     const b = sim?.state?.boats?.[e?.boatId];

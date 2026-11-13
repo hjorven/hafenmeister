@@ -35,3 +35,20 @@ test('Aufstieg: Feier erscheint, Weiter schließt sie und das Spiel läuft weite
   const chronik = await page.evaluate(() => window.hafenmeister.sim.state.modules.aufstieg.stufen);
   expect(chronik.map((s) => s.stufe)).toEqual([1]);
 });
+
+test('Aufstieg: neues Spiel ohne Neuladen schließt eine offene Feier', async ({ game }) => {
+  test.setTimeout(60_000);
+  const { page } = game;
+  await page.waitForFunction(() => !!window.hafenmeister.sim && !!window.hafenmeister.aufstieg, null, { timeout: 15_000 });
+  await page.evaluate(() => {
+    const g = window.hafenmeister;
+    g.einstieg?.beenden?.();
+    if (g.paused) g.setPaused(false);
+    g.aufstieg.zeigeStufe(3);
+  });
+  await expect(page.locator('#hm-feier')).toBeVisible();
+  await page.evaluate(() => window.hafenmeister.sim.newGame(7));
+  await expect(page.locator('#hm-feier')).toBeHidden();
+  expect(await page.evaluate(() => window.hafenmeister.paused), 'Spiel läuft nach dem Schließen weiter').toBe(false);
+  expect(await page.evaluate(() => window.hafenmeister.aufstieg.offen)).toBe(false);
+});

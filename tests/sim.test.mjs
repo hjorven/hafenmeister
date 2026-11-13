@@ -175,25 +175,24 @@ test('Hafengeld wird beim Anlegen fällig: Wünsche, Kapazität der Toilette, St
   assert.equal(sim.collect(s, ctx, yacht.id).ok, false);
 });
 
-test('Wer bleibt, zahlt jeden Morgen die nächste Nacht und gilt bis dahin als unbezahlt', () => {
+test('Wer bleibt, zahlt beim Anlegen alle Nächte; morgens kommt keine neue Münze', () => {
   const s = quietState({ money: 0 });
   const b = waitingBoat(s, { wishes: [], nights: 2 });
   sim.assign(s, ctx, b.id, 'A1');
-  assert.equal(b.pendingFee, 10);
+  assert.equal(b.pendingFee, 20);
   sim.collect(s, ctx, b.id);
   assert.equal(b.paid, true);
   const ev = sim.tick(s, ctx, RULES.dayLength + RULES.eveningLength);
   assert.equal(s.day, 2);
-  assert.ok(ev.some((e) => e.type === 'feeReady' && e.boatId === b.id));
-  assert.equal(b.paid, false);
-  assert.equal(b.pendingFee, 10);
-  // Nicht kassiert: nachts landet die Hälfte in der Kasse des Vertrauens, dann reist das Boot ab
+  assert.ok(!ev.some((e) => e.type === 'feeReady' && e.boatId === b.id));
+  assert.equal(b.paid, true);
+  assert.equal(b.pendingFee, 0);
   sim.tick(s, ctx, RULES.dayLength + RULES.eveningLength);
-  assert.equal(s.money, 15);
+  assert.equal(s.money, 20);
   assert.equal(s.boats[b.id], undefined);
 });
 
-test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gästezahl', () => {
+test('Nacht: liegengebliebene Münzen bringen vier Fünftel, Abreise mit Bewertung, Ruf und Gästezahl', () => {
   const s = quietState({ money: 0 });
   s.facilities.wc = 1;
   const happy = waitingBoat(s, { wishes: ['wc'] });
@@ -207,8 +206,8 @@ test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gäste
   sim.tick(s, ctx, RULES.dayLength);
   sim.collect(s, ctx, happy.id); // 13
   const ev = sim.tick(s, ctx, RULES.eveningLength);
-  // plain und stays je 10, nicht kassiert -> je 5
-  assert.equal(s.money, 13 + 5 + 5);
+  // plain 10, stays 20 (zwei Nächte im Voraus), nicht kassiert -> vier Fünftel: 8 und 16
+  assert.equal(s.money, 13 + 8 + 16);
   const dep = ev.filter((e) => e.type === 'departed');
   assert.deepEqual(dep.map((e) => e.rating), [5, 4]);
   assert.equal(s.guests, 2);
@@ -218,8 +217,8 @@ test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gäste
   assert.equal(s.berths.A3, stays.id);
   assert.equal(s.berths.A1, undefined);
   assert.equal(s.ratings.slice(-2).join(), '5,4');
-  assert.ok(ev.some((e) => e.type === 'dayEnd' && e.income === 23));
-  assert.equal(s.stats.bestDayIncome, 23);
+  assert.ok(ev.some((e) => e.type === 'dayEnd' && e.income === 37));
+  assert.equal(s.stats.bestDayIncome, 37);
 });
 
 test('Ruf: Schnitt der letzten 20, Faktor für Ankünfte', () => {

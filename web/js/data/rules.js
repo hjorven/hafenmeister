@@ -37,7 +37,14 @@ export function rulesFromEconomy(E = ECONOMY) {
   }
   r.nights = [1, 1];   // nur für Bootsarten ohne Klasse in E.klassen
   r.wishBonus = E.wunschBonus ?? 0;
-  r.uncollectedShare = E.kassieren?.nachtsAnteil ?? 0;
+  // Kassieren: Anteil beim Rundgang und nachts, Vorauszahlung, Trinkgeld für den langen Strich
+  const ka = E.kassieren || {};
+  r.roundShare = ka.rundgangAnteil ?? 0;
+  r.uncollectedShare = r.roundShare;
+  r.prepay = ka.vorausNaechte ?? 1;   // höchstens so viele Nächte beim Anlegen auf einmal
+  r.strokeTip = ka.strichTrinkgeld
+    ? { from: ka.strichTrinkgeld.abMuenzen, perCoin: ka.strichTrinkgeld.jeMuenze, max: ka.strichTrinkgeld.hoechstens }
+    : null;
   r.underKeelClearance = E.passregel?.wasserUnterKiel ?? 0;
 
   // Wünsche

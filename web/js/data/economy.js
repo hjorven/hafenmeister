@@ -73,9 +73,16 @@ export const ECONOMY = {
   },
   wunschBonus: 0.25,          // Hafengeld = Grundpreis * (1 + wunschBonus * erfüllte Wünsche)
 
-  // Nicht kassierte Münzen: dieser Anteil landet nachts trotzdem in der Kasse (Kasse des Vertrauens,
-  // abends sammelt der Hafenmeister-Rundgang ihn ein)
-  kassieren: { nachtsAnteil: 0.5 },
+  // Kassieren (P12). Liegegeld wird beim Anlegen fällig. vorausNaechte: Gäste zahlen bis zu so viele
+  // geplante Nächte auf einmal (eine Münze je Aufenthalt, 1 = jede Nacht einzeln). Was der Spieler nicht selbst einstreicht, holt
+  // abends der Hafenmeister auf seinem Rundgang (oder nachts): in die Kasse kommt rundgangAnteil.
+  // strichTrinkgeld: ab abMuenzen Münzen in einem Kassierstrich je Münze ab der Grenze jeMuenze
+  // Trinkgeld auf die eingestrichene Summe, höchstens hoechstens.
+  kassieren: {
+    rundgangAnteil: 0.8,
+    vorausNaechte: 7,
+    strichTrinkgeld: { abMuenzen: 3, jeMuenze: 0.04, hoechstens: 0.2 },
+  },
   // Passregel: so viel Wasser muss unter dem Kiel bleiben (Meter)
   passregel: { wasserUnterKiel: 0.3 },
 
@@ -268,6 +275,7 @@ export const ECONOMY = {
     ] },
   },
 
+  // ---------------------------------------------------------------- Kassieren
   // ---------------------------------------------------------------- Hafenbüro
   // Komfort, keine Einnahmen. Logik bei den Spielregeln (sim.js).
   // allesKassieren: Knopf "Alles kassieren". sofortKassieren: Liegegeld kommt beim Anlegen von
