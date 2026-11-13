@@ -608,6 +608,18 @@ export function init(game) {
     e.anim.dock(b, { route: true, waitFor: () => platzFrei(platz, b, e.anim) });
   }
 
+  // Stufenausbau mit weniger Bojen (Spielregel settleWaitSpots): ein wartendes Boot verholt an eine
+  // andere Boje. Liegt es schon dort (abgleich nach 'stufe' hat es umgesetzt), bleibt es liegen.
+  game.on('boot:boje', ({ id, boje } = {}) => {
+    const e = boats.get(id);
+    if (!e || boje == null) return;
+    e.info = { ...e.info, boje };
+    if (e.faehrt || e.anim.berth?.kind !== 'buoy' && e.anim.state !== 'idle') return;
+    if (e.anim.berth?.id === `boje-${boje}`) return;
+    if (bojenStufe !== stufe()) baueBojen();
+    e.anim.dock(warteplatz(boje, e.anim), { route: true });
+  });
+
   game.on('boot-faehrt', ({ id } = {}) => {
     const e = boats.get(id);
     if (!e) return;

@@ -72,6 +72,9 @@ test('Boot kommt, wird zugewiesen, abends steigt das Geld', async ({ game }, tes
   // 1. Ein Boot liegt an der Boje und erscheint in der Warteliste
   await forwardUntil(page, 'sim.waitingBoats().length > 0', 'ein Boot wartet an der Boje');
   const boatId = await page.evaluate(() => window.hafenmeister.sim.waitingBoats()[0].id);
+  // Festhalten wie ein ausgewähltes Boot: sonst fährt es bei Andrang (Zeit zählt ab Ankunft im Revier)
+  // von selbst in eine Box, bevor es die Boje erreicht. Die Anfahrt vom Kartenrand ist lang (Fahrwasser).
+  await page.evaluate((id) => window.hafenmeister.sim.holdBoat?.(id, true), boatId);
 
   // 2. Boot antippen: in 3D an der Boje (game.boatsVisible) oder in der Warteliste unten
   const in3d = await page.evaluate(() => !!window.hafenmeister.boatsVisible);
