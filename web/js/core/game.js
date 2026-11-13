@@ -75,9 +75,12 @@ export function createGame({ canvas, bounds, home }) {
     else if (!document.hidden && pausedByVisibility) { pausedByVisibility = false; game.setPaused(false); }
   });
 
-  const clock = new THREE.Clock();
-  renderer.setAnimationLoop(() => {
-    const raw = Math.min(clock.getDelta(), 0.1);
+  // Zeit aus dem Zeitstempel der Bildschleife (THREE.Clock ist in Three.js 0.187 veraltet und warnt)
+  let zuletzt = null;
+  renderer.setAnimationLoop((zeit) => {
+    const jetzt = Number.isFinite(zeit) ? zeit : performance.now();
+    const raw = zuletzt === null ? 0 : Math.min(Math.max(0, (jetzt - zuletzt) / 1000), 0.1);
+    zuletzt = jetzt;
     const dt = game.paused ? 0 : raw * game.speed;
     game.time += dt;
     rig.update(raw);
@@ -91,16 +94,24 @@ export function createGame({ canvas, bounds, home }) {
 // Wie viel Bildschirm verdecken die Leisten oben und unten? Nur waagerechte Leisten zaehlen,
 // seitliche (Handy quer) nicht. Hoechstens ein Viertel der Hoehe je Seite.
 function hudInsets(canvas, w, h) {
+  // Die Leisten sind heute durchsichtige Behaelter mit Knoepfen in den Ecken. Es zaehlt nur,
+  // was wirklich ein grosses Stueck der Breite verdeckt: ein sichtbares Kind ab 30 % der Breite
+  // oder eines ueber der Bildmitte. Kleine Eckknoepfe (Handy quer, PC) ueberdecken kaum etwas.
   const c = canvas.getBoundingClientRect();
   let top = 0;
   let bottom = 0;
   for (const id of ['hud-top', 'hud-bottom']) {
     const el = document.getElementById(id);
     if (!el || el.hidden) continue;
-    const r = el.getBoundingClientRect();
-    if (r.width < w * 0.6 || r.height <= 0) continue;
-    if (r.top - c.top < h / 2) top = Math.max(top, r.bottom - c.top);
-    else bottom = Math.max(bottom, c.bottom - r.top);
+    const teile = el.children.length ? [...el.children] : [el];
+    for (const k of teile) {
+      const r = k.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0) continue;
+      const mitte = r.left - c.left < w * 0.55 && r.right - c.left > w * 0.45;
+      if (r.width < w * 0.3 && !mitte) continue;
+      if (r.top - c.top < h / 2) top = Math.max(top, r.bottom - c.top);
+      else bottom = Math.max(bottom, c.bottom - r.top);
+    }
   }
   return [Math.min(top, h / 4), Math.min(bottom, h / 4)];
 }

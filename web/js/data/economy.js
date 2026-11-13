@@ -17,11 +17,17 @@ export const ECONOMY = {
     tagSekunden: 90,        // Tag, Boote laufen ein
     abendSekunden: 30,      // Abend, Kassieren
     saisonTage: 30,         // danach Winter
-    winterTage: 3,          // keine Gäste, Bauprojekte doppelt so schnell
-    winterBautempo: 2,
+    winterTage: 3,          // keine Gäste
+    winterBautempo: 2,      // noch ungenutzt, wie stufen[].ausbau.bautage: Paket P18 nutzt oder löscht beides
+    // Saisontage je Jahreszeit [von, bis]
+    jahreszeiten: { fruehling: [1, 8], sommer: [9, 22], herbst: [23, 30] },
+    erstesBootNach: 3,      // Sekunden: am ersten Tag eines neuen Spiels kommt gleich ein Boot
     // Tagesrhythmus wie im echten Hafen, als Anteile des Tages (0 = Morgen, 1 = Abend):
-    // vormittags legen die Gäste ab, ab Mittag kommen die neuen, die meisten am Nachmittag.
-    ankunftVon: 0.35,       // etwa 11:00
+    // vormittags legen die Gäste ab, neue kommen den ganzen Tag, die meisten am Nachmittag.
+    // Keine Wellen: zwischen zwei Ankünften liegen immer mindestens ankunftAbstand Sekunden. Es kommen
+    // nie mehr Boote, als so ins Fenster passen (81 s / 3 s = 27), auch nicht an Regattatagen.
+    ankunftVon: 0.05,      // etwa 7:15, damit nach dem ersten Boot kein Loch entsteht
+    ankunftAbstand: 3,      // Sekunden Mindestabstand zwischen zwei Ankünften (kleiner, wenn der Tag sonst nicht reicht)
     ankunftBis: 0.95,       // etwa 19:30
     ankunftSpitze: 0.62,    // Schwerpunkt am Nachmittag (etwa 15:30), breit verteilt
     abreiseVon: 0.07,       // etwa 7:30
@@ -39,6 +45,9 @@ export const ECONOMY = {
     plaetze: { 1: 3, 2: 6, 3: 5, 4: 7, 5: 8, 6: 8 },
     selbstEinfahrenNach: 8,   // Sekunden zum Selbstlenken, dann sucht sich das Boot selbst eine freie Box
     ueberNacht: true,         // wer abends noch wartet, bleibt über Nacht an der Boje (ohne Bewertung)
+    anfahrtMax: 35,           // meldet die 3D-Ansicht nichts, gilt ein Boot danach als an der Boje
+    ausBoxMax: 20,            // ein abreisendes Boot gibt seine Box spätestens nach so vielen Sekunden frei
+    vorschau: 3,              // so viele kommende Boote zeigt die Vorschau
   },
 
   // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber
@@ -48,21 +57,22 @@ export const ECONOMY = {
 
   // ---------------------------------------------------------------- Gäste
   klassen: {
-    //      Grundpreis pro Nacht, Nächte [min, max], Anteil Motorboote (nur die wünschen Diesel),
-    //      Anteil Segelboote (Segelmacher, Regatta)
-    S:   { grundpreis: 10,  naechte: [1, 2], motor: 0.35, segel: 0.40 },
-    M:   { grundpreis: 22,  naechte: [1, 3], motor: 0.40, segel: 0.55 },
-    L:   { grundpreis: 45,  naechte: [1, 3], motor: 0.40, segel: 0.55 },
-    XL:  { grundpreis: 120, naechte: [1, 2], motor: 0.50, segel: 0.40 },
-    XXL: { grundpreis: 0,   naechte: [1, 1], motor: 1.00, segel: 0.00 },  // kein Liegegeld, Einnahmen je Besuch (services)
+    //      Grundpreis pro Nacht, Nächte [min, max]. Ob ein Boot Motor- oder Segelboot ist, steht im
+    //      Bootskatalog (data/boats). Gäste bleiben eher länger (Urlaubstörn), dafür kommen weniger
+    //      am Tag: so bleibt der Hafen voll, ohne dass Boote im Sekundentakt einlaufen.
+    S:   { grundpreis: 10,  naechte: [1, 3] },
+    M:   { grundpreis: 22,  naechte: [2, 4] },
+    L:   { grundpreis: 45,  naechte: [2, 5] },
+    XL:  { grundpreis: 120, naechte: [1, 3] },
+    XXL: { grundpreis: 0,   naechte: [1, 1] },  // kein Liegegeld, Einnahmen je Besuch (services)
   },
   wunschBonus: 0.25,          // Hafengeld = Grundpreis * (1 + wunschBonus * erfüllte Wünsche)
 
-  // Sonderfälle innerhalb einer Klasse (Anteil an den Ankünften dieser Klasse)
-  sonderboote: {
-    mehrrumpf: { klasse: 'L', abStufe: 4, anteil: 0.12, braucht: 'stirn' },
-    behoerde:  { klasse: 'L', abStufe: 4, anteil: 0.05, preisFaktor: 0.5, rufBonus: 1 },
-  },
+  // Nicht kassierte Münzen: dieser Anteil landet nachts trotzdem in der Kasse (Kasse des Vertrauens,
+  // abends sammelt der Hafenmeister-Rundgang ihn ein)
+  kassieren: { nachtsAnteil: 0.5 },
+  // Passregel: so viel Wasser muss unter dem Kiel bleiben (Meter)
+  passregel: { wasserUnterKiel: 0.3 },
 
   wuensche: {
     //      ab Stufe, welche Klassen ihn haben können, Bauwerk, das ihn erfüllt
@@ -73,14 +83,14 @@ export const ECONOMY = {
     diesel: { abStufe: 4, klassen: ['S', 'M', 'L', 'XL'], durch: 'diesel', nurMotor: true },
   },
   // Wie viele Wünsche ein Boot hat: [min, max] je Klasse (gekappt auf verfügbare Wünsche)
-  wunschAnzahl: { S: [0, 2], M: [1, 2], L: [1, 3], XL: [2, 3] },
+  wunschAnzahl: { S: [0, 2], M: [1, 2], L: [1, 3], XL: [2, 3], XXL: [0, 0] },
 
   // Platzarten: Strom und Zufriedenheit. Stege ohne Strom bekommen ihn über bauwerke.strom.
   platzarten: {
     box:     { strom: false },
     finger:  { strom: true, rufBonus: 0.5 },   // halber Anker extra
     stirn:   { strom: false },
-    kai:     { strom: true },
+    kai:     { strom: true, nurKlassen: ['XL'], offen: true },   // offen: Sturm trifft ihn
     fischer: { gast: false },                  // fest vergeben, bringt Pacht
     // Stufe 6, Klasse XXL: fest vergeben, Besuche über services (kreuzfahrtterminal,
     // marineanleger, seenotretter), kein Liegegeld
@@ -92,11 +102,13 @@ export const ECONOMY = {
 
   ruf: {
     start: 3,
+    startBewertungen: 5,      // so viele Bewertungen mit start liegen zum Spielbeginn vor
     fenster: 20,              // Schnitt der letzten 20 Bewertungen
+    sondergastBonus: 1,       // Sondergäste (Marine, Behörden, Traditionssegler) geben so viel extra
     ohneWunsch: 4,
-    // Ankünfte = Grundzahl * (0.5 + 0.25 * (Ruf - 1)): 1 Anker 0.5x, 3 Anker 1x, 5 Anker 1.5x
-    ankunftBasis: 0.5,
-    ankunftJeAnker: 0.25,
+    // Ankünfte = Grundzahl * (0.75 + 0.125 * (Ruf - 1)): 1 Anker 0.75x, 3 Anker 1x, 5 Anker 1.25x
+    ankunftBasis: 0.75,
+    ankunftJeAnker: 0.125,
     abgewiesen: { chance: 0.25, wertung: 2.5 },  // wer keinen Platz bekommt, drückt den Ruf leicht
   },
 
@@ -107,9 +119,9 @@ export const ECONOMY = {
   // Gäste fürs Stufenziel.
   dauerlieger: {
     abStufe: 2,
-    pachtAnteil: 0.5,          // Pacht je Saisontag = Anteil des Gastpreises (ohne Wunschbonus)
+    anteilGastpreis: 0.5,      // Pacht je Saisontag = Anteil des Gastpreises (ohne Wunschbonus)
     vorauskasse: true,         // true: Saisonpacht im Voraus (Rest der Saison, dann jede Saison neu);
-                               // false: jeden Abend pachtAnteil des Gastpreises
+                               // false: jeden Abend anteilGastpreis des Gastpreises
     hoechstAnteil: 0.25,       // höchstens ein Viertel der Plätze (fest vergebene zählen nicht)
     tagestoernChance: 0.4,     // je Tag: morgens raus, abends zurück
     toernChance: 0.12,         // je Tag: Törn über mehrere Tage, Platz frei für Gäste
@@ -122,6 +134,22 @@ export const ECONOMY = {
     bewerberTage: 10,          // so lange wartet ein Bewerber auf eine Box
     kuendigungsZuschlag: 0.2,  // sofort kündigen: Pacht der restlichen Tage zurück plus dieser Anteil der Saisonpacht
   },
+  // Stammgäste (features/stammgaeste.js): Anteil der neuen Boote, die Stammgäste sind; ab so vielen
+  // Ankern kommt ein Gast wieder; Länge der Liste; ab diesem Besuch als Dauerlieger zu behalten
+  stammgaeste: { chance: 0.15, abBewertung: 4, maxListe: 40, dauerAbBesuch: 5 },
+  // Tagesziele (features/tagesziele.js): Belohnung je Ziel nach Stufe; Anteil der erwarteten Ankünfte
+  // bzw. des erwarteten Hafengelds als Ziel; "Alle Plätze belegt" nur bis zu so vielen Plätzen;
+  // Größe für "ein großes Schiff unterbringen" je Stufe
+  tagesziele: {
+    belohnung: { 1: 10, 2: 25, 3: 50, 4: 80, 5: 120, 6: 150 },
+    unterbringenAnteil: 0.6, unterbringenMin: 2,
+    kassierenAnteil: 0.6,
+    seglerSoll: { 2: 2, 4: 3 },
+    vollBisPlaetze: 12,
+    groesse: { 3: 'L', 4: 'L', 5: 'XL', 6: 'XL' },
+  },
+  // Besucher an Land (Fahrgastschiff, Kreuzfahrt) geben abends je Stufe von Kiosk/Restaurant so viel aus
+  besucher: { ausgabeJeKioskStufe: 2 },
 
 
   // ---------------------------------------------------------------- Ausbaustufen
@@ -135,20 +163,20 @@ export const ECONOMY = {
       ziel: { gaeste: 20, ruf: 2.5 },
       ausbau: { id: 'dorfhafen', name: 'Dorfhafen am See', kosten: 400, bautage: 0,
         plaetze: ['F01'] } },
-    { stufe: 2, name: 'Dorfhafen am See', ankuenfte: 13, mix: { S: 0.45, M: 0.55 },
-      ziel: { gaeste: 140, ruf: 3.0 },
+    { stufe: 2, name: 'Dorfhafen am See', ankuenfte: 11, mix: { S: 0.45, M: 0.55 },
+      ziel: { gaeste: 120, ruf: 3.0 },
       ausbau: { id: 'durchstich', name: 'Durchstich zur Ostsee', kosten: 5000, bautage: 2,
         plaetze: ['B23', 'B24', 'B25', 'B26', 'F02'] } },
-    { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 22, mix: { S: 0.32, M: 0.40, L: 0.28 },
-      ziel: { gaeste: 480, ruf: 3.5 },
+    { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 16, mix: { S: 0.32, M: 0.40, L: 0.28 },
+      ziel: { gaeste: 360, ruf: 3.5 },
       ausbau: { id: 'marina', name: 'Schwimmsteg D', kosten: 20000, bautage: 2,
         plaetze: ['D01', 'D02', 'D03', 'D04', 'D05', 'D06'] } },
-    { stufe: 4, name: 'Marina', ankuenfte: 30, mix: { S: 0.24, M: 0.34, L: 0.42 },
-      ziel: { gaeste: 800, ruf: 3.8 },
+    { stufe: 4, name: 'Marina', ankuenfte: 18, mix: { S: 0.24, M: 0.34, L: 0.42 },
+      ziel: { gaeste: 560, ruf: 3.8 },
       ausbau: { id: 'aussenhafen', name: 'Außenhafen mit Kai', kosten: 42000, bautage: 3,
         plaetze: ['K01', 'FK01', 'FK02'] } },
-    { stufe: 5, name: 'Küstenmarina', ankuenfte: 32, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
-      ziel: { gaeste: 1200, ruf: 4.2 },
+    { stufe: 5, name: 'Küstenmarina', ankuenfte: 20, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
+      ziel: { gaeste: 840, ruf: 4.2 },
       // Die Pier bringt die Plätze der Großschiffe: Kreuzfahrtpier, Marineanleger, Liegeplatz des
       // Seenotrettungskreuzers. Sie sind fest vergeben, Gastboote legen dort nicht an.
       ausbau: { id: 'grossschiffpier', name: 'Pier für Großschiffe', kosten: 70000, bautage: 4,
@@ -156,7 +184,7 @@ export const ECONOMY = {
     // Stufe 6: Großschiffe (XXL) zahlen kein Liegegeld, sie kommen als Besuche über die Services
     // kreuzfahrtterminal, marineanleger und seenotretter und bringen Geld je Besuch.
     // Keine eigene Zahl für Tagesgäste (Entscheidung Jorven, 11.11.2026).
-    { stufe: 6, name: 'Seehafen', ankuenfte: 32, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
+    { stufe: 6, name: 'Seehafen', ankuenfte: 20, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
       // Abschluss der Region: so viele Besuche großer Schiffe (Kreuzfahrtschiff, Flottenbesuch)
       // in Stufe 6, dieser Ruf und alle Plätze gebaut. Alles davon sieht der Spieler im Hafen.
       ziel: { grossschiffBesuche: 6, ruf: 4.5, allePlaetze: true },
@@ -262,82 +290,172 @@ export const ECONOMY = {
   //   sturmschutz, regatta, hafenfest   schaltet frei bzw. wirkt bei Ereignissen
   // Kein Service hat laufende Kosten (plan.md, Leitlinien: keine laufenden Kosten), unterhalt
   // ist deshalb immer 0.
+  // Services und Sonderanlagen: alle Zahlen hier, Namen, Texte und Lage in data/services.js.
+  // Je Service: abStufe (ab welcher Hafenstufe baubar) und die Ausbaustufen in Reihenfolge, je Stufe
+  // kosten, optional abStufe, ruf (Mindestruf), braucht ([{ id, stufe }]) und wirkung (Felder siehe
+  // data/services.js). sturmschutz ist ein Anteil 0 bis 1.
   services: {
-    // Angebote an Land (docs/echter-hafen.md, C11): bezahlt sich in rund 25 bis 45 Spieltagen
-    baecker: { abStufe: 1, stufen: [
-      { name: 'Brötchenservice', kosten: 80, wirkung: { kunden: { anteil: 0.3, preis: 3 }, ruf: 0.03 } },
-      { name: 'Hafenbäcker', kosten: 3200, abStufe: 3, wirkung: { proTag: 30, kunden: { anteil: 0.4, preis: 3 }, ruf: 0.06 } },
+    bootsverleih: { abStufe: 1, stufen: [   // Bootsverleih
+      // Ruderboote am Strand
+      { kosten: 150, wirkung: { proTag: 8, wetter: { regen: 0.3, sturm: 0 } } },
+      // Tretboote und Kanus
+      { kosten: 900, abStufe: 2, wirkung: { proTag: 25, wetter: { regen: 0.3, sturm: 0 }, ruf: 0.03 } },
+      // SUP- und Jollenverleih
+      { kosten: 2600, abStufe: 3, wirkung: { proTag: 95, wetter: { regen: 0.25, sturm: 0 }, ruf: 0.06, gaeste: { S: 1.05 } } },
     ] },
-    hafencafe: { abStufe: 2, stufen: [
-      { name: 'Hafencafé', kosten: 800, wirkung: { proTag: 18, wetter: { regen: 0.5, sturm: 0.3 }, kunden: { anteil: 0.2, preis: 4 }, ruf: 0.03 } },
-      { name: 'Café mit Terrasse', kosten: 4800, abStufe: 3, wirkung: { proTag: 70, wetter: { regen: 0.4, sturm: 0.2 }, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.06 } },
+    slip: { abStufe: 2, stufen: [   // Slipanlage
+      // Slipanlage
+      { kosten: 700, wirkung: { proTag: 16, wetter: { regen: 0.4, sturm: 0 }, kunden: { anteil: 0.1, preis: 6, nur: { klasse: ['S', 'M'] } }, gaeste: { S: 1.1 } } },
+      // Slip mit Trailerparkplatz
+      { kosten: 1600, abStufe: 3, wirkung: { proTag: 60, wetter: { regen: 0.4, sturm: 0 }, kunden: { anteil: 0.12, preis: 10, nur: { klasse: ['S', 'M'] } }, gaeste: { S: 1.05 } } },
     ] },
-    grillplatz: { abStufe: 2, stufen: [
-      { name: 'Grillplatz', kosten: 400, wirkung: { ruf: 0.05 } },
+    raeucherei: { abStufe: 2, stufen: [   // Räucherei
+      // Räucherkate
+      { kosten: 1200, wirkung: { proTag: 20, kunden: { anteil: 0.15, preis: 4 }, ruf: 0.05 } },
+      // Räucherei mit Fischladen
+      { kosten: 8000, abStufe: 4, wirkung: { proTag: 60, kunden: { anteil: 0.2, preis: 6 }, ruf: 0.08 } },
     ] },
-    fahrradverleih: { abStufe: 3, stufen: [
-      { name: 'Fahrradverleih', kosten: 2000, wirkung: { proTag: 25, wetter: { regen: 0.3, sturm: 0 }, kunden: { anteil: 0.15, preis: 8 } } },
+    fischhalle: { abStufe: 5, stufen: [   // Fischhalle
+      // Fischhalle
+      { kosten: 13500, braucht: [{ id: 'raeucherei', stufe: 1 }], wirkung: { proTag: 60, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.08, besucherFuerVersorgung: 40 } },
+      // Fischhalle mit Fischmarkt
+      { kosten: 16000, wirkung: { proTag: 260, kunden: { anteil: 0.4, preis: 6 }, ruf: 0.12, besucherFuerVersorgung: 90 } },
     ] },
-    eisdiele: { abStufe: 4, stufen: [
-      { name: 'Eisdiele', kosten: 5000, wirkung: { proTag: 90, wetter: { regen: 0.2, sturm: 0 }, kunden: { anteil: 0.25, preis: 3 }, ruf: 0.03 } },
+    baecker: { abStufe: 1, stufen: [   // Bäcker
+      // Brötchenservice
+      { kosten: 80, wirkung: { kunden: { anteil: 0.3, preis: 3 }, ruf: 0.03 } },
+      // Hafenbäcker
+      { kosten: 3200, abStufe: 3, wirkung: { proTag: 30, kunden: { anteil: 0.4, preis: 3 }, ruf: 0.06 } },
     ] },
-    bootsverleih: { abStufe: 1, stufen: [
-      { name: 'Bootsverleih',            kosten: 150,  wirkung: { proTag: 8 } },
-      { name: 'Bootsverleih mit Kanus',  kosten: 900,  abStufe: 2, wirkung: { proTag: 25 } },
+    hafencafe: { abStufe: 2, stufen: [   // Hafencafé
+      // Hafencafé
+      { kosten: 800, wirkung: { proTag: 18, wetter: { regen: 0.5, sturm: 0.3 }, kunden: { anteil: 0.2, preis: 4 }, ruf: 0.03 } },
+      // Café mit Terrasse
+      { kosten: 4800, abStufe: 3, wirkung: { proTag: 70, wetter: { regen: 0.4, sturm: 0.2 }, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.06 } },
     ] },
-    raeucherei: { abStufe: 2, stufen: [
-      { name: 'Räucherkate',             kosten: 1200, wirkung: { proTag: 20, kunden: { anteil: 0.15, preis: 4 } } },
-      { name: 'Fischräucherei',          kosten: 8000, abStufe: 4, wirkung: { proTag: 60, kunden: { anteil: 0.2, preis: 6 } } },
+    grillplatz: { abStufe: 2, stufen: [   // Grillplatz
+      // Grillplatz
+      { kosten: 400, wirkung: { ruf: 0.05 } },
     ] },
-    slip: { abStufe: 2, stufen: [
-      { name: 'Slip',                    kosten: 700,  wirkung: { gaeste: { S: 1.1 }, proTag: 16 } },
+    fahrradverleih: { abStufe: 3, stufen: [   // Fahrradverleih
+      // Fahrradverleih
+      { kosten: 2000, wirkung: { proTag: 25, wetter: { regen: 0.3, sturm: 0 }, kunden: { anteil: 0.15, preis: 8 } } },
     ] },
-    mastenkran: { abStufe: 3, stufen: [
-      { name: 'Mastenkran',              kosten: 4000, wirkung: { gaeste: { M: 1.2 } } },
+    eisdiele: { abStufe: 4, stufen: [   // Eisdiele
+      // Eisdiele
+      { kosten: 5000, wirkung: { proTag: 90, wetter: { regen: 0.2, sturm: 0 }, kunden: { anteil: 0.25, preis: 3 }, ruf: 0.03 } },
     ] },
-    segelclub: { abStufe: 3, stufen: [
-      { name: 'Segelclub',               kosten: 5000, wirkung: { gaeste: { S: 1.2 }, regatta: true } },
-      { name: 'Segelclub mit Jugendabteilung', kosten: 14500, abStufe: 4, wirkung: { gaeste: { S: 1.3, M: 1.05 }, regatta: true } },
+    segelclub: { abStufe: 3, stufen: [   // Segelclub
+      // Segelclub
+      { kosten: 5000, wirkung: { proTag: 20, ruf: 0.08, gaeste: { S: 1.2 }, freischalten: ['regatta'] } },
+      // Segelschule
+      { kosten: 14500, abStufe: 4, wirkung: { proTag: 120, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.12, gaeste: { S: 1.3, M: 1.05 }, freischalten: ['regatta'] } },
+      // Regattaverein
+      { kosten: 15000, abStufe: 4, ruf: 3.8, wirkung: { proTag: 150, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.16, gaeste: { S: 1.15, M: 1.1, L: 1.05 }, freischalten: ['regatta'], regatta: 1.3 } },
     ] },
-    ausruester: { abStufe: 3, stufen: [
-      { name: 'Bootsausrüster',          kosten: 4500, wirkung: { kunden: { anteil: 0.25, preis: 8 } } },
+    mastenkran: { abStufe: 3, stufen: [   // Mastenkran
+      // Mastenkran
+      { kosten: 4000, wirkung: { kunden: { anteil: 0.08, preis: 35, nur: { antrieb: 'segel' } }, gaeste: { M: 1.2 } } },
     ] },
-    seenotretter: { abStufe: 4, stufen: [
-      { name: 'Seenotretter-Station',    kosten: 8000, wirkung: { sturmschutz: true } },
+    ausruester: { abStufe: 3, stufen: [   // Bootsausrüster
+      // Bootsausrüster
+      { kosten: 4500, wirkung: { kunden: { anteil: 0.25, preis: 8 } } },
+      // Yachtausrüster mit Motorenwerkstatt
+      { kosten: 9000, abStufe: 4, wirkung: { kunden: { anteil: 0.25, preis: 24 }, synergie: [{ id: 'travellift', faktor: 1.15 }], ruf: 0.04 } },
     ] },
-    travellift: { abStufe: 4, stufen: [
-      { name: 'Travellift und Werft',    kosten: 12500, wirkung: { proTag: 40, winter: { proTag: 400 } } },
+    travellift: { abStufe: 4, stufen: [   // Travellift und Werft
+      // Bootsschuppen mit Werkstatt
+      { kosten: 12500, braucht: [{ id: 'mastenkran', stufe: 1 }], wirkung: { kunden: { anteil: 0.06, preis: 120 }, winter: { proTag: 400 }, proTag: 40 } },
+      // Travellift
+      { kosten: 14000, wirkung: { kunden: { anteil: 0.08, preis: 170 }, gaeste: { L: 1.1 }, winter: { proTag: 600 } } },
+      // Werfthalle mit Slipwagen
+      { kosten: 26000, ruf: 3.8, wirkung: { kunden: { anteil: 0.1, preis: 190 }, gaeste: { L: 1.12 }, ruf: 0.08, winter: { proTag: 1100 } } },
     ] },
-    winterlager: { abStufe: 4, stufen: [
-      { name: 'Winterlager',             kosten: 10000,  wirkung: { winter: { proTag: 900 } } },
-      { name: 'Große Winterhalle',       kosten: 27000, abStufe: 5, wirkung: { winter: { proTag: 2200 } } },
+    winterlager: { abStufe: 4, stufen: [   // Winterlager
+      // Freilager mit Böcken
+      { kosten: 10000, braucht: [{ id: 'travellift', stufe: 2 }], wirkung: { winter: { proTag: 900 } } },
+      // Winterlagerhalle
+      { kosten: 27000, abStufe: 5, wirkung: { winter: { proTag: 2200 }, ruf: 0.06, gaeste: { L: 1.05 } } },
     ] },
-    segelmacher: { abStufe: 4, stufen: [
-      { name: 'Segelmacher',             kosten: 7500, wirkung: { hafengeld: { segel: 1.15 } } },
+    segelmacher: { abStufe: 4, stufen: [   // Segelmacher
+      // Segelmacherei
+      { kosten: 7500, braucht: [{ id: 'segelclub', stufe: 1 }], wirkung: { kunden: { anteil: 0.07, preis: 90, nur: { antrieb: 'segel' } }, hafengeld: { segel: 1.15 }, synergie: [{ id: 'mastenkran', faktor: 1.2 }] } },
+      // Segelloft
+      { kosten: 11000, abStufe: 5, wirkung: { kunden: { anteil: 0.1, preis: 120, nur: { antrieb: 'segel' } }, hafengeld: { segel: 1.2 }, synergie: [{ id: 'mastenkran', faktor: 1.2 }, { id: 'segelclub', faktor: 1.1 }], ruf: 0.05 } },
     ] },
-    fischhalle: { abStufe: 5, stufen: [
-      { name: 'Fischhalle',              kosten: 13500, wirkung: { proTag: 60 } },
+    seenotretter: { abStufe: 4, stufen: [   // Seenotretter-Station
+      // Seenotrettungsboot
+      { kosten: 8000, wirkung: { sturmschutz: 0.5, ruf: 0.15 } },
+      // Seenotrettungskreuzer
+      { kosten: 20000, abStufe: 6, wirkung: { sturmschutz: 0.8, ruf: 0.25, freischalten: ['seenotkreuzer'], besuch: { art: 'tag-der-seenotretter', alleTage: 28, ersterNach: 5, dauer: 1, einnahme: 900, gaeste: 600, ruf: 0.02 } } },
     ] },
-    museumshafen: { abStufe: 5, stufen: [
-      { name: 'Museumshafen',            kosten: 22000, wirkung: { gaeste: { XL: 1.5 }, proTag: 80 } },
+    fahrgastanleger: { abStufe: 5, stufen: [   // Fahrgastanleger
+      // Fahrgastanleger
+      { kosten: 21000, wirkung: { freischalten: ['fahrgastschiff'], wetter: { regen: 0.6, sturm: 0 }, besuch: { art: 'ausflugsfahrt', alleTage: 1, ersterNach: 1, dauer: 1, einnahme: 160, gaeste: 60 }, proTag: 150 } },
+      // Ausflugsflotte
+      { kosten: 26000, ruf: 4, wirkung: { freischalten: ['fahrgastschiff'], wetter: { regen: 0.6, sturm: 0 }, ruf: 0.05, besuch: { art: 'ausflugsfahrt', alleTage: 1, ersterNach: 1, dauer: 1, einnahme: 360, gaeste: 140 } } },
     ] },
-    fahrgastanleger: { abStufe: 5, stufen: [
-      { name: 'Fahrgastanleger',         kosten: 21000, wirkung: { proTag: 150 } },
+    museumshafen: { abStufe: 5, stufen: [   // Museumshafen
+      // Museumshafen
+      { kosten: 22000, ruf: 4, wirkung: { proTag: 80, freischalten: ['traditionssegler'], ruf: 0.12, gaeste: { XL: 1.5 } } },
+      // Museumshafen mit Speicher
+      { kosten: 30000, ruf: 4.2, wirkung: { proTag: 160, freischalten: ['traditionssegler'], ruf: 0.18, gaeste: { XL: 1.5 }, hafenfest: 1.5 } },
+      // Windjammertreffen (Stufe 6). Stufen addieren sich nicht: proTag 160 aus Stufe 2 plus 120 für das Treffen
+      { kosten: 34000, abStufe: 6, wirkung: { proTag: 280, freischalten: ['traditionssegler'], ruf: 0.18, gaeste: { XL: 1.6 }, hafenfest: 1.5, besuch: { art: 'windjammer', alleTage: 12, ersterNach: 4, dauer: 2, einnahme: 5000, gaeste: 1800, ruf: 0.03 } } },
+    ] },
+    barkasse: { abStufe: 6, stufen: [   // Barkasse
+      // Barkasse
+      { kosten: 9000, braucht: [{ id: 'fahrgastanleger', stufe: 1 }], wirkung: { proTag: 220, wetter: { regen: 0.5, sturm: 0 }, ruf: 0.03 } },
+    ] },
+    kreuzfahrtterminal: { abStufe: 6, stufen: [   // Kreuzfahrtterminal
+      // Kreuzfahrtpier
+      { kosten: 60000, ruf: 4, braucht: [{ id: 'fahrgastanleger', stufe: 1 }], wirkung: { freischalten: ['kreuzfahrtschiff'], besuch: { art: 'kreuzfahrt', alleTage: 7, ersterNach: 3, dauer: 1, einnahme: 6500, gaeste: 1500 } } },
+      // Kreuzfahrtterminal
+      { kosten: 120000, ruf: 4.5, wirkung: { freischalten: ['kreuzfahrtschiff'], ruf: 0.1, besuch: { art: 'kreuzfahrt', alleTage: 4, ersterNach: 2, dauer: 1, einnahme: 9500, gaeste: 2600 } } },
+    ] },
+    marineanleger: { abStufe: 6, stufen: [   // Marineanleger
+      // Marineanleger
+      { kosten: 50000, ruf: 4, braucht: [{ id: 'seenotretter', stufe: 1 }], wirkung: { freischalten: ['marine'], sturmschutz: 0.1, besuch: { art: 'flottenbesuch', alleTage: 10, ersterNach: 4, dauer: 2, einnahme: 3600, gaeste: 500, ruf: 0.02 } } },
+      // Marinestützpunkt
+      { kosten: 100000, ruf: 4.6, wirkung: { proTag: 450, freischalten: ['marine'], sturmschutz: 0.2, ruf: 0.08, besuch: { art: 'flottenbesuch', alleTage: 6, ersterNach: 3, dauer: 2, einnahme: 4200, gaeste: 2200, ruf: 0.03 } } },
     ] },
   },
 
+
   // ---------------------------------------------------------------- Ereignisse
-  // Vorschlag aus dem Balancing; die Logik gehört dem Ereignis-Thread.
-  // alleTage = mittlerer Abstand in Saisontagen (zufällig +-30 %), angekündigt 1 Tag vorher.
+  // Alle Zahlen der Ereignisse (Texte und Wetterbild in data/events.js, Logik in events/scheduler.js).
+  //   abStufe     ab dieser Ausbaustufe möglich
+  //   alleTage    mittlerer Abstand in Tagen (Zufall streut um +- ablauf.streuung)
+  //   dauer       Länge in Tagen
+  //   vorrang     wenn mehrere fällig sind, gewinnt der größere Wert
+  //   braucht     optional: Service, der gebaut sein muss
+  //   saison      Saisontage [von, bis], an denen das Ereignis liegen darf
+  //   ankuendigen Tage vorher angekündigt (Standard 1)
+  //   wirkung     auf die Spielregeln, Felder wie DEFAULT_MODS in data/events.js
+  //   schutz      Service, der die schlechten Folgen mindert: faktor je Ausbaustufe (1 = volle Folgen).
+  //               Gibt es den stufenlosen Sturmschutz der Services (services.*.wirkung.sturmschutz),
+  //               gilt der: Folgen = 1 - Sturmschutz.
   ereignisse: {
-    // ankunftFaktor: von See läuft niemand ein, nur Boote aus dem See (vor allem S) kommen
-    sturm:         { abStufe: 3, alleTage: 10, ankunftFaktor: { S: 0.6, M: 0.1, L: 0.1, XL: 0 }, extraNacht: 1,
-                     rufMalus: 0.5, rufMalusMitSeenotretter: 0 },
-    regatta:       { abStufe: 3, braucht: 'segelclub', alleTage: 12, dauer: 2,
-                     ankunftFaktorSegel: 2 },
-    hafenfest:     { abStufe: 4, alleTage: 15, dauer: 1, einnahme: 1500,
-                     extraXL: 2 },
+    ablauf: { ruhigeTage: 2, ersterTag: 3, streuung: 0.3 },
+    nebel:     { abStufe: 1, alleTage: 13, dauer: 1, vorrang: 1, saison: [1, 30],
+                 wirkung: { arrivalFactor: 0.7, extraNights: 1 } },
+    sommertag: { abStufe: 1, alleTage: 11, dauer: 1, vorrang: 1, saison: [7, 24],
+                 wirkung: { arrivalFactor: 1.25, sizeFactor: { S: 2, M: 1.2 }, visitorFactor: 1.5, serviceIncomeFactor: 1.3 } },
+    sturm:     { abStufe: 3, alleTage: 12, dauer: 1, vorrang: 4, saison: [3, 30],
+                 wirkung: { seaArrivals: false, extraNights: 1, satisfaction: { outer: -1 } },
+                 schutz: { durch: 'seenotretter', faktor: [1, 0.5, 0] } },
+    regatta:   { abStufe: 3, braucht: 'segelclub', alleTage: 14, dauer: 2, vorrang: 5, ankuendigen: 2, saison: [6, 26],
+                 // kindFactor: Schlüssel sind die Bootsarten (kind) aus data/boat-catalog.js
+                 wirkung: { arrivalFactor: 1.6, kindFactor: { jolle: 3, segelyacht: 3, mehrrumpf: 2 },
+                   visitorFactor: 1.5, serviceIncomeFactor: 1.3, ratingBonus: 0.25 } },
+    hafenfest: { abStufe: 4, alleTage: 20, dauer: 1, vorrang: 4, saison: [10, 24],
+                 // Traditionssegler (XL) kommen erst ab Stufe 5, vorher nur mehr Boote und Besucher
+                 wirkung: { arrivalFactor: 1.3, kindFactor: { traditionssegler: 6 }, sizeFactor: { XL: 2 },
+                   visitorFactor: 2, serviceIncomeFactor: 1.5, ratingBonus: 0.25 } },
+    // Wintertage: Boote im Winterlager, kaum Gäste
+    winter:    { wirkung: { winter: true, arrivalFactor: 0.15, visitorFactor: 0.3, serviceIncomeFactor: 0.5 } },
   },
+
 };
 
 export default ECONOMY;

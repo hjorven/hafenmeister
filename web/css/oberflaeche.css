@@ -69,7 +69,14 @@
   --hm-rahmen-breite: calc(var(--hm-px) * 3) calc(var(--hm-px) * 3) calc(var(--hm-px) * 4);
 }
 
-body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-tinte); }
+/* Schriftgröße mit Faktor aus den Einstellungen (P50): body.hm-gross */
+body.hm-neu { --hm-s: calc(var(--hm-schrift) * var(--hm-gross, 1)); }
+body.hm-neu.hm-gross { --hm-gross: 1.2; }
+html:has(body.hm-gross) { font-size: 118%; }
+body.hm-neu { font: 400 var(--hm-s)/1.4 var(--hm-pixel); color: var(--hm-tinte); letter-spacing: 0.01em; }
+/* Alles in Pixelschrift, auch Fließtext und was Module mit system-ui in den <head> schreiben.
+ * Ziffern und Euro kommen über unicode-range weiter aus der Systemschrift (lesbar, siehe @font-face). */
+.hm-neu, .hm-neu *:not(canvas) { font-family: var(--hm-pixel) !important; }
 .hm-neu button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .hm-neu button:focus-visible { outline: 3px dashed var(--hm-gold); outline-offset: 3px; }
 .hm-neu .spacer { display: none; }
@@ -85,6 +92,7 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
 .hm-neu .bau-schild,
 .hm-neu .bau-tipp,
 .hm-neu #hm-audio-popover .hm-audio-panel,
+.hm-neu #hm-audio-popover.hm-audio-panel,
 .hm-neu #card .hud-btn,
 .hm-neu .hm-knopf,
 .hm-neu .hm-tempo-knopf {
@@ -154,7 +162,7 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
   align-items: center;
   gap: 6px;
   padding: 0 8px;
-  font-size: calc(var(--hm-schrift) + 4px);
+  font-size: calc(var(--hm-s) + 4px);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -217,7 +225,7 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
   background: none;
   color: var(--hm-tinte);
   font-family: var(--hm-pixel);
-  font-size: calc(var(--hm-schrift) + 2px);
+  font-size: calc(var(--hm-s) + 2px);
   font-weight: 600;
   text-align: left;
   text-decoration: none;
@@ -235,6 +243,8 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
   top: calc(var(--hm-oben) + var(--hm-knopf) + 6px);
   right: var(--hm-rechts);
   max-width: calc(100vw - 2 * var(--hm-rand));
+  border-radius: 0;
+  box-shadow: none;
 }
 .hm-neu .hm-audio-panel { padding: 10px 12px; }
 .hm-neu .hm-audio-mute { border-radius: 0; background: var(--hm-mulde); color: var(--hm-tinte); font-family: var(--hm-pixel); font-weight: 600; }
@@ -275,7 +285,7 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
   padding: 0 10px 0 6px;
   color: var(--hm-tinte);
   font-family: var(--hm-pixel);
-  font-size: calc(var(--hm-schrift) + 1px);
+  font-size: calc(var(--hm-s) + 1px);
   font-weight: 600;
   white-space: nowrap;
   --hm-symbol: 18px;
@@ -313,7 +323,7 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
   margin: 0;
   padding: 8px 10px;
   color: var(--hm-tinte);
-  font-size: var(--hm-schrift);
+  font-size: var(--hm-s);
   animation: hm-auf 0.12s steps(3);
 }
 .hm-neu #hm-menue.hm-tafel-px { position: absolute; width: auto; max-height: none; overflow: visible; padding: 4px; }
@@ -321,7 +331,7 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
 .hm-neu #hm-seite .hm-tafel li:first-child { border-top: 0; }
 .hm-neu #hm-seite .hm-tafel li.erledigt { color: var(--hm-meer); }
 .hm-neu #weather-panel .wp-row { border-top: var(--hm-px) dotted rgba(36, 54, 74, 0.25); }
-.hm-neu .hm-klapp-kopf { margin: 0 0 6px; font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-schrift) + 1px); }
+.hm-neu .hm-klapp-kopf { margin: 0 0 6px; font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-s) + 1px); }
 .hm-neu .hm-balken-zeile { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 4px 0; }
 .hm-neu .hm-balken-wert { font-variant-numeric: tabular-nums; color: var(--hm-tinte-2); }
 .hm-neu .hm-balken-zeile.ok .hm-balken-wert { color: var(--hm-meer); font-weight: 700; }
@@ -339,12 +349,12 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
   border-image-source: var(--rahmen-meer);
   color: #fff;
   font-family: var(--hm-pixel);
-  font-size: calc(var(--hm-schrift) + 2px);
+  font-size: calc(var(--hm-s) + 2px);
   z-index: 35;
 }
 
 .hm-neu #event-banner { top: calc(var(--hm-oben) + var(--hm-knopf) + 8px); z-index: 25; }
-.hm-neu #event-banner strong { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-schrift) + 2px); }
+.hm-neu #event-banner strong { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-s) + 2px); }
 
 /* ------------------------------------------------------------ Unten: Zeit, Kassieren, Bauen */
 .hm-neu #hud-bottom {
@@ -387,7 +397,7 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
   background: none;
   box-shadow: none;
   font-family: var(--hm-pixel);
-  font-size: calc(var(--hm-schrift) + 1px);
+  font-size: calc(var(--hm-s) + 1px);
   font-weight: 600;
   white-space: nowrap;
   color: var(--hm-tinte);
@@ -455,7 +465,7 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
   border-image-source: var(--rahmen-gold);
   color: #3b2a07;
   font-family: var(--hm-pixel);
-  font-size: calc(var(--hm-schrift) + 4px);
+  font-size: calc(var(--hm-s) + 4px);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -485,7 +495,7 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
   border-image-source: var(--rahmen-koralle);
   color: #fff;
   font-family: var(--hm-pixel);
-  font-size: calc(var(--hm-schrift) + 5px);
+  font-size: calc(var(--hm-s) + 5px);
   font-weight: 700;
   text-shadow: 0 var(--hm-px) 0 rgba(0, 0, 0, 0.25);
   white-space: nowrap;
@@ -517,7 +527,7 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
 .hm-neu.card-open .bau-tipp { display: none; }
 
 /* Knopf "Einfahren" am Boot (gesten.js) */
-.hm-neu .hm-einfahren { border-image-source: var(--rahmen-meer); color: #fff; font-family: var(--hm-pixel); font-size: calc(var(--hm-schrift) + 2px); padding: 0 14px; min-height: 44px; }
+.hm-neu .hm-einfahren { border-image-source: var(--rahmen-meer); color: #fff; font-family: var(--hm-pixel); font-size: calc(var(--hm-s) + 2px); padding: 0 14px; min-height: 44px; }
 
 /* Preisschilder über Bauplätzen (bauen.js) */
 .hm-neu .bau-schild { padding: 2px 8px; font-family: var(--hm-pixel); font-size: 13px; }
@@ -537,7 +547,6 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
 }
 .hm-neu .bau-schild.empfohlen::after { background: #b8862a; }
 .hm-neu .bau-schild.unten::after { top: calc(-8px - var(--hm-px) * 3); transform: rotate(180deg); border: 0; }
-.hm-neu .bau-schild.rand::after { display: none; }
 .hm-neu .bau-schild.empfohlen { outline: 0; border-image-source: var(--rahmen-gold); }
 .hm-neu .bau-schild-preis { color: var(--hm-meer); }
 
@@ -549,11 +558,11 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
   min-width: 0;
   padding: 12px 14px 10px;
   color: var(--hm-tinte);
-  font-size: var(--hm-schrift);
+  font-size: var(--hm-s);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-.hm-neu #card h2 { margin: 0 0 2px; font-family: var(--hm-pixel); font-size: calc(var(--hm-schrift) + 7px); font-weight: 700; line-height: 1.15; }
+.hm-neu #card h2 { margin: 0 0 2px; font-family: var(--hm-pixel); font-size: calc(var(--hm-s) + 7px); font-weight: 700; line-height: 1.15; }
 .hm-neu #card p { margin: 0 0 10px; color: var(--hm-tinte-2); opacity: 1; }
 .hm-neu #card .card-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 .hm-neu #card .card-actions .hud-btn { flex: 1 1 120px; }
@@ -564,7 +573,7 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
   padding: 4px 10px;
   color: var(--hm-tinte);
   font-family: var(--hm-pixel);
-  font-size: calc(var(--hm-schrift) + 2px);
+  font-size: calc(var(--hm-s) + 2px);
   font-weight: 600;
   line-height: 1.15;
   cursor: pointer;
@@ -610,7 +619,7 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
   padding: 2px 8px;
   background: var(--hm-mulde);
   font-family: var(--hm-pixel);
-  font-size: var(--hm-schrift);
+  font-size: var(--hm-s);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -626,12 +635,12 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
 .hm-neu .bau-rat { border-radius: 0; background: #e2f2ee; box-shadow: inset 0 0 0 var(--hm-px) rgba(35, 137, 125, 0.4); }
 .hm-neu .bau-reiter { border-radius: 0; padding: 3px; gap: 3px; background: var(--hm-mulde); overflow-x: auto; scrollbar-width: none; }
 .hm-neu .bau-reiter::-webkit-scrollbar { display: none; }
-.hm-neu .bau-tab { flex: 1 1 auto; min-width: 0; border-radius: 0; padding: 4px 6px; gap: 5px; font-family: var(--hm-pixel); font-size: var(--hm-schrift); color: var(--hm-tinte); }
+.hm-neu .bau-tab { flex: 1 1 auto; min-width: 0; border-radius: 0; padding: 4px 6px; gap: 5px; font-family: var(--hm-pixel); font-size: var(--hm-s); color: var(--hm-tinte); }
 .hm-neu .bau-tab[aria-selected="true"] { background: var(--hm-papier); box-shadow: inset 0 calc(var(--hm-px) * -2) 0 var(--hm-meer); }
 .hm-neu .bau-zahl { border-radius: 0; background: var(--hm-meer); flex: none; }
 .hm-neu .bau-zeile { border-radius: 0; border: var(--hm-px) solid rgba(36, 54, 74, 0.22); background: #fff; }
 .hm-neu .bau-zeile:hover { border-color: var(--hm-meer); }
-.hm-neu .bau-zeile-kopf { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-schrift) + 1px); }
+.hm-neu .bau-zeile-kopf { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-s) + 1px); }
 .hm-neu .bau-zeile-preis { color: var(--hm-meer); }
 .hm-neu .bau-zeile.teuer .bau-zeile-preis { color: #b8473a; }
 .hm-neu .bau-zeile.gesperrt { border-style: dashed; }
@@ -689,9 +698,9 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
 
 /* Einstieg-Blase */
 .hm-neu .hm-tipp { padding: 10px 14px 8px; z-index: 18; }
-.hm-neu .hm-tipp .titel { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-schrift) + 3px); }
+.hm-neu .hm-tipp .titel { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-s) + 3px); }
 .hm-neu .hm-tipp .zaehler { font-family: var(--hm-pixel); font-weight: 400; }
-.hm-neu .hm-tipp button { border-radius: 0; font-family: var(--hm-pixel); font-size: var(--hm-schrift); }
+.hm-neu .hm-tipp button { border-radius: 0; font-family: var(--hm-pixel); font-size: var(--hm-s); }
 .hm-neu .hm-tipp .weiter { background: var(--hm-meer); box-shadow: inset 0 calc(var(--hm-px) * -2) 0 rgba(0, 0, 0, 0.2); }
 
 /* Fotomodus: alles weg außer der Fotoleiste */
@@ -715,3 +724,258 @@ body.hm-neu { font: 500 var(--hm-schrift)/1.35 var(--hm-text); color: var(--hm-t
 /* "Als Nächstes" (bauen.js) ruht, solange der Einstieg spricht oder abends Kassieren unten steht */
 .hm-neu:has(.hm-tipp:not([hidden])) .bau-tipp,
 .hm-neu:has(#btn-collect:not([hidden])) .bau-tipp { display: none; }
+
+/* ------------------------------------------------------------ Einstellungen (P50) */
+.hm-neu #hm-einstellungen {
+  position: absolute;
+  z-index: 41;
+  top: calc(var(--hm-oben) + var(--hm-knopf) + 6px);
+  right: var(--hm-rechts);
+  width: min(360px, calc(100vw - var(--hm-links) - var(--hm-rechts)));
+  max-height: calc(100dvh - var(--hm-oben) - var(--hm-knopf) - var(--hm-unten) - 12px);
+  overflow-y: auto;
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px 12px;
+}
+.hm-neu #hm-einstellungen[hidden] { display: none; }
+.hm-neu #hm-einstellungen .hm-karte-kopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hm-neu #hm-einstellungen .hm-klapp-kopf { margin: 0; font-size: calc(var(--hm-s) + 3px); }
+.hm-neu .hm-schalter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 10px;
+  border: var(--hm-px) solid rgba(36, 54, 74, 0.22);
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+.hm-neu .hm-schalter:hover { border-color: var(--hm-meer); }
+.hm-neu .hm-schalter-text { flex: 1; display: grid; gap: 1px; }
+.hm-neu .hm-schalter-text strong { font-family: var(--hm-pixel); font-weight: 600; }
+.hm-neu .hm-schalter-text span { color: var(--hm-tinte-2); font-size: 0.94em; line-height: 1.3; }
+/* Schiebeschalter im Pixel-Stil: Mulde mit Klotz, an = Meer und Klotz rechts */
+.hm-neu .hm-schalter-griff {
+  position: relative;
+  flex: none;
+  width: calc(var(--hm-px) * 22);
+  height: calc(var(--hm-px) * 12);
+  background: var(--hm-mulde);
+  box-shadow: inset 0 0 0 var(--hm-px) var(--hm-tinte);
+}
+.hm-neu .hm-schalter-griff::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--hm-px) * 2);
+  left: calc(var(--hm-px) * 2);
+  width: calc(var(--hm-px) * 8);
+  height: calc(var(--hm-px) * 8);
+  background: var(--hm-papier);
+  box-shadow: inset 0 0 0 var(--hm-px) var(--hm-tinte);
+  transition: transform 0.1s steps(2);
+}
+.hm-neu .hm-schalter[aria-checked="true"] .hm-schalter-griff { background: var(--hm-meer); }
+.hm-neu .hm-schalter[aria-checked="true"] .hm-schalter-griff::after { transform: translateX(calc(var(--hm-px) * 10)); }
+.hm-neu.foto #hm-einstellungen { display: none !important; }
+
+/* Weniger Bewegung: nichts springt, blinkt oder gleitet */
+.hm-neu.hm-ruhig *, .hm-neu.hm-ruhig *::before, .hm-neu.hm-ruhig *::after {
+  animation-duration: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0s !important;
+  scroll-behavior: auto !important;
+}
+
+/* Linkshänder (Touch): Bauen unten links, Zeit unten rechts */
+.hm-neu.hand-links #hm-zeit { grid-column: 3; justify-self: end; }
+.hm-neu.hand-links #btn-build { grid-column: 1; justify-self: start; }
+
+.hm-neu .hm-wahl { display: grid; gap: 6px; padding: 8px 10px; border: var(--hm-px) solid rgba(36, 54, 74, 0.22); background: #fff; }
+.hm-neu .hm-wahl-stufen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 3px; background: var(--hm-mulde); }
+.hm-neu .hm-wahl-stufen button { min-height: 40px; border: 0; background: transparent; font-family: var(--hm-pixel); font-weight: 600; cursor: pointer; }
+.hm-neu .hm-wahl-stufen button[aria-checked="true"] { background: var(--hm-papier); box-shadow: inset 0 calc(var(--hm-px) * -2) 0 var(--hm-meer); }
+
+/* Farbe nie allein (Einstellung "Schilder mit Form"): Gold bekommt ein Zeichen */
+.hm-neu.hm-formen .bau-schild.empfohlen:not(.rand)::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: -9px;
+  width: 18px;
+  height: 18px;
+  background: var(--hm-tinte) var(--px-stern) center / 12px 12px no-repeat;
+}
+.hm-neu.hm-formen #hm-seite #weather-chip.has-news::after {
+  content: '';
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  background: var(--px-hinweis) center / 12px 12px no-repeat, var(--hm-tinte);
+}
+
+/* ------------------------------------------------------------ Reste im Pixel-Stil (Symbole neu, Runde 3)
+ * Alles, was andere Module mit eigener Schrift, runden Ecken oder Zeichen wie ✓ ← zeichnen,
+ * bekommt hier Pixelrahmen und Pixel-Symbole aus ui/pixel-symbole.js. IDs und Klassen bleiben.
+ */
+
+/* Wetter- und Ereignisbilder: Pixelraster bleiben scharf (nur ganze Vielfache von 12 px) */
+.hm-neu .hm-pixelbild { image-rendering: pixelated; flex: none; }
+.hm-neu #weather-chip svg { width: 24px; height: 24px; }
+.hm-neu #weather-panel svg, .hm-neu #event-banner svg { width: 24px; height: 24px; flex: none; }
+
+/* Tagesziele: Kreis und Haken statt ○ ✓ */
+.hm-neu .hm-tafel li .haken {
+  width: 18px; height: 18px; font-size: 0; color: transparent; align-self: center;
+  background: var(--hm-tinte-2);
+  -webkit-mask: var(--px-kreis) center / 18px 18px no-repeat;
+  mask: var(--px-kreis) center / 18px 18px no-repeat;
+}
+.hm-neu .hm-tafel li.erledigt .haken {
+  background: var(--hm-meer);
+  -webkit-mask-image: var(--px-haken); mask-image: var(--px-haken);
+}
+
+/* Bauen: Pfeile am Rand (Bauplatz außerhalb des Bildes) als Pixelpfeil im Tintenschild statt ← ↑ → ↓.
+ * ::after ist das Tintenquadrat, ::before der Pfeil (Maske), gedreht in 90-Grad-Schritten, damit er scharf bleibt. */
+.hm-neu .bau-schild.rand { --pf: var(--px-pfeil); --dreh: 0deg; }
+.hm-neu .bau-schild.rand[data-pfeil="↓"] { --dreh: 90deg; }
+.hm-neu .bau-schild.rand[data-pfeil="←"] { --dreh: 180deg; }
+.hm-neu .bau-schild.rand[data-pfeil="↑"] { --dreh: 270deg; }
+.hm-neu .bau-schild.rand:is([data-pfeil="↓→"], [data-pfeil="↓←"], [data-pfeil="↑←"], [data-pfeil="↑→"]) { --pf: var(--px-pfeilschraeg); }
+.hm-neu .bau-schild.rand[data-pfeil="↓←"] { --dreh: 90deg; }
+.hm-neu .bau-schild.rand[data-pfeil="↑←"] { --dreh: 180deg; }
+.hm-neu .bau-schild.rand[data-pfeil="↑→"] { --dreh: 270deg; }
+.hm-neu .bau-schild.rand::after {
+  content: "";
+  display: block;
+  position: absolute; left: -10px; top: -12px; width: 20px; height: 20px; margin: 0;
+  border: 0; transform: none; clip-path: none;
+  background: var(--hm-tinte);
+}
+.hm-neu .bau-schild.rand::before {
+  content: "";
+  position: absolute; z-index: 1; left: -10px; top: -12px; width: 20px; height: 20px;
+  border-radius: 0; font-size: 0;
+  background: var(--hm-papier);
+  -webkit-mask: var(--pf) center / 12px 12px no-repeat;
+  mask: var(--pf) center / 12px 12px no-repeat;
+  transform: rotate(var(--dreh));
+}
+
+/* Spielstand-Fenster (save/save-panel.js) */
+.hm-neu .hm-save-backdrop { background: rgba(20, 32, 48, 0.5); }
+.hm-neu .hm-save {
+  border-style: solid; border-color: transparent; border-radius: 0; box-shadow: none; background: none;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-papier) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  color: var(--hm-tinte);
+  font: 500 var(--hm-s)/1.4 var(--hm-text);
+}
+/* Handy quer: das Fenster ist höher als der Bildschirm, also scrollen statt oben abschneiden */
+.hm-neu .hm-save { max-height: calc(100dvh - 32px); overflow-y: auto; box-sizing: border-box; }
+.hm-neu .hm-save-backdrop { overflow-y: auto; }
+.hm-neu .hm-save h2 { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-s) + 5px); }
+.hm-neu .hm-save .hm-info { color: var(--hm-tinte-2); }
+.hm-neu .hm-save button {
+  border-style: solid; border-color: transparent; border-radius: 0;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-meer) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  background: none; color: #fff;
+  font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-s) + 1px);
+}
+.hm-neu .hm-save button.zweit { border-image-source: var(--rahmen-papier); color: var(--hm-tinte); }
+.hm-neu .hm-save button:active { transform: translateY(var(--hm-px)); }
+.hm-neu .hm-banner {
+  border-style: solid; border-color: transparent; border-radius: 0; background: none;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-tinte) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  color: #fff; font: 500 var(--hm-s)/1.4 var(--hm-text);
+}
+.hm-neu .hm-banner button {
+  border-style: solid; border-color: transparent; border-radius: 0;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-gold) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  background: none; color: var(--hm-tinte); font-family: var(--hm-pixel); font-weight: 600;
+}
+.hm-neu .hm-banner button.zu { border-image: none; border-color: transparent; color: #fff; }
+
+/* Fotomodus-Leiste (ui/fotomodus.js) */
+.hm-neu .hm-foto-leiste {
+  border-style: solid; border-color: transparent; border-radius: 0; box-shadow: none; background: none;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-papier) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  padding: 4px;
+}
+.hm-neu .hm-foto-leiste button {
+  border-style: solid; border-color: transparent; border-radius: 0;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-tinte) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  background: none; color: #fff; font-family: var(--hm-pixel); font-weight: 600; font-size: var(--hm-s);
+}
+.hm-neu .hm-foto-leiste button[aria-pressed="true"] { border-image-source: var(--rahmen-koralle); background: none; }
+.hm-neu .hm-foto-leiste button:active { transform: translateY(var(--hm-px)); }
+
+/* PC: Tastenhilfe und Hinweis am Mauszeiger (ui/input-pc.js) */
+.hm-neu .pc-help { background: rgba(20, 32, 48, 0.5); }
+.hm-neu .pc-help-box {
+  border-style: solid; border-color: transparent; border-radius: 0; box-shadow: none; background: none;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-papier) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  color: var(--hm-tinte);
+}
+.hm-neu .pc-help-box h2 { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-s) + 5px); }
+.hm-neu .pc-help-box dt { font-family: var(--hm-pixel); font-weight: 600; }
+.hm-neu .pc-help-box dd { color: var(--hm-tinte-2); }
+.hm-neu kbd, .hm-neu .pc-help-box kbd {
+  border-radius: 0;
+  border: var(--hm-px) solid var(--hm-tinte);
+  border-bottom-width: calc(var(--hm-px) * 2);
+  background: var(--hm-papier);
+  box-shadow: none;
+  font-family: var(--hm-pixel); font-weight: 600;
+}
+.hm-neu .pc-help-box .hud-btn {
+  border-style: solid; border-color: transparent; border-radius: 0; box-shadow: none; background: none;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-meer) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  color: #fff; font-family: var(--hm-pixel); font-weight: 600;
+}
+.hm-neu .pc-tooltip {
+  border-style: solid; border-color: transparent; border-radius: 0; box-shadow: none; background: none;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-tinte) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  font-family: var(--hm-pixel); font-weight: 600;
+}
+
+/* Ton-Fenster: Regler als Pixelbalken mit eckigem Griff */
+.hm-neu .hm-audio-row { font-family: var(--hm-pixel); font-weight: 600; }
+.hm-neu .hm-audio-row input[type="range"] { -webkit-appearance: none; appearance: none; background: none; height: var(--tap, 44px); }
+.hm-neu .hm-audio-row input[type="range"]::-webkit-slider-runnable-track {
+  height: calc(var(--hm-px) * 4); background: var(--hm-mulde); box-shadow: inset 0 0 0 var(--hm-px) rgba(36, 54, 74, 0.4);
+}
+.hm-neu .hm-audio-row input[type="range"]::-moz-range-track {
+  height: calc(var(--hm-px) * 4); background: var(--hm-mulde); box-shadow: inset 0 0 0 var(--hm-px) rgba(36, 54, 74, 0.4);
+}
+.hm-neu .hm-audio-row input[type="range"]::-moz-range-progress { height: calc(var(--hm-px) * 4); background: var(--hm-meer); }
+.hm-neu .hm-audio-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 24px; margin-top: calc(var(--hm-px) * 2 - 12px);
+  border: var(--hm-px) solid var(--hm-tinte); border-radius: 0;
+  background: var(--hm-gold); box-shadow: 0 var(--hm-px) 0 var(--hm-tinte);
+}
+.hm-neu .hm-audio-row input[type="range"]::-moz-range-thumb {
+  width: 14px; height: 20px; border: var(--hm-px) solid var(--hm-tinte); border-radius: 0;
+  background: var(--hm-gold); box-shadow: 0 var(--hm-px) 0 var(--hm-tinte);
+}
+
+/* Pixelschrift auch im Fließtext (Nachprüfung PR 157): kleine Texte etwas größer, damit Pixelify am Handy lesbar bleibt.
+ * Untergrenze etwa 13 px; vorher standen dort bis zu 0,68 rem (11 px) in der Systemschrift. */
+.hm-neu :is(.bau-tipp-titel, .bau-marke, .bau-zahl) { font-size: 0.8rem; letter-spacing: 0.02em; }
+.hm-neu :is(.bau-zeile-text, .bau-fortschritt, .bau-tab) { font-size: 0.9rem; }
+.hm-neu .hm-tipp .zaehler { font-size: 13px; }
+.hm-neu :is(#weather-panel, #event-banner) :is(small, .wp-sub, p) { font-size: max(13px, 0.875rem); }
+.hm-neu kbd, .hm-neu .pc-help-box kbd { font-size: max(13px, 0.9em); padding: 1px 6px; line-height: 1.3; }

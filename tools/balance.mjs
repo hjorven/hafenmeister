@@ -3,9 +3,9 @@
 //
 // Spielt die echten Spielregeln (web/js/sim.js) mit den Zahlen aus web/js/data/economy.js und den
 // Liegeplätzen aus web/js/data/harbor.js viele Male durch und meldet, wie lange jede
-// Ausbaustufe dauert. Zwei Spielertypen: "geschickt" (kauft sofort das Sinnvollste) und
+// Ausbaustufe dauert. Drei Spielertypen: "geschickt" (kauft sofort das Sinnvollste),
 // "gemütlich" (schaut nur jeden zweiten Tag in den Bauplan, lässt Käufe aus, weist Boote
-// nicht immer optimal zu).
+// nicht immer optimal zu) und zum Vergleich "untätig" (tut nichts, 30 Tage).
 //
 // Aufruf (aus dem Repo-Hauptordner):
 //   node tools/balance.mjs                 Bericht, 60 Durchläufe je Spielertyp
@@ -21,11 +21,13 @@ import { pathToFileURL } from 'node:url';
 import { ECONOMY as E } from '../web/js/data/economy.js';
 import { HAFEN as HAFEN_DATEI } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
-import { SERVICES } from '../web/js/data/services.js';
+import { SERVICES, GROSSSCHIFF_BESUCHE } from '../web/js/data/services.js';
 import { createState } from '../web/js/state.js';
 import * as sim from '../web/js/sim.js';
 import { erstelleRegeln, mitZahlen, neuerZustand } from '../web/js/services/rules.js';
 import { createScheduler } from '../web/js/events/scheduler.js';
+import { pruefeZahlen } from './zahlen.mjs';
+import { zufallAus } from '../web/js/random.js';
 
 // Hat harbor.js für eine Stufe aus economy.js noch keine Plätze (Stufe 6 vor dem Export der
 // Pier), rechnet das Werkzeug mit den Plätzen der letzten Hafenstufe weiter und sagt das.
@@ -42,15 +44,8 @@ const HAFEN = HAFEN_ERGAENZT ? {
 } : HAFEN_DATEI;
 
 // ------------------------------------------------------------------ Zufall (deterministisch)
-function rng(seed) {
-  let a = (seed * 2654435761) >>> 0 || 1;
-  return () => {
-    a |= 0; a = (a + 0x6D2B79F5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+// Gemeinsamer Zufall des Spiels (web/js/random.js)
+const rng = (seed) => zufallAus((seed * 2654435761) >>> 0 || 1);
 
 // ------------------------------------------------------------------ Daten prüfen
 export const hinweise = [];
@@ -113,6 +108,8 @@ export function pruefen() {
       if (st.unterhalt) fehler.push(`services.${k}[${i}]: unterhalt ist verboten (keine laufenden Kosten)`);
     });
   }
+  // Ungelesene Felder, Ja/Nein statt Zahl, Stufen billiger als davor (tools/zahlen.mjs)
+  fehler.push(...pruefeZahlen());
   return fehler;
 }
 
@@ -121,8 +118,6 @@ export function pruefen() {
 // (web/js/services/rules.js). Ein Bot spielt: weist Boote zu, kassiert, baut.
 const RULES = sim.rulesFromEconomy(E);
 const SVC = erstelleRegeln(mitZahlen(SERVICES, E.services));
-// Besuche, die als Besuch eines großen Schiffs (XXL) zählen (art aus web/js/data/services.js)
-const GROSSSCHIFF_BESUCHE = ['kreuzfahrt', 'flottenbesuch'];
 const PLATZ = new Map(HAFEN.plaetze.map((p) => [p.id, p]));
 
 const PROFILE = {
@@ -131,7 +126,12 @@ const PROFILE = {
   // schaut nur alle 20 s auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz,
   // kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus
   gemuetlich: { zuweisenAlle: 20, kaufAlleTage: 2, auslassen: 0.35, fehlZuweisung: 0.25 },
+  // tut nichts: weist nie zu (Boote fahren nach selbstEinfahrenNach selbst ein), kassiert nie (nur die
+  // Kasse des Vertrauens nachts), kauft nichts. Zeigt, was das Spiel ohne Spieler hergibt.
+  untaetig: { zuweisenAlle: 5, kaufAlleTage: Infinity, auslassen: 1, fehlZuweisung: 0, nichts: true },
 };
+// Spielertypen im Bericht, die bis zum Abschluss spielen
+const SPIELER = ['geschickt', 'gemuetlich'];
 
 export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true } = {}) {
   const prof = PROFILE[profilName];
@@ -159,7 +159,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   });
 
   const lauf = { stufeTag: { 1: 1 }, zielTag: {}, sparTage: {}, pausen: [], letzterKauf: 1, kaeufe: 0,
-    einStufe: {}, ende: null, grossschiffBesuche: 0 };
+    einStufe: {}, ende: null, grossschiffBesuche: 0, leerlauf: {}, geldAmTag: {} };
   let abgewiesen = {}; let unerfuellt = {};
   const rufWert = () => sim.reputation(state);
 
@@ -266,7 +266,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     let liegend = [];
     while (state.day === tag) {
       const events = sim.tick(state, ctx, prof.zuweisenAlle);
-      if (state.phase === 'day' && state.office < RULES.office.autoAssign) {
+      if (!prof.nichts && state.phase === 'day' && state.office < RULES.office.autoAssign) {
         for (const id of [...state.queue]) {
           const passend = sim.fittingBerths(state, ctx, id);
           if (!passend.length) continue;
@@ -279,11 +279,11 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
           abgewiesen.alle = (abgewiesen.alle || 0) + 1;
         } else if (ev.type === 'feeReady') {
           const b = state.boats[ev.boatId];
-          for (const w of b.wishes) if (!ev.wishesMet.includes(w)) unerfuellt[w] = (unerfuellt[w] || 0) + 1;
+          for (const w of b?.wishes ?? []) if (!ev.wishesMet.includes(w)) unerfuellt[w] = (unerfuellt[w] || 0) + 1;
         } else if (ev.type === 'evening') {
           liegend = sim.mooredBoats(state).filter((b) => !b.stationed)
             .map((b) => ({ klasse: b.size, antrieb: b.motor ? 'motor' : 'segel' }));
-          sim.collectAll(state, ctx, true);
+          if (!prof.nichts) sim.collectAll(state, ctx, true);
         }
       }
     }
@@ -303,7 +303,13 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     lauf.einStufe[stufe] = (lauf.einStufe[stufe] || 0) + state.stats.totalIncome - geldVorher;
 
     if (zielErreicht()) { lauf.ende = state.day; break; }
+    const kaeufeVorher = lauf.kaeufe;
     if (state.day % prof.kaufAlleTage === 0) einkaufen();
+    // Leerlauf: ein Saisontag, an dem der Spieler nichts kaufen konnte (nur zuweisen, kassieren, warten)
+    if (!prof.nichts && !winter && lauf.kaeufe === kaeufeVorher) {
+      lauf.leerlauf[state.stage] = (lauf.leerlauf[state.stage] || 0) + 1;
+    }
+    lauf.geldAmTag[state.day] = Math.round(state.stats.totalIncome);
     protokoll?.push(`Tag ${state.day}${winter ? ' (Winter)' : ''}: Stufe ${state.stage}, Geld ${Math.round(state.money)}, Ruf ${rufWert().toFixed(2)}, Gäste ${state.stageGuests}, Boote ${sim.mooredBoats(state).length}, abgewiesen ${state.stats.turnedAway}`);
   }
   return {
@@ -311,6 +317,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     kaeufe: lauf.kaeufe, laengstePause: Math.max(0, ...lauf.pausen.map((x) => x[0])),
     pauseJeStufe: Object.fromEntries(E.stufen.map((x) => [x.stufe, Math.max(0, ...lauf.pausen.filter((p) => p[1] === x.stufe).map((p) => p[0]))])),
     gaeste: state.guests, sparTage: lauf.sparTage, einStufe: lauf.einStufe, abgewiesen: state.stats.turnedAway,
+    leerlauf: lauf.leerlauf, geldAmTag: lauf.geldAmTag,
   };
 }
 
@@ -319,11 +326,12 @@ function quantil(a, q) { const s = [...a].sort((x, y) => x - y); return s[Math.m
 // Annahme für "mit Vorspulen": die Hälfte der Spielzeit läuft auf der höchsten Stufe
 // (2x bis zum Hafenbüro in Stufe 3, danach 3x), die andere Hälfte auf 1x.
 const typisch = () => 0.5 + 0.5 / 4;   // halbe Zeit mit Vorspulen 4x (Taste F, Sonne ziehen)
+const zahl = (n) => String(n).replace('.', ',');
 const fmtZeit = (min) => `${Math.floor(min / 60)} h ${String(Math.round(min % 60)).padStart(2, '0')} min`;
 
 function bericht(laeufe, json) {
   const out = {};
-  for (const profil of Object.keys(PROFILE)) {
+  for (const profil of SPIELER) {
     const res = Array.from({ length: laeufe }, (_, i) => spiel(i + 1, profil));
     const stufen = {};
     const N = E.stufen.length;
@@ -334,7 +342,8 @@ function bericht(laeufe, json) {
       }).filter((d) => d != null);
       const spar = res.map((x) => x.sparTage[n]).filter((d) => d != null);
       stufen[n] = { median: quantil(dauer, 0.5), p10: quantil(dauer, 0.1), p90: quantil(dauer, 0.9), fertig: dauer.length,
-        sparen: spar.length ? quantil(spar, 0.5) : null, pause: quantil(res.map((x) => x.pauseJeStufe[n]), 0.5) };
+        sparen: spar.length ? quantil(spar, 0.5) : null, pause: quantil(res.map((x) => x.pauseJeStufe[n]), 0.5),
+        leerlauf: quantil(res.map((x) => x.leerlauf[n] || 0), 0.5) };
     }
     const ende = res.map((x) => x.ende).filter(Boolean);
     out[profil] = {
@@ -342,23 +351,32 @@ function bericht(laeufe, json) {
       gesamt: { median: quantil(ende, 0.5), p10: quantil(ende, 0.1), p90: quantil(ende, 0.9) },
       laengstePause: quantil(res.map((x) => x.laengstePause), 0.5),
       kaeufe: quantil(res.map((x) => x.kaeufe), 0.5),
+      einnahmenTag30: quantil(res.map((x) => x.geldAmTag[30] ?? 0), 0.5),
     };
   }
+  // Vergleich: wer nichts tut (30 Tage, Stufe 1)
+  const nichts = Array.from({ length: Math.min(laeufe, 20) }, (_, i) => spiel(i + 1, 'untaetig', { maxTage: 31 }));
+  out.untaetig = { laeufe: nichts.length, einnahmenTag30: quantil(nichts.map((x) => x.geldAmTag[30] ?? 0), 0.5),
+    gaeste: quantil(nichts.map((x) => x.gaeste), 0.5), ruf: quantil(nichts.map((x) => Math.round(x.ruf * 100) / 100), 0.5) };
   if (json) { console.log(JSON.stringify(out, null, 2)); return; }
   const tagMin = (E.zeit.tagSekunden + E.zeit.abendSekunden) / 60;
-  for (const [profil, o] of Object.entries(out)) {
+  for (const profil of SPIELER) {
+    const o = out[profil];
     console.log(`\nSpielertyp ${profil} (${o.laeufe} Läufe, ${o.fertig} bis zum Regionsabschluss)`);
-    console.log('| Stufe | Name | Spieltage Median | 10 % bis 90 % | davon Sparen | längste Pause ohne Kauf | Echtzeit bei 1x | mit Vorspulen |');
-    console.log('|---|---|---|---|---|---|---|---|');
+    console.log('| Stufe | Name | Spieltage Median | 10 % bis 90 % | davon Sparen | Leerlauf | längste Pause ohne Kauf | Echtzeit bei 1x | mit Vorspulen |');
+    console.log('|---|---|---|---|---|---|---|---|---|');
     for (let n = 1; n <= E.stufen.length; n++) {
       const s = o.stufen[n];
-      console.log(`| ${n} | ${E.stufen[n - 1].name} | ${s.median ?? '-'} | ${s.p10 ?? '-'} bis ${s.p90 ?? '-'} | ${s.sparen ?? '-'} | ${s.pause} | ${s.median != null ? fmtZeit(s.median * tagMin) : '-'} | ${s.median != null ? fmtZeit(s.median * tagMin * typisch(n)) : '-'} |`);
+      console.log(`| ${n} | ${E.stufen[n - 1].name} | ${s.median ?? '-'} | ${s.p10 ?? '-'} bis ${s.p90 ?? '-'} | ${s.sparen ?? '-'} | ${s.leerlauf} | ${s.pause} | ${s.median != null ? fmtZeit(s.median * tagMin) : '-'} | ${s.median != null ? fmtZeit(s.median * tagMin * typisch(n)) : '-'} |`);
     }
     const g = o.gesamt;
     let typ = 0; for (let n = 1; n <= E.stufen.length; n++) typ += (o.stufen[n].median || 0) * tagMin * typisch(n);
-    console.log(`| | **Gesamt** | **${g.median ?? '-'}** | ${g.p10 ?? '-'} bis ${g.p90 ?? '-'} | | | **${g.median != null ? fmtZeit(g.median * tagMin) : '-'}** | **${fmtZeit(typ)}** |`);
-    console.log(`Käufe (Median): ${o.kaeufe}, längste Pause ohne Kauf (Median): ${o.laengstePause} Tage`);
+    console.log(`| | **Gesamt** | **${g.median ?? '-'}** | ${g.p10 ?? '-'} bis ${g.p90 ?? '-'} | | | | **${g.median != null ? fmtZeit(g.median * tagMin) : '-'}** | **${fmtZeit(typ)}** |`);
+    console.log(`Käufe (Median): ${o.kaeufe}, längste Pause ohne Kauf (Median): ${o.laengstePause} Tage, Einnahmen bis Tag 30: ${o.einnahmenTag30} €`);
   }
+  const u = out.untaetig;
+  console.log(`\nZum Vergleich, Spielertyp untätig (${u.laeufe} Läufe, weist nie zu, kassiert nie, kauft nichts): Einnahmen bis Tag 30 ${u.einnahmenTag30} €, Gäste ${u.gaeste}, Ruf ${zahl(u.ruf)}`);
+  console.log('Leerlauf = Saisontage der Stufe ohne Kauf (Median, nur zuweisen, kassieren, warten).');
 }
 
 // ------------------------------------------------------------------ Aufruf

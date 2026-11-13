@@ -65,7 +65,7 @@ function gastAuf(state, ctx, platz, nights = 1) {
 
 test('Zahlen kommen aus economy.js', () => {
   const { ctx } = neu();
-  assert.equal(regeln(ctx).pachtAnteil, ECONOMY.dauerlieger.pachtAnteil);
+  assert.equal(regeln(ctx).anteilGastpreis, ECONOMY.dauerlieger.anteilGastpreis);
   assert.equal(regeln(ctx).hoechstAnteil, ECONOMY.dauerlieger.hoechstAnteil);
   assert.equal(regeln(ctx).vorauskasse, ECONOMY.dauerlieger.vorauskasse);
   assert.equal(ctx.rules.stationedFee, ECONOMY.fischer.pachtProTag);
@@ -122,7 +122,7 @@ test('Vermieten: Saisonpacht für den Rest der Saison kommt sofort, abends nicht
   assert.equal(boot.dauer, true);
   assert.equal(state.money, vorher + a.summe);
   // 50 % des Gastpreises je Saisontag
-  assert.equal(a.jeTag, Math.round(sim.nightlyFee(state, ctx, boot, 0) * ECONOMY.dauerlieger.pachtAnteil));
+  assert.equal(a.jeTag, Math.round(sim.nightlyFee(state, ctx, boot, 0) * ECONOMY.dauerlieger.anteilGastpreis));
   const ev = r.events.find((e) => e.type === 'dauerPacht');
   assert.equal(ev.amount, a.summe);
   // Belegter Platz ist kein zweites Mal möglich
@@ -482,4 +482,24 @@ test('Sofort kündigen kostet die Pacht der restlichen Tage und eine Entschädig
   machDauerplatz(state, ctx, platz2);
   kuendigeSofort(state, ctx, platz2);
   assert.ok(state.money <= g0);
+});
+
+test('Gebühr: Dauerlieger zahlt den Anteil des Gastpreises, die feste Pacht gilt nur für Fischer und Dienste', () => {
+  const { ctx, state } = neu(11, 2);
+  ctx.rules.dauer.vorauskasse = false;   // mit Vorauskasse zahlt der Dauerlieger abends nichts (eigener Test oben)
+  ctx.rules.queue.selfEnterAfter = null;
+  state.upcoming = [];
+  assert.ok(ctx.rules.stationedFee > 0, 'feste Pacht ist gesetzt');
+  const r = machDauerplatz(state, ctx, freierPlatz(state, ctx));
+  assert.ok(r.ok);
+  const boot = state.boats[r.boatId];
+  const anteil = Math.round(sim.nightlyFee(state, ctx, boot, 0) * ctx.rules.stationedFeeShare);
+  assert.ok(anteil > 0);
+  assert.notEqual(anteil, ctx.rules.stationedFee, 'Voraussetzung: beide Beträge unterscheiden sich');
+  const ev = sim.tick(state, ctx, ctx.rules.dayLength + 1).filter((e) => e.type === 'stationedFee');
+  const dauer = ev.find((e) => e.boatId === r.boatId);
+  assert.equal(dauer.amount, anteil, 'Dauerlieger: Anteil des Gastpreises');
+  for (const e of ev) {
+    if (e.boatId !== r.boatId) assert.equal(e.amount, ctx.rules.stationedFee, 'Fischer und Dienste: feste Pacht');
+  }
 });

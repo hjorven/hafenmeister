@@ -1,6 +1,6 @@
 # Pixel-Art-Fassung
 
-Stand: 12.11.2026. Thread "Spiel als Pixel-Art zeichnen".
+Stand: 12.11.2026. Thread "Spiel als Pixel-Art zeichnen". Status: gebaut als eigene Seite `pixel/`; ob sie das Hauptspiel wird, ist Frage 9 der [Roadmap](roadmap.md#offene-fragen-an-jorven).
 
 Die Pixel-Fassung ist dasselbe Spiel in Pixel-Art. Sie liegt ganz in `web/pixel/` und ändert keine andere Datei.
 

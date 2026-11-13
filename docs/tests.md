@@ -22,9 +22,7 @@ Nur ein Gerät (alles nach dem Befehl geht an Playwright):
 bash tests/pruefen.sh --project=pc
 ```
 
-Solange GitHub Actions nicht läuft, gilt: lokal `bash tests/pruefen.sh` ausführen, nur bei `Alles grün.` mergen. Nicht auf Actions warten.
-
-Stand: 11.11.2026. Bei jedem Pull Request und jedem Push auf `main` startet der Workflow **Tests** (`.github/workflows/tests.yml`). Er öffnet das Spiel in einem echten Browser (Chromium mit Software-WebGL) in fünf Gerätegrößen und prüft, ob es lädt und sich bedienen lässt.
+Stand: 12.11.2026. Status: gebaut. Bei jedem Pull Request und jedem Push auf `main` startet der Workflow **Tests** (`.github/workflows/tests.yml`). Er öffnet das Spiel in einem echten Browser (Chromium mit Software-WebGL) in fünf Gerätegrößen und prüft, ob es lädt und sich bedienen lässt.
 
 ## Was geprüft wird
 
@@ -52,9 +50,9 @@ Three.js wird in den Tests aus `tests/node_modules/three` geliefert statt vom CD
 
 ## Regel für alle Threads
 
-Vor dem Mergen eines PRs muss `bash tests/pruefen.sh` lokal grün sein. Sobald GitHub Actions läuft, zusätzlich der Check **Spiel testen (Handy, Tablet, PC)** im PR. Ist er rot, steht im Lauf unter **Annotations**, welcher Test auf welchem Gerät scheitert. Unter **Artifacts** liegen `bildschirmfotos` (alle Geräte) und `testbericht` (HTML-Bericht und Fotos der Fehlschläge).
+Vor dem Mergen eines PRs muss `bash tests/pruefen.sh` lokal grün sein, dazu der Check **Spiel testen (Handy, Tablet, PC)** im PR. Ist er rot, steht im Lauf unter **Annotations**, welcher Test auf welchem Gerät scheitert. Unter **Artifacts** liegen `bildschirmfotos` (alle Geräte) und `testbericht` (HTML-Bericht und Fotos der Fehlschläge).
 
-Damit GitHub das auch erzwingt, einmal in GitHub einstellen (nur Jorven, erst wenn Actions wieder läuft, sonst kann niemand mergen):
+Damit GitHub das auch erzwingt, kann Jorven es einmal in GitHub einstellen (freiwillig):
 
 1. https://github.com/hjorven/hafenmeister/settings/branches öffnen, **Add classic branch protection rule** (oder unter **Rules**, **Rulesets** eine neue Regel für `main`).
 2. Branch name pattern: `main`.
@@ -103,6 +101,51 @@ cd tests && npm run bericht; cd ..
 ```
 
 Die Fotos liegen danach auch in `tests/bildschirmfotos/` (z. B. `handy-start.png`, `pc-weit.png`). Der Testserver baut vorher mit `tools/build-pages.sh` die Seite und liefert sie unter `http://localhost:4173/hafenmeister/` aus, genau wie GitHub Pages im Unterordner.
+
+## Testmodus und Adresszusätze
+
+Alle Zusätze, die das Spiel versteht, an einer Stelle. Sie hängen an die Adresse, z. B. `https://hjorven.github.io/hafenmeister/?stufe=6&services=alle` oder lokal `http://localhost:8000/?stufe=3&uhrzeit=20`. Mehrere werden mit `&` verbunden. Für Spieler sind sie nicht gedacht; ein Zusatz, den es nicht gibt, wird still übergangen.
+
+**Hauptspiel** (`web/index.html`)
+
+| Zusatz | Werte | Wirkung | Modul |
+|---|---|---|---|
+| `?stufe=n` | 1 bis 6 | Testmodus: frischer Spielstand dieser Stufe, alles bis dahin gebaut, Stege, Landschaft und Gebäude dieser Stufe. Die Adresse setzt nur die Startstufe: Nach einem Ausbau folgen Stege, Gelände, Services, Menschen und Verkehr der neuen Stufe. Der gespeicherte Spielstand wird weder geladen noch überschrieben. Services: Bauen kostet nichts, der Ruf zählt als 5 | `bridge.js`, `render/landscape.js`, `render/stege.js`, `render/services.js`, `render/buildings.js`, `render/people.js`, `render/boats/verkehr.js` |
+| `?services=alle` | `alle` | alle Services in ihrer höchsten Ausbaustufe gebaut (sinnvoll mit `?stufe=6`) | `render/services.js` |
+| `?stegbild=n` | 0 bis 12 | festes Stegbild (0 = Grundbild, das auch die Tests nutzen), siehe [stegbilder.md](stegbilder.md) | `data/stegbild.js` |
+| `?gelaende=n` | 1 bis 10 | feste Geländeform nach einem echten Hafen (1 Heiligenhafen bis 10 Wangerooge), sonst aus dem Spielstand oder zufällig; Tests nutzen 1 | `render/landschaft/formen.js` |
+| `?landbild=n` | Zahl | festes Landbild (Felder, Wald, Dorf), sonst aus dem Seed des Spielstands; nur Ansicht | `render/landscape.js`, `render/landschaft/vielfalt.js` |
+| `?uhrzeit=h` | Stunden, z. B. `6.5`, `19`, `22` | Licht und Himmel fest auf diese Uhrzeit, die Spielzeit läuft weiter | `render/landscape.js` |
+| `?revier=nordsee` | `ostsee`, `nordsee` (statt `revier` geht auch `region`) | startet im Revier. Die Nordsee ist bisher nur Landschaft und Daten, siehe [regionen.md](regionen.md) | `world/region.js`, `render/landscape.js` |
+| `?qualitaet=` | `hoch`, `mittel`, `niedrig` (auch `quality`) | Grafikstufe der Landschaft statt der automatischen Wahl | `render/landscape.js` |
+| `?einstieg=1` | `1` | Einstieg für neue Spieler beginnt von vorn ([einstieg.md](einstieg.md)) | `features/einstieg.js` |
+| `?demo=boote` | `boote` | Vorführung der Schiffsanimationen (Einlaufen, Anlegen, Ablegen) | `render/boat-anim.js` |
+| `?demo=boote-s` | `boote-s` | alle S-Boote an den Plätzen der Stufe 1 | `render/boats/s.js` |
+| `?leute=voll` | `voll` | jede Box der Stufe mit einer Crew belegen (Menschen-Test) | `render/people.js` |
+
+**Pixel-Fassung** (`web/pixel/`, siehe [pixel-art.md](pixel-art.md))
+
+| Zusatz | Seite | Wirkung |
+|---|---|---|
+| `?hoehe=` | `pixel/index.html` | Neigung der Kamera beim Start in Grad (heute 30, 50 oder 70; mit PR 137 frei von 20 bis 86) |
+| `?px=` | `pixel/index.html` | Pixelgröße, Standard `auto` |
+| `?umriss=0` | `pixel/index.html` | ohne Umrisslinien |
+| `?stil=filter`, `?schiffe=filter` | `pixel/index.html` | alter Filter-Weg zum Vergleich |
+| `?groesse=`, `?hoehe=`, `?richtung=`, `?segel=` | `pixel/boote.html` | Auswahl der Testseite vorbelegen |
+| `?modell=`, `?groesse=`, `?wasser=0`, `?richtungen=`, `?stil=`, `?lupe=` | `pixel/werkstatt.html` | Auswahl der Werkstatt vorbelegen |
+
+Die Pixel-Fassung versteht zusätzlich alle Zusätze des Hauptspiels.
+
+**In der Konsole des Browsers** (Hilfen für Tests, Spielobjekt `window.hafenmeister`)
+
+| Aufruf | Wirkung |
+|---|---|
+| `hafenmeister.sim.fastForward(sekunden)` | Spielzeit vorspulen |
+| `hafenmeister.camera.reset()` | Startansicht |
+| `hafenmeister.bauen.vorschau(key)` | Bauvorschau öffnen ([bauen.md](bauen.md)) |
+| `hafenmeister.einstieg.start()` | Einstieg starten |
+
+Wer einen neuen Zusatz einbaut, trägt ihn im selben PR hier ein.
 
 ## Neue Tests schreiben
 

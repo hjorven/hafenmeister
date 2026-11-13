@@ -1,5 +1,7 @@
 # PC-Bedienung
 
+**Archiv (12.11.2026):** ersetzt durch [docs/ui/oberflaeche.md](../../ui/oberflaeche.md). Was hier noch gilt (Gesten, Maus, Tastatur, Touch-Lösungen), steht dort im Abschnitt "Bedienung je Gerät". Die Sonne zum Ziehen und die alten Leisten gibt es nicht mehr.
+
 Stand: 11.11.2026. Gilt für Geräte mit Maus oder Trackpad ab 1024 px Breite. Tablet und Handy haben eigene Dokumente.
 
 **Ausprobieren:**

@@ -1,6 +1,6 @@
 # Hafen und Schiffe
 
-Stand: 11.11.2026. Dieses Dokument ist der **Katalog** zum [Spielplan](plan.md): Stufenbilder, Liegeplätze, Einlaufen und Schiffsmodelle. Regeln, Stufe 6, die Größe XXL, Services und Entscheidungen stehen im Spielplan. Wo sich beide widersprechen, gilt der Spielplan.
+Stand: 11.11.2026. Status: Katalog und Konzept; was davon im Spiel ist, sagt [plan.md](plan.md#13-stand-gebaut-als-nächstes-nach-10). Dieses Dokument ist der **Katalog** zum [Spielplan](plan.md): Stufenbilder, Liegeplätze, Einlaufen und Schiffsmodelle. Regeln, Stufe 6, die Größe XXL, Services und Entscheidungen stehen im Spielplan. Wo sich beide widersprechen, gilt der Spielplan.
 
 **Was sich gegenüber dem Spielplan ändert**
 

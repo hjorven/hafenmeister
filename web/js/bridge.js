@@ -4,9 +4,10 @@
 
 import * as sim from './sim.js';
 import { createState, deserialize, load as loadLocal, save as saveLocal } from './state.js';
-import { HAFEN } from './data/harbor.js';
+import { HAFEN, platzInWelt } from './data/harbor.js';
 import { BOAT_CATALOG } from './data/boat-catalog.js';
 import { ECONOMY } from './data/economy.js';
+import { GROSSSCHIFF_BESUCHE } from './data/services.js';
 
 const BOAT_FILES = ['./data/boats/s.js', './data/boats/m.js', './data/boats/l.js', './data/boats/xl.js', './data/boats/xxl.js'];
 
@@ -81,6 +82,17 @@ export async function initBridge(game) {
   let state = null;
   let selected = null; // ausgewähltes wartendes Boot
 
+  // Entfernung von der Warteboje eines Boots zu einem Liegeplatz (Weltkoordinaten), damit sich
+  // Gäste beim Selbst-Einfahren die nächste freie Box suchen. Ohne Landschaft: Reihenfolge am Steg.
+  const platzById = Object.fromEntries(HAFEN.plaetze.map((p) => [p.id, p]));
+  ctx.berthDistance = (boat, berth, st) => {
+    const boje = game.landscape?.warteplaetze?.bojen?.[boat.waitSpot ?? 0];
+    const p = platzById[berth.id];
+    if (!boje || !p) return null;
+    const w = platzInWelt(p, st.stage);
+    return w ? Math.hypot(w.x - boje.x, w.z - boje.z) : null;
+  };
+
   // Modifikatoren der Module Ereignisse und Services abfragen, falls es sie gibt
   sim.addHook(ctx, 'modifiers', () => game.events?.modifiers?.());
   sim.addHook(ctx, 'modifiers', () => game.services?.effekte?.());
@@ -117,7 +129,7 @@ export async function initBridge(game) {
   // Kurzbeschreibung eines Boots für Grafik und Figuren
   function bootInfo(b) {
     return {
-      id: b.id, groesse: b.size, art: b.typeId, modell: b.modelId, palette: b.id % 4, name: b.name,
+      id: b.id, groesse: b.size, art: b.typeId, modell: b.modelId, palette: b.id % 4, name: b.name, herkunft: b.origin ?? null,
       platz: b.berthId, boje: b.waitSpot, zustand: b.status === 'moored' ? 'liegt' : b.status === 'waiting' ? 'wartet' : 'kommt',
       bezahlt: b.status === 'moored' ? (b.stationed ? true : b.paid !== false && !(b.pendingFee > 0)) : false, offen: b.pendingFee || 0,
     };
@@ -146,6 +158,8 @@ export async function initBridge(game) {
       }
       // Stufenausbau: ein fest liegendes Boot zieht auf einen neuen Platz um
       if (e.type === 'relocated') game.emit('boot-zugewiesen', { id: e.boatId, platz: e.to, umzug: true });
+      // Stufenausbau mit weniger Bojen: ein wartendes Boot verholt an eine andere Boje
+      if (e.type === 'waitSpotChanged') game.emit('boot:boje', { id: e.boatId, boje: e.waitSpot });
       // Tagestörn eines Gastes: gleiche Ereignisse wie die Runde der Dauerlieger
       if (e.type === 'tripOut') game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: 0, gast: true });
       if (e.type === 'tripBack') game.emit('dauer:einlaufen', { id: e.boatId, platzId: e.berthId, gast: true });
@@ -288,6 +302,7 @@ export async function initBridge(game) {
     platzZustaende: () => sim.berthStates(state, ctx),
     aufAusflug: (boatId) => !!state.boats[boatIdOf(boatId)]?.trip?.away,
     regionGoal: () => sim.regionGoal(state, ctx),
+    stageUpPreview: () => sim.stageUpPreview(state, ctx),
     holdBoat: (boatId, held = true) => sim.holdBoat(state, boatIdOf(boatId), held),
     // Hat das Boot sein Liegegeld für die kommende Nacht bezahlt? (Bändchen am Bug, Hafenmeister-Rundgang)
     istBezahlt: (boatId) => {
@@ -370,9 +385,10 @@ export async function initBridge(game) {
     const berthId = berthIdOf(d.platz ?? d.berth ?? d.berthId ?? (d.pick?.type === 'berth' ? d.pick.id : null) ?? d.target);
     if (boatId != null && berthId) api.assign(boatId, berthId);
   });
-  // Besuche großer Schiffe zählen für das Abschlussziel der Region
+  // Besuche großer Schiffe zählen für das Abschlussziel der Region (Liste in data/services.js,
+  // auch der Tag der offenen Tür des Marinestützpunkts zählt). Einziger Zähler: state.bigVisits.
   game.on('services:besuch', (b = {}) => {
-    if (['kreuzfahrt', 'flottenbesuch'].includes(b.art)) dispatch(sim.addBigVisit(state, ctx));
+    if (GROSSSCHIFF_BESUCHE.includes(b.art)) dispatch(sim.addBigVisit(state, ctx));
   });
   // Hafenmeister-Rundgang am Abend (render/people.js): Wer noch nicht bezahlt hat, zahlt jetzt die Hälfte
   game.on('hafenmeister:halt', (d = {}) => {

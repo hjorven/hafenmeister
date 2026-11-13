@@ -2,7 +2,7 @@
 // Beschreibung in docs/neue-features.md, Abschnitt 3. Zahlen in ECONOMY.dauerlieger (economy.js).
 //
 // Die Entscheidung: Ein Dauerplatz bringt die Saisonpacht sofort und sicher, auch bei Sturm
-// (rules.dauer.vorauskasse, Pacht je Saisontag = pachtAnteil des Gastpreises). Dafür liegt dort
+// (rules.dauer.vorauskasse, Pacht je Saisontag = anteilGastpreis des Gastpreises). Dafür liegt dort
 // kein Gast: keine Bewertung, kein Ruf, kein Gast fürs Stufenziel. Höchstens hoechstAnteil
 // (ein Viertel) der Plätze. Gekündigt wird zum Saisonende, nicht mittendrin.
 //
@@ -43,11 +43,13 @@ import { regelnBereit } from './regeln-bereit.js';
 import { random, randomInt } from '../random.js';
 import { STAMM } from './stammgaeste.js';
 import { BOOTSNAMEN } from '../data/bootsnamen.js';
+import { ECONOMY } from '../data/economy.js';
 
-// Grundwerte; das Spiel nimmt ECONOMY.dauerlieger (über rulesFromEconomy in ctx.rules.dauer)
+// Zahlen aus data/economy.js (ECONOMY.dauerlieger); die Werte hier gelten nur, wo dort etwas fehlt.
+// Im Spiel kommen sie über rulesFromEconomy in ctx.rules.dauer (regeln(ctx)).
 export const DAUER = {
   abStufe: 2,
-  pachtAnteil: 0.5,
+  anteilGastpreis: 0.5,
   vorauskasse: true,
   hoechstAnteil: 0.25,
   tagestoernChance: 0.4,   // Wahrscheinlichkeit pro Tag für eine Runde draußen (morgens raus, abends zurück)
@@ -60,6 +62,7 @@ export const DAUER = {
   bewerberStart: 2,
   bewerberTage: 10,
   kuendigungsZuschlag: 0.2,
+  ...ECONOMY.dauerlieger,
 };
 
 /** Einstellungen: Grundwerte, überschrieben von ctx.rules.dauer (economy.js). */
@@ -111,7 +114,7 @@ export function pachtZeitraum(state, ctx) {
 
 /** Pacht je Saisontag für ein Boot (oder eine Probe mit typeId und size). */
 export function pachtJeTag(state, ctx, boot) {
-  return Math.max(1, Math.round(sim.nightlyFee(state, ctx, boot, 0) * regeln(ctx).pachtAnteil));
+  return Math.max(1, Math.round(sim.nightlyFee(state, ctx, boot, 0) * regeln(ctx).anteilGastpreis));
 }
 
 /** Tage bis zum Saisonende (ab morgen), im Winter 0. */

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createState, serialize, deserialize } from '../web/js/state.js';
-import { RULES } from '../web/js/data/rules.js';
+import { RULES, ECONOMY, testBoot, ruhigerStand } from './regeln.mjs';
 import * as sim from '../web/js/sim.js';
 import { boatTypes, berths } from './fixtures.mjs';
 
@@ -13,27 +13,8 @@ ctx.rules.trips = null;
 ctx.rules.departWindow = null;
 const ctxLive = sim.createContext({ boatTypes, berths });
 
-/** Testboot direkt in die Warteschlange legen. */
-function waitingBoat(state, props = {}) {
-  const boat = {
-    id: state.nextId++, typeId: 'S1', modelId: null, name: 'Test', size: 'S',
-    length: 4, beam: 1.4, draft: 0.2, motor: false, special: false, dayVisitors: 0, stationed: false,
-    wishes: [], nights: 1, status: 'waiting', arriveAt: 0, waitingSince: state.clock, berthId: null,
-    wishesMet: 0, wishesTotal: 0, pendingFee: 0, penalty: 0, ...props,
-  };
-  state.boats[boat.id] = boat;
-  state.queue.push(boat.id);
-  return boat;
-}
-
-/** Spielstand, bei dem heute niemand mehr von selbst kommt. */
-function quietState(props = {}) {
-  const s = createState({ seed: 1 });
-  Object.assign(s, props);
-  s.scheduledDay = s.day;
-  s.upcoming = [];
-  return s;
-}
+const waitingBoat = testBoot;
+const quietState = ruhigerStand;
 
 const berth = (id) => ctx.berthById[id];
 
@@ -182,12 +163,13 @@ test('Hafengeld wird beim Anlegen fällig: Wünsche, Kapazität der Toilette, St
   assert.equal(fees.length, 8);
   // 6 Boote mit WC: 10 × 1,25 = 12,5 -> 13; das siebte ohne WC: 10
   assert.deepEqual(fees.slice(0, 7).map((e) => e.amount), [13, 13, 13, 13, 13, 13, 10]);
-  // Yacht: Strom ja, Dusche nein -> 40 × 1,25 = 50
-  assert.equal(fees[7].amount, 50);
+  // Yacht: Strom ja, Dusche nein -> Grundpreis L × 1,25
+  const yachtFee = Math.round(RULES.baseFee.L * (1 + RULES.wishBonus));
+  assert.equal(fees[7].amount, yachtFee);
   assert.equal(s.money, 0);
   const c = sim.collect(s, ctx, yacht.id);
   assert.equal(c.ok, true);
-  assert.equal(s.money, 50);
+  assert.equal(s.money, yachtFee);
   assert.equal(yacht.paid, true);
   assert.equal(sim.collect(s, ctx, yacht.id).ok, false);
 });
@@ -240,13 +222,15 @@ test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gäste
 test('Ruf: Schnitt der letzten 20, Faktor für Ankünfte', () => {
   const s = createState({ seed: 1 });
   assert.equal(sim.reputation(s), 3);
-  assert.equal(sim.reputationFactor(1), 0.5);
+  const E = ECONOMY.ruf;
+  assert.equal(sim.reputationFactor(1), E.ankunftBasis);
   assert.equal(sim.reputationFactor(3), 1);
-  assert.equal(sim.reputationFactor(5), 1.5);
+  assert.equal(sim.reputationFactor(5), E.ankunftBasis + 4 * E.ankunftJeAnker);
 });
 
 test('Bewertung: Komfort, Sondergast und Sturmschaden, begrenzt auf 1 bis 5', () => {
-  assert.equal(sim.rateBoat(ctx, { wishesMet: 1, wishesTotal: 2, berthId: 'D1', special: false, penalty: 0 }), 3.5);
+  // Hälfte der Wünsche: 3 Anker, dazu der Komfort des Platzes
+  assert.equal(sim.rateBoat(ctx, { wishesMet: 1, wishesTotal: 2, berthId: 'D1', special: false, penalty: 0 }), Math.min(5, 3 + berth('D1').comfort * RULES.comfortBonus));
   assert.equal(sim.rateBoat(ctx, { wishesMet: 0, wishesTotal: 0, berthId: 'K1', special: true, penalty: 0 }), 5);
   assert.equal(sim.rateBoat(ctx, { wishesMet: 0, wishesTotal: 3, berthId: 'A1', special: false, penalty: 1 }), 1);
 });
@@ -294,7 +278,7 @@ test('Stationierte Einheit: fester Platz, Pacht, reist nicht ab', () => {
   assert.equal(sim.stationBoat(s, ctx, 'L4', 'R1').reason, 'occupied');
   for (let d = 0; d < 3; d++) sim.tick(s, ctx, RULES.dayLength + RULES.eveningLength);
   assert.equal(s.berths.R1, r.boatId);
-  assert.ok(s.money >= 3 * 20); // 40 × 0,5 pro Nacht
+  assert.ok(s.money >= 3 * RULES.stationedFee); // feste Pacht pro Nacht
 });
 
 test('Tagesgäste bringen abends Geld, wenn es einen Kiosk gibt', () => {
@@ -446,14 +430,15 @@ test('Ausbaustufe: Ziel prüfen und aufsteigen', () => {
   const s = createState({ seed: 1 });
   let c = sim.canAdvanceStage(s, ctx);
   assert.deepEqual(c.missing, ['guests', 'money']);
-  s.guests = 25;
-  s.money = 500;
+  const goal = RULES.stageGoals[1];
+  s.stageGuests = goal.guests;   // Gäste zählen je Stufe
+  s.money = goal.cost + 100;
   c = sim.canAdvanceStage(s, ctx);
   assert.equal(c.ok, true);
   assert.equal(sim.advanceStage(s, ctx).ok, true);
   assert.equal(s.stage, 2);
   assert.equal(s.money, 100);
-  s.stage = 5;
+  s.stage = RULES.maxStage;
   assert.deepEqual(sim.canAdvanceStage(s, ctx).missing, ['max']);
 });
 
@@ -604,8 +589,8 @@ test('Wartende Boote fahren nach kurzer Zeit selbst in eine passende freie Box',
   assert.equal(b.status, 'waiting', 'erst kurz warten, Zeit zum Lenken');
   const ev = sim.tick(s, ctxLive, 2);
   assert.equal(b.status, 'moored');
-  // nimmt die knappste passende Box, nicht die mit Strom (das lohnt sich nur von Hand)
-  assert.equal(b.berthId, 'A1');
+  // nimmt die Box mit Strom, weil es den Wunsch danach hat (ohne Entfernungsangabe die erste am Steg)
+  assert.equal(b.berthId, 'C1');
   assert.ok(ev.some((e) => e.type === 'selfEntered' && e.boatId === b.id));
   assert.ok(ev.some((e) => e.type === 'feeReady' && e.boatId === b.id));
   assert.equal(held.status, 'waiting', 'gehaltenes Boot bleibt an der Boje');
@@ -613,7 +598,7 @@ test('Wartende Boote fahren nach kurzer Zeit selbst in eine passende freie Box',
   sim.holdBoat(s, held.id, false);
   sim.tick(s, ctxLive, 1);
   assert.equal(held.status, 'moored');
-  assert.notEqual(held.berthId, 'A1', 'nie in eine belegte Box');
+  assert.notEqual(held.berthId, b.berthId, 'nie in eine belegte Box');
 });
 
 test('Tagestörn: nur mit mehreren Nächten, Box bleibt belegt, abends zurück', () => {
@@ -739,4 +724,73 @@ test('Volle Bojen: Boot mit freier passender Box fährt direkt ein statt abzudre
   sim.markAtBuoy(u, ctxLive, 900);
   sim.tick(u, ctxLive, RULES.queue.selfEnterAfter);
   assert.equal(u.boats[900].status, 'moored');
+});
+
+test('Selbst-Einfahren nimmt die nächste freie passende Box, auch eine zu große, und eins nach dem anderen', () => {
+  const c = sim.createContext({ boatTypes, berths });
+  // Entfernung wie von der Brücke geliefert: hier liegt C3 am nächsten, dann A2
+  const nah = { C3: 1, A2: 2, A1: 3 };
+  c.berthDistance = (boat, berth) => nah[berth.id] ?? 100;
+  const s = quietState({ stage: 3 });
+  const a = waitingBoat(s, { atBuoy: true, atBuoySince: 0 });
+  const b = waitingBoat(s, { atBuoy: true, atBuoySince: 0 });
+  sim.tick(s, c, c.rules.queue.selfEnterAfter);
+  assert.equal(a.berthId, 'C3', 'kleines Boot nimmt die nahe große Box');
+  assert.equal(b.status, 'waiting', 'das zweite Boot fährt erst danach');
+  sim.tick(s, c, 1);
+  assert.equal(b.berthId, 'A2');
+  // Ohne Entfernungsangabe gilt die Reihenfolge am Steg
+  const d = sim.createContext({ boatTypes, berths });
+  const t = quietState({ stage: 3 });
+  const x = waitingBoat(t, { atBuoy: true, atBuoySince: 0 });
+  assert.equal(sim.selfBerth(t, d, x.id), 'A1');
+});
+
+test('Ankünfte kommen verteilt: Mindestabstand, im Fenster, sortiert', () => {
+  const mk = (ts) => ts.map((t, i) => ({ id: i + 1, arriveAt: t }));
+  // genug Platz: voller Mindestabstand
+  const a = sim.spreadArrivals(mk([10, 10.2, 10.4, 30]), 10, 60, 3);
+  assert.deepEqual(a.map((b) => b.arriveAt), [10, 13, 16, 30]);
+  // Pulk am Ende rückt nach vorn auf, nichts liegt hinter dem Fenster
+  const b = sim.spreadArrivals(mk([58, 59, 59.5, 60]), 10, 60, 3);
+  assert.deepEqual(b.map((x) => x.arriveAt), [51, 54, 57, 60]);
+  // zu viele Boote für den Abstand: gleichmäßig kleiner, weiter im Fenster
+  const c = sim.spreadArrivals(mk(Array(40).fill(20)), 10, 60, 3);
+  for (let i = 1; i < c.length; i++) assert.ok(c[i].arriveAt - c[i - 1].arriveAt >= 1.1);
+  assert.ok(c[0].arriveAt >= 10 && c.at(-1).arriveAt <= 60);
+  // ohne Mindestabstand bleibt alles, wie es ist
+  assert.deepEqual(sim.spreadArrivals(mk([5, 5]), 0, 10, 0).map((x) => x.arriveAt), [5, 5]);
+});
+
+test('Ein ganzer Tag: kein Boot kommt weniger als 1 Sekunde nach dem vorigen, Herkunft je Boot verschieden', () => {
+  const s = createState({ seed: 77 });
+  s.stage = 5;
+  sim.tick(s, ctxLive, 0);
+  const list = s.upcoming;
+  assert.ok(list.length >= 5);
+  for (let i = 1; i < list.length; i++) assert.ok(list[i].arriveAt - list[i - 1].arriveAt >= 1, `Abstand ${i}`);
+  for (const b of list) assert.ok(b.origin >= 0 && b.origin < 1);
+  for (let i = 1; i < list.length; i++) {
+    const d = Math.abs(list[i].origin - list[i - 1].origin);
+    assert.ok(Math.min(d, 1 - d) > 0.2, 'aufeinanderfolgende Boote kommen aus verschiedenen Richtungen');
+  }
+  assert.equal(sim.boatOrigin(s, 5), sim.boatOrigin(s, 5));
+});
+
+test('Selbst-Einfahren: Box mit erfülltem Wunsch vor der nächsten, bei Gleichstand die nächste', () => {
+  const c = sim.createContext({ boatTypes, berths });
+  // A-Boxen ohne Strom liegen am nächsten, C-Boxen haben Strom
+  const nah = { A1: 1, A2: 2, C1: 5, C2: 4 };
+  c.berthDistance = (boat, b) => nah[b.id] ?? 100;
+  const s = quietState({ stage: 3 });
+  const mitWunsch = waitingBoat(s, { wishes: ['strom'], atBuoy: true, atBuoySince: 0 });
+  const ohne = waitingBoat(s, { atBuoy: true, atBuoySince: 0 });
+  assert.equal(sim.berthWishHits(s, c, mitWunsch, c.berthById.C2), 1);
+  assert.equal(sim.berthWishHits(s, c, mitWunsch, c.berthById.A1), 0);
+  assert.equal(sim.selfBerth(s, c, mitWunsch.id), 'C2', 'Strom zählt mehr als der kürzere Weg, unter den Strom-Boxen die nächste');
+  assert.equal(sim.selfBerth(s, c, ohne.id), 'A1', 'ohne Wunsch bleibt es die nächste Box');
+  sim.tick(s, c, c.rules.queue.selfEnterAfter);
+  sim.tick(s, c, 1);
+  assert.equal(mitWunsch.berthId, 'C2');
+  assert.equal(ohne.berthId, 'A1');
 });

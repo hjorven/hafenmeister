@@ -168,3 +168,15 @@ export function imageStats(buffer) {
 export function isTouchProject(testInfo) {
   return !!testInfo.project.use.hasTouch;
 }
+
+// Einstieg (web/js/features/einstieg.js) beenden: seine Hinweiskarten erscheinen zeitversetzt
+// und koennen sonst mitten in einer Test-Geste ueber der Stelle liegen, an der gezogen wird.
+// Nur fuer Tests der Grundbedienung; der Einstieg selbst wird hier nicht geprueft.
+export async function ohneEinstieg(page) {
+  const vorhanden = optionalModules().some((m) => m.rel === 'js/features/einstieg.js' && m.exists);
+  if (!vorhanden) return;
+  await page.waitForFunction(() => !!window.hafenmeister.einstieg, null, { timeout: 15_000 });
+  await page.evaluate(() => window.hafenmeister.einstieg.beenden());
+  // Ein Bild warten, damit Karte und Ring wirklich weg sind
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+}
