@@ -67,8 +67,6 @@ test('Boot kommt, wird zugewiesen, abends steigt das Geld', async ({ game }, tes
     window.__anBoje = new Set();
     window.hafenmeister.on('boot:an-boje', (d) => window.__anBoje.add(String(d?.id).replace(/^b/, '')));
     window.hafenmeister.sim.newGame(42);
-    // Ein neues Spiel startet den Einstieg neu; seine Kamerafahrten würden das Antippen verschieben
-    window.hafenmeister.einstieg?.beenden?.();
   });
   const startMoney = await page.evaluate(() => window.hafenmeister.sim.state.money);
 
