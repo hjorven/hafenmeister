@@ -16,6 +16,7 @@
 //   Andere Morgen-Fenster (Kartenwahl der Tagesziele) warten darauf: erst der Abschluss, dann die Wahl.
 
 import { SERVICE_BY_ID } from '../data/services.js';
+import { VORRANG } from './meldungen.js';
 
 const QUELLE_NAME = {
   liegegeld: 'Liegegeld',
@@ -378,6 +379,8 @@ export function init(game) {
     zettel.setAttribute('aria-label', `Tag ${b.tag}: ${euro(b.summe)} eingenommen. Tagesabschluss öffnen`);
     zettel.dataset.tag = String(b.tag);
     zettel.hidden = false;
+    // Meldungs-Ordnung (ui/meldungen.js): Kartenwahl und Feier gehen vor, Tipps und Dauerplatz-Meldungen warten
+    game.meldungen?.wunsch('zettel', VORRANG.zettel);
     platziereZettel();
     zettel.classList.remove('rein'); void zettel.offsetWidth; zettel.classList.add('rein');
     zettelZeit = ZETTEL_SEKUNDEN;
@@ -449,10 +452,14 @@ export function init(game) {
       restzeit -= dt;
       if (restzeit <= 0) schliesse();
     }
-    if (zettelZeit > 0) {
+    // Steht gerade eine wichtigere Meldung, tritt der Zettel zurück und seine Zeit läuft nicht ab
+    const zettelDarf = !game.meldungen || game.meldungen.darf('zettel');
+    zettel.classList.toggle('zurueck', !zettel.hidden && !zettelDarf);
+    if (zettelZeit > 0 && zettelDarf) {
       zettelZeit -= dt;
       if (zettelZeit <= 0) { zettel.hidden = true; meldeFertig(); }
     }
+    if (zettel.hidden) game.meldungen?.fertig('zettel');
     // Schilder links klappen auf und zu, Kassieren erscheint und geht: Lage regelmäßig nachmessen
     messUhr += dt;
     if (messUhr > 0.3) {

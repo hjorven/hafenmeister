@@ -48,3 +48,7 @@ Sturm und Winter stehen nicht in der Liste: Beide erklärt das Ereignisschild (`
 `web/js/features/hilfe.js`: Menüpunkt „Hilfe“ (`#btn-hilfe`, Symbol `hilfe` aus `ui/pixel-symbole.js`). Die Tafel `#hm-hilfe` zeigt die sechs Grundgriffe mit Pixelbild (Boote an den Bojen, Einweisen, Liegegeld, Zeit, Bauen, Tagesziele und Ausbau), Texte getrennt für Finger und Maus. Der Knopf „Einstieg wiederholen“ startet den Einstieg neu (`game.einstieg.start()`); schon gesehene Hinweise bleiben gesehen.
 
 Test: `tests/specs/einstieg.spec.mjs` prüft auf allen Geräten, dass jedes Hinweisziel existiert, kein Text Gelöschtes nennt (Sonne, Leiste), die Hilfe sechs Bilder zeigt und „Einstieg wiederholen“ wirkt, und dass ein Hinweis nur einmal kommt.
+
+## Zusammenspiel mit anderen Meldungen
+
+Blase und Tipps folgen der Meldungs-Ordnung (`docs/meldungen.md`): Morgen-Zettel, Kartenwahl, Tagesabschluss, Feier und Dauerplatz-Meldungen gehen vor; die Blase tritt solange zurück und kommt danach wieder.
