@@ -257,9 +257,9 @@ export function neuInStufe(ctx, from, to) {
   const neu = [];
   const ausbau = r.stageGoals?.[from];
   const plaetze = ausbau?.project ? (r.berthProjects?.[ausbau.project] || []).length : 0;
-  if (plaetze) neu.push(`${plaetze} neue Liegeplätze mit dem Ausbau`);
+  if (plaetze) neu.push(plaetze === 1 ? 'Ein neuer Liegeplatz mit dem Ausbau' : `${plaetze} neue Liegeplätze mit dem Ausbau`);
   const stege = (r.jettyProjects || []).filter((p) => p.stage === to);
-  if (stege.length) neu.push(`${stege.length} neue Stegprojekte im Baumenü`);
+  if (stege.length) neu.push(stege.length === 1 ? 'Ein neues Stegprojekt im Baumenü' : `${stege.length} neue Stegprojekte im Baumenü`);
   const vorher = Object.keys(r.sizeMix?.[from] || {});
   for (const g of Object.keys(r.sizeMix?.[to] || {})) {
     if (!vorher.includes(g)) neu.push(`Ab jetzt kommen ${GROESSE_TEXT[g] || g}`);
@@ -346,7 +346,16 @@ function kamerafahrt(game, { dauer = 7, drehung = 0.7, zoom = 0.85 } = {}) {
   const alt = pose();
   // Startansicht (ganzer Hafen) als Ziel: einmal ausrechnen lassen, dann zurück auf die alte Pose
   let heim = alt;
-  try { rig.reset(); heim = pose(); } catch { /* alte Pose bleibt Ziel */ }
+  try {
+    rig.reset();
+    // Die Karte der Feier liegt unten (quer: rechts). Den Hafen in den freien Teil darüber
+    // (quer: links daneben) schieben, damit die Fahrt nicht hinter der Karte verschwindet.
+    const w = rig.screenW || innerWidth, h = rig.screenH || innerHeight;
+    const quer = h <= 500 && w > h;
+    if (quer) rig.panBy?.(-w * 0.22, 0);
+    else rig.panBy?.(0, -h * 0.24);
+    heim = pose();
+  } catch { /* alte Pose bleibt Ziel */ }
   setze(alt);
   if (ruhig) {
     setze(heim);
@@ -445,8 +454,11 @@ export async function init(game) {
   let letzterAbschluss = null;
   sichereChronik(st());
   if (st().regionDone) starteEndlos(st(), ctx());
-  game.on('spielstand-geladen', () => { sichereChronik(st()); if (st().regionDone) starteEndlos(st(), ctx()); });
-  game.on('sim:change', (e) => { if (e?.reason === 'load') sichereChronik(st()); });
+  // Neuer oder anderer Spielstand ohne Neuladen der Seite (game.sim.newGame meldet sim:change mit reason 'load').
+  // Ein Wechsel über das Spielstand-Menü lädt die Seite neu, dann beginnt alles von vorn.
+  const neuerStand = () => { sichereChronik(st()); if (st().regionDone) starteEndlos(st(), ctx()); };
+  game.on('spielstand-geladen', neuerStand);
+  game.on('sim:change', (e) => { if (e?.reason === 'load') neuerStand(); });
 
   // ------------------------------------------------------------------ Feier-Fenster
   const schicht = el('div', { id: 'hm-feier', class: 'hm-feier', hidden: true, role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'hm-feier-titel' });
@@ -455,7 +467,9 @@ export async function init(game) {
   let offen = null;
   let schliesse = null;
   // Anderer Spielstand geladen: offene Feier gehört zum alten Stand
-  game.on('spielstand-geladen', () => { warteschlange.length = 0; schliesse?.(); });
+  const standWeg = () => { warteschlange.length = 0; schliesse?.(); };
+  game.on('spielstand-geladen', standWeg);
+  game.on('sim:change', (e) => { if (e?.reason === 'load') standWeg(); });
 
   function zeige(feier) {
     if (offen) { warteschlange.push(feier); return; }
