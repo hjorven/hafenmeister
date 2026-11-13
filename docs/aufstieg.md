@@ -37,6 +37,7 @@ Belohnung: 5.000 € je erreichtem Ziel, 10.000 € dazu, wenn alle vier erreich
 - Ereignisse: `sim:seasonEnd` `{ jahr, saison, ziele, erreicht, sterne, belohnung, rang, neuerRang }`, `sim:seasonStart` `{ jahr, saison, ziele }`, `feier:auf` und `feier:zu` `{ art: 'stufe' | 'region' | 'saison' }`.
 - `game.aufstieg`: `zielDaten()` (für das Ziel-Schild in `ui/oberflaeche.js`), `saisonStand()`, `offen`, zum Ausprobieren `zeigeStufe(n)` und `zeigeRegion()` (ohne Wirkung auf den Spielstand).
 - Spielstand: `state.modules.aufstieg` = `{ chronik, stufen, xl, endlos }`, übersteht Speichern und Laden. Ein alter Stand ohne Chronik zählt die laufende Stufe ab dem Laden.
+- Spielstandwechsel: Über das Spielstand-Menü lädt die Seite neu, eine offene Feier verschwindet damit. Ein neues Spiel ohne Neuladen (`game.sim.newGame`, meldet `sim:change` mit `reason: 'load'`) schließt eine offene Feier und leert die Warteschlange (Browsertest `tests/specs/aufstieg.spec.mjs`).
 - Kamerafahrt: setzt `target`, `viewWidth`, `yaw`, `pitch` des Kamera-Rigs und ruft `_apply()`, wie `ui/bauen.js`. Die Startansicht kommt aus `rig.reset()`.
 
 ## Entscheidungen (P16-Thread, 13.11.2026, Jorven schlief)

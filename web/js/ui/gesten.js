@@ -17,6 +17,7 @@
 //   ui:tow-end    { boot, platz }         losgelassen, platz = null heißt abgebrochen
 //   ui:auto-einfahren { boot }            Knopf "Einfahren"
 //   ui:collect    { coin, combo }         eine Münze eingestrichen
+//   ui:strich-ende { anzahl }             Strich zu Ende (Trinkgeld ab 3 Münzen, bridge.js)
 //   ui:vorspulen  { speed }               (sendet jetzt ui/oberflaeche.js)
 //   tap           wie core/input.js, wenn ein Boot nur angetippt wurde
 // Klänge: game.audio.sfx(name, optionen), sonst ein kleiner eingebauter WebAudio-Ersatz.
@@ -310,13 +311,19 @@ export function init(game) {
     if (strich.combo >= 2) texte.push({ text: `x${strich.combo}`, x: p.x, y: p.y - 34, t: 0, dauer: 0.6, klein: true });
   }
 
+  // Trinkgeld für den langen Strich kommt von den Spielregeln (bridge.js, sim:strokeTip)
+  let trinkgeld = 0;
+  game.on('sim:strokeTip', (e) => { trinkgeld = e?.amount || 0; });
   function endStrich() {
     const s = strich;
     strich = null;
     const p = s.pts[s.pts.length - 1];
+    trinkgeld = 0;
+    game.emit('ui:strich-ende', { anzahl: s.combo });
     if (s.combo >= 2) sound.play('strich-ende', { anzahl: s.combo });
     if (s.combo >= 3) {
       texte.push({ text: `${s.combo} Münzen in einem Strich`, x: p.x, y: p.y - 60, t: 0, dauer: 1.6 });
+      if (trinkgeld > 0) texte.push({ text: `+${trinkgeld} € Trinkgeld`, x: p.x, y: p.y - 30, t: 0, dauer: 1.8 });
       haptic(25);
     }
   }

@@ -8,7 +8,7 @@ Kein Tutorial mit Story, sondern Hinweis-Kreise: Ein leuchtender Kreis zeigt auf
 |---|---|---|---|
 | 1 | Willkommen | eine Warteboje | mindestens 6 s zu sehen und ein wartendes Boot liegt im Bild |
 | 2 | Ein Boot wartet | das wartende Boot | ein Boot angelegt hat |
-| 3 | Liegegeld beim Anlegen | die Münze am Boot (gleich nach dem Anlegen) | eine Münze eingestrichen ist (Antippen oder Strich; den Knopf „Kassieren“ gibt es erst mit dem Hafenbüro). Der Text sagt auch: Was liegen bleibt, holt abends der Hafenmeister, aber nur einen Teil (heute die Hälfte; die Zahl kommt aus den Regeln, `roundShare` oder `uncollectedShare`). |
+| 3 | Liegegeld beim Anlegen | die Münze am Boot (gleich nach dem Anlegen) | eine Münze eingestrichen ist (Antippen oder Strich; den Knopf „Kassieren“ gibt es erst mit dem Hafenbüro). Der Text sagt auch: Was liegen bleibt, holt abends der Hafenmeister, aber nur einen Teil (vier Fünftel; die Zahl kommt aus den Regeln, `roundShare` oder `uncollectedShare`). |
 | 4 | Der Tag läuft | Vorspul-Knopf 3x der Zeitsteuerung unten links (Text nennt Pause, 1x, 3x, 8x, am PC Taste F) | vorgespult oder „Weiter“ |
 | 5 | Hafen ausbauen | Knopf „Bauen“ | „Bauen“ gedrückt oder „Weiter“ |
 | 6 | Tagesziele | Knopf „Tagesziele“ | „Los geht’s“ |

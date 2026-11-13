@@ -11,7 +11,9 @@
 // - Menü: "Tagesabschluss" öffnet die Karte jederzeit, mit Blättern durch die letzten Tage.
 // - Münzen über Gebäuden: Bei der Abrechnung der Services steigt über jeder Anlage eine Münze mit dem Betrag auf.
 //
-// Schnittstelle: game.tagesabschluss = { zeige(tag?), schliesse(), offen() }
+// Schnittstelle: game.tagesabschluss = { zeige(tag?), schliesse(), offen(), beschaeftigt() }
+//   beschaeftigt(): Karte oder Zettel sind zu sehen. Wenn beides wieder weg ist, kommt 'tagesabschluss:fertig'.
+//   Andere Morgen-Fenster (Kartenwahl der Tagesziele) warten darauf: erst der Abschluss, dann die Wahl.
 
 import { SERVICE_BY_ID } from '../data/services.js';
 
@@ -152,14 +154,14 @@ export function init(game) {
     const nach = laufend ? null : idx >= 0 && idx < alle.length - 1 ? alle[idx + 1] : { tag: 'jetzt' };
 
     const kopf = el('header', { class: 'hm-ta-kopf' },
-      el('button', { type: 'button', class: 'hm-ta-blaettern', 'aria-label': 'Tag davor', disabled: !vor, onclick: () => zeige(vor.tag) }, '‹'),
+      el('button', { type: 'button', class: 'hm-ta-blaettern', 'aria-label': 'Tag davor', disabled: !vor, onclick: () => zeige(vor.tag) }, el('i', { class: 'hm-sym hm-ta-links-sym', 'aria-hidden': 'true', style: '--sym: var(--px-pfeil)' })),
       el('div', { class: 'hm-ta-kopftext' },
         el('h2', { id: 'hm-ta-titel' }, titel),
         el('p', { class: 'hm-ta-summe' + (b.summe > 0 ? '' : ' null') },
           el('i', { class: 'hm-ta-muenze-sym', 'aria-hidden': 'true' }),
           `+ ${euro(b.summe)}`,
           rekord ? el('span', { class: 'hm-ta-rekord' }, 'Rekord') : null)),
-      el('button', { type: 'button', class: 'hm-ta-blaettern', 'aria-label': 'Tag danach', disabled: !nach, onclick: () => zeige(nach.tag) }, '›'),
+      el('button', { type: 'button', class: 'hm-ta-blaettern', 'aria-label': 'Tag danach', disabled: !nach, onclick: () => zeige(nach.tag) }, el('i', { class: 'hm-sym', 'aria-hidden': 'true', style: '--sym: var(--px-pfeil)' })),
       el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Schließen', onclick: () => schliesse() }));
 
     // Einnahmen je Quelle
@@ -205,7 +207,7 @@ export function init(game) {
     boote.push(el('span', {}, el('b', {}, String(b.angelegt)), b.angelegt === 1 ? ' Boot angelegt' : ' Boote angelegt'));
     if (b.abgereist || !laufend) {
       boote.push(el('span', {}, el('b', {}, String(b.abgereist)), b.abgereist === 1 ? ' Gast abgereist' : ' Gäste abgereist',
-        b.bewertung != null ? ` (Schnitt ${num1(b.bewertung)} Sterne)` : ''));
+        b.bewertung != null ? `, ${num1(b.bewertung)} Sterne` : ''));
     }
     if (b.weggefahrenSumme > 0) {
       const gruende = Object.entries(b.weggefahren).filter(([, n]) => n > 0).map(([k, n]) => `${n} ${WEG_TEXT[k] ?? k}`).join(', ');
@@ -233,7 +235,7 @@ export function init(game) {
     const fuss = el('footer', { class: 'hm-ta-fuss' },
       el('label', { class: 'hm-ta-auto' },
         el('input', { type: 'checkbox', checked: auto, onclick: (e) => { schreibeAuto(e.target.checked); } }),
-        ' Jeden Abend zeigen'),
+        el('span', {}, ' Jeden Abend zeigen')),
       el('button', { type: 'button', class: 'hm-knopf hm-primaer hm-px hm-ta-weiter', onclick: () => schliesse() }, 'Weiter'));
 
     // Zwei Spalten (Handy quer): links das Geld, rechts Boote, Verlauf und Hinweis
@@ -243,7 +245,9 @@ export function init(game) {
         el('div', { class: 'hm-ta-links' },
           el('h3', { class: 'hm-ta-unter' }, 'Einnahmen'),
           einnahmen,
-          ausgaben),
+          ausgaben,
+          // Bei sehr wenig Höhe steht der Hinweis links unter dem Geld (CSS .sehr-eng)
+          tipp ? el('p', { class: 'hm-ta-tipp hm-ta-tipp-links' }, tipp) : null),
         el('div', { class: 'hm-ta-rechts' },
           el('div', { class: 'hm-ta-boote' }, ...boote, ruf),
           balken(b),
@@ -264,6 +268,7 @@ export function init(game) {
     zeichne(b);
     zettel.hidden = true;
     karte.hidden = false;
+    platziere();
     karte.classList.remove('rein'); void karte.offsetWidth; karte.classList.add('rein');
     angefasst = !auto;
     restzeit = auto ? AUTO_SCHLIESSEN : 0;
@@ -273,12 +278,19 @@ export function init(game) {
     if (!auto) game.oberflaeche?.klappeZu?.();
     return true;
   }
+  // Schließt Karte und Zettel (auch von außen, z. B. wenn der Spieler die Tafel der Tagesziele antippt)
   function schliesse() {
-    if (karte.hidden) return;
+    if (karte.hidden) {
+      if (!zettel.hidden) { zettel.hidden = true; zettelZeit = 0; meldeFertig(); }
+      return;
+    }
+    zettel.hidden = true;
+    zettelZeit = 0;
     karte.hidden = true;
     restzeit = 0;
     document.body.classList.remove('ta-offen');
     game.emit('tagesabschluss:zu', { tag: gezeigt });
+    meldeFertig();
   }
   // Anfassen hält die Karte offen
   const festhalten = () => {
@@ -291,6 +303,59 @@ export function init(game) {
   karte.addEventListener('keydown', (e) => { if (e.key === 'Escape') schliesse(); else festhalten(); });
   karte.addEventListener('wheel', festhalten, { passive: true });
 
+  // ------------------------------------------------------------ Platz für die Karte
+  // Die Karte darf keine Bedienknöpfe verdecken. Gemessen wird, wo Statusleiste, Seitenleiste,
+  // Zeit, Kassieren, Bauen und die Knöpfe oben rechts liegen; die Karte nimmt den freien Bereich dazwischen.
+  const handyMedia = window.matchMedia?.('(max-width: 599px), (max-height: 499px)');
+  const istHandy = () => !!handyMedia?.matches;
+  function rechteck(sel) {
+    const x = typeof sel === 'string' ? document.querySelector(sel) : sel;
+    if (!x || x.hidden || x.offsetParent === null) return null;
+    const r = x.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 ? r : null;
+  }
+  function platziere() {
+    if (karte.hidden) return;
+    const huelle = (karte.offsetParent ?? root).getBoundingClientRect();
+    const W = huelle.width;
+    const H = huelle.height;
+    const rand = 8;
+    const quer = W > H;
+    let links = rand;
+    let rechts = W - rand;
+    let oben = rand;
+    let unten = H - rand;
+    const status = rechteck('.hm-status');
+    const werkzeuge = rechteck('.hm-werkzeuge');
+    const unteres = ['#hm-zeit', '#btn-collect', '#btn-build'].map(rechteck).filter(Boolean);
+    if (quer && istHandy()) {
+      // Neben Kasse und Zeit (links) und vor die Knöpfe rechts. Die Schilder (Wetter, Tagesziele,
+      // Ausbau) darf die offene Karte überdecken, wie am Handy hochkant auch: sie zeigen nur etwas an.
+      for (const r of [status, rechteck('#hm-zeit')]) if (r) links = Math.max(links, r.right - huelle.left + rand);
+      for (const r of [werkzeuge, rechteck('#btn-build')]) if (r) rechts = Math.min(rechts, r.left - huelle.left - rand);
+      const kassieren = rechteck('#btn-collect');
+      if (kassieren && kassieren.right - huelle.left > links && kassieren.left - huelle.left < rechts) unten = Math.min(unten, kassieren.top - huelle.top - rand);
+    } else {
+      // Unter die Statusleiste und über Zeit, Kassieren und Bauen
+      for (const r of [status, werkzeuge]) if (r) oben = Math.max(oben, r.bottom - huelle.top + rand);
+      for (const r of unteres) unten = Math.min(unten, r.top - huelle.top - rand);
+    }
+    const breite = Math.max(220, Math.min(quer && istHandy() ? 560 : 380, rechts - links));
+    karte.style.left = `${Math.round(links + (rechts - links - breite) / 2)}px`;
+    karte.style.top = `${Math.round(oben)}px`;
+    karte.style.width = `${Math.round(breite)}px`;
+    karte.style.maxHeight = `${Math.max(160, Math.round(unten - oben))}px`;
+    karte.classList.toggle('eng', unten - oben < 520);
+    // Sehr wenig Höhe (Handy quer, Kassieren unten sichtbar): Säulen und Unterzeilen weglassen
+    karte.classList.toggle('sehr-eng', unten - oben < 300);
+    karte.classList.remove('ohne-tipp');
+    if (karte.scrollHeight > karte.clientHeight + 4) karte.classList.add('sehr-eng');
+    // Reicht es dann immer noch nicht, entfällt der Hinweis (Zahlen gehen vor)
+    if (karte.scrollHeight > karte.clientHeight + 4) karte.classList.add('ohne-tipp');
+  }
+  window.addEventListener('resize', () => platziere());
+  game.on('resize', () => platziere());
+
   function zeigeZettel(b) {
     zettel.replaceChildren(
       el('i', { class: 'hm-ta-muenze-sym', 'aria-hidden': 'true' }),
@@ -299,6 +364,14 @@ export function init(game) {
     zettel.setAttribute('aria-label', `Tag ${b.tag}: ${euro(b.summe)} eingenommen. Tagesabschluss öffnen`);
     zettel.dataset.tag = String(b.tag);
     zettel.hidden = false;
+    // Unter Statusleiste und Ereignis-Banner, damit sich nichts überdeckt
+    const huelle = (zettel.offsetParent ?? root).getBoundingClientRect();
+    let oben = 0;
+    for (const sel of ['.hm-status', '.hm-werkzeuge', '#event-banner', '.hm-tipp']) {
+      const r = rechteck(sel);
+      if (r && r.left < huelle.left + huelle.width * 0.75 && r.right > huelle.left + huelle.width * 0.25) oben = Math.max(oben, r.bottom - huelle.top + 8);
+    }
+    zettel.style.top = oben ? `${Math.round(oben)}px` : '';
     zettel.classList.remove('rein'); void zettel.offsetWidth; zettel.classList.add('rein');
     zettelZeit = ZETTEL_SEKUNDEN;
   }
@@ -315,7 +388,8 @@ export function init(game) {
     const einstieg = game.einstieg?.schritt?.();
     const foto = document.body.classList.contains('foto');
     if (foto) return;
-    if (leseAuto() && !einstieg) zeige(b.tag, { auto: true });
+    // Am Handy kommt von selbst nur der Zettel: die Karte würde sonst Zeit, Kassieren und Bauen verdecken
+    if (leseAuto() && !einstieg && !istHandy()) zeige(b.tag, { auto: true });
     else zeigeZettel(b);
     game.audio?.sfx?.(b.rekord && b.besterTag?.summe > 0 ? 'fertig' : 'kasse');
   });
@@ -333,7 +407,7 @@ export function init(game) {
     }
     if (zettelZeit > 0) {
       zettelZeit -= dt;
-      if (zettelZeit <= 0) zettel.hidden = true;
+      if (zettelZeit <= 0) { zettel.hidden = true; meldeFertig(); }
     }
     bewegeMuenzen(dt);
     requestAnimationFrame(uhr);
@@ -381,5 +455,13 @@ export function init(game) {
     }
   }
 
-  game.tagesabschluss = { zeige: (tag) => zeige(tag ?? null), schliesse, offen: () => !karte.hidden };
+  function meldeFertig() {
+    if (karte.hidden && zettel.hidden) game.emit('tagesabschluss:fertig', {});
+  }
+  game.tagesabschluss = {
+    zeige: (tag) => zeige(tag ?? null),
+    schliesse,
+    offen: () => !karte.hidden,
+    beschaeftigt: () => !karte.hidden || !zettel.hidden,
+  };
 }
