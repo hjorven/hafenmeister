@@ -6,6 +6,8 @@
 // Marine mit breiten Betonpiers und Backsteinbau (Kiel), Museumshafen vor Speichern (Ebeltoft),
 // Werft mit grosser Halle am Becken (Heiligenhafen, Marstal), Seenotretter am eigenen Steg (Laboe).
 import * as THREE from 'three';
+import { HAFEN } from '../data/harbor.js';
+import { seenotPlatz, seenotEinsatzWeg } from '../data/besuchswege.js';
 
 export const LAND_Y = 0.3;
 const U = 0.62;                       // Meter je Planeinheit
@@ -63,6 +65,8 @@ function haus(g, w, h, d, wand, dach, x = 0, z = 0, ry = 0, dachH = null) {
   // Fensterband zur Wasserseite
   const n = Math.max(1, Math.floor(w / 2.2));
   for (let i = 0; i < n; i++) box(o, 0.9, 0.9, 0.06, FARBE.glass, -w / 2 + (i + 0.5) * (w / n), h * 0.45, -d / 2 - 0.03);
+  // Tuer zur Landseite (Sueden, Weg und Strasse)
+  box(o, 1.1, Math.min(2.1, h * 0.75), 0.08, FARBE.ink, 0, 0, d / 2 + 0.04);
   g.add(o);
   return o;
 }
@@ -472,7 +476,8 @@ function segelmacher(stufe) {
   return { group: g, update: (dt, t) => { segel.rotation.y = Math.sin(t * 0.9) * 0.25; } };
 }
 
-function seenotretter(stufe) {
+// Liegeplatz und Einsatzweg des Rettungsboots: js/data/besuchswege.js (seenotPlatz, seenotEinsatzWeg)
+function seenotretter(stufe, { lage = { x: 224, y: 211 } } = {}) {
   const g = new THREE.Group();
   // Stationsgebaeude mit Ausguck
   haus(g, 8, 3.2, 6, FARBE.white, FARBE.red);
@@ -480,12 +485,9 @@ function seenotretter(stufe) {
   box(g, 3, 1.4, 3, FARBE.glass, 5.2, LAND_Y + 6, 0.5);
   box(g, 3.2, 0.3, 3.2, FARBE.red, 5.2, LAND_Y + 7.4, 0.5);
   const fl = flagge(g, -5, -3.6, 7, FARBE.orange);
-  // Eigener Steg zum Dienstplatz aus js/data/harbor.js (179,1 / 243,2, Richtung 85 Grad)
-  // Stufe 1: Dienstplatz in der Kanalmuendung (harbor.js), Kreuzer: SK01 an der Westmole (57/302,6)
   const gross = stufe >= 2;
-  const [dx, dz] = gross ? P(57 - 200, 302.6 - 211) : P(179.1 - 200, 243.2 - 211);
-  // Schwimmsteg laengsseits an der Ostseite des Liegeplatzes, zur Ostmole hin
-  if (!gross) steg(g, dx + 3.6, dz + 8, dx + 3.6, dz - 10, 1.8, FARBE.pont, 0.5);
+  const platz = seenotPlatz(gross);
+  const [dx, dz] = P(platz.x - lage.x, platz.y - lage.y);
   const boot = new THREE.Group();
   const L = gross ? 20 : 10.5, B = gross ? 5 : 3.6;
   rumpf(boot, L, B, gross ? 2.6 : 1.6, FARBE.white, 0, 0, 0, 0, FARBE.white);
@@ -497,26 +499,53 @@ function seenotretter(stufe) {
     zyl(boot, 0.18, 7, FARBE.white, L * 0.05, 4.4, 0, 6);
     rumpf(boot, 7, 2.4, 1.2, FARBE.orange, -L * 0.35, 1.8, 0);          // Tochterboot in der Heckwanne
   }
-  const ruhe = { x: dx, z: dz, ry: ((gross ? 6 : 85) * Math.PI) / 180 };   // SK01 liegt mit 6 Grad (harbor.js)
+  boot.userData.fest = true;
+  const ruhe = { x: dx, z: dz, ry: (platz.dreh * Math.PI) / 180 };
   boot.position.set(ruhe.x, 0, ruhe.z);
   boot.rotation.y = ruhe.ry;
   g.add(boot);
+  // Einsatzweg in lokalen Metern (relativ zum Anker)
+  const weg = seenotEinsatzWeg(gross).map(([x, y]) => new THREE.Vector3(...((q) => [q[0], 0, q[1]])(P(x - lage.x, y - lage.y))));
+  const laengen = [0];
+  for (let i = 1; i < weg.length; i++) laengen.push(laengen[i - 1] + weg[i].distanceTo(weg[i - 1]));
+  const gesamt = laengen[laengen.length - 1];
+  const _p = new THREE.Vector3();
+  function aufWeg(s) {
+    for (let i = 1; i < weg.length; i++) {
+      if (s <= laengen[i] || i === weg.length - 1) {
+        const k = Math.min(1, Math.max(0, (s - laengen[i - 1]) / Math.max(1e-6, laengen[i] - laengen[i - 1])));
+        _p.copy(weg[i - 1]).lerp(weg[i], k);
+        return Math.atan2(-(weg[i].z - weg[i - 1].z), weg[i].x - weg[i - 1].x);
+      }
+    }
+    return ruhe.ry;
+  }
   let einsatz = -1;                       // Spielzeit, zu der der Einsatz begann
+  let kurs = ruhe.ry;
   return {
     group: g,
+    boot,
     // Bei Sturm (Ereignis 'sturm') laeuft das Rettungsboot aus und kommt zurueck
     einsatz(t) { einsatz = t; },
     update(dt, t) {
       wehen(fl, t);
-      let p = 0;
+      let p = 0, raus = true;
       if (einsatz >= 0) {
-        const e = (t - einsatz) / 30;
-        if (e >= 1) einsatz = -1; else p = Math.sin(e * Math.PI);
+        const e = (t - einsatz) / 40;
+        if (e >= 1) einsatz = -1; else { p = Math.sin(e * Math.PI); raus = e < 0.5; }
       }
-      boot.position.x = ruhe.x + p * 6;
-      boot.position.z = ruhe.z - p * 60;
+      if (p > 0.001) {
+        const r = aufWeg(p * gesamt);
+        const soll = raus ? r : r + Math.PI;
+        let d = ((soll - kurs + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+        kurs += d * Math.min(1, dt * 2);
+        boot.position.set(_p.x, 0, _p.z);
+      } else {
+        boot.position.set(ruhe.x, 0, ruhe.z);
+        kurs = ruhe.ry;
+      }
       boot.position.y = Math.sin(t * 1.4) * 0.06 * (1 + p * 4);
-      boot.rotation.y = ruhe.ry + Math.sin(t * 0.9) * 0.02;
+      boot.rotation.y = kurs + Math.sin(t * 0.9) * 0.02;
       boot.rotation.z = Math.sin(t * 1.7) * 0.02 * (1 + p * 5);
     },
   };
@@ -643,62 +672,98 @@ export function barkasseBoot() {
   return { group: g, laenge: 16, breite: 4.2, fl };
 }
 
-function kreuzfahrtterminal(stufe) {
+// Pierlinien der Stufe 6 aus harbor.js (bauart 'pier'), steg 'P' Kreuzfahrt, 'MA' Marine
+function pierLinien(steg) {
+  return (HAFEN.stufen?.[6]?.stege ?? []).filter((l) => l.bauart === 'pier' && l.steg === steg).map((l) => l.punkte);
+}
+// Wurzel (Landende) einer Pier: Punkt mit kleinstem y
+function pierWurzel(steg, rueck) {
+  let best = null;
+  for (const l of pierLinien(steg)) for (const q of l) if (!best || q[1] < best[1]) best = q;
+  return best ?? rueck;
+}
+
+function kreuzfahrtterminal(stufe, { lage = { x: -150, y: 212 } } = {}) {
   const g = new THREE.Group();
-  // Lange weisse Terminalhalle mit Glasband und geschwungenem Dach (Vorbild Warnemuende)
-  const lang = stufe >= 2 ? 34 : 16;
-  box(g, lang, 6, 9, FARBE.white, 0, LAND_Y, 0);
-  box(g, lang - 1, 1.6, 0.1, FARBE.glass, 0, LAND_Y + 2.6, -4.55);
-  const dach = add(g, new THREE.CylinderGeometry(5, 5, lang + 1, 16, 1, false, 0, Math.PI), FARBE.pont, 0, LAND_Y + 6, 0);
+  // Lange weisse Terminalhalle mit Glasband und geschwungenem Dach (Vorbild Warnemuende), quer ueber der
+  // Wurzel der Kreuzfahrtpier: Die Gaeste gehen nach Norden auf die Pier, nach Sueden zu den Bussen.
+  const lang = stufe >= 2 ? 34 : 18;
+  const tief = 8;
+  box(g, lang, 6, tief, FARBE.white, 0, LAND_Y, 0);
+  box(g, lang - 1, 1.6, 0.1, FARBE.glass, 0, LAND_Y + 2.6, -tief / 2 - 0.05);
+  box(g, lang - 1, 1.6, 0.1, FARBE.glass, 0, LAND_Y + 2.6, tief / 2 + 0.05);
+  const dach = add(g, new THREE.CylinderGeometry(tief / 2 + 0.6, tief / 2 + 0.6, lang + 1, 16, 1, false, 0, Math.PI), FARBE.pont, 0, LAND_Y + 6, 0);
   dach.rotation.z = Math.PI / 2;
   dach.rotation.x = Math.PI / 2;
   dach.scale.set(1, 1, 0.25);
-  // Gangway-Turm am Kopf der T-Pier (Liegeplatz P01 bei -227/290, Pierkopf auf y 262)
-  const [px, pz] = P(-227 - -150, 262 - 198);
-  const turm = new THREE.Group();
-  turm.position.set(px, 1.3, pz - 1.5);
-  box(turm, 2, 9, 2, FARBE.steel);
-  const gw = box(turm, 1.4, 1.4, 5, FARBE.white, 0, 7, -2.8);
-  turm.userData.fest = true;
-  g.add(turm);
-  // Busse vor dem Terminal
+  // Ausgang zur Pier (Nordseite) und Eingang zum Busplatz (Suedseite): Vordaecher
+  const [wx] = P(pierWurzel('P', [-150, 219])[0] - lage.x, 0);
+  box(g, 4, 0.25, 3, FARBE.blue, wx, LAND_Y + 3.2, -tief / 2 - 1.5);
+  box(g, 6, 0.25, 3, FARBE.blue, 0, LAND_Y + 3.2, tief / 2 + 1.5);
+  // Busplatz zwischen Halle und Nehrungsstrasse, Busse laengs zur Strasse
+  flaeche(g, lang + 8, 5.5, FARBE.road, 0, tief / 2 + 3);
   const busse = stufe >= 2 ? 3 : 1;
-  for (let i = 0; i < busse; i++) box(g, 2.5, 3, 11, [FARBE.blue, FARBE.yellow, FARBE.white][i], -12 + i * 4, LAND_Y, 13);
-  flaeche(g, lang + 6, 12, FARBE.road, 0, 12);
-  const fl = [flagge(g, -lang / 2 - 1.5, -5.5, 9, FARBE.blue), flagge(g, -lang / 2 + 0.5, -5.5, 9, FARBE.red)];
-  if (stufe >= 2) {
-    const turm2 = turm.clone();
-    turm2.position.x = px + 30;
-    turm2.userData.fest = true;
-    g.add(turm2);
+  for (let i = 0; i < busse; i++) box(g, 11, 3, 2.5, [FARBE.blue, FARBE.yellow, FARBE.white][i], -lang / 2 + 6 + i * 12, LAND_Y, tief / 2 + 3.2);
+  const fl = [flagge(g, -lang / 2 - 1.2, -tief / 2 - 1, 9, FARBE.blue), flagge(g, -lang / 2 + 1, -tief / 2 - 1, 9, FARBE.red)];
+  // Gangway-Tuerme an der Ostkante der Kreuzfahrtpier, das Schiff (P01) liegt oestlich daneben
+  const [pwx] = pierWurzel('P', [-150, 219]);
+  const p01 = HAFEN.plaetze?.find((q) => q.id === 'P01')?.lage?.[6] ?? [-122, 380];
+  const tuerme = stufe >= 2 ? [-40, 0] : [-20];
+  for (const off of tuerme) {
+    const [px, pz] = P(pwx + 1.6 - lage.x, p01[1] + off - lage.y);
+    const turm = new THREE.Group();
+    turm.position.set(px, 1.3, pz);
+    box(turm, 2, 9, 2, FARBE.steel);
+    box(turm, 4, 1.4, 1.4, FARBE.white, 2.6, 7, 0);
+    turm.userData.fest = true;
+    g.add(turm);
   }
   return { group: g, update: (dt, t) => fl.forEach((f, i) => wehen(f, t, i)) };
 }
 
-function marineanleger(stufe) {
+function marineanleger(stufe, { lage = { x: -336, y: 210 } } = {}) {
   const g = new THREE.Group();
-  // Wache und Schranke an der Wurzel der T-Pier (Plan x -225), Zaun zum Strand
-  const [px, pz0] = P(-225 - -300, 214 - 198);
-  box(g, 3, 2.6, 3, FARBE.navyGrey, px - 7, LAND_Y, pz0 + 2);
-  box(g, 3.2, 0.3, 3.2, FARBE.ink, px - 7, LAND_Y + 2.6, pz0 + 2);
-  const schranke = box(g, 6, 0.15, 0.15, FARBE.red, px - 3, LAND_Y + 1, pz0 + 4);
-  for (let i = 0; i < 12; i++) box(g, 2.4, 2, 0.08, FARBE.steel, px - 10 - i * 2.5, LAND_Y, pz0);
-  // Backsteinbau mit Fahnenmast
-  haus(g, 16, 6, 8, FARBE.brick, FARBE.ink, -6, 4);
-  const fl = flagge(g, 4, -3, 10, FARBE.navy);
+  // Eingezaeunter Stuetzpunkt an der Wurzel der eigenen Marinepier (Steg MA). Zwei Zugaenge: das Tor mit
+  // Wache an der Nehrungsstrasse (Sueden) und die Pier nach Norden; dazwischen der Exerzierplatz.
+  const X0 = -21, X1 = 21, Z0 = -9, Z1 = 8;   // Zaun in lokalen Metern (Norden = -z)
+  const [wx] = P(pierWurzel('MA', [-330, 220])[0] - lage.x, 0);
+  const torX = 6, torB = 6;                   // Tor in der Suedseite (Mitte, Breite)
+  flaeche(g, X1 - X0, Z1 - Z0, FARBE.pave, (X0 + X1) / 2, (Z0 + Z1) / 2);
+  // Zaun aus Feldern, mit Luecken fuer Tor (Sueden) und Pier (Norden)
+  const feld = (x0, z0, x1, z1) => {
+    const len = Math.hypot(x1 - x0, z1 - z0), n = Math.max(1, Math.round(len / 2.5));
+    for (let i = 0; i < n; i++) {
+      const k = (i + 0.5) / n;
+      box(g, len / n - 0.15, 2, 0.08, FARBE.steel, x0 + (x1 - x0) * k, LAND_Y, z0 + (z1 - z0) * k, Math.atan2(-(z1 - z0), x1 - x0));
+    }
+  };
+  feld(X0, Z1, torX - torB / 2, Z1); feld(torX + torB / 2, Z1, X1, Z1);
+  feld(X0, Z0, wx - 3, Z0); feld(wx + 3, Z0, X1, Z0);
+  feld(X0, Z0, X0, Z1); feld(X1, Z0, X1, Z1);
+  // Wache und Schranke am Tor
+  box(g, 3, 2.6, 3, FARBE.navyGrey, torX - torB / 2 - 2, LAND_Y, Z1 - 2);
+  box(g, 3.4, 0.3, 3.4, FARBE.ink, torX - torB / 2 - 2, LAND_Y + 2.6, Z1 - 2);
+  const schranke = new THREE.Group();
+  schranke.position.set(torX - torB / 2, LAND_Y + 1, Z1 + 0.3);
+  box(schranke, torB, 0.15, 0.15, FARBE.red, torB / 2, 0, 0);
+  g.add(schranke);
+  // Torposten an der Pier
+  box(g, 1.2, 2.2, 1.2, FARBE.navyGrey, wx - 3.6, LAND_Y, Z0 + 0.8);
+  // Stabsgebaeude in Backstein mit Fahnenmast
+  haus(g, 14, 6, 7, FARBE.brick, FARBE.ink, -12, 2);
+  const fl = flagge(g, wx + 4, Z0 + 2, 10, FARBE.navy);
   // Radarmast mit drehender Antenne
-  zyl(g, 0.3, 12, FARBE.steel, -14, LAND_Y, -2, 6);
-  const radar = box(g, 3, 0.3, 0.4, FARBE.white, -14, LAND_Y + 12.2, -2);
-  let heli = null;
+  zyl(g, 0.3, 12, FARBE.steel, X0 + 2, LAND_Y, Z0 + 2, 6);
+  const radar = box(g, 3, 0.3, 0.4, FARBE.white, X0 + 2, LAND_Y + 12.2, Z0 + 2);
   if (stufe >= 2) {
-    haus(g, 12, 5, 7, FARBE.brick, FARBE.ink, -6, 16);
-    haus(g, 10, 7, 10, FARBE.navyGrey, FARBE.grey, 12, 12);          // Werkstatthalle
-    heli = new THREE.Group();
-    heli.position.set(-24, LAND_Y + 0.03, 10);
-    add(heli, new THREE.CircleGeometry(5, 24).rotateX(-Math.PI / 2), FARBE.grey);
-    box(heli, 0.6, 0.02, 3.6, FARBE.white, -1, 0.01, 0);
-    box(heli, 0.6, 0.02, 3.6, FARBE.white, 1, 0.01, 0);
-    box(heli, 2, 0.02, 0.6, FARBE.white, 0, 0.01, 0);
+    haus(g, 9, 5, 5, FARBE.brick, FARBE.ink, 15, -4.5);              // Unterkunft
+    haus(g, 9, 6, 6, FARBE.navyGrey, FARBE.grey, -12, -5.5);         // Werkstatthalle
+    const heli = new THREE.Group();
+    heli.position.set(16, LAND_Y + 0.03, 3.5);
+    add(heli, new THREE.CircleGeometry(3.4, 24).rotateX(-Math.PI / 2), FARBE.grey);
+    box(heli, 0.5, 0.02, 2.6, FARBE.white, -0.8, 0.01, 0);
+    box(heli, 0.5, 0.02, 2.6, FARBE.white, 0.8, 0.01, 0);
+    box(heli, 1.6, 0.02, 0.5, FARBE.white, 0, 0.01, 0);
     g.add(heli);
   }
   return {
