@@ -95,10 +95,11 @@ Ein einziger `onTick` für alle Boote, keine Speicheranforderungen pro Bild. Lei
 
 Seit dem Gelände-Umbau (Thread "Boote ums Gelände herum führen") gibt es keine festen Wegpunkte mehr. Jede Fahrt wird beim Losfahren aus einer Karte berechnet (`web/js/world/fahrwasser.js`, reine Rechnung ohne Three.js):
 
-- **Karte:** Raster mit 1,5 m Zellen über x -300..320, z -340..140 (Weltmeter). Je Zelle Wassertiefe aus `game.landscape.tiefeBei` und Abstand zum nächsten Hindernis. Hindernisse sind Land, Strand, Molen (aus der Tiefe), alle Steglinien der Stufe mit Breite und Pfählen und alle Liegeplätze als Rechtecke (aus `HAFEN`, also mit Stegbild). Wartebojen und Ankerplätze sind weiche Zonen, die Wege nach Möglichkeit meiden. Außerhalb des Rasters gilt offenes Wasser.
-- **Neu bauen:** bei `stufe`, `stege` (Steg gekauft), `stegbild` und `landschaft:geaendert`, sofort. Laufende Fahrten planen dann ab ihrer Position neu.
-- **Weg:** A* für das jeweilige Boot. Abstand `r` = halbe Breite + Rand + 15 % der Länge (Bug und Heck schwenken in Kurven aus), Tiefe = Tiefgang + 0,3 m. Nur am Anfang und Ende (Gasse vor der Box, beim Ablegen) darf es bis auf Rumpf + 0,35 m eng werden, das kostet viel. Danach geglättet und, wo Platz ist, bis 3 m nach Steuerbord versetzt. Gibt es keinen Weg mit vollem Tiefgang, fährt das Boot lieber flach als über Land (`flach: true`).
-- **Anlegen:** Der Drehpunkt vor der Box (`approachPoints`) wird nur auf freiem, tiefem Wasser gewählt (`game.boatAnim.setFrei`), weit draußen und seitlich, sonst näher an der Box.
+- **Karte:** Raster mit 1,5 m Zellen über x -300..320, z -340..140 (Weltmeter). Je Zelle Wassertiefe aus `game.landscape.tiefeBei` und Abstand zum nächsten Hindernis. Hindernisse sind Land, Strand, Molen, Inseln und Felsen der Geländeform (aus der Tiefe), alle Steglinien der Stufe mit Breite und Pfählen, alle Liegeplätze als Rechtecke (aus `HAFEN`, also mit Stegbild), ab Stufe 3 die Seebrücke und ab Stufe 6 die Liegewannen der Großschiffe (`GROSSE_GAESTE` in `data/verkehr.js`). Wartebojen und Ankerplätze sind weiche Zonen, die Wege nach Möglichkeit meiden. Außerhalb des Rasters gilt offenes Wasser.
+- **Neu bauen:** bei `stufe`, `stege` (Steg gekauft), `stegbild`, `landschaft:geaendert` und anderer Geländeform, sofort. Laufende Fahrten planen dann ab ihrer Position neu.
+- **Weg:** A* für das jeweilige Boot. Abstand `r` = halbe Breite + Rand + 15 % der Länge (Bug und Heck schwenken in Kurven aus), Tiefe = Tiefgang + 0,3 m. Nur am Anfang und Ende (Gasse vor der Box, beim Ablegen) darf es bis auf Rumpf + 0,35 m eng werden, das kostet viel. Danach geglättet (jede Gerade prüft jede Zelle, die sie berührt) und, wo Platz ist, bis 3 m nach Steuerbord versetzt. Gibt es keinen Weg mit vollem Tiefgang, fährt das Boot lieber flach als über Land (`flach: true`).
+- **Anlegen:** Der Drehpunkt vor der Box (`approachPoints`) wird nur auf freiem, tiefem Wasser gewählt (`game.boatAnim.setFrei`), von dem die Gerade bis vor die Box frei ist (`setSicht`), weit draußen und seitlich, sonst näher an der Box.
+- **Bojenwechsel:** `boot:boje` { id, boje } (Stufenausbau mit weniger Bojen) lässt das Boot per Wegsuche an die neue Boje verholen.
 - **Engstellen:** Wo zwei Boote nicht aneinander vorbeipassen, erkennt die Karte eine Engstelle mit Achse. Davor fragt das Boot eine Einbahn-Freigabe an (`boat-channel.js`, aus Jorvens Engpass-Patch): bis drei Boote gleicher Richtung als Konvoi, Gegenverkehr wartet in Reihenfolge davor. Die Freigabe gilt nur in der Engstelle, nach 45 s Warten fährt das Boot trotzdem.
 - **Richtungen:** Ankünfte und Abfahrten verteilen sich auf die Abschnitte des Kartenrands, die das Boot erreichen kann (Westen, Nordwesten, Norden, Nordosten, Osten), ohne zweimal hintereinander denselben. Trägt `boot-kommt` ein Feld `herkunft` (0 = Westen bis 1 = Osten, aus den Spielregeln), gilt das. Ist der See für die Größe nicht mit dem Meer verbunden, kommen die Boote von den entfernten Enden des Sees.
 - **Tagestörn:** Die Runde liegt auf dem freiesten Wasser in der Nähe des alten Punkts, der Kreis nur so groß, wie dort Platz ist.
@@ -106,12 +107,13 @@ Seit dem Gelände-Umbau (Thread "Boote ums Gelände herum führen") gibt es kein
 
 ### Prüfen
 
-- `node --test tests/fahrwasser.test.mjs`: jeder Liegeplatz in Stufe 1 bis 6 und allen 13 Stegbildern ist von der Warteboje erreichbar, kein Weg kommt Land, Steg oder Liegeplatz näher als Rumpf + 0,35 m, Bojen und Ankerplätze liegen frei, Engstellen und Freigabe. Plätze, die nur über zu flaches Wasser erreichbar sind, stehen als Hinweis in der Ausgabe.
-- `node tools/fahrwasser-pruefen.cjs --stufen 1-6 --stegbilder 0-12 --sekunden 40 [--geraet handy] [--bilder ordner]`: spielt jede Kombination mit Tempo 8x und vollem Hafen und zählt in jedem Bild Rümpfe auf Land, auf Stegplanken, Rumpf in Rumpf und Notfall-Durchlässe (Vorbeifahrer getrennt). Braucht `cd tests && npm ci`.
+- `node --test tests/fahrwasser.test.mjs`: jeder Liegeplatz in Stufe 1 bis 6, allen 13 Stegbildern und allen 10 Geländeformen ist von der Warteboje erreichbar, der Kartenrand ist von der Boje erreichbar, Bahnen und Binnensee-Runde der Vorbeifahrer liegen in jeder Form auf Wasser, kein Weg kommt Land, Steg oder Liegeplatz näher als Rumpf + 0,35 m, Bojen und Ankerplätze liegen frei, Engstellen und Freigabe. Plätze, die nur über zu flaches Wasser erreichbar sind, stehen als Hinweis in der Ausgabe.
+- `node tools/fahrwasser-pruefen.cjs --stufen 1-6 --stegbilder 0-12 (oder 0,7,12) --sekunden 40 [--geraet handy] [--bilder ordner]`: spielt jede Kombination mit Tempo 8x und vollem Hafen und zählt in jedem Bild Rümpfe auf Land, auf Stegplanken, Rumpf in Rumpf und Notfall-Durchlässe (Vorbeifahrer getrennt). Braucht `cd tests && npm ci`.
 
 ## Offen
 
-- Vorbeifahrer (`render/boats/verkehr.js`) und Besuchsschiffe der Services fahren noch auf eigenen festen Bahnen; sie können auf `game.fahrwasser.weg` umgestellt werden.
+- Vorbeifahrer (`render/boats/verkehr.js`) und Besuchsschiffe der Services fahren noch auf eigenen festen Bahnen (geprüft gegen alle Geländeformen); sie können auf `game.fahrwasser.weg` umgestellt werden. Die Binnensee-Runde weicht Inseln schon aus (`rundeImWasser`).
+- Restliche Berührungen beim Anlegen in Stufe 4 (Stege C und B, Handy) und vereinzelt Rumpf an Rumpf in vollen Gassen.
 
 ## Dauerlieger
 

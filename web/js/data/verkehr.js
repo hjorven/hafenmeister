@@ -22,11 +22,11 @@ const osten = (y, xKurve = 420 - (y - 264)) => [[xKurve - 40, y], [xKurve, y + 5
 const ostwaerts = (y, xKurve, rest = osten(y)) => [...westen(y, xKurve), ...rest];
 const westwaerts = (y, xKurve, vorher = osten(y).reverse()) => [...vorher, ...westen(y, xKurve).reverse()];
 export const SEE = {
-  // Noch kein Durchstich: die See ist frei, Bahnen gut 14 m vor den Buhnenköpfen (y bis 254),
-  // weit genug draußen, dass auch über dem Watt (Geländeform 8) noch 1,2 m Wasser stehen
+  // Noch kein Durchstich: die See ist frei, Bahnen gut 24 m vor den Buhnenköpfen (y bis 254),
+  // weit genug draußen, dass über Watt (Form 8), Sandplaten (Form 3) und Felsen (Form 6, 7) 1,2 m Wasser stehen
   1: [
-    { pts: ostwaerts(278, -340), art: 'klein' }, { pts: westwaerts(292, -326), art: 'klein' },
-    { pts: ostwaerts(316, -298), art: 'gross' }, { pts: westwaerts(334, -278), art: 'gross' },
+    { pts: ostwaerts(294, -340), art: 'klein' }, { pts: westwaerts(308, -326), art: 'klein' },
+    { pts: ostwaerts(328, -298), art: 'gross' }, { pts: westwaerts(346, -278), art: 'gross' },
   ],
   // Stufe 3 und 4: Molenköpfe bis y 268 (x 149 bis 187), Rinne bis y 356 (x 152 bis 212),
   // Reede ab x 222, Ankerfeld um (345, 385) mit Radius 62. Die kleinen Bahnen biegen vor der Einfahrt nach Norden ab.
