@@ -316,11 +316,17 @@ export async function initBridge(game) {
   function loadSaved() {
     try {
       const r = game.spielstand?.laden?.();
-      if (r?.game) return deserialize(JSON.stringify(r.game));
+      if (r?.game) return pruefen(deserialize(JSON.stringify(r.game)));
     } catch (err) {
       console.warn('Spielstand nicht lesbar, neues Spiel', err);
     }
     return null;
+  }
+  // Alte Stände: Gäste in Boxen, die es nicht mehr gibt oder die zu flach sind, legen um (sim.repairBerths)
+  function pruefen(st) {
+    const changes = sim.repairBerths(st, ctx);
+    if (changes.length) console.info('Spielstand geprüft, Boote umgelegt:', changes);
+    return st;
   }
   // Testmodus ?stufe=n: frischer Spielstand dieser Stufe (alles bis dahin gebaut), der echte
   // gespeicherte Spielstand wird weder geladen noch überschrieben. Ohne Parameter wie gehabt.
@@ -331,7 +337,7 @@ export async function initBridge(game) {
 
   game.on('spielstand-geladen', (next) => {
     try {
-      setState(deserialize(JSON.stringify(next)));
+      setState(pruefen(deserialize(JSON.stringify(next))));
       announce();
     } catch (err) {
       console.error('Geladener Spielstand passt nicht zu den Regeln', err);

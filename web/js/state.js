@@ -97,7 +97,46 @@ function validate(data) {
   if (!Number.isFinite(data.money) || !Number.isFinite(data.day)) {
     throw new Error('Spielstand fehlerhaft: Zahlen beschädigt');
   }
+  tiefPruefen(data);
   return data;
+}
+
+const istObjekt = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+const zahlIn = (v, min, max) => Number.isFinite(v) && v >= min && v <= max;
+
+/**
+ * Prüft verschachtelte Daten (roadmap C03), bevor ein Stand übernommen wird. Falsche Typen und
+ * unmögliche Zahlen werfen einen Fehler; lose Verweise (Platz zeigt auf ein Boot, das es nicht gibt)
+ * werden entfernt, damit ein leicht beschädigter Stand trotzdem lädt.
+ */
+function tiefPruefen(data) {
+  const fehler = (was) => { throw new Error(`Spielstand fehlerhaft: ${was}`); };
+  for (const key of ['boats', 'berths', 'buildings', 'facilities', 'modules', 'leaving', 'logbook', 'stats']) {
+    if (!istObjekt(data[key])) fehler(`${key} ist kein Objekt`);
+  }
+  if (!Number.isInteger(data.day) || !zahlIn(data.day, 1, 1e6)) fehler('Tag');
+  if (!Number.isInteger(data.stage) || !zahlIn(data.stage, 1, 20)) fehler('Stufe');
+  if (!zahlIn(data.money, -1e12, 1e12)) fehler('Geld');
+  if (!zahlIn(data.clock, 0, 1e7)) fehler('Uhrzeit');
+  if (!Number.isFinite(data.seed) || !Number.isFinite(data.rng)) fehler('Zufall');
+  if (data.ratings.length > 10000 || !data.ratings.every((r) => zahlIn(r, 0, 5))) fehler('Bewertungen');
+  const boote = Object.entries(data.boats);
+  if (boote.length > 5000) fehler('zu viele Boote');
+  let hoechste = 0;
+  for (const [key, b] of boote) {
+    if (!istObjekt(b) || !Number.isFinite(b.id) || String(b.id) !== key) fehler(`Boot ${key}`);
+    if (typeof b.status !== 'string') fehler(`Boot ${key} ohne Zustand`);
+    for (const f of ['length', 'beam', 'draft']) if (f in b && !zahlIn(b[f], 0, 1000)) fehler(`Boot ${key}: ${f}`);
+    if (b.berthId != null && typeof b.berthId !== 'string') fehler(`Boot ${key}: Platz`);
+    hoechste = Math.max(hoechste, b.id);
+  }
+  if (!Number.isInteger(data.nextId) || data.nextId <= hoechste) data.nextId = Math.floor(hoechste) + 1;
+  for (const [platz, id] of Object.entries(data.berths)) {
+    if (!data.boats[id]) delete data.berths[platz];
+  }
+  data.queue = data.queue.filter((id) => data.boats[id]);
+  data.upcoming = data.upcoming.filter((u) => u !== null && (typeof u === 'object' || data.boats[u]));
+  data.harborName = String(data.harborName ?? '').replace(/[\u0000-\u001f\u007f<>]/g, '').slice(0, 32);
 }
 
 // Speichern im Browser, Speicherplätze, Export und Import: web/js/save/ (ein Speicherweg,

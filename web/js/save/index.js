@@ -18,7 +18,7 @@ import { hasSave, loadGame, requestPersistentStorage } from './storage.js';
 import { startPwa } from './pwa.js';
 import { openSavePanel, openStart, showExportReminderIfDue, showUpdateBanner } from './save-panel.js';
 import * as plaetze from './plaetze.js';
-import { createState } from '../state.js';
+import { createState, deserialize } from '../state.js';
 
 // Für den Fall, dass index.html die Zeilen noch nicht hat. Doppelt schadet nicht.
 function ensureHeadLinks() {
@@ -85,12 +85,20 @@ export function init(game) {
     } catch { /* ohne Bild */ }
   }
 
-  /** Neuen Hafen anlegen und starten. stegbild: 1 bis n, einstieg: Einführung zeigen. */
-  function neuesSpielAnlegen({ name, stegbild, einstieg = true }) {
+  /** Prüft einen Stand so streng wie beim Laden (state.js), bevor er übernommen wird. */
+  function pruefeStand(spiel) {
+    try { deserialize(JSON.stringify(spiel)); } catch (err) {
+      throw new Error(`Dieser Hafen lässt sich nicht laden (${String(err?.message ?? err).replace(/^Spielstand /, '')}).`);
+    }
+  }
+
+  /** Neuen Hafen anlegen und starten. stegbild: 1 bis n, gelaende: Küstenform 1 bis 10, einstieg: Einführung zeigen. */
+  function neuesSpielAnlegen({ name, stegbild, gelaende, einstieg = true }) {
     const st = createState();
     st.harborName = name;
     st.modules = st.modules ?? {};
     if (Number.isInteger(stegbild) && stegbild >= 1) st.modules.stegbild = { nr: stegbild };
+    if (Number.isInteger(gelaende) && gelaende >= 1) st.modules.gelaende = { nr: gelaende };
     if (!einstieg) st.modules.einstieg = { fertig: true, erledigt: [] };
     const id = plaetze.platzAnlegen(st, { name });
     bildMachen();
@@ -111,7 +119,15 @@ export function init(game) {
     namensVorschlag,
     stegbildAnzahl: () => game.stegbild?.anzahl ?? 0,
     neuesSpiel: neuesSpielAnlegen,
-    wechseln: (id) => { bildMachen(); plaetze.wechseln(id, testmodus() ? null : aktuell()); neuStarten(); },
+    wechseln: (id) => {
+      const r = plaetze.platzLesen(id);
+      if (!r) throw new Error('Dieser Hafen ist leer oder beschädigt.');
+      pruefeStand(r.game);
+      bildMachen();
+      plaetze.wechseln(id, testmodus() ? null : aktuell());
+      neuStarten();
+    },
+    pruefeStand,
     probeKopie: () => probeKopie(),
     probeVerwerfen: () => { plaetze.probeVerwerfen(); neuStarten(); },
     probeUebernehmen: () => {
@@ -216,9 +232,10 @@ export function init(game) {
     if (direkt || st.testmodus || navigator.webdriver || location.search) return;
     const v = plaetze.verzeichnis();
     if (v.plaetze.length < 2) return;
-    const vorher = game.paused ? 0 : (game.speed || 1);
-    game.oberflaeche?.tempo?.(0);
-    const weiter = () => game.oberflaeche?.tempo?.(vorher);
+    // Spiel pausieren wie mit dem Pause-Knopf (Anzeige stimmt), danach wie vorher weiter
+    const warPausiert = !!game.paused;
+    if (!warPausiert) game.setPaused?.(true);
+    const weiter = () => { if (!warPausiert) game.setPaused?.(false); };
     openStart({
       eintrag: plaetze.aktiverPlatz(),
       info: plaetze.infoAus(st),

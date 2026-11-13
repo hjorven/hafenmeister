@@ -15,6 +15,7 @@ import {
 import { STEGBILDER } from '../data/stegbilder.js';
 import { HAFEN } from '../data/harbor.js';
 import { ECONOMY } from '../data/economy.js';
+import { FORMEN } from '../render/landschaft/formen.js';
 
 const CSS = `
 .hm-save-backdrop{position:fixed;inset:0;background:rgba(20,34,50,.5);display:flex;
@@ -90,6 +91,10 @@ img.hm-sp-bild{box-shadow:0 0 0 var(--sp-px) rgba(36,54,74,.35)}
 .hm-sp-steg[aria-checked=true]{outline:calc(var(--sp-px) * 2) solid var(--sp-tinte);outline-offset:2px}
 .hm-sp-steg[aria-checked=true]::after{content:"";position:absolute;right:4px;bottom:4px;width:12px;height:12px;
   background:var(--hm-gold,#f2c14e);box-shadow:0 0 0 2px var(--sp-tinte)}
+.hm-sp-kueste{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px}
+.hm-sp-kueste .hm-sp-k{min-height:40px;font-size:14px}
+.hm-neu .hm-sp .hm-sp-kueste .hm-sp-k[aria-checked=true]{border-image-source:var(--rahmen-tinte);color:var(--sp-papier)}
+body:not(.hm-neu) .hm-sp-kueste .hm-sp-k[aria-checked=true]{background:var(--sp-tinte);color:#fff}
 .hm-sp label.hm-sp-haken{display:flex;align-items:center;gap:10px;min-height:44px;margin-top:8px;cursor:pointer}
 .hm-sp label.hm-sp-haken input{width:22px;height:22px;accent-color:var(--sp-meer)}
 .hm-banner{position:fixed;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom));
@@ -306,6 +311,7 @@ export function openSavePanel(opts) {
       const liste = await pickAndImport();
       const frei = P.MAX_PLAETZE - P.verzeichnis().plaetze.length;
       const namen = [];
+      for (const { spiel } of liste) opts.pruefeStand?.(spiel); // erst alles prüfen, dann übernehmen
       for (const { name, spiel } of liste.slice(0, frei)) {
         const id = P.importieren(spiel, name);
         namen.push(P.verzeichnis().plaetze.find((p) => p.id === id)?.name ?? 'Hafen');
@@ -495,6 +501,7 @@ export function openSavePanel(opts) {
   // ------------------------------------------------------------- Neues Spiel
   let neuName = null;
   let neuStegbild = 0; // 0 = Zufall
+  let neuGelaende = 0; // 0 = Zufall
   let neuEinstieg = null;
 
   function zeichneNeu() {
@@ -541,6 +548,30 @@ export function openSavePanel(opts) {
       inhalt.append(raster);
     }
 
+    // Küste (Geländeform)
+    if (FORMEN.length > 1) {
+      inhalt.append(el('h3', { id: 'hm-neu-kueste' }, 'Küste'));
+      const idee = el('p', { class: 'hm-sp-info', style: 'margin-top:6px' });
+      const zeigeIdee = () => {
+        const f = FORMEN.find((x) => x.nr === neuGelaende);
+        idee.textContent = f ? f.idee : 'Eine der Küstenformen wird ausgewürfelt.';
+      };
+      const reihe = el('div', { class: 'hm-sp-kueste', role: 'radiogroup', 'aria-labelledby': 'hm-neu-kueste' });
+      for (const f of [{ nr: 0, name: 'Zufall' }, ...FORMEN]) {
+        const b = knopf(f.name, () => {
+          neuGelaende = f.nr;
+          for (const k of reihe.children) k.setAttribute('aria-checked', String(k === b));
+          zeigeIdee();
+        });
+        b.setAttribute('role', 'radio');
+        b.setAttribute('aria-checked', String(neuGelaende === f.nr));
+        b.dataset.gelaende = String(f.nr);
+        reihe.append(b);
+      }
+      zeigeIdee();
+      inhalt.append(reihe, idee);
+    }
+
     // Einführung
     const haken = el('input', { type: 'checkbox', checked: neuEinstieg });
     haken.addEventListener('change', () => { neuEinstieg = haken.checked; });
@@ -554,7 +585,8 @@ export function openSavePanel(opts) {
     const los = knopf('Hafen gründen', sicher(() => {
       const anz = Math.max(1, anzahl);
       const nr = neuStegbild || (anzahl ? 1 + Math.floor(Math.random() * anz) : 0);
-      opts.neuesSpiel({ name: P.nameSauber(neuName), stegbild: nr, einstieg: neuEinstieg });
+      const form = neuGelaende || FORMEN[Math.floor(Math.random() * FORMEN.length)]?.nr || 1;
+      opts.neuesSpiel({ name: P.nameSauber(neuName), stegbild: nr, gelaende: form, einstieg: neuEinstieg });
     }, 'Das neue Spiel konnte nicht angelegt werden.'), 'hm-primaer breit');
     los.id = 'hm-neu-los';
     los.disabled = voll;

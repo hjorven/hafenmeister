@@ -338,3 +338,77 @@ test('alle Häfen in einer Datei und zurück', () => {
   assert.equal(importInhalt(JSON.stringify(wrap({ ...stand(7), harborName: 'Sieben' })))[0].name, 'Sieben');
   assert.throws(() => importInhalt(JSON.stringify({ format: 'hafenmeister-sammlung', plaetze: 3 })), (e) => e.code === 'ungueltig');
 });
+
+// ---------------------------------------------------------------------------
+// Prüfung beim Laden alter Stände (sim.repairBerths) und Umbau auf Version 2
+
+import * as sim from '../web/js/sim.js';
+import { echterHafen, ruhigerStand, testBoot } from './regeln.mjs';
+import { unwrap, SAVE_VERSION } from '../web/js/save/storage.js';
+
+function liegt(st, boot, platzId) {
+  st.queue = st.queue.filter((id) => id !== boot.id);
+  boot.status = 'moored';
+  boot.berthId = platzId;
+  st.berths[platzId] = boot.id;
+}
+
+test('alter Stand: Gast in zu flacher Box legt beim Laden um', () => {
+  const ctx = echterHafen();
+  const st = ruhigerStand();
+  const plaetze = sim.availableBerths(st, ctx);
+  // eine Box, die für ein tiefes Boot zu flach ist, und eine, die passt
+  const frei = plaetze.filter((p) => !p.reserved && !p.sizes);
+  const flach = frei.reduce((a, b) => (sim.berthDepth(b, st.stage) < sim.berthDepth(a, st.stage) ? b : a));
+  const tiefgang = sim.berthDepth(flach, st.stage) - ctx.rules.underKeelClearance + 0.05;
+  const boot = testBoot(st, { draft: tiefgang, length: 4, beam: 1.4 });
+  assert.ok(flach, 'Testhafen hat eine flache Box');
+  liegt(st, boot, flach.id);
+  const changes = sim.repairBerths(st, ctx);
+  assert.equal(changes.length, 1);
+  const neu = st.boats[boot.id];
+  if (changes[0].to) {
+    assert.notEqual(neu.berthId, flach.id);
+    assert.ok(sim.fits(neu, ctx.berthById[neu.berthId], ctx.rules, st.stage));
+    assert.equal(st.berths[neu.berthId], boot.id);
+  } else {
+    assert.equal(neu, undefined, 'ohne passende Box reist der Gast ab');
+  }
+  assert.equal(st.berths[flach.id], undefined);
+});
+
+test('Laden: passende Boote und fest liegende Boote bleiben, wo sie sind', () => {
+  const ctx = echterHafen();
+  const st = ruhigerStand();
+  const p = sim.availableBerths(st, ctx).find((b) => !b.reserved && sim.berthDepth(b, st.stage) >= 1);
+  const boot = testBoot(st, { draft: 0.2 });
+  liegt(st, boot, p.id);
+  const fest = testBoot(st, { draft: 5, stationed: true });
+  const q = sim.availableBerths(st, ctx).find((b) => b.id !== p.id && !b.reserved);
+  liegt(st, fest, q.id);
+  assert.deepEqual(sim.repairBerths(st, ctx), []);
+  assert.equal(st.boats[boot.id].berthId, p.id);
+  assert.equal(st.boats[fest.id].berthId, q.id);
+});
+
+test('Laden: Box, die es in der Stufe nicht gibt, wird geräumt', () => {
+  const ctx = echterHafen();
+  const st = ruhigerStand();
+  const fremd = ctx.berths.find((b) => !sim.berthAvailable(st, b) && !b.reserved);
+  const boot = testBoot(st, { draft: 0.2 });
+  liegt(st, boot, fremd.id);
+  const [c] = sim.repairBerths(st, ctx);
+  assert.equal(c.from, fremd.id);
+  assert.equal(st.berths[fremd.id], undefined);
+});
+
+test('Version 1 wird auf 2 umgebaut: Geländeform 1 und Stegbild 0, vorhandene Werte bleiben', () => {
+  assert.equal(SAVE_VERSION, 2);
+  const alt = unwrap({ format: 'hafenmeister-spielstand', version: 1, spiel: { ...createState({ seed: 1 }), modules: { einstieg: { fertig: true } } } }).game;
+  assert.deepEqual(alt.modules.gelaende, { nr: 1 });
+  assert.deepEqual(alt.modules.stegbild, { nr: 0 });
+  assert.deepEqual(alt.modules.einstieg, { fertig: true });
+  const mit = unwrap({ format: 'hafenmeister-spielstand', version: 1, spiel: { ...createState({ seed: 1 }), modules: { gelaende: { nr: 7 }, stegbild: { nr: 4 } } } }).game;
+  assert.equal(mit.modules.gelaende.nr, 7);
+  assert.equal(mit.modules.stegbild.nr, 4);
+});

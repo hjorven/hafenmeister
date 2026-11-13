@@ -9,7 +9,7 @@
 // nicht. Darum gibt es zusätzlich Export und Import als Datei.
 
 export const SAVE_FORMAT = 'hafenmeister-spielstand';
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 // Der Spielstand des gerade aktiven Speicherplatzes liegt immer unter KEY_SAVE (auch
 // data/stegbild.js liest ihn dort vor dem Start). Die anderen Plätze: save/plaetze.js.
@@ -23,7 +23,17 @@ const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
 // Wer das Format von state.js ändert, erhöht SAVE_VERSION und trägt hier ein,
 // wie ein alter Stand umgebaut wird. Beispiel:
 //   MIGRATIONS[1] = (game) => ({ ...game, ruf: game.ruf ?? 3 });
-const MIGRATIONS = {};
+const MIGRATIONS = {
+  // Version 2 (November 2026): Geländeform und Stegbild stehen ausdrücklich im Stand. Ältere Stände
+  // stammen aus der Zeit vor den Formen und Varianten: Geländeform 1 (Nehrung), Stegbild 0 (Grundbild).
+  // Das Landbild (Felder, Wald, Dorf) braucht kein Feld, es folgt aus dem seed.
+  1: (game) => {
+    const modules = game.modules && typeof game.modules === 'object' ? { ...game.modules } : {};
+    if (!Number.isInteger(modules.gelaende?.nr)) modules.gelaende = { nr: 1 };
+    if (!Number.isInteger(modules.stegbild?.nr)) modules.stegbild = { nr: 0 };
+    return { ...game, modules };
+  },
+};
 
 export class SaveError extends Error {
   constructor(code, message) {

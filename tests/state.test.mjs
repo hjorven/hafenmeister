@@ -67,3 +67,29 @@ test('neuer Spielstand hat einen Hafennamen (leer) und alte Stände bekommen ihn
   delete alt.harborName;
   assert.equal(deserialize(JSON.stringify(alt)).harborName, '');
 });
+
+test('Laden prüft verschachtelte Daten: falsche Typen und Extremwerte werden abgelehnt', () => {
+  const kaputt = (aendern) => { const s = createState({ seed: 2 }); aendern(s); return JSON.stringify(s); };
+  assert.throws(() => deserialize(kaputt((s) => { s.boats = null; })), /boats/);
+  assert.throws(() => deserialize(kaputt((s) => { s.day = 1e9; })), /Tag/);
+  assert.throws(() => deserialize(kaputt((s) => { s.stage = 0; })), /Stufe/);
+  assert.throws(() => deserialize(kaputt((s) => { s.money = 1e300; })), /Geld/);
+  assert.throws(() => deserialize(kaputt((s) => { s.ratings = [3, 99]; })), /Bewertungen/);
+  assert.throws(() => deserialize(kaputt((s) => { s.boats = { 7: { id: 8, status: 'moored' } }; })), /Boot 7/);
+  assert.throws(() => deserialize(kaputt((s) => { s.boats = { 7: { id: 7, status: 'moored', draft: -3 } }; })), /draft/);
+});
+
+test('Laden repariert lose Verweise und begrenzt den Hafennamen', () => {
+  const s = createState({ seed: 2 });
+  s.boats = { 5: { id: 5, status: 'moored', berthId: 'A03' } };
+  s.berths = { A03: 5, A04: 77 };
+  s.queue = [5, 99];
+  s.nextId = 2;
+  s.harborName = '<b>Hafen</b>' + 'x'.repeat(100);
+  const d = deserialize(JSON.stringify(s));
+  assert.deepEqual(d.berths, { A03: 5 });
+  assert.deepEqual(d.queue, [5]);
+  assert.equal(d.nextId, 6);
+  assert.equal(d.harborName.includes('<'), false);
+  assert.ok(d.harborName.length <= 32);
+});
