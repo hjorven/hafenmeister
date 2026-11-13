@@ -67,7 +67,7 @@ Welche Form gilt: `?gelaende=N` in der Adresse (nur ansehen), sonst die im Spiel
 ### Rand der Karte und Watt
 
 - `KERN` (x -420..430, y -200..470) ist fein gerechnet und dicht bepflanzt; `karteRaster` deckt genau diesen Bereich ab.
-- `BEREICH` (x -640..660, y -200..640) ist der Rand mit halber Auflösung, damit bei größter Kamerabreite keine harte Kante zum groben Außenring zu sehen ist. Die Tiefentextur rechnet dort nur jedes zweite Texel.
+- `BEREICH` (x -640..660, y -440..640) ist der Rand mit halber Auflösung, damit bei größter Kamerabreite keine harte Kante zum groben Außenring zu sehen ist. Die Tiefentextur rechnet dort nur jedes zweite Texel.
 - Watt (Nordsee und Form 8): Sandplaten knapp über Wasser, dazwischen Priele über 0,9 m tief. Kein flacher Dauersaum, der im Wasser-Shader überall schäumt. Ab Stufe 5 vor dem Außenhafen und ab Stufe 6 in der Liegewanne weggebaggert.
 
 ## Abwechslung an Land (Landbild)
