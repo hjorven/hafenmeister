@@ -131,21 +131,31 @@ try {
   }
 } catch { /* Form 1 */ }
 
-/** Modul für js/main.js (MODULES): Nummer im Spielstand festhalten, game.gelaende bereitstellen. */
 /**
  * Ausschnitt, der den Charakter der Form zeigt: Hafen, Einfahrt und alle Landmarken der Form
  * (Leuchttürme, Inseln im See und vor der Küste). Weltmeter wie die Kamera: { minX, maxX, minZ, maxZ }.
  * Gedacht für einen kurzen Überblick beim Spielstart, bevor die Kamera zum Hafen fährt.
+ * maxBreiteM: höchste Breite des Rahmens; unter 250 m (Handy hochkant) nur Einfahrt und die nächsten Landmarken.
  */
-export function blickRect(f = gelaendeform()) {
+export function blickRect(f = gelaendeform(), { maxBreiteM = 420 } = {}) {
   const U = 0.62;
-  let x0 = -170, x1 = 240, y0 = -20, y1 = 290;          // Hafen, Becken, Einfahrt mit Molen
-  const nimm = (x, y, rx = 12, ry = 12) => { x0 = Math.min(x0, x - rx); x1 = Math.max(x1, x + rx); y0 = Math.min(y0, y - ry); y1 = Math.max(y1, y + ry); };
-  for (const [x, y] of f.leuchttuerme || []) nimm(x, y, 16, 16);
-  for (const i of [...(f.seeInseln || []), ...(f.seeAussen || [])]) nimm(i.x, i.y, Math.min(i.rx, 20) + 8, Math.min(i.ry, 20) + 8);
+  // Kern: Hafen, Becken und Einfahrt mit Molen; bei schmalem Rahmen nur der Ostteil mit der Einfahrt
+  const schmal = maxBreiteM < 250;
+  let x0 = schmal ? 20 : -170, x1 = 240, y0 = -20, y1 = 290;
+  const marken = [
+    ...(f.leuchttuerme || []).map(([x, y]) => [x, y, 16, 16]),
+    ...[...(f.seeInseln || []), ...(f.seeAussen || [])].map((i) => [i.x, i.y, Math.min(i.rx, 20) + 8, Math.min(i.ry, 20) + 8]),
+  ].sort((p, q) => Math.hypot(p[0] - 178, p[1] - 200) - Math.hypot(q[0] - 178, q[1] - 200));
+  // Landmarken von der Einfahrt aus nach Nähe dazunehmen, solange der Rahmen nicht zu breit wird
+  for (const [x, y, rx, ry] of marken) {
+    const nx0 = Math.min(x0, x - rx), nx1 = Math.max(x1, x + rx);
+    if ((nx1 - nx0) * U > maxBreiteM) continue;
+    x0 = nx0; x1 = nx1; y0 = Math.min(y0, y - ry); y1 = Math.max(y1, y + ry);
+  }
   return { minX: x0 * U, maxX: x1 * U, minZ: -y1 * U, maxZ: -y0 * U };
 }
 
+/** Modul für js/main.js (MODULES): Nummer im Spielstand festhalten, game.gelaende bereitstellen. */
 export function init(game) {
   const merken = () => {
     const st = game.state;
@@ -166,6 +176,6 @@ export function init(game) {
   });
   game.gelaende = {
     aktuell: () => ({ ...form, quelle: aktiv.quelle }), anzahl: FORMEN.length, formen: FORMEN.map(({ nr, name, idee }) => ({ nr, name, idee })),
-    blickRect: () => blickRect(form),
+    blickRect: (opt) => blickRect(form, opt),
   };
 }
