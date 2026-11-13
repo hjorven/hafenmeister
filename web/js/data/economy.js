@@ -122,16 +122,33 @@ export const ECONOMY = {
   // Stammgäste (features/stammgaeste.js): Anteil der neuen Boote, die Stammgäste sind; ab so vielen
   // Ankern kommt ein Gast wieder; Länge der Liste; ab diesem Besuch als Dauerlieger zu behalten
   stammgaeste: { chance: 0.15, abBewertung: 4, maxListe: 40, dauerAbBesuch: 5 },
-  // Tagesziele (features/tagesziele.js): Belohnung je Ziel nach Stufe; Anteil der erwarteten Ankünfte
-  // bzw. des erwarteten Hafengelds als Ziel; "Alle Plätze belegt" nur bis zu so vielen Plätzen;
-  // Größe für "ein großes Schiff unterbringen" je Stufe
+  // Tagesziele (features/tagesziele.js, docs/neue-features.md Abschnitt 6). Morgens drei Karten
+  // (leicht, mittel, schwer), der Spieler nimmt eine; es zählen nur eigene Handlungen.
+  // geld: Belohnung eines leichten Ziels je Ausbaustufe. schwere: soll = Grundmenge mal Faktor,
+  // geld = geld[stufe] mal Faktor. ziele: Grundmenge (basis oder basisAnteil der Boote, die der
+  // Spieler heute selbst einweist), Obergrenze maxAnteil dieser Boote, angeboten ab abBooten am Tag.
+  // kassieren: Anteil des Liegegelds, das der Spieler heute selbst einstreichen kann (mit allen Nächten).
+  // wochenziele: Anteil von sieben Tagen Booten bzw. Liegegeld. gutschein.hoechstens mal geld[stufe].
   tagesziele: {
-    belohnung: { 1: 10, 2: 25, 3: 50, 4: 80, 5: 120, 6: 150 },
-    unterbringenAnteil: 0.6, unterbringenMin: 2,
-    kassierenAnteil: 0.6,
-    seglerSoll: { 2: 2, 4: 3 },
-    vollBisPlaetze: 12,
-    groesse: { 3: 'L', 4: 'L', 5: 'XL', 6: 'XL' },
+    geld: { 1: 10, 2: 25, 3: 50, 4: 80, 5: 120, 6: 150 },
+    schwere: {
+      leicht: { soll: 1, geld: 1 },
+      mittel: { soll: 1.6, geld: 2 },
+      schwer: { soll: 2.4, geld: 3.5 },
+    },
+    ziele: {
+      einweisen:   { basisAnteil: 0.35, min: 2, maxAnteil: 0.85, abBooten: 1.5 },
+      passgenau:   { basis: 1.3, maxAnteil: 0.5, abBooten: 2, spielraum: 1.2 },   // Box höchstens 20 % länger
+      wunsch:      { basis: 1.4, maxAnteil: 0.5, abBooten: 1.5 },
+      seglerStrom: { basis: 1.6, maxAnteil: 0.4, abBooten: 3 },
+      rundum:      { abBooten: 2, mindestWuensche: 2 },
+      letzter:     { bisPlaetze: 12 },
+      kassieren:   { anteil: 0.3, maxAnteil: 0.8 },
+    },
+    grossAb: { 3: 'L', 5: 'XL' },                 // "ein großes Schiff einweisen": Klasse ab Stufe
+    halberAnker: 0.5,                             // so viel besser bewerten alle Gäste, die gerade liegen
+    gutschein: { prozent: 10, hoechstens: 15 },
+    woche: { tage: 7, geld: 12, gaeste: 0.25, zufrieden: 0.15, segler: 0.1, liegegeld: 0.55 },
   },
   // Besucher an Land (Fahrgastschiff, Kreuzfahrt) geben abends je Stufe von Kiosk/Restaurant so viel aus
   besucher: { ausgabeJeKioskStufe: 2 },
