@@ -228,3 +228,22 @@ test('Stufenausbau: Gäste auf wegfallenden Plätzen reisen ab, Dauerlieger zieh
   // Kein Boot liegt mehr auf einem Platz, den es nicht gibt
   for (const [platz] of Object.entries(state.berths)) assert.ok(ctx.berthById[platz].stages.includes(state.stage), platz);
 });
+
+test('Gebühr: Dauerlieger zahlt den Anteil des Gastpreises, die feste Pacht gilt nur für Fischer und Dienste', () => {
+  const { ctx, state } = neu(11, 2);
+  ctx.rules.queue.selfEnterAfter = null;
+  state.upcoming = [];
+  assert.ok(ctx.rules.stationedFee > 0, 'feste Pacht ist gesetzt');
+  const r = machDauerplatz(state, ctx, freierPlatz(state, ctx));
+  assert.ok(r.ok);
+  const boot = state.boats[r.boatId];
+  const anteil = Math.round(sim.nightlyFee(state, ctx, boot, 0) * ctx.rules.stationedFeeShare);
+  assert.ok(anteil > 0);
+  assert.notEqual(anteil, ctx.rules.stationedFee, 'Voraussetzung: beide Beträge unterscheiden sich');
+  const ev = sim.tick(state, ctx, ctx.rules.dayLength + 1).filter((e) => e.type === 'stationedFee');
+  const dauer = ev.find((e) => e.boatId === r.boatId);
+  assert.equal(dauer.amount, anteil, 'Dauerlieger: Anteil des Gastpreises');
+  for (const e of ev) {
+    if (e.boatId !== r.boatId) assert.equal(e.amount, ctx.rules.stationedFee, 'Fischer und Dienste: feste Pacht');
+  }
+});
