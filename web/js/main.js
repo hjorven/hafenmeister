@@ -104,7 +104,7 @@ function weltAnForm(game) {
       minZ = Math.min(minZ, z - r); maxZ = Math.max(maxZ, z + r);
     };
     for (const [x, y] of form?.leuchttuerme || []) pkt(x * U, -y * U, 40);
-    for (const i of form?.seeInseln || []) {
+    for (const i of [...(form?.seeInseln || []), ...(form?.seeAussen || [])]) {
       pkt((i.x - i.rx) * U, -(i.y + i.ry) * U, 40);
       pkt((i.x + i.rx) * U, -(i.y - i.ry) * U, 40);
     }
