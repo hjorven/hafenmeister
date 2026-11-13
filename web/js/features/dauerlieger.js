@@ -721,7 +721,11 @@ export async function init(game) {
     }
     zeigeWartende();
   }
-  setTimeout(wartendeZeigen, 300);
+  // init wartet auf die Regeln (regelnBereit), 'ready' kann also schon vorbei sein: einmal nach dem Start zeigen
+  let gestartet = false;
+  const nachStart = () => { if (gestartet) return; gestartet = true; setTimeout(wartendeZeigen, 600); };
+  game.on('ready', nachStart);
+  if (document.getElementById('boot')?.classList.contains('done') || game.boatAnim) nachStart();
 
   // Deutsche Ereignisse für Grafik und Ton, Hinweise für den Spieler
   game.on('sim:dauerAuslaufen', (e) => game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: e.tage }));
