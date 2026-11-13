@@ -33,6 +33,7 @@ Wozu: Man sieht, wer gleich kommt, und kann entscheiden, ob man die große Box m
 - Baumodus (`body.building`) und Fotomodus (`body.foto`): Schilder und Funk aus.
 - Bootskarte offen (`body.card-open`): Funk aus, damit nichts unter der Karte hervorschaut.
 - Ganz herausgezoomt (Boot kürzer als 20 Bildschirmpixel): keine Schilder.
+- Sonderfälle mit der orangen Raute der Leitstelle (ui/hud.js): Die Schilder stehen über der Raute.
 - Würden sich die Schilder zweier Boote überdecken, bleibt nur die erste Reihe stehen; das gewählte Boot hat Vorrang.
 
 ## Schnittstelle

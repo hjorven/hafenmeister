@@ -305,6 +305,10 @@ export function init(game) {
   }
 
   const sim = () => game.sim;
+  const raute = (id) => {
+    const b = st()?.boats?.[id];
+    return !!b && !!game.sim?.sonderfall?.(id) && !!game.sim?.bueroAutomatik?.(b.size);
+  };
   const st = () => game.sim?.state;
 
   // Wer wartet gerade sichtbar an Boje oder Anker?
@@ -403,7 +407,19 @@ export function init(game) {
       }
       const a = game.boatView?.boot?.(id);
       if (!a) { entferneReihe(id); continue; }
-      const h = Math.max(1.4, (a.model?.userData?.iconHeight ?? (a.info?.length ?? 6) * 0.35) + (r.art === 'ergebnis' ? 1.2 : 0.3));
+      let h = Math.max(1.4, (a.model?.userData?.iconHeight ?? (a.info?.length ?? 6) * 0.35) + (r.art === 'ergebnis' ? 1.2 : 0.3));
+      // Sonderfall mit Leitstelle: über der Mastspitze schwebt die orange Raute (ui/hud.js), die Schilder stehen darüber
+      if (r.art === 'warten' && raute(id)) {
+        if (r.mast == null && game.THREE) {
+          const box = new game.THREE.Box3().setFromObject(a.model);
+          r.mast = Number.isFinite(box.max.y) ? box.max.y - a.model.position.y : 0;
+        }
+        // gleiche Rechnung wie ui/hud.js: Raute über dem Mast, mit der Entfernung größer
+        const h0 = Math.max(2.4, a.model?.userData?.iconHeight ?? 0, r.mast ?? 0) + 1.0;
+        const cam = game.camera?.camera;
+        const weit = cam ? Math.hypot(cam.position.x - a.model.position.x, cam.position.y - h0, cam.position.z - a.model.position.z) : 60;
+        h = h0 + 2.5 * Math.min(6, Math.max(1, weit * 0.022));
+      }
       const p = projiziere(a, h);
       let sichtbar = !!p && p.z * rc.width / 2 >= 20 && Math.abs(p.x) < 1.2 && Math.abs(p.y) < 1.2;
       const x = sichtbar ? Math.round(rc.left - rr.left + (p.x + 1) / 2 * rc.width) : 0;
