@@ -16,8 +16,12 @@ test('nachts abgerechnet, liegt bis zum Ablegen am Vormittag noch in der Box: Wi
   assert.equal(wimpelAn({ legtAb: true, imSpiel: false, abgerechnet: true }), true);
 });
 
-test('nach dem Ablegen (boot-faehrt) ist der Wimpel weg', () => {
-  assert.equal(wimpelAn({ ...box, imSpiel: false, abgerechnet: true, faehrt: true }), false);
+test('boot-faehrt: Wimpel bleibt, bis das Boot aus der Box ist', () => {
+  // wartet noch auf die Leute an Bord oder einen Nachbarn
+  assert.equal(wimpelAn({ ...box, imSpiel: false, abgerechnet: true, faehrt: true }), true);
+  assert.equal(wimpelAn({ legtAb: true, imSpiel: false, abgerechnet: true, faehrt: true }), true);
+  // aus der Box heraus und unterwegs
+  assert.equal(wimpelAn({ imSpiel: false, abgerechnet: true, faehrt: true }), false);
 });
 
 test('weder in den Spielregeln noch abgerechnet: kein Wimpel', () => {
