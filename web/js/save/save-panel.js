@@ -734,7 +734,8 @@ export function showUpdateBanner(apply) {
 /**
  * Kleines Fenster für eine wichtige Meldung (beschädigter Stand, kein Speicher). Es liegt über allem,
  * auch über der Einführung, damit nichts verdeckt wird; pause()/weiter() halten das Spiel so lange an.
- * knoepfe: [{ text, fn, primaer }]; fn darf async sein und false liefern, dann bleibt das Fenster offen.
+ * knoepfe: [{ text, fn, primaer }]; fn darf async sein. Liefert fn false, bleibt das Fenster offen;
+ * liefert fn einen Text, bleibt es ebenfalls offen und zeigt den Text als Bestätigung.
  */
 function openHinweis({ art, titel, text, knoepfe, pause, weiter }) {
   if (document.querySelector(`.hm-save-backdrop[data-art="${art}"]`)) return;
@@ -744,16 +745,18 @@ function openHinweis({ art, titel, text, knoepfe, pause, weiter }) {
   const zu = () => { backdrop.remove(); document.removeEventListener('keydown', onKey, true); weiter?.(); };
   const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); zu(); } };
   const reihe = el('div', { class: 'hm-sp-reihe' });
+  const msg = el('p', { class: 'hm-sp-msg', role: 'status' });
   for (const k of knoepfe) {
     reihe.append(knopf(k.text, async () => {
-      let bleibt = false;
-      try { bleibt = (await k.fn?.()) === false; } catch { bleibt = true; }
-      if (!bleibt) zu();
+      let r;
+      try { r = await k.fn?.(); } catch { r = false; msg.textContent = 'Das hat nicht geklappt. Versuche es noch einmal.'; msg.classList.add('fehler'); }
+      if (typeof r === 'string') { msg.textContent = r; msg.classList.remove('fehler'); return; }
+      if (r !== false) zu();
     }, k.primaer ? 'hm-primaer' : ''));
   }
   const box = el('div', { class: 'hm-sp hm-px', role: 'alertdialog', 'aria-modal': 'true', 'aria-labelledby': `hm-hinweis-${art}` },
     el('div', { class: 'hm-sp-kopf' }, el('h2', { id: `hm-hinweis-${art}` }, titel)),
-    el('div', { class: 'hm-sp-inhalt' }, el('p', {}, text), reihe));
+    el('div', { class: 'hm-sp-inhalt' }, el('p', {}, text), msg, reihe));
   backdrop.append(box);
   document.addEventListener('keydown', onKey, true);
   // Liegt schon ein anderes Fenster (Spielstände) offen, kommt dieses darüber
@@ -786,10 +789,11 @@ export function showKaputtMeldung({ art, name, savedAt, kaputt, pause, weiter })
       { text: 'Als Datei sichern', primaer: true, fn: async () => {
         const k = kaputt?.();
         if (!k) return true;
-        return (await kaputtSichern(k)) !== 'abgebrochen' ? true : false;
+        if ((await kaputtSichern(k)) === 'abgebrochen') return false;
+        return 'Gesichert. Die Datei enthält den beschädigten Stand, so wie er war. Im Fenster "Spielstände" kannst du ihn danach wegwerfen.';
       } },
-      // "Später": der Stand bleibt im Fenster "Spielstände", bis er gesichert oder weggeworfen ist
-      { text: 'Später', fn: () => true },
+      // "Schließen": der Stand bleibt im Fenster "Spielstände", bis er gesichert oder weggeworfen ist
+      { text: 'Schließen', fn: () => true },
     ],
   });
 }
@@ -803,7 +807,8 @@ export function showOhneSpeicherMeldung({ getGame, pause, weiter }) {
     pause,
     weiter,
     knoepfe: [
-      { text: 'Als Datei sichern', primaer: true, fn: async () => (await exportGame(getGame())) !== 'abgebrochen' },
+      { text: 'Als Datei sichern', primaer: true, fn: async () => ((await exportGame(getGame())) === 'abgebrochen' ? false
+        : 'Gesichert. Gespeichert wird trotzdem weiter nichts: Sichere vor dem Schließen noch einmal als Datei.') },
       { text: 'Verstanden', fn: () => true },
     ],
   });

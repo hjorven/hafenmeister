@@ -648,6 +648,11 @@ export function init(game) {
   const randMat = new THREE.MeshLambertMaterial({ color: '#d99a1e', flatShading: true });
   const randGeo = new THREE.TorusGeometry(0.55, 0.06, 6, 18);
 
+  // Wert jeder offenen Münze aus sim:feeReady: { base, bonus, nights } (P12, Review B3 und B6)
+  const muenzWert = new Map();   // bootId -> { base, bonus, nights }
+  // Wer mehrere Nächte im Voraus zahlt, hat eine größere Münze (bis 1,4-fach bei 4 Nächten)
+  const groesse = (id) => 1 + Math.min(0.4, 0.13 * Math.max(0, (muenzWert.get(id)?.nights ?? 1) - 1));
+
   function zeigeMuenze(id) {
     if (muenzen.has(id) || !boats.has(id)) return;
     const m = new THREE.Mesh(muenzGeo, muenzMat);
@@ -660,6 +665,155 @@ export function init(game) {
     game.scene.add(m);
     muenzen.set(id, m);
   }
+
+  // --- Betrag beim Einstreichen: "22 € + 11 €" fliegt kurz hoch (Wunschbonus grün) -------------
+  // Holt der Hafenmeister die Münze (Rundgang, Review B4), wird sie silbern und kleiner, und es
+  // steht "18 € statt 22 €" daneben: so sieht man, dass Selbst-Einstreichen mehr bringt.
+  const betraege = [];           // { sprite, t, dauer, y0 }
+  const eur = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
+  function textSprite(teile, unten) {
+    const px = 2;                                   // Pixelstil: klein zeichnen, hart vergrößern
+    const font = '700 13px "Pixelify Sans", system-ui, sans-serif';
+    const cv = document.createElement('canvas');
+    const c2 = cv.getContext('2d');
+    c2.font = font;
+    const oben = Math.ceil(teile.reduce((a, t) => a + c2.measureText(t.text).width, 0));
+    c2.font = '600 10px "Pixelify Sans", system-ui, sans-serif';
+    const breite = Math.max(oben, unten ? Math.ceil(c2.measureText(unten).width) : 0) + 10;
+    c2.font = font;
+    const hoch = unten ? 30 : 18;
+    cv.width = breite * px; cv.height = hoch * px;
+    c2.scale(px, px);
+    c2.imageSmoothingEnabled = false;
+    c2.font = font;
+    c2.textBaseline = 'middle';
+    c2.lineJoin = 'round';
+    let x = (breite - oben) / 2;
+    for (const t of teile) {
+      c2.lineWidth = 3; c2.strokeStyle = '#1d2733'; c2.strokeText(t.text, x, 9);
+      c2.fillStyle = t.farbe; c2.fillText(t.text, x, 9);
+      x += c2.measureText(t.text).width;
+    }
+    if (unten) {
+      c2.font = '600 10px "Pixelify Sans", system-ui, sans-serif';
+      const w = c2.measureText(unten).width;
+      c2.lineWidth = 3; c2.strokeText(unten, (breite - w) / 2, 23);
+      c2.fillStyle = '#e8eef3'; c2.fillText(unten, (breite - w) / 2, 23);
+    }
+    const tex = new THREE.CanvasTexture(cv);
+    tex.magFilter = THREE.NearestFilter;
+    tex.minFilter = THREE.NearestFilter;
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true, sizeAttenuation: false }));
+    // feste Größe auf dem Bildschirm (Anteil der Bildhöhe), am Handy etwas größer; groesseText()
+    // rechnet das jedes Bild in die Kamera um
+    sp.userData.h = (window.innerWidth < 700 ? 0.04 : 0.036) * (hoch / 18);
+    sp.userData.seiten = breite / hoch;
+    groesseText(sp);
+    sp.center.set(0.5, 0);
+    sp.renderOrder = 6;
+    return sp;
+  }
+  // Orthografische Kamera: Sprites messen in Welt-Metern, also Bildhöhe in Metern einrechnen.
+  // Perspektive: sizeAttenuation false misst schon in Bildschirmanteilen.
+  function groesseText(sp) {
+    const cam = game.camera?.camera;
+    let h = sp.userData.h;
+    if (cam?.isOrthographicCamera) h *= (cam.top - cam.bottom) / (cam.zoom || 1);
+    // Perspektive mit sizeAttenuation false: Bildhöhe (NDC 2) entspricht 2 / projectionMatrix[5]
+    else if (cam) h *= 2 / (cam.projectionMatrix.elements[5] || 1);
+    sp.scale.set(h * sp.userData.seiten, h, 1);
+  }
+  function zeigeBetrag(id, d) {
+    const m = muenzen.get(id);
+    if (!m) return;
+    const pos = m.position.clone();
+    const w = muenzWert.get(id);
+    let teile, unten = null;
+    if (d.round) {
+      teile = [{ text: eur(d.amount), farbe: '#cfd8e0' }, { text: ` statt ${eur(d.full ?? d.amount)}`, farbe: '#9fb0bf' }];
+      unten = 'Hafenmeister';
+    } else {
+      // Zuschläge des Hafenbüros (P02): Trinkgeld beim persönlichen Abholen, Nebenkosten; amount enthält sie
+      const tip = d.tip || 0, extras = d.extras || 0;
+      const kern = d.amount - tip - extras;
+      const passt = w && w.base + w.bonus === kern;
+      teile = passt && w.bonus > 0
+        ? [{ text: eur(w.base), farbe: '#ffd75e' }, { text: ` + ${eur(w.bonus)}`, farbe: '#8fe07a' }]
+        : [{ text: eur(kern), farbe: '#ffd75e' }];
+      const zeile = [];
+      if (passt && w.nights > 1) zeile.push(`${w.nights} Nächte`);
+      if (tip > 0) zeile.push(`+${eur(tip)} Trinkgeld`);
+      if (extras > 0) zeile.push(`+${eur(extras)} Nebenkosten`);
+      if (zeile.length) unten = zeile.join(' · ');
+    }
+    const sp = textSprite(teile, unten);
+    sp.position.copy(pos).add(new THREE.Vector3(0, 0.9, 0));
+    // Nicht über einen anderen Betrag legen: so lange eine Zeile höher, bis auf dem Bildschirm Platz ist
+    const cam = game.camera?.camera;
+    if (cam) {
+      // Lage und Größe in Bildschirmkoordinaten (-1 bis 1); Sprites sind unten mittig verankert
+      const z = cam.zoom || 1, pm = cam.projectionMatrix.elements;
+      const box = (b) => {
+        const v = b.position.clone().project(cam);
+        return cam.isOrthographicCamera
+          ? { x: v.x, y: v.y, w: (b.scale.x * 2 * z) / (cam.right - cam.left), h: (b.scale.y * 2 * z) / (cam.top - cam.bottom) }
+          : { x: v.x, y: v.y, w: b.scale.x * pm[0], h: b.scale.y * pm[5] };
+      };
+      for (let k = 0; k < 8; k++) {
+        const a = box(sp);
+        const stoss = betraege.some((o) => {
+          const b = box(o.sprite);
+          return Math.abs(a.x - b.x) < (a.w + b.w) / 2 && a.y < b.y + b.h && b.y < a.y + a.h;
+        });
+        if (!stoss) break;
+        sp.position.y += sp.scale.y * 1.05;
+      }
+    }
+    game.scene.add(sp);
+    betraege.push({ sprite: sp, t: 0, dauer: d.round ? 2.2 : 1.6, y0: sp.position.y });
+  }
+  // Rundgang: Münze wird silbern, schrumpft auf vier Fünftel und steigt langsam auf
+  const silberMat = new THREE.MeshLambertMaterial({ color: '#c9d2da', emissive: '#3a4450', flatShading: true });
+  const silberRand = new THREE.MeshLambertMaterial({ color: '#9aa6b2', flatShading: true });
+  const silbern = [];            // { m, t, s0, y0 }
+  function versilbern(id, anteil) {
+    const m = muenzen.get(id);
+    if (!m) return false;
+    muenzen.delete(id);
+    m.userData.eingestrichen = true;
+    m.userData.pick = null;
+    m.material = silberMat;
+    for (const k of m.children) k.material = silberRand;
+    silbern.push({ m, t: 0, s0: m.scale.x * Math.sqrt(anteil), y0: m.position.y });
+    return true;
+  }
+  game.onTick((dt) => {
+    for (let i = betraege.length - 1; i >= 0; i--) {
+      const b = betraege[i];
+      b.t += dt;
+      const k = b.t / b.dauer;
+      groesseText(b.sprite);
+      // steigt um etwa eine Texthöhe auf dem Bildschirm
+      b.sprite.position.y = b.y0 + Math.min(1, k) * b.sprite.scale.y * 1.5;
+      b.sprite.material.opacity = k < 0.7 ? 1 : Math.max(0, 1 - (k - 0.7) / 0.3);
+      if (k >= 1) {
+        b.sprite.parent?.remove(b.sprite);
+        b.sprite.material.map.dispose();
+        b.sprite.material.dispose();
+        betraege.splice(i, 1);
+      }
+    }
+    for (let i = silbern.length - 1; i >= 0; i--) {
+      const s = silbern[i];
+      s.t += dt;
+      const k = Math.min(1, s.t / 1.2);
+      s.m.scale.setScalar(Math.max(0.01, s.s0 * (k < 0.75 ? 1 : 1 - (k - 0.75) / 0.25)));
+      s.m.position.y = s.y0 + k * 1.5;
+      s.m.rotation.y += dt * 4;
+      if (k >= 1) { s.m.parent?.remove(s.m); silbern.splice(i, 1); }
+    }
+  });
   function entferneMuenze(id, spaet = 0) {
     const m = muenzen.get(id);
     if (!m) return;
@@ -678,7 +832,7 @@ export function init(game) {
       m.position.set(a.model.position.x, h + Math.sin(t * 2 + id) * 0.15, a.model.position.z);
       m.rotation.y = t * 2.2;
       const k = Math.min(1, (t - m.userData.t0) * 3);
-      m.scale.setScalar(Math.max(0.01, k * (1 + Math.max(0, 0.25 - (t - m.userData.t0)) * 2)));
+      m.scale.setScalar(Math.max(0.01, k * groesse(id) * (1 + Math.max(0, 0.25 - (t - m.userData.t0)) * 2)));
     }
   });
   // Liegegeld wird beim Anlegen faellig (PR 100): die Muenze erst zeigen, wenn das Boot in der Box fest ist
@@ -686,6 +840,12 @@ export function init(game) {
   game.on('sim:feeReady', (d) => {
     const e = boats.get(d?.boatId);
     if (!e) return;
+    // Wert merken (offen gebliebene Münzen vom Vortag werden zusammengezählt)
+    const alt = muenzWert.get(d.boatId);
+    const base = d.base ?? d.amount, bonus = d.bonus ?? 0, nights = d.nights ?? 1;
+    muenzWert.set(d.boatId, alt && game.sim?.state?.boats?.[d.boatId]?.pendingFee > d.amount
+      ? { base: alt.base + base, bonus: alt.bonus + bonus, nights: alt.nights + nights }
+      : { base, bonus, nights });
     if (amPlatz(e.anim)) zeigeMuenze(d.boatId);
     else e.muenzeWartet = true;
   });
@@ -695,8 +855,16 @@ export function init(game) {
   });
   game.on('sim:collected', (d) => {
     bandT = 1;                         // Wimpel gleich beim Kassieren zeigen, nicht erst bei der naechsten Pruefung
-    if (d?.boatId != null) { entferneMuenze(d.boatId, 700); const e = boats.get(d.boatId); if (e) e.muenzeWartet = false; }
-    else for (const id of [...muenzen.keys()]) entferneMuenze(id, 700);
+    if (d?.boatId == null) { for (const id of [...muenzen.keys()]) entferneMuenze(id, 700); return; }
+    const e = boats.get(d.boatId);
+    if (e) e.muenzeWartet = false;
+    // Nachts sieht es niemand: die Münze verschwindet einfach (Wert steht im Tagesabschluss)
+    if (d.night) { entferneMuenze(d.boatId, 0); muenzWert.delete(d.boatId); return; }
+    // nur wo eine Münze zu sehen war (der Kassenautomat kassiert still, bevor das Boot fest ist)
+    if (muenzen.has(d.boatId)) zeigeBetrag(d.boatId, d);
+    if (d.round && versilbern(d.boatId, (d.amount || 1) / (d.full || d.amount || 1))) { muenzWert.delete(d.boatId); return; }
+    entferneMuenze(d.boatId, 700);
+    muenzWert.delete(d.boatId);
   });
   game.on('sim:departed', (d) => {
     entferneMuenze(d?.boatId, 0);
@@ -864,7 +1032,14 @@ export function init(game) {
     }
     for (const id of [...muenzen.keys()]) if (!boats.has(id)) entferneMuenze(id);
     const st = game.sim?.state ?? game.state;
-    for (const [id, b] of Object.entries(st?.boats ?? {})) if (b?.pendingFee > 0) zeigeMuenze(Number(id));
+    // Münzen nur über Booten, die schon in ihrer Box fest sind; wer noch hinfährt, bekommt sie beim Festmachen
+    for (const [id, b] of Object.entries(st?.boats ?? {})) {
+      if (!(b?.pendingFee > 0)) continue;
+      const e = boats.get(Number(id));
+      if (!e) continue;
+      if (amPlatz(e.anim)) zeigeMuenze(Number(id));
+      else e.muenzeWartet = true;
+    }
   }
 
   game.on('ready', () => {
