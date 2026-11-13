@@ -107,12 +107,13 @@ export class CameraRig {
       try { rect = h.rectFn(); } catch (err) { console.warn('Startansicht nicht berechenbar', err); }
     }
     const right = rect ? (this.insetRight || 0) : 0;
+    const left = rect ? (this.insetLeft || 0) : 0;   // Schilderspalte links (Handy quer), setzt main.js
     if (rect) {
       const r = rect;
       const w = r.maxX - r.minX;
       const sinP = Math.sin(PITCH);
       const availH = Math.max(1, this.screenH - ins.top - ins.bottom);
-      const availW = Math.max(1, this.screenW - right);
+      const availW = Math.max(1, this.screenW - right - left);
       const aspectAvail = this.screenW / availH;
       // Auf flachen Bildschirmen (Handy quer) darf die Uebersicht weiter heraus als maxWidth,
       // damit der ganze Hafen ins Bild passt; Herauszoomen reicht dann bis hierhin.
@@ -132,7 +133,7 @@ export class CameraRig {
     // Mitte des freien Bereichs liegt um (oben - unten) / 2 tiefer als die Bildschirmmitte
     // und um rechts / 2 weiter links (Knopfspalte am Handy)
     const shift = (ins.top - ins.bottom) / 2;
-    if (shift || right) this.panBy(-right / 2, shift);
+    if (shift || right || left) this.panBy((left - right) / 2, shift);
   }
 
   resize(width, height) {

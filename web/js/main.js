@@ -138,7 +138,42 @@ function extras(game, stufe) {
     }
     liste.push(e);
   });
+  // Landmarken der Gelaendeform (Leuchttuerme, Inseln im See): nur, wenn sie nah genug liegen,
+  // dass der Hafen trotzdem gross bleibt (gleiche Grenze wie Bojen und Bauplaetze).
+  try {
+    const form = game.gelaende?.aktuell?.();
+    for (const [x, y] of form?.leuchttuerme || []) {
+      liste.push({ minX: x * U - 10, maxX: x * U + 10, minZ: -y * U - 10, maxZ: -y * U + 10 });
+    }
+    for (const i of form?.seeInseln || []) {
+      liste.push({ minX: (i.x - i.rx) * U, maxX: (i.x + i.rx) * U, minZ: -(i.y + i.ry) * U, maxZ: -(i.y - i.ry) * U });
+    }
+  } catch (err) { console.warn('Geländeform nicht lesbar', err); }
   return liste;
+}
+
+// Schilderspalte links (Wetter, Tagesziele, Ausbau, Zeit): Im Querformat deckt sie einen Streifen
+// ueber die ganze Hoehe ab und zaehlt wie eine Leiste. Im Hochformat liegen die Schilder ueber dem
+// Land oben, dort zaehlen sie nicht (sonst wird der Hafen zu schmal).
+function linkeSpalte(cam) {
+  if (cam.screenW <= cam.screenH) return 0;
+  const ins = cam.insets || { top: 0, bottom: 0 };
+  const canvas = document.getElementById('stage');
+  const c = canvas ? canvas.getBoundingClientRect() : { left: 0, top: 0 };
+  let rechts = 0;
+  for (const id of ['hm-seite', 'hm-zeit']) {
+    const el = document.getElementById(id);
+    if (!el || el.hidden) continue;
+    for (const k of (el.children.length ? [el, ...el.children] : [el])) {
+      const r = k.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0) continue;
+      if (r.left - c.left > cam.screenW * 0.4) continue;
+      // nur, was im freien Band zwischen den Leisten liegt
+      if (r.bottom - c.top <= ins.top || r.top - c.top >= cam.screenH - ins.bottom) continue;
+      rechts = Math.max(rechts, r.right - c.left);
+    }
+  }
+  return Math.min(rechts + 8, cam.screenW * 0.3);
 }
 
 const vereinige = (a, b) => ({
@@ -150,7 +185,7 @@ const vereinige = (a, b) => ({
 // (Schraegsicht 50 Grad: Tiefe erscheint um sin 50 verkuerzt).
 function breiteFuer(r, cam) {
   const ins = cam.insets || { top: 0, bottom: 0 };
-  const w = Math.max(1, cam.screenW - (cam.insetRight || 0));
+  const w = Math.max(1, cam.screenW - (cam.insetRight || 0) - (cam.insetLeft || 0));
   const h = Math.max(1, cam.screenH - ins.top - ins.bottom);
   return Math.max(r.maxX - r.minX, (r.maxZ - r.minZ) * Math.sin(50 * Math.PI / 180) * (w / h));
 }
@@ -160,6 +195,7 @@ function breiteFuer(r, cam) {
 function startRect(game, stufe) {
   const cam = game.camera;
   try { if (cam.insetsFn) { const [top, bottom] = cam.insetsFn(); cam.insets = { top, bottom }; } } catch (err) { /* alte Werte */ }
+  try { cam.insetLeft = linkeSpalte(cam); } catch (err) { cam.insetLeft = 0; }
   let r = homeRect(stufe);
   const grenze = Math.max(breiteFuer(r, cam) * 1.5, 50);
   const mx = (r.minX + r.maxX) / 2;
@@ -170,14 +206,14 @@ function startRect(game, stufe) {
     if (breiteFuer(neu, cam) <= grenze) r = neu;
   }
   // Bleibt Tiefe uebrig (Hochformat), legt die Kamera das Suedufer an den unteren Rand und zeigt
-  // oben viel leeres Wasser. Der Ueberschuss kommt je zur Haelfte nach Norden und Sueden dazu:
-  // der Hafen steht dann mittig im freien Bereich.
+  // oben viel leeres Wasser; mittig zeigt es unten viel Land. Der Ueberschuss kommt deshalb zu
+  // 70 % nach Norden (Wasser, Einfahrt, ankommende Boote) und zu 30 % nach Sueden (Ufer).
   const ins = cam.insets || { top: 0, bottom: 0 };
-  const w = Math.max(1, cam.screenW - (cam.insetRight || 0));
+  const w = Math.max(1, cam.screenW - (cam.insetRight || 0) - (cam.insetLeft || 0));
   const h = Math.max(1, cam.screenH - ins.top - ins.bottom);
   const sichtbar = breiteFuer(r, cam) / Math.sin(50 * Math.PI / 180) * (h / w);
   const rest = sichtbar - (r.maxZ - r.minZ);
-  if (rest > 0) r = { ...r, minZ: r.minZ - rest / 2, maxZ: r.maxZ + rest / 2 };
+  if (rest > 0) r = { ...r, minZ: r.minZ - rest * 0.7, maxZ: r.maxZ + rest * 0.3 };
   return r;
 }
 
