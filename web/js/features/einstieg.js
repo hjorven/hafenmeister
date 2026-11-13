@@ -226,6 +226,14 @@ export function erledige(e, id) {
 // Im Browser
 
 export async function init(game) {
+  // Die Schnittstelle gibt es sofort: Wer beenden() oder start() ruft, bevor die Regeln bereit sind
+  // (Tests, Speicherplatzwahl), wird gemerkt und gleich nach dem Aufbau ausgeführt.
+  let vorher = null;
+  const schnittstelle = game.einstieg = {
+    start() { vorher = 'start'; },
+    beenden() { vorher = 'beenden'; },
+    schritt: () => null,
+  };
   const api = await regelnBereit(game);
   const { THREE } = game;
   const st = () => api.state;
@@ -249,6 +257,10 @@ export async function init(game) {
   if (/[?&]einstieg=1\b/.test(location.search)) {
     st().modules ||= {};
     st().modules.einstieg = { fertig: false, erledigt: [] };
+  } else if (st()?.testmodus) {
+    // Testmodus ?stufe=n speichert nie: der Einstieg käme sonst nach jedem Neuladen wieder
+    st().modules ||= {};
+    st().modules.einstieg = { ...(st().modules.einstieg || {}), fertig: true, erledigt: [...REIHENFOLGE] };
   }
 
   let aktuell = null;     // id des gezeigten Schritts
@@ -300,6 +312,7 @@ export async function init(game) {
   }
 
   // Freie Spielfläche ohne Leisten und Knopfspalten, mit etwas Rand: nur dort gilt ein Boot als "im Bild"
+  let letztesDeck = [];
   function freieFlaeche(rand = 28) {
     const h0 = host.getBoundingClientRect();
     let l = 0, t = 0, r = h0.width, u = h0.height;
@@ -324,8 +337,10 @@ export async function init(game) {
     for (const el of document.querySelectorAll('#hm-seite > *, #hm-zeit, #btn-build, #btn-collect, .hm-banner')) {
       if (!sichtbar(el)) continue;
       const q = el.getBoundingClientRect();
-      deck.push({ l: q.left - h0.left - 8, t: q.top - h0.top - 8, r: q.right - h0.left + 8, u: q.bottom - h0.top + 8 });
+      // 30 px Abstand: ein Tipp auf den Kreis eines fahrenden Bootes trifft sonst das Schild daneben
+      deck.push({ l: q.left - h0.left - 30, t: q.top - h0.top - 30, r: q.right - h0.left + 30, u: q.bottom - h0.top + 30 });
     }
+    letztesDeck = deck;
     return { l: l + rand, t: t + rand, r: r - rand, u: u - rand, deck };
   }
   const imBild = (p, f) => p && p.x >= f.l && p.x <= f.r && p.y >= f.t && p.y <= f.u
@@ -645,7 +660,10 @@ export async function init(game) {
     const l = lage();
     const id = naechsterSchritt(e, l);
     halte(!e.erledigt.includes('anlegen'));
-    if (id === 'willkommen' && l.willkommenSek >= WILLKOMMEN_SEK && !l.bootImBild) zumBoot(new Set(api.waitingBoats().map((b) => b.id)));
+    // Kein wartendes Boot frei im Bild (noch draußen oder hinter einem Schild): Kamera hinfahren
+    const sucheBoot = (id === 'willkommen' && l.willkommenSek >= WILLKOMMEN_SEK)
+      || (!id && e.erledigt.includes('willkommen') && !e.erledigt.includes('anlegen') && !l.abend);
+    if (sucheBoot && !l.bootImBild) zumBoot(new Set(api.waitingBoats().map((b) => b.id)));
     // Wer schon vorspult, kennt die Zeitsteuerung: der Hinweis würde nur kurz aufblitzen
     if (id === 'tempo' && (game.speed || 1) > 1) { schritt('tempo'); return; }
     if (id !== aktuell) { zeige(id); fluege = 0; gerahmt = false; }
@@ -671,6 +689,8 @@ export async function init(game) {
     if (!k || ring.hidden || !(k.obj || k.punkt)) return;
     const p = k.obj ? aufBildschirm(k.obj) : punktAufBildschirm(k.punkt);
     if (!p) return;
+    // Fährt das Boot unter ein Schild, verschwindet der Kreis bis zur nächsten Entscheidung
+    if (letztesDeck.some((d) => p.x > d.l && p.x < d.r && p.y > d.t && p.y < d.u)) { ring.hidden = true; return; }
     k.x = p.x; k.y = p.y;
     setzeKreis();
   }
@@ -684,10 +704,12 @@ export async function init(game) {
   window.addEventListener('pointerup', () => { ziehen = false; }, true);
   window.addEventListener('pointercancel', () => { ziehen = false; }, true);
 
-  game.einstieg = {
+  Object.assign(schnittstelle, {
     start() { st().modules ||= {}; const alt = st().modules.einstieg?.hinweise ?? []; st().modules.einstieg = { fertig: false, erledigt: [], hinweise: alt }; zeige(null); },
     beenden,
     schritt: () => aktuell,
-  };
+  });
+  game.einstieg = schnittstelle;
+  if (vorher) schnittstelle[vorher]();
   requestAnimationFrame(frame);
 }

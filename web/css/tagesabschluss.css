@@ -267,8 +267,10 @@ body.foto .hm-ta, body.foto .hm-ta-zettel, body.foto .hm-ta-muenzen { display: n
     box-shadow: 0 -6px 6px -4px rgba(36, 54, 74, 0.18);
   }
   .hm-ta-uhr { display: none; }
-  .hm-ta .hm-ta-weiter { min-height: 40px; min-width: 96px; }
-  .hm-ta-auto { font-size: 12px; white-space: nowrap; overflow: hidden; }
+  /* Der Schalter behält seinen Text, Weiter nimmt den Rest (iPhone quer: Fuß nur etwa 200 px breit) */
+  .hm-ta .hm-ta-weiter { min-height: 40px; min-width: 72px; flex: 1 1 auto; padding-left: 8px; padding-right: 8px; }
+  .hm-ta-fuss { gap: 8px; }
+  .hm-ta-auto { flex: 0 0 auto; font-size: 12px; white-space: nowrap; }
   .hm-ta-kopf h2 { font-size: var(--hm-schrift, 15px); }
   .hm-ta-blaettern { height: 34px; }
   .hm-ta-summe { font-size: calc(var(--hm-schrift, 15px) + 6px); }

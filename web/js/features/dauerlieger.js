@@ -649,7 +649,7 @@ export async function init(game) {
       width: min(420px, calc(100% - 32px)); display: flex; gap: 10px; align-items: flex-start;
       padding: 10px 12px; color: var(--hm-tinte, #283648); cursor: pointer; line-height: 1.35; }
     #dauer-hinweis:not(.hm-px) { background: #fffcf6; border: 2px solid #283648; }
-    #dauer-hinweis[hidden] { display: none; }
+    #dauer-hinweis[hidden], body.card-open #dauer-hinweis { display: none; }
     #dauer-hinweis img, #dauer-hinweis svg { flex: none; width: 24px; height: 24px; image-rendering: pixelated; }
     #dauer-hinweis strong { display: block; font-weight: 600; }
     #dauer-hinweis span { display: block; font-size: max(13px, 0.875rem); }
@@ -670,10 +670,50 @@ export async function init(game) {
     p.textContent = text;
     body.append(t, p);
     hinweis.append(body);
-    // Steht das Ereignisschild gerade da, darunter
-    const ev = document.getElementById('event-banner');
-    hinweis.style.top = ev && !ev.hidden ? `${ev.getBoundingClientRect().bottom - host.getBoundingClientRect().top + 8}px` : '';
     hinweis.hidden = false;
+    platziereHinweis();
+  }
+  // Der Hinweis liegt nicht über der linken Spalte, dem Funk oder dem Ereignisschild:
+  // oben in der Lücke dazwischen (PC, Querformat), sonst darunter (Handy hochkant).
+  const sichtbar = (e) => e && !e.hidden && e.offsetParent !== null && getComputedStyle(e).visibility !== 'hidden';
+  function platziereHinweis() {
+    if (hinweis.hidden) return;
+    const h = host.getBoundingClientRect();
+    const rand = 8;
+    const kopf = document.getElementById('hud-top');
+    let oben = (sichtbar(kopf) ? kopf.getBoundingClientRect().bottom - h.top : 56) + rand;
+    const ev = document.getElementById('event-banner');
+    if (sichtbar(ev)) oben = Math.max(oben, ev.getBoundingClientRect().bottom - h.top + rand);
+    const hinder = [...document.querySelectorAll('#hm-seite > *, #hm-seite > * > *, #hm-funk, .hm-tipp')]
+      .filter(sichtbar).map((e) => e.getBoundingClientRect()).filter((r) => r.width > 0 && r.height > 0)
+      .map((r) => ({ l: r.left - h.left, r: r.right - h.left, o: r.top - h.top, u: r.bottom - h.top }));
+    const breit = Math.min(420, h.width - 32);
+    const hoehe = 120;
+    const imBand = hinder.filter((r) => r.o < oben + hoehe && r.u > oben);
+    const mitte = h.width / 2;
+    const L = Math.max(0, ...imBand.filter((r) => (r.l + r.r) / 2 < mitte).map((r) => r.r));
+    const R = Math.min(h.width, ...imBand.filter((r) => (r.l + r.r) / 2 >= mitte).map((r) => r.l));
+    const luecke = R - L - 2 * rand;
+    let links, w;
+    if (luecke >= Math.min(260, breit)) {
+      w = Math.min(breit, luecke);
+      links = L + rand + (luecke - w) / 2;
+    } else {
+      w = breit;
+      links = (h.width - w) / 2;
+      oben = Math.max(oben, ...hinder.filter((r) => r.l < links + w && r.r > links).map((r) => r.u + rand));
+    }
+    hinweis.style.left = `${Math.round(links)}px`;
+    hinweis.style.width = `${Math.round(w)}px`;
+    hinweis.style.transform = 'none';
+    hinweis.style.top = `${Math.round(oben)}px`;
+  }
+  setInterval(platziereHinweis, 1000);
+  window.addEventListener('resize', platziereHinweis);
+  // Solange eine Karte offen ist, ist der Hinweis ausgeblendet und seine Zeit läuft nicht ab
+  function weiter() {
+    if (document.body.classList.contains('card-open')) { hinweisTimer = setTimeout(weiter, 1000); return; }
+    naechster();
   }
   function naechster() {
     clearTimeout(hinweisTimer);
@@ -682,7 +722,7 @@ export async function init(game) {
     const m = schlange.shift();
     if (!m) { hinweis.hidden = true; return; }
     fuelle(m.symbol, m.titel, m.text);
-    hinweisTimer = setTimeout(naechster, m.sekunden * 1000);
+    hinweisTimer = setTimeout(weiter, m.sekunden * 1000);
   }
   function zeigeHinweis(titel, text, sekunden = 7, symbol = 'hinweis') {
     // gleiche Meldung nicht doppelt in die Schlange
