@@ -1,6 +1,6 @@
 // Prueft im laufenden Spiel jede Bootsfahrt gegen Land, Stege und andere Boote.
 //
-//   node tools/fahrwasser-pruefen.cjs [--stufen 1-6] [--stegbilder 0-12 oder 0,7,12] [--sekunden 40] [--geraet pc|handy] [--bilder ordner]
+//   node tools/fahrwasser-pruefen.cjs [--stufen 1-6] [--stegbilder 0-12 oder 0,7,12] [--sekunden 40] [--geraet pc|handy] [--gelaende 1-10] [--bilder ordner]
 //
 // Startet das Spiel mit ?stufe=n&stegbild=m (Testmodus: alles der Stufe gebaut), stellt Tempo 8x ein,
 // laesst wartende Boote laufend selbst einfahren und kassiert. In jedem Bild prueft es alle sichtbaren Boote:
@@ -29,6 +29,7 @@ const STUFEN = bereich(arg('stufen', '1-6'));
 const STEGBILDER = bereich(arg('stegbilder', '0'));
 const SEKUNDEN = Number(arg('sekunden', '40'));
 const GERAET = arg('geraet', 'pc');
+const GELAENDE = arg('gelaende', '') ? bereich(arg('gelaende', '')) : [null];   // Geländeformen 1 bis 10 (?gelaende=N)
 const BILDER = arg('bilder', '');
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
 
@@ -132,7 +133,7 @@ function pruefer() {
   const geraete = { pc: { viewport: { width: 1440, height: 900 } }, handy: { ...devices['Pixel 7'] } };
   const ergebnis = [];
   let fehler = 0;
-  for (const sb of STEGBILDER) {
+  for (const gf of GELAENDE) for (const sb of STEGBILDER) {
     for (const st of STUFEN) {
       const ctx = await browser.newContext({ ...geraete[GERAET], deviceScaleFactor: 1, serviceWorkers: 'block' });
       const page = await ctx.newPage();
@@ -142,7 +143,7 @@ function pruefer() {
         const rel = route.request().url().split('three@0.187.0/')[1];
         route.fulfill({ path: path.join(THREE, rel), contentType: 'text/javascript' });
       });
-      await page.goto(`${url}?stufe=${st}&stegbild=${sb}`);
+      await page.goto(`${url}?stufe=${st}&stegbild=${sb}${gf ? `&gelaende=${gf}` : ''}`);
       await page.waitForFunction(() => window.hafenmeister?.sim && window.hafenmeister?.boatView && window.hafenmeister?.fahrwasser, null, { timeout: 30000 });
       await page.waitForTimeout(1500);
       await page.evaluate(pruefer);
@@ -161,7 +162,7 @@ function pruefer() {
       const r = await page.evaluate(() => window.__fahrwasserPruefung);
       const summe = r.land + r.steg + r.boot;
       fehler += summe;
-      const zeile = { stegbild: sb, stufe: st, proben: r.proben, maxBoote: r.maxBoote, land: r.land, steg: r.steg, boot: r.boot, vorbei: r.vorbei, durchlass: r.durchlass, fehler: log.length };
+      const zeile = { ...(gf ? { gelaende: gf } : {}), stegbild: sb, stufe: st, proben: r.proben, maxBoote: r.maxBoote, land: r.land, steg: r.steg, boot: r.boot, vorbei: r.vorbei, durchlass: r.durchlass, fehler: log.length };
       ergebnis.push({ ...zeile, beispiele: r.beispiele });
       console.log(JSON.stringify(zeile));
       console.log('   ', JSON.stringify(Object.entries(r.arten).sort((a, b) => b[1] - a[1]).slice(0, 12)));

@@ -101,14 +101,14 @@ Das Abschlussziel benutzt nur Dinge, die der Spieler im Hafen sieht: Geld, Ruf u
 
 | Stufe | Name | Ab Ausbaustufe | Kosten | Schaltet frei |
 |---|---|---|---|---|
-| 1 | Hafenmeister mit Funk | 2 | 600 € | Knopf „Kassieren“ (alle Münzen auf einmal), Vorschau der nächsten Boote (`vorschau`, Anzeige P11); vorher streicht man jede Münze selbst |
+| 1 | Hafenmeister mit Funk | 2 | 600 € | Knopf „Kassieren“ (alle Münzen auf einmal), Vorschau der nächsten Boote (`vorschau`; die Anzeige und ihr Text im Bauen-Menü kommen mit P11); vorher streicht man jede Münze selbst |
 | 2 | Kassenautomat | 2 | 1.800 € | Liegegeld von S und M kommt beim Anlegen von selbst in die Kasse (`klassen`); L, XL, XXL zahlen persönlich und geben beim Abholen 15 % Trinkgeld (`trinkgeld`) |
 | 3 | Hafenbüro | 3 | 3.800 € | Vorschlag: Das Büro zeigt für jedes Boot die beste Box (goldene Raute, nach Wünschen, Komfort und knappem Platz), „Vorschlag annehmen“ fährt hin. Ohne Büro nimmt „Einfahren lassen“ die Box, die sich das Boot selbst suchen würde (nur nach Wünschen und Weg, seit PR 176). Nebenkosten: Das Büro rechnet Strom, Wasser und Duschen ab, auf jedes kassierte Liegegeld kommen 10 % (`nebenkosten.anteil`), nicht beim Rundgang und nicht für liegengebliebene Münzen |
 | 4 | Hafenleitstelle | 4 | 9.500 € | volle Automatik: wartende Standardboote bekommen sofort die Box mit den meisten erfüllten Wünschen, je Größe S, M, L abschaltbar (Bauen, Reiter Hafen); Sonderfälle bleiben beim Spieler |
 
 Von Hand eingewiesene Gäste (Ziehen, Ring, „Einfahren lassen“, „Vorschlag annehmen“) bewerten um `vonHandBonus` = 0,25 Anker besser; selbst eingefahrene und von der Leitstelle zugewiesene nicht.
 
-**Sonderfälle** (`ECONOMY.hafenbuero.sonderfaelle`, Roadmap P02): Mehrrumpfboote, Schiffe der Klassen XL und XXL, Sondergäste und Boote, für die nur noch genau eine Box frei ist, weist die Automatik nicht zu. Wer einmal Sonderfall ist, bleibt es (`boat.officeCase`). Sie tragen eine orange Raute und fahren erst nach 25 s an der Boje selbst ein (statt 8 s), dann in die Box, die sie sich selbst suchen. Der Bot weist sie mit Leitstelle selbst zu. Ergebnis nach PR 176 mit Nebenkosten (`node tools/balance.mjs`): geschickt 246, gemütlich 261 Spieltage (ohne Nebenkosten 251 und 266) bis zum Abschluss, im Korridor 200 bis 360.
+**Sonderfälle** (`ECONOMY.hafenbuero.sonderfaelle`, Roadmap P02): Mehrrumpfboote, Schiffe der Klassen XL und XXL, Sondergäste und Boote, für die nur noch genau eine Box frei ist, weist die Automatik nicht zu. Mehrrumpf, Größe und Sondergast hängen am Boot; „nur eine Box“ wird bei jeder Prüfung neu bewertet (ist die Box belegt, gibt es nichts zu entscheiden; werden mehr frei, weist die Leitstelle zu). Sie tragen eine orange Raute und fahren erst nach 25 s an der Boje selbst ein (statt 8 s), dann in die Box, die sie sich selbst suchen. Der Bot weist sie mit Leitstelle selbst zu. Ergebnis nach PR 176 mit Nebenkosten (`node tools/balance.mjs`): geschickt 246, gemütlich 261 Spieltage (ohne Nebenkosten 251 und 266) bis zum Abschluss, im Korridor 200 bis 360.
 
 **Tagestörn** (`ECONOMY.tagestoern`): Gäste mit zwei oder mehr Nächten fahren mit 35 % Wahrscheinlichkeit tagsüber hinaus (zwischen 12 % und 30 % des Tages) und kommen zwischen 60 % und 85 % des Tages in dieselbe Box zurück. Die Box bleibt reserviert.
 

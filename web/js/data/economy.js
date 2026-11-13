@@ -157,7 +157,7 @@ export const ECONOMY = {
     grossAb: { 3: 'L', 5: 'XL' },                 // "ein großes Schiff einweisen": Klasse ab Stufe
     halberAnker: 0.5,                             // so viel besser bewerten alle Gäste, die gerade liegen
     gutschein: { prozent: 10, hoechstens: 15 },
-    woche: { tage: 7, geld: 12, gaeste: 0.25, zufrieden: 0.15, segler: 0.1, liegegeld: 0.55 },
+    woche: { tage: 7, geld: 12, gaeste: 0.5, zufrieden: 0.3, segler: 0.15, liegegeld: 0.7 },   // Anteil der Woche: nicht in zwei Tagen zu schaffen
   },
   // Besucher an Land (Fahrgastschiff, Kreuzfahrt) geben abends je Stufe von Kiosk/Restaurant so viel aus
   besucher: { ausgabeJeKioskStufe: 2 },

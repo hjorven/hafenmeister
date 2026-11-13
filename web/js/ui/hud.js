@@ -287,8 +287,22 @@ export function init(game) {
     const b = sim?.state?.boats?.[e?.boatId];
     // Der Bonus fürs Einweisen zählt immer; gezeigt wird er, sobald das Büro es auch könnte
     if (b?.byHand && sim.state.office >= (sim.ctx.rules.office.propose ?? Infinity) && sim.ctx.rules.handAssignBonus) {
-      setTimeout(() => flugtext(b.id, 'Selbst eingewiesen: +¼ Anker'), 600);
+      // Erst zeigen, wenn das Boot in der Box fest ist (vorher ist es oft noch weit draußen)
+      clearTimeout(bonusOffen.get(b.id));
+      bonusOffen.set(b.id, setTimeout(() => zeigeBonus(b.id), 30000));
     }
+  });
+  const bonusOffen = new Map();
+  function zeigeBonus(id) {
+    if (!bonusOffen.has(id)) return;
+    clearTimeout(bonusOffen.get(id));
+    bonusOffen.delete(id);
+    flugtext(id, 'Selbst eingewiesen: +¼ Anker');
+  }
+  // boat:moored kommt auch an Boje und Ankerplatz; zählen soll nur die Box
+  game.on('boat:moored', (e) => {
+    if (e?.id == null || !bonusOffen.has(e.id) || /^(boje|anker)-/.test(String(e.berth ?? ''))) return;
+    setTimeout(() => zeigeBonus(e.id), 300);
   });
 
   function buildCard(sim, st) {
