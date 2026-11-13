@@ -3,8 +3,10 @@
 // Alle wiederholten Dinge werden beim Bau zu wenigen festen Netzen gebacken, damit es auch auf schwachen Handys flüssig bleibt.
 import * as THREE from 'three';
 import { vereinfacheRaster } from './netz.js';
-import { punkt, BEREICH, PLAN_M, molen, buhnen, rauschen, hafenAbstand, suedufer, DURCHSTICH, SLIP, pricken, leuchttuerme } from './gelaende.js';
+import { punkt, BEREICH, PLAN_M, molen, buhnen, rauschen, DURCHSTICH, SLIP, pricken, leuchttuerme } from './gelaende.js';
 import { erzeugeLeuchtfeuer } from './tageslicht.js';
+import { setzeBewuchs } from './bewuchs.js';
+import { JAHRESZEIT_FARBEN, JAHRESZEIT_TYPEN } from './vielfalt.js';
 
 const U = PLAN_M;
 
@@ -55,7 +57,7 @@ function baueNetz(region, stufe, x0, x1, y0, y1, schritt, loch, absenken, unterG
   for (const [k, v] of Object.entries(region.farben)) farben[k] = new THREE.Color(v);
   // Nur benutzte Rasterpunkte als Ecken, geteilt zwischen Dreiecken (flatShading braucht keine eigenen Normalen)
   const neu = new Int32Array(H.length).fill(-1);
-  const pos = [], col = [], index = [];
+  const pos = [], col = [], index = [], typen = [], streuung = [];
   const c = new THREE.Color();
   for (const k of dreiecke) {
     if (neu[k] < 0) {
@@ -65,8 +67,10 @@ function baueNetz(region, stufe, x0, x1, y0, y1, schritt, loch, absenken, unterG
       pos.push(x, H[k] - absenken, z);
       c.copy(farben[T[k]] || farben.sand);
       // leichte Farbstreuung, damit große Flächen nicht tot wirken
-      c.multiplyScalar(0.97 + 0.05 * rauschen(x / 6, z / 6, 77));
+      const streu = 0.97 + 0.05 * rauschen(x / 6, z / 6, 77);
+      c.multiplyScalar(streu);
       col.push(c.r, c.g, c.b);
+      typen.push(T[k]); streuung.push(streu);
     }
     index.push(neu[k]);
   }
@@ -75,7 +79,29 @@ function baueNetz(region, stufe, x0, x1, y0, y1, schritt, loch, absenken, unterG
   geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
   geo.setIndex(index);
   geo.computeVertexNormals();
+  // Für die Jahreszeit: Bodenart und Streuung je Ecke (faerbeBoden)
+  geo.userData.typen = typen;
+  geo.userData.streuung = streuung;
   return geo;
+}
+
+/** Färbt die Ecken eines Geländenetzes für die Jahreszeit um (nur Felder, Wiesen, Wald, Heide, Dorf). */
+function faerbeBoden(geo, region, jahreszeit) {
+  const { typen, streuung } = geo.userData;
+  if (!typen) return;
+  const col = geo.attributes.color, c = new THREE.Color();
+  const tab = JAHRESZEIT_FARBEN[jahreszeit] || {};
+  const cache = {};
+  let geaendert = false;
+  for (let i = 0; i < typen.length; i++) {
+    const t = typen[i];
+    if (!JAHRESZEIT_TYPEN.has(t) || !(t in region.farben)) continue;
+    const hex = tab[t] || region.farben[t];
+    c.set(cache[t] ??= hex).multiplyScalar(streuung[i]);
+    col.setXYZ(i, c.r, c.g, c.b);
+    geaendert = true;
+  }
+  if (geaendert) col.needsUpdate = true;
 }
 
 // ------------------------------------------------------------------ Hilfen für Instanzen
@@ -152,146 +178,9 @@ export function verschmelze(geos) {
   return out;
 }
 
-function kronenKiefer() {
-  // Ohne Bodenfläche: die sieht man von oben nie
-  const a = new THREE.ConeGeometry(1, 1.25, 6, 1, true); a.translate(0, 1.0, 0);
-  const b = new THREE.ConeGeometry(0.72, 1.0, 6, 1, true); b.translate(0, 1.7, 0);
-  return verschmelze([a, b]);
-}
-function kronenLaub() {
-  const g = new THREE.IcosahedronGeometry(1, 0);
-  g.translate(0, 1.55, 0);
-  return verschmelze([g]);
-}
-function stamm() {
-  const g = new THREE.CylinderGeometry(0.12, 0.16, 1, 3, 1, true);
-  g.translate(0, 0.5, 0);
-  return verschmelze([g]);
-}
-const stein = () => verschmelze([new THREE.DodecahedronGeometry(1, 0)]);
 const blockstein = () => verschmelze([new THREE.IcosahedronGeometry(1, 0)]);   // 20 statt 36 Dreiecke, für die vielen Molensteine
 
-// ------------------------------------------------------------------ Pflanzen und Felsen setzen
-
-function setzePflanzen(region, stufe, q, gruppe, schatten) {
-  const pf = region.pflanzen;
-  const rnd = zufall(4711 + stufe);
-  const kiefern = [], laub = [], staemme = [], gras = [], schilf = [], felsen = [];
-  const menge = q.pflanzen;
-  const baumFarbe = () => region.baumfarben[Math.floor(rnd() * region.baumfarben.length)];
-  const laubFarbe = () => region.laubfarben[Math.floor(rnd() * region.laubfarben.length)];
-
-  const baum = (px, py, p, gross = 1) => {
-    const x = px * U, z = -py * U, s = (2.2 + rnd() * 1.6) * gross;
-    const y = p.h - 0.1;
-    if (rnd() < pf.kiefer) {
-      kiefern.push({ x, y, z, s, sy: s * (1.1 + rnd() * 0.5), rot: rnd() * 6.3, farbe: baumFarbe() });
-      staemme.push({ x, y, z, s: s * 0.9, sy: s * 0.9, farbe: '#8a6a54' });
-      return;
-    }
-    if (pf.pappel && rnd() < pf.pappel) {
-      // Pappel: schmal und hoch
-      laub.push({ x, y: y + s * 0.4, z, s: s * 0.45, sy: s * 1.6, rot: rnd() * 6.3, farbe: laubFarbe() });
-      staemme.push({ x, y, z, s: s * 0.7, sy: s * 1.0, farbe: '#7c6656' });
-      return;
-    }
-    const birke = rnd() < (pf.birke || 0);
-    // Windschief: Krone vom Westwind nach Osten gedrückt
-    const schief = pf.windschief ? { kz: -0.35, sy: s * 0.6 } : {};
-    laub.push({ x, y, z, s: s * 0.95, sy: s * (0.85 + rnd() * 0.3), rot: pf.windschief ? 0 : rnd() * 6.3, farbe: laubFarbe(), ...schief });
-    staemme.push({ x, y, z, s: s * 0.9, sy: s * 1.2, farbe: birke ? '#efece4' : '#8a6a54', ...(pf.windschief ? { kz: -0.25 } : {}) });
-  };
-
-  // Bäume: jitter-Raster auf dem Festland und (in Schweden) auf den Schären
-  const zelle = 7 / Math.sqrt(menge * pf.dichte + 0.01);
-  const baumBereich = (x0, x1, y0, y1, anteil) => {
-    for (let gy = y0; gy < y1; gy += zelle) {
-      for (let gx = x0; gx < x1; gx += zelle) {
-        const px = gx + rnd() * zelle, py = gy + rnd() * zelle;
-        const wald = rauschen(px / 70, py / 70, 41);
-        if (rnd() > anteil * (wald > 0.5 ? 0.9 : 0.12)) continue;
-        if (hafenAbstand(px, py) < 6) continue;
-        const p = punkt(px, py, stufe, region);
-        if (p.h < 0.3) continue;
-        if (p.typ === 'gras' || (p.typ === 'fels' && rnd() < 0.3) || (p.typ === 'duenengras' && rnd() < 0.08)) baum(px, py, p);
-      }
-    }
-  };
-  baumBereich(BEREICH.x0, BEREICH.x1, BEREICH.y0, BEREICH.y1, 1);
-  // Äußerer Ring nur dünn, damit der Horizont nicht leer ist
-  const zelleAlt = zelle;
-  const aussen = [[-1500, BEREICH.x0, -1500, 470], [BEREICH.x1, 1500, -1500, 470], [BEREICH.x0, BEREICH.x1, -1500, BEREICH.y0]];
-  for (const [x0, x1, y0, y1] of aussen) {
-    const weit = zelleAlt * (3.2 / Math.max(0.3, menge));
-    for (let gy = y0; gy < y1; gy += weit) {
-      for (let gx = x0; gx < x1; gx += weit) {
-        const px = gx + rnd() * weit, py = gy + rnd() * weit;
-        if (rauschen(px / 90, py / 90, 41) < 0.5 || rnd() > 0.8 * pf.dichte) continue;
-        const p = punkt(px, py, stufe, region);
-        if (p.h > 0.3 && (p.typ === 'gras' || p.typ === 'fels')) baum(px, py, p, 1.1);
-      }
-    }
-  }
-
-  // Dünengras, Salzwiese und Strandhafer als kleine Büschel
-  const nGras = Math.round(1400 * menge * pf.duenengras);
-  for (let k = 0; k < nGras; k++) {
-    const px = BEREICH.x0 + rnd() * (BEREICH.x1 - BEREICH.x0);
-    const py = 150 + rnd() * 100;
-    const p = punkt(px, py, stufe, region);
-    if (!(p.typ === 'duene' || p.typ === 'duenengras' || p.typ === 'salzwiese') || p.h < 0.15) continue;
-    const s = 0.5 + rnd() * 0.5;
-    gras.push({ x: px * U, y: p.h - 0.05, z: -py * U, s, sy: s * (1.2 + rnd()), rot: rnd() * 6.3, farbe: rnd() < 0.5 ? '#d2dca6' : '#c4d49a' });
-  }
-
-  // Schilf am Ufer des Binnensees, in Gruppen
-  const nSchilf = Math.round(1800 * menge * pf.schilf);
-  const hafenFrei = (px) => !(stufe >= 2 && px > -170 && px < 225) && !(stufe >= 1 && px > -125 && px < -80);
-  for (let k = 0; k < nSchilf; k++) {
-    const px = BEREICH.x0 + rnd() * (BEREICH.x1 - BEREICH.x0);
-    const nord = rnd() < 0.5;
-    const py = nord ? 186 - rnd() * 14 : suedufer(px) + rnd() * 14;
-    if (rauschen(px / 14, py / 14, 55) < 0.48) continue;
-    if (!nord && !hafenFrei(px)) continue;
-    if (px > DURCHSTICH[0] - 12 && px < DURCHSTICH[1] + 12) continue;
-    const p = punkt(px, py, stufe, region);
-    if (p.see > 0.5 || p.h > 0.25 || p.h < -0.7) continue;
-    const s = 0.35 + rnd() * 0.25;
-    schilf.push({ x: px * U, y: Math.min(0, p.h), z: -py * U, s, sy: s * (3.4 + rnd() * 1.6), rot: rnd() * 6.3, kx: (rnd() - 0.5) * 0.2, farbe: rnd() < 0.3 ? '#c8bc78' : rnd() < 0.5 ? '#8eb46e' : '#a2c07a' });
-  }
-
-  // Felsen und Findlinge
-  const nFels = Math.round(500 * menge * pf.findlinge);
-  for (let k = 0; k < nFels; k++) {
-    const px = BEREICH.x0 + rnd() * (BEREICH.x1 - BEREICH.x0);
-    const py = BEREICH.y0 + rnd() * (300 - BEREICH.y0);
-    const p = punkt(px, py, stufe, region);
-    const amUfer = p.h > -0.6 && p.h < 0.8;
-    if (!(p.typ === 'fels' || (amUfer && rnd() < 0.25))) continue;
-    if (hafenAbstand(px, py) < 0 && stufe >= 2) continue;
-    if (p.typ === 'pflaster' || p.typ === 'mole') continue;
-    const s = 0.4 + rnd() * (p.typ === 'fels' ? 1.8 : 0.8);
-    felsen.push({ x: px * U, y: p.h - s * 0.25, z: -py * U, s, sy: s * (0.5 + rnd() * 0.3), rot: rnd() * 6.3, kx: rnd() * 0.4, farbe: rnd() < 0.5 ? region.farben.fels : '#b0bcc4' });
-  }
-
-  const flach = { flatShading: true };
-  const mKrone = new THREE.MeshLambertMaterial(flach);
-  const mStamm = new THREE.MeshLambertMaterial(flach);
-  const teile = [
-    instanzen(kronenKiefer(), mKrone, kiefern, 'kiefern'),
-    instanzen(kronenLaub(), mKrone, laub, 'laubbaeume'),
-    instanzen(stamm(), mStamm, staemme, 'staemme'),
-    instanzen(verschmelze([new THREE.ConeGeometry(0.5, 1, 4, 1, true).translate(0, 0.5, 0)]), new THREE.MeshLambertMaterial(flach), gras, 'duenengras'),
-    instanzen(verschmelze([new THREE.ConeGeometry(0.12, 1, 3, 1, true).translate(0, 0.5, 0)]), new THREE.MeshLambertMaterial(flach), schilf, 'schilf'),
-    instanzen(stein(), new THREE.MeshLambertMaterial(flach), felsen, 'felsen'),
-  ];
-  for (const t of teile) {
-    t.castShadow = schatten && (t.name !== 'schilf' && t.name !== 'duenengras');
-    t.receiveShadow = false;
-    gruppe.add(t);
-  }
-  return { baeume: [...kiefern, ...laub], felsen };
-}
+// Pflanzen, Felsen, Dorf und Höfe setzt bewuchs.js (setzeBewuchs).
 
 // ------------------------------------------------------------------ Molen, Kaimauern, Buhnen
 
@@ -593,7 +482,8 @@ export function baueGelaende(region, stufe, qualitaet, { tiefsterPegel = 0 } = {
   baueKaimauern(region, stufe, gruppe, q.schatten);
   baueBuhnen(region, stufe, gruppe);
   const feuer = baueLeuchttuerme(region, stufe, gruppe, q.schatten);
-  const { baeume } = setzePflanzen(region, stufe, q, gruppe, q.schatten);
+  const bewuchs = setzeBewuchs(region, stufe, q, gruppe, q.schatten);
+  const { baeume } = bewuchs;
 
   let flach = null;
   if (!q.schatten) {
@@ -605,6 +495,14 @@ export function baueGelaende(region, stufe, qualitaet, { tiefsterPegel = 0 } = {
     gruppe,
     /** Leuchtfeuer der Leuchttürme blinken lassen (jedes Bild). */
     aktualisiereFeuer(zeit, nacht) { for (const f of feuer) f.userData.aktualisiere(zeit, nacht); },
+    /** Felder, Wiesen und Laub für die Jahreszeit färben ('fruehling' | 'sommer' | 'herbst' | 'winter'). */
+    setzeJahreszeit(jahreszeit) {
+      faerbeBoden(innen.geometry, region, jahreszeit);
+      faerbeBoden(aussen.geometry, region, jahreszeit);
+      bewuchs.faerbe(jahreszeit);
+    },
+    /** Jedes Bild: Mühlenflügel drehen. */
+    aktualisiere(dt) { bewuchs.aktualisiere(dt); },
     aktualisiereSchatten(richtung, laenge, nacht) {
       if (flach) flach.userData.aktualisiere(richtung, laenge, nacht);
     },
