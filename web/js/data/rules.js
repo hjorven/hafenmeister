@@ -136,6 +136,8 @@ export function rulesFromEconomy(E = ECONOMY) {
   // Stationierte Boote: Fischer zahlen eine feste Pacht, Dauerlieger einen Anteil ihres Gastpreises
   r.stationedFee = E.fischer?.pachtProTag ?? null;
   r.stationedFeeShare = E.dauerlieger?.anteilGastpreis ?? 0;
+  // Dauerlieger (features/dauerlieger.js): alle Zahlen, über regeln(ctx) gelesen
+  if (E.dauerlieger) r.dauer = { ...(r.dauer || {}), ...E.dauerlieger };
 
   // Warten vor dem Hafen
   const w = E.warten || {};
