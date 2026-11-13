@@ -13,7 +13,7 @@
 //   --bild 10          alle n Sekunden Echtzeit ein Bildschirmfoto
 //   --stufe 1          Startstufe (1 = neues Spiel; ab 2 Testmodus ?stufe=n, der nicht speichert)
 //   --bis 6            Lauf endet, wenn diese Stufe erreicht und ihr Ziel erfüllt ist
-//   --gelaende n / --stegbild n   werden an die Adresse gehängt (?gelaende=n, ?stegbild=n)
+//   --gelaende n / --stegbild n / --landbild n   werden an die Adresse gehängt (?gelaende=n usw.)
 //   --web web          Ordner mit dem Spiel (Standard web/ im Repo)
 //   --out dir          Ausgabeordner (Standard /tmp/zeitraffer: Bilder, ergebnis-<gerät>.json)
 //
@@ -36,7 +36,7 @@ const START = Number(opt('stufe', 1));
 const BIS = Number(opt('bis', 6));
 const WEB = path.resolve(opt('web', path.join(REPO, 'web')));
 const OUT = path.resolve(opt('out', path.join(require('os').tmpdir(), 'zeitraffer')));
-const EXTRA = ['gelaende', 'stegbild'].filter((k) => opt(k) != null).map((k) => `&${k}=${opt(k)}`).join('');
+const EXTRA = ['gelaende', 'stegbild', 'landbild'].filter((k) => opt(k) != null).map((k) => `&${k}=${opt(k)}`).join('');
 
 function ladePlaywright() {
   for (const p of [path.join(REPO, 'tests', 'node_modules', '@playwright', 'test'), 'playwright', '@playwright/test']) {

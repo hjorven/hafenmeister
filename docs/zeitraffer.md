@@ -34,7 +34,7 @@ Die Läufe können gleichzeitig laufen, werden dann aber jeder langsamer.
 | `--bild` | `10` | alle n Sekunden ein Bildschirmfoto |
 | `--stufe` | `1` | Startstufe. 1 = neues Spiel. Ab 2 Testmodus `?stufe=n`, der nicht speichert, darum entfällt dann die Speicherprüfung |
 | `--bis` | `6` | Lauf endet, wenn diese Stufe erreicht und ihr Ziel erfüllt ist |
-| `--gelaende`, `--stegbild` | | werden an die Adresse gehängt (`?gelaende=n`, `?stegbild=n`) |
+| `--gelaende`, `--stegbild`, `--landbild` | | werden an die Adresse gehängt (`?gelaende=n`, `?stegbild=n`, `?landbild=n`) |
 | `--web` | `web` | Ordner mit dem Spiel. Für Läufe gegen `main`, während man selbst arbeitet: `git archive origin/main web \| tar -x -C /tmp/zr-main` und `--web /tmp/zr-main/web` |
 | `--out` | `/tmp/zeitraffer` | Ausgabeordner |
 
