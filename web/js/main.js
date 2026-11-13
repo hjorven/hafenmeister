@@ -312,7 +312,8 @@ function ueberblick(game) {
   if (Math.abs(start.w - ende.w) < 1 && Math.hypot(start.x - ende.x, start.z - ende.z) < 1) { cam.reset(); return; }
   // Ein Startfenster ("Willkommen zurueck", Speicherplaetze) verdeckt das Bild: so lange halten,
   // der Flug beginnt erst, wenn es zu ist. Klicks und Tasten darin brechen nichts ab.
-  const fenster = () => document.querySelector('.hm-save-backdrop, [aria-modal="true"]');
+  const fenster = () => [...document.querySelectorAll('.hm-save-backdrop, [aria-modal="true"]')]
+    .some((el) => !el.hidden && el.getClientRects().length > 0);   // versteckte Dialoge (Aufstieg) zaehlen nicht
 
   // _apply sofort, damit kein Bild mit altem Ausschnitt entsteht (mit PR 137 macht update() das ohnehin)
   const setze = (x, z, w) => { cam.target.x = x; cam.target.z = z; cam.viewWidth = w; cam._apply?.(); };
