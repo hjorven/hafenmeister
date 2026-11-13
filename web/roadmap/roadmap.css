@@ -101,6 +101,31 @@ h1 span { color: var(--meer); }
 .mini { display: flex; height: 8px; border-radius: 2px; overflow: hidden; background: var(--mulde); }
 .mini > i { display: block; height: 100%; }
 
+/* ---------- Bilder und Neuigkeiten ---------- */
+.neu { margin: 0 0 14px; display: grid; gap: 10px; }
+.neu .gruppe-titel { margin: 0; }
+.leiste {
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 260px); gap: 10px;
+  overflow-x: auto; padding: 2px 2px 10px; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+}
+.leiste .bild { scroll-snap-align: start; }
+.bilder { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.bild { margin: 0; background: var(--papier); border: 2px solid var(--rahmen); border-radius: 4px; overflow: hidden; }
+.bild-knopf { display: block; width: 100%; padding: 0; border: 0; background: var(--mulde); cursor: zoom-in; }
+.bild img { display: block; width: 100%; height: 150px; object-fit: cover; object-position: top center; }
+.bild.hoch img { object-fit: contain; }
+.bild figcaption { padding: 6px 8px; font-size: 13px; color: var(--tinte-2); line-height: 1.35; }
+.merges > summary { cursor: pointer; padding: 10px 12px; font: 600 15px var(--pixel); min-height: 44px; }
+.merges ul { list-style: none; margin: 0; padding: 0 12px 10px; display: grid; gap: 6px; }
+.merges li { display: grid; grid-template-columns: 5.6em 3.4em 1fr; gap: 8px; font-size: 14px; align-items: baseline; }
+.merges .datum { color: var(--tinte-2); font-family: var(--pixel); }
+.merges .neben { grid-column: 3; }
+.gross { max-width: min(96vw, 1100px); padding: 10px; border: 2px solid var(--rahmen); border-radius: 4px; background: var(--papier); color: var(--tinte); }
+.gross::backdrop { background: rgba(10, 20, 30, 0.7); }
+.gross img { display: block; max-width: 100%; max-height: 78vh; margin: 0 auto; }
+.gross p { margin: 8px 0; font-size: 14px; }
+.gross button { font: 15px var(--pixel); min-height: 40px; padding: 0 14px; border: 2px solid var(--rahmen); border-radius: 4px; background: var(--tinte); color: var(--papier); cursor: pointer; }
+
 /* ---------- Werkzeugleiste ---------- */
 .werkzeug {
   position: sticky; top: 0; z-index: 2;
@@ -165,7 +190,7 @@ h1 span { color: var(--meer); }
 }
 .punkte .code { font: 600 14px var(--pixel); }
 .punkte .neben { grid-column: 2 / 4; font-size: 12.5px; color: var(--tinte-2); }
-.punkte .paket-link {
+.paket-link {
   font: 13px var(--pixel); background: none; border: 0; padding: 0 4px 0 0; color: var(--meer);
   cursor: pointer; text-decoration: underline;
 }
@@ -188,6 +213,13 @@ mark { background: var(--gold); color: #24364a; border-radius: 2px; padding: 0 1
   .chips button { flex: 1 1 auto; padding: 0 6px; font-size: 14px; min-height: 40px; }
   .chips button .punkt { margin-right: 4px; }
   .suche { flex-basis: 100%; order: 3; }
+  .leiste { grid-auto-columns: 72%; }
+  .bilder { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .bilder .bild img { height: 120px; }
+  .bilder .bild figcaption { font-size: 12px; padding: 4px 6px; }
+  .merges li { grid-template-columns: 4.8em 1fr; }
+  .merges li > span:nth-child(3) { grid-column: 1 / 3; }
+  .merges .neben { grid-column: 1 / 3; }
   .zeile { grid-template-columns: 1fr; gap: 2px; }
   .punkte li { grid-template-columns: 1fr auto; gap: 4px 8px; }
   .punkte li .code { grid-row: 1; grid-column: 1; }

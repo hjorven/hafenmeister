@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - "docs/roadmap.md"
+      - "docs/roadmap-bilder.json"
       - "tools/roadmap.mjs"
       - ".github/workflows/roadmap.yml"
   workflow_dispatch:

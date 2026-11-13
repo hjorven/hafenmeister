@@ -27,6 +27,8 @@ const QUELLE = join(WURZEL, 'docs/roadmap.md');
 const ZIEL_JSON = join(WURZEL, 'web/roadmap/daten.json');
 const ZIEL_SVG = join(WURZEL, 'docs/roadmap-fortschritt.svg');
 const ZIEL_README = join(WURZEL, 'README.md');
+const BILDER = join(WURZEL, 'docs/roadmap-bilder.json');
+const BILDER_ORDNER = 'web/roadmap/bilder';
 const REPO = 'https://github.com/hjorven/hafenmeister';
 const SEITE = 'https://hjorven.github.io/hafenmeister/roadmap/';
 
@@ -326,6 +328,20 @@ export function readmeAbschnitt(daten) {
     r.push(`| [${w.nr === 99 ? '-' : w.nr}](${link}) | ${w.titel} | \`${balken(z)}\` ${Math.round(anteil(z) * 100)} % | ${z.erledigt} | ${z.teilweise + z.arbeit} | ${z.offen + z.frage} |`);
   }
   r.push('');
+  if (daten.neueBilder.length) {
+    r.push('**Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):');
+    r.push('');
+    r.push('<table><tr>');
+    daten.neueBilder.slice(0, 6).forEach((nr, i) => {
+      const b = daten.bilder[nr];
+      const pk = b.pakete[0];
+      const ziel = pk ? `${SEITE}#paket=${pk}` : SEITE;
+      if (i && i % 3 === 0) r.push('</tr><tr>');
+      r.push(`<td width="33%" valign="top"><a href="${ziel}"><img src="${BILDER_ORDNER}/${b.datei}" alt="${esc(b.titel || '')}" width="100%"></a><br><sub>${esc([b.pakete.join(', '), b.titel, b.pr ? `PR ${b.pr}` : ''].filter(Boolean).join(' · '))}</sub></td>`);
+    });
+    r.push('</tr></table>');
+    r.push('');
+  }
   for (const w of daten.wellen) {
     const z = w.zaehler;
     const name = w.nr === 99 ? w.titel : `Welle ${w.nr}: ${w.titel}`;
@@ -358,14 +374,52 @@ export function readmeEinsetzen(readme, abschnitt) {
 
 // ---------- Hauptteil ----------
 
-export function erzeuge(md, st = { datum: '', commit: '' }) {
+export function erzeuge(md, st = { datum: '', commit: '' }, bilder = [], merges = []) {
   const d = lese(md);
-  return { stand: st, quelle: `${REPO}/blob/main/docs/roadmap.md`, repo: REPO, status: STATUS, ...d };
+  const ids = new Set(d.pakete.map((p) => p.id));
+  // Bilder: Pakete aus der Liste, sonst über die PR-Nummer
+  const liste = bilder.map((b, i) => {
+    let pakete = (b.pakete || []).filter((id) => ids.has(id));
+    if (!pakete.length && b.pr) pakete = d.pakete.filter((p) => p.prs.includes(b.pr)).map((p) => p.id);
+    return { ...b, pakete, nr: i };
+  });
+  for (const p of d.pakete) p.bilder = liste.filter((b) => b.pakete.includes(p.id)).map((b) => b.nr);
+  const neueBilder = [...liste].sort((a, b) => (b.datum || '').localeCompare(a.datum || '') || b.nr - a.nr).slice(0, 9).map((b) => b.nr);
+  // Merges: Pakete aus "Pnn" im Titel oder über die PR-Nummer
+  const mg = merges.map((m) => {
+    const imTitel = [...m.titel.matchAll(/\bP(\d{2})\b/g)].map((x) => 'P' + x[1]).filter((id) => ids.has(id));
+    const perPr = d.pakete.filter((p) => p.prs.includes(m.pr)).map((p) => p.id);
+    return { ...m, pakete: [...new Set([...imTitel, ...perPr])] };
+  });
+  return { stand: st, quelle: `${REPO}/blob/main/docs/roadmap.md`, repo: REPO, status: STATUS, ...d, bilder: liste, neueBilder, merges: mg };
+}
+
+export function leseBilder() {
+  try {
+    const j = JSON.parse(readFileSync(BILDER, 'utf8'));
+    return (j.bilder || []).filter((b) => b && typeof b.datei === 'string' && /^[\w.-]+$/.test(b.datei));
+  } catch { return []; }
+}
+
+export function leseMerges(anzahl = 12) {
+  try {
+    const out = execSync(`git log --first-parent -n 60 --format=%cs%x09%s HEAD`, { cwd: WURZEL, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    const liste = [];
+    for (const z of out.split('\n')) {
+      const [datum, ...rest] = z.split('\t');
+      const titel = rest.join('\t');
+      const m = titel.match(/^(.*)\s\(#(\d+)\)$/);
+      if (!m) continue;
+      liste.push({ datum, titel: m[1], pr: Number(m[2]) });
+      if (liste.length >= anzahl) break;
+    }
+    return liste;
+  } catch { return []; }
 }
 
 function main() {
   const arg = process.argv.slice(2);
-  const daten = erzeuge(readFileSync(QUELLE, 'utf8'), stand());
+  const daten = erzeuge(readFileSync(QUELLE, 'utf8'), stand(), leseBilder(), leseMerges());
   if (arg.includes('--json')) { process.stdout.write(JSON.stringify(daten, null, 2) + '\n'); return; }
 
   const dateien = [
@@ -374,7 +428,7 @@ function main() {
     [ZIEL_README, readmeEinsetzen(readFileSync(ZIEL_README, 'utf8'), readmeAbschnitt(daten))],
   ];
   // Datum und Commit allein machen nichts veraltet: Vergleich ohne Stand
-  const ohneStand = (s) => s.replace(/"stand": \{[^}]*\}/, '').replace(/ · Stand [0-9.]+/, '');
+  const ohneStand = (s) => s.replace(/"stand": \{[^}]*\}/, '').replace(/"merges": \[[\s\S]*?\n \]/, '').replace(/ · Stand [0-9.]+/, '');
   let veraltet = 0;
   for (const [pfad, inhalt] of dateien) {
     let alt = '';
