@@ -750,11 +750,13 @@ export function bauen(nr, seed = 1) {
   // Leuchttürme stehen auf festem Land in der Karte; sonst das nächste Land in der Nähe, sonst keiner
   lt = lt.map(([x, y]) => {
     // gut 9 m vom Ufer, damit Turm und Sockel sicher auf festem Grund stehen (nicht auf Salzwiese am Wasser)
-    if (landig(x, y) > 15) return [x, y];
-    for (let r = 6; r <= 180; r += 6) {
+    // In Marschland nicht auf die Salzwiese am Ufer (die ist kaum höher als das Wasser), auf Dünen schon
+    const fest = (qx, qy) => landig(qx, qy) > 15 && (!stil.marsch || probe(qx, qy).d > 56 || probe(qx, qy).duene > 0.3);
+    if (fest(x, y)) return [x, y];
+    for (let r = 6; r <= 240; r += 6) {
       for (let a = 0; a < 16; a++) {
         const qx = x + r * Math.cos(a * Math.PI / 8), qy = y + r * Math.sin(a * Math.PI / 8);
-        if (landig(qx, qy) > 15) return [qx, qy];
+        if (fest(qx, qy)) return [qx, qy];
       }
     }
     return null;
