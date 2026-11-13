@@ -96,7 +96,7 @@ bash tools/check-modules.sh
 | `game.pick(x, y, { tolerance, types })` | was liegt unter einem Bildschirmpunkt, liefert `{ type, id, object, point }` oder `null` |
 | `game.boatTypes[größe]` | von den Schiffs-Modulen: `{ TYPES, MODELS, buildBoat, setSails, animateBoat }` je Größe `s`, `m`, `l`, `xl`, `xxl` |
 | `game.onTick(fn)` | `fn(dt, game)` jedes Bild, `dt` in Sekunden, 0 während der Pause |
-| `game.on(name, fn)`, `game.emit(name, daten)` | Ereignisse |
+| `game.on(name, fn)`, `game.emit(name, daten)` | Ereignisse (`core/ereignisse.js`): wirft ein Zuhörer, bekommen die anderen das Ereignis trotzdem; der Fehler steht in der Konsole |
 | `game.setPaused(true/false)`, `game.paused`, `game.speed`, `game.time` | Pause, Vorspulen, Spielzeit |
 
 **Startansicht:** `main.js` setzt `setHomeRect(() => startRect(game, stufe))`. Kern sind die Liegeplätze der aktuellen Stufe, ab 20 Plätzen ohne die äußersten 10 % je Richtung; dazu Wartebojen, Bauplätze und die Landmarken der Geländeform (`game.gelaende.aktuell()`: `leuchttuerme`, `seeInseln`), solange die Ansicht dadurch höchstens anderthalbmal so breit wird. Freie Höhe geht zu 70 % nach Norden (Wasser) und zu 30 % nach Süden. Im Querformat zählt die linke Schilderspalte (`#hm-seite`, `#hm-zeit`) als `camera.insetLeft`.
