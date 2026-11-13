@@ -63,6 +63,8 @@ body.hm.foto .hm-tipp, body.hm.foto .hm-ring { display: none; }
 @media (max-height: 499px) { .hm-tipp { font-size: 14px; padding: 10px 14px 8px; width: min(340px, 46%); } }
 `;
 
+// Wie ui-phone.css: flaches Querformat, dort blendet die Oberfläche die Seitenleiste unter der Blase aus
+const QUER = typeof matchMedia === 'function' ? matchMedia('(max-height: 499px) and (orientation: landscape)') : { matches: false };
 const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
 
 /** Texte je Schritt, für Finger und Maus getrennt, wo es einen Unterschied macht. */
@@ -136,7 +138,7 @@ export function einstiegState(state) {
 
 /**
  * Welcher Schritt jetzt zu zeigen ist (ohne Browser testbar).
- * lage: { tag, bootImBild, willkommenSek, abend, muenzen, bauenSichtbar, tafelSichtbar, karteOffen }
+ * lage: { tag, bootImBild, willkommenSek, abend, muenzen, bauenSichtbar, tafelSichtbar, ohneZiele, karteOffen }
  *   bootImBild: ein wartendes Boot liegt sichtbar im Bild (nicht nur in der Sim, noch auf der Anfahrt)
  *   willkommenSek: wie lange "Willkommen" schon zu sehen ist
  * Gibt die id zurück oder null. Erledigt Schritte, die der Spieler schon hinter sich hat.
@@ -149,6 +151,9 @@ export function naechsterSchritt(e, lage) {
     if (lage.tag > e.startTag) { e.fertig = true; return null; }
   }
   const done = new Set(e.erledigt);
+  // Handy quer: Die Seitenleiste mit der Tafel tritt hinter die Blase zurück (ui-phone.css),
+  // der Hinweis auf die Tagesziele hätte also kein Ziel. Er entfällt dort.
+  if (lage.ohneZiele && done.has('bauen')) done.add('ziele');
   // Willkommen ist vorbei, wenn man es lesen konnte und das erste Boot im Bild wartet, oder schon eines lag
   if (!done.has('willkommen') && ((lage.bootImBild && lage.willkommenSek >= WILLKOMMEN_SEK) || done.has('anlegen'))) done.add('willkommen');
   const ruhig = !lage.karteOffen;
@@ -240,6 +245,16 @@ export async function init(game) {
     return { x: r.left + r.width / 2 - h.left, y: r.top + r.height / 2 - h.top, w, h: hh, rund: Math.min(w, hh) / 2 };
   }
   const muenzen = () => objekte('coin', (pk, o) => !o.userData.eingestrichen);
+  const bootNr = (pk) => Number(String(pk.id).replace(/^b/, ''));
+  // Liegende Boote, deren Liegegeld noch offen ist (deren Münze gleich erscheint)
+  function zahlendeIds() {
+    const boats = st()?.boats ?? {};
+    return new Set(Object.values(boats).filter((b) => b.status === 'moored' && b.pendingFee > 0).map((b) => b.id));
+  }
+  function zahlendesBoot() {
+    const ids = zahlendeIds();
+    return ids.size ? objekte('boat', (pk) => ids.has(bootNr(pk)))[0] ?? null : null;
+  }
 
   // Freie Spielfläche ohne Leisten und Knopfspalten, mit etwas Rand: nur dort gilt ein Boot als "im Bild"
   function freieFlaeche(rand = 28) {
@@ -302,8 +317,15 @@ export async function init(game) {
           const p = aufBildschirm(m);
           if (imBild(p, f) && (!best || Math.hypot(p.x - c.x, p.y - c.y) < Math.hypot(best.x - c.x, best.y - c.y))) best = { ...p, obj: m };
         }
-        // Ist noch keine Münze im Bild (Boot fährt noch an den Platz), bleibt nur der Text stehen
-        return best ? { ...best, w: 64, h: 64 } : null;
+        if (best) return { ...best, w: 64, h: 64 };
+        // Noch keine Münze: Das Boot fährt von der Boje in die Box, die Münze kommt, wenn es fest ist.
+        // Bis dahin zeigt der Kreis auf das anlegende Boot, sonst (mit Hafenbüro) auf „Kassieren“.
+        const boot = zahlendesBoot();
+        if (boot) {
+          const p = aufBildschirm(boot);
+          if (imBild(p, f)) return { ...p, w: 76, h: 76, obj: boot };
+        }
+        return domKreis(document.getElementById('btn-collect'), 6);
       }
       // Vorspulen: Zeitsteuerung unten links (Doppelpfeil)
       case 'tempo': return domKreis(document.querySelector('.hm-tempo-knopf[data-tempo="tempo2"]'), 6);
@@ -325,6 +347,7 @@ export async function init(game) {
       muenzen: Object.values(s.boats).some((b) => b.status === 'moored' && b.pendingFee > 0),
       bauenSichtbar: sichtbar(document.getElementById('btn-build')),
       tafelSichtbar: sichtbar(document.querySelector('.hm-tafel > button')),
+      ohneZiele: QUER.matches,
       // Karte oder Baumodus offen: keine neuen Hinweise darüberlegen
       karteOffen: document.body.classList.contains('card-open') || document.body.classList.contains('building'),
     };
@@ -379,7 +402,7 @@ export async function init(game) {
     };
     const oben = Math.max(unterkante('#hud-top'), unterkante('#weather-chip'), unterkante('.hm-tafel > button'), unterkante('#hm-seite'), 8) + 10;
     let unten = h.height - 12;
-    for (const sel of ['#btn-build', '#btn-collect', '#hud-bottom', '#card']) {
+    for (const sel of ['#btn-build', '#btn-collect', '#hud-bottom', '#hm-zeit', '#card']) {
       const el = document.querySelector(sel);
       if (sichtbar(el)) unten = Math.min(unten, el.getBoundingClientRect().top - h.top - 12);
     }
@@ -451,12 +474,11 @@ export async function init(game) {
   // damit Schritt 2 beginnen kann. Höchstens dreimal, damit sie dem Spieler nicht hinterherzieht.
   let fluege = 0;
   let letzterFlug = -Infinity;
-  function zumBoot() {
-    if (ziehen || fluege >= 3 || !game.camera?.flyTo) return;
+  function zumBoot(ids) {
+    if (ziehen || fluege >= 3 || !game.camera?.flyTo || !ids.size) return;
     const jetzt = performance.now();
     if (jetzt - letzterFlug < 5000) return;
-    const w = new Set(api.waitingBoats().map((b) => b.id));
-    const o = objekte('boat', (pk) => w.has(Number(String(pk.id).replace(/^b/, ''))))[0];
+    const o = objekte('boat', (pk) => ids.has(bootNr(pk)))[0];
     if (!o) return;
     const pos = o.getWorldPosition(new THREE.Vector3());
     game.camera.flyTo(pos.x, pos.z);
@@ -484,10 +506,13 @@ export async function init(game) {
     const l = lage();
     const id = naechsterSchritt(e, l);
     halte(!e.erledigt.includes('anlegen'));
-    if (id === 'willkommen' && l.willkommenSek >= WILLKOMMEN_SEK && !l.bootImBild) zumBoot();
-    if (id !== aktuell) zeige(id);
+    if (id === 'willkommen' && l.willkommenSek >= WILLKOMMEN_SEK && !l.bootImBild) zumBoot(new Set(api.waitingBoats().map((b) => b.id)));
+    // Wer schon vorspult, kennt die Zeitsteuerung: der Hinweis würde nur kurz aufblitzen
+    if (id === 'tempo' && (game.speed || 1) > 1) { schritt('tempo'); return; }
+    if (id !== aktuell) { zeige(id); fluege = 0; }
     k = id ? ziel(id) : null;
     if (!id) return;
+    if (id === 'muenzen' && !k) zumBoot(zahlendeIds());
     // Ist die Bootskarte offen, sagt sie selbst, was zu tun ist; der Text würde nur die Stege verdecken
     tipp.hidden = ziehen || (id === 'anlegen' && document.body.classList.contains('card-open'));
     ring.hidden = !k || ziehen;

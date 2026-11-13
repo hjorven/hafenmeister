@@ -61,6 +61,15 @@ test('Liegegeld-Text nennt den Anteil, den der Hafenmeister abends holt', () => 
   for (const t of Object.values(TEXTE)) assert.doesNotMatch(t.text + t.kurz, /Sonne/);
 });
 
+test('Handy quer: ohne Tafel endet der Einstieg nach Bauen', () => {
+  const e = einstiegState({});
+  for (const id of ['willkommen', 'anlegen', 'muenzen', 'tempo']) erledige(e, id);
+  assert.equal(naechsterSchritt(e, lage({ ohneZiele: true })), 'bauen');
+  erledige(e, 'bauen');
+  assert.equal(naechsterSchritt(e, lage({ ohneZiele: true })), null);
+  assert.equal(e.fertig, true);
+});
+
 test('beendet bleibt beendet und liegt im Spielstand', () => {
   const state = {};
   const e = einstiegState(state);
