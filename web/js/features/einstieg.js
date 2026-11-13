@@ -60,6 +60,8 @@ const CSS = `
 .hm-tipp .beenden { background: transparent; color: var(--hm-tinte-2, #5a6a7c); padding: 0 8px; }
 .hm-tipp .weiter:focus-visible, .hm-tipp .beenden:focus-visible { outline: 3px solid var(--hm-gold, #f2c14e); outline-offset: 2px; }
 body.hm.foto .hm-tipp, body.hm.foto .hm-ring { display: none; }
+/* Ein Tipp beim ersten Mal steht neben der linken Spalte, die bleibt sichtbar (ui-phone.css blendet sie sonst aus) */
+@media (max-height: 499px) and (orientation: landscape) { .hm-neu:has(.hm-tipp.hinweis:not([hidden])) #hm-seite { visibility: visible; } }
 @media (max-height: 499px) { .hm-tipp { font-size: calc(var(--hm-s, 15px) - 1px); padding: 10px 14px 8px; width: min(340px, 46%); } }
 `;
 
@@ -467,28 +469,46 @@ export async function init(game) {
       const r = el.getBoundingClientRect();
       return r.left - h.left < 380 ? r.bottom - h.top : 0;
     };
-    const oben = Math.max(unterkante('#hud-top'), unterkante('#weather-chip'), unterkante('.hm-tafel > button'), unterkante('#hm-seite'), 8) + 10;
-    let unten = h.height - 12;
-    for (const sel of ['#btn-build', '#btn-collect', '#hud-bottom', '#hm-zeit', '#card', '.hm-banner']) {
-      const el = document.querySelector(sel);
-      if (sichtbar(el)) unten = Math.min(unten, el.getBoundingClientRect().top - h.top - 12);
-    }
-    // Nicht unter die Knopfspalte rechts (Handy hochkant): Breite bis kurz vor die Knöpfe
+    // Tipps beim ersten Mal lassen die linke Spalte (Wetter, Tagesziel, Ausbau) frei: daneben stellen,
+    // wenn dort genug Platz ist (Querformat, Tablet, PC), sonst wie die Schritte darunter
+    const istHinweis = !!aktuell?.startsWith('hinweis:');
+    tipp.classList.toggle('hinweis', istHinweis);   // zuerst: im Querformat bleibt die Spalte dann sichtbar
     let rechts = h.width - 12;
     for (const el of document.querySelectorAll('#hud-top button, #hud-top .hud-btn')) {
       if (!sichtbar(el)) continue;
       const r = el.getBoundingClientRect();
       if (r.left - h.left > h.width * 0.6 && r.top - h.top > 40) rechts = Math.min(rechts, r.left - h.left - 8);
     }
+    let seite = 0;
+    if (istHinweis) {
+      for (const el of document.querySelectorAll('#hm-seite > *')) {
+        if (!sichtbar(el)) continue;
+        const r = el.getBoundingClientRect();
+        if (r.left - h.left < h.width * 0.4) seite = Math.max(seite, r.right - h.left);
+      }
+    }
+    const nebenSeite = seite > 0 && rechts - seite - 20 >= 220;
+    const oben = Math.max(unterkante('#hud-top'), nebenSeite ? 0 : Math.max(unterkante('#weather-chip'), unterkante('.hm-tafel > button'), unterkante('#hm-seite')), 8) + 10;
+    let unten = h.height - 12;
+    for (const sel of ['#btn-build', '#btn-collect', '#hud-bottom', '#hm-zeit', '#card', '.hm-banner']) {
+      const el = document.querySelector(sel);
+      if (sichtbar(el)) unten = Math.min(unten, el.getBoundingClientRect().top - h.top - 12);
+    }
     // Querformat (flaches Handy): liegt das Ziel links, steht die Blase rechts, sonst links
     const rechtsStehen = h.height < 500 && k && k.x < h.width * 0.6;
-    const breite = rechtsStehen ? Math.min(300, rechts - 12) : Math.min(360, rechts - 12);
+    let breite = rechtsStehen ? Math.min(300, rechts - 12) : Math.min(360, rechts - 12);
+    let links = rechtsStehen ? rechts - breite : null;
+    if (nebenSeite) {
+      links = seite + 10;
+      breite = Math.min(rechtsStehen ? 300 : 360, rechts - links - 10);
+    }
     tipp.style.width = `${Math.round(breite)}px`;
-    tipp.style.left = rechtsStehen ? `${Math.round(rechts - breite)}px` : '';
+    tipp.style.left = links != null ? `${Math.round(links)}px` : '';
     // Handy: immer die Kurzfassung, damit der Hafen frei bleibt
     tipp.classList.toggle('eng', h.width < 600 || h.height < 560);
     let hoehe = tipp.offsetHeight;
-    const trifft = (y) => k && k.y + k.h / 2 > y - 6 && k.y - k.h / 2 < y + hoehe + 6 && (rechtsStehen ? k.x + k.w / 2 > rechts - tipp.offsetWidth : k.x - k.w / 2 < 12 + tipp.offsetWidth);
+    const lx = links ?? 12;
+    const trifft = (y) => k && k.y + k.h / 2 > y - 6 && k.y - k.h / 2 < y + hoehe + 6 && k.x + k.w / 2 > lx && k.x - k.w / 2 < lx + tipp.offsetWidth;
     const deckung = (y) => (k ? Math.max(0, Math.min(k.y + k.h / 2, y + hoehe) - Math.max(k.y - k.h / 2, y)) : 0);
     const yUnten = Math.max(oben, unten - hoehe);
     let y = oben;
@@ -616,7 +636,9 @@ export async function init(game) {
       if (!tipp.hidden) lege(k);
       return;
     }
-    if (aktuell || !offeneHinweise.length || !ruhig) return;
+    // Nacheinander statt gleichzeitig: Dauerplatz-Meldung, Morgen-Zettel oder Feier zuerst ausreden lassen
+    const andere = ['#dauer-hinweis', '.hm-ta-zettel', '#hm-feier'].some((sel) => sichtbar(document.querySelector(sel)));
+    if (aktuell || !offeneHinweise.length || !ruhig || andere) return;
     const id = offeneHinweise.shift();
     e.hinweise ||= [];
     e.hinweise.push(id);   // gilt als gesehen, auch wenn der Spieler gleich neu lädt

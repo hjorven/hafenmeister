@@ -686,7 +686,11 @@ export async function init(game) {
   const fensterOffen = () => document.body.classList.contains('card-open') || [...document.querySelectorAll(FENSTER)].some(sichtbar);
   function platziereHinweis() {
     if (hinweis.hidden) return;
-    hinweis.classList.toggle('zurueck', fensterOffen());
+    // Ein Tipp (Einstieg, "beim ersten Mal") hat Vorrang: der Hinweis wartet, bis er weg ist. Der Tipp wartet
+    // seinerseits nur, solange dieser Hinweis sichtbar ist (einstieg.js), also blockieren sie sich nicht.
+    // Ausnahme: ein wartender Dauerlieger mit Frist bis zum Abend bleibt sichtbar.
+    const tippOffen = hinweisArt !== 'wartet' && [...document.querySelectorAll('.hm-tipp:not([hidden])')].some(sichtbar);
+    hinweis.classList.toggle('zurueck', fensterOffen() || tippOffen);
     if (hinweis.classList.contains('zurueck')) return;
     const h = host.getBoundingClientRect();
     const rand = 8;
