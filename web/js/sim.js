@@ -951,7 +951,9 @@ export function tagesbericht(state, ctx) {
   const summe = Object.values(h.einnahmen).reduce((a, b) => a + b, 0);
   const ausgaben = Object.values(h.ausgaben).reduce((a, b) => a + b, 0);
   const ziele = state.modules?.ziele;
-  const zielListe = ziele && ziele.tag === state.day ? ziele.liste || [] : [];
+  // Tagesziele (features/tagesziele.js, Version 2): die gewählte Karte des Tages
+  const gewaehltesZiel = ziele && ziele.tag === state.day && ziele.gewaehlt != null ? ziele.karten?.[ziele.gewaehlt] : null;
+  const zielListe = gewaehltesZiel ? [gewaehltesZiel] : [];
   const b = h.bewertungen;
   const vorher = s.besterTag || (s.bestDayIncome > 0 ? { tag: null, summe: s.bestDayIncome } : null);
   return {
