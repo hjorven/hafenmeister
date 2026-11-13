@@ -115,6 +115,7 @@ Alle Zusätze, die das Spiel versteht, an einer Stelle. Sie hängen an die Adres
 | `?stegbild=n` | 0 bis 12 | festes Stegbild (0 = Grundbild, das auch die Tests nutzen), siehe [stegbilder.md](stegbilder.md) | `data/stegbild.js` |
 | `?gelaende=n` | 1 bis 10 | feste Geländeform nach einem echten Hafen (1 Heiligenhafen bis 10 Wangerooge), sonst aus dem Spielstand oder zufällig; Tests nutzen 1 | `render/landschaft/formen.js` |
 | `?landbild=n` | Zahl | festes Landbild (Felder, Wald, Dorf), sonst aus dem Seed des Spielstands; nur Ansicht | `render/landscape.js`, `render/landschaft/vielfalt.js` |
+| `?ueberblick=1` | `1`, `0` | Überblicksflug über die Geländeform beim Laden auch in Tests und in der Pixel-Fassung erzwingen (`1`) oder abschalten (`0`) | `main.js` |
 | `?uhrzeit=h` | Stunden, z. B. `6.5`, `19`, `22` | Licht und Himmel fest auf diese Uhrzeit, die Spielzeit läuft weiter | `render/landscape.js` |
 | `?revier=nordsee` | `ostsee`, `nordsee` (statt `revier` geht auch `region`) | startet im Revier. Die Nordsee ist bisher nur Landschaft und Daten, siehe [regionen.md](regionen.md) | `world/region.js`, `render/landscape.js` |
 | `?qualitaet=` | `hoch`, `mittel`, `niedrig` (auch `quality`) | Grafikstufe der Landschaft statt der automatischen Wahl | `render/landscape.js` |
