@@ -87,7 +87,7 @@ h1 span { color: var(--meer); }
 /* ---------- Wellen ---------- */
 .wellen {
   display: grid; gap: 10px; margin: 22px 0 18px;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
 }
 .welle {
   text-align: left; cursor: pointer; padding: 10px 10px 12px; color: inherit; font: inherit;
