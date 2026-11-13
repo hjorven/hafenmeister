@@ -25,7 +25,11 @@ export function baueTiefentextur(region, stufe, schritt) {
       daten[k + 3] = 255;
       if ((i & 1 || j & 1) && i < nx - 1 && j < ny - 1 && !imKern(px, py)) { offen.push(i, j); continue; }
       const p = punkt(px, py, stufe, region);
-      daten[k] = Math.round(Math.min(1, Math.max(0, -p.h) / TIEFE_MAX) * 255);
+      // Im Binnensee zeigt die Farbe höchstens das Band unter 3 m: ausgebaggerte Becken und Rinnen
+      // sollen nicht als dunkle Rechtecke quer über den See stehen (die echte Tiefe bleibt in punkt())
+      const t = Math.max(0, Math.min(1, (p.see - 0.3) / 0.6));
+      const deckel = 2.95 + 10 * t * t * (3 - 2 * t);
+      daten[k] = Math.round(Math.min(1, Math.min(deckel, Math.max(0, -p.h)) / TIEFE_MAX) * 255);
       daten[k + 1] = Math.round(p.see * 255);
     }
   }

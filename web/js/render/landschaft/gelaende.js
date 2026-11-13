@@ -18,7 +18,7 @@ export const PLAN_M = 0.62;
 /** Bereich, für den das Gelände fein berechnet wird (Planeinheiten). */
 // Fein gerechnetes Gelände und Tiefentextur. Breit genug, dass der Übergang zum groben Außenring
 // auch bei größter Kamerabreite am Ost- und Westrand nicht als harte Kante zu sehen ist.
-export const BEREICH = { x0: -640, x1: 660, y0: -200, y1: 640 };
+export const BEREICH = { x0: -640, x1: 660, y0: -440, y1: 640 };
 /** Kernbereich für dichte Bepflanzung (wie vor der Verbreiterung, damit nicht mehr Bäume gezeichnet werden). */
 export const KERN = { x0: -420, x1: 430, y0: -200, y1: 470 };
 
@@ -340,6 +340,33 @@ function seeInsel(F, px, py, h, typ, stufe, region) {
   return { h, typ };
 }
 
+/**
+ * Inseln, Sandplaten und Felsen der Form vor der Küste (in der offenen See, im Blick vom Hafen).
+ * Ab Stufe 5 baggert der Ausbau alles weg, was in Außenhafen, Rinne oder Liegewanne liegt.
+ */
+function seeAussen(F, px, py, h, typ, stufe) {
+  for (const i of F.seeAussen || []) {
+    const dx = (px - i.x) / i.rx, dy = (py - i.y) / i.ry;
+    const e = Math.sqrt(dx * dx + dy * dy) * (0.9 + 0.2 * rauschen(px / 10, py / 10, 91));
+    if (e >= 1.7) continue;
+    let frei = 1;
+    if (stufe >= 5) frei = smooth(0, 20, Math.min(polyAbstand(px, py, AUSSENHAFEN), polyAbstand(px, py, RINNE5)));
+    if (stufe >= 6) frei = Math.min(frei, smooth(0, 40, polyAbstand(px, py, PIERWANNE6)));
+    if (frei <= 0) continue;
+    if (e < 1) {
+      const innen = 1 - e;
+      const hh = i.art === 'sandplate' ? 0.08 + innen * 0.5 : i.art === 'fels' ? 0.3 + innen * 4.5 : 0.15 + innen * 2.2;
+      const t = i.art === 'fels' ? (e > 0.75 ? 'steinschuettung' : 'fels') : e > 0.7 || i.art === 'sandplate' ? 'sand' : innen > 0.55 ? 'duenengras' : 'sand';
+      const ziel = frei >= 1 ? hh : h + (hh - h) * frei;
+      if (ziel > h) { h = ziel; typ = ziel > 0 ? t : 'wasser'; }
+    } else if (h < 0) {
+      // flacher, heller Saum um Insel und Platen
+      h = Math.max(h, h + (-0.3 - (e - 1) * 2.4 - h) * frei);
+    }
+  }
+  return { h, typ };
+}
+
 /** Leuchttürme der Form in Planeinheiten (auf Land, vom Gelände getragen). */
 export function leuchttuerme() {
   return (gelaendeform().leuchttuerme || []).map(([x, y]) => [x, y]);
@@ -481,6 +508,7 @@ export function punkt(px, py, stufe, region) {
     // Der Priel vor der Einfahrt ist auch bei Ebbe befahrbar
     if (g.gezeiten) h -= g.gezeiten * (1 - smooth(70, 110, Math.abs(px - 230))) * smooth(0, 25, dist);
     if (typ !== 'watt' || h < -0.6) typ = 'wasser';
+    ({ h, typ } = seeAussen(F, px, py, h, typ, stufe));
   }
 
   // ---------------- Bauprojekte, die Wasser und Land verändern
@@ -497,13 +525,13 @@ export function punkt(px, py, stufe, region) {
     const dx = Math.abs(px - ENGPASS_X);
     const fase = Math.max(0, ln + 8 - py);
     // Zur Beckenseite läuft die Rinne als runde Zunge aus (Höhenlinien sind Bögen), statt mit einer Kante quer zur Fahrt zu enden
-    const zunge = smooth(ln - 50, ln, py + 34 * (dx / (halb + 10)) ** 2);
+    const zunge = smooth(ln - 50, ln, py + 50 - 50 * Math.min(1, dx / (halb + 24)) ** 2 - 38);
     const ziel = DURCHSTICH_TIEFE + (g.gezeiten || 0);
     if (py > ln - 12 && py < 236 && dx < halb + fase) {
       const tief = -ziel + 0.4 * smooth(halb - 6, halb + fase, dx);
-      if (h > tief) h = h >= 0 || py > ln ? tief : h + (tief - h) * zunge;
+      if (h > tief) h = tief;
       typ = 'wasser';
-    } else if (py > ln - 50 && py <= ln - 12 && h < 0 && h > -ziel) {
+    } else if (py > ln - 50 && py <= ln - 12 && dx < halb + 24 && h < 0 && h > -ziel) {
       h += (-ziel - h) * zunge;
     } else if (py > ln - 4 && py < 226 && dx < halb + fase + 4 && h > -0.5) {
       h = 1.0; typ = 'steinschuettung';

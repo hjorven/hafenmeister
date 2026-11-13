@@ -34,6 +34,7 @@
  *  leuchttuerme  [[x, y]] Leuchttürme an Land (auf Inseln, Nehrungsspitzen)
  *  riff          { x0, x1, y, breite, tiefe } Sandriff vor dem Seestrand (nicht im Fahrwasser)
  *  watt          Breite des Watts vor dem Seestrand (fällt bei Niedrigwasser trocken), Priel am Engpass bleibt frei
+ *  seeAussen     [{ x, y, rx, ry, art: 'insel'|'sandplate'|'fels' }] vor der Küste in der offenen See; ab Stufe 5 im Ausbaubereich weggebaggert
  *  steilufer     Höhe des Steilufers am Festland außerhalb des Hafens (Meter)
  */
 export const FORMEN = [
@@ -42,17 +43,21 @@ export const FORMEN = [
     luecken: [{ x0: 236, x1: 266, tiefe: 1.0 }], leuchttuerme: [[284, 205]], duenen: 0.8, seeOst: 300,
     seeInseln: [{ x: 300, y: 40, rx: 34, ry: 46, art: 'schilf' }] },
   { nr: 3, name: 'Sandbank', idee: 'Hinter einer langen Sandbank: im Osten nur noch Sand knapp über dem Wasser, Riff vor dem Weststrand, Wald statt See im Westen.',
-    ostEnde: 238, ostArt: 'sandbank', leuchttuerme: [[126, 212]], seeWest: -185, riff: { x0: -380, x1: 110, y: 246, breite: 8, tiefe: 0.7 } },
+    ostEnde: 238, ostArt: 'sandbank', leuchttuerme: [[126, 212]], seeWest: -185, riff: { x0: -380, x1: 110, y: 246, breite: 8, tiefe: 0.7 },
+    seeAussen: [{ x: -230, y: 262, rx: 64, ry: 9, art: 'sandplate' }, { x: -86, y: 270, rx: 36, ry: 7, art: 'sandplate' }, { x: 330, y: 258, rx: 40, ry: 8, art: 'sandplate' }] },
   { nr: 4, name: 'Bodden', idee: 'Weites, flaches Boddenwasser: die Nehrung endet im Osten, dort liegen Inseln mit Schilf und Wald.',
     ostEnde: 300, ostArt: 'offen', seeOstOffen: true, duenen: 0.7, seeWest: -260,
-    seeInseln: [{ x: 300, y: 90, rx: 34, ry: 20, art: 'wald' }, { x: 372, y: 150, rx: 22, ry: 14, art: 'schilf' }, { x: 396, y: 40, rx: 26, ry: 18, art: 'wiese' }] },
+    seeInseln: [{ x: 300, y: 90, rx: 34, ry: 20, art: 'wald' }, { x: 372, y: 150, rx: 22, ry: 14, art: 'schilf' }, { x: 396, y: 40, rx: 26, ry: 18, art: 'wiese' },
+      { x: -236, y: 138, rx: 34, ry: 16, art: 'schilf' }] },
   { nr: 5, name: 'Inselkette', idee: 'Die Nehrung zerfällt östlich des Engpasses in kleine Inseln, im See setzt sich die Kette fort, hohe Dünen im Westen.',
     luecken: [{ x0: 240, x1: 262, tiefe: 0.9 }, { x0: 300, x1: 318, tiefe: 0.8 }, { x0: 358, x1: 378, tiefe: 0.9 }], duenen: 1.3, leuchttuerme: [[338, 206]],
     seeInseln: [{ x: 262, y: 120, rx: 16, ry: 11, art: 'wiese' }, { x: 300, y: 82, rx: 20, ry: 13, art: 'wald' }, { x: 334, y: 40, rx: 15, ry: 10, art: 'schilf' }] },
-  { nr: 6, name: 'Offene Küste', idee: 'Niedrige, schmale Nehrung, die im Osten als Haken in den See biegt. Viel Himmel, wenig Düne.',
-    duenen: 0.4, breiteSee: -6, ostEnde: 352, ostArt: 'offen', hakenOst: true, seeOst: 320 },
+  { nr: 6, name: 'Offene Küste', idee: 'Niedrige, schmale Nehrung, die im Osten als Haken in den See biegt. Vor der Küste eine kleine Insel mit Leuchtturm.',
+    duenen: 0.4, breiteSee: -6, ostEnde: 352, ostArt: 'offen', hakenOst: true, seeOst: 320,
+    seeAussen: [{ x: 336, y: 268, rx: 20, ry: 13, art: 'insel' }], leuchttuerme: [[336, 270]] },
   { nr: 7, name: 'Steilküste', idee: 'Hohe, steile Ufer mit Felsbändern rahmen ein kleines, tief eingeschnittenes Hafenbecken ein.',
-    steilufer: 12, duenen: 1.1, seeWest: -195, seeOst: 250 },
+    steilufer: 12, duenen: 1.1, seeWest: -195, seeOst: 250,
+    seeAussen: [{ x: 352, y: 262, rx: 17, ry: 11, art: 'fels' }, { x: 300, y: 250, rx: 7, ry: 6, art: 'fels' }, { x: 384, y: 276, rx: 9, ry: 7, art: 'fels' }] },
   { nr: 8, name: 'Watt', idee: 'Breites Watt vor dem Strand, das bei Ebbe trockenfällt; nur der Priel vor der Einfahrt bleibt tief. Salzwiesen im Osten.',
     watt: 30, duenen: 0.9, leuchttuerme: [[330, 212]], seeOst: 330 },
   { nr: 9, name: 'Dünenspitze', idee: 'Hohe Wanderdünen, die Nehrung endet im Osten mit einer Spitze und Leuchtturm, vom Festland ragt eine Waldhalbinsel in den See.',
