@@ -599,7 +599,7 @@ body.ta-offen .hm-tafel { visibility: hidden; }
   .hm-neu #hm-seite .hm-tafel > ul.tz-wahl {
     position: fixed; z-index: 16; width: auto; max-width: 640px;
     left: calc(var(--hm-links) + min(280px, 40vw) + 8px);
-    right: calc(var(--hm-rand) + var(--hm-safe-right));
+    right: calc(var(--hm-rand) + var(--hm-safe-right) + var(--hm-bauen) + 16px);   /* Bauen unten rechts bleibt frei */
     top: calc(var(--hm-oben) + var(--hm-knopf) + 8px);
     max-height: calc(100dvh - var(--hm-oben) - var(--hm-knopf) - var(--hm-bauen) - var(--hm-safe-bottom) - 28px);
     display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 10px; align-content: start;
