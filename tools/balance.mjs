@@ -266,8 +266,11 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     let liegend = [];
     while (state.day === tag) {
       const events = sim.tick(state, ctx, prof.zuweisenAlle);
-      if (!prof.nichts && state.phase === 'day' && state.office < RULES.office.autoAssign) {
+      if (!prof.nichts && state.phase === 'day') {
+        // Mit Hafenbüro-Automatik weist der Spieler nur noch die Sonderfälle selbst zu
+        const buero = sim.officeAutomatic(state, ctx);
         for (const id of [...state.queue]) {
+          if (buero && !sim.officeSpecialCase(state, ctx, id)) continue;
           const passend = sim.fittingBerths(state, ctx, id);
           if (!passend.length) continue;
           const platz = r() < prof.fehlZuweisung ? passend[Math.floor(r() * passend.length)] : passend[0];

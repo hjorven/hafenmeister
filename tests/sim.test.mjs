@@ -201,6 +201,8 @@ test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gäste
   sim.assign(s, ctx, happy.id, 'A1');
   sim.assign(s, ctx, plain.id, 'A2');
   sim.assign(s, ctx, stays.id, 'A3');
+  // Den Bonus fürs Einweisen von Hand prüft tests/hafenbuero.test.mjs, hier zählt nur die Wunschwertung
+  for (const b of [happy, plain, stays]) s.boats[b.id].byHand = false;
   sim.tick(s, ctx, RULES.dayLength);
   sim.collect(s, ctx, happy.id); // 13
   const ev = sim.tick(s, ctx, RULES.eveningLength);
@@ -235,7 +237,7 @@ test('Bewertung: Komfort, Sondergast und Sturmschaden, begrenzt auf 1 bis 5', ()
   assert.equal(sim.rateBoat(ctx, { wishesMet: 0, wishesTotal: 3, berthId: 'A1', special: false, penalty: 1 }), 1);
 });
 
-test('Hafenbüro: Stufe 1 Knopf, Stufe 2 kassiert selbst, Stufe 3 weist selbst zu', () => {
+test('Hafenbüro: Stufe 1 Knopf, Stufe 2 kassiert selbst, Leitstelle weist selbst zu', () => {
   const s = quietState({ stage: 3 });
   const a = waitingBoat(s);
   sim.assign(s, ctx, a.id, 'A1');
@@ -250,7 +252,7 @@ test('Hafenbüro: Stufe 1 Knopf, Stufe 2 kassiert selbst, Stufe 3 weist selbst z
   assert.ok(ev.some((e) => e.type === 'collected'), 'Büro kassiert gleich beim Anlegen');
   assert.equal(t.money, 10);
 
-  const u = quietState({ stage: 3, office: 3 });
+  const u = quietState({ stage: 3, office: RULES.office.autoAssign });
   u.upcoming = [{ ...waitingBoat(createState({ seed: 3 })), id: 500, status: 'expected', arriveAt: 0.5 }];
   sim.tick(u, ctx, 1);
   assert.equal(u.boats[500].status, 'moored');
@@ -466,7 +468,7 @@ test('Gleicher Seed, gleiche Eingaben: gleiches Spiel, auch nach Speichern mitte
 
 test('Langer Lauf mit Automatik: Zahlen bleiben stimmig', () => {
   const s = createState({ seed: 2026 });
-  s.office = 3; // weist selbst zu
+  s.office = RULES.office.autoAssign; // weist selbst zu
   let sumEvents = 0;
   for (let d = 0; d < 120; d++) {
     // Vorspulen: ein ganzer Tag in einem Aufruf
