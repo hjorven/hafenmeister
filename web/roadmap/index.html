@@ -24,6 +24,7 @@
 
   <main>
     <section class="wellen" id="wellen" aria-label="Wellen"></section>
+    <section class="neu" id="neu" aria-label="Zuletzt"></section>
 
     <div class="werkzeug">
       <div class="schalter" role="tablist" aria-label="Ansicht">
@@ -44,6 +45,12 @@
   <footer class="fuss">
     Erzeugt aus <code>docs/roadmap.md</code> mit <code>node tools/roadmap.mjs</code>. Änderungen bitte dort eintragen.
   </footer>
+
+  <dialog id="gross" class="gross" aria-label="Bild groß">
+    <img id="gross-bild" alt="">
+    <p id="gross-text"></p>
+    <form method="dialog"><button type="submit">Schließen</button></form>
+  </dialog>
 
   <script type="module" src="roadmap.js"></script>
 </body>

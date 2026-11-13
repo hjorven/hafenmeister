@@ -9,6 +9,7 @@ Stand: 12.11.2026 abends (Welle-0-Status 13.11. nachgetragen), abgeglichen mit `
 - "Fertig heißt spielbar" ([abnahme.md](abnahme.md)): Ein Punkt ist erst erledigt, wenn er im laufenden Spiel am Handy und am PC sichtbar funktioniert. Nichts in Doku, Einstieg oder Karte, das nichts tut.
 - Jedes Paket aktualisiert beim Merge seine Zeilen hier (Status und PR-Nummer) und die betroffene Doku.
 - Aus dieser Datei entstehen automatisch die Übersicht in der README und die Seite https://hjorven.github.io/hafenmeister/roadmap/ (`tools/roadmap.mjs`, Action "Roadmap-Übersicht"). Damit sie stimmen: Status in der Statusspalte mit den Wörtern `offen`, `in Arbeit (PR n)`, `erledigt (PR n)`, `teilweise`, `entfällt`; neue Pakete als Zeile `| Pnn | Titel | Inhalt | ... |` in einer Tabelle unter einer Überschrift `### Welle n: Thema`.
+- Vorschaubilder je Paket stehen in `docs/roadmap-bilder.json`, die Dateien in `web/roadmap/bilder/` (JPEG, höchstens 1000 px). Der Thread "Roadmap interaktiv im Repo zeigen" sammelt neue Bilder aus dem Projektordner stündlich ein; wer selbst eins eintragen will, ergänzt dort eine Zeile mit `datei`, `pakete`, `titel`, `pr`, `geraet`, `datum`.
 - Zahlen nur in `web/js/data/economy.js` (siehe Paket P06).
 - Vor jedem Merge im Hauptordner:
 

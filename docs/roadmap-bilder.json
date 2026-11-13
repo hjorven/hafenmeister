@@ -1,0 +1,269 @@
+{
+ "hinweis": "Bilder je Paket fuer die Roadmap-Seite und die README. Dateien liegen in web/roadmap/bilder/ (JPEG, hoechstens 1000 px). Neueste zuerst nach 'datum'. Pflege: Thread 'Roadmap interaktiv im Repo zeigen'.",
+ "bilder": [
+  {
+   "datei": "p01-pr149-dauer-pc-g4-karte.jpg",
+   "pakete": [
+    "P01"
+   ],
+   "titel": "Dauerlieger-Bewerber auf der Platzkarte",
+   "pr": 149,
+   "geraet": "pc",
+   "datum": "2026-11-12",
+   "quelle": "feature-tests/pr149/dauer-pc-g4-karte.png"
+  },
+  {
+   "datei": "p01-pr149-dauer-iphone-g8-wartet.jpg",
+   "pakete": [
+    "P01"
+   ],
+   "titel": "Dauerlieger wartet auf seine Box",
+   "pr": 149,
+   "geraet": "handy",
+   "datum": "2026-11-12",
+   "quelle": "feature-tests/pr149/dauer-iphone-g8-wartet.png"
+  },
+  {
+   "datei": "p02-pr146-3-pc-vorschlag-des-bueros.jpg",
+   "pakete": [
+    "P02"
+   ],
+   "titel": "Vorschlag des Hafenbüros",
+   "pr": 146,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "hafenbuero/3-pc-vorschlag-des-bueros.png"
+  },
+  {
+   "datei": "p02-pr146-1-handy-sonderfall-raute.jpg",
+   "pakete": [
+    "P02"
+   ],
+   "titel": "Sonderfall bleibt beim Spieler",
+   "pr": 146,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "hafenbuero/1-handy-sonderfall-raute.png"
+  },
+  {
+   "datei": "p03-pr112-v5-handy-willkommen.jpg",
+   "pakete": [
+    "P03"
+   ],
+   "titel": "Einstieg: Willkommen",
+   "pr": 112,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "einstieg/v5-handy-willkommen.png"
+  },
+  {
+   "datei": "p03-pr112-hilfe-pc.jpg",
+   "pakete": [
+    "P03"
+   ],
+   "titel": "Hilfe am PC",
+   "pr": 112,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "einstieg/hilfe-pc.png"
+  },
+  {
+   "datei": "p09-pr150-sp-neu-dialog-pc.jpg",
+   "pakete": [
+    "P09"
+   ],
+   "titel": "Neues Spiel mit Küstenwahl",
+   "pr": 150,
+   "geraet": "pc",
+   "datum": "2026-11-12",
+   "quelle": "feature-tests/pr150/sp-neu-dialog-pc.png"
+  },
+  {
+   "datei": "p09-pr150-sp-neu-dialog-handy.jpg",
+   "pakete": [
+    "P09"
+   ],
+   "titel": "Speicherplätze am Handy",
+   "pr": 150,
+   "geraet": "handy",
+   "datum": "2026-11-12",
+   "quelle": "feature-tests/pr150/sp-neu-dialog-handy.png"
+  },
+  {
+   "datei": "p10-pr153-zw-iphone-s3-b2-morgen.jpg",
+   "pakete": [
+    "P10"
+   ],
+   "titel": "Wunschplätze in Gold",
+   "pr": 153,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "feature-tests/pr153/zw-iphone-s3-b2-morgen.png"
+  },
+  {
+   "datei": "p11-pr158-pc-wuensche-und-funk.jpg",
+   "pakete": [
+    "P11"
+   ],
+   "titel": "Wünsche über dem Boot und Funk",
+   "pr": 158,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "vorschau-p11/pc-wuensche-und-funk.png"
+  },
+  {
+   "datei": "p11-pr158-handy-wuensche.jpg",
+   "pakete": [
+    "P11"
+   ],
+   "titel": "Wünsche am Handy",
+   "pr": 158,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "vorschau-p11/handy-wuensche.png"
+  },
+  {
+   "datei": "p12-pr151-pc-betrag-und-rundgang.jpg",
+   "pakete": [
+    "P12"
+   ],
+   "titel": "Betrag auf der Münze und Rundgang",
+   "pr": 151,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "kassieren/pc-betrag-und-rundgang.png"
+  },
+  {
+   "datei": "p12-pr151-handy-betraege-gestapelt.jpg",
+   "pakete": [
+    "P12"
+   ],
+   "titel": "Beträge gestapelt",
+   "pr": 151,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "kassieren/handy-betraege-gestapelt.png"
+  },
+  {
+   "datei": "p13-pr152-handy-karten-waehlen.jpg",
+   "pakete": [
+    "P13"
+   ],
+   "titel": "Tagesziele wählen",
+   "pr": 152,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "tagesziele/handy-karten-waehlen.png"
+  },
+  {
+   "datei": "p13-pr152-pc-deko-am-hafenmeisterhaus.jpg",
+   "pakete": [
+    "P13"
+   ],
+   "titel": "Belohnung am Hafenmeisterhaus",
+   "pr": 152,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "tagesziele/pc-deko-am-hafenmeisterhaus.png"
+  },
+  {
+   "datei": "p15-pr159-ta-sheet.jpg",
+   "pakete": [
+    "P15"
+   ],
+   "titel": "Tagesabschluss am Abend",
+   "pr": 159,
+   "geraet": "alle",
+   "datum": "2026-11-13",
+   "quelle": "feature-tests/pr159/ta-sheet.png"
+  },
+  {
+   "datei": "p16-pr156-pc-regionsabschluss.jpg",
+   "pakete": [
+    "P16"
+   ],
+   "titel": "Regionsabschluss",
+   "pr": 156,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "aufstieg/pc-regionsabschluss.png"
+  },
+  {
+   "datei": "p16-pr156-handy-aufstieg-stufe3.jpg",
+   "pakete": [
+    "P16"
+   ],
+   "titel": "Aufstieg zu Stufe 3",
+   "pr": 156,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "aufstieg/handy-aufstieg-stufe3.png"
+  },
+  {
+   "datei": "p18-pr143-pc-stufe3-strom.jpg",
+   "pakete": [
+    "P18"
+   ],
+   "titel": "Bauen mit Vorschau",
+   "pr": 143,
+   "geraet": "pc",
+   "datum": "2026-11-12",
+   "quelle": "bauen/pc-stufe3-strom.png"
+  },
+  {
+   "datei": "p18-pr143-handy-stufe3-ablauf.jpg",
+   "pakete": [
+    "P18"
+   ],
+   "titel": "Bauen am Handy",
+   "pr": 143,
+   "geraet": "handy",
+   "datum": "2026-11-12",
+   "quelle": "bauen/handy-stufe3-ablauf.png"
+  },
+  {
+   "datei": "p62-pr195-kuesten-seed1.jpg",
+   "pakete": [
+    "P62"
+   ],
+   "titel": "Zehn Küstentypen aus Seed",
+   "pr": 195,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "gelaende/vorschau/neu/kuesten-seed1.png"
+  },
+  {
+   "datei": "p64-pr211-deko-pc-g8-4242-s6.jpg",
+   "pakete": [
+    "P64"
+   ],
+   "titel": "Ufer je Küstentyp",
+   "pr": 211,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "feature-tests/pr211/deko-pc-g8-4242-s6.png"
+  },
+  {
+   "datei": "p64-pr204-korb-pc-g6-1-seebruecke.jpg",
+   "pakete": [
+    "P64"
+   ],
+   "titel": "Strandkörbe und Seebrücke",
+   "pr": 204,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "feature-tests/pr204/korb-pc-g6-1-seebruecke.png"
+  },
+  {
+   "datei": "p66-pr180-handy-stufe4-final.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Fahrwasser am Handy",
+   "pr": 180,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "fahrwasser/handy-stufe4-final.png"
+  }
+ ]
+}

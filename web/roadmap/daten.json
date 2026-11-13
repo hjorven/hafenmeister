@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "13.11.2026",
-  "commit": "97fe934"
+  "commit": "5c77a08"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -52,7 +52,11 @@
     "H10",
     "C01"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": [
+    0,
+    1
+   ]
   },
   {
    "id": "P02",
@@ -81,7 +85,11 @@
     "E7",
     "E8"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": [
+    2,
+    3
+   ]
   },
   {
    "id": "P03",
@@ -105,7 +113,11 @@
     "J8",
     "O7"
    ],
-   "status": "teilweise"
+   "status": "teilweise",
+   "bilder": [
+    4,
+    5
+   ]
   },
   {
    "id": "P04",
@@ -121,7 +133,8 @@
     "Ü4",
     "Svc F6"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": []
   },
   {
    "id": "P05",
@@ -138,7 +151,8 @@
     "D4",
     "O4"
    ],
-   "status": "teilweise"
+   "status": "teilweise",
+   "bilder": []
   },
   {
    "id": "P06",
@@ -168,7 +182,8 @@
     "Q4",
     "C04"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": []
   },
   {
    "id": "P07",
@@ -183,7 +198,8 @@
     "Bed P4",
     "Bed P8"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": []
   },
   {
    "id": "P08",
@@ -211,7 +227,8 @@
     "C05",
     "C07"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": []
   },
   {
    "id": "P09",
@@ -234,7 +251,11 @@
     "C03",
     "C05"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": [
+    6,
+    7
+   ]
   },
   {
    "id": "P10",
@@ -259,7 +280,10 @@
     "A9",
     "Bed P2"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": [
+    8
+   ]
   },
   {
    "id": "P11",
@@ -278,7 +302,11 @@
     "B2",
     "Bed P1"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": [
+    9,
+    10
+   ]
   },
   {
    "id": "P12",
@@ -298,7 +326,11 @@
     "B5",
     "B6"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": [
+    11,
+    12
+   ]
   },
   {
    "id": "P13",
@@ -317,7 +349,11 @@
     "I3",
     "I4"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": [
+    13,
+    14
+   ]
   },
   {
    "id": "P14",
@@ -334,7 +370,8 @@
     "C9",
     "Bed P1"
    ],
-   "status": "teilweise"
+   "status": "teilweise",
+   "bilder": []
   },
   {
    "id": "P15",
@@ -350,7 +387,10 @@
     "Ü22",
     "Svc F4"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": [
+    15
+   ]
   },
   {
    "id": "P16",
@@ -368,7 +408,11 @@
     "I8",
     "I9"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": [
+    16,
+    17
+   ]
   },
   {
    "id": "P17",
@@ -386,7 +430,8 @@
     "D3",
     "J4"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P18",
@@ -406,7 +451,11 @@
     "D7",
     "Bed P7"
    ],
-   "status": "teilweise"
+   "status": "teilweise",
+   "bilder": [
+    18,
+    19
+   ]
   },
   {
    "id": "P19",
@@ -428,7 +477,8 @@
     "Svc F8",
     "M3"
    ],
-   "status": "teilweise"
+   "status": "teilweise",
+   "bilder": []
   },
   {
    "id": "P20",
@@ -447,7 +497,8 @@
     "H5",
     "I10"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P21",
@@ -461,7 +512,8 @@
     "F36",
     "I5"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P22",
@@ -475,7 +527,8 @@
     "I6",
     "I7"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P23",
@@ -492,7 +545,8 @@
     "Svc F7",
     "Svc F9"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P24",
@@ -511,7 +565,8 @@
     "G7",
     "G9"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P25",
@@ -529,7 +584,8 @@
     "H8",
     "H9"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P26",
@@ -544,7 +600,8 @@
     "L4",
     "L5"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P27",
@@ -557,7 +614,8 @@
    "punkte": [
     "F1"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P28",
@@ -570,7 +628,8 @@
    "punkte": [
     "F2"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P29",
@@ -583,7 +642,8 @@
    "punkte": [
     "F7"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P30",
@@ -596,7 +656,8 @@
    "punkte": [
     "F8"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P31",
@@ -610,7 +671,8 @@
     "F9",
     "B8"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P32",
@@ -624,7 +686,8 @@
     "F3",
     "M3"
    ],
-   "status": "teilweise"
+   "status": "teilweise",
+   "bilder": []
   },
   {
    "id": "P33",
@@ -637,7 +700,8 @@
    "punkte": [
     "F4"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P34",
@@ -651,7 +715,8 @@
     "F5",
     "F35"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P35",
@@ -664,7 +729,8 @@
    "punkte": [
     "F6"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P36",
@@ -677,7 +743,8 @@
    "punkte": [
     "F10"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P37",
@@ -690,7 +757,8 @@
    "punkte": [
     "F11"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P38",
@@ -703,7 +771,8 @@
    "punkte": [
     "F12"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P39",
@@ -716,7 +785,8 @@
    "punkte": [
     "F13"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P40",
@@ -729,7 +799,8 @@
    "punkte": [
     "F16"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P41",
@@ -743,7 +814,8 @@
     "F19",
     "F20"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P42",
@@ -758,7 +830,8 @@
     "F41",
     "F42"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P43",
@@ -772,7 +845,8 @@
     "F22",
     "L6"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P44",
@@ -787,7 +861,8 @@
     "F27",
     "C05"
    ],
-   "status": "teilweise"
+   "status": "teilweise",
+   "bilder": []
   },
   {
    "id": "P45",
@@ -801,7 +876,8 @@
     "F24",
     "K7"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P46",
@@ -816,7 +892,8 @@
     "F30",
     "L1"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P47",
@@ -829,7 +906,8 @@
    "punkte": [
     "F31"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P48",
@@ -842,7 +920,8 @@
    "punkte": [
     "F32"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P49",
@@ -856,7 +935,8 @@
     "F33",
     "F34"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P50",
@@ -872,7 +952,8 @@
     "Bed P5",
     "Bed P6"
    ],
-   "status": "erledigt"
+   "status": "erledigt",
+   "bilder": []
   },
   {
    "id": "P51",
@@ -885,7 +966,8 @@
    "punkte": [
     "F38"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P52",
@@ -898,7 +980,8 @@
    "punkte": [
     "F39"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P53",
@@ -911,7 +994,8 @@
    "punkte": [
     "F40"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P54",
@@ -922,7 +1006,8 @@
    "prs": [],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
    "punkte": [],
-   "status": "entfaellt"
+   "status": "entfaellt",
+   "bilder": []
   },
   {
    "id": "P55",
@@ -941,7 +1026,8 @@
     "Bed P3",
     "Bed P10"
    ],
-   "status": "teilweise"
+   "status": "teilweise",
+   "bilder": []
   },
   {
    "id": "P57",
@@ -961,7 +1047,8 @@
     "K5",
     "K6"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P58",
@@ -974,7 +1061,8 @@
    "punkte": [
     "C08"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P59",
@@ -989,7 +1077,8 @@
     "D6",
     "D9"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P60",
@@ -1002,7 +1091,8 @@
    "punkte": [
     "D8"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P61",
@@ -1017,7 +1107,8 @@
     "N16",
     "C06"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P62",
@@ -1040,7 +1131,10 @@
     "T8",
     "T10"
    ],
-   "status": "arbeit"
+   "status": "arbeit",
+   "bilder": [
+    20
+   ]
   },
   {
    "id": "P63",
@@ -1057,7 +1151,8 @@
     "T7",
     "T13"
    ],
-   "status": "arbeit"
+   "status": "arbeit",
+   "bilder": []
   },
   {
    "id": "P64",
@@ -1074,7 +1169,11 @@
    "punkte": [
     "T11"
    ],
-   "status": "arbeit"
+   "status": "arbeit",
+   "bilder": [
+    21,
+    22
+   ]
   },
   {
    "id": "P65",
@@ -1089,7 +1188,8 @@
     "T5",
     "T12"
    ],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P66",
@@ -1111,7 +1211,10 @@
     "T8",
     "T9"
    ],
-   "status": "arbeit"
+   "status": "arbeit",
+   "bilder": [
+    23
+   ]
   },
   {
    "id": "P67",
@@ -1122,7 +1225,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P68",
@@ -1133,7 +1237,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P69",
@@ -1144,7 +1249,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P70",
@@ -1155,7 +1261,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P71",
@@ -1166,7 +1273,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P72",
@@ -1177,7 +1285,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P73",
@@ -1188,7 +1297,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P74",
@@ -1199,7 +1309,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P75",
@@ -1210,7 +1321,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P76",
@@ -1221,7 +1333,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P77",
@@ -1232,7 +1345,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P78",
@@ -1243,7 +1357,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P79",
@@ -1254,7 +1369,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P80",
@@ -1265,7 +1381,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P81",
@@ -1276,7 +1393,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   },
   {
    "id": "P82",
@@ -1287,7 +1405,8 @@
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
-   "status": "offen"
+   "status": "offen",
+   "bilder": []
   }
  ],
  "punkte": [
@@ -4209,5 +4328,390 @@
   "offen": 113,
   "entfaellt": 0,
   "alle": 217
- }
+ },
+ "bilder": [
+  {
+   "datei": "p01-pr149-dauer-pc-g4-karte.jpg",
+   "pakete": [
+    "P01"
+   ],
+   "titel": "Dauerlieger-Bewerber auf der Platzkarte",
+   "pr": 149,
+   "geraet": "pc",
+   "datum": "2026-11-12",
+   "quelle": "feature-tests/pr149/dauer-pc-g4-karte.png",
+   "nr": 0
+  },
+  {
+   "datei": "p01-pr149-dauer-iphone-g8-wartet.jpg",
+   "pakete": [
+    "P01"
+   ],
+   "titel": "Dauerlieger wartet auf seine Box",
+   "pr": 149,
+   "geraet": "handy",
+   "datum": "2026-11-12",
+   "quelle": "feature-tests/pr149/dauer-iphone-g8-wartet.png",
+   "nr": 1
+  },
+  {
+   "datei": "p02-pr146-3-pc-vorschlag-des-bueros.jpg",
+   "pakete": [
+    "P02"
+   ],
+   "titel": "Vorschlag des Hafenbüros",
+   "pr": 146,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "hafenbuero/3-pc-vorschlag-des-bueros.png",
+   "nr": 2
+  },
+  {
+   "datei": "p02-pr146-1-handy-sonderfall-raute.jpg",
+   "pakete": [
+    "P02"
+   ],
+   "titel": "Sonderfall bleibt beim Spieler",
+   "pr": 146,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "hafenbuero/1-handy-sonderfall-raute.png",
+   "nr": 3
+  },
+  {
+   "datei": "p03-pr112-v5-handy-willkommen.jpg",
+   "pakete": [
+    "P03"
+   ],
+   "titel": "Einstieg: Willkommen",
+   "pr": 112,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "einstieg/v5-handy-willkommen.png",
+   "nr": 4
+  },
+  {
+   "datei": "p03-pr112-hilfe-pc.jpg",
+   "pakete": [
+    "P03"
+   ],
+   "titel": "Hilfe am PC",
+   "pr": 112,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "einstieg/hilfe-pc.png",
+   "nr": 5
+  },
+  {
+   "datei": "p09-pr150-sp-neu-dialog-pc.jpg",
+   "pakete": [
+    "P09"
+   ],
+   "titel": "Neues Spiel mit Küstenwahl",
+   "pr": 150,
+   "geraet": "pc",
+   "datum": "2026-11-12",
+   "quelle": "feature-tests/pr150/sp-neu-dialog-pc.png",
+   "nr": 6
+  },
+  {
+   "datei": "p09-pr150-sp-neu-dialog-handy.jpg",
+   "pakete": [
+    "P09"
+   ],
+   "titel": "Speicherplätze am Handy",
+   "pr": 150,
+   "geraet": "handy",
+   "datum": "2026-11-12",
+   "quelle": "feature-tests/pr150/sp-neu-dialog-handy.png",
+   "nr": 7
+  },
+  {
+   "datei": "p10-pr153-zw-iphone-s3-b2-morgen.jpg",
+   "pakete": [
+    "P10"
+   ],
+   "titel": "Wunschplätze in Gold",
+   "pr": 153,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "feature-tests/pr153/zw-iphone-s3-b2-morgen.png",
+   "nr": 8
+  },
+  {
+   "datei": "p11-pr158-pc-wuensche-und-funk.jpg",
+   "pakete": [
+    "P11"
+   ],
+   "titel": "Wünsche über dem Boot und Funk",
+   "pr": 158,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "vorschau-p11/pc-wuensche-und-funk.png",
+   "nr": 9
+  },
+  {
+   "datei": "p11-pr158-handy-wuensche.jpg",
+   "pakete": [
+    "P11"
+   ],
+   "titel": "Wünsche am Handy",
+   "pr": 158,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "vorschau-p11/handy-wuensche.png",
+   "nr": 10
+  },
+  {
+   "datei": "p12-pr151-pc-betrag-und-rundgang.jpg",
+   "pakete": [
+    "P12"
+   ],
+   "titel": "Betrag auf der Münze und Rundgang",
+   "pr": 151,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "kassieren/pc-betrag-und-rundgang.png",
+   "nr": 11
+  },
+  {
+   "datei": "p12-pr151-handy-betraege-gestapelt.jpg",
+   "pakete": [
+    "P12"
+   ],
+   "titel": "Beträge gestapelt",
+   "pr": 151,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "kassieren/handy-betraege-gestapelt.png",
+   "nr": 12
+  },
+  {
+   "datei": "p13-pr152-handy-karten-waehlen.jpg",
+   "pakete": [
+    "P13"
+   ],
+   "titel": "Tagesziele wählen",
+   "pr": 152,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "tagesziele/handy-karten-waehlen.png",
+   "nr": 13
+  },
+  {
+   "datei": "p13-pr152-pc-deko-am-hafenmeisterhaus.jpg",
+   "pakete": [
+    "P13"
+   ],
+   "titel": "Belohnung am Hafenmeisterhaus",
+   "pr": 152,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "tagesziele/pc-deko-am-hafenmeisterhaus.png",
+   "nr": 14
+  },
+  {
+   "datei": "p15-pr159-ta-sheet.jpg",
+   "pakete": [
+    "P15"
+   ],
+   "titel": "Tagesabschluss am Abend",
+   "pr": 159,
+   "geraet": "alle",
+   "datum": "2026-11-13",
+   "quelle": "feature-tests/pr159/ta-sheet.png",
+   "nr": 15
+  },
+  {
+   "datei": "p16-pr156-pc-regionsabschluss.jpg",
+   "pakete": [
+    "P16"
+   ],
+   "titel": "Regionsabschluss",
+   "pr": 156,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "aufstieg/pc-regionsabschluss.png",
+   "nr": 16
+  },
+  {
+   "datei": "p16-pr156-handy-aufstieg-stufe3.jpg",
+   "pakete": [
+    "P16"
+   ],
+   "titel": "Aufstieg zu Stufe 3",
+   "pr": 156,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "aufstieg/handy-aufstieg-stufe3.png",
+   "nr": 17
+  },
+  {
+   "datei": "p18-pr143-pc-stufe3-strom.jpg",
+   "pakete": [
+    "P18"
+   ],
+   "titel": "Bauen mit Vorschau",
+   "pr": 143,
+   "geraet": "pc",
+   "datum": "2026-11-12",
+   "quelle": "bauen/pc-stufe3-strom.png",
+   "nr": 18
+  },
+  {
+   "datei": "p18-pr143-handy-stufe3-ablauf.jpg",
+   "pakete": [
+    "P18"
+   ],
+   "titel": "Bauen am Handy",
+   "pr": 143,
+   "geraet": "handy",
+   "datum": "2026-11-12",
+   "quelle": "bauen/handy-stufe3-ablauf.png",
+   "nr": 19
+  },
+  {
+   "datei": "p62-pr195-kuesten-seed1.jpg",
+   "pakete": [
+    "P62"
+   ],
+   "titel": "Zehn Küstentypen aus Seed",
+   "pr": 195,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "gelaende/vorschau/neu/kuesten-seed1.png",
+   "nr": 20
+  },
+  {
+   "datei": "p64-pr211-deko-pc-g8-4242-s6.jpg",
+   "pakete": [
+    "P64"
+   ],
+   "titel": "Ufer je Küstentyp",
+   "pr": 211,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "feature-tests/pr211/deko-pc-g8-4242-s6.png",
+   "nr": 21
+  },
+  {
+   "datei": "p64-pr204-korb-pc-g6-1-seebruecke.jpg",
+   "pakete": [
+    "P64"
+   ],
+   "titel": "Strandkörbe und Seebrücke",
+   "pr": 204,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "feature-tests/pr204/korb-pc-g6-1-seebruecke.png",
+   "nr": 22
+  },
+  {
+   "datei": "p66-pr180-handy-stufe4-final.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Fahrwasser am Handy",
+   "pr": 180,
+   "geraet": "handy",
+   "datum": "2026-11-13",
+   "quelle": "fahrwasser/handy-stufe4-final.png",
+   "nr": 23
+  }
+ ],
+ "neueBilder": [
+  23,
+  22,
+  21,
+  20,
+  17,
+  16,
+  15,
+  14,
+  13
+ ],
+ "merges": [
+  {
+   "datum": "2026-11-13",
+   "titel": "Dauerlieger-Hinweis: Morgen-Zettel des Tagesabschlusses freilassen",
+   "pr": 219,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "Roadmap interaktiv: Seite /roadmap/ mit Filter und Übersicht in der README",
+   "pr": 222,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "Plan für Ausbau Stufe 7 bis 20 (Hafenverbund), Welle 6 in der Roadmap",
+   "pr": 220,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "Dauerlieger-Hinweis: Reste nach PR 214 (Kartenwahl, Knöpfe unten)",
+   "pr": 218,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "Nehrung bekommt verlässlich Strandkörbe und Seebrücke",
+   "pr": 216,
+   "pakete": [
+    "P62",
+    "P64"
+   ]
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "Verärgert-Text nur für Boote im Bild",
+   "pr": 215,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "Tagesabschluss: \"Abends zeigen\" am iPhone quer nicht mehr abgeschnitten",
+   "pr": 217,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "Einstieg: Boot hinter Schildern, kein Einstieg im Testmodus, beenden() vor dem Laden gemerkt",
+   "pr": 212,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "Funk und Dauerlieger-Hinweis: nichts liegt mehr übereinander, Länge auch am Handy",
+   "pr": 214,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "P10 Folge: Bojenlieger zuerst, Wunschpreis bei nur Goldboxen, passgenau am Bootsmaß",
+   "pr": 208,
+   "pakete": [
+    "P10"
+   ]
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "Ufer direkt am Hafen je Küstentyp, Strandkörbe und Seebrücke nur an passendem Strand",
+   "pr": 211,
+   "pakete": [
+    "P62",
+    "P64"
+   ]
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "Kamera auf Seed-Gelände: weiteste Zoomstufe bis 1000 m, Spielbereich aus der Geländekarte, Ufer in der Startansicht",
+   "pr": 210,
+   "pakete": [
+    "P62"
+   ]
+  }
+ ]
 }

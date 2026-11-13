@@ -10,6 +10,7 @@ on:
     paths:
       - "web/**"
       - "docs/roadmap.md"
+      - "docs/roadmap-bilder.json"
       - "tools/roadmap.mjs"
       - "tools/build-pages.sh"
       - "tools/check-pages.sh"
@@ -32,6 +33,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Ganze Historie: die Roadmap-Seite zeigt die letzten Merges
+          fetch-depth: 0
 
       - name: Seite zusammenstellen
         run: bash tools/build-pages.sh
