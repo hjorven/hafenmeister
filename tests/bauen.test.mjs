@@ -1,7 +1,7 @@
 // Bauen mit Vorschau (docs/bauen.md): Wahl des naechsten Schritts und Wirkungstexte, ohne Browser.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { waehleSchritt, wirkungText, leer } from '../web/js/ui/bauen-rat.js';
+import { waehleSchritt, wirkungText, leer, umbauText, regionsSchritt } from '../web/js/ui/bauen-rat.js';
 
 const steg = (id, kosten, plaetzeNeu, gesperrt = null) => ({ key: `steg:${id}`, art: 'steg', name: id, kosten, plaetzeNeu, gesperrt, nutzen: [] });
 const vers = (id, kosten, stufeNeu = 1, gesperrt = null) => ({ key: `versorgung:${id}`, art: 'versorgung', name: id, wunsch: id, kosten, stufeNeu, gesperrt, nutzen: [] });
@@ -49,4 +49,23 @@ test('Wirkung eines Services als Satz, ohne Zahl fuer Tagesgaeste', () => {
   assert.match(t, /50 % mehr Boote der Größe XL/);
   assert.doesNotMatch(t, /80 Tagesgäste/);
   assert.equal(wirkungText({}), '');
+});
+
+test('Bauabschnitte: Abschnitt bereit, wenn nur Geld fehlte, Baustelle meldet sich', () => {
+  const ausbau = (extra = {}) => ({ key: 'hafen:stufe', art: 'hafen', name: 'Durchstich, Abschnitt 1 von 2', kosten: 2500, gesamt: 5000, nutzen: [], ...extra });
+  const a = waehleSchritt({ geld: 2600, eintraege: [ausbau()], bedarf: leer(), stufe: stufe(['money']) });
+  assert.equal(a.ziel, 'hafen:stufe');
+  assert.equal(a.leistbar, true);
+  const b = waehleSchritt({ geld: 100, eintraege: [ausbau({ gesperrt: 'Baustelle läuft, morgen früh weiter', begonnen: true })], bedarf: leer(), stufe: stufe(['money']) });
+  assert.match(b.text, /Baustelle/);
+  const c = waehleSchritt({ geld: 100, eintraege: [ausbau({ begonnen: true })], bedarf: leer(), stufe: stufe(['guests', 'money']) });
+  assert.match(c.text, /Noch 2.400 € sparen/);
+});
+
+test('Umbau-Hinweis vor dem Stufenausbau und Regionsziel in der letzten Stufe', () => {
+  assert.equal(umbauText({ gone: [], guests: [], fixed: [], moving: [] }), null);
+  assert.match(umbauText({ gone: ['B01', 'B02'], guests: [7], fixed: [], moving: [] }), /2 Plätze weg.*Ein Gast reist/);
+  assert.equal(regionsSchritt({ active: false }), null);
+  assert.match(regionsSchritt({ active: true, missing: ['bigVisits'], goal: { bigVisits: 6 }, visits: 2 }).text, /Noch 4 Besuche/);
+  assert.match(regionsSchritt({ active: true, ok: true, missing: [] }).text, /fertig ausgebaut/);
 });
