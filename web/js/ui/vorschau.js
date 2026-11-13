@@ -214,6 +214,10 @@ const CSS = `
 .hm-wunsch.nein { background: #aeb4bb; filter: saturate(0); opacity: .8; }
 .hm-wunsch.ja::after { content: ""; position: absolute; right: -5px; bottom: -5px; width: 12px; height: 12px; background: #3b9a4a var(--haken) center / 100% 100% no-repeat; box-shadow: 0 0 0 2px #24364a; image-rendering: pixelated; animation: hm-haken .3s steps(3) both; animation-delay: var(--v, 0s); }
 @keyframes hm-haken { from { transform: scale(0); } to { transform: scale(1); } }
+.hm-wunsch-reihe.klein { gap: 4px; --hm-wunsch: 12px; }
+.hm-wunsch-reihe.klein .hm-wunsch { box-shadow: 0 0 0 1px #24364a, 1px 2px 0 1px rgba(20,32,48,.3); }
+.hm-wunsch-reihe.klein .hm-wunsch.ja::after { width: 8px; height: 8px; right: -4px; bottom: -4px; box-shadow: 0 0 0 1px #24364a; }
+.hm-wunsch-reihe.klein.gewaehlt .hm-wunsch { box-shadow: 0 0 0 1px #24364a, 0 0 0 3px #f2c14e; }
 /* Vielfache von 12 bleiben scharf */
 :root { --hm-wunsch: 24px; }
 
@@ -423,11 +427,16 @@ export function init(game) {
         h = h0 + 2.5 * Math.min(6, Math.max(1, weit * 0.022));
       }
       const p = projiziere(a, h);
-      let sichtbar = !!p && p.z * rc.width / 2 >= 20 && Math.abs(p.x) < 1.2 && Math.abs(p.y) < 1.2;
+      // Bootslänge in Bildschirmpixeln: weit weg kleine Schilder (12 px), ganz weit weg keine,
+      // damit die Schilder nie viel größer sind als das Boot darunter
+      const px = p ? p.z * rc.width / 2 : 0;
+      const klein = px < 70;
+      let sichtbar = !!p && px >= 32 && Math.abs(p.x) < 1.2 && Math.abs(p.y) < 1.2;
+      if (r.klein !== klein) { r.klein = klein; r.node.classList.toggle('klein', klein); r.breite = null; }
       const x = sichtbar ? Math.round(rc.left - rr.left + (p.x + 1) / 2 * rc.width) : 0;
-      const y = sichtbar ? Math.round(rc.top - rr.top + (1 - p.y) / 2 * rc.height) - (r.art === 'ergebnis' ? 22 : 6) : 0;
+      const y = sichtbar ? Math.round(rc.top - rr.top + (1 - p.y) / 2 * rc.height) - (r.art === 'ergebnis' ? (klein ? 12 : 22) : (klein ? 3 : 6)) : 0;
       if (sichtbar) {
-        const w = (r.breite ??= r.node.children.length * 30 + 8), h = 34;
+        const w = (r.breite ??= r.node.children.length * (klein ? 16 : 30) + 8), h = klein ? 20 : 34;
         const box = [x - w / 2, y - h, x + w / 2, y];
         if (belegt.some((b) => box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1])) sichtbar = false;
         else belegt.push(box);
