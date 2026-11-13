@@ -33,6 +33,7 @@ export class CameraRig {
     this.ortho = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 2000);
     this.projektion = 'perspektive';
     this.bounds = bounds;                     // { minX, maxX, minZ, maxZ } in Metern
+    this.rand = null;                         // Rand der Landschaft { minX, maxX, ... }, setzt main.js
     this.minWidth = minWidth;                 // kleinster sichtbarer Ausschnitt in Metern (ganz hineingezoomt)
     this.maxWidth = maxWidth;
     this.target = new THREE.Vector3();
@@ -326,6 +327,9 @@ export class CameraRig {
 
   // Um einen Bildschirmpunkt zoomen. factor > 1 zoomt hinein.
   zoomAt(factor, sx = this.screenW / 2, sy = this.screenH / 2) {
+    // Zoomen zum Finger oder Mauszeiger verschiebt den Blickpunkt: eine laufende Fahrt (flyTo) bricht
+    // ab wie beim Schieben. Drehen und Neigen lassen den Blickpunkt stehen, dort laeuft sie weiter.
+    if (sx !== this.screenW / 2 || sy !== this.screenH / 2) this._fly = null;
     let before = this.screenToWorld(sx, sy);
     if (!before) { sx = this.screenW / 2; sy = this.screenH / 2; before = this.screenToWorld(sx, sy); }
     this.viewWidth = THREE.MathUtils.clamp(this.viewWidth / factor, this.minWidth, Math.max(this.maxWidth, this._homeWidth || 0));
@@ -373,6 +377,14 @@ export class CameraRig {
     const b = this.bounds;
     this.target.x = THREE.MathUtils.clamp(this.target.x, b.minX, b.maxX);
     this.target.z = THREE.MathUtils.clamp(this.target.z, b.minZ, b.maxZ);
+    // Rand der Landschaft (rig.rand, Weltmeter): seitlich nie ins Bild. Nach Norden und Sueden
+    // laeuft die Landschaft in Wasser bzw. Land aus und verschwindet im Dunst.
+    const r = this.rand;
+    if (r) {
+      const m = this.viewWidth * 0.55;
+      const lo = r.minX + m, hi = r.maxX - m;
+      this.target.x = lo <= hi ? THREE.MathUtils.clamp(this.target.x, lo, hi) : (r.minX + r.maxX) / 2;
+    }
     this.pitch = Math.min(PITCH_MAX, Math.max(this.pitch, this.pitchMin()));
   }
 
