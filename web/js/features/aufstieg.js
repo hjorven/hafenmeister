@@ -346,7 +346,16 @@ function kamerafahrt(game, { dauer = 7, drehung = 0.7, zoom = 0.85 } = {}) {
   const alt = pose();
   // Startansicht (ganzer Hafen) als Ziel: einmal ausrechnen lassen, dann zurück auf die alte Pose
   let heim = alt;
-  try { rig.reset(); heim = pose(); } catch { /* alte Pose bleibt Ziel */ }
+  try {
+    rig.reset();
+    // Die Karte der Feier liegt unten (quer: rechts). Den Hafen in den freien Teil darüber
+    // (quer: links daneben) schieben, damit die Fahrt nicht hinter der Karte verschwindet.
+    const w = rig.screenW || innerWidth, h = rig.screenH || innerHeight;
+    const quer = h <= 500 && w > h;
+    if (quer) rig.panBy?.(-w * 0.22, 0);
+    else rig.panBy?.(0, -h * 0.24);
+    heim = pose();
+  } catch { /* alte Pose bleibt Ziel */ }
   setze(alt);
   if (ruhig) {
     setze(heim);
