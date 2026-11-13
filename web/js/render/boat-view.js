@@ -343,6 +343,8 @@ export function init(game) {
   }
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   let bandT = 0;
+  // Jede Aenderung in den Spielregeln (neuer Tag, Kassieren, Abrechnung) gleich im naechsten Bild pruefen.
+  game.on('sim:change', () => { bandT = 1; });
   game.onTick((dt) => {
     const t = game.time;
     bandT += dt;
@@ -352,8 +354,12 @@ export function init(game) {
     for (const [id, e] of boats) {
       if (pruefen) {
         const sb = st?.boats?.[id];
-        const an = !!sb && !sb.stationed && !e.faehrt && e.anim.berth?.kind !== 'buoy' &&
-          (e.anim.moored || e.anim.state === 'casting-off') && !!game.sim?.istBezahlt?.(id);
+        // Nachts abgerechnete Gaeste sind nicht mehr in den Spielregeln, liegen aber bis zum Ablegen am
+        // Vormittag in der Box: fuer sie gilt, ob sie zuletzt bezahlt hatten.
+        if (sb) e.bezahlt = !!game.sim?.istBezahlt?.(id);
+        const bezahlt = sb ? e.bezahlt : !!(e.abgerechnet && e.bezahlt);
+        const an = !sb?.stationed && !e.faehrt && e.anim.berth?.kind !== 'buoy' &&
+          (e.anim.moored || e.anim.state === 'casting-off') && bezahlt;
         if (an) {
           const g = baendchen(e);
           if (!g.visible) { g.visible = true; g.userData.t0 = t; g.userData.band.material = bandFarbe(); }
@@ -688,6 +694,7 @@ export function init(game) {
     if (e?.muenzeWartet && amPlatz(e.anim)) { e.muenzeWartet = false; zeigeMuenze(d.id); }
   });
   game.on('sim:collected', (d) => {
+    bandT = 1;                         // Wimpel gleich beim Kassieren zeigen, nicht erst bei der naechsten Pruefung
     if (d?.boatId != null) { entferneMuenze(d.boatId, 700); const e = boats.get(d.boatId); if (e) e.muenzeWartet = false; }
     else for (const id of [...muenzen.keys()]) entferneMuenze(id, 700);
   });
@@ -698,22 +705,23 @@ export function init(game) {
   });
 
   // Boot ist am Platz fest: die Box blitzt einmal hell auf (Form und Drehung der Box aus render/stege.js)
-  const blitze = new Map();     // platzId -> Restzeit
+  // Der Blitz laeuft in echter Zeit (0,9 s), auch bei 3x/8x und in der Pause, sonst ist er bei Zeitraffer weg.
+  const blitze = new Map();     // platzId -> Startzeit (performance.now)
   game.on('boat:moored', (d) => {
     const id = d?.berth;
     if (!id || String(id).startsWith('boje-') || !game.stege?.platz?.(id)?.mesh) return;
-    blitze.set(id, 1);
+    blitze.set(id, performance.now());
   });
-  game.onTick((dt) => {
-    for (const [id, t] of blitze) {
+  game.onTick(() => {
+    const jetzt = performance.now();
+    for (const [id, t0] of blitze) {
       const mat = game.stege?.platz?.(id)?.mesh?.material;
-      const r = t - dt / 0.9;
+      const r = 1 - (jetzt - t0) / 900;
       if (!mat || r <= 0) {
         blitze.delete(id);
         if (mat) mat.opacity = 0;
         continue;
       }
-      blitze.set(id, r);
       mat.color.set('#ffffff');
       mat.opacity = 0.55 * r * r;
     }

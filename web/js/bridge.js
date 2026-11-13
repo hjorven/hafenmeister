@@ -250,13 +250,14 @@ export async function initBridge(game) {
     openJettyProjects: () => sim.openJettyProjects(state, ctx),
     advanceStage: run(() => sim.advanceStage(state, ctx)),
     stationBoat: run((typeId, berthId, modelId) => sim.stationBoat(state, ctx, typeId, berthId, modelId)),
-    spend: (amount) => {
-      const ok = sim.spend(state, amount);
+    // zweck und quelle ordnen Beträge im Tagesabschluss ein (sim.QUELLEN, docs/tagesabschluss.md)
+    spend: (amount, zweck = 'bau') => {
+      const ok = sim.spend(state, amount, zweck);
       if (ok) game.emit('sim:change', { reason: 'spend' });
       return ok;
     },
-    addIncome: (amount) => {
-      sim.addIncome(state, amount);
+    addIncome: (amount, quelle = 'sonstiges', detail = null) => {
+      sim.addIncome(state, amount, quelle, detail);
       game.emit('sim:change', { reason: 'income' });
     },
     setRegion(region) {
@@ -403,9 +404,19 @@ export async function initBridge(game) {
   // Abrechnung des Services-Moduls am Tagesende
   game.on('services:abrechnung', (a = {}) => {
     const sum = Number(a.summe) || 0;
-    if (sum > 0) api.addIncome(sum);
-    else if (sum < 0) api.spend(Math.min(state.money, -sum));
+    // Je Anlage einzeln buchen, damit der Tagesabschluss die Services aufschlüsseln kann
+    const posten = Array.isArray(a.einnahmen) ? a.einnahmen.filter((e) => Number(e?.betrag) > 0) : [];
+    const teil = posten.reduce((x, e) => x + Number(e.betrag), 0);
+    if (sum > 0 && teil === sum) {
+      for (const e of posten) sim.addIncome(state, Number(e.betrag), 'services', String(e.id));
+      game.emit('sim:change', { reason: 'income' });
+    } else if (sum > 0) api.addIncome(sum, 'services');
+    else if (sum < 0) api.spend(Math.min(state.money, -sum), 'services');
   });
+
+  // Bericht des laufenden Tages (Einnahmen je Quelle bis jetzt) und die letzten Tage
+  api.tagesbericht = () => sim.tagesbericht(state, ctx);
+  api.verlauf = () => [...(state.stats.verlauf || [])];
 
   game.onTick((dt) => dispatch(sim.tick(state, ctx, dt)));
   game.on('ready', announce);
