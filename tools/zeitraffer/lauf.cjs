@@ -184,6 +184,8 @@ const PROBE = () => {
   out.fps = W.frames / ((tNow - W.f0) / 1000); out.spielzeitJeSek = W.letzt ? (jetzt - W.letzt.t) / ((tNow - W.letzt.w) / 1000) : null;
   W.frames = 0; W.f0 = tNow; W.letzt = { t: jetzt, w: tNow };
   out.wetterFx = !!document.getElementById('weather-fx');
+  // Bei einem Fund sofort anhalten, damit das Nahbild die Stelle noch zeigt (lauf.cjs lässt wieder laufen)
+  if (['land', 'steg', 'fest', 'ueberlapp', 'haengt'].some((k) => out[k].length)) { G.setPaused(true); out.angehalten = true; }
   return out;
 };
 
@@ -313,6 +315,7 @@ const SNAP = () => {
         }
       }
     }
+    if (await page.evaluate(() => window.hafenmeister.paused)) await page.evaluate(() => window.hafenmeister.setPaused(false));
     if (w >= naechstesBild) {
       naechstesBild = w + BILD_S * 1000;
       bildNr++;
