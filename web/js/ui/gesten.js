@@ -522,7 +522,7 @@ export function init(game) {
     texte.push({ text, x: s.x, y: s.y - 30, t: 0, dauer: 1.8, klein: true, farbe });
   };
   game.on('sim:moored', (e) => { if (e?.passgenau && e.hand) textAmBoot(e.boatId, 'Passgenau +¼ Anker', '#ffd76a'); });
-  const aerger = (e) => { if (e?.rated) textAmBoot(e.boatId, `Verärgert: ${String(game.sim?.ctx?.rules?.turnAway?.rating ?? 2.5).replace('.', ',')} Anker`, '#ff9a8a'); };
+  const aerger = (e) => { if (e?.rated) textAmBoot(e.boatId, `Verärgert: ${String(game.sim?.ctx?.rules?.turnAway?.rating ?? 2.5).replace('.', ',')} Anker`, '#ff9a8a', { nurImBild: true }); };
   game.on('sim:dismissed', aerger);
   // Bojengeld über Nacht (Review A9): kleiner Betrag über jedem Boot an der Boje
   game.on('sim:buoyFee', (e) => {
