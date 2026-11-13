@@ -590,6 +590,17 @@ class PathTask {
     const lane0 = b.lane;
     b.lane = approach(b.lane, b.laneWant * fade, (0.8 + b.info.beam * 0.3) * dt);
     let nx = _v.x + Math.sin(hd) * b.lane, nz = _v.z + Math.cos(hd) * b.lane;
+    // Ausweichen nur ueber freies Wasser: nie seitlich auf Land, Steg oder in einen Liegeplatz
+    // (der Weg selbst ist frei, der Versatz nicht unbedingt). Sonst Versatz kleiner, notfalls null.
+    const frei = b.mgr.frei;
+    if (frei && Math.abs(b.lane) > 0.05) {
+      const r = b.info.beam / 2 + 0.3, t = Math.min((b.info.draft ?? 1) + 0.2, 9);
+      for (let i = 0; i < 4 && Math.abs(b.lane) > 0.05 && !frei(nx, nz, r, t); i++) {
+        b.lane = Math.abs(lane0) < Math.abs(b.lane) && i === 0 ? lane0 : b.lane * 0.5;
+        nx = _v.x + Math.sin(hd) * b.lane; nz = _v.z + Math.cos(hd) * b.lane;
+      }
+      if (!frei(nx, nz, r, t) && frei(_v.x, _v.z, r, t)) { b.lane = 0; nx = _v.x; nz = _v.z; }
+    }
     // harte Regel: ein fahrendes Boot schiebt sich nie in ein anderes hinein (nicht im Notfall-Durchlass)
     if (this.s > s0 + 1e-4 || b.lane !== lane0) {
       const vorher = b.hitsAt(b.x, b.z, b.heading);
