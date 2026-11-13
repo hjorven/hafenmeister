@@ -137,6 +137,7 @@ export function init(game) {
         id: it.id, art: it.art,
         x: p.x / U, y: -p.z / U,
         halbBreite: (box.max.x - box.min.x) / 2 / U,
+        dreh: it.mesh.rotation.y,
         tuer: e && it.art !== 'strandkoerbe' ? { x: e.x / U, y: -e.z / U } : null,
       });
     }

@@ -90,29 +90,26 @@ const WORLD = {
 WORLD.width = WORLD.maxX - WORLD.minX;
 WORLD.centerX = (WORLD.minX + WORLD.maxX) / 2;
 
-// Spielbereich fuer den Blickpunkt an die Gelaendeform anpassen: Leuchttuerme und Inseln der Form
-// (mit 40 m Rand) muessen erreichbar sein. Obergrenze SICHER ist im Spiel geprueft: auch ganz
-// herausgezoomt und flach nach aussen bleibt der Rand des Gelaendes (BEREICH in gelaende.js,
-// danach der grobe Aussenring) im Dunst. WORLD wird an Ort und Stelle geaendert, weil die Kamera
-// es als rig.bounds haelt.
-const SICHER = { minX: -340, maxX: 300, minZ: -270, maxZ: 60 };
+// Spielbereich und weiteste Zoomstufe aus der Gelaendekarte (game.gelaende, render/landschaft/formen.js):
+// - Blickpunkt bleibt in spielRect() (Hafen, Einfahrt, Leuchttuerme, nahe Inseln).
+// - Ganz herausgezoomt sieht man den Kuestentyp: maxWidth so breit wie spielRect, 800 bis 1000 m.
+// - rig.rand = aussenRect(): Die Kamera haelt den Blickpunkt so weit vom Rand der Landschaft weg,
+//   dass deren Kante nie ins Bild kommt (core/camera.js _clamp).
+// WORLD wird an Ort und Stelle geaendert, weil die Kamera es als rig.bounds haelt.
+const SICHER = { minX: -340, maxX: 300, minZ: -270, maxZ: 60 };   // Fallback ohne Geländekarte
 function weltAnForm(game) {
-  // Grundbereich wie bisher, nach Norden bis zum Ende des Fahrwassers vor dem Aussenhafen (Plan-y 380, karte.js)
-  let minX = -420 * U, maxX = 306 * U, minZ = -380 * U - 20, maxZ = 30 * U;
-  try {
-    const form = game.gelaende?.aktuell?.();
-    const pkt = (x, z, r) => {
-      minX = Math.min(minX, x - r); maxX = Math.max(maxX, x + r);
-      minZ = Math.min(minZ, z - r); maxZ = Math.max(maxZ, z + r);
-    };
-    for (const [x, y] of form?.leuchttuerme || []) pkt(x * U, -y * U, 40);
-    for (const i of [...(form?.seeInseln || []), ...(form?.seeAussen || [])]) {
-      pkt((i.x - i.rx) * U, -(i.y + i.ry) * U, 40);
-      pkt((i.x + i.rx) * U, -(i.y - i.ry) * U, 40);
-    }
-  } catch (err) { console.warn('Geländeform nicht lesbar', err); }
-  WORLD.minX = Math.max(SICHER.minX, minX); WORLD.maxX = Math.min(SICHER.maxX, maxX);
-  WORLD.minZ = Math.max(SICHER.minZ, minZ); WORLD.maxZ = Math.min(SICHER.maxZ, maxZ);
+  const g = game.gelaende;
+  const cam = game.camera;
+  let r = null;
+  try { r = g?.spielRect?.(); } catch (err) { console.warn('Spielbereich nicht lesbar', err); }
+  if (!r || !Number.isFinite(r.minX + r.maxX + r.minZ + r.maxZ)) {
+    r = { minX: -420 * U, maxX: 306 * U, minZ: -380 * U - 20, maxZ: 30 * U };
+    r = { minX: Math.max(SICHER.minX, r.minX), maxX: Math.min(SICHER.maxX, r.maxX), minZ: Math.max(SICHER.minZ, r.minZ), maxZ: Math.min(SICHER.maxZ, r.maxZ) };
+  } else {
+    try { const rand = g.aussenRect?.(); if (rand && Number.isFinite(rand.minX + rand.maxX)) cam.rand = rand; } catch { /* ohne Rand */ }
+    cam.maxWidth = Math.max(800, Math.min(1000, Math.round(r.maxX - r.minX)));
+  }
+  Object.assign(WORLD, r);
   WORLD.width = WORLD.maxX - WORLD.minX;
   WORLD.centerX = (WORLD.minX + WORLD.maxX) / 2;
 }
@@ -242,6 +239,20 @@ function startRect(game, stufe) {
     const neu = vereinige(r, e);
     if (breiteFuer(neu, cam) <= grenze) r = neu;
   }
+  // Ufer links und rechts der Stege (game.gelaende.startRect, Gelaende-Thread): zeigt, an welcher
+  // Kueste der Hafen liegt. Gekappt auf das 1,6-fache des Hafens, damit er am Handy gross bleibt.
+  try {
+    const u = game.gelaende?.startRect?.(stufe);
+    if (u && Number.isFinite(u.minX + u.maxX + u.minZ + u.maxZ)) {
+      const w = r.maxX - r.minX;
+      const cx = (r.minX + r.maxX) / 2;
+      r = vereinige(r, {
+        minX: Math.max(u.minX, cx - 0.8 * w), maxX: Math.min(u.maxX, cx + 0.8 * w),
+        // nur zur Seite: nach Sueden kaemen Baeume dicht vor die Kamera, nach Norden nur Wasser
+        minZ: r.minZ, maxZ: r.maxZ,
+      });
+    }
+  } catch (err) { console.warn('Ufer für die Startansicht nicht lesbar', err); }
   return polstern(cam, r);
 }
 

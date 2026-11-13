@@ -241,10 +241,57 @@ export const SLIP = { x0: -131, x1: -123 };
 /** Bereich hinter dem Ufer, den der Hafen bebaut. Dort bleibt das Gelände eben und baumfrei. */
 export const HAFENFLAECHE = { x0: -165, x1: 215, y0: -92 };
 
-/** Abstand außerhalb der Hafenfläche in Planeinheiten (0 oder negativ = innerhalb). */
-export function hafenAbstand(px, py) {
-  return Math.max(HAFENFLAECHE.x0 - px, px - HAFENFLAECHE.x1, HAFENFLAECHE.y0 - py);
+/**
+ * Ufer je Küstentyp (natur.js stil.ufer) an Land in den ersten Metern hinter der Wasserlinie.
+ * Keine großen Höhen am Hafen: dort stehen Gebäude, Slip und Stegwurzeln.
+ */
+function uferArt(art, px, py, h, typ, d, hafenAb) {
+  const n = fbm(px / 9, py / 9, 131);
+  const amHafen = 1 - smooth(0, 30, hafenAb);   // 1 auf der Hafenfläche
+  const slip = px > SLIP.x0 - 3 && px < SLIP.x1 + 3 && d < 14;
+  if (slip) return { h, typ };
+  switch (art) {
+    case 'fels':
+      // Granitbuckel bis ans Wasser
+      if (d < 8 + 7 * n) return { h: Math.max(h, 0.25) + (1.3 - 0.8 * amHafen) * smooth(0.3, 0.8, n) * smooth(0, 3, d), typ: 'fels' };
+      break;
+    case 'steine':
+      if (d < 4 + 5 * n) return { h, typ: n > 0.5 ? 'fels' : 'sand' };
+      break;
+    case 'kliff':
+      // schmaler Steinstrand, dahinter eine Abbruchkante (am Hafen niedrig)
+      if (d < 3) return { h, typ: n > 0.55 ? 'fels' : 'sand' };
+      if (d < 12 + 4 * n) return { h: h + (0.7 + 2.2 * (1 - amHafen)) * smooth(3, 12, d), typ: 'kliff' };
+      break;
+    case 'schilf':
+      if (d < 5 + 5 * n) return { h: Math.min(h, 0.3), typ: 'schilfrand' };
+      break;
+    case 'salzwiese':
+      if (d < 9 + 9 * n) return { h: Math.min(h, 0.22 + d * 0.01), typ: 'salzwiese' };
+      break;
+    case 'watt':
+      if (d < 10 + 8 * n) return { h: Math.min(h, 0.25 + d * 0.01), typ: 'salzwiese' };
+      break;
+    case 'wald':
+      // Wald bis fast ans Wasser, nur ein schmaler Kiesstreifen
+      if (d < 2.5) return { h, typ: 'sand' };
+      if ((typ === 'gras' || typ === 'sand') && amHafen < 0.5) return { h: h + 0.6 * smooth(2, 14, d), typ: 'waldboden' };
+      if (d < 9 + 5 * n && (typ === 'gras' || typ === 'sand')) return { h, typ: 'waldboden' };   // am Hafen: dunkler Saum statt Strand
+      break;
+    case 'sand':
+      if (d < 11 + 7 * n && typ === 'gras') return { h, typ: 'sand' };
+      break;
+  }
+  return { h, typ };
 }
+
+/** Abstand außerhalb der Hafenfläche in Planeinheiten (0 oder negativ = innerhalb). */
+export function hafenAbstand(px, py, stufe = 6) {
+  // Stufe 1 und 2 bebauen nur den Westteil (Steg A und B); östlich davon reicht die Natur bis an den Ort
+  const x1 = stufe <= 2 ? HAFENFLAECHE_KLEIN_X1 : HAFENFLAECHE.x1;
+  return Math.max(HAFENFLAECHE.x0 - px, px - x1, HAFENFLAECHE.y0 - py);
+}
+const HAFENFLAECHE_KLEIN_X1 = 0;
 
 function inPoly(px, py, poly) {
   let inside = false;
@@ -352,7 +399,7 @@ export function punkt(px, py, stufe, region) {
   const ln = seeNord(px), ms = meerSued(px);   // nur noch Maße für Seegatt und Durchstich
   const seeOffen = q.L < 0 ? 1 - smooth(0, 60, q.offenAbstand) : 0;
   const see = seeOffen;
-  const hafenAb = hafenAbstand(px, py);
+  const hafenAb = hafenAbstand(px, py, stufe);
   // Ab Stufe 3 wird die Kaifläche aufgeschüttet, auch wo die Natur dort eine Bucht hatte
   const kai = stufe >= 3 && px >= KAIFLAECHE.x0 && px <= KAIFLAECHE.x1 && py <= Math.min(KAIFLAECHE.y1, stegUfer(px)) && py > KAIFLAECHE.y0;
   let h, typ;
@@ -423,6 +470,8 @@ export function punkt(px, py, stufe, region) {
       stufe, region, uferAbstandM: d * PLAN_M, hafenAbstand: hafenAb, offeneSee: seeM < d * PLAN_M + 1, seeAbstandM: seeM,
       form: F.nr, formSteilufer: !!st.steil, insel: false,
     }));
+    // Ufer je Küstentyp, auch direkt an den Stegen: so erkennt man den Typ schon in der Startansicht
+    if (st.ufer && !kai && typ !== 'pflaster' && q.duene < 0.05) ({ h, typ } = uferArt(st.ufer, px, py, h, typ, d, hafenAb));
     // Straße und Wege (Promenade ist schon Pflaster)
     if (py < 0 && py > -100) {
       for (const w of wegeCache(stufe)) {
@@ -437,7 +486,7 @@ export function punkt(px, py, stufe, region) {
   } else {
     // ---------------- Wasser: Lagune, Bodden, Fluss, Förde oder offene See
     const dw = Math.max(0, -q.d);
-    const tiefMax = 2.5 + 2.5 * seeOffen - 0.4 * q.kanal * (1 - seeOffen);
+    const tiefMax = (2.5 + 2.5 * seeOffen - 0.4 * q.kanal * (1 - seeOffen)) * (q.stil.tiefe ?? 1);
     h = -Math.max(0.2, tiefMax * (1 - Math.exp(-dw / (26 + 16 * seeOffen))) + 0.5 * wob);
     if (g.gezeiten) h -= g.gezeiten * smooth(0, 8, dw);
     typ = 'wasser';
@@ -453,11 +502,15 @@ export function punkt(px, py, stufe, region) {
       const n = fbm(px / 70, py / 34, 51);
       const w = 0.12 - 1.1 * smooth(0.46, 0.62, n) - 1.3 * smooth(wattBreite - 10, wattBreite + 4, dw) - 1.6 * q.kanal;
       // Hafen, Zufahrt, Reede und alles, was der Ausbau ausbaggert, bleiben frei
-      let frei = smooth(0, 90, pflichtAbstand(px, py, N) + 60 * (fbm(px / 80, py / 80, 57) - 0.5));
+      // Watt-Küste: die Platen reichen bis nah an die Stege
+      const wattRand = q.stil.ufer === 'watt' ? 26 : 90;
+      let frei = smooth(0, wattRand, pflichtAbstand(px, py, N) + (wattRand / 1.5) * (fbm(px / 80, py / 80, 57) - 0.5));
       if (stufe >= 5) frei = Math.min(frei, smooth(0, 24, Math.min(polyAbstand(px, py, AUSSENHAFEN), polyAbstand(px, py, RINNE5))));
       if (stufe >= 6) frei = Math.min(frei, smooth(0, 40, polyAbstand(px, py, PIERWANNE6)));
       if (frei > 0) { h = Math.max(h, h + (w - h) * frei); typ = 'watt'; }
     }
+    // Schilfufer: flacher Saum vor dem Land, in dem das Schilf steht
+    if (q.stil.ufer === 'schilf' && dw < 7 && pflichtAbstand(px, py, N) > 4) h = Math.max(h, -0.25 - 0.06 * dw);
     // Mindesttiefe vor der Einfahrt (Reede, Ankerfelder) und in der Zufahrt
     const reede = smooth(0, -50, kastenAbstand(px, py, SEE_NORD));
     if (reede > 0) h = Math.min(h, h + (-4.6 - (g.gezeiten || 0) - h) * reede);
