@@ -56,7 +56,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 |---|---|---|---|
 | Ü1 | Dauerlieger-Pacht reparieren: Fischer 15 €, Dauerlieger 50 % ihres Gastpreises, wie die Karte verspricht | offen | P01 |
 | Ü2 | Hafenbüro Stufe 1 einen Nutzen geben (Knopf "Kassieren" erst mit Stufe 1 oder andere Wirkung) | offen (entschieden: "Alle kassieren" erst nach Kauf) | P02 |
-| Ü3 | Einstieg neu abstimmen: Schritt 1 ohne Sonne, Schritt 3 "Liegegeld beim Anlegen" | in Arbeit (PR 112, Teil) | P03 |
+| Ü3 | Einstieg neu abstimmen: Schritt 1 ohne Sonne, Schritt 3 "Liegegeld beim Anlegen" | erledigt (PR 112) | P03 |
 | Ü4 | Ein Zähler für das Abschlussziel Stufe 6 (Tag der offenen Tür zählt mit) | erledigt (PR 139): eine Liste `GROSSSCHIFF_BESUCHE` in `data/services.js`, ein Zähler `state.bigVisits`; der Tag der offenen Tür gehört zum Flottenbesuch des Stützpunkts | P04 |
 | Ü5 | Boote auf wegfallenden Plätzen beim Stufenausbau regeln (B01, B02 in Stufe 3, T-Kopf Steg B): Gäste reisen erst ab, Dauerlieger ziehen samt Dauerplatz um | erledigt (`sim.js` `advanceStage`, Hook `stageUp`, Test in `tests/dauerlieger.test.mjs`) | P05 |
 | Ü6 | Regeltests gegen die echten Zahlen: gemeinsamer Helfer mit `rulesFromEconomy(ECONOMY)` | erledigt | P06 |
@@ -195,7 +195,7 @@ Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätz
 | `README.md` | veraltet ("Meilenstein 0 ist fertig", Supabase, Balancing-Skript am falschen Ort) | P08 |
 | `docs/plan.md` | teils veraltet (Meilensteine, Vorspulen, Hafenhorn, Fernglas, Vorschau, Pixel-Oberfläche fehlt) | P08 |
 | `docs/abnahme.md` | Ist-Stand-Tabelle veraltet | P08 |
-| `docs/einstieg.md` | Schritt 1 "Sonne im Tagesbalken" | P03 |
+| `docs/einstieg.md` | erledigt (PR 112) | P03 |
 | `docs/regionen.md` | beschreibt Ungebautes als fertig | P08 jetzt (als "geplant" kennzeichnen), P57 später |
 | `docs/echter-hafen.md` | Teil B und C überholt (C1, C2, C3, C9, C10, C11 behoben) | P08 |
 | `docs/balancing.md` | "4x, Sonne ziehen", "18 Services" | P08 |
@@ -313,7 +313,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | Tote Zahlen `ECONOMY.ereignisse` oder die doppelten in `data/events.js` (eine Quelle bleibt) | `economy.js`, `data/events.js` | P06 (erledigt) |
 | Zweiter Satz Service-Zahlen (Mischung `mische`) | `data/services.js`, `services/rules.js` | P06 (erledigt) |
 | Alter Rückfall-Speicherweg `hafenmeister.save` mit eigenem Exportformat (alte Stände werden beim Laden einmal übernommen) | `state.js`, `save/storage.js` | P09 |
-| Alle Texte zur Sonne als Vorspul-Griff | `features/einstieg.js` (offen, P03), `ui/input-pc.js`, `ui/input-touch.js`, `ui/gesten.js`, Doku (erledigt, P07) | P03, P07 |
+| Alle Texte zur Sonne als Vorspul-Griff | `features/einstieg.js` (erledigt, PR 112, P03), `ui/input-pc.js`, `ui/input-touch.js`, `ui/gesten.js`, Doku (erledigt, P07) | P03, P07 |
 | Ungenutzte Felder `bautage`, `winterBautempo`, falls P18 sie nicht nutzt | `economy.js` | P18 |
 | Versprechen in Plan und Doku ohne Gegenstück im Spiel (Abschnitt 8) | `plan.md`, `regionen.md`, `README.md` | P08 |
 
@@ -458,9 +458,9 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| J1 | Schritt 1 zeigt auf "3x" statt auf die Sonne | offen | P03 |
-| J2 | Im Einstieg fährt das erste Boot nicht selbst ein | offen | P03 |
-| J3 | Münze gleich nach dem Anlegen erklären, auch den halben Preis | offen | P03 |
+| J1 | Schritt 1 zeigt auf "3x" statt auf die Sonne | erledigt (PR 112: Willkommen zeigt auf die Boje, Schritt 4 auf 3x) | P03 |
+| J2 | Im Einstieg fährt das erste Boot nicht selbst ein | erledigt (PR 112, `holdBoat` bis zum ersten Anlegen; Kamera fährt zum Boot, wenn es außerhalb liegt) | P03 |
+| J3 | Münze gleich nach dem Anlegen erklären, auch den halben Preis | erledigt (PR 112, Anteil aus den Regeln) | P03 |
 | J4 | Erstes Bauen führen, Geld fürs WC geschenkt (= Ü15) | offen | P17, P03 |
 | J5 | Ruf am ersten Abreisenden erklären | offen | P03 (nach P14) |
 | J6 | Hinweise beim ersten Mal (kein Platz, Sturm, Winter, Stufenziel, Stammgast) | offen | P03 |
@@ -635,7 +635,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|---|
 | P01 | Dauerlieger zur echten Entscheidung machen | Ü1, Ü20, Doku Dauerlieger, Gast wird umgelegt (plan 9a) | `sim.js`, `features/dauerlieger.js`, `economy.js`, `tests/dauerlieger.test.mjs`, `docs/neue-features.md`, `docs/spielregeln.md` | neu |
 | P02 | Hafenbüro mit eigenen Aufgaben ausbauen | Ü2, Ü11 | `ui/hud.js`, `sim.js` (Automatik), `economy.js`, `ui/bauen.js` (Texte) | neu |
-| P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen" (PR 112) |
+| P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 folgen im nächsten PR, J4 mit P17, J5 nach P14 |
 | P04 | Abschlussziel Stufe 6 richtig zählen | Ü4 | `bridge.js`, `render/services.js`, `docs/services.md` | bestehend: "Services und Sonderanlagen einbauen" |
 | P05 | Boote auf wegfallenden Plätzen regeln | Ü5 | `sim.js` (Stufenausbau), `tests/` | bestehend: "Spielregeln ohne Grafik umsetzen" |
 | P06 | Eine Quelle für alle Zahlen und echte Regeltests (erledigt) | Ü6, Ü24 | `economy.js`, `data/rules.js`, `data/services.js`, `services/rules.js`, `data/events.js`, `tests/regeln.mjs` (statt `tests/helpers.mjs`, das ist der Browser-Helfer), alle Regeltests, `tools/zahlen.mjs`, `docs/zahlen.md`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" |
