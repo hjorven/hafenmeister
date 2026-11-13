@@ -92,6 +92,8 @@ Dazu ein Knopf "Ton und Musik einstellen", der das Ton-Fenster mit getrennten Re
 - 8x läuft bis zum nächsten Boot an der Boje.
 - PC: <kbd>F</kbd> 3x an und aus, <kbd>G</kbd> 8x an und aus, <kbd>K</kbd> Kassieren, <kbd>Leertaste</kbd> Pause.
 
+Schrift: alles in Pixelify Sans, auch Fließtext und Modul-Stile (`.hm-neu *` mit `!important` in `oberflaeche.css`); Ziffern und Euro bleiben über `unicode-range` in der Systemschrift. Kleine Texte nicht unter etwa 13 px.
+
 Schriftgrößen in Regeln immer als `var(--hm-s)` schreiben, nicht `var(--hm-schrift)`, sonst wirkt "Größere Schrift" nicht.
 
 ## Symbole (Runde 3)
