@@ -281,6 +281,11 @@ function polstern(cam, r) {
 // Fuer Tests: ?ueberblickhalten=30 haelt den Ueberblick 30 s, bevor der Flug beginnt.
 const UEBERBLICK = { halten: 2.5, flug: 1.5 };   // Sekunden
 
+// Hat der Spieler die Kamera seit der letzten Startansicht selbst bewegt? Solange nicht, folgt die
+// Startansicht der Stufe, die erst nach dem Laden feststeht (Spielstand, Testmodus ?stufe=n).
+let kameraFrei = true;
+const imFenster = (ev) => !!ev?.target?.closest?.('.hm-save-backdrop, [aria-modal="true"]');
+
 function ueberblick(game) {
   const cam = game.camera;
   const wahl = new URLSearchParams(location.search).get('ueberblick');
@@ -298,23 +303,28 @@ function ueberblick(game) {
   // Beide Enden mit derselben Einpassung wie die Startansicht (Leisten, Schilderspalte, Schraegsicht)
   const lage = () => ({ x: cam.target.x, z: cam.target.z, w: cam.viewWidth });
   cam.reset();
-  const ende = lage();
+  let ende = lage();   // vorlaeufig; die Stufe eines geladenen Spiels steht evtl. erst spaeter fest
   const home = cam.home;
   cam.setHomeRect(() => { raender(cam); return polstern(cam, { ...blick }); });
   cam.reset();
   const start = lage();
   cam.home = home;
   if (Math.abs(start.w - ende.w) < 1 && Math.hypot(start.x - ende.x, start.z - ende.z) < 1) { cam.reset(); return; }
+  // Ein Startfenster ("Willkommen zurueck", Speicherplaetze) verdeckt das Bild: so lange halten,
+  // der Flug beginnt erst, wenn es zu ist. Klicks und Tasten darin brechen nichts ab.
+  const fenster = () => document.querySelector('.hm-save-backdrop, [aria-modal="true"]');
 
   // _apply sofort, damit kein Bild mit altem Ausschnitt entsteht (mit PR 137 macht update() das ohnehin)
   const setze = (x, z, w) => { cam.target.x = x; cam.target.z = z; cam.viewWidth = w; cam._apply?.(); };
   setze(start.x, start.z, start.w);
   document.body.classList.add('hm-ueberblick');
-  const t0 = performance.now();
+  let t0 = performance.now();
   let laeuft = true;
+  let fliegt = false;
   const ereignisse = ['pointerdown', 'wheel', 'keydown'];
   let tipp = null;
   const ab = (ev) => {
+    if (fenster()) return;
     if (ev?.type === 'pointerdown') tipp = { x: ev.clientX, y: ev.clientY, t: performance.now() };
     fertig(true);
   };
@@ -322,7 +332,7 @@ function ueberblick(game) {
   // zoomt oder dreht, behaelt seinen Ausschnitt.
   const los = (ev) => {
     window.removeEventListener('pointerup', los, true);
-    if (tipp && performance.now() - tipp.t < 300 && Math.hypot(ev.clientX - tipp.x, ev.clientY - tipp.y) < 10) cam.reset();
+    if (tipp && performance.now() - tipp.t < 300 && Math.hypot(ev.clientX - tipp.x, ev.clientY - tipp.y) < 10) { cam.reset(); kameraFrei = true; }
   };
   window.addEventListener('pointerup', los, true);
   const groesse = () => { if (laeuft) { fertig(true); cam.reset(); } };
@@ -343,6 +353,13 @@ function ueberblick(game) {
 
   function schritt(jetzt) {
     if (!laeuft) return;
+    if (fenster()) { t0 = jetzt; requestAnimationFrame(schritt); return; }
+    if (!fliegt && (jetzt - t0) / 1000 >= UEBERBLICK.halten) {
+      // Ziel erst jetzt festlegen: Stufe und Plaetze des geladenen Spiels stehen fest
+      fliegt = true;
+      cam.reset();
+      ende = lage();
+    }
     const s = Math.min(1, Math.max(0, ((jetzt - t0) / 1000 - UEBERBLICK.halten) / UEBERBLICK.flug));
     const e = s * s * (3 - 2 * s);   // weich an- und auslaufen
     // Breite geometrisch, damit das Hineinzoomen gleichmaessig wirkt
@@ -370,9 +387,21 @@ function boot() {
   // Knopf "Übersicht" zeigt den ganzen Hafen der aktuellen Stufe samt Bojen und Bauplaetzen
   let stufe = 1;
   game.on('stufe', (n) => { const v = Number(typeof n === 'object' ? n?.stufe : n); if (v >= 1) stufe = v; });
-  game.camera.setHomeRect(() => startRect(game, stufe));
+  // Die Stufe der Spielregeln gilt vor dem Ereignis (geladener Spielstand, Testmodus)
+  const aktuelleStufe = () => { const v = Number(game.sim?.state?.stage); return v >= 1 ? v : stufe; };
+  game.camera.setHomeRect(() => startRect(game, aktuelleStufe()));
+  for (const e of ['pointerdown', 'wheel', 'keydown']) {
+    window.addEventListener(e, (ev) => { if (!imFenster(ev)) kameraFrei = false; }, { capture: true, passive: true });
+  }
+  let zuletzt = null;
+  game.on('stufe', () => {
+    const v = aktuelleStufe();
+    if (v === zuletzt) return;
+    zuletzt = v;
+    if (kameraFrei && !document.body.classList.contains('hm-ueberblick')) game.camera.reset();
+  });
 
-  document.getElementById('btn-overview').addEventListener('click', () => game.camera.reset());
+  document.getElementById('btn-overview').addEventListener('click', () => { game.camera.reset(); kameraFrei = true; });
   const pauseBtn = document.getElementById('btn-pause');
   pauseBtn.addEventListener('click', () => game.setPaused(!game.paused));
   // Beschriftung nur für Bildschirmleser und Maus-Hinweis: das Symbol zeichnet ui/oberflaeche.js
