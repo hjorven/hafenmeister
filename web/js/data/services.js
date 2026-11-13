@@ -80,7 +80,7 @@ const TEXTE = [
   {
     id: 'raeucherei', name: 'Räucherei', gruppe: 'freizeit',
     kurz: 'Fischbrötchen am Steg. Gäste mögen das, der Ruf steigt.',
-    lage: { x: -184, y: -26, dreh: 0 }, radius: 7,
+    lage: { x: -228, y: -21, dreh: 0 }, radius: 7,
     stufen: [
       { name: 'Räucherkate' },
       { name: 'Räucherei mit Fischladen' },
@@ -90,7 +90,7 @@ const TEXTE = [
   {
     id: 'fischhalle', name: 'Fischhalle', gruppe: 'freizeit',
     kurz: 'Frischer Fang am Fischereikai. Fischerboote bringen Besucher an Kiosk und Restaurant.',
-    lage: { x: -30, y: 204, dreh: 180 }, radius: 10,
+    lage: { x: -30, y: 210, dreh: 180 }, radius: 10,
     stufen: [
       { name: 'Fischhalle' },
       { name: 'Fischhalle mit Fischmarkt' },
@@ -203,11 +203,13 @@ const TEXTE = [
   },
   {
     id: 'seenotretter', name: 'Seenotretter-Station', gruppe: 'sicherheit',
-    kurz: 'Ein Rettungsboot in der Kanalmündung. Weniger Sturmschäden, mehr Vertrauen.',
-    lage: { x: 200, y: 211, dreh: 0 }, radius: 16,
+    kurz: 'Ein Rettungsboot an der Ostmole. Weniger Sturmschäden, mehr Vertrauen.',
+    // Station am eigenen Boot: Stufe 1 am Dienststeg an der Ostmole (harbor.js dienste), der Kreuzer
+    // liegt an SK01 an der Westmole, dafuer zieht die Station an die Wurzel der Westmole.
+    lage: { x: 224, y: 211, dreh: 0 }, radius: 10,
     stufen: [
       { name: 'Seenotrettungsboot' },
-      { name: 'Seenotrettungskreuzer', besuchText: 'Tag der Seenotretter: Besichtigung und Vorführung' },
+      { name: 'Seenotrettungskreuzer', lage: { x: 6, y: 206, dreh: 0 }, besuchText: 'Tag der Seenotretter: Besichtigung und Vorführung' },
     ],
   },
 
@@ -236,7 +238,8 @@ const TEXTE = [
   {
     id: 'barkasse', name: 'Barkasse', gruppe: 'grosse-schiffe',
     kurz: 'Hafenrundfahrten: zweimal am Tag fährt die Barkasse mit Gästen durch den Binnenhafen und den Außenhafen.',
-    lage: { x: 192, y: 2, dreh: 0 }, radius: 8,
+    // Bude am Ostufer des Sees, oestlich von Travellift und Werfthalle
+    lage: { x: 216, y: -6, dreh: 0 }, radius: 8,
     stufen: [
       { name: 'Barkasse' },
     ],
@@ -244,7 +247,8 @@ const TEXTE = [
   {
     id: 'kreuzfahrtterminal', name: 'Kreuzfahrtterminal', gruppe: 'grosse-schiffe',
     kurz: 'Terminal an der Großschiffpier. Einmal pro Woche legt ein Kreuzfahrtschiff an.',
-    lage: { x: -150, y: 198, dreh: 0 }, radius: 20,
+    // Terminal an der Wurzel der Kreuzfahrtpier (harbor.js Stufe 6, Steg P bei x -150, Nord-Sued), Busse an der Nehrungsstrasse
+    lage: { x: -150, y: 212, dreh: 0 }, radius: 18,
     stufen: [
       { name: 'Kreuzfahrtpier', besuchText: 'Kreuzfahrtschiff legt an' },
       { name: 'Kreuzfahrtterminal', besuchText: 'Kreuzfahrtschiff legt an' },
@@ -253,7 +257,8 @@ const TEXTE = [
   {
     id: 'marineanleger', name: 'Marineanleger', gruppe: 'sicherheit',
     kurz: 'Liegeplatz für Marineschiffe. Flottenbesuche bringen Zuschauer.',
-    lage: { x: -300, y: 198, dreh: 0 }, radius: 20,
+    // Eingezaeunter Stuetzpunkt an der Wurzel der eigenen Marinepier (Steg MA bei x -310), Tor zur Nehrungsstrasse
+    lage: { x: -316, y: 210, dreh: 0 }, radius: 18,
     stufen: [
       { name: 'Marineanleger', besuchText: 'Flottenbesuch: Marineschiffe machen fest' },
       { name: 'Marinestützpunkt', besuchText: 'Flottenbesuch mit Tag der offenen Tür' },
