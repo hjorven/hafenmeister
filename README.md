@@ -40,20 +40,20 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 **Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
 
 <table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P11"><img src="web/roadmap/bilder/p11-pr227-pc-weit-kleine-schilder.jpg" alt="Wunsch-Schilder aus der Ferne" width="100%"></a><br><sub>P11 · Wunsch-Schilder aus der Ferne · PR 227</sub></td>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P11"><img src="web/roadmap/bilder/p11-pr227-iphone-300m-kleine-schilder.jpg" alt="Wunsch-Schilder weit weg klein" width="100%"></a><br><sub>P11 · Wunsch-Schilder weit weg klein · PR 227</sub></td>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P03"><img src="web/roadmap/bilder/p03-pr225-t-iphonequer-t1-1.jpg" alt="Einstieg: Tipps neben der linken Spalte" width="100%"></a><br><sub>P03 · Einstieg: Tipps neben der linken Spalte · PR 225</sub></td>
+</tr><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P62"><img src="web/roadmap/bilder/p62-pr224-k210-pc-g4-1-weit.jpg" alt="Weite Sicht: kleinere See im Norden" width="100%"></a><br><sub>P62 · Weite Sicht: kleinere See im Norden · PR 224</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P66"><img src="web/roadmap/bilder/p66-pr180-handy-stufe4-final.jpg" alt="Fahrwasser am Handy" width="100%"></a><br><sub>P66 · Fahrwasser am Handy · PR 180</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P64"><img src="web/roadmap/bilder/p64-pr204-korb-pc-g6-1-seebruecke.jpg" alt="Strandkörbe und Seebrücke" width="100%"></a><br><sub>P64 · Strandkörbe und Seebrücke · PR 204</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P64"><img src="web/roadmap/bilder/p64-pr211-deko-pc-g8-4242-s6.jpg" alt="Ufer je Küstentyp" width="100%"></a><br><sub>P64 · Ufer je Küstentyp · PR 211</sub></td>
-</tr><tr>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P62"><img src="web/roadmap/bilder/p62-pr195-kuesten-seed1.jpg" alt="Zehn Küstentypen aus Seed" width="100%"></a><br><sub>P62 · Zehn Küstentypen aus Seed · PR 195</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P16"><img src="web/roadmap/bilder/p16-pr156-handy-aufstieg-stufe3.jpg" alt="Aufstieg zu Stufe 3" width="100%"></a><br><sub>P16 · Aufstieg zu Stufe 3 · PR 156</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P16"><img src="web/roadmap/bilder/p16-pr156-pc-regionsabschluss.jpg" alt="Regionsabschluss" width="100%"></a><br><sub>P16 · Regionsabschluss · PR 156</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (0 von 5 erledigt)</summary>
 
 | Paket | Titel | Status | PRs |
 |---|---|---|---|
-| [P62](https://hjorven.github.io/hafenmeister/roadmap/#paket=P62) | Geländeform und Engpass neu bauen | in Arbeit | [#204](https://github.com/hjorven/hafenmeister/pull/204) [#210](https://github.com/hjorven/hafenmeister/pull/210) [#211](https://github.com/hjorven/hafenmeister/pull/211) [#216](https://github.com/hjorven/hafenmeister/pull/216) |
+| [P62](https://hjorven.github.io/hafenmeister/roadmap/#paket=P62) | Geländeform und Engpass neu bauen | in Arbeit | [#210](https://github.com/hjorven/hafenmeister/pull/210) [#211](https://github.com/hjorven/hafenmeister/pull/211) [#216](https://github.com/hjorven/hafenmeister/pull/216) [#224](https://github.com/hjorven/hafenmeister/pull/224) |
 | [P63](https://hjorven.github.io/hafenmeister/roadmap/#paket=P63) | Marinebasis und Anlagen neu platzieren | in Arbeit | [#172](https://github.com/hjorven/hafenmeister/pull/172) |
 | [P64](https://hjorven.github.io/hafenmeister/roadmap/#paket=P64) | Gelände abwechslungsreicher gestalten | in Arbeit | [#204](https://github.com/hjorven/hafenmeister/pull/204) [#211](https://github.com/hjorven/hafenmeister/pull/211) [#216](https://github.com/hjorven/hafenmeister/pull/216) |
 | [P65](https://hjorven.github.io/hafenmeister/roadmap/#paket=P65) | Wetter und Effekte flüssig machen | offen |  |
@@ -65,9 +65,9 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 
 | Paket | Titel | Status | PRs |
 |---|---|---|---|
-| [P01](https://hjorven.github.io/hafenmeister/roadmap/#paket=P01) | Dauerlieger zur echten Entscheidung machen | **erledigt** | [#149](https://github.com/hjorven/hafenmeister/pull/149) |
+| [P01](https://hjorven.github.io/hafenmeister/roadmap/#paket=P01) | Dauerlieger zur echten Entscheidung machen | **erledigt** | [#149](https://github.com/hjorven/hafenmeister/pull/149) [#226](https://github.com/hjorven/hafenmeister/pull/226) |
 | [P02](https://hjorven.github.io/hafenmeister/roadmap/#paket=P02) | Hafenbüro mit eigenen Aufgaben ausbauen | **erledigt** | [#146](https://github.com/hjorven/hafenmeister/pull/146) [#151](https://github.com/hjorven/hafenmeister/pull/151) [#158](https://github.com/hjorven/hafenmeister/pull/158) |
-| [P03](https://hjorven.github.io/hafenmeister/roadmap/#paket=P03) | Einstieg an neue Oberfläche anpassen | teilweise | [#112](https://github.com/hjorven/hafenmeister/pull/112) |
+| [P03](https://hjorven.github.io/hafenmeister/roadmap/#paket=P03) | Einstieg an neue Oberfläche anpassen | teilweise | [#112](https://github.com/hjorven/hafenmeister/pull/112) [#225](https://github.com/hjorven/hafenmeister/pull/225) |
 | [P04](https://hjorven.github.io/hafenmeister/roadmap/#paket=P04) | Abschlussziel Stufe 6 richtig zählen | **erledigt** | [#139](https://github.com/hjorven/hafenmeister/pull/139) |
 | [P05](https://hjorven.github.io/hafenmeister/roadmap/#paket=P05) | Boote auf wegfallenden Plätzen regeln | teilweise | [#143](https://github.com/hjorven/hafenmeister/pull/143) |
 | [P06](https://hjorven.github.io/hafenmeister/roadmap/#paket=P06) | Eine Quelle für alle Zahlen und echte Regeltests | **erledigt** |  |
@@ -83,7 +83,7 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 | Paket | Titel | Status | PRs |
 |---|---|---|---|
 | [P10](https://hjorven.github.io/hafenmeister/roadmap/#paket=P10) | Zuweisen wieder zur Entscheidung machen | **erledigt** | [#147](https://github.com/hjorven/hafenmeister/pull/147) [#153](https://github.com/hjorven/hafenmeister/pull/153) [#176](https://github.com/hjorven/hafenmeister/pull/176) |
-| [P11](https://hjorven.github.io/hafenmeister/roadmap/#paket=P11) | Wünsche über dem Boot und Ankunftsvorschau | **erledigt** | [#146](https://github.com/hjorven/hafenmeister/pull/146) [#158](https://github.com/hjorven/hafenmeister/pull/158) |
+| [P11](https://hjorven.github.io/hafenmeister/roadmap/#paket=P11) | Wünsche über dem Boot und Ankunftsvorschau | **erledigt** | [#146](https://github.com/hjorven/hafenmeister/pull/146) [#158](https://github.com/hjorven/hafenmeister/pull/158) [#227](https://github.com/hjorven/hafenmeister/pull/227) |
 | [P12](https://hjorven.github.io/hafenmeister/roadmap/#paket=P12) | Kassieren verständlich machen | **erledigt** | [#146](https://github.com/hjorven/hafenmeister/pull/146) [#151](https://github.com/hjorven/hafenmeister/pull/151) |
 | [P13](https://hjorven.github.io/hafenmeister/roadmap/#paket=P13) | Tagesziele an eigene Handlungen binden | **erledigt** | [#152](https://github.com/hjorven/hafenmeister/pull/152) |
 | [P14](https://hjorven.github.io/hafenmeister/roadmap/#paket=P14) | Bewertungen und Gästebuch zeigen | teilweise |  |
