@@ -1,11 +1,9 @@
-// Spielstand: Anlegen, Zufall mit Seed, Speichern, Laden, Export.
+// Spielstand: Anlegen, Zufall mit Seed, Prüfen und Umbauen beim Laden.
 // Kennt weder Three.js noch das DOM. Der Spielstand ist reines JSON.
 
 import { RULES } from './data/rules.js';
 
 export const SAVE_VERSION = 1;
-export const SAVE_KEY = 'hafenmeister.save';
-const EXPORT_PREFIX = 'HM1:';
 
 /**
  * Legt einen neuen Spielstand an.
@@ -20,6 +18,7 @@ export function createState({ seed, rules = RULES } = {}) {
     version: SAVE_VERSION,
     seed: s,
     rng: s,
+    harborName: '', // Name des Hafens, setzt der Speicherplatz (save/plaetze.js)
     day: 1,
     phase: 'day', // 'day' oder 'evening'
     clock: 0, // Sekunden seit Tagesbeginn, Abend beginnt bei rules.dayLength
@@ -98,72 +97,51 @@ function validate(data) {
   if (!Number.isFinite(data.money) || !Number.isFinite(data.day)) {
     throw new Error('Spielstand fehlerhaft: Zahlen beschädigt');
   }
+  tiefPruefen(data);
   return data;
 }
 
-function defaultStorage() {
-  try {
-    return globalThis.localStorage ?? null;
-  } catch {
-    return null; // privater Modus oder gesperrter Speicher
-  }
-}
-
-/** Speichert den Spielstand. Gibt false zurück, wenn kein Speicher verfügbar ist. */
-export function save(state, storage = defaultStorage()) {
-  if (!storage) return false;
-  try {
-    storage.setItem(SAVE_KEY, serialize(state));
-    return true;
-  } catch {
-    return false; // Speicher voll oder gesperrt
-  }
-}
-
-/** Lädt den Spielstand. Gibt null zurück, wenn keiner da oder er unlesbar ist. */
-export function load(storage = defaultStorage()) {
-  if (!storage) return null;
-  try {
-    const text = storage.getItem(SAVE_KEY);
-    return text ? deserialize(text) : null;
-  } catch {
-    return null;
-  }
-}
-
-/** Löscht den gespeicherten Spielstand. */
-export function clearSave(storage = defaultStorage()) {
-  try {
-    storage?.removeItem(SAVE_KEY);
-  } catch {
-    // nichts zu tun
-  }
-}
+const istObjekt = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+const zahlIn = (v, min, max) => Number.isFinite(v) && v >= min && v <= max;
 
 /**
- * Spielstand als kurzer Text zum Kopieren (Sicherung, Umzug auf ein anderes Gerät).
- * iOS löscht localStorage von Webseiten nach 7 Tagen ohne Besuch, deshalb braucht es diesen Weg.
+ * Prüft verschachtelte Daten (roadmap C03), bevor ein Stand übernommen wird. Falsche Typen und
+ * unmögliche Zahlen werfen einen Fehler; lose Verweise (Platz zeigt auf ein Boot, das es nicht gibt)
+ * werden entfernt, damit ein leicht beschädigter Stand trotzdem lädt.
  */
-export function exportSave(state) {
-  const bytes = new TextEncoder().encode(serialize(state));
-  let bin = '';
-  for (const b of bytes) bin += String.fromCharCode(b);
-  return EXPORT_PREFIX + btoa(bin);
+function tiefPruefen(data) {
+  const fehler = (was) => { throw new Error(`Spielstand fehlerhaft: ${was}`); };
+  for (const key of ['boats', 'berths', 'buildings', 'facilities', 'modules', 'leaving', 'logbook', 'stats']) {
+    if (!istObjekt(data[key])) fehler(`${key} ist kein Objekt`);
+  }
+  if (!Number.isInteger(data.day) || !zahlIn(data.day, 1, 1e6)) fehler('Tag');
+  if (!Number.isInteger(data.stage) || !zahlIn(data.stage, 1, 20)) fehler('Stufe');
+  if (!zahlIn(data.money, -1e12, 1e12)) fehler('Geld');
+  if (!zahlIn(data.clock, 0, 1e7)) fehler('Uhrzeit');
+  if (!Number.isFinite(data.seed) || !Number.isFinite(data.rng)) fehler('Zufall');
+  if (data.ratings.length > 10000 || !data.ratings.every((r) => zahlIn(r, 0, 5))) fehler('Bewertungen');
+  const boote = Object.entries(data.boats);
+  if (boote.length > 5000) fehler('zu viele Boote');
+  let hoechste = 0;
+  for (const [key, b] of boote) {
+    if (!istObjekt(b) || !Number.isFinite(b.id) || String(b.id) !== key) fehler(`Boot ${key}`);
+    if (typeof b.status !== 'string') fehler(`Boot ${key} ohne Zustand`);
+    for (const f of ['length', 'beam', 'draft']) if (f in b && !zahlIn(b[f], 0, 1000)) fehler(`Boot ${key}: ${f}`);
+    if (b.berthId != null && typeof b.berthId !== 'string') fehler(`Boot ${key}: Platz`);
+    hoechste = Math.max(hoechste, b.id);
+  }
+  if (!Number.isInteger(data.nextId) || data.nextId <= hoechste) data.nextId = Math.floor(hoechste) + 1;
+  for (const [platz, id] of Object.entries(data.berths)) {
+    if (!data.boats[id]) delete data.berths[platz];
+  }
+  data.queue = data.queue.filter((id) => data.boats[id]);
+  data.upcoming = data.upcoming.filter((u) => u !== null && (typeof u === 'object' || data.boats[u]));
+  data.harborName = String(data.harborName ?? '').replace(/[\u0000-\u001f\u007f<>]/g, '').slice(0, 32);
 }
 
-/** Gegenstück zu exportSave. Wirft bei falschem Text einen Fehler mit verständlicher Meldung. */
-export function importSave(code) {
-  const text = String(code).trim();
-  if (!text.startsWith(EXPORT_PREFIX)) throw new Error('Das ist kein Hafenmeister-Spielstand');
-  let bin;
-  try {
-    bin = atob(text.slice(EXPORT_PREFIX.length));
-  } catch {
-    throw new Error('Spielstand ist beschädigt');
-  }
-  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
-  return deserialize(new TextDecoder().decode(bytes));
-}
+// Speichern im Browser, Speicherplätze, Export und Import: web/js/save/ (ein Speicherweg,
+// docs/speichern.md). Der frühere Rückfall unter 'hafenmeister.save' mit Kurztext "HM1:"
+// wird von save/plaetze.js beim ersten Start übernommen, "HM1:"-Texte liest save/storage.js.
 
 // ---------------------------------------------------------------------------
 // Start im Browser: main.js ruft init(game) auf. Die Anbindung liegt in bridge.js,
