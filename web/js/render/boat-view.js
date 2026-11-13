@@ -707,7 +707,7 @@ export function init(game) {
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true, sizeAttenuation: false }));
     // feste Größe auf dem Bildschirm (Anteil der Bildhöhe), am Handy etwas größer; groesseText()
     // rechnet das jedes Bild in die Kamera um
-    sp.userData.h = (window.innerWidth < 700 ? 0.05 : 0.036) * (hoch / 18);
+    sp.userData.h = (window.innerWidth < 700 ? 0.04 : 0.036) * (hoch / 18);
     sp.userData.seiten = breite / hoch;
     groesseText(sp);
     sp.center.set(0.5, 0);
@@ -738,6 +738,25 @@ export function init(game) {
     if (!d.round && w?.nights > 1 && w.base + w.bonus === d.amount) unten = `${w.nights} Nächte`;
     const sp = textSprite(teile, unten);
     sp.position.copy(pos).add(new THREE.Vector3(0, 0.9, 0));
+    // Nicht über einen anderen Betrag legen: so lange eine Zeile höher, bis auf dem Bildschirm Platz ist
+    const cam = game.camera?.camera;
+    if (cam?.isOrthographicCamera) {
+      // Lage und Größe in Bildschirmkoordinaten (-1 bis 1); Sprites sind unten mittig verankert
+      const z = cam.zoom || 1;
+      const box = (b) => {
+        const v = b.position.clone().project(cam);
+        return { x: v.x, y: v.y, w: (b.scale.x * 2 * z) / (cam.right - cam.left), h: (b.scale.y * 2 * z) / (cam.top - cam.bottom) };
+      };
+      for (let k = 0; k < 8; k++) {
+        const a = box(sp);
+        const stoss = betraege.some((o) => {
+          const b = box(o.sprite);
+          return Math.abs(a.x - b.x) < (a.w + b.w) / 2 && a.y < b.y + b.h && b.y < a.y + a.h;
+        });
+        if (!stoss) break;
+        sp.position.y += sp.scale.y * 1.05;
+      }
+    }
     game.scene.add(sp);
     betraege.push({ sprite: sp, t: 0, dauer: d.round ? 2.2 : 1.6, y0: sp.position.y });
   }
@@ -983,7 +1002,14 @@ export function init(game) {
     }
     for (const id of [...muenzen.keys()]) if (!boats.has(id)) entferneMuenze(id);
     const st = game.sim?.state ?? game.state;
-    for (const [id, b] of Object.entries(st?.boats ?? {})) if (b?.pendingFee > 0) zeigeMuenze(Number(id));
+    // Münzen nur über Booten, die schon in ihrer Box fest sind; wer noch hinfährt, bekommt sie beim Festmachen
+    for (const [id, b] of Object.entries(st?.boats ?? {})) {
+      if (!(b?.pendingFee > 0)) continue;
+      const e = boats.get(Number(id));
+      if (!e) continue;
+      if (amPlatz(e.anim)) zeigeMuenze(Number(id));
+      else e.muenzeWartet = true;
+    }
   }
 
   game.on('ready', () => {

@@ -329,8 +329,11 @@ export async function initBridge(game) {
     holdBoat: (boatId, held = true) => sim.holdBoat(state, boatIdOf(boatId), held),
     // Hat das Boot sein Liegegeld für die kommende Nacht bezahlt? (Bändchen am Bug, Hafenmeister-Rundgang)
     istBezahlt: (boatId) => {
-      const b = state.boats[boatIdOf(boatId)];
-      return !!b && b.status === 'moored' && (b.stationed || (b.paid !== false && !(b.pendingFee > 0)));
+      const id = boatIdOf(boatId);
+      const b = state.boats[id];
+      // Abgerechnete Gäste (nachts) liegen bis zum Ablegen am Vormittag noch in der Box: bezahlt
+      if (!b) return Object.values(state.leaving || {}).some((l) => String(l.boatId) === String(id));
+      return b.status === 'moored' && (b.stationed || (b.paid !== false && !(b.pendingFee > 0)));
     },
     passendePlaetze: (boatId) => sim.fittingBerths(state, ctx, boatIdOf(boatId)),
   };

@@ -438,7 +438,9 @@ export function init(game) {
       const pl = netz.plaetze.get(platz);
       if (!pl || netz.komp[pl.einstieg] !== netz.flaechen.festland) continue;
       const roh = HAFEN.plaetze.find((q) => q.id === platz);
-      halte.push({ platz, boot, node: pl.einstieg, steg: roh?.steg ?? '', x: pl.x, y: pl.y, zahlt: istUnbezahlt(boot, platz) });
+      // Nur vergessene Münzen (Review B4): bezahlte Boote stehen gar nicht erst auf der Runde
+      if (!istUnbezahlt(boot, platz)) continue;
+      halte.push({ platz, boot, node: pl.einstieg, steg: roh?.steg ?? '', x: pl.x, y: pl.y, zahlt: true });
     }
     const stegX = new Map();
     for (const h of halte) stegX.set(h.steg, Math.min(stegX.get(h.steg) ?? Infinity, h.x));
@@ -450,14 +452,24 @@ export function init(game) {
     if (!netz || rundgang) return false;
     const halte = rundgangPlanen();
     if (!halte.length) return false;
-    const start = bueroKnoten();
+    // Er beginnt am Ufer beim ersten offenen Steg (er ist abends ohnehin am Hafen unterwegs), nicht
+    // im Buero: Der Abend dauert nur 30 s, vom Buero aus kaeme er kaum zu einem Boot (P12).
+    let start = netz.naechster(halte[0].x, halte[0].y, netz.flaechen.festland);
+    if (start == null || start < 0) start = bueroKnoten();
     if (start == null || start < 0) return false;
     const a = neueFigur({ node: start, typ: 'hafenmeister' });
     if (!a) return false;
     a.koerperFarbe = new THREE.Color('#2e3f5c');
-    a.tempo = P.RUNDGANG_TEMPO;   // der Abend ist kurz, er geht zuegig
+    // Der Abend ist kurz: so zuegig, dass er alle offenen Boote im Abend schafft (P12). Weg grob als
+    // Luftlinie Buero -> Halte -> Buero mal 1,3 fuer Umwege; dazu kurze Halte. Hoechstens leichter Laufschritt.
+    const abendLaenge = game.sim?.ctx?.rules?.eveningLength ?? 30;
+    let weg = 0, vor = netz.nodes[start];
+    for (const h of halte) { weg += Math.hypot(h.x - vor.x, h.y - vor.y); vor = h; }
+    weg += Math.hypot(netz.nodes[start].x - vor.x, netz.nodes[start].y - vor.y);
+    const zeit = Math.max(6, abendLaenge * 0.75 - 1 - halte.length * P.RUNDGANG_HALT);
+    a.tempo = Math.min(P.RUNDGANG_TEMPO_MAX, Math.max(P.RUNDGANG_TEMPO, (weg * 1.3) / zeit));
     a.zustand = 'drinnen';
-    a.uhr = sofort ? 0.5 : zufall(1, 3);
+    a.uhr = sofort ? 0.3 : zufall(0.3, 1);
     rundgang = { agent: a, halte, start };
     rundgangHeute = true;
     api.rundgang = rundgang;
@@ -487,7 +499,7 @@ export function init(game) {
   function haltAmBoot(a) {
     const h = a.halt;
     a.zustand = 'verweilt';
-    a.uhr = 3.5;
+    a.uhr = P.RUNDGANG_HALT;
     const pl = netz.plaetze.get(h.platz);
     if (pl) {
       const n = netz.nodes[pl.einstieg];
