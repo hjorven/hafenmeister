@@ -110,7 +110,11 @@ Mengen richten sich nach den Booten, die der Spieler heute selbst einweisen kann
 - **Seltener Gast:** Am nächsten Tag wird ein ankommendes Boot zu einer der seltensten Arten aus den zwei größten Klassen, die heute kommen können (`boat.selten`). Beim Einlaufen erscheint ein Hinweis.
 - **Deko-Stück:** Blumenkübel, Bank am Wasser, Hafenlaterne, Rettungsring, Alter Anker, Fischkisten, Alte Tonne, Wimpelmast, in dieser Reihenfolge. Sie stehen auf der Wiese beim Hafenmeisterhaus und suchen sich selbst einen freien Platz: nie auf Wegen oder dem Wegenetz der Menschen, nie in Gebäuden (auch noch nicht gekauften) oder auf Bauplätzen von Anlagen, nie im Wasser oder am Hang. Neu verdiente Stücke hüpfen beim Aufstellen.
 
-**Wochenziel.** Ein größeres Ziel über sieben Saisontage, oben in der Tafel: Gäste von Hand einweisen, Gäste mit 4 Ankern verabschieden, zufriedene Segler verabschieden oder Liegegeld selbst einstreichen. Belohnung: das 12-fache Grundgeld und das nächste Deko-Stück. Ziele mit 4 Ankern kommen nur, wenn alle Wünsche der Stufe erfüllbar sind. Im Winter ruht die Woche, Wintertage zählen nicht.
+**Wochenziel.** Ein größeres Ziel über sieben Saisontage, oben in der Tafel: Gäste von Hand einweisen, Gäste mit 4 Ankern verabschieden, zufriedene Segler verabschieden oder Liegegeld selbst einstreichen. Belohnung: das 12-fache Grundgeld und das nächste Deko-Stück. Ziele mit 4 Ankern kommen nur, wenn alle Wünsche der Stufe erfüllbar sind. Im Winter ruht die Woche, Wintertage zählen nicht. Die Größe ist so bemessen, dass die Woche nicht in zwei Tagen zu schaffen ist (etwa die Hälfte aller Ankünfte der Woche von Hand einweisen).
+
+**Morgens.** Erst kommt der Tagesabschluss, danach öffnet sich die Kartenwahl einmal von selbst (nicht während Einstieg, Bauen oder offener Karte; dann leuchtet nur das Schild). Solange der Abschluss offen ist, tritt die Tafel zurück und Meldungen warten. Am Handy quer liegen die drei Karten nebeneinander rechts neben der linken Spalte; die Tafel endet immer über Zeitsteuerung, Kassieren und Bauen.
+
+**Deko-Plätze.** Die Stücke suchen ihren Platz relativ zum Hafenmeisterhaus und meiden alles, was an Land steht (Gebäude mit 3 m Abstand, Dorf, Anlagen, Flaggenmast, Wege). Sie hängen an keinen festen Koordinaten und passen sich jeder Hafenlage an.
 
 **Winter:** keine Tageskarten (Winterarbeiten bringt P20).
 

@@ -234,3 +234,13 @@ test('alte Spielstände mit drei festen Zielen laufen weiter', () => {
   assert.ok(tageswechsel(state, ctx));
   assert.equal(z.karten.length, 3);
 });
+
+test('Wochenziele sind nicht in zwei Tagen zu schaffen (Prüfbefund: Blumenkübel an Tag 2)', () => {
+  for (let stufe = 1; stufe <= 6; stufe++) {
+    const { ctx, state } = neu(5, stufe);
+    const h = lage(state, ctx);
+    if (!h.boote) continue;
+    assert.ok(WOCHE.gaeste.soll(h) > 2 * h.boote, `Stufe ${stufe}: ${WOCHE.gaeste.soll(h)} Gäste bei ${h.boote} Booten am Tag`);
+    if (h.geld >= 5) assert.ok(WOCHE.geld.soll(h) > 2 * h.geld, `Stufe ${stufe}: Liegegeld`);
+  }
+});
