@@ -129,3 +129,46 @@ test('Dorf liegt an Land mit Abstand zum Hafen und hat Häuser und Kirche', () =
   }
   setzeBild(0);
 });
+
+test('Jedes Landbild passt zu allen zehn Geländeformen: Fahrwasser, Wasser, Inseln, Bauflächen, Leuchttürme', async () => {
+  const { FORMEN, formSetzen } = await import('../web/js/render/landschaft/formen.js');
+  const { festePunkte } = await import('../web/js/render/landschaft/karte.js');
+  const { leuchttuerme } = await import('../web/js/render/landschaft/gelaende.js');
+  const r = region('ostsee');
+  const nurFestland = new Set(['dorf', 'kliff', 'raps', 'korn', 'acker', 'feldweg']);
+  try {
+    for (const F of FORMEN) {
+      formSetzen(F.nr);
+      for (const stufe of [1, 3, 5, 6]) {
+        setzeBild(0);
+        const ref = [];
+        for (let px = -420; px <= 430; px += 8) for (let py = -200; py <= 470; py += 8) ref.push([px, py, punkt(px, py, stufe, r).h]);
+        const fp = festePunkte(stufe);
+        for (const nr of [0, 3, 7, 12, 25]) {
+          setzeBild(nr);
+          for (const [px, py, h0] of ref) {
+            const p = punkt(px, py, stufe, r);
+            if (h0 < 0 && py >= -60) assert.ok(p.h < 0, `Form ${F.nr} Bild ${nr} Stufe ${stufe}: Wasser bei (${px}, ${py}) wurde Land`);
+            if (h0 >= 0 && p.h < 0) assert.ok(py < -60, `Form ${F.nr} Bild ${nr} Stufe ${stufe}: neues Wasser bei (${px}, ${py})`);
+          }
+          for (const [px, py] of fp.fahrwasser) {
+            assert.ok(punkt(px, py, stufe, r).h < -1, `Form ${F.nr} Bild ${nr} Stufe ${stufe}: Fahrwasser bei (${px}, ${py}) zu flach`);
+          }
+          for (const i of F.seeInseln || []) {
+            for (const [dx, dy] of [[0, 0], [0.4, 0], [-0.4, 0], [0, 0.4], [0, -0.4]]) {
+              const p = punkt(i.x + dx * i.rx, i.y + dy * i.ry, stufe, r);
+              assert.ok(!nurFestland.has(p.typ), `Form ${F.nr} Bild ${nr}: ${p.typ} auf der Insel bei (${i.x}, ${i.y})`);
+            }
+          }
+          for (const [px, py] of leuchttuerme()) {
+            const p = punkt(px, py, stufe, r);
+            assert.ok(!['waldboden', 'dorf'].includes(p.typ), `Form ${F.nr} Bild ${nr}: ${p.typ} am Leuchtturm (${px}, ${py})`);
+          }
+        }
+      }
+    }
+  } finally {
+    formSetzen(1);
+    setzeBild(0);
+  }
+});

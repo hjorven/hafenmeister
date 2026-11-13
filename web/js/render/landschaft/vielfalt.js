@@ -13,6 +13,7 @@
 
 import { SERVICES } from '../../data/services.js';
 import { anlagenFlaechen } from '../../data/anlagen-flaechen.js';
+import { gelaendeform } from './formen.js';
 
 const PLAN_M = 0.62;
 
@@ -165,7 +166,9 @@ export function freiKreiseAusServices(services = SERVICES) {
 const FACH = 32, FREI_WEIT = 60;
 function faecherFuer(stufe) {
   stufe = Math.max(1, Math.min(6, Math.round(stufe || 1)));
-  if (_frei.has(stufe)) return _frei.get(stufe);
+  const form = gelaendeform();
+  const schluessel = `${stufe}-${form?.nr ?? 1}`;
+  if (_frei.has(schluessel)) return _frei.get(schluessel);
   const faecher = new Map();
   const add = (x0, x1, y0, y1, eintrag) => {
     for (let i = Math.floor((x0 - FREI_WEIT) / FACH); i <= Math.floor((x1 + FREI_WEIT) / FACH); i++) {
@@ -185,7 +188,9 @@ function faecherFuer(stufe) {
     const xs = p.map((q) => q[0]), ys = p.map((q) => q[1]);
     add(Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys), { p });
   }
-  _frei.set(stufe, faecher);
+  // Leuchttürme der Geländeform: rundherum frei, keine Bäume am Turm
+  for (const [x, y] of form?.leuchttuerme || []) add(x - 12, x + 12, y - 12, y + 12, { px: x, py: y, r: 12 });
+  _frei.set(schluessel, faecher);
   return faecher;
 }
 
@@ -449,14 +454,15 @@ export function land(px, py, h, typ, d, k = {}) {
       const breite = 10 + 30 * smooth(0, 15, seeM - uferM);
       const kante = smooth(fuss, fuss + breite, uferM);
       h += bild.kliffHoehe * s * kante * (1 - 0.7 * smooth(60, 160, seeM)) * (1 - smooth(150, 200, seeM));
-      if (s > 0.35 && breite < 15 && uferM > fuss - 0.5 && uferM < fuss + breite + 0.5) return { h, typ: 'kliff' };
+      // Die Abbruchkante nur im fein gerechneten Bereich färben, im groben Netz gäbe sie breite braune Flecken
+      if (s > 0.35 && breite < 15 && uferM > fuss - 0.5 && uferM < fuss + breite + 0.5) return { h, typ: aussenAnteil(px, py) > 0 ? 'gras' : 'kliff' };
       // Oben an der Kante ein Streifen Gras ohne Bäume, damit man die Abbruchkante sieht
       if (s > 0.35 && breite < 15 && uferM < fuss + breite + 7) return { h, typ: 'gras' };
     }
   }
 
   // ---- Küstenstreifen nach Art der Seite
-  if (seeM < 70 && kSeite === 'heide' && !nordsee) art = 'heide';
+  if (seeM < 70 && kSeite === 'heide' && !nordsee) art = aussenAnteil(px, py) > 0 ? 'feld' : 'heide';   // im groben Netz keine Heideflecken
   if (seeM < 60 && kSeite === 'wald') art = 'wald';
   if (seeM < 45 && kSeite === 'kliff') art = 'wald';   // Buchenwald auf der Kliffkante
 
