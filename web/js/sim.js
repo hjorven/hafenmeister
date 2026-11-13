@@ -488,6 +488,18 @@ function startDay(state, ctx, events) {
       if (boat) { boat.id = state.nextId++; list.push(boat); }
     }
     if (list.length) list[0].arriveAt = Math.min(list[0].arriveAt ?? first, first);
+    // Ruhiger Start: Die übrigen Boote des ersten Tags rücken gleichmäßig in die Zeit ab calm (fünf
+    // Mindestabstände nach dem ersten Boot), damit man das erste in Ruhe zuweisen kann und danach
+    // keine Gruppe auf einmal kommt.
+    const calm = (list[0]?.arriveAt ?? first) + 5 * (ctx.rules.arrivalMinGap || 0);
+    const end = from + window;
+    if (calm < end) {
+      for (let i = 1; i < list.length; i++) {
+        const t = list[i].arriveAt;
+        list[i].arriveAt = Math.round((calm + (Math.max(t, from) - from) * (end - calm) / (end - from)) * 10) / 10;
+      }
+      spreadArrivals(list.slice(1), calm, end, ctx.rules.arrivalMinGap);
+    }
   }
   // Herkunft in der Reihenfolge der Ankunft, damit zwei Boote hintereinander nie aus derselben Ecke kommen
   list.forEach((boat, i) => { boat.origin = boatOrigin(state, state.day * 7 + i); });

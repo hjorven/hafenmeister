@@ -73,3 +73,14 @@ test('Keine Wellen: in jeder Stufe, bei Ruf 5 und an Regattatagen mindestens der
     }
   }
 });
+
+test('Erster Tag: erstes Boot gleich, die übrigen mit ruhigem Abstand und ohne Gruppe', () => {
+  for (let seed = 1; seed <= 20; seed++) {
+    const s = createState({ seed });
+    sim.tick(s, ctx, 0);
+    const t = s.upcoming.map((b) => b.arriveAt);
+    assert.equal(t[0], RULES.firstArrivalAt);
+    if (t.length > 1) assert.ok(t[1] - t[0] >= 5 * RULES.arrivalMinGap - 0.05, `zweites Boot zu früh: ${t}`);
+    for (let i = 2; i < t.length; i++) assert.ok(t[i] - t[i - 1] >= RULES.arrivalMinGap - 0.05, `Gruppe: ${t}`);
+  }
+});

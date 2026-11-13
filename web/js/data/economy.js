@@ -26,7 +26,7 @@ export const ECONOMY = {
     // vormittags legen die Gäste ab, neue kommen den ganzen Tag, die meisten am Nachmittag.
     // Keine Wellen: zwischen zwei Ankünften liegen immer mindestens ankunftAbstand Sekunden. Es kommen
     // nie mehr Boote, als so ins Fenster passen (81 s / 3 s = 27), auch nicht an Regattatagen.
-    ankunftVon: 0.05,       // etwa 7:15, damit nach dem ersten Boot kein Loch entsteht
+    ankunftVon: 0.05,      // etwa 7:15, damit nach dem ersten Boot kein Loch entsteht
     ankunftAbstand: 3,      // Sekunden Mindestabstand zwischen zwei Ankünften (kleiner, wenn der Tag sonst nicht reicht)
     ankunftBis: 0.95,       // etwa 19:30
     ankunftSpitze: 0.62,    // Schwerpunkt am Nachmittag (etwa 15:30), breit verteilt
