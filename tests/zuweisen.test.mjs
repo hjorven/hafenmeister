@@ -58,12 +58,12 @@ test('Wunschplätze: nur Plätze mit Strom leuchten gold, Platzwert rechnet den 
   assert.ok(mit.anchors > kein.anchors);
 });
 
-test('Passgenau: kleinste passende Boxklasse bringt einen Viertelanker, zu große nicht', () => {
+test('Passgenau: Box höchstens ein Fünftel länger als das Boot bringt einen Viertelanker, zu große nicht', () => {
   const s = quietState(2);
-  const boat = waitingBoat(s, { size: 'S', length: 4.5 });
+  const boat = waitingBoat(s, { size: 'M', typeId: 'M1', length: 8.5, beam: 2.8, draft: 1.2 });
   const passend = sim.fittingBerths(s, ctx, boat.id);
-  const klein = passend.find((id) => ctx.berthById[id].size === 'S');
-  const gross = passend.find((id) => ctx.berthById[id].size === 'M');
+  const klein = passend.find((id) => ctx.berthById[id].maxLength <= 8.5 * 1.2);
+  const gross = passend.find((id) => ctx.berthById[id].maxLength > 8.5 * 1.2);
   assert.ok(klein && gross);
   assert.equal(sim.isSnug(s, ctx, boat, ctx.berthById[klein]), true);
   assert.equal(sim.isSnug(s, ctx, boat, ctx.berthById[gross]), false);
@@ -75,6 +75,12 @@ test('Passgenau: kleinste passende Boxklasse bringt einen Viertelanker, zu groß
   const ev = r.events.find((e) => e.type === 'moored');
   assert.equal(ev.passgenau, true);
   assert.equal(ev.hand, true);
+});
+
+test('Passgenau ist keine Selbstverständlichkeit: kurze Boote der Klasse sind es nirgends', () => {
+  const s = quietState(2);
+  const kurz = waitingBoat(s, { size: 'M', typeId: 'M1', length: 6.5, beam: 2.5, draft: 1 });
+  for (const id of sim.fittingBerths(s, ctx, kurz.id)) assert.equal(sim.isSnug(s, ctx, kurz, ctx.berthById[id]), false);
 });
 
 test('Stufe 1 hat nur eine Boxgröße: dort gibt es nichts passgenau zu wählen', () => {
@@ -146,4 +152,32 @@ test('Bojengeld über Nacht und Bojenlieger werden morgens zuerst bedient', () =
   delete s.berths[frei];
   const ev2 = sim.selfEnter(Object.assign(s, { clock: rules.queue.selfEnterAfter + 1 }), ctx);
   assert.equal(ev2.find((e) => e.type === 'selfEntered')?.boatId, alt.id);
+});
+
+test('Bojenlieger warten morgens die Abreisen ab und bekommen die erste frei werdende Box', () => {
+  const s = quietState(3);
+  for (const p of sim.availableBerths(s, ctx)) s.berths[p.id] = 9999; // alles belegt
+  s.clock = rules.dayLength - 1;
+  const alt = waitingBoat(s, { size: 'M', typeId: 'M1', length: 8, beam: 2.8, draft: 1 });
+  sim.tick(s, ctx, rules.eveningLength + 3); // über Nacht an der Boje
+  assert.equal(s.boats[alt.id]?.overnight, 1);
+  s.upcoming = [];
+  const morgenEnde = Math.round(rules.departWindow[1] * rules.dayLength + rules.leaveMax);
+  assert.ok(morgenEnde > rules.queue.patience, 'die Abreisen dauern länger als die normale Geduld');
+  // Nach der normalen Geduld ist der Bojenlieger noch da
+  sim.tick(s, ctx, rules.queue.patience + 5 - s.clock);
+  assert.equal(s.boats[alt.id]?.status, 'waiting', 'fährt nicht vor den Abreisen weg');
+  assert.ok(sim.patienceLeft(s, ctx, alt.id) <= rules.queue.patience);
+  // Ein neues Boot kommt dazu, dann wird eine Box frei: der Bojenlieger bekommt sie
+  const neu = waitingBoat(s, { size: 'M', typeId: 'M1', length: 8, beam: 2.8, draft: 1 });
+  const frei = sim.fittingBerths({ ...s, berths: {} }, ctx, alt.id)[0];
+  delete s.berths[frei];
+  const ev = sim.tick(s, ctx, rules.queue.selfEnterAfter + 1);
+  assert.equal(ev.find((e) => e.type === 'selfEntered')?.boatId, alt.id);
+  assert.equal(s.boats[neu.id].status, 'waiting');
+  // Nach den Abreisen zählt die Geduld wieder normal
+  const b2 = s.boats[neu.id];
+  b2.overnight = 1;
+  s.clock = morgenEnde + rules.queue.patience + 1;
+  assert.equal(sim.patienceLeft(s, ctx, b2.id), 0);
 });

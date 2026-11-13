@@ -509,10 +509,16 @@ export function init(game) {
   }
 
   // Rückmeldung der Spielregeln an der Stelle des Boots: passgenau angelegt, verärgert abgefahren
-  const textAmBoot = (id, text, farbe) => {
+  // nurImBild: Liegt das Boot außerhalb des Bildes (oder unter den Leisten), keinen Text zeigen,
+  // statt ihn an den Rand zu kleben (Bojengeld: der Betrag steht ohnehin im Tagesabschluss)
+  const textAmBoot = (id, text, farbe, { nurImBild = false } = {}) => {
     const a = game.boatView?.boot?.(id);
     if (!a?.model) return;
     const s = toScreen(a.model.getWorldPosition(new THREE.Vector3()));
+    if (nurImBild) {
+      const w = game.camera.screenW, h = game.camera.screenH;
+      if (_v.z > 1 || s.x < 0 || s.x > w || s.y - 30 < 70 || s.y - 30 > h - 110) return;
+    }
     texte.push({ text, x: s.x, y: s.y - 30, t: 0, dauer: 1.8, klein: true, farbe });
   };
   game.on('sim:moored', (e) => { if (e?.passgenau && e.hand) textAmBoot(e.boatId, 'Passgenau +¼ Anker', '#ffd76a'); });
@@ -520,7 +526,7 @@ export function init(game) {
   game.on('sim:dismissed', aerger);
   // Bojengeld über Nacht (Review A9): kleiner Betrag über jedem Boot an der Boje
   game.on('sim:buoyFee', (e) => {
-    for (const [id, betrag] of Object.entries(e?.perBoat || {})) if (betrag > 0) textAmBoot(Number(id), `Bojengeld +${betrag} €`, '#ffd76a');
+    for (const [id, betrag] of Object.entries(e?.perBoat || {})) if (betrag > 0) textAmBoot(Number(id), `Bojengeld +${betrag} €`, '#ffd76a', { nurImBild: true });
   });
   // Gold auch beim bloßen Antippen eines Boots (Bootskarte offen)
   let auswahlGold = new Set();

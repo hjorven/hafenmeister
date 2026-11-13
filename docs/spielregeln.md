@@ -33,7 +33,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 
 - Beim Antippen oder Ziehen leuchten passende freie Boxen türkis, Boxen, die einen Platz-Wunsch des Boots erfüllen (Strom), gold (`game.sim.wunschPlaetze`). Rastet die Leine ein, steht über der Box, was sie bringt: Liegegeld der ersten Nacht mit Wunschbonus, erwartete Anker, erfüllte Wünsche und „passgenau“ (`game.sim.platzWert(boot, platz)`).
 - Die Bootskarte nennt „zahlt etwa … € pro Nacht“ und wie viele gold leuchtende Plätze frei sind.
-- Passgenau: Die Box ist höchstens ein Fünftel größer als die kleinste Box des Hafens, an die das Boot passt (`ECONOMY.passgenau`). Das bringt bei der Abreise einen Viertelanker mehr. In Stufe 1 gibt es nur eine Boxgröße, dort zählt es nicht.
+- Passgenau: Die Box ist höchstens ein Fünftel länger als das Boot selbst (`ECONOMY.passgenau`, wie das Tagesziel „passgenau einweisen“), und es gibt im Hafen auch passende Boxen, die zu groß wären. Das bringt bei der Abreise einen Viertelanker mehr. In Stufe 1 gibt es nur eine Boxgröße, dort zählt es nicht.
 - Abweisen von Hand hat dieselbe Folge wie Wegfahren aus Ungeduld: mit `ECONOMY.ruf.abgewiesen.chance` eine Bewertung `abgewiesen.wertung`. Keine Bewertung, wenn das Boot an keinen Platz des Hafens passt oder gar nicht warten konnte (alle Bojen belegt). In `stats.turnedAway` zählt nur, wer von selbst weiterfährt.
 - `sim:moored` trägt `hand: true`, wenn der Spieler die Box gewählt hat (Ziehen, Ring), und `passgenau: true`. „Einfahren lassen“, Selbst-Einfahren und Hafenbüro setzen kein `hand`.
 
