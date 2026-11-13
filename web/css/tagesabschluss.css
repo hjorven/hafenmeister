@@ -248,8 +248,17 @@ body.foto .hm-ta, body.foto .hm-ta-zettel, body.foto .hm-ta-muenzen { display: n
   .hm-ta-boote > span { font-size: 12.5px; padding: 2px 6px; }
   .hm-ta-name small { font-size: 11.5px; }
   .hm-ta-tipp { font-size: 12.5px; padding: 4px 6px; }
-  .hm-ta-fuss { margin-top: 6px; }
-  .hm-ta .hm-ta-weiter { min-height: 40px; }
+  .hm-ta-fuss {
+    position: sticky;
+    bottom: -8px;
+    margin: 6px -4px -8px;
+    padding: 6px 4px 8px;
+    background: var(--hm-papier, #fffaf0);
+    box-shadow: 0 -6px 6px -4px rgba(36, 54, 74, 0.18);
+  }
+  .hm-ta-uhr { display: none; }
+  .hm-ta .hm-ta-weiter { min-height: 40px; min-width: 96px; }
+  .hm-ta-auto { font-size: 12px; white-space: nowrap; }
   .hm-ta-kopf h2 { font-size: var(--hm-schrift, 15px); }
   .hm-ta-blaettern { height: 34px; }
   .hm-ta-summe { font-size: calc(var(--hm-schrift, 15px) + 6px); }

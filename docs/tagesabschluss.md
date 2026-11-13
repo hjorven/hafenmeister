@@ -1,6 +1,6 @@
 # Tagesabschluss
 
-Stand: 12.11.2026, Paket P15 (Ü22, Svc F4). Status: in Arbeit, wartet auf Freigabe nach der Gelände-Überarbeitung.
+Stand: 13.11.2026, Paket P15 (Ü22, Svc F4). Status: erledigt (PR 159).
 
 ## Was der Spieler sieht
 
@@ -21,3 +21,11 @@ Stand: 12.11.2026, Paket P15 (Ü22, Svc F4). Status: in Arbeit, wartet auf Freig
 - Andere Module geben beim Gutschreiben ihre Quelle an, zum Beispiel `game.sim.addIncome(50, 'pacht')`. Ohne Angabe landet der Betrag unter "Sonstiges".
 - `web/js/ui/tagesabschluss.js`, `web/css/tagesabschluss.css`: Karte, Zettel, Münzen. Schnittstelle `game.tagesabschluss = { zeige(tag), schliesse(), offen() }`.
 - Test: `tests/tagesabschluss.test.mjs`.
+
+## Entscheidungen (Thread, Jorven schlief, 13.11.2026)
+
+- Die Karte kommt am Ende der Nacht, wenn alles abgerechnet ist (auch der Rundgang und die Nachtkasse), nicht schon zu Beginn des Abends. Sonst wären die Zahlen unvollständig.
+- Das Spiel läuft weiter, die Karte hält es nicht an. Bei 2 Minuten je Spieltag wäre ein Halt jeden Tag lästig. Wer sie nicht will, schaltet sie ab.
+- "Rekord" erst ab Tag 2, wenn es einen Tag davor zu schlagen gab.
+- Dauerlieger (P01): Saisonpacht im Voraus bucht `'pacht'` mit detail `'saison'`, die Rückzahlung beim Kündigen als Ausgabe `'pacht'`.
+- Handy quer: zwei Spalten, "Weiter" bleibt unten fest sichtbar.

@@ -29,7 +29,9 @@ const QUELLE_TEXT = {
 };
 const REIHENFOLGE = ['liegegeld', 'pacht', 'gastro', 'services', 'tagesziele', 'sonstiges'];
 const LIEGEGELD_TEXT = { kassiert: 'selbst eingestrichen', rundgang: 'beim Rundgang, halb', nacht: 'über Nacht, halb' };
-const AUSGABE_NAME = { bau: 'Bauen', ausbau: 'Ausbau des Hafens', services: 'Services' };
+const AUSGABE_NAME = { bau: 'Bauen', ausbau: 'Ausbau des Hafens', services: 'Services', pacht: 'Pacht zurückgezahlt' };
+// Pacht (features/dauerlieger.js): Saisonpacht im Voraus, sonst die abendliche Pacht der Fischer und Dienste
+const PACHT_TEXT = { saison: 'Saisonpacht im Voraus' };
 const WEG_TEXT = {
   queueFull: 'Wartebojen voll',
   patience: 'zu lange gewartet',
@@ -172,6 +174,10 @@ export function init(game) {
         const teile = Object.entries(LIEGEGELD_TEXT).filter(([k]) => d[k] > 0).map(([k, t]) => `${euro(d[k])} ${t}`);
         if (teile.length > 1 || (teile.length === 1 && !d.kassiert)) klein = teile.join(', ');
       }
+      if (q === 'pacht' && d) {
+        const teile = Object.entries(PACHT_TEXT).filter(([k]) => d[k] > 0).map(([k, t]) => `${t} ${euro(d[k])}`);
+        if (teile.length) klein = teile.join(', ');
+      }
       if (q === 'services' && d) {
         const top = Object.entries(d).sort((x, y) => y[1] - x[1]);
         const namen = top.slice(0, 3).map(([id, v]) => `${SERVICE_BY_ID[id]?.name ?? id} ${euro(v)}`);
@@ -204,7 +210,9 @@ export function init(game) {
       const gruende = Object.entries(b.weggefahren).filter(([, n]) => n > 0).map(([k, n]) => `${n} ${WEG_TEXT[k] ?? k}`).join(', ');
       boote.push(el('span', { class: 'warn' }, el('b', {}, String(b.weggefahrenSumme)), ' weitergefahren', el('small', {}, gruende)));
     }
-    const rufDiff = Math.round(((b.ruf?.nachher ?? 0) - (b.ruf?.vorher ?? 0)) * 10) / 10;
+    // Unterschied aus den gezeigten (gerundeten) Werten, damit "2,2 auf 2,1" auch "(−0,1)" zeigt
+    const r1 = (x) => Math.round((x ?? 0) * 10) / 10;
+    const rufDiff = Math.round((r1(b.ruf?.nachher) - r1(b.ruf?.vorher)) * 10) / 10;
     const ruf = b.ruf
       ? el('span', { class: rufDiff > 0 ? 'auf' : rufDiff < 0 ? 'ab warn' : '' },
         'Ruf ', el('b', {}, num1(b.ruf.vorher)), ' auf ', el('b', {}, num1(b.ruf.nachher)),
