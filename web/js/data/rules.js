@@ -150,7 +150,7 @@ export function rulesFromEconomy(E = ECONOMY) {
   // nur der Knopf "Kassieren" ist dann von Anfang an da.
   const stufen = E.hafenbuero?.stufen || [];
   const hat = (k) => stufen.some((st) => st.schaltetFrei?.includes(k));
-  const o = { collectAllButton: Infinity, autoCollect: Infinity, autoAssign: Infinity, preview: Infinity, propose: Infinity, cost: {}, fromStage: {}, names: {} };
+  const o = { collectAllButton: Infinity, autoCollect: Infinity, autoAssign: Infinity, preview: Infinity, propose: Infinity, extras: Infinity, cost: {}, fromStage: {}, names: {} };
   stufen.forEach((st, i) => {
     o.cost[i + 1] = st.kosten;
     o.fromStage[i + 1] = st.abStufe;
@@ -164,6 +164,7 @@ export function rulesFromEconomy(E = ECONOMY) {
     if (frei.includes('automatik')) o.autoAssign = i + 1;
     if (frei.includes('vorschau')) o.preview = i + 1;
     if (frei.includes('vorschlag')) o.propose = i + 1;
+    if (frei.includes('nebenkosten')) o.extras = i + 1;
   });
   // Ohne eigene Stufe für sofortKassieren kassiert die Automatik mit, ohne Vorschlagsstufe schlägt sie vor
   if (!hat('sofortKassieren')) o.autoCollect = o.autoAssign;
@@ -181,6 +182,7 @@ export function rulesFromEconomy(E = ECONOMY) {
   }
   const tg = E.hafenbuero?.trinkgeld;
   r.tip = tg ? { sizes: [...tg.klassen], share: tg.anteil } : null;
+  r.officeExtrasShare = E.hafenbuero?.nebenkosten?.anteil ?? 0;
   r.handAssignBonus = E.hafenbuero?.vonHandBonus ?? 0;
   r.office = o;
   return r;

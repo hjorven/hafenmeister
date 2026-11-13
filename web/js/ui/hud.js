@@ -250,7 +250,7 @@ export function init(game) {
     return el('p', { class: 'card-hint hm-sonderfall' }, pixelBild('raute', 14), `${warum}: Die Leitstelle lässt dir die Wahl.${sonst}`);
   }
 
-  // Kurzer Text, der über einem Boot aufsteigt (Trinkgeld, Bonus fürs Einweisen)
+  // Kurzer Text, der über einem Boot aufsteigt (Trinkgeld, Nebenkosten, Bonus fürs Einweisen)
   function flugtext(boatId, text, gold = false) {
     const a = game.boatView?.boot(boatId);
     const cam = game.camera;
@@ -275,7 +275,10 @@ export function init(game) {
     }, 1700);
   }
   const flugAktiv = new Map();
-  game.on('sim:collected', (e) => { if (e?.tip) flugtext(e.boatId, `Trinkgeld +${euro(e.tip)}`, true); });
+  game.on('sim:collected', (e) => {
+    if (e?.tip) flugtext(e.boatId, `Trinkgeld +${euro(e.tip)}`, true);
+    if (e?.extras) flugtext(e.boatId, `Strom, Wasser, Duschen +${euro(e.extras)}`);
+  });
   game.on('sim:moored', (e) => {
     const sim = game.sim;
     const b = sim?.state?.boats?.[e?.boatId];

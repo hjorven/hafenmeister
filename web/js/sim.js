@@ -1144,13 +1144,16 @@ function chargeFee(state, ctx, boat, mods, events) {
 /**
  * Münze über einem Boot einstreichen. Mit { hand: true } holt der Spieler sie selbst ab (Tippen,
  * Strich): Große Boote (rules.tip.sizes) geben dann Trinkgeld (rules.tip.share des Betrags).
+ * Ab der Bürostufe mit 'nebenkosten' (rules.office.extras) rechnet das Büro Strom, Wasser und
+ * Duschen ab: rules.officeExtrasShare des Liegegelds kommt dazu (Ereignis collected mit extras).
  */
 export function collect(state, ctx, boatId, { hand = false } = {}) {
   const boat = state.boats[boatId];
   if (!boat || boat.pendingFee <= 0) return { ok: false, events: [] };
   const t = ctx.rules.tip;
   const tip = hand && t?.sizes?.includes(boat.size) ? Math.round(boat.pendingFee * t.share) : 0;
-  const amount = boat.pendingFee + tip;
+  const extras = state.office >= (ctx.rules.office.extras ?? Infinity) ? Math.round(boat.pendingFee * (ctx.rules.officeExtrasShare || 0)) : 0;
+  const amount = boat.pendingFee + tip + extras;
   boat.pendingFee = 0;
   boat.paid = true;
   addIncome(state, amount - tip, 'liegegeld', 'kassiert');
@@ -1158,6 +1161,7 @@ export function collect(state, ctx, boatId, { hand = false } = {}) {
   const ev = { type: 'collected', boatId, amount };
   if (hand) ev.hand = true;
   if (tip) ev.tip = tip;
+  if (extras) ev.extras = extras;
   return { ok: true, events: [ev] };
 }
 

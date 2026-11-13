@@ -71,7 +71,7 @@ Ein Spieltag dauert 2 Minuten bei normaler Geschwindigkeit: 90 Sekunden Tag, 30 
 
 Die kleine Entscheidung, die das Spiel trägt: Gebe ich den Stirnplatz jetzt der Motoryacht, oder halte ich ihn für den Katamaran frei, der gleich kommt?
 
-**Hafenbüro in vier Stufen:** 1 Hafenmeister mit Funk (Knopf „Kassieren“ und Vorschau der nächsten Boote), 2 Kassenautomat (kassiert S und M; große Boote zahlen persönlich mit Trinkgeld), 3 Hafenbüro (schlägt für jedes Boot die beste Box vor, goldene Raute, der Spieler bestätigt), 4 Hafenleitstelle ab Ausbaustufe 4 (volle Automatik, je Größe abschaltbar). Ohne Büro nimmt „Einfahren lassen“ die Box, die sich das Boot selbst suchen würde. Von Hand eingewiesene Gäste geben einen Viertelanker mehr.
+**Hafenbüro in vier Stufen:** 1 Hafenmeister mit Funk (Knopf „Kassieren“ und Vorschau der nächsten Boote), 2 Kassenautomat (kassiert S und M; große Boote zahlen persönlich mit Trinkgeld), 3 Hafenbüro (schlägt für jedes Boot die beste Box vor, goldene Raute, der Spieler bestätigt; rechnet Strom, Wasser und Duschen ab, 10 % auf jedes Liegegeld), 4 Hafenleitstelle ab Ausbaustufe 4 (volle Automatik, je Größe abschaltbar). Ohne Büro nimmt „Einfahren lassen“ die Box, die sich das Boot selbst suchen würde. Von Hand eingewiesene Gäste geben einen Viertelanker mehr.
 
 **Automatik:** Die Leitstelle weist Standardfälle selbst zu. Sonderfälle bleiben beim Spieler und werden mit einer orangen Raute hervorgehoben: Mehrrumpfboote, Sondergäste, große Schiffe und Boote, für die nur noch ein einziger Platz passt. Sie fahren erst nach 25 Sekunden an der Boje selbst ein. So bleibt die Kernentscheidung bis zum Schluss erhalten.
 
@@ -150,7 +150,7 @@ Ein Bauwerk „versorgt n Boote“ heißt: pro Abend bekommen n Boote diesen Wun
 |---|---|---|
 | Bootsverleih | 1 | kleines Einkommen pro Tag, Leihboote fahren über den See |
 | Slip | 2 | Trailerboote kommen über Land, zusätzliche S-Gäste ohne Liegeplatz |
-| Hafenmeisterbüro | 2 bis 4 | Stufe 1: Knopf "Kassieren" und Funk-Vorschau (vorher streicht man Münzen einzeln), 2: Kassenautomat für S und M, 3: Vorschläge, 4: Leitstelle mit Automatik für Standardfälle |
+| Hafenmeisterbüro | 2 bis 4 | Stufe 1: Knopf "Kassieren" und Funk-Vorschau (vorher streicht man Münzen einzeln), 2: Kassenautomat für S und M, 3: Vorschläge und Nebenkosten (+10 % Liegegeld), 4: Leitstelle mit Automatik für Standardfälle |
 | Mastenkran | 3 | Segelboote aus dem Binnenland kommen, mehr M-Gäste |
 | Segelclub | 3 | Regatten möglich, mehr Jollen |
 | Seenotretter-Station | 4 | Sturm richtet weniger Schaden an, Rettungsboot rückt sichtbar aus |

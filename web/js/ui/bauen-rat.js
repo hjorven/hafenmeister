@@ -1,5 +1,7 @@
 // Reine Rechenteile fuer ui/bauen.js (ohne DOM und Three.js, damit tests/bauen.test.mjs sie pruefen kann):
 // Wirkung eines Services als Satz und die Wahl des naechsten sinnvollen Schritts.
+import { ECONOMY } from '../data/economy.js';
+
 export const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
 export const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 export const WUNSCH = { wc: 'ein WC', dusche: 'eine Dusche', essen: 'etwas zu essen', diesel: 'Diesel', strom: 'Strom am Platz' };
@@ -9,6 +11,7 @@ export const FREI = {
   vorschau: 'Über Funk melden sich die nächsten Boote an: Du siehst Größe und Ankunftszeit vorher.',
   sofortKassieren: 'Der Automat kassiert das Liegegeld kleiner und mittlerer Boote (S, M) selbst, sobald sie festgemacht haben. Große Boote zahlen persönlich: Holst du ihre Münze ab, gibt es Trinkgeld.',
   vorschlag: 'Das Büro schlägt für jedes Boot die beste Box vor (goldene Raute). Ein Tipp auf „Vorschlag annehmen“ genügt.',
+  nebenkosten: `Das Büro rechnet Strom, Wasser und Duschen ab: Auf jedes Liegegeld kommen ${Math.round((ECONOMY.hafenbuero?.nebenkosten?.anteil ?? 0) * 100)} % dazu.`,
   automatik: 'Das Büro weist Standardboote selbst zu, je Größe abschaltbar. Mehrrumpfboote, große Schiffe, Sondergäste und Boote, für die nur eine Box passt, bleiben bei dir: Über ihnen schwebt eine orange Raute.',
   vorspulen3: 'Dreifach vorspulen.',
 };

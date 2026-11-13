@@ -187,6 +187,36 @@ test('E2: Kassenautomat nimmt nur S und M, große Boote geben beim Abholen Trink
   assert.equal(ev2.tip, undefined);
 });
 
+test('Hafenbüro (Stufe 3) rechnet Strom, Wasser und Duschen ab, vorher nicht', () => {
+  const rules = sim.rulesFromEconomy(ECONOMY);
+  rules.trips = null;
+  const ctx = sim.createContext({ boatTypes, berths, rules });
+  const anteil = ECONOMY.hafenbuero.nebenkosten.anteil;
+  assert.ok(anteil > 0);
+  assert.equal(rules.office.extras, 3, 'Nebenkosten gehören zum Hafenbüro');
+  for (const office of [0, 1, 2]) {
+    const s = quietState({ stage: 3, office });
+    const l = liegend(s, ctx, { size: 'L', length: 12, beam: 4, draft: 1.8 });
+    const ev = sim.collect(s, ctx, l.id).events[0];
+    assert.equal(ev.extras, undefined, `Bürostufe ${office}: keine Nebenkosten`);
+  }
+  const s = quietState({ stage: 3, office: 3 });
+  const l = liegend(s, ctx, { size: 'L', length: 12, beam: 4, draft: 1.8 });
+  const fee = l.pendingFee;
+  const vorher = s.money;
+  const ev = sim.collect(s, ctx, l.id, { hand: true }).events[0];
+  assert.equal(ev.extras, Math.round(fee * anteil));
+  assert.equal(ev.amount, fee + ev.tip + ev.extras);
+  assert.equal(s.money - vorher, ev.amount);
+  // Auch der Automat rechnet sie mit ab (S und M beim Festmachen)
+  const m = liegend(s, ctx, { size: 'M', length: 8, beam: 2.6, draft: 1 });
+  assert.equal(m.pendingFee, 0);
+  // Der Rundgang am Abend nimmt nur den Anteil des Liegegelds, ohne Nebenkosten
+  const l2 = liegend(s, ctx, { size: 'L', length: 12, beam: 4, draft: 1.8 });
+  const r = sim.collectOnRound(s, ctx, l2.id).events[0];
+  assert.equal(r.extras, undefined);
+});
+
 test('A2 und E3: Einfahren lassen ohne Büro nimmt die knappste Box, mit Büro den Vorschlag', () => {
   const ctx = context();
   ctx.rules.office.propose = 3;

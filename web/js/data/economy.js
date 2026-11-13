@@ -272,12 +272,15 @@ export const ECONOMY = {
   hafenbuero: { stufen: [
     { name: 'Hafenmeister mit Funk', abStufe: 2, kosten: 600,  schaltetFrei: ['allesKassieren', 'vorschau'] },
     { name: 'Kassenautomat',         abStufe: 2, kosten: 1800, schaltetFrei: ['sofortKassieren'], klassen: ['S', 'M'] },
-    { name: 'Hafenbüro',             abStufe: 3, kosten: 3800, schaltetFrei: ['vorschlag'] },
+    { name: 'Hafenbüro',             abStufe: 3, kosten: 3800, schaltetFrei: ['vorschlag', 'nebenkosten'] },
     { name: 'Hafenleitstelle',       abStufe: 4, kosten: 9500, schaltetFrei: ['automatik'] },
   ],
   // Große Boote (L, XL, XXL) zahlen persönlich: Holt der Spieler ihre Münze selbst ab (Tippen oder
   // Strich), gibt es anteil des Liegegelds als Trinkgeld. Der Kassenautomat nimmt nur S und M.
   trinkgeld: { klassen: ['L', 'XL', 'XXL'], anteil: 0.15 },
+  // Ab dem Hafenbüro (Stufe 3) rechnet das Büro Strom, Wasser und Duschen ab: Auf jedes
+  // kassierte Liegegeld kommt anteil obendrauf (von Hand und vom Automaten, nicht beim Rundgang).
+  nebenkosten: { anteil: 0.1 },
   // Bewertung: Gäste, die der Spieler selbst einweist (Ziehen, Ring, "Einfahren lassen",
   // Vorschlag annehmen), geben so viele Anker mehr. Selbst eingefahrene und vom Büro
   // zugewiesene nicht.

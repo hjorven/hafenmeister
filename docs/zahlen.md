@@ -84,7 +84,7 @@ Je erfülltem Wunsch +25 %.
 |---|---|---|---|---|
 | 1 | Hafenmeister mit Funk | 2 | 600 € | allesKassieren, vorschau |
 | 2 | Kassenautomat | 2 | 1.800 € | sofortKassieren |
-| 3 | Hafenbüro | 3 | 3.800 € | vorschlag |
+| 3 | Hafenbüro | 3 | 3.800 € | vorschlag, nebenkosten |
 | 4 | Hafenleitstelle | 4 | 9.500 € | automatik |
 
 ## Services
