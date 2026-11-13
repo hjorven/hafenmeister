@@ -527,7 +527,8 @@ export async function init(game) {
   let fluege = 0;
   let letzterFlug = -Infinity;
   function zumBoot(ids) {
-    if (ziehen || fluege >= 3 || !game.camera?.flyTo || !ids.size) return;
+    // Bei angehaltener Zeit schaut der Spieler selbst: die Kamera nicht wegziehen
+    if (ziehen || game.paused || fluege >= 3 || !game.camera?.flyTo || !ids.size) return;
     const jetzt = performance.now();
     if (jetzt - letzterFlug < 5000) return;
     const o = objekte('boat', (pk) => ids.has(bootNr(pk)))[0];
@@ -544,7 +545,7 @@ export async function init(game) {
   let gerahmt = false;
   function rahmeBootUndPlatz() {
     const boot = sichtbaresBoot();
-    if (!boot || ziehen || !game.camera?.flyTo) return;
+    if (!boot || ziehen || game.paused || !game.camera?.flyTo) return;
     gerahmt = true;
     const bp = boot.obj.getWorldPosition(new THREE.Vector3());
     let best = null;
@@ -589,7 +590,7 @@ export async function init(game) {
     game.emit('einstieg:ende', {});
   }
   function hinweisTakt(e) {
-    const ruhig = !document.body.classList.contains('card-open') && !document.body.classList.contains('building') && !document.body.classList.contains('foto');
+    const ruhig = !document.body.classList.contains('card-open') && !document.body.classList.contains('building') && !document.body.classList.contains('foto') && !document.body.classList.contains('hm-feier-an');
     if (aktuell?.startsWith('hinweis:')) {
       if (performance.now() > hinweisBis) { schliesseHinweis(); return; }
       tipp.hidden = !ruhig;
