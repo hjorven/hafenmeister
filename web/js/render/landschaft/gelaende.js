@@ -21,6 +21,8 @@ export const PLAN_M = 0.62;
 // auch bei größter Kamerabreite am Ost- und Westrand nicht als harte Kante zu sehen ist.
 export { BEREICH } from './natur.js';
 /** Kernbereich für dichte Bepflanzung (wie vor der Verbreiterung, damit nicht mehr Bäume gezeichnet werden). */
+/** Außenring bis zum Kartenrand (äußeres Geländenetz, grobe Tiefentextur). */
+export const AUSSEN = { x0: -1600, x1: 1600, y0: -1600, y1: 1400 };
 export const KERN = { x0: -420, x1: 430, y0: -200, y1: 470 };
 
 /** Planeinheiten -> Weltmeter. */
@@ -338,9 +340,15 @@ function kastenAbstand(px, py, k) {
   return dx > 0 && dy > 0 ? Math.hypot(dx, dy) : Math.max(dx, dy);
 }
 
+/** Abstand zur Pflicht-See vor der Einfahrt samt Seeweg in die offene See (negativ darin). */
+function seeAbstand(px, py, N) {
+  const k = kastenAbstand(px, py, SEE_NORD);
+  return N.seeweg ? Math.min(k, abstandZuLinie(px, py, N.seeweg.punkte) - N.seeweg.halb) : k;
+}
+
 /** Abstand zum Pflichtwasser der Landschaft (vor den Stegen, Zufahrt, vor der Einfahrt), negativ darin. */
 function pflichtAbstand(px, py, N) {
-  return Math.min(wasserBedarf(px, py), kastenAbstand(px, py, SEE_NORD), abstandZuLinie(px, py, N.route.punkte) - N.route.halb);
+  return Math.min(wasserBedarf(px, py), seeAbstand(px, py, N), abstandZuLinie(px, py, N.route.punkte) - N.route.halb);
 }
 
 function abstandZuLinie(px, py, pts) {
@@ -512,7 +520,7 @@ export function punkt(px, py, stufe, region) {
     // Schilfufer: flacher Saum vor dem Land, in dem das Schilf steht
     if (q.stil.ufer === 'schilf' && dw < 7 && pflichtAbstand(px, py, N) > 4) h = Math.max(h, -0.25 - 0.06 * dw);
     // Mindesttiefe vor der Einfahrt (Reede, Ankerfelder) und in der Zufahrt
-    const reede = smooth(0, -50, kastenAbstand(px, py, SEE_NORD));
+    const reede = smooth(0, -50, seeAbstand(px, py, N));
     if (reede > 0) h = Math.min(h, h + (-4.6 - (g.gezeiten || 0) - h) * reede);
     if (typ !== 'watt' || h < -0.6) typ = h >= 0 ? typ : 'wasser';
   }
@@ -606,6 +614,22 @@ export function punkt(px, py, stufe, region) {
   if (basis) {
     if (typ === 'pflaster' || typ === 'mole' || typ === 'steinschuettung') h += basis;
     else if (h > 0) h += basis * smooth(0.1, 1.0, h);
+  }
+  // Rand der Karte: Land läuft in den letzten rund 300 Einheiten mit unruhiger Küste ins Meer aus, damit es
+  // nirgends an der geraden Kante des Außenrings abgeschnitten endet (man sieht flach und gedreht bis dorthin)
+  const zumRand = Math.min(px - AUSSEN.x0, AUSSEN.x1 - px, py - AUSSEN.y0, AUSSEN.y1 - py);
+  if (zumRand < 420) {
+    let k = 1 - smooth(60, 300, zumRand + 120 * (fbm(px / 150, py / 150, 71) - 0.5));
+    // Leuchttürme im Randbereich behalten ihre Landzunge
+    for (const [lx, ly] of F.leuchttuerme || []) k *= smooth(50, 140, Math.hypot(px - lx, py - ly));
+    if (k > 0) {
+      const ziel = -5;
+      const vorher = h;
+      h = h + (ziel - h) * k * k * (3 - 2 * k);
+      if (vorher >= 0 && h < 0) return { h, typ: 'wasser', see: 1 };
+      if (h < 0) return { h, typ, see: Math.max(see, k) };
+      if (h < 0.6 && typ !== 'sand') typ = 'sand';
+    }
   }
   return { h, typ, see };
 }

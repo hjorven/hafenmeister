@@ -47,11 +47,17 @@ function lagen(weg, kursVon) {
 }
 
 // Alle Fahrten eines Schiffs: am Platz, Ablegen, Einlaufen
-function fahrten(d, lage) {
+// nurHafenteil: ohne den seeseitigen Endpunkt. Der ist im Spiel nur ein Richtungshinweis, ab dem Punkt davor
+// fährt das Schiff über die Fahrwasserkarte hinaus (services-besuch.js wege(), game.fahrwasser.seeWeg).
+function fahrten(d, lage, nurHafenteil = false) {
   const [vx, vy] = d.liegeVersatz ?? [0, 0];
   const platz = lage ? [lage[0] + vx, lage[1] + vy] : d.weg[0];
-  const weg = [platz, ...d.weg.slice(1)];
-  const ankunft = d.ankunft ? [...d.ankunft.slice(0, -1), platz] : [...weg].reverse();
+  let weg = [platz, ...d.weg.slice(1)];
+  let ankunft = d.ankunft ? [...d.ankunft.slice(0, -1), platz] : [...weg].reverse();
+  if (nurHafenteil) {
+    weg = weg.slice(0, -1); ankunft = ankunft.slice(1);
+    if (weg.length < 2 || ankunft.length < 2) return { platz, liegen: { x: platz[0], y: platz[1], kurs: d.liegeKurs }, raus: [], rein: [] };
+  }
   const raus = lagen(weg, (seg, fahrt) => (d.raus === 'rueckwaerts' || seg === 0 ? d.liegeKurs : fahrt));
   const rein = lagen(ankunft, (seg, fahrt) => (d.rein === 'rueckwaerts' || seg === ankunft.length - 2 ? d.liegeKurs : fahrt));
   return { platz, liegen: { x: platz[0], y: platz[1], kurs: d.liegeKurs }, raus, rein };
@@ -114,7 +120,7 @@ function pruefeFahrt(name, lagenListe, masse, tief, { stufe, h, stegeOhne = [], 
 // Stege, an denen ein Schiff selbst liegt (die darf es am Platz berühren)
 const EIGENER_STEG = { P01: ['P'], MA01: ['MA'], MA02: ['MA'], K01: ['K'] };
 
-function pruefeAuftritte(nr) {
+function pruefeAuftritte(nr, nurHafenteil = false) {
   const h = stegbildSetzen(kopie(), nr);
   const fehler = [];
   for (const [id, a] of Object.entries(AUFTRITTE)) {
@@ -122,7 +128,7 @@ function pruefeAuftritte(nr) {
       const stufe = d.stufe ?? 6;
       const lage = d.platz ? h.plaetze.find((q) => q.id === d.platz)?.lage?.[stufe] : null;
       if (d.platz) assert.ok(lage, `${id}: Liegeplatz ${d.platz} fehlt in harbor.js Stufe ${stufe}`);
-      const f = fahrten(d, lage);
+      const f = fahrten(d, lage, nurHafenteil);
       const name = `Stegbild ${nr}, ${id} ${d.modell}`;
       const opt = { stufe, h, stegeOhne: EIGENER_STEG[d.platz] ?? [], plaetzeOhne: [d.platz] };
       // Ablegen und Einlaufen ohne das erste/letzte Wegstück am eigenen Steg
@@ -232,7 +238,8 @@ test('In jeder Geländeform kommen alle Besuchsschiffe frei an, Anlagen stehen a
     for (const F of FORMEN) {
       formSetzen(F.nr);
       const vor = `Form ${F.nr} (${F.name}): `;
-      fehler.push(...pruefeAuftritte(0).map((t) => vor + t));
+      // Hinter der Reede ist die See je Küste anders: dort gilt die Fahrwasserkarte, nicht der feste Endpunkt
+      fehler.push(...pruefeAuftritte(0, F.nr !== 1).map((t) => vor + t));
       for (const [gross, stufe] of [[false, 4], [true, 6]]) {
         const weg = seenotEinsatzWeg(gross);
         const ls = lagen(weg, (seg, fahrt) => fahrt).filter((q) => q.seg > 0 || Math.hypot(q.x - weg[0][0], q.y - weg[0][1]) > 12);

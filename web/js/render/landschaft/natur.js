@@ -132,7 +132,7 @@ export const stegUfer = (x) => kuesteAlt(x);
 export const STEGSTREIFEN = { x0: -150, x1: -20 };
 /** Wasser östlich der Stege für die Runde der Vorbeifahrer (data/verkehr.js SEE_RUNDE) in Stufe 1 und 2. */
 export const RUNDE12 = { x0: 32, x1: 342, y0: 84, y1: 174 };
-export const SEE_NORD = { x0: -440, x1: 480, y0: 245, y1: 820 };
+export const SEE_NORD = { x0: -400, x1: 440, y0: 245, y1: 600 };
 
 /**
  * Was der Hafen von der Natur wirklich braucht (Spielkoordinaten), sonst ist die Küste frei.
@@ -181,7 +181,7 @@ function kasten(px, py, x0, x1, y0, y1, rund) {
 }
 
 /** Pflicht-Werte: Land erzwingen (max) und Wasser erzwingen (min) auf eine Landigkeit L. */
-function pflicht(px, py, L, route, seed) {
+function pflicht(px, py, L, route, seed, seeweg = null) {
   const zack = 14 * (fbm(px / 40, py / 40, seed + 91) - 0.5);
   // Land für Gebäude, Dienste, Straße und Zugänge (weicher Rand, damit es nicht nach Kreisen aussieht)
   const welle = 10 * (fbm(px / 60, py / 60, seed + 93) - 0.5);
@@ -196,6 +196,8 @@ function pflicht(px, py, L, route, seed) {
   L = smin(L, wasserBedarf(px, py) + zack * 0.5, 24);
   // offenes Wasser vor der Einfahrt
   L = smin(L, kasten(px, py, SEE_NORD.x0, SEE_NORD.x1, SEE_NORD.y0, SEE_NORD.y1, 110) + zack, 50);
+  // Seeweg: breites Wasser von der Reede bis in die offene See, dort wo die Natur am wenigsten Land hat
+  if (seeweg) L = smin(L, abstandLinie(px, py, seeweg.punkte) - seeweg.halb + zack, 40);
   // natürliche Zufahrt
   if (route) L = smin(L, abstandLinie(px, py, route.punkte) - route.halb, 20);
   return L;
@@ -690,36 +692,69 @@ export function bauen(nr, seed = 1) {
     return f[k] * (1 - u) * (1 - v) + f[k + 1] * u * (1 - v) + f[k + nx] * (1 - u) * v + f[k + nx + 1] * u * v;
   };
   // Pflichtbereiche exakt, Natur aus dem Raster
-  const landig = (px, py) => pflicht(px, py, lies(gRoh, px, py), route, bseed);
-
-  // Abstand zum Ufer (an Land und im Wasser) und zur offenen See
-  const nass = new Uint8Array(n);
-  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) nass[j * nx + i] = landig(x0 + i * S, y0 + j * S) < 0 ? 1 : 0;
-  const dL = chamfer(nass, nx, ny, 1), dW = chamfer(nass, nx, ny, 0);
-  // offene See: breites Wasser (über 50 Einheiten vom Ufer) am Kartenrand, und zwar das Gebiet, das in der
-  // Naturkarte am weitesten "draußen" (Norden) liegt; Lagunen und Bodden hinter schmalen Durchlässen zählen nicht
-  const breit = new Uint8Array(n);
-  for (let k = 0; k < n; k++) breit[k] = nass[k] && dW[k] * S > 50 ? 1 : 0;
-  const gruppe = new Int32Array(n).fill(-1);
-  let beste = -1, besteGroesse = 0, gid = 0;
-  for (let k0 = 0; k0 < n; k0++) {
-    if (!breit[k0] || gruppe[k0] >= 0) continue;
-    const i0 = k0 % nx, j0 = (k0 - i0) / nx;
-    if (i0 !== 0 && j0 !== 0 && i0 !== nx - 1 && j0 !== ny - 1) continue;
-    const stapel = [k0]; gruppe[k0] = gid; let groesse = -Infinity;
-    while (stapel.length) {
-      const k = stapel.pop(), i = k % nx, j = (k - i) / nx;
-      groesse = Math.max(groesse, ay + (x0 + i * S) * s + (y0 + j * S) * c);   // Naturkoordinate Y
-      if (i > 0 && breit[k - 1] && gruppe[k - 1] < 0) { gruppe[k - 1] = gid; stapel.push(k - 1); }
-      if (i < nx - 1 && breit[k + 1] && gruppe[k + 1] < 0) { gruppe[k + 1] = gid; stapel.push(k + 1); }
-      if (j > 0 && breit[k - nx] && gruppe[k - nx] < 0) { gruppe[k - nx] = gid; stapel.push(k - nx); }
-      if (j < ny - 1 && breit[k + nx] && gruppe[k + nx] < 0) { gruppe[k + nx] = gid; stapel.push(k + nx); }
+  // Abstand zum Ufer (an Land und im Wasser) und zur offenen See, für eine gegebene Landigkeit
+  const vermessen = (landigFn) => {
+    const nass = new Uint8Array(n);
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) nass[j * nx + i] = landigFn(x0 + i * S, y0 + j * S) < 0 ? 1 : 0;
+    const dL = chamfer(nass, nx, ny, 1), dW = chamfer(nass, nx, ny, 0);
+    // offene See: breites Wasser (über 50 Einheiten vom Ufer) am Kartenrand, und zwar das Gebiet, das in der
+    // Naturkarte am weitesten "draußen" (Norden) liegt; Lagunen und Bodden hinter schmalen Durchlässen zählen nicht
+    const breit = new Uint8Array(n);
+    for (let k = 0; k < n; k++) breit[k] = nass[k] && dW[k] * S > 50 ? 1 : 0;
+    const gruppe = new Int32Array(n).fill(-1);
+    let beste = -1, besteGroesse = -Infinity, gid = 0;
+    for (let k0 = 0; k0 < n; k0++) {
+      if (!breit[k0] || gruppe[k0] >= 0) continue;
+      const i0 = k0 % nx, j0 = (k0 - i0) / nx;
+      if (i0 !== 0 && j0 !== 0 && i0 !== nx - 1 && j0 !== ny - 1) continue;
+      const stapel = [k0]; gruppe[k0] = gid; let groesse = -Infinity;
+      while (stapel.length) {
+        const k = stapel.pop(), i = k % nx, j = (k - i) / nx;
+        groesse = Math.max(groesse, ay + (x0 + i * S) * s + (y0 + j * S) * c);   // Naturkoordinate Y
+        if (i > 0 && breit[k - 1] && gruppe[k - 1] < 0) { gruppe[k - 1] = gid; stapel.push(k - 1); }
+        if (i < nx - 1 && breit[k + 1] && gruppe[k + 1] < 0) { gruppe[k + 1] = gid; stapel.push(k + 1); }
+        if (j > 0 && breit[k - nx] && gruppe[k - nx] < 0) { gruppe[k - nx] = gid; stapel.push(k - nx); }
+        if (j < ny - 1 && breit[k + nx] && gruppe[k + nx] < 0) { gruppe[k + nx] = gid; stapel.push(k + nx); }
+      }
+      if (groesse > besteGroesse) { beste = gid; besteGroesse = groesse; }
+      gid++;
     }
-    if (groesse > besteGroesse) { beste = gid; besteGroesse = groesse; }
-    gid++;
-  }
-  const nichtOffen = new Uint8Array(n);
-  for (let k = 0; k < n; k++) nichtOffen[k] = gruppe[k] === beste && beste >= 0 ? 0 : 1;
+    const nichtOffen = new Uint8Array(n);
+    for (let k = 0; k < n; k++) nichtOffen[k] = gruppe[k] === beste && beste >= 0 ? 0 : 1;
+    return { nass, dL, dW, nichtOffen };
+  };
+  // Seeweg von der Reede in die offene See. Die Pflicht-See vor der Einfahrt ist nur so groß wie Reede,
+  // Ankerfelder und Piers; was dahinter liegt, gehört dem Küstentyp. Schließt die Natur die Reede ein (Nehrung,
+  // Haken, Bodden), bekommt sie ein breites Seegatt: in der Richtung, in der am wenigsten Land im Weg liegt
+  // (bei Gleichstand die nördlichste), bis in die offene See.
+  const landigOhne = (px, py) => pflicht(px, py, lies(gRoh, px, py), route, bseed);
+  let masse = vermessen(landigOhne);
+  const seeweg = (() => {
+    const cx = (SEE_NORD.x0 + SEE_NORD.x1) / 2, cy = SEE_NORD.y1 - 80;
+    const offen = (px, py) => {
+      const i = Math.round((px - x0) / S), j = Math.round((py - y0) / S);
+      return i >= 0 && j >= 0 && i < nx && j < ny && !masse.nichtOffen[j * nx + i];
+    };
+    if (offen(cx, cy)) return null;
+    let best = null;
+    for (let grad = 0; grad <= 120; grad += 5) for (const vz of grad ? [1, -1] : [1]) {
+      const a = (vz * grad * Math.PI) / 180, ex = Math.sin(a), ey = Math.cos(a);
+      let land = 0, t = 60, ziel = false;
+      for (; t < 2600; t += 10) {
+        const px = cx + ex * t, py = cy + ey * t;
+        if (px < WELT.x0 + 20 || px > WELT.x1 - 20 || py < WELT.y0 + 20 || py > WELT.y1 - 20) break;
+        if (offen(px, py)) { ziel = true; break; }
+        if (landigOhne(px, py) > -12) land += 10;
+      }
+      if (!ziel) continue;
+      const kosten = land + t * 0.05 + grad * 0.4;
+      if (!best || kosten < best.kosten) best = { kosten, land, punkte: [[cx, cy], [cx + ex * (t + 90), cy + ey * (t + 90)]], grad: vz * grad };
+    }
+    return best ? { punkte: best.punkte, halb: 80, grad: best.grad, land: best.land } : null;
+  })();
+  const landig = seeweg ? (px, py) => pflicht(px, py, lies(gRoh, px, py), route, bseed, seeweg) : landigOhne;
+  if (seeweg) masse = vermessen(landig);
+  const { nass, dL, dW, nichtOffen } = masse;
   const dOffen = chamfer(nichtOffen, nx, ny, 0);   // Abstand zur offenen See in Rasterzellen (0 dort)
 
   /**
@@ -766,7 +801,7 @@ export function bauen(nr, seed = 1) {
 
   return {
     nr: typ.nr, seed, name: typ.name, idee: typ.idee,
-    landig, probe, route, nachNatur, vonNatur, anker: [ax, ay], dreh: d0,
+    landig, probe, route, seeweg, nachNatur, vonNatur, anker: [ax, ay], dreh: d0,
     leuchttuerme: lt.map(([x, y]) => [Math.round(x), Math.round(y)]),
     inseln: inseln.map(({ x, y, rx, ry, art }) => { const [lx, ly] = vonNatur(x, y); return { x: lx, y: ly, rx, ry, art }; }),
     stil,

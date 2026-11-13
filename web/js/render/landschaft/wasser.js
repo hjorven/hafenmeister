@@ -3,24 +3,27 @@
 // Eine einzige große Fläche mit einem schlanken Shader, dazu eine kleine Tiefentextur.
 // Kein Spiegeln, keine Brechung: läuft auch auf schwachen Handys.
 import * as THREE from 'three';
-import { punkt, BEREICH, KERN, PLAN_M } from './gelaende.js';
+import { punkt, BEREICH, KERN, PLAN_M, AUSSEN } from './gelaende.js';
 
 const U = PLAN_M;
 const TIEFE_MAX = 8;   // Meter, die in der Textur abgebildet werden
 
-/** Tiefentextur: R = Wassertiefe (0..8 m), G = 0 Binnensee bis 1 offene See. */
-export function baueTiefentextur(region, stufe, schritt) {
-  const nx = Math.ceil((BEREICH.x1 - BEREICH.x0) / schritt) + 1;
-  const ny = Math.ceil((BEREICH.y1 - BEREICH.y0) / schritt) + 1;
+/** Außenring bis zum Kartenrand (wie das äußere Geländenetz in terrain.js), grob gerechnet. */
+export const FERN = AUSSEN;
+
+/** Tiefentextur: R = Wassertiefe (0..8 m), G = 0 Binnensee bis 1 offene See. B: Bereich in Planeinheiten. */
+export function baueTiefentextur(region, stufe, schritt, B = BEREICH) {
+  const nx = Math.ceil((B.x1 - B.x0) / schritt) + 1;
+  const ny = Math.ceil((B.y1 - B.y0) / schritt) + 1;
   const daten = new Uint8Array(nx * ny * 4);
   // Außerhalb des Kerns nur jedes zweite Texel rechnen, die übrigen danach aus den Nachbarn mitteln
   const imKern = (px, py) => px >= KERN.x0 - schritt && px <= KERN.x1 + schritt && py >= KERN.y0 - schritt && py <= KERN.y1 + schritt;
   const offen = [];
   for (let j = 0; j < ny; j++) {
     // Zeile 0 liegt im Süden (kleines py), passend zu uv.y = (z0 - z) / Tiefe der Fläche
-    const py = BEREICH.y0 + j * schritt;
+    const py = B.y0 + j * schritt;
     for (let i = 0; i < nx; i++) {
-      const px = BEREICH.x0 + i * schritt;
+      const px = B.x0 + i * schritt;
       const k = (j * nx + i) * 4;
       daten[k + 3] = 255;
       if ((i & 1 || j & 1) && i < nx - 1 && j < ny - 1 && !imKern(px, py)) { offen.push(i, j); continue; }
@@ -65,6 +68,8 @@ const VERTEX = /* glsl */ `
 const FRAGMENT = /* glsl */ `
   uniform sampler2D uTiefe;
   uniform vec4 uBereich;      // x0, zSued, 1/Breite, 1/Tiefe (Meter)
+  uniform sampler2D uTiefeFern;   // grobe Tiefen im Außenring, damit Flachwasser nicht am Rand des feinen Bereichs endet
+  uniform vec4 uFern;
   uniform float uZeit;
   uniform float uPegel;
   uniform float uWind;
@@ -102,11 +107,16 @@ const FRAGMENT = /* glsl */ `
   void main() {
     vec2 uv = vec2((vWelt.x - uBereich.x) * uBereich.z, (uBereich.y - vWelt.z) * uBereich.w);
     vec4 t = texture2D(uTiefe, clamp(uv, 0.0, 1.0));
-    float innen = step(0.0, uv.x) * step(uv.x, 1.0) * step(0.0, uv.y) * step(uv.y, 1.0);
-    float d = t.r * ${TIEFE_MAX.toFixed(1)} + uPegel;
-    float see = t.g;
-    // Außerhalb des fein berechneten Bereichs: offenes, tiefes Wasser
-    d = mix(max(d, 4.5), d, innen);
+    // Außerhalb des fein berechneten Bereichs gilt die grobe Textur des Außenrings, mit weichem Übergang
+    float innen = smoothstep(0.0, 0.03, min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y)));
+    vec2 uf = vec2((vWelt.x - uFern.x) * uFern.z, (uFern.y - vWelt.z) * uFern.w);
+    vec4 tf = texture2D(uTiefeFern, clamp(uf, 0.0, 1.0));
+    float d = mix(tf.r, t.r, innen) * ${TIEFE_MAX.toFixed(1)} + uPegel;
+    float see = mix(tf.g, t.g, innen);
+    // Jenseits des Außenrings: offenes, tiefes Meer
+    float draussen = 1.0 - smoothstep(0.0, 0.03, min(min(uf.x, 1.0 - uf.x), min(uf.y, 1.0 - uf.y)));
+    d = mix(d, max(d, 4.5), draussen);
+    see = mix(see, 1.0, draussen);
 
     float px = length(vec2(dFdx(vWelt.x), dFdy(vWelt.x))) + length(vec2(dFdx(vWelt.z), dFdy(vWelt.z)));
     float aa = max(fwidth(d) * 0.8, 0.002);
@@ -168,6 +178,8 @@ export function erzeugeWasser(region) {
   const uniforms = {
     ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),   // Dunst zum Horizont (scene.fog, core/game.js)
     uTiefe: { value: null },
+    uTiefeFern: { value: null },
+    uFern: { value: new THREE.Vector4(FERN.x0 * U, -FERN.y0 * U, 1 / ((FERN.x1 - FERN.x0) * U), 1 / ((FERN.y1 - FERN.y0) * U)) },
     uBereich: { value: new THREE.Vector4(x0, zSued, 1 / (x1 - x0), 1 / (zSued - zNord)) },
     uZeit: { value: 0 },
     uPegel: { value: 0 },
@@ -195,6 +207,10 @@ export function erzeugeWasser(region) {
       if (uniforms.uTiefe.value) uniforms.uTiefe.value.dispose();
       uniforms.uTiefe.value = tex;
     },
+    setzeTiefeFern(tex) {
+      if (uniforms.uTiefeFern.value) uniforms.uTiefeFern.value.dispose();
+      uniforms.uTiefeFern.value = tex;
+    },
     setzeRegion(r) {
       r.wasser.see.forEach((c, i) => uniforms.uSee.value[i].set(c));
       r.wasser.binnen.forEach((c, i) => uniforms.uBinnen.value[i].set(c));
@@ -216,6 +232,7 @@ export function erzeugeWasser(region) {
       geo.dispose();
       mat.dispose();
       uniforms.uTiefe.value?.dispose();
+      uniforms.uTiefeFern.value?.dispose();
     },
   };
 }
