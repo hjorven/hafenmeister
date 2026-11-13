@@ -54,7 +54,7 @@ body #hm-hilfe.hm-hilfe { position: absolute; z-index: 42; inset: 0; margin: aut
 #hm-hilfe.hm-hilfe li .hm-pixelbild { grid-row: span 2; width: 40px; height: 40px; color: var(--hm-tinte, #283648); }
 #hm-hilfe.hm-hilfe li strong { font-size: var(--hm-s, 14px); }
 #hm-hilfe.hm-hilfe li span { font-size: calc(var(--hm-s, 14px) - 1px); line-height: 1.35; }
-#hm-hilfe.hm-hilfe #hm-hilfe.hm-hilfe-knoepfe { display: flex; justify-content: flex-end; }
+#hm-hilfe.hm-hilfe .hm-hilfe-knoepfe { display: flex; justify-content: flex-end; }
 @media (max-width: 599px), (max-height: 499px) { #hm-hilfe.hm-hilfe ol { grid-template-columns: 1fr; } }
 body.foto #hm-hilfe { display: none !important; }
 `;

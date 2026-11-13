@@ -36,31 +36,31 @@ const CSS = `
 @keyframes hm-ring-puls { 0%,100% { scale: 1; opacity: .95; } 50% { scale: 1.1; opacity: .7; } }
 .hm-tipp { position: absolute; z-index: 31; left: calc(12px + env(safe-area-inset-left, 0px));
   width: min(360px, calc(100% - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
-  box-sizing: border-box; padding: 14px 16px 12px; border-radius: 18px;
-  background: rgba(255,252,246,.97); color: #283648; box-shadow: 0 6px 24px rgba(20,40,60,.22);
-  font: 500 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-sizing: border-box; padding: 12px 14px 10px; border-radius: 0;
+  background: var(--hm-papier, #fffaf0); color: var(--hm-tinte, #24364a);
+  font-family: var(--hm-pixel); font-size: var(--hm-s, 15px); line-height: 1.4;
   pointer-events: none; animation: hm-tipp-rein .35s ease-out; }
 .hm-tipp button { pointer-events: auto; }
 .hm-tipp[hidden] { display: none; }
 @keyframes hm-tipp-rein { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
-.hm-tipp .zaehler { font-size: 12px; font-weight: 600; letter-spacing: .04em; color: #7a8796; margin-bottom: 4px; }
-.hm-tipp .titel { font-weight: 700; font-size: 16px; margin: 0 0 4px; }
+.hm-tipp .zaehler { font-size: calc(var(--hm-s, 15px) - 3px); color: var(--hm-tinte-2, #5a6a7c); margin-bottom: 4px; }
+.hm-tipp .titel { font-weight: 600; font-size: calc(var(--hm-s, 15px) + 2px); margin: 0 0 4px; }
 .hm-tipp p { margin: 0; }
 .hm-tipp .kurz { display: none; }
 .hm-tipp.eng .lang, .hm-tipp.eng .zaehler { display: none; }
 .hm-tipp.eng .kurz { display: block; }
-.hm-tipp.eng { padding: 8px 12px 6px; font-size: 14px; }
-.hm-tipp.eng .titel { font-size: 15px; margin-bottom: 2px; }
+.hm-tipp.eng { padding: 8px 12px 6px; font-size: calc(var(--hm-s, 15px) - 1px); }
+.hm-tipp.eng .titel { font-size: var(--hm-s, 15px); margin-bottom: 2px; }
 .hm-tipp.eng .knoepfe { margin-top: 4px; }
 .hm-tipp.eng button { min-height: 36px; }
 .hm-tipp .knoepfe { display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 10px; }
-.hm-tipp button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 20px; cursor: pointer;
-  font: 600 14px system-ui, -apple-system, sans-serif; }
-.hm-tipp .weiter { background: #2f6f8f; color: #fff; }
-.hm-tipp .beenden { background: transparent; color: #5d6b7a; padding: 0 8px; }
-.hm-tipp .weiter:focus-visible, .hm-tipp .beenden:focus-visible { outline: 3px solid #f2c14e; outline-offset: 2px; }
+.hm-tipp button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 0; cursor: pointer;
+  font-family: var(--hm-pixel); font-size: var(--hm-s, 15px); }
+.hm-tipp .weiter { background: var(--hm-meer, #23897d); color: #fff; box-shadow: inset 0 -4px 0 rgba(0,0,0,.2); }
+.hm-tipp .beenden { background: transparent; color: var(--hm-tinte-2, #5a6a7c); padding: 0 8px; }
+.hm-tipp .weiter:focus-visible, .hm-tipp .beenden:focus-visible { outline: 3px solid var(--hm-gold, #f2c14e); outline-offset: 2px; }
 body.hm.foto .hm-tipp, body.hm.foto .hm-ring { display: none; }
-@media (max-height: 499px) { .hm-tipp { font-size: 14px; padding: 10px 14px 8px; width: min(340px, 46%); } }
+@media (max-height: 499px) { .hm-tipp { font-size: calc(var(--hm-s, 15px) - 1px); padding: 10px 14px 8px; width: min(340px, 46%); } }
 `;
 
 // Wie ui-phone.css: flaches Querformat, dort blendet die Oberfläche die Seitenleiste unter der Blase aus
@@ -285,7 +285,7 @@ export async function init(game) {
     const r = el.getBoundingClientRect();
     const h = host.getBoundingClientRect();
     const w = r.width + rand * 2, hh = r.height + rand * 2;
-    return { x: r.left + r.width / 2 - h.left, y: r.top + r.height / 2 - h.top, w, h: hh, rund: Math.min(w, hh) / 2 };
+    return { x: r.left + r.width / 2 - h.left, y: r.top + r.height / 2 - h.top, w, h: hh, rund: 2 };   // eckig wie die Pixel-Knöpfe
   }
   const muenzen = () => objekte('coin', (pk, o) => !o.userData.eingestrichen);
   const bootNr = (pk) => Number(String(pk.id).replace(/^b/, ''));
@@ -318,9 +318,18 @@ export async function init(game) {
       const br = el.getBoundingClientRect();
       if (br.left - h0.left > h0.width * 0.6 && br.top - h0.top > 40) r = Math.min(r, br.left - h0.left);
     }
-    return { l: l + rand, t: t + rand, r: r - rand, u: u - rand };
+    // Schilder und Knöpfe im Bild (links die Seitenleiste, unten Zeit und Bauen): Was darunter liegt,
+    // sieht man nicht; ein Kreis darauf säße auf dem Schild (iPhone: erste Boje unter „Ausbau“)
+    const deck = [];
+    for (const el of document.querySelectorAll('#hm-seite > *, #hm-zeit, #btn-build, #btn-collect, .hm-banner')) {
+      if (!sichtbar(el)) continue;
+      const q = el.getBoundingClientRect();
+      deck.push({ l: q.left - h0.left - 8, t: q.top - h0.top - 8, r: q.right - h0.left + 8, u: q.bottom - h0.top + 8 });
+    }
+    return { l: l + rand, t: t + rand, r: r - rand, u: u - rand, deck };
   }
-  const imBild = (p, f) => p && p.x >= f.l && p.x <= f.r && p.y >= f.t && p.y <= f.u;
+  const imBild = (p, f) => p && p.x >= f.l && p.x <= f.r && p.y >= f.t && p.y <= f.u
+    && !(f.deck ?? []).some((d) => p.x > d.l && p.x < d.r && p.y > d.t && p.y < d.u);
 
   // Das erste wartende Boot, das wirklich im Bild liegt (nicht eines, das noch von draußen anfährt)
   function sichtbaresBoot() {
@@ -445,7 +454,7 @@ export async function init(game) {
     };
     const oben = Math.max(unterkante('#hud-top'), unterkante('#weather-chip'), unterkante('.hm-tafel > button'), unterkante('#hm-seite'), 8) + 10;
     let unten = h.height - 12;
-    for (const sel of ['#btn-build', '#btn-collect', '#hud-bottom', '#hm-zeit', '#card']) {
+    for (const sel of ['#btn-build', '#btn-collect', '#hud-bottom', '#hm-zeit', '#card', '.hm-banner']) {
       const el = document.querySelector(sel);
       if (sichtbar(el)) unten = Math.min(unten, el.getBoundingClientRect().top - h.top - 12);
     }
@@ -457,7 +466,7 @@ export async function init(game) {
       if (r.left - h.left > h.width * 0.6 && r.top - h.top > 40) rechts = Math.min(rechts, r.left - h.left - 8);
     }
     // Querformat (flaches Handy): liegt das Ziel links, steht die Blase rechts, sonst links
-    const rechtsStehen = h.height < 500 && k && k.x < h.width / 2;
+    const rechtsStehen = h.height < 500 && k && k.x < h.width * 0.6;
     const breite = rechtsStehen ? Math.min(300, rechts - 12) : Math.min(360, rechts - 12);
     tipp.style.width = `${Math.round(breite)}px`;
     tipp.style.left = rechtsStehen ? `${Math.round(rechts - breite)}px` : '';
@@ -527,6 +536,36 @@ export async function init(game) {
     game.camera.flyTo(pos.x, pos.z);
     fluege += 1;
     letzterFlug = jetzt;
+  }
+
+  // Schritt 2: Boot und ein freier Platz sollen beide im Bild sein (Handy quer liegt der Steg sonst
+  // unter dem Rand). Einmal pro Schritt: liegt der nächste freie Platz außerhalb, fährt die Kamera
+  // auf die Mitte zwischen beiden.
+  let gerahmt = false;
+  function rahmeBootUndPlatz() {
+    const boot = sichtbaresBoot();
+    if (!boot || ziehen || !game.camera?.flyTo) return;
+    gerahmt = true;
+    const bp = boot.obj.getWorldPosition(new THREE.Vector3());
+    let best = null;
+    const frei = [];
+    game.scene.traverseVisible((o) => {
+      const pk = o.userData?.pick;
+      if (pk?.type !== 'berth' || api.platzZustand?.(pk.id) !== 'frei') return;
+      const w = o.getWorldPosition(new THREE.Vector3());
+      const d = Math.hypot(w.x - bp.x, w.z - bp.z);
+      frei.push(w);
+      if (!best || d < best.d) best = { d, w, o };
+    });
+    if (!best) return;
+    // Mitte der freien Plätze in der Nähe des nächsten (ein Steg), nicht nur der eine Platz
+    const nah = frei.filter((w) => Math.hypot(w.x - best.w.x, w.z - best.w.z) < 30);
+    const mx = nah.reduce((a, w) => a + w.x, 0) / nah.length;
+    const mz = nah.reduce((a, w) => a + w.z, 0) / nah.length;
+    // Flaches Querformat: immer mittig rahmen, der Steg liegt dort sonst knapp über dem Rand
+    const f = freieFlaeche(60);
+    if (!QUER.matches && imBild(punktAufBildschirm(best.w), f)) return;
+    game.camera.flyTo((bp.x + mx) / 2, (bp.z + mz) / 2);
   }
 
   function setzeKreis() {
@@ -608,7 +647,8 @@ export async function init(game) {
     if (id === 'willkommen' && l.willkommenSek >= WILLKOMMEN_SEK && !l.bootImBild) zumBoot(new Set(api.waitingBoats().map((b) => b.id)));
     // Wer schon vorspult, kennt die Zeitsteuerung: der Hinweis würde nur kurz aufblitzen
     if (id === 'tempo' && (game.speed || 1) > 1) { schritt('tempo'); return; }
-    if (id !== aktuell) { zeige(id); fluege = 0; }
+    if (id !== aktuell) { zeige(id); fluege = 0; gerahmt = false; }
+    if (id === 'anlegen' && !gerahmt) rahmeBootUndPlatz();
     k = id ? ziel(id) : null;
     if (!id) return;
     if (id === 'muenzen' && !k) zumBoot(zahlendeIds());
