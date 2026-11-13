@@ -289,7 +289,10 @@ function ueberblick(game) {
   const halten = Number(new URLSearchParams(location.search).get('ueberblickhalten'));
   if (Number.isFinite(halten) && halten > 0 && halten <= 120) UEBERBLICK.halten = halten;
   let blick = null;
-  try { blick = game.gelaende?.blickRect?.(); } catch (err) { console.warn('Blick auf die Gelaendeform nicht lesbar', err); }
+  // Hochkant zeigt ein 420 m breiter Rahmen nur einen duennen Streifen: dann nur Einfahrt, Molen
+  // und die naechsten Landmarken, hoechstens 200 m breit (Absprache Gelaende-Thread)
+  const hoch = cam.screenH > cam.screenW;
+  try { blick = game.gelaende?.blickRect?.(hoch ? { maxBreiteM: 200 } : undefined); } catch (err) { console.warn('Blick auf die Gelaendeform nicht lesbar', err); }
   if (!blick || !Number.isFinite(blick.minX + blick.maxX + blick.minZ + blick.maxZ)) return;
 
   // Beide Enden mit derselben Einpassung wie die Startansicht (Leisten, Schilderspalte, Schraegsicht)
