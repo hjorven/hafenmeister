@@ -143,6 +143,7 @@ Stand `main` nach PR 160 (P06), nachgeprüft im Code. Die Pakete in der rechten 
 | Start | 0 €, fünf Startbewertungen mit 3 Ankern, Ruf ist der Schnitt der letzten 20 | `state.js`, `economy.js` (`ruf.start`), `data/rules.js` (`startSamples`) | P17 |
 | Dauerlieger | zahlen pauschal 15 € pro Abend (`fischer.pachtProTag`), Dauerplätze kosten nichts und haben keine Obergrenze | `sim.js` (`startEvening`, `rulesFromEconomy`), `features/dauerlieger.js` | P01 |
 | Abweisen von Hand | kostet nichts und bringt keine Bewertung | `sim.js` (`dismiss`) | P10 |
+| Note aus Wünschen | keiner erfüllt 2,5 (wie ein Abgewiesener), alle erfüllt 5, linear dazwischen; vorher 1 + 4 × Anteil | `economy.js` (`ruf.wunschNote`), `sim.js` (`ratingParts`) | P14 |
 | Wegfahren ohne Platz | mit 25 % Wahrscheinlichkeit eine Bewertung von 2,5 (`ruf.abgewiesen`); dreht ein Boot ab, weil alle Wartebojen belegt sind, gibt es keine Bewertung | `sim.js` (`turnAway`) | P10 |
 | Hafenmeister-Rundgang | startet bei 68 % des Tages (`RUNDGANG_AB`), etwa 8 Sekunden vor dem Abend | `data/people.js` | P12 |
 | Mindestruf für Service-Stufen | Segelclub Stufe 3 (Regattaverein) 3,8; Travellift Stufe 3 (Werfthalle) 3,8; Fahrgastanleger Stufe 2 4,0; Museumshafen 4,0 und 4,2; Kreuzfahrtterminal 4,0 und 4,5; Marineanleger 4,0 und 4,6 | `economy.js` (`services[id].stufen[n].ruf`) | P06 (erledigt) |

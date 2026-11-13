@@ -41,7 +41,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 
 **Passregel:** Ein Boot passt an einen Platz, wenn es nicht länger und nicht breiter ist als der Platz und die Wassertiefe der aktuellen Stufe mindestens 0,3 m größer ist als sein Tiefgang. Fischerplätze sind fest vergeben, der Kai ist nur für XL.
 
-**Hafengeld:** Grundpreis der Größe × (1 + 0,25 × erfüllte Wünsche). **Ruf:** Schnitt der letzten 20 Bewertungen.
+**Hafengeld:** Grundpreis der Größe × (1 + 0,25 × erfüllte Wünsche). **Ruf:** Schnitt der letzten 20 Bewertungen. **Bewertung:** aus den Wünschen 2,5 (keiner erfüllt) bis 5 (alle), ohne Wünsche 4, dazu Platz, passgenau, von Hand, Sondergast, Services und Abzüge; Rechnung in `ratingParts`, Erklärung in [gaestebuch.md](gaestebuch.md).
 
 ## `game.sim` (im Browser)
 
@@ -90,8 +90,8 @@ Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, 
 | `sim:change` | etwas hat sich geändert, Oberfläche neu zeichnen |
 | `sim:arrived` | `{ boatId, waitSpot }`, Boot liegt an der Boje |
 | `sim:moored` | `{ boatId, berthId, hand?, passgenau? }` |
-| `sim:turnedAway` | `{ boatId, reason: 'queueFull' \| 'patience' \| 'evening', rated }` |
-| `sim:dismissed` | `{ boatId, rated }` (rated: Gast hat schlecht bewertet) |
+| `sim:turnedAway` | `{ boatId, reason: 'queueFull' \| 'patience' \| 'evening', rated }`, bei `rated` dazu `rating, guest, day` |
+| `sim:dismissed` | `{ boatId, rated }` (rated: Gast hat schlecht bewertet), bei `rated` dazu `rating, guest, day` |
 | `sim:buoyFee` | `{ amount, boats }` Bojengeld der Boote, die über Nacht an der Boje liegen |
 | `sim:atBuoy` | `{ boatId }`, Geduld läuft |
 | `sim:selfEntered` | `{ boatId, berthId }` Boot hat sich selbst eine Box gesucht (zusätzlich zu `sim:moored`) |
@@ -104,7 +104,7 @@ Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, 
 | `sim:collected` | `{ boatId, amount }`; vom Rundgang zusätzlich `round: true` und `full` (Wert der Münze), nachts zusätzlich `night: true` |
 | `sim:strokeTip` | `{ amount, coins, share }` Trinkgeld nach einem langen Kassierstrich |
 | `sim:collected` | `{ boatId, amount }` |
-| `sim:departed` | `{ boatId, berthId, typeId, rating }` |
+| `sim:departed` | `{ boatId, berthId, typeId, rating, leaveAt, parts, guest, day }` (`parts` erklärt die Note, siehe [gaestebuch.md](gaestebuch.md)) |
 | `sim:dayStart`, `sim:evening`, `sim:dayEnd` | Tageslauf |
 | `sim:select` | `{ boatId, berths }` |
 | `sim:assignFailed` | `{ boatId, berthId, reason }` |

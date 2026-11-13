@@ -78,6 +78,7 @@ export function init(game) {
   // ---------------------------------------------------------------- Bewertungen mitschreiben
   game.on('sim:departed', (e) => { if (state()) eintragen(state(), e); if (offen) zeichne(); });
   game.on('sim:turnedAway', (e) => { if (state() && e?.rated) eintragen(state(), e); if (offen) zeichne(); });
+  game.on('sim:dismissed', (e) => { if (state() && e?.rated) eintragen(state(), e); if (offen) zeichne(); });
   game.on('sim:dayEnd', (e) => { if (state()) eintragen(state(), e); if (offen) zeichne(); });
 
   // ---------------------------------------------------------------- Blasen über ablegenden Booten
@@ -87,65 +88,148 @@ export function init(game) {
   const DAUER = 4200;                  // ms sichtbar (echte Zeit, auch beim Vorspulen lesbar)
   let letzterTon = 0;
 
+  // Unzufriedene zeigen über dem Boot, was gefehlt hat: Symbol mit rotem Schrägstrich
+  const fehltTeil = (grund) => (grund && GRUND[grund]
+    ? el('span', { class: 'hm-gb-fehlt', title: GRUND[grund].lang }, sym(GRUND[grund].sym), el('i', { class: 'hm-gb-strich' }))
+    : null);
+  const blasenInhalt = (eintrag, grund) => [sym('stern', 'stern'), el('b', {}, num1(eintrag.note)), fehltTeil(grund)];
+
+  // Legen viele Boote auf einmal ab (morgens, Tempo 8x), erscheinen die Blasen nacheinander
+  const warteschlange = [];
+  let naechsteAb = 0;
+  const ABSTAND = 260;                 // ms zwischen zwei Blasen
+
   function zeigeBlase(id) {
     const st = state();
     if (!st) return;
     const eintrag = buchState(st).eintraege.find((x) => x.id === id && !x.gezeigt);
     if (!eintrag) return;
     eintrag.gezeigt = true;
-    const anim = game.boatView?.boot?.(id);
-    if (!anim?.model) return;
     const grund = hauptgrund(eintrag);
     const gut = zufrieden(eintrag);
-    const b = el('div', { class: `hm-gb-blase ${gut ? 'gut' : 'schlecht'}` },
-      sym('stern', 'stern'),
-      el('b', {}, num1(eintrag.note)),
-      grund && GRUND[grund] ? el('span', { class: 'hm-gb-fehlt', title: GRUND[grund].lang }, sym(GRUND[grund].sym), sym('zu', 'strich')) : null,
-    );
-    blasenEbene.append(b);
-    blasen.get(id)?.el.remove();
-    blasen.set(id, { el: b, t0: performance.now(), anim });
-    setze(id, blasen.get(id));
+    const anim = game.boatView?.boot?.(id);
+    const pos = anim?.model ? bildschirm(anim, 0) : null;
+    if (pos?.sichtbar) warteschlange.push({ id, eintrag, grund, gut, anim, seit: performance.now() });
+    else meldung(eintrag, grund, gut);       // Boot nicht im Bild: kurze Meldung am Rand
     const jetzt = performance.now();
     if (jetzt - letzterTon > 700) {
       letzterTon = jetzt;
       game.audio?.sfx?.('bewertung', { anker: eintrag.note });
     }
-    game.emit('gaestebuch:bewertung', { id, note: eintrag.note, grund, zufrieden: gut });
+    game.emit('gaestebuch:bewertung', { id, note: eintrag.note, grund, zufrieden: gut, imBild: !!pos?.sichtbar });
     if (!rafLaeuft) { rafLaeuft = true; requestAnimationFrame(schritt); }
   }
 
-  function setze(id, x) {
+  function starte(x) {
+    const b = el('div', { class: `hm-gb-blase ${x.gut ? 'gut' : 'schlecht'}` }, ...blasenInhalt(x.eintrag, x.grund));
+    blasenEbene.append(b);
+    blasen.get(x.id)?.el.remove();
+    blasen.set(x.id, { el: b, t0: performance.now(), anim: x.anim, versatz: 0 });
+  }
+
+  // Bildschirmlage über dem Boot (Pixel im Spielbereich)
+  function bildschirm(anim, hoch) {
     const cam = game.camera?.camera;
-    const m = x.anim?.model;
-    if (!cam || !m || !m.parent) { x.el.style.opacity = '0'; return false; }
-    const h = Math.max(2.4, (m.userData?.iconHeight ?? (x.anim.info?.length ?? 6) * 0.35) + 1.6);
+    const m = anim?.model;
+    if (!cam || !m || !m.parent) return null;
+    const h = Math.max(2.4, (m.userData?.iconHeight ?? (anim.info?.length ?? 6) * 0.35) + 1.6);
     const v = m.position.clone();
     v.y += h;
     v.project(cam);
     const w = game.camera.screenW ?? window.innerWidth;
     const hh = game.camera.screenH ?? window.innerHeight;
-    const sichtbar = v.z < 1 && Math.abs(v.x) < 0.98 && v.y < 1.05 && v.y > -0.95;
-    const t = (performance.now() - x.t0) / DAUER;
-    const steig = Math.min(1, t * 4);
-    x.el.style.transform = `translate(${Math.round((v.x + 1) / 2 * w)}px, ${Math.round((1 - v.y) / 2 * hh - steig * 14)}px) translate(-50%, -100%)`;
-    x.el.style.opacity = sichtbar ? String(t < 0.8 ? 1 : Math.max(0, (1 - t) / 0.2)) : '0';
-    return t < 1;
+    return {
+      x: (v.x + 1) / 2 * w, y: (1 - v.y) / 2 * hh - hoch,
+      sichtbar: v.z < 1 && Math.abs(v.x) < 0.98 && v.y < 1.05 && v.y > -0.95,
+    };
   }
 
+  const HINDERNISSE = ['.hm-status', '.hm-werkzeuge', '#hm-seite > *', '#hm-zeit', '#btn-build', '#btn-collect', '.hm-gb-meldung', '.hm-tipp', '#card:not([hidden])'];
   let rafLaeuft = false;
   function schritt() {
-    for (const [id, x] of blasen) {
-      if (!setze(id, x)) { x.el.remove(); blasen.delete(id); }
+    const jetzt = performance.now();
+    // höchstens fünf Blasen zugleich; wer wartet, verfällt nach einer Blasendauer (das Boot ist dann weit weg)
+    while (warteschlange.length && warteschlange[0].seit < jetzt - DAUER) warteschlange.shift();
+    while (warteschlange.length && jetzt >= naechsteAb && blasen.size < 5) { starte(warteschlange.shift()); naechsteAb = jetzt + ABSTAND; }
+    // Lage jeder Blase, dann Überlappungen auflösen: jüngere weichen nach oben aus
+    const belegt = [];
+    // Feste Teile der Oberfläche (Status, Seite, Zeit, Bauen, Meldungen): Blasen darunter werden blass
+    const spiel = blasenEbene.getBoundingClientRect();
+    const hindernisse = [];
+    for (const q of HINDERNISSE) {
+      for (const e of document.querySelectorAll(q)) {
+        if (!e.offsetParent && getComputedStyle(e).position !== 'fixed') continue;
+        const r = e.getBoundingClientRect();
+        if (r.width && r.height) hindernisse.push(r);
+      }
     }
-    if (blasen.size) requestAnimationFrame(schritt);
+    for (const [id, x] of [...blasen].sort((a, b) => a[1].t0 - b[1].t0)) {
+      const t = (jetzt - x.t0) / DAUER;
+      const p = bildschirm(x.anim, Math.min(1, t * 4) * 14);
+      if (!p || t >= 1) { x.el.remove(); blasen.delete(id); continue; }
+      const bw = x.el.offsetWidth || 80;
+      const bh = x.el.offsetHeight || 34;
+      let links = p.x - bw / 2;
+      let oben = p.y - bh;
+      for (let i = 0; i < 8; i++) {
+        const stoss = belegt.find((r) => links < r.rechts && r.links < links + bw && oben < r.unten && r.oben < oben + bh);
+        if (!stoss) break;
+        oben = stoss.oben - bh - 2;
+      }
+      // sanft zur neuen Lage gleiten statt springen
+      x.versatz = x.versatz + ((p.y - bh - oben) - x.versatz) * 0.35;
+      oben = p.y - bh - x.versatz;
+      belegt.push({ links, rechts: links + bw, oben, unten: oben + bh });
+      x.el.style.transform = `translate(${Math.round(links)}px, ${Math.round(oben)}px)`;
+      const L = links + spiel.left, O = oben + spiel.top;
+      const unter = hindernisse.some((r) => L < r.right && r.left < L + bw && O < r.bottom && r.top < O + bh);
+      const deck = unter ? 0.2 : 1;
+      x.el.style.opacity = p.sichtbar ? String(deck * (t < 0.8 ? 1 : Math.max(0, (1 - t) / 0.2))) : '0';
+    }
+    for (const [id, x] of meldungen) {
+      if (jetzt - x.t0 > MELDUNG_DAUER) { x.el.remove(); meldungen.delete(id); }
+    }
+    if (blasen.size || warteschlange.length || meldungen.size) requestAnimationFrame(schritt);
     else rafLaeuft = false;
   }
 
-  // 'boot-faehrt' kommt beim Ablegen am Vormittag (oder sofort beim Umbau und bei abgewiesenen Booten).
-  // Das Boot ist dann noch an seinem Platz; erst danach räumt render/boat-view.js es weg, wenn es niemand sieht.
+  // Boot außerhalb des Bildes: Meldung rechts oben unter den Knöpfen (höchstens drei, antippen öffnet das Gästebuch)
+  const meldungsLeiste = el('div', { id: 'hm-gb-meldungen', role: 'status', 'aria-live': 'polite' });
+  (document.getElementById('game') || document.body).append(meldungsLeiste);
+  const meldungen = new Map();
+  const MELDUNG_DAUER = 3600;
+  let meldungNr = 0;
+  function meldung(eintrag, grund, gut) {
+    const name = eintrag.boot?.bootsname ? `„${eintrag.boot.bootsname}“` : (eintrag.boot?.name || 'Gast');
+    const m = el('button', {
+      type: 'button', class: `hm-gb-meldung ${gut ? 'gut' : 'schlecht'}`, title: 'Gästebuch öffnen',
+      'aria-label': `${name} bewertet mit ${num1(eintrag.note)} Sternen. Gästebuch öffnen`,
+      onclick: () => oeffnen(),
+    }, ...blasenInhalt(eintrag, grund), el('span', { class: 'hm-gb-meldung-name' }, name));
+    meldungsLeiste.prepend(m);
+    const nr = ++meldungNr;
+    meldungen.set(nr, { el: m, t0: performance.now() });
+    while (meldungen.size > 3) {
+      const [alt] = meldungen.keys();
+      meldungen.get(alt).el.remove();
+      meldungen.delete(alt);
+    }
+  }
+
+  // Die Spielregeln melden das Ablegen vor 'boot-faehrt'; dann ist das Boot noch da, auch wenn
+  // render/boat-view.js es gleich danach wegräumt, weil es niemand sieht.
+  game.on('sim:castOff', (e) => { if (e?.boatId != null) zeigeBlase(e.boatId); });
+  game.on('sim:departed', (e) => { if (e?.boatId != null && !(e.leaveAt > 0)) zeigeBlase(e.boatId); });
+  game.on('sim:turnedAway', (e) => { if (e?.rated) zeigeBlase(e.boatId); });
+  game.on('sim:dismissed', (e) => { if (e?.rated) zeigeBlase(e.boatId); });
   game.on('boot-faehrt', ({ id } = {}) => { if (id != null) zeigeBlase(id); });
-  game.on('spielstand-geladen', () => { for (const x of blasen.values()) x.el.remove(); blasen.clear(); });
+  game.on('spielstand-geladen', () => {
+    for (const x of blasen.values()) x.el.remove();
+    for (const x of meldungen.values()) x.el.remove();
+    blasen.clear();
+    meldungen.clear();
+    warteschlange.length = 0;
+  });
 
   // ---------------------------------------------------------------- Gästebuch
   const backdrop = el('div', { class: 'hm-gb-backdrop', hidden: true });

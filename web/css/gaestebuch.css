@@ -32,7 +32,7 @@
   pointer-events: none;
   z-index: 12;
 }
-body.foto #hm-gb-blasen { display: none; }
+body.foto #hm-gb-blasen, body.hm-gb-offen #hm-gb-blasen { display: none; }
 .hm-gb-blase {
   position: absolute;
   left: 0;
@@ -59,7 +59,7 @@ body.foto #hm-gb-blasen { display: none; }
 .hm-gb-blase.gut { border-image-source: var(--rahmen-gold); }
 .hm-gb-blase.schlecht { border-image-source: var(--rahmen-hell); }
 .hm-gb-blase .stern { width: 20px; height: 20px; }
-/* Fehlender Wunsch: Symbol, darüber ein rotes Kreuz */
+/* Fehlender Wunsch: Symbol in Tinte, darüber ein schmaler roter Schrägstrich (Symbol bleibt erkennbar) */
 .hm-gb-fehlt {
   position: relative;
   display: inline-grid;
@@ -70,7 +70,54 @@ body.foto #hm-gb-blasen { display: none; }
   color: var(--hm-tinte, #24364a);
 }
 .hm-gb-fehlt > .hm-gb-sym { grid-area: 1 / 1; width: 20px; height: 20px; }
-.hm-gb-fehlt > .strich { width: 24px; height: 24px; color: var(--hm-koralle, #ee6454); opacity: 0.9; }
+.hm-gb-strich {
+  grid-area: 1 / 1;
+  width: 28px;
+  height: 4px;
+  background: var(--hm-koralle, #ee6454);
+  box-shadow: 0 0 0 1px var(--hm-papier, #fffaf0);
+  transform: rotate(-45deg);
+}
+/* Meldung, wenn das ablegende Boot nicht im Bild ist: rechts oben unter Übersicht und Menü */
+#hm-gb-meldungen {
+  position: absolute;
+  z-index: 19;
+  top: calc(var(--hm-oben, 12px) + var(--hm-knopf, 48px) + 8px);
+  right: var(--hm-rechts, 12px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  pointer-events: none;
+}
+body.foto #hm-gb-meldungen, body.hm-gb-offen #hm-gb-meldungen { display: none; }
+.hm-neu .hm-gb-meldung {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: min(260px, 60vw);
+  min-height: 36px;
+  padding: 0 8px 0 4px;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--hm-rahmen-breite, 6px 6px 8px);
+  border-image-source: var(--rahmen-papier);
+  border-image-slice: 3 3 4 3 fill;
+  border-image-width: var(--hm-rahmen-breite, 6px 6px 8px);
+  background: none;
+  color: var(--hm-tinte, #24364a);
+  font-family: var(--hm-pixel, system-ui);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  animation: hm-gb-rein 0.2s steps(3);
+}
+.hm-neu .hm-gb-meldung.gut { border-image-source: var(--rahmen-gold); }
+.hm-neu .hm-gb-meldung.schlecht { border-image-source: var(--rahmen-hell); }
+.hm-gb-meldung .stern { width: 18px; height: 18px; }
+.hm-gb-meldung-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; font-size: calc(var(--hm-schrift, 15px) - 2px); color: var(--hm-tinte-2, #5a6a7c); }
+@keyframes hm-gb-rein { from { transform: translateX(30%); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes hm-gb-auf {
   0% { scale: 0.4; }
   60% { scale: 1.15; }
@@ -241,6 +288,7 @@ body.foto #hm-gb-blasen { display: none; }
   .hm-neu .hm-gb { width: 100%; padding-bottom: var(--hm-safe-bottom, 0px); }
   .hm-gb-liste li { grid-template-columns: 56px 1fr; }
   .hm-gb-wer { white-space: normal; }
+  .hm-gb-meldung-name { display: none; }
 }
 /* Handy quer: wenig Höhe, Ruf und Gründe nebeneinander */
 @media (max-height: 499px) and (orientation: landscape) {
@@ -251,5 +299,16 @@ body.foto #hm-gb-blasen { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hm-gb-blase, .hm-neu .hm-gb { animation: none; }
+  .hm-gb-blase, .hm-neu .hm-gb, .hm-neu .hm-gb-meldung { animation: none; }
+}
+
+/* Menü bei wenig Höhe (Handy quer): mit Tagesabschluss, Einstellungen und Gästebuch ist es höher als
+   der Bildschirm. Scrollbar statt abgeschnitten (abgestimmt mit der Oberfläche, oberflaeche.css). */
+@media (max-height: 499px) {
+  .hm-neu #hm-menue.hm-tafel-px {
+    max-height: calc(100vh - var(--hm-oben, 12px) - var(--hm-knopf, 48px) - 14px);
+    max-height: calc(100dvh - var(--hm-oben, 12px) - var(--hm-knopf, 48px) - 14px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
 }

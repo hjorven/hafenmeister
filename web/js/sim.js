@@ -1097,7 +1097,7 @@ export function dismiss(state, ctx, boatId) {
   const weg = heute(state).weggefahren;
   weg.weggeschickt = (weg.weggeschickt || 0) + 1;
   const rated = turnAwayRating(state, ctx, boat, 'dismissed');
-  return { ok: true, events: [{ type: 'dismissed', boatId, rated }] };
+  return { ok: true, events: [{ type: 'dismissed', boatId, rated, ...(rated ? { rating: ctx.rules.turnAway.rating, guest: guestInfo(boat), day: state.day } : {}) }] };
 }
 
 // ---------------------------------------------------------------------------
