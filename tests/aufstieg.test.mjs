@@ -186,3 +186,15 @@ test('Spielstand mit Chronik und Endlosspiel übersteht Speichern und Laden', ()
   assert.deepEqual(geladen.modules.aufstieg, state.modules.aufstieg);
   assert.equal(saisonStand(geladen, ctx).aktiv, true);
 });
+
+test('Bester Tag zählt Einnahmen vor dem Aufstieg nicht zur neuen Stufe', () => {
+  const { ctx, state } = neu();
+  state.stats.dayIncome = 300;          // heute schon in Stufe 1 verdient
+  aufstiegState(state).chronik[1].besterTag = 100;
+  stufeAbschliessen(state, 1, 2);
+  const m = aufstiegState(state);
+  assert.equal(m.stufen[0].besterTag, 300, 'alte Stufe bekommt den Tag');
+  state.stats.dayIncome = 340;          // nach dem Aufstieg kamen 40 € dazu
+  nacht({ state: Object.assign(state, { stage: 2 }), ctx, events: [] });
+  assert.equal(m.chronik[2].besterTag, 40);
+});

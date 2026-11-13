@@ -23,6 +23,7 @@ import * as sim from '../sim.js';
 import { ECONOMY } from '../data/economy.js';
 import { SERVICES } from '../data/services.js';
 import { regelnBereit } from './regeln-bereit.js';
+import { pixelBild } from '../ui/pixel-symbole.js';
 
 const E = () => ECONOMY.endlos || {};
 
@@ -53,7 +54,15 @@ function stand(state) {
     einnahmen: state.stats?.totalIncome || 0,
     besterTag: 0,
     besterRuf: sim.reputation(state),
+    // Einnahmen, die am ersten Tag der Stufe schon vor dem Aufstieg kamen: gehören zur alten Stufe
+    tagSchon: state.stats?.dayIncome || 0,
   };
+}
+
+/** Einnahmen des laufenden Tages, die in die Stufe c fallen. */
+function heuteInStufe(state, c) {
+  const heute = state.stats?.dayIncome || 0;
+  return Math.max(0, heute - (c && c.abTag === state.day ? c.tagSchon || 0 : 0));
 }
 
 /**
@@ -73,7 +82,7 @@ export function sichereChronik(state) {
 /** Abend für Abend: bester Tag und bester Ruf der laufenden Stufe. */
 export function merkeTag(state) {
   const c = sichereChronik(state);
-  c.besterTag = Math.max(c.besterTag || 0, state.stats?.dayIncome || 0);
+  c.besterTag = Math.max(c.besterTag || 0, heuteInStufe(state, c));
   c.besterRuf = Math.max(c.besterRuf || 0, sim.reputation(state));
 }
 
@@ -90,7 +99,7 @@ export function stufeAbschliessen(state, from, to) {
     bisTag: state.day,
     gaeste: c ? (state.guests || 0) - c.gaeste : null,
     einnahmen: c ? (state.stats?.totalIncome || 0) - c.einnahmen : null,
-    besterTag: Math.max(c?.besterTag || 0, state.stats?.dayIncome || 0),
+    besterTag: Math.max(c?.besterTag || 0, heuteInStufe(state, c)),
     ruf: sim.reputation(state),
   };
   m.stufen = m.stufen.filter((s) => s.stufe !== from);
@@ -272,7 +281,7 @@ export function neuInStufe(ctx, from, to) {
     for (const [lvl, ab] of Object.entries(buero.fromStage)) if (ab === to && buero.names?.[lvl]) bauten.push(buero.names[lvl]);
   }
   const einzig = [...new Set(bauten)];
-  if (einzig.length) neu.push(`Neu zu bauen: ${kurzListe(einzig, 5)}`);
+  if (einzig.length) neu.push(`Neu zu bauen: ${kurzListe(einzig, 4)}`);
   return neu;
 }
 
@@ -444,10 +453,14 @@ export async function init(game) {
   document.body.append(schicht);
   const warteschlange = [];
   let offen = null;
+  let schliesse = null;
+  // Anderer Spielstand geladen: offene Feier gehört zum alten Stand
+  game.on('spielstand-geladen', () => { warteschlange.length = 0; schliesse?.(); });
 
   function zeige(feier) {
     if (offen) { warteschlange.push(feier); return; }
     offen = feier;
+    zahlNr = 0;
     game.bauen?.offen && game.bauen.schliessen?.();
     game.emit('ui:cancel');
     const warPause = !!game.paused;
@@ -455,12 +468,23 @@ export async function init(game) {
     const fahrt = feier.fahrt ? kamerafahrt(game, feier.fahrt) : null;
     document.body.classList.add('hm-feier-an');
     const knopf = el('button', { type: 'button', class: 'hm-px hm-knopf hm-primaer hm-feier-weiter' }, feier.knopf || 'Weiter');
+    // Kopf und Knopf bleiben immer sichtbar, nur der Inhalt dazwischen scrollt (Handy quer)
+    const inhalt = el('div', { class: 'hm-feier-inhalt' }, feier.inhalt);
     const karte = el('div', { class: `hm-px hm-feier-karte ${feier.art}` },
-      el('p', { class: 'hm-feier-ober' }, feier.ober),
-      el('h2', { id: 'hm-feier-titel', class: 'hm-feier-titel' }, feier.titel),
-      feier.unter ? el('p', { class: 'hm-feier-unter' }, feier.unter) : null,
-      el('div', { class: 'hm-feier-inhalt' }, feier.inhalt),
-      knopf);
+      el('div', { class: 'hm-feier-kopfteil' },
+        el('p', { class: 'hm-feier-ober' }, feier.ober),
+        el('h2', { id: 'hm-feier-titel', class: 'hm-feier-titel' }, feier.titel),
+        feier.unter ? el('p', { class: 'hm-feier-unter' }, feier.unter) : null),
+      inhalt);
+    // "Hafen ansehen": Karte klein machen, damit man die Kamerafahrt in Ruhe sieht
+    const ansehen = feier.fahrt ? el('button', { type: 'button', class: 'hm-px hm-knopf hm-feier-ansehen', 'aria-pressed': 'false' }, 'Hafen ansehen') : null;
+    ansehen?.addEventListener('click', () => {
+      const klein = !karte.classList.contains('klein');
+      karte.classList.toggle('klein', klein);
+      ansehen.setAttribute('aria-pressed', String(klein));
+      ansehen.textContent = klein ? 'Zahlen zeigen' : 'Hafen ansehen';
+    });
+    karte.append(el('div', { class: 'hm-feier-fuss' }, ansehen, knopf));
     schicht.replaceChildren(...[
       feier.art !== 'saison' ? wimpelKette() : null,
       feier.art === 'region' ? feuerwerk(6) : null,
@@ -479,6 +503,7 @@ export async function init(game) {
         schicht.replaceChildren();
         document.body.classList.remove('hm-feier-an');
         offen = null;
+        schliesse = null;
         if (!warPause) game.setPaused?.(false);
         game.emit('feier:zu', { art: feier.art });
         feier.danach?.();
@@ -486,15 +511,17 @@ export async function init(game) {
       }, 260);
     };
     const taste = (e) => {
-      if (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); zu(); }
+      if (e.key === 'Escape' || ((e.key === 'Enter' || e.key === ' ') && document.activeElement !== ansehen)) { e.preventDefault(); e.stopPropagation(); zu(); }
     };
+    schliesse = zu;
     knopf.addEventListener('click', zu);
     document.addEventListener('keydown', taste, true);
     setTimeout(() => knopf.focus({ preventScroll: true }), 50);
   }
 
+  let zahlNr = 0;
   function zahl(name, wert) {
-    return el('div', { class: 'hm-feier-zahl' }, el('b', {}, wert), el('span', {}, name));
+    return el('div', { class: 'hm-feier-zahl', style: `--n:${zahlNr++ % 8}` }, el('b', {}, wert), el('span', {}, name));
   }
 
   function stufenName(n) {
@@ -581,7 +608,7 @@ export async function init(game) {
       art: 'region',
       ober: `${stufenName(s.stage)} fertig ausgebaut`,
       titel: `Hafenmeister der ${region}`,
-      unter: `Vom Badesteg zum Seehafen in ${ganz(s.day)} Tagen.`,
+      unter: `Vom Badesteg zum Seehafen in ${ganz(s.day)} ${s.day === 1 ? 'Tag' : 'Tagen'}.`,
       inhalt: [zahlen, chronik, el('p', { class: 'hm-feier-ziel' }, weiter)],
       knopf: 'Weiterspielen',
       fahrt: { dauer: 12, drehung: 1.6, zoom: 0.8 },
@@ -592,7 +619,7 @@ export async function init(game) {
   game.on('sim:seasonEnd', (ev) => {
     const liste = el('ul', { class: 'hm-feier-ziele' }, ev.ziele.map((z) =>
       el('li', { class: z.ok ? 'ok' : 'nein' },
-        el('i', { class: 'hm-feier-haken', 'aria-hidden': 'true' }),
+        el('i', { class: 'hm-feier-haken', 'aria-hidden': 'true' }, pixelBild(z.ok ? 'haken' : 'zu', 12)),
         el('span', {}, ZIEL_NAMEN[z.art] || z.art),
         el('span', { class: 'hm-feier-wert' }, zielText(z)),
         el('span', { class: 'hm-leise' }, z.ok ? 'erreicht' : 'nicht erreicht'))));

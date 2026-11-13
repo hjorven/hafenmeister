@@ -207,7 +207,7 @@ Kleine Rückmeldungen: Haptik auf dem Handy (`navigator.vibrate`), wo verfügbar
 | Nordsee | Deich, Watt, Sielhafen, Priele | Gezeiten: bei Ebbe liegen Boote trocken, Tiefgang zählt doppelt |
 
 - **Erfolge** (geplant, P22): zum Beispiel „Alle drei Traditionssegler gleichzeitig im Hafen“, „Ein Abend mit 5,0 Ankern“.
-- **Endlosmodus** nach dem Spielziel (geplant, P16), Bestenliste online (geplant, P58, Abschnitt 12).
+- **Endlosmodus** nach dem Spielziel: jede Saison vier Saisonziele mit Sternen, Belohnung und Rang (im Spiel, P16, [aufstieg.md](aufstieg.md)); Bestenliste online (geplant, P58, Abschnitt 12).
 
 ### 9a. Neue Features (Entscheidung Jorven, 11.11.2026)
 

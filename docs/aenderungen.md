@@ -8,6 +8,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 - Ein beschädigter Spielstand wird gemeldet und lässt sich als Datei sichern; im privaten Fenster sagt das Spiel deutlich, dass nichts gespeichert wird.
 - Bis zu 8 Häfen nebeneinander, Neues Spiel mit Name, Stegbild und Küste, Probe-Kopie, Papierkorb und alle Häfen in einer Datei (150).
+- Jeder Aufstieg wird gefeiert: Kamerafahrt über den Hafen, Zahlen der alten Stufe und was neu ist. Der fertige Seehafen bekommt eine große Feier mit Chronik, danach geht es mit Saisonzielen, Sternen und Rängen weiter (156).
 - Einstieg für neue Spieler mit Hinweiskreisen, passend zur neuen Oberfläche und zum Gelände (112).
 - Die Geländeformen sind am Hafen klar zu unterscheiden, kein dunkles Band mehr im Fahrwasser (173).
 - Zehn Geländeformen nach echten Häfen an Ost- und Nordsee, jedes Spiel bekommt eine; die Einfahrt ist breiter (164, 168).

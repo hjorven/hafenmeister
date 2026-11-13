@@ -16,7 +16,6 @@
   box-sizing: border-box;
   pointer-events: auto;
   background: linear-gradient(to bottom, rgba(16, 28, 42, 0) 35%, rgba(16, 28, 42, 0.45) 100%);
-  font-family: var(--hm-text, system-ui, sans-serif);
   color: var(--hm-tinte, #24364a);
   animation: hm-feier-ein 0.3s steps(4);
 }
@@ -42,8 +41,9 @@ body #hud-goal.done { display: none !important; }
   box-sizing: border-box;
   width: min(440px, 100%);
   max-height: min(64vh, 560px);
-  overflow-y: auto;
-  padding: 14px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 18px 14px;
   text-align: center;
   animation: hm-feier-karte 0.5s steps(6) 0.9s both;
 }
@@ -86,15 +86,10 @@ body #hud-goal.done { display: none !important; }
   padding: 6px 4px;
   background: var(--hm-mulde, #e9dfca);
   box-shadow: inset 0 0 0 var(--hm-px, 2px) rgba(36, 54, 74, 0.18);
-  animation: hm-feier-zahl 0.3s steps(3) both;
+  /* nacheinander einblenden; backwards: nach dem Einblenden gilt wieder der normale Stil */
+  animation: hm-feier-zahl 0.3s steps(3) backwards;
+  animation-delay: calc(1s + var(--n, 0) * 0.12s);
 }
-.hm-feier-zahl:nth-child(2) { animation-delay: 1.15s; }
-.hm-feier-zahl:nth-child(3) { animation-delay: 1.3s; }
-.hm-feier-zahl:nth-child(4) { animation-delay: 1.45s; }
-.hm-feier-zahl:nth-child(5) { animation-delay: 1.6s; }
-.hm-feier-zahl:nth-child(6) { animation-delay: 1.75s; }
-.hm-feier-zahl:nth-child(7) { animation-delay: 1.9s; }
-.hm-feier-zahl:first-child { animation-delay: 1s; }
 .hm-feier-karte.region .hm-feier-zahl { background: rgba(255, 250, 240, 0.7); }
 .hm-feier-zahl b { font-size: 1.1em; font-variant-numeric: tabular-nums; }
 .hm-feier-zahl span { font-size: 0.78em; color: var(--hm-tinte-2, #5a6a7c); }
@@ -125,13 +120,21 @@ body #hud-goal.done { display: none !important; }
 .hm-feier-wert { font-variant-numeric: tabular-nums; color: var(--hm-tinte-2, #5a6a7c); text-align: right; }
 .hm-feier-ziele li { grid-template-columns: 18px 1fr auto; }
 .hm-feier-ziele li .hm-leise { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.hm-feier-haken { width: 12px; height: 12px; box-shadow: 0 0 0 var(--hm-px, 2px) var(--hm-tinte, #24364a); background: var(--hm-mulde, #e9dfca); }
-.hm-feier-ziele li.ok .hm-feier-haken { background: var(--hm-meer, #23897d); }
+.hm-feier-haken { display: inline-flex; width: 12px; height: 12px; color: var(--hm-koralle, #ee6454); }
+.hm-feier-ziele li.ok .hm-feier-haken { color: var(--hm-meer, #23897d); }
 .hm-feier-ziele li.ok .hm-feier-wert { color: var(--hm-meer, #23897d); font-weight: 700; }
 .hm-feier-ziele li.nein { color: var(--hm-tinte-2, #5a6a7c); }
 
 .hm-feier-ziel { margin: 10px 0 2px; font-size: 0.9em; text-align: left; }
-.hm-feier-weiter { width: 100%; margin-top: 12px; min-height: 48px; font-family: var(--hm-pixel, system-ui); font-weight: 600; font-size: 1.05em; }
+.hm-feier-kopfteil { flex: none; }
+.hm-feier-inhalt { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.hm-feier-fuss { flex: none; display: flex; gap: 8px; margin-top: 10px; }
+.hm-feier-weiter { flex: 1 1 60%; min-height: 48px; font-family: var(--hm-pixel, system-ui); font-weight: 600; font-size: 1.05em; }
+.hm-feier-ansehen { flex: 1 1 40%; min-height: 48px; font-size: 0.9em; }
+.hm-feier-karte.klein .hm-feier-inhalt,
+.hm-feier-karte.klein .hm-feier-unter { display: none; }
+.hm-feier-karte.klein { animation: none; }
+.hm-feier:has(.hm-feier-karte.klein) { background: none; }
 
 /* Wimpelkette quer über den Bildschirm */
 .hm-feier-wimpel {
@@ -187,14 +190,26 @@ body #hud-goal.done { display: none !important; }
 }
 
 @media (max-width: 600px) {
-  .hm-feier-karte { padding: 12px 14px 14px; max-height: 68vh; }
-  .hm-feier-zahlen { grid-template-columns: repeat(3, 1fr); }
+  /* Handy hoch: Karte im unteren Drittel, darüber bleibt der Hafen für die Kamerafahrt frei */
+  .hm-feier-karte { padding: 10px 12px 12px; max-height: 54vh; }
+  .hm-feier-titel { font-size: 22px; }
+  .hm-feier-unter { margin: 2px 0 6px; font-size: 0.85em; }
+  .hm-feier-zahlen { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .hm-feier-zahl { padding: 4px 2px; }
+  .hm-feier-neu li, .hm-feier-ziel { font-size: 0.88em; }
 }
 /* Handy quer: wenig Höhe, Karte rechts statt unten, damit der Hafen links sichtbar bleibt */
 @media (max-height: 500px) and (orientation: landscape) {
   .hm-feier { align-items: flex-end; justify-content: center; }
-  .hm-feier-karte { width: min(400px, 56vw); max-height: calc(100vh - 32px); }
-  .hm-feier-zahlen { grid-template-columns: repeat(3, 1fr); }
+  .hm-feier { padding-top: calc(var(--hm-safe-top, 0px) + 8px); padding-bottom: calc(var(--hm-safe-bottom, 0px) + 8px); }
+  .hm-feier-karte { width: min(400px, 56vw); max-height: 100%; padding: 8px 12px 10px; }
+  .hm-feier-titel { font-size: 20px; }
+  .hm-feier-unter { margin: 2px 0 4px; font-size: 0.85em; }
+  .hm-feier-zahlen { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .hm-feier-zahl { padding: 3px 2px; }
+  .hm-feier-fuss { margin-top: 6px; }
+  .hm-feier-weiter, .hm-feier-ansehen { min-height: 44px; }
+  .hm-feier-wimpel { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hm-feier, .hm-feier-karte, .hm-feier-zahl, .hm-feier-wimpel, .hm-feier-wimpel i, .hm-funke i { animation: none !important; }
