@@ -64,7 +64,7 @@ In jeder Form gleich: Festlandufer und Becken am Hafen, Engpass bei x 178 mit Mo
 
 Welche Form gilt: `?gelaende=N` in der Adresse (nur ansehen), sonst die im Spielstand (`modules.gelaende.nr`), in Tests und ohne Browser Form 1, in einem neuen Spiel eine zufällige. Im Spiel: `game.gelaende.aktuell()`, `game.gelaende.formen`. Eine Form entfernen: ihren Eintrag aus `FORMEN` löschen; Spielstände mit dieser Nummer bekommen Form 1.
 
-Überblick je Form: `game.gelaende.blickRect()` liefert einen Ausschnitt in Weltmetern ({ minX, maxX, minZ, maxZ }) mit Hafen, Einfahrt und allen Landmarken der Form (Leuchttürme, Inseln im See und vor der Küste, `seeAussen`). Er ist höchstens 420 m breit und für einen kurzen Überblick beim Spielstart gedacht. Die Startansicht selbst gehört dem Grundgerüst.
+Überblick je Form: `game.gelaende.blickRect()` liefert einen Ausschnitt in Weltmetern ({ minX, maxX, minZ, maxZ }) mit Hafen, Einfahrt und allen Landmarken der Form (Leuchttürme, Inseln im See und vor der Küste, `seeAussen`). Er ist höchstens 420 m breit und für einen kurzen Überblick beim Spielstart gedacht. Mit `blickRect({ maxBreiteM })` wird er schmaler (unter 250 m nur Einfahrt und die nächsten Landmarken, etwa für Handy hochkant). Die Startansicht selbst gehört dem Grundgerüst.
 
 Molen: `punkt()` meldet sie so breit, wie sie gezeichnet sind (Linie bis 0,6 Breite, runder Kopf bis 0,95 Breite um den letzten Punkt).
 

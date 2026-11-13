@@ -552,7 +552,8 @@ export function preview(state, ctx) {
 // ---------------------------------------------------------------------------
 // Zuweisen
 
-function moor(state, ctx, boat, berthId, events) {
+// hand: Der Spieler hat die Box selbst gewählt (Ziehen, Antippen). Tagesziele zählen nur solche Boote.
+function moor(state, ctx, boat, berthId, events, hand = false) {
   state.queue = state.queue.filter((id) => id !== boat.id);
   boat.status = 'moored';
   boat.berthId = berthId;
@@ -560,7 +561,7 @@ function moor(state, ctx, boat, berthId, events) {
   boat.waitSpot = null;
   state.berths[berthId] = boat.id;
   if (!boat.stationed) heute(state).angelegt++;
-  events.push({ type: 'moored', boatId: boat.id, berthId });
+  events.push(hand ? { type: 'moored', boatId: boat.id, berthId, hand: true } : { type: 'moored', boatId: boat.id, berthId });
   const seen = (state.logbook[boat.typeId] ||= []);
   const key = boat.modelId ?? boat.typeId;
   if (!seen.includes(key)) {
@@ -572,10 +573,11 @@ function moor(state, ctx, boat, berthId, events) {
 }
 
 /**
- * Weist einem wartenden Boot einen Platz zu.
+ * Weist einem wartenden Boot einen Platz zu. Ohne Angabe gilt das als Handlung des Spielers
+ * ('moored' mit hand: true); "Einfahren lassen" übergibt { hand: false }.
  * @returns {{ ok: boolean, reason?: string, events: object[] }}
  */
-export function assign(state, ctx, boatId, berthId) {
+export function assign(state, ctx, boatId, berthId, { hand = true } = {}) {
   const events = [];
   const boat = state.boats[boatId];
   const berth = ctx.berthById[berthId];
@@ -584,7 +586,7 @@ export function assign(state, ctx, boatId, berthId) {
   if (!isFree(state, berthId)) return { ok: false, reason: 'occupied', events };
   const why = whyNotFit(boat, berth, ctx.rules, state.stage) || hookWhyNotFit(state, ctx, boat, berth);
   if (why) return { ok: false, reason: why, events };
-  moor(state, ctx, boat, berthId, events);
+  moor(state, ctx, boat, berthId, events, hand);
   return { ok: true, events };
 }
 
@@ -594,7 +596,7 @@ export function autoEnter(state, ctx, boatId) {
   if (!boat || boat.status !== 'waiting') return { ok: false, reason: 'notWaiting', events: [] };
   const best = fittingBerths(state, ctx, boatId)[0];
   if (!best) return { ok: false, reason: 'noFreeBerth', events: [] };
-  return assign(state, ctx, boatId, best);
+  return assign(state, ctx, boatId, best, { hand: false });
 }
 
 /** Weist allen wartenden Booten den besten freien Platz zu (Hafenbüro Stufe 3). */
@@ -951,7 +953,9 @@ export function tagesbericht(state, ctx) {
   const summe = Object.values(h.einnahmen).reduce((a, b) => a + b, 0);
   const ausgaben = Object.values(h.ausgaben).reduce((a, b) => a + b, 0);
   const ziele = state.modules?.ziele;
-  const zielListe = ziele && ziele.tag === state.day ? ziele.liste || [] : [];
+  // Tagesziele (features/tagesziele.js, Version 2): die gewählte Karte des Tages
+  const gewaehltesZiel = ziele && ziele.tag === state.day && ziele.gewaehlt != null ? ziele.karten?.[ziele.gewaehlt] : null;
+  const zielListe = gewaehltesZiel ? [gewaehltesZiel] : [];
   const b = h.bewertungen;
   const vorher = s.besterTag || (s.bestDayIncome > 0 ? { tag: null, summe: s.bestDayIncome } : null);
   return {
@@ -1045,15 +1049,15 @@ function chargeFee(state, ctx, boat, mods, events) {
   if (state.office >= ctx.rules.office.autoCollect) events.push(...collect(state, ctx, boat.id).events);
 }
 
-/** Münze über einem Boot antippen. */
-export function collect(state, ctx, boatId) {
+/** Münze über einem Boot antippen. hand: der Spieler streicht selbst ein (Antippen, Strich), nicht Automat oder Knopf. */
+export function collect(state, ctx, boatId, { hand = false } = {}) {
   const boat = state.boats[boatId];
   if (!boat || boat.pendingFee <= 0) return { ok: false, events: [] };
   const amount = boat.pendingFee;
   boat.pendingFee = 0;
   boat.paid = true;
   addIncome(state, amount, 'liegegeld', 'kassiert');
-  return { ok: true, events: [{ type: 'collected', boatId, amount }] };
+  return { ok: true, events: [hand ? { type: 'collected', boatId, amount, hand: true } : { type: 'collected', boatId, amount }] };
 }
 
 /**

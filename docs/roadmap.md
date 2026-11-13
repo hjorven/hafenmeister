@@ -72,7 +72,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Ü11 | Hafenbüro lässt Sonderfälle beim Spieler (Mehrrumpf, XL, Sondergäste, nur ein passender Platz), wie `plan.md` Abschnitt 3 und 14 | offen | P02 |
 | Ü12 | Kassieren verständlich: Rundgang erst mit dem Abend, Einstieg erklärt die Hälfte, halbe Münze sieht anders aus | offen | P12 |
 | Ü13 | Abweisen von Hand und Wegfahren aus Ungeduld mit derselben Folge | offen | P10 |
-| Ü14 | Tagesziele zählen nur eigene Handlungen, kombinierte Ziele, Ruf als Belohnung (`plan.md` 9a) | offen | P13 |
+| Ü14 | Tagesziele zählen nur eigene Handlungen, kombinierte Ziele, Ruf als Belohnung (`plan.md` 9a) | erledigt (PR 152) | P13 |
 
 ## 4. Balancing (Ü15 bis Ü20)
 
@@ -166,7 +166,7 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Gruppen-Ankunft, Wünsche je Bootsart, `feeFactor`, `arrivalWeight` | data/boats/*.js | in die Regeln holen | P19, P32 (Gruppen) |
 | Stammgast bringt Ruf am alten Platz | plan.md 9a | bauen | P25 |
 | Dauerlieger zahlen pro Saison, Gast wird umgelegt | plan.md 9a | bauen | P01 |
-| Tagesziel-Belohnung in Ruf, Ziele wie "Drei Segelboote mit Dusche" | plan.md 9a | bauen | P13 |
+| Tagesziel-Belohnung in Ruf, Ziele wie "Drei Segelboote mit Dusche" | plan.md 9a | gebaut (PR 152) | P13 |
 | Tretboote und Kanus nur als Kulisse | plan.md 14 (im Spiel zahlender Gast S2, 6 €) | entfällt: bleiben in Stufe 1 Gäste, plan.md angepasst | |
 
 ## 9. Im Spiel, aber nicht dokumentiert
@@ -443,10 +443,10 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| I1 | Ziele verlangen eine Handlung (= Ü14) | offen | P13 |
-| I2 | Eines aus dreien wählen | offen | P13 |
-| I3 | Belohnungen mischen (Geld, Anker, seltener Gast, Rabatt, Deko) | offen | P13 |
-| I4 | Wochenziel | offen | P13 |
+| I1 | Ziele verlangen eine Handlung (= Ü14) | erledigt (PR 152) | P13 |
+| I2 | Eines aus dreien wählen | erledigt (PR 152) | P13 |
+| I3 | Belohnungen mischen (Geld, Anker, seltener Gast, Rabatt, Deko) | erledigt (PR 152) | P13 |
+| I4 | Wochenziel | erledigt (PR 152) | P13 |
 | I5 | Logbuch als Sammelalbum mit Schattenrissen | offen | P21 |
 | I6 | Erfolge als Dinge im Hafen (Pokal, Wimpel, Schild) | offen | P22 |
 | I7 | Meilensteine mit Ton und Bild | offen | P22 |
@@ -651,7 +651,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P10 | Zuweisen wieder zur Entscheidung machen | Ü8, Ü9, Ü13 | `sim.js` (Selbst-Einfahren, `dismiss`, `turnAway`), `render/boat-view.js`, `features/platzschilder.js` | neu |
 | P11 | Wünsche über dem Boot und Ankunftsvorschau | Ü10 | neues Modul `web/js/ui/vorschau.js`, `render/boat-view.js` | neu |
 | P12 | Kassieren verständlich machen | Ü12 (Rundgang ab Abend, halbe Münze sichtbar) | `data/people.js`, `render/boat-view.js`, `docs/spielregeln.md` | neu |
-| P13 | Tagesziele an eigene Handlungen binden | Ü14 | `features/tagesziele.js`, `sim.js` (Ereignisse mit "von Hand") | neu |
+| P13 | Tagesziele an eigene Handlungen binden | Ü14, I1 bis I4 | `features/tagesziele.js`, `features/ziel-deko.js`, `sim.js` (Ereignisse mit "von Hand"), `economy.js` (`tagesziele`) | erledigt (PR 152) |
 | P14 | Bewertungen und Gästebuch zeigen | Ü21, F18 | `render/boat-view.js`, neues Modul `web/js/ui/gaestebuch.js` | neu |
 | P15 | Tagesabschluss am Abend zeigen | Ü22 | neues Modul `web/js/ui/tagesabschluss.js`, `sim.js` (`sim:dayEnd`) | erledigt (PR 159) |
 | P16 | Aufstieg und Abschluss feiern, Endlosspiel | Ü23, Endlosmodus | `ui/oberflaeche.js`, `core/camera.js` (Kamerafahrt), `sim.js` | neu |

@@ -83,7 +83,7 @@ export function hinweis(b, rules = {}) {
     return `${n === 1 ? 'Ein Boot hat' : `${n} Boote haben`} zu lange an der Boje gewartet. Zieh wartende Boote früher in eine Box.`;
   }
   if (b.bewertung != null && b.bewertung < 3) return 'Die Gäste waren unzufrieden. Wünsche wie Strom und Wasser bringen bessere Bewertungen.';
-  if (b.ziele?.gesamt > 0 && b.ziele.erledigt === 0) return 'Tagesziele an der Tafel links bringen jeden Tag etwas extra.';
+  if (b.ziele?.gesamt > 0 && b.ziele.erledigt === 0) return 'Dein Tagesziel links an der Tafel bringt eine Belohnung, wenn du es schaffst.';
   return null;
 }
 

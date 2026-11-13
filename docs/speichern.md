@@ -26,7 +26,7 @@ Safari auf iPhone und iPad löscht alles, was eine Seite im Browser gespeichert 
 
 Gespeichert wird nur über `web/js/save/`. `state.js` legt Spielstände an und prüft sie (`createState`, `deserialize`), speichert aber nicht selbst. Der frühere zweite Weg (`hafenmeister.save` mit Kurztext `HM1:`) ist entfernt:
 
-- Ein Stand unter `hafenmeister.save` wird beim ersten Start einmal übernommen (als aktiver Hafen, oder als eigener Platz "Älterer Hafen", wenn schon ein anderes Spiel läuft) und danach gelöscht.
+- Ein Stand unter `hafenmeister.save` wird beim ersten Start einmal übernommen (als aktiver Hafen, oder als eigener Platz "Älterer Hafen", wenn schon ein anderes Spiel läuft) und danach gelöscht. Er hat keine Version und wird wie Version 1 umgebaut (Geländeform 1, Stegbild 0), genau wie ein Kurztext `HM1:`.
 - Ein alter Kurztext `HM1:...` (auch in einer Datei) lässt sich weiter über "Aus Datei laden" öffnen.
 
 ## Speicherplätze
@@ -40,6 +40,7 @@ Bis zu 8 Häfen liegen nebeneinander im Browser (`web/js/save/plaetze.js`, Fenst
 | `hafenmeister.spielstand.vorher` | Sicherung vor dem letzten Speichern des aktiven Hafens |
 | `hafenmeister.platz.<id>` | Stand jedes anderen Hafens und der Häfen im Papierkorb |
 | `hafenmeister.bild.<id>` | Vorschaubild (kleines JPEG), wird abends, beim Wechsel und beim Verlassen erneuert |
+| `hafenmeister.kaputt` | Text eines Stands, der sich nicht laden ließ: `{ zeit, name, text }`, bis der Spieler ihn als Datei sichert oder wegwirft |
 
 Eintrag im Verzeichnis: `{ id, name, erstellt, gespielt, info: { stufe, tag, geld, region }, probeVon? }`. Der Name steht zusätzlich im Spielstand als `harborName`, damit er in einer Datei mitreist.
 
@@ -61,6 +62,10 @@ Neues Spiel: Name (Vorschlag), Stegbild (Zufall oder 1 bis 12), Küste (Zufall o
 Start: Gibt es mehrere Häfen, fragt eine kleine Karte "Weiter" (pausiert bis dahin), "Anderer Hafen" oder "Neues Spiel". Mit nur einem Hafen startet das Spiel direkt.
 
 Gesichert wird außerdem nach jedem Kauf, jedem Bau und jedem Stufenaufstieg, beim Verlassen der Seite und abends.
+
+Beschädigter Stand: Geladen wird mit derselben strengen Prüfung wie `state.js` (`deserialize`). Lässt sich der Stand nicht laden, kommt die Sicherung `hafenmeister.spielstand.vorher` dran, sonst startet ein neues Spiel. In beiden Fällen wird der beschädigte Text unter `hafenmeister.kaputt` aufgehoben (das nächste Speichern überschreibt ihn nicht) und nach dem Start erscheint eine Meldung mit "Als Datei sichern". Im Fenster "Spielstände" bleibt er oben stehen, bis er gesichert und weggeworfen ist. Ist der Speicher voll, weicht diese Kopie als Letztes nach Papierkorb und Vorschaubildern.
+
+Ohne Speicher (privates Fenster, gesperrt, voll): Lässt der Browser nichts speichern oder schlägt das Speichern fehl, sagt eine Meldung, dass beim Schließen der Hafen weg ist, mit "Als Datei sichern". Das Fenster "Spielstände" zeigt dann statt "Alles wird automatisch gespeichert" denselben Hinweis.
 
 Prüfung beim Laden: `sim.repairBerths` legt Gäste um, die in einer Box liegen, die es in der aktuellen Stufe nicht gibt oder die zu flach, zu kurz oder zu schmal ist (alte Stände). Ohne freie passende Box reisen sie ohne Rechnung ab.
 

@@ -241,7 +241,8 @@ export async function initBridge(game) {
       if (selected === id) selected = null;
       return sim.dismiss(state, ctx, id);
     }),
-    collect: run((boatId) => sim.collect(state, ctx, boatIdOf(boatId))),
+    // Einzelne Münze: immer eine Handlung des Spielers (Antippen oder Strich)
+    collect: run((boatId) => sim.collect(state, ctx, boatIdOf(boatId), { hand: true })),
     collectAll: run((force = true) => sim.collectAll(state, ctx, force)),
     upgradeFacility: run((key) => sim.upgradeFacility(state, ctx, key)),
     upgradeOffice: run(() => sim.upgradeOffice(state, ctx)),
