@@ -143,8 +143,8 @@ export function init(game) {
       const g = RANG[selbst?.info.size] ?? 1;
       // nur Ankerplaetze in freiem, tiefem Wasser (nie im Gelaende oder an einem Steg)
       const mass = selbst ? bootMass(selbst.info) : { r: 3, t: 1 };
-      const k = karteJetzt();
-      const idx = plaetze.findIndex((q, i) => !anker.has(i) && (RANG[q.groesse] ?? 2) >= g && befahrbar(k, q.x, q.z, mass.r * 0.8, mass.t));
+      const karteA = karteJetzt();
+      const idx = plaetze.findIndex((q, i) => !anker.has(i) && (RANG[q.groesse] ?? 2) >= g && befahrbar(karteA, q.x, q.z, mass.r * 0.8, mass.t));
       if (idx >= 0) {
         const q = plaetze[idx];
         return reserviere({ id: `anker-${idx}`, x: q.x, z: q.z, heading: b.heading, kind: 'buoy', abstand: (q.schwoikreisM ?? 10) * 2, kreis: q.schwoikreisM ?? 10 });
@@ -400,7 +400,7 @@ export function init(game) {
     const weich = [];
     for (const bj of w.bojen ?? []) weich.push({ x: bj.x, z: bj.z, r: 14, kosten: 3 });
     for (const a of w.ankerplaetze ?? []) weich.push({ x: a.x, z: a.z, r: (a.schwoikreisM ?? 8) + 4, kosten: 2 });
-    karte = baueKarte({ tiefe, bereich: BEREICH, ...hindernisseAusHafen(HAFEN, st), weich, engRadius: 3.6 });
+    karte = baueKarte({ tiefe, bereich: BEREICH, ...hindernisseAusHafen(HAFEN, st), weich, engRadius: 5 });
     karteSig = sig;
     karteAlt = false;
     flaechen.clear();
@@ -959,20 +959,37 @@ export function init(game) {
   });
 
   let draussenZahl = 0;
-  game.on('dauer:einlaufen', ({ id, platzId } = {}) => {
+  // warten: Dauerlieger ist früher zurück, sein Platz ist noch belegt. Er kreist vor dem Hafen,
+  // bis der Gast umgelegt ist (features/dauerlieger.js), und kommt dann mit einem zweiten
+  // 'dauer:einlaufen' ohne warten herein. info: Bootsdaten, falls das Boot nicht in game.sim.boote steht.
+  game.on('dauer:einlaufen', ({ id, platzId, warten, info: mitInfo } = {}) => {
     let e = boats.get(id);
     if (!e) {
-      const info = sucheInfo(id);
+      const info = sucheInfo(id) ?? mitInfo;
       if (!info) return;
       e = erzeuge(info);
       const start = freierStart(e.anim.info);
       e.anim.place(start.x, start.z, 0);
     }
-    e.draussen = false;
     e.faehrt = false;
+    if (warten) {
+      // wartet wie die Tagestörns auf freiem Wasser (Punkt über die Fahrwege, Kreis so groß wie das freie Wasser)
+      e.draussen = true;
+      const n = draussenZahl++ % 4;
+      const kreis = 14 + e.anim.info.length + n * 9;
+      const ziel = rundePunkt(e.anim.info, rundenWunsch(), kreis);
+      e.anim.undock([ziel], { sails: false, route: true }).then((ok) => {
+        if (!ok || boats.get(id) !== e || !e.draussen) return;
+        const rad = Math.max(8, Math.min(kreis, ziel.frei - bootMass(e.anim.info).r - 2));
+        e.anim.hold(ziel, { radius: rad, speed: e.anim.cfg.cruise * 0.5, sails: false, state: 'waiting' });
+      });
+      return;
+    }
+    e.draussen = false;
     const b = platzBerth(platzId ?? e.info.platz);
     if (!b) return;
-    e.anim.dock(b, { route: true, seconds: 30 });
+    // Liegt noch ein Gast in der Box (er wird gerade umgelegt oder legt morgens ab), erst warten
+    e.anim.dock(b, { route: true, seconds: 30, waitFor: () => platzFrei(platzId ?? e.info.platz, b, e.anim) });
   });
 
   /** Ist die Box frei? Kein anderes Boot hat sie als Platz, und keins steht noch in ihr. */
@@ -1011,7 +1028,11 @@ export function init(game) {
       if (e.anim.state !== 'idle' && e.anim.state !== 'moored') continue;   // faehrt gerade
       if (e.draussen) continue;                                          // Dauerlieger auf Runde
       const b = info.platz ? platzBerth(info.platz) : warteplatz(info.boje ?? 0, e.anim);
-      if (b) e.anim.moorAt(b);
+      if (!b) continue;
+      // Stufenausbau (nicht Laden): liegt das Boot sichtbar woanders, faehrt es hin statt zu springen
+      const weit = Math.hypot((b.x ?? e.anim.x) - e.anim.x, (b.z ?? e.anim.z) - e.anim.z) > 1.5;
+      if (!laden && weit && e.anim.model.visible !== false && (e.anim.moored || e.anim.state === 'moored')) e.anim.dock(b, { route: true });
+      else e.anim.moorAt(b);
     }
     for (const id of [...muenzen.keys()]) if (!boats.has(id)) entferneMuenze(id);
     const st = game.sim?.state ?? game.state;

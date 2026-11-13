@@ -1,6 +1,6 @@
 # Landschaft, Wasser und Licht
 
-Stand: 12.11.2026. Status: gebaut (Ostsee Stufe 1 bis 6; Nordsee nur als Bild, siehe [regionen.md](regionen.md)). Code: `web/js/render/landscape.js` (Einstieg, wird von `main.js` geladen) und `web/js/render/landschaft/`.
+Stand: 13.11.2026. Status: gebaut (Ostsee Stufe 1 bis 6; Nordsee nur als Bild, siehe [regionen.md](regionen.md)). Code: `web/js/render/landscape.js` (Einstieg, wird von `main.js` geladen) und `web/js/render/landschaft/`.
 
 ## Was man sieht
 
@@ -45,34 +45,62 @@ Haken für andere Threads, damit niemand in `gelaende.js` schreiben muss:
 
 ## Geländeformen
 
-Jedes neue Spiel bekommt eine von zehn Geländeformen (`web/js/render/landschaft/formen.js`). Die Formen sind frei nach Landschaften an Ost- und Nordsee gebaut und fürs Spiel geformt (breite Durchfahrten, freies Wasser, lesbare Einfahrt); keine bildet einen echten Ort ab.
+Jedes Spiel bekommt einen von zehn Küstentypen und dazu einen eigenen Zufallswert (Seed). Typ und Seed zusammen ergeben die ganze Landschaft rund um den Hafen: Küste, Buchten, Inseln, Nehrungen, Flüsse, Felsen, Watt und wo darin der Hafen liegt. Gleicher Typ, anderer Seed: andere Küste. Code: `web/js/render/landschaft/natur.js` (Typen, Aufbau, ohne Three.js) und `formen.js` (welche Form gilt). Die Typen sind frei nach Landschaften an Ost- und Nordsee gebaut, keiner bildet einen echten Ort ab.
 
-| Nr. | Name | Was anders ist |
+| Nr. | Name | Idee |
 |---|---|---|
-| 1 | Nehrung | Grundform: Nehrung mit Dünen und Salzwiesen |
-| 2 | Lotseninsel | flacher Priel trennt östlich des Engpasses eine Insel mit Leuchtturm ab |
-| 3 | Sandbank | im Osten nur Sandbank knapp über Wasser, Riff vor dem Weststrand, Leuchtturm an der Nehrungsspitze |
-| 4 | Bodden | Nehrung endet im Osten, flaches Boddenwasser mit drei Inseln |
-| 5 | Inselkette | Nehrung zerfällt östlich in kleine Inseln, hohe Dünen, Leuchtturm |
-| 6 | Offene Küste | niedrige, schmale Nehrung mit Haken im Osten |
-| 7 | Steilküste | hohe Steilufer mit Felsbändern am Festland, kleine Waldinsel im Westen |
-| 8 | Watt | breites Watt vor dem Strand, nur der Priel vor der Einfahrt bleibt tief, Leuchtturm |
-| 9 | Dünenspitze | hohe Dünen, breite Nehrung, Spitze mit Leuchtturm und Haken |
-| 10 | Doppelinsel | bewaldete Insel im See westlich des Hafens, Insel mit Leuchtturm östlich des Engpasses |
+| 1 | Nehrung | Lagune hinter einer gewundenen Nehrung mit Dünen, Seegatten und Salzwiesen |
+| 2 | Offene Bucht | weite Bucht zwischen zwei bewaldeten Landzungen mit Steilufer, Felsen vor den Spitzen |
+| 3 | Flussmündung | ein Fluss kommt in Schleifen aus dem Land und weitet sich zur Mündung, Schilfinseln, Sandbank davor |
+| 4 | Bodden | verzweigtes Boddenwasser mit Wieken, Halbinseln und Inseln, ein schmaler Durchlass zur See |
+| 5 | Schären | felsige, zerklüftete Küste mit Dutzenden kleiner Felsinseln |
+| 6 | Steilküste | fast gerade Küste mit hohem Steilufer, Findlingen und einem Bachtal |
+| 7 | Watt | flache Küste mit weitem Watt, Prielen und Halligen mit Warft |
+| 8 | Förde | lange, gewundene Förde mit bewaldeten Hängen, der Hafen an ihrem inneren Ende |
+| 9 | Strandhaken | eine Nehrung wächst um die Bucht herum und endet in einem Haken mit Leuchtturm |
+| 10 | Inselhafen | der Hafen liegt auf einer Insel, über einen Sund sieht man das Festland |
 
-In jeder Form gleich: Festlandufer und Becken am Hafen, Engpass bei x 178 mit Molen und Fahrwasser, westliche Nehrung (Anlagen der Stufe 6), Wartebojen, Ankerfelder und offenes Wasser im Norden. Darum passen Liegeplätze, Stegbilder, Bauen und Spielstände in jeder Form. `tests/gelaendeform.test.mjs` prüft das für alle Formen.
+**So entsteht eine Landschaft.** Jeder Typ beschreibt seine Natur in eigenen Koordinaten (See grob im Norden) aus wenigen Bausteinen: Küstenlinie, Bänder (Nehrung, Haken), Buchten und Inseln (Ellipsen mit rauem Rand), Wasserläufe (Fluss, Priel, Sund) und Platen. Der Seed verschiebt, biegt und verteilt sie. Dann legt `bauen()` den Hafen hinein: Der Typ nennt einen Ankerpunkt und einen Drehwinkel, `bauen()` sucht dort das echte Ufer und dreht und verschiebt die Natur so, dass der Hafen dort sitzt. Die Spielkoordinaten bleiben dabei, wie sie sind: Hafen bei (0, 0), See vorne in +y. Daraus entsteht die Landigkeit L (über 0 Land, darunter Wasser), dazu ein Raster mit Abstand zum Ufer, Abstand zur offenen See und Masken für Düne, Fels, Hallig, Wald, Platen und Wasserläufe (5 Planeinheiten, dazwischen weich interpoliert). Eine Landschaft zu bauen dauert etwa 0,2 bis 0,4 s, einmal je Spiel.
 
-Welche Form gilt: `?gelaende=N` in der Adresse (nur ansehen), sonst die im Spielstand (`modules.gelaende.nr`), in Tests und ohne Browser Form 1, in einem neuen Spiel eine zufällige. Im Spiel: `game.gelaende.aktuell()`, `game.gelaende.formen`. Eine Form entfernen: ihren Eintrag aus `FORMEN` löschen; Spielstände mit dieser Nummer bekommen Form 1.
+**Fest in jedem Typ** (`natur.js`, Pflichtbereiche), damit Stege, Liegeplätze, Bojen, Anlagen und Spielstände überall passen:
 
-Überblick je Form: `game.gelaende.blickRect()` liefert einen Ausschnitt in Weltmetern ({ minX, maxX, minZ, maxZ }) mit Hafen, Einfahrt und allen Landmarken der Form (Leuchttürme, Inseln im See und vor der Küste, `seeAussen`). Er ist höchstens 420 m breit und für einen kurzen Überblick beim Spielstart gedacht. Mit `blickRect({ maxBreiteM })` wird er schmaler (unter 250 m nur Einfahrt und die nächsten Landmarken, etwa für Handy hochkant). Die Startansicht selbst gehört dem Grundgerüst.
+- der Uferstreifen der Stege und der Hafenfläche (x -215 bis 232, Ufer wie bisher),
+- Wasser vor den Stegen (x -170 bis 250, bis y 185) und östlich davon für die Runde der Vorbeifahrer,
+- die Zufahrt durch das Seegatt bei x 178,
+- offenes, mindestens 4,6 m tiefes Wasser vor der Einfahrt (x -440 bis 480, y 245 bis 820): Reede, Ankerfelder, Piers, Bahnen der Vorbeifahrer und Besuchsschiffe,
+- Land für den Ort hinter dem Hafen (rund, mit welligem Rand).
+
+Alle Pflichtbereiche gehen weich in die Natur über (kein Kasten). Watt hält Abstand zu ihnen.
+
+**Der Hafen wächst ins Gelände.** Ab Stufe 3 gräbt der Ausbau Becken, Rinne, Außenhafen und Liegewanne aus, auch dort, wo vorher Land war (mit befestigter Kante statt langem Hang). Wo die Natur den Hafen nicht schützt, baut er ab Stufe 3 Wellenbrecher (`wellenbrecher(stufe)`, in `molen(stufe)` enthalten): von den Molenwurzeln bei y 212 nach Westen und Osten, über Inseln und Landzungen hinweg unterbrochen. Ab Stufe 5 trägt ein Kai zwischen Becken und Außenhafen (x -4 bis 150, y 196 bis 229) Seenotretter und Museumshafen, ab Stufe 6 reicht der westliche Wellenbrecher bis zu den Pieranlagen. Buhnen gibt es nur an offenen Sandstränden.
+
+**Welche Form gilt:** `?gelaende=N&seed=S` in der Adresse (nur ansehen), sonst die im Spielstand (`modules.gelaende = { nr, seed }`), in Tests und ohne Browser Typ 1 mit Seed 1, in einem neuen Spiel Typ und Seed zufällig. Ältere Spielstände ohne Seed bekommen Seed 1. Im Spiel: `game.gelaende.aktuell()` (`{ nr, name, idee, seed, dreh, leuchttuerme, quelle }`), `game.gelaende.formen`. Einen Typ entfernen: seinen Eintrag aus `TYPEN` in `natur.js` löschen; Spielstände mit dieser Nummer bekommen Typ 1.
+
+**Prüfung:** `tests/gelaendeform.test.mjs` prüft alle Typen in beiden Revieren und ein paar Seeds je Typ (Engpass, Fahrwasser, Bojen, Ankerplätze, Liegeplatztiefen, Leuchttürme an Land, Wellenbrecher, Menschenwege an Land). Für viele Seeds:
+
+```bash
+node tools/seeds-pruefen.mjs 200
+```
+
+Das prüft 200 Seeds je Typ in Ostsee und Nordsee und nennt jeden, der durchfällt.
+
+**Rechtecke für die Kamera** (Weltmeter, `{ minX, maxX, minZ, maxZ }`):
+
+| Funktion | Inhalt |
+|---|---|
+| `game.gelaende.weltRect()` | die ganze erzeugte Landschaft (`WELT`, Plan x -1300 bis 1300, y -800 bis 1300) |
+| `game.gelaende.feinRect()` | fein gerechnetes Gelände (`BEREICH`) |
+| `game.gelaende.aussenRect()` | Außenring bis zum Kartenrand (Plan x -1600 bis 1600, y -1600 bis 1400) |
+| `game.gelaende.spielRect()` | Hafen, Einfahrt, Leuchttürme und nahe Inseln |
+| `game.gelaende.blickRect({ maxBreiteM })` | kurzer Überblick beim Start, höchstens 420 m breit |
 
 Molen: `punkt()` meldet sie so breit, wie sie gezeichnet sind (Linie bis 0,6 Breite, runder Kopf bis 0,95 Breite um den letzten Punkt).
 
 ### Rand der Karte und Watt
 
 - `KERN` (x -420..430, y -200..470) ist fein gerechnet und dicht bepflanzt; `karteRaster` deckt genau diesen Bereich ab.
-- `BEREICH` (x -640..660, y -440..640) ist der Rand mit halber Auflösung, damit bei größter Kamerabreite keine harte Kante zum groben Außenring zu sehen ist. Die Tiefentextur rechnet dort nur jedes zweite Texel.
-- Watt (Nordsee und Form 8): Sandplaten knapp über Wasser, dazwischen Priele über 0,9 m tief. Kein flacher Dauersaum, der im Wasser-Shader überall schäumt. Ab Stufe 5 vor dem Außenhafen und ab Stufe 6 in der Liegewanne weggebaggert.
+- `BEREICH` (x -900..900, y -560..900, in `natur.js`) ist der Rand mit halber Auflösung, damit bei größter Kamerabreite keine harte Kante zum groben Außenring zu sehen ist. Die Tiefentextur rechnet dort nur jedes zweite Texel.
+- Watt (Nordsee vor offenen Küsten und Typ 7 überall): große, weiche Sandplaten knapp über Wasser, dazwischen Priele über 0,9 m tief. Ab Stufe 5 vor dem Außenhafen und ab Stufe 6 in der Liegewanne weggebaggert.
 
 ## Abwechslung an Land (Landbild)
 

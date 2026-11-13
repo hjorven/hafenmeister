@@ -180,3 +180,15 @@ export async function ohneEinstieg(page) {
   // Ein Bild warten, damit Karte und Ring wirklich weg sind
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
+
+// Warten, bis die Kamera stillsteht: kein Schwung nach dem Wischen, keine Kamerafahrt (flyTo),
+// kein Nachdrehen oder Nachneigen. Danach noch zwei Bilder, damit Leisten-Animationen durch sind.
+export async function kameraRuhig(page, timeout = 10_000) {
+  await page.waitForFunction(() => {
+    const c = window.hafenmeister.camera;
+    const s = c._schwung || {};
+    return !c._fly && (c._yawTarget ?? null) === null && (c._pitchTarget ?? null) === null &&
+      !s.x && !s.y && !s.yaw && !s.pitch;
+  }, null, { timeout, polling: 50 });
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+}

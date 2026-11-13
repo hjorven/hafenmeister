@@ -10,7 +10,8 @@
 // zum Beispiel für die Regel "Wassertiefe mindestens 0,3 m größer als der Tiefgang".
 
 import * as vielfalt from './vielfalt.js';
-import { gelaendeform } from './formen.js';
+import { gelaendeform, natur, beiFormwechsel } from './formen.js';
+import { SEE_NORD, WELT, BEREICH, HAFENWASSER12, RUNDE12 } from './natur.js';
 import { anlagenFlaechen } from '../../data/anlagen-flaechen.js';
 
 export const PLAN_M = 0.62;
@@ -18,7 +19,7 @@ export const PLAN_M = 0.62;
 /** Bereich, für den das Gelände fein berechnet wird (Planeinheiten). */
 // Fein gerechnetes Gelände und Tiefentextur. Breit genug, dass der Übergang zum groben Außenring
 // auch bei größter Kamerabreite am Ost- und Westrand nicht als harte Kante zu sehen ist.
-export const BEREICH = { x0: -640, x1: 660, y0: -440, y1: 640 };
+export { BEREICH } from './natur.js';
 /** Kernbereich für dichte Bepflanzung (wie vor der Verbreiterung, damit nicht mehr Bäume gezeichnet werden). */
 export const KERN = { x0: -420, x1: 430, y0: -200, y1: 470 };
 
@@ -69,42 +70,12 @@ export const meerSued = (x) => 224 + 4 * Math.sin(x / 80 + 1) + 2 * Math.sin(x /
 
 // ------------------------------------------------------------------ Abstand zur offenen See
 
-let _seeRaster = null;
 /**
- * Abstand in Metern zum nächsten Wasser der offenen See (nicht Binnensee), stetig, aus einem Raster
- * mit 4 Planeinheiten, das nur die Grundform kennt (ohne Molen und Engpass). 0 auf offener See.
+ * Abstand in Metern zum nächsten Wasser der offenen See (nicht Lagune, Bodden, Fluss oder Hafenbecken),
+ * aus der Landschaft der Form (natur.js). 0 auf offener See.
  */
 export function seeAbstandM(px, py) {
-  if (!_seeRaster) {
-    const S = 4, x0 = BEREICH.x0 - 40, y0 = BEREICH.y0 - 40;
-    const nx = Math.ceil((BEREICH.x1 + 40 - x0) / S) + 1, ny = Math.ceil((BEREICH.y1 + 40 - y0) / S) + 1;
-    const d = new Float32Array(nx * ny);
-    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
-      const x = x0 + i * S, y = y0 + j * S;
-      d[j * nx + i] = y > meerSued(x) && y > suedufer(x) ? 0 : 1e9;
-    }
-    for (let pass = 0; pass < 2; pass++) {
-      const r = pass ? -1 : 1;
-      for (let jj = 0; jj < ny; jj++) for (let ii = 0; ii < nx; ii++) {
-        const i = pass ? nx - 1 - ii : ii, j = pass ? ny - 1 - jj : jj, k = j * nx + i;
-        let v = d[k];
-        const a = i - r, b = j - r;
-        if (a >= 0 && a < nx) v = Math.min(v, d[k - r] + 1);
-        if (b >= 0 && b < ny) {
-          v = Math.min(v, d[k - r * nx] + 1);
-          if (a >= 0 && a < nx) v = Math.min(v, d[k - r * nx - r] + 1.4142);
-          if (i + r >= 0 && i + r < nx) v = Math.min(v, d[k - r * nx + r] + 1.4142);
-        }
-        d[k] = v;
-      }
-    }
-    _seeRaster = { S, x0, y0, nx, ny, d };
-  }
-  const { S, x0, y0, nx, ny, d } = _seeRaster;
-  const fx = clamp((px - x0) / S, 0, nx - 1.001), fy = clamp((py - y0) / S, 0, ny - 1.001);
-  const i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j, k = j * nx + i;
-  const w = d[k] * (1 - u) * (1 - v) + d[k + 1] * u * (1 - v) + d[k + nx] * (1 - u) * v + d[k + nx + 1] * u * v;
-  return w * S * PLAN_M;
+  return natur().probe(px, py).offenAbstand * PLAN_M;
 }
 
 /**
@@ -121,21 +92,52 @@ export const seegattAchse = (py) => ENGPASS_X + 5 * Math.sin(clamp((py - 150) / 
 export const seegattHalb = (py) => Math.min(34, 20 + 0.03 * (py - 205) ** 2);
 export const SEEGATT_TIEFE = 2.2;
 
-/** Molen je Stufe als Linienzüge in Planeinheiten, mit Breite. */
+/** Molen je Stufe als Linienzüge in Planeinheiten, mit Breite. Ab Stufe 3 dazu Wellenbrecher (wellenbrecher). */
 export function molen(stufe) {
-  if (stufe >= 5) {
-    return [
-      { name: 'Westmole', punkte: [[-2, 224], [-10, 282], [18, 312], [96, 320]], breite: 9 },
-      { name: 'Ostmole', punkte: [[210, 222], [220, 280], [196, 306]], breite: 9 },
-    ];
-  }
-  if (stufe >= 3) {
-    return [
-      { name: 'Westmole', punkte: [[146, 222], [142, 274]], breite: 8 },
-      { name: 'Ostmole', punkte: [[210, 222], [216, 268]], breite: 8 },
-    ];
-  }
-  return [];
+  const fest = stufe >= 5 ? [
+    { name: 'Westmole', punkte: [[-2, 224], [-10, 282], [18, 312], [96, 320]], breite: 9 },
+    { name: 'Ostmole', punkte: [[210, 222], [220, 280], [196, 306]], breite: 9 },
+  ] : stufe >= 3 ? [
+    { name: 'Westmole', punkte: [[146, 222], [142, 274]], breite: 8 },
+    { name: 'Ostmole', punkte: [[210, 222], [216, 268]], breite: 8 },
+  ] : [];
+  return [...fest, ...wellenbrecher(stufe)];
+}
+
+/**
+ * Wellenbrecher ab Stufe 3: Steinwälle, die den Hafen nach See hin schützen, dort wo die Natur es nicht tut.
+ * Sie laufen von den Molenwurzeln nach Westen und Osten, bis sie auf Land treffen oder weit genug sind.
+ * Liegt dort schon Land (Nehrung, Landzunge), gibt es keinen Wellenbrecher.
+ */
+export function wellenbrecher(stufe) {
+  if (stufe < 3) return [];
+  const N = natur();
+  const out = [];
+  const wasser = (x, y) => N.landig(x, y) < 1;
+  // Von der Molenwurzel nach außen: über Wasser ein Wall, auf Land (Insel, Landzunge) Pause, danach weiter
+  const zug = (name, start, richtung, ende, y) => {
+    let teil = [start, [start[0] + richtung * 10, y], [start[0] + richtung * 10, y]], x = start[0] + richtung * 10, nr = 1;
+    const fertig = () => {
+      if (teil && teil.length >= 2 && Math.abs(teil[teil.length - 1][0] - teil[0][0]) >= 24) out.push({ name: nr > 1 ? `${name} ${nr}` : name, punkte: teil, breite: 11 });
+      if (teil) nr++;
+      teil = null;
+    };
+    while (richtung < 0 ? x > ende : x < ende) {
+      x += richtung * 8;
+      if (wasser(x, y)) {
+        if (!teil) teil = [[x - richtung * 4, y]];
+        if (teil.length < 2) teil.push([x, y]); else teil[teil.length - 1] = [x, y];
+      } else if (teil) {
+        teil[teil.length - 1] = [x - richtung * 2, y];
+        fertig();
+      }
+    }
+    fertig();
+  };
+  if (stufe >= 5) zug('Wellenbrecher West', [-2, 224], -1, stufe >= 6 ? -400 : -260, 212);
+  else zug('Wellenbrecher West', [146, 222], -1, -250, 212);
+  zug('Wellenbrecher Ost', [210, 222], 1, 300, 212);
+  return out;
 }
 
 const _wege = new Map();
@@ -166,22 +168,30 @@ export function strasseNehrung() {
 }
 
 const _molen = new Map();
+beiFormwechsel(() => { _molen.clear(); });
 function molenCache(stufe) {
   if (!_molen.has(stufe)) _molen.set(stufe, molen(stufe));
   return _molen.get(stufe);
 }
 
 /**
- * Buhnen am Seestrand der Nehrung, etwa alle 50 m (80 Planeinheiten).
- * Je Buhne ein Linienzug in Planeinheiten vom Strand ins Wasser.
+ * Buhnen an offenen Sandstränden nahe am Hafen, etwa alle 50 m (80 Planeinheiten).
+ * Je Buhne ein Linienzug in Planeinheiten vom Strand ins Wasser (nach Norden, wo die See ist).
  */
 export function buhnen(stufe) {
+  const N = natur();
   const out = [];
   for (let x = -380; x <= 400; x += 80) {
     if (x > 110 && x < 245) continue;                       // Engpass und Einfahrt
     if (stufe >= 5 && x > -40 && x < 245) continue;         // Außenhafen
-    const y0 = meerSued(x) - 5;
-    out.push([[x, y0], [x + 2, y0 + 30]]);
+    if (x > -230 && x < 110) continue;                      // Stege
+    // Strand von Norden her suchen: erstes Land unter offener See
+    for (let y = 520; y > 0; y -= 4) {
+      if (N.landig(x, y) < 0) continue;
+      const p = N.probe(x, y + 6);
+      if (p.L < 0 && p.offenAbstand < 10 && N.probe(x, y - 20).L > 0) out.push([[x, y - 5], [x + 2, y + 25]]);
+      break;
+    }
   }
   return out;
 }
@@ -192,11 +202,17 @@ export function buhnen(stufe) {
  */
 export function pricken(stufe) {
   if (stufe >= 3) return [];
+  const N = natur();
   const out = [];
   for (let py = 160; py <= 250; py += 15) {
     const nehrung = py > 180 && py < 230;
     const hw = nehrung ? seegattHalb(py) : SEEGATT_RINNE.halb + 4;
-    for (const s of [-1, 1]) out.push([seegattAchse(py) + s * hw * 0.82, py]);
+    for (const s of [-1, 1]) {
+      const px = seegattAchse(py) + s * hw * 0.82;
+      // Pricken nur, wo das Wasser flach ist (in tiefem, offenem Wasser braucht die Rinne keine Markierung)
+      const q = N.probe(px, py);
+      if (q.L < 0 && q.d > -60 && !(q.offenAbstand < 1 && q.d < -30)) out.push([px, py]);
+    }
   }
   return out;
 }
@@ -258,6 +274,28 @@ function baggern(h, px, py, poly, tiefe, rand = 10) {
   return k > 0 ? Math.min(h, h + (-tiefe - h) * k) : h;
 }
 
+/**
+ * Wie baggern, gräbt aber auch Land ab: Der Hafen wächst ins Gelände. Wo vorher Land war,
+ * entsteht innen eine steile, befestigte Kante (Steinschüttung) statt eines langen Hangs.
+ */
+function graben(h, px, py, poly, tiefe, rand = 10) {
+  if (h < 0) return baggern(h, px, py, poly, tiefe, rand);
+  const d = polyAbstand(px, py, poly);
+  if (d >= 0) return h;
+  return Math.min(h, -tiefe * smooth(0, 7, -d) - 0.3);
+}
+
+/** Abstand zu einem achsparallelen Rechteck { x0, x1, y0, y1 } (negativ innen). */
+function kastenAbstand(px, py, k) {
+  const dx = Math.max(k.x0 - px, px - k.x1), dy = Math.max(k.y0 - py, py - k.y1);
+  return dx > 0 && dy > 0 ? Math.hypot(dx, dy) : Math.max(dx, dy);
+}
+
+/** Abstand zum Pflichtwasser der Landschaft (vor den Stegen, Zufahrt, vor der Einfahrt), negativ darin. */
+function pflichtAbstand(px, py, N) {
+  return Math.min(kastenAbstand(px, py, { ...HAFENWASSER12, y0: 0 }), kastenAbstand(px, py, RUNDE12), kastenAbstand(px, py, SEE_NORD), abstandZuLinie(px, py, N.route.punkte) - N.route.halb);
+}
+
 function abstandZuLinie(px, py, pts) {
   let best = Infinity;
   for (let i = 0; i < pts.length - 1; i++) {
@@ -285,87 +323,7 @@ const SEEGATT_RINNE = { y0: 110, y1: 300, halb: 14 };
 // Stufe 6: Liegewanne an der Grossschiffspier westlich der Westmole (wie skripte/konzeptbilder/hafen_von_oben.py)
 const PIERWANNE6 = [[-365, 228], [20, 228], [20, 520], [-365, 520]];   // Marinepier und Kreuzfahrtpier, nach Norden auslaufend (Abstimmung Thread Anlagen)
 
-// ------------------------------------------------------------------ Geländeformen (formen.js)
-
-/** Endet die Nehrung der Form hier (östlich von ostEnde), und liegt der Punkt nicht im Haken? */
-function nehrungWeg(F, px, py, ln) {
-  if (F.ostEnde == null || px <= F.ostEnde) return false;
-  return !(F.hakenOst && haken(F, px, py, ln) > 0);
-}
-
-/** Haken am Ostende: 0 außerhalb, bis 1 in der Mitte. Biegt vom Nehrungsende nach Süden in den See. */
-function haken(F, px, py, ln) {
-  const cx = F.ostEnde + 4, cy = ln - 6;
-  const e = ((px - cx) / 16) ** 2 + ((py - cy) / 28) ** 2;
-  return e < 1 ? 1 - e : 0;
-}
-
-function nehrungsErsatz(F, px, py, ln, ms, wob, g) {
-  const k = smooth(F.ostEnde, F.ostEnde + 14, px);   // weicher Übergang am Nehrungsende
-  if (F.ostArt === 'sandbank') {
-    // Sandbank: meist knapp unter Wasser, einzelne Sandflächen darüber
-    const b = fbm(px / 26, py / 9, 71);
-    const h = 0.6 - k * 0.6 - 0.9 * (1 - b) + 0.2 * Math.sin(Math.PI * clamp((py - ln) / (ms - ln), 0, 1));
-    return { h, typ: h >= 0 ? 'sand' : 'wasser' };
-  }
-  // offen: Boddenwasser, flach am Rand, zur Mitte bis gut 2 m
-  const tief = 0.4 + 1.8 * k;
-  return { h: Math.min(-0.3, -tief - 0.3 * wob), typ: 'wasser' };
-}
-
-/** Inseln im Binnensee und der Haken: Land mit Sandrand, rundherum flaches Wasser. */
-function seeInsel(F, px, py, h, typ, stufe, region) {
-  if (F.hakenOst && F.ostEnde != null && px > F.ostEnde - 20) {
-    const k = haken(F, px, py, seeNord(px));
-    if (k > 0) {
-      const hh = 0.15 + k * 1.6;
-      return { h: Math.max(h, hh), typ: k < 0.35 ? 'sand' : 'duenengras' };
-    }
-  }
-  for (const i of F.seeInseln || []) {
-    const dx = (px - i.x) / i.rx, dy = (py - i.y) / i.ry;
-    const e = Math.sqrt(dx * dx + dy * dy) * (0.9 + 0.2 * rauschen(px / 12, py / 12, 81));
-    if (e < 1) {
-      const innen = 1 - e;
-      let hh = 0.15 + innen * (i.art === 'wald' ? 3.0 : i.art === 'schilf' ? 0.5 : 1.4);
-      let t = e > 0.8 ? 'sand' : i.art === 'schilf' ? 'salzwiese' : 'gras';
-      ({ h: hh, typ: t } = vielfalt.land(px, py, hh, t, innen * Math.min(i.rx, i.ry), {
-        stufe, region, uferAbstandM: innen * Math.min(i.rx, i.ry) * PLAN_M, hafenAbstand: hafenAbstand(px, py), offeneSee: false,
-        seeAbstandM: seeAbstandM(px, py), form: F.nr, formSteilufer: false, insel: true,
-      }));
-      return { h: hh, typ: t };
-    }
-    if (e < 1.5 && h < 0) h = Math.max(h, -0.2 - (e - 1) * 3.0);   // flacher Rand um die Insel
-  }
-  return { h, typ };
-}
-
-/**
- * Inseln, Sandplaten und Felsen der Form vor der Küste (in der offenen See, im Blick vom Hafen).
- * Ab Stufe 5 baggert der Ausbau alles weg, was in Außenhafen, Rinne oder Liegewanne liegt.
- */
-function seeAussen(F, px, py, h, typ, stufe) {
-  for (const i of F.seeAussen || []) {
-    const dx = (px - i.x) / i.rx, dy = (py - i.y) / i.ry;
-    const e = Math.sqrt(dx * dx + dy * dy) * (0.9 + 0.2 * rauschen(px / 10, py / 10, 91));
-    if (e >= 1.7) continue;
-    let frei = 1;
-    if (stufe >= 5) frei = smooth(0, 20, Math.min(polyAbstand(px, py, AUSSENHAFEN), polyAbstand(px, py, RINNE5)));
-    if (stufe >= 6) frei = Math.min(frei, smooth(0, 40, polyAbstand(px, py, PIERWANNE6)));
-    if (frei <= 0) continue;
-    if (e < 1) {
-      const innen = 1 - e;
-      const hh = i.art === 'sandplate' ? 0.08 + innen * 0.5 : i.art === 'fels' ? 0.3 + innen * 4.5 : 0.15 + innen * 2.2;
-      const t = i.art === 'fels' ? (e > 0.75 ? 'steinschuettung' : 'fels') : e > 0.7 || i.art === 'sandplate' ? 'sand' : innen > 0.55 ? 'duenengras' : 'sand';
-      const ziel = frei >= 1 ? hh : h + (hh - h) * frei;
-      if (ziel > h) { h = ziel; typ = ziel > 0 ? t : 'wasser'; }
-    } else if (h < 0) {
-      // flacher, heller Saum um Insel und Platen
-      h = Math.max(h, h + (-0.3 - (e - 1) * 2.4 - h) * frei);
-    }
-  }
-  return { h, typ };
-}
+// ------------------------------------------------------------------ Geländeformen (formen.js, natur.js)
 
 /** Leuchttürme der Form in Planeinheiten (auf Land, vom Gelände getragen). */
 export function leuchttuerme() {
@@ -387,43 +345,65 @@ export function punkt(px, py, stufe, region) {
   const wob = rauschen(px / 80, py / 60, 12) - 0.5;
   const ausgebaut = stufe >= 3 && px >= -150 && px <= 202;
   const F = gelaendeform();
-  const ln = seeNord(px);
-  // Die Form darf den Binnensee verkleinern, aber das Festland nie über die Nehrung hinaus in die See schieben
-  const uferForm = kueste(px) + 0.02 * Math.max(0, (F.seeWest ?? -235) - px) ** 2
-    + (F.seeOstOffen ? 0.05 * Math.max(0, px - 395) ** 2 : 0.02 * Math.max(0, px - (F.seeOst ?? 345)) ** 2);
-  const ufer = ausgebaut ? 6 : Math.min(uferForm, Math.max(suedufer(px), ln + 2));
-  const ms = meerSued(px) + (F.breiteSee || 0) * smooth(228, 262, px);   // nur östlich des Engpasses (westlich liegen Außenhafen und Piers)
-  const see = clamp((py - (ln + ms) / 2) / 8 + 0.5, 0, 1);
+  const N = F.natur;
+  const q = N.probe(px, py);
+  const ln = seeNord(px), ms = meerSued(px);   // nur noch Maße für Seegatt und Durchstich
+  const seeOffen = q.L < 0 ? 1 - smooth(0, 60, q.offenAbstand) : 0;
+  const see = seeOffen;
+  const hafenAb = hafenAbstand(px, py);
   let h, typ;
 
-  if (py <= ufer) {
-    // ---------------- Festland
-    const d = ufer - py;
-    const sandBreite = g.strandBreite + 4 * Math.sin(px / 23);
-    if (ausgebaut && py > -92) {
+  if (q.L >= 0) {
+    // ---------------- Land
+    const d = Math.max(0, q.d);
+    // offene Küsten haben breite Sandstrände, Lagunen und Flüsse schmale
+    const offenNah = 1 - smooth(20, 90, q.offenAbstand);
+    const sandBreite = (g.strandBreite + 4 * Math.sin(px / 23)) * (0.55 + 0.75 * offenNah);
+    if (stufe >= 3 && px >= -150 && px <= 202 && py <= 6 && py > -92) {
       h = 1.2; typ = 'pflaster';
       if (py < -13) typ = 'gras';
     } else {
       h = d < sandBreite ? 0.12 + d * 0.045 : 0.12 + sandBreite * 0.045 + Math.min(d - sandBreite, 8) * 0.06;
       typ = d < sandBreite ? 'sand' : 'gras';
     }
-    // Hügel und Felsen im Hinterland, nicht auf der Hafenfläche
-    const land = smooth(10, 40, d) * smooth(0, 30, hafenAbstand(px, py));
+    // Hügel im Hinterland, nicht auf der Hafenfläche; weit im Land höher und weiter geschwungen
+    const land = smooth(10, 40, d) * smooth(0, 30, hafenAb);
     if (g.huegel) h += g.huegel * land * fbm(px / 140, py / 110, 3);
+    if (!g.deich) h += 5 * land * smooth(60, 420, d) * fbm(px / 320, py / 280, 23);   // Marsch an der Nordsee bleibt flach
     if (g.felsen) {
-      // Schärenfelsen nur am Rand der Karte, weit weg vom Hafen
       const r = fbm(px / 45, py / 45, 9);
       const f = g.felsen * land * smooth(0.58, 0.9, r) * smooth(200, 340, Math.abs(px - 20));
       h += f;
       if (f > 2.2) typ = 'fels';
     }
-    if (F.steilufer) {
-      // Steilufer der Förde: gleich hinter dem schmalen Strand steigt das Land steil an, nicht am Hafen
-      const kd = smooth(sandBreite * 0.6, sandBreite * 0.6 + 7, d), kh = smooth(25, 70, hafenAbstand(px, py));
+    const st = q.stil;
+    if (st.steil) {
+      // Steilufer: gleich hinter dem schmalen Strand steigt das Land steil an, nicht am Hafen
+      const kd = smooth(sandBreite * 0.6, sandBreite * 0.6 + 7, d), kh = smooth(25, 90, hafenAb);
       if (kd * kh > 0) {
-        h += F.steilufer * kd * kh * (0.75 + 0.5 * fbm(px / 60, py / 60, 41));
+        h += st.steil * kd * kh * (0.75 + 0.5 * fbm(px / 60, py / 60, 41)) * (0.4 + 0.6 * offenNah);
         if (kd > 0.08 && kd < 0.85 && kh > 0.6) typ = 'fels';
       }
+    }
+    if (q.duene > 0.05 && hafenAb > 0) {
+      // Dünen auf Nehrungen und Haken: Profil quer zur Linie, wellig
+      const welle = 0.6 + 0.4 * fbm(px / 30, py / 12, 17);
+      const hd = 0.25 + q.duene * g.duenenHoehe * welle * smooth(0, 20, hafenAb);
+      if (hd > h) h = hd;
+      typ = d < 4 ? 'sand' : q.duene < 0.3 ? 'sand' : q.duene < 0.6 ? 'duenengras' : 'duene';
+    }
+    if (q.fels > 0.4 && hafenAb > 10) {
+      h += 2.5 * q.fels * (0.5 + fbm(px / 18, py / 18, 37)) * smooth(0, 6, d);
+      if (d > 2) typ = 'fels';
+    }
+    if (q.hallig > 0) {
+      // Hallig: flache Salzwiese, in der Mitte eine Warft
+      h = Math.min(h, 0.7) + 2.2 * smooth(0.6, 0.85, q.hallig);
+      typ = q.hallig > 0.6 ? 'gras' : 'salzwiese';
+    }
+    if (st.marsch && hafenAb > 20 && d < 50 && typ !== 'fels' && q.duene < 0.05) {
+      const m = fbm(px / 40, py / 40, 63);
+      if (m > 0.62 - 0.12 * st.marsch) { typ = 'salzwiese'; h = Math.min(h, 0.2 + d * 0.01); }
     }
     if (g.deich) {
       // Grüner Deich hinter der Straße, dahinter flacher Polder
@@ -434,9 +414,10 @@ export function punkt(px, py, stufe, region) {
       if (dy < -g.deich.breite) h = Math.min(h, 0.9);
     }
     // Abwechslung an Land (Thread "Gelände abwechslungsreicher gestalten")
+    const seeM = q.offenAbstand * PLAN_M;
     ({ h, typ } = vielfalt.land(px, py, h, typ, d, {
-      stufe, region, uferAbstandM: d * PLAN_M, hafenAbstand: hafenAbstand(px, py), offeneSee: seeAbstandM(px, py) < d * PLAN_M, seeAbstandM: seeAbstandM(px, py),
-      form: F.nr, formSteilufer: !!F.steilufer, insel: false,
+      stufe, region, uferAbstandM: d * PLAN_M, hafenAbstand: hafenAb, offeneSee: seeM < d * PLAN_M + 1, seeAbstandM: seeM,
+      form: F.nr, formSteilufer: !!st.steil, insel: false,
     }));
     // Straße und Wege (Promenade ist schon Pflaster)
     if (py < 0 && py > -100) {
@@ -444,82 +425,52 @@ export function punkt(px, py, stufe, region) {
         if (w.typ === 'promenade') continue;
         if (abstandZuLinie(px, py, w.punkte) < w.breite / 2) {
           typ = 'weg';
-          h = Math.min(h, (ausgebaut ? 1.2 : h));
+          h = Math.min(h, (stufe >= 3 && px >= -150 && px <= 202 ? 1.2 : h));
           break;
         }
       }
     }
-  } else if (py < ln) {
-    // ---------------- Binnensee
-    const dist = Math.min(py - ufer, ln - py);
-    h = -Math.max(0.2, 2.5 * (1 - Math.exp(-Math.max(0, dist) / 26)) + 0.5 * wob);
-    // Reviere mit Gezeiten: Hafenbecken ist ausgebaggert, damit es bei Ebbe nicht trockenfällt
-    if (g.gezeiten) h -= g.gezeiten * smooth(0, 8, dist);
-    typ = 'wasser';
-    ({ h, typ } = seeInsel(F, px, py, h, typ, stufe, region));
-  } else if (py < ms && !nehrungWeg(F, px, py, ln)) {
-    // ---------------- Nehrung
-    const t = (py - ln) / (ms - ln);
-    const profil = Math.pow(Math.sin(Math.PI * clamp(t, 0, 1)), 0.7);
-    {
-      const welle = 0.6 + 0.4 * fbm(px / 30, py / 12, 17);
-      h = 0.25 + profil * g.duenenHoehe * (F.duenen ?? 1) * welle;
-      typ = t < 0.08 || t > 0.86 ? 'sand' : t < 0.45 ? 'duenengras' : 'duene';
-      // Flache Durchlässe der Form (machen aus der Nehrung Inseln), mit Sandrand
-      for (const l of F.luecken || []) {
-        const dl = Math.max(l.x0 - px, px - l.x1);
-        if (dl < 0) { const k = smooth(0, 6, -dl); h = Math.min(h, 0.1 - (l.tiefe + 0.1) * k); typ = h < 0 ? 'wasser' : 'sand'; }
-        else if (dl < 10) { h = Math.min(h, 0.15 + dl * 0.08); typ = 'sand'; }
-      }
-      if (h >= 0) typ = vielfalt.nehrung(px, py, h, typ, { stufe, region, uferAbstandM: Math.min(py - ln, ms - py) * PLAN_M, hafenAbstand: hafenAbstand(px, py), offeneSee: t > 0.5, seeAbstandM: (ms - py) * PLAN_M, form: F.nr, formSteilufer: false, insel: false });
-      // Salzwiesen und kleine Lagunen auf der Seeseite des Binnensees (wie am Graswarder)
-      const lag = fbm(px / 22, py / 9, 31);
-      const frei = (px < 100 || px > 255) && !(stufe >= 5 && px > -30 && px < 200);
-      if (frei && h >= 0 && t < 0.5 && lag > 0.56) {
-        typ = 'salzwiese';
-        h = Math.min(h, 0.15 + (0.7 - lag) * 2);
-        if (t > 0.1 && t < 0.4 && lag > 0.69) { h = -0.7; typ = 'wasser'; }
-      }
-    }
-  } else if (py < ms) {
-    // ---------------- Wo die Form keine Nehrung hat: Boddenwasser oder Sandbank, am Ende ein Haken
-    ({ h, typ } = nehrungsErsatz(F, px, py, ln, ms, wob, g));
   } else {
-    // ---------------- Offene See
-    const dist = py - ms;
-    // Watt vor der Küste, aber ein tiefer Priel vor der Einfahrt und der Reede (um x = 230)
-    const watt = Math.max((g.wattBreite || 0) * smooth(95, 135, Math.abs(px - 230)), (F.watt || 0) * smooth(36, 70, Math.abs(px - ENGPASS_X)));
-    h = -Math.max(0.2, 5 * (1 - Math.exp(-Math.max(0, dist - watt) / 42)) + 0.6 * wob + (watt ? 0.25 : 0));
-    if (watt > 4 && dist < watt + 6) {
-      // Watt (Nordsee oder Form 8): Platen fallen bei Niedrigwasser trocken, dazwischen Priele
-      // Sandplaten liegen knapp über Wasser, Priele klar darunter: kein flacher Dauersaum, der überall schäumt
-      const n = fbm(px / 22, py / 9, 51);
-      const w = 0.12 - 1.1 * smooth(0.5, 0.58, n) - 1.3 * smooth(watt - 10, watt + 4, dist);
-      // ab Stufe 5 ist das Watt vor dem Außenhafen weggebaggert, ab Stufe 6 auch in der Liegewanne
-      let frei = 1;
-      if (stufe >= 5) frei = smooth(0, 24, Math.min(polyAbstand(px, py, AUSSENHAFEN), polyAbstand(px, py, RINNE5)));
+    // ---------------- Wasser: Lagune, Bodden, Fluss, Förde oder offene See
+    const dw = Math.max(0, -q.d);
+    const tiefMax = 2.5 + 2.5 * seeOffen - 0.4 * q.kanal * (1 - seeOffen);
+    h = -Math.max(0.2, tiefMax * (1 - Math.exp(-dw / (26 + 16 * seeOffen))) + 0.5 * wob);
+    if (g.gezeiten) h -= g.gezeiten * smooth(0, 8, dw);
+    typ = 'wasser';
+    // Sandplaten vor Mündungen
+    if (q.plate > -6) {
+      const hp = -0.35 + 0.07 * q.plate + 0.15 * fbm(px / 14, py / 14, 71);
+      if (hp > h) { h = hp; typ = hp >= 0 ? 'sand' : 'wasser'; }
+    }
+    // Watt: Nordsee vor offenen Küsten, Typ Watt überall; Platen fallen bei Niedrigwasser trocken, dazwischen Priele
+    const wattBreite = Math.max((g.wattBreite || 0) * seeOffen, q.stil.watt || 0) * (0.6 + 0.8 * fbm(px / 90, py / 90, 3));
+    if (wattBreite > 4 && dw < wattBreite + 6) {
+      // weiche, große Platen: auch das grobe Netz am Kartenrand kann sie ohne Zacken zeigen
+      const n = fbm(px / 70, py / 34, 51);
+      const w = 0.12 - 1.1 * smooth(0.46, 0.62, n) - 1.3 * smooth(wattBreite - 10, wattBreite + 4, dw) - 1.6 * q.kanal;
+      // Hafen, Zufahrt, Reede und alles, was der Ausbau ausbaggert, bleiben frei
+      let frei = smooth(0, 90, pflichtAbstand(px, py, N) + 60 * (fbm(px / 80, py / 80, 57) - 0.5));
+      if (stufe >= 5) frei = Math.min(frei, smooth(0, 24, Math.min(polyAbstand(px, py, AUSSENHAFEN), polyAbstand(px, py, RINNE5))));
       if (stufe >= 6) frei = Math.min(frei, smooth(0, 40, polyAbstand(px, py, PIERWANNE6)));
-      if (watt > 4 && frei > 0) { h = Math.max(h, h + (w - h) * frei); typ = 'watt'; }
+      if (frei > 0) { h = Math.max(h, h + (w - h) * frei); typ = 'watt'; }
     }
-    if (F.riff && px > F.riff.x0 && px < F.riff.x1) {
-      const k = 1 - smooth(0, F.riff.breite, Math.abs(py - F.riff.y)) ;
-      if (k > 0) h = Math.max(h, -(F.riff.tiefe + 0.3 * fbm(px / 20, py / 8, 61)) * (2 - k) / 1);
-    }
-    // Der Priel vor der Einfahrt ist auch bei Ebbe befahrbar
-    if (g.gezeiten) h -= g.gezeiten * (1 - smooth(70, 110, Math.abs(px - 230))) * smooth(0, 25, dist);
-    if (typ !== 'watt' || h < -0.6) typ = 'wasser';
-    ({ h, typ } = seeAussen(F, px, py, h, typ, stufe));
+    // Mindesttiefe vor der Einfahrt (Reede, Ankerfelder) und in der Zufahrt
+    const reede = smooth(0, -50, kastenAbstand(px, py, SEE_NORD));
+    if (reede > 0) h = Math.min(h, h + (-4.6 - (g.gezeiten || 0) - h) * reede);
+    if (typ !== 'watt' || h < -0.6) typ = h >= 0 ? typ : 'wasser';
   }
 
   // ---------------- Bauprojekte, die Wasser und Land verändern
   if (stufe <= 2 && h < 0 && py < 160) h = baggern(h, px, py, HAFENBECKEN12, 1.9, 8);
   if (stufe >= 3) {
-    if (h < 0) {
-      h = baggern(h, px, py, HAFENBECKEN3, 2.6, 30);
-      h = baggern(h, px, py, stufe >= 4 ? BECKEN4 : BECKEN3, 3.5 + 0.4 * wob, 14);
-      if (stufe >= 4) h = baggern(h, px, py, BECKEN4_WEST, 2.6, 12);
-      if (stufe < 5) h = baggern(h, px, py, RINNE34, 4.4, 6);
+    const vorher = h;
+    if (py > 6 || h < 0) {
+      h = graben(h, px, py, HAFENBECKEN3, 2.6, 30);
+      h = graben(h, px, py, stufe >= 4 ? BECKEN4 : BECKEN3, 3.5 + 0.4 * wob, 14);
+      if (stufe >= 4) h = graben(h, px, py, BECKEN4_WEST, 2.6, 12);
+      if (stufe < 5) h = graben(h, px, py, RINNE34, 4.4, 6);
     }
+    if (vorher >= 0 && h < 0) typ = 'wasser';
     // Durchstich: gerade Kaimauern, innen zum Becken hin abgeschrägte Ecken (8 Planeinheiten)
     const halb = (DURCHSTICH[1] - DURCHSTICH[0]) / 2;
     const dx = Math.abs(px - ENGPASS_X);
@@ -537,11 +488,14 @@ export function punkt(px, py, stufe, region) {
       h = 1.0; typ = 'steinschuettung';
     }
     if (stufe >= 5) {
-      if (py > 229) h = baggern(h, px, py, AUSSENHAFEN, 5.0, 6);
-      h = baggern(h, px, py, RINNE5, 4.6, 6);
-      if (px > 2 && px < 150 && py > 214 && py <= 229) { h = 1.3; typ = 'pflaster'; }
+      const v5 = h;
+      if (py > 229) h = graben(h, px, py, AUSSENHAFEN, 5.0, 6);
+      h = graben(h, px, py, RINNE5, 4.6, 6);
+      if (v5 >= 0 && h < 0) typ = 'wasser';
+      // Kai zwischen Hafenbecken und Außenhafen (trägt Seenotretter und Museumshafen)
+      if (px > -4 && px <= 150.5 && py > 196 && py <= 229) { h = 1.3; typ = 'pflaster'; }
     }
-    if (stufe >= 6) h = baggern(h, px, py, PIERWANNE6, 8.5, 40);
+    if (stufe >= 6) { const v6 = h; h = graben(h, px, py, PIERWANNE6, 8.5, 40); if (v6 >= 0 && h < 0) typ = 'wasser'; }
   } else if (py > SEEGATT_RINNE.y0 && py < SEEGATT_RINNE.y1) {
     // Natürliches Seegatt durch die Nehrung: Rinne mit flachen Rändern, an den Enden Sandhaken.
     // Vor und hinter der Nehrung läuft die Rinne trichterförmig aus und geht in See und Binnensee über.

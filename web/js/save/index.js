@@ -21,6 +21,7 @@ import {
   openSavePanel, openStart, showExportReminderIfDue, showUpdateBanner, showKaputtMeldung, showOhneSpeicherMeldung,
 } from './save-panel.js';
 import * as plaetze from './plaetze.js';
+import { neuerSeed } from '../render/landschaft/formen.js';
 import { createState, deserialize } from '../state.js';
 
 // Für den Fall, dass index.html die Zeilen noch nicht hat. Doppelt schadet nicht.
@@ -146,7 +147,7 @@ export function init(game) {
     st.harborName = name;
     st.modules = st.modules ?? {};
     if (Number.isInteger(stegbild) && stegbild >= 1) st.modules.stegbild = { nr: stegbild };
-    if (Number.isInteger(gelaende) && gelaende >= 1) st.modules.gelaende = { nr: gelaende };
+    if (Number.isInteger(gelaende) && gelaende >= 1) st.modules.gelaende = { nr: gelaende, seed: neuerSeed(Math.random, gelaende) };
     if (!einstieg) st.modules.einstieg = { fertig: true, erledigt: [] };
     const id = plaetze.platzAnlegen(st, { name });
     bildMachen();

@@ -36,7 +36,7 @@ export const NOCH_UNGELESEN = {
   winterBautempo: 'P18',
 };
 // Felder, die Ja/Nein sein dürfen. Alles andere ist eine Zahl, ein Text, eine Liste oder ein Objekt.
-const JA_NEIN = new Set(['ueberNacht', 'strom', 'offen', 'gast', 'allePlaetze', 'nurMotor', 'seaArrivals', 'winter',
+const JA_NEIN = new Set(['ueberNacht', 'vorauskasse', 'strom', 'offen', 'gast', 'allePlaetze', 'nurMotor', 'seaArrivals', 'winter',
   'C', 'CS', 'D', 'K', 'A', 'B']);
 
 function quelltexte() {
