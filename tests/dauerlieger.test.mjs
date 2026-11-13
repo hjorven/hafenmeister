@@ -10,7 +10,7 @@ import {
   haengeEin, machDauerplatz, hebeAuf, kannDauerplatz, dauerState, draussenBis, fitHook, bewerberFuer, bewerberPacht,
   neuerBewerber, sofortKosten, kuendigeSofort,
   hoechstZahl, anzahl, gastPlaetze, kuendige, umlege, umlegeZiele, wartetAuf, pachtJeTag, regeln,
-  ergaenzeAlteStaende, UMWELT,
+  ergaenzeAlteStaende, UMWELT, passendeBewerber,
 } from '../web/js/features/dauerlieger.js';
 
 function neu(seed = 7, stufe = 2) {
@@ -502,4 +502,45 @@ test('Gebühr: Dauerlieger zahlt den Anteil des Gastpreises, die feste Pacht gil
   for (const e of ev) {
     if (e.boatId !== r.boatId) assert.equal(e.amount, ctx.rules.stationedFee, 'Fischer und Dienste: feste Pacht');
   }
+});
+
+test('bewerberFuer rechnet wie machDauerplatz: wen es nennt, den nimmt machDauerplatz auch', () => {
+  for (const seed of [1, 2, 3, 4, 5, 6]) {
+    for (const stufe of [2, 3, 4, 5, 6]) {
+      const { ctx, state } = neu(seed, stufe);
+      ruhig(ctx);
+      for (let i = 0; i < 12; i++) neuerBewerber(state, ctx);
+      // Bis zur Obergrenze vermieten, dabei jedes Mal alle Plätze prüfen
+      for (let runde = 0; runde < 60; runde++) {
+        const ids = Object.keys(ctx.berthById);
+        for (const id of ids) {
+          const k = kannDauerplatz(state, ctx, id);
+          if (!k.ok) assert.deepEqual(bewerberFuer(state, ctx, id), [], `${id}: ${k.reason}, aber Bewerber genannt`);
+        }
+        const id = ids.find((i) => bewerberFuer(state, ctx, i).length);
+        if (!id) break;
+        const b = bewerberFuer(state, ctx, id)[0];
+        const r = machDauerplatz(state, ctx, id, b.id);
+        assert.ok(r.ok, `Seed ${seed}, Stufe ${stufe}, ${id}: bewerberFuer nannte ${b.id}, machDauerplatz: ${r.reason}`);
+      }
+      assert.ok(anzahl(state) <= hoechstZahl(state, ctx));
+    }
+  }
+});
+
+test('Obergrenze voll: Bewerber passen noch, aber bewerberFuer nennt keinen und der Grund ist voll', () => {
+  const { ctx, state } = neu();
+  ruhig(ctx);
+  for (let i = 0; i < 12; i++) neuerBewerber(state, ctx);
+  while (anzahl(state) < hoechstZahl(state, ctx)) {
+    const id = Object.keys(ctx.berthById).find((i) => bewerberFuer(state, ctx, i).length);
+    if (!id) break;
+    assert.ok(machDauerplatz(state, ctx, id).ok);
+  }
+  assert.equal(anzahl(state), hoechstZahl(state, ctx));
+  for (let i = 0; i < 12; i++) neuerBewerber(state, ctx);
+  const frei = Object.keys(ctx.berthById).find((id) => passendeBewerber(state, ctx, id).length && kannDauerplatz(state, ctx, id).reason === 'voll');
+  assert.ok(frei, 'ein freier Platz mit passendem Bewerber');
+  assert.deepEqual(bewerberFuer(state, ctx, frei), []);
+  assert.equal(machDauerplatz(state, ctx, frei, passendeBewerber(state, ctx, frei)[0].id).reason, 'voll');
 });
