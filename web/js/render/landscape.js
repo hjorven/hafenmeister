@@ -7,7 +7,8 @@
 //   game.emit('pegel', 1.2)                       Wasserstand in Metern (Gezeiten)
 //   game.emit('wetter', { bewoelkung, wind })     je 0..1
 //   game.emit('uhrzeit', 19.5)                    Stunden; null = wieder dem Spieltag folgen
-// Meldet: game.emit('licht', zustand) bei jeder Lichtänderung (zustand.nacht 0..1 für Fensterlicht).
+// Meldet: game.emit('licht', zustand) bei jeder Lichtänderung (zustand.nacht 0..1 für Fensterlicht),
+//         game.emit('landschaft:geaendert', { stufe, region }) nach jedem Neubau des Geländes.
 import { erzeugeLandschaft, autoQualitaet } from './landschaft/index.js';
 import { uhrzeitAusSpielzeit } from './landschaft/zeit.js';
 
@@ -59,6 +60,8 @@ export function init(game) {
   game.on('wetter', (w) => land.setzeWetter(w || {}));
   game.on('uhrzeit', (h) => { feste = h == null ? null : Number(h); if (feste != null) land.setzeUhrzeit(feste); });
   land.licht.beiAenderung((z) => game.emit('licht', z));
+  // Nach jedem Neubau (Stufe oder Region): Fahrwege, Anlagen und Bewuchs können neu rechnen
+  land.beiNeubau((info) => game.emit('landschaft:geaendert', info));
 
   let letzteUhr = -99, anzeigeUhr = 6.5, letzt = performance.now();
   let fx = Infinity, fz = Infinity;
