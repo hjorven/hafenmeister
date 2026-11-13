@@ -171,7 +171,7 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 
 ## 9. Im Spiel, aber nicht dokumentiert
 
-Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätzlich mit ihrem Paket. Stand PR 177: alle zwölf stehen jetzt in [balancing.md](balancing.md#regeln-im-spiel-die-sonst-nirgends-stehen) bzw. [tests.md](tests.md#testmodus-und-adresszusätze), der Rückfall-Speicherweg in [speichern.md](speichern.md) kommt mit P09.
+Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätzlich mit ihrem Paket. Stand PR 177: alle zwölf stehen jetzt in [balancing.md](balancing.md#regeln-im-spiel-die-sonst-nirgends-stehen) bzw. [tests.md](tests.md#testmodus-und-adresszusätze), die Übernahme des alten Rückfall-Speicherwegs steht seit P09 in [speichern.md](speichern.md#ein-speicherweg).
 
 | Was im Spiel passiert | Wo im Code | Paket |
 |---|---|---|
