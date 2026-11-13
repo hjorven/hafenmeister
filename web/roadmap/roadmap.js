@@ -166,6 +166,45 @@ function passtSuche(...texte) {
   return texte.some((t) => (t || '').toLowerCase().includes(q));
 }
 
+// ---------- Bilder und Neuigkeiten ----------
+
+function bildKachel(b, mitPaket) {
+  if (!b) return null;
+  const unter = [mitPaket ? b.pakete.join(', ') : null, b.titel, b.pr ? `PR ${b.pr}` : null].filter(Boolean).join(' · ');
+  return h('figure', { class: `bild ${b.geraet === 'handy' ? 'hoch' : ''}` },
+    h('button', { type: 'button', class: 'bild-knopf', 'aria-label': `${b.titel || 'Bild'} groß zeigen`, onclick: () => gross(b, unter) },
+      h('img', { src: `bilder/${b.datei}`, alt: b.titel || '', loading: 'lazy', decoding: 'async' })),
+    h('figcaption', {},
+      mitPaket && b.pakete[0] ? h('button', { type: 'button', class: 'paket-link', text: b.pakete.join(', '), onclick: () => zuPaket(b.pakete[0]) }) : null,
+      ' ', [b.titel, b.pr ? `PR ${b.pr}` : null].filter(Boolean).join(' · ')));
+}
+
+function gross(b, text) {
+  const dlg = document.getElementById('gross');
+  document.getElementById('gross-bild').src = `bilder/${b.datei}`;
+  document.getElementById('gross-bild').alt = b.titel || '';
+  document.getElementById('gross-text').textContent = text;
+  if (dlg.showModal) dlg.showModal(); else window.open(`bilder/${b.datei}`, '_blank', 'noopener');
+}
+
+function neuigkeiten() {
+  const box = document.getElementById('neu');
+  box.replaceChildren();
+  const bilder = (D.neueBilder || []).map((nr) => D.bilder[nr]).filter(Boolean);
+  const merges = (D.merges || []).slice(0, 8);
+  if (!bilder.length && !merges.length) return;
+  const kopf = h('h2', { class: 'gruppe-titel', text: 'Zuletzt im Spiel' });
+  const leiste = bilder.length ? h('div', { class: 'leiste' }, bilder.map((b) => bildKachel(b, true))) : null;
+  const liste = merges.length ? h('details', { class: 'merges kasten' },
+    h('summary', {}, h('span', { text: `Letzte ${merges.length} Merges` })),
+    h('ul', {}, merges.map((m) => h('li', {},
+      h('span', { class: 'datum', text: m.datum.split('-').reverse().join('.') }),
+      h('a', { href: `${D.repo}/pull/${m.pr}`, target: '_blank', rel: 'noopener', text: `#${m.pr}` }),
+      h('span', { text: m.titel }),
+      m.pakete.length ? h('span', { class: 'neben' }, m.pakete.map((id) => h('button', { type: 'button', class: 'paket-link', text: id, onclick: () => zuPaket(id) }))) : null)))) : null;
+  box.append(kopf, leiste, liste);
+}
+
 // ---------- Pakete ----------
 
 function paketKarte(p, q) {
@@ -176,12 +215,13 @@ function paketKarte(p, q) {
       h('span', { class: 'paket-id' }, ...markiert(p.id, q)),
       h('span', { class: 'paket-titel' }, ...markiert(p.titel, q)),
       marke(p.status),
-      h('span', { class: 'paket-unter', text: `${welle ? welleName(welle) : ''}${punkte.length ? ` · ${punkte.length} ${punkte.length === 1 ? 'Punkt' : 'Punkte'}` : ''}${p.prs.length ? ` · ${p.prs.length} PR` : ''}` })),
+      h('span', { class: 'paket-unter', text: `${welle ? welleName(welle) : ''}${punkte.length ? ` · ${punkte.length} ${punkte.length === 1 ? 'Punkt' : 'Punkte'}` : ''}${p.prs.length ? ` · ${p.prs.length} PR` : ''}${p.bilder && p.bilder.length ? ` · ${p.bilder.length} ${p.bilder.length === 1 ? 'Bild' : 'Bilder'}` : ''}` })),
     h('div', { class: 'paket-inhalt' },
       p.inhalt ? h('div', { class: 'zeile' }, h('span', { text: 'Inhalt' }), h('span', {}, ...markiert(p.inhalt, q))) : null,
       p.thread ? h('div', { class: 'zeile' }, h('span', { text: 'Thread, Stand' }), h('span', {}, ...markiert(p.thread, q))) : null,
       p.prs.length ? h('div', { class: 'zeile' }, h('span', { text: 'Pull Requests' }),
         h('span', { class: 'prs' }, p.prs.map((n) => h('a', { href: `${D.repo}/pull/${n}`, target: '_blank', rel: 'noopener', text: `#${n}` })))) : null,
+      p.bilder && p.bilder.length ? h('div', { class: 'bilder' }, p.bilder.map((nr) => bildKachel(D.bilder[nr], false))) : null,
       punkte.length ? h('div', {}, h('ul', { class: 'punkte' }, punkte.map((x) => punktZeile(x, q, p.id)))) : null));
   det.addEventListener('toggle', () => {
     if (det.open) zustand.paket = p.id;
@@ -282,6 +322,8 @@ async function start() {
   ausAdresse();
   document.getElementById('suche').value = zustand.q;
   kopf();
+  neuigkeiten();
+  document.getElementById('gross').addEventListener('click', (e) => { if (e.target.id === 'gross') e.target.close(); });
 
   let warte = 0;
   document.getElementById('suche').addEventListener('input', (e) => {

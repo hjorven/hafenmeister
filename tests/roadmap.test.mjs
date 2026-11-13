@@ -53,3 +53,17 @@ test('README-Abschnitt wird ersetzt, nicht verdoppelt', () => {
   assert.equal(zweimal.split('<!-- roadmap:start -->').length, 2);
 });
 
+
+test('Bilder der Roadmap: Datei vorhanden, Paket bekannt, nicht zu groß', async () => {
+  const { readdirSync, statSync } = await import('node:fs');
+  const { leseBilder } = await import('../tools/roadmap.mjs');
+  const bilder = leseBilder();
+  const ordner = new URL('../web/roadmap/bilder/', import.meta.url);
+  const dateien = new Set(readdirSync(ordner));
+  const mit = erzeuge(md, undefined, bilder);
+  for (const b of mit.bilder) {
+    assert.ok(dateien.has(b.datei), `${b.datei} fehlt in web/roadmap/bilder/`);
+    assert.ok(statSync(new URL(b.datei, ordner)).size < 400_000, `${b.datei} ist größer als 400 KB`);
+    assert.ok(b.pakete.length, `${b.datei} gehört zu keinem Paket`);
+  }
+});

@@ -37,6 +37,18 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 | [5](https://hjorven.github.io/hafenmeister/roadmap/#welle=5) | Regionen und Online | `░░░░░░░░░░` 0 % | 0 | 0 | 2 |
 | [6](https://hjorven.github.io/hafenmeister/roadmap/#welle=6) | Ausbau Stufe 7 bis 20 | `░░░░░░░░░░` 0 % | 0 | 0 | 16 |
 
+**Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
+
+<table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P66"><img src="web/roadmap/bilder/p66-pr180-handy-stufe4-final.jpg" alt="Fahrwasser am Handy" width="100%"></a><br><sub>P66 · Fahrwasser am Handy · PR 180</sub></td>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P64"><img src="web/roadmap/bilder/p64-pr204-korb-pc-g6-1-seebruecke.jpg" alt="Strandkörbe und Seebrücke" width="100%"></a><br><sub>P64 · Strandkörbe und Seebrücke · PR 204</sub></td>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P64"><img src="web/roadmap/bilder/p64-pr211-deko-pc-g8-4242-s6.jpg" alt="Ufer je Küstentyp" width="100%"></a><br><sub>P64 · Ufer je Küstentyp · PR 211</sub></td>
+</tr><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P62"><img src="web/roadmap/bilder/p62-pr195-kuesten-seed1.jpg" alt="Zehn Küstentypen aus Seed" width="100%"></a><br><sub>P62 · Zehn Küstentypen aus Seed · PR 195</sub></td>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P16"><img src="web/roadmap/bilder/p16-pr156-handy-aufstieg-stufe3.jpg" alt="Aufstieg zu Stufe 3" width="100%"></a><br><sub>P16 · Aufstieg zu Stufe 3 · PR 156</sub></td>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P16"><img src="web/roadmap/bilder/p16-pr156-pc-regionsabschluss.jpg" alt="Regionsabschluss" width="100%"></a><br><sub>P16 · Regionsabschluss · PR 156</sub></td>
+</tr></table>
+
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (0 von 5 erledigt)</summary>
 
 | Paket | Titel | Status | PRs |
