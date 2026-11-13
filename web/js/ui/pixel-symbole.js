@@ -58,6 +58,9 @@ export const PIXEL = {
   schnee: ['.....ii.....', '..i..ii..i..', '...i.ii.i...', '....iiii....', '.i...ii...i.', 'iiiiiiiiiiii', 'iiiiiiiiiiii', '.i...ii...i.', '....iiii....', '...i.ii.i...', '..i..ii..i..', '.....ii.....'],
   regatta: ['.....k......', '....Rkk.....', '...RRkpk....', '..RRRkppk...', '.RRRRkpppk..', 'RRRRRkkkkkk.', '.....k......', 'kkkkkkkkkkkk', '.kBBBBBBBBk.', '..kBBBBBBk..', 'WW.WWW.WWW.W', '............'],
   fest: ['..kkk.......', '.kRRRk.kkk..', '.kRRRkkyyyk.', '.kRRRkkyyyk.', '..kRk.kyyyk.', '...k...kyk..', '...k....k...', '....k...k...', '....k..k....', '.....kk.....', '.....k......', '.....k......'],
+  // Hafenbüro: orange Raute = Sonderfall für den Spieler, goldene Raute = Vorschlag des Büros
+  raute: ['.....kk.....', '....kssk....', '...kssssk...', '..kssssssk..', '.kssssssssk.', 'kssssppssssk', 'kssssppssssk', '.kssssssssk.', '..kssssssk..', '...kssssk...', '....kssk....', '.....kk.....'],
+  rauteGold: ['.....kk.....', '....kggk....', '...kggggk...', '..kggggggk..', '.kggggggggk.', 'kggggppggggk', 'kggggppggggk', '.kggggggggk.', '..kggggggk..', '...kggggk...', '....kggk....', '.....kk.....'],
   schiff: ['............', '......RR....', '......RR....', '...kkkkkkk..', '...kpBpBpk..', '.kkkkkkkkkk.', '.kpBpBpBpBk.', 'kkkkkkkkkkkk', 'kBBBBBBBBBBk', '.kBBBBBBBBk.', '..kkkkkkkk..', 'WW.WWW.WWW.W'],
 };
 

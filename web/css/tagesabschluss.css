@@ -7,8 +7,9 @@
   position: absolute;
   z-index: 32;
   top: calc(var(--hm-oben, 12px) + var(--hm-knopf, 48px) + 10px);
+  /* Lage und Höhe setzt ui/tagesabschluss.js (platziere): frei zwischen den Bedienknöpfen */
   left: 50%;
-  transform: translateX(-50%);
+  margin-left: calc(-1 * min(190px, 50% - var(--hm-rand, 12px)));
   box-sizing: border-box;
   width: min(380px, calc(100% - 2 * var(--hm-rand, 12px)));
   max-height: calc(100% - var(--hm-oben, 12px) - var(--hm-knopf, 48px) - var(--hm-unten, 12px) - 90px);
@@ -21,7 +22,12 @@
   pointer-events: auto;
 }
 .hm-ta[hidden], .hm-ta-zettel[hidden] { display: none !important; }
-.hm-ta.rein { animation: hm-ta-rein 0.28s steps(5, end); }
+.hm-ta[style*="left"] { margin-left: 0; }
+.hm-ta.rein { animation: hm-ta-karte-rein 0.28s steps(5, end); }
+@keyframes hm-ta-karte-rein {
+  from { transform: translateY(-14px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
 @keyframes hm-ta-rein {
   from { transform: translate(-50%, -14px); opacity: 0; }
   to { transform: translate(-50%, 0); opacity: 1; }
@@ -99,14 +105,15 @@
 .hm-ta-block { display: grid; gap: 2px; }
 .hm-ta-zeile {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 8px;
   padding: 3px 0;
   border-bottom: 2px dotted var(--hm-mulde, #e9dfca);
 }
-.hm-ta-name { flex: 1 1 auto; min-width: 0; font-weight: 650; }
+.hm-ta-name { flex: 1 1 0; min-width: 5.5em; font-weight: 650; }
 .hm-ta-name small { display: block; color: var(--hm-tinte-2, #5a6a7c); font-size: 12.5px; font-weight: 500; line-height: 1.25; }
-.hm-ta-zusatz { flex: none; color: var(--hm-tinte-2, #5a6a7c); font-size: 13px; }
+.hm-ta-zusatz { flex: none; white-space: nowrap; color: var(--hm-tinte-2, #5a6a7c); font-size: 13px; }
 .hm-ta-betrag { flex: none; font-family: var(--hm-pixel); font-weight: 700; font-variant-numeric: tabular-nums; }
 .hm-ta-zeile.leise { opacity: 0.65; }
 .hm-ta-zeile.minus .hm-ta-betrag { color: #b8473a; }
@@ -121,6 +128,7 @@
   flex-wrap: wrap;
   gap: 4px 6px;
   margin-top: 10px;
+  align-items: flex-start;
 }
 .hm-ta-boote > span {
   padding: 3px 8px;
@@ -241,13 +249,14 @@ body.foto .hm-ta, body.foto .hm-ta-zettel, body.foto .hm-ta-muenzen { display: n
     padding: 6px 12px 8px;
     font-size: 14px;
   }
-  .hm-ta-spalten { display: grid; grid-template-columns: 1.1fr 1fr; gap: 0 14px; align-items: start; }
+  .hm-ta-spalten { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 0 14px; align-items: start; }
   .hm-ta-boote { margin-top: 6px; }
   .hm-ta-best { display: none; }
   .hm-ta-balken { margin-top: 8px; }
   .hm-ta-boote > span { font-size: 12.5px; padding: 2px 6px; }
   .hm-ta-name small { font-size: 11.5px; }
-  .hm-ta-tipp { font-size: 12.5px; padding: 4px 6px; }
+  .hm-ta-tipp { font-size: 12px; padding: 3px 6px; line-height: 1.25; }
+  .hm-ta-zusatz { order: 3; flex-basis: 100%; font-size: 12px; }
   .hm-ta-fuss {
     position: sticky;
     bottom: -8px;
@@ -258,7 +267,7 @@ body.foto .hm-ta, body.foto .hm-ta-zettel, body.foto .hm-ta-muenzen { display: n
   }
   .hm-ta-uhr { display: none; }
   .hm-ta .hm-ta-weiter { min-height: 40px; min-width: 96px; }
-  .hm-ta-auto { font-size: 12px; white-space: nowrap; }
+  .hm-ta-auto { font-size: 12px; white-space: nowrap; overflow: hidden; }
   .hm-ta-kopf h2 { font-size: var(--hm-schrift, 15px); }
   .hm-ta-blaettern { height: 34px; }
   .hm-ta-summe { font-size: calc(var(--hm-schrift, 15px) + 6px); }
@@ -269,3 +278,31 @@ body.foto .hm-ta, body.foto .hm-ta-zettel, body.foto .hm-ta-muenzen { display: n
 @media (prefers-reduced-motion: reduce) {
   .hm-ta.rein, .hm-ta-zettel.rein { animation: none; }
 }
+
+/* Blätterpfeile aus ui/pixel-symbole.js */
+.hm-ta-blaettern { display: grid; place-items: center; }
+.hm-ta-blaettern .hm-sym { width: 18px; height: 18px; }
+.hm-ta-links-sym { transform: scaleX(-1); }
+
+/* Wenig Höhe zwischen den Knöpfen: kompakter, damit nichts innen rollt */
+.hm-ta.eng { padding-top: 6px; padding-bottom: 8px; }
+.hm-ta.eng .hm-ta-best,
+.hm-ta.eng .hm-ta-unter { display: none; }
+.hm-ta.eng .hm-ta-kopf h2 { font-size: var(--hm-schrift, 15px); }
+.hm-ta.eng .hm-ta-summe { font-size: calc(var(--hm-schrift, 15px) + 4px); }
+.hm-ta.eng .hm-ta-blaettern { height: 34px; width: 34px; }
+.hm-ta.eng .hm-ta-balken { height: 28px; margin-top: 6px; }
+.hm-ta.eng .hm-ta-boote { margin-top: 6px; }
+.hm-ta.eng .hm-ta-tipp { margin-top: 6px; }
+.hm-ta.sehr-eng .hm-ta-balken,
+.hm-ta.sehr-eng .hm-ta-name small,
+.hm-ta.sehr-eng .hm-ta-boote small { display: none; }
+.hm-ta.sehr-eng .hm-ta-kopf { margin-bottom: 2px; }
+.hm-ta-fuss { min-width: 0; }
+.hm-ta-auto { min-width: 0; }
+.hm-ta-auto span { overflow: hidden; text-overflow: ellipsis; }
+.hm-ta-tipp-links { display: none; }
+.hm-ta.sehr-eng .hm-ta-tipp-links { display: block; }
+.hm-ta.sehr-eng .hm-ta-rechts .hm-ta-tipp { display: none; }
+.hm-ta.ohne-tipp .hm-ta-tipp { display: none !important; }
+.hm-ta.sehr-eng .hm-ta-zusatz { order: 0; flex-basis: auto; }

@@ -105,8 +105,15 @@ test('Boot kommt, wird zugewiesen, abends steigt das Geld', async ({ game }, tes
   // 4. Abends erscheint "Kassieren", Antippen bringt das Hafengeld
   await forwardUntil(page, "state.phase === 'evening' && sim.mooredBoats().some((b) => b.pendingFee > 0)",
     'Abend mit offenem Hafengeld');
+  // Ohne Hafenbüro streicht man Münzen einzeln, den Knopf "Kassieren" bringt erst Bürostufe 1
   const collect = page.locator('#btn-collect');
-  await expect(collect, 'Knopf "Kassieren" erscheint abends nicht').toBeVisible();
+  await expect(collect, 'Knopf "Kassieren" darf es ohne Hafenbüro nicht geben').toBeHidden();
+  await page.evaluate(() => {
+    const g = window.hafenmeister;
+    g.sim.state.office = Math.max(g.sim.state.office, g.sim.ctx.rules.office.collectAllButton);
+    g.emit('sim:change', { reason: 'test' });
+  });
+  await expect(collect, 'Knopf "Kassieren" erscheint mit Hafenbüro Stufe 1 abends nicht').toBeVisible();
   const moneyText = await page.locator('#money').textContent();
   await press(collect, testInfo);
 
