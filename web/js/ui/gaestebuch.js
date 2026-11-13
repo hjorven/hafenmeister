@@ -144,7 +144,10 @@ export function init(game) {
     };
   }
 
-  const HINDERNISSE = ['.hm-status', '.hm-werkzeuge', '#hm-seite > *', '#hm-zeit', '#btn-build', '#btn-collect', '.hm-gb-meldung', '.hm-tipp', '#card:not([hidden])'];
+  const HINDERNISSE = ['.hm-status', '.hm-werkzeuge', '#hm-seite > *', '#hm-zeit', '#btn-build', '#btn-collect', '.hm-gb-meldung', '.hm-tipp', '#card:not([hidden])'].join(', ');
+  let gemessen = 0;
+  let spiel = null;
+  let hindernisse = [];
   let rafLaeuft = false;
   function schritt() {
     const jetzt = performance.now();
@@ -154,13 +157,16 @@ export function init(game) {
     // Lage jeder Blase, dann Überlappungen auflösen: jüngere weichen nach oben aus
     const belegt = [];
     // Feste Teile der Oberfläche (Status, Seite, Zeit, Bauen, Meldungen): Blasen darunter werden blass
-    const spiel = blasenEbene.getBoundingClientRect();
-    const hindernisse = [];
-    for (const q of HINDERNISSE) {
-      for (const e of document.querySelectorAll(q)) {
-        if (!e.offsetParent && getComputedStyle(e).position !== 'fixed') continue;
-        const r = e.getBoundingClientRect();
-        if (r.width && r.height) hindernisse.push(r);
+    // Lagen der Oberfläche nur alle 300 ms neu messen (spart Layout-Arbeit in jedem Bild)
+    if (jetzt - gemessen > 300 || !blasen.size) {
+      gemessen = jetzt;
+      spiel = blasenEbene.getBoundingClientRect();
+      hindernisse = [];
+      if (blasen.size) {
+        for (const e of document.querySelectorAll(HINDERNISSE)) {
+          const r = e.getBoundingClientRect();
+          if (r.width && r.height) hindernisse.push(r);
+        }
       }
     }
     for (const [id, x] of [...blasen].sort((a, b) => a[1].t0 - b[1].t0)) {
