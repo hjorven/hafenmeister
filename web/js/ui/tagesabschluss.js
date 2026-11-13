@@ -11,7 +11,9 @@
 // - Menü: "Tagesabschluss" öffnet die Karte jederzeit, mit Blättern durch die letzten Tage.
 // - Münzen über Gebäuden: Bei der Abrechnung der Services steigt über jeder Anlage eine Münze mit dem Betrag auf.
 //
-// Schnittstelle: game.tagesabschluss = { zeige(tag?), schliesse(), offen() }
+// Schnittstelle: game.tagesabschluss = { zeige(tag?), schliesse(), offen(), beschaeftigt() }
+//   beschaeftigt(): Karte oder Zettel sind zu sehen. Wenn beides wieder weg ist, kommt 'tagesabschluss:fertig'.
+//   Andere Morgen-Fenster (Kartenwahl der Tagesziele) warten darauf: erst der Abschluss, dann die Wahl.
 
 import { SERVICE_BY_ID } from '../data/services.js';
 
@@ -276,12 +278,19 @@ export function init(game) {
     if (!auto) game.oberflaeche?.klappeZu?.();
     return true;
   }
+  // Schließt Karte und Zettel (auch von außen, z. B. wenn der Spieler die Tafel der Tagesziele antippt)
   function schliesse() {
-    if (karte.hidden) return;
+    if (karte.hidden) {
+      if (!zettel.hidden) { zettel.hidden = true; zettelZeit = 0; meldeFertig(); }
+      return;
+    }
+    zettel.hidden = true;
+    zettelZeit = 0;
     karte.hidden = true;
     restzeit = 0;
     document.body.classList.remove('ta-offen');
     game.emit('tagesabschluss:zu', { tag: gezeigt });
+    meldeFertig();
   }
   // Anfassen hält die Karte offen
   const festhalten = () => {
@@ -398,7 +407,7 @@ export function init(game) {
     }
     if (zettelZeit > 0) {
       zettelZeit -= dt;
-      if (zettelZeit <= 0) zettel.hidden = true;
+      if (zettelZeit <= 0) { zettel.hidden = true; meldeFertig(); }
     }
     bewegeMuenzen(dt);
     requestAnimationFrame(uhr);
@@ -446,5 +455,13 @@ export function init(game) {
     }
   }
 
-  game.tagesabschluss = { zeige: (tag) => zeige(tag ?? null), schliesse, offen: () => !karte.hidden };
+  function meldeFertig() {
+    if (karte.hidden && zettel.hidden) game.emit('tagesabschluss:fertig', {});
+  }
+  game.tagesabschluss = {
+    zeige: (tag) => zeige(tag ?? null),
+    schliesse,
+    offen: () => !karte.hidden,
+    beschaeftigt: () => !karte.hidden || !zettel.hidden,
+  };
 }

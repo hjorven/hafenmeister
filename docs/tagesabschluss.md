@@ -37,3 +37,8 @@ Stand: 13.11.2026, Paket P15 (Ü22, Svc F4). Status: erledigt (PR 159).
 - Die Karte misst beim Öffnen den freien Platz: hochkant zwischen Statusleiste und Zeit/Kassieren/Bauen, quer zwischen Kasse/Zeit links, Bauen rechts und Kassieren unten. Die Schilder links (Wetter, Tagesziele, Ausbau) darf die offene Karte überdecken, sie zeigen nur etwas an.
 - Reicht die Höhe nicht, wird die Karte kompakter (Klasse `eng`, dann `sehr-eng` ohne Säulen und Unterzeilen, zuletzt `ohne-tipp`), statt innen zu rollen.
 - Blätterpfeile kommen aus `ui/pixel-symbole.js` (`pfeil`).
+
+## Reihenfolge am Morgen (mit den Tageszielen, P13)
+
+- `game.tagesabschluss.beschaeftigt()` ist true, solange Karte oder Zettel zu sehen sind. Sind beide weg, kommt `'tagesabschluss:fertig'`.
+- Die Kartenwahl der Tagesziele wartet darauf: erst der Abschluss, dann die Wahl. `game.tagesabschluss.schliesse()` schließt Karte und Zettel, etwa wenn der Spieler vorher auf die Tafel tippt.
