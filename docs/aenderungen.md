@@ -6,6 +6,8 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 13.11.2026
 
+- Einstieg für neue Spieler mit Hinweiskreisen, passend zur neuen Oberfläche und zum Gelände (112).
+- Die Geländeformen sind am Hafen klar zu unterscheiden, kein dunkles Band mehr im Fahrwasser (173).
 - Zehn Geländeformen nach echten Häfen an Ost- und Nordsee, jedes Spiel bekommt eine; die Einfahrt ist breiter (164, 168).
 - Abwechslungsreiches Land: Felder mit Knicks, Wald, Dorf mit Kirche und Mühle, Steilufer, Jahreszeiten (163, 171).
 - Marinebasis, Kreuzfahrtpier und Anlagen haben eigene Piers mit freien Wegen in jedem Stegbild (167).
