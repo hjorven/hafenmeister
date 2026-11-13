@@ -226,6 +226,14 @@ export function erledige(e, id) {
 // Im Browser
 
 export async function init(game) {
+  // Die Schnittstelle gibt es sofort: Wer beenden() oder start() ruft, bevor die Regeln bereit sind
+  // (Tests, Speicherplatzwahl), wird gemerkt und gleich nach dem Aufbau ausgeführt.
+  let vorher = null;
+  const schnittstelle = game.einstieg = {
+    start() { vorher = 'start'; },
+    beenden() { vorher = 'beenden'; },
+    schritt: () => null,
+  };
   const api = await regelnBereit(game);
   const { THREE } = game;
   const st = () => api.state;
@@ -696,10 +704,12 @@ export async function init(game) {
   window.addEventListener('pointerup', () => { ziehen = false; }, true);
   window.addEventListener('pointercancel', () => { ziehen = false; }, true);
 
-  game.einstieg = {
+  Object.assign(schnittstelle, {
     start() { st().modules ||= {}; const alt = st().modules.einstieg?.hinweise ?? []; st().modules.einstieg = { fertig: false, erledigt: [], hinweise: alt }; zeige(null); },
     beenden,
     schritt: () => aktuell,
-  };
+  });
+  game.einstieg = schnittstelle;
+  if (vorher) schnittstelle[vorher]();
   requestAnimationFrame(frame);
 }
