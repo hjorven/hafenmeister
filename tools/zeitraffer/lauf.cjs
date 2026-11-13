@@ -255,6 +255,12 @@ const SNAP = () => {
   // Speichern und Laden: speichern, mit fast angehaltener Zeit neu laden, vergleichen,
   // dann mit Zeitraffer weiter (lädt denselben Spielstand noch einmal).
   const speichernPruefen = async (warum) => {
+    // Nicht kurz vor dem Tageswechsel: dort springt schon ein Hauch Spielzeit nach dem Laden in den nächsten Tag
+    for (let i = 0; i < 20; i++) {
+      const knapp = await page.evaluate(() => { const S = window.hafenmeister.sim; const r = S.ctx.rules; return S.state.clock > r.dayLength + r.eveningLength - 3; });
+      if (!knapp) break;
+      await page.waitForTimeout(150);
+    }
     await page.evaluate(() => window.hafenmeister.setPaused(true));
     const vorher = await page.evaluate(`(${SNAP})()`);
     const ok = await page.evaluate(() => window.hafenmeister.spielstand?.speichern?.());

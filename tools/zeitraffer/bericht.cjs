@@ -99,7 +99,7 @@ for (const R of laeufe) {
   // Speichern
   md.push('### Speichern und Laden', '', '| Wann | gespeichert | Abweichung nach dem Laden |', '|---|---|---|');
   for (const s of R.speichern) {
-    md.push(`| ${s.warum} | ${s.gespeichert ? 'ja' : 'nein'} | ${s.abweichungen.length ? s.abweichungen.map((k) => `${k}: ${s.vorher[k]} statt ${s.nachher[k]}`).join('; ').replace(/\|/g, '/') : 'keine'} |`);
+    md.push(`| ${s.warum} | ${s.gespeichert ? 'ja' : 'nein'} | ${s.abweichungen.length ? s.abweichungen.map((k) => `${k} vorher ${s.vorher[k]}, nachher ${s.nachher[k]}`).join('; ').replace(/\|/g, '/') : 'keine'} |`);
     if (!s.gespeichert || s.abweichungen.length) fehlerliste.push({ geraet: R.geraet, art: 'Speichern', text: `${s.warum}: ${s.gespeichert ? '' : 'nicht gespeichert; '}${s.abweichungen.map((k) => `${k} vorher ${s.vorher[k]}, nachher ${s.nachher[k]}`).join('; ')}` });
   }
   md.push('');
