@@ -142,9 +142,10 @@ export function init(game) {
   // einem wartenden Boot oder einer Münze startet, übernimmt dieses Modul ihn ganz.
   host.addEventListener('pointerdown', (e) => {
     if (e.target !== canvas) return;
-    // Zweiter Finger: Leine oder Strich abbrechen, damit Zoomen sofort geht
-    if (tow) { endTow(false); return; }
-    if (strich) { endStrich(); return; }
+    // Zweiter Finger: Leine oder Strich abbrechen und den ersten Finger an core/input.js
+    // übergeben, damit Zoomen, Drehen und Neigen mit beiden Fingern sofort greifen
+    if (tow) { const t = tow; endTow(false, true); game.input?.uebernehmen?.(t.pid, t.finger); return; }
+    if (strich) { const s = strich; endStrich(); game.input?.uebernehmen?.(s.pid, s.pts[s.pts.length - 1]); return; }
     if (e.button !== undefined && e.button > 0) return;
     sound.unlock();
     const p = local(e);
@@ -216,11 +217,18 @@ export function init(game) {
     game.emit('ui:tow', { boot: tow.boot, x: w?.x, z: w?.z, platz: tow.ziel });
   }
 
-  function endTow(ok) {
+  function endTow(ok, abbruch = false) {
     const t = tow;
     tow = null;
     ringGroup.clear();
     if (boxen()) game.stege.highlight([]);
+    if (abbruch) {
+      // Zweiter Finger: Der Spieler will die Karte bewegen. Boot abwählen, sonst schiebt die
+      // Bootskarte am Handy die Ansicht mitten in der Geste nach oben (ui/input-touch.js).
+      if (game.sim?.selected === t.boot) game.sim.select?.(null);
+      if (t.moved) game.emit('ui:tow-end', { boot: t.boot, platz: null });
+      return;
+    }
     if (!t.moved) {
       // Nur angetippt: wie ein normaler Tipp behandeln und den Knopf "Einfahren" zeigen
       const pick = game.pick(t.start.x, t.start.y);
