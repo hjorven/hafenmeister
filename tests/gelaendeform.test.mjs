@@ -221,23 +221,43 @@ test('Viele Seeds je Küstentyp: Fahrwasser, Wartebojen, Liegeplätze und Leucht
   } finally { formSetzen(1); }
 });
 
-test('Strandkörbe und Seebrücke finden in jeder Küste einen echten Strand außerhalb des Hafens', async () => {
-  const { bauen, strandStelle } = await import('../web/js/render/landschaft/natur.js');
-  for (const f of FORMEN) {
-    for (const seed of [1, 7, 99, 4242]) {
-      const N = bauen(f.nr, seed);
-      const sb = strandStelle(N, -170, 216, { seebruecke: true, laenge: 83 });
-      const kb = strandStelle(N, -210, 214, { meiden: sb ? [sb] : [] });
-      for (const [name, s] of [['Seebrücke', sb], ['Strandkörbe', kb]]) {
-        if (!s) continue;   // keine passende Stelle: dann steht dort nichts (kein Fehler, aber selten)
-        const l = N.landig(s[0], s[1]);
-        assert.ok(l >= 2 && l <= 9, `Form ${f.nr} Seed ${seed}: ${name} bei ${s} nicht am Strand (L ${l.toFixed(1)})`);
-        assert.ok(!(s[0] > -200 && s[0] < 270 && s[1] > -110 && s[1] < 250), `Form ${f.nr} Seed ${seed}: ${name} bei ${s} im Hafen`);
+test('Strandkörbe stehen nur auf ebenem, trockenem Sand, die Seebrücke führt vom Sandufer ins freie Wasser', async () => {
+  const { strandStelle } = await import('../web/js/render/landschaft/natur.js');
+  const { natur } = await import('../web/js/render/landschaft/formen.js');
+  const NASS = ['wasser', 'watt', 'fels', 'kliff', 'schilfrand', 'salzwiese', 'mole', 'pflaster', 'weg', 'steinschuettung', 'waldboden'];
+  let koerbe = 0, bruecken = 0;
+  try {
+    for (const f of FORMEN) {
+      for (const seed of [1, 7, 99]) {
+        formSetzen(f.nr, seed);
+        const N = natur();
+        for (const stufe of [1, 3]) {
+          const boden = (x, y) => punkt(x, y, stufe, REGIONEN.ostsee);
+          const wo = `Form ${f.nr} Seed ${seed} Stufe ${stufe}`;
+          const sb = strandStelle(N, -170, 216, { seebruecke: true, laenge: 85, boden, stufe });
+          const kb = strandStelle(N, -14, -8, { meiden: sb ? [sb] : [], boden, stufe });
+          if (kb) {
+            koerbe++;
+            const hs = [[0, 0], [14, 0], [0, -6], [14, -6], [7, -3]].map(([dx, dy]) => boden(kb[0] + dx, kb[1] + dy));
+            for (const q of hs) assert.ok(!NASS.includes(q.typ) && q.h >= 0.2, `${wo}: Strandkorb auf ${q.typ} (${q.h.toFixed(2)} m)`);
+            assert.equal(boden(kb[0], kb[1]).typ, 'sand', `${wo}: Strandkörbe nicht auf Sand`);
+            assert.ok(Math.max(...hs.map((q) => q.h)) - Math.min(...hs.map((q) => q.h)) < 0.8, `${wo}: Strandkörbe am Hang`);
+            assert.ok(!['fels', 'kliff', 'wald'].includes(N.stil.ufer), `${wo}: Strandkörbe an einer Küste ohne Strand (${N.stil.ufer})`);
+          }
+          if (sb) {
+            bruecken++;
+            const [x, y, w] = sb, ex = -Math.sin(w), ey = Math.cos(w);
+            assert.equal(boden(x, y).typ, 'sand', `${wo}: Seebrücke beginnt nicht auf Sand`);
+            for (let t = 8; t <= 85; t += 5) {
+              const q = boden(x + ex * t, y + ey * t);
+              assert.ok((q.typ === 'wasser' || q.typ === 'watt') && q.h < 0, `${wo}: Seebrücke kreuzt ${q.typ} nach ${t} Einheiten`);
+            }
+          }
+        }
       }
-      if (sb) for (let t = 10; t <= 83; t += 8) assert.ok(N.landig(sb[0], sb[1] + t) < 0, `Form ${f.nr} Seed ${seed}: vor der Seebrücke ist Land`);
-      assert.ok(kb, `Form ${f.nr} Seed ${seed}: kein Strand für Strandkörbe`);
     }
-  }
+  } finally { formSetzen(1, 1); }
+  assert.ok(koerbe >= 4 && bruecken >= 4, `zu wenige Strände gefunden (${koerbe} Körbe, ${bruecken} Brücken)`);
 });
 
 test('Am Hafen ist der Küstentyp zu sehen: neben den Stegen und in der Nähe unterscheidet sich die Natur', async () => {

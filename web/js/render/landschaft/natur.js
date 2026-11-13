@@ -774,32 +774,61 @@ export function bauen(nr, seed = 1) {
 
 /**
  * Eine Stelle am Strand nahe (px, py) für Strandkörbe und Seebrücke: knapp über der Wasserlinie, nicht im
- * Hafen (samt Becken, Durchstich und Außenhafen späterer Stufen) und nicht an der Liegewanne der Großschiffe. seebruecke: davor nach Norden mindestens laenge
- * Planeinheiten freies Wasser. meiden: schon vergebene Stellen [[x, y], ...], mindestens 50 Einheiten Abstand.
- * Gibt [x, y] oder null zurück.
+ * Hafen (samt Becken, Durchstich und Außenhafen späterer Stufen) und nicht an der Liegewanne der Großschiffe.
+ * boden(x, y) liefert { h, typ } des fertigen Geländes (gelaende.js punkt). Damit stehen Körbe nur auf
+ * ebenem, trockenem Sand (alle Ecken der Gruppe), und die Seebrücke führt genau einmal vom Sandufer ins
+ * Wasser: auf ganzer Länge und Breite Wasser, kein Land, keine Mole. An Fels-, Kliff-, Schilf- und
+ * Waldküsten gibt es so von selbst keine Stelle. Ohne boden wird nur die Natur geprüft.
+ * meiden: schon vergebene Stellen [[x, y], ...], mindestens 50 Einheiten Abstand.
+ * Gibt [x, y, dreh] zurück (dreh in Bogenmaß um die Hochachse, 0 = Seebrücke zeigt nach Norden) oder null.
  */
-export function strandStelle(N, px, py, { seebruecke = false, laenge = 72, meiden = [] } = {}) {
+export function strandStelle(N, px, py, { seebruecke = false, laenge = 72, meiden = [], boden = null, stufe = 6 } = {}) {
   const L = N.landig;
-  const frei = (x, y) => !(x > -200 && x < 270 && y > -110 && y < 250) && !(x > -380 && x < 40 && y > 190 && y < 270)
+  // Stufe 1 und 2: nur der Bereich der Stege und Gebäude ist tabu, östlich davon liegt noch freier Strand
+  const hx1 = stufe <= 2 ? 0 : 262, hy1 = stufe <= 2 ? 120 : 250;
+  const frei = (x, y) => !(x > (seebruecke ? -230 : -175) && x < hx1 + (seebruecke ? 40 : 0) && y > -110 && y < hy1) && !(x > -380 && x < 40 && y > 190 && y < 270)
     && !(y > 236 && x > -460 && x < 500) && meiden.every(([mx, my]) => Math.hypot(mx - x, my - y) > 50);
+  const sand = (x, y) => { if (!boden) return L(x, y) > 1; const b = boden(x, y); return b.typ === 'sand' && b.h > 0.2 && b.h < 1.3 ? b.h : null; };
+  const nass = (x, y) => { if (!boden) return L(x, y) < -3; const b = boden(x, y); return (b.typ === 'wasser' || b.typ === 'watt') && b.h < -0.25; };
+  // Strandkörbe: Gruppe von etwa 9 x 4 m (14 x 6 Planeinheiten), nach Osten und Süden von der Lage aus
+  const korbPlatz = (x, y) => {
+    if (!boden) return sand(x, y);
+    if (sand(x, y) == null || sand(x + 12, y) == null) return false;   // vorn echter Sand
+    const NICHT = ['wasser', 'watt', 'fels', 'kliff', 'schilfrand', 'salzwiese', 'mole', 'pflaster', 'weg', 'steinschuettung', 'waldboden', 'dorf', 'feldweg'];
+    let lo = Infinity, hi = -Infinity;
+    for (const [dx, dy] of [[0, 0], [14, 0], [0, -6], [14, -6], [7, -3]]) {
+      const q = boden(x + dx, y + dy);
+      if (NICHT.includes(q.typ) || q.h < 0.2 || q.h > 2.2) return false;
+      lo = Math.min(lo, q.h); hi = Math.max(hi, q.h);
+    }
+    return hi - lo < 0.8;
+  };
+  // Seebrücke in Richtung (ex, ey): Fuß auf Sand, davor auf ganzer Länge (drei Spuren) Wasser
+  const brueckePlatz = (x, y, ex, ey) => {
+    if (!sand(x, y) || !sand(x - ex * 5, y - ey * 5)) return false;
+    for (let t = 8; t <= laenge; t += 5) {
+      for (const q of [-5, 0, 5]) if (!nass(x + ex * t - ey * q, y + ey * t + ex * q)) return false;
+    }
+    return true;
+  };
+  const RICHT = [0, 0.5, -0.5, 1, -1, 1.57, -1.57, 2.36, -2.36, 3.14];
   const passt = (x, y) => {
     const l = L(x, y);
-    if (l < 2 || l > 9 || !frei(x, y)) return false;
-    if (L(x, y + 14) > -1 && L(x + 14, y) > -1 && L(x - 14, y) > -1) return false;   // Wasser muss nah sein
-    if (!seebruecke) return true;
-    for (let t = 10; t <= laenge; t += 8) if (L(x, y + t) > -3) return false;
-    return L(x, y - 10) > 4;
+    if (l < 1.5 || l > 12 || !frei(x, y)) return null;
+    if (!seebruecke) return korbPlatz(x, y) ? [x, y, 0] : null;
+    if (l > 6) return null;
+    for (const w of RICHT) if (brueckePlatz(x, y, -Math.sin(w), Math.cos(w))) return [x, y, w];
+    return null;
   };
-  if (passt(px, py)) return [px, py];
-  for (let r = 8; r <= 700; r += 8) {
+  let treffer = passt(px, py);
+  for (let r = 8; r <= 700 && !treffer; r += 8) {
     const n = Math.max(12, Math.round(r / 6));
-    for (let k = 0; k < n; k++) {
+    for (let k = 0; k < n && !treffer; k++) {
       const a = (k / n) * Math.PI * 2;
-      const x = px + r * Math.cos(a), y = py + r * Math.sin(a);
-      if (passt(x, y)) return [x, y];
+      treffer = passt(px + r * Math.cos(a), py + r * Math.sin(a));
     }
   }
-  return null;
+  return treffer;
 }
 
 /** Chamfer-Abstand (Rasterzellen) zu den Zellen mit maske[k] !== ziel... genauer: zu Zellen mit maske[k] === quelle. */

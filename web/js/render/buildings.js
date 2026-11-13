@@ -24,6 +24,8 @@ import * as THREE from 'three';
 import { buendeln } from './buendeln.js';
 import { natur } from './landschaft/formen.js';
 import { strandStelle } from './landschaft/natur.js';
+import { punkt } from './landschaft/gelaende.js';
+import { REGIONEN as LAND_REGIONEN } from './landschaft/regionen.js';
 
 const U = 0.62;
 const W = (xp, yp) => [xp * U, -yp * U];
@@ -396,32 +398,36 @@ const PLAN = [
 const WELLENBRECHER = [[-150, 136], [-95, 150], [-30, 154], [30, 148]];
 
 // Strandkörbe und Seebrücke gehören an einen echten Strand: Die Küste ist je Spiel anders (natur.js),
-// darum sucht strandStelle die nächste passende Stelle zur geplanten Lage. Der Hafen-Korb (koerbe-4) bleibt.
-const STRAND = new Set(['koerbe-1', 'koerbe-2', 'koerbe-3', 'seebruecke']);
+// darum sucht strandStelle die nächste passende Stelle zur geplanten Lage: ebener, trockener Sand, die
+// Seebrücke vom Sandufer ins freie Wasser. Wo die Küste keinen Strand hat (Fels, Kliff, Schilf, Wald), fehlen sie.
+const STRAND = new Set(['koerbe-1', 'koerbe-2', 'koerbe-3', 'koerbe-4', 'seebruecke']);
 let _strand = null, _strandN = null;
-function strandLage(id, stufe) {
+function strandLage(id, stufe, region = 'ostsee') {
   let N;
   try { N = natur(); } catch { return null; }
   if (!N?.landig) return null;
   if (_strandN !== N) { _strand = new Map(); _strandN = N; }
-  if (!_strand.has(stufe)) {
+  const reg = LAND_REGIONEN[region] ?? LAND_REGIONEN.ostsee;
+  const boden = (x, y) => punkt(x, y, stufe, reg);
+  const key = `${stufe}|${region}`;
+  if (!_strand.has(key)) {
     const vergeben = [], out = {};
     // Seebrücke zuerst: Sie braucht freies Wasser davor, Körbe finden leichter Platz
     for (const e of [...PLAN.filter((x) => x.id === 'seebruecke'), ...PLAN.filter((x) => STRAND.has(x.id) && x.id !== 'seebruecke')]) {
       const [x, y] = lageInStufe(e.p, stufe);
-      const s = strandStelle(N, x, y, { seebruecke: e.art === 'seebruecke', laenge: (e.opt?.laenge ?? 44) / U + 12, meiden: vergeben });
+      const s = strandStelle(N, x, y, { seebruecke: e.art === 'seebruecke', laenge: (e.opt?.laenge ?? 44) / U + 14, meiden: vergeben, boden, stufe });
       out[e.id] = s;
       if (s) vergeben.push(s);
     }
-    _strand.set(stufe, out);
+    _strand.set(key, out);
   }
-  return _strand.get(stufe)[id] ?? null;
+  return _strand.get(key)[id] ?? null;
 }
 
 /** Lage in Planeinheiten in einer Stufe; Strandsachen am echten Strand, sonst null (dann fehlen sie). */
-function stelle(it, stufe) {
+function stelle(it, stufe, region) {
   if (!it.p) return null;
-  if (STRAND.has(it.id)) return strandLage(it.id, stufe);
+  if (STRAND.has(it.id)) return strandLage(it.id, stufe, region);
   return lageInStufe(it.p, stufe);
 }
 
@@ -505,7 +511,7 @@ export function init(game) {
   function setStage(n) {
     stufe = Math.max(1, Math.min(6, Math.round(Number(n) || 1)));
     for (const it of items) {
-      const ort = stelle(it, stufe);
+      const ort = stelle(it, stufe, regionName);
       const sichtbar = stufe >= it.ab && (it.bis == null || stufe <= it.bis) && gekauft(it) && (!it.p || !!ort);
       // Unsichtbares aus der Szene nehmen statt visible = false, damit game.pick es nicht trifft
       if (sichtbar && !it.mesh.parent) group.add(it.mesh);
@@ -515,7 +521,7 @@ export function init(game) {
       const [x, z] = W(xp, yp);
       const boden = it.mole ? hoehe(x, z, 1.4) : it.art === 'seebruecke' ? 0 : hoehe(x, z, 0.3);
       it.mesh.position.set(x, boden, z);
-      it.mesh.rotation.y = THREE.MathUtils.degToRad(it.dreh ?? 0);
+      it.mesh.rotation.y = ort[2] ?? THREE.MathUtils.degToRad(it.dreh ?? 0);
     }
     api.stage = stufe;
   }
@@ -558,11 +564,11 @@ export function init(game) {
   // Wo ein Gebaeude in einer Stufe steht (auch wenn es noch nicht gebaut ist), fuer die Bau-Vorschau
   function lage(id, n = stufe) {
     const it = items.find((i) => i.id === id);
-    const ort = it && stelle(it, n);
+    const ort = it && stelle(it, n, regionName);
     if (!ort) return null;
     const [xp, yp] = ort;
     const [x, z] = W(xp, yp);
-    return { x, z, y: it.mole ? hoehe(x, z, 1.4) : hoehe(x, z, 0.3), dreh: THREE.MathUtils.degToRad(it.dreh ?? 0), mesh: it.mesh };
+    return { x, z, y: it.mole ? hoehe(x, z, 1.4) : hoehe(x, z, 0.3), dreh: ort[2] ?? THREE.MathUtils.degToRad(it.dreh ?? 0), mesh: it.mesh };
   }
   // Welches Gebaeude zu welcher gekauften Versorgung gehoert: { gebaeudeId: { art, stufe } }
   const fuerKauf = (art, n) => Object.entries(KAUF).filter(([, k]) => k.art === art && k.stufe === n).map(([id]) => id);
