@@ -3,7 +3,7 @@
 // Schnittstelle für andere Module: docs/spielregeln.md
 
 import * as sim from './sim.js';
-import { createState, deserialize, load as loadLocal, save as saveLocal } from './state.js';
+import { createState, deserialize } from './state.js';
 import { HAFEN, platzInWelt } from './data/harbor.js';
 import { BOAT_CATALOG } from './data/boat-catalog.js';
 import { ECONOMY } from './data/economy.js';
@@ -108,8 +108,7 @@ export async function initBridge(game) {
 
   function persist() {
     if (state.testmodus) return; // Testmodus ?stufe=n lässt den echten Spielstand in Ruhe
-    if (game.spielstand?.speichern) game.spielstand.speichern(state);
-    else saveLocal(state);
+    game.spielstand?.speichern?.(state); // ein Speicherweg: web/js/save/ (docs/speichern.md)
   }
 
   function announce() {
@@ -317,15 +316,21 @@ export async function initBridge(game) {
   };
   game.sim = api;
 
-  // Spielstand: zuerst game.spielstand (Speichermodul), sonst eigener localStorage, sonst neu
+  // Spielstand des aktiven Speicherplatzes (game.spielstand, web/js/save/), sonst neu
   function loadSaved() {
     try {
       const r = game.spielstand?.laden?.();
-      if (r?.game) return deserialize(JSON.stringify(r.game));
+      if (r?.game) return pruefen(deserialize(JSON.stringify(r.game)));
     } catch (err) {
       console.warn('Spielstand nicht lesbar, neues Spiel', err);
     }
-    return loadLocal();
+    return null;
+  }
+  // Alte Stände: Gäste in Boxen, die es nicht mehr gibt oder die zu flach sind, legen um (sim.repairBerths)
+  function pruefen(st) {
+    const changes = sim.repairBerths(st, ctx);
+    if (changes.length) console.info('Spielstand geprüft, Boote umgelegt:', changes);
+    return st;
   }
   // Testmodus ?stufe=n: frischer Spielstand dieser Stufe (alles bis dahin gebaut), der echte
   // gespeicherte Spielstand wird weder geladen noch überschrieben. Ohne Parameter wie gehabt.
@@ -336,7 +341,7 @@ export async function initBridge(game) {
 
   game.on('spielstand-geladen', (next) => {
     try {
-      setState(deserialize(JSON.stringify(next)));
+      setState(pruefen(deserialize(JSON.stringify(next))));
       announce();
     } catch (err) {
       console.error('Geladener Spielstand passt nicht zu den Regeln', err);
