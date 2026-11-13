@@ -177,8 +177,17 @@ export function bewerberPacht(state, ctx, bewerber) {
 }
 
 /** Offene Bewerber, die an diesen Platz passen (in der Reihenfolge ihrer Anfrage). */
-export function bewerberFuer(state, ctx, platzId) {
+export function passendeBewerber(state, ctx, platzId) {
   return dauerState(state).bewerber.filter((b) => bewerberPasst(state, ctx, b, platzId));
+}
+
+/**
+ * Bewerber, denen der Spieler diesen Platz jetzt wirklich geben kann. Leer, wenn der Platz gerade
+ * nicht vermietbar ist (belegt, reserviert, Obergrenze voll ...): rechnet wie machDauerplatz, den Grund
+ * nennt kannDauerplatz(state, ctx, platzId).reason.
+ */
+export function bewerberFuer(state, ctx, platzId) {
+  return kannDauerplatz(state, ctx, platzId).ok ? passendeBewerber(state, ctx, platzId) : [];
 }
 
 /**
@@ -234,7 +243,7 @@ export function kannDauerplatz(state, ctx, platzId) {
   if (berth.reserved) return { ok: false, reason: 'reserved' };
   if (!sim.isFree(state, platzId)) return { ok: false, reason: 'occupied' };
   if (anzahl(state) >= hoechstZahl(state, ctx)) return { ok: false, reason: 'voll' };
-  if (!bewerberFuer(state, ctx, platzId).length) return { ok: false, reason: 'keinBewerber' };
+  if (!passendeBewerber(state, ctx, platzId).length) return { ok: false, reason: 'keinBewerber' };
   return { ok: true };
 }
 
@@ -821,9 +830,22 @@ export async function init(game) {
     card.hidden = false;
     document.body.classList.add('card-open');
   }
+  // Warum etwas nicht ging, in Worten (statt still nichts zu tun)
+  const GRUND_VERMIETEN = {
+    occupied: () => 'Der Platz ist gerade belegt.',
+    reserved: () => 'Dieser Platz ist für Fischer oder Dienste reserviert.',
+    noBerth: () => 'Diesen Platz gibt es in dieser Ausbaustufe nicht.',
+    stage: () => `Dauerplätze gibt es ab Ausbaustufe ${R().abStufe}.`,
+    keinBewerber: () => 'Dieser Bewerber passt nicht mehr an den Platz.',
+    money: () => 'Dafür reicht das Geld gerade nicht.',
+  };
+  const grundText = (reason) => (GRUND_VERMIETEN[reason] ?? (() => 'Das geht gerade nicht.'))();
   function aktion(r) {
-    api.dispatch(r.events);
-    if (offen?.art === 'platz') platzKarte(offen.id);
+    api.dispatch(r.events ?? []);
+    // Bei voller Obergrenze erklärt die Karte das selbst, sonst steht der Grund oben
+    const text = r.ok === false && r.reason !== 'voll' ? grundText(r.reason) : '';
+    // Zeigt die Platzkarte nichts mehr (zum Beispiel jetzt belegt), kommt der Grund als Hinweis oben
+    if (offen?.art === 'platz' && !platzKarte(offen.id, text) && text) zeigeHinweis('Das ging nicht', text, 6, 'warnung');
   }
   const zahl = () => `Dauerplätze: ${anzahl(api.state)} von ${hoechstZahl(api.state, api.ctx)}`;
   const saisonende = () => {
@@ -833,7 +855,7 @@ export async function init(game) {
   };
 
   // Karte für einen Platz: Dauerplatz ansehen und kündigen, freien Platz vermieten, Stammgast behalten
-  function platzKarte(platzId) {
+  function platzKarte(platzId, hinweisText = '') {
     const st = api.state;
     const p = dauerState(st).plaetze[platzId];
     const k = kannDauerplatz(st, api.ctx, platzId);
@@ -910,6 +932,7 @@ export async function init(game) {
       });
       teile.push(el('div', { class: 'card-actions dauer-liste' }, ...zeilen));
     }
+    if (hinweisText) teile.splice(1, 0, el('p', { class: 'card-note' }, hinweisText));
     zeige(teile);
     return true;
   }
