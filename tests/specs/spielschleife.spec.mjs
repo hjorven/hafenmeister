@@ -27,10 +27,11 @@ async function forwardUntil(page, condition, what) {
 async function boatOnScreen(page, boatId) {
   // boat-view.js meldet 'boot:an-boje', sobald das Boot sichtbar an der Boje fest ist.
   // Bis dahin schneller laufen lassen, damit das Einlaufen nicht eine halbe Minute dauert.
-  await page.evaluate(() => { window.hafenmeister.speed = 6; });
+  // Auf GitHub rendert das Tablet (große Fläche, Software-Grafik) nur wenige Bilder je Sekunde, daher viel Zeit.
+  await page.evaluate(() => { window.hafenmeister.speed = 8; });
   await expect.poll(
     () => page.evaluate((id) => window.__anBoje.has(String(id).replace(/^b/, '')), boatId),
-    { message: '3D-Boot kommt nicht an der Boje an (Ereignis boot:an-boje fehlt)', timeout: 40_000 },
+    { message: '3D-Boot kommt nicht an der Boje an (Ereignis boot:an-boje fehlt)', timeout: 75_000 },
   ).toBe(true);
   // Anhalten, damit das Boot nicht mehr schaukelt: Antippen und der Knopf am Boot liegen dann still
   await page.evaluate(() => { window.hafenmeister.speed = 1; window.hafenmeister.setPaused(true); });
@@ -54,7 +55,7 @@ async function boatOnScreen(page, boatId) {
 }
 
 test('Boot kommt, wird zugewiesen, abends steigt das Geld', async ({ game }, testInfo) => {
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
   const { page } = game;
   // bridge.js richtet game.sim nach dem Laden der Bootsdaten ein, das kann kurz dauern
   const hasSim = await page.waitForFunction(() => !!window.hafenmeister.sim, null, { timeout: 15_000 })

@@ -2,7 +2,9 @@
 // Start (im Ordner tests/):  npx playwright test
 import { defineConfig, devices } from '@playwright/test';
 
-const PORT = 4173;
+// Port des Testservers. tests/pruefen.sh waehlt jedes Mal einen freien Port (HM_TEST_PORT),
+// damit nie ein alter, noch laufender Server einen veralteten Stand ausliefert.
+const PORT = Number(process.env.HM_TEST_PORT || 4173);
 const CI = !!process.env.CI;
 
 // Software-WebGL (SwiftShader), damit Three.js auch ohne Grafikkarte rendert (CI, Container).
@@ -41,9 +43,11 @@ export default defineConfig({
     { name: 'pc', use: chromium({ ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } }) },
   ],
   webServer: {
-    command: `bash ../tools/build-pages.sh && node server.mjs ${PORT}`,
+    command: `bash ../tools/build-pages.sh && exec node server.mjs ${PORT}`,
     url: `http://localhost:${PORT}/hafenmeister/`,
-    reuseExistingServer: !CI,
+    // Nie einen schon laufenden Server benutzen: der koennte ein altes _site/ ausliefern
+    // (z. B. nach einem abgebrochenen Lauf). Ist der Port belegt, bricht Playwright mit Meldung ab.
+    reuseExistingServer: false,
     timeout: 60_000,
   },
 });

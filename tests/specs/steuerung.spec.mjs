@@ -1,6 +1,6 @@
 // Grundbedienung: Pause, Karte verschieben, zoomen, Uebersicht, Antippen.
 // Auf Touch-Geraeten mit echten Finger-Gesten, am PC mit Maus.
-import { test, expect, cameraState, stageCenter, touchGesture, lerpFrames, isTouchProject, ohneEinstieg } from '../helpers.mjs';
+import { test, expect, cameraState, stageCenter, touchGesture, lerpFrames, isTouchProject, ohneEinstieg, kameraRuhig } from '../helpers.mjs';
 
 async function press(page, selector, testInfo) {
   const btn = page.locator(selector);
@@ -30,6 +30,7 @@ test('Pause hält die Spielzeit an und Weiter läuft weiter', async ({ game }, t
 
 test('Karte verschieben und mit Übersicht zurück', async ({ game }, testInfo) => {
   const { page } = game;
+  await kameraRuhig(page);
   const before = await cameraState(page);
   const c = await stageCenter(page);
   const to = { x: c.x - 120, y: c.y - 60 };
@@ -42,22 +43,31 @@ test('Karte verschieben und mit Übersicht zurück', async ({ game }, testInfo) 
     await page.mouse.move(to.x, to.y, { steps: 12 });
     await page.mouse.up();
   }
+  await kameraRuhig(page);   // Wischen hat Schwung: erst messen, wenn die Karte ausgeglitten ist
   const moved = await cameraState(page);
   const dist = Math.hypot(moved.x - before.x, moved.z - before.z);
   expect(dist, 'Ziehen verschiebt die Karte nicht').toBeGreaterThan(1);
 
-  await press(page, '#btn-overview', testInfo);
-  const back = await cameraState(page);
-  // Erwartet: genau die Startansicht, die camera.reset() berechnet
-  const home = await page.evaluate(() => {
-    const c = window.hafenmeister.camera;
-    c.reset();
-    return { x: c.target.x, z: c.target.z, width: c.viewWidth };
-  });
+  // "Uebersicht" muss genau zur Startansicht fuehren, die camera.reset() gerade berechnet.
+  // Die Startansicht selbst kann sich kurz nach dem Laden noch aendern (Module legen Bauplaetze an,
+  // Leisten bewegen sich). Darum: Knopf druecken, Ruhe abwarten, mit reset() vergleichen; weicht die
+  // Startansicht inzwischen ab, noch einmal (hoechstens 5 Versuche). Ein Knopf, der nie zur
+  // Startansicht fuehrt, faellt damit weiterhin durch.
+  const tol = 0.05;   // Meter, Rundung der Kamerafahrt
+  let back, home;
+  for (let versuch = 0; versuch < 5; versuch++) {
+    await press(page, '#btn-overview', testInfo);
+    await kameraRuhig(page);
+    back = await cameraState(page);
+    home = await page.evaluate(() => {
+      const cam = window.hafenmeister.camera;
+      cam.reset();
+      return { x: cam.target.x, z: cam.target.z, width: cam.viewWidth };
+    });
+    if (Math.abs(back.x - home.x) < tol && Math.abs(back.z - home.z) < tol && Math.abs(back.width - home.width) < tol) break;
+    await page.waitForTimeout(300);
+  }
   expect(Math.hypot(moved.x - home.x, moved.z - home.z), 'Testaufbau: Karte war nicht verschoben').toBeGreaterThan(1);
-  // Kleine Abweichungen sind erlaubt: Leisten und Startrechteck koennen sich zwischen den beiden
-  // Aufrufen um Bruchteile bewegen (Animationen). Gemessen in 1 % der Ausschnittbreite.
-  const tol = Math.max(0.2, home.width * 0.01);
   expect(Math.abs(back.x - home.x), 'Uebersicht fuehrt nicht zur Startansicht (x)').toBeLessThan(tol);
   expect(Math.abs(back.z - home.z), 'Uebersicht fuehrt nicht zur Startansicht (z)').toBeLessThan(tol);
   expect(Math.abs(back.width - home.width), 'Uebersicht fuehrt nicht zur Startansicht (Breite)').toBeLessThan(tol);

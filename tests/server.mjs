@@ -61,5 +61,9 @@ http.createServer((req, res) => {
   });
   fs.createReadStream(file).pipe(res);
 }).listen(PORT, () => {
+  // Endet der Testlauf ohne aufzuraeumen (Abbruch, Zeitlimit), beendet sich der Server selbst,
+  // statt spaeteren Laeufen einen veralteten Stand auszuliefern.
+  const eltern = process.ppid;
+  setInterval(() => { if (process.ppid !== eltern) process.exit(0); }, 2000).unref();
   console.log(`Hafenmeister-Testserver: http://localhost:${PORT}${BASE}`);
 });
