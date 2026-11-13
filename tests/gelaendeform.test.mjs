@@ -126,23 +126,24 @@ test('Bauflächen und Anlagenflächen liegen nicht im Engpass oder Fahrwasser', 
 
 test('Alle Geländeformen: Engpass, Fahrwasser, Liegeplätze, Wartebojen und Leuchttürme passen', () => {
   try {
-    for (const F of FORMEN) {
+    for (const F of FORMEN) for (const R of ['ostsee', 'nordsee']) {
       formSetzen(F.nr);
+      const reg = REGIONEN[R];
       for (const st of STUFEN) {
-        assert.ok(engpassBreiteM(st, 'ostsee', st <= 2 ? 1.2 : 2.5) >= (st <= 2 ? 18 : 30), `Form ${F.nr} Stufe ${st}: Engpass zu schmal`);
+        assert.ok(engpassBreiteM(st, R, st <= 2 ? 1.2 : 2.5) >= (st <= 2 ? 18 : 30), `Form ${F.nr} ${R} Stufe ${st}: Engpass zu schmal`);
         const f = festePunkte(st);
-        for (const [px, py] of f.fahrwasser) assert.ok(-punkt(px, py, st, REGIONEN.ostsee).h >= (st <= 2 ? 1.6 : 3), `Form ${F.nr} Stufe ${st}: Fahrwasser flach bei ${px},${py}`);
-        for (const b of warteplaetze(st).bojen) assert.ok(-punkt(b.px, b.py, st, REGIONEN.ostsee).h > 1.2, `Form ${F.nr} Stufe ${st}: Boje ${b.id} zu flach`);
-        for (const a of warteplaetze(st).ankerplaetze) assert.ok(-punkt(a.px, a.py, st, REGIONEN.ostsee).h > 1.0, `Form ${F.nr} Stufe ${st}: Ankerplatz ${a.id} zu flach`);
+        for (const [px, py] of f.fahrwasser) assert.ok(-punkt(px, py, st, reg).h >= (st <= 2 ? 1.6 : 3), `Form ${F.nr} ${R} Stufe ${st}: Fahrwasser flach bei ${px},${py}`);
+        for (const b of warteplaetze(st).bojen) assert.ok(-punkt(b.px, b.py, st, reg).h > 1.2, `Form ${F.nr} ${R} Stufe ${st}: Boje ${b.id} zu flach`);
+        for (const a of warteplaetze(st).ankerplaetze) assert.ok(-punkt(a.px, a.py, st, reg).h > 1.0, `Form ${F.nr} ${R} Stufe ${st}: Ankerplatz ${a.id} zu flach`);
       }
       for (const p of HAFEN.plaetze) for (const [st, l] of Object.entries(p.lage)) {
         const soll = p.tiefe?.[st];
         if (soll == null) continue;
-        assert.ok(-punkt(l[0], l[1], Number(st), REGIONEN.ostsee).h >= soll - 0.4, `Form ${F.nr}: ${p.id} Stufe ${st} zu flach`);
+        assert.ok(-punkt(l[0], l[1], Number(st), reg).h >= soll - 0.4, `Form ${F.nr} ${R}: ${p.id} Stufe ${st} zu flach`);
       }
-      for (const [x, y] of leuchttuerme()) assert.ok(punkt(x, y, 3, REGIONEN.ostsee).h > 0.3, `Form ${F.nr}: Leuchtturm bei ${x},${y} steht im Wasser`);
+      for (const [x, y] of leuchttuerme()) assert.ok(punkt(x, y, 3, reg).h > 0.3, `Form ${F.nr} ${R}: Leuchtturm bei ${x},${y} steht im Wasser`);
       // Westliche Nehrung bleibt Land (Anlagen der Stufe 6)
-      for (let x = -360; x <= -90; x += 30) assert.ok(punkt(x, 210, 6, REGIONEN.ostsee).h > 0, `Form ${F.nr}: westliche Nehrung bei x ${x} ist Wasser`);
+      for (let x = -360; x <= -90; x += 30) assert.ok(punkt(x, 210, 6, reg).h > 0, `Form ${F.nr} ${R}: westliche Nehrung bei x ${x} ist Wasser`);
     }
   } finally { formSetzen(1); }
 });

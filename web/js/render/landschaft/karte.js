@@ -6,7 +6,7 @@
 // Planeinheiten wie web/js/data/harbor.js (1 = 0,62 m, x Osten, y Norden).
 // Welt: x = px * 0,62, z = -py * 0,62.
 import {
-  punkt, PLAN_M, BEREICH, ENGPASS_X, DURCHSTICH, DURCHSTICH_TIEFE, SEEGATT_TIEFE,
+  punkt, PLAN_M, BEREICH, KERN, ENGPASS_X, DURCHSTICH, DURCHSTICH_TIEFE, SEEGATT_TIEFE,
   seegattAchse, seegattHalb, seeNord, meerSued, molen, HAFENFLAECHE,
 } from './gelaende.js';
 import { region as regionNach } from './regionen.js';
@@ -115,8 +115,9 @@ export function festePunkteWelt(stufe) {
  */
 export function karteRaster(stufe, region, schritt = 2) {
   const reg = regionVon(region);
-  const x0 = BEREICH.x0, y0 = BEREICH.y0;
-  const nx = Math.floor((BEREICH.x1 - x0) / schritt) + 1, ny = Math.floor((BEREICH.y1 - y0) / schritt) + 1;
+  // Kernbereich (Hafen, Revier und Anfahrt); der breitere Rand von BEREICH ist nur Kulisse
+  const x0 = KERN.x0, y0 = KERN.y0;
+  const nx = Math.floor((KERN.x1 - x0) / schritt) + 1, ny = Math.floor((KERN.y1 - y0) / schritt) + 1;
   const n = nx * ny;
   const tiefe = new Float32Array(n), artA = new Uint8Array(n), ufer = new Float32Array(n);
   for (let j = 0; j < ny; j++) {
