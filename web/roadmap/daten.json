@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "512dd44"
+  "commit": "9fca715"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -365,10 +365,12 @@
   {
    "id": "P14",
    "titel": "Bewertungen und Gästebuch zeigen",
-   "inhalt": "Ü21, F18",
-   "thread": "neu",
+   "inhalt": "Ü21, F18, C1, C9; Note aus Wünschen 2,5 bis 5 (Befund P10)",
+   "thread": "erledigt (PR 154)",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    154
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "Ü21",
@@ -377,7 +379,7 @@
     "C9",
     "Bed P1"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1665,12 +1667,14 @@
   {
    "code": "Ü21",
    "text": "Bewertung beim Ablegen über dem Boot zeigen, bei schlechter Note mit Symbol des fehlenden Wunsches",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 154)",
    "pakete": [
     "P14"
    ],
-   "prs": [],
+   "prs": [
+    154
+   ],
    "abschnitt": "Rückmeldung (Ü21 bis Ü23)"
   },
   {
@@ -1911,12 +1915,14 @@
   {
    "code": "F18",
    "text": "Gästebuch: letzte 20 Bewertungen am Hafenbüro",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 154)",
    "pakete": [
     "P14"
    ],
-   "prs": [],
+   "prs": [
+    154
+   ],
    "abschnitt": "Langzeit"
   },
   {
@@ -2441,12 +2447,14 @@
   {
    "code": "C1",
    "text": "Bewertung beim Ablegen zeigen (= Ü21)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 154)",
    "pakete": [
     "P14"
    ],
-   "prs": [],
+   "prs": [
+    154
+   ],
    "abschnitt": "C Ruf und Bewertung"
   },
   {
@@ -2529,12 +2537,14 @@
   {
    "code": "C9",
    "text": "Ruf-Verlauf mit den drei häufigsten Gründen für schlechte Noten",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 154)",
    "pakete": [
     "P14"
    ],
-   "prs": [],
+   "prs": [
+    154
+   ],
    "abschnitt": "C Ruf und Bewertung"
   },
   {
@@ -4211,8 +4221,8 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 7,
-    "teilweise": 3,
+    "erledigt": 8,
+    "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
     "offen": 5,
@@ -4333,8 +4343,8 @@
   }
  ],
  "gesamt": {
-  "erledigt": 16,
-  "teilweise": 6,
+  "erledigt": 17,
+  "teilweise": 5,
   "arbeit": 4,
   "frage": 0,
   "offen": 54,
@@ -4342,11 +4352,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 101,
+  "erledigt": 105,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 108,
+  "offen": 104,
   "entfaellt": 0,
   "alle": 217
  },
@@ -4702,6 +4712,23 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "P14: Bewertungen über dem Boot und Gästebuch",
+   "pr": 154,
+   "pakete": [
+    "P14"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Bauen P18: Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen",
+   "pr": 232,
+   "pakete": [
+    "P18",
+    "P05"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "Roadmap-Pflege: PR 224 bis 227 eingetragen, vier neue Bilder",
    "pr": 230,
    "pakete": []
@@ -4766,18 +4793,6 @@
    "datum": "2026-11-13",
    "titel": "Roadmap interaktiv: Seite /roadmap/ mit Filter und Übersicht in der README",
    "pr": 222,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Plan für Ausbau Stufe 7 bis 20 (Hafenverbund), Welle 6 in der Roadmap",
-   "pr": 220,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Dauerlieger-Hinweis: Reste nach PR 214 (Kartenwahl, Knöpfe unten)",
-   "pr": 218,
    "pakete": []
   }
  ]
