@@ -674,8 +674,21 @@ export function officeSpecialCase(state, ctx, boatId, fitting = null) {
   if (sp.specialGuests && boat.special) return 'sondergast';
   // Nur noch eine passende Box: jedes Mal neu bewertet. Ist sie belegt, gibt es nichts zu
   // entscheiden; werden mehr frei, ist das Boot wieder ein Standardfall für die Leitstelle.
-  if (sp.onlyBerth && (fitting ?? fittingBerths(state, ctx, boatId)).length === 1) return 'einzigerPlatz';
+  // Warten mehrere Boote auf dieselbe Box, gibt die Leitstelle sie dem, der am längsten wartet
+  // (Entscheidung 13.11.: keine leere Box, während Boote warten).
+  const f = sp.onlyBerth ? (fitting ?? fittingBerths(state, ctx, boatId)) : null;
+  if (f?.length === 1 && wartendeAufBox(state, ctx, f[0], boatId) === 0) return 'einzigerPlatz';
   return null;
+}
+
+/** Wie viele andere wartende Boote passen in diese Box? */
+function wartendeAufBox(state, ctx, berthId, ausser) {
+  let n = 0;
+  for (const id of state.queue) {
+    if (id === ausser || state.boats[id]?.status !== 'waiting') continue;
+    if (fittingBerths(state, ctx, id).includes(berthId)) n++;
+  }
+  return n;
 }
 
 /** Hat das Hafenbüro die Automatik (Stufe mit 'automatik')? */
@@ -941,7 +954,8 @@ function arrive(state, ctx, boat, events) {
     if (why) {
       events.push({ type: 'officeSpecial', boatId: boat.id, reason: why });
     }
-    else if (fitting.length) moor(state, ctx, boat, fitting[0], events);
+    // Wartet schon jemand auf die einzige Box, bekommt der sie (autoAssign in Reihenfolge)
+    else if (fitting.length > 1 || (fitting.length === 1 && !wartendeAufBox(state, ctx, fitting[0], boat.id))) moor(state, ctx, boat, fitting[0], events);
   }
 }
 
