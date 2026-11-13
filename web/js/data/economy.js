@@ -167,7 +167,7 @@ export const ECONOMY = {
       seglerStrom: { basis: 1.6, maxAnteil: 0.4, abBooten: 3 },
       rundum:      { abBooten: 2, mindestWuensche: 2 },
       letzter:     { bisPlaetze: 12 },
-      kassieren:   { anteil: 0.3, maxAnteil: 0.8 },
+      kassieren:   { anteil: 0.3, maxAnteil: 0.8, verlaufTage: 3, ohneVerlauf: 0.5 },   // Geld nach den echten Liegegeld-Einnahmen der letzten Tage
     },
     grossAb: { 3: 'L', 5: 'XL' },                 // "ein großes Schiff einweisen": Klasse ab Stufe
     halberAnker: 0.5,                             // so viel besser bewerten alle Gäste, die gerade liegen
