@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "13.11.2026",
-  "commit": "5c77a08"
+  "commit": "c4ffad3"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -36,10 +36,11 @@
    "id": "P01",
    "titel": "Dauerlieger zur echten Entscheidung machen",
    "inhalt": "Ü1, Ü20, Doku Dauerlieger, Gast wird umgelegt (plan 9a)",
-   "thread": "erledigt (PR 149)",
+   "thread": "erledigt (PR 149, 226)",
    "welle": 1,
    "prs": [
-    149
+    149,
+    226
    ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
    "punkte": [
@@ -95,10 +96,11 @@
    "id": "P03",
    "titel": "Einstieg an neue Oberfläche anpassen",
    "inhalt": "Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), docs/einstieg.md",
-   "thread": "bestehend: \"Einstieg für neue Spieler bauen\"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; offen: J4 mit P17, J5 nach P14",
+   "thread": "bestehend: \"Einstieg für neue Spieler bauen\"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); offen: J4 mit P17, J5 nach P14",
    "welle": 1,
    "prs": [
-    112
+    112,
+    225
    ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
    "punkte": [
@@ -116,7 +118,8 @@
    "status": "teilweise",
    "bilder": [
     4,
-    5
+    5,
+    25
    ]
   },
   {
@@ -289,11 +292,12 @@
    "id": "P11",
    "titel": "Wünsche über dem Boot und Ankunftsvorschau",
    "inhalt": "Ü10",
-   "thread": "erledigt (PR 158)",
+   "thread": "erledigt (PR 158, 227)",
    "welle": 2,
    "prs": [
     146,
-    158
+    158,
+    227
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -305,7 +309,9 @@
    "status": "erledigt",
    "bilder": [
     9,
-    10
+    10,
+    26,
+    27
    ]
   },
   {
@@ -1114,7 +1120,7 @@
    "id": "P62",
    "titel": "Geländeform und Engpass neu bauen",
    "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
-   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216): zehn Küstentypen aus Seed; offen: Pflicht-See im Norden verkleinern",
+   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224)",
    "welle": 0,
    "prs": [
     179,
@@ -1123,7 +1129,8 @@
     204,
     210,
     211,
-    216
+    216,
+    224
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1133,7 +1140,8 @@
    ],
    "status": "arbeit",
    "bilder": [
-    20
+    20,
+    24
    ]
   },
   {
@@ -4617,20 +4625,106 @@
    "datum": "2026-11-13",
    "quelle": "fahrwasser/handy-stufe4-final.png",
    "nr": 23
+  },
+  {
+   "datei": "p62-pr224-k210-pc-g4-1-weit.jpg",
+   "pakete": [
+    "P62"
+   ],
+   "titel": "Weite Sicht: kleinere See im Norden",
+   "pr": 224,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "feature-tests/pr224/k210-pc-g4-1-weit.png",
+   "nr": 24
+  },
+  {
+   "datei": "p03-pr225-t-iphonequer-t1-1.jpg",
+   "pakete": [
+    "P03"
+   ],
+   "titel": "Einstieg: Tipps neben der linken Spalte",
+   "pr": 225,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr225/t-iphonequer-t1-1.png",
+   "nr": 25
+  },
+  {
+   "datei": "p11-pr227-iphone-300m-kleine-schilder.jpg",
+   "pakete": [
+    "P11"
+   ],
+   "titel": "Wunsch-Schilder weit weg klein",
+   "pr": 227,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "vorschau-p11/iphone-300m-kleine-schilder.png",
+   "nr": 26
+  },
+  {
+   "datei": "p11-pr227-pc-weit-kleine-schilder.jpg",
+   "pakete": [
+    "P11"
+   ],
+   "titel": "Wunsch-Schilder aus der Ferne",
+   "pr": 227,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "vorschau-p11/pc-weit-kleine-schilder.png",
+   "nr": 27
   }
  ],
  "neueBilder": [
+  27,
+  26,
+  25,
+  24,
   23,
   22,
   21,
   20,
-  17,
-  16,
-  15,
-  14,
-  13
+  17
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Dauerlieger-Hinweis wartet, solange ein Tipp sichtbar ist",
+   "pr": 226,
+   "pakete": [
+    "P01"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Wunsch-Schilder: weit weg klein, ganz weit weg aus",
+   "pr": 227,
+   "pakete": [
+    "P11"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Einstieg: Tipps neben der linken Spalte und nacheinander",
+   "pr": 225,
+   "pakete": [
+    "P03"
+   ]
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "See im Norden je Küstentyp: kleinere Pflicht-See, Seeweg hinaus, Kartenrand ohne Kanten",
+   "pr": 224,
+   "pakete": [
+    "P62"
+   ]
+  },
+  {
+   "datum": "2026-11-13",
+   "titel": "Roadmap: Vorschaubilder je Paket, zuletzt gemergte PRs, Bildergalerie in der README",
+   "pr": 223,
+   "pakete": []
+  },
   {
    "datum": "2026-11-13",
    "titel": "Dauerlieger-Hinweis: Morgen-Zettel des Tagesabschlusses freilassen",
@@ -4675,43 +4769,6 @@
    "titel": "Tagesabschluss: \"Abends zeigen\" am iPhone quer nicht mehr abgeschnitten",
    "pr": 217,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Einstieg: Boot hinter Schildern, kein Einstieg im Testmodus, beenden() vor dem Laden gemerkt",
-   "pr": 212,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Funk und Dauerlieger-Hinweis: nichts liegt mehr übereinander, Länge auch am Handy",
-   "pr": 214,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "P10 Folge: Bojenlieger zuerst, Wunschpreis bei nur Goldboxen, passgenau am Bootsmaß",
-   "pr": 208,
-   "pakete": [
-    "P10"
-   ]
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Ufer direkt am Hafen je Küstentyp, Strandkörbe und Seebrücke nur an passendem Strand",
-   "pr": 211,
-   "pakete": [
-    "P62",
-    "P64"
-   ]
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Kamera auf Seed-Gelände: weiteste Zoomstufe bis 1000 m, Spielbereich aus der Geländekarte, Ufer in der Startansicht",
-   "pr": 210,
-   "pakete": [
-    "P62"
-   ]
   }
  ]
 }
