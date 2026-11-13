@@ -28,7 +28,10 @@ starten nur auf einem wartenden Boot oder einer Münze.
   sonst wird sie steiler.
 - Dunst zum Horizont (`scene.fog` in `core/game.js`, Farbe folgt dem Himmel): erst weit hinter dem
   Blickpunkt, von oben nicht zu sehen. Das Wasser rechnet ihn im Shader mit.
-- Der Blickpunkt bleibt im Spielbereich (`rig.bounds`).
+- Der Blickpunkt bleibt im Spielbereich (`rig.bounds`, `WORLD` in `js/main.js`). Er richtet sich nach der
+  Geländeform: Leuchttürme und Inseln der Form sind mit 40 m Rand erreichbar, höchstens bis
+  x -340 bis 300 m, z -270 bis 60 m (`SICHER`). Bis dorthin ist geprüft, dass auch ganz herausgezoomt
+  und flach nach außen kein Rand des Geländes zu sehen ist.
 
 ## Schnittstelle für Module
 
