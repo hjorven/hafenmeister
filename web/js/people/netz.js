@@ -27,10 +27,10 @@ const STRASSE_Y = -88;       // Dorfstrasse hinter dem Hafen
 const NEHRUNG_Y = 209;       // Weg auf der Nehrung zwischen See und Strand (hinter den Duenen)
 const FEST_X = [-240, 236];  // Uferweg und Strasse, an den Enden geht es aus dem Bild
 const NEHRUNG_X0 = -290;
-const DURCHSTICH_X = 146;    // ab Stufe 3 endet der Nehrungsweg am Durchstich
+const DURCHSTICH_X = 140;    // Nehrungsweg endet vor dem Engpass (Seegatt Stufe 1-2 ab x 150, Durchstich ab x 150, render/landschaft/karte.js)
 const MOLEN = {
-  3: [[[150, 222], [149, 268]]],
-  4: [[[150, 222], [149, 268]]],
+  3: [[[146, 222], [142, 274]]],
+  4: [[[146, 222], [142, 274]]],
   5: [[[-2, 224], [-10, 282], [18, 312], [96, 320]]],
 };
 const SEEBRUECKE_LAENGE = (44 + 3.2) / 0.62;   // aus buildings.js, in Planeinheiten
@@ -103,7 +103,7 @@ export function baueNetz({ hafen, stufe, gebaeude = [] }) {
   }
 
   // ---------------------------------------------------------------- Nehrung
-  const nEnde = stufe >= 3 ? DURCHSTICH_X : 290;
+  const nEnde = DURCHSTICH_X;   // auch in Stufe 1 und 2: dort trennt das Seegatt die Nehrung
   const nPts = [];
   for (let x = NEHRUNG_X0; x <= nEnde; x += 10) nPts.push([x, NEHRUNG_Y]);
   if (nPts[nPts.length - 1][0] !== nEnde) nPts.push([nEnde, NEHRUNG_Y]);
