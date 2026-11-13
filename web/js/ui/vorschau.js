@@ -257,6 +257,10 @@ const CSS = `
 }
 `;
 
+// Bildbreite in Metern, bis zu der die Wunsch-Schilder voll bzw. klein stehen
+export const SCHILD_VOLL_BIS = 160;
+export const SCHILD_KLEIN_BIS = 420;
+
 // Funkgerät 12 x 12 für den Kopf
 const FUNK_RASTER = ['.........#..', '........#...', '.......#....', '..########..', '.#........#.', '.#.##.###.#.', '.#.##.....#.', '.#....###.#.', '.#.##.....#.', '.#........#.', '..########..', '............'];
 
@@ -427,11 +431,11 @@ export function init(game) {
         h = h0 + 2.5 * Math.min(6, Math.max(1, weit * 0.022));
       }
       const p = projiziere(a, h);
-      // Bootslänge in Bildschirmpixeln: weit weg kleine Schilder (12 px), ganz weit weg keine,
-      // damit die Schilder nie viel größer sind als das Boot darunter
-      const px = p ? p.z * rc.width / 2 : 0;
-      const klein = px < 70;
-      let sichtbar = !!p && px >= 32 && Math.abs(p.x) < 1.2 && Math.abs(p.y) < 1.2;
+      // Nach der Bildbreite in Metern (gleich auf jedem Gerät): bis 160 m volle Schilder,
+      // bis 420 m kleine (12 px), weiter draußen keine. Die Startansicht am Handy (~90 m) zeigt sie immer.
+      const breiteM = game.camera?.viewWidth ?? 100;
+      const klein = breiteM > SCHILD_VOLL_BIS;
+      let sichtbar = !!p && breiteM <= SCHILD_KLEIN_BIS && Math.abs(p.x) < 1.2 && Math.abs(p.y) < 1.2;
       if (r.klein !== klein) { r.klein = klein; r.node.classList.toggle('klein', klein); r.breite = null; }
       const x = sichtbar ? Math.round(rc.left - rr.left + (p.x + 1) / 2 * rc.width) : 0;
       const y = sichtbar ? Math.round(rc.top - rr.top + (1 - p.y) / 2 * rc.height) - (r.art === 'ergebnis' ? (klein ? 12 : 22) : (klein ? 3 : 6)) : 0;

@@ -32,7 +32,7 @@ Wozu: Man sieht, wer gleich kommt, und kann entscheiden, ob man die große Box m
 
 - Baumodus (`body.building`) und Fotomodus (`body.foto`): Schilder und Funk aus.
 - Bootskarte offen (`body.card-open`): Funk aus, damit nichts unter der Karte hervorschaut.
-- Weiter weg (Boot kürzer als 70 Bildschirmpixel) werden die Schilder halb so groß (12 px), ganz weit weg (kürzer als 32 Pixel) verschwinden sie. So sind sie nie viel größer als das Boot darunter.
+- Nach der Bildbreite in Metern (auf jedem Gerät gleich, `SCHILD_VOLL_BIS`, `SCHILD_KLEIN_BIS`): bis 160 m volle Schilder, bis 420 m halb so große (12 px), weiter draußen keine. Die Startansicht am Handy und die übliche Spielansicht zeigen sie immer.
 - Sonderfälle mit der orangen Raute der Leitstelle (ui/hud.js): Die Schilder stehen über der Raute.
 - Ragt eine Funk-Karte in etwas unten rechts hinein ("Als Nächstes", Kassieren, Zeit, Bauen), fällt sie weg; der Funk zeigt dann nur die Karten, die frei Platz haben (am Handy quer oft nur eine).
 - Der Dauerlieger-Hinweis (features/dauerlieger.js) legt sich nicht über Funk und linke Spalte: oben in die Lücke dazwischen, am Handy hochkant darunter. Solange eine Karte offen ist, ist er aus und seine Zeit läuft nicht ab.

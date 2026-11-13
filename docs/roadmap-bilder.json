@@ -264,6 +264,50 @@
    "geraet": "handy",
    "datum": "2026-11-13",
    "quelle": "fahrwasser/handy-stufe4-final.png"
+  },
+  {
+   "datei": "p62-pr224-k210-pc-g4-1-weit.jpg",
+   "pakete": [
+    "P62"
+   ],
+   "titel": "Weite Sicht: kleinere See im Norden",
+   "pr": 224,
+   "geraet": "pc",
+   "datum": "2026-11-13",
+   "quelle": "feature-tests/pr224/k210-pc-g4-1-weit.png"
+  },
+  {
+   "datei": "p03-pr225-t-iphonequer-t1-1.jpg",
+   "pakete": [
+    "P03"
+   ],
+   "titel": "Einstieg: Tipps neben der linken Spalte",
+   "pr": 225,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr225/t-iphonequer-t1-1.png"
+  },
+  {
+   "datei": "p11-pr227-iphone-300m-kleine-schilder.jpg",
+   "pakete": [
+    "P11"
+   ],
+   "titel": "Wunsch-Schilder weit weg klein",
+   "pr": 227,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "vorschau-p11/iphone-300m-kleine-schilder.png"
+  },
+  {
+   "datei": "p11-pr227-pc-weit-kleine-schilder.jpg",
+   "pakete": [
+    "P11"
+   ],
+   "titel": "Wunsch-Schilder aus der Ferne",
+   "pr": 227,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "vorschau-p11/pc-weit-kleine-schilder.png"
   }
  ]
 }
