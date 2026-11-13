@@ -72,11 +72,12 @@
   .hm-neu #card {
     left: auto;
     right: 0;
-    top: 0;
+    /* unter Übersicht und Menü, damit beide bei offener Karte erreichbar bleiben */
+    top: calc(var(--hm-oben) + var(--hm-knopf) + 6px);
     bottom: 0;
     width: var(--hm-karte-breite);
     max-height: none;
-    padding: calc(var(--hm-safe-top) + 12px) calc(var(--hm-safe-right) + 14px) calc(var(--hm-safe-bottom) + 10px) 14px;
+    padding: 10px calc(var(--hm-safe-right) + 14px) calc(var(--hm-safe-bottom) + 10px) 14px;
     border-bottom-width: calc(var(--hm-px) * 4);
     border-right-width: 0;
     transform: translateX(105%);

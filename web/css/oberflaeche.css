@@ -541,7 +541,6 @@ body.hm-neu { font: 500 var(--hm-s)/1.35 var(--hm-text); color: var(--hm-tinte);
 }
 .hm-neu .bau-schild.empfohlen::after { background: #b8862a; }
 .hm-neu .bau-schild.unten::after { top: calc(-8px - var(--hm-px) * 3); transform: rotate(180deg); border: 0; }
-.hm-neu .bau-schild.rand::after { display: none; }
 .hm-neu .bau-schild.empfohlen { outline: 0; border-image-source: var(--rahmen-gold); }
 .hm-neu .bau-schild-preis { color: var(--hm-meer); }
 
@@ -795,25 +794,174 @@ body.hm-neu { font: 500 var(--hm-s)/1.35 var(--hm-text); color: var(--hm-tinte);
 
 /* Farbe nie allein (Einstellung "Schilder mit Form"): Gold bekommt ein Zeichen */
 .hm-neu.hm-formen .bau-schild.empfohlen:not(.rand)::before {
-  content: '\2605';
+  content: '';
   position: absolute;
   top: -9px;
   left: -9px;
   width: 18px;
   height: 18px;
-  background: var(--hm-tinte);
-  color: var(--hm-gold);
-  font: 700 12px/18px var(--hm-text);
-  text-align: center;
+  background: var(--hm-tinte) var(--px-stern) center / 12px 12px no-repeat;
 }
 .hm-neu.hm-formen #hm-seite #weather-chip.has-news::after {
-  content: '!';
-  display: inline-grid;
-  place-items: center;
+  content: '';
+  flex: none;
   width: 16px;
   height: 16px;
   margin-left: 6px;
+  background: var(--px-hinweis) center / 12px 12px no-repeat, var(--hm-tinte);
+}
+
+/* ------------------------------------------------------------ Reste im Pixel-Stil (Symbole neu, Runde 3)
+ * Alles, was andere Module mit eigener Schrift, runden Ecken oder Zeichen wie ✓ ← zeichnen,
+ * bekommt hier Pixelrahmen und Pixel-Symbole aus ui/pixel-symbole.js. IDs und Klassen bleiben.
+ */
+
+/* Wetter- und Ereignisbilder: Pixelraster bleiben scharf (nur ganze Vielfache von 12 px) */
+.hm-neu .hm-pixelbild { image-rendering: pixelated; flex: none; }
+.hm-neu #weather-chip svg { width: 24px; height: 24px; }
+.hm-neu #weather-panel svg, .hm-neu #event-banner svg { width: 24px; height: 24px; flex: none; }
+
+/* Tagesziele: Kreis und Haken statt ○ ✓ */
+.hm-neu .hm-tafel li .haken {
+  width: 18px; height: 18px; font-size: 0; color: transparent; align-self: center;
+  background: var(--hm-tinte-2);
+  -webkit-mask: var(--px-kreis) center / 18px 18px no-repeat;
+  mask: var(--px-kreis) center / 18px 18px no-repeat;
+}
+.hm-neu .hm-tafel li.erledigt .haken {
+  background: var(--hm-meer);
+  -webkit-mask-image: var(--px-haken); mask-image: var(--px-haken);
+}
+
+/* Bauen: Pfeile am Rand (Bauplatz außerhalb des Bildes) als Pixelpfeil im Tintenschild statt ← ↑ → ↓.
+ * ::after ist das Tintenquadrat, ::before der Pfeil (Maske), gedreht in 90-Grad-Schritten, damit er scharf bleibt. */
+.hm-neu .bau-schild.rand { --pf: var(--px-pfeil); --dreh: 0deg; }
+.hm-neu .bau-schild.rand[data-pfeil="↓"] { --dreh: 90deg; }
+.hm-neu .bau-schild.rand[data-pfeil="←"] { --dreh: 180deg; }
+.hm-neu .bau-schild.rand[data-pfeil="↑"] { --dreh: 270deg; }
+.hm-neu .bau-schild.rand:is([data-pfeil="↓→"], [data-pfeil="↓←"], [data-pfeil="↑←"], [data-pfeil="↑→"]) { --pf: var(--px-pfeilschraeg); }
+.hm-neu .bau-schild.rand[data-pfeil="↓←"] { --dreh: 90deg; }
+.hm-neu .bau-schild.rand[data-pfeil="↑←"] { --dreh: 180deg; }
+.hm-neu .bau-schild.rand[data-pfeil="↑→"] { --dreh: 270deg; }
+.hm-neu .bau-schild.rand::after {
+  content: "";
+  display: block;
+  position: absolute; left: -10px; top: -12px; width: 20px; height: 20px; margin: 0;
+  border: 0; transform: none; clip-path: none;
   background: var(--hm-tinte);
-  color: var(--hm-gold);
-  font: 700 12px/1 var(--hm-text);
+}
+.hm-neu .bau-schild.rand::before {
+  content: "";
+  position: absolute; z-index: 1; left: -10px; top: -12px; width: 20px; height: 20px;
+  border-radius: 0; font-size: 0;
+  background: var(--hm-papier);
+  -webkit-mask: var(--pf) center / 12px 12px no-repeat;
+  mask: var(--pf) center / 12px 12px no-repeat;
+  transform: rotate(var(--dreh));
+}
+
+/* Spielstand-Fenster (save/save-panel.js) */
+.hm-neu .hm-save-backdrop { background: rgba(20, 32, 48, 0.5); }
+.hm-neu .hm-save {
+  border-style: solid; border-color: transparent; border-radius: 0; box-shadow: none; background: none;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-papier) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  color: var(--hm-tinte);
+  font: 500 var(--hm-s)/1.4 var(--hm-text);
+}
+/* Handy quer: das Fenster ist höher als der Bildschirm, also scrollen statt oben abschneiden */
+.hm-neu .hm-save { max-height: calc(100dvh - 32px); overflow-y: auto; box-sizing: border-box; }
+.hm-neu .hm-save-backdrop { overflow-y: auto; }
+.hm-neu .hm-save h2 { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-s) + 5px); }
+.hm-neu .hm-save .hm-info { color: var(--hm-tinte-2); }
+.hm-neu .hm-save button {
+  border-style: solid; border-color: transparent; border-radius: 0;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-meer) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  background: none; color: #fff;
+  font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-s) + 1px);
+}
+.hm-neu .hm-save button.zweit { border-image-source: var(--rahmen-papier); color: var(--hm-tinte); }
+.hm-neu .hm-save button:active { transform: translateY(var(--hm-px)); }
+.hm-neu .hm-banner {
+  border-style: solid; border-color: transparent; border-radius: 0; background: none;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-tinte) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  color: #fff; font: 500 var(--hm-s)/1.4 var(--hm-text);
+}
+.hm-neu .hm-banner button {
+  border-style: solid; border-color: transparent; border-radius: 0;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-gold) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  background: none; color: var(--hm-tinte); font-family: var(--hm-pixel); font-weight: 600;
+}
+.hm-neu .hm-banner button.zu { border-image: none; border-color: transparent; color: #fff; }
+
+/* Fotomodus-Leiste (ui/fotomodus.js) */
+.hm-neu .hm-foto-leiste {
+  border-style: solid; border-color: transparent; border-radius: 0; box-shadow: none; background: none;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-papier) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  padding: 4px;
+}
+.hm-neu .hm-foto-leiste button {
+  border-style: solid; border-color: transparent; border-radius: 0;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-tinte) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  background: none; color: #fff; font-family: var(--hm-pixel); font-weight: 600; font-size: var(--hm-s);
+}
+.hm-neu .hm-foto-leiste button[aria-pressed="true"] { border-image-source: var(--rahmen-koralle); background: none; }
+.hm-neu .hm-foto-leiste button:active { transform: translateY(var(--hm-px)); }
+
+/* PC: Tastenhilfe und Hinweis am Mauszeiger (ui/input-pc.js) */
+.hm-neu .pc-help { background: rgba(20, 32, 48, 0.5); }
+.hm-neu .pc-help-box {
+  border-style: solid; border-color: transparent; border-radius: 0; box-shadow: none; background: none;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-papier) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  color: var(--hm-tinte);
+}
+.hm-neu .pc-help-box h2 { font-family: var(--hm-pixel); font-weight: 600; font-size: calc(var(--hm-s) + 5px); }
+.hm-neu .pc-help-box dt { font-family: var(--hm-pixel); font-weight: 600; }
+.hm-neu .pc-help-box dd { color: var(--hm-tinte-2); }
+.hm-neu kbd, .hm-neu .pc-help-box kbd {
+  border-radius: 0;
+  border: var(--hm-px) solid var(--hm-tinte);
+  border-bottom-width: calc(var(--hm-px) * 2);
+  background: var(--hm-papier);
+  box-shadow: none;
+  font-family: var(--hm-pixel); font-weight: 600;
+}
+.hm-neu .pc-help-box .hud-btn {
+  border-style: solid; border-color: transparent; border-radius: 0; box-shadow: none; background: none;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-meer) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  color: #fff; font-family: var(--hm-pixel); font-weight: 600;
+}
+.hm-neu .pc-tooltip {
+  border-style: solid; border-color: transparent; border-radius: 0; box-shadow: none; background: none;
+  border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-tinte) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch;
+  font-family: var(--hm-pixel); font-weight: 600;
+}
+
+/* Ton-Fenster: Regler als Pixelbalken mit eckigem Griff */
+.hm-neu .hm-audio-row { font-family: var(--hm-pixel); font-weight: 600; }
+.hm-neu .hm-audio-row input[type="range"] { -webkit-appearance: none; appearance: none; background: none; height: var(--tap, 44px); }
+.hm-neu .hm-audio-row input[type="range"]::-webkit-slider-runnable-track {
+  height: calc(var(--hm-px) * 4); background: var(--hm-mulde); box-shadow: inset 0 0 0 var(--hm-px) rgba(36, 54, 74, 0.4);
+}
+.hm-neu .hm-audio-row input[type="range"]::-moz-range-track {
+  height: calc(var(--hm-px) * 4); background: var(--hm-mulde); box-shadow: inset 0 0 0 var(--hm-px) rgba(36, 54, 74, 0.4);
+}
+.hm-neu .hm-audio-row input[type="range"]::-moz-range-progress { height: calc(var(--hm-px) * 4); background: var(--hm-meer); }
+.hm-neu .hm-audio-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 24px; margin-top: calc(var(--hm-px) * 2 - 12px);
+  border: var(--hm-px) solid var(--hm-tinte); border-radius: 0;
+  background: var(--hm-gold); box-shadow: 0 var(--hm-px) 0 var(--hm-tinte);
+}
+.hm-neu .hm-audio-row input[type="range"]::-moz-range-thumb {
+  width: 14px; height: 20px; border: var(--hm-px) solid var(--hm-tinte); border-radius: 0;
+  background: var(--hm-gold); box-shadow: 0 var(--hm-px) 0 var(--hm-tinte);
 }

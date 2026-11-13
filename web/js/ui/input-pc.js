@@ -112,11 +112,32 @@ export function init(game) {
 
   function toggleHelp(show = help.hidden) {
     if (show) {
-      help.innerHTML = `<div class="pc-help-box" role="dialog" aria-modal="true" aria-labelledby="pc-help-title">
-          <h2 id="pc-help-title">Maus und Tastatur</h2>
-          <dl>${HELP.filter((h) => h[2]()).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
-          <button type="button" class="hud-btn" data-close>Weiter</button>
-        </div>`;
+      // Ohne innerHTML (Audit C05): <kbd> in den festen Texten oben wird zu echten Elementen
+      const mitTasten = (text) => text.split(/<kbd>(.*?)<\/kbd>/).map((t, i) => {
+        if (i % 2 === 0) return document.createTextNode(t);
+        const k = document.createElement('kbd'); k.textContent = t; return k;
+      });
+      const box = document.createElement('div');
+      box.className = 'pc-help-box';
+      box.setAttribute('role', 'dialog');
+      box.setAttribute('aria-modal', 'true');
+      box.setAttribute('aria-labelledby', 'pc-help-title');
+      const h2 = document.createElement('h2');
+      h2.id = 'pc-help-title';
+      h2.textContent = 'Maus und Tastatur';
+      const dl = document.createElement('dl');
+      for (const [k, v] of HELP.filter((h) => h[2]())) {
+        const dt = document.createElement('dt'); dt.append(...mitTasten(k));
+        const dd = document.createElement('dd'); dd.textContent = v;
+        dl.append(dt, dd);
+      }
+      const weiter = document.createElement('button');
+      weiter.type = 'button';
+      weiter.className = 'hud-btn';
+      weiter.dataset.close = '';
+      weiter.textContent = 'Weiter';
+      box.append(h2, dl, weiter);
+      help.replaceChildren(box);
     }
     help.hidden = !show;
     document.body.classList.toggle('help-open', show);
