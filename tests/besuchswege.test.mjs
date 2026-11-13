@@ -11,6 +11,7 @@ import { SERVICES } from '../web/js/data/services.js';
 import { anlagenFlaechen } from '../web/js/data/anlagen-flaechen.js';
 import { punkt, BEREICH } from '../web/js/render/landschaft/gelaende.js';
 import { region } from '../web/js/render/landschaft/regionen.js';
+import { FORMEN, formSetzen } from '../web/js/render/landschaft/formen.js';
 
 const U = 0.62;
 const ostsee = region('ostsee');
@@ -221,5 +222,36 @@ test('Besuchsschiffe in Stufe 6 bleiben mindestens 5 m von der Seebrücke weg', 
       if (hit) { fehler.push(`${id} ${d.modell} bei (${q.x.toFixed(0)}, ${q.y.toFixed(0)})`); break; }
     }
   }
+  assert.deepEqual(fehler, []);
+});
+
+// Alle 10 Geländeformen (?gelaende=1..10): Wege im Grundbild, Seenotretter, Barkasse, Bauplätze, Anlagenflächen
+test('In jeder Geländeform kommen alle Besuchsschiffe frei an, Anlagen stehen an Land', () => {
+  const fehler = [];
+  try {
+    for (const F of FORMEN) {
+      formSetzen(F.nr);
+      const vor = `Form ${F.nr} (${F.name}): `;
+      fehler.push(...pruefeAuftritte(0).map((t) => vor + t));
+      for (const [gross, stufe] of [[false, 4], [true, 6]]) {
+        const weg = seenotEinsatzWeg(gross);
+        const ls = lagen(weg, (seg, fahrt) => fahrt).filter((q) => q.seg > 0 || Math.hypot(q.x - weg[0][0], q.y - weg[0][1]) > 12);
+        fehler.push(...pruefeFahrt(`${vor}Seenotretter Stufe ${stufe}`, ls, gross ? SEENOT_MASSE.gross : SEENOT_MASSE.klein, TIEFGANG.seenot + 0.3,
+          { stufe, h: HAFEN, plaetzeOhne: gross ? ['SK01'] : [] }));
+      }
+      for (const r of RUNDFAHRTEN) fehler.push(...pruefeFahrt(`${vor}Barkasse ${r.name}`, lagen(r.weg, (seg, fahrt) => fahrt), [16, 4.4], TIEFGANG.barkasse + 0.3, { stufe: 6, h: HAFEN }));
+      for (const sv of SERVICES) {
+        for (const l of [sv.lage, ...sv.stufen.map((st) => st.lage).filter(Boolean)]) for (let stufe = Math.max(1, sv.abStufe); stufe <= 6; stufe++) {
+          const hh = punkt(l.x, l.y, stufe, ostsee).h;
+          if (hh < (['slip', 'bootsverleih'].includes(sv.id) ? -0.6 : 0.3)) fehler.push(`${vor}${sv.id} Stufe ${stufe}: Boden ${hh.toFixed(2)} m`);
+        }
+      }
+      for (let stufe = 1; stufe <= 6; stufe++) for (const f of anlagenFlaechen(stufe)) {
+        const xs = f.poly.map((q) => q[0]), ys = f.poly.map((q) => q[1]);
+        const hh = punkt((Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2, stufe, ostsee).h;
+        if (Math.abs(hh - (f.hoehe ?? 1.2)) >= 0.25) fehler.push(`${vor}Fläche ${f.id} Stufe ${stufe} auf ${hh.toFixed(2)} m`);
+      }
+    }
+  } finally { formSetzen(1); }
   assert.deepEqual(fehler, []);
 });
