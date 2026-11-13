@@ -1,5 +1,7 @@
 # Handy-Oberfläche
 
+**Archiv (12.11.2026):** ersetzt durch [docs/ui/oberflaeche.md](../../ui/oberflaeche.md). Was hier noch gilt (Gesten, Maus, Tastatur, Touch-Lösungen), steht dort im Abschnitt "Bedienung je Gerät". Die Sonne zum Ziehen und die alten Leisten gibt es nicht mehr.
+
 Stand: 11.11.2026. Gilt für Handys im Hochformat (bis 599 px breit) und im Querformat (bis 499 px hoch). Tablet steht in [tablet.md](tablet.md).
 
 ## Dateien

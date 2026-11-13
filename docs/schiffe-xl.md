@@ -1,6 +1,6 @@
 # Schiffe der Größe XL
 
-Stand: 11.11.2026. 3 Arten mit je 5 Modellen, je 3 Farbvarianten, als 3D-Modelle im Flat-Vector-Stil. Ab Stufe 5, Liegeplatz Kai im Außenhafen.
+Stand: 11.11.2026. 3 Arten mit je 5 Modellen, je 3 Farbvarianten, als 3D-Modelle im Flat-Vector-Stil. Status: gebaut, dazu XXL und Vorbeifahrer (PR 81). Ab Stufe 5, Liegeplatz Kai im Außenhafen.
 
 | Datei | Inhalt |
 |---|---|

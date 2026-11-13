@@ -1,6 +1,6 @@
 # Landschaft, Wasser und Licht
 
-Stand: 12.11.2026. Code: `web/js/render/landscape.js` (Einstieg, wird von `main.js` geladen) und `web/js/render/landschaft/`.
+Stand: 12.11.2026. Status: gebaut (Ostsee Stufe 1 bis 6; Nordsee nur als Bild, siehe [regionen.md](regionen.md)). Code: `web/js/render/landscape.js` (Einstieg, wird von `main.js` geladen) und `web/js/render/landschaft/`.
 
 ## Was man sieht
 

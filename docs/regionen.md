@@ -1,8 +1,22 @@
 # Hafenregionen
 
-Stand: 11.11.2026. Ergänzt Abschnitt 9 im [Spielplan](plan.md). Dieses Dokument beschreibt die zwei Reviere des Spiels, Ostsee und Nordsee: was sie im Aussehen und im Spielgefühl unterscheidet, wie man sie freischaltet und wie sie als Daten beschrieben sind. Die Daten liegen in `web/js/data/regions.js`, die Rechenfunktionen (Wasserstand, Tidenfenster) in `web/js/world/region.js`.
+Stand: 12.11.2026 (Status ergänzt), Konzept vom 11.11.2026. Status: Ostsee gebaut, Nordsee **geplant** (Roadmap-Paket P57, Welle 5, nach der Ostsee). Ergänzt Abschnitt 9 im [Spielplan](plan.md). Dieses Dokument beschreibt die zwei Reviere des Spiels, Ostsee und Nordsee: was sie im Aussehen und im Spielgefühl unterscheidet, wie man sie freischaltet und wie sie als Daten beschrieben sind. Die Daten liegen in `web/js/data/regions.js`, die Rechenfunktionen (Wasserstand, Tidenfenster) in `web/js/world/region.js`.
 
 **Entscheidung Jorven (11.11.2026):** nur zwei Regionen, keine länderspezifischen. Gebäude und Stimmung sind ein Mix aus deutschen, dänischen und schwedischen Häfen, weil sich die Hafenkulturen nicht stark genug unterscheiden, um eigene Regionen zu tragen.
+
+## Was davon gebaut ist (12.11.2026)
+
+| Teil | Stand |
+|---|---|
+| Ostsee: Landschaft, Stufen 1 bis 6, Regeln | gebaut, das ist das Spiel |
+| Revierdaten beider Reviere (`data/regions.js`), Rechenfunktionen für Wasserstand und Tidenfenster (`world/region.js`, Test `node tools/test-regionen.mjs`) | gebaut |
+| Nordsee-Landschaft mit Deich, Watt und Salzwiese zum Ansehen (`?revier=nordsee`) | gebaut, nur Bild |
+| Ebbe und Flut in den Spielregeln, Pegel am Kai, trockenfallendes Watt, Warten vor dem Siel | **geplant** (P57) |
+| Trockenfallplätze, Schleuse als Bauprojekt | **geplant** (P57) |
+| Freischalten der Nordsee, eigener Spielstand je Revier, Startgeld aus dem Ostsee-Ruf | **geplant** (P57; die Bedingung in Abschnitt 4 ist noch nicht entschieden, siehe Roadmap) |
+| Revierfaktoren (`spiel`: Hafengeld, Ankünfte, Startgeld), besondere Dienste und Ereignisse je Revier | **geplant** (P57); die Regeln lesen sie heute nicht |
+
+Alles unten ab Abschnitt 2 beschreibt das Ziel. Was als geplant markiert ist, gibt es im Spiel noch nicht.
 
 ## 1. Die Idee
 
@@ -37,7 +51,7 @@ Die Vorbilder sind Anregungen. Die Häfen im Spiel bekommen erfundene Namen.
 - **Besondere Dienste:** Fischbrötchen, Krabbenverkauf, Wattführung, Inselfähre, Schleuse als großes Bauprojekt.
 - **Ereignisse:** Sturmflut, Kutterkorso, Krabbenfest, Kreuzfahrttag.
 
-## 3. Ebbe und Flut in der Nordsee
+## 3. Ebbe und Flut in der Nordsee (geplant)
 
 Nur die Nordsee hat einen spürbaren Tidenhub. In der Ostsee schwankt der Wasserstand so wenig, dass das Spiel ihn ignoriert.
 
@@ -62,7 +76,7 @@ Bei Springtide fällt das Wasser etwas unter 0, bei Nipptide bleibt es darüber.
 - **Großes Bauprojekt Schleuse:** Danach hält das Hafenbecken das Wasser, die Liegeplätze darin sind unabhängig von der Tide. Das ist das Nordsee-Gegenstück zum Durchstich der Ostsee.
 - Die Tide wechselt alle 15 Spieltage zwischen Springtide (mehr Hub) und Nipptide (weniger Hub). Das sorgt für Abwechslung, ohne dass man es planen muss.
 
-## 4. Freischalten
+## 4. Freischalten (geplant)
 
 Man beginnt an der Ostsee. Sobald der Ostseehafen Stufe 5 (Küstenmarina) erreicht, wird die Nordsee frei. Stufe 6 bleibt damit freiwillig. Beide Häfen bleiben spielbar, jeder hat seinen eigenen Spielstand. Der Ruf des Ostseehafens gibt an der Nordsee ein kleines Startgeld.
 
