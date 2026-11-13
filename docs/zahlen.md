@@ -87,6 +87,8 @@ Je erfülltem Wunsch +25 %.
 | 3 | Hafenbüro | 3 | 3.800 € | vorschlag, nebenkosten |
 | 4 | Hafenleitstelle | 4 | 9.500 € | automatik |
 
+Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab der Stufe mit nebenkosten: 10 % auf jedes kassierte Liegegeld. Von Hand eingewiesen: +0,25 Anker. Sonderfälle fahren nach 25 s selbst ein.
+
 ## Services
 
 | Service | Stufe | Name | ab Hafenstufe | Kosten | Mindestruf | Wirkung |
