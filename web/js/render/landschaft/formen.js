@@ -47,7 +47,7 @@ export const FORMEN = [
     seeAussen: [{ x: -230, y: 262, rx: 64, ry: 9, art: 'sandplate' }, { x: -86, y: 270, rx: 36, ry: 7, art: 'sandplate' }, { x: 330, y: 258, rx: 40, ry: 8, art: 'sandplate' }] },
   { nr: 4, name: 'Bodden', idee: 'Weites, flaches Boddenwasser: die Nehrung endet im Osten, dort liegen Inseln mit Schilf und Wald.',
     ostEnde: 300, ostArt: 'offen', seeOstOffen: true, duenen: 0.7, seeWest: -260,
-    seeInseln: [{ x: 300, y: 90, rx: 34, ry: 20, art: 'wald' }, { x: 372, y: 150, rx: 22, ry: 14, art: 'schilf' }, { x: 396, y: 40, rx: 26, ry: 18, art: 'wiese' },
+    seeInseln: [{ x: 300, y: 90, rx: 34, ry: 20, art: 'wald' }, { x: 372, y: 150, rx: 22, ry: 14, art: 'schilf' }, { x: 366, y: 40, rx: 26, ry: 18, art: 'wiese' },
       { x: -236, y: 138, rx: 34, ry: 16, art: 'schilf' }] },
   { nr: 5, name: 'Inselkette', idee: 'Die Nehrung zerfällt östlich des Engpasses in kleine Inseln, im See setzt sich die Kette fort, hohe Dünen im Westen.',
     luecken: [{ x0: 240, x1: 262, tiefe: 0.9 }, { x0: 300, x1: 318, tiefe: 0.8 }, { x0: 358, x1: 378, tiefe: 0.9 }], duenen: 1.3, leuchttuerme: [[338, 206]],
@@ -131,6 +131,30 @@ try {
   }
 } catch { /* Form 1 */ }
 
+/**
+ * Ausschnitt, der den Charakter der Form zeigt: Hafen, Einfahrt und alle Landmarken der Form
+ * (Leuchttürme, Inseln im See und vor der Küste). Weltmeter wie die Kamera: { minX, maxX, minZ, maxZ }.
+ * Gedacht für einen kurzen Überblick beim Spielstart, bevor die Kamera zum Hafen fährt.
+ * maxBreiteM: höchste Breite des Rahmens; unter 250 m (Handy hochkant) nur Einfahrt und die nächsten Landmarken.
+ */
+export function blickRect(f = gelaendeform(), { maxBreiteM = 420 } = {}) {
+  const U = 0.62;
+  // Kern: Hafen, Becken und Einfahrt mit Molen; bei schmalem Rahmen nur der Ostteil mit der Einfahrt
+  const schmal = maxBreiteM < 250;
+  let x0 = schmal ? 20 : -170, x1 = 240, y0 = -20, y1 = 290;
+  const marken = [
+    ...(f.leuchttuerme || []).map(([x, y]) => [x, y, 16, 16]),
+    ...[...(f.seeInseln || []), ...(f.seeAussen || [])].map((i) => [i.x, i.y, Math.min(i.rx, 20) + 8, Math.min(i.ry, 20) + 8]),
+  ].sort((p, q) => Math.hypot(p[0] - 178, p[1] - 200) - Math.hypot(q[0] - 178, q[1] - 200));
+  // Landmarken von der Einfahrt aus nach Nähe dazunehmen, solange der Rahmen nicht zu breit wird
+  for (const [x, y, rx, ry] of marken) {
+    const nx0 = Math.min(x0, x - rx), nx1 = Math.max(x1, x + rx);
+    if ((nx1 - nx0) * U > maxBreiteM) continue;
+    x0 = nx0; x1 = nx1; y0 = Math.min(y0, y - ry); y1 = Math.max(y1, y + ry);
+  }
+  return { minX: x0 * U, maxX: x1 * U, minZ: -y1 * U, maxZ: -y0 * U };
+}
+
 /** Modul für js/main.js (MODULES): Nummer im Spielstand festhalten, game.gelaende bereitstellen. */
 export function init(game) {
   const merken = () => {
@@ -150,5 +174,8 @@ export function init(game) {
     try { game.spielstand?.speichern?.(neu); } catch { /* egal */ }
     globalThis.location?.reload?.();
   });
-  game.gelaende = { aktuell: () => ({ ...form, quelle: aktiv.quelle }), anzahl: FORMEN.length, formen: FORMEN.map(({ nr, name, idee }) => ({ nr, name, idee })) };
+  game.gelaende = {
+    aktuell: () => ({ ...form, quelle: aktiv.quelle }), anzahl: FORMEN.length, formen: FORMEN.map(({ nr, name, idee }) => ({ nr, name, idee })),
+    blickRect: (opt) => blickRect(form, opt),
+  };
 }

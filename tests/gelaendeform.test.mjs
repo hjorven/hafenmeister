@@ -157,3 +157,24 @@ test('Formwahl: URL, Spielstand, Tests und neues Spiel', () => {
   assert.equal(formWaehlen({ url: '', s: s({}), zufall: () => 0.99 }).nr, FORMEN[FORMEN.length - 1].nr);
   assert.equal(formWaehlen({ url: '?gelaende=99', s: s({}), webdriver: true }).nr, 1);
 });
+
+test('Überblick je Form: enthält Hafen, Einfahrt und alle Landmarken, passt in die Kamera', async () => {
+  const { blickRect } = await import('../web/js/render/landschaft/formen.js');
+  for (const F of FORMEN) {
+    const r = blickRect(F);
+    const drin = (x, y) => x * 0.62 >= r.minX && x * 0.62 <= r.maxX && -y * 0.62 >= r.minZ && -y * 0.62 <= r.maxZ;
+    assert.ok(drin(178, 268) && drin(-100, 0), `Form ${F.nr}: Einfahrt oder Hafen fehlt`);
+    for (const [x, y] of F.leuchttuerme || []) assert.ok(drin(x, y), `Form ${F.nr}: Leuchtturm fehlt`);
+    for (const i of [...(F.seeInseln || []), ...(F.seeAussen || [])]) assert.ok(drin(i.x, i.y), `Form ${F.nr}: Insel fehlt`);
+    assert.ok(r.maxX - r.minX <= 420, `Form ${F.nr}: Überblick breiter als die Kamera erlaubt`);
+  }
+});
+
+test('Schmaler Überblick (Handy hochkant): Einfahrt drin, nächste Landmarke wenn sie passt, Breite eingehalten', async () => {
+  const { blickRect } = await import('../web/js/render/landschaft/formen.js');
+  for (const F of FORMEN) {
+    const r = blickRect(F, { maxBreiteM: 200 });
+    assert.ok(r.maxX - r.minX <= 200 + 1e-6, `Form ${F.nr}: zu breit`);
+    assert.ok(178 * 0.62 >= r.minX && 178 * 0.62 <= r.maxX && -268 * 0.62 >= r.minZ, `Form ${F.nr}: Einfahrt fehlt`);
+  }
+});

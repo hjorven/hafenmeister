@@ -72,7 +72,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Ü11 | Hafenbüro lässt Sonderfälle beim Spieler (Mehrrumpf, XL, Sondergäste, nur ein passender Platz), wie `plan.md` Abschnitt 3 und 14 | offen | P02 |
 | Ü12 | Kassieren verständlich: Rundgang erst mit dem Abend, Einstieg erklärt die Hälfte, halbe Münze sieht anders aus | offen | P12 |
 | Ü13 | Abweisen von Hand und Wegfahren aus Ungeduld mit derselben Folge | offen | P10 |
-| Ü14 | Tagesziele zählen nur eigene Handlungen, kombinierte Ziele, Ruf als Belohnung (`plan.md` 9a) | offen | P13 |
+| Ü14 | Tagesziele zählen nur eigene Handlungen, kombinierte Ziele, Ruf als Belohnung (`plan.md` 9a) | erledigt (PR 152) | P13 |
 
 ## 4. Balancing (Ü15 bis Ü20)
 
@@ -90,7 +90,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Nr | Punkt | Status | Paket |
 |---|---|---|---|
 | Ü21 | Bewertung beim Ablegen über dem Boot zeigen, bei schlechter Note mit Symbol des fehlenden Wunsches | offen | P14 |
-| Ü22 | Tagesabschluss am Abend: Liegegeld, Services, Pacht, Tagesziele, weggefahrene Boote, bester Tag | offen | P15 |
+| Ü22 | Tagesabschluss am Abend: Liegegeld, Services, Pacht, Tagesziele, weggefahrene Boote, bester Tag | erledigt (PR 159): Karte am Tagesende, Verlauf 30 Tage, `docs/tagesabschluss.md` | P15 |
 | Ü23 | Aufstieg und Regionsabschluss feiern: Kamerafahrt, Zahlen der Stufe, "Weiterspielen" | offen | P16 |
 
 ## 6. Aufräumen (Ü24, Ü25)
@@ -98,7 +98,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Nr | Punkt | Status | Paket |
 |---|---|---|---|
 | Ü24 | Eine Quelle für alle Zahlen: alles nach `economy.js`, Rest löschen (`data/rules.js` alte Werte, `services.js`-Mischung, `events.js` gegen `ECONOMY.ereignisse`, Feature-Dateien). Fehler `sturmschutz: true` trifft auf Code, der eine Zahl erwartet | erledigt | P06 |
-| Ü25 | Ein Speicherweg und "Neues Spiel" (`newGame()` gibt es), mehrere Speicherplätze | offen | P09 |
+| Ü25 | Ein Speicherweg und "Neues Spiel" (`newGame()` gibt es), mehrere Speicherplätze | erledigt | P09 |
 
 ---
 
@@ -117,7 +117,7 @@ Note 1 bis 5 aus dem Überblick. "nein" heißt: bleibt, wie es ist.
 | Wetterflagge | 4 | nein | |
 | Fotomodus und Hafen schauen | 4 | nein | |
 | Menschen im Hafen | 4 | nein | |
-| Speichern, Export, Web-App | 4 | teilweise | P09 |
+| Speichern, Export, Web-App | 4 | erledigt | P09 |
 | Ankunft und Selbst-Einfahren | 3 | ja | P10 |
 | Wünsche und Versorgung | 3 | teilweise | P10, P11, P19 |
 | Liegegeld und Kassieren | 3 | ja | P12 |
@@ -166,12 +166,12 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Gruppen-Ankunft, Wünsche je Bootsart, `feeFactor`, `arrivalWeight` | data/boats/*.js | in die Regeln holen | P19, P32 (Gruppen) |
 | Stammgast bringt Ruf am alten Platz | plan.md 9a | bauen | P25 |
 | Dauerlieger zahlen pro Saison, Gast wird umgelegt | plan.md 9a | bauen | P01 |
-| Tagesziel-Belohnung in Ruf, Ziele wie "Drei Segelboote mit Dusche" | plan.md 9a | bauen | P13 |
+| Tagesziel-Belohnung in Ruf, Ziele wie "Drei Segelboote mit Dusche" | plan.md 9a | gebaut (PR 152) | P13 |
 | Tretboote und Kanus nur als Kulisse | plan.md 14 (im Spiel zahlender Gast S2, 6 €) | entfällt: bleiben in Stufe 1 Gäste, plan.md angepasst | |
 
 ## 9. Im Spiel, aber nicht dokumentiert
 
-Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätzlich mit ihrem Paket. Stand PR 177: alle zwölf stehen jetzt in [balancing.md](balancing.md#regeln-im-spiel-die-sonst-nirgends-stehen) bzw. [tests.md](tests.md#testmodus-und-adresszusätze), der Rückfall-Speicherweg in [speichern.md](speichern.md) kommt mit P09.
+Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätzlich mit ihrem Paket. Stand PR 177: alle zwölf stehen jetzt in [balancing.md](balancing.md#regeln-im-spiel-die-sonst-nirgends-stehen) bzw. [tests.md](tests.md#testmodus-und-adresszusätze), die Übernahme des alten Rückfall-Speicherwegs steht seit P09 in [speichern.md](speichern.md#ein-speicherweg).
 
 | Was im Spiel passiert | Wo im Code | Paket |
 |---|---|---|
@@ -185,7 +185,7 @@ Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätz
 | Mindestruf je Service-Stufe (Regattaverein, Werfthalle 3,8; Museumshafen 4,0; Kreuzfahrtterminal 4,5; Marinestützpunkt 4,6) | `data/services.js` | P08, dokumentiert in `balancing.md` (P08, PR 177) |
 | Deckel: Ruf-Bonus aller Services höchstens +0,75, Sturmschutz höchstens 0,8 | `data/services.js` | P08, dokumentiert in `balancing.md` (P08, PR 177) |
 | Marinestützpunkt ersetzt Flottenbesuch (alle 10 Tage) durch Tag der offenen Tür (alle 14 Tage) | `data/services.js` | P04 (behoben: Stützpunkt bringt Flottenbesuch alle 6 Tage mit Tag der offenen Tür), dokumentiert in `balancing.md` (P08, PR 177) |
-| Rückfall-Speichern unter `hafenmeister.save` neben `hafenmeister.spielstand` | `state.js`, `save/storage.js` | P09 |
+| Rückfall-Speichern unter `hafenmeister.save` neben `hafenmeister.spielstand` | `state.js`, `save/storage.js` | P09 (erledigt) |
 | Adresszusätze `?stufe=`, `?services=alle`, `?uhrzeit=`, `?revier=nordsee`, `?einstieg=1`, `?demo=boote`, `?stegbild=` verstreut | mehrere Module | P08: Liste in `docs/tests.md`, erledigt (PR 177) |
 
 ## 10. Dokumente
@@ -203,7 +203,7 @@ Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätz
 | `docs/spielregeln.md` | Pacht der Dauerlieger, Start des Rundgangs fehlen | P01, P12 |
 | `docs/services.md` | Stufennamen, Zählung der Großschiffbesuche (Zählung erledigt, P04) | P04; P08 erledigt (PR 177) (Statuszeile, Mindestruf und Deckel in `balancing.md`) |
 | `docs/ereignisse.md` | Winter "mit wenig Ankünften" | P20 |
-| `docs/speichern.md` | Exportformat HM1 fehlt | P09 |
+| `docs/speichern.md` | Exportformat HM1 fehlt | P09 (erledigt: Abschnitte "Ein Speicherweg", "Speicherplätze", "Versionen") |
 | `web/js/audio/README.md` | nennt Hafenhorn-Ereignis, das kein Modul sendet | P26 |
 | `docs/schiffsanimationen.md` | "Mit der Sonne vorspulen" (erledigt, P07) | P07 |
 | `docs/ui/pc.md`, `tablet.md`, `handy.md` | vom 11.11., teils durch `oberflaeche.md` ersetzt | P08, erledigt (PR 177): nach `docs/archiv/ui/` verschoben, Gültiges steht in `oberflaeche.md` |
@@ -260,9 +260,9 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
-| F26 | Mehrere Speicherplätze: wechseln, neu, überschreiben, kopieren, umbenennen, löschen, als Datei | offen | P09 |
-| F27 | Neues Spiel mit Auswahl: Hafenname, Stegbild, später Herausforderung oder Revier | offen | P09, P44 |
-| F28 | Probe-Kopie für teure Ausbauten | offen | P09 |
+| F26 | Mehrere Speicherplätze: wechseln, neu, überschreiben, kopieren, umbenennen, löschen, als Datei | erledigt (bis 8 Plätze, Papierkorb, Gesamtdatei) | P09 |
+| F27 | Neues Spiel mit Auswahl: Hafenname, Stegbild, später Herausforderung oder Revier | erledigt für Name, Stegbild, Küste, Einführung; Herausforderung und Revier folgen | P09, P44 |
+| F28 | Probe-Kopie für teure Ausbauten | erledigt | P09 |
 
 ### Spielgefühl
 
@@ -312,7 +312,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | Alte Ersatzregeln mit eigenen Zahlen | `web/js/data/rules.js` | P06 (erledigt) |
 | Tote Zahlen `ECONOMY.ereignisse` oder die doppelten in `data/events.js` (eine Quelle bleibt) | `economy.js`, `data/events.js` | P06 (erledigt) |
 | Zweiter Satz Service-Zahlen (Mischung `mische`) | `data/services.js`, `services/rules.js` | P06 (erledigt) |
-| Alter Rückfall-Speicherweg `hafenmeister.save` mit eigenem Exportformat (alte Stände werden beim Laden einmal übernommen) | `state.js`, `save/storage.js` | P09 |
+| Alter Rückfall-Speicherweg `hafenmeister.save` mit eigenem Exportformat (alte Stände werden beim Laden einmal übernommen) | `state.js`, `save/storage.js` | P09 (erledigt) |
 | Alle Texte zur Sonne als Vorspul-Griff | `features/einstieg.js` (erledigt, PR 112, P03), `ui/input-pc.js`, `ui/input-touch.js`, `ui/gesten.js`, Doku (erledigt, P07) | P03, P07 |
 | Ungenutzte Felder `bautage`, `winterBautempo`, falls P18 sie nicht nutzt | `economy.js` | P18 |
 | Versprechen in Plan und Doku ohne Gegenstück im Spiel (Abschnitt 8) | `plan.md`, `regionen.md`, `README.md` | P08, erledigt (PR 177): als "geplant" mit Paket markiert |
@@ -403,7 +403,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Svc F1 | Eine Liste, klare Stufennamen | erledigt | P06 |
 | Svc F2 | Jeder Service ändert das Spiel (Slip, Mastenkran, Fahrradverleih, Räucherei, Werft) | offen | P23 |
 | Svc F3 | Entweder-oder-Bauplätze (Café oder Eisdiele, Werfthalle oder Winterhalle) | offen | P23 |
-| Svc F4 | Einnahmen zeigen: Münzen über Gebäuden, Tagesabschluss je Quelle | offen | P15 |
+| Svc F4 | Einnahmen zeigen: Münzen über Gebäuden, Tagesabschluss je Quelle | erledigt (PR 159) | P15 |
 | Svc F5 | Auslastung statt Festbetrag | offen | P23 |
 | Svc F6 | Abschlussziel reparieren, Stützpunkt bringt mehr Besuche (= Ü4) | erledigt (PR 139): ein Zähler; Stützpunkt Flottenbesuch alle 6 statt 10 Tage, mit Tag der offenen Tür | P04 |
 | Svc F7 | Große Schiffe als Ereignis mit Tagesgästen | offen | P23 |
@@ -443,10 +443,10 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| I1 | Ziele verlangen eine Handlung (= Ü14) | offen | P13 |
-| I2 | Eines aus dreien wählen | offen | P13 |
-| I3 | Belohnungen mischen (Geld, Anker, seltener Gast, Rabatt, Deko) | offen | P13 |
-| I4 | Wochenziel | offen | P13 |
+| I1 | Ziele verlangen eine Handlung (= Ü14) | erledigt (PR 152) | P13 |
+| I2 | Eines aus dreien wählen | erledigt (PR 152) | P13 |
+| I3 | Belohnungen mischen (Geld, Anker, seltener Gast, Rabatt, Deko) | erledigt (PR 152) | P13 |
+| I4 | Wochenziel | erledigt (PR 152) | P13 |
 | I5 | Logbuch als Sammelalbum mit Schattenrissen | offen | P21 |
 | I6 | Erfolge als Dinge im Hafen (Pokal, Wimpel, Schild) | offen | P22 |
 | I7 | Meilensteine mit Ton und Bild | offen | P22 |
@@ -506,9 +506,9 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| N1 bis N12 | Speicherplätze, Seite "Spielstände", Aktionen je Platz, Wechseln ohne Verlust, Papierkorb, Umzug des alten Stands, Start mit "Weiter", Kopie, Vorschaubild, Gesamt-Export, ehrliche Grenzen, Neues Spiel mit Auswahl | offen | P09 |
-| N13 | Nach jedem Kauf und Stufenaufstieg sichern | offen | P09 |
-| N14 | Rückfall-Speicherweg entfernen | offen | P09 |
+| N1 bis N12 | Speicherplätze, Seite "Spielstände", Aktionen je Platz, Wechseln ohne Verlust, Papierkorb, Umzug des alten Stands, Start mit "Weiter", Kopie, Vorschaubild, Gesamt-Export, ehrliche Grenzen, Neues Spiel mit Auswahl | erledigt | P09 |
+| N13 | Nach jedem Kauf und Stufenaufstieg sichern | erledigt | P09 |
+| N14 | Rückfall-Speicherweg entfernen | erledigt | P09 |
 | N15 | 3D-Bibliothek mitliefern statt von fremdem Server | offen | P61 |
 | N16 | Alle Spieldateien vorab für offline speichern | offen | P61 |
 
@@ -611,8 +611,8 @@ Ein Audit von außerhalb (`AUDIT-ISTSTAND.md`, ZIP-Stand mit PR 143) hat die Roa
 | Nr | Befund | Am Stand geprüft | Paket |
 |---|---|---|---|
 | C01 | Dauerlieger-Gebühr übernimmt die Fischerpacht (= Ü1) | ja, `sim.js:1395` | P01 |
-| C02 | Alter Speicherweg `hafenmeister.save` neben dem neuen; alter Weg nur noch für eine einmalige, getestete Übernahme lesen, dann Schreibpfad entfernen (= N14) | ja, `state.js:7` | P09 |
-| C03 | Spielstand-Import prüft verschachtelte Daten kaum: ein Schema für den ganzen Spielstand, IDs gegen Boots- und Platzdaten, Zahlen begrenzen, unbekannte Felder kontrolliert behandeln, erst nach vollständiger Prüfung übernehmen, Tests mit falschen Typen und Extremwerten | ja, `state.js` `validate` | P09 |
+| C02 | Alter Speicherweg `hafenmeister.save` neben dem neuen; alter Weg nur noch für eine einmalige, getestete Übernahme lesen, dann Schreibpfad entfernen (= N14) | ja, `state.js:7` | P09 (erledigt) |
+| C03 | Spielstand-Import prüft verschachtelte Daten kaum: ein Schema für den ganzen Spielstand, IDs gegen Boots- und Platzdaten, Zahlen begrenzen, unbekannte Felder kontrolliert behandeln, erst nach vollständiger Prüfung übernehmen, Tests mit falschen Typen und Extremwerten | ja, `state.js` `validate` | P09 (erledigt: `state.js` prüft Typen, Grenzen und Verweise; Import erst nach Prüfung aller Häfen) |
 | C04 | Abnahmekriterium für P06: neue Spielstände, alle Regeltests und das Balancing nutzen dieselbe Regelkonfiguration | ja, `data/rules.js` besteht | P06 |
 | C05 | HTML per `innerHTML` (`render/services.js`, `ui/input-pc.js`): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, `textContent` oder Escapen, dazu Test mit präparierten Namen | ja | P08 (Sicherheit), Pflicht für P44 (Hafenname) und P09 (Import) |
 | C06 | Three.js kommt von jsDelivr, Erststart hängt am CDN (= N15, N16) | ja, `web/index.html` | P61 |
@@ -642,7 +642,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P07 | Tempo einheitlich regeln | Ü7, Hilfetexte, `docs/schiffsanimationen.md` | `ui/oberflaeche.js`, `ui/input-pc.js`, `ui/input-touch.js`, `ui/gesten.js`, `plan.md` 14 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
 | P08 | Doku auf den Stand bringen | Abschnitte 9 und 10, Liste aller Adresszusätze, `plan.md` Meilensteine und Pixel-Oberfläche | `README.md`, `docs/*.md` (außer den Paket-eigenen) | erledigt (PR 177); bestehend: "Bestandsaufnahme Repo und Plan erstellen" |
 | P54 | Ausfahrende Boote weichen wartenden Booten aus (aufgegangen in P66) | Neuer Fehler (Jorven, 12.11.2026): Beim Rausfahren kollidieren Boote mit Booten an der Warteboje und zittern beide, als wollten sie aneinander vorbei. Ausweichen ohne Berührung und ohne Zittern, an Handy und PC prüfen | `render/boat-anim.js`, `render/boat-view.js`, `world/fahrwege.js` | bestehend: "Schiffsanimationen umsetzen" |
-| P09 | Speicherplätze und Neues Spiel | Ü25, F26, F27 (Grundgerüst), F28, `docs/speichern.md` | `save/*.js`, `state.js`, `save/save-panel.js` | neu |
+| P09 | Speicherplätze und Neues Spiel | Ü25, F26, F27 (Grundgerüst), F28, `docs/speichern.md` | `save/*.js`, `state.js`, `save/save-panel.js` | erledigt (PR 150) |
 
 ### Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)
 
@@ -651,9 +651,9 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P10 | Zuweisen wieder zur Entscheidung machen | Ü8, Ü9, Ü13 | `sim.js` (Selbst-Einfahren, `dismiss`, `turnAway`), `render/boat-view.js`, `features/platzschilder.js` | neu |
 | P11 | Wünsche über dem Boot und Ankunftsvorschau | Ü10 | neues Modul `web/js/ui/vorschau.js`, `render/boat-view.js` | neu |
 | P12 | Kassieren verständlich machen | Ü12 (Rundgang ab Abend, halbe Münze sichtbar) | `data/people.js`, `render/boat-view.js`, `docs/spielregeln.md` | neu |
-| P13 | Tagesziele an eigene Handlungen binden | Ü14 | `features/tagesziele.js`, `sim.js` (Ereignisse mit "von Hand") | neu |
+| P13 | Tagesziele an eigene Handlungen binden | Ü14, I1 bis I4 | `features/tagesziele.js`, `features/ziel-deko.js`, `sim.js` (Ereignisse mit "von Hand"), `economy.js` (`tagesziele`) | erledigt (PR 152) |
 | P14 | Bewertungen und Gästebuch zeigen | Ü21, F18 | `render/boat-view.js`, neues Modul `web/js/ui/gaestebuch.js` | neu |
-| P15 | Tagesabschluss am Abend zeigen | Ü22 | neues Modul `web/js/ui/tagesabschluss.js`, `sim.js` (`sim:dayEnd`) | neu |
+| P15 | Tagesabschluss am Abend zeigen | Ü22 | neues Modul `web/js/ui/tagesabschluss.js`, `sim.js` (`sim:dayEnd`) | erledigt (PR 159) |
 | P16 | Aufstieg und Abschluss feiern, Endlosspiel | Ü23, Endlosmodus | `ui/oberflaeche.js`, `core/camera.js` (Kamerafahrt), `sim.js` | neu |
 | P17 | Start und frühe Stufen straffen | Ü15, Ü16, Startwerte dokumentieren | `economy.js`, `state.js`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" (nach P06) |
 | P18 | Ausbau in Bauabschnitten | Ü18, `bautage` nutzen oder löschen | `ui/bauen.js`, `economy.js`, `sim.js`, Stegdarstellung | bestehend: "Bauen mit Vorschau und Tiefe ausbauen" |

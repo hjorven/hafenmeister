@@ -220,7 +220,7 @@ Alle sechs sind gebaut, Einzelheiten in [neue-features.md](neue-features.md). Hi
 | **Wetter an der Flagge** | Die Flagge am Hafenbüro zeigt Wind und Wetter für morgen. Wer hinsieht, kann sich auf Sturm oder Regatta vorbereiten. |
 | **Fotomodus** | Leisten ausblenden, Kamera frei drehen, Bild speichern. |
 | **Hafen schauen** | Nichts tun und zusehen: Die Kamera fährt langsam durch den Hafen, Musik läuft, das Spiel geht weiter. |
-| **Tagesziele** | Jeden Tag ein kleines, freiwilliges Ziel (zum Beispiel „Drei Segelboote mit Dusche“), Belohnung in Geld (Belohnung in Ruf und Ziele mit Wünschen geplant, P13). |
+| **Tagesziele** | Jeden Morgen drei Karten (leicht, mittel, schwer), der Spieler nimmt eine, zum Beispiel „3 Segelboote an Plätze mit Strom legen“. Es zählt nur, was er selbst tut. Belohnung: Geld, ein halber Anker, ein seltener Gast, ein Gutschein oder ein Deko-Stück im Hafen. Dazu ein Wochenziel ([neue-features.md](neue-features.md), Abschnitt 6). |
 
 Dauerlieger und Menschen im Hafen (Abschnitt 11a) hängen zusammen: Die Crew der Dauerlieger geht morgens an Bord und abends an Land.
 
@@ -326,7 +326,7 @@ Die Arbeitsliste mit allen Punkten, Paketen und Threads ist die [Roadmap](roadma
 - **Schiffe:** S, M, L, XL und XXL als 3D-Modelle, Einlaufen, Anlegen, Ablegen, Segel bergen, Vorbeifahrer, Kreuzfahrt- und Marinebesuche.
 - **Leben:** Menschen mit Wegfindung, Badegäste, Ereignisse (Nebel, Sommertag, Sturm, Regatta, Hafenfest), Jahreslauf mit Winter, Ton und Musik.
 - **Features aus 9a:** Dauerlieger, Stammgäste, Wetter an der Flagge, Fotomodus, Hafen schauen, Tagesziele.
-- **Oberfläche:** Pixel-Oberfläche für alle Geräte, Tempo Pause, 1x, 3x, 8x, Einstieg mit Hinweis-Kreisen, Speichern mit Export und Import.
+- **Oberfläche:** Pixel-Oberfläche für alle Geräte, Tempo Pause, 1x, 3x, 8x, Einstieg mit Hinweis-Kreisen, Speichern mit Export und Import, Tagesabschluss mit Einnahmen je Quelle und Münzen über den Services ([tagesabschluss.md](tagesabschluss.md)).
 - **Pixel-Fassung** als eigene Seite unter `pixel/`.
 - **Balancing:** `tools/balance.mjs` mit den echten Regeln; etwa 257 Spieltage, rund 8,5 Stunden bis zum Abschluss der Ostsee.
 

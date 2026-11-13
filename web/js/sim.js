@@ -550,14 +550,16 @@ export function preview(state, ctx) {
 // ---------------------------------------------------------------------------
 // Zuweisen
 
-function moor(state, ctx, boat, berthId, events) {
+// hand: Der Spieler hat die Box selbst gewählt (Ziehen, Antippen). Tagesziele zählen nur solche Boote.
+function moor(state, ctx, boat, berthId, events, hand = false) {
   state.queue = state.queue.filter((id) => id !== boat.id);
   boat.status = 'moored';
   boat.berthId = berthId;
   boat.waitingSince = null;
   boat.waitSpot = null;
   state.berths[berthId] = boat.id;
-  events.push({ type: 'moored', boatId: boat.id, berthId });
+  if (!boat.stationed) heute(state).angelegt++;
+  events.push(hand ? { type: 'moored', boatId: boat.id, berthId, hand: true } : { type: 'moored', boatId: boat.id, berthId });
   const seen = (state.logbook[boat.typeId] ||= []);
   const key = boat.modelId ?? boat.typeId;
   if (!seen.includes(key)) {
@@ -569,10 +571,11 @@ function moor(state, ctx, boat, berthId, events) {
 }
 
 /**
- * Weist einem wartenden Boot einen Platz zu.
+ * Weist einem wartenden Boot einen Platz zu. Ohne Angabe gilt das als Handlung des Spielers
+ * ('moored' mit hand: true); "Einfahren lassen" übergibt { hand: false }.
  * @returns {{ ok: boolean, reason?: string, events: object[] }}
  */
-export function assign(state, ctx, boatId, berthId) {
+export function assign(state, ctx, boatId, berthId, { hand = true } = {}) {
   const events = [];
   const boat = state.boats[boatId];
   const berth = ctx.berthById[berthId];
@@ -581,7 +584,7 @@ export function assign(state, ctx, boatId, berthId) {
   if (!isFree(state, berthId)) return { ok: false, reason: 'occupied', events };
   const why = whyNotFit(boat, berth, ctx.rules, state.stage) || hookWhyNotFit(state, ctx, boat, berth);
   if (why) return { ok: false, reason: why, events };
-  moor(state, ctx, boat, berthId, events);
+  moor(state, ctx, boat, berthId, events, hand);
   return { ok: true, events };
 }
 
@@ -591,7 +594,7 @@ export function autoEnter(state, ctx, boatId) {
   if (!boat || boat.status !== 'waiting') return { ok: false, reason: 'notWaiting', events: [] };
   const best = fittingBerths(state, ctx, boatId)[0];
   if (!best) return { ok: false, reason: 'noFreeBerth', events: [] };
-  return assign(state, ctx, boatId, best);
+  return assign(state, ctx, boatId, best, { hand: false });
 }
 
 /** Weist allen wartenden Booten den besten freien Platz zu (Hafenbüro Stufe 3). */
@@ -772,6 +775,8 @@ function turnAway(state, ctx, boat, events, why) {
   delete state.boats[boat.id];
   state.stats.turnedAway++;
   state.stats.turnedAwayToday++;
+  const weg = heute(state).weggefahren;
+  weg[why] = (weg[why] || 0) + 1;
   const ta = ctx.rules.turnAway;
   // Sind alle Wartebojen belegt, dreht ein Boot ab, ohne gewartet zu haben: keine Bewertung.
   const rated = why !== 'queueFull' && why !== 'rebuild' && random(state) < ta.chance;
@@ -863,6 +868,8 @@ export function dismiss(state, ctx, boatId) {
   if (!boat || boat.status !== 'waiting') return { ok: false, events: [] };
   state.queue = state.queue.filter((id) => id !== boatId);
   delete state.boats[boatId];
+  const weg = heute(state).weggefahren;
+  weg.weggeschickt = (weg.weggeschickt || 0) + 1;
   return { ok: true, events: [{ type: 'dismissed', boatId }] };
 }
 
@@ -894,12 +901,81 @@ export function waitingBoats(state) {
   return state.queue.map((id) => state.boats[id]).filter(Boolean);
 }
 
-/** Geld gutschreiben (auch für andere Module, zum Beispiel Services). */
-export function addIncome(state, amount) {
+/**
+ * Geld gutschreiben (auch für andere Module, zum Beispiel Services).
+ * quelle ordnet den Betrag im Tagesabschluss ein (QUELLEN), detail unterteilt sie weiter
+ * (zum Beispiel die Anlage bei 'services' oder 'rundgang' beim Liegegeld).
+ */
+export function addIncome(state, amount, quelle = 'sonstiges', detail = null) {
   if (!(amount > 0)) return;
   state.money += amount;
   state.stats.dayIncome += amount;
   state.stats.totalIncome += amount;
+  const h = heute(state);
+  h.einnahmen[quelle] = (h.einnahmen[quelle] || 0) + amount;
+  if (detail) {
+    const d = (h.details[quelle] ||= {});
+    d[detail] = (d[detail] || 0) + amount;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tagesabschluss: was der Tag gebracht hat, je Quelle (docs/tagesabschluss.md)
+
+/** Einnahmequellen in der Reihenfolge des Tagesabschlusses. */
+export const QUELLEN = ['liegegeld', 'pacht', 'gastro', 'services', 'tagesziele', 'sonstiges'];
+/** So viele Tage hebt der Spielstand auf (für den Verlauf und den besten Tag). */
+export const VERLAUF_TAGE = 30;
+
+function neuerTag(state) {
+  return {
+    tag: state.day, einnahmen: {}, details: {}, ausgaben: {},
+    angelegt: 0, abgereist: 0, bewertungen: [], weggefahren: {}, rufStart: Math.round(reputation(state) * 100) / 100,
+  };
+}
+
+/** Laufende Buchführung des heutigen Tages (wird nachts zum Bericht). */
+export function heute(state) {
+  const s = state.stats;
+  if (!s.heute || s.heute.tag !== state.day) s.heute = neuerTag(state);
+  return s.heute;
+}
+
+/**
+ * Bericht des Tages bauen: Einnahmen je Quelle, Ausgaben, Boote, Bewertungen, Tagesziele, Ruf und bester Tag.
+ * Wird nachts mit dem Ereignis 'dayEnd' geliefert und in state.stats.verlauf aufgehoben.
+ */
+export function tagesbericht(state, ctx) {
+  const h = heute(state);
+  const s = state.stats;
+  const summe = Object.values(h.einnahmen).reduce((a, b) => a + b, 0);
+  const ausgaben = Object.values(h.ausgaben).reduce((a, b) => a + b, 0);
+  const ziele = state.modules?.ziele;
+  // Tagesziele (features/tagesziele.js, Version 2): die gewählte Karte des Tages
+  const gewaehltesZiel = ziele && ziele.tag === state.day && ziele.gewaehlt != null ? ziele.karten?.[ziele.gewaehlt] : null;
+  const zielListe = gewaehltesZiel ? [gewaehltesZiel] : [];
+  const b = h.bewertungen;
+  const vorher = s.besterTag || (s.bestDayIncome > 0 ? { tag: null, summe: s.bestDayIncome } : null);
+  return {
+    tag: state.day,
+    stufe: state.stage,
+    einnahmen: { ...h.einnahmen },
+    details: JSON.parse(JSON.stringify(h.details)),
+    summe,
+    ausgaben: { ...h.ausgaben },
+    ausgabenSumme: ausgaben,
+    angelegt: h.angelegt,
+    abgereist: h.abgereist,
+    bewertung: b.length ? Math.round((b.reduce((x, y) => x + y, 0) / b.length) * 10) / 10 : null,
+    weggefahren: { ...h.weggefahren },
+    weggefahrenSumme: Object.values(h.weggefahren).reduce((x, y) => x + y, 0),
+    ziele: { erledigt: zielListe.filter((z) => z.erledigt).length, gesamt: zielListe.length },
+    ruf: { vorher: h.rufStart, nachher: Math.round(reputation(state) * 100) / 100 },
+    rekord: summe > 0 && (!vorher || summe > vorher.summe),
+    besterTag: vorher,
+    liegend: mooredBoats(state).filter((x) => !x.stationed).length,
+    plaetze: ctx ? availableBerths(state, ctx).length : null,
+  };
 }
 
 function startEvening(state, ctx, events) {
@@ -919,7 +995,7 @@ function startEvening(state, ctx, events) {
       // Dauerlieger zahlen einen Anteil ihres Gastpreises, Fischer und Dienste (Retter, Polizei) die feste Pacht
       const share = Math.round(nightlyFee(state, ctx, boat, 0) * ctx.rules.stationedFeeShare);
       const fee = boat.dauer ? share : ctx.rules.stationedFee ?? share;
-      addIncome(state, fee);
+      addIncome(state, fee, 'pacht');
       events.push({ type: 'stationedFee', boatId: boat.id, amount: fee });
     }
   }
@@ -927,12 +1003,12 @@ function startEvening(state, ctx, events) {
   if (visitors > 0) {
     const amount = Math.round(visitors * ctx.rules.visitorSpend * (state.facilities.essen || 0) * mods.serviceIncomeFactor);
     if (amount > 0) {
-      addIncome(state, amount);
+      addIncome(state, amount, 'gastro');
       events.push({ type: 'visitorIncome', visitors, amount });
     }
   }
   const boats = mooredBoats(state);
-  for (const fn of ctx.hooks.evening) fn({ state, ctx, boats, events, addIncome: (a) => addIncome(state, a) });
+  for (const fn of ctx.hooks.evening) fn({ state, ctx, boats, events, addIncome: (a, quelle, detail) => addIncome(state, a, quelle, detail) });
   events.push({ type: 'evening', day: state.day });
 }
 
@@ -967,15 +1043,15 @@ function chargeFee(state, ctx, boat, mods, events) {
   if (state.office >= ctx.rules.office.autoCollect) events.push(...collect(state, ctx, boat.id).events);
 }
 
-/** Münze über einem Boot antippen. */
-export function collect(state, ctx, boatId) {
+/** Münze über einem Boot antippen. hand: der Spieler streicht selbst ein (Antippen, Strich), nicht Automat oder Knopf. */
+export function collect(state, ctx, boatId, { hand = false } = {}) {
   const boat = state.boats[boatId];
   if (!boat || boat.pendingFee <= 0) return { ok: false, events: [] };
   const amount = boat.pendingFee;
   boat.pendingFee = 0;
   boat.paid = true;
-  addIncome(state, amount);
-  return { ok: true, events: [{ type: 'collected', boatId, amount }] };
+  addIncome(state, amount, 'liegegeld', 'kassiert');
+  return { ok: true, events: [hand ? { type: 'collected', boatId, amount, hand: true } : { type: 'collected', boatId, amount }] };
 }
 
 /**
@@ -988,7 +1064,7 @@ export function collectOnRound(state, ctx, boatId) {
   const amount = Math.round(boat.pendingFee * ctx.rules.uncollectedShare);
   boat.pendingFee = 0;
   boat.paid = true;
-  addIncome(state, amount);
+  addIncome(state, amount, 'liegegeld', 'rundgang');
   return { ok: true, events: [{ type: 'collected', boatId, amount, round: true }] };
 }
 
@@ -1023,7 +1099,7 @@ function night(state, ctx, events) {
     }
   }
   if (honesty > 0) {
-    addIncome(state, honesty);
+    addIncome(state, honesty, 'liegegeld', 'nacht');
     events.push({ type: 'honestyBox', amount: honesty });
   }
   // Abreise
@@ -1033,6 +1109,8 @@ function night(state, ctx, events) {
     if (boat.nights > 0) continue;
     const rating = rateBoat(ctx, boat, mods.ratingBonus);
     pushRating(state, ctx, rating);
+    heute(state).abgereist++;
+    heute(state).bewertungen.push(rating);
     state.guests++;
     state.stageGuests = (state.stageGuests || 0) + 1;
     delete state.berths[boat.berthId];
@@ -1045,8 +1123,12 @@ function night(state, ctx, events) {
   }
   for (const fn of ctx.hooks.night) fn({ state, ctx, events });
   const s = state.stats;
-  events.push({ type: 'dayEnd', day: state.day, income: s.dayIncome, turnedAway: s.turnedAwayToday });
+  const bericht = tagesbericht(state, ctx);
+  events.push({ type: 'dayEnd', day: state.day, income: s.dayIncome, turnedAway: s.turnedAwayToday, bericht });
   s.bestDayIncome = Math.max(s.bestDayIncome, s.dayIncome);
+  if (bericht.rekord) s.besterTag = { tag: bericht.tag, summe: bericht.summe };
+  s.verlauf = [...(s.verlauf || []), bericht].slice(-VERLAUF_TAGE);
+  s.heute = null;
   s.dayIncome = 0;
   s.turnedAwayToday = 0;
 
@@ -1144,9 +1226,13 @@ export function runDay(state, ctx) {
 // Kasse und Ausbau
 
 /** Bezahlt einen Betrag, wenn genug Geld da ist. */
-export function spend(state, amount) {
+export function spend(state, amount, zweck = 'bau') {
   if (!(amount >= 0) || state.money < amount) return false;
   state.money -= amount;
+  if (amount > 0) {
+    const a = heute(state).ausgaben;
+    a[zweck] = (a[zweck] || 0) + amount;
+  }
   return true;
 }
 
@@ -1271,7 +1357,7 @@ export function applyTestStage(state, ctx, stage) {
 export function advanceStage(state, ctx) {
   const check = canAdvanceStage(state, ctx);
   if (!check.ok) return { ok: false, missing: check.missing };
-  spend(state, check.goal.cost);
+  spend(state, check.goal.cost, 'ausbau');
   if (check.goal.project) state.buildings[check.goal.project] = 1;
   const from = state.stage;
   state.stage++;
@@ -1377,6 +1463,42 @@ function clearVanishedBerths(state, ctx, from, events) {
   for (const id of gone) if (state.leaving?.[id]) delete state.leaving[id];
   settleWaitSpots(state, ctx, events);
   for (const fn of ctx.hooks.stageUp) fn({ state, ctx, from, to: state.stage, gone, moves, findBerth, events });
+}
+
+/**
+ * Prüfung beim Laden eines Spielstands (save/, bridge.js): Liegt ein Gast in einer Box, die es in
+ * der aktuellen Stufe nicht gibt oder die für ihn zu flach, zu kurz oder zu schmal ist (alter Stand
+ * aus einer Zeit mit anderen Tiefen, Stegbildern oder Regeln), legt er in eine freie passende Box um.
+ * Findet sich keine, reist er ohne Rechnung und ohne Bewertung ab (er hätte nie dort liegen dürfen).
+ * Fest liegende Boote (Dauerlieger, Fischer, Retter) bleiben unberührt, ihre Plätze verwalten die Module.
+ * Gibt die Liste der Änderungen zurück: [{ boatId, from, to }] (to = null: abgereist).
+ */
+export function repairBerths(state, ctx) {
+  const changes = [];
+  const exists = (b) => b && berthAvailable(state, b);
+  for (const boat of mooredBoats(state)) {
+    if (boat.stationed) continue;
+    const berth = ctx.berthById[boat.berthId];
+    if (exists(berth) && fits(boat, berth, ctx.rules, state.stage)) continue;
+    const old = boat.berthId;
+    if (state.berths[old] === boat.id) delete state.berths[old];
+    const to = availableBerths(state, ctx)
+      .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
+      .sort((a, b) => (a.maxLength * a.maxBeam) - (b.maxLength * b.maxBeam) || String(a.id).localeCompare(String(b.id)))[0]?.id ?? null;
+    if (to) {
+      boat.berthId = to;
+      state.berths[to] = boat.id;
+    } else {
+      delete state.boats[boat.id];
+    }
+    changes.push({ boatId: boat.id, from: old, to });
+  }
+  // Einträge in berths, die auf kein liegendes Boot mehr zeigen
+  for (const [id, boatId] of Object.entries(state.berths)) {
+    const b = state.boats[boatId];
+    if (!b || b.berthId !== id) delete state.berths[id];
+  }
+  return changes;
 }
 
 /**

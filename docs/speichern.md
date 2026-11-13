@@ -1,6 +1,6 @@
 # Spielstand und Web-App
 
-Stand: 11.11.2026. Status: gebaut (ein Speicherplatz); mehrere Speicherplätze und Neues Spiel kommen mit Paket P09.
+Stand: 13.11.2026. Status: gebaut, mit Speicherplätzen und Neuem Spiel (Paket P09).
 
 ## Warum
 
@@ -22,6 +22,68 @@ Safari auf iPhone und iPad löscht alles, was eine Seite im Browser gespeichert 
 | `web/js/save/save-panel.js` | Fertiges Fenster "Spielstand" (Sichern, Laden, Installieren) und Erinnerung für Safari |
 | `tests/speichern.test.mjs` | Tests für `storage.js` |
 
+## Ein Speicherweg
+
+Gespeichert wird nur über `web/js/save/`. `state.js` legt Spielstände an und prüft sie (`createState`, `deserialize`), speichert aber nicht selbst. Der frühere zweite Weg (`hafenmeister.save` mit Kurztext `HM1:`) ist entfernt:
+
+- Ein Stand unter `hafenmeister.save` wird beim ersten Start einmal übernommen (als aktiver Hafen, oder als eigener Platz "Älterer Hafen", wenn schon ein anderes Spiel läuft) und danach gelöscht. Er hat keine Version und wird wie Version 1 umgebaut (Geländeform 1, Stegbild 0), genau wie ein Kurztext `HM1:`.
+- Ein alter Kurztext `HM1:...` (auch in einer Datei) lässt sich weiter über "Aus Datei laden" öffnen.
+
+## Speicherplätze
+
+Bis zu 8 Häfen liegen nebeneinander im Browser (`web/js/save/plaetze.js`, Fenster `save-panel.js`).
+
+| Schlüssel im localStorage | Inhalt |
+|---|---|
+| `hafenmeister.plaetze` | Verzeichnis: `{ format, aktiv, naechste, plaetze: [...], papierkorb: [...] }` |
+| `hafenmeister.spielstand` | Stand des aktiven Hafens (Umschlag wie unten). `data/stegbild.js` und `render/landschaft/formen.js` lesen hier schon vor dem Start. |
+| `hafenmeister.spielstand.vorher` | Sicherung vor dem letzten Speichern des aktiven Hafens |
+| `hafenmeister.platz.<id>` | Stand jedes anderen Hafens und der Häfen im Papierkorb |
+| `hafenmeister.bild.<id>` | Vorschaubild (kleines JPEG), wird abends, beim Wechsel und beim Verlassen erneuert |
+| `hafenmeister.kaputt` | Text eines Stands, der sich nicht laden ließ: `{ zeit, name, text }`, bis der Spieler ihn als Datei sichert oder wegwirft |
+
+Eintrag im Verzeichnis: `{ id, name, erstellt, gespielt, info: { stufe, tag, geld, region }, probeVon? }`. Der Name steht zusätzlich im Spielstand als `harborName`, damit er in einer Datei mitreist.
+
+Abläufe:
+
+| Aktion | Was passiert |
+|---|---|
+| Wechseln, Neues Spiel, Probe-Kopie, Probe verwerfen | laufenden Stand speichern, auf seinen Platz kopieren, Ziel nach `hafenmeister.spielstand` kopieren, Verzeichnis umstellen, erst dann aufräumen; die Seite lädt neu (ohne Testzusätze in der Adresse) |
+| Kopieren, Umbenennen, Als Datei sichern | ohne Neuladen |
+| Überschreiben | der bisherige Stand des Ziels kommt in den Papierkorb |
+| Löschen | in den Papierkorb (die letzten 5), dort zurückholen oder endgültig löschen; ist der Speicher voll, wird zuerst der älteste Eintrag im Papierkorb geopfert, nie ein Hafen |
+| Probe übernehmen | die Probe ersetzt ihr Original (Name und Platz des Originals), ohne Neuladen |
+| Alle als Datei sichern | eine Datei mit allen Häfen (Format `hafenmeister-sammlung`); "Aus Datei laden" legt jeden als eigenen Platz an |
+
+Schutz: Ein Tab merkt sich beim Start seinen Platz. Hat ein anderer Tab inzwischen gewechselt, speichert er nicht mehr. Ist das Verzeichnis beschädigt, werden die Plätze aus den `hafenmeister.platz.*`-Schlüsseln wiedergefunden.
+
+Neues Spiel: Name (Vorschlag), Stegbild (Zufall oder 1 bis 12), Küste (Zufall oder eine der 10 Geländeformen), Einführung ja oder nein. Die Auswahl steht in `modules.stegbild.nr`, `modules.gelaende.nr` und `modules.einstieg` des neuen Stands. Das Landbild (Felder, Wald, Dorf) folgt aus dem `seed`. Einstellungen (zum Beispiel "Boote fahren selbst ein") gelten je Gerät und bleiben nach einem neuen Spiel erhalten.
+
+Start: Gibt es mehrere Häfen, fragt eine kleine Karte "Weiter" (pausiert bis dahin), "Anderer Hafen" oder "Neues Spiel". Mit nur einem Hafen startet das Spiel direkt.
+
+Gesichert wird außerdem nach jedem Kauf, jedem Bau und jedem Stufenaufstieg, beim Verlassen der Seite und abends.
+
+Beschädigter Stand: Geladen wird mit derselben strengen Prüfung wie `state.js` (`deserialize`). Lässt sich der Stand nicht laden, kommt die Sicherung `hafenmeister.spielstand.vorher` dran, sonst startet ein neues Spiel. In beiden Fällen wird der beschädigte Text unter `hafenmeister.kaputt` aufgehoben (das nächste Speichern überschreibt ihn nicht) und nach dem Start erscheint eine Meldung mit "Als Datei sichern". Im Fenster "Spielstände" bleibt er oben stehen, bis er gesichert und weggeworfen ist. Ist der Speicher voll, weicht diese Kopie als Letztes nach Papierkorb und Vorschaubildern.
+
+Ohne Speicher (privates Fenster, gesperrt, voll): Lässt der Browser nichts speichern oder schlägt das Speichern fehl, sagt eine Meldung, dass beim Schließen der Hafen weg ist, mit "Als Datei sichern". Das Fenster "Spielstände" zeigt dann statt "Alles wird automatisch gespeichert" denselben Hinweis.
+
+Prüfung beim Laden: `sim.repairBerths` legt Gäste um, die in einer Box liegen, die es in der aktuellen Stufe nicht gibt oder die zu flach, zu kurz oder zu schmal ist (alte Stände). Ohne freie passende Box reisen sie ohne Rechnung ab.
+
+## Was andere Threads am Spielstandformat beachten müssen
+
+1. Neues Feld in `game.state` oder in `state.modules.<name>`: Startwert in `createState` (oder das Modul setzt ihn beim Laden), alte Stände ohne Feld müssen weiter laden.
+2. Ändert sich die Bedeutung eines Felds: `SAVE_VERSION` in `web/js/save/storage.js` erhöhen und in `MIGRATIONS` den Umbau eintragen, mit Test in `tests/speicherplaetze.test.mjs`.
+3. Nichts im Spielstand, was sich nicht mit `JSON.stringify` speichern lässt; keine Zufallsquelle außerhalb von `seed`/`rng`.
+4. Die Schlüssel `hafenmeister.spielstand` und `hafenmeister.plaetze` nicht umbenennen. Wer vor dem Start etwas aus dem Stand braucht (wie Stegbild und Geländeform), liest `hafenmeister.spielstand` und bekommt dort den aktiven Hafen.
+5. Zustand je Gerät (Einstellungen) gehört nicht in den Spielstand, Zustand je Hafen schon.
+
+## Versionen
+
+| Version | Änderung |
+|---|---|
+| 1 | erster Stand |
+| 2 | `modules.gelaende.nr` (Geländeform, alt: 1) und `modules.stegbild.nr` (Stegbild, alt: 0) stehen immer im Stand |
+
 ## Einbindung (für das Grundgerüst)
 
 `web/js/save/index.js` ist ein Modul für den Modul-Lader. In `web/js/main.js` kommt in die Liste `MODULES` eine Zeile:
@@ -37,10 +99,13 @@ Das reicht. `init(game)` meldet den Service Worker an, ergänzt fehlende Manifes
 | `game.spielstand.speichern(zustand)` | speichert, ohne Argument `game.state`; `true` oder `false` |
 | `game.spielstand.laden()` | `{ game, savedAt, ausSicherung }` oder `null` |
 | `game.spielstand.vorhanden()` | `true`, wenn ein Stand im Browser liegt |
-| `game.spielstand.loeschen()` | löscht Stand und Sicherung (neues Spiel) |
-| `game.spielstand.oeffnen()` | Fenster "Spielstand" (für einen Menüknopf der Oberfläche) |
+| `game.spielstand.oeffnen()` | Fenster "Spielstände" (Menüknopf, Taste L) |
+| `game.spielstand.neuesSpiel()` | Fenster direkt bei "Neues Spiel" |
+| `game.spielstand.probeKopie()` | Probe-Kopie anlegen und dorthin wechseln (zum Beispiel vor einem teuren Ausbau) |
+| `game.spielstand.platz()` | `{ id, name, probeVon? }` des laufenden Hafens |
+| `game.spielstand.plaetze()` | Verzeichnis aller Plätze |
 
-Ereignis: Nach einem Import wird `game.state` ersetzt und `spielstand-geladen` mit dem neuen Zustand gesendet. `state.js` und die Oberfläche bauen darauf neu auf.
+Ereignis `spielstand-geladen`: wird nicht mehr vom Speichermodul gesendet (ein geladener Hafen kommt als eigener Platz, ein Wechsel lädt die Seite neu). Module dürfen weiter darauf hören.
 
 Automatisch gespeichert wird `game.state`, wenn die Seite verlassen oder das Handy gesperrt wird. Das Speichern nach jedem Abend ruft `state.js` selbst auf.
 
@@ -64,13 +129,13 @@ Empfohlen in `web/index.html` im `<head>`, damit iOS die Angaben schon beim erst
 ```json
 {
   "format": "hafenmeister-spielstand",
-  "version": 1,
+  "version": 2,
   "gespeichert": "2026-11-11T20:00:00.000Z",
   "spiel": { }
 }
 ```
 
-Dateiname: `hafenmeister-JJJJ-MM-TT.json`. Auf Handy und Tablet öffnet "Sichern" das Teilen-Menü (In Dateien sichern, per Nachricht schicken), am PC wird die Datei heruntergeladen.
+Dateiname: `hafenmeister-<hafenname>-JJJJ-MM-TT.json`, alle Häfen zusammen `hafenmeister-alle-haefen-JJJJ-MM-TT.json`. Auf Handy und Tablet öffnet "Sichern" das Teilen-Menü (In Dateien sichern, per Nachricht schicken), am PC wird die Datei heruntergeladen.
 
 ## Service Worker und Updates
 
