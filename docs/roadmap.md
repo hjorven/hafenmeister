@@ -91,7 +91,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 |---|---|---|---|
 | Ü21 | Bewertung beim Ablegen über dem Boot zeigen, bei schlechter Note mit Symbol des fehlenden Wunsches | offen | P14 |
 | Ü22 | Tagesabschluss am Abend: Liegegeld, Services, Pacht, Tagesziele, weggefahrene Boote, bester Tag | erledigt (PR 159): Karte am Tagesende, Verlauf 30 Tage, `docs/tagesabschluss.md` | P15 |
-| Ü23 | Aufstieg und Regionsabschluss feiern: Kamerafahrt, Zahlen der Stufe, "Weiterspielen" | offen | P16 |
+| Ü23 | Aufstieg und Regionsabschluss feiern: Kamerafahrt, Zahlen der Stufe, "Weiterspielen" | erledigt (PR 156) | P16 |
 
 ## 6. Aufräumen (Ü24, Ü25)
 
@@ -157,7 +157,7 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Möwen aufscheuchen, Wellenring, Glocke | plan.md 8 | bauen | P26 |
 | Logbuch mit Bild | plan.md 9 | bauen | P21 |
 | Erfolge | plan.md 9 | bauen | P22 |
-| Endlosmodus nach Abschluss | plan.md 9, 12 | bauen | P16 |
+| Endlosmodus nach Abschluss | plan.md 9, 12 | gebaut: Saisonziele (PR 156, docs/aufstieg.md) | P16 |
 | Bestenliste, Online mit Supabase | plan.md 12, README | bauen, als letzter Schritt | P58 |
 | Nordsee mit Gezeiten, Schleuse, Trockenfallplätzen | plan.md 9, regionen.md | bauen, nach der Ostsee | P57 |
 | Revierfaktoren in `regions.js` (Hafengeld, Ankünfte, Startgeld, Schiffshäufigkeit) | regions.js | mit Nordsee bauen | P57 |
@@ -381,7 +381,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | D7 | Sparziel anheften, Balken neben dem Geld, Schild am Bauplatz | offen | P18 |
 | D8 | Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe | offen | P60 |
 | D9 | Neue Gastplätze in Stufe 6 (Superyacht-Steg oder Stadtkai) | offen | P59 |
-| D10 | Stufenaufstieg feiern (= Ü23) | offen | P16 |
+| D10 | Stufenaufstieg feiern (= Ü23) | erledigt (PR 156) | P16 |
 
 ### E Hafenbüro und Automatik
 
@@ -450,8 +450,8 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | I5 | Logbuch als Sammelalbum mit Schattenrissen | offen | P21 |
 | I6 | Erfolge als Dinge im Hafen (Pokal, Wimpel, Schild) | offen | P22 |
 | I7 | Meilensteine mit Ton und Bild | offen | P22 |
-| I8 | Richtiger Abschluss mit Kamerafahrt und Titel | offen | P16 |
-| I9 | Endlosspiel mit Saisonzielen | offen | P16 |
+| I8 | Richtiger Abschluss mit Kamerafahrt und Titel | erledigt (PR 156) | P16 |
+| I9 | Endlosspiel mit Saisonzielen | erledigt (PR 156) | P16 |
 | I10 | Ziele im Winter (Winterarbeiten) | offen | P20 |
 
 ### J Einstieg und Hilfe
@@ -654,7 +654,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P13 | Tagesziele an eigene Handlungen binden | Ü14, I1 bis I4 | `features/tagesziele.js`, `features/ziel-deko.js`, `sim.js` (Ereignisse mit "von Hand"), `economy.js` (`tagesziele`) | erledigt (PR 152) |
 | P14 | Bewertungen und Gästebuch zeigen | Ü21, F18 | `render/boat-view.js`, neues Modul `web/js/ui/gaestebuch.js` | neu |
 | P15 | Tagesabschluss am Abend zeigen | Ü22 | neues Modul `web/js/ui/tagesabschluss.js`, `sim.js` (`sim:dayEnd`) | erledigt (PR 159) |
-| P16 | Aufstieg und Abschluss feiern, Endlosspiel | Ü23, Endlosmodus | `ui/oberflaeche.js`, `core/camera.js` (Kamerafahrt), `sim.js` | neu |
+| P16 | Aufstieg und Abschluss feiern, Endlosspiel | Ü23, Endlosmodus | `features/aufstieg.js` (Kamerafahrt über die öffentlichen Felder des Rigs, kein Eingriff in `core/camera.js`), `css/aufstieg.css`, `economy.js` (`endlos`), Andockstelle in `ui/oberflaeche.js` | erledigt (PR 156) |
 | P17 | Start und frühe Stufen straffen | Ü15, Ü16, Startwerte dokumentieren | `economy.js`, `state.js`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" (nach P06) |
 | P18 | Ausbau in Bauabschnitten | Ü18, `bautage` nutzen oder löschen | `ui/bauen.js`, `economy.js`, `sim.js`, Stegdarstellung | bestehend: "Bauen mit Vorschau und Tiefe ausbauen" |
 | P19 | Ruf schwerer machen mit Wünschen je Bootsart | Ü17, `feeFactor`, `arrivalWeight`, Kapazität sichtbar | `sim.js`, `data/boats/*.js`, `economy.js` | neu |

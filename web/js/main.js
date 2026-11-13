@@ -42,6 +42,7 @@ const MODULES = [
   './features/wetterflagge.js',
   './features/hafen-schauen.js',
   './features/einstieg.js',
+  './features/aufstieg.js',
   './save/index.js',
   './ui/tagesabschluss.js',
   './ui/oberflaeche.js',
