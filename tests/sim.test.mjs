@@ -174,25 +174,24 @@ test('Hafengeld wird beim Anlegen fällig: Wünsche, Kapazität der Toilette, St
   assert.equal(sim.collect(s, ctx, yacht.id).ok, false);
 });
 
-test('Wer bleibt, zahlt jeden Morgen die nächste Nacht und gilt bis dahin als unbezahlt', () => {
+test('Wer bleibt, zahlt beim Anlegen alle Nächte; morgens kommt keine neue Münze', () => {
   const s = quietState({ money: 0 });
   const b = waitingBoat(s, { wishes: [], nights: 2 });
   sim.assign(s, ctx, b.id, 'A1');
-  assert.equal(b.pendingFee, 10);
+  assert.equal(b.pendingFee, 20);
   sim.collect(s, ctx, b.id);
   assert.equal(b.paid, true);
   const ev = sim.tick(s, ctx, RULES.dayLength + RULES.eveningLength);
   assert.equal(s.day, 2);
-  assert.ok(ev.some((e) => e.type === 'feeReady' && e.boatId === b.id));
-  assert.equal(b.paid, false);
-  assert.equal(b.pendingFee, 10);
-  // Nicht kassiert: nachts landet die Hälfte in der Kasse des Vertrauens, dann reist das Boot ab
+  assert.ok(!ev.some((e) => e.type === 'feeReady' && e.boatId === b.id));
+  assert.equal(b.paid, true);
+  assert.equal(b.pendingFee, 0);
   sim.tick(s, ctx, RULES.dayLength + RULES.eveningLength);
-  assert.equal(s.money, 15);
+  assert.equal(s.money, 20);
   assert.equal(s.boats[b.id], undefined);
 });
 
-test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gästezahl', () => {
+test('Nacht: liegengebliebene Münzen bringen vier Fünftel, Abreise mit Bewertung, Ruf und Gästezahl', () => {
   const s = quietState({ money: 0 });
   s.facilities.wc = 1;
   const happy = waitingBoat(s, { wishes: ['wc'] });
@@ -201,11 +200,13 @@ test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gäste
   sim.assign(s, ctx, happy.id, 'A1');
   sim.assign(s, ctx, plain.id, 'A2');
   sim.assign(s, ctx, stays.id, 'A3');
+  // Den Bonus fürs Einweisen von Hand prüft tests/hafenbuero.test.mjs, hier zählt nur die Wunschwertung
+  for (const b of [happy, plain, stays]) s.boats[b.id].byHand = false;
   sim.tick(s, ctx, RULES.dayLength);
   sim.collect(s, ctx, happy.id); // 13
   const ev = sim.tick(s, ctx, RULES.eveningLength);
-  // plain und stays je 10, nicht kassiert -> je 5
-  assert.equal(s.money, 13 + 5 + 5);
+  // plain 10, stays 20 (zwei Nächte im Voraus), nicht kassiert -> vier Fünftel: 8 und 16
+  assert.equal(s.money, 13 + 8 + 16);
   const dep = ev.filter((e) => e.type === 'departed');
   assert.deepEqual(dep.map((e) => e.rating), [5, 4]);
   assert.equal(s.guests, 2);
@@ -215,8 +216,8 @@ test('Nacht: halbe Münzen ohne Kassieren, Abreise mit Bewertung, Ruf und Gäste
   assert.equal(s.berths.A3, stays.id);
   assert.equal(s.berths.A1, undefined);
   assert.equal(s.ratings.slice(-2).join(), '5,4');
-  assert.ok(ev.some((e) => e.type === 'dayEnd' && e.income === 23));
-  assert.equal(s.stats.bestDayIncome, 23);
+  assert.ok(ev.some((e) => e.type === 'dayEnd' && e.income === 37));
+  assert.equal(s.stats.bestDayIncome, 37);
 });
 
 test('Ruf: Schnitt der letzten 20, Faktor für Ankünfte', () => {
@@ -235,7 +236,7 @@ test('Bewertung: Komfort, Sondergast und Sturmschaden, begrenzt auf 1 bis 5', ()
   assert.equal(sim.rateBoat(ctx, { wishesMet: 0, wishesTotal: 3, berthId: 'A1', special: false, penalty: 1 }), 1);
 });
 
-test('Hafenbüro: Stufe 1 Knopf, Stufe 2 kassiert selbst, Stufe 3 weist selbst zu', () => {
+test('Hafenbüro: Stufe 1 Knopf, Stufe 2 kassiert selbst, Leitstelle weist selbst zu', () => {
   const s = quietState({ stage: 3 });
   const a = waitingBoat(s);
   sim.assign(s, ctx, a.id, 'A1');
@@ -250,7 +251,7 @@ test('Hafenbüro: Stufe 1 Knopf, Stufe 2 kassiert selbst, Stufe 3 weist selbst z
   assert.ok(ev.some((e) => e.type === 'collected'), 'Büro kassiert gleich beim Anlegen');
   assert.equal(t.money, 10);
 
-  const u = quietState({ stage: 3, office: 3 });
+  const u = quietState({ stage: 3, office: RULES.office.autoAssign });
   u.upcoming = [{ ...waitingBoat(createState({ seed: 3 })), id: 500, status: 'expected', arriveAt: 0.5 }];
   sim.tick(u, ctx, 1);
   assert.equal(u.boats[500].status, 'moored');
@@ -466,7 +467,7 @@ test('Gleicher Seed, gleiche Eingaben: gleiches Spiel, auch nach Speichern mitte
 
 test('Langer Lauf mit Automatik: Zahlen bleiben stimmig', () => {
   const s = createState({ seed: 2026 });
-  s.office = 3; // weist selbst zu
+  s.office = RULES.office.autoAssign; // weist selbst zu
   let sumEvents = 0;
   for (let d = 0; d < 120; d++) {
     // Vorspulen: ein ganzer Tag in einem Aufruf

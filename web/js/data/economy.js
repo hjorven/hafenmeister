@@ -68,9 +68,16 @@ export const ECONOMY = {
   },
   wunschBonus: 0.25,          // Hafengeld = Grundpreis * (1 + wunschBonus * erfüllte Wünsche)
 
-  // Nicht kassierte Münzen: dieser Anteil landet nachts trotzdem in der Kasse (Kasse des Vertrauens,
-  // abends sammelt der Hafenmeister-Rundgang ihn ein)
-  kassieren: { nachtsAnteil: 0.5 },
+  // Kassieren (P12). Liegegeld wird beim Anlegen fällig. vorausNaechte: Gäste zahlen bis zu so viele
+  // geplante Nächte auf einmal (eine Münze je Aufenthalt, 1 = jede Nacht einzeln). Was der Spieler nicht selbst einstreicht, holt
+  // abends der Hafenmeister auf seinem Rundgang (oder nachts): in die Kasse kommt rundgangAnteil.
+  // strichTrinkgeld: ab abMuenzen Münzen in einem Kassierstrich je Münze ab der Grenze jeMuenze
+  // Trinkgeld auf die eingestrichene Summe, höchstens hoechstens.
+  kassieren: {
+    rundgangAnteil: 0.8,
+    vorausNaechte: 7,
+    strichTrinkgeld: { abMuenzen: 3, jeMuenze: 0.04, hoechstens: 0.2 },
+  },
   // Passregel: so viel Wasser muss unter dem Kiel bleiben (Meter)
   passregel: { wasserUnterKiel: 0.3 },
 
@@ -119,16 +126,33 @@ export const ECONOMY = {
   // Stammgäste (features/stammgaeste.js): Anteil der neuen Boote, die Stammgäste sind; ab so vielen
   // Ankern kommt ein Gast wieder; Länge der Liste; ab diesem Besuch als Dauerlieger zu behalten
   stammgaeste: { chance: 0.15, abBewertung: 4, maxListe: 40, dauerAbBesuch: 5 },
-  // Tagesziele (features/tagesziele.js): Belohnung je Ziel nach Stufe; Anteil der erwarteten Ankünfte
-  // bzw. des erwarteten Hafengelds als Ziel; "Alle Plätze belegt" nur bis zu so vielen Plätzen;
-  // Größe für "ein großes Schiff unterbringen" je Stufe
+  // Tagesziele (features/tagesziele.js, docs/neue-features.md Abschnitt 6). Morgens drei Karten
+  // (leicht, mittel, schwer), der Spieler nimmt eine; es zählen nur eigene Handlungen.
+  // geld: Belohnung eines leichten Ziels je Ausbaustufe. schwere: soll = Grundmenge mal Faktor,
+  // geld = geld[stufe] mal Faktor. ziele: Grundmenge (basis oder basisAnteil der Boote, die der
+  // Spieler heute selbst einweist), Obergrenze maxAnteil dieser Boote, angeboten ab abBooten am Tag.
+  // kassieren: Anteil des Liegegelds, das der Spieler heute selbst einstreichen kann (mit allen Nächten).
+  // wochenziele: Anteil von sieben Tagen Booten bzw. Liegegeld. gutschein.hoechstens mal geld[stufe].
   tagesziele: {
-    belohnung: { 1: 10, 2: 25, 3: 50, 4: 80, 5: 120, 6: 150 },
-    unterbringenAnteil: 0.6, unterbringenMin: 2,
-    kassierenAnteil: 0.6,
-    seglerSoll: { 2: 2, 4: 3 },
-    vollBisPlaetze: 12,
-    groesse: { 3: 'L', 4: 'L', 5: 'XL', 6: 'XL' },
+    geld: { 1: 10, 2: 25, 3: 50, 4: 80, 5: 120, 6: 150 },
+    schwere: {
+      leicht: { soll: 1, geld: 1 },
+      mittel: { soll: 1.6, geld: 2 },
+      schwer: { soll: 2.4, geld: 3.5 },
+    },
+    ziele: {
+      einweisen:   { basisAnteil: 0.35, min: 2, maxAnteil: 0.85, abBooten: 1.5 },
+      passgenau:   { basis: 1.3, maxAnteil: 0.5, abBooten: 2, spielraum: 1.2 },   // Box höchstens 20 % länger
+      wunsch:      { basis: 1.4, maxAnteil: 0.5, abBooten: 1.5 },
+      seglerStrom: { basis: 1.6, maxAnteil: 0.4, abBooten: 3 },
+      rundum:      { abBooten: 2, mindestWuensche: 2 },
+      letzter:     { bisPlaetze: 12 },
+      kassieren:   { anteil: 0.3, maxAnteil: 0.8 },
+    },
+    grossAb: { 3: 'L', 5: 'XL' },                 // "ein großes Schiff einweisen": Klasse ab Stufe
+    halberAnker: 0.5,                             // so viel besser bewerten alle Gäste, die gerade liegen
+    gutschein: { prozent: 10, hoechstens: 15 },
+    woche: { tage: 7, geld: 12, gaeste: 0.5, zufrieden: 0.3, segler: 0.15, liegegeld: 0.7 },   // Anteil der Woche: nicht in zwei Tagen zu schaffen
   },
   // Besucher an Land (Fahrgastschiff, Kreuzfahrt) geben abends je Stufe von Kiosk/Restaurant so viel aus
   besucher: { ausgabeJeKioskStufe: 2 },
@@ -246,6 +270,7 @@ export const ECONOMY = {
     ] },
   },
 
+  // ---------------------------------------------------------------- Kassieren
   // ---------------------------------------------------------------- Hafenbüro
   // Komfort, keine Einnahmen. Logik bei den Spielregeln (sim.js).
   // allesKassieren: Knopf "Alles kassieren". sofortKassieren: Liegegeld kommt beim Anlegen von
@@ -253,10 +278,33 @@ export const ECONOMY = {
   // erfüllten Wünschen (ohne Hafenbüro fahren sie nach warten.selbstEinfahrenNach Sekunden in
   // irgendeine passende freie Box).
   hafenbuero: { stufen: [
-    { name: 'Hafenmeister',  abStufe: 2, kosten: 600,  schaltetFrei: ['allesKassieren'] },
-    { name: 'Kassenautomat', abStufe: 2, kosten: 1800, schaltetFrei: ['sofortKassieren'] },
-    { name: 'Hafenbüro',     abStufe: 3, kosten: 3800, schaltetFrei: ['automatik'] },
-  ] },
+    { name: 'Hafenmeister mit Funk', abStufe: 2, kosten: 600,  schaltetFrei: ['allesKassieren', 'vorschau'] },
+    { name: 'Kassenautomat',         abStufe: 2, kosten: 1800, schaltetFrei: ['sofortKassieren'], klassen: ['S', 'M'] },
+    { name: 'Hafenbüro',             abStufe: 3, kosten: 3800, schaltetFrei: ['vorschlag', 'nebenkosten'] },
+    { name: 'Hafenleitstelle',       abStufe: 4, kosten: 9500, schaltetFrei: ['automatik'] },
+  ],
+  // Große Boote (L, XL, XXL) zahlen persönlich: Holt der Spieler ihre Münze selbst ab (Tippen oder
+  // Strich), gibt es anteil des Liegegelds als Trinkgeld. Der Kassenautomat nimmt nur S und M.
+  trinkgeld: { klassen: ['L', 'XL', 'XXL'], anteil: 0.15 },
+  // Ab dem Hafenbüro (Stufe 3) rechnet das Büro Strom, Wasser und Duschen ab: Auf jedes
+  // kassierte Liegegeld kommt anteil obendrauf (von Hand und vom Automaten, nicht beim Rundgang).
+  nebenkosten: { anteil: 0.1 },
+  // Bewertung: Gäste, die der Spieler selbst einweist (Ziehen, Ring, "Einfahren lassen",
+  // Vorschlag annehmen), geben so viele Anker mehr. Selbst eingefahrene und vom Büro
+  // zugewiesene nicht.
+  vonHandBonus: 0.25,
+  // Sonderfälle (plan.md Abschnitt 3): Die Automatik weist sie nicht zu, sie bleiben beim Spieler
+  // und tragen über dem Boot eine orange Raute. Nach selbstEinfahrenNach Sekunden an der Boje suchen
+  // sie sich doch selbst eine Box (knappste, ohne Wünsche). Ohne Hafenbüro gilt für alle
+  // warten.selbstEinfahrenNach.
+  sonderfaelle: {
+    arten: ['mehrrumpf'],        // Mehrrumpfboote
+    klassen: ['XL', 'XXL'],      // große Schiffe
+    // weitere Fälle: 'sondergast' (Traditionssegler, Behördenboote, sondergast in den Bootsdaten)
+    // und 'einzigerPlatz' (nur noch genau eine passende freie Box)
+    auch: ['sondergast', 'einzigerPlatz'],
+    selbstEinfahrenNach: 25,
+  } },
 
   // ---------------------------------------------------------------- Services
   // Format abgestimmt mit dem Services-Thread (web/js/data/services.js hat Startwerte, was
@@ -438,6 +486,33 @@ export const ECONOMY = {
     winter:    { wirkung: { winter: true, arrivalFactor: 0.15, visitorFactor: 0.3, serviceIncomeFactor: 0.5 } },
   },
 
+  // ---------------------------------------------------------------- Endlosspiel (P16)
+  // Nach dem Abschluss der Region geht das Spiel weiter: jede Saison neue Saisonziele.
+  // Logik in web/js/features/aufstieg.js, Beschreibung in docs/aufstieg.md.
+  // Gemessen mit tools/balance.mjs --verlauf (geschickter Spieler, Stufe 6 voll ausgebaut):
+  // etwa 45 Gäste und 8.000 € am Tag, Ruf nahe 5, 7 bis 9 Besuche großer Schiffe je Saison.
+  // start = Ziel der ersten Saison, jeSaison = Zuwachs je weitere Saison, max = Obergrenze.
+  // Beginnt das Endlosspiel mitten in der Saison, gelten die Zählziele anteilig für die
+  // restlichen Tage; sind es weniger als mindestTage, beginnen die Ziele mit der nächsten Saison.
+  endlos: {
+    mindestTage: 8,
+    ziele: {
+      gaeste:       { start: 900,    jeSaison: 60,    max: 1300 },
+      ruf:          { start: 4.4,    jeSaison: 0.05,  max: 4.8 },
+      grossschiffe: { start: 5,      jeSaison: 1,     max: 9 },
+      einnahmen:    { start: 150000, jeSaison: 10000, max: 230000 },   // in ungeraden Saisons
+      xl:           { start: 40,     jeSaison: 5,     max: 80 },       // in geraden Saisons
+    },
+    belohnung: { jeZiel: 5000, alleZiele: 10000 },
+    // Rang nach gesammelten Sternen (ein Stern je erreichtem Saisonziel)
+    raenge: [
+      { sterne: 0,  titel: 'Hafenmeister' },
+      { sterne: 4,  titel: 'Leitender Hafenmeister' },
+      { sterne: 10, titel: 'Hafenkapitän' },
+      { sterne: 18, titel: 'Hafendirektor' },
+      { sterne: 28, titel: 'Ehrenhafenmeister' },
+    ],
+  },
 };
 
 export default ECONOMY;

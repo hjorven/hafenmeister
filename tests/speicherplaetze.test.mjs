@@ -250,8 +250,10 @@ test('Import liest auch den alten Kurztext HM1:', () => {
   let bin = '';
   for (const b of bytes) bin += String.fromCharCode(b);
   const code = `HM1:${btoa(bin)}`;
-  assert.deepEqual(importText(code), alt);
-  assert.deepEqual(importText(`  ${code}\n`), alt);
+  // Alte Stände werden wie Version 1 umgebaut: Geländeform 1, Stegbild 0
+  const erwartet = { ...alt, modules: { ...alt.modules, gelaende: { nr: 1 }, stegbild: { nr: 0 } } };
+  assert.deepEqual(importText(code), erwartet);
+  assert.deepEqual(importText(`  ${code}\n`), erwartet);
   assert.throws(() => importText('HM1:%%%'), (e) => e.code === 'ungueltig');
   P.einrichten();
   const id = P.importieren(importText(code));
@@ -411,4 +413,76 @@ test('Version 1 wird auf 2 umgebaut: Geländeform 1 und Stegbild 0, vorhandene W
   const mit = unwrap({ format: 'hafenmeister-spielstand', version: 1, spiel: { ...createState({ seed: 1 }), modules: { gelaende: { nr: 7 }, stegbild: { nr: 4 } } } }).game;
   assert.equal(mit.modules.gelaende.nr, 7);
   assert.equal(mit.modules.stegbild.nr, 4);
+});
+
+test('alter Stand nur aus hafenmeister.save: Geländeform und Stegbild stehen danach im Stand', () => {
+  const s = frisch();
+  const alt = stand(5);
+  delete alt.modules?.stegbild;
+  delete alt.modules?.gelaende;
+  s.setItem('hafenmeister.save', JSON.stringify(alt));
+  P.einrichten();
+  const r = loadGame();
+  assert.equal(r.game.modules.stegbild.nr, 0);
+  assert.equal(r.game.modules.gelaende.nr, 1);
+  // vorhandene Werte bleiben
+  const s2 = frisch();
+  s2.setItem('hafenmeister.save', JSON.stringify({ ...stand(6), modules: { stegbild: { nr: 4 }, gelaende: { nr: 7 } } }));
+  P.einrichten();
+  assert.equal(loadGame().game.modules.stegbild.nr, 4);
+  assert.equal(loadGame().game.modules.gelaende.nr, 7);
+});
+
+test('Laden mit strenger Prüfung: Stand, den state.js ablehnt, gilt als beschädigt', () => {
+  const s = frisch();
+  saveGame(stand(3));
+  saveGame({ ...stand(4), day: 'kaputt' }); // Umschlag gültig, Inhalt nicht
+  const pruefen = (g) => deserialize(JSON.stringify(g));
+  const r = loadGame({ pruefen });
+  assert.equal(r.ausSicherung, true);
+  assert.equal(r.game.day, 3);
+  s.setItem('hafenmeister.spielstand.vorher', '{kaputt');
+  assert.equal(loadGame({ pruefen }), null);
+  assert.ok(loadGame(), 'ohne Prüfung wie bisher');
+});
+
+test('beschädigter Stand wird aufgehoben, bis er weggeworfen wird', () => {
+  const s = frisch();
+  assert.equal(P.kaputtLesen(), null);
+  P.kaputtMerken('{"format":"hafenmeister-spielstand","ver', 'Möwenhafen');
+  const k = P.kaputtLesen();
+  assert.equal(k.name, 'Möwenhafen');
+  assert.equal(k.text, '{"format":"hafenmeister-spielstand","ver');
+  // Neues Spiel speichert über den aktiven Platz: die Kopie bleibt
+  saveGame(stand(1));
+  saveGame(stand(2));
+  assert.equal(P.kaputtLesen().text, k.text);
+  assert.ok(s.getItem(P.KEY_KAPUTT));
+  P.kaputtVerwerfen();
+  assert.equal(P.kaputtLesen(), null);
+  assert.equal(s.getItem(P.KEY_KAPUTT), null);
+});
+
+test('beschädigter Stand ohne Speicher bleibt für diesen Tab erhalten', () => {
+  frisch({ getItem: () => { throw new Error('gesperrt'); }, setItem: () => { throw new Error('gesperrt'); }, removeItem: () => {} });
+  P.kaputtMerken('abc', 'X');
+  assert.equal(P.kaputtLesen().text, 'abc');
+});
+
+test('Speicher voll: die Kopie eines beschädigten Stands weicht dem laufenden Spiel', () => {
+  const s = frisch(memoryStore({ quota: 60000 }));
+  P.einrichten();
+  P.kaputtMerken('x'.repeat(30000), 'Alt');
+  const gross = stand(8, { log: Array.from({ length: 300 }, (_, i) => ({ tag: i, text: 'y'.repeat(100) })) });
+  assert.equal(P.speichernAktiv(gross), true);
+  assert.equal(s.getItem(P.KEY_KAPUTT), null);
+});
+
+test('gesperrter Tab (Stand aus neuerer Version) überschreibt nichts', () => {
+  const s = frisch();
+  P.einrichten();
+  s.setItem('hafenmeister.spielstand', JSON.stringify({ format: 'hafenmeister-spielstand', version: 99, spiel: {} }));
+  P.sperren();
+  assert.equal(P.speichernAktiv(stand(2)), false);
+  assert.equal(JSON.parse(s.getItem('hafenmeister.spielstand')).version, 99);
 });

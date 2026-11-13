@@ -29,6 +29,7 @@ export const KEY_ALT = 'hafenmeister.save'; // alter zweiter Speicherweg aus sta
 export const MAX_PLAETZE = 8;
 export const NAME_MAX = 32;
 export const PAPIERKORB_MAX = 5;
+export const KEY_KAPUTT = 'hafenmeister.kaputt'; // beschädigter Stand, bis der Spieler ihn sichert oder verwirft
 const platzKey = (id) => `hafenmeister.platz.${id}`;
 const bildKey = (id) => `hafenmeister.bild.${id}`;
 
@@ -39,6 +40,7 @@ let gesperrt = false;  // nach einem Wechsel bis zum Neuladen nichts mehr speich
 export function _reset() {
   meinPlatz = null;
   gesperrt = false;
+  kaputtImTab = null;
 }
 
 // ---------------------------------------------------------------------------
@@ -83,6 +85,8 @@ function platzSchaffen(ausser) {
     const k = s.key(i);
     if (k && k !== ausser && k.startsWith('hafenmeister.bild.')) { entfernen(k); return true; }
   }
+  // Zuletzt die Kopie eines beschädigten Stands: das laufende Spiel geht vor (im Tab bleibt sie erhalten)
+  if (ausser !== KEY_KAPUTT && lesenText(KEY_KAPUTT) !== null) { entfernen(KEY_KAPUTT); return true; }
   return false;
 }
 
@@ -264,6 +268,11 @@ export function aktiverPlatz() {
   return eintrag(v, meinPlatz ?? v.aktiv);
 }
 
+/** Bis zum Neuladen nichts mehr speichern (z.B. Stand aus einer neueren Version des Spiels). */
+export function sperren() {
+  gesperrt = true;
+}
+
 /** false, wenn ein anderer Tab inzwischen einen anderen Platz geöffnet hat. */
 export function diesesTabAktiv() {
   const v = verzeichnisLesen();
@@ -283,7 +292,10 @@ export function speichernAktiv(game) {
   const v = verzeichnisLesen();
   const e = v ? eintrag(v, v.aktiv) : null;
   if (e && game.harborName !== e.name) game.harborName = e.name;
-  if (!saveGame(game)) return false;
+  let ok = saveGame(game);
+  // Speicher voll: Papierkorb, Vorschaubilder, aufgehobene Kopie opfern und noch einmal versuchen
+  while (!ok && speicher() && platzSchaffen(KEY_SAVE)) ok = saveGame(game);
+  if (!ok) return false;
   if (e) {
     e.info = infoAus(game);
     e.gespielt = jetzt();
@@ -578,6 +590,41 @@ export function probeVerwerfen() {
 /** Spielstand aus einer Datei als neuer Platz. Gibt die id zurück. */
 export function importieren(game, name = game?.harborName) {
   return platzAnlegen(game, { name: nameSauber(name, 'Geladener Hafen') });
+}
+
+// ---------------------------------------------------------------------------
+// Beschädigter Spielstand
+
+let kaputtImTab = null; // falls der Browser die Kopie nicht speichern kann
+
+/**
+ * Hebt den Text eines Spielstands auf, der sich nicht laden ließ, damit ihn das nächste
+ * Speichern nicht überschreibt. Der Spieler kann ihn als Datei sichern (Fenster "Spielstände").
+ */
+export function kaputtMerken(text, name) {
+  if (typeof text !== 'string' || !text) return null;
+  const k = { zeit: jetzt(), name: name ? nameSauber(name) : null, text };
+  kaputtImTab = k;
+  try { speicher()?.setItem(KEY_KAPUTT, JSON.stringify(k)); } catch { /* bleibt nur in diesem Tab */ }
+  return k;
+}
+
+/** Der aufgehobene beschädigte Stand { zeit, name, text } oder null. */
+export function kaputtLesen() {
+  const t = lesenText(KEY_KAPUTT);
+  if (t !== null) {
+    try {
+      const k = JSON.parse(t);
+      if (k && typeof k.text === 'string') return k;
+    } catch { /* unten */ }
+  }
+  return kaputtImTab;
+}
+
+/** Aufgehobenen beschädigten Stand wegwerfen. */
+export function kaputtVerwerfen() {
+  kaputtImTab = null;
+  entfernen(KEY_KAPUTT);
 }
 
 /** Umschlag-Text eines Platzes (für Tests und Export). */

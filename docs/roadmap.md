@@ -55,7 +55,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Nr | Punkt | Status | Paket |
 |---|---|---|---|
 | Ü1 | Dauerlieger-Pacht reparieren: Fischer 15 €, Dauerlieger 50 % ihres Gastpreises, wie die Karte verspricht | offen | P01 |
-| Ü2 | Hafenbüro Stufe 1 einen Nutzen geben (Knopf "Kassieren" erst mit Stufe 1 oder andere Wirkung) | offen (entschieden: "Alle kassieren" erst nach Kauf) | P02 |
+| Ü2 | Hafenbüro Stufe 1 einen Nutzen geben (Knopf "Kassieren" erst mit Stufe 1 oder andere Wirkung) | erledigt (PR 146): Knopf erst mit Bürostufe 1 | P02 |
 | Ü3 | Einstieg neu abstimmen: Schritt 1 ohne Sonne, Schritt 3 "Liegegeld beim Anlegen" | erledigt (PR 112) | P03 |
 | Ü4 | Ein Zähler für das Abschlussziel Stufe 6 (Tag der offenen Tür zählt mit) | erledigt (PR 139): eine Liste `GROSSSCHIFF_BESUCHE` in `data/services.js`, ein Zähler `state.bigVisits`; der Tag der offenen Tür gehört zum Flottenbesuch des Stützpunkts | P04 |
 | Ü5 | Boote auf wegfallenden Plätzen beim Stufenausbau regeln (B01, B02 in Stufe 3, T-Kopf Steg B): Gäste reisen erst ab, Dauerlieger ziehen samt Dauerplatz um | erledigt (`sim.js` `advanceStage`, Hook `stageUp`, Test in `tests/dauerlieger.test.mjs`) | P05 |
@@ -69,10 +69,10 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Ü8 | Selbst-Einfahren weniger klug: die nächste oder eine der freien Boxen am Steg, auch eine zu große, damit Umlenken lohnt; Boote berühren sich dabei nie | Regel erledigt (`sim.js` `selfBerth`: nächste Box ab Warteboje, eins nach dem anderen); Abstand und Ausweichen bei den Schiffsanimationen offen | P10 |
 | Ü9 | Wunschplätze beim Zuweisen in Gold zeigen (Strom, Fingersteg) | offen | P10 |
 | Ü10 | Wünsche als Symbole über wartenden Booten, drei Umrisse für die nächsten Ankünfte (`sim.preview()`) | offen | P11 |
-| Ü11 | Hafenbüro lässt Sonderfälle beim Spieler (Mehrrumpf, XL, Sondergäste, nur ein passender Platz), wie `plan.md` Abschnitt 3 und 14 | offen | P02 |
-| Ü12 | Kassieren verständlich: Rundgang erst mit dem Abend, Einstieg erklärt die Hälfte, halbe Münze sieht anders aus | offen | P12 |
+| Ü11 | Hafenbüro lässt Sonderfälle beim Spieler (Mehrrumpf, XL, Sondergäste, nur ein passender Platz), wie `plan.md` Abschnitt 3 und 14 | erledigt (PR 146) | P02 |
+| Ü12 | Kassieren verständlich: Rundgang erst mit dem Abend, Einstieg erklärt die Hälfte, halbe Münze sieht anders aus | erledigt bis auf den Einstieg-Text (P03): Rundgang ab Abend, bringt vier Fünftel (B4), Münze wird dabei silbern mit „18 € statt 22 €“ | P12 |
 | Ü13 | Abweisen von Hand und Wegfahren aus Ungeduld mit derselben Folge | offen | P10 |
-| Ü14 | Tagesziele zählen nur eigene Handlungen, kombinierte Ziele, Ruf als Belohnung (`plan.md` 9a) | offen | P13 |
+| Ü14 | Tagesziele zählen nur eigene Handlungen, kombinierte Ziele, Ruf als Belohnung (`plan.md` 9a) | erledigt (PR 152) | P13 |
 
 ## 4. Balancing (Ü15 bis Ü20)
 
@@ -91,7 +91,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 |---|---|---|---|
 | Ü21 | Bewertung beim Ablegen über dem Boot zeigen, bei schlechter Note mit Symbol des fehlenden Wunsches | offen | P14 |
 | Ü22 | Tagesabschluss am Abend: Liegegeld, Services, Pacht, Tagesziele, weggefahrene Boote, bester Tag | erledigt (PR 159): Karte am Tagesende, Verlauf 30 Tage, `docs/tagesabschluss.md` | P15 |
-| Ü23 | Aufstieg und Regionsabschluss feiern: Kamerafahrt, Zahlen der Stufe, "Weiterspielen" | offen | P16 |
+| Ü23 | Aufstieg und Regionsabschluss feiern: Kamerafahrt, Zahlen der Stufe, "Weiterspielen" | erledigt (PR 156) | P16 |
 
 ## 6. Aufräumen (Ü24, Ü25)
 
@@ -130,7 +130,7 @@ Note 1 bis 5 aus dem Überblick. "nein" heißt: bleibt, wie es ist.
 | Tests | 3 | ja | P06 |
 | Zuweisen von Hand | 2 | ja | P10 |
 | Ruf und Bewertung | 2 | ja | P14, P19 |
-| Hafenbüro (3 Stufen) | 2 | ja | P02 |
+| Hafenbüro (4 Stufen, PR 146) | 2 | ja | P02 |
 | Jahreslauf und Winter | 2 | ja | P20 |
 | Dauerlieger | 2 | ja | P01 |
 | Tagesziele | 2 | ja | P13 |
@@ -150,14 +150,14 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 |---|---|---|---|
 | Vorschau der nächsten 3 Boote | plan.md 3 | bauen | P11 |
 | Wünsche als Symbole über dem Boot | plan.md 3 | bauen | P11 |
-| Hafenbüro lässt Sonderfälle beim Spieler | plan.md 3 | bauen | P02 |
+| Hafenbüro lässt Sonderfälle beim Spieler | plan.md 3 | gebaut (PR 146) | P02 |
 | Vorspulen 2x, 3x erst mit Hafenbüro | plan.md 3, 14 | ersetzt durch Pause, 1x, 3x, 8x ab Start (Jorven bestätigt) | P07 |
 | Hafenhorn gedrückt halten (Sammelkassieren) | plan.md 8, Ton fertig | bauen | P26 |
 | Fernglas mit Steckbrief (Doppeltipp) | plan.md 8 | bauen | P26 |
 | Möwen aufscheuchen, Wellenring, Glocke | plan.md 8 | bauen | P26 |
 | Logbuch mit Bild | plan.md 9 | bauen | P21 |
 | Erfolge | plan.md 9 | bauen | P22 |
-| Endlosmodus nach Abschluss | plan.md 9, 12 | bauen | P16 |
+| Endlosmodus nach Abschluss | plan.md 9, 12 | gebaut: Saisonziele (PR 156, docs/aufstieg.md) | P16 |
 | Bestenliste, Online mit Supabase | plan.md 12, README | bauen, als letzter Schritt | P58 |
 | Nordsee mit Gezeiten, Schleuse, Trockenfallplätzen | plan.md 9, regionen.md | bauen, nach der Ostsee | P57 |
 | Revierfaktoren in `regions.js` (Hafengeld, Ankünfte, Startgeld, Schiffshäufigkeit) | regions.js | mit Nordsee bauen | P57 |
@@ -166,7 +166,7 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Gruppen-Ankunft, Wünsche je Bootsart, `feeFactor`, `arrivalWeight` | data/boats/*.js | in die Regeln holen | P19, P32 (Gruppen) |
 | Stammgast bringt Ruf am alten Platz | plan.md 9a | bauen | P25 |
 | Dauerlieger zahlen pro Saison, Gast wird umgelegt | plan.md 9a | bauen | P01 |
-| Tagesziel-Belohnung in Ruf, Ziele wie "Drei Segelboote mit Dusche" | plan.md 9a | bauen | P13 |
+| Tagesziel-Belohnung in Ruf, Ziele wie "Drei Segelboote mit Dusche" | plan.md 9a | gebaut (PR 152) | P13 |
 | Tretboote und Kanus nur als Kulisse | plan.md 14 (im Spiel zahlender Gast S2, 6 €) | entfällt: bleiben in Stufe 1 Gäste, plan.md angepasst | |
 
 ## 9. Im Spiel, aber nicht dokumentiert
@@ -178,7 +178,7 @@ Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätz
 | Dauerlieger zahlen pauschal 15 € pro Abend | `sim.js` (`startEvening`, `rulesFromEconomy`) | P01 |
 | Dauerplätze kosten nichts, keine Obergrenze, keine Gäste, keine Bewertungen | `features/dauerlieger.js` | P01 |
 | Abweisen von Hand kostet nichts, Wegfahren aus Ungeduld kann eine 2,5 bringen | `sim.js` (`dismiss`, `turnAway`) | P10 |
-| Rundgang startet bei 68 % des Tages, 8 Sekunden vor dem Abend | `data/people.js` (`RUNDGANG_AB`) | P12 |
+| Rundgang startet bei 68 % des Tages, 8 Sekunden vor dem Abend (erledigt: startet mit dem Abend, `RUNDGANG_AB` entfernt, steht in `spielregeln.md`) | `render/people.js` | P12 |
 | Start mit 0 € und fünf Startbewertungen von 3 Ankern | `state.js`, `economy.js` (`ruf`) | P17 |
 | Service-Werte als Mischung aus zwei Dateien | `services/rules.js` (`mische`) | P06 (erledigt) |
 | Dritte Service-Stufen und abweichende Stufennamen (Travellift) | `data/services.js`, `economy.js` | P06 (erledigt: Stufenzahl und Namen aus einer Liste), dokumentiert in `balancing.md` (P08, PR 177) |
@@ -328,10 +328,10 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
 | A1 | Selbst einfahrende Gäste nehmen die nächste freie Box am Steg, auch zu große | offen (entschieden) | P10 |
-| A2 | "Einfahren" ohne Hafenbüro nimmt irgendeinen passenden Platz, den besten kennt erst das Büro | offen | P02 |
+| A2 | "Einfahren" ohne Hafenbüro nimmt irgendeinen passenden Platz, den besten kennt erst das Büro | erledigt (PR 146) | P02 |
 | A3 | Platzwert beim Ziehen: Liegegeld mit Wunschbonus, erwartete Anker, Wunschplätze gold | offen | P10 |
 | A4 | Geduld sichtbar: Ring an der Boje, im letzten Drittel Flagge oder kurzes Tuten | offen | P55 |
-| A5 | Vorschau: drei Bootsumrisse mit Größe und Uhrzeit, als "Funkgerät" Wirkung der ersten Bürostufe | offen | P11, P02 |
+| A5 | Vorschau: drei Bootsumrisse mit Größe und Uhrzeit, als "Funkgerät" Wirkung der ersten Bürostufe | Freischaltung erledigt (PR 146, `rules.office.preview`), Anzeige offen | P11, P02 |
 | A6 | Passgenau belohnen: Bonus, wenn die Box höchstens ein Fünftel größer ist | offen | P10 |
 | A7 | Selbst-Einfahren einstellbar: schnell, langsam, aus | erledigt (Einstellungen: Normal 8 s, Langsam 20 s, Nie) | P50 |
 | A8 | Abweisen und Wegfahren angleichen (= Ü13) | offen | P10 |
@@ -344,10 +344,10 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 |---|---|---|---|
 | B1 | Auslastung an jedem Versorgungsgebäude ("14 von 20"), Schlange vor der Dusche | offen | P55 |
 | B2 | Wunschsymbole über dem Boot, beim Anlegen Haken oder grau | offen | P11 |
-| B3 | Münze nennt ihren Wert ("22 € + 11 €") | offen | P12 |
-| B4 | Rundgang als Helfer: erst abends, nur vergessene Münzen, etwa vier Fünftel statt der Hälfte | offen | P12 |
-| B5 | Langen Kassierstrich mit Trinkgeld belohnen; Knopf "Kassieren" erst mit Hafenbüro | offen | P12, P02 |
-| B6 | Mehrere Nächte beim Anlegen auf einmal zahlen | offen | P12 |
+| B3 | Münze nennt ihren Wert ("22 € + 11 €") | erledigt (`render/boat-view.js`, `feeReady` mit `base`, `bonus`) | P12 |
+| B4 | Rundgang als Helfer: erst abends, nur vergessene Münzen, etwa vier Fünftel statt der Hälfte | erledigt (`ECONOMY.kassieren.rundgangAnteil` 0,8, gilt auch nachts) | P12 |
+| B5 | Langen Kassierstrich mit Trinkgeld belohnen; Knopf "Kassieren" erst mit Hafenbüro | erledigt: Strich-Trinkgeld (PR 151, `sim:strokeTip`), Knopf (PR 146) | P12, P02 |
+| B6 | Mehrere Nächte beim Anlegen auf einmal zahlen | erledigt (`ECONOMY.kassieren.vorausNaechte`, `boat.paidThrough`, größere Münze) | P12 |
 | B7 | Wünsche je Bootsart aus den Bootsdaten nutzen | offen | P19 |
 | B8 | Neue Wünsche in späten Stufen, je Stufe mindestens einer (= F9) | offen | P31 |
 | B9 | Wege zählen: weit vom Sanitärhaus zählt die Dusche halb | offen | P19 |
@@ -381,20 +381,20 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | D7 | Sparziel anheften, Balken neben dem Geld, Schild am Bauplatz | offen | P18 |
 | D8 | Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe | offen | P60 |
 | D9 | Neue Gastplätze in Stufe 6 (Superyacht-Steg oder Stadtkai) | offen | P59 |
-| D10 | Stufenaufstieg feiern (= Ü23) | offen | P16 |
+| D10 | Stufenaufstieg feiern (= Ü23) | erledigt (PR 156) | P16 |
 
 ### E Hafenbüro und Automatik
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| E1 | Stufe 1 wird das Funkgerät: Vorschau und Knopf "Kassieren" | offen (entschieden) | P02 |
-| E2 | Kassenautomat nur für S und M, L und XL persönlich mit Trinkgeld | offen | P02 |
-| E3 | Büro schlägt vor (gold), Spieler bestätigt; erst später volle Automatik | offen | P02 |
-| E4 | Sonderfälle bleiben Handarbeit (= Ü11) | offen | P02 |
-| E5 | Automatik je Größenklasse an oder aus | offen | P02 |
-| E6 | Von Hand eingewiesene Gäste geben einen Viertelanker mehr | offen | P02 |
-| E7 | Volle Automatik erst ab Hafenstufe 4 und teurer | offen | P02 |
-| E8 | Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste) | offen | P02 (verknüpft P28, P37, P38) |
+| E1 | Stufe 1 wird das Funkgerät: Vorschau und Knopf "Kassieren" | erledigt (PR 146), Vorschau-Anzeige mit P11 | P02 |
+| E2 | Kassenautomat nur für S und M, L und XL persönlich mit Trinkgeld | erledigt (PR 146) | P02 |
+| E3 | Büro schlägt vor (gold), Spieler bestätigt; erst später volle Automatik | erledigt (PR 146) | P02 |
+| E4 | Sonderfälle bleiben Handarbeit (= Ü11) | erledigt (PR 146) | P02 |
+| E5 | Automatik je Größenklasse an oder aus | erledigt (PR 146) | P02 |
+| E6 | Von Hand eingewiesene Gäste geben einen Viertelanker mehr | erledigt (PR 146) | P02 |
+| E7 | Volle Automatik erst ab Hafenstufe 4 und teurer | erledigt (PR 146) | P02 |
+| E8 | Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste) | offen, kommt mit P28, P37, P38 | P02 (verknüpft P28, P37, P38) |
 
 ### F Services und Angebote (hier "Svc")
 
@@ -443,15 +443,15 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| I1 | Ziele verlangen eine Handlung (= Ü14) | offen | P13 |
-| I2 | Eines aus dreien wählen | offen | P13 |
-| I3 | Belohnungen mischen (Geld, Anker, seltener Gast, Rabatt, Deko) | offen | P13 |
-| I4 | Wochenziel | offen | P13 |
+| I1 | Ziele verlangen eine Handlung (= Ü14) | erledigt (PR 152) | P13 |
+| I2 | Eines aus dreien wählen | erledigt (PR 152) | P13 |
+| I3 | Belohnungen mischen (Geld, Anker, seltener Gast, Rabatt, Deko) | erledigt (PR 152) | P13 |
+| I4 | Wochenziel | erledigt (PR 152) | P13 |
 | I5 | Logbuch als Sammelalbum mit Schattenrissen | offen | P21 |
 | I6 | Erfolge als Dinge im Hafen (Pokal, Wimpel, Schild) | offen | P22 |
 | I7 | Meilensteine mit Ton und Bild | offen | P22 |
-| I8 | Richtiger Abschluss mit Kamerafahrt und Titel | offen | P16 |
-| I9 | Endlosspiel mit Saisonzielen | offen | P16 |
+| I8 | Richtiger Abschluss mit Kamerafahrt und Titel | erledigt (PR 156) | P16 |
+| I9 | Endlosspiel mit Saisonzielen | erledigt (PR 156) | P16 |
 | I10 | Ziele im Winter (Winterarbeiten) | offen | P20 |
 
 ### J Einstieg und Hilfe
@@ -634,7 +634,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | Paket | Titel (Thread) | Inhalt | Dateien | Thread |
 |---|---|---|---|---|
 | P01 | Dauerlieger zur echten Entscheidung machen | Ü1, Ü20, Doku Dauerlieger, Gast wird umgelegt (plan 9a) | `sim.js`, `features/dauerlieger.js`, `economy.js`, `tests/dauerlieger.test.mjs`, `docs/neue-features.md`, `docs/spielregeln.md` | neu |
-| P02 | Hafenbüro mit eigenen Aufgaben ausbauen | Ü2, Ü11 | `ui/hud.js`, `sim.js` (Automatik), `economy.js`, `ui/bauen.js` (Texte) | neu |
+| P02 | Hafenbüro mit eigenen Aufgaben ausbauen | Ü2, Ü11, A2, E1 bis E7, erledigt (PR 146) | `ui/hud.js`, `sim.js` (Automatik), `economy.js`, `ui/bauen.js` (Texte) | neu |
 | P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 folgen im nächsten PR, J4 mit P17, J5 nach P14 |
 | P04 | Abschlussziel Stufe 6 richtig zählen | Ü4 | `bridge.js`, `render/services.js`, `docs/services.md` | bestehend: "Services und Sonderanlagen einbauen" |
 | P05 | Boote auf wegfallenden Plätzen regeln | Ü5 | `sim.js` (Stufenausbau), `tests/` | bestehend: "Spielregeln ohne Grafik umsetzen" |
@@ -650,11 +650,11 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|---|
 | P10 | Zuweisen wieder zur Entscheidung machen | Ü8, Ü9, Ü13 | `sim.js` (Selbst-Einfahren, `dismiss`, `turnAway`), `render/boat-view.js`, `features/platzschilder.js` | neu |
 | P11 | Wünsche über dem Boot und Ankunftsvorschau | Ü10 | neues Modul `web/js/ui/vorschau.js`, `render/boat-view.js` | neu |
-| P12 | Kassieren verständlich machen | Ü12 (Rundgang ab Abend, halbe Münze sichtbar) | `data/people.js`, `render/boat-view.js`, `docs/spielregeln.md` | neu |
-| P13 | Tagesziele an eigene Handlungen binden | Ü14 | `features/tagesziele.js`, `sim.js` (Ereignisse mit "von Hand") | neu |
+| P12 | Kassieren verständlich machen | Ü12 (Rundgang ab Abend, halbe Münze sichtbar), B3, B4, B5 (Trinkgeld), B6. Stand: erledigt (PR 151) | `data/people.js`, `render/people.js`, `render/boat-view.js`, `sim.js`, `bridge.js`, `ui/gesten.js`, `economy.js`, `tests/kassieren.test.mjs`, `docs/spielregeln.md` | neu |
+| P13 | Tagesziele an eigene Handlungen binden | Ü14, I1 bis I4 | `features/tagesziele.js`, `features/ziel-deko.js`, `sim.js` (Ereignisse mit "von Hand"), `economy.js` (`tagesziele`) | erledigt (PR 152) |
 | P14 | Bewertungen und Gästebuch zeigen | Ü21, F18 | `render/boat-view.js`, neues Modul `web/js/ui/gaestebuch.js` | neu |
 | P15 | Tagesabschluss am Abend zeigen | Ü22 | neues Modul `web/js/ui/tagesabschluss.js`, `sim.js` (`sim:dayEnd`) | erledigt (PR 159) |
-| P16 | Aufstieg und Abschluss feiern, Endlosspiel | Ü23, Endlosmodus | `ui/oberflaeche.js`, `core/camera.js` (Kamerafahrt), `sim.js` | neu |
+| P16 | Aufstieg und Abschluss feiern, Endlosspiel | Ü23, Endlosmodus | `features/aufstieg.js` (Kamerafahrt über die öffentlichen Felder des Rigs, kein Eingriff in `core/camera.js`), `css/aufstieg.css`, `economy.js` (`endlos`), Andockstelle in `ui/oberflaeche.js` | erledigt (PR 156) |
 | P17 | Start und frühe Stufen straffen | Ü15, Ü16, Startwerte dokumentieren | `economy.js`, `state.js`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" (nach P06) |
 | P18 | Ausbau in Bauabschnitten | Ü18, `bautage` nutzen oder löschen | `ui/bauen.js`, `economy.js`, `sim.js`, Stegdarstellung | bestehend: "Bauen mit Vorschau und Tiefe ausbauen" |
 | P19 | Ruf schwerer machen mit Wünschen je Bootsart | Ü17, `feeFactor`, `arrivalWeight`, Kapazität sichtbar | `sim.js`, `data/boats/*.js`, `economy.js` | neu |

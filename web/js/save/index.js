@@ -4,7 +4,8 @@
 //
 // Andere Module nutzen:
 //   game.spielstand.speichern(zustand)  -> true/false (aktiver Platz, ohne Argument game.state)
-//   game.spielstand.laden()             -> { game, savedAt, ausSicherung } oder null
+//   game.spielstand.laden()             -> { game, savedAt, ausSicherung } oder null (streng geprüft;
+//                                          ein beschädigter Stand wird aufgehoben und gemeldet)
 //   game.spielstand.vorhanden()         -> true, wenn der aktive Platz einen Stand hat
 //   game.spielstand.oeffnen()           -> Fenster "Spielstände" (Menüknopf, Taste L)
 //   game.spielstand.neuesSpiel()        -> Fenster direkt bei "Neues Spiel"
@@ -14,9 +15,11 @@
 //
 // Wechsel, Neues Spiel und Probe laden die Seite neu, damit jedes Modul sauber neu startet.
 
-import { hasSave, loadGame, requestPersistentStorage } from './storage.js';
+import { hasSave, loadGame, rohText, SAVE_VERSION, requestPersistentStorage, storageAvailable } from './storage.js';
 import { startPwa } from './pwa.js';
-import { openSavePanel, openStart, showExportReminderIfDue, showUpdateBanner } from './save-panel.js';
+import {
+  openSavePanel, openStart, showExportReminderIfDue, showUpdateBanner, showKaputtMeldung, showOhneSpeicherMeldung,
+} from './save-panel.js';
 import * as plaetze from './plaetze.js';
 import { neuerSeed } from '../render/landschaft/formen.js';
 import { createState, deserialize } from '../state.js';
@@ -67,7 +70,52 @@ export function init(game) {
   const aktuell = () => game.state;
   // Testmodus ?stufe=n (state.testmodus, js/bridge.js) überschreibt den echten Spielstand nicht
   const testmodus = () => !!aktuell()?.testmodus;
-  const speichern = (zustand = aktuell()) => (zustand && !zustand.testmodus ? plaetze.speichernAktiv(zustand) : false);
+  // Spiel anhalten, solange eine Meldung offen ist, danach wie vorher weiter (wie der Pause-Knopf)
+  function anhalten() {
+    let warPausiert = true;
+    return {
+      pause: () => { warPausiert = !!game.paused; if (!warPausiert) game.setPaused?.(true); },
+      weiter: () => { if (!warPausiert) game.setPaused?.(false); },
+    };
+  }
+
+  // Merkt sich, ob das letzte Speichern geklappt hat (Privatmodus, Speicher voll oder gesperrt)
+  let speichernGeht = storageAvailable();
+  let ohneSpeicherGemeldet = false;
+  const speichern = (zustand = aktuell()) => {
+    if (!zustand || zustand.testmodus) return false;
+    if (!plaetze.diesesTabAktiv()) return false; // anderer Tab spielt: kein Fehler
+    const ok = plaetze.speichernAktiv(zustand);
+    speichernGeht = ok;
+    if (!ok && !ohneSpeicherGemeldet && document.readyState !== 'loading') {
+      ohneSpeicherGemeldet = true;
+      showOhneSpeicherMeldung({ getGame: aktuell, ...anhalten() });
+    }
+    return ok;
+  };
+
+  // Laden mit derselben strengen Prüfung wie state.js. Ließ sich der Stand nicht laden,
+  // wird sein Text aufgehoben und der Spieler bekommt nach dem Start eine Meldung.
+  let ladeMeldung = null; // { art: 'verloren' | 'sicherung', name, savedAt }
+  function laden() {
+    const roh = rohText();
+    const r = loadGame({ pruefen: (spiel) => deserialize(JSON.stringify(spiel)) });
+    if (roh !== null && (!r || r.ausSicherung)) {
+      // Name nur, wenn er sicher zu diesem Stand gehört (Verzeichnis kannte ihn), sonst aus dem Text
+      const e = plaetze.aktiverPlatz();
+      const ausText = /"harborName":"((?:[^"\\]|\\.){1,64})"/.exec(roh)?.[1];
+      const name = e?.info ? e.name : (ausText ? plaetze.nameSauber(ausText.replace(/\\(.)/g, '$1')) : null);
+      plaetze.kaputtMerken(roh, name);
+      let version = 0;
+      try { version = JSON.parse(roh)?.version; } catch { /* Müll */ }
+      const zuNeu = Number.isInteger(version) && version > SAVE_VERSION;
+      // Stand aus einer neueren Version (anderer Tab mit neuem Spiel): hier nichts überschreiben,
+      // nach dem Neuladen lädt die neue Version ihn wieder
+      if (zuNeu) plaetze.sperren();
+      ladeMeldung = { art: zuNeu ? 'zu-neu' : r ? 'sicherung' : 'verloren', name, savedAt: r?.savedAt ?? null };
+    }
+    return r;
+  }
 
   // Vorschaubild des laufenden Hafens: kleines JPEG aus dem 3D-Bild
   function bildMachen() {
@@ -116,6 +164,7 @@ export function init(game) {
     getGame: aktuell,
     testmodus,
     speichern,
+    speichernGeht: () => speichernGeht && storageAvailable(),
     plaetze,
     namensVorschlag,
     stegbildAnzahl: () => game.stegbild?.anzahl ?? 0,
@@ -155,7 +204,7 @@ export function init(game) {
 
   game.spielstand = {
     speichern,
-    laden: loadGame,
+    laden,
     vorhanden: hasSave,
     oeffnen: () => panel('liste'),
     neuesSpiel: () => panel('neu'),
@@ -221,6 +270,16 @@ export function init(game) {
     zeigeProbe();
     if (erinnert) return;
     erinnert = true;
+    // Beschädigter Stand oder Browser ohne Speicher geht vor jeder anderen Frage
+    if (ladeMeldung && !st.testmodus) {
+      showKaputtMeldung({ ...ladeMeldung, kaputt: plaetze.kaputtLesen, ...anhalten() });
+      return;
+    }
+    if (!storageAvailable() && !st.testmodus && !ohneSpeicherGemeldet) {
+      ohneSpeicherGemeldet = true;
+      showOhneSpeicherMeldung({ getGame: aktuell, ...anhalten() });
+      return;
+    }
     // Safari-Erinnerung erst, wenn es den Hafen schon ein paar Tage gibt (nicht beim ersten Start)
     const seit = Date.parse(plaetze.aktiverPlatz()?.erstellt ?? '');
     const alt = !Number.isNaN(seit) && Date.now() - seit > 3 * 86400000;

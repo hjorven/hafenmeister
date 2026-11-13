@@ -27,7 +27,7 @@ export const ZAHLEN_DATEI = path.join(ROOT, 'docs', 'zahlen.md');
 const NAMENS_LISTEN = [
   /^klassen$/, /^wuensche$/, /^wunschAnzahl$/, /^platzarten$/, /^stromAnSteg$/, /^bauwerke$/, /^services$/,
   /^ereignisse$/, /^warten\.plaetze$/, /^stufen\.\d+\.mix$/, /\.gaeste$/, /\.wetter$/, /\.hafengeld$/,
-  /^ereignisse\.\w+\.wirkung\.(sizeFactor|kindFactor|satisfaction)$/, /^tagesziele\.(belohnung|seglerSoll|groesse)$/,
+  /^ereignisse\.\w+\.wirkung\.(sizeFactor|kindFactor|satisfaction)$/, /^tagesziele\.(geld|schwere|ziele|grossAb)$/,
   /^zeit\.jahreszeiten$/, /\.ankunftFaktor$/,
 ];
 // Felder, die bewusst noch niemand liest (mit Paket, das sie anschließt oder löscht)
@@ -130,6 +130,14 @@ export function tabellen() {
     b.stufen.map((st, i) => [i === 0 ? b.name : '', i + 1, st.name, st.abStufe, euro(st.kosten), st.versorgt ?? '-']))), '');
   t.push('## Hafenbüro', '', tabelle(['Stufe', 'Name', 'ab Hafenstufe', 'Kosten', 'schaltet frei'], E.hafenbuero.stufen.map((st, i) => [
     i + 1, st.name, st.abStufe, euro(st.kosten), (st.schaltetFrei ?? []).join(', ')])), '');
+  {
+    const hb = E.hafenbuero;
+    const pz = (x) => `${Math.round((x ?? 0) * 100)} %`;
+    t.push(`Trinkgeld beim Selbst-Abholen (${(hb.trinkgeld?.klassen ?? []).join(', ')}): ${pz(hb.trinkgeld?.anteil)} des Liegegelds. `
+      + `Nebenkosten ab der Stufe mit nebenkosten: ${pz(hb.nebenkosten?.anteil)} auf jedes kassierte Liegegeld. `
+      + `Von Hand eingewiesen: +${String(hb.vonHandBonus ?? 0).replace('.', ',')} Anker. `
+      + `Sonderfälle fahren nach ${hb.sonderfaelle?.selbstEinfahrenNach ?? '-'} s selbst ein.`, '');
+  }
   t.push('## Services', '', tabelle(['Service', 'Stufe', 'Name', 'ab Hafenstufe', 'Kosten', 'Mindestruf', 'Wirkung'], SERVICES.flatMap((s) =>
     s.stufen.map((st, i) => [i === 0 ? s.name : '', i + 1, st.name, st.abStufe ?? s.abStufe, euro(st.kosten), st.ruf != null ? zahl(st.ruf) : '-',
       wirkungText(st.wirkung) + (st.wirkung.besuch ? `; Besuch alle ${st.wirkung.besuch.alleTage} Tage, ${euro(st.wirkung.besuch.einnahme)}` : '')]))), '');

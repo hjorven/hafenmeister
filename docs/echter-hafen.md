@@ -205,7 +205,7 @@ Zuständig: Spielregeln (`arrivalWindow`, Abendregel), Balancing (Zahlen), Schif
 **Spiel soll (Vorschlag, der nichts komplizierter macht):**
 - Die Münze erscheint **sobald das Boot fest ist** (nach `boat:moored`), nicht erst abends. Einstreichen wie bisher. Bleibt ein Boot mehrere Nächte, erscheint am nächsten Morgen die nächste Münze („verlängert“).
 - Nach dem Einstreichen bekommt das Boot ein kleines **farbiges Bändchen** am Bug (Tagesfarbe), das man im Hafen sieht. Boote ohne Bändchen sind die, bei denen noch eine Münze schwebt.
-- Abends (19 Uhr) geht ein **Hafenmeister-Rundgang** mit Laterne die Stege ab und sammelt nicht eingestrichene Münzen zur Hälfte ein (heute: Kasse des Vertrauens in der Nacht). Ab Hafenbüro Stufe 2 kassiert der Automat sofort, wie bisher abends.
+- Abends (19 Uhr) geht ein **Hafenmeister-Rundgang** mit Laterne die Stege ab und sammelt nicht eingestrichene Münzen ein; in die Kasse kommen vier Fünftel (seit P12, Rundgang startet mit dem Abend). Ab Hafenbüro Stufe 2 kassiert der Automat sofort, wie bisher abends.
 - Die Wünsche (WC, Dusche, Essen) zählen weiter abends; die Bewertung kommt bei der Abreise. Der Aufschlag für erfüllte Wünsche wird zur Bewertung oder zu einem Trinkgeld am Abend, damit der Preis bei Ankunft feststeht.
 
 Zuständig: Spielregeln (Regel), Schiffsanimationen (Bändchen), Menschen (Hafenmeister-Rundgang, freiwillig).

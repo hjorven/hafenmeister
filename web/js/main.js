@@ -29,6 +29,7 @@ const MODULES = [
   './ui/input-pc.js',
   './ui/input-touch.js',
   './ui/gesten.js',
+  './ui/kamera.js',
   './ui/hud.js',
   './ui/bauen.js',
   './ui/fotomodus.js',
@@ -42,6 +43,7 @@ const MODULES = [
   './features/wetterflagge.js',
   './features/hafen-schauen.js',
   './features/einstieg.js',
+  './features/aufstieg.js',
   './save/index.js',
   './ui/tagesabschluss.js',
   './ui/oberflaeche.js',
@@ -60,6 +62,7 @@ async function loadModules(game) {
     if (typeof init !== 'function') return;
     try { init(game); } catch (err) { console.error('Fehler in', MODULES[i], err); }
   });
+  weltAnForm(game);
   removePlaceholders(game);
   game.emit('ready');
 }
@@ -84,6 +87,33 @@ const WORLD = {
 };
 WORLD.width = WORLD.maxX - WORLD.minX;
 WORLD.centerX = (WORLD.minX + WORLD.maxX) / 2;
+
+// Spielbereich fuer den Blickpunkt an die Gelaendeform anpassen: Leuchttuerme und Inseln der Form
+// (mit 40 m Rand) muessen erreichbar sein. Obergrenze SICHER ist im Spiel geprueft: auch ganz
+// herausgezoomt und flach nach aussen bleibt der Rand des Gelaendes (BEREICH in gelaende.js,
+// danach der grobe Aussenring) im Dunst. WORLD wird an Ort und Stelle geaendert, weil die Kamera
+// es als rig.bounds haelt.
+const SICHER = { minX: -340, maxX: 300, minZ: -270, maxZ: 60 };
+function weltAnForm(game) {
+  // Grundbereich wie bisher, nach Norden bis zum Ende des Fahrwassers vor dem Aussenhafen (Plan-y 380, karte.js)
+  let minX = -420 * U, maxX = 306 * U, minZ = -380 * U - 20, maxZ = 30 * U;
+  try {
+    const form = game.gelaende?.aktuell?.();
+    const pkt = (x, z, r) => {
+      minX = Math.min(minX, x - r); maxX = Math.max(maxX, x + r);
+      minZ = Math.min(minZ, z - r); maxZ = Math.max(maxZ, z + r);
+    };
+    for (const [x, y] of form?.leuchttuerme || []) pkt(x * U, -y * U, 40);
+    for (const i of [...(form?.seeInseln || []), ...(form?.seeAussen || [])]) {
+      pkt((i.x - i.rx) * U, -(i.y + i.ry) * U, 40);
+      pkt((i.x + i.rx) * U, -(i.y - i.ry) * U, 40);
+    }
+  } catch (err) { console.warn('Geländeform nicht lesbar', err); }
+  WORLD.minX = Math.max(SICHER.minX, minX); WORLD.maxX = Math.min(SICHER.maxX, maxX);
+  WORLD.minZ = Math.max(SICHER.minZ, minZ); WORLD.maxZ = Math.min(SICHER.maxZ, maxZ);
+  WORLD.width = WORLD.maxX - WORLD.minX;
+  WORLD.centerX = (WORLD.minX + WORLD.maxX) / 2;
+}
 
 // Startansicht in zwei Teilen:
 // 1. Kern: alle Liegeplaetze der Stufe mit 12 m Rand (Stufe ohne eigene Plaetze nimmt die davor).

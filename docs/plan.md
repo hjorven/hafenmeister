@@ -55,7 +55,7 @@ Ein kleines, gemütliches Aufbauspiel in 3D. Du fängst mit einem Badesteg an ei
 Ein Spieltag dauert 2 Minuten bei normaler Geschwindigkeit: 90 Sekunden Tag, 30 Sekunden Abend. Tempo von Anfang an mit vier Knöpfen unten links: Pause, 1x, 3x, 8x; am PC schaltet Taste F 3x an und aus (Jorven, 12.11.2026: "Tempo so bleiben").
 
 1. **Vormittags** legen die Gäste der Nacht ab, Dauerlieger fahren zum Tagestörn hinaus. **Ab Mittag** laufen neue Boote ein und warten an Wartebojen oder im Ankerfeld vor dem Hafen. Du tippst ein Boot an (oder ziehst es an der Schleppleine), die passenden Plätze leuchten, du tippst einen an. Tust du nichts, fährt das Boot nach 8 Sekunden selbst in eine passende freie Box. Wer abends noch wartet, bleibt über Nacht an der Boje.
-2. **Beim Festmachen** wird das Liegegeld fällig: Über dem Boot erscheint eine Münze, du streichst sie ein, das Boot bekommt einen Bezahlt-Wimpel. **Abends** geht der Hafenmeister seine Runde und sammelt, was noch offen ist. Ab dem Hafenbüro (erste Stufe "Hafenmeister") gibt es den Knopf "Alle kassieren", ab dem Kassenautomaten kommt das Geld von selbst. Sammelkassieren mit dem Hafenhorn (Abschnitt 8) ist geplant (P26).
+2. **Kassieren:** Liegegeld wird beim Anlegen fällig, Gäste zahlen alle Nächte auf einmal. Über dem Boot erscheint eine Münze, eingestrichen bekommt das Boot einen Bezahlt-Wimpel; streichst du sie selbst ein, fliegt ihr Wert hoch („22 € + 11 €“ mit Wunschbonus), ein langer Strich über viele Münzen bringt Trinkgeld. Was liegen bleibt, holt abends der Hafenmeister auf seinem Rundgang, er bringt aber nur vier Fünftel. Ab dem Hafenbüro (erste Stufe "Hafenmeister") gibt es den Knopf "Alle kassieren", ab dem Kassenautomaten kommt das Geld von selbst. Sammelkassieren mit dem Hafenhorn (Abschnitt 8) ist geplant (P26).
 3. **Jederzeit** kannst du bauen und ausbauen: Baumodus mit Vorschau und Bestätigung ([bauen.md](bauen.md)).
 
 **Regeln**
@@ -71,7 +71,9 @@ Ein Spieltag dauert 2 Minuten bei normaler Geschwindigkeit: 90 Sekunden Tag, 30 
 
 Die kleine Entscheidung, die das Spiel trägt: Gebe ich den Stirnplatz jetzt der Motoryacht, oder halte ich ihn für den Katamaran frei, der gleich kommt?
 
-**Hafenbüro in drei Stufen:** Hafenmeister (ab Stufe 2: "Alle kassieren"), Kassenautomat (ab Stufe 2: Liegegeld kommt von selbst), Hafenbüro (ab Stufe 3: wartende Boote bekommen sofort die Box mit den meisten erfüllten Wünschen). Geplant (P02): Sonderfälle bleiben beim Spieler und werden hervorgehoben (Mehrrumpfboote, Sondergäste, große Schiffe, Boote mit nur noch einem passenden Platz), damit die Kernentscheidung bis zum Schluss erhalten bleibt.
+**Hafenbüro in vier Stufen:** 1 Hafenmeister mit Funk (Knopf „Kassieren“ und Vorschau der nächsten Boote), 2 Kassenautomat (kassiert S und M; große Boote zahlen persönlich mit Trinkgeld), 3 Hafenbüro (schlägt für jedes Boot die beste Box vor, goldene Raute, der Spieler bestätigt; rechnet Strom, Wasser und Duschen ab, 10 % auf jedes Liegegeld), 4 Hafenleitstelle ab Ausbaustufe 4 (volle Automatik, je Größe abschaltbar). Ohne Büro nimmt „Einfahren lassen“ die Box, die sich das Boot selbst suchen würde. Von Hand eingewiesene Gäste geben einen Viertelanker mehr.
+
+**Automatik:** Die Leitstelle weist Standardfälle selbst zu. Sonderfälle bleiben beim Spieler und werden mit einer orangen Raute hervorgehoben: Mehrrumpfboote, Sondergäste, große Schiffe und Boote, für die nur noch ein einziger Platz passt. Sie fahren erst nach 25 Sekunden an der Boje selbst ein. So bleibt die Kernentscheidung bis zum Schluss erhalten.
 
 ## 4. Ausbaustufen
 
@@ -148,7 +150,7 @@ Ein Bauwerk „versorgt n Boote“ heißt: pro Abend bekommen n Boote diesen Wun
 |---|---|---|
 | Bootsverleih | 1 | kleines Einkommen pro Tag, Leihboote fahren über den See |
 | Slip | 2 | Trailerboote kommen über Land, zusätzliche S-Gäste ohne Liegeplatz |
-| Hafenbüro | 2 bis 3 | drei Stufen, siehe Abschnitt 3 |
+| Hafenmeisterbüro | 2 bis 4 | Stufe 1: Knopf "Kassieren" und Funk-Vorschau (vorher streicht man Münzen einzeln), 2: Kassenautomat für S und M, 3: Vorschläge und Nebenkosten (+10 % Liegegeld), 4: Leitstelle mit Automatik für Standardfälle |
 | Mastenkran | 3 | Segelboote aus dem Binnenland kommen, mehr M-Gäste |
 | Segelclub | 3 | Regatten möglich, mehr Jollen |
 | Seenotretter-Station | 4 | Sturm richtet weniger Schaden an, Rettungsboot rückt sichtbar aus |
@@ -207,7 +209,7 @@ Kleine Rückmeldungen: Haptik auf dem Handy (`navigator.vibrate`), wo verfügbar
 | Nordsee | Deich, Watt, Sielhafen, Priele | Gezeiten: bei Ebbe liegen Boote trocken, Tiefgang zählt doppelt |
 
 - **Erfolge** (geplant, P22): zum Beispiel „Alle drei Traditionssegler gleichzeitig im Hafen“, „Ein Abend mit 5,0 Ankern“.
-- **Endlosmodus** nach dem Spielziel (geplant, P16), Bestenliste online (geplant, P58, Abschnitt 12).
+- **Endlosmodus** nach dem Spielziel: jede Saison vier Saisonziele mit Sternen, Belohnung und Rang (im Spiel, P16, [aufstieg.md](aufstieg.md)); Bestenliste online (geplant, P58, Abschnitt 12).
 
 ### 9a. Neue Features (Entscheidung Jorven, 11.11.2026)
 
@@ -220,7 +222,7 @@ Alle sechs sind gebaut, Einzelheiten in [neue-features.md](neue-features.md). Hi
 | **Wetter an der Flagge** | Die Flagge am Hafenbüro zeigt Wind und Wetter für morgen. Wer hinsieht, kann sich auf Sturm oder Regatta vorbereiten. |
 | **Fotomodus** | Leisten ausblenden, Kamera frei drehen, Bild speichern. |
 | **Hafen schauen** | Nichts tun und zusehen: Die Kamera fährt langsam durch den Hafen, Musik läuft, das Spiel geht weiter. |
-| **Tagesziele** | Jeden Tag ein kleines, freiwilliges Ziel (zum Beispiel „Drei Segelboote mit Dusche“), Belohnung in Geld (Belohnung in Ruf und Ziele mit Wünschen geplant, P13). |
+| **Tagesziele** | Jeden Morgen drei Karten (leicht, mittel, schwer), der Spieler nimmt eine, zum Beispiel „3 Segelboote an Plätze mit Strom legen“. Es zählt nur, was er selbst tut. Belohnung: Geld, ein halber Anker, ein seltener Gast, ein Gutschein oder ein Deko-Stück im Hafen. Dazu ein Wochenziel ([neue-features.md](neue-features.md), Abschnitt 6). |
 
 Dauerlieger und Menschen im Hafen (Abschnitt 11a) hängen zusammen: Die Crew der Dauerlieger geht morgens an Bord und abends an Land.
 
@@ -347,7 +349,7 @@ Die Arbeitsliste mit allen Punkten, Paketen und Threads ist die [Roadmap](roadma
 | Frage | Entscheidung |
 |---|---|
 | Stil | Welt in Flat Vector 3D, Oberfläche im Pixel-Stil; Pixel-Fassung als eigene Seite (ob sie Hauptspiel wird: offen, Frage 9) |
-| Zuweisen von Hand oder automatisch | von Hand oder Selbst-Einfahren nach 8 s; ab Hafenbüro Automatik (nur Standardfälle: P02) |
+| Zuweisen von Hand oder automatisch | von Hand, ab Hafenbüro Vorschläge, ab Hafenleitstelle Automatik nur für Standardfälle |
 | "Alle kassieren" | erst ab Hafenbüro Stufe 1, vorher streicht man Münzen ein (12.11.2026) |
 | Wartende Boote | an Wartebojen oder im Ankerfeld, keine Leiste |
 | Liegegeld | beim Festmachen, bezahlte Boote tragen einen Wimpel |
