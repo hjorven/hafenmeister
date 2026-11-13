@@ -394,7 +394,7 @@ export function init(game) {
     const weich = [];
     for (const bj of w.bojen ?? []) weich.push({ x: bj.x, z: bj.z, r: 14, kosten: 3 });
     for (const a of w.ankerplaetze ?? []) weich.push({ x: a.x, z: a.z, r: (a.schwoikreisM ?? 8) + 4, kosten: 2 });
-    karte = baueKarte({ tiefe, bereich: BEREICH, ...hindernisseAusHafen(HAFEN, st), weich, engRadius: 3.6 });
+    karte = baueKarte({ tiefe, bereich: BEREICH, ...hindernisseAusHafen(HAFEN, st), weich, engRadius: 5 });
     karteSig = sig;
     karteAlt = false;
     flaechen.clear();
@@ -835,7 +835,11 @@ export function init(game) {
       if (e.anim.state !== 'idle' && e.anim.state !== 'moored') continue;   // faehrt gerade
       if (e.draussen) continue;                                          // Dauerlieger auf Runde
       const b = info.platz ? platzBerth(info.platz) : warteplatz(info.boje ?? 0, e.anim);
-      if (b) e.anim.moorAt(b);
+      if (!b) continue;
+      // Stufenausbau (nicht Laden): liegt das Boot sichtbar woanders, faehrt es hin statt zu springen
+      const weit = Math.hypot((b.x ?? e.anim.x) - e.anim.x, (b.z ?? e.anim.z) - e.anim.z) > 1.5;
+      if (!laden && weit && e.anim.model.visible !== false && (e.anim.moored || e.anim.state === 'moored')) e.anim.dock(b, { route: true });
+      else e.anim.moorAt(b);
     }
     for (const id of [...muenzen.keys()]) if (!boats.has(id)) entferneMuenze(id);
     const st = game.sim?.state ?? game.state;
