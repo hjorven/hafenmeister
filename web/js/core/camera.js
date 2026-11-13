@@ -51,6 +51,7 @@ export class CameraRig {
     this._fly = null;
     this._schwung = { yaw: 0, pitch: 0, x: 0, y: 0 };   // Nachlauf nach dem Loslassen
     this._letzt = { yaw: 0, pitch: 0, t: 0 };
+    this.nebel = 0;                           // 0..1 aus dem Wetter, setzt core/game.js
     this.boden = null;                        // (x, z) -> Bodenhoehe in Metern, setzt core/game.js
     this.onChange = null;
   }
@@ -379,6 +380,13 @@ export class CameraRig {
     return (this.viewWidth / 2) / (tan * this.aspect);
   }
 
+  // Dunst zum Horizont (core/game.js setzt scene.fog danach): erst weit hinter dem Blickpunkt,
+  // von oben nicht zu sehen. rig.nebel (0..1, Wetter) zieht ihn naeher heran.
+  get dunst() {
+    const d = this.distance, n = Math.min(1, Math.max(0, this.nebel || 0));
+    return { nah: Math.max(d * 1.5, 380) * (1 - 0.65 * n), fern: Math.max(d * 3.2, 1100) * (1 - 0.55 * n) };
+  }
+
   // Richtung vom Blickpunkt zur Kamera
   _richtung(out = new THREE.Vector3()) {
     return out.set(
@@ -422,13 +430,20 @@ export class CameraRig {
     } else {
       const cam = this.perspektive;
       const dist = this.distance;
-      if (this.pitch < 40 * DEG) this._ueberGrund(dist);
+      this._ueberGrund(dist);
       cam.fov = FOV;
       cam.aspect = this.aspect;
       // Nahe Ebene so weit weg wie moeglich (bessere Tiefengenauigkeit), ferne bis zum Horizont
       cam.near = Math.max(0.5, dist * 0.12);
-      cam.far = Math.max(2500, dist * 8);
+      // Hinter dem Ende des Dunsts ist alles Himmelfarbe: dort muss nichts mehr gezeichnet werden
+      cam.far = this.dunst.fern * 1.02;
       cam.position.copy(this.target).addScaledVector(this._richtung(), dist);
+      // Steilufer, Duenen: reicht auch die steilste Neigung nicht, hebt sich die Kamera selbst an
+      if (typeof this.boden === 'function') {
+        let h = 0;
+        try { h = this.boden(cam.position.x, cam.position.z) || 0; } catch { h = 0; }
+        if (cam.position.y < h + BODEN_ABSTAND) cam.position.y = h + BODEN_ABSTAND;
+      }
       cam.lookAt(this.target);
       cam.updateProjectionMatrix();
       cam.updateMatrixWorld();

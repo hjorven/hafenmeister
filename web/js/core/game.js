@@ -91,6 +91,9 @@ export function createGame({ canvas, bounds, home }) {
   const TEST_MAX = 120;
   game.testTempo = testTempo;
 
+  let nebelZiel = 0;
+  game.on('weather', (w) => { if (w && typeof w === 'object') nebelZiel = Math.min(1, Math.max(0, Number(w.fog) || 0)); });
+
   // Zeit aus dem Zeitstempel der Bildschleife (THREE.Clock ist in Three.js 0.187 veraltet und warnt)
   let zuletzt = null;
   renderer.setAnimationLoop((zeit) => {
@@ -108,6 +111,7 @@ export function createGame({ canvas, bounds, home }) {
         for (const fn of tickers) fn(dt, game);
       }
       rig.update(Math.min(echt, 0.1));
+      dunst(scene, rig);
       renderer.render(scene, rig.camera);
       return;
     }
@@ -116,6 +120,8 @@ export function createGame({ canvas, bounds, home }) {
     game.time += dt;
     rig.update(raw);
     for (const fn of tickers) fn(dt, game);
+    // Nebel aus dem Wetter zieht den Dunst weich heran
+    rig.nebel += (nebelZiel - rig.nebel) * Math.min(1, raw * 0.8);
     dunst(scene, rig);
     renderer.render(scene, rig.camera);
   });
@@ -130,9 +136,9 @@ function dunst(scene, rig) {
   if (!fog || !fog.isFog) return;
   if (scene.background?.isColor) fog.color.copy(scene.background);
   if (rig.projektion === 'ortho') { fog.near = 1e5; fog.far = 2e5; return; }
-  const d = rig.distance;
-  fog.near = Math.max(d * 1.7, 420);
-  fog.far = Math.max(d * 4.5, 1400);
+  const { nah, fern } = rig.dunst;
+  fog.near = nah;
+  fog.far = fern;
 }
 
 // Wie viel Bildschirm verdecken die Leisten oben und unten? Nur waagerechte Leisten zaehlen,
