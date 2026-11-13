@@ -221,6 +221,7 @@ const CSS = `
   display: flex; flex-direction: column; align-items: stretch; gap: 4px; width: 124px; font-family: var(--hm-pixel); pointer-events: auto; }
 #hm-funk[hidden], body.foto #hm-funk, body.building #hm-funk, body.card-open #hm-funk { display: none !important; }
 #hm-funk.verdeckt { visibility: hidden; pointer-events: none; }
+#hm-funk .hm-funk-boot.platzlos { display: none; }
 #hm-funk .hm-funk-kopf { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 30px; padding: 0 6px; font-weight: 600; font-size: 13px; cursor: pointer; }
 #hm-funk .hm-funk-kopf .hm-sym { width: 18px; height: 18px; }
 #hm-funk.zu .hm-funk-liste { display: none; }
@@ -241,9 +242,10 @@ const CSS = `
 @media (max-width: 540px), (max-height: 420px) {
   #hm-funk { width: 84px; }
   #hm-funk.verdeckt { visibility: hidden; pointer-events: none; }
+#hm-funk .hm-funk-boot.platzlos { display: none; }
 #hm-funk .hm-funk-kopf { min-height: 26px; font-size: 12px; }
   #hm-funk .hm-funk-boot { padding: 4px 3px 3px; gap: 2px; }
-  #hm-funk .hm-funk-laenge { display: none; }
+  #hm-funk .hm-funk-zeile { flex-wrap: wrap; gap: 2px 5px; }
 }
 @media (max-height: 420px) {
   #hm-funk .hm-funk-liste { gap: 2px; }
@@ -464,6 +466,7 @@ export function init(game) {
   const setzeZu = (z) => {
     zu = z;
     funk.classList.toggle('zu', z);
+    requestAnimationFrame(() => kuerzen());
     kopf.setAttribute('aria-expanded', String(!z));
     if (z) satz.hidden = true;
     try { localStorage.setItem('hm-funk-zu', z ? '1' : '0'); } catch { /* privat */ }
@@ -535,6 +538,7 @@ export function init(game) {
       b.addEventListener('click', (e) => { e.stopPropagation(); zeigeSatz(d, b); });
       return b;
     }));
+    kuerzen();
   }
   let geplant = false;
   const plane = () => {
@@ -557,6 +561,25 @@ export function init(game) {
       return r.width > 0 && r.left < f.right && r.right > f.left && r.top < f.bottom && r.bottom > f.top;
     });
     funk.classList.toggle('verdeckt', ueber);
+    kuerzen();
+  }
+  // Was unten rechts steht ("Als Nächstes", Kassieren, Zeit, Bauen) bleibt frei: Karten, die hineinragen, fallen weg
+  function kuerzen() {
+    const karten = [...liste.querySelectorAll('.hm-funk-boot')];
+    for (const k of karten) k.classList.remove('platzlos');
+    if (funk.hidden || funk.classList.contains('zu') || !karten.length) return;
+    const f = funk.getBoundingClientRect();
+    let grenze = window.innerHeight;
+    for (const x of document.querySelectorAll('#bau-tipp, #btn-collect, #hud-bottom .hm-px, #hud-bottom button')) {
+      if (x.hidden || !x.offsetParent || getComputedStyle(x).visibility === 'hidden') continue;
+      const r = x.getBoundingClientRect();
+      if (r.width && r.left < f.right && r.right > f.left && r.bottom > f.top) grenze = Math.min(grenze, r.top);
+    }
+    let weg = false;
+    for (const k of karten) {
+      weg = weg || k.getBoundingClientRect().bottom > grenze - 4;
+      if (weg) k.classList.add('platzlos');
+    }
   }
   // Handy hochkant: Bootskarte offen -> Funk ausblenden (Klasse hm-schmal)
   const schmal = () => document.body.classList.toggle('hm-schmal', window.innerWidth < 600);
