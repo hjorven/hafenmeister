@@ -24,9 +24,10 @@
 .hm-ta[hidden], .hm-ta-zettel[hidden] { display: none !important; }
 .hm-ta[style*="left"] { margin-left: 0; }
 .hm-ta.rein { animation: hm-ta-karte-rein 0.28s steps(5, end); }
+/* Nur einblenden, nicht verschieben: die Karte steht sofort an ihrer gemessenen Stelle */
 @keyframes hm-ta-karte-rein {
-  from { transform: translateY(-14px); opacity: 0; }
-  to { transform: none; opacity: 1; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes hm-ta-rein {
   from { transform: translate(-50%, -14px); opacity: 0; }

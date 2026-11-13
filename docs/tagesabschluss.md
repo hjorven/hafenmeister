@@ -10,7 +10,7 @@ Stand: 13.11.2026, Paket P15 (Ü22, Svc F4). Status: erledigt (PR 159).
 - Boote: angelegt, abgereist mit Schnitt der Bewertung, weitergefahren mit Grund (Wartebojen voll, zu lange gewartet, abends ohne Platz, weggeschickt). Ruf vorher und nachher.
 - Die letzten sieben Tage als Säulen, der beste Tag in Gold. "Rekord", wenn der Tag den besten bisher schlägt.
 - Ein Hinweis, was morgen mehr bringt (liegen gebliebenes Liegegeld, fehlende Plätze, zu langes Warten, schlechte Bewertungen, Tagesziele).
-- Die Karte schließt nach 14 Sekunden echter Zeit von selbst, solange man sie nicht anfasst. Häkchen "Jeden Abend zeigen" aus: dann nur ein kleiner Zettel mit der Summe, Antippen öffnet die Karte. Während des Einstiegs kommt immer nur der Zettel.
+- Die Karte schließt nach 14 Sekunden echter Zeit von selbst, solange man sie nicht anfasst. Häkchen "Abends zeigen" aus: dann nur ein kleiner Zettel mit der Summe, Antippen öffnet die Karte. Während des Einstiegs kommt immer nur der Zettel.
 - Menü, "Tagesabschluss": öffnet den letzten Abschluss, mit den Pfeilen blättert man durch die letzten 30 Tage und bis zum laufenden Tag ("bis jetzt").
 - Münzen über Gebäuden: Rechnen die Services zu Beginn des Abends ab, steigt über jeder Anlage eine Münze mit dem Betrag auf.
 
@@ -34,7 +34,7 @@ Stand: 13.11.2026, Paket P15 (Ü22, Svc F4). Status: erledigt (PR 159).
 
 - Am Handy (Breite unter 600 px oder Höhe unter 500 px) kommt von selbst nur der Zettel mit der Tagessumme. Die Karte öffnet sich erst auf Tippen und schließt nicht von selbst. So verdeckt sie nie Zeit, Kassieren oder Bauen, während das Spiel läuft.
 - Der Zettel sitzt unter Statusleiste und Ereignis-Banner.
-- Die Karte misst beim Öffnen den freien Platz: hochkant zwischen Statusleiste und Zeit/Kassieren/Bauen, quer zwischen Kasse/Zeit links, Bauen rechts und Kassieren unten. Die Schilder links (Wetter, Tagesziele, Ausbau) darf die offene Karte überdecken, sie zeigen nur etwas an.
+- Die Karte misst beim Öffnen den freien Platz: hochkant zwischen Statusleiste und Zeit/Kassieren/Bauen, quer zwischen Kasse/Zeit links, Bauen rechts und Kassieren unten. Am Handy hochkant liegt die Karte auch unter der linken Spalte (Wetter, Tagesziele, Ausbau), quer rechts daneben; sie verdeckt keine Bedienung.
 - Reicht die Höhe nicht, wird die Karte kompakter (Klasse `eng`, dann `sehr-eng` ohne Säulen und Unterzeilen, zuletzt `ohne-tipp`), statt innen zu rollen.
 - Blätterpfeile kommen aus `ui/pixel-symbole.js` (`pfeil`).
 

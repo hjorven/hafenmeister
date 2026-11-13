@@ -7,7 +7,7 @@
 //   Boote (angelegt, abgereist mit Bewertung, weitergefahren), Ruf vorher und nachher, bester Tag,
 //   die letzten sieben Tage als Balken und ein Hinweis, was morgen mehr bringt.
 // - Sie erscheint von selbst und schließt nach einer Weile wieder, solange niemand sie anfasst.
-//   Wer das nicht will, schaltet "Jeden Abend zeigen" aus; dann kommt nur ein kleiner Zettel mit der Summe.
+//   Wer das nicht will, schaltet "Abends zeigen" aus; dann kommt nur ein kleiner Zettel mit der Summe.
 // - Menü: "Tagesabschluss" öffnet die Karte jederzeit, mit Blättern durch die letzten Tage.
 // - Münzen über Gebäuden: Bei der Abrechnung der Services steigt über jeder Anlage eine Münze mit dem Betrag auf.
 //
@@ -235,7 +235,7 @@ export function init(game) {
     const fuss = el('footer', { class: 'hm-ta-fuss' },
       el('label', { class: 'hm-ta-auto' },
         el('input', { type: 'checkbox', checked: auto, onclick: (e) => { schreibeAuto(e.target.checked); } }),
-        el('span', {}, ' Jeden Abend zeigen')),
+        el('span', {}, ' Abends zeigen')),
       el('button', { type: 'button', class: 'hm-knopf hm-primaer hm-px hm-ta-weiter', onclick: () => schliesse() }, 'Weiter'));
 
     // Zwei Spalten (Handy quer): links das Geld, rechts Boote, Verlauf und Hinweis
@@ -269,6 +269,7 @@ export function init(game) {
     zettel.hidden = true;
     karte.hidden = false;
     platziere();
+    requestAnimationFrame(() => platziere());
     karte.classList.remove('rein'); void karte.offsetWidth; karte.classList.add('rein');
     angefasst = !auto;
     restzeit = auto ? AUTO_SCHLIESSEN : 0;
@@ -336,8 +337,10 @@ export function init(game) {
       const kassieren = rechteck('#btn-collect');
       if (kassieren && kassieren.right - huelle.left > links && kassieren.left - huelle.left < rechts) unten = Math.min(unten, kassieren.top - huelle.top - rand);
     } else {
-      // Unter die Statusleiste und über Zeit, Kassieren und Bauen
-      for (const r of [status, werkzeuge]) if (r) oben = Math.max(oben, r.bottom - huelle.top + rand);
+      // Unter die Statusleiste und über Zeit, Kassieren und Bauen. Hochkant und am Handy auch unter die linke
+      // Spalte (Wetter, Tagesziele, Ausbau): sie ist bedienbar und darf nicht verdeckt werden.
+      const spalte = istHandy() || !quer ? ['#weather-chip', '#weather-panel', '.hm-tafel > button', '.hm-tafel ul', '#hm-ziel > *'].flatMap((x) => [...document.querySelectorAll(x)].map(rechteck)) : [];
+      for (const r of [status, werkzeuge, ...spalte]) if (r) oben = Math.max(oben, r.bottom - huelle.top + rand);
       for (const r of unteres) unten = Math.min(unten, r.top - huelle.top - rand);
     }
     const breite = Math.max(220, Math.min(quer && istHandy() ? 560 : 380, rechts - links));
@@ -354,6 +357,13 @@ export function init(game) {
     if (karte.scrollHeight > karte.clientHeight + 4) karte.classList.add('ohne-tipp');
   }
   window.addEventListener('resize', () => platziere());
+  // Schilder und Knöpfe erscheinen oft ein Bild später (Ziel, Kassieren): dann neu messen
+  let neuGeplant = false;
+  game.on('sim:change', () => {
+    if (karte.hidden || neuGeplant) return;
+    neuGeplant = true;
+    requestAnimationFrame(() => { neuGeplant = false; platziere(); });
+  });
   game.on('resize', () => platziere());
 
   function zeigeZettel(b) {
@@ -430,6 +440,7 @@ export function init(game) {
 
   // Uhr: echte Zeit, damit die Karte auch bei Pause und Vorspulen gleich lange bleibt
   let letzte = performance.now();
+  let messUhr = 0;
   function uhr(t) {
     const dt = Math.min(0.25, (t - letzte) / 1000);
     letzte = t;
@@ -440,6 +451,13 @@ export function init(game) {
     if (zettelZeit > 0) {
       zettelZeit -= dt;
       if (zettelZeit <= 0) { zettel.hidden = true; meldeFertig(); }
+    }
+    // Schilder links klappen auf und zu, Kassieren erscheint und geht: Lage regelmäßig nachmessen
+    messUhr += dt;
+    if (messUhr > 0.3) {
+      messUhr = 0;
+      if (!karte.hidden) platziere();
+      if (!zettel.hidden) platziereZettel();
     }
     bewegeMuenzen(dt);
     requestAnimationFrame(uhr);
