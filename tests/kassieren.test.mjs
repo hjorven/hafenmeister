@@ -42,7 +42,7 @@ test('Zahlen aus economy.js: vier Fünftel beim Rundgang, Vorauszahlung, Trinkge
   const ctx = context();
   assert.equal(ctx.rules.roundShare, ECONOMY.kassieren.rundgangAnteil);
   assert.equal(sim.roundShare(ctx), 0.8);
-  assert.equal(ctx.rules.prepay, true);
+  assert.equal(ctx.rules.prepay, ECONOMY.kassieren.vorausNaechte);
   assert.equal(ctx.rules.strokeTip.from, ECONOMY.kassieren.strichTrinkgeld.abMuenzen);
 });
 

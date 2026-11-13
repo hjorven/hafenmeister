@@ -68,14 +68,14 @@ export const ECONOMY = {
   },
   wunschBonus: 0.25,          // Hafengeld = Grundpreis * (1 + wunschBonus * erfüllte Wünsche)
 
-  // Kassieren (P12). Liegegeld wird beim Anlegen fällig. vorauszahlen: Gäste zahlen alle geplanten
-  // Nächte auf einmal (eine Münze je Aufenthalt). Was der Spieler nicht selbst einstreicht, holt
+  // Kassieren (P12). Liegegeld wird beim Anlegen fällig. vorausNaechte: Gäste zahlen bis zu so viele
+  // geplante Nächte auf einmal (eine Münze je Aufenthalt, 1 = jede Nacht einzeln). Was der Spieler nicht selbst einstreicht, holt
   // abends der Hafenmeister auf seinem Rundgang (oder nachts): in die Kasse kommt rundgangAnteil.
   // strichTrinkgeld: ab abMuenzen Münzen in einem Kassierstrich je Münze ab der Grenze jeMuenze
   // Trinkgeld auf die eingestrichene Summe, höchstens hoechstens.
   kassieren: {
     rundgangAnteil: 0.8,
-    vorauszahlen: true,
+    vorausNaechte: 7,
     strichTrinkgeld: { abMuenzen: 3, jeMuenze: 0.04, hoechstens: 0.2 },
   },
   // Passregel: so viel Wasser muss unter dem Kiel bleiben (Meter)

@@ -347,7 +347,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | B3 | Münze nennt ihren Wert ("22 € + 11 €") | erledigt (`render/boat-view.js`, `feeReady` mit `base`, `bonus`) | P12 |
 | B4 | Rundgang als Helfer: erst abends, nur vergessene Münzen, etwa vier Fünftel statt der Hälfte | erledigt (`ECONOMY.kassieren.rundgangAnteil` 0,8, gilt auch nachts) | P12 |
 | B5 | Langen Kassierstrich mit Trinkgeld belohnen; Knopf "Kassieren" erst mit Hafenbüro | erledigt: Strich-Trinkgeld (PR 151, `sim:strokeTip`), Knopf (PR 146) | P12, P02 |
-| B6 | Mehrere Nächte beim Anlegen auf einmal zahlen | erledigt (`ECONOMY.kassieren.vorauszahlen`, `boat.paidThrough`, größere Münze) | P12 |
+| B6 | Mehrere Nächte beim Anlegen auf einmal zahlen | erledigt (`ECONOMY.kassieren.vorausNaechte`, `boat.paidThrough`, größere Münze) | P12 |
 | B7 | Wünsche je Bootsart aus den Bootsdaten nutzen | offen | P19 |
 | B8 | Neue Wünsche in späten Stufen, je Stufe mindestens einer (= F9) | offen | P31 |
 | B9 | Wege zählen: weit vom Sanitärhaus zählt die Dusche halb | offen | P19 |

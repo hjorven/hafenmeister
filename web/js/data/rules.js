@@ -41,7 +41,7 @@ export function rulesFromEconomy(E = ECONOMY) {
   const ka = E.kassieren || {};
   r.roundShare = ka.rundgangAnteil ?? 0;
   r.uncollectedShare = r.roundShare;
-  r.prepay = !!ka.vorauszahlen;
+  r.prepay = ka.vorausNaechte ?? 1;   // höchstens so viele Nächte beim Anlegen auf einmal
   r.strokeTip = ka.strichTrinkgeld
     ? { from: ka.strichTrinkgeld.abMuenzen, perCoin: ka.strichTrinkgeld.jeMuenze, max: ka.strichTrinkgeld.hoechstens }
     : null;

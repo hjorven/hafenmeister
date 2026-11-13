@@ -1133,8 +1133,8 @@ function checkWishes(state, ctx, boat) {
 }
 
 /**
- * Liegegeld fällig stellen: beim Anlegen und für Bleibende jeden Morgen. Mit rules.prepay zahlt
- * ein Gast beim Anlegen alle geplanten Nächte auf einmal (boat.paidThrough = letzter bezahlter Tag);
+ * Liegegeld fällig stellen: beim Anlegen und für Bleibende jeden Morgen. Mit rules.prepay (Zahl) zahlt
+ * ein Gast beim Anlegen bis zu so viele geplante Nächte auf einmal (boat.paidThrough = letzter bezahlter Tag);
  * an den Morgen danach werden nur noch die Wünsche geprüft. Bleibt er länger (Sturm), wird jede
  * weitere Nacht wieder einzeln fällig. Das Boot gilt als unbezahlt (boat.paid = false), bis
  * kassiert ist. Mit dem Kassenautomaten kassiert das Büro sofort selbst.
@@ -1145,7 +1145,7 @@ function chargeFee(state, ctx, boat, mods, events) {
   const metList = checkWishes(state, ctx, boat);
   boat.feeDay = state.day;
   if (boat.paidThrough != null && state.day <= boat.paidThrough) return; // schon im Voraus bezahlt
-  const nights = ctx.rules.prepay && boat.paidThrough == null ? Math.max(1, boat.nights || 1) : 1;
+  const nights = boat.paidThrough == null ? Math.max(1, Math.min(ctx.rules.prepay || 1, boat.nights || 1)) : 1;
   const perNight = nightlyFee(state, ctx, boat, metList.length, mods.priceFactor);
   const basePerNight = Math.min(perNight, nightlyFee(state, ctx, boat, 0, mods.priceFactor));
   const fee = perNight * nights;
