@@ -36,7 +36,7 @@ const START = Number(opt('stufe', 1));
 const BIS = Number(opt('bis', 6));
 const WEB = path.resolve(opt('web', path.join(REPO, 'web')));
 const OUT = path.resolve(opt('out', path.join(require('os').tmpdir(), 'zeitraffer')));
-const EXTRA = ['gelaende', 'stegbild', 'landbild'].filter((k) => opt(k) != null).map((k) => `&${k}=${opt(k)}`).join('');
+const EXTRA = ['gelaende', 'seed', 'stegbild', 'landbild'].filter((k) => opt(k) != null).map((k) => `&${k}=${opt(k)}`).join('');
 
 function ladePlaywright() {
   for (const p of [path.join(REPO, 'tests', 'node_modules', '@playwright', 'test'), 'playwright', '@playwright/test']) {
@@ -161,7 +161,14 @@ const PROBE = () => {
     const still = weg < 0.15 && !ruhig.has(b.st) ? (alt?.still ?? jetzt) : null;
     W.stand.set(b.a, { x: b.x, z: b.z, still });
     // Länger als 5 Spielminuten in Fahrt, ohne sich zu bewegen
-    if (still != null && jetzt - still > 300) out.haengt.push({ id: b.id, g: b.g, st: b.st, s: Math.round(jetzt - still), p: [b.x, b.z] });
+    if (still != null && jetzt - still > 300) {
+      const a = b.a, t = a.task;
+      const grund = [t?.constructor?.name ?? 'ohne', a.wartetVorEngstelle ? 'engstelle' : '', a.blocked ? 'blockiert' : '', a.yieldF < 0.05 ? 'vorfahrt' : '', t?.pivot ? 'drehen' : '', t?.constructor?.name === 'WaitTask' ? 'warten' : ''].filter(Boolean).join('+') + (a.hinderer ? ` vor ${a.hinderer.moored ? 'liegt' : a.hinderer.state ?? 'fremd'}${a.hinderer.wartetVorEngstelle ? '+engstelle' : ''}` : '');
+      // Kette der Hindernisse bis zum Kopf der Schlange (fuer die Ursache)
+      const kette = []; let o = a.hinderer;
+      for (let i = 0; i < 30 && o && !kette.some((k) => k.o === o); i++) { kette.push({ o, t: `${o.id}:${o.moored ? 'liegt' : o.state ?? 'fremd'}:${o.task?.constructor?.name ?? '-'}:v${(o.speed ?? 0).toFixed(1)}:y${(o.yieldF ?? 1).toFixed(2)}${o.blocked ? ':bl' : ''}${o.wartetVorEngstelle ? ':eng' : ''}${o.ghost > 0 ? ':ghost' : ''}@${Math.round(o.x)},${Math.round(o.z)}` }); o = o.hinderer; }
+      out.haengt.push({ id: b.id + ' ' + grund, g: b.g, st: b.st, s: Math.round(jetzt - still), p: [b.x, b.z], kette: kette.map((k) => k.t).join(' > ') + (o && kette.some((k) => k.o === o) ? ' > KREIS' : '') });
+    }
   }
   for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
     const a = bs[i], b = bs[j]; if (Math.hypot(a.x - b.x, a.z - b.z) > (a.L + b.L) / 2) continue;
@@ -170,6 +177,8 @@ const PROBE = () => {
     const p = [(a.x + b.x) / 2, (a.z + b.z) / 2];
     if (a.st === 'moored' && b.st === 'moored') out.ueberlapp.push({ a: a.id, b: b.id, g: a.g + b.g, st: 'moored', p });
     else if ((sa != null && jetzt - sa > 30) || (sb != null && jetzt - sb > 30)) out.fest.push({ a: a.id, b: b.id, g: a.g + b.g, st: a.st + '/' + b.st, p });
+    // in Fahrt ineinander (sichtbar, auch wenn es sich gleich wieder loest): Pulk oder Durchlass
+    else out.ueberlapp.push({ a: a.id, b: b.id, g: a.g + b.g, st: a.st + '/' + b.st, p });
   }
   // Sim: Boot wartet, kommt aber nie an der Boje an; Box bleibt nach Abfahrt belegt
   const st = S.state; const seen = new Set();
@@ -314,7 +323,7 @@ const SNAP = () => {
       for (const k of ['land', 'steg', 'fest', 'ueberlapp', 'haengt', 'sim']) for (const e of p[k]) {
         const n = k === 'sim' ? `${e.art}${e.id != null ? ' ' + e.id : ''}${e.platz ? ' ' + e.platz : ''}`
           : (k === 'fest' || k === 'ueberlapp') ? `${e.a} + ${e.b} (${e.g}, ${e.st})` : `${e.id} (${e.g}, ${e.st}${e.platz ? ', ' + e.platz : ''})`;
-        const m = R.treffer[k][n] ||= { mal: 0, erst: `Stufe ${zustand.stufe}, Tag ${zustand.tag}`, p: e.p?.map((v) => Math.round(v)), stufe: zustand.stufe };
+        const m = R.treffer[k][n] ||= { mal: 0, erst: `Stufe ${zustand.stufe}, Tag ${zustand.tag}`, p: e.p?.map((v) => Math.round(v)), stufe: zustand.stufe, ...(e.kette ? { kette: e.kette } : {}) };
         m.mal++;
         // Nahbild: höchstens zwei je Art und Stufe
         const nk = `${k}-${zustand.stufe}`;
