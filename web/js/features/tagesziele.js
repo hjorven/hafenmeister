@@ -132,7 +132,8 @@ export function lage(state, ctx) {
   if (tage.length) {
     // Liegegeld plus das, was ungezahlt davonfuhr: so viel hätte man einstreichen können
     const echt = tage.reduce((x, t) => x + (t.einnahmen.liegegeld || 0) + (t.weggefahrenSumme || 0), 0) / tage.length;
-    geldTag = Math.min(geldTag, echt);
+    // Untergrenze aus der Rechnung der Stufe: direkt nach einem Aufstieg nicht geschenkt
+    geldTag = Math.min(geldTag, Math.max(echt, geldTag * (K.untergrenze ?? 0.25)));
   } else {
     geldTag *= K.ohneVerlauf ?? 0.5;
   }
