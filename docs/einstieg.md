@@ -27,6 +27,8 @@ Kein Tutorial mit Story, sondern Hinweis-Kreise: Ein leuchtender Kreis zeigt auf
 - Texte unterscheiden Finger (Handy, Tablet) und Maus (PC).
 - Gespeichert in `state.modules.einstieg` (`{ fertig, erledigt, v2, v3, startTag }`; v3 hat den Vorspul-Schritt von `sonne` in `tempo` umbenannt). Ein neues Spiel beginnt den Einstieg wieder, ältere Spielstände ohne Eintrag bekommen ihn auch.
 - Zum Ansehen neu starten: `?einstieg=1` an die Adresse hängen, zum Beispiel `https://hjorven.github.io/hafenmeister/?einstieg=1`.
+- Im Testmodus `?stufe=n` gibt es keinen Einstieg (der Spielstand wird dort nie gespeichert, er käme sonst nach jedem Neuladen wieder). Mit `?stufe=n&einstieg=1` läuft er trotzdem.
+- Liegt das wartende Boot hinter einem Schild (Seitenleiste, Zeit, Bauen), verschwindet der Kreis dort und die Kamera fährt zum Boot.
 
 ## Hinweise beim ersten Mal
 
