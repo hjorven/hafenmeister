@@ -12,8 +12,8 @@ const EINBETTEN = process.argv.includes('--einbetten');
 const laeufe = fs.readdirSync(DIR).filter((f) => /^ergebnis-.*\.json$/.test(f)).map((f) => JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8')));
 if (!laeufe.length) { console.error('Keine ergebnis-*.json in ' + DIR); process.exit(1); }
 
-// Erwartung aus tools/balance.mjs (Spielertyp geschickt, Median, Stand PR 160): Tag, an dem die Stufe erreicht ist
-const ERWARTET = { 2: 14, 3: 51, 4: 94, 5: 143, 6: 194, ziel: 248 };
+// Erwartung aus tools/balance.mjs (Spielertyp geschickt, Median, Stand PR 181): Tag, an dem die Stufe erreicht ist
+const ERWARTET = { 2: 14, 3: 52, 4: 94, 5: 145, 6: 206, ziel: 258 };
 const ART = {
   land: 'Boot fährt über Land (Strand, Gelände)',
   steg: 'Boot fährt durch Steg oder Kai',

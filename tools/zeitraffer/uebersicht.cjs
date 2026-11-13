@@ -29,7 +29,7 @@ const md = [
   '| Lauf | Gerät | Aufstieg an Tag (Stufe 2/3/4/5/6) | Ziel Stufe 6 an Tag | durch Steg | über Land | ineinander fest | liegend überlappt | hängt | Regeln | Konsolenfehler | Speichern abweichend | |',
   '|---|---|---|---|---|---|---|---|---|---|---|---|---|',
   ...zeilen, '',
-  'Erwartung aus tools/balance.mjs: Stufe 2/3/4/5/6 an Tag 14 / 51 / 94 / 143 / 194, Ziel an Tag 248.', '',
+  'Erwartung aus tools/balance.mjs: Stufe 2/3/4/5/6 an Tag 14 / 52 / 94 / 145 / 206, Ziel an Tag 258 (Stand PR 181).', '',
 ];
 fs.writeFileSync(path.join(DIR, 'uebersicht.md'), md.join('\n'));
 console.log(md.join('\n'));
