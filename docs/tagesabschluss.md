@@ -5,7 +5,7 @@ Stand: 13.11.2026, Paket P15 (Ü22, Svc F4). Status: erledigt (PR 159).
 ## Was der Spieler sieht
 
 - Am Ende jedes Tages erscheint oben in der Mitte eine kleine Karte "Tag n geschafft" mit der Tagessumme.
-- Einnahmen je Quelle: Liegegeld (aufgeteilt in selbst eingestrichen, beim Rundgang, über Nacht, Trinkgeld für den Kassierstrich), Pacht, Gastronomie, Services (die drei stärksten Anlagen mit Namen), Tagesziele (erfüllt von gesamt), Sonstiges.
+- Einnahmen je Quelle: Liegegeld (aufgeteilt in selbst eingestrichen, beim Rundgang, über Nacht, Trinkgeld für den Kassierstrich), Pacht, Gastronomie, Services (die drei stärksten Anlagen mit Namen), Tagesziele (erfüllt von gesamt), Saisonziele (Belohnung am Saisonende im Endlosspiel, docs/aufstieg.md), Sonstiges.
 - Ausgaben des Tages (Bauen, Ausbau) und der Saldo der Kasse.
 - Boote: angelegt, abgereist mit Schnitt der Bewertung, weitergefahren mit Grund (Wartebojen voll, zu lange gewartet, abends ohne Platz, weggeschickt). Ruf vorher und nachher.
 - Die letzten sieben Tage als Säulen, der beste Tag in Gold. "Rekord", wenn der Tag den besten bisher schlägt.

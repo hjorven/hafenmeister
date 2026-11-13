@@ -205,3 +205,21 @@ test('Bester Tag zählt Einnahmen vor dem Aufstieg nicht zur neuen Stufe', () =>
   nacht({ state: Object.assign(state, { stage: 2 }), ctx, events: [] });
   assert.equal(m.chronik[2].besterTag, 40);
 });
+
+test('Saisonbelohnung wird als eigene Einnahme gebucht und steht im Tagesabschluss', () => {
+  const { ctx, state } = neu();
+  state.regionDone = true;
+  starteEndlos(state, ctx);
+  state.guests += 99999;
+  const vorher = { geld: state.money, gesamt: state.stats.totalIncome };
+  state.day = ctx.rules.seasonDays;
+  const events = [];
+  nacht({ state, ctx, events });
+  const ende = events.find((e) => e.type === 'seasonEnd');
+  assert.ok(ende.belohnung > 0);
+  assert.equal(state.money - vorher.geld, ende.belohnung);
+  assert.equal(state.stats.totalIncome - vorher.gesamt, ende.belohnung);
+  assert.ok(sim.QUELLEN.includes('saisonziele'));
+  const bericht = sim.tagesbericht(state, ctx);
+  assert.equal(bericht.einnahmen.saisonziele, ende.belohnung);
+});
