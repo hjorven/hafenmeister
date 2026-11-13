@@ -24,12 +24,15 @@ export const ECONOMY = {
     erstesBootNach: 3,      // Sekunden: am ersten Tag eines neuen Spiels kommt gleich ein Boot
     // Tagesrhythmus wie im echten Hafen, als Anteile des Tages (0 = Morgen, 1 = Abend):
     // vormittags legen die Gäste ab, neue kommen den ganzen Tag, die meisten am Nachmittag.
-    // Keine Wellen: zwischen zwei Ankünften liegen immer mindestens ankunftAbstand Sekunden. Es kommen
-    // nie mehr Boote, als so ins Fenster passen (81 s / 3 s = 27), auch nicht an Regattatagen.
+    // Keine Wellen und kein Fließband: zwischen zwei Ankünften liegen zufällig ankunftAbstand bis
+    // ankunftAbstandMax Sekunden, kurze häufiger als lange, über das ganze Fenster verteilt. Es kommen
+    // nie mehr Boote, als mit ankunftDichte im Mittel ins Fenster passen (81 s / 4 s = 20), auch nicht
+    // an Regattatagen.
     ankunftVon: 0.05,      // etwa 7:15, damit nach dem ersten Boot kein Loch entsteht
     ankunftAbstand: 3,      // Sekunden Mindestabstand zwischen zwei Ankünften (kleiner, wenn der Tag sonst nicht reicht)
+    ankunftAbstandMax: 8,   // Sekunden, längster gewürfelter Abstand (bei wenigen Booten wird gestreckt)
+    ankunftDichte: 4,       // Sekunden je Boot im Mittel an den vollsten Tagen
     ankunftBis: 0.95,       // etwa 19:30
-    ankunftSpitze: 0.62,    // Schwerpunkt am Nachmittag (etwa 15:30), breit verteilt
     abreiseVon: 0.07,       // etwa 7:30
     abreiseBis: 0.3,        // etwa 11:00
   },
@@ -119,10 +122,30 @@ export const ECONOMY = {
     abgewiesen: { chance: 0.25, wertung: 2.5 },  // wer keinen Platz bekommt, drückt den Ruf leicht
   },
 
-  fischer: { pachtProTag: 15 },
-  // Dauerlieger (features/dauerlieger.js): Pacht je Abend als Anteil des Gastpreises (Paket P01),
-  // ab welcher Stufe, wie oft sie hinausfahren (je Tag), Törn über mehrere Tage [min, max]
-  dauerlieger: { anteilGastpreis: 0.5, abStufe: 2, tagestoernChance: 0.4, toernChance: 0.12, toernTage: [1, 3] },
+  fischer: { pachtProTag: 15 },   // feste Pacht je Abend, nur für Fischer und andere fest vergebene Plätze
+
+  // Dauerlieger (features/dauerlieger.js, docs/neue-features.md Abschnitt 3): ein Platz wird für die
+  // ganze Saison vermietet. Sichere Einnahme, auch bei Sturm, dafür kein Gast, kein Ruf und keine
+  // Gäste fürs Stufenziel.
+  dauerlieger: {
+    abStufe: 2,
+    anteilGastpreis: 0.5,      // Pacht je Saisontag = Anteil des Gastpreises (ohne Wunschbonus)
+    vorauskasse: true,         // true: Saisonpacht im Voraus (Rest der Saison, dann jede Saison neu);
+                               // false: jeden Abend anteilGastpreis des Gastpreises
+    hoechstAnteil: 0.25,       // höchstens ein Viertel der Plätze (fest vergebene zählen nicht)
+    tagestoernChance: 0.4,     // je Tag: morgens raus, abends zurück
+    toernChance: 0.12,         // je Tag: Törn über mehrere Tage, Platz frei für Gäste
+    toernTage: [1, 3],
+    frueherZurueck: 0.35,      // Anteil der Törns, von denen das Boot schon am Nachmittag des letzten Tages zurückkommt
+    zurueckUm: [0.45, 0.62],   // dann zu diesem Anteil des Tages; liegt dort noch ein Gast, muss er umgelegt werden
+    bewerberStart: 2,          // so viele Einheimische fragen gleich an, sobald Dauerplätze möglich sind
+    bewerberMax: 3,            // höchstens so viele offene Anfragen
+    bewerberChance: 0.35,      // je Nacht in der Saison: neue Anfrage
+    bewerberTage: 10,          // so lange wartet ein Bewerber auf eine Box
+    passtFreieBox: 0.85,       // Anteil der Bewerber, deren Boot in eine gerade freie Gastbox passt
+    seglerAnteil: 0.7,         // Anteil Segler unter den Bewerbern (wenn möglich)
+    kuendigungsZuschlag: 0.2,  // sofort kündigen: Pacht der restlichen Tage zurück plus dieser Anteil der Saisonpacht
+  },
   // Stammgäste (features/stammgaeste.js): Anteil der neuen Boote, die Stammgäste sind; ab so vielen
   // Ankern kommt ein Gast wieder; Länge der Liste; ab diesem Besuch als Dauerlieger zu behalten
   stammgaeste: { chance: 0.15, abBewertung: 4, maxListe: 40, dauerAbBesuch: 5 },
@@ -147,7 +170,7 @@ export const ECONOMY = {
       seglerStrom: { basis: 1.6, maxAnteil: 0.4, abBooten: 3 },
       rundum:      { abBooten: 2, mindestWuensche: 2 },
       letzter:     { bisPlaetze: 12 },
-      kassieren:   { anteil: 0.3, maxAnteil: 0.8 },
+      kassieren:   { anteil: 0.3, maxAnteil: 0.8, verlaufTage: 3, ohneVerlauf: 0.5 },   // Geld nach den echten Liegegeld-Einnahmen der letzten Tage
     },
     grossAb: { 3: 'L', 5: 'XL' },                 // "ein großes Schiff einweisen": Klasse ab Stufe
     halberAnker: 0.5,                             // so viel besser bewerten alle Gäste, die gerade liegen

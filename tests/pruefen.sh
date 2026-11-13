@@ -47,5 +47,11 @@ fi
 if ! node -e "const { chromium } = require('@playwright/test'); require('fs').accessSync(chromium.executablePath())" 2>/dev/null; then
   npx playwright install chromium
 fi
+# Alten Testserver auf dem Standardport beenden (z. B. nach einem abgebrochenen Lauf)
+pkill -f "node server.mjs 4173" 2>/dev/null || true
+# Jedes Mal ein freier Port und ein frisch gebauter Server, nie ein alter Server mit altem Stand
+HM_TEST_PORT=$(node -e "const s=require('net').createServer();s.listen(0,'127.0.0.1',()=>{console.log(s.address().port);s.close()})")
+export HM_TEST_PORT
+echo "Testserver auf Port $HM_TEST_PORT"
 npx playwright test "${args[@]}"
 echo "Alles grün. Bildschirmfotos: tests/bildschirmfotos/, Bericht: cd tests && npx playwright show-report bericht"

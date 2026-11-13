@@ -36,7 +36,7 @@ export const NOCH_UNGELESEN = {
   winterBautempo: 'P18',
 };
 // Felder, die Ja/Nein sein dürfen. Alles andere ist eine Zahl, ein Text, eine Liste oder ein Objekt.
-const JA_NEIN = new Set(['ueberNacht', 'strom', 'offen', 'gast', 'allePlaetze', 'nurMotor', 'seaArrivals', 'winter',
+const JA_NEIN = new Set(['ueberNacht', 'vorauskasse', 'strom', 'offen', 'gast', 'allePlaetze', 'nurMotor', 'seaArrivals', 'winter',
   'C', 'CS', 'D', 'K', 'A', 'B']);
 
 function quelltexte() {
@@ -112,7 +112,7 @@ export function tabellen() {
   t.push('## Zeit', '', tabelle(['Was', 'Wert'], [
     ['Tag / Abend', `${z.tagSekunden} s / ${z.abendSekunden} s`],
     ['Saison / Winter', `${z.saisonTage} / ${z.winterTage} Tage`],
-    ['Ankünfte', `${zahl(z.ankunftVon)} bis ${zahl(z.ankunftBis)} des Tages, Spitze ${zahl(z.ankunftSpitze)}`],
+    ['Ankünfte', `${zahl(z.ankunftVon)} bis ${zahl(z.ankunftBis)} des Tages, Abstand ${zahl(z.ankunftAbstand)} bis ${zahl(z.ankunftAbstandMax)} s, an vollen Tagen ${zahl(z.ankunftDichte)} s im Mittel`],
     ['Abreise', `${zahl(z.abreiseVon)} bis ${zahl(z.abreiseBis)} des Tages`],
     ['Erstes Boot', `nach ${z.erstesBootNach} s`],
     ['Geduld an der Boje', `${E.warten.geduld} s, selbst einfahren nach ${E.warten.selbstEinfahrenNach} s`],

@@ -38,17 +38,29 @@ Ein Ruhemodus für ein Tablet auf dem Tisch. Im Fotomodus erscheint der Knopf �
 
 ## 3. Dauerlieger
 
-Gebaut: `web/js/features/dauerlieger.js`, Tests in `tests/dauerlieger.test.mjs`.
+Gebaut: `web/js/features/dauerlieger.js`, Zahlen in `ECONOMY.dauerlieger` (`web/js/data/economy.js`), Tests in `tests/dauerlieger.test.mjs`.
 
-Eine echte Marina hat nicht nur Gastplätze, sondern feste Plätze mit Dauerliegern, die tagsüber raussegeln und abends wiederkommen.
+Eine echte Marina hat nicht nur Gastplätze, sondern feste Plätze mit Dauerliegern, die für die ganze Saison bezahlen, tagsüber raussegeln und abends wiederkommen. Im Spiel ist das eine echte Entscheidung: **sicheres Geld sofort** gegen **Gäste, Ruf und Fortschritt**.
 
-- Ab Stufe 2 einen freien Liegeplatz antippen (ohne ausgewähltes Boot). Die Infokarte bietet „Zum Dauerplatz machen“. Dort liegt dann ein eigenes Boot, am liebsten ein Segelboot.
-- Ein Dauerplatz bringt jeden Abend einen festen Anteil des Gastpreises (`rules.stationedFeeShare`, heute 50 Prozent), ohne Zuweisen. Gastplätze bringen mehr, brauchen aber Arbeit. Das ist die neue kleine Entscheidung.
+| | Gastbox | Dauerplatz |
+|---|---|---|
+| Geld | Liegegeld je Nacht, mit Wunschbonus, nur wenn ein Gast kommt | Saisonpacht im Voraus: 50 % des Gastpreises je Saisontag, sicher, auch bei Sturm |
+| Arbeit | zuweisen, kassieren | keine, außer einen Gast umlegen, wenn der Dauerlieger früher zurückkommt |
+| Ruf und Stufenziel | jeder abgereiste Gast bewertet und zählt fürs Stufenziel | keine Bewertung, zählt nicht fürs Stufenziel |
+| Grenze | | höchstens ein Viertel der Gastboxen (fest vergebene Fischerplätze zählen nicht) |
+
+- **Bewerber:** Ab Stufe 2 fragen Einheimische mit eigenem Boot nach einem festen Platz (zwei gleich zu Beginn, danach in manchen Nächten ein neuer, höchstens drei offen, jeder wartet zehn Tage). Meist (85 %) passt das Boot eines neuen Bewerbers in eine gerade freie Gastbox. Ein Hinweis oben meldet neue Anfragen.
+- **Vermieten:** Eine freie Box antippen (ohne ausgewähltes Boot). Die Box leuchtet gelb, die Karte zeigt die Bewerber, deren Boot hineinpasst, mit Namen, Größe und Pacht. Ein Tipp auf einen Bewerber vermietet die Box, die Pacht für den Rest der Saison kommt sofort in die Kasse. Passt niemand oder ist die Grenze erreicht, sagt die Karte das.
+- **Stammgast fragt an:** Ein Stammgast ab dem 5. Besuch, der gerade hier liegt, fragt selbst nach seinem Platz. Antippen seiner Box: „Als Dauerlieger behalten“, auch er zahlt die Saisonpacht im Voraus.
+- **Neue Saison:** Am ersten Saisontag zahlen alle Dauerlieger die ganze Saison im Voraus (Hinweis „Neue Saison: Pacht bezahlt“). Wer im Winter vermietet, zahlt gleich die ganze nächste Saison.
+- **Kündigen:** Zum Saisonende kostenlos (lässt sich zurücknehmen), das Boot verlässt den Hafen am ersten Wintertag. Sofort kündigen kostet die Pacht der restlichen Tage zurück plus 20 % einer Saisonpacht als Entschädigung. Vermieten und gleich wieder kündigen bringt also nichts ein.
 - **Tagestörn:** An etwa 4 von 10 Tagen läuft das Boot morgens aus und kommt abends zurück. Der Platz bleibt in der Zeit belegt (rotes Schild).
-- **Mehrtägiger Törn:** An etwa 1 von 8 Tagen geht es für 1 bis 3 Tage weg. Dann ist das Schild grün, und der Platz leuchtet für Gäste auf, die spätestens in der Nacht abreisen, in der das Boot zurückkommt. Liegt dann noch ein Gast dort (zum Beispiel nach einem Sturm), wartet das Boot eine Nacht.
-- Antippen eines Dauerplatzes zeigt Boot, Rot oder Grün, Rückkehrtag und den Knopf „Dauerplatz aufheben“.
-- Das Hafenbüro beachtet die Regel beim automatischen Zuweisen.
-- Schnittstelle: Hook `fit` in `sim.js` (zusätzliche Passregel), `game.sim.dispatch(events)` in `bridge.js`. Spielstand in `state.modules.dauer`. Ereignisse `dauer:auslaufen { id, platzId, tage }` (tage 0 = Tagestörn) und `dauer:einlaufen { id, platzId }` für Animation und Ton.
+- **Mehrtägiger Törn:** An etwa 1 von 8 Tagen geht es für 1 bis 3 Tage weg. Dann ist das Schild grün, und der Platz leuchtet für Gäste auf, die spätestens in der Nacht abreisen, in der das Boot zurückkommt. Bei Sturm und im Winter bleiben Dauerlieger im Hafen.
+- **Früher zurück, Gast umlegen:** Etwa jeder dritte Törn endet schon am Nachmittag des letzten Tages. Ist die Box frei, legt das Boot gleich an. Liegt noch ein Gast darin, kreist der Dauerlieger auf freiem Wasser vor dem Hafen (auch nach dem Laden eines Spielstands), das Vorspulen springt auf normales Tempo zurück und ein Hinweis im Pixel-Rahmen bleibt stehen, bis alle wartenden Dauerlieger drin sind (bei mehreren nennt er alle Plätze; andere Meldungen kommen danach). Den Gast (oder den Hinweis, dann fliegt die Kamera zum Platz) antippen: Die freien passenden Boxen leuchten, ein Tipp auf eine davon legt den Gast um. Erst wenn er dort fest ist, fährt der Dauerlieger herein. Wer bis zum Abend nicht umlegt, verärgert den Dauerlieger: Er kündigt zum Saisonende und kommt nachts trotzdem an seinen Platz.
+- Antippen eines Dauerplatzes zeigt Boot, bezahlte Pacht, Saisonende, Rot oder Grün mit Rückkehrtag und die Knöpfe zum Kündigen.
+- Das Hafenbüro beachtet die Regel beim automatischen Zuweisen. Umlegen bleibt Sache des Spielers.
+- Ohne Vorauskasse (`ECONOMY.dauerlieger.vorauskasse: false`) zahlt jeder Dauerlieger jeden Abend 50 % seines Gastpreises. Fischer zahlen immer die feste Pacht `ECONOMY.fischer.pachtProTag` (15 €).
+- Schnittstelle: Hooks `fit`, `tick`, `evening`, `night` in `sim.js`, `game.sim.dispatch(events)` in `bridge.js`. Spielstand in `state.modules.dauer` (`plaetze`, `bewerber`). Ereignisse `sim:dauerNeu`, `sim:dauerPacht`, `sim:dauerBewerber`, `sim:dauerWartet`, `sim:dauerUmgelegt`, `sim:dauerKuendigung`, `sim:dauerAbfindung`, `sim:dauerAufgehoben`; für Animation und Ton `dauer:auslaufen { id, platzId, tage }` (tage 0 = Tagestörn), `dauer:einlaufen { id, platzId }` und `dauer:einlaufen { id, platzId, warten: true, info }` (kreist vor dem Hafen). `game.dauerlieger.karte(platzId)`, `.gastKarte(gastId)`, `.machDauerplatz(platzId)`, `.kuendige(platzId, an)`, `.umlege(gastId, zielId)`.
 
 ## 4. Stammgäste
 
@@ -113,6 +125,8 @@ Mengen richten sich nach den Booten, die der Spieler heute selbst einweisen kann
 **Wochenziel.** Ein größeres Ziel über sieben Saisontage, oben in der Tafel: Gäste von Hand einweisen, Gäste mit 4 Ankern verabschieden, zufriedene Segler verabschieden oder Liegegeld selbst einstreichen. Belohnung: das 12-fache Grundgeld und das nächste Deko-Stück. Ziele mit 4 Ankern kommen nur, wenn alle Wünsche der Stufe erfüllbar sind. Im Winter ruht die Woche, Wintertage zählen nicht. Die Größe ist so bemessen, dass die Woche nicht in zwei Tagen zu schaffen ist (etwa die Hälfte aller Ankünfte der Woche von Hand einweisen).
 
 **Morgens.** Erst kommt der Tagesabschluss, danach öffnet sich die Kartenwahl einmal von selbst (nicht während Einstieg, Bauen oder offener Karte; dann leuchtet nur das Schild). Solange der Abschluss offen ist, tritt die Tafel zurück und Meldungen warten. Am Handy quer liegen die drei Karten nebeneinander rechts neben der linken Spalte; die Tafel endet immer über Zeitsteuerung, Kassieren und Bauen.
+
+**Geldziele.** Kassierziele und das Liegegeld-Wochenziel richten sich nach dem, was in den letzten drei Tagen wirklich an Liegegeld hereinkam (plus was ungezahlt davonfuhr), höchstens nach der Rechnung der Stufe. Ohne Verlauf zählt die halbe Rechnung. Nach einem Aufstieg zählen die Tage der alten Stufe, so bleibt "leicht" leicht. Eine offen gelassene Kartenwahl klappt abends zu und kommt erst nach dem Tagesabschluss wieder; solange sie offen ist, wartet der Bau-Tipp "Als Nächstes".
 
 **Deko-Plätze.** Die Stücke suchen ihren Platz relativ zum Hafenmeisterhaus und meiden alles, was an Land steht (Gebäude mit 3 m Abstand, Dorf, Anlagen, Flaggenmast, Wege). Sie hängen an keinen festen Koordinaten und passen sich jeder Hafenlage an.
 
