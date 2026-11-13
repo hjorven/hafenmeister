@@ -295,7 +295,8 @@ export function init(game) {
   game.on('ui:cancel', schliessen);
   game.on('stufe', (n) => {
     const v = Number(typeof n === 'object' ? n?.stufe : n);
-    if (v >= 1 && !testStufe) { stufe = v; aktualisiere(); }
+    // Im Testmodus (?stufe=n) nur die Startstufe aus der Adresse, ein Ausbau gilt danach auch hier
+    if (v >= 1 && (!testStufe || v !== stufe)) { stufe = v; aktualisiere(); }
   });
   // ------------------------------------------------------------------ Tankstelle (Versorgung "diesel")
   // Gekauft wird sie über die Spielregeln (Bauen, sim.js facilities.diesel), hier steht das Modell

@@ -69,7 +69,15 @@ export function init(game) {
 
   let feste = url.uhrzeit;   // feste Uhrzeit aus URL oder Ereignis, sonst Spielzeit
   // Vorschau-Parameter in der Adresse haben Vorrang vor dem Spielstand (nur Anzeige)
-  game.on('stufe', (n) => { if (!url.stufe) land.setzeStufe(n); });
+  // ?stufe=n ist nur die Startstufe: Ein Ausbau im Testmodus wechselt das Gelaende mit,
+  // sonst fahren Boote durch Land, wo der Durchstich sein muesste.
+  let landStufe = Number(url.stufe) || null;
+  game.on('stufe', (n) => {
+    const v = Number(typeof n === 'object' ? n?.stufe : n);
+    if (url.stufe && v === landStufe) return;
+    landStufe = v;
+    land.setzeStufe(n);
+  });
   game.on('region', (id) => { if (!url.region) land.setzeRegion(typeof id === 'string' ? id : id?.id); });
   game.on('pegel', (m) => land.setzePegel(Number(m) || 0));
   game.on('wetter', (w) => land.setzeWetter(w || {}));
