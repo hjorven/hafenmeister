@@ -94,7 +94,7 @@ export function init(game) {
   ];
   function seeRunde(st) {
     const ls = game.landscape;
-    const sig = `${st}|${ls?.stufe ?? ''}|${ls?.region ?? ''}|${game.gelaende?.aktuell?.()?.nr ?? 1}`;
+    const sig = `${st}|${ls?.stufe ?? ''}|${ls?.region ?? ''}|${game.gelaende?.aktuell?.()?.nr ?? 1}|${game.gelaende?.aktuell?.()?.seed ?? 1}`;
     if (sig !== rundeSig) {
       rundeSig = sig;
       const r = rundeGrund(st);
@@ -182,8 +182,53 @@ export function init(game) {
     });
   }
 
-  // --- Seebahnen hinter der Nehrung
+  // --- Vorbeifahrer auf See: Weg aus der Fahrwasserkarte (game.fahrwasser.vorbeiWeg), von einem
+  // Rand der Karte zu einem anderen, mit Abstand zu den Liegeplaetzen. Ohne Karte (Testseiten) die
+  // alten Bahnen aus data/verkehr.js.
   function meerBoot(fortschritt = 0) {
+    if (!game.fahrwasser?.vorbeiWeg) return meerBootBahn(fortschritt);
+    const art = Math.random() < 0.6 ? 'klein' : 'gross';
+    const pool = bisStufe(FLOTTE[art], stufeAktiv);
+    const gebaut = baue(zufall(pool));
+    if (!gebaut) return false;
+    const b = anmelden(gebaut);
+    const w = game.fahrwasser.vorbeiWeg({ ...b.anim.info });
+    const frei = w && [...boote].every((o) => o.typ !== 'meer' || Math.hypot(o.anim.x - w.start.x, o.anim.z - w.start.z) > 60 + o.anim.info.length);
+    if (!frei) {
+      b.anim.remove();
+      if (b.dispose) b.anim.model.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
+      return false;
+    }
+    b.typ = 'meer';
+    const pts = [w.start, ...w.punkte];
+    const { p, dir, weiter } = aufWeg(pts, fortschritt);
+    b.anim.place(p.x, p.z, Math.atan2(-dir.z, dir.x));
+    b.anim.speed = b.v;
+    boote.add(b);
+    b.anim.sailTo(weiter, { sails: b.anim.info.kind === 'sail', stop: false })
+      .then(() => { if (boote.has(b)) entferne(b); });
+    return true;
+  }
+
+  // Punkt bei Anteil f eines Wegs aus Weltpunkten, Richtung dort und die restlichen Punkte
+  function aufWeg(pts, f) {
+    let total = 0;
+    for (let i = 1; i < pts.length; i++) total += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].z - pts[i - 1].z);
+    let rest = total * f;
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], c = pts[i];
+      const l = Math.hypot(c.x - a.x, c.z - a.z);
+      if (rest <= l || i === pts.length - 1) {
+        const t = l ? Math.min(1, rest / l) : 0;
+        return { p: { x: a.x + (c.x - a.x) * t, z: a.z + (c.z - a.z) * t }, dir: { x: c.x - a.x, z: c.z - a.z }, weiter: pts.slice(i) };
+      }
+      rest -= l;
+    }
+    return { p: pts[0], dir: { x: 1, z: 0 }, weiter: pts.slice(1) };
+  }
+
+  // --- Alte Seebahnen (nur ohne Fahrwasserkarte)
+  function meerBootBahn(fortschritt = 0) {
     const bahnen = seeBahnen(stufeAktiv);
     const art = Math.random() < 0.6 ? 'klein' : 'gross';
     let frei = bahnen.filter((l) => l.art === art && bahnFrei(l, fortschritt));

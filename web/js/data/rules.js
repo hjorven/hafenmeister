@@ -20,11 +20,12 @@ export function rulesFromEconomy(E = ECONOMY) {
   // Ankunftsfenster als Anteile des Tages (0 bis 1) und Schwerpunkt am Nachmittag (0 bis 1)
   r.arrivalFrom = z.ankunftVon ?? 0;
   r.arrivalWindow = z.ankunftBis ?? 1;
-  r.arrivalPeak = z.ankunftSpitze ?? null;
   r.departWindow = [z.abreiseVon ?? 0, z.abreiseBis ?? 0];
   r.firstArrivalAt = z.erstesBootNach ?? null;
   // Mindestabstand zwischen zwei Ankünften in Sekunden (kleiner, wenn sonst nicht alle in den Tag passen)
   r.arrivalMinGap = z.ankunftAbstand ?? 0;
+  r.arrivalMaxGap = z.ankunftAbstandMax ?? r.arrivalMinGap;
+  r.arrivalDenseGap = z.ankunftDichte ?? r.arrivalMinGap;
   r.seasonDays = z.saisonTage;
   r.winterDays = z.winterTage ?? 0;
 
@@ -147,7 +148,10 @@ export function rulesFromEconomy(E = ECONOMY) {
     approachMax: w.anfahrtMax ?? 0,
     selfEnterAfter: w.selbstEinfahrenNach ?? null,
     overnight: !!w.ueberNacht,
+    buoyFee: w.bojengeld ?? 0,   // Bojengeld über Nacht (P10)
   };
+  // Passgenau zuweisen (P10)
+  r.snug = E.passgenau ? { share: E.passgenau.hoechstensGroesser, rating: E.passgenau.ruf } : null;
   r.leaveMax = w.ausBoxMax ?? 0;
   r.previewCount = w.vorschau ?? 0;
 

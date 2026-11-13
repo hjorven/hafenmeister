@@ -123,11 +123,25 @@ export function lage(state, ctx) {
     return sim.facilityCapacity(state, ctx, w) > 0;
   });
   const gross = stufenWert(ZAHLEN.grossAb, state.stage);
+  // Geldziele nach dem, was wirklich hereinkam: höchstens der Schnitt der letzten Tage. Ohne
+  // Verlauf (erster Tag, Spielstand ohne Statistik) nur ein Teil der Rechnung, nach einem
+  // Aufstieg zählen die Tage der alten Stufe, damit "leicht" auch dann leicht bleibt.
+  const K = Z.kassieren;
+  const tage = (state.stats?.verlauf || []).slice(-(K.verlaufTage || 3)).filter((t) => t && t.einnahmen);
+  let geldTag = rate * geld;
+  if (tage.length) {
+    // Liegegeld plus das, was ungezahlt davonfuhr: so viel hätte man einstreichen können
+    const echt = tage.reduce((x, t) => x + (t.einnahmen.liegegeld || 0) + (t.weggefahrenSumme || 0), 0) / tage.length;
+    // Untergrenze aus der Rechnung der Stufe: direkt nach einem Aufstieg nicht geschenkt
+    geldTag = Math.min(geldTag, Math.max(echt, geldTag * (K.untergrenze ?? 0.25)));
+  } else {
+    geldTag *= K.ohneVerlauf ?? 0.5;
+  }
   return {
     boote: rate * anteilZuweisen,
     zuweisen: anteilZuweisen > 0 && rate > 0,
     kassieren: geld > 0 && rate > 0,
-    geld: rate * geld,
+    geld: geldTag,
     segler: arten.some((t) => t.sail && handZuweisen(state, ctx, t.size)),
     strom,
     wuensche,
@@ -586,6 +600,8 @@ const CSS = `
 .hm-neu .hm-tafel > button.tz-neu { border-image-source: var(--rahmen-gold); }
 @media (prefers-reduced-motion: reduce) { .hm-tafel.jubel > button { animation: none; } }
 body.hm.foto .hm-tafel { display: none; }
+/* Solange die Wahl offen ist, wartet der Bau-Tipp "Als Nächstes" (sonst läge die Wahl darüber) */
+.hm-neu:has(.hm-tafel > ul.tz-wahl:not([hidden])) #bau-tipp { visibility: hidden; }
 /* Abends hat der Tagesabschluss Vorrang: die Tafel tritt zurück, bis er zu ist */
 body.ta-offen .hm-tafel { visibility: hidden; }
 /* Handy: Kopfzeile weg (der Einstieg erklärt sie), Ausbau-Schild tritt zurück, solange die Wahl offen ist */
@@ -842,6 +858,9 @@ export async function init(game) {
     if (wahlWartet) morgenWahl();
   }
   game.on('tagesabschluss:fertig', nachAbschluss);
+  // Abends klappt die Tafel zu: eine offen gelassene Wahl liegt sonst morgens über dem Abschluss
+  let abendGewesen = false;   // von selbst nur nach einem echten Abend, nicht beim Laden oder neuen Spiel
+  game.on('sim:dayEnd', () => { abendGewesen = true; auf(false); });
   game.on('tagesabschluss:zu', () => setTimeout(() => { if (!abschlussOffen()) nachAbschluss(); }, 0));
 
   function pruefeTag() {
@@ -851,7 +870,8 @@ export async function init(game) {
   function neuerMorgen() {
     pruefeTag();
     const z = zielState(st());
-    if (wahlTag === st().day || z.tag !== st().day || !z.karten.length || gewaehlt(st())) return;
+    if (!abendGewesen || wahlTag === st().day || z.tag !== st().day || !z.karten.length || gewaehlt(st())) return;
+    abendGewesen = false;
     wahlTag = st().day;
     wahlWartet = true;
     if (!abschlussOffen()) morgenWahl();

@@ -67,11 +67,11 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Nr | Punkt | Status | Paket |
 |---|---|---|---|
 | Ü8 | Selbst-Einfahren weniger klug: die nächste oder eine der freien Boxen am Steg, auch eine zu große, damit Umlenken lohnt; Boote berühren sich dabei nie | Regel erledigt (`sim.js` `selfBerth`: nächste Box ab Warteboje, eins nach dem anderen); Abstand und Ausweichen bei den Schiffsanimationen offen | P10 |
-| Ü9 | Wunschplätze beim Zuweisen in Gold zeigen (Strom, Fingersteg) | offen | P10 |
+| Ü9 | Wunschplätze beim Zuweisen in Gold zeigen (Strom, Fingersteg) | erledigt (PR 153: gold mit Stern, `game.sim.wunschPlaetze`) | P10 |
 | Ü10 | Wünsche als Symbole über wartenden Booten, drei Umrisse für die nächsten Ankünfte (`sim.preview()`) | offen | P11 |
 | Ü11 | Hafenbüro lässt Sonderfälle beim Spieler (Mehrrumpf, XL, Sondergäste, nur ein passender Platz), wie `plan.md` Abschnitt 3 und 14 | erledigt (PR 146) | P02 |
 | Ü12 | Kassieren verständlich: Rundgang erst mit dem Abend, Einstieg erklärt die Hälfte, halbe Münze sieht anders aus | erledigt bis auf den Einstieg-Text (P03): Rundgang ab Abend, bringt vier Fünftel (B4), Münze wird dabei silbern mit „18 € statt 22 €“ | P12 |
-| Ü13 | Abweisen von Hand und Wegfahren aus Ungeduld mit derselben Folge | offen | P10 |
+| Ü13 | Abweisen von Hand und Wegfahren aus Ungeduld mit derselben Folge | erledigt (PR 153, `turnAwayRating`) | P10 |
 | Ü14 | Tagesziele zählen nur eigene Handlungen, kombinierte Ziele, Ruf als Belohnung (`plan.md` 9a) | erledigt (PR 152) | P13 |
 
 ## 4. Balancing (Ü15 bis Ü20)
@@ -177,7 +177,7 @@ Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätz
 |---|---|---|
 | Dauerlieger zahlen pauschal 15 € pro Abend | `sim.js` (`startEvening`, `rulesFromEconomy`) | P01 |
 | Dauerplätze kosten nichts, keine Obergrenze, keine Gäste, keine Bewertungen | `features/dauerlieger.js` | P01 |
-| Abweisen von Hand kostet nichts, Wegfahren aus Ungeduld kann eine 2,5 bringen | `sim.js` (`dismiss`, `turnAway`) | P10 |
+| Abweisen von Hand kostet nichts, Wegfahren aus Ungeduld kann eine 2,5 bringen (erledigt, PR 153) | `sim.js` (`dismiss`, `turnAway`) | P10 |
 | Rundgang startet bei 68 % des Tages, 8 Sekunden vor dem Abend (erledigt: startet mit dem Abend, `RUNDGANG_AB` entfernt, steht in `spielregeln.md`) | `render/people.js` | P12 |
 | Start mit 0 € und fünf Startbewertungen von 3 Ankern | `state.js`, `economy.js` (`ruf`) | P17 |
 | Service-Werte als Mischung aus zwei Dateien | `services/rules.js` (`mische`) | P06 (erledigt) |
@@ -327,15 +327,15 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| A1 | Selbst einfahrende Gäste nehmen die nächste freie Box am Steg, auch zu große | offen (entschieden) | P10 |
+| A1 | Selbst einfahrende Gäste nehmen die nächste freie Box am Steg, auch zu große | erledigt (PR 147, PR 176 bevorzugt Wunschplätze) | P10 |
 | A2 | "Einfahren" ohne Hafenbüro nimmt irgendeinen passenden Platz, den besten kennt erst das Büro | erledigt (PR 146) | P02 |
-| A3 | Platzwert beim Ziehen: Liegegeld mit Wunschbonus, erwartete Anker, Wunschplätze gold | offen | P10 |
+| A3 | Platzwert beim Ziehen: Liegegeld mit Wunschbonus, erwartete Anker, Wunschplätze gold | erledigt (PR 153, `game.sim.platzWert`) | P10 |
 | A4 | Geduld sichtbar: Ring an der Boje, im letzten Drittel Flagge oder kurzes Tuten | offen | P55 |
 | A5 | Vorschau: drei Bootsumrisse mit Größe und Uhrzeit, als "Funkgerät" Wirkung der ersten Bürostufe | Freischaltung erledigt (PR 146, `rules.office.preview`), Anzeige offen | P11, P02 |
-| A6 | Passgenau belohnen: Bonus, wenn die Box höchstens ein Fünftel größer ist | offen | P10 |
+| A6 | Passgenau belohnen: Bonus, wenn die Box höchstens ein Fünftel größer ist | erledigt (PR 153, `ECONOMY.passgenau`, ab Stufe 2) | P10 |
 | A7 | Selbst-Einfahren einstellbar: schnell, langsam, aus | erledigt (Einstellungen: Normal 8 s, Langsam 20 s, Nie) | P50 |
-| A8 | Abweisen und Wegfahren angleichen (= Ü13) | offen | P10 |
-| A9 | Bojenlieger über Nacht zahlen wenig und werden morgens zuerst bedient | offen | P10 |
+| A8 | Abweisen und Wegfahren angleichen (= Ü13) | erledigt (PR 153) | P10 |
+| A9 | Bojenlieger über Nacht zahlen wenig und werden morgens zuerst bedient | erledigt (PR 153, `ECONOMY.warten.bojengeld`) | P10 |
 | A10 | Größenmischung je Stufe: an vollen Tagen ein bis zwei große Boote zu viel | offen | P17 |
 
 ### B Wünsche, Versorgung, Liegegeld und Kassieren
@@ -531,7 +531,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
 | Bed P1 | Die fünf fehlenden Anzeigen (A4, B1, B2, B11, C1) | B11 erledigt, Rest offen | P55, P11, P14 |
-| Bed P2 | Bootskarte mit "zahlt etwa 33 € pro Nacht" und Zahl der Wunschplätze | offen | P10 |
+| Bed P2 | Bootskarte mit "zahlt etwa 33 € pro Nacht" und Zahl der Wunschplätze | erledigt (PR 153) | P10 |
 | Bed P3 | Zeiger am Bildrand für wartende Boote | offen | P55 |
 | Bed P4 | Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf "bis zum nächsten Boot" | erledigt (1x bei Ereignis, Ausbau möglich, Regionsziel; 8x läuft bis zum nächsten Boot) | P07 |
 | Bed P5 | Einstellungen-Seite (Ton und Musik getrennt, Selbst-Einfahren, Bewegung, Schrift, Linkshänder) | erledigt (Ton und Musik über Knopf ins Ton-Fenster mit getrennten Reglern) | P50 |
@@ -648,7 +648,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 
 | Paket | Titel (Thread) | Inhalt | Dateien | Thread |
 |---|---|---|---|---|
-| P10 | Zuweisen wieder zur Entscheidung machen | Ü8, Ü9, Ü13 | `sim.js` (Selbst-Einfahren, `dismiss`, `turnAway`), `render/boat-view.js`, `features/platzschilder.js` | neu |
+| P10 | Zuweisen wieder zur Entscheidung machen | Ü8, Ü9, Ü13 | `sim.js` (Selbst-Einfahren, `dismiss`, `turnAway`), `render/boat-view.js`, `features/platzschilder.js` | erledigt (PR 153; Ü8 kam mit PR 147) |
 | P11 | Wünsche über dem Boot und Ankunftsvorschau | Ü10 | neues Modul `web/js/ui/vorschau.js`, `render/boat-view.js` | neu |
 | P12 | Kassieren verständlich machen | Ü12 (Rundgang ab Abend, halbe Münze sichtbar), B3, B4, B5 (Trinkgeld), B6. Stand: erledigt (PR 151) | `data/people.js`, `render/people.js`, `render/boat-view.js`, `sim.js`, `bridge.js`, `ui/gesten.js`, `economy.js`, `tests/kassieren.test.mjs`, `docs/spielregeln.md` | neu |
 | P13 | Tagesziele an eigene Handlungen binden | Ü14, I1 bis I4 | `features/tagesziele.js`, `features/ziel-deko.js`, `sim.js` (Ereignisse mit "von Hand"), `economy.js` (`tagesziele`) | erledigt (PR 152) |
