@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { punkt, KERN, PLAN_M, hafenAbstand } from './gelaende.js';
 import { natur } from './formen.js';
+import { strandLagen } from './strand.js';
 import { verschmelze } from './terrain.js';
 import { aktuellesBild, waldBei, feldZeile, knickAn, dorfPlan, hoefe, freiAbstand, soelle, zufallAus, JAHRESZEIT_FARBEN } from './vielfalt.js';
 
@@ -200,13 +201,18 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
     st.push({ x, y, z, s: s * 0.9, sy: s * 1.2, farbe: birke ? '#efece4' : '#8a6a54', ...(pf.windschief ? { kz: -0.25 } : {}) });
   };
 
+  // Strandkörbe und der Fuß der Seebrücke (strand.js) bleiben frei von Bäumen
+  const strand = Object.entries(strandLagen(stufe, region.id)).filter(([, l]) => l).map(([id, [x, y, w]]) => (id === 'seebruecke'
+    ? [x, y, 16] : [x + 7 * Math.cos(w) + 3 * Math.sin(w), y + 7 * Math.sin(w) - 3 * Math.cos(w), 20]));
+  const amStrand = (px, py) => strand.some(([x, y, r]) => Math.hypot(px - x, py - y) < r);
+
   // ---- Bäume: dicht im Wald, vereinzelt auf Wiesen und Weiden, nie auf Feldern, Wegen, Hafenflächen
   const zelle = 6.8 / Math.sqrt(menge * pf.dichte + 0.01);
   const baumBereich = (x0, x1, y0, y1, weite, gross, fern = false) => {
     for (let gy = y0; gy < y1; gy += weite) {
       for (let gx = x0; gx < x1; gx += weite) {
         const px = gx + rnd() * weite, py = gy + rnd() * weite;
-        if (hafenAbstand(px, py, stufe) < 6 || freiAbstand(px, py, stufe) < 3) continue;
+        if (hafenAbstand(px, py, stufe) < 6 || freiAbstand(px, py, stufe) < 3 || amStrand(px, py)) continue;
         const p = punkt(px, py, stufe, region);
         if (p.h < 0.3) continue;
         let chance = 0;

@@ -22,10 +22,7 @@
 // Welt: x = xPlan * 0.62, z = -yPlan * 0.62, y oben, Wasser bei 0.
 import * as THREE from 'three';
 import { buendeln } from './buendeln.js';
-import { natur } from './landschaft/formen.js';
-import { strandStelle } from './landschaft/natur.js';
-import { punkt } from './landschaft/gelaende.js';
-import { REGIONEN as LAND_REGIONEN } from './landschaft/regionen.js';
+import { STRAND_PLAN, strandLagen } from './landschaft/strand.js';
 
 const U = 0.62;
 const W = (xp, yp) => [xp * U, -yp * U];
@@ -397,32 +394,10 @@ const PLAN = [
 // Schwimmwellenbrecher im See ab Stufe 4, Oeffnung nach Osten zum Fahrwasser
 const WELLENBRECHER = [[-150, 136], [-95, 150], [-30, 154], [30, 148]];
 
-// Strandkörbe und Seebrücke gehören an einen echten Strand: Die Küste ist je Spiel anders (natur.js),
-// darum sucht strandStelle die nächste passende Stelle zur geplanten Lage: ebener, trockener Sand, die
-// Seebrücke vom Sandufer ins freie Wasser. Wo die Küste keinen Strand hat (Fels, Kliff, Schilf, Wald), fehlen sie.
-const STRAND = new Set(['koerbe-1', 'koerbe-2', 'koerbe-3', 'koerbe-4', 'seebruecke']);
-let _strand = null, _strandN = null;
-function strandLage(id, stufe, region = 'ostsee') {
-  let N;
-  try { N = natur(); } catch { return null; }
-  if (!N?.landig) return null;
-  if (_strandN !== N) { _strand = new Map(); _strandN = N; }
-  const reg = LAND_REGIONEN[region] ?? LAND_REGIONEN.ostsee;
-  const boden = (x, y) => punkt(x, y, stufe, reg);
-  const key = `${stufe}|${region}`;
-  if (!_strand.has(key)) {
-    const vergeben = [], out = {};
-    // Seebrücke zuerst: Sie braucht freies Wasser davor, Körbe finden leichter Platz
-    for (const e of [...PLAN.filter((x) => x.id === 'seebruecke'), ...PLAN.filter((x) => STRAND.has(x.id) && x.id !== 'seebruecke')]) {
-      const [x, y] = lageInStufe(e.p, stufe);
-      const s = strandStelle(N, x, y, { seebruecke: e.art === 'seebruecke', laenge: (e.opt?.laenge ?? 44) / U + 14, meiden: vergeben, boden, stufe });
-      out[e.id] = s;
-      if (s) vergeben.push(s);
-    }
-    _strand.set(key, out);
-  }
-  return _strand.get(key)[id] ?? null;
-}
+// Strandkörbe und Seebrücke gehören an einen echten Strand: Ihre Lage kommt aus landschaft/strand.js (je Küste
+// und Stufe gesucht, die Wunschlage steht dort), p in PLAN sagt hier nur, dass sie einen Platz brauchen.
+const STRAND = new Set(Object.keys(STRAND_PLAN));
+const strandLage = (id, stufe, region = 'ostsee') => strandLagen(stufe, region)[id] ?? null;
 
 /** Lage in Planeinheiten in einer Stufe; Strandsachen am echten Strand, sonst null (dann fehlen sie). */
 function stelle(it, stufe, region) {

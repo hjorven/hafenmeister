@@ -782,22 +782,30 @@ export function bauen(nr, seed = 1) {
  * meiden: schon vergebene Stellen [[x, y], ...], mindestens 50 Einheiten Abstand.
  * Gibt [x, y, dreh] zurück (dreh in Bogenmaß um die Hochachse, 0 = Seebrücke zeigt nach Norden) oder null.
  */
-export function strandStelle(N, px, py, { seebruecke = false, laenge = 72, meiden = [], boden = null, stufe = 6 } = {}) {
+export function strandStelle(N, px, py, { seebruecke = false, laenge = 72, meiden = [], sperren = [], boden = null, stufe = 6, weit = 420 } = {}) {
   const L = N.landig;
-  // Stufe 1 und 2: nur der Bereich der Stege und Gebäude ist tabu, östlich davon liegt noch freier Strand
-  const hx1 = stufe <= 2 ? 0 : 262, hy1 = stufe <= 2 ? 120 : 250;
-  const frei = (x, y) => !(x > (seebruecke ? -230 : -175) && x < hx1 + (seebruecke ? 40 : 0) && y > -110 && y < hy1) && !(x > -380 && x < 40 && y > 190 && y < 270)
-    && !(y > 236 && x > -460 && x < 500) && meiden.every(([mx, my]) => Math.hypot(mx - x, my - y) > 50);
+  const abseits = (x, y) => meiden.every(([mx, my]) => Math.hypot(mx - x, my - y) > 50);
+  // Strandkörbe: nicht zwischen Gebäuden, Diensten und Wegen des Hafens und nicht auf der Kaifläche (ab Stufe 3)
+  const korbFrei = (x, y) => abseits(x, y) && landBedarf(x, y) < -8
+    && !(stufe >= 3 && x > KAIFLAECHE.x0 - 8 && x < KAIFLAECHE.x1 + 8 && y > KAIFLAECHE.y0 - 8 && y < KAIFLAECHE.y1 + 8);
+  // Seebrücke: an keiner Stelle im Hafenwasser (Stege, Becken, Runde der Boote) und in keiner Sperrfläche
+  // (sperren: Rechtecke { x0, x1, y0, y1 }, etwa die Liegeplätze der großen Gäste)
+  const hx1 = stufe <= 2 ? 0 : 302, hy1 = stufe <= 2 ? 120 : 250;
+  const brueckeFrei = (x, y) => !(x > -230 && x < hx1 && y > -110 && y < hy1) && wasserBedarf(x, y) > 20
+    && sperren.every((r) => x < r.x0 - 18 || x > r.x1 + 18 || y < r.y0 - 18 || y > r.y1 + 18);
   const sand = (x, y) => { if (!boden) return L(x, y) > 1; const b = boden(x, y); return b.typ === 'sand' && b.h > 0.2 && b.h < 1.3 ? b.h : null; };
   const nass = (x, y) => { if (!boden) return L(x, y) < -3; const b = boden(x, y); return (b.typ === 'wasser' || b.typ === 'watt') && b.h < -0.25; };
-  // Strandkörbe: Gruppe von etwa 9 x 4 m (14 x 6 Planeinheiten), nach Osten und Süden von der Lage aus
-  const korbPlatz = (x, y) => {
+  // Strandkörbe: Gruppe von etwa 9 x 4 m (14 x 6 Planeinheiten), gedreht um w; vorn (Kante 0..14) echter Sand
+  const NICHT = ['wasser', 'watt', 'fels', 'kliff', 'schilfrand', 'salzwiese', 'mole', 'pflaster', 'weg', 'steinschuettung', 'waldboden', 'dorf', 'feldweg'];
+  const korbPlatz = (x, y, w = 0) => {
+    const c = Math.cos(w), sn = Math.sin(w);
+    const an = (dx, dy) => [x + dx * c - dy * sn, y + dx * sn + dy * c];
+    if (!korbFrei(...an(7, -3))) return false;
     if (!boden) return sand(x, y);
-    if (sand(x, y) == null || sand(x + 12, y) == null) return false;   // vorn echter Sand
-    const NICHT = ['wasser', 'watt', 'fels', 'kliff', 'schilfrand', 'salzwiese', 'mole', 'pflaster', 'weg', 'steinschuettung', 'waldboden', 'dorf', 'feldweg'];
+    if (sand(x, y) == null || sand(...an(12, 0)) == null) return false;
     let lo = Infinity, hi = -Infinity;
     for (const [dx, dy] of [[0, 0], [14, 0], [0, -6], [14, -6], [7, -3]]) {
-      const q = boden(x + dx, y + dy);
+      const q = boden(...an(dx, dy));
       if (NICHT.includes(q.typ) || q.h < 0.2 || q.h > 2.2) return false;
       lo = Math.min(lo, q.h); hi = Math.max(hi, q.h);
     }
@@ -806,6 +814,7 @@ export function strandStelle(N, px, py, { seebruecke = false, laenge = 72, meide
   // Seebrücke in Richtung (ex, ey): Fuß auf Sand, davor auf ganzer Länge (drei Spuren) Wasser
   const brueckePlatz = (x, y, ex, ey) => {
     if (!sand(x, y) || !sand(x - ex * 5, y - ey * 5)) return false;
+    for (let t = 0; t <= laenge; t += 5) if (!brueckeFrei(x + ex * t, y + ey * t)) return false;
     for (let t = 8; t <= laenge; t += 5) {
       for (const q of [-5, 0, 5]) if (!nass(x + ex * t - ey * q, y + ey * t + ex * q)) return false;
     }
@@ -814,14 +823,15 @@ export function strandStelle(N, px, py, { seebruecke = false, laenge = 72, meide
   const RICHT = [0, 0.5, -0.5, 1, -1, 1.57, -1.57, 2.36, -2.36, 3.14];
   const passt = (x, y) => {
     const l = L(x, y);
-    if (l < 1.5 || l > 12 || !frei(x, y)) return null;
-    if (!seebruecke) return korbPlatz(x, y) ? [x, y, 0] : null;
+    if (l < 1.5 || l > 12) return null;
+    if (!seebruecke) { for (const w of [0, 1.5708, -1.5708, 3.1416]) if (korbPlatz(x, y, w)) return [x, y, w]; return null; }
+    if (!abseits(x, y)) return null;
     if (l > 6) return null;
     for (const w of RICHT) if (brueckePlatz(x, y, -Math.sin(w), Math.cos(w))) return [x, y, w];
     return null;
   };
   let treffer = passt(px, py);
-  for (let r = 8; r <= 700 && !treffer; r += 8) {
+  for (let r = 8; r <= weit && !treffer; r += 8) {
     const n = Math.max(12, Math.round(r / 6));
     for (let k = 0; k < n && !treffer; k++) {
       const a = (k / n) * Math.PI * 2;

@@ -147,6 +147,9 @@ export function baueNetz({ hafen, stufe, gebaeude = [], istLand = null }) {
   // Seebruecke (aus den Gebaeuden), ragt nach Norden in die Ostsee
   for (const g of gebaeude) {
     if (g.art !== 'seebruecke') continue;
+    // Die Seebrücke steht je Küste woanders und in anderer Richtung (landschaft/strand.js). Dieses Netz kennt
+    // nur den Nehrungsweg: Begehbar ist sie hier nur, wenn sie von dort nach Norden führt.
+    if (Math.abs(g.dreh ?? 0) > 0.01 || Math.abs(g.y - NEHRUNG_Y) > 30 || !land(g.x, NEHRUNG_Y)) continue;
     linie([[g.x, NEHRUNG_Y], [g.x, g.y], [g.x, g.y + SEEBRUECKE_LAENGE]], 'bruecke', 'nehrung');
   }
 
