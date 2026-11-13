@@ -151,6 +151,7 @@ export function init(game) {
     for (const it of game.buildings?.items ?? []) {
       if (stufe < (it.ab ?? 1) || (it.bis != null && stufe > it.bis)) continue;
       const l = it.p ? game.buildings.lage(it.id, stufe) : null;
+      if (it.p && !l) continue;   // kein Platz an dieser Küste (z. B. Strandkörbe ohne Strand): steht nirgends
       const m = it.mesh;
       if (!m) continue;
       const alt = m.position.clone();
