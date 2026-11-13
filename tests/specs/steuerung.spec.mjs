@@ -101,3 +101,30 @@ test('Antippen der Karte meldet einen Punkt im Wasser oder an Land', async ({ ga
   const taps = await page.evaluate(() => window.__taps);
   expect(taps[0].hasWorld, 'Tipp hat keinen Weltpunkt').toBe(true);
 });
+
+test('Kamera neigen (zwei Finger hoch oder rechte Maustaste) und Kompass richtet aus', async ({ game }, testInfo) => {
+  const { page } = game;
+  const pitch = () => page.evaluate(() => window.hafenmeister.camera.pitchGrad);
+  await page.evaluate(() => window.hafenmeister.camera.zoomAt(2));
+  const before = await pitch();
+  const c = await stageCenter(page);
+  if (isTouchProject(testInfo)) {
+    // Finger nebeneinander, gemeinsam nach oben: flacher
+    await touchGesture(page, lerpFrames(
+      [{ x: c.x - 40, y: c.y + 40 }, { x: c.x + 40, y: c.y + 40 }],
+      [{ x: c.x - 40, y: c.y - 40 }, { x: c.x + 40, y: c.y - 40 }],
+    ));
+  } else {
+    await page.mouse.move(c.x, c.y + 40);
+    await page.mouse.down({ button: 'right' });
+    await page.mouse.move(c.x, c.y - 40, { steps: 12 });
+    await page.mouse.up({ button: 'right' });
+  }
+  await page.waitForTimeout(500);
+  const flat = await pitch();
+  expect(flat, 'Neigen macht die Kamera nicht flacher').toBeLessThan(before - 5);
+  const kompass = page.locator('#btn-kompass');
+  await expect(kompass).toBeVisible();
+  if (isTouchProject(testInfo)) await kompass.tap(); else await kompass.click();
+  await page.waitForFunction(() => Math.abs(window.hafenmeister.camera.pitchGrad - 50) < 1);
+});

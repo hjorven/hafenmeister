@@ -83,10 +83,12 @@ export const ZURUECK_AN_BORD = 0.35;
 export const AN_BORD_PAUSE = [20, 60];
 // Abends bleiben so viele noch an Land (im Restaurant), der Rest geht an Bord.
 export const ABENDS_AN_LAND = 0.2;
-// Hafenmeister-Rundgang: startet ab diesem Anteil des Spieltags (game.sim.tagesAnteil, 0,75 = Abend)
-// am spaeten Nachmittag, geht zuegig (m/s) und bricht morgens ab.
-export const RUNDGANG_AB = 0.68;
+// Hafenmeister-Rundgang: startet mit dem Abend (Phase 'abend', nicht frueher), holt nur Muenzen,
+// die der Spieler liegen liess, geht zuegig (m/s) und bricht morgens ab.
 export const RUNDGANG_TEMPO = 2.4;
+// Schneller geht er nie (leichter Laufschritt); kurzer Halt je Boot (Sekunden Spielzeit)
+export const RUNDGANG_TEMPO_MAX = 8;
+export const RUNDGANG_HALT = 1.2;
 // Hoechstens so lange wartet ein ablegendes Boot auf seine Leute (Sekunden Spielzeit).
 export const WARTEN_MAX = 20;
 

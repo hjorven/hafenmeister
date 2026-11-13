@@ -5,9 +5,9 @@
 //   ui/gesten.js   Schleppleine von der Warteboje, Kassierstrich                       für alle Geräte
 //   ui/oberflaeche.js  Tempo-Knöpfe unten links (Pause, 1x, 3x, 8x)                     für alle Geräte
 //   ui/input-pc.js (diese Datei) alles, was nur Maus und Tastatur können:
-//     - rechte Maustaste: Klick = Abbrechen, Ziehen = Hafen drehen (wenn die Kamera das kann), sonst verschieben
-//     - mittlere Maustaste ziehen = verschieben
-//     - Mausrad: rechnet Firefox-Zeilen und Trackpad-Pinch richtig um, Umschalt + Rad dreht
+//     - rechte oder mittlere Maustaste ziehen = Kamera schwenken: links/rechts dreht, hoch/runter neigt
+//       (rechte Taste nur geklickt = Abbrechen)
+//     - Mausrad: rechnet Firefox-Zeilen und Trackpad-Pinch richtig um, Umschalt + Rad dreht, Alt + Rad neigt
 //     - Doppelklick: wartendes Boot fährt selbst ein, sonst näher heran
 //     - Mauszeiger und Tooltip je nach Objekt unter der Maus
 //     - Tastenkürzel und eine Hilfe-Übersicht (Taste ?), Tastenschilder an den Knöpfen
@@ -16,7 +16,7 @@
 // Was dieses Modul vom Spielobjekt nutzt (mit ? = optional, ohne fällt nur die Funktion weg):
 //   game.canvas, game.camera.zoomAt/panBy/reset/screenToWorld, game.pick, game.setPaused, game.paused,
 //   game.speed, game.on/emit
-//   game.camera.rotateBy?(rad), rotateFree?(rad), snapRotation?(), flyTo?(x, z)
+//   game.camera.rotateBy?(rad), rotateFree?(rad), tiltFree?(rad), tiltBy?(rad), release?(), flyTo?(x, z)
 //   game.sim?.wartet?(bootId)        wartet das Boot vor dem Hafen?
 //   game.describe?(treffer)          -> Tooltip-Text oder null (sonst ein kurzer Text aus game.sim.state)
 //   game.sim?.waitingBoats?(), select?(id), selected   Boot per Taste wählen
@@ -90,7 +90,8 @@ export function init(game) {
     ['Mausrad, <kbd>+</kbd> <kbd>-</kbd>', 'Zoomen zum Mauszeiger', () => true],
     ['Doppelklick auf Wasser oder Land', 'Näher heran', () => true],
     ['Ziehen, <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>, Pfeiltasten', 'Karte verschieben', () => true],
-    ['Rechte Maustaste ziehen, Umschalt + Mausrad, <kbd>Q</kbd> <kbd>E</kbd>', 'Hafen drehen, rastet in 45-Grad-Schritten ein', () => !!cam.rotateBy],
+    ['Rechte Maustaste ziehen nach links oder rechts, Umschalt + Mausrad, <kbd>Q</kbd> <kbd>E</kbd>', 'Hafen drehen', () => !!cam.rotateBy],
+    ['Rechte Maustaste ziehen nach oben oder unten, Alt + Mausrad, <kbd>R</kbd> <kbd>V</kbd>, <kbd>Bild auf</kbd> <kbd>Bild ab</kbd>', 'Kamera neigen: flach über das Wasser oder steil von oben', () => !!cam.tiltFree],
     ['<kbd>0</kbd> oder <kbd>Pos1</kbd>', 'Ganzen Hafen zeigen, Norden wieder oben', () => true],
     ['<kbd>M</kbd>', 'Ton aus und an', () => !!game.audio],
     ['<kbd>P</kbd>', 'Fotomodus', () => !!game.foto],
@@ -205,9 +206,12 @@ export function init(game) {
       gesture.y = e.clientY;
       if (!gesture.moved && Math.hypot(e.clientX - gesture.x0, e.clientY - gesture.y0) < DRAG_PX) return;
       gesture.moved = true;
-      if (gesture.kind === 'right' && cam.rotateFree) {
-        cam.rotateFree(-dx * 0.008);
-        canvas.style.cursor = 'ew-resize';
+      if (cam.rotateFree) {
+        // Wie in 3D-Programmen: Maus nach links/rechts dreht, nach oben/unten neigt
+        // (Maus nach oben = flacher, mehr Horizont; nach unten = steiler, mehr von oben)
+        if (Math.abs(dx) > Math.abs(dy) * 0.25) cam.rotateFree(-dx * 0.006);
+        if (cam.tiltFree && Math.abs(dy) > Math.abs(dx) * 0.25) cam.tiltFree(dy * 0.005);
+        canvas.style.cursor = 'move';
       } else {
         cam.panBy(dx, dy);
         canvas.style.cursor = 'grabbing';
@@ -230,10 +234,8 @@ export function init(game) {
     gesture = null;
     try { canvas.releasePointerCapture(e.pointerId); } catch { /* egal */ }
     canvas.style.cursor = '';
-    if (g.kind === 'right') {
-      if (!g.moved && e.type === 'pointerup') game.emit('ui:cancel');
-      else if (g.moved && cam.snapRotation) cam.snapRotation();
-    }
+    if (g.kind === 'right' && !g.moved && e.type === 'pointerup') game.emit('ui:cancel');
+    else if (g.moved) (cam.release ?? cam.snapRotation)?.call(cam);
   };
   window.addEventListener('pointerup', endGesture, true);
   window.addEventListener('pointercancel', endGesture, true);
@@ -255,7 +257,6 @@ export function init(game) {
 
   // Mausrad und Trackpad. core/input.js zoomt auch, rechnet aber Firefox-Zeilen (deltaMode 1)
   // und Trackpad-Pinch (ctrlKey) nicht um. Deshalb übernimmt der PC das Rad.
-  let snapTimer = 0;
   window.addEventListener('wheel', (e) => {
     if (e.target !== canvas) return;
     e.preventDefault();
@@ -265,8 +266,10 @@ export function init(game) {
     const dy = e.deltaY * unit;
     if (e.shiftKey && !e.ctrlKey && cam.rotateFree) {
       cam.rotateFree((dy || e.deltaX * unit) * 0.002);
-      clearTimeout(snapTimer);
-      snapTimer = setTimeout(() => cam.snapRotation && cam.snapRotation(), 250);
+      return;
+    }
+    if (e.altKey && !e.ctrlKey && cam.tiltFree) {
+      cam.tiltFree(-(dy || e.deltaX * unit) * 0.0015);
       return;
     }
     cam.zoomAt(Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0015)), p.x, p.y);
@@ -332,6 +335,8 @@ export function init(game) {
       case 'KeyB': { const b = byId('btn-build'); if (!visible(b)) return; b.click(); break; }
       case 'KeyQ': if (!cam.rotateBy) return; cam.rotateBy(Math.PI / 4); break;
       case 'KeyE': if (!cam.rotateBy) return; cam.rotateBy(-Math.PI / 4); break;
+      case 'KeyR': case 'PageUp': if (!cam.tiltBy) return; cam.tiltBy(8 * Math.PI / 180); break;
+      case 'KeyV': case 'PageDown': if (!cam.tiltBy) return; cam.tiltBy(-8 * Math.PI / 180); break;
       case 'KeyM': game.emit('ui:mute'); break;
       case 'KeyF': setFast(!(game.speed > 1)); break;
       case 'KeyG': if (game.oberflaeche?.tempo) game.oberflaeche.tempo(game.speed >= 8 ? 1 : 8); break;

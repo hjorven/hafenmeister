@@ -141,6 +141,10 @@ test('kombiniertes Ziel: Segelboote an Plätze mit Strom', () => {
 test('Ziele, die nicht machbar sind, kommen nicht: volle Automatik ohne Zuweis- und Kassierziele', () => {
   const { ctx, state } = neu(3, 4);
   state.office = 99;
+  // Große Boote (L und größer) zahlen auch mit Kassenautomat persönlich (Hafenbüro P02, Trinkgeld)
+  assert.equal(lage(state, ctx).kassieren, true);
+  // Nur S und M im Hafen: dann bleibt mit voller Automatik nichts zum Zuweisen und Kassieren
+  ctx.rules.sizeMix = { ...ctx.rules.sizeMix, [state.stage]: { S: 1, M: 1 } };
   const h = lage(state, ctx);
   assert.equal(h.zuweisen, false);
   assert.equal(h.kassieren, false);
@@ -229,4 +233,14 @@ test('alte Spielstände mit drei festen Zielen laufen weiter', () => {
   assert.equal(z.version, 2);
   assert.ok(tageswechsel(state, ctx));
   assert.equal(z.karten.length, 3);
+});
+
+test('Wochenziele sind nicht in zwei Tagen zu schaffen (Prüfbefund: Blumenkübel an Tag 2)', () => {
+  for (let stufe = 1; stufe <= 6; stufe++) {
+    const { ctx, state } = neu(5, stufe);
+    const h = lage(state, ctx);
+    if (!h.boote) continue;
+    assert.ok(WOCHE.gaeste.soll(h) > 2 * h.boote, `Stufe ${stufe}: ${WOCHE.gaeste.soll(h)} Gäste bei ${h.boote} Booten am Tag`);
+    if (h.geld >= 5) assert.ok(WOCHE.geld.soll(h) > 2 * h.geld, `Stufe ${stufe}: Liegegeld`);
+  }
 });
