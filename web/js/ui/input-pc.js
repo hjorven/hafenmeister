@@ -38,7 +38,7 @@ const PAN_KEYS = {
   KeyW: [0, 1], ArrowUp: [0, 1], KeyS: [0, -1], ArrowDown: [0, -1],
   KeyA: [1, 0], ArrowLeft: [1, 0], KeyD: [-1, 0], ArrowRight: [-1, 0],
 };
-const KEY_BADGES = { 'btn-pause': 'Leertaste', 'btn-build': 'B', 'btn-overview': '0' };
+const KEY_BADGES = { 'btn-pause': 'Leertaste', 'btn-build': 'B', 'btn-overview': '0', 'btn-collect': 'K' };
 
 export function init(game) {
   const canvas = game.canvas;
@@ -77,7 +77,10 @@ export function init(game) {
     ['Wartendes Boot ziehen', 'An der Schleppleine in einen leuchtenden Platz ziehen', () => true],
     ['Doppelklick auf wartendes Boot', 'Boot fährt selbst in den besten Platz', () => true],
     ['Maustaste halten und über Münzen streichen', 'Alles in einem Zug kassieren', () => true],
-    ['Tempo-Knöpfe unten links, <kbd>F</kbd>', 'Vorspulen: 1x, 3x, 8x; F schaltet 3x an und aus', () => true],
+    ['Tempo-Knöpfe unten links', 'Pause, 1x, 3x, 8x (8x bis zum nächsten Boot)', () => true],
+    ['<kbd>F</kbd>', '3x an und aus', () => true],
+    ['<kbd>G</kbd>', '8x an und aus', () => !!game.oberflaeche?.tempo],
+    ['<kbd>K</kbd>', 'Kassieren (abends)', () => true],
     ['<kbd>1</kbd> bis <kbd>9</kbd>', 'Wartendes Boot wählen, bei offener Karte deren Knopf', () => true],
     ['<kbd>Tab</kbd>, Umschalt + <kbd>Tab</kbd>', 'Nächstes, voriges wartendes Boot', () => true],
     ['<kbd>Enter</kbd>', 'Gewähltes Boot einfahren lassen, bei offener Karte deren ersten Knopf', () => true],
@@ -109,11 +112,32 @@ export function init(game) {
 
   function toggleHelp(show = help.hidden) {
     if (show) {
-      help.innerHTML = `<div class="pc-help-box" role="dialog" aria-modal="true" aria-labelledby="pc-help-title">
-          <h2 id="pc-help-title">Maus und Tastatur</h2>
-          <dl>${HELP.filter((h) => h[2]()).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
-          <button type="button" class="hud-btn" data-close>Weiter</button>
-        </div>`;
+      // Ohne innerHTML (Audit C05): <kbd> in den festen Texten oben wird zu echten Elementen
+      const mitTasten = (text) => text.split(/<kbd>(.*?)<\/kbd>/).map((t, i) => {
+        if (i % 2 === 0) return document.createTextNode(t);
+        const k = document.createElement('kbd'); k.textContent = t; return k;
+      });
+      const box = document.createElement('div');
+      box.className = 'pc-help-box';
+      box.setAttribute('role', 'dialog');
+      box.setAttribute('aria-modal', 'true');
+      box.setAttribute('aria-labelledby', 'pc-help-title');
+      const h2 = document.createElement('h2');
+      h2.id = 'pc-help-title';
+      h2.textContent = 'Maus und Tastatur';
+      const dl = document.createElement('dl');
+      for (const [k, v] of HELP.filter((h) => h[2]())) {
+        const dt = document.createElement('dt'); dt.append(...mitTasten(k));
+        const dd = document.createElement('dd'); dd.textContent = v;
+        dl.append(dt, dd);
+      }
+      const weiter = document.createElement('button');
+      weiter.type = 'button';
+      weiter.className = 'hud-btn';
+      weiter.dataset.close = '';
+      weiter.textContent = 'Weiter';
+      box.append(h2, dl, weiter);
+      help.replaceChildren(box);
     }
     help.hidden = !show;
     document.body.classList.toggle('help-open', show);
@@ -310,6 +334,8 @@ export function init(game) {
       case 'KeyE': if (!cam.rotateBy) return; cam.rotateBy(-Math.PI / 4); break;
       case 'KeyM': game.emit('ui:mute'); break;
       case 'KeyF': setFast(!(game.speed > 1)); break;
+      case 'KeyG': if (game.oberflaeche?.tempo) game.oberflaeche.tempo(game.speed >= 8 ? 1 : 8); break;
+      case 'KeyK': { const c = byId('btn-collect'); if (!visible(c)) return; c.click(); break; }
       case 'KeyL': if (!game.spielstand?.oeffnen) return; game.spielstand.oeffnen(); break;
       case 'Escape': game.emit('ui:cancel'); break;
       case 'Home': case 'Digit0': case 'Numpad0': cam.reset(); break;
