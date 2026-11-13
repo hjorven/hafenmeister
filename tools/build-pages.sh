@@ -36,6 +36,12 @@ else
 HTML
 fi
 
+# Roadmap-Seite (/roadmap/) immer frisch aus docs/roadmap.md, auch wenn daten.json
+# im Repo noch nicht nachgezogen ist. Ohne Node bleibt die eingecheckte Fassung.
+if [ -f tools/roadmap.mjs ] && [ -d _site/roadmap ] && command -v node >/dev/null 2>&1; then
+  node tools/roadmap.mjs --json > _site/roadmap/daten.json
+fi
+
 # Kein Jekyll: Dateien und Ordner mit Unterstrich bleiben erhalten.
 touch _site/.nojekyll
 

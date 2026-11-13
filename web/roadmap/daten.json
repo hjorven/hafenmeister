@@ -1,0 +1,4006 @@
+{
+ "stand": {
+  "datum": "13.11.2026",
+  "commit": "b1e4100"
+ },
+ "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
+ "repo": "https://github.com/hjorven/hafenmeister",
+ "status": {
+  "erledigt": {
+   "name": "erledigt",
+   "farbe": "#23897d"
+  },
+  "teilweise": {
+   "name": "teilweise",
+   "farbe": "#e8b23a"
+  },
+  "arbeit": {
+   "name": "in Arbeit",
+   "farbe": "#3a7cc4"
+  },
+  "frage": {
+   "name": "Frage",
+   "farbe": "#9a5bc4"
+  },
+  "offen": {
+   "name": "offen",
+   "farbe": "#9aa7b1"
+  },
+  "entfaellt": {
+   "name": "entfällt",
+   "farbe": "#c9cfd4"
+  }
+ },
+ "pakete": [
+  {
+   "id": "P01",
+   "titel": "Dauerlieger zur echten Entscheidung machen",
+   "inhalt": "Ü1, Ü20, Doku Dauerlieger, Gast wird umgelegt (plan 9a)",
+   "thread": "erledigt (PR 149)",
+   "welle": 1,
+   "prs": [
+    149
+   ],
+   "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
+   "punkte": [
+    "Ü1",
+    "Ü20",
+    "H1",
+    "H2",
+    "H3",
+    "H4",
+    "H10",
+    "C01"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P02",
+   "titel": "Hafenbüro mit eigenen Aufgaben ausbauen",
+   "inhalt": "Ü2, Ü11, A2, E1 bis E7, erledigt (PR 146)",
+   "thread": "neu",
+   "welle": 1,
+   "prs": [
+    146,
+    151,
+    158
+   ],
+   "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
+   "punkte": [
+    "Ü2",
+    "Ü11",
+    "A2",
+    "A5",
+    "B5",
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5",
+    "E6",
+    "E7",
+    "E8"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P03",
+   "titel": "Einstieg an neue Oberfläche anpassen",
+   "inhalt": "Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), docs/einstieg.md",
+   "thread": "bestehend: \"Einstieg für neue Spieler bauen\"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; offen: J4 mit P17, J5 nach P14",
+   "welle": 1,
+   "prs": [
+    112
+   ],
+   "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
+   "punkte": [
+    "Ü3",
+    "J1",
+    "J2",
+    "J3",
+    "J4",
+    "J5",
+    "J6",
+    "J7",
+    "J8",
+    "O7"
+   ],
+   "status": "teilweise"
+  },
+  {
+   "id": "P04",
+   "titel": "Abschlussziel Stufe 6 richtig zählen",
+   "inhalt": "Ü4",
+   "thread": "bestehend: \"Services und Sonderanlagen einbauen\"",
+   "welle": 1,
+   "prs": [
+    139
+   ],
+   "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
+   "punkte": [
+    "Ü4",
+    "Svc F6"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P05",
+   "titel": "Boote auf wegfallenden Plätzen regeln",
+   "inhalt": "Ü5",
+   "thread": "bestehend: \"Spielregeln ohne Grafik umsetzen\"",
+   "welle": 1,
+   "prs": [
+    143
+   ],
+   "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
+   "punkte": [
+    "Ü5",
+    "D4",
+    "O4"
+   ],
+   "status": "teilweise"
+  },
+  {
+   "id": "P06",
+   "titel": "Eine Quelle für alle Zahlen und echte Regeltests",
+   "inhalt": "Ü6, Ü24",
+   "thread": "bestehend: \"Balancing für 94 Liegeplätze ausarbeiten\"",
+   "welle": 1,
+   "prs": [],
+   "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
+   "punkte": [
+    "Ü6",
+    "Ü24",
+    "Svc F1",
+    "G8",
+    "M1",
+    "M2",
+    "M3",
+    "M4",
+    "M5",
+    "M6",
+    "M7",
+    "O1",
+    "O3",
+    "O5",
+    "O6",
+    "O8",
+    "Q4",
+    "C04"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P07",
+   "titel": "Tempo einheitlich regeln",
+   "inhalt": "Ü7, Hilfetexte, docs/schiffsanimationen.md",
+   "thread": "bestehend: \"Gesamte Oberfläche neu überarbeiten\"",
+   "welle": 1,
+   "prs": [],
+   "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
+   "punkte": [
+    "Ü7",
+    "Bed P4",
+    "Bed P8"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P08",
+   "titel": "Doku auf den Stand bringen",
+   "inhalt": "Abschnitte 9 und 10, Liste aller Adresszusätze, plan.md Meilensteine und Pixel-Oberfläche",
+   "thread": "erledigt (PR 177); bestehend: \"Bestandsaufnahme Repo und Plan erstellen\"",
+   "welle": 1,
+   "prs": [
+    144,
+    177
+   ],
+   "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
+   "punkte": [
+    "K1",
+    "Bed P9",
+    "Q1",
+    "Q2",
+    "Q3",
+    "Q5",
+    "Q6",
+    "Q7",
+    "Q8",
+    "Q9",
+    "Q10",
+    "C05",
+    "C07"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P09",
+   "titel": "Speicherplätze und Neues Spiel",
+   "inhalt": "Ü25, F26, F27 (Grundgerüst), F28, docs/speichern.md",
+   "thread": "erledigt (PR 150)",
+   "welle": 1,
+   "prs": [
+    150
+   ],
+   "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
+   "punkte": [
+    "Ü25",
+    "F26",
+    "F27",
+    "F28",
+    "N13",
+    "N14",
+    "C02",
+    "C03",
+    "C05"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P10",
+   "titel": "Zuweisen wieder zur Entscheidung machen",
+   "inhalt": "Ü8, Ü9, Ü13",
+   "thread": "erledigt (PR 153; Ü8 kam mit PR 147)",
+   "welle": 2,
+   "prs": [
+    147,
+    153,
+    176
+   ],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "Ü8",
+    "Ü9",
+    "Ü13",
+    "A1",
+    "A3",
+    "A6",
+    "A8",
+    "A9",
+    "Bed P2"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P11",
+   "titel": "Wünsche über dem Boot und Ankunftsvorschau",
+   "inhalt": "Ü10",
+   "thread": "erledigt (PR 158)",
+   "welle": 2,
+   "prs": [
+    146,
+    158
+   ],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "Ü10",
+    "A5",
+    "B2",
+    "Bed P1"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P12",
+   "titel": "Kassieren verständlich machen",
+   "inhalt": "Ü12 (Rundgang ab Abend, halbe Münze sichtbar), B3, B4, B5 (Trinkgeld), B6. Stand: erledigt (PR 151)",
+   "thread": "neu",
+   "welle": 2,
+   "prs": [
+    146,
+    151
+   ],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "Ü12",
+    "B3",
+    "B4",
+    "B5",
+    "B6"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P13",
+   "titel": "Tagesziele an eigene Handlungen binden",
+   "inhalt": "Ü14, I1 bis I4",
+   "thread": "erledigt (PR 152)",
+   "welle": 2,
+   "prs": [
+    152
+   ],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "Ü14",
+    "I1",
+    "I2",
+    "I3",
+    "I4"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P14",
+   "titel": "Bewertungen und Gästebuch zeigen",
+   "inhalt": "Ü21, F18",
+   "thread": "neu",
+   "welle": 2,
+   "prs": [],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "Ü21",
+    "F18",
+    "C1",
+    "C9",
+    "Bed P1"
+   ],
+   "status": "teilweise"
+  },
+  {
+   "id": "P15",
+   "titel": "Tagesabschluss am Abend zeigen",
+   "inhalt": "Ü22",
+   "thread": "erledigt (PR 159)",
+   "welle": 2,
+   "prs": [
+    159
+   ],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "Ü22",
+    "Svc F4"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P16",
+   "titel": "Aufstieg und Abschluss feiern, Endlosspiel",
+   "inhalt": "Ü23, Endlosmodus",
+   "thread": "erledigt (PR 156)",
+   "welle": 2,
+   "prs": [
+    156
+   ],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "Ü23",
+    "D10",
+    "I8",
+    "I9"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P17",
+   "titel": "Start und frühe Stufen straffen",
+   "inhalt": "Ü15, Ü16, Startwerte dokumentieren",
+   "thread": "bestehend: \"Balancing für 94 Liegeplätze ausarbeiten\" (nach P06)",
+   "welle": 2,
+   "prs": [],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "Ü15",
+    "Ü16",
+    "A10",
+    "B10",
+    "D3",
+    "J4"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P18",
+   "titel": "Ausbau in Bauabschnitten",
+   "inhalt": "Ü18, bautage nutzen oder löschen",
+   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"",
+   "welle": 2,
+   "prs": [
+    143
+   ],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "Ü18",
+    "D1",
+    "D2",
+    "D4",
+    "D7",
+    "Bed P7"
+   ],
+   "status": "teilweise"
+  },
+  {
+   "id": "P19",
+   "titel": "Ruf schwerer machen mit Wünschen je Bootsart",
+   "inhalt": "Ü17, feeFactor, arrivalWeight, Kapazität sichtbar",
+   "thread": "neu",
+   "welle": 2,
+   "prs": [],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "Ü17",
+    "B7",
+    "B9",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "C6",
+    "Svc F8",
+    "M3"
+   ],
+   "status": "teilweise"
+  },
+  {
+   "id": "P20",
+   "titel": "Winter mit Inhalt füllen",
+   "inhalt": "Ü19, F14, F15, docs/ereignisse.md",
+   "thread": "neu",
+   "welle": 2,
+   "prs": [],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "Ü19",
+    "F14",
+    "F15",
+    "G4",
+    "G5",
+    "H5",
+    "I10"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P21",
+   "titel": "Logbuch und Hafenchronik zeigen",
+   "inhalt": "Logbuch (Note 1), F36, sim:logbookNew",
+   "thread": "neu",
+   "welle": 2,
+   "prs": [],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "F36",
+    "I5"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P22",
+   "titel": "Erfolge einbauen",
+   "inhalt": "plan.md 9",
+   "thread": "neu",
+   "welle": 2,
+   "prs": [],
+   "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
+   "punkte": [
+    "I6",
+    "I7"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P23",
+   "titel": "Services mit eigener Wirkung",
+   "inhalt": "Services nicht nur \"€ pro Tag\"",
+   "thread": "bestehend: \"Services und Sonderanlagen einbauen\"",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "Svc F2",
+    "Svc F3",
+    "Svc F5",
+    "Svc F7",
+    "Svc F9"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P24",
+   "titel": "Ereignisse zum Vorbereiten und neue Ereignisse",
+   "inhalt": "Vorwarnung mit Handlungsmöglichkeit, F17",
+   "thread": "bestehend: \"Ereignisse Sturm und Regatta einbauen\"",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F17",
+    "G1",
+    "G2",
+    "G3",
+    "G6",
+    "G7",
+    "G9"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P25",
+   "titel": "Stammgäste mit Wirkung und Gästepost",
+   "inhalt": "Ruf am alten Platz (plan 9a), F37",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F37",
+    "C8",
+    "H6",
+    "H7",
+    "H8",
+    "H9"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P26",
+   "titel": "Überraschende Gesten fertig bauen",
+   "inhalt": "Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), audio/README.md",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "L3",
+    "L4",
+    "L5"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P27",
+   "titel": "Päckchen liegen bei vollem Hafen",
+   "inhalt": "F1",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F1"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P28",
+   "titel": "Anmeldung per Funk",
+   "inhalt": "F2 (nutzt P11)",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F2"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P29",
+   "titel": "Baggern für tiefere Liegeplätze",
+   "inhalt": "F7",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F7"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P30",
+   "titel": "Stege nachrüsten",
+   "inhalt": "F8",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F8"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P31",
+   "titel": "Neue Gästewünsche",
+   "inhalt": "F9",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F9",
+    "B8"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P32",
+   "titel": "Flottillen",
+   "inhalt": "F3, Gruppen-Ankunft",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F3",
+    "M3"
+   ],
+   "status": "teilweise"
+  },
+  {
+   "id": "P33",
+   "titel": "Liegende Boote umlegen",
+   "inhalt": "F4",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F4"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P34",
+   "titel": "Wind im Hafen spürbar machen",
+   "inhalt": "F5, F35",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F5",
+    "F35"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P35",
+   "titel": "Preisstufe am Hafenbüro",
+   "inhalt": "F6",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F6"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P36",
+   "titel": "Bojenfeld im See",
+   "inhalt": "F10",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F10"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P37",
+   "titel": "Havarist einschleppen",
+   "inhalt": "F11",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F11"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P38",
+   "titel": "Eigenes Hafenfest ansetzen",
+   "inhalt": "F12",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F12"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P39",
+   "titel": "Jugendtraining am Segelclub",
+   "inhalt": "F13",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F13"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P40",
+   "titel": "Seltene Besucher",
+   "inhalt": "F16 (nach P21)",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
+   "punkte": [
+    "F16"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P41",
+   "titel": "Statistik und Saisonbilanz",
+   "inhalt": "F19, F20",
+   "thread": "neu",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F19",
+    "F20"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P42",
+   "titel": "Herausforderungen, Wochenhafen und Hafen als Code",
+   "inhalt": "F21, F41, F42 (nach P09, P45)",
+   "thread": "neu",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F21",
+    "F41",
+    "F42"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P43",
+   "titel": "Fotoaufträge und Postkarten",
+   "inhalt": "F22",
+   "thread": "bestehend: \"Spielschleife zusammenbauen und Vorschläge einbauen\" (Fotomodus)",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F22",
+    "L6"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P44",
+   "titel": "Hafenname und Flagge",
+   "inhalt": "F23, F27 (Auswahl beim Start)",
+   "thread": "neu",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F23",
+    "F27",
+    "C05"
+   ],
+   "status": "teilweise"
+  },
+  {
+   "id": "P45",
+   "titel": "Kreativmodus",
+   "inhalt": "F24",
+   "thread": "neu",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F24",
+    "K7"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P46",
+   "titel": "Ruhiger Abend und Serien-Akkord",
+   "inhalt": "F29, F30",
+   "thread": "bestehend: \"Ton und Musik hinzufügen\"",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F29",
+    "F30",
+    "L1"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P47",
+   "titel": "Große Ankünfte ankündigen",
+   "inhalt": "F31",
+   "thread": "bestehend: \"Kamera frei neigen und drehen\"",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F31"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P48",
+   "titel": "Leinen annehmen beim Anlegen",
+   "inhalt": "F32",
+   "thread": "bestehend: \"Schiffsanimationen umsetzen\"",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F32"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P49",
+   "titel": "Signalflaggen und Hafenwissen",
+   "inhalt": "F33, F34 (nach P21)",
+   "thread": "neu",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F33",
+    "F34"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P50",
+   "titel": "Einstellungen für Sicht und Bewegung",
+   "inhalt": "F25",
+   "thread": "bestehend: \"Gesamte Oberfläche neu überarbeiten\"",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F25",
+    "A7",
+    "Bed P5",
+    "Bed P6"
+   ],
+   "status": "erledigt"
+  },
+  {
+   "id": "P51",
+   "titel": "Hafentiere",
+   "inhalt": "F38",
+   "thread": "bestehend: \"Menschen im Hafen herumlaufen lassen\"",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F38"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P52",
+   "titel": "Naturecke am Schilf",
+   "inhalt": "F39",
+   "thread": "bestehend: \"Landschaft und Wasser gestalten\"",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F39"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P53",
+   "titel": "Spätankömmling in der Nacht",
+   "inhalt": "F40",
+   "thread": "neu",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
+   "punkte": [
+    "F40"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P54",
+   "titel": "Ausfahrende Boote weichen wartenden Booten aus",
+   "inhalt": "Neuer Fehler (Jorven, 12.11.2026): Beim Rausfahren kollidieren Boote mit Booten an der Warteboje und zittern beide, als wollten sie aneinander vorbei. Ausweichen ohne Berührung und ohne Zittern, an Handy und PC prüfen",
+   "thread": "bestehend: \"Schiffsanimationen umsetzen\"",
+   "welle": 1,
+   "prs": [],
+   "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
+   "punkte": [],
+   "status": "entfaellt"
+  },
+  {
+   "id": "P55",
+   "titel": "Versteckte Regeln im Hafen sichtbar machen",
+   "inhalt": "A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen \"hier ist etwas zu tun\"",
+   "thread": "neu",
+   "welle": 2,
+   "prs": [],
+   "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
+   "punkte": [
+    "A4",
+    "B1",
+    "C7",
+    "L2",
+    "Bed P1",
+    "Bed P3",
+    "Bed P10"
+   ],
+   "status": "teilweise"
+  },
+  {
+   "id": "P57",
+   "titel": "Nordsee mit Gezeiten spielbar machen",
+   "inhalt": "Revierfaktoren, Gezeiten, Schleuse, Trockenfallplätze, docs/regionen.md",
+   "thread": "bestehend: \"Hafenregionen Ostsee und Nordsee gestalten\"",
+   "welle": 5,
+   "prs": [
+    177
+   ],
+   "abschnitt": "Welle 5: Regionen und Online (Extras)",
+   "punkte": [
+    "K1",
+    "K2",
+    "K3",
+    "K4",
+    "K5",
+    "K6"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P58",
+   "titel": "Online mit Supabase",
+   "inhalt": "Hafenname, Bestenliste, Gastboote; erst wenn alles lokal fertig ist",
+   "thread": "neu, zuletzt",
+   "welle": 5,
+   "prs": [],
+   "abschnitt": "Welle 5: Regionen und Online (Extras)",
+   "punkte": [
+    "C08"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P59",
+   "titel": "Stege umbauen und Varianten wählen",
+   "inhalt": "D5, D6, D9 (neue Gastplätze in Stufe 6)",
+   "thread": "neu (stimmt sich mit \"Stegbild pro Spiel variieren\" ab)",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
+   "punkte": [
+    "D5",
+    "D6",
+    "D9"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P60",
+   "titel": "Hafen verschönern",
+   "inhalt": "D8",
+   "thread": "neu",
+   "welle": 4,
+   "prs": [],
+   "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
+   "punkte": [
+    "D8"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P61",
+   "titel": "Spiel komplett offline startbar",
+   "inhalt": "N15, N16",
+   "thread": "bestehend: \"Spiel über GitHub Pages veröffentlichen\"",
+   "welle": 2,
+   "prs": [],
+   "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
+   "punkte": [
+    "N15",
+    "N16",
+    "C06"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P62",
+   "titel": "Geländeform und Engpass neu bauen",
+   "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
+   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216): zehn Küstentypen aus Seed; offen: Pflicht-See im Norden verkleinern",
+   "welle": 0,
+   "prs": [
+    179,
+    184,
+    195,
+    204,
+    210,
+    211,
+    216
+   ],
+   "abschnitt": "Pakete der Welle 0",
+   "punkte": [
+    "T3",
+    "T8",
+    "T10"
+   ],
+   "status": "arbeit"
+  },
+  {
+   "id": "P63",
+   "titel": "Marinebasis und Anlagen neu platzieren",
+   "inhalt": "T6, T7, T13: Marinebasis mit Zufahrt von See, Großschiffpier, Services und Bauplätze passend zum neuen Gelände, jede Anlage von Wasser oder Land erreichbar",
+   "thread": "in Arbeit (PR 172): Lage der Anlagen in docs/services.md; Abgleich mit dem Seed-Gelände offen; stimmt sich mit \"Services und Sonderanlagen einbauen\" und \"Stegbild pro Spiel variieren\" ab",
+   "welle": 0,
+   "prs": [
+    172
+   ],
+   "abschnitt": "Pakete der Welle 0",
+   "punkte": [
+    "T6",
+    "T7",
+    "T13"
+   ],
+   "status": "arbeit"
+  },
+  {
+   "id": "P64",
+   "titel": "Gelände abwechslungsreicher gestalten",
+   "inhalt": "T11: Wald, Wiesen, Schilf, Felsen, Höhen, Dorfrand, je nach Stufe und Stegbild; erst nach P62-Grundform",
+   "thread": "in Arbeit (PR 204, 211, 216): Umgebung und Ufer je Küstentyp",
+   "welle": 0,
+   "prs": [
+    204,
+    211,
+    216
+   ],
+   "abschnitt": "Pakete der Welle 0",
+   "punkte": [
+    "T11"
+   ],
+   "status": "arbeit"
+  },
+  {
+   "id": "P65",
+   "titel": "Wetter und Effekte flüssig machen",
+   "inhalt": "T1, T5, T12: Wetter (Regen, Nebel, Sturm, Schnee) ohne Ruckeln, Heckwelle auf beiden Seiten, Effekte ohne Artefakte; Messung je Wetter mit feature-tests/leistung.cjs",
+   "thread": "neu",
+   "welle": 0,
+   "prs": [],
+   "abschnitt": "Pakete der Welle 0",
+   "punkte": [
+    "T1",
+    "T5",
+    "T12"
+   ],
+   "status": "offen"
+  },
+  {
+   "id": "P66",
+   "titel": "Boote ums Gelände herum führen",
+   "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
+   "thread": "in Arbeit (PR 180, 181, 199): Ausweichen über freies Wasser, Fahrwasserkarte; Stau an der Einfahrt offen; übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "welle": 0,
+   "prs": [
+    81,
+    180,
+    181,
+    199
+   ],
+   "abschnitt": "Pakete der Welle 0",
+   "punkte": [
+    "T2",
+    "T3",
+    "T4",
+    "T8",
+    "T9"
+   ],
+   "status": "arbeit"
+  }
+ ],
+ "punkte": [
+  {
+   "code": "Ü1",
+   "text": "Dauerlieger-Pacht reparieren: Fischer 15 €, Dauerlieger 50 % ihres Gastpreises, wie die Karte verspricht",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 149)",
+   "pakete": [
+    "P01"
+   ],
+   "prs": [
+    149
+   ],
+   "abschnitt": "Fehler beheben (Ü1 bis Ü7)"
+  },
+  {
+   "code": "Ü2",
+   "text": "Hafenbüro Stufe 1 einen Nutzen geben (Knopf \"Kassieren\" erst mit Stufe 1 oder andere Wirkung)",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 146): Knopf erst mit Bürostufe 1",
+   "pakete": [
+    "P02"
+   ],
+   "prs": [
+    146
+   ],
+   "abschnitt": "Fehler beheben (Ü1 bis Ü7)"
+  },
+  {
+   "code": "Ü3",
+   "text": "Einstieg neu abstimmen: Schritt 1 ohne Sonne, Schritt 3 \"Liegegeld beim Anlegen\"",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 112)",
+   "pakete": [
+    "P03"
+   ],
+   "prs": [
+    112
+   ],
+   "abschnitt": "Fehler beheben (Ü1 bis Ü7)"
+  },
+  {
+   "code": "Ü4",
+   "text": "Ein Zähler für das Abschlussziel Stufe 6 (Tag der offenen Tür zählt mit)",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 139): eine Liste GROSSSCHIFF_BESUCHE in data/services.js, ein Zähler state.bigVisits; der Tag der offenen Tür gehört zum Flottenbesuch des Stützpunkts",
+   "pakete": [
+    "P04"
+   ],
+   "prs": [
+    139
+   ],
+   "abschnitt": "Fehler beheben (Ü1 bis Ü7)"
+  },
+  {
+   "code": "Ü5",
+   "text": "Boote auf wegfallenden Plätzen beim Stufenausbau regeln (B01, B02 in Stufe 3, T-Kopf Steg B): Gäste reisen erst ab, Dauerlieger ziehen samt Dauerplatz um",
+   "status": "erledigt",
+   "statusText": "erledigt (sim.js advanceStage, Hook stageUp, Test in tests/dauerlieger.test.mjs)",
+   "pakete": [
+    "P05"
+   ],
+   "prs": [],
+   "abschnitt": "Fehler beheben (Ü1 bis Ü7)"
+  },
+  {
+   "code": "Ü6",
+   "text": "Regeltests gegen die echten Zahlen: gemeinsamer Helfer mit rulesFromEconomy(ECONOMY)",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "Fehler beheben (Ü1 bis Ü7)"
+  },
+  {
+   "code": "Ü7",
+   "text": "Tempo und Hilfetexte vereinheitlichen (Knöpfe, Taste F, Plan, PC-Hilfe)",
+   "status": "erledigt",
+   "statusText": "erledigt, Jorven bestätigt \"Tempo so bleiben\" (Taste F = 3x über die Tempo-Knöpfe, PC-Hilfe, Kommentare und Doku ohne Sonne, plan.md 3 und 14); Einstieg-Texte in P03",
+   "pakete": [
+    "P07"
+   ],
+   "prs": [],
+   "abschnitt": "Fehler beheben (Ü1 bis Ü7)"
+  },
+  {
+   "code": "Ü8",
+   "text": "Selbst-Einfahren weniger klug: die nächste oder eine der freien Boxen am Steg, auch eine zu große, damit Umlenken lohnt; Boote berühren sich dabei nie",
+   "status": "teilweise",
+   "statusText": "Regel erledigt (sim.js selfBerth: nächste Box ab Warteboje, eins nach dem anderen); Abstand und Ausweichen bei den Schiffsanimationen offen",
+   "pakete": [
+    "P10"
+   ],
+   "prs": [],
+   "abschnitt": "Kernschleife (Ü8 bis Ü14)"
+  },
+  {
+   "code": "Ü9",
+   "text": "Wunschplätze beim Zuweisen in Gold zeigen (Strom, Fingersteg)",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 153: gold mit Stern, game.sim.wunschPlaetze)",
+   "pakete": [
+    "P10"
+   ],
+   "prs": [
+    153
+   ],
+   "abschnitt": "Kernschleife (Ü8 bis Ü14)"
+  },
+  {
+   "code": "Ü10",
+   "text": "Wünsche als Symbole über wartenden Booten, drei Umrisse für die nächsten Ankünfte (sim.preview())",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 158, vorschau.md)",
+   "pakete": [
+    "P11"
+   ],
+   "prs": [
+    158
+   ],
+   "abschnitt": "Kernschleife (Ü8 bis Ü14)"
+  },
+  {
+   "code": "Ü11",
+   "text": "Hafenbüro lässt Sonderfälle beim Spieler (Mehrrumpf, XL, Sondergäste, nur ein passender Platz), wie plan.md Abschnitt 3 und 14",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 146)",
+   "pakete": [
+    "P02"
+   ],
+   "prs": [
+    146
+   ],
+   "abschnitt": "Kernschleife (Ü8 bis Ü14)"
+  },
+  {
+   "code": "Ü12",
+   "text": "Kassieren verständlich: Rundgang erst mit dem Abend, Einstieg erklärt die Hälfte, halbe Münze sieht anders aus",
+   "status": "teilweise",
+   "statusText": "erledigt bis auf den Einstieg-Text (P03): Rundgang ab Abend, bringt vier Fünftel (B4), Münze wird dabei silbern mit „18 € statt 22 €“",
+   "pakete": [
+    "P12"
+   ],
+   "prs": [],
+   "abschnitt": "Kernschleife (Ü8 bis Ü14)"
+  },
+  {
+   "code": "Ü13",
+   "text": "Abweisen von Hand und Wegfahren aus Ungeduld mit derselben Folge",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 153, turnAwayRating)",
+   "pakete": [
+    "P10"
+   ],
+   "prs": [
+    153
+   ],
+   "abschnitt": "Kernschleife (Ü8 bis Ü14)"
+  },
+  {
+   "code": "Ü14",
+   "text": "Tagesziele zählen nur eigene Handlungen, kombinierte Ziele, Ruf als Belohnung (plan.md 9a)",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 152)",
+   "pakete": [
+    "P13"
+   ],
+   "prs": [
+    152
+   ],
+   "abschnitt": "Kernschleife (Ü8 bis Ü14)"
+  },
+  {
+   "code": "Ü15",
+   "text": "Weicher Start: 100 € Startgeld oder geschenktes WC",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P17"
+   ],
+   "prs": [],
+   "abschnitt": "Balancing (Ü15 bis Ü20)"
+  },
+  {
+   "code": "Ü16",
+   "text": "Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P17"
+   ],
+   "prs": [],
+   "abschnitt": "Balancing (Ü15 bis Ü20)"
+  },
+  {
+   "code": "Ü17",
+   "text": "Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus data/boats, spürbare Kapazität",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P19"
+   ],
+   "prs": [],
+   "abschnitt": "Balancing (Ü15 bis Ü20)"
+  },
+  {
+   "code": "Ü18",
+   "text": "Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P18"
+   ],
+   "prs": [],
+   "abschnitt": "Balancing (Ü15 bis Ü20)"
+  },
+  {
+   "code": "Ü19",
+   "text": "Winter nutzen: Zeitraffer vor Stufe 4 oder Winterarbeiten (F14)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P20"
+   ],
+   "prs": [],
+   "abschnitt": "Balancing (Ü15 bis Ü20)"
+  },
+  {
+   "code": "Ü20",
+   "text": "Dauerlieger als Entscheidung: Spieler legt fest, welche Boxen Dauerplätze sind (höchstens ein Viertel der Gastboxen), Saisonpacht im Voraus, sichere Einnahme bei Sturm",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 149)",
+   "pakete": [
+    "P01"
+   ],
+   "prs": [
+    149
+   ],
+   "abschnitt": "Balancing (Ü15 bis Ü20)"
+  },
+  {
+   "code": "Ü21",
+   "text": "Bewertung beim Ablegen über dem Boot zeigen, bei schlechter Note mit Symbol des fehlenden Wunsches",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P14"
+   ],
+   "prs": [],
+   "abschnitt": "Rückmeldung (Ü21 bis Ü23)"
+  },
+  {
+   "code": "Ü22",
+   "text": "Tagesabschluss am Abend: Liegegeld, Services, Pacht, Tagesziele, weggefahrene Boote, bester Tag",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 159): Karte am Tagesende, Verlauf 30 Tage, docs/tagesabschluss.md",
+   "pakete": [
+    "P15"
+   ],
+   "prs": [
+    159
+   ],
+   "abschnitt": "Rückmeldung (Ü21 bis Ü23)"
+  },
+  {
+   "code": "Ü23",
+   "text": "Aufstieg und Regionsabschluss feiern: Kamerafahrt, Zahlen der Stufe, \"Weiterspielen\"",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 156)",
+   "pakete": [
+    "P16"
+   ],
+   "prs": [
+    156
+   ],
+   "abschnitt": "Rückmeldung (Ü21 bis Ü23)"
+  },
+  {
+   "code": "Ü24",
+   "text": "Eine Quelle für alle Zahlen: alles nach economy.js, Rest löschen (data/rules.js alte Werte, services.js-Mischung, events.js gegen ECONOMY.ereignisse, Feature-Dateien). Fehler sturmschutz: true trifft auf Code, der eine Zahl erwartet",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "Aufräumen (Ü24, Ü25)"
+  },
+  {
+   "code": "Ü25",
+   "text": "Ein Speicherweg und \"Neues Spiel\" (newGame() gibt es), mehrere Speicherplätze",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P09"
+   ],
+   "prs": [],
+   "abschnitt": "Aufräumen (Ü24, Ü25)"
+  },
+  {
+   "code": "F1",
+   "text": "Päckchen liegen: bei vollem Hafen längsseits an ein gleich großes Boot, halbes Liegegeld, beide Crews einen halben Anker schlechter",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P27"
+   ],
+   "prs": [],
+   "abschnitt": "Kernspiel"
+  },
+  {
+   "code": "F2",
+   "text": "Anmeldung per Funk: morgens melden sich ein bis zwei Boote an, Platz freihalten gibt Bonus",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P28"
+   ],
+   "prs": [],
+   "abschnitt": "Kernspiel"
+  },
+  {
+   "code": "F3",
+   "text": "Flottillen: drei bis fünf Boote wollen am selben Steg liegen (Feld group)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P32"
+   ],
+   "prs": [],
+   "abschnitt": "Kernspiel"
+  },
+  {
+   "code": "F4",
+   "text": "Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P33"
+   ],
+   "prs": [],
+   "abschnitt": "Kernspiel"
+  },
+  {
+   "code": "F5",
+   "text": "Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld exposed)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P34"
+   ],
+   "prs": [],
+   "abschnitt": "Kernspiel"
+  },
+  {
+   "code": "F6",
+   "text": "Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P35"
+   ],
+   "prs": [],
+   "abschnitt": "Kernspiel"
+  },
+  {
+   "code": "F7",
+   "text": "Baggern: Wassertiefe je Steg als Bauprojekt",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P29"
+   ],
+   "prs": [],
+   "abschnitt": "Kernspiel"
+  },
+  {
+   "code": "F8",
+   "text": "Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P30"
+   ],
+   "prs": [],
+   "abschnitt": "Kernspiel"
+  },
+  {
+   "code": "F9",
+   "text": "Neue Wünsche: WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P31"
+   ],
+   "prs": [],
+   "abschnitt": "Kernspiel"
+  },
+  {
+   "code": "F10",
+   "text": "Bojenfeld: billige Muringbojen im See für kleine Boote ohne Wünsche",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P36"
+   ],
+   "prs": [],
+   "abschnitt": "Kernspiel"
+  },
+  {
+   "code": "F11",
+   "text": "Havarist wird eingeschleppt, braucht sofort einen Platz, Ruf und neuer Stammgast",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P37"
+   ],
+   "prs": [],
+   "abschnitt": "Hafenleben"
+  },
+  {
+   "code": "F12",
+   "text": "Eigenes Hafenfest einmal pro Saison ansetzen",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P38"
+   ],
+   "prs": [],
+   "abschnitt": "Hafenleben"
+  },
+  {
+   "code": "F13",
+   "text": "Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P39"
+   ],
+   "prs": [],
+   "abschnitt": "Hafenleben"
+  },
+  {
+   "code": "F14",
+   "text": "Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P20"
+   ],
+   "prs": [],
+   "abschnitt": "Hafenleben"
+  },
+  {
+   "code": "F15",
+   "text": "Krantage: Dauerlieger sichtbar ins Winterlager und zurück",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P20"
+   ],
+   "prs": [],
+   "abschnitt": "Hafenleben"
+  },
+  {
+   "code": "F16",
+   "text": "Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P40"
+   ],
+   "prs": [],
+   "abschnitt": "Hafenleben"
+  },
+  {
+   "code": "F17",
+   "text": "Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P24"
+   ],
+   "prs": [],
+   "abschnitt": "Hafenleben"
+  },
+  {
+   "code": "F18",
+   "text": "Gästebuch: letzte 20 Bewertungen am Hafenbüro",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P14"
+   ],
+   "prs": [],
+   "abschnitt": "Langzeit"
+  },
+  {
+   "code": "F19",
+   "text": "Statistikseite: Belegung und Einnahmen der letzten 30 Tage, Einnahmen nach Quelle",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P41"
+   ],
+   "prs": [],
+   "abschnitt": "Langzeit"
+  },
+  {
+   "code": "F20",
+   "text": "Saisonbilanz nach dem Winter",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P41"
+   ],
+   "prs": [],
+   "abschnitt": "Langzeit"
+  },
+  {
+   "code": "F21",
+   "text": "Herausforderungen mit Seed (nur Segler, kein Hafenbüro, doppelte Ankünfte)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P42"
+   ],
+   "prs": [],
+   "abschnitt": "Langzeit"
+  },
+  {
+   "code": "F22",
+   "text": "Fotoaufträge und Postkarte",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P43"
+   ],
+   "prs": [],
+   "abschnitt": "Langzeit"
+  },
+  {
+   "code": "F23",
+   "text": "Hafenname und Flagge, sichtbar an Einfahrt und Mast",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P44"
+   ],
+   "prs": [],
+   "abschnitt": "Langzeit"
+  },
+  {
+   "code": "F24",
+   "text": "Kreativmodus als eigener Spielstand",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P45"
+   ],
+   "prs": [],
+   "abschnitt": "Langzeit"
+  },
+  {
+   "code": "F25",
+   "text": "Einstellungen: Schilder auch über die Form, weniger Bewegung, größere Schrift, Linkshänder am Handy",
+   "status": "erledigt",
+   "statusText": "erledigt (Menü, Einstellungen; docs/ui/oberflaeche.md)",
+   "pakete": [
+    "P50"
+   ],
+   "prs": [],
+   "abschnitt": "Langzeit"
+  },
+  {
+   "code": "F26",
+   "text": "Mehrere Speicherplätze: wechseln, neu, überschreiben, kopieren, umbenennen, löschen, als Datei",
+   "status": "erledigt",
+   "statusText": "erledigt (bis 8 Plätze, Papierkorb, Gesamtdatei)",
+   "pakete": [
+    "P09"
+   ],
+   "prs": [],
+   "abschnitt": "Spielstände"
+  },
+  {
+   "code": "F27",
+   "text": "Neues Spiel mit Auswahl: Hafenname, Stegbild, später Herausforderung oder Revier",
+   "status": "erledigt",
+   "statusText": "erledigt für Name, Stegbild, Küste, Einführung; Herausforderung und Revier folgen",
+   "pakete": [
+    "P09",
+    "P44"
+   ],
+   "prs": [],
+   "abschnitt": "Spielstände"
+  },
+  {
+   "code": "F28",
+   "text": "Probe-Kopie für teure Ausbauten",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P09"
+   ],
+   "prs": [],
+   "abschnitt": "Spielstände"
+  },
+  {
+   "code": "F29",
+   "text": "Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P46"
+   ],
+   "prs": [],
+   "abschnitt": "Spielgefühl"
+  },
+  {
+   "code": "F30",
+   "text": "Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P46"
+   ],
+   "prs": [],
+   "abschnitt": "Spielgefühl"
+  },
+  {
+   "code": "F31",
+   "text": "Große Ankünfte mit Horn, Kamera schwenkt auf Wunsch zur Einfahrt",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P47"
+   ],
+   "prs": [],
+   "abschnitt": "Spielgefühl"
+  },
+  {
+   "code": "F32",
+   "text": "Leinen annehmen: Symbol am Steg, Antippen bringt Trinkgeld",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P48"
+   ],
+   "prs": [],
+   "abschnitt": "Spielgefühl"
+  },
+  {
+   "code": "F33",
+   "text": "Signalflaggen als Wunschanzeige, Lexikon im Logbuch",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P49"
+   ],
+   "prs": [],
+   "abschnitt": "Seemannschaft"
+  },
+  {
+   "code": "F34",
+   "text": "Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P49"
+   ],
+   "prs": [],
+   "abschnitt": "Seemannschaft"
+  },
+  {
+   "code": "F35",
+   "text": "Wind beim Anlegen: große Boote brauchen länger, bevorzugen Plätze gegen den Wind",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P34"
+   ],
+   "prs": [],
+   "abschnitt": "Seemannschaft"
+  },
+  {
+   "code": "F36",
+   "text": "Hafenchronik: jeder Tag eine Zeile",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P21"
+   ],
+   "prs": [],
+   "abschnitt": "Geschichten"
+  },
+  {
+   "code": "F37",
+   "text": "Gästepost von Stammgästen, hängt im Hafenbüro",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P25"
+   ],
+   "prs": [],
+   "abschnitt": "Geschichten"
+  },
+  {
+   "code": "F38",
+   "text": "Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P51"
+   ],
+   "prs": [],
+   "abschnitt": "Geschichten"
+  },
+  {
+   "code": "F39",
+   "text": "Naturecke: Schilfgürtel erhalten oder bebauen, nicht umkehrbar",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P52"
+   ],
+   "prs": [],
+   "abschnitt": "Welt"
+  },
+  {
+   "code": "F40",
+   "text": "Spätankömmling: nachts läuft ein Boot mit Lichtern ein",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P53"
+   ],
+   "prs": [],
+   "abschnitt": "Welt"
+  },
+  {
+   "code": "F41",
+   "text": "Hafen als Code: Startwert, Stegbild, Ausbau als kurzer Code, Ansicht im Kreativmodus",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P42"
+   ],
+   "prs": [],
+   "abschnitt": "Teilen ohne Server"
+  },
+  {
+   "code": "F42",
+   "text": "Wochenhafen: fester Startwert je Kalenderwoche, 30 Tage, Ergebniskarte als Bild",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P42"
+   ],
+   "prs": [],
+   "abschnitt": "Teilen ohne Server"
+  },
+  {
+   "code": "A1",
+   "text": "Selbst einfahrende Gäste nehmen die nächste freie Box am Steg, auch zu große",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 147, PR 176 bevorzugt Wunschplätze)",
+   "pakete": [
+    "P10"
+   ],
+   "prs": [
+    147,
+    176
+   ],
+   "abschnitt": "A Ankunft, Warten und Zuweisen"
+  },
+  {
+   "code": "A2",
+   "text": "\"Einfahren\" ohne Hafenbüro nimmt irgendeinen passenden Platz, den besten kennt erst das Büro",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 146)",
+   "pakete": [
+    "P02"
+   ],
+   "prs": [
+    146
+   ],
+   "abschnitt": "A Ankunft, Warten und Zuweisen"
+  },
+  {
+   "code": "A3",
+   "text": "Platzwert beim Ziehen: Liegegeld mit Wunschbonus, erwartete Anker, Wunschplätze gold",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 153, game.sim.platzWert)",
+   "pakete": [
+    "P10"
+   ],
+   "prs": [
+    153
+   ],
+   "abschnitt": "A Ankunft, Warten und Zuweisen"
+  },
+  {
+   "code": "A4",
+   "text": "Geduld sichtbar: Ring an der Boje, im letzten Drittel Flagge oder kurzes Tuten",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P55"
+   ],
+   "prs": [],
+   "abschnitt": "A Ankunft, Warten und Zuweisen"
+  },
+  {
+   "code": "A5",
+   "text": "Vorschau: drei Bootsumrisse mit Größe und Uhrzeit, als \"Funkgerät\" Wirkung der ersten Bürostufe",
+   "status": "erledigt",
+   "statusText": "Freischaltung erledigt (PR 146, rules.office.preview), Anzeige erledigt (PR 158)",
+   "pakete": [
+    "P11",
+    "P02"
+   ],
+   "prs": [
+    146,
+    158
+   ],
+   "abschnitt": "A Ankunft, Warten und Zuweisen"
+  },
+  {
+   "code": "A6",
+   "text": "Passgenau belohnen: Bonus, wenn die Box höchstens ein Fünftel größer ist",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 153, ECONOMY.passgenau, ab Stufe 2)",
+   "pakete": [
+    "P10"
+   ],
+   "prs": [
+    153
+   ],
+   "abschnitt": "A Ankunft, Warten und Zuweisen"
+  },
+  {
+   "code": "A7",
+   "text": "Selbst-Einfahren einstellbar: schnell, langsam, aus",
+   "status": "erledigt",
+   "statusText": "erledigt (Einstellungen: Normal 8 s, Langsam 20 s, Nie)",
+   "pakete": [
+    "P50"
+   ],
+   "prs": [],
+   "abschnitt": "A Ankunft, Warten und Zuweisen"
+  },
+  {
+   "code": "A8",
+   "text": "Abweisen und Wegfahren angleichen (= Ü13)",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 153)",
+   "pakete": [
+    "P10"
+   ],
+   "prs": [
+    153
+   ],
+   "abschnitt": "A Ankunft, Warten und Zuweisen"
+  },
+  {
+   "code": "A9",
+   "text": "Bojenlieger über Nacht zahlen wenig und werden morgens zuerst bedient",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 153, ECONOMY.warten.bojengeld)",
+   "pakete": [
+    "P10"
+   ],
+   "prs": [
+    153
+   ],
+   "abschnitt": "A Ankunft, Warten und Zuweisen"
+  },
+  {
+   "code": "A10",
+   "text": "Größenmischung je Stufe: an vollen Tagen ein bis zwei große Boote zu viel",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P17"
+   ],
+   "prs": [],
+   "abschnitt": "A Ankunft, Warten und Zuweisen"
+  },
+  {
+   "code": "B1",
+   "text": "Auslastung an jedem Versorgungsgebäude (\"14 von 20\"), Schlange vor der Dusche",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P55"
+   ],
+   "prs": [],
+   "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
+  },
+  {
+   "code": "B2",
+   "text": "Wunschsymbole über dem Boot, beim Anlegen Haken oder grau",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 158)",
+   "pakete": [
+    "P11"
+   ],
+   "prs": [
+    158
+   ],
+   "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
+  },
+  {
+   "code": "B3",
+   "text": "Münze nennt ihren Wert (\"22 € + 11 €\")",
+   "status": "erledigt",
+   "statusText": "erledigt (render/boat-view.js, feeReady mit base, bonus)",
+   "pakete": [
+    "P12"
+   ],
+   "prs": [],
+   "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
+  },
+  {
+   "code": "B4",
+   "text": "Rundgang als Helfer: erst abends, nur vergessene Münzen, etwa vier Fünftel statt der Hälfte",
+   "status": "erledigt",
+   "statusText": "erledigt (ECONOMY.kassieren.rundgangAnteil 0,8, gilt auch nachts)",
+   "pakete": [
+    "P12"
+   ],
+   "prs": [],
+   "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
+  },
+  {
+   "code": "B5",
+   "text": "Langen Kassierstrich mit Trinkgeld belohnen; Knopf \"Kassieren\" erst mit Hafenbüro",
+   "status": "erledigt",
+   "statusText": "erledigt: Strich-Trinkgeld (PR 151, sim:strokeTip), Knopf (PR 146)",
+   "pakete": [
+    "P12",
+    "P02"
+   ],
+   "prs": [
+    146,
+    151
+   ],
+   "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
+  },
+  {
+   "code": "B6",
+   "text": "Mehrere Nächte beim Anlegen auf einmal zahlen",
+   "status": "erledigt",
+   "statusText": "erledigt (ECONOMY.kassieren.vorausNaechte, boat.paidThrough, größere Münze)",
+   "pakete": [
+    "P12"
+   ],
+   "prs": [],
+   "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
+  },
+  {
+   "code": "B7",
+   "text": "Wünsche je Bootsart aus den Bootsdaten nutzen",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P19"
+   ],
+   "prs": [],
+   "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
+  },
+  {
+   "code": "B8",
+   "text": "Neue Wünsche in späten Stufen, je Stufe mindestens einer (= F9)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P31"
+   ],
+   "prs": [],
+   "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
+  },
+  {
+   "code": "B9",
+   "text": "Wege zählen: weit vom Sanitärhaus zählt die Dusche halb",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P19"
+   ],
+   "prs": [],
+   "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
+  },
+  {
+   "code": "B10",
+   "text": "Liegegeld nach Länge statt fest je Größe",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P17"
+   ],
+   "prs": [],
+   "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
+  },
+  {
+   "code": "B11",
+   "text": "Bezahlt-Zeichen am Bug",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 131)",
+   "pakete": [],
+   "prs": [
+    131
+   ],
+   "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
+  },
+  {
+   "code": "C1",
+   "text": "Bewertung beim Ablegen zeigen (= Ü21)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P14"
+   ],
+   "prs": [],
+   "abschnitt": "C Ruf und Bewertung"
+  },
+  {
+   "code": "C2",
+   "text": "Ruf als Schnitt der letzten drei Tage statt 20 Bewertungen",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P19"
+   ],
+   "prs": [],
+   "abschnitt": "C Ruf und Bewertung"
+  },
+  {
+   "code": "C3",
+   "text": "Service-Bonus als Extra-Wünsche statt Aufschlag auf jede Bewertung",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P19"
+   ],
+   "prs": [],
+   "abschnitt": "C Ruf und Bewertung"
+  },
+  {
+   "code": "C4",
+   "text": "Gäste ohne Wünsche geben 4,5, der Platz entscheidet über den Rest",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P19"
+   ],
+   "prs": [],
+   "abschnitt": "C Ruf und Bewertung"
+  },
+  {
+   "code": "C5",
+   "text": "Ruf als Auszeichnung mit Namen und Zeichen im Hafen",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P19"
+   ],
+   "prs": [],
+   "abschnitt": "C Ruf und Bewertung"
+  },
+  {
+   "code": "C6",
+   "text": "Ruf lockt andere Gäste (ab 4 große Yachten, ab 4,5 seltene Modelle)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P19"
+   ],
+   "prs": [],
+   "abschnitt": "C Ruf und Bewertung"
+  },
+  {
+   "code": "C7",
+   "text": "Warnen, bevor es Anker kostet (Gebäude blinkt bei fast ausgebuchter Dusche)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P55"
+   ],
+   "prs": [],
+   "abschnitt": "C Ruf und Bewertung"
+  },
+  {
+   "code": "C8",
+   "text": "Stammgäste zählen beim Ruf doppelt",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P25"
+   ],
+   "prs": [],
+   "abschnitt": "C Ruf und Bewertung"
+  },
+  {
+   "code": "C9",
+   "text": "Ruf-Verlauf mit den drei häufigsten Gründen für schlechte Noten",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P14"
+   ],
+   "prs": [],
+   "abschnitt": "C Ruf und Bewertung"
+  },
+  {
+   "code": "D1",
+   "text": "Ausbau in Bauabschnitten (= Ü18)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P18"
+   ],
+   "prs": [],
+   "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
+  },
+  {
+   "code": "D2",
+   "text": "Über Nacht gebaut: abends Baustelle, morgens fertig",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P18"
+   ],
+   "prs": [],
+   "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
+  },
+  {
+   "code": "D3",
+   "text": "Frühe Stufen kürzen (= Ü16)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P17"
+   ],
+   "prs": [],
+   "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
+  },
+  {
+   "code": "D4",
+   "text": "Wegfallende Plätze regeln (= Ü5), Hinweis im Baumenü",
+   "status": "teilweise",
+   "statusText": "Regel erledigt (PR 143); Daten für den Hinweis liefert game.sim.stageUpPreview(), Anzeige im Baumenü offen",
+   "pakete": [
+    "P05",
+    "P18"
+   ],
+   "prs": [
+    143
+   ],
+   "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
+  },
+  {
+   "code": "D5",
+   "text": "Zwei Varianten je Steg (viele schmale oder wenige breite Boxen)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P59"
+   ],
+   "prs": [],
+   "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
+  },
+  {
+   "code": "D6",
+   "text": "Boxen umbauen (zwei schmale zu einer breiten)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P59"
+   ],
+   "prs": [],
+   "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
+  },
+  {
+   "code": "D7",
+   "text": "Sparziel anheften, Balken neben dem Geld, Schild am Bauplatz",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P18"
+   ],
+   "prs": [],
+   "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
+  },
+  {
+   "code": "D8",
+   "text": "Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P60"
+   ],
+   "prs": [],
+   "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
+  },
+  {
+   "code": "D9",
+   "text": "Neue Gastplätze in Stufe 6 (Superyacht-Steg oder Stadtkai)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P59"
+   ],
+   "prs": [],
+   "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
+  },
+  {
+   "code": "D10",
+   "text": "Stufenaufstieg feiern (= Ü23)",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 156)",
+   "pakete": [
+    "P16"
+   ],
+   "prs": [
+    156
+   ],
+   "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
+  },
+  {
+   "code": "E1",
+   "text": "Stufe 1 wird das Funkgerät: Vorschau und Knopf \"Kassieren\"",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 146), Vorschau-Anzeige mit P11",
+   "pakete": [
+    "P02"
+   ],
+   "prs": [
+    146
+   ],
+   "abschnitt": "E Hafenbüro und Automatik"
+  },
+  {
+   "code": "E2",
+   "text": "Kassenautomat nur für S und M, L und XL persönlich mit Trinkgeld",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 146)",
+   "pakete": [
+    "P02"
+   ],
+   "prs": [
+    146
+   ],
+   "abschnitt": "E Hafenbüro und Automatik"
+  },
+  {
+   "code": "E3",
+   "text": "Büro schlägt vor (gold), Spieler bestätigt; erst später volle Automatik",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 146)",
+   "pakete": [
+    "P02"
+   ],
+   "prs": [
+    146
+   ],
+   "abschnitt": "E Hafenbüro und Automatik"
+  },
+  {
+   "code": "E4",
+   "text": "Sonderfälle bleiben Handarbeit (= Ü11)",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 146)",
+   "pakete": [
+    "P02"
+   ],
+   "prs": [
+    146
+   ],
+   "abschnitt": "E Hafenbüro und Automatik"
+  },
+  {
+   "code": "E5",
+   "text": "Automatik je Größenklasse an oder aus",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 146)",
+   "pakete": [
+    "P02"
+   ],
+   "prs": [
+    146
+   ],
+   "abschnitt": "E Hafenbüro und Automatik"
+  },
+  {
+   "code": "E6",
+   "text": "Von Hand eingewiesene Gäste geben einen Viertelanker mehr",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 146)",
+   "pakete": [
+    "P02"
+   ],
+   "prs": [
+    146
+   ],
+   "abschnitt": "E Hafenbüro und Automatik"
+  },
+  {
+   "code": "E7",
+   "text": "Volle Automatik erst ab Hafenstufe 4 und teurer",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 146)",
+   "pakete": [
+    "P02"
+   ],
+   "prs": [
+    146
+   ],
+   "abschnitt": "E Hafenbüro und Automatik"
+  },
+  {
+   "code": "E8",
+   "text": "Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste)",
+   "status": "offen",
+   "statusText": "offen, kommt mit P28, P37, P38",
+   "pakete": [
+    "P02"
+   ],
+   "prs": [],
+   "abschnitt": "E Hafenbüro und Automatik"
+  },
+  {
+   "code": "Svc F1",
+   "text": "Eine Liste, klare Stufennamen",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "F Services und Angebote (hier \"Svc\")"
+  },
+  {
+   "code": "Svc F2",
+   "text": "Jeder Service ändert das Spiel (Slip, Mastenkran, Fahrradverleih, Räucherei, Werft)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P23"
+   ],
+   "prs": [],
+   "abschnitt": "F Services und Angebote (hier \"Svc\")"
+  },
+  {
+   "code": "Svc F3",
+   "text": "Entweder-oder-Bauplätze (Café oder Eisdiele, Werfthalle oder Winterhalle)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P23"
+   ],
+   "prs": [],
+   "abschnitt": "F Services und Angebote (hier \"Svc\")"
+  },
+  {
+   "code": "Svc F4",
+   "text": "Einnahmen zeigen: Münzen über Gebäuden, Tagesabschluss je Quelle",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 159)",
+   "pakete": [
+    "P15"
+   ],
+   "prs": [
+    159
+   ],
+   "abschnitt": "F Services und Angebote (hier \"Svc\")"
+  },
+  {
+   "code": "Svc F5",
+   "text": "Auslastung statt Festbetrag",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P23"
+   ],
+   "prs": [],
+   "abschnitt": "F Services und Angebote (hier \"Svc\")"
+  },
+  {
+   "code": "Svc F6",
+   "text": "Abschlussziel reparieren, Stützpunkt bringt mehr Besuche (= Ü4)",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 139): ein Zähler; Stützpunkt Flottenbesuch alle 6 statt 10 Tage, mit Tag der offenen Tür",
+   "pakete": [
+    "P04"
+   ],
+   "prs": [
+    139
+   ],
+   "abschnitt": "F Services und Angebote (hier \"Svc\")"
+  },
+  {
+   "code": "Svc F7",
+   "text": "Große Schiffe als Ereignis mit Tagesgästen",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P23"
+   ],
+   "prs": [],
+   "abschnitt": "F Services und Angebote (hier \"Svc\")"
+  },
+  {
+   "code": "Svc F8",
+   "text": "Mindestruf mit Sinn oder weg",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P19"
+   ],
+   "prs": [],
+   "abschnitt": "F Services und Angebote (hier \"Svc\")"
+  },
+  {
+   "code": "Svc F9",
+   "text": "Service-Karte mit Bilanz (verdient, bezahlt sich in n Tagen)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P23"
+   ],
+   "prs": [],
+   "abschnitt": "F Services und Angebote (hier \"Svc\")"
+  },
+  {
+   "code": "G1",
+   "text": "Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P24"
+   ],
+   "prs": [],
+   "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
+  },
+  {
+   "code": "G2",
+   "text": "Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P24"
+   ],
+   "prs": [],
+   "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
+  },
+  {
+   "code": "G3",
+   "text": "Ereignisse mit Nachspiel",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P24"
+   ],
+   "prs": [],
+   "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
+  },
+  {
+   "code": "G4",
+   "text": "Winter als Planungsbild (Bilanz, Winterarbeiten, Verträge)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P20"
+   ],
+   "prs": [],
+   "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
+  },
+  {
+   "code": "G5",
+   "text": "Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P20"
+   ],
+   "prs": [],
+   "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
+  },
+  {
+   "code": "G6",
+   "text": "Ergebnis eines Ereignisses am Abend zeigen",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P24"
+   ],
+   "prs": [],
+   "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
+  },
+  {
+   "code": "G7",
+   "text": "Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P24"
+   ],
+   "prs": [],
+   "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
+  },
+  {
+   "code": "G8",
+   "text": "Eine Zahlenliste für Ereignisse",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
+  },
+  {
+   "code": "G9",
+   "text": "Seltene große Tage, z. B. Hanse-Woche, zehn Tage vorher angekündigt",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P24"
+   ],
+   "prs": [],
+   "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
+  },
+  {
+   "code": "H1",
+   "text": "Pacht nach Bootsgröße (= Ü1)",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 149)",
+   "pakete": [
+    "P01"
+   ],
+   "prs": [
+    149
+   ],
+   "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
+  },
+  {
+   "code": "H2",
+   "text": "Saisonvertrag im Voraus",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 149)",
+   "pakete": [
+    "P01"
+   ],
+   "prs": [
+    149
+   ],
+   "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
+  },
+  {
+   "code": "H3",
+   "text": "Bewerber statt Verwandlung: Stammgäste und Einheimische fragen an",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 149)",
+   "pakete": [
+    "P01"
+   ],
+   "prs": [
+    149
+   ],
+   "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
+  },
+  {
+   "code": "H4",
+   "text": "Obergrenze ein Viertel der Plätze",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 149)",
+   "pakete": [
+    "P01"
+   ],
+   "prs": [
+    149
+   ],
+   "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
+  },
+  {
+   "code": "H5",
+   "text": "Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P20"
+   ],
+   "prs": [],
+   "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
+  },
+  {
+   "code": "H6",
+   "text": "Lieblingsplatz eines Stammgasts",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P25"
+   ],
+   "prs": [],
+   "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
+  },
+  {
+   "code": "H7",
+   "text": "Sichtbare Treue: Wimpel je fünf Besuche",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P25"
+   ],
+   "prs": [],
+   "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
+  },
+  {
+   "code": "H8",
+   "text": "Stammgäste wachsen mit (Wünsche, größeres Boot)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P25"
+   ],
+   "prs": [],
+   "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
+  },
+  {
+   "code": "H9",
+   "text": "Leere Box während eines Tagestörns für einen Tagesgast",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P25"
+   ],
+   "prs": [],
+   "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
+  },
+  {
+   "code": "H10",
+   "text": "Dauerlieger vor Vertragsende kündigen kostet",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 149)",
+   "pakete": [
+    "P01"
+   ],
+   "prs": [
+    149
+   ],
+   "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
+  },
+  {
+   "code": "I1",
+   "text": "Ziele verlangen eine Handlung (= Ü14)",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 152)",
+   "pakete": [
+    "P13"
+   ],
+   "prs": [
+    152
+   ],
+   "abschnitt": "I Tagesziele, Logbuch, Abschluss und Endlosspiel"
+  },
+  {
+   "code": "I2",
+   "text": "Eines aus dreien wählen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 152)",
+   "pakete": [
+    "P13"
+   ],
+   "prs": [
+    152
+   ],
+   "abschnitt": "I Tagesziele, Logbuch, Abschluss und Endlosspiel"
+  },
+  {
+   "code": "I3",
+   "text": "Belohnungen mischen (Geld, Anker, seltener Gast, Rabatt, Deko)",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 152)",
+   "pakete": [
+    "P13"
+   ],
+   "prs": [
+    152
+   ],
+   "abschnitt": "I Tagesziele, Logbuch, Abschluss und Endlosspiel"
+  },
+  {
+   "code": "I4",
+   "text": "Wochenziel",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 152)",
+   "pakete": [
+    "P13"
+   ],
+   "prs": [
+    152
+   ],
+   "abschnitt": "I Tagesziele, Logbuch, Abschluss und Endlosspiel"
+  },
+  {
+   "code": "I5",
+   "text": "Logbuch als Sammelalbum mit Schattenrissen",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P21"
+   ],
+   "prs": [],
+   "abschnitt": "I Tagesziele, Logbuch, Abschluss und Endlosspiel"
+  },
+  {
+   "code": "I6",
+   "text": "Erfolge als Dinge im Hafen (Pokal, Wimpel, Schild)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P22"
+   ],
+   "prs": [],
+   "abschnitt": "I Tagesziele, Logbuch, Abschluss und Endlosspiel"
+  },
+  {
+   "code": "I7",
+   "text": "Meilensteine mit Ton und Bild",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P22"
+   ],
+   "prs": [],
+   "abschnitt": "I Tagesziele, Logbuch, Abschluss und Endlosspiel"
+  },
+  {
+   "code": "I8",
+   "text": "Richtiger Abschluss mit Kamerafahrt und Titel",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 156)",
+   "pakete": [
+    "P16"
+   ],
+   "prs": [
+    156
+   ],
+   "abschnitt": "I Tagesziele, Logbuch, Abschluss und Endlosspiel"
+  },
+  {
+   "code": "I9",
+   "text": "Endlosspiel mit Saisonzielen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 156)",
+   "pakete": [
+    "P16"
+   ],
+   "prs": [
+    156
+   ],
+   "abschnitt": "I Tagesziele, Logbuch, Abschluss und Endlosspiel"
+  },
+  {
+   "code": "I10",
+   "text": "Ziele im Winter (Winterarbeiten)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P20"
+   ],
+   "prs": [],
+   "abschnitt": "I Tagesziele, Logbuch, Abschluss und Endlosspiel"
+  },
+  {
+   "code": "J1",
+   "text": "Schritt 1 zeigt auf \"3x\" statt auf die Sonne",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 112: Willkommen zeigt auf die Boje, Schritt 4 auf 3x)",
+   "pakete": [
+    "P03"
+   ],
+   "prs": [
+    112
+   ],
+   "abschnitt": "J Einstieg und Hilfe"
+  },
+  {
+   "code": "J2",
+   "text": "Im Einstieg fährt das erste Boot nicht selbst ein",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 112, holdBoat bis zum ersten Anlegen; Kamera fährt zum Boot, wenn es außerhalb liegt)",
+   "pakete": [
+    "P03"
+   ],
+   "prs": [
+    112
+   ],
+   "abschnitt": "J Einstieg und Hilfe"
+  },
+  {
+   "code": "J3",
+   "text": "Münze gleich nach dem Anlegen erklären, auch den halben Preis",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 112, Anteil aus den Regeln)",
+   "pakete": [
+    "P03"
+   ],
+   "prs": [
+    112
+   ],
+   "abschnitt": "J Einstieg und Hilfe"
+  },
+  {
+   "code": "J4",
+   "text": "Erstes Bauen führen, Geld fürs WC geschenkt (= Ü15)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P17",
+    "P03"
+   ],
+   "prs": [],
+   "abschnitt": "J Einstieg und Hilfe"
+  },
+  {
+   "code": "J5",
+   "text": "Ruf am ersten Abreisenden erklären",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P03"
+   ],
+   "prs": [],
+   "abschnitt": "J Einstieg und Hilfe"
+  },
+  {
+   "code": "J6",
+   "text": "Hinweise beim ersten Mal (kein Platz, Sturm, Winter, Stufenziel, Stammgast)",
+   "status": "erledigt",
+   "statusText": "erledigt (kein Platz zweifach, Stufenziel, Stammgast; Sturm und Winter erklärt schon das Ereignisschild)",
+   "pakete": [
+    "P03"
+   ],
+   "prs": [],
+   "abschnitt": "J Einstieg und Hilfe"
+  },
+  {
+   "code": "J7",
+   "text": "Hilfe-Seite für alle Geräte mit sechs Bildern",
+   "status": "erledigt",
+   "statusText": "erledigt (Menü „Hilfe“, features/hilfe.js)",
+   "pakete": [
+    "P03"
+   ],
+   "prs": [],
+   "abschnitt": "J Einstieg und Hilfe"
+  },
+  {
+   "code": "J8",
+   "text": "Einstieg im Menü wiederholen",
+   "status": "erledigt",
+   "statusText": "erledigt (Knopf in der Hilfe)",
+   "pakete": [
+    "P03"
+   ],
+   "prs": [],
+   "abschnitt": "J Einstieg und Hilfe"
+  },
+  {
+   "code": "K1",
+   "text": "Nordsee nach der Ostsee, Doku entsprechend kennzeichnen",
+   "status": "offen",
+   "statusText": "entschieden (Welle 5); Doku gekennzeichnet (PR 177)",
+   "pakete": [
+    "P08",
+    "P57"
+   ],
+   "prs": [
+    177
+   ],
+   "abschnitt": "K Reviere und Nordsee"
+  },
+  {
+   "code": "K2",
+   "text": "Gezeiten als Kernidee: Tiefgang nur bei Hochwasser",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P57"
+   ],
+   "prs": [],
+   "abschnitt": "K Reviere und Nordsee"
+  },
+  {
+   "code": "K3",
+   "text": "Kleinster spielbarer Kern: eigene Karte, Pegel, Tiefgang-Fenster, Kutter",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P57"
+   ],
+   "prs": [],
+   "abschnitt": "K Reviere und Nordsee"
+  },
+  {
+   "code": "K4",
+   "text": "Trockenfallen als Platzart",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P57"
+   ],
+   "prs": [],
+   "abschnitt": "K Reviere und Nordsee"
+  },
+  {
+   "code": "K5",
+   "text": "Seekarte zum Wechseln, Spielstand und Ruf je Hafen",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P57"
+   ],
+   "prs": [],
+   "abschnitt": "K Reviere und Nordsee"
+  },
+  {
+   "code": "K6",
+   "text": "Freischalten an einer Stelle festlegen",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P57"
+   ],
+   "prs": [],
+   "abschnitt": "K Reviere und Nordsee"
+  },
+  {
+   "code": "K7",
+   "text": "Nordsee-Stimmung bis dahin als Farbthema im Kreativ- oder Fotomodus",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P45"
+   ],
+   "prs": [],
+   "abschnitt": "K Reviere und Nordsee"
+  },
+  {
+   "code": "L1",
+   "text": "Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P46"
+   ],
+   "prs": [],
+   "abschnitt": "L Hafenleben, Ton und Fotomodus"
+  },
+  {
+   "code": "L2",
+   "text": "Figuren als Anzeige (Schlange vor der Dusche, volle Tische)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P55"
+   ],
+   "prs": [],
+   "abschnitt": "L Hafenleben, Ton und Fotomodus"
+  },
+  {
+   "code": "L3",
+   "text": "Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P26"
+   ],
+   "prs": [],
+   "abschnitt": "L Hafenleben, Ton und Fotomodus"
+  },
+  {
+   "code": "L4",
+   "text": "Fernglas mit Steckbrief",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P26"
+   ],
+   "prs": [],
+   "abschnitt": "L Hafenleben, Ton und Fotomodus"
+  },
+  {
+   "code": "L5",
+   "text": "Möwen antippen, Glocke am Steg",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P26"
+   ],
+   "prs": [],
+   "abschnitt": "L Hafenleben, Ton und Fotomodus"
+  },
+  {
+   "code": "L6",
+   "text": "Fotoaufträge und Postkarte (= F22)",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P43"
+   ],
+   "prs": [],
+   "abschnitt": "L Hafenleben, Ton und Fotomodus"
+  },
+  {
+   "code": "M1",
+   "text": "Eine führende Zahlendatei",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "M Zahlen und Daten"
+  },
+  {
+   "code": "M2",
+   "text": "Ersatzregeln abschaffen; prüfen, ob ein neues Spiel heute mit den Ersatzregeln startet",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "M Zahlen und Daten"
+  },
+  {
+   "code": "M3",
+   "text": "Tote Daten anschließen (Gruppen, Wünsche je Art) oder löschen (Bauzeiten, Sonderboote, zweite Ereignisliste)",
+   "status": "teilweise",
+   "statusText": "teils erledigt: Sonderboote, Antriebsanteile je Klasse und zweite Ereignisliste gelöscht; Bauzeiten bleiben für P18, Gruppen und Wünsche je Art für P19, P32",
+   "pakete": [
+    "P06",
+    "P19",
+    "P32"
+   ],
+   "prs": [],
+   "abschnitt": "M Zahlen und Daten"
+  },
+  {
+   "code": "M4",
+   "text": "Zahlenübersicht aus den Daten erzeugen",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "M Zahlen und Daten"
+  },
+  {
+   "code": "M5",
+   "text": "Prüfwerkzeug: ungelesene Felder, Ja/Nein statt Zahl, Stufe billiger als davor",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "M Zahlen und Daten"
+  },
+  {
+   "code": "M6",
+   "text": "Eine Sprache für Feldnamen",
+   "status": "teilweise",
+   "statusText": "teils erledigt: Regel in docs/balancing.md (Daten deutsch, sim.js englisch, Übersetzung nur in data/rules.js)",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "M Zahlen und Daten"
+  },
+  {
+   "code": "M7",
+   "text": "Ein gemeinsamer Zufall mit Startwert für alle Module",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "M Zahlen und Daten"
+  },
+  {
+   "code": "N13",
+   "text": "Nach jedem Kauf und Stufenaufstieg sichern",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P09"
+   ],
+   "prs": [],
+   "abschnitt": "N Speichern und Web-App"
+  },
+  {
+   "code": "N14",
+   "text": "Rückfall-Speicherweg entfernen",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P09"
+   ],
+   "prs": [],
+   "abschnitt": "N Speichern und Web-App"
+  },
+  {
+   "code": "N15",
+   "text": "3D-Bibliothek mitliefern statt von fremdem Server",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P61"
+   ],
+   "prs": [],
+   "abschnitt": "N Speichern und Web-App"
+  },
+  {
+   "code": "N16",
+   "text": "Alle Spieldateien vorab für offline speichern",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P61"
+   ],
+   "prs": [],
+   "abschnitt": "N Speichern und Web-App"
+  },
+  {
+   "code": "O1",
+   "text": "Gemeinsamer Aufbau für Regeltests (= Ü6)",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "O Tests und Werkzeuge"
+  },
+  {
+   "code": "O2",
+   "text": "Ein Test je Fehler, vor der Reparatur",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [],
+   "prs": [],
+   "abschnitt": "O Tests und Werkzeuge"
+  },
+  {
+   "code": "O3",
+   "text": "Ein ganzer Spieltag als Test mit festem Startwert",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "O Tests und Werkzeuge"
+  },
+  {
+   "code": "O4",
+   "text": "Stufenwechsel als Test",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 143 und Test \"voller Hafen über alle Stufen\" in tests/economy-sim.test.mjs)",
+   "pakete": [
+    "P05"
+   ],
+   "prs": [
+    143
+   ],
+   "abschnitt": "O Tests und Werkzeuge"
+  },
+  {
+   "code": "O5",
+   "text": "Dritter Spielertyp im Balancing (tut nichts)",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "O Tests und Werkzeuge"
+  },
+  {
+   "code": "O6",
+   "text": "Balancing meldet Leerlauf je Stufe",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "O Tests und Werkzeuge"
+  },
+  {
+   "code": "O7",
+   "text": "Test: jedes Hinweis-Ziel existiert, keine Texte zu Gelöschtem",
+   "status": "erledigt",
+   "statusText": "erledigt (tests/specs/einstieg.spec.mjs)",
+   "pakete": [
+    "P03"
+   ],
+   "prs": [],
+   "abschnitt": "O Tests und Werkzeuge"
+  },
+  {
+   "code": "O8",
+   "text": "Doku-Zahlen aus den Daten prüfen",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "O Tests und Werkzeuge"
+  },
+  {
+   "code": "Bed P1",
+   "text": "Die fünf fehlenden Anzeigen (A4, B1, B2, B11, C1)",
+   "status": "teilweise",
+   "statusText": "B11 und B2 erledigt, Rest offen",
+   "pakete": [
+    "P55",
+    "P11",
+    "P14"
+   ],
+   "prs": [],
+   "abschnitt": "P Bedienung (hier \"Bed\")"
+  },
+  {
+   "code": "Bed P2",
+   "text": "Bootskarte mit \"zahlt etwa 33 € pro Nacht\" und Zahl der Wunschplätze",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 153)",
+   "pakete": [
+    "P10"
+   ],
+   "prs": [
+    153
+   ],
+   "abschnitt": "P Bedienung (hier \"Bed\")"
+  },
+  {
+   "code": "Bed P3",
+   "text": "Zeiger am Bildrand für wartende Boote",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P55"
+   ],
+   "prs": [],
+   "abschnitt": "P Bedienung (hier \"Bed\")"
+  },
+  {
+   "code": "Bed P4",
+   "text": "Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf \"bis zum nächsten Boot\"",
+   "status": "erledigt",
+   "statusText": "erledigt (1x bei Ereignis, Ausbau möglich, Regionsziel; 8x läuft bis zum nächsten Boot)",
+   "pakete": [
+    "P07"
+   ],
+   "prs": [],
+   "abschnitt": "P Bedienung (hier \"Bed\")"
+  },
+  {
+   "code": "Bed P5",
+   "text": "Einstellungen-Seite (Ton und Musik getrennt, Selbst-Einfahren, Bewegung, Schrift, Linkshänder)",
+   "status": "erledigt",
+   "statusText": "erledigt (Ton und Musik über Knopf ins Ton-Fenster mit getrennten Reglern)",
+   "pakete": [
+    "P50"
+   ],
+   "prs": [],
+   "abschnitt": "P Bedienung (hier \"Bed\")"
+  },
+  {
+   "code": "Bed P6",
+   "text": "Farbe nie allein: Form zu Grün-Rot und Gold",
+   "status": "erledigt",
+   "statusText": "erledigt mit Einstellung \"Schilder mit Form\" (Balken, Stern, Ausrufezeichen)",
+   "pakete": [
+    "P50"
+   ],
+   "prs": [],
+   "abschnitt": "P Bedienung (hier \"Bed\")"
+  },
+  {
+   "code": "Bed P7",
+   "text": "Letzten Kauf zehn Sekunden lang zurücknehmen",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P18"
+   ],
+   "prs": [],
+   "abschnitt": "P Bedienung (hier \"Bed\")"
+  },
+  {
+   "code": "Bed P8",
+   "text": "PC-Tasten für Kassieren und drei Tempostufen, Hilfe zeigt genau die echten Tasten",
+   "status": "erledigt",
+   "statusText": "erledigt (K, F, G, Leertaste; Hilfe angepasst)",
+   "pakete": [
+    "P07"
+   ],
+   "prs": [],
+   "abschnitt": "P Bedienung (hier \"Bed\")"
+  },
+  {
+   "code": "Bed P9",
+   "text": "Stil im Plan festhalten; Rolle der Pixel-Fassung klären",
+   "status": "frage",
+   "statusText": "Frage 9; Ist-Stand im Plan festgehalten (PR 177), Entscheidung offen",
+   "pakete": [
+    "P08"
+   ],
+   "prs": [
+    177
+   ],
+   "abschnitt": "P Bedienung (hier \"Bed\")"
+  },
+  {
+   "code": "Bed P10",
+   "text": "Zeichen am Rand für \"hier ist etwas zu tun\"",
+   "status": "offen",
+   "statusText": "offen",
+   "pakete": [
+    "P55"
+   ],
+   "prs": [],
+   "abschnitt": "P Bedienung (hier \"Bed\")"
+  },
+  {
+   "code": "Q1",
+   "text": "README als Startseite mit Stand",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 177)",
+   "pakete": [
+    "P08"
+   ],
+   "prs": [
+    177
+   ],
+   "abschnitt": "Q Doku"
+  },
+  {
+   "code": "Q2",
+   "text": "Plan dreiteilen: Gebaut, Als Nächstes, Nach 1.0",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 177)",
+   "pakete": [
+    "P08"
+   ],
+   "prs": [
+    177
+   ],
+   "abschnitt": "Q Doku"
+  },
+  {
+   "code": "Q3",
+   "text": "Statuszeile in jedem Dokument",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 177)",
+   "pakete": [
+    "P08"
+   ],
+   "prs": [
+    177
+   ],
+   "abschnitt": "Q Doku"
+  },
+  {
+   "code": "Q4",
+   "text": "Zahlentabellen aus den Daten (M4)",
+   "status": "erledigt",
+   "statusText": "erledigt",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "Q Doku"
+  },
+  {
+   "code": "Q5",
+   "text": "Ist-Tabelle der Abnahme neu",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 177)",
+   "pakete": [
+    "P08"
+   ],
+   "prs": [
+    177
+   ],
+   "abschnitt": "Q Doku"
+  },
+  {
+   "code": "Q6",
+   "text": "Erledigtes in echter-hafen.md abhaken",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 177)",
+   "pakete": [
+    "P08"
+   ],
+   "prs": [
+    177
+   ],
+   "abschnitt": "Q Doku"
+  },
+  {
+   "code": "Q7",
+   "text": "Geräte-Dokumente in oberflaeche.md zusammenlegen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 177)",
+   "pakete": [
+    "P08"
+   ],
+   "prs": [
+    177
+   ],
+   "abschnitt": "Q Doku"
+  },
+  {
+   "code": "Q8",
+   "text": "Ein Dokument für Testmodus und Adresszusätze",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 177)",
+   "pakete": [
+    "P08"
+   ],
+   "prs": [
+    177
+   ],
+   "abschnitt": "Q Doku"
+  },
+  {
+   "code": "Q9",
+   "text": "Änderungsprotokoll für Spieler",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 177)",
+   "pakete": [
+    "P08"
+   ],
+   "prs": [
+    177
+   ],
+   "abschnitt": "Q Doku"
+  },
+  {
+   "code": "Q10",
+   "text": "Entscheidungsliste pflegen (Tretboote, Tempo, Stil)",
+   "status": "teilweise",
+   "statusText": "Tretboote und Tempo erledigt (PR 144), weitere Entscheidungen nachgetragen (PR 177), Stil offen (Frage 9)",
+   "pakete": [
+    "P08"
+   ],
+   "prs": [
+    144,
+    177
+   ],
+   "abschnitt": "Q Doku"
+  },
+  {
+   "code": "T1",
+   "text": "Jedes Wetter außer dem Standard ruckelt stark, auch am Gaming-PC",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P65"
+   ],
+   "prs": [],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "T2",
+   "text": "Boote fahren durch Stege",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P66"
+   ],
+   "prs": [],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "T3",
+   "text": "Boote fahren am Anfang durch den Strand",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P66",
+    "P62"
+   ],
+   "prs": [],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "T4",
+   "text": "Boote kollidieren, bleiben ineinander stecken und zittern",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P66"
+   ],
+   "prs": [],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "T5",
+   "text": "Wasserspur (Heckwelle) nur auf der rechten Seite",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P65"
+   ],
+   "prs": [],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "T6",
+   "text": "Marinebasis hat auf einer Seite keinen Eingang",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P63"
+   ],
+   "prs": [],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "T7",
+   "text": "Marinebasis ist falsch platziert",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P63"
+   ],
+   "prs": [],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "T8",
+   "text": "Boote machen im Gelände fest (Liegeplatz oder Ankerplatz an Land)",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P66",
+    "P62"
+   ],
+   "prs": [],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "T9",
+   "text": "Ankünfte kommen in Wellen statt einzeln aus zufälligen Richtungen",
+   "status": "teilweise",
+   "statusText": "",
+   "pakete": [
+    "P66"
+   ],
+   "prs": [
+    81
+   ],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "T10",
+   "text": "Engpass durch die Dünen ist viel zu eng und unschön",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P62"
+   ],
+   "prs": [],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "T11",
+   "text": "Zu wenig Abwechslung im Gelände",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P64"
+   ],
+   "prs": [],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "T12",
+   "text": "Komische Effekte (Flackern, Artefakte)",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P65"
+   ],
+   "prs": [],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "T13",
+   "text": "Bauplätze und Anlagen müssen zum neuen Gelände passen (Stegbilder, Services, Großschiffpier)",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P63"
+   ],
+   "prs": [],
+   "abschnitt": "Funde aus Jorvens Spieltest"
+  },
+  {
+   "code": "C01",
+   "text": "Dauerlieger-Gebühr übernimmt die Fischerpacht (= Ü1)",
+   "status": "erledigt",
+   "statusText": "",
+   "pakete": [
+    "P01"
+   ],
+   "prs": [
+    149
+   ],
+   "abschnitt": "Technische Befunde aus dem Audit (12.11.2026)"
+  },
+  {
+   "code": "C02",
+   "text": "Alter Speicherweg hafenmeister.save neben dem neuen; alter Weg nur noch für eine einmalige, getestete Übernahme lesen, dann Schreibpfad entfernen (= N14)",
+   "status": "erledigt",
+   "statusText": "",
+   "pakete": [
+    "P09"
+   ],
+   "prs": [],
+   "abschnitt": "Technische Befunde aus dem Audit (12.11.2026)"
+  },
+  {
+   "code": "C03",
+   "text": "Spielstand-Import prüft verschachtelte Daten kaum: ein Schema für den ganzen Spielstand, IDs gegen Boots- und Platzdaten, Zahlen begrenzen, unbekannte Felder kontrolliert behandeln, erst nach vollständiger Prüfung übernehmen, Tests mit falschen Typen und Extremwerten",
+   "status": "erledigt",
+   "statusText": "",
+   "pakete": [
+    "P09"
+   ],
+   "prs": [],
+   "abschnitt": "Technische Befunde aus dem Audit (12.11.2026)"
+  },
+  {
+   "code": "C04",
+   "text": "Abnahmekriterium für P06: neue Spielstände, alle Regeltests und das Balancing nutzen dieselbe Regelkonfiguration",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P06"
+   ],
+   "prs": [],
+   "abschnitt": "Technische Befunde aus dem Audit (12.11.2026)"
+  },
+  {
+   "code": "C05",
+   "text": "HTML per innerHTML (render/services.js, ui/input-pc.js): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, textContent oder Escapen, dazu Test mit präparierten Namen",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P08",
+    "P44",
+    "P09"
+   ],
+   "prs": [],
+   "abschnitt": "Technische Befunde aus dem Audit (12.11.2026)"
+  },
+  {
+   "code": "C06",
+   "text": "Three.js kommt von jsDelivr, Erststart hängt am CDN (= N15, N16)",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P61"
+   ],
+   "prs": [],
+   "abschnitt": "Technische Befunde aus dem Audit (12.11.2026)"
+  },
+  {
+   "code": "C07",
+   "text": "GitHub Actions: Rechte je Job statt für den ganzen Workflow (pages.yml gibt pages: write und id-token: write auch dem Build), Actions auf Commit-SHAs pinnen, Dependabot prüfen",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P08"
+   ],
+   "prs": [],
+   "abschnitt": "Technische Befunde aus dem Audit (12.11.2026)"
+  },
+  {
+   "code": "C08",
+   "text": "Kein Supabase-Code vorhanden; vor dem Online-Start eigenes Sicherheitsreview (RLS je Tabelle, Rechte anonymer Nutzer, Rate Limits, serverseitige Prüfung)",
+   "status": null,
+   "statusText": "",
+   "pakete": [
+    "P58"
+   ],
+   "prs": [],
+   "abschnitt": "Technische Befunde aus dem Audit (12.11.2026)"
+  }
+ ],
+ "wellen": [
+  {
+   "nr": 0,
+   "titel": "Gelände und Bootswege",
+   "pakete": [
+    "P62",
+    "P63",
+    "P64",
+    "P65",
+    "P66"
+   ],
+   "zaehler": {
+    "erledigt": 0,
+    "teilweise": 0,
+    "arbeit": 4,
+    "frage": 0,
+    "offen": 1,
+    "entfaellt": 0,
+    "alle": 5
+   }
+  },
+  {
+   "nr": 1,
+   "titel": "Fehler und Fundament",
+   "pakete": [
+    "P01",
+    "P02",
+    "P03",
+    "P04",
+    "P05",
+    "P06",
+    "P07",
+    "P08",
+    "P09",
+    "P54"
+   ],
+   "zaehler": {
+    "erledigt": 7,
+    "teilweise": 2,
+    "arbeit": 0,
+    "frage": 0,
+    "offen": 0,
+    "entfaellt": 1,
+    "alle": 10
+   }
+  },
+  {
+   "nr": 2,
+   "titel": "Kernschleife und Rückmeldung",
+   "pakete": [
+    "P10",
+    "P11",
+    "P12",
+    "P13",
+    "P14",
+    "P15",
+    "P16",
+    "P17",
+    "P18",
+    "P19",
+    "P20",
+    "P21",
+    "P22",
+    "P55",
+    "P61"
+   ],
+   "zaehler": {
+    "erledigt": 6,
+    "teilweise": 4,
+    "arbeit": 0,
+    "frage": 0,
+    "offen": 5,
+    "entfaellt": 0,
+    "alle": 15
+   }
+  },
+  {
+   "nr": 3,
+   "titel": "Tiefe und Hafenleben",
+   "pakete": [
+    "P23",
+    "P24",
+    "P25",
+    "P26",
+    "P27",
+    "P28",
+    "P29",
+    "P30",
+    "P31",
+    "P32",
+    "P33",
+    "P34",
+    "P35",
+    "P36",
+    "P37",
+    "P38",
+    "P39",
+    "P40",
+    "P59"
+   ],
+   "zaehler": {
+    "erledigt": 0,
+    "teilweise": 1,
+    "arbeit": 0,
+    "frage": 0,
+    "offen": 18,
+    "entfaellt": 0,
+    "alle": 19
+   }
+  },
+  {
+   "nr": 4,
+   "titel": "Langzeit, Spielgefühl, Welt",
+   "pakete": [
+    "P41",
+    "P42",
+    "P43",
+    "P44",
+    "P45",
+    "P46",
+    "P47",
+    "P48",
+    "P49",
+    "P50",
+    "P51",
+    "P52",
+    "P53",
+    "P60"
+   ],
+   "zaehler": {
+    "erledigt": 1,
+    "teilweise": 1,
+    "arbeit": 0,
+    "frage": 0,
+    "offen": 12,
+    "entfaellt": 0,
+    "alle": 14
+   }
+  },
+  {
+   "nr": 5,
+   "titel": "Regionen und Online",
+   "pakete": [
+    "P57",
+    "P58"
+   ],
+   "zaehler": {
+    "erledigt": 0,
+    "teilweise": 0,
+    "arbeit": 0,
+    "frage": 0,
+    "offen": 2,
+    "entfaellt": 0,
+    "alle": 2
+   }
+  }
+ ],
+ "gesamt": {
+  "erledigt": 14,
+  "teilweise": 8,
+  "arbeit": 4,
+  "frage": 0,
+  "offen": 38,
+  "entfaellt": 1,
+  "alle": 65
+ },
+ "punkteGesamt": {
+  "erledigt": 95,
+  "teilweise": 8,
+  "arbeit": 0,
+  "frage": 1,
+  "offen": 113,
+  "entfaellt": 0,
+  "alle": 217
+ }
+}

@@ -1,0 +1,54 @@
+# Hält die Roadmap-Übersicht aktuell: Nach jeder Änderung an docs/roadmap.md auf main
+# erzeugt tools/roadmap.mjs den README-Abschnitt, das Fortschrittsbild und die Daten
+# der Seite /roadmap/ neu und committet sie, wenn sich etwas geändert hat.
+# Die Pages-Seite selbst baut tools/build-pages.sh ohnehin frisch aus docs/roadmap.md.
+name: Roadmap-Übersicht
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/roadmap.md"
+      - "tools/roadmap.mjs"
+      - ".github/workflows/roadmap.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: roadmap
+  cancel-in-progress: false
+
+jobs:
+  aktualisieren:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Übersicht erzeugen
+        run: node tools/roadmap.mjs
+
+      - name: Committen, falls etwas veraltet war
+        run: |
+          if git diff --quiet -- README.md docs/roadmap-fortschritt.svg web/roadmap/daten.json; then
+            echo "Übersicht ist aktuell."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md docs/roadmap-fortschritt.svg web/roadmap/daten.json
+          git commit -m "Roadmap-Übersicht aus docs/roadmap.md aktualisiert"
+          for versuch in 1 2 3 4; do
+            if git push origin HEAD:main; then exit 0; fi
+            echo "Push abgelehnt, hole neuen Stand (Versuch $versuch)."
+            sleep $((versuch * 5))
+            git pull --rebase origin main || { git rebase --abort; git reset --hard origin/main; node tools/roadmap.mjs; git add README.md docs/roadmap-fortschritt.svg web/roadmap/daten.json; git commit -m "Roadmap-Übersicht aus docs/roadmap.md aktualisiert" || exit 0; }
+          done
+          exit 1
