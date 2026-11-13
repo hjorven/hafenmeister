@@ -407,7 +407,9 @@ export async function initBridge(game) {
     if (id == null) { api.collectAll(true); return; }
     if (!(d.combo > 1)) strich = { n: 0, sum: 0 };
     const r = api.collect(id);
-    const amount = r?.events?.find((e) => e.type === 'collected')?.amount || 0;
+    // Trinkgeld auf das Liegegeld, nicht auf Zuschläge des Hafenbüros (tip, extras)
+    const c = r?.events?.find((e) => e.type === 'collected');
+    const amount = c ? c.amount - (c.tip || 0) - (c.extras || 0) : 0;
     if (r?.ok && d.combo) { strich.n++; strich.sum += amount; }
   });
   game.on('ui:strich-ende', () => {
