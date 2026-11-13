@@ -20,6 +20,8 @@ const LAGE = {
   tonne:        { x: -5.5, z: 9.5, dreh: 0 },
   wimpel:       { x: 8.0,  z: 8.0, dreh: 0 },
 };
+// Gruppen der Szene, deren Teile an Land im Weg stehen (Boote, Menschen, Wetter zählen nicht)
+const SZENE_GRUPPEN = ['landschaft', 'gebaeude', 'services', 'wetterflagge'];
 const RADIUS = { kuebel: 1.6, bank: 1.3, laterne: 0.6, rettungsring: 0.7, anker: 1.1, fischkisten: 1.3, tonne: 0.9, wimpel: 1.6 };
 const U = 0.62;   // Planeinheit in Metern (data/harbor.js)
 
@@ -156,7 +158,7 @@ export function init(game) {
       m.updateMatrixWorld(true);
       _b.setFromObject(m);
       if (l && !m.parent) m.position.copy(alt);
-      if (!_b.isEmpty()) kasten.push({ x0: _b.min.x - 2, x1: _b.max.x + 2, z0: _b.min.z - 2, z1: _b.max.z + 2 });
+      if (!_b.isEmpty()) kasten.push({ x0: _b.min.x - 3, x1: _b.max.x + 3, z0: _b.min.z - 3, z1: _b.max.z + 3 });   // 3 m: Dach und Wand wirken von schräg oben näher
     }
     const kreise = [];
     for (const sv of SERVICES) {
@@ -179,6 +181,22 @@ export function init(game) {
           const a = netz.nodes[i], b = netz.nodes[j];
           strecken.push({ ax: a.x * U, az: -a.y * U, bx: b.x * U, bz: -b.y * U, r: 1.3 });
         }
+      });
+    }
+    // Alles andere, was an Land steht: Häuser im Dorf, Anlagen, Flaggenmast, Bäume als Einzelteile.
+    // Flaches (Wege, Bauplatz-Markierungen) und Großes (Gelände, Wasser) zählt nicht.
+    const a = anker();
+    for (const name of SZENE_GRUPPEN) {
+      const gr = game.scene?.getObjectByName(name);
+      gr?.updateMatrixWorld(true);
+      gr?.traverseVisible((o) => {
+        if (!o.isMesh || o.isInstancedMesh || !o.geometry) return;
+        if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+        _b.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld);
+        if (_b.isEmpty() || _b.max.y - _b.min.y < 0.3) return;
+        if (_b.max.x - _b.min.x > 40 || _b.max.z - _b.min.z > 40) return;
+        if (a && Math.hypot((_b.min.x + _b.max.x) / 2 - a.x, (_b.min.z + _b.max.z) / 2 - a.z) > 60) return;
+        { const m = 1.2 + Math.min(1.8, (_b.max.y - _b.min.y) * 0.4); kasten.push({ x0: _b.min.x - m, x1: _b.max.x + m, z0: _b.min.z - m, z1: _b.max.z + m }); }
       });
     }
     return { kasten, kreise, strecken };
