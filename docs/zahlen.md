@@ -9,7 +9,7 @@ Zahlen in economy.js ändern und die Datei neu schreiben. `tests/zahlen.test.mjs
 |---|---|
 | Tag / Abend | 90 s / 30 s |
 | Saison / Winter | 30 / 3 Tage |
-| Ankünfte | 0,05 bis 0,95 des Tages, Spitze 0,62 |
+| Ankünfte | 0,05 bis 0,95 des Tages, Abstand 3 bis 8 s, an vollen Tagen 4 s im Mittel |
 | Abreise | 0,07 bis 0,3 des Tages |
 | Erstes Boot | nach 3 s |
 | Geduld an der Boje | 30 s, selbst einfahren nach 8 s |
