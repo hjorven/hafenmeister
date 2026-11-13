@@ -1,12 +1,23 @@
 # Was ist neu im Spiel
 
-Stand: 12.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im Spiel unter https://hjorven.github.io/hafenmeister/ geändert hat, neueste Einträge oben. Technische Einzelheiten stehen in den Pull Requests (Nummer in Klammern), offene Arbeit in der [Roadmap](roadmap.md).
+Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im Spiel unter https://hjorven.github.io/hafenmeister/ geändert hat, neueste Einträge oben. Technische Einzelheiten stehen in den Pull Requests (Nummer in Klammern), offene Arbeit in der [Roadmap](roadmap.md).
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 13.11.2026
+
+- Zehn Geländeformen nach echten Häfen an Ost- und Nordsee, jedes Spiel bekommt eine; die Einfahrt ist breiter (164, 168).
+- Abwechslungsreiches Land: Felder mit Knicks, Wald, Dorf mit Kirche und Mühle, Steilufer, Jahreszeiten (163, 171).
+- Marinebasis, Kreuzfahrtpier und Anlagen haben eigene Piers mit freien Wegen in jedem Stegbild (167).
+- Wetter läuft flüssig, auch Regen, Nebel und Sturm (169).
+- Boote kommen einzeln und aus ihrer Richtung statt im Pulk (162, 160).
+- Wer selbst einfährt, nimmt die nächste freie passende Box (147).
+- Beim Ausbau legen Gäste aus zu flachen Boxen um (166).
+- Einstellungen mit Tempo, alle Symbole im Pixel-Stil (157, 170).
+- Startansicht: Hafen am Handy hoch und quer groß und mittig, quer nicht mehr hinter der Schilderspalte (145).
+
 ## 12.11.2026, nachmittags
 
-- Startansicht am Handy hoch und quer: Der Hafen ist in jeder Stufe groß und mittig im Bild (145).
 - Tempo einheitlich: Pause, 1x, 3x, 8x unten links, am PC schaltet Taste F 3x an und aus (142).
 - Boote auf Plätzen, die beim Ausbau wegfallen, ziehen sauber um (143).
 - XXL-Schiffe und vorbeifahrende Boote ab Stufe 1, mit wechselnder Bahn, Tempo und Bootsart (81).

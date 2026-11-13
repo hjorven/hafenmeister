@@ -4,11 +4,11 @@ Ein gemütliches Aufbauspiel in 3D für den Browser: Du bist Hafenmeister, fäng
 
 **Spielen:** https://hjorven.github.io/hafenmeister/ (Pixel-Fassung: https://hjorven.github.io/hafenmeister/pixel/)
 
-## Stand (12.11.2026)
+## Stand (13.11.2026)
 
-Die Ostsee ist in allen sechs Stufen spielbar, vom Bootssteg bis zum Seehafen mit Abschlussziel. Gebaut sind Zuweisen und Selbst-Einfahren, Liegegeld beim Festmachen, Bauen mit Vorschau, 20 Services und Angebote an Land, Dauerlieger, Stammgäste, Tagesziele, Wetter, Ereignisse mit Winter, Menschen im Hafen, Ton und Musik, Fotomodus, Speichern und eine Pixel-Oberfläche für alle Geräte. Bis zum Abschluss der Ostsee dauert es etwa 8,5 Stunden.
+Die Ostsee ist in allen sechs Stufen spielbar, vom Bootssteg bis zum Seehafen mit Abschlussziel. Jedes Spiel liegt in einer von zehn Geländeformen nach echten Häfen. Gebaut sind Zuweisen und Selbst-Einfahren, Liegegeld beim Festmachen, Bauen mit Vorschau, 20 Services und Angebote an Land, Dauerlieger, Stammgäste, Tagesziele, Wetter, Ereignisse mit Winter, Menschen im Hafen, Ton und Musik, Fotomodus, Speichern und eine Pixel-Oberfläche für alle Geräte. Bis zum Abschluss der Ostsee dauert es etwa 8,5 Stunden.
 
-Als Nächstes arbeiten die Pakete der [Roadmap](docs/roadmap.md) die Funde aus Jorvens Überblick ab. Danach kommen die Nordsee und, als letzter Schritt, ein kleiner Online-Teil. Was sich für Spieler geändert hat, steht in [docs/aenderungen.md](docs/aenderungen.md).
+Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arbeiten die Pakete der [Roadmap](docs/roadmap.md) die Funde aus Jorvens Überblick ab. Danach kommen die Nordsee und, als letzter Schritt, ein kleiner Online-Teil. Was sich für Spieler geändert hat, steht in [docs/aenderungen.md](docs/aenderungen.md).
 
 | Stufe | Name | Gastplätze |
 |---|---|---|
