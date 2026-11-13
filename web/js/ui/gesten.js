@@ -24,6 +24,7 @@
 // Klänge: game.audio.sfx(name, optionen), sonst ein kleiner eingebauter WebAudio-Ersatz.
 
 import { HAFEN, platzInWelt } from '../data/harbor.js';
+import { PIXEL, FARBE as PIXELFARBE } from './pixel-symbole.js';
 
 const TAP_SLOP = 10;          // px, ab hier wird aus einem Tipp ein Ziehen
 const SNAP_PX = 56;           // so nah muss der Finger am Platz sein, damit die Leine einrastet
@@ -31,6 +32,7 @@ const EDGE_PX = 64;           // Randzone, in der die Karte beim Ziehen mitläuf
 const EDGE_SPEED = 520;       // px pro Sekunde am äußersten Rand
 // Farben beim Zuweisen: Türkis passt, Gold passt und erfüllt einen Wunsch (P10, Review Ü9)
 export const FARBE = { passt: '#2a9d8f', wunsch: '#f2b01e', hell: '#c9fff6', wunschHell: '#ffe9a3' };
+const SCHRIFT = '"Pixelify Sans", system-ui, sans-serif';
 const WUNSCH = { strom: 'Strom', wc: 'WC', dusche: 'Dusche', essen: 'Essen', diesel: 'Diesel' };
 
 export function init(game) {
@@ -362,7 +364,8 @@ export function init(game) {
       for (const m of ringGroup.children) {
         if (m.userData.platz === tow?.ziel) continue;
         const mat = game.stege.platz?.(m.userData.platz)?.mesh?.material;
-        if (mat) mat.opacity = o;
+        // Gold kräftiger als Türkis, damit es auf dem Wasser nicht blass wirkt
+        if (mat) mat.opacity = gold.has(m.userData.platz) ? o + 0.3 : o;
       }
     }
 
@@ -387,10 +390,23 @@ export function init(game) {
   function draw(dt) {
     const W = canvas.clientWidth;
     const H = canvas.clientHeight;
-    const etwas = !!tow?.moved || (strich && strich.pts.length > 1) || texte.length > 0;
+    if (!tow && auswahlGold.size && game.sim?.selected == null) auswahlGold = new Set();
+    const sterne = tow?.moved ? gold : auswahlGold;
+    const etwas = !!tow?.moved || (strich && strich.pts.length > 1) || texte.length > 0 || sterne.size > 0;
     if (!etwas && leer) return;
     ctx.clearRect(0, 0, W, H);
     leer = !etwas;
+
+    // Kleiner Stern über jeder Box, die einen Wunsch erfüllt (Farbe nie allein, Review Bed P6)
+    for (const id of sterne) {
+      const sp = game.stege?.platz?.(id);
+      if (!sp) continue;
+      const s = toScreen(_stern.set(sp.x, 0.5, sp.z));
+      // Größe folgt dem Zoom, damit sich die Sterne weit draußen nicht überdecken
+      const s2 = toScreen(_stern.set(sp.x + 1, 0.5, sp.z));
+      const k = Math.min(1.5, Math.max(0.6, Math.hypot(s2.x - s.x, s2.y - s.y) * 0.2));
+      zeichnePixel(PIXEL.stern, s.x - 6 * k, s.y - 6 * k, k);
+    }
 
     if (tow?.moved) {
       const from = toScreen(tow.object.getWorldPosition(new THREE.Vector3()));
@@ -432,12 +448,13 @@ export function init(game) {
       const k = t.t / t.dauer;
       if (k >= 1) { texte.splice(i, 1); continue; }
       ctx.globalAlpha = k < 0.7 ? 1 : 1 - (k - 0.7) / 0.3;
-      ctx.font = `800 ${t.klein ? 20 : 26}px system-ui, -apple-system, sans-serif`;
+      ctx.font = `700 ${t.klein ? 20 : 26}px ${SCHRIFT}`;
       ctx.textAlign = 'center';
       ctx.lineWidth = 5;
       ctx.strokeStyle = 'rgba(40,54,72,0.85)';
       ctx.fillStyle = t.farbe ?? '#f4c542';
-      const y = Math.max(24, t.y - k * 30);
+      // Auch wenn das Boot außerhalb des Bildes liegt: Text am Rand zeigen
+      const y = Math.min(Math.max(70, t.y - k * 30), H - 110);
       // Am Rand nicht abschneiden: Text ganz im Bild halten
       const halb = ctx.measureText(t.text).width / 2 + 10;
       t.x = Math.min(Math.max(t.x, halb), Math.max(halb, W - halb));
@@ -452,9 +469,10 @@ export function init(game) {
   function drawWert(p, w, istGold) {
     const z1 = `${w.fee} € · ${String(w.anchors.toFixed(1)).replace('.', ',')} Anker`;
     const teile = [...(w.wishesMet || []).map((k) => WUNSCH[k] ?? k)];
+    if (w.comfort) teile.push('Fingersteg');
     if (w.snug) teile.push('passgenau');
     const z2 = teile.join(' · ');
-    ctx.font = '800 15px system-ui, -apple-system, sans-serif';
+    ctx.font = `700 15px ${SCHRIFT}`;
     const breite = Math.max(ctx.measureText(z1).width, z2 ? ctx.measureText(z2).width : 0) + 18;
     const hoehe = z2 ? 44 : 26;
     const W = canvas.clientWidth;
@@ -469,7 +487,7 @@ export function init(game) {
     ctx.fillStyle = '#fffbea';
     ctx.fillText(z1, x + 10, y + 18);
     if (z2) {
-      ctx.font = '700 13px system-ui, -apple-system, sans-serif';
+      ctx.font = `600 13px ${SCHRIFT}`;
       ctx.fillStyle = istGold || w.snug ? '#ffd76a' : '#d9e2ea';
       ctx.fillText(z2, x + 10, y + 36);
     }
@@ -485,6 +503,25 @@ export function init(game) {
   game.on('sim:moored', (e) => { if (e?.passgenau && e.hand) textAmBoot(e.boatId, 'Passgenau +¼ Anker', '#ffd76a'); });
   const aerger = (e) => { if (e?.rated) textAmBoot(e.boatId, `Verärgert: ${String(game.sim?.ctx?.rules?.turnAway?.rating ?? 2.5).replace('.', ',')} Anker`, '#ff9a8a'); };
   game.on('sim:dismissed', aerger);
+  // Bojengeld über Nacht (Review A9): kleiner Betrag über jedem Boot an der Boje
+  game.on('sim:buoyFee', (e) => {
+    for (const [id, betrag] of Object.entries(e?.perBoat || {})) if (betrag > 0) textAmBoot(Number(id), `Bojengeld +${betrag} €`, '#ffd76a');
+  });
+  // Gold auch beim bloßen Antippen eines Boots (Bootskarte offen)
+  let auswahlGold = new Set();
+  game.on('sim:select', ({ boatId } = {}) => {
+    const g = boatId != null ? game.sim?.wunschPlaetze?.(boatId) : null;
+    auswahlGold = new Set(Array.isArray(g) ? g : []);
+  });
+  game.on('sim:moored', () => { if (game.sim?.selected == null) auswahlGold = new Set(); });
+  const _stern = new THREE.Vector3();
+  function zeichnePixel(raster, x, y, k) {
+    raster.forEach((zeile, j) => [...zeile].forEach((c, i) => {
+      if (c === '.' || c === ' ') return;
+      ctx.fillStyle = PIXELFARBE[c] ?? '#24364a';
+      ctx.fillRect(Math.round(x + i * k), Math.round(y + j * k), Math.ceil(k), Math.ceil(k));
+    }));
+  }
   game.on('sim:turnedAway', aerger);
 
   // Leine mit etwas Durchhang, eingerastet straff

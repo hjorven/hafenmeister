@@ -200,7 +200,7 @@ export function init(game) {
       wert ? el('p', { class: 'card-zahlt' }, `Zahlt etwa ${wert.fee} € pro Nacht${gold.length ? `, am Wunschplatz ${sim.platzWert(b.id, gold[0])?.fee ?? wert.fee} €` : ''}.`) : null,
       el('p', { class: 'card-hint' }, !fitting.length
         ? 'Gerade ist kein passender Platz frei.'
-        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}. Zieh das Boot hin, sonst nimmt es eine Box nahe der Einfahrt.`),
+        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}. Zieh das Boot hin, sonst sucht es sich selbst eine Box.`),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
       el(
         'div',
@@ -310,8 +310,9 @@ export function init(game) {
   // die runden Ringe sind nur der Ersatz ohne render/stege.js.
   let ringGroup = null;
   let leuchtend = [];
+  let gold = new Set();
   function showRings(ids, boatId = null) {
-    const gold = new Set(boatId != null ? game.sim?.wunschPlaetze?.(boatId) ?? [] : []);
+    gold = new Set(boatId != null ? game.sim?.wunschPlaetze?.(boatId) ?? [] : []);
     if (game.stege?.highlight) {
       leuchtend = [...ids];
       game.stege.highlight(leuchtend, '#2a9d8f');
@@ -350,7 +351,7 @@ export function init(game) {
       const o = 0.38 + 0.14 * Math.sin(performance.now() / 250);
       for (const id of leuchtend) {
         const mat = game.stege?.platz?.(id)?.mesh?.material;
-        if (mat) mat.opacity = o;
+        if (mat) mat.opacity = gold.has(id) ? o + 0.3 : o;
       }
     }
     if (!ringGroup?.children.length) return;

@@ -645,7 +645,7 @@ export function berthValue(state, ctx, boatId, berthId = null) {
   const snug = !!berth && isSnug(state, ctx, boat, berth);
   const probe = { ...boat, wishesMet: boat.wishesMet + met.length, wishesTotal: boat.wishesTotal + boat.wishes.length, berthId: berth?.id ?? null, snug };
   const anchors = rateBoat(ctx, probe, mods.ratingBonus);
-  return { fee, wishesMet: met, wishes: [...boat.wishes], anchors, snug };
+  return { fee, wishesMet: met, wishes: [...boat.wishes], anchors, snug, comfort: (berth?.comfort || 0) > 0 };
 }
 
 /** "Automatisch einfahren": ein wartendes Boot nimmt den besten freien Platz. */
@@ -1113,13 +1113,16 @@ function night(state, ctx, events) {
   const buoyShare = ctx.rules.queue.buoyFee ?? 0;
   if (buoyShare > 0 && state.queue.length) {
     let buoy = 0;
+    const perBoat = {};
     for (const id of state.queue) {
       const b = state.boats[id];
-      if (b) buoy += Math.round(nightlyFee(state, ctx, b, 0) * buoyShare);
+      if (!b) continue;
+      perBoat[id] = Math.round(nightlyFee(state, ctx, b, 0) * buoyShare);
+      buoy += perBoat[id];
     }
     if (buoy > 0) {
       addIncome(state, buoy);
-      events.push({ type: 'buoyFee', amount: buoy, boats: state.queue.length });
+      events.push({ type: 'buoyFee', amount: buoy, boats: state.queue.length, perBoat });
     }
   }
   // Abreise
