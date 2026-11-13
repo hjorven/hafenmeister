@@ -14,6 +14,8 @@
 import { SERVICES } from '../../data/services.js';
 import { anlagenFlaechen } from '../../data/anlagen-flaechen.js';
 import { gelaendeform } from './formen.js';
+// Nur innerhalb von Funktionen benutzt (gelaende.js importiert diese Datei, die Bindung ist dann schon gesetzt)
+import { BEREICH } from './gelaende.js';
 
 const PLAN_M = 0.62;
 
@@ -279,6 +281,11 @@ function waldWert(px, py) {
   return fbm(px / w.skala + 3.1, py / w.skala - 1.7, bild.seed + 41);
 }
 
+/** Liegt hier Wald? (Rauschen wie in land(); draußen im groben Netz nur noch für Bäume, nicht als Bodenfarbe) */
+export function waldBei(px, py, nordsee = false) {
+  return waldWert(px, py) > (nordsee ? bild.wald.schwelle + 0.12 : bild.wald.schwelle);
+}
+
 /** Sölle: kleine runde Teiche in den Feldern (Toteislöcher), feste Lagen je Bild. */
 export function soelle() {
   const r = zufallAus(bild.seed + 5);
@@ -465,7 +472,7 @@ export function land(px, py, h, typ, d, k = {}) {
   }
 
   // ---- Küstenstreifen nach Art der Seite
-  if (seeM < 70 && kSeite === 'heide' && !nordsee) art = aussenAnteil(px, py) > 0 ? 'feld' : 'heide';   // im groben Netz keine Heideflecken
+  if (seeM < 70 && kSeite === 'heide' && !nordsee) art = 'heide';
   if (seeM < 60 && kSeite === 'wald') art = 'wald';
   if (seeM < 45 && kSeite === 'kliff') art = 'wald';   // Buchenwald auf der Kliffkante
 
@@ -500,20 +507,20 @@ export function land(px, py, h, typ, d, k = {}) {
     }
   }
 
-  // Außerhalb des fein gerechneten Bereichs keine Felder: das grobe Netz würde Treppen zeigen.
-  // Zum Rand hin werden Felder zu Wiesen und Weiden, große Flecken bleiben Wald.
-  // Draußen: große Schläge ohne Wege und Raine, nur ruhige Farben (kein Raps)
-  // Gleich hinter dem feinen Bereich laufen die (achsparallelen) Felder weiter, ohne Wege; erst weiter draußen Flecken
+  // Außerhalb des fein gerechneten Bereichs (FEIN = KERN in gelaende.js) ist das Netz grob.
+  // Dort nur zwei Grüntöne mit wenigen Prozent Unterschied (gras, wiese), kein Wald-, Acker- oder
+  // Kornboden: jeder Kontrast zeigt sonst die Rasterquadrate. Wald bleibt als Bäume (bewuchs.js, waldBei).
   const aussenD = Math.max(FEIN.x0 - px, px - FEIN.x1, FEIN.y0 - py);
-  if (art === 'feld' && aussenD > 0 && aussenD < 140) {
-    // ruhigere Farben, damit die groben Dreiecke dort keine harten Zacken zeigen
-    const f = feldBei(px, py);
-    return { h, typ: AUSSEN_FRUCHT[f.frucht] || f.frucht };
-  }
-  if (art === 'feld' && aussenAnteil(px, py) > 0.5) {
-    // Weiche Flecken in nah beieinander liegenden Farben: im groben Netz gäben Rechtecke Treppen
-    const w = fbm(px / 160 + 4, py / 160 - 2, bild.seed + 29);
-    return { h, typ: w > 0.62 && !nordsee ? 'korn' : w > 0.46 ? 'wiese' : 'weide' };
+  if (aussenD > 0 && (art === 'feld' || art === 'wald' || art === 'heide')) {
+    // Im Rand mit halber Auflösung (BEREICH) laufen die achsparallelen Felder ohne Wege weiter und
+    // dünnen Feld für Feld zur Außenkante hin aus, in ruhigen Farben (kein Raps, Korn, Acker).
+    const randD = Math.min(px - BEREICH.x0, BEREICH.x1 - px, py - BEREICH.y0);
+    if (art === 'feld' && randD > 0) {
+      const f = feldBei(px, py);
+      if (hash2(f.spalte, f.zeile, bild.seed + 13) < randD / (randD + aussenD) * 1.2 - 0.2) return { h, typ: AUSSEN_FRUCHT[f.frucht] || f.frucht };
+    }
+    const w = fbm(px / 220 + 4, py / 220 - 2, bild.seed + 29);
+    return { h, typ: w > 0.52 ? 'wiese' : 'gras' };
   }
   if (art === 'feld') {
     if (feldwegBei(px, py)) return { h, typ: 'feldweg' };

@@ -8,7 +8,7 @@ import * as THREE from 'three';
 import { punkt, KERN, PLAN_M, hafenAbstand, suedufer, seeNord } from './gelaende.js';
 import { festePunkte } from './karte.js';
 import { verschmelze } from './terrain.js';
-import { aktuellesBild, feldZeile, knickAn, dorfPlan, hoefe, freiAbstand, soelle, zufallAus, JAHRESZEIT_FARBEN } from './vielfalt.js';
+import { aktuellesBild, waldBei, feldZeile, knickAn, dorfPlan, hoefe, freiAbstand, soelle, zufallAus, JAHRESZEIT_FARBEN } from './vielfalt.js';
 
 const U = PLAN_M;
 const FELDARTEN = new Set(['raps', 'korn', 'acker', 'weide', 'wiese', 'gras']);
@@ -210,7 +210,9 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
         const p = punkt(px, py, stufe, region);
         if (p.h < 0.3) continue;
         let chance = 0;
-        if (p.typ === 'waldboden') chance = 0.92;
+        // Draußen ist der Boden nur noch grün (kontrastarm im groben Netz), Wald zeigen die Bäume
+        if (fern && (p.typ === 'gras' || p.typ === 'wiese') && waldBei(px, py, nordsee)) chance = 0.92;
+        else if (p.typ === 'waldboden') chance = 0.92;
         else if (p.typ === 'gras') chance = 0.05;
         else if (p.typ === 'weide' || p.typ === 'wiese') chance = 0.025;
         else if (p.typ === 'dorf') chance = 0.025;
