@@ -220,3 +220,51 @@ test('Viele Seeds je Küstentyp: Fahrwasser, Wartebojen, Liegeplätze und Leucht
     }
   } finally { formSetzen(1); }
 });
+
+test('Strandkörbe und Seebrücke finden in jeder Küste einen echten Strand außerhalb des Hafens', async () => {
+  const { bauen, strandStelle } = await import('../web/js/render/landschaft/natur.js');
+  for (const f of FORMEN) {
+    for (const seed of [1, 7, 99, 4242]) {
+      const N = bauen(f.nr, seed);
+      const sb = strandStelle(N, -170, 216, { seebruecke: true, laenge: 83 });
+      const kb = strandStelle(N, -210, 214, { meiden: sb ? [sb] : [] });
+      for (const [name, s] of [['Seebrücke', sb], ['Strandkörbe', kb]]) {
+        if (!s) continue;   // keine passende Stelle: dann steht dort nichts (kein Fehler, aber selten)
+        const l = N.landig(s[0], s[1]);
+        assert.ok(l >= 2 && l <= 9, `Form ${f.nr} Seed ${seed}: ${name} bei ${s} nicht am Strand (L ${l.toFixed(1)})`);
+        assert.ok(!(s[0] > -200 && s[0] < 270 && s[1] > -110 && s[1] < 250), `Form ${f.nr} Seed ${seed}: ${name} bei ${s} im Hafen`);
+      }
+      if (sb) for (let t = 10; t <= 83; t += 8) assert.ok(N.landig(sb[0], sb[1] + t) < 0, `Form ${f.nr} Seed ${seed}: vor der Seebrücke ist Land`);
+      assert.ok(kb, `Form ${f.nr} Seed ${seed}: kein Strand für Strandkörbe`);
+    }
+  }
+});
+
+test('Am Hafen ist der Küstentyp zu sehen: neben den Stegen und in der Nähe unterscheidet sich die Natur', async () => {
+  const { bauen, TYPEN } = await import('../web/js/render/landschaft/natur.js');
+  // Muster aus Land, Watt und Wasser im Ausschnitt der Startansicht (x -330..330, y -120..260), je Typ und Seed
+  const muster = (N) => {
+    let s = '';
+    for (let y = -120; y <= 260; y += 20) {
+      for (let x = -330; x <= 330; x += 20) {
+        const q = N.probe(x, y);
+        s += q.L > 0 ? '1' : q.stil.watt && -q.d < q.stil.watt * 0.6 ? 'w' : '0';
+      }
+    }
+    return s;
+  };
+  const verschieden = (a, b) => [...a].filter((c, i) => c !== b[i]).length / a.length;
+  for (const seed of [1, 99]) {
+    const m = TYPEN.map((t) => muster(bauen(t.nr, seed)));
+    for (let i = 0; i < m.length; i++) for (let j = i + 1; j < m.length; j++) {
+      assert.ok(verschieden(m[i], m[j]) > 0.04, `Seed ${seed}: Typ ${i + 1} und ${j + 1} sehen am Hafen fast gleich aus`);
+    }
+  }
+  // Inselhafen: hinter dem Ort liegt Wasser (Sund)
+  for (const seed of [1, 7, 99, 4242]) {
+    const N = bauen(10, seed);
+    let sund = false;
+    for (let y = -130; y >= -500 && !sund; y -= 10) sund = N.landig(0, y) < 0;
+    assert.ok(sund, `Inselhafen Seed ${seed}: kein Wasser hinter dem Ort`);
+  }
+});

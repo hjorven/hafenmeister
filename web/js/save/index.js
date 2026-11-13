@@ -21,7 +21,7 @@ import {
   openSavePanel, openStart, showExportReminderIfDue, showUpdateBanner, showKaputtMeldung, showOhneSpeicherMeldung,
 } from './save-panel.js';
 import * as plaetze from './plaetze.js';
-import { neuerSeed } from '../render/landschaft/formen.js';
+import { neuerSeed, FORMEN } from '../render/landschaft/formen.js';
 import { createState, deserialize } from '../state.js';
 
 // Für den Fall, dass index.html die Zeilen noch nicht hat. Doppelt schadet nicht.
@@ -147,7 +147,9 @@ export function init(game) {
     st.harborName = name;
     st.modules = st.modules ?? {};
     if (Number.isInteger(stegbild) && stegbild >= 1) st.modules.stegbild = { nr: stegbild };
-    if (Number.isInteger(gelaende) && gelaende >= 1) st.modules.gelaende = { nr: gelaende, seed: neuerSeed(Math.random, gelaende) };
+    // Küste: gewählte Form oder eine zufällige, immer mit eigenem Seed (sonst erbte das neue Spiel die alte Küste)
+    const form = Number.isInteger(gelaende) && gelaende >= 1 && gelaende <= FORMEN.length ? gelaende : FORMEN[Math.floor(Math.random() * FORMEN.length)].nr;
+    st.modules.gelaende = { nr: form, seed: neuerSeed(Math.random, form) };
     if (!einstieg) st.modules.einstieg = { fertig: true, erledigt: [] };
     const id = plaetze.platzAnlegen(st, { name });
     bildMachen();

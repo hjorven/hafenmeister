@@ -22,6 +22,8 @@
 // Welt: x = xPlan * 0.62, z = -yPlan * 0.62, y oben, Wasser bei 0.
 import * as THREE from 'three';
 import { buendeln } from './buendeln.js';
+import { natur } from './landschaft/formen.js';
+import { strandStelle } from './landschaft/natur.js';
 
 const U = 0.62;
 const W = (xp, yp) => [xp * U, -yp * U];
@@ -393,6 +395,36 @@ const PLAN = [
 // Schwimmwellenbrecher im See ab Stufe 4, Oeffnung nach Osten zum Fahrwasser
 const WELLENBRECHER = [[-150, 136], [-95, 150], [-30, 154], [30, 148]];
 
+// Strandkörbe und Seebrücke gehören an einen echten Strand: Die Küste ist je Spiel anders (natur.js),
+// darum sucht strandStelle die nächste passende Stelle zur geplanten Lage. Der Hafen-Korb (koerbe-4) bleibt.
+const STRAND = new Set(['koerbe-1', 'koerbe-2', 'koerbe-3', 'seebruecke']);
+let _strand = null, _strandN = null;
+function strandLage(id, stufe) {
+  let N;
+  try { N = natur(); } catch { return null; }
+  if (!N?.landig) return null;
+  if (_strandN !== N) { _strand = new Map(); _strandN = N; }
+  if (!_strand.has(stufe)) {
+    const vergeben = [], out = {};
+    // Seebrücke zuerst: Sie braucht freies Wasser davor, Körbe finden leichter Platz
+    for (const e of [...PLAN.filter((x) => x.id === 'seebruecke'), ...PLAN.filter((x) => STRAND.has(x.id) && x.id !== 'seebruecke')]) {
+      const [x, y] = lageInStufe(e.p, stufe);
+      const s = strandStelle(N, x, y, { seebruecke: e.art === 'seebruecke', laenge: (e.opt?.laenge ?? 44) / U + 12, meiden: vergeben });
+      out[e.id] = s;
+      if (s) vergeben.push(s);
+    }
+    _strand.set(stufe, out);
+  }
+  return _strand.get(stufe)[id] ?? null;
+}
+
+/** Lage in Planeinheiten in einer Stufe; Strandsachen am echten Strand, sonst null (dann fehlen sie). */
+function stelle(it, stufe) {
+  if (!it.p) return null;
+  if (STRAND.has(it.id)) return strandLage(it.id, stufe);
+  return lageInStufe(it.p, stufe);
+}
+
 function lageInStufe(p, stufe) {
   if (Array.isArray(p)) return p;
   let best = null;
@@ -473,12 +505,13 @@ export function init(game) {
   function setStage(n) {
     stufe = Math.max(1, Math.min(6, Math.round(Number(n) || 1)));
     for (const it of items) {
-      const sichtbar = stufe >= it.ab && (it.bis == null || stufe <= it.bis) && gekauft(it);
+      const ort = stelle(it, stufe);
+      const sichtbar = stufe >= it.ab && (it.bis == null || stufe <= it.bis) && gekauft(it) && (!it.p || !!ort);
       // Unsichtbares aus der Szene nehmen statt visible = false, damit game.pick es nicht trifft
       if (sichtbar && !it.mesh.parent) group.add(it.mesh);
       if (!sichtbar && it.mesh.parent) group.remove(it.mesh);
       if (!sichtbar || !it.p) continue;
-      const [xp, yp] = lageInStufe(it.p, stufe);
+      const [xp, yp] = ort;
       const [x, z] = W(xp, yp);
       const boden = it.mole ? hoehe(x, z, 1.4) : it.art === 'seebruecke' ? 0 : hoehe(x, z, 0.3);
       it.mesh.position.set(x, boden, z);
@@ -525,8 +558,9 @@ export function init(game) {
   // Wo ein Gebaeude in einer Stufe steht (auch wenn es noch nicht gebaut ist), fuer die Bau-Vorschau
   function lage(id, n = stufe) {
     const it = items.find((i) => i.id === id);
-    if (!it?.p) return null;
-    const [xp, yp] = lageInStufe(it.p, n);
+    const ort = it && stelle(it, n);
+    if (!ort) return null;
+    const [xp, yp] = ort;
     const [x, z] = W(xp, yp);
     return { x, z, y: it.mole ? hoehe(x, z, 1.4) : hoehe(x, z, 0.3), dreh: THREE.MathUtils.degToRad(it.dreh ?? 0), mesh: it.mesh };
   }

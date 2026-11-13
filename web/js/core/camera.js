@@ -340,6 +340,8 @@ export class CameraRig {
 
   // Um Bildschirm-Pixel verschieben (Finger zieht die Karte mit).
   panBy(dx, dy) {
+    // Wer selbst schiebt, bricht eine laufende Kamerafahrt (flyTo) ab, sonst zieht sie das Bild zurück
+    this._fly = null;
     this._schwung.x = this._schwung.y = 0;
     this._pan(dx, dy);
   }

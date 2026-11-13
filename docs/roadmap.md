@@ -463,9 +463,9 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | J3 | Münze gleich nach dem Anlegen erklären, auch den halben Preis | erledigt (PR 112, Anteil aus den Regeln) | P03 |
 | J4 | Erstes Bauen führen, Geld fürs WC geschenkt (= Ü15) | offen | P17, P03 |
 | J5 | Ruf am ersten Abreisenden erklären | offen | P03 (nach P14) |
-| J6 | Hinweise beim ersten Mal (kein Platz, Sturm, Winter, Stufenziel, Stammgast) | offen | P03 |
-| J7 | Hilfe-Seite für alle Geräte mit sechs Bildern | offen | P03 |
-| J8 | Einstieg im Menü wiederholen | offen | P03 |
+| J6 | Hinweise beim ersten Mal (kein Platz, Sturm, Winter, Stufenziel, Stammgast) | erledigt (kein Platz zweifach, Stufenziel, Stammgast; Sturm und Winter erklärt schon das Ereignisschild) | P03 |
+| J7 | Hilfe-Seite für alle Geräte mit sechs Bildern | erledigt (Menü „Hilfe“, `features/hilfe.js`) | P03 |
+| J8 | Einstieg im Menü wiederholen | erledigt (Knopf in der Hilfe) | P03 |
 
 ### K Reviere und Nordsee
 
@@ -522,7 +522,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | O4 | Stufenwechsel als Test | erledigt (PR 143 und Test "voller Hafen über alle Stufen" in `tests/economy-sim.test.mjs`) | P05 |
 | O5 | Dritter Spielertyp im Balancing (tut nichts) | erledigt | P06 |
 | O6 | Balancing meldet Leerlauf je Stufe | erledigt | P06 |
-| O7 | Test: jedes Hinweis-Ziel existiert, keine Texte zu Gelöschtem | offen | P03 |
+| O7 | Test: jedes Hinweis-Ziel existiert, keine Texte zu Gelöschtem | erledigt (`tests/specs/einstieg.spec.mjs`) | P03 |
 | O8 | Doku-Zahlen aus den Daten prüfen | erledigt | P06 |
 | (Befund) | Prüfskript der Reviere läuft nicht im normalen Testlauf | offen | P57 |
 
@@ -635,7 +635,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|---|
 | P01 | Dauerlieger zur echten Entscheidung machen | Ü1, Ü20, Doku Dauerlieger, Gast wird umgelegt (plan 9a) | `sim.js`, `features/dauerlieger.js`, `economy.js`, `tests/dauerlieger.test.mjs`, `docs/neue-features.md`, `docs/spielregeln.md` | erledigt (PR 149) |
 | P02 | Hafenbüro mit eigenen Aufgaben ausbauen | Ü2, Ü11, A2, E1 bis E7, erledigt (PR 146) | `ui/hud.js`, `sim.js` (Automatik), `economy.js`, `ui/bauen.js` (Texte) | neu |
-| P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 folgen im nächsten PR, J4 mit P17, J5 nach P14 |
+| P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; offen: J4 mit P17, J5 nach P14 |
 | P04 | Abschlussziel Stufe 6 richtig zählen | Ü4 | `bridge.js`, `render/services.js`, `docs/services.md` | bestehend: "Services und Sonderanlagen einbauen" |
 | P05 | Boote auf wegfallenden Plätzen regeln | Ü5 | `sim.js` (Stufenausbau), `tests/` | bestehend: "Spielregeln ohne Grafik umsetzen" |
 | P06 | Eine Quelle für alle Zahlen und echte Regeltests (erledigt) | Ü6, Ü24 | `economy.js`, `data/rules.js`, `data/services.js`, `services/rules.js`, `data/events.js`, `tests/regeln.mjs` (statt `tests/helpers.mjs`, das ist der Browser-Helfer), alle Regeltests, `tools/zahlen.mjs`, `docs/zahlen.md`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" |

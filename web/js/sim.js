@@ -1139,7 +1139,7 @@ export function addIncome(state, amount, quelle = 'sonstiges', detail = null) {
 // Tagesabschluss: was der Tag gebracht hat, je Quelle (docs/tagesabschluss.md)
 
 /** Einnahmequellen in der Reihenfolge des Tagesabschlusses. */
-export const QUELLEN = ['liegegeld', 'pacht', 'gastro', 'services', 'tagesziele', 'sonstiges'];
+export const QUELLEN = ['liegegeld', 'pacht', 'gastro', 'services', 'tagesziele', 'saisonziele', 'sonstiges'];
 /** So viele Tage hebt der Spielstand auf (für den Verlauf und den besten Tag). */
 export const VERLAUF_TAGE = 30;
 

@@ -23,6 +23,7 @@ const QUELLE_NAME = {
   gastro: 'Gastronomie',
   services: 'Services',
   tagesziele: 'Tagesziele',
+  saisonziele: 'Saisonziele',
   sonstiges: 'Sonstiges',
 };
 const QUELLE_TEXT = {

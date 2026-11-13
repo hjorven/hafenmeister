@@ -1,6 +1,7 @@
 // Das Spielobjekt, das alle Module bekommen: Renderer, Szene, Kamera, Ereignisse, Spielschleife.
 import * as THREE from 'three';
 import { CameraRig } from './camera.js';
+import { createEmitter } from './ereignisse.js';
 
 export function createGame({ canvas, bounds, home }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -20,7 +21,7 @@ export function createGame({ canvas, bounds, home }) {
   rig.boden = (x, z) => game.landschaft?.hoeheBei?.(x, z) ?? 0;
   if (home.rect) rig.setHomeRect(home.rect); else rig.setHome(home.x, home.z, home.width);
 
-  const listeners = new Map();
+  const ereignisse = createEmitter();
   const tickers = new Set();
 
   const game = {
@@ -33,15 +34,9 @@ export function createGame({ canvas, bounds, home }) {
     time: 0,                  // Spielzeit in Sekunden, laeuft nur ohne Pause
     speed: 1,
 
-    on(name, fn) {
-      if (!listeners.has(name)) listeners.set(name, new Set());
-      listeners.get(name).add(fn);
-      return () => listeners.get(name).delete(fn);
-    },
-    emit(name, data) {
-      const set = listeners.get(name);
-      if (set) for (const fn of set) fn(data);
-    },
+    // Ereignisse: ein Fehler in einem Zuhörer hält die anderen nicht auf (core/ereignisse.js)
+    on: ereignisse.on,
+    emit: ereignisse.emit,
     // fn(dt, game) wird jedes Bild aufgerufen. dt in Sekunden, 0 waehrend der Pause.
     onTick(fn) {
       tickers.add(fn);
