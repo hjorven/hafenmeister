@@ -187,6 +187,9 @@ export function init(game) {
   function zielDaten() {
     const sim = game.sim;
     if (!sim?.state) return null;
+    // Nach dem Abschluss der Region: Saisonziele des Endlosspiels (features/aufstieg.js, P16)
+    const endlos = sim.state.regionDone ? game.aufstieg?.zielDaten?.() : null;
+    if (endlos) return endlos;
     const rg = sim.regionGoal?.();
     if (rg?.active) {
       const g = rg.goal;
@@ -221,14 +224,14 @@ export function init(game) {
     ziel.hidden = !d;
     if (!d) return;
     const erfuellt = d.zeilen.filter((z) => z.ist >= z.soll).length;
-    const schluessel = JSON.stringify([d.titel, d.fertig, d.zeilen.map((z) => z.text), zielPanel.hidden]);
+    const schluessel = JSON.stringify([d.titel, d.kopf, d.zahl, d.fertig, d.zeilen.map((z) => z.text), zielPanel.hidden]);
     if (schluessel === zielSchluessel) return;
     zielSchluessel = schluessel;
     ziel.classList.toggle('fertig', d.fertig);
     zielKnopf.replaceChildren(
       el('i', { class: 'hm-sym', 'aria-hidden': 'true', style: '--sym: var(--px-flagge)' }),
       el('span', { class: 'hm-chip-text' }, d.titel),
-      el('span', { class: 'hm-chip-zahl' }, d.fertig ? 'bereit' : `${erfuellt}/${d.zeilen.length}`),
+      el('span', { class: 'hm-chip-zahl' }, d.zahl ?? (d.fertig ? 'bereit' : `${erfuellt}/${d.zeilen.length}`)),
     );
     zielKnopf.setAttribute('aria-label', `${d.kopf}. ${erfuellt} von ${d.zeilen.length} erfüllt.`);
     if (zielPanel.hidden) return;
@@ -417,6 +420,8 @@ export function init(game) {
   game.on('sim:change', plane);
   game.on('sim:stageUp', () => { zielSchluessel = ''; plane(); });
   game.on('sim:regionDone', () => { zielSchluessel = ''; plane(); });
+  game.on('sim:seasonEnd', () => { zielSchluessel = ''; plane(); });
+  game.on('sim:seasonStart', () => { zielSchluessel = ''; plane(); });
   game.on('spielstand-geladen', plane);
   game.on('ready', () => { ordnen(); plane(); zeigeTempo(); setTimeout(ordnen, 600); });
   game.on('tap', () => klappeZu());

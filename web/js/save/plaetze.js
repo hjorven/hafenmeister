@@ -268,6 +268,11 @@ export function aktiverPlatz() {
   return eintrag(v, meinPlatz ?? v.aktiv);
 }
 
+/** Bis zum Neuladen nichts mehr speichern (z.B. Stand aus einer neueren Version des Spiels). */
+export function sperren() {
+  gesperrt = true;
+}
+
 /** false, wenn ein anderer Tab inzwischen einen anderen Platz geöffnet hat. */
 export function diesesTabAktiv() {
   const v = verzeichnisLesen();
