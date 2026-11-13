@@ -120,6 +120,10 @@ export const ECONOMY = {
     fenster: 20,              // Schnitt der letzten 20 Bewertungen
     sondergastBonus: 1,       // Sondergäste (Marine, Behörden, Traditionssegler) geben so viel extra
     ohneWunsch: 4,
+    // Note aus den Wünschen: keiner erfüllt = keiner, alle erfüllt = alle, dazwischen linear.
+    // keiner nicht unter abgewiesen.wertung: wer einen Platz bekam, ist nicht unzufriedener als
+    // wer weggeschickt wurde (Befund P10, vorher 1 + 4 * Anteil, entschieden in P14).
+    wunschNote: { keiner: 2.5, alle: 5 },
     // Ankünfte = Grundzahl * (0.75 + 0.125 * (Ruf - 1)): 1 Anker 0.75x, 3 Anker 1x, 5 Anker 1.25x
     ankunftBasis: 0.75,
     ankunftJeAnker: 0.125,

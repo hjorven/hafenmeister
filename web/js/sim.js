@@ -969,7 +969,7 @@ function turnAway(state, ctx, boat, events, why) {
   const weg = heute(state).weggefahren;
   weg[why] = (weg[why] || 0) + 1;
   const rated = turnAwayRating(state, ctx, boat, why);
-  events.push({ type: 'turnedAway', boatId: boat.id, reason: why, rated });
+  events.push({ type: 'turnedAway', boatId: boat.id, reason: why, rated, ...(rated ? { rating: ctx.rules.turnAway.rating, guest: guestInfo(boat), day: state.day } : {}) });
 }
 
 /**
@@ -1097,7 +1097,7 @@ export function dismiss(state, ctx, boatId) {
   const weg = heute(state).weggefahren;
   weg.weggeschickt = (weg.weggeschickt || 0) + 1;
   const rated = turnAwayRating(state, ctx, boat, 'dismissed');
-  return { ok: true, events: [{ type: 'dismissed', boatId, rated }] };
+  return { ok: true, events: [{ type: 'dismissed', boatId, rated, ...(rated ? { rating: ctx.rules.turnAway.rating, guest: guestInfo(boat), day: state.day } : {}) }] };
 }
 
 // ---------------------------------------------------------------------------
@@ -1260,6 +1260,7 @@ function checkWishes(state, ctx, boat) {
       if (ok) served[w] = (served[w] || 0) + 1;
     }
     if (ok) metList.push(w);
+    else (boat.missed ||= {})[w] = (boat.missed[w] || 0) + 1; // für Gästebuch und Bewertung (ratingParts)
   }
   boat.wishesMet += metList.length;
   boat.wishesTotal += boat.wishes.length;
@@ -1362,17 +1363,41 @@ export function collectAll(state, ctx, force = false) {
   return events;
 }
 
+/**
+ * Bestandteile einer Bewertung, damit Gästebuch und Oberfläche sie erklären können:
+ * base (aus den Wünschen), comfort (Platzart), special (Sondergast), bonus (Services, Ereignisse),
+ * penalty (Abzug, zum Beispiel ungeschützter Platz bei Sturm), missed ({ wunsch: Nächte ohne }),
+ * value (Ergebnis wie rateBoat).
+ */
+export function ratingParts(ctx, boat, ratingBonus = 0) {
+  const r = ctx.rules;
+  const lo = r.rating.noneMet ?? r.rating.min;
+  const hi = r.rating.allMet ?? r.rating.max;
+  const base = !boat.wishesTotal ? r.rating.noWishes : lo + ((hi - lo) * boat.wishesMet) / boat.wishesTotal;
+  const berth = ctx.berthById[boat.berthId];
+  const comfort = (berth?.comfort || 0) * r.comfortBonus;
+  const special = boat.special ? r.specialGuestRatingBonus : 0;
+  const snug = boat.snug && r.snug ? r.snug.rating : 0;     // Päckchen/eng liegen
+  const byHand = boat.byHand ? r.handAssignBonus ?? 0 : 0;  // von Hand zugewiesen (P10)
+  const penalty = boat.penalty || 0;
+  const raw = base + comfort + special + snug + byHand + ratingBonus - penalty;
+  const value = Math.round(Math.min(r.rating.max, Math.max(r.rating.min, raw)) * 10) / 10;
+  return {
+    value, base, comfort, special, snug, byHand, bonus: ratingBonus, penalty,
+    wishes: [...(boat.wishes || [])], wishesMet: boat.wishesMet || 0, wishesTotal: boat.wishesTotal || 0, missed: { ...(boat.missed || {}) },
+  };
+}
+
 /** Bewertung eines abreisenden Gastes (1 bis 5). */
 export function rateBoat(ctx, boat, ratingBonus = 0) {
-  const r = ctx.rules;
-  let value = boat.wishesTotal === 0 ? r.rating.noWishes : 1 + (4 * boat.wishesMet) / boat.wishesTotal;
-  const berth = ctx.berthById[boat.berthId];
-  value += (berth?.comfort || 0) * r.comfortBonus;
-  if (boat.special) value += r.specialGuestRatingBonus;
-  if (boat.snug && r.snug) value += r.snug.rating;
-  if (boat.byHand) value += r.handAssignBonus ?? 0;
-  value += ratingBonus - boat.penalty;
-  return Math.round(Math.min(r.rating.max, Math.max(r.rating.min, value)) * 10) / 10;
+  return ratingParts(ctx, boat, ratingBonus).value;
+}
+
+/** Kurzbeschreibung eines Gastes für Bewertungsereignisse (Gästebuch). */
+function guestInfo(boat) {
+  const g = { typeId: boat.typeId, modelId: boat.modelId, name: boat.name, size: boat.size, kind: boat.kind };
+  for (const k of ['bootsname', 'heimathafen', 'stammId', 'besuche']) if (boat[k] != null) g[k] = boat[k];
+  return g;
 }
 
 function night(state, ctx, events) {
@@ -1409,7 +1434,8 @@ function night(state, ctx, events) {
     if (boat.stationed) continue;
     boat.nights -= 1;
     if (boat.nights > 0) continue;
-    const rating = rateBoat(ctx, boat, mods.ratingBonus);
+    const parts = ratingParts(ctx, boat, mods.ratingBonus);
+    const rating = parts.value;
     pushRating(state, ctx, rating);
     heute(state).abgereist++;
     heute(state).bewertungen.push(rating);
@@ -1421,7 +1447,7 @@ function night(state, ctx, events) {
     const w = ctx.rules.departWindow;
     const leaveAt = w ? Math.round((w[0] + random(state) * (w[1] - w[0])) * ctx.rules.dayLength * 10) / 10 : 0;
     startLeaving(state, boat.id, boat.berthId, leaveAt);
-    events.push({ type: 'departed', boatId: boat.id, berthId: boat.berthId, typeId: boat.typeId, rating, leaveAt });
+    events.push({ type: 'departed', boatId: boat.id, berthId: boat.berthId, typeId: boat.typeId, rating, leaveAt, parts, guest: guestInfo(boat), day: state.day });
   }
   for (const fn of ctx.hooks.night) fn({ state, ctx, events });
   const s = state.stats;
@@ -1753,13 +1779,14 @@ function clearVanishedBerths(state, ctx, from, events) {
     if (!boat.stationed) {
       if (boat.pendingFee > 0) events.push(...collect(state, ctx, boat.id).events);
       endTrip(boat, events);
-      const rating = rateBoat(ctx, boat, mods.ratingBonus);
+      const parts = ratingParts(ctx, boat, mods.ratingBonus);
+      const rating = parts.value;
       pushRating(state, ctx, rating);
       state.guests++;
       state.stageGuests = (state.stageGuests || 0) + 1;
       delete state.berths[old];
       delete state.boats[boat.id];
-      events.push({ type: 'departed', boatId: boat.id, berthId: old, typeId: boat.typeId, rating, leaveAt: 0, reason: 'rebuild' });
+      events.push({ type: 'departed', boatId: boat.id, berthId: old, typeId: boat.typeId, rating, leaveAt: 0, reason: 'rebuild', parts, guest: guestInfo(boat), day: state.day });
       continue;
     }
     delete state.berths[old];

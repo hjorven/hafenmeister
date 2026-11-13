@@ -48,6 +48,7 @@ const MODULES = [
   './features/hilfe.js',
   './save/index.js',
   './ui/tagesabschluss.js',
+  './ui/gaestebuch.js',
   './ui/oberflaeche.js',
 ];
 
