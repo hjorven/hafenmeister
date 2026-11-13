@@ -72,6 +72,9 @@ test('Boot kommt, wird zugewiesen, abends steigt das Geld', async ({ game }, tes
   // 1. Ein Boot liegt an der Boje und erscheint in der Warteliste
   await forwardUntil(page, 'sim.waitingBoats().length > 0', 'ein Boot wartet an der Boje');
   const boatId = await page.evaluate(() => window.hafenmeister.sim.waitingBoats()[0].id);
+  // Festhalten wie ein ausgewähltes Boot: sonst fährt es bei Andrang (Zeit zählt ab Ankunft im Revier)
+  // von selbst in eine Box, bevor es die Boje erreicht. Die Anfahrt vom Kartenrand ist lang (Fahrwasser).
+  await page.evaluate((id) => window.hafenmeister.sim.holdBoat?.(id, true), boatId);
 
   // 2. Boot antippen: in 3D an der Boje (game.boatsVisible) oder in der Warteliste unten
   const in3d = await page.evaluate(() => !!window.hafenmeister.boatsVisible);
@@ -102,8 +105,15 @@ test('Boot kommt, wird zugewiesen, abends steigt das Geld', async ({ game }, tes
   // 4. Abends erscheint "Kassieren", Antippen bringt das Hafengeld
   await forwardUntil(page, "state.phase === 'evening' && sim.mooredBoats().some((b) => b.pendingFee > 0)",
     'Abend mit offenem Hafengeld');
+  // Ohne Hafenbüro streicht man Münzen einzeln, den Knopf "Kassieren" bringt erst Bürostufe 1
   const collect = page.locator('#btn-collect');
-  await expect(collect, 'Knopf "Kassieren" erscheint abends nicht').toBeVisible();
+  await expect(collect, 'Knopf "Kassieren" darf es ohne Hafenbüro nicht geben').toBeHidden();
+  await page.evaluate(() => {
+    const g = window.hafenmeister;
+    g.sim.state.office = Math.max(g.sim.state.office, g.sim.ctx.rules.office.collectAllButton);
+    g.emit('sim:change', { reason: 'test' });
+  });
+  await expect(collect, 'Knopf "Kassieren" erscheint mit Hafenbüro Stufe 1 abends nicht').toBeVisible();
   const moneyText = await page.locator('#money').textContent();
   await press(collect, testInfo);
 

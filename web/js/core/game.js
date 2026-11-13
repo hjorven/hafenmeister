@@ -11,8 +11,13 @@ export function createGame({ canvas, bounds, home }) {
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#62b4c2');
+  // Dunst zum Horizont: bei flachem Blick verschwimmen Landschaftsrand und Wasserkante im Himmel.
+  // Farbe folgt dem Himmel (scene.background), Abstand der Kamera (siehe dunst() unten).
+  scene.fog = new THREE.Fog(scene.background.clone(), 1e5, 2e5);
 
   const rig = new CameraRig({ bounds });
+  // Bodenhoehe fuer die Kamera: sie bleibt ueber Gelaende und Wasser (Landschaft setzt game.landschaft)
+  rig.boden = (x, z) => game.landschaft?.hoeheBei?.(x, z) ?? 0;
   if (home.rect) rig.setHomeRect(home.rect); else rig.setHome(home.x, home.z, home.width);
 
   const listeners = new Map();
@@ -75,32 +80,88 @@ export function createGame({ canvas, bounds, home }) {
     else if (!document.hidden && pausedByVisibility) { pausedByVisibility = false; game.setPaused(false); }
   });
 
-  const clock = new THREE.Clock();
-  renderer.setAnimationLoop(() => {
-    const raw = Math.min(clock.getDelta(), 0.1);
+  // Nur für den Zeitraffer-Test (tools/zeitraffer, docs/zeitraffer.md): ?testtempo=500 läuft
+  // 500-mal so schnell wie 1x. Die Spielzeit eines Bildes wird in Schritte von höchstens
+  // TEST_SCHRITT Sekunden geteilt (so groß wie ein Bild bei 8x), damit Boote und Regeln
+  // dasselbe sehen wie im normalen Spiel. Höchstens TEST_MAX Schritte je Bild, damit die Seite
+  // bedienbar bleibt; reicht die Rechenzeit nicht, läuft das Spiel langsamer als verlangt.
+  // Ohne Parameter ändert sich nichts.
+  const testTempo = Math.min(2000, Math.max(0, Number(new URLSearchParams(location.search).get('testtempo')) || 0));
+  const TEST_SCHRITT = 0.8;
+  const TEST_MAX = 120;
+  game.testTempo = testTempo;
+
+  let nebelZiel = 0;
+  game.on('weather', (w) => { if (w && typeof w === 'object') nebelZiel = Math.min(1, Math.max(0, Number(w.fog) || 0)); });
+
+  // Zeit aus dem Zeitstempel der Bildschleife (THREE.Clock ist in Three.js 0.187 veraltet und warnt)
+  let zuletzt = null;
+  renderer.setAnimationLoop((zeit) => {
+    const jetzt = Number.isFinite(zeit) ? zeit : performance.now();
+    const delta = zuletzt === null ? 0 : Math.max(0, (jetzt - zuletzt) / 1000);
+    zuletzt = jetzt;
+    if (testTempo > 0) {
+      const echt = Math.min(delta, 0.5);
+      let rest = game.paused ? 0 : Math.min(echt * testTempo * game.speed, TEST_SCHRITT * TEST_MAX);
+      const n = Math.max(1, Math.ceil(rest / TEST_SCHRITT));
+      for (let i = 0; i < n; i++) {
+        const dt = rest / (n - i);
+        rest -= dt;
+        game.time += dt;
+        for (const fn of tickers) fn(dt, game);
+      }
+      rig.update(Math.min(echt, 0.1));
+      dunst(scene, rig);
+      renderer.render(scene, rig.camera);
+      return;
+    }
+    const raw = Math.min(delta, 0.1);
     const dt = game.paused ? 0 : raw * game.speed;
     game.time += dt;
     rig.update(raw);
     for (const fn of tickers) fn(dt, game);
+    // Nebel aus dem Wetter zieht den Dunst weich heran
+    rig.nebel += (nebelZiel - rig.nebel) * Math.min(1, raw * 0.8);
+    dunst(scene, rig);
     renderer.render(scene, rig.camera);
   });
 
   return game;
 }
 
+// Dunst nur in der Perspektive und erst weit hinter dem Blickpunkt: von oben sieht man ihn nicht,
+// bei flachem Blick blendet er den Rand der Landschaft und die Kante der Wasserflaeche aus.
+function dunst(scene, rig) {
+  const fog = scene.fog;
+  if (!fog || !fog.isFog) return;
+  if (scene.background?.isColor) fog.color.copy(scene.background);
+  if (rig.projektion === 'ortho') { fog.near = 1e5; fog.far = 2e5; return; }
+  const { nah, fern } = rig.dunst;
+  fog.near = nah;
+  fog.far = fern;
+}
+
 // Wie viel Bildschirm verdecken die Leisten oben und unten? Nur waagerechte Leisten zaehlen,
 // seitliche (Handy quer) nicht. Hoechstens ein Viertel der Hoehe je Seite.
 function hudInsets(canvas, w, h) {
+  // Die Leisten sind heute durchsichtige Behaelter mit Knoepfen in den Ecken. Es zaehlt nur,
+  // was wirklich ein grosses Stueck der Breite verdeckt: ein sichtbares Kind ab 30 % der Breite
+  // oder eines ueber der Bildmitte. Kleine Eckknoepfe (Handy quer, PC) ueberdecken kaum etwas.
   const c = canvas.getBoundingClientRect();
   let top = 0;
   let bottom = 0;
   for (const id of ['hud-top', 'hud-bottom']) {
     const el = document.getElementById(id);
     if (!el || el.hidden) continue;
-    const r = el.getBoundingClientRect();
-    if (r.width < w * 0.6 || r.height <= 0) continue;
-    if (r.top - c.top < h / 2) top = Math.max(top, r.bottom - c.top);
-    else bottom = Math.max(bottom, c.bottom - r.top);
+    const teile = el.children.length ? [...el.children] : [el];
+    for (const k of teile) {
+      const r = k.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0) continue;
+      const mitte = r.left - c.left < w * 0.55 && r.right - c.left > w * 0.45;
+      if (r.width < w * 0.3 && !mitte) continue;
+      if (r.top - c.top < h / 2) top = Math.max(top, r.bottom - c.top);
+      else bottom = Math.max(bottom, c.bottom - r.top);
+    }
   }
   return [Math.min(top, h / 4), Math.min(bottom, h / 4)];
 }

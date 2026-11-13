@@ -14,48 +14,8 @@
 // das Tempo setzt dieses Modul (game.speed, Ereignis 'ui:vorspulen', wie bisher).
 
 // ------------------------------------------------------------------ Pixel-Grafik
-// Jede Grafik ist ein Raster aus Zeichen. '#' ist die Vordergrundfarbe (als Maske, CSS färbt),
-// andere Buchstaben sind feste Farben aus FARBE.
-const FARBE = {
-  o: '#7a5212', g: '#f2c14e', h: '#fde49a', d: '#d39b2c',     // Münze
-  s: '#e0962a', y: '#ffd95a', r: '#f0a03a',                    // Stern, Sonne
-  m: '#eef2f8', n: '#aeb9cc',                                   // Mond
-};
-
-const PIXEL = {
-  pause: ['............', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '..###..###..', '............'],
-  tempo1: ['............', '...#........', '...##.......', '...###......', '...####.....', '...#####....', '...#####....', '...####.....', '...###......', '...##.......', '...#........', '............'],
-  tempo2: ['............', '.#.....#....', '.##....##...', '.###...###..', '.####..####.', '.#####.#####', '.#####.#####', '.####..####.', '.###...###..', '.##....##...', '.#.....#....', '............'],
-  tempo3: ['............', '............', '#...#...#...', '##..##..##..', '###.###.###.', '############', '############', '###.###.###.', '##..##..##..', '#...#...#...', '............', '............'],
-  menue: ['............', '............', '.##########.', '.##########.', '............', '.##########.', '.##########.', '............', '.##########.', '.##########.', '............', '............'],
-  uebersicht: ['###......###', '#..........#', '#..........#', '............', '............', '.....##.....', '.....##.....', '............', '............', '#..........#', '#..........#', '###......###'],
-  foto: ['............', '....####....', '.##########.', '.#........#.', '.#...##...#.', '.#..#..#..#.', '.#..#..#..#.', '.#...##...#.', '.#........#.', '.##########.', '............', '............'],
-  ton: ['............', '.....#......', '....##...#..', '.####..#..#.', '.####...#.#.', '.####...#.#.', '.####...#.#.', '.####..#..#.', '....##...#..', '.....#......', '............', '............'],
-  stumm: ['............', '.....#......', '....##......', '.####..#...#', '.####...#.#.', '.####....#..', '.####...#.#.', '.####..#...#', '....##......', '.....#......', '............', '............'],
-  spielstand: ['............', '.#########..', '.#.#####.##.', '.#.#####..#.', '.#........#.', '.#........#.', '.#.######.#.', '.#.#....#.#.', '.#.#....#.#.', '.##########.', '............', '............'],
-  tasten: ['............', '............', '############', '#.#.#.#.#.##', '#..........#', '##.#.#.#.#.#', '#..........#', '#..######..#', '#..........#', '############', '............', '............'],
-  bauen: ['............', '.#######....', '.########...', '.#######....', '....##......', '....##......', '....##......', '....##......', '....##......', '....##......', '....##......', '............'],
-  ziele: ['............', '..#.........', '.#..#######.', '#...........', '............', '..#.........', '.#..#######.', '#...........', '............', '..#.........', '.#..#######.', '#...........'],
-  flagge: ['............', '.#####......', '.#########..', '.#########..', '.#########..', '.#..######..', '.#..........', '.#..........', '.#..........', '.#..........', '.#..........', '............'],
-  zu: ['............', '.##......##.', '.###....###.', '..###..###..', '...######...', '....####....', '....####....', '...######...', '..###..###..', '.###....###.', '.##......##.', '............'],
-  muenze: ['...oooooo...', '..ohhhhhhoo.', '.ohhggggggdo', '.ohggoooggdo', 'ohggoggggggo', 'ohgoooooggdo', 'ohggoggggggo', 'ohgoooooggdo', '.ohggoooggdo', '.oggggggggdo', '..oddddddoo.', '...oooooo...'],
-  stern: ['.....oo.....', '....oyyo....', '....oyyo....', 'oooooyyooooo', 'oyyyyyyyyyyo', '.osyyyyyyso.', '..osyyyyso..', '..osyyyyso..', '.osyysssyso.', '.osso..osso.', 'oso......oso', 'oo........oo'],
-  sonne: ['.....yy.....', '..y..yy..y..', '...y....y...', '....rrrr....', '.y.ryyyyr.y.', 'yy.ryyyyr.yy', 'yy.ryyyyr.yy', '.y.ryyyyr.y.', '....rrrr....', '...y....y...', '..y..yy..y..', '.....yy.....'],
-  mond: ['............', '....nnnn....', '...nmmmmn...', '..nmmmmnn...', '..nmmmn.....', '..nmmmn.....', '..nmmmn.....', '..nmmmmn....', '..nmmmmmnn..', '...nmmmmmn..', '....nnnnn...', '............'],
-};
-
-function pixelSvg(raster) {
-  const h = raster.length;
-  const w = raster[0].length;
-  let r = '';
-  raster.forEach((zeile, y) => {
-    [...zeile].forEach((c, x) => {
-      if (c === '.' || c === ' ') return;
-      r += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${c === '#' ? 'black' : FARBE[c] ?? 'black'}"/>`;
-    });
-  });
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges">${r}</svg>`;
-}
+// Symbole (Raster, Farben, SVG) stehen in ui/pixel-symbole.js, damit alle Schilder denselben Satz nutzen.
+import { PIXEL, pixelSvg } from './pixel-symbole.js';
 
 // Rahmen als 9-Teile-Bild: Umriss, Licht oben, Schatten unten, Pixel-Ecken, harter Schlagschatten.
 // 8 breit, 9 hoch; in CSS border-image-slice 3 3 4 3.
@@ -83,6 +43,8 @@ const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximu
 const ganz = (n) => Math.round(n).toLocaleString('de-DE');
 const euro = (n) => `${ganz(n)} €`;
 
+import { initEinstellungen, SCHALTER, WAHLEN } from './einstellungen.js';
+
 function el(tag, attrs = {}, ...kids) {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -99,7 +61,7 @@ const TEMPO = [
   { id: 'pause', label: 'Pause', speed: 0 },
   { id: 'tempo1', label: 'Normale Geschwindigkeit', speed: 1 },
   { id: 'tempo2', label: 'Dreifach vorspulen', speed: 3 },
-  { id: 'tempo3', label: 'Achtfach vorspulen', speed: 8 },
+  { id: 'tempo3', label: 'Achtfach vorspulen bis zum nächsten Boot', speed: 8 },
 ];
 
 export function init(game) {
@@ -152,7 +114,7 @@ export function init(game) {
     b.className = 'hm-tempo-knopf';
     b.dataset.tempo = t.id;
     b.setAttribute('aria-label', t.label);
-    b.title = t.id === 'tempo2' ? `${t.label} (Taste F)` : t.label;
+    b.title = t.id === 'tempo2' ? `${t.label} (Taste F)` : t.id === 'tempo3' ? `${t.label} (Taste G)` : t.label;
     b.hidden = false;
     b.textContent = '';
     symbol(b, t.id);
@@ -177,6 +139,12 @@ export function init(game) {
     game.emit('ui:vorspulen', { speed });
     zeigeTempo();
   }
+  // Tempo, das mitdenkt (roadmap Bed P4): Bei einem Sonderfall geht es zurück auf 1x, damit man ihn nicht verpasst.
+  // 8x läuft nur bis zum nächsten Boot an der Boje.
+  const zurueck = () => { if ((game.speed || 1) > 1 && !game.paused) waehleTempo(1); };
+  for (const ereignis of ['event:announce', 'event:start', 'sim:stageReady', 'sim:regionDone']) game.on(ereignis, zurueck);
+  game.on('sim:atBuoy', () => { if ((game.speed || 1) >= 8) zurueck(); });
+
   function zeigeTempo() {
     const s = game.speed || 1;
     for (const t of TEMPO) {
@@ -219,6 +187,9 @@ export function init(game) {
   function zielDaten() {
     const sim = game.sim;
     if (!sim?.state) return null;
+    // Nach dem Abschluss der Region: Saisonziele des Endlosspiels (features/aufstieg.js, P16)
+    const endlos = sim.state.regionDone ? game.aufstieg?.zielDaten?.() : null;
+    if (endlos) return endlos;
     const rg = sim.regionGoal?.();
     if (rg?.active) {
       const g = rg.goal;
@@ -253,14 +224,14 @@ export function init(game) {
     ziel.hidden = !d;
     if (!d) return;
     const erfuellt = d.zeilen.filter((z) => z.ist >= z.soll).length;
-    const schluessel = JSON.stringify([d.titel, d.fertig, d.zeilen.map((z) => z.text), zielPanel.hidden]);
+    const schluessel = JSON.stringify([d.titel, d.kopf, d.zahl, d.fertig, d.zeilen.map((z) => z.text), zielPanel.hidden]);
     if (schluessel === zielSchluessel) return;
     zielSchluessel = schluessel;
     ziel.classList.toggle('fertig', d.fertig);
     zielKnopf.replaceChildren(
       el('i', { class: 'hm-sym', 'aria-hidden': 'true', style: '--sym: var(--px-flagge)' }),
       el('span', { class: 'hm-chip-text' }, d.titel),
-      el('span', { class: 'hm-chip-zahl' }, d.fertig ? 'bereit' : `${erfuellt}/${d.zeilen.length}`),
+      el('span', { class: 'hm-chip-zahl' }, d.zahl ?? (d.fertig ? 'bereit' : `${erfuellt}/${d.zeilen.length}`)),
     );
     zielKnopf.setAttribute('aria-label', `${d.kopf}. ${erfuellt} von ${d.zeilen.length} erfüllt.`);
     if (zielPanel.hidden) return;
@@ -273,7 +244,8 @@ export function init(game) {
           el('span', { class: 'hm-balken-wert' }, z.text),
           el('span', { class: 'hm-balken' }, el('i', { style: `width:${Math.round(anteil * 100)}%` })));
       }),
-      d.aktion ? el('button', { type: 'button', class: 'hm-px hm-knopf hm-primaer', onclick: () => { klappeZu(); d.aktion.tun(); } }, d.aktion.text) : null,
+      // replaceChildren schreibt null als Text "null" (Stufe 6 hat keine Aktion): leere Liste statt null
+      ...(d.aktion ? [el('button', { type: 'button', class: 'hm-px hm-knopf hm-primaer', onclick: () => { klappeZu(); d.aktion.tun(); } }, d.aktion.text)] : []),
     );
   }
   zielKnopf.addEventListener('click', (e) => {
@@ -288,21 +260,69 @@ export function init(game) {
 
   // ---------------------------------------------------------------- Menü
   const MENUE = [
+    ['btn-tagesabschluss', 'Tagesabschluss', 'abschluss'],   // ui/tagesabschluss.js
     ['btn-foto', 'Fotomodus', 'foto'],
     ['btn-sound', null, 'ton'],      // Text setzt das Ton-Modul (Ton / Stumm)
     ['btn-save', 'Spielstand', 'spielstand'],
     ['btn-help', 'Maus und Tastatur', 'tasten'],
+    ['btn-einstellungen', 'Einstellungen', 'zahnrad'],
   ];
+
+  // ---------------------------------------------------------------- Einstellungen (P50)
+  const einst = initEinstellungen(game);
+  const einstBtn = el('button', { type: 'button', id: 'btn-einstellungen', 'aria-haspopup': 'dialog', 'aria-controls': 'hm-einstellungen' }, 'Einstellungen');
+  top.append(einstBtn);
+  const einstTafel = el('div', { id: 'hm-einstellungen', class: 'hm-px hm-tafel-px', role: 'dialog', 'aria-label': 'Einstellungen', hidden: true });
+  const einstZu = el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Einstellungen schließen', onclick: () => einstAuf(false) });
+  const touch = globalThis.matchMedia?.('(pointer: coarse)').matches ?? false;
+  const schalterKnopf = {};
+  einstTafel.append(el('div', { class: 'hm-karte-kopf' }, el('p', { class: 'hm-klapp-kopf' }, 'Einstellungen'), einstZu));
+  for (const sch of SCHALTER) {
+    if (sch.nurTouch && !touch) continue;
+    const k = el('button', {
+      type: 'button', role: 'switch', class: 'hm-schalter', 'aria-checked': String(einst.wert(sch.name)),
+      onclick: () => einst.setze(sch.name, !einst.wert(sch.name)),
+    }, el('span', { class: 'hm-schalter-text' }, el('strong', {}, sch.titel), el('span', {}, sch.text)), el('i', { class: 'hm-schalter-griff', 'aria-hidden': 'true' }));
+    schalterKnopf[sch.name] = k;
+    einstTafel.append(k);
+  }
+  const wahlKnoepfe = [];
+  for (const w of WAHLEN) {
+    const gruppe = el('div', { class: 'hm-wahl-stufen', role: 'radiogroup', 'aria-label': w.titel });
+    for (const [id, name] of w.stufen) {
+      const k = el('button', { type: 'button', role: 'radio', 'aria-checked': String(einst.wert(w.name) === id), onclick: () => einst.setze(w.name, id) }, name);
+      wahlKnoepfe.push([w.name, id, k]);
+      gruppe.append(k);
+    }
+    einstTafel.append(el('div', { class: 'hm-wahl' }, el('span', { class: 'hm-schalter-text' }, el('strong', {}, w.titel), el('span', {}, w.text)), gruppe));
+  }
+  // Ton und Musik haben eigene Regler im Ton-Fenster (audio.js): von hier aus dorthin
+  const tonKnopf = el('button', { type: 'button', class: 'hud-btn hm-knopf', onclick: (e) => { e.stopPropagation(); einstAuf(false); $('btn-sound')?.click(); } }, 'Ton und Musik einstellen');
+  // Gleich unter die Überschrift: am Handy hochkant passt die Tafel nicht ganz auf den Bildschirm, der Knopf läge sonst unter dem Rand
+  einstTafel.firstElementChild.after(tonKnopf);
+  root.append(einstTafel);
+  game.on('einstellungen', () => {
+    for (const [n, k] of Object.entries(schalterKnopf)) k.setAttribute('aria-checked', String(einst.wert(n)));
+    for (const [n, id, k] of wahlKnoepfe) k.setAttribute('aria-checked', String(einst.wert(n) === id));
+  });
+  function einstAuf(auf) {
+    einstTafel.hidden = !auf;
+    einstBtn.setAttribute('aria-expanded', String(auf));
+    if (auf) einstTafel.querySelector('.hm-schalter')?.focus({ preventScroll: true });
+  }
+  einstBtn.addEventListener('click', (e) => { e.stopPropagation(); klappeAndereZu('einstellungen'); einstAuf(einstTafel.hidden); });
   function menueAuf(auf) {
     menue.hidden = !auf;
     menueBtn.setAttribute('aria-expanded', String(auf));
   }
   menueBtn.addEventListener('click', (e) => { e.stopPropagation(); const auf = menue.hidden; klappeAndereZu('menue'); menueAuf(auf); });
-  menue.addEventListener('click', (e) => { if (e.target.closest('button')) setTimeout(() => menueAuf(false), 0); });
+  // Capture: Knöpfe anderer Module (Ton) stoppen ihren Klick, das Menü soll trotzdem zuklappen und nichts verdecken
+  menue.addEventListener('click', (e) => { if (e.target.closest('button')) setTimeout(() => menueAuf(false), 0); }, true);
 
   // Immer nur ein Aufklapper offen: Menü, Wetter, Tagesziele, Ziel
   function klappeAndereZu(ausser) {
     if (ausser !== 'menue') menueAuf(false);
+    if (ausser !== 'einstellungen') einstAuf(false);
     if (ausser !== 'ziel') { zielPanel.hidden = true; zielKnopf.setAttribute('aria-expanded', 'false'); }
     const liste = document.querySelector('.hm-tafel ul');
     if (ausser !== 'tafel' && liste && !liste.hidden) { liste.hidden = true; liste.parentNode.querySelector('button')?.setAttribute('aria-expanded', 'false'); }
@@ -311,8 +331,9 @@ export function init(game) {
   }
   const klappeZu = () => klappeAndereZu(null);
   document.addEventListener('pointerdown', (e) => {
-    if (e.target.closest?.('#hm-menue, #btn-menu, #hm-seite, #hm-audio-popover, .hm-save-backdrop')) return;
+    if (e.target.closest?.('#hm-menue, #btn-menu, #hm-seite, #hm-audio-popover, .hm-save-backdrop, #hm-einstellungen')) return;
     menueAuf(false);
+    einstAuf(false);
     zielPanel.hidden = true;
     zielKnopf.setAttribute('aria-expanded', 'false');
   }, true);
@@ -399,6 +420,8 @@ export function init(game) {
   game.on('sim:change', plane);
   game.on('sim:stageUp', () => { zielSchluessel = ''; plane(); });
   game.on('sim:regionDone', () => { zielSchluessel = ''; plane(); });
+  game.on('sim:seasonEnd', () => { zielSchluessel = ''; plane(); });
+  game.on('sim:seasonStart', () => { zielSchluessel = ''; plane(); });
   game.on('spielstand-geladen', plane);
   game.on('ready', () => { ordnen(); plane(); zeigeTempo(); setTimeout(ordnen, 600); });
   game.on('tap', () => klappeZu());

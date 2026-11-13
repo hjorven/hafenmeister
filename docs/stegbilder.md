@@ -1,6 +1,6 @@
 # Stegbilder: jede Marina sieht anders aus
 
-Stand: 12.11.2026
+Stand: 12.11.2026. Status: gebaut.
 
 Damit der Hafen nicht in jedem Spiel gleich aussieht, gibt es neben dem Grundbild aus `web/js/data/harbor.js` zwölf Varianten der Stege A, B, C (mit Stichsteg CS) und D. Ein neues Spiel würfelt eine davon, der Spielstand merkt sie sich, und der Ausbau wächst innerhalb dieser Variante weiter.
 

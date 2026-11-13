@@ -3,10 +3,11 @@
 // Schnittstelle für andere Module: docs/spielregeln.md
 
 import * as sim from './sim.js';
-import { createState, deserialize, load as loadLocal, save as saveLocal } from './state.js';
-import { HAFEN } from './data/harbor.js';
+import { createState, deserialize } from './state.js';
+import { HAFEN, platzInWelt } from './data/harbor.js';
 import { BOAT_CATALOG } from './data/boat-catalog.js';
 import { ECONOMY } from './data/economy.js';
+import { GROSSSCHIFF_BESUCHE } from './data/services.js';
 
 const BOAT_FILES = ['./data/boats/s.js', './data/boats/m.js', './data/boats/l.js', './data/boats/xl.js', './data/boats/xxl.js'];
 
@@ -81,6 +82,17 @@ export async function initBridge(game) {
   let state = null;
   let selected = null; // ausgewähltes wartendes Boot
 
+  // Entfernung von der Warteboje eines Boots zu einem Liegeplatz (Weltkoordinaten), damit sich
+  // Gäste beim Selbst-Einfahren die nächste freie Box suchen. Ohne Landschaft: Reihenfolge am Steg.
+  const platzById = Object.fromEntries(HAFEN.plaetze.map((p) => [p.id, p]));
+  ctx.berthDistance = (boat, berth, st) => {
+    const boje = game.landscape?.warteplaetze?.bojen?.[boat.waitSpot ?? 0];
+    const p = platzById[berth.id];
+    if (!boje || !p) return null;
+    const w = platzInWelt(p, st.stage);
+    return w ? Math.hypot(w.x - boje.x, w.z - boje.z) : null;
+  };
+
   // Modifikatoren der Module Ereignisse und Services abfragen, falls es sie gibt
   sim.addHook(ctx, 'modifiers', () => game.events?.modifiers?.());
   sim.addHook(ctx, 'modifiers', () => game.services?.effekte?.());
@@ -96,8 +108,7 @@ export async function initBridge(game) {
 
   function persist() {
     if (state.testmodus) return; // Testmodus ?stufe=n lässt den echten Spielstand in Ruhe
-    if (game.spielstand?.speichern) game.spielstand.speichern(state);
-    else saveLocal(state);
+    game.spielstand?.speichern?.(state); // ein Speicherweg: web/js/save/ (docs/speichern.md)
   }
 
   function announce() {
@@ -117,7 +128,7 @@ export async function initBridge(game) {
   // Kurzbeschreibung eines Boots für Grafik und Figuren
   function bootInfo(b) {
     return {
-      id: b.id, groesse: b.size, art: b.typeId, modell: b.modelId, palette: b.id % 4, name: b.name,
+      id: b.id, groesse: b.size, art: b.typeId, modell: b.modelId, palette: b.id % 4, name: b.name, herkunft: b.origin ?? null,
       platz: b.berthId, boje: b.waitSpot, zustand: b.status === 'moored' ? 'liegt' : b.status === 'waiting' ? 'wartet' : 'kommt',
       bezahlt: b.status === 'moored' ? (b.stationed ? true : b.paid !== false && !(b.pendingFee > 0)) : false, offen: b.pendingFee || 0,
     };
@@ -146,6 +157,8 @@ export async function initBridge(game) {
       }
       // Stufenausbau: ein fest liegendes Boot zieht auf einen neuen Platz um
       if (e.type === 'relocated') game.emit('boot-zugewiesen', { id: e.boatId, platz: e.to, umzug: true });
+      // Stufenausbau mit weniger Bojen: ein wartendes Boot verholt an eine andere Boje
+      if (e.type === 'waitSpotChanged') game.emit('boot:boje', { id: e.boatId, boje: e.waitSpot });
       // Tagestörn eines Gastes: gleiche Ereignisse wie die Runde der Dauerlieger
       if (e.type === 'tripOut') game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: 0, gast: true });
       if (e.type === 'tripBack') game.emit('dauer:einlaufen', { id: e.boatId, platzId: e.berthId, gast: true });
@@ -228,7 +241,8 @@ export async function initBridge(game) {
       if (selected === id) selected = null;
       return sim.dismiss(state, ctx, id);
     }),
-    collect: run((boatId) => sim.collect(state, ctx, boatIdOf(boatId))),
+    // Münze vom Spieler selbst eingestrichen (Tippen, Strich): zählt für Tagesziele, große Boote geben Trinkgeld
+    collect: run((boatId) => sim.collect(state, ctx, boatIdOf(boatId), { hand: true })),
     collectAll: run((force = true) => sim.collectAll(state, ctx, force)),
     upgradeFacility: run((key) => sim.upgradeFacility(state, ctx, key)),
     upgradeOffice: run(() => sim.upgradeOffice(state, ctx)),
@@ -237,13 +251,14 @@ export async function initBridge(game) {
     openJettyProjects: () => sim.openJettyProjects(state, ctx),
     advanceStage: run(() => sim.advanceStage(state, ctx)),
     stationBoat: run((typeId, berthId, modelId) => sim.stationBoat(state, ctx, typeId, berthId, modelId)),
-    spend: (amount) => {
-      const ok = sim.spend(state, amount);
+    // zweck und quelle ordnen Beträge im Tagesabschluss ein (sim.QUELLEN, docs/tagesabschluss.md)
+    spend: (amount, zweck = 'bau') => {
+      const ok = sim.spend(state, amount, zweck);
       if (ok) game.emit('sim:change', { reason: 'spend' });
       return ok;
     },
-    addIncome: (amount) => {
-      sim.addIncome(state, amount);
+    addIncome: (amount, quelle = 'sonstiges', detail = null) => {
+      sim.addIncome(state, amount, quelle, detail);
       game.emit('sim:change', { reason: 'income' });
     },
     setRegion(region) {
@@ -261,6 +276,26 @@ export async function initBridge(game) {
     // Lesen
     reputation: () => sim.reputation(state),
     fittingBerths: (boatId) => sim.fittingBerths(state, ctx, boatIdOf(boatId)),
+    // Hafenbüro: Grund, warum die Automatik dieses Boot dem Spieler lässt, oder null
+    sonderfall: (boatId) => {
+      const b = state.boats[boatIdOf(boatId)];
+      // Ab den Vorschlägen des Büros (Stufe 3); mit Leitstelle nur in Klassen, die sie zuweist
+      if (!b || state.office < (ctx.rules.office.propose ?? Infinity)) return null;
+      if (sim.officeAutomatic(state, ctx) && !sim.officeAutoFor(state, ctx, b.size)) return null;
+      return sim.officeSpecialCase(state, ctx, b.id);
+    },
+    // Vorschlag des Büros (Platz-id) für ein wartendes Boot oder null
+    vorschlag: (boatId) => sim.officeProposal(state, ctx, boatIdOf(boatId)),
+    // Welche Platz-Wünsche des Boots (Strom ...) diese Box erfüllt
+    platzWuensche: (boatId, berthId) => {
+      const b = state.boats[boatIdOf(boatId)];
+      const p = ctx.berthById[berthIdOf(berthId)];
+      if (!b || !p) return [];
+      return b.wishes.filter((w) => ctx.rules.berthWishes[w] && sim.berthHas(state, ctx, p, ctx.rules.berthWishes[w]));
+    },
+    // Automatik des Büros je Größenklasse
+    bueroAutomatik: (size) => sim.officeAutoFor(state, ctx, size),
+    setBueroAutomatik: run((size, on) => sim.setOfficeAuto(state, size, on)),
     whyNotFit: (boatId, berthId) => {
       const b = state.boats[boatIdOf(boatId)];
       const p = ctx.berthById[berthIdOf(berthId)];
@@ -288,6 +323,7 @@ export async function initBridge(game) {
     platzZustaende: () => sim.berthStates(state, ctx),
     aufAusflug: (boatId) => !!state.boats[boatIdOf(boatId)]?.trip?.away,
     regionGoal: () => sim.regionGoal(state, ctx),
+    stageUpPreview: () => sim.stageUpPreview(state, ctx),
     holdBoat: (boatId, held = true) => sim.holdBoat(state, boatIdOf(boatId), held),
     // Hat das Boot sein Liegegeld für die kommende Nacht bezahlt? (Bändchen am Bug, Hafenmeister-Rundgang)
     istBezahlt: (boatId) => {
@@ -298,15 +334,21 @@ export async function initBridge(game) {
   };
   game.sim = api;
 
-  // Spielstand: zuerst game.spielstand (Speichermodul), sonst eigener localStorage, sonst neu
+  // Spielstand des aktiven Speicherplatzes (game.spielstand, web/js/save/), sonst neu
   function loadSaved() {
     try {
       const r = game.spielstand?.laden?.();
-      if (r?.game) return deserialize(JSON.stringify(r.game));
+      if (r?.game) return pruefen(deserialize(JSON.stringify(r.game)));
     } catch (err) {
       console.warn('Spielstand nicht lesbar, neues Spiel', err);
     }
-    return loadLocal();
+    return null;
+  }
+  // Alte Stände: Gäste in Boxen, die es nicht mehr gibt oder die zu flach sind, legen um (sim.repairBerths)
+  function pruefen(st) {
+    const changes = sim.repairBerths(st, ctx);
+    if (changes.length) console.info('Spielstand geprüft, Boote umgelegt:', changes);
+    return st;
   }
   // Testmodus ?stufe=n: frischer Spielstand dieser Stufe (alles bis dahin gebaut), der echte
   // gespeicherte Spielstand wird weder geladen noch überschrieben. Ohne Parameter wie gehabt.
@@ -317,7 +359,7 @@ export async function initBridge(game) {
 
   game.on('spielstand-geladen', (next) => {
     try {
-      setState(deserialize(JSON.stringify(next)));
+      setState(pruefen(deserialize(JSON.stringify(next))));
       announce();
     } catch (err) {
       console.error('Geladener Spielstand passt nicht zu den Regeln', err);
@@ -370,9 +412,10 @@ export async function initBridge(game) {
     const berthId = berthIdOf(d.platz ?? d.berth ?? d.berthId ?? (d.pick?.type === 'berth' ? d.pick.id : null) ?? d.target);
     if (boatId != null && berthId) api.assign(boatId, berthId);
   });
-  // Besuche großer Schiffe zählen für das Abschlussziel der Region
+  // Besuche großer Schiffe zählen für das Abschlussziel der Region (Liste in data/services.js,
+  // auch der Tag der offenen Tür des Marinestützpunkts zählt). Einziger Zähler: state.bigVisits.
   game.on('services:besuch', (b = {}) => {
-    if (['kreuzfahrt', 'flottenbesuch'].includes(b.art)) dispatch(sim.addBigVisit(state, ctx));
+    if (GROSSSCHIFF_BESUCHE.includes(b.art)) dispatch(sim.addBigVisit(state, ctx));
   });
   // Hafenmeister-Rundgang am Abend (render/people.js): Wer noch nicht bezahlt hat, zahlt jetzt die Hälfte
   game.on('hafenmeister:halt', (d = {}) => {
@@ -382,9 +425,19 @@ export async function initBridge(game) {
   // Abrechnung des Services-Moduls am Tagesende
   game.on('services:abrechnung', (a = {}) => {
     const sum = Number(a.summe) || 0;
-    if (sum > 0) api.addIncome(sum);
-    else if (sum < 0) api.spend(Math.min(state.money, -sum));
+    // Je Anlage einzeln buchen, damit der Tagesabschluss die Services aufschlüsseln kann
+    const posten = Array.isArray(a.einnahmen) ? a.einnahmen.filter((e) => Number(e?.betrag) > 0) : [];
+    const teil = posten.reduce((x, e) => x + Number(e.betrag), 0);
+    if (sum > 0 && teil === sum) {
+      for (const e of posten) sim.addIncome(state, Number(e.betrag), 'services', String(e.id));
+      game.emit('sim:change', { reason: 'income' });
+    } else if (sum > 0) api.addIncome(sum, 'services');
+    else if (sum < 0) api.spend(Math.min(state.money, -sum), 'services');
   });
+
+  // Bericht des laufenden Tages (Einnahmen je Quelle bis jetzt) und die letzten Tage
+  api.tagesbericht = () => sim.tagesbericht(state, ctx);
+  api.verlauf = () => [...(state.stats.verlauf || [])];
 
   game.onTick((dt) => dispatch(sim.tick(state, ctx, dt)));
   game.on('ready', announce);

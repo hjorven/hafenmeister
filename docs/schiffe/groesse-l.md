@@ -1,6 +1,6 @@
 # Schiffe der Größe L
 
-Stand: 11.11.2026. 4 Arten mit je 5 Modellen, 3 Farbvarianten je Modell. Daten in `web/js/data/boats/l.js`, Modelle in `web/js/render/boats/l.js`.
+Stand: 11.11.2026. 4 Arten mit je 5 Modellen, 3 Farbvarianten je Modell. Status: gebaut. Daten in `web/js/data/boats/l.js`, Modelle in `web/js/render/boats/l.js`.
 
 ![Alle 20 Modelle](groesse-l.jpg)
 

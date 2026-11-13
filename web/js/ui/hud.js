@@ -4,6 +4,13 @@
 // Daten kommen aus game.sim (web/js/bridge.js), siehe docs/spielregeln.md.
 
 const WISH_LABEL = { wc: 'WC', dusche: 'Dusche', essen: 'Essen', strom: 'Strom', diesel: 'Diesel' };
+// Warum das Hafenbüro ein Boot dem Spieler lässt (sim.officeSpecialCase)
+const SONDERFALL_LABEL = {
+  mehrrumpf: 'Mehrrumpfboot',
+  gross: 'Großes Schiff',
+  sondergast: 'Sondergast',
+  einzigerPlatz: 'Nur eine Box passt',
+};
 const FACILITY_LABEL = { wc: 'Toilette', dusche: 'Dusche', essen: 'Kiosk', diesel: 'Tankstelle' };
 const REASON_LABEL = {
   length: 'Das Boot ist zu lang für diesen Platz.',
@@ -20,6 +27,7 @@ const REASON_LABEL = {
 };
 
 import { HAFEN, platzInWelt } from '../data/harbor.js';
+import { pixelBild } from './pixel-symbole.js';
 
 const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
 const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -62,13 +70,23 @@ export function init(game) {
     @media (max-width: 600px) { #hud-goal { bottom: calc(env(safe-area-inset-bottom, 0px) + 124px); max-width: calc(100vw - 32px); font-size: 0.8rem; } }
     #hud-goal.done { pointer-events: auto; cursor: pointer; background: rgba(32, 110, 62, 0.92); font-weight: 600; }
     #queue .boat-chip[aria-pressed="true"] { outline: 3px solid #f2c14e; }
+    #card .hm-sonderfall { color: #8a4206; font-weight: 600; }
+    #card .hm-vorschlag { color: #6b4e00; font-weight: 600; }
+    #card .hm-sonderfall .hm-pixelbild, #card .hm-vorschlag .hm-pixelbild { vertical-align: -2px; margin-right: 6px; }
+    .hm-flugtext { position: fixed; z-index: 6; pointer-events: none; transform: translate(-50%, -100%); white-space: nowrap;
+      padding: 2px 8px; border: 2px solid #24364a; background: #fffcf6; color: #24364a; font: 600 14px var(--hm-pixel, sans-serif);
+      animation: hm-flug 1.6s ease-out forwards; }
+    .hm-flugtext.gold { background: #fde49a; }
+    @keyframes hm-flug { 0% { opacity: 0; margin-top: 0; } 15% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; margin-top: -36px; } }
   `;
   document.head.append(style);
 
-  // Knopf "Kassieren" erscheint abends neben "Bauen", solange Münzen offen sind
+  // Knopf "Kassieren" erscheint neben "Bauen", solange Münzen offen sind, aber erst mit dem
+  // Hafenmeister (Hafenbüro Stufe 1, rules.office.collectAllButton). Vorher streicht man die
+  // Münzen einzeln ein (ui/gesten.js).
   const collectBtn = el('button', { type: 'button', class: 'hud-btn', id: 'btn-collect', hidden: true });
   buildBtn?.before(collectBtn);
-  collectBtn.addEventListener('click', () => game.sim?.collectAll(true));
+  collectBtn.addEventListener('click', () => game.sim?.collectAll(false));
 
   // Knopf "Spielstand" (Sichern, Laden, Installieren) aus dem Speichermodul
   const saveBtn = el('button', { type: 'button', class: 'hud-btn', id: 'btn-save', 'aria-label': 'Spielstand sichern oder laden' }, 'Spielstand');
@@ -129,7 +147,8 @@ export function init(game) {
     const phase = season.winter ? ' · Winter' : st.phase === 'evening' ? ' · Abend' : '';
     day.textContent = `Tag ${st.day}${phase}`;
     const pending = sim.mooredBoats().reduce((a, b) => a + (b.pendingFee || 0), 0);
-    collectBtn.hidden = pending <= 0;
+    const darfKnopf = st.office >= (sim.ctx?.rules?.office?.collectAllButton ?? 0);
+    collectBtn.hidden = pending <= 0 || !darfKnopf;
     collectBtn.textContent = `Kassieren ${euro(pending)}`;
     renderGoal(sim);
   }
@@ -162,7 +181,7 @@ export function init(game) {
               }
             },
           },
-          b.besuche > 1 ? `${b.size} ${b.name} · Stammgast` : `${b.size} ${b.name}`,
+          `${b.size} ${b.name}${b.besuche > 1 ? ' · Stammgast' : ''}${sim.sonderfall?.(b.id) ? ' · für dich' : ''}`,
         ),
       ),
     );
@@ -175,6 +194,8 @@ export function init(game) {
       return closeCard();
     }
     const fitting = sim.fittingBerths(b.id);
+    const vorschlag = sim.vorschlag?.(b.id) ?? null;
+    vorschlagZeigen(vorschlag);
     const schliessen = () => { sim.select(null); closeCard(); };
     // Kurz und auf einen Blick: Name, Eckdaten als Schilder, ein Satz, zwei Knöpfe.
     // "Einfahren" steht immer groß in der Karte, auf jedem Gerät an derselben Stelle.
@@ -192,18 +213,80 @@ export function init(game) {
         el('li', { title: 'Tiefgang' }, `Tiefgang ${meters(b.draft)}`),
         el('li', { title: 'Aufenthalt' }, nacht),
         ...b.wishes.map((w) => el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`))),
+      sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length, sim.bueroAutomatik?.(b.size)),
+      vorschlag ? el('p', { class: 'card-hint hm-vorschlag' }, pixelBild('rauteGold', 14), vorschlagText(b, vorschlag)) : null,
       el('p', { class: 'card-hint' }, !fitting.length
         ? 'Gerade ist kein passender Platz frei.'
-        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}. Zieh das Boot hin oder lass es einfahren.`),
+        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}. Zieh das Boot hin oder ${vorschlag ? 'nimm den Vorschlag an' : 'lass es einfahren'}.`),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
       el(
         'div',
         { class: 'card-actions' },
-        el('button', { type: 'button', class: 'hud-btn hm-primaer', 'aria-label': 'Automatisch einfahren', title: 'Das Boot sucht sich den besten freien Platz', disabled: !fitting.length, onclick: () => sim.autoEnter(b.id) }, 'Einfahren lassen'),
+        vorschlag
+          ? el('button', { type: 'button', class: 'hud-btn hm-primaer', 'aria-label': `Vorschlag annehmen: ${vorschlag}`, title: 'Das Boot fährt in die Box, die das Hafenbüro vorschlägt', onclick: () => sim.autoEnter(b.id) }, 'Vorschlag annehmen')
+          : el('button', { type: 'button', class: 'hud-btn hm-primaer', 'aria-label': 'Automatisch einfahren', title: 'Das Boot nimmt die nächste passende Box, ohne auf Wünsche zu achten', disabled: !fitting.length, onclick: () => sim.autoEnter(b.id) }, 'Einfahren lassen'),
         el('button', { type: 'button', class: 'hud-btn hm-gefahr', onclick: () => { sim.dismiss(b.id); closeCard(); } }, 'Abweisen'),
       ),
     );
   }
+
+  // Vorschlag des Hafenbüros (ab Bürostufe 3): beste Box, welche Wünsche sie erfüllt
+  function vorschlagText(b, platzId) {
+    const erfuellt = (sim0()?.platzWuensche?.(b.id, platzId) ?? []).map((w) => WISH_LABEL[w] ?? w);
+    return `Vorschlag des Büros: Box ${platzId}${erfuellt.length ? ` mit ${erfuellt.join(' und ')}` : ''}. Sie ist mit einer goldenen Raute markiert.`;
+  }
+  const sim0 = () => game.sim;
+
+  // Hafenbüro mit Automatik: Sonderfälle bleiben beim Spieler (plan.md Abschnitt 3)
+  // Ab Bürostufe 3 (Vorschläge) gilt es schon: Für Sonderfälle schlägt das Büro nichts vor.
+  function sonderfallHinweis(grund, frei, automatisch) {
+    if (!grund) return null;
+    const warum = grund === 'einzigerPlatz' ? 'Nur noch eine Box passt' : SONDERFALL_LABEL[grund] ?? 'Sonderfall';
+    if (!automatisch) {
+      return el('p', { class: 'card-hint hm-sonderfall' }, pixelBild('raute', 14), `${warum}: Dafür macht das Büro keinen Vorschlag, du entscheidest.`);
+    }
+    const sek = game.sim?.ctx?.rules?.office?.special?.selfEnterAfter;
+    const sonst = frei && sek ? ` Sonst fährt es nach ${sek} s selbst ein.` : '';
+    return el('p', { class: 'card-hint hm-sonderfall' }, pixelBild('raute', 14), `${warum}: Die Leitstelle lässt dir die Wahl.${sonst}`);
+  }
+
+  // Kurzer Text, der über einem Boot aufsteigt (Trinkgeld, Nebenkosten, Bonus fürs Einweisen)
+  function flugtext(boatId, text, gold = false) {
+    const a = game.boatView?.boot(boatId);
+    const cam = game.camera;
+    if (!a?.model || !cam?.camera || !game.THREE) return;
+    const v = a.model.position.clone();
+    v.y += 2;
+    v.project(cam.camera);
+    if (v.z > 1) return;
+    const x = (v.x + 1) / 2 * (cam.screenW ?? innerWidth);
+    const y = (1 - v.y) / 2 * (cam.screenH ?? innerHeight);
+    // Mehrere Texte am selben Boot stapeln statt übereinander
+    const n = flugAktiv.get(boatId) ?? 0;
+    flugAktiv.set(boatId, n + 1);
+    const t = el('div', { class: `hm-flugtext hm-px${gold ? ' gold' : ''}`, role: 'status' }, text);
+    t.style.left = `${Math.round(x)}px`;
+    t.style.top = `${Math.round(y - n * 30)}px`;
+    document.body.append(t);
+    setTimeout(() => {
+      t.remove();
+      const m = (flugAktiv.get(boatId) ?? 1) - 1;
+      if (m > 0) flugAktiv.set(boatId, m); else flugAktiv.delete(boatId);
+    }, 1700);
+  }
+  const flugAktiv = new Map();
+  game.on('sim:collected', (e) => {
+    if (e?.tip) flugtext(e.boatId, `Trinkgeld +${euro(e.tip)}`, true);
+    if (e?.extras) flugtext(e.boatId, `Strom, Wasser, Duschen +${euro(e.extras)}`);
+  });
+  game.on('sim:moored', (e) => {
+    const sim = game.sim;
+    const b = sim?.state?.boats?.[e?.boatId];
+    // Der Bonus fürs Einweisen zählt immer; gezeigt wird er, sobald das Büro es auch könnte
+    if (b?.byHand && sim.state.office >= (sim.ctx.rules.office.propose ?? Infinity) && sim.ctx.rules.handAssignBonus) {
+      setTimeout(() => flugtext(b.id, 'Selbst eingewiesen: +¼ Anker'), 600);
+    }
+  });
 
   function buildCard(sim, st) {
     const rows = [];
@@ -248,6 +331,14 @@ export function init(game) {
         {},
         `Nächste Ausbaustufe: Gäste ${adv.guests}, nötig ${adv.goal.guests} · Ruf ${num1(adv.reputation)}, nötig ${num1(adv.goal.reputation)} · Kosten ${euro(adv.goal.cost)}`,
       );
+      // Hinweis: Beim Umbau fallen Plätze weg, Gäste dort reisen ab, feste Boote ziehen um
+      const umbau = sim.stageUpPreview?.();
+      if (umbau && umbau.guests.length + umbau.fixed.length > 0) {
+        const teile = [];
+        if (umbau.guests.length) teile.push(`${umbau.guests.length} ${umbau.guests.length === 1 ? 'Gast reist' : 'Gäste reisen'} ab`);
+        if (umbau.fixed.length) teile.push(`${umbau.fixed.length} ${umbau.fixed.length === 1 ? 'festes Boot zieht' : 'feste Boote ziehen'} um`);
+        stageLine.append(el('br'), `Beim Umbau fallen ${umbau.gone.length} Plätze weg: ${teile.join(', ')}.`);
+      }
       rows.push(
         el('button', { type: 'button', class: 'hud-btn', disabled: !adv.ok, onclick: () => act(sim.advanceStage()) }, `${adv.goal.name ?? 'Hafen erweitern'} · ${euro(adv.goal.cost)}`),
       );
@@ -280,6 +371,7 @@ export function init(game) {
     if (pauseBtn) pauseBtn.hidden = false;
     renderStats(sim, st);
     renderQueue(sim);
+    rautenAbgleich(sim);
     if (cardMode === 'boat') boatCard(sim, st);
     else if (cardMode === 'build') buildCard(sim, st);
   }
@@ -289,6 +381,114 @@ export function init(game) {
     scheduled = true;
     requestAnimationFrame(render);
   }
+
+  // Orange Raute über wartenden Sonderfällen: Das Hafenbüro weist sie nicht zu, sie warten auf
+  // den Spieler. Schwebt über dem Boot, folgt ihm (game.boatView), pulsiert leicht.
+  // (Kein Wimpel: Den tragen bezahlte Boote am Bug.)
+  const rauten = new Map(); // bootId -> Group
+  let rautenTeile = null;
+  function rauteBauen(gold = false) {
+    const THREE = game.THREE;
+    if (!rautenTeile) {
+      const form = new THREE.Shape();
+      form.moveTo(0, 0.62); form.lineTo(0.62, 0); form.lineTo(0, -0.62); form.lineTo(-0.62, 0); form.lineTo(0, 0.62);
+      rautenTeile = {
+        stock: new THREE.CylinderGeometry(0.05, 0.05, 1.1, 6),
+        punkt: new THREE.CircleGeometry(0.16, 12),
+        tuch: new THREE.ShapeGeometry(form),
+        stockMat: new THREE.MeshBasicMaterial({ color: '#f4f1e8', depthTest: false, transparent: true }),
+        tuchMat: new THREE.MeshBasicMaterial({ color: '#f08a24', side: THREE.DoubleSide, depthTest: false, transparent: true }),
+        randMat: new THREE.MeshBasicMaterial({ color: '#7a3a08', side: THREE.DoubleSide, depthTest: false, transparent: true }),
+        goldMat: new THREE.MeshBasicMaterial({ color: '#f5c542', side: THREE.DoubleSide, depthTest: false, transparent: true }),
+        goldRandMat: new THREE.MeshBasicMaterial({ color: '#8a6300', side: THREE.DoubleSide, depthTest: false, transparent: true }),
+      };
+    }
+    const t = rautenTeile;
+    const g = new THREE.Group();
+    g.name = 'hafenbuero-raute';
+    const stock = new THREE.Mesh(t.stock, t.stockMat);
+    stock.position.y = 0.55;
+    const raute = new THREE.Group();
+    raute.position.y = 1.7;
+    const rand = new THREE.Mesh(t.tuch, gold ? t.goldRandMat : t.randMat);
+    rand.scale.setScalar(1.18);
+    rand.position.z = -0.01;
+    const tuch = new THREE.Mesh(t.tuch, gold ? t.goldMat : t.tuchMat);
+    const punkt = new THREE.Mesh(t.punkt, t.stockMat);
+    punkt.position.z = 0.01;
+    for (const m of [stock, rand, tuch, punkt]) m.renderOrder = 12;
+    raute.add(rand, tuch, punkt);
+    g.add(stock, raute);
+    g.userData.raute = raute;
+    return g;
+  }
+  function rautenAbgleich(sim) {
+    if (!game.THREE || !game.scene || !game.boatView) return;
+    // Raute nur mit Leitstelle: vorher weist ohnehin niemand außer dem Spieler zu
+    const soll = new Set(sim.waitingBoats().filter((b) => sim.sonderfall?.(b.id) && sim.bueroAutomatik?.(b.size)).map((b) => b.id));
+    for (const [id, g] of rauten) if (!soll.has(id)) { g.parent?.remove(g); rauten.delete(id); }
+    for (const id of soll) {
+      if (rauten.has(id)) continue;
+      const g = rauteBauen();
+      g.userData.t0 = game.time ?? 0;
+      game.scene.add(g);
+      rauten.set(id, g);
+    }
+  }
+  // Goldene Raute über der vorgeschlagenen Box, solange das Boot ausgewählt ist
+  let vorschlagMarke = null;
+  let vorschlagPlatz = null;
+  function vorschlagZeigen(platzId) {
+    vorschlagPlatz = platzId;
+    if (!platzId) { if (vorschlagMarke) vorschlagMarke.visible = false; return; }
+    if (!game.THREE || !game.scene) return;
+    if (!vorschlagMarke) {
+      vorschlagMarke = rauteBauen(true);
+      vorschlagMarke.name = 'hafenbuero-vorschlag';
+      game.scene.add(vorschlagMarke);
+    }
+    // Lage aus den gezeichneten Stegen (render/stege.js), sonst aus den Platzdaten
+    const platz = HAFEN.plaetze.find((p) => p.id === platzId);
+    const w = game.stege?.platz?.(platzId) ?? (platz && platzInWelt(platz, game.sim?.state?.stage ?? 1));
+    vorschlagMarke.visible = !!w;
+    if (w) vorschlagMarke.userData.ort = w;
+  }
+  game.onTick?.(() => {
+    const blick = game.camera?.camera ?? null;
+    if (vorschlagMarke?.visible) {
+      const w = vorschlagMarke.userData.ort;
+      const tt = performance.now() / 1000;
+      vorschlagMarke.position.set(w.x, 1.2 + Math.sin(tt * 2) * 0.15, w.z);
+      if (blick) vorschlagMarke.rotation.y = Math.atan2(blick.position.x - w.x, blick.position.z - w.z);
+      const weit = blick ? blick.position.distanceTo(vorschlagMarke.position) : 60;
+      vorschlagMarke.scale.setScalar(Math.min(6, Math.max(1, weit * 0.022)));
+    }
+  });
+  game.onTick?.(() => {
+    if (!rauten.size) return;
+    const t = game.time ?? 0;
+    const blick = game.camera?.camera ?? null;
+    for (const [id, g] of rauten) {
+      const a = game.boatView?.boot(id);
+      if (!a?.model) { g.visible = false; continue; }
+      g.visible = true;
+      // Über der Mastspitze: Höhe des Modells einmal messen (Segel und Takelage eingeschlossen)
+      if (g.userData.hoehe == null && game.THREE) {
+        const box = new game.THREE.Box3().setFromObject(a.model);
+        g.userData.hoehe = Number.isFinite(box.max.y) ? box.max.y - a.model.position.y : 0;
+      }
+      const h = Math.max(2.4, a.model.userData.iconHeight ?? 0, g.userData.hoehe ?? 0) + 1.0;
+      g.position.set(a.model.position.x, h + Math.sin(t * 1.6 + id) * 0.12, a.model.position.z);
+      // Immer quer zur Kamera, damit die Raute von jeder Seite gleich gut zu sehen ist
+      if (blick) g.rotation.y = Math.atan2(blick.position.x - g.position.x, blick.position.z - g.position.z);
+      const k = Math.min(1, (t - g.userData.t0) * 3);
+      // Etwa gleich groß auf dem Bildschirm, egal wie weit die Kamera weg ist
+      const weit = blick ? blick.position.distanceTo(g.position) : 60;
+      const groesse = Math.max(0.01, k) * Math.min(6, Math.max(1, weit * 0.022));
+      g.scale.setScalar(groesse);
+      g.userData.raute.scale.setScalar(1 + Math.max(0, Math.sin(t * 3 + id)) * 0.12);
+    }
+  });
 
   // Passende Plätze als Ringe im Wasser markieren, sobald ein Boot gewählt ist.
   // Antippen eines Rings weist das Boot dort zu (pick type 'berth').
@@ -325,6 +525,7 @@ export function init(game) {
     }
   }
   const clearRings = () => {
+    vorschlagZeigen(null);
     ringGroup?.clear();
     if (leuchtend.length) { leuchtend = []; game.stege?.highlight?.([]); }
   };

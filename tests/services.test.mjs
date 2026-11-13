@@ -1,7 +1,8 @@
 // Tests fuer die Services-Regeln. Aufruf: node --test tests/
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SERVICES, SERVICE_BY_ID, RUF_BONUS_MAX } from '../web/js/data/services.js';
+import { SERVICES, SERVICE_BY_ID, SERVICE_TEXTE, RUF_BONUS_MAX } from '../web/js/data/services.js';
+import { ECONOMY } from '../web/js/data/economy.js';
 import { erstelleRegeln, neuerZustand, mitZahlen } from '../web/js/services/rules.js';
 
 const R = erstelleRegeln();
@@ -33,7 +34,7 @@ test('Freischalten nach Hafenstufe, Ruf, Voraussetzung und Geld', () => {
   assert.equal(R.pruefe(z, 'travellift', { stufe: 4, ruf: 3, geld: 10 }).geldFehlt, true);
   const ok = R.bauen(z, 'travellift', { stufe: 4, ruf: 3, geld: 1e6 });
   assert.equal(ok.ok, true);
-  assert.equal(ok.kosten, 6000);
+  assert.equal(ok.kosten, ECONOMY.services.travellift.stufen[0].kosten);
   assert.equal(z.gebaut.travellift, 1);
   assert.equal(R.pruefe(z, 'kreuzfahrtterminal', { stufe: 5, ruf: 5, geld: 1e9 }).ok, false);
 });
@@ -56,7 +57,7 @@ test('Einnahmen: Tagesgeschaeft mit Wetter, Kunden mit Filter, keine laufenden K
   R.bauen(z, 'mastenkran', { stufe: 3, ruf: 3 });
   const sonne = R.tagesabschluss(z, { tag: 1, wetter: 'sonne', boote: [...boote(10), ...boote(10, 'M', 'motor')] }, () => 0.99);
   const verleih = sonne.einnahmen.find((e) => e.id === 'bootsverleih');
-  assert.equal(verleih.betrag, 14);
+  assert.equal(verleih.betrag, ECONOMY.services.bootsverleih.stufen[0].wirkung.proTag);
   // 10 Segelboote x 0,08 = 0,8 Kunden, mit rng 0,99 abgerundet auf 0
   assert.equal(sonne.einnahmen.find((e) => e.id === 'mastenkran'), undefined);
   const mitKunde = R.tagesabschluss(z, { tag: 2, wetter: 'sonne', boote: boote(10) }, () => 0.1);
@@ -118,13 +119,36 @@ test('Effekte: Ruf gedeckelt, Gaeste multipliziert, Freischaltungen', () => {
   assert.ok(e.hafengeld.segel > 1);
 });
 
-test('Zahlen aus dem Balancing ueberschreiben Startwerte', () => {
+test('Eine Quelle: alle Service-Zahlen kommen aus economy.js, Namen aus data/services.js', () => {
+  for (const s of SERVICES) {
+    const z = ECONOMY.services[s.id];
+    assert.ok(z, `${s.id} fehlt in ECONOMY.services`);
+    assert.equal(s.abStufe, z.abStufe);
+    assert.equal(s.stufen.length, z.stufen.length, `${s.id}: Zahl der Stufen`);
+    s.stufen.forEach((st, i) => {
+      assert.equal(st.kosten, z.stufen[i].kosten);
+      assert.ok(st.name && !/ \d$/.test(st.name), `${s.id} Stufe ${i + 1} braucht einen Namen in data/services.js`);
+      const schutz = st.wirkung.sturmschutz;
+      if (schutz != null) assert.ok(typeof schutz === 'number' && schutz >= 0 && schutz <= 1, `${s.id}: sturmschutz ist eine Zahl`);
+      if (st.wirkung.besuch) assert.ok(st.wirkung.besuch.text, `${s.id}: Besuch braucht einen Text`);
+    });
+  }
+  for (const id of Object.keys(ECONOMY.services)) assert.ok(SERVICE_BY_ID[id], `${id} hat keine Texte in data/services.js`);
+  // Kein zweiter Zahlensatz in data/services.js
+  for (const s of SERVICE_TEXTE) {
+    assert.equal(s.abStufe, undefined, s.id);
+    for (const st of s.stufen) for (const k of ['kosten', 'wirkung', 'ruf', 'braucht', 'abStufe']) assert.equal(st[k], undefined, `${s.id}.${k}`);
+  }
+});
+
+test('Andere Zahlen überlagern (Versuche): Stufe ersetzt ihre Felder, wirkung als Ganzes', () => {
   const R2 = erstelleRegeln(mitZahlen(SERVICES, { bootsverleih: { stufen: [{ kosten: 99, wirkung: { proTag: 50 } }] } }));
   const s = R2.byId.bootsverleih.stufen[0];
   assert.equal(s.kosten, 99);
   assert.equal(s.wirkung.proTag, 50);
-  assert.equal(s.wirkung.wetter.regen, 0.3);
-  assert.equal(SERVICE_BY_ID.bootsverleih.stufen[0].kosten, 120);
+  assert.equal(s.wirkung.wetter, undefined);
+  assert.equal(s.name, SERVICE_BY_ID.bootsverleih.stufen[0].name);
+  assert.equal(SERVICE_BY_ID.bootsverleih.stufen[0].kosten, ECONOMY.services.bootsverleih.stufen[0].kosten);
 });
 
 test('Zustand bleibt JSON', () => {
@@ -148,4 +172,47 @@ test('Angebote an Land: Bäcker ab Stufe 1, Café ab 2, Eisdiele erst ab 4', () 
   const sonne = R.tagesabschluss(z, { tag: 2, wetter: 'sonne', boote }, () => 0).summe;
   const regen = R.tagesabschluss(z, { tag: 3, wetter: 'regen', boote }, () => 0).summe;
   assert.ok(sonne > regen, `${sonne} > ${regen}`);
+});
+
+test('Windjammertreffen: dritte Stufe des Museumshafens erst in Stufe 6, Besuch alle 12 Tage für zwei Tage', () => {
+  const z = neuerZustand();
+  const k5 = { stufe: 5, ruf: 5, tag: 1, geld: 1e9 };
+  R.bauen(z, 'museumshafen', k5);
+  R.bauen(z, 'museumshafen', k5);
+  assert.equal(z.gebaut.museumshafen, 2);
+  assert.equal(R.pruefe(z, 'museumshafen', k5).ok, false);              // Treffen erst ab Hafenstufe 6
+  const k6 = { stufe: 6, ruf: 5, tag: 10, geld: 1e9 };
+  assert.equal(R.bauen(z, 'museumshafen', k6).ok, true);
+  assert.equal(z.besuche.museumshafen, 14);
+  const r = R.tagesabschluss(z, { tag: 14, boote: [] }, () => 0);
+  const b = r.besuche.find((x) => x.art === 'windjammer');
+  assert.equal(b.dauer, 2);
+  assert.equal(z.besuche.museumshafen, 26);
+  assert.ok(R.effekte(z).freischalten.includes('traditionssegler'));
+});
+
+test('Barkasse: ab Stufe 6, braucht den Fahrgastanleger, verdient nicht bei Sturm', () => {
+  const z = neuerZustand();
+  const k = { stufe: 6, ruf: 5, tag: 1, geld: 1e9 };
+  assert.equal(R.liste(z, { stufe: 5 }).some((x) => x.id === 'barkasse'), false);
+  const ohne = R.pruefe(z, 'barkasse', k);
+  assert.equal(ohne.ok, false);
+  assert.match(ohne.fehlt.join(), /Fahrgastanleger/);
+  R.bauen(z, 'fahrgastanleger', k);
+  assert.equal(R.bauen(z, 'barkasse', k).ok, true);
+  const sonne = R.tagesabschluss(z, { tag: 2, boote: [] }, () => 0).einnahmen.find((e) => e.id === 'barkasse');
+  assert.equal(sonne.betrag, 220);
+  const sturm = R.tagesabschluss(z, { tag: 3, wetter: 'sturm', boote: [] }, () => 0).einnahmen.find((e) => e.id === 'barkasse');
+  assert.equal(sturm, undefined);
+});
+
+test('Liste der Großschiffbesuche fürs Abschlussziel passt zum Katalog', async () => {
+  const { GROSSSCHIFF_BESUCHE } = await import('../web/js/data/services.js');
+  const arten = new Set(SERVICES.flatMap((s) => s.stufen.map((st) => st.wirkung?.besuch?.art).filter(Boolean)));
+  for (const a of GROSSSCHIFF_BESUCHE) assert.ok(arten.has(a), `Besuchsart ${a} gibt es nicht`);
+  assert.ok(!GROSSSCHIFF_BESUCHE.includes('windjammer'));
+  // Der Marinestützpunkt bringt mehr zählende Besuche als der Anleger (Roadmap Svc F6)
+  const [anleger, stuetzpunkt] = SERVICE_BY_ID.marineanleger.stufen.map((st) => st.wirkung.besuch);
+  assert.ok(GROSSSCHIFF_BESUCHE.includes(stuetzpunkt.art));
+  assert.ok(stuetzpunkt.alleTage < anleger.alleTage);
 });

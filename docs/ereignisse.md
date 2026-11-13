@@ -1,6 +1,6 @@
 # Ereignisse und Jahreslauf
 
-Stand: 11.11.2026. Umsetzung von [Plan Abschnitt 7](plan.md#7-ereignisse-und-jahreslauf).
+Stand: 11.11.2026. Status: gebaut; weitere Ereignisse P24, Winter mit Aufgaben P20 ([Roadmap](roadmap.md)). Umsetzung von [Plan Abschnitt 7](plan.md#7-ereignisse-und-jahreslauf).
 
 ## Was es gibt
 
@@ -29,7 +29,7 @@ Kreuzfahrtschiffe, Marinebesuche und Ausflugsfahrten plant das Services-Modul al
 | `web/js/data/events.js` | alle Zahlen: Ereignisse, Standardwerte, Jahreslauf |
 | `web/js/events/scheduler.js` | Planer, reine Logik ohne Three.js und DOM, läuft in Node |
 | `web/js/events/events.js` | Anbindung an `game` (Modul für `main.js`) |
-| `web/js/events/effects.js` | Regen, Schnee, Nebel, Blitze, Feuerwerk als 2D-Ebene `#weather-fx` über `#stage` |
+| `web/js/events/effects.js` | Regen, Schnee, Nebel, Blitze, Feuerwerk als ein Shader-Durchgang in der 3D-Szene (Netz `wetter-effekte`, Punkte `wetter-feuerwerk`) |
 | `web/js/events/banner.js` | Ankündigungsschild `#event-banner`, Wetterknopf `#weather-chip`, Wetterbericht `#weather-panel` |
 | `web/css/events.css` | Aussehen, wird von `events.js` nachgeladen |
 | `tests/ereignisse.test.mjs` | Tests |
@@ -87,3 +87,33 @@ Im Browser in der Konsole Tage vorspulen:
 ```js
 for (let d = 1; d < 60; d++) hafenmeister.emit('day:start', { day: d, stage: 4 });
 ```
+
+
+## Leistung der Wettereffekte (12.11.2026)
+
+Bis dahin lag eine zweite 2D-Leinwand `#weather-fx` über dem Spiel, die jedes Bild neu gemalt
+wurde (doppelte Pixeldichte, Nebel mit sechs großen Verläufen je Bild). Jedes Wetter außer
+Sonne ließ das Spiel dadurch ruckeln. Außerdem lief sie mit dem Spieltempo, bei 8x sprangen
+Regen und Schwaden.
+
+Jetzt:
+- Ein Dreieck über den ganzen Bildschirm (`renderOrder` 1e6, ohne Tiefentest, nicht antippbar)
+  zeichnet Tönung, Nebel, Regen, Schnee und Blitz in einem Shader-Durchgang. Ist nichts zu
+  sehen, wird es nicht gezeichnet.
+- Feuerwerk sind höchstens 384 Punkte im selben Bild.
+- Alle Bewegungen laufen nach echter Uhr, unabhängig von Pause und Tempo.
+- Nebelwerte aus PR 91: Schleier 8 %, Rand 38 %, Schwaden 10 %, Mitte klar.
+- `game.wetterEffekte.stand` und `.sofort()` zum Prüfen.
+- 'weather' trägt zusätzlich `wetter` ('ruhig' | 'wind' | 'sturm') für den Ton.
+
+Gemessen mit Software-Grafik (Bilder je Sekunde, Standardwetter zum Vergleich):
+
+| Gerät, Stufe | Standard | Sturm vorher | Sturm nachher | Nebel vorher | Nebel nachher |
+|---|---|---|---|---|---|
+| Handy, 1 | 13,8 | 7,3 | 12,4 | 8,9 | 12,2 |
+| Handy, 6 | 11,6 | 5,5 | 10,9 | 7,4 | 11,6 |
+| PC, 1 | 7,6 | 5,6 | 6,6 | 6,1 | 7,1 |
+| PC, 6 | 6,6 | 3,8 | 6,2 | 5,7 | 7,1 |
+
+Hinweis für die Pixel-Fassung: Die Effekte sind ein `ShaderMaterial` und werden dort nicht
+automatisch übernommen.

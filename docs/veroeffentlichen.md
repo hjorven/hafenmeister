@@ -1,5 +1,7 @@
 # Veröffentlichen über GitHub Pages
 
+Stand: 12.11.2026. Status: gebaut, läuft. Der veröffentlichte Stand steht unter https://hjorven.github.io/hafenmeister/version.txt .
+
 Das Spiel liegt im Ordner `web/` und wird bei jedem Push auf `main` automatisch veröffentlicht unter:
 
 **https://hjorven.github.io/hafenmeister/**

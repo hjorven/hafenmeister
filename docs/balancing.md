@@ -1,16 +1,28 @@
 # Balancing
 
-Stand: 12.11.2026, nach „Boote fahren selbst ein“ (PR 103), „Tagesrhythmus“ (PR 108) und „Warteschlange entlasten“ (PR 113). Gilt für die erste Region (deutsche Ostsee, Stufen 1 bis 6, 94 Gastplätze plus die festen Plätze der Großschiffe in Stufe 6).
+Stand: 12.11.2026, nach „Eine Quelle für alle Zahlen“ (Paket P06) und Stufe 6 mit Windjammertreffen und Barkasse (PR 139). Gilt für die erste Region (deutsche Ostsee, Stufen 1 bis 6, 94 Gastplätze plus die festen Plätze der Großschiffe in Stufe 6).
 
 ## Wo die Zahlen liegen
 
+**Eine Quelle:** Jede Zahl, die das Spiel braucht, steht in `web/js/data/economy.js` (`ECONOMY`). Andere Dateien haben keine eigenen Zahlen mehr (Paket P06):
+
 | Datei | Inhalt | Gehört |
 |---|---|---|
-| `web/js/data/economy.js` | alle Spielzahlen: Grundpreise, Wünsche, Ruf, Stufen und Ziele, Stegprojekte mit Platz-ids, Bauwerke, Hafenbüro, Services, Ereignisse | Balancing |
+| `web/js/data/economy.js` | alle Spielzahlen: Zeit, Preise, Wünsche, Ruf, Stufen und Ziele, Stegprojekte, Bauwerke, Hafenbüro, Services, Ereignisse, Warten, Tagestörn, Stammgäste, Dauerlieger, Tagesziele | Balancing |
+| `web/js/data/rules.js` | `rulesFromEconomy(E)`: baut aus `ECONOMY` die Regeln für `sim.js`, ohne eigene Zahlen. `RULES = rulesFromEconomy(ECONOMY)` | Balancing |
+| `web/js/data/services.js` | nur Namen, Texte und Lage der Services; `SERVICES` fügt sie mit `ECONOMY.services` zusammen | Services |
+| `web/js/data/events.js` | nur Texte und Wetterbild der Ereignisse; `EVENTS`, `YEAR`, `SCHEDULE` kommen aus `ECONOMY.ereignisse` und `ECONOMY.zeit` | Ereignisse |
+| `docs/zahlen.md` | Übersicht aller Zahlen, erzeugt mit `node tools/zahlen.mjs --schreiben` | erzeugt |
+| `tools/zahlen.mjs` | prüft die Zahlen: Felder, die kein Spielcode liest, Ja/Nein statt Zahl, Ausbaustufen, die nicht teurer werden | Balancing |
 | `tools/balance.mjs` | spielt die Regeln ohne Grafik viele Male durch und meldet die Spielzeit | Balancing |
-| `tests/balance.test.mjs` | prüft, dass die Daten zu `harbor.js` passen und die Spielzeit im Zielkorridor bleibt | Balancing |
+| `tests/regeln.mjs` | gemeinsamer Aufbau für alle Regeltests: echter Hafen, `RULES` aus `ECONOMY`, Testboote | Balancing |
+| `tests/balance.test.mjs`, `tests/zahlen.test.mjs`, `tests/spieltag.test.mjs` | Daten passen zu `harbor.js`, Spielzeit im Zielkorridor, `docs/zahlen.md` aktuell, ein ganzer Spieltag mit festem Startwert | Balancing |
 
-`web/js/sim.js` (Spielregeln) und die Services lesen ihre Zahlen nur aus `ECONOMY`. Wer eine Zahl braucht, die noch fehlt, trägt sie in `economy.js` ein, statt sie im Code festzulegen. Die höchste Stufe im Spiel (`rules.maxStage`) ist die höchste Stufe in `ECONOMY.stufen`, derzeit 6.
+Wer eine Zahl braucht, die noch fehlt, trägt sie in `economy.js` ein und liest sie über `rulesFromEconomy` (Spielregeln) oder direkt aus `ECONOMY` (Module), statt sie im Code festzulegen. Danach `node tools/zahlen.mjs --schreiben`. Die höchste Stufe im Spiel (`rules.maxStage`) ist die höchste Stufe in `ECONOMY.stufen`, derzeit 6.
+
+**Feldnamen:** In `economy.js` deutsch (`kosten`, `abStufe`, `wirkung`), in `sim.js` englisch (`cost`, `fromStage`). Die Übersetzung steht an genau einer Stelle, in `data/rules.js`. Ausnahme: die Wirkung der Ereignisse (`arrivalFactor` und so weiter) heißt wie die Felder, die `sim.js` liest.
+
+**Zufall:** Alles, was Geld, Gäste oder Ruf ändert, nimmt den Zufall aus `web/js/random.js` (`random(state)` im Spielstand oder `zufallAus(seed)`), nie `Math.random`. Gleicher Startwert, gleiches Spiel. `tests/zahlen.test.mjs` prüft das für die Regelmodule.
 
 ## Benutzen
 
@@ -21,14 +33,16 @@ node tools/balance.mjs --laeufe 200
 node tools/balance.mjs --verlauf 3
 node tools/balance.mjs --verlauf 3 --gemuetlich
 node tools/balance.mjs --json
+node tools/zahlen.mjs --pruefen
+node tools/zahlen.mjs --schreiben
 node --test tests/*.test.mjs
 ```
 
-`--pruefen` meldet jeden Liegeplatz aus `harbor.js`, der keinem Projekt gehört oder doppelt vergeben ist, und jedes Projekt, das in einer späteren Stufe Plätze verlieren würde. `--verlauf` zeigt Tag für Tag, was ein Spieler kauft und wie Geld und Ruf laufen. Hat `economy.js` mehr Stufen als `harbor.js`, rechnet das Werkzeug trotzdem und meldet die fehlenden Platz-ids als Hinweis.
+`--pruefen` ruft auch `tools/zahlen.mjs` auf und meldet jeden Liegeplatz aus `harbor.js`, der keinem Projekt gehört oder doppelt vergeben ist, und jedes Projekt, das in einer späteren Stufe Plätze verlieren würde. `--verlauf` zeigt Tag für Tag, was ein Spieler kauft und wie Geld und Ruf laufen. Hat `economy.js` mehr Stufen als `harbor.js`, rechnet das Werkzeug trotzdem und meldet die fehlenden Platz-ids als Hinweis.
 
 ## Ergebnis (100 Läufe je Spielertyp, mit den echten Spielregeln)
 
-`tools/balance.mjs` spielt mit `web/js/sim.js` (über `sim.rulesFromEconomy(ECONOMY)`), dem Bootskatalog, den Services (`web/js/services/rules.js`) und den Ereignissen (`web/js/events/scheduler.js`: Sturm, Regatta, Hafenfest, Nebel, mit Wetter). Ein Spieltag dauert bei 1x 2 Minuten. „Mit Vorspulen“ nimmt an, dass die Hälfte der Zeit mit 4x läuft (Taste F am PC, Sonne ziehen am Handy).
+`tools/balance.mjs` spielt mit `web/js/sim.js` (über `rulesFromEconomy(ECONOMY)` aus `data/rules.js`), dem Bootskatalog, den Services (`web/js/services/rules.js`) und den Ereignissen (`web/js/events/scheduler.js`: Sturm, Regatta, Hafenfest, Nebel, mit Wetter). Ein Spieltag dauert bei 1x 2 Minuten. „Mit Vorspulen“ nimmt an, dass die Hälfte der Zeit mit 4x läuft (Taste F am PC, Sonne ziehen am Handy).
 
 **Geschickter Spieler** (weist alle 5 Sekunden zu, nimmt immer den besten Platz, kauft jeden Tag)
 
@@ -36,15 +50,19 @@ node --test tests/*.test.mjs
 |---|---|---|---|---|---|---|
 | 1 | Bootssteg am See | 13 | 13 bis 14 | 6 | 26 min | 16 min |
 | 2 | Dorfhafen am See | 47 | 37 bis 50 | 19 | 1 h 34 min | 59 min |
-| 3 | Durchstich zur Ostsee | 40 | 37 bis 43 | 12 | 1 h 20 min | 50 min |
+| 3 | Durchstich zur Ostsee | 41 | 38 bis 44 | 12 | 1 h 22 min | 51 min |
 | 4 | Marina | 45 | 43 bis 47 | 15 | 1 h 30 min | 56 min |
-| 5 | Küstenmarina | 46 | 43 bis 50 | 12 | 1 h 32 min | 58 min |
-| 6 | Seehafen bis zum Abschluss | 67 | 61 bis 72 | | 2 h 14 min | 1 h 24 min |
-| | **Gesamt** | **257** | 245 bis 266 | | **8 h 34 min** | **5 h 23 min** |
+| 5 | Küstenmarina | 46 | 43 bis 49 | 12 | 1 h 32 min | 58 min |
+| 6 | Seehafen bis zum Abschluss | 65 | 60 bis 69 | | 2 h 10 min | 1 h 21 min |
+| | **Gesamt** | **256** | 245 bis 266 | | **8 h 32 min** | **5 h 21 min** |
 
-**Gemütlicher Spieler** (schaut nur alle 20 Sekunden auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz, kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus): 273 Tage, 9 h 06 min bei 1x, 5 h 35 min mit Vorspulen. Am meisten Zeit verliert er in Stufe 2, weil er dort spät in Versorgung investiert.
+**Gemütlicher Spieler** (schaut nur alle 20 Sekunden auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz, kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus): 273 Tage, 9 h 06 min bei 1x, 5 h 40 min mit Vorspulen. Am meisten Zeit verliert er in Stufe 2, weil er dort spät in Versorgung investiert.
 
 Ungeschicktes Spielen bremst nie stark und blockiert nie. Das passt zu „kein Scheitern“.
+
+**Untätiger Spieler** zum Vergleich (weist nie zu, kassiert nie, kauft nichts, 20 Läufe): Bis Tag 30 kommen 510 € in die Kasse (nur die Kasse des Vertrauens), der Ruf fällt auf 1,9. Der geschickte Spieler hat bis dahin 2.127 € eingenommen. Spielen lohnt sich also deutlich, Nichtstun ruiniert aber auch nichts.
+
+**Leerlauf** (Saisontage einer Stufe ohne Kauf, Median, geschickter Spieler): Stufe 1 10 von 13, Stufe 2 37 von 47, Stufe 3 27 von 41, Stufe 4 31 von 45, Stufe 5 35 von 46, Stufe 6 40 von 65. An rund drei von vier Tagen gibt es nichts zu kaufen, nur zuzuweisen und zu kassieren. Das ist der größte Hebel für Paket P17 und die Pakete mit neuen Aufgaben.
 
 **Einnahmen pro Tag** (Median, geschickter Spieler, mit Services und Ereignissen): Stufe 1 rund 50 €, Stufe 2 rund 160 €, Stufe 3 rund 1.000 €, Stufe 4 rund 2.000 €, Stufe 5 rund 3.500 €, Stufe 6 rund 6.300 €. Das Liegegeld kommt beim Anlegen, der Bot streicht es sofort ein.
 
@@ -77,15 +95,20 @@ Das Abschlussziel benutzt nur Dinge, die der Spieler im Hafen sieht: Geld, Ruf u
 
 **Einfahren und Warten** (`ECONOMY.warten`): Ein ankommendes Boot gibt dem Spieler `selbstEinfahrenNach` = 8 Sekunden zum Lenken. Lenkt er es nicht, fährt es selbst in eine passende freie Box; bei vollen Bojen fährt es gleich ohne Boje hinein (Spielregeln, PR 113). Wer selbst zuweist, kann eine Box mit erfüllten Wünschen wählen und bekommt dafür die bessere Bewertung. Passt keine freie Box, wartet das Boot bis zu 30 Sekunden (`geduld`), etwa drei bis vier Stunden auf der Spieluhr. Wer abends noch an der Boje liegt, bleibt über Nacht dort und fährt morgens weiter, ohne schlechte Bewertung (`ueberNacht`). Warteplätze je Stufe: 3, 6, 5, 7, 8, 8, so viele, wie die Landschaft Bojen zeichnet. Dreht ein Boot ab, weil alle Bojen belegt sind, gibt es keine schlechte Bewertung.
 
-**Tagesrhythmus** (`ECONOMY.zeit`, Anteile des 90-Sekunden-Tags): Gäste legen zwischen 0,07 und 0,3 ab (etwa 7:30 bis 11:00), neue kommen zwischen 0,35 und 0,95 (etwa 11:00 bis 19:30), die meisten um 0,62 (Nachmittag, etwa 15:30). Die breite Verteilung und 32 Ankünfte in Stufe 5 und 6 halten die Warteschlange ruhig: Ohne dass jemand zuweist, drehen in Stufe 5 und 6 nur 1 bis 2 Boote am Tag ab, weil der Hafen voll ist (gemessen mit allen Plätzen und Ruf 5).
+**Tagesrhythmus** (`ECONOMY.zeit`, Anteile des 90-Sekunden-Tags): Gäste legen zwischen 0,07 und 0,3 ab (etwa 7:30 bis 11:00), neue kommen zwischen 0,2 und 0,95 (etwa 9:30 bis 19:30, seit PR zu T9 mit mindestens 3 Sekunden Abstand, `ankunftAbstand`), die meisten um 0,62 (Nachmittag, etwa 15:30). Die breite Verteilung und 32 Ankünfte in Stufe 5 und 6 halten die Warteschlange ruhig: Ohne dass jemand zuweist, drehen in Stufe 5 und 6 nur 1 bis 2 Boote am Tag ab, weil der Hafen voll ist (gemessen mit allen Plätzen und Ruf 5).
 
-**Hafenbüro** (`ECONOMY.hafenbuero`), reiner Komfort, keine Einnahmen:
+**Hafenbüro** (`ECONOMY.hafenbuero`), vor allem Komfort; Einnahmen bringen nur Trinkgeld (Stufe 2) und Nebenkosten (Stufe 3):
 
 | Stufe | Name | Ab Ausbaustufe | Kosten | Schaltet frei |
 |---|---|---|---|---|
-| 1 | Hafenmeister | 2 | 600 € | Knopf „Alles kassieren“ |
-| 2 | Kassenautomat | 2 | 1.800 € | Liegegeld kommt beim Anlegen von selbst in die Kasse |
-| 3 | Hafenbüro | 3 | 3.800 € | wartende Boote bekommen sofort die Box mit den meisten erfüllten Wünschen |
+| 1 | Hafenmeister mit Funk | 2 | 600 € | Knopf „Kassieren“ (alle Münzen auf einmal), Vorschau der nächsten Boote (`vorschau`, Anzeige P11); vorher streicht man jede Münze selbst |
+| 2 | Kassenautomat | 2 | 1.800 € | Liegegeld von S und M kommt beim Anlegen von selbst in die Kasse (`klassen`); L, XL, XXL zahlen persönlich und geben beim Abholen 15 % Trinkgeld (`trinkgeld`) |
+| 3 | Hafenbüro | 3 | 3.800 € | Vorschlag: Das Büro zeigt für jedes Boot die beste Box (goldene Raute, nach Wünschen, Komfort und knappem Platz), „Vorschlag annehmen“ fährt hin. Ohne Büro nimmt „Einfahren lassen“ die Box, die sich das Boot selbst suchen würde (nur nach Wünschen und Weg, seit PR 176). Nebenkosten: Das Büro rechnet Strom, Wasser und Duschen ab, auf jedes kassierte Liegegeld kommen 10 % (`nebenkosten.anteil`), nicht beim Rundgang und nicht für liegengebliebene Münzen |
+| 4 | Hafenleitstelle | 4 | 9.500 € | volle Automatik: wartende Standardboote bekommen sofort die Box mit den meisten erfüllten Wünschen, je Größe S, M, L abschaltbar (Bauen, Reiter Hafen); Sonderfälle bleiben beim Spieler |
+
+Von Hand eingewiesene Gäste (Ziehen, Ring, „Einfahren lassen“, „Vorschlag annehmen“) bewerten um `vonHandBonus` = 0,25 Anker besser; selbst eingefahrene und von der Leitstelle zugewiesene nicht.
+
+**Sonderfälle** (`ECONOMY.hafenbuero.sonderfaelle`, Roadmap P02): Mehrrumpfboote, Schiffe der Klassen XL und XXL, Sondergäste und Boote, für die nur noch genau eine Box frei ist, weist die Automatik nicht zu. Wer einmal Sonderfall ist, bleibt es (`boat.officeCase`). Sie tragen eine orange Raute und fahren erst nach 25 s an der Boje selbst ein (statt 8 s), dann in die Box, die sie sich selbst suchen. Der Bot weist sie mit Leitstelle selbst zu. Ergebnis nach PR 176 mit Nebenkosten (`node tools/balance.mjs`): geschickt 246, gemütlich 261 Spieltage (ohne Nebenkosten 251 und 266) bis zum Abschluss, im Korridor 200 bis 360.
 
 **Tagestörn** (`ECONOMY.tagestoern`): Gäste mit zwei oder mehr Nächten fahren mit 35 % Wahrscheinlichkeit tagsüber hinaus (zwischen 12 % und 30 % des Tages) und kommen zwischen 60 % und 85 % des Tages in dieselbe Box zurück. Die Box bleibt reserviert.
 
@@ -95,7 +118,7 @@ Das Abschlussziel benutzt nur Dinge, die der Spieler im Hafen sieht: Geld, Ruf u
 
 **Versorgung:** Toilette, Dusche, Gastronomie je 4 Stufen, Tankstelle 2 Stufen, Stromsäulen an Steg B. Kapazitäten sind so gewählt, dass die größte Stufe einen vollen Hafen (91 Gastplätze) versorgt.
 
-**Services:** 18 Services mit 1 bis 2 Stufen, Format mit dem Services-Thread abgestimmt (`ECONOMY.services[id].stufen[n].wirkung`). Kein Service hat laufende Kosten.
+**Services:** 21 Services mit 1 bis 3 Stufen, alle Zahlen in `ECONOMY.services[id].stufen[n]`, Namen in `data/services.js`. Kein Service hat laufende Kosten. Sturmschutz: Seenotretter-Station halbiert die Folgen eines Sturms, der Seenotkreuzer nimmt 80 % weg (Deckel 0,8). Das Windjammertreffen kostet 34.000 €, mehr als die Stufe davor.
 
 **Angebote an Land** (echter-hafen.md C11, PR 111). Jedes hat sich nach rund 25 bis 45 Spieltagen bezahlt gemacht, also innerhalb seiner Stufe. Grillplatz und Brötchenservice sind fast nur Ruf und dafür billig.
 
@@ -107,7 +130,23 @@ Das Abschlussziel benutzt nur Dinge, die der Spieler im Hafen sieht: Geld, Ruf u
 | Fahrradverleih | 3 | 2.000 € | Tageseinnahme bei gutem Wetter, Kunden |
 | Eisdiele | 4 | 5.000 € | Tageseinnahme bei gutem Wetter, Kunden, etwas Ruf |
 
-Mit den Angeboten wird die Region drei Spieltage schneller fertig (257 statt 259), die Spielzeit bleibt im Korridor.
+Mit den Angeboten wird die Region drei Spieltage schneller fertig, die Spielzeit bleibt im Korridor. Alle Zahlen im Überblick: `docs/zahlen.md`.
+
+## Regeln im Spiel, die sonst nirgends stehen
+
+Stand `main` nach PR 160 (P06), nachgeprüft im Code. Die Pakete in der rechten Spalte ändern die Regel noch; dann wird auch diese Tabelle angepasst ([Roadmap](roadmap.md), Abschnitt 9).
+
+| Regel | Wert heute | Wo im Code | Paket |
+|---|---|---|---|
+| Start | 0 €, fünf Startbewertungen mit 3 Ankern, Ruf ist der Schnitt der letzten 20 | `state.js`, `economy.js` (`ruf.start`), `data/rules.js` (`startSamples`) | P17 |
+| Dauerlieger | zahlen pauschal 15 € pro Abend (`fischer.pachtProTag`), Dauerplätze kosten nichts und haben keine Obergrenze | `sim.js` (`startEvening`, `rulesFromEconomy`), `features/dauerlieger.js` | P01 |
+| Abweisen von Hand | kostet nichts und bringt keine Bewertung | `sim.js` (`dismiss`) | P10 |
+| Wegfahren ohne Platz | mit 25 % Wahrscheinlichkeit eine Bewertung von 2,5 (`ruf.abgewiesen`); dreht ein Boot ab, weil alle Wartebojen belegt sind, gibt es keine Bewertung | `sim.js` (`turnAway`) | P10 |
+| Hafenmeister-Rundgang | startet bei 68 % des Tages (`RUNDGANG_AB`), etwa 8 Sekunden vor dem Abend | `data/people.js` | P12 |
+| Mindestruf für Service-Stufen | Segelclub Stufe 3 (Regattaverein) 3,8; Travellift Stufe 3 (Werfthalle) 3,8; Fahrgastanleger Stufe 2 4,0; Museumshafen 4,0 und 4,2; Kreuzfahrtterminal 4,0 und 4,5; Marineanleger 4,0 und 4,6 | `economy.js` (`services[id].stufen[n].ruf`) | P06 (erledigt) |
+| Deckel der Services | Ruf-Bonus aller Services zusammen höchstens +0,75 (`RUF_BONUS_MAX`), Sturmschutz höchstens 0,8 (`STURMSCHUTZ_MAX`) | `data/services.js` | P06 (erledigt) |
+| Marineanleger Stufe 2 (Stützpunkt) | Flottenbesuch alle 6 statt alle 10 Tage (je 2 Tage), dazu Tag der offenen Tür | `economy.js` (`services.marineanleger`) | P04 (erledigt) |
+| Stufennamen der Services | Travellift heißt in Stufe 1 "Bootsschuppen mit Werkstatt", Stufe 2 "Travellift", Stufe 3 "Werfthalle mit Slipwagen"; die Namen in [services.md](services.md) folgen `data/services.js` | `data/services.js` | P04, P06 (erledigt) |
 
 ## Was die Simulation abdeckt
 
@@ -115,6 +154,7 @@ Mit den Angeboten wird die Region drei Spieltage schneller fertig (257 statt 259
 - Services bringen Tageseinnahmen, Kunden, Besuche großer Schiffe und Winter-Einnahmen über `services/rules.js`, ihre Wirkung auf Ankünfte und Ruf geht über einen Modifikator in `sim.js` ein.
 - Ereignisse kommen aus `events/scheduler.js` mit demselben Startwert wie das Spiel. Sturm kostet Ankünfte, Regatta und Hafenfest bringen mehr, das Wetter geht in die Services ein.
 - Der Bot kassiert immer alles sofort, auch ohne Hafenbüro.
+- Mit Hafenbüro-Automatik weist der Bot nur noch die Sonderfälle selbst zu (`sim.officeSpecialCase`).
 - Das Abschlussziel von Stufe 6 prüft im Spiel `sim.regionGoal()` (Meldung `sim:regionDone`), im Werkzeug `tools/balance.mjs` mit denselben Zahlen.
 
 ## Was noch auffällt

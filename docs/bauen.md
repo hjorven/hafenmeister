@@ -1,6 +1,6 @@
 # Bauen mit Vorschau
 
-Stand 12.11.2026. Code: `web/js/ui/bauen.js` (Oberfläche, 3D) und `web/js/ui/bauen-rat.js` (Rechenteile ohne Browser, getestet in `tests/bauen.test.mjs`).
+Stand 12.11.2026. Status: gebaut. Code: `web/js/ui/bauen.js` (Oberfläche, 3D) und `web/js/ui/bauen-rat.js` (Rechenteile ohne Browser, getestet in `tests/bauen.test.mjs`).
 
 ## Ablauf im Spiel
 

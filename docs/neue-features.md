@@ -1,6 +1,6 @@
 # Neue Features: Stammgäste, Dauerlieger, Wetterflagge, Fotomodus, Hafen schauen, Tagesziele
 
-Stand: 11.11.2026. Von Jorven am 11.11.2026 freigegeben („Vorschläge finde ich gut, alle, baue sie ein“). Gebaut vom Thread „Spielschleife zusammenbauen und Vorschläge einbauen“, gegengeprüft vom Thread „Jedes neue Feature einzeln testen“. Es gilt [abnahme.md](abnahme.md): Ein Feature erscheint erst im Spiel, wenn es funktioniert.
+Stand: 11.11.2026. Status: alle sechs gebaut; Ausbau in den Paketen P01, P13 und P25 der [Roadmap](roadmap.md). Von Jorven am 11.11.2026 freigegeben („Vorschläge finde ich gut, alle, baue sie ein“). Gebaut vom Thread „Spielschleife zusammenbauen und Vorschläge einbauen“, gegengeprüft vom Thread „Jedes neue Feature einzeln testen“. Es gilt [abnahme.md](abnahme.md): Ein Feature erscheint erst im Spiel, wenn es funktioniert.
 
 Alle sechs bleiben im Rahmen des Plans: keine Story, keine Figuren mit Namen, keine neue Zahl neben Geld und Ruf, Symbole statt Text.
 
@@ -11,7 +11,7 @@ Alle sechs bleiben im Rahmen des Plans: keine Story, keine Figuren mit Namen, ke
 | Dauerlieger | `sim.js`, Animationen für Aus- und Einlaufen | gebaut: `web/js/features/dauerlieger.js` |
 | Stammgäste | `sim.js` (Gäste, Bewertung) | gebaut: `web/js/features/stammgaeste.js` |
 | Wetter an der Flagge | `events/events.js` | gebaut: `web/js/features/wetterflagge.js` |
-| Tagesziele an der Tafel | `sim.js` | gebaut: `web/js/features/tagesziele.js` |
+| Tagesziele an der Tafel | `sim.js` | gebaut: `web/js/features/tagesziele.js`, `ziel-deko.js` |
 
 ## 1. Fotomodus mit Rundflug
 
@@ -81,21 +81,39 @@ Neben der Wurzel von Steg A steht ein Flaggenmast mit Windsack. Er zeigt das Wet
 
 ## 6. Tagesziele an der Tafel
 
-Gebaut: `web/js/features/tagesziele.js`, Tests in `tests/tagesziele.test.mjs`.
+Gebaut: `web/js/features/tagesziele.js` (Regeln und Tafel), `web/js/features/ziel-deko.js` (Deko im Hafen, von `tagesziele.js` nachgeladen), Tests in `tests/tagesziele.test.mjs`, Zahlen in `ECONOMY.tagesziele` (`web/js/data/economy.js`). Roadmap P13 (Ü14, I1 bis I4).
 
-Links unter der oberen Leiste steht „Tagesziele 0/3“. Antippen klappt die Tafel mit drei kleinen Zielen für den Tag auf, Antippen der Karte klappt sie wieder zu.
+**Ablauf.** Links unter dem Wetter steht morgens „Tagesziel wählen“ mit goldenem Rahmen. Antippen klappt drei Karten auf: leicht, mittel, schwer, jede mit Ziel und Belohnung. Der Spieler nimmt eine (Knopf „Nehmen“), das ist die Entscheidung des Tages. Danach zeigt der Knopf den Stand („Tagesziel 2/5“), die Tafel einen Balken. Was abends nicht geschafft ist, verfällt still. Fortschritt vor der Wahl zählt nicht.
 
-| Ziel | Ab Stufe |
-|---|---|
-| N Boote unterbringen (etwa 60 Prozent der erwarteten Ankünfte) | 1 |
-| Alle Wünsche eines Boots erfüllen (ab 2 Wünschen) | 1 |
-| N € Hafengeld kassieren (etwa 60 Prozent des erwarteten Hafengelds) | 1 |
-| Alle Plätze gleichzeitig belegt (nur bis 12 Plätze) | 1 |
-| Einen Stammgast unterbringen (nur wenn es Stammgäste gibt) | 1 |
-| 2 oder 3 Segelboote unterbringen | 2 |
-| Ein L- oder XL-Schiff unterbringen | 3 |
+**Nur eigene Handlungen zählen.** Boote, die der Spieler selbst an einen Platz legt (`moored` mit `hand: true`, gesetzt in `sim.assign`), und Münzen, die er selbst antippt oder mit einem Strich einsammelt (`collected` mit `hand: true`, `sim.collect(..., { hand: true })` aus `bridge.js`). Nicht zählen: selbst eingefahrene Boote, „Einfahren lassen“, das Hafenbüro, der Kassenautomat, der Knopf „Alle kassieren“, der Rundgang und „Hafen schauen“.
 
-- Belohnung je Ziel: 10, 25, 50, 80, 120 € je nach Stufe, mit Haken, kurzem Hüpfen der Tafel, Vibration und Ereignis `ziel:erreicht` für den Ton.
-- Kein Druck: Was abends nicht geschafft ist, verfällt still. Im Winter gibt es keine Ziele und keine Tafel.
-- Spielstand in `state.modules.ziele`.
-- Später möglich: die Tafel als 3D-Brett am Hafenbüro.
+**Nur machbare Ziele.** Übernimmt das Hafenbüro das Zuweisen oder Kassieren (`sim.handAssignFor` / `sim.handCollectFor`, sobald P02 sie liefert, sonst die Bürostufe), kommen diese Ziele nicht. Bleibt nichts übrig, gibt es keine Tafel.
+
+| Ziel | Schwere | Ab |
+|---|---|---|
+| N Boote von Hand einweisen | alle | Stufe 1 |
+| N Boote passgenau einweisen (Box höchstens 20 % länger als das Boot) | alle | Stufe 2 |
+| N Gäste mit Wunsch X versorgen (schwer: nur Segler) | alle | Wunsch erfüllbar |
+| N Segelboote an Plätze mit Strom legen | mittel, schwer | Strom am Steg |
+| Einem oder zwei Gästen alle Wünsche erfüllen (ab 2 Wünschen) | mittel, schwer | Stufe 2 |
+| Ein oder zwei L- bzw. XL-Schiffe einweisen | mittel, schwer | Stufe 3 bzw. 5 |
+| Einen Stammgast von Hand einweisen | leicht, mittel | Stammgäste vorhanden |
+| Den letzten freien Platz selbst belegen | schwer | bis 12 Plätze |
+| N € Liegegeld selbst einstreichen | alle | Stufe 1 |
+
+Mengen richten sich nach den Booten, die der Spieler heute selbst einweisen kann, und dem Liegegeld mit allen Nächten (Zahlen in `ECONOMY.tagesziele.ziele`).
+
+**Belohnungen.** Leicht bringt Geld (10, 25, 50, 80, 120, 150 € je Stufe). Mittel: doppeltes Geld, ein halber Anker oder ein Gutschein. Schwer: 3,5-faches Geld, ein halber Anker, ein seltener Gast oder ein Deko-Stück.
+
+- **Halber Anker:** Alle Gäste, die gerade liegen, bewerten bei der Abreise einen halben Anker besser.
+- **Gutschein:** 10 % zurück beim nächsten Bau (Stegprojekt, Versorgung, Hafenbüro, Anlage), höchstens das 15-fache des Grundgelds.
+- **Seltener Gast:** Am nächsten Tag wird ein ankommendes Boot zu einer der seltensten Arten aus den zwei größten Klassen, die heute kommen können (`boat.selten`). Beim Einlaufen erscheint ein Hinweis.
+- **Deko-Stück:** Blumenkübel, Bank am Wasser, Hafenlaterne, Rettungsring, Alter Anker, Fischkisten, Alte Tonne, Wimpelmast, in dieser Reihenfolge. Sie stehen auf der Wiese beim Hafenmeisterhaus und suchen sich selbst einen freien Platz: nie auf Wegen oder dem Wegenetz der Menschen, nie in Gebäuden (auch noch nicht gekauften) oder auf Bauplätzen von Anlagen, nie im Wasser oder am Hang. Neu verdiente Stücke hüpfen beim Aufstellen.
+
+**Wochenziel.** Ein größeres Ziel über sieben Saisontage, oben in der Tafel: Gäste von Hand einweisen, Gäste mit 4 Ankern verabschieden, zufriedene Segler verabschieden oder Liegegeld selbst einstreichen. Belohnung: das 12-fache Grundgeld und das nächste Deko-Stück. Ziele mit 4 Ankern kommen nur, wenn alle Wünsche der Stufe erfüllbar sind. Im Winter ruht die Woche, Wintertage zählen nicht.
+
+**Winter:** keine Tageskarten (Winterarbeiten bringt P20).
+
+**Für andere Module:** `game.tagesziele` (`zustand()`, `karten()`, `gewaehlt()`, `woche()`, `waehle(i)`, `oeffnen()`), Ereignisse `ziel:gewaehlt`, `ziel:erreicht` { art, text, belohnung, belohnungText }, `wochenziel:erreicht`, `ziel:seltenerGast`, `ziel:gutschein`, `ziel:deko`. Ton: `auswahl` beim Nehmen, `fertig` beim Tagesziel, `stufe` beim Wochenziel.
+
+**Spielstand:** `state.modules.ziele` (Version 2). Alte Spielstände mit drei festen Zielen bekommen am selben Tag neue Karten.

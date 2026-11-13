@@ -311,8 +311,9 @@ export function init(game) {
   let markiert = { ids: [], farbe: '#ffd23f' };
 
   function aktuelleStufe(n) {
-    // Testmodus ?stufe=n gilt beim Start vor dem Spielstand (wie Gebaeude, Landschaft und Services)
-    const v = n ?? new URLSearchParams(location.search).get('stufe') ?? game.sim?.state?.stage ?? game.state?.stufe ?? 1;
+    // Testmodus ?stufe=n setzt nur die Startstufe (die Spielregeln starten dann in dieser Stufe).
+    // Danach gilt die Stufe der Spielregeln, auch nach einem Ausbau im Testmodus.
+    const v = n ?? game.sim?.state?.stage ?? new URLSearchParams(location.search).get('stufe') ?? game.state?.stufe ?? 1;
     return String(Math.max(1, Math.min(6, Math.round(Number(v) || 1))));
   }
 

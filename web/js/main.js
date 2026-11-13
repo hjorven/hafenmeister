@@ -11,6 +11,7 @@ import { warteplaetze } from './render/landschaft/gelaende.js';
 // Neue Module hier eintragen, dann muss niemand sonst main.js oder index.html anfassen.
 const MODULES = [
   './data/stegbild.js',
+  './render/landschaft/formen.js',      // Geländeform des Spiels (Thread Geländeform), vor der Landschaft
   './world/region.js',
   './render/landscape.js',
   './render/stege.js',
@@ -28,6 +29,7 @@ const MODULES = [
   './ui/input-pc.js',
   './ui/input-touch.js',
   './ui/gesten.js',
+  './ui/kamera.js',
   './ui/hud.js',
   './ui/bauen.js',
   './ui/fotomodus.js',
@@ -42,7 +44,9 @@ const MODULES = [
   './features/wetterflagge.js',
   './features/hafen-schauen.js',
   './features/einstieg.js',
+  './features/aufstieg.js',
   './save/index.js',
+  './ui/tagesabschluss.js',
   './ui/oberflaeche.js',
 ];
 
@@ -59,6 +63,7 @@ async function loadModules(game) {
     if (typeof init !== 'function') return;
     try { init(game); } catch (err) { console.error('Fehler in', MODULES[i], err); }
   });
+  weltAnForm(game);
   removePlaceholders(game);
   game.emit('ready');
 }
@@ -84,57 +89,247 @@ const WORLD = {
 WORLD.width = WORLD.maxX - WORLD.minX;
 WORLD.centerX = (WORLD.minX + WORLD.maxX) / 2;
 
-// Startansicht: alle Liegeplaetze einer Stufe mit 12 m Rand, dazu die Wartebojen mit 8 m Rand
-// (die wartenden Boote liegen bis 6 m oestlich der Boje im Wind).
-// Hat eine Stufe keine eigenen Plaetze in harbor.js (Stufe 6), gelten die der Stufe davor.
+// Spielbereich fuer den Blickpunkt an die Gelaendeform anpassen: Leuchttuerme und Inseln der Form
+// (mit 40 m Rand) muessen erreichbar sein. Obergrenze SICHER ist im Spiel geprueft: auch ganz
+// herausgezoomt und flach nach aussen bleibt der Rand des Gelaendes (BEREICH in gelaende.js,
+// danach der grobe Aussenring) im Dunst. WORLD wird an Ort und Stelle geaendert, weil die Kamera
+// es als rig.bounds haelt.
+const SICHER = { minX: -340, maxX: 300, minZ: -270, maxZ: 60 };
+function weltAnForm(game) {
+  // Grundbereich wie bisher, nach Norden bis zum Ende des Fahrwassers vor dem Aussenhafen (Plan-y 380, karte.js)
+  let minX = -420 * U, maxX = 306 * U, minZ = -380 * U - 20, maxZ = 30 * U;
+  try {
+    const form = game.gelaende?.aktuell?.();
+    const pkt = (x, z, r) => {
+      minX = Math.min(minX, x - r); maxX = Math.max(maxX, x + r);
+      minZ = Math.min(minZ, z - r); maxZ = Math.max(maxZ, z + r);
+    };
+    for (const [x, y] of form?.leuchttuerme || []) pkt(x * U, -y * U, 40);
+    for (const i of [...(form?.seeInseln || []), ...(form?.seeAussen || [])]) {
+      pkt((i.x - i.rx) * U, -(i.y + i.ry) * U, 40);
+      pkt((i.x + i.rx) * U, -(i.y - i.ry) * U, 40);
+    }
+  } catch (err) { console.warn('Geländeform nicht lesbar', err); }
+  WORLD.minX = Math.max(SICHER.minX, minX); WORLD.maxX = Math.min(SICHER.maxX, maxX);
+  WORLD.minZ = Math.max(SICHER.minZ, minZ); WORLD.maxZ = Math.min(SICHER.maxZ, maxZ);
+  WORLD.width = WORLD.maxX - WORLD.minX;
+  WORLD.centerX = (WORLD.minX + WORLD.maxX) / 2;
+}
+
+// Startansicht in zwei Teilen:
+// 1. Kern: alle Liegeplaetze der Stufe mit 12 m Rand (Stufe ohne eigene Plaetze nimmt die davor).
+// 2. Extras: Wartebojen (8 m Rand, die Boote liegen bis 6 m oestlich im Wind) und sichtbare
+//    Bauplaetze (6 m Rand). Sie kommen nacheinander dazu, die naechsten zuerst, solange der
+//    Ausschnitt dadurch nicht zu weit herausgezoomt werden muss (siehe startRect).
+// Ankerfelder zaehlen nicht: gross, nur Ausweichplatz.
 function homeRect(stufe) {
   try {
     let s = stufe;
     let pts = [];
     for (; s >= 1 && !pts.length; s--) pts = plaetzeInStufe(s).map((p) => platzInWelt(p, s));
     if (!pts.length) throw new Error('keine Plaetze');
-    const xs = pts.map((p) => p.x);
-    const zs = pts.map((p) => p.z);
-    const r = {
-      minX: Math.min(...xs) - 12, maxX: Math.max(...xs) + 12,
-      minZ: Math.min(...zs) - 12, maxZ: Math.max(Math.max(...zs) + 8, 6),
+    // Ab 20 Plaetzen bleiben die aeussersten 10 % je Richtung draussen (z. B. die Grossschiffpier
+    // weit im Westen), sonst waere der Hafen am Handy hochkant nur ein schmaler Streifen.
+    const schnitt = (werte) => {
+      const v = [...werte].sort((a, b) => a - b);
+      const k = v.length >= 20 ? Math.floor(v.length * 0.1) : 0;
+      return [v[k], v[v.length - 1 - k]];
     };
-    let wp = { bojen: [], ankerbereiche: [] };
-    try { wp = warteplaetze(stufe); } catch (err) { console.warn('Wartebojen nicht lesbar', err); }
-    const dazu = (x, z, rand) => {
-      r.minX = Math.min(r.minX, x - rand);
-      r.maxX = Math.max(r.maxX, x + rand);
-      r.minZ = Math.min(r.minZ, z - rand);
-      r.maxZ = Math.max(r.maxZ, z + rand);
-    };
-    for (const b of wp.bojen) dazu(b.x, b.z, 8);
-    // Ankerfelder zaehlen nicht: sie sind gross, nur Ausweichplatz und zogen am Handy den Steg aus dem Bild.
-    return r;
+    const [x0, x1] = schnitt(pts.map((p) => p.x));
+    const [z0, z1] = schnitt(pts.map((p) => p.z));
+    return { minX: x0 - 12, maxX: x1 + 12, minZ: z0 - 12, maxZ: z1 + 10 };
   } catch (err) {
     console.warn('Startansicht aus harbor.js nicht ableitbar, nehme festen Wert', err);
     return { minX: -76, maxX: -44, minZ: -45, maxZ: 6 };
   }
 }
 
-// Dazu alle sichtbaren Bauplaetze (Stegprojekte und Services, pick buildsite) mit 6 m Rand.
-// Wird bei jedem reset() neu gerechnet, weil die Module Bauplaetze erst spaeter anlegen
-// und gebaute Plaetze wieder verschwinden.
-function startRect(game, stufe) {
-  const r = homeRect(stufe);
-  const box = new game.THREE.Box3();
+const bauplatzMass = new Map();
+
+function extras(game, stufe) {
+  const liste = [];
+  try {
+    for (const b of warteplaetze(stufe).bojen) {
+      liste.push({ minX: b.x - 8, maxX: b.x + 8, minZ: b.z - 8, maxZ: b.z + 8 });
+    }
+  } catch (err) { console.warn('Wartebojen nicht lesbar', err); }
+  // Bauplaetze pulsieren: jede Flaeche wird einmal gemessen und auf ganze Meter gerundet gemerkt,
+  // damit reset() immer genau denselben Ausschnitt liefert.
   const teil = new game.THREE.Box3();
   game.scene.traverseVisible((o) => {
-    if (o.userData?.pick?.type !== 'buildsite') return;
-    teil.setFromObject(o);
-    if (!teil.isEmpty()) box.union(teil);
+    const pick = o.userData?.pick;
+    if (pick?.type !== 'buildsite') return;
+    const key = `${pick.id}|${o.uuid}`;
+    let e = bauplatzMass.get(key);
+    if (!e) {
+      teil.setFromObject(o);
+      if (teil.isEmpty()) return;
+      e = { minX: Math.floor(teil.min.x) - 6, maxX: Math.ceil(teil.max.x) + 6,
+            minZ: Math.floor(teil.min.z) - 6, maxZ: Math.ceil(teil.max.z) + 6 };
+      bauplatzMass.set(key, e);
+    }
+    liste.push(e);
   });
-  if (!box.isEmpty()) {
-    r.minX = Math.min(r.minX, box.min.x - 6);
-    r.maxX = Math.max(r.maxX, box.max.x + 6);
-    r.minZ = Math.min(r.minZ, box.min.z - 6);
-    r.maxZ = Math.max(r.maxZ, box.max.z + 6);
+  // Landmarken der Gelaendeform (Leuchttuerme, Inseln im See): nur, wenn sie nah genug liegen,
+  // dass der Hafen trotzdem gross bleibt (gleiche Grenze wie Bojen und Bauplaetze).
+  try {
+    const form = game.gelaende?.aktuell?.();
+    for (const [x, y] of form?.leuchttuerme || []) {
+      liste.push({ minX: x * U - 10, maxX: x * U + 10, minZ: -y * U - 10, maxZ: -y * U + 10 });
+    }
+    for (const i of form?.seeInseln || []) {
+      liste.push({ minX: (i.x - i.rx) * U, maxX: (i.x + i.rx) * U, minZ: -(i.y + i.ry) * U, maxZ: -(i.y - i.ry) * U });
+    }
+  } catch (err) { console.warn('Geländeform nicht lesbar', err); }
+  return liste;
+}
+
+// Schilderspalte links (Wetter, Tagesziele, Ausbau, Zeit): Im Querformat deckt sie einen Streifen
+// ueber die ganze Hoehe ab und zaehlt wie eine Leiste. Im Hochformat liegen die Schilder ueber dem
+// Land oben, dort zaehlen sie nicht (sonst wird der Hafen zu schmal).
+function linkeSpalte(cam) {
+  if (cam.screenW <= cam.screenH) return 0;
+  const ins = cam.insets || { top: 0, bottom: 0 };
+  const canvas = document.getElementById('stage');
+  const c = canvas ? canvas.getBoundingClientRect() : { left: 0, top: 0 };
+  let rechts = 0;
+  for (const id of ['hm-seite', 'hm-zeit']) {
+    const el = document.getElementById(id);
+    if (!el || el.hidden) continue;
+    for (const k of (el.children.length ? [el, ...el.children] : [el])) {
+      const r = k.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0) continue;
+      if (r.left - c.left > cam.screenW * 0.4) continue;
+      // nur, was im freien Band zwischen den Leisten liegt
+      if (r.bottom - c.top <= ins.top || r.top - c.top >= cam.screenH - ins.bottom) continue;
+      rechts = Math.max(rechts, r.right - c.left);
+    }
   }
-  return r;
+  return Math.min(rechts + 8, cam.screenW * 0.3);
+}
+
+const vereinige = (a, b) => ({
+  minX: Math.min(a.minX, b.minX), maxX: Math.max(a.maxX, b.maxX),
+  minZ: Math.min(a.minZ, b.minZ), maxZ: Math.max(a.maxZ, b.maxZ),
+});
+
+// Noetige Bildbreite in Metern, damit das Rechteck in den freien Bereich passt
+// (Schraegsicht 50 Grad: Tiefe erscheint um sin 50 verkuerzt).
+function breiteFuer(r, cam) {
+  const ins = cam.insets || { top: 0, bottom: 0 };
+  const w = Math.max(1, cam.screenW - (cam.insetRight || 0) - (cam.insetLeft || 0));
+  const h = Math.max(1, cam.screenH - ins.top - ins.bottom);
+  return Math.max(r.maxX - r.minX, (r.maxZ - r.minZ) * Math.sin(50 * Math.PI / 180) * (w / h));
+}
+
+// Der Hafen soll gross im Bild sein: Extras kommen nur dazu, solange die Breite hoechstens
+// 1,5-mal so gross wird wie fuer die Liegeplaetze allein (mindestens 50 m).
+function raender(cam) {
+  try { if (cam.insetsFn) { const [top, bottom] = cam.insetsFn(); cam.insets = { top, bottom }; } } catch (err) { /* alte Werte */ }
+  try { cam.insetLeft = linkeSpalte(cam); } catch (err) { cam.insetLeft = 0; }
+}
+
+function startRect(game, stufe) {
+  const cam = game.camera;
+  raender(cam);
+  let r = homeRect(stufe);
+  const grenze = Math.max(breiteFuer(r, cam) * 1.5, 50);
+  const mx = (r.minX + r.maxX) / 2;
+  const mz = (r.minZ + r.maxZ) / 2;
+  const abstand = (e) => Math.hypot((e.minX + e.maxX) / 2 - mx, (e.minZ + e.maxZ) / 2 - mz);
+  for (const e of extras(game, stufe).sort((a, b) => abstand(a) - abstand(b))) {
+    const neu = vereinige(r, e);
+    if (breiteFuer(neu, cam) <= grenze) r = neu;
+  }
+  return polstern(cam, r);
+}
+
+// Bleibt Tiefe uebrig (Hochformat), legt die Kamera das Suedufer an den unteren Rand und zeigt
+// oben viel leeres Wasser; mittig zeigt es unten viel Land. Der Ueberschuss kommt deshalb zu
+// 70 % nach Norden (Wasser, Einfahrt, ankommende Boote) und zu 30 % nach Sueden (Ufer).
+function polstern(cam, r) {
+  const ins = cam.insets || { top: 0, bottom: 0 };
+  const w = Math.max(1, cam.screenW - (cam.insetRight || 0) - (cam.insetLeft || 0));
+  const h = Math.max(1, cam.screenH - ins.top - ins.bottom);
+  const sichtbar = breiteFuer(r, cam) / Math.sin(50 * Math.PI / 180) * (h / w);
+  const rest = sichtbar - (r.maxZ - r.minZ);
+  return rest > 0 ? { ...r, minZ: r.minZ - rest * 0.7, maxZ: r.maxZ + rest * 0.3 } : r;
+}
+
+// Ueberblick beim Laden: Die Kamera zeigt zuerst die ganze Gelaendeform
+// (game.gelaende.blickRect(): Hafen, Einfahrt, Landmarken) und faehrt dann weich auf die
+// Startansicht. Tippen, Ziehen, Mausrad oder eine Taste beenden den Flug sofort: Nach kurzem
+// Tippen springt die Kamera auf die Startansicht, sonst bleibt sie, wo der Spieler sie hinzieht.
+// Waehrend des Flugs traegt body die Klasse hm-ueberblick, am Ende meldet game 'ueberblick:ende' { abgebrochen }.
+// Nicht in Tests (navigator.webdriver) und nicht in der Pixel-Fassung, ausser mit ?ueberblick=1;
+// ?ueberblick=0 schaltet ihn ab. Der Knopf "Uebersicht" fliegt nie.
+const UEBERBLICK = { halten: 2.5, flug: 1.5 };   // Sekunden
+
+function ueberblick(game) {
+  const cam = game.camera;
+  const wahl = new URLSearchParams(location.search).get('ueberblick');
+  if (wahl === '0') return;
+  if (wahl !== '1' && (navigator.webdriver || /\/pixel\//.test(location.pathname))) return;
+  let blick = null;
+  try { blick = game.gelaende?.blickRect?.(); } catch (err) { console.warn('Blick auf die Gelaendeform nicht lesbar', err); }
+  if (!blick || !Number.isFinite(blick.minX + blick.maxX + blick.minZ + blick.maxZ)) return;
+
+  // Beide Enden mit derselben Einpassung wie die Startansicht (Leisten, Schilderspalte, Schraegsicht)
+  const lage = () => ({ x: cam.target.x, z: cam.target.z, w: cam.viewWidth });
+  cam.reset();
+  const ende = lage();
+  const home = cam.home;
+  cam.setHomeRect(() => { raender(cam); return polstern(cam, { ...blick }); });
+  cam.reset();
+  const start = lage();
+  cam.home = home;
+  if (Math.abs(start.w - ende.w) < 1 && Math.hypot(start.x - ende.x, start.z - ende.z) < 1) { cam.reset(); return; }
+
+  // _apply sofort, damit kein Bild mit altem Ausschnitt entsteht (mit PR 137 macht update() das ohnehin)
+  const setze = (x, z, w) => { cam.target.x = x; cam.target.z = z; cam.viewWidth = w; cam._apply?.(); };
+  setze(start.x, start.z, start.w);
+  document.body.classList.add('hm-ueberblick');
+  const t0 = performance.now();
+  let laeuft = true;
+  const ereignisse = ['pointerdown', 'wheel', 'keydown'];
+  let tipp = null;
+  const ab = (ev) => {
+    if (ev?.type === 'pointerdown') tipp = { x: ev.clientX, y: ev.clientY, t: performance.now() };
+    fertig(true);
+  };
+  // Kurzes Tippen ohne Ziehen heisst "weiter": dann gleich auf die Startansicht. Wer zieht,
+  // zoomt oder dreht, behaelt seinen Ausschnitt.
+  const los = (ev) => {
+    window.removeEventListener('pointerup', los, true);
+    if (tipp && performance.now() - tipp.t < 300 && Math.hypot(ev.clientX - tipp.x, ev.clientY - tipp.y) < 10) cam.reset();
+  };
+  window.addEventListener('pointerup', los, true);
+  const groesse = () => { if (laeuft) { fertig(true); cam.reset(); } };
+  ereignisse.forEach((e) => window.addEventListener(e, ab, { capture: true, passive: true }));
+  window.addEventListener('resize', groesse);
+  const aus = game.on('kamera:ausrichten', ab);   // Neigen oder Drehen per Knopf (Kamera-Thread)
+
+  function fertig(abgebrochen) {
+    if (!laeuft) return;
+    laeuft = false;
+    ereignisse.forEach((e) => window.removeEventListener(e, ab, { capture: true }));
+    window.removeEventListener('resize', groesse);
+    aus();
+    if (!abgebrochen) window.removeEventListener('pointerup', los, true);
+    document.body.classList.remove('hm-ueberblick');
+    game.emit('ueberblick:ende', { abgebrochen });
+  }
+
+  function schritt(jetzt) {
+    if (!laeuft) return;
+    const s = Math.min(1, Math.max(0, ((jetzt - t0) / 1000 - UEBERBLICK.halten) / UEBERBLICK.flug));
+    const e = s * s * (3 - 2 * s);   // weich an- und auslaufen
+    // Breite geometrisch, damit das Hineinzoomen gleichmaessig wirkt
+    setze(start.x + (ende.x - start.x) * e, start.z + (ende.z - start.z) * e, start.w * Math.pow(ende.w / start.w, e));
+    if (s >= 1) { cam.reset(); fertig(false); return; }
+    requestAnimationFrame(schritt);
+  }
+  requestAnimationFrame(schritt);
 }
 
 function boot() {
@@ -175,6 +370,7 @@ try {
   // Erst jetzt stehen Stege, Bauplaetze und die geladene Stufe fest
   game.camera.reset();
   document.getElementById('boot').classList.add('done');
+  try { ueberblick(game); } catch (err) { console.warn('Ueberblick beim Start fehlgeschlagen', err); game.camera.reset(); }
 } catch (err) {
   const el = document.getElementById('boot');
   el.classList.add('error');

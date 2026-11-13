@@ -14,7 +14,7 @@
 
 import { addBoat } from '../boat-anim.js';
 
-import { U, welt, SEE_X, SEE, SEE_RUNDE, FLOTTE, ANZAHL, aufBahn, seeBahnen, seeRunde, bisStufe, uferStrecke, versetzt, VERSATZ_MAX } from '../../data/verkehr.js';
+import { U, welt, SEE_X, SEE, SEE_RUNDE, FLOTTE, ANZAHL, aufBahn, seeBahnen, seeRunde as rundeGrund, rundeImWasser, bisStufe, uferStrecke, versetzt, VERSATZ_MAX } from '../../data/verkehr.js';
 
 // Reisegeschwindigkeit in m/s, gemütlich
 function tempo(info, id) {
@@ -43,7 +43,7 @@ export function init(game) {
   // ?stufe=3 in der Adresse zeigt die Landschaft einer Stufe (render/landscape.js), dann auch hier
   const q = typeof location !== 'undefined' ? new URLSearchParams(location.search) : null;
   const urlStufe = Number(q?.get('stufe')) || null;
-  const stufe = () => urlStufe ?? game.state?.stage ?? game.state?.stufe ?? 1;
+  const stufe = () => game.state?.stage ?? game.state?.stufe ?? urlStufe ?? 1;
   const zufall = (list) => list[Math.floor(Math.random() * list.length)];
 
   function baue(id) {
@@ -84,6 +84,23 @@ export function init(game) {
     const model = b.anim.model;
     b.anim.remove();
     if (b.dispose) model.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
+  }
+
+  // Runde passend zur Geländeform (Inseln im Binnensee): je Stufe und Gelände einmal gerechnet
+  let rundeSig = '', rundeWert = null;
+  const meideRunde = (ls) => [
+    ...(ls.warteplaetze?.bojen ?? []).map((b) => ({ x: b.x, z: b.z, r: 10 })),
+    ...(ls.warteplaetze?.ankerplaetze ?? []).map((a) => ({ x: a.x, z: a.z, r: (a.schwoikreisM ?? 8) + 4 })),
+  ];
+  function seeRunde(st) {
+    const ls = game.landscape;
+    const sig = `${st}|${ls?.stufe ?? ''}|${ls?.region ?? ''}|${game.gelaende?.aktuell?.()?.nr ?? 1}`;
+    if (sig !== rundeSig) {
+      rundeSig = sig;
+      const r = rundeGrund(st);
+      rundeWert = r && ls?.tiefeBei ? rundeImWasser(r, (x, z) => ls.tiefeBei(x, z), { innen: (ANZAHL.see[st] ?? 3) * 8 - 6, meide: meideRunde(ls) }) : r;
+    }
+    return rundeWert;
   }
 
   // --- Runde auf dem Binnensee

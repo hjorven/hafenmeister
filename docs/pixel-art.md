@@ -1,6 +1,6 @@
 # Pixel-Art-Fassung
 
-Stand: 12.11.2026. Thread "Spiel als Pixel-Art zeichnen".
+Stand: 12.11.2026. Thread "Spiel als Pixel-Art zeichnen". Status: gebaut als eigene Seite `pixel/`; ob sie das Hauptspiel wird, ist Frage 9 der [Roadmap](roadmap.md#offene-fragen-an-jorven).
 
 Die Pixel-Fassung ist dasselbe Spiel in Pixel-Art. Sie liegt ganz in `web/pixel/` und ändert keine andere Datei.
 
@@ -34,13 +34,9 @@ Zum Vergleich gibt es den alten Filter-Weg weiter: `?stil=filter` (feste Palette
 
 ## Kamerahöhe
 
-Das normale Spiel schaut immer mit 50 Grad Neigung. In der Pixel-Fassung gibt es drei Höhen: flach 30°, Spiel 50°, hoch 70°.
+Neigen und Drehen gehen frei wie im Spiel (siehe docs/kamera.md): zwei Finger gemeinsam hoch oder runter, rechte Maustaste ziehen, Alt + Mausrad, Tasten R/V und Bild auf/ab, Kompass oben rechts richtet wieder aus. Die Pixel-Fassung bleibt orthografisch (`rig.setProjektion('ortho')`), flachste Neigung 20 Grad.
 
-- Knopf "50°" oben rechts neben dem Menü schaltet reihum
-- Tasten: Bild auf, Bild ab
-- Adresse: `?hoehe=30`, `?hoehe=50`, `?hoehe=70`
-
-Drehen geht wie im Spiel (8 Rastrichtungen, frei beim Ziehen). Boote drehen sich ohnehin frei, also sieht man sie in jeder Richtung.
+- Adresse: `?hoehe=30` startet mit 30 Grad (20 bis 86), Übersicht und Kompass kehren dorthin zurück
 
 ## Adresszusätze und Tasten
 
