@@ -43,6 +43,7 @@ const MODULES = [
   './features/hafen-schauen.js',
   './features/einstieg.js',
   './save/index.js',
+  './ui/tagesabschluss.js',
   './ui/oberflaeche.js',
 ];
 

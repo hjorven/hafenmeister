@@ -210,7 +210,7 @@ export async function init(game) {
       pruefeTag();
       const fertig = werteAus(st(), api.ctx, e);
       for (const ziel of fertig) {
-        api.addIncome(ziel.belohnung);
+        api.addIncome(ziel.belohnung, 'tagesziele');
         game.emit('ziel:erreicht', { art: ziel.art, text: text(ziel), belohnung: ziel.belohnung });
         tafel.classList.remove('jubel'); void tafel.offsetWidth; tafel.classList.add('jubel');
         if (navigator.vibrate) navigator.vibrate([20, 40, 20]);

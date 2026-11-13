@@ -326,7 +326,7 @@ Die Arbeitsliste mit allen Punkten, Paketen und Threads ist die [Roadmap](roadma
 - **Schiffe:** S, M, L, XL und XXL als 3D-Modelle, Einlaufen, Anlegen, Ablegen, Segel bergen, Vorbeifahrer, Kreuzfahrt- und Marinebesuche.
 - **Leben:** Menschen mit Wegfindung, Badegäste, Ereignisse (Nebel, Sommertag, Sturm, Regatta, Hafenfest), Jahreslauf mit Winter, Ton und Musik.
 - **Features aus 9a:** Dauerlieger, Stammgäste, Wetter an der Flagge, Fotomodus, Hafen schauen, Tagesziele.
-- **Oberfläche:** Pixel-Oberfläche für alle Geräte, Tempo Pause, 1x, 3x, 8x, Einstieg mit Hinweis-Kreisen, Speichern mit Export und Import.
+- **Oberfläche:** Pixel-Oberfläche für alle Geräte, Tempo Pause, 1x, 3x, 8x, Einstieg mit Hinweis-Kreisen, Speichern mit Export und Import, Tagesabschluss mit Einnahmen je Quelle und Münzen über den Services ([tagesabschluss.md](tagesabschluss.md)).
 - **Pixel-Fassung** als eigene Seite unter `pixel/`.
 - **Balancing:** `tools/balance.mjs` mit den echten Regeln; etwa 257 Spieltage, rund 8,5 Stunden bis zum Abschluss der Ostsee.
 
