@@ -732,10 +732,20 @@ export function init(game) {
     if (d.round) {
       teile = [{ text: eur(d.amount), farbe: '#cfd8e0' }, { text: ` statt ${eur(d.full ?? d.amount)}`, farbe: '#9fb0bf' }];
       unten = 'Hafenmeister';
-    } else if (w && w.base + w.bonus === d.amount && w.bonus > 0) {
-      teile = [{ text: eur(w.base), farbe: '#ffd75e' }, { text: ` + ${eur(w.bonus)}`, farbe: '#8fe07a' }];
-    } else teile = [{ text: eur(d.amount), farbe: '#ffd75e' }];
-    if (!d.round && w?.nights > 1 && w.base + w.bonus === d.amount) unten = `${w.nights} Nächte`;
+    } else {
+      // Zuschläge des Hafenbüros (P02): Trinkgeld beim persönlichen Abholen, Nebenkosten; amount enthält sie
+      const tip = d.tip || 0, extras = d.extras || 0;
+      const kern = d.amount - tip - extras;
+      const passt = w && w.base + w.bonus === kern;
+      teile = passt && w.bonus > 0
+        ? [{ text: eur(w.base), farbe: '#ffd75e' }, { text: ` + ${eur(w.bonus)}`, farbe: '#8fe07a' }]
+        : [{ text: eur(kern), farbe: '#ffd75e' }];
+      const zeile = [];
+      if (passt && w.nights > 1) zeile.push(`${w.nights} Nächte`);
+      if (tip > 0) zeile.push(`+${eur(tip)} Trinkgeld`);
+      if (extras > 0) zeile.push(`+${eur(extras)} Nebenkosten`);
+      if (zeile.length) unten = zeile.join(' · ');
+    }
     const sp = textSprite(teile, unten);
     sp.position.copy(pos).add(new THREE.Vector3(0, 0.9, 0));
     // Nicht über einen anderen Betrag legen: so lange eine Zeile höher, bis auf dem Bildschirm Platz ist
