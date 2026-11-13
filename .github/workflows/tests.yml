@@ -17,10 +17,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  spiel:
-    name: Spiel testen (Handy, Tablet, PC)
+  schnell:
+    name: Pfade und Tests ohne Browser
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Pfade wie für GitHub Pages prüfen
+        run: bash tools/check-pages.sh web
+
+      - name: Tests ohne Browser (node --test)
+        run: |
+          shopt -s nullglob
+          dateien=(tests/*.test.mjs)
+          if [ ${#dateien[@]} -gt 0 ]; then node --test "${dateien[@]}"; else echo "Keine tests/*.test.mjs vorhanden."; fi
+
+  geraet:
+    # Ein Job je Geraet, parallel. Zusammen sind es zu viele Tests fuer einen Job.
+    name: Spiel testen (${{ matrix.projekt }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        projekt: [handy, handy-quer, tablet, tablet-quer, pc]
     defaults:
       run:
         working-directory: tests
@@ -33,17 +58,6 @@ jobs:
           cache: npm
           cache-dependency-path: tests/package-lock.json
 
-      - name: Pfade wie für GitHub Pages prüfen
-        working-directory: .
-        run: bash tools/check-pages.sh web
-
-      - name: Tests ohne Browser (node --test)
-        working-directory: .
-        run: |
-          shopt -s nullglob
-          dateien=(tests/*.test.mjs)
-          if [ ${#dateien[@]} -gt 0 ]; then node --test "${dateien[@]}"; else echo "Keine tests/*.test.mjs vorhanden."; fi
-
       - name: Abhängigkeiten installieren
         run: npm ci --no-audit --no-fund
 
@@ -51,13 +65,13 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Tests ausführen
-        run: npx playwright test
+        run: npx playwright test --project=${{ matrix.projekt }}
 
       - name: Bildschirmfotos hochladen
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: bildschirmfotos
+          name: bildschirmfotos-${{ matrix.projekt }}
           path: tests/bildschirmfotos/
           if-no-files-found: ignore
           retention-days: 14
@@ -66,9 +80,23 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: testbericht
+          name: testbericht-${{ matrix.projekt }}
           path: |
             tests/bericht/
             tests/test-results/
           if-no-files-found: ignore
           retention-days: 14
+
+  spiel:
+    # Sammel-Check mit dem bisherigen Namen, damit eine Branch-Regel nur diesen einen Check braucht
+    name: Spiel testen (Handy, Tablet, PC)
+    needs: [schnell, geraet]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ergebnis aller Geräte
+        run: |
+          echo "schnell: ${{ needs.schnell.result }}, Geräte: ${{ needs.geraet.result }}"
+          test "${{ needs.schnell.result }}" = success
+          test "${{ needs.geraet.result }}" = success
