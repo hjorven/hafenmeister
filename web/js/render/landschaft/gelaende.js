@@ -559,7 +559,9 @@ export function punkt(px, py, stufe, region) {
     }
   }
   for (const m of molenCache(stufe)) {
-    if (abstandZuLinie(px, py, m.punkte) < m.breite / 2) { h = 1.4; typ = 'mole'; }
+    // so breit wie gezeichnet: Steinschüttung an den Seiten (bis 0,6 Breite) und runder Kopf (bis 0,95 Breite)
+    const kopf = m.punkte[m.punkte.length - 1];
+    if (abstandZuLinie(px, py, m.punkte) < m.breite * 0.6 || Math.hypot(px - kopf[0], py - kopf[1]) < m.breite * 0.95) { h = 1.4; typ = 'mole'; }
   }
   if (stufe >= 2 && px > SLIP.x0 && px < SLIP.x1) {
     // Slipanlage: Rampe vom Land bis 0,6 m unter Wasser, ab Stufe 3 durch die Kaimauer hindurch
