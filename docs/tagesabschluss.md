@@ -5,7 +5,7 @@ Stand: 13.11.2026, Paket P15 (Ü22, Svc F4). Status: erledigt (PR 159).
 ## Was der Spieler sieht
 
 - Am Ende jedes Tages erscheint oben in der Mitte eine kleine Karte "Tag n geschafft" mit der Tagessumme.
-- Einnahmen je Quelle: Liegegeld (aufgeteilt in selbst eingestrichen, beim Rundgang halb, über Nacht halb), Pacht, Gastronomie, Services (die drei stärksten Anlagen mit Namen), Tagesziele (erfüllt von gesamt), Sonstiges.
+- Einnahmen je Quelle: Liegegeld (aufgeteilt in selbst eingestrichen, beim Rundgang, über Nacht, Trinkgeld für den Kassierstrich), Pacht, Gastronomie, Services (die drei stärksten Anlagen mit Namen), Tagesziele (erfüllt von gesamt), Sonstiges.
 - Ausgaben des Tages (Bauen, Ausbau) und der Saldo der Kasse.
 - Boote: angelegt, abgereist mit Schnitt der Bewertung, weitergefahren mit Grund (Wartebojen voll, zu lange gewartet, abends ohne Platz, weggeschickt). Ruf vorher und nachher.
 - Die letzten sieben Tage als Säulen, der beste Tag in Gold. "Rekord", wenn der Tag den besten bisher schlägt.
@@ -29,3 +29,4 @@ Stand: 13.11.2026, Paket P15 (Ü22, Svc F4). Status: erledigt (PR 159).
 - "Rekord" erst ab Tag 2, wenn es einen Tag davor zu schlagen gab.
 - Dauerlieger (P01): Saisonpacht im Voraus bucht `'pacht'` mit detail `'saison'`, die Rückzahlung beim Kündigen als Ausgabe `'pacht'`.
 - Handy quer: zwei Spalten, "Weiter" bleibt unten fest sichtbar.
+- Kassieren (P12): Nachtkasse bucht `'liegegeld'`/`'nacht'`, Rundgang `'rundgang'`, Trinkgeld `'strichtrinkgeld'`. Der Anteil beim Rundgang kommt aus `rules.uncollectedShare`, darum steht "halb" nicht mehr im Text.
