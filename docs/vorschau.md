@@ -34,6 +34,8 @@ Wozu: Man sieht, wer gleich kommt, und kann entscheiden, ob man die große Box m
 - Bootskarte offen (`body.card-open`): Funk aus, damit nichts unter der Karte hervorschaut.
 - Ganz herausgezoomt (Boot kürzer als 20 Bildschirmpixel): keine Schilder.
 - Sonderfälle mit der orangen Raute der Leitstelle (ui/hud.js): Die Schilder stehen über der Raute.
+- Ragt eine Funk-Karte in etwas unten rechts hinein ("Als Nächstes", Kassieren, Zeit, Bauen), fällt sie weg; der Funk zeigt dann nur die Karten, die frei Platz haben (am Handy quer oft nur eine).
+- Der Dauerlieger-Hinweis (features/dauerlieger.js) legt sich nicht über Funk und linke Spalte: oben in die Lücke dazwischen, am Handy hochkant darunter. Solange eine Karte offen ist, ist er aus und seine Zeit läuft nicht ab.
 - Würden sich die Schilder zweier Boote überdecken, bleibt nur die erste Reihe stehen; das gewählte Boot hat Vorrang.
 
 ## Schnittstelle
