@@ -152,7 +152,10 @@ export function init(game) {
   }
 
   function neuesNetz() {
-    netz = baueNetz({ hafen: HAFEN, stufe: Math.min(5, stufe), gebaeude: gebaeudeListe() });
+    const hoehe = (x, z) => game.landscape?.hoeheBei?.(x, z) ?? game.landschaft?.hoeheBei?.(x, z);
+    // Kueste je Gelaendeform und Seed: Nehrungsweg, Strand und Badestellen nur, wo wirklich Land ist
+    const istLand = (px, py) => { const h = hoehe(px * U, -py * U); return h == null || h > 0.05; };
+    netz = baueNetz({ hafen: HAFEN, stufe: Math.min(5, stufe), gebaeude: gebaeudeListe(), istLand });
     api.netz = netz;
   }
 
