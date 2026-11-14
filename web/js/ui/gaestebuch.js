@@ -150,7 +150,7 @@ export function init(game) {
     };
   }
 
-  const HINDERNISSE = ['.hm-status', '.hm-werkzeuge', '#hm-seite > *', '#hm-zeit', '#btn-build', '#btn-collect', '.hm-gb-meldung', '.hm-tipp', '#card:not([hidden])'].join(', ');
+  const HINDERNISSE = ['.hm-status', '.hm-werkzeuge', '#hm-seite > *', '#hm-zeit', '#btn-build', '#btn-collect', '.hm-gb-meldung', '.hm-tipp', '#card:not([hidden])', '#hm-meldeplatz > :not([hidden])'].join(', ');
   let gemessen = 0;
   let spiel = null;
   let hindernisse = [];
@@ -171,12 +171,12 @@ export function init(game) {
       else rafLaeuft = false;
       return;
     }
-    // höchstens fünf Blasen zugleich; wer wartet, verfällt nach einer Blasendauer (das Boot ist dann weit weg)
+    // höchstens zwei Blasen zugleich (ruhiges Bild, Jorven 14.11.); wer wartet, verfällt nach einer Blasendauer (das Boot ist dann weit weg)
     while (warteschlange.length && warteschlange[0].seit < jetzt - DAUER) warteschlange.shift();
-    while (warteschlange.length && jetzt >= naechsteAb && blasen.size < 5) { starte(warteschlange.shift()); naechsteAb = jetzt + ABSTAND; }
+    while (warteschlange.length && jetzt >= naechsteAb && blasen.size < 2) { starte(warteschlange.shift()); naechsteAb = jetzt + ABSTAND; }
     // Lage jeder Blase, dann Überlappungen auflösen: jüngere weichen nach oben aus
     const belegt = [];
-    // Feste Teile der Oberfläche (Status, Seite, Zeit, Bauen, Meldungen): Blasen darunter werden blass
+    // Feste Teile der Oberfläche (Status, Seite, Zeit, Bauen, Meldungen): Blasen darunter verschwinden
     // Lagen der Oberfläche nur alle 300 ms neu messen (spart Layout-Arbeit in jedem Bild)
     if (jetzt - gemessen > 300 || !blasen.size) {
       gemessen = jetzt;
@@ -209,7 +209,7 @@ export function init(game) {
       x.el.style.transform = `translate(${Math.round(links)}px, ${Math.round(oben)}px)`;
       const L = links + spiel.left, O = oben + spiel.top;
       const unter = hindernisse.some((r) => L < r.right && r.left < L + bw && O < r.bottom && r.top < O + bh);
-      const deck = unter ? 0.2 : 1;
+      const deck = unter ? 0 : 1;   // unter der Oberfläche ganz weg statt blass (sonst wirkt es unruhig)
       x.el.style.opacity = p.sichtbar ? String(deck * (t < 0.8 ? 1 : Math.max(0, (1 - t) / 0.2))) : '0';
     }
     // Meldungs-Ordnung (ui/meldungen.js): Steht gerade Wichtigeres, wartet die Leiste ausgeblendet,
