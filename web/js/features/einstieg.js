@@ -642,8 +642,8 @@ export async function init(game) {
       if (!tipp.hidden) lege(k);
       return;
     }
-    // Nacheinander statt gleichzeitig: erst anfangen, wenn keine andere Meldung steht (ui/meldungen.js)
-    const frei = !game.meldungen || game.meldungen.stand().steht === null;
+    // Nacheinander statt gleichzeitig: erst anfangen, wenn keine wichtigere Meldung steht (ui/meldungen.js)
+    const frei = !game.meldungen || game.meldungen.stand().vorrang < VORRANG.tipp;
     if (aktuell || !offeneHinweise.length || !ruhig || !frei) return;
     const id = offeneHinweise.shift();
     e.hinweise ||= [];

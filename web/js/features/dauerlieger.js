@@ -651,6 +651,8 @@ export async function init(game) {
       padding: 10px 12px; color: var(--hm-tinte, #283648); cursor: pointer; line-height: 1.35; }
     #dauer-hinweis:not(.hm-px) { background: #fffcf6; border: 2px solid #283648; }
     #dauer-hinweis[hidden], body.card-open #dauer-hinweis, #dauer-hinweis.zurueck { display: none; }
+    /* Steht der Hinweis, ruht "Als Nächstes" (ui/bauen.js): hochkant nimmt er dessen Platz unten ein */
+    .hm-neu:has(#dauer-hinweis:not([hidden]):not(.zurueck)) .bau-tipp { display: none; }
     #dauer-hinweis img, #dauer-hinweis svg { flex: none; width: 24px; height: 24px; image-rendering: pixelated; }
     #dauer-hinweis strong { display: block; font-weight: 600; }
     #dauer-hinweis span { display: block; font-size: max(13px, 0.875rem); }
@@ -736,20 +738,13 @@ export async function init(game) {
       if ((!passt(oben, l, w) || aufTipp) && hinweisArt !== 'wartet') hinweis.classList.add('zurueck');
       return;
     }
-    // Handy hochkant: unter der linken Spalte, möglichst nicht über einem Tipp
+    // Handy hochkant: unten über Zeit und Bauen, an der Stelle von "Als Nächstes" (ruht solange, CSS oben).
+    // Unter der linken Spalte lägen Wartebojen und Einfahrt, also das Spielgeschehen.
+    // Gleichzeitige Meldungen gibt es nicht mehr (ui/meldungen.js), ein Tipp steht also nie zugleich.
     const w = breit;
     const links = (h.width - w) / 2;
-    const unter = (liste) => Math.max(oben, ...liste.filter((r) => r.l < links + w && r.r > links).map((r) => r.u + rand));
-    const untenAlles = unter(hinder);
-    const untenSpalte = unter(hinder.filter((r) => !r.tipp));
-    setze(links, w, untenAlles);
-    if (passt(untenAlles, links, w)) return;
-    const ueberTipp = hinder.some((r) => r.tipp && r.l < links + w && r.r > links && r.o < untenSpalte + hinweis.offsetHeight && r.u > untenSpalte);
-    // Ein wartender Dauerlieger hat eine Frist bis zum Abend: dann notfalls über den Einstiegstipp oder
-    // eine aufgeklappte Tafel, aber nie über Spalte und Knöpfe. Andere Hinweise warten, bis Platz ist.
-    if (passt(untenSpalte, links, w) && (!ueberTipp || hinweisArt === 'wartet')) { setze(links, w, untenSpalte); return; }
-    if (hinweisArt === 'wartet') { setze(links, w, Math.max(rand, grenze(links, w) - hinweis.offsetHeight)); return; }
-    hinweis.classList.add('zurueck');
+    const unterSpalte = Math.max(oben, ...hinder.filter((r) => !r.tipp && r.l < links + w && r.r > links).map((r) => r.u + rand));
+    setze(links, w, Math.max(unterSpalte, grenze(links, w) - hinweis.offsetHeight));
   }
   setInterval(platziereHinweis, 300);
   game.on('meldungen:wechsel', () => platziereHinweis());

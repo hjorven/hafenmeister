@@ -77,7 +77,11 @@ export function init(game) {
     },
     fertig(id) { if (wuensche.delete(id)) wechsel(); },
     darf(id) { return waehle(alle()) === id; },
-    /** Für Tests und Fehlersuche: wer steht, wer wartet */
-    stand() { return { steht: waehle(alle()), wartet: alle().map((w) => w.id) }; },
+    /** Wer steht (mit Vorrang) und wer wartet; vorrang ist -Infinity, wenn nichts steht */
+    stand() {
+      const liste = alle();
+      const steht = waehle(liste);
+      return { steht, vorrang: steht ? liste.find((w) => w.id === steht).vorrang : -Infinity, wartet: liste.map((w) => w.id) };
+    },
   };
 }
