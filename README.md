@@ -40,13 +40,13 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 **Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
 
 <table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P17"><img src="web/roadmap/bilder/p17-pr237-iphone-erstes-bauwerk.jpg" alt="Erstes Bauwerk geschenkt: Toilettenhäuschen" width="100%"></a><br><sub>P17 · Erstes Bauwerk geschenkt: Toilettenhäuschen · PR 237</sub></td>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P17"><img src="web/roadmap/bilder/p17-pr237-pc-erstes-bauwerk.jpg" alt="Erstes Bauwerk geschenkt: Toilettenhäuschen" width="100%"></a><br><sub>P17 · Erstes Bauwerk geschenkt: Toilettenhäuschen · PR 237</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P66"><img src="web/roadmap/bilder/p66-pr228-pc-pulk-einfahrt.jpg" alt="Boote sammeln sich als Pulk an der Einfahrt" width="100%"></a><br><sub>P66 · Boote sammeln sich als Pulk an der Einfahrt · PR 228</sub></td>
+</tr><tr>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P18"><img src="web/roadmap/bilder/p18-pr232-p18-handy-baustelle.jpg" alt="Ausbau in Abschnitten" width="100%"></a><br><sub>P18 · Ausbau in Abschnitten · PR 232</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P18"><img src="web/roadmap/bilder/p18-pr232-p18-pc-baustelle.jpg" alt="Baustelle über Nacht" width="100%"></a><br><sub>P18 · Baustelle über Nacht · PR 232</sub></td>
-</tr><tr>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P14"><img src="web/roadmap/bilder/p14-pr154-iphone-blasen-und-meldungen.jpg" alt="Bewertungen über dem Boot" width="100%"></a><br><sub>P14 · Bewertungen über dem Boot · PR 154</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P14"><img src="web/roadmap/bilder/p14-pr154-pc-gaestebuch.jpg" alt="Gästebuch am Hafenbüro" width="100%"></a><br><sub>P14 · Gästebuch am Hafenbüro · PR 154</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P11"><img src="web/roadmap/bilder/p11-pr227-pc-weit-kleine-schilder.jpg" alt="Wunsch-Schilder aus der Ferne" width="100%"></a><br><sub>P11 · Wunsch-Schilder aus der Ferne · PR 227</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (0 von 5 erledigt)</summary>
@@ -86,8 +86,8 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 | [P11](https://hjorven.github.io/hafenmeister/roadmap/#paket=P11) | Wünsche über dem Boot und Ankunftsvorschau | **erledigt** | [#146](https://github.com/hjorven/hafenmeister/pull/146) [#158](https://github.com/hjorven/hafenmeister/pull/158) [#227](https://github.com/hjorven/hafenmeister/pull/227) [#231](https://github.com/hjorven/hafenmeister/pull/231) |
 | [P12](https://hjorven.github.io/hafenmeister/roadmap/#paket=P12) | Kassieren verständlich machen | **erledigt** | [#146](https://github.com/hjorven/hafenmeister/pull/146) [#151](https://github.com/hjorven/hafenmeister/pull/151) |
 | [P13](https://hjorven.github.io/hafenmeister/roadmap/#paket=P13) | Tagesziele an eigene Handlungen binden | **erledigt** | [#152](https://github.com/hjorven/hafenmeister/pull/152) |
-| [P14](https://hjorven.github.io/hafenmeister/roadmap/#paket=P14) | Bewertungen und Gästebuch zeigen | **erledigt** | [#154](https://github.com/hjorven/hafenmeister/pull/154) |
-| [P15](https://hjorven.github.io/hafenmeister/roadmap/#paket=P15) | Tagesabschluss am Abend zeigen | **erledigt** | [#159](https://github.com/hjorven/hafenmeister/pull/159) |
+| [P14](https://hjorven.github.io/hafenmeister/roadmap/#paket=P14) | Bewertungen und Gästebuch zeigen | **erledigt** | [#154](https://github.com/hjorven/hafenmeister/pull/154) [#233](https://github.com/hjorven/hafenmeister/pull/233) |
+| [P15](https://hjorven.github.io/hafenmeister/roadmap/#paket=P15) | Tagesabschluss am Abend zeigen | **erledigt** | [#159](https://github.com/hjorven/hafenmeister/pull/159) [#239](https://github.com/hjorven/hafenmeister/pull/239) |
 | [P16](https://hjorven.github.io/hafenmeister/roadmap/#paket=P16) | Aufstieg und Abschluss feiern, Endlosspiel | **erledigt** | [#156](https://github.com/hjorven/hafenmeister/pull/156) |
 | [P17](https://hjorven.github.io/hafenmeister/roadmap/#paket=P17) | Start und frühe Stufen straffen | teilweise | [#237](https://github.com/hjorven/hafenmeister/pull/237) |
 | [P18](https://hjorven.github.io/hafenmeister/roadmap/#paket=P18) | Ausbau in Bauabschnitten | **erledigt** | [#143](https://github.com/hjorven/hafenmeister/pull/143) [#232](https://github.com/hjorven/hafenmeister/pull/232) [#235](https://github.com/hjorven/hafenmeister/pull/235) |
