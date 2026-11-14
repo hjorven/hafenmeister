@@ -154,7 +154,7 @@ const PROBE = () => {
   for (const b of bs) {
     const E = ecken(b, 0.85);
     const nl = E.filter(([x, z]) => !wasser(x, z)).length;
-    if (nl >= 2) out.land.push({ id: b.id, g: b.g, st: b.st + ':' + (b.a.task?.constructor?.name ?? '-') + (b.a.reverse ? ':rueck' : ''), n: nl, platz: b.platz, p: [b.x, b.z] });
+    if (nl >= 2) out.land.push({ id: b.id, g: b.g, st: b.st + ':' + (b.a.task?.constructor?.name ?? '-') + (b.a.reverse ? ':rueck' : '') + (Math.abs(b.a.lane ?? 0) > 0.3 ? ':lane' + b.a.lane.toFixed(1) : '') + (b.a.ghost > 0 ? ':durchlass' : '') + (b.a.zeitraffer ? ':zeitraffer' : '') + (b.a.task?.pivot ? ':dreht' : ''), n: nl, platz: b.platz, p: [b.x, b.z] });
     const ns = E.filter(([x, z]) => steg(x, z)).length;
     if (ns >= 1 && !(b.st === 'moored' && ns === 1)) out.steg.push({ id: b.id, g: b.g, st: b.st + ':' + (b.a.task?.constructor?.name ?? '-') + (b.a.reverse ? ':rueck' : ''), n: ns, platz: b.platz, p: [b.x, b.z] });
     const alt = W.stand.get(b.a); const weg = alt ? Math.hypot(alt.x - b.x, alt.z - b.z) : 99;
