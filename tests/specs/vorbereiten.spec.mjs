@@ -60,3 +60,46 @@ test('Vorbereiten: Sturmklar machen verholt Gäste nach innen', async ({ game })
   expect(nach.schild, 'offener Platz ist bis nach dem Sturm gesperrt').toBe('reserviert');
   await expect(karte).toContainText('sturmklar');
 });
+
+// P24 Teil 2: Hanse-Woche zwei Tage vorher (große Plätze freihalten), Mittsommer mit Tipp zum Grillplatz
+test('Vorbereiten: Hanse-Woche große Plätze freihalten, Mittsommer nennt den Grillplatz', async ({ game }) => {
+  test.setTimeout(60_000);
+  const { page } = game;
+  await page.waitForFunction(() => !!window.hafenmeister?.sim && !!window.hafenmeister.vorbereitung, null, { timeout: 15_000 });
+  await page.evaluate(async () => {
+    const g = window.hafenmeister;
+    const sim = await import('./js/sim.js');
+    g.einstieg?.beenden?.();
+    g.setPaused(true);
+    sim.applyTestStage(g.sim.state, g.sim.ctx, 5);
+    g.emit('stufe', 5);
+    const d = g.sim.state.day;
+    g.events.load({ ...g.events.save(), gross: { id: 'hansewoche', startDay: d + 2, endDay: d + 5, announcedDay: d - 8 }, planned: null, current: null });
+    g.emit('event:announce', { event: g.events.gross.event, day: d, startDay: d + 2, endDay: d + 5 });
+  });
+  await page.evaluate(() => document.querySelector('ul.tz-wahl button')?.click());
+  const karte = page.locator('#ev-vorbereiten');
+  await expect(karte).toBeVisible({ timeout: 5_000 });
+  await expect(karte).toContainText('Hanse-Woche');
+  await expect(page.locator('#weather-chip')).toContainText('Hanse-Woche');
+  await karte.getByRole('button', { name: 'Plätze freihalten' }).click();
+  const v = await page.evaluate(() => {
+    const g = window.hafenmeister; const h = g.sim.state.modules.vorbereitung.hansewoche;
+    return { n: h?.plaetze.length, schild: h && g.sim.platzZustand(h.plaetze[0]) };
+  });
+  expect(v.n).toBeGreaterThan(0);
+  expect(v.schild).toBe('reserviert');
+  await expect(karte).toContainText('freigehalten');
+
+  // Mittsommer ohne Grillplatz: die Ankündigung nennt den Grillplatz
+  await page.evaluate(() => {
+    const g = window.hafenmeister;
+    document.querySelector('#ev-vorbereiten button:last-child')?.click();
+    const d = g.sim.state.day;
+    g.events.load({ ...g.events.save(), gross: null, planned: { id: 'mittsommer', startDay: d + 1, endDay: d + 1, announcedDay: d }, current: null });
+    g.emit('event:announce', { event: g.events.planned.event, day: d, startDay: d + 1, endDay: d + 1 });
+  });
+  await expect(karte).toBeVisible({ timeout: 5_000 });
+  await expect(karte).toContainText('Mittsommer');
+  await expect(karte).toContainText('Grillplatz');
+});

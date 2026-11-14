@@ -135,7 +135,7 @@ export async function initBridge(game) {
   }
 
   // Nach diesen Ereignissen kann sich das Grün-Rot-Schild eines Platzes geändert haben
-  const BERTH_EVENTS = new Set(['relocated', 'moored', 'departed', 'castOff', 'berthFreed', 'tripOut', 'tripBack', 'built', 'stageUp', 'stationed', 'unstationed', 'dayStart']);
+  const BERTH_EVENTS = new Set(['relocated', 'moored', 'departed', 'castOff', 'berthFreed', 'tripOut', 'tripBack', 'built', 'stageUp', 'stationed', 'unstationed', 'dayStart', 'reserved', 'reservationReleased']);
   let berthsChanged = false;
 
   function dispatch(events) {
@@ -306,6 +306,14 @@ export async function initBridge(game) {
     waitSpotCount: () => sim.waitSpotCount(state, ctx),
     mooredBoats: () => sim.mooredBoats(state),
     preview: () => sim.preview(state, ctx),
+    // Anmeldung per Funk (P28, docs/funk-anmeldung.md)
+    anmeldungFrei: () => sim.announcementsOpen(state, ctx),
+    angemeldet: () => sim.announcedBoats(state),
+    freihaltbar: (boatId) => sim.reservableBerths(state, ctx, boatIdOf(boatId)),
+    freihalten: run((boatId, berthId = null) => sim.reserveBerth(state, ctx, boatIdOf(boatId), berthId == null ? null : berthIdOf(berthId))),
+    freigeben: run((boatId) => sim.releaseBerth(state, ctx, boatIdOf(boatId))),
+    freigehaltenFuer: (berthId) => sim.reservedFor(state, berthIdOf(berthId)),
+    funkBonus: (boatId) => sim.reservationBonus(state, ctx, sim.announcedBoats(state).find((b) => b.id === boatIdOf(boatId)) ?? state.boats[boatIdOf(boatId)]),
     season: () => sim.season(state, ctx),
     canAdvanceStage: () => sim.canAdvanceStage(state, ctx),
     facilityUpgrade: (key) => sim.facilityUpgrade(state, ctx, key),

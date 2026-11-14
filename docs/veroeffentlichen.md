@@ -1,8 +1,8 @@
 # Veröffentlichen über GitHub Pages
 
-Stand: 12.11.2026. Status: gebaut, läuft. Der veröffentlichte Stand steht unter https://hjorven.github.io/hafenmeister/version.txt .
+Stand: 14.11.2026. Status: gebaut, läuft, gebündelt. Der veröffentlichte Stand steht unter https://hjorven.github.io/hafenmeister/version.txt .
 
-Das Spiel liegt im Ordner `web/` und wird bei jedem Push auf `main` automatisch veröffentlicht unter:
+Das Spiel liegt im Ordner `web/` und wird gebündelt veröffentlicht: alle 30 Minuten (zur Minute 7 und 37) schaut der Workflow nach, ob sich seit der veröffentlichten Fassung etwas an der Seite geändert hat, und baut nur dann. Viele Merges hintereinander ergeben so einen einzigen Bau. Nach einem Merge ist die Änderung also spätestens nach rund 30 bis 40 Minuten online (GitHub startet Zeitpläne manchmal ein paar Minuten später). Adresse:
 
 **https://hjorven.github.io/hafenmeister/**
 
@@ -12,7 +12,11 @@ Solange es `web/index.html` noch nicht gibt, erscheint dort eine Platzhalterseit
 
 1. Im Repo auf **Settings** gehen, links **Pages** wählen.
 2. Unter **Build and deployment** bei **Source** den Eintrag **GitHub Actions** auswählen (nicht "Deploy from a branch").
-3. Fertig. Der nächste Push auf `main` veröffentlicht die Seite. Alternativ unter **Actions**, Workflow **GitHub Pages**, auf **Run workflow** klicken.
+3. Fertig. Der nächste Lauf nach Zeitplan veröffentlicht die Seite.
+
+## Sofort veröffentlichen
+
+Unter https://github.com/hjorven/hafenmeister/actions/workflows/pages.yml auf **Run workflow** klicken (Branch `main`). Von Hand gestartet baut der Workflow immer, auch ohne Änderung. Dauer rund eine Minute.
 
 Direkter Link: https://github.com/hjorven/hafenmeister/settings/pages
 
@@ -55,7 +59,7 @@ Auf Handy oder Tablet im selben WLAN testen: statt `localhost` die IP-Adresse de
 
 ## Wie es funktioniert
 
-- `.github/workflows/pages.yml`: läuft bei Push auf `main` oder per Hand, baut die Seite und veröffentlicht sie. Nur der Deploy-Job darf auf Pages schreiben; Regeln für Rechte und gepinnte Actions in [sicherheit.md](sicherheit.md).
+- `.github/workflows/pages.yml`: läuft alle 30 Minuten oder per Hand. `tools/pages-geaendert.sh` liest den Commit aus der veröffentlichten `version.txt` und vergleicht mit `main` nur die Dateien, aus denen die Seite entsteht (`web/`, `docs/roadmap.md`, `docs/roadmap-bilder.json`, die Bau-Skripte in `tools/`, der Workflow). Keine Änderung: der Lauf endet nach wenigen Sekunden ohne Bau. Ist `version.txt` nicht erreichbar, wird sicherheitshalber gebaut. Nach dem Bau prüft der Workflow, dass `offline-liste.json` (P61) in der Seite steckt. Nur der Deploy-Job darf auf Pages schreiben; Regeln für Rechte und gepinnte Actions in [sicherheit.md](sicherheit.md).
 - `tools/build-pages.sh`: kopiert `web/` nach `_site/` (oder legt die Platzhalterseite an), ergänzt `.nojekyll` und `version.txt`.
 - `tools/check-pages.sh`: sucht absolute Pfade und Verweise auf Dateien, die es nicht gibt.
 
@@ -65,4 +69,8 @@ Nur `web/` wird veröffentlicht. Konzepte (`docs/`) und Skripte (`skripte/`) ble
 
 - **Läufe stehen ewig auf "Queued", Jobs starten nicht:** Meist liegt es an der Abrechnung des Accounts, nicht am Repo. Unter https://github.com/settings/billing/budgets prüfen, ob ein Actions-Budget von 0 Dollar alles stoppt, und unter https://github.com/settings/billing/usage nachsehen, welches (private) Repo den Actions-Speicher füllt. Dort alte Artefakte und Caches löschen.
 - **"pages build and deployment" bricht mit startup_failure ab:** Die Pages-Quelle steht noch auf "Deploy from a branch". Auf **GitHub Actions** umstellen (siehe oben).
-- Der Workflow läuft nur, wenn sich `web/`, die beiden Skripte in `tools/` oder der Workflow selbst ändern. Bei vielen Merges kurz hintereinander wird nur der neueste Stand veröffentlicht, ältere Läufe werden abgebrochen.
+- Der Workflow baut nur, wenn sich seit der veröffentlichten Fassung etwas an der Seite geändert hat (siehe oben). Im Log des Schritts "Hat sich seit der letzten Veröffentlichung etwas geändert?" steht, gegen welchen Commit verglichen wurde. Selbst prüfen, ob gebaut würde:
+
+  ```bash
+  git fetch origin main && bash tools/pages-geaendert.sh schedule origin/main
+  ```

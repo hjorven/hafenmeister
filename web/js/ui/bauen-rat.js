@@ -11,6 +11,7 @@ export const WUNSCH_KURZ = Object.fromEntries(Object.entries(WUNSCH_TEXTE).map((
 export const FREI = {
   allesKassieren: 'Der Knopf „Kassieren“ streicht alle Münzen auf einmal ein. Bis dahin streichst du jede Münze selbst.',
   vorschau: 'Funk: Du siehst die nächsten drei Boote mit Größe, Ankunftszeit und Wünschen.',
+  anmeldung: 'Morgens melden sich ein bis zwei Boote per Funk an. Hältst du ihnen eine Box frei, fahren sie direkt hinein und zahlen einen Bonus.',
   sofortKassieren: 'Der Automat kassiert das Liegegeld kleiner und mittlerer Boote (S, M) selbst, sobald sie festgemacht haben. Große Boote zahlen persönlich: Holst du ihre Münze ab, gibt es Trinkgeld.',
   vorschlag: 'Das Büro schlägt für jedes Boot die beste Box vor (goldene Raute). Ein Tipp auf „Vorschlag annehmen“ genügt.',
   nebenkosten: `Das Büro rechnet Strom, Wasser und Duschen ab: Auf jedes Liegegeld kommen ${Math.round((ECONOMY.hafenbuero?.nebenkosten?.anteil ?? 0) * 100)} % dazu.`,
@@ -61,6 +62,9 @@ export function waehleSchritt({ geld, eintraege, bedarf, stufe, region = null, g
   if (ausbau && !ausbau.gesperrt && zielErreicht && leistbar(ausbau)) {
     return { text: `Alles bereit: ${ausbau.gesamt ? ausbau.name : stufe?.goal?.name ?? 'nächste Ausbaustufe'} bauen.`, ziel: ausbau.key, leistbar: true };
   }
+  // Geschenktes erstes Bauwerk geht allem anderen vor (kostet nichts, Gäste wünschen es sich; Einzeltest 14.11.)
+  const g = geschenk && offen.find((e) => e.key === geschenk);
+  if (g) return { text: `${g.name} bauen. Das erste Bauwerk ist geschenkt.`, ziel: g.key, leistbar: true };
   // 2. Kein Platz: Boote weggeschickt oder Hafen fast voll
   const stege = offen.filter((e) => e.art === 'steg');
   const voll = bedarf.plaetze > 0 && bedarf.belegt / bedarf.plaetze >= 0.85;
