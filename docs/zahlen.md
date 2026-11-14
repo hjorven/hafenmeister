@@ -82,7 +82,7 @@ Liegegeld je angefangenem Meter Bootslänge (B10); der Grundpreis ist der Schnit
 
 | Stufe | Name | ab Hafenstufe | Kosten | schaltet frei |
 |---|---|---|---|---|
-| 1 | Hafenmeister mit Funk | 2 | 600 € | allesKassieren, vorschau |
+| 1 | Hafenmeister mit Funk | 2 | 600 € | allesKassieren, vorschau, anmeldung |
 | 2 | Kassenautomat | 2 | 1.800 € | sofortKassieren |
 | 3 | Hafenbüro | 3 | 3.800 € | vorschlag, nebenkosten |
 | 4 | Hafenleitstelle | 4 | 9.500 € | automatik |

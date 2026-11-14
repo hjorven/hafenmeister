@@ -390,6 +390,9 @@ export function berthHas(state, ctx, berth, prop) {
 
 /** Zusätzliche Passregeln aus dem Hook 'fit'. Gibt den ersten Grund zurück oder null. */
 export function hookWhyNotFit(state, ctx, boat, berth) {
+  // Für ein angemeldetes Boot frei gehalten (Anmeldung per Funk, P28): nur dieses Boot passt
+  const r = reservedFor(state, berth.id);
+  if (r && r.id !== boat.id) return 'funk';
   for (const fn of ctx.hooks.fit || []) {
     const why = fn({ state, ctx, boat, berth });
     if (why) return why;
@@ -619,6 +622,7 @@ function startDay(state, ctx, events) {
   state.upcoming = list;
   state.scheduledDay = state.day;
   events.push({ type: 'dayStart', day: state.day, stage: state.stage, expected: list.length, winter: sea.winter, year: sea.year });
+  if (!sea.winter) announce(state, ctx, events);
 }
 
 /**
@@ -677,11 +681,171 @@ export function preview(state, ctx) {
 }
 
 // ---------------------------------------------------------------------------
+// Anmeldung per Funk (P28, docs/funk-anmeldung.md)
+//
+// Ab der Bürostufe mit 'anmeldung' melden sich morgens ein bis zwei der heute erwarteten Boote
+// per Funk an (boat.funk = { platz: null }). Der Spieler kann ihnen eine passende Box frei halten
+// (reserveBerth): Bis das Boot da ist, passt kein anderes Boot hinein (hookWhyNotFit, Grund 'funk'),
+// das Schild am Platz steht auf rot. Kommt das Boot, fährt es ohne Halt an der Boje direkt hinein
+// und zahlt einen Bonus (rules.funk.bonusShare des Liegegelds einer Nacht ohne Wünsche) und gibt
+// rules.funk.rating Anker mehr. Legt der Spieler es woanders hin, verfällt die Reservierung ohne Bonus.
+// Die Auswahl verbraucht keinen Spielzufall (Hash aus Seed und Tag), damit Spielstände und das
+// Balancing gleich bleiben.
+
+/** Feste Zahl von 0 bis unter 1 aus Seed, Tag und Salz (verbraucht keinen Zufall). */
+function hash01(state, salt) {
+  let h = (state.seed >>> 0) ^ Math.imul(state.day + 1, 0x9e3779b1) ^ Math.imul(salt + 7, 0x85ebca6b);
+  h = Math.imul(h ^ (h >>> 16), 0x7feb352d);
+  h = Math.imul(h ^ (h >>> 15), 0x846ca68b);
+  h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
+}
+
+/** Ist die Anmeldung per Funk freigeschaltet (Bürostufe) und gibt es die Regel? */
+export function announcementsOpen(state, ctx) {
+  return !!ctx.rules.funk && state.office >= (ctx.rules.office?.announce ?? Infinity);
+}
+
+/** Morgens: ein bis zwei der heute erwarteten Boote melden sich an (nur Gäste, die nicht zu früh kommen). */
+function announce(state, ctx, events) {
+  if (!announcementsOpen(state, ctx)) return;
+  const f = ctx.rules.funk;
+  const ab = (f.leadShare ?? 0) * ctx.rules.dayLength;
+  const pool = state.upcoming.filter((b) => !b.stationed && b.arriveAt >= ab);
+  if (!pool.length) return;
+  const n = Math.min(pool.length, hash01(state, 1) < (f.twoShare ?? 0) ? 2 : 1);
+  const ids = [];
+  for (let i = 0; i < n; i++) {
+    const rest = pool.filter((b) => !b.funk);
+    const b = rest[Math.floor(hash01(state, 2 + i) * rest.length)];
+    b.funk = { platz: null };
+    ids.push(b.id);
+  }
+  events.push({ type: 'announced', boatIds: ids });
+}
+
+/** Angemeldete Boote des Tages, die noch nicht liegen (erwartet oder an der Boje), nach Ankunft sortiert. */
+export function announcedBoats(state) {
+  const out = state.upcoming.filter((b) => b.funk);
+  for (const id of state.queue) if (state.boats[id]?.funk) out.push(state.boats[id]);
+  return out.sort((a, b) => a.arriveAt - b.arriveAt);
+}
+
+/** Welches angemeldete Boot hat diese Box frei gehalten bekommen? (oder null) */
+export function reservedFor(state, berthId) {
+  for (const b of state.upcoming || []) if (b.funk?.platz === berthId) return b;
+  for (const id of state.queue || []) {
+    const b = state.boats[id];
+    if (b?.status === 'waiting' && b.funk?.platz === berthId) return b;
+  }
+  return null;
+}
+
+function announcedBoat(state, boatId) {
+  const id = Number(boatId);
+  const b = state.upcoming.find((x) => x.id === id) ?? state.boats[id];
+  if (!b || !b.funk || (b.status !== 'expected' && b.status !== 'waiting')) return null;
+  return b;
+}
+
+/**
+ * Boxen, die man einem angemeldeten Boot frei halten kann, die beste zuerst (Wünsche, Komfort, knapp):
+ * frei oder gerade beim Ablegen (der Gast reist heute ab), das Boot passt, kein anderes Boot hat sie.
+ */
+export function reservableBerths(state, ctx, boatId) {
+  const boat = announcedBoat(state, boatId);
+  if (!boat) return [];
+  return availableBerths(state, ctx)
+    .filter((b) => !state.berths[b.id] && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
+    .sort((a, b) => berthScore(state, ctx, boat, b) - berthScore(state, ctx, boat, a))
+    .map((b) => b.id);
+}
+
+/** Box für ein angemeldetes Boot frei halten. Ohne berthId die beste. */
+export function reserveBerth(state, ctx, boatId, berthId = null) {
+  const events = [];
+  const boat = announcedBoat(state, boatId);
+  if (!boat) return { ok: false, reason: 'notAnnounced', events };
+  if (boat.funk.platz && boat.funk.platz === berthId) return { ok: true, berthId, events };
+  const alt = boat.funk.platz;
+  boat.funk.platz = null;                       // die eigene alte Box zählt beim Suchen nicht
+  const frei = reservableBerths(state, ctx, boat.id);
+  const ziel = berthId ?? frei[0];
+  if (!ziel || !frei.includes(ziel)) {
+    boat.funk.platz = alt;
+    return { ok: false, reason: berthId ? 'notReservable' : 'noFreeBerth', events };
+  }
+  boat.funk.platz = ziel;
+  if (alt) events.push({ type: 'reservationReleased', boatId: boat.id, berthId: alt, reason: 'moved' });
+  events.push({ type: 'reserved', boatId: boat.id, berthId: ziel });
+  return { ok: true, berthId: ziel, events };
+}
+
+/** Frei gehaltene Box wieder freigeben (der Spieler braucht sie doch). Ohne Folgen für die Bewertung. */
+export function releaseBerth(state, ctx, boatId) {
+  const events = [];
+  const boat = announcedBoat(state, boatId);
+  if (!boat?.funk?.platz) return { ok: false, events };
+  dropReservation(boat, events, 'released');
+  return { ok: true, events };
+}
+
+function dropReservation(boat, events, reason) {
+  if (!boat?.funk?.platz) return;
+  events.push({ type: 'reservationReleased', boatId: boat.id, berthId: boat.funk.platz, reason });
+  boat.funk.platz = null;
+}
+
+/** Nach einem Stufenausbau: Reservierungen auf Plätzen, die es nicht mehr gibt, fallen weg. */
+function dropVanishedReservations(state, ctx, events) {
+  for (const b of announcedBoats(state)) {
+    const berth = ctx.berthById[b.funk.platz];
+    if (b.funk.platz && (!berth || !berthAvailable(state, berth) || !fits(b, berth, ctx.rules, state.stage))) dropReservation(b, events, 'rebuild');
+  }
+}
+
+/** Frei gehaltene Box des Boots, wenn sie jetzt frei ist und es hineinpasst, sonst null. */
+function reservedBerthReady(state, ctx, boat) {
+  const id = boat?.funk?.platz;
+  if (!id) return null;
+  const berth = ctx.berthById[id];
+  if (!berth || !berthAvailable(state, berth) || !isFree(state, id)) return null;
+  if (whyNotFit(boat, berth, ctx.rules, state.stage) || hookWhyNotFit(state, ctx, boat, berth)) return null;
+  return id;
+}
+
+/** Wartet das Boot an der Boje auf seine frei gehaltene Box (die gerade noch abgelegt wird)? */
+function waitsForReservation(state, ctx, boat) {
+  const id = boat?.funk?.platz;
+  if (!id) return false;
+  const berth = ctx.berthById[id];
+  return !!berth && berthAvailable(state, berth);
+}
+
+/** Bonus, wenn das Boot in seine frei gehaltene Box einläuft (Anteil des Liegegelds einer Nacht ohne Wünsche). */
+export function reservationBonus(state, ctx, boat) {
+  return boat ? Math.round(nightlyFee(state, ctx, boat, 0) * (ctx.rules.funk?.bonusShare ?? 0)) : 0;
+}
+
+/** Beim Anlegen: eigene Box -> Bonus, andere Box -> Reservierung verfällt. Gibt das Bonus-Ereignis zurück. */
+function keepReservation(state, ctx, boat, berthId, events) {
+  if (!boat.funk) return null;
+  if (!boat.funk.platz) return null;
+  if (boat.funk.platz !== berthId) { dropReservation(boat, events, 'elsewhere'); return null; }
+  boat.funk.kept = true;
+  const amount = reservationBonus(state, ctx, boat);
+  addIncome(state, amount, 'liegegeld', 'funk');
+  boat.funk.bonus = amount;
+  return { type: 'reservationKept', boatId: boat.id, berthId, amount };
+}
+
+// ---------------------------------------------------------------------------
 // Zuweisen
 
 // hand: Der Spieler hat die Box selbst gewählt (Ziehen, Antippen). Tagesziele zählen nur solche Boote.
 function moor(state, ctx, boat, berthId, events, hand = false) {
   state.queue = state.queue.filter((id) => id !== boat.id);
+  const kept = keepReservation(state, ctx, boat, berthId, events);
   boat.status = 'moored';
   boat.berthId = berthId;
   boat.waitingSince = null;
@@ -701,6 +865,7 @@ function moor(state, ctx, boat, berthId, events, hand = false) {
   }
   // Wie im echten Hafen: Das Liegegeld für die kommende Nacht wird gleich nach dem Anlegen fällig.
   if (!boat.stationed) chargeFee(state, ctx, boat, modifiers(state, ctx), events);
+  if (kept) events.push(kept);
 }
 
 /**
@@ -819,7 +984,7 @@ export function officeProposals(state, ctx) {
   const vergeben = new Set();
   for (const id of state.queue) {
     const boat = state.boats[id];
-    if (!boat || boat.status !== 'waiting') continue;
+    if (!boat || boat.status !== 'waiting' || waitsForReservation(state, ctx, boat)) continue;
     const fitting = fittingBerths(state, ctx, id);
     if (!fitting.length || officeSpecialCase(state, ctx, id, fitting)) continue;
     const frei = fitting.find((p) => !vergeben.has(p));
@@ -903,6 +1068,7 @@ export function officeAutomatic(state, ctx) {
 export function autoAssign(state, ctx, { standardOnly = false } = {}) {
   const events = [];
   for (const id of [...state.queue]) {
+    if (waitsForReservation(state, ctx, state.boats[id])) continue;
     const fitting = fittingBerths(state, ctx, id);
     if (!fitting.length) continue;
     if (standardOnly) {
@@ -954,7 +1120,7 @@ export function selfEnter(state, ctx) {
   const order = [...state.queue].sort((a, b) => (state.boats[b]?.overnight || 0) - (state.boats[a]?.overnight || 0));
   for (const id of order) {
     const b = state.boats[id];
-    if (!b || b.held) continue;
+    if (!b || b.held || waitsForReservation(state, ctx, b)) continue;
     // Mit Hafenbüro wartet ein Sonderfall länger auf den Spieler (ohne Andrang-Abkürzung)
     if (office && state.officeAuto?.[b.size] !== false && officeSpecialCase(state, ctx, id)) {
       const wait = ctx.rules.office.special?.selfEnterAfter;
@@ -1096,6 +1262,7 @@ export function unstationBoat(state, ctx, boatId) {
 // Ankunft und Warten
 
 function turnAway(state, ctx, boat, events, why) {
+  dropReservation(boat, events, why);
   state.queue = state.queue.filter((id) => id !== boat.id);
   delete state.boats[boat.id];
   state.stats.turnedAway++;
@@ -1137,6 +1304,18 @@ export function freeWaitSpot(state, ctx) {
 function arrive(state, ctx, boat, events) {
   state.boats[boat.id] = boat;
   const spot = freeWaitSpot(state, ctx);
+  // Angemeldet und Box frei gehalten (P28): Das Boot fährt ohne Halt an der Boje in seine Box
+  const res = reservedBerthReady(state, ctx, boat);
+  if (res) {
+    boat.status = 'waiting';
+    boat.waitSpot = spot ?? state.queue.length % Math.max(1, waitSpotCount(state, ctx));
+    boat.waitingSince = state.clock;
+    boat.atBuoy = false;
+    boat.atBuoySince = null;
+    events.push({ type: 'arrived', boatId: boat.id, waitSpot: boat.waitSpot, direct: true, reserved: res });
+    moor(state, ctx, boat, res, events);
+    return;
+  }
   if (spot == null) {
     // Alle Bojen belegt: Wer eine passende freie Box sieht, hält direkt darauf zu statt abzudrehen
     const direct = ctx.rules.queue.selfEnterAfter != null ? selfBerth(state, ctx, boat.id) : null;
@@ -1162,7 +1341,7 @@ function arrive(state, ctx, boat, events) {
   boat.atBuoySince = null;
   state.queue.push(boat.id);
   events.push({ type: 'arrived', boatId: boat.id, waitSpot: spot });
-  if (officeAutoFor(state, ctx, boat.size)) {
+  if (officeAutoFor(state, ctx, boat.size) && !waitsForReservation(state, ctx, boat)) {
     const fitting = fittingBerths(state, ctx, boat.id);
     const why = fitting.length ? officeSpecialCase(state, ctx, boat.id, fitting) : null;
     if (why) {
@@ -1237,12 +1416,14 @@ export function patienceFrom(state, ctx, b) {
 export function dismiss(state, ctx, boatId) {
   const boat = state.boats[boatId];
   if (!boat || boat.status !== 'waiting') return { ok: false, events: [] };
+  const pre = [];
+  dropReservation(boat, pre, 'dismissed');
   state.queue = state.queue.filter((id) => id !== boatId);
   delete state.boats[boatId];
   const weg = heute(state).weggefahren;
   weg.weggeschickt = (weg.weggeschickt || 0) + 1;
   const rated = turnAwayRating(state, ctx, boat, 'dismissed');
-  return { ok: true, events: [{ type: 'dismissed', boatId, rated, ...(rated ? { rating: ctx.rules.turnAway.rating, guest: guestInfo(boat), day: state.day } : {}) }] };
+  return { ok: true, events: [...pre, { type: 'dismissed', boatId, rated, ...(rated ? { rating: ctx.rules.turnAway.rating, guest: guestInfo(boat), day: state.day } : {}) }] };
 }
 
 // ---------------------------------------------------------------------------
@@ -1585,11 +1766,12 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   const special = boat.special ? r.specialGuestRatingBonus : 0;
   const snug = boat.snug && r.snug ? r.snug.rating : 0;     // Päckchen/eng liegen
   const byHand = boat.byHand ? r.handAssignBonus ?? 0 : 0;  // von Hand zugewiesen (P10)
+  const funk = boat.funk?.kept ? r.funk?.rating ?? 0 : 0;   // angemeldet, Box frei gehalten (P28)
   const penalty = boat.penalty || 0;
-  const raw = base + comfort + special + snug + byHand + ratingBonus - penalty;
+  const raw = base + comfort + special + snug + byHand + funk + ratingBonus - penalty;
   const value = Math.round(Math.min(r.rating.max, Math.max(r.rating.min, raw)) * 10) / 10;
   return {
-    value, base, comfort, special, snug, byHand, bonus: ratingBonus, penalty,
+    value, base, comfort, special, snug, byHand, funk, bonus: ratingBonus, penalty,
     wishes: [...(boat.wishes || [])], wishesMet: boat.wishesMet || 0, wishesTotal: boat.wishesTotal || 0, missed: { ...(boat.missed || {}) },
     far: { ...(boat.far || {}) },
   };
@@ -1699,7 +1881,14 @@ function queueStep(state, ctx, events, countPatience) {
     if (!b.atBuoy && state.clock - b.waitingSince >= (queue.approachMax ?? 0)) {
       events.push(...markAtBuoy(state, ctx, id).events);
     }
-    if (countPatience && b.atBuoy && state.clock - patienceFrom(state, ctx, b) > queue.patience) turnAway(state, ctx, b, events, 'patience');
+    // Wer eine frei gehaltene Box hat, wartet auf sie (sie wird gerade noch abgelegt) und fährt nicht weg
+    if (countPatience && b.atBuoy && state.clock - patienceFrom(state, ctx, b) > queue.patience && !waitsForReservation(state, ctx, b)) turnAway(state, ctx, b, events, 'patience');
+  }
+  // Angemeldete Boote an der Boje: in die frei gehaltene Box, sobald sie frei ist (P28)
+  for (const id of [...state.queue]) {
+    const b = state.boats[id];
+    const res = b && !b.held ? reservedBerthReady(state, ctx, b) : null;
+    if (res) moor(state, ctx, b, res, events);
   }
   // Hafenbüro mit Automatik: wartende Standardfälle bekommen ihren Platz, sobald einer frei wird.
   // Sonderfälle bleiben beim Spieler und fahren erst nach office.special.selfEnterAfter selbst ein.
@@ -1741,6 +1930,7 @@ export function tick(state, ctx, dt) {
       tripStep(state, ctx, events);
       for (const fn of ctx.hooks.tick) fn({ state, ctx, events });
       if (state.clock >= dayLength) {
+        for (const b of state.upcoming) dropReservation(b, events, 'evening');
         state.upcoming = []; // wer heute nicht mehr eingelaufen ist, kommt nicht
         startEvening(state, ctx, events);
       }
@@ -1912,6 +2102,7 @@ export function advanceStage(state, ctx, opts = {}) {
   state.stageGuests = 0;
   const events = [{ type: 'stageUp', stage: state.stage }];
   clearVanishedBerths(state, ctx, from, events);
+  dropVanishedReservations(state, ctx, events);
   return { ok: true, events };
 }
 

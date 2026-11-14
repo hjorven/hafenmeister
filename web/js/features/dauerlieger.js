@@ -247,6 +247,7 @@ export function kannDauerplatz(state, ctx, platzId) {
   if (istDauerplatz(state, platzId)) return { ok: false, reason: 'schon' };
   if (berth.reserved) return { ok: false, reason: 'reserved' };
   if (!sim.isFree(state, platzId)) return { ok: false, reason: 'occupied' };
+  if (sim.reservedFor(state, platzId)) return { ok: false, reason: 'funk' };   // für ein angemeldetes Boot frei gehalten (P28)
   if (anzahl(state) >= hoechstZahl(state, ctx)) return { ok: false, reason: 'voll' };
   if (!passendeBewerber(state, ctx, platzId).length) return { ok: false, reason: 'keinBewerber' };
   return { ok: true };
@@ -635,6 +636,7 @@ const GRUND = {
   size: 'Dieser Platz ist für andere Schiffsgrößen.',
   reserved: 'Dieser Platz ist fest vergeben.',
   occupied: 'Der Platz ist schon belegt.',
+  funk: 'Diese Box ist für ein angemeldetes Boot frei gehalten.',
   dauer: 'Das ist ein Dauerplatz.',
   dauerZurueck: 'Der Dauerlieger dieses Platzes kommt vorher zurück.',
 };
@@ -940,6 +942,7 @@ export async function init(game) {
   const GRUND_VERMIETEN = {
     occupied: () => 'Der Platz ist gerade belegt.',
     reserved: () => 'Dieser Platz ist für Fischer oder Dienste reserviert.',
+    funk: () => 'Diese Box ist heute für ein angemeldetes Boot frei gehalten.',
     noBerth: () => 'Diesen Platz gibt es in dieser Ausbaustufe nicht.',
     stage: () => `Dauerplätze gibt es ab Ausbaustufe ${R().abStufe}.`,
     keinBewerber: () => 'Dieser Bewerber passt nicht mehr an den Platz.',

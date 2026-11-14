@@ -188,8 +188,20 @@ export function funkDaten(state, ctx, liste) {
       zeit: gleich ? 'gleich' : uhrzeitText(b.arriveAt, rules),
       gleich,
       wuensche: [...(b.wishes ?? [])],
+      // Anmeldung per Funk (P28): angemeldet, und welche Box frei gehalten ist
+      angemeldet: !!b.funk,
+      platz: b.funk?.platz ?? null,
     };
   });
+}
+
+/**
+ * Boote für den Funk: die nächsten (preview) und dazu alle angemeldeten des Tages (P28), nach Ankunft.
+ */
+export function funkListe(preview, angemeldet) {
+  const ids = new Set((preview ?? []).map((b) => b.id));
+  const extra = (angemeldet ?? []).filter((b) => !ids.has(b.id) && b.status === 'expected');
+  return [...(preview ?? []), ...extra].sort((a, b) => a.arriveAt - b.arriveAt);
 }
 
 /** Ist der Funk (Vorschau) freigeschaltet? Erste Stufe des Hafenbüros, außer im Winter. */
@@ -203,7 +215,8 @@ const meter = (m) => `${String(m).replace('.', ',')} m`;
 const listeText = (l) => (l.length <= 1 ? l.join('') : `${l.slice(0, -1).join(', ')} und ${l[l.length - 1]}`);
 export function funkSatz(d) {
   const w = d.wuensche.length ? `, möchte ${listeText(d.wuensche.map(wunschName))}` : ', ohne Wünsche';
-  return `${d.name}, ${meter(d.laenge)} lang, ${d.zeit === 'gleich' ? 'gleich da' : `gegen ${d.zeit}`}${w}`;
+  const a = d.platz ? `, angemeldet, Box ${d.platz} frei gehalten` : d.angemeldet ? ', hat sich angemeldet' : '';
+  return `${d.name}, ${meter(d.laenge)} lang, ${d.zeit === 'gleich' ? 'gleich da' : `gegen ${d.zeit}`}${w}${a}`;
 }
 
 // ------------------------------------------------------------------ Aussehen
@@ -254,6 +267,11 @@ body.hm-ruhig .hm-wunsch.hm-geduld.eilig { animation: none; background-color: #f
 #hm-funk .hm-funk-leer { padding: 6px 4px; font-size: 12px; text-align: center; color: var(--hm-tinte-2, #5a6a7c); }
 #hm-funk .hm-funk-satz { position: absolute; right: calc(100% + 6px); width: max-content; max-width: min(240px, 60vw); padding: 8px 10px; font: 500 13px/1.3 var(--hm-text); }
 #hm-funk .hm-funk-satz[hidden] { display: none; }
+/* Angemeldet per Funk (P28): blau gestrichelt, mit frei gehaltener Box gold und Platz-Nummer */
+#hm-funk .hm-funk-boot.angemeldet { outline: 2px dashed #3f7cc4; outline-offset: -4px; }
+#hm-funk .hm-funk-boot.angemeldet.gehalten { outline: 2px solid #d9a514; }
+#hm-funk .hm-funk-marke { font: 700 11px/1 var(--hm-text, inherit); padding: 2px 4px; background: #3f7cc4; color: #fff; }
+#hm-funk .hm-funk-boot.gehalten .hm-funk-marke { background: #d9a514; color: #24364a; }
 #hm-funk .hm-funk-boot.neu { animation: hm-funk-neu .5s steps(4) both; }
 @keyframes hm-funk-neu { from { transform: translateX(14px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (max-width: 540px), (max-height: 420px) {
@@ -575,8 +593,8 @@ export function init(game) {
     const winter = frei && sim()?.season?.()?.winter;
     funk.hidden = !frei || !!winter;
     if (funk.hidden) { funkSchluessel = ''; return; }
-    const daten = funkDaten(s, ctx, sim()?.preview?.() ?? []);
-    const schluessel = JSON.stringify([s?.phase, daten.map((d) => [d.id, d.zeit, d.wuensche])]);
+    const daten = funkDaten(s, ctx, funkListe(sim()?.preview?.() ?? [], sim()?.angemeldet?.() ?? []));
+    const schluessel = JSON.stringify([s?.phase, daten.map((d) => [d.id, d.zeit, d.wuensche, d.angemeldet, d.platz])]);
     if (schluessel === funkSchluessel) return;
     funkSchluessel = schluessel;
     const vorher = bekannt;
@@ -589,7 +607,7 @@ export function init(game) {
     // Bildgröße: 3 Bildschirmpixel je Rasterpunkt (Handy 2), für alle Boote gleich, damit die Längen vergleichbar bleiben
     const k = funk.getBoundingClientRect().width < 100 ? 2 : 3;
     liste.replaceChildren(...daten.map((d) => {
-      const b = el('button', `hm-px hm-funk-boot${d.gleich ? ' gleich' : ''}${vorher.size && !vorher.has(d.id) ? ' neu' : ''}`);
+      const b = el('button', `hm-px hm-funk-boot${d.gleich ? ' gleich' : ''}${vorher.size && !vorher.has(d.id) ? ' neu' : ''}${d.angemeldet ? ' angemeldet' : ''}${d.platz ? ' gehalten' : ''}`);
       b.type = 'button';
       b.setAttribute('role', 'listitem');
       b.setAttribute('aria-label', funkSatz(d));
@@ -605,7 +623,9 @@ export function init(game) {
       const w = el('span', 'hm-funk-wuensche');
       for (const x of d.wuensche) w.append(symbol(x));
       b.append(img, zeile, w);
-      b.addEventListener('click', (e) => { e.stopPropagation(); zeigeSatz(d, b); });
+      if (d.angemeldet) b.append(el('span', 'hm-funk-marke', d.platz ? `Box ${d.platz}` : 'angemeldet'));
+      // Angemeldete Boote: Antippen öffnet die Anmeldung (Box freihalten), sonst der Satz dazu
+      b.addEventListener('click', (e) => { e.stopPropagation(); if (!(d.angemeldet && game.funkAnmeldung?.zeige(d.id))) zeigeSatz(d, b); });
       return b;
     }));
     kuerzen();

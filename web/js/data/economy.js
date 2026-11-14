@@ -364,7 +364,7 @@ export const ECONOMY = {
   // erfüllten Wünschen (ohne Hafenbüro fahren sie nach warten.selbstEinfahrenNach Sekunden in
   // irgendeine passende freie Box).
   hafenbuero: { stufen: [
-    { name: 'Hafenmeister mit Funk', abStufe: 2, kosten: 600,  schaltetFrei: ['allesKassieren', 'vorschau'] },
+    { name: 'Hafenmeister mit Funk', abStufe: 2, kosten: 600,  schaltetFrei: ['allesKassieren', 'vorschau', 'anmeldung'] },
     { name: 'Kassenautomat',         abStufe: 2, kosten: 1800, schaltetFrei: ['sofortKassieren'], klassen: ['S', 'M'] },
     { name: 'Hafenbüro',             abStufe: 3, kosten: 3800, schaltetFrei: ['vorschlag', 'nebenkosten'] },
     { name: 'Hafenleitstelle',       abStufe: 4, kosten: 9500, schaltetFrei: ['automatik'] },
@@ -391,6 +391,17 @@ export const ECONOMY = {
     auch: ['sondergast', 'einzigerPlatz'],
     selbstEinfahrenNach: 25,
   } },
+
+  // ---------------------------------------------------------------- Anmeldung per Funk (P28)
+  // Ab "Hafenmeister mit Funk" (schaltetFrei 'anmeldung') melden sich morgens ein bis zwei der
+  // heute erwarteten Gäste per Funk an. Wer ihnen eine Box frei hält, bekommt beim Einlaufen einen
+  // Bonus. Die frei gehaltene Box ist bis dahin für andere Boote gesperrt (das ist der Preis).
+  //   fruehestens  nur Boote, die frühestens bei diesem Anteil des Tages kommen (0,35 = etwa 12:00),
+  //                damit Zeit zum Entscheiden bleibt
+  //   zweiAnteil   so oft melden sich zwei Boote statt einem
+  //   bonusAnteil  Bonus beim Einlaufen in die frei gehaltene Box, Anteil des Liegegelds einer Nacht
+  //   ruf          so viele Anker mehr in der Bewertung des Gastes
+  funkAnmeldung: { fruehestens: 0.35, zweiAnteil: 0.4, bonusAnteil: 0.5, ruf: 0.25 },
 
   // ---------------------------------------------------------------- Services
   // Format abgestimmt mit dem Services-Thread (web/js/data/services.js hat Startwerte, was
