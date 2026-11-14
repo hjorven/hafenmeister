@@ -11,11 +11,15 @@ export class ChannelLock {
     this.queue = [];
   }
 
-  request(boat, richtung = 'ein') {
+  // bild: laufende Nummer des Bildes (game.boatAnim.frame). Wartende fragen jedes Bild neu; wer
+  // ein paar Bilder lang nicht mehr fragt (Boot entfernt, Weg neu geplant, Wartezeit abgelaufen),
+  // faellt aus der Schlange und haelt den Gegenverkehr nicht mehr auf.
+  request(boat, richtung = 'ein', bild = null) {
     if (this.aktiv.has(boat)) return true;
+    if (bild != null) this.queue = this.queue.filter((e) => e.boat === boat || e.bild == null || bild - e.bild <= 20);
     const q = this.queue.find((e) => e.boat === boat);
-    if (!q) this.queue.push({ boat, richtung });
-    else q.richtung = richtung;
+    if (!q) this.queue.push({ boat, richtung, bild });
+    else { q.richtung = richtung; q.bild = bild; }
 
     // Ist die Engstelle leer, bestimmt das aelteste wartende Boot die Fahrtrichtung.
     if (this.aktiv.size === 0 && this.queue.length) this.richtung = this.queue[0].richtung;
@@ -51,7 +55,7 @@ export class Engstellen {
     if (!l) { l = new ChannelLock(this.maxKonvoi); this.locks.set(nr, l); }
     return l;
   }
-  request(nr, boat, richtung) { return this.lock(nr).request(boat, richtung); }
+  request(nr, boat, richtung, bild = null) { return this.lock(nr).request(boat, richtung, bild); }
   release(nr, boat) { this.locks.get(nr)?.release(boat); }
   releaseAll(boat) { for (const l of this.locks.values()) l.release(boat); }
   /** Neue Karte (andere Stufe, neue Stege): alle Freigaben verfallen. */
