@@ -533,7 +533,18 @@ export async function init(game) {
       const yU = Math.max(oben, unten - hoehe);
       y = !trifft(oben) ? oben : !trifft(yU) ? yU : (deckung(yU) < deckung(oben) ? yU : oben);
     }
+    // Kein Platz zwischen linker Spalte und Zeit/Bauen (z. B. Handy hochkant mit aufgeklappter
+    // Tagesziel-Tafel): nie über die Knöpfe rutschen. Ein Tipp wartet, ein Schritt legt sich über die Spalte.
+    if (y + hoehe > unten + 0.5 && !tipp.classList.contains('eng')) {
+      tipp.classList.add('eng');
+      hoehe = tipp.offsetHeight;
+    }
+    if (y + hoehe > unten + 0.5) {
+      if (istHinweis) return false;
+      y = Math.max(Math.max(unterkante('#hud-top'), 8) + 10, unten - hoehe);
+    }
     tipp.style.top = `${Math.round(y)}px`;
+    return true;
   }
 
   // ---------------------------------------------------------------- Ablauf
@@ -647,9 +658,10 @@ export async function init(game) {
       if (tipp.hidden) hinweisBis = Math.max(hinweisBis, performance.now() + 8000);
       const id = aktuell.slice(8);
       k = id === 'stufe' ? domKreis(document.getElementById('btn-build'), 6) : null;
+      // Passt der Tipp nirgends hin, ohne Knöpfe zu verdecken, wartet er (seine Zeit läuft nicht ab)
+      if (!tipp.hidden && !lege(k)) { tipp.hidden = true; hinweisBis = Math.max(hinweisBis, performance.now() + 8000); }
       ring.hidden = !k || tipp.hidden;
-      if (k) setzeKreis();
-      if (!tipp.hidden) lege(k);
+      if (k && !ring.hidden) setzeKreis();
       return;
     }
     // Nacheinander statt gleichzeitig: erst anfangen, wenn keine wichtigere Meldung steht (ui/meldungen.js)

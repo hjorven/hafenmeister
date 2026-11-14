@@ -276,27 +276,81 @@ class BoatAnimManager {
       b.blockedFor = steht ? b.blockedFor + dt : 0;
       b.blockedTotal = steht ? (b.blockedTotal ?? 0) + dt : 0;   // wird beim Pruefen nicht zurueckgesetzt
       if (b.blockedFor > 12) {
-        if (this.festgefahren(b)) { b.ghost = 4; b.durchlaesse = (b.durchlaesse ?? 0) + 1; }
+        const kette = this.festgefahren(b);
+        if (kette) {
+          // wie im echten Hafen: wer einlaeuft, setzt ein Stueck zurueck und laesst den Auslaufenden
+          // vorbei. Nur wenn keiner der Kette zuruecksetzen kann, faehrt b kurz durch (Notfall).
+          if (!this.zuruecksetzen(kette)) { b.ghost = 4; b.durchlaesse = (b.durchlaesse ?? 0) + 1; }
+        }
         b.blockedFor = 0;
       }
     }
   }
 
-  /** Haengt b in einem Kreis gegenseitiger Blockade fest (A wartet auf B wartet auf A)? */
+  /**
+   * Haengt b in einem Kreis gegenseitiger Blockade fest (A wartet auf B wartet auf A)?
+   * Gibt dann die Boote der Kette zurueck (b zuerst), sonst null.
+   */
   festgefahren(b) {
     let o = b.hinderer;
+    const kette = [b];
     // b haelt eine Engstelle frei (faehrt im Konvoi), o wartet vor genau dieser Engstelle auf die
     // Freigabe: o kommt erst, wenn b durch ist, b erst, wenn o weg ist. Das ist eine Blockade.
     const halten = [...this.engstellen.locks.values()].some((l) => l.aktiv.has(b));
     for (let i = 0; i < 40 && o; i++) {         // abends stehen bis zu 30 Boote in einer Kette
-      if (o === b) return true;                       // Kreis: niemand kommt weiter
-      if (halten && o.wartetVorEngstelle) return true;
-      if (o instanceof Hindernis) return false;       // fremdes Schiff faehrt weiter, warten
-      if (!o.movingTask?.()) return !!(o.moored || o.state === 'waiting') && (b.blockedTotal ?? 0) > 30;   // liegt fest im Weg
+      if (o === b) return kette;                      // Kreis: niemand kommt weiter
+      if (halten && o.wartetVorEngstelle) return kette.concat([o]);
+      if (o instanceof Hindernis) return null;        // fremdes Schiff faehrt weiter, warten
+      if (!o.movingTask?.()) return (o.moored || o.state === 'waiting') && (b.blockedTotal ?? 0) > 30 ? kette : null;   // liegt fest im Weg
       // vorn faehrt es: Schlange. Steht es (auch ohne eigene Vorfahrt-Sperre, z. B. beim Drehen),
       // weiter der Kette folgen: fuehrt sie zurueck zu b, ist es ein Kreis.
-      if ((o.blockedFor ?? 0) < 1 && (o.speed ?? 0) > 0.1) return false;
+      if ((o.blockedFor ?? 0) < 1 && (o.speed ?? 0) > 0.1) return null;
+      if (!kette.includes(o)) kette.push(o);
       o = o.hinderer;
+    }
+    return null;
+  }
+
+  /**
+   * Loest eine Blockade ohne Ueberlappung: ein Boot der Kette setzt ein Stueck zurueck (eine bis
+   * anderthalb Bootslaengen, nur ueber freies Wasser und an keinem Boot vorbei) und faehrt danach
+   * seinen Weg neu. Einlaufende setzen zuerst zurueck, Auslaufende zuletzt (Auslaufende haben Vorrang).
+   * Gibt true zurueck, wenn ein Boot zuruecksetzt.
+   */
+  zuruecksetzen(kette) {
+    const jetzt = this.game.time ?? 0;
+    // Nur Einlaufende setzen zurueck. Auslaufende stehen meist in einer Schlange gleicher Richtung,
+    // dort bringt Zuruecksetzen nichts (es schiebt nur die Schlange durcheinander): dann Durchlass.
+    const kandidaten = kette
+      .filter((o) => o instanceof BoatAnim && o.state !== 'leaving' && o.task instanceof PathTask && o.task.opts.route && o.task.fest && !o.task.pivot && !o.moored)
+      .filter((o) => !(jetzt - (o.zurueckAm ?? -1e9) < 25))      // nicht dauernd vor und zurueck
+      .sort((p, q) => (q.task.remaining ?? 0) - (p.task.remaining ?? 0));
+    for (const o of kandidaten) {
+      const L = o.info.length;
+      const dx = Math.cos(o.heading), dz = -Math.sin(o.heading);
+      const r = o.info.beam / 2 + 0.3, t = Math.min((o.info.draft ?? 1) + 0.2, 9);
+      let weit = 0;
+      for (const f of [1.5, 1, 0.6]) {
+        const d = L * f + 2;
+        let ok = true;
+        for (let k = 1; k <= 6 && ok; k++) {
+          const x = o.x - dx * d * k / 6, z = o.z - dz * d * k / 6;
+          if (this.frei && !this.frei(x, z, r, t)) ok = false;
+          else if (o.hitsAt(x, z, o.heading)) ok = false;
+        }
+        if (ok) { weit = d; break; }
+      }
+      if (!weit) continue;
+      const weiter = o.task;
+      if (weiter.eng) for (const e of weiter.eng) if (e.frei) { this.engstellen.release(e.nr, o); e.frei = false; }
+      o.wartetVorEngstelle = false;
+      o.tasks.unshift(new WaitTask(2 + Math.min(4, L / 6)), weiter);
+      o.task = new StraightTask({ x: o.x - dx * weit, z: o.z - dz * weit }, { reverse: true, speed: Math.min(1.2, o.cfg.harbor * 0.4), aufgeben: true });
+      o.task.start(o);
+      o.zurueckAm = jetzt;
+      o.zurueckgesetzt = (o.zurueckgesetzt ?? 0) + 1;
+      o.blockedFor = 0;
+      return true;
     }
     return false;
   }
@@ -536,7 +590,7 @@ class PathTask {
       const bis = e.ein - this.s;                          // Weg bis zur Engstelle
       if (bis > L * 2 + 10) continue;                      // noch weit weg: nicht anfragen
       const dir = e.richtung > 0 ? 'plus' : 'minus';
-      if (mgr.request(e.nr, b, dir, b.mgr.frame)) { e.frei = true; b.wartetVorEngstelle = false; continue; }
+      if (mgr.request(e.nr, b, dir, b.mgr.frame, b.state === 'leaving')) { e.frei = true; b.wartetVorEngstelle = false; continue; }
       // nach 120 s Warten trotzdem fahren (Fehlerfall); dann auch nicht mehr in der Schlange stehen.
       // Abends stehen bis zu 25 Boote an, die Schlange laeuft in Dreier-Konvois je Richtung; frueher
       // (45 s) fuhren Wartende dem Gegenverkehr in die Engstelle und steckten dort Bug an Bug fest.
@@ -589,7 +643,11 @@ class PathTask {
     // Rumpf an Rumpf: nur so weit, wie vor dem Bug Platz ist (Seitenversatz darf weiterlaufen)
     let weg = b.speed * dt;
     const platz = (b.room ?? Infinity) - 0.4;
-    if (weg > platz) { weg = Math.max(0, platz); b.speed = Math.min(b.speed, weg / Math.max(dt, 1e-3)); }
+    // Liegen zwei Rumpfe schon ineinander (nach einem Durchlass), darf das Boot weiter, wenn es sich
+    // dabei vom anderen entfernt; sonst kaemen beide nie wieder auseinander.
+    const h = b.hinderer, hp = b.room < 0 && h?.pose ? h.pose() : null;
+    const trennt = hp && Math.hypot(b.x + Math.cos(b.heading) * weg - hp.x, b.z - Math.sin(b.heading) * weg - hp.z) > Math.hypot(b.x - hp.x, b.z - hp.z) + weg * 0.3;
+    if (weg > platz && !trennt) { weg = Math.max(0, platz); b.speed = Math.min(b.speed, weg / Math.max(dt, 1e-3)); }
     const s0 = this.s;
     this.s = Math.min(this.len, this.s + weg);
     const u = this.len > 0 ? this.s / this.len : 1;
@@ -670,6 +728,8 @@ class StraightTask {
       const vorher = b.hitsAt(b.x, b.z, b.heading);
       const nachher = b.hitsAt(nx, nz, b.heading);
       this.halt = nachher && nachher !== vorher ? (this.halt ?? 0) + dt : 0;
+      // beim Zuruecksetzen aus einer Blockade: lieber aufhoeren als in ein Boot hinein
+      if (this.halt > 0 && this.opts.aufgeben) { b.speed = 0; b.reverse = false; b.blocked = false; return true; }
       if (this.halt > 0 && this.halt < 10) { this.s = s0; this.v = 0; b.speed = 0; b.blocked = true; return false; }
     }
     b.blocked = false;
@@ -971,7 +1031,7 @@ class BoatAnim {
     // Ein ankommendes Boot (opts.einfahrt) ist waehrenddessen noch nicht zu sehen: es liegt sonst
     // sichtbar am Startpunkt im Weg der anderen, und es taucht erst auf, wenn dort Platz ist.
     if (opts.verzoegerung > 0) this.push(opts.einfahrt ? new EinfahrtWarten(opts.verzoegerung) : new WaitTask(opts.verzoegerung));
-    if (this.moored) this.pushUndock({});
+    if (this.moored) this.pushUndock({ takt: opts.takt });
     let b = normBerth(berth);
     if (b.kind === 'buoy') b = { ...b, heading: this.bojenKurs(b) };
     const big = this.info.size === 'XL' || this.info.size === 'XXL';
@@ -1085,12 +1145,15 @@ class BoatAnim {
   finish(ok) { const r = this._resolve; this._resolve = null; if (r) r(ok); }
   push(task) { this.tasks.push(task); }
 
-  pushUndock() {
+  pushUndock(opts = {}) {
     const b = this.berth;
     // Leute vom Steg erst wieder an Bord lassen (Modul render/people.js), dann Leinen los
     if (b && b.kind !== 'buoy') this.push(new AwaitTask((bt) => bt.game.people?.anBord?.(bt.id), 20));
     // erst ablegen, wenn kein anderes Boot direkt daneben unterwegs ist (wie im echten Hafen)
     this.push(new UntilTask((bt) => !bt.nachbarUnterwegs(), 25));
+    // opts.takt: (boot) => true, sobald dieses Boot an der Reihe ist (gemeinsamer Ablegetakt aller
+    // Boote, render/boat-view.js); erst unmittelbar vor dem Leinenloswerfen gefragt
+    if (opts.takt) this.push(new UntilTask((bt) => opts.takt(bt), 180));
     this.push(new CallTask((bt) => {
       bt.state = 'casting-off';
       bt.emit('boat:cast-off', { berth: b?.id });
@@ -1373,6 +1436,9 @@ class BoatAnim {
   }
 
   priorityOver(o) {
+    // Hafenregel: Auslaufende haben Vorrang vor Einlaufenden (wer hinaus will, macht Platz frei)
+    const raus = (b) => (b.state === 'leaving' ? 1 : 0);
+    if (raus(this) !== raus(o)) return raus(this) > raus(o);
     const a = this.movingTask()?.remaining ?? 1e9, c = o.movingTask()?.remaining ?? 1e9;
     if (Math.abs(a - c) > 1) return a < c;
     return String(this.id) < String(o.id);

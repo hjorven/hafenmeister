@@ -14,24 +14,30 @@ export class ChannelLock {
   // bild: laufende Nummer des Bildes (game.boatAnim.frame). Wartende fragen jedes Bild neu; wer
   // ein paar Bilder lang nicht mehr fragt (Boot entfernt, Weg neu geplant, Wartezeit abgelaufen),
   // faellt aus der Schlange und haelt den Gegenverkehr nicht mehr auf.
-  request(boat, richtung = 'ein', bild = null) {
+  // vorrang: Auslaufende (Hafenregel). Ist die Engstelle frei, faehrt zuerst die Richtung des
+  // aeltesten wartenden Auslaufenden; Einlaufende warten, bis kein Auslaufender mehr ansteht.
+  request(boat, richtung = 'ein', bild = null, vorrang = false) {
     if (this.aktiv.has(boat)) return true;
     if (bild != null) this.queue = this.queue.filter((e) => e.boat === boat || e.bild == null || bild - e.bild <= 20);
     const q = this.queue.find((e) => e.boat === boat);
-    if (!q) this.queue.push({ boat, richtung, bild });
-    else { q.richtung = richtung; q.bild = bild; }
+    if (!q) this.queue.push({ boat, richtung, bild, vorrang });
+    else { q.richtung = richtung; q.bild = bild; q.vorrang = vorrang; }
 
-    // Ist die Engstelle leer, bestimmt das aelteste wartende Boot die Fahrtrichtung.
-    if (this.aktiv.size === 0 && this.queue.length) this.richtung = this.queue[0].richtung;
+    // Ist die Engstelle leer, bestimmt das aelteste wartende Boot mit Vorrang (sonst das aelteste)
+    // die Fahrtrichtung.
+    if (this.aktiv.size === 0 && this.queue.length) this.richtung = (this.queue.find((e) => e.vorrang) ?? this.queue[0]).richtung;
 
     // Gleiche Richtung wie der laufende Konvoi: darf mitfahren, solange vor ihm in der Schlange
-    // kein Boot der Gegenrichtung wartet (niemand ueberholt den Gegenverkehr).
+    // kein Boot der Gegenrichtung wartet (niemand ueberholt den Gegenverkehr) - ausser es hat selbst
+    // Vorrang und der Wartende nicht.
     if (richtung !== this.richtung) return false;
     if (this.aktiv.size >= this.maxKonvoi) return false;
     for (const e of this.queue) {
       if (e.boat === boat) break;
-      if (e.richtung !== richtung) return false;
+      if (e.richtung !== richtung && (e.vorrang || !vorrang)) return false;
     }
+    // ohne Vorrang nicht hinein, solange ein Auslaufender der Gegenrichtung irgendwo wartet
+    if (!vorrang && this.queue.some((e) => e.vorrang && e.richtung !== richtung)) return false;
     this.queue.splice(this.queue.findIndex((e) => e.boat === boat), 1);
     this.aktiv.add(boat);
     return true;
@@ -55,7 +61,7 @@ export class Engstellen {
     if (!l) { l = new ChannelLock(this.maxKonvoi); this.locks.set(nr, l); }
     return l;
   }
-  request(nr, boat, richtung, bild = null) { return this.lock(nr).request(boat, richtung, bild); }
+  request(nr, boat, richtung, bild = null, vorrang = false) { return this.lock(nr).request(boat, richtung, bild, vorrang); }
   release(nr, boat) { this.locks.get(nr)?.release(boat); }
   releaseAll(boat) { for (const l of this.locks.values()) l.release(boat); }
   /** Neue Karte (andere Stufe, neue Stege): alle Freigaben verfallen. */

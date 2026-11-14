@@ -237,6 +237,20 @@ test('Engstelle: Konvoi bis drei, Gegenverkehr wartet, Reihenfolge bleibt', () =
   assert.equal(e.locks.size, 0);
 });
 
+test('Engstelle: Auslaufende haben Vorrang, Einlaufende warten davor', () => {
+  const lock = new ChannelLock(3);
+  const ein1 = { id: 'E1' }, ein2 = { id: 'E2' }, aus1 = { id: 'A1' }, aus2 = { id: 'A2' };
+  assert.equal(lock.request(ein1, 'ein', 1, false), true);
+  assert.equal(lock.request(aus1, 'aus', 1, true), false, 'Engstelle besetzt: auch mit Vorrang warten');
+  assert.equal(lock.request(ein2, 'ein', 2, false), false, 'Einlaufender wartet, solange ein Auslaufender wartet');
+  lock.release(ein1);
+  assert.equal(lock.request(ein2, 'ein', 3, false), false, 'frei: die Richtung des Auslaufenden gilt, obwohl der Einlaufende frueher fragt');
+  assert.equal(lock.request(aus1, 'aus', 3, true), true);
+  assert.equal(lock.request(aus2, 'aus', 4, true), true, 'weitere Auslaufende fahren im Konvoi mit');
+  lock.release(aus1); lock.release(aus2);
+  assert.equal(lock.request(ein2, 'ein', 5, false), true, 'danach der Einlaufende');
+});
+
 test('Engstelle: wer nicht mehr fragt, faellt aus der Schlange und haelt niemanden auf', () => {
   const lock = new ChannelLock(3);
   const a = { id: 'A' }, weg = { id: 'W' }, g = { id: 'G' };
