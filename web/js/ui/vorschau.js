@@ -531,8 +531,10 @@ export function init(game) {
   funk.append(kopf, liste, satz);
   root.append(funk);
 
-  let zu = false;
-  try { zu = localStorage.getItem('hm-funk-zu') === '1'; } catch { /* privat */ }
+  // Am Handy hochkant zuerst zugeklappt (nur der Kopf "Funk"): die Liste nähme sonst die halbe rechte Seite ein.
+  // Wer sie aufklappt, behält sie offen (gemerkt).
+  let zu = !!globalThis.matchMedia?.('(max-width: 599px) and (orientation: portrait)').matches;
+  try { const g = localStorage.getItem('hm-funk-zu'); if (g != null) zu = g === '1'; } catch { /* privat */ }
   const setzeZu = (z) => {
     zu = z;
     funk.classList.toggle('zu', z);
