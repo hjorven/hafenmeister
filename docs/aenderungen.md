@@ -8,7 +8,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 - Über jedem wartenden Boot zeigt ein kleiner Ring, wie lange es noch Geduld hat: grün, gelb, im letzten Drittel rot und blinkend, dazu ein kurzes Tuten. Abends und nach einer Nacht an der Boje ruht die Geduld, der Ring wird dann grau-blau.
 - Über Toilette, Dusche, Kiosk und Tankstelle steht, wie viele Boote sie heute schon versorgt haben ("14/20"). Wird es knapp, blinkt das Schild orange, ist es voll, wird es rot. Morgens zählt es neu.
-- Warten Boote außerhalb des Bildes, zeigt ein Pfeil am Rand mit ihrem Geduldsring dorthin. Antippen fährt die Kamera hin.
+- Warten Boote außerhalb des Bildes, zeigt ein Pfeil am Rand mit ihrem Geduldsring dorthin. Antippen fährt die Kamera hin (269).
 - An freien Plätzen hängen keine Festmacherleinen mehr ohne Boot. Ein ankommendes Boot, das zugewiesen wurde, während es noch auf seine Einfahrt wartete, blieb unsichtbar in der Box liegen; jetzt taucht es auf und fährt sichtbar hinein.
 - Vorspulen bleibt: 3x springt nicht mehr jeden Morgen auf 1x, weil ein Ausbau möglich ist oder ein Ereignis angekündigt wird. Gebremst wird nur noch, wenn gleich etwas zu tun ist (Dauerlieger wartet, Region geschafft, bei 8x das nächste Boot); dann zeigt ein Knopf „Weiter mit 3x“ den Grund, und nach dem Umlegen läuft das alte Tempo von selbst weiter.
 - Menüs am Handy verdecken weniger vom Hafen: Die Tagesziel-Wahl zeigt die drei Karten nebeneinander, und ein Tipp auf die Karte nimmt das Ziel. Bootskarte, Wetter, Tagesziel, Ausbau-Ziel, Baumenü und der Hinweis "Als Nächstes" sind flacher; das Baumenü schließt am Handy mit dem Kreuz oben. Am Handy quer bleiben die Knöpfe der Bootskarte immer sichtbar, und die Karte ist nur so hoch wie ihr Inhalt.
