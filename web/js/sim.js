@@ -490,6 +490,31 @@ function makeBoat(fields) {
   };
 }
 
+/**
+ * Größenmischung nach Plätzen (A10, ECONOMY.platzMix): Faktor je Größe, wie gut der Hafen gerade Platz
+ * für diese Größe hat. Gezählt werden gebaute Plätze, an die die kleinste Bootsart der Größe passt,
+ * verglichen mit dem Bedarf (Ankünfte am Tag × Anteil × mittlere Nächte, mal extra[Größe] für Zuschläge
+ * wie Ruf oder Winterarbeiten). Höchstens 1.
+ */
+export function sizeBerthFactors(state, ctx, types = eligibleTypes(state, ctx), extra = {}) {
+  const pm = ctx.rules.sizeByBerths;
+  const out = {};
+  if (!pm) return out;
+  const mix = ctx.rules.sizeMix[state.stage] || {};
+  const n = ctx.rules.arrivalsPerDay[state.stage] || 0;
+  const plaetze = availableBerths(state, ctx).filter((b) => !b.reserved);
+  for (const [size, w] of Object.entries(mix)) {
+    const proben = types.filter((t) => t.size === size).map(smallestOf);
+    if (!proben.length) continue;
+    const probe = proben.reduce((a, b) => (b.length < a.length ? b : a));
+    const anzahl = plaetze.filter((b) => fits(probe, b, ctx.rules, state.stage)).length;
+    const [nMin, nMax] = range(ctx.rules.nightsBySize?.[size] ?? ctx.rules.nights);
+    const bedarf = n * w * (extra[size] ?? 1) * (nMin + nMax) / 2;
+    out[size] = bedarf > 0 ? Math.max(pm.mindestens, Math.min(1, (anzahl * pm.auslastung) / bedarf)) : 1;
+  }
+  return out;
+}
+
 /** Würfelt ein Boot für die aktuelle Ausbaustufe aus. Gibt null zurück, wenn keine Bootsart passt. */
 export function rollBoat(state, ctx, mods = modifiers(state, ctx)) {
   const types = eligibleTypes(state, ctx, mods);
@@ -502,8 +527,10 @@ export function rollBoat(state, ctx, mods = modifiers(state, ctx)) {
   const selten = draw ? new Set(draw.rare) : new Set();
   const seltenErlaubt = draw && rep >= draw.rareFrom;
   const sizeWeights = {};
+  // Nur so viele Boote einer Größe, wie der Hafen Plätze für sie hat (A10)
+  const platz = sizeBerthFactors(state, ctx, types, Object.fromEntries(Object.keys(mix).map((k) => [k, (mods.sizeFactor[k] ?? 1) * (gross[k] ?? 1)])));
   for (const [size, w] of Object.entries(mix)) {
-    if (types.some((t) => t.size === size)) sizeWeights[size] = w * (mods.sizeFactor[size] ?? 1) * (gross[size] ?? 1);
+    if (types.some((t) => t.size === size)) sizeWeights[size] = w * (mods.sizeFactor[size] ?? 1) * (gross[size] ?? 1) * (platz[size] ?? 1);
   }
   let boat = null;
   // Bis zu 8 Versuche, Maße zu würfeln, die an einen Platz des Hafens passen

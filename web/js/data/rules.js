@@ -40,6 +40,7 @@ export function rulesFromEconomy(E = ECONOMY) {
   }
   r.nights = [1, 1];   // nur für Bootsarten ohne Klasse in E.klassen
   r.wishBonus = E.wunschBonus ?? 0;
+  r.sizeByBerths = E.platzMix ?? null;
   // Kassieren: Anteil beim Rundgang und nachts, Vorauszahlung, Trinkgeld für den langen Strich
   const ka = E.kassieren || {};
   r.roundShare = ka.rundgangAnteil ?? 0;
