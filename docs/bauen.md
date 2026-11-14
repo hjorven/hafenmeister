@@ -6,7 +6,7 @@ Stand 13.11.2026 (Roadmap P18). Status: gebaut. Code: `web/js/ui/bauen.js` (Ober
 
 1. **Bauen** öffnet den Baumodus. Die Spielzeit hält an, damit man in Ruhe plant. Am PC und Tablet zeigt die Kamera den ganzen Hafen neben der Karte, am Handy bleibt sie, wo sie ist.
 2. Über jedem freien Bauplatz steht ein Schild mit Name und Preis. Stege sind die hellen Umrisse im Wasser (`render/stege.js`), Angebote die Schilder mit Plus an Land (`render/services.js`). Versorgung und Hafenbüro, deren Gebäude noch fehlt, bekommen im Baumodus einen hellen Grundriss an Land.
-3. Die Bauliste hat vier Reiter: **Stege**, **Versorgung** (WC, Dusche, Essen, Diesel, Strom), **Angebote** (Services) und **Hafen** (Hafenbüro, nächste Ausbaustufe). Was erst in der nächsten Ausbaustufe geht, steht gestrichelt mit „Ab Ausbaustufe n“ darunter.
+3. Die Bauliste hat vier Reiter: **Stege** (neue Stege und Nachrüsten bestehender Stege mit Fingerstegen und Laternen, [nachruesten.md](nachruesten.md)), **Versorgung** (WC, Dusche, Essen, Diesel, Strom), **Angebote** (Services) und **Hafen** (Hafenbüro, nächste Ausbaustufe). Was erst in der nächsten Ausbaustufe geht, steht gestrichelt mit „Ab Ausbaustufe n“ darunter.
 4. Eintrag, Schild oder Umriss antippen öffnet die **Vorschau**: Die Kamera fährt hin, das Bauwerk steht als Geisterbild im Hafen (Stege gelb, Gebäude türkis, Strom färbt die Plätze des Stegs), die Karte zeigt Nutzen, was die Gäste zuletzt vermisst haben, Preis und Kasse danach. Erst **Bauen für … €** kauft.
 5. Nach dem Kauf wächst das Gebäude aus dem Boden bzw. der Steg steht da, eine Welle läuft über die Stelle, der Bauklang spielt und kurz steht „+8 Liegeplätze“ darüber. Die Karte bleibt klein mit **Weiter bauen** oder **Fertig**, damit das Neue zu sehen ist.
 
@@ -44,7 +44,7 @@ Gebaut oder nicht mehr im Bauplan: Das Sparziel fällt weg. Noch einmal tippen l
 
 ## Kauf zurücknehmen
 
-Nach jedem Kauf steht auf der Karte zehn Sekunden lang **Rückgängig (10 s)**. Weil im Baumodus die Zeit steht, ist in der Zeit nichts anderes passiert: Kasse, Ausgaben des Tages, Stege, Versorgung, Hafenbüro, Angebote und Bauabschnitte kommen genau auf den Stand vor dem Kauf zurück. Den Stufenausbau in einem Stück (Stufe 1 zu 2) kann man nicht zurücknehmen, weil dabei schon Boote umgezogen sind; Bauabschnitte schon.
+Nach jedem Kauf steht auf der Karte zehn Sekunden lang **Rückgängig (10 s)**. Weil im Baumodus die Zeit steht, ist in der Zeit nichts anderes passiert: Kasse, Ausgaben des Tages, Stege, Nachrüstungen, Versorgung, Hafenbüro, Angebote und Bauabschnitte kommen genau auf den Stand vor dem Kauf zurück. Den Stufenausbau in einem Stück (Stufe 1 zu 2) kann man nicht zurücknehmen, weil dabei schon Boote umgezogen sind; Bauabschnitte schon.
 
 ## Zu wenig Platz für Preisschilder
 
