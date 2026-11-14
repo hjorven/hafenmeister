@@ -146,7 +146,7 @@ export const SEE_NORD = { x0: -400, x1: 440, y0: 245, y1: 600 };
 export const BEDARF = {
   wasser: {
     kaesten: [
-      { x0: -152, x1: -16, y0: 6, y1: 100, rund: 22 },   // Stege, Liegeplätze und Bojen Stufe 1 und 2
+      { x0: -152, x1: -16, y0: 6, y1: 110, rund: 22 },   // Stege, Liegeplätze und Bojen Stufe 1 und 2
       { x0: -90, x1: 68, y0: 6, y1: 30, rund: 10 },      // Uferstrecke
       RUNDE12,
     ],

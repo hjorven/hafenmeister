@@ -2,7 +2,7 @@
 // Aufruf: node tools/seeds-pruefen.mjs [Seeds je Typ, Standard 50] [erster Seed, Standard 1]
 // Gibt jeden Seed aus, der durchfällt, und endet dann mit Fehlercode 1.
 import { FORMEN, formSetzen } from '../web/js/render/landschaft/formen.js';
-import { punkt, warteplaetze, leuchttuerme } from '../web/js/render/landschaft/gelaende.js';
+import { punkt, warteplaetze, warteplatzTiefe, leuchttuerme } from '../web/js/render/landschaft/gelaende.js';
 import { festePunkte } from '../web/js/render/landschaft/karte.js';
 import { REGIONEN } from '../web/js/render/landschaft/regionen.js';
 import { HAFEN } from '../web/js/data/harbor.js';
@@ -21,6 +21,8 @@ for (const F of FORMEN) {
         const w = warteplaetze(st);
         for (const b of w.bojen) if (-punkt(b.px, b.py, st, reg).h <= 1.2) f.push(`${R} Stufe ${st} Boje ${b.id}`);
         for (const a of w.ankerplaetze) if (-punkt(a.px, a.py, st, reg).h <= 1.0) f.push(`${R} Stufe ${st} Anker ${a.id}`);
+        // ganzer Schwoikreis im Wasser, nicht nur die Mitte
+        for (const o of [...w.bojen, ...w.ankerplaetze]) if (warteplatzTiefe(o, st, reg) < 0.8) f.push(`${R} Stufe ${st} Schwoikreis ${o.id} am Ufer`);
       }
       for (const p of HAFEN.plaetze) for (const [st, l] of Object.entries(p.lage)) {
         const soll = p.tiefe?.[st];

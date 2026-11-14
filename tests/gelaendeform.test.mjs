@@ -2,7 +2,7 @@
 // docs/landschaft.md, Abschnitt "Engpass und feste Punkte".
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { punkt, warteplaetze, pricken, molen, PLAN_M, seeAbstandM } from '../web/js/render/landschaft/gelaende.js';
+import { punkt, warteplaetze, warteplatzTiefe, pricken, molen, PLAN_M, seeAbstandM } from '../web/js/render/landschaft/gelaende.js';
 import { festePunkte, festePunkteWelt, karteRaster, engpassBreiteM, art, ART } from '../web/js/render/landschaft/karte.js';
 import { REGIONEN } from '../web/js/render/landschaft/regionen.js';
 import { anlagenFlaechen } from '../web/js/data/anlagen-flaechen.js';
@@ -207,9 +207,11 @@ test('Viele Seeds je Küstentyp: Fahrwasser, Wartebojen, Liegeplätze und Leucht
   try {
     for (const F of FORMEN) for (const seed of [2, 3, 17, 4242]) {
       formSetzen(F.nr, seed);
-      for (const st of [1, 3, 5, 6]) {
+      for (const st of [1, 2, 3, 5, 6]) {
         for (const [px, py] of festePunkte(st).fahrwasser) assert.ok(-punkt(px, py, st, reg).h >= (st <= 2 ? 1.6 : 3), `Typ ${F.nr} Seed ${seed} Stufe ${st}: Fahrwasser flach bei ${px},${py}`);
         for (const b of warteplaetze(st).bojen) assert.ok(-punkt(b.px, b.py, st, reg).h > 1.2, `Typ ${F.nr} Seed ${seed} Stufe ${st}: Boje ${b.id} zu flach`);
+        const w = warteplaetze(st);
+        for (const o of [...w.bojen, ...w.ankerplaetze]) assert.ok(warteplatzTiefe(o, st, reg) >= 0.8, `Typ ${F.nr} Seed ${seed} Stufe ${st}: Schwoikreis von ${o.id} reicht ans Ufer`);
       }
       for (const p of HAFEN.plaetze) for (const [st, l] of Object.entries(p.lage)) {
         const soll = p.tiefe?.[st];
