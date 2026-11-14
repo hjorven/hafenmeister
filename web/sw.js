@@ -15,7 +15,7 @@
 //
 // Bei Änderungen an dieser Datei VERSION erhöhen.
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CACHE = `hafenmeister-${VERSION}`;
 
 // Grundausstattung, damit das Spiel nach dem ersten Besuch offline startet.
@@ -57,7 +57,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.typ === 'aktivieren') self.skipWaiting();
-  if (event.data && event.data.typ === 'vorladen') event.waitUntil(vorladen());
+  if (event.data && event.data.typ === 'vorladen') event.waitUntil(vorladen(event.data.dateien));
 });
 
 // ---------------------------------------------------------------------------
@@ -66,17 +66,20 @@ self.addEventListener('message', (event) => {
 const STAND_KEY = '__offline-stand';
 let vorladenLaeuft = null;
 
-function vorladen() {
-  vorladenLaeuft ||= ladeListe().finally(() => { vorladenLaeuft = null; });
+function vorladen(seitenDateien) {
+  vorladenLaeuft ||= ladeListe(seitenDateien).finally(() => { vorladenLaeuft = null; });
   return vorladenLaeuft;
 }
 
-async function ladeListe() {
+async function ladeListe(seitenDateien) {
   let liste;
   try {
     // 'no-cache': immer beim Server nachfragen, ob es einen neuen Stand gibt
     const res = await fetch(new Request('offline-liste.json', { cache: 'no-cache' }));
-    if (!res.ok) return melde({ typ: 'offline-fehlt' });   // z.B. lokal ohne Deploy-Schritt
+    // Ohne Liste (lokaler Server ohne tools/build-pages.sh): wenigstens alles sichern, was die
+    // Seite in dieser Sitzung geladen hat. Beim ersten Besuch lädt die Seite CSS und Skripte, bevor
+    // der Worker sie sieht, darum landen sie sonst nicht im Cache.
+    if (!res.ok) return sichereGeladene(seitenDateien);
     liste = await res.json();
   } catch {
     return;   // offline: der letzte vollständige Stand bleibt im Cache
@@ -112,6 +115,22 @@ async function ladeListe() {
     return melde({ typ: 'offline-bereit', stand: liste.stand, geladen });
   }
   return melde({ typ: 'offline-unvollstaendig', stand: liste.stand, geladen, fehler });
+}
+
+async function sichereGeladene(geladen) {
+  const cache = await caches.open(CACHE);
+  const basis = new URL('./', self.location).href;
+  const urls = (Array.isArray(geladen) ? geladen : [])
+    .filter((u) => typeof u === 'string' && u.startsWith(basis));
+  let neu = 0, fehler = 0;
+  for (const u of new Set(urls.map((x) => x.split('#')[0]))) {
+    if (await cache.match(u, { ignoreSearch: true })) continue;
+    try {
+      const res = await fetch(new Request(u, { cache: 'no-cache' }));
+      if (res.ok) { await cache.put(u, res); neu++; } else fehler++;
+    } catch { fehler++; }
+  }
+  return melde({ typ: 'offline-ohne-liste', geladen: neu, fehler });
 }
 
 async function melde(nachricht) {
