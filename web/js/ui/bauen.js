@@ -25,6 +25,7 @@ import { HAFEN, platzInWelt } from '../data/harbor.js';
 import { baueModell } from '../render/services-models.js';
 
 import { umbauText, euro, num1, WUNSCH, WUNSCH_KURZ, FREI, leer, wirkungText, waehleSchritt, regionsSchritt } from './bauen-rat.js';
+import { WUNSCH_TEXTE, wunschFuerService } from '../data/wuensche-texte.js';
 
 const U = 0.62;
 const REITER = [
@@ -227,12 +228,15 @@ export function init(game) {
       if (!p || p.fertig || !p.def) continue;
       const s = game.services.katalog?.find((k) => k.id === x.id);
       const w = wirkungText(p.def.wirkung);
+      // Gäste wünschen sich manche Angebote (P19): das erste Bauen erfüllt den Wunsch
+      const wunsch = x.stufe > 0 ? null : wunschFuerService(x.id);
       out.push({
         key: `angebot:${x.id}`, art: 'angebot', id: x.id, name: x.stufe > 0 ? p.def.name : x.name, kosten: p.kosten,
         ausbau: x.stufe > 0,
         gesperrt: p.freigeschaltet ? null : `braucht ${p.fehlt.join(', ')}`,
         kurz: '',
-        nutzen: [x.kurz, w].filter(Boolean),
+        wunsch,
+        nutzen: [x.kurz, w, wunsch ? `Gäste wünschen sich ${WUNSCH_TEXTE[wunsch].mit}, das hebt ihre Note.` : null].filter(Boolean),
         ort: s ? () => serviceOrt(s, p.stufe) : null,
         modell: s ? { id: x.id, stufe: p.stufe } : null,
         kaufen: () => game.services.bauen(x.id),

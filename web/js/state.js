@@ -120,6 +120,9 @@ function tiefPruefen(data) {
   if (!zahlIn(data.clock, 0, 1e7)) fehler('Uhrzeit');
   if (!Number.isFinite(data.seed) || !Number.isFinite(data.rng)) fehler('Zufall');
   if (data.ratings.length > 10000 || !data.ratings.every((r) => zahlIn(r, 0, 5))) fehler('Bewertungen');
+  // Tag jeder Bewertung (Ruf über die letzten Tage, P19); fehlt in älteren Spielständen
+  if (data.ratingDays != null && (!Array.isArray(data.ratingDays) || data.ratingDays.length > data.ratings.length
+    || !data.ratingDays.every((t) => Number.isInteger(t) && t >= 0))) fehler('Tage der Bewertungen');
   const boote = Object.entries(data.boats);
   if (boote.length > 5000) fehler('zu viele Boote');
   let hoechste = 0;

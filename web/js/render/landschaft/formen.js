@@ -16,7 +16,7 @@
 //   6. Neues Spiel: Typ und Seed zufällig, werden gemerkt.
 
 import { TYPEN, bauen, WELT, BEREICH } from './natur.js';
-import { zonenRaster, seezugaenge, ZONE, ZONE_NAME } from './zonen.js';
+import { zonenRaster, seezugaenge, fahrrinneWelt, ZONE, ZONE_NAME } from './zonen.js';
 import { HAFEN } from '../../data/harbor.js';
 
 export const FORMEN = TYPEN.map(({ nr, name, idee }) => ({ nr, name, idee }));
@@ -228,6 +228,8 @@ export function init(game) {
     ZONE, ZONE_NAME,
     zonen: (stufe = game.state?.stage ?? 1) => zonenJetzt(stufe),
     zone: (x, z, stufe = game.state?.stage ?? 1) => zonenJetzt(stufe).bei(x, z),
+    // Fahrrinne von der Reede in die offene See in Weltmetern: { punkte: [{x, z}], halbM, tiefeM } (zum Betonnen und Anzeigen)
+    fahrrinne: () => fahrrinneWelt(),
     // Seezugänge außerhalb des Außenrings mit Weg über Wasser bis vor die Einfahrt
     seezugaenge: (stufe = game.state?.stage ?? 1, opt = {}) => {
       const key = `${stufe}|${regionId()}|${form.nr}|${form.seed}|${opt.tiefeM ?? ''}|${opt.abstand ?? ''}`;

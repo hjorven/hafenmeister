@@ -302,6 +302,7 @@ test('Früher zurück, Platz frei: legt am Nachmittag gleich an', () => {
   const platz = freierPlatz(state, ctx);
   const { boatId } = machDauerplatz(state, ctx, platz);
   aufToern(state, platz, state.day, 0.5);
+  state.upcoming = [];   // Platz bleibt frei: kein Gast fährt bis zum Nachmittag selbst hinein
   const ev = sim.tick(state, ctx, ctx.rules.dayLength * 0.5 + 1);
   assert.ok(ev.some((e) => e.type === 'dauerEinlaufen' && e.boatId === boatId));
   assert.equal(state.berths[platz], boatId);

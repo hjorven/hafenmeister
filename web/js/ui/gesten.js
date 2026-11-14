@@ -26,6 +26,7 @@
 
 import { HAFEN, platzInWelt } from '../data/harbor.js';
 import { PIXEL, FARBE as PIXELFARBE } from './pixel-symbole.js';
+import { wunschKurz } from '../data/wuensche-texte.js';
 
 const TAP_SLOP = 10;          // px, ab hier wird aus einem Tipp ein Ziehen
 const SNAP_PX = 56;           // so nah muss der Finger am Platz sein, damit die Leine einrastet
@@ -34,7 +35,7 @@ const EDGE_SPEED = 520;       // px pro Sekunde am äußersten Rand
 // Farben beim Zuweisen: Türkis passt, Gold passt und erfüllt einen Wunsch (P10, Review Ü9)
 export const FARBE = { passt: '#2a9d8f', wunsch: '#f2b01e', hell: '#c9fff6', wunschHell: '#ffe9a3' };
 const SCHRIFT = '"Pixelify Sans", system-ui, sans-serif';
-const WUNSCH = { strom: 'Strom', wc: 'WC', dusche: 'Dusche', essen: 'Essen', diesel: 'Diesel' };
+const WUNSCH = new Proxy({}, { get: (_, k) => wunschKurz(k) });   // alle Wünsche, auch Angebote (P19)
 
 export function init(game) {
   const { THREE } = game;

@@ -18,6 +18,7 @@ Stand: 14.11.2026, 08:30 UTC, abgeglichen mit `main` bei `b1cf180` (PR 262). Gep
 | Thema | Thread | Paket | Stand | PR |
 |---|---|---|---|---|
 | Boote: Wegsuche mit Korridoren, Anfahrt von außerhalb der Karte, Stau an Bojen und Ankerfeld | "Staus an Bojen und Ankerfeld auflösen" | P66 | läuft; Zonen und Seezugänge sind gemergt (PR 262) | als Nächstes |
+| Ruf schwerer, Teil 2: Kapazität sichtbar, C5, B9 | "Ruf schwerer machen (P19)" | P19 | Teil 1 gemergt (PR 244), Teil 2 läuft | als Nächstes |
 | Gelände: Zonen, Seegatt für geschlossene Bodden, kleinere Pflicht-See | "Geländeform und Engpass neu bauen" | P62 | läuft; Zonen für die Wegsuche gemergt (PR 262) | als Nächstes |
 | Menüs am Handy kompakter, Verdeckung gemessen | "Menüs am Handy kompakter machen" | P07 (Folge) | PR offen, ohne Konflikt | 261 |
 | Leinen ohne Boot, Box-frei-Anzeige beim Ablegen | "Leinen ohne Boot an freien Plätzen beheben" | P66 (Folge) | gemergt (PR 258); Box-frei-Anzeige beim Ablegen noch zu prüfen | 258 |
@@ -30,8 +31,8 @@ Stand: 14.11.2026, 08:30 UTC, abgeglichen mit `main` bei `b1cf180` (PR 262). Gep
 
 | PR | Inhalt | Zustand | Was zu tun ist |
 |---|---|---|---|
-| 244 | P19 Teil 1: Ruf schwerer, Wünsche je Bootsart | Konflikt mit `main`, 21 Commits zurück | Thread "Ruf schwerer machen (P19)" rebased, prüft, merged. Vor P17. |
-| 252 | Liegegeld je angefangenem Meter (B10), Winterknöpfe quer | Konflikt mit `main` | eigener Thread rebased und merged; berührt `economy.js` wie 244, darum nacheinander (erst 244, dann 252) |
+| 244 | P19 Teil 1: Ruf schwerer, Wünsche je Bootsart | gemergt 14.11. | Thread "Ruf schwerer machen (P19)" macht mit Teil 2 weiter (C5, Kapazität sichtbar, B9) |
+| 252 | Liegegeld je angefangenem Meter (B10), Winterknöpfe quer | Konflikt mit `main` | jetzt dran: eigener Thread rebased auf `main` mit 244 und merged; P19 Teil 2 rebased danach, beide ändern `economy.js` |
 | 251 | Zeitraffer: Pulk erkennen | ohne Konflikt | Zeitraffer-Thread merged |
 | 261 | Menüs am Handy kompakter | ohne Konflikt | Menü-Thread merged |
 | 190 | Überblick hochkant schmal, Startansicht folgt der Stufe | veraltet (Tag alt, kein gemeinsamer Stand mit dem jetzigen `main`) | Thread prüft, ob es noch nötig ist; neu auf `main` aufbauen oder schließen |
@@ -68,7 +69,7 @@ Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tem
 | 2 | **Offene PRs 244, 252, 190, 91 auflösen** (bestehende Threads) | liegende Arbeit veraltet weiter und blockiert `economy.js` | - | 244 und 252 beide `economy.js`, `docs/zahlen.md`: nacheinander |
 | 3 | ~~**P61 Spiel komplett offline startbar**~~ erledigt (PR 270, Thread "Spiel offline startbar machen") | Grundproblem C06, unabhängig von allem anderen, klein | - | `web/index.html` Importmap (Grundgerüst), Tests leiten Three.js heute per `page.route` um, Pages-Workflow |
 | 4 | **P08-Rest: Actions absichern** (erledigt 14.11., siehe `docs/sicherheit.md`) | Audit C07 und Abschnitt 6 des Audits | - | `.github/workflows/` mit Roadmap-Action und Pages |
-| 5 | **Balancing-Paket: P17 Aufstieg angleichen und Bewertungsformel** (neu) | Prio A: 20 bis 38 Tage Lücke ab Stufe 3 zwischen Zeitraffer und `tools/balance.mjs`; Bewertung 2 + 3 x Anteil, damit Aufnehmen nie schlechter ist als Abweisen; Rechnung und Zeitraffer müssen danach auf höchstens 5 % übereinstimmen | nach 1 (Stau verfälscht die Messung) und 2 (244, 252 auf `main`) | `economy.js`, `tools/balance.mjs`, `docs/zahlen.md`, Einstieg (J5) |
+| 5 | **Balancing-Paket: P17 Aufstieg angleichen und Bewertungsformel** (neu) | Prio A: 20 bis 38 Tage Lücke ab Stufe 3 zwischen Zeitraffer und `tools/balance.mjs`; seit P19 Teil 1 (PR 244) brauchen gemütliche Spieler in Stufe 2 50 statt 38 Tage, also auch Stufe 2 prüfen; Bewertung 2 + 3 x Anteil, damit Aufnehmen nie schlechter ist als Abweisen; Rechnung und Zeitraffer müssen danach auf höchstens 5 % übereinstimmen | nach 1 (Stau verfälscht die Messung), 252 und P19 Teil 2 | `economy.js`, `tools/balance.mjs`, `docs/zahlen.md`, Einstieg (J5) |
 | 6 | **P55 Versteckte Regeln sichtbar machen** (neu) | Welle 2: Geduldsring, Auslastung, Zeiger am Rand; macht das Spiel lesbar, bevor Inhalt dazukommt | nach 261 (Verdeckung) | `ui/vorschau.js`, `boat-view.js`, Meldungs-Ordnung, Platzschilder |
 | 7 | **P21 Logbuch und Hafenchronik** (erledigt, docs/logbuch.md) | Welle 2; `state.logbook` wird gefüllt, aber nie gezeigt (tote Daten) | - | `state.js`, Speichern (`SAVE_VERSION`), Tagesabschluss-Tafel |
 | 8 | **P22 Erfolge** (neu) | letztes offenes Welle-2-Paket außer P20-Rest | P21 (Chronik als Anzeigeort) | Aufstieg-Feier, Meldungs-Ordnung |
@@ -83,7 +84,7 @@ Danach geht es weiter wie in [Abschnitt 5](#5-alles-weitere-bis-zum-ende) beschr
 
 ## 4. Berührungspunkte, auf die alle achten
 
-- `web/js/data/economy.js`: P19 (244), Balancing (252), P17, P23. Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
+- `web/js/data/economy.js`: Reihenfolge 252, P19 Teil 2, P17, P23 (244 ist gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
 - `web/js/sim.js`: kleine, getrennte Änderungen, vorher auf `main` rebasen, neue Regel mit eigenem Test.
 - Meldungs-Ordnung (höchstens eine schwebende Meldung, Tipps nie über Zeit und Bauen): P55, P22, P24 melden sich dort an, statt eigene Ebenen zu bauen.
 - `web/index.html`, `web/js/main.js`: nur eine `MODULES`-Zeile je neuem Modul; P61 ändert die Importmap und stimmt das im PR ab.
@@ -181,5 +182,6 @@ Schon erledigt aus Jorvens Vorschlägen: F14, F15, F18, F26, F27 (Grundgerüst),
 
 | Datum | Änderung |
 |---|---|
+| 14.11.2026, 10:15 Uhr | PR 244 (P19 Teil 1) gemergt; P19 Teil 2 läuft; Befund Stufe 2 dauert 50 statt 38 Tage ins Balancing-Paket. |
 | 14.11.2026, 10 Uhr | Abschnitt 5: alle offenen Vorschläge (F1 bis F42) und Stufe 7 bis 20 in Reihenfolge. |
 | 14.11.2026 | Erste Fassung. Roadmap-Status P02, P04, P12, P63, P65 auf "erledigt" nachgetragen. |

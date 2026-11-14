@@ -1,7 +1,7 @@
 // Zonen des Geländes und Seezugänge (web/js/render/landschaft/zonen.js) für alle Küstentypen.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { punkt, warteplaetze, PLAN_M, AUSSEN } from '../web/js/render/landschaft/gelaende.js';
+import { punkt, warteplaetze, fahrrinne, PLAN_M, AUSSEN } from '../web/js/render/landschaft/gelaende.js';
 import { festePunkte } from '../web/js/render/landschaft/karte.js';
 import { REGIONEN } from '../web/js/render/landschaft/regionen.js';
 import { FORMEN, formSetzen } from '../web/js/render/landschaft/formen.js';
@@ -53,15 +53,14 @@ test('Zonen: Stege, Liegeplätze, Bojen, Ankerfeld und Durchfahrt sind in jedem 
 test('Seezugänge: außerhalb der Karte, aus vielen Richtungen, Weg nur über Wasser bis vor die Einfahrt', () => {
   const reg = REGIONEN.ostsee;
   try {
-    for (const F of FORMEN) for (const seed of [1, 7, 4242]) {
+    for (const F of FORMEN) for (const seed of F.nr === 4 ? [1, 4, 7, 9, 25] : F.nr === 7 ? [1, 20, 23] : [1, 7, 4242]) {
       formSetzen(F.nr, seed);
       for (const st of [1, 3, 6]) {
         const liste = seezugaenge(st, 'ostsee'), wo = `Typ ${F.nr} Seed ${seed} Stufe ${st}`;
-        // Ganz geschlossene Reviere (manche Bodden) haben keinen Weg zur See: dann Zugänge im Binnenwasser
-        const binnen = liste.length > 0 && liste.every((q) => q.aufKarte);
-        assert.ok(liste.length >= (binnen ? 1 : 8), `${wo}: nur ${liste.length} Seezugänge`);
-        if (!binnen) assert.ok(new Set(liste.map((q) => q.richtung)).size >= 3, `${wo}: zu wenige Richtungen`);
-        assert.ok(!binnen || F.nr === 4, `${wo}: kein Weg zur offenen See`);
+        // Jede Küste hat einen Seeweg von außerhalb der Karte (Fahrrinne in gelaende.js), auch Bodden und Watt
+        assert.ok(liste.length >= 8, `${wo}: nur ${liste.length} Seezugänge`);
+        assert.ok(liste.every((q) => !q.aufKarte && q.tiefeM >= 2.5), `${wo}: kein tiefer Weg zur offenen See`);
+        assert.ok(new Set(liste.map((q) => q.richtung)).size >= 3, `${wo}: zu wenige Richtungen`);
         const ziel = festePunkte(st).einfahrt.aussen;
         for (const q of liste) {
           // außerhalb des Außenrings, den keine Zoomstufe zeigt
@@ -79,6 +78,27 @@ test('Seezugänge: außerhalb der Karte, aus vielen Richtungen, Weg nur über Wa
               assert.ok(tief >= q.tiefeM * 0.8, `${wo}: ${q.id} führt bei ${px.toFixed(0)},${py.toFixed(0)} über ${tief.toFixed(2)} m (zugesagt ${q.tiefeM})`);
             }
           }
+        }
+      }
+    }
+  } finally { formSetzen(1); }
+});
+
+test('Fahrrinne: führt von der Reede über Wasser bis hinter den Außenring und ist ausgebaggert', () => {
+  const reg = REGIONEN.ostsee;
+  try {
+    for (const F of FORMEN) for (const seed of F.nr === 4 ? [1, 4, 9, 12, 25] : [1, 23]) {
+      formSetzen(F.nr, seed);
+      const R = fahrrinne(), wo = `Typ ${F.nr} Seed ${seed}`;
+      assert.ok(R && R.punkte.length >= 2, `${wo}: keine Fahrrinne`);
+      const [ex, ey] = R.punkte.at(-1);
+      assert.ok(ex <= AUSSEN.x0 || ex >= AUSSEN.x1 || ey <= AUSSEN.y0 || ey >= AUSSEN.y1, `${wo}: Fahrrinne endet auf der Karte`);
+      for (let s = 1; s < R.punkte.length; s++) {
+        const [ax, ay] = R.punkte[s - 1], [bx, by] = R.punkte[s], lang = Math.hypot(bx - ax, by - ay);
+        for (let t = 0; t <= lang; t += 8) {
+          const px = ax + (bx - ax) * t / lang, py = ay + (by - ay) * t / lang;
+          if (px <= AUSSEN.x0 || px >= AUSSEN.x1 || py <= AUSSEN.y0 || py >= AUSSEN.y1) continue;
+          assert.ok(-punkt(px, py, 3, reg).h >= 4, `${wo}: Fahrrinne bei ${px.toFixed(0)},${py.toFixed(0)} nur ${(-punkt(px, py, 3, reg).h).toFixed(2)} m`);
         }
       }
     }

@@ -2,7 +2,7 @@
 //
 // 1. Beim Ablegen zeigt jedes Gastboot seine Note in einer Blase über dem Boot (Stern und Zahl).
 //    Unzufriedene Gäste (unter 4 Sternen) zeigen dazu das Symbol, was ihnen gefehlt hat, durchgestrichen.
-// 2. Gästebuch: die letzten 20 Bewertungen (genau die, aus denen der Ruf besteht) mit Satz und Grund,
+// 2. Gästebuch: die letzten 20 Bewertungen mit Satz und Grund (der Ruf ist der Schnitt der letzten drei Tage),
 //    der Ruf-Verlauf der letzten 30 Tage und die drei häufigsten Gründe für schlechte Noten.
 //    Öffnen: Ruf oben links antippen, Menü "Gästebuch", Hafenmeister-Haus oder Hafenbüro antippen, Taste N (G ist 8x).
 //
@@ -12,9 +12,11 @@
 
 import {
   GAESTEBUCH, GRUND, buchState, eintragen, hauptgrund, topGruende, zusammenfassung, verlauf, satz, absender,
-  erklaerung, zufrieden,
+  erklaerung, zufrieden, rufErklaerung,
 } from './gaestebuch-daten.js';
 import { VORRANG } from './meldungen.js';
+import { ANGEBOT_BILDER } from './wunsch-bilder.js';
+import { ANGEBOT_TEXTE } from '../data/wuensche-texte.js';
 
 // ------------------------------------------------------------------ Pixel-Symbole (12 x 12, wie ui/oberflaeche.js)
 const FARBE = { s: '#e0962a', y: '#ffd95a', o: '#7a5212' };
@@ -30,6 +32,9 @@ const PIXEL = {
   buch: ['............', '.####..####.', '#....##....#', '#.##.##.##.#', '#....##....#', '#.##.##.##.#', '#....##....#', '#.##.##.##.#', '#....##....#', '#....##....#', '.####..####.', '............'],
   zu: ['............', '.##......##.', '.###....###.', '..###..###..', '...######...', '....####....', '....####....', '...######...', '..###..###..', '.###....###.', '.##......##.', '............'],
 };
+
+// Wünsche an Angebote an Land (P19): dieselben Bilder wie über dem Boot (ui/wunsch-bilder.js)
+for (const [k, b] of Object.entries(ANGEBOT_BILDER)) PIXEL[k] = b.raster;
 
 function pixelSvg(raster) {
   const h = raster.length;
@@ -322,10 +327,12 @@ export function init(game) {
   }
 
   function bauKnopf(key) {
-    const def = { wc: 'wc', dusche: 'dusche', essen: 'essen', diesel: 'diesel', strom: 'strom' }[key];
-    if (!def || !game.bauen?.eintraege) return null;
+    // Versorgung baut das Bauwerk, ein Angebotswunsch den Service (P19)
+    const ziel = { wc: 'versorgung:wc', dusche: 'versorgung:dusche', essen: 'versorgung:essen', diesel: 'versorgung:diesel', strom: 'versorgung:strom' }[key]
+      ?? (ANGEBOT_TEXTE[key] ? `angebot:${ANGEBOT_TEXTE[key].service}` : null);
+    if (!ziel || !game.bauen?.eintraege) return null;
     let e = null;
-    try { e = game.bauen.eintraege().find((x) => x.key === `versorgung:${def}`); } catch { e = null; }
+    try { e = game.bauen.eintraege().find((x) => x.key === ziel); } catch { e = null; }
     if (!e) return null;
     if (e.gesperrt) return el('span', { class: 'hm-gb-spaeter' }, e.gesperrt);
     return el('button', {
@@ -392,7 +399,7 @@ export function init(game) {
     if (liste.length) listeTeil.append(ul);
 
     const fuss = el('p', { class: 'hm-gb-klein hm-gb-fuss' },
-      `Dein Ruf ist der Schnitt der letzten ${GAESTEBUCH.maxEintraege} Bewertungen. Ab 4 Sternen kommen Gäste als Stammgast wieder, ein guter Ruf lockt mehr Boote an.`);
+      rufErklaerung(state()));
 
     const koerper = el('div', { class: 'hm-gb-koerper' }, rufTeil, gruendeTeil, listeTeil, fuss);
     const scroll = panel.querySelector('.hm-gb-koerper')?.scrollTop ?? 0;

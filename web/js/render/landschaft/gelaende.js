@@ -347,6 +347,86 @@ function seeAbstand(px, py, N) {
   return N.seeweg ? Math.min(k, abstandZuLinie(px, py, N.seeweg.punkte) - N.seeweg.halb) : k;
 }
 
+/**
+ * Fahrrinne von der Reede in die offene See: der kürzeste Weg über Wasser bis hinter den Außenring, möglichst
+ * in der Mitte des Wassers. punkt() baggert sie auf 4,6 m aus. So hat jede Küste einen Seeweg, auch flache
+ * Bodden und das Watt; in ohnehin tiefem Wasser ändert sie nichts. Hängt nur von der Küste ab, nicht von der Stufe.
+ * @returns {{ punkte: number[][], halb: number, tiefe: number, bb: number[] } | null}  Planeinheiten
+ */
+export function fahrrinne() {
+  const N = natur();
+  if (_rinne.N !== N) { _rinne.N = N; _rinne.weg = sucheFahrrinne(N, 25) ?? sucheFahrrinne(N, 10); }
+  return _rinne.weg;
+}
+const _rinne = { N: null, weg: null };
+function sucheFahrrinne(N, uferAbstand) {
+  const G = 20, gx0 = AUSSEN.x0 - 2 * G, gy0 = AUSSEN.y0 - 2 * G;
+  const nx = Math.ceil((AUSSEN.x1 - AUSSEN.x0) / G) + 5, ny = Math.ceil((AUSSEN.y1 - AUSSEN.y0) / G) + 5, n = nx * ny;
+  const draussen = (px, py) => px <= AUSSEN.x0 || px >= AUSSEN.x1 || py <= AUSSEN.y0 || py >= AUSSEN.y1;
+  // Kosten je Zelle: 0 = gesperrt (Land, Ufersaum, Hafen), sonst 1 in freiem Wasser bis 3 nah am Ufer
+  const kosten = new Float32Array(n);
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const px = gx0 + i * G, py = gy0 + j * G;
+    if (draussen(px, py)) { kosten[j * nx + i] = 1; continue; }
+    if (px > -440 && px < 450 && py > -220 && py < 250) continue;   // nicht durch den Hafen
+    const q = N.probe(px, py);
+    if (q.L < 0 && q.d < -uferAbstand) kosten[j * nx + i] = 1 + 2 * smooth(-90, -uferAbstand, q.d);
+  }
+  const start = Math.round((SEE_NORD.y1 - 80 - gy0) / G) * nx + Math.round(((SEE_NORD.x0 + SEE_NORD.x1) / 2 - gx0) / G);
+  kosten[start] = kosten[start] || 1;
+  const dist = new Float64Array(n).fill(Infinity), von = new Int32Array(n).fill(-1), fertig = new Uint8Array(n);
+  dist[start] = 0;
+  const offen = [start];
+  let ziel = -1;
+  while (offen.length) {
+    // kleinste Entfernung zuerst (die Liste bleibt kurz: nur der Rand der Suche)
+    let b = 0;
+    for (let q = 1; q < offen.length; q++) if (dist[offen[q]] < dist[offen[b]]) b = q;
+    const k = offen[b];
+    offen[b] = offen[offen.length - 1]; offen.pop();
+    if (fertig[k]) continue;
+    fertig[k] = 1;
+    const i = k % nx, j = (k - i) / nx;
+    if (draussen(gx0 + i * G, gy0 + j * G)) { ziel = k; break; }
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+      if (!di && !dj) continue;
+      const a = i + di, c = j + dj;
+      if (a < 0 || c < 0 || a >= nx || c >= ny) continue;
+      const q = c * nx + a;
+      if (!kosten[q] || fertig[q]) continue;
+      const d = dist[k] + (di && dj ? 1.4142 : 1) * (kosten[k] + kosten[q]) / 2;
+      if (d < dist[q]) { dist[q] = d; von[q] = k; offen.push(q); }
+    }
+  }
+  if (ziel < 0) return null;
+  const zellen = [];
+  for (let q = ziel; q >= 0; q = von[q]) zellen.push(q);
+  zellen.reverse();
+  // begradigen: nur Knicke behalten, zwischen denen die gerade Linie über freies Wasser führt
+  const sicht = (p, q) => {
+    const pi = p % nx, pj = (p - pi) / nx, qi = q % nx, qj = (q - qi) / nx;
+    const m = Math.max(Math.abs(qi - pi), Math.abs(qj - pj)) * 2;
+    for (let t = 1; t < m; t++) {
+      const fi = pi + (qi - pi) * t / m, fj = pj + (qj - pj) * t / m;
+      if (!kosten[Math.floor(fj) * nx + Math.floor(fi)] || !kosten[Math.ceil(fj) * nx + Math.ceil(fi)]
+        || !kosten[Math.floor(fj) * nx + Math.ceil(fi)] || !kosten[Math.ceil(fj) * nx + Math.floor(fi)]) return false;
+    }
+    return true;
+  };
+  const knicke = [zellen[0]];
+  for (let a = 0; a < zellen.length - 1;) {
+    let b = zellen.length - 1;
+    while (b > a + 1 && !sicht(zellen[a], zellen[b])) b--;
+    knicke.push(zellen[b]);
+    a = b;
+  }
+  const punkte = knicke.map((k) => { const i = k % nx; return [gx0 + i * G, gy0 + ((k - i) / nx) * G]; });
+  const halb = 45;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const [x, y] of punkte) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  return { punkte, halb, tiefe: 4.6, bb: [x0 - halb, y0 - halb, x1 + halb, y1 + halb] };
+}
+
 /** Abstand zum Pflichtwasser der Landschaft (vor den Stegen, Zufahrt, vor der Einfahrt), negativ darin. */
 function pflichtAbstand(px, py, N) {
   return Math.min(wasserBedarf(px, py), seeAbstand(px, py, N), abstandZuLinie(px, py, N.route.punkte) - N.route.halb);
@@ -523,6 +603,12 @@ export function punkt(px, py, stufe, region) {
     // Mindesttiefe vor der Einfahrt (Reede, Ankerfelder) und in der Zufahrt
     const reede = smooth(0, -50, seeAbstand(px, py, N));
     if (reede > 0) h = Math.min(h, h + (-4.6 - (g.gezeiten || 0) - h) * reede);
+    // Fahrrinne in die offene See: ausgebaggert, wo das Wasser von Natur aus flacher ist
+    const R = fahrrinne();
+    if (R && px > R.bb[0] && px < R.bb[2] && py > R.bb[1] && py < R.bb[3]) {
+      const k = smooth(R.halb, R.halb - 10, abstandZuLinie(px, py, R.punkte));
+      if (k > 0) { const soll = -R.tiefe - (g.gezeiten || 0); if (soll < h) h += (soll - h) * k; }
+    }
     if (typ !== 'watt' || h < -0.6) typ = h >= 0 ? typ : 'wasser';
   }
 

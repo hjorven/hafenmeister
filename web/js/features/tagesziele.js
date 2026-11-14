@@ -23,11 +23,12 @@ import { random, randomRange } from '../random.js';
 import { ECONOMY } from '../data/economy.js';
 import { heimathaefen } from '../data/bootsnamen.js';
 import { regelnBereit } from './regeln-bereit.js';
+import { wunschKurz } from '../data/wuensche-texte.js';
 
 export const ZAHLEN = ECONOMY.tagesziele;
 export const SCHWEREN = ['leicht', 'mittel', 'schwer'];
 const SCHWERE_NAME = { leicht: 'Leicht', mittel: 'Mittel', schwer: 'Schwer' };
-const WUNSCH_NAME = { wc: 'WC', dusche: 'Dusche', essen: 'Essen', strom: 'Strom', diesel: 'Diesel' };
+const WUNSCH_NAME = new Proxy({}, { get: (_, k) => wunschKurz(k) });   // alle Wünsche, auch Angebote (P19)
 
 /** Deko-Stücke für den Hafen, in der Reihenfolge, in der sie verdient werden. */
 export const DEKO = [

@@ -13,9 +13,11 @@
 
 export const SIZE = 'L';
 
+// Gästeprofil je Art (Roadmap P19): wishes, feeFactor (mal Grundpreis L), arrivalWeight (unter den L-Booten).
 export const TYPES = [
   {
     id: 'L1', name: 'Fahrtenyacht', fromStage: 3,
+    wishes: ['wc', 'dusche', 'essen', 'strom'], feeFactor: 1.0, arrivalWeight: 3,
     length: [9.5, 14], beam: [3.2, 4.3], draft: [1.6, 2.1],
     crew: [2, 6],
     mooring: 'box',
@@ -23,6 +25,7 @@ export const TYPES = [
   },
   {
     id: 'L2', name: 'Mehrrumpfboot', fromStage: 4,
+    wishes: ['dusche', 'essen', 'strom'], feeFactor: 1.5, arrivalWeight: 1,
     length: [10, 13], beam: [6, 7.5], draft: [1.0, 1.3],
     crew: [2, 8],
     mooring: 'stirn',
@@ -30,6 +33,7 @@ export const TYPES = [
   },
   {
     id: 'L3', name: 'Motoryacht', fromStage: 3,
+    wishes: ['dusche', 'essen', 'strom', 'diesel'], feeFactor: 1.2, arrivalWeight: 2,
     length: [10, 14], beam: [3.6, 4.5], draft: [0.9, 1.3],
     crew: [2, 6],
     mooring: 'box',
@@ -37,6 +41,7 @@ export const TYPES = [
   },
   {
     id: 'L4', name: 'Arbeits- und Behördenboot', fromStage: 4,
+    wishes: [], feeFactor: 1.0, arrivalWeight: 0.6,
     length: [10, 14], beam: [3.5, 4.5], draft: [1.0, 1.6],
     crew: [2, 8],
     mooring: 'box',
