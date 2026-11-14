@@ -6,6 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Ist die Dusche, die Toilette oder der Kiosk für heute fast oder ganz ausgelastet, stehen die Gäste davor Schlange.
 - Über jedem wartenden Boot zeigt ein kleiner Ring, wie lange es noch Geduld hat: grün, gelb, im letzten Drittel rot und blinkend, dazu ein kurzes Tuten. Abends und nach einer Nacht an der Boje ruht die Geduld, der Ring wird dann grau-blau.
 - Über Toilette, Dusche, Kiosk und Tankstelle steht, wie viele Boote sie heute schon versorgt haben ("14/20"). Wird es knapp, blinkt das Schild orange, ist es voll, wird es rot. Morgens zählt es neu.
 - Warten Boote außerhalb des Bildes, zeigt ein Pfeil am Rand mit ihrem Geduldsring dorthin. Antippen fährt die Kamera hin (269).

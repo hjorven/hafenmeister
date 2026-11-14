@@ -3,7 +3,7 @@
 // Nehrung zu Toilette, Dusche, Kiosk, Restaurant, Strandkoerben und Aussichtspunkten laufen.
 // Dazu Spaziergaenger aus dem Ort und Badegaeste am Strand, je nach Stufe, Jahreszeit,
 // Tageszeit und Wetter. Reine Belebung, keine Story, keine eigene Zahl in der Oberflaeche.
-// Gehoert dem Thread "Menschen im Hafen herumlaufen lassen".
+// Gehoert dem Thread "Menschen im Hafen herumlaufen lassen". Schlange vor der Versorgung: Paket P55 (docs/hafenzeichen.md).
 //
 // Schnittstelle:
 //   game.people.anBord(bootId)   Promise, erfuellt wenn alle Leute dieses Boots an Bord sind
@@ -24,11 +24,25 @@ import { HAFEN } from '../data/harbor.js';
 import { baueNetz } from '../people/netz.js';
 import * as P from '../data/people.js';
 import { crewFuer, figurenFuer } from '../people/crew.js';
+import { auslastungStufe } from '../ui/hafenzeichen.js';
 
 const U = HAFEN.einheiten?.meterProEinheit ?? 0.62;
 const BORD_HOEHE = { S: 0.6, M: 0.8, L: 1.0, XL: 2.2, T: 0.8 };
 
 const zufall = (a, b) => a + Math.random() * (b - a);
+
+// Schlange vor der Versorgung (Paket P55, Roadmap L2): Ist die Versorgung heute knapp oder voll
+// (game.sim.auslastung, ui/hafenzeichen.js), gehen Gäste nicht gleich hinein, sondern stellen sich
+// vor der Tür an. Welches Ziel zu welcher Versorgung gehört:
+const VERSORGUNG = { toilette: 'wc', sanitaer: 'wc', dusche: 'dusche', kiosk: 'essen', restaurant: 'essen' };
+const SCHLANGE_ABSTAND = 1.1;    // Meter zwischen zwei Wartenden
+const SCHLANGE_MAX = 6;          // mehr stellen sich nicht an, sie gehen gleich hinein
+/** Wie lange jemand ansteht (Sekunden Spielzeit): knapp kurz, voll länger. */
+export function anstehZeit(stufe, zufallswert = Math.random()) {
+  if (stufe === 'voll') return 14 + zufallswert * 12;
+  if (stufe === 'knapp') return 6 + zufallswert * 8;
+  return 0;
+}
 const ganz = (a, b) => Math.floor(zufall(a, b + 1));
 const wahl = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -386,6 +400,15 @@ export function init(game) {
     if (wenn === 'feierabend') { a.zustand = 'drinnen'; a.uhr = 1e9; rundgangEnde(a); return; }
     const z = a.ziel;
     const art = z ? P.ZIELE[z.art] : null;
+    // Schlange vor der Tür, wenn die Versorgung heute knapp oder voll ist (tagsüber)
+    const anstehen = !abend && z ? anstehZeit(andrang(z.art)) : 0;
+    if (anstehen > 0 && schlangeLaenge(z.node) < SCHLANGE_MAX) {
+      a.zustand = 'schlange';
+      a.schlangeSeit = ++schlangeZaehler;
+      a.uhr = anstehen;
+      a.sitzt = false;
+      return;
+    }
     a.zustand = art?.drinnen ? 'drinnen' : 'verweilt';
     a.sitzt = !!art?.sitzen;
     a.uhr = art ? zufall(...art.dauer) : zufall(4, 8);
@@ -394,6 +417,60 @@ export function init(game) {
     if (abend && a.bleibtAbends && (z?.art === 'restaurant' || z?.art === 'grillplatz')) a.uhr = 1e9;
     // zum Wasser schauen (Norden ist -z)
     if (!art?.drinnen) a.blick = Math.PI / 2 + zufall(-0.8, 0.8);
+  }
+
+  // ---------------------------------------------------------------- Schlange vor der Versorgung (L2)
+  let schlangeZaehler = 0;
+  function andrang(art) {
+    const key = VERSORGUNG[art];
+    const v = key ? game.sim?.auslastung?.()?.[key] : null;
+    return v ? auslastungStufe(v.versorgt, v.kapazitaet) : 'frei';
+  }
+  function schlangeLaenge(node) {
+    let n = 0;
+    for (const a of agenten) if (a.zustand === 'schlange' && a.ziel?.node === node) n++;
+    return n;
+  }
+  // Nach dem Anstehen: hinein (oder am Kiosk stehen bleiben) wie sonst auch
+  function ansteheEnde(a) {
+    const art = a.ziel ? P.ZIELE[a.ziel.art] : null;
+    a.zustand = art?.drinnen ? 'drinnen' : 'verweilt';
+    a.uhr = art ? zufall(...art.dauer) : zufall(4, 8);
+    const w = knotenWelt(a.node, a.klasse);
+    a.x = w.x; a.y = w.y; a.z = w.z;
+  }
+  // Wartende stellen sich hintereinander von der Tür weg auf, die Ersten rücken nach
+  const _gb = new THREE.Vector3();
+  function schlangenOrdnen(dt) {
+    const reihen = new Map();
+    for (const a of agenten) if (a.zustand === 'schlange' && a.ziel) {
+      if (!reihen.has(a.ziel.node)) reihen.set(a.ziel.node, []);
+      reihen.get(a.ziel.node).push(a);
+    }
+    for (const [node, liste] of reihen) {
+      liste.sort((p, q) => p.schlangeSeit - q.schlangeSeit);
+      const tuer = knotenWelt(node, 'M');
+      const it = game.buildings?.items?.find((i) => i.id === liste[0].ziel.id);
+      let dx = 0, dz = -1;
+      if (it?.mesh) {
+        it.mesh.getWorldPosition(_gb);
+        dx = tuer.x - _gb.x; dz = tuer.z - _gb.z;
+        const l = Math.hypot(dx, dz) || 1;
+        dx /= l; dz /= l;
+      }
+      // Die Erste steht an der Tür, die anderen reihen sich an der Hauswand entlang auf (quer zur
+      // Tür, etwas vor der Wand): so sieht man die Schlange auch von schräg oben
+      const qx = -dz, qz = dx;
+      liste.forEach((a, k) => {
+        const vor = k ? 1.2 : 0.3;
+        const zx = tuer.x + qx * SCHLANGE_ABSTAND * k + dx * vor, zz = tuer.z + qz * SCHLANGE_ABSTAND * k + dz * vor;
+        const f = Math.min(1, dt * 3);
+        a.x += (zx - a.x) * f;
+        a.z += (zz - a.z) * f;
+        a.y = hoeheLand(a.x, a.z);
+        a.blick = Math.atan2(dz, -dx);   // zur Tür schauen
+      });
+    }
   }
 
   function entfernen(a) {
@@ -661,6 +738,7 @@ export function init(game) {
       if (a.zustand === 'geht') { bewegen(a, dt); continue; }
       a.uhr -= dt;
       if (a.uhr > 0) continue;
+      if (a.zustand === 'schlange') { ansteheEnde(a); continue; }
       if (a.zustand === 'wartet-start') {
         const c = a.befehl;
         a.befehl = null;
@@ -685,6 +763,7 @@ export function init(game) {
       if (agenten[k].zustand === 'entfernt') agenten.splice(k, 1);
     }
     for (const b of boote.values()) b.agenten = b.agenten.filter((a) => a.zustand !== 'entfernt');
+    schlangenOrdnen(dt);
     spaziergaenger(dt);
   }
 
