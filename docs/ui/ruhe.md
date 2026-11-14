@@ -11,7 +11,7 @@ zugleich Aufmerksamkeit. Dazu standen Ziffern und Euro in der Systemschrift ("R�
    Wer warten muss, wartet ausgeblendet; seine Zeit läuft erst, wenn er steht.
 2. **Der Rest ist ein Zähler.** Ein kleiner roter Zähler (+2) an der stehenden Meldung zeigt, wie viele noch kommen.
 3. **Die Mitte gehört dem Hafen.** Feste Knöpfe nur an den Rändern, Meldungen klein, höchstens zwei Zeilen.
-4. **Daumen unten.** Am Handy hochkant steht der Meldeplatz unten über Zeit und Bauen; Kassieren klein über Bauen.
+4. **Daumen unten.** Der Meldeplatz steht unten bei den Knöpfen; am Handy hochkant Kassieren klein über Bauen.
 5. **Eine Schrift.** Alles in Pixelify Sans, auch Ziffern und Euro; die Schrift wird vorab geladen.
 
 ## Anordnung Handy hochkant
@@ -33,8 +33,8 @@ zugleich Aufmerksamkeit. Dazu standen Ziffern und Euro in der Systemschrift ("R�
 +--------------------------------------+
 ```
 
-PC, Tablet und Handy quer: der Meldeplatz steht oben in der Mitte zwischen linker Spalte und Funk,
-solange dort mindestens 300 px frei sind, sonst unten wie am Handy.
+PC, Tablet quer und Handy quer: der Meldeplatz steht unten in der Lücke zwischen Zeit, Kassieren und Bauen
+(wie ein Untertitel), wenn sie mindestens 320 px breit ist; sonst über den Knöpfen wie am Handy hochkant.
 
 Vorher und nachher (Handy, Morgen und Kassieren): `/mnt/project-files/handy-ui/ruhig/vergleich-handy.png`.
 
