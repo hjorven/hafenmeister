@@ -506,6 +506,17 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "p19/p19-karte-pc.png"
+  },
+  {
+   "datei": "p55-pr275-handy-schlange-versorgung.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Schlange vor der Versorgung, wenn sie knapp ist",
+   "pr": 275,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p55/handy-3-schlange.png"
   }
  ]
 }

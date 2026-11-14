@@ -1,6 +1,6 @@
 # Hafenmeister: Roadmap
 
-Stand: 14.11.2026 vormittags, abgeglichen mit `main` bei Commit `360ca43` (PR 274). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
+Stand: 14.11.2026 vormittags, abgeglichen mit `main` bei Commit `d71d3e7` (PR 278). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
 
 **Verhältnis zu [plan.md](plan.md):** `plan.md` bleibt der einzige gültige Plan für Vision, Regeln und Entscheidungen. Diese Roadmap ist die **Arbeitsliste**: Sie sagt, was noch fehlt, was falsch ist, was weg soll, und welches Paket (welcher Thread) es erledigt. Wo die Roadmap eine Entscheidung aus `plan.md` ändern würde, steht das unter [Offene Fragen an Jorven](#offene-fragen-an-jorven) und gilt erst nach seiner Antwort; danach wird `plan.md` im selben PR angepasst.
 
@@ -347,7 +347,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| B1 | Auslastung an jedem Versorgungsgebäude ("14 von 20"), Schlange vor der Dusche | Schild erledigt (P55, `game.sim.auslastung()`), Schlange offen (L2) | P55 |
+| B1 | Auslastung an jedem Versorgungsgebäude ("14 von 20"), Schlange vor der Dusche | Schild erledigt (P55, `game.sim.auslastung()`), Schlange erledigt (L2) | P55 |
 | B2 | Wunschsymbole über dem Boot, beim Anlegen Haken oder grau | erledigt (PR 158) | P11 |
 | B3 | Münze nennt ihren Wert ("22 € + 11 €") | erledigt (`render/boat-view.js`, `feeReady` mit `base`, `bonus`) | P12 |
 | B4 | Rundgang als Helfer: erst abends, nur vergessene Münzen, etwa vier Fünftel statt der Hälfte | erledigt (`ECONOMY.kassieren.rundgangAnteil` 0,8, gilt auch nachts) | P12 |
@@ -489,7 +489,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
 | L1 | Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel | offen | P46 |
-| L2 | Figuren als Anzeige (Schlange vor der Dusche, volle Tische) | offen (braucht `render/people.js`, Thread Menschen; Auslastung zeigt schon das Schild) | P55 |
+| L2 | Figuren als Anzeige (Schlange vor der Dusche, volle Tische) | erledigt (P55, Schlange vor WC, Dusche, Kiosk und Restaurant, wenn knapp oder voll; `render/people.js`) | P55 |
 | L3 | Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles | offen | P26 |
 | L4 | Fernglas mit Steckbrief | offen | P26 |
 | L5 | Möwen antippen, Glocke am Steg | offen | P26 |
@@ -538,7 +538,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Bed P1 | Die fünf fehlenden Anzeigen (A4, B1, B2, B11, C1) | B11, B2, A4 und B1 erledigt (P55), C1 siehe P14 | P55, P11, P14 |
 | Bed P2 | Bootskarte mit "zahlt etwa 33 € pro Nacht" und Zahl der Wunschplätze | erledigt (PR 153) | P10 |
 | Bed P3 | Zeiger am Bildrand für wartende Boote | erledigt (PR 269: Zeiger mit Geduldsring, gebündelt, Antippen fährt hin) | P55 |
-| Bed P4 | Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf "bis zum nächsten Boot" | erledigt (Tempo bleibt; 1x nur bei wartendem Dauerlieger, Regionsziel, 8x bis zum nächsten Boot, danach Knopf "Weiter mit 3x" und automatische Rückkehr; 14.11.) | P07 |
+| Bed P4 | Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf "bis zum nächsten Boot" | geändert auf Jorvens Wunsch (14.11.): Tempo läuft durch, keine automatische Bremsung mehr | P07 |
 | Bed P5 | Einstellungen-Seite (Ton und Musik getrennt, Selbst-Einfahren, Bewegung, Schrift, Linkshänder) | erledigt (Ton und Musik über Knopf ins Ton-Fenster mit getrennten Reglern) | P50 |
 | Bed P6 | Farbe nie allein: Form zu Grün-Rot und Gold | erledigt mit Einstellung "Schilder mit Form" (Balken, Stern, Ausrufezeichen) | P50 |
 | Bed P7 | Letzten Kauf zehn Sekunden lang zurücknehmen | erledigt (PR 232) | P18 |
@@ -644,7 +644,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P04 | Abschlussziel Stufe 6 richtig zählen | Ü4 | `bridge.js`, `render/services.js`, `docs/services.md` | erledigt (PR 139): ein Zähler `state.bigVisits`, Liste `GROSSSCHIFF_BESUCHE` in `data/services.js` (Vorarbeit PR 113) |
 | P05 | Boote auf wegfallenden Plätzen regeln | Ü5 | `sim.js` (Stufenausbau), `tests/` | erledigt (Ü5: `advanceStage`, Hook `stageUp`, Test in `tests/dauerlieger.test.mjs`); bestehend: "Spielregeln ohne Grafik umsetzen" |
 | P06 | Eine Quelle für alle Zahlen und echte Regeltests (erledigt) | Ü6, Ü24 | `economy.js`, `data/rules.js`, `data/services.js`, `services/rules.js`, `data/events.js`, `tests/regeln.mjs` (statt `tests/helpers.mjs`, das ist der Browser-Helfer), alle Regeltests, `tools/zahlen.mjs`, `docs/zahlen.md`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" |
-| P07 | Tempo einheitlich regeln | Ü7, Hilfetexte, `docs/schiffsanimationen.md` | `ui/oberflaeche.js`, `ui/input-pc.js`, `ui/input-touch.js`, `ui/gesten.js`, `plan.md` 14 | erledigt (Ü7, Tempo bleibt mit PR 257); bestehend: "Gesamte Oberfläche neu überarbeiten" |
+| P07 | Tempo einheitlich regeln | Ü7, Hilfetexte, `docs/schiffsanimationen.md` | `ui/oberflaeche.js`, `ui/input-pc.js`, `ui/input-touch.js`, `ui/gesten.js`, `plan.md` 14 | erledigt (Ü7, Tempo bleibt mit PR 257, läuft ohne automatische Bremsung seit PR 278); bestehend: "Gesamte Oberfläche neu überarbeiten" |
 | P08 | Doku auf den Stand bringen | Abschnitte 9 und 10, Liste aller Adresszusätze, `plan.md` Meilensteine und Pixel-Oberfläche | `README.md`, `docs/*.md` (außer den Paket-eigenen) | erledigt (PR 177); bestehend: "Bestandsaufnahme Repo und Plan erstellen" |
 | P54 | Ausfahrende Boote weichen wartenden Booten aus (aufgegangen in P66) | Neuer Fehler (Jorven, 12.11.2026): Beim Rausfahren kollidieren Boote mit Booten an der Warteboje und zittern beide, als wollten sie aneinander vorbei. Ausweichen ohne Berührung und ohne Zittern, an Handy und PC prüfen | `render/boat-anim.js`, `render/boat-view.js`, `world/fahrwege.js` | bestehend: "Schiffsanimationen umsetzen" |
 | P09 | Speicherplätze und Neues Spiel | Ü25, F26, F27 (Grundgerüst), F28, `docs/speichern.md` | `save/*.js`, `state.js`, `save/save-panel.js` | erledigt (PR 150) |
@@ -742,7 +742,7 @@ Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen
 
 | Paket | Titel (Thread) | Inhalt | Welle | Thread |
 |---|---|---|---|---|
-| P55 | Versteckte Regeln im Hafen sichtbar machen | A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen "hier ist etwas zu tun" | 2 | erledigt bis auf L2 (PR 269, `docs/hafenzeichen.md`) |
+| P55 | Versteckte Regeln im Hafen sichtbar machen | A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen "hier ist etwas zu tun" | 2 | erledigt (PR 269 und 275, `docs/hafenzeichen.md`) |
 | P59 | Stege umbauen und Varianten wählen | D5, D6, D9 (neue Gastplätze in Stufe 6) | 3 | neu (stimmt sich mit "Stegbild pro Spiel variieren" ab) |
 | P60 | Hafen verschönern | D8 | 4 | neu |
 | P61 | Spiel komplett offline startbar | N15, N16 | 2 | erledigt (PR 270), Thread "Spiel offline startbar machen" |
