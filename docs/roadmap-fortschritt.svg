@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="760" height="358" viewBox="0 0 760 358" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
 <rect width="760" height="358" rx="10" fill="#f4efe3" stroke="#d8cdb4"/>
 <text x="20" y="32" font-size="19" font-weight="700" fill="#16324a">Roadmap: 17 von 80 Paketen erledigt</text>
-<text x="20" y="54" font-size="13" fill="#4a5d6c">5 teilweise, 4 in Arbeit, 54 offen, 1 zusammengelegt · Stand 14.11.2026</text>
+<text x="20" y="54" font-size="13" fill="#4a5d6c">6 teilweise, 4 in Arbeit, 53 offen, 1 zusammengelegt · Stand 14.11.2026</text>
 <text x="20" y="91" font-size="13" fill="#16324a">Welle 0: Gelände und Bootswege</text>
 <rect x="330" y="78" width="340" height="18" rx="4" fill="#e3dccb"/>
 <rect x="330.0" y="78" width="272.0" height="18" fill="#3a7cc4"/>
@@ -15,7 +15,7 @@
 <text x="20" y="159" font-size="13" fill="#16324a">Welle 2: Kernschleife und Rückmeldung</text>
 <rect x="330" y="146" width="340" height="18" rx="4" fill="#e3dccb"/>
 <rect x="330.0" y="146" width="181.3" height="18" fill="#23897d"/>
-<rect x="511.3" y="146" width="45.3" height="18" fill="#e8b23a"/>
+<rect x="511.3" y="146" width="68.0" height="18" fill="#e8b23a"/>
 <text x="682" y="159" font-size="13" fill="#16324a">8/15</text>
 <text x="20" y="193" font-size="13" fill="#16324a">Welle 3: Tiefe und Hafenleben</text>
 <rect x="330" y="180" width="340" height="18" rx="4" fill="#e3dccb"/>
