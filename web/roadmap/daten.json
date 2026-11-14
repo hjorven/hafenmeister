@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "a6ac8ab"
+  "commit": "a441ab1"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -614,7 +614,7 @@
     "G7",
     "G9"
    ],
-   "status": "offen",
+   "status": "teilweise",
    "bilder": []
   },
   {
@@ -2947,8 +2947,8 @@
   {
    "code": "G1",
    "text": "Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (14.11.)",
    "pakete": [
     "P24"
    ],
@@ -2958,8 +2958,8 @@
   {
    "code": "G2",
    "text": "Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (14.11.)",
    "pakete": [
     "P24"
    ],
@@ -3004,8 +3004,8 @@
   {
    "code": "G6",
    "text": "Ergebnis eines Ereignisses am Abend zeigen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (14.11.)",
    "pakete": [
     "P24"
    ],
@@ -4342,10 +4342,10 @@
    ],
    "zaehler": {
     "erledigt": 0,
-    "teilweise": 1,
+    "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
-    "offen": 18,
+    "offen": 17,
     "entfaellt": 0,
     "alle": 19
    }
@@ -4430,19 +4430,19 @@
  ],
  "gesamt": {
   "erledigt": 23,
-  "teilweise": 5,
+  "teilweise": 6,
   "arbeit": 3,
   "frage": 0,
-  "offen": 49,
+  "offen": 48,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 133,
+  "erledigt": 136,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 79,
+  "offen": 76,
   "entfaellt": 0,
   "alle": 219
  },
@@ -5026,6 +5026,65 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "Ereignisse zum Vorbereiten: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend (P24 Teil 1)",
+   "pr": 281,
+   "pakete": [
+    "P24"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap: Funde aus dem Feature-Test behoben, PR 244 bis 279 eingetragen, Bilder für P19, P21, P55",
+   "pr": 276,
+   "pakete": [
+    "P19",
+    "P21",
+    "P55"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Arbeitsplan: Stand 11:30, P19/P55/P21/P61/C07 erledigt, neue Reihenfolge",
+   "pr": 283,
+   "pakete": [
+    "P19",
+    "P55",
+    "P21",
+    "P61"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "P19 Teil 2: Wege zählen, Auszeichnung des Hafens, \"heute voll\" in der Bootskarte",
+   "pr": 279,
+   "pakete": [
+    "P19"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Tagesziel klappt nicht mehr auf, \"Als Nächstes\" eine Zeile und nur kurz",
+   "pr": 277,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "P55 L2: Schlange vor der Versorgung, wenn sie knapp oder voll ist",
+   "pr": 275,
+   "pakete": [
+    "P55"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Tempo läuft durch: keine automatische Bremsung mehr",
+   "pr": 278,
+   "pakete": [
+    "P07"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "Logbuch und Hafenchronik: Sammelalbum mit Pixelbildern, Chronik je Tag (P21)",
    "pr": 274,
    "pakete": [
@@ -5063,52 +5122,6 @@
    "pakete": [
     "P19"
    ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Arbeitsplan: alle offenen Vorschläge und Stufe 7 bis 20 in Reihenfolge",
-   "pr": 272,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Spiel offline startbar: Three.js mitgeliefert, Spieldateien vorab im Cache (P61)",
-   "pr": 270,
-   "pakete": [
-    "P61"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 258 und 262 bei P66, Karte der Zonen und Seewege",
-   "pr": 268,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Handy: Hilfe aufklappbar, Einstellungen kompakt, Baumenü niedriger",
-   "pr": 267,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "GitHub Actions absichern: Rechte je Job, SHAs, Secret-Scan (Audit C07)",
-   "pr": 264,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Überblick: hochkant schmal, wartet auf das Startfenster, Startansicht folgt der geladenen Stufe",
-   "pr": 190,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Ablegen: Box bleibt belegt, bis das Boot wirklich draußen ist",
-   "pr": 266,
-   "pakete": []
   }
  ]
 }
