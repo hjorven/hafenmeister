@@ -209,19 +209,34 @@ test('Nacht: liegengebliebene Münzen bringen vier Fünftel, Abreise mit Bewertu
   // plain 10, stays 20 (zwei Nächte im Voraus), nicht kassiert -> vier Fünftel: 8 und 16
   assert.equal(s.money, 13 + 8 + 16);
   const dep = ev.filter((e) => e.type === 'departed');
-  assert.deepEqual(dep.map((e) => e.rating), [5, 4]);
+  // alle Wünsche erfüllt und ohne Wünsche: je die Note aus economy.js (ruf.wunschNote.alle, ruf.ohneWunsch)
+  const voll = ctx.rules.rating.allMet, ohne = ctx.rules.rating.noWishes;
+  assert.deepEqual(dep.map((e) => e.rating), [voll, ohne]);
   assert.equal(s.guests, 2);
   assert.equal(s.day, 2);
   assert.equal(s.phase, 'day');
   assert.equal(s.clock, 0);
   assert.equal(s.berths.A3, stays.id);
   assert.equal(s.berths.A1, undefined);
-  assert.equal(s.ratings.slice(-2).join(), '5,4');
+  assert.equal(s.ratings.slice(-2).join(), `${voll},${ohne}`);
+  assert.deepEqual(s.ratingDays.slice(-2), [1, 1]);
   assert.ok(ev.some((e) => e.type === 'dayEnd' && e.income === 37));
   assert.equal(s.stats.bestDayIncome, 37);
 });
 
-test('Ruf: Schnitt der letzten 20, Faktor für Ankünfte', () => {
+test('Ruf: Schnitt der letzten drei Tage, mindestens der letzten Bewertungen', () => {
+  const rules = { reputation: { days: 3, minCount: 4 } };
+  // Tag 10: Bewertungen von Tag 5 (zwei), Tag 8, Tag 9 und Tag 10 (je eine)
+  const s = { day: 10, ratings: [1, 1, 5, 4, 3], ratingDays: [5, 5, 8, 9, 10] };
+  assert.deepEqual(sim.reputationRatings(s, rules), [1, 5, 4, 3]);   // drei Tage = 3, aufgefüllt auf 4
+  s.ratings.push(5, 5, 5); s.ratingDays.push(10, 10, 10);
+  assert.deepEqual(sim.reputationRatings(s, rules), [5, 4, 3, 5, 5, 5]);   // Tag 8 bis 10, mehr als 4
+  assert.equal(sim.reputation(s, rules), 27 / 6);
+  // Ältere Spielstände ohne Tage: nur die letzten minCount
+  assert.deepEqual(sim.reputationRatings({ day: 3, ratings: [2, 3, 4, 5, 5] }, rules), [3, 4, 5, 5]);
+});
+
+test('Ruf: Startwert und Faktor für Ankünfte', () => {
   const s = createState({ seed: 1 });
   assert.equal(sim.reputation(s), 3);
   const E = ECONOMY.ruf;
@@ -577,6 +592,25 @@ test('Box bleibt belegt, bis das abreisende Boot heraus ist (Meldung oder Rückf
   s.leaving = { A6: { boatId: 99, elapsed: 0 } };
   sim.settleWaiting(s);
   assert.ok(sim.isFree(s, 'A6'));
+});
+
+test('Ansicht hält die Box, solange das abreisende Boot noch darin liegt (höchstens 5 Minuten)', () => {
+  const s = quietState();
+  s.leaving = { A3: { boatId: 77, elapsed: 0, at: 0, off: true } };
+  // Boot wartet sichtbar auf den Ablegetakt: jede Sekunde 'noch in der Box'
+  for (let i = 0; i < 3 * RULES.leaveMax; i++) {
+    assert.ok(sim.holdLeaving(s, 77));
+    sim.tick(s, ctx, 1);
+  }
+  assert.ok(!sim.isFree(s, 'A3'), 'Box bleibt belegt');
+  assert.equal(sim.berthState(s, ctx, 'A3'), 'belegt');
+  assert.equal(sim.holdLeaving(s, 12345), false, 'fremdes Boot hält nichts');
+  // Hängt die Ansicht, wird die Box nach 5 Minuten trotzdem frei
+  for (let t = 0; t < 300 + RULES.leaveMax + 2; t++) { sim.holdLeaving(s, 77); sim.tick(s, ctx, 1); }
+  assert.ok(sim.isFree(s, 'A3'));
+  // Noch nicht abgelegt (Abreise am Vormittag geplant): Halten ändert nichts
+  s.leaving = { A4: { boatId: 78, elapsed: 0, at: 1e9, off: false } };
+  assert.equal(sim.holdLeaving(s, 78), false);
 });
 
 test('Erster Tag: das erste Boot kommt nach wenigen Sekunden', () => {

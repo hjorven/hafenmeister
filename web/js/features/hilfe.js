@@ -50,12 +50,25 @@ body #hm-hilfe.hm-hilfe { position: absolute; z-index: 42; inset: 0; margin: aut
 #hm-hilfe.hm-hilfe .hm-karte-kopf { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 #hm-hilfe.hm-hilfe .hm-klapp-kopf { margin: 0; font-size: calc(var(--hm-s, 14px) + 3px); }
 #hm-hilfe.hm-hilfe ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-#hm-hilfe.hm-hilfe li { display: grid; grid-template-columns: 44px 1fr; gap: 4px 10px; align-items: start; padding: 8px; background: var(--hm-mulde, rgba(0,0,0,.05)); }
-#hm-hilfe.hm-hilfe li .hm-pixelbild { grid-row: span 2; width: 40px; height: 40px; color: var(--hm-tinte, #283648); }
-#hm-hilfe.hm-hilfe li strong { font-size: var(--hm-s, 14px); }
-#hm-hilfe.hm-hilfe li span { font-size: calc(var(--hm-s, 14px) - 1px); line-height: 1.35; }
+#hm-hilfe.hm-hilfe li { padding: 8px; background: var(--hm-mulde, rgba(0,0,0,.05)); }
+#hm-hilfe.hm-hilfe summary { display: flex; align-items: center; gap: 10px; list-style: none; cursor: pointer; }
+#hm-hilfe.hm-hilfe summary::-webkit-details-marker { display: none; }
+#hm-hilfe.hm-hilfe li .hm-pixelbild { flex: none; width: 40px; height: 40px; color: var(--hm-tinte, #283648); }
+#hm-hilfe.hm-hilfe li strong { flex: 1; font-size: var(--hm-s, 14px); }
+#hm-hilfe.hm-hilfe li span { display: block; margin: 4px 0 0 50px; font-size: calc(var(--hm-s, 14px) - 1px); line-height: 1.35; }
 #hm-hilfe.hm-hilfe .hm-hilfe-knoepfe { display: flex; justify-content: flex-end; }
-@media (max-width: 599px), (max-height: 499px) { #hm-hilfe.hm-hilfe ol { grid-template-columns: 1fr; } }
+/* Handy: Liste mit Titeln, Pfeil zeigt auf- und zugeklappt; quer zwei Spalten, damit alle Titel ins Bild passen */
+@media (max-width: 599px), (max-height: 499px) {
+  #hm-hilfe.hm-hilfe ol { grid-template-columns: 1fr; gap: 4px; }
+  #hm-hilfe.hm-hilfe li { padding: 4px 8px; }
+  #hm-hilfe.hm-hilfe li .hm-pixelbild { width: 28px; height: 28px; }
+  #hm-hilfe.hm-hilfe summary { min-height: 36px; gap: 8px; }
+  #hm-hilfe.hm-hilfe summary::after { content: ''; flex: none; width: 10px; height: 6px; background: currentColor;
+    clip-path: polygon(0 0, 100% 0, 50% 100%); }
+  #hm-hilfe.hm-hilfe details[open] > summary::after { transform: rotate(180deg); }
+  #hm-hilfe.hm-hilfe li span { margin: 2px 0 4px 36px; }
+}
+@media (max-height: 499px) and (orientation: landscape) { #hm-hilfe.hm-hilfe ol { grid-template-columns: 1fr 1fr; } }
 body.foto #hm-hilfe { display: none !important; }
 `;
 
@@ -79,7 +92,10 @@ export function init(game) {
   const tafel = el('div', { id: 'hm-hilfe', class: 'hm-hilfe hm-px hm-tafel-px', role: 'dialog', 'aria-label': 'Hilfe' });
   tafel.hidden = true;
   const zu = el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Hilfe schließen', onclick: () => schliessen() });
-  const liste = el('ol', {}, ...KARTEN.map((k) => el('li', {}, pixelBild(k.bild, 40), el('strong', {}, k.titel), el('span', {}, k.text))));
+  // Jede Karte klappt auf (details): am Handy stehen erst nur Bild und Titel da, ein Tipp zeigt den Text.
+  // Am PC und Tablet sind alle offen wie bisher (oeffnen()).
+  const liste = el('ol', {}, ...KARTEN.map((k) => el('li', {},
+    el('details', {}, el('summary', {}, pixelBild(k.bild, 40), el('strong', {}, k.titel)), el('span', {}, k.text)))));
   const nochmal = el('button', { type: 'button', class: 'hud-btn hm-knopf', onclick: () => { schliessen(); game.einstieg?.start?.(); } }, 'Einstieg wiederholen');
   tafel.append(el('div', { class: 'hm-karte-kopf' }, el('p', { class: 'hm-klapp-kopf' }, 'So geht der Hafen'), zu), liste, el('div', { class: 'hm-hilfe-knoepfe' }, nochmal));
   // Klicks in der Tafel nicht als Klick auf die Karte durchreichen
@@ -91,7 +107,10 @@ export function init(game) {
   knopf.addEventListener('click', () => { if (tafel.hidden) oeffnen(); else schliessen(); });
   (document.getElementById('hud-top') || host).append(knopf);
 
+  const klein = () => typeof matchMedia === 'function' && matchMedia('(max-width: 599px), (max-height: 499px)').matches;
   function oeffnen() {
+    const offen = !klein();
+    for (const d of liste.querySelectorAll('details')) d.open = offen;
     tafel.hidden = false;
     knopf.setAttribute('aria-expanded', 'true');
     zu.focus({ preventScroll: true });

@@ -58,9 +58,15 @@ Anteil der einzelnen Tafel allein am Handy hochkant (ohne die feste Oberfläche)
 - **Baumenü (Handy):** Kreuz oben statt Zeile "Schließen" unten, hochkant höchstens 52 % der Höhe.
 - **"Als Nächstes":** schmaler und kleiner.
 
+Runde 2 (gleicher Tag):
+
+- **Einstellungen (Handy):** Zeilen ohne Kästen, Beschreibung klein, quer zweispaltig. Verdeckt hochkant 88 → 81 %, quer 61 → 79 % gesamt, aber ohne Scrollen: vorher waren quer nur zwei Schalter sichtbar, jetzt alle.
+- **Hilfe (Handy):** aufklappbare Liste, erst nur Bild und Titel, ein Tipp zeigt den Text; quer zwei Spalten. Hochkant 91 → 79 %, quer 84 → 80 %. Am PC und Tablet sind alle Karten offen wie bisher.
+- **Baumenü (Handy hochkant):** höchstens 48 % der Höhe.
+- **Tagesabschluss:** bleibt; die Karte allein verdeckt am Handy etwa 23 %, der Rest ist die feste Oberfläche.
+
 Bewusst groß bleiben Spielstand, Gästebuch, Tastenhilfe und die Aufstiegsfeier (sie halten das Spiel an und
-brauchen den ganzen Bildschirm) sowie Hilfe und Einstellungen. Nächste Kandidaten: Einstellungen und Hilfe am Handy
-(88 und 91 %), Tagesabschluss am Handy (55 %).
+brauchen den ganzen Bildschirm).
 
 ## Selbst messen
 

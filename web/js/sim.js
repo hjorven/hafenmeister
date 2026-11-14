@@ -105,6 +105,8 @@ function normalizeType(raw) {
     unlock: null, // Boot kommt nur, wenn ein Modul diese Freischaltung meldet (zum Beispiel 'kreuzfahrt')
     fromSea: minStage >= 3, // kommt über die Ostsee, bei Sturm nicht
     ...t,
+    // Gästeprofil aus data/boats (Roadmap P19): arrivalWeight geht vor dem alten weight
+    weight: t.arrivalWeight ?? t.weight ?? 1,
     minStage,
     length: range(t.length),
     beam: range(t.beam),
@@ -161,6 +163,7 @@ export const DEFAULT_MODIFIERS = Object.freeze({
   satisfaction: { outer: 0, all: 0 }, // zu Tagesbeginn: Zufriedenheit an ungeschützten Plätzen und überall
   ratingBonus: 0, // wird bei jeder Abreise auf die Bewertung addiert
   unlock: {}, // { kreuzfahrt: true } schaltet Bootsarten mit type.unlock frei
+  offers: {}, // { baecker: 1 } gebaute Angebote an Land mit Stufe: erfüllen Wünsche (rules.offerWishes)
 });
 
 /** Alle Modifikatoren zusammengerechnet: Faktoren werden multipliziert, Zahlen addiert. */
@@ -186,6 +189,7 @@ export function modifiers(state, ctx) {
       m.satisfaction.all += p.satisfaction.all || 0;
     }
     Object.assign(m.unlock, p.unlock || {});
+    Object.assign(m.offers, p.offers || {});
   }
   return m;
 }
@@ -193,16 +197,42 @@ export function modifiers(state, ctx) {
 // ---------------------------------------------------------------------------
 // Ruf
 
-/** Ruf als Zahl von 1 bis 5 (Schnitt der letzten Bewertungen). */
-export function reputation(state) {
-  const r = state.ratings;
+/**
+ * Bewertungen, aus denen der Ruf besteht (Roadmap P19 C2): alle der letzten rules.reputation.days Tage
+ * (heute mitgezählt), mindestens aber die letzten minCount. state.ratingDays hält den Tag jeder
+ * Bewertung, von hinten ausgerichtet; ältere Spielstände ohne Tage zählen nur zum Auffüllen.
+ */
+export function reputationRatings(state, rules = RULES) {
+  const r = state.ratings || [];
+  const tage = state.ratingDays || [];
+  const { days = 0, minCount = r.length } = rules.reputation || {};
+  if (!days) return r.slice(-minCount);
+  const versatz = r.length - tage.length;
+  const ab = (state.day ?? 1) - days + 1;
+  let von = r.length;
+  while (von > 0) {
+    const tag = von - 1 >= versatz ? tage[von - 1 - versatz] : null;
+    if (r.length - von >= minCount && !(tag != null && tag >= ab)) break;
+    von--;
+  }
+  return r.slice(von);
+}
+
+/** Ruf als Zahl von 1 bis 5 (Schnitt der Bewertungen aus reputationRatings). */
+export function reputation(state, rules = RULES) {
+  const r = reputationRatings(state, rules);
   return r.length ? r.reduce((a, b) => a + b, 0) / r.length : 3;
 }
 
 function pushRating(state, ctx, value) {
   const { window, min, max } = ctx.rules.reputation;
+  // Tage von hinten ausrichten: ältere Bewertungen ohne Tag behalten keinen
+  const tage = (state.ratingDays ||= []);
+  if (tage.length > state.ratings.length) tage.splice(0, tage.length - state.ratings.length);
   state.ratings.push(Math.min(max, Math.max(min, value)));
+  tage.push(state.day);
   while (state.ratings.length > window) state.ratings.shift();
+  while (tage.length > state.ratings.length) tage.shift();
 }
 
 /** Faktor für die Zahl der Ankünfte: Ruf 1 ergibt 0,5, Ruf 3 ergibt 1, Ruf 5 ergibt 1,5. */
@@ -271,6 +301,20 @@ function startLeaving(state, boatId, berthId, at = 0) {
   // at: Spieluhr des neuen Tages, zu der das Boot ablegt (gestaffelte Abreise am Vormittag).
   // Bis dahin liegt es noch in der Box (off: false), danach läuft die Rückfallzeit.
   state.leaving[berthId] = { boatId, elapsed: 0, at, off: !(at > 0) };
+}
+
+/**
+ * Die 3D-Ansicht meldet: das abreisende Boot liegt noch sichtbar in seiner Box (wartet auf den
+ * Ablegetakt, auf seine Leute oder auf ein Nachbarboot). Die Rückfallzeit beginnt dann von vorn,
+ * die Box bleibt belegt, bis 'boot:aus-box' kommt. Ohne Ansicht (Tests, Balancing) meldet niemand.
+ */
+export function holdLeaving(state, boatId) {
+  let ok = false;
+  for (const l of Object.values(state.leaving || {})) {
+    // hoechstens 5 Minuten Spielzeit: haengt die Ansicht, wird die Box trotzdem frei
+    if (String(l.boatId) === String(boatId) && l.off && (l.total ?? 0) < 300) { l.elapsed = 0; ok = true; }
+  }
+  return ok;
 }
 
 /** Box freigeben, sobald das abreisende Boot heraus ist (per Boot-id oder Platz-id). */
@@ -356,15 +400,36 @@ export function eligibleTypes(state, ctx, mods = modifiers(state, ctx)) {
 function rollWishes(state, ctx, type) {
   const { rules } = ctx;
   if (type.noWishes) return [];
+  // Wünsche der Stufe, die diese Bootsart haben kann (type.wishes aus data/boats, Roadmap P19 B7)
+  const eigene = Array.isArray(type.wishes) ? type.wishes : null;
   const pool = (rules.wishes[state.stage] || []).filter(
-    (w) => (type.motor || !rules.motorOnlyWishes.includes(w)) && (!rules.wishSizes?.[w] || rules.wishSizes[w].includes(type.size)),
+    (w) => (type.motor || !rules.motorOnlyWishes.includes(w)) && (!rules.wishSizes?.[w] || rules.wishSizes[w].includes(type.size))
+      && (!eigene || eigene.includes(w)),
   );
   const [lo, hi] = rules.wishCountBySize?.[type.size] || rules.wishCount[state.stage] || [0, 0];
   const n = Math.min(pool.length, randomInt(state, lo, hi));
   const left = [...pool];
   const out = [];
   for (let i = 0; i < n; i++) out.push(left.splice(Math.floor(random(state) * left.length), 1)[0]);
+  // Dazu manchmal ein Wunsch an ein Angebot an Land (rules.offerWishes, P19 C3)
+  const angebote = offerWishPool(state, ctx, type);
+  if (angebote.length && random(state) < (rules.offerWishShare?.[state.stage] ?? 0)) {
+    out.push(angebote[Math.floor(random(state) * angebote.length)]);
+  }
   return out;
+}
+
+/** Wünsche an Angebote, die diese Bootsart in dieser Stufe haben kann. */
+export function offerWishPool(state, ctx, type) {
+  const o = ctx.rules.offerWishes || {};
+  return Object.keys(o).filter((k) => o[k].minStage <= state.stage && (!o[k].sizes || o[k].sizes.includes(type.size))
+    && (!o[k].sailOnly || type.sail));
+}
+
+/** Ist ein Wunsch an ein Angebot erfüllt? Der Service muss gebaut sein (mods.offers aus den Services). */
+export function offerWishMet(ctx, wish, mods) {
+  const o = ctx.rules.offerWishes?.[wish];
+  return !!o && !!mods?.offers?.[o.service];
 }
 
 function makeBoat(fields) {
@@ -382,9 +447,15 @@ export function rollBoat(state, ctx, mods = modifiers(state, ctx)) {
   const types = eligibleTypes(state, ctx, mods);
   if (!types.length) return null;
   const mix = ctx.rules.sizeMix[state.stage] || {};
+  // Guter Ruf lockt große Boote und seltene Modelle (rules.reputationDraw, P19 C6)
+  const draw = ctx.rules.reputationDraw;
+  const rep = draw ? reputation(state, ctx.rules) : 0;
+  const gross = draw && rep >= draw.bigFrom ? draw.big : {};
+  const selten = draw ? new Set(draw.rare) : new Set();
+  const seltenErlaubt = draw && rep >= draw.rareFrom;
   const sizeWeights = {};
   for (const [size, w] of Object.entries(mix)) {
-    if (types.some((t) => t.size === size)) sizeWeights[size] = w * (mods.sizeFactor[size] ?? 1);
+    if (types.some((t) => t.size === size)) sizeWeights[size] = w * (mods.sizeFactor[size] ?? 1) * (gross[size] ?? 1);
   }
   let boat = null;
   // Bis zu 8 Versuche, Maße zu würfeln, die an einen Platz des Hafens passen
@@ -395,7 +466,7 @@ export function rollBoat(state, ctx, mods = modifiers(state, ctx)) {
       ofSize.map((t) => [t.id, t.weight * (mods.kindFactor[t.kind] ?? 1) * (mods.kindFactor[t.id] ?? 1)]),
     );
     const type = ctx.typeById[randomWeighted(state, typeWeights) ?? ofSize[0].id];
-    const models = type.models.filter((m) => (m.minStage ?? type.minStage) <= state.stage);
+    const models = type.models.filter((m) => (m.minStage ?? type.minStage) <= state.stage && (seltenErlaubt || !selten.has(m.id)));
     const model = models.length ? randomPick(state, models) : null;
     const dim = (key) => (model && model[key] != null ? model[key] : randomRange(state, ...type[key]));
     const [nMin, nMax] = range(type.nights ?? ctx.rules.nightsBySize?.[type.size] ?? ctx.rules.nights);
@@ -649,11 +720,12 @@ export function berthValue(state, ctx, boatId, berthId = null) {
   const bw = ctx.rules.berthWishes || {};
   const served = state.served || {};
   const met = [];
+  const mods = modifiers(state, ctx);
   for (const w of boat.wishes) {
     if (bw[w]) { if (berth && berthHas(state, ctx, berth, bw[w])) met.push(w); }
+    else if (ctx.rules.offerWishes?.[w]) { if (offerWishMet(ctx, w, mods)) met.push(w); }
     else if ((served[w] || 0) < facilityCapacity(state, ctx, w)) met.push(w);
   }
-  const mods = modifiers(state, ctx);
   const fee = nightlyFee(state, ctx, boat, met.length, mods.priceFactor);
   const snug = !!berth && isSnug(state, ctx, boat, berth);
   const probe = { ...boat, wishesMet: boat.wishesMet + met.length, wishesTotal: boat.wishesTotal + boat.wishes.length, berthId: berth?.id ?? null, snug, byHand: true };
@@ -1119,7 +1191,7 @@ export function dismiss(state, ctx, boatId) {
 /** Hafengeld für eine Nacht bei n erfüllten Wünschen. */
 export function nightlyFee(state, ctx, boat, wishesMet, priceFactor = 1) {
   const type = ctx.typeById[boat.typeId];
-  const base = type?.fee ?? ctx.rules.baseFee[boat.size] ?? 0;
+  const base = type?.fee ?? (ctx.rules.baseFee[boat.size] ?? 0) * (type?.feeFactor ?? 1);
   return Math.round(base * (1 + ctx.rules.wishBonus * wishesMet) * priceFactor);
 }
 
@@ -1276,7 +1348,7 @@ function startEvening(state, ctx, events) {
  * Wünsche eines liegenden Bootes für heute prüfen (beim Anlegen und an jedem Morgen). Die Versorgung
  * reicht je Tag für eine feste Zahl Boote, state.served zählt mit. Zählt für die Bewertung.
  */
-function checkWishes(state, ctx, boat) {
+function checkWishes(state, ctx, boat, mods = modifiers(state, ctx)) {
   const berth = ctx.berthById[boat.berthId];
   const served = (state.served ||= {});
   const metList = [];
@@ -1284,6 +1356,7 @@ function checkWishes(state, ctx, boat) {
     const prop = ctx.rules.berthWishes[w];
     let ok;
     if (prop) ok = berthHas(state, ctx, berth, prop);
+    else if (ctx.rules.offerWishes?.[w]) ok = offerWishMet(ctx, w, mods);
     else {
       ok = (served[w] || 0) < facilityCapacity(state, ctx, w);
       if (ok) served[w] = (served[w] || 0) + 1;
@@ -1306,7 +1379,7 @@ function checkWishes(state, ctx, boat) {
  */
 function chargeFee(state, ctx, boat, mods, events) {
   if (boat.feeDay === state.day) return; // heute schon abgerechnet
-  const metList = checkWishes(state, ctx, boat);
+  const metList = checkWishes(state, ctx, boat, mods);
   boat.feeDay = state.day;
   if (boat.paidThrough != null && state.day <= boat.paidThrough) return; // schon im Voraus bezahlt
   const nights = boat.paidThrough == null ? Math.max(1, Math.min(ctx.rules.prepay || 1, boat.nights || 1)) : 1;
@@ -1556,6 +1629,7 @@ export function tick(state, ctx, dt) {
         events.push({ type: 'castOff', boatId: l.boatId, berthId });
       }
       l.elapsed += step;
+      l.total = (l.total ?? 0) + step;
       if (l.elapsed >= (ctx.rules.leaveMax ?? 0)) events.push(...berthCleared(state, ctx, { berthId }).events);
     }
     if (state.phase === 'day') {
@@ -1711,7 +1785,8 @@ export function applyTestStage(state, ctx, stage) {
   }
   state.guests = guests;
   state.stageGuests = 0;
-  state.ratings = Array(r.reputation.window).fill(4);
+  state.ratings = Array(r.reputation.minCount ?? r.reputation.window).fill(4);
+  state.ratingDays = [];
   const next = r.stageGoals[n];
   const facilityCosts = Object.values(r.facilities).flatMap((f) => Object.entries(f.cost || {}).filter(([lvl]) => (f.fromStage?.[lvl] ?? 1) <= n).map(([, c]) => c));
   state.money = Math.max(500, Math.round((next?.cost || 0) * 0.5), Math.max(0, ...facilityCosts));

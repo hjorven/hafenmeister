@@ -41,13 +41,13 @@ Stand: 12.11.2026. Status: gebaut. Bei jedem Pull Request und jedem Push auf `ma
 | `tests/specs/spielschleife.spec.mjs` | Rauchtest der Spielschleife: Boot kommt an die Boje, wird in 3D angetippt (oder in der Warteliste, falls `game.boatsVisible` fehlt), die Karte geht auf, „Automatisch einfahren“ legt es an, abends erscheint „Kassieren“, danach steigt das Geld oben. Zeit wird mit `game.sim.fastForward` vorgespult, Seed 42. |
 | `tests/specs/bauen.spec.mjs` | Bauen mit Vorschau (docs/bauen.md): Baumodus öffnet die Bauliste mit vier Reitern, die Vorschau kostet nichts, erst „Bauen für 80 €“ bezahlt, danach steht die Toilette im Hafen und der Hinweis „Als Nächstes“ erscheint. |
 | `tests/specs/layout.spec.mjs` | Seite scrollt nicht, Spielfläche füllt den Bildschirm, Knöpfe `#btn-pause`, `#btn-overview`, `#btn-build` sind sichtbar, im Bild und auf Touch-Geräten mindestens 40 x 40 Pixel groß (Handy quer 36), die Leisten überlappen nicht, die Media Queries treffen das richtige Gerät. |
-| `tests/specs/leinen.spec.mjs` | Festmacherleinen nur an echten Booten: ein Boot, das zugewiesen wird, während es noch unsichtbar auf seine Einfahrt wartet, wird sichtbar und liegt fest; dazu auf allen zehn Küstentypen (Stufe 3 und 6 im Wechsel, `?testtempo=300`, mindestens vier Spieltage) keine Leinen an unsichtbaren, verwaisten oder den Spielregeln unbekannten Booten. Nur PC. |
+| `tests/specs/leinen.spec.mjs` | Festmacherleinen nur an echten Booten: ein Boot, das zugewiesen wird, während es noch unsichtbar auf seine Einfahrt wartet, wird sichtbar und liegt fest; dazu auf allen zehn Küstentypen (Stufe 3 und 6 im Wechsel, `?testtempo=300`, mindestens vier Spieltage) keine Leinen an unsichtbaren, verwaisten oder den Spielregeln unbekannten Booten, und keine Box mit dem Zustand „frei“, in der noch ein sichtbares Boot liegt. Nur PC. |
 
 Zusätzlich läuft `tools/check-pages.sh web` (absolute Pfade, fehlende Dateien), denn der Pages-Workflow prüft das erst nach dem Merge.
 
 Die Tests verwenden nur die gemeinsamen Namen aus dem Grundgerüst (`window.hafenmeister`, `#stage`, `#hud-top`, `#hud-bottom`, die drei Knöpfe). Wer eines davon umbenennt, muss den Test im selben PR anpassen.
 
-Three.js wird in den Tests aus `tests/node_modules/three` geliefert statt vom CDN, damit ein CDN-Ausfall keinen Test rot macht. Ändert jemand die Three.js-Version in der Import-Map von `web/index.html`, bitte dieselbe Version in `tests/package.json` eintragen und `npm install` im Ordner `tests/` ausführen (sonst lädt der Test vom echten CDN).
+Three.js liegt im Spiel selbst (`web/vendor/three-<Version>/`, P61), Tests brauchen keine Umleitung mehr. Die Fixture in `tests/helpers.mjs` sperrt jedes CDN: lädt das Spiel doch etwas von jsDelivr, unpkg oder ähnlichem, wird der Test rot. `tests/specs/offline.spec.mjs` prüft auf Handy und PC, dass das Spiel nach dem ersten Besuch ohne Netz startet. Neue Three.js-Version: in `tests/package.json` eintragen, `npm install` im Ordner `tests/`, `bash tools/three-holen.sh`, Import-Maps nachziehen (`tests/offline.test.mjs` meldet, was fehlt).
 
 ## Regel für alle Threads
 

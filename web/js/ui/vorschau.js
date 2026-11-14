@@ -14,6 +14,7 @@
 // den Spielstand. Schnittstelle: game.vorschau = { wunschSymbole, funkAn(), aktualisieren() }.
 import { uhrzeitAusSpielzeit } from '../render/landschaft/zeit.js';
 import { ringZustand, ringBild } from './geduldsring.js';
+import { ANGEBOT_BILDER } from './wunsch-bilder.js';
 
 // ------------------------------------------------------------------ Pixel-Grafik
 // '#' ist die Glyphe (weiß auf farbigem Schild), '.' ist leer. 12 x 12 wie die Oberfläche.
@@ -39,6 +40,8 @@ export const WUNSCH = {
     raster: ['............', '.######.....', '.#....#.#...', '.#....#..#..', '.######..#..', '.######..#..', '.######.##..', '.######.#...', '.######.#...', '.########...', '########....', '............'],
   },
 };
+// Wünsche an Angebote an Land (P19): Bilder aus ui/wunsch-bilder.js
+Object.assign(WUNSCH, ANGEBOT_BILDER);
 // Unbekannter Wunsch (neue Wünsche aus späteren Paketen): Fragezeichen, bis jemand ein Bild einträgt
 const UNBEKANNT = {
   name: null, farbe: '#5a6a7c',

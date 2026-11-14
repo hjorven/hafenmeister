@@ -13,14 +13,14 @@ on:
       - "docs/roadmap-bilder.json"
       - "tools/roadmap.mjs"
       - "tools/build-pages.sh"
+      - "tools/offline-liste.mjs"
       - "tools/check-pages.sh"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+# Grundsatz: Der Workflow selbst bekommt keine Rechte, jeder Job nur, was er braucht.
+# Nur der Deploy-Job darf auf Pages schreiben (pages, id-token); der Build liest nur.
+permissions: {}
 
 # Bei vielen Merges kurz hintereinander zählt nur der neueste Stand:
 # ältere wartende oder laufende Läufe werden abgebrochen.
@@ -31,9 +31,13 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          persist-credentials: false
           # Ganze Historie: die Roadmap-Seite zeigt die letzten Merges
           fetch-depth: 0
 
@@ -43,18 +47,20 @@ jobs:
       - name: Pfade prüfen
         run: bash tools/check-pages.sh _site
 
-      - uses: actions/configure-pages@v5
-
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
           path: _site
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

@@ -63,6 +63,11 @@ export function rulesFromEconomy(E = ECONOMY) {
   r.wishCountBySize = { ...(E.wunschAnzahl || {}) };
   r.wishCount = {};   // je Stufe, nur für Klassen ohne Eintrag in wunschAnzahl: keine Wünsche
   // Wunsch -> Eigenschaft des Liegeplatzes, die ihn erfüllt (statt eines Gebäudes)
+  // Wünsche an Angebote an Land (P19 C3): erfüllt, wenn der Service gebaut ist (mods.offers)
+  const aw = E.angebotWunsch || {};
+  r.offerWishShare = { ...(aw.anteil || {}) };
+  r.offerWishes = Object.fromEntries(Object.entries(aw.wuensche || {}).map(([k, w]) => [k,
+    { service: w.service, minStage: w.abStufe ?? 1, sizes: w.klassen ?? null, sailOnly: !!w.nurSegel }]));
   r.berthWishes = Object.fromEntries(Object.entries(E.wuensche || {}).filter(([, w]) => w.durch === 'platz').map(([k]) => [k, 'power']));
 
   // Liegeplätze: Platzarten, Strom an Stegen
@@ -84,11 +89,14 @@ export function rulesFromEconomy(E = ECONOMY) {
 
   // Ruf und Bewertung
   const f = E.ruf || {};
-  r.reputation = { window: f.fenster, start: f.start, startSamples: f.startBewertungen ?? 0, min: ANKER_MIN, max: ANKER_MAX };
+  r.reputation = { window: f.hoechstens ?? f.fenster, days: f.tage ?? 0, minCount: f.mindestens ?? f.fenster, start: f.start, startSamples: f.startBewertungen ?? 0, min: ANKER_MIN, max: ANKER_MAX };
   r.rating = { noWishes: f.ohneWunsch, min: ANKER_MIN, max: ANKER_MAX, noneMet: f.wunschNote?.keiner ?? ANKER_MIN, allMet: f.wunschNote?.alle ?? ANKER_MAX };
   r.arrivalFactorAtRep = { 1: f.ankunftBasis, 5: f.ankunftBasis + 4 * f.ankunftJeAnker };
   r.turnAway = { chance: f.abgewiesen?.chance ?? 0, rating: f.abgewiesen?.wertung ?? ANKER_MIN };
   r.specialGuestRatingBonus = f.sondergastBonus ?? 0;
+  r.reputationDraw = f.lockt
+    ? { bigFrom: f.lockt.grosseAb, big: { ...f.lockt.grosse }, rareFrom: f.lockt.seltenAb, rare: [...f.lockt.selten] }
+    : null;
 
   // Ausbaustufen
   r.arrivalsPerDay = {};

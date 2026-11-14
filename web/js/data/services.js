@@ -30,7 +30,8 @@
 //   kunden                 { anteil, preis, nur } Anteil der Boote des Tages, die zahlen, Preis je Kunde,
 //                          nur = Filter { antrieb: 'segel'|'motor', klasse: ['S','M'] }
 //   synergie               [{ id, faktor }] Kundeneinnahmen x faktor, wenn der andere Service steht
-//   ruf                    Bonus auf den Ruf (alle Services zusammen hoechstens RUF_BONUS_MAX)
+//   ruf                    frueher Bonus auf jede Bewertung; seit P19 wuenschen sich Gaeste Angebote
+//                          (economy.js angebotWunsch), der Wert zaehlt nicht mehr fuer die Note
 //   gaeste                 { S: 1.1 } mehr ankommende Boote je Klasse (Faktoren werden multipliziert)
 //   sturmschutz            0 bis 1, Anteil der Sturmschaeden, der verhindert wird (zusammen hoechstens 0.8)
 //   regatta                Faktor fuer Einnahmen bei Regatten (Thread Ereignisse)
@@ -79,7 +80,7 @@ const TEXTE = [
   },
   {
     id: 'raeucherei', name: 'Räucherei', gruppe: 'freizeit',
-    kurz: 'Fischbrötchen am Steg. Gäste mögen das, der Ruf steigt.',
+    kurz: 'Fischbrötchen am Steg. Gäste, die Räucherfisch wollen, sind zufrieden.',
     lage: { x: -228, y: -21, dreh: 0 }, radius: 7,
     stufen: [
       { name: 'Räucherkate' },
@@ -120,7 +121,7 @@ const TEXTE = [
   },
   {
     id: 'grillplatz', name: 'Grillplatz', gruppe: 'an-land',
-    kurz: 'Grill und Bänke am Strand. Abends sitzen die Crews zusammen. Bringt kein Geld, nur Ruf.',
+    kurz: 'Grill und Bänke am Strand. Abends sitzen die Crews zusammen. Bringt kein Geld, aber Gäste wünschen ihn sich.',
     lage: { x: -163, y: -7, dreh: 0 }, radius: 7,
     stufen: [
       { name: 'Grillplatz' },

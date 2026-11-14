@@ -101,6 +101,8 @@ export function erstelleRegeln(katalog = SERVICES) {
       for (const f of w.freischalten ?? []) if (!e.freischalten.includes(f)) e.freischalten.push(f);
     }
     e.ruf = Math.min(e.ruf, RUF_BONUS_MAX);
+    // Gebaute Angebote mit Stufe: erfüllen Wünsche der Gäste (sim.js offerWishMet, P19 C3)
+    e.angebote = { ...z.gebaut };
     e.sturmschutz = Math.min(e.sturmschutz, STURMSCHUTZ_MAX);
     for (const k of Object.keys(e.gaeste)) e.gaeste[k] = runde(e.gaeste[k], 3);
     return e;

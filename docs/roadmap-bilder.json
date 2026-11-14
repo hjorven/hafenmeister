@@ -429,6 +429,17 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "tempo/tempo-handy.png"
+  },
+  {
+   "datei": "p66-pr262-zonen-und-seewege.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Zonen des Geländes und Seewege für die Wegsuche der Boote",
+   "pr": 262,
+   "geraet": "karte",
+   "datum": "2026-11-14",
+   "quelle": "gelaende/vorschau/zonen/zonen-und-seewege.png"
   }
  ]
 }
