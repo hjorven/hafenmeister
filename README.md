@@ -48,13 +48,13 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 **Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
 
 <table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P24"><img src="web/roadmap/bilder/p24-pr281-pc-sturm-angekuendigt.jpg" alt="Sturm angekündigt, Boote am offenen Stegkopf" width="100%"></a><br><sub>P24 · Sturm angekündigt, Boote am offenen Stegkopf · PR 281</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P55"><img src="web/roadmap/bilder/p55-pr275-handy-schlange-versorgung.jpg" alt="Schlange vor der Versorgung, wenn sie knapp ist" width="100%"></a><br><sub>P55 · Schlange vor der Versorgung, wenn sie knapp ist · PR 275</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P19"><img src="web/roadmap/bilder/p19-pr244-pc-wuensche-bootsart.jpg" alt="Wünsche je Bootsart auf der Ankunftskarte" width="100%"></a><br><sub>P19 · Wünsche je Bootsart auf der Ankunftskarte · PR 244</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P55"><img src="web/roadmap/bilder/p55-pr269-pc-geduldsring.jpg" alt="Geduldsring und Wünsche an der Boje" width="100%"></a><br><sub>P55 · Geduldsring und Wünsche an der Boje · PR 269</sub></td>
 </tr><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P55"><img src="web/roadmap/bilder/p55-pr269-pc-geduldsring.jpg" alt="Geduldsring und Wünsche an der Boje" width="100%"></a><br><sub>P55 · Geduldsring und Wünsche an der Boje · PR 269</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P21"><img src="web/roadmap/bilder/p21-pr274-handy-steckbrief.jpg" alt="Logbuch: Steckbrief eines Bootes" width="100%"></a><br><sub>P21 · Logbuch: Steckbrief eines Bootes · PR 274</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P66"><img src="web/roadmap/bilder/p66-pr262-zonen-und-seewege.jpg" alt="Zonen des Geländes und Seewege für die Wegsuche der Boote" width="100%"></a><br><sub>P66 · Zonen des Geländes und Seewege für die Wegsuche der Boote · PR 262</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P07"><img src="web/roadmap/bilder/p07-pr257-handy-weiter-mit-3x.jpg" alt="Tempo bleibt: Knopf &quot;Weiter mit 3x&quot; mit Grund" width="100%"></a><br><sub>P07 · Tempo bleibt: Knopf &quot;Weiter mit 3x&quot; mit Grund · PR 257</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (2 von 5 erledigt)</summary>
@@ -113,7 +113,7 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 | Paket | Titel | Status | PRs |
 |---|---|---|---|
 | [P23](https://hjorven.github.io/hafenmeister/roadmap/#paket=P23) | Services mit eigener Wirkung | offen |  |
-| [P24](https://hjorven.github.io/hafenmeister/roadmap/#paket=P24) | Ereignisse zum Vorbereiten und neue Ereignisse | teilweise |  |
+| [P24](https://hjorven.github.io/hafenmeister/roadmap/#paket=P24) | Ereignisse zum Vorbereiten und neue Ereignisse | teilweise | [#281](https://github.com/hjorven/hafenmeister/pull/281) |
 | [P25](https://hjorven.github.io/hafenmeister/roadmap/#paket=P25) | Stammgäste mit Wirkung und Gästepost | offen |  |
 | [P26](https://hjorven.github.io/hafenmeister/roadmap/#paket=P26) | Überraschende Gesten fertig bauen | offen |  |
 | [P27](https://hjorven.github.io/hafenmeister/roadmap/#paket=P27) | Päckchen liegen bei vollem Hafen | offen |  |

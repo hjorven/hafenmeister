@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "387c015"
+  "commit": "d09e3c7"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -603,9 +603,11 @@
    "id": "P24",
    "titel": "Ereignisse zum Vorbereiten und neue Ereignisse",
    "inhalt": "Vorwarnung mit Handlungsmöglichkeit, F17",
-   "thread": "bestehend: \"Ereignisse Sturm und Regatta einbauen\"",
+   "thread": "Teil 1 erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend), Teil 2 offen; bestehend: \"Ereignisse Sturm und Regatta einbauen\"",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    281
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F17",
@@ -617,7 +619,10 @@
     "G9"
    ],
    "status": "teilweise",
-   "bilder": []
+   "bilder": [
+    47,
+    48
+   ]
   },
   {
    "id": "P25",
@@ -5016,9 +5021,34 @@
    "datum": "2026-11-14",
    "quelle": "p55/handy-3-schlange.png",
    "nr": 46
+  },
+  {
+   "datei": "p24-pr281-handy-sturmklar.jpg",
+   "pakete": [
+    "P24"
+   ],
+   "titel": "Morgen Sturm: Gäste sturmklar verholen",
+   "pr": 281,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "ereignisse/vorbereiten-handy-1-sturm.png",
+   "nr": 47
+  },
+  {
+   "datei": "p24-pr281-pc-sturm-angekuendigt.jpg",
+   "pakete": [
+    "P24"
+   ],
+   "titel": "Sturm angekündigt, Boote am offenen Stegkopf",
+   "pr": 281,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "ereignisse/vorbereiten-pc-1-sturm-angekuendigt.png",
+   "nr": 48
   }
  ],
  "neueBilder": [
+  48,
   46,
   45,
   43,
@@ -5026,10 +5056,29 @@
   39,
   38,
   37,
-  36,
-  34
+  36
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: P24 Teil 1 (PR 281) eingetragen, Bilder zum Sturm",
+   "pr": 286,
+   "pakete": [
+    "P24"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Auszeichnung: Satz im Gästebuch ohne falschen Fall (\"dann heißt der Hafen ...\")",
+   "pr": 291,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Fehler aus Jorvens Feature-Test (14.11.) behoben",
+   "pr": 290,
+   "pakete": []
+  },
   {
    "datum": "2026-11-14",
    "titel": "Balancing: große Boote kommen nach Platzangebot (A10)",
@@ -5102,28 +5151,6 @@
    "pr": 279,
    "pakete": [
     "P19"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tagesziel klappt nicht mehr auf, \"Als Nächstes\" eine Zeile und nur kurz",
-   "pr": 277,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P55 L2: Schlange vor der Versorgung, wenn sie knapp oder voll ist",
-   "pr": 275,
-   "pakete": [
-    "P55"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tempo läuft durch: keine automatische Bremsung mehr",
-   "pr": 278,
-   "pakete": [
-    "P07"
    ]
   }
  ]
