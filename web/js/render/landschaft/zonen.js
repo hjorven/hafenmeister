@@ -4,7 +4,7 @@
 // Beschreibung: docs/landschaft.md, Abschnitt "Zonen und Seezugänge".
 //
 // Planeinheiten wie web/js/data/harbor.js (1 = 0,62 m, x Osten, y Norden). Welt: x = px * 0,62, z = -py * 0,62.
-import { punkt, warteplaetze, PLAN_M, AUSSEN } from './gelaende.js';
+import { punkt, warteplaetze, fahrrinne, PLAN_M, AUSSEN } from './gelaende.js';
 import { festePunkte } from './karte.js';
 import { region as regionNach } from './regionen.js';
 import { natur } from './formen.js';
@@ -223,29 +223,33 @@ function seezugaengeBei(stufe, region, o) {
     const mitte = -punkt(px, py, stufe, reg).h;
     if (mitte < tiefeM) continue;
     // weit draußen in klar tiefem Wasser, fern von jeder Sandbank, gibt es zwischen den Rasterpunkten nichts Flaches
-    if (q && q.d < -80 && q.plate < -30 && mitte >= tiefeM + 1.5) { tief[k] = 1; continue; }
+    if (q && q.d < -80 && q.plate < -30 && mitte >= tiefeM + 1.5) {
+      // vier Proben in den Ecken genügen (der Rand einer ausgebaggerten Rinne in flachem Wasser fällt so auf)
+      const t = (a, b) => -punkt(px + a * GROB / 2, py + b * GROB / 2, stufe, reg).h >= tiefeM;
+      if (t(-1, -1) && t(1, -1) && t(-1, 1) && t(1, 1)) tief[k] = 1;
+      continue;
+    }
     if (hafen) {
       let ok = true;
       for (let b = -2; b <= 2 && ok; b++) for (let a = -2; a <= 2 && ok; a++) {
-        if ((a || b) && -punkt(px + a * GROB / 4, py + b * GROB / 4, stufe, reg).h < Math.min(tiefeM, 1.5)) ok = false;
+        if ((a || b) && -punkt(px + a * GROB / 4, py + b * GROB / 4, stufe, reg).h < tiefeM) ok = false;
       }
       if (!ok) continue;
     } else {
       // Sandbänke und Platen zwischen den Rasterpunkten
       let ok = true;
       for (let b = -1; b <= 1 && ok; b++) for (let a = -1; a <= 1 && ok; a++) {
-        if ((a || b) && -punkt(px + a * GROB / 3, py + b * GROB / 3, stufe, reg).h < Math.min(tiefeM, 1.5)) ok = false;
+        if ((a || b) && -punkt(px + a * GROB / 3, py + b * GROB / 3, stufe, reg).h < tiefeM) ok = false;
       }
       if (!ok) continue;
     }
     tief[k] = 1;
   }
-  // befahrbar: die Zelle und ihre acht Nachbarn sind tief (gut 12 m Abstand zu Land und Flachem)
-  const frei = new Uint8Array(n);
-  for (let j = 1; j < ny - 1; j++) for (let i = 1; i < nx - 1; i++) {
-    const k = j * nx + i;
-    frei[k] = tief[k] && tief[k - 1] && tief[k + 1] && tief[k - nx] && tief[k + nx] && tief[k - nx - 1] && tief[k - nx + 1] && tief[k + nx - 1] && tief[k + nx + 1] ? 1 : 0;
-  }
+  // befahrbar: tiefe Zellen. Der Abstand zu Land und Flachem steckt schon in "tief" (Ufersaum, feinere Proben);
+  // ein Rand von Nachbarzellen dazu würde schmale Seegatts sperren.
+  const frei = tief;
+  for (let i = 0; i < nx; i++) { frei[i] = 0; frei[(ny - 1) * nx + i] = 0; }
+  for (let j = 0; j < ny; j++) { frei[j * nx] = 0; frei[j * nx + nx - 1] = 0; }
   // Ziel: vor der Einfahrt; liegt die Zelle nicht frei, die nächste freie in der Nähe
   const ziel = festePunkte(stufe).einfahrt.aussen;
   const kBei = (px, py) => Math.round((py - gy0) / GROB) * nx + Math.round((px - gx0) / GROB);
@@ -364,4 +368,10 @@ function seezugaengeBei(stufe, region, o) {
   const zaehler = {};
   for (const z of out) { zaehler[z.richtung] = (zaehler[z.richtung] ?? 0) + 1; z.id = `see-${z.richtung.toLowerCase()}-${zaehler[z.richtung]}`; }
   return out;
+}
+
+/** Fahrrinne (gelaende.js fahrrinne()) in Weltmetern: { punkte: [{x, z}], halbM, tiefeM } oder null. */
+export function fahrrinneWelt() {
+  const R = fahrrinne();
+  return R ? { punkte: R.punkte.map(([px, py]) => ({ x: +(px * PLAN_M).toFixed(1), z: +(-py * PLAN_M).toFixed(1) })), halbM: +(R.halb * PLAN_M).toFixed(1), tiefeM: R.tiefe } : null;
 }

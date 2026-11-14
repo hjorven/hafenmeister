@@ -12,7 +12,7 @@ const TOUCH = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)'
 export const KARTEN = [
   {
     bild: 'schiff', titel: 'Boote warten an den Bojen',
-    text: 'Gastboote kommen übers Wasser und warten an den gelben Bojen. Nach einer Weile fahren sie selbst in eine freie Box; passt keine, fahren sie weiter.',
+    text: 'Gastboote kommen übers Wasser und warten an den gelben Bojen. Nach einer Weile fahren sie selbst in eine freie Box; passt keine, fahren sie weiter. Der Ring über dem Boot zeigt seine Geduld, Pfeile am Rand zeigen Boote außerhalb des Bildes.',
   },
   {
     bild: 'pfeil', titel: 'Boot einweisen',
@@ -34,7 +34,7 @@ export const KARTEN = [
   },
   {
     bild: 'bauen', titel: 'Bauen',
-    text: '„Bauen“ hält die Zeit an und zeigt erst eine Vorschau. Gekauft wird mit „Bauen für …“. Neue Liegeplätze, Anlagen für die Gäste und die nächste Ausbaustufe.',
+    text: '„Bauen“ hält die Zeit an und zeigt erst eine Vorschau. Gekauft wird mit „Bauen für …“. Neue Liegeplätze, Anlagen für die Gäste und die nächste Ausbaustufe. Das Schild über WC, Dusche und Kiosk zählt, wie viele Boote sie heute versorgt haben.',
   },
   {
     bild: 'ziele', titel: 'Tagesziele und Ausbau',

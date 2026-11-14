@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "5dee9f3"
+  "commit": "e2192e1"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1049,9 +1049,11 @@
    "id": "P55",
    "titel": "Versteckte Regeln im Hafen sichtbar machen",
    "inhalt": "A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen \"hier ist etwas zu tun\"",
-   "thread": "neu",
+   "thread": "erledigt bis auf L2 (PR 269, docs/hafenzeichen.md)",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    269
+   ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
     "A4",
@@ -2282,8 +2284,8 @@
   {
    "code": "A4",
    "text": "Geduld sichtbar: Ring an der Boje, im letzten Drittel Flagge oder kurzes Tuten",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P55: Ring über dem Boot, rot und blinkend im letzten Drittel, kurzes Tuten, ruht abends; docs/hafenzeichen.md)",
    "pakete": [
     "P55"
    ],
@@ -2369,8 +2371,8 @@
   {
    "code": "B1",
    "text": "Auslastung an jedem Versorgungsgebäude (\"14 von 20\"), Schlange vor der Dusche",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "teilweise",
+   "statusText": "Schild erledigt (P55, game.sim.auslastung()), Schlange offen (L2)",
    "pakete": [
     "P55"
    ],
@@ -2566,8 +2568,8 @@
   {
    "code": "C7",
    "text": "Warnen, bevor es Anker kostet (Gebäude blinkt bei fast ausgebuchter Dusche)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P55: Schild knapp orange und blinkend, voll rot, Tipp beim ersten Mal)",
    "pakete": [
     "P55"
    ],
@@ -3464,7 +3466,7 @@
    "code": "L2",
    "text": "Figuren als Anzeige (Schlange vor der Dusche, volle Tische)",
    "status": "offen",
-   "statusText": "offen",
+   "statusText": "offen (braucht render/people.js, Thread Menschen; Auslastung zeigt schon das Schild)",
    "pakete": [
     "P55"
    ],
@@ -3733,8 +3735,8 @@
   {
    "code": "Bed P1",
    "text": "Die fünf fehlenden Anzeigen (A4, B1, B2, B11, C1)",
-   "status": "teilweise",
-   "statusText": "B11 und B2 erledigt, Rest offen",
+   "status": "erledigt",
+   "statusText": "B11, B2, A4 und B1 erledigt (P55), C1 siehe P14",
    "pakete": [
     "P55",
     "P11",
@@ -3759,12 +3761,14 @@
   {
    "code": "Bed P3",
    "text": "Zeiger am Bildrand für wartende Boote",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 269: Zeiger mit Geduldsring, gebündelt, Antippen fährt hin)",
    "pakete": [
     "P55"
    ],
-   "prs": [],
+   "prs": [
+    269
+   ],
    "abschnitt": "P Bedienung (hier \"Bed\")"
   },
   {
@@ -3840,8 +3844,8 @@
   {
    "code": "Bed P10",
    "text": "Zeichen am Rand für \"hier ist etwas zu tun\"",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt für wartende Boote (P55); Münzen und Dauerlieger bewusst ohne Randzeichen",
    "pakete": [
     "P55"
    ],
@@ -4417,11 +4421,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 123,
+  "erledigt": 128,
   "teilweise": 8,
   "arbeit": 0,
   "frage": 1,
-  "offen": 87,
+  "offen": 82,
   "entfaellt": 0,
   "alle": 219
  },

@@ -127,13 +127,18 @@ export const TEXTE = {
 export const HINWEISE = {
   geduld: {
     titel: 'Ein Boot ist weitergefahren',
-    text: 'Es hat zu lange an der Boje gewartet. Weise wartende Boote schneller zu oder bau mehr passende Plätze.',
-    kurz: 'Es hat zu lange gewartet. Schneller zuweisen oder mehr Plätze bauen.',
+    text: 'Es hat zu lange an der Boje gewartet. Der Ring über einem wartenden Boot zeigt seine Geduld, rot heißt: gleich fährt es. Weise wartende Boote schneller zu oder bau mehr passende Plätze.',
+    kurz: 'Es hat zu lange gewartet. Der Ring über dem Boot zeigt die Geduld.',
   },
   voll: {
     titel: 'Kein Platz an den Bojen',
     text: 'Alle Wartebojen waren besetzt, darum ist ein Boot gleich weitergefahren. Mehr Liegeplätze machen die Bojen schneller frei.',
     kurz: 'Alle Bojen waren besetzt. Mehr Liegeplätze helfen.',
+  },
+  versorgung: {
+    titel: 'Versorgung für heute voll',
+    text: 'Das Schild über dem Gebäude zählt, wie viele Boote heute versorgt wurden. Ist es rot, bekommen weitere Gäste diesen Wunsch nicht mehr erfüllt. Morgen zählt es neu, ein Ausbau unter „Bauen“ versorgt mehr Boote.',
+    kurz: 'Rotes Schild: für heute voll. Ein Ausbau versorgt mehr Boote.',
   },
   stufe: {
     titel: 'Der Hafen kann wachsen',
@@ -152,6 +157,7 @@ export function hinweisFuer(name, d = {}) {
   if (name === 'sim:turnedAway') return d.reason === 'patience' ? 'geduld' : d.reason === 'queueFull' ? 'voll' : null;
   if (name === 'sim:stageReady') return 'stufe';
   if (name === 'stammgast:neu') return 'stammgast';
+  if (name === 'hafenzeichen:voll') return 'versorgung';
   return null;
 }
 
@@ -643,7 +649,7 @@ export async function init(game) {
   // und höchstens 250 ms je Takt: Ruckelt das Bild (schwaches Gerät, Tab im Hintergrund), verfällt er nicht ungesehen.
   let hinweisRest = 0;
   let hinweisTaktZuletzt = 0;
-  for (const name of ['sim:turnedAway', 'sim:stageReady', 'stammgast:neu']) {
+  for (const name of ['sim:turnedAway', 'sim:stageReady', 'stammgast:neu', 'hafenzeichen:voll']) {
     game.on(name, (d) => { const e = st() && einstiegState(st()); if (e) merkeHinweis(e, hinweisFuer(name, d), offeneHinweise); });
   }
   function schliesseHinweis() {
