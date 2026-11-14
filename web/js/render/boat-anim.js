@@ -798,9 +798,13 @@ class WaitTask {
 
 // Ankunft spaeter: das Boot ist bis dahin unsichtbar (zaehlt im Verkehr nicht) und erscheint erst,
 // wenn am Startpunkt kein anderes Boot liegt oder faehrt (hoechstens 60 s zusaetzlich).
+// Das Verstecken ist ein Zustand des Boots (b.versteckt), nicht nur dieser Aufgabe: bricht ein neuer
+// Befehl (Zuweisen, Laden, Ablegen) das Warten ab, wartet das Boot im neuen Ablauf weiter unsichtbar
+// auf freien Raum (begin) oder wird sofort wieder sichtbar (cancel, moorAt). Sonst lag es fuer immer
+// unsichtbar mit sichtbaren Leinen in seiner Box (Fund Jorven 14.11.).
 class EinfahrtWarten {
   constructor(sec) { this.sec = sec; }
-  start(b) { this.t = 0; b.model.visible = false; }
+  start(b) { this.t = 0; b.verstecken(true); }
   step(b, dt) {
     b.speed = 0;
     this.t += dt;
@@ -812,7 +816,7 @@ class EinfahrtWarten {
         if ((o.x - b.x) ** 2 + (o.z - b.z) ** 2 < r * r) return false;
       }
     }
-    b.model.visible = true;
+    b.verstecken(false);
     return true;
   }
 }
@@ -962,6 +966,7 @@ class BoatAnim {
     this.task = null;
     this.berth = null;
     this.moored = false;
+    this.versteckt = false;   // wartet unsichtbar auf die Einfahrt (EinfahrtWarten)
     this.lines = [];
 
     this.sail = opts.sails ?? model.userData.sailsUp ?? (info.kind === 'sail' && this.parts.sails.length ? 1 : 0);
@@ -1169,7 +1174,15 @@ class BoatAnim {
     this.lineGeo.dispose();
   }
 
+  /** Unsichtbar bis zur Einfahrt (EinfahrtWarten). Leinen, Kielwasser und Schaum folgen dem Modell. */
+  verstecken(an) {
+    if (!an && !this.versteckt) return;
+    this.versteckt = !!an;
+    this.model.visible = !an;
+  }
+
   cancel() {
+    this.verstecken(false);
     this.mgr.engstellen.releaseAll(this);
     this.wartetVorEngstelle = false;
     this.tasks.length = 0;
@@ -1187,6 +1200,9 @@ class BoatAnim {
     this.tasks.length = 0;
     this.task = null;
     this.finish(false);
+    // Wartete das Boot noch unsichtbar auf seine Einfahrt: im neuen Ablauf erst auftauchen, wenn am
+    // Startpunkt Platz ist (ohne weitere Wartezeit)
+    if (this.versteckt) this.push(new EinfahrtWarten(0));
     return new Promise((res) => { this._resolve = res; });
   }
   finish(ok) { const r = this._resolve; this._resolve = null; if (r) r(ok); }
@@ -1615,7 +1631,8 @@ class BoatAnim {
 
     this.applyParts(step, t, lee, rel);
     this.applyWake(t, ch, sh);
-    if (this.lines.length) {
+    // Leinen gibt es nur an einem sichtbaren Boot (nie eine Leine ohne Boot)
+    if (this.lines.length && m.visible !== false) {
       // auf Handys werden die Leinen liegender Boote nur jedes zweite Bild nachgefuehrt
       const busy = !this.moored || this.state !== 'moored';
       if (busy || !mgr.lowPower || ((mgr.frame + (this.ph[0] * 10 | 0)) & 1) === 0) this.applyLines();
@@ -1696,7 +1713,7 @@ class BoatAnim {
   applyWake(t, ch, sh) {
     const v = this.speed;
     const L = this.info.length, B = this.info.beam;
-    const show = v > 0.12 && !this.reverse && !this.parts.ownWake;
+    const show = v > 0.12 && !this.reverse && !this.parts.ownWake && this.model.visible !== false;
     this.wake.visible = show;
     if (show) {
       const k = clamp(v / this.cfg.cruise, 0, 1.4);
@@ -1708,7 +1725,7 @@ class BoatAnim {
       this.wake.scale.set(len, 1, wid * (0.95 + Math.sin(t * 2.3 + this.ph[0]) * 0.05));
     }
     if (this.foam) {
-      const on = this.thrusters > 0.05;
+      const on = this.thrusters > 0.05 && this.model.visible !== false;
       for (let i = 0; i < 2; i++) {
         const f = this.foam[i];
         f.visible = on;
