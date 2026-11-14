@@ -23,11 +23,12 @@ import { random, randomRange } from '../random.js';
 import { ECONOMY } from '../data/economy.js';
 import { heimathaefen } from '../data/bootsnamen.js';
 import { regelnBereit } from './regeln-bereit.js';
+import { wunschKurz } from '../data/wuensche-texte.js';
 
 export const ZAHLEN = ECONOMY.tagesziele;
 export const SCHWEREN = ['leicht', 'mittel', 'schwer'];
 const SCHWERE_NAME = { leicht: 'Leicht', mittel: 'Mittel', schwer: 'Schwer' };
-const WUNSCH_NAME = { wc: 'WC', dusche: 'Dusche', essen: 'Essen', strom: 'Strom', diesel: 'Diesel' };
+const WUNSCH_NAME = new Proxy({}, { get: (_, k) => wunschKurz(k) });   // alle Wünsche, auch Angebote (P19)
 
 /** Deko-Stücke für den Hafen, in der Reihenfolge, in der sie verdient werden. */
 export const DEKO = [
@@ -360,6 +361,19 @@ export function belohnungText(b) {
   }
 }
 
+/** Kurzform für die Wahlkarten (schmale Spalten am Handy). */
+export function belohnungKurz(b) {
+  if (!b) return '';
+  switch (b.art) {
+    case 'geld': return `${b.wert} €`;
+    case 'anker': return 'Halber Anker für alle';
+    case 'gutschein': return `${b.prozent} % Bau-Gutschein`;
+    case 'gast': return `Seltener Gast: ${b.name}`;
+    case 'deko': return `Deko: ${b.name}`;
+    default: return '';
+  }
+}
+
 /**
  * Belohnung gutschreiben. Gibt den Geldbetrag zurück, den der Aufrufer bucht (sim.addIncome).
  * Alles andere ändert den Spielstand direkt.
@@ -570,15 +584,25 @@ const CSS = `
 .hm-tafel li { padding: 4px 0; }
 .hm-tafel .tz-kopf { font-weight: 600; }
 .hm-tafel .tz-klein { display: block; font-weight: 400; font-size: max(13px, .86em); opacity: .75; margin-top: 2px; }
-.hm-tafel .tz-karte { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; }
-.hm-tafel .tz-schwere { grid-column: 1 / -1; font-size: max(12px, .8em); letter-spacing: .04em; text-transform: uppercase; opacity: .7; }
 .hm-tafel .tz-schwere.schwer { color: #b3472f; opacity: 1; }
 .hm-tafel .tz-schwere.mittel { color: #8a6a12; opacity: 1; }
 .hm-tafel .tz-text { font-weight: 600; }
-.hm-tafel .tz-lohn { grid-column: 1; font-weight: 400; font-size: .9em; color: #2d6f80; }
-.hm-tafel .tz-nehmen { grid-column: 2; grid-row: 2 / span 2; min-height: 40px; min-width: 76px; padding: 0 10px; cursor: pointer; font: inherit; }
+.hm-tafel .tz-schwere { font-size: max(11px, .78em); letter-spacing: .04em; text-transform: uppercase; opacity: .7; }
+.hm-tafel .tz-lohn { font-weight: 400; font-size: .88em; color: #2d6f80; }
+/* Kartenwahl: drei Karten nebeneinander, jede Karte ist ein Knopf (Tipp nimmt das Ziel) */
+.hm-tafel > ul.tz-wahl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px;
+  box-sizing: border-box; width: min(470px, calc(100vw - 24px)); max-width: none; padding: 6px; }
+.hm-tafel > ul.tz-wahl > li { grid-column: 1 / -1; }
+.hm-tafel > ul.tz-wahl > li.tz-karte { grid-column: auto; display: flex; padding: 0; border-top: 0; }
+.hm-tafel .tz-nehmen { display: flex; flex-direction: column; align-items: stretch; gap: 2px; width: 100%; min-width: 0;
+  min-height: 0; margin: 0; padding: 6px 6px 6px; border: 0; border-radius: 6px; background: #fff; color: inherit;
+  text-align: left; cursor: pointer; font: inherit; font-weight: 400; line-height: 1.2; }
+.hm-tafel .tz-nehmen .tz-text { flex: 1 1 auto; overflow-wrap: anywhere; hyphens: auto; }
+.hm-tafel .tz-nehmen-wort { margin-top: 4px; padding: 3px 0; text-align: center; background: #23897d; color: #fff; font-weight: 600; }
+.hm-tafel .tz-woche-kurz { display: flex; gap: 8px; align-items: baseline; }
+.hm-tafel .tz-woche-kurz > .tz-woche-text { flex: 1 1 auto; min-width: 0; }
 .hm-tafel .tz-woche-kurz { margin: 0; }
-.hm-tafel .tz-woche-kurz .tz-stand { float: right; margin-left: 8px; font-variant-numeric: tabular-nums; }
+.hm-tafel .tz-woche-kurz .tz-stand { order: 2; flex: none; font-variant-numeric: tabular-nums; }
 .hm-tafel .tz-ziel .tz-stand { float: right; font-variant-numeric: tabular-nums; opacity: .8; margin-left: 8px; }
 .hm-tafel li.erledigt .tz-text { color: #3f8f55; }
 .hm-tafel .tz-balken { height: 6px; margin-top: 4px; background: rgba(36,54,74,.12); }
@@ -588,8 +612,6 @@ const CSS = `
   font-weight: 600; font-size: .92em; pointer-events: none; }
 .hm-tafel.jubel > button { animation: hm-tafel-jubel .8s ease-out; }
 @keyframes hm-tafel-jubel { 0% { transform: scale(1); } 30% { transform: scale(1.15); background: #f2c14e; } 100% { transform: scale(1); } }
-.hm-neu #hm-seite .hm-tafel .tz-nehmen { width: auto; margin: 0; min-height: 40px; padding: 2px 8px; font-size: var(--hm-schrift); }
-.hm-neu #hm-seite .hm-tafel li.tz-karte { padding: 3px 0; gap: 0 8px; }
 .hm-neu #hm-seite .hm-tafel li.tz-klein { padding: 3px 0; margin: 0; }
 .hm-neu .hm-tafel .tz-notiz { border-image-source: var(--rahmen-gold); background: none; padding: 6px 10px; }
 .hm-neu .hm-tafel .tz-balken { height: calc(var(--hm-px, 2px) * 3); background: var(--hm-mulde); box-shadow: inset 0 0 0 var(--hm-px, 2px) rgba(36,54,74,.3); }
@@ -597,6 +619,17 @@ const CSS = `
 .hm-neu .hm-tafel li.erledigt .tz-balken > i, .hm-neu .hm-tafel li.erledigt .tz-text { background: none; color: var(--hm-meer); }
 .hm-neu .hm-tafel li.erledigt .tz-balken > i { background: var(--hm-meer); }
 .hm-neu .hm-tafel .tz-notiz { font-family: var(--hm-pixel); }
+.hm-neu #hm-seite .hm-tafel > ul.tz-wahl { padding: 6px; font-size: calc(var(--hm-s) - 1px);
+  width: min(470px, calc(100vw - 2 * var(--hm-rand) - var(--hm-safe-left) - var(--hm-safe-right))); max-height: none; overflow: visible; }
+.hm-neu #hm-seite .hm-tafel > ul.tz-wahl > li { border-top: 0; }
+.hm-neu #hm-seite .hm-tafel > ul.tz-wahl > li.tz-klein { padding: 0 2px 2px; }
+.hm-neu .hm-tafel .tz-nehmen.hm-knopf { min-height: 0; padding: 6px 7px 7px; font-size: inherit; font-weight: 400; line-height: 1.2;
+  border-image-source: var(--rahmen-papier); color: var(--hm-tinte); }
+.hm-neu .hm-tafel .tz-nehmen.hm-knopf:hover { border-image-source: var(--rahmen-gold); }
+.hm-neu .hm-tafel .tz-nehmen .tz-text { font-weight: 600; }
+.hm-neu .hm-tafel .tz-nehmen .tz-lohn { color: var(--hm-meer); }
+.hm-neu .hm-tafel .tz-nehmen-wort { background: none; border-style: solid; border-color: transparent; border-width: var(--hm-rahmen-breite);
+  border-image: var(--rahmen-meer) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch; padding: 1px 0 2px; }
 .hm-neu .hm-tafel > button.tz-neu { border-image-source: var(--rahmen-gold); }
 @media (prefers-reduced-motion: reduce) { .hm-tafel.jubel > button { animation: none; } }
 body.hm.foto .hm-tafel { display: none; }
@@ -609,22 +642,25 @@ body.ta-offen .hm-tafel { visibility: hidden; }
   .hm-neu #hm-seite .hm-tafel > ul.tz-wahl > li.tz-kopf-kurz { display: none; }
   .hm-neu #hm-seite:has(.hm-tafel > ul.tz-wahl:not([hidden])) > #hm-ziel { display: none !important; }
 }
-/* Handy quer: Kartenwahl als Blatt rechts neben der linken Spalte, drei Karten nebeneinander,
+/* Handy hochkant: Wochenziel in einer Zeile (voller Text im Titel und in der Tafel nach der Wahl) */
+@media (max-width: 599px) {
+  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl > li.tz-woche-kurz > .tz-woche-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl { gap: 4px; padding: 4px; }
+  .hm-neu .hm-tafel .tz-nehmen.hm-knopf { padding: 4px 6px 5px; }
+  .hm-neu .hm-tafel .tz-nehmen-wort { margin-top: 2px; padding: 0 0 1px; font-size: calc(var(--hm-s) - 2px); }
+}
+/* Handy quer: Kartenwahl als Blatt rechts neben der linken Spalte,
    die Zeitsteuerung unten links bleibt frei und sichtbar */
 @media (max-height: 499px) and (orientation: landscape) {
   .hm-neu #hm-seite .hm-tafel > ul.tz-wahl {
-    position: fixed; z-index: 16; width: auto; max-width: 640px;
+    position: fixed; z-index: 16; width: auto; max-width: 560px;
     left: calc(var(--hm-links) + min(280px, 40vw) + 8px);
     right: calc(var(--hm-rand) + var(--hm-safe-right) + var(--hm-bauen) + 16px);   /* Bauen unten rechts bleibt frei */
     top: calc(var(--hm-oben) + var(--hm-knopf) + 8px);
     max-height: calc(100dvh - var(--hm-oben) - var(--hm-knopf) - var(--hm-bauen) - var(--hm-safe-bottom) - 28px);
-    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 10px; align-content: start;
+    align-content: start;
   }
-  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl > li.tz-klein { grid-column: 1 / -1; }
   .hm-neu #hm-seite .hm-tafel > ul.tz-wahl > li.tz-kopf-kurz { display: none; }
-  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl > li.tz-karte { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto auto; border-top: 0; }
-  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl .tz-nehmen { grid-column: 1; grid-row: auto; width: 100%; margin-top: 4px; min-height: 36px; }
-  .hm-neu #hm-seite .hm-tafel > ul.tz-wahl { padding-block: 4px 6px; }
   .hm-neu:has(#hm-seite .hm-tafel > ul.tz-wahl:not([hidden])) #hm-zeit { visibility: visible; }
 }
 `;
@@ -728,15 +764,20 @@ export async function init(game) {
     if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
   }
 
+  // Die ganze Karte ist der Knopf: ein Tipp nimmt das Ziel. Kurze Belohnung auf der Karte,
+  // der volle Text steht im Titel und in der Ansage.
   function karteLi(ziel, i) {
+    const lang = belohnungText(ziel.belohnung);
     const li = el('li', { class: 'tz-karte' },
+      el('button', {
+        type: 'button', class: `tz-nehmen hm-knopf ${ziel.schwere}`, title: lang,
+        'aria-label': `Nehmen: ${text(ziel)}. ${SCHWERE_NAME[ziel.schwere]}, Belohnung: ${lang}`,
+        onclick: (ev) => { ev.stopPropagation(); nimm(i); },
+      },
       el('span', { class: `tz-schwere ${ziel.schwere}`, text: SCHWERE_NAME[ziel.schwere] }),
       el('span', { class: 'tz-text', text: text(ziel) }),
-      el('span', { class: 'tz-lohn', text: belohnungText(ziel.belohnung) }),
-      el('button', {
-        type: 'button', class: 'tz-nehmen hm-knopf hm-primaer', 'aria-label': `Nehmen: ${text(ziel)}`,
-        onclick: (ev) => { ev.stopPropagation(); nimm(i); },
-      }, 'Nehmen'),
+      el('span', { class: 'tz-lohn', text: belohnungKurz(ziel.belohnung) }),
+      el('span', { class: 'tz-nehmen-wort', 'aria-hidden': 'true', text: 'Nehmen' })),
     );
     return li;
   }
@@ -772,8 +813,9 @@ export async function init(game) {
       // Kompakt, damit am Handy alles ohne Scrollen passt: Kopf, Wochenziel in einer Zeile, drei Karten
       zeilen.push(el('li', { class: 'tz-klein tz-kopf-kurz', text: 'Nimm ein Ziel. Es zählt nur, was du selbst tust.' }));
       if (z.woche) {
-        zeilen.push(el('li', { class: 'tz-klein tz-woche-kurz' },
-          el('span', { class: 'tz-stand', text: stand(z.woche) }), `Woche: ${wocheText(z.woche)}`));
+        zeilen.push(el('li', { class: 'tz-klein tz-woche-kurz', title: `Wochenziel: ${wocheText(z.woche)}` },
+          el('span', { class: 'tz-stand', text: stand(z.woche) }),
+          el('span', { class: 'tz-woche-text', text: `Woche: ${wocheText(z.woche)}` })));
       }
       z.karten.forEach((k, i) => zeilen.push(karteLi(k, i)));
       liste.classList.add('tz-wahl');

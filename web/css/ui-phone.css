@@ -39,6 +39,8 @@
     font-size: 14px;
   }
   .hm-neu .hm-status .stat { padding: 0 6px; font-size: calc(var(--hm-s) + 3px); }
+  /* "Weiter mit 3x" steht in der Zeitleiste ganz oben, sonst verdeckt ihn das Hinweisschild darüber */
+  .hm-neu .hm-tempo-zurueck { position: static; order: -1; justify-self: stretch; }
 }
 
 /* Hochkant: Kassieren über der unteren Reihe */

@@ -129,7 +129,9 @@ export function init(game) {
   zeit.append(el('div', { class: 'hm-zeit-kopf' }, day ?? el('span'), himmel), tempoLeiste);
   bottom.prepend(zeit);
 
-  function waehleTempo(speed) {
+  // intern: Das Spiel drosselt selbst (drossle), das gemerkte Tempo bleibt dann stehen.
+  function waehleTempo(speed, intern = false) {
+    if (!intern) vergiss();
     if (game.paused) game.setPaused?.(false);
     const vorher = game.speed || 1;
     game.speed = speed;
@@ -139,11 +141,52 @@ export function init(game) {
     game.emit('ui:vorspulen', { speed });
     zeigeTempo();
   }
-  // Tempo, das mitdenkt (roadmap Bed P4): Bei einem Sonderfall geht es zurück auf 1x, damit man ihn nicht verpasst.
-  // 8x läuft nur bis zum nächsten Boot an der Boje.
-  const zurueck = () => { if ((game.speed || 1) > 1 && !game.paused) waehleTempo(1); };
-  for (const ereignis of ['event:announce', 'event:start', 'sim:stageReady', 'sim:regionDone']) game.on(ereignis, zurueck);
-  game.on('sim:atBuoy', () => { if ((game.speed || 1) >= 8) zurueck(); });
+
+  // Tempo, das mitdenkt (roadmap Bed P4, docs/ui/oberflaeche.md): Das gewählte Tempo bleibt.
+  // Nur wenn gleich etwas zu tun ist, geht es auf 1x: ein Dauerlieger wartet auf seinen Platz,
+  // die Region ist geschafft, bei 8x das nächste Boot an der Boje. Dann merkt sich die Leiste das
+  // alte Tempo und zeigt darüber "Weiter mit 3x". Ist der Anlass erledigt (tempoZurueck), kehrt
+  // das Tempo von selbst zurück. Ankündigungen, Ereignisse und "Ausbau möglich" kommen jeden
+  // Morgen als Schild und bremsen nicht mehr (Jorven, 14.11.: 3x sprang jeden Morgen auf 1x).
+  let gemerkt = null;   // { speed, grund, timer }
+  const zurueckKnopf = el('button', { type: 'button', class: 'hm-knopf hm-tempo-zurueck', hidden: true });
+  const zurueckText = el('span', { class: 'hm-tempo-zurueck-text' });
+  const zurueckGrund = el('span', { class: 'hm-tempo-zurueck-grund' });
+  zurueckKnopf.append(zurueckText, zurueckGrund);
+  zurueckKnopf.addEventListener('click', () => { const s = gemerkt?.speed; vergiss(); if (s) waehleTempo(s); });
+  zeit.append(zurueckKnopf);
+  function vergiss() {
+    if (gemerkt) clearTimeout(gemerkt.timer);
+    gemerkt = null;
+    zurueckKnopf.hidden = true;
+  }
+  /** Spiel drosselt auf 1x. grund: kurzer Text. halten: Knopf bleibt, bis tempoZurueck(grund) kommt. */
+  function drossle(grund, { halten = false } = {}) {
+    const s = game.speed || 1;
+    if (s <= 1 || game.paused) return false;
+    const speed = gemerkt?.speed ?? s;
+    vergiss();
+    waehleTempo(1, true);
+    gemerkt = { speed, grund, timer: halten ? 0 : setTimeout(vergiss, 30000) };
+    zurueckKnopf.replaceChildren(zurueckText, zurueckGrund);
+    symbol(zurueckKnopf, speed >= 8 ? 'tempo3' : 'tempo2');
+    zurueckText.textContent = `Weiter mit ${speed}x`;
+    zurueckGrund.textContent = grund;
+    zurueckKnopf.setAttribute('aria-label', `Weiter mit ${speed}x (gebremst: ${grund})`);
+    zurueckKnopf.hidden = false;
+    return true;
+  }
+  /** Anlass erledigt: altes Tempo zurück, wenn der Spieler inzwischen nichts anderes gewählt hat. */
+  function tempoZurueck(grund) {
+    if (!gemerkt || (grund && gemerkt.grund !== grund)) return false;
+    const s = gemerkt.speed;
+    vergiss();
+    if ((game.speed || 1) !== 1 || game.paused) return false;
+    waehleTempo(s, true);
+    return true;
+  }
+  game.on('sim:regionDone', () => drossle('Region geschafft'));
+  game.on('sim:atBuoy', () => { if ((game.speed || 1) >= 8) drossle('Boot an der Boje'); });
 
   function zeigeTempo() {
     const s = game.speed || 1;
@@ -452,5 +495,5 @@ export function init(game) {
   plane();
   zeigeTempo();
 
-  game.oberflaeche = { ordnen, klappeZu, tempo: waehleTempo, menue: (auf) => menueAuf(auf !== false) };
+  game.oberflaeche = { ordnen, klappeZu, tempo: (speed) => waehleTempo(speed), drossle, tempoZurueck, menue: (auf) => menueAuf(auf !== false) };
 }

@@ -48,6 +48,9 @@ import { pixelBild } from '../ui/pixel-symbole.js';
 import { VORRANG } from '../ui/meldungen.js';
 import { ECONOMY } from '../data/economy.js';
 
+// Grund am Knopf "Weiter mit 3x", wenn ein früh zurückgekehrter Dauerlieger das Tempo bremst
+const TEMPO_GRUND = 'Dauerlieger wartet';
+
 // Zahlen aus data/economy.js (ECONOMY.dauerlieger); die Werte hier gelten nur, wo dort etwas fehlt.
 // Im Spiel kommen sie über rulesFromEconomy in ctx.rules.dauer (regeln(ctx)).
 export const DAUER = {
@@ -802,7 +805,7 @@ export async function init(game) {
     .filter(([, p]) => p.wartet && api.state.boats[p.gastId]).map(([platzId, p]) => ({ platzId, p }));
   function zeigeWartende() {
     const w = wartende();
-    if (!w.length) { if (hinweisArt === 'wartet') naechster(); return; }
+    if (!w.length) { game.oberflaeche?.tempoZurueck?.(TEMPO_GRUND); if (hinweisArt === 'wartet') naechster(); return; }
     clearTimeout(hinweisTimer);
     hinweisArt = 'wartet';
     const erster = w[0];
@@ -864,8 +867,8 @@ export async function init(game) {
     const p = dauerState(api.state).plaetze[e.berthId];
     const boot = p?.boot;
     if (boot) game.emit('dauer:einlaufen', { id: boot.id, platzId: e.berthId, warten: true, info: info(boot, e.berthId) });
-    // Beim Vorspulen bliebe kaum Zeit zum Umlegen: Tempo zurück auf normal
-    if ((game.speed ?? 1) > 1) game.oberflaeche?.tempo?.(1) ?? (game.speed = 1);
+    // Beim Vorspulen bliebe kaum Zeit zum Umlegen: kurz auf 1x, nach dem Umlegen zurück (zeigeWartende)
+    if ((game.speed ?? 1) > 1) game.oberflaeche?.drossle?.(TEMPO_GRUND, { halten: true }) ?? (game.speed = 1);
     zeigeWartende();
     game.emit('hinweis', { art: 'dauer-wartet', platz: e.berthId });
   });

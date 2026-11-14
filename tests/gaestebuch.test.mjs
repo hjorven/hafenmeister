@@ -24,14 +24,17 @@ function spiele(state, ctx, tage) {
   }
 }
 
-test('Gästebuch enthält genau die Noten, aus denen der Ruf besteht', () => {
+test('Gästebuch zeigt die letzten 20 Noten, der Ruf ist der Schnitt der letzten drei Tage', () => {
   const { ctx, state } = neu();
   spiele(state, ctx, 40);
   const e = G.buchState(state).eintraege;
-  assert.equal(e.length, ctx.rules.reputation.window);
-  assert.deepEqual(e.map((x) => x.note), [...state.ratings].reverse());
-  const schnitt = e.reduce((a, x) => a + x.note, 0) / e.length;
-  assert.ok(Math.abs(schnitt - sim.reputation(state)) < 1e-9);
+  assert.equal(e.length, G.GAESTEBUCH.maxEintraege);
+  assert.deepEqual(e.map((x) => x.note), state.ratings.slice(-G.GAESTEBUCH.maxEintraege).reverse());
+  const teil = sim.reputationRatings(state, ctx.rules);
+  assert.ok(teil.length >= ctx.rules.reputation.minCount);
+  const schnitt = teil.reduce((a, x) => a + x, 0) / teil.length;
+  assert.ok(Math.abs(schnitt - sim.reputation(state, ctx.rules)) < 1e-9);
+  assert.match(G.rufErklaerung(state), new RegExp(`gerade ${teil.length}\\)`));
 });
 
 test('jede Abreise erklärt ihre Note: fehlende Wünsche mit Nächten, Pluspunkte', () => {

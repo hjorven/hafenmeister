@@ -13,9 +13,11 @@
 // Die Logik läuft ohne Browser (tests/gaestebuch.test.mjs).
 
 import * as sim from '../sim.js';
+import { RULES } from '../data/rules.js';
+import { ANGEBOT_TEXTE } from '../data/wuensche-texte.js';
 
 export const GAESTEBUCH = {
-  maxEintraege: 20,     // wie das Ruf-Fenster (economy.js ruf.fenster): genau diese Noten machen den Ruf
+  maxEintraege: 20,     // so viele Bewertungen zeigt das Gästebuch (der Ruf zählt die letzten Tage, economy.js ruf.tage)
   maxVerlauf: 30,       // Tage im Ruf-Verlauf
   zufriedenAb: 4,       // ab dieser Note zufrieden (wie Stammgäste, features/stammgaeste.js)
   topGruende: 3,
@@ -37,6 +39,9 @@ export const GRUND = {
   abgewiesen: { text: 'keinen Platz bekommen',      lang: 'Keinen Liegeplatz bekommen',                sym: 'warten' },
 };
 
+// Wünsche an Angebote an Land (P19 C3): Texte aus data/wuensche-texte.js, Symbol wie der Wunsch
+for (const [k, t] of Object.entries(ANGEBOT_TEXTE)) GRUND[k] = { text: t.fehlt, lang: t.lang, sym: k };
+
 /** Was die Note hebt. */
 export const PLUS = {
   wuensche: 'alle Wünsche erfüllt',
@@ -45,10 +50,10 @@ export const PLUS = {
   sonder:   'besonderer Gast',
   passgenau: 'Box passt genau',
   vonHand:  'vom Hafenmeister eingewiesen',
-  bonus:    'Hafenangebote',
+  bonus:    'Fest im Hafen',
 };
 
-const WUNSCH_KEYS = ['wc', 'dusche', 'essen', 'strom', 'diesel'];
+const WUNSCH_KEYS = ['wc', 'dusche', 'essen', 'strom', 'diesel', ...Object.keys(ANGEBOT_TEXTE)];
 
 export function buchState(state) {
   state.modules ||= {};
@@ -168,6 +173,15 @@ export function zusammenfassung(state) {
   return { anzahl: liste.length, zufrieden: liste.filter(zufrieden).length, schnitt };
 }
 
+/** Satz unter dem Gästebuch: woraus der Ruf besteht (economy.js ruf.tage, ruf.mindestens). */
+export function rufErklaerung(state) {
+  const { days, minCount } = RULES.reputation;
+  const n = sim.reputationRatings(state).length;
+  const tage = days === 1 ? 'von heute' : `der letzten ${days} Tage`;
+  return `Dein Ruf ist der Schnitt aller Bewertungen ${tage}, mindestens der letzten ${minCount} (gerade ${n}). `
+    + 'Ab 4 Sternen kommen Gäste als Stammgast wieder, ein guter Ruf lockt mehr und größere Boote an.';
+}
+
 /** Ruf-Verlauf mit dem heutigen Stand am Ende: [{ tag, ruf, heute? }]. */
 export function verlauf(state) {
   const v = [...buchState(state).verlauf];
@@ -204,6 +218,8 @@ const SATZ = {
   komfort: ['Toller Liegeplatz am Fingersteg.', 'Der Platz war richtig bequem.'],
   stamm: (n) => `Schon unser ${n}. Besuch hier.`,
 };
+for (const [k, t] of Object.entries(ANGEBOT_TEXTE)) SATZ[k] = t.saetze;
+
 
 /** Ein Satz im Gästebuch, zum Beispiel "Eine warme Dusche hätte gutgetan." */
 export function satz(eintrag) {

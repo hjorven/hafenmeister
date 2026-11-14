@@ -45,9 +45,6 @@ function ladePlaywright() {
   throw new Error('Playwright fehlt: cd tests && npm ci');
 }
 const { chromium, devices } = ladePlaywright();
-const THREE_DIR = [path.join(REPO, 'tests', 'node_modules', 'three'), '/mnt/project-files/feature-tests/three/package']
-  .find((d) => fs.existsSync(path.join(d, 'build', 'three.module.js')));
-if (!THREE_DIR) throw new Error('three@0.187.0 fehlt: cd tests && npm ci');
 
 const GERAETE = {
   pc: { viewport: { width: 1440, height: 900 } },
@@ -154,9 +151,9 @@ const PROBE = () => {
   for (const b of bs) {
     const E = ecken(b, 0.85);
     const nl = E.filter(([x, z]) => !wasser(x, z)).length;
-    if (nl >= 2) out.land.push({ id: b.id, g: b.g, st: b.st + ':' + (b.a.task?.constructor?.name ?? '-'), n: nl, platz: b.platz, p: [b.x, b.z] });
+    if (nl >= 2) out.land.push({ id: b.id, g: b.g, st: b.st + ':' + (b.a.task?.constructor?.name ?? '-') + (b.a.reverse ? ':rueck' : '') + (Math.abs(b.a.lane ?? 0) > 0.3 ? ':lane' + b.a.lane.toFixed(1) : '') + (b.a.ghost > 0 ? ':durchlass' : '') + (b.a.zeitraffer ? ':zeitraffer' : '') + (b.a.task?.pivot ? ':dreht' : ''), n: nl, platz: b.platz, p: [b.x, b.z] });
     const ns = E.filter(([x, z]) => steg(x, z)).length;
-    if (ns >= 1 && !(b.st === 'moored' && ns === 1)) out.steg.push({ id: b.id, g: b.g, st: b.st, n: ns, platz: b.platz, p: [b.x, b.z] });
+    if (ns >= 1 && !(b.st === 'moored' && ns === 1)) out.steg.push({ id: b.id, g: b.g, st: b.st + ':' + (b.a.task?.constructor?.name ?? '-') + (b.a.reverse ? ':rueck' : ''), n: ns, platz: b.platz, p: [b.x, b.z] });
     const alt = W.stand.get(b.a); const weg = alt ? Math.hypot(alt.x - b.x, alt.z - b.z) : 99;
     const still = weg < 0.15 && !ruhig.has(b.st) ? (alt?.still ?? jetzt) : null;
     W.stand.set(b.a, { x: b.x, z: b.z, still });
@@ -230,10 +227,6 @@ const SNAP = () => {
   });
   page.on('pageerror', (e) => fehler.push({ wann: ort(), text: 'Skriptfehler: ' + String(e.message).slice(0, 400), stack: String(e.stack || '').split('\n').slice(1, 4).map((z) => z.trim().replace(/https?:\/\/localhost:\d+\//, '')).join(' < ') }));
   page.on('response', (r) => { if (r.status() >= 400) fehlendeDateien.push({ wann: ort(), url: r.url(), status: r.status() }); });
-  await page.route(/^https:\/\/cdn\.jsdelivr\.net\/npm\/three@([^/]+)\/(.+)$/, (route) => {
-    const file = route.request().url().split(/three@[^/]+\//)[1].split(/[?#]/)[0];
-    route.fulfill({ path: path.join(THREE_DIR, file), contentType: 'text/javascript' });
-  });
 
   const query = `?testtempo=${TEMPO}${START > 1 ? `&stufe=${START}` : ''}${EXTRA}`;
   R = { geraet: GERAET, tempo: TEMPO, query, start: new Date().toISOString(), commit: null,

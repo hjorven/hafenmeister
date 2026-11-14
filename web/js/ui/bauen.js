@@ -25,6 +25,7 @@ import { HAFEN, platzInWelt } from '../data/harbor.js';
 import { baueModell } from '../render/services-models.js';
 
 import { umbauText, euro, num1, WUNSCH, WUNSCH_KURZ, FREI, leer, wirkungText, waehleSchritt, regionsSchritt } from './bauen-rat.js';
+import { WUNSCH_TEXTE, wunschFuerService } from '../data/wuensche-texte.js';
 
 const U = 0.62;
 const REITER = [
@@ -227,12 +228,15 @@ export function init(game) {
       if (!p || p.fertig || !p.def) continue;
       const s = game.services.katalog?.find((k) => k.id === x.id);
       const w = wirkungText(p.def.wirkung);
+      // Gäste wünschen sich manche Angebote (P19): das erste Bauen erfüllt den Wunsch
+      const wunsch = x.stufe > 0 ? null : wunschFuerService(x.id);
       out.push({
         key: `angebot:${x.id}`, art: 'angebot', id: x.id, name: x.stufe > 0 ? p.def.name : x.name, kosten: p.kosten,
         ausbau: x.stufe > 0,
         gesperrt: p.freigeschaltet ? null : `braucht ${p.fehlt.join(', ')}`,
         kurz: '',
-        nutzen: [x.kurz, w].filter(Boolean),
+        wunsch,
+        nutzen: [x.kurz, w, wunsch ? `Gäste wünschen sich ${WUNSCH_TEXTE[wunsch].mit}, das hebt ihre Note.` : null].filter(Boolean),
         ort: s ? () => serviceOrt(s, p.stufe) : null,
         modell: s ? { id: x.id, stufe: p.stufe } : null,
         kaufen: () => game.services.bauen(x.id),
@@ -1172,14 +1176,16 @@ export function init(game) {
     fuelle(
       el('div', { class: 'bau-kopf' },
         el('h2', {}, 'Bauen'),
-        el('span', { class: 'bau-kasse' }, `Kasse ${euro(geld)}`)),
+        el('span', { class: 'bau-kasse' }, `Kasse ${euro(geld)}`),
+        // Am Handy ersetzt das Kreuz die Zeile "Schließen" unten (oberflaeche.css), die Liste bekommt den Platz
+        el('button', { type: 'button', class: 'hm-zu bau-zu', 'aria-label': 'Baumenü schließen', title: 'Schließen', onclick: schliessen }, 'Schließen')),
       n ? el('button', { type: 'button', class: 'bau-rat', onclick: () => n.ziel && vorschau(n.ziel) },
         el('span', { class: 'bau-tipp-titel' }, 'Als Nächstes'), el('span', {}, n.text)) : null,
       meldung ? el('p', { class: 'card-note', role: 'status' }, meldung) : null,
       tabs,
       el('div', { class: 'bau-liste' }, zeilen.length ? zeilen : el('p', { class: 'bau-leer' }, reiter === 'steg' ? 'Gerade gibt es keinen freien Bauplatz für Stege. Die nächste Ausbaustufe bringt neue.' : 'Hier ist gerade nichts zu bauen.')),
       reiter === 'hafen' ? automatikSchalter() : null,
-      el('div', { class: 'card-actions' }, el('button', { type: 'button', class: 'hud-btn', onclick: schliessen }, 'Schließen')),
+      el('div', { class: 'card-actions bau-unten' }, el('button', { type: 'button', class: 'hud-btn', onclick: schliessen }, 'Schließen')),
     );
   }
 
@@ -1344,6 +1350,7 @@ function stil() {
     #card.bau-karte > * { flex-shrink: 0; }
     #card.bau-karte > .bau-liste { flex: 0 1 auto; min-height: 0; }
     .bau-kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .bau-kopf .bau-zu { display: none; }
     .bau-kopf h2 { margin: 0; min-width: 0; flex: 1 1 auto; overflow-wrap: anywhere; }
     .bau-kasse { flex: 0 0 auto; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; opacity: 0.8; }
     .bau-rat { display: grid; gap: 2px; text-align: left; border: 0; border-radius: 12px; padding: 10px 12px;

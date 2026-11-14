@@ -639,7 +639,10 @@ export async function init(game) {
 
   // ------------------------------------------------------------ Hinweise beim ersten Mal (J6)
   const offeneHinweise = [];
-  let hinweisBis = 0;
+  // Sichtbare Zeit, die der Tipp noch steht (ms). Sie läuft nur, solange er wirklich im Bild ist,
+  // und höchstens 250 ms je Takt: Ruckelt das Bild (schwaches Gerät, Tab im Hintergrund), verfällt er nicht ungesehen.
+  let hinweisRest = 0;
+  let hinweisTaktZuletzt = 0;
   for (const name of ['sim:turnedAway', 'sim:stageReady', 'stammgast:neu']) {
     game.on(name, (d) => { const e = st() && einstiegState(st()); if (e) merkeHinweis(e, hinweisFuer(name, d), offeneHinweise); });
   }
@@ -652,14 +655,17 @@ export async function init(game) {
   function hinweisTakt(e) {
     const ruhig = !document.body.classList.contains('card-open') && !document.body.classList.contains('building') && !document.body.classList.contains('foto') && !document.body.classList.contains('hm-feier-an');
     if (aktuell?.startsWith('hinweis:')) {
-      if (performance.now() > hinweisBis) { schliesseHinweis(); return; }
+      const jetzt = performance.now();
+      const dt = Math.min(250, Math.max(0, jetzt - hinweisTaktZuletzt));
+      hinweisTaktZuletzt = jetzt;
+      if (!tipp.hidden) hinweisRest -= dt;
+      if (hinweisRest <= 0) { schliesseHinweis(); return; }
+      // Solange eine andere Meldung vorgeht, wartet der Tipp ausgeblendet
       tipp.hidden = !ruhig || !darf();
-      // Solange eine andere Meldung vorgeht, läuft die Zeit des Tipps nicht ab
-      if (tipp.hidden) hinweisBis = Math.max(hinweisBis, performance.now() + 8000);
       const id = aktuell.slice(8);
       k = id === 'stufe' ? domKreis(document.getElementById('btn-build'), 6) : null;
       // Passt der Tipp nirgends hin, ohne Knöpfe zu verdecken, wartet er (seine Zeit läuft nicht ab)
-      if (!tipp.hidden && !lege(k)) { tipp.hidden = true; hinweisBis = Math.max(hinweisBis, performance.now() + 8000); }
+      if (!tipp.hidden && !lege(k)) tipp.hidden = true;
       ring.hidden = !k || tipp.hidden;
       if (k && !ring.hidden) setzeKreis();
       return;
@@ -671,7 +677,10 @@ export async function init(game) {
     e.hinweise ||= [];
     e.hinweise.push(id);   // gilt als gesehen, auch wenn der Spieler gleich neu lädt
     zeigeHinweis(id);
-    hinweisBis = performance.now() + 20000;
+    hinweisRest = 20000;
+    hinweisTaktZuletzt = performance.now();
+    // Gleich an seinen Platz legen, dann erst zeigen: kein Sprung von der alten Lage
+    hinweisTakt(e);
   }
   function zeigeHinweis(id) {
     const t = HINWEISE[id];
@@ -689,7 +698,7 @@ export async function init(game) {
     w.addEventListener('click', schliesseHinweis);
     kn.append(w);
     tipp.append(z, h, p, pk, kn);
-    tipp.hidden = false;
+    tipp.hidden = true;   // hinweisTakt legt ihn hin und zeigt ihn
     try { game.audio?.sfx?.('hinweis'); } catch { /* Ton ist nicht wichtig */ }
   }
 
@@ -723,8 +732,10 @@ export async function init(game) {
     if (!id) return;
     if (id === 'muenzen' && !k) zumBoot(zahlendeIds());
     // Ist die Bootskarte offen, sagt sie selbst, was zu tun ist; der Text würde nur die Stege verdecken
-    tipp.hidden = ziehen || (id === 'anlegen' && document.body.classList.contains('card-open')) || !darf();
-    ring.hidden = !k || ziehen || !darf();
+    // Beim Bauen führt das Baumenü selbst (Vorschau, Kaufknopf): die Blase wartet auf allen Geräten, bis es zu ist
+    const bauOffen = document.body.classList.contains('building');
+    tipp.hidden = ziehen || bauOffen || (id === 'anlegen' && document.body.classList.contains('card-open')) || !darf();
+    ring.hidden = !k || ziehen || bauOffen || !darf();
     if (k) setzeKreis();
     if (!tipp.hidden) lege(k);
   }

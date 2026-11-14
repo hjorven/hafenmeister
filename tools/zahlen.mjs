@@ -28,14 +28,14 @@ const NAMENS_LISTEN = [
   /^klassen$/, /^wuensche$/, /^wunschAnzahl$/, /^platzarten$/, /^stromAnSteg$/, /^bauwerke$/, /^services$/,
   /^ereignisse$/, /^warten\.plaetze$/, /^stufen\.\d+\.mix$/, /\.gaeste$/, /\.wetter$/, /\.hafengeld$/,
   /^ereignisse\.\w+\.wirkung\.(sizeFactor|kindFactor|satisfaction)$/, /^tagesziele\.(geld|schwere|ziele|grossAb)$/,
-  /^zeit\.jahreszeiten$/, /\.ankunftFaktor$/,
+  /^zeit\.jahreszeiten$/, /\.ankunftFaktor$/, /^angebotWunsch\.wuensche$/, /^ruf\.lockt\.grosse$/,
 ];
 // Felder, die bewusst noch niemand liest (mit Paket, das sie anschließt oder löscht)
 export const NOCH_UNGELESEN = {
 };
 // Felder, die Ja/Nein sein dürfen. Alles andere ist eine Zahl, ein Text, eine Liste oder ein Objekt.
 const JA_NEIN = new Set(['ueberNacht', 'vorauskasse', 'strom', 'offen', 'gast', 'allePlaetze', 'nurMotor', 'seaArrivals', 'winter',
-  'C', 'CS', 'D', 'K', 'A', 'B']);
+  'C', 'CS', 'D', 'K', 'A', 'B', 'nurSegel']);
 
 function quelltexte() {
   const out = [];

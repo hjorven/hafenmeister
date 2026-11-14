@@ -102,6 +102,27 @@ export const ECONOMY = {
   // Wie viele Wünsche ein Boot hat: [min, max] je Klasse (gekappt auf verfügbare Wünsche)
   wunschAnzahl: { S: [0, 2], M: [1, 2], L: [1, 3], XL: [2, 3], XXL: [0, 0] },
 
+  // Wünsche an Angebote (P19 C3): Statt eines Ruf-Aufschlags auf jede Bewertung wünschen sich manche
+  // Gäste ein Angebot an Land. Erfüllt, sobald der Service gebaut ist (irgendeine Stufe), sonst fehlt
+  // er wie eine Dusche. anteil: so viele Boote haben je Stufe einen solchen Wunsch zusätzlich.
+  // Je Wunsch: Service, ab Stufe (gewünscht wird es erst, wenn man es bauen kann), Klassen, nurSegel.
+  angebotWunsch: {
+    anteil: { 1: 0.1, 2: 0.2, 3: 0.35, 4: 0.45, 5: 0.5, 6: 0.5 },
+    wuensche: {
+      broetchen:   { service: 'baecker',        abStufe: 1, klassen: ['S', 'M', 'L', 'XL'] },
+      cafe:        { service: 'hafencafe',      abStufe: 2, klassen: ['S', 'M', 'L', 'XL'] },
+      grill:       { service: 'grillplatz',     abStufe: 2, klassen: ['S', 'M', 'L'] },
+      fisch:       { service: 'raeucherei',     abStufe: 2, klassen: ['M', 'L', 'XL'] },
+      segelclub:   { service: 'segelclub',      abStufe: 3, klassen: ['S', 'M', 'L'], nurSegel: true },
+      rad:         { service: 'fahrradverleih', abStufe: 3, klassen: ['M', 'L', 'XL'] },
+      ausruester:  { service: 'ausruester',     abStufe: 3, klassen: ['M', 'L', 'XL'] },
+      kran:        { service: 'mastenkran',     abStufe: 3, klassen: ['M', 'L'], nurSegel: true },
+      eis:         { service: 'eisdiele',       abStufe: 4, klassen: ['S', 'M', 'L'] },
+      werft:       { service: 'travellift',     abStufe: 4, klassen: ['L', 'XL'] },
+      segelmacher: { service: 'segelmacher',    abStufe: 4, klassen: ['M', 'L', 'XL'], nurSegel: true },
+    },
+  },
+
   // Platzarten: Strom und Zufriedenheit. Stege ohne Strom bekommen ihn über bauwerke.strom.
   platzarten: {
     box:     { strom: false },
@@ -120,17 +141,30 @@ export const ECONOMY = {
   ruf: {
     start: 3,
     startBewertungen: 5,      // so viele Bewertungen mit start liegen zum Spielbeginn vor
-    fenster: 20,              // Schnitt der letzten 20 Bewertungen
+    // Ruf = Schnitt aller Bewertungen der letzten tage Tage (heute mitgezählt), mindestens aber der
+    // letzten mindestens Bewertungen (P19 C2: ein schlechter Tag ist gleich zu spüren, ein guter auch).
+    // hoechstens: so viele Bewertungen hebt der Spielstand auf.
+    tage: 3,
+    mindestens: 10,
+    hoechstens: 400,
     sondergastBonus: 1,       // Sondergäste (Marine, Behörden, Traditionssegler) geben so viel extra
-    ohneWunsch: 4,
     // Note aus den Wünschen: keiner erfüllt = keiner, alle erfüllt = alle, dazwischen linear.
     // keiner nicht unter abgewiesen.wertung: wer einen Platz bekam, ist nicht unzufriedener als
-    // wer weggeschickt wurde (Befund P10, vorher 1 + 4 * Anteil, entschieden in P14).
-    wunschNote: { keiner: 2.5, alle: 5 },
+    // wer weggeschickt wurde (Befund P10). alle = 4,5: die volle Note gibt es erst mit gutem Platz
+    // (Fingersteg, passgenau, von Hand eingewiesen), P19 C4. Gäste ohne Wünsche geben ohneWunsch.
+    ohneWunsch: 4.5,
+    wunschNote: { keiner: 2.5, alle: 4.5 },
     // Ankünfte = Grundzahl * (0.75 + 0.125 * (Ruf - 1)): 1 Anker 0.75x, 3 Anker 1x, 5 Anker 1.25x
     ankunftBasis: 0.75,
     ankunftJeAnker: 0.125,
     abgewiesen: { chance: 0.25, wertung: 2.5 },  // wer keinen Platz bekommt, drückt den Ruf leicht
+    // Ein guter Ruf lockt andere Gäste (P19 C6): ab grosseAb Sternen kommen große Boote häufiger
+    // (Faktor je Klasse), ab seltenAb kommen auch die seltenen Modelle (Liebhaberstücke).
+    lockt: {
+      grosseAb: 4, grosse: { L: 1.3, XL: 1.4 },
+      seltenAb: 4.5,
+      selten: ['S4-5', 'S5-3', 'M1-5', 'M2-5', 'M3-5', 'L1-5', 'L2-5', 'L3-4', 'XL1-4', 'XL2-4', 'XL2-5'],
+    },
   },
 
   fischer: { pachtProTag: 15 },   // feste Pacht je Abend, nur für Fischer und andere fest vergebene Plätze
