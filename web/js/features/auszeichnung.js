@@ -29,7 +29,7 @@ export function text(a) {
     const fehlt = Math.max(1, a.days - a.up);
     teile.push(a.up > 0
       ? `Noch ${abende(fehlt)} mit Ruf ab ${komma(a.next.from)}, dann heißt der Hafen „${a.next.name}“.`
-      : `${abende(a.days).replace(/^e/, 'E')} in Folge mit Ruf ab ${komma(a.next.from)} machen ihn zum „${a.next.name}“.`);
+      : `${abende(a.days).replace(/^e/, 'E')} in Folge mit Ruf ab ${komma(a.next.from)}, dann heißt der Hafen „${a.next.name}“.`);
   } else if (a.level) {
     teile.push('Höher geht es nicht.');
   }

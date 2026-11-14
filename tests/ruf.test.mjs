@@ -252,7 +252,8 @@ test('Gästebuch: weiter Weg steht als Grund da, Auszeichnung hat einen Satz', a
   const { ctx, state } = neu({ stufe: 4 });
   const leer = sim.award(state, ctx.rules);
   assert.match(A.text(leer), /Noch keine Auszeichnung/);
-  assert.match(A.text(leer), /Gastlicher Hafen/);
+  assert.match(A.text(leer), /dann heißt der Hafen „Gastlicher Hafen“/);
+  assert.doesNotMatch(A.text(leer), /zum „/, 'Name steht nie im Dativ hinter "zum"');
   state.award = { level: 3, up: 0, down: 0, best: 3 };
   assert.match(A.text(sim.award(state, ctx.rules)), /Höher geht es nicht/);
   assert.match(A.karte({ type: 'awardDown', level: 2, name: 'Empfohlener Hafen', lost: 'Ausgezeichneter Hafen' }).titel, /Empfohlener Hafen/);
