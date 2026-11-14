@@ -419,12 +419,12 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| G1 | Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren | offen | P24 |
-| G2 | Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen | offen | P24 |
+| G1 | Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren | erledigt (14.11.) | P24 |
+| G2 | Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen | erledigt (14.11.) | P24 |
 | G3 | Ereignisse mit Nachspiel | offen | P24 |
 | G4 | Winter als Planungsbild (Bilanz, Winterarbeiten, Verträge) | erledigt (PR 245) | P20 |
 | G5 | Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind) | offen | P20 |
-| G6 | Ergebnis eines Ereignisses am Abend zeigen | offen | P24 |
+| G6 | Ergebnis eines Ereignisses am Abend zeigen | erledigt (14.11.) | P24 |
 | G7 | Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand) | offen | P24 |
 | G8 | Eine Zahlenliste für Ereignisse | erledigt | P06 |
 | G9 | Seltene große Tage, z. B. Hanse-Woche, zehn Tage vorher angekündigt | offen | P24 |

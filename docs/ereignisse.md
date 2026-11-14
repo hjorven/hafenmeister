@@ -1,6 +1,6 @@
 # Ereignisse und Jahreslauf
 
-Stand: 11.11.2026. Status: gebaut; weitere Ereignisse P24, Winter mit Aufgaben P20 ([Roadmap](roadmap.md)). Umsetzung von [Plan Abschnitt 7](plan.md#7-ereignisse-und-jahreslauf).
+Stand: 14.11.2026. Status: gebaut, Vorbereiten für Sturm und Regatta gebaut (P24 Teil 1: G1, G2, G6); weitere Ereignisse P24 Teil 2, Winter mit Aufgaben P20 ([Roadmap](roadmap.md)). Umsetzung von [Plan Abschnitt 7](plan.md#7-ereignisse-und-jahreslauf).
 
 ## Was es gibt
 
@@ -8,7 +8,7 @@ Stand: 11.11.2026. Status: gebaut; weitere Ereignisse P24, Winter mit Aufgaben P
 |---|---|---|---|---|
 | Nebel | 1 | 1 Tag | 13 Tage | 30 % weniger Ankünfte, Gäste bleiben eine Nacht länger |
 | Sommertag | 1 | 1 Tag | 11 Tage (nur Saisontag 7 bis 24) | mehr kleine Boote und Badegäste, Kiosk verdient mehr |
-| Sturm | 3 | 1 Tag | 12 Tage | niemand läuft von See ein, Gäste bleiben eine Nacht länger, Außenhafen -1 Anker; Seenotretter-Station mindert das |
+| Sturm | 3 | 1 Tag | 12 Tage | niemand läuft von See ein, Gäste bleiben eine Nacht länger, Gäste an offenen Plätzen (Stirnplätze am Stegkopf, Kai) -1 Anker; Seenotretter-Station mindert das |
 | Regatta | 3, mit Segelclub | 2 Tage, 2 Tage vorher angekündigt | 14 Tage | 1,6x Ankünfte, vor allem Segelboote, mehr Besucher, etwas Ruf |
 | Hafenfest | 4 | 1 Tag | 20 Tage (Hochsommer) | Traditionssegler und Marine, doppelt so viele Besucher, abends Feuerwerk |
 
@@ -17,6 +17,21 @@ Kreuzfahrtschiffe, Marinebesuche und Ausflugsfahrten plant das Services-Modul al
 **Leitlinien:** jedes Ereignis wird angekündigt, keins kostet Geld oder zerstört etwas, nie zwei gleichzeitig, danach mindestens zwei ruhige Tage. Im Schnitt 4 Ereignisse pro Saison in Stufe 1 und 2, etwa 8 ab Stufe 3.
 
 **Jahreslauf:** 30 Saisontage (1 bis 8 Frühling, 9 bis 22 Sommer, 23 bis 30 Herbst), danach 3 Tage Winter mit Schnee, ohne Ereignisse, mit wenig Ankünften (`winter: true` in den Modifikatoren).
+
+## Vorbereiten (P24)
+
+Am Tag der Ankündigung erscheint statt des Schilds eine Karte mit Knopf (`#ev-vorbereiten`, Meldungs-Ordnung Vorrang 60). Derselbe Knopf steht im Wetterbericht unter dem Ereignis, solange es angekündigt ist. Am Abend vor dem Ereignis erinnert die Karte noch einmal, wenn nichts vorbereitet ist.
+
+| Ereignis | Knopf | Was passiert | Ergebnis am Abend des letzten Tags |
+|---|---|---|---|
+| Sturm (ab Stufe 3) | Sturmklar machen | Gäste von offenen Plätzen fahren auf freie Plätze innen (die Boote verholen sichtbar), offene Plätze bleiben bis nach dem Sturm für Gäste gesperrt (Schild "reserviert"). Gäste auf Tagestörn bleiben auf ihrem Platz. "Offene Plätze freigeben" hebt die Sperre auf. | wie viele innen lagen, wie viele draußen und ob sie schlechter bewerten (die Seenotretter mindern das) |
+| Regatta (ab Stufe 3, mit Segelclub) | Plätze freihalten | 3 bis 6 freie Plätze (je Stufe) bleiben bis zum Start leer, während der Regatta legen dort nur Segelboote an. Jedes Segelboot darauf zahlt einmal Startgeld (S 8 €, M 15 €, L 25 €; Tagesabschluss: Sonstiges). "Plätze freigeben" hebt das auf. | wie viele Regattaboote auf den freigehaltenen Plätzen lagen und das Startgeld |
+
+Ohne Vorbereitung passiert nichts Schlimmes: der Sturm kostet nur Anker bei den Gästen draußen, die Regatta läuft wie bisher. Zahlen: `ECONOMY.platzarten.stirn.offen`, `ECONOMY.ereignisse.regatta.vorbereiten`. Regeln als reine Funktionen in `web/js/events/vorbereiten.js` (Hooks `fit`, `evening`, `night` der Spielregeln), Karte und Knöpfe in `web/js/events/vorbereiten-ui.js`. Der Stand liegt in `state.modules.vorbereitung` und wird mitgespeichert.
+
+Sim-Ereignisse (über `game.sim.dispatch`, also als `sim:<type>`): `relocated` mit `grund: 'sturm'` (die 3D-Ansicht fährt das Boot hinüber), `sturmklar`, `regattaPlaetze`, `ereignisErgebnis` `{ art, vorbereitet, verholt, draussen, anker }` bzw. `{ art, plaetze, teilnehmer, startgeld }`.
+
+Berührungspunkte: Dauerplätze (`features/dauerlieger.js`) bleiben unberührt, weil fest liegende Boote die Sperre nicht betrifft und freigehaltene Plätze nur aus freien Gastplätzen gewählt werden. Das Büro und das Selbst-Einfahren fragen die Passregel und meiden gesperrte Plätze von selbst. Die Wetterflagge zeigt den Sturm weiter wie bisher.
 
 ## Was schon wirkt
 
@@ -30,9 +45,12 @@ Kreuzfahrtschiffe, Marinebesuche und Ausflugsfahrten plant das Services-Modul al
 | `web/js/events/scheduler.js` | Planer, reine Logik ohne Three.js und DOM, läuft in Node |
 | `web/js/events/events.js` | Anbindung an `game` (Modul für `main.js`) |
 | `web/js/events/effects.js` | Regen, Schnee, Nebel, Blitze, Feuerwerk als ein Shader-Durchgang in der 3D-Szene (Netz `wetter-effekte`, Punkte `wetter-feuerwerk`) |
+| `web/js/events/vorbereiten.js` | Vorbereiten für Sturm und Regatta: Regeln ohne DOM, läuft in Node |
+| `web/js/events/vorbereiten-ui.js` | Karte `#ev-vorbereiten`, Knopf im Wetterbericht, Ergebnis am Abend |
 | `web/js/events/banner.js` | Ankündigungsschild `#event-banner`, Wetterknopf `#weather-chip`, Wetterbericht `#weather-panel` |
 | `web/css/events.css` | Aussehen, wird von `events.js` nachgeladen |
 | `tests/ereignisse.test.mjs` | Tests |
+| `tests/vorbereiten.test.mjs` | Tests zum Vorbereiten |
 
 ## Schnittstelle
 
@@ -75,7 +93,7 @@ game.events.load(daten)
 ## Prüfen
 
 ```bash
-node --test tests/ereignisse.test.mjs
+node --test tests/ereignisse.test.mjs tests/vorbereiten.test.mjs
 ```
 
 ```bash
