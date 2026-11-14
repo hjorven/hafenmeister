@@ -25,7 +25,8 @@
 }
 .hm-lb-menue-zahl[hidden] { display: none; }
 
-/* ------------------------------------------------------------ Meldung "Neu im Logbuch" (rechts oben, wie das Gästebuch) */
+/* ------------------------------------------------------------ Meldung "Neu im Logbuch"
+ * Steht im gemeinsamen Meldeplatz (ui/meldungen.js); die Lage hier gilt nur ohne Meldeplatz. */
 #hm-lb-meldung {
   position: absolute;
   z-index: 19;
@@ -276,6 +277,8 @@
   .hm-lb-raster { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .hm-lb-meldung-bild { width: 63px; height: 33px; }
 }
+
+.hm-neu #hm-meldeplatz .hm-lb-meldung { max-width: 100%; animation: hm-mp-rein 0.24s steps(4, end); }
 
 @media (prefers-reduced-motion: reduce) {
   .hm-neu .hm-lb, .hm-neu .hm-lb-meldung, .hm-lb-karte.wackeln { animation: none; }

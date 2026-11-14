@@ -6,6 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Erfolge- und Logbuch-Meldung stehen im gemeinsamen Meldeplatz (volle Breite, gleiches Einblenden). 
 - Logbuch: Die großen Schiffe kommen jetzt hinein, wenn man sie sieht: beim Besuch am Kreuzfahrt- oder Marineanleger, wenn sie vor dem Hafen vorbeifahren, und der Seenotkreuzer an der Station. Fischerplätze bekommen neue Kutter, und jede Saison wechseln sie, sodass alle fünf Fischkutter einmal da sind. Zwei Seenotkreuzer, die im Spiel nie auftauchen, stehen nicht mehr als ewiger Schattenriss im Logbuch.
 - Ruhigere Oberfläche: Kurze Meldungen (Ankündigungen wie „Heute: Sommertag“, der Morgen-Zettel mit dem Tageserlös, Dauerplatz-Meldungen, Bewertungen, Tipps und „Als Nächstes“) stehen nur noch an einem Platz und nacheinander, ein kleiner Zähler zeigt, wie viele noch kommen. Am Handy steht dieser Platz unten über Zeit und Bauen, Kassieren ist ein kleiner Münzknopf über Bauen, der Funk ist zuerst zugeklappt und es schweben höchstens zwei Bewertungen über den Booten. Alle Texte, auch Zahlen und Euro, stehen jetzt in der Pixelschrift, das Euro-Zeichen ist neu gezeichnet.
 - Neu: Erfolge. 30 Erfolge vom ersten Festmachen bis zum Hafenmillionär melden sich rechts oben mit eigenem Ton und stehen im Logbuch unter "Erfolge" mit Fortschritt. Im Hafen wachsen dafür ein Mast mit bunten Wimpeln, eine Pokaltreppe und eine Ehrentafel mit einem Schild je Ausbaustufe. Alte Spielstände bekommen schon Erreichtes still nachgetragen.
