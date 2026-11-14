@@ -87,6 +87,7 @@ export function init(game) {
     ['<kbd>B</kbd>', 'Bauen', () => visible(byId('btn-build'))],
     ['<kbd>N</kbd>', 'Gästebuch', () => !!game.gaestebuch],
     ['<kbd>J</kbd>', 'Logbuch und Chronik', () => !!game.logbuch],
+    ['<kbd>T</kbd>', 'Statistik der letzten 30 Tage', () => !!game.statistik],
     ['<kbd>Leertaste</kbd>', 'Pause', () => !!game.setPaused],
     ['<kbd>Esc</kbd> oder Rechtsklick', 'Abbrechen', () => true],
     ['Mausrad, <kbd>+</kbd> <kbd>-</kbd>', 'Zoomen zum Mauszeiger', () => true],

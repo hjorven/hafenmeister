@@ -138,7 +138,11 @@ export function init(game) {
     if (tage.length < 2) return null;
     const max = Math.max(1, ...tage.map((x) => x.summe));
     const bestTag = sim()?.state?.stats?.besterTag?.tag;
-    return el('div', { class: 'hm-ta-balken', role: 'img', 'aria-label': `Einnahmen der letzten ${tage.length} Tage` },
+    // Antippen öffnet die Statistik der letzten 30 Tage (ui/statistik.js, P41) mit diesem Tag
+    const statistik = game.statistik?.oeffnen ? () => { const tag = b.laufend ? null : b.tag; schliesse(); game.statistik.oeffnen(tag); } : null;
+    return el(statistik ? 'button' : 'div', statistik
+      ? { type: 'button', class: 'hm-ta-balken hm-ta-zur-statistik', title: 'Statistik der letzten 30 Tage', 'aria-label': `Einnahmen der letzten ${tage.length} Tage, Statistik öffnen`, onclick: statistik }
+      : { class: 'hm-ta-balken', role: 'img', 'aria-label': `Einnahmen der letzten ${tage.length} Tage` },
       ...tage.map((x) => el('div', { class: `hm-ta-saeule${x.tag === b.tag ? ' heute' : ''}${x.tag === bestTag ? ' best' : ''}`, title: `Tag ${x.tag}: ${euro(x.summe)}` },
         el('i', { style: { height: `${Math.max(4, Math.round((x.summe / max) * 100))}%` } }),
         el('span', {}, String(x.tag)))));
