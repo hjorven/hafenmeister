@@ -418,6 +418,17 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr249/245-krantag-pc.png"
+  },
+  {
+   "datei": "p07-pr257-handy-weiter-mit-3x.jpg",
+   "pakete": [
+    "P07"
+   ],
+   "titel": "Tempo bleibt: Knopf \"Weiter mit 3x\" mit Grund",
+   "pr": 257,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "tempo/tempo-handy.png"
   }
  ]
 }
