@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "14a7d7d"
+  "commit": "7ddc5c4"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -368,10 +368,11 @@
    "id": "P14",
    "titel": "Bewertungen und Gästebuch zeigen",
    "inhalt": "Ü21, F18, C1, C9; Note aus Wünschen 2,5 bis 5 (Befund P10)",
-   "thread": "erledigt (PR 154)",
+   "thread": "erledigt (PR 154, 233)",
    "welle": 2,
    "prs": [
-    154
+    154,
+    233
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -391,10 +392,11 @@
    "id": "P15",
    "titel": "Tagesabschluss am Abend zeigen",
    "inhalt": "Ü22",
-   "thread": "erledigt (PR 159)",
+   "thread": "erledigt (PR 159, 239)",
    "welle": 2,
    "prs": [
-    159
+    159,
+    239
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -447,7 +449,10 @@
     "J4"
    ],
    "status": "teilweise",
-   "bilder": []
+   "bilder": [
+    33,
+    34
+   ]
   },
   {
    "id": "P18",
@@ -4773,20 +4778,84 @@
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr228/pulk-pc-g8-4242.png",
    "nr": 32
+  },
+  {
+   "datei": "p17-pr237-pc-erstes-bauwerk.jpg",
+   "pakete": [
+    "P17"
+   ],
+   "titel": "Erstes Bauwerk geschenkt: Toilettenhäuschen",
+   "pr": 237,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr237/237-vorschau-pc.png",
+   "nr": 33
+  },
+  {
+   "datei": "p17-pr237-iphone-erstes-bauwerk.jpg",
+   "pakete": [
+    "P17"
+   ],
+   "titel": "Erstes Bauwerk geschenkt: Toilettenhäuschen",
+   "pr": 237,
+   "geraet": "iphone",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr237/237-vorschau-iphone.png",
+   "nr": 34
   }
  ],
  "neueBilder": [
+  34,
+  33,
   32,
   31,
   30,
   29,
   28,
   27,
-  26,
-  25,
-  24
+  26
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Tests: Zeitlimit 90 s, Warten unabhängig vom Bildtakt",
+   "pr": 242,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Tagesabschluss: Geschenk nicht als verdient, Einzahl in der Bauvorschau",
+   "pr": 239,
+   "pakete": [
+    "P15"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Bauen: erstes Bauwerk geschenkt und geführt (J4, Ü15), Ausbau-Fähnchen zählt Abschnitte",
+   "pr": 237,
+   "pakete": [
+    "P03",
+    "P17"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 235 bei P18 eingetragen, Bild Pulk an der Einfahrt (P66)",
+   "pr": 238,
+   "pakete": [
+    "P18",
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "P14-Folge: Menü am Handy quer, Bootsnamen eindeutig, Gästebuch-Meldung in der Meldungs-Ordnung",
+   "pr": 233,
+   "pakete": [
+    "P14"
+   ]
+  },
   {
    "datum": "2026-11-14",
    "titel": "Zeitraffer: robuster auf großem Gelände, Erwartung Stand PR 181",
@@ -4839,44 +4908,6 @@
    "pakete": [
     "P18",
     "P05"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 224 bis 227 eingetragen, vier neue Bilder",
-   "pr": 230,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Land nördlich der Reede: kein kahler Block mehr, ruhige Farben im groben Netz",
-   "pr": 229,
-   "pakete": [
-    "P62"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Wunsch-Schilder nach Bildbreite in Metern: am Handy wieder in der Startansicht",
-   "pr": 231,
-   "pakete": [
-    "P11"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Dauerlieger-Hinweis wartet, solange ein Tipp sichtbar ist",
-   "pr": 226,
-   "pakete": [
-    "P01"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Wunsch-Schilder: weit weg klein, ganz weit weg aus",
-   "pr": 227,
-   "pakete": [
-    "P11"
    ]
   }
  ]

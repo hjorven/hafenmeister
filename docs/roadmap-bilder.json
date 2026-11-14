@@ -363,6 +363,28 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr228/pulk-pc-g8-4242.png"
+  },
+  {
+   "datei": "p17-pr237-pc-erstes-bauwerk.jpg",
+   "pakete": [
+    "P17"
+   ],
+   "titel": "Erstes Bauwerk geschenkt: Toilettenhäuschen",
+   "pr": 237,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr237/237-vorschau-pc.png"
+  },
+  {
+   "datei": "p17-pr237-iphone-erstes-bauwerk.jpg",
+   "pakete": [
+    "P17"
+   ],
+   "titel": "Erstes Bauwerk geschenkt: Toilettenhäuschen",
+   "pr": 237,
+   "geraet": "iphone",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr237/237-vorschau-iphone.png"
   }
  ]
 }
