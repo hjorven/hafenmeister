@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "a441ab1"
+  "commit": "47fac50"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -443,7 +443,8 @@
    "thread": "bestehend: \"Balancing für 94 Liegeplätze ausarbeiten\" (nach P06)",
    "welle": 2,
    "prs": [
-    237
+    237,
+    252
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -2495,12 +2496,14 @@
   {
    "code": "B10",
    "text": "Liegegeld nach Länge statt fest je Größe",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 252, ECONOMY.klassen.proMeter, sim.baseNightlyFee)",
    "pakete": [
     "P17"
    ],
-   "prs": [],
+   "prs": [
+    252
+   ],
    "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
   },
   {
@@ -4438,11 +4441,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 136,
+  "erledigt": 137,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 76,
+  "offen": 75,
   "entfaellt": 0,
   "alle": 219
  },
@@ -5026,6 +5029,20 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "Balancing: Liegegeld je angefangenem Meter (B10); Winterknöpfe quer fest unten",
+   "pr": 252,
+   "pakete": [
+    "P17"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Tests: Tagesabschluss-Zettel im Browser prüfen, solange er sicher steht",
+   "pr": 284,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "Ereignisse zum Vorbereiten: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend (P24 Teil 1)",
    "pr": 281,
    "pakete": [
@@ -5105,22 +5122,6 @@
    "pr": 271,
    "pakete": [
     "P62"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Arbeitsplan: PR 244 gemergt, P19 Teil 2 läuft, Befund Stufe 2 ins Balancing",
-   "pr": 273,
-   "pakete": [
-    "P19"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P19 Teil 1: Ruf schwerer, Wünsche je Bootsart, Angebote als Wünsche",
-   "pr": 244,
-   "pakete": [
-    "P19"
    ]
   }
  ]
