@@ -66,7 +66,8 @@ test('Hilfe im Menü: sechs Bilder, Einstieg wiederholen', async ({ game }, test
 
   await press(tafel.getByRole('button', { name: 'Einstieg wiederholen' }), testInfo);
   await expect(tafel).toBeHidden();
-  await page.waitForFunction(() => window.hafenmeister.einstieg.schritt() !== null, null, { timeout: 10_000 });
+  // Unter Last kommt der Klick spaet an: grosszuegig warten, unabhaengig vom Bildtakt pruefen
+  await page.waitForFunction(() => window.hafenmeister.einstieg.schritt() !== null, null, { timeout: 20_000, polling: 100 });
   expect(await page.evaluate(() => window.hafenmeister.sim.state.modules.einstieg.fertig)).toBe(false);
 });
 

@@ -19,7 +19,8 @@ const chromium = (device) => ({ ...device, browserName: 'chromium', launchOption
 export default defineConfig({
   testDir: './specs',
   outputDir: './test-results',
-  timeout: 45_000,
+  // Das Spiel ist gewachsen: ein Test braucht allein schon 10 bis 25 s, unter Last doppelt so lange
+  timeout: 90_000,
   // Unter Last (Software-WebGL, mehrere Browser parallel) kommen Klicks erst Sekunden spaeter im
   // Spiel an. 20 s lassen echten Fehlern trotzdem keinen Ausweg, sie werden nur langsamer rot.
   expect: { timeout: 20_000 },
