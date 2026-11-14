@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "20c15f5"
+  "commit": "adc0086"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -516,7 +516,9 @@
    "status": "erledigt",
    "bilder": [
     44,
-    45
+    45,
+    49,
+    50
    ]
   },
   {
@@ -5045,9 +5047,34 @@
    "datum": "2026-11-14",
    "quelle": "ereignisse/vorbereiten-pc-1-sturm-angekuendigt.png",
    "nr": 48
+  },
+  {
+   "datei": "p19-pr279-handy-heute-voll.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Bootskarte am Handy: Wunsch \"Essen (heute voll)\"",
+   "pr": 279,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr279/279-voll-iphone.png",
+   "nr": 49
+  },
+  {
+   "datei": "p19-pr279-pc-heute-voll.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Bootskarte am PC: Wunsch \"WC (heute voll)\"",
+   "pr": 279,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr279/279-voll-pc.png",
+   "nr": 50
   }
  ],
  "neueBilder": [
+  50,
   48,
   46,
   45,
@@ -5055,10 +5082,17 @@
   41,
   39,
   38,
-  37,
-  36
+  37
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: Bilder zu P19 Teil 2 (heute voll, PR 279), Stand nach PR 291",
+   "pr": 293,
+   "pakete": [
+    "P19"
+   ]
+  },
   {
    "datum": "2026-11-14",
    "titel": "P22 Erfolge: 30 Erfolge, Reiter im Logbuch, Wimpel, Pokale und Ehrentafel im Hafen",
@@ -5138,16 +5172,6 @@
    "pr": 281,
    "pakete": [
     "P24"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap: Funde aus dem Feature-Test behoben, PR 244 bis 279 eingetragen, Bilder für P19, P21, P55",
-   "pr": 276,
-   "pakete": [
-    "P19",
-    "P21",
-    "P55"
    ]
   }
  ]
