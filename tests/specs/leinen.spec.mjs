@@ -12,7 +12,7 @@ const BEREIT = () => window.hafenmeister?.boatView && window.hafenmeister?.sim?.
 // Laeuft im Browser als Ticker, damit auch kurze Zustaende auffallen.
 function pruefer() {
   const G = window.hafenmeister;
-  const W = window.__leinen = { funde: [], gesehen: new Set(), n: 0, tage: new Set() };
+  const W = window.__leinen = { funde: [], frei: [], gesehen: new Set(), n: 0, tage: new Set() };
   G.onTick((dt) => {
     if (!dt) return;
     const S = G.sim, st = S?.state;
@@ -22,6 +22,17 @@ function pruefer() {
     W.tage.add(st.day);
     if (++W.n % 3) return;
     for (const a of G.boatAnim.boats) {
+      // Ein sichtbares Boot liegt in einer Box (fest oder beim Ablegen noch drin), die Platzkarte
+      // sagt aber "frei" (Box zu frueh freigegeben, waehrend das Boot auf den Ablegetakt wartet)
+      const box = String(a.berth?.id ?? '');
+      if (a.model.visible !== false && box && a.berth.kind !== 'buoy' && !box.startsWith('boje') && !box.startsWith('anker')
+        && (a.moored || a.state === 'casting-off') && S.platzZustand?.(box) === 'frei') {
+        const k = `${a.id}|frei|${box}`;
+        if (!W.gesehen.has(k)) {
+          W.gesehen.add(k);
+          W.frei.push(`Boot ${a.id} liegt in ${box} (Tag ${st.day}, ${a.state}, ${a.task?.constructor?.name ?? '-'}), Platzkarte sagt frei`);
+        }
+      }
       if (!a.lines.length || !a.lineObj.visible) continue;
       const grund = [];
       if (a.model.visible === false) grund.push('Boot unsichtbar');
@@ -91,7 +102,7 @@ test.describe('Festmacherleinen', () => {
   // selbst ein, Muenzen werden sofort eingestrichen): nirgends Leinen ohne sichtbares Boot.
   for (let g = 1; g <= 10; g++) {
     const stufe = g % 2 ? 3 : 6;
-    test(`Kuestentyp ${g}, Stufe ${stufe}: ueber viele Tage keine Leinen ohne Boot`, async ({ page, problems }) => {
+    test(`Kuestentyp ${g}, Stufe ${stufe}: ueber viele Tage keine Leinen ohne Boot, keine freie Box mit Boot`, async ({ page, problems }) => {
       void problems;
       test.setTimeout(120_000);
       await page.goto(`./?stufe=${stufe}&gelaende=${g}&testtempo=300`);
@@ -99,9 +110,10 @@ test.describe('Festmacherleinen', () => {
       await page.evaluate(pruefer);
       // mindestens 6 Spieltage, hoechstens 50 s Echtzeit
       await page.waitForFunction(() => window.__leinen.tage.size >= 7, null, { timeout: 50_000 }).catch(() => {});
-      const r = await page.evaluate(() => ({ tage: window.__leinen.tage.size, funde: window.__leinen.funde.slice(0, 10) }));
+      const r = await page.evaluate(() => ({ tage: window.__leinen.tage.size, funde: window.__leinen.funde.slice(0, 10), frei: window.__leinen.frei.slice(0, 10) }));
       expect(r.tage, 'genug Spieltage gelaufen').toBeGreaterThanOrEqual(4);
       expect(r.funde, 'keine Leinen ohne Boot').toEqual([]);
+      expect(r.frei, 'keine Box "frei", in der noch ein Boot liegt').toEqual([]);
     });
   }
 });

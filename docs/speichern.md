@@ -14,7 +14,7 @@ Safari auf iPhone und iPad löscht alles, was eine Seite im Browser gespeichert 
 | Datei | Aufgabe |
 |---|---|
 | `web/manifest.webmanifest` | Name, Farben, Icons, `start_url` und `scope` relativ (`./`) |
-| `web/sw.js` | Service Worker: eigene Dateien zuerst aus dem Netz, ohne Netz aus dem Cache. CDN-Bibliotheken mit fester Version zuerst aus dem Cache. Supabase und Ähnliches wird nicht angefasst. |
+| `web/sw.js` | Service Worker: eigene Dateien zuerst aus dem Netz, ohne Netz aus dem Cache. Nach jedem Start legt er alle Dateien aus `offline-liste.json` (entsteht beim Deploy, `tools/offline-liste.mjs`) in den Cache, damit das Spiel danach ohne Netz startet; nur bei neuem Stand. Supabase und Ähnliches wird nicht angefasst. |
 | `web/icons/` | `icon.svg` (Vorlage), PNG in 192 und 512, `icon-maskable-512.png` für Android, `apple-touch-icon.png` (180) für iOS |
 | `web/js/save/storage.js` | Speichern, Laden, Sicherung des vorigen Stands, Export und Import, Versionsnummer und Umbau alter Stände |
 | `web/js/save/pwa.js` | Service Worker anmelden, Update melden, Installation anbieten, Erkennung iOS und App-Modus |
@@ -142,7 +142,7 @@ Dateiname: `hafenmeister-<hafenname>-JJJJ-MM-TT.json`, alle Häfen zusammen `haf
 
 - Bei jeder Änderung an `web/sw.js` die Zeile `const VERSION = 'v1';` hochzählen. Für Spielcode ist das nicht nötig: Eigene Dateien kommen immer zuerst frisch aus dem Netz.
 - Beim ersten Besuch wird der Service Worker sofort aktiv. Spätere Versionen warten, bis das Spiel `apply()` aufruft, damit kein laufendes Spiel mitten im Abend neu lädt.
-- Neue Bibliotheken vom CDN nur mit fester Version einbinden (`three@0.187.0`), sonst werden sie nicht offline gespeichert.
+- Neue Bibliotheken nicht vom CDN laden, sondern nach `web/vendor/` legen (wie Three.js, siehe `tools/three-holen.sh`). Dateien in `css/`, `fonts/`, `icons/`, `js/` und `vendor/` landen automatisch im Offline-Vorrat; was woanders liegt, in `tools/offline-liste.mjs` ergänzen.
 
 ## Testen
 

@@ -273,6 +273,20 @@ function startLeaving(state, boatId, berthId, at = 0) {
   state.leaving[berthId] = { boatId, elapsed: 0, at, off: !(at > 0) };
 }
 
+/**
+ * Die 3D-Ansicht meldet: das abreisende Boot liegt noch sichtbar in seiner Box (wartet auf den
+ * Ablegetakt, auf seine Leute oder auf ein Nachbarboot). Die Rückfallzeit beginnt dann von vorn,
+ * die Box bleibt belegt, bis 'boot:aus-box' kommt. Ohne Ansicht (Tests, Balancing) meldet niemand.
+ */
+export function holdLeaving(state, boatId) {
+  let ok = false;
+  for (const l of Object.values(state.leaving || {})) {
+    // hoechstens 5 Minuten Spielzeit: haengt die Ansicht, wird die Box trotzdem frei
+    if (String(l.boatId) === String(boatId) && l.off && (l.total ?? 0) < 300) { l.elapsed = 0; ok = true; }
+  }
+  return ok;
+}
+
 /** Box freigeben, sobald das abreisende Boot heraus ist (per Boot-id oder Platz-id). */
 export function berthCleared(state, ctx, { boatId = null, berthId = null } = {}) {
   const events = [];
@@ -1532,6 +1546,7 @@ export function tick(state, ctx, dt) {
         events.push({ type: 'castOff', boatId: l.boatId, berthId });
       }
       l.elapsed += step;
+      l.total = (l.total ?? 0) + step;
       if (l.elapsed >= (ctx.rules.leaveMax ?? 0)) events.push(...berthCleared(state, ctx, { berthId }).events);
     }
     if (state.phase === 'day') {

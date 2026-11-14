@@ -579,6 +579,25 @@ test('Box bleibt belegt, bis das abreisende Boot heraus ist (Meldung oder Rückf
   assert.ok(sim.isFree(s, 'A6'));
 });
 
+test('Ansicht hält die Box, solange das abreisende Boot noch darin liegt (höchstens 5 Minuten)', () => {
+  const s = quietState();
+  s.leaving = { A3: { boatId: 77, elapsed: 0, at: 0, off: true } };
+  // Boot wartet sichtbar auf den Ablegetakt: jede Sekunde 'noch in der Box'
+  for (let i = 0; i < 3 * RULES.leaveMax; i++) {
+    assert.ok(sim.holdLeaving(s, 77));
+    sim.tick(s, ctx, 1);
+  }
+  assert.ok(!sim.isFree(s, 'A3'), 'Box bleibt belegt');
+  assert.equal(sim.berthState(s, ctx, 'A3'), 'belegt');
+  assert.equal(sim.holdLeaving(s, 12345), false, 'fremdes Boot hält nichts');
+  // Hängt die Ansicht, wird die Box nach 5 Minuten trotzdem frei
+  for (let t = 0; t < 300 + RULES.leaveMax + 2; t++) { sim.holdLeaving(s, 77); sim.tick(s, ctx, 1); }
+  assert.ok(sim.isFree(s, 'A3'));
+  // Noch nicht abgelegt (Abreise am Vormittag geplant): Halten ändert nichts
+  s.leaving = { A4: { boatId: 78, elapsed: 0, at: 1e9, off: false } };
+  assert.equal(sim.holdLeaving(s, 78), false);
+});
+
 test('Erster Tag: das erste Boot kommt nach wenigen Sekunden', () => {
   for (const seed of [1, 2, 3, 4, 5]) {
     const s = createState({ seed });

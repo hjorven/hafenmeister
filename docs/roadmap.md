@@ -514,8 +514,8 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | N1 bis N12 | Speicherplätze, Seite "Spielstände", Aktionen je Platz, Wechseln ohne Verlust, Papierkorb, Umzug des alten Stands, Start mit "Weiter", Kopie, Vorschaubild, Gesamt-Export, ehrliche Grenzen, Neues Spiel mit Auswahl | erledigt | P09 |
 | N13 | Nach jedem Kauf und Stufenaufstieg sichern | erledigt | P09 |
 | N14 | Rückfall-Speicherweg entfernen | erledigt | P09 |
-| N15 | 3D-Bibliothek mitliefern statt von fremdem Server | offen | P61 |
-| N16 | Alle Spieldateien vorab für offline speichern | offen | P61 |
+| N15 | 3D-Bibliothek mitliefern statt von fremdem Server | erledigt (PR 270, `web/vendor/three-0.187.0/`, `tools/three-holen.sh`) | P61 |
+| N16 | Alle Spieldateien vorab für offline speichern | erledigt (PR 270, `offline-liste.json` beim Deploy, Service Worker lädt vorab) | P61 |
 
 ### O Tests und Werkzeuge
 
@@ -593,7 +593,7 @@ Jorven (12.11.2026, Spieltest am Gaming-PC): Das Gelände wird komplett überarb
 | P63 | Marinebasis und Anlagen neu platzieren | T6, T7, T13: Marinebasis mit Zufahrt von See, Großschiffpier, Services und Bauplätze passend zum neuen Gelände, jede Anlage von Wasser oder Land erreichbar | `web/js/render/services.js`, `web/js/data/services.js`, `web/js/data/harbor.js` | erledigt (PR 167, 172): eigene Piers mit freien Wegen in jedem Stegbild |
 | P64 | Gelände abwechslungsreicher gestalten | T11: Wald, Wiesen, Schilf, Felsen, Höhen, Dorfrand, je nach Stufe und Stegbild; erst nach P62-Grundform | `web/js/render/landschaft/*.js` | in Arbeit (PR 204, 211, 216): Umgebung und Ufer je Küstentyp |
 | P65 | Wetter und Effekte flüssig machen | T1, T5, T12: Wetter (Regen, Nebel, Sturm, Schnee) ohne Ruckeln, Heckwelle auf beiden Seiten, Effekte ohne Artefakte; Messung je Wetter mit `feature-tests/leistung.cjs` | `web/js/render/landschaft/wasser.js`, Wetter- und Effektmodule, `web/js/render/boat-anim.js` (nur Heckwelle) | erledigt (PR 169): Wetter flüssig, Heckwelle auf beiden Seiten |
-| P66 | Boote ums Gelände herum führen | T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch "hafenmeister-engpass-fix" (`boat-channel.js`, `boat-routes.js`, Tests `boot-engpass`, `boot-routen`) | `web/js/render/boat-view.js`, `boat-anim.js`, neue `boat-channel.js`, `boat-routes.js`, `web/js/world/fahrwege.js`, `tests/` | in Arbeit (PR 180, 181, 199, 228, 240, 254, 256): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread "Schiffsanimationen umsetzen" |
+| P66 | Boote ums Gelände herum führen | T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch "hafenmeister-engpass-fix" (`boat-channel.js`, `boat-routes.js`, Tests `boot-engpass`, `boot-routen`) | `web/js/render/boat-view.js`, `boat-anim.js`, neue `boat-channel.js`, `boat-routes.js`, `web/js/world/fahrwege.js`, `tests/` | in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread "Schiffsanimationen umsetzen" |
 
 Abstimmung: P62 legt zuerst die Wasserfläche fest; P63 und P66 bauen darauf. P65 misst die Leistung nach jeder Geländeänderung neu. Welle 0 ist fertig, wenn alle fünf Pakete auf `main` sind und auf allen Stufen und Stegbildern kein Boot Land, Stege oder andere Boote berührt.
 
@@ -620,11 +620,11 @@ Ein Audit von außerhalb (`AUDIT-ISTSTAND.md`, ZIP-Stand mit PR 143) hat die Roa
 | C03 | Spielstand-Import prüft verschachtelte Daten kaum: ein Schema für den ganzen Spielstand, IDs gegen Boots- und Platzdaten, Zahlen begrenzen, unbekannte Felder kontrolliert behandeln, erst nach vollständiger Prüfung übernehmen, Tests mit falschen Typen und Extremwerten | ja, `state.js` `validate` | P09 (erledigt: `state.js` prüft Typen, Grenzen und Verweise; Import erst nach Prüfung aller Häfen) |
 | C04 | Abnahmekriterium für P06: neue Spielstände, alle Regeltests und das Balancing nutzen dieselbe Regelkonfiguration | ja, `data/rules.js` besteht | P06 |
 | C05 | HTML per `innerHTML` (`render/services.js`, `ui/input-pc.js`): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, `textContent` oder Escapen, dazu Test mit präparierten Namen | ja | P08 (Sicherheit), Pflicht für P44 (Hafenname) und P09 (Import) |
-| C06 | Three.js kommt von jsDelivr, Erststart hängt am CDN (= N15, N16) | ja, `web/index.html` | P61 |
-| C07 | GitHub Actions: Rechte je Job statt für den ganzen Workflow (`pages.yml` gibt `pages: write` und `id-token: write` auch dem Build), Actions auf Commit-SHAs pinnen, Dependabot prüfen | ja | P08 (mit Thread "Spiel über GitHub Pages veröffentlichen") |
+| C06 | Three.js kommt von jsDelivr, Erststart hängt am CDN (= N15, N16) | erledigt (PR 270) | P61 |
+| C07 | GitHub Actions: Rechte je Job statt für den ganzen Workflow (`pages.yml` gibt `pages: write` und `id-token: write` auch dem Build), Actions auf Commit-SHAs pinnen, Dependabot prüfen | erledigt (P08-Rest, 14.11.): `permissions: {}` je Workflow, Rechte je Job, alle Actions auf SHAs, Dependabot für Actions, Regeln in [sicherheit.md](sicherheit.md) | P08 |
 | C08 | Kein Supabase-Code vorhanden; vor dem Online-Start eigenes Sicherheitsreview (RLS je Tabelle, Rechte anonymer Nutzer, Rate Limits, serverseitige Prüfung) | ja | P58 |
 
-Weitere Ergänzungen aus Abschnitt 6 des Audits, alle P08 (Release-Vorbereitung): Secret-Scan in CI, CSP und Sicherheits-Header der veröffentlichten Seite prüfen, Browser-Tests in CI als Pflicht vor jedem Release nachweisen, `SECURITY.md` mit Meldeweg, sobald das Spiel öffentlich genutzt wird.
+Weitere Ergänzungen aus Abschnitt 6 des Audits, alle P08 (Release-Vorbereitung): Secret-Scan in CI (erledigt 14.11., `secret-scan.yml` mit gitleaks), CSP und Sicherheits-Header der veröffentlichten Seite prüfen, Browser-Tests in CI als Pflicht vor jedem Release nachweisen, `SECURITY.md` mit Meldeweg, sobald das Spiel öffentlich genutzt wird.
 
 ---
 
@@ -745,7 +745,7 @@ Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen
 | P55 | Versteckte Regeln im Hafen sichtbar machen | A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen "hier ist etwas zu tun" | 2 | neu |
 | P59 | Stege umbauen und Varianten wählen | D5, D6, D9 (neue Gastplätze in Stufe 6) | 3 | neu (stimmt sich mit "Stegbild pro Spiel variieren" ab) |
 | P60 | Hafen verschönern | D8 | 4 | neu |
-| P61 | Spiel komplett offline startbar | N15, N16 | 2 | bestehend: "Spiel über GitHub Pages veröffentlichen" |
+| P61 | Spiel komplett offline startbar | N15, N16 | 2 | erledigt (PR 270), Thread "Spiel offline startbar machen" |
 
 P56 bleibt frei.
 
