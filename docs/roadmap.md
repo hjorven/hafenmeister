@@ -347,7 +347,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| B1 | Auslastung an jedem Versorgungsgebäude ("14 von 20"), Schlange vor der Dusche | Schild erledigt (P55, `game.sim.auslastung()`), Schlange offen (L2) | P55 |
+| B1 | Auslastung an jedem Versorgungsgebäude ("14 von 20"), Schlange vor der Dusche | Schild erledigt (P55, `game.sim.auslastung()`), Schlange erledigt (L2) | P55 |
 | B2 | Wunschsymbole über dem Boot, beim Anlegen Haken oder grau | erledigt (PR 158) | P11 |
 | B3 | Münze nennt ihren Wert ("22 € + 11 €") | erledigt (`render/boat-view.js`, `feeReady` mit `base`, `bonus`) | P12 |
 | B4 | Rundgang als Helfer: erst abends, nur vergessene Münzen, etwa vier Fünftel statt der Hälfte | erledigt (`ECONOMY.kassieren.rundgangAnteil` 0,8, gilt auch nachts) | P12 |
@@ -489,7 +489,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
 | L1 | Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel | offen | P46 |
-| L2 | Figuren als Anzeige (Schlange vor der Dusche, volle Tische) | offen (braucht `render/people.js`, Thread Menschen; Auslastung zeigt schon das Schild) | P55 |
+| L2 | Figuren als Anzeige (Schlange vor der Dusche, volle Tische) | erledigt (P55, Schlange vor WC, Dusche, Kiosk und Restaurant, wenn knapp oder voll; `render/people.js`) | P55 |
 | L3 | Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles | offen | P26 |
 | L4 | Fernglas mit Steckbrief | offen | P26 |
 | L5 | Möwen antippen, Glocke am Steg | offen | P26 |
@@ -742,7 +742,7 @@ Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen
 
 | Paket | Titel (Thread) | Inhalt | Welle | Thread |
 |---|---|---|---|---|
-| P55 | Versteckte Regeln im Hafen sichtbar machen | A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen "hier ist etwas zu tun" | 2 | erledigt bis auf L2 (PR 269, `docs/hafenzeichen.md`) |
+| P55 | Versteckte Regeln im Hafen sichtbar machen | A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen "hier ist etwas zu tun" | 2 | erledigt (PR 269 und 275, `docs/hafenzeichen.md`) |
 | P59 | Stege umbauen und Varianten wählen | D5, D6, D9 (neue Gastplätze in Stufe 6) | 3 | neu (stimmt sich mit "Stegbild pro Spiel variieren" ab) |
 | P60 | Hafen verschönern | D8 | 4 | neu |
 | P61 | Spiel komplett offline startbar | N15, N16 | 2 | erledigt (PR 270), Thread "Spiel offline startbar machen" |
