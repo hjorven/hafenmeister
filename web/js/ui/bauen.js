@@ -308,8 +308,9 @@ export function init(game) {
     const adv = sim.canAdvanceStage();
     const spar = sparSchritt(sparziel(), sim.state.money);
     if (spar) return spar;
-    const r = waehleSchritt({ geld: sim.state.money, eintraege: eintraege(), bedarf: bedarf(), stufe: adv.goal ? adv : null });
-    return r ?? regionsSchritt(sim.regionGoal?.());
+    const region = sim.regionGoal?.();
+    const r = waehleSchritt({ geld: sim.state.money, eintraege: eintraege(), bedarf: bedarf(), stufe: adv.goal ? adv : null, region });
+    return r ?? regionsSchritt(region);
   }
 
   // ------------------------------------------------------------------ Letzten Kauf zuruecknehmen (P18, Bed P7)
@@ -324,7 +325,8 @@ export function init(game) {
       return {
         key: e.key, money: st.money, office: st.office,
         buildings: { ...st.buildings }, facilities: { ...st.facilities },
-        heuteTag: st.stats?.heute?.tag, ausgaben: st.stats?.heute?.ausgaben ? structuredClone(st.stats.heute.ausgaben) : null,
+        // Erster Kauf des Tages: stats.heute entsteht erst beim Bezahlen, vorher waren die Ausgaben leer
+        heuteTag: st.day, ausgaben: st.stats?.heute?.tag === st.day && st.stats.heute.ausgaben ? structuredClone(st.stats.heute.ausgaben) : {},
         services: st.modules?.services ? structuredClone(st.modules.services) : null,
         ausbau: speicher()?.ausbau ? structuredClone(speicher().ausbau) : null,
       };
@@ -344,7 +346,7 @@ export function init(game) {
     }
     st.money = u.money;
     st.office = u.office;
-    if (u.ausgaben && st.stats?.heute?.tag === u.heuteTag) st.stats.heute.ausgaben = u.ausgaben;
+    if (st.stats?.heute && st.stats.heute.tag === u.heuteTag) st.stats.heute.ausgaben = u.ausgaben;
     if (u.services && st.modules?.services) { ersetze(st.modules.services, u.services); game.services?.neuZeichnen?.(); }
     speicher().ausbau = u.ausbau;
     zeigeBaustelle();
@@ -1265,7 +1267,14 @@ export function init(game) {
       const f = flieger[i];
       f.t += dt;
       _v.copy(f.p).project(rig.camera);
-      const sx = (_v.x + 1) / 2 * c.width, sy = (1 - _v.y) / 2 * c.height - f.t * 40;
+      let sx = (_v.x + 1) / 2 * c.width, sy = (1 - _v.y) / 2 * c.height - f.t * 40;
+      // Im Bild bleiben: unter der oberen Leiste, ueber einer Karte unten, nicht ueber den Rand
+      const w = f.f.offsetWidth, h = f.f.offsetHeight;
+      const oben = (document.getElementById('hud-top')?.getBoundingClientRect().bottom ?? c.top) - c.top + 8 + h;
+      const k = card.hidden ? null : card.getBoundingClientRect();
+      const unten = k && k.width >= c.width * 0.6 ? k.top - c.top - 8 : c.height - 8;
+      sy = Math.max(oben, Math.min(unten, sy));
+      sx = Math.max(w / 2 + 8, Math.min(c.width - w / 2 - 8, sx));
       f.f.style.transform = `translate(-50%, -100%) translate(${Math.round(sx)}px, ${Math.round(sy)}px)`;
       f.f.style.opacity = String(Math.max(0, Math.min(1, 2.2 - f.t)));
       if (f.t > 2.2) { f.f.remove(); flieger.splice(i, 1); }

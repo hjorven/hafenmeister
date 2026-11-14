@@ -40,7 +40,7 @@ export const leer = () => ({ weg: 0, offen: {}, belegt: 0, plaetze: 0, abend: fa
  * lage = { geld, eintraege, bedarf, stufe: { goal, ok, guests, reputation, missing } }
  * Liefert { text, ziel, leistbar } oder null.
  */
-export function waehleSchritt({ geld, eintraege, bedarf, stufe }) {
+export function waehleSchritt({ geld, eintraege, bedarf, stufe, region = null }) {
   const offen = eintraege.filter((e) => !e.gesperrt);
   const leistbar = (e) => e.kosten <= geld;
   const guenstigste = (liste) => [...liste].sort((a, b) => (leistbar(b) - leistbar(a)) || a.kosten - b.kosten)[0];
@@ -86,6 +86,9 @@ export function waehleSchritt({ geld, eintraege, bedarf, stufe }) {
     if (e?.gesamt && zielErreicht) return { text: `Noch ${euro(e.kosten - geld)} sparen für ${e.name}.`, ziel: e.key, leistbar: false };
     if (stufe.missing.includes('money')) return { text: `Noch ${euro(stufe.goal.cost - geld)} sparen für ${name}.`, ziel: e?.key ?? null, leistbar: false };
   }
+  // Letzte Stufe: das Abschlussziel der Region geht Kleinkram vor
+  const rs = regionsSchritt(region);
+  if (rs) return rs;
   // 6. Etwas Neues, das sich leisten laesst
   const neu = offen.filter((e) => leistbar(e)).sort((a, b) => a.kosten - b.kosten)[0];
   if (neu) return { text: `Neu im Bauplan: ${neu.name} für ${euro(neu.kosten)}.`, ziel: neu.key, leistbar: true };
