@@ -594,6 +594,28 @@
    "geraet": "handy-quer",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr281/281-regatta-ergebnis-iphonequer.png"
+  },
+  {
+   "datei": "p28-pr288-handy-funk-anmeldung.jpg",
+   "pakete": [
+    "P28"
+   ],
+   "titel": "Funk: Boot meldet sich an, Box freihalten mit Bonus (Handy)",
+   "pr": 288,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "funk-anmeldung/handy-anmeldung.png"
+  },
+  {
+   "datei": "p28-pr288-pc-box-frei-gehalten.jpg",
+   "pakete": [
+    "P28"
+   ],
+   "titel": "Box frei gehalten, Funkliste am Rand (PC)",
+   "pr": 288,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "funk-anmeldung/pc-box-frei-gehalten.png"
   }
  ]
 }

@@ -1,6 +1,6 @@
 # Hafenmeister: Roadmap
 
-Stand: 14.11.2026 abends, abgeglichen mit `main` bei Commit `adc0086` (PR 295). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
+Stand: 14.11.2026 abends, abgeglichen mit `main` bei Commit `546f080` (PR 288). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
 
 **Verhältnis zu [plan.md](plan.md):** `plan.md` bleibt der einzige gültige Plan für Vision, Regeln und Entscheidungen. Diese Roadmap ist die **Arbeitsliste**: Sie sagt, was noch fehlt, was falsch ist, was weg soll, und welches Paket (welcher Thread) es erledigt. Wo die Roadmap eine Entscheidung aus `plan.md` ändern würde, steht das unter [Offene Fragen an Jorven](#offene-fragen-an-jorven) und gilt erst nach seiner Antwort; danach wird `plan.md` im selben PR angepasst.
 
