@@ -134,6 +134,25 @@ const BOT = () => {
 // ------------------------------------------------------------------ im Browser: Prüfungen
 // A Rumpf über Land, B Rumpf durch Steg, C ineinander und fest, D zwei liegende Boote überlappen,
 // E Boot bewegt sich nicht, obwohl es fahren sollte, F Sim-Zustände, die zu lange dauern.
+// Logbuch: welche Bootsmodelle haben schon einmal angelegt (state.logbook, siehe docs/logbuch.md)?
+// Gleiche Zählung wie ui/logbuch-daten.js katalog() und fortschritt(): Arten ohne Modelle zählen als ein Eintrag.
+const LOGBUCH = () => {
+  const G = window.hafenmeister; const st = G.sim?.state; const types = G.sim?.ctx?.types;
+  if (!st?.logbook || !types) return null;
+  const liste = Array.isArray(types) ? types : Object.values(types);
+  const r = { gesehen: 0, gesamt: 0, je: {}, fehlt: [] };
+  for (const t of liste) {
+    const g = String(t.size).toUpperCase(); const j = (r.je[g] ||= { gesehen: 0, gesamt: 0 });
+    const models = Array.isArray(t.models) && t.models.length ? t.models : [{ id: t.id, name: t.name }];
+    for (const mo of models) {
+      j.gesamt++; r.gesamt++;
+      if ((st.logbook[t.id] ?? []).includes(mo.id)) { j.gesehen++; r.gesehen++; continue; }
+      r.fehlt.push({ g, art: t.id, modell: mo.id, name: mo.name || t.name, ab: mo.minStage ?? mo.fromStage ?? t.minStage ?? t.fromStage ?? 1, unlock: t.unlock ?? null, fest: !!t.stationed });
+    }
+  }
+  return r;
+};
+
 const PROBE = () => {
   const G = window.hafenmeister; const T = G.THREE; const S = G.sim;
   const W = window.__zrp ||= {}; W.ray ||= new T.Raycaster(); W.stand ||= new Map(); W.simSeit ||= new Map(); W.unterwegs ||= new Map();
@@ -260,7 +279,7 @@ const SNAP = () => {
 
   const query = `?testtempo=${TEMPO}${START > 1 ? `&stufe=${START}` : ''}${EXTRA}`;
   R = { geraet: GERAET, tempo: TEMPO, query, start: new Date().toISOString(), commit: null,
-    verlauf: [], kaeufe: [], stufen: [], bilder: [], treffer: { land: {}, steg: {}, fest: {}, ueberlapp: {}, haengt: {}, pulk: {}, lange: {}, sim: {} },
+    verlauf: [], kaeufe: [], stufen: [], bilder: [], logbuch: {}, treffer: { land: {}, steg: {}, fest: {}, ueberlapp: {}, haengt: {}, pulk: {}, lange: {}, sim: {} },
     nahbilder: [], speichern: [], wetter: {}, leistung: [], ende: null };
   try { R.commit = fs.readFileSync(path.join(WEB, 'version.txt'), 'utf8').trim(); } catch { /* lokal */ }
 
@@ -338,6 +357,7 @@ const SNAP = () => {
     if (zustand.winter) R.wetter.winter = (R.wetter.winter || 0) + 1;
 
     if (letzteStufe !== zustand.stufe) {
+      if (letzteStufe != null) (R.logbuch.jeStufe ||= {})[letzteStufe] = await page.evaluate(`(${LOGBUCH})()`).catch(() => null);
       if (letzteStufe != null) R.stufen.push({ stufe: zustand.stufe, tag: zustand.tag, w: zustand.w });
       letzteStufe = zustand.stufe;
       await page.evaluate(() => window.hafenmeister.camera.reset());
@@ -383,6 +403,7 @@ const SNAP = () => {
     await page.waitForTimeout(700);
   }
   if (!R.ende) { const v = tz(); R.ende = `Zeit abgelaufen (${MINUTEN} min), erreicht: Stufe ${v?.stufe}, Tag ${v?.tag}`; }
+  R.logbuch.ende = await page.evaluate(`(${LOGBUCH})()`).catch(() => null);
   R.dauerMin = +((Date.now() - t0) / 60000).toFixed(1);
   R.fehler = fehler; R.warnungen = warnungen; R.fehlendeDateien = fehlendeDateien;
   fs.writeFileSync(path.join(OUT, `ergebnis-${GERAET}.json`), JSON.stringify(R, null, 1));

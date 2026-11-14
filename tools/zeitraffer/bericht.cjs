@@ -107,6 +107,19 @@ for (const R of laeufe) {
   md.push('');
 
   // Wetter und Leistung
+  // Logbuch: angelegte Bootsmodelle (state.logbook)
+  const lb = R.logbuch?.ende;
+  if (lb) {
+    const je = Object.entries(lb.je).map(([g, j]) => `${g} ${j.gesehen}/${j.gesamt}`).join(', ');
+    md.push('### Logbuch (angelegte Bootsmodelle)', '', `${lb.gesehen} von ${lb.gesamt} Modellen haben angelegt (${je}).`, '');
+    const stufen = Object.entries(R.logbuch.jeStufe || {}).map(([st, x]) => `Stufe ${st}: ${x?.gesehen ?? '?'}`).join(', ');
+    if (stufen) md.push(`Stand am Ende jeder Stufe: ${stufen}.`, '');
+    if (lb.fehlt.length) {
+      md.push('| Größe | Art | Modell | ab Stufe | Hinweis |', '|---|---|---|---|---|', ...lb.fehlt.map((f) => `| ${f.g} | ${f.art} | ${f.name} (${f.modell}) | ${f.ab} | ${f.unlock ? 'braucht ' + f.unlock : f.fest ? 'liegt fest' : ''} |`), '');
+      const xxl = lb.fehlt.filter((f) => f.g === 'XXL');
+      if (xxl.length) fehlerliste.push({ geraet: R.geraet, art: 'Logbuch', text: `${xxl.length} XXL-Modelle haben in der ganzen Partie nie angelegt: ${xxl.map((f) => f.name).join(', ')}` });
+    }
+  }
   md.push('### Wetter, Ereignisse und Bildrate', '');
   const jeEreignis = {};
   for (const l of R.leistung) { const k = l.ereignis || 'normal'; (jeEreignis[k] ||= []).push(l.fps); }
