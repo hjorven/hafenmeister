@@ -19,6 +19,7 @@ const REASON_LABEL = {
   draft: 'Hier ist das Wasser zu flach für dieses Boot.',
   size: 'Dieser Platz ist für andere Schiffsgrößen.',
   reserved: 'Dieser Platz ist fest vergeben.',
+  funk: 'Diese Box ist für ein angemeldetes Boot frei gehalten.',
   occupied: 'Der Platz ist schon belegt.',
   noBerth: 'Diesen Platz gibt es noch nicht.',
   noFreeBerth: 'Gerade ist kein passender Platz frei.',
@@ -288,6 +289,7 @@ export function init(game) {
     }, 1700);
   }
   const flugAktiv = new Map();
+  game.flugtext = flugtext;   // auch für andere Module (Anmeldung per Funk)
   // Trinkgeld und Nebenkosten beim Kassieren zeigt die Münzanzeige in render/boat-view.js (P12)
   game.on('sim:moored', (e) => {
     const sim = game.sim;

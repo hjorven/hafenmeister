@@ -26,6 +26,8 @@ Das gewählte Boot bekommt einen goldenen Rand um seine Schilder. Boote ohne Wü
 
 Antippen einer Karte zeigt einen Satz dazu ("Fahrtenyacht, 12 m lang, gegen 15:40, möchte Strom und Dusche"). Der Kopf "Funk" klappt die Liste ein und aus, das merkt sich das Gerät. Abends steht "Funk still", tagsüber ohne weitere Boote "Heute kommt niemand mehr". Im Winter ist der Funk aus.
 
+**Angemeldete Boote** (P28, [funk-anmeldung.md](funk-anmeldung.md)) stehen immer im Funk, auch wenn sie nicht unter den nächsten drei sind: blau gestrichelt mit "angemeldet", mit frei gehaltener Box gold mit der Platznummer. Antippen öffnet die Anmeldung.
+
 Wozu: Man sieht, wer gleich kommt, und kann entscheiden, ob man die große Box mit Strom für die Yacht um 15:40 freihält.
 
 ## Wann es ausgeblendet ist
