@@ -1,14 +1,15 @@
-// Geländeformen: jedes Spiel bekommt einen von zehn Küstentypen (natur.js) und dazu einen eigenen
+// Geländeformen: jedes Spiel bekommt einen von 15 Küstentypen (natur.js) und dazu einen eigenen
 // Zufallswert (seed). Typ und Seed zusammen ergeben die ganze Landschaft rund um den Hafen: Küste, Buchten,
 // Inseln, Nehrungen, Flüsse, Felsen, Watt und wo darin der Hafen liegt. Gleicher Typ, anderer Seed: andere Küste.
-// Die Typen sind frei nach Landschaften an Ost- und Nordsee gebaut, keine bildet einen echten Ort ab.
+// Die Typen 1 bis 10 sind frei nach Landschaften an Ost- und Nordsee gebaut; 11 bis 15 sind echte Orte
+// aus Karten- und Höhendaten (data/kuesten-vorbilder.js), Maßstab und Stege vom Spiel.
 // Beschreibung: docs/landschaft.md, Abschnitt "Geländeformen".
 //
 // Fest in jedem Typ (natur.js, PFLICHT): Uferstreifen der Stege, Wasser vor den Stegen, Zufahrt durch das
 // Seegatt bei x 178, offenes Wasser vor der Einfahrt, Land für den Ort hinter dem Hafen.
 //
 // Welche Form gilt (erste passende Regel, wie bei den Stegbildern):
-//   1. URL ?gelaende=N (1 bis 10) und ?seed=S. Nur zum Ansehen, wird nicht gespeichert.
+//   1. URL ?gelaende=N (1 bis 15) und ?seed=S. Nur zum Ansehen, wird nicht gespeichert.
 //   2. Spielstand mit modules.gelaende.nr (und .seed).
 //   3. Eigener Eintrag 'hafenmeister.gelaende' im Browser, der zum Spielstand gehört.
 //   4. Spielstand von vor den Formen: Form 1, Seed 1.

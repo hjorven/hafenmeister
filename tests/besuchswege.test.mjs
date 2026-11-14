@@ -231,7 +231,7 @@ test('Besuchsschiffe in Stufe 6 bleiben mindestens 5 m von der Seebrücke weg', 
   assert.deepEqual(fehler, []);
 });
 
-// Alle 10 Geländeformen (?gelaende=1..10): Wege im Grundbild, Seenotretter, Barkasse, Bauplätze, Anlagenflächen
+// Alle Geländeformen (?gelaende=1..15): Wege im Grundbild, Seenotretter, Barkasse, Bauplätze, Anlagenflächen
 test('In jeder Geländeform kommen alle Besuchsschiffe frei an, Anlagen stehen an Land', () => {
   const fehler = [];
   try {
