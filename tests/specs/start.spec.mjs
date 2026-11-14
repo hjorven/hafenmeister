@@ -37,27 +37,33 @@ test('Spielflaeche zeigt ein Bild (nicht leer, nicht schwarz)', async ({ game })
   expect(stats.colors, 'Bild hat kaum Farben, vermutlich wird nichts gezeichnet').toBeGreaterThanOrEqual(3);
 });
 
-test('Bildschirmfotos', async ({ game }, testInfo) => {
-  // Zwei Vollbilder vom ganzen Hafen: auf Tablets mit Software-Grafik (CI) laeuft das
-  // inzwischen mit rund 3 Bildern pro Sekunde, daher die dreifache Zeit
-  test.slow();
-  const { page } = game;
-  const dir = path.join(testInfo.config.rootDir, '..', 'bildschirmfotos');
-  fs.mkdirSync(dir, { recursive: true });
-  const name = testInfo.project.name;
+// Nur hier die echte Pixeldichte des Geraets (sonst 1, siehe playwright.config.mjs),
+// damit die Vorschaubilder so scharf sind wie am Handy.
+test.describe('in echter Pixeldichte', () => {
+  test.use({ deviceScaleFactor: async ({ echteDichte }, use) => use(echteDichte) });
 
-  // Startansicht
-  await page.waitForTimeout(300);
-  const start = await page.screenshot();
-  fs.writeFileSync(path.join(dir, `${name}-start.png`), start);
-  await testInfo.attach(`${name}-start`, { body: start, contentType: 'image/png' });
+  test('Bildschirmfotos', async ({ game }, testInfo) => {
+    // Zwei Vollbilder vom ganzen Hafen in echter Dichte: auf Tablets mit Software-Grafik (CI)
+    // laeuft das mit rund 3 Bildern pro Sekunde, daher die dreifache Zeit
+    test.slow();
+    const { page } = game;
+    const dir = path.join(testInfo.config.rootDir, '..', 'bildschirmfotos');
+    fs.mkdirSync(dir, { recursive: true });
+    const name = testInfo.project.name;
 
-  // Ganz herausgezoomt
-  await page.evaluate(() => window.hafenmeister.camera.zoomAt(0.01));
-  await page.waitForTimeout(300);
-  const weit = await page.screenshot();
-  fs.writeFileSync(path.join(dir, `${name}-weit.png`), weit);
-  await testInfo.attach(`${name}-weit`, { body: weit, contentType: 'image/png' });
+    // Startansicht
+    await page.waitForTimeout(300);
+    const start = await page.screenshot();
+    fs.writeFileSync(path.join(dir, `${name}-start.png`), start);
+    await testInfo.attach(`${name}-start`, { body: start, contentType: 'image/png' });
+
+    // Ganz herausgezoomt
+    await page.evaluate(() => window.hafenmeister.camera.zoomAt(0.01));
+    await page.waitForTimeout(300);
+    const weit = await page.screenshot();
+    fs.writeFileSync(path.join(dir, `${name}-weit.png`), weit);
+    await testInfo.attach(`${name}-weit`, { body: weit, contentType: 'image/png' });
+  });
 });
 
 test('Erstes Spiel ohne Speicherplatzwahl hat Küste und Stegbild im Spielstand', async ({ game }) => {

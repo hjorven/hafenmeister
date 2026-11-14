@@ -43,6 +43,11 @@ async function routeThree(page) {
 
 // Fixture: jede Seite sammelt Fehler. Am Ende jedes Tests muss die Liste leer sein.
 export const test = base.extend({
+  // Echte Pixeldichte des Geraets (aus playwright.config.mjs); Tests laufen sonst mit Dichte 1.
+  echteDichte: [1, { option: true }],
+  // Name des Projekts (handy, tablet, ...). Damit kann test.skip(({ projekt }) => ...) auf Ebene
+  // von Datei oder describe überspringen, bevor die Fixture game das Spiel lädt.
+  projekt: async ({}, use, testInfo) => { await use(testInfo.project.name); },
   problems: async ({ page }, use) => {
     const problems = [];
     const modules = optionalModules();
