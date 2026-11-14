@@ -16,6 +16,7 @@ export const VORRANG = {
   feier: 100,          // features/aufstieg.js, #hm-feier
   kartenwahl: 90,      // features/tagesziele.js, Kartenwahl am Morgen
   abschluss: 80,       // ui/tagesabschluss.js, Karte
+  winter: 75,          // features/winter.js, Winterpause und Frühlingsgruß
   zettel: 70,          // ui/tagesabschluss.js, Morgen-Zettel
   dauerWartet: 65,     // features/dauerlieger.js, Dauerlieger früher zurück (hat eine Frist bis zum Abend)
   einstieg: 50,        // features/einstieg.js, Schritte des Einstiegs

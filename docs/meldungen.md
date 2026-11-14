@@ -11,6 +11,7 @@ warten ausgeblendet, ihre Zeit läuft solange nicht ab, und sie kommen danach. D
 | 100 | Feier beim Aufstieg (`#hm-feier`) | `features/aufstieg.js`, zählt von selbst, solange sichtbar |
 | 90 | Kartenwahl der Tagesziele (`.tz-wahl`) | `features/tagesziele.js`, zählt von selbst |
 | 80 | Karte des Tagesabschlusses (`#hm-tagesabschluss`) | `ui/tagesabschluss.js`, zählt von selbst |
+| 75 | Winterpause am ersten Wintertag und Gruß zum Saisonbeginn (`#hm-winter`) | `features/winter.js` |
 | 70 | Morgen-Zettel (`#hm-ta-zettel`) | `ui/tagesabschluss.js` |
 | 65 | Dauerlieger früher zurück (hat eine Frist bis zum Abend) | `features/dauerlieger.js` |
 | 50 | Schritte des Einstiegs | `features/einstieg.js` |

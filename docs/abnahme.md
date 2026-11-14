@@ -40,7 +40,7 @@ Danach `http://localhost:8000` öffnen, auf dem PC und mit den Geräte-Werkzeuge
 | Dauerlieger | halb: zahlen pauschal 15 € statt Pacht, keine Entscheidung (P01) |
 | Stammgäste, Wetterflagge, Fotomodus, Hafen schauen, Tagesziele | funktioniert |
 | Einstieg | halb: verweist noch auf die gelöschte Sonne (P03, PR 112) |
-| Ereignisse, Winter | funktioniert; Winter ohne eigene Aufgaben (P20) |
+| Ereignisse, Winter | funktioniert; Winterpause mit Bilanz, Winterarbeiten und „Winter überspringen“ (`docs/winter.md`); Krantage offen (P20) |
 | Menschen, Ton, Musik | funktioniert |
 | Speichern, Export, Web-App | funktioniert; ein Speicherplatz, zweiter alter Speicherweg (P09) |
 | Pixel-Fassung `pixel/` | funktioniert als eigene Seite |

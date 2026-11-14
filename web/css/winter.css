@@ -1,0 +1,92 @@
+/* Winterpause (web/js/features/winter.js, docs/winter.md)
+ * Karte am ersten Wintertag im Pixel-Stil der Oberfläche, wie der Tagesabschluss.
+ */
+
+.hm-wi {
+  position: absolute;
+  z-index: 32;
+  top: calc(var(--hm-oben, 12px) + var(--hm-knopf, 48px) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  width: min(400px, calc(100% - 2 * var(--hm-rand, 12px)));
+  /* Unten bleibt Platz für Zeit, Kassieren und Bauen */
+  max-height: calc(100% - var(--hm-oben, 12px) - var(--hm-knopf, 48px) - var(--hm-unten, 12px) - 96px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 14px 12px;
+  color: var(--hm-tinte, #24364a);
+  font-size: var(--hm-schrift, 15px);
+  line-height: 1.3;
+  pointer-events: auto;
+}
+.hm-wi[hidden] { display: none !important; }
+
+.hm-wi-kopf { display: flex; align-items: center; gap: 6px; }
+.hm-wi-kopf h2 {
+  flex: 1 1 auto;
+  margin: 0;
+  font-family: var(--hm-pixel);
+  font-size: calc(var(--hm-schrift, 15px) + 3px);
+  font-weight: 700;
+  line-height: 1.15;
+}
+.hm-wi-zu {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: var(--hm-mulde, #e9dfca);
+  color: var(--hm-tinte, #24364a);
+  font-family: var(--hm-pixel);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+.hm-wi-leise { margin: 4px 0; color: var(--hm-tinte-2, #5a6a7c); font-size: 13.5px; }
+.hm-wi-block { display: grid; gap: 2px; margin-top: 10px; }
+.hm-wi-block h3 {
+  margin: 0 0 2px;
+  color: var(--hm-tinte-2, #5a6a7c);
+  font-family: var(--hm-pixel);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.hm-wi-zeile {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 2px dotted var(--hm-mulde, #e9dfca);
+}
+.hm-wi-zeile span { flex: 1 1 auto; }
+.hm-wi-zeile b { flex: none; font-family: var(--hm-pixel); font-variant-numeric: tabular-nums; }
+.hm-wi-zeile.leise { opacity: 0.65; }
+
+.hm-wi-auftrag {
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: var(--hm-mulde, #e9dfca);
+}
+.hm-wi-auftrag.an { background: #e3f3df; box-shadow: inset 0 0 0 2px #5c9a52; }
+.hm-wi-auftrag-kopf { display: flex; align-items: baseline; gap: 8px; }
+.hm-wi-auftrag-kopf b { flex: 1 1 auto; font-family: var(--hm-pixel); }
+.hm-wi-auftrag-kopf span { flex: none; font-family: var(--hm-pixel); font-weight: 700; }
+.hm-wi-auftrag p { margin: 0; font-size: 13.5px; line-height: 1.3; }
+.hm-wi-auftrag-knopf { justify-self: start; min-height: 40px; }
+.hm-wi-meldung { margin: 6px 0 0; font-weight: 650; }
+.hm-wi-liste { margin: 6px 0; padding-left: 20px; }
+
+.hm-wi-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.hm-wi-knoepfe .hm-knopf { flex: 1 1 140px; }
+.hm-wi .hm-knopf:disabled { opacity: 0.55; cursor: default; }
+
+/* Flaches Handy quer: schmaler und rechts, damit die linke Spalte frei bleibt */
+@media (max-height: 500px) {
+  .hm-wi { left: auto; right: var(--hm-rand, 12px); transform: none; width: min(360px, 58%); top: 8px; max-height: calc(100% - 16px); }
+}
