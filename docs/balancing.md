@@ -140,21 +140,21 @@ Stand `main` nach PR 160 (P06), nachgeprüft im Code. Die Pakete in der rechten 
 
 | Regel | Wert heute | Wo im Code | Paket |
 |---|---|---|---|
-| Start | 0 €, fünf Startbewertungen mit 3 Ankern, Ruf ist der Schnitt der letzten 20 | `state.js`, `economy.js` (`ruf.start`), `data/rules.js` (`startSamples`) | P17 |
+| Start | 0 €, fünf Startbewertungen mit 3 Ankern, Ruf ist der Schnitt der letzten drei Tage, mindestens der letzten 10 Bewertungen (P19, [ruf.md](ruf.md)) | `state.js`, `economy.js` (`ruf.start`), `data/rules.js` (`startSamples`) | P17 |
 | Dauerlieger | zahlen pauschal 15 € pro Abend (`fischer.pachtProTag`), Dauerplätze kosten nichts und haben keine Obergrenze | `sim.js` (`startEvening`, `rulesFromEconomy`), `features/dauerlieger.js` | P01 |
 | Abweisen von Hand | kostet nichts und bringt keine Bewertung | `sim.js` (`dismiss`) | P10 |
-| Note aus Wünschen | keiner erfüllt 2,5 (wie ein Abgewiesener), alle erfüllt 5, linear dazwischen; vorher 1 + 4 × Anteil | `economy.js` (`ruf.wunschNote`), `sim.js` (`ratingParts`) | P14 |
+| Note aus Wünschen | keiner erfüllt 2,5 (wie ein Abgewiesener), alle erfüllt 4,5, ohne Wünsche 4,5; die volle Note nur mit gutem Platz (P19 C4) | `economy.js` (`ruf.wunschNote`, `ruf.ohneWunsch`), `sim.js` (`ratingParts`) | P14, P19 |
 | Wegfahren ohne Platz | mit 25 % Wahrscheinlichkeit eine Bewertung von 2,5 (`ruf.abgewiesen`); dreht ein Boot ab, weil alle Wartebojen belegt sind, gibt es keine Bewertung | `sim.js` (`turnAway`) | P10 |
 | Hafenmeister-Rundgang | startet bei 68 % des Tages (`RUNDGANG_AB`), etwa 8 Sekunden vor dem Abend | `data/people.js` | P12 |
 | Mindestruf für Service-Stufen | Segelclub Stufe 3 (Regattaverein) 3,8; Travellift Stufe 3 (Werfthalle) 3,8; Fahrgastanleger Stufe 2 4,0; Museumshafen 4,0 und 4,2; Kreuzfahrtterminal 4,0 und 4,5; Marineanleger 4,0 und 4,6 | `economy.js` (`services[id].stufen[n].ruf`) | P06 (erledigt) |
-| Deckel der Services | Ruf-Bonus aller Services zusammen höchstens +0,75 (`RUF_BONUS_MAX`), Sturmschutz höchstens 0,8 (`STURMSCHUTZ_MAX`) | `data/services.js` | P06 (erledigt) |
+| Deckel der Services | Sturmschutz höchstens 0,8 (`STURMSCHUTZ_MAX`); der Ruf-Bonus der Services zählt seit P19 nicht mehr für die Note, Gäste wünschen sich Angebote (`angebotWunsch`) | `data/services.js`, `economy.js` | P06, P19 |
 | Marineanleger Stufe 2 (Stützpunkt) | Flottenbesuch alle 6 statt alle 10 Tage (je 2 Tage), dazu Tag der offenen Tür | `economy.js` (`services.marineanleger`) | P04 (erledigt) |
 | Stufennamen der Services | Travellift heißt in Stufe 1 "Bootsschuppen mit Werkstatt", Stufe 2 "Travellift", Stufe 3 "Werfthalle mit Slipwagen"; die Namen in [services.md](services.md) folgen `data/services.js` | `data/services.js` | P04, P06 (erledigt) |
 
 ## Was die Simulation abdeckt
 
 - Ankünfte, Bootsarten mit Maßen und Passregel, Wünsche, Warteschlange, Abweisen, Ruf, Kassieren, Stufenziele und Stegprojekte kommen aus `sim.js`.
-- Services bringen Tageseinnahmen, Kunden, Besuche großer Schiffe und Winter-Einnahmen über `services/rules.js`, ihre Wirkung auf Ankünfte und Ruf geht über einen Modifikator in `sim.js` ein.
+- Services bringen Tageseinnahmen, Kunden, Besuche großer Schiffe und Winter-Einnahmen über `services/rules.js`, ihre Wirkung auf Ankünfte und erfüllte Wünsche geht über einen Modifikator in `sim.js` ein (`offers`, P19).
 - Ereignisse kommen aus `events/scheduler.js` mit demselben Startwert wie das Spiel. Sturm kostet Ankünfte, Regatta und Hafenfest bringen mehr, das Wetter geht in die Services ein.
 - Der Bot kassiert immer alles sofort, auch ohne Hafenbüro.
 - Mit Hafenbüro-Automatik weist der Bot nur noch die Sonderfälle selbst zu (`sim.officeSpecialCase`).
@@ -163,6 +163,6 @@ Stand `main` nach PR 160 (P06), nachgeprüft im Code. Die Pakete in der rechten 
 ## Was noch auffällt
 
 - **Sparphasen am Ende jeder Stufe:** Die längste Zeit ohne Kauf liegt bei 12 bis 23 Spieltagen, jeweils während man auf das große Bauprojekt spart. Ereignisse füllen diese Zeit, trotzdem empfehle ich für die Oberfläche einen Sparbalken am Bauprojekt, der sich sichtbar füllt. Dann fühlt sich Sparen wie Fortschritt an.
-- **Ruf ist für gute Spieler leicht:** Wer seine Versorgung ausbaut, liegt fast immer bei 4,9 bis 5 Ankern. Die Ruf-Ziele bremsen vor allem Spieler, die Versorgung vernachlässigen. Das ist gewollt (cozy).
+- **Ruf (seit P19):** Ein geschickter Spieler liegt je nach Stufe bei 4,1 bis 4,8 Sternen, ein gemütlicher bei 4,1 bis 4,7 (vorher 4,9 bis 5). Die Ziele 4,2 (Stufe 5) und 4,5 (Abschluss) verlangen jetzt gute Plätze und Angebote. Einzelheiten in [ruf.md](ruf.md).
 - **Stufe 6 ist die längste Stufe** (rund 69 Tage), weil man auf die teuren Großschiff-Services spart. Dafür passiert dort am meisten: Kreuzfahrtschiffe und Flottenbesuche laufen ein.
 - **Nach dem Abschluss** bleiben einige Services übrig (große Winterhalle, Museumshafen und andere). Sie sind Inhalt für den Endlosmodus.

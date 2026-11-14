@@ -41,7 +41,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 
 **Passregel:** Ein Boot passt an einen Platz, wenn es nicht länger und nicht breiter ist als der Platz und die Wassertiefe der aktuellen Stufe mindestens 0,3 m größer ist als sein Tiefgang. Fischerplätze sind fest vergeben, der Kai ist nur für XL.
 
-**Hafengeld:** Grundpreis der Größe × (1 + 0,25 × erfüllte Wünsche). **Ruf:** Schnitt der letzten 20 Bewertungen. **Bewertung:** aus den Wünschen 2,5 (keiner erfüllt) bis 5 (alle), ohne Wünsche 4, dazu Platz, passgenau, von Hand, Sondergast, Services und Abzüge; Rechnung in `ratingParts`, Erklärung in [gaestebuch.md](gaestebuch.md).
+**Hafengeld:** Grundpreis der Größe × `feeFactor` der Bootsart × (1 + 0,25 × erfüllte Wünsche). **Ruf:** Schnitt aller Bewertungen der letzten drei Tage, mindestens der letzten 10. **Bewertung:** aus den Wünschen 2,5 (keiner erfüllt) bis 4,5 (alle), ohne Wünsche 4,5, dazu Platz, passgenau, von Hand, Sondergast, Feste und Abzüge; Rechnung in `ratingParts`, Erklärung in [gaestebuch.md](gaestebuch.md) und [ruf.md](ruf.md). **Wünsche:** je Bootsart aus `data/boats` (`wishes`), dazu manchmal ein Wunsch an ein Angebot an Land, erfüllt, wenn der Service gebaut ist.
 
 ## `game.sim` (im Browser)
 
