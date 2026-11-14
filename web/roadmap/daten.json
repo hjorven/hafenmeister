@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "57fa0eb"
+  "commit": "3cf2b65"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -525,7 +525,10 @@
     "I10"
    ],
    "status": "teilweise",
-   "bilder": []
+   "bilder": [
+    35,
+    36
+   ]
   },
   {
    "id": "P21",
@@ -1225,14 +1228,15 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
    "welle": 0,
    "prs": [
     81,
     180,
     181,
     199,
-    228
+    228,
+    240
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -4816,20 +4820,56 @@
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr237/237-vorschau-iphone.png",
    "nr": 34
+  },
+  {
+   "datei": "p20-pr245-handy-winterpause.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winterpause: Bilanz der Saison und Winterarbeiten",
+   "pr": 245,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "winter/wi-handy-1-karte.png",
+   "nr": 35
+  },
+  {
+   "datei": "p20-pr245-quer-winterarbeiten.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winter im Hafen: Schnee und beauftragte Winterarbeit",
+   "pr": 245,
+   "geraet": "handy-quer",
+   "datum": "2026-11-14",
+   "quelle": "winter/wi-quer-2-auftrag.png",
+   "nr": 36
   }
  ],
  "neueBilder": [
+  36,
+  35,
   34,
   33,
   32,
   31,
   30,
   29,
-  28,
-  27,
-  26
+  28
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Tests: Pixeldichte 1 außer bei Bildschirmfotos, Geräte-Ausnahmen vor dem Laden überspringen",
+   "pr": 247,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Meldungs-Ordnung: Kartenwahl wartet hinter der Feier, Tipps nie über Zeit und Bauen",
+   "pr": 241,
+   "pakete": []
+  },
   {
    "datum": "2026-11-14",
    "titel": "Roadmap-Pflege: PR 233 bei P14, PR 239 bei P15, Bilder fürs erste Bauwerk (P17)",
@@ -4844,7 +4884,9 @@
    "datum": "2026-11-14",
    "titel": "Boote: Auslaufende mit Vorrang, Zurücksetzen statt Durchlass, gemeinsamer Ablegetakt",
    "pr": 240,
-   "pakete": []
+   "pakete": [
+    "P66"
+   ]
   },
   {
    "datum": "2026-11-14",
@@ -4906,22 +4948,6 @@
    "titel": "Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich",
    "pr": 234,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Bauen: Nachbesserungen zu PR 232 (Ausbau-Fähnchen, Rückgängig am ersten Kauf, Regionsziel)",
-   "pr": 235,
-   "pakete": [
-    "P18"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Boote: Abendstau, Pulk am Eingang, Ablegetakt und Seebrücke im Fahrwasser",
-   "pr": 228,
-   "pakete": [
-    "P66"
-   ]
   }
  ]
 }
