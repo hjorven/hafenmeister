@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "3cf2b65"
+  "commit": "4fd332b"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -437,7 +437,8 @@
    "thread": "bestehend: \"Balancing für 94 Liegeplätze ausarbeiten\" (nach P06)",
    "welle": 2,
    "prs": [
-    237
+    237,
+    250
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -2457,12 +2458,14 @@
   {
    "code": "B10",
    "text": "Liegegeld nach Länge statt fest je Größe",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 250, ECONOMY.klassen.proMeter, sim.baseNightlyFee)",
    "pakete": [
     "P17"
    ],
-   "prs": [],
+   "prs": [
+    250
+   ],
    "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
   },
   {
@@ -4392,11 +4395,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 112,
+  "erledigt": 113,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 97,
+  "offen": 96,
   "entfaellt": 0,
   "alle": 217
  },
@@ -4860,6 +4863,35 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "Winter: Karte unter Übersicht und Menü, Knöpfe bleiben unten, keine Platzschilder im Winter",
+   "pr": 249,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Ankerplätze und Wartebojen immer im Wasser, Küstenberechnung schneller",
+   "pr": 246,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 240 bei P66 eingetragen, Bilder zum Winter (P20)",
+   "pr": 248,
+   "pakete": [
+    "P66",
+    "P20"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Winter: Winterpause, Winterarbeiten, Winter überspringen und Krantage (P20)",
+   "pr": 245,
+   "pakete": [
+    "P20"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "Tests: Pixeldichte 1 außer bei Bildschirmfotos, Geräte-Ausnahmen vor dem Laden überspringen",
    "pr": 247,
    "pakete": []
@@ -4919,35 +4951,6 @@
     "P18",
     "P66"
    ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P14-Folge: Menü am Handy quer, Bootsnamen eindeutig, Gästebuch-Meldung in der Meldungs-Ordnung",
-   "pr": 233,
-   "pakete": [
-    "P14"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Zeitraffer: robuster auf großem Gelände, Erwartung Stand PR 181",
-   "pr": 221,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 154, 228, 229, 231, 232 eingetragen, Bilder für P14 und P18",
-   "pr": 236,
-   "pakete": [
-    "P14",
-    "P18"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich",
-   "pr": 234,
-   "pakete": []
   }
  ]
 }

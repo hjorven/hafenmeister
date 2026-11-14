@@ -6,6 +6,8 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Winterkarte auch am Handy quer mit Knöpfen fest unten (links von Bauen, reicht bis unten), Hinweis mit Maus „bitte scrollen“.
+- Liegegeld nach Länge: Gäste zahlen je angefangenem Meter, ein langes Boot also mehr als ein kurzes derselben Klasse (B10).
 - Winterpause: Am ersten Wintertag zeigt eine Karte die Bilanz der Saison und bietet Winterarbeiten an (Steg überholen, Frühjahrswerbung, Sanitär winterfest, Hafenbecken ausbaggern), die die nächste Saison verbessern. Der Winter lässt sich überspringen. Krantage: Dauerlieger gehen über den Winter ins Winterlager und kommen zum Saisonbeginn zurück (245).
 - Winterkarte: am Handy quer unter Übersicht und Menü, Knöpfe bleiben beim Scrollen unten mit Hinweis, im Winter keine Platzschilder und kein doppeltes Winter-Banner.
 - Das erste Bauwerk ist geschenkt: Wer zum ersten Mal „Bauen“ öffnet, bekommt das Geld fürs Toilettenhäuschen und sieht gleich dessen Vorschau, der Einstieg sagt es vorher an (237).

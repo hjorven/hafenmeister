@@ -31,9 +31,11 @@ export function rulesFromEconomy(E = ECONOMY) {
 
   // Hafengeld und Aufenthalt je Klasse
   r.baseFee = {};
+  r.feePerMeter = {};
   r.nightsBySize = {};
   for (const [size, k] of Object.entries(E.klassen || {})) {
     r.baseFee[size] = k.grundpreis;
+    if (k.proMeter) r.feePerMeter[size] = k.proMeter;
     r.nightsBySize[size] = k.naechte;
   }
   r.nights = [1, 1];   // nur für Bootsarten ohne Klasse in E.klassen

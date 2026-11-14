@@ -70,7 +70,7 @@ Ungeschicktes Spielen bremst nie stark und blockiert nie. Das passt zu „kein S
 
 ## Die wichtigsten Zahlen
 
-**Grundpreise pro Nacht:** S 10 €, M 22 €, L 45 €, XL 120 €. Jeder erfüllte Wunsch +25 %. Mehrrumpfboote brauchen einen Stirnplatz, Behördenboote zahlen die Hälfte und geben einen Anker extra.
+**Liegegeld nach Länge (B10):** Wie in echten Häfen zahlt ein Gast je angefangenem Meter Bootslänge: S 2,50 €, M 2,70 €, L 3,70 €, XL 4,20 € je Meter und Nacht. Ein 4-m-Ruderboot zahlt 10 €, eine 12-m-Yacht 44 €, ein 30-m-Großsegler 126 €. Im Schnitt der Klasse ergibt das die Grundpreise S 11 €, M 22 €, L 45 €, XL 120 € (sie gelten noch für Boote ohne Länge und für Schätzungen). Jeder erfüllte Wunsch +25 %. Auch Dauerlieger-Pacht und Bojengeld richten sich nach der Länge. Gemessen (40 Läufe): geschickt 243 statt 249 Spieltage, gemütlich 252 statt 258, Einnahmen bis Tag 30 3.474 € statt 3.020 € (kleine Boote zahlen im Schnitt etwas mehr). Mehrrumpfboote brauchen einen Stirnplatz, Behördenboote zahlen die Hälfte und geben einen Anker extra.
 
 **XXL (Stufe 6):** Kreuzfahrtschiffe, Marineschiffe und der Seenotrettungskreuzer zahlen kein Liegegeld. Sie liegen an festen Plätzen (P01 Kreuzfahrtpier, MA01 und MA02 Marineanleger, SK01 Seenotkreuzer), auf die keine Gastboote gelegt werden. Geld bringen sie je Besuch über die Services:
 

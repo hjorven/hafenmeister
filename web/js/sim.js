@@ -1105,10 +1105,21 @@ export function dismiss(state, ctx, boatId) {
 // ---------------------------------------------------------------------------
 // Hafengeld (fällig beim Anlegen und jeden Morgen) und Abend
 
+/**
+ * Grundpreis einer Nacht ohne Wünsche: je angefangenem Meter Bootslänge (B10, ECONOMY.klassen.proMeter),
+ * sonst der feste Grundpreis der Klasse. Bootsarten mit eigenem Preis (fee) zahlen den.
+ */
+export function baseNightlyFee(ctx, boat) {
+  const type = ctx.typeById[boat.typeId];
+  if (type?.fee != null) return type.fee;
+  const proMeter = ctx.rules.feePerMeter?.[boat.size];
+  if (proMeter && boat.length > 0) return proMeter * Math.ceil(boat.length - 1e-9);
+  return ctx.rules.baseFee[boat.size] ?? 0;
+}
+
 /** Hafengeld für eine Nacht bei n erfüllten Wünschen. */
 export function nightlyFee(state, ctx, boat, wishesMet, priceFactor = 1) {
-  const type = ctx.typeById[boat.typeId];
-  const base = type?.fee ?? ctx.rules.baseFee[boat.size] ?? 0;
+  const base = baseNightlyFee(ctx, boat);
   return Math.round(base * (1 + ctx.rules.wishBonus * wishesMet) * priceFactor);
 }
 

@@ -67,13 +67,16 @@ export const ECONOMY = {
     //      Grundpreis pro Nacht, Nächte [min, max]. Ob ein Boot Motor- oder Segelboot ist, steht im
     //      Bootskatalog (data/boats). Gäste bleiben eher länger (Urlaubstörn), dafür kommen weniger
     //      am Tag: so bleibt der Hafen voll, ohne dass Boote im Sekundentakt einlaufen.
-    S:   { grundpreis: 10,  naechte: [1, 3] },
-    M:   { grundpreis: 22,  naechte: [2, 4] },
-    L:   { grundpreis: 45,  naechte: [2, 5] },
-    XL:  { grundpreis: 120, naechte: [1, 3] },
+    //      proMeter (B10): wie in echten Häfen zahlt ein Gast je angefangenem Meter Bootslänge;
+    //      der Satz steigt mit der Größe. Im Schnitt der Klasse ergibt das etwa den Grundpreis.
+    //      Der Grundpreis gilt für Boote ohne Länge und für Schätzungen (Tagesziele).
+    S:   { grundpreis: 11,  proMeter: 2.5, naechte: [1, 3] },
+    M:   { grundpreis: 22,  proMeter: 2.7, naechte: [2, 4] },
+    L:   { grundpreis: 45,  proMeter: 3.7, naechte: [2, 5] },
+    XL:  { grundpreis: 120, proMeter: 4.2, naechte: [1, 3] },
     XXL: { grundpreis: 0,   naechte: [1, 1] },  // kein Liegegeld, Einnahmen je Besuch (services)
   },
-  wunschBonus: 0.25,          // Hafengeld = Grundpreis * (1 + wunschBonus * erfüllte Wünsche)
+  wunschBonus: 0.25,          // Hafengeld = proMeter * Länge (aufgerundet) * (1 + wunschBonus * erfüllte Wünsche)
 
   // Kassieren (P12). Liegegeld wird beim Anlegen fällig. vorausNaechte: Gäste zahlen bis zu so viele
   // geplante Nächte auf einmal (eine Münze je Aufenthalt, 1 = jede Nacht einzeln). Was der Spieler nicht selbst einstreicht, holt
