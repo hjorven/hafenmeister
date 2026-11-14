@@ -118,7 +118,7 @@ export function init(game) {
       game.audio?.sfx?.('bewertung', { anker: eintrag.note });
     }
     game.emit('gaestebuch:bewertung', { id, note: eintrag.note, grund, zufrieden: gut, imBild: !!pos?.sichtbar });
-    if (!rafLaeuft) { rafLaeuft = true; requestAnimationFrame(schritt); }
+    if (!rafLaeuft) { rafLaeuft = true; letztesBild = performance.now(); requestAnimationFrame(schritt); }
   }
 
   function starte(x) {
@@ -150,8 +150,22 @@ export function init(game) {
   let spiel = null;
   let hindernisse = [];
   let rafLaeuft = false;
+  let letztesBild = performance.now();
   function schritt() {
     const jetzt = performance.now();
+    // Während der Feier (features/aufstieg.js) sind Blasen und Meldungen ausgeblendet und ihre Zeit steht
+    const dt = jetzt - letztesBild;
+    letztesBild = jetzt;
+    if (document.body.classList.contains('hm-feier-an')) {
+      for (const x of blasen.values()) x.t0 += dt;
+      for (const x of meldungen.values()) x.t0 += dt;
+      for (const x of warteschlange) x.seit += dt;
+      naechsteAb = Math.max(naechsteAb, jetzt + ABSTAND);
+      letzterTakt = jetzt;   // die Leiste der Meldungen zählt die Feier nicht noch einmal
+      if (blasen.size || warteschlange.length || meldungen.size) requestAnimationFrame(schritt);
+      else rafLaeuft = false;
+      return;
+    }
     // höchstens fünf Blasen zugleich; wer wartet, verfällt nach einer Blasendauer (das Boot ist dann weit weg)
     while (warteschlange.length && warteschlange[0].seit < jetzt - DAUER) warteschlange.shift();
     while (warteschlange.length && jetzt >= naechsteAb && blasen.size < 5) { starte(warteschlange.shift()); naechsteAb = jetzt + ABSTAND; }
