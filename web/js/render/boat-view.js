@@ -258,6 +258,9 @@ export function init(game) {
     if (fortT < 0.5) return;
     fortT = 0;
     for (const [id, e] of [...boats]) {
+      // Abreisendes Boot liegt noch in seiner Box: die Spielregeln halten sie belegt, bis es draussen
+      // ist ('boat:clear' unten), sonst zeigte die Platzkarte "frei" mit Boot darin
+      if (e.faehrt && inBox(e.anim)) game.emit('boot:noch-in-box', { id });
       if (!e.faehrt || e.anim.berth || e.anim.state !== 'leaving') continue;
       if (!game.boatAnim.imBild?.(e.anim.x, e.anim.z, e.anim.info.length)) entferne(id);
     }
@@ -394,7 +397,15 @@ export function init(game) {
     const e = boats.get(id);
     if (!e) return;
     boats.delete(id);
+    // verschwindet ein Boot direkt aus seiner Box (abseits des Bildes, Laden): seine Box ist frei
+    const box = inBox(e.anim);
     e.anim.remove();
+    if (box) game.emit('boot:aus-box', { id });
+  }
+  // Liegt das Boot noch an (oder in) einer Box, nicht an Boje oder Anker?
+  function inBox(anim) {
+    const art = String(anim.berth?.id ?? '');
+    return !!art && anim.berth.kind !== 'buoy' && !art.startsWith('boje-') && !art.startsWith('anker-');
   }
 
   // --- Fahrwasser: Wege, Start- und Zielpunkte aus der Karte des Gelaendes (world/fahrwasser.js) ---
