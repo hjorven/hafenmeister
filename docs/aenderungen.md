@@ -6,6 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Handy quer: Die Startansicht zeigt den Hafen groß und mittig, mit Einfahrt oben und nur einem schmalen Streifen Land unten, statt vor allem Felder.
 - Neue Ereignisse: Heringstage (mit Räucherei, im Frühling), Mittsommer (Saisontag 14, abends brennt am Grillplatz ein Feuer, viele Badegäste) und Holzboot-Treffen. Ab Stufe 5 kommt einmal im Jahr die Hanse-Woche, zehn Tage vorher angekündigt; zwei Tage vorher kannst du große Plätze freihalten, große Schiffe darauf zahlen Festgeld.
 - Gebaute Services machen Ereignisse größer: Räucherei, Museumshafen, Grillplatz und andere verdienen an Ereignistagen extra, die Ankündigung sagt wie viel oder welcher Bau sich lohnen würde.
 - Ereignisse wirken nach: nach dem Sturm laufen die Wartenden ein, nach Regatta, Hafenfest und Hanse-Woche kommen noch Nachzügler. Wer vorbereitet war, bekommt bessere Bewertungen.
