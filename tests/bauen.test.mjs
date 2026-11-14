@@ -69,3 +69,11 @@ test('Umbau-Hinweis vor dem Stufenausbau und Regionsziel in der letzten Stufe', 
   assert.match(regionsSchritt({ active: true, missing: ['bigVisits'], goal: { bigVisits: 6 }, visits: 2 }).text, /Noch 4 Besuche/);
   assert.match(regionsSchritt({ active: true, ok: true, missing: [] }).text, /fertig ausgebaut/);
 });
+
+test('Letzte Stufe: Regionsziel vor neuem Kleinkram, Wuensche weiter zuerst', () => {
+  const region = { active: true, missing: ['bigVisits'], goal: { bigVisits: 6 }, visits: 1 };
+  const baecker = { key: 'angebot:baecker', art: 'angebot', name: 'Bäcker', kosten: 80, nutzen: [] };
+  assert.match(waehleSchritt({ geld: 500, eintraege: [baecker], bedarf: leer(), stufe: null, region }).text, /Noch 5 Besuche/);
+  const r = waehleSchritt({ geld: 2000, eintraege: [vers('dusche', 900, 2)], bedarf: { ...leer(), offen: { dusche: 3 } }, stufe: null, region });
+  assert.equal(r.ziel, 'versorgung:dusche');
+});

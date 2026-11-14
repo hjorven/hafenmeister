@@ -205,16 +205,30 @@ export function init(game) {
     if (!adv?.goal) return null;
     const g = adv.goal;
     const geld = sim.state.money;
-    const zeilen = [
-      { name: 'Gäste', ist: Math.min(adv.guests, g.guests), soll: g.guests, text: `${ganz(Math.min(adv.guests, g.guests))} von ${ganz(g.guests)}` },
-      { name: 'Ruf', ist: Math.min(adv.reputation, g.reputation), soll: g.reputation, text: `${num1(adv.reputation)} von ${num1(g.reputation)}` },
-      { name: 'Kasse', ist: Math.min(geld, g.cost), soll: g.cost, text: `${euro(Math.min(geld, g.cost))} von ${euro(g.cost)}` },
-    ];
+    // Ausbau in Bauabschnitten (ui/bauen.js, Roadmap P18): die Kasse zaehlt gegen den naechsten Abschnitt
+    const ab = game.bauen?.ausbau?.();
+    const abschnitte = ab && ab.n > 1;
+    const begonnen = abschnitte && (ab.fertig > 0 || ab.imBau);
+    const preis = abschnitte ? ab.preis : g.cost;
+    const nr = abschnitte ? Math.min(ab.n, ab.fertig + 1) : 1;
+    const kasse = { name: abschnitte ? `Kasse für Abschnitt ${nr}` : 'Kasse', ist: Math.min(geld, preis), soll: preis, text: `${euro(Math.min(geld, preis))} von ${euro(preis)}` };
+    const zeilen = begonnen
+      ? [
+        { name: 'Bauabschnitte', ist: ab.fertig, soll: ab.n, text: `${ab.fertig} von ${ab.n}${ab.imBau ? ', Baustelle läuft' : ''}` },
+        ab.imBau ? { name: 'Baustelle', ist: 0, soll: 1, text: 'morgen früh fertig' } : kasse,
+      ]
+      : [
+        { name: 'Gäste', ist: Math.min(adv.guests, g.guests), soll: g.guests, text: `${ganz(Math.min(adv.guests, g.guests))} von ${ganz(g.guests)}` },
+        { name: 'Ruf', ist: Math.min(adv.reputation, g.reputation), soll: g.reputation, text: `${num1(adv.reputation)} von ${num1(g.reputation)}` },
+        kasse,
+      ];
+    const bereit = begonnen ? !ab.imBau && geld >= preis
+      : abschnitte ? adv.missing.every((m) => m === 'money') && geld >= preis : adv.ok;
     return {
       titel: 'Ausbau',   // "Stufe 2" in Stufe 1 las sich wie die aktuelle Stufe
-      kopf: `Nächster Ausbau: ${g.name ?? 'Hafen erweitern'}`,
-      zeilen, fertig: adv.ok,
-      aktion: game.bauen?.oeffnen ? { text: adv.ok ? 'Jetzt ausbauen' : 'Im Baumenü ansehen', tun: () => game.bauen.oeffnen('hafen') } : null,
+      kopf: `Nächster Ausbau: ${g.name ?? 'Hafen erweitern'}${abschnitte ? `, Abschnitt ${nr} von ${ab.n}` : ''}`,
+      zeilen, fertig: bereit,
+      aktion: game.bauen?.oeffnen ? { text: bereit ? 'Jetzt ausbauen' : 'Im Baumenü ansehen', tun: () => game.bauen.oeffnen('hafen') } : null,
     };
   }
 
@@ -424,6 +438,7 @@ export function init(game) {
   game.on('sim:seasonEnd', () => { zielSchluessel = ''; plane(); });
   game.on('sim:seasonStart', () => { zielSchluessel = ''; plane(); });
   game.on('spielstand-geladen', plane);
+  for (const ev of ['bauen:abschnitt', 'bauen:abschnittFertig', 'bauen:zurueck']) game.on(ev, plane);
   game.on('ready', () => { ordnen(); plane(); zeigeTempo(); setTimeout(ordnen, 600); });
   game.on('tap', () => klappeZu());
   plane();
