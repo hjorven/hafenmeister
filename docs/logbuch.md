@@ -44,7 +44,9 @@ Zu welchem Tag ein Ereignis gehört: Die Spielregeln melden die Ereignisse eines
 
 ## Schnittstelle (für P22 Erfolge und andere)
 
-`game.logbuch = { oeffnen(reiter?, modellId?), schliessen(), offen, fortschritt(), chronik(), tagesSatz(tag), merken(merk) }`
+`game.logbuch = { oeffnen(reiter?, modellId?), schliessen(), offen, fortschritt(), chronik(), tagesSatz(tag), merken(merk), reiter(def), neuZeichnen({ nurZahl? }) }`
+
+- `reiter({ id, name, teil(state, { el, zeichne }), zahl?() })` hängt einen weiteren Reiter an (P22: "Erfolge", docs/erfolge.md); `zahl()` zählt in der Menüzahl mit.
 
 - Ein Erfolg schreibt sich so in die Chronik des Tages: `game.logbuch.merken({ a: 'text', art: 'erfolg', text: 'Erfolg: Hundert Gäste' })`.
 - `fortschritt()` liefert `{ gesehen, gesamt, arten, artenGesamt, je: { S: { gesehen, gesamt } ... } }`, zum Beispiel für einen Sammel-Erfolg.

@@ -6,6 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Neu: Erfolge. 30 Erfolge vom ersten Festmachen bis zum Hafenmillionär melden sich rechts oben mit eigenem Ton und stehen im Logbuch unter "Erfolge" mit Fortschritt. Im Hafen wachsen dafür ein Mast mit bunten Wimpeln, eine Pokaltreppe und eine Ehrentafel mit einem Schild je Ausbaustufe. Alte Spielstände bekommen schon Erreichtes still nachgetragen.
 - Ist die Dusche, die Toilette oder der Kiosk für heute fast oder ganz ausgelastet, stehen die Gäste davor Schlange (275).
 - Vorspulen läuft jetzt ganz durch: 3x und 8x bleiben, bis du selbst etwas anderes wählst. Auch wartende Dauerlieger, Regionsabschluss und Boote an der Boje bremsen nicht mehr; der Knopf „Weiter mit 3x“ entfällt.
 - Neu: das Logbuch (Menü oder Taste J). Jedes Bootsmodell, das einmal angelegt hat, kommt mit Pixelbild hinein, fehlende stehen als Schattenriss da; ein Steckbrief zeigt Maße und wann es zuerst kam. Die Hafenchronik schreibt jeden Abend eine Zeile über den Tag, die Karte am Abend zeigt den wichtigsten Satz. Ein neues Modell meldet sich kurz rechts oben. Alte Spielstände behalten ihr Logbuch und bekommen die letzten 30 Tage nachgetragen.
