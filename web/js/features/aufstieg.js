@@ -567,7 +567,7 @@ export async function init(game) {
     const zahlen = el('div', { class: 'hm-feier-zahlen' });
     if (e) {
       const tage = e.abTag != null ? e.bisTag - e.abTag + 1 : null;
-      if (tage != null) zahlen.append(zahl('Tage', ganz(tage)));
+      if (tage != null) zahlen.append(zahl(tage === 1 ? 'Tag' : 'Tage', ganz(tage)));
       if (e.gaeste != null) zahlen.append(zahl('Gäste', ganz(e.gaeste)));
       if (e.einnahmen != null) zahlen.append(zahl('Einnahmen', euro(e.einnahmen)));
       if (e.besterTag) zahlen.append(zahl('Bester Tag', euro(e.besterTag)));

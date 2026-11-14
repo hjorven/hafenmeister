@@ -181,3 +181,24 @@ test('Bojenlieger warten morgens die Abreisen ab und bekommen die erste frei wer
   s.clock = morgenEnde + rules.queue.patience + 1;
   assert.equal(sim.patienceLeft(s, ctx, b2.id), 0);
 });
+
+test('Winterbeginn: Bojenlieger von der Nacht fahren weiter, ohne Bewertung und ohne als weggefahren zu zählen', () => {
+  const s = quietState(3);
+  for (const p of sim.availableBerths(s, ctx)) s.berths[p.id] = 9999; // alles belegt
+  s.day = rules.seasonDays;
+  s.clock = rules.dayLength - 1;
+  s.upcoming = [];
+  const alt = waitingBoat(s, { size: 'M', typeId: 'M1', length: 8, beam: 2.8, draft: 1 });
+  const weg = s.stats.turnedAway;
+  const ev = sim.tick(s, ctx, rules.eveningLength + 3); // über Nacht, erster Wintertag beginnt
+  assert.equal(s.day, rules.seasonDays + 1);
+  assert.equal(s.boats[alt.id], undefined, 'kein Gast an der Boje im Winter');
+  assert.deepEqual(s.queue, []);
+  const t = ev.find((e) => e.type === 'turnedAway' && e.boatId === alt.id);
+  assert.equal(t?.reason, 'winter');
+  assert.equal(t.rated, false);
+  const andere = ev.filter((e) => e.type === 'turnedAway' && e.reason !== 'winter').length;
+  assert.equal(s.stats.turnedAway, weg + andere, 'Winter zählt nicht als weggefahren');
+  assert.ok(ev.filter((e) => e.reason === 'winter').every((e) => e.rated === false));
+  assert.equal(sim.waitingBoats(s).length, 0);
+});
