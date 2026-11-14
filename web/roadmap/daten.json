@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "4260b5d"
+  "commit": "f46ad33"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -63,7 +63,7 @@
    "id": "P02",
    "titel": "Hafenbüro mit eigenen Aufgaben ausbauen",
    "inhalt": "Ü2, Ü11, A2, E1 bis E7, erledigt (PR 146)",
-   "thread": "neu",
+   "thread": "erledigt (PR 146)",
    "welle": 1,
    "prs": [
     146,
@@ -127,9 +127,10 @@
    "id": "P04",
    "titel": "Abschlussziel Stufe 6 richtig zählen",
    "inhalt": "Ü4",
-   "thread": "bestehend: \"Services und Sonderanlagen einbauen\"",
+   "thread": "erledigt (PR 113): ein Zähler state.bigVisits in bridge.js",
    "welle": 1,
    "prs": [
+    113,
     139
    ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
@@ -323,7 +324,7 @@
    "id": "P12",
    "titel": "Kassieren verständlich machen",
    "inhalt": "Ü12 (Rundgang ab Abend, halbe Münze sichtbar), B3, B4, B5 (Trinkgeld), B6. Stand: erledigt (PR 151)",
-   "thread": "neu",
+   "thread": "erledigt (PR 151)",
    "welle": 2,
    "prs": [
     146,
@@ -1178,9 +1179,10 @@
    "id": "P63",
    "titel": "Marinebasis und Anlagen neu platzieren",
    "inhalt": "T6, T7, T13: Marinebasis mit Zufahrt von See, Großschiffpier, Services und Bauplätze passend zum neuen Gelände, jede Anlage von Wasser oder Land erreichbar",
-   "thread": "in Arbeit (PR 172): Lage der Anlagen in docs/services.md; Abgleich mit dem Seed-Gelände offen; stimmt sich mit \"Services und Sonderanlagen einbauen\" und \"Stegbild pro Spiel variieren\" ab",
+   "thread": "erledigt (PR 167, 172): eigene Piers mit freien Wegen in jedem Stegbild",
    "welle": 0,
    "prs": [
+    167,
     172
    ],
    "abschnitt": "Pakete der Welle 0",
@@ -1189,7 +1191,7 @@
     "T7",
     "T13"
    ],
-   "status": "arbeit",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1217,23 +1219,25 @@
    "id": "P65",
    "titel": "Wetter und Effekte flüssig machen",
    "inhalt": "T1, T5, T12: Wetter (Regen, Nebel, Sturm, Schnee) ohne Ruckeln, Heckwelle auf beiden Seiten, Effekte ohne Artefakte; Messung je Wetter mit feature-tests/leistung.cjs",
-   "thread": "neu",
+   "thread": "erledigt (PR 169): Wetter flüssig, Heckwelle auf beiden Seiten",
    "welle": 0,
-   "prs": [],
+   "prs": [
+    169
+   ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
     "T1",
     "T5",
     "T12"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
    "welle": 0,
    "prs": [
     81,
@@ -1243,7 +1247,9 @@
     228,
     240,
     254,
-    256
+    256,
+    258,
+    262
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1256,7 +1262,8 @@
    "status": "arbeit",
    "bilder": [
     23,
-    32
+    32,
+    39
    ]
   },
   {
@@ -4181,7 +4188,7 @@
   {
    "code": "C07",
    "text": "GitHub Actions: Rechte je Job statt für den ganzen Workflow (pages.yml gibt pages: write und id-token: write auch dem Build), Actions auf Commit-SHAs pinnen, Dependabot prüfen",
-   "status": null,
+   "status": "erledigt",
    "statusText": "",
    "pakete": [
     "P08"
@@ -4213,11 +4220,11 @@
     "P66"
    ],
    "zaehler": {
-    "erledigt": 0,
+    "erledigt": 2,
     "teilweise": 0,
-    "arbeit": 4,
+    "arbeit": 3,
     "frage": 0,
-    "offen": 1,
+    "offen": 0,
     "entfaellt": 0,
     "alle": 5
    }
@@ -4390,22 +4397,22 @@
   }
  ],
  "gesamt": {
-  "erledigt": 17,
+  "erledigt": 19,
   "teilweise": 7,
-  "arbeit": 4,
+  "arbeit": 3,
   "frage": 0,
-  "offen": 52,
+  "offen": 51,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 112,
+  "erledigt": 113,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
   "offen": 97,
   "entfaellt": 0,
-  "alle": 217
+  "alle": 218
  },
  "bilder": [
   {
@@ -4875,9 +4882,22 @@
    "datum": "2026-11-14",
    "quelle": "tempo/tempo-handy.png",
    "nr": 38
+  },
+  {
+   "datei": "p66-pr262-zonen-und-seewege.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Zonen des Geländes und Seewege für die Wegsuche der Boote",
+   "pr": 262,
+   "geraet": "karte",
+   "datum": "2026-11-14",
+   "quelle": "gelaende/vorschau/zonen/zonen-und-seewege.png",
+   "nr": 39
   }
  ],
  "neueBilder": [
+  39,
   38,
   37,
   36,
@@ -4885,10 +4905,70 @@
   34,
   33,
   32,
-  31,
-  30
+  31
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "GitHub Actions absichern: Rechte je Job, SHAs, Secret-Scan (Audit C07)",
+   "pr": 264,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Überblick: hochkant schmal, wartet auf das Startfenster, Startansicht folgt der geladenen Stufe",
+   "pr": 190,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Ablegen: Box bleibt belegt, bis das Boot wirklich draußen ist",
+   "pr": 266,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Tests: Wetter-Test wartet auf den Spielstand und setzt das Wetter je Runde neu",
+   "pr": 265,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Arbeitsplan: was läuft, bekannte Fehler, die nächsten zehn Pakete",
+   "pr": 263,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Menüs am Handy verdecken weniger: Messung und kompaktere Tafeln",
+   "pr": 261,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Zonen des Geländes und Seezugänge für die Wegsuche der Boote",
+   "pr": 262,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Boote: keine Leinen ohne Boot - unsichtbares Warten auf die Einfahrt endet bei jedem neuen Befehl",
+   "pr": 258,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 256 bei P66, Bild \"Tempo bleibt\" (P07)",
+   "pr": 260,
+   "pakete": [
+    "P66",
+    "P07"
+   ]
+  },
   {
    "datum": "2026-11-14",
    "titel": "Einstieg: Blase und Kreis warten auf allen Geräten, solange das Baumenü offen ist",
@@ -4908,76 +4988,6 @@
    "pakete": [
     "P66"
    ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 254 bei P66 eingetragen",
-   "pr": 255,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Boote: Zurücksetzen prüft bis zum Heck, Ankerplätze am Weltrand nicht an Land",
-   "pr": 254,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 246 bei P62, PR 249 bei P20, Winter-Bild am PC",
-   "pr": 253,
-   "pakete": [
-    "P62",
-    "P20"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tipps: gleich an ihrem Platz, Zeit läuft nur sichtbar; Meldungs-Tests stabil",
-   "pr": 250,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Winter: Karte unter Übersicht und Menü, Knöpfe bleiben unten, keine Platzschilder im Winter",
-   "pr": 249,
-   "pakete": [
-    "P20"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Ankerplätze und Wartebojen immer im Wasser, Küstenberechnung schneller",
-   "pr": 246,
-   "pakete": [
-    "P62"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 240 bei P66 eingetragen, Bilder zum Winter (P20)",
-   "pr": 248,
-   "pakete": [
-    "P66",
-    "P20"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Winter: Winterpause, Winterarbeiten, Winter überspringen und Krantage (P20)",
-   "pr": 245,
-   "pakete": [
-    "P20"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tests: Pixeldichte 1 außer bei Bildschirmfotos, Geräte-Ausnahmen vor dem Laden überspringen",
-   "pr": 247,
-   "pakete": []
   }
  ]
 }

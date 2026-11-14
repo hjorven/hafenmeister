@@ -401,6 +401,11 @@ export async function initBridge(game) {
     if (boatId == null && berthId == null) return;
     dispatch(sim.berthCleared(state, ctx, { boatId, berthId }).events);
   });
+  // 3D-Ansicht meldet: abreisendes Boot liegt noch in der Box (Box bleibt belegt, Rückfallzeit neu)
+  game.on('boot:noch-in-box', (d = {}) => {
+    const boatId = boatIdOf(d.id ?? d.boot ?? null);
+    if (boatId != null) sim.holdLeaving(state, boatId);
+  });
   game.on('ui:cancel', () => api.select(null));
   // Münzen einstreichen: mit { coin } nur diese Münze (coin = Boot-id), sonst alle (Hafenhorn)
   // Kassierstrich (ui/gesten.js): combo zählt die Münzen im Zug, am Ende 'ui:strich-ende'.
