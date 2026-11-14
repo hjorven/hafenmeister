@@ -253,6 +253,37 @@ export async function init(game) {
     return true;
   }
 
+  // Ohne Meldeplatz (ui/meldungen.js vor PR 282): unten mittig, aber nie über Zeit, Kassieren oder Bauen
+  function platziere() {
+    if (game.meldungen?.imPlatz?.(box)) return;
+    const h = host.getBoundingClientRect();
+    const sicht = (e) => e && !e.hidden && e.offsetParent && getComputedStyle(e).visibility !== 'hidden';
+    // PC und quer: in der Lücke zwischen Zeit und Bauen/Kassieren, wenn sie breit genug ist (wie der Meldeplatz)
+    const zeit = document.getElementById('hm-zeit');
+    if (sicht(zeit)) {
+      const z = zeit.getBoundingClientRect();
+      let rechts = h.right - 12;
+      for (const e of document.querySelectorAll('#btn-collect, #btn-build')) if (sicht(e)) rechts = Math.min(rechts, e.getBoundingClientRect().left);
+      const luecke = rechts - z.right - 16;
+      if (luecke >= 320) {
+        const w = Math.min(440, luecke);
+        Object.assign(box.style, { left: `${Math.round(z.right + 8 + (luecke - w) / 2 - h.left)}px`, width: `${Math.round(w)}px`, transform: 'none' });
+        const k2 = box.getBoundingClientRect();
+        Object.assign(box.style, { bottom: 'auto', top: `${Math.round(h.bottom - 12 - k2.height - h.top)}px` });
+        return;
+      }
+    }
+    Object.assign(box.style, { left: '', width: '', transform: '' });
+    const k = box.getBoundingClientRect();
+    let unten = h.bottom - 12;
+    for (const e of document.querySelectorAll('#hm-zeit, #btn-collect, #btn-build, #bau-tipp')) {
+      if (e.hidden || !e.offsetParent || getComputedStyle(e).visibility === 'hidden') continue;
+      const r = e.getBoundingClientRect();
+      if (r.width && r.right > k.left && r.left < k.right) unten = Math.min(unten, r.top - 8);
+    }
+    Object.assign(box.style, { bottom: 'auto', top: `${Math.round(Math.max(8, unten - k.height - h.top))}px` });
+  }
+
   // Takt: Sichtbarkeit nach der Meldungs-Ordnung, Zeit nur zählen, solange die Meldung steht
   let letzte = performance.now();
   function takt() {
@@ -270,6 +301,7 @@ export async function init(game) {
       && !document.body.classList.contains('building') && !document.body.classList.contains('foto');
     leuchte(steht ? ziel : null);
     if (!steht) return;
+    platziere();
     aktuell.sichtbar += dt;
     const grenze = aktuell.art === 'bestaetigt' ? BESTAETIGT_S : SICHTBAR_S;
     if (aktuell.sichtbar >= grenze) fertig();
