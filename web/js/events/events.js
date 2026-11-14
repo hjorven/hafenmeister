@@ -10,6 +10,7 @@
 //   game.emit('event:announce', { event, day, startDay, endDay })
 //   game.emit('event:start', { event, day, endDay })
 //   game.emit('event:end', { event, day })
+//   game.emit('event:nachspiel', { event, day, endDay })   Nachspiel nach einem Ereignis (G3)
 //   game.emit('sturm', { tag })                     am Sturmtag (Seenotretter rücken aus)
 //   game.emit('weather', { wind, fog, rain, snow, sun, event, part, wetter })   bei jedem Tageswechsel
 //   game.emit('wetter', { bewoelkung, wind })   dasselbe im Format von render/landscape.js
@@ -18,15 +19,18 @@
 //   game.events.modifiers()  Wirkung heute für die Spielregeln
 //   game.events.season(day)  Jahreslauf: 30 Tage Saison, 3 Tage Winter
 //   game.events.forecast(n), game.events.weather(day), game.events.current, game.events.planned
+//   game.events.gross (angekündigtes großes Ereignis), game.events.nachspiel (heute), game.events.bauStufe(id)
 //   game.events.save(), game.events.load(daten)
 //
 // Mit den Spielregeln (sim.js) folgt das Modul game.state.day und game.state.phase; der eigene
 // Stand liegt in game.state.modules.events und wird mit dem Spielstand gespeichert.
 // Ohne Spielregeln zählt eine Ersatzuhr die Tage (120 s pro Tag, letzte 30 s Abend).
 import { createScheduler } from './scheduler.js';
+import { DEFAULT_MODS } from '../data/events.js';
 import { initEffects } from './effects.js';
 import { initBanner } from './banner.js';
 import { initVorbereiten } from './vorbereiten-ui.js';
+import { initFeuer } from './feuer.js';
 
 const DAY_SECONDS = 120;
 const EVENING_SECONDS = 30;
@@ -58,6 +62,8 @@ export function init(game) {
     let fx = null;
     try { fx = game.services?.effekte?.(); } catch { fx = null; }
     if (fx) {
+      // Gebaute Services (Stufe je id): Ereignisse, die einen Bau brauchen (Heringstage: Räucherei)
+      for (const [id, lvl] of Object.entries(fx.angebote ?? {})) if (typeof lvl === 'number') out[id] = Math.max(out[id] ?? 0, lvl);
       const frei = fx.freischalten ?? [];
       if (frei.includes?.('regatta')) out.segelclub = Math.max(out.segelclub ?? 0, 1);
       if (typeof fx.sturmschutz === 'number') out.seenotretterSchutz = fx.sturmschutz;
@@ -95,6 +101,7 @@ export function init(game) {
       if (c.type === 'end') {
         game.emit('event:end', { event: c.event, day: c.day });
       }
+      if (c.type === 'nachspiel') game.emit('event:nachspiel', { event: c.event, day: c.day, endDay: c.endDay });
     }
     store();
     emitWeather(scheduler.weather(day));
@@ -151,13 +158,45 @@ export function init(game) {
     store();
   }
 
+  // Stufe eines gebauten Bauwerks oder Service (0 = nicht gebaut)
+  function bauStufe(id) {
+    let n = 0;
+    try { n = game.services?.stufeVon?.(id) ?? 0; } catch { n = 0; }
+    return Math.max(n || 0, readBuildings()[id] ?? 0);
+  }
+  // Bauten machen ein Ereignis größer (G7): ihre Wirkung kommt zur Wirkung des Ereignisses dazu
+  // kindFactor und sizeFactor multiplizieren sich beim Mischen (scheduler.mergeMods), Zahlen wie
+  // visitorFactor werden ersetzt: deshalb hier gleich mit dem Wert des Ereignisses malgenommen.
+  function bautenWirkung() {
+    const def = scheduler.current?.event;
+    if (!def?.bauten) return null;
+    const out = {};
+    for (const [id, b] of Object.entries(def.bauten)) {
+      if (!b.wirkung || bauStufe(id) <= 0) continue;
+      for (const [k, v] of Object.entries(b.wirkung)) {
+        if (k === 'kindFactor' || k === 'sizeFactor') {
+          out[k] ??= {};
+          for (const [kk, vv] of Object.entries(v)) out[k][kk] = (out[k][kk] ?? 1) * vv;
+        } else if (typeof v === 'number') {
+          out[k] = (out[k] ?? def.mods?.[k] ?? DEFAULT_MODS[k] ?? 1) * v;
+        }
+      }
+    }
+    return Object.keys(out).length ? out : null;
+  }
+  // War man auf das Ereignis vorbereitet? (events/vorbereiten.js merkt es sich für das Nachspiel)
+  const vorbereitet = (id) => !!game.state?.modules?.vorbereitung?.nachspiel?.[id];
+
   game.events = {
     scheduler,
     modifiers: () => {
       syncSim();
       scheduler.advanceTo(today, { stage, buildings: readBuildings() });   // Schutzbauten aktuell halten
-      return serviceBoost(scheduler.modifiers());
+      return serviceBoost(scheduler.modifiers({ vorbereitet, extra: bautenWirkung() }));
     },
+    bauStufe,
+    get gross() { return scheduler.gross; },
+    get nachspiel() { return scheduler.nachspiel; },
     weather: (day) => scheduler.weather(day),
     forecast: (n) => scheduler.forecast(n),
     season: (day) => scheduler.season(day),
@@ -216,6 +255,7 @@ export function init(game) {
   loadCss();
   initEffects(game);
   initBanner(game);
+  initFeuer(game);
   // Sturm und Regatta vorbereiten (P24), sobald die Spielregeln stehen
   initVorbereiten(game).catch(() => { /* ohne Spielregeln nichts vorzubereiten */ });
 

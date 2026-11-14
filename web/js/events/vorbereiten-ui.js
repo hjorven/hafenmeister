@@ -15,17 +15,43 @@ export async function initVorbereiten(game) {
   const ctx = api.ctx;
   const st = () => api.state;
 
-  // Angekündigtes oder laufendes Ereignis aus dem Planer (events/events.js)
+  // Angekündigtes oder laufendes Ereignis aus dem Planer (events/events.js). Das große Ereignis
+  // (Hanse-Woche) hat einen eigenen Platz: geplantGross().
   const geplant = () => {
     const p = game.events?.planned;
     return p ? { id: p.id, startDay: p.startDay, endDay: p.endDay } : null;
   };
+  const geplantGross = () => {
+    const p = game.events?.gross;
+    return p ? { id: p.id, startDay: p.startDay, endDay: p.endDay } : null;
+  };
+  const serviceName = (id) => game.services?.katalog?.find?.((x) => x.id === id)?.name ?? id;
+  const bauStufe = (id) => game.events?.bauStufe?.(id) ?? 0;
   const laufend = () => {
     const c = game.events?.current;
     return c ? { id: c.id, startDay: c.startDay, endDay: c.endDay } : null;
   };
   const outer = () => game.events?.modifiers?.()?.satisfaction?.outer ?? 0;
-  V.haengeEin(api.addHook, { laufend, geplant, outer });
+  V.haengeEin(api.addHook, { laufend, geplant, outer, bauStufe });
+
+  // Bauten zum Ereignis (G7): was gebaut ist und was es bringt, sonst der beste fehlende Bau als Tipp
+  function bauZeile(eventId) {
+    const bauten = V.BAUTEN[eventId];
+    if (!bauten) return '';
+    const da = Object.keys(bauten).filter((id) => bauStufe(id) > 0);
+    if (da.length) {
+      const summe = da.reduce((a, id) => a + V.bauGeld(eventId, id, bauStufe(id)), 0);
+      const wer = da.length === 1 ? bauten[da[0]].text : da.slice(0, 3).map(serviceName).join(da.length === 2 ? ' und ' : ', ');
+      return `${wer}: +${summe.toLocaleString('de-DE')} € am Tag.`;
+    }
+    const s = st();
+    // Nur Bauten, die man in dieser Stufe schon bauen kann (Katalog der Services)
+    const kann = Object.keys(bauten).filter((id) => {
+      const k = game.services?.katalog?.find?.((x) => x.id === id);
+      return !k || (k.abStufe ?? 1) <= (s?.stage ?? 1);
+    });
+    return kann.length ? `Mit ${serviceName(kann[0])}: ${bauten[kann[0]].text.split(': ').pop()}.` : '';
+  }
 
   // ------------------------------------------------------------ Was kann man gerade vorbereiten?
   // { art: 'sturm' | 'regatta', plan, erledigt, text, knopf, zurueck? } oder null
@@ -56,6 +82,33 @@ export async function initVorbereiten(game) {
         knopf: 'Sturmklar machen' };
     }
     const r = p?.id === 'regatta' ? p : (laufend()?.id === 'regatta' ? laufend() : null);
+    const g = geplantGross()?.id === 'hansewoche' ? geplantGross() : (laufend()?.id === 'hansewoche' ? laufend() : null);
+    if (!r && g && s.stage >= 5) {
+      // Hanse-Woche: lange vorher angekündigt; große Plätze freihalten erst ab zwei Tagen vorher
+      const v = s.modules?.vorbereitung?.hansewoche;
+      const haben = v && v.startDay === g.startDay ? v.plaetze.length : 0;
+      const n = V.freihaltenAnzahl('hansewoche', s.stage);
+      const tage = g.startDay - s.day;
+      if (haben > 0) {
+        const mehr = haben < n && V.freihaltenKandidaten('hansewoche', s, ctx).length > 0;
+        return { art: 'hansewoche', plan: g, erledigt: true, titel: `${haben} große ${haben === 1 ? 'Platz' : 'Plätze'} freigehalten`,
+          text: 'Ab dem Start nur für große Schiffe, jedes zahlt Festgeld.',
+          knopf: mehr ? 'Mehr freihalten' : null, zurueck: 'Plätze freigeben' };
+      }
+      const wann = tage <= 0 ? 'Heute' : tage === 1 ? 'Morgen' : tage === 2 ? 'Übermorgen' : `In ${tage} Tagen`;
+      if (tage > 2) {
+        return { art: 'hansewoche', plan: g, erledigt: false, nurInfo: true, titel: `${wann}: Hanse-Woche`,
+          text: 'Vier Tage Fest mit Traditionsseglern. Zwei Tage vorher große Plätze freihalten.' };
+      }
+      if (n <= 0) return null;
+      if (!V.freihaltenKandidaten('hansewoche', s, ctx).length) {
+        return { art: 'hansewoche', plan: g, erledigt: false, nurInfo: true, titel: `${wann}: Hanse-Woche`,
+          text: 'Alle großen Plätze sind belegt. Wird einer frei, kannst du ihn im Wetterbericht freihalten.' };
+      }
+      return { art: 'hansewoche', plan: g, erledigt: false, titel: `${wann}: Hanse-Woche`,
+        text: `${n} große Plätze freihalten? Jedes große Schiff darauf zahlt Festgeld.`,
+        knopf: 'Plätze freihalten' };
+    }
     if (r && s.stage >= 3) {
       const v = s.modules?.vorbereitung?.regatta;
       const haben = v && v.startDay === r.startDay ? v.plaetze.length : 0;
@@ -68,6 +121,10 @@ export async function initVorbereiten(game) {
       }
       const tage = r.startDay - s.day;
       const wann = tage <= 0 ? 'Heute' : tage === 1 ? 'Morgen' : 'Übermorgen';
+      if (!V.regattaKandidaten(s, ctx).length) {
+        return { art: 'regatta', plan: r, erledigt: false, nurInfo: true, titel: `${wann} Regatta`,
+          text: 'Alle Plätze für Segler sind belegt. Wird einer frei, kannst du ihn im Wetterbericht freihalten.' };
+      }
       return { art: 'regatta', plan: r, erledigt: false, titel: `${wann} Regatta`,
         text: `${n} Plätze für Segler freihalten? Jedes Regattaboot darauf zahlt Startgeld.`,
         knopf: 'Plätze freihalten' };
@@ -80,8 +137,9 @@ export async function initVorbereiten(game) {
     const a = angebot();
     if (!s || !a || a.art !== art) return;
     let r;
+    if (a.nurInfo) return;
     if (art === 'sturm') r = zurueck ? V.sturmklarAufheben(s) : V.sturmklar(s, ctx, a.plan);
-    else r = zurueck ? V.regattaFreigeben(s) : V.regattaFreihalten(s, ctx, a.plan);
+    else r = zurueck ? V.freigeben(art, s) : V.freihalten(art, s, ctx, a.plan);
     api.dispatch(r.events);
     // Grün-Rot-Schilder: gesperrte und freigehaltene Plätze zeigen 'reserviert'
     game.emit('sim:berthState', { plaetze: api.platzZustaende() });
@@ -108,9 +166,11 @@ export async function initVorbereiten(game) {
   let rest = 0;             // verbleibende Zeit (ms), solange die Uhr steht
   let gezeigt = null;       // 'angebot' | 'ergebnis'
 
+  let danach = null;         // Karte, die wartet, bis die stehende geht (Nachspiel, dann Ankündigung)
   function schliesse() {
     karte.hidden = true;
     gezeigt = null;
+    if (danach) { const f = danach; danach = null; setTimeout(f, 0); }
     clearTimeout(timer);
     timer = 0;
     clearInterval(nachsehen);
@@ -127,6 +187,8 @@ export async function initVorbereiten(game) {
     return b;
   }
 
+  let kartenTitel = null;
+  let kartenText = null;
   function fuelle(symbol, titel, text, knoepfe = []) {
     karte.replaceChildren();
     const kopf = document.createElement('div');
@@ -139,6 +201,8 @@ export async function initVorbereiten(game) {
     p.textContent = text;
     body.append(t, p);
     kopf.append(body);
+    kartenTitel = t;
+    kartenText = p;
     karte.append(kopf);
     if (knoepfe.length) {
       const reihe = document.createElement('div');
@@ -148,10 +212,10 @@ export async function initVorbereiten(game) {
     }
   }
 
+  // Welche Ankündigung gerade steht (Meldeplatz: immer nur eine; die Ordnung entscheidet ui/meldungen.js)
+  let gezeigtTag = null;     // Spieltag, an dem die Karte kam
   function zeige(sekunden) {
-    // Das Ereignisschild hat denselben Platz: die Karte übernimmt
-    const banner = document.getElementById('event-banner');
-    if (banner) banner.hidden = true;
+    gezeigtTag = st()?.day ?? null;
     clearTimeout(timer);
     timer = 0;
     rest = sekunden * 1000;
@@ -160,13 +224,14 @@ export async function initVorbereiten(game) {
     ordne();
   }
 
+  const SYMBOL = { sturm: 'sturm', regatta: 'regatta', hansewoche: 'kogge', mittsommer: 'feuer', heringstage: 'fisch', holzboote: 'holzboot', hafenfest: 'fest' };
   function zeigeAngebot() {
     const a = angebot();
     if (!a) return false;
     const knoepfe = [];
     if (a.knopf) knoepfe.push(knopf(a.knopf, true, () => { handle(a.art); zeigeAngebotNach(); }));
-    knoepfe.push(knopf(a.erledigt ? 'Gut' : 'Später', false, schliesse));
-    fuelle(a.art === 'sturm' ? 'sturm' : 'regatta', a.titel, a.text, knoepfe);
+    knoepfe.push(knopf(a.erledigt || a.nurInfo ? 'Gut' : 'Später', false, schliesse));
+    fuelle(SYMBOL[a.art], a.titel, a.text, knoepfe);
     gezeigt = 'angebot';
     zeige(STEHT_SEKUNDEN);
     return true;
@@ -175,12 +240,36 @@ export async function initVorbereiten(game) {
   function zeigeAngebotNach() {
     const a = angebot();
     if (!a) { schliesse(); return; }
-    fuelle(a.art === 'sturm' ? 'sturm' : 'regatta', a.titel, a.text, [knopf('Gut', false, schliesse)]);
+    fuelle(SYMBOL[a.art], a.titel, a.text, [knopf('Gut', false, schliesse)]);
     zeige(5);
   }
 
+  // Ankündigung eines Ereignisses mit Bauten (G7): was die eigenen Bauten daraus machen
+  function zeigeBauAnkuendigung(event, startDay) {
+    const zeile = bauZeile(event.id);
+    if (!zeile) return false;
+    const s = st();
+    const tage = startDay - (s?.day ?? startDay);
+    const wann = tage <= 0 ? 'Heute' : tage === 1 ? 'Morgen' : tage === 2 ? 'Übermorgen' : `In ${tage} Tagen`;
+    fuelle(SYMBOL[event.id] ?? 'fest', `${wann}: ${event.title}`, zeile, [knopf('Gut', false, schliesse)]);
+    gezeigt = 'angebot';
+    zeige(10);
+    return true;
+  }
+
+  // Nachspiel (G3): am Morgen nach dem Ereignis
+  function zeigeNachspiel(event) {
+    const n = event?.nachspiel;
+    if (!n?.title) return;
+    const bonus = n.modsVorbereitet && st()?.modules?.vorbereitung?.nachspiel?.[event.id] != null;
+    const text = bonus ? `${n.text} Gut vorbereitet: Gäste bewerten besser.` : n.text;
+    fuelle(SYMBOL[event.id] ?? 'fest', n.title, text, [knopf('Gut', false, schliesse)]);
+    gezeigt = 'nachspiel';
+    zeige(8);
+  }
+
   function zeigeErgebnis(e) {
-    const t = V.ergebnisText(e);
+    const t = V.ergebnisText(e, serviceName);
     fuelle(t.symbol, t.titel, t.text, [knopf('Gut', false, schliesse)]);
     gezeigt = 'ergebnis';
     zeige(ERGEBNIS_SEKUNDEN);
@@ -218,6 +307,14 @@ export async function initVorbereiten(game) {
   let nachsehen = 0;
   function ordne() {
     if (karte.hidden) { clearInterval(nachsehen); nachsehen = 0; return; }
+    // Zahlen auf der Karte live halten (zum Beispiel: inzwischen liegt ein dritter Gast offen)
+    if (gezeigt === 'angebot' && kartenTitel) {
+      const a = angebot();
+      if (a && a.titel && a.text) {
+        if (kartenTitel.textContent !== a.titel) kartenTitel.textContent = a.titel;
+        if (kartenText.textContent !== a.text) kartenText.textContent = a.text;
+      }
+    }
     karte.classList.remove('zurueck');
     const frei = game.meldungen?.imPlatz?.(karte) ? true : platziere();
     const darf = game.meldungen ? game.meldungen.darf('ereignis') : true;
@@ -246,12 +343,25 @@ export async function initVorbereiten(game) {
     /** banner.js fragt: übernimmt die Karte diese Ankündigung? */
     uebernimmt: (event) => {
       const a = angebot();
-      return !!a && a.art === event?.id;
+      return (!!a && a.art === event?.id) || !!bauZeile(event?.id);
     },
+    bauZeile,
   };
-  game.on('event:announce', ({ event }) => {
+  game.on('event:announce', ({ event, startDay }) => {
     // Erst nach dem Morgen der Spielregeln (Planer und Sim sind dann auf demselben Tag)
-    setTimeout(() => { if (angebot()?.art === event?.id) zeigeAngebot(); }, 0);
+    const zeigen = () => {
+      if (angebot()?.art === event?.id) zeigeAngebot();
+      else zeigeBauAnkuendigung(event, startDay);
+    };
+    // Steht gerade das Nachspiel, kommt die Ankündigung danach
+    setTimeout(() => { if (gezeigt === 'nachspiel' && !karte.hidden) danach = zeigen; else zeigen(); }, 0);
+  });
+  game.on('event:nachspiel', ({ event }) => setTimeout(() => zeigeNachspiel(event), 0));
+  // Hanse-Woche: zwei Tage vorher erinnern (dann kann man Plätze freihalten)
+  game.on('sim:dayStart', () => {
+    const g = geplantGross();
+    const s = st();
+    if (g?.id === 'hansewoche' && s && g.startDay - s.day === 2) setTimeout(() => { if (gezeigt !== 'nachspiel') zeigeAngebot(); }, 0);
   });
   // Am Abend vor dem Sturm oder der Regatta noch einmal erinnern, wenn nichts vorbereitet ist
   game.on('sim:evening', () => {
@@ -259,20 +369,25 @@ export async function initVorbereiten(game) {
     const s = st();
     if (!a || a.erledigt || !s || a.plan.startDay !== s.day + 1) return;
     if (a.art === 'sturm' && V.draussen(s, ctx).length === 0) return;
+    if (a.nurInfo) return;
     zeigeAngebot();
   });
   game.on('sim:ereignisErgebnis', (e) => zeigeErgebnis(e));
-  game.on('sim:dayStart', () => { if (gezeigt === 'angebot') schliesse(); });
-  game.on('spielstand-geladen', schliesse);
-  game.on('foto', schliesse);
+  // Neuer Tag: alte Karten (auch das Ergebnis vom Vorabend, falls es noch wartet) gehen
+  game.on('sim:dayStart', () => { if (gezeigt && gezeigtTag !== st()?.day) schliesse(); });
+  game.on('spielstand-geladen', () => { danach = null; schliesse(); });
+  game.on('foto', () => { danach = null; schliesse(); });
 
   // Wetterbericht: Knopf unter dem Ereignis (banner.js ruft zeile(entry) auf)
   game.vorbereitung.zeile = (entry) => {
     const a = angebot();
-    if (!a || !entry?.event || entry.event.id !== a.art || entry.day < a.plan.startDay || entry.day > a.plan.endDay) return null;
-    if (entry.day !== a.plan.startDay) return null;
+    const bau = entry?.event ? bauZeile(entry.event.id) : '';
+    const passt = a && entry?.event && entry.event.id === a.art && entry.day === a.plan.startDay;
+    if (!passt && !bau) return null;
     const box = document.createElement('div');
     box.className = 'evv-zeile';
+    if (bau) { const b = document.createElement('small'); b.textContent = bau; box.append(b); }
+    if (!passt) return box;
     const p = document.createElement('small');
     p.textContent = a.erledigt ? a.titel : a.text;
     box.append(p);
