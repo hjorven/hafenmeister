@@ -204,7 +204,7 @@
     "Bed P4",
     "Bed P8"
    ],
-   "status": "erledigt",
+   "status": "teilweise",
    "bilder": [
     38
    ]
@@ -3771,8 +3771,8 @@
   {
    "code": "Bed P4",
    "text": "Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf \"bis zum nächsten Boot\"",
-   "status": "erledigt",
-   "statusText": "erledigt (Tempo bleibt; 1x nur bei wartendem Dauerlieger, Regionsziel, 8x bis zum nächsten Boot, danach Knopf \"Weiter mit 3x\" und automatische Rückkehr; 14.11.)",
+   "status": "offen",
+   "statusText": "geändert auf Jorvens Wunsch (14.11.): Tempo läuft durch, keine automatische Bremsung mehr",
    "pakete": [
     "P07"
    ],
@@ -4257,8 +4257,8 @@
     "P54"
    ],
    "zaehler": {
-    "erledigt": 8,
-    "teilweise": 1,
+    "erledigt": 7,
+    "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
     "offen": 0,
@@ -4409,8 +4409,8 @@
   }
  ],
  "gesamt": {
-  "erledigt": 21,
-  "teilweise": 7,
+  "erledigt": 20,
+  "teilweise": 8,
   "arbeit": 3,
   "frage": 0,
   "offen": 49,
@@ -4418,11 +4418,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 129,
+  "erledigt": 128,
   "teilweise": 8,
   "arbeit": 0,
   "frage": 1,
-  "offen": 81,
+  "offen": 82,
   "entfaellt": 0,
   "alle": 219
  },
