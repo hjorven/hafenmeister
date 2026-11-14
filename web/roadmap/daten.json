@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "7befb73"
+  "commit": "a6ac8ab"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -127,7 +127,7 @@
    "id": "P04",
    "titel": "Abschlussziel Stufe 6 richtig zählen",
    "inhalt": "Ü4",
-   "thread": "erledigt (PR 113): ein Zähler state.bigVisits in bridge.js",
+   "thread": "erledigt (PR 139): ein Zähler state.bigVisits, Liste GROSSSCHIFF_BESUCHE in data/services.js (Vorarbeit PR 113)",
    "welle": 1,
    "prs": [
     113,
@@ -145,7 +145,7 @@
    "id": "P05",
    "titel": "Boote auf wegfallenden Plätzen regeln",
    "inhalt": "Ü5",
-   "thread": "bestehend: \"Spielregeln ohne Grafik umsetzen\"",
+   "thread": "erledigt (Ü5: advanceStage, Hook stageUp, Test in tests/dauerlieger.test.mjs); bestehend: \"Spielregeln ohne Grafik umsetzen\"",
    "welle": 1,
    "prs": [
     143,
@@ -195,16 +195,19 @@
    "id": "P07",
    "titel": "Tempo einheitlich regeln",
    "inhalt": "Ü7, Hilfetexte, docs/schiffsanimationen.md",
-   "thread": "bestehend: \"Gesamte Oberfläche neu überarbeiten\"",
+   "thread": "erledigt (Ü7, Tempo bleibt mit PR 257, läuft ohne automatische Bremsung seit PR 278); bestehend: \"Gesamte Oberfläche neu überarbeiten\"",
    "welle": 1,
-   "prs": [],
+   "prs": [
+    257,
+    278
+   ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
    "punkte": [
     "Ü7",
     "Bed P4",
     "Bed P8"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": [
     38
    ]
@@ -489,10 +492,11 @@
    "id": "P19",
    "titel": "Ruf schwerer machen mit Wünschen je Bootsart",
    "inhalt": "Ü17, feeFactor, arrivalWeight, Kapazität sichtbar",
-   "thread": "erledigt: Teil 1 (PR 244: B7, C2, C3, C4, C6, F8), Teil 2 (C5, B9, \"heute voll\"), ruf.md",
+   "thread": "erledigt: Teil 1 (PR 244: B7, C2, C3, C4, C6, F8), Teil 2 (PR 279: C5, B9, \"heute voll\"), ruf.md",
    "welle": 2,
    "prs": [
-    244
+    244,
+    279
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -508,7 +512,10 @@
     "M3"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    44,
+    45
+   ]
   },
   {
    "id": "P20",
@@ -541,16 +548,21 @@
    "id": "P21",
    "titel": "Logbuch und Hafenchronik zeigen",
    "inhalt": "Logbuch (Note 1), F36, sim:logbookNew",
-   "thread": "erledigt (docs/logbuch.md, SAVE_VERSION 3)",
+   "thread": "erledigt (PR 274, docs/logbuch.md, SAVE_VERSION 3)",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    274
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "F36",
     "I5"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    40,
+    41
+   ]
   },
   {
    "id": "P22",
@@ -1067,7 +1079,11 @@
     "Bed P10"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    42,
+    43,
+    46
+   ]
   },
   {
    "id": "P57",
@@ -1156,7 +1172,7 @@
    "id": "P62",
    "titel": "Geländeform und Engpass neu bauen",
    "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
-   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224, 229, 246): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224), Land nördlich der Reede (PR 229)",
+   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224, 229, 246, 271): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224), Land nördlich der Reede (PR 229), Fahrrinne in die offene See an jeder Küste (PR 271)",
    "welle": 0,
    "prs": [
     179,
@@ -1168,7 +1184,8 @@
     216,
     224,
     229,
-    246
+    246,
+    271
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -4260,8 +4277,8 @@
     "P54"
    ],
    "zaehler": {
-    "erledigt": 7,
-    "teilweise": 2,
+    "erledigt": 8,
+    "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
     "offen": 0,
@@ -4412,8 +4429,8 @@
   }
  ],
  "gesamt": {
-  "erledigt": 22,
-  "teilweise": 6,
+  "erledigt": 23,
+  "teilweise": 5,
   "arbeit": 3,
   "frage": 0,
   "offen": 49,
@@ -4909,48 +4926,104 @@
    "datum": "2026-11-14",
    "quelle": "gelaende/vorschau/zonen/zonen-und-seewege.png",
    "nr": 39
+  },
+  {
+   "datei": "p21-pr274-pc-logbuch-album.jpg",
+   "pakete": [
+    "P21"
+   ],
+   "titel": "Logbuch: Sammelalbum aller Boote mit Pixelbildern",
+   "pr": 274,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "logbuch/pc-boote.png",
+   "nr": 40
+  },
+  {
+   "datei": "p21-pr274-handy-steckbrief.jpg",
+   "pakete": [
+    "P21"
+   ],
+   "titel": "Logbuch: Steckbrief eines Bootes",
+   "pr": 274,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "logbuch/handy-steckbrief.png",
+   "nr": 41
+  },
+  {
+   "datei": "p55-pr269-handy-geduldsring.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Geduldsring über wartenden Booten",
+   "pr": 269,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p55/handy-1-geduldsring.png",
+   "nr": 42
+  },
+  {
+   "datei": "p55-pr269-pc-geduldsring.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Geduldsring und Wünsche an der Boje",
+   "pr": 269,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "p55/pc-1-geduldsring.png",
+   "nr": 43
+  },
+  {
+   "datei": "p19-pr244-handy-gaestebuch-ruf.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Ruf schwerer: Gästebuch zeigt, was Gästen gefehlt hat",
+   "pr": 244,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p19/p19-buch-handy.png",
+   "nr": 44
+  },
+  {
+   "datei": "p19-pr244-pc-wuensche-bootsart.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Wünsche je Bootsart auf der Ankunftskarte",
+   "pr": 244,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "p19/p19-karte-pc.png",
+   "nr": 45
+  },
+  {
+   "datei": "p55-pr275-handy-schlange-versorgung.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Schlange vor der Versorgung, wenn sie knapp ist",
+   "pr": 275,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p55/handy-3-schlange.png",
+   "nr": 46
   }
  ],
  "neueBilder": [
+  46,
+  45,
+  43,
+  41,
   39,
   38,
   37,
   36,
-  35,
-  34,
-  33,
-  32,
-  31
+  34
  ],
  "merges": [
-  {
-   "datum": "2026-11-14",
-   "titel": "P19 Teil 2: Wege zählen, Auszeichnung des Hafens, \"heute voll\" in der Bootskarte",
-   "pr": 279,
-   "pakete": [
-    "P19"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tagesziel klappt nicht mehr auf, \"Als Nächstes\" eine Zeile und nur kurz",
-   "pr": 277,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P55 L2: Schlange vor der Versorgung, wenn sie knapp oder voll ist",
-   "pr": 275,
-   "pakete": [
-    "P55"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tempo läuft durch: keine automatische Bremsung mehr",
-   "pr": 278,
-   "pakete": []
-  },
   {
    "datum": "2026-11-14",
    "titel": "Logbuch und Hafenchronik: Sammelalbum mit Pixelbildern, Chronik je Tag (P21)",
@@ -4971,7 +5044,9 @@
    "datum": "2026-11-14",
    "titel": "Fahrrinne in die offene See: jede Küste hat einen Seeweg",
    "pr": 271,
-   "pakete": []
+   "pakete": [
+    "P62"
+   ]
   },
   {
    "datum": "2026-11-14",
@@ -5010,6 +5085,30 @@
    "pakete": [
     "P66"
    ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Handy: Hilfe aufklappbar, Einstellungen kompakt, Baumenü niedriger",
+   "pr": 267,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "GitHub Actions absichern: Rechte je Job, SHAs, Secret-Scan (Audit C07)",
+   "pr": 264,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Überblick: hochkant schmal, wartet auf das Startfenster, Startansicht folgt der geladenen Stufe",
+   "pr": 190,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Ablegen: Box bleibt belegt, bis das Boot wirklich draußen ist",
+   "pr": 266,
+   "pakete": []
   }
  ]
 }

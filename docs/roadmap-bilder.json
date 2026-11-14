@@ -440,6 +440,83 @@
    "geraet": "karte",
    "datum": "2026-11-14",
    "quelle": "gelaende/vorschau/zonen/zonen-und-seewege.png"
+  },
+  {
+   "datei": "p21-pr274-pc-logbuch-album.jpg",
+   "pakete": [
+    "P21"
+   ],
+   "titel": "Logbuch: Sammelalbum aller Boote mit Pixelbildern",
+   "pr": 274,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "logbuch/pc-boote.png"
+  },
+  {
+   "datei": "p21-pr274-handy-steckbrief.jpg",
+   "pakete": [
+    "P21"
+   ],
+   "titel": "Logbuch: Steckbrief eines Bootes",
+   "pr": 274,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "logbuch/handy-steckbrief.png"
+  },
+  {
+   "datei": "p55-pr269-handy-geduldsring.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Geduldsring über wartenden Booten",
+   "pr": 269,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p55/handy-1-geduldsring.png"
+  },
+  {
+   "datei": "p55-pr269-pc-geduldsring.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Geduldsring und Wünsche an der Boje",
+   "pr": 269,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "p55/pc-1-geduldsring.png"
+  },
+  {
+   "datei": "p19-pr244-handy-gaestebuch-ruf.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Ruf schwerer: Gästebuch zeigt, was Gästen gefehlt hat",
+   "pr": 244,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p19/p19-buch-handy.png"
+  },
+  {
+   "datei": "p19-pr244-pc-wuensche-bootsart.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Wünsche je Bootsart auf der Ankunftskarte",
+   "pr": 244,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "p19/p19-karte-pc.png"
+  },
+  {
+   "datei": "p55-pr275-handy-schlange-versorgung.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Schlange vor der Versorgung, wenn sie knapp ist",
+   "pr": 275,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p55/handy-3-schlange.png"
   }
  ]
 }
