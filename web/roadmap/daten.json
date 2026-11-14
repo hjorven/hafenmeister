@@ -204,7 +204,9 @@
     "Bed P8"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    38
+   ]
   },
   {
    "id": "P08",
@@ -1231,7 +1233,7 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
    "welle": 0,
    "prs": [
     81,
@@ -1240,7 +1242,8 @@
     199,
     228,
     240,
-    254
+    254,
+    256
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -4860,9 +4863,22 @@
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr249/245-krantag-pc.png",
    "nr": 37
+  },
+  {
+   "datei": "p07-pr257-handy-weiter-mit-3x.jpg",
+   "pakete": [
+    "P07"
+   ],
+   "titel": "Tempo bleibt: Knopf \"Weiter mit 3x\" mit Grund",
+   "pr": 257,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "tempo/tempo-handy.png",
+   "nr": 38
   }
  ],
  "neueBilder": [
+  38,
   37,
   36,
   35,
@@ -4870,10 +4886,15 @@
   33,
   32,
   31,
-  30,
-  29
+  30
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Einstieg: Blase und Kreis warten auf allen Geräten, solange das Baumenü offen ist",
+   "pr": 259,
+   "pakete": []
+  },
   {
    "datum": "2026-11-14",
    "titel": "Tempo bleibt: 3x springt nicht mehr jeden Morgen auf 1x",
@@ -4884,7 +4905,9 @@
    "datum": "2026-11-14",
    "titel": "Boote: Kurswächter Ufer, XL am kurzen Kai im Wasser",
    "pr": 256,
-   "pakete": []
+   "pakete": [
+    "P66"
+   ]
   },
   {
    "datum": "2026-11-14",
@@ -4954,12 +4977,6 @@
    "datum": "2026-11-14",
    "titel": "Tests: Pixeldichte 1 außer bei Bildschirmfotos, Geräte-Ausnahmen vor dem Laden überspringen",
    "pr": 247,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Meldungs-Ordnung: Kartenwahl wartet hinter der Feier, Tipps nie über Zeit und Bauen",
-   "pr": 241,
    "pakete": []
   }
  ]
