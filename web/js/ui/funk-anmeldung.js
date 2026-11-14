@@ -16,7 +16,7 @@ import { regelnBereit } from '../features/regeln-bereit.js';
 const SICHTBAR_S = 25;      // so lange steht eine Anmeldung ohne Entscheidung (nur sichtbare Zeit zählt)
 const BESTAETIGT_S = 5;     // so lange steht die Bestätigung nach dem Freihalten
 
-const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
+const euro = (n) => `${Math.round(n).toLocaleString('de-DE')}\u00a0€`;
 const meter = (m) => `${String(Math.round(m * 10) / 10).replace('.', ',')} m`;
 const liste = (l) => (l.length <= 1 ? l.join('') : `${l.slice(0, -1).join(', ')} und ${l[l.length - 1]}`);
 
@@ -47,6 +47,7 @@ body.card-open #hm-funk-anmeldung { display: none !important; }
 #hm-funk-anmeldung .fa-knoepfe .hm-knopf { flex: 0 0 auto; min-height: 40px; padding: 4px 10px; font: 600 14px/1.1 var(--hm-text, inherit); cursor: pointer; white-space: nowrap; }
 #hm-funk-anmeldung .fa-knoepfe .hm-knopf:not(.hm-px) { background: #fffcf6; border: 2px solid #283648; }
 #hm-funk-anmeldung .fa-knoepfe .hm-primaer { flex: 1 1 auto; }
+@media (max-width: 420px) { #hm-funk-anmeldung .fa-knoepfe .hm-knopf { padding: 4px 8px; font-size: 13px; } }
 #hm-funk-anmeldung .fa-zaehler { position: absolute; right: 8px; top: 6px; font-size: 12px; color: var(--hm-tinte-2, #5a6a7c); }
 `;
 
@@ -157,7 +158,7 @@ export async function init(game) {
         const i = (aktuell.auswahl ?? 0) % frei.length;
         markiere(frei[i]);
         satz.textContent += ` Box frei halten? Bonus ${euro(bonus)}.`;
-        knoepfe.append(knopf(`Box ${frei[i]} freihalten`, true, () => halten(frei[i])));
+        knoepfe.append(knopf(`${frei[i]} freihalten`, true, () => halten(frei[i])));
         if (frei.length > 1) knoepfe.append(knopf('Andere', false, () => { aktuell.auswahl = i + 1; zeigePlatz(frei[(i + 1) % frei.length]); zeichne(); }));
         knoepfe.append(knopf('Nein', false, () => fertig()));
       } else {
@@ -167,7 +168,8 @@ export async function init(game) {
       }
     }
     text.append(titel, satz, knoepfe);
-    const weitere = angemeldet().filter((x) => x.id !== b.id && !erledigt.has(x.id)).length;
+    // Wartende zählt der Meldeplatz selbst (ui/meldungen.js); eigener Zähler nur ohne ihn
+    const weitere = game.meldungen?.imPlatz?.(box) ? 0 : angemeldet().filter((x) => x.id !== b.id && !erledigt.has(x.id)).length;
     const teile = [sym, text];
     if (weitere) {
       const z = document.createElement('span');
