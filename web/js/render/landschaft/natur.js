@@ -1,6 +1,6 @@
 // Hafenmeister: die natürliche Landschaft rund um den Hafen, je Spiel anders.
 //
-// 15 Küstentypen (TYPEN; 11 bis 15 nach echten Vorbildern), jeder mit eigener Abwandlung je Spielstand (seed). Ein Typ legt fest,
+// 15 Küstentypen (TYPEN; 11 bis 15 aus echten Karten), jeder mit eigener Abwandlung je Spielstand (seed). Ein Typ legt fest,
 // wie Küste, Inseln, Nehrungen, Flüsse und Buchten liegen; der Zufall verschiebt, biegt und verteilt.
 // Daraus entsteht eine "Landigkeit" L (Planeinheiten, ungefähr Abstand zur Uferlinie): L > 0 Land,
 // L < 0 Wasser. Höhen, Tiefen und Oberflächen rechnet gelaende.js daraus.
@@ -15,6 +15,8 @@
 // Alles andere ist frei: der Hafenausbau (gelaende.js) baggert und schüttet in höheren Stufen nach.
 //
 // Reines JavaScript ohne Three.js, damit Tests und Werkzeuge es in Node nutzen können.
+
+import { VORBILDER, VORBILD_WELT } from '../../data/kuesten-vorbilder.js';
 
 export const PLAN_M = 0.62;
 /** Ganze Welt in Planeinheiten (etwa 1,6 x 1,3 km). */
@@ -595,183 +597,50 @@ function inselhafen(r) {
   };
 }
 
-// ------------------------------------------------------------------ Fünf Typen nach echten Vorbildern
-// Jorven hat am 14.11.2026 Luftbilder von fünf Häfen geschickt. Übernommen ist jeweils, was die Lage
-// ausmacht (wo Land, Inseln, Engstellen und offene See liegen); Maßstab und Stege richtet das Spiel ein.
+// ------------------------------------------------------------------ Fünf Küsten aus echten Karten
+// Jorven hat am 14.11.2026 Luftbilder von fünf Häfen geschickt. Küstenlinie und Höhen dieser Orte kommen
+// aus echten Karten- und Höhendaten (data/kuesten-vorbilder.js, erzeugt von tools/kuesten/vorbilder.py),
+// schon in Spielkoordinaten: Hafen bei (0, 0), See in +y, Maßstab je Ort so gewählt, dass Reede und Stege
+// ins echte Wasser passen. Der Seed ändert hier nur Kleinigkeiten (Uferrauheit, Bewuchs, Beiwerk).
 
-function schaerensund(r) {
-  // Vorbild Marstrand: der Hafen liegt an der Sundseite einer Felsinsel, gegenüber die große Nachbarinsel,
-  // an beiden Enden des Sunds offene See, ringsum Schären, ein Leuchtfeuer an der Westspitze
-  const rx = zw(r, 540, 660), ry = zw(r, 300, 370);
-  const sund = zw(r, 650, 740), nrx = zw(r, 640, 800), nry = zw(r, 300, 380), nx = zw(r, -160, 260);
-  const inseln = [
-    { x: 0, y: -ry, rx, ry, rau: 0.32, korn: 55, art: 'land' },
-    { x: nx, y: sund + nry, rx: nrx, ry: nry, dreh: zw(r, -0.25, 0.25), rau: 0.38, korn: 50, art: 'wald' },
-  ];
-  for (let i = 0; i < 300 && inseln.length < 30; i++) {
-    const x = zw(r, -1800, 1800), y = zw(r, -1100, 1700);
-    const g = zw(r, 8, 46);
-    if (Math.abs(x) < 560 && y > -40 && y < sund) continue;                       // Sund vor dem Hafen bleibt frei
-    if (inseln.some((o) => Math.hypot(o.x - x, o.y - y) < Math.max(o.rx, o.ry) * 1.15 + g + 30)) continue;
-    inseln.push({ x, y, rx: g, ry: g * zw(r, 0.5, 0.9), dreh: zw(r, -1.5, 1.5), art: r() < 0.8 ? 'fels' : 'wald', rau: 0.45, korn: 12 });
-  }
-  return {
-    kueste: freieKueste(r, { y: -3200, amp: 60 }), rauheit: 26, rauKorn: 24,
-    inseln,
-    // kleine Buchten schneiden in beide Inseln
-    buchten: [
-      ...Array.from({ length: 4 }, (_, k) => { const a = Math.PI * (1.1 + 0.27 * k) + zw(r, -0.1, 0.1); return { x: Math.cos(a) * rx * 0.95, y: -ry + Math.sin(a) * ry * 0.95, rx: zw(r, 50, 110), ry: zw(r, 40, 80), dreh: a, rau: 0.4, korn: 18 }; }),
-      { x: nx + zw(r, -300, 300), y: sund + nry * 0.15, rx: zw(r, 70, 130), ry: zw(r, 60, 110), rau: 0.4, korn: 18 },
-    ],
-    hafen: { x: zw(r, -160, 160), y: 0, dreh: zw(r, -0.3, 0.3) },
-    // Am Hafen: Schären links und rechts des Hafens und am Rand der Reede
-    nah: (q) => {
-      const inseln = [];
-      const frei = [[-640, -250, 20, 235], [470, 660, 10, 235], [-640, -440, 250, 600], [470, 640, 260, 600]];
-      for (let i = 0; i < 80 && inseln.length < 12; i++) {
-        const [a, b, c, d] = frei[i % frei.length];
-        const x = zw(q, a, b), y = zw(q, c, d), g = zw(q, 7, 24);
-        if (inseln.some((o) => Math.hypot(o.x - x, o.y - y) < o.rx + g + 14)) continue;
-        inseln.push({ x, y, rx: g, ry: g * zw(q, 0.5, 0.9), dreh: zw(q, -1.5, 1.5), art: q() < 0.8 ? 'fels' : 'wald', rau: 0.45, korn: 9 });
-      }
-      return { inseln };
-    },
-    stil: { felsufer: 30, steil: 7, wald: 0.3, ufer: 'fels', tiefe: 1.3 },
-    leuchttuerme: [[-rx * 0.92, -ry * 1.05]],
+const _karten = new Map();
+/** Karte eines Vorbilds: Landigkeit L(px, py) und Höhe hoehe(px, py) in Metern (Spielmaßstab). */
+function karteVon(nr) {
+  if (_karten.has(nr)) return _karten.get(nr);
+  const v = VORBILDER[nr], W = VORBILD_WELT;
+  const bytes = (t) => Uint8Array.from(atob(t), (c) => c.charCodeAt(0));
+  const bits = bytes(v.land), n = v.nx * v.ny;
+  const nass = new Uint8Array(n);
+  for (let k = 0; k < n; k++) nass[k] = (bits[k >> 3] >> (7 - (k & 7))) & 1 ? 0 : 1;
+  const dL = chamfer(nass, v.nx, v.ny, 1), dW = chamfer(nass, v.nx, v.ny, 0);
+  const sdf = new Float32Array(n);
+  for (let k = 0; k < n; k++) sdf[k] = nass[k] ? -(dW[k] - 0.5) * v.s : (dL[k] - 0.5) * v.s;
+  const hoch = bytes(v.hoehe);
+  const lies = (f, nx, ny, s, px, py, mal) => {
+    const fx = clamp((px - W.x0) / s, 0, nx - 1.001), fy = clamp((py - W.y0) / s, 0, ny - 1.001);
+    const i = Math.floor(fx), j = Math.floor(fy), u = fx - i, w = fy - j, k = j * nx + i;
+    return (f[k] * (1 - u) * (1 - w) + f[k + 1] * u * (1 - w) + f[k + nx] * (1 - u) * w + f[k + nx + 1] * u * w) * mal;
   };
+  const K = {
+    L: (px, py) => lies(sdf, v.nx, v.ny, v.s, px, py, 1),
+    hoehe: (px, py) => lies(hoch, v.hx, v.hy, v.sh, px, py, 0.5),
+  };
+  _karten.set(nr, K);
+  return K;
 }
 
-function rundbucht(r) {
-  // Vorbild Punat: fast geschlossene runde Bucht mit einer bewaldeten Insel in der Mitte, die Marina am Ufer,
-  // eine schmale Mündung seitlich zur offenen See, ringsum Wald, heller flacher Saum am Ufer
-  const s = vz(r);
-  const brx = zw(r, 600, 700), bry = zw(r, 430, 480), by = bry - 60;
-  const my = by + bry * zw(r, 0.55, 0.7);
-  return {
-    kueste: freieKueste(r, { y: 1180, amp: 60 }), rauheit: 14,
-    buchten: [
-      { x: 0, y: by, rx: brx, ry: bry, rau: 0.14, korn: 70 },
-      { x: -s * brx * 0.78, y: by - bry * 0.15, rx: zw(r, 170, 230), ry: zw(r, 120, 160), rau: 0.25, korn: 30 },   // Nebenbucht
-      { x: -s * zw(r, 700, 1000), y: 1200, rx: zw(r, 260, 380), ry: zw(r, 120, 180), rau: 0.3, korn: 40 },         // Bucht an der Außenküste
-    ],
-    // Mündung: schmal, mit einem Knick
-    kanaele: [{ punkte: gewunden([[s * brx * 0.55, my], [s * (brx + 120), my + 200], [s * (brx + 230), 1060], [s * (brx + 200), 1500]], 50, 24, 95), halb: zw(r, 46, 60) }],
-    inseln: [
-      { x: -s * zw(r, 120, 320), y: zw(r, 680, 710), rx: zw(r, 70, 95), ry: zw(r, 50, 62), dreh: zw(r, -0.3, 0.3), art: 'wald', rau: 0.2, korn: 24 },   // Klosterinsel
-      { x: s * zw(r, 300, 900), y: zw(r, 1330, 1420), rx: zw(r, 30, 60), ry: zw(r, 20, 36), art: 'fels' },
-    ],
-    hafen: { x: zw(r, -160, 160), y: -40, dreh: zw(r, -0.25, 0.25) },
-    // Am Hafen: bewaldete Landzunge an einer Seite, Badebucht an der anderen
-    nah: (q) => {
-      const t = vz(q);
-      return {
-        inseln: [{ x: t * zw(q, 520, 600), y: zw(q, 40, 90), rx: zw(q, 110, 150), ry: zw(q, 80, 110), art: 'wald', rau: 0.22, korn: 26 }],
-        buchten: [{ x: -t * zw(q, 520, 600), y: zw(q, 10, 40), rx: zw(q, 80, 120), ry: zw(q, 50, 70), rau: 0.2, korn: 22 }],
-      };
-    },
-    stil: { steil: 4, wald: 0.85, ufer: 'sand', tiefe: 1.4 },
-    leuchttuerme: [[s * (brx + 320), 1120]],
-  };
-}
+const ausKarte = (nr, stil, nah = null) => () => ({
+  karte: karteVon(nr), kueste: [[-1, 0], [1, 0]], rauheit: 2.5, rauKorn: 14,
+  hafen: { x: 0, y: 0, dreh: 0 }, stil, nah, leuchttuerme: [],
+});
 
-function molenkueste(r) {
-  // Vorbild Shilshole Bay: fast gerade Küste am offenen Wasser, die Marina hinter einem langen Steinwall
-  // parallel zum Ufer, auf einer Seite eine Sandspitze unter bewaldetem Hang, auf der anderen ein Kanal ins Land
-  const s = vz(r);
-  const kx = -s * zw(r, 620, 800);
-  return {
-    kueste: freieKueste(r, { amp: 45, schritt: 520 }), rauheit: 8,
-    kanaele: [{ punkte: gewunden([[kx, 60], [kx - s * 60, -160], [kx - s * 420, -360], [kx - s * 1100, -420], [kx - s * 2200, -380]], 50, 30, 97), halb: zw(r, 34, 46) }],
-    buchten: [{ x: kx, y: 30, rx: zw(r, 120, 170), ry: zw(r, 70, 100), rau: 0.2, korn: 30 }],
-    hafen: { x: zw(r, -300, 300), y: 0, dreh: zw(r, -0.2, 0.2) },
-    // Am Hafen: der Steinwall liegt gut 130 m vor den Stegen, an beiden Enden offen; die Zufahrt ist die Lücke.
-    // Nach Westen knickt er leicht zum Ufer (Liegewanne der Großschiffe ab Stufe 6 bleibt frei)
-    nah: (q) => {
-      const y = zw(q, 212, 216), w = zw(q, 520, 640), o = zw(q, 560, 680);
-      const wall = (x0, x1) => { const pts = []; for (let x = x0; x <= x1 + 1; x += 60) pts.push([x, y - 0.00003 * x * x - 0.2 * Math.max(0, -150 - x) + zw(q, -2, 2)]); return pts; };
-      const t = vz(q);
-      return {
-        baender: [{ punkte: wall(-w, o), halb: zw(q, 18, 20), duene: 0, fels: 2 }],
-        // Sandspitze unter dem Hang, ein Stück neben dem Hafen
-        inseln: [{ x: t * zw(q, 740, 840), y: zw(q, -10, 15), rx: zw(q, 150, 190), ry: zw(q, 60, 80), dreh: t * zw(q, 0.1, 0.25), art: 'sand', rau: 0.15, korn: 30 }],
-        platen: [{ x: t * zw(q, 800, 900), y: zw(q, 150, 190), rx: zw(q, 120, 170), ry: zw(q, 16, 24), dreh: t * 0.3 }],
-        leuchttuerme: [[o - 20, y]],
-      };
-    },
-    stil: { steil: zw(r, 9, 13), wald: 0.7, ufer: 'sand' },
-    leuchttuerme: [],
-  };
-}
-
-function bergbucht(r) {
-  // Vorbild Bucht von Kotor: weite Becken zwischen hohen bewaldeten Bergen, durch eine schmale Enge
-  // miteinander verbunden, dazu ein langer Seitenarm; die offene See liegt weit hinter dem äußeren Becken
-  const s = vz(r);
-  const brx = zw(r, 560, 640), bry = zw(r, 380, 430), by = bry - 50;
-  const ex = s * zw(r, 380, 440), ey = by + bry * 0.72;          // Anfang der Enge
-  const ax = s * zw(r, 660, 740), ay = zw(r, 960, 1020);          // Ende der Enge, Anfang des äußeren Beckens
-  const cx = s * zw(r, 980, 1060), cy = zw(r, 1230, 1300);        // Mitte des äußeren Beckens
-  return {
-    kueste: freieKueste(r, { y: 2500, amp: 100 }), rauheit: 16, rauKorn: 50,
-    buchten: [
-      { x: 0, y: by, rx: brx, ry: bry, rau: 0.22, korn: 60 },
-      { x: cx, y: cy, rx: zw(r, 480, 560), ry: zw(r, 320, 370), dreh: s * zw(r, 0.15, 0.35), rau: 0.25, korn: 60 },
-      { x: -s * (brx + 200), y: by + zw(r, 60, 200), rx: zw(r, 380, 480), ry: zw(r, 130, 170), dreh: -s * zw(r, 0.3, 0.6), rau: 0.25, korn: 40 },   // Seitenarm
-    ],
-    kanaele: [
-      { punkte: gewunden([[ex - s * 120, ey - 140], [ex, ey], [ax, ay], [cx, cy]], 40, 12, 99), halb: zw(r, 52, 64) },
-      { punkte: gewunden([[cx, cy], [cx + s * 200, cy + 700], [cx, 2700]], 60, 60, 101), halb: zw(r, 110, 150) },
-    ],
-    inseln: [
-      { x: -s * zw(r, 150, 420), y: zw(r, 690, 760), rx: zw(r, 26, 40), ry: zw(r, 18, 26), art: 'fels', rau: 0.2 },    // Kircheninsel
-      { x: -s * zw(r, 480, 600), y: zw(r, 560, 640), rx: zw(r, 20, 30), ry: zw(r, 16, 22), art: 'wald', rau: 0.2 },
-    ],
-    hafen: { x: zw(r, -160, 160), y: -30, dreh: zw(r, -0.25, 0.25) },
-    // Am Hafen: Berghänge rücken an einer Seite bis ans Wasser
-    nah: (q) => {
-      const t = vz(q);
-      return { inseln: [{ x: t * zw(q, 560, 640), y: zw(q, 60, 120), rx: zw(q, 120, 160), ry: zw(q, 110, 150), art: 'wald', rau: 0.25, korn: 30 }] };
-    },
-    stil: { steil: zw(r, 8, 12), berg: zw(r, 50, 70), wald: 1, ufer: 'steine', tiefe: 1.6 },
-    leuchttuerme: [[ax - s * 90, ay + 20]],
-  };
-}
-
-function felsbucht(r) {
-  // Vorbild Porto Cervo: zerklüftete Felsküste, der Hafen in einer tief eingeschnittenen Bucht mit Nebenarm,
-  // zwei Felszungen fassen die Einfahrt ein, davor gleich die offene See, kleine helle Badebuchten
-  const kueste = freieKueste(r, { amp: 150, schritt: 250 });
-  const hx = zw(r, -250, 250);
-  const inseln = [];
-  for (let i = 0; i < 120 && inseln.length < 14; i++) {
-    const x = zw(r, -1700, 1700), y = zw(r, 160, 900), g = zw(r, 6, 26);
-    if (Math.abs(x - hx) < 620 && y < 760) continue;
-    if (inseln.some((o) => Math.hypot(o.x - x, o.y - y) < o.rx + g + 20)) continue;
-    inseln.push({ x, y, rx: g, ry: g * zw(r, 0.5, 0.9), dreh: zw(r, -1.5, 1.5), art: 'fels', rau: 0.45, korn: 10 });
-  }
-  return {
-    kueste, rauheit: 30, rauKorn: 22,
-    inseln,
-    buchten: Array.from({ length: 8 }, () => { const x = zw(r, 750, 1750) * vz(r); return { x: hx + x, y: zw(r, 0, 120), rx: zw(r, 60, 130), ry: zw(r, 80, 190), dreh: zw(r, -0.6, 0.6), rau: 0.35, korn: 18 }; }),
-    hafen: { x: hx, y: 0, dreh: zw(r, -0.35, 0.35) },
-    // Am Hafen: zwei Felszungen umschließen die Bucht bis auf die Einfahrt, innen ein Nebenarm
-    nah: (q) => {
-      const ende = zw(q, 70, 115), yw = zw(q, 216, 224), yo = zw(q, 214, 224);
-      const t = vz(q);
-      return {
-        baender: [
-          { punkte: gewunden([[-900, -40], [-640, 40], [-470, 132], [-300, 174], [-150, yw - 6], [ende - 60, yw + 2], [ende, yw - 12]], 30, 6, 103), halb: zw(q, 27, 32), duene: 0 },
-          { punkte: gewunden([[1000, -40], [700, 70], [560, 180], [440, yo], [300, yo + 4], [250, yo - 6]], 30, 9, 105), halb: zw(q, 26, 36), duene: 0 },
-        ],
-        buchten: [{ x: t < 0 ? -zw(q, 330, 400) : zw(q, 400, 470), y: zw(q, 70, 110), rx: zw(q, 80, 110), ry: zw(q, 50, 70), dreh: t * 0.4, rau: 0.3, korn: 16 }],
-        inseln: Array.from({ length: 5 }, () => ({ x: vz(q) * zw(q, 480, 660), y: zw(q, 250, 420), rx: zw(q, 5, 12), ry: zw(q, 4, 9), art: 'fels', rau: 0.35 })),
-        leuchttuerme: [[ende - 30, yw]],
-      };
-    },
-    stil: { felsufer: 38, steil: 6, wald: 0.3, ufer: 'fels', tiefe: 1.2 },
-    leuchttuerme: [],
-  };
-}
+// Shilshole Bay: die Grundkarte kennt den Wellenbrecher nicht, er liegt wie in echt gut 150 m vor dem Ufer
+// und ist an beiden Enden offen. Nach Westen knickt er leicht zum Ufer (Liegewanne ab Stufe 6 bleibt frei).
+const shilsholeWall = (q) => {
+  const y = zw(q, 212, 216), pts = [];
+  for (let x = -600; x <= 631; x += 60) pts.push([x, y - 0.00003 * x * x - 0.2 * Math.max(0, -150 - x) + zw(q, -2, 2)]);
+  return { baender: [{ punkte: pts, halb: zw(q, 18, 20), duene: 0, fels: 2 }], leuchttuerme: [[610, y - 10]] };
+};
 
 export const TYPEN = [
   { nr: 1, name: 'Nehrung', idee: 'Lagune hinter einer gewundenen Nehrung mit Dünen, Seegatten und Salzwiesen.', bau: nehrung },
@@ -784,11 +653,11 @@ export const TYPEN = [
   { nr: 8, name: 'Förde', idee: 'Lange, gewundene Förde mit bewaldeten Hängen, der Hafen an ihrem inneren Ende.', bau: foerde },
   { nr: 9, name: 'Strandhaken', idee: 'Eine Nehrung wächst um die Bucht herum und endet in einem Haken mit Leuchtturm.', bau: haken },
   { nr: 10, name: 'Inselhafen', idee: 'Der Hafen liegt auf einer Insel, über einen Sund sieht man das Festland.', bau: inselhafen },
-  { nr: 11, name: 'Schärensund', idee: 'Hafen an der Sundseite einer Felsinsel, gegenüber die Nachbarinsel, ringsum Schären (Vorbild Marstrand).', bau: schaerensund },
-  { nr: 12, name: 'Rundbucht', idee: 'Fast geschlossene runde Bucht mit einer Waldinsel in der Mitte und schmaler Mündung (Vorbild Punat).', bau: rundbucht },
-  { nr: 13, name: 'Molenküste', idee: 'Gerade Küste am offenen Wasser, der Hafen hinter einem langen Steinwall (Vorbild Shilshole Bay).', bau: molenkueste },
-  { nr: 14, name: 'Bergbucht', idee: 'Weite Becken zwischen hohen Bergen, durch eine schmale Enge verbunden (Vorbild Bucht von Kotor).', bau: bergbucht },
-  { nr: 15, name: 'Felsbucht', idee: 'Tief eingeschnittene Bucht in zerklüfteter Felsküste, Felszungen fassen die Einfahrt ein (Vorbild Porto Cervo).', bau: felsbucht },
+  { nr: 11, name: 'Marstrand', idee: 'Echte Karte: Hafen am Sund zwischen Marstrandsön und Koön an der schwedischen Westküste, Fels ringsum.', bau: ausKarte(11, { felsufer: 34, wald: 0.15, ufer: 'fels', tiefe: 1.3 }) },
+  { nr: 12, name: 'Punat', idee: 'Echte Karte: fast geschlossene Bucht auf Krk mit der Klosterinsel Košljun, schmale Mündung zur Adria.', bau: ausKarte(12, { wald: 0.8, ufer: 'steine', tiefe: 1.3 }) },
+  { nr: 13, name: 'Shilshole Bay', idee: 'Echte Karte: gerade Küste am Puget Sound, der Hafen hinter einem langen Wellenbrecher, Hang mit Wald dahinter.', bau: ausKarte(13, { wald: 0.6, ufer: 'sand' }, shilsholeWall) },
+  { nr: 14, name: 'Bucht von Kotor', idee: 'Echte Karte: Tivat in der Bucht von Kotor, weite Becken zwischen hohen Bergen, die Enge von Verige im Norden.', bau: ausKarte(14, { wald: 1, ufer: 'steine', tiefe: 1.6 }) },
+  { nr: 15, name: 'Porto Cervo', idee: 'Echte Karte: tief eingeschnittene Felsbucht an der Costa Smeralda, die Einfahrt nach Osten.', bau: ausKarte(15, { felsufer: 34, wald: 0.3, ufer: 'fels', tiefe: 1.2 }) },
 ];
 
 // ------------------------------------------------------------------ Aufbau und Abfrage
@@ -825,7 +694,7 @@ export function bauen(nr, seed = 1) {
 
   /** Landigkeit in Naturkoordinaten */
   function roh(X, Y) {
-    let L = ufer(X) - Y + rau * (fbm(X / korn, Y / korn, bseed) - 0.5) * 2;
+    let L = (p.karte ? p.karte.L(X, Y) : ufer(X) - Y) + rau * (fbm(X / korn, Y / korn, bseed) - 0.5) * 2;
     for (const b of baender) {
       if (weitWeg(X, Y, b.bb)) continue;
       const d = b.halb - abstandLinie(X, Y, b.punkte);
@@ -879,6 +748,7 @@ export function bauen(nr, seed = 1) {
   const n = nx * ny;
   const gRoh = new Float32Array(n), gDuene = new Float32Array(n), gFels = new Float32Array(n), gHallig = new Float32Array(n);
   const gWald = new Float32Array(n), gPlate = new Float32Array(n), gKanal = new Float32Array(n);
+  const gRelief = p.karte ? new Float32Array(n) : null;   // Höhen aus der echten Karte (Meter im Spielmaßstab)
   for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
     const k = j * nx + i;
     const px = x0 + i * S, py = y0 + j * S;
@@ -907,6 +777,7 @@ export function bauen(nr, seed = 1) {
       const d = abstandLinie(X, Y, q.punkte);
       if (d < q.halb + (q.tal || 0) + 6) kanal = Math.max(kanal, 1 - smooth(q.halb, q.halb + (q.tal || 0) + 6, d));
     }
+    if (gRelief) gRelief[k] = p.karte.hoehe(X, Y);
     gDuene[k] = duene; gFels[k] = fels; gHallig[k] = hallig; gWald[k] = wald; gPlate[k] = plate; gKanal[k] = kanal;
   }
   const lies = (f, px, py) => {
@@ -947,7 +818,8 @@ export function bauen(nr, seed = 1) {
       gid++;
     }
     const nichtOffen = new Uint8Array(n);
-    for (let k = 0; k < n; k++) nichtOffen[k] = gruppe[k] === beste && beste >= 0 ? 0 : 1;
+    // Küsten aus echten Karten: jedes breite Wasser, das bis an den Kartenrand reicht, gilt als offene See
+    for (let k = 0; k < n; k++) nichtOffen[k] = (p.karte ? gruppe[k] >= 0 : gruppe[k] === beste && beste >= 0) ? 0 : 1;
     return { nass, dL, dW, nichtOffen };
   };
   // Seeweg von der Reede in die offene See. Die Pflicht-See vor der Einfahrt ist nur so groß wie Reede,
@@ -963,6 +835,9 @@ export function bauen(nr, seed = 1) {
       return i >= 0 && j >= 0 && i < nx && j < ny && !masse.nichtOffen[j * nx + i];
     };
     if (offen(cx, cy)) return null;
+    // Küsten aus echten Karten bekommen kein gerades Seegatt: ihr Wasser hängt von Natur aus zusammen,
+    // den Weg hinaus findet und vertieft die Fahrrinne (gelaende.js)
+    if (p.karte) return null;
     let best = null;
     for (let grad = 0; grad <= 120; grad += 5) for (const vz of grad ? [1, -1] : [1]) {
       const a = (vz * grad * Math.PI) / 180, ex = Math.sin(a), ey = Math.cos(a);
@@ -999,6 +874,9 @@ export function bauen(nr, seed = 1) {
       L, d, offenAbstand: lies(dOffen, px, py) * S,
       duene: lies(gDuene, px, py), fels, hallig: lies(gHallig, px, py), wald: Math.max(stil.wald || 0, lies(gWald, px, py)),
       plate: lies(gPlate, px, py), kanal: lies(gKanal, px, py), stil,
+      // nur Küsten aus echten Karten: Geländehöhe und Gefälle (Meter Höhe je Planeinheit)
+      relief: gRelief ? lies(gRelief, px, py) : 0,
+      gefaelle: gRelief ? Math.hypot(lies(gRelief, px + 12, py) - lies(gRelief, px - 12, py), lies(gRelief, px, py + 12) - lies(gRelief, px, py - 12)) / 24 : 0,
     };
   }
 

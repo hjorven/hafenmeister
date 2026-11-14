@@ -6,7 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
-- Fünf neue Küsten nach echten Häfen: Schärensund (Marstrand), Rundbucht (Punat), Molenküste (Shilshole Bay), Bergbucht (Kotor) und Felsbucht (Porto Cervo). Ein neues Spiel würfelt jetzt aus 15 Küsten.
+- Fünf neue Küsten aus echten Karten: Marstrand, Punat, Shilshole Bay, Bucht von Kotor und Porto Cervo. Küstenlinie und Berge stammen aus echten Karten- und Höhendaten, Stege und Maßstab vom Spiel. Ein neues Spiel würfelt jetzt aus 15 Küsten.
 - Bootskarte: Ist die Versorgung für einen Wunsch heute schon voll, steht er rot da ("Wunsch: Dusche (heute voll)").
 - Wege zählen: Liegt eine Box weit weg vom WC oder der Dusche, zählt der Wunsch für die Note nur halb; das Ziehschild zeigt "Dusche weit", das Gästebuch "weiter Weg zur Dusche". Das Sanitärgebäude hat auch Duschen.
 - Auszeichnung: Drei Abende mit gutem Ruf machen den Hafen zum "Gastlichen", "Empfohlenen" oder "Ausgezeichneten Hafen"; ein Wimpel weht am Hafenmeisterhaus, das Gästebuch sagt, was zur nächsten Stufe fehlt.
