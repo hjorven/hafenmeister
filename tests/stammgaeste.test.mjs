@@ -5,7 +5,8 @@ import * as sim from '../web/js/sim.js';
 import { createState } from '../web/js/state.js';
 import { HAFEN } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
-import { STAMM, haengeEin, stammState, beschreibung, nachtHook, namenNachtragen } from '../web/js/features/stammgaeste.js';
+import { STAMM, haengeEin, stammState, beschreibung, nachtHook, namenNachtragen, freierName } from '../web/js/features/stammgaeste.js';
+import { BOOTSNAMEN } from '../web/js/data/bootsnamen.js';
 import * as dauer from '../web/js/features/dauerlieger.js';
 
 function neu(seed = 7, stufe = 2) {
@@ -132,4 +133,38 @@ test('Boote ohne Namen (vor dem Einhängen gewürfelt) bekommen Namen nach, ohne
   }
   assert.equal(JSON.stringify(state.rng ?? state.seed), rng);
   assert.equal(namenNachtragen(state), 0, 'zweimal ändert nichts');
+});
+
+test('Bootsnamen sind im Hafen eindeutig, auch in Stufe 6 mit vielen Booten', () => {
+  for (const stufe of [2, 6]) {
+    const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN });
+    haengeEin((n, f) => sim.addHook(ctx, n, f));
+    const state = sim.applyTestStage(createState({ seed: 21 }), ctx, stufe);
+    state.office = 3;
+    let meist = 0;
+    for (let tag = 0; tag < 25; tag++) {
+      for (let t = 0; t < 400; t++) {
+        sim.tick(state, ctx, 1);
+        const namen = [...Object.values(state.boats), ...state.upcoming].filter((b) => !b.stationed).map((b) => b.bootsname);
+        meist = Math.max(meist, namen.length);
+        assert.equal(new Set(namen).size, namen.length, `Stufe ${stufe} Tag ${state.day}: ${namen.join(', ')}`);
+      }
+      sim.runDay(state, ctx);
+      sim.collectAll(state, ctx, true);
+    }
+    assert.ok(meist > 3, `Stufe ${stufe}: genug Boote gleichzeitig (${meist})`);
+  }
+});
+
+test('freierName: zuletzt vergebene Namen kommen nicht gleich wieder, volle Liste bekommt Zusatz', () => {
+  const state = createState({ seed: 4 });
+  const reihe = [];
+  for (let i = 0; i < STAMM.namenGedaechtnis; i++) reihe.push(freierName(state, 0));
+  assert.equal(new Set(reihe).size, reihe.length);
+  // Alle Grundnamen liegen im Hafen: ein Zusatz macht den Namen eindeutig
+  state.boats = {};
+  BOOTSNAMEN.forEach((name, i) => { state.boats[i + 1] = { id: i + 1, bootsname: name }; });
+  const n = freierName(state, 0.5);
+  assert.match(n, / II$/);
+  assert.ok(!BOOTSNAMEN.includes(n));
 });

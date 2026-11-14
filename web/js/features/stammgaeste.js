@@ -8,7 +8,9 @@
 // - Ab dem 5. Besuch kann man einen liegenden Stammgast als Dauerlieger behalten (dauerlieger.js).
 //
 // Spielstand: state.modules.stamm = { naechsteId, liste: [{ stammId, bootsname, heimathafen, typeId, modelId,
-//   name, size, kind, motor, length, beam, draft, wishes, besuche, zuletzt }], abend: { bootId: schnappschuss } }
+//   name, size, kind, motor, length, beam, draft, wishes, besuche, zuletzt }], abend: { bootId: schnappschuss },
+//   zuletztNamen: [die zuletzt vergebenen Namen], heute: { tag, namen: [heute vergeben] } }
+// Namen sind im Hafen eindeutig (freierName); Stammgäste mit einem gerade vergebenen Namen kommen dann nicht.
 //
 // Die Logik läuft ohne Browser (tests/stammgaeste.test.mjs).
 
@@ -29,6 +31,47 @@ export function stammState(state) {
 
 const pick = (state, list) => list[Math.floor(random(state) * list.length)];
 
+// Namen, die gerade im Hafen oder auf dem Weg dorthin sind (ohne das Boot selbst). Dazu die heute
+// vergebenen: Die Boote eines Tages werden zusammen gewürfelt und stehen erst danach in state.upcoming.
+function namenImHafen(state, ausser) {
+  const n = new Set(heuteVergeben(state));
+  for (const b of [...Object.values(state.boats || {}), ...(state.upcoming || [])]) {
+    if (b && b !== ausser && b.bootsname) n.add(b.bootsname);
+  }
+  return n;
+}
+
+function heuteVergeben(state) {
+  const s = stammState(state);
+  if (s.heute?.tag !== state.day) s.heute = { tag: state.day, namen: [] };
+  return s.heute.namen;
+}
+
+const ZUSATZ = ['II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+
+/**
+ * Ein Name, den gerade kein anderes Boot trägt. Vorrang: auch nicht unter den zuletzt vergebenen
+ * Namen und nicht der eines Stammgasts; reicht die Liste nicht (Stufe 6), nur nicht im Hafen;
+ * sind alle vergeben, mit Zusatz („Möwe II“). wuerfel liefert eine Zahl in [0, 1).
+ */
+export function freierName(state, wuerfel, ausser = null) {
+  const s = stammState(state);
+  const belegt = namenImHafen(state, ausser);
+  const auch = new Set([...(s.zuletztNamen || []), ...s.liste.map((g) => g.bootsname)]);
+  let frei = BOOTSNAMEN.filter((n) => !belegt.has(n) && !auch.has(n));
+  if (!frei.length) frei = BOOTSNAMEN.filter((n) => !belegt.has(n));
+  if (!frei.length) {
+    for (const z of ZUSATZ) {
+      frei = BOOTSNAMEN.map((n) => `${n} ${z}`).filter((n) => !belegt.has(n));
+      if (frei.length) break;
+    }
+  }
+  const name = frei.length ? frei[Math.floor(wuerfel * frei.length)] : BOOTSNAMEN[Math.floor(wuerfel * BOOTSNAMEN.length)];
+  heuteVergeben(state).push(name);
+  s.zuletztNamen = [...(s.zuletztNamen || []).filter((n) => n !== name), name].slice(-STAMM.namenGedaechtnis);
+  return name;
+}
+
 function anwesend(state) {
   const ids = new Set();
   for (const b of Object.values(state.boats)) if (b.stammId) ids.add(b.stammId);
@@ -44,9 +87,11 @@ export function ankunftHook({ state, ctx, boat }) {
     const da = anwesend(state);
     const mods = sim.modifiers(state, ctx);
     const erlaubt = new Set(sim.eligibleTypes(state, ctx, mods).map((t) => t.id));
-    const kandidaten = s.liste.filter((g) => !da.has(g.stammId) && erlaubt.has(g.typeId));
+    const namen = namenImHafen(state, boat);
+    const kandidaten = s.liste.filter((g) => !da.has(g.stammId) && erlaubt.has(g.typeId) && !namen.has(g.bootsname));
     if (kandidaten.length) {
       const g = pick(state, kandidaten);
+      heuteVergeben(state).push(g.bootsname);
       const vorher = { ...boat };
       Object.assign(boat, {
         typeId: g.typeId, modelId: g.modelId, name: g.name, size: g.size, kind: g.kind, motor: g.motor,
@@ -59,7 +104,7 @@ export function ankunftHook({ state, ctx, boat }) {
       Object.assign(boat, vorher);
     }
   }
-  boat.bootsname = pick(state, BOOTSNAMEN);
+  boat.bootsname = freierName(state, random(state), boat);
   boat.heimathafen = pick(state, heimathaefen(state.region, boat.size));
   boat.besuche = 1;
 }
@@ -139,7 +184,8 @@ export function namenNachtragen(state) {
   };
   for (const b of [...Object.values(state.boats || {}), ...(state.upcoming || [])]) {
     if (!b || b.stationed || b.bootsname) continue;
-    b.bootsname = wahl(BOOTSNAMEN, b.id, 1);
+    const h = BOOTSNAMEN.indexOf(wahl(BOOTSNAMEN, b.id, 1));
+    b.bootsname = freierName(state, h / BOOTSNAMEN.length, b);
     b.heimathafen = wahl(heimathaefen(state.region, b.size), b.id, 2);
     b.besuche ??= 1;
     n++;

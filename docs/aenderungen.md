@@ -4,6 +4,11 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 14.11.2026
+
+- Zwei Boote im Hafen tragen nie denselben Namen, und gerade abgereiste Namen kommen nicht gleich wieder. Auch die Boote des ersten geladenen Tags haben Namen (233).
+- Menü am Handy quer zweispaltig, damit alles ins Bild passt; ist es doch zu niedrig, zeigt ein Streifen unten, dass weitere Zeilen folgen (233).
+
 ## 13.11.2026
 
 - Die Geldanzeige oben bleibt nicht mehr stehen, wenn beim Kassieren irgendwo im Spiel ein Fehler auftritt.
