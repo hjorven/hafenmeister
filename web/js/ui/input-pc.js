@@ -77,7 +77,7 @@ export function init(game) {
     ['Wartendes Boot ziehen', 'An der Schleppleine in einen leuchtenden Platz ziehen', () => true],
     ['Doppelklick auf wartendes Boot', 'Boot fährt selbst in den besten Platz', () => true],
     ['Maustaste halten und über Münzen streichen', 'Alles in einem Zug kassieren', () => true],
-    ['Tempo-Knöpfe unten links', 'Pause, 1x, 3x, 8x (8x bis zum nächsten Boot)', () => true],
+    ['Tempo-Knöpfe unten links', 'Pause, 1x, 3x, 8x', () => true],
     ['<kbd>F</kbd>', '3x an und aus', () => true],
     ['<kbd>G</kbd>', '8x an und aus', () => !!game.oberflaeche?.tempo],
     ['<kbd>K</kbd>', 'Kassieren (abends)', () => true],

@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "325ad88"
+  "commit": "d41221c"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -204,7 +204,7 @@
     "Bed P4",
     "Bed P8"
    ],
-   "status": "erledigt",
+   "status": "teilweise",
    "bilder": [
     38
    ]
@@ -1048,10 +1048,11 @@
    "id": "P55",
    "titel": "Versteckte Regeln im Hafen sichtbar machen",
    "inhalt": "A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen \"hier ist etwas zu tun\"",
-   "thread": "erledigt bis auf L2 (PR 269, docs/hafenzeichen.md)",
+   "thread": "erledigt (PR 269 und 275, docs/hafenzeichen.md)",
    "welle": 2,
    "prs": [
-    269
+    269,
+    275
    ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
@@ -1063,7 +1064,7 @@
     "Bed P3",
     "Bed P10"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2370,8 +2371,8 @@
   {
    "code": "B1",
    "text": "Auslastung an jedem Versorgungsgebäude (\"14 von 20\"), Schlange vor der Dusche",
-   "status": "teilweise",
-   "statusText": "Schild erledigt (P55, game.sim.auslastung()), Schlange offen (L2)",
+   "status": "erledigt",
+   "statusText": "Schild erledigt (P55, game.sim.auslastung()), Schlange erledigt (L2)",
    "pakete": [
     "P55"
    ],
@@ -3462,8 +3463,8 @@
   {
    "code": "L2",
    "text": "Figuren als Anzeige (Schlange vor der Dusche, volle Tische)",
-   "status": "offen",
-   "statusText": "offen (braucht render/people.js, Thread Menschen; Auslastung zeigt schon das Schild)",
+   "status": "erledigt",
+   "statusText": "erledigt (P55, Schlange vor WC, Dusche, Kiosk und Restaurant, wenn knapp oder voll; render/people.js)",
    "pakete": [
     "P55"
    ],
@@ -3771,8 +3772,8 @@
   {
    "code": "Bed P4",
    "text": "Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf \"bis zum nächsten Boot\"",
-   "status": "erledigt",
-   "statusText": "erledigt (Tempo bleibt; 1x nur bei wartendem Dauerlieger, Regionsziel, 8x bis zum nächsten Boot, danach Knopf \"Weiter mit 3x\" und automatische Rückkehr; 14.11.)",
+   "status": "offen",
+   "statusText": "geändert auf Jorvens Wunsch (14.11.): Tempo läuft durch, keine automatische Bremsung mehr",
    "pakete": [
     "P07"
    ],
@@ -4257,8 +4258,8 @@
     "P54"
    ],
    "zaehler": {
-    "erledigt": 8,
-    "teilweise": 1,
+    "erledigt": 7,
+    "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
     "offen": 0,
@@ -4287,8 +4288,8 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 10,
-    "teilweise": 4,
+    "erledigt": 11,
+    "teilweise": 3,
     "arbeit": 0,
     "frage": 0,
     "offen": 1,
@@ -4418,8 +4419,8 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 129,
-  "teilweise": 8,
+  "erledigt": 130,
+  "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
   "offen": 81,
@@ -4922,6 +4923,20 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "P55 L2: Schlange vor der Versorgung, wenn sie knapp oder voll ist",
+   "pr": 275,
+   "pakete": [
+    "P55"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Tempo läuft durch: keine automatische Bremsung mehr",
+   "pr": 278,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "Logbuch und Hafenchronik: Sammelalbum mit Pixelbildern, Chronik je Tag (P21)",
    "pr": 274,
    "pakete": [
@@ -4990,18 +5005,6 @@
    "datum": "2026-11-14",
    "titel": "GitHub Actions absichern: Rechte je Job, SHAs, Secret-Scan (Audit C07)",
    "pr": 264,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Überblick: hochkant schmal, wartet auf das Startfenster, Startansicht folgt der geladenen Stufe",
-   "pr": 190,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Ablegen: Box bleibt belegt, bis das Boot wirklich draußen ist",
-   "pr": 266,
    "pakete": []
   }
  ]
