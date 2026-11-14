@@ -136,3 +136,134 @@ test('Ruf-Gedächtnis: Spielstand ohne Tage der Bewertungen lädt und rechnet', 
   assert.ok(Array.isArray(state.ratingDays));
   assert.ok(state.ratingDays.length <= state.ratings.length);
 });
+
+// ---------------------------------------------------------------- Teil 2: Kapazität, Wege, Auszeichnung
+
+function liegendesBoot(ctx, state, wishes, berthPick = 0) {
+  const b = sim.rollBoat(state, ctx);
+  b.id = state.nextId++;
+  b.wishes = wishes;
+  b.status = 'waiting';
+  b.waitingSince = 0;
+  state.boats[b.id] = b;
+  state.queue.push(b.id);
+  const platz = sim.fittingBerths(state, ctx, b.id)[berthPick];
+  return { b, platz };
+}
+
+test('Versorgung heute voll: die Bootskarte nennt den Wunsch (berthValue.full)', () => {
+  const { ctx, state } = neu({ stufe: 3 });
+  const vorher = sim.facilityLoad(state, ctx);   // Auslastung aus P55
+  state.served = { wc: vorher.wc.kapazitaet };
+  // Bootskarte: berthValue nennt die volle Versorgung
+  const { b } = liegendesBoot(ctx, state, ['wc']);
+  assert.deepEqual(sim.berthValue(state, ctx, b.id).full, ['wc']);
+});
+
+test('Weiter Weg: WC weit weg zählt für die Note halb, das Liegegeld bleibt voll', () => {
+  const ergebnis = {};
+  for (const meter of [40, 300]) {
+    const { ctx, state } = neu({ stufe: 3 });
+    sim.addHook(ctx, 'walk', ({ wish }) => (wish === 'wc' ? meter : null));
+    const { b, platz } = liegendesBoot(ctx, state, ['wc']);
+    const wert = sim.berthValue(state, ctx, b.id, platz);
+    sim.assign(state, ctx, b.id, platz);
+    const boot = state.boats[b.id];
+    ergebnis[meter] = { wert, boot: { met: boot.wishesMet, far: boot.far }, parts: sim.ratingParts(ctx, boot) };
+  }
+  assert.equal(ergebnis[40].boot.met, 1);
+  assert.equal(ergebnis[300].boot.met, 0.5);
+  assert.deepEqual(ergebnis[300].boot.far, { wc: 1 });
+  assert.equal(ergebnis[300].parts.far.wc, 1);
+  assert.deepEqual(ergebnis[300].wert.far, ['wc']);
+  assert.equal(ergebnis[300].wert.fee, ergebnis[40].wert.fee, 'Liegegeld gleich');
+  assert.ok(ergebnis[300].wert.anchors < ergebnis[40].wert.anchors, 'Note niedriger');
+});
+
+test('Weiter Weg: nur für WC und Dusche, ohne Hook oder ohne Gebäude zählt alles voll', () => {
+  const { ctx, state } = neu({ stufe: 3 });
+  const berth = ctx.berths[0];
+  assert.deepEqual(sim.walkShare(state, ctx, berth, 'wc'), { far: false, share: 1, meters: null });
+  sim.addHook(ctx, 'walk', () => 999);
+  assert.equal(sim.walkShare(state, ctx, berth, 'essen').share, 1);
+  assert.equal(sim.walkShare(state, ctx, berth, 'dusche').share, ctx.rules.walk.share);
+  const ctx2 = neu({ stufe: 3 }).ctx;
+  sim.addHook(ctx2, 'walk', () => null);
+  assert.equal(sim.walkShare(state, ctx2, berth, 'wc').share, 1, 'unbekannte Entfernung zählt voll');
+});
+
+test('Auszeichnung: drei Abende über der Marke, eine Stufe nach der anderen, zurück erst unter der Haltemarke', () => {
+  const { ctx, state } = neu({ stufe: 4 });
+  const a = ctx.rules.award;
+  const abend = (ruf) => {
+    state.ratings = Array(40).fill(ruf);
+    state.ratingDays = Array(40).fill(state.day);
+    const ev = [];
+    // nur die Auswertung des Abends: über runDay wäre der Tag voll Boote
+    sim.updateAward(state, ctx, ev);
+    return ev;
+  };
+  assert.equal(sim.award(state, ctx.rules).level, 0);
+  abend(4.7); abend(4.7);
+  assert.equal(sim.award(state, ctx.rules).level, 0, 'nach zwei Abenden noch nicht');
+  const ev = abend(4.7);
+  assert.equal(ev[0]?.type, 'awardUp');
+  assert.equal(ev[0].name, a.levels[0].name);
+  assert.equal(ev[0].first, true);
+  for (let i = 0; i < a.days * 2; i++) abend(4.7);
+  assert.equal(sim.award(state, ctx.rules).level, 3);
+  assert.equal(sim.award(state, ctx.rules).next, null);
+  // knapp unter der Marke, aber über der Haltemarke: bleibt
+  for (let i = 0; i < 5; i++) abend(a.levels[2].from - a.hold / 2);
+  assert.equal(sim.award(state, ctx.rules).level, 3);
+  // drei Abende darunter: eine Stufe zurück
+  abend(4.0); abend(4.0);
+  const runter = abend(4.0);
+  assert.equal(runter[0]?.type, 'awardDown');
+  assert.equal(runter[0].lost, a.levels[2].name);
+  assert.equal(sim.award(state, ctx.rules).level, 2);
+  assert.equal(sim.award(state, ctx.rules).best, 3);
+});
+
+test('Auszeichnung: im Winter zählt kein Abend, Spielstand mit und ohne Auszeichnung lädt', async () => {
+  const { ctx, state } = neu({ stufe: 4 });
+  state.day = ctx.rules.seasonDays + 2; // Winter
+  state.ratings = Array(40).fill(4.9);
+  state.ratingDays = Array(40).fill(state.day);
+  for (let i = 0; i < 5; i++) sim.updateAward(state, ctx, []);
+  assert.equal(sim.award(state, ctx.rules).level, 0);
+  const { serialize, deserialize } = await import('../web/js/state.js');
+  const kopie = JSON.parse(serialize(state));
+  kopie.award = { level: 2, up: 1, down: 0, best: 2 };
+  assert.equal(deserialize(JSON.stringify(kopie)).award.level, 2);
+  delete kopie.award;
+  assert.equal(deserialize(JSON.stringify(kopie)).award.level, 0, 'älterer Spielstand: ohne Auszeichnung');
+  kopie.award = { level: 'drei' };
+  assert.throws(() => deserialize(JSON.stringify(kopie)));
+});
+
+test('Gästebuch: weiter Weg steht als Grund da, Auszeichnung hat einen Satz', async () => {
+  const D = await import('../web/js/ui/gaestebuch-daten.js');
+  const { gruende, plus } = D.gruendeAusAbreise({ parts: { wishes: ['dusche'], wishesTotal: 1, wishesMet: 0.5, missed: {}, far: { dusche: 1 }, penalty: 0, bonus: 0, comfort: 0, special: 0, snug: 0, byHand: 0 } });
+  assert.deepEqual(gruende, [{ key: 'weit:dusche', n: 1 }]);
+  assert.ok(!plus.some((p) => p.key === 'wuensche'), 'nicht "alle Wünsche erfüllt"');
+  assert.match(D.erklaerung({ gruende, plus }), /weiter Weg zur Dusche/);
+  const A = await import('../web/js/features/auszeichnung.js');
+  const { ctx, state } = neu({ stufe: 4 });
+  const leer = sim.award(state, ctx.rules);
+  assert.match(A.text(leer), /Noch keine Auszeichnung/);
+  assert.match(A.text(leer), /Gastlicher Hafen/);
+  state.award = { level: 3, up: 0, down: 0, best: 3 };
+  assert.match(A.text(sim.award(state, ctx.rules)), /Höher geht es nicht/);
+  assert.match(A.karte({ type: 'awardDown', level: 2, name: 'Empfohlener Hafen', lost: 'Ausgezeichneter Hafen' }).titel, /Empfohlener Hafen/);
+  assert.match(A.wimpelSvg(2), /^<svg/);
+});
+
+test('Wege im Bild: nächstes gebautes Gebäude, Sanitärgebäude zählt auch für die Dusche', async () => {
+  const V = await import('../web/js/features/versorgung.js');
+  assert.deepEqual(V.gebauteFuer('dusche', { wc: 1, dusche: 1 }), ['dusche']);
+  assert.deepEqual(V.gebauteFuer('dusche', { wc: 3, dusche: 1 }), ['dusche', 'sanitaer']);
+  assert.deepEqual(V.gebauteFuer('wc', { wc: 0 }), []);
+  assert.equal(V.kuerzesterWeg({ x: 0, z: 0 }, [{ x: 3, z: 4 }, null, { x: 30, z: 0 }]), 5);
+  assert.equal(V.kuerzesterWeg({ x: 0, z: 0 }, []), null);
+});

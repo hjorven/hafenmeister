@@ -219,7 +219,10 @@ export function init(game) {
         el('li', { title: 'Länge und Breite' }, `${meters(b.length)} × ${meters(b.beam)}`),
         el('li', { title: 'Tiefgang' }, `Tiefgang ${meters(b.draft)}`),
         el('li', { title: 'Aufenthalt' }, nacht),
-        ...b.wishes.map((w) => el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`))),
+        // Versorgung heute schon voll (Kapazität sichtbar, P19): steht gleich am Wunsch
+        ...b.wishes.map((w) => (wert?.full?.includes(w)
+          ? el('li', { class: 'wunsch voll', title: 'Für heute ist diese Versorgung voll' }, `Wunsch: ${WISH_LABEL[w] ?? w} (heute voll)`)
+          : el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`)))),
       sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length, sim.bueroAutomatik?.(b.size)),
       vorschlag ? el('p', { class: 'card-hint hm-vorschlag' }, pixelBild('rauteGold', 14), vorschlagText(b, vorschlag)) : null,
       wert ? el('p', { class: 'card-zahlt' }, zahltText(wert.fee, gold.length ? sim.platzWert(b.id, gold[0])?.fee ?? wert.fee : null, gold.length > 0 && gold.length >= fitting.length)) : null,

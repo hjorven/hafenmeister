@@ -94,6 +94,10 @@ export function rulesFromEconomy(E = ECONOMY) {
   r.arrivalFactorAtRep = { 1: f.ankunftBasis, 5: f.ankunftBasis + 4 * f.ankunftJeAnker };
   r.turnAway = { chance: f.abgewiesen?.chance ?? 0, rating: f.abgewiesen?.wertung ?? ANKER_MIN };
   r.specialGuestRatingBonus = f.sondergastBonus ?? 0;
+  r.walk = f.wege ? { far: f.wege.weit, share: f.wege.anteil, wishes: [...f.wege.wuensche] } : null;
+  r.award = f.auszeichnung
+    ? { days: f.auszeichnung.tage, hold: f.auszeichnung.halten ?? 0, levels: f.auszeichnung.stufen.map((x) => ({ from: x.ab, name: x.name })) }
+    : null;
   r.reputationDraw = f.lockt
     ? { bigFrom: f.lockt.grosseAb, big: { ...f.lockt.grosse }, rareFrom: f.lockt.seltenAb, rare: [...f.lockt.selten] }
     : null;

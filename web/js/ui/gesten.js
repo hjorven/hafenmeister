@@ -484,7 +484,9 @@ export function init(game) {
   // Erste Zeile Liegegeld und erwartete Anker, zweite Zeile erfüllte Wünsche und "passgenau".
   function drawWert(p, w, istGold) {
     const z1 = `${w.fee} € · ${String(w.anchors.toFixed(1)).replace('.', ',')} Anker`;
-    const teile = [...(w.wishesMet || []).map((k) => WUNSCH[k] ?? k)];
+    // weiter Weg zum WC oder zur Dusche (P19 B9): zählt nur halb, steht als "Dusche weit" da
+    const weit = new Set(w.far || []);
+    const teile = [...(w.wishesMet || []).map((k) => `${WUNSCH[k] ?? k}${weit.has(k) ? ' weit' : ''}`)];
     if (w.comfort) teile.push('Fingersteg');
     if (w.snug) teile.push('passgenau');
     const z2 = teile.join(' · ');
