@@ -39,7 +39,7 @@ test('Liegeplätze und Wartebojen sind in jedem Geländebild gleich tief', () =>
         }
       }
       for (let stufe = 1; stufe <= 6; stufe++) {
-        for (const b of warteplaetze(stufe).bojen) {
+        for (const b of warteplaetze(stufe, r).bojen) {
           assert.ok(punkt(b.px, b.py, stufe, r).h < -1, `Bild ${nr} ${name} Boje ${b.id} Stufe ${stufe} zu flach`);
         }
       }

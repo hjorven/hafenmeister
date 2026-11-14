@@ -111,7 +111,9 @@ export const UFER = {
   2: { x0: -26, x1: 60, y: 18 },
 };
 
-export function uferStrecke(stufe, hafen = HAFEN) {
+// meiden: Wartebojen [px, py] und Ankerfelder [px, py, radius] (Plan); der Paddler bleibt östlich
+// der Bojen am Ufer und endet vor einem Ankerfeld
+export function uferStrecke(stufe, hafen = HAFEN, meiden = []) {
   const u = UFER[stufe];
   if (!u) return null;
   const nahe = [];
@@ -120,8 +122,20 @@ export function uferStrecke(stufe, hafen = HAFEN) {
     const l = p.stufen?.includes(stufe) ? p.lage?.[String(stufe)] : null;
     if (l && l[1] < 70) nahe.push(l[0]);
   }
+  for (const [x, y, r] of meiden) if (!r && y < 70) nahe.push(x + 6);
   const x0 = Math.max(u.x0, ...nahe.map((x) => x + 20));
-  return { x0, x1: x0 + (u.x1 - u.x0), y: u.y };
+  let x1 = x0 + (u.x1 - u.x0);
+  // Ankerfelder [px, py, radius]: die Strecke endet davor (Abstand 10), ganz ohne Platz kein Paddler
+  for (const [x, y, r] of meiden) {
+    if (!r) continue;
+    const dy = Math.abs(y - u.y);
+    if (dy >= r + 10) continue;
+    const halb = Math.sqrt((r + 10) ** 2 - dy * dy);
+    if (x - halb <= x0 && x + halb >= x0) return null;
+    if (x - halb > x0) x1 = Math.min(x1, x - halb);
+  }
+  if (x1 - x0 < 20) return null;
+  return { x0, x1, y: u.y };
 }
 
 export const seeBahnen = (stufe) => SEE[stufe >= 6 ? 6 : stufe >= 5 ? 5 : stufe >= 3 ? 3 : 1];

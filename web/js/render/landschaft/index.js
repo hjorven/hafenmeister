@@ -23,7 +23,7 @@ export function autoQualitaet() {
 function baueWartebereich(stufe, region) {
   const gruppe = new THREE.Group();
   gruppe.name = 'wartebereich';
-  const { bojen, ankerbereiche, ankerplaetze } = warteplaetze(stufe);
+  const { bojen, ankerbereiche, ankerplaetze } = warteplaetze(stufe, region);
   const mBoje = new THREE.MeshLambertMaterial({ color: '#f6c445', flatShading: true });
   const mTopp = new THREE.MeshLambertMaterial({ color: '#f4f1ea', flatShading: true });
   // Gut sichtbare Warteboje: gelbe Kugel mit weißem Toppzeichen, etwas größer als echt

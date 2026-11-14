@@ -32,7 +32,7 @@ test('Wartebojen und Ankerbereiche liegen in jedem Revier und jeder Stufe in tie
     const r = region(name);
     const ebbe = r.gelaende.gezeiten || 0;
     for (let stufe = 1; stufe <= 5; stufe++) {
-      const { bojen, ankerbereiche, ankerplaetze } = warteplaetze(stufe);
+      const { bojen, ankerbereiche, ankerplaetze } = warteplaetze(stufe, r);
       assert.ok(bojen.length >= 3, `Stufe ${stufe}: zu wenige Bojen`);
       assert.ok(ankerplaetze.length >= 12, `Stufe ${stufe}: nur ${ankerplaetze.length} Ankerplätze`);
       for (const b of [...bojen, ...ankerbereiche, ...ankerplaetze]) {

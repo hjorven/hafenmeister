@@ -152,7 +152,8 @@ const bauplatzMass = new Map();
 function extras(game, stufe) {
   const liste = [];
   try {
-    for (const b of warteplaetze(stufe).bojen) {
+    // Lage je Gelände und Seed: aus der gebauten Landschaft, sonst neu gerechnet
+    for (const b of game.landscape?.warteplaetze?.bojen ?? warteplaetze(stufe, game.landscape?.region).bojen) {
       liste.push({ minX: b.x - 8, maxX: b.x + 8, minZ: b.z - 8, maxZ: b.z + 8 });
     }
   } catch (err) { console.warn('Wartebojen nicht lesbar', err); }
@@ -236,13 +237,16 @@ function startRect(game, stufe) {
   const cam = game.camera;
   raender(cam);
   let r = homeRect(stufe);
-  const grenze = Math.max(breiteFuer(r, cam) * 1.5, 50);
+  // Welche Extras dazukommen, haengt nur von Bildformat und Leisten ab, nicht von der Schilderspalte
+  // links: die ist beim Laden (Ueberblick, Einstieg) zeitweise breiter, sonst sprang die Startansicht
+  const fest = { ...cam, insetLeft: 0, insetRight: 0 };
+  const grenze = Math.max(breiteFuer(r, fest) * 1.5, 50);
   const mx = (r.minX + r.maxX) / 2;
   const mz = (r.minZ + r.maxZ) / 2;
   const abstand = (e) => Math.hypot((e.minX + e.maxX) / 2 - mx, (e.minZ + e.maxZ) / 2 - mz);
   for (const e of extras(game, stufe).sort((a, b) => abstand(a) - abstand(b))) {
     const neu = vereinige(r, e);
-    if (breiteFuer(neu, cam) <= grenze) r = neu;
+    if (breiteFuer(neu, fest) <= grenze) r = neu;
   }
   // Ufer links und rechts der Stege (game.gelaende.startRect, Gelaende-Thread): zeigt, an welcher
   // Kueste der Hafen liegt. Gekappt auf das 1,6-fache des Hafens, damit er am Handy gross bleibt.

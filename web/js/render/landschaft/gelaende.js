@@ -13,6 +13,8 @@ import * as vielfalt from './vielfalt.js';
 import { gelaendeform, natur, beiFormwechsel } from './formen.js';
 import { SEE_NORD, WELT, BEREICH, KAIFLAECHE, wasserBedarf, stegUfer } from './natur.js';
 import { anlagenFlaechen } from '../../data/anlagen-flaechen.js';
+import { region as regionNach } from './regionen.js';
+import { SEE_RUNDE } from '../../data/verkehr.js';
 
 export const PLAN_M = 0.62;
 
@@ -749,7 +751,120 @@ export function gelaendeAbfrage(stufe, region) {
 /** Halber Abstand zwischen ankernden Booten in Metern (Boot schwoit um den Anker), je größter Bootsklasse. */
 export const SCHWOIKREIS_M = { S: 5, M: 6, L: 7.5, XL: 16 };
 
-export function warteplaetze(stufe) {
+// Stegfeld der Stufen 1 und 2 (Liegeplätze und Stegpunkte über alle Stegbilder, Planeinheiten)
+const STEGFELD = { 1: { x0: -138.5, x1: -94.4, y0: -11.2, y1: 49.6 }, 2: { x0: -143.8, x1: -30.4, y0: -11.2, y1: 73.5 } };
+const _warte = new Map();
+beiFormwechsel(() => _warte.clear());
+
+/**
+ * Stufe 1 und 2: Wartebojen als kompakter Block seitlich neben dem Stegfeld (nicht quer davor), das
+ * Ankerfeld noch weiter außen auf derselben Seite. Vor den Stegen bleibt so der Weg von der Einfahrt
+ * zu den Boxen frei, und wer ablegt, fährt nicht durch wartende Boote. Seite und Lage hängen vom
+ * Gelände ab (Seed): genommen wird die Seite, auf der der Block am nächsten am Stegfeld in tiefem
+ * Wasser liegt. Passt nirgends, bleibt die alte Reihe vor den Stegen (dort ist sicher Wasser).
+ */
+function seitenLage(stufe, region) {
+  const key = `${stufe}|${region?.name ?? region?.id ?? ''}`;
+  if (_warte.has(key)) return _warte.get(key);
+  const box = STEGFELD[stufe];
+  const ebbe = region?.gelaende?.gezeiten || 0;
+  const tief = (px, py, rM) => warteplatzTiefe({ px, py, schwoikreisM: rM }, stufe, region) - ebbe;
+  const abstand = 18;
+  // Korridor von der Stegfront zur Durchfahrt (natur.route ist je Form die sichere Wasserstraße
+  // vom Binnensee zum Seegatt). Bojen und Ankerfeld bleiben davon weg, der Weg bleibt frei.
+  const route = gelaendeform().natur?.route;
+  const korridor = [[(box.x0 + box.x1) / 2, box.y1 + 8], ...(route?.punkte ?? [[40, 140], [150, 172], [178, 200]])];
+  const halb = route?.halb ?? 24;
+  const abKorridor = (px, py) => {
+    let d = Infinity;
+    for (let i = 1; i < korridor.length; i++) {
+      const [ax, ay] = korridor[i - 1], [bx, by] = korridor[i];
+      const dx = bx - ax, dy = by - ay;
+      const t = clamp(((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy), 0, 1);
+      d = Math.min(d, Math.hypot(px - ax - t * dx, py - ay - t * dy));
+    }
+    return d;
+  };
+  const formen = stufe === 1 ? [[1, 3], [2, 2], [3, 1]] : [[2, 3], [3, 2], [1, 6]];
+  let best = null;
+  // Bojenblock: erst streng (nicht vor die Stegfront), sonst etwas weiter hinaus
+  for (const [vorne, rand] of [[6, 14], [30, 6]]) {
+    for (const s of [1, -1]) for (const [spalten, zeilen] of formen) {
+      const kante = s > 0 ? box.x1 : box.x0;
+      outer: for (const dx of [0, 10, 20, 32, 46]) {
+        for (const y0 of [14, 22, 30, 40, 52, 66]) {
+          const lagen = [];
+          for (let r = 0; r < zeilen; r++) for (let c = 0; c < spalten; c++) {
+            lagen.push([kante + s * (34 + dx + c * abstand), y0 + r * abstand]);
+          }
+          if (lagen.some(([px, py]) => py > box.y1 + vorne || abKorridor(px, py) < halb + rand)) continue;
+          if (!lagen.every(([px, py]) => tief(px, py, SCHWOIKREIS_M.M) >= 2)) continue;
+          const k = dx + (y0 - 14) * 0.5 + (spalten - 1) * 6;
+          if (!best || k < best.k) best = { k, lagen, seite: s > 0 ? 'ost' : 'west' };
+          break outer;
+        }
+      }
+    }
+    if (best) break;
+  }
+  // Ankerfeld: nahe beim Bojenblock (sonst nahe bei den Stegen), nicht im Korridor, nicht auf den
+  // Bojen, nicht an den Stegen; lieber kleiner als im Weg
+  const mitte = best
+    ? best.lagen.reduce((m, [px, py]) => [m[0] + px / best.lagen.length, m[1] + py / best.lagen.length], [0, 0])
+    : [(box.x0 + box.x1) / 2, box.y1];
+  const R0 = stufe === 1 ? 44 : 50;
+  const uferAb = Math.max(box.x1, ...(best?.lagen ?? []).map(([px]) => px));
+  const kand = [];
+  for (const f of [1, 0.8, 0.65]) {
+    const R = Math.round(R0 * f);
+    for (let px = -280; px <= 220; px += 12) for (let py = 0; py <= 220; py += 12) {
+      if (abKorridor(px, py) < R + halb + 6) continue;
+      // Uferstreifen (y 18, data/verkehr.js UFER): der Paddler braucht östlich der Stege und Bojen
+      // gut 20 Einheiten bis zum Ankerfeld (uferStrecke endet davor), sonst liegt das Feld weiter draußen
+      if (py - R < 34 && px - R - 10 < uferAb + 46 && px + R + 10 > box.x0) continue;
+      // Runde der Freizeitboote auf dem See (data/verkehr.js SEE_RUNDE) bleibt frei
+      const sr = SEE_RUNDE[stufe];
+      if (sr && Math.hypot(Math.max(sr.cx - sr.rx - px, 0, px - sr.cx - sr.rx), Math.max(sr.cy - sr.ry - py, 0, py - sr.cy - sr.ry)) < R + 14) continue;
+      if (best?.lagen.some(([bx, by]) => Math.hypot(bx - px, by - py) < R + 14)) continue;
+      const ex = Math.max(box.x0 - px, 0, px - box.x1), ey = Math.max(box.y0 - py, 0, py - box.y1);
+      if (Math.hypot(ex, ey) < R + 24) continue;
+      kand.push({ px, py, radius: R, k: Math.hypot(px - mitte[0], py - mitte[1]) + (R0 - R) * 12 });
+    }
+  }
+  kand.sort((p, q) => p.k - q.k);
+  let anker = null;
+  for (const c of kand) {
+    let ok = tief(c.px, c.py, 0) >= 2.2;
+    for (let k = 0; ok && k < 12; k++) {
+      const w = k / 12 * Math.PI * 2;
+      ok = tief(c.px + c.radius * 0.8 * Math.cos(w), c.py + c.radius * 0.8 * Math.sin(w), 0) >= 1.8
+        && tief(c.px + c.radius * 0.45 * Math.cos(w + 0.26), c.py + c.radius * 0.45 * Math.sin(w + 0.26), 0) >= 1.8;
+    }
+    if (!ok) continue;
+    // genug Ankerplätze in tiefem Wasser (Raster wie unten in warteplaetze)
+    const abstand = SCHWOIKREIS_M.M * 2 / PLAN_M, rr = c.radius - abstand * 0.45;
+    let n = 0;
+    for (let j = -4; j <= 4; j++) for (let i = -4; i <= 4; i++) {
+      const dx = (i + (j & 1 ? 0.5 : 0)) * abstand, dy = j * abstand * 0.866;
+      if (Math.hypot(dx, dy) <= rr && tief(c.px + dx, c.py + dy, SCHWOIKREIS_M.M) >= 1.6) n++;
+    }
+    if (!anker || n > anker.n) anker = { px: c.px, py: c.py, radius: c.radius, n };
+    if (n >= 12) break;
+  }
+  // zu wenig Plätze (flaches Revier, etwa Nordsee bei Niedrigwasser): alter Ankerkreis, dort ist sicher Wasser
+  if (anker && anker.n < 8) anker = null;
+  if (anker) delete anker.n;
+  if (best || anker) best = { ...(best ?? {}), anker };
+  _warte.set(key, best);
+  return best;
+}
+
+/**
+ * @param {number} stufe
+ * @param {object} [region] Eintrag aus regionen.js (für die Tiefe an den Warteplätzen; ohne: Ostsee)
+ */
+export function warteplaetze(stufe, region) {
+  region = typeof region === 'string' ? regionNach(region) : (region ?? regionNach('ostsee'));
   const bojen = [], ankerbereiche = [];
   const reihe = (id, x0, y0, dx, dy, n, groesse) => {
     for (let i = 0; i < n; i++) bojen.push({ id: `${id}${i + 1}`, px: x0 + dx * i, py: y0 + dy * i, groesse });
@@ -757,14 +872,18 @@ export function warteplaetze(stufe) {
   if (stufe <= 2) {
     // Nahe vor Steg A, damit die wartenden Boote in der Startansicht zu sehen sind.
     // Boote liegen mit dem Bug an der Boje, nach Osten bleibt gut 4 m Platz.
-    const lagen = stufe === 1
+    const seite = seitenLage(stufe, region);
+    // Rückfall (kein Platz neben den Stegen): Reihe vor den Stegen, dort ist nach natur.js sicher Wasser
+    const lagen = seite?.lagen ?? (stufe === 1
       ? [[-100, 56], [-86, 53], [-72, 50]]
-      : [[-112, 86], [-94, 90], [-76, 88], [-58, 92], [-40, 89], [-22, 92]];
+      : [[-112, 86], [-94, 90], [-76, 88], [-58, 92], [-40, 89], [-22, 92]]);
     lagen.forEach(([px, py], i) => bojen.push({ id: `see-${i + 1}`, px, py, groesse: 'M' }));
-    // Ankerfeld im See östlich der Bojen, abseits des Wegs vom Graben zu den Stegen
-    ankerbereiche.push(stufe === 1
-      ? { id: 'see-anker', px: -25, py: 102, radius: 44, groesse: 'M' }
-      : { id: 'see-anker', px: 42, py: 130, radius: 50, groesse: 'M' });
+    // Ankerfeld außen neben den Bojen; Rückfall: Ankerkreis aus natur.js (BEDARF.wasser.kreise)
+    ankerbereiche.push(seite?.anker
+      ? { id: 'see-anker', ...seite.anker, groesse: 'M' }
+      : stufe === 1
+        ? { id: 'see-anker', px: -25, py: 102, radius: 44, groesse: 'M' }
+        : { id: 'see-anker', px: 42, py: 130, radius: 50, groesse: 'M' });
   } else if (stufe <= 4) {
     reihe('reede-', 240, 266, 14, 9, stufe === 3 ? 5 : 7, 'L');
     ankerbereiche.push({ id: 'reede-anker', px: 355, py: 392, radius: 62, groesse: 'L' });
@@ -790,7 +909,9 @@ export function warteplaetze(stufe) {
         // nicht auf Wartebojen und nicht in der Fahrrinne
         const frei = bojen.every((o) => Math.hypot(o.px - px, o.py - py) > abstand * 0.8)
           && polyAbstand(px, py, stufe >= 5 ? RINNE5 : RINNE34) > abstand * 0.6;
-        if (Math.hypot(dx, dy) <= r && frei) liste.push([px, py]);
+        // jeder Ankerplatz in tiefem Wasser (Schwoikreis), auch bei Niedrigwasser
+        const tiefOk = stufe > 2 || warteplatzTiefe({ px, py, schwoikreisM: SCHWOIKREIS_M[b.groesse] }, stufe, region) - (region.gelaende?.gezeiten || 0) >= 1.6;
+        if (Math.hypot(dx, dy) <= r && frei && tiefOk) liste.push([px, py]);
       }
     }
     if (!liste.length) liste.push([b.px, b.py]);
