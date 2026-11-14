@@ -92,6 +92,7 @@ export function rulesFromEconomy(E = ECONOMY) {
 
   // Ruf und Bewertung
   const f = E.ruf || {};
+  r.startMoney = E.start?.geld ?? 0;
   r.reputation = { window: f.hoechstens ?? f.fenster, days: f.tage ?? 0, minCount: f.mindestens ?? f.fenster, start: f.start, startSamples: f.startBewertungen ?? 0, min: ANKER_MIN, max: ANKER_MAX };
   r.rating = { noWishes: f.ohneWunsch, min: ANKER_MIN, max: ANKER_MAX, noneMet: f.wunschNote?.keiner ?? ANKER_MIN, allMet: f.wunschNote?.alle ?? ANKER_MAX };
   r.arrivalFactorAtRep = { 1: f.ankunftBasis, 5: f.ankunftBasis + 4 * f.ankunftJeAnker };

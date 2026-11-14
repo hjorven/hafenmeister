@@ -18,8 +18,8 @@ Zahlen in economy.js ändern und die Datei neu schreiben. `tests/zahlen.test.mjs
 
 | Stufe | Name | Ankünfte/Tag | Mix | Ziel | Ausbau |
 |---|---|---|---|---|---|
-| 1 | Bootssteg am See | 4 | S 1 | 20 Gäste, Ruf 2,5 | Dorfhafen am See, 400 € |
-| 2 | Dorfhafen am See | 11 | S 0,45, M 0,55 | 120 Gäste, Ruf 3 | Durchstich zur Ostsee, 5.000 € |
+| 1 | Bootssteg am See | 4 | S 1 | 20 Gäste, Ruf 2,5 | Dorfhafen am See, 300 € |
+| 2 | Dorfhafen am See | 11 | S 0,45, M 0,55 | 90 Gäste, Ruf 3 | Durchstich zur Ostsee, 5.000 € |
 | 3 | Durchstich zur Ostsee | 16 | S 0,32, M 0,4, L 0,28 | 360 Gäste, Ruf 3,5 | Schwimmsteg D, 20.000 € |
 | 4 | Marina | 18 | S 0,24, M 0,34, L 0,42 | 560 Gäste, Ruf 3,8 | Außenhafen mit Kai, 42.000 € |
 | 5 | Küstenmarina | 20 | S 0,2, M 0,33, L 0,41, XL 0,06 | 840 Gäste, Ruf 4,2 | Pier für Großschiffe, 70.000 € |
@@ -43,7 +43,7 @@ Liegegeld je angefangenem Meter Bootslänge (B10); der Grundpreis ist der Schnit
 |---|---|---|---|
 | Haken an Steg A | 1 | 180 € | 4 |
 | Steg A verlängern | 2 | 500 € | 5 |
-| Steg B | 2 | 700 € | 10 |
+| Steg B | 2 | 450 € | 10 |
 | Steg B verlängern | 2 | 1.400 € | 10 |
 | T-Kopf an Steg B | 2 | 600 € | 6 |
 | Steg A ausbauen | 3 | 2.200 € | 6 |
