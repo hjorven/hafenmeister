@@ -177,7 +177,7 @@ Ereignisse werden einen Tag vorher angekündigt. Keines bestraft hart.
 
 Einzelheiten in [ereignisse.md](ereignisse.md). Weitere Ereignisse (Mittsommer, Holzboot-Treffen, Heringstage) sind geplant (P24).
 
-**Jahreslauf:** Eine Saison hat 30 Spieltage. Danach kommt ein kurzer Winter von 3 Tagen mit Schnee und wenig Gästen; ein gebautes Winterlager verdient in dieser Zeit Geld. Das gibt dem langen Spiel einen Rhythmus und Abwechslung im Bild. Ein Winter mit eigenen Aufgaben (Winterarbeiten, Krantage) ist geplant (P20).
+**Jahreslauf:** Eine Saison hat 30 Spieltage. Danach kommt ein kurzer Winter von 3 Tagen mit Schnee und wenig Gästen; ein gebautes Winterlager verdient in dieser Zeit Geld. Das gibt dem langen Spiel einen Rhythmus und Abwechslung im Bild. Am ersten Wintertag kommt die Winterpause mit Saisonbilanz und Winterarbeiten, die die nächste Saison verbessern; der Winter lässt sich überspringen (`docs/winter.md`). Krantage folgen (P20).
 
 ## 8. Steuerung, die positiv überrascht
 

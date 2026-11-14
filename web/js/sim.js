@@ -24,13 +24,15 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     typeById: Object.fromEntries(types.map((t) => [t.id, t])),
     berths: list,
     berthById: Object.fromEntries(list.map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [], stageUp: [], tick: [] },
+    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [] },
   };
 }
 
 /**
  * Erweiterung einhängen. Namen:
  *   modifiers  fn(state, ctx) -> Teil von DEFAULT_MODIFIERS, wird jeden Tag und bei jeder Ankunft gelesen
+ *   rating     fn({ ctx, boat }) -> Anker, die zur Platzart (comfort) einer Bewertung dazukommen
+ *              (zum Beispiel ein im Winter überholter Steg, features/winter.js)
  *   arrival    fn({ state, ctx, boat }) darf das neue Boot ändern (zum Beispiel Wünsche)
  *   evening    fn({ state, ctx, boats, addIncome, events }) am Abend nach dem Hafengeld
  *   night      fn({ state, ctx, events }) nach der Abreise, vor dem neuen Tag
@@ -1378,7 +1380,11 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   const hi = r.rating.allMet ?? r.rating.max;
   const base = !boat.wishesTotal ? r.rating.noWishes : lo + ((hi - lo) * boat.wishesMet) / boat.wishesTotal;
   const berth = ctx.berthById[boat.berthId];
-  const comfort = (berth?.comfort || 0) * r.comfortBonus;
+  let pflege = 0;
+  for (const fn of ctx.hooks?.rating || []) {
+    try { pflege += Number(fn({ ctx, boat })) || 0; } catch (err) { console.error('Fehler in Bewertungs-Hook', err); }
+  }
+  const comfort = (berth?.comfort || 0) * r.comfortBonus + pflege;
   const special = boat.special ? r.specialGuestRatingBonus : 0;
   const snug = boat.snug && r.snug ? r.snug.rating : 0;     // Päckchen/eng liegen
   const byHand = boat.byHand ? r.handAssignBonus ?? 0 : 0;  // von Hand zugewiesen (P10)

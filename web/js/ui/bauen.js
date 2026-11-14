@@ -923,7 +923,7 @@ export function init(game) {
     tippZiel = n?.ziel ?? null;
     buildBtn.classList.toggle('bau-punkt', !!n?.leistbar);
     const imEinstieg = !!game.einstieg?.schritt?.();
-    const aus = !n || offen || buildBtn.hidden || document.body.classList.contains('card-open') || imEinstieg || document.body.classList.contains('foto');
+    const aus = !n || offen || buildBtn.hidden || document.body.classList.contains('card-open') || imEinstieg || document.body.classList.contains('foto') || !!game.winter?.offen?.();
     tipp.hidden = aus;
     if (aus) return;
     tipp.replaceChildren(el('span', { class: 'bau-tipp-titel' }, 'Als Nächstes'), el('span', { class: 'bau-tipp-text' }, n.text));
@@ -1263,6 +1263,7 @@ export function init(game) {
   game.on('resize', () => { platziereTipp(); if (offen && aktiv) zeigeOrt(eintraege().find((x) => x.key === aktiv)?.ort?.()); });
   game.on('ready', setzeTipp);
   game.on('einstieg:ende', setzeTipp);   // Hinweis gleich zeigen, sobald der Einstieg vorbei ist
+  game.on('winter:karte', setzeTipp);    // Winterpause (features/winter.js) verdeckt sonst den Hinweis
   new MutationObserver(() => setzeTipp()).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
   // Animationen laufen auch in der Pause (Baumodus pausiert die Spielzeit)

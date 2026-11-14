@@ -34,7 +34,7 @@ const QUELLE_TEXT = {
 const REIHENFOLGE = ['liegegeld', 'pacht', 'gastro', 'services', 'tagesziele', 'sonstiges'];
 // Beim Rundgang und über Nacht zahlen Gäste nur einen Anteil (rules.uncollectedShare); Trinkgeld kommt mit P12
 const LIEGEGELD_TEXT = { kassiert: 'selbst eingestrichen', rundgang: 'beim Rundgang', nacht: 'über Nacht', strichtrinkgeld: 'Trinkgeld (Kassierstrich)', trinkgeld: 'Trinkgeld großer Boote', nebenkosten: 'Nebenkosten (Hafenbüro)', boje: 'Bojengeld über Nacht' };
-const AUSGABE_NAME = { bau: 'Bauen', ausbau: 'Ausbau des Hafens', services: 'Services', pacht: 'Pacht zurückgezahlt' };
+const AUSGABE_NAME = { bau: 'Bauen', ausbau: 'Ausbau des Hafens', services: 'Services', pacht: 'Pacht zurückgezahlt', winter: 'Winterarbeiten' };
 // Pacht (features/dauerlieger.js): Saisonpacht im Voraus, sonst die abendliche Pacht der Fischer und Dienste
 const PACHT_TEXT = { saison: 'Saisonpacht im Voraus' };
 const WEG_TEXT = {
@@ -432,6 +432,7 @@ export function init(game) {
   game.on('sim:dayEnd', (e) => {
     const b = e?.bericht;
     if (!b) return;
+    if (game.winter?.springt) return;   // Winter überspringen (features/winter.js): keine Karte je Wintertag
     const einstieg = game.einstieg?.schritt?.();
     const foto = document.body.classList.contains('foto');
     if (foto) return;

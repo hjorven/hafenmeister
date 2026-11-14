@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "e6634ea"
+  "commit": "3cf2b65"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -509,9 +509,11 @@
    "id": "P20",
    "titel": "Winter mit Inhalt füllen",
    "inhalt": "Ü19, F14, F15, docs/ereignisse.md",
-   "thread": "neu",
+   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, docs/winter.md); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "Ü19",
@@ -522,8 +524,11 @@
     "H5",
     "I10"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "teilweise",
+   "bilder": [
+    35,
+    36
+   ]
   },
   {
    "id": "P21",
@@ -1664,12 +1669,14 @@
   {
    "code": "Ü19",
    "text": "Winter nutzen: Zeitraffer vor Stufe 4 oder Winterarbeiten (F14)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 245): Winterarbeiten und „Winter überspringen“",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "Balancing (Ü15 bis Ü20)"
   },
   {
@@ -1892,23 +1899,27 @@
   {
    "code": "F14",
    "text": "Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 245)",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "Hafenleben"
   },
   {
    "code": "F15",
    "text": "Krantage: Dauerlieger sichtbar ins Winterlager und zurück",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 245)",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "Hafenleben"
   },
   {
@@ -2931,12 +2942,14 @@
   {
    "code": "G4",
    "text": "Winter als Planungsbild (Bilanz, Winterarbeiten, Verträge)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 245)",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
@@ -3050,11 +3063,13 @@
    "code": "H5",
    "text": "Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land",
    "status": "offen",
-   "statusText": "offen",
+   "statusText": "teilweise (PR 245): im Winter im Winterlager; Segelmacher und Kran in der Saison offen",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
   },
   {
@@ -3228,12 +3243,14 @@
   {
    "code": "I10",
    "text": "Ziele im Winter (Winterarbeiten)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 245)",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "I Tagesziele, Logbuch, Abschluss und Endlosspiel"
   },
   {
@@ -4245,10 +4262,10 @@
    ],
    "zaehler": {
     "erledigt": 8,
-    "teilweise": 3,
+    "teilweise": 4,
     "arbeit": 0,
     "frage": 0,
-    "offen": 4,
+    "offen": 3,
     "entfaellt": 0,
     "alle": 15
    }
@@ -4367,19 +4384,19 @@
  ],
  "gesamt": {
   "erledigt": 17,
-  "teilweise": 6,
+  "teilweise": 7,
   "arbeit": 4,
   "frage": 0,
-  "offen": 53,
+  "offen": 52,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 107,
+  "erledigt": 112,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 102,
+  "offen": 97,
   "entfaellt": 0,
   "alle": 217
  },
@@ -4803,18 +4820,42 @@
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr237/237-vorschau-iphone.png",
    "nr": 34
+  },
+  {
+   "datei": "p20-pr245-handy-winterpause.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winterpause: Bilanz der Saison und Winterarbeiten",
+   "pr": 245,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "winter/wi-handy-1-karte.png",
+   "nr": 35
+  },
+  {
+   "datei": "p20-pr245-quer-winterarbeiten.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winter im Hafen: Schnee und beauftragte Winterarbeit",
+   "pr": 245,
+   "geraet": "handy-quer",
+   "datum": "2026-11-14",
+   "quelle": "winter/wi-quer-2-auftrag.png",
+   "nr": 36
   }
  ],
  "neueBilder": [
+  36,
+  35,
   34,
   33,
   32,
   31,
   30,
   29,
-  28,
-  27,
-  26
+  28
  ],
  "merges": [
   {

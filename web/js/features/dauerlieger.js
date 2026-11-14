@@ -29,6 +29,7 @@
 //   tagestoern       heute eine Runde draußen
 //   jahr, pacht      Saison (Jahr), für die bezahlt ist, und der Betrag
 //   kuendigung       null | 'spieler' | 'lieger' (verlässt den Hafen zum Saisonende)
+//   winterlager      über den Winter im Winterlager (Krantage, P20); kommt zum ersten Saisontag zurück
 // state.modules.dauer.bewerber = [{ id, artId, modellId, name, size, sail, bootsname, bisTag }]
 //
 // Ereignisse (über game.sim.dispatch, also als sim:<type>): dauerNeu, dauerAufgehoben, dauerAuslaufen,
@@ -415,8 +416,9 @@ function legeAn(state, platzId, p, events) {
   boot.berthId = platzId;
   state.boats[boot.id] = boot;
   state.berths[platzId] = boot.id;
-  Object.assign(p, { boot: null, rueckNacht: null, frueherUm: null, wartet: false, gastId: null });
-  events.push({ type: 'dauerEinlaufen', boatId: boot.id, berthId: platzId, tagestoern: false });
+  const ausWinterlager = !!p.winterlager;
+  Object.assign(p, { boot: null, rueckNacht: null, frueherUm: null, wartet: false, gastId: null, winterlager: false });
+  events.push({ type: 'dauerEinlaufen', boatId: boot.id, berthId: platzId, tagestoern: false, ...(ausWinterlager ? { winterlager: true } : {}) });
 }
 
 /**
@@ -512,6 +514,25 @@ export function nachtHook({ state, ctx, events }) {
   if (morgen.winter && !heute.winter) {
     for (const [platzId, p] of Object.entries(d.plaetze)) {
       if (p.kuendigung) events.push(...hebeAuf(state, ctx, platzId).events);
+    }
+    // Krantage (Roadmap P20, F15/H5): Die übrigen Dauerlieger gehen über den Winter ins Winterlager
+    // (mit Travellift und Winterlager an Land im eigenen Hafen, sonst beim Nachbarn) und kommen in der
+    // Nacht vor dem ersten Saisontag zurück. Der Platz bleibt ihrer.
+    const rueck = state.day + ctx.rules.winterDays;
+    for (const [platzId, p] of Object.entries(d.plaetze)) {
+      if (p.kuendigung) continue;
+      if (p.boot) {
+        // schon auf Törn: bleibt gleich bis zum Frühling weg
+        Object.assign(p, { rueckNacht: Math.max(p.rueckNacht ?? 0, rueck), frueherUm: null, wartet: false, gastId: null, winterlager: true });
+        continue;
+      }
+      const boot = state.boats[p.bootId];
+      if (!boot) continue;
+      delete state.berths[platzId];
+      delete state.boats[boot.id];
+      boot.status = 'away';
+      Object.assign(p, { boot, rueckNacht: rueck, frueherUm: null, tagestoern: false, winterlager: true });
+      events.push({ type: 'dauerAuslaufen', boatId: boot.id, berthId: platzId, tage: ctx.rules.winterDays, winterlager: true });
     }
   }
   // Neue Saison: alle zahlen im Voraus
@@ -820,7 +841,7 @@ export async function init(game) {
   if (document.getElementById('boot')?.classList.contains('done') || game.boatAnim) nachStart();
 
   // Deutsche Ereignisse für Grafik und Ton, Hinweise für den Spieler
-  game.on('sim:dauerAuslaufen', (e) => game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: e.tage }));
+  game.on('sim:dauerAuslaufen', (e) => game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: e.tage, winterlager: !!e.winterlager }));
   // Nach dem Umlegen fährt der Dauerlieger erst herein, wenn der Gast in seiner neuen Box fest ist.
   // So kreuzen sich die beiden Boote nicht in der engen Gasse vor den Boxen.
   const nachGast = new Map();   // Gast-id -> { id, platzId, zeit }
