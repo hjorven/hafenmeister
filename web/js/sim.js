@@ -1175,7 +1175,9 @@ export function heute(state) {
 export function tagesbericht(state, ctx) {
   const h = heute(state);
   const s = state.stats;
-  const summe = Object.values(h.einnahmen).reduce((a, b) => a + b, 0);
+  // Geschenke (das erste Bauwerk, ui/bauen.js) stehen unter "Sonstiges", zählen aber nicht als verdient
+  const geschenkt = h.details?.sonstiges?.startgeschenk || 0;
+  const summe = Object.values(h.einnahmen).reduce((a, b) => a + b, 0) - geschenkt;
   const ausgaben = Object.values(h.ausgaben).reduce((a, b) => a + b, 0);
   const ziele = state.modules?.ziele;
   // Tagesziele (features/tagesziele.js, Version 2): die gewählte Karte des Tages
@@ -1189,6 +1191,7 @@ export function tagesbericht(state, ctx) {
     einnahmen: { ...h.einnahmen },
     details: JSON.parse(JSON.stringify(h.details)),
     summe,
+    geschenkt,
     ausgaben: { ...h.ausgaben },
     ausgabenSumme: ausgaben,
     angelegt: h.angelegt,

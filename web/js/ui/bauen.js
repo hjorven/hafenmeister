@@ -1204,9 +1204,9 @@ export function init(game) {
     const b = bedarf();
     let bedarfText = null;
     if (e.art === 'steg' && (b.weg || b.plaetze)) {
-      bedarfText = b.weg ? `Zuletzt sind ${b.weg} Boote weitergefahren, ohne anzulegen.` : `Abends waren ${b.belegt} von ${b.plaetze} Gastplätzen belegt.`;
+      bedarfText = b.weg ? (b.weg === 1 ? 'Zuletzt ist 1 Boot weitergefahren, ohne anzulegen.' : `Zuletzt sind ${b.weg} Boote weitergefahren, ohne anzulegen.`) : `Abends waren ${b.belegt} von ${b.plaetze} Gastplätzen belegt.`;
     } else if (e.wunsch && b.offen[e.wunsch]) {
-      bedarfText = `Zuletzt wollten ${b.offen[e.wunsch]} Gäste ${WUNSCH[e.wunsch]} und bekamen es nicht.`;
+      bedarfText = b.offen[e.wunsch] === 1 ? `Zuletzt wollte 1 Gast ${WUNSCH[e.wunsch]} und bekam es nicht.` : `Zuletzt wollten ${b.offen[e.wunsch]} Gäste ${WUNSCH[e.wunsch]} und bekamen es nicht.`;
     } else if (e.wunsch && e.art === 'versorgung' && b.abend) {
       bedarfText = 'Zuletzt hat das hier niemandem gefehlt.';
     }
