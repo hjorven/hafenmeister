@@ -352,6 +352,17 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "bauen/p18-handy-baustelle.png"
+  },
+  {
+   "datei": "p66-pr228-pc-pulk-einfahrt.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Boote sammeln sich als Pulk an der Einfahrt",
+   "pr": 228,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr228/pulk-pc-g8-4242.png"
   }
  ]
 }
