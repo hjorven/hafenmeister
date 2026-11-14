@@ -308,6 +308,50 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "vorschau-p11/pc-weit-kleine-schilder.png"
+  },
+  {
+   "datei": "p14-pr154-pc-gaestebuch.jpg",
+   "pakete": [
+    "P14"
+   ],
+   "titel": "Gästebuch am Hafenbüro",
+   "pr": 154,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "gaestebuch/pc-gaestebuch.png"
+  },
+  {
+   "datei": "p14-pr154-iphone-blasen-und-meldungen.jpg",
+   "pakete": [
+    "P14"
+   ],
+   "titel": "Bewertungen über dem Boot",
+   "pr": 154,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "gaestebuch/iphone-blasen-und-meldungen.png"
+  },
+  {
+   "datei": "p18-pr232-p18-pc-baustelle.jpg",
+   "pakete": [
+    "P18"
+   ],
+   "titel": "Baustelle über Nacht",
+   "pr": 232,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "bauen/p18-pc-baustelle.png"
+  },
+  {
+   "datei": "p18-pr232-p18-handy-baustelle.jpg",
+   "pakete": [
+    "P18"
+   ],
+   "titel": "Ausbau in Abschnitten",
+   "pr": 232,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "bauen/p18-handy-baustelle.png"
   }
  ]
 }
