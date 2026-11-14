@@ -4185,7 +4185,7 @@
   {
    "code": "C07",
    "text": "GitHub Actions: Rechte je Job statt für den ganzen Workflow (pages.yml gibt pages: write und id-token: write auch dem Build), Actions auf Commit-SHAs pinnen, Dependabot prüfen",
-   "status": null,
+   "status": "erledigt",
    "statusText": "",
    "pakete": [
     "P08"
@@ -4403,13 +4403,13 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 112,
+  "erledigt": 113,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
   "offen": 97,
   "entfaellt": 0,
-  "alle": 217
+  "alle": 218
  },
  "bilder": [
   {
