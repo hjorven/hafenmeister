@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "e2192e1"
+  "commit": "76b488f"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -204,7 +204,7 @@
     "Bed P4",
     "Bed P8"
    ],
-   "status": "erledigt",
+   "status": "teilweise",
    "bilder": [
     38
    ]
@@ -540,7 +540,7 @@
    "id": "P21",
    "titel": "Logbuch und Hafenchronik zeigen",
    "inhalt": "Logbuch (Note 1), F36, sim:logbookNew",
-   "thread": "neu",
+   "thread": "erledigt (docs/logbuch.md, SAVE_VERSION 3)",
    "welle": 2,
    "prs": [],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
@@ -548,7 +548,7 @@
     "F36",
     "I5"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1346,7 +1346,7 @@
   {
    "id": "P73",
    "titel": "Stufe 10 Hafenverbund und Hafenkarten",
-   "inhalt": "modules.verbund, SAVE_VERSION 3 mit Migration, Übernahme alter Häfen, Kurzrechnung mit Abgleichstest, Standortwechsel",
+   "inhalt": "modules.verbund, SAVE_VERSION 4 mit Migration (3 ist seit P21 das Logbuch), Übernahme alter Häfen, Kurzrechnung mit Abgleichstest, Standortwechsel",
    "thread": "neu",
    "welle": 6,
    "prs": [],
@@ -2167,8 +2167,8 @@
   {
    "code": "F36",
    "text": "Hafenchronik: jeder Tag eine Zeile",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt",
    "pakete": [
     "P21"
    ],
@@ -3205,8 +3205,8 @@
   {
    "code": "I5",
    "text": "Logbuch als Sammelalbum mit Schattenrissen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt",
    "pakete": [
     "P21"
    ],
@@ -3774,8 +3774,8 @@
   {
    "code": "Bed P4",
    "text": "Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf \"bis zum nächsten Boot\"",
-   "status": "erledigt",
-   "statusText": "erledigt (Tempo bleibt; 1x nur bei wartendem Dauerlieger, Regionsziel, 8x bis zum nächsten Boot, danach Knopf \"Weiter mit 3x\" und automatische Rückkehr; 14.11.)",
+   "status": "offen",
+   "statusText": "geändert auf Jorvens Wunsch (14.11.): Tempo läuft durch, keine automatische Bremsung mehr",
    "pakete": [
     "P07"
    ],
@@ -4260,8 +4260,8 @@
     "P54"
    ],
    "zaehler": {
-    "erledigt": 8,
-    "teilweise": 1,
+    "erledigt": 7,
+    "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
     "offen": 0,
@@ -4290,11 +4290,11 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 9,
+    "erledigt": 10,
     "teilweise": 4,
     "arbeit": 0,
     "frage": 0,
-    "offen": 2,
+    "offen": 1,
     "entfaellt": 0,
     "alle": 15
    }
@@ -4413,19 +4413,19 @@
  ],
  "gesamt": {
   "erledigt": 20,
-  "teilweise": 7,
+  "teilweise": 8,
   "arbeit": 3,
   "frage": 0,
-  "offen": 50,
+  "offen": 49,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 128,
+  "erledigt": 129,
   "teilweise": 8,
   "arbeit": 0,
   "frage": 1,
-  "offen": 82,
+  "offen": 81,
   "entfaellt": 0,
   "alle": 219
  },

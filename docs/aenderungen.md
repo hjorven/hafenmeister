@@ -8,6 +8,9 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 - Winterkarte auch am Handy quer mit Knöpfen fest unten (links von Bauen, reicht bis unten), Hinweis mit Maus „bitte scrollen“.
 - Liegegeld nach Länge: Gäste zahlen je angefangenem Meter, ein langes Boot also mehr als ein kurzes derselben Klasse (B10, 252).
+- Vorspulen läuft jetzt ganz durch: 3x und 8x bleiben, bis du selbst etwas anderes wählst. Auch wartende Dauerlieger, Regionsabschluss und Boote an der Boje bremsen nicht mehr; der Knopf „Weiter mit 3x“ entfällt.
+- Neu: das Logbuch (Menü oder Taste J). Jedes Bootsmodell, das einmal angelegt hat, kommt mit Pixelbild hinein, fehlende stehen als Schattenriss da; ein Steckbrief zeigt Maße und wann es zuerst kam. Die Hafenchronik schreibt jeden Abend eine Zeile über den Tag, die Karte am Abend zeigt den wichtigsten Satz. Ein neues Modell meldet sich kurz rechts oben. Alte Spielstände behalten ihr Logbuch und bekommen die letzten 30 Tage nachgetragen.
+- Das Gästebuch öffnet am PC jetzt mit Taste N; G schaltete zugleich 8x.
 - Über jedem wartenden Boot zeigt ein kleiner Ring, wie lange es noch Geduld hat: grün, gelb, im letzten Drittel rot und blinkend, dazu ein kurzes Tuten. Abends und nach einer Nacht an der Boje ruht die Geduld, der Ring wird dann grau-blau.
 - Über Toilette, Dusche, Kiosk und Tankstelle steht, wie viele Boote sie heute schon versorgt haben ("14/20"). Wird es knapp, blinkt das Schild orange, ist es voll, wird es rot. Morgens zählt es neu.
 - Warten Boote außerhalb des Bildes, zeigt ein Pfeil am Rand mit ihrem Geduldsring dorthin. Antippen fährt die Kamera hin (269).
