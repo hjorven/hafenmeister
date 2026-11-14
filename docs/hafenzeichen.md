@@ -1,6 +1,6 @@
 # Versteckte Regeln sichtbar machen (Paket P55)
 
-Stand: 14.11.2026. Status: gemergt (PR 269, L2 im Folge-PR). Roadmap-Punkte A4, B1, C7, L2, Bed P1 (Rest), Bed P3, Bed P10 (für wartende Boote).
+Stand: 14.11.2026. Status: gemergt (PR 269, L2 in PR 275). Roadmap-Punkte A4, B1, C7, L2, Bed P1 (Rest), Bed P3, Bed P10 (für wartende Boote).
 
 Drei Regeln hat das Spiel schon lange gerechnet, aber nie gezeigt: wie lange ein Boot an der Boje wartet, wie viele Boote eine Dusche am Tag versorgt, und dass draußen vor dem Bild Boote warten. Jetzt sieht man alle drei im Hafen selbst, ohne neue Tafel.
 

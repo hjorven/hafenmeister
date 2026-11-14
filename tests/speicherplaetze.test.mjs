@@ -251,7 +251,8 @@ test('Import liest auch den alten Kurztext HM1:', () => {
   for (const b of bytes) bin += String.fromCharCode(b);
   const code = `HM1:${btoa(bin)}`;
   // Alte Stände werden wie Version 1 umgebaut: Geländeform 1, Stegbild 0
-  const erwartet = { ...alt, modules: { ...alt.modules, gelaende: { nr: 1 }, stegbild: { nr: 0 } } };
+  // dazu ein leeres Logbuch (Version 3, P21)
+  const erwartet = { ...alt, modules: { ...alt.modules, gelaende: { nr: 1 }, stegbild: { nr: 0 }, logbuch: { erst: {}, chronik: [], offen: [], ungelesen: [], ab: 1 } } };
   assert.deepEqual(importText(code), erwartet);
   assert.deepEqual(importText(`  ${code}\n`), erwartet);
   assert.throws(() => importText('HM1:%%%'), (e) => e.code === 'ungueltig');
@@ -405,7 +406,7 @@ test('Laden: Box, die es in der Stufe nicht gibt, wird geräumt', () => {
 });
 
 test('Version 1 wird auf 2 umgebaut: Geländeform 1 und Stegbild 0, vorhandene Werte bleiben', () => {
-  assert.equal(SAVE_VERSION, 2);
+  assert.ok(SAVE_VERSION >= 2);
   const alt = unwrap({ format: 'hafenmeister-spielstand', version: 1, spiel: { ...createState({ seed: 1 }), modules: { einstieg: { fertig: true } } } }).game;
   assert.deepEqual(alt.modules.gelaende, { nr: 1 });
   assert.deepEqual(alt.modules.stegbild, { nr: 0 });
