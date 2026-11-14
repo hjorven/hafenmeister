@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "f46ad33"
+  "commit": "669ebc0"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1133,16 +1133,18 @@
    "id": "P61",
    "titel": "Spiel komplett offline startbar",
    "inhalt": "N15, N16",
-   "thread": "bestehend: \"Spiel über GitHub Pages veröffentlichen\"",
+   "thread": "erledigt (PR 270), Thread \"Spiel offline startbar machen\"",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    270
+   ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
     "N15",
     "N16",
     "C06"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -3614,23 +3616,27 @@
   {
    "code": "N15",
    "text": "3D-Bibliothek mitliefern statt von fremdem Server",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 270, web/vendor/three-0.187.0/, tools/three-holen.sh)",
    "pakete": [
     "P61"
    ],
-   "prs": [],
+   "prs": [
+    270
+   ],
    "abschnitt": "N Speichern und Web-App"
   },
   {
    "code": "N16",
    "text": "Alle Spieldateien vorab für offline speichern",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 270, offline-liste.json beim Deploy, Service Worker lädt vorab)",
    "pakete": [
     "P61"
    ],
-   "prs": [],
+   "prs": [
+    270
+   ],
    "abschnitt": "N Speichern und Web-App"
   },
   {
@@ -4177,12 +4183,14 @@
   {
    "code": "C06",
    "text": "Three.js kommt von jsDelivr, Erststart hängt am CDN (= N15, N16)",
-   "status": null,
+   "status": "erledigt",
    "statusText": "",
    "pakete": [
     "P61"
    ],
-   "prs": [],
+   "prs": [
+    270
+   ],
    "abschnitt": "Technische Befunde aus dem Audit (12.11.2026)"
   },
   {
@@ -4275,11 +4283,11 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 8,
+    "erledigt": 9,
     "teilweise": 4,
     "arbeit": 0,
     "frage": 0,
-    "offen": 3,
+    "offen": 2,
     "entfaellt": 0,
     "alle": 15
    }
@@ -4397,22 +4405,22 @@
   }
  ],
  "gesamt": {
-  "erledigt": 19,
+  "erledigt": 20,
   "teilweise": 7,
   "arbeit": 3,
   "frage": 0,
-  "offen": 51,
+  "offen": 50,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 113,
+  "erledigt": 116,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 97,
+  "offen": 95,
   "entfaellt": 0,
-  "alle": 218
+  "alle": 219
  },
  "bilder": [
   {
@@ -4910,6 +4918,28 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "Spiel offline startbar: Three.js mitgeliefert, Spieldateien vorab im Cache (P61)",
+   "pr": 270,
+   "pakete": [
+    "P61"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 258 und 262 bei P66, Karte der Zonen und Seewege",
+   "pr": 268,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Handy: Hilfe aufklappbar, Einstellungen kompakt, Baumenü niedriger",
+   "pr": 267,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "GitHub Actions absichern: Rechte je Job, SHAs, Secret-Scan (Audit C07)",
    "pr": 264,
    "pakete": []
@@ -4967,26 +4997,6 @@
    "pakete": [
     "P66",
     "P07"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Einstieg: Blase und Kreis warten auf allen Geräten, solange das Baumenü offen ist",
-   "pr": 259,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tempo bleibt: 3x springt nicht mehr jeden Morgen auf 1x",
-   "pr": 257,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Boote: Kurswächter Ufer, XL am kurzen Kai im Wasser",
-   "pr": 256,
-   "pakete": [
-    "P66"
    ]
   }
  ]
