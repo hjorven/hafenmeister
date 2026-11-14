@@ -223,7 +223,9 @@ export function init(game) {
       wert ? el('p', { class: 'card-zahlt' }, zahltText(wert.fee, gold.length ? sim.platzWert(b.id, gold[0])?.fee ?? wert.fee : null, gold.length > 0 && gold.length >= fitting.length)) : null,
       el('p', { class: 'card-hint' }, !fitting.length
         ? 'Gerade ist kein passender Platz frei.'
-        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length && gold.length >= fitting.length ? 'alle' : gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}. Zieh das Boot hin oder ${vorschlag ? 'nimm den Vorschlag an' : 'lass es einfahren'}.`),
+        : [`${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length && gold.length >= fitting.length ? 'alle' : gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}.`,
+          // Die Anleitung tritt am Handy zurück (der Einstieg erklärt das Ziehen), die Karte bleibt flach
+          el('span', { class: 'card-wie' }, ` Zieh das Boot hin oder ${vorschlag ? 'nimm den Vorschlag an' : 'lass es einfahren'}.`)]),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
       el(
         'div',
