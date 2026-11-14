@@ -64,6 +64,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 | `reputation()`, `season()`, `canAdvanceStage()`, `facilityUpgrade(key)`, `modifiers()` | Lesen |
 | `geduld(bootId)` | restliche Sekunden an der Boje |
 | `platzZustand(platzId)`, `platzZustaende()` | Zustand für das Grün-Rot-Schild: `'frei'`, `'belegt'`, `'ausflug'`, `'reserviert'`, `'aus'` |
+| `anmeldungFrei()`, `angemeldet()`, `freihaltbar(boot)`, `freihalten(boot, platz?)`, `freigeben(boot)`, `freigehaltenFuer(platz)`, `funkBonus(boot)` | Anmeldung per Funk (P28), siehe [funk-anmeldung.md](funk-anmeldung.md) |
 | `aufAusflug(bootId)` | Gast ist gerade auf Tagestörn |
 | `regionGoal()` | Abschlussziel der letzten Stufe: `{ active, ok, missing, visits, reputation, openBerths, goal }` |
 | `istBezahlt(bootId)` | Liegegeld für die kommende Nacht kassiert (für Bändchen am Bug und Rundgang) |
@@ -97,6 +98,7 @@ Ein Boot: `{ id, typeId, modelId, name, size, kind, length, beam, draft, motor, 
 | `sim:selfEntered` | `{ boatId, berthId }` Boot hat sich selbst eine Box gesucht (zusätzlich zu `sim:moored`) |
 | `sim:tripOut`, `sim:tripBack` | `{ boatId, berthId }` Tagestörn eines Gastes. Für die Grafik zusätzlich `dauer:auslaufen { id, platzId, tage: 0, gast: true }` und `dauer:einlaufen { id, platzId, gast: true }` |
 | `sim:berthState` | `{ plaetze: { A01: 'frei' \| 'belegt' \| 'ausflug' \| 'reserviert' } }` nach jeder Änderung und beim Laden, für das Grün-Rot-Schild |
+| `sim:announced`, `sim:reserved`, `sim:reservationReleased`, `sim:reservationKept` | Anmeldung per Funk (P28): `{ boatIds }`, `{ boatId, berthId }`, `{ boatId, berthId, reason }`, `{ boatId, berthId, amount }`, siehe [funk-anmeldung.md](funk-anmeldung.md) |
 | `sim:regionDone` | `{ region, day }` Abschlussziel der Region erreicht (letzte Stufe) |
 | `sim:castOff` | `{ boatId, berthId }` abgerechnetes Boot legt jetzt ab (Vormittag) |
 | `sim:berthFreed` | `{ berthId, boatId }` Box nach der Abreise wieder frei (bis dahin gilt sie als belegt, `state.leaving`) |

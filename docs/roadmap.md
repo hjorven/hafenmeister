@@ -226,7 +226,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
 | F1 | Päckchen liegen: bei vollem Hafen längsseits an ein gleich großes Boot, halbes Liegegeld, beide Crews einen halben Anker schlechter | offen | P27 |
-| F2 | Anmeldung per Funk: morgens melden sich ein bis zwei Boote an, Platz freihalten gibt Bonus | offen | P28 |
+| F2 | Anmeldung per Funk: morgens melden sich ein bis zwei Boote an, Platz freihalten gibt Bonus | erledigt (PR 288, [funk-anmeldung.md](funk-anmeldung.md)) | P28 |
 | F3 | Flottillen: drei bis fünf Boote wollen am selben Steg liegen (Feld `group`) | offen | P32 |
 | F4 | Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung | offen | P33 |
 | F5 | Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld `exposed`) | offen | P34 |
@@ -399,7 +399,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | E5 | Automatik je Größenklasse an oder aus | erledigt (PR 146) | P02 |
 | E6 | Von Hand eingewiesene Gäste geben einen Viertelanker mehr | erledigt (PR 146) | P02 |
 | E7 | Volle Automatik erst ab Hafenstufe 4 und teurer | erledigt (PR 146) | P02 |
-| E8 | Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste) | offen, kommt mit P28, P37, P38 | P02 (verknüpft P28, P37, P38) |
+| E8 | Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste) | teilweise: Reservierungen erledigt (P28, PR 288); Havaristen und Feste kommen mit P37, P38 | P02 (verknüpft P28, P37, P38) |
 
 ### F Services und Angebote (hier "Svc")
 
@@ -676,7 +676,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | neu |
 | P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | neu |
 | P27 | Päckchen liegen bei vollem Hafen | F1 | neu |
-| P28 | Anmeldung per Funk | F2 (nutzt P11) | neu |
+| P28 | Anmeldung per Funk | F2 (nutzt P11) | erledigt (PR 288, `docs/funk-anmeldung.md`) |
 | P29 | Baggern für tiefere Liegeplätze | F7 | neu |
 | P30 | Stege nachrüsten | F8 | neu |
 | P31 | Neue Gästewünsche | F9 | neu |
