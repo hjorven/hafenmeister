@@ -592,18 +592,55 @@ export function season(state, ctx) {
   return { year: Math.floor((state.day - 1) / len) + 1, day: i + 1, winter: i >= seasonDays };
 }
 
-/** Fest vergebene Plätze (Fischer) bekommen ihr Boot, sobald es den Platz gibt. */
+/**
+ * Fest vergebene Plätze (Fischer) bekommen ihr Boot, sobald es den Platz gibt. Welcher Kutter: zuerst
+ * einer, der noch nicht im Logbuch steht (in der Reihenfolge der Bootsdaten), sonst der erste, der passt.
+ * So kommen über die Stufen und Jahre alle Fischkutter einmal in den Hafen.
+ */
 function fillReservedBerths(state, ctx, events) {
   for (const berth of availableBerths(state, ctx)) {
     if (!berth.reserved || !isFree(state, berth.id)) continue;
     const type = ctx.types.find((t) => t.stationed && t.kind === berth.kind && t.minStage <= state.stage);
     if (!type) continue;
-    const r = stationBoat(state, ctx, type.id, berth.id);
+    const seen = state.logbook?.[type.id] || [];
+    const models = (type.models || []).filter((m) => (m.fromStage ?? 1) <= state.stage);
+    const order = [...models.filter((m) => !seen.includes(m.id)), ...models.filter((m) => seen.includes(m.id))];
+    let r = { ok: false, events: [] };
+    for (const m of order) { r = stationBoat(state, ctx, type.id, berth.id, m.id); if (r.ok) break; }
+    if (!r.ok) r = stationBoat(state, ctx, type.id, berth.id);
     if (r.ok) events.push(...r.events);
   }
 }
 
+/** Neue Saison: Die Fischer wechseln (andere Kutter kommen), danach füllt fillReservedBerths die Plätze neu. */
+function rotateStationed(state, ctx, events) {
+  for (const boat of Object.values(state.boats)) {
+    if (!boat?.stationed || !ctx.berthById[boat.berthId]?.reserved) continue;
+    const type = ctx.typeById[boat.typeId];
+    if (!type || !(type.models || []).some((m) => m.id !== boat.modelId && (m.fromStage ?? 1) <= state.stage)) continue;
+    events.push(...unstationBoat(state, ctx, boat.id).events);
+  }
+}
+
+/**
+ * Ein Schiff wurde gesehen, ohne über moor() anzulegen (Besuch eines großen Schiffs an seinem Anleger,
+ * vorbeifahrendes Großschiff, Seenotkreuzer an der Station). Trägt es ins Logbuch ein wie beim Anlegen.
+ */
+export function logbookSighting(state, ctx, typeId, modelId = null) {
+  if (!ctx.typeById[typeId]) return [];
+  if (modelId && !ctx.typeById[typeId].models?.some((m) => m.id === modelId)) return [];
+  const seen = (state.logbook[typeId] ||= []);
+  const key = modelId ?? typeId;
+  if (seen.includes(key)) return [];
+  seen.push(key);
+  return [{ type: 'logbookNew', typeId, modelId, gesichtet: true }];
+}
+
 function startDay(state, ctx, events) {
+  {
+    const sea0 = season(state, ctx);
+    if (sea0.day === 1 && sea0.year > 1) rotateStationed(state, ctx, events);
+  }
   fillReservedBerths(state, ctx, events);
   const mods = modifiers(state, ctx);
   const sea = season(state, ctx);

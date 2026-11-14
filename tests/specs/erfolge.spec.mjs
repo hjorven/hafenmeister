@@ -25,6 +25,8 @@ test('Erfolge: Meldung, Reiter im Logbuch, Chronik und Dinge im Hafen', async ({
   const meldung = page.locator('#hm-ef-meldung .hm-ef-meldung');
   await expect(meldung).toBeVisible({ timeout: 15_000 });
   await expect(meldung).toContainText('Erste Leine fest');
+  // steht im gemeinsamen Meldeplatz (ui/meldungen.js)
+  expect(await page.evaluate(() => window.hafenmeister.meldungen?.imPlatz?.(document.getElementById('hm-ef-meldung')) ?? true)).toBe(true);
   // Die Meldung verdeckt keine Knöpfe (nach dem Hereinschieben gemessen)
   await page.waitForTimeout(400);
   const box = await meldung.boundingBox();
