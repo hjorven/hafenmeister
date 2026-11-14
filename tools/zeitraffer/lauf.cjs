@@ -13,7 +13,7 @@
 //   --bild 10          alle n Sekunden Echtzeit ein Bildschirmfoto
 //   --stufe 1          Startstufe (1 = neues Spiel; ab 2 Testmodus ?stufe=n, der nicht speichert)
 //   --bis 6            Lauf endet, wenn diese Stufe erreicht und ihr Ziel erfüllt ist
-//   --gelaende n / --stegbild n / --landbild n   werden an die Adresse gehängt (?gelaende=n usw.)
+//   --gelaende n / --seed s / --stegbild n / --landbild n   werden an die Adresse gehängt (?gelaende=n usw.)
 //   --web web          Ordner mit dem Spiel (Standard web/ im Repo)
 //   --out dir          Ausgabeordner (Standard /tmp/zeitraffer: Bilder, ergebnis-<gerät>.json)
 //
@@ -228,7 +228,7 @@ const SNAP = () => {
     if (m.type() === 'error') fehler.push({ wann: ort(), text: m.text().slice(0, 400) });
     else if (m.type() === 'warning') warnungen.push({ wann: ort(), text: m.text().slice(0, 300) });
   });
-  page.on('pageerror', (e) => fehler.push({ wann: ort(), text: 'Skriptfehler: ' + String(e.message).slice(0, 400) }));
+  page.on('pageerror', (e) => fehler.push({ wann: ort(), text: 'Skriptfehler: ' + String(e.message).slice(0, 400), stack: String(e.stack || '').split('\n').slice(1, 4).map((z) => z.trim().replace(/https?:\/\/localhost:\d+\//, '')).join(' < ') }));
   page.on('response', (r) => { if (r.status() >= 400) fehlendeDateien.push({ wann: ort(), url: r.url(), status: r.status() }); });
   await page.route(/^https:\/\/cdn\.jsdelivr\.net\/npm\/three@([^/]+)\/(.+)$/, (route) => {
     const file = route.request().url().split(/three@[^/]+\//)[1].split(/[?#]/)[0];
@@ -257,7 +257,15 @@ const SNAP = () => {
 
   const bildschirmfoto = async (name, label) => {
     const datei = `bilder/${name}.jpg`;
-    await page.screenshot({ path: path.join(OUT, datei), type: 'jpeg', quality: 62 });
+    // Für das Bild kurz anhalten: ohne Spielschritte ist ein Bild schnell fertig
+    const lief = await page.evaluate(() => { const G = window.hafenmeister; const l = !G.paused; G.setPaused(true); return l; });
+    const t = Date.now();
+    try {
+      await page.screenshot({ path: path.join(OUT, datei), type: 'jpeg', quality: 62, timeout: 90000 });
+    } catch (e) {
+      fehler.push({ wann: ort(), text: `Bildschirmfoto nach ${Math.round((Date.now() - t) / 1000)} s abgebrochen (Seite reagiert nicht): ${String(e.message).split('\n')[0]}` });
+    }
+    if (lief) await page.evaluate(() => window.hafenmeister.setPaused(false));
     return { datei, label };
   };
 
@@ -333,7 +341,7 @@ const SNAP = () => {
           await page.waitForTimeout(1200);
           await page.evaluate(() => window.hafenmeister.camera.zoomAt(4));
           await page.waitForTimeout(1200);
-          await page.evaluate((q) => { const G = window.hafenmeister; const r = G.canvas.getBoundingClientRect(); const v = new G.THREE.Vector3(q[0], 0, q[1]).project(G.camera.camera); const d = document.createElement('div'); d.className = '__ring'; Object.assign(d.style, { position: 'fixed', left: (r.left + (v.x + 1) / 2 * r.width - 40) + 'px', top: (r.top + (1 - v.y) / 2 * r.height - 40) + 'px', width: '80px', height: '80px', border: '3px solid #e0201a', borderRadius: '50%', zIndex: 99999, pointerEvents: 'none' }); document.body.appendChild(d); }, e.p);
+          await page.evaluate((q) => { const G = window.hafenmeister; const r = G.canvas.getBoundingClientRect(); const v = new G.THREE.Vector3(q[0], 0, q[1]).project(G.camera.camera); const d = document.createElement('div'); d.className = '__ring'; Object.assign(d.style, { position: 'fixed', left: (r.left + (v.x + 1) / 2 * r.width - 40) + 'px', top: (r.top + (1 - v.y) / 2 * r.height - 40) + 'px', width: '80px', height: '80px', border: '3px solid #e0201a', borderRadius: '50%', zIndex: 99999, pointerEvents: 'none' }); document.body.appendChild(d); const st = document.createElement('style'); st.className = '__ring'; st.textContent = 'body > *:not(#game):not(.__ring), #game > *:not(#stage) { visibility: hidden !important; }'; document.head.appendChild(st); }, e.p);
           const b = await bildschirmfoto(`${GERAET}-nah-${k}-s${zustand.stufe}-${nahZaehler[nk]}`, `${k}: ${n}, Stufe ${zustand.stufe}, Tag ${zustand.tag}`);
           R.nahbilder.push({ ...b, art: k, wer: n, stufe: zustand.stufe, tag: zustand.tag });
           m.bild = b.datei;

@@ -42,13 +42,13 @@ Sie steht dann in `/tmp/zr-serie/uebersicht.md`.
 | `--bild` | `10` | alle n Sekunden ein Bildschirmfoto |
 | `--stufe` | `1` | Startstufe. 1 = neues Spiel. Ab 2 Testmodus `?stufe=n`, der nicht speichert, darum entfällt dann die Speicherprüfung |
 | `--bis` | `6` | Lauf endet, wenn diese Stufe erreicht und ihr Ziel erfüllt ist |
-| `--gelaende`, `--stegbild`, `--landbild` | | werden an die Adresse gehängt (`?gelaende=n`, `?stegbild=n`, `?landbild=n`) |
+| `--gelaende`, `--seed`, `--stegbild`, `--landbild` | | werden an die Adresse gehängt (`?gelaende=n`, `?seed=s`, `?stegbild=n`, `?landbild=n`) |
 | `--web` | `web` | Ordner mit dem Spiel. Für Läufe gegen `main`, während man selbst arbeitet: `git archive origin/main web \| tar -x -C /tmp/zr-main` und `--web /tmp/zr-main/web` |
 | `--out` | `/tmp/zeitraffer` | Ausgabeordner |
 
 ## Der Testschalter `?testtempo=`
 
-`web/js/core/game.js` liest `?testtempo=n` aus der Adresse. Ohne den Parameter ändert sich am Spiel nichts, im Spiel gibt es dafür keinen Knopf. Mit dem Parameter läuft die Spielzeit n-mal so schnell wie bei 1x. Die Spielzeit eines Bildes wird in Schritte von höchstens 0,8 s geteilt (so viel wie ein Bild bei 8x), damit Boote, Menschen und Regeln dieselben Schritte sehen wie im normalen Spiel. Höchstens 120 Schritte je Bild, damit die Seite bedienbar bleibt. Reicht die Rechenzeit nicht, läuft das Spiel langsamer als verlangt. Im Container mit Software-Grafik erreicht 500 etwa 400-fach in Stufe 1 und 150-fach in Stufe 6; ein ganzes Spiel (etwa 250 Spieltage) dauert so 5 bis 15 Minuten.
+`web/js/core/game.js` liest `?testtempo=n` aus der Adresse. Ohne den Parameter ändert sich am Spiel nichts, im Spiel gibt es dafür keinen Knopf. Mit dem Parameter läuft die Spielzeit n-mal so schnell wie bei 1x. Die Spielzeit eines Bildes wird in Schritte von höchstens 0,8 s geteilt (so viel wie ein Bild bei 8x), damit Boote, Menschen und Regeln dieselben Schritte sehen wie im normalen Spiel. Höchstens 120 Schritte je Bild, damit die Seite bedienbar bleibt. Reicht die Rechenzeit nicht, läuft das Spiel langsamer als verlangt. Im Container mit Software-Grafik erreicht 500 etwa 400-fach in Stufe 1 und 150-fach in Stufe 6; ein ganzes Spiel (etwa 300 Spieltage) dauert auf dem großen Seed-Gelände so etwa 25 Minuten, wenn PC und Handy gleichzeitig laufen. Bildschirmfotos halten das Spiel kurz an; bleibt eines 90 s hängen, steht das als Fehler im Bericht, der Lauf geht weiter.
 
 ## Wer spielt
 
