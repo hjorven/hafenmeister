@@ -37,6 +37,9 @@ export const GRUND = {
   abends:     { text: 'abends kein Platz',          lang: 'Abends noch immer ohne Liegeplatz',         sym: 'warten' },
   weggeschickt: { text: 'weggeschickt',            lang: 'Vom Hafenmeister weggeschickt',             sym: 'warten' },
   abgewiesen: { text: 'keinen Platz bekommen',      lang: 'Keinen Liegeplatz bekommen',                sym: 'warten' },
+  // Weiter Weg (P19 B9): der Wunsch war erfüllt, zählte aber nur halb
+  'weit:wc':     { text: 'weiter Weg zum WC',        lang: 'Weiter Weg zum WC',                          sym: 'wc' },
+  'weit:dusche': { text: 'weiter Weg zur Dusche',    lang: 'Weiter Weg zur Dusche',                      sym: 'dusche' },
 };
 
 // Wünsche an Angebote an Land (P19 C3): Texte aus data/wuensche-texte.js, Symbol wie der Wunsch
@@ -75,9 +78,11 @@ export function gruendeAusAbreise(e) {
     // Wünsche: je Wunsch die Nächte, in denen er fehlte (meiste zuerst)
     const missed = Object.entries(p.missed || {}).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]);
     for (const [key, n] of missed) gruende.push({ key, n });
+    // weiter Weg zum WC oder zur Dusche (P19 B9), nach den fehlenden Wünschen
+    for (const [key, n] of Object.entries(p.far || {})) if (n > 0 && GRUND[`weit:${key}`]) gruende.push({ key: `weit:${key}`, n });
     if (p.penalty > 0.001) gruende.push({ key: 'sturm', n: r2(p.penalty) });
     if (p.bonus < -0.001) gruende.push({ key: 'stimmung', n: r2(-p.bonus) });
-    if (p.wishesTotal > 0 && !missed.length) plus.push({ key: 'wuensche', wert: 0 });
+    if (p.wishesTotal > 0 && !missed.length && !Object.values(p.far || {}).some((n) => n > 0)) plus.push({ key: 'wuensche', wert: 0 });
     if (!p.wishes?.length) plus.push({ key: 'ohne', wert: 0 });
     if (p.comfort > 0.001) plus.push({ key: 'komfort', wert: r2(p.comfort) });
     if (p.special > 0.001) plus.push({ key: 'sonder', wert: r2(p.special) });
@@ -149,7 +154,7 @@ export function hauptgrund(eintrag) {
   if (eintrag.art === 'umbau') return 'umbau';
   if (eintrag.art === 'abgewiesen') return eintrag.gruende[0].key;
   // Fehlende Wünsche zuerst (die kann der Spieler bauen), dann der Rest
-  const w = eintrag.gruende.find((g) => WUNSCH_KEYS.includes(g.key));
+  const w = eintrag.gruende.find((g) => WUNSCH_KEYS.includes(g.key) || g.key.startsWith('weit:'));
   return (w ?? eintrag.gruende[0]).key;
 }
 
@@ -216,6 +221,8 @@ const SATZ = {
   gut: ['Netter Hafen, gerne wieder.', 'Ruhige Nacht, guter Platz.', 'Hat gepasst.', 'Schöner Liegeplatz.'],
   mittel: ['Ganz in Ordnung.', 'Geht so.', 'Für eine Nacht reicht es.'],
   komfort: ['Toller Liegeplatz am Fingersteg.', 'Der Platz war richtig bequem.'],
+  'weit:wc': ['Bis zum Klo war es ein halber Landgang.', 'Nachts so weit zum WC laufen, nein danke.'],
+  'weit:dusche': ['Nach der Dusche waren wir auf dem Rückweg schon wieder verschwitzt.', 'Die Dusche war am anderen Ende des Hafens.'],
   stamm: (n) => `Schon unser ${n}. Besuch hier.`,
 };
 for (const [k, t] of Object.entries(ANGEBOT_TEXTE)) SATZ[k] = t.saetze;
@@ -250,7 +257,7 @@ export function erklaerung(eintrag) {
   for (const g of eintrag.gruende) {
     const def = GRUND[g.key];
     if (!def) continue;
-    if (WUNSCH_KEYS.includes(g.key)) teile.push(g.n > 1 ? `${def.text} (${g.n} Nächte)` : def.text);
+    if (WUNSCH_KEYS.includes(g.key) || g.key.startsWith('weit:')) teile.push(g.n > 1 ? `${def.text} (${g.n} Nächte)` : def.text);
     else if (g.key === 'sturm' || g.key === 'stimmung') teile.push(`${def.text} −${komma(g.n)}`);
     else teile.push(def.text);
   }

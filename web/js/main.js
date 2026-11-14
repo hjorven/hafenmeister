@@ -35,11 +35,14 @@ const MODULES = [
   './ui/fotomodus.js',
   './ui/vorschau.js',
   './ui/meldungen.js',                 // Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich
+  './ui/hafenzeichen.js',              // P55: Auslastung an Gebäuden, Zeiger am Rand zu wartenden Booten
   './audio/audio.js',
   './state.js',
   './events/events.js',
   './features/dauerlieger.js',
   './features/winter.js',
+  './features/versorgung.js',
+  './features/auszeichnung.js',
   './features/platzschilder.js',
   './features/stammgaeste.js',
   './features/tagesziele.js',
@@ -51,6 +54,7 @@ const MODULES = [
   './save/index.js',
   './ui/tagesabschluss.js',
   './ui/gaestebuch.js',
+  './ui/logbuch.js',                   // Logbuch und Hafenchronik (P21)
   './ui/oberflaeche.js',
 ];
 

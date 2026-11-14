@@ -41,7 +41,7 @@ Stand: 11.11.2026. Die Regeln laufen ohne Grafik und ohne DOM und sind mit Node 
 
 **Passregel:** Ein Boot passt an einen Platz, wenn es nicht länger und nicht breiter ist als der Platz und die Wassertiefe der aktuellen Stufe mindestens 0,3 m größer ist als sein Tiefgang. Fischerplätze sind fest vergeben, der Kai ist nur für XL.
 
-**Hafengeld:** Grundpreis der Größe × `feeFactor` der Bootsart × (1 + 0,25 × erfüllte Wünsche). **Ruf:** Schnitt aller Bewertungen der letzten drei Tage, mindestens der letzten 10. **Bewertung:** aus den Wünschen 2,5 (keiner erfüllt) bis 4,5 (alle), ohne Wünsche 4,5, dazu Platz, passgenau, von Hand, Sondergast, Feste und Abzüge; Rechnung in `ratingParts`, Erklärung in [gaestebuch.md](gaestebuch.md) und [ruf.md](ruf.md). **Wünsche:** je Bootsart aus `data/boats` (`wishes`), dazu manchmal ein Wunsch an ein Angebot an Land, erfüllt, wenn der Service gebaut ist.
+**Hafengeld:** Grundpreis der Größe × `feeFactor` der Bootsart × (1 + 0,25 × erfüllte Wünsche). **Ruf:** Schnitt aller Bewertungen der letzten drei Tage, mindestens der letzten 10. **Bewertung:** aus den Wünschen 2,5 (keiner erfüllt) bis 4,5 (alle), ohne Wünsche 4,5, dazu Platz, passgenau, von Hand, Sondergast, Feste und Abzüge; Rechnung in `ratingParts`, Erklärung in [gaestebuch.md](gaestebuch.md) und [ruf.md](ruf.md). **Wünsche:** je Bootsart aus `data/boats` (`wishes`), dazu manchmal ein Wunsch an ein Angebot an Land, erfüllt, wenn der Service gebaut ist. **Wege:** über 120 m bis zum WC oder zur Dusche zählt der Wunsch für die Note halb (Hook `walk`). **Versorgung heute:** `facilityLoad`. **Auszeichnung:** drei Abende Ruf ab 3,8 / 4,2 / 4,6 (`award`, `state.award`).
 
 ## `game.sim` (im Browser)
 
@@ -167,7 +167,7 @@ Solange niemand die Boote im Wasser zeigt, listet `#queue` die wartenden Boote a
 
 Faktoren mehrerer Module werden multipliziert, Zahlen addiert.
 
-**Hooks:** `game.sim.addHook(name, fn)` mit `arrival` (`{ state, ctx, boat }`, Boot ändern), `evening` (`{ state, ctx, boats, addIncome, events }`), `night` (`{ state, ctx, events }`), `fit` (`{ state, ctx, boat, berth }`, Grund oder null) und `tick` (`{ state, ctx, events }`, jede Spielsekunde tagsüber). Rückgabe: Funktion zum Aushängen.
+**Hooks:** `game.sim.addHook(name, fn)` mit `arrival` (`{ state, ctx, boat }`, Boot ändern), `evening` (`{ state, ctx, boats, addIncome, events }`), `night` (`{ state, ctx, events }`), `fit` (`{ state, ctx, boat, berth }`, Grund oder null), `tick` (`{ state, ctx, events }`, jede Spielsekunde tagsüber) und `walk` (`{ state, ctx, berth, wish }`, Meter zum nächsten Gebäude oder null, P19). Rückgabe: Funktion zum Aushängen.
 
 **Neuer Wunsch:** `game.sim.addService(key, { levels, cost, fromStage, wishFromStage })`, oder mit `berthProp` für Wünsche, die der Liegeplatz erfüllt.
 

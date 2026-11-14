@@ -631,6 +631,13 @@ const CSS = `
 .hm-neu .hm-tafel .tz-nehmen-wort { background: none; border-style: solid; border-color: transparent; border-width: var(--hm-rahmen-breite);
   border-image: var(--rahmen-meer) 3 3 4 3 fill / var(--hm-rahmen-breite) stretch; padding: 1px 0 2px; }
 .hm-neu .hm-tafel > button.tz-neu { border-image-source: var(--rahmen-gold); }
+.hm-tafel > button.tz-neu, .hm-neu #hm-seite .hm-tafel > button.tz-neu { position: relative; }
+/* Neue Karten liegen bereit: kleiner Pixelpunkt blinkt am Schild, bis die Wahl offen war */
+.hm-tafel > button.tz-neu::after { content: ''; position: absolute; top: -4px; right: -4px; width: 10px; height: 10px;
+  background: #ee6454; box-shadow: 0 0 0 2px #fffaf0; animation: hm-tz-punkt 1s steps(2) infinite; }
+.hm-tafel > button.tz-neu[aria-expanded="true"]::after { display: none; }
+@keyframes hm-tz-punkt { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .hm-tafel > button.tz-neu::after { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .hm-tafel.jubel > button { animation: none; } }
 body.hm.foto .hm-tafel { display: none; }
 /* Solange die Wahl offen ist, wartet der Bau-Tipp "Als Nächstes" (sonst läge die Wahl darüber) */
@@ -885,14 +892,12 @@ export async function init(game) {
 
   // Morgens: erst der Tagesabschluss, dann die Kartenwahl (einmal pro Tag von selbst)
   let wahlWartet = false;
+  // Jorven 14.11.: Die Wahl klappt nicht mehr von selbst auf (verdeckte zu viel). Morgens hüpft nur das
+  // Schild "Tagesziel wählen" mit blinkendem Punkt (tz-neu); die Karten kommen erst auf Tipp.
   function morgenWahl() {
     wahlWartet = false;
     if (gewaehlt(st()) || !zielState(st()).karten.length) return;
-    const b = document.body.classList;
-    const besetzt = b.contains('card-open') || b.contains('foto') || game.bauen?.offen
-      || document.querySelector('.hm-tipp:not([hidden])') || game.einstieg?.schritt?.();
-    if (besetzt) { zeichne(); jubel(); return; }
-    auf(true);
+    zeichne();
     jubel();
   }
   function nachAbschluss() {

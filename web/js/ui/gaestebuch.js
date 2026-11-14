@@ -4,7 +4,7 @@
 //    Unzufriedene Gäste (unter 4 Sternen) zeigen dazu das Symbol, was ihnen gefehlt hat, durchgestrichen.
 // 2. Gästebuch: die letzten 20 Bewertungen mit Satz und Grund (der Ruf ist der Schnitt der letzten drei Tage),
 //    der Ruf-Verlauf der letzten 30 Tage und die drei häufigsten Gründe für schlechte Noten.
-//    Öffnen: Ruf oben links antippen, Menü "Gästebuch", Hafenmeister-Haus oder Hafenbüro antippen, Taste G.
+//    Öffnen: Ruf oben links antippen, Menü "Gästebuch", Hafenmeister-Haus oder Hafenbüro antippen, Taste N (G ist 8x).
 //
 // Daten und Texte: ui/gaestebuch-daten.js (ohne Browser, tests/gaestebuch.test.mjs).
 // Schnittstelle: game.gaestebuch = { oeffnen(), schliessen(), get offen, eintraege(), topGruende() }
@@ -326,9 +326,21 @@ export function init(game) {
     return `<svg class="hm-gb-kurve" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" shape-rendering="crispEdges" role="img" aria-label="Ruf der letzten ${v.length} Tage">${r}</svg>`;
   }
 
+  // Auszeichnung des Hafens (P19 C5, features/auszeichnung.js): Wimpel, Name, was zur nächsten Stufe fehlt
+  function auszeichnungZeile() {
+    const az = game.auszeichnung;
+    const t = az?.text?.();
+    if (!t) return null;
+    const bild = el('img', { class: 'hm-az-wimpel', alt: '' });
+    bild.src = `data:image/svg+xml,${encodeURIComponent(az.wimpelSvg(az.stand()?.level ?? 0))}`;
+    return el('p', { class: 'hm-gb-klein hm-gb-auszeichnung' }, bild, el('span', {}, t));
+  }
+
   function bauKnopf(key) {
     // Versorgung baut das Bauwerk, ein Angebotswunsch den Service (P19)
-    const ziel = { wc: 'versorgung:wc', dusche: 'versorgung:dusche', essen: 'versorgung:essen', diesel: 'versorgung:diesel', strom: 'versorgung:strom' }[key]
+    // weiter Weg (P19 B9): das Sanitärgebäude (WC Stufe 3) bringt WC und Dusche an eine zweite Stelle
+    const ziel = { wc: 'versorgung:wc', dusche: 'versorgung:dusche', essen: 'versorgung:essen', diesel: 'versorgung:diesel', strom: 'versorgung:strom',
+      'weit:wc': 'versorgung:wc', 'weit:dusche': 'versorgung:wc' }[key]
       ?? (ANGEBOT_TEXTE[key] ? `angebot:${ANGEBOT_TEXTE[key].service}` : null);
     if (!ziel || !game.bauen?.eintraege) return null;
     let e = null;
@@ -361,6 +373,7 @@ export function init(game) {
       el('div', { class: 'hm-gb-verlauf' }),
       el('p', { class: 'hm-gb-klein' },
         v.length > 1 ? `Ruf der letzten ${v.length} Tage. Linie: 4 Sterne, ab da sind Gäste zufrieden.` : 'Hier wächst der Verlauf deines Rufs, Tag für Tag.'),
+      auszeichnungZeile(),
     );
     rufTeil.querySelector('.hm-gb-verlauf').innerHTML = verlaufSvg(v);
 
@@ -433,7 +446,7 @@ export function init(game) {
   window.addEventListener('keydown', (e) => {
     if (e.target?.closest?.('input, textarea, select, [contenteditable]')) return;
     if (offen && e.key === 'Escape') { schliessen(); e.preventDefault(); return; }
-    if (e.code === 'KeyG' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.code === 'KeyN' && !e.ctrlKey && !e.metaKey && !e.altKey) {
       if (offen) schliessen(); else oeffnen();
     }
   });

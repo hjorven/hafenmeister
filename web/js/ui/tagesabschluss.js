@@ -255,11 +255,22 @@ export function init(game) {
           el('div', { class: 'hm-ta-boote' }, ...boote, ruf),
           balken(b),
           best ? el('p', { class: 'hm-ta-best' + (rekord ? ' rekord' : '') }, best) : null,
+          chronik(b),
           tipp ? el('p', { class: 'hm-ta-tipp' }, tipp) : null,
           fuss)),
       el('div', { class: 'hm-ta-uhr', 'aria-hidden': 'true' }, el('i')),
     );
     karte.dataset.tag = String(b.tag);
+  }
+
+  // Eine Zeile aus der Hafenchronik (ui/logbuch.js, P21), antippen öffnet die Chronik
+  function chronik(b) {
+    const satz = game.logbuch?.tagesSatz?.(b.tag);
+    if (!satz) return null;
+    return el('button', {
+      type: 'button', class: 'hm-ta-chronik', title: 'Chronik im Logbuch öffnen',
+      onclick: () => { schliesse(); game.logbuch.oeffnen('chronik'); },
+    }, satz);
   }
 
   // ------------------------------------------------------------ Öffnen und Schließen

@@ -30,7 +30,7 @@ Ein kleines, gemütliches Aufbauspiel in 3D. Du fängst mit einem Badesteg an ei
 - **Cozy:** kein Scheitern, kein Zeitdruck, keine Story, keine Figuren mit Namen. Höchstens ein kurzer Einstieg am Anfang („Der alte Steg gehört jetzt dir“).
 - **3D:** Der ganze Hafen ist eine echte 3D-Szene im Flat-Vector-Stil (flache Farben, weiche Schatten), drehbar, frei zoombar. Die Oberfläche darüber ist im Pixel-Stil (Abschnitt 10). Die Draufsichten in `docs/hafen/` sind nur Bauplan, nicht das Aussehen.
 - **Genug Tiefe, dass es interessant bleibt:** Passregel nach Länge, Breite und Tiefgang, Wünsche der Gäste, Ruf, Ausbauentscheidungen, Ereignisse, Sammelziele.
-- **Genug Inhalt für lange Zeit:** sechs Ausbaustufen, über 20 Schiffsarten, viele Services, dazu (geplant) ein Logbuch zum Sammeln (P21) und eine zweite Hafenregion, die Nordsee, für einen neuen Durchgang (P57).
+- **Genug Inhalt für lange Zeit:** sechs Ausbaustufen, über 20 Schiffsarten, viele Services, dazu ein Logbuch zum Sammeln mit Hafenchronik (P21) und eine zweite Hafenregion, die Nordsee, für einen neuen Durchgang (P57).
 - **Lebendig:** Schiffe laufen sichtbar ein, legen an, werfen Leinen, bergen Segel. Möwen, Wellen, Abendlicht, Fenster, die angehen. Soundeffekte und ruhige Hintergrundmusik.
 - **Überraschend gute Steuerung:** kleine Gesten, die sich gut anfühlen (Abschnitt 8).
 - **Überall spielbar:** PC, Tablet und Handy, hoch und quer, im Browser über GitHub Pages (https://hjorven.github.io/hafenmeister/), installierbar als Web-App.
@@ -201,7 +201,7 @@ Kleine Rückmeldungen: Haptik auf dem Handy (`navigator.vibrate`), wo verfügbar
 ## 9. Inhalt für lange Zeit
 
 - **Dauerlieger, Stammgäste und Tagesziele** (Abschnitt 9a) geben dem Alltag im Hafen Abwechslung.
-- **Logbuch** (geplant, P21): Jede Schiffsart und jedes Modell wird beim ersten Anlegen eingetragen, mit Bild. Bei über 100 Modellen ein langes Sammelziel.
+- **Logbuch** (P21, [logbuch.md](logbuch.md)): Jede Schiffsart und jedes Modell wird beim ersten Anlegen eingetragen, mit Pixelbild aus dem 3D-Modell, fehlende als Schattenriss. Dazu die Hafenchronik: jeder Tag eine Zeile. Bei fast 90 Modellen ein langes Sammelziel.
 - **Zwei Hafenregionen (Entscheidung Jorven, 11.11.2026; Nordsee geplant, P57):** Ostsee und Nordsee. Keine länderspezifischen Regionen. Gebäude und Stimmung sind ein Mix aus deutschen, dänischen und schwedischen Häfen (rote Holzhäuser, Reetdächer, Backstein, Fachwerk), weil sich die Hafenkulturen nicht stark genug unterscheiden, um eigene Regionen zu tragen. Der erste Durchgang spielt an der Ostsee, nach dessen Abschluss wird die Nordsee frei.
 
 | Region | Landschaft | Besonderheit |
