@@ -519,6 +519,21 @@ export const ECONOMY = {
     winter:    { wirkung: { winter: true, arrivalFactor: 0.15, visitorFactor: 0.3, serviceIncomeFactor: 0.5 } },
   },
 
+  // ---------------------------------------------------------------- Winterarbeiten (P20)
+  // Am ersten Wintertag liegen drei Aufträge zur Wahl, jeder wirkt die ganze nächste Saison
+  // (werbung nur im Frühling). kosten je Ausbaustufe 1 bis 6. Logik in web/js/features/winter.js,
+  // Beschreibung in docs/winter.md.
+  winterarbeiten: {
+    // Einen Steg überholen: Gäste an diesem Steg bewerten um bonus Anker besser
+    steg:     { kosten: [60, 220, 650, 1600, 3200, 5200], bonus: 0.3 },
+    // Frühjahrswerbung in Segelvereinen: im Frühling (Saisontag 1 bis bisTag) kommen mehr Boote
+    werbung:  { kosten: [50, 180, 500, 1300, 2600, 4200], faktor: 1.25, bisTag: 8 },
+    // Sanitär winterfest machen: Gäste mit Wunsch Toilette oder Dusche bewerten um bonus Anker besser
+    sanitaer: { kosten: [40, 160, 450, 1100, 2200, 3600], bonus: 0.2, wuensche: ['wc', 'dusche'] },
+    // Hafenbecken ausbaggern: große Boote kommen öfter (Faktor je Klasse), ab Stufe 3
+    baggern:  { abStufe: 3, kosten: [0, 0, 900, 2200, 4200, 6800], faktor: 1.25, klassen: ['L', 'XL'] },
+  },
+
   // ---------------------------------------------------------------- Endlosspiel (P16)
   // Nach dem Abschluss der Region geht das Spiel weiter: jede Saison neue Saisonziele.
   // Logik in web/js/features/aufstieg.js, Beschreibung in docs/aufstieg.md.

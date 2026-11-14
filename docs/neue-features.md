@@ -130,7 +130,7 @@ Mengen richten sich nach den Booten, die der Spieler heute selbst einweisen kann
 
 **Deko-Plätze.** Die Stücke suchen ihren Platz relativ zum Hafenmeisterhaus und meiden alles, was an Land steht (Gebäude mit 3 m Abstand, Dorf, Anlagen, Flaggenmast, Wege). Sie hängen an keinen festen Koordinaten und passen sich jeder Hafenlage an.
 
-**Winter:** keine Tageskarten (Winterarbeiten bringt P20).
+**Winter:** keine Tageskarten; dafür die Winterpause mit Winterarbeiten (`docs/winter.md`).
 
 **Für andere Module:** `game.tagesziele` (`zustand()`, `karten()`, `gewaehlt()`, `woche()`, `waehle(i)`, `oeffnen()`), Ereignisse `ziel:gewaehlt`, `ziel:erreicht` { art, text, belohnung, belohnungText }, `wochenziel:erreicht`, `ziel:seltenerGast`, `ziel:gutschein`, `ziel:deko`. Ton: `auswahl` beim Nehmen, `fertig` beim Tagesziel, `stufe` beim Wochenziel.
 
