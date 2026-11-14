@@ -1031,7 +1031,7 @@ export async function init(game) {
         const titel = `${b.bootsname ? `„${b.bootsname}“, ` : ''}${b.name}, Größe ${b.size}`;
         return knopf(vor ? `${titel} · +${euro(pa.summe)}` : `${titel} · ${euro(pa.jeTag)} je Abend`,
           () => aktion(machDauerplatz(st, api.ctx, platzId, b.id)), 'hm-primaer dauer-bewerber',
-          `Wartet noch ${Math.max(0, b.bisTag - st.day)} Tage auf eine Antwort`);
+          ((n) => n === 1 ? 'Wartet noch einen Tag auf eine Antwort' : n === 0 ? 'Wartet nur noch heute auf eine Antwort' : `Wartet noch ${n} Tage auf eine Antwort`)(Math.max(0, b.bisTag - st.day)));
       });
       teile.push(el('div', { class: 'card-actions dauer-liste' }, ...zeilen));
     }

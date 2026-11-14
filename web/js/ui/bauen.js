@@ -308,6 +308,8 @@ export function init(game) {
     return out;
   }
 
+  // Erstes Bauwerk geschenkt (siehe startGeschenk)
+  const GESCHENK_KEY = 'versorgung:wc';
   function naechsterSchritt() {
     const sim = game.sim;
     if (!sim?.state) return null;
@@ -315,7 +317,7 @@ export function init(game) {
     const spar = sparSchritt(sparziel(), sim.state.money);
     if (spar) return spar;
     const region = sim.regionGoal?.();
-    const r = waehleSchritt({ geld: sim.state.money, eintraege: eintraege(), bedarf: bedarf(), stufe: adv.goal ? adv : null, region });
+    const r = waehleSchritt({ geld: sim.state.money, eintraege: eintraege(), bedarf: bedarf(), stufe: adv.goal ? adv : null, region, geschenk: geschenkOffen() ? GESCHENK_KEY : null });
     return r ?? regionsSchritt(region);
   }
 
@@ -779,7 +781,7 @@ export function init(game) {
       if (e.gesperrt || !e.ort) continue;
       const o = e.ort();
       if (!o) continue;
-      const s = el('button', { type: 'button', class: `bau-schild${e.kosten > geld ? ' teuer' : ''}${e.key === tippZiel ? ' empfohlen' : ''}`, tabindex: '-1',
+      const s = el('button', { type: 'button', class: `bau-schild${e.kosten > geld ? ' teuer' : ''}${e.key === tippZiel ? ' empfohlen' : ''}`, tabindex: '-1', title: `${e.name}, ${euro(e.kosten)}`,
         onclick: (ev) => { ev.stopPropagation(); vorschau(e.key); } },
         el('span', { class: 'bau-schild-name' }, e.name), el('span', { class: 'bau-schild-preis' }, euro(e.kosten)));
       schilder.append(s);
@@ -1018,14 +1020,20 @@ export function init(game) {
   // bekommt das Geld fuer das Toilettenhaeuschen geschenkt (einmal pro Spielstand, auch nach
   // "Einstieg beenden"). Die Vorschau geht gleich auf, der Knopf "Bauen fuer ..." leuchtet.
   // Gekauft wird trotzdem wie immer: Vorschau ansehen, dann bestaetigen.
-  const GESCHENK_KEY = 'versorgung:wc';
   let gefuehrt = null;
+  // Gibt es das Geschenk noch? (Rat "Als Naechstes" rechnet damit, damit er nicht zum Sparen raet)
+  function geschenkOffen() {
+    const s = speicher();
+    const st = game.sim?.state;
+    if (!s || !st || s.geschenk || st.stage !== 1 || (st.facilities?.wc || 0) > 0) return false;
+    const e = eintraege().find((x) => x.key === GESCHENK_KEY);
+    return !!e && !e.gesperrt;
+  }
   function startGeschenk() {
+    if (!geschenkOffen()) return false;
     const s = speicher();
     const st = game.sim.state;
-    if (!s || s.geschenk || st.stage !== 1 || (st.facilities?.wc || 0) > 0) return false;
     const e = eintraege().find((x) => x.key === GESCHENK_KEY);
-    if (!e || e.gesperrt) return false;
     s.geschenk = e.kosten;
     // Im Tagesabschluss unter "Sonstiges" sichtbar, zaehlt aber nicht als verdientes Geld
     // (Aufstieg, bester Tag und Tagesziele rechnen mit stats.dayIncome und totalIncome)
@@ -1435,8 +1443,10 @@ function stil() {
     .bau-sparschild { z-index: 3; }
     .hm-status { position: relative; }
     .bau-sparschild[hidden] { display: none; }
-    /* Zu wenig Platz: nur der Preis, zuletzt ein Punkt mit Plus (Antippen oeffnet die Vorschau) */
-    .bau-schild.klein .bau-schild-name { display: none; }
+    /* Zu wenig Platz: schmal mit gekuerztem Namen (ein Preis allein sagt nicht, was es ist; Feature-Test 14.11.),
+       zuletzt ein Punkt mit Plus (Antippen oeffnet die Vorschau) */
+    .bau-schild.klein { padding: 3px 6px; }
+    .bau-schild.klein .bau-schild-name { max-width: 84px; overflow: hidden; text-overflow: ellipsis; font-size: 11px; }
     .bau-schild.punkt { width: 22px; height: 22px; padding: 0 !important; border-radius: 50%; place-items: center; }
     .bau-schild.punkt > span { display: none; }
     .bau-schild.punkt::before { content: '+'; font-weight: 800; font-size: 15px; line-height: 1; color: #2a7d63; }

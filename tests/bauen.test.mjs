@@ -77,3 +77,15 @@ test('Letzte Stufe: Regionsziel vor neuem Kleinkram, Wuensche weiter zuerst', ()
   const r = waehleSchritt({ geld: 2000, eintraege: [vers('dusche', 900, 2)], bedarf: { ...leer(), offen: { dusche: 3 } }, stufe: null, region });
   assert.equal(r.ziel, 'versorgung:dusche');
 });
+
+test('Geschenktes erstes Bauwerk: kein Rat zum Sparen (Feature-Test 14.11.)', () => {
+  const ohne = waehleSchritt({ geld: 0, eintraege: [vers('wc', 80)], bedarf: leer(), stufe: stufe(['guests']) });
+  assert.match(ohne.text, /Noch 80 € sparen/);
+  const mit = waehleSchritt({ geld: 0, eintraege: [vers('wc', 80)], bedarf: leer(), stufe: stufe(['guests']), geschenk: 'versorgung:wc' });
+  assert.equal(mit.ziel, 'versorgung:wc');
+  assert.equal(mit.leistbar, true);
+  assert.doesNotMatch(mit.text, /sparen/);
+  assert.match(mit.text, /geschenkt/);
+  const wunsch = waehleSchritt({ geld: 28, eintraege: [vers('wc', 80)], bedarf: { ...leer(), offen: { wc: 3 } }, stufe: null, geschenk: 'versorgung:wc' });
+  assert.doesNotMatch(wunsch.text, /sparen/);
+});

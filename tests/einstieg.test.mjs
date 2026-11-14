@@ -103,3 +103,18 @@ test('Hinweise beim ersten Mal: Zuordnung und nur einmal je Spielstand', () => {
   assert.equal(merkeHinweis(e, 'geduld', offen), false, 'schon gesehen');
   assert.equal(merkeHinweis(e, null, offen), false);
 });
+
+test('Nur noch Tagesziele offen: Hinweis kommt am nächsten Morgen, danach nicht mehr (Feature-Test 14.11.)', () => {
+  const e = einstiegState({});
+  naechsterSchritt(e, lage({ tag: 1 }));
+  for (const id of ['willkommen', 'anlegen', 'muenzen', 'tempo', 'bauen']) erledige(e, id);
+  assert.equal(naechsterSchritt(e, lage({ tag: 2 })), 'ziele');
+  assert.equal(e.fertig, false);
+  assert.equal(naechsterSchritt(e, lage({ tag: 3 })), null);
+  assert.equal(e.fertig, true);
+  const f = einstiegState({});
+  naechsterSchritt(f, lage({ tag: 1 }));
+  erledige(f, 'willkommen');
+  assert.equal(naechsterSchritt(f, lage({ tag: 2 })), null, 'mitten im Einstieg endet er weiter nach einem Tag');
+  assert.equal(f.fertig, true);
+});
