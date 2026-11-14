@@ -313,6 +313,7 @@ export async function init(game) {
         : 'Keine Gäste bis zum Frühling. Zeit, Bilanz zu ziehen und die nächste Saison vorzubereiten.' }),
       bilanz, arbeiten, naechste,
       el('div', { class: 'hm-wi-knoepfe' },
+        el('p', { class: 'hm-wi-mehr', 'aria-hidden': 'true', text: 'Weiter unten mehr, nach oben wischen' }),
         el('button', { type: 'button', class: 'hm-knopf hm-primaer hm-px hm-wi-ja', onclick: ueberspringe, text: 'Winter überspringen' }),
         el('button', { type: 'button', class: 'hm-knopf hm-px', onclick: schliessen, text: 'Hafen ansehen' })),
     );
@@ -350,7 +351,18 @@ export async function init(game) {
   // Die Karte endet über Zeit, Kassieren und Bauen (je nachdem, was unter ihr liegt)
   function passeHoeheAn() {
     const h = host.getBoundingClientRect();
-    const k = karte.getBoundingClientRect();
+    // Oben: unter allen Knöpfen der oberen Leiste, die über der Karte stehen (Übersicht, Menü,
+    // Kompass; im flachen Querformat stehen sie rechts oben, wo sonst die Karte liegt)
+    karte.style.top = '';
+    let k = karte.getBoundingClientRect();
+    let oben = 0;
+    for (const e of document.querySelectorAll('button, [role="button"]')) {
+      if (karte.contains(e) || e.offsetParent === null) continue;
+      const r = e.getBoundingClientRect();
+      if (!r.width || r.top > h.top + 140 || r.bottom <= k.top - 2 || r.right <= k.left || r.left >= k.right) continue;
+      if (r.top < k.top + 60) oben = Math.max(oben, r.bottom + 8 - h.top);
+    }
+    if (oben) { karte.style.top = `${Math.round(oben)}px`; k = karte.getBoundingClientRect(); }
     let unten = h.bottom - 8;
     for (const sel of ['#hm-zeit', '#btn-build', '#btn-collect', '#hud-bottom']) {
       const e = document.querySelector(sel);
@@ -360,7 +372,14 @@ export async function init(game) {
     }
     const max = Math.max(160, Math.round(unten - k.top));
     if (karte.style.maxHeight !== `${max}px`) karte.style.maxHeight = `${max}px`;
+    zeigeMehr();
   }
+
+  // Hinweis und Schatten über den Knöpfen, solange unten noch etwas kommt
+  function zeigeMehr() {
+    karte.classList.toggle('scrollt', karte.scrollTop + karte.clientHeight < karte.scrollHeight - 4);
+  }
+  karte.addEventListener('scroll', zeigeMehr, { passive: true });
 
   function takt() {
     // Erster Blick auf diesen Winter (auch nach dem Laden oder wenn die Zeit steht): Karte von selbst

@@ -49,6 +49,13 @@ test('Winterpause: Bilanz, Winterarbeit, Winter überspringen', async ({ game },
   const zeit = await page.locator('#hm-zeit').boundingBox();
   const k = await karte.boundingBox();
   if (zeit && k) expect(k.y + k.height <= zeit.y + 1 || k.x >= zeit.x + zeit.width - 1, 'Winterkarte verdeckt die Zeitsteuerung').toBe(true);
+  // Übersicht und Menü oben bleiben erreichbar (Handy quer: Karte steht rechts unter ihnen)
+  const verdeckt = await page.evaluate(() => {
+    const k = document.querySelector('#hm-winter').getBoundingClientRect();
+    return [...document.querySelectorAll('#btn-overview, #btn-menu')].filter((e) => e.offsetParent !== null).map((e) => e.getBoundingClientRect())
+      .filter((r) => r.width && r.left < k.right && r.right > k.left && r.top < k.bottom && r.bottom > k.top).length;
+  });
+  expect(verdeckt, 'Winterkarte liegt über Übersicht oder Menü').toBe(0);
 
   const ueber = page.locator('#hm-winter .hm-knopf', { hasText: 'Winter überspringen' });
   await ueber.scrollIntoViewIfNeeded();
