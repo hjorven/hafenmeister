@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "d09e3c7"
+  "commit": "20c15f5"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -570,7 +570,7 @@
    "id": "P22",
    "titel": "Erfolge einbauen",
    "inhalt": "plan.md 9",
-   "thread": "neu",
+   "thread": "erledigt (30 Erfolge, Reiter im Logbuch, Dinge im Hafen, docs/erfolge.md)",
    "welle": 2,
    "prs": [],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
@@ -578,7 +578,7 @@
     "I6",
     "I7"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -3244,8 +3244,8 @@
   {
    "code": "I6",
    "text": "Erfolge als Dinge im Hafen (Pokal, Wimpel, Schild)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (Erfolgsmast, Pokaltreppe, Ehrentafel, docs/erfolge.md)",
    "pakete": [
     "P22"
    ],
@@ -3255,8 +3255,8 @@
   {
    "code": "I7",
    "text": "Meilensteine mit Ton und Bild",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (Meldung mit Symbol, Ton \"erfolg\")",
    "pakete": [
     "P22"
    ],
@@ -4318,11 +4318,11 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 12,
+    "erledigt": 13,
     "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
-    "offen": 1,
+    "offen": 0,
     "entfaellt": 0,
     "alle": 15
    }
@@ -4440,20 +4440,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 23,
+  "erledigt": 24,
   "teilweise": 6,
   "arbeit": 3,
   "frage": 0,
-  "offen": 48,
+  "offen": 47,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 138,
+  "erledigt": 140,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 74,
+  "offen": 72,
   "entfaellt": 0,
   "alle": 219
  },
@@ -5061,6 +5061,22 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "P22 Erfolge: 30 Erfolge, Reiter im Logbuch, Wimpel, Pokale und Ehrentafel im Hafen",
+   "pr": 295,
+   "pakete": [
+    "P22"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Offline-Start auch ohne offline-liste.json (Folge zu P61)",
+   "pr": 292,
+   "pakete": [
+    "P61"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "Roadmap-Pflege: P24 Teil 1 (PR 281) eingetragen, Bilder zum Sturm",
    "pr": 286,
    "pakete": [
@@ -5132,25 +5148,6 @@
     "P19",
     "P21",
     "P55"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Arbeitsplan: Stand 11:30, P19/P55/P21/P61/C07 erledigt, neue Reihenfolge",
-   "pr": 283,
-   "pakete": [
-    "P19",
-    "P55",
-    "P21",
-    "P61"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P19 Teil 2: Wege zählen, Auszeichnung des Hafens, \"heute voll\" in der Bootskarte",
-   "pr": 279,
-   "pakete": [
-    "P19"
    ]
   }
  ]
