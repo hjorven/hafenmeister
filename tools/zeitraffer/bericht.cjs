@@ -18,8 +18,10 @@ const ART = {
   land: 'Boot fährt über Land (Strand, Gelände)',
   steg: 'Boot fährt durch Steg oder Kai',
   fest: 'Boote stecken ineinander fest',
-  ueberlapp: 'Zwei liegende Boote überlappen',
+  ueberlapp: 'Boote überlappen (beide liegend, oder kurz in Fahrt ohne festzustecken)',
   haengt: 'Boot hängt (fährt, bewegt sich aber nicht)',
+  pulk: 'Pulk: 12 oder mehr fahrende Boote im Umkreis von 45 m (je Spieltag ein Eintrag)',
+  lange: 'Ein- oder Auslaufen dauert im Hafen länger als 10 Spielminuten',
   sim: 'Spielregeln: Zustand hängt oder Geld falsch',
 };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -105,6 +107,19 @@ for (const R of laeufe) {
   md.push('');
 
   // Wetter und Leistung
+  // Logbuch: angelegte Bootsmodelle (state.logbook)
+  const lb = R.logbuch?.ende;
+  if (lb) {
+    const je = Object.entries(lb.je).map(([g, j]) => `${g} ${j.gesehen}/${j.gesamt}`).join(', ');
+    md.push('### Logbuch (angelegte Bootsmodelle)', '', `${lb.gesehen} von ${lb.gesamt} Modellen haben angelegt (${je}).`, '');
+    const stufen = Object.entries(R.logbuch.jeStufe || {}).map(([st, x]) => `Stufe ${st}: ${x?.gesehen ?? '?'}`).join(', ');
+    if (stufen) md.push(`Stand am Ende jeder Stufe: ${stufen}.`, '');
+    if (lb.fehlt.length) {
+      md.push('| Größe | Art | Modell | ab Stufe | Hinweis |', '|---|---|---|---|---|', ...lb.fehlt.map((f) => `| ${f.g} | ${f.art} | ${f.name} (${f.modell}) | ${f.ab} | ${f.unlock ? 'braucht ' + f.unlock : f.fest ? 'liegt fest' : ''} |`), '');
+      const xxl = lb.fehlt.filter((f) => f.g === 'XXL');
+      if (xxl.length) fehlerliste.push({ geraet: R.geraet, art: 'Logbuch', text: `${xxl.length} XXL-Modelle haben in der ganzen Partie nie angelegt: ${xxl.map((f) => f.name).join(', ')}` });
+    }
+  }
   md.push('### Wetter, Ereignisse und Bildrate', '');
   const jeEreignis = {};
   for (const l of R.leistung) { const k = l.ereignis || 'normal'; (jeEreignis[k] ||= []).push(l.fps); }

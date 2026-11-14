@@ -62,11 +62,14 @@ Ein einfacher Bot über `game.sim` und `game.services`, wie der Spielertyp "gesc
 | Boot über Land | Mindestens 2 von 7 Rumpfpunkten (85 % der Größe) liegen laut `game.landschaft.istWasser` auf Land |
 | Boot durch Steg | Strahl von oben trifft `game.stege.group` an einem Rumpfpunkt (ein Punkt ist beim Festmachen erlaubt) |
 | Boote ineinander fest | Rümpfe überlappen und eines steht seit 30 Spielsekunden still, obwohl es fährt |
-| Liegende Boote überlappen | Zwei festgemachte Boote überlappen |
+| Boote überlappen | Zwei festgemachte Boote überlappen ("liegend"), oder zwei Boote berühren sich kurz in Fahrt, ohne festzustecken ("in Fahrt berührt", mit `+durchlass`, wenn eines gerade durchgelassen wird). Die Übersicht zählt beides getrennt |
 | Boot hängt | Boot ist in Fahrt, bewegt sich aber seit 5 Spielminuten nicht |
+| Pulk | 12 oder mehr fahrende Boote (nicht liegend, nicht an der Boje) im Umkreis von 45 m, auch wenn sich jedes noch langsam bewegt. Je Spieltag ein Eintrag mit der größten Zahl und den Zuständen (zum Beispiel "22 leaving, 4 docking") |
+| Zu lange unterwegs | Ein- oder Auslaufen dauert innerhalb von 100 m um die Stege länger als 10 Spielminuten (lange Wege über die offene See zählen nicht) |
 | Spielregeln | Boot wartet, kommt aber 400 Spielsekunden lang nicht an der Boje an; Box bleibt nach der Abfahrt 400 Spielsekunden belegt; Geld keine Zahl oder negativ |
 | Aufstieg und Geld | Tag jedes Aufstiegs gegen die Erwartung aus `tools/balance.mjs`, fehlgeschlagene Käufe, Geldverlauf |
 | Speichern und Laden | Nach jedem Aufstieg und alle 40 Spieltage: speichern, mit fast angehaltener Zeit (`?testtempo=0.001`) neu laden, Stufe, Tag, Geld, Gäste, Hafenbüro, Bauwerke, Stege, Services, Ereignis und liegende Boote vergleichen. Mehr Geld nach dem Laden ist erlaubt: Boote auf dem Weg in ihre Box liegen sofort fest und zahlen |
+| Logbuch | Welche Bootsmodelle in der ganzen Partie mindestens einmal angelegt haben (`state.logbook`, wie das Logbuch zählt), Stand je Stufe und am Ende, fehlende Modelle mit Größe und Grund. Fehlt ein XXL-Modell, steht das in der Fehlerliste |
 | Wetter | Welche Ereignisse vorkamen (Nebel, Sturm, Regatta, Winter ...) und die Bildrate je Ereignis |
 
 Jeder Fund bekommt beim ersten Mal ein Nahbild mit rotem Kreis (höchstens zwei je Art und Stufe). Die Prüfungen für Land, Steg und Ineinander stammen aus der Messlatte des Threads "Jedes neue Feature einzeln testen" (`/mnt/project-files/feature-tests/messlatte/`); dort gibt es auch Einzelprüfungen je Stegbild und für feste Wege.
