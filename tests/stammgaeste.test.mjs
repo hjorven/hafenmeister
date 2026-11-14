@@ -5,7 +5,7 @@ import * as sim from '../web/js/sim.js';
 import { createState } from '../web/js/state.js';
 import { HAFEN } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
-import { STAMM, haengeEin, stammState, beschreibung, nachtHook } from '../web/js/features/stammgaeste.js';
+import { STAMM, haengeEin, stammState, beschreibung, nachtHook, namenNachtragen } from '../web/js/features/stammgaeste.js';
 import * as dauer from '../web/js/features/dauerlieger.js';
 
 function neu(seed = 7, stufe = 2) {
@@ -114,4 +114,22 @@ test('ab dem 5. Besuch als Dauerlieger behalten', () => {
   // Reist nachts nicht ab
   spiele(state, ctx, 3);
   assert.ok(state.boats[900] || dauer.draussenBis(state, platz.id) != null);
+});
+
+test('Boote ohne Namen (vor dem Einhängen gewürfelt) bekommen Namen nach, ohne den Würfel zu bewegen', () => {
+  const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN });
+  const state = createState({ seed: 3 });
+  state.stage = 2;
+  sim.tick(state, ctx, 0);   // ohne Stammgäste-Hook: keine Namen
+  assert.ok(state.upcoming.length > 0);
+  assert.ok(state.upcoming.every((b) => !b.bootsname));
+  const rng = JSON.stringify(state.rng ?? state.seed);
+  const n = namenNachtragen(state);
+  assert.equal(n, state.upcoming.length);
+  for (const b of state.upcoming) {
+    assert.equal(typeof b.bootsname, 'string');
+    assert.equal(typeof b.heimathafen, 'string');
+  }
+  assert.equal(JSON.stringify(state.rng ?? state.seed), rng);
+  assert.equal(namenNachtragen(state), 0, 'zweimal ändert nichts');
 });

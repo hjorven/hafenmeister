@@ -125,9 +125,33 @@ export function beschreibung(boat) {
   return boat.besuche > 1 ? `${teil} · Stammgast, ${boat.besuche}. Besuch` : teil;
 }
 
+/**
+ * Gäste ohne Namen nachtragen: Boote, die vor dem Einhängen der Hooks gewürfelt wurden (erster Tag
+ * nach dem Laden, Testmodus ?stufe=n) oder aus älteren Spielständen stammen. Fester Zufall aus der
+ * Boots-id, damit der Würfel der Spielregeln unberührt bleibt. Gibt die Zahl der benannten Boote zurück.
+ */
+export function namenNachtragen(state) {
+  let n = 0;
+  const wahl = (list, id, salz) => {
+    let h = 2166136261 ^ salz;
+    for (const c of String(id)) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+    return list[Math.abs(h) % list.length];
+  };
+  for (const b of [...Object.values(state.boats || {}), ...(state.upcoming || [])]) {
+    if (!b || b.stationed || b.bootsname) continue;
+    b.bootsname = wahl(BOOTSNAMEN, b.id, 1);
+    b.heimathafen = wahl(heimathaefen(state.region, b.size), b.id, 2);
+    b.besuche ??= 1;
+    n++;
+  }
+  return n;
+}
+
 export async function init(game) {
   await regelnBereit(game);
   haengeEin(game.sim.addHook);
+  namenNachtragen(game.sim.state);
+  game.on('sim:change', (d) => { if ((d?.reason === 'load' || d?.reason === 'new') && game.sim.state) namenNachtragen(game.sim.state); });
   game.on('sim:stammgastNeu', (e) => game.emit('stammgast:neu', e));
   game.stammgaeste = { liste: () => stammState(game.sim.state).liste, beschreibung, kannBleiben: (b) => kannBleiben(game.sim.state, b) };
 }

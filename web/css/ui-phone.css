@@ -69,6 +69,9 @@
   }
   .hm-neu .hm-zeit-kopf { min-height: 20px; }
   .hm-neu #hm-seite { width: min(280px, 40vw); }
+  /* Menü in zwei Spalten: mit sieben Einträgen war es höher als der Bildschirm (Handy quer) */
+  .hm-neu #hm-menue.hm-tafel-px { grid-template-columns: repeat(2, minmax(190px, 1fr)); }
+  .hm-neu #hm-menue .hm-zeile { min-height: 44px; }
   .hm-neu #card {
     left: auto;
     right: 0;
