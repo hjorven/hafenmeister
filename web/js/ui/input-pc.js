@@ -85,6 +85,8 @@ export function init(game) {
     ['<kbd>Tab</kbd>, Umschalt + <kbd>Tab</kbd>', 'Nächstes, voriges wartendes Boot', () => true],
     ['<kbd>Enter</kbd>', 'Gewähltes Boot einfahren lassen, bei offener Karte deren ersten Knopf', () => true],
     ['<kbd>B</kbd>', 'Bauen', () => visible(byId('btn-build'))],
+    ['<kbd>N</kbd>', 'Gästebuch', () => !!game.gaestebuch],
+    ['<kbd>J</kbd>', 'Logbuch und Chronik', () => !!game.logbuch],
     ['<kbd>Leertaste</kbd>', 'Pause', () => !!game.setPaused],
     ['<kbd>Esc</kbd> oder Rechtsklick', 'Abbrechen', () => true],
     ['Mausrad, <kbd>+</kbd> <kbd>-</kbd>', 'Zoomen zum Mauszeiger', () => true],

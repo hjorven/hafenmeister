@@ -151,7 +151,7 @@ modules.verbund = {
 }
 ```
 
-- **Migration:** `SAVE_VERSION` 2 auf 3 in `web/js/save/storage.js`. `MIGRATIONS[2]` legt `modules.verbund` mit genau einem Standort an (dem bisherigen Hafen, `stufe` = `state.stage`). Test in `tests/speicherplaetze.test.mjs`: jeder Stand der Versionen 1 und 2 lädt und spielt weiter wie vorher.
+- **Migration:** `SAVE_VERSION` 3 auf 4 in `web/js/save/storage.js` (Version 3 ist seit P21 das Logbuch). `MIGRATIONS[3]` legt `modules.verbund` mit genau einem Standort an (dem bisherigen Hafen, `stufe` = `state.stage`). Test in `tests/speicherplaetze.test.mjs`: jeder Stand der Versionen 1 bis 3 lädt und spielt weiter wie vorher.
 - **Inaktive Standorte** speichern keine einzelnen Boote, nur die Kurzform `kurz`: gebaute Projekte, Bauwerke, Services, Dauerlieger, Ruf-Fenster, Belegung je Klasse, Tageszahlen der letzten Tage. Ziel: höchstens 30 KB je Standort, der ganze Verbund unter 250 KB, damit acht Speicherplätze weiter in den Browserspeicher passen ([speichern.md](speichern.md)).
 - **Prüfung beim Laden** wie heute streng (`deserialize`, Audit C03): jeder Standort einzeln, Platz-ids gegen `harbor.js`, Zahlen begrenzt. Standortnamen werden nie per `innerHTML` gezeigt (Audit C05).
 - **Eine Kasse:** `state.money` gehört dem Verbund. Beim Wechsel wandert das Geld mit.

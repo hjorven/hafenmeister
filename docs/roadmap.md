@@ -140,7 +140,7 @@ Note 1 bis 5 aus dem Überblick. "nein" heißt: bleibt, wie es ist.
 | Dauerlieger | 2 | ja | P01 |
 | Tagesziele | 2 | ja | P13 |
 | Abschlussziel Stufe 6 | 2 | ja | P04, P16 |
-| Logbuch | 1 | ja | P21 |
+| Logbuch | 1 | ja | P21 (erledigt) |
 | Nordsee und Gezeiten | 1 | ja | P57 |
 
 P23 (Services) und P24 (Ereignisse) sind die Pakete "Services mit eigener Wirkung" und "Ereignisse zum Vorbereiten", siehe Paketliste.
@@ -160,7 +160,7 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Hafenhorn gedrückt halten (Sammelkassieren) | plan.md 8, Ton fertig | bauen | P26 |
 | Fernglas mit Steckbrief (Doppeltipp) | plan.md 8 | bauen | P26 |
 | Möwen aufscheuchen, Wellenring, Glocke | plan.md 8 | bauen | P26 |
-| Logbuch mit Bild | plan.md 9 | bauen | P21 |
+| Logbuch mit Bild | plan.md 9 | erledigt (docs/logbuch.md) | P21 |
 | Erfolge | plan.md 9 | bauen | P22 |
 | Endlosmodus nach Abschluss | plan.md 9, 12 | gebaut: Saisonziele (PR 156, docs/aufstieg.md) | P16 |
 | Bestenliste, Online mit Supabase | plan.md 12, README | bauen, als letzter Schritt | P58 |
@@ -290,7 +290,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
-| F36 | Hafenchronik: jeder Tag eine Zeile | offen | P21 |
+| F36 | Hafenchronik: jeder Tag eine Zeile | erledigt | P21 |
 | F37 | Gästepost von Stammgästen, hängt im Hafenbüro | offen | P25 |
 | F38 | Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten | offen | P51 |
 
@@ -452,7 +452,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | I2 | Eines aus dreien wählen | erledigt (PR 152) | P13 |
 | I3 | Belohnungen mischen (Geld, Anker, seltener Gast, Rabatt, Deko) | erledigt (PR 152) | P13 |
 | I4 | Wochenziel | erledigt (PR 152) | P13 |
-| I5 | Logbuch als Sammelalbum mit Schattenrissen | offen | P21 |
+| I5 | Logbuch als Sammelalbum mit Schattenrissen | erledigt | P21 |
 | I6 | Erfolge als Dinge im Hafen (Pokal, Wimpel, Schild) | offen | P22 |
 | I7 | Meilensteine mit Ton und Bild | offen | P22 |
 | I8 | Richtiger Abschluss mit Kamerafahrt und Titel | erledigt (PR 156) | P16 |
@@ -664,7 +664,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P18 | Ausbau in Bauabschnitten | Ü18, `bautage` nutzen oder löschen | `ui/bauen.js`, `economy.js`, `sim.js`, Stegdarstellung | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Bauabschnitte, Baustelle über Nacht und Sparziel (PR 232), Nachbesserungen (PR 235) |
 | P19 | Ruf schwerer machen mit Wünschen je Bootsart | Ü17, `feeFactor`, `arrivalWeight`, Kapazität sichtbar | `sim.js`, `data/boats/*.js`, `economy.js` | Teil 1 erledigt (B7, C2, C3, C4, C6, F8, [ruf.md](ruf.md)); Teil 2 offen: C5, Kapazität sichtbar, B9 |
 | P20 | Winter mit Inhalt füllen | Ü19, F14, F15, `docs/ereignisse.md` | `sim.js` (Jahreslauf), neues Feature-Modul, Travellift/Winterlager in `render/services.js` | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, 249, `docs/winter.md`); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing |
-| P21 | Logbuch und Hafenchronik zeigen | Logbuch (Note 1), F36, `sim:logbookNew` | neues Modul `web/js/ui/logbuch.js`, `state.js` | neu |
+| P21 | Logbuch und Hafenchronik zeigen | Logbuch (Note 1), F36, `sim:logbookNew` | neues Modul `web/js/ui/logbuch.js`, `state.js` | erledigt (docs/logbuch.md, SAVE_VERSION 3) |
 | P22 | Erfolge einbauen | plan.md 9 | neues Feature-Modul | neu |
 
 ### Welle 3: Tiefe und Hafenleben (Extras)
@@ -727,7 +727,7 @@ Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen
 | P70 | Stufe 7 Hafenstadt | Yachthafen Ost (Steg E), Promenade, Belegungsplan je Steg; `harbor.js` Stufe 7, Gelände und Seeds geprüft | P67, P68, P69 | neu |
 | P71 | Stufe 8 Fährhafen | Fähranleger, Inselfähre nach Fahrplan | P70, P66 | neu |
 | P72 | Stufe 9 Werfthafen | Werft mit Schiffslift, großes Winterlager | P71, P20 | neu |
-| P73 | Stufe 10 Hafenverbund und Hafenkarten | `modules.verbund`, `SAVE_VERSION` 3 mit Migration, Übernahme alter Häfen, Kurzrechnung mit Abgleichstest, Standortwechsel | P72, P09 | neu |
+| P73 | Stufe 10 Hafenverbund und Hafenkarten | `modules.verbund`, `SAVE_VERSION` 4 mit Migration (3 ist seit P21 das Logbuch), Übernahme alter Häfen, Kurzrechnung mit Abgleichstest, Standortwechsel | P72, P09 | neu |
 | P74 | Stufe 11 Gästeweitergabe und Törngäste | volle Häfen schicken weiter, Törngäste von Hafen zu Hafen | P73, P32 | neu |
 | P75 | Stufe 12 Hafenprofile | Yacht-, Traditions-, Fischerei-, Familienhafen | P73 | neu |
 | P76 | Stufe 13 Regattawoche | Regattawoche über den Verbund | P75, P24, P39 | neu |

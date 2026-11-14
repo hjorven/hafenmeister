@@ -71,7 +71,7 @@ Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tem
 | 4 | **P08-Rest: Actions absichern** (erledigt 14.11., siehe `docs/sicherheit.md`) | Audit C07 und Abschnitt 6 des Audits | - | `.github/workflows/` mit Roadmap-Action und Pages |
 | 5 | **Balancing-Paket: P17 Aufstieg angleichen und Bewertungsformel** (neu) | Prio A: 20 bis 38 Tage Lücke ab Stufe 3 zwischen Zeitraffer und `tools/balance.mjs`; seit P19 Teil 1 (PR 244) brauchen gemütliche Spieler in Stufe 2 50 statt 38 Tage, also auch Stufe 2 prüfen; Bewertung 2 + 3 x Anteil, damit Aufnehmen nie schlechter ist als Abweisen; Rechnung und Zeitraffer müssen danach auf höchstens 5 % übereinstimmen | nach 1 (Stau verfälscht die Messung), 252 und P19 Teil 2 | `economy.js`, `tools/balance.mjs`, `docs/zahlen.md`, Einstieg (J5) |
 | 6 | **P55 Versteckte Regeln sichtbar machen** (PR 269, gemergt bis auf L2) | Welle 2: Geduldsring, Auslastung, Zeiger am Rand; macht das Spiel lesbar, bevor Inhalt dazukommt | nach 261 (Verdeckung) | `ui/vorschau.js`, `boat-view.js`, Meldungs-Ordnung, Platzschilder |
-| 7 | **P21 Logbuch und Hafenchronik** (neu) | Welle 2; `state.logbook` wird gefüllt, aber nie gezeigt (tote Daten) | - | `state.js`, Speichern (`SAVE_VERSION`), Tagesabschluss-Tafel |
+| 7 | **P21 Logbuch und Hafenchronik** (erledigt, docs/logbuch.md) | Welle 2; `state.logbook` wird gefüllt, aber nie gezeigt (tote Daten) | - | `state.js`, Speichern (`SAVE_VERSION`), Tagesabschluss-Tafel |
 | 8 | **P22 Erfolge** (neu) | letztes offenes Welle-2-Paket außer P20-Rest | P21 (Chronik als Anzeigeort) | Aufstieg-Feier, Meldungs-Ordnung |
 | 9 | **P24 Ereignisse zum Vorbereiten** (bestehend: Ereignisse-Thread) | erstes Extra aus Welle 3; der Thread kennt den Code | 2 (PR 91 geklärt), 1 | Wetterflagge/Flaggenmast, Tempo-Drossel, Meldungs-Ordnung |
 | 10 | **P23 Services mit eigener Wirkung** (neu, der alte Services-Thread ist abgebrochen) | Welle 3, macht Stufe 4 bis 6 tiefer | 5 (Zahlen) | `render/services.js`, `data/services.js`, Besuchswege (P63) |
@@ -88,7 +88,7 @@ Danach geht es weiter wie in [Abschnitt 5](#5-alles-weitere-bis-zum-ende) beschr
 - `web/js/sim.js`: kleine, getrennte Änderungen, vorher auf `main` rebasen, neue Regel mit eigenem Test.
 - Meldungs-Ordnung (höchstens eine schwebende Meldung, Tipps nie über Zeit und Bauen): P55, P22, P24 melden sich dort an, statt eigene Ebenen zu bauen.
 - `web/index.html`, `web/js/main.js`: nur eine `MODULES`-Zeile je neuem Modul; P61 ändert die Importmap und stimmt das im PR ab.
-- Speichern: neue Felder (P21, P22) mit `SAVE_VERSION` und Migration; Welle 6 plant Version 3, darum hier nur kleine Schritte.
+- Speichern: neue Felder (P21, P22) mit `SAVE_VERSION` und Migration; P21 hat Version 3 genommen (Logbuch), Welle 6 plant jetzt Version 4.
 - Nach jedem Merge, der Boote oder Gelände berührt: Zeitraffer-Serie und Messlatte erneut.
 
 ---

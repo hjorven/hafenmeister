@@ -175,6 +175,25 @@
 
 .hm-ta-best { margin: 8px 0 0; color: var(--hm-tinte-2, #5a6a7c); font-size: 13.5px; }
 .hm-ta-best.rekord { color: #8a6412; font-weight: 700; }
+/* Zeile aus der Hafenchronik (ui/logbuch.js): antippen öffnet die Chronik */
+.hm-ta-chronik {
+  display: block;
+  width: 100%;
+  margin: 6px 0 0;
+  padding: 4px 6px;
+  border: 0;
+  background: #f7e3a6;
+  color: var(--hm-tinte, #24364a);
+  font: inherit;
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.hm-ta-chronik:hover { box-shadow: inset 0 0 0 2px var(--hm-tinte, #24364a); }
 .hm-ta-tipp {
   margin: 8px 0 0;
   padding: 6px 8px;

@@ -649,7 +649,7 @@ function moor(state, ctx, boat, berthId, events, hand = false) {
   const key = boat.modelId ?? boat.typeId;
   if (!seen.includes(key)) {
     seen.push(key);
-    events.push({ type: 'logbookNew', typeId: boat.typeId, modelId: boat.modelId });
+    events.push({ type: 'logbookNew', typeId: boat.typeId, modelId: boat.modelId, boatId: boat.id });
   }
   // Wie im echten Hafen: Das Liegegeld für die kommende Nacht wird gleich nach dem Anlegen fällig.
   if (!boat.stationed) chargeFee(state, ctx, boat, modifiers(state, ctx), events);
@@ -1655,9 +1655,10 @@ export function tick(state, ctx, dt) {
 
 /** Spult bis zum nächsten Morgen vor (für Simulationen und Balancing). */
 export function runDay(state, ctx) {
-  if (state.scheduledDay !== state.day) tick(state, ctx, 0);
+  // Die Ereignisse des Tagesbeginns (fest liegende Boote, Logbuch) gehören dazu
+  const start = state.scheduledDay !== state.day ? tick(state, ctx, 0) : [];
   const left = ctx.rules.dayLength + ctx.rules.eveningLength - state.clock;
-  return tick(state, ctx, left);
+  return [...start, ...tick(state, ctx, left)];
 }
 
 // ---------------------------------------------------------------------------
