@@ -333,10 +333,13 @@ class BoatAnimManager {
       for (const f of [1.5, 1, 0.6]) {
         const d = L * f + 2;
         let ok = true;
-        for (let k = 1; k <= 6 && ok; k++) {
-          const x = o.x - dx * d * k / 6, z = o.z - dz * d * k / 6;
-          if (this.frei && !this.frei(x, z, r, t)) ok = false;
-          else if (o.hitsAt(x, z, o.heading)) ok = false;
+        // Rumpfmitte bis zum Ziel auf Boote pruefen, das Wasser bis dorthin, wo das Heck am Ende liegt
+        // (eine halbe Laenge hinter der Mitte), damit das Heck nicht auf Ufer oder Steg setzt
+        const n = Math.ceil((d + L / 2) / 1.5);
+        for (let k = 1; k <= n && ok; k++) {
+          const s = Math.min(d, ((d + L / 2) * k) / n), w = ((d + L / 2) * k) / n;
+          if (this.frei && !this.frei(o.x - dx * w, o.z - dz * w, r, t)) ok = false;
+          else if (o.hitsAt(o.x - dx * s, o.z - dz * s, o.heading)) ok = false;
         }
         if (ok) { weit = d; break; }
       }

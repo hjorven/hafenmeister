@@ -169,7 +169,10 @@ export function init(game) {
     for (let n = 0, j = k; n < 240; n++, j++) {
       if (anker.has(j)) continue;
       const q = ankerSlot(j, d);
-      if (befahrbar(karteB, mitte.x + q.x, mitte.z + q.z, Math.max(massA.r, d * 0.4), massA.t)) { k = j; p = q; break; }
+      // ausserhalb der Karte gilt befahrbar() als offenes Wasser: dort zusaetzlich die Wassertiefe des
+      // Gelaendes pruefen (am Rand der Welt ist sie 0, das Boot laege sonst an Land)
+      const ax = mitte.x + q.x, az = mitte.z + q.z, tiefe = game.landscape?.tiefeBei?.(ax, az) ?? 99;
+      if (tiefe >= massA.t + 0.3 && befahrbar(karteB, ax, az, Math.max(massA.r, d * 0.4), massA.t)) { k = j; p = q; break; }
     }
     return reserviere({ id: `anker-${k}`, x: mitte.x + p.x, z: mitte.z + p.z, heading: b.heading, kind: 'buoy', abstand: d, kreis: gross ? 30 : 10 });
   }
