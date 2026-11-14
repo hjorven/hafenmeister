@@ -22,7 +22,7 @@ async function ueberdeckt(page, sel) {
 test('Tagesabschluss: Zettel ohne "null", Karte verdeckt keine Bedienung', async ({ game }, testInfo) => {
   test.setTimeout(90_000);
   const { page } = game;
-  await page.waitForFunction(() => !!window.hafenmeister.sim?.state && !!window.hafenmeister.tagesabschluss, null, { timeout: 15_000 });
+  await page.waitForFunction(() => !!window.hafenmeister.sim?.state && !!window.hafenmeister.tagesabschluss, null, { timeout: 30_000, polling: 100 });
   // Ohne automatische Karte: dann kommt auf jedem Gerät der Zettel
   await page.evaluate(() => {
     try { localStorage.setItem('hm-tagesabschluss-auto', 'aus'); } catch {}
@@ -30,23 +30,51 @@ test('Tagesabschluss: Zettel ohne "null", Karte verdeckt keine Bedienung', async
     g.sim.newGame(42);
     g.einstieg?.beenden?.();
   });
-  for (let i = 0; i < 60; i++) {
-    const tag = await page.evaluate(() => {
+  // Der Zettel steht nur 5 s Echtzeit, seine Uhr zählt aber höchstens 0,25 s je Bild, also mindestens
+  // 20 Bilder. Unter Last (viele Browser mit Software-Grafik) vergingen zwischen zwei Testbefehlen
+  // mehr als 5 s und der Zettel war schon weg. Daher prüft der Browser ihn selbst, im selben Aufruf
+  // in dem er erscheint, und höchstens 12 Bilder später: das liegt sicher in seiner Standzeit.
+  let befund = null;
+  for (let i = 0; i < 60 && !befund; i++) {
+    befund = await page.evaluate(([liste]) => {
       const g = window.hafenmeister;
       g.einstieg?.beenden?.();
       g.sim.fastForward(5);
-      return g.sim.state.day;
-    });
-    if (tag > 1) break;
+      // Der Zettel kommt schon zu Beginn des Abends ('sim:dayEnd'), nicht erst mit dem neuen Tag
+      const z = document.querySelector('#hm-ta-zettel');
+      if (z.hidden && g.sim.state.day <= 1) return null;
+      const decken = () => {
+        const a = z.getBoundingClientRect();
+        const hits = [];
+        for (const s of liste) for (const x of document.querySelectorAll(s)) {
+          if (x.offsetParent === null) continue;
+          const r = x.getBoundingClientRect();
+          if (!r.width || !r.height) continue;
+          if (Math.min(a.right, r.right) - Math.max(a.left, r.left) > 1 && Math.min(a.bottom, r.bottom) - Math.max(a.top, r.top) > 1) hits.push(`${s} ${[r.left, r.top, r.right, r.bottom].map(Math.round).join(',')}`);
+        }
+        return hits;
+      };
+      const sichtbar = () => !z.hidden && getComputedStyle(z).display !== 'none' && z.getBoundingClientRect().width > 0;
+      // Schilder erscheinen teils ein Bild später; der Zettel misst dann neu
+      return new Promise((fertig) => {
+        let n = 0;
+        const bild = () => {
+          n++;
+          const hits = sichtbar() ? decken() : null;
+          if ((hits && !hits.length) || n >= 12) fertig({ sichtbar: sichtbar(), text: z.innerText, hits, bilder: n });
+          else requestAnimationFrame(bild);
+        };
+        requestAnimationFrame(bild);
+      });
+    }, [BEDIENUNG]);
   }
+  expect(befund, 'kein Tagesende nach 60 x 5 Spielsekunden').not.toBeNull();
+  expect(befund.sichtbar, `Zettel nicht sichtbar (${befund.bilder} Bilder nach dem Tagesende)`).toBe(true);
+  expect(befund.text).not.toContain('null');
+  expect(befund.text).not.toContain('undefined');
+  expect(befund.text).toMatch(/\+ [\d.]+ €/);
+  expect(befund.hits, 'Zettel verdeckt').toEqual([]);
   const zettel = page.locator('#hm-ta-zettel');
-  await expect(zettel).toBeVisible();
-  const text = await zettel.innerText();
-  expect(text).not.toContain('null');
-  expect(text).not.toContain('undefined');
-  expect(text).toMatch(/\+ [\d.]+ €/);
-  // Schilder erscheinen teils ein Bild später; Zettel und Karte messen dann neu
-  await expect.poll(() => ueberdeckt(page, '#hm-ta-zettel'), { message: 'Zettel verdeckt', timeout: 3000 }).toEqual([]);
 
   // Der Zettel bleibt nur 5 s (Echtzeit). Unter Last kann er vor dem Antippen schon weg sein;
   // dann öffnet der Test die Karte über die Schnittstelle, geprüft wird sie trotzdem.
@@ -61,7 +89,7 @@ test('Tagesabschluss: Zettel ohne "null", Karte verdeckt keine Bedienung', async
   // Schalter "Abends zeigen" wird nicht abgeschnitten (iPhone quer: Fuß nur etwa 200 px breit)
   const schalter = karte.locator('.hm-ta-auto span');
   expect(await schalter.evaluate((e) => e.scrollWidth - e.clientWidth)).toBeLessThanOrEqual(0);
-  await expect.poll(() => ueberdeckt(page, '#hm-tagesabschluss'), { message: 'Karte verdeckt', timeout: 3000 }).toEqual([]);
+  await expect.poll(() => ueberdeckt(page, '#hm-tagesabschluss'), { message: 'Karte verdeckt', timeout: 10_000 }).toEqual([]);
   const weiter = karte.locator('.hm-ta-weiter');
   await expect(weiter).toBeInViewport({ ratio: 1 });
   if (isTouchProject(testInfo)) await weiter.tap(); else await weiter.click();
