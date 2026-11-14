@@ -189,6 +189,7 @@ export function init(game) {
         if (top.length > 3) namen.push(`${top.length - 3} weitere`);
         klein = namen.join(', ');
       }
+      if (q === 'sonstiges' && d?.startgeschenk) klein = 'Geschenk fürs erste Bauwerk';
       if (q === 'tagesziele' && b.ziele?.gesamt) zusatz = `${b.ziele.erledigt} von ${b.ziele.gesamt}`;
       einnahmen.append(zeile(QUELLE_NAME[q] ?? q, euro(b.einnahmen[q]), { klein, zusatz }));
     }
@@ -201,7 +202,7 @@ export function init(game) {
       ? el('div', { class: 'hm-ta-block hm-ta-aus' },
         ...Object.entries(b.ausgaben).filter(([, v]) => v > 0)
           .map(([k, v]) => zeile(AUSGABE_NAME[k] ?? k, `− ${euro(v)}`, { klasse: 'minus' })),
-        zeile('Kasse heute', `${b.summe - b.ausgabenSumme >= 0 ? '+' : '−'} ${euro(Math.abs(b.summe - b.ausgabenSumme))}`, { klasse: 'saldo' }))
+        zeile('Kasse heute', `${b.summe + (b.geschenkt || 0) - b.ausgabenSumme >= 0 ? '+' : '−'} ${euro(Math.abs(b.summe + (b.geschenkt || 0) - b.ausgabenSumme))}`, { klasse: 'saldo' }))
       : null;
 
     // Boote und Ruf

@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "9fca715"
+  "commit": "14a7d7d"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -96,11 +96,12 @@
    "id": "P03",
    "titel": "Einstieg an neue Oberfläche anpassen",
    "inhalt": "Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), docs/einstieg.md",
-   "thread": "bestehend: \"Einstieg für neue Spieler bauen\"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); offen: J4 mit P17, J5 nach P14",
+   "thread": "bestehend: \"Einstieg für neue Spieler bauen\"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); J4 mit P17 erledigt (PR 237); offen: J5 nach P14",
    "welle": 1,
    "prs": [
     112,
-    225
+    225,
+    237
    ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
    "punkte": [
@@ -433,7 +434,9 @@
    "inhalt": "Ü15, Ü16, Startwerte dokumentieren",
    "thread": "bestehend: \"Balancing für 94 Liegeplätze ausarbeiten\" (nach P06)",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    237
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "Ü15",
@@ -443,18 +446,19 @@
     "D3",
     "J4"
    ],
-   "status": "offen",
+   "status": "teilweise",
    "bilder": []
   },
   {
    "id": "P18",
    "titel": "Ausbau in Bauabschnitten",
    "inhalt": "Ü18, bautage nutzen oder löschen",
-   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Bauabschnitte, Baustelle über Nacht und Sparziel (PR 232)",
+   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Bauabschnitte, Baustelle über Nacht und Sparziel (PR 232), Nachbesserungen (PR 235)",
    "welle": 2,
    "prs": [
     143,
-    232
+    232,
+    235
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -1233,7 +1237,8 @@
    ],
    "status": "arbeit",
    "bilder": [
-    23
+    23,
+    32
    ]
   },
   {
@@ -1605,12 +1610,14 @@
   {
    "code": "Ü15",
    "text": "Weicher Start: 100 € Startgeld oder geschenktes WC",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 237): geschenktes Toilettenhäuschen beim ersten Bauen",
    "pakete": [
     "P17"
    ],
-   "prs": [],
+   "prs": [
+    237
+   ],
    "abschnitt": "Balancing (Ü15 bis Ü20)"
   },
   {
@@ -3265,13 +3272,15 @@
   {
    "code": "J4",
    "text": "Erstes Bauen führen, Geld fürs WC geschenkt (= Ü15)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 237)",
    "pakete": [
     "P17",
     "P03"
    ],
-   "prs": [],
+   "prs": [
+    237
+   ],
    "abschnitt": "J Einstieg und Hilfe"
   },
   {
@@ -4230,10 +4239,10 @@
    ],
    "zaehler": {
     "erledigt": 8,
-    "teilweise": 2,
+    "teilweise": 3,
     "arbeit": 0,
     "frage": 0,
-    "offen": 5,
+    "offen": 4,
     "entfaellt": 0,
     "alle": 15
    }
@@ -4352,19 +4361,19 @@
  ],
  "gesamt": {
   "erledigt": 17,
-  "teilweise": 5,
+  "teilweise": 6,
   "arbeit": 4,
   "frage": 0,
-  "offen": 54,
+  "offen": 53,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 105,
+  "erledigt": 107,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 104,
+  "offen": 102,
   "entfaellt": 0,
   "alle": 217
  },
@@ -4752,9 +4761,22 @@
    "datum": "2026-11-14",
    "quelle": "bauen/p18-handy-baustelle.png",
    "nr": 31
+  },
+  {
+   "datei": "p66-pr228-pc-pulk-einfahrt.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Boote sammeln sich als Pulk an der Einfahrt",
+   "pr": 228,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr228/pulk-pc-g8-4242.png",
+   "nr": 32
   }
  ],
  "neueBilder": [
+  32,
   31,
   30,
   29,
@@ -4762,10 +4784,38 @@
   27,
   26,
   25,
-  24,
-  23
+  24
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Zeitraffer: robuster auf großem Gelände, Erwartung Stand PR 181",
+   "pr": 221,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 154, 228, 229, 231, 232 eingetragen, Bilder für P14 und P18",
+   "pr": 236,
+   "pakete": [
+    "P14",
+    "P18"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich",
+   "pr": 234,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Bauen: Nachbesserungen zu PR 232 (Ausbau-Fähnchen, Rückgängig am ersten Kauf, Regionsziel)",
+   "pr": 235,
+   "pakete": [
+    "P18"
+   ]
+  },
   {
    "datum": "2026-11-14",
    "titel": "Boote: Abendstau, Pulk am Eingang, Ablegetakt und Seebrücke im Fahrwasser",
@@ -4828,34 +4878,6 @@
    "pakete": [
     "P11"
    ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Einstieg: Tipps neben der linken Spalte und nacheinander",
-   "pr": 225,
-   "pakete": [
-    "P03"
-   ]
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "See im Norden je Küstentyp: kleinere Pflicht-See, Seeweg hinaus, Kartenrand ohne Kanten",
-   "pr": 224,
-   "pakete": [
-    "P62"
-   ]
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Roadmap: Vorschaubilder je Paket, zuletzt gemergte PRs, Bildergalerie in der README",
-   "pr": 223,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Dauerlieger-Hinweis: Morgen-Zettel des Tagesabschlusses freilassen",
-   "pr": 219,
-   "pakete": []
   }
  ]
 }

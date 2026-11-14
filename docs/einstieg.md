@@ -10,7 +10,7 @@ Kein Tutorial mit Story, sondern Hinweis-Kreise: Ein leuchtender Kreis zeigt auf
 | 2 | Ein Boot wartet | das wartende Boot | ein Boot angelegt hat |
 | 3 | Liegegeld beim Anlegen | die Münze am Boot (gleich nach dem Anlegen) | eine Münze eingestrichen ist (Antippen oder Strich; den Knopf „Kassieren“ gibt es erst mit dem Hafenbüro). Der Text sagt auch: Was liegen bleibt, holt abends der Hafenmeister, aber nur einen Teil (vier Fünftel; die Zahl kommt aus den Regeln, `roundShare` oder `uncollectedShare`). |
 | 4 | Der Tag läuft | Vorspul-Knopf 3x der Zeitsteuerung unten links (Text nennt Pause, 1x, 3x, 8x, am PC Taste F) | vorgespult oder „Weiter“ |
-| 5 | Hafen ausbauen | Knopf „Bauen“ | „Bauen“ gedrückt oder „Weiter“ |
+| 5 | Hafen ausbauen (das erste Bauwerk ist geschenkt) | Knopf „Bauen“ | „Bauen“ gedrückt oder „Weiter“; „Bauen“ öffnet gleich die Vorschau des geschenkten Toilettenhäuschens (`docs/bauen.md`, Erstes Bauwerk geschenkt). Ist das Geschenk schon eingelöst, nennt der Text es nicht. |
 | 6 | Tagesziele | Knopf „Tagesziele“ | „Los geht’s“ |
 
 - Ein Boot, das in den Regeln schon wartet, in 3D aber noch von draußen anfährt, zählt erst, wenn es im Bild liegt.

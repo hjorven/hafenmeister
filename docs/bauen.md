@@ -23,6 +23,15 @@ Der Stand liegt im Spielstand unter `modules.bauen.ausbau` (`{ stufe, fertig, im
 
 Vor dem Ausbau sagt die Vorschau, was mit Booten auf Plätzen passiert, die beim Umbau wegfallen (`game.sim.stageUpPreview()`): Gäste reisen ab und zahlen noch, feste Boote ziehen um.
 
+## Erstes Bauwerk geschenkt
+
+Weicher Start (Roadmap Ü15, J4): Öffnet man in Stufe 1 ohne Toilette das erste Mal „Bauen“, legt das Spiel den Preis des Toilettenhäuschens (80 €, aus `economy.js`) als Geschenk in die Kasse und öffnet gleich dessen Vorschau. Ein grüner Kasten sagt, dass das Geld geschenkt ist, der Knopf „Bauen für 80 €“ leuchtet. Gekauft wird wie immer erst mit dem Knopf; „Zurück“ führt zur Liste, das Geschenk bleibt in der Kasse.
+
+- Einmal pro Spielstand (`state.modules.bauen.geschenk` = Betrag), auch wenn der Einstieg beendet wurde. Kein Geschenk, wenn schon eine Toilette steht oder der Hafen über Stufe 1 ist.
+- Im Tagesabschluss steht es unter „Sonstiges“ mit „Geschenk fürs erste Bauwerk“. Es zählt nicht als verdientes Geld (`stats.dayIncome`, `stats.totalIncome`), also nicht für Aufstieg, besten Tag oder Tagesziele.
+- Der Einstieg (Schritt 5) sagt „Das erste Bauwerk ist geschenkt“, solange das Geschenk noch aussteht.
+- Ereignis `bauen:geschenk` { key, betrag }.
+
 ## Sparziel
 
 In der Vorschau von allem, was gerade zu teuer ist, steht **Als Sparziel merken**. Dann:

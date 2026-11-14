@@ -228,6 +228,9 @@ export function init(game) {
       titel: 'Ausbau',   // "Stufe 2" in Stufe 1 las sich wie die aktuelle Stufe
       kopf: `Nächster Ausbau: ${g.name ?? 'Hafen erweitern'}${abschnitte ? `, Abschnitt ${nr} von ${ab.n}` : ''}`,
       zeilen, fertig: bereit,
+      // Begonnener Ausbau: das Faehnchen zaehlt Abschnitte ("1/2"), nicht erfuellte Zeilen (las sich wie "nichts gebaut")
+      zahl: begonnen && !bereit ? `${ab.fertig}/${ab.n}` : undefined,
+      zahlText: begonnen && !bereit ? `${ab.fertig} von ${ab.n} Bauabschnitten fertig` : undefined,
       aktion: game.bauen?.oeffnen ? { text: bereit ? 'Jetzt ausbauen' : 'Im Baumenü ansehen', tun: () => game.bauen.oeffnen('hafen') } : null,
     };
   }
@@ -247,7 +250,7 @@ export function init(game) {
       el('span', { class: 'hm-chip-text' }, d.titel),
       el('span', { class: 'hm-chip-zahl' }, d.zahl ?? (d.fertig ? 'bereit' : `${erfuellt}/${d.zeilen.length}`)),
     );
-    zielKnopf.setAttribute('aria-label', `${d.kopf}. ${erfuellt} von ${d.zeilen.length} erfüllt.`);
+    zielKnopf.setAttribute('aria-label', `${d.kopf}. ${d.zahlText ?? `${erfuellt} von ${d.zeilen.length} erfüllt`}.`);
     if (zielPanel.hidden) return;
     zielPanel.replaceChildren(
       el('p', { class: 'hm-klapp-kopf' }, d.kopf),

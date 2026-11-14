@@ -60,6 +60,8 @@ export function init(game) {
     if (!st) return null;
     st.modules ||= {};
     st.modules.bauen ||= { heute: leer(), gestern: leer() };
+    st.modules.bauen.heute ||= leer();
+    st.modules.bauen.gestern ||= leer();
     return st.modules.bauen;
   };
   function bedarf() {
@@ -978,6 +980,8 @@ export function init(game) {
       if (rig?.bounds && suedGrenze == null) { suedGrenze = rig.bounds.maxZ; rig.bounds.maxZ += 140; }
       game.audio?.sfx?.('auswahl');
       game.emit('bauen:offen');
+      // Erstes Bauwerk (Roadmap J4, Ü15): Das Toilettenhaeuschen ist geschenkt, die Vorschau steht gleich offen
+      if (startGeschenk()) return;
       // Erst wenn die Karte eingefahren ist (Handy: Bottom Sheet mit Uebergang), stimmt ihr Rahmen
       setTimeout(() => { if (offen && !aktiv) uebersicht(); }, 380);
     }
@@ -989,8 +993,36 @@ export function init(game) {
     zeichne();
   }
 
+  // ------------------------------------------------------------------ Erstes Bauwerk geschenkt
+  // Weicher Start (Roadmap Ü15, J4): Wer in Stufe 1 noch keine Toilette hat und das erste Mal baut,
+  // bekommt das Geld fuer das Toilettenhaeuschen geschenkt (einmal pro Spielstand, auch nach
+  // "Einstieg beenden"). Die Vorschau geht gleich auf, der Knopf "Bauen fuer ..." leuchtet.
+  // Gekauft wird trotzdem wie immer: Vorschau ansehen, dann bestaetigen.
+  const GESCHENK_KEY = 'versorgung:wc';
+  let gefuehrt = null;
+  function startGeschenk() {
+    const s = speicher();
+    const st = game.sim.state;
+    if (!s || s.geschenk || st.stage !== 1 || (st.facilities?.wc || 0) > 0) return false;
+    const e = eintraege().find((x) => x.key === GESCHENK_KEY);
+    if (!e || e.gesperrt) return false;
+    s.geschenk = e.kosten;
+    // Im Tagesabschluss unter "Sonstiges" sichtbar, zaehlt aber nicht als verdientes Geld
+    // (Aufstieg, bester Tag und Tagesziele rechnen mit stats.dayIncome und totalIncome)
+    game.sim.addIncome(e.kosten, 'sonstiges', 'startgeschenk');
+    if (st.stats) {
+      st.stats.dayIncome = Math.max(0, (st.stats.dayIncome || 0) - e.kosten);
+      st.stats.totalIncome = Math.max(0, (st.stats.totalIncome || 0) - e.kosten);
+    }
+    gefuehrt = GESCHENK_KEY;
+    game.emit('bauen:geschenk', { key: GESCHENK_KEY, betrag: e.kosten });
+    vorschau(GESCHENK_KEY);
+    return true;
+  }
+
   function schliessen() {
     if (!offen) return;
+    gefuehrt = null;
     offen = false;
     aktiv = null;
     fertig = null;
@@ -1045,6 +1077,7 @@ export function init(game) {
       return;
     }
     entferneGeist();
+    gefuehrt = null;
     // Zehn Sekunden lang zuruecknehmbar (Roadmap P18, Bed P7); nicht der Stufenausbau in einem Stueck
     rueck = snap && (e.key !== 'hafen:stufe' || r.abschnitt) ? { ...snap, bis: performance.now() + RUECK_MS, name: e.name, kosten: vorher - game.sim.state.money } : null;
     if (speicher()?.sparziel === key) { speicher().sparziel = null; zeigeSparziel(); }
@@ -1171,9 +1204,9 @@ export function init(game) {
     const b = bedarf();
     let bedarfText = null;
     if (e.art === 'steg' && (b.weg || b.plaetze)) {
-      bedarfText = b.weg ? `Zuletzt sind ${b.weg} Boote weitergefahren, ohne anzulegen.` : `Abends waren ${b.belegt} von ${b.plaetze} Gastplätzen belegt.`;
+      bedarfText = b.weg ? (b.weg === 1 ? 'Zuletzt ist 1 Boot weitergefahren, ohne anzulegen.' : `Zuletzt sind ${b.weg} Boote weitergefahren, ohne anzulegen.`) : `Abends waren ${b.belegt} von ${b.plaetze} Gastplätzen belegt.`;
     } else if (e.wunsch && b.offen[e.wunsch]) {
-      bedarfText = `Zuletzt wollten ${b.offen[e.wunsch]} Gäste ${WUNSCH[e.wunsch]} und bekamen es nicht.`;
+      bedarfText = b.offen[e.wunsch] === 1 ? `Zuletzt wollte 1 Gast ${WUNSCH[e.wunsch]} und bekam es nicht.` : `Zuletzt wollten ${b.offen[e.wunsch]} Gäste ${WUNSCH[e.wunsch]} und bekamen es nicht.`;
     } else if (e.wunsch && e.art === 'versorgung' && b.abend) {
       bedarfText = 'Zuletzt hat das hier niemandem gefehlt.';
     }
@@ -1184,11 +1217,15 @@ export function init(game) {
       ? el('button', { type: 'button', class: 'hud-btn bau-ja', disabled: true }, e.gesperrt[0].toUpperCase() + e.gesperrt.slice(1))
       : teuer
         ? el('button', { type: 'button', class: 'hud-btn bau-ja', disabled: true }, `Noch ${euro(e.kosten - geld)} sparen`)
-        : el('button', { type: 'button', class: 'hud-btn bau-ja', onclick: () => kaufen(e.key) }, `Bauen für ${euro(e.kosten)}`);
+        : el('button', { type: 'button', class: `hud-btn bau-ja${gefuehrt === e.key ? ' bau-leuchtet' : ''}`, onclick: () => kaufen(e.key) }, `Bauen für ${euro(e.kosten)}`);
+    const geschenkText = gefuehrt === e.key
+      ? `Dein erstes Bauwerk: Das Geld dafür (${euro(speicher()?.geschenk || e.kosten)}) ist geschenkt und liegt schon in der Kasse. Bestätige mit „Bauen für ${euro(e.kosten)}“.`
+      : null;
     fuelle(
       el('div', { class: 'bau-kopf' },
         el('h2', {}, e.name),
         el('span', { class: 'bau-kasse' }, `Kasse ${euro(geld)}`)),
+      geschenkText ? el('p', { class: 'bau-geschenk', role: 'status' }, geschenkText) : null,
       el('ul', { class: 'bau-nutzen' }, e.nutzen.map((t) => el('li', {}, t))),
       e.fortschritt ? el('div', { class: 'bau-fortschritt' }, e.fortschritt.map((f) =>
         el('div', { class: 'bau-balken-zeile' },
@@ -1337,6 +1374,10 @@ function stil() {
       border-radius: 6px; padding: 1px 6px; }
     .bau-leer { margin: 6px 0; opacity: 0.7; font-size: 0.9rem; }
     .bau-nutzen { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 0.92rem; line-height: 1.35; }
+    .bau-geschenk { margin: 0; padding: 8px 10px; background: #e3f3df; color: #24442a; border: 2px solid #5c9a52; font-size: 0.9rem; line-height: 1.35; }
+    #card .bau-ja.bau-leuchtet { animation: bau-leuchten 1.4s ease-in-out infinite; }
+    @keyframes bau-leuchten { 0%, 100% { box-shadow: 0 0 0 2px rgba(242,193,78,.9), 0 0 10px 2px rgba(242,193,78,.5); } 50% { box-shadow: 0 0 0 4px rgba(242,193,78,.6), 0 0 18px 6px rgba(242,193,78,.35); } }
+    @media (prefers-reduced-motion: reduce) { #card .bau-ja.bau-leuchtet { animation: none; box-shadow: 0 0 0 3px rgba(242,193,78,.9); } }
     .bau-bedarf { margin: 0; padding: 8px 10px; border-radius: 10px; background: #fff4dc; font-size: 0.9rem; line-height: 1.35; }
     .bau-preis { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
     .bau-fortschritt { display: grid; gap: 6px; font-size: 0.86rem; }
