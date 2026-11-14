@@ -85,7 +85,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Ü16 | Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken | offen | P17 |
 | Ü17 | Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus `data/boats`, spürbare Kapazität | offen | P19 |
 | Ü18 | Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend | erledigt (PR 232) | P18 |
-| Ü19 | Winter nutzen: Zeitraffer vor Stufe 4 oder Winterarbeiten (F14) | offen | P20 |
+| Ü19 | Winter nutzen: Zeitraffer vor Stufe 4 oder Winterarbeiten (F14) | erledigt (PR 245): Winterarbeiten und „Winter überspringen“ | P20 |
 | Ü20 | Dauerlieger als Entscheidung: Spieler legt fest, welche Boxen Dauerplätze sind (höchstens ein Viertel der Gastboxen), Saisonpacht im Voraus, sichere Einnahme bei Sturm | erledigt (PR 149) | P01 |
 
 ## 5. Rückmeldung (Ü21 bis Ü23)
@@ -241,8 +241,8 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F11 | Havarist wird eingeschleppt, braucht sofort einen Platz, Ruf und neuer Stammgast | offen | P37 |
 | F12 | Eigenes Hafenfest einmal pro Saison ansetzen | offen | P38 |
 | F13 | Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub | offen | P39 |
-| F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | offen | P20 |
-| F15 | Krantage: Dauerlieger sichtbar ins Winterlager und zurück | offen | P20 |
+| F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | erledigt (PR 245) | P20 |
+| F15 | Krantage: Dauerlieger sichtbar ins Winterlager und zurück | erledigt (PR 245) | P20 |
 | F16 | Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv | offen | P40 |
 | F17 | Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage | offen | P24 |
 
@@ -420,7 +420,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | G1 | Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren | offen | P24 |
 | G2 | Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen | offen | P24 |
 | G3 | Ereignisse mit Nachspiel | offen | P24 |
-| G4 | Winter als Planungsbild (Bilanz, Winterarbeiten, Verträge) | offen | P20 |
+| G4 | Winter als Planungsbild (Bilanz, Winterarbeiten, Verträge) | erledigt (PR 245) | P20 |
 | G5 | Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind) | offen | P20 |
 | G6 | Ergebnis eines Ereignisses am Abend zeigen | offen | P24 |
 | G7 | Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand) | offen | P24 |
@@ -435,7 +435,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | H2 | Saisonvertrag im Voraus | erledigt (PR 149) | P01 |
 | H3 | Bewerber statt Verwandlung: Stammgäste und Einheimische fragen an | erledigt (PR 149) | P01 |
 | H4 | Obergrenze ein Viertel der Plätze | erledigt (PR 149) | P01 |
-| H5 | Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land | offen | P20 |
+| H5 | Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land | teilweise (PR 245): im Winter im Winterlager; Segelmacher und Kran in der Saison offen | P20 |
 | H6 | Lieblingsplatz eines Stammgasts | offen | P25 |
 | H7 | Sichtbare Treue: Wimpel je fünf Besuche | offen | P25 |
 | H8 | Stammgäste wachsen mit (Wünsche, größeres Boot) | offen | P25 |
@@ -455,7 +455,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | I7 | Meilensteine mit Ton und Bild | offen | P22 |
 | I8 | Richtiger Abschluss mit Kamerafahrt und Titel | erledigt (PR 156) | P16 |
 | I9 | Endlosspiel mit Saisonzielen | erledigt (PR 156) | P16 |
-| I10 | Ziele im Winter (Winterarbeiten) | offen | P20 |
+| I10 | Ziele im Winter (Winterarbeiten) | erledigt (PR 245) | P20 |
 
 ### J Einstieg und Hilfe
 
@@ -591,7 +591,7 @@ Jorven (12.11.2026, Spieltest am Gaming-PC): Das Gelände wird komplett überarb
 | P63 | Marinebasis und Anlagen neu platzieren | T6, T7, T13: Marinebasis mit Zufahrt von See, Großschiffpier, Services und Bauplätze passend zum neuen Gelände, jede Anlage von Wasser oder Land erreichbar | `web/js/render/services.js`, `web/js/data/services.js`, `web/js/data/harbor.js` | in Arbeit (PR 172): Lage der Anlagen in `docs/services.md`; Abgleich mit dem Seed-Gelände offen; stimmt sich mit "Services und Sonderanlagen einbauen" und "Stegbild pro Spiel variieren" ab |
 | P64 | Gelände abwechslungsreicher gestalten | T11: Wald, Wiesen, Schilf, Felsen, Höhen, Dorfrand, je nach Stufe und Stegbild; erst nach P62-Grundform | `web/js/render/landschaft/*.js` | in Arbeit (PR 204, 211, 216): Umgebung und Ufer je Küstentyp |
 | P65 | Wetter und Effekte flüssig machen | T1, T5, T12: Wetter (Regen, Nebel, Sturm, Schnee) ohne Ruckeln, Heckwelle auf beiden Seiten, Effekte ohne Artefakte; Messung je Wetter mit `feature-tests/leistung.cjs` | `web/js/render/landschaft/wasser.js`, Wetter- und Effektmodule, `web/js/render/boat-anim.js` (nur Heckwelle) | neu |
-| P66 | Boote ums Gelände herum führen | T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch "hafenmeister-engpass-fix" (`boat-channel.js`, `boat-routes.js`, Tests `boot-engpass`, `boot-routen`) | `web/js/render/boat-view.js`, `boat-anim.js`, neue `boat-channel.js`, `boat-routes.js`, `web/js/world/fahrwege.js`, `tests/` | in Arbeit (PR 180, 181, 199, 228): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); übernimmt P54 vom Thread "Schiffsanimationen umsetzen" |
+| P66 | Boote ums Gelände herum führen | T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch "hafenmeister-engpass-fix" (`boat-channel.js`, `boat-routes.js`, Tests `boot-engpass`, `boot-routen`) | `web/js/render/boat-view.js`, `boat-anim.js`, neue `boat-channel.js`, `boat-routes.js`, `web/js/world/fahrwege.js`, `tests/` | in Arbeit (PR 180, 181, 199, 228, 240): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread "Schiffsanimationen umsetzen" |
 
 Abstimmung: P62 legt zuerst die Wasserfläche fest; P63 und P66 bauen darauf. P65 misst die Leistung nach jeder Geländeänderung neu. Welle 0 ist fertig, wenn alle fünf Pakete auf `main` sind und auf allen Stufen und Stegbildern kein Boot Land, Stege oder andere Boote berührt.
 
@@ -661,7 +661,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P17 | Start und frühe Stufen straffen | Ü15, Ü16, Startwerte dokumentieren | `economy.js`, `state.js`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" (nach P06) |
 | P18 | Ausbau in Bauabschnitten | Ü18, `bautage` nutzen oder löschen | `ui/bauen.js`, `economy.js`, `sim.js`, Stegdarstellung | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Bauabschnitte, Baustelle über Nacht und Sparziel (PR 232), Nachbesserungen (PR 235) |
 | P19 | Ruf schwerer machen mit Wünschen je Bootsart | Ü17, `feeFactor`, `arrivalWeight`, Kapazität sichtbar | `sim.js`, `data/boats/*.js`, `economy.js` | neu |
-| P20 | Winter mit Inhalt füllen | Ü19, F14, F15, `docs/ereignisse.md` | `sim.js` (Jahreslauf), neues Feature-Modul, Travellift/Winterlager in `render/services.js` | neu |
+| P20 | Winter mit Inhalt füllen | Ü19, F14, F15, `docs/ereignisse.md` | `sim.js` (Jahreslauf), neues Feature-Modul, Travellift/Winterlager in `render/services.js` | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, `docs/winter.md`); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing |
 | P21 | Logbuch und Hafenchronik zeigen | Logbuch (Note 1), F36, `sim:logbookNew` | neues Modul `web/js/ui/logbuch.js`, `state.js` | neu |
 | P22 | Erfolge einbauen | plan.md 9 | neues Feature-Modul | neu |
 

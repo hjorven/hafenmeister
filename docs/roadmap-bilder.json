@@ -385,6 +385,28 @@
    "geraet": "iphone",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr237/237-vorschau-iphone.png"
+  },
+  {
+   "datei": "p20-pr245-handy-winterpause.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winterpause: Bilanz der Saison und Winterarbeiten",
+   "pr": 245,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "winter/wi-handy-1-karte.png"
+  },
+  {
+   "datei": "p20-pr245-quer-winterarbeiten.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winter im Hafen: Schnee und beauftragte Winterarbeit",
+   "pr": 245,
+   "geraet": "handy-quer",
+   "datum": "2026-11-14",
+   "quelle": "winter/wi-quer-2-auftrag.png"
   }
  ]
 }
