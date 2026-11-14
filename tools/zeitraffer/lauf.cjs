@@ -136,7 +136,7 @@ const BOT = () => {
 // E Boot bewegt sich nicht, obwohl es fahren sollte, F Sim-Zustände, die zu lange dauern.
 const PROBE = () => {
   const G = window.hafenmeister; const T = G.THREE; const S = G.sim;
-  const W = window.__zrp ||= {}; W.ray ||= new T.Raycaster(); W.stand ||= new Map(); W.simSeit ||= new Map();
+  const W = window.__zrp ||= {}; W.ray ||= new T.Raycaster(); W.stand ||= new Map(); W.simSeit ||= new Map(); W.unterwegs ||= new Map();
   if (!W.raf) { W.raf = true; const f = () => { W.frames++; requestAnimationFrame(f); }; requestAnimationFrame(f); }
   const jetzt = G.time;
   const gast = new Map((G.boatView?.boote ?? []).map((e) => [e.anim, e.id]));
@@ -149,8 +149,12 @@ const PROBE = () => {
   const wasser = (x, z) => (G.landschaft?.istWasser ? G.landschaft.istWasser(x, z) : true);
   const ziele = []; G.stege?.group?.traverse((o) => { if (o.isMesh && o.visible && !(o.material?.transparent && (o.material.opacity ?? 1) < 0.5)) ziele.push(o); });
   const steg = (x, z) => { W.ray.set(new T.Vector3(x, 20, z), new T.Vector3(0, -1, 0)); return W.ray.intersectObjects(ziele, false).find((t) => t.point.y > 0.15) || null; };
-  const out = { land: [], steg: [], fest: [], ueberlapp: [], haengt: [], sim: [], n: bs.length };
+  const out = { land: [], steg: [], fest: [], ueberlapp: [], haengt: [], pulk: [], lange: [], sim: [], n: bs.length };
   const ruhig = new Set(['moored', 'waiting', 'idle']);
+  // Pulk: ab PULK_N fahrenden Booten im Umkreis PULK_R m. Zu lange unterwegs: mehr als LANGE_S Spielsekunden
+  // ein- oder auslaufend innerhalb von 100 m um die Stege (lange Wege über die offene See zählen nicht)
+  const PULK_R = 45, PULK_N = 12, LANGE_S = 600;
+  const hafen = G.stege?.group ? new T.Box3().setFromObject(G.stege.group).expandByScalar(100) : null;
   for (const b of bs) {
     const E = ecken(b, 0.85);
     const nl = E.filter(([x, z]) => !wasser(x, z)).length;
@@ -180,6 +184,25 @@ const PROBE = () => {
     // in Fahrt ineinander (sichtbar, auch wenn es sich gleich wieder loest): Pulk oder Durchlass
     else out.ueberlapp.push({ a: a.id, b: b.id, g: a.g + b.g, st: a.st + '/' + b.st + (a.a.ghost > 0 || b.a.ghost > 0 ? '+durchlass' : a.a.zeitraffer || b.a.zeitraffer ? '+zeitraffer' : ''), p });
   }
+  // Pulk: viele fahrende Boote auf engem Raum, auch wenn sich jedes noch langsam bewegt (Jorvens Stau-Bild 14.11.)
+  const fahrend = bs.filter((b) => !ruhig.has(b.st));
+  let pk = null;
+  for (const a of fahrend) { const nb = fahrend.filter((c) => Math.hypot(c.x - a.x, c.z - a.z) < PULK_R); if (!pk || nb.length > pk.nb.length) pk = { a, nb }; }
+  if (pk && pk.nb.length >= PULK_N) {
+    const z = {}; for (const c of pk.nb) z[c.st] = (z[c.st] || 0) + 1;
+    out.pulk.push({ id: 'Tag ' + S.state.day, g: pk.nb.length + ' Boote', st: Object.entries(z).sort((x, y) => y[1] - x[1]).map(([k, v]) => v + ' ' + k).join(', '), n: pk.nb.length, p: [pk.a.x, pk.a.z] });
+  }
+  // Ein- oder Auslaufen dauert zu lange (Boot kriecht im Pulk, ohne ganz stillzustehen)
+  const lebt = new Set();
+  for (const b of fahrend) {
+    if (b.st !== 'leaving' && b.st !== 'docking') continue;
+    lebt.add(b.a); const u = W.unterwegs.get(b.a);
+    if (!u || u.st !== b.st) { W.unterwegs.set(b.a, { st: b.st, zuletzt: jetzt, innen: 0 }); continue; }
+    if (!hafen || hafen.containsPoint(new T.Vector3(b.x, (hafen.min.y + hafen.max.y) / 2, b.z))) u.innen += jetzt - u.zuletzt;
+    u.zuletzt = jetzt;
+    if (u.innen > LANGE_S) out.lange.push({ id: b.id, g: b.g, st: b.st, s: Math.round(u.innen), platz: b.platz, p: [b.x, b.z] });
+  }
+  for (const k of [...W.unterwegs.keys()]) if (!lebt.has(k)) W.unterwegs.delete(k);
   // Sim: Boot wartet, kommt aber nie an der Boje an; Box bleibt nach Abfahrt belegt
   const st = S.state; const seen = new Set();
   for (const b of Object.values(st.boats)) {
@@ -201,7 +224,7 @@ const PROBE = () => {
   W.frames = 0; W.f0 = tNow; W.letzt = { t: jetzt, w: tNow };
   out.wetterFx = !!document.getElementById('weather-fx');
   // Bei einem Fund sofort anhalten, damit das Nahbild die Stelle noch zeigt (lauf.cjs lässt wieder laufen)
-  if (['land', 'steg', 'fest', 'ueberlapp', 'haengt'].some((k) => out[k].length)) { G.setPaused(true); out.angehalten = true; }
+  if (['land', 'steg', 'fest', 'ueberlapp', 'haengt', 'pulk', 'lange'].some((k) => out[k].length)) { G.setPaused(true); out.angehalten = true; }
   return out;
 };
 
@@ -237,7 +260,7 @@ const SNAP = () => {
 
   const query = `?testtempo=${TEMPO}${START > 1 ? `&stufe=${START}` : ''}${EXTRA}`;
   R = { geraet: GERAET, tempo: TEMPO, query, start: new Date().toISOString(), commit: null,
-    verlauf: [], kaeufe: [], stufen: [], bilder: [], treffer: { land: {}, steg: {}, fest: {}, ueberlapp: {}, haengt: {}, sim: {} },
+    verlauf: [], kaeufe: [], stufen: [], bilder: [], treffer: { land: {}, steg: {}, fest: {}, ueberlapp: {}, haengt: {}, pulk: {}, lange: {}, sim: {} },
     nahbilder: [], speichern: [], wetter: {}, leistung: [], ende: null };
   try { R.commit = fs.readFileSync(path.join(WEB, 'version.txt'), 'utf8').trim(); } catch { /* lokal */ }
 
@@ -328,11 +351,12 @@ const SNAP = () => {
       naechsteProbe = w + 2000;
       const p = await page.evaluate(`(${PROBE})()`);
       R.leistung.push({ w: zustand.w, fps: +p.fps.toFixed(1), tempo: p.spielzeitJeSek ? Math.round(p.spielzeitJeSek) : null, boote: p.n, ereignis: zustand.ereignis, stufe: zustand.stufe });
-      for (const k of ['land', 'steg', 'fest', 'ueberlapp', 'haengt', 'sim']) for (const e of p[k]) {
+      for (const k of ['land', 'steg', 'fest', 'ueberlapp', 'haengt', 'pulk', 'lange', 'sim']) for (const e of p[k] ?? []) {
         const n = k === 'sim' ? `${e.art}${e.id != null ? ' ' + e.id : ''}${e.platz ? ' ' + e.platz : ''}`
           : (k === 'fest' || k === 'ueberlapp') ? `${e.a} + ${e.b} (${e.g}, ${e.st})` : `${e.id} (${e.g}, ${e.st}${e.platz ? ', ' + e.platz : ''})`;
         const m = R.treffer[k][n] ||= { mal: 0, erst: `Stufe ${zustand.stufe}, Tag ${zustand.tag}`, p: e.p?.map((v) => Math.round(v)), stufe: zustand.stufe, ...(e.kette ? { kette: e.kette } : {}) };
         m.mal++;
+        if (e.n) m.n = Math.max(m.n || 0, e.n);
         // Nahbild: höchstens zwei je Art und Stufe
         const nk = `${k}-${zustand.stufe}`;
         if (e.p && m.mal === 1 && (nahZaehler[nk] || 0) < 2) {

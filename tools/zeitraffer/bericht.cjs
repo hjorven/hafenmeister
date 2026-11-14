@@ -20,6 +20,8 @@ const ART = {
   fest: 'Boote stecken ineinander fest',
   ueberlapp: 'Boote überlappen (beide liegend, oder kurz in Fahrt ohne festzustecken)',
   haengt: 'Boot hängt (fährt, bewegt sich aber nicht)',
+  pulk: 'Pulk: 12 oder mehr fahrende Boote im Umkreis von 45 m (je Spieltag ein Eintrag)',
+  lange: 'Ein- oder Auslaufen dauert im Hafen länger als 10 Spielminuten',
   sim: 'Spielregeln: Zustand hängt oder Geld falsch',
 };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
