@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "4fd332b"
+  "commit": "8aa4583"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -438,7 +438,7 @@
    "welle": 2,
    "prs": [
     237,
-    250
+    252
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -2459,12 +2459,12 @@
    "code": "B10",
    "text": "Liegegeld nach Länge statt fest je Größe",
    "status": "erledigt",
-   "statusText": "erledigt (PR 250, ECONOMY.klassen.proMeter, sim.baseNightlyFee)",
+   "statusText": "erledigt (PR 252, ECONOMY.klassen.proMeter, sim.baseNightlyFee)",
    "pakete": [
     "P17"
    ],
    "prs": [
-    250
+    252
    ],
    "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
   },
