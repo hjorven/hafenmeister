@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "4a3163c"
+  "commit": "325ad88"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -539,7 +539,7 @@
    "id": "P21",
    "titel": "Logbuch und Hafenchronik zeigen",
    "inhalt": "Logbuch (Note 1), F36, sim:logbookNew",
-   "thread": "neu",
+   "thread": "erledigt (docs/logbuch.md, SAVE_VERSION 3)",
    "welle": 2,
    "prs": [],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
@@ -547,7 +547,7 @@
     "F36",
     "I5"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1345,7 +1345,7 @@
   {
    "id": "P73",
    "titel": "Stufe 10 Hafenverbund und Hafenkarten",
-   "inhalt": "modules.verbund, SAVE_VERSION 3 mit Migration, Übernahme alter Häfen, Kurzrechnung mit Abgleichstest, Standortwechsel",
+   "inhalt": "modules.verbund, SAVE_VERSION 4 mit Migration (3 ist seit P21 das Logbuch), Übernahme alter Häfen, Kurzrechnung mit Abgleichstest, Standortwechsel",
    "thread": "neu",
    "welle": 6,
    "prs": [],
@@ -2166,8 +2166,8 @@
   {
    "code": "F36",
    "text": "Hafenchronik: jeder Tag eine Zeile",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt",
    "pakete": [
     "P21"
    ],
@@ -3202,8 +3202,8 @@
   {
    "code": "I5",
    "text": "Logbuch als Sammelalbum mit Schattenrissen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt",
    "pakete": [
     "P21"
    ],
@@ -4287,11 +4287,11 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 9,
+    "erledigt": 10,
     "teilweise": 4,
     "arbeit": 0,
     "frage": 0,
-    "offen": 2,
+    "offen": 1,
     "entfaellt": 0,
     "alle": 15
    }
@@ -4409,20 +4409,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 20,
+  "erledigt": 21,
   "teilweise": 7,
   "arbeit": 3,
   "frage": 0,
-  "offen": 50,
+  "offen": 49,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 127,
+  "erledigt": 129,
   "teilweise": 8,
   "arbeit": 0,
   "frage": 1,
-  "offen": 83,
+  "offen": 81,
   "entfaellt": 0,
   "alle": 219
  },
@@ -4922,6 +4922,14 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "Logbuch und Hafenchronik: Sammelalbum mit Pixelbildern, Chronik je Tag (P21)",
+   "pr": 274,
+   "pakete": [
+    "P21"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "P55: Geduldsring, Auslastung an der Versorgung, Zeiger am Bildrand",
    "pr": 269,
    "pakete": [
@@ -4994,12 +5002,6 @@
    "datum": "2026-11-14",
    "titel": "Ablegen: Box bleibt belegt, bis das Boot wirklich draußen ist",
    "pr": 266,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tests: Wetter-Test wartet auf den Spielstand und setzt das Wetter je Runde neu",
-   "pr": 265,
    "pakete": []
   }
  ]
