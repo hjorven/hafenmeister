@@ -190,6 +190,12 @@ class BoatAnimManager {
     this.hindernisse = new Set();                     // fremde Schiffe (Besuchsschiffe der Services)
     this.router = null;                               // (boat, ziel) => { punkte, engstellen }, setzt boat-view.js
     this.frei = null;                                 // (x, z, r) => true, wenn dort freies Wasser ist
+    // (x, z) => true, wenn dort Wasser ist (genau aus dem Gelaende, sonst aus der Karte)
+    this.wasser = (x, z) => {
+      const ls = this.game.landscape;
+      if (ls?.istWasser) return ls.istWasser(x, z);
+      return this.frei ? this.frei(x, z, 0, 0.15) : true;
+    };
     this.sicht = null;                                // (a, b, r, t) => true, wenn die Strecke a-b frei ist
     this.engstellen = new Engstellen(3);              // Einbahn-Freigabe in engen Durchfahrten
     this.sea = 0.25;                                  // 0 = glatt, 1 = Sturm
@@ -333,10 +339,13 @@ class BoatAnimManager {
       for (const f of [1.5, 1, 0.6]) {
         const d = L * f + 2;
         let ok = true;
-        for (let k = 1; k <= 6 && ok; k++) {
-          const x = o.x - dx * d * k / 6, z = o.z - dz * d * k / 6;
-          if (this.frei && !this.frei(x, z, r, t)) ok = false;
-          else if (o.hitsAt(x, z, o.heading)) ok = false;
+        // Rumpfmitte bis zum Ziel auf Boote pruefen, das Wasser bis dorthin, wo das Heck am Ende liegt
+        // (eine halbe Laenge hinter der Mitte), damit das Heck nicht auf Ufer oder Steg setzt
+        const n = Math.ceil((d + L / 2) / 1.5);
+        for (let k = 1; k <= n && ok; k++) {
+          const s = Math.min(d, ((d + L / 2) * k) / n), w = ((d + L / 2) * k) / n;
+          if (this.frei && !this.frei(o.x - dx * w, o.z - dz * w, r, t)) ok = false;
+          else if (o.hitsAt(o.x - dx * s, o.z - dz * s, o.heading)) ok = false;
         }
         if (ok) { weit = d; break; }
       }
@@ -672,6 +681,28 @@ class PathTask {
       }
       if (!frei(nx, nz, r, t) && frei(_v.x, _v.z, r, t)) { b.lane = 0; nx = _v.x; nz = _v.z; }
     }
+    // Kurswaechter Ufer: Bug und Heck schwenken in Kurven ueber die Bahn hinaus (an Mole und Muendung
+    // auch ueber die Kante). Laege eine Rumpfecke an Land, rueckt das Boot seitlich davon weg, so weit
+    // das Wasser auf der anderen Seite frei ist (nicht in den letzten Metern vor dem Liegeplatz).
+    const wasser = b.mgr.wasser;
+    if (frei && this.s > L * 0.5 && remaining > L * 0.8) {
+      // der Rumpf zeigt nicht genau in Bahnrichtung (steer() dreht nur so schnell, wie das Boot kann):
+      // mit dem Kurs pruefen, den es nach diesem Schritt wirklich hat
+      const dmax = b.cfg.turn * 6 * dt;
+      const hNeu = b.heading + clamp(wrapAngle(hd - b.heading), -dmax, dmax);
+      const ecke = rumpfAnLand(wasser, nx, nz, hNeu, L, b.info.beam);
+      if (ecke) {
+        const r = b.info.beam / 2 + 0.3, t = Math.min((b.info.draft ?? 1) + 0.2, 9);
+        let gefunden = false;
+        for (let k = 0.5; k <= Math.abs(b.lane) + b.info.beam * 1.5 + 1; k += 0.5) {
+          const lane = b.lane - ecke * k;
+          const qx = _v.x + Math.sin(hd) * lane, qz = _v.z + Math.cos(hd) * lane;
+          if (frei(qx, qz, r, t) && !rumpfAnLand(wasser, qx, qz, hNeu, L, b.info.beam)) { b.lane = lane; nx = qx; nz = qz; gefunden = true; break; }
+        }
+        // nichts frei: zurueck auf die Bahn selbst (sie haelt Abstand zum Ufer)
+        if (!gefunden && Math.abs(b.lane) > 0.05) { b.lane = approach(b.lane, 0, b.info.beam * dt * 2); nx = _v.x + Math.sin(hd) * b.lane; nz = _v.z + Math.cos(hd) * b.lane; }
+      }
+    }
     // harte Regel: ein fahrendes Boot schiebt sich nie in ein anderes hinein (nicht im Notfall-Durchlass)
     if (this.s > s0 + 1e-4 || b.lane !== lane0) {
       const vorher = b.hitsAt(b.x, b.z, b.heading);
@@ -679,9 +710,13 @@ class PathTask {
       if (nachher && nachher !== vorher) {
         b.lane = lane0;
         nx = _v.x + Math.sin(hd) * b.lane; nz = _v.z + Math.cos(hd) * b.lane;
-        const n2 = b.hitsAt(nx, nz, hd);
-        if (n2 && n2 !== vorher) {
-          b.stoesstAn = n2;          // fuer traffic(): wer im Weg ist, auch wenn es kein Boot vorn ist
+        let n2 = b.hitsAt(nx, nz, hd);
+        // der alte Versatz laege an Land (der Kurswaechter hatte ihn verschoben): auf die Bahnmitte,
+        // wenn dort kein Boot ist (die Bahn haelt Abstand zum Ufer), sonst warten
+        let anLand = !n2 && this.s > L * 0.5 && remaining > L * 0.8 && !!rumpfAnLand(wasser, nx, nz, hd, L, b.info.beam);
+        if (anLand && !b.hitsAt(_v.x, _v.z, hd)) { b.lane = 0; nx = _v.x; nz = _v.z; anLand = false; n2 = null; }
+        if ((n2 && n2 !== vorher) || anLand) {
+          b.stoesstAn = n2 || nachher;   // fuer traffic(): wer im Weg ist, auch wenn es kein Boot vorn ist
           this.s = s0; b.speed = 0;
           this.curve.getPointAt(this.len > 0 ? this.s / this.len : 1, _v);
           b.blocked = true;
@@ -702,6 +737,18 @@ class PathTask {
     }
     return false;
   }
+}
+
+// Liegt eine Ecke des Rumpfs (leicht verkleinert, wie die Pruefung im Zeitraffer) an Land?
+// Gibt die Seite zurueck (+1 Steuerbord, -1 Backbord, Bug oder Heck mittig: Seite der naechsten Ecke),
+// 0 wenn alles im Wasser liegt. jede: true = irgendeine Ecke (fuer "lag schon vorher an Land").
+function rumpfAnLand(wasser, x, z, h, L, B, jede = false) {
+  const c = Math.cos(h), s = -Math.sin(h), px = Math.sin(h), pz = Math.cos(h);
+  for (const [l, w] of [[0.46, 0.46], [0.46, -0.46], [-0.46, 0.46], [-0.46, -0.46], [0.5, 0.25], [0.5, -0.25]]) {
+    const ex = x + c * L * l + px * B * w, ez = z + s * L * l + pz * B * w;
+    if (!wasser(ex, ez)) return jede ? 1 : Math.sign(w);
+  }
+  return 0;
 }
 
 // Gerade Fahrt ohne Kursaenderung, auch rueckwaerts oder seitlich (Querstrahlruder).
@@ -1201,7 +1248,23 @@ class BoatAnim {
       const fwd = Math.max(0, b.length / 2 - L / 2 - 0.3);
       return { x: b.x + dx * fwd, z: b.z + dz * fwd };
     }
-    return { x: b.x, z: b.z };
+    // laengsseits (Kai, Pier): liegt der Rumpf auf Land (Kaimauer, Mole am Ende eines zu kurzen
+    // Kais fuer ein langes Schiff, Gelaende aus Seed), die naechste Lage im Wasser suchen: entlang
+    // des Kais bis zur halben Laenge oder quer bis zur Rumpfbreite
+    const frei = this.mgr.frei, wasser = this.mgr.wasser;
+    let x = b.x, z = b.z;
+    const B = this.info.beam;
+    if (frei && rumpfAnLand(wasser, x, z, b.heading, L, B)) {
+      const px = Math.sin(b.heading), pz = Math.cos(b.heading);
+      suche: for (let d = 0.5; d <= Math.max(L / 2, B); d += 0.5) {
+        for (const [a, q] of [[d, 0], [-d, 0], [0, d], [0, -d]]) {
+          if ((a && Math.abs(a) > L / 2) || (q && Math.abs(q) > B)) continue;
+          const tx = b.x + dx * a + px * q, tz = b.z + dz * a + pz * q;
+          if (!rumpfAnLand(wasser, tx, tz, b.heading, L, B)) { x = tx; z = tz; break suche; }
+        }
+      }
+    }
+    return { x, z };
   }
 
   /** Anlaufrichtung an Boje oder Ankerplatz: gegen den Wind, aber liegt der Platz nah am Ufer, aus der

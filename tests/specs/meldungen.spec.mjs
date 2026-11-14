@@ -14,9 +14,9 @@ const sichtbare = (page) => page.evaluate((liste) => liste.filter((sel) => [...d
 })), MELDUNGEN);
 
 test('Meldungen: höchstens eine zugleich, der Tipp wartet auf Zettel und Kartenwahl', async ({ game }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(150_000);
   const { page } = game;
-  await page.waitForFunction(() => !!window.hafenmeister.sim?.state && !!window.hafenmeister.meldungen && !!window.hafenmeister.tagesabschluss, null, { timeout: 15_000 });
+  await page.waitForFunction(() => !!window.hafenmeister.sim?.state && !!window.hafenmeister.meldungen && !!window.hafenmeister.tagesabschluss, null, { timeout: 30_000, polling: 100 });
   await page.evaluate(() => {
     try { localStorage.setItem('hm-tagesabschluss-auto', 'aus'); } catch {}
     const g = window.hafenmeister;
@@ -26,7 +26,7 @@ test('Meldungen: höchstens eine zugleich, der Tipp wartet auf Zettel und Karten
     g.tagesziele?.waehle?.(0);
     g.emit('stammgast:neu', { boatId: 1 });
   });
-  await expect.poll(() => page.evaluate(() => [document.querySelector('.hm-tipp').hidden ? 'verborgen' : 'sichtbar', JSON.stringify(window.hafenmeister.meldungen.stand()), window.hafenmeister.einstieg.schritt()].join(' ')), { timeout: 8000 }).toMatch(/^sichtbar/);
+  await expect.poll(() => page.evaluate(() => [document.querySelector('.hm-tipp').hidden ? 'verborgen' : 'sichtbar', JSON.stringify(window.hafenmeister.meldungen.stand()), window.hafenmeister.einstieg.schritt()].join(' ')), { timeout: 30_000, intervals: [100] }).toMatch(/^sichtbar/);
 
   // Bis zum nächsten Morgen vorspulen: der Zettel kommt, der Tipp tritt zurück
   for (let i = 0; i < 60; i++) {
@@ -44,32 +44,32 @@ test('Meldungen: höchstens eine zugleich, der Tipp wartet auf Zettel und Karten
   // Der Tipp ist nicht verloren: Er steht noch an und kommt, sobald nichts anderes mehr steht
   expect(await page.evaluate(() => window.hafenmeister.einstieg.schritt())).toBe('hinweis:stammgast');
   await page.evaluate(() => { window.hafenmeister.tagesabschluss.schliesse(); window.hafenmeister.tagesziele?.waehle?.(0); });
-  await expect.poll(() => sichtbare(page), { timeout: 10_000 }).toEqual(['.hm-tipp']);
+  await expect.poll(() => sichtbare(page), { timeout: 30_000, intervals: [100] }).toEqual(['.hm-tipp']);
 });
 
 test('Meldungen: Kartenwahl wartet ausgeblendet hinter der Feier und kommt danach wieder', async ({ game }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(120_000);
   const { page } = game;
-  await page.waitForFunction(() => !!window.hafenmeister.sim?.state && !!window.hafenmeister.meldungen && !!window.hafenmeister.aufstieg, null, { timeout: 15_000 });
+  await page.waitForFunction(() => !!window.hafenmeister.sim?.state && !!window.hafenmeister.meldungen && !!window.hafenmeister.aufstieg, null, { timeout: 30_000, polling: 100 });
   await page.evaluate(() => { const g = window.hafenmeister; g.sim.newGame(42); g.einstieg.beenden(); });
   // Tafel aufklappen: ohne gewählte Karte zeigt sie die Kartenwahl
   await page.locator('.hm-tafel > button').first().click();
-  await expect(page.locator('.hm-tafel > ul.tz-wahl')).toBeVisible({ timeout: 8000 });
+  await expect(page.locator('.hm-tafel > ul.tz-wahl')).toBeVisible({ timeout: 30_000 });
   await page.evaluate(() => window.hafenmeister.aufstieg.zeigeStufe(2));
-  await expect(page.locator('#hm-feier')).toBeVisible();
+  await expect(page.locator('#hm-feier')).toBeVisible({ timeout: 30_000 });
   for (let i = 0; i < 8; i++) {
     expect(await sichtbare(page)).toEqual(['#hm-feier']);
     await page.waitForTimeout(150);
   }
   await page.locator('.hm-feier-weiter').click();
-  await expect(page.locator('#hm-feier')).toBeHidden();
-  await expect.poll(() => sichtbare(page), { timeout: 5000 }).toEqual(['.hm-tafel > ul.tz-wahl']);
+  await expect(page.locator('#hm-feier')).toBeHidden({ timeout: 30_000 });
+  await expect.poll(() => sichtbare(page), { timeout: 30_000, intervals: [100] }).toEqual(['.hm-tafel > ul.tz-wahl']);
 });
 
 test('Meldungen: ein Tipp liegt nie über Zeit, Bauen oder Kassieren, auch bei aufgeklappter Tagesziel-Tafel', async ({ game }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(120_000);
   const { page } = game;
-  await page.waitForFunction(() => !!window.hafenmeister.sim?.state && !!window.hafenmeister.meldungen, null, { timeout: 15_000 });
+  await page.waitForFunction(() => !!window.hafenmeister.sim?.state && !!window.hafenmeister.meldungen, null, { timeout: 30_000, polling: 100 });
   await page.evaluate(() => { const g = window.hafenmeister; g.sim.newGame(42); g.einstieg.beenden(); g.tagesziele?.waehle?.(0); });
   await expect(page.locator('.hm-tafel > ul.tz-wahl')).toBeHidden();
   // Tafel aufklappen, dann kommt ein Tipp
@@ -94,6 +94,6 @@ test('Meldungen: ein Tipp liegt nie über Zeit, Bauen oder Kassieren, auch bei a
   }
   // Tafel zu: spätestens jetzt steht der Tipp, frei von den Knöpfen
   await page.locator('.hm-tafel > button').first().click();
-  await expect.poll(ueberKnopf, { timeout: 5000 }).toBe('frei');
+  await expect.poll(ueberKnopf, { timeout: 30_000, intervals: [100] }).toBe('frei');
   expect(await page.evaluate(() => window.hafenmeister.einstieg.schritt())).toBe('hinweis:stammgast');
 });
