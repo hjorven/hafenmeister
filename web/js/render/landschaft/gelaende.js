@@ -715,6 +715,20 @@ export function warteplaetze(stufe) {
 }
 
 /**
+ * Geringste Wassertiefe (m) an einem Warteplatz: Mitte und rundum im Schwoikreis (Bojen 6 m).
+ * Ein Boot dreht sich dort mit dem Wind, deshalb zählt der ganze Kreis und nicht nur die Mitte.
+ */
+export function warteplatzTiefe(o, stufe, region) {
+  const r = (o.schwoikreisM ?? 6) / PLAN_M;
+  let min = -punkt(o.px, o.py, stufe, region).h;
+  for (let k = 0; k < 12; k++) {
+    const w = k / 12 * Math.PI * 2;
+    min = Math.min(min, -punkt(o.px + r * Math.cos(w), o.py + r * Math.sin(w), stufe, region).h);
+  }
+  return min;
+}
+
+/**
  * Begehbare Wege in Weltmetern für Menschen und Fahrzeuge: Straße, Zugänge, Promenade, Kai, Molenwege.
  * Stege kommen nicht von hier, sondern aus web/js/data/harbor.js.
  * Jeder Weg: { id, typ, breite (m), punkte: [{x, y, z}] } mit y = Bodenhöhe.

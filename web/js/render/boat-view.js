@@ -161,8 +161,17 @@ export function init(game) {
       const fx = Math.cos(b.heading), fz = -Math.sin(b.heading);
       return { x: b.x + fx * 40, z: b.z + fz * 40 };
     })();
-    const p = ankerSlot(k, gross ? 60 : 20);
-    return reserviere({ id: `anker-${k}`, x: mitte.x + p.x, z: mitte.z + p.z, heading: b.heading, kind: 'buoy', abstand: gross ? 60 : 20, kreis: gross ? 30 : 10 });
+    // Ausweichplatz in Ringen um die Mitte: nur in freiem, tiefem Wasser, nie an Land oder im Flachen
+    const d = gross ? 60 : 20;
+    const massA = selbst ? bootMass(selbst.info) : { r: 3, t: 1 };
+    const karteB = karteJetzt();
+    let p = ankerSlot(k, d);
+    for (let n = 0, j = k; n < 240; n++, j++) {
+      if (anker.has(j)) continue;
+      const q = ankerSlot(j, d);
+      if (befahrbar(karteB, mitte.x + q.x, mitte.z + q.z, Math.max(massA.r, d * 0.4), massA.t)) { k = j; p = q; break; }
+    }
+    return reserviere({ id: `anker-${k}`, x: mitte.x + p.x, z: mitte.z + p.z, heading: b.heading, kind: 'buoy', abstand: d, kreis: gross ? 30 : 10 });
   }
 
   // k-ter Ankerplatz: Mitte, dann Ringe mit dem Abstand d (6, 12, 18 ... Plaetze je Ring)
