@@ -77,7 +77,7 @@ export function init(game) {
   }
   game.on('sim:turnedAway', (e) => {
     const s = speicher();
-    if (s && e?.reason !== 'dismissed') s.heute.weg++;
+    if (s && e?.reason !== 'dismissed' && e?.reason !== 'winter') s.heute.weg++;
   });
   game.on('sim:feeReady', (e) => {
     const s = speicher();

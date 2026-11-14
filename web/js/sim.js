@@ -581,6 +581,9 @@ function startDay(state, ctx, events) {
   for (const boat of mooredBoats(state)) {
     if (!boat.stationed) chargeFee(state, ctx, boat, mods, events);
   }
+  // Winter: keine Gäste. Wer über Nacht an einer Boje gewartet hat (rules.queue.overnight), fährt weiter,
+  // sonst fährt er mitten im Winter in eine Box (Feature-Test 14.11., Pulk am Kartenrand).
+  if (sea.winter) for (const id of [...state.queue]) if (state.boats[id]) turnAway(state, ctx, state.boats[id], events, 'winter');
   planTrips(state, ctx, mods, sea.winter);
   const rate = sea.winter ? 0 : arrivalRate(state, ctx, mods);
   // Ankünfte über den ganzen Tag: zwischen arrivalFrom und arrivalWindow (Anteile des Tages).
@@ -1098,10 +1101,13 @@ export function unstationBoat(state, ctx, boatId) {
 function turnAway(state, ctx, boat, events, why) {
   state.queue = state.queue.filter((id) => id !== boat.id);
   delete state.boats[boat.id];
-  state.stats.turnedAway++;
-  state.stats.turnedAwayToday++;
-  const weg = heute(state).weggefahren;
-  weg[why] = (weg[why] || 0) + 1;
+  // Winterbeginn: Wer über Nacht an der Boje lag, fährt ins Winterlager. Das zählt nicht als weggefahren.
+  if (why !== 'winter') {
+    state.stats.turnedAway++;
+    state.stats.turnedAwayToday++;
+    const weg = heute(state).weggefahren;
+    weg[why] = (weg[why] || 0) + 1;
+  }
   const rated = turnAwayRating(state, ctx, boat, why);
   events.push({ type: 'turnedAway', boatId: boat.id, reason: why, rated, ...(rated ? { rating: ctx.rules.turnAway.rating, guest: guestInfo(boat), day: state.day } : {}) });
 }
@@ -1114,7 +1120,7 @@ function turnAway(state, ctx, boat, events, why) {
  * @returns {boolean} ob eine Bewertung abgegeben wurde
  */
 function turnAwayRating(state, ctx, boat, why) {
-  if (why === 'queueFull' || why === 'rebuild' || !couldEverFit(state, ctx, boat)) return false;
+  if (why === 'queueFull' || why === 'rebuild' || why === 'winter' || !couldEverFit(state, ctx, boat)) return false;
   const ta = ctx.rules.turnAway;
   const rated = random(state) < ta.chance;
   if (rated) pushRating(state, ctx, ta.rating);

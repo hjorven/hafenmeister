@@ -79,6 +79,9 @@ export function init(game) {
       const hoeher = FENSTER.filter((g) => g.vorrang > f.vorrang).map((g) => `body[data-hm-meldung="${g.id}"] ${f.sel}`);
       return hoeher.length ? `${hoeher.join(',\n')} { visibility: hidden !important; pointer-events: none !important; }` : '';
     }).filter(Boolean);
+    // Das Wetter- und Ereignisschild oben (events/banner.js) legte sich über die Winterpause-Karte
+    // (Feature-Test 14.11.): es tritt zurück, solange eine Karte steht, und kommt danach nicht wieder.
+    regeln.push(`${['winter', 'abschluss', 'kartenwahl', 'feier'].map((id) => `body[data-hm-meldung="${id}"] #event-banner`).join(',\n')} { visibility: hidden !important; pointer-events: none !important; }`);
     const style = document.createElement('style');
     style.textContent = regeln.join('\n');
     document.head.append(style);
