@@ -243,7 +243,7 @@ const PROBE = () => {
   W.frames = 0; W.f0 = tNow; W.letzt = { t: jetzt, w: tNow };
   out.wetterFx = !!document.getElementById('weather-fx');
   // Bei einem Fund sofort anhalten, damit das Nahbild die Stelle noch zeigt (lauf.cjs lässt wieder laufen)
-  if (['land', 'steg', 'fest', 'ueberlapp', 'haengt', 'pulk', 'lange'].some((k) => out[k].length)) { G.setPaused(true); out.angehalten = true; }
+  if (['land', 'steg', 'fest', 'ueberlapp', 'haengt'].some((k) => out[k].length)) { G.setPaused(true); out.angehalten = true; }
   return out;
 };
 
