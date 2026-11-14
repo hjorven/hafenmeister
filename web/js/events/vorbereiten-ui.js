@@ -36,12 +36,18 @@ export async function initVorbereiten(game) {
     if (p?.id === 'sturm' && s.stage >= 3 && V.hatOffenePlaetze(s, ctx)) {
       const v = s.modules?.vorbereitung?.sturm;
       const klar = !!(v?.klar && v.startDay === p.startDay);
-      const n = V.draussen(s, ctx).length;
+      const liste = V.draussen(s, ctx);
+      const n = liste.length;
       const wann = p.startDay - s.day <= 1 ? 'Morgen' : 'Bald';
       if (klar) {
+        const weg = liste.filter((b) => b.trip?.away).length;
+        const voll = n - weg;
+        const teile = [];
+        if (voll > 0) teile.push(`${voll === 1 ? 'Ein Gast liegt' : `${voll} Gäste liegen`} noch draußen: innen ist kein passender Platz frei.`);
+        if (weg > 0) teile.push(`${weg === 1 ? 'Ein Gast ist' : `${weg} Gäste sind`} auf Tagestörn und ${weg === 1 ? 'kommt' : 'kommen'} an den offenen Platz zurück.`);
         return { art: 'sturm', plan: p, erledigt: true, titel: 'Hafen ist sturmklar',
-          text: n > 0 ? `${n === 1 ? 'Ein Gast liegt' : `${n} Gäste liegen`} noch draußen: innen war kein Platz frei.` : 'Offene Plätze bleiben bis nach dem Sturm frei.',
-          knopf: n > 0 ? 'Noch einmal verholen' : null, zurueck: 'Offene Plätze freigeben' };
+          text: teile.length ? teile.join(' ') : 'Offene Plätze bleiben bis nach dem Sturm frei.',
+          knopf: voll > 0 && liste.some((b) => !b.trip?.away && V.innenZiel(s, ctx, b.id)) ? 'Noch einmal verholen' : null, zurueck: 'Offene Plätze freigeben' };
       }
       return { art: 'sturm', plan: p, erledigt: false, titel: `${wann} Sturm`,
         text: n > 0
@@ -105,6 +111,8 @@ export async function initVorbereiten(game) {
     gezeigt = null;
     clearTimeout(timer);
     timer = 0;
+    clearInterval(nachsehen);
+    nachsehen = 0;
     game.meldungen?.fertig('ereignis');
   }
 
@@ -176,12 +184,45 @@ export async function initVorbereiten(game) {
     zeige(ERGEBNIS_SEKUNDEN);
   }
 
-  // Meldungs-Ordnung: steht etwas Wichtigeres, wartet die Karte ausgeblendet (ihre Zeit läuft weiter)
+  // Platz der Karte: oben rechts neben der linken Spalte (Wetter, Tagesziel, Ausbau), auf dem PC mittig.
+  // Reicht der Platz daneben nicht (Handy hochkant), steht sie unten über Zeit und Bauen, in
+  // Daumenreichweite. Liegt sie auch dort über der linken Spalte (zum Beispiel eine aufgeklappte
+  // Tafel), wartet sie. Gibt true zurück, wenn die Karte frei steht.
+  const rechteck = (e) => e.getBoundingClientRect();
+  const sichtbar = (e) => !e.hidden && !e.closest('[hidden]') && getComputedStyle(e).display !== 'none' && rechteck(e).width > 0;
+  const ueber = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+  function platziere() {
+    const h = host.getBoundingClientRect();
+    const seite = [...document.querySelectorAll('#hm-seite > *')].filter(sichtbar).map(rechteck);
+    const rechts = Math.max(h.left, ...seite.map((r) => r.right)) - h.left;
+    const rand = 12;
+    const mitte = (h.width - Math.min(420, h.width - 32)) / 2;
+    const links = Math.max(mitte, rechts + rand);
+    const breit = Math.min(420, h.width - links - 16);
+    if (breit >= 260) {
+      Object.assign(karte.style, { left: `${Math.round(links)}px`, width: `${Math.round(breit)}px`, transform: 'none', top: '', bottom: '' });
+    } else {
+      const unten = [...document.querySelectorAll('#hm-zeit, #btn-build, #hud-bottom')].filter(sichtbar).map((e) => rechteck(e).top);
+      const grenze = unten.length ? Math.min(...unten) : h.bottom - 16;
+      Object.assign(karte.style, { left: '', width: '', transform: '', top: 'auto', bottom: `${Math.round(h.bottom - grenze + 10)}px` });
+    }
+    const k = rechteck(karte);
+    const hinder = [...seite, ...[...document.querySelectorAll('#hm-zeit, #btn-collect, #btn-build')].filter(sichtbar).map(rechteck)];
+    return !hinder.some((r) => ueber(k, r)) && k.top >= h.top;
+  }
+
+  // Meldungs-Ordnung: steht etwas Wichtigeres, wartet die Karte ausgeblendet (ihre Uhr steht).
+  // Ebenso, solange kein freier Platz da ist.
+  let nachsehen = 0;
   function ordne() {
-    if (karte.hidden) return;
+    if (karte.hidden) { clearInterval(nachsehen); nachsehen = 0; return; }
+    karte.classList.remove('zurueck');
+    const frei = platziere();
     const darf = game.meldungen ? game.meldungen.darf('ereignis') : true;
-    const zurueck = !darf || document.body.classList.contains('card-open');
+    const zurueck = !darf || !frei || document.body.classList.contains('card-open');
     karte.classList.toggle('zurueck', zurueck);
+    // Die linke Spalte klappt ohne Ereignis auf und zu: solange die Karte steht, regelmäßig nachsehen
+    if (!nachsehen) nachsehen = setInterval(ordne, 400);
     if (zurueck && timer) {
       clearTimeout(timer);
       timer = 0;
@@ -193,6 +234,7 @@ export async function initVorbereiten(game) {
   }
   game.on('meldungen:wechsel', ordne);
   game.on('card', ordne);
+  game.on('resize', ordne);
   new MutationObserver(ordne).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
   // Ankündigung: Karte mit Knopf statt des Ereignisschilds
