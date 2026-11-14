@@ -40,13 +40,13 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 **Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
 
 <table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P66"><img src="web/roadmap/bilder/p66-pr228-pc-pulk-einfahrt.jpg" alt="Boote sammeln sich als Pulk an der Einfahrt" width="100%"></a><br><sub>P66 · Boote sammeln sich als Pulk an der Einfahrt · PR 228</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P18"><img src="web/roadmap/bilder/p18-pr232-p18-handy-baustelle.jpg" alt="Ausbau in Abschnitten" width="100%"></a><br><sub>P18 · Ausbau in Abschnitten · PR 232</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P18"><img src="web/roadmap/bilder/p18-pr232-p18-pc-baustelle.jpg" alt="Baustelle über Nacht" width="100%"></a><br><sub>P18 · Baustelle über Nacht · PR 232</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P14"><img src="web/roadmap/bilder/p14-pr154-iphone-blasen-und-meldungen.jpg" alt="Bewertungen über dem Boot" width="100%"></a><br><sub>P14 · Bewertungen über dem Boot · PR 154</sub></td>
 </tr><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P14"><img src="web/roadmap/bilder/p14-pr154-iphone-blasen-und-meldungen.jpg" alt="Bewertungen über dem Boot" width="100%"></a><br><sub>P14 · Bewertungen über dem Boot · PR 154</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P14"><img src="web/roadmap/bilder/p14-pr154-pc-gaestebuch.jpg" alt="Gästebuch am Hafenbüro" width="100%"></a><br><sub>P14 · Gästebuch am Hafenbüro · PR 154</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P11"><img src="web/roadmap/bilder/p11-pr227-pc-weit-kleine-schilder.jpg" alt="Wunsch-Schilder aus der Ferne" width="100%"></a><br><sub>P11 · Wunsch-Schilder aus der Ferne · PR 227</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P11"><img src="web/roadmap/bilder/p11-pr227-iphone-300m-kleine-schilder.jpg" alt="Wunsch-Schilder weit weg klein" width="100%"></a><br><sub>P11 · Wunsch-Schilder weit weg klein · PR 227</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (0 von 5 erledigt)</summary>
@@ -90,7 +90,7 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 | [P15](https://hjorven.github.io/hafenmeister/roadmap/#paket=P15) | Tagesabschluss am Abend zeigen | **erledigt** | [#159](https://github.com/hjorven/hafenmeister/pull/159) |
 | [P16](https://hjorven.github.io/hafenmeister/roadmap/#paket=P16) | Aufstieg und Abschluss feiern, Endlosspiel | **erledigt** | [#156](https://github.com/hjorven/hafenmeister/pull/156) |
 | [P17](https://hjorven.github.io/hafenmeister/roadmap/#paket=P17) | Start und frühe Stufen straffen | offen |  |
-| [P18](https://hjorven.github.io/hafenmeister/roadmap/#paket=P18) | Ausbau in Bauabschnitten | **erledigt** | [#143](https://github.com/hjorven/hafenmeister/pull/143) [#232](https://github.com/hjorven/hafenmeister/pull/232) |
+| [P18](https://hjorven.github.io/hafenmeister/roadmap/#paket=P18) | Ausbau in Bauabschnitten | **erledigt** | [#143](https://github.com/hjorven/hafenmeister/pull/143) [#232](https://github.com/hjorven/hafenmeister/pull/232) [#235](https://github.com/hjorven/hafenmeister/pull/235) |
 | [P19](https://hjorven.github.io/hafenmeister/roadmap/#paket=P19) | Ruf schwerer machen mit Wünschen je Bootsart | teilweise |  |
 | [P20](https://hjorven.github.io/hafenmeister/roadmap/#paket=P20) | Winter mit Inhalt füllen | offen |  |
 | [P21](https://hjorven.github.io/hafenmeister/roadmap/#paket=P21) | Logbuch und Hafenchronik zeigen | offen |  |

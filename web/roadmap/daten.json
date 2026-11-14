@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "9fca715"
+  "commit": "60cec22"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -450,11 +450,12 @@
    "id": "P18",
    "titel": "Ausbau in Bauabschnitten",
    "inhalt": "Ü18, bautage nutzen oder löschen",
-   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Bauabschnitte, Baustelle über Nacht und Sparziel (PR 232)",
+   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Bauabschnitte, Baustelle über Nacht und Sparziel (PR 232), Nachbesserungen (PR 235)",
    "welle": 2,
    "prs": [
     143,
-    232
+    232,
+    235
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -1233,7 +1234,8 @@
    ],
    "status": "arbeit",
    "bilder": [
-    23
+    23,
+    32
    ]
   },
   {
@@ -4752,9 +4754,22 @@
    "datum": "2026-11-14",
    "quelle": "bauen/p18-handy-baustelle.png",
    "nr": 31
+  },
+  {
+   "datei": "p66-pr228-pc-pulk-einfahrt.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Boote sammeln sich als Pulk an der Einfahrt",
+   "pr": 228,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr228/pulk-pc-g8-4242.png",
+   "nr": 32
   }
  ],
  "neueBilder": [
+  32,
   31,
   30,
   29,
@@ -4762,10 +4777,38 @@
   27,
   26,
   25,
-  24,
-  23
+  24
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Zeitraffer: robuster auf großem Gelände, Erwartung Stand PR 181",
+   "pr": 221,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 154, 228, 229, 231, 232 eingetragen, Bilder für P14 und P18",
+   "pr": 236,
+   "pakete": [
+    "P14",
+    "P18"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich",
+   "pr": 234,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Bauen: Nachbesserungen zu PR 232 (Ausbau-Fähnchen, Rückgängig am ersten Kauf, Regionsziel)",
+   "pr": 235,
+   "pakete": [
+    "P18"
+   ]
+  },
   {
    "datum": "2026-11-14",
    "titel": "Boote: Abendstau, Pulk am Eingang, Ablegetakt und Seebrücke im Fahrwasser",
@@ -4828,34 +4871,6 @@
    "pakete": [
     "P11"
    ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Einstieg: Tipps neben der linken Spalte und nacheinander",
-   "pr": 225,
-   "pakete": [
-    "P03"
-   ]
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "See im Norden je Küstentyp: kleinere Pflicht-See, Seeweg hinaus, Kartenrand ohne Kanten",
-   "pr": 224,
-   "pakete": [
-    "P62"
-   ]
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Roadmap: Vorschaubilder je Paket, zuletzt gemergte PRs, Bildergalerie in der README",
-   "pr": 223,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Dauerlieger-Hinweis: Morgen-Zettel des Tagesabschlusses freilassen",
-   "pr": 219,
-   "pakete": []
   }
  ]
 }
