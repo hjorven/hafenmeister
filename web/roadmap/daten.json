@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "67a0e70"
+  "commit": "b762995"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -68,7 +68,8 @@
    "prs": [
     146,
     151,
-    158
+    158,
+    288
    ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
    "punkte": [
@@ -685,15 +686,20 @@
    "id": "P28",
    "titel": "Anmeldung per Funk",
    "inhalt": "F2 (nutzt P11)",
-   "thread": "neu",
+   "thread": "erledigt (PR 288, docs/funk-anmeldung.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    288
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F2"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    54,
+    55
+   ]
   },
   {
    "id": "P29",
@@ -1820,12 +1826,14 @@
   {
    "code": "F2",
    "text": "Anmeldung per Funk: morgens melden sich ein bis zwei Boote an, Platz freihalten gibt Bonus",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 288, funk-anmeldung.md)",
    "pakete": [
     "P28"
    ],
-   "prs": [],
+   "prs": [
+    288
+   ],
    "abschnitt": "Kernspiel"
   },
   {
@@ -1989,8 +1997,8 @@
   {
    "code": "F17",
    "text": "Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (14.11.)",
    "pakete": [
     "P24"
    ],
@@ -2852,12 +2860,14 @@
   {
    "code": "E8",
    "text": "Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste)",
-   "status": "offen",
-   "statusText": "offen, kommt mit P28, P37, P38",
+   "status": "teilweise",
+   "statusText": "teilweise: Reservierungen erledigt (P28, PR 288); Havaristen und Feste kommen mit P37, P38",
    "pakete": [
     "P02"
    ],
-   "prs": [],
+   "prs": [
+    288
+   ],
    "abschnitt": "E Hafenbüro und Automatik"
   },
   {
@@ -2988,8 +2998,8 @@
   {
    "code": "G3",
    "text": "Ereignisse mit Nachspiel",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (14.11.)",
    "pakete": [
     "P24"
    ],
@@ -3034,8 +3044,8 @@
   {
    "code": "G7",
    "text": "Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (14.11.)",
    "pakete": [
     "P24"
    ],
@@ -3056,8 +3066,8 @@
   {
    "code": "G9",
    "text": "Seltene große Tage, z. B. Hanse-Woche, zehn Tage vorher angekündigt",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (14.11.)",
    "pakete": [
     "P24"
    ],
@@ -4360,11 +4370,11 @@
     "P59"
    ],
    "zaehler": {
-    "erledigt": 0,
+    "erledigt": 1,
     "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
-    "offen": 17,
+    "offen": 16,
     "entfaellt": 0,
     "alle": 19
    }
@@ -4448,20 +4458,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 24,
+  "erledigt": 25,
   "teilweise": 6,
   "arbeit": 3,
   "frage": 0,
-  "offen": 47,
+  "offen": 46,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 140,
-  "teilweise": 6,
+  "erledigt": 145,
+  "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 72,
+  "offen": 66,
   "entfaellt": 0,
   "alle": 219
  },
@@ -5113,9 +5123,34 @@
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr281/281-regatta-ergebnis-iphonequer.png",
    "nr": 53
+  },
+  {
+   "datei": "p28-pr288-handy-funk-anmeldung.jpg",
+   "pakete": [
+    "P28"
+   ],
+   "titel": "Funk: Boot meldet sich an, Box freihalten mit Bonus (Handy)",
+   "pr": 288,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "funk-anmeldung/handy-anmeldung.png",
+   "nr": 54
+  },
+  {
+   "datei": "p28-pr288-pc-box-frei-gehalten.jpg",
+   "pakete": [
+    "P28"
+   ],
+   "titel": "Box frei gehalten, Funkliste am Rand (PC)",
+   "pr": 288,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "funk-anmeldung/pc-box-frei-gehalten.png",
+   "nr": 55
   }
  ],
  "neueBilder": [
+  55,
   53,
   52,
   50,
@@ -5123,10 +5158,52 @@
   45,
   43,
   41,
-  39,
-  38
+  39
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: Bilder zu P28 Anmeldung per Funk (PR 288)",
+   "pr": 302,
+   "pakete": [
+    "P28"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "P24 Teil 2: Hanse-Woche, Mittsommer, Heringstage, Holzboote, Bauten und Nachspiel",
+   "pr": 299,
+   "pakete": [
+    "P24"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Folgefunde Einzeltest: geschenktes WC zuerst, Bootskarte nennt den Münzbetrag",
+   "pr": 301,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Zeitraffer: Pulk erkennen, Überlappungen getrennt zählen",
+   "pr": 251,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "P28: Anmeldung per Funk, Box freihalten mit Bonus",
+   "pr": 288,
+   "pakete": [
+    "P28",
+    "P02"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Pages gebündelt statt nach jedem Merge, PR-Tests schneller",
+   "pr": 294,
+   "pakete": []
+  },
   {
    "datum": "2026-11-14",
    "titel": "Roadmap-Pflege: P22 Erfolge mit PR 295 und Bildern, Regatta-Bild zu P24",
@@ -5174,49 +5251,6 @@
    "pr": 292,
    "pakete": [
     "P61"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: P24 Teil 1 (PR 281) eingetragen, Bilder zum Sturm",
-   "pr": 286,
-   "pakete": [
-    "P24"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Auszeichnung: Satz im Gästebuch ohne falschen Fall (\"dann heißt der Hafen ...\")",
-   "pr": 291,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Fehler aus Jorvens Feature-Test (14.11.) behoben",
-   "pr": 290,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Balancing: große Boote kommen nach Platzangebot (A10)",
-   "pr": 287,
-   "pakete": [
-    "P17"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "README und Plan auf den Stand vom 14.11.2026 (nach PR 285)",
-   "pr": 289,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Arbeitsplan: 252 und P24 Teil 1 gemergt, P17 nach PR 280 und A10",
-   "pr": 285,
-   "pakete": [
-    "P24",
-    "P17"
    ]
   }
  ]
