@@ -1,6 +1,6 @@
 # Hafenmeister: Roadmap
 
-Stand: 14.11.2026 vormittags, abgeglichen mit `main` bei Commit `dae7f97` (PR 279). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
+Stand: 14.11.2026 nachmittags, abgeglichen mit `main` bei Commit `d09e3c7` (PR 291). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
 
 **Verhältnis zu [plan.md](plan.md):** `plan.md` bleibt der einzige gültige Plan für Vision, Regeln und Entscheidungen. Diese Roadmap ist die **Arbeitsliste**: Sie sagt, was noch fehlt, was falsch ist, was weg soll, und welches Paket (welcher Thread) es erledigt. Wo die Roadmap eine Entscheidung aus `plan.md` ändern würde, steht das unter [Offene Fragen an Jorven](#offene-fragen-an-jorven) und gilt erst nach seiner Antwort; danach wird `plan.md` im selben PR angepasst.
 
@@ -453,8 +453,8 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | I3 | Belohnungen mischen (Geld, Anker, seltener Gast, Rabatt, Deko) | erledigt (PR 152) | P13 |
 | I4 | Wochenziel | erledigt (PR 152) | P13 |
 | I5 | Logbuch als Sammelalbum mit Schattenrissen | erledigt | P21 |
-| I6 | Erfolge als Dinge im Hafen (Pokal, Wimpel, Schild) | offen | P22 |
-| I7 | Meilensteine mit Ton und Bild | offen | P22 |
+| I6 | Erfolge als Dinge im Hafen (Pokal, Wimpel, Schild) | erledigt (Erfolgsmast, Pokaltreppe, Ehrentafel, docs/erfolge.md) | P22 |
+| I7 | Meilensteine mit Ton und Bild | erledigt (Meldung mit Symbol, Ton "erfolg") | P22 |
 | I8 | Richtiger Abschluss mit Kamerafahrt und Titel | erledigt (PR 156) | P16 |
 | I9 | Endlosspiel mit Saisonzielen | erledigt (PR 156) | P16 |
 | I10 | Ziele im Winter (Winterarbeiten) | erledigt (PR 245) | P20 |
@@ -665,14 +665,14 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P19 | Ruf schwerer machen mit Wünschen je Bootsart | Ü17, `feeFactor`, `arrivalWeight`, Kapazität sichtbar | `sim.js`, `data/boats/*.js`, `economy.js` | erledigt: Teil 1 (PR 244: B7, C2, C3, C4, C6, F8), Teil 2 (PR 279: C5, B9, "heute voll"), [ruf.md](ruf.md) |
 | P20 | Winter mit Inhalt füllen | Ü19, F14, F15, `docs/ereignisse.md` | `sim.js` (Jahreslauf), neues Feature-Modul, Travellift/Winterlager in `render/services.js` | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, 249, `docs/winter.md`); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing |
 | P21 | Logbuch und Hafenchronik zeigen | Logbuch (Note 1), F36, `sim:logbookNew` | neues Modul `web/js/ui/logbuch.js`, `state.js` | erledigt (PR 274, docs/logbuch.md, SAVE_VERSION 3) |
-| P22 | Erfolge einbauen | plan.md 9 | neues Feature-Modul | neu |
+| P22 | Erfolge einbauen | plan.md 9 | neues Feature-Modul | erledigt (30 Erfolge, Reiter im Logbuch, Dinge im Hafen, docs/erfolge.md) |
 
 ### Welle 3: Tiefe und Hafenleben (Extras)
 
 | Paket | Titel (Thread) | Inhalt | Thread |
 |---|---|---|---|
 | P23 | Services mit eigener Wirkung | Services nicht nur "€ pro Tag" | bestehend: "Services und Sonderanlagen einbauen" |
-| P24 | Ereignisse zum Vorbereiten und neue Ereignisse | Vorwarnung mit Handlungsmöglichkeit, F17 | bestehend: "Ereignisse Sturm und Regatta einbauen" |
+| P24 | Ereignisse zum Vorbereiten und neue Ereignisse | Vorwarnung mit Handlungsmöglichkeit, F17 | Teil 1 erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend), Teil 2 offen; bestehend: "Ereignisse Sturm und Regatta einbauen" |
 | P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | neu |
 | P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | neu |
 | P27 | Päckchen liegen bei vollem Hafen | F1 | neu |

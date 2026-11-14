@@ -1,0 +1,103 @@
+/* Erfolge (Roadmap P22). Wird von web/js/features/erfolge.js geladen. Reiter im Logbuch nutzt dessen
+ * Klassen (logbuch.css: .hm-lb-stand, .hm-lb-balken, .hm-lb-art, .hm-lb-neu). Beschreibung: docs/erfolge.md
+ */
+
+.hm-ef-sym {
+  display: inline-block;
+  flex: none;
+  width: var(--hm-symbol, 24px);
+  height: var(--hm-symbol, 24px);
+  background: var(--ef-farbe, currentColor);
+  -webkit-mask: var(--ef-sym) center / contain no-repeat;
+  mask: var(--ef-sym) center / contain no-repeat;
+  /* Tintenrand wie die Pixel-Symbole */
+  filter: drop-shadow(1px 0 0 var(--hm-tinte, #24364a)) drop-shadow(-1px 0 0 var(--hm-tinte, #24364a)) drop-shadow(0 1px 0 var(--hm-tinte, #24364a)) drop-shadow(0 -1px 0 var(--hm-tinte, #24364a));
+  font-style: normal;
+}
+.hm-ef-sym.offen { background: #b9ae97; filter: none; opacity: 0.8; }
+
+/* Punkt am Reiter: neue Erfolge */
+.hm-lb-reiter { position: relative; }
+.hm-lb-punkt { position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; background: var(--hm-gold, #ffd95a); box-shadow: 0 0 0 2px var(--hm-tinte, #24364a); }
+
+/* ------------------------------------------------------------ Meldung (rechts oben, wie Logbuch und Gästebuch) */
+#hm-ef-meldung {
+  position: absolute;
+  z-index: 19;
+  top: calc(var(--hm-oben, 12px) + var(--hm-knopf, 48px) + 8px);
+  right: var(--hm-rechts, 12px);
+  pointer-events: none;
+}
+#hm-ef-meldung[hidden], body.foto #hm-ef-meldung, body.hm-lb-offen #hm-ef-meldung, body.hm-feier-an #hm-ef-meldung { display: none; }
+.hm-neu .hm-ef-meldung {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(300px, 70vw);
+  padding: 2px 10px 2px 6px;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--hm-rahmen-breite, 6px 6px 8px);
+  border-image-source: var(--rahmen-gold);
+  border-image-slice: 3 3 4 3 fill;
+  border-image-width: var(--hm-rahmen-breite, 6px 6px 8px);
+  background: none;
+  color: var(--hm-tinte, #24364a);
+  font-family: var(--hm-pixel, system-ui);
+  text-align: left;
+  cursor: pointer;
+  animation: hm-ef-rein 0.25s steps(3);
+}
+.hm-ef-meldung .hm-ef-feld { display: grid; place-items: center; flex: none; width: 32px; height: 32px; background: var(--hm-papier, #fffaf0); box-shadow: inset 0 0 0 var(--hm-px, 2px) rgba(36, 54, 74, 0.35); }
+.hm-ef-meldung .hm-ef-sym { width: 24px; height: 24px; }
+.hm-ef-meldung.pokal .hm-ef-feld { animation: hm-ef-glanz 0.9s steps(2) 2; }
+.hm-ef-meldung-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
+.hm-ef-meldung-text small { font-size: calc(var(--hm-schrift, 15px) - 4px); text-transform: uppercase; letter-spacing: 0.06em; color: var(--hm-tinte-2, #5a6a7c); }
+.hm-ef-meldung-text b { font-size: calc(var(--hm-schrift, 15px) - 1px); }
+.hm-ef-meldung-text span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: calc(var(--hm-schrift, 15px) - 2px);
+  color: var(--hm-tinte-2, #5a6a7c);
+}
+@keyframes hm-ef-rein { from { transform: translateX(30%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes hm-ef-glanz { 50% { transform: scale(1.25); } }
+
+/* ------------------------------------------------------------ Reiter "Erfolge" */
+.hm-ef-liste { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; }
+.hm-ef-karte {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 8px 8px 10px;
+  background: #ddd3bd;
+  color: var(--hm-tinte-2, #5a6a7c);
+}
+.hm-ef-karte.da { background: var(--hm-papier, #fffaf0); color: var(--hm-tinte, #24364a); box-shadow: inset 0 0 0 var(--hm-px, 2px) rgba(36, 54, 74, 0.25); }
+.hm-ef-karte.neu { background: #f7e3a6; }
+.hm-ef-karte .hm-ef-sym { width: 32px; height: 32px; margin-top: 2px; }
+.hm-ef-karte .hm-lb-neu { top: auto; bottom: 6px; left: auto; right: 6px; }
+.hm-ef-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; line-height: 1.2; }
+.hm-ef-text b { font-weight: 600; }
+.hm-ef-text > span:not(.hm-lb-klein) { font-size: calc(var(--hm-schrift, 15px) - 2px); }
+.hm-ef-fortschritt { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+.hm-lb-balken.klein { flex: 1; height: 6px; margin: 0; min-width: 50px; }
+.hm-ef-fortschritt .hm-lb-klein { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+@media (max-width: 599px) and (orientation: portrait) {
+  /* Meldung nur mit Titel, damit sie neben der linken Spalte Platz hat (wie die Logbuch-Meldung) */
+  .hm-neu .hm-ef-meldung { max-width: calc(100vw - 225px); min-width: 150px; }
+  .hm-ef-meldung-text small, .hm-ef-meldung-text span { display: none; }
+  .hm-ef-meldung-text b { white-space: normal; }
+  .hm-ef-liste { grid-template-columns: 1fr; gap: 4px; }
+  .hm-ef-karte { padding: 6px 8px; }
+  .hm-ef-karte .hm-ef-sym { width: 24px; height: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-neu .hm-ef-meldung, .hm-ef-meldung.pokal .hm-ef-feld { animation: none; }
+}

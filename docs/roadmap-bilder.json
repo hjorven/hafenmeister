@@ -517,6 +517,50 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "p55/handy-3-schlange.png"
+  },
+  {
+   "datei": "p24-pr281-handy-sturmklar.jpg",
+   "pakete": [
+    "P24"
+   ],
+   "titel": "Morgen Sturm: Gäste sturmklar verholen",
+   "pr": 281,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "ereignisse/vorbereiten-handy-1-sturm.png"
+  },
+  {
+   "datei": "p24-pr281-pc-sturm-angekuendigt.jpg",
+   "pakete": [
+    "P24"
+   ],
+   "titel": "Sturm angekündigt, Boote am offenen Stegkopf",
+   "pr": 281,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "ereignisse/vorbereiten-pc-1-sturm-angekuendigt.png"
+  },
+  {
+   "datei": "p19-pr279-handy-heute-voll.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Bootskarte am Handy: Wunsch \"Essen (heute voll)\"",
+   "pr": 279,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr279/279-voll-iphone.png"
+  },
+  {
+   "datei": "p19-pr279-pc-heute-voll.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Bootskarte am PC: Wunsch \"WC (heute voll)\"",
+   "pr": 279,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr279/279-voll-pc.png"
   }
  ]
 }

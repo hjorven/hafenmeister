@@ -14,7 +14,7 @@ Safari auf iPhone und iPad löscht alles, was eine Seite im Browser gespeichert 
 | Datei | Aufgabe |
 |---|---|
 | `web/manifest.webmanifest` | Name, Farben, Icons, `start_url` und `scope` relativ (`./`) |
-| `web/sw.js` | Service Worker: eigene Dateien zuerst aus dem Netz, ohne Netz aus dem Cache. Nach jedem Start legt er alle Dateien aus `offline-liste.json` (entsteht beim Deploy, `tools/offline-liste.mjs`) in den Cache, damit das Spiel danach ohne Netz startet; nur bei neuem Stand. Supabase und Ähnliches wird nicht angefasst. |
+| `web/sw.js` | Service Worker: eigene Dateien zuerst aus dem Netz, ohne Netz aus dem Cache. Nach jedem Start legt er alle Dateien aus `offline-liste.json` (entsteht beim Deploy, `tools/offline-liste.mjs`) in den Cache, damit das Spiel danach ohne Netz startet; nur bei neuem Stand. Fehlt die Liste (lokaler Server ohne `tools/build-pages.sh`), sichert er alles, was die Seite geladen hat. Supabase und Ähnliches wird nicht angefasst. |
 | `web/icons/` | `icon.svg` (Vorlage), PNG in 192 und 512, `icon-maskable-512.png` für Android, `apple-touch-icon.png` (180) für iOS |
 | `web/js/save/storage.js` | Speichern, Laden, Sicherung des vorigen Stands, Export und Import, Versionsnummer und Umbau alter Stände |
 | `web/js/save/pwa.js` | Service Worker anmelden, Update melden, Installation anbieten, Erkennung iOS und App-Modus |

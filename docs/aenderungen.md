@@ -6,6 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Neu: Erfolge. 30 Erfolge vom ersten Festmachen bis zum Hafenmillionär melden sich rechts oben mit eigenem Ton und stehen im Logbuch unter "Erfolge" mit Fortschritt. Im Hafen wachsen dafür ein Mast mit bunten Wimpeln, eine Pokaltreppe und eine Ehrentafel mit einem Schild je Ausbaustufe. Alte Spielstände bekommen schon Erreichtes still nachgetragen.
 - Große Boote kommen nur so oft, wie der Hafen Plätze für sie hat: Vor dem Ausbau fahren deutlich weniger Yachten und Großsegler wieder weg, weil nichts frei ist (A10, 287).
 - Bootskarte: Ist die Versorgung für einen Wunsch heute schon voll, steht er rot da ("Wunsch: Dusche (heute voll)").
 - Wege zählen: Liegt eine Box weit weg vom WC oder der Dusche, zählt der Wunsch für die Note nur halb; das Ziehschild zeigt "Dusche weit", das Gästebuch "weiter Weg zur Dusche". Das Sanitärgebäude hat auch Duschen.

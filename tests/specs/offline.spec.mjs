@@ -96,3 +96,29 @@ test('Ein zweiter Start ohne Aenderung laedt nichts neu', async ({ game }) => {
   expect(m.geladen, 'unveraenderter Stand wurde trotzdem neu geladen').toBe(0);
   await spielLaeuft(page);
 });
+
+// Lokale Server ohne tools/build-pages.sh liefern keine offline-liste.json. Dann sichert der Service
+// Worker alles, was die Seite geladen hat; auch das reicht fuer einen Start ohne Netz.
+test('Ohne offline-liste.json startet das Spiel trotzdem ohne Netz', async ({ page, context, problems }) => {
+  await context.route('**/offline-liste.json', (r) => r.fulfill({ status: 404, body: 'fehlt' }));
+  const meldung = () => page.evaluate(() => new Promise((ok) => {
+    navigator.serviceWorker.addEventListener('message', (e) => {
+      if (e.data?.typ?.startsWith('offline-')) ok(e.data);
+    });
+  }));
+  await page.goto('./');
+  const m = await meldung();
+  expect(m.typ).toBe('offline-ohne-liste');
+  expect(m.fehler).toBe(0);
+  const css = await page.evaluate(async () => {
+    const c = await caches.open((await caches.keys()).find((k) => k.startsWith('hafenmeister-')));
+    return (await c.keys()).map((r) => r.url).filter((u) => u.endsWith('.css')).length;
+  });
+  expect(css, 'CSS-Dateien fehlen im Cache').toBeGreaterThan(3);
+  await context.setOffline(true);
+  await page.reload();
+  await spielLaeuft(page);
+  await context.setOffline(false);
+  expect(problems.filter((p) => !/offline-liste\.json/.test(p))).toEqual([]);
+  problems.length = 0;
+});
