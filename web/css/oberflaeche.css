@@ -1155,7 +1155,7 @@ body.foto #hm-meldeplatz, body.hm-feier-an #hm-meldeplatz, body.building #hm-mel
   .hm-neu #hm-meldeplatz > * { animation: none !important; }
 }
 /* "Als Nächstes" im Meldeplatz: ohne Pfeil, eine Zeile Titel, eine Zeile Text */
-.hm-neu #hm-meldeplatz #bau-tipp { padding: 5px 12px; text-align: left; animation: hm-mp-rein 0.24s steps(4, end); }
+.hm-neu #hm-meldeplatz #bau-tipp { padding: 5px 12px; text-align: left; animation: none; }
 .hm-neu #hm-meldeplatz #bau-tipp::after { display: none; }
 /* Tipps beim ersten Mal (features/einstieg.js, Klasse .hinweis): liegt der Meldeplatz unten (Handy hochkant),
  * stehen sie an derselben Stelle, kurz und flach: Titel, Kurztext, "Verstanden" daneben. Die Meldungs-Ordnung
