@@ -164,8 +164,11 @@ Dazu ein Knopf "Ton und Musik einstellen", der das Ton-Fenster mit getrennten Re
 
 ## Tempo, das mitdenkt (P07, Bed P4 und P8)
 
-- Bei Ankündigung oder Beginn eines Ereignisses, wenn ein Ausbau möglich wird und beim Abschluss der Region geht das Tempo zurück auf 1x.
-- 8x läuft bis zum nächsten Boot an der Boje.
+- Das gewählte Tempo bleibt. Ankündigungen, Ereignisse und "Ausbau möglich" kommen morgens als Schild und bremsen nicht (bis 14.11. sprang 3x dadurch fast jeden Morgen auf 1x).
+- Gebremst wird nur, wenn gleich etwas zu tun ist: ein früh zurückgekehrter Dauerlieger wartet auf seinen Platz, die Region ist geschafft, bei 8x das nächste Boot an der Boje.
+- Dann merkt sich die Zeitleiste das alte Tempo und zeigt den Knopf "Weiter mit 3x" (oder 8x) mit dem Grund. PC: über der Leiste, Handy: oben in der Leiste, damit das Hinweisschild ihn nicht verdeckt. Wählt der Spieler selbst ein Tempo, verschwindet er; sonst nach 30 s.
+- Ist der Anlass erledigt (Dauerlieger: alle Gäste umgelegt), kehrt das Tempo von selbst zurück, sofern noch 1x läuft.
+- Schnittstelle: `game.oberflaeche.drossle(grund, { halten })` und `game.oberflaeche.tempoZurueck(grund)`.
 - PC: <kbd>F</kbd> 3x an und aus, <kbd>G</kbd> 8x an und aus, <kbd>K</kbd> Kassieren, <kbd>Leertaste</kbd> Pause.
 
 Schrift: alles in Pixelify Sans, auch Fließtext und Modul-Stile (`.hm-neu *` mit `!important` in `oberflaeche.css`); Ziffern und Euro bleiben über `unicode-range` in der Systemschrift. Kleine Texte nicht unter etwa 13 px.
