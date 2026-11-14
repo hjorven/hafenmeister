@@ -21,7 +21,7 @@
   line-height: 1.3;
   pointer-events: auto;
 }
-.hm-ta[hidden], .hm-ta-zettel[hidden] { display: none !important; }
+.hm-ta[hidden], .hm-ta-zettel[hidden], .hm-ta-zettel.zurueck { display: none !important; }
 .hm-ta[style*="left"] { margin-left: 0; }
 .hm-ta.rein { animation: hm-ta-karte-rein 0.28s steps(5, end); }
 /* Nur einblenden, nicht verschieben: die Karte steht sofort an ihrer gemessenen Stelle */
