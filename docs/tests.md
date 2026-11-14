@@ -5,15 +5,27 @@
 Im Hauptordner des Repos:
 
 ```bash
+bash tests/pruefen.sh --schnell
+```
+
+Er prüft nacheinander die Pfade für GitHub Pages, die Tests ohne Browser ohne die langen Simulationen (`tests/node-tests.sh --ohne-langsame`) und die Browser-Tests auf dem Handy hochkant. Am Ende steht `Alles grün.`, sonst bricht er mit dem Fehler ab. Beim ersten Lauf installiert er die Abhängigkeiten in `tests/` selbst. Dauer rund 6 Minuten. Alle fünf Geräte und die langen Simulationen prüft danach der PR-Check auf GitHub parallel; beides zusammen ist seit 14.11.2026 die Regel vor dem Merge.
+
+Alles lokal (rund 20 Minuten im Claude-Container, z. B. wenn GitHub Actions nicht läuft):
+
+```bash
 bash tests/pruefen.sh
 ```
 
-Er prüft nacheinander die Pfade für GitHub Pages, alle Tests ohne Browser (`tests/*.test.mjs`) und alle Browser-Tests auf Handy, Tablet und PC. Am Ende steht `Alles grün.`, sonst bricht er mit dem Fehler ab. Beim ersten Lauf installiert er die Abhängigkeiten in `tests/` selbst. Dauer etwa 20 Minuten.
-
-Nur die schnellen Prüfungen ohne Browser (etwa 5 Sekunden):
+Nur die Prüfungen ohne Browser (rund 4,5 Minuten, davon allein `tests/fahrwasser.test.mjs` rund 4 Minuten):
 
 ```bash
 bash tests/pruefen.sh --ohne-browser
+```
+
+Nur die Tests ohne Browser und ohne die langen Simulationen (rund 15 Sekunden):
+
+```bash
+bash tests/node-tests.sh --ohne-langsame
 ```
 
 Nur ein Gerät (alles nach dem Befehl geht an Playwright):
@@ -22,7 +34,24 @@ Nur ein Gerät (alles nach dem Befehl geht an Playwright):
 bash tests/pruefen.sh --project=pc
 ```
 
-Stand: 12.11.2026. Status: gebaut. Bei jedem Pull Request und jedem Push auf `main` startet der Workflow **Tests** (`.github/workflows/tests.yml`). Er öffnet das Spiel in einem echten Browser (Chromium mit Software-WebGL) in fünf Gerätegrößen und prüft, ob es lädt und sich bedienen lässt.
+Reine Doku-Änderungen: Hat der Branch gegenüber `origin/main` nur Dateien in `docs/`, `*.md` im Hauptordner, `.github/dependabot.yml` oder `.gitleaksignore` geändert (und nichts ist uncommittet), überspringt `bash tests/pruefen.sh` die Browser-Tests und die langen Simulationen von selbst. Trotzdem alles prüfen: `bash tests/pruefen.sh --alles`. Was als Doku gilt, entscheidet `tools/ci-bereiche.sh`:
+
+```bash
+git fetch origin main && bash tools/ci-bereiche.sh origin/main HEAD
+```
+
+## Auf GitHub (Workflow Tests)
+
+Stand: 14.11.2026. Der Workflow **Tests** (`.github/workflows/tests.yml`) läuft bei jedem Pull Request, jede Nacht um 02:41 UTC auf `main` und per Hand (Run workflow). Nach dem Merge läuft er nicht noch einmal auf `main`: Der PR war schon grün, und die Doppelläufe haben anderen PRs die Runner weggenommen. Er öffnet das Spiel in einem echten Browser (Chromium mit Software-WebGL) in fünf Gerätegrößen und prüft, ob es lädt und sich bedienen lässt.
+
+| Job | Was | Dauer (gemessen) |
+|---|---|---|
+| Was hat sich geändert | `tools/ci-bereiche.sh`: nur Doku? | wenige Sekunden |
+| Pfade und Tests ohne Browser | `tools/check-pages.sh web`, `tests/node-tests.sh` (bei reiner Doku `--ohne-langsame`) | rund 4,5 Minuten, Doku rund 1 Minute |
+| Spiel testen (Gerät Teil/Teile) | Playwright je Gerät, `pc` in drei und `tablet` in zwei Teilen (`--shard`); bei reiner Doku übersprungen | je Job höchstens rund 7 Minuten |
+| Spiel testen (Handy, Tablet, PC) | Sammel-Check, grün wenn alles grün ist oder die Browser-Tests bei reiner Doku übersprungen wurden | Sekunden |
+
+Vorher (bis 14.11.2026) dauerte ein PR-Lauf 8 bis 15 Minuten, weil `pc` am Stück rund 11 Minuten brauchte, und nach jedem Merge lief derselbe Satz noch einmal auf `main`.
 
 ## Was geprüft wird
 
@@ -51,7 +80,7 @@ Three.js liegt im Spiel selbst (`web/vendor/three-<Version>/`, P61), Tests brauc
 
 ## Regel für alle Threads
 
-Vor dem Mergen eines PRs muss `bash tests/pruefen.sh` lokal grün sein, dazu der Check **Spiel testen (Handy, Tablet, PC)** im PR. Ist er rot, steht im Lauf unter **Annotations**, welcher Test auf welchem Gerät scheitert. Jedes Gerät läuft als eigener, paralleler Job (`Spiel testen (handy)` usw.), der Sammel-Check `Spiel testen (Handy, Tablet, PC)` ist grün, wenn alle Geräte und die Tests ohne Browser grün sind. Unter **Artifacts** liegen je Gerät `bildschirmfotos-<gerät>` und `testbericht-<gerät>` (HTML-Bericht und Fotos der Fehlschläge).
+Vor dem Mergen eines PRs muss `bash tests/pruefen.sh --schnell` lokal grün sein, dazu der Check **Spiel testen (Handy, Tablet, PC)** im PR. Ist er rot, steht im Lauf unter **Annotations**, welcher Test auf welchem Gerät scheitert. Jedes Gerät (pc und tablet in mehreren Teilen) läuft als eigener, paralleler Job (`Spiel testen (handy 1/1)`, `Spiel testen (pc 2/3)` usw.), der Sammel-Check `Spiel testen (Handy, Tablet, PC)` ist grün, wenn alle Geräte und die Tests ohne Browser grün sind. Unter **Artifacts** liegen je Gerät und Teil `bildschirmfotos-<gerät>-<teil>` und `testbericht-<gerät>-<teil>` (HTML-Bericht und Fotos der Fehlschläge).
 
 Damit GitHub das auch erzwingt, kann Jorven es einmal in GitHub einstellen (freiwillig):
 

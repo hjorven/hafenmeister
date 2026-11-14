@@ -1,6 +1,6 @@
 # Hafenmeister: Roadmap
 
-Stand: 14.11.2026 nachmittags, abgeglichen mit `main` bei Commit `d09e3c7` (PR 291). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
+Stand: 14.11.2026 abends, abgeglichen mit `main` bei Commit `adc0086` (PR 295). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
 
 **Verhältnis zu [plan.md](plan.md):** `plan.md` bleibt der einzige gültige Plan für Vision, Regeln und Entscheidungen. Diese Roadmap ist die **Arbeitsliste**: Sie sagt, was noch fehlt, was falsch ist, was weg soll, und welches Paket (welcher Thread) es erledigt. Wo die Roadmap eine Entscheidung aus `plan.md` ändern würde, steht das unter [Offene Fragen an Jorven](#offene-fragen-an-jorven) und gilt erst nach seiner Antwort; danach wird `plan.md` im selben PR angepasst.
 
@@ -16,7 +16,7 @@ Stand: 14.11.2026 nachmittags, abgeglichen mit `main` bei Commit `d09e3c7` (PR 2
 - Vor jedem Merge im Hauptordner:
 
 ```bash
-bash tests/pruefen.sh
+bash tests/pruefen.sh --schnell
 ```
 
 **Reihenfolge seit 12.11.2026 abends (Jorven):**
@@ -665,7 +665,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P19 | Ruf schwerer machen mit Wünschen je Bootsart | Ü17, `feeFactor`, `arrivalWeight`, Kapazität sichtbar | `sim.js`, `data/boats/*.js`, `economy.js` | erledigt: Teil 1 (PR 244: B7, C2, C3, C4, C6, F8), Teil 2 (PR 279: C5, B9, "heute voll"), [ruf.md](ruf.md) |
 | P20 | Winter mit Inhalt füllen | Ü19, F14, F15, `docs/ereignisse.md` | `sim.js` (Jahreslauf), neues Feature-Modul, Travellift/Winterlager in `render/services.js` | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, 249, `docs/winter.md`); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing |
 | P21 | Logbuch und Hafenchronik zeigen | Logbuch (Note 1), F36, `sim:logbookNew` | neues Modul `web/js/ui/logbuch.js`, `state.js` | erledigt (PR 274, docs/logbuch.md, SAVE_VERSION 3) |
-| P22 | Erfolge einbauen | plan.md 9 | neues Feature-Modul | erledigt (30 Erfolge, Reiter im Logbuch, Dinge im Hafen, docs/erfolge.md) |
+| P22 | Erfolge einbauen | plan.md 9 | neues Feature-Modul | erledigt (PR 295: 30 Erfolge, Reiter im Logbuch, Dinge im Hafen, docs/erfolge.md) |
 
 ### Welle 3: Tiefe und Hafenleben (Extras)
 
