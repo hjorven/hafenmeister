@@ -293,12 +293,13 @@
    "id": "P11",
    "titel": "Wünsche über dem Boot und Ankunftsvorschau",
    "inhalt": "Ü10",
-   "thread": "erledigt (PR 158, 227)",
+   "thread": "erledigt (PR 158, 227, 231)",
    "welle": 2,
    "prs": [
     146,
     158,
-    227
+    227,
+    231
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -380,7 +381,10 @@
     "Bed P1"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    28,
+    29
+   ]
   },
   {
    "id": "P15",
@@ -446,7 +450,7 @@
    "id": "P18",
    "titel": "Ausbau in Bauabschnitten",
    "inhalt": "Ü18, bautage nutzen oder löschen",
-   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"",
+   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Bauabschnitte, Baustelle über Nacht und Sparziel (PR 232)",
    "welle": 2,
    "prs": [
     143,
@@ -464,7 +468,9 @@
    "status": "erledigt",
    "bilder": [
     18,
-    19
+    19,
+    30,
+    31
    ]
   },
   {
@@ -1124,7 +1130,7 @@
    "id": "P62",
    "titel": "Geländeform und Engpass neu bauen",
    "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
-   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224)",
+   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224, 229): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224), Land nördlich der Reede (PR 229)",
    "welle": 0,
    "prs": [
     179,
@@ -1134,7 +1140,8 @@
     210,
     211,
     216,
-    224
+    224,
+    229
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1207,13 +1214,14 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199): Ausweichen über freies Wasser, Fahrwasserkarte; Stau an der Einfahrt offen; übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "thread": "in Arbeit (PR 180, 181, 199, 228): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
    "welle": 0,
    "prs": [
     81,
     180,
     181,
-    199
+    199,
+    228
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -4696,20 +4704,76 @@
    "datum": "2026-11-14",
    "quelle": "vorschau-p11/pc-weit-kleine-schilder.png",
    "nr": 27
+  },
+  {
+   "datei": "p14-pr154-pc-gaestebuch.jpg",
+   "pakete": [
+    "P14"
+   ],
+   "titel": "Gästebuch am Hafenbüro",
+   "pr": 154,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "gaestebuch/pc-gaestebuch.png",
+   "nr": 28
+  },
+  {
+   "datei": "p14-pr154-iphone-blasen-und-meldungen.jpg",
+   "pakete": [
+    "P14"
+   ],
+   "titel": "Bewertungen über dem Boot",
+   "pr": 154,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "gaestebuch/iphone-blasen-und-meldungen.png",
+   "nr": 29
+  },
+  {
+   "datei": "p18-pr232-p18-pc-baustelle.jpg",
+   "pakete": [
+    "P18"
+   ],
+   "titel": "Baustelle über Nacht",
+   "pr": 232,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "bauen/p18-pc-baustelle.png",
+   "nr": 30
+  },
+  {
+   "datei": "p18-pr232-p18-handy-baustelle.jpg",
+   "pakete": [
+    "P18"
+   ],
+   "titel": "Ausbau in Abschnitten",
+   "pr": 232,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "bauen/p18-handy-baustelle.png",
+   "nr": 31
   }
  ],
  "neueBilder": [
+  31,
+  30,
+  29,
+  28,
   27,
   26,
   25,
   24,
-  23,
-  22,
-  21,
-  20,
-  17
+  23
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Boote: Abendstau, Pulk am Eingang, Ablegetakt und Seebrücke im Fahrwasser",
+   "pr": 228,
+   "pakete": [
+    "P66"
+   ]
+  },
   {
    "datum": "2026-11-14",
    "titel": "P14: Bewertungen über dem Boot und Gästebuch",
@@ -4737,13 +4801,17 @@
    "datum": "2026-11-14",
    "titel": "Land nördlich der Reede: kein kahler Block mehr, ruhige Farben im groben Netz",
    "pr": 229,
-   "pakete": []
+   "pakete": [
+    "P62"
+   ]
   },
   {
    "datum": "2026-11-14",
    "titel": "Wunsch-Schilder nach Bildbreite in Metern: am Handy wieder in der Startansicht",
    "pr": 231,
-   "pakete": []
+   "pakete": [
+    "P11"
+   ]
   },
   {
    "datum": "2026-11-14",
@@ -4787,12 +4855,6 @@
    "datum": "2026-11-13",
    "titel": "Dauerlieger-Hinweis: Morgen-Zettel des Tagesabschlusses freilassen",
    "pr": 219,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Roadmap interaktiv: Seite /roadmap/ mit Filter und Übersicht in der README",
-   "pr": 222,
    "pakete": []
   }
  ]
