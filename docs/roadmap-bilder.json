@@ -561,6 +561,39 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr279/279-voll-pc.png"
+  },
+  {
+   "datei": "p22-pr295-handy-erfolge.jpg",
+   "pakete": [
+    "P22"
+   ],
+   "titel": "Reiter Erfolge im Logbuch am Handy",
+   "pr": 295,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "erfolge/handy-erfolge.png"
+  },
+  {
+   "datei": "p22-pr295-pc-wimpel-pokale.jpg",
+   "pakete": [
+    "P22"
+   ],
+   "titel": "Wimpelmast und Pokale im Hafen am PC",
+   "pr": 295,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "erfolge/pc-hafen-dinge.png"
+  },
+  {
+   "datei": "p24-pr281-quer-regatta-vorbei.jpg",
+   "pakete": [
+    "P24"
+   ],
+   "titel": "Regatta vorbei: Ergebnis am Abend, Handy quer",
+   "pr": 281,
+   "geraet": "handy-quer",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr281/281-regatta-ergebnis-iphonequer.png"
   }
  ]
 }
