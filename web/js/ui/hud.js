@@ -230,7 +230,8 @@ export function init(game) {
           : el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`)))),
       sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length, sim.bueroAutomatik?.(b.size)),
       vorschlag ? el('p', { class: 'card-hint hm-vorschlag' }, pixelBild('rauteGold', 14), vorschlagText(b, vorschlag)) : null,
-      wert ? el('p', { class: 'card-zahlt' }, zahltText(wert.fee, gold.length ? sim.platzWert(b.id, gold[0])?.fee ?? wert.fee : null, gold.length > 0 && gold.length >= fitting.length)) : null,
+      wert ? el('p', { class: 'card-zahlt' }, zahltText(wert.fee, gold.length ? sim.platzWert(b.id, gold[0])?.fee ?? wert.fee : null, gold.length > 0 && gold.length >= fitting.length,
+        Math.max(1, Math.min(sim.ctx.rules.prepay || 1, b.nights || 1)), !!sim.ctx.rules.tip?.sizes?.includes(b.size))) : null,
       el('p', { class: 'card-hint' }, !fitting.length
         ? 'Gerade ist kein passender Platz frei.'
         : [`${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length && gold.length >= fitting.length ? 'alle' : gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}.`,
@@ -626,9 +627,15 @@ export function init(game) {
 /**
  * Preiszeile der Bootskarte (P10): Grundpreis und Preis am Wunschplatz. Erfüllen alle passenden
  * freien Plätze den Wunsch, gibt es den Grundpreis gerade nicht, dann steht nur der Wunschpreis da.
+ * Beim Anlegen zahlt der Gast mehrere Nächte auf einmal (rules.prepay), große Boote geben Trinkgeld,
+ * wenn man die Münze selbst holt: Die Karte nennt darum den Betrag der Münze (Einzeltest 14.11.:
+ * "15 € pro Nacht" stand da, die Münze brachte 69 €).
  */
-function zahltText(fee, wunschFee, alleGold) {
-  if (wunschFee == null) return `Zahlt etwa ${fee} € pro Nacht.`;
-  if (alleGold) return `Zahlt ${wunschFee} € pro Nacht.`;
-  return `Zahlt etwa ${fee} € pro Nacht, am Wunschplatz ${wunschFee} €.`;
+export function zahltText(fee, wunschFee, alleGold, naechte = 1, trinkgeld = false) {
+  const n = Math.max(1, naechte);
+  const summe = (x) => (n > 1 ? `${x * n} € für ${n} Nächte (je ${x} €)` : `${x} € für eine Nacht`);
+  const tg = trinkgeld ? ' Holst du die Münze selbst, gibt es Trinkgeld dazu.' : '';
+  if (wunschFee == null) return `Zahlt beim Anlegen etwa ${summe(fee)}.${tg}`;
+  if (alleGold) return `Zahlt beim Anlegen ${summe(wunschFee)}.${tg}`;
+  return `Zahlt beim Anlegen etwa ${summe(fee)}, am Wunschplatz ${n > 1 ? `${wunschFee * n} €` : `${wunschFee} €`}.${tg}`;
 }

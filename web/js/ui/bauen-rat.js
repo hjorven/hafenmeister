@@ -61,6 +61,9 @@ export function waehleSchritt({ geld, eintraege, bedarf, stufe, region = null, g
   if (ausbau && !ausbau.gesperrt && zielErreicht && leistbar(ausbau)) {
     return { text: `Alles bereit: ${ausbau.gesamt ? ausbau.name : stufe?.goal?.name ?? 'nächste Ausbaustufe'} bauen.`, ziel: ausbau.key, leistbar: true };
   }
+  // Geschenktes erstes Bauwerk geht allem anderen vor (kostet nichts, Gäste wünschen es sich; Einzeltest 14.11.)
+  const g = geschenk && offen.find((e) => e.key === geschenk);
+  if (g) return { text: `${g.name} bauen. Das erste Bauwerk ist geschenkt.`, ziel: g.key, leistbar: true };
   // 2. Kein Platz: Boote weggeschickt oder Hafen fast voll
   const stege = offen.filter((e) => e.art === 'steg');
   const voll = bedarf.plaetze > 0 && bedarf.belegt / bedarf.plaetze >= 0.85;
