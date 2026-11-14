@@ -292,3 +292,44 @@ test('Hafen schauen (autoAssign ohne Option) nimmt die frei gehaltene Box nicht'
   assert.equal(ereignis(ev, 'moored').length, 0);
   assert.equal(sim.fittingBerths(s, ctx, id).length, 0);
 });
+
+test('Dauerlauf: 3 Spiele à 40 Tage mit Freihalten, Tauschen, Freigeben, Abweisen; nie zwei Boote in einer Box', () => {
+  for (const seed of [3, 11, 29]) {
+    const ctx = context();
+    const s = morgen(seed);
+    let gehalten = 0, eingehalten = 0;
+    for (let tag = 0; tag < 40; tag++) {
+      const start = s.day;
+      let schritt = 0;
+      while (s.day === start && schritt++ < 400) {
+        const ev = sim.tick(s, ctx, 1);
+        eingehalten += ereignis(ev, 'reservationKept').length;
+        // Spieler: jede Anmeldung mal halten, mal tauschen, mal freigeben
+        for (const b of sim.announcedBoats(s)) {
+          const k = (b.id + s.day + Math.floor(s.clock)) % 23;
+          if (k === 0 && !b.funk.platz && sim.reserveBerth(s, ctx, b.id).ok) gehalten++;
+          else if (k === 1 && b.funk.platz) sim.reserveBerth(s, ctx, b.id, sim.reservableBerths(s, ctx, b.id).find((p) => p !== b.funk.platz) ?? b.funk.platz);
+          else if (k === 2 && b.funk.platz && b.id % 5 === 0) sim.releaseBerth(s, ctx, b.id);
+        }
+        // Wartende zuweisen, manche abweisen
+        for (const id of [...s.queue]) {
+          if (id % 7 === 0) { sim.dismiss(s, ctx, id); continue; }
+          const p = sim.fittingBerths(s, ctx, id)[0];
+          if (p) sim.assign(s, ctx, id, p);
+        }
+        // Invarianten
+        const belegt = new Map();
+        for (const [platz, id] of Object.entries(s.berths)) {
+          assert.ok(!belegt.has(id) || id < 0, `Boot ${id} in zwei Boxen`);
+          belegt.set(id, platz);
+          const r = sim.reservedFor(s, platz);
+          assert.ok(!r, `Box ${platz} belegt und zugleich frei gehalten`);
+        }
+        const plaetze = sim.announcedBoats(s).map((b) => b.funk.platz).filter(Boolean);
+        assert.equal(new Set(plaetze).size, plaetze.length, 'eine Box für zwei Anmeldungen');
+      }
+    }
+    assert.ok(gehalten > 3, `Seed ${seed}: gehalten ${gehalten}`);
+    assert.ok(eingehalten > 0, `Seed ${seed}: eingehalten ${eingehalten}`);
+  }
+});
