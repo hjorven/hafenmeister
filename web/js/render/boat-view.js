@@ -16,6 +16,7 @@ import { addBoat, berthFromPlatz } from './boat-anim.js';
 import { HAFEN } from '../data/harbor.js';
 import { wimpelAn } from './wimpel-regel.js';
 import { seebrueckeStrecke } from './landschaft/strand.js';
+import { molen } from './landschaft/gelaende.js';
 import { baueKarte, route, hindernisseAusHafen, bootMass, erreichbar, befahrbar, sichtlinie, zellMitte } from '../world/fahrwasser.js';
 
 const U = HAFEN.einheiten?.meterProEinheit ?? 0.62;
@@ -437,9 +438,20 @@ export function init(game) {
     const tiefe = ls?.tiefeBei ? (x, z) => ls.tiefeBei(x, z) : () => 3;
     const w = ls?.warteplaetze ?? {};
     const weich = [];
-    for (const bj of w.bojen ?? []) weich.push({ x: bj.x, z: bj.z, r: 14, kosten: 3 });
-    for (const a of w.ankerplaetze ?? []) weich.push({ x: a.x, z: a.z, r: (a.schwoikreisM ?? 8) + 4, kosten: 2 });
-    karte = baueKarte({ tiefe, bereich: bereichMit(sb), ...hindernisseAusHafen(HAFEN, st, { seebruecke: sb }), weich, engRadius: 5 });
+    for (const bj of w.bojen ?? []) weich.push({ x: bj.x, z: bj.z, r: 14, kosten: 8 });
+    for (const a of w.ankerplaetze ?? []) weich.push({ x: a.x, z: a.z, r: (a.schwoikreisM ?? 8) + 4, kosten: 6 });
+    // Molen samt Steinschuettung am Kopf (terrain.js: Steine bis 0,95 Breiten um den Kopf) sind hart,
+    // auch wo das Gelaenderaster sie zwischen zwei Zellen verliert (Feature-Test: Bug im Molenkopf)
+    const h = hindernisseAusHafen(HAFEN, st, { seebruecke: sb });
+    const linien = [...(h.linien ?? [])];
+    if (st >= 3) for (const m of molen(st)) {
+      const pts = m.punkte.map(([px, py]) => ({ x: px * 0.62, z: -py * 0.62 }));
+      const w = m.breite * 0.62;
+      linien.push({ punkte: pts, breite: w * 0.9 });
+      const k = pts[pts.length - 1];
+      linien.push({ punkte: [k, { x: k.x + 0.01, z: k.z }], breite: 2 * (w * 0.95 + 0.9) });
+    }
+    karte = baueKarte({ tiefe, bereich: bereichMit(sb), ...h, linien, weich, engRadius: 5 });
     karteSig = sig;
     karteAlt = false;
     flaechen.clear();
@@ -751,7 +763,8 @@ export function init(game) {
         if (game.boatAnim.imBild(p.x, p.z, L + 6)) return vorher;
         // hoechstens bis 40 m vor das Ziel (dort soll man es noch heranfahren sehen)
         if (Math.hypot(ziel.x - p.x, ziel.z - p.z) < 40 + L) return vorher;
-        if (frei(p) && befahrbar(karteJetzt(), p.x, p.z, r * 0.8, t)) vorher = p;
+        // Kurs zum naechsten Wegpunkt mitgeben (wer schon faehrt, soll nicht erst wenden)
+        if (frei(p) && befahrbar(karteJetzt(), p.x, p.z, r * 0.8, t)) vorher = { ...p, h: Math.atan2(-(q.z - pz), q.x - px) };
       }
       px = q.x; pz = q.z;
     }
@@ -777,11 +790,76 @@ export function init(game) {
     takt.naechst = jetzt + (wartend > 10 ? 4 : 6 + Math.random() * 3);
     return true;
   }
+  // --- Seezugaenge: Boote kommen von weit draussen auf See (ausserhalb jeder Zoomstufe), aus
+  // verschiedenen Richtungen, nie ueber Land (game.gelaende.seezugaenge, Gelaende-Thread). Ohne
+  // Seezugaenge (aeltere Gelaende, Tests) bleibt der Start am Kartenrand.
+  let letzterZugang = null;
+  function zugaenge(info) {
+    const f = game.gelaende?.seezugaenge;
+    if (typeof f !== 'function') return [];
+    const tiefeM = bootMass(info).t > 2.3 ? 4 : 2;
+    let l = null;
+    try { l = f(stufe(), { tiefeM }); } catch (err) { console.warn('Seezugaenge nicht lesbar', err); }
+    return (l ?? []).filter((z) => !z.umweg && Array.isArray(z.weg) && z.weg.length >= 2);
+  }
+  // Seeweg eines Zugangs teilen: draussen die groben Punkte, ab dem ersten Punkt in der feinen Karte
+  // (frei von Wartebojen und Ankerplaetzen) sucht die Karte den Weg. Rueckgabe { see, uebergabe }.
+  function seeTeil(zugang) {
+    const k = karteJetzt();
+    const w = game.landscape?.warteplaetze ?? {};
+    // Wartebereiche und alle, die dort gerade liegen (auch auf Ausweichplaetzen um das Ankerfeld)
+    const kreise = [...(w.bojen ?? []).map((o) => ({ x: o.x, z: o.z, r: 30 })),
+      ...(w.ankerbereiche ?? []).map((o) => ({ x: o.x, z: o.z, r: (o.radiusM ?? 30) + 20 }))];
+    for (const o of game.boatAnim.boats) if (o.moored && (o.berth?.kind === 'buoy' || o.berth?.kind === 'anchor')) kreise.push({ x: o.x, z: o.z, r: 30 });
+    const innen = (p) => p.x > k.x0 + 20 && p.x < k.x1 - 20 && p.z > k.z0 + 20 && p.z < k.z1 - 20;
+    const frei = (p) => kreise.every((o) => Math.hypot(o.x - p.x, o.z - p.z) > o.r);
+    const pts = [{ x: zugang.x, z: zugang.z }, ...zugang.weg.slice(1).map((p) => ({ x: p.x, z: p.z }))];
+    // erster Punkt in der Karte, bis zu dem der Seeweg (alle 4 m geprueft) kein Wartebereich beruehrt
+    let n = pts.length;
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], b = pts[i], d = Math.hypot(b.x - a.x, b.z - a.z);
+      let ok = true;
+      for (let t = 0; t <= d && ok; t += 4) ok = frei({ x: a.x + (b.x - a.x) * t / d, z: a.z + (b.z - a.z) * t / d });
+      if (!ok) { n = Math.max(1, i - 1); break; }
+      if (innen(b)) { n = i; break; }
+    }
+    const see = pts.slice(1, n + 1);
+    return { see: see.length ? see : [pts[0]], uebergabe: pts[n] };
+  }
+  function waehleZugang(info, herkunft) {
+    const l = zugaenge(info);
+    if (!l.length) return null;
+    // Richtungen gleichmaessig: nach Himmelsrichtung ordnen, herkunft (0..1) waehlt die Richtung
+    const nach = l.slice().sort((a, b) => (a.grad ?? 0) - (b.grad ?? 0));
+    let z = Number.isFinite(herkunft) ? nach[Math.min(nach.length - 1, Math.floor(Math.max(0, herkunft) * nach.length))]
+      : nach[Math.floor(Math.random() * nach.length)];
+    if (z === letzterZugang && nach.length > 1) z = nach[(nach.indexOf(z) + 1 + Math.floor(Math.random() * (nach.length - 1))) % nach.length];
+    letzterZugang = z;
+    return z;
+  }
+  // Beim Laden einmal rechnen (erster Aufruf kostet bis 0,6 s), nicht erst beim ersten Boot
+  setTimeout(() => { zugaenge({ length: 8, beam: 3, draft: 1.2 }); zugaenge({ length: 30, beam: 8, draft: 3.5, size: 'XL' }); }, 0);
+
   game.on('boot-kommt', (info) => {
     if (!info || info.id == null) return;
     if (bojenStufe !== stufe()) baueBojen();
     const e = erzeuge(info);
     const ziel = warteplatz(info.boje ?? 0, e.anim);
+    const zugang = waehleZugang(e.anim.info, info.herkunft);
+    if (zugang) {
+      const { see } = seeTeil(zugang);
+      e.pick = e.anim.model.userData.pick;
+      delete e.anim.model.userData.pick;
+      e.anim.place(zugang.x, zugang.z, Math.atan2(-(see[0].z - zugang.z), see[0].x - zugang.x));
+      if (e.anim.info.kind === 'sail') e.anim.setSails(true);
+      const jetzt = game.time ?? 0;
+      ankunftT = Math.max(jetzt, ankunftT + 3 + Math.random() * 6);
+      // Ab der Einfahrt springt das Boot, solange es niemand sieht, bis kurz vor den Bildrand (wie
+      // ohne Seezugang): die Anfahrt im Revier dauert so bei jeder Kamera etwa gleich lang
+      const vorruecken = (a) => (game.boatAnim.imBild?.(a.x, a.z, a.info.length + 6) ? null : naeherStart(a.info, { x: a.x, z: a.z }, ziel));
+      e.anim.dock(ziel, { route: true, einfahrt: true, verzoegerung: ankunftT - jetzt, see, vorruecken });
+      return;
+    }
     const start = naeherStart(e.anim.info, freierStart(e.anim.info, info.herkunft), ziel);
     // Antippen und Ziehen erst, wenn das Boot an der Boje fest ist (siehe boat:moored unten)
     e.pick = e.anim.model.userData.pick;
@@ -843,13 +921,17 @@ export function init(game) {
     if (!e) return;
     // niemand sieht es: gleich weg (spart Rueckstau beim schnellen Vorspulen)
     if (!game.boatAnim.imBild?.(e.anim.x, e.anim.z, e.anim.info.length)) { entferne(id); return; }
-    const ziel = randPunkt(e.anim.info) ?? { x: e.anim.x, z: e.anim.z - 300 };
+    // hinaus bis vor die Einfahrt und weiter auf See zu einem Seezugang (dort verschwindet es)
+    const zugang = waehleZugang(e.anim.info);
+    const raus = zugang ? [...seeTeil(zugang).see.reverse(), { x: zugang.x, z: zugang.z }] : null;
+    const ziel = raus ? raus[0] : (randPunkt(e.anim.info) ?? { x: e.anim.x, z: e.anim.z - 300 });
     const weg = [ziel];
+    const see = raus ? raus.slice(1) : undefined;
     e.faehrt = true;
     entferneMuenze(id, 0);
     // Abends legen viele zugleich ab: gestaffelt, 3 bis 6 s Abstand, damit es wie geordneter
     // Verkehr aussieht und nicht wie ein Pulk an der Einfahrt (hoechstens 30 s Warten)
-    e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true, takt: ablegeTakt }).then((ok) => {
+    e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true, takt: ablegeTakt, see }).then((ok) => {
       if (ok && boats.get(id) === e) entferne(id);
     });
   });
@@ -1150,12 +1232,15 @@ export function init(game) {
     const n = draussenZahl++ % 4;
     const kreis = 18 + e.anim.info.length + n * 11;
     const runde = rundePunkt(e.anim.info, rundenWunsch(), kreis);
-    const ziel = tage > 0 ? (randPunkt(e.anim.info) ?? runde) : runde;
+    // mehrtaegiger Toern: hinaus auf See bis zu einem Seezugang wie die abreisenden Gaeste
+    const zugang = tage > 0 ? waehleZugang(e.anim.info) : null;
+    const raus = zugang ? [...seeTeil(zugang).see.reverse(), { x: zugang.x, z: zugang.z }] : null;
+    const ziel = raus ? raus[0] : tage > 0 ? (randPunkt(e.anim.info) ?? runde) : runde;
     const segel = e.anim.info.kind === 'sail';
     const weg = [ziel];
     e.draussen = true;
     entferneMuenze(id, 0);
-    e.anim.undock(weg, { sails: segel, route: true, takt: ablegeTakt }).then((ok) => {
+    e.anim.undock(weg, { sails: segel, route: true, takt: ablegeTakt, see: raus ? raus.slice(1) : undefined }).then((ok) => {
       if (!ok || boats.get(id) !== e) return;
       if (tage > 0) {
         // mehrtaegiger Toern: aus dem Bild, kommt mit 'dauer:einlaufen' zurueck
@@ -1176,12 +1261,15 @@ export function init(game) {
   // bis der Gast umgelegt ist (features/dauerlieger.js), und kommt dann mit einem zweiten
   // 'dauer:einlaufen' ohne warten herein. info: Bootsdaten, falls das Boot nicht in game.sim.boote steht.
   game.on('dauer:einlaufen', ({ id, platzId, warten, info: mitInfo } = {}) => {
-    let e = boats.get(id);
+    let e = boats.get(id), zurueck = null;
     if (!e) {
       const info = sucheInfo(id) ?? mitInfo;
       if (!info) return;
       e = erzeuge(info);
-      const start = freierStart(e.anim.info);
+      // vom mehrtaegigen Toern zurueck: von weit draussen ueber einen Seezugang (nicht beim Warten,
+      // dann kreist es gleich vor dem Hafen)
+      zurueck = warten ? null : waehleZugang(e.anim.info);
+      const start = zurueck ? { x: zurueck.x, z: zurueck.z } : freierStart(e.anim.info);
       e.anim.place(start.x, start.z, 0);
     }
     e.faehrt = false;
@@ -1202,7 +1290,7 @@ export function init(game) {
     const b = platzBerth(platzId ?? e.info.platz);
     if (!b) return;
     // Liegt noch ein Gast in der Box (er wird gerade umgelegt oder legt morgens ab), erst warten
-    e.anim.dock(b, { route: true, seconds: 30, waitFor: () => platzFrei(platzId ?? e.info.platz, b, e.anim) });
+    e.anim.dock(b, { route: true, seconds: 30, waitFor: () => platzFrei(platzId ?? e.info.platz, b, e.anim), see: zurueck ? seeTeil(zurueck).see : undefined });
   });
 
   /** Ist die Box frei? Kein anderes Boot hat sie als Platz, und keins steht noch in ihr. */

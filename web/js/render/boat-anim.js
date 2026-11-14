@@ -1083,6 +1083,15 @@ class BoatAnim {
     // Ein ankommendes Boot (opts.einfahrt) ist waehrenddessen noch nicht zu sehen: es liegt sonst
     // sichtbar am Startpunkt im Weg der anderen, und es taucht erst auf, wenn dort Platz ist.
     if (opts.verzoegerung > 0) this.push(opts.einfahrt ? new EinfahrtWarten(opts.verzoegerung) : new WaitTask(opts.verzoegerung));
+    else if (opts.see?.length && opts.einfahrt) this.push(new EinfahrtWarten(0));
+    // opts.see: Anfahrt von weit draussen auf See (Seezugang des Gelaendes, grobe Punkte ueber Wasser)
+    // bis vor die Einfahrt; ab dort sucht der Fahrweg der Karte den Weg zum Platz.
+    if (opts.see?.length) this.push(new PathTask(opts.see, { see: true, stop: false }));
+    // opts.vorruecken(boot) -> { x, z, h } | null: danach unbemerkt naeher heran (boat-view naeherStart)
+    if (opts.vorruecken) this.push(new CallTask((bt) => {
+      const p = opts.vorruecken(bt);
+      if (p && Number.isFinite(p.x)) { bt.x = p.x; bt.z = p.z; if (Number.isFinite(p.h)) bt.heading = p.h; }
+    }));
     if (this.moored) this.pushUndock({ takt: opts.takt });
     let b = normBerth(berth);
     if (b.kind === 'buoy') b = { ...b, heading: this.bojenKurs(b) };
@@ -1148,6 +1157,8 @@ class BoatAnim {
       if (opts.sails) this.push(new CallTask((b) => b.setSails(true)));
       this.push(new CallTask((b) => { b.state = 'leaving'; }));
       this.push(new PathTask(points, { speed: opts.speed, harbor: opts.harbor, stop: opts.stop, route: opts.route }));
+      // opts.see: danach weiter hinaus auf See bis zum Seezugang (dort verschwindet das Boot)
+      if (opts.see?.length) this.push(new PathTask(opts.see, { see: true, stop: false }));
     }
     this.push(new CallTask((b) => {
       b.state = 'idle';
@@ -1544,7 +1555,19 @@ class BoatAnim {
     // damit An- und Abfahrt auf der Spieluhr nicht Stunden dauern
     const offen = this.task instanceof PathTask && !this.task.pivot && !this.mgr.inView(this.x, this.z, this.info.length);
     this.zeitraffer = offen;
-    if (offen) dt *= 4;
+    // Auf dem langen Weg draussen auf See (Seezugang) noch schneller: so dauert die Anfahrt aus
+    // mehreren Kilometern nur Sekunden, solange niemand hinsieht. Sieht man das Boot, faehrt es echt.
+    if (offen) dt *= this.task.opts?.see ? 24 : 4;
+    // grosse Schritte teilen, damit das Boot keine Kurve abschneidet
+    if (dt > 1.2) {
+      const n = Math.ceil(dt / 1.2);
+      for (let i = 0; i < n; i++) this.schritt(dt / n, t);
+      return;
+    }
+    this.schritt(dt, t);
+  }
+
+  schritt(dt, t) {
     if (dt > 0) {
       let guard = 8;
       while (guard-- > 0) {
