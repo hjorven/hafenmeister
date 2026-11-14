@@ -18,10 +18,13 @@ export const VORRANG = {
   abschluss: 80,       // ui/tagesabschluss.js, Karte
   winter: 75,          // features/winter.js, Winterpause und Frühlingsgruß
   zettel: 70,          // ui/tagesabschluss.js, Morgen-Zettel
+  auszeichnung: 60,    // features/auszeichnung.js, Karte nach dem Tagesabschluss (neue oder verlorene Auszeichnung)
   dauerWartet: 65,     // features/dauerlieger.js, Dauerlieger früher zurück (hat eine Frist bis zum Abend)
+  ereignis: 60,        // events/vorbereiten-ui.js, Sturm und Regatta vorbereiten, Ergebnis am Abend
   einstieg: 50,        // features/einstieg.js, Schritte des Einstiegs
   tipp: 45,            // features/einstieg.js, Tipps beim ersten Mal (kurz, gehen den Dauerplatz-Meldungen vor)
   dauer: 40,           // features/dauerlieger.js, andere Meldungen
+  erfolg: 30,          // features/erfolge.js, neuer Erfolg (rechts oben, kurz)
   logbuch: 22,         // ui/logbuch.js, neues Bootsmodell im Logbuch (rechts oben, kurz)
   gaestebuch: 20,      // ui/gaestebuch.js, Bewertung eines Boots außerhalb des Bildes (rechts oben, kurz)
 };
@@ -78,6 +81,9 @@ export function init(game) {
       const hoeher = FENSTER.filter((g) => g.vorrang > f.vorrang).map((g) => `body[data-hm-meldung="${g.id}"] ${f.sel}`);
       return hoeher.length ? `${hoeher.join(',\n')} { visibility: hidden !important; pointer-events: none !important; }` : '';
     }).filter(Boolean);
+    // Das Wetter- und Ereignisschild oben (events/banner.js) legte sich über die Winterpause-Karte
+    // (Feature-Test 14.11.): es tritt zurück, solange eine Karte steht, und kommt danach nicht wieder.
+    regeln.push(`${['winter', 'abschluss', 'kartenwahl', 'feier'].map((id) => `body[data-hm-meldung="${id}"] #event-banner`).join(',\n')} { visibility: hidden !important; pointer-events: none !important; }`);
     const style = document.createElement('style');
     style.textContent = regeln.join('\n');
     document.head.append(style);

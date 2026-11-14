@@ -24,7 +24,7 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     typeById: Object.fromEntries(types.map((t) => [t.id, t])),
     berths: list,
     berthById: Object.fromEntries(list.map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [] },
+    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [] },
   };
 }
 
@@ -33,6 +33,9 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
  *   modifiers  fn(state, ctx) -> Teil von DEFAULT_MODIFIERS, wird jeden Tag und bei jeder Ankunft gelesen
  *   rating     fn({ ctx, boat }) -> Anker, die zur Platzart (comfort) einer Bewertung dazukommen
  *              (zum Beispiel ein im Winter überholter Steg, features/winter.js)
+ *   walk       fn({ state, ctx, berth, wish }) -> Meter vom Platz zum nächsten Gebäude, das den
+ *              Wunsch erfüllt, oder null (unbekannt). Weiter als rules.walk.far zählt der Wunsch nur
+ *              zum Anteil rules.walk.share (P19 B9, features/wege.js kennt die Gebäude im Bild)
  *   arrival    fn({ state, ctx, boat }) darf das neue Boot ändern (zum Beispiel Wünsche)
  *   evening    fn({ state, ctx, boats, addIncome, events }) am Abend nach dem Hafengeld
  *   night      fn({ state, ctx, events }) nach der Abreise, vor dem neuen Tag
@@ -233,6 +236,51 @@ function pushRating(state, ctx, value) {
   tage.push(state.day);
   while (state.ratings.length > window) state.ratings.shift();
   while (tage.length > state.ratings.length) tage.shift();
+}
+
+/**
+ * Auszeichnung des Hafens (P19 C5): { level, name, up, down, best, next } mit level 0 = keine.
+ * up/down zählen die Abende in Folge über der nächsten bzw. unter der gehaltenen Stufe.
+ */
+export function award(state, rules = RULES) {
+  const a = rules.award;
+  const z = state.award || {};
+  const level = a ? Math.min(z.level || 0, a.levels.length) : 0;
+  return {
+    level,
+    name: level ? a.levels[level - 1].name : null,
+    up: z.up || 0,
+    down: z.down || 0,
+    best: Math.max(z.best || 0, level),
+    next: a && level < a.levels.length ? { level: level + 1, ...a.levels[level] } : null,
+    days: a?.days ?? 0,
+    hold: level ? a.levels[level - 1].from - (a.hold || 0) : null,
+  };
+}
+
+/** Abends: Auszeichnung nach dem Ruf fortschreiben (nur in der Saison). */
+export function updateAward(state, ctx, events) {
+  const a = ctx.rules.award;
+  if (!a || season(state, ctx).winter) return;
+  const z = (state.award ||= { level: 0, up: 0, down: 0, best: 0 });
+  const rep = Math.round(reputation(state, ctx.rules) * 100) / 100;
+  const next = a.levels[z.level];
+  const cur = z.level ? a.levels[z.level - 1] : null;
+  z.up = next && rep >= next.from ? (z.up || 0) + 1 : 0;
+  z.down = cur && rep < cur.from - (a.hold || 0) ? (z.down || 0) + 1 : 0;
+  if (next && z.up >= a.days) {
+    z.level++;
+    z.up = 0;
+    z.down = 0;
+    const neu = z.level > (z.best || 0);
+    z.best = Math.max(z.best || 0, z.level);
+    events.push({ type: 'awardUp', level: z.level, name: next.name, first: neu, reputation: rep });
+  } else if (cur && z.down >= a.days) {
+    z.level--;
+    z.down = 0;
+    z.up = 0;
+    events.push({ type: 'awardDown', level: z.level, name: z.level ? a.levels[z.level - 1].name : null, lost: cur.name, reputation: rep });
+  }
 }
 
 /** Faktor für die Zahl der Ankünfte: Ruf 1 ergibt 0,5, Ruf 3 ergibt 1, Ruf 5 ergibt 1,5. */
@@ -442,6 +490,31 @@ function makeBoat(fields) {
   };
 }
 
+/**
+ * Größenmischung nach Plätzen (A10, ECONOMY.platzMix): Faktor je Größe, wie gut der Hafen gerade Platz
+ * für diese Größe hat. Gezählt werden gebaute Plätze, an die die kleinste Bootsart der Größe passt,
+ * verglichen mit dem Bedarf (Ankünfte am Tag × Anteil × mittlere Nächte, mal extra[Größe] für Zuschläge
+ * wie Ruf oder Winterarbeiten). Höchstens 1.
+ */
+export function sizeBerthFactors(state, ctx, types = eligibleTypes(state, ctx), extra = {}) {
+  const pm = ctx.rules.sizeByBerths;
+  const out = {};
+  if (!pm) return out;
+  const mix = ctx.rules.sizeMix[state.stage] || {};
+  const n = ctx.rules.arrivalsPerDay[state.stage] || 0;
+  const plaetze = availableBerths(state, ctx).filter((b) => !b.reserved);
+  for (const [size, w] of Object.entries(mix)) {
+    const proben = types.filter((t) => t.size === size).map(smallestOf);
+    if (!proben.length) continue;
+    const probe = proben.reduce((a, b) => (b.length < a.length ? b : a));
+    const anzahl = plaetze.filter((b) => fits(probe, b, ctx.rules, state.stage)).length;
+    const [nMin, nMax] = range(ctx.rules.nightsBySize?.[size] ?? ctx.rules.nights);
+    const bedarf = n * w * (extra[size] ?? 1) * (nMin + nMax) / 2;
+    out[size] = bedarf > 0 ? Math.max(pm.mindestens, Math.min(1, (anzahl * pm.auslastung) / bedarf)) : 1;
+  }
+  return out;
+}
+
 /** Würfelt ein Boot für die aktuelle Ausbaustufe aus. Gibt null zurück, wenn keine Bootsart passt. */
 export function rollBoat(state, ctx, mods = modifiers(state, ctx)) {
   const types = eligibleTypes(state, ctx, mods);
@@ -454,8 +527,10 @@ export function rollBoat(state, ctx, mods = modifiers(state, ctx)) {
   const selten = draw ? new Set(draw.rare) : new Set();
   const seltenErlaubt = draw && rep >= draw.rareFrom;
   const sizeWeights = {};
+  // Nur so viele Boote einer Größe, wie der Hafen Plätze für sie hat (A10)
+  const platz = sizeBerthFactors(state, ctx, types, Object.fromEntries(Object.keys(mix).map((k) => [k, (mods.sizeFactor[k] ?? 1) * (gross[k] ?? 1)])));
   for (const [size, w] of Object.entries(mix)) {
-    if (types.some((t) => t.size === size)) sizeWeights[size] = w * (mods.sizeFactor[size] ?? 1) * (gross[size] ?? 1);
+    if (types.some((t) => t.size === size)) sizeWeights[size] = w * (mods.sizeFactor[size] ?? 1) * (gross[size] ?? 1) * (platz[size] ?? 1);
   }
   let boat = null;
   // Bis zu 8 Versuche, Maße zu würfeln, die an einen Platz des Hafens passen
@@ -533,6 +608,9 @@ function startDay(state, ctx, events) {
   for (const boat of mooredBoats(state)) {
     if (!boat.stationed) chargeFee(state, ctx, boat, mods, events);
   }
+  // Winter: keine Gäste. Wer über Nacht an einer Boje gewartet hat (rules.queue.overnight), fährt weiter,
+  // sonst fährt er mitten im Winter in eine Box (Feature-Test 14.11., Pulk am Kartenrand).
+  if (sea.winter) for (const id of [...state.queue]) if (state.boats[id]) turnAway(state, ctx, state.boats[id], events, 'winter');
   planTrips(state, ctx, mods, sea.winter);
   const rate = sea.winter ? 0 : arrivalRate(state, ctx, mods);
   // Ankünfte über den ganzen Tag: zwischen arrivalFrom und arrivalWindow (Anteile des Tages).
@@ -720,17 +798,29 @@ export function berthValue(state, ctx, boatId, berthId = null) {
   const bw = ctx.rules.berthWishes || {};
   const served = state.served || {};
   const met = [];
+  const far = [];
+  const full = [];
+  let weight = 0;
   const mods = modifiers(state, ctx);
   for (const w of boat.wishes) {
-    if (bw[w]) { if (berth && berthHas(state, ctx, berth, bw[w])) met.push(w); }
-    else if (ctx.rules.offerWishes?.[w]) { if (offerWishMet(ctx, w, mods)) met.push(w); }
-    else if ((served[w] || 0) < facilityCapacity(state, ctx, w)) met.push(w);
+    let ok = false;
+    if (bw[w]) ok = !!berth && berthHas(state, ctx, berth, bw[w]);
+    else if (ctx.rules.offerWishes?.[w]) ok = offerWishMet(ctx, w, mods);
+    else {
+      ok = (served[w] || 0) < facilityCapacity(state, ctx, w);
+      if (!ok && facilityCapacity(state, ctx, w) > 0) full.push(w); // gebaut, aber heute voll
+    }
+    if (!ok) continue;
+    met.push(w);
+    const weg = walkShare(state, ctx, berth, w);
+    weight += weg.share;
+    if (weg.far) far.push(w);
   }
   const fee = nightlyFee(state, ctx, boat, met.length, mods.priceFactor);
   const snug = !!berth && isSnug(state, ctx, boat, berth);
-  const probe = { ...boat, wishesMet: boat.wishesMet + met.length, wishesTotal: boat.wishesTotal + boat.wishes.length, berthId: berth?.id ?? null, snug, byHand: true };
+  const probe = { ...boat, wishesMet: boat.wishesMet + weight, wishesTotal: boat.wishesTotal + boat.wishes.length, berthId: berth?.id ?? null, snug, byHand: true };
   const anchors = rateBoat(ctx, probe, mods.ratingBonus);
-  return { fee, wishesMet: met, wishes: [...boat.wishes], anchors, snug, comfort: (berth?.comfort || 0) > 0 };
+  return { fee, wishesMet: met, wishes: [...boat.wishes], anchors, snug, comfort: (berth?.comfort || 0) > 0, far, full };
 }
 
 /**
@@ -1038,10 +1128,13 @@ export function unstationBoat(state, ctx, boatId) {
 function turnAway(state, ctx, boat, events, why) {
   state.queue = state.queue.filter((id) => id !== boat.id);
   delete state.boats[boat.id];
-  state.stats.turnedAway++;
-  state.stats.turnedAwayToday++;
-  const weg = heute(state).weggefahren;
-  weg[why] = (weg[why] || 0) + 1;
+  // Winterbeginn: Wer über Nacht an der Boje lag, fährt ins Winterlager. Das zählt nicht als weggefahren.
+  if (why !== 'winter') {
+    state.stats.turnedAway++;
+    state.stats.turnedAwayToday++;
+    const weg = heute(state).weggefahren;
+    weg[why] = (weg[why] || 0) + 1;
+  }
   const rated = turnAwayRating(state, ctx, boat, why);
   events.push({ type: 'turnedAway', boatId: boat.id, reason: why, rated, ...(rated ? { rating: ctx.rules.turnAway.rating, guest: guestInfo(boat), day: state.day } : {}) });
 }
@@ -1054,7 +1147,7 @@ function turnAway(state, ctx, boat, events, why) {
  * @returns {boolean} ob eine Bewertung abgegeben wurde
  */
 function turnAwayRating(state, ctx, boat, why) {
-  if (why === 'queueFull' || why === 'rebuild' || !couldEverFit(state, ctx, boat)) return false;
+  if (why === 'queueFull' || why === 'rebuild' || why === 'winter' || !couldEverFit(state, ctx, boat)) return false;
   const ta = ctx.rules.turnAway;
   const rated = random(state) < ta.chance;
   if (rated) pushRating(state, ctx, ta.rating);
@@ -1188,10 +1281,24 @@ export function dismiss(state, ctx, boatId) {
 // ---------------------------------------------------------------------------
 // Hafengeld (fällig beim Anlegen und jeden Morgen) und Abend
 
+/**
+ * Grundpreis einer Nacht ohne Wünsche: je angefangenem Meter Bootslänge (B10, ECONOMY.klassen.proMeter),
+ * sonst der feste Grundpreis der Klasse, beides mal feeFactor der Bootsart (P19). Bootsarten mit eigenem
+ * Preis (fee) zahlen den.
+ */
+export function baseNightlyFee(ctx, boat) {
+  const type = ctx.typeById[boat.typeId];
+  if (type?.fee != null) return type.fee;
+  // feeFactor der Bootsart (P19, data/boats): Aufschlag oder Nachlass, etwa für Mehrrumpfboote
+  const faktor = type?.feeFactor ?? 1;
+  const proMeter = ctx.rules.feePerMeter?.[boat.size];
+  if (proMeter && boat.length > 0) return proMeter * Math.ceil(boat.length - 1e-9) * faktor;
+  return (ctx.rules.baseFee[boat.size] ?? 0) * faktor;
+}
+
 /** Hafengeld für eine Nacht bei n erfüllten Wünschen. */
 export function nightlyFee(state, ctx, boat, wishesMet, priceFactor = 1) {
-  const type = ctx.typeById[boat.typeId];
-  const base = type?.fee ?? (ctx.rules.baseFee[boat.size] ?? 0) * (type?.feeFactor ?? 1);
+  const base = baseNightlyFee(ctx, boat);
   return Math.round(base * (1 + ctx.rules.wishBonus * wishesMet) * priceFactor);
 }
 
@@ -1212,6 +1319,25 @@ export function facilityLoad(state, ctx) {
     if (kapazitaet > 0) out[key] = { versorgt: state.served?.[key] || 0, kapazitaet };
   }
   return out;
+}
+
+/**
+ * Wie weit ein Platz vom nächsten Gebäude für einen Wunsch entfernt ist (Meter, Hook 'walk') und
+ * wie viel der erfüllte Wunsch dann für die Note zählt (P19 B9). Ohne Hook oder für Wünsche
+ * außerhalb von rules.walk.wishes: { far: false, share: 1 }.
+ */
+export function walkShare(state, ctx, berth, wish) {
+  const w = ctx.rules.walk;
+  if (!w || !berth || !w.wishes.includes(wish) || !ctx.hooks.walk?.length) return { far: false, share: 1, meters: null };
+  let meters = null;
+  for (const fn of ctx.hooks.walk) {
+    try {
+      const d = fn({ state, ctx, berth, wish });
+      if (Number.isFinite(d)) meters = meters == null ? d : Math.min(meters, d);
+    } catch (err) { console.error('Fehler im Wege-Hook', err); }
+  }
+  const far = meters != null && meters > w.far;
+  return { far, share: far ? w.share : 1, meters };
 }
 
 /** Liegende Boote, nach Ankunft sortiert. */
@@ -1339,6 +1465,7 @@ function startEvening(state, ctx, events) {
       events.push({ type: 'visitorIncome', visitors, amount });
     }
   }
+  updateAward(state, ctx, events);
   const boats = mooredBoats(state);
   for (const fn of ctx.hooks.evening) fn({ state, ctx, boats, events, addIncome: (a, quelle, detail) => addIncome(state, a, quelle, detail) });
   events.push({ type: 'evening', day: state.day });
@@ -1352,6 +1479,7 @@ function checkWishes(state, ctx, boat, mods = modifiers(state, ctx)) {
   const berth = ctx.berthById[boat.berthId];
   const served = (state.served ||= {});
   const metList = [];
+  let weight = 0;
   for (const w of boat.wishes) {
     const prop = ctx.rules.berthWishes[w];
     let ok;
@@ -1361,10 +1489,15 @@ function checkWishes(state, ctx, boat, mods = modifiers(state, ctx)) {
       ok = (served[w] || 0) < facilityCapacity(state, ctx, w);
       if (ok) served[w] = (served[w] || 0) + 1;
     }
-    if (ok) metList.push(w);
-    else (boat.missed ||= {})[w] = (boat.missed[w] || 0) + 1; // für Gästebuch und Bewertung (ratingParts)
+    if (ok) {
+      metList.push(w);
+      // Weiter Weg (B9): zählt für die Note nur zum Anteil, das Liegegeld bleibt voll
+      const weg = walkShare(state, ctx, berth, w);
+      weight += weg.share;
+      if (weg.far) (boat.far ||= {})[w] = (boat.far[w] || 0) + 1;
+    } else (boat.missed ||= {})[w] = (boat.missed[w] || 0) + 1; // für Gästebuch und Bewertung (ratingParts)
   }
-  boat.wishesMet += metList.length;
+  boat.wishesMet += weight;
   boat.wishesTotal += boat.wishes.length;
   return metList;
 }
@@ -1491,6 +1624,7 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   return {
     value, base, comfort, special, snug, byHand, bonus: ratingBonus, penalty,
     wishes: [...(boat.wishes || [])], wishesMet: boat.wishesMet || 0, wishesTotal: boat.wishesTotal || 0, missed: { ...(boat.missed || {}) },
+    far: { ...(boat.far || {}) },
   };
 }
 

@@ -641,6 +641,7 @@ body.hm-neu { font: 400 var(--hm-s)/1.4 var(--hm-pixel); color: var(--hm-tinte);
 }
 .hm-neu .hm-fakten li.groesse { background: var(--hm-tinte); color: var(--hm-papier); }
 .hm-neu .hm-fakten li.wunsch { background: #fde8b0; }
+.hm-neu .hm-fakten li.wunsch.voll { background: #f6c3bd; color: #8c2d24; }
 .hm-neu #card .card-hint { color: var(--hm-tinte); }
 
 /* Bauen-Karte (bauen.js) */

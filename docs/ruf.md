@@ -1,6 +1,6 @@
 # Ruf und Bewertung
 
-Stand: 14.11.2026. Status: gepflegt. Roadmap-Paket P19 ("Ruf schwerer machen mit Wünschen je Bootsart"), Punkte Ü17, B7, C2, C3, C4, C6, Svc F8. Teil 2 (C5 Auszeichnung, Kapazität sichtbar, B9 Wege) steht unten unter "Offen".
+Stand: 14.11.2026. Status: gepflegt. Roadmap-Paket P19 ("Ruf schwerer machen mit Wünschen je Bootsart"), Punkte Ü17, B7, B9, C2, C3, C4, C5, C6, Svc F8. Teil 1 (PR 244): Ruf über drei Tage, Wünsche je Bootsart, Angebote als Wünsche, Ruf lockt. Teil 2: Wege, Auszeichnung, "heute voll" in der Bootskarte (die Auslastung am Gebäude kam mit P55).
 
 ## Ziel
 
@@ -57,6 +57,35 @@ Ab 4 Sternen kommen L-Boote 1,3-mal und XL-Boote 1,4-mal so oft (`ruf.lockt.gros
 
 Bleibt. Mit dem neuen Ruf hat er eine Aufgabe: Segelclub- und Werftausbau ab 3,8, Fahrgastanleger und Museumshafen ab 4,0, Kreuzfahrtterminal 4,0 und 4,5, Marineanleger 4,0 und 4,6. Das Bauen-Menü nennt den fehlenden Ruf ("braucht Ruf 4,5").
 
+### Kapazität sichtbar (Ü17)
+
+Jede Versorgung mit Gebäude (WC, Dusche, Essen) versorgt je Tag eine feste Zahl Boote (`bauwerke.*.versorgt`). Das Schild "14/20" am Gebäude kommt aus P55 (PR 269, [hafenzeichen.md](hafenzeichen.md), `game.sim.auslastung()`). P19 ergänzt die Bootskarte: Ein Wunsch, dessen Versorgung heute schon voll ist, steht rot da ("Wunsch: Dusche (heute voll)", `berthValue(...).full`).
+
+### Wege (B9)
+
+Liegt eine Box weiter als 120 m (Luftlinie Box bis Tür) vom nächsten Gebäude für WC oder Dusche, zählt der erfüllte Wunsch für die Note nur halb (`ruf.wege`). Liegegeld und Wunschbonus bleiben voll. Das Sanitärgebäude (WC Stufe 3) hat auch Duschen und bringt beides an eine zweite Stelle.
+
+- Ziehschild beim Einrasten: "Dusche weit"; die erwarteten Anker sind dort niedriger, darum schlägt das Hafenbüro nähere Boxen vor.
+- Gästebuch: Grund "weiter Weg zur Dusche" mit eigenen Sätzen und Knopf zum WC-Ausbau.
+- Regeln: Hook `walk` (`sim.walkShare`), `boat.far`, `ratingParts(...).far`, `berthValue(...).far`. Die Entfernungen misst `features/versorgung.js` im Bild (`game.versorgung.weg(platz, wunsch)`). `tools/balance.mjs` kennt keine Wege und rechnet alles voll.
+- Gemessen im Testhafen Stufe 4: 6 von 76 Plätzen liegen weit (Steg D außen), in Stufe 6 mehr.
+
+### Auszeichnung (C5)
+
+Liegt der Ruf an 3 Abenden in Folge (Saison, nicht im Winter) mindestens bei der nächsten Marke, bekommt der Hafen die nächste Auszeichnung. Liegt er 3 Abende in Folge mehr als 0,2 unter der Marke der gehaltenen Stufe, geht sie eine Stufe zurück.
+
+| Stufe | Ruf ab | Name | Wimpel |
+|---|---|---|---|
+| 1 | 3,8 | Gastlicher Hafen | grün |
+| 2 | 4,2 | Empfohlener Hafen | blau |
+| 3 | 4,6 | Ausgezeichneter Hafen | gold |
+
+- Am Flaggenmast des Hafenmeisterhauses (und des Hafenbüros) weht unter der Flagge ein Wimpel in der Farbe der Stufe.
+- Nach dem Tagesabschluss sagt eine kleine Karte, dass die Auszeichnung neu ist oder verloren ging (Meldungs-Ordnung `VORRANG.auszeichnung` 60; am Handy hochkant unten über der Zeit).
+- Das Gästebuch zeigt unter dem Ruf-Verlauf Wimpel, Namen und was zur nächsten Stufe fehlt.
+- Spielstand: `state.award = { level, up, down, best }`; ältere Spielstände bekommen 0. Regeln: `sim.award`, `sim.updateAward`, Ereignisse `awardUp` { level, name, first }, `awardDown` { level, name, lost }.
+- Nach den Messungen aus Teil 1 erreicht ein geschickter Spieler Stufe 1 in Ausbaustufe 1, Stufe 2 in Ausbaustufe 2 bis 3 und Stufe 3 ab Ausbaustufe 4; ein gemütlicher Spieler Stufe 3 etwa ab Ausbaustufe 5.
+
 ## Gemessen (tools/balance.mjs, 30 Läufe)
 
 | | vorher | nachher |
@@ -78,9 +107,10 @@ Stufe 2 dauert für gemütliche Spieler länger (50 statt 38 Tage, vor allem Spa
 - **Tagesziele:** Ziele "mit Wunsch versorgen" wählen nur Versorgung und Strom, Namen kommen aus `wuensche-texte.js`.
 - **P31 (neue Wünsche in späten Stufen):** neue Wünsche kommen in `economy.js` und `wuensche-texte.js`; die Oberfläche liest alle Namen von dort.
 - **Services-Effekte:** `effekte().ruf` wird noch berechnet, zählt aber nicht mehr für die Note. `effekte().angebote` meldet die gebauten Services an die Regeln.
+- **Winter (P20):** "Sanitär winterfest" hebt Gäste mit WC- oder Dusch-Wunsch über den Hook `rating`, unabhängig vom Weg. Im Winter zählen keine Abende für die Auszeichnung.
+- **Gebäude (render/buildings.js):** Wege und Schilder lesen `game.buildings.eingang(id)`; ändern sich die Gebäude-ids der Versorgung (Toilette, Sanitär, Dusche, Kiosk, Restaurant), muss `GEBAEUDE` in `features/versorgung.js` mit.
+- **Liegegeld je Meter (PR 252):** ändert nur das Liegegeld; Wege und Auszeichnung wirken auf die Note.
 
-## Offen (Teil 2)
+## Offen
 
-- C5: Ruf als Auszeichnung mit Namen und Zeichen im Hafen.
-- Kapazität sichtbar: wie viele Gäste Toilette, Dusche, Essen und Diesel heute noch versorgen.
-- B9: Wege zählen (weit vom Sanitärhaus zählt die Dusche halb).
+- `tools/balance.mjs` rechnet ohne Wege; der Abzug trifft nur wenige Plätze am Rand.

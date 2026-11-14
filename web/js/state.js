@@ -28,6 +28,7 @@ export function createState({ seed, rules = RULES } = {}) {
     guests: 0, // abgereiste Gäste insgesamt
     stageGuests: 0, // abgereiste Gäste in der aktuellen Ausbaustufe
     ratings: Array(rep.startSamples).fill(rep.start), // letzte Bewertungen, neueste hinten
+    award: { level: 0, up: 0, down: 0, best: 0 }, // Auszeichnung des Hafens (P19 C5)
     facilities: Object.fromEntries(Object.keys(rules.facilities).map((k) => [k, 0])),
     office: 0,
     buildings: {}, // Bauprojekte und Anlagen mit Stufe, zum Beispiel { 'steg-d': 1, mole: 2 }
@@ -123,6 +124,10 @@ function tiefPruefen(data) {
   // Tag jeder Bewertung (Ruf über die letzten Tage, P19); fehlt in älteren Spielständen
   if (data.ratingDays != null && (!Array.isArray(data.ratingDays) || data.ratingDays.length > data.ratings.length
     || !data.ratingDays.every((t) => Number.isInteger(t) && t >= 0))) fehler('Tage der Bewertungen');
+  // Auszeichnung des Hafens (P19 C5); fehlt in älteren Spielständen
+  if (data.award != null && (!istObjekt(data.award)
+    || !['level', 'up', 'down', 'best'].every((k) => data.award[k] == null || (Number.isInteger(data.award[k]) && zahlIn(data.award[k], 0, 1000)))))
+    fehler('Auszeichnung');
   const boote = Object.entries(data.boats);
   if (boote.length > 5000) fehler('zu viele Boote');
   let hoechste = 0;

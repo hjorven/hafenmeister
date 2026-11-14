@@ -173,7 +173,10 @@ export function bewerberPasst(state, ctx, bewerber, platzId) {
 
 /** Pacht eines Bewerbers: je Tag, Tage, Summe (für die Saison, die jetzt bezahlt würde). */
 export function bewerberPacht(state, ctx, bewerber) {
-  const jeTag = pachtJeTag(state, ctx, { typeId: bewerber.artId, size: bewerber.size });
+  // Länge wie beim Festmachen (sim.stationBoat): Modell, sonst kleinste der Art; Liegegeld geht nach Länge (B10)
+  const t = ctx.typeById[bewerber.artId];
+  const m = t?.models?.find((x) => x.id === bewerber.modellId) || t?.models?.[0];
+  const jeTag = pachtJeTag(state, ctx, { typeId: bewerber.artId, size: bewerber.size, length: m?.length ?? t?.length?.[0] ?? 0 });
   const { tage } = pachtZeitraum(state, ctx);
   return { jeTag, tage, summe: jeTag * tage };
 }
@@ -1031,7 +1034,7 @@ export async function init(game) {
         const titel = `${b.bootsname ? `„${b.bootsname}“, ` : ''}${b.name}, Größe ${b.size}`;
         return knopf(vor ? `${titel} · +${euro(pa.summe)}` : `${titel} · ${euro(pa.jeTag)} je Abend`,
           () => aktion(machDauerplatz(st, api.ctx, platzId, b.id)), 'hm-primaer dauer-bewerber',
-          `Wartet noch ${Math.max(0, b.bisTag - st.day)} Tage auf eine Antwort`);
+          ((n) => n === 1 ? 'Wartet noch einen Tag auf eine Antwort' : n === 0 ? 'Wartet nur noch heute auf eine Antwort' : `Wartet noch ${n} Tage auf eine Antwort`)(Math.max(0, b.bisTag - st.day)));
       });
       teile.push(el('div', { class: 'card-actions dauer-liste' }, ...zeilen));
     }

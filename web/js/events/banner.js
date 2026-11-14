@@ -108,6 +108,9 @@ export function initBanner(game) {
         const p = document.createElement('span');
         p.textContent = e.event.text;
         txt.append(p);
+        // Vorbereiten (events/vorbereiten-ui.js): Sturmklar machen, Plätze für die Regatta freihalten
+        const extra = game.vorbereitung?.zeile?.(e);
+        if (extra) txt.append(extra);
       }
       row.append(txt);
       panel.append(row);
@@ -140,6 +143,11 @@ export function initBanner(game) {
   game.on('event:loaded', refresh);
 
   game.on('event:announce', ({ event, startDay, day }) => {
+    // Kann man sich vorbereiten, zeigt events/vorbereiten-ui.js eine Karte mit Knopf an dieser Stelle
+    if (game.vorbereitung?.uebernimmt?.(event)) {
+      chip.classList.remove('pulse'); void chip.offsetWidth; chip.classList.add('pulse');
+      return;
+    }
     show(EVENT_ICON[event.id] ?? 'wolke', event.teaser ?? `${dayLabel(startDay - day)}: ${event.title}`, event.text);
     chip.classList.remove('pulse'); void chip.offsetWidth; chip.classList.add('pulse');
   });

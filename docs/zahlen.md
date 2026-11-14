@@ -27,15 +27,15 @@ Zahlen in economy.js ändern und die Datei neu schreiben. `tests/zahlen.test.mjs
 
 ## Liegegeld je Klasse
 
-| Klasse | Grundpreis | Nächte | Wünsche |
-|---|---|---|---|
-| S | 10 € | 1 bis 3 | 0 bis 2 |
-| M | 22 € | 2 bis 4 | 1 bis 2 |
-| L | 45 € | 2 bis 5 | 1 bis 3 |
-| XL | 120 € | 1 bis 3 | 2 bis 3 |
-| XXL | 0 € | 1 bis 1 | 0 bis 0 |
+| Klasse | je Meter | Grundpreis | Nächte | Wünsche |
+|---|---|---|---|---|
+| S | 2,5 € | 11 € | 1 bis 3 | 0 bis 2 |
+| M | 2,7 € | 22 € | 2 bis 4 | 1 bis 2 |
+| L | 3,7 € | 45 € | 2 bis 5 | 1 bis 3 |
+| XL | 4,2 € | 120 € | 1 bis 3 | 2 bis 3 |
+| XXL | - | 0 € | 1 bis 1 | 0 bis 0 |
 
-Je erfülltem Wunsch +25 %.
+Liegegeld je angefangenem Meter Bootslänge (B10); der Grundpreis ist der Schnitt der Klasse und gilt für Boote ohne Länge. Je erfülltem Wunsch +25 %.
 
 ## Stegprojekte
 
