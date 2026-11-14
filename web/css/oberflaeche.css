@@ -327,6 +327,22 @@ body.hm-neu { font: 400 var(--hm-s)/1.4 var(--hm-pixel); color: var(--hm-tinte);
   animation: hm-auf 0.12s steps(3);
 }
 .hm-neu #hm-menue.hm-tafel-px { position: absolute; width: auto; max-height: none; overflow: visible; padding: 4px; }
+/* Nie höher als der Bildschirm: notfalls scrollen statt Einträge unerreichbar abschneiden */
+.hm-neu #hm-menue.hm-tafel-px { max-height: calc(100dvh - var(--hm-oben) - var(--hm-knopf) - 14px); overflow-y: auto; overscroll-behavior: contain; }
+/* Weitere Zeilen unterhalb: Streifen am unteren Rand (oberflaeche.js setzt hm-mehr) */
+.hm-neu #hm-menue.hm-mehr::after {
+  content: '▼ weiter unten';
+  position: sticky;
+  bottom: -4px;
+  grid-column: 1 / -1;
+  margin: -14px -4px -4px;
+  padding: 16px 0 4px;
+  text-align: center;
+  font-size: 0.8em;
+  color: var(--hm-tinte-2);
+  background: linear-gradient(to bottom, rgba(255, 250, 240, 0), var(--hm-papier) 55%);
+  pointer-events: none;
+}
 .hm-neu #hm-seite .hm-tafel li { padding: 6px 0; border-top: var(--hm-px) dotted rgba(36, 54, 74, 0.25); }
 .hm-neu #hm-seite .hm-tafel li:first-child { border-top: 0; }
 .hm-neu #hm-seite .hm-tafel li.erledigt { color: var(--hm-meer); }

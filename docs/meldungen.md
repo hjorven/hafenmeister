@@ -16,6 +16,7 @@ warten ausgeblendet, ihre Zeit läuft solange nicht ab, und sie kommen danach. D
 | 50 | Schritte des Einstiegs | `features/einstieg.js` |
 | 45 | Tipps beim ersten Mal | `features/einstieg.js` |
 | 40 | Andere Dauerplatz-Meldungen | `features/dauerlieger.js` |
+| 20 | Bewertung eines Boots außerhalb des Bildes (`#hm-gb-meldungen`, die Blasen über Booten im Bild zählen nicht) | `ui/gaestebuch.js` |
 
 Bei gleichem Vorrang bleibt, wer zuerst da war.
 

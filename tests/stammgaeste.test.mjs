@@ -5,7 +5,8 @@ import * as sim from '../web/js/sim.js';
 import { createState } from '../web/js/state.js';
 import { HAFEN } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
-import { STAMM, haengeEin, stammState, beschreibung, nachtHook } from '../web/js/features/stammgaeste.js';
+import { STAMM, haengeEin, stammState, beschreibung, nachtHook, namenNachtragen, freierName } from '../web/js/features/stammgaeste.js';
+import { BOOTSNAMEN } from '../web/js/data/bootsnamen.js';
 import * as dauer from '../web/js/features/dauerlieger.js';
 
 function neu(seed = 7, stufe = 2) {
@@ -114,4 +115,56 @@ test('ab dem 5. Besuch als Dauerlieger behalten', () => {
   // Reist nachts nicht ab
   spiele(state, ctx, 3);
   assert.ok(state.boats[900] || dauer.draussenBis(state, platz.id) != null);
+});
+
+test('Boote ohne Namen (vor dem Einhängen gewürfelt) bekommen Namen nach, ohne den Würfel zu bewegen', () => {
+  const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN });
+  const state = createState({ seed: 3 });
+  state.stage = 2;
+  sim.tick(state, ctx, 0);   // ohne Stammgäste-Hook: keine Namen
+  assert.ok(state.upcoming.length > 0);
+  assert.ok(state.upcoming.every((b) => !b.bootsname));
+  const rng = JSON.stringify(state.rng ?? state.seed);
+  const n = namenNachtragen(state);
+  assert.equal(n, state.upcoming.length);
+  for (const b of state.upcoming) {
+    assert.equal(typeof b.bootsname, 'string');
+    assert.equal(typeof b.heimathafen, 'string');
+  }
+  assert.equal(JSON.stringify(state.rng ?? state.seed), rng);
+  assert.equal(namenNachtragen(state), 0, 'zweimal ändert nichts');
+});
+
+test('Bootsnamen sind im Hafen eindeutig, auch in Stufe 6 mit vielen Booten', () => {
+  for (const stufe of [2, 6]) {
+    const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN });
+    haengeEin((n, f) => sim.addHook(ctx, n, f));
+    const state = sim.applyTestStage(createState({ seed: 21 }), ctx, stufe);
+    state.office = 3;
+    let meist = 0;
+    for (let tag = 0; tag < 25; tag++) {
+      for (let t = 0; t < 400; t++) {
+        sim.tick(state, ctx, 1);
+        const namen = [...Object.values(state.boats), ...state.upcoming].filter((b) => !b.stationed).map((b) => b.bootsname);
+        meist = Math.max(meist, namen.length);
+        assert.equal(new Set(namen).size, namen.length, `Stufe ${stufe} Tag ${state.day}: ${namen.join(', ')}`);
+      }
+      sim.runDay(state, ctx);
+      sim.collectAll(state, ctx, true);
+    }
+    assert.ok(meist > 3, `Stufe ${stufe}: genug Boote gleichzeitig (${meist})`);
+  }
+});
+
+test('freierName: zuletzt vergebene Namen kommen nicht gleich wieder, volle Liste bekommt Zusatz', () => {
+  const state = createState({ seed: 4 });
+  const reihe = [];
+  for (let i = 0; i < STAMM.namenGedaechtnis; i++) reihe.push(freierName(state, 0));
+  assert.equal(new Set(reihe).size, reihe.length);
+  // Alle Grundnamen liegen im Hafen: ein Zusatz macht den Namen eindeutig
+  state.boats = {};
+  BOOTSNAMEN.forEach((name, i) => { state.boats[i + 1] = { id: i + 1, bootsname: name }; });
+  const n = freierName(state, 0.5);
+  assert.match(n, / II$/);
+  assert.ok(!BOOTSNAMEN.includes(n));
 });
