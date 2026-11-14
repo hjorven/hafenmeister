@@ -194,3 +194,39 @@ test('Texte für Steckbrief und fehlende Modelle', () => {
   assert.equal(L.fehltText({ minStage: 6, unlock: 'kreuzfahrt' }, {}, 6), 'Kommt mit einem eigenen Anleger');
   assert.equal(L.fehltText({ minStage: 2 }, { minStage: 2 }, 3), 'Noch nicht gesehen');
 });
+
+test('Fischkutter: freie Fischerplätze bekommen erst Kutter, die noch fehlen; zur neuen Saison wechseln sie', async () => {
+  const { ctx, state } = await neu(5, 5);
+  sim.runDay(state, ctx);
+  const fischer = () => Object.values(state.boats).filter((b) => b.stationed && b.typeId === 'M4').map((b) => b.modelId);
+  const erste = fischer();
+  assert.ok(erste.length >= 2, 'mehrere Fischerplätze in Stufe 5');
+  assert.equal(new Set(erste).size, erste.length, 'jeder Platz ein anderer Kutter');
+  // bis zum ersten Tag der nächsten Saison
+  const { seasonDays, winterDays } = ctx.rules;
+  while (state.day <= seasonDays + winterDays) { sim.runDay(state, ctx); sim.collectAll(state, ctx, true); }
+  sim.runDay(state, ctx);
+  const alle = new Set(state.logbook.M4);
+  const modelle = ctx.typeById.M4.models.filter((m) => (m.fromStage ?? 1) <= 5).map((m) => m.id);
+  assert.deepEqual([...alle].sort(), [...new Set([...erste, ...fischer()])].sort());
+  assert.ok(alle.size > erste.length, 'neue Saison bringt andere Kutter');
+  assert.ok(alle.size >= Math.min(modelle.length, 2 * erste.length));
+});
+
+test('Großschiffe: gesichtet kommen sie ins Logbuch, Modelle ohne Auftritt stehen nicht darin', async () => {
+  const { ctx, state } = await neu(6, 6);
+  const ev = sim.logbookSighting(state, ctx, 'XXL1', 'XXL1-3');
+  assert.deepEqual(ev.map((e) => e.type), ['logbookNew']);
+  assert.deepEqual(sim.logbookSighting(state, ctx, 'XXL1', 'XXL1-3'), [], 'nur einmal');
+  assert.deepEqual(sim.logbookSighting(state, ctx, 'XXL1', 'gibt-es-nicht'), []);
+  L.verarbeite(state, ev, { winter: () => false });
+  const e = L.buchState(state).erst['XXL1-3'];
+  assert.equal(e.gesichtet, true);
+  assert.match(L.erstText(e), /^Zuerst gesichtet am Tag/);
+  const kat = L.katalog(ctx.types);
+  const xxl = kat.find((g) => g.size === 'XXL').arten.flatMap((a) => a.modelle.map((m) => m.id));
+  assert.ok(xxl.includes('XXL1-3') && xxl.includes('XXL3-1'));
+  assert.ok(!xxl.includes('XXL3-2') && !xxl.includes('XXL3-3'), 'nie zu sehen, also nicht im Logbuch');
+  assert.ok(xxl.every((id) => L.kommtVor({ id, size: 'XXL' })));
+  assert.equal(L.fortschritt(state, kat).je.XXL.gesehen, 1);
+});

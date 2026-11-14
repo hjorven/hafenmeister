@@ -21,6 +21,9 @@
 //   { a: 'start' }                 Hafen eröffnet (Tag 1)
 //   { a: 'text', text, art? }      freier Satz (für spätere Pakete, zum Beispiel P22 Erfolge: art 'erfolg')
 
+import { FLOTTE } from '../data/verkehr.js';
+import { BESUCH_MODELL } from '../data/besuchswege.js';
+
 export const LOGBUCH = {
   maxChronik: 2000,       // Tage, die die Chronik höchstens aufhebt (etwa 15 Spieljahre)
   maxMerk: 16,            // Merkmale je Tag
@@ -91,6 +94,22 @@ export function gesehen(state, typeId, key = typeId) {
  * types: ctx.types (sim.js) oder eine Liste wie BOAT_CATALOG. Arten ohne Modelle zählen als ein Eintrag.
  */
 export const GROESSEN = ['S', 'M', 'L', 'XL', 'XXL'];
+
+// Große Schiffe (XXL) legen nicht über die Spielregeln an. Sie kommen ins Logbuch, wenn man sie sieht
+// (bridge.js, sim.logbookSighting): als Besuch an ihrem Anleger, als Verkehr vor dem Hafen oder an der
+// Seenotretter-Station. Ein XXL-Modell ohne einen dieser Wege kommt im Spiel nie vor und steht darum nicht
+// im Logbuch (sonst bliebe es für immer ein Schattenriss).
+export const XXL_STATION = { 'XXL3-1': 'Liegt an der Seenotretter-Station (ab ihrer zweiten Stufe)' };
+const XXL_BESUCH = new Set(Object.values(BESUCH_MODELL));
+// FLOTTE: Listen (ufer, see) oder Tabellen Stufe -> Modelle (klein, gross)
+const FLOTTE_STUFEN = Object.values(FLOTTE).flatMap((t) => (Array.isArray(t) ? [[1, t]] : Object.entries(t).map(([k, v]) => [+k, v])));
+const XXL_VERKEHR = new Set(FLOTTE_STUFEN.flatMap(([, v]) => v).filter((id) => /^XXL/.test(id)));
+const XXL_VERKEHR_AB = Math.min(99, ...FLOTTE_STUFEN.filter(([, v]) => v.some((id) => /^XXL/.test(id))).map(([k]) => k));
+/** Kann dieses Modell im Spiel überhaupt vorkommen? (nur für XXL eingeschränkt) */
+export function kommtVor(mo) {
+  if (mo.size !== 'XXL') return true;
+  return XXL_BESUCH.has(mo.id) || XXL_VERKEHR.has(mo.id) || !!XXL_STATION[mo.id];
+}
 export function katalog(types) {
   const liste = Array.isArray(types) ? types : Object.values(types || {});
   const out = [];
@@ -108,9 +127,10 @@ export function katalog(types) {
             minStage: mo.minStage ?? mo.fromStage ?? t.minStage ?? 1,
             length: zahl(mo.length ?? t.length), beam: zahl(mo.beam ?? t.beam), draft: zahl(mo.draft ?? t.draft),
             shape: mo.shape ?? null,
-          })),
+          })).filter((mo) => kommtVor(mo)),
         };
-      });
+      })
+      .filter((art) => art.modelle.length);
     if (arten.length) out.push({ size: g, arten });
   }
   return out;
@@ -175,6 +195,7 @@ export function neuEintragen(state, e, boat = null, names = {}, tag = state.day)
   if (!key) return null;
   if (!m.erst[key]) {
     m.erst[key] = { tag, stufe: state.stage };
+    if (e.gesichtet) m.erst[key].gesichtet = true;
     if (boat?.bootsname) m.erst[key].boot = kurz(boat.bootsname);
     if (boat?.heimathafen) m.erst[key].hafen = kurz(boat.heimathafen);
   }
@@ -421,12 +442,15 @@ export function erstText(e) {
   if (!e) return '';
   const boot = e.boot ? `„${e.boot}“${e.hafen ? ` aus ${e.hafen}` : ''}` : '';
   if (!e.tag) return 'Schon vor dem Logbuch im Hafen gewesen.';
-  return `Zuerst am Tag ${e.tag}${e.stufe ? ` (Stufe ${e.stufe})` : ''}${boot ? `: ${boot}` : ''}.`;
+  return `Zuerst ${e.gesichtet ? 'gesichtet ' : ''}am Tag ${e.tag}${e.stufe ? ` (Stufe ${e.stufe})` : ''}${boot ? `: ${boot}` : ''}.`;
 }
 
 /** Hinweis für ein Modell, das noch fehlt. */
 export function fehltText(art, mo, stufe) {
   const ab = Math.max(art.minStage || 1, mo.minStage || 1);
+  if (XXL_STATION[mo.id]) return XXL_STATION[mo.id];
+  if (mo.size === 'XXL' && XXL_BESUCH.has(mo.id)) return 'Kommt zu Besuch an seinen eigenen Anleger';
+  if (mo.size === 'XXL' && XXL_VERKEHR.has(mo.id)) return stufe < XXL_VERKEHR_AB ? `Fährt ab Stufe ${XXL_VERKEHR_AB} vor dem Hafen vorbei` : 'Fährt manchmal vor dem Hafen vorbei';
   if (art.unlock) return 'Kommt mit einem eigenen Anleger';
   if (art.stationed) return ab > stufe ? `Liegt ab Stufe ${ab} fest im Hafen` : 'Liegt fest im Hafen';
   if (ab > stufe) return `Kommt ab Stufe ${ab}`;

@@ -23,6 +23,15 @@ import { HAFEN } from './harbor.js';
 // Marinepier bei x -310. Die grossen Schiffe laufen gerade von Norden mit dem Bug voraus ein und legen abends
 // achteraus wieder ab (mit Schleppern), ganz ohne zu drehen: Zwischen den Piers ist kein Platz zum Wenden.
 
+// Welche Besuchsschiffe ein Modell aus den Bootsdaten sind (render/boats/xxl.js). Nach ihnen richtet sich
+// das 3D-Modell (render/services-besuch.js) und der Eintrag ins Logbuch, wenn das Schiff kommt (bridge.js).
+// 'xl:<Modell>' in AUFTRITTE ist schon ein Modell der Bootsdaten (Traditionssegler).
+export const BESUCH_MODELL = { kreuzfahrtschiff: 'XXL1-3', korvette: 'XXL2-2', minenjagdboot: 'XXL2-1' };
+/** Modell-IDs der Schiffe eines Besuchs (Service-id aus services:besuch), ohne die eigenen Flat-Modelle. */
+export function besuchModelle(id) {
+  return (AUFTRITTE[id]?.schiffe ?? []).map((d) => (d.modell.startsWith('xl:') ? d.modell.slice(3) : BESUCH_MODELL[d.modell])).filter(Boolean);
+}
+
 export const AUFTRITTE = {
   fahrgastanleger: {
     art: 'ausflugsfahrt', jedenTag: true,
