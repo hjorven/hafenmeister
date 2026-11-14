@@ -33,7 +33,7 @@ const QUELLE_TEXT = {
 };
 const REIHENFOLGE = ['liegegeld', 'pacht', 'gastro', 'services', 'tagesziele', 'sonstiges'];
 // Beim Rundgang und über Nacht zahlen Gäste nur einen Anteil (rules.uncollectedShare); Trinkgeld kommt mit P12
-const LIEGEGELD_TEXT = { kassiert: 'selbst eingestrichen', rundgang: 'beim Rundgang', nacht: 'über Nacht', strichtrinkgeld: 'Trinkgeld (Kassierstrich)', trinkgeld: 'Trinkgeld großer Boote', nebenkosten: 'Nebenkosten (Hafenbüro)', boje: 'Bojengeld über Nacht' };
+const LIEGEGELD_TEXT = { kassiert: 'selbst eingestrichen', rundgang: 'beim Rundgang', nacht: 'über Nacht', strichtrinkgeld: 'Trinkgeld (Kassierstrich)', trinkgeld: 'Trinkgeld großer Boote', nebenkosten: 'Nebenkosten (Hafenbüro)', boje: 'Bojengeld über Nacht', funk: 'Bonus für frei gehaltene Boxen (Funk)' };
 const AUSGABE_NAME = { bau: 'Bauen', ausbau: 'Ausbau des Hafens', services: 'Services', pacht: 'Pacht zurückgezahlt', winter: 'Winterarbeiten' };
 // Pacht (features/dauerlieger.js): Saisonpacht im Voraus, sonst die abendliche Pacht der Fischer und Dienste
 const PACHT_TEXT = { saison: 'Saisonpacht im Voraus' };
