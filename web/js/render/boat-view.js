@@ -736,17 +736,23 @@ export function init(game) {
   }
 
   // --- Ereignisse der Spielregeln -----------------------------------------------------------
-  let ankunftT = -1e9, abfahrtT = -1e9;
-  // Ablegen gestaffelt (Gaeste abends, Dauerlieger morgens): 6 bis 12 s Spielzeit Abstand, damit auch
-  // bei 8x nicht mehrere Boote zugleich losfahren. Wer wartet, liegt noch fest in seiner Box. Ist die
-  // Schlange laenger als 90 s, rueckt der Takt enger (ein Viertel), nie aber zwei Boote zugleich; so
-  // ist die Box spaetestens nach gut zwei Minuten frei fuer das naechste Boot (dock waitFor).
-  function abfahrtVerzoegerung() {
+  let ankunftT = -1e9;
+  // Gemeinsamer Ablegetakt (Gaeste abends, Dauerlieger und Tagesausfluege morgens, Wartende von Boje
+  // und Anker zur Box): unmittelbar vor dem Leinenloswerfen fragt jedes Boot, ob es an der Reihe ist.
+  // 6 bis 9 s Spielzeit Abstand, damit auch bei 8x und 'Alle einweisen' nie mehrere zugleich in die
+  // Einfahrt fahren. Warten mehr als zehn Boote, rueckt der Takt auf 4 s (die Boxen muessen fuer die
+  // naechsten Gaeste frei werden). Wer wartet, liegt noch fest.
+  const takt = { naechst: -1e9, fragt: new Map() };
+  function ablegeTakt(anim) {
     const jetzt = game.time ?? 0;
-    const luecke = 6 + Math.random() * 6;
-    const vorn = abfahrtT - jetzt;
-    abfahrtT = jetzt + Math.max(0, vorn + (vorn >= 90 ? luecke / 4 : luecke));
-    return abfahrtT - jetzt;
+    if (takt.naechst - jetzt > 30) takt.naechst = jetzt;     // Spielzeit neu (Laden, neues Spiel)
+    takt.fragt.set(anim, jetzt);
+    if (jetzt < takt.naechst) return false;
+    takt.fragt.delete(anim);
+    let wartend = 0;
+    for (const [a, t] of takt.fragt) { if (jetzt - t > 2) takt.fragt.delete(a); else wartend++; }
+    takt.naechst = jetzt + (wartend > 10 ? 4 : 6 + Math.random() * 3);
+    return true;
   }
   game.on('boot-kommt', (info) => {
     if (!info || info.id == null) return;
@@ -793,7 +799,8 @@ export function init(game) {
     e.anim.reserviert = null;
     // ab Stufe 3 von der Reede durch Einfahrt und Durchstich in den See.
     // Liegt noch ein Boot in der Box (es faehrt heute ab), wartet das neue, bis die Box frei ist.
-    e.anim.dock(b, { route: true, waitFor: () => platzFrei(platz, b, e.anim) });
+    // von der Boje oder vom Anker los im gemeinsamen Ablegetakt (sonst bei 'Alle einweisen' ein Pulk)
+    e.anim.dock(b, { route: true, waitFor: () => platzFrei(platz, b, e.anim), takt: ablegeTakt });
   }
 
   // Stufenausbau mit weniger Bojen (Spielregel settleWaitSpots): ein wartendes Boot verholt an eine
@@ -819,7 +826,7 @@ export function init(game) {
     entferneMuenze(id, 0);
     // Abends legen viele zugleich ab: gestaffelt, 3 bis 6 s Abstand, damit es wie geordneter
     // Verkehr aussieht und nicht wie ein Pulk an der Einfahrt (hoechstens 30 s Warten)
-    e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true, verzoegerung: e.anim.moored ? abfahrtVerzoegerung() : 0 }).then((ok) => {
+    e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true, takt: ablegeTakt }).then((ok) => {
       if (ok && boats.get(id) === e) entferne(id);
     });
   });
@@ -1125,7 +1132,7 @@ export function init(game) {
     const weg = [ziel];
     e.draussen = true;
     entferneMuenze(id, 0);
-    e.anim.undock(weg, { sails: segel, route: true, verzoegerung: e.anim.moored ? abfahrtVerzoegerung() : 0 }).then((ok) => {
+    e.anim.undock(weg, { sails: segel, route: true, takt: ablegeTakt }).then((ok) => {
       if (!ok || boats.get(id) !== e) return;
       if (tage > 0) {
         // mehrtaegiger Toern: aus dem Bild, kommt mit 'dauer:einlaufen' zurueck
