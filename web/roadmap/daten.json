@@ -489,9 +489,11 @@
    "id": "P19",
    "titel": "Ruf schwerer machen mit Wünschen je Bootsart",
    "inhalt": "Ü17, feeFactor, arrivalWeight, Kapazität sichtbar",
-   "thread": "Teil 1 erledigt (B7, C2, C3, C4, C6, F8, ruf.md); Teil 2 offen: C5, Kapazität sichtbar, B9",
+   "thread": "Teil 1 erledigt (PR 244; B7, C2, C3, C4, C6, F8, ruf.md); Teil 2 offen: C5, Kapazität sichtbar, B9",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    244
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "Ü17",
@@ -506,7 +508,10 @@
     "M3"
    ],
    "status": "teilweise",
-   "bilder": []
+   "bilder": [
+    44,
+    45
+   ]
   },
   {
    "id": "P20",
@@ -539,16 +544,21 @@
    "id": "P21",
    "titel": "Logbuch und Hafenchronik zeigen",
    "inhalt": "Logbuch (Note 1), F36, sim:logbookNew",
-   "thread": "erledigt (docs/logbuch.md, SAVE_VERSION 3)",
+   "thread": "erledigt (PR 274, docs/logbuch.md, SAVE_VERSION 3)",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    274
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "F36",
     "I5"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    40,
+    41
+   ]
   },
   {
    "id": "P22",
@@ -1064,7 +1074,10 @@
     "Bed P10"
    ],
    "status": "teilweise",
-   "bilder": []
+   "bilder": [
+    42,
+    43
+   ]
   },
   {
    "id": "P57",
@@ -1153,7 +1166,7 @@
    "id": "P62",
    "titel": "Geländeform und Engpass neu bauen",
    "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
-   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224, 229, 246): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224), Land nördlich der Reede (PR 229)",
+   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224, 229, 246, 271): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224), Land nördlich der Reede (PR 229), Fahrrinne in die offene See an jeder Küste (PR 271)",
    "welle": 0,
    "prs": [
     179,
@@ -1165,7 +1178,8 @@
     216,
     224,
     229,
-    246
+    246,
+    271
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -4906,18 +4920,90 @@
    "datum": "2026-11-14",
    "quelle": "gelaende/vorschau/zonen/zonen-und-seewege.png",
    "nr": 39
+  },
+  {
+   "datei": "p21-pr274-pc-logbuch-album.jpg",
+   "pakete": [
+    "P21"
+   ],
+   "titel": "Logbuch: Sammelalbum aller Boote mit Pixelbildern",
+   "pr": 274,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "logbuch/pc-boote.png",
+   "nr": 40
+  },
+  {
+   "datei": "p21-pr274-handy-steckbrief.jpg",
+   "pakete": [
+    "P21"
+   ],
+   "titel": "Logbuch: Steckbrief eines Bootes",
+   "pr": 274,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "logbuch/handy-steckbrief.png",
+   "nr": 41
+  },
+  {
+   "datei": "p55-pr269-handy-geduldsring.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Geduldsring über wartenden Booten",
+   "pr": 269,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p55/handy-1-geduldsring.png",
+   "nr": 42
+  },
+  {
+   "datei": "p55-pr269-pc-geduldsring.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Geduldsring und Wünsche an der Boje",
+   "pr": 269,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "p55/pc-1-geduldsring.png",
+   "nr": 43
+  },
+  {
+   "datei": "p19-pr244-handy-gaestebuch-ruf.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Ruf schwerer: Gästebuch zeigt, was Gästen gefehlt hat",
+   "pr": 244,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p19/p19-buch-handy.png",
+   "nr": 44
+  },
+  {
+   "datei": "p19-pr244-pc-wuensche-bootsart.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Wünsche je Bootsart auf der Ankunftskarte",
+   "pr": 244,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "p19/p19-karte-pc.png",
+   "nr": 45
   }
  ],
  "neueBilder": [
+  45,
+  44,
+  43,
+  42,
+  41,
+  40,
   39,
   38,
-  37,
-  36,
-  35,
-  34,
-  33,
-  32,
-  31
+  37
  ],
  "merges": [
   {
@@ -4940,7 +5026,9 @@
    "datum": "2026-11-14",
    "titel": "Fahrrinne in die offene See: jede Küste hat einen Seeweg",
    "pr": 271,
-   "pakete": []
+   "pakete": [
+    "P62"
+   ]
   },
   {
    "datum": "2026-11-14",
