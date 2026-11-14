@@ -38,6 +38,8 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 | A | Stau im Hafenbecken ab Stufe 3: je Lauf rund 300 Bootspaare ineinander fest und 430 hängende Boote, 90 % in Stufe 5 und 6 | Zeitraffer-Serie auf `5b00546`; nach PR 280 neu messen | P66, PR 280 |
 | A | Boote noch über Land (rund 21 je Lauf) und durch Stege (rund 17 je Lauf), vor allem Typ 3 und 8 | dieselbe Serie | P66 mit P62 |
 | A | Aufstieg weicht von der Rechnung ab; nach PR 252: geschickt 225, gemütlich 239 Tage, Stufe 2 gemütlich 36 Tage; A10 (PR 287) verschiebt um +2 bis +6 Tage | Zeitraffer-Serien, `tools/balance.mjs` | Balancing-Paket P17 |
+| B | Menschen laufen auf festen Koordinaten (`people/netz.js`), nicht auf dem Seed-Gelände | Gelände-Thread, 14.11. | Zusammenspiel 3, oder eigener Thread "Menschen auf das Gelände stellen" |
+| C | `tests/specs/leinen.spec.mjs` prüft nur Küstentyp 1 bis 10 | Gelände-Thread | Leinen- oder Test-Thread nach PR 300 |
 | B | `istWasser` und Bild stimmen am Durchstich nicht überall überein | Messlatte (`feature-tests/messlatte/README.md`) | P62 |
 | C | Winter: Rest von H5, G5 | roadmap.md P20 | P20-Rest nach P17 |
 
@@ -70,11 +72,11 @@ Danach geht es weiter wie in [Abschnitt 5](#5-alles-weitere-bis-zum-ende) beschr
 
 ## 3a. Welle 0 abschließen und danach das Zusammenspiel prüfen
 
-**Wann ist Welle 0 fertig?** P63 und P65 sind erledigt, P64 (Umgebung je Küstentyp) ist mit PR 204, 211, 216 fertig, der Thread ist geschlossen. Offen sind:
+**Wann ist Welle 0 fertig?** P62, P63, P64 und P65 sind erledigt, P66 hat PR 280 gemergt (Wartebojen, Anfahrt von weit draußen). Offen sind:
 
-1. P66: PR 280 (Wartebojen neben den Stegen, Anfahrt von weit draußen) gemergt.
-2. P62: Thread "Geländeform und Engpass neu bauen" meldet seine letzte Arbeit (Seegatt für geschlossene Bodden) als gemergt.
-3. Abnahme laut Roadmap Abschnitt 14: eine Zeitraffer-Serie über alle 10 Küstentypen, PC und Handy, auf dem Stand nach 1 und 2. Grenze: kein Boot dauerhaft über Land oder durch Stege, keine Boote ineinander fest länger als ein paar Sekunden. Erst dann steht P62, P64, P66 in der Roadmap auf "erledigt".
+1. P66: Fix des Boote-Threads für den Ankerfeld-Rückfall (13 % der Seeds) und Restboote nach dem Winter.
+2. PR 300 (fünf neue Küstentypen 11 bis 15, nicht Welle 0, aber danach würfelt jedes neue Spiel aus 15 Küsten).
+3. Abnahme laut Roadmap Abschnitt 14: Zeitraffer-Serie über alle 15 Küstentypen, PC und Handy, nach 1 und 2. Grenze: kein Boot dauerhaft über Land oder durch Stege, keine Boote ineinander fest länger als ein paar Sekunden. Danach P66 in der Roadmap auf "erledigt".
 
 Der Planungs-Thread meldet dem Koordinator, sobald alle drei Punkte erfüllt sind.
 
@@ -195,6 +197,7 @@ Schon erledigt aus Jorvens Vorschlägen: F14, F15, F18, F26, F27 (Grundgerüst),
 
 | Datum | Änderung |
 |---|---|
+| 14.11.2026, 22:10 Uhr | PR 280 gemergt, P62 und P64 erledigt; Welle-0-Abnahme über 15 Küsten nach Ankerfeld-Fix und PR 300; Menschen auf festen Koordinaten als Fund B. |
 | 14.11.2026, 22:00 Uhr | P28, P24 Teil 2, ruhige Oberfläche gemergt; Abschnitt 3a: wann Welle 0 fertig ist und Zusammenspiel-Prüfung in drei Threads danach. |
 | 14.11.2026, 21:15 Uhr | A10, Feature-Test-Fehler und P22 gemergt; P17 startet jetzt (Schlussmessung nach PR 280); neu: P41, P26; P28 wieder aufnehmen. |
 | 14.11.2026, 11:45 Uhr | PR 252 und P24 Teil 1 gemergt; A10, P24 Teil 2, P28 und Schicht-Test laufen; P17 startet nach PR 280 und A10 und übernimmt Ü16. |
