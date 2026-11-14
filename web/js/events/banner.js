@@ -39,28 +39,50 @@ export function initBanner(game) {
   banner.hidden = true;
   host.appendChild(banner);
 
-  let hideTimer = 0;
+  // Ankündigungen stehen im gemeinsamen Meldeplatz (ui/meldungen.js): immer nur eine Meldung zugleich.
+  // Mehrere Ankündigungen warten hier nacheinander; die Zeit einer Ankündigung läuft nur, solange sie steht.
+  const ID = 'ankuendigung';
+  const schlange = [];
+  let steht = null;          // { iconName, title, text, seconds, rest }
   function show(iconName, title, text, seconds = 7) {
+    if (steht?.title === title || schlange.some((m) => m.title === title)) return;
+    schlange.push({ iconName, title, text, seconds, rest: seconds });
+    if (schlange.length > 3) schlange.shift();
+    if (!steht) naechste();
+  }
+  function naechste() {
+    steht = schlange.shift() ?? null;
+    banner.classList.remove('leaving');
+    if (!steht) { banner.hidden = true; game.meldungen?.fertig(ID); return; }
     banner.replaceChildren();
-    banner.append(svgIcon(iconName));
+    banner.append(svgIcon(steht.iconName));
     const body = document.createElement('div');
     const t = document.createElement('strong');
-    t.textContent = title;
+    t.textContent = steht.title;
     const p = document.createElement('span');
-    p.textContent = text;
+    p.textContent = steht.text;
     body.append(t, p);
     banner.append(body);
     // Schild und Wetterbericht nie gleichzeitig: das neue Schild klappt den Bericht zu
     if (!panel.hidden) toggle(false);
     banner.hidden = false;
-    banner.classList.remove('leaving');
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => {
-      banner.classList.add('leaving');
-      setTimeout(() => { banner.hidden = true; }, 400);
-    }, seconds * 1000);
+    game.meldungen?.wunsch(ID, game.meldungen.VORRANG?.ankuendigung ?? 55);
   }
-  banner.addEventListener('click', () => { banner.hidden = true; });
+  let letzte = performance.now();
+  setInterval(() => {
+    const jetzt = performance.now();
+    const dt = Math.min(1, (jetzt - letzte) / 1000);
+    letzte = jetzt;
+    if (!steht) return;
+    const darf = !game.meldungen || game.meldungen.darf(ID);
+    banner.classList.toggle('zurueck', !darf);
+    if (!darf || document.hidden) return;
+    steht.rest -= dt;
+    if (steht.rest <= 0.4) banner.classList.add('leaving');
+    if (steht.rest <= 0) naechste();
+  }, 200);
+  // Antippen: weg, die nächste kommt
+  banner.addEventListener('click', () => naechste());
 
   // Wetterknopf mit aufklappbarem Bericht
   const chip = document.createElement('button');
@@ -125,9 +147,9 @@ export function initBanner(game) {
     panel.hidden = !open;
     chip.setAttribute('aria-expanded', String(open));
     if (open) {
-      // Bericht geöffnet: Ankündigung ausblenden, ihr Inhalt steht im Bericht
-      clearTimeout(hideTimer);
-      banner.hidden = true;
+      // Bericht geöffnet: Ankündigungen ausblenden, ihr Inhalt steht im Bericht
+      schlange.length = 0;
+      naechste();
       renderPanel();
     }
   }

@@ -419,6 +419,12 @@ function boot() {
 
 try {
   const game = boot();
+  // Pixelschrift vor den Modulen laden: sie zeichnen Zahlen auch in Canvas (Münzen, Beträge), die
+  // sonst einmal in der Systemschrift entstehen und so bleiben. Höchstens 2,5 s warten (offline, alter Browser).
+  await Promise.race([
+    Promise.all(['400', '600', '700'].map((w) => document.fonts?.load?.(`${w} 16px "Pixelify Sans"`, 'Tag 0123456789 €'))),
+    new Promise((r) => setTimeout(r, 2500)),
+  ]).catch(() => {});
   await loadModules(game);
   // Erst jetzt stehen Stege, Bauplaetze und die geladene Stufe fest
   game.camera.reset();

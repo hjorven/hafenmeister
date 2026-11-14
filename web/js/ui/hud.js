@@ -151,7 +151,12 @@ export function init(game) {
     const pending = sim.mooredBoats().reduce((a, b) => a + (b.pendingFee || 0), 0);
     const darfKnopf = st.office >= (sim.ctx?.rules?.office?.collectAllButton ?? 0);
     collectBtn.hidden = pending <= 0 || !darfKnopf;
-    collectBtn.textContent = `Kassieren ${euro(pending)}`;
+    // Wort und Betrag getrennt: am Handy hochkant steht nur Münze und Betrag (oberflaeche.css)
+    const kassierText = `Kassieren ${euro(pending)}`;
+    if (collectBtn.getAttribute('aria-label') !== kassierText) {
+      collectBtn.setAttribute('aria-label', kassierText);
+      collectBtn.replaceChildren(el('span', { class: 'hm-kassier-wort' }, 'Kassieren '), el('span', { class: 'hm-kassier-betrag' }, euro(pending)));
+    }
     renderGoal(sim);
   }
 

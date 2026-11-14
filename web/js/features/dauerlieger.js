@@ -715,6 +715,8 @@ export async function init(game) {
     // Meldungs-Ordnung (ui/meldungen.js): Einstieg und Tipps gehen vor, ein wartender Dauerlieger mit Frist geht vor sie
     hinweis.classList.toggle('zurueck', fensterOffen() || (game.meldungen ? !game.meldungen.darf('dauer') : false));
     if (hinweis.classList.contains('zurueck')) return;
+    // Im gemeinsamen Meldeplatz (ui/meldungen.js) legt der Platz die Lage fest
+    if (game.meldungen?.imPlatz?.(hinweis)) return;
     const h = host.getBoundingClientRect();
     const rand = 8;
     const kopf = document.getElementById('hud-top');

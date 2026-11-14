@@ -6,6 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Ruhigere Oberfläche: Kurze Meldungen (Ankündigungen wie „Heute: Sommertag“, der Morgen-Zettel mit dem Tageserlös, Dauerplatz-Meldungen, Bewertungen, Tipps und „Als Nächstes“) stehen nur noch an einem Platz und nacheinander, ein kleiner Zähler zeigt, wie viele noch kommen. Am Handy steht dieser Platz unten über Zeit und Bauen, Kassieren ist ein kleiner Münzknopf über Bauen, der Funk ist zuerst zugeklappt und es schweben höchstens zwei Bewertungen über den Booten. Alle Texte, auch Zahlen und Euro, stehen jetzt in der Pixelschrift, das Euro-Zeichen ist neu gezeichnet.
 - Ist die Dusche, die Toilette oder der Kiosk für heute fast oder ganz ausgelastet, stehen die Gäste davor Schlange (275).
 - Vorspulen läuft jetzt ganz durch: 3x und 8x bleiben, bis du selbst etwas anderes wählst. Auch wartende Dauerlieger, Regionsabschluss und Boote an der Boje bremsen nicht mehr; der Knopf „Weiter mit 3x“ entfällt.
 - Neu: das Logbuch (Menü oder Taste J). Jedes Bootsmodell, das einmal angelegt hat, kommt mit Pixelbild hinein, fehlende stehen als Schattenriss da; ein Steckbrief zeigt Maße und wann es zuerst kam. Die Hafenchronik schreibt jeden Abend eine Zeile über den Tag, die Karte am Abend zeigt den wichtigsten Satz. Ein neues Modell meldet sich kurz rechts oben. Alte Spielstände behalten ihr Logbuch und bekommen die letzten 30 Tage nachgetragen.
