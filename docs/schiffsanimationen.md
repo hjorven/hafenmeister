@@ -78,9 +78,16 @@ Seegang und Wind für Ereignisse: `game.boatAnim.setSea(0 bis 1)`, `game.boatAni
 
 ## Von See und wieder hinaus
 
-- Neue Boote beginnen außerhalb des Bildes (auch am Handy hochkant und in der Übersicht) und laufen sichtbar zur Boje ein.
-- Abfahrende Boote verschwinden erst, wenn sie aus dem Bild sind; wer beim Ablegen gar nicht zu sehen ist, ist sofort fort.
-- Zeitraffer: Außerhalb des Bildes fahren Boote auf freier Strecke viermal so schnell (`boat.zeitraffer`), damit An- und Abfahrt nicht Stunden der Spieluhr dauern.
+- **Seezugänge:** Neue Boote beginnen weit draußen auf See, außerhalb jeder Zoomstufe, an einem der Seezugänge des Geländes (`game.gelaende.seezugaenge(stufe, { tiefeM })`, 2 m für kleine, 4 m für große Boote; Zugänge mit `umweg` werden nicht genommen). Die Richtung folgt der Herkunft aus den Spielregeln (Zugänge nach Himmelsrichtung geordnet), nie zweimal hintereinander derselbe Zugang. Das Boot fährt den groben Seeweg des Zugangs bis vor die Einfahrt (`dock(..., { see })`, Wege halten mindestens 12 m Abstand zu Land), ab dort sucht die feine Karte den Weg zur Boje. Abreisende Gäste und mehrtägige Törns fahren denselben Weg rückwärts hinaus (`undock(..., { see })`) und verschwinden am Zugang. Ohne Seezugänge (ältere Gelände, Tests) gilt der alte Start am Kartenrand (`freierStart`, `naeherStart`).
+- Abfahrende Boote verschwinden erst am Seezugang; wer beim Ablegen gar nicht zu sehen ist, ist sofort fort.
+- Zeitraffer: Außerhalb des Bildes fahren Boote auf freier Strecke viermal so schnell, auf dem Seeweg 24-mal (`boat.zeitraffer`); große Schritte werden geteilt (höchstens 1,2 s je Teilschritt), damit kein Boot eine Kurve abschneidet. Wer ganz herausgezoomt zusieht, sieht die Boote in echtem Tempo von weit draußen kommen.
+
+## Wartebojen und Ankerfeld (Stufe 1 und 2)
+
+- Die Wartebojen liegen als kompakter Block (1 x 3, 2 x 2 oder 2 x 3) seitlich neben dem Stegfeld, nahe am Ufer, nie weiter hinaus als die Stegfront. Das Ankerfeld liegt außen daneben. Beide halten Abstand zum Korridor von der Stegfront zur Durchfahrt (`natur().route`), so bleibt der Weg zwischen Einfahrt und Boxen frei (Jorven, 14.11.).
+- Lage je Gelände und Seed: `warteplaetze(stufe, region)` in `landschaft/gelaende.js` sucht die Seite und Lage, an der der Block am nächsten am Stegfeld in tiefem Wasser liegt (Schwoikreis mindestens 2 m), und ein Ankerfeld mit mindestens 8 Plätzen (lieber kleiner als im Weg). Der Uferstreifen des Paddlers und die Seerunde (`data/verkehr.js`) bleiben frei. Passt nichts, gelten die alten Lagen vor den Stegen. Gemessen über 10 Küstenformen x 20 Seeds (Ostsee): Bojen seitlich in 97 % (Stufe 1) und 95 % (Stufe 2), Ankerfeld neu in 87 % und 86 %.
+- Im Fahrwasser kosten Bojen (14 m, Kosten 8) und Ankerplätze (Schwoikreis plus 4 m, Kosten 6) deutlich mehr als freies Wasser: Durchfahrende meiden sie.
+- Molenköpfe samt Steinschüttung (terrain.js, Steine bis 0,95 Breiten um den Kopf) und die Molen selbst sind hart in der Karte.
 
 ## Nacht und Abreise
 

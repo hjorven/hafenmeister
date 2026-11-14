@@ -158,7 +158,7 @@ export function init(game) {
 
   // --- Paddler am Ufer: hin und her, an den Enden kurz Pause
   function uferBoot() {
-    const u = uferStrecke(stufeAktiv);
+    const u = uferStrecke(stufeAktiv, undefined, [...(game.landscape?.warteplaetze?.bojen ?? []).map((o) => [o.px, o.py]), ...(game.landscape?.warteplaetze?.ankerbereiche ?? []).map((o) => [o.px, o.py, o.radius])]);
     if (!u) return;
     const gebaut = baue(zufall(FLOTTE.ufer));
     if (!gebaut) return;
@@ -172,7 +172,7 @@ export function init(game) {
   }
 
   function pendeln(b, richtung) {
-    const u = uferStrecke(stufeAktiv);
+    const u = uferStrecke(stufeAktiv, undefined, [...(game.landscape?.warteplaetze?.bojen ?? []).map((o) => [o.px, o.py]), ...(game.landscape?.warteplaetze?.ankerbereiche ?? []).map((o) => [o.px, o.py, o.radius])]);
     if (!u || !boote.has(b)) return;
     const ziel = welt(richtung > 0 ? u.x1 : u.x0, u.y + (Math.random() * 6 - 3));
     b.anim.sailTo([ziel], { stop: true }).then((ok) => {

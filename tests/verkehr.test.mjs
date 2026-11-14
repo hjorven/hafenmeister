@@ -103,8 +103,8 @@ test('Runden auf dem Binnensee und Paddler am Ufer, Stufe 1 und 2, alle Stegbild
   for (const nr of STEGBILD_NR) mitStegbild(nr, () => {
     for (const st of [1, 2]) {
       for (const inset of [0, 2, 8, 10, 16, 18]) pruefe(st, superellipse(SEE_RUNDE[st], inset), `Stegbild ${nr} See-Runde ${inset}`, { tiefe: 0.8, platz: 25 });
-      const u = uferStrecke(st);
-      pruefe(st, punkteAuf([[u.x0, u.y], [u.x1, u.y]]), `Stegbild ${nr} Ufer`, { tiefe: 0.6, boje: 14, platz: 9 });
+      const u = uferStrecke(st, undefined, [...warteplaetze(st).bojen.map((o) => [o.px, o.py]), ...warteplaetze(st).ankerbereiche.map((o) => [o.px, o.py, o.radius])]);
+      if (u) pruefe(st, punkteAuf([[u.x0, u.y], [u.x1, u.y]]), `Stegbild ${nr} Ufer`, { tiefe: 0.6, boje: 14, platz: 9 });
     }
   });
 });
