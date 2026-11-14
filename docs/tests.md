@@ -8,7 +8,7 @@ Im Hauptordner des Repos:
 bash tests/pruefen.sh
 ```
 
-Er prüft nacheinander die Pfade für GitHub Pages, alle Tests ohne Browser (`tests/*.test.mjs`) und alle Browser-Tests auf Handy, Tablet und PC. Am Ende steht `Alles grün.`, sonst bricht er mit dem Fehler ab. Beim ersten Lauf installiert er die Abhängigkeiten in `tests/` selbst. Dauer etwa 15 bis 20 Minuten.
+Er prüft nacheinander die Pfade für GitHub Pages, alle Tests ohne Browser (`tests/*.test.mjs`) und alle Browser-Tests auf Handy, Tablet und PC. Am Ende steht `Alles grün.`, sonst bricht er mit dem Fehler ab. Beim ersten Lauf installiert er die Abhängigkeiten in `tests/` selbst. Dauer etwa 20 Minuten.
 
 Nur die schnellen Prüfungen ohne Browser (etwa 5 Sekunden):
 

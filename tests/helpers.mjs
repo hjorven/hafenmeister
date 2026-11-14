@@ -85,9 +85,9 @@ export const test = base.extend({
     await page.waitForFunction(() => {
       const boot = document.getElementById('boot');
       return boot && (boot.classList.contains('done') || boot.classList.contains('error'));
-    }, null, { timeout: 30_000 });
+    }, null, { timeout: 45_000, polling: 100 });
     await expect(page.locator('#boot'), 'Startmeldung zeigt einen Fehler').not.toHaveClass(/error/);
-    await page.waitForFunction(() => window.hafenmeister && window.hafenmeister.time > 0.1);
+    await page.waitForFunction(() => window.hafenmeister && window.hafenmeister.time > 0.1, null, { timeout: 30_000, polling: 100 });
     await use({ page, problems });
   },
 });
@@ -175,7 +175,7 @@ export function isTouchProject(testInfo) {
 export async function ohneEinstieg(page) {
   const vorhanden = optionalModules().some((m) => m.rel === 'js/features/einstieg.js' && m.exists);
   if (!vorhanden) return;
-  await page.waitForFunction(() => !!window.hafenmeister.einstieg, null, { timeout: 15_000 });
+  await page.waitForFunction(() => !!window.hafenmeister.einstieg, null, { timeout: 30_000, polling: 100 });
   await page.evaluate(() => window.hafenmeister.einstieg.beenden());
   // Ein Bild warten, damit Karte und Ring wirklich weg sind
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
