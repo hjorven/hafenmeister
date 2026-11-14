@@ -4,7 +4,7 @@
 //    Unzufriedene Gäste (unter 4 Sternen) zeigen dazu das Symbol, was ihnen gefehlt hat, durchgestrichen.
 // 2. Gästebuch: die letzten 20 Bewertungen (genau die, aus denen der Ruf besteht) mit Satz und Grund,
 //    der Ruf-Verlauf der letzten 30 Tage und die drei häufigsten Gründe für schlechte Noten.
-//    Öffnen: Ruf oben links antippen, Menü "Gästebuch", Hafenmeister-Haus oder Hafenbüro antippen, Taste G.
+//    Öffnen: Ruf oben links antippen, Menü "Gästebuch", Hafenmeister-Haus oder Hafenbüro antippen, Taste N (G ist 8x).
 //
 // Daten und Texte: ui/gaestebuch-daten.js (ohne Browser, tests/gaestebuch.test.mjs).
 // Schnittstelle: game.gaestebuch = { oeffnen(), schliessen(), get offen, eintraege(), topGruende() }
@@ -426,7 +426,7 @@ export function init(game) {
   window.addEventListener('keydown', (e) => {
     if (e.target?.closest?.('input, textarea, select, [contenteditable]')) return;
     if (offen && e.key === 'Escape') { schliessen(); e.preventDefault(); return; }
-    if (e.code === 'KeyG' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.code === 'KeyN' && !e.ctrlKey && !e.metaKey && !e.altKey) {
       if (offen) schliessen(); else oeffnen();
     }
   });

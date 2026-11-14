@@ -83,6 +83,7 @@ Prüfung beim Laden: `sim.repairBerths` legt Gäste um, die in einer Box liegen,
 |---|---|
 | 1 | erster Stand |
 | 2 | `modules.gelaende.nr` (Geländeform, alt: 1) und `modules.stegbild.nr` (Stegbild, alt: 0) stehen immer im Stand |
+| 3 | `modules.logbuch` (Logbuch und Chronik, P21): altes Logbuch bleibt ohne Tag, die letzten Tage aus `stats.verlauf` kommen in die Chronik ([logbuch.md](logbuch.md)) |
 
 ## Einbindung (für das Grundgerüst)
 

@@ -22,6 +22,7 @@ export const VORRANG = {
   einstieg: 50,        // features/einstieg.js, Schritte des Einstiegs
   tipp: 45,            // features/einstieg.js, Tipps beim ersten Mal (kurz, gehen den Dauerplatz-Meldungen vor)
   dauer: 40,           // features/dauerlieger.js, andere Meldungen
+  logbuch: 22,         // ui/logbuch.js, neues Bootsmodell im Logbuch (rechts oben, kurz)
   gaestebuch: 20,      // ui/gaestebuch.js, Bewertung eines Boots außerhalb des Bildes (rechts oben, kurz)
 };
 

@@ -134,6 +134,11 @@ function tiefPruefen(data) {
   for (const [platz, id] of Object.entries(data.berths)) {
     if (!data.boats[id]) delete data.berths[platz];
   }
+  // Logbuch (P21): je Bootsart eine Liste von Modell-IDs (Text), alles andere fällt weg
+  for (const [typ, liste] of Object.entries(data.logbook)) {
+    if (!Array.isArray(liste)) { delete data.logbook[typ]; continue; }
+    data.logbook[typ] = [...new Set(liste.filter((x) => typeof x === 'string' && x.length < 40))];
+  }
   data.queue = data.queue.filter((id) => data.boats[id]);
   data.upcoming = data.upcoming.filter((u) => u !== null && (typeof u === 'object' || data.boats[u]));
   data.harborName = String(data.harborName ?? '').replace(/[\u0000-\u001f\u007f<>]/g, '').slice(0, 32);

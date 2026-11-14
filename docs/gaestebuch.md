@@ -11,7 +11,7 @@ Roadmap-Paket P14 (Ü21, F18, C1, C9). Code: `web/js/ui/gaestebuch.js` (Oberflä
 - Abgewiesene oder weggeschickte Boote, die eine Note abgeben, zeigen sie genauso.
 - Im Fotomodus und bei offenem Gästebuch sind Blasen und Meldungen aus.
 
-**Gästebuch.** Öffnen: Ruf oben links antippen, Menü „Gästebuch“, Hafenmeister-Haus oder Hafenbüro antippen, am PC Taste `G`. Schließen: X, `Esc`, daneben tippen.
+**Gästebuch.** Öffnen: Ruf oben links antippen, Menü „Gästebuch“, Hafenmeister-Haus oder Hafenbüro antippen, am PC Taste `N` (`G` schaltet 8x). Schließen: X, `Esc`, daneben tippen.
 
 - Ruf groß mit Stern, daneben der Verlauf der letzten 30 Tage als Säulen (grün ab 4, gelb ab 3, rot darunter, gestrichelte Linie bei 4).
 - „Was Gästen gefehlt hat“: die drei häufigsten Gründe der unzufriedenen Gäste unter den letzten 20, jeweils „n von 20“ und ein Knopf, der das passende Bauwerk im Baumenü zeigt (`game.bauen.vorschau('versorgung:<wunsch>')`), oder ab welcher Stufe es das gibt.
