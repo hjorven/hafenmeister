@@ -41,6 +41,8 @@ const MODULES = [
   './events/events.js',
   './features/dauerlieger.js',
   './features/winter.js',
+  './features/versorgung.js',
+  './features/auszeichnung.js',
   './features/platzschilder.js',
   './features/stammgaeste.js',
   './features/tagesziele.js',
