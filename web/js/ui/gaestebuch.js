@@ -14,6 +14,7 @@ import {
   GAESTEBUCH, GRUND, buchState, eintragen, hauptgrund, topGruende, zusammenfassung, verlauf, satz, absender,
   erklaerung, zufrieden,
 } from './gaestebuch-daten.js';
+import { VORRANG } from './meldungen.js';
 
 // ------------------------------------------------------------------ Pixel-Symbole (12 x 12, wie ui/oberflaeche.js)
 const FARBE = { s: '#e0962a', y: '#ffd95a', o: '#7a5212' };
@@ -192,9 +193,16 @@ export function init(game) {
       const deck = unter ? 0.2 : 1;
       x.el.style.opacity = p.sichtbar ? String(deck * (t < 0.8 ? 1 : Math.max(0, (1 - t) / 0.2))) : '0';
     }
+    // Meldungs-Ordnung (ui/meldungen.js): Steht gerade Wichtigeres, wartet die Leiste ausgeblendet,
+    // ihre Zeit läuft solange nicht ab
+    const darf = leisteFrei();
+    const dt = jetzt - (letzterTakt || jetzt);
+    letzterTakt = jetzt;
     for (const [id, x] of meldungen) {
+      if (!darf) { x.t0 += dt; continue; }
       if (jetzt - x.t0 > MELDUNG_DAUER) { x.el.remove(); meldungen.delete(id); }
     }
+    if (!meldungen.size) leisteFertig();
     if (blasen.size || warteschlange.length || meldungen.size) requestAnimationFrame(schritt);
     else rafLaeuft = false;
   }
@@ -205,6 +213,17 @@ export function init(game) {
   const meldungen = new Map();
   const MELDUNG_DAUER = 3600;
   let meldungNr = 0;
+  let letzterTakt = 0;
+  const MELDUNG_ID = 'gaestebuch';
+  function leisteFrei() {
+    if (!meldungen.size) return true;
+    game.meldungen?.wunsch(MELDUNG_ID, VORRANG.gaestebuch);
+    const darf = game.meldungen ? game.meldungen.darf(MELDUNG_ID) : true;
+    meldungsLeiste.hidden = !darf;
+    return darf;
+  }
+  function leisteFertig() { game.meldungen?.fertig(MELDUNG_ID); meldungsLeiste.hidden = false; letzterTakt = 0; }
+  game.on('meldungen:wechsel', () => { if (meldungen.size) leisteFrei(); });
   function meldung(eintrag, grund, gut) {
     const name = eintrag.boot?.bootsname ? `„${eintrag.boot.bootsname}“` : (eintrag.boot?.name || 'Gast');
     const m = el('button', {
@@ -215,6 +234,7 @@ export function init(game) {
     meldungsLeiste.prepend(m);
     const nr = ++meldungNr;
     meldungen.set(nr, { el: m, t0: performance.now() });
+    leisteFrei();
     while (meldungen.size > 3) {
       const [alt] = meldungen.keys();
       meldungen.get(alt).el.remove();
@@ -234,6 +254,7 @@ export function init(game) {
     for (const x of meldungen.values()) x.el.remove();
     blasen.clear();
     meldungen.clear();
+    leisteFertig();
     warteschlange.length = 0;
   });
 

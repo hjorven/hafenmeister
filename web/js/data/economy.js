@@ -155,8 +155,9 @@ export const ECONOMY = {
     kuendigungsZuschlag: 0.2,  // sofort kündigen: Pacht der restlichen Tage zurück plus dieser Anteil der Saisonpacht
   },
   // Stammgäste (features/stammgaeste.js): Anteil der neuen Boote, die Stammgäste sind; ab so vielen
-  // Ankern kommt ein Gast wieder; Länge der Liste; ab diesem Besuch als Dauerlieger zu behalten
-  stammgaeste: { chance: 0.15, abBewertung: 4, maxListe: 40, dauerAbBesuch: 5 },
+  // Ankern kommt ein Gast wieder; Länge der Liste; ab diesem Besuch als Dauerlieger zu behalten;
+  // namenGedaechtnis: so viele zuletzt vergebene Bootsnamen kommen möglichst nicht gleich wieder
+  stammgaeste: { chance: 0.15, abBewertung: 4, maxListe: 40, dauerAbBesuch: 5, namenGedaechtnis: 30 },
   // Tagesziele (features/tagesziele.js, docs/neue-features.md Abschnitt 6). Morgens drei Karten
   // (leicht, mittel, schwer), der Spieler nimmt eine; es zählen nur eigene Handlungen.
   // geld: Belohnung eines leichten Ziels je Ausbaustufe. schwere: soll = Grundmenge mal Faktor,

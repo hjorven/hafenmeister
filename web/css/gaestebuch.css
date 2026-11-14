@@ -90,7 +90,7 @@ body.foto #hm-gb-blasen, body.hm-gb-offen #hm-gb-blasen { display: none; }
   gap: 4px;
   pointer-events: none;
 }
-body.foto #hm-gb-meldungen, body.hm-gb-offen #hm-gb-meldungen { display: none; }
+body.foto #hm-gb-meldungen, body.hm-gb-offen #hm-gb-meldungen, #hm-gb-meldungen[hidden] { display: none; }
 .hm-neu .hm-gb-meldung {
   pointer-events: auto;
   display: flex;
@@ -302,13 +302,3 @@ body.foto #hm-gb-meldungen, body.hm-gb-offen #hm-gb-meldungen { display: none; }
   .hm-gb-blase, .hm-neu .hm-gb, .hm-neu .hm-gb-meldung { animation: none; }
 }
 
-/* Menü bei wenig Höhe (Handy quer): mit Tagesabschluss, Einstellungen und Gästebuch ist es höher als
-   der Bildschirm. Scrollbar statt abgeschnitten (abgestimmt mit der Oberfläche, oberflaeche.css). */
-@media (max-height: 499px) {
-  .hm-neu #hm-menue.hm-tafel-px {
-    max-height: calc(100vh - var(--hm-oben, 12px) - var(--hm-knopf, 48px) - 14px);
-    max-height: calc(100dvh - var(--hm-oben, 12px) - var(--hm-knopf, 48px) - 14px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-}

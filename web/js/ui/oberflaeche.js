@@ -329,9 +329,14 @@ export function init(game) {
     if (auf) einstTafel.querySelector('.hm-schalter')?.focus({ preventScroll: true });
   }
   einstBtn.addEventListener('click', (e) => { e.stopPropagation(); klappeAndereZu('einstellungen'); einstAuf(einstTafel.hidden); });
+  // Passt das Menü nicht ganz ins Bild (Handy quer), zeigt ein Streifen unten, dass weitere Zeilen folgen
+  const mehrUnten = () => menue.classList.toggle('hm-mehr', !menue.hidden && menue.scrollTop + menue.clientHeight < menue.scrollHeight - 4);
+  menue.addEventListener('scroll', mehrUnten, { passive: true });
+  window.addEventListener('resize', mehrUnten);
   function menueAuf(auf) {
     menue.hidden = !auf;
     menueBtn.setAttribute('aria-expanded', String(auf));
+    if (auf) { menue.scrollTop = 0; mehrUnten(); }
   }
   menueBtn.addEventListener('click', (e) => { e.stopPropagation(); const auf = menue.hidden; klappeAndereZu('menue'); menueAuf(auf); });
   // Capture: Knöpfe anderer Module (Ton) stoppen ihren Klick, das Menü soll trotzdem zuklappen und nichts verdecken
