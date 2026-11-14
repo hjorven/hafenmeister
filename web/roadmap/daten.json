@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "090cf7c"
+  "commit": "4a3163c"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1048,9 +1048,11 @@
    "id": "P55",
    "titel": "Versteckte Regeln im Hafen sichtbar machen",
    "inhalt": "A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen \"hier ist etwas zu tun\"",
-   "thread": "neu",
+   "thread": "erledigt bis auf L2 (PR 269, docs/hafenzeichen.md)",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    269
+   ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
     "A4",
@@ -2281,8 +2283,8 @@
   {
    "code": "A4",
    "text": "Geduld sichtbar: Ring an der Boje, im letzten Drittel Flagge oder kurzes Tuten",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P55: Ring über dem Boot, rot und blinkend im letzten Drittel, kurzes Tuten, ruht abends; docs/hafenzeichen.md)",
    "pakete": [
     "P55"
    ],
@@ -2368,8 +2370,8 @@
   {
    "code": "B1",
    "text": "Auslastung an jedem Versorgungsgebäude (\"14 von 20\"), Schlange vor der Dusche",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "teilweise",
+   "statusText": "Schild erledigt (P55, game.sim.auslastung()), Schlange offen (L2)",
    "pakete": [
     "P55"
    ],
@@ -2563,8 +2565,8 @@
   {
    "code": "C7",
    "text": "Warnen, bevor es Anker kostet (Gebäude blinkt bei fast ausgebuchter Dusche)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P55: Schild knapp orange und blinkend, voll rot, Tipp beim ersten Mal)",
    "pakete": [
     "P55"
    ],
@@ -3461,7 +3463,7 @@
    "code": "L2",
    "text": "Figuren als Anzeige (Schlange vor der Dusche, volle Tische)",
    "status": "offen",
-   "statusText": "offen",
+   "statusText": "offen (braucht render/people.js, Thread Menschen; Auslastung zeigt schon das Schild)",
    "pakete": [
     "P55"
    ],
@@ -3730,8 +3732,8 @@
   {
    "code": "Bed P1",
    "text": "Die fünf fehlenden Anzeigen (A4, B1, B2, B11, C1)",
-   "status": "teilweise",
-   "statusText": "B11 und B2 erledigt, Rest offen",
+   "status": "erledigt",
+   "statusText": "B11, B2, A4 und B1 erledigt (P55), C1 siehe P14",
    "pakete": [
     "P55",
     "P11",
@@ -3756,12 +3758,14 @@
   {
    "code": "Bed P3",
    "text": "Zeiger am Bildrand für wartende Boote",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 269: Zeiger mit Geduldsring, gebündelt, Antippen fährt hin)",
    "pakete": [
     "P55"
    ],
-   "prs": [],
+   "prs": [
+    269
+   ],
    "abschnitt": "P Bedienung (hier \"Bed\")"
   },
   {
@@ -3837,8 +3841,8 @@
   {
    "code": "Bed P10",
    "text": "Zeichen am Rand für \"hier ist etwas zu tun\"",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt für wartende Boote (P55); Münzen und Dauerlieger bewusst ohne Randzeichen",
    "pakete": [
     "P55"
    ],
@@ -4414,11 +4418,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 122,
+  "erledigt": 127,
   "teilweise": 8,
   "arbeit": 0,
   "frage": 1,
-  "offen": 88,
+  "offen": 83,
   "entfaellt": 0,
   "alle": 219
  },
@@ -4918,6 +4922,28 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "P55: Geduldsring, Auslastung an der Versorgung, Zeiger am Bildrand",
+   "pr": 269,
+   "pakete": [
+    "P55"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Fahrrinne in die offene See: jede Küste hat einen Seeweg",
+   "pr": 271,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Arbeitsplan: PR 244 gemergt, P19 Teil 2 läuft, Befund Stufe 2 ins Balancing",
+   "pr": 273,
+   "pakete": [
+    "P19"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "P19 Teil 1: Ruf schwerer, Wünsche je Bootsart, Angebote als Wünsche",
    "pr": 244,
    "pakete": [
@@ -4975,26 +5001,6 @@
    "titel": "Tests: Wetter-Test wartet auf den Spielstand und setzt das Wetter je Runde neu",
    "pr": 265,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Arbeitsplan: was läuft, bekannte Fehler, die nächsten zehn Pakete",
-   "pr": 263,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Menüs am Handy verdecken weniger: Messung und kompaktere Tafeln",
-   "pr": 261,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Zonen des Geländes und Seezugänge für die Wegsuche der Boote",
-   "pr": 262,
-   "pakete": [
-    "P66"
-   ]
   }
  ]
 }
