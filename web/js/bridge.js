@@ -316,6 +316,16 @@ export async function initBridge(game) {
     // Anteil des Tages von 0 (Morgen) bis 1 (Nacht), für die Sonne im Tagesbalken
     // Restliche Geduld eines wartenden Boots in Sekunden (für eine Anzeige an der Boje)
     geduld: (boatId) => sim.patienceLeft(state, ctx, boatIdOf(boatId)),
+    // Läuft die Geduld gerade? (abends, auf der Anfahrt und vor dem Morgen nach einer Nacht an der Boje nicht)
+    geduldLaeuft: (boatId) => sim.patienceRunning(state, ctx, boatIdOf(boatId)),
+    // Ruht die Geduld? Abends und nach einer Nacht an der Boje bis zum Vormittag (nicht während der Anfahrt am Tag)
+    geduldRuht: (boatId) => {
+      const b = state.boats[boatIdOf(boatId)];
+      if (!b || b.status !== 'waiting') return false;
+      return state.phase !== 'day' || (!!b.atBuoy && !sim.patienceRunning(state, ctx, b.id));
+    },
+    // Versorgung heute: { wc: { versorgt, kapazitaet }, ... } für gebaute Versorgung (Auslastung am Gebäude)
+    auslastung: () => sim.facilityLoad(state, ctx),
     /** Anteil, den der Hafenmeister für liegengebliebene Münzen abliefert (0,8 = vier Fünftel). */
     rundgangAnteil: () => sim.roundShare(ctx),
     tagesAnteil: () => Math.min(1, state.clock / (ctx.rules.dayLength + ctx.rules.eveningLength)),

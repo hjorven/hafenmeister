@@ -8,6 +8,9 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 - Neu: das Logbuch (Menü oder Taste J). Jedes Bootsmodell, das einmal angelegt hat, kommt mit Pixelbild hinein, fehlende stehen als Schattenriss da; ein Steckbrief zeigt Maße und wann es zuerst kam. Die Hafenchronik schreibt jeden Abend eine Zeile über den Tag, die Karte am Abend zeigt den wichtigsten Satz. Ein neues Modell meldet sich kurz rechts oben. Alte Spielstände behalten ihr Logbuch und bekommen die letzten 30 Tage nachgetragen.
 - Das Gästebuch öffnet am PC jetzt mit Taste N; G schaltete zugleich 8x.
+- Über jedem wartenden Boot zeigt ein kleiner Ring, wie lange es noch Geduld hat: grün, gelb, im letzten Drittel rot und blinkend, dazu ein kurzes Tuten. Abends und nach einer Nacht an der Boje ruht die Geduld, der Ring wird dann grau-blau.
+- Über Toilette, Dusche, Kiosk und Tankstelle steht, wie viele Boote sie heute schon versorgt haben ("14/20"). Wird es knapp, blinkt das Schild orange, ist es voll, wird es rot. Morgens zählt es neu.
+- Warten Boote außerhalb des Bildes, zeigt ein Pfeil am Rand mit ihrem Geduldsring dorthin. Antippen fährt die Kamera hin (269).
 - Der Ruf ist schwerer: Er zählt die Bewertungen der letzten drei Tage, die volle Note gibt es nur mit gutem Platz, und jede Bootsart wünscht sich etwas anderes. Manche Gäste wollen ein Café, frische Brötchen, einen Segelclub oder eine Werft; ein guter Ruf lockt große Yachten und ab 4,5 Sternen seltene Modelle.
 - Ein ablegender Gast hält seine Box, bis er wirklich draußen ist: die Platzkarte zeigt nicht mehr „frei“, solange das Boot noch sichtbar in der Box auf das Ablegen wartet.
 - Am Handy: Die Hilfe ist eine Liste zum Aufklappen (erst Titel, ein Tipp zeigt den Text), die Einstellungen passen ohne Kästen fast ganz ins Bild und quer in zwei Spalten, das Baumenü ist hochkant niedriger.
