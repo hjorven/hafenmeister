@@ -85,7 +85,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Ü16 | Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken | offen | P17 |
 | Ü17 | Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus `data/boats`, spürbare Kapazität | offen | P19 |
 | Ü18 | Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend | erledigt (PR 232) | P18 |
-| Ü19 | Winter nutzen: Zeitraffer vor Stufe 4 oder Winterarbeiten (F14) | erledigt (PR WPR): Winterarbeiten und „Winter überspringen“ | P20 |
+| Ü19 | Winter nutzen: Zeitraffer vor Stufe 4 oder Winterarbeiten (F14) | erledigt (PR 245): Winterarbeiten und „Winter überspringen“ | P20 |
 | Ü20 | Dauerlieger als Entscheidung: Spieler legt fest, welche Boxen Dauerplätze sind (höchstens ein Viertel der Gastboxen), Saisonpacht im Voraus, sichere Einnahme bei Sturm | erledigt (PR 149) | P01 |
 
 ## 5. Rückmeldung (Ü21 bis Ü23)
@@ -241,7 +241,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F11 | Havarist wird eingeschleppt, braucht sofort einen Platz, Ruf und neuer Stammgast | offen | P37 |
 | F12 | Eigenes Hafenfest einmal pro Saison ansetzen | offen | P38 |
 | F13 | Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub | offen | P39 |
-| F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | erledigt (PR WPR) | P20 |
+| F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | erledigt (PR 245) | P20 |
 | F15 | Krantage: Dauerlieger sichtbar ins Winterlager und zurück | offen | P20 |
 | F16 | Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv | offen | P40 |
 | F17 | Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage | offen | P24 |
@@ -420,7 +420,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | G1 | Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren | offen | P24 |
 | G2 | Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen | offen | P24 |
 | G3 | Ereignisse mit Nachspiel | offen | P24 |
-| G4 | Winter als Planungsbild (Bilanz, Winterarbeiten, Verträge) | erledigt (PR WPR) | P20 |
+| G4 | Winter als Planungsbild (Bilanz, Winterarbeiten, Verträge) | erledigt (PR 245) | P20 |
 | G5 | Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind) | offen | P20 |
 | G6 | Ergebnis eines Ereignisses am Abend zeigen | offen | P24 |
 | G7 | Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand) | offen | P24 |
@@ -455,7 +455,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | I7 | Meilensteine mit Ton und Bild | offen | P22 |
 | I8 | Richtiger Abschluss mit Kamerafahrt und Titel | erledigt (PR 156) | P16 |
 | I9 | Endlosspiel mit Saisonzielen | erledigt (PR 156) | P16 |
-| I10 | Ziele im Winter (Winterarbeiten) | erledigt (PR WPR) | P20 |
+| I10 | Ziele im Winter (Winterarbeiten) | erledigt (PR 245) | P20 |
 
 ### J Einstieg und Hilfe
 
@@ -661,7 +661,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P17 | Start und frühe Stufen straffen | Ü15, Ü16, Startwerte dokumentieren | `economy.js`, `state.js`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" (nach P06) |
 | P18 | Ausbau in Bauabschnitten | Ü18, `bautage` nutzen oder löschen | `ui/bauen.js`, `economy.js`, `sim.js`, Stegdarstellung | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Bauabschnitte, Baustelle über Nacht und Sparziel (PR 232), Nachbesserungen (PR 235) |
 | P19 | Ruf schwerer machen mit Wünschen je Bootsart | Ü17, `feeFactor`, `arrivalWeight`, Kapazität sichtbar | `sim.js`, `data/boats/*.js`, `economy.js` | neu |
-| P20 | Winter mit Inhalt füllen | Ü19, F14, F15, `docs/ereignisse.md` | `sim.js` (Jahreslauf), neues Feature-Modul, Travellift/Winterlager in `render/services.js` | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Winterpause, Winterarbeiten, Winter überspringen (PR WPR, `docs/winter.md`); offen: F15, H5 Krantage, G5 mit dem Balancing |
+| P20 | Winter mit Inhalt füllen | Ü19, F14, F15, `docs/ereignisse.md` | `sim.js` (Jahreslauf), neues Feature-Modul, Travellift/Winterlager in `render/services.js` | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, `docs/winter.md`); offen: F15, H5 Krantage, G5 mit dem Balancing |
 | P21 | Logbuch und Hafenchronik zeigen | Logbuch (Note 1), F36, `sim:logbookNew` | neues Modul `web/js/ui/logbuch.js`, `state.js` | neu |
 | P22 | Erfolge einbauen | plan.md 9 | neues Feature-Modul | neu |
 

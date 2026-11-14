@@ -31,7 +31,7 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 |---|---|---|---|---|---|
 | [0](https://hjorven.github.io/hafenmeister/roadmap/#welle=0) | Gelände und Bootswege | `████░░░░░░` 40 % | 0 | 4 | 1 |
 | [1](https://hjorven.github.io/hafenmeister/roadmap/#welle=1) | Fehler und Fundament | `█████████░` 94 % | 8 | 1 | 0 |
-| [2](https://hjorven.github.io/hafenmeister/roadmap/#welle=2) | Kernschleife und Rückmeldung | `██████░░░░` 63 % | 8 | 3 | 4 |
+| [2](https://hjorven.github.io/hafenmeister/roadmap/#welle=2) | Kernschleife und Rückmeldung | `███████░░░` 67 % | 8 | 4 | 3 |
 | [3](https://hjorven.github.io/hafenmeister/roadmap/#welle=3) | Tiefe und Hafenleben | `░░░░░░░░░░` 3 % | 0 | 1 | 18 |
 | [4](https://hjorven.github.io/hafenmeister/roadmap/#welle=4) | Langzeit, Spielgefühl, Welt | `█░░░░░░░░░` 11 % | 1 | 1 | 12 |
 | [5](https://hjorven.github.io/hafenmeister/roadmap/#welle=5) | Regionen und Online | `░░░░░░░░░░` 0 % | 0 | 0 | 2 |
@@ -92,7 +92,7 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 | [P17](https://hjorven.github.io/hafenmeister/roadmap/#paket=P17) | Start und frühe Stufen straffen | teilweise | [#237](https://github.com/hjorven/hafenmeister/pull/237) |
 | [P18](https://hjorven.github.io/hafenmeister/roadmap/#paket=P18) | Ausbau in Bauabschnitten | **erledigt** | [#143](https://github.com/hjorven/hafenmeister/pull/143) [#232](https://github.com/hjorven/hafenmeister/pull/232) [#235](https://github.com/hjorven/hafenmeister/pull/235) |
 | [P19](https://hjorven.github.io/hafenmeister/roadmap/#paket=P19) | Ruf schwerer machen mit Wünschen je Bootsart | teilweise |  |
-| [P20](https://hjorven.github.io/hafenmeister/roadmap/#paket=P20) | Winter mit Inhalt füllen | offen |  |
+| [P20](https://hjorven.github.io/hafenmeister/roadmap/#paket=P20) | Winter mit Inhalt füllen | teilweise | [#245](https://github.com/hjorven/hafenmeister/pull/245) |
 | [P21](https://hjorven.github.io/hafenmeister/roadmap/#paket=P21) | Logbuch und Hafenchronik zeigen | offen |  |
 | [P22](https://hjorven.github.io/hafenmeister/roadmap/#paket=P22) | Erfolge einbauen | offen |  |
 | [P55](https://hjorven.github.io/hafenmeister/roadmap/#paket=P55) | Versteckte Regeln im Hafen sichtbar machen | teilweise |  |
