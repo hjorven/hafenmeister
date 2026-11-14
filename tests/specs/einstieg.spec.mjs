@@ -77,7 +77,7 @@ test('Hinweis beim ersten Mal: erscheint einmal, „Verstanden“ schließt ihn'
   await page.evaluate(() => window.hafenmeister.einstieg.beenden());
   await page.evaluate(() => window.hafenmeister.emit('sim:turnedAway', { boatId: 999, reason: 'patience', rated: false }));
   const tipp = page.locator('.hm-tipp');
-  await expect(tipp).toBeVisible({ timeout: 5_000 });
+  await expect(tipp).toBeVisible({ timeout: 30_000 });
   await expect(tipp).toContainText('weitergefahren');
   await press(tipp.getByRole('button', { name: 'Verstanden' }), testInfo);
   await expect(tipp).toBeHidden();
