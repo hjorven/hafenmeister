@@ -55,7 +55,7 @@ Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tem
 |---|---|---|---|---|
 | 1 | **P66 PR 280 fertig machen** (läuft) | Prio A; liegt seit 10 Stunden offen und blockiert P27 und die Schlussmessung von P17 | - | P62, Stegbilder, XXL; danach Zeitraffer-Serie neu |
 | 2 | **P17 Balancing: Aufstieg angleichen, Ü15, Ü16** (neu, startet jetzt) | Prio A; A10 ist gemergt. Rechnung (`tools/balance.mjs`) und Regeln jetzt angleichen, Schlussmessung im Zeitraffer nach PR 280 | Schlussmessung nach 1 | `economy.js` (einziger Thread dort), `docs/zahlen.md`, Einstieg (J5) |
-| 3 | **P28 Funk-Anmeldung abschließen** (Thread wieder aufnehmen) | PR 288 ist fast fertig | - | `ui/vorschau.js`, `sim.js`, Meldeplatz (PR 282) |
+| 3 | **P28 Funk-Anmeldung** | erledigt (PR 288, `docs/funk-anmeldung.md`) | - | `ui/vorschau.js`, `sim.js`, Meldeplatz (PR 282) |
 | 4 | **P41 Statistik und Saisonbilanz** (neu) | nutzt die vorhandenen Daten (`state.stats.verlauf`, Einnahmen nach Quelle); fast nur eigene Dateien | - | Tagesabschluss-Tafel, Winterkarte (Saisonbilanz dort ergänzen statt doppeln) |
 | 5 | **P26 Überraschende Gesten** (neu) | Hafenhorn, Fernglas mit Steckbrief, Möwen, Glocke: macht den Hafen lebendig, berührt kaum Regeln | - | `audio.js`, Gesten (`ui/gesten.js`), Fotomodus |
 | 6 | **P24 Ereignisse Teil 2** (läuft) | neue Ereignisse F17 | - | Meldeplatz (PR 282) |
