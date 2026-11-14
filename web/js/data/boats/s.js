@@ -15,7 +15,7 @@ export const TYPES = [
   {
     id: 'S1', crew: [1, 3], name: 'Ruderboot', fromStage: 1,
     length: [3, 4.5], beam: [1.2, 1.5], draft: [0.2, 0.2],
-    propulsion: 'riemen', feeFactor: 0.8, nights: [1, 2], group: [1, 1],
+    propulsion: 'riemen', feeFactor: 1.0, nights: [1, 2], group: [1, 1],
     wishes: ['wc', 'essen'], arrivalWeight: 3,
     // Kommt in Stufe 1 auch durch den flachen Graben von der Ostsee.
     canUseDitch: true,
@@ -23,14 +23,14 @@ export const TYPES = [
   {
     id: 'S2', crew: [1, 3], name: 'Paddel- und Tretboot', fromStage: 1,
     length: [2.5, 5.2], beam: [0.6, 1.8], draft: [0.1, 0.1],
-    propulsion: 'paddel', feeFactor: 0.5, nights: [1, 1], group: [1, 3],
-    wishes: ['wc', 'essen'], arrivalWeight: 3,
+    propulsion: 'paddel', feeFactor: 0.6, nights: [1, 1], group: [1, 3],
+    wishes: ['wc', 'essen'], arrivalWeight: 2,
     note: 'zahlen wenig und bleiben meist nur eine Nacht, kommen aber oft zu mehreren',
   },
   {
     id: 'S3', crew: [1, 3], name: 'Beiboot und Schlauchboot', fromStage: 1,
     length: [2.3, 5], beam: [1.3, 2.0], draft: [0.2, 0.4],
-    propulsion: 'gemischt', feeFactor: 0.8, nights: [1, 2], group: [1, 1],
+    propulsion: 'gemischt', feeFactor: 0.9, nights: [1, 2], group: [1, 1],
     wishes: ['wc', 'dusche', 'essen'], arrivalWeight: 2,
   },
   {

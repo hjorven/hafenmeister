@@ -3,7 +3,8 @@
 // ein Knopf je Boot (data-boat, aria-pressed), damit Tastatur und Bildschirmleser alles erreichen.
 // Daten kommen aus game.sim (web/js/bridge.js), siehe docs/spielregeln.md.
 
-const WISH_LABEL = { wc: 'WC', dusche: 'Dusche', essen: 'Essen', strom: 'Strom', diesel: 'Diesel' };
+// Namen aller Wünsche (auch Angebote an Land, P19) aus data/wuensche-texte.js
+const WISH_LABEL = new Proxy({}, { get: (_, k) => wunschKurz(k) });
 // Warum das Hafenbüro ein Boot dem Spieler lässt (sim.officeSpecialCase)
 const SONDERFALL_LABEL = {
   mehrrumpf: 'Mehrrumpfboot',
@@ -28,6 +29,7 @@ const REASON_LABEL = {
 
 import { HAFEN, platzInWelt } from '../data/harbor.js';
 import { pixelBild } from './pixel-symbole.js';
+import { wunschKurz } from '../data/wuensche-texte.js';
 
 const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
 const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });

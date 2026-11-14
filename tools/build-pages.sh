@@ -42,6 +42,11 @@ if [ -f tools/roadmap.mjs ] && [ -d _site/roadmap ] && command -v node >/dev/nul
   node tools/roadmap.mjs --json > _site/roadmap/daten.json
 fi
 
+# Liste aller Spieldateien für den Offline-Start (Service Worker lädt sie vorab, P61)
+if [ -f _site/index.html ] && [ -d _site/js ] && command -v node >/dev/null 2>&1; then
+  node tools/offline-liste.mjs _site
+fi
+
 # Kein Jekyll: Dateien und Ordner mit Unterstrich bleiben erhalten.
 touch _site/.nojekyll
 

@@ -45,9 +45,6 @@ function ladePlaywright() {
   throw new Error('Playwright fehlt: cd tests && npm ci');
 }
 const { chromium, devices } = ladePlaywright();
-const THREE_DIR = [path.join(REPO, 'tests', 'node_modules', 'three'), '/mnt/project-files/feature-tests/three/package']
-  .find((d) => fs.existsSync(path.join(d, 'build', 'three.module.js')));
-if (!THREE_DIR) throw new Error('three@0.187.0 fehlt: cd tests && npm ci');
 
 const GERAETE = {
   pc: { viewport: { width: 1440, height: 900 } },
@@ -230,10 +227,6 @@ const SNAP = () => {
   });
   page.on('pageerror', (e) => fehler.push({ wann: ort(), text: 'Skriptfehler: ' + String(e.message).slice(0, 400), stack: String(e.stack || '').split('\n').slice(1, 4).map((z) => z.trim().replace(/https?:\/\/localhost:\d+\//, '')).join(' < ') }));
   page.on('response', (r) => { if (r.status() >= 400) fehlendeDateien.push({ wann: ort(), url: r.url(), status: r.status() }); });
-  await page.route(/^https:\/\/cdn\.jsdelivr\.net\/npm\/three@([^/]+)\/(.+)$/, (route) => {
-    const file = route.request().url().split(/three@[^/]+\//)[1].split(/[?#]/)[0];
-    route.fulfill({ path: path.join(THREE_DIR, file), contentType: 'text/javascript' });
-  });
 
   const query = `?testtempo=${TEMPO}${START > 1 ? `&stufe=${START}` : ''}${EXTRA}`;
   R = { geraet: GERAET, tempo: TEMPO, query, start: new Date().toISOString(), commit: null,

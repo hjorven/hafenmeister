@@ -1,11 +1,13 @@
 // Reine Rechenteile fuer ui/bauen.js (ohne DOM und Three.js, damit tests/bauen.test.mjs sie pruefen kann):
 // Wirkung eines Services als Satz und die Wahl des naechsten sinnvollen Schritts.
 import { ECONOMY } from '../data/economy.js';
+import { WUNSCH_TEXTE } from '../data/wuensche-texte.js';
 
 export const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
 export const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-export const WUNSCH = { wc: 'ein WC', dusche: 'eine Dusche', essen: 'etwas zu essen', diesel: 'Diesel', strom: 'Strom am Platz' };
-export const WUNSCH_KURZ = { wc: 'WC', dusche: 'Dusche', essen: 'Essen', diesel: 'Diesel', strom: 'Strom' };
+// Namen aller Wünsche, auch der Angebote an Land (P19), aus data/wuensche-texte.js
+export const WUNSCH = Object.fromEntries(Object.entries(WUNSCH_TEXTE).map(([k, t]) => [k, t.mit]));
+export const WUNSCH_KURZ = Object.fromEntries(Object.entries(WUNSCH_TEXTE).map(([k, t]) => [k, t.kurz]));
 export const FREI = {
   allesKassieren: 'Der Knopf „Kassieren“ streicht alle Münzen auf einmal ein. Bis dahin streichst du jede Münze selbst.',
   vorschau: 'Funk: Du siehst die nächsten drei Boote mit Größe, Ankunftszeit und Wünschen.',

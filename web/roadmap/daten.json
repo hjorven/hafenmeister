@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "f46ad33"
+  "commit": "090cf7c"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -489,7 +489,7 @@
    "id": "P19",
    "titel": "Ruf schwerer machen mit Wünschen je Bootsart",
    "inhalt": "Ü17, feeFactor, arrivalWeight, Kapazität sichtbar",
-   "thread": "neu",
+   "thread": "Teil 1 erledigt (B7, C2, C3, C4, C6, F8, ruf.md); Teil 2 offen: C5, Kapazität sichtbar, B9",
    "welle": 2,
    "prs": [],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
@@ -1133,16 +1133,18 @@
    "id": "P61",
    "titel": "Spiel komplett offline startbar",
    "inhalt": "N15, N16",
-   "thread": "bestehend: \"Spiel über GitHub Pages veröffentlichen\"",
+   "thread": "erledigt (PR 270), Thread \"Spiel offline startbar machen\"",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    270
+   ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
     "N15",
     "N16",
     "C06"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1659,8 +1661,8 @@
   {
    "code": "Ü17",
    "text": "Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus data/boats, spürbare Kapazität",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "teilweise",
+   "statusText": "teils erledigt (P19 Teil 1): Wünsche je Bootsart, Ruf über drei Tage, Angebote als Wünsche, ruf.md; Kapazität sichtbar in Teil 2",
    "pakete": [
     "P19"
    ],
@@ -2438,8 +2440,8 @@
   {
    "code": "B7",
    "text": "Wünsche je Bootsart aus den Bootsdaten nutzen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 1, type.wishes)",
    "pakete": [
     "P19"
    ],
@@ -2506,8 +2508,8 @@
   {
    "code": "C2",
    "text": "Ruf als Schnitt der letzten drei Tage statt 20 Bewertungen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 1, mindestens 10 Bewertungen)",
    "pakete": [
     "P19"
    ],
@@ -2517,8 +2519,8 @@
   {
    "code": "C3",
    "text": "Service-Bonus als Extra-Wünsche statt Aufschlag auf jede Bewertung",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 1, angebotWunsch)",
    "pakete": [
     "P19"
    ],
@@ -2528,8 +2530,8 @@
   {
    "code": "C4",
    "text": "Gäste ohne Wünsche geben 4,5, der Platz entscheidet über den Rest",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 1, alle Wünsche ebenfalls 4,5)",
    "pakete": [
     "P19"
    ],
@@ -2550,8 +2552,8 @@
   {
    "code": "C6",
    "text": "Ruf lockt andere Gäste (ab 4 große Yachten, ab 4,5 seltene Modelle)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 1, ruf.lockt)",
    "pakete": [
     "P19"
    ],
@@ -2901,8 +2903,8 @@
   {
    "code": "Svc F8",
    "text": "Mindestruf mit Sinn oder weg",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 1): bleibt, mit dem neuen Ruf ist er eine echte Hürde",
    "pakete": [
     "P19"
    ],
@@ -3614,23 +3616,27 @@
   {
    "code": "N15",
    "text": "3D-Bibliothek mitliefern statt von fremdem Server",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 270, web/vendor/three-0.187.0/, tools/three-holen.sh)",
    "pakete": [
     "P61"
    ],
-   "prs": [],
+   "prs": [
+    270
+   ],
    "abschnitt": "N Speichern und Web-App"
   },
   {
    "code": "N16",
    "text": "Alle Spieldateien vorab für offline speichern",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 270, offline-liste.json beim Deploy, Service Worker lädt vorab)",
    "pakete": [
     "P61"
    ],
-   "prs": [],
+   "prs": [
+    270
+   ],
    "abschnitt": "N Speichern und Web-App"
   },
   {
@@ -4177,12 +4183,14 @@
   {
    "code": "C06",
    "text": "Three.js kommt von jsDelivr, Erststart hängt am CDN (= N15, N16)",
-   "status": null,
+   "status": "erledigt",
    "statusText": "",
    "pakete": [
     "P61"
    ],
-   "prs": [],
+   "prs": [
+    270
+   ],
    "abschnitt": "Technische Befunde aus dem Audit (12.11.2026)"
   },
   {
@@ -4275,11 +4283,11 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 8,
+    "erledigt": 9,
     "teilweise": 4,
     "arbeit": 0,
     "frage": 0,
-    "offen": 3,
+    "offen": 2,
     "entfaellt": 0,
     "alle": 15
    }
@@ -4397,22 +4405,22 @@
   }
  ],
  "gesamt": {
-  "erledigt": 19,
+  "erledigt": 20,
   "teilweise": 7,
   "arbeit": 3,
   "frage": 0,
-  "offen": 51,
+  "offen": 50,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 113,
-  "teilweise": 7,
+  "erledigt": 122,
+  "teilweise": 8,
   "arbeit": 0,
   "frage": 1,
-  "offen": 97,
+  "offen": 88,
   "entfaellt": 0,
-  "alle": 218
+  "alle": 219
  },
  "bilder": [
   {
@@ -4910,6 +4918,42 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "P19 Teil 1: Ruf schwerer, Wünsche je Bootsart, Angebote als Wünsche",
+   "pr": 244,
+   "pakete": [
+    "P19"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Arbeitsplan: alle offenen Vorschläge und Stufe 7 bis 20 in Reihenfolge",
+   "pr": 272,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Spiel offline startbar: Three.js mitgeliefert, Spieldateien vorab im Cache (P61)",
+   "pr": 270,
+   "pakete": [
+    "P61"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 258 und 262 bei P66, Karte der Zonen und Seewege",
+   "pr": 268,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Handy: Hilfe aufklappbar, Einstellungen kompakt, Baumenü niedriger",
+   "pr": 267,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "GitHub Actions absichern: Rechte je Job, SHAs, Secret-Scan (Audit C07)",
    "pr": 264,
    "pakete": []
@@ -4948,43 +4992,6 @@
    "datum": "2026-11-14",
    "titel": "Zonen des Geländes und Seezugänge für die Wegsuche der Boote",
    "pr": 262,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Boote: keine Leinen ohne Boot - unsichtbares Warten auf die Einfahrt endet bei jedem neuen Befehl",
-   "pr": 258,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 256 bei P66, Bild \"Tempo bleibt\" (P07)",
-   "pr": 260,
-   "pakete": [
-    "P66",
-    "P07"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Einstieg: Blase und Kreis warten auf allen Geräten, solange das Baumenü offen ist",
-   "pr": 259,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tempo bleibt: 3x springt nicht mehr jeden Morgen auf 1x",
-   "pr": 257,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Boote: Kurswächter Ufer, XL am kurzen Kai im Wasser",
-   "pr": 256,
    "pakete": [
     "P66"
    ]

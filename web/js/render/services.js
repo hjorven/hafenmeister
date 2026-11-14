@@ -4,7 +4,7 @@
 //
 //   game.services.liste()            Services der aktuellen Hafenstufe mit Preis und Sperrgruenden
 //   game.services.bauen(id)          naechste Ausbaustufe bauen (bezahlt mit game.sim.spend)
-//   game.services.effekte()          Ruf-Bonus, Gaeste-Faktoren, Sturmschutz, Freischaltungen (fuer sim.js)
+//   game.services.effekte()          gebaute Angebote (Wuensche, P19), Gaeste-Faktoren, Sturmschutz, Freischaltungen (fuer sim.js)
 //   game.services.abrechnen(tag)     Tagesabrechnung, siehe rules.js; passiert auch bei game.emit('tag:ende', tag)
 //   game.services.naechsteBesuche()  "Kreuzfahrtschiff in 3 Tagen" fuer die Oberflaeche
 //   game.services.oeffnen(id)        Baukarte zeigen
@@ -449,7 +449,9 @@ export function fuerSpielregeln(e) {
   const { XXL: _x, ...sizeFactor } = e.gaeste;
   return {
     ...e,
-    ratingBonus: e.ruf,
+    // Kein Aufschlag mehr auf jede Bewertung: Gäste wünschen sich Angebote (P19 C3, rules.offerWishes)
+    ratingBonus: 0,
+    offers: { ...(e.angebote ?? {}) },
     sizeFactor,
     unlock,
     // Segelmacher: Segelboote zahlen mehr. Die Regeln kennen nur einen Preisfaktor fuer alle,

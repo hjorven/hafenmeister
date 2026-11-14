@@ -14,8 +14,8 @@ Roadmap-Paket P14 (Ü21, F18, C1, C9). Code: `web/js/ui/gaestebuch.js` (Oberflä
 **Gästebuch.** Öffnen: Ruf oben links antippen, Menü „Gästebuch“, Hafenmeister-Haus oder Hafenbüro antippen, am PC Taste `G`. Schließen: X, `Esc`, daneben tippen.
 
 - Ruf groß mit Stern, daneben der Verlauf der letzten 30 Tage als Säulen (grün ab 4, gelb ab 3, rot darunter, gestrichelte Linie bei 4).
-- „Was Gästen gefehlt hat“: die drei häufigsten Gründe der unzufriedenen Gäste unter den letzten 20, jeweils „n von 20“ und ein Knopf, der das passende Bauwerk im Baumenü zeigt (`game.bauen.vorschau('versorgung:<wunsch>')`), oder ab welcher Stufe es das gibt.
-- Die letzten 20 Bewertungen, also genau die, aus denen der Ruf besteht: Note, Bootsname und Heimathafen, Tag, Platz, ein Satz des Gastes und darunter, warum (zum Beispiel „keine Dusche (2 Nächte) · bequemer Liegeplatz +0,5“).
+- „Was Gästen gefehlt hat“: die drei häufigsten Gründe der unzufriedenen Gäste unter den letzten 20, jeweils „n von 20“ und ein Knopf, der das passende Bauwerk (`versorgung:<wunsch>`) oder den gewünschten Service (`angebot:<service>`, P19) im Baumenü zeigt, oder ab welcher Stufe es das gibt.
+- Die letzten 20 Bewertungen (der Ruf selbst ist seit P19 der Schnitt der letzten drei Tage, der Satz unten im Gästebuch nennt die Zahl): Note, Bootsname und Heimathafen, Tag, Platz, ein Satz des Gastes und darunter, warum (zum Beispiel „keine Dusche (2 Nächte) · bequemer Liegeplatz +0,5“).
 
 Am Handy hochkant kommt das Gästebuch als Blatt von unten, quer und am PC als Tafel in der Mitte.
 
@@ -41,7 +41,7 @@ Begrenzt auf 1 bis 5, auf eine Stelle gerundet.
 
 - Ereignisse der Regeln: `sim:departed` trägt `parts` (siehe oben, mit `missed: { wunsch: Nächte ohne }`), `guest` (`typeId, modelId, name, size, kind`, dazu `bootsname, heimathafen, stammId, besuche`, falls gesetzt) und `day`. `sim:turnedAway` und `sim:dismissed` tragen bei `rated` auch `rating`, `guest` und `day`.
 - `boat.missed` zählt je Wunsch die Nächte ohne (in `chargeFee`).
-- Spielstand: `state.modules.gaestebuch = { eintraege: [...], verlauf: [{ tag, ruf }] }`, neueste Einträge zuerst, höchstens 20 (wie `ruf.fenster`), Verlauf höchstens 30 Tage.
+- Spielstand: `state.modules.gaestebuch = { eintraege: [...], verlauf: [{ tag, ruf }] }`, neueste Einträge zuerst, höchstens 20 (`GAESTEBUCH.maxEintraege`), Verlauf höchstens 30 Tage.
 - `game.gaestebuch = { oeffnen(), schliessen(), offen, eintraege(), topGruende() }`.
 - Ereignis `gaestebuch:bewertung { id, note, grund, zufrieden, imBild }`, sobald eine Blase oder Meldung erscheint (für den Einstieg, Schritt „erste Bewertung erklären“).
 

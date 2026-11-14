@@ -3,10 +3,16 @@
 // Liefert ein Schiffs-Thread eine Art mit derselben id, gilt dessen Eintrag (state.js mischt beides).
 // Maße in Metern als [min, max]. Felder: docs/spielregeln.md
 
-export const BOAT_CATALOG = [
+import * as S from './boats/s.js';
+import * as M from './boats/m.js';
+import * as L from './boats/l.js';
+import * as XL from './boats/xl.js';
+import * as XXL from './boats/xxl.js';
+
+const ERSATZ = [
   // Größe S
   { id: 'S1', name: 'Ruderboot', size: 'S', minStage: 1, kind: 'ruderboot', length: [3, 4.5], beam: [1.2, 1.5], draft: [0.2, 0.2] },
-  { id: 'S2', name: 'Paddel- und Tretboot', size: 'S', minStage: 1, kind: 'paddelboot', length: [2.5, 5.2], beam: [0.6, 1.8], draft: [0.1, 0.1], nights: [1, 1], fee: 6, weight: 0.7 },
+  { id: 'S2', name: 'Paddel- und Tretboot', size: 'S', minStage: 1, kind: 'paddelboot', length: [2.5, 5.2], beam: [0.6, 1.8], draft: [0.1, 0.1], nights: [1, 1] },
   { id: 'S3', name: 'Beiboot und Schlauchboot', size: 'S', minStage: 1, kind: 'beiboot', length: [2.3, 5], beam: [1.3, 2.0], draft: [0.2, 0.4], motor: true },
   { id: 'S4', name: 'Segeljolle', size: 'S', minStage: 2, kind: 'jolle', sail: true, length: [2.3, 5.5], beam: [1.1, 2.0], draft: [0.1, 0.3] },
   { id: 'S5', name: 'Offenes Motorboot', size: 'S', minStage: 2, kind: 'motorboot', motor: true, length: [4, 6], beam: [1.7, 2.4], draft: [0.3, 0.5] },
@@ -25,5 +31,23 @@ export const BOAT_CATALOG = [
   { id: 'XL2', name: 'Großyacht', size: 'XL', minStage: 5, kind: 'grossyacht', motor: true, length: [20, 35], beam: [5.5, 7.5], draft: [2.0, 3.5] },
   { id: 'XL3', name: 'Fahrgast- und Arbeitsschiff', size: 'XL', minStage: 5, kind: 'fahrgast', motor: true, dayVisitors: 40, nights: [1, 1], length: [20, 35], beam: [6, 8], draft: [1.3, 2.5] },
 ];
+
+/** Arten einer Datendatei (TYPES, MODELS mit typeId) im Format der Regeln; die Größe steckt in der id. */
+function ausDatei(mod) {
+  const models = Array.isArray(mod.MODELS) ? mod.MODELS : [];
+  return (mod.TYPES || []).map((t) => ({
+    ...t,
+    size: t.size ?? String(t.id).match(/^[A-Z]+/)?.[0],
+    models: t.models ?? models.filter((m) => m.typeId === t.id),
+  }));
+}
+
+// Ersatzkatalog und Datendateien gemischt (gleiche id: die Datei gewinnt, fehlende Felder aus dem
+// Ersatz). So rechnen Spiel, Tests und tools/balance.mjs mit denselben Arten, Modellen und Gästeprofilen
+// (wishes, feeFactor, arrivalWeight, Roadmap P19).
+const DATEIEN = [S, M, L, XL, XXL].flatMap(ausDatei);
+const byId = new Map(ERSATZ.map((t) => [t.id, t]));
+for (const t of DATEIEN) byId.set(t.id, { ...(byId.get(t.id) || {}), ...t });
+export const BOAT_CATALOG = [...byId.values()];
 
 export default BOAT_CATALOG;

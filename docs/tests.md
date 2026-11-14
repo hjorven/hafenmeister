@@ -47,7 +47,7 @@ Zusätzlich läuft `tools/check-pages.sh web` (absolute Pfade, fehlende Dateien)
 
 Die Tests verwenden nur die gemeinsamen Namen aus dem Grundgerüst (`window.hafenmeister`, `#stage`, `#hud-top`, `#hud-bottom`, die drei Knöpfe). Wer eines davon umbenennt, muss den Test im selben PR anpassen.
 
-Three.js wird in den Tests aus `tests/node_modules/three` geliefert statt vom CDN, damit ein CDN-Ausfall keinen Test rot macht. Ändert jemand die Three.js-Version in der Import-Map von `web/index.html`, bitte dieselbe Version in `tests/package.json` eintragen und `npm install` im Ordner `tests/` ausführen (sonst lädt der Test vom echten CDN).
+Three.js liegt im Spiel selbst (`web/vendor/three-<Version>/`, P61), Tests brauchen keine Umleitung mehr. Die Fixture in `tests/helpers.mjs` sperrt jedes CDN: lädt das Spiel doch etwas von jsDelivr, unpkg oder ähnlichem, wird der Test rot. `tests/specs/offline.spec.mjs` prüft auf Handy und PC, dass das Spiel nach dem ersten Besuch ohne Netz startet. Neue Three.js-Version: in `tests/package.json` eintragen, `npm install` im Ordner `tests/`, `bash tools/three-holen.sh`, Import-Maps nachziehen (`tests/offline.test.mjs` meldet, was fehlt).
 
 ## Regel für alle Threads
 

@@ -6,6 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Der Ruf ist schwerer: Er zählt die Bewertungen der letzten drei Tage, die volle Note gibt es nur mit gutem Platz, und jede Bootsart wünscht sich etwas anderes. Manche Gäste wollen ein Café, frische Brötchen, einen Segelclub oder eine Werft; ein guter Ruf lockt große Yachten und ab 4,5 Sternen seltene Modelle.
 - Ein ablegender Gast hält seine Box, bis er wirklich draußen ist: die Platzkarte zeigt nicht mehr „frei“, solange das Boot noch sichtbar in der Box auf das Ablegen wartet.
 - Am Handy: Die Hilfe ist eine Liste zum Aufklappen (erst Titel, ein Tipp zeigt den Text), die Einstellungen passen ohne Kästen fast ganz ins Bild und quer in zwei Spalten, das Baumenü ist hochkant niedriger.
 - An freien Plätzen hängen keine Festmacherleinen mehr ohne Boot. Ein ankommendes Boot, das zugewiesen wurde, während es noch auf seine Einfahrt wartete, blieb unsichtbar in der Box liegen; jetzt taucht es auf und fährt sichtbar hinein.
