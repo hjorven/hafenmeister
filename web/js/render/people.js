@@ -772,7 +772,14 @@ export function init(game) {
   function soll(typ) {
     const basis = P.SPAZIERGAENGER[typ]?.[stufe] ?? 0;
     const f = (P.JAHRESZEIT[typ]?.[jahreszeit] ?? 1) * (abend ? P.ABENDS[typ] : 1) * (regen ? P.REGEN : 1);
-    return Math.round(basis * f);
+    return Math.round(basis * f * festFaktor(typ));
+  }
+  // Ereignisse mit vielen Besuchern (Mittsommer, Heringstage, Hanse-Woche, ECONOMY.ereignisse.<id>.menschen):
+  // mehr Spaziergänger und Badegäste, abends bleiben mehr (Mittsommer: am Strand)
+  function festFaktor(typ) {
+    const m = game.events?.current?.event?.menschen;
+    if (!m) return 1;
+    return (abend ? m.abends?.[typ] ?? m[typ] : m[typ]) ?? 1;
   }
 
   function badewetter() {
@@ -950,6 +957,8 @@ export function init(game) {
   game.on('services:gebaut', ({ id } = {}) => {
     if (P.SERVICE_ZIELE.includes(id) && netz) queueMicrotask(netzErneuern);
   });
+  // Fest beginnt oder endet: Zahl der Spaziergänger anpassen
+  for (const name of ['event:start', 'event:end']) game.on(name, () => { if (netz) anpassen(); });
   game.on('season', (s) => {
     const part = typeof s === 'object' ? s?.part : s;
     if (!part || part === jahreszeit) return;

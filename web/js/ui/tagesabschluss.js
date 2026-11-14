@@ -33,7 +33,7 @@ const QUELLE_TEXT = {
 };
 const REIHENFOLGE = ['liegegeld', 'pacht', 'gastro', 'services', 'tagesziele', 'sonstiges'];
 // Beim Rundgang und über Nacht zahlen Gäste nur einen Anteil (rules.uncollectedShare); Trinkgeld kommt mit P12
-const LIEGEGELD_TEXT = { kassiert: 'selbst eingestrichen', rundgang: 'beim Rundgang', nacht: 'über Nacht', strichtrinkgeld: 'Trinkgeld (Kassierstrich)', trinkgeld: 'Trinkgeld großer Boote', nebenkosten: 'Nebenkosten (Hafenbüro)', boje: 'Bojengeld über Nacht' };
+const LIEGEGELD_TEXT = { kassiert: 'selbst eingestrichen', rundgang: 'beim Rundgang', nacht: 'über Nacht', strichtrinkgeld: 'Trinkgeld (Kassierstrich)', trinkgeld: 'Trinkgeld großer Boote', nebenkosten: 'Nebenkosten (Hafenbüro)', boje: 'Bojengeld über Nacht', funk: 'Bonus für frei gehaltene Boxen (Funk)' };
 const AUSGABE_NAME = { bau: 'Bauen', ausbau: 'Ausbau des Hafens', services: 'Services', pacht: 'Pacht zurückgezahlt', winter: 'Winterarbeiten' };
 // Pacht (features/dauerlieger.js): Saisonpacht im Voraus, sonst die abendliche Pacht der Fischer und Dienste
 const PACHT_TEXT = { saison: 'Saisonpacht im Voraus' };
@@ -191,6 +191,7 @@ export function init(game) {
       }
       if (q === 'sonstiges' && d?.startgeschenk) klein = 'Geschenk fürs erste Bauwerk';
       if (q === 'sonstiges' && d?.regatta) klein = [klein, `Startgeld der Regatta ${euro(d.regatta)}`].filter(Boolean).join(', ');   // events/vorbereiten.js
+      if (q === 'sonstiges' && d?.hansewoche) klein = [klein, `Festgeld der Hanse-Woche ${euro(d.hansewoche)}`].filter(Boolean).join(', ');
       if (q === 'tagesziele' && b.ziele?.gesamt) zusatz = `${b.ziele.erledigt} von ${b.ziele.gesamt}`;
       einnahmen.append(zeile(QUELLE_NAME[q] ?? q, euro(b.einnahmen[q]), { klein, zusatz }));
     }

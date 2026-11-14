@@ -20,7 +20,9 @@
 //   title, teaser, text   Texte für die Ankündigung (kurz, ohne Story)
 //
 // Felder in EVENTS (für events/scheduler.js):
-//   stage, every, duration, weight, requires, season, announceDays, mods, protect { building, factor }
+//   stage, every, duration, weight, requires, season, announceDays, mods, protect { building, factor },
+//   amTag (fester Saisontag), gross (eigener Platz im Planer, lange vorher angekündigt), menschen, bauten,
+//   nachspiel { tage, mods, modsVorbereitet, title, text }
 
 // Standardwerte, wenn nichts los ist. Die Sim liest diese Felder, alle sind optional.
 import { ECONOMY } from './economy.js';
@@ -76,7 +78,46 @@ const TEXTE = [
     weather: { wind: 0.3, fog: 0, rain: 0, sun: 0.9 },
     evening: 'feuerwerk',
   },
+  // Neue Ereignisse (P24, F17). Was ein gebauter Service dazu beiträgt, steht in economy.js (bauten).
+  {
+    id: 'mittsommer',
+    title: 'Mittsommer',
+    teaser: 'Morgen ist Mittsommer',
+    text: 'Die hellste Nacht des Jahres. Viele Gäste am Strand, Crews bleiben eine Nacht länger.',
+    weather: { wind: 0.15, fog: 0, rain: 0, sun: 1 },
+    evening: 'mittsommerfeuer',
+  },
+  {
+    id: 'heringstage',
+    title: 'Heringstage',
+    teaser: 'Morgen beginnen die Heringstage',
+    text: 'Zwei Tage Frühjahrsfang. Viele Besucher kommen für Räucherfisch an den Hafen.',
+    weather: { wind: 0.35, fog: 0.1, rain: 0, sun: 0.6 },
+  },
+  {
+    id: 'holzboote',
+    title: 'Holzboot-Treffen',
+    teaser: 'Morgen kommen die Holzboote',
+    text: 'Zwei Tage lang Klassiker aus Holz und Ruderboote. Gäste bewerten etwas besser.',
+    weather: { wind: 0.3, fog: 0, rain: 0, sun: 0.85 },
+  },
+  {
+    id: 'hansewoche',
+    title: 'Hanse-Woche',
+    teaser: 'In zehn Tagen beginnt die Hanse-Woche',
+    text: 'Vier Tage Fest: Traditionssegler, große Schiffe und viele Besucher. Abends Feuerwerk.',
+    weather: { wind: 0.35, fog: 0, rain: 0, sun: 0.9 },
+    evening: 'feuerwerk',
+  },
 ];
+
+// Nachspiel (G3): kurze Texte für die Tage nach einem Ereignis (Zahlen in ECONOMY.ereignisse.nachspiel)
+export const NACHSPIEL_TEXTE = {
+  sturm: { title: 'Nach dem Sturm', text: 'Wer draußen gewartet hat, läuft heute ein.' },
+  regatta: { title: 'Nach der Regatta', text: 'Nachzügler der Regatta suchen heute einen Platz.' },
+  hafenfest: { title: 'Nach dem Hafenfest', text: 'Das Fest hat sich herumgesprochen: mehr Besucher.' },
+  hansewoche: { title: 'Nach der Hanse-Woche', text: 'Noch zwei Tage mehr Besucher und Traditionssegler.' },
+};
 
 // Jahreslauf: Saison und Winter aus ECONOMY.zeit. Im Winter gibt es keine Ereignisse,
 // die Boote stehen im Winterlager.
@@ -114,6 +155,13 @@ export function mitZahlen(texte, zahlen) {
     if (z.braucht) def.requires = z.braucht;
     if (z.ankuendigen != null) def.announceDays = z.ankuendigen;
     if (z.schutz) def.protect = { building: z.schutz.durch, factor: z.schutz.faktor };
+    // Lange vorher angekündigt (fünf Tage und mehr): eigener Platz im Planer (scheduler.js, Hanse-Woche)
+    if ((z.ankuendigen ?? 1) >= 5) def.gross = true;
+    if (z.amTag) def.amTag = z.amTag;
+    if (z.menschen) def.menschen = z.menschen;
+    if (z.bauten) def.bauten = z.bauten;
+    const n = zahlen.nachspiel?.[t.id];
+    if (n) def.nachspiel = { tage: n.tage, mods: n.wirkung ?? {}, modsVorbereitet: n.wirkungVorbereitet ?? null, ...(NACHSPIEL_TEXTE[t.id] ?? {}) };
     return def;
   });
 }

@@ -389,7 +389,7 @@ export const ECONOMY = {
   // erfüllten Wünschen (ohne Hafenbüro fahren sie nach warten.selbstEinfahrenNach Sekunden in
   // irgendeine passende freie Box).
   hafenbuero: { stufen: [
-    { name: 'Hafenmeister mit Funk', abStufe: 2, kosten: 600,  schaltetFrei: ['allesKassieren', 'vorschau'] },
+    { name: 'Hafenmeister mit Funk', abStufe: 2, kosten: 600,  schaltetFrei: ['allesKassieren', 'vorschau', 'anmeldung'] },
     { name: 'Kassenautomat',         abStufe: 2, kosten: 1800, schaltetFrei: ['sofortKassieren'], klassen: ['S', 'M'] },
     { name: 'Hafenbüro',             abStufe: 3, kosten: 3800, schaltetFrei: ['vorschlag', 'nebenkosten'] },
     { name: 'Hafenleitstelle',       abStufe: 4, kosten: 9500, schaltetFrei: ['automatik'] },
@@ -416,6 +416,17 @@ export const ECONOMY = {
     auch: ['sondergast', 'einzigerPlatz'],
     selbstEinfahrenNach: 25,
   } },
+
+  // ---------------------------------------------------------------- Anmeldung per Funk (P28)
+  // Ab "Hafenmeister mit Funk" (schaltetFrei 'anmeldung') melden sich morgens ein bis zwei der
+  // heute erwarteten Gäste per Funk an. Wer ihnen eine Box frei hält, bekommt beim Einlaufen einen
+  // Bonus. Die frei gehaltene Box ist bis dahin für andere Boote gesperrt (das ist der Preis).
+  //   fruehestens  nur Boote, die frühestens bei diesem Anteil des Tages kommen (0,35 = etwa 12:00),
+  //                damit Zeit zum Entscheiden bleibt
+  //   zweiAnteil   so oft melden sich zwei Boote statt einem
+  //   bonusAnteil  Bonus beim Einlaufen in die frei gehaltene Box, Anteil des Liegegelds einer Nacht
+  //   ruf          so viele Anker mehr in der Bewertung des Gastes
+  funkAnmeldung: { fruehestens: 0.35, zweiAnteil: 0.4, bonusAnteil: 0.5, ruf: 0.25 },
 
   // ---------------------------------------------------------------- Services
   // Format abgestimmt mit dem Services-Thread (web/js/data/services.js hat Startwerte, was
@@ -596,6 +607,54 @@ export const ECONOMY = {
                  // Traditionssegler (XL) kommen erst ab Stufe 5, vorher nur mehr Boote und Besucher
                  wirkung: { arrivalFactor: 1.3, kindFactor: { traditionssegler: 6 }, sizeFactor: { XL: 2 },
                    visitorFactor: 2, serviceIncomeFactor: 1.5, ratingBonus: 0.25 } },
+    // ---- Neue Ereignisse (P24, F17) und Bindung an Bauten (G7) ----------------------------------
+    // menschen: mehr Spaziergänger (ort) und Badegäste (strand) im Bild (render/people.js), abends: wer bleibt.
+    // bauten: gebaute Services machen das Ereignis größer. Je Bau und Ereignistag abends Geld (proTag je
+    // Ausbaustufe des Baus), dazu optional mehr Wirkung (wirkung wird zur Wirkung des Ereignisses gemischt).
+    // Ohne den Bau nennt die Ankündigung, was er bringen würde (events/vorbereiten.js baubonus).
+    // Mittsommer: die hellste Nacht des Jahres, einmal je Saison um den Saisontag 14
+    // amTag: fester Saisontag, die anderen Ereignisse halten davor und danach Abstand
+    mittsommer: { abStufe: 2, amTag: 14, alleTage: 33, dauer: 1, vorrang: 6, saison: [14, 14],
+                  wirkung: { arrivalFactor: 1.15, visitorFactor: 1.6, serviceIncomeFactor: 1.3, extraNights: 1 },
+                  menschen: { ort: 1.5, strand: 2, abends: { ort: 1.6, strand: 3 } },
+                  bauten: { grillplatz: { proTag: [60], text: 'Mittsommerfeuer am Grillplatz' },
+                            eisdiele: { proTag: [40, 70], text: 'Eis bis in die Nacht' } } },
+    // Heringstage: Frühjahrsfang, nur mit Räucherei (sie ist der Grund für das Fest)
+    heringstage: { abStufe: 2, braucht: 'raeucherei', amTag: 5, alleTage: 33, dauer: 2, vorrang: 5, saison: [5, 6],
+                   wirkung: { visitorFactor: 1.5, serviceIncomeFactor: 1.2, kindFactor: { M4: 2 } },
+                   menschen: { ort: 1.6 },
+                   bauten: { raeucherei: { proTag: [70, 140], text: 'Räucherei: Heringsbrötchen' },
+                             fischhalle: { proTag: [120, 200], text: 'Fischhalle: Heringsmarkt' } } },
+    // Holzboot-Treffen: Klassiker aus Holz und Ruderboote, mit Museumshafen auch Traditionssegler
+    holzboote: { abStufe: 3, alleTage: 16, dauer: 2, vorrang: 5, saison: [5, 28],
+                 wirkung: { arrivalFactor: 1.2, kindFactor: { M2: 5, S1: 2 }, visitorFactor: 1.3, ratingBonus: 0.15 },
+                 menschen: { ort: 1.3 },
+                 bauten: { museumshafen: { proTag: [150, 250], text: 'Museumshafen: Holzboote ansehen',
+                                           wirkung: { kindFactor: { traditionssegler: 3 }, visitorFactor: 1.3 } },
+                           slip: { proTag: [30, 50], text: 'Slipanlage: Holzboote zu Wasser' },
+                           segelmacher: { proTag: [60, 90], text: 'Segelmacher: alte Segel flicken' } } },
+    // Hanse-Woche (G9): selten und groß, zehn Tage vorher angekündigt, einmal im Jahr ab Stufe 5.
+    // Plant sich neben den anderen Ereignissen (ab fünf Tagen Ankündigung: eigener Platz im Planer), die halten Abstand.
+    // vorbereiten: so viele große Plätze (für L und XL) bis zum Start freihalten; jedes große Schiff
+    // darauf zahlt einmal Festgeld je Klasse.
+    hansewoche: { abStufe: 5, alleTage: 33, dauer: 4, vorrang: 9, ankuendigen: 10, saison: [21, 29],
+                  wirkung: { arrivalFactor: 1.5, kindFactor: { traditionssegler: 6, M2: 2 }, sizeFactor: { XL: 2, L: 1.3 },
+                    visitorFactor: 2.2, serviceIncomeFactor: 1.6, ratingBonus: 0.3 },
+                  menschen: { ort: 2, strand: 1.4, abends: { ort: 1.6 } },
+                  bauten: { museumshafen: { proTag: [300, 500], text: 'Museumshafen: Hanse-Markt am Kai' },
+                            hafencafe: { proTag: [80, 120], text: 'Hafencafé: Festgäste' } },
+                  vorbereiten: { plaetze: { 5: 3, 6: 4 }, festgeld: { L: 40, XL: 90 } } },
+    // Nachspiel (G3): nach dem letzten Ereignistag wirkt etwas nach (tage, wirkung). Wer vorbereitet war
+    // (Sturmklar, Plätze freigehalten), bekommt zusätzlich wirkungVorbereitet. Steht im Wetterbericht.
+    nachspiel: {
+      sturm:      { tage: 1, wirkung: { arrivalFactor: 1.4 },
+                    wirkungVorbereitet: { ratingBonus: 0.15 } },
+      regatta:    { tage: 1, wirkung: { kindFactor: { jolle: 1.5, segelyacht: 1.5 } },
+                    wirkungVorbereitet: { ratingBonus: 0.1 } },
+      hafenfest:  { tage: 2, wirkung: { arrivalFactor: 1.15, visitorFactor: 1.3 } },
+      hansewoche: { tage: 2, wirkung: { arrivalFactor: 1.2, visitorFactor: 1.4, kindFactor: { traditionssegler: 2 } },
+                    wirkungVorbereitet: { ratingBonus: 0.1 } },
+    },
     // Wintertage: Boote im Winterlager, kaum Gäste
     winter:    { wirkung: { winter: true, arrivalFactor: 0.15, visitorFactor: 0.3, serviceIncomeFactor: 0.5 } },
   },

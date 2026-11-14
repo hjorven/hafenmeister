@@ -44,6 +44,7 @@ Vorher und nachher (Handy, Morgen und Kassieren): `/mnt/project-files/handy-ui/r
 |---|---|---|
 | Morgen-Zettel "Tag 47: + 640 €" | ui/tagesabschluss.js | 70 |
 | Dauerlieger wartet (Frist) | features/dauerlieger.js | 65 |
+| Anmeldung per Funk "Box freihalten?" | ui/funk-anmeldung.js | 57 |
 | Ankündigung "Heute: Sommertag", "Übermorgen: Regatta" | events/banner.js | 55 |
 | Tipp beim ersten Mal (Einstieg) | features/einstieg.js | 45 |
 | Dauerplatz-Meldungen | features/dauerlieger.js | 40 |

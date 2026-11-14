@@ -1,6 +1,6 @@
 # Ereignisse und Jahreslauf
 
-Stand: 14.11.2026. Status: gebaut, Vorbereiten für Sturm und Regatta gebaut (P24 Teil 1: G1, G2, G6); weitere Ereignisse P24 Teil 2, Winter mit Aufgaben P20 ([Roadmap](roadmap.md)). Umsetzung von [Plan Abschnitt 7](plan.md#7-ereignisse-und-jahreslauf).
+Stand: 14.11.2026. Status: gebaut. P24 fertig: Vorbereiten für Sturm und Regatta (Teil 1: G1, G2, G6), neue Ereignisse, Bauten, Nachspiel und Hanse-Woche (Teil 2: F17, G3, G7, G9); Winter mit Aufgaben P20 ([Roadmap](roadmap.md)). Umsetzung von [Plan Abschnitt 7](plan.md#7-ereignisse-und-jahreslauf).
 
 ## Was es gibt
 
@@ -11,10 +11,29 @@ Stand: 14.11.2026. Status: gebaut, Vorbereiten für Sturm und Regatta gebaut (P2
 | Sturm | 3 | 1 Tag | 12 Tage | niemand läuft von See ein, Gäste bleiben eine Nacht länger, Gäste an offenen Plätzen (Stirnplätze am Stegkopf, Kai) -1 Anker; Seenotretter-Station mindert das |
 | Regatta | 3, mit Segelclub | 2 Tage, 2 Tage vorher angekündigt | 14 Tage | 1,6x Ankünfte, vor allem Segelboote, mehr Besucher, etwas Ruf |
 | Hafenfest | 4 | 1 Tag | 20 Tage (Hochsommer) | Traditionssegler und Marine, doppelt so viele Besucher, abends Feuerwerk |
+| Heringstage | 2, mit Räucherei | 2 Tage | einmal im Jahr, fest am Saisontag 5 | 1,5x Besucher, mehr Menschen im Ort; Räucherei und Fischhalle verdienen extra |
+| Mittsommer | 2 | 1 Tag | einmal im Jahr, fest am Saisontag 14 | 1,6x Besucher, doppelt so viele Badegäste, abends bleiben sie am Strand; Gäste bleiben eine Nacht länger; mit Grillplatz brennt abends das Mittsommerfeuer |
+| Holzboot-Treffen | 3 | 2 Tage | 16 Tage (Saisontag 5 bis 28) | Klassiker aus Holz (5x) und Ruderboote, Gäste bewerten etwas besser; mit Museumshafen auch Traditionssegler |
+| Hanse-Woche | 5 | 4 Tage, 10 Tage vorher angekündigt | einmal im Jahr (Saisontag 21 bis 29) | großes Fest: Traditionssegler, große Schiffe, 2,2x Besucher, Ruf, abends Feuerwerk |
 
 Kreuzfahrtschiffe, Marinebesuche und Ausflugsfahrten plant das Services-Modul als regelmäßige Besuche.
 
-**Leitlinien:** jedes Ereignis wird angekündigt, keins kostet Geld oder zerstört etwas, nie zwei gleichzeitig, danach mindestens zwei ruhige Tage. Im Schnitt 4 Ereignisse pro Saison in Stufe 1 und 2, etwa 8 ab Stufe 3.
+**Leitlinien:** jedes Ereignis wird angekündigt, keins kostet Geld oder zerstört etwas, nie zwei gleichzeitig, danach mindestens zwei ruhige Tage. Im Schnitt 5 bis 6 Ereignisse pro Saison in Stufe 1 und 2, etwa 8 ab Stufe 3 (gemessen über vier Jahre und sechs Samen).
+
+**Feste Tage und große Ereignisse (P24 Teil 2):** Mittsommer und Heringstage haben einen festen Saisontag (`amTag`), die anderen Ereignisse halten davor und danach Abstand. Ereignisse mit mindestens fünf Tagen Ankündigung (Hanse-Woche) haben im Planer einen eigenen Platz: Sie werden lange vorher angekündigt, die kleinen laufen bis kurz davor weiter. Der Wetterknopf zeigt "Hanse-Woche in 7 Tagen", der Wetterbericht hat eine Zeile dafür.
+
+**Nachspiel (G3):** Nach Sturm, Regatta, Hafenfest und Hanse-Woche wirkt das Ereignis nach (`ECONOMY.ereignisse.nachspiel`): nach dem Sturm einen Tag 1,4x Ankünfte (wer draußen gewartet hat), nach der Regatta Nachzügler unter den Seglern, nach Hafenfest und Hanse-Woche zwei Tage mehr Besucher. Wer vorbereitet war (sturmklar, Plätze freigehalten), bekommt dazu einen kleinen Bewertungsbonus. Am Morgen kommt eine kurze Karte ("Nach dem Sturm").
+
+**Bauten (G7):** Gebaute Services machen ein Ereignis größer (`ECONOMY.ereignisse.<id>.bauten`): An jedem Ereignistag bringt jeder passende Bau abends Geld (Tagesabschluss: Services, beim Bau), manche auch mehr Wirkung (Museumshafen beim Holzboot-Treffen: Traditionssegler). Die Ankündigung sagt, was die eigenen Bauten bringen ("Grillplatz und Eisdiele: +100 € am Tag"), oder nennt den passenden Bau als Tipp ("Mit Grillplatz: ..."). Das Ergebnis am Abend nennt die Beträge.
+
+| Ereignis | Bauten (Geld je Tag nach Ausbaustufe) |
+|---|---|
+| Mittsommer | Grillplatz 60 € (Mittsommerfeuer), Eisdiele 40 / 70 € |
+| Heringstage | Räucherei 70 / 140 €, Fischhalle 120 / 200 € |
+| Holzboot-Treffen | Museumshafen 150 / 250 € und Traditionssegler, Slipanlage 30 / 50 €, Segelmacher 60 / 90 € |
+| Hanse-Woche | Museumshafen 300 / 500 €, Hafencafé 80 / 120 € |
+
+**Mehr Menschen im Bild:** Ereignisse mit `menschen` (Mittsommer, Heringstage, Holzboot-Treffen, Hanse-Woche) lassen mehr Spaziergänger und Badegäste kommen (`render/people.js`), am Mittsommerabend bleiben dreimal so viele am Strand.
 
 **Jahreslauf:** 30 Saisontage (1 bis 8 Frühling, 9 bis 22 Sommer, 23 bis 30 Herbst), danach 3 Tage Winter mit Schnee, ohne Ereignisse, mit wenig Ankünften (`winter: true` in den Modifikatoren).
 
@@ -25,13 +44,16 @@ Am Tag der Ankündigung erscheint statt des Schilds eine Karte mit Knopf (`#ev-v
 | Ereignis | Knopf | Was passiert | Ergebnis am Abend des letzten Tags |
 |---|---|---|---|
 | Sturm (ab Stufe 3) | Sturmklar machen | Gäste von offenen Plätzen fahren auf freie Plätze innen (die Boote verholen sichtbar), offene Plätze bleiben bis nach dem Sturm für Gäste gesperrt (Schild "reserviert"). Gäste auf Tagestörn bleiben auf ihrem Platz. "Offene Plätze freigeben" hebt die Sperre auf. | wie viele innen lagen, wie viele draußen und ob sie schlechter bewerten (die Seenotretter mindern das) |
+| Hanse-Woche (ab Stufe 5) | Plätze freihalten (ab zwei Tagen vorher) | 3 bis 4 große Plätze (für L und XL) bleiben bis zum Start leer, während des Fests nur für große Schiffe. Jedes zahlt einmal Festgeld (L 40 €, XL 90 €; Tagesabschluss: Sonstiges). Bei der Ankündigung zehn Tage vorher nur ein Hinweis, zwei Tage vorher die Karte mit Knopf. | wie viele große Schiffe auf den Plätzen lagen und das Festgeld, dazu die Bauten |
 | Regatta (ab Stufe 3, mit Segelclub) | Plätze freihalten | 3 bis 6 freie Plätze (je Stufe) bleiben bis zum Start leer, während der Regatta legen dort nur Segelboote an. Jedes Segelboot darauf zahlt einmal Startgeld (S 8 €, M 15 €, L 25 €; Tagesabschluss: Sonstiges). "Plätze freigeben" hebt das auf. | wie viele Regattaboote auf den freigehaltenen Plätzen lagen und das Startgeld |
+
+Während der Regatta und der Hanse-Woche fahren passende Boote bevorzugt auf die freigehaltenen Plätze (Hook `score` der Spielregeln, gilt für Selbst-Einfahren, Büro und die beste Box), sonst nähmen Segler erst andere freie Plätze und das Freihalten brächte nichts (Fund aus dem Feature-Test von PR 281). Ist kein passender Platz frei, sagt die Karte das und der Knopf steht im Wetterbericht, sobald einer frei wird. Die Zahlen auf der Karte (zum Beispiel wie viele Gäste offen liegen) bleiben live.
 
 Ohne Vorbereitung passiert nichts Schlimmes: der Sturm kostet nur Anker bei den Gästen draußen, die Regatta läuft wie bisher. Zahlen: `ECONOMY.platzarten.stirn.offen`, `ECONOMY.ereignisse.regatta.vorbereiten`. Regeln als reine Funktionen in `web/js/events/vorbereiten.js` (Hooks `fit`, `evening`, `night` der Spielregeln), Karte und Knöpfe in `web/js/events/vorbereiten-ui.js`. Der Stand liegt in `state.modules.vorbereitung` und wird mitgespeichert.
 
 Sim-Ereignisse (über `game.sim.dispatch`, also als `sim:<type>`): `relocated` mit `grund: 'sturm'` (die 3D-Ansicht fährt das Boot hinüber), `sturmklar`, `regattaPlaetze`, `ereignisErgebnis` `{ art, vorbereitet, verholt, draussen, anker }` bzw. `{ art, plaetze, teilnehmer, startgeld }`.
 
-Berührungspunkte: Dauerplätze (`features/dauerlieger.js`) bleiben unberührt, weil fest liegende Boote die Sperre nicht betrifft und freigehaltene Plätze nur aus freien Gastplätzen gewählt werden. Das Büro und das Selbst-Einfahren fragen die Passregel und meiden gesperrte Plätze von selbst. Die Wetterflagge zeigt den Sturm weiter wie bisher.
+Berührungspunkte: Die Karte meldet sich am gemeinsamen Meldeplatz an (`game.meldungen.anmelden('#ev-vorbereiten', 'ereignis')`, Thread "Handy-Oberfläche neu und ruhig gestalten"); Morgen-Zettel und Dauerlieger mit Frist gehen vor. Steht das Nachspiel, wartet eine Ankündigung desselben Morgens dahinter. Dauerplätze (`features/dauerlieger.js`) bleiben unberührt, weil fest liegende Boote die Sperre nicht betrifft und freigehaltene Plätze nur aus freien Gastplätzen gewählt werden. Das Büro und das Selbst-Einfahren fragen die Passregel und meiden gesperrte Plätze von selbst. Die Wetterflagge zeigt den Sturm weiter wie bisher.
 
 ## Was schon wirkt
 

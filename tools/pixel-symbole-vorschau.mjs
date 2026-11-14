@@ -17,7 +17,7 @@ const NAMEN = {
   flagge: 'Ausbau', zu: 'Schließen', zahnrad: 'Einstellungen', haken: 'Erledigt', kreis: 'Offen', pfeil: 'Pfeil',
   pfeilschraeg: 'Pfeil schräg', warnung: 'Achtung', hinweis: 'Neuigkeit', muenze: 'Geld', stern: 'Ruf', sonne: 'Sonne',
   mond: 'Mond', wolke: 'Wolken', regen: 'Regen', sturm: 'Sturm', nebel: 'Nebel', schnee: 'Schnee', regatta: 'Regatta',
-  fest: 'Hafenfest', schiff: 'Kreuzfahrt',
+  fest: 'Hafenfest', schiff: 'Kreuzfahrt', feuer: 'Mittsommer', fisch: 'Heringstage', holzboot: 'Holzboote', kogge: 'Hanse-Woche',
 };
 
 const kachel = ([k, r]) => {
