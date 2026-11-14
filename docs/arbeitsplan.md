@@ -51,7 +51,7 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 | A | Bewertung: unerfüllter Wunsch bringt weniger Ruf als Abweisen (1 + 4 x erfüllt/alle); Vorschlag 2 + 3 x Anteil. Falscher Anreiz in der Kernschleife | Befund aus P10/P14 | Balancing-Paket P17 (siehe 3), abgestimmt mit P19 |
 | B | Dauerlieger-Hinweis am Handy quer vom Morgen-Zettel verdeckt | Befund nach PR 218 | Menü-Thread (PR 261) prüft es mit |
 | B | `istWasser` und Bild stimmen am Durchstich nicht überall überein | Messlatte (`feature-tests/messlatte/README.md`) | P62 |
-| B | Erststart hängt an jsDelivr (Three.js vom CDN) | Audit C06, `web/index.html` Zeile 23 | P61 |
+| B | ~~Erststart hängt an jsDelivr (Three.js vom CDN)~~ erledigt (PR 270) | Audit C06 | P61 |
 | C | Winter: Rest von H5, G5 | roadmap.md P20 | P20-Rest mit P17 |
 
 Erledigt und in der Roadmap nachgetragen (14.11.): P02, P04 (ein Zähler `state.bigVisits`), P12, P63, P65. Audit C07 (P08-Rest): Rechte je Job, Actions auf SHAs, Secret-Scan und Dependabot, siehe `docs/sicherheit.md`. Audit C05 (`innerHTML`) ist im Code erledigt: `render/services.js` und `ui/input-pc.js` bauen mit `textContent`; die übrigen `innerHTML` setzen nur feste Texte oder SVG. Pflicht bleibt für P44 (Hafenname) ein Test mit präparierten Namen.
@@ -66,7 +66,7 @@ Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tem
 |---|---|---|---|---|
 | 1 | **P66 Stau im Hafenbecken** (läuft) | Prio A, jedes Spiel ab Stufe 3 betroffen | P62-Zonen (gemergt) | P62, Stegbilder, XXL-Besuche; Zeitraffer misst nach jedem Merge |
 | 2 | **Offene PRs 244, 252, 190, 91 auflösen** (bestehende Threads) | liegende Arbeit veraltet weiter und blockiert `economy.js` | - | 244 und 252 beide `economy.js`, `docs/zahlen.md`: nacheinander |
-| 3 | **P61 Spiel komplett offline startbar** (neu) | Grundproblem C06, unabhängig von allem anderen, klein | - | `web/index.html` Importmap (Grundgerüst), Tests leiten Three.js heute per `page.route` um, Pages-Workflow |
+| 3 | ~~**P61 Spiel komplett offline startbar**~~ erledigt (PR 270, Thread "Spiel offline startbar machen") | Grundproblem C06, unabhängig von allem anderen, klein | - | `web/index.html` Importmap (Grundgerüst), Tests leiten Three.js heute per `page.route` um, Pages-Workflow |
 | 4 | **P08-Rest: Actions absichern** (erledigt 14.11., siehe `docs/sicherheit.md`) | Audit C07 und Abschnitt 6 des Audits | - | `.github/workflows/` mit Roadmap-Action und Pages |
 | 5 | **Balancing-Paket: P17 Aufstieg angleichen und Bewertungsformel** (neu) | Prio A: 20 bis 38 Tage Lücke ab Stufe 3 zwischen Zeitraffer und `tools/balance.mjs`; Bewertung 2 + 3 x Anteil, damit Aufnehmen nie schlechter ist als Abweisen; Rechnung und Zeitraffer müssen danach auf höchstens 5 % übereinstimmen | nach 1 (Stau verfälscht die Messung) und 2 (244, 252 auf `main`) | `economy.js`, `tools/balance.mjs`, `docs/zahlen.md`, Einstieg (J5) |
 | 6 | **P55 Versteckte Regeln sichtbar machen** (neu) | Welle 2: Geduldsring, Auslastung, Zeiger am Rand; macht das Spiel lesbar, bevor Inhalt dazukommt | nach 261 (Verdeckung) | `ui/vorschau.js`, `boat-view.js`, Meldungs-Ordnung, Platzschilder |

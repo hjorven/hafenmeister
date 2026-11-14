@@ -1,6 +1,5 @@
 const { chromium, devices } = require(require('path').join(__dirname, '../../tests/node_modules/playwright'));
 const path = require('path');
-const THREE = path.join(__dirname, '../../tests/node_modules/three');
 const GERAETE = {
   handy: devices['iPhone 13'],
   'handy-quer': devices['iPhone 13 landscape'],
@@ -15,10 +14,6 @@ async function open(b, geraet, query = '', dsf = 1) {
   const log = [];
   page.on('pageerror', (e) => log.push('[pageerror] ' + e.message));
   page.on('console', (m) => { if (m.type() === 'error') log.push('[err] ' + m.text()); });
-  await page.route(/^https:\/\/cdn\.jsdelivr\.net\/npm\/three@([^/]+)\/(.+)$/, (r) => {
-    const f = r.request().url().match(/three@[^/]+\/([^?#]+)/)[1];
-    r.fulfill({ path: path.join(THREE, f), contentType: 'text/javascript' });
-  });
   await page.goto(`http://localhost:${process.env.HM_PORT || 4180}/hafenmeister/` + query);
   await page.waitForFunction(() => document.getElementById('boot')?.classList.contains('done') || document.getElementById('boot')?.classList.contains('error'), null, { timeout: 45000 });
   await page.waitForFunction(() => window.hafenmeister && window.hafenmeister.time > 0.1, null, { timeout: 30000 });
