@@ -6,6 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Der Hafen wächst sichtbar mit: Aus der Holzbude des Hafenmeisters wird ein Haus mit Ausguck und später mit Anbau, das Hafenbüro bekommt einen Seitenflügel und im Seehafen einen Lotsenturm mit drehendem Radar, Kiosk und Restaurant bekommen Terrasse und Obergeschoss, Wohnhäuser werden aufgestockt und an der Hafenstraße stehen Stadthäuser mit Läden. Das Dorf wächst vom alten Kern nach außen, und an der Landstraße entsteht Stufe für Stufe eine Häuserzeile. Beim Aufstieg wachsen neue Gebäude aus dem Boden.
 - Erfolge- und Logbuch-Meldung stehen im gemeinsamen Meldeplatz (volle Breite, gleiches Einblenden).
 - Logbuch: Die großen Schiffe kommen jetzt hinein, wenn man sie sieht: beim Besuch am Kreuzfahrt- oder Marineanleger, wenn sie vor dem Hafen vorbeifahren, und der Seenotkreuzer an der Station. Fischerplätze bekommen neue Kutter, und jede Saison wechseln sie, sodass alle fünf Fischkutter einmal da sind. Zwei Seenotkreuzer, die im Spiel nie auftauchen, stehen nicht mehr als ewiger Schattenriss im Logbuch.
 - Neue Ereignisse: Heringstage (mit Räucherei, im Frühling), Mittsommer (Saisontag 14, abends brennt am Grillplatz ein Feuer, viele Badegäste) und Holzboot-Treffen. Ab Stufe 5 kommt einmal im Jahr die Hanse-Woche, zehn Tage vorher angekündigt; zwei Tage vorher kannst du große Plätze freihalten, große Schiffe darauf zahlen Festgeld.
