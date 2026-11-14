@@ -101,6 +101,14 @@ export const TEXTE = {
   bauen: {
     titel: 'Hafen ausbauen',
     text: TOUCH
+      ? 'Mit dem Geld baust du neue Liegeplätze und Anlagen. Das erste Bauwerk, ein Toilettenhäuschen, ist geschenkt. Tipp auf „Bauen“: Die Zeit hält an, und du siehst erst eine Vorschau. Gekauft wird erst mit „Bauen für …“.'
+      : 'Mit dem Geld baust du neue Liegeplätze und Anlagen. Das erste Bauwerk, ein Toilettenhäuschen, ist geschenkt. Klick auf „Bauen“: Die Zeit hält an, und du siehst erst eine Vorschau. Gekauft wird erst mit „Bauen für …“.',
+    kurz: 'Das erste Bauwerk ist geschenkt: „Bauen“, Vorschau ansehen, dann „Bauen für …“.',
+  },
+  // Wie "bauen", wenn das geschenkte erste Bauwerk schon vorher gebaut wurde (ui/bauen.js, Roadmap J4)
+  bauenOhneGeschenk: {
+    titel: 'Hafen ausbauen',
+    text: TOUCH
       ? 'Mit dem Geld baust du neue Liegeplätze und Anlagen. Tipp auf „Bauen“: Die Zeit hält an, und du siehst erst eine Vorschau. Gekauft wird erst mit „Bauen für …“. Mit dem Ruf deiner Gäste wächst der Hafen.'
       : 'Mit dem Geld baust du neue Liegeplätze und Anlagen. Klick auf „Bauen“: Die Zeit hält an, und du siehst erst eine Vorschau. Gekauft wird erst mit „Bauen für …“. Mit dem Ruf deiner Gäste wächst der Hafen.',
     kurz: 'Mit dem Geld baust du aus. Erst Vorschau, gekauft wird mit „Bauen für …“.',
@@ -436,7 +444,9 @@ export async function init(game) {
     // Meldungs-Ordnung (ui/meldungen.js): Zettel, Kartenwahl, Feier und Dauerplatz-Meldungen gehen vor
     if (!id) { game.meldungen?.fertig('einstieg'); tipp.hidden = true; ring.hidden = true; return; }
     game.meldungen?.wunsch('einstieg', id.startsWith('hinweis:') ? VORRANG.tipp : VORRANG.einstieg);
-    const t = TEXTE[id];
+    const st0 = game.sim?.state;
+    const geschenkWeg = !!st0?.modules?.bauen?.geschenk || (st0?.facilities?.wc || 0) > 0 || st0?.stage > 1;
+    const t = id === 'bauen' && geschenkWeg ? TEXTE.bauenOhneGeschenk : TEXTE[id];
     const nr = REIHENFOLGE.indexOf(id) + 1;
     const info = id === 'tempo' || id === 'bauen' || id === 'ziele';
     tipp.replaceChildren();

@@ -81,7 +81,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 
 | Nr | Punkt | Status | Paket |
 |---|---|---|---|
-| Ü15 | Weicher Start: 100 € Startgeld oder geschenktes WC | offen | P17 |
+| Ü15 | Weicher Start: 100 € Startgeld oder geschenktes WC | erledigt (PR J4PR): geschenktes Toilettenhäuschen beim ersten Bauen | P17 |
 | Ü16 | Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken | offen | P17 |
 | Ü17 | Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus `data/boats`, spürbare Kapazität | offen | P19 |
 | Ü18 | Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend | erledigt (PR 232) | P18 |
@@ -464,7 +464,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | J1 | Schritt 1 zeigt auf "3x" statt auf die Sonne | erledigt (PR 112: Willkommen zeigt auf die Boje, Schritt 4 auf 3x) | P03 |
 | J2 | Im Einstieg fährt das erste Boot nicht selbst ein | erledigt (PR 112, `holdBoat` bis zum ersten Anlegen; Kamera fährt zum Boot, wenn es außerhalb liegt) | P03 |
 | J3 | Münze gleich nach dem Anlegen erklären, auch den halben Preis | erledigt (PR 112, Anteil aus den Regeln) | P03 |
-| J4 | Erstes Bauen führen, Geld fürs WC geschenkt (= Ü15) | offen | P17, P03 |
+| J4 | Erstes Bauen führen, Geld fürs WC geschenkt (= Ü15) | erledigt (PR J4PR) | P17, P03 |
 | J5 | Ruf am ersten Abreisenden erklären | offen | P03 (nach P14) |
 | J6 | Hinweise beim ersten Mal (kein Platz, Sturm, Winter, Stufenziel, Stammgast) | erledigt (kein Platz zweifach, Stufenziel, Stammgast; Sturm und Winter erklärt schon das Ereignisschild) | P03 |
 | J7 | Hilfe-Seite für alle Geräte mit sechs Bildern | erledigt (Menü „Hilfe“, `features/hilfe.js`) | P03 |

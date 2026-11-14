@@ -4,6 +4,10 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 14.11.2026
+
+- Das erste Bauwerk ist geschenkt: Wer zum ersten Mal „Bauen“ öffnet, bekommt das Geld fürs Toilettenhäuschen und sieht gleich dessen Vorschau, der Einstieg sagt es vorher an.
+
 ## 13.11.2026
 
 - Die Geldanzeige oben bleibt nicht mehr stehen, wenn beim Kassieren irgendwo im Spiel ein Fehler auftritt.

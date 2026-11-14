@@ -23,18 +23,25 @@ test('Bauen: Vorschau, Bestätigen, Gebäude steht', async ({ game }, testInfo) 
 
   await press(page.locator('#btn-build'), testInfo);
   await expect(page.locator('#card.bau-karte')).toBeVisible();
-  await expect(page.locator('#card .bau-tab')).toHaveCount(4);
-
-  await press(page.locator('#card .bau-tab', { hasText: 'Versorgung' }), testInfo);
-  await press(page.locator('#card [data-bau="versorgung:wc"]'), testInfo);
+  // Erstes Bauwerk (Roadmap J4): Das Toilettenhaeuschen ist geschenkt, die Vorschau steht gleich offen
+  await expect(page.locator('#card .bau-geschenk')).toBeVisible();
   const ja = page.locator('#card .bau-ja');
   await expect(ja).toHaveText('Bauen für 80 €');
-  // Die Vorschau allein kostet nichts
-  expect(await page.evaluate(() => window.hafenmeister.sim.state.money)).toBe(300);
+  await expect(ja).toHaveClass(/bau-leuchtet/);
+  // Geschenk liegt in der Kasse, die Vorschau allein kostet nichts; es zaehlt nicht als Einnahme
+  expect(await page.evaluate(() => window.hafenmeister.sim.state.money)).toBe(380);
+  expect(await page.evaluate(() => window.hafenmeister.sim.state.stats.totalIncome)).toBe(0);
+  // Zurueck zur Liste und ueber den Reiter wieder hin: dieselbe Vorschau, kein zweites Geschenk
+  await press(page.locator('#card .hud-btn', { hasText: 'Zurück' }), testInfo);
+  await expect(page.locator('#card .bau-tab')).toHaveCount(4);
+  await press(page.locator('#card .bau-tab', { hasText: 'Versorgung' }), testInfo);
+  await press(page.locator('#card [data-bau="versorgung:wc"]'), testInfo);
+  await expect(ja).toHaveText('Bauen für 80 €');
+  expect(await page.evaluate(() => window.hafenmeister.sim.state.money)).toBe(380);
 
   await press(ja, testInfo);
   await expect(page.locator('#card h2')).toContainText('ist gebaut');
-  expect(await page.evaluate(() => window.hafenmeister.sim.state.money)).toBe(220);
+  expect(await page.evaluate(() => window.hafenmeister.sim.state.money)).toBe(300);
   expect(await page.evaluate(() => window.hafenmeister.sim.state.facilities.wc)).toBe(1);
   expect(await steht(), 'Toilette steht nach dem Kauf nicht').toBe(true);
 
@@ -44,4 +51,10 @@ test('Bauen: Vorschau, Bestätigen, Gebäude steht', async ({ game }, testInfo) 
   await page.evaluate(() => window.hafenmeister.einstieg?.beenden?.());
   await expect(page.locator('#bau-tipp')).toBeVisible();
   await expect(page.locator('#bau-tipp')).toContainText('Als Nächstes');
+
+  // Wieder oeffnen: kein Geschenk mehr, die Liste kommt
+  await press(page.locator('#btn-build'), testInfo);
+  await expect(page.locator('#card .bau-tab')).toHaveCount(4);
+  await expect(page.locator('#card .bau-geschenk')).toHaveCount(0);
+  expect(await page.evaluate(() => window.hafenmeister.sim.state.money)).toBe(300);
 });
