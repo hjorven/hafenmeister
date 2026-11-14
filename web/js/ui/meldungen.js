@@ -70,6 +70,26 @@ export function init(game) {
   // Sofort Bescheid geben, nicht erst im nächsten Bild: nach langem Vorspulen kommen Bilder oft verspätet
   const wechsel = () => game.emit?.('meldungen:wechsel', {});
 
+  // Fenster mit kleinerem Vorrang warten ausgeblendet, solange ein wichtigeres steht (z. B. die Kartenwahl
+  // der Tagesziele hinter der Feier). Dafür trägt body das Merkmal data-hm-meldung mit der stehenden Meldung.
+  if (typeof document !== 'undefined') {
+    const regeln = FENSTER.map((f) => {
+      const hoeher = FENSTER.filter((g) => g.vorrang > f.vorrang).map((g) => `body[data-hm-meldung="${g.id}"] ${f.sel}`);
+      return hoeher.length ? `${hoeher.join(',\n')} { visibility: hidden !important; pointer-events: none !important; }` : '';
+    }).filter(Boolean);
+    const style = document.createElement('style');
+    style.textContent = regeln.join('\n');
+    document.head.append(style);
+    const merke = () => {
+      const steht = waehle(alle()) || '';
+      if ((document.body.dataset.hmMeldung || '') !== steht) {
+        if (steht) document.body.dataset.hmMeldung = steht; else delete document.body.dataset.hmMeldung;
+      }
+    };
+    setInterval(merke, 250);
+    for (const name of ['meldungen:wechsel', 'feier:auf', 'feier:zu']) game.on?.(name, merke);
+  }
+
   game.meldungen = {
     wunsch(id, vorrang) {
       const alt = wuensche.get(id);

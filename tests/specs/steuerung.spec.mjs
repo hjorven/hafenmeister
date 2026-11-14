@@ -119,32 +119,35 @@ test('Antippen der Karte meldet einen Punkt im Wasser oder an Land', async ({ ga
   expect(taps[0].hasWorld, 'Tipp hat keinen Weltpunkt').toBe(true);
 });
 
-test('Kamera neigen (zwei Finger hoch oder rechte Maustaste) und Kompass richtet aus', async ({ game }, testInfo) => {
-  // Neigen ist auf allen Geräten dieselbe Logik: Finger am Handy, Maus am PC. Spart am Tablet im
-  // CI-Lauf je etwa 40 s (dort nur wenige Bilder je Sekunde).
-  test.skip(!['handy', 'pc'].includes(testInfo.project.name), 'Neigen wird am Handy und am PC geprüft');
-  const { page } = game;
-  const pitch = () => page.evaluate(() => window.hafenmeister.camera.pitchGrad);
-  await page.evaluate(() => window.hafenmeister.camera.zoomAt(2));
-  const before = await pitch();
-  const c = await stageCenter(page);
-  if (isTouchProject(testInfo)) {
-    // Finger nebeneinander, gemeinsam nach oben: flacher
-    await touchGesture(page, lerpFrames(
-      [{ x: c.x - 40, y: c.y + 40 }, { x: c.x + 40, y: c.y + 40 }],
-      [{ x: c.x - 40, y: c.y - 40 }, { x: c.x + 40, y: c.y - 40 }],
-    ));
-  } else {
-    await page.mouse.move(c.x, c.y + 40);
-    await page.mouse.down({ button: 'right' });
-    await page.mouse.move(c.x, c.y - 40, { steps: 12 });
-    await page.mouse.up({ button: 'right' });
-  }
-  await page.waitForTimeout(500);
-  const flat = await pitch();
-  expect(flat, 'Neigen macht die Kamera nicht flacher').toBeLessThan(before - 5);
-  const kompass = page.locator('#btn-kompass');
-  await expect(kompass).toBeVisible();
-  if (isTouchProject(testInfo)) await kompass.tap(); else await kompass.click();
-  await page.waitForFunction(() => Math.abs(window.hafenmeister.camera.pitchGrad - 50) < 1);
+// Neigen ist auf allen Geräten dieselbe Logik: Finger am Handy, Maus am PC. Übersprungen wird
+// vor dem Laden (Bedingung über die Fixture projekt), sonst lädt jedes Tablet das Spiel umsonst.
+test.describe('nur Handy und PC', () => {
+  test.skip(({ projekt }) => !['handy', 'pc'].includes(projekt), 'Neigen wird am Handy und am PC geprüft');
+
+  test('Kamera neigen (zwei Finger hoch oder rechte Maustaste) und Kompass richtet aus', async ({ game }, testInfo) => {
+    const { page } = game;
+    const pitch = () => page.evaluate(() => window.hafenmeister.camera.pitchGrad);
+    await page.evaluate(() => window.hafenmeister.camera.zoomAt(2));
+    const before = await pitch();
+    const c = await stageCenter(page);
+    if (isTouchProject(testInfo)) {
+      // Finger nebeneinander, gemeinsam nach oben: flacher
+      await touchGesture(page, lerpFrames(
+        [{ x: c.x - 40, y: c.y + 40 }, { x: c.x + 40, y: c.y + 40 }],
+        [{ x: c.x - 40, y: c.y - 40 }, { x: c.x + 40, y: c.y - 40 }],
+      ));
+    } else {
+      await page.mouse.move(c.x, c.y + 40);
+      await page.mouse.down({ button: 'right' });
+      await page.mouse.move(c.x, c.y - 40, { steps: 12 });
+      await page.mouse.up({ button: 'right' });
+    }
+    await page.waitForTimeout(500);
+    const flat = await pitch();
+    expect(flat, 'Neigen macht die Kamera nicht flacher').toBeLessThan(before - 5);
+    const kompass = page.locator('#btn-kompass');
+    await expect(kompass).toBeVisible();
+    if (isTouchProject(testInfo)) await kompass.tap(); else await kompass.click();
+    await page.waitForFunction(() => Math.abs(window.hafenmeister.camera.pitchGrad - 50) < 1);
+  });
 });

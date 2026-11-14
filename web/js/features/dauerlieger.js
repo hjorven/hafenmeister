@@ -765,7 +765,11 @@ export async function init(game) {
     const w = breit;
     const links = (h.width - w) / 2;
     const unterSpalte = Math.max(oben, ...hinder.filter((r) => !r.tipp && r.l < links + w && r.r > links).map((r) => r.u + rand));
-    setze(links, w, Math.max(unterSpalte, grenze(links, w) - hinweis.offsetHeight));
+    const unten = grenze(links, w) - hinweis.offsetHeight;
+    // Aufgeklappte linke Spalte (z. B. Tagesziel-Tafel) reicht bis zu den Knöpfen: nie über Zeit und Bauen.
+    // Andere Meldungen warten, bis die Spalte zu ist; ein wartender Dauerlieger (Frist) legt sich über die Spalte.
+    if (unterSpalte > unten && hinweisArt !== 'wartet') { hinweis.classList.add('zurueck'); return; }
+    setze(links, w, Math.max(oben, unten));
   }
   setInterval(platziereHinweis, 300);
   game.on('meldungen:wechsel', () => platziereHinweis());

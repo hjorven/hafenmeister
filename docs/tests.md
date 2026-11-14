@@ -163,4 +163,15 @@ test('Boot legt am Steg an', async ({ game }, testInfo) => {
 
 Die Fixture `game` öffnet das Spiel und wartet, bis alles geladen ist. Am Ende jedes Tests schlägt er fehl, wenn es Skriptfehler, Konsolenfehler oder fehlende Dateien gab. Hilfen in `tests/helpers.mjs`: `cameraState`, `stageCenter`, `touchGesture`, `lerpFrames`, `imageStats`, `isTouchProject`.
 
+Test nur auf bestimmten Geräten: nicht im Test mit `test.skip(testInfo.project.name ...)` überspringen, denn dann hat `game` das Spiel schon geladen (am Tablet rund 10 s umsonst). Besser vor dem Laden, auf Ebene von Datei oder `describe`, über die Fixture `projekt`:
+
+```js
+test.describe('nur Handy und PC', () => {
+  test.skip(({ projekt }) => !['handy', 'pc'].includes(projekt), 'Grund');
+  test('...', async ({ game }) => { /* ... */ });
+});
+```
+
+Pixeldichte: Alle Tests laufen mit Dichte 1 (`deviceScaleFactor: 1` in `tests/playwright.config.mjs`). Software-Grafik rechnet jeden Bildpunkt auf der CPU; am Tablet hochkant mit echter Dichte 2,25 dauert ein Bild rund 330 ms, mit Dichte 1 rund 60 ms. Layout und Größen in CSS-Pixeln ändern sich dadurch nicht. Nur der Test `Bildschirmfotos` nutzt die echte Dichte des Geräts (Option `echteDichte`), damit die Vorschaubilder scharf bleiben.
+
 Keine Vergleiche mit gespeicherten Bildschirmfotos: Bei vielen parallelen Grafik-Änderungen wären die ständig rot. Die Fotos sind zum Anschauen gedacht.
