@@ -16,7 +16,7 @@ Stand: 14.11.2026 vormittags, abgeglichen mit `main` bei Commit `dae7f97` (PR 27
 - Vor jedem Merge im Hauptordner:
 
 ```bash
-bash tests/pruefen.sh
+bash tests/pruefen.sh --schnell
 ```
 
 **Reihenfolge seit 12.11.2026 abends (Jorven):**

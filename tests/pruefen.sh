@@ -11,30 +11,52 @@
 #   bash tests/pruefen.sh --project=pc
 # Nur die schnellen Pruefungen ohne Browser:
 #   bash tests/pruefen.sh --ohne-browser
+# Schnellmodus: Browser-Tests nur auf Handy hochkant und PC (der PR-Check prueft alle fuenf Geraete):
+#   bash tests/pruefen.sh --schnell
+# Reine Doku-Aenderungen gegenueber origin/main (tools/ci-bereiche.sh): Browser-Tests und die
+# langen Simulationen entfallen von selbst. Trotzdem alles: --alles
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 ohne_browser=0
+schnell=0
+alles=0
 args=()
 for a in "$@"; do
-  if [ "$a" = "--ohne-browser" ]; then ohne_browser=1; else args+=("$a"); fi
+  case "$a" in
+    --ohne-browser) ohne_browser=1 ;;
+    --schnell) schnell=1 ;;
+    --alles) alles=1 ;;
+    *) args+=("$a") ;;
+  esac
 done
+
+nur_doku=false
+if [ "$alles" = 0 ] && git rev-parse --verify -q origin/main >/dev/null; then
+  # Vergleich mit origin/main inklusive noch nicht committeter Aenderungen
+  if [ -z "$(git status --porcelain)" ]; then
+    nur_doku=$(bash tools/ci-bereiche.sh origin/main HEAD 2>/dev/null | sed -n 's/^nur_doku=//p')
+  fi
+fi
 
 echo "== 1/3 Pfade für GitHub Pages"
 bash tools/check-pages.sh web
 
 echo "== 2/3 Tests ohne Browser"
-shopt -s nullglob
-dateien=(tests/*.test.mjs)
-if [ ${#dateien[@]} -gt 0 ]; then
-  node --test "${dateien[@]}"
-else
-  echo "Keine tests/*.test.mjs vorhanden."
+if [ "$nur_doku" = true ]; then
+  bash tests/node-tests.sh --ohne-langsame
+  echo "Nur Doku geändert (gegenüber origin/main): Browser-Tests übersprungen. Alles grün."
+  exit 0
 fi
+bash tests/node-tests.sh
 
 if [ "$ohne_browser" = 1 ]; then
   echo "Browser-Tests übersprungen (--ohne-browser)."
   exit 0
+fi
+if [ "$schnell" = 1 ]; then
+  echo "Schnellmodus: Browser-Tests nur auf Handy und PC (alle fünf Geräte prüft der PR-Check)."
+  args=(--project=handy --project=pc ${args[@]+"${args[@]}"})
 fi
 
 echo "== 3/3 Browser-Tests (Handy, Tablet, PC)"
@@ -53,5 +75,5 @@ pkill -f "node server.mjs 4173" 2>/dev/null || true
 HM_TEST_PORT=$(node -e "const s=require('net').createServer();s.listen(0,'127.0.0.1',()=>{console.log(s.address().port);s.close()})")
 export HM_TEST_PORT
 echo "Testserver auf Port $HM_TEST_PORT"
-npx playwright test "${args[@]}"
+npx playwright test ${args[@]+"${args[@]}"}
 echo "Alles grün. Bildschirmfotos: tests/bildschirmfotos/, Bericht: cd tests && npx playwright show-report bericht"

@@ -9,7 +9,7 @@ Stand: 14.11.2026, 11:30 UTC, abgeglichen mit `main` bei `dae7f97` (PR 279). Gep
 - Fertig heißt spielbar ([abnahme.md](abnahme.md)): Handy und PC, im laufenden Spiel geprüft, mit Randfällen.
 - Erst Grundprobleme fixen, dann aufbauen. Neue Features werden mit den alten zusammen geprüft.
 - Nichts wartet auf Jorvens Entscheidungen: Threads entscheiden selbst und schreiben die Entscheidung in ihren PR.
-- Ein Paket je Thread, ein Branch je Thread, bis zu 20 Threads gleichzeitig. Threads mergen selbst, wenn `bash tests/pruefen.sh` mit "Alles grün." endet.
+- Ein Paket je Thread, ein Branch je Thread, bis zu 20 Threads gleichzeitig. Threads mergen selbst, wenn `bash tests/pruefen.sh --schnell` mit "Alles grün." endet und der PR-Check grün ist.
 
 ---
 

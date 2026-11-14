@@ -3,27 +3,20 @@
 # Voraussetzung: Settings > Pages > Build and deployment > Source = "GitHub Actions".
 name: GitHub Pages
 
+# Gebündelt statt nach jedem Merge: Alle 30 Minuten schaut der Lauf nach, ob sich seit der
+# veröffentlichten Fassung (version.txt auf der Seite) etwas an der Seite geändert hat. Nur dann
+# wird gebaut. Viele Merges hintereinander ergeben so einen einzigen Bau.
+# Sofort veröffentlichen: Actions > GitHub Pages > Run workflow (baut immer).
 on:
-  push:
-    branches: [main]
-    # Nur wenn sich etwas an der Seite ändert, nicht bei reinen Doku- oder Skript-Änderungen.
-    paths:
-      - "web/**"
-      - "docs/roadmap.md"
-      - "docs/roadmap-bilder.json"
-      - "tools/roadmap.mjs"
-      - "tools/build-pages.sh"
-      - "tools/offline-liste.mjs"
-      - "tools/check-pages.sh"
-      - ".github/workflows/pages.yml"
+  schedule:
+    - cron: "7,37 * * * *"
   workflow_dispatch:
 
 # Grundsatz: Der Workflow selbst bekommt keine Rechte, jeder Job nur, was er braucht.
 # Nur der Deploy-Job darf auf Pages schreiben (pages, id-token); der Build liest nur.
 permissions: {}
 
-# Bei vielen Merges kurz hintereinander zählt nur der neueste Stand:
-# ältere wartende oder laufende Läufe werden abgebrochen.
+# Laufen zwei Läufe gleichzeitig (Zeitplan und Run workflow), zählt nur der neueste.
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -31,6 +24,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      bauen: ${{ steps.pruefen.outputs.bauen }}
     timeout-minutes: 10
     permissions:
       contents: read
@@ -41,18 +36,31 @@ jobs:
           # Ganze Historie: die Roadmap-Seite zeigt die letzten Merges
           fetch-depth: 0
 
+      - name: Hat sich seit der letzten Veröffentlichung etwas geändert?
+        id: pruefen
+        env:
+          EREIGNIS: ${{ github.event_name }}
+        run: bash tools/pages-geaendert.sh "$EREIGNIS" >> "$GITHUB_OUTPUT"
+
       - name: Seite zusammenstellen
-        run: bash tools/build-pages.sh
+        if: steps.pruefen.outputs.bauen == 'true'
+        run: |
+          bash tools/build-pages.sh
+          # Offline-Liste (P61) muss im veröffentlichten Stand stecken
+          test -s _site/offline-liste.json
 
       - name: Pfade prüfen
+        if: steps.pruefen.outputs.bauen == 'true'
         run: bash tools/check-pages.sh _site
 
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        if: steps.pruefen.outputs.bauen == 'true'
         with:
           path: _site
 
   deploy:
     needs: build
+    if: needs.build.outputs.bauen == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
