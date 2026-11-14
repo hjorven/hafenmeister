@@ -8,9 +8,9 @@ Im Hauptordner des Repos:
 bash tests/pruefen.sh --schnell
 ```
 
-Er prüft nacheinander die Pfade für GitHub Pages, alle Tests ohne Browser (`tests/*.test.mjs`) und die Browser-Tests auf Handy (hochkant) und PC. Am Ende steht `Alles grün.`, sonst bricht er mit dem Fehler ab. Beim ersten Lauf installiert er die Abhängigkeiten in `tests/` selbst. Alle fünf Geräte prüft danach der PR-Check auf GitHub parallel; das reicht seit 14.11.2026 als Regel vor dem Merge.
+Er prüft nacheinander die Pfade für GitHub Pages, die Tests ohne Browser ohne die langen Simulationen (`tests/node-tests.sh --ohne-langsame`) und die Browser-Tests auf dem Handy hochkant. Am Ende steht `Alles grün.`, sonst bricht er mit dem Fehler ab. Beim ersten Lauf installiert er die Abhängigkeiten in `tests/` selbst. Dauer rund 6 Minuten. Alle fünf Geräte und die langen Simulationen prüft danach der PR-Check auf GitHub parallel; beides zusammen ist seit 14.11.2026 die Regel vor dem Merge.
 
-Alle fünf Geräte lokal (rund 20 Minuten, z. B. wenn GitHub Actions nicht läuft oder Layout geändert wurde):
+Alles lokal (rund 20 Minuten im Claude-Container, z. B. wenn GitHub Actions nicht läuft):
 
 ```bash
 bash tests/pruefen.sh

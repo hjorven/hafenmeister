@@ -11,7 +11,8 @@
 #   bash tests/pruefen.sh --project=pc
 # Nur die schnellen Pruefungen ohne Browser:
 #   bash tests/pruefen.sh --ohne-browser
-# Schnellmodus: Browser-Tests nur auf Handy hochkant und PC (der PR-Check prueft alle fuenf Geraete):
+# Schnellmodus (rund 6 statt rund 20 Minuten): Browser-Tests nur auf Handy hochkant, Tests ohne
+# Browser ohne die langen Simulationen. Alles andere prueft der PR-Check auf GitHub parallel:
 #   bash tests/pruefen.sh --schnell
 # Reine Doku-Aenderungen gegenueber origin/main (tools/ci-bereiche.sh): Browser-Tests und die
 # langen Simulationen entfallen von selbst. Trotzdem alles: --alles
@@ -43,20 +44,24 @@ echo "== 1/3 Pfade für GitHub Pages"
 bash tools/check-pages.sh web
 
 echo "== 2/3 Tests ohne Browser"
-if [ "$nur_doku" = true ]; then
+if [ "$schnell" = 1 ] && [ "$nur_doku" != true ]; then
+  bash tests/node-tests.sh --ohne-langsame
+  echo "Lange Simulationen übersprungen (--schnell), die prüft der PR-Check."
+elif [ "$nur_doku" = true ]; then
   bash tests/node-tests.sh --ohne-langsame
   echo "Nur Doku geändert (gegenüber origin/main): Browser-Tests übersprungen. Alles grün."
   exit 0
+else
+  bash tests/node-tests.sh
 fi
-bash tests/node-tests.sh
 
 if [ "$ohne_browser" = 1 ]; then
   echo "Browser-Tests übersprungen (--ohne-browser)."
   exit 0
 fi
 if [ "$schnell" = 1 ]; then
-  echo "Schnellmodus: Browser-Tests nur auf Handy und PC (alle fünf Geräte prüft der PR-Check)."
-  args=(--project=handy --project=pc ${args[@]+"${args[@]}"})
+  echo "Schnellmodus: Browser-Tests nur auf Handy hochkant (alle fünf Geräte prüft der PR-Check)."
+  args=(--project=handy ${args[@]+"${args[@]}"})
 fi
 
 echo "== 3/3 Browser-Tests (Handy, Tablet, PC)"
