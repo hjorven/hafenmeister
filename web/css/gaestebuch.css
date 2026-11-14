@@ -90,7 +90,7 @@ body.foto #hm-gb-blasen, body.hm-gb-offen #hm-gb-blasen { display: none; }
   gap: 4px;
   pointer-events: none;
 }
-body.foto #hm-gb-meldungen, body.hm-gb-offen #hm-gb-meldungen { display: none; }
+body.foto #hm-gb-meldungen, body.hm-gb-offen #hm-gb-meldungen, #hm-gb-meldungen[hidden] { display: none; }
 .hm-neu .hm-gb-meldung {
   pointer-events: auto;
   display: flex;
