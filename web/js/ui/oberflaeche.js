@@ -61,7 +61,7 @@ const TEMPO = [
   { id: 'pause', label: 'Pause', speed: 0 },
   { id: 'tempo1', label: 'Normale Geschwindigkeit', speed: 1 },
   { id: 'tempo2', label: 'Dreifach vorspulen', speed: 3 },
-  { id: 'tempo3', label: 'Achtfach vorspulen bis zum nächsten Boot', speed: 8 },
+  { id: 'tempo3', label: 'Achtfach vorspulen', speed: 8 },
 ];
 
 export function init(game) {
@@ -139,11 +139,8 @@ export function init(game) {
     game.emit('ui:vorspulen', { speed });
     zeigeTempo();
   }
-  // Tempo, das mitdenkt (roadmap Bed P4): Bei einem Sonderfall geht es zurück auf 1x, damit man ihn nicht verpasst.
-  // 8x läuft nur bis zum nächsten Boot an der Boje.
-  const zurueck = () => { if ((game.speed || 1) > 1 && !game.paused) waehleTempo(1); };
-  for (const ereignis of ['event:announce', 'event:start', 'sim:stageReady', 'sim:regionDone']) game.on(ereignis, zurueck);
-  game.on('sim:atBuoy', () => { if ((game.speed || 1) >= 8) zurueck(); });
+  // Das gewählte Tempo läuft durch (Jorven, 14.11.): Kein Ereignis, Hinweis oder Boot setzt es zurück.
+  // Nur der Spieler ändert es. Hinweise erscheinen trotzdem, ohne das Tempo anzufassen.
 
   function zeigeTempo() {
     const s = game.speed || 1;

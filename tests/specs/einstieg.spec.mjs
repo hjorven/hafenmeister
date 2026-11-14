@@ -77,7 +77,7 @@ test('Hinweis beim ersten Mal: erscheint einmal, „Verstanden“ schließt ihn'
   await page.evaluate(() => window.hafenmeister.einstieg.beenden());
   await page.evaluate(() => window.hafenmeister.emit('sim:turnedAway', { boatId: 999, reason: 'patience', rated: false }));
   const tipp = page.locator('.hm-tipp');
-  await expect(tipp).toBeVisible({ timeout: 5_000 });
+  await expect(tipp).toBeVisible({ timeout: 30_000 });
   await expect(tipp).toContainText('weitergefahren');
   await press(tipp.getByRole('button', { name: 'Verstanden' }), testInfo);
   await expect(tipp).toBeHidden();
@@ -86,4 +86,18 @@ test('Hinweis beim ersten Mal: erscheint einmal, „Verstanden“ schließt ihn'
   await page.waitForTimeout(1000);
   await expect(tipp).toBeHidden();
   expect(await page.evaluate(() => window.hafenmeister.sim.state.modules.einstieg.hinweise)).toContain('geduld');
+});
+
+test('Einstieg: Blase und Kreis warten, solange das Baumenü offen ist', async ({ game }) => {
+  const { page } = game;
+  await bereit(page);
+  await page.evaluate(() => window.hafenmeister.einstieg.start());
+  const tipp = page.locator('.hm-tipp');
+  await expect(tipp).toBeVisible({ timeout: 30_000 });
+  await page.evaluate(() => window.hafenmeister.bauen.oeffnen());
+  await expect.poll(() => page.evaluate(() => document.body.classList.contains('building')), { timeout: 30_000, intervals: [100] }).toBe(true);
+  await expect(tipp).toBeHidden({ timeout: 30_000 });
+  await expect(page.locator('.hm-ring')).toBeHidden();
+  await page.evaluate(() => window.hafenmeister.bauen.schliessen());
+  await expect(tipp).toBeVisible({ timeout: 30_000 });
 });

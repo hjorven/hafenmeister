@@ -384,7 +384,11 @@ export function erzeuge(md, st = { datum: '', commit: '' }, bilder = [], merges 
     return { ...b, pakete, nr: i };
   });
   for (const p of d.pakete) p.bilder = liste.filter((b) => b.pakete.includes(p.id)).map((b) => b.nr);
-  const neueBilder = [...liste].sort((a, b) => (b.datum || '').localeCompare(a.datum || '') || b.nr - a.nr).slice(0, 9).map((b) => b.nr);
+  // "Zuletzt im Spiel": je Paket und PR nur ein Bild (das neueste), sonst stehen Handy- und PC-Bild doppelt da
+  const gesehen = new Set();
+  const neueBilder = [...liste].sort((a, b) => (b.datum || '').localeCompare(a.datum || '') || b.nr - a.nr)
+    .filter((b) => { const k = `${b.pakete.join(',')}|${b.pr || b.datei}`; if (gesehen.has(k)) return false; gesehen.add(k); return true; })
+    .slice(0, 9).map((b) => b.nr);
   // Merges: Pakete aus "Pnn" im Titel oder über die PR-Nummer
   const mg = merges.map((m) => {
     const imTitel = [...m.titel.matchAll(/\bP(\d{2})\b/g)].map((x) => 'P' + x[1]).filter((id) => ids.has(id));

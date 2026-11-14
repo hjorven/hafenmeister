@@ -165,7 +165,7 @@ test('Hafengeld wird beim Anlegen fällig: Wünsche, Kapazität der Toilette, St
   // 6 Boote mit WC: 10 × 1,25 = 12,5 -> 13; das siebte ohne WC: 10
   assert.deepEqual(fees.slice(0, 7).map((e) => e.amount), [13, 13, 13, 13, 13, 13, 10]);
   // Yacht: Strom ja, Dusche nein -> Grundpreis L × 1,25
-  const yachtFee = Math.round(RULES.baseFee.L * (1 + RULES.wishBonus));
+  const yachtFee = Math.round(sim.baseNightlyFee(ctx, yacht) * (1 + RULES.wishBonus));
   assert.equal(fees[7].amount, yachtFee);
   assert.equal(s.money, 0);
   const c = sim.collect(s, ctx, yacht.id);
@@ -209,19 +209,34 @@ test('Nacht: liegengebliebene Münzen bringen vier Fünftel, Abreise mit Bewertu
   // plain 10, stays 20 (zwei Nächte im Voraus), nicht kassiert -> vier Fünftel: 8 und 16
   assert.equal(s.money, 13 + 8 + 16);
   const dep = ev.filter((e) => e.type === 'departed');
-  assert.deepEqual(dep.map((e) => e.rating), [5, 4]);
+  // alle Wünsche erfüllt und ohne Wünsche: je die Note aus economy.js (ruf.wunschNote.alle, ruf.ohneWunsch)
+  const voll = ctx.rules.rating.allMet, ohne = ctx.rules.rating.noWishes;
+  assert.deepEqual(dep.map((e) => e.rating), [voll, ohne]);
   assert.equal(s.guests, 2);
   assert.equal(s.day, 2);
   assert.equal(s.phase, 'day');
   assert.equal(s.clock, 0);
   assert.equal(s.berths.A3, stays.id);
   assert.equal(s.berths.A1, undefined);
-  assert.equal(s.ratings.slice(-2).join(), '5,4');
+  assert.equal(s.ratings.slice(-2).join(), `${voll},${ohne}`);
+  assert.deepEqual(s.ratingDays.slice(-2), [1, 1]);
   assert.ok(ev.some((e) => e.type === 'dayEnd' && e.income === 37));
   assert.equal(s.stats.bestDayIncome, 37);
 });
 
-test('Ruf: Schnitt der letzten 20, Faktor für Ankünfte', () => {
+test('Ruf: Schnitt der letzten drei Tage, mindestens der letzten Bewertungen', () => {
+  const rules = { reputation: { days: 3, minCount: 4 } };
+  // Tag 10: Bewertungen von Tag 5 (zwei), Tag 8, Tag 9 und Tag 10 (je eine)
+  const s = { day: 10, ratings: [1, 1, 5, 4, 3], ratingDays: [5, 5, 8, 9, 10] };
+  assert.deepEqual(sim.reputationRatings(s, rules), [1, 5, 4, 3]);   // drei Tage = 3, aufgefüllt auf 4
+  s.ratings.push(5, 5, 5); s.ratingDays.push(10, 10, 10);
+  assert.deepEqual(sim.reputationRatings(s, rules), [5, 4, 3, 5, 5, 5]);   // Tag 8 bis 10, mehr als 4
+  assert.equal(sim.reputation(s, rules), 27 / 6);
+  // Ältere Spielstände ohne Tage: nur die letzten minCount
+  assert.deepEqual(sim.reputationRatings({ day: 3, ratings: [2, 3, 4, 5, 5] }, rules), [3, 4, 5, 5]);
+});
+
+test('Ruf: Startwert und Faktor für Ankünfte', () => {
   const s = createState({ seed: 1 });
   assert.equal(sim.reputation(s), 3);
   const E = ECONOMY.ruf;
@@ -579,6 +594,25 @@ test('Box bleibt belegt, bis das abreisende Boot heraus ist (Meldung oder Rückf
   assert.ok(sim.isFree(s, 'A6'));
 });
 
+test('Ansicht hält die Box, solange das abreisende Boot noch darin liegt (höchstens 5 Minuten)', () => {
+  const s = quietState();
+  s.leaving = { A3: { boatId: 77, elapsed: 0, at: 0, off: true } };
+  // Boot wartet sichtbar auf den Ablegetakt: jede Sekunde 'noch in der Box'
+  for (let i = 0; i < 3 * RULES.leaveMax; i++) {
+    assert.ok(sim.holdLeaving(s, 77));
+    sim.tick(s, ctx, 1);
+  }
+  assert.ok(!sim.isFree(s, 'A3'), 'Box bleibt belegt');
+  assert.equal(sim.berthState(s, ctx, 'A3'), 'belegt');
+  assert.equal(sim.holdLeaving(s, 12345), false, 'fremdes Boot hält nichts');
+  // Hängt die Ansicht, wird die Box nach 5 Minuten trotzdem frei
+  for (let t = 0; t < 300 + RULES.leaveMax + 2; t++) { sim.holdLeaving(s, 77); sim.tick(s, ctx, 1); }
+  assert.ok(sim.isFree(s, 'A3'));
+  // Noch nicht abgelegt (Abreise am Vormittag geplant): Halten ändert nichts
+  s.leaving = { A4: { boatId: 78, elapsed: 0, at: 1e9, off: false } };
+  assert.equal(sim.holdLeaving(s, 78), false);
+});
+
 test('Erster Tag: das erste Boot kommt nach wenigen Sekunden', () => {
   for (const seed of [1, 2, 3, 4, 5]) {
     const s = createState({ seed });
@@ -807,4 +841,48 @@ test('Selbst-Einfahren: Box mit erfülltem Wunsch vor der nächsten, bei Gleichs
   sim.tick(s, c, 1);
   assert.equal(mitWunsch.berthId, 'C2');
   assert.equal(ohne.berthId, 'A1');
+});
+
+test('Liegegeld je angefangenem Meter (B10): längeres Boot zahlt mehr, ohne Länge der Grundpreis', () => {
+  const kurz = { typeId: 'L1', size: 'L', length: 9.6 };
+  const lang = { typeId: 'L1', size: 'L', length: 13.2 };
+  assert.equal(sim.baseNightlyFee(ctx, kurz), RULES.feePerMeter.L * 10);
+  assert.equal(sim.baseNightlyFee(ctx, lang), RULES.feePerMeter.L * 14);
+  assert.ok(sim.nightlyFee(null, ctx, lang, 0) > sim.nightlyFee(null, ctx, kurz, 0));
+  // genau 10,0 m zählt als 10 Meter
+  assert.equal(sim.baseNightlyFee(ctx, { typeId: 'L1', size: 'L', length: 10 }), RULES.feePerMeter.L * 10);
+  // ohne Länge: Grundpreis der Klasse
+  assert.equal(sim.baseNightlyFee(ctx, { typeId: 'L1', size: 'L', length: 0 }), RULES.baseFee.L);
+});
+
+test('Größenmischung nach Plätzen (A10): ohne Platz für große Boote kommen sie seltener', () => {
+  const s = createState({ seed: 4 });
+  s.stage = 3;
+  const types = sim.eligibleTypes(s, ctx);
+  const f = sim.sizeBerthFactors(s, ctx, types);
+  for (const v of Object.values(f)) assert.ok(v >= RULES.sizeByBerths.mindestens && v <= 1, JSON.stringify(f));
+  // Ohne Regel: kein Faktor
+  const ohne = sim.createContext({ boatTypes, berths, rules: { ...RULES, sizeByBerths: null } });
+  assert.deepEqual(sim.sizeBerthFactors(s, ohne, types), {});
+  // Doppelter Bedarf halbiert den Faktor, solange er nicht an einer Grenze liegt
+  const groesse = Object.keys(f).find((k) => f[k] > RULES.sizeByBerths.mindestens * 2 && f[k] < 1) ?? null;
+  if (groesse) {
+    const doppelt = sim.sizeBerthFactors(s, ctx, types, { [groesse]: 2 });
+    assert.ok(Math.abs(doppelt[groesse] - Math.max(RULES.sizeByBerths.mindestens, f[groesse] / 2)) < 1e-9);
+  }
+});
+
+test('A10 mit echtem Hafen: wenig gebaut heißt seltener, ausgebaut kommt die volle Mischung', async () => {
+  const { HAFEN } = await import('../web/js/data/harbor.js');
+  const { BOAT_CATALOG } = await import('../web/js/data/boat-catalog.js');
+  const echt = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: sim.rulesFromEconomy(ECONOMY) });
+  // Stufe 3 erreicht, aber noch nichts gebaut: zu wenig Plätze für den Bedarf
+  const leer = createState({ seed: 4, rules: echt.rules });
+  leer.stage = 3;
+  const f = sim.sizeBerthFactors(leer, echt);
+  assert.ok(Object.values(f).some((v) => v < 1), JSON.stringify(f));
+  for (const v of Object.values(f)) assert.ok(v >= echt.rules.sizeByBerths.mindestens);
+  // Alle Stegprojekte der Stufe gebaut: volle Mischung
+  const voll = sim.applyTestStage(createState({ seed: 4, rules: echt.rules }), echt, 3);
+  for (const v of Object.values(sim.sizeBerthFactors(voll, echt))) assert.equal(v, 1);
 });

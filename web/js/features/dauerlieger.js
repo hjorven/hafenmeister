@@ -29,6 +29,7 @@
 //   tagestoern       heute eine Runde draußen
 //   jahr, pacht      Saison (Jahr), für die bezahlt ist, und der Betrag
 //   kuendigung       null | 'spieler' | 'lieger' (verlässt den Hafen zum Saisonende)
+//   winterlager      über den Winter im Winterlager (Krantage, P20); kommt zum ersten Saisontag zurück
 // state.modules.dauer.bewerber = [{ id, artId, modellId, name, size, sail, bootsname, bisTag }]
 //
 // Ereignisse (über game.sim.dispatch, also als sim:<type>): dauerNeu, dauerAufgehoben, dauerAuslaufen,
@@ -172,7 +173,10 @@ export function bewerberPasst(state, ctx, bewerber, platzId) {
 
 /** Pacht eines Bewerbers: je Tag, Tage, Summe (für die Saison, die jetzt bezahlt würde). */
 export function bewerberPacht(state, ctx, bewerber) {
-  const jeTag = pachtJeTag(state, ctx, { typeId: bewerber.artId, size: bewerber.size });
+  // Länge wie beim Festmachen (sim.stationBoat): Modell, sonst kleinste der Art; Liegegeld geht nach Länge (B10)
+  const t = ctx.typeById[bewerber.artId];
+  const m = t?.models?.find((x) => x.id === bewerber.modellId) || t?.models?.[0];
+  const jeTag = pachtJeTag(state, ctx, { typeId: bewerber.artId, size: bewerber.size, length: m?.length ?? t?.length?.[0] ?? 0 });
   const { tage } = pachtZeitraum(state, ctx);
   return { jeTag, tage, summe: jeTag * tage };
 }
@@ -415,8 +419,9 @@ function legeAn(state, platzId, p, events) {
   boot.berthId = platzId;
   state.boats[boot.id] = boot;
   state.berths[platzId] = boot.id;
-  Object.assign(p, { boot: null, rueckNacht: null, frueherUm: null, wartet: false, gastId: null });
-  events.push({ type: 'dauerEinlaufen', boatId: boot.id, berthId: platzId, tagestoern: false });
+  const ausWinterlager = !!p.winterlager;
+  Object.assign(p, { boot: null, rueckNacht: null, frueherUm: null, wartet: false, gastId: null, winterlager: false });
+  events.push({ type: 'dauerEinlaufen', boatId: boot.id, berthId: platzId, tagestoern: false, ...(ausWinterlager ? { winterlager: true } : {}) });
 }
 
 /**
@@ -512,6 +517,25 @@ export function nachtHook({ state, ctx, events }) {
   if (morgen.winter && !heute.winter) {
     for (const [platzId, p] of Object.entries(d.plaetze)) {
       if (p.kuendigung) events.push(...hebeAuf(state, ctx, platzId).events);
+    }
+    // Krantage (Roadmap P20, F15/H5): Die übrigen Dauerlieger gehen über den Winter ins Winterlager
+    // (mit Travellift und Winterlager an Land im eigenen Hafen, sonst beim Nachbarn) und kommen in der
+    // Nacht vor dem ersten Saisontag zurück. Der Platz bleibt ihrer.
+    const rueck = state.day + ctx.rules.winterDays;
+    for (const [platzId, p] of Object.entries(d.plaetze)) {
+      if (p.kuendigung) continue;
+      if (p.boot) {
+        // schon auf Törn: bleibt gleich bis zum Frühling weg
+        Object.assign(p, { rueckNacht: Math.max(p.rueckNacht ?? 0, rueck), frueherUm: null, wartet: false, gastId: null, winterlager: true });
+        continue;
+      }
+      const boot = state.boats[p.bootId];
+      if (!boot) continue;
+      delete state.berths[platzId];
+      delete state.boats[boot.id];
+      boot.status = 'away';
+      Object.assign(p, { boot, rueckNacht: rueck, frueherUm: null, tagestoern: false, winterlager: true });
+      events.push({ type: 'dauerAuslaufen', boatId: boot.id, berthId: platzId, tage: ctx.rules.winterDays, winterlager: true });
     }
   }
   // Neue Saison: alle zahlen im Voraus
@@ -744,7 +768,11 @@ export async function init(game) {
     const w = breit;
     const links = (h.width - w) / 2;
     const unterSpalte = Math.max(oben, ...hinder.filter((r) => !r.tipp && r.l < links + w && r.r > links).map((r) => r.u + rand));
-    setze(links, w, Math.max(unterSpalte, grenze(links, w) - hinweis.offsetHeight));
+    const unten = grenze(links, w) - hinweis.offsetHeight;
+    // Aufgeklappte linke Spalte (z. B. Tagesziel-Tafel) reicht bis zu den Knöpfen: nie über Zeit und Bauen.
+    // Andere Meldungen warten, bis die Spalte zu ist; ein wartender Dauerlieger (Frist) legt sich über die Spalte.
+    if (unterSpalte > unten && hinweisArt !== 'wartet') { hinweis.classList.add('zurueck'); return; }
+    setze(links, w, Math.max(oben, unten));
   }
   setInterval(platziereHinweis, 300);
   game.on('meldungen:wechsel', () => platziereHinweis());
@@ -816,7 +844,7 @@ export async function init(game) {
   if (document.getElementById('boot')?.classList.contains('done') || game.boatAnim) nachStart();
 
   // Deutsche Ereignisse für Grafik und Ton, Hinweise für den Spieler
-  game.on('sim:dauerAuslaufen', (e) => game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: e.tage }));
+  game.on('sim:dauerAuslaufen', (e) => game.emit('dauer:auslaufen', { id: e.boatId, platzId: e.berthId, tage: e.tage, winterlager: !!e.winterlager }));
   // Nach dem Umlegen fährt der Dauerlieger erst herein, wenn der Gast in seiner neuen Box fest ist.
   // So kreuzen sich die beiden Boote nicht in der engen Gasse vor den Boxen.
   const nachGast = new Map();   // Gast-id -> { id, platzId, zeit }
@@ -836,8 +864,7 @@ export async function init(game) {
     const p = dauerState(api.state).plaetze[e.berthId];
     const boot = p?.boot;
     if (boot) game.emit('dauer:einlaufen', { id: boot.id, platzId: e.berthId, warten: true, info: info(boot, e.berthId) });
-    // Beim Vorspulen bliebe kaum Zeit zum Umlegen: Tempo zurück auf normal
-    if ((game.speed ?? 1) > 1) game.oberflaeche?.tempo?.(1) ?? (game.speed = 1);
+    // Das Tempo bleibt (Jorven, 14.11.): der Hinweis reicht, man hat bis zum Abend Zeit zum Umlegen
     zeigeWartende();
     game.emit('hinweis', { art: 'dauer-wartet', platz: e.berthId });
   });
@@ -1007,7 +1034,7 @@ export async function init(game) {
         const titel = `${b.bootsname ? `„${b.bootsname}“, ` : ''}${b.name}, Größe ${b.size}`;
         return knopf(vor ? `${titel} · +${euro(pa.summe)}` : `${titel} · ${euro(pa.jeTag)} je Abend`,
           () => aktion(machDauerplatz(st, api.ctx, platzId, b.id)), 'hm-primaer dauer-bewerber',
-          `Wartet noch ${Math.max(0, b.bisTag - st.day)} Tage auf eine Antwort`);
+          ((n) => n === 1 ? 'Wartet noch einen Tag auf eine Antwort' : n === 0 ? 'Wartet nur noch heute auf eine Antwort' : `Wartet noch ${n} Tage auf eine Antwort`)(Math.max(0, b.bisTag - st.day)));
       });
       teile.push(el('div', { class: 'card-actions dauer-liste' }, ...zeilen));
     }

@@ -32,7 +32,7 @@ Kein Tutorial mit Story, sondern Hinweis-Kreise: Ein leuchtender Kreis zeigt auf
 
 ## Hinweise beim ersten Mal
 
-Nach dem Einstieg erscheint jeder dieser Hinweise einmal pro Spielstand (gemerkt in `state.modules.einstieg.hinweise`), in derselben Blase mit dem Knopf „Verstanden“. Nach 20 s schließt er von selbst. Solange eine Karte, das Bauen oder der Fotomodus offen ist, wartet er.
+Nach dem Einstieg erscheint jeder dieser Hinweise einmal pro Spielstand (gemerkt in `state.modules.einstieg.hinweise`), in derselben Blase mit dem Knopf „Verstanden“. Nach 20 s im Bild schließt er von selbst; solange er wartet oder das Bild ruckelt, läuft diese Zeit nicht ab. Solange eine Karte, das Bauen oder der Fotomodus offen ist, wartet er.
 
 | Hinweis | Auslöser | Kreis |
 |---|---|---|
@@ -42,6 +42,19 @@ Nach dem Einstieg erscheint jeder dieser Hinweise einmal pro Spielstand (gemerkt
 | Ein neuer Stammgast | `stammgast:neu` | keiner |
 
 Sturm und Winter stehen nicht in der Liste: Beide erklärt das Ereignisschild (`events/banner.js`) bei jedem Auftreten.
+
+Zum Ausprobieren (Browser-Konsole, im laufenden Spiel): neues Spiel, Einstieg beenden, dann einen Auslöser schicken.
+Jeder Hinweis kommt pro Spielstand nur einmal, für einen zweiten Versuch also wieder mit `newGame` beginnen.
+
+```js
+const g = window.hafenmeister;
+g.sim.newGame(42);
+g.einstieg.beenden();
+g.tagesziele?.waehle?.(0);   // Kartenwahl des ersten Tages schließen, sonst wartet der Tipp auf sie
+g.emit('stammgast:neu', { boatId: 1 });
+```
+
+Die Schritte des Einstiegs (Blase und Kreis) warten ebenso, solange das Baumenü offen ist: Es führt dann selbst.
 
 ## Hilfe im Menü
 

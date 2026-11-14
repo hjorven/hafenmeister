@@ -27,9 +27,11 @@ export const BERTHS = {
 /** Sicherheitsabstand unter dem Kiel, Regel aus docs/hafen-und-schiffe.md. */
 export const KEEL_CLEARANCE = 0.3;
 
+// Gästeprofil je Art (Roadmap P19): wishes, feeFactor (mal Grundpreis XL), arrivalWeight (unter den XL-Booten).
 export const TYPES = [
   {
     id: 'XL1',
+    wishes: ['wc', 'dusche', 'essen'], feeFactor: 0.8, arrivalWeight: 2,
     name: 'Traditionssegler',
     fromStage: 5,
     length: [20, 40],
@@ -42,6 +44,7 @@ export const TYPES = [
   },
   {
     id: 'XL2',
+    wishes: ['dusche', 'essen', 'strom', 'diesel'], feeFactor: 1.5, arrivalWeight: 1,
     name: 'Großyacht',
     fromStage: 5,
     length: [20, 35],
@@ -54,6 +57,7 @@ export const TYPES = [
   },
   {
     id: 'XL3',
+    wishes: ['strom', 'diesel'], feeFactor: 1.0, arrivalWeight: 1,
     name: 'Fahrgast- und Arbeitsschiff',
     fromStage: 5,
     length: [20, 35],

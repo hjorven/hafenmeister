@@ -302,6 +302,7 @@ test('Früher zurück, Platz frei: legt am Nachmittag gleich an', () => {
   const platz = freierPlatz(state, ctx);
   const { boatId } = machDauerplatz(state, ctx, platz);
   aufToern(state, platz, state.day, 0.5);
+  state.upcoming = [];   // Platz bleibt frei: kein Gast fährt bis zum Nachmittag selbst hinein
   const ev = sim.tick(state, ctx, ctx.rules.dayLength * 0.5 + 1);
   assert.ok(ev.some((e) => e.type === 'dauerEinlaufen' && e.boatId === boatId));
   assert.equal(state.berths[platz], boatId);
@@ -552,4 +553,37 @@ test('Obergrenze voll: Bewerber passen noch, aber bewerberFuer nennt keinen und 
   assert.ok(frei, 'ein freier Platz mit passendem Bewerber');
   assert.deepEqual(bewerberFuer(state, ctx, frei), []);
   assert.equal(machDauerplatz(state, ctx, frei, passendeBewerber(state, ctx, frei)[0].id).reason, 'voll');
+});
+
+test('Krantage: über den Winter im Winterlager, zum ersten Saisontag zurück an seinem Platz', () => {
+  const { ctx, state } = neu();
+  ruhig(ctx);
+  const platz = freierPlatz(state, ctx);
+  const { boatId } = machDauerplatz(state, ctx, platz);
+  let ausgelaufen = null;
+  while (!sim.season(state, ctx).winter) {
+    const ev = sim.runDay(state, ctx);
+    ausgelaufen ??= (ev || []).find?.((e) => e.type === 'dauerAuslaufen' && e.winterlager) ?? null;
+  }
+  const p = dauerState(state).plaetze[platz];
+  assert.ok(p, 'Dauerplatz bleibt über den Winter');
+  assert.equal(p.winterlager, true);
+  assert.ok(p.boot, 'Boot ist im Winterlager, nicht im Hafen');
+  assert.equal(state.boats[boatId], undefined);
+  assert.equal(state.berths[platz], undefined);
+  while (sim.season(state, ctx).winter) sim.runDay(state, ctx);
+  assert.equal(sim.season(state, ctx).day, 1);
+  assert.equal(state.berths[platz], boatId, 'zum ersten Saisontag wieder am Platz');
+  assert.equal(state.boats[boatId].status, 'moored');
+  assert.equal(dauerState(state).plaetze[platz].winterlager, false);
+});
+
+test('Krantage: Gekündigte gehen nicht ins Winterlager, sie verlassen den Hafen', () => {
+  const { ctx, state } = neu();
+  ruhig(ctx);
+  const platz = freierPlatz(state, ctx);
+  machDauerplatz(state, ctx, platz);
+  kuendige(state, platz, true);
+  while (!sim.season(state, ctx).winter) sim.runDay(state, ctx);
+  assert.equal(dauerState(state).plaetze[platz], undefined);
 });

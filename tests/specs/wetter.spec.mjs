@@ -13,17 +13,24 @@ const WETTER = {
 test('Wetter: Effekte in der Szene, keine zweite Leinwand', async ({ game }) => {
   test.setTimeout(60_000);
   const { page } = game;
-  await page.waitForFunction(() => !!window.hafenmeister.wetterEffekte, null, { timeout: 15_000 });
+  await page.waitForFunction(() => !!window.hafenmeister.wetterEffekte, null, { timeout: 30_000, polling: 100 });
+  // Der Spielstand entsteht erst nach dem Laden aller Module (js/bridge.js). Sobald er da ist, setzt
+  // events.js im nächsten Bild das Wetter des Tages und überschreibt damit unser Testwetter. Unter
+  // Last kam das mitten in die Schleife unten; daher erst warten, dann pausieren (kein Tageswechsel).
+  await page.waitForFunction(() => !!window.hafenmeister?.state?.modules, null, { timeout: 30_000, polling: 100 });
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  await page.evaluate(() => window.hafenmeister.setPaused?.(true));
   expect(await page.locator('#weather-fx').count(), 'alte 2D-Wetterebene ist noch da').toBe(0);
 
   for (const [name, wx] of Object.entries(WETTER)) {
-    const stand = await page.evaluate((wx) => {
+    // Jede Runde setzt das Wetter neu: kommt doch noch echtes Wetter dazwischen, zählt die nächste.
+    // Ein echter Fehler bleibt rot, weil jede Runde dasselbe falsche Ergebnis liefert.
+    await expect.poll(() => page.evaluate((wx) => {
       const g = window.hafenmeister;
       g.emit('weather', wx);
       g.wetterEffekte.sofort();
-      return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(g.wetterEffekte.stand))));
-    }, wx);
-    expect(stand.sichtbar, `${name}: Effekt sichtbar`).toBe(name !== 'sommertag');
+      return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(g.wetterEffekte.stand.sichtbar))));
+    }, wx), { message: `${name}: Effekt sichtbar`, timeout: 15_000 }).toBe(name !== 'sommertag');
   }
 
   // Der Schleier ist nie antippbar: Mitte des Bildes trifft weiter das, was darunter liegt

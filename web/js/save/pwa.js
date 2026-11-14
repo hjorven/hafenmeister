@@ -85,6 +85,16 @@ export const IOS_INSTALL_TEXT =
 // Service Worker
 
 let started = false;
+let offlineStatus = null;
+
+/**
+ * Stand des Offline-Vorladens (P61): null (noch nichts gehört) oder die letzte Meldung des
+ * Service Workers, z.B. { typ: 'offline-bereit', stand, geladen }. Jede Meldung kommt zusätzlich
+ * als Ereignis 'hm:offline' am window an.
+ */
+export function offlineState() {
+  return offlineStatus;
+}
 
 /**
  * Meldet den Service Worker an und hört auf Installation und Updates.
@@ -119,6 +129,7 @@ export function startPwa({ onUpdate = null, swUrl = 'sw.js' } = {}) {
       // Manche Umgebungen (gesperrte Service Worker, Tests) liefern keine Anmeldung zurück
       if (!reg) return;
       watchForUpdate(reg, onUpdate);
+      startOfflineVorrat();
       // Bei längeren Sitzungen stündlich nach Updates sehen.
       setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000);
     } catch (err) {
@@ -128,6 +139,37 @@ export function startPwa({ onUpdate = null, swUrl = 'sw.js' } = {}) {
 
   if (document.readyState === 'complete') register();
   else window.addEventListener('load', register, { once: true });
+}
+
+// Alle Spieldateien vorab in den Cache legen lassen, damit der nächste Start ohne Netz klappt.
+// Läuft bei jedem Start; der Service Worker lädt nur, wenn sich das Spiel geändert hat.
+function startOfflineVorrat() {
+  const container = navigator.serviceWorker;
+  container.addEventListener('message', (e) => {
+    const d = e.data;
+    if (!d || typeof d.typ !== 'string' || !d.typ.startsWith('offline-')) return;
+    offlineStatus = d;
+    window.dispatchEvent(new CustomEvent('hm:offline', { detail: d }));
+  });
+  container.startMessages?.();
+  // Kurz warten, damit das Vorladen nicht mit den ersten Bildern des Spiels um das Netz streitet
+  setTimeout(() => {
+    container.ready
+      .then((reg) => reg.active?.postMessage({ typ: 'vorladen', dateien: geladeneDateien() }))
+      .catch(() => {});
+  }, 3000);
+}
+
+// Alle Dateien der eigenen Seite, die in dieser Sitzung geladen wurden (Rückfall für den Service
+// Worker, wenn offline-liste.json fehlt).
+function geladeneDateien() {
+  try {
+    const basis = new URL('./', document.baseURI).href;
+    const urls = [location.href.split('?')[0], ...performance.getEntriesByType('resource').map((e) => e.name)];
+    return [...new Set(urls.filter((u) => u.startsWith(basis)))];
+  } catch {
+    return [];
+  }
 }
 
 function watchForUpdate(reg, onUpdate) {

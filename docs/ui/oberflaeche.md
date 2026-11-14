@@ -164,8 +164,9 @@ Dazu ein Knopf "Ton und Musik einstellen", der das Ton-Fenster mit getrennten Re
 
 ## Tempo, das mitdenkt (P07, Bed P4 und P8)
 
-- Bei Ankündigung oder Beginn eines Ereignisses, wenn ein Ausbau möglich wird und beim Abschluss der Region geht das Tempo zurück auf 1x.
-- 8x läuft bis zum nächsten Boot an der Boje.
+- Das gewählte Tempo läuft durch (Jorven, 14.11.): 3x und 8x bleiben, bis der Spieler selbst etwas anderes wählt. Kein Ereignis, kein "Ausbau möglich", kein wartender Dauerlieger, kein Regionsabschluss und kein Boot an der Boje setzt es zurück. Hinweise erscheinen trotzdem, ohne das Tempo anzufassen.
+- Pausiert wird nur, wenn der Spieler selbst etwas öffnet (Bauen, Spielstand) und während der Aufstiegsfeier; danach läuft das alte Tempo weiter.
+- Module dürfen `game.speed` nicht selbst ändern.
 - PC: <kbd>F</kbd> 3x an und aus, <kbd>G</kbd> 8x an und aus, <kbd>K</kbd> Kassieren, <kbd>Leertaste</kbd> Pause.
 
 Schrift: alles in Pixelify Sans, auch Fließtext und Modul-Stile (`.hm-neu *` mit `!important` in `oberflaeche.css`); Ziffern und Euro bleiben über `unicode-range` in der Systemschrift. Kleine Texte nicht unter etwa 13 px.

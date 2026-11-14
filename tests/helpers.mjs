@@ -20,29 +20,24 @@ export function optionalModules() {
   });
 }
 
-// Three.js kommt im Spiel vom CDN. In den Tests liefern wir dieselbe Version aus node_modules,
-// damit die Tests nicht am Netz haengen. Andere Versionen gehen weiter ans echte CDN.
-const THREE_DIR = path.join(HERE, 'node_modules', 'three');
-const THREE_VERSION = JSON.parse(fs.readFileSync(path.join(THREE_DIR, 'package.json'), 'utf8')).version;
+// Three.js liegt im Spiel selbst (web/vendor/three-<Version>/, P61). Das Spiel darf beim Start
+// keinen fremden Server brauchen: jede Anfrage an ein CDN wird abgebrochen und als Fehler gezaehlt.
+const CDN = /^https?:\/\/(cdn\.jsdelivr\.net|unpkg\.com|cdnjs\.cloudflare\.com|esm\.sh|cdn\.skypack\.dev)\//;
 
-async function routeThree(page) {
-  await page.route(/^https:\/\/cdn\.jsdelivr\.net\/npm\/three@([^/]+)\/(.+)$/, async (route) => {
-    const [, version, file] = route.request().url().match(/three@([^/]+)\/([^?#]+)/);
-    const local = path.join(THREE_DIR, file);
-    if (version !== THREE_VERSION || !local.startsWith(THREE_DIR) || !fs.existsSync(local)) {
-      return route.continue();
-    }
-    return route.fulfill({
-      status: 200,
-      contentType: 'text/javascript; charset=utf-8',
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: fs.readFileSync(local),
-    });
+async function sperreCdn(page, problems) {
+  await page.route(CDN, (route) => {
+    problems.push(`Anfrage an fremden Server (CDN): ${route.request().url()}`);
+    return route.abort();
   });
 }
 
 // Fixture: jede Seite sammelt Fehler. Am Ende jedes Tests muss die Liste leer sein.
 export const test = base.extend({
+  // Echte Pixeldichte des Geraets (aus playwright.config.mjs); Tests laufen sonst mit Dichte 1.
+  echteDichte: [1, { option: true }],
+  // Name des Projekts (handy, tablet, ...). Damit kann test.skip(({ projekt }) => ...) auf Ebene
+  // von Datei oder describe überspringen, bevor die Fixture game das Spiel lädt.
+  projekt: async ({}, use, testInfo) => { await use(testInfo.project.name); },
   problems: async ({ page }, use) => {
     const problems = [];
     const modules = optionalModules();
@@ -74,7 +69,7 @@ export const test = base.extend({
       problems.push(`Anfrage fehlgeschlagen: ${req.url()} (${req.failure()?.errorText})`);
     });
 
-    await routeThree(page);
+    await sperreCdn(page, problems);
     await use(problems);
     expect(problems, 'Fehler beim Laden oder Spielen').toEqual([]);
   },

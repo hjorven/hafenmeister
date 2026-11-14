@@ -64,3 +64,14 @@ test('Schild steht am Stegende der Box, nicht draußen an den Pfählen', async (
   // Steg B ist die Linie x = -55, die Box liegt mit der Mitte bei x = -63.7 und Richtung Osten
   assert.ok(Math.abs(kopf.x - -55) < 3, `x ${kopf.x}`);
 });
+
+test('im Winter kein Schild an den Gastboxen (keine Gäste)', () => {
+  const { ctx, state } = neu();
+  const box = sim.availableBerths(state, ctx).find((b) => b.kind === 'box' || b.kind === 'finger');
+  assert.equal(farbe(state, ctx, box), 'gruen');
+  state.day = ctx.rules.seasonDays + 1;
+  assert.equal(sim.season(state, ctx).winter, true);
+  assert.equal(farbe(state, ctx, box), null);
+  state.day = ctx.rules.seasonDays + ctx.rules.winterDays + 1;
+  assert.equal(farbe(state, ctx, box), 'gruen');
+});

@@ -363,6 +363,204 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr228/pulk-pc-g8-4242.png"
+  },
+  {
+   "datei": "p17-pr237-pc-erstes-bauwerk.jpg",
+   "pakete": [
+    "P17"
+   ],
+   "titel": "Erstes Bauwerk geschenkt: Toilettenhäuschen",
+   "pr": 237,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr237/237-vorschau-pc.png"
+  },
+  {
+   "datei": "p17-pr237-iphone-erstes-bauwerk.jpg",
+   "pakete": [
+    "P17"
+   ],
+   "titel": "Erstes Bauwerk geschenkt: Toilettenhäuschen",
+   "pr": 237,
+   "geraet": "iphone",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr237/237-vorschau-iphone.png"
+  },
+  {
+   "datei": "p20-pr245-handy-winterpause.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winterpause: Bilanz der Saison und Winterarbeiten",
+   "pr": 245,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "winter/wi-handy-1-karte.png"
+  },
+  {
+   "datei": "p20-pr245-quer-winterarbeiten.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winter im Hafen: Schnee und beauftragte Winterarbeit",
+   "pr": 245,
+   "geraet": "handy-quer",
+   "datum": "2026-11-14",
+   "quelle": "winter/wi-quer-2-auftrag.png"
+  },
+  {
+   "datei": "p20-pr249-pc-winterpause.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winterpause am PC: Saisonbilanz, Winterarbeiten, Winter überspringen",
+   "pr": 249,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr249/245-krantag-pc.png"
+  },
+  {
+   "datei": "p07-pr257-handy-weiter-mit-3x.jpg",
+   "pakete": [
+    "P07"
+   ],
+   "titel": "Tempo bleibt: Knopf \"Weiter mit 3x\" mit Grund",
+   "pr": 257,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "tempo/tempo-handy.png"
+  },
+  {
+   "datei": "p66-pr262-zonen-und-seewege.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Zonen des Geländes und Seewege für die Wegsuche der Boote",
+   "pr": 262,
+   "geraet": "karte",
+   "datum": "2026-11-14",
+   "quelle": "gelaende/vorschau/zonen/zonen-und-seewege.png"
+  },
+  {
+   "datei": "p21-pr274-pc-logbuch-album.jpg",
+   "pakete": [
+    "P21"
+   ],
+   "titel": "Logbuch: Sammelalbum aller Boote mit Pixelbildern",
+   "pr": 274,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "logbuch/pc-boote.png"
+  },
+  {
+   "datei": "p21-pr274-handy-steckbrief.jpg",
+   "pakete": [
+    "P21"
+   ],
+   "titel": "Logbuch: Steckbrief eines Bootes",
+   "pr": 274,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "logbuch/handy-steckbrief.png"
+  },
+  {
+   "datei": "p55-pr269-handy-geduldsring.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Geduldsring über wartenden Booten",
+   "pr": 269,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p55/handy-1-geduldsring.png"
+  },
+  {
+   "datei": "p55-pr269-pc-geduldsring.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Geduldsring und Wünsche an der Boje",
+   "pr": 269,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "p55/pc-1-geduldsring.png"
+  },
+  {
+   "datei": "p19-pr244-handy-gaestebuch-ruf.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Ruf schwerer: Gästebuch zeigt, was Gästen gefehlt hat",
+   "pr": 244,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p19/p19-buch-handy.png"
+  },
+  {
+   "datei": "p19-pr244-pc-wuensche-bootsart.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Wünsche je Bootsart auf der Ankunftskarte",
+   "pr": 244,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "p19/p19-karte-pc.png"
+  },
+  {
+   "datei": "p55-pr275-handy-schlange-versorgung.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Schlange vor der Versorgung, wenn sie knapp ist",
+   "pr": 275,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p55/handy-3-schlange.png"
+  },
+  {
+   "datei": "p24-pr281-handy-sturmklar.jpg",
+   "pakete": [
+    "P24"
+   ],
+   "titel": "Morgen Sturm: Gäste sturmklar verholen",
+   "pr": 281,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "ereignisse/vorbereiten-handy-1-sturm.png"
+  },
+  {
+   "datei": "p24-pr281-pc-sturm-angekuendigt.jpg",
+   "pakete": [
+    "P24"
+   ],
+   "titel": "Sturm angekündigt, Boote am offenen Stegkopf",
+   "pr": 281,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "ereignisse/vorbereiten-pc-1-sturm-angekuendigt.png"
+  },
+  {
+   "datei": "p19-pr279-handy-heute-voll.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Bootskarte am Handy: Wunsch \"Essen (heute voll)\"",
+   "pr": 279,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr279/279-voll-iphone.png"
+  },
+  {
+   "datei": "p19-pr279-pc-heute-voll.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Bootskarte am PC: Wunsch \"WC (heute voll)\"",
+   "pr": 279,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr279/279-voll-pc.png"
   }
  ]
 }

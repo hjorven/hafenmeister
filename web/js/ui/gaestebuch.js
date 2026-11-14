@@ -2,9 +2,9 @@
 //
 // 1. Beim Ablegen zeigt jedes Gastboot seine Note in einer Blase über dem Boot (Stern und Zahl).
 //    Unzufriedene Gäste (unter 4 Sternen) zeigen dazu das Symbol, was ihnen gefehlt hat, durchgestrichen.
-// 2. Gästebuch: die letzten 20 Bewertungen (genau die, aus denen der Ruf besteht) mit Satz und Grund,
+// 2. Gästebuch: die letzten 20 Bewertungen mit Satz und Grund (der Ruf ist der Schnitt der letzten drei Tage),
 //    der Ruf-Verlauf der letzten 30 Tage und die drei häufigsten Gründe für schlechte Noten.
-//    Öffnen: Ruf oben links antippen, Menü "Gästebuch", Hafenmeister-Haus oder Hafenbüro antippen, Taste G.
+//    Öffnen: Ruf oben links antippen, Menü "Gästebuch", Hafenmeister-Haus oder Hafenbüro antippen, Taste N (G ist 8x).
 //
 // Daten und Texte: ui/gaestebuch-daten.js (ohne Browser, tests/gaestebuch.test.mjs).
 // Schnittstelle: game.gaestebuch = { oeffnen(), schliessen(), get offen, eintraege(), topGruende() }
@@ -12,9 +12,11 @@
 
 import {
   GAESTEBUCH, GRUND, buchState, eintragen, hauptgrund, topGruende, zusammenfassung, verlauf, satz, absender,
-  erklaerung, zufrieden,
+  erklaerung, zufrieden, rufErklaerung,
 } from './gaestebuch-daten.js';
 import { VORRANG } from './meldungen.js';
+import { ANGEBOT_BILDER } from './wunsch-bilder.js';
+import { ANGEBOT_TEXTE } from '../data/wuensche-texte.js';
 
 // ------------------------------------------------------------------ Pixel-Symbole (12 x 12, wie ui/oberflaeche.js)
 const FARBE = { s: '#e0962a', y: '#ffd95a', o: '#7a5212' };
@@ -30,6 +32,9 @@ const PIXEL = {
   buch: ['............', '.####..####.', '#....##....#', '#.##.##.##.#', '#....##....#', '#.##.##.##.#', '#....##....#', '#.##.##.##.#', '#....##....#', '#....##....#', '.####..####.', '............'],
   zu: ['............', '.##......##.', '.###....###.', '..###..###..', '...######...', '....####....', '....####....', '...######...', '..###..###..', '.###....###.', '.##......##.', '............'],
 };
+
+// Wünsche an Angebote an Land (P19): dieselben Bilder wie über dem Boot (ui/wunsch-bilder.js)
+for (const [k, b] of Object.entries(ANGEBOT_BILDER)) PIXEL[k] = b.raster;
 
 function pixelSvg(raster) {
   const h = raster.length;
@@ -118,7 +123,7 @@ export function init(game) {
       game.audio?.sfx?.('bewertung', { anker: eintrag.note });
     }
     game.emit('gaestebuch:bewertung', { id, note: eintrag.note, grund, zufrieden: gut, imBild: !!pos?.sichtbar });
-    if (!rafLaeuft) { rafLaeuft = true; requestAnimationFrame(schritt); }
+    if (!rafLaeuft) { rafLaeuft = true; letztesBild = performance.now(); requestAnimationFrame(schritt); }
   }
 
   function starte(x) {
@@ -150,8 +155,22 @@ export function init(game) {
   let spiel = null;
   let hindernisse = [];
   let rafLaeuft = false;
+  let letztesBild = performance.now();
   function schritt() {
     const jetzt = performance.now();
+    // Während der Feier (features/aufstieg.js) sind Blasen und Meldungen ausgeblendet und ihre Zeit steht
+    const seitBild = jetzt - letztesBild;
+    letztesBild = jetzt;
+    if (document.body.classList.contains('hm-feier-an')) {
+      for (const x of blasen.values()) x.t0 += seitBild;
+      for (const x of meldungen.values()) x.t0 += seitBild;
+      for (const x of warteschlange) x.seit += seitBild;
+      naechsteAb = Math.max(naechsteAb, jetzt + ABSTAND);
+      letzterTakt = jetzt;   // die Leiste der Meldungen zählt die Feier nicht noch einmal
+      if (blasen.size || warteschlange.length || meldungen.size) requestAnimationFrame(schritt);
+      else rafLaeuft = false;
+      return;
+    }
     // höchstens fünf Blasen zugleich; wer wartet, verfällt nach einer Blasendauer (das Boot ist dann weit weg)
     while (warteschlange.length && warteschlange[0].seit < jetzt - DAUER) warteschlange.shift();
     while (warteschlange.length && jetzt >= naechsteAb && blasen.size < 5) { starte(warteschlange.shift()); naechsteAb = jetzt + ABSTAND; }
@@ -307,11 +326,25 @@ export function init(game) {
     return `<svg class="hm-gb-kurve" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" shape-rendering="crispEdges" role="img" aria-label="Ruf der letzten ${v.length} Tage">${r}</svg>`;
   }
 
+  // Auszeichnung des Hafens (P19 C5, features/auszeichnung.js): Wimpel, Name, was zur nächsten Stufe fehlt
+  function auszeichnungZeile() {
+    const az = game.auszeichnung;
+    const t = az?.text?.();
+    if (!t) return null;
+    const bild = el('img', { class: 'hm-az-wimpel', alt: '' });
+    bild.src = `data:image/svg+xml,${encodeURIComponent(az.wimpelSvg(az.stand()?.level ?? 0))}`;
+    return el('p', { class: 'hm-gb-klein hm-gb-auszeichnung' }, bild, el('span', {}, t));
+  }
+
   function bauKnopf(key) {
-    const def = { wc: 'wc', dusche: 'dusche', essen: 'essen', diesel: 'diesel', strom: 'strom' }[key];
-    if (!def || !game.bauen?.eintraege) return null;
+    // Versorgung baut das Bauwerk, ein Angebotswunsch den Service (P19)
+    // weiter Weg (P19 B9): das Sanitärgebäude (WC Stufe 3) bringt WC und Dusche an eine zweite Stelle
+    const ziel = { wc: 'versorgung:wc', dusche: 'versorgung:dusche', essen: 'versorgung:essen', diesel: 'versorgung:diesel', strom: 'versorgung:strom',
+      'weit:wc': 'versorgung:wc', 'weit:dusche': 'versorgung:wc' }[key]
+      ?? (ANGEBOT_TEXTE[key] ? `angebot:${ANGEBOT_TEXTE[key].service}` : null);
+    if (!ziel || !game.bauen?.eintraege) return null;
     let e = null;
-    try { e = game.bauen.eintraege().find((x) => x.key === `versorgung:${def}`); } catch { e = null; }
+    try { e = game.bauen.eintraege().find((x) => x.key === ziel); } catch { e = null; }
     if (!e) return null;
     if (e.gesperrt) return el('span', { class: 'hm-gb-spaeter' }, e.gesperrt);
     return el('button', {
@@ -340,6 +373,7 @@ export function init(game) {
       el('div', { class: 'hm-gb-verlauf' }),
       el('p', { class: 'hm-gb-klein' },
         v.length > 1 ? `Ruf der letzten ${v.length} Tage. Linie: 4 Sterne, ab da sind Gäste zufrieden.` : 'Hier wächst der Verlauf deines Rufs, Tag für Tag.'),
+      auszeichnungZeile(),
     );
     rufTeil.querySelector('.hm-gb-verlauf').innerHTML = verlaufSvg(v);
 
@@ -378,7 +412,7 @@ export function init(game) {
     if (liste.length) listeTeil.append(ul);
 
     const fuss = el('p', { class: 'hm-gb-klein hm-gb-fuss' },
-      `Dein Ruf ist der Schnitt der letzten ${GAESTEBUCH.maxEintraege} Bewertungen. Ab 4 Sternen kommen Gäste als Stammgast wieder, ein guter Ruf lockt mehr Boote an.`);
+      rufErklaerung(state()));
 
     const koerper = el('div', { class: 'hm-gb-koerper' }, rufTeil, gruendeTeil, listeTeil, fuss);
     const scroll = panel.querySelector('.hm-gb-koerper')?.scrollTop ?? 0;
@@ -412,7 +446,7 @@ export function init(game) {
   window.addEventListener('keydown', (e) => {
     if (e.target?.closest?.('input, textarea, select, [contenteditable]')) return;
     if (offen && e.key === 'Escape') { schliessen(); e.preventDefault(); return; }
-    if (e.code === 'KeyG' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.code === 'KeyN' && !e.ctrlKey && !e.metaKey && !e.altKey) {
       if (offen) schliessen(); else oeffnen();
     }
   });

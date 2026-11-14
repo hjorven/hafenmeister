@@ -21,7 +21,6 @@ try { pw = req('@playwright/test'); } catch { pw = require('playwright'); }
 const { chromium, devices } = pw;
 
 const ROOT = path.resolve(__dirname, '../web');
-const THREE = path.resolve(__dirname, '../tests/node_modules/three');
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > 0 ? process.argv[i + 1] : d; };
 // '1-6', '0,7,12' oder gemischt '0-2,7'
 const bereich = (s) => s.split(',').flatMap((t) => { const [a, b] = t.split('-').map(Number); return Array.from({ length: (b ?? a) - a + 1 }, (_, i) => a + i); });
@@ -139,10 +138,6 @@ function pruefer() {
       const page = await ctx.newPage();
       const log = [];
       page.on('pageerror', (e) => log.push(e.message));
-      await page.route('https://cdn.jsdelivr.net/npm/three@0.187.0/**', (route) => {
-        const rel = route.request().url().split('three@0.187.0/')[1];
-        route.fulfill({ path: path.join(THREE, rel), contentType: 'text/javascript' });
-      });
       await page.goto(`${url}?stufe=${st}&stegbild=${sb}${gf ? `&gelaende=${gf}` : ''}`);
       await page.waitForFunction(() => window.hafenmeister?.sim && window.hafenmeister?.boatView && window.hafenmeister?.fahrwasser, null, { timeout: 30000 });
       await page.waitForTimeout(1500);

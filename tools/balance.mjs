@@ -133,14 +133,15 @@ const PROFILE = {
 // Spielertypen im Bericht, die bis zum Abschluss spielen
 const SPIELER = ['geschickt', 'gemuetlich'];
 
-export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true } = {}) {
+export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true, beobachter = null } = {}) {
   const prof = PROFILE[profilName];
   const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: RULES });
   const state = createState({ seed, rules: RULES });
   const r = rng(seed + 7919);
   const svc = neuerZustand();
   let effekte = SVC.effekte(svc);
-  sim.addHook(ctx, 'modifiers', () => ({ sizeFactor: effekte.gaeste, ratingBonus: effekte.ruf }));
+  // wie render/services.js fuerSpielregeln: gebaute Angebote erfüllen Wünsche, kein Ruf-Aufschlag (P19 C3)
+  sim.addHook(ctx, 'modifiers', () => ({ sizeFactor: effekte.gaeste, offers: { ...effekte.angebote } }));
   // Ereignisse (Nebel, Sommertag, Sturm, Regatta, Hafenfest, Winter) wie im Spiel
   const plan = mitEreignissen ? createScheduler({ seed }) : null;
   const gebaeude = () => {
@@ -266,6 +267,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     let liegend = [];
     while (state.day === tag) {
       const events = sim.tick(state, ctx, prof.zuweisenAlle);
+      beobachter?.(state, ctx, events);
       if (!prof.nichts && state.phase === 'day') {
         // Mit Hafenbüro-Automatik weist der Spieler nur noch die Sonderfälle selbst zu
         const buero = sim.officeAutomatic(state, ctx);

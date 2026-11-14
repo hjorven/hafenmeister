@@ -25,6 +25,7 @@ import { HAFEN, platzInWelt } from '../data/harbor.js';
 import { baueModell } from '../render/services-models.js';
 
 import { umbauText, euro, num1, WUNSCH, WUNSCH_KURZ, FREI, leer, wirkungText, waehleSchritt, regionsSchritt } from './bauen-rat.js';
+import { WUNSCH_TEXTE, wunschFuerService } from '../data/wuensche-texte.js';
 
 const U = 0.62;
 const REITER = [
@@ -76,7 +77,7 @@ export function init(game) {
   }
   game.on('sim:turnedAway', (e) => {
     const s = speicher();
-    if (s && e?.reason !== 'dismissed') s.heute.weg++;
+    if (s && e?.reason !== 'dismissed' && e?.reason !== 'winter') s.heute.weg++;
   });
   game.on('sim:feeReady', (e) => {
     const s = speicher();
@@ -227,12 +228,15 @@ export function init(game) {
       if (!p || p.fertig || !p.def) continue;
       const s = game.services.katalog?.find((k) => k.id === x.id);
       const w = wirkungText(p.def.wirkung);
+      // Gäste wünschen sich manche Angebote (P19): das erste Bauen erfüllt den Wunsch
+      const wunsch = x.stufe > 0 ? null : wunschFuerService(x.id);
       out.push({
         key: `angebot:${x.id}`, art: 'angebot', id: x.id, name: x.stufe > 0 ? p.def.name : x.name, kosten: p.kosten,
         ausbau: x.stufe > 0,
         gesperrt: p.freigeschaltet ? null : `braucht ${p.fehlt.join(', ')}`,
         kurz: '',
-        nutzen: [x.kurz, w].filter(Boolean),
+        wunsch,
+        nutzen: [x.kurz, w, wunsch ? `Gäste wünschen sich ${WUNSCH_TEXTE[wunsch].mit}, das hebt ihre Note.` : null].filter(Boolean),
         ort: s ? () => serviceOrt(s, p.stufe) : null,
         modell: s ? { id: x.id, stufe: p.stufe } : null,
         kaufen: () => game.services.bauen(x.id),
@@ -304,6 +308,8 @@ export function init(game) {
     return out;
   }
 
+  // Erstes Bauwerk geschenkt (siehe startGeschenk)
+  const GESCHENK_KEY = 'versorgung:wc';
   function naechsterSchritt() {
     const sim = game.sim;
     if (!sim?.state) return null;
@@ -311,7 +317,7 @@ export function init(game) {
     const spar = sparSchritt(sparziel(), sim.state.money);
     if (spar) return spar;
     const region = sim.regionGoal?.();
-    const r = waehleSchritt({ geld: sim.state.money, eintraege: eintraege(), bedarf: bedarf(), stufe: adv.goal ? adv : null, region });
+    const r = waehleSchritt({ geld: sim.state.money, eintraege: eintraege(), bedarf: bedarf(), stufe: adv.goal ? adv : null, region, geschenk: geschenkOffen() ? GESCHENK_KEY : null });
     return r ?? regionsSchritt(region);
   }
 
@@ -775,7 +781,7 @@ export function init(game) {
       if (e.gesperrt || !e.ort) continue;
       const o = e.ort();
       if (!o) continue;
-      const s = el('button', { type: 'button', class: `bau-schild${e.kosten > geld ? ' teuer' : ''}${e.key === tippZiel ? ' empfohlen' : ''}`, tabindex: '-1',
+      const s = el('button', { type: 'button', class: `bau-schild${e.kosten > geld ? ' teuer' : ''}${e.key === tippZiel ? ' empfohlen' : ''}`, tabindex: '-1', title: `${e.name}, ${euro(e.kosten)}`,
         onclick: (ev) => { ev.stopPropagation(); vorschau(e.key); } },
         el('span', { class: 'bau-schild-name' }, e.name), el('span', { class: 'bau-schild-preis' }, euro(e.kosten)));
       schilder.append(s);
@@ -923,12 +929,28 @@ export function init(game) {
     tippZiel = n?.ziel ?? null;
     buildBtn.classList.toggle('bau-punkt', !!n?.leistbar);
     const imEinstieg = !!game.einstieg?.schritt?.();
-    const aus = !n || offen || buildBtn.hidden || document.body.classList.contains('card-open') || imEinstieg || document.body.classList.contains('foto');
-    tipp.hidden = aus;
-    if (aus) return;
+    const aus = !n || offen || buildBtn.hidden || document.body.classList.contains('card-open') || imEinstieg || document.body.classList.contains('foto') || !!game.winter?.offen?.();
+    // Jorven 14.11.: Der Hinweis verdeckte zu viel. Er ist eine Zeile und steht nur kurz, wenn ein neues
+    // Ziel dran ist (tippZiel wechselt); danach erinnert nur der Punkt am Bauen-Knopf (bau-punkt).
+    const schluessel = n?.ziel ?? n?.text ?? '';
+    if (schluessel !== tippSchluessel) {
+      tippSchluessel = schluessel;
+      clearTimeout(tippTimer);
+      tippTimer = 0;
+      tippAbgelaufen = false;
+    }
+    tipp.hidden = aus || tippAbgelaufen;
+    if (tipp.hidden) return;
+    // Die Zeit läuft erst, wenn der Hinweis wirklich zu sehen ist
+    if (!tippTimer) tippTimer = setTimeout(() => { tippAbgelaufen = true; tipp.hidden = true; }, TIPP_DAUER);
     tipp.replaceChildren(el('span', { class: 'bau-tipp-titel' }, 'Als Nächstes'), el('span', { class: 'bau-tipp-text' }, n.text));
+    tipp.title = `Als Nächstes: ${n.text}`;
     platziereTipp();
   }
+  const TIPP_DAUER = 8000;
+  let tippSchluessel = null;
+  let tippTimer = 0;
+  let tippAbgelaufen = false;
   function platziereTipp() {
     if (tipp.hidden) return;
     const b = buildBtn.getBoundingClientRect();
@@ -998,14 +1020,20 @@ export function init(game) {
   // bekommt das Geld fuer das Toilettenhaeuschen geschenkt (einmal pro Spielstand, auch nach
   // "Einstieg beenden"). Die Vorschau geht gleich auf, der Knopf "Bauen fuer ..." leuchtet.
   // Gekauft wird trotzdem wie immer: Vorschau ansehen, dann bestaetigen.
-  const GESCHENK_KEY = 'versorgung:wc';
   let gefuehrt = null;
+  // Gibt es das Geschenk noch? (Rat "Als Naechstes" rechnet damit, damit er nicht zum Sparen raet)
+  function geschenkOffen() {
+    const s = speicher();
+    const st = game.sim?.state;
+    if (!s || !st || s.geschenk || st.stage !== 1 || (st.facilities?.wc || 0) > 0) return false;
+    const e = eintraege().find((x) => x.key === GESCHENK_KEY);
+    return !!e && !e.gesperrt;
+  }
   function startGeschenk() {
+    if (!geschenkOffen()) return false;
     const s = speicher();
     const st = game.sim.state;
-    if (!s || s.geschenk || st.stage !== 1 || (st.facilities?.wc || 0) > 0) return false;
     const e = eintraege().find((x) => x.key === GESCHENK_KEY);
-    if (!e || e.gesperrt) return false;
     s.geschenk = e.kosten;
     // Im Tagesabschluss unter "Sonstiges" sichtbar, zaehlt aber nicht als verdientes Geld
     // (Aufstieg, bester Tag und Tagesziele rechnen mit stats.dayIncome und totalIncome)
@@ -1172,14 +1200,16 @@ export function init(game) {
     fuelle(
       el('div', { class: 'bau-kopf' },
         el('h2', {}, 'Bauen'),
-        el('span', { class: 'bau-kasse' }, `Kasse ${euro(geld)}`)),
+        el('span', { class: 'bau-kasse' }, `Kasse ${euro(geld)}`),
+        // Am Handy ersetzt das Kreuz die Zeile "Schließen" unten (oberflaeche.css), die Liste bekommt den Platz
+        el('button', { type: 'button', class: 'hm-zu bau-zu', 'aria-label': 'Baumenü schließen', title: 'Schließen', onclick: schliessen }, 'Schließen')),
       n ? el('button', { type: 'button', class: 'bau-rat', onclick: () => n.ziel && vorschau(n.ziel) },
         el('span', { class: 'bau-tipp-titel' }, 'Als Nächstes'), el('span', {}, n.text)) : null,
       meldung ? el('p', { class: 'card-note', role: 'status' }, meldung) : null,
       tabs,
       el('div', { class: 'bau-liste' }, zeilen.length ? zeilen : el('p', { class: 'bau-leer' }, reiter === 'steg' ? 'Gerade gibt es keinen freien Bauplatz für Stege. Die nächste Ausbaustufe bringt neue.' : 'Hier ist gerade nichts zu bauen.')),
       reiter === 'hafen' ? automatikSchalter() : null,
-      el('div', { class: 'card-actions' }, el('button', { type: 'button', class: 'hud-btn', onclick: schliessen }, 'Schließen')),
+      el('div', { class: 'card-actions bau-unten' }, el('button', { type: 'button', class: 'hud-btn', onclick: schliessen }, 'Schließen')),
     );
   }
 
@@ -1263,6 +1293,7 @@ export function init(game) {
   game.on('resize', () => { platziereTipp(); if (offen && aktiv) zeigeOrt(eintraege().find((x) => x.key === aktiv)?.ort?.()); });
   game.on('ready', setzeTipp);
   game.on('einstieg:ende', setzeTipp);   // Hinweis gleich zeigen, sobald der Einstieg vorbei ist
+  game.on('winter:karte', setzeTipp);    // Winterpause (features/winter.js) verdeckt sonst den Hinweis
   new MutationObserver(() => setzeTipp()).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
   // Animationen laufen auch in der Pause (Baumodus pausiert die Spielzeit)
@@ -1343,6 +1374,7 @@ function stil() {
     #card.bau-karte > * { flex-shrink: 0; }
     #card.bau-karte > .bau-liste { flex: 0 1 auto; min-height: 0; }
     .bau-kopf { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .bau-kopf .bau-zu { display: none; }
     .bau-kopf h2 { margin: 0; min-width: 0; flex: 1 1 auto; overflow-wrap: anywhere; }
     .bau-kasse { flex: 0 0 auto; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; opacity: 0.8; }
     .bau-rat { display: grid; gap: 2px; text-align: left; border: 0; border-radius: 12px; padding: 10px 12px;
@@ -1411,8 +1443,10 @@ function stil() {
     .bau-sparschild { z-index: 3; }
     .hm-status { position: relative; }
     .bau-sparschild[hidden] { display: none; }
-    /* Zu wenig Platz: nur der Preis, zuletzt ein Punkt mit Plus (Antippen oeffnet die Vorschau) */
-    .bau-schild.klein .bau-schild-name { display: none; }
+    /* Zu wenig Platz: schmal mit gekuerztem Namen (ein Preis allein sagt nicht, was es ist; Feature-Test 14.11.),
+       zuletzt ein Punkt mit Plus (Antippen oeffnet die Vorschau) */
+    .bau-schild.klein { padding: 3px 6px; }
+    .bau-schild.klein .bau-schild-name { max-width: 84px; overflow: hidden; text-overflow: ellipsis; font-size: 11px; }
     .bau-schild.punkt { width: 22px; height: 22px; padding: 0 !important; border-radius: 50%; place-items: center; }
     .bau-schild.punkt > span { display: none; }
     .bau-schild.punkt::before { content: '+'; font-weight: 800; font-size: 15px; line-height: 1; color: #2a7d63; }

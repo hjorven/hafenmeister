@@ -1,11 +1,13 @@
 // Reine Rechenteile fuer ui/bauen.js (ohne DOM und Three.js, damit tests/bauen.test.mjs sie pruefen kann):
 // Wirkung eines Services als Satz und die Wahl des naechsten sinnvollen Schritts.
 import { ECONOMY } from '../data/economy.js';
+import { WUNSCH_TEXTE } from '../data/wuensche-texte.js';
 
 export const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
 export const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-export const WUNSCH = { wc: 'ein WC', dusche: 'eine Dusche', essen: 'etwas zu essen', diesel: 'Diesel', strom: 'Strom am Platz' };
-export const WUNSCH_KURZ = { wc: 'WC', dusche: 'Dusche', essen: 'Essen', diesel: 'Diesel', strom: 'Strom' };
+// Namen aller Wünsche, auch der Angebote an Land (P19), aus data/wuensche-texte.js
+export const WUNSCH = Object.fromEntries(Object.entries(WUNSCH_TEXTE).map(([k, t]) => [k, t.mit]));
+export const WUNSCH_KURZ = Object.fromEntries(Object.entries(WUNSCH_TEXTE).map(([k, t]) => [k, t.kurz]));
 export const FREI = {
   allesKassieren: 'Der Knopf „Kassieren“ streicht alle Münzen auf einmal ein. Bis dahin streichst du jede Münze selbst.',
   vorschau: 'Funk: Du siehst die nächsten drei Boote mit Größe, Ankunftszeit und Wünschen.',
@@ -40,13 +42,18 @@ export const leer = () => ({ weg: 0, offen: {}, belegt: 0, plaetze: 0, abend: fa
  * lage = { geld, eintraege, bedarf, stufe: { goal, ok, guests, reputation, missing } }
  * Liefert { text, ziel, leistbar } oder null.
  */
-export function waehleSchritt({ geld, eintraege, bedarf, stufe, region = null }) {
+export function waehleSchritt({ geld, eintraege, bedarf, stufe, region = null, geschenk = null }) {
   const offen = eintraege.filter((e) => !e.gesperrt);
-  const leistbar = (e) => e.kosten <= geld;
+  // geschenk: Schluessel des ersten Bauwerks, dessen Geld beim Oeffnen des Baumenues geschenkt wird
+  // (ui/bauen.js startGeschenk, Roadmap J4). Es gilt als leistbar, sonst raet die Tafel zum Sparen.
+  const leistbar = (e) => e.key === geschenk || e.kosten <= geld;
   const guenstigste = (liste) => [...liste].sort((a, b) => (leistbar(b) - leistbar(a)) || a.kosten - b.kosten)[0];
   // Bei Platzmangel: von dem, was sich leisten laesst, das mit den meisten Plaetzen
   const meistePlaetze = (liste) => [...liste].sort((a, b) => (leistbar(b) - leistbar(a)) || (leistbar(a) ? b.plaetzeNeu - a.plaetzeNeu : 0) || a.kosten - b.kosten)[0];
-  const mit = (e, text) => ({ text: leistbar(e) ? text : `${text} Noch ${euro(e.kosten - geld)} sparen.`, ziel: e.key, leistbar: leistbar(e) });
+  const mit = (e, text) => ({
+    text: e.key === geschenk ? `${text} Das erste Bauwerk ist geschenkt.` : leistbar(e) ? text : `${text} Noch ${euro(e.kosten - geld)} sparen.`,
+    ziel: e.key, leistbar: leistbar(e),
+  });
 
   // 1. Ausbaustufe bereit (bei Bauabschnitten reicht das Geld fuer den naechsten Abschnitt)
   const ausbau = eintraege.find((x) => x.key === 'hafen:stufe');
@@ -91,7 +98,7 @@ export function waehleSchritt({ geld, eintraege, bedarf, stufe, region = null })
   if (rs) return rs;
   // 6. Etwas Neues, das sich leisten laesst
   const neu = offen.filter((e) => leistbar(e)).sort((a, b) => a.kosten - b.kosten)[0];
-  if (neu) return { text: `Neu im Bauplan: ${neu.name} für ${euro(neu.kosten)}.`, ziel: neu.key, leistbar: true };
+  if (neu) return { text: neu.key === geschenk ? `${neu.name} bauen. Das erste Bauwerk ist geschenkt.` : `Neu im Bauplan: ${neu.name} für ${euro(neu.kosten)}.`, ziel: neu.key, leistbar: true };
   const spar = guenstigste(offen);
   if (spar) return mit(spar, `Als Nächstes: ${spar.name}.`);
   return null;

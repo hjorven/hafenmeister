@@ -14,7 +14,14 @@ const launchOptions = {
 // Optional: vorinstallierter Chromium, z. B. CHROMIUM_PATH=/opt/pw-browsers/chromium
 if (process.env.CHROMIUM_PATH) launchOptions.executablePath = process.env.CHROMIUM_PATH;
 
-const chromium = (device) => ({ ...device, browserName: 'chromium', launchOptions });
+// Software-WebGL rechnet jeden Bildpunkt auf der CPU: Tablet hochkant mit echter Dichte (2,25)
+// schafft nur rund 3 Bilder pro Sekunde (330 ms je Bild), mit Dichte 1 rund 15 (60 ms). Alle Tests
+// laufen daher mit Dichte 1 (Layout in CSS-Pixeln bleibt gleich). Nur die Bildschirmfotos nutzen
+// die echte Dichte des Geraets (echteDichte, siehe start.spec.mjs), damit die Vorschau scharf ist.
+const chromium = (device) => ({
+  ...device, browserName: 'chromium', launchOptions,
+  deviceScaleFactor: 1, echteDichte: device.deviceScaleFactor ?? 1,
+});
 
 export default defineConfig({
   testDir: './specs',

@@ -28,14 +28,14 @@ const NAMENS_LISTEN = [
   /^klassen$/, /^wuensche$/, /^wunschAnzahl$/, /^platzarten$/, /^stromAnSteg$/, /^bauwerke$/, /^services$/,
   /^ereignisse$/, /^warten\.plaetze$/, /^stufen\.\d+\.mix$/, /\.gaeste$/, /\.wetter$/, /\.hafengeld$/,
   /^ereignisse\.\w+\.wirkung\.(sizeFactor|kindFactor|satisfaction)$/, /^tagesziele\.(geld|schwere|ziele|grossAb)$/,
-  /^zeit\.jahreszeiten$/, /\.ankunftFaktor$/,
+  /^zeit\.jahreszeiten$/, /\.ankunftFaktor$/, /^angebotWunsch\.wuensche$/, /^ruf\.lockt\.grosse$/,
 ];
 // Felder, die bewusst noch niemand liest (mit Paket, das sie anschließt oder löscht)
 export const NOCH_UNGELESEN = {
 };
 // Felder, die Ja/Nein sein dürfen. Alles andere ist eine Zahl, ein Text, eine Liste oder ein Objekt.
 const JA_NEIN = new Set(['ueberNacht', 'vorauskasse', 'strom', 'offen', 'gast', 'allePlaetze', 'nurMotor', 'seaArrivals', 'winter',
-  'C', 'CS', 'D', 'K', 'A', 'B']);
+  'C', 'CS', 'D', 'K', 'A', 'B', 'nurSegel']);
 
 function quelltexte() {
   const out = [];
@@ -120,9 +120,9 @@ export function tabellen() {
     s.ziel.gaeste != null ? `${s.ziel.gaeste} Gäste, Ruf ${zahl(s.ziel.ruf)}` : `${s.ziel.grossschiffBesuche} Großschiffbesuche, Ruf ${zahl(s.ziel.ruf)}${s.ziel.allePlaetze ? ', alle Plätze' : ''}`,
     s.ausbau ? `${s.ausbau.name}, ${euro(s.ausbau.kosten)}` : '-',
   ])), '');
-  t.push('## Liegegeld je Klasse', '', tabelle(['Klasse', 'Grundpreis', 'Nächte', 'Wünsche'], Object.entries(E.klassen).map(([k, v]) => [
-    k, euro(v.grundpreis), v.naechte.join(' bis '), (E.wunschAnzahl[k] ?? [0, 0]).join(' bis '),
-  ])), '', `Je erfülltem Wunsch +${Math.round(E.wunschBonus * 100)} %.`, '');
+  t.push('## Liegegeld je Klasse', '', tabelle(['Klasse', 'je Meter', 'Grundpreis', 'Nächte', 'Wünsche'], Object.entries(E.klassen).map(([k, v]) => [
+    k, v.proMeter ? `${String(v.proMeter).replace('.', ',')} €` : '-', euro(v.grundpreis), v.naechte.join(' bis '), (E.wunschAnzahl[k] ?? [0, 0]).join(' bis '),
+  ])), '', `Liegegeld je angefangenem Meter Bootslänge (B10); der Grundpreis ist der Schnitt der Klasse und gilt für Boote ohne Länge. Je erfülltem Wunsch +${Math.round(E.wunschBonus * 100)} %.`, '');
   t.push('## Stegprojekte', '', tabelle(['Projekt', 'ab Stufe', 'Kosten', 'Plätze'], E.stegprojekte.map((p) => [p.name, p.stufe, euro(p.kosten), p.plaetze.length])), '');
   t.push('## Versorgung', '', tabelle(['Bauwerk', 'Stufe', 'Name', 'ab Hafenstufe', 'Kosten', 'versorgt'], Object.entries(E.bauwerke).flatMap(([k, b]) =>
     b.stufen.map((st, i) => [i === 0 ? b.name : '', i + 1, st.name, st.abStufe, euro(st.kosten), st.versorgt ?? '-']))), '');

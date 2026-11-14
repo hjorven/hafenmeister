@@ -3,7 +3,8 @@
 // ein Knopf je Boot (data-boat, aria-pressed), damit Tastatur und Bildschirmleser alles erreichen.
 // Daten kommen aus game.sim (web/js/bridge.js), siehe docs/spielregeln.md.
 
-const WISH_LABEL = { wc: 'WC', dusche: 'Dusche', essen: 'Essen', strom: 'Strom', diesel: 'Diesel' };
+// Namen aller Wünsche (auch Angebote an Land, P19) aus data/wuensche-texte.js
+const WISH_LABEL = new Proxy({}, { get: (_, k) => wunschKurz(k) });
 // Warum das Hafenbüro ein Boot dem Spieler lässt (sim.officeSpecialCase)
 const SONDERFALL_LABEL = {
   mehrrumpf: 'Mehrrumpfboot',
@@ -28,6 +29,7 @@ const REASON_LABEL = {
 
 import { HAFEN, platzInWelt } from '../data/harbor.js';
 import { pixelBild } from './pixel-symbole.js';
+import { wunschKurz } from '../data/wuensche-texte.js';
 
 const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
 const num1 = (n) => n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -217,13 +219,18 @@ export function init(game) {
         el('li', { title: 'Länge und Breite' }, `${meters(b.length)} × ${meters(b.beam)}`),
         el('li', { title: 'Tiefgang' }, `Tiefgang ${meters(b.draft)}`),
         el('li', { title: 'Aufenthalt' }, nacht),
-        ...b.wishes.map((w) => el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`))),
+        // Versorgung heute schon voll (Kapazität sichtbar, P19): steht gleich am Wunsch
+        ...b.wishes.map((w) => (wert?.full?.includes(w)
+          ? el('li', { class: 'wunsch voll', title: 'Für heute ist diese Versorgung voll' }, `Wunsch: ${WISH_LABEL[w] ?? w} (heute voll)`)
+          : el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`)))),
       sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length, sim.bueroAutomatik?.(b.size)),
       vorschlag ? el('p', { class: 'card-hint hm-vorschlag' }, pixelBild('rauteGold', 14), vorschlagText(b, vorschlag)) : null,
       wert ? el('p', { class: 'card-zahlt' }, zahltText(wert.fee, gold.length ? sim.platzWert(b.id, gold[0])?.fee ?? wert.fee : null, gold.length > 0 && gold.length >= fitting.length)) : null,
       el('p', { class: 'card-hint' }, !fitting.length
         ? 'Gerade ist kein passender Platz frei.'
-        : `${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length && gold.length >= fitting.length ? 'alle' : gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}. Zieh das Boot hin oder ${vorschlag ? 'nimm den Vorschlag an' : 'lass es einfahren'}.`),
+        : [`${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length && gold.length >= fitting.length ? 'alle' : gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}.`,
+          // Die Anleitung tritt am Handy zurück (der Einstieg erklärt das Ziehen), die Karte bleibt flach
+          el('span', { class: 'card-wie' }, ` Zieh das Boot hin oder ${vorschlag ? 'nimm den Vorschlag an' : 'lass es einfahren'}.`)]),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
       el(
         'div',

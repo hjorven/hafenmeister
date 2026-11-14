@@ -91,6 +91,13 @@ export const TEXTE = {
       : `Angelegt. Das Boot zahlt gleich: Klick auf die Münze am Boot, mehrere fährst du mit gedrückter Maustaste in einem Zug ab. Bezahlt zeigt einen Wimpel am Bug. Was liegen bleibt, holt abends der Hafenmeister, aber nur ${ANTEIL}.`,
     kurz: TOUCH ? `Tipp auf die Münze am Boot. Liegen gelassen gibt es abends nur ${ANTEIL}.` : `Klick auf die Münze am Boot. Liegen gelassen gibt es abends nur ${ANTEIL}.`,
   },
+  // Wie "muenzen", solange das Boot noch in die Box fährt: Die Regel meldet das Anlegen schon beim
+  // Zuweisen, die Münze kommt erst, wenn es sichtbar fest ist (render/boat-view.js). Feature-Test 14.11.
+  muenzenUnterwegs: {
+    titel: 'Das Boot legt an',
+    text: 'Es fährt jetzt in die Box. Sobald die Leinen fest sind, zahlt es: Am Boot erscheint eine Münze.',
+    kurz: 'Das Boot fährt in die Box. Gleich erscheint seine Münze.',
+  },
   tempo: {
     titel: 'Der Tag läuft',
     text: TOUCH
@@ -127,13 +134,18 @@ export const TEXTE = {
 export const HINWEISE = {
   geduld: {
     titel: 'Ein Boot ist weitergefahren',
-    text: 'Es hat zu lange an der Boje gewartet. Weise wartende Boote schneller zu oder bau mehr passende Plätze.',
-    kurz: 'Es hat zu lange gewartet. Schneller zuweisen oder mehr Plätze bauen.',
+    text: 'Es hat zu lange an der Boje gewartet. Der Ring über einem wartenden Boot zeigt seine Geduld, rot heißt: gleich fährt es. Weise wartende Boote schneller zu oder bau mehr passende Plätze.',
+    kurz: 'Es hat zu lange gewartet. Der Ring über dem Boot zeigt die Geduld.',
   },
   voll: {
     titel: 'Kein Platz an den Bojen',
     text: 'Alle Wartebojen waren besetzt, darum ist ein Boot gleich weitergefahren. Mehr Liegeplätze machen die Bojen schneller frei.',
     kurz: 'Alle Bojen waren besetzt. Mehr Liegeplätze helfen.',
+  },
+  versorgung: {
+    titel: 'Versorgung für heute voll',
+    text: 'Das Schild über dem Gebäude zählt, wie viele Boote heute versorgt wurden. Ist es rot, bekommen weitere Gäste diesen Wunsch nicht mehr erfüllt. Morgen zählt es neu, ein Ausbau unter „Bauen“ versorgt mehr Boote.',
+    kurz: 'Rotes Schild: für heute voll. Ein Ausbau versorgt mehr Boote.',
   },
   stufe: {
     titel: 'Der Hafen kann wachsen',
@@ -152,6 +164,7 @@ export function hinweisFuer(name, d = {}) {
   if (name === 'sim:turnedAway') return d.reason === 'patience' ? 'geduld' : d.reason === 'queueFull' ? 'voll' : null;
   if (name === 'sim:stageReady') return 'stufe';
   if (name === 'stammgast:neu') return 'stammgast';
+  if (name === 'hafenzeichen:voll') return 'versorgung';
   return null;
 }
 
@@ -202,7 +215,10 @@ export function naechsterSchritt(e, lage) {
   // Nach einem ganzen Spieltag schließt der Einstieg von selbst, damit kein Hinweis Tage später noch über dem Hafen liegt
   if (lage.tag != null) {
     e.startTag ??= lage.tag;
-    if (lage.tag > e.startTag) { e.fertig = true; return null; }
+    // Ausnahme: Fehlt nur noch der Hinweis auf die Tagesziele (z. B. abends gebaut, dann kam der
+    // Tagesabschluss), kommt er am nächsten Morgen, da passt er ohnehin am besten (Feature-Test 14.11.).
+    const nurZiele = REIHENFOLGE.every((id) => id === 'ziele' || e.erledigt.includes(id));
+    if (lage.tag > e.startTag && !(nurZiele && lage.tag === e.startTag + 1)) { e.fertig = true; return null; }
   }
   const done = new Set(e.erledigt);
   // Handy quer: Die Seitenleiste mit der Tafel tritt hinter die Blase zurück (ui-phone.css),
@@ -432,9 +448,13 @@ export async function init(game) {
   }
 
   // ---------------------------------------------------------------- Sprechblase
-  function zeige(id) {
+  // Schritt 3 hat zwei Fassungen: Boot fährt noch in die Box, oder fest mit Münze
+  let fassung = null;
+  const fassungFuer = (id) => (id === 'muenzen' && !muenzen().length ? 'muenzenUnterwegs' : id);
+  function zeige(id, still = false) {
     const vorher = aktuell;
     aktuell = id;
+    fassung = id ? fassungFuer(id) : null;
     // Andere Hinweise (z. B. "Als Nächstes" beim Bauen) warten auf das Ende des Einstiegs: Bescheid geben
     if (vorher !== id) {
       game.emit('einstieg:schritt', { schritt: id });
@@ -446,7 +466,7 @@ export async function init(game) {
     game.meldungen?.wunsch('einstieg', id.startsWith('hinweis:') ? VORRANG.tipp : VORRANG.einstieg);
     const st0 = game.sim?.state;
     const geschenkWeg = !!st0?.modules?.bauen?.geschenk || (st0?.facilities?.wc || 0) > 0 || st0?.stage > 1;
-    const t = id === 'bauen' && geschenkWeg ? TEXTE.bauenOhneGeschenk : TEXTE[id];
+    const t = id === 'bauen' && geschenkWeg ? TEXTE.bauenOhneGeschenk : TEXTE[fassung] ?? TEXTE[id];
     const nr = REIHENFOLGE.indexOf(id) + 1;
     const info = id === 'tempo' || id === 'bauen' || id === 'ziele';
     tipp.replaceChildren();
@@ -470,6 +490,7 @@ export async function init(game) {
     const pk = document.createElement('p'); pk.className = 'kurz'; pk.textContent = t.kurz ?? t.text;
     tipp.append(z, h, p, pk, k);
     tipp.hidden = false;
+    if (still) return;
     try { game.audio?.sfx?.('hinweis'); } catch { /* Ton ist nicht wichtig */ }
   }
 
@@ -533,7 +554,18 @@ export async function init(game) {
       const yU = Math.max(oben, unten - hoehe);
       y = !trifft(oben) ? oben : !trifft(yU) ? yU : (deckung(yU) < deckung(oben) ? yU : oben);
     }
+    // Kein Platz zwischen linker Spalte und Zeit/Bauen (z. B. Handy hochkant mit aufgeklappter
+    // Tagesziel-Tafel): nie über die Knöpfe rutschen. Ein Tipp wartet, ein Schritt legt sich über die Spalte.
+    if (y + hoehe > unten + 0.5 && !tipp.classList.contains('eng')) {
+      tipp.classList.add('eng');
+      hoehe = tipp.offsetHeight;
+    }
+    if (y + hoehe > unten + 0.5) {
+      if (istHinweis) return false;
+      y = Math.max(Math.max(unterkante('#hud-top'), 8) + 10, unten - hoehe);
+    }
     tipp.style.top = `${Math.round(y)}px`;
+    return true;
   }
 
   // ---------------------------------------------------------------- Ablauf
@@ -628,8 +660,11 @@ export async function init(game) {
 
   // ------------------------------------------------------------ Hinweise beim ersten Mal (J6)
   const offeneHinweise = [];
-  let hinweisBis = 0;
-  for (const name of ['sim:turnedAway', 'sim:stageReady', 'stammgast:neu']) {
+  // Sichtbare Zeit, die der Tipp noch steht (ms). Sie läuft nur, solange er wirklich im Bild ist,
+  // und höchstens 250 ms je Takt: Ruckelt das Bild (schwaches Gerät, Tab im Hintergrund), verfällt er nicht ungesehen.
+  let hinweisRest = 0;
+  let hinweisTaktZuletzt = 0;
+  for (const name of ['sim:turnedAway', 'sim:stageReady', 'stammgast:neu', 'hafenzeichen:voll']) {
     game.on(name, (d) => { const e = st() && einstiegState(st()); if (e) merkeHinweis(e, hinweisFuer(name, d), offeneHinweise); });
   }
   function schliesseHinweis() {
@@ -641,15 +676,19 @@ export async function init(game) {
   function hinweisTakt(e) {
     const ruhig = !document.body.classList.contains('card-open') && !document.body.classList.contains('building') && !document.body.classList.contains('foto') && !document.body.classList.contains('hm-feier-an');
     if (aktuell?.startsWith('hinweis:')) {
-      if (performance.now() > hinweisBis) { schliesseHinweis(); return; }
+      const jetzt = performance.now();
+      const dt = Math.min(250, Math.max(0, jetzt - hinweisTaktZuletzt));
+      hinweisTaktZuletzt = jetzt;
+      if (!tipp.hidden) hinweisRest -= dt;
+      if (hinweisRest <= 0) { schliesseHinweis(); return; }
+      // Solange eine andere Meldung vorgeht, wartet der Tipp ausgeblendet
       tipp.hidden = !ruhig || !darf();
-      // Solange eine andere Meldung vorgeht, läuft die Zeit des Tipps nicht ab
-      if (tipp.hidden) hinweisBis = Math.max(hinweisBis, performance.now() + 8000);
       const id = aktuell.slice(8);
       k = id === 'stufe' ? domKreis(document.getElementById('btn-build'), 6) : null;
+      // Passt der Tipp nirgends hin, ohne Knöpfe zu verdecken, wartet er (seine Zeit läuft nicht ab)
+      if (!tipp.hidden && !lege(k)) tipp.hidden = true;
       ring.hidden = !k || tipp.hidden;
-      if (k) setzeKreis();
-      if (!tipp.hidden) lege(k);
+      if (k && !ring.hidden) setzeKreis();
       return;
     }
     // Nacheinander statt gleichzeitig: erst anfangen, wenn keine wichtigere Meldung steht (ui/meldungen.js)
@@ -659,7 +698,10 @@ export async function init(game) {
     e.hinweise ||= [];
     e.hinweise.push(id);   // gilt als gesehen, auch wenn der Spieler gleich neu lädt
     zeigeHinweis(id);
-    hinweisBis = performance.now() + 20000;
+    hinweisRest = 20000;
+    hinweisTaktZuletzt = performance.now();
+    // Gleich an seinen Platz legen, dann erst zeigen: kein Sprung von der alten Lage
+    hinweisTakt(e);
   }
   function zeigeHinweis(id) {
     const t = HINWEISE[id];
@@ -677,7 +719,7 @@ export async function init(game) {
     w.addEventListener('click', schliesseHinweis);
     kn.append(w);
     tipp.append(z, h, p, pk, kn);
-    tipp.hidden = false;
+    tipp.hidden = true;   // hinweisTakt legt ihn hin und zeigt ihn
     try { game.audio?.sfx?.('hinweis'); } catch { /* Ton ist nicht wichtig */ }
   }
 
@@ -706,13 +748,16 @@ export async function init(game) {
     // Wer schon vorspult, kennt die Zeitsteuerung: der Hinweis würde nur kurz aufblitzen
     if (id === 'tempo' && (game.speed || 1) > 1) { schritt('tempo'); return; }
     if (id !== aktuell) { zeige(id); fluege = 0; gerahmt = false; }
+    else if (id && fassungFuer(id) !== fassung) zeige(id, true);   // Boot ist fest: Text ohne neuen Ton tauschen
     if (id === 'anlegen' && !gerahmt) rahmeBootUndPlatz();
     k = id ? ziel(id) : null;
     if (!id) return;
     if (id === 'muenzen' && !k) zumBoot(zahlendeIds());
     // Ist die Bootskarte offen, sagt sie selbst, was zu tun ist; der Text würde nur die Stege verdecken
-    tipp.hidden = ziehen || (id === 'anlegen' && document.body.classList.contains('card-open')) || !darf();
-    ring.hidden = !k || ziehen || !darf();
+    // Beim Bauen führt das Baumenü selbst (Vorschau, Kaufknopf): die Blase wartet auf allen Geräten, bis es zu ist
+    const bauOffen = document.body.classList.contains('building');
+    tipp.hidden = ziehen || bauOffen || (id === 'anlegen' && document.body.classList.contains('card-open')) || !darf();
+    ring.hidden = !k || ziehen || bauOffen || !darf();
     if (k) setzeKreis();
     if (!tipp.hidden) lege(k);
   }

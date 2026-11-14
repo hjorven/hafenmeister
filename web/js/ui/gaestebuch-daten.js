@@ -13,9 +13,11 @@
 // Die Logik läuft ohne Browser (tests/gaestebuch.test.mjs).
 
 import * as sim from '../sim.js';
+import { RULES } from '../data/rules.js';
+import { ANGEBOT_TEXTE } from '../data/wuensche-texte.js';
 
 export const GAESTEBUCH = {
-  maxEintraege: 20,     // wie das Ruf-Fenster (economy.js ruf.fenster): genau diese Noten machen den Ruf
+  maxEintraege: 20,     // so viele Bewertungen zeigt das Gästebuch (der Ruf zählt die letzten Tage, economy.js ruf.tage)
   maxVerlauf: 30,       // Tage im Ruf-Verlauf
   zufriedenAb: 4,       // ab dieser Note zufrieden (wie Stammgäste, features/stammgaeste.js)
   topGruende: 3,
@@ -35,7 +37,13 @@ export const GRUND = {
   abends:     { text: 'abends kein Platz',          lang: 'Abends noch immer ohne Liegeplatz',         sym: 'warten' },
   weggeschickt: { text: 'weggeschickt',            lang: 'Vom Hafenmeister weggeschickt',             sym: 'warten' },
   abgewiesen: { text: 'keinen Platz bekommen',      lang: 'Keinen Liegeplatz bekommen',                sym: 'warten' },
+  // Weiter Weg (P19 B9): der Wunsch war erfüllt, zählte aber nur halb
+  'weit:wc':     { text: 'weiter Weg zum WC',        lang: 'Weiter Weg zum WC',                          sym: 'wc' },
+  'weit:dusche': { text: 'weiter Weg zur Dusche',    lang: 'Weiter Weg zur Dusche',                      sym: 'dusche' },
 };
+
+// Wünsche an Angebote an Land (P19 C3): Texte aus data/wuensche-texte.js, Symbol wie der Wunsch
+for (const [k, t] of Object.entries(ANGEBOT_TEXTE)) GRUND[k] = { text: t.fehlt, lang: t.lang, sym: k };
 
 /** Was die Note hebt. */
 export const PLUS = {
@@ -45,10 +53,10 @@ export const PLUS = {
   sonder:   'besonderer Gast',
   passgenau: 'Box passt genau',
   vonHand:  'vom Hafenmeister eingewiesen',
-  bonus:    'Hafenangebote',
+  bonus:    'Fest im Hafen',
 };
 
-const WUNSCH_KEYS = ['wc', 'dusche', 'essen', 'strom', 'diesel'];
+const WUNSCH_KEYS = ['wc', 'dusche', 'essen', 'strom', 'diesel', ...Object.keys(ANGEBOT_TEXTE)];
 
 export function buchState(state) {
   state.modules ||= {};
@@ -70,9 +78,11 @@ export function gruendeAusAbreise(e) {
     // Wünsche: je Wunsch die Nächte, in denen er fehlte (meiste zuerst)
     const missed = Object.entries(p.missed || {}).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]);
     for (const [key, n] of missed) gruende.push({ key, n });
+    // weiter Weg zum WC oder zur Dusche (P19 B9), nach den fehlenden Wünschen
+    for (const [key, n] of Object.entries(p.far || {})) if (n > 0 && GRUND[`weit:${key}`]) gruende.push({ key: `weit:${key}`, n });
     if (p.penalty > 0.001) gruende.push({ key: 'sturm', n: r2(p.penalty) });
     if (p.bonus < -0.001) gruende.push({ key: 'stimmung', n: r2(-p.bonus) });
-    if (p.wishesTotal > 0 && !missed.length) plus.push({ key: 'wuensche', wert: 0 });
+    if (p.wishesTotal > 0 && !missed.length && !Object.values(p.far || {}).some((n) => n > 0)) plus.push({ key: 'wuensche', wert: 0 });
     if (!p.wishes?.length) plus.push({ key: 'ohne', wert: 0 });
     if (p.comfort > 0.001) plus.push({ key: 'komfort', wert: r2(p.comfort) });
     if (p.special > 0.001) plus.push({ key: 'sonder', wert: r2(p.special) });
@@ -144,7 +154,7 @@ export function hauptgrund(eintrag) {
   if (eintrag.art === 'umbau') return 'umbau';
   if (eintrag.art === 'abgewiesen') return eintrag.gruende[0].key;
   // Fehlende Wünsche zuerst (die kann der Spieler bauen), dann der Rest
-  const w = eintrag.gruende.find((g) => WUNSCH_KEYS.includes(g.key));
+  const w = eintrag.gruende.find((g) => WUNSCH_KEYS.includes(g.key) || g.key.startsWith('weit:'));
   return (w ?? eintrag.gruende[0]).key;
 }
 
@@ -166,6 +176,15 @@ export function zusammenfassung(state) {
   const liste = buchState(state).eintraege;
   const schnitt = liste.length ? r1(liste.reduce((a, e) => a + e.note, 0) / liste.length) : null;
   return { anzahl: liste.length, zufrieden: liste.filter(zufrieden).length, schnitt };
+}
+
+/** Satz unter dem Gästebuch: woraus der Ruf besteht (economy.js ruf.tage, ruf.mindestens). */
+export function rufErklaerung(state) {
+  const { days, minCount } = RULES.reputation;
+  const n = sim.reputationRatings(state).length;
+  const tage = days === 1 ? 'von heute' : `der letzten ${days} Tage`;
+  return `Dein Ruf ist der Schnitt aller Bewertungen ${tage}, mindestens der letzten ${minCount} (gerade ${n}). `
+    + 'Ab 4 Sternen kommen Gäste als Stammgast wieder, ein guter Ruf lockt mehr und größere Boote an.';
 }
 
 /** Ruf-Verlauf mit dem heutigen Stand am Ende: [{ tag, ruf, heute? }]. */
@@ -202,8 +221,12 @@ const SATZ = {
   gut: ['Netter Hafen, gerne wieder.', 'Ruhige Nacht, guter Platz.', 'Hat gepasst.', 'Schöner Liegeplatz.'],
   mittel: ['Ganz in Ordnung.', 'Geht so.', 'Für eine Nacht reicht es.'],
   komfort: ['Toller Liegeplatz am Fingersteg.', 'Der Platz war richtig bequem.'],
+  'weit:wc': ['Bis zum Klo war es ein halber Landgang.', 'Nachts so weit zum WC laufen, nein danke.'],
+  'weit:dusche': ['Nach der Dusche waren wir auf dem Rückweg schon wieder verschwitzt.', 'Die Dusche war am anderen Ende des Hafens.'],
   stamm: (n) => `Schon unser ${n}. Besuch hier.`,
 };
+for (const [k, t] of Object.entries(ANGEBOT_TEXTE)) SATZ[k] = t.saetze;
+
 
 /** Ein Satz im Gästebuch, zum Beispiel "Eine warme Dusche hätte gutgetan." */
 export function satz(eintrag) {
@@ -234,7 +257,7 @@ export function erklaerung(eintrag) {
   for (const g of eintrag.gruende) {
     const def = GRUND[g.key];
     if (!def) continue;
-    if (WUNSCH_KEYS.includes(g.key)) teile.push(g.n > 1 ? `${def.text} (${g.n} Nächte)` : def.text);
+    if (WUNSCH_KEYS.includes(g.key) || g.key.startsWith('weit:')) teile.push(g.n > 1 ? `${def.text} (${g.n} Nächte)` : def.text);
     else if (g.key === 'sturm' || g.key === 'stimmung') teile.push(`${def.text} −${komma(g.n)}`);
     else teile.push(def.text);
   }

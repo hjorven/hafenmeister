@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "14a7d7d"
+  "commit": "adc0086"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -63,7 +63,7 @@
    "id": "P02",
    "titel": "Hafenbüro mit eigenen Aufgaben ausbauen",
    "inhalt": "Ü2, Ü11, A2, E1 bis E7, erledigt (PR 146)",
-   "thread": "neu",
+   "thread": "erledigt (PR 146)",
    "welle": 1,
    "prs": [
     146,
@@ -127,9 +127,10 @@
    "id": "P04",
    "titel": "Abschlussziel Stufe 6 richtig zählen",
    "inhalt": "Ü4",
-   "thread": "bestehend: \"Services und Sonderanlagen einbauen\"",
+   "thread": "erledigt (PR 139): ein Zähler state.bigVisits, Liste GROSSSCHIFF_BESUCHE in data/services.js (Vorarbeit PR 113)",
    "welle": 1,
    "prs": [
+    113,
     139
    ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
@@ -144,7 +145,7 @@
    "id": "P05",
    "titel": "Boote auf wegfallenden Plätzen regeln",
    "inhalt": "Ü5",
-   "thread": "bestehend: \"Spielregeln ohne Grafik umsetzen\"",
+   "thread": "erledigt (Ü5: advanceStage, Hook stageUp, Test in tests/dauerlieger.test.mjs); bestehend: \"Spielregeln ohne Grafik umsetzen\"",
    "welle": 1,
    "prs": [
     143,
@@ -194,9 +195,12 @@
    "id": "P07",
    "titel": "Tempo einheitlich regeln",
    "inhalt": "Ü7, Hilfetexte, docs/schiffsanimationen.md",
-   "thread": "bestehend: \"Gesamte Oberfläche neu überarbeiten\"",
+   "thread": "erledigt (Ü7, Tempo bleibt mit PR 257, läuft ohne automatische Bremsung seit PR 278); bestehend: \"Gesamte Oberfläche neu überarbeiten\"",
    "welle": 1,
-   "prs": [],
+   "prs": [
+    257,
+    278
+   ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
    "punkte": [
     "Ü7",
@@ -204,7 +208,9 @@
     "Bed P8"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    38
+   ]
   },
   {
    "id": "P08",
@@ -321,7 +327,7 @@
    "id": "P12",
    "titel": "Kassieren verständlich machen",
    "inhalt": "Ü12 (Rundgang ab Abend, halbe Münze sichtbar), B3, B4, B5 (Trinkgeld), B6. Stand: erledigt (PR 151)",
-   "thread": "neu",
+   "thread": "erledigt (PR 151)",
    "welle": 2,
    "prs": [
     146,
@@ -368,10 +374,11 @@
    "id": "P14",
    "titel": "Bewertungen und Gästebuch zeigen",
    "inhalt": "Ü21, F18, C1, C9; Note aus Wünschen 2,5 bis 5 (Befund P10)",
-   "thread": "erledigt (PR 154)",
+   "thread": "erledigt (PR 154, 233)",
    "welle": 2,
    "prs": [
-    154
+    154,
+    233
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -391,10 +398,11 @@
    "id": "P15",
    "titel": "Tagesabschluss am Abend zeigen",
    "inhalt": "Ü22",
-   "thread": "erledigt (PR 159)",
+   "thread": "erledigt (PR 159, 239)",
    "welle": 2,
    "prs": [
-    159
+    159,
+    239
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -435,7 +443,9 @@
    "thread": "bestehend: \"Balancing für 94 Liegeplätze ausarbeiten\" (nach P06)",
    "welle": 2,
    "prs": [
-    237
+    237,
+    252,
+    287
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -447,7 +457,10 @@
     "J4"
    ],
    "status": "teilweise",
-   "bilder": []
+   "bilder": [
+    33,
+    34
+   ]
   },
   {
    "id": "P18",
@@ -481,9 +494,12 @@
    "id": "P19",
    "titel": "Ruf schwerer machen mit Wünschen je Bootsart",
    "inhalt": "Ü17, feeFactor, arrivalWeight, Kapazität sichtbar",
-   "thread": "neu",
+   "thread": "erledigt: Teil 1 (PR 244: B7, C2, C3, C4, C6, F8), Teil 2 (PR 279: C5, B9, \"heute voll\"), ruf.md",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    244,
+    279
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "Ü17",
@@ -497,16 +513,24 @@
     "Svc F8",
     "M3"
    ],
-   "status": "teilweise",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    44,
+    45,
+    49,
+    50
+   ]
   },
   {
    "id": "P20",
    "titel": "Winter mit Inhalt füllen",
    "inhalt": "Ü19, F14, F15, docs/ereignisse.md",
-   "thread": "neu",
+   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, 249, docs/winter.md); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    245,
+    249
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "Ü19",
@@ -517,29 +541,38 @@
     "H5",
     "I10"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "teilweise",
+   "bilder": [
+    35,
+    36,
+    37
+   ]
   },
   {
    "id": "P21",
    "titel": "Logbuch und Hafenchronik zeigen",
    "inhalt": "Logbuch (Note 1), F36, sim:logbookNew",
-   "thread": "neu",
+   "thread": "erledigt (PR 274, docs/logbuch.md, SAVE_VERSION 3)",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    274
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "F36",
     "I5"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    40,
+    41
+   ]
   },
   {
    "id": "P22",
    "titel": "Erfolge einbauen",
    "inhalt": "plan.md 9",
-   "thread": "neu",
+   "thread": "erledigt (30 Erfolge, Reiter im Logbuch, Dinge im Hafen, docs/erfolge.md)",
    "welle": 2,
    "prs": [],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
@@ -547,7 +580,7 @@
     "I6",
     "I7"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -572,9 +605,11 @@
    "id": "P24",
    "titel": "Ereignisse zum Vorbereiten und neue Ereignisse",
    "inhalt": "Vorwarnung mit Handlungsmöglichkeit, F17",
-   "thread": "bestehend: \"Ereignisse Sturm und Regatta einbauen\"",
+   "thread": "Teil 1 erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend), Teil 2 offen; bestehend: \"Ereignisse Sturm und Regatta einbauen\"",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    281
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F17",
@@ -585,8 +620,11 @@
     "G7",
     "G9"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "teilweise",
+   "bilder": [
+    47,
+    48
+   ]
   },
   {
    "id": "P25",
@@ -1033,9 +1071,12 @@
    "id": "P55",
    "titel": "Versteckte Regeln im Hafen sichtbar machen",
    "inhalt": "A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen \"hier ist etwas zu tun\"",
-   "thread": "neu",
+   "thread": "erledigt (PR 269 und 275, docs/hafenzeichen.md)",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    269,
+    275
+   ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
     "A4",
@@ -1046,8 +1087,12 @@
     "Bed P3",
     "Bed P10"
    ],
-   "status": "teilweise",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    42,
+    43,
+    46
+   ]
   },
   {
    "id": "P57",
@@ -1118,23 +1163,25 @@
    "id": "P61",
    "titel": "Spiel komplett offline startbar",
    "inhalt": "N15, N16",
-   "thread": "bestehend: \"Spiel über GitHub Pages veröffentlichen\"",
+   "thread": "erledigt (PR 270), Thread \"Spiel offline startbar machen\"",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    270
+   ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
     "N15",
     "N16",
     "C06"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
    "id": "P62",
    "titel": "Geländeform und Engpass neu bauen",
    "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
-   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224, 229): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224), Land nördlich der Reede (PR 229)",
+   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224, 229, 246, 271): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224), Land nördlich der Reede (PR 229), Fahrrinne in die offene See an jeder Küste (PR 271)",
    "welle": 0,
    "prs": [
     179,
@@ -1145,7 +1192,9 @@
     211,
     216,
     224,
-    229
+    229,
+    246,
+    271
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1163,9 +1212,10 @@
    "id": "P63",
    "titel": "Marinebasis und Anlagen neu platzieren",
    "inhalt": "T6, T7, T13: Marinebasis mit Zufahrt von See, Großschiffpier, Services und Bauplätze passend zum neuen Gelände, jede Anlage von Wasser oder Land erreichbar",
-   "thread": "in Arbeit (PR 172): Lage der Anlagen in docs/services.md; Abgleich mit dem Seed-Gelände offen; stimmt sich mit \"Services und Sonderanlagen einbauen\" und \"Stegbild pro Spiel variieren\" ab",
+   "thread": "erledigt (PR 167, 172): eigene Piers mit freien Wegen in jedem Stegbild",
    "welle": 0,
    "prs": [
+    167,
     172
    ],
    "abschnitt": "Pakete der Welle 0",
@@ -1174,7 +1224,7 @@
     "T7",
     "T13"
    ],
-   "status": "arbeit",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1202,30 +1252,37 @@
    "id": "P65",
    "titel": "Wetter und Effekte flüssig machen",
    "inhalt": "T1, T5, T12: Wetter (Regen, Nebel, Sturm, Schnee) ohne Ruckeln, Heckwelle auf beiden Seiten, Effekte ohne Artefakte; Messung je Wetter mit feature-tests/leistung.cjs",
-   "thread": "neu",
+   "thread": "erledigt (PR 169): Wetter flüssig, Heckwelle auf beiden Seiten",
    "welle": 0,
-   "prs": [],
+   "prs": [
+    169
+   ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
     "T1",
     "T5",
     "T12"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
    "welle": 0,
    "prs": [
     81,
     180,
     181,
     199,
-    228
+    228,
+    240,
+    254,
+    256,
+    258,
+    262
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1238,7 +1295,8 @@
    "status": "arbeit",
    "bilder": [
     23,
-    32
+    32,
+    39
    ]
   },
   {
@@ -1316,7 +1374,7 @@
   {
    "id": "P73",
    "titel": "Stufe 10 Hafenverbund und Hafenkarten",
-   "inhalt": "modules.verbund, SAVE_VERSION 3 mit Migration, Übernahme alter Häfen, Kurzrechnung mit Abgleichstest, Standortwechsel",
+   "inhalt": "modules.verbund, SAVE_VERSION 4 mit Migration (3 ist seit P21 das Logbuch), Übernahme alter Häfen, Kurzrechnung mit Abgleichstest, Standortwechsel",
    "thread": "neu",
    "welle": 6,
    "prs": [],
@@ -1634,8 +1692,8 @@
   {
    "code": "Ü17",
    "text": "Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus data/boats, spürbare Kapazität",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19): Wünsche je Bootsart, Ruf über drei Tage, Angebote als Wünsche, Kapazität sichtbar (Schild am Gebäude aus P55, \"heute voll\" in der Bootskarte), ruf.md",
    "pakete": [
     "P19"
    ],
@@ -1658,12 +1716,14 @@
   {
    "code": "Ü19",
    "text": "Winter nutzen: Zeitraffer vor Stufe 4 oder Winterarbeiten (F14)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 245): Winterarbeiten und „Winter überspringen“",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "Balancing (Ü15 bis Ü20)"
   },
   {
@@ -1886,23 +1946,27 @@
   {
    "code": "F14",
    "text": "Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 245)",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "Hafenleben"
   },
   {
    "code": "F15",
    "text": "Krantage: Dauerlieger sichtbar ins Winterlager und zurück",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 245)",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "Hafenleben"
   },
   {
@@ -2131,8 +2195,8 @@
   {
    "code": "F36",
    "text": "Hafenchronik: jeder Tag eine Zeile",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt",
    "pakete": [
     "P21"
    ],
@@ -2248,8 +2312,8 @@
   {
    "code": "A4",
    "text": "Geduld sichtbar: Ring an der Boje, im letzten Drittel Flagge oder kurzes Tuten",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P55: Ring über dem Boot, rot und blinkend im letzten Drittel, kurzes Tuten, ruht abends; docs/hafenzeichen.md)",
    "pakete": [
     "P55"
    ],
@@ -2324,19 +2388,21 @@
   {
    "code": "A10",
    "text": "Größenmischung je Stufe: an vollen Tagen ein bis zwei große Boote zu viel",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 287, ECONOMY.platzMix, sim.sizeBerthFactors)",
    "pakete": [
     "P17"
    ],
-   "prs": [],
+   "prs": [
+    287
+   ],
    "abschnitt": "A Ankunft, Warten und Zuweisen"
   },
   {
    "code": "B1",
    "text": "Auslastung an jedem Versorgungsgebäude (\"14 von 20\"), Schlange vor der Dusche",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "Schild erledigt (P55, game.sim.auslastung()), Schlange erledigt (L2)",
    "pakete": [
     "P55"
    ],
@@ -2407,8 +2473,8 @@
   {
    "code": "B7",
    "text": "Wünsche je Bootsart aus den Bootsdaten nutzen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 1, type.wishes)",
    "pakete": [
     "P19"
    ],
@@ -2429,8 +2495,8 @@
   {
    "code": "B9",
    "text": "Wege zählen: weit vom Sanitärhaus zählt die Dusche halb",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 2): über 120 m zählt WC oder Dusche halb, ruf.md",
    "pakete": [
     "P19"
    ],
@@ -2440,12 +2506,14 @@
   {
    "code": "B10",
    "text": "Liegegeld nach Länge statt fest je Größe",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 252, ECONOMY.klassen.proMeter, sim.baseNightlyFee)",
    "pakete": [
     "P17"
    ],
-   "prs": [],
+   "prs": [
+    252
+   ],
    "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
   },
   {
@@ -2475,8 +2543,8 @@
   {
    "code": "C2",
    "text": "Ruf als Schnitt der letzten drei Tage statt 20 Bewertungen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 1, mindestens 10 Bewertungen)",
    "pakete": [
     "P19"
    ],
@@ -2486,8 +2554,8 @@
   {
    "code": "C3",
    "text": "Service-Bonus als Extra-Wünsche statt Aufschlag auf jede Bewertung",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 1, angebotWunsch)",
    "pakete": [
     "P19"
    ],
@@ -2497,8 +2565,8 @@
   {
    "code": "C4",
    "text": "Gäste ohne Wünsche geben 4,5, der Platz entscheidet über den Rest",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 1, alle Wünsche ebenfalls 4,5)",
    "pakete": [
     "P19"
    ],
@@ -2508,8 +2576,8 @@
   {
    "code": "C5",
    "text": "Ruf als Auszeichnung mit Namen und Zeichen im Hafen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 2): drei Stufen mit Namen, Wimpel am Hafenmeisterhaus",
    "pakete": [
     "P19"
    ],
@@ -2519,8 +2587,8 @@
   {
    "code": "C6",
    "text": "Ruf lockt andere Gäste (ab 4 große Yachten, ab 4,5 seltene Modelle)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 1, ruf.lockt)",
    "pakete": [
     "P19"
    ],
@@ -2530,8 +2598,8 @@
   {
    "code": "C7",
    "text": "Warnen, bevor es Anker kostet (Gebäude blinkt bei fast ausgebuchter Dusche)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P55: Schild knapp orange und blinkend, voll rot, Tipp beim ersten Mal)",
    "pakete": [
     "P55"
    ],
@@ -2870,8 +2938,8 @@
   {
    "code": "Svc F8",
    "text": "Mindestruf mit Sinn oder weg",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 1): bleibt, mit dem neuen Ruf ist er eine echte Hürde",
    "pakete": [
     "P19"
    ],
@@ -2892,8 +2960,8 @@
   {
    "code": "G1",
    "text": "Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (14.11.)",
    "pakete": [
     "P24"
    ],
@@ -2903,8 +2971,8 @@
   {
    "code": "G2",
    "text": "Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (14.11.)",
    "pakete": [
     "P24"
    ],
@@ -2925,12 +2993,14 @@
   {
    "code": "G4",
    "text": "Winter als Planungsbild (Bilanz, Winterarbeiten, Verträge)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 245)",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
@@ -2947,8 +3017,8 @@
   {
    "code": "G6",
    "text": "Ergebnis eines Ereignisses am Abend zeigen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (14.11.)",
    "pakete": [
     "P24"
    ],
@@ -3044,11 +3114,13 @@
    "code": "H5",
    "text": "Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land",
    "status": "offen",
-   "statusText": "offen",
+   "statusText": "teilweise (PR 245): im Winter im Winterlager; Segelmacher und Kran in der Saison offen",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
   },
   {
@@ -3163,8 +3235,8 @@
   {
    "code": "I5",
    "text": "Logbuch als Sammelalbum mit Schattenrissen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt",
    "pakete": [
     "P21"
    ],
@@ -3174,8 +3246,8 @@
   {
    "code": "I6",
    "text": "Erfolge als Dinge im Hafen (Pokal, Wimpel, Schild)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (Erfolgsmast, Pokaltreppe, Ehrentafel, docs/erfolge.md)",
    "pakete": [
     "P22"
    ],
@@ -3185,8 +3257,8 @@
   {
    "code": "I7",
    "text": "Meilensteine mit Ton und Bild",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (Meldung mit Symbol, Ton \"erfolg\")",
    "pakete": [
     "P22"
    ],
@@ -3222,12 +3294,14 @@
   {
    "code": "I10",
    "text": "Ziele im Winter (Winterarbeiten)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 245)",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "I Tagesziele, Logbuch, Abschluss und Endlosspiel"
   },
   {
@@ -3421,8 +3495,8 @@
   {
    "code": "L2",
    "text": "Figuren als Anzeige (Schlange vor der Dusche, volle Tische)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P55, Schlange vor WC, Dusche, Kiosk und Restaurant, wenn knapp oder voll; render/people.js)",
    "pakete": [
     "P55"
    ],
@@ -3577,23 +3651,27 @@
   {
    "code": "N15",
    "text": "3D-Bibliothek mitliefern statt von fremdem Server",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 270, web/vendor/three-0.187.0/, tools/three-holen.sh)",
    "pakete": [
     "P61"
    ],
-   "prs": [],
+   "prs": [
+    270
+   ],
    "abschnitt": "N Speichern und Web-App"
   },
   {
    "code": "N16",
    "text": "Alle Spieldateien vorab für offline speichern",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 270, offline-liste.json beim Deploy, Service Worker lädt vorab)",
    "pakete": [
     "P61"
    ],
-   "prs": [],
+   "prs": [
+    270
+   ],
    "abschnitt": "N Speichern und Web-App"
   },
   {
@@ -3687,8 +3765,8 @@
   {
    "code": "Bed P1",
    "text": "Die fünf fehlenden Anzeigen (A4, B1, B2, B11, C1)",
-   "status": "teilweise",
-   "statusText": "B11 und B2 erledigt, Rest offen",
+   "status": "erledigt",
+   "statusText": "B11, B2, A4 und B1 erledigt (P55), C1 siehe P14",
    "pakete": [
     "P55",
     "P11",
@@ -3713,19 +3791,21 @@
   {
    "code": "Bed P3",
    "text": "Zeiger am Bildrand für wartende Boote",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 269: Zeiger mit Geduldsring, gebündelt, Antippen fährt hin)",
    "pakete": [
     "P55"
    ],
-   "prs": [],
+   "prs": [
+    269
+   ],
    "abschnitt": "P Bedienung (hier \"Bed\")"
   },
   {
    "code": "Bed P4",
    "text": "Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf \"bis zum nächsten Boot\"",
-   "status": "erledigt",
-   "statusText": "erledigt (1x bei Ereignis, Ausbau möglich, Regionsziel; 8x läuft bis zum nächsten Boot)",
+   "status": "offen",
+   "statusText": "geändert auf Jorvens Wunsch (14.11.): Tempo läuft durch, keine automatische Bremsung mehr",
    "pakete": [
     "P07"
    ],
@@ -3794,8 +3874,8 @@
   {
    "code": "Bed P10",
    "text": "Zeichen am Rand für \"hier ist etwas zu tun\"",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt für wartende Boote (P55); Münzen und Dauerlieger bewusst ohne Randzeichen",
    "pakete": [
     "P55"
    ],
@@ -4140,18 +4220,20 @@
   {
    "code": "C06",
    "text": "Three.js kommt von jsDelivr, Erststart hängt am CDN (= N15, N16)",
-   "status": null,
+   "status": "erledigt",
    "statusText": "",
    "pakete": [
     "P61"
    ],
-   "prs": [],
+   "prs": [
+    270
+   ],
    "abschnitt": "Technische Befunde aus dem Audit (12.11.2026)"
   },
   {
    "code": "C07",
    "text": "GitHub Actions: Rechte je Job statt für den ganzen Workflow (pages.yml gibt pages: write und id-token: write auch dem Build), Actions auf Commit-SHAs pinnen, Dependabot prüfen",
-   "status": null,
+   "status": "erledigt",
    "statusText": "",
    "pakete": [
     "P08"
@@ -4183,11 +4265,11 @@
     "P66"
    ],
    "zaehler": {
-    "erledigt": 0,
+    "erledigt": 2,
     "teilweise": 0,
-    "arbeit": 4,
+    "arbeit": 3,
     "frage": 0,
-    "offen": 1,
+    "offen": 0,
     "entfaellt": 0,
     "alle": 5
    }
@@ -4238,11 +4320,11 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 8,
-    "teilweise": 3,
+    "erledigt": 13,
+    "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
-    "offen": 4,
+    "offen": 0,
     "entfaellt": 0,
     "alle": 15
    }
@@ -4273,10 +4355,10 @@
    ],
    "zaehler": {
     "erledigt": 0,
-    "teilweise": 1,
+    "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
-    "offen": 18,
+    "offen": 17,
     "entfaellt": 0,
     "alle": 19
    }
@@ -4360,22 +4442,22 @@
   }
  ],
  "gesamt": {
-  "erledigt": 17,
+  "erledigt": 24,
   "teilweise": 6,
-  "arbeit": 4,
+  "arbeit": 3,
   "frage": 0,
-  "offen": 53,
+  "offen": 47,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 107,
-  "teilweise": 7,
+  "erledigt": 140,
+  "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 102,
+  "offen": 72,
   "entfaellt": 0,
-  "alle": 217
+  "alle": 219
  },
  "bilder": [
   {
@@ -4773,110 +4855,323 @@
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr228/pulk-pc-g8-4242.png",
    "nr": 32
+  },
+  {
+   "datei": "p17-pr237-pc-erstes-bauwerk.jpg",
+   "pakete": [
+    "P17"
+   ],
+   "titel": "Erstes Bauwerk geschenkt: Toilettenhäuschen",
+   "pr": 237,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr237/237-vorschau-pc.png",
+   "nr": 33
+  },
+  {
+   "datei": "p17-pr237-iphone-erstes-bauwerk.jpg",
+   "pakete": [
+    "P17"
+   ],
+   "titel": "Erstes Bauwerk geschenkt: Toilettenhäuschen",
+   "pr": 237,
+   "geraet": "iphone",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr237/237-vorschau-iphone.png",
+   "nr": 34
+  },
+  {
+   "datei": "p20-pr245-handy-winterpause.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winterpause: Bilanz der Saison und Winterarbeiten",
+   "pr": 245,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "winter/wi-handy-1-karte.png",
+   "nr": 35
+  },
+  {
+   "datei": "p20-pr245-quer-winterarbeiten.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winter im Hafen: Schnee und beauftragte Winterarbeit",
+   "pr": 245,
+   "geraet": "handy-quer",
+   "datum": "2026-11-14",
+   "quelle": "winter/wi-quer-2-auftrag.png",
+   "nr": 36
+  },
+  {
+   "datei": "p20-pr249-pc-winterpause.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winterpause am PC: Saisonbilanz, Winterarbeiten, Winter überspringen",
+   "pr": 249,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr249/245-krantag-pc.png",
+   "nr": 37
+  },
+  {
+   "datei": "p07-pr257-handy-weiter-mit-3x.jpg",
+   "pakete": [
+    "P07"
+   ],
+   "titel": "Tempo bleibt: Knopf \"Weiter mit 3x\" mit Grund",
+   "pr": 257,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "tempo/tempo-handy.png",
+   "nr": 38
+  },
+  {
+   "datei": "p66-pr262-zonen-und-seewege.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Zonen des Geländes und Seewege für die Wegsuche der Boote",
+   "pr": 262,
+   "geraet": "karte",
+   "datum": "2026-11-14",
+   "quelle": "gelaende/vorschau/zonen/zonen-und-seewege.png",
+   "nr": 39
+  },
+  {
+   "datei": "p21-pr274-pc-logbuch-album.jpg",
+   "pakete": [
+    "P21"
+   ],
+   "titel": "Logbuch: Sammelalbum aller Boote mit Pixelbildern",
+   "pr": 274,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "logbuch/pc-boote.png",
+   "nr": 40
+  },
+  {
+   "datei": "p21-pr274-handy-steckbrief.jpg",
+   "pakete": [
+    "P21"
+   ],
+   "titel": "Logbuch: Steckbrief eines Bootes",
+   "pr": 274,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "logbuch/handy-steckbrief.png",
+   "nr": 41
+  },
+  {
+   "datei": "p55-pr269-handy-geduldsring.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Geduldsring über wartenden Booten",
+   "pr": 269,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p55/handy-1-geduldsring.png",
+   "nr": 42
+  },
+  {
+   "datei": "p55-pr269-pc-geduldsring.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Geduldsring und Wünsche an der Boje",
+   "pr": 269,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "p55/pc-1-geduldsring.png",
+   "nr": 43
+  },
+  {
+   "datei": "p19-pr244-handy-gaestebuch-ruf.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Ruf schwerer: Gästebuch zeigt, was Gästen gefehlt hat",
+   "pr": 244,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p19/p19-buch-handy.png",
+   "nr": 44
+  },
+  {
+   "datei": "p19-pr244-pc-wuensche-bootsart.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Wünsche je Bootsart auf der Ankunftskarte",
+   "pr": 244,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "p19/p19-karte-pc.png",
+   "nr": 45
+  },
+  {
+   "datei": "p55-pr275-handy-schlange-versorgung.jpg",
+   "pakete": [
+    "P55"
+   ],
+   "titel": "Schlange vor der Versorgung, wenn sie knapp ist",
+   "pr": 275,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "p55/handy-3-schlange.png",
+   "nr": 46
+  },
+  {
+   "datei": "p24-pr281-handy-sturmklar.jpg",
+   "pakete": [
+    "P24"
+   ],
+   "titel": "Morgen Sturm: Gäste sturmklar verholen",
+   "pr": 281,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "ereignisse/vorbereiten-handy-1-sturm.png",
+   "nr": 47
+  },
+  {
+   "datei": "p24-pr281-pc-sturm-angekuendigt.jpg",
+   "pakete": [
+    "P24"
+   ],
+   "titel": "Sturm angekündigt, Boote am offenen Stegkopf",
+   "pr": 281,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "ereignisse/vorbereiten-pc-1-sturm-angekuendigt.png",
+   "nr": 48
+  },
+  {
+   "datei": "p19-pr279-handy-heute-voll.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Bootskarte am Handy: Wunsch \"Essen (heute voll)\"",
+   "pr": 279,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr279/279-voll-iphone.png",
+   "nr": 49
+  },
+  {
+   "datei": "p19-pr279-pc-heute-voll.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Bootskarte am PC: Wunsch \"WC (heute voll)\"",
+   "pr": 279,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr279/279-voll-pc.png",
+   "nr": 50
   }
  ],
  "neueBilder": [
-  32,
-  31,
-  30,
-  29,
-  28,
-  27,
-  26,
-  25,
-  24
+  50,
+  48,
+  46,
+  45,
+  43,
+  41,
+  39,
+  38,
+  37
  ],
  "merges": [
   {
    "datum": "2026-11-14",
-   "titel": "Zeitraffer: robuster auf großem Gelände, Erwartung Stand PR 181",
-   "pr": 221,
+   "titel": "Roadmap-Pflege: Bilder zu P19 Teil 2 (heute voll, PR 279), Stand nach PR 291",
+   "pr": 293,
+   "pakete": [
+    "P19"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "P22 Erfolge: 30 Erfolge, Reiter im Logbuch, Wimpel, Pokale und Ehrentafel im Hafen",
+   "pr": 295,
+   "pakete": [
+    "P22"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Offline-Start auch ohne offline-liste.json (Folge zu P61)",
+   "pr": 292,
+   "pakete": [
+    "P61"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: P24 Teil 1 (PR 281) eingetragen, Bilder zum Sturm",
+   "pr": 286,
+   "pakete": [
+    "P24"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Auszeichnung: Satz im Gästebuch ohne falschen Fall (\"dann heißt der Hafen ...\")",
+   "pr": 291,
    "pakete": []
   },
   {
    "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 154, 228, 229, 231, 232 eingetragen, Bilder für P14 und P18",
-   "pr": 236,
-   "pakete": [
-    "P14",
-    "P18"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich",
-   "pr": 234,
+   "titel": "Fehler aus Jorvens Feature-Test (14.11.) behoben",
+   "pr": 290,
    "pakete": []
   },
   {
    "datum": "2026-11-14",
-   "titel": "Bauen: Nachbesserungen zu PR 232 (Ausbau-Fähnchen, Rückgängig am ersten Kauf, Regionsziel)",
-   "pr": 235,
+   "titel": "Balancing: große Boote kommen nach Platzangebot (A10)",
+   "pr": 287,
    "pakete": [
-    "P18"
+    "P17"
    ]
   },
   {
    "datum": "2026-11-14",
-   "titel": "Boote: Abendstau, Pulk am Eingang, Ablegetakt und Seebrücke im Fahrwasser",
-   "pr": 228,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P14: Bewertungen über dem Boot und Gästebuch",
-   "pr": 154,
-   "pakete": [
-    "P14"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Bauen P18: Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen",
-   "pr": 232,
-   "pakete": [
-    "P18",
-    "P05"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 224 bis 227 eingetragen, vier neue Bilder",
-   "pr": 230,
+   "titel": "README und Plan auf den Stand vom 14.11.2026 (nach PR 285)",
+   "pr": 289,
    "pakete": []
   },
   {
    "datum": "2026-11-14",
-   "titel": "Land nördlich der Reede: kein kahler Block mehr, ruhige Farben im groben Netz",
-   "pr": 229,
+   "titel": "Arbeitsplan: 252 und P24 Teil 1 gemergt, P17 nach PR 280 und A10",
+   "pr": 285,
    "pakete": [
-    "P62"
+    "P24",
+    "P17"
    ]
   },
   {
    "datum": "2026-11-14",
-   "titel": "Wunsch-Schilder nach Bildbreite in Metern: am Handy wieder in der Startansicht",
-   "pr": 231,
+   "titel": "Balancing: Liegegeld je angefangenem Meter (B10); Winterknöpfe quer fest unten",
+   "pr": 252,
    "pakete": [
-    "P11"
+    "P17"
    ]
   },
   {
    "datum": "2026-11-14",
-   "titel": "Dauerlieger-Hinweis wartet, solange ein Tipp sichtbar ist",
-   "pr": 226,
-   "pakete": [
-    "P01"
-   ]
+   "titel": "Tests: Tagesabschluss-Zettel im Browser prüfen, solange er sicher steht",
+   "pr": 284,
+   "pakete": []
   },
   {
    "datum": "2026-11-14",
-   "titel": "Wunsch-Schilder: weit weg klein, ganz weit weg aus",
-   "pr": 227,
+   "titel": "Ereignisse zum Vorbereiten: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend (P24 Teil 1)",
+   "pr": 281,
    "pakete": [
-    "P11"
+    "P24"
    ]
   }
  ]
