@@ -220,6 +220,15 @@ export const ECONOMY = {
     gutschein: { prozent: 10, hoechstens: 15 },
     woche: { tage: 7, geld: 12, gaeste: 0.5, zufrieden: 0.3, segler: 0.15, liegegeld: 0.7 },   // Anteil der Woche: nicht in zwei Tagen zu schaffen
   },
+  // Erfolge (features/erfolge-daten.js, docs/erfolge.md): Schwellen. Listen haben zwei oder drei Stufen
+  // (Wimpel, dann Pokal). ausgebuchtAb: so viele Gastboxen muss der Hafen mindestens haben, damit
+  // "alle belegt" zählt (am alten Steg mit 4 Boxen wäre es sonst geschenkt). lob: so viele Tage in Folge
+  // gibt jeder abreisende Gast mindestens lobAb Anker. fuenfAnkerAb: Abreisen an dem Abend mit 5 Ankern.
+  erfolge: {
+    passgenau: 25, ausgebuchtAb: 12, tagesziele: 10, wochenziele: 1,
+    gaeste: [100, 1000], stammgaeste: [1, 25], fuenfAnkerAb: 2, ruf: 4.5, lob: 7, lobAb: 4,
+    tag: [1000, 10000], gesamt: [100000, 1000000], logbuch: [10, 30, 60], traditionssegler: 2, sturm: 1,
+  },
   // Besucher an Land (Fahrgastschiff, Kreuzfahrt) geben abends je Stufe von Kiosk/Restaurant so viel aus
   besucher: { ausgabeJeKioskStufe: 2 },
 
