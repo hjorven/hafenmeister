@@ -56,3 +56,21 @@ test('Logbuch: Boote mit Bild, Steckbrief, Chronik und Meldung', async ({ game }
   await fenster.locator('.hm-lb-zu').click();
   await expect(fenster).toBeHidden();
 });
+
+test('Logbuch: Großschiffe kommen gesichtet hinein (Besuch, Verkehr)', async ({ game }) => {
+  const { page } = game;
+  await page.waitForFunction(() => !!window.hafenmeister.sim?.state && !!window.hafenmeister.logbuch, null, { timeout: 30_000, polling: 100 });
+  const r = await page.evaluate(async () => {
+    const g = window.hafenmeister;
+    g.emit('services:besuch', { id: 'kreuzfahrtterminal', art: 'kreuzfahrt', tag: g.sim.state.day, dauer: 1 });
+    g.emit('verkehr:gesichtet', { modell: 'XXL2-3' });
+    g.emit('verkehr:gesichtet', { modell: 'L1-1' });   // kleine Boote zählen nur beim Anlegen
+    await new Promise((res) => setTimeout(res, 100));
+    const lb = g.sim.state.logbook;
+    return { xxl1: lb.XXL1 ?? [], xxl2: lb.XXL2 ?? [], l1: (lb.L1 ?? []).includes('L1-1'), erst: g.sim.state.modules.logbuch.erst['XXL1-3'] };
+  });
+  expect(r.xxl1).toContain('XXL1-3');
+  expect(r.xxl2).toContain('XXL2-3');
+  expect(r.l1).toBe(false);
+  expect(r.erst?.gesichtet).toBe(true);
+});
