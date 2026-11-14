@@ -6,7 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
-- Neu: Stege nachrüsten. Im Baumenü unter "Stege" bekommt ein Steg Fingerstege (ab Stufe 3, Gäste dort bewerten um 0,5 Anker besser) oder Laternen (ab Stufe 2, 0,2 Anker, nachts leuchten sie). Vorschau mit Geisterbild am Steg. Stromsäulen stehen jetzt sichtbar an jedem Steg mit Strom (296).
+- Neu: Stege nachrüsten. Im Baumenü unter "Stege" bekommt ein Steg Fingerstege (ab Stufe 3, Gäste dort bewerten um 0,5 Anker besser) oder Laternen (ab Stufe 2, 0,2 Anker, nachts leuchten sie). Vorschau mit Geisterbild am Steg. Stromsäulen stehen jetzt sichtbar an jedem Steg mit Strom (297).
 - Neu: Erfolge. 30 Erfolge vom ersten Festmachen bis zum Hafenmillionär melden sich rechts oben mit eigenem Ton und stehen im Logbuch unter "Erfolge" mit Fortschritt. Im Hafen wachsen dafür ein Mast mit bunten Wimpeln, eine Pokaltreppe und eine Ehrentafel mit einem Schild je Ausbaustufe. Alte Spielstände bekommen schon Erreichtes still nachgetragen.
 - Große Boote kommen nur so oft, wie der Hafen Plätze für sie hat: Vor dem Ausbau fahren deutlich weniger Yachten und Großsegler wieder weg, weil nichts frei ist (A10, 287).
 - Bootskarte: Ist die Versorgung für einen Wunsch heute schon voll, steht er rot da ("Wunsch: Dusche (heute voll)").
