@@ -401,6 +401,8 @@ export function init(game) {
   // Versucht oben Mitte, dann rechts unter den Knöpfen oben, jeweils erst lang ("Tag 3: + 40 €"), dann kurz ("+ 40 €").
   const ZETTEL_MEIDEN = ['.hm-status', '.hm-werkzeuge', '#event-banner', '.hm-tipp', '#weather-chip', '#weather-panel', '.hm-tafel > button', '.hm-tafel ul', '#hm-ziel > *', '#hm-zeit', '#btn-collect', '#btn-build'];
   function platziereZettel() {
+    // Im gemeinsamen Meldeplatz (ui/meldungen.js) legt der Platz die Lage fest
+    if (game.meldungen?.imPlatz?.(zettel)) { zettel.classList.remove('kurz'); return; }
     const huelle = (zettel.offsetParent ?? root).getBoundingClientRect();
     const hindernisse = ZETTEL_MEIDEN.flatMap((sel) => [...document.querySelectorAll(sel)].map(rechteck)).filter(Boolean);
     const unterkante = (r) => r.bottom - huelle.top + 8;

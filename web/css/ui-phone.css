@@ -41,15 +41,17 @@
   .hm-neu .hm-status .stat { padding: 0 6px; font-size: calc(var(--hm-s) + 3px); }
 }
 
-/* Hochkant: Kassieren über der unteren Reihe */
+/* Hochkant: Kassieren klein über Bauen (rechter Daumen), nur Münze und Betrag; die Mitte bleibt frei */
 @media (max-width: 599px) and (orientation: portrait) {
-  .hm-neu #hud-bottom { grid-template-columns: 1fr auto; }
+  .hm-neu #hud-bottom { grid-template-columns: 1fr auto; align-items: end; }
   .hm-neu #btn-build { grid-column: 2; grid-row: 2; }
-  .hm-neu #hm-zeit { grid-column: 1; grid-row: 2; }
-  .hm-neu #btn-collect { grid-column: 1 / -1; grid-row: 1; }
+  .hm-neu #hm-zeit { grid-column: 1; grid-row: 1 / span 2; align-self: end; }
+  .hm-neu #btn-collect { grid-column: 2; grid-row: 1; justify-self: end; height: 48px; padding: 0 10px 0 8px; gap: 6px; font-size: calc(var(--hm-s) + 1px); }
+  .hm-neu #btn-collect .hm-kassier-wort { display: none; }
+  .hm-neu.hand-links #btn-collect { grid-column: 1; justify-self: start; }
   .hm-neu.hand-links #hud-bottom { grid-template-columns: auto 1fr; }
   .hm-neu.hand-links #btn-build { grid-column: 1; grid-row: 2; justify-self: start; }
-  .hm-neu.hand-links #hm-zeit { grid-column: 2; grid-row: 2; justify-self: end; }
+  .hm-neu.hand-links #hm-zeit { grid-column: 2; grid-row: 1 / span 2; justify-self: end; }
   .hm-neu .hm-himmel { min-width: 40px; }
 }
 @media (max-width: 359px) and (orientation: portrait) {

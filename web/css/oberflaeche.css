@@ -15,29 +15,28 @@
  * Module zur Laufzeit in den <head> schreiben.
  */
 
+/* Alles in Pixelify Sans, auch Ziffern und Euro (Jorven 14.11.: "Rückgängig 8 s" stand in der Systemschrift).
+ * Vorher kamen Ziffern über unicode-range aus der Systemschrift; das sah wie ein Ladefehler aus.
+ * Damit Zahlen lesbar bleiben, stehen sie nie unter 14 px (Regeln unten bei "Ziffern").
+ * index.html lädt die drei Schnitte vorab (preload), main.js wartet kurz auf sie, bevor Module
+ * Texte in Canvas zeichnen; font-display: block statt swap, damit nie kurz die Systemschrift erscheint. */
 @font-face {
   font-family: "Pixelify Sans";
   src: url("../fonts/pixelify-sans-latin-400-normal.woff2") format("woff2");
   font-weight: 400;
-  font-display: swap;
-  /* Ziffern und Euro aus der Systemschrift: die Pixel-Ziffern 3, 5, 8 und das Euro-Zeichen sind klein kaum zu unterscheiden */
-  unicode-range: U+0000-002F, U+003A-20AB, U+20AD-FFFF;
+  font-display: block;
 }
 @font-face {
   font-family: "Pixelify Sans";
   src: url("../fonts/pixelify-sans-latin-600-normal.woff2") format("woff2");
   font-weight: 600;
-  font-display: swap;
-  /* Ziffern und Euro aus der Systemschrift: die Pixel-Ziffern 3, 5, 8 und das Euro-Zeichen sind klein kaum zu unterscheiden */
-  unicode-range: U+0000-002F, U+003A-20AB, U+20AD-FFFF;
+  font-display: block;
 }
 @font-face {
   font-family: "Pixelify Sans";
   src: url("../fonts/pixelify-sans-latin-700-normal.woff2") format("woff2");
   font-weight: 700;
-  font-display: swap;
-  /* Ziffern und Euro aus der Systemschrift: die Pixel-Ziffern 3, 5, 8 und das Euro-Zeichen sind klein kaum zu unterscheiden */
-  unicode-range: U+0000-002F, U+003A-20AB, U+20AD-FFFF;
+  font-display: block;
 }
 
 :root {
@@ -75,7 +74,7 @@ body.hm-neu.hm-gross { --hm-gross: 1.2; }
 html:has(body.hm-gross) { font-size: 118%; }
 body.hm-neu { font: 400 var(--hm-s)/1.4 var(--hm-pixel); color: var(--hm-tinte); letter-spacing: 0.01em; }
 /* Alles in Pixelschrift, auch Fließtext und was Module mit system-ui in den <head> schreiben.
- * Ziffern und Euro kommen über unicode-range weiter aus der Systemschrift (lesbar, siehe @font-face). */
+ * Ziffern und Euro gehören dazu (siehe @font-face). */
 .hm-neu, .hm-neu *:not(canvas) { font-family: var(--hm-pixel) !important; }
 .hm-neu button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .hm-neu button:focus-visible { outline: 3px dashed var(--hm-gold); outline-offset: 3px; }
@@ -1089,3 +1088,88 @@ body.hm-neu { font: 400 var(--hm-s)/1.4 var(--hm-pixel); color: var(--hm-tinte);
 @media (max-width: 599px), (max-height: 499px) {
   .hm-neu .bau-tipp { max-width: min(220px, calc(100vw - 32px)); padding: 2px 8px 3px; font-size: calc(var(--hm-s) - 3px); }
 }
+
+/* ------------------------------------------------------------ Meldeplatz (ui/meldungen.js)
+ * Ein Platz für alle kurzen Meldungen: Ankündigung, Dauerplatz, Morgen-Zettel, Bewertung.
+ * Immer nur eine steht, ein Zähler (+2) zeigt die wartenden. Unten über den Knöpfen (Handy hochkant)
+ * oder oben in der Mitte (Lage und Breite setzt ui/meldungen.js über --hm-mp-*).
+ * Die Module setzen ihre alte Lage noch als Inline-Stil; !important schlägt sie hier. */
+.hm-neu #hm-meldeplatz {
+  position: absolute;
+  z-index: 26;
+  left: var(--hm-mp-mitte, 50%);
+  top: var(--hm-mp-oben, calc(var(--hm-oben) + var(--hm-knopf) + 8px));
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: var(--hm-mp-breite, min(440px, calc(100% - 24px)));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+.hm-neu #hm-meldeplatz.unten { top: auto; bottom: var(--hm-mp-unten, 140px); }
+body.foto #hm-meldeplatz, body.hm-feier-an #hm-meldeplatz, body.building #hm-meldeplatz { display: none !important; }
+.hm-neu #hm-meldeplatz > :not(.hm-meldeplatz-zahl) {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  width: auto !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+.hm-neu #hm-meldeplatz > :is([hidden], .zurueck) { display: none !important; }
+/* Eine Meldung: Symbol, fette Zeile, höchstens zwei Zeilen Text */
+.hm-neu #hm-meldeplatz :is(#event-banner, #dauer-hinweis) {
+  display: flex; gap: 10px; align-items: center;
+  padding: 6px 12px; min-height: 44px; border-left: 0; border-radius: 0;
+  animation: hm-mp-rein 0.24s steps(4, end);
+}
+.hm-neu #hm-meldeplatz :is(#event-banner, #dauer-hinweis) :is(svg, img) { flex: none; width: 24px; height: 24px; }
+.hm-neu #hm-meldeplatz :is(#event-banner, #dauer-hinweis) strong { font-size: var(--hm-s); font-weight: 600; line-height: 1.25; }
+.hm-neu #hm-meldeplatz :is(#event-banner, #dauer-hinweis) span {
+  font-size: max(14px, calc(var(--hm-s) - 1px)); line-height: 1.3; opacity: 0.85; margin-top: 1px;
+  display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+.hm-neu #hm-meldeplatz #event-banner.leaving { opacity: 0; transition: opacity 0.4s steps(3); }
+.hm-neu #hm-meldeplatz #hm-ta-zettel { animation: hm-mp-rein 0.24s steps(4, end); }
+/* Bewertungen: nur die neueste, die anderen verfallen still */
+.hm-neu #hm-meldeplatz #hm-gb-meldungen { display: flex; align-items: center; pointer-events: none; }
+.hm-neu #hm-meldeplatz #hm-gb-meldungen > .hm-gb-meldung:not(:first-child) { display: none; }
+.hm-neu #hm-meldeplatz #hm-gb-meldungen > .hm-gb-meldung { max-width: 100%; }
+/* Zähler: wie viele Meldungen noch warten */
+.hm-neu .hm-meldeplatz-zahl {
+  position: absolute; right: -6px; top: -10px; z-index: 1;
+  min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box;
+  display: grid; place-items: center;
+  background: var(--hm-koralle); color: #fff;
+  border: var(--hm-px) solid var(--hm-tinte);
+  box-shadow: 0 var(--hm-px) 0 var(--hm-tinte);
+  font-size: 14px; font-weight: 700; line-height: 1;
+}
+.hm-neu .hm-meldeplatz-zahl[hidden] { display: none; }
+.hm-neu #hm-meldeplatz.unten .hm-meldeplatz-zahl { top: -12px; }
+@keyframes hm-mp-rein { from { opacity: 0; translate: 0 6px; } to { opacity: 1; translate: 0 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .hm-neu #hm-meldeplatz > * { animation: none !important; }
+}
+/* "Als Nächstes" im Meldeplatz: ohne Pfeil, eine Zeile Titel, eine Zeile Text */
+.hm-neu #hm-meldeplatz #bau-tipp { padding: 5px 12px; text-align: left; animation: none; }
+.hm-neu #hm-meldeplatz #bau-tipp::after { display: none; }
+/* Tipps beim ersten Mal (features/einstieg.js, Klasse .hinweis): liegt der Meldeplatz unten (Handy hochkant),
+ * stehen sie an derselben Stelle, kurz und flach: Titel, Kurztext, "Verstanden" daneben. Die Meldungs-Ordnung
+ * sorgt dafür, dass nie zugleich eine andere Meldung dort steht. */
+body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis {
+  top: auto !important; bottom: var(--hm-mp-unten, 140px) !important;
+  left: var(--hm-mp-mitte, 50%) !important; right: auto !important; transform: translateX(-50%) !important;
+  width: var(--hm-mp-breite, calc(100% - 24px)) !important; max-width: none !important; box-sizing: border-box;
+  display: grid; grid-template-columns: 1fr auto; column-gap: 10px; align-items: center;
+  padding: 6px 8px 6px 12px; font-size: max(14px, calc(var(--hm-s) - 1px));
+}
+body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis[hidden] { display: none; }
+body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis :is(.zaehler, .lang) { display: none; }
+body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis .titel { grid-column: 1; font-size: var(--hm-s); margin: 0; line-height: 1.25; }
+body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis .kurz { display: block; grid-column: 1; line-height: 1.3; opacity: 0.85; }
+body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis .knoepfe { grid-column: 2; grid-row: 1 / span 3; margin: 0; }
+body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis button { min-height: 40px; padding: 0 12px; }
