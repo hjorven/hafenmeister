@@ -16,6 +16,8 @@
 //   6. Neues Spiel: Typ und Seed zufällig, werden gemerkt.
 
 import { TYPEN, bauen, WELT, BEREICH } from './natur.js';
+import { zonenRaster, seezugaenge, ZONE, ZONE_NAME } from './zonen.js';
+import { HAFEN } from '../../data/harbor.js';
 
 export const FORMEN = TYPEN.map(({ nr, name, idee }) => ({ nr, name, idee }));
 /** Höchster Seed, den das Spiel auswürfelt (jeder ganzzahlige Seed ab 1 ist gültig). */
@@ -66,12 +68,14 @@ export function natur() { return form.natur; }
 export function formSetzen(nr, seed = 1) {
   form = formBauen(nr, seed);
   aktiv = { nr: form.nr, seed: form.seed, quelle: 'gesetzt' };
-  for (const f of beiWechsel) f(form);
+  for (const f of beiWechsel ?? []) f(form);
   return form;
 }
-const beiWechsel = [];
+// var ohne Startwert: gelaende.js meldet sich über beiFormwechsel an, je nach Ladereihenfolge (Importkreis
+// über zonen.js) schon bevor dieses Modul ausgewertet ist
+var beiWechsel;
 /** f(form) nach jedem formSetzen (gelaende.js leert damit seine Zwischenspeicher). */
-export function beiFormwechsel(f) { beiWechsel.push(f); }
+export function beiFormwechsel(f) { (beiWechsel ??= []).push(f); }
 
 function speicher() {
   try { return globalThis.localStorage ?? null; } catch { return null; }
@@ -219,5 +223,29 @@ export function init(game) {
     anzahl: FORMEN.length, formen: FORMEN.map(({ nr, name, idee }) => ({ nr, name, idee })),
     blickRect: (opt) => blickRect(form, opt),
     startRect: (stufe = game.state?.stage ?? 1) => startRect(stufe, form),
+    // Zonen für die Wegsuche (zonen.js): Raster mit Steg, Liegeplatz, Bojen, Ankerfeld, Durchfahrt, Becken,
+    // Binnenwasser und offener See; zone(x, z) ist ein Nachschlagen im Raster der aktuellen Stufe.
+    ZONE, ZONE_NAME,
+    zonen: (stufe = game.state?.stage ?? 1) => zonenJetzt(stufe),
+    zone: (x, z, stufe = game.state?.stage ?? 1) => zonenJetzt(stufe).bei(x, z),
+    // Seezugänge außerhalb des Außenrings mit Weg über Wasser bis vor die Einfahrt
+    seezugaenge: (stufe = game.state?.stage ?? 1, opt = {}) => {
+      const key = `${stufe}|${regionId()}|${form.nr}|${form.seed}|${opt.tiefeM ?? ''}|${opt.abstand ?? ''}`;
+      if (!_zugaenge.has(key)) _zugaenge.set(key, seezugaenge(stufe, regionId(), opt));
+      return _zugaenge.get(key);
+    },
   };
+  const regionId = () => { const r = game.landscape?.region; return (r?.id ?? r) === 'nordsee' ? 'nordsee' : 'ostsee'; };
+  const _zugaenge = new Map();
+  let _zonen = null;
+  // Raster je Stufe, Revier, Küste, Stegbild und Lage der Warteplätze; neu gebaut, sobald sich eines ändert
+  function zonenJetzt(stufe) {
+    const w = game.landscape?.warteplaetze;
+    // Warteplätze der gezeigten Landschaft, falls sie zu dieser Stufe gehören; sonst die der Stufe aus gelaende.js
+    const wp = w?.bojen && (game.landscape?.stufe ?? stufe) === stufe ? w : undefined;
+    const sig = `${stufe}|${regionId()}|${form.nr}|${form.seed}|${game.stegbild?.aktuell?.()?.nr ?? HAFEN.stegbild?.nr ?? 0}|`
+      + (wp ? [...wp.bojen, ...(wp.ankerbereiche ?? [])].map((q) => `${Math.round(q.px)},${Math.round(q.py)}`).join(';') : '');
+    if (_zonen?.sig !== sig) _zonen = { sig, raster: zonenRaster(stufe, regionId(), { warteplaetze: wp }) };
+    return _zonen.raster;
+  }
 }
