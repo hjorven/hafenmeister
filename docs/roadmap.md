@@ -335,7 +335,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | A1 | Selbst einfahrende Gäste nehmen die nächste freie Box am Steg, auch zu große | erledigt (PR 147, PR 176 bevorzugt Wunschplätze) | P10 |
 | A2 | "Einfahren" ohne Hafenbüro nimmt irgendeinen passenden Platz, den besten kennt erst das Büro | erledigt (PR 146) | P02 |
 | A3 | Platzwert beim Ziehen: Liegegeld mit Wunschbonus, erwartete Anker, Wunschplätze gold | erledigt (PR 153, `game.sim.platzWert`) | P10 |
-| A4 | Geduld sichtbar: Ring an der Boje, im letzten Drittel Flagge oder kurzes Tuten | offen | P55 |
+| A4 | Geduld sichtbar: Ring an der Boje, im letzten Drittel Flagge oder kurzes Tuten | erledigt (P55: Ring über dem Boot, rot und blinkend im letzten Drittel, kurzes Tuten, ruht abends; `docs/hafenzeichen.md`) | P55 |
 | A5 | Vorschau: drei Bootsumrisse mit Größe und Uhrzeit, als "Funkgerät" Wirkung der ersten Bürostufe | Freischaltung erledigt (PR 146, `rules.office.preview`), Anzeige erledigt (PR 158) | P11, P02 |
 | A6 | Passgenau belohnen: Bonus, wenn die Box höchstens ein Fünftel größer ist | erledigt (PR 153, `ECONOMY.passgenau`, ab Stufe 2) | P10 |
 | A7 | Selbst-Einfahren einstellbar: schnell, langsam, aus | erledigt (Einstellungen: Normal 8 s, Langsam 20 s, Nie) | P50 |
@@ -347,7 +347,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| B1 | Auslastung an jedem Versorgungsgebäude ("14 von 20"), Schlange vor der Dusche | offen | P55 |
+| B1 | Auslastung an jedem Versorgungsgebäude ("14 von 20"), Schlange vor der Dusche | Schild erledigt (P55, `game.sim.auslastung()`), Schlange offen (L2) | P55 |
 | B2 | Wunschsymbole über dem Boot, beim Anlegen Haken oder grau | erledigt (PR 158) | P11 |
 | B3 | Münze nennt ihren Wert ("22 € + 11 €") | erledigt (`render/boat-view.js`, `feeReady` mit `base`, `bonus`) | P12 |
 | B4 | Rundgang als Helfer: erst abends, nur vergessene Münzen, etwa vier Fünftel statt der Hälfte | erledigt (`ECONOMY.kassieren.rundgangAnteil` 0,8, gilt auch nachts) | P12 |
@@ -369,7 +369,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | C4 | Gäste ohne Wünsche geben 4,5, der Platz entscheidet über den Rest | offen | P19 |
 | C5 | Ruf als Auszeichnung mit Namen und Zeichen im Hafen | offen | P19 |
 | C6 | Ruf lockt andere Gäste (ab 4 große Yachten, ab 4,5 seltene Modelle) | offen | P19 |
-| C7 | Warnen, bevor es Anker kostet (Gebäude blinkt bei fast ausgebuchter Dusche) | offen | P55 |
+| C7 | Warnen, bevor es Anker kostet (Gebäude blinkt bei fast ausgebuchter Dusche) | erledigt (P55: Schild knapp orange und blinkend, voll rot, Tipp beim ersten Mal) | P55 |
 | C8 | Stammgäste zählen beim Ruf doppelt | offen | P25 |
 | C9 | Ruf-Verlauf mit den drei häufigsten Gründen für schlechte Noten | erledigt (PR 154) | P14 |
 
@@ -489,7 +489,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
 | L1 | Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel | offen | P46 |
-| L2 | Figuren als Anzeige (Schlange vor der Dusche, volle Tische) | offen | P55 |
+| L2 | Figuren als Anzeige (Schlange vor der Dusche, volle Tische) | offen (braucht `render/people.js`, Thread Menschen; Auslastung zeigt schon das Schild) | P55 |
 | L3 | Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles | offen | P26 |
 | L4 | Fernglas mit Steckbrief | offen | P26 |
 | L5 | Möwen antippen, Glocke am Steg | offen | P26 |
@@ -535,16 +535,16 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| Bed P1 | Die fünf fehlenden Anzeigen (A4, B1, B2, B11, C1) | B11 und B2 erledigt, Rest offen | P55, P11, P14 |
+| Bed P1 | Die fünf fehlenden Anzeigen (A4, B1, B2, B11, C1) | B11, B2, A4 und B1 erledigt (P55), C1 siehe P14 | P55, P11, P14 |
 | Bed P2 | Bootskarte mit "zahlt etwa 33 € pro Nacht" und Zahl der Wunschplätze | erledigt (PR 153) | P10 |
-| Bed P3 | Zeiger am Bildrand für wartende Boote | offen | P55 |
+| Bed P3 | Zeiger am Bildrand für wartende Boote | erledigt (P55: Zeiger mit Geduldsring, gebündelt, Antippen fährt hin) | P55 |
 | Bed P4 | Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf "bis zum nächsten Boot" | erledigt (Tempo bleibt; 1x nur bei wartendem Dauerlieger, Regionsziel, 8x bis zum nächsten Boot, danach Knopf "Weiter mit 3x" und automatische Rückkehr; 14.11.) | P07 |
 | Bed P5 | Einstellungen-Seite (Ton und Musik getrennt, Selbst-Einfahren, Bewegung, Schrift, Linkshänder) | erledigt (Ton und Musik über Knopf ins Ton-Fenster mit getrennten Reglern) | P50 |
 | Bed P6 | Farbe nie allein: Form zu Grün-Rot und Gold | erledigt mit Einstellung "Schilder mit Form" (Balken, Stern, Ausrufezeichen) | P50 |
 | Bed P7 | Letzten Kauf zehn Sekunden lang zurücknehmen | erledigt (PR 232) | P18 |
 | Bed P8 | PC-Tasten für Kassieren und drei Tempostufen, Hilfe zeigt genau die echten Tasten | erledigt (K, F, G, Leertaste; Hilfe angepasst) | P07 |
 | Bed P9 | Stil im Plan festhalten; Rolle der Pixel-Fassung klären | Frage 9; Ist-Stand im Plan festgehalten (PR 177), Entscheidung offen | P08 |
-| Bed P10 | Zeichen am Rand für "hier ist etwas zu tun" | offen | P55 |
+| Bed P10 | Zeichen am Rand für "hier ist etwas zu tun" | erledigt für wartende Boote (P55); Münzen und Dauerlieger bewusst ohne Randzeichen | P55 |
 
 ### Q Doku
 

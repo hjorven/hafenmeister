@@ -1064,12 +1064,23 @@ export function markAtBuoy(state, ctx, boatId) {
   return { ok: true, events: [{ type: 'atBuoy', boatId }] };
 }
 
-/** Sekunden, die ein wartendes Boot noch an der Boje bleibt (während der Anfahrt die volle Geduld). */
+/**
+ * Sekunden, die ein wartendes Boot noch an der Boje bleibt (während der Anfahrt die volle Geduld).
+ * Abends läuft keine Geduld ab (queueStep): Dann steht der Wert so, wie er bei Tagesende war.
+ */
 export function patienceLeft(state, ctx, boatId) {
   const b = state.boats[boatId];
   if (!b || b.status !== 'waiting') return 0;
   if (!b.atBuoy) return ctx.rules.queue.patience;
-  return Math.max(0, Math.min(ctx.rules.queue.patience, ctx.rules.queue.patience - (state.clock - patienceFrom(state, ctx, b))));
+  const clock = state.phase === 'day' ? state.clock : Math.min(state.clock, ctx.rules.dayLength);
+  return Math.max(0, Math.min(ctx.rules.queue.patience, ctx.rules.queue.patience - (clock - patienceFrom(state, ctx, b))));
+}
+
+/** Läuft die Geduld dieses wartenden Boots gerade? (nicht abends, nicht auf der Anfahrt, nicht vor dem Morgen nach einer Nacht an der Boje) */
+export function patienceRunning(state, ctx, boatId) {
+  const b = state.boats[boatId];
+  if (!b || b.status !== 'waiting' || !b.atBuoy || state.phase !== 'day') return false;
+  return state.clock >= patienceFrom(state, ctx, b);
 }
 
 /**
@@ -1116,6 +1127,19 @@ export function nightlyFee(state, ctx, boat, wishesMet, priceFactor = 1) {
 export function facilityCapacity(state, ctx, key) {
   const f = ctx.rules.facilities[key];
   return f ? f.levels[state.facilities[key] || 0] || 0 : 0;
+}
+
+/**
+ * Auslastung der Versorgung heute: je gebauter Versorgung (Kapazität > 0) wie viele Boote heute schon
+ * versorgt wurden und wie viele es höchstens werden können. Zählt neu an jedem Morgen (state.served).
+ */
+export function facilityLoad(state, ctx) {
+  const out = {};
+  for (const key of Object.keys(ctx.rules.facilities || {})) {
+    const kapazitaet = facilityCapacity(state, ctx, key);
+    if (kapazitaet > 0) out[key] = { versorgt: state.served?.[key] || 0, kapazitaet };
+  }
+  return out;
 }
 
 /** Liegende Boote, nach Ankunft sortiert. */

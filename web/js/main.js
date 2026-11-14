@@ -35,6 +35,7 @@ const MODULES = [
   './ui/fotomodus.js',
   './ui/vorschau.js',
   './ui/meldungen.js',                 // Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich
+  './ui/hafenzeichen.js',              // P55: Auslastung an Gebäuden, Zeiger am Rand zu wartenden Booten
   './audio/audio.js',
   './state.js',
   './events/events.js',

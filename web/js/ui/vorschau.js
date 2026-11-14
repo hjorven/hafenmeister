@@ -3,7 +3,8 @@
 // 1. Wunschsymbole: Über jedem Boot, das an der Warteboje oder im Ankerfeld wartet, stehen
 //    seine Wünsche als kleine Pixel-Schilder (WC, Dusche, Essen, Strom, Diesel). Beim Anlegen
 //    bekommt jeder erfüllte Wunsch einen Haken, jeder unerfüllte wird grau; nach ein paar
-//    Sekunden verschwindet die Reihe wieder.
+//    Sekunden verschwindet die Reihe wieder. Ganz links in der Reihe steht der Geduldsring
+//    (Paket P55, ui/geduldsring.js), darum hat jedes wartende Boot eine Reihe, auch ohne Wünsche.
 // 2. Funk: Ab der ersten Stufe des Hafenbüros (rules.office.preview, Grundwert 1) hört der
 //    Hafenmeister den Funk ab. Rechts am Rand stehen die nächsten drei Boote des Tages als
 //    Umriss mit Länge, ungefährer Uhrzeit und Wünschen (game.sim.preview()).
@@ -12,6 +13,7 @@
 // Ereignisse 'sim:moored', 'sim:feeReady', 'boat:moored', 'sim:select'. Schreibt nichts in
 // den Spielstand. Schnittstelle: game.vorschau = { wunschSymbole, funkAn(), aktualisieren() }.
 import { uhrzeitAusSpielzeit } from '../render/landschaft/zeit.js';
+import { ringZustand, ringBild } from './geduldsring.js';
 
 // ------------------------------------------------------------------ Pixel-Grafik
 // '#' ist die Glyphe (weiß auf farbigem Schild), '.' ist leer. 12 x 12 wie die Oberfläche.
@@ -218,6 +220,14 @@ const CSS = `
 .hm-wunsch-reihe.klein .hm-wunsch { box-shadow: 0 0 0 1px #24364a, 1px 2px 0 1px rgba(20,32,48,.3); }
 .hm-wunsch-reihe.klein .hm-wunsch.ja::after { width: 8px; height: 8px; right: -4px; bottom: -4px; box-shadow: 0 0 0 1px #24364a; }
 .hm-wunsch-reihe.klein.gewaehlt .hm-wunsch { box-shadow: 0 0 0 1px #24364a, 0 0 0 3px #f2c14e; }
+/* Geduldsring (P55, ui/geduldsring.js): Bild kommt als --ring */
+.hm-wunsch.hm-geduld { background: #f4efe2 var(--ring) center / 100% 100% no-repeat; }
+.hm-wunsch.hm-geduld::before { display: none; }
+.hm-wunsch.hm-geduld.eilig { animation: hm-geduld-blink 1s steps(2, jump-none) infinite; }
+@keyframes hm-geduld-blink { 0% { background-color: #f4efe2; } 100% { background-color: #f6c9bd; } }
+@media (prefers-reduced-motion: reduce) { .hm-wunsch.hm-geduld.eilig { animation: none; background-color: #f6c9bd; } }
+body.hm-ruhig .hm-wunsch.hm-geduld.eilig { animation: none; background-color: #f6c9bd; }
+
 /* Vielfache von 12 bleiben scharf */
 :root { --hm-wunsch: 24px; }
 
@@ -298,6 +308,12 @@ export function init(game) {
     const node = el('div', 'hm-wunsch-reihe');
     node.dataset.boot = String(id);
     node.style.visibility = 'hidden';     // bis zum ersten Platzieren über dem Boot
+    if (!erfuellt) {
+      // Geduldsring (P55): läuft mit der Geduld des Boots ab, Bild setzt der Takt unten
+      const ring = el('i', 'hm-wunsch hm-geduld');
+      ring.title = 'Geduld: so lange wartet das Boot noch an der Boje';
+      node.append(ring);
+    }
     wuensche.forEach((w, i) => {
       const s = symbol(w, erfuellt ? (erfuellt.has(w) ? 'ja' : 'nein') : '');
       if (erfuellt) s.style.setProperty('--v', `${0.15 + i * 0.18}s`);
@@ -328,15 +344,15 @@ export function init(game) {
     const soll = new Set();
     for (const id of s.queue ?? []) {
       const b = s.boats?.[id];
-      if (!b || b.status !== 'waiting' || !b.wishes?.length) continue;
+      if (!b || b.status !== 'waiting') continue;
       const a = game.boatView?.boot?.(id);
       if (!a || (a.berth && a.berth.kind !== 'buoy')) continue;
       soll.add(id);
-      const key = b.wishes.join(',');
+      const key = (b.wishes ?? []).join(',');
       const r = reihen.get(id);
       if (r && r.art === 'warten' && r.key === key) continue;
       if (r) entferneReihe(id);
-      reihen.set(id, { node: baueReihe(id, b.wishes), key, art: 'warten' });
+      reihen.set(id, { node: baueReihe(id, b.wishes ?? []), key, art: 'warten' });
     }
     for (const [id, r] of [...reihen]) if (r.art === 'warten' && !soll.has(id)) entferneReihe(id);
   }
@@ -397,9 +413,41 @@ export function init(game) {
     _p.x = v.x; _p.y = v.y; _p.z = Math.hypot(w.x - v.x, w.y - v.y);
     return _p;
   }
+  // Liegt eine Reihe unter Bedienelementen (Leiste oben, Zeit, Tafeln)? Dann bleibt sie weg, statt
+  // halb hinter einem Knopf zu stecken. Die Ebenen ohne Zeiger-Ereignisse zählen nicht.
+  function bedienelement(x, y) {
+    const e = document.elementFromPoint(x, y);
+    const stage = game.renderer?.domElement;
+    if (!e || e === stage || e === document.body || e === document.documentElement || e === root || e.id === 'stage') return false;
+    return !e.closest('#hm-zeiger-ebene');
+  }
+  function verdeckungPruefen() {
+    for (const r of reihen.values()) {
+      if (!r.sollXY) { r.verdeckt = false; continue; }
+      const [x, y] = r.sollXY;
+      const w = (r.breite ?? 40) / 2, h = r.klein ? 20 : 34;
+      r.verdeckt = bedienelement(x, y - h / 2) || bedienelement(x - w, y - h / 2) || bedienelement(x + w, y - h / 2);
+    }
+  }
+  // Geduldsring einer Wartereihe: Bild nur tauschen, wenn sich der Schritt oder die Farbe ändert
+  function geduldZeigen(id, r) {
+    const ring = r.ring ??= r.node.querySelector('.hm-geduld');
+    if (!ring) return;
+    const voll = game.sim?.ctx?.rules?.queue?.patience ?? 30;
+    const rest = game.sim?.geduld?.(id) ?? voll;
+    const laeuft = !game.sim?.geduldRuht?.(id);
+    const z = ringZustand(rest, voll, laeuft);
+    const bild = ringBild(z);
+    if (r.ringBild !== bild) { ring.style.setProperty('--ring', bild); r.ringBild = bild; }
+    if (r.eilig !== z.eilig) { ring.classList.toggle('eilig', z.eilig); r.eilig = z.eilig; }
+    if (r.laeuft !== laeuft) {
+      r.laeuft = laeuft;
+      ring.title = laeuft ? 'Geduld: so lange wartet das Boot noch an der Boje' : 'Geduld ruht: abends und bis zum Vormittag nach einer Nacht an der Boje wartet das Boot ohne Eile';
+    }
+  }
   game.onTick?.((dt) => {
     abgleichT += dt || 0.016;
-    if (abgleichT > 0.25 || dt === 0) { abgleichT = 0; wartendeAbgleichen(); }
+    if (abgleichT > 0.25 || dt === 0) { abgleichT = 0; wartendeAbgleichen(); verdeckungPruefen(); }
     if (!reihen.size) return;
     const canvas = game.renderer?.domElement;
     if (!canvas) return;
@@ -407,8 +455,10 @@ export function init(game) {
     const rr = ebene.getBoundingClientRect();
     const jetzt = performance.now();
     const belegt = [];      // Rechtecke der schon gesetzten Reihen: keine Reihe deckt eine andere zu
-    // das gewählte Boot zuerst, damit seine Reihe nie verdeckt wird
-    const folge = [...reihen].sort(([a], [b]) => (b === gewaehlt) - (a === gewaehlt));
+    // das gewählte Boot zuerst, damit seine Reihe nie verdeckt wird, dann die Wartenden mit der
+    // wenigsten Geduld (P55: ein roter Ring verschwindet nie hinter einem grünen)
+    const geduld = (id, r) => (r.art === 'warten' ? game.sim?.geduld?.(id) ?? Infinity : Infinity);
+    const folge = [...reihen].sort(([a, ra], [b, rb]) => ((b === gewaehlt) - (a === gewaehlt)) || (geduld(a, ra) - geduld(b, rb)));
     for (const [id, r] of folge) {
       if (r.art === 'ergebnis' && jetzt > r.bis) {
         if (!r.node.classList.contains('weg')) { r.node.classList.add('weg'); r.bis = jetzt + 400; continue; }
@@ -439,6 +489,9 @@ export function init(game) {
       if (r.klein !== klein) { r.klein = klein; r.node.classList.toggle('klein', klein); r.breite = null; }
       const x = sichtbar ? Math.round(rc.left - rr.left + (p.x + 1) / 2 * rc.width) : 0;
       const y = sichtbar ? Math.round(rc.top - rr.top + (1 - p.y) / 2 * rc.height) - (r.art === 'ergebnis' ? (klein ? 12 : 22) : (klein ? 3 : 6)) : 0;
+      // unter Knöpfen und Tafeln keine Reihe (geprüft im langsamen Takt, siehe verdeckungPruefen)
+      r.sollXY = sichtbar ? [x + rr.left, y + rr.top] : null;
+      if (sichtbar && r.verdeckt) sichtbar = false;
       if (sichtbar) {
         const w = (r.breite ??= r.node.children.length * (klein ? 16 : 30) + 8), h = klein ? 20 : 34;
         const box = [x - w / 2, y - h, x + w / 2, y];
@@ -448,6 +501,7 @@ export function init(game) {
       r.node.classList.toggle('gewaehlt', id === gewaehlt);
       r.node.style.visibility = sichtbar ? '' : 'hidden';
       if (!sichtbar) continue;
+      if (r.art === 'warten') geduldZeigen(id, r);
       const tr = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
       if (r.pos !== tr) { r.node.style.transform = tr; r.pos = tr; }
     }
