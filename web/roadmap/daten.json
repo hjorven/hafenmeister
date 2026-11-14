@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "3cf2b65"
+  "commit": "4fd332b"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -509,10 +509,11 @@
    "id": "P20",
    "titel": "Winter mit Inhalt füllen",
    "inhalt": "Ü19, F14, F15, docs/ereignisse.md",
-   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, docs/winter.md); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing",
+   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, 249, docs/winter.md); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing",
    "welle": 2,
    "prs": [
-    245
+    245,
+    249
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -527,7 +528,8 @@
    "status": "teilweise",
    "bilder": [
     35,
-    36
+    36,
+    37
    ]
   },
   {
@@ -1144,7 +1146,7 @@
    "id": "P62",
    "titel": "Geländeform und Engpass neu bauen",
    "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
-   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224, 229): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224), Land nördlich der Reede (PR 229)",
+   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224, 229, 246): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224), Land nördlich der Reede (PR 229)",
    "welle": 0,
    "prs": [
     179,
@@ -1155,7 +1157,8 @@
     211,
     216,
     224,
-    229
+    229,
+    246
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -4844,9 +4847,22 @@
    "datum": "2026-11-14",
    "quelle": "winter/wi-quer-2-auftrag.png",
    "nr": 36
+  },
+  {
+   "datei": "p20-pr249-pc-winterpause.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winterpause am PC: Saisonbilanz, Winterarbeiten, Winter überspringen",
+   "pr": 249,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr249/245-krantag-pc.png",
+   "nr": 37
   }
  ],
  "neueBilder": [
+  37,
   36,
   35,
   34,
@@ -4854,10 +4870,42 @@
   32,
   31,
   30,
-  29,
-  28
+  29
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Winter: Karte unter Übersicht und Menü, Knöpfe bleiben unten, keine Platzschilder im Winter",
+   "pr": 249,
+   "pakete": [
+    "P20"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Ankerplätze und Wartebojen immer im Wasser, Küstenberechnung schneller",
+   "pr": 246,
+   "pakete": [
+    "P62"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 240 bei P66 eingetragen, Bilder zum Winter (P20)",
+   "pr": 248,
+   "pakete": [
+    "P66",
+    "P20"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Winter: Winterpause, Winterarbeiten, Winter überspringen und Krantage (P20)",
+   "pr": 245,
+   "pakete": [
+    "P20"
+   ]
+  },
   {
    "datum": "2026-11-14",
    "titel": "Tests: Pixeldichte 1 außer bei Bildschirmfotos, Geräte-Ausnahmen vor dem Laden überspringen",
@@ -4919,35 +4967,6 @@
     "P18",
     "P66"
    ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P14-Folge: Menü am Handy quer, Bootsnamen eindeutig, Gästebuch-Meldung in der Meldungs-Ordnung",
-   "pr": 233,
-   "pakete": [
-    "P14"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Zeitraffer: robuster auf großem Gelände, Erwartung Stand PR 181",
-   "pr": 221,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 154, 228, 229, 231, 232 eingetragen, Bilder für P14 und P18",
-   "pr": 236,
-   "pakete": [
-    "P14",
-    "P18"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich",
-   "pr": 234,
-   "pakete": []
   }
  ]
 }
