@@ -85,7 +85,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 |---|---|---|---|
 | Ü15 | Weicher Start: 100 € Startgeld oder geschenktes WC | erledigt (PR 237): geschenktes Toilettenhäuschen beim ersten Bauen | P17 |
 | Ü16 | Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken | offen | P17 |
-| Ü17 | Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus `data/boats`, spürbare Kapazität | teils erledigt (P19 Teil 1): Wünsche je Bootsart, Ruf über drei Tage, Angebote als Wünsche, [ruf.md](ruf.md); Kapazität sichtbar in Teil 2 | P19 |
+| Ü17 | Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus `data/boats`, spürbare Kapazität | erledigt (P19): Wünsche je Bootsart, Ruf über drei Tage, Angebote als Wünsche, Kapazität sichtbar (Schild am Gebäude aus P55, "heute voll" in der Bootskarte), [ruf.md](ruf.md) | P19 |
 | Ü18 | Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend | erledigt (PR 232) | P18 |
 | Ü19 | Winter nutzen: Zeitraffer vor Stufe 4 oder Winterarbeiten (F14) | erledigt (PR 245): Winterarbeiten und „Winter überspringen“ | P20 |
 | Ü20 | Dauerlieger als Entscheidung: Spieler legt fest, welche Boxen Dauerplätze sind (höchstens ein Viertel der Gastboxen), Saisonpacht im Voraus, sichere Einnahme bei Sturm | erledigt (PR 149) | P01 |
@@ -347,7 +347,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| B1 | Auslastung an jedem Versorgungsgebäude ("14 von 20"), Schlange vor der Dusche | Schild erledigt (P55, `game.sim.auslastung()`), Schlange offen (L2) | P55 |
+| B1 | Auslastung an jedem Versorgungsgebäude ("14 von 20"), Schlange vor der Dusche | Schild erledigt (P55, `game.sim.auslastung()`), Schlange erledigt (L2) | P55 |
 | B2 | Wunschsymbole über dem Boot, beim Anlegen Haken oder grau | erledigt (PR 158) | P11 |
 | B3 | Münze nennt ihren Wert ("22 € + 11 €") | erledigt (`render/boat-view.js`, `feeReady` mit `base`, `bonus`) | P12 |
 | B4 | Rundgang als Helfer: erst abends, nur vergessene Münzen, etwa vier Fünftel statt der Hälfte | erledigt (`ECONOMY.kassieren.rundgangAnteil` 0,8, gilt auch nachts) | P12 |
@@ -355,7 +355,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | B6 | Mehrere Nächte beim Anlegen auf einmal zahlen | erledigt (`ECONOMY.kassieren.vorausNaechte`, `boat.paidThrough`, größere Münze) | P12 |
 | B7 | Wünsche je Bootsart aus den Bootsdaten nutzen | erledigt (P19 Teil 1, `type.wishes`) | P19 |
 | B8 | Neue Wünsche in späten Stufen, je Stufe mindestens einer (= F9) | offen | P31 |
-| B9 | Wege zählen: weit vom Sanitärhaus zählt die Dusche halb | offen | P19 |
+| B9 | Wege zählen: weit vom Sanitärhaus zählt die Dusche halb | erledigt (P19 Teil 2): über 120 m zählt WC oder Dusche halb, [ruf.md](ruf.md) | P19 |
 | B10 | Liegegeld nach Länge statt fest je Größe | erledigt (PR 252, `ECONOMY.klassen.proMeter`, `sim.baseNightlyFee`) | P17 |
 | B11 | Bezahlt-Zeichen am Bug | erledigt (PR 131) | |
 
@@ -367,7 +367,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | C2 | Ruf als Schnitt der letzten drei Tage statt 20 Bewertungen | erledigt (P19 Teil 1, mindestens 10 Bewertungen) | P19 |
 | C3 | Service-Bonus als Extra-Wünsche statt Aufschlag auf jede Bewertung | erledigt (P19 Teil 1, `angebotWunsch`) | P19 |
 | C4 | Gäste ohne Wünsche geben 4,5, der Platz entscheidet über den Rest | erledigt (P19 Teil 1, alle Wünsche ebenfalls 4,5) | P19 |
-| C5 | Ruf als Auszeichnung mit Namen und Zeichen im Hafen | offen | P19 |
+| C5 | Ruf als Auszeichnung mit Namen und Zeichen im Hafen | erledigt (P19 Teil 2): drei Stufen mit Namen, Wimpel am Hafenmeisterhaus | P19 |
 | C6 | Ruf lockt andere Gäste (ab 4 große Yachten, ab 4,5 seltene Modelle) | erledigt (P19 Teil 1, `ruf.lockt`) | P19 |
 | C7 | Warnen, bevor es Anker kostet (Gebäude blinkt bei fast ausgebuchter Dusche) | erledigt (P55: Schild knapp orange und blinkend, voll rot, Tipp beim ersten Mal) | P55 |
 | C8 | Stammgäste zählen beim Ruf doppelt | offen | P25 |
@@ -489,7 +489,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
 | L1 | Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel | offen | P46 |
-| L2 | Figuren als Anzeige (Schlange vor der Dusche, volle Tische) | offen (braucht `render/people.js`, Thread Menschen; Auslastung zeigt schon das Schild) | P55 |
+| L2 | Figuren als Anzeige (Schlange vor der Dusche, volle Tische) | erledigt (P55, Schlange vor WC, Dusche, Kiosk und Restaurant, wenn knapp oder voll; `render/people.js`) | P55 |
 | L3 | Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles | offen | P26 |
 | L4 | Fernglas mit Steckbrief | offen | P26 |
 | L5 | Möwen antippen, Glocke am Steg | offen | P26 |
@@ -662,7 +662,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P16 | Aufstieg und Abschluss feiern, Endlosspiel | Ü23, Endlosmodus | `features/aufstieg.js` (Kamerafahrt über die öffentlichen Felder des Rigs, kein Eingriff in `core/camera.js`), `css/aufstieg.css`, `economy.js` (`endlos`), Andockstelle in `ui/oberflaeche.js` | erledigt (PR 156) |
 | P17 | Start und frühe Stufen straffen | Ü15, Ü16, Startwerte dokumentieren | `economy.js`, `state.js`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" (nach P06) |
 | P18 | Ausbau in Bauabschnitten | Ü18, `bautage` nutzen oder löschen | `ui/bauen.js`, `economy.js`, `sim.js`, Stegdarstellung | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Bauabschnitte, Baustelle über Nacht und Sparziel (PR 232), Nachbesserungen (PR 235) |
-| P19 | Ruf schwerer machen mit Wünschen je Bootsart | Ü17, `feeFactor`, `arrivalWeight`, Kapazität sichtbar | `sim.js`, `data/boats/*.js`, `economy.js` | Teil 1 erledigt (B7, C2, C3, C4, C6, F8, [ruf.md](ruf.md)); Teil 2 offen: C5, Kapazität sichtbar, B9 |
+| P19 | Ruf schwerer machen mit Wünschen je Bootsart | Ü17, `feeFactor`, `arrivalWeight`, Kapazität sichtbar | `sim.js`, `data/boats/*.js`, `economy.js` | erledigt: Teil 1 (PR 244: B7, C2, C3, C4, C6, F8), Teil 2 (C5, B9, "heute voll"), [ruf.md](ruf.md) |
 | P20 | Winter mit Inhalt füllen | Ü19, F14, F15, `docs/ereignisse.md` | `sim.js` (Jahreslauf), neues Feature-Modul, Travellift/Winterlager in `render/services.js` | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, 249, `docs/winter.md`); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing |
 | P21 | Logbuch und Hafenchronik zeigen | Logbuch (Note 1), F36, `sim:logbookNew` | neues Modul `web/js/ui/logbuch.js`, `state.js` | erledigt (docs/logbuch.md, SAVE_VERSION 3) |
 | P22 | Erfolge einbauen | plan.md 9 | neues Feature-Modul | neu |
@@ -742,7 +742,7 @@ Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen
 
 | Paket | Titel (Thread) | Inhalt | Welle | Thread |
 |---|---|---|---|---|
-| P55 | Versteckte Regeln im Hafen sichtbar machen | A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen "hier ist etwas zu tun" | 2 | erledigt bis auf L2 (PR 269, `docs/hafenzeichen.md`) |
+| P55 | Versteckte Regeln im Hafen sichtbar machen | A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen "hier ist etwas zu tun" | 2 | erledigt (PR 269 und 275, `docs/hafenzeichen.md`) |
 | P59 | Stege umbauen und Varianten wählen | D5, D6, D9 (neue Gastplätze in Stufe 6) | 3 | neu (stimmt sich mit "Stegbild pro Spiel variieren" ab) |
 | P60 | Hafen verschönern | D8 | 4 | neu |
 | P61 | Spiel komplett offline startbar | N15, N16 | 2 | erledigt (PR 270), Thread "Spiel offline startbar machen" |

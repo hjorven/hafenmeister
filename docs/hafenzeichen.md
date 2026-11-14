@@ -1,6 +1,6 @@
 # Versteckte Regeln sichtbar machen (Paket P55)
 
-Stand: 14.11.2026. Status: gemergt mit diesem Paket. Roadmap-Punkte A4, B1, C7, Bed P1 (Rest), Bed P3, Bed P10 (für wartende Boote). L2 bleibt offen (siehe unten).
+Stand: 14.11.2026. Status: gemergt (PR 269, L2 in PR 275). Roadmap-Punkte A4, B1, C7, L2, Bed P1 (Rest), Bed P3, Bed P10 (für wartende Boote).
 
 Drei Regeln hat das Spiel schon lange gerechnet, aber nie gezeigt: wie lange ein Boot an der Boje wartet, wie viele Boote eine Dusche am Tag versorgt, und dass draußen vor dem Bild Boote warten. Jetzt sieht man alle drei im Hafen selbst, ohne neue Tafel.
 
@@ -35,9 +35,16 @@ Schnittstelle: `game.sim.auslastung()` liefert `{ wc: { versorgt, kapazitaet }, 
 
 Datei: `web/js/ui/hafenzeichen.js` (Schilder, Zeiger, Tuten). Schnittstelle `game.hafenzeichen = { zeiger(), schilder(), ring(id), aktualisieren() }`.
 
+## 4. Schlange vor der Versorgung (L2)
+
+- Ist eine Versorgung heute knapp oder voll, gehen Gäste, die zu Toilette, Sanitärgebäude, Dusche, Kiosk oder Restaurant laufen, nicht gleich hinein: Sie stellen sich an. Die Erste steht an der Tür, die anderen reihen sich an der Hauswand entlang auf und rücken nach.
+- Anstehen dauert bei knapp 6 bis 14 s, bei voll 14 bis 26 s Spielzeit, dann geht es wie sonst weiter. Höchstens sechs stehen an, abends niemand.
+- Reine Anzeige: Die Schlange ändert keine Regel und kein Geld.
+
+Datei: `web/js/render/people.js` (Zustand `schlange`, `schlangenOrdnen`).
+
 ## Nicht in diesem Paket
 
-- L2 "Figuren als Anzeige" (Schlange vor der Dusche): braucht eine Änderung in `render/people.js` (Thread Menschen). Das Schild zeigt die Auslastung schon; eine sichtbare Schlange bleibt offen.
 - Zeiger für andere Aufgaben am Rand (liegen gebliebene Münzen, Dauerlieger): bewusst nicht, damit der Rand ruhig bleibt. Münzen holt abends der Rundgang.
 
 ## Geprüft

@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "76b488f"
+  "commit": "7befb73"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -440,8 +440,7 @@
    "thread": "bestehend: \"Balancing für 94 Liegeplätze ausarbeiten\" (nach P06)",
    "welle": 2,
    "prs": [
-    237,
-    252
+    237
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -490,9 +489,11 @@
    "id": "P19",
    "titel": "Ruf schwerer machen mit Wünschen je Bootsart",
    "inhalt": "Ü17, feeFactor, arrivalWeight, Kapazität sichtbar",
-   "thread": "Teil 1 erledigt (B7, C2, C3, C4, C6, F8, ruf.md); Teil 2 offen: C5, Kapazität sichtbar, B9",
+   "thread": "erledigt: Teil 1 (PR 244: B7, C2, C3, C4, C6, F8), Teil 2 (C5, B9, \"heute voll\"), ruf.md",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    244
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "Ü17",
@@ -506,7 +507,7 @@
     "Svc F8",
     "M3"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1049,10 +1050,11 @@
    "id": "P55",
    "titel": "Versteckte Regeln im Hafen sichtbar machen",
    "inhalt": "A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen \"hier ist etwas zu tun\"",
-   "thread": "erledigt bis auf L2 (PR 269, docs/hafenzeichen.md)",
+   "thread": "erledigt (PR 269 und 275, docs/hafenzeichen.md)",
    "welle": 2,
    "prs": [
-    269
+    269,
+    275
    ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
@@ -1064,7 +1066,7 @@
     "Bed P3",
     "Bed P10"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1664,8 +1666,8 @@
   {
    "code": "Ü17",
    "text": "Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus data/boats, spürbare Kapazität",
-   "status": "teilweise",
-   "statusText": "teils erledigt (P19 Teil 1): Wünsche je Bootsart, Ruf über drei Tage, Angebote als Wünsche, ruf.md; Kapazität sichtbar in Teil 2",
+   "status": "erledigt",
+   "statusText": "erledigt (P19): Wünsche je Bootsart, Ruf über drei Tage, Angebote als Wünsche, Kapazität sichtbar (Schild am Gebäude aus P55, \"heute voll\" in der Bootskarte), ruf.md",
    "pakete": [
     "P19"
    ],
@@ -2371,8 +2373,8 @@
   {
    "code": "B1",
    "text": "Auslastung an jedem Versorgungsgebäude (\"14 von 20\"), Schlange vor der Dusche",
-   "status": "teilweise",
-   "statusText": "Schild erledigt (P55, game.sim.auslastung()), Schlange offen (L2)",
+   "status": "erledigt",
+   "statusText": "Schild erledigt (P55, game.sim.auslastung()), Schlange erledigt (L2)",
    "pakete": [
     "P55"
    ],
@@ -2465,8 +2467,8 @@
   {
    "code": "B9",
    "text": "Wege zählen: weit vom Sanitärhaus zählt die Dusche halb",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 2): über 120 m zählt WC oder Dusche halb, ruf.md",
    "pakete": [
     "P19"
    ],
@@ -2476,14 +2478,12 @@
   {
    "code": "B10",
    "text": "Liegegeld nach Länge statt fest je Größe",
-   "status": "erledigt",
-   "statusText": "erledigt (PR 252, ECONOMY.klassen.proMeter, sim.baseNightlyFee)",
+   "status": "offen",
+   "statusText": "offen",
    "pakete": [
     "P17"
    ],
-   "prs": [
-    252
-   ],
+   "prs": [],
    "abschnitt": "B Wünsche, Versorgung, Liegegeld und Kassieren"
   },
   {
@@ -2546,8 +2546,8 @@
   {
    "code": "C5",
    "text": "Ruf als Auszeichnung mit Namen und Zeichen im Hafen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 2): drei Stufen mit Namen, Wimpel am Hafenmeisterhaus",
    "pakete": [
     "P19"
    ],
@@ -3465,8 +3465,8 @@
   {
    "code": "L2",
    "text": "Figuren als Anzeige (Schlange vor der Dusche, volle Tische)",
-   "status": "offen",
-   "statusText": "offen (braucht render/people.js, Thread Menschen; Auslastung zeigt schon das Schild)",
+   "status": "erledigt",
+   "statusText": "erledigt (P55, Schlange vor WC, Dusche, Kiosk und Restaurant, wenn knapp oder voll; render/people.js)",
    "pakete": [
     "P55"
    ],
@@ -4290,8 +4290,8 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 10,
-    "teilweise": 4,
+    "erledigt": 12,
+    "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
     "offen": 1,
@@ -4412,8 +4412,8 @@
   }
  ],
  "gesamt": {
-  "erledigt": 20,
-  "teilweise": 8,
+  "erledigt": 22,
+  "teilweise": 6,
   "arbeit": 3,
   "frage": 0,
   "offen": 49,
@@ -4421,11 +4421,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 129,
-  "teilweise": 8,
+  "erledigt": 133,
+  "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 81,
+  "offen": 79,
   "entfaellt": 0,
   "alle": 219
  },
@@ -4925,96 +4925,89 @@
  "merges": [
   {
    "datum": "2026-11-14",
-   "titel": "Winter: Karte unter Übersicht und Menü, Knöpfe bleiben unten, keine Platzschilder im Winter",
-   "pr": 249,
+   "titel": "P19 Teil 2: Wege zählen, Auszeichnung des Hafens, \"heute voll\" in der Bootskarte",
+   "pr": 279,
    "pakete": [
-    "P20"
+    "P19"
    ]
   },
   {
    "datum": "2026-11-14",
-   "titel": "Ankerplätze und Wartebojen immer im Wasser, Küstenberechnung schneller",
-   "pr": 246,
-   "pakete": [
-    "P62"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 240 bei P66 eingetragen, Bilder zum Winter (P20)",
-   "pr": 248,
-   "pakete": [
-    "P66",
-    "P20"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Winter: Winterpause, Winterarbeiten, Winter überspringen und Krantage (P20)",
-   "pr": 245,
-   "pakete": [
-    "P20"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tests: Pixeldichte 1 außer bei Bildschirmfotos, Geräte-Ausnahmen vor dem Laden überspringen",
-   "pr": 247,
+   "titel": "Tagesziel klappt nicht mehr auf, \"Als Nächstes\" eine Zeile und nur kurz",
+   "pr": 277,
    "pakete": []
   },
   {
    "datum": "2026-11-14",
-   "titel": "Meldungs-Ordnung: Kartenwahl wartet hinter der Feier, Tipps nie über Zeit und Bauen",
-   "pr": 241,
+   "titel": "P55 L2: Schlange vor der Versorgung, wenn sie knapp oder voll ist",
+   "pr": 275,
+   "pakete": [
+    "P55"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Tempo läuft durch: keine automatische Bremsung mehr",
+   "pr": 278,
    "pakete": []
   },
   {
    "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 233 bei P14, PR 239 bei P15, Bilder fürs erste Bauwerk (P17)",
-   "pr": 243,
+   "titel": "Logbuch und Hafenchronik: Sammelalbum mit Pixelbildern, Chronik je Tag (P21)",
+   "pr": 274,
    "pakete": [
-    "P14",
-    "P15",
-    "P17"
+    "P21"
    ]
   },
   {
    "datum": "2026-11-14",
-   "titel": "Boote: Auslaufende mit Vorrang, Zurücksetzen statt Durchlass, gemeinsamer Ablegetakt",
-   "pr": 240,
+   "titel": "P55: Geduldsring, Auslastung an der Versorgung, Zeiger am Bildrand",
+   "pr": 269,
    "pakete": [
-    "P66"
+    "P55"
    ]
   },
   {
    "datum": "2026-11-14",
-   "titel": "Tests: Zeitlimit 90 s, Warten unabhängig vom Bildtakt",
-   "pr": 242,
+   "titel": "Fahrrinne in die offene See: jede Küste hat einen Seeweg",
+   "pr": 271,
    "pakete": []
   },
   {
    "datum": "2026-11-14",
-   "titel": "Tagesabschluss: Geschenk nicht als verdient, Einzahl in der Bauvorschau",
-   "pr": 239,
+   "titel": "Arbeitsplan: PR 244 gemergt, P19 Teil 2 läuft, Befund Stufe 2 ins Balancing",
+   "pr": 273,
    "pakete": [
-    "P15"
+    "P19"
    ]
   },
   {
    "datum": "2026-11-14",
-   "titel": "Bauen: erstes Bauwerk geschenkt und geführt (J4, Ü15), Ausbau-Fähnchen zählt Abschnitte",
-   "pr": 237,
+   "titel": "P19 Teil 1: Ruf schwerer, Wünsche je Bootsart, Angebote als Wünsche",
+   "pr": 244,
    "pakete": [
-    "P03",
-    "P17"
+    "P19"
    ]
   },
   {
    "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 235 bei P18 eingetragen, Bild Pulk an der Einfahrt (P66)",
-   "pr": 238,
+   "titel": "Arbeitsplan: alle offenen Vorschläge und Stufe 7 bis 20 in Reihenfolge",
+   "pr": 272,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Spiel offline startbar: Three.js mitgeliefert, Spieldateien vorab im Cache (P61)",
+   "pr": 270,
    "pakete": [
-    "P18",
+    "P61"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 258 und 262 bei P66, Karte der Zonen und Seewege",
+   "pr": 268,
+   "pakete": [
     "P66"
    ]
   }
