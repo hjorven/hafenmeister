@@ -371,8 +371,10 @@ export async function init(game) {
     if (art === 'winter' && !winter()) { schliessen(); return; }
     const darf = !game.meldungen || game.meldungen.darf('winter');
     const ruhig = !document.body.classList.contains('foto') && !document.body.classList.contains('building');
+    const war = karte.hidden;
     karte.hidden = !(darf && ruhig);
     if (!karte.hidden) passeHoeheAn();
+    if (war !== karte.hidden) game.emit('winter:karte', { offen: !karte.hidden });
     // Der Gruß zum Saisonbeginn steht 20 s, gezählt nur, solange er zu sehen ist
     const jetzt = performance.now();
     if (art === 'fruehling' && !karte.hidden) {
