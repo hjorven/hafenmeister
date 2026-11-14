@@ -162,6 +162,22 @@ export const ECONOMY = {
       seltenAb: 4.5,
       selten: ['S4-5', 'S5-3', 'M1-5', 'M2-5', 'M3-5', 'L1-5', 'L2-5', 'L3-4', 'XL1-4', 'XL2-4', 'XL2-5'],
     },
+    // Wege (P19 B9): Liegt ein Gast weiter als weit Meter (Luftlinie Box bis Tür) vom nächsten
+    // Gebäude, das einen dieser Wünsche erfüllt, zählt der Wunsch für die Note nur zum anteil.
+    // Liegegeld und Wunschbonus bleiben voll. Das Sanitärgebäude (WC Stufe 3) hat auch Duschen.
+    wege: { weit: 120, anteil: 0.5, wuensche: ['wc', 'dusche'] },
+    // Auszeichnung (P19 C5): Liegt der Ruf an tage Abenden in Folge (Saison) mindestens bei ab,
+    // bekommt der Hafen die Auszeichnung; liegt er tage Abende in Folge unter ab - halten, geht sie
+    // eine Stufe zurück. Wimpel am Hafenmeisterhaus, Name im Gästebuch.
+    auszeichnung: {
+      tage: 3,
+      halten: 0.2,
+      stufen: [
+        { ab: 3.8, name: 'Gastlicher Hafen' },
+        { ab: 4.2, name: 'Empfohlener Hafen' },
+        { ab: 4.6, name: 'Ausgezeichneter Hafen' },
+      ],
+    },
   },
 
   fischer: { pachtProTag: 15 },   // feste Pacht je Abend, nur für Fischer und andere fest vergebene Plätze

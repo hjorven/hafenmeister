@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "57a42bb"
+  "commit": "a6ac8ab"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -492,10 +492,11 @@
    "id": "P19",
    "titel": "Ruf schwerer machen mit Wünschen je Bootsart",
    "inhalt": "Ü17, feeFactor, arrivalWeight, Kapazität sichtbar",
-   "thread": "Teil 1 erledigt (PR 244; B7, C2, C3, C4, C6, F8, ruf.md); Teil 2 offen: C5, Kapazität sichtbar, B9",
+   "thread": "erledigt: Teil 1 (PR 244: B7, C2, C3, C4, C6, F8), Teil 2 (PR 279: C5, B9, \"heute voll\"), ruf.md",
    "welle": 2,
    "prs": [
-    244
+    244,
+    279
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -510,7 +511,7 @@
     "Svc F8",
     "M3"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": [
     44,
     45
@@ -1682,8 +1683,8 @@
   {
    "code": "Ü17",
    "text": "Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus data/boats, spürbare Kapazität",
-   "status": "teilweise",
-   "statusText": "teils erledigt (P19 Teil 1): Wünsche je Bootsart, Ruf über drei Tage, Angebote als Wünsche, ruf.md; Kapazität sichtbar in Teil 2",
+   "status": "erledigt",
+   "statusText": "erledigt (P19): Wünsche je Bootsart, Ruf über drei Tage, Angebote als Wünsche, Kapazität sichtbar (Schild am Gebäude aus P55, \"heute voll\" in der Bootskarte), ruf.md",
    "pakete": [
     "P19"
    ],
@@ -2483,8 +2484,8 @@
   {
    "code": "B9",
    "text": "Wege zählen: weit vom Sanitärhaus zählt die Dusche halb",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 2): über 120 m zählt WC oder Dusche halb, ruf.md",
    "pakete": [
     "P19"
    ],
@@ -2562,8 +2563,8 @@
   {
    "code": "C5",
    "text": "Ruf als Auszeichnung mit Namen und Zeichen im Hafen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 2): drei Stufen mit Namen, Wimpel am Hafenmeisterhaus",
    "pakete": [
     "P19"
    ],
@@ -4306,8 +4307,8 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 11,
-    "teilweise": 3,
+    "erledigt": 12,
+    "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
     "offen": 1,
@@ -4428,8 +4429,8 @@
   }
  ],
  "gesamt": {
-  "erledigt": 22,
-  "teilweise": 6,
+  "erledigt": 23,
+  "teilweise": 5,
   "arbeit": 3,
   "frage": 0,
   "offen": 49,
@@ -4437,11 +4438,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 130,
-  "teilweise": 7,
+  "erledigt": 133,
+  "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 81,
+  "offen": 79,
   "entfaellt": 0,
   "alle": 219
  },
