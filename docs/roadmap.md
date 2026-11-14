@@ -81,7 +81,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 
 | Nr | Punkt | Status | Paket |
 |---|---|---|---|
-| Ü15 | Weicher Start: 100 € Startgeld oder geschenktes WC | offen | P17 |
+| Ü15 | Weicher Start: 100 € Startgeld oder geschenktes WC | erledigt (PR 237): geschenktes Toilettenhäuschen beim ersten Bauen | P17 |
 | Ü16 | Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken | offen | P17 |
 | Ü17 | Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus `data/boats`, spürbare Kapazität | offen | P19 |
 | Ü18 | Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend | erledigt (PR 232) | P18 |
@@ -464,7 +464,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | J1 | Schritt 1 zeigt auf "3x" statt auf die Sonne | erledigt (PR 112: Willkommen zeigt auf die Boje, Schritt 4 auf 3x) | P03 |
 | J2 | Im Einstieg fährt das erste Boot nicht selbst ein | erledigt (PR 112, `holdBoat` bis zum ersten Anlegen; Kamera fährt zum Boot, wenn es außerhalb liegt) | P03 |
 | J3 | Münze gleich nach dem Anlegen erklären, auch den halben Preis | erledigt (PR 112, Anteil aus den Regeln) | P03 |
-| J4 | Erstes Bauen führen, Geld fürs WC geschenkt (= Ü15) | offen | P17, P03 |
+| J4 | Erstes Bauen führen, Geld fürs WC geschenkt (= Ü15) | erledigt (PR 237) | P17, P03 |
 | J5 | Ruf am ersten Abreisenden erklären | offen | P03 (nach P14) |
 | J6 | Hinweise beim ersten Mal (kein Platz, Sturm, Winter, Stufenziel, Stammgast) | erledigt (kein Platz zweifach, Stufenziel, Stammgast; Sturm und Winter erklärt schon das Ereignisschild) | P03 |
 | J7 | Hilfe-Seite für alle Geräte mit sechs Bildern | erledigt (Menü „Hilfe“, `features/hilfe.js`) | P03 |
@@ -638,7 +638,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|---|
 | P01 | Dauerlieger zur echten Entscheidung machen | Ü1, Ü20, Doku Dauerlieger, Gast wird umgelegt (plan 9a) | `sim.js`, `features/dauerlieger.js`, `economy.js`, `tests/dauerlieger.test.mjs`, `docs/neue-features.md`, `docs/spielregeln.md` | erledigt (PR 149, 226) |
 | P02 | Hafenbüro mit eigenen Aufgaben ausbauen | Ü2, Ü11, A2, E1 bis E7, erledigt (PR 146) | `ui/hud.js`, `sim.js` (Automatik), `economy.js`, `ui/bauen.js` (Texte) | neu |
-| P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); offen: J4 mit P17, J5 nach P14 |
+| P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); J4 mit P17 erledigt (PR 237); offen: J5 nach P14 |
 | P04 | Abschlussziel Stufe 6 richtig zählen | Ü4 | `bridge.js`, `render/services.js`, `docs/services.md` | bestehend: "Services und Sonderanlagen einbauen" |
 | P05 | Boote auf wegfallenden Plätzen regeln | Ü5 | `sim.js` (Stufenausbau), `tests/` | bestehend: "Spielregeln ohne Grafik umsetzen" |
 | P06 | Eine Quelle für alle Zahlen und echte Regeltests (erledigt) | Ü6, Ü24 | `economy.js`, `data/rules.js`, `data/services.js`, `services/rules.js`, `data/events.js`, `tests/regeln.mjs` (statt `tests/helpers.mjs`, das ist der Browser-Helfer), alle Regeltests, `tools/zahlen.mjs`, `docs/zahlen.md`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" |

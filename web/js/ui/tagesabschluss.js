@@ -189,6 +189,7 @@ export function init(game) {
         if (top.length > 3) namen.push(`${top.length - 3} weitere`);
         klein = namen.join(', ');
       }
+      if (q === 'sonstiges' && d?.startgeschenk) klein = 'Geschenk fürs erste Bauwerk';
       if (q === 'tagesziele' && b.ziele?.gesamt) zusatz = `${b.ziele.erledigt} von ${b.ziele.gesamt}`;
       einnahmen.append(zeile(QUELLE_NAME[q] ?? q, euro(b.einnahmen[q]), { klein, zusatz }));
     }
