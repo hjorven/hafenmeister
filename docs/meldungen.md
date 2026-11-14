@@ -32,3 +32,12 @@ game.on('meldungen:wechsel', () => { /* sofort neu fragen */ });
 
 Wo die Meldung steht, entscheidet ihr Modul selbst: nie über Knöpfen (Zeit, Kassieren, Bauen, oben rechts)
 und nie über der linken Spalte (Wetter, Tagesziel, Ausbau). Ein neuer Vorrang kommt in `VORRANG` und in diese Tabelle.
+
+Fenster aus `FENSTER` (Feier, Kartenwahl, Tagesabschluss) blendet die Ordnung selbst aus, solange ein
+wichtigeres steht: `body` trägt dafür `data-hm-meldung` mit der stehenden Meldung, das CSS kommt aus
+`ui/meldungen.js`. So wartet eine offene Kartenwahl unsichtbar hinter der Feier und kommt danach wieder.
+Bewertungsblasen und Gästebuch-Meldungen (`ui/gaestebuch.js`) sind während der Feier aus, ihre Zeit steht.
+
+Passt eine Meldung nirgends hin, ohne Knöpfe zu verdecken (Handy hochkant mit aufgeklappter
+Tagesziel-Tafel), wartet sie ausgeblendet, bis Platz ist. Nur ein Schritt des Einstiegs und ein wartender
+Dauerlieger mit Frist legen sich dann über die linke Spalte, nie über Zeit, Kassieren oder Bauen.
