@@ -91,6 +91,13 @@ export const TEXTE = {
       : `Angelegt. Das Boot zahlt gleich: Klick auf die Münze am Boot, mehrere fährst du mit gedrückter Maustaste in einem Zug ab. Bezahlt zeigt einen Wimpel am Bug. Was liegen bleibt, holt abends der Hafenmeister, aber nur ${ANTEIL}.`,
     kurz: TOUCH ? `Tipp auf die Münze am Boot. Liegen gelassen gibt es abends nur ${ANTEIL}.` : `Klick auf die Münze am Boot. Liegen gelassen gibt es abends nur ${ANTEIL}.`,
   },
+  // Wie "muenzen", solange das Boot noch in die Box fährt: Die Regel meldet das Anlegen schon beim
+  // Zuweisen, die Münze kommt erst, wenn es sichtbar fest ist (render/boat-view.js). Feature-Test 14.11.
+  muenzenUnterwegs: {
+    titel: 'Das Boot legt an',
+    text: 'Es fährt jetzt in die Box. Sobald die Leinen fest sind, zahlt es: Am Boot erscheint eine Münze.',
+    kurz: 'Das Boot fährt in die Box. Gleich erscheint seine Münze.',
+  },
   tempo: {
     titel: 'Der Tag läuft',
     text: TOUCH
@@ -208,7 +215,10 @@ export function naechsterSchritt(e, lage) {
   // Nach einem ganzen Spieltag schließt der Einstieg von selbst, damit kein Hinweis Tage später noch über dem Hafen liegt
   if (lage.tag != null) {
     e.startTag ??= lage.tag;
-    if (lage.tag > e.startTag) { e.fertig = true; return null; }
+    // Ausnahme: Fehlt nur noch der Hinweis auf die Tagesziele (z. B. abends gebaut, dann kam der
+    // Tagesabschluss), kommt er am nächsten Morgen, da passt er ohnehin am besten (Feature-Test 14.11.).
+    const nurZiele = REIHENFOLGE.every((id) => id === 'ziele' || e.erledigt.includes(id));
+    if (lage.tag > e.startTag && !(nurZiele && lage.tag === e.startTag + 1)) { e.fertig = true; return null; }
   }
   const done = new Set(e.erledigt);
   // Handy quer: Die Seitenleiste mit der Tafel tritt hinter die Blase zurück (ui-phone.css),
@@ -438,9 +448,13 @@ export async function init(game) {
   }
 
   // ---------------------------------------------------------------- Sprechblase
-  function zeige(id) {
+  // Schritt 3 hat zwei Fassungen: Boot fährt noch in die Box, oder fest mit Münze
+  let fassung = null;
+  const fassungFuer = (id) => (id === 'muenzen' && !muenzen().length ? 'muenzenUnterwegs' : id);
+  function zeige(id, still = false) {
     const vorher = aktuell;
     aktuell = id;
+    fassung = id ? fassungFuer(id) : null;
     // Andere Hinweise (z. B. "Als Nächstes" beim Bauen) warten auf das Ende des Einstiegs: Bescheid geben
     if (vorher !== id) {
       game.emit('einstieg:schritt', { schritt: id });
@@ -452,7 +466,7 @@ export async function init(game) {
     game.meldungen?.wunsch('einstieg', id.startsWith('hinweis:') ? VORRANG.tipp : VORRANG.einstieg);
     const st0 = game.sim?.state;
     const geschenkWeg = !!st0?.modules?.bauen?.geschenk || (st0?.facilities?.wc || 0) > 0 || st0?.stage > 1;
-    const t = id === 'bauen' && geschenkWeg ? TEXTE.bauenOhneGeschenk : TEXTE[id];
+    const t = id === 'bauen' && geschenkWeg ? TEXTE.bauenOhneGeschenk : TEXTE[fassung] ?? TEXTE[id];
     const nr = REIHENFOLGE.indexOf(id) + 1;
     const info = id === 'tempo' || id === 'bauen' || id === 'ziele';
     tipp.replaceChildren();
@@ -476,6 +490,7 @@ export async function init(game) {
     const pk = document.createElement('p'); pk.className = 'kurz'; pk.textContent = t.kurz ?? t.text;
     tipp.append(z, h, p, pk, k);
     tipp.hidden = false;
+    if (still) return;
     try { game.audio?.sfx?.('hinweis'); } catch { /* Ton ist nicht wichtig */ }
   }
 
@@ -733,6 +748,7 @@ export async function init(game) {
     // Wer schon vorspult, kennt die Zeitsteuerung: der Hinweis würde nur kurz aufblitzen
     if (id === 'tempo' && (game.speed || 1) > 1) { schritt('tempo'); return; }
     if (id !== aktuell) { zeige(id); fluege = 0; gerahmt = false; }
+    else if (id && fassungFuer(id) !== fassung) zeige(id, true);   // Boot ist fest: Text ohne neuen Ton tauschen
     if (id === 'anlegen' && !gerahmt) rahmeBootUndPlatz();
     k = id ? ziel(id) : null;
     if (!id) return;

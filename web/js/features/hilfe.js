@@ -17,8 +17,8 @@ export const KARTEN = [
   {
     bild: 'pfeil', titel: 'Boot einweisen',
     text: TOUCH
-      ? 'Zieh ein wartendes Boot mit dem Finger auf einen leuchtenden Platz (grünes Schild heißt frei). Oder tipp es an und drück „Einfahren“.'
-      : 'Zieh ein wartendes Boot mit der Maus auf einen leuchtenden Platz (grünes Schild heißt frei). Oder klick es an und drück „Einfahren“.',
+      ? 'Zieh ein wartendes Boot mit dem Finger auf einen leuchtenden Platz (grünes Schild heißt frei). Oder tipp es an und drück „Einfahren lassen“.'
+      : 'Zieh ein wartendes Boot mit der Maus auf einen leuchtenden Platz (grünes Schild heißt frei). Oder klick es an und drück „Einfahren lassen“.',
   },
   {
     bild: 'muenze', titel: 'Liegegeld einstreichen',

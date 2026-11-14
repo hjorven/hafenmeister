@@ -110,11 +110,18 @@ export function createGame({ canvas, bounds, home }) {
       renderer.render(scene, rig.camera);
       return;
     }
+    // Langsame Geräte (unter 10 Bildern/s): die Spielzeit läuft trotzdem richtig, in Teilschritten
+    // von höchstens 0,1 s echter Zeit, damit Boote und Regeln keine zu großen Sprünge machen.
+    // Mehr als 0,25 s je Bild (Tab im Hintergrund, Hänger) holt das Spiel nicht nach (Feature-Test 14.11.).
     const raw = Math.min(delta, 0.1);
-    const dt = game.paused ? 0 : raw * game.speed;
-    game.time += dt;
+    const echt = game.paused ? 0 : Math.min(delta, 0.25);
+    const schritte = Math.max(1, Math.ceil(echt / 0.1 - 1e-9));
     rig.update(raw);
-    for (const fn of tickers) fn(dt, game);
+    for (let i = 0; i < schritte; i++) {
+      const dt = (echt / schritte) * game.speed;
+      game.time += dt;
+      for (const fn of tickers) fn(dt, game);
+    }
     // Nebel aus dem Wetter zieht den Dunst weich heran
     rig.nebel += (nebelZiel - rig.nebel) * Math.min(1, raw * 0.8);
     dunst(scene, rig);
