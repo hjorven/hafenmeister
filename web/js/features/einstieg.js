@@ -732,8 +732,10 @@ export async function init(game) {
     if (!id) return;
     if (id === 'muenzen' && !k) zumBoot(zahlendeIds());
     // Ist die Bootskarte offen, sagt sie selbst, was zu tun ist; der Text würde nur die Stege verdecken
-    tipp.hidden = ziehen || (id === 'anlegen' && document.body.classList.contains('card-open')) || !darf();
-    ring.hidden = !k || ziehen || !darf();
+    // Beim Bauen führt das Baumenü selbst (Vorschau, Kaufknopf): die Blase wartet auf allen Geräten, bis es zu ist
+    const bauOffen = document.body.classList.contains('building');
+    tipp.hidden = ziehen || bauOffen || (id === 'anlegen' && document.body.classList.contains('card-open')) || !darf();
+    ring.hidden = !k || ziehen || bauOffen || !darf();
     if (k) setzeKreis();
     if (!tipp.hidden) lege(k);
   }
