@@ -225,7 +225,7 @@ python3 -m http.server 8000 --directory web
 Danach `http://localhost:8000` öffnen. Vor jedem Merge im Hauptordner:
 
 ```bash
-bash tests/pruefen.sh
+bash tests/pruefen.sh --schnell
 ```
 
 Am Ende muss `Alles grün.` stehen. Einzelheiten in [docs/tests.md](docs/tests.md).
