@@ -82,6 +82,8 @@ Die Kaifläche (`KAIFLAECHE`, x -150 bis 202, y -92 bis 6) schüttet der Ausbau 
 
 **Welche Form gilt:** `?gelaende=N&seed=S` in der Adresse (nur ansehen), sonst die im Spielstand (`modules.gelaende = { nr, seed }`), in Tests und ohne Browser Typ 1 mit Seed 1, in einem neuen Spiel Typ und Seed zufällig. Ältere Spielstände ohne Seed bekommen Seed 1. Im Spiel: `game.gelaende.aktuell()` (`{ nr, name, idee, seed, dreh, leuchttuerme, quelle }`), `game.gelaende.formen`. Einen Typ entfernen: seinen Eintrag aus `TYPEN` in `natur.js` löschen; Spielstände mit dieser Nummer bekommen Typ 1.
 
+**Rechenzeit:** `bauen()` vermisst die Karte zweimal (Ufer und offene See). Dafür genügt das Vorzeichen der Landigkeit; fern vom Hafen entscheidet `pflichtZeichen` es ohne die Pflichtbereiche auszurechnen. Das Ergebnis ist bitgenau dasselbe (350 Seeds verglichen), die Küstenberechnung braucht rund 37 Prozent weniger Zeit.
+
 **Prüfung:** `tests/gelaendeform.test.mjs` prüft alle Typen in beiden Revieren und ein paar Seeds je Typ (Engpass, Fahrwasser, Bojen, Ankerplätze, Liegeplatztiefen, Leuchttürme an Land, Wellenbrecher, Menschenwege an Land). Für viele Seeds:
 
 ```bash

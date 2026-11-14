@@ -203,6 +203,44 @@ function pflicht(px, py, L, route, seed, seeweg = null) {
   return L;
 }
 
+/** Abstand zu einem Rahmen [x0, y0, x1, y1] (0 innen): Untergrenze für den Abstand zu allem darin. */
+function rahmenAbstand(px, py, r) {
+  const dx = px < r[0] ? r[0] - px : px > r[2] ? px - r[2] : 0, dy = py < r[1] ? r[1] - py : py > r[3] ? py - r[3] : 0;
+  return dx > dy ? dx : dy;
+}
+let _rahmen = null;
+function pflichtRahmen() {
+  if (_rahmen) return _rahmen;
+  const um = (r, x0, y0, x1, y1) => { r[0] = Math.min(r[0], x0); r[1] = Math.min(r[1], y0); r[2] = Math.max(r[2], x1); r[3] = Math.max(r[3], y1); };
+  const land = [Infinity, Infinity, -Infinity, -Infinity], wasser = [Infinity, Infinity, -Infinity, -Infinity];
+  for (const [x, y, r] of BEDARF.land.kreise) um(land, x - r, y - r, x + r, y + r);
+  for (const l of BEDARF.land.linien) for (const [x, y] of l.punkte) um(land, x - l.halb, y - l.halb, x + l.halb, y + l.halb);
+  for (const k of BEDARF.wasser.kaesten) um(wasser, k.x0, k.y0, k.x1, k.y1);
+  for (const [x, y, r] of BEDARF.wasser.kreise) um(wasser, x - r, y - r, x + r, y + r);
+  um(wasser, SEE_NORD.x0, SEE_NORD.y0, SEE_NORD.x1, SEE_NORD.y1);
+  return (_rahmen = { land, wasser, streifen: [STEGSTREIFEN.x0 - 40, -60, STEGSTREIFEN.x1 + 40, 40] });
+}
+/**
+ * Nur das Vorzeichen von pflicht(): +1 sicher Land, -1 sicher Wasser, 0 unklar (dann genau rechnen).
+ * Fern vom Hafen ändern die Pflichtbereiche nichts am Vorzeichen; das spart beim Vermessen der Karte
+ * den größten Teil der Rechenzeit, ohne dass sich ein Seed ändert. Schranken: smax(a, b, k) liegt in
+ * [max, max + k/4], smin in [min - k/4, min]; Rauschen der Ränder höchstens 7.
+ */
+function pflichtZeichen(px, py, L, route, seeweg) {
+  const R = pflichtRahmen();
+  if (rahmenAbstand(px, py, R.streifen) <= 0) return 0;
+  // Wasser bleibt Wasser, wenn kein Pflicht-Land in der Nähe ist (die smin danach senken nur weiter)
+  if (L < -8) return rahmenAbstand(px, py, R.land) > 24 ? -1 : 0;
+  // Land bleibt Land, wenn alles Pflicht-Wasser weit weg ist (vier smin kosten zusammen höchstens 33,5)
+  if (L > 36) {
+    if (rahmenAbstand(px, py, R.wasser) < 52) return 0;
+    if (route && abstandLinie(px, py, route.punkte) - route.halb < 45) return 0;
+    if (seeweg && abstandLinie(px, py, seeweg.punkte) - seeweg.halb < 52) return 0;
+    return 1;
+  }
+  return 0;
+}
+
 /** Wie weit (px, py) im Pflicht-Land liegt (positiv innen, Planeinheiten). */
 function landBedarf(px, py) {
   let best = -Infinity;
@@ -660,7 +698,8 @@ export function bauen(nr, seed = 1) {
   const gWald = new Float32Array(n), gPlate = new Float32Array(n), gKanal = new Float32Array(n);
   for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
     const k = j * nx + i;
-    const [X, Y] = nachNatur(x0 + i * S, y0 + j * S);
+    const px = x0 + i * S, py = y0 + j * S;
+    const X = ax + px * c - py * s, Y = ay + px * s + py * c;   // wie nachNatur, ohne Feld je Zelle
     gRoh[k] = roh(X, Y);
     let duene = 0, fels = 0, hallig = 0, wald = 0, plate = -40, kanal = 0;
     for (const b of baender) {
@@ -693,9 +732,13 @@ export function bauen(nr, seed = 1) {
   };
   // Pflichtbereiche exakt, Natur aus dem Raster
   // Abstand zum Ufer (an Land und im Wasser) und zur offenen See, für eine gegebene Landigkeit
-  const vermessen = (landigFn) => {
+  const vermessen = (landigFn, sw = null) => {
     const nass = new Uint8Array(n);
-    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) nass[j * nx + i] = landigFn(x0 + i * S, y0 + j * S) < 0 ? 1 : 0;
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+      const px = x0 + i * S, py = y0 + j * S;
+      const z = pflichtZeichen(px, py, lies(gRoh, px, py), route, sw);
+      nass[j * nx + i] = (z ? z < 0 : landigFn(px, py) < 0) ? 1 : 0;
+    }
     const dL = chamfer(nass, nx, ny, 1), dW = chamfer(nass, nx, ny, 0);
     // offene See: breites Wasser (über 50 Einheiten vom Ufer) am Kartenrand, und zwar das Gebiet, das in der
     // Naturkarte am weitesten "draußen" (Norden) liegt; Lagunen und Bodden hinter schmalen Durchlässen zählen nicht
@@ -753,7 +796,7 @@ export function bauen(nr, seed = 1) {
     return best ? { punkte: best.punkte, halb: 80, grad: best.grad, land: best.land } : null;
   })();
   const landig = seeweg ? (px, py) => pflicht(px, py, lies(gRoh, px, py), route, bseed, seeweg) : landigOhne;
-  if (seeweg) masse = vermessen(landig);
+  if (seeweg) masse = vermessen(landig, seeweg);
   const { nass, dL, dW, nichtOffen } = masse;
   const dOffen = chamfer(nichtOffen, nx, ny, 0);   // Abstand zur offenen See in Rasterzellen (0 dort)
 
