@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "64a6773"
+  "commit": "4260b5d"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -3752,7 +3752,7 @@
    "code": "Bed P4",
    "text": "Tempo, das mitdenkt: zurück auf 1x bei Sonderfall oder Ereignis, Knopf \"bis zum nächsten Boot\"",
    "status": "erledigt",
-   "statusText": "erledigt (1x bei Ereignis, Ausbau möglich, Regionsziel; 8x läuft bis zum nächsten Boot)",
+   "statusText": "erledigt (Tempo bleibt; 1x nur bei wartendem Dauerlieger, Regionsziel, 8x bis zum nächsten Boot, danach Knopf \"Weiter mit 3x\" und automatische Rückkehr; 14.11.)",
    "pakete": [
     "P07"
    ],
@@ -4876,6 +4876,26 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "Tempo bleibt: 3x springt nicht mehr jeden Morgen auf 1x",
+   "pr": 257,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Boote: Kurswächter Ufer, XL am kurzen Kai im Wasser",
+   "pr": 256,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 254 bei P66 eingetragen",
+   "pr": 255,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "Boote: Zurücksetzen prüft bis zum Heck, Ankerplätze am Weltrand nicht an Land",
    "pr": 254,
    "pakete": [
@@ -4940,30 +4960,6 @@
    "datum": "2026-11-14",
    "titel": "Meldungs-Ordnung: Kartenwahl wartet hinter der Feier, Tipps nie über Zeit und Bauen",
    "pr": 241,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 233 bei P14, PR 239 bei P15, Bilder fürs erste Bauwerk (P17)",
-   "pr": 243,
-   "pakete": [
-    "P14",
-    "P15",
-    "P17"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Boote: Auslaufende mit Vorrang, Zurücksetzen statt Durchlass, gemeinsamer Ablegetakt",
-   "pr": 240,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tests: Zeitlimit 90 s, Warten unabhängig vom Bildtakt",
-   "pr": 242,
    "pakete": []
   }
  ]

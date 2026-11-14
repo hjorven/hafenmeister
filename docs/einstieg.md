@@ -43,6 +43,19 @@ Nach dem Einstieg erscheint jeder dieser Hinweise einmal pro Spielstand (gemerkt
 
 Sturm und Winter stehen nicht in der Liste: Beide erklärt das Ereignisschild (`events/banner.js`) bei jedem Auftreten.
 
+Zum Ausprobieren (Browser-Konsole, im laufenden Spiel): neues Spiel, Einstieg beenden, dann einen Auslöser schicken.
+Jeder Hinweis kommt pro Spielstand nur einmal, für einen zweiten Versuch also wieder mit `newGame` beginnen.
+
+```js
+const g = window.hafenmeister;
+g.sim.newGame(42);
+g.einstieg.beenden();
+g.tagesziele?.waehle?.(0);   // Kartenwahl des ersten Tages schließen, sonst wartet der Tipp auf sie
+g.emit('stammgast:neu', { boatId: 1 });
+```
+
+Die Schritte des Einstiegs (Blase und Kreis) warten ebenso, solange das Baumenü offen ist: Es führt dann selbst.
+
 ## Hilfe im Menü
 
 `web/js/features/hilfe.js`: Menüpunkt „Hilfe“ (`#btn-hilfe`, Symbol `hilfe` aus `ui/pixel-symbole.js`). Die Tafel `#hm-hilfe` zeigt die sechs Grundgriffe mit Pixelbild (Boote an den Bojen, Einweisen, Liegegeld, Zeit, Bauen, Tagesziele und Ausbau), Texte getrennt für Finger und Maus. Der Knopf „Einstieg wiederholen“ startet den Einstieg neu (`game.einstieg.start()`); schon gesehene Hinweise bleiben gesehen.
