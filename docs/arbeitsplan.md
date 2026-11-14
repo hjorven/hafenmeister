@@ -1,6 +1,6 @@
 # Arbeitsplan
 
-Stand: 14.11.2026, 11:30 UTC, abgeglichen mit `main` bei `dae7f97` (PR 279). Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
+Stand: 14.11.2026, 21:15 UTC, abgeglichen mit `main` bei `adc0086` (PR 295). Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
 
 **Wozu diese Datei:** [roadmap.md](roadmap.md) sagt, *was* insgesamt noch fehlt (Pakete P01 bis P82). Dieser Arbeitsplan sagt, *was jetzt gerade* läuft, welche Fehler zuerst weg müssen und welche Pakete als Nächstes starten. [plan.md](plan.md) bleibt der gültige Plan für Vision und Regeln.
 
@@ -15,20 +15,19 @@ Stand: 14.11.2026, 11:30 UTC, abgeglichen mit `main` bei `dae7f97` (PR 279). Gep
 
 ## 1. Was gerade überarbeitet wird
 
-Stand 14.11.2026, 11:30 UTC.
+Stand 14.11.2026, 21:15 UTC.
 
 | Thema | Thread | Paket | Stand | PR |
 |---|---|---|---|---|
-| Boote: Wartebojen neben den Stegen, Anfahrt von weit draußen, Stau im Becken | "Staus an Bojen und Ankerfeld auflösen" | P66 | PR offen | 280 |
-| Gelände: Seewege, Seegatt für geschlossene Bodden | "Geländeform und Engpass neu bauen" | P62 | Fahrrinne in die offene See gemergt (PR 271), läuft weiter | - |
-| Ereignisse zum Vorbereiten: Sturm sturmklar machen, Regatta-Plätze freihalten | "Ereignisse Sturm und Regatta einbauen" | P24 Teil 1 | PR offen; PR 91 (Nebel) geschlossen | 281 |
-| Ruhige Handy-Oberfläche: ein Meldeplatz, eine Meldung zur Zeit | "Handy-Oberfläche neu und ruhig gestalten" | P07 (Folge) | PR offen | 282 |
-| Fehler aus Jorvens Feature-Test | "Fehler aus Jorvens Feature-Test beheben" | Grundprobleme | läuft | - |
-| Erfolge | Logbuch-Thread | P22 | läuft (nach P21) | - |
-| Liegegeld je angefangenem Meter, Winterknöpfe quer | Balancing-Thread | B10 | PR offen mit Konflikt, muss auf `main` (mit P19) | 252 |
-| Feature-Test, Zeitraffer-Test, Tests, Roadmap-Seite | Prüf- und Pflege-Threads | - | laufen; Zeitraffer-PR offen | 251, 276 |
+| Boote: Wartebojen neben den Stegen, Anfahrt von weit draußen, Stau im Becken | "Staus an Bojen und Ankerfeld auflösen" | P66 | PR seit 11 Uhr offen, muss fertig werden | 280 |
+| Gelände: Seewege, Seegatt für geschlossene Bodden | "Geländeform und Engpass neu bauen" | P62 | läuft | - |
+| Ereignisse Teil 2: neue Ereignisse (G3, F17) | "Ereignisse Sturm und Regatta einbauen" | P24 | Teil 1 gemergt (PR 281), Teil 2 läuft | - |
+| Ruhige Handy-Oberfläche: ein Meldeplatz | "Handy-Oberfläche neu und ruhig gestalten" | P07 (Folge) | PR offen | 282 |
+| Anmeldung per Funk | "Anmeldung per Funk einbauen" | P28 | PR offen, Thread abgebrochen, muss wieder aufgenommen werden | 288 |
+| Merges und Seitenbau beschleunigen | eigener Thread | Werkzeug | PR offen | 294 |
+| Schicht-Test, Feature-Test, Zeitraffer, Roadmap-Seite, Kamera | Prüf- und Pflege-Threads | - | laufen | 251, 296 |
 
-Seit dem Morgen gemergt: P19 komplett (PR 244, 279), P55 komplett (PR 269, 275), P21 Logbuch und Chronik (PR 274), P61 offline (PR 270), Audit C07 (PR 264), Menüs am Handy (PR 261, 267), Ablegen mit Box-belegt (PR 266), Tempo ohne automatische Bremsung (PR 278), Überblick hochkant (PR 190).
+Seit 11:30 gemergt: A10 große Boote nach Platzangebot (PR 287), Fehler aus Jorvens Feature-Test (PR 290), P22 Erfolge (PR 295), Offline-Folge (PR 292), Auszeichnung im Gästebuch (PR 291), README und Plan (PR 289).
 
 ---
 
@@ -38,43 +37,42 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 
 | Prio | Fehler | Beleg | Paket / Thread |
 |---|---|---|---|
-| A | Stau im Hafenbecken ab Stufe 3: je Lauf rund 300 Bootspaare ineinander fest und 430 hängende Boote, 90 % in Stufe 5 und 6 | Zeitraffer-Serie auf `5b00546` (`zeitraffer/2026-11-13-5b00546/vergleich.md` im Projektordner); nach PR 280 neu messen | P66, PR 280 |
+| A | Stau im Hafenbecken ab Stufe 3: je Lauf rund 300 Bootspaare ineinander fest und 430 hängende Boote, 90 % in Stufe 5 und 6 | Zeitraffer-Serie auf `5b00546`; nach PR 280 neu messen | P66, PR 280 |
 | A | Boote noch über Land (rund 21 je Lauf) und durch Stege (rund 17 je Lauf), vor allem Typ 3 und 8 | dieselbe Serie | P66 mit P62 |
-| A | Aufstieg langsamer als gerechnet: Ziel Stufe 6 im Mittel an Tag 278 bis 296 statt 258; seit P19 dauert Stufe 2 für gemütliche Spieler 50 statt 38 Tage | Zeitraffer-Serien, `tools/balance.mjs` | Balancing-Paket P17 |
-| A/B | Fehler aus Jorvens Feature-Test | Jorvens Test | Thread "Fehler aus Jorvens Feature-Test beheben" |
+| A | Aufstieg weicht von der Rechnung ab; nach PR 252: geschickt 225, gemütlich 239 Tage, Stufe 2 gemütlich 36 Tage; A10 (PR 287) verschiebt um +2 bis +6 Tage | Zeitraffer-Serien, `tools/balance.mjs` | Balancing-Paket P17 |
 | B | `istWasser` und Bild stimmen am Durchstich nicht überall überein | Messlatte (`feature-tests/messlatte/README.md`) | P62 |
-| C | Winter: Rest von H5, G5 | roadmap.md P20 | P20-Rest mit P17 |
+| C | Winter: Rest von H5, G5 | roadmap.md P20 | P20-Rest nach P17 |
 
-Erledigt: Bewertung "1 + 4 x erfüllt/alle" (seit P14 Untergrenze 2,5, Aufnehmen ist nie schlechter als Abweisen), C05, C06 (P61), C07, P02, P04, P12, P63, P65.
+Erledigt: Fehler aus Jorvens Feature-Test vom 14.11. (PR 290), Bewertung "1 + 4 x erfüllt/alle" (seit P14), C05, C06 (P61), C07, P02, P04, P12, P63, P65.
 
 ---
 
 ## 3. Die nächsten Pakete, in dieser Reihenfolge
 
-Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tempo durchlaufen. Dann machen wir sichtbar, was die Regeln schon tun (P55, P21 sind fertig). Erst dann kommen neue Inhalte.
+Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tempo durchlaufen. Sichtbarkeit (P55), Logbuch (P21) und Erfolge (P22) sind fertig. Jetzt: Grundprobleme abschließen, dann Inhalte, die wenig Dateien teilen.
 
 | Nr | Paket | Warum jetzt | Hängt ab von | Kann kollidieren mit |
 |---|---|---|---|---|
-| 1 | **P66 Stau und Wartebojen** (PR 280 offen) | Prio A, jedes Spiel ab Stufe 3 | - | P62, Stegbilder, XXL; danach Zeitraffer-Serie neu |
-| 2 | **Fehler aus Jorvens Feature-Test** (läuft) | Grundprobleme, die Jorven selbst gesehen hat | - | je nach Fehler; meldet Berührungspunkte im PR |
-| 3 | **PR 252 auf `main` bringen** (Balancing-Thread) | Konflikt seit P19; blockiert `economy.js` für P17 | - | `economy.js`, `docs/zahlen.md` |
-| 4 | **Balancing-Paket P17: Aufstieg angleichen** (neu, nach 1 und 3) | Prio A: Rechnung und Zeitraffer auf höchstens 5 % zusammenbringen, Stufe 2 und ab Stufe 3 | 1 (Stau verfälscht die Messung), 3 | `economy.js`, `tools/balance.mjs`, Einstieg (J5) |
-| 5 | **P24 Ereignisse zum Vorbereiten** (PR 281 offen, dann Teil 2 mit neuen Ereignissen F17) | erstes Extra, Thread kennt den Code | - | Wetterflagge, Meldungs-Ordnung (PR 282) |
-| 6 | **P22 Erfolge** (läuft) | letztes offenes Welle-2-Paket | P21 (erledigt) | Aufstieg-Feier, Meldungs-Ordnung (PR 282) |
-| 7 | **P20-Rest Winter** (H5, G5) | Kernschleife über das Jahr fertig | 4 | `winter.js`, `economy.js` |
-| 8 | **P23 Services mit eigener Wirkung** (neu) | Welle 3, macht Stufe 4 bis 6 tiefer | 4 (Zahlen) | `render/services.js`, `data/services.js`, Besuchswege |
-| 9 | **P28 Anmeldung per Funk** (neu) | Welle 3, macht jede Ankunft planbarer; baut auf P11-Vorschau | - | `ui/vorschau.js`, `sim.js` |
-| 10 | **P27 Päckchen liegen** (neu) | Welle 3, voller Hafen wird zur Entscheidung | 1 (Liegeplätze und Wege stabil) | `sim.js`, `boat-view.js`, Wegsuche |
+| 1 | **P66 PR 280 fertig machen** (läuft) | Prio A; liegt seit 10 Stunden offen und blockiert P27 und die Schlussmessung von P17 | - | P62, Stegbilder, XXL; danach Zeitraffer-Serie neu |
+| 2 | **P17 Balancing: Aufstieg angleichen, Ü15, Ü16** (neu, startet jetzt) | Prio A; A10 ist gemergt. Rechnung (`tools/balance.mjs`) und Regeln jetzt angleichen, Schlussmessung im Zeitraffer nach PR 280 | Schlussmessung nach 1 | `economy.js` (einziger Thread dort), `docs/zahlen.md`, Einstieg (J5) |
+| 3 | **P28 Funk-Anmeldung abschließen** (Thread wieder aufnehmen) | PR 288 ist fast fertig | - | `ui/vorschau.js`, `sim.js`, Meldeplatz (PR 282) |
+| 4 | **P41 Statistik und Saisonbilanz** (neu) | nutzt die vorhandenen Daten (`state.stats.verlauf`, Einnahmen nach Quelle); fast nur eigene Dateien | - | Tagesabschluss-Tafel, Winterkarte (Saisonbilanz dort ergänzen statt doppeln) |
+| 5 | **P26 Überraschende Gesten** (neu) | Hafenhorn, Fernglas mit Steckbrief, Möwen, Glocke: macht den Hafen lebendig, berührt kaum Regeln | - | `audio.js`, Gesten (`ui/gesten.js`), Fotomodus |
+| 6 | **P24 Ereignisse Teil 2** (läuft) | neue Ereignisse F17 | - | Meldeplatz (PR 282) |
+| 7 | **P27 Päckchen liegen** | voller Hafen wird zur Entscheidung | 1 | `sim.js`, `boat-view.js`, Wegsuche |
+| 8 | **P20-Rest Winter** (H5, G5) | Kernschleife über das Jahr fertig | 2 | `winter.js`, `economy.js` |
+| 9 | **P23 Services mit eigener Wirkung** | macht Stufe 4 bis 6 tiefer | 2 (Zahlen) | `render/services.js`, `data/services.js` |
+| 10 | **P33 Liegende Boote umlegen** | eigene Entscheidung im vollen Hafen | 1 | `sim.js`, `boat-view.js` |
 
 Danach geht es weiter wie in [Abschnitt 5](#5-alles-weitere-bis-zum-ende) beschrieben, bis Stufe 20 und Online.
 
-**Startregel:** 1, 2, 5, 6 laufen. 3 jetzt. 9 kann sofort starten (wenig Berührung). 4 startet nach 1 und 3, 7 und 8 nach 4, 10 nach 1. Nie zwei Threads gleichzeitig an `economy.js`. Alle neuen Meldungen gehen über den einen Meldeplatz aus PR 282.
+**Startregel:** Jetzt starten: 2, 4, 5; 3 wieder aufnehmen; 1 zu Ende bringen. 7 und 10 nach 1, 8 und 9 nach 2. Nie zwei Threads gleichzeitig an `economy.js`. Alle neuen Meldungen gehen über den einen Meldeplatz aus PR 282.
 
 ---
 
 ## 4. Berührungspunkte, auf die alle achten
 
-- `web/js/data/economy.js`: Reihenfolge 252, P17, P20-Rest, P23 (P19 ist gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
+- `web/js/data/economy.js`: Reihenfolge P17 (mit Ü16), P20-Rest, P23 (P19, 252 und A10 sind gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
 - `web/js/sim.js`: kleine, getrennte Änderungen, vorher auf `main` rebasen, neue Regel mit eigenem Test.
 - Meldungs-Ordnung (höchstens eine schwebende Meldung, Tipps nie über Zeit und Bauen): P55, P22, P24 melden sich dort an, statt eigene Ebenen zu bauen.
 - `web/index.html`, `web/js/main.js`: nur eine `MODULES`-Zeile je neuem Modul; P61 ändert die Importmap und stimmt das im PR ab.
@@ -93,7 +91,7 @@ Hier stehen alle Vorschläge Jorvens, die noch offen sind, in der Reihenfolge, i
 |---|---|---|
 | P20-Rest | Winter: Rest von H5 und G5 | F14, F15 erledigt |
 | P55, P21 | erledigt (PR 269, 275, 274) | F36 Hafenchronik |
-| P22 | Erfolge, läuft | - |
+| P22 | Erfolge, erledigt (PR 295) | - |
 
 ### Abschnitt B: Tiefe und Hafenleben (Welle 3)
 
@@ -173,6 +171,8 @@ Schon erledigt aus Jorvens Vorschlägen: F14, F15, F18, F26, F27 (Grundgerüst),
 
 | Datum | Änderung |
 |---|---|
+| 14.11.2026, 21:15 Uhr | A10, Feature-Test-Fehler und P22 gemergt; P17 startet jetzt (Schlussmessung nach PR 280); neu: P41, P26; P28 wieder aufnehmen. |
+| 14.11.2026, 11:45 Uhr | PR 252 und P24 Teil 1 gemergt; A10, P24 Teil 2, P28 und Schicht-Test laufen; P17 startet nach PR 280 und A10 und übernimmt Ü16. |
 | 14.11.2026, 11:30 Uhr | P19, P55, P21, P61, C07 erledigt; P24 Teil 1, P22, ruhige Handy-Oberfläche und Feature-Test-Fehler laufen; Bewertungsbefund gestrichen (seit P14 behoben); neue Nr. 9 und 10: P28, P27. |
 | 14.11.2026, 10:15 Uhr | PR 244 (P19 Teil 1) gemergt; P19 Teil 2 läuft; Befund Stufe 2 dauert 50 statt 38 Tage ins Balancing-Paket. |
 | 14.11.2026, 10 Uhr | Abschnitt 5: alle offenen Vorschläge (F1 bis F42) und Stufe 7 bis 20 in Reihenfolge. |

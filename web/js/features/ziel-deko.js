@@ -3,7 +3,9 @@
 // von DEKO, nie auf Wegen, in Gebäuden, auf Bauplätzen von Anlagen, im Wasser oder am Hang. Geladen von tagesziele.js, nicht aus main.js, weil es Three.js braucht.
 //
 // Liest state.modules.ziele.deko (Liste der ids). Ereignis 'ziel:deko' { id } stellt das Stück sofort auf,
-// mit einem kurzen Hüpfer. Schnittstelle: game.zielDeko = { group, aufbauen(), lage(id) }.
+// mit einem kurzen Hüpfer. Schnittstelle: game.zielDeko = { group, aufbauen(), lage(id), zusatz(id, def), huepfen(obj) }.
+// zusatz: weitere Stücke anderer Module (P22 Erfolge, features/erfolge-dinge.js), die nach denselben Regeln
+// einen Platz bekommen: def = { lage: { x, z, dreh }, radius, objekt (THREE.Object3D), da() -> bool }.
 import * as THREE from 'three';
 import { DEKO } from './tagesziele.js';
 import { SERVICES } from '../data/services.js';
@@ -136,6 +138,7 @@ export function init(game) {
   game.scene.add(group);
   const stuecke = new Map();
   const huepfer = [];
+  const extra = new Map();   // id -> { lage, radius, objekt, da }
 
   function anker() {
     const stufe = game.buildings?.stage ?? game.sim?.state?.stage ?? 1;
@@ -226,8 +229,8 @@ export function init(game) {
     const gesetzt = [];
     const out = new Map();
     for (const id of ids) {
-      const p = LAGE[id];
-      const r = RADIUS[id] ?? 1;
+      const p = LAGE[id] ?? extra.get(id)?.lage ?? { x: 0, z: 8, dreh: 0 };
+      const r = RADIUS[id] ?? extra.get(id)?.radius ?? 1;
       let fund = null;
       for (let ring = 0; ring <= 30 && !fund; ring += 1) {
         const n = ring === 0 ? 1 : Math.ceil(ring * 4);
@@ -250,7 +253,13 @@ export function init(game) {
 
   function aufbauen() {
     const besitz = game.sim?.state?.modules?.ziele?.deko ?? [];
-    lagen = platzSuche(DEKO.map((d) => d.id).filter((id) => besitz.includes(id)));
+    const zusaetze = [...extra].filter(([, d]) => { try { return !!d.da(); } catch { return false; } }).map(([id]) => id);
+    lagen = platzSuche([...DEKO.map((d) => d.id).filter((id) => besitz.includes(id)), ...zusaetze]);
+    for (const [id, d] of extra) {
+      const l = zusaetze.includes(id) ? lagen.get(id) : null;
+      d.objekt.visible = !!l;
+      if (l) { d.objekt.position.set(l.x, l.y, l.z); d.objekt.rotation.y = l.dreh; }
+    }
     for (const d of DEKO) {
       let o = stuecke.get(d.id);
       if (!besitz.includes(d.id)) { if (o) { group.remove(o); stuecke.delete(d.id); } continue; }
@@ -297,6 +306,18 @@ export function init(game) {
   game.on('sim:change', (e) => { if (e?.reason === 'load') aufbauen(); });
   aufbauen();
 
-  game.zielDeko = { group, aufbauen, lage };
+  function zusatz(id, def) {
+    if (!id || !def?.objekt || DEKO.some((d) => d.id === id)) return;
+    const alt = extra.get(id);
+    if (alt) group.remove(alt.objekt);
+    def.objekt.name ||= `deko-${id}`;
+    def.da ||= () => true;
+    extra.set(id, def);
+    group.add(def.objekt);
+    aufbauen();
+  }
+  const huepfen = (o) => { if (o) huepfer.push({ o, t: 0 }); };
+
+  game.zielDeko = { group, aufbauen, lage, zusatz, huepfen };
   return game.zielDeko;
 }

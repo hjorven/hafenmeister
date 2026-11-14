@@ -67,13 +67,21 @@ export const ECONOMY = {
     //      Grundpreis pro Nacht, Nächte [min, max]. Ob ein Boot Motor- oder Segelboot ist, steht im
     //      Bootskatalog (data/boats). Gäste bleiben eher länger (Urlaubstörn), dafür kommen weniger
     //      am Tag: so bleibt der Hafen voll, ohne dass Boote im Sekundentakt einlaufen.
-    S:   { grundpreis: 10,  naechte: [1, 3] },
-    M:   { grundpreis: 22,  naechte: [2, 4] },
-    L:   { grundpreis: 45,  naechte: [2, 5] },
-    XL:  { grundpreis: 120, naechte: [1, 3] },
+    //      proMeter (B10): wie in echten Häfen zahlt ein Gast je angefangenem Meter Bootslänge;
+    //      der Satz steigt mit der Größe. Im Schnitt der Klasse ergibt das etwa den Grundpreis.
+    //      Der Grundpreis gilt für Boote ohne Länge und für Schätzungen (Tagesziele).
+    S:   { grundpreis: 11,  proMeter: 2.5, naechte: [1, 3] },
+    M:   { grundpreis: 22,  proMeter: 2.7, naechte: [2, 4] },
+    L:   { grundpreis: 45,  proMeter: 3.7, naechte: [2, 5] },
+    XL:  { grundpreis: 120, proMeter: 4.2, naechte: [1, 3] },
     XXL: { grundpreis: 0,   naechte: [1, 1] },  // kein Liegegeld, Einnahmen je Besuch (services)
   },
-  wunschBonus: 0.25,          // Hafengeld = Grundpreis * (1 + wunschBonus * erfüllte Wünsche)
+  // Größenmischung nach Plätzen (A10): Boote einer Größe kommen seltener, wenn der Hafen für sie
+  // wenige Plätze hat (wer vorher funkt, hört "für 12 m sind wir voll"). Faktor je Größe:
+  // Plätze, an die die kleinste Bootsart der Größe passt, mal auslastung, geteilt durch den Bedarf
+  // (Ankünfte am Tag mal Anteil mal mittlere Nächte); höchstens 1, mindestens `mindestens`.
+  platzMix: { auslastung: 1.0, mindestens: 0.3 },
+  wunschBonus: 0.25,          // Hafengeld = proMeter * Länge (aufgerundet) * (1 + wunschBonus * erfüllte Wünsche)
 
   // Kassieren (P12). Liegegeld wird beim Anlegen fällig. vorausNaechte: Gäste zahlen bis zu so viele
   // geplante Nächte auf einmal (eine Münze je Aufenthalt, 1 = jede Nacht einzeln). Was der Spieler nicht selbst einstreicht, holt
@@ -124,7 +132,7 @@ export const ECONOMY = {
   platzarten: {
     box:     { strom: false },
     finger:  { strom: true, rufBonus: 0.5 },   // halber Anker extra
-    stirn:   { strom: false },
+    stirn:   { strom: false, offen: true },   // Stirnplatz am Stegkopf: liegt zur See hin offen
     kai:     { strom: true, nurKlassen: ['XL'], offen: true },   // offen: Sturm trifft ihn
     fischer: { gast: false },                  // fest vergeben, bringt Pacht
     // Stufe 6, Klasse XXL: fest vergeben, Besuche über services (kreuzfahrtterminal,
@@ -235,6 +243,15 @@ export const ECONOMY = {
     halberAnker: 0.5,                             // so viel besser bewerten alle Gäste, die gerade liegen
     gutschein: { prozent: 10, hoechstens: 15 },
     woche: { tage: 7, geld: 12, gaeste: 0.5, zufrieden: 0.3, segler: 0.15, liegegeld: 0.7 },   // Anteil der Woche: nicht in zwei Tagen zu schaffen
+  },
+  // Erfolge (features/erfolge-daten.js, docs/erfolge.md): Schwellen. Listen haben zwei oder drei Stufen
+  // (Wimpel, dann Pokal). ausgebuchtAb: so viele Gastboxen muss der Hafen mindestens haben, damit
+  // "alle belegt" zählt (am alten Steg mit 4 Boxen wäre es sonst geschenkt). lob: so viele Tage in Folge
+  // gibt jeder abreisende Gast mindestens lobAb Anker. fuenfAnkerAb: Abreisen an dem Abend mit 5 Ankern.
+  erfolge: {
+    passgenau: 25, ausgebuchtAb: 12, tagesziele: 10, wochenziele: 1,
+    gaeste: [100, 1000], stammgaeste: [1, 25], fuenfAnkerAb: 2, ruf: 4.5, lob: 7, lobAb: 4,
+    tag: [1000, 10000], gesamt: [100000, 1000000], logbuch: [10, 30, 60], traditionssegler: 2, sturm: 1,
   },
   // Besucher an Land (Fahrgastschiff, Kreuzfahrt) geben abends je Stufe von Kiosk/Restaurant so viel aus
   besucher: { ausgabeJeKioskStufe: 2 },
@@ -560,7 +577,10 @@ export const ECONOMY = {
     regatta:   { abStufe: 3, braucht: 'segelclub', alleTage: 14, dauer: 2, vorrang: 5, ankuendigen: 2, saison: [6, 26],
                  // kindFactor: Schlüssel sind die Bootsarten (kind) aus data/boat-catalog.js
                  wirkung: { arrivalFactor: 1.6, kindFactor: { jolle: 3, segelyacht: 3, mehrrumpf: 2 },
-                   visitorFactor: 1.5, serviceIncomeFactor: 1.3, ratingBonus: 0.25 } },
+                   visitorFactor: 1.5, serviceIncomeFactor: 1.3, ratingBonus: 0.25 },
+                 // Vorbereiten (events/vorbereiten.js): so viele Plätze je Stufe für Segler freihalten,
+                 // jedes Segelboot darauf zahlt einmal Startgeld je Klasse (Klassen ohne Betrag nehmen nicht teil)
+                 vorbereiten: { plaetze: { 3: 3, 4: 4, 5: 5, 6: 6 }, startgeld: { S: 8, M: 15, L: 25 } } },
     hafenfest: { abStufe: 4, alleTage: 20, dauer: 1, vorrang: 4, saison: [10, 24],
                  // Traditionssegler (XL) kommen erst ab Stufe 5, vorher nur mehr Boote und Besucher
                  wirkung: { arrivalFactor: 1.3, kindFactor: { traditionssegler: 6 }, sizeFactor: { XL: 2 },

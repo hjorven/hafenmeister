@@ -165,7 +165,7 @@ test('Hafengeld wird beim Anlegen fällig: Wünsche, Kapazität der Toilette, St
   // 6 Boote mit WC: 10 × 1,25 = 12,5 -> 13; das siebte ohne WC: 10
   assert.deepEqual(fees.slice(0, 7).map((e) => e.amount), [13, 13, 13, 13, 13, 13, 10]);
   // Yacht: Strom ja, Dusche nein -> Grundpreis L × 1,25
-  const yachtFee = Math.round(RULES.baseFee.L * (1 + RULES.wishBonus));
+  const yachtFee = Math.round(sim.baseNightlyFee(ctx, yacht) * (1 + RULES.wishBonus));
   assert.equal(fees[7].amount, yachtFee);
   assert.equal(s.money, 0);
   const c = sim.collect(s, ctx, yacht.id);
@@ -841,4 +841,48 @@ test('Selbst-Einfahren: Box mit erfülltem Wunsch vor der nächsten, bei Gleichs
   sim.tick(s, c, 1);
   assert.equal(mitWunsch.berthId, 'C2');
   assert.equal(ohne.berthId, 'A1');
+});
+
+test('Liegegeld je angefangenem Meter (B10): längeres Boot zahlt mehr, ohne Länge der Grundpreis', () => {
+  const kurz = { typeId: 'L1', size: 'L', length: 9.6 };
+  const lang = { typeId: 'L1', size: 'L', length: 13.2 };
+  assert.equal(sim.baseNightlyFee(ctx, kurz), RULES.feePerMeter.L * 10);
+  assert.equal(sim.baseNightlyFee(ctx, lang), RULES.feePerMeter.L * 14);
+  assert.ok(sim.nightlyFee(null, ctx, lang, 0) > sim.nightlyFee(null, ctx, kurz, 0));
+  // genau 10,0 m zählt als 10 Meter
+  assert.equal(sim.baseNightlyFee(ctx, { typeId: 'L1', size: 'L', length: 10 }), RULES.feePerMeter.L * 10);
+  // ohne Länge: Grundpreis der Klasse
+  assert.equal(sim.baseNightlyFee(ctx, { typeId: 'L1', size: 'L', length: 0 }), RULES.baseFee.L);
+});
+
+test('Größenmischung nach Plätzen (A10): ohne Platz für große Boote kommen sie seltener', () => {
+  const s = createState({ seed: 4 });
+  s.stage = 3;
+  const types = sim.eligibleTypes(s, ctx);
+  const f = sim.sizeBerthFactors(s, ctx, types);
+  for (const v of Object.values(f)) assert.ok(v >= RULES.sizeByBerths.mindestens && v <= 1, JSON.stringify(f));
+  // Ohne Regel: kein Faktor
+  const ohne = sim.createContext({ boatTypes, berths, rules: { ...RULES, sizeByBerths: null } });
+  assert.deepEqual(sim.sizeBerthFactors(s, ohne, types), {});
+  // Doppelter Bedarf halbiert den Faktor, solange er nicht an einer Grenze liegt
+  const groesse = Object.keys(f).find((k) => f[k] > RULES.sizeByBerths.mindestens * 2 && f[k] < 1) ?? null;
+  if (groesse) {
+    const doppelt = sim.sizeBerthFactors(s, ctx, types, { [groesse]: 2 });
+    assert.ok(Math.abs(doppelt[groesse] - Math.max(RULES.sizeByBerths.mindestens, f[groesse] / 2)) < 1e-9);
+  }
+});
+
+test('A10 mit echtem Hafen: wenig gebaut heißt seltener, ausgebaut kommt die volle Mischung', async () => {
+  const { HAFEN } = await import('../web/js/data/harbor.js');
+  const { BOAT_CATALOG } = await import('../web/js/data/boat-catalog.js');
+  const echt = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: sim.rulesFromEconomy(ECONOMY) });
+  // Stufe 3 erreicht, aber noch nichts gebaut: zu wenig Plätze für den Bedarf
+  const leer = createState({ seed: 4, rules: echt.rules });
+  leer.stage = 3;
+  const f = sim.sizeBerthFactors(leer, echt);
+  assert.ok(Object.values(f).some((v) => v < 1), JSON.stringify(f));
+  for (const v of Object.values(f)) assert.ok(v >= echt.rules.sizeByBerths.mindestens);
+  // Alle Stegprojekte der Stufe gebaut: volle Mischung
+  const voll = sim.applyTestStage(createState({ seed: 4, rules: echt.rules }), echt, 3);
+  for (const v of Object.values(sim.sizeBerthFactors(voll, echt))) assert.equal(v, 1);
 });

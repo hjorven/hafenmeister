@@ -26,6 +26,7 @@
 import { createScheduler } from './scheduler.js';
 import { initEffects } from './effects.js';
 import { initBanner } from './banner.js';
+import { initVorbereiten } from './vorbereiten-ui.js';
 
 const DAY_SECONDS = 120;
 const EVENING_SECONDS = 30;
@@ -215,6 +216,8 @@ export function init(game) {
   loadCss();
   initEffects(game);
   initBanner(game);
+  // Sturm und Regatta vorbereiten (P24), sobald die Spielregeln stehen
+  initVorbereiten(game).catch(() => { /* ohne Spielregeln nichts vorzubereiten */ });
 
   // Spielstand laden (auch nach Import), erster Tag sofort, damit Wetter und Wetterbericht stehen
   game.on('ready', () => { if (!external && today === 0 && !game.state) newDay(1); });
