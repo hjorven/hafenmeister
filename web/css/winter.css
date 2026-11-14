@@ -103,7 +103,8 @@
 /* Flaches Handy quer: schmaler und rechts, damit die linke Spalte frei bleibt */
 @media (max-height: 500px) {
   .hm-wi { left: auto; right: var(--hm-rand, 12px); transform: none; width: min(360px, 58%); top: 8px; max-height: calc(100% - 16px); }
-  /* Zu flach für stehende Knöpfe: sie kommen am Ende der Karte */
-  .hm-wi-knoepfe { position: static; margin: 12px 0 0; padding: 0; box-shadow: none !important; background: none; }
-  .hm-wi-mehr { display: none !important; }
+  /* Flach: Knöpfe stehen auch hier unten, aber kompakt in einer Zeile */
+  .hm-wi-knoepfe { gap: 6px; padding: 6px 14px 10px; margin-top: 8px; }
+  .hm-wi-knoepfe .hm-knopf { flex: 1 1 0; min-height: 36px; padding-top: 2px; padding-bottom: 2px; font-size: 14px; }
+  .hm-wi-mehr { font-size: 12px; }
 }

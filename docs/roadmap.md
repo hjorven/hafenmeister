@@ -356,7 +356,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | B7 | Wünsche je Bootsart aus den Bootsdaten nutzen | erledigt (P19 Teil 1, `type.wishes`) | P19 |
 | B8 | Neue Wünsche in späten Stufen, je Stufe mindestens einer (= F9) | offen | P31 |
 | B9 | Wege zählen: weit vom Sanitärhaus zählt die Dusche halb | erledigt (P19 Teil 2): über 120 m zählt WC oder Dusche halb, [ruf.md](ruf.md) | P19 |
-| B10 | Liegegeld nach Länge statt fest je Größe | offen | P17 |
+| B10 | Liegegeld nach Länge statt fest je Größe | erledigt (PR 252, `ECONOMY.klassen.proMeter`, `sim.baseNightlyFee`) | P17 |
 | B11 | Bezahlt-Zeichen am Bug | erledigt (PR 131) | |
 
 ### C Ruf und Bewertung

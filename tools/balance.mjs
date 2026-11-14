@@ -133,7 +133,7 @@ const PROFILE = {
 // Spielertypen im Bericht, die bis zum Abschluss spielen
 const SPIELER = ['geschickt', 'gemuetlich'];
 
-export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true } = {}) {
+export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true, beobachter = null } = {}) {
   const prof = PROFILE[profilName];
   const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: RULES });
   const state = createState({ seed, rules: RULES });
@@ -267,6 +267,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     let liegend = [];
     while (state.day === tag) {
       const events = sim.tick(state, ctx, prof.zuweisenAlle);
+      beobachter?.(state, ctx, events);
       if (!prof.nichts && state.phase === 'day') {
         // Mit Hafenbüro-Automatik weist der Spieler nur noch die Sonderfälle selbst zu
         const buero = sim.officeAutomatic(state, ctx);

@@ -10,6 +10,8 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 - Wege zählen: Liegt eine Box weit weg vom WC oder der Dusche, zählt der Wunsch für die Note nur halb; das Ziehschild zeigt "Dusche weit", das Gästebuch "weiter Weg zur Dusche". Das Sanitärgebäude hat auch Duschen.
 - Auszeichnung: Drei Abende mit gutem Ruf machen den Hafen zum "Gastlichen", "Empfohlenen" oder "Ausgezeichneten Hafen"; ein Wimpel weht am Hafenmeisterhaus, das Gästebuch sagt, was zur nächsten Stufe fehlt.
 - Ist die Dusche, die Toilette oder der Kiosk für heute fast oder ganz ausgelastet, stehen die Gäste davor Schlange (275).
+- Winterkarte auch am Handy quer mit Knöpfen fest unten (links von Bauen, reicht bis unten), Hinweis mit Maus „bitte scrollen“.
+- Liegegeld nach Länge: Gäste zahlen je angefangenem Meter, ein langes Boot also mehr als ein kurzes derselben Klasse (B10, 252).
 - Vorspulen läuft jetzt ganz durch: 3x und 8x bleiben, bis du selbst etwas anderes wählst. Auch wartende Dauerlieger, Regionsabschluss und Boote an der Boje bremsen nicht mehr; der Knopf „Weiter mit 3x“ entfällt.
 - Neu: das Logbuch (Menü oder Taste J). Jedes Bootsmodell, das einmal angelegt hat, kommt mit Pixelbild hinein, fehlende stehen als Schattenriss da; ein Steckbrief zeigt Maße und wann es zuerst kam. Die Hafenchronik schreibt jeden Abend eine Zeile über den Tag, die Karte am Abend zeigt den wichtigsten Satz. Ein neues Modell meldet sich kurz rechts oben. Alte Spielstände behalten ihr Logbuch und bekommen die letzten 30 Tage nachgetragen.
 - Das Gästebuch öffnet am PC jetzt mit Taste N; G schaltete zugleich 8x.

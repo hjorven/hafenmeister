@@ -173,7 +173,10 @@ export function bewerberPasst(state, ctx, bewerber, platzId) {
 
 /** Pacht eines Bewerbers: je Tag, Tage, Summe (für die Saison, die jetzt bezahlt würde). */
 export function bewerberPacht(state, ctx, bewerber) {
-  const jeTag = pachtJeTag(state, ctx, { typeId: bewerber.artId, size: bewerber.size });
+  // Länge wie beim Festmachen (sim.stationBoat): Modell, sonst kleinste der Art; Liegegeld geht nach Länge (B10)
+  const t = ctx.typeById[bewerber.artId];
+  const m = t?.models?.find((x) => x.id === bewerber.modellId) || t?.models?.[0];
+  const jeTag = pachtJeTag(state, ctx, { typeId: bewerber.artId, size: bewerber.size, length: m?.length ?? t?.length?.[0] ?? 0 });
   const { tage } = pachtZeitraum(state, ctx);
   return { jeTag, tage, summe: jeTag * tage };
 }
