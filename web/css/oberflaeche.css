@@ -1097,7 +1097,7 @@ body.hm-neu { font: 400 var(--hm-s)/1.4 var(--hm-pixel); color: var(--hm-tinte);
 .hm-neu #hm-meldeplatz {
   position: absolute;
   z-index: 26;
-  left: 50%;
+  left: var(--hm-mp-mitte, 50%);
   top: var(--hm-mp-oben, calc(var(--hm-oben) + var(--hm-knopf) + 8px));
   transform: translateX(-50%);
   width: max-content;
@@ -1162,7 +1162,7 @@ body.foto #hm-meldeplatz, body.hm-feier-an #hm-meldeplatz, body.building #hm-mel
  * sorgt dafür, dass nie zugleich eine andere Meldung dort steht. */
 body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis {
   top: auto !important; bottom: var(--hm-mp-unten, 140px) !important;
-  left: 50% !important; right: auto !important; transform: translateX(-50%) !important;
+  left: var(--hm-mp-mitte, 50%) !important; right: auto !important; transform: translateX(-50%) !important;
   width: var(--hm-mp-breite, calc(100% - 24px)) !important; max-width: none !important; box-sizing: border-box;
   display: grid; grid-template-columns: 1fr auto; column-gap: 10px; align-items: center;
   padding: 6px 8px 6px 12px; font-size: max(14px, calc(var(--hm-s) - 1px));

@@ -16,8 +16,9 @@
 // Meldeplatz (Jorven 14.11.: "Überall ist irgendwas, was deine Aufmerksamkeit haben will"):
 //   Die Elemente in PLATZ (Ankündigung, Dauerplatz-Meldung, Morgen-Zettel, Bewertungen) werden in den
 //   Meldeplatz umgehängt und sehen dort gleich aus. Es steht immer nur die vorderste, die anderen warten;
-//   ein kleiner Zähler (+2) zeigt, wie viele noch kommen. Am Handy hochkant liegt der Platz unten über
-//   Zeit und Bauen (Daumen, Spielfläche bleibt frei), sonst oben in der Mitte zwischen den Spalten.
+//   ein kleiner Zähler (+2) zeigt, wie viele noch kommen. Der Platz liegt unten: in der Lücke zwischen
+//   Zeit, Kassieren und Bauen, wenn sie breit genug ist (PC, Tablet quer, Handy quer), sonst über den
+//   Knöpfen (Handy hochkant). So bleibt die Mitte frei und die Meldung liegt beim Daumen.
 
 export const VORRANG = {
   feier: 100,          // features/aufstieg.js, #hm-feier
@@ -146,22 +147,39 @@ export function init(game) {
     umhaengen();
     const h = platz.parentNode.getBoundingClientRect();
     const rand = 8;
+    const wurzel = document.documentElement.style;
+    // 1. Unten in der Lücke zwischen den Knöpfen (Zeit | Kassieren | Bauen), wenn sie breit genug ist:
+    //    PC, Tablet quer, Handy quer. Die Meldung steht dann wie ein Untertitel auf Höhe der Knöpfe.
+    const knoepfe = rechteck('#hm-zeit, #btn-build, #btn-collect').sort((x, y) => x.left - y.left);
+    let luecke = null;
+    for (let i = 0; i + 1 < knoepfe.length; i++) {
+      const l = knoepfe[i].right - h.left + rand;
+      const r = knoepfe[i + 1].left - h.left - rand;
+      if (r - l >= 320 && (!luecke || r - l > luecke.r - luecke.l)) luecke = { l, r };
+    }
+    // 2. sonst oben zwischen linker Spalte und rechtem Rand (selten), 3. sonst über den Knöpfen (Handy hochkant)
     const links = Math.max(0, ...rechteck('#hm-seite > *').map((r) => r.right - h.left));
     const oben = Math.max(0, ...rechteck('#hud-top .hm-status, #hud-top .hm-werkzeuge').map((r) => r.bottom - h.top));
-    const breite = Math.min(440, h.width - 2 * (links + rand));
-    const unten = breite < 300;
-    platz.classList.toggle('unten', unten);
-    // Auch für die Tipps des Einstiegs (features/einstieg.js), die am Handy an derselben Stelle stehen
-    if ((document.body.dataset.hmMeldeplatz || '') !== (unten ? 'unten' : 'oben')) document.body.dataset.hmMeldeplatz = unten ? 'unten' : 'oben';
-    const wurzel = document.documentElement.style;
-    if (unten) {
-      const knoepfe = rechteck('#hm-zeit, #btn-build, #btn-collect, #hud-bottom .hm-px');
+    const breiteOben = Math.min(440, h.width - 2 * (links + rand));
+    const art = luecke ? 'luecke' : breiteOben >= 300 && h.height >= 700 ? 'oben' : 'unten';
+    platz.classList.toggle('unten', art !== 'oben');
+    // Auch für die Tipps des Einstiegs (features/einstieg.js), die dann an derselben Stelle stehen
+    const merk = art === 'oben' ? 'oben' : 'unten';
+    if ((document.body.dataset.hmMeldeplatz || '') !== merk) document.body.dataset.hmMeldeplatz = merk;
+    if (art === 'luecke') {
+      const boden = Math.max(...knoepfe.map((r) => r.bottom));
+      wurzel.setProperty('--hm-mp-unten', `${Math.round(h.bottom - boden)}px`);
+      wurzel.setProperty('--hm-mp-breite', `${Math.round(Math.min(440, luecke.r - luecke.l))}px`);
+      wurzel.setProperty('--hm-mp-mitte', `${Math.round((luecke.l + luecke.r) / 2)}px`);
+    } else if (art === 'unten') {
       const kante = knoepfe.length ? Math.min(...knoepfe.map((r) => r.top)) : h.bottom;
       wurzel.setProperty('--hm-mp-unten', `${Math.round(h.bottom - kante + rand)}px`);
       wurzel.setProperty('--hm-mp-breite', `${Math.round(Math.min(440, h.width - 2 * 12))}px`);
+      wurzel.setProperty('--hm-mp-mitte', '50%');
     } else {
       wurzel.setProperty('--hm-mp-oben', `${Math.round(oben + rand)}px`);
-      wurzel.setProperty('--hm-mp-breite', `${Math.round(breite)}px`);
+      wurzel.setProperty('--hm-mp-breite', `${Math.round(breiteOben)}px`);
+      wurzel.setProperty('--hm-mp-mitte', '50%');
     }
     // Zähler: wie viele kurze Meldungen außer der stehenden noch warten
     const liste = alle();
