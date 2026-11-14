@@ -517,6 +517,8 @@ export function punkt(px, py, stufe, region) {
       if (f > 2.2) typ = 'fels';
     }
     const st = q.stil;
+    // Berge: je weiter vom Wasser, desto höher (Bergbucht); das Ufer selbst bleibt niedrig
+    if (st.berg) h += st.berg * land * smooth(15, 520, d) * (0.55 + 0.9 * fbm(px / 240, py / 200, 29));
     if (st.steil) {
       // Steilufer: gleich hinter dem schmalen Strand steigt das Land steil an, nicht am Hafen
       const kd = smooth(sandBreite * 0.6, sandBreite * 0.6 + 7, d), kh = smooth(25, 90, hafenAb);
@@ -532,8 +534,9 @@ export function punkt(px, py, stufe, region) {
       if (hd > h) h = hd;
       typ = d < 4 ? 'sand' : q.duene < 0.3 ? 'sand' : q.duene < 0.6 ? 'duenengras' : 'duene';
     }
-    if (q.fels > 0.4 && hafenAb > 10) {
-      h += 2.5 * q.fels * (0.5 + fbm(px / 18, py / 18, 37)) * smooth(0, 6, d);
+    // Fels nicht auf dem Hafengelände; ein Steinwall vor dem Hafen (Molenküste, Maske über 1) bleibt Stein
+    if (q.fels > 0.4 && (hafenAb > 10 || q.fels > 1.3)) {
+      h += 2.5 * Math.min(1, q.fels) * (0.5 + fbm(px / 18, py / 18, 37)) * smooth(0, 6, d);
       if (d > 2) typ = 'fels';
     }
     if (q.hallig > 0) {
