@@ -58,7 +58,7 @@ const TEXTE = [
     id: 'sturm',
     title: 'Sturm',
     teaser: 'Morgen zieht ein Sturm auf',
-    text: 'Von See läuft niemand ein, Gäste im Hafen bleiben eine Nacht länger. Die Seenotretter halten Wache.',
+    text: 'Von See läuft niemand ein, Gäste bleiben eine Nacht länger. Wer offen am Stegkopf liegt, bewertet schlechter.',
     weather: { wind: 1, fog: 0.2, rain: 1, sun: 0 },
   },
   {

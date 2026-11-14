@@ -190,6 +190,7 @@ export function init(game) {
         klein = namen.join(', ');
       }
       if (q === 'sonstiges' && d?.startgeschenk) klein = 'Geschenk fürs erste Bauwerk';
+      if (q === 'sonstiges' && d?.regatta) klein = [klein, `Startgeld der Regatta ${euro(d.regatta)}`].filter(Boolean).join(', ');   // events/vorbereiten.js
       if (q === 'tagesziele' && b.ziele?.gesamt) zusatz = `${b.ziele.erledigt} von ${b.ziele.gesamt}`;
       einnahmen.append(zeile(QUELLE_NAME[q] ?? q, euro(b.einnahmen[q]), { klein, zusatz }));
     }
