@@ -814,17 +814,29 @@ export function init(game) {
     const innen = (p) => p.x > k.x0 + 20 && p.x < k.x1 - 20 && p.z > k.z0 + 20 && p.z < k.z1 - 20;
     const frei = (p) => kreise.every((o) => Math.hypot(o.x - p.x, o.z - p.z) > o.r);
     const pts = [{ x: zugang.x, z: zugang.z }, ...zugang.weg.slice(1).map((p) => ({ x: p.x, z: p.z }))];
-    // erster Punkt in der Karte, bis zu dem der Seeweg (alle 4 m geprueft) kein Wartebereich beruehrt
-    let n = pts.length;
+    // Uebergabe an die feine Karte: die erste Stelle des Seewegs (alle 4 m geprueft) in der Karte und
+    // in befahrbarem Wasser, also meist am Kartenrand in Richtung des Zugangs. So verteilen sich An- und
+    // Abfahrten rund um die Karte, statt alle am Endpunkt vor der Einfahrt zusammenzulaufen. Beruehrt
+    // der Weg vorher einen Wartebereich, ist die Stelle davor die Uebergabe.
+    const see = [];
+    let vorher = pts[0];
     for (let i = 1; i < pts.length; i++) {
-      const a = pts[i - 1], b = pts[i], d = Math.hypot(b.x - a.x, b.z - a.z);
-      let ok = true;
-      for (let t = 0; t <= d && ok; t += 4) ok = frei({ x: a.x + (b.x - a.x) * t / d, z: a.z + (b.z - a.z) * t / d });
-      if (!ok) { n = Math.max(1, i - 1); break; }
-      if (innen(b)) { n = i; break; }
+      const a = pts[i - 1], b = pts[i], d = Math.hypot(b.x - a.x, b.z - a.z) || 1;
+      for (let t = 4; t <= d + 0.01; t += 4) {
+        const q = { x: a.x + (b.x - a.x) * Math.min(1, t / d), z: a.z + (b.z - a.z) * Math.min(1, t / d) };
+        // Wartebereiche zaehlen erst in der Karte: davor findet der Fahrweg keinen Weg und das Boot
+        // fuhre gerade uebers Land (Zeitraffer Stufe 6: Treffer an Land weit draussen)
+        const drin = innen(q) && befahrbar(k, q.x, q.z, 4, 2);
+        if (!frei(q) && innen(vorher) && befahrbar(k, vorher.x, vorher.z, 4, 2)) { see.push(vorher); return { see, uebergabe: vorher }; }
+        if (drin) { see.push(q); return { see, uebergabe: q }; }
+        vorher = q;
+        // dicht gesetzt (alle 12 m): die Kurve des Bootes bleibt so auf der geraden Strecke des Seewegs
+        // und schneidet an Kuestenknicken kein Land
+        if (t % 12 < 4 && t < d - 6) see.push(q);
+      }
+      see.push(b);
     }
-    const see = pts.slice(1, n + 1);
-    return { see: see.length ? see : [pts[0]], uebergabe: pts[n] };
+    return { see: see.length ? see : [pts[0]], uebergabe: see[see.length - 1] ?? pts[0] };
   }
   function waehleZugang(info, herkunft) {
     const l = zugaenge(info);
