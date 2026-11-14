@@ -43,16 +43,16 @@ export async function initVorbereiten(game) {
         const weg = liste.filter((b) => b.trip?.away).length;
         const voll = n - weg;
         const teile = [];
-        if (voll > 0) teile.push(`${voll === 1 ? 'Ein Gast liegt' : `${voll} Gäste liegen`} noch draußen: innen ist kein passender Platz frei.`);
-        if (weg > 0) teile.push(`${weg === 1 ? 'Ein Gast ist' : `${weg} Gäste sind`} auf Tagestörn und ${weg === 1 ? 'kommt' : 'kommen'} an den offenen Platz zurück.`);
+        if (voll > 0) teile.push(`${voll === 1 ? 'Ein Gast bleibt' : `${voll} Gäste bleiben`} draußen: innen ist nichts Passendes frei.`);
+        if (weg > 0) teile.push(`${weg === 1 ? 'Ein Gast ist' : `${weg} Gäste sind`} auf Tagestörn.`);
         return { art: 'sturm', plan: p, erledigt: true, titel: 'Hafen ist sturmklar',
-          text: teile.length ? teile.join(' ') : 'Offene Plätze bleiben bis nach dem Sturm frei.',
+          text: teile.length ? teile.join(' ') : 'Offene Plätze bleiben bis nach dem Sturm leer.',
           knopf: voll > 0 && liste.some((b) => !b.trip?.away && V.innenZiel(s, ctx, b.id)) ? 'Noch einmal verholen' : null, zurueck: 'Offene Plätze freigeben' };
       }
       return { art: 'sturm', plan: p, erledigt: false, titel: `${wann} Sturm`,
         text: n > 0
-          ? `${n === 1 ? 'Ein Gast liegt' : `${n} Gäste liegen`} an offenen Plätzen am Stegkopf und würde${n === 1 ? '' : 'n'} beim Sturm schlechter bewerten. Nach innen verholen?`
-          : 'Offene Plätze am Stegkopf trifft der Sturm. Für Gäste sperren, bis er vorbei ist?',
+          ? `${n === 1 ? 'Ein Gast liegt' : `${n} Gäste liegen`} offen am Stegkopf. Nach innen verholen?`
+          : 'Offene Plätze am Stegkopf bis nach dem Sturm sperren?',
         knopf: 'Sturmklar machen' };
     }
     const r = p?.id === 'regatta' ? p : (laufend()?.id === 'regatta' ? laufend() : null);
@@ -62,14 +62,14 @@ export async function initVorbereiten(game) {
       const n = V.regattaAnzahl(s.stage);
       if (haben > 0) {
         const mehr = haben < n && V.regattaKandidaten(s, ctx).length > 0;
-        return { art: 'regatta', plan: r, erledigt: true, titel: `${haben} ${haben === 1 ? 'Platz' : 'Plätze'} für die Regatta`,
-          text: `Sie bleiben bis zum Start frei, dann legen dort nur Segelboote an und zahlen Startgeld.`,
+        return { art: 'regatta', plan: r, erledigt: true, titel: `${haben} ${haben === 1 ? 'Platz' : 'Plätze'} freigehalten`,
+          text: 'Ab dem Start nur für Segelboote, jedes zahlt Startgeld.',
           knopf: mehr ? 'Mehr freihalten' : null, zurueck: 'Plätze freigeben' };
       }
       const tage = r.startDay - s.day;
       const wann = tage <= 0 ? 'Heute' : tage === 1 ? 'Morgen' : 'Übermorgen';
       return { art: 'regatta', plan: r, erledigt: false, titel: `${wann} Regatta`,
-        text: `Halte ${n} Plätze für die Segler frei: jedes Regattaboot darauf zahlt einmal Startgeld.`,
+        text: `${n} Plätze für Segler freihalten? Jedes Regattaboot darauf zahlt Startgeld.`,
         knopf: 'Plätze freihalten' };
     }
     return null;
@@ -297,6 +297,11 @@ export async function initVorbereiten(game) {
     .evv-knoepfe { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; pointer-events: auto; }
     .evv-knoepfe .hm-knopf { flex: 1 1 120px; }
     #ev-vorbereiten .evv-knoepfe { padding-left: 34px; }
+    @media (max-width: 599px) {
+      #ev-vorbereiten { padding: 8px 10px; }
+      #ev-vorbereiten .evv-knoepfe { padding-left: 0; margin-top: 6px; }
+      #ev-vorbereiten .evv-knoepfe .hm-knopf { min-height: 44px; font-size: var(--hm-s, 16px); }
+    }
     #weather-panel .evv-zeile { grid-column: 1 / -1; padding: 2px 4px 8px; text-align: left; }
     #weather-panel .evv-zeile small { display: block; }
     #weather-panel .evv-zeile .hm-knopf { min-height: 44px; }
