@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "3864c2a"
+  "commit": "f46ad33"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1237,7 +1237,7 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
    "welle": 0,
    "prs": [
     81,
@@ -1247,7 +1247,9 @@
     228,
     240,
     254,
-    256
+    256,
+    258,
+    262
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1260,7 +1262,8 @@
    "status": "arbeit",
    "bilder": [
     23,
-    32
+    32,
+    39
    ]
   },
   {
@@ -4185,7 +4188,7 @@
   {
    "code": "C07",
    "text": "GitHub Actions: Rechte je Job statt für den ganzen Workflow (pages.yml gibt pages: write und id-token: write auch dem Build), Actions auf Commit-SHAs pinnen, Dependabot prüfen",
-   "status": null,
+   "status": "erledigt",
    "statusText": "",
    "pakete": [
     "P08"
@@ -4403,13 +4406,13 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 112,
+  "erledigt": 113,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
   "offen": 97,
   "entfaellt": 0,
-  "alle": 217
+  "alle": 218
  },
  "bilder": [
   {
@@ -4879,9 +4882,22 @@
    "datum": "2026-11-14",
    "quelle": "tempo/tempo-handy.png",
    "nr": 38
+  },
+  {
+   "datei": "p66-pr262-zonen-und-seewege.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Zonen des Geländes und Seewege für die Wegsuche der Boote",
+   "pr": 262,
+   "geraet": "karte",
+   "datum": "2026-11-14",
+   "quelle": "gelaende/vorschau/zonen/zonen-und-seewege.png",
+   "nr": 39
   }
  ],
  "neueBilder": [
+  39,
   38,
   37,
   36,
@@ -4889,10 +4905,33 @@
   34,
   33,
   32,
-  31,
-  30
+  31
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "GitHub Actions absichern: Rechte je Job, SHAs, Secret-Scan (Audit C07)",
+   "pr": 264,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Überblick: hochkant schmal, wartet auf das Startfenster, Startansicht folgt der geladenen Stufe",
+   "pr": 190,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Ablegen: Box bleibt belegt, bis das Boot wirklich draußen ist",
+   "pr": 266,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Tests: Wetter-Test wartet auf den Spielstand und setzt das Wetter je Runde neu",
+   "pr": 265,
+   "pakete": []
+  },
   {
    "datum": "2026-11-14",
    "titel": "Arbeitsplan: was läuft, bekannte Fehler, die nächsten zehn Pakete",
@@ -4909,13 +4948,17 @@
    "datum": "2026-11-14",
    "titel": "Zonen des Geländes und Seezugänge für die Wegsuche der Boote",
    "pr": 262,
-   "pakete": []
+   "pakete": [
+    "P66"
+   ]
   },
   {
    "datum": "2026-11-14",
    "titel": "Boote: keine Leinen ohne Boot - unsichtbares Warten auf die Einfahrt endet bei jedem neuen Befehl",
    "pr": 258,
-   "pakete": []
+   "pakete": [
+    "P66"
+   ]
   },
   {
    "datum": "2026-11-14",
@@ -4945,37 +4988,6 @@
    "pakete": [
     "P66"
    ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 254 bei P66 eingetragen",
-   "pr": 255,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Boote: Zurücksetzen prüft bis zum Heck, Ankerplätze am Weltrand nicht an Land",
-   "pr": 254,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: PR 246 bei P62, PR 249 bei P20, Winter-Bild am PC",
-   "pr": 253,
-   "pakete": [
-    "P62",
-    "P20"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tipps: gleich an ihrem Platz, Zeit läuft nur sichtbar; Meldungs-Tests stabil",
-   "pr": 250,
-   "pakete": []
   }
  ]
 }

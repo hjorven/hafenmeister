@@ -55,7 +55,7 @@ Auf Handy oder Tablet im selben WLAN testen: statt `localhost` die IP-Adresse de
 
 ## Wie es funktioniert
 
-- `.github/workflows/pages.yml`: läuft bei Push auf `main` oder per Hand, baut die Seite und veröffentlicht sie.
+- `.github/workflows/pages.yml`: läuft bei Push auf `main` oder per Hand, baut die Seite und veröffentlicht sie. Nur der Deploy-Job darf auf Pages schreiben; Regeln für Rechte und gepinnte Actions in [sicherheit.md](sicherheit.md).
 - `tools/build-pages.sh`: kopiert `web/` nach `_site/` (oder legt die Platzhalterseite an), ergänzt `.nojekyll` und `version.txt`.
 - `tools/check-pages.sh`: sucht absolute Pfade und Verweise auf Dateien, die es nicht gibt.
 

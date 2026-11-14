@@ -6,6 +6,8 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Ein ablegender Gast hält seine Box, bis er wirklich draußen ist: die Platzkarte zeigt nicht mehr „frei“, solange das Boot noch sichtbar in der Box auf das Ablegen wartet.
+- Am Handy: Die Hilfe ist eine Liste zum Aufklappen (erst Titel, ein Tipp zeigt den Text), die Einstellungen passen ohne Kästen fast ganz ins Bild und quer in zwei Spalten, das Baumenü ist hochkant niedriger.
 - An freien Plätzen hängen keine Festmacherleinen mehr ohne Boot. Ein ankommendes Boot, das zugewiesen wurde, während es noch auf seine Einfahrt wartete, blieb unsichtbar in der Box liegen; jetzt taucht es auf und fährt sichtbar hinein.
 - Vorspulen bleibt: 3x springt nicht mehr jeden Morgen auf 1x, weil ein Ausbau möglich ist oder ein Ereignis angekündigt wird. Gebremst wird nur noch, wenn gleich etwas zu tun ist (Dauerlieger wartet, Region geschafft, bei 8x das nächste Boot); dann zeigt ein Knopf „Weiter mit 3x“ den Grund, und nach dem Umlegen läuft das alte Tempo von selbst weiter.
 - Menüs am Handy verdecken weniger vom Hafen: Die Tagesziel-Wahl zeigt die drei Karten nebeneinander, und ein Tipp auf die Karte nimmt das Ziel. Bootskarte, Wetter, Tagesziel, Ausbau-Ziel, Baumenü und der Hinweis "Als Nächstes" sind flacher; das Baumenü schließt am Handy mit dem Kreuz oben. Am Handy quer bleiben die Knöpfe der Bootskarte immer sichtbar, und die Karte ist nur so hoch wie ihr Inhalt.
