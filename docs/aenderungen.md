@@ -6,6 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Neu: Anmeldung per Funk. Ab dem Hafenmeister mit Funk melden sich morgens ein bis zwei Boote mit Ankunftszeit, Länge und Wünschen an. Hältst du ihnen eine Box frei (sie leuchtet gold, das Schild wird rot), fahren sie ohne Halt an der Boje direkt hinein, zahlen einen Bonus und sind zufriedener. Im Funk rechts stehen angemeldete Boote markiert, Antippen öffnet die Anmeldung wieder.
 - Bootskarte: Ist die Versorgung für einen Wunsch heute schon voll, steht er rot da ("Wunsch: Dusche (heute voll)").
 - Wege zählen: Liegt eine Box weit weg vom WC oder der Dusche, zählt der Wunsch für die Note nur halb; das Ziehschild zeigt "Dusche weit", das Gästebuch "weiter Weg zur Dusche". Das Sanitärgebäude hat auch Duschen.
 - Auszeichnung: Drei Abende mit gutem Ruf machen den Hafen zum "Gastlichen", "Empfohlenen" oder "Ausgezeichneten Hafen"; ein Wimpel weht am Hafenmeisterhaus, das Gästebuch sagt, was zur nächsten Stufe fehlt.
