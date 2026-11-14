@@ -246,7 +246,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | erledigt (PR 245) | P20 |
 | F15 | Krantage: Dauerlieger sichtbar ins Winterlager und zurück | erledigt (PR 245) | P20 |
 | F16 | Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv | offen | P40 |
-| F17 | Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage | offen | P24 |
+| F17 | Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage | erledigt (14.11.) | P24 |
 
 ### Langzeit
 
@@ -421,13 +421,13 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 |---|---|---|---|
 | G1 | Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren | erledigt (14.11.) | P24 |
 | G2 | Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen | erledigt (14.11.) | P24 |
-| G3 | Ereignisse mit Nachspiel | offen | P24 |
+| G3 | Ereignisse mit Nachspiel | erledigt (14.11.) | P24 |
 | G4 | Winter als Planungsbild (Bilanz, Winterarbeiten, Verträge) | erledigt (PR 245) | P20 |
 | G5 | Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind) | offen | P20 |
 | G6 | Ergebnis eines Ereignisses am Abend zeigen | erledigt (14.11.) | P24 |
-| G7 | Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand) | offen | P24 |
+| G7 | Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand) | erledigt (14.11.) | P24 |
 | G8 | Eine Zahlenliste für Ereignisse | erledigt | P06 |
-| G9 | Seltene große Tage, z. B. Hanse-Woche, zehn Tage vorher angekündigt | offen | P24 |
+| G9 | Seltene große Tage, z. B. Hanse-Woche, zehn Tage vorher angekündigt | erledigt (14.11.) | P24 |
 
 ### H Dauerlieger, Stammgäste und Tagestörn
 

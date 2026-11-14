@@ -6,6 +6,10 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Neue Ereignisse: Heringstage (mit Räucherei, im Frühling), Mittsommer (Saisontag 14, abends brennt am Grillplatz ein Feuer, viele Badegäste) und Holzboot-Treffen. Ab Stufe 5 kommt einmal im Jahr die Hanse-Woche, zehn Tage vorher angekündigt; zwei Tage vorher kannst du große Plätze freihalten, große Schiffe darauf zahlen Festgeld.
+- Gebaute Services machen Ereignisse größer: Räucherei, Museumshafen, Grillplatz und andere verdienen an Ereignistagen extra, die Ankündigung sagt wie viel oder welcher Bau sich lohnen würde.
+- Ereignisse wirken nach: nach dem Sturm laufen die Wartenden ein, nach Regatta, Hafenfest und Hanse-Woche kommen noch Nachzügler. Wer vorbereitet war, bekommt bessere Bewertungen.
+- Freigehaltene Regattaplätze werden jetzt wirklich von Seglern genommen, und die Zahl auf der Sturmkarte bleibt aktuell.
 - Ruhigere Oberfläche: Kurze Meldungen (Ankündigungen wie „Heute: Sommertag“, der Morgen-Zettel mit dem Tageserlös, Dauerplatz-Meldungen, Bewertungen, Tipps und „Als Nächstes“) stehen nur noch an einem Platz und nacheinander, ein kleiner Zähler zeigt, wie viele noch kommen. Am Handy steht dieser Platz unten über Zeit und Bauen, Kassieren ist ein kleiner Münzknopf über Bauen, der Funk ist zuerst zugeklappt und es schweben höchstens zwei Bewertungen über den Booten. Alle Texte, auch Zahlen und Euro, stehen jetzt in der Pixelschrift, das Euro-Zeichen ist neu gezeichnet.
 - Neu: Erfolge. 30 Erfolge vom ersten Festmachen bis zum Hafenmillionär melden sich rechts oben mit eigenem Ton und stehen im Logbuch unter "Erfolge" mit Fortschritt. Im Hafen wachsen dafür ein Mast mit bunten Wimpeln, eine Pokaltreppe und eine Ehrentafel mit einem Schild je Ausbaustufe. Alte Spielstände bekommen schon Erreichtes still nachgetragen.
 - Große Boote kommen nur so oft, wie der Hafen Plätze für sie hat: Vor dem Ausbau fahren deutlich weniger Yachten und Großsegler wieder weg, weil nichts frei ist (A10, 287).

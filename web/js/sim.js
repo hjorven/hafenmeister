@@ -24,7 +24,7 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     typeById: Object.fromEntries(types.map((t) => [t.id, t])),
     berths: list,
     berthById: Object.fromEntries(list.map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [] },
+    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [] },
   };
 }
 
@@ -41,6 +41,8 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
  *   night      fn({ state, ctx, events }) nach der Abreise, vor dem neuen Tag
  *   tick       fn({ state, ctx, events }) jede Spielsekunde tagsüber (zum Beispiel ein Dauerlieger,
  *              der am Nachmittag früher zurückkommt)
+ *   score      fn({ state, ctx, boat, berth }) -> Zahl, kommt zur Platzwahl dazu (höher = lieber), zum Beispiel
+ *              freigehaltene Regattaplätze für Segler (events/vorbereiten.js)
  *   fit        fn({ state, ctx, boat, berth }) -> Grund (Text) oder null; zusätzliche Passregel
  *              für freie Plätze (zum Beispiel Dauerplätze, deren Boot gerade draußen ist)
  *   stageUp    fn({ state, ctx, from, to, gone, moves, findBerth, events }) nach einem Stufenausbau:
@@ -411,7 +413,14 @@ function berthScore(state, ctx, boat, berth) {
   // damit große Plätze für große Boote frei bleiben.
   const wishHits = berthWishHits(state, ctx, boat, berth);
   const slack = berth.maxLength * berth.maxBeam - boat.length * boat.beam;
-  return wishHits * 1000 + (berth.comfort || 0) * 100 - slack;
+  return wishHits * 1000 + (berth.comfort || 0) * 100 - slack + hookScore(state, ctx, boat, berth);
+}
+
+/** Zusätzliche Vorliebe für einen Platz aus den Hooks 'score' (0 ohne Hooks) */
+function hookScore(state, ctx, boat, berth) {
+  let n = 0;
+  for (const fn of ctx.hooks.score ?? []) n += fn({ state, ctx, boat, berth }) || 0;
+  return n;
 }
 
 /** Freie Plätze, an die das Boot passt, der beste zuerst. Diese Plätze leuchten beim Antippen auf. */
@@ -1129,9 +1138,10 @@ export function selfBerth(state, ctx, boatId) {
   };
   const list = availableBerths(state, ctx)
     .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
-    .map((b) => ({ b, d: dist(b), w: berthWishHits(state, ctx, boat, b) }))
-    // Die Crew sucht sich den Platz, der ihre Wünsche erfüllt; unter gleich guten den nächsten
-    .sort((x, y) => y.w - x.w || (x.d ?? Infinity) - (y.d ?? Infinity) || String(x.b.id).localeCompare(String(y.b.id), 'de', { numeric: true }));
+    .map((b) => ({ b, d: dist(b), w: berthWishHits(state, ctx, boat, b), h: hookScore(state, ctx, boat, b) }))
+    // Die Crew sucht sich den Platz, der ihre Wünsche erfüllt; unter gleich guten den nächsten.
+    // Vorher zählt die Vorliebe aus den Hooks (zum Beispiel freigehaltene Regattaplätze für Segler).
+    .sort((x, y) => y.h - x.h || y.w - x.w || (x.d ?? Infinity) - (y.d ?? Infinity) || String(x.b.id).localeCompare(String(y.b.id), 'de', { numeric: true }));
   return list[0]?.b.id ?? null;
 }
 

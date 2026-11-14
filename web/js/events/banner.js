@@ -8,6 +8,7 @@ import { pixelBild } from '../ui/pixel-symbole.js';
 const EVENT_ICON = {
   nebel: 'nebel', sommertag: 'sonne', sturm: 'sturm', regatta: 'regatta',
   hafenfest: 'fest', kreuzfahrttag: 'schiff',
+  mittsommer: 'feuer', heringstage: 'fisch', holzboote: 'holzboot', hansewoche: 'kogge',
 };
 
 const PART_NAME = { fruehling: 'Frühling', sommer: 'Sommer', herbst: 'Herbst', winter: 'Winter' };
@@ -103,11 +104,15 @@ export function initBanner(game) {
     chip.replaceChildren(svgIcon(iconFor(fc[0])));
     const next = fc.slice(1).find((e) => e.event);
     const label = document.createElement('span');
+    // Großes Ereignis (Hanse-Woche), lange vorher angekündigt: Tage bis dahin
+    const gross = game.events?.gross;
+    const grossIn = gross ? gross.startDay - fc[0].day : null;
     if (fc[0].event) label.textContent = fc[0].event.title;
     else if (next) label.textContent = `${dayLabel(next.day - fc[0].day)}: ${next.event.title}`;
+    else if (gross && grossIn > 0) label.textContent = `${gross.event.title} in ${grossIn} ${grossIn === 1 ? 'Tag' : 'Tagen'}`;
     else label.textContent = PART_NAME[fc[0].season.part] ?? '';
     chip.append(label);
-    chip.classList.toggle('has-news', !!next || !!fc[0].event);
+    chip.classList.toggle('has-news', !!next || !!fc[0].event || !!gross);
   }
 
   function renderPanel() {
@@ -137,6 +142,24 @@ export function initBanner(game) {
       row.append(txt);
       panel.append(row);
     });
+    // Großes Ereignis weiter in der Zukunft (Hanse-Woche, zehn Tage vorher angekündigt)
+    const gross = game.events?.gross;
+    const letzter = fc.length ? fc[fc.length - 1].day : 0;
+    if (gross?.event && gross.startDay > letzter) {
+      const row = document.createElement('div');
+      row.className = 'wp-row event';
+      row.append(svgIcon(EVENT_ICON[gross.event.id] ?? 'fest'));
+      const txt = document.createElement('div');
+      const t = document.createElement('strong');
+      t.textContent = `In ${gross.startDay - (fc[0]?.day ?? 0)} Tagen: ${gross.event.title}`;
+      const p = document.createElement('span');
+      p.textContent = gross.event.text;
+      txt.append(t, p);
+      const extra = game.vorbereitung?.zeile?.({ day: gross.startDay, event: gross.event });
+      if (extra) txt.append(extra);
+      row.append(txt);
+      panel.append(row);
+    }
   }
 
   function wxText(wx) {
