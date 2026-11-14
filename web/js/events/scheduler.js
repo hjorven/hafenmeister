@@ -11,6 +11,10 @@
 //   { type: 'end', event, day }
 //   { type: 'start', event, day, endDay }
 //   { type: 'announce', event, day, startDay, endDay }
+//   { type: 'nachspiel', event, day, endDay }     Nachspiel nach dem letzten Ereignistag (G3)
+//
+// Große Ereignisse (def.gross, z. B. Hanse-Woche) haben einen eigenen Platz im Planer: Sie werden lange
+// vorher angekündigt, die kleinen laufen bis kurz davor weiter und halten Abstand (minGapDays).
 import { EVENTS, DEFAULT_MODS, SCHEDULE, YEAR } from '../data/events.js';
 import { random } from '../random.js';
 
@@ -71,6 +75,8 @@ export function createScheduler({ seed = 1, defs = EVENTS, schedule = SCHEDULE, 
     nextDue: {},         // id -> frühester Starttag
     current: null,       // { id, startDay, endDay }
     planned: null,       // { id, startDay, endDay, announcedDay }
+    gross: null,         // großes Ereignis, lange vorher angekündigt: { id, startDay, endDay, announcedDay }
+    nachspiel: null,     // { id, startDay, endDay }
     lastEndDay: -Infinity,
     count: {},           // id -> wie oft schon
   };
@@ -78,12 +84,20 @@ export function createScheduler({ seed = 1, defs = EVENTS, schedule = SCHEDULE, 
   const announceDays = (def) => def.announceDays ?? 1;
   const rand = (a, b) => a + (b - a) * nextRandom(st);
   const interval = (def) => Math.max(2, Math.round(def.every * rand(1 - schedule.jitter, 1 + schedule.jitter)));
+  // Einmal im Jahr (alleTage so lang wie ein Jahr oder länger): frühestens in der nächsten Saison wieder,
+  // ohne Streuung, damit kein Jahr ausfällt. Sonst Abstand mit Streuung.
+  function naechsteFaelligkeit(def, startDay) {
+    const len = year.seasonDays + year.winterDays;
+    if (def.every >= len) return startDay + len - Math.round(len * 0.2);
+    return startDay + interval(def);
+  }
 
   function unlock(day) {
     for (const def of defs) {
       if (def.stage <= st.stage && st.nextDue[def.id] === undefined) {
         // Das erste Mal kommt ein neues Ereignis bald, damit man es kennenlernt.
-        st.nextDue[def.id] = Math.max(day + 1, schedule.firstDay) + Math.round(def.every * rand(0.3, 0.7));
+        // Feste Tage (Mittsommer) gleich ab dem nächsten passenden Saisontag
+        st.nextDue[def.id] = def.amTag ? day + 1 : Math.max(day + 1, schedule.firstDay) + Math.round(def.every * rand(0.3, 0.7));
       }
     }
   }
@@ -108,27 +122,80 @@ export function createScheduler({ seed = 1, defs = EVENTS, schedule = SCHEDULE, 
     return f[Math.min(lvl, f.length - 1)];
   }
 
-  function tryPlan(day) {
-    if (st.planned) return null;
-    const busyUntil = st.current ? st.current.endDay : st.lastEndDay;
+  // Passt ein Ereignis [s, e] neben das angekündigte große Ereignis (mit Abstand)?
+  const abstand = (s, e, a, b) => e + schedule.minGapDays < a || s > b + schedule.minGapDays;
+  function nebenGross(s, e) {
+    const g = st.gross;
+    return !g || abstand(s, e, g.startDay, g.endDay);
+  }
+  // Ereignisse mit festem Saisontag (def.amTag, Mittsommer): an diesem Tag kommen sie sicher,
+  // die anderen halten Abstand. Liefert den Tag (absolut), an dem das feste Ereignis als Nächstes läge.
+  const festeDefs = defs.filter((d) => d.amTag);
+  function festerTag(def, ab) {
+    const len = year.seasonDays + year.winterDays;
+    const jahrStart = Math.floor((Math.max(1, ab) - 1) / len) * len;
+    for (const j of [0, len]) {
+      const d = jahrStart + j + def.amTag;
+      if (d >= ab) return d;
+    }
+    return Infinity;
+  }
+  function nebenFesten(s, e, day) {
+    for (const def of festeDefs) {
+      if (def.stage > st.stage || (def.requires && !((st.buildings?.[def.requires] ?? 0) > 0))) continue;
+      if ((st.nextDue[def.id] ?? Infinity) > festerTag(def, day)) continue;   // dieses Jahr schon gewesen
+      const f = festerTag(def, day + 1);
+      if (!abstand(s, e, f, f + def.duration - 1)) return false;
+    }
+    return true;
+  }
+
+  // Bestes fälliges Ereignis einer Art (klein oder groß) für Ankündigung heute
+  function waehle(day, gross, busyUntil) {
     let best = null;
     for (const def of defs) {
+      if (!!def.gross !== gross) continue;
       if (def.stage > st.stage) continue;
       if (def.requires && !((st.buildings?.[def.requires] ?? 0) > 0)) continue;
       const startDay = day + announceDays(def);
       if (!fitsSeason(def, startDay)) continue;
       if (startDay < schedule.firstDay) continue;
       if (startDay <= busyUntil + schedule.minGapDays) continue;
+      if (!gross && !nebenGross(startDay, startDay + def.duration - 1)) continue;
       const due = st.nextDue[def.id];
       if (due === undefined || startDay < due) continue;
+      if (def.amTag) {
+        // Festes Datum: nur genau an seinem Saisontag, dann vor allen anderen
+        if (seasonOf(startDay, year).seasonDay !== def.amTag) continue;
+        return { def, startDay, score: Infinity };
+      }
+      if (!nebenFesten(startDay, startDay + def.duration - 1, day)) continue;
       // Wer am längsten überfällig ist, kommt zuerst; das Gewicht entscheidet bei Gleichstand.
       const score = (startDay - due) + def.weight * 0.5 + nextRandom(st) * 0.1;
       if (!best || score > best.score) best = { def, startDay, score };
     }
+    return best;
+  }
+
+  function tryPlanGross(day) {
+    if (st.gross || (st.current && byId.get(st.current.id)?.gross)) return null;
+    const busyUntil = Math.max(st.current ? st.current.endDay : -Infinity, st.planned ? st.planned.endDay : -Infinity, st.lastEndDay);
+    const best = waehle(day, true, busyUntil);
+    if (!best) return null;
+    const { def, startDay } = best;
+    st.gross = { id: def.id, startDay, endDay: startDay + def.duration - 1, announcedDay: day };
+    st.nextDue[def.id] = naechsteFaelligkeit(def, startDay);
+    return { type: 'announce', event: def, day, startDay, endDay: st.gross.endDay };
+  }
+
+  function tryPlan(day) {
+    if (st.planned) return null;
+    const busyUntil = st.current ? st.current.endDay : st.lastEndDay;
+    const best = waehle(day, false, busyUntil);
     if (!best) return null;
     const { def, startDay } = best;
     st.planned = { id: def.id, startDay, endDay: startDay + def.duration - 1, announcedDay: day };
-    st.nextDue[def.id] = startDay + interval(def);
+    st.nextDue[def.id] = naechsteFaelligkeit(def, startDay);
     // Andere Ereignisse rücken nicht direkt dahinter: kurze Ruhe nach jedem Ereignis.
     return { type: 'announce', event: def, day, startDay, endDay: st.planned.endDay };
   }
@@ -136,19 +203,36 @@ export function createScheduler({ seed = 1, defs = EVENTS, schedule = SCHEDULE, 
   function step(day) {
     const changes = [];
     unlock(day);
+    if (st.nachspiel && day > st.nachspiel.endDay) st.nachspiel = null;
     if (st.current && day > st.current.endDay) {
       const def = byId.get(st.current.id);
       changes.push({ type: 'end', event: def, day });
       st.lastEndDay = st.current.endDay;
       st.current = null;
+      // Nachspiel (G3): wirkt ab heute, solange kein neues Ereignis läuft
+      if (def?.nachspiel?.tage > 0 && !seasonOf(day, year).winter) {
+        st.nachspiel = { id: def.id, startDay: day, endDay: day + def.nachspiel.tage - 1 };
+        changes.push({ type: 'nachspiel', event: def, day, endDay: st.nachspiel.endDay });
+      }
     }
-    if (st.planned && day >= st.planned.startDay) {
-      const def = byId.get(st.planned.id);
-      st.current = { id: def.id, startDay: st.planned.startDay, endDay: st.planned.endDay };
-      st.planned = null;
+    if (!st.current && st.gross && day >= st.gross.startDay) {
+      const def = byId.get(st.gross.id);
+      st.current = { id: def.id, startDay: st.gross.startDay, endDay: st.gross.endDay };
+      st.gross = null;
+      st.nachspiel = null;
       st.count[def.id] = (st.count[def.id] ?? 0) + 1;
       changes.push({ type: 'start', event: def, day, endDay: st.current.endDay });
     }
+    if (!st.current && st.planned && day >= st.planned.startDay) {
+      const def = byId.get(st.planned.id);
+      st.current = { id: def.id, startDay: st.planned.startDay, endDay: st.planned.endDay };
+      st.planned = null;
+      st.nachspiel = null;
+      st.count[def.id] = (st.count[def.id] ?? 0) + 1;
+      changes.push({ type: 'start', event: def, day, endDay: st.current.endDay });
+    }
+    const gross = tryPlanGross(day);
+    if (gross) changes.push(gross);
     const ann = tryPlan(day);
     if (ann) changes.push(ann);
     st.day = day;
@@ -159,6 +243,13 @@ export function createScheduler({ seed = 1, defs = EVENTS, schedule = SCHEDULE, 
     get day() { return st.day; },
     get current() { return st.current ? { ...st.current, event: byId.get(st.current.id) } : null; },
     get planned() { return st.planned ? { ...st.planned, event: byId.get(st.planned.id) } : null; },
+    /** Angekündigtes großes Ereignis (Hanse-Woche) oder null */
+    get gross() { return st.gross ? { ...st.gross, event: byId.get(st.gross.id) } : null; },
+    /** Nachspiel heute (G3) oder null: { id, startDay, endDay, event } */
+    get nachspiel() {
+      const n = st.nachspiel;
+      return n && !st.current && st.day >= n.startDay && st.day <= n.endDay ? { ...n, event: byId.get(n.id) } : null;
+    },
 
     // Bis zu diesem Tag weiterrechnen (übersprungene Tage werden nachgeholt).
     advanceTo(day, { stage, buildings } = {}) {
@@ -177,11 +268,20 @@ export function createScheduler({ seed = 1, defs = EVENTS, schedule = SCHEDULE, 
     // Wirkung heute. Schlechte Folgen werden durch Schutzbauten gemindert.
     season: (day = st.day) => seasonOf(day, year),
 
-    modifiers() {
+    // vorbereitet(id): war man auf das Ereignis vorbereitet? (Nachspiel mit Bonus, events/vorbereiten.js)
+    // extra: weitere Wirkung des laufenden Ereignisses (Bauten, G7), wird dazugemischt
+    modifiers({ vorbereitet = () => false, extra = null } = {}) {
       if (seasonOf(st.day || 1, year).winter) return mergeMods(DEFAULT_MODS, year.winterMods);
-      if (!st.current) return mergeMods(DEFAULT_MODS, null);
+      if (!st.current) {
+        const n = api.nachspiel;
+        if (!n?.event?.nachspiel) return mergeMods(DEFAULT_MODS, null);
+        let m = mergeMods(DEFAULT_MODS, n.event.nachspiel.mods);
+        if (n.event.nachspiel.modsVorbereitet && vorbereitet(n.id)) m = mergeMods(m, n.event.nachspiel.modsVorbereitet);
+        return m;
+      }
       const def = byId.get(st.current.id);
-      return mergeMods(DEFAULT_MODS, def.mods, protection(def));
+      const m = mergeMods(DEFAULT_MODS, def.mods, protection(def));
+      return extra ? mergeMods(m, extra) : m;
     },
 
     // Wetter eines Tages: Ereigniswetter oder ruhiges Alltagswetter.
@@ -219,12 +319,17 @@ export function createScheduler({ seed = 1, defs = EVENTS, schedule = SCHEDULE, 
       // Unbekannte Ereignisse aus alten Spielständen verwerfen
       if (st.current && !byId.has(st.current.id)) st.current = null;
       if (st.planned && !byId.has(st.planned.id)) st.planned = null;
+      if (st.gross && !byId.has(st.gross.id)) st.gross = null;
+      if (st.nachspiel && !byId.has(st.nachspiel.id)) st.nachspiel = null;
+      st.gross ??= null;
+      st.nachspiel ??= null;
     },
   };
 
   function eventOn(day) {
     if (st.current && day >= st.current.startDay && day <= st.current.endDay) return st.current.id;
     if (st.planned && day >= st.planned.startDay && day <= st.planned.endDay) return st.planned.id;
+    if (st.gross && day >= st.gross.startDay && day <= st.gross.endDay) return st.gross.id;
     return null;
   }
 

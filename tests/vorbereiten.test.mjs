@@ -237,3 +237,113 @@ test('Spielstand: Stand liegt in state.modules.vorbereitung und übersteht JSON'
   const motor = { id: 901, typeId: 'S1', size: 'S', length: 3, beam: 1.4, draft: 0.2, stationed: false, wishes: [], nights: 1 };
   assert.equal(sim.hookWhyNotFit(kopie, ctx, motor, platz), 'regatta');
 });
+
+// ---------------------------------------------------------------- P24 Teil 2: Hanse-Woche, Bauten, Nachspiel
+
+test('Hanse-Woche: große Plätze freihalten, nur L und XL, Festgeld einmal je Schiff', () => {
+  const { ctx, state } = neu({ stufe: 5 });
+  const plan = { id: 'hansewoche', startDay: state.day + 2, endDay: state.day + 5 };
+  const r = V.freihalten('hansewoche', state, ctx, plan);
+  assert.ok(r.ok);
+  assert.equal(r.plaetze.length, ECONOMY.ereignisse.hansewoche.vorbereiten.plaetze[5]);
+  // Plätze, an die ein großes Schiff passt; nicht dieselben wie die Regatta
+  const reg = V.freihalten('regatta', state, ctx, { id: 'regatta', startDay: state.day + 2, endDay: state.day + 3 });
+  assert.ok(!reg.plaetze.some((id) => r.plaetze.includes(id)), 'keine doppelt freigehaltenen Plätze');
+  V.freigeben('regatta', state);
+  const platz = ctx.berthById[r.plaetze[0]];
+  const gross = { id: 950, typeId: 'L1', size: 'L', length: 10, beam: 3.4, draft: 1.7, stationed: false, wishes: [], nights: 1 };
+  const klein = { id: 951, typeId: 'S4', size: 'S', length: 3, beam: 1.4, draft: 0.2, stationed: false, wishes: [], nights: 1 };
+  assert.equal(sim.hookWhyNotFit(state, ctx, gross, platz), 'hansewoche', 'vor dem Start für alle gesperrt');
+  state.day = plan.startDay;
+  assert.equal(sim.hookWhyNotFit(state, ctx, gross, platz), null);
+  assert.equal(sim.hookWhyNotFit(state, ctx, klein, platz), 'hansewoche');
+  gastAuf(state, ctx, platz.id, 'L1', 3);
+  const geld0 = state.money;
+  const ev = [];
+  const add = (a, q, d) => sim.addIncome(state, a, q, d);
+  V.abendHook({ state, ctx, events: ev, addIncome: add }, { laufend: () => plan });
+  V.abendHook({ state, ctx, events: ev, addIncome: add }, { laufend: () => plan });
+  assert.equal(state.money - geld0, ECONOMY.ereignisse.hansewoche.vorbereiten.festgeld.L, 'Festgeld einmal');
+  state.day = plan.endDay;
+  V.abendHook({ state, ctx, events: ev, addIncome: add }, { laufend: () => plan });
+  const e = ev.find((x) => x.type === 'ereignisErgebnis');
+  assert.equal(e.art, 'hansewoche');
+  assert.equal(e.teilnehmer, 1);
+  const t = V.ergebnisText(e);
+  assert.match(t.text, /großes Schiff lag.*Festgeld/);
+  // vorbereitet: Bonus im Nachspiel gemerkt, nach drei Tagen vergessen
+  assert.equal(state.modules.vorbereitung.nachspiel.hansewoche, plan.endDay);
+  V.nachtHook({ state, ctx }, {});
+  assert.equal(state.modules.vorbereitung.hansewoche, undefined);
+  state.day += 3;
+  V.nachtHook({ state, ctx }, {});
+  assert.equal(state.modules.vorbereitung.nachspiel.hansewoche, undefined);
+});
+
+test('Bauten (G7): gebaute Services bringen an jedem Ereignistag Geld, fehlende stehen im Ergebnis', () => {
+  const { ctx, state } = neu({ stufe: 4 });
+  const plan = { id: 'heringstage', startDay: state.day, endDay: state.day + 1 };
+  const stufen = { raeucherei: 2 };
+  const ev = [];
+  const add = (a, q, d) => sim.addIncome(state, a, q, d);
+  const geld0 = state.money;
+  V.abendHook({ state, ctx, events: ev, addIncome: add }, { laufend: () => plan, bauStufe: (id) => stufen[id] ?? 0 });
+  const proTag = ECONOMY.ereignisse.heringstage.bauten.raeucherei.proTag[1];
+  assert.equal(state.money - geld0, proTag);
+  state.day = plan.endDay;
+  V.abendHook({ state, ctx, events: ev, addIncome: add }, { laufend: () => plan, bauStufe: (id) => stufen[id] ?? 0 });
+  assert.equal(state.money - geld0, 2 * proTag);
+  const e = ev.find((x) => x.type === 'ereignisErgebnis');
+  assert.deepEqual(e.bau, { raeucherei: 2 * proTag });
+  assert.deepEqual(e.fehlt, ['fischhalle']);
+  const t = V.ergebnisText(e, (id) => ({ raeucherei: 'Räucherei', fischhalle: 'Fischhalle' }[id]));
+  assert.equal(t.titel, 'Heringstage vorbei');
+  assert.match(t.text, /Räucherei 280 €/);
+  // Ohne Bauten: der Tipp nennt einen Bau
+  const ev2 = [];
+  V.abendHook({ state, ctx, events: ev2, addIncome: add }, { laufend: () => ({ id: 'mittsommer', startDay: state.day, endDay: state.day }) });
+  assert.match(V.ergebnisText(ev2[0], (id) => id).text, /^Mit grillplatz/);
+  assert.equal(V.bauGeld('mittsommer', 'grillplatz', 1), 60);
+  assert.equal(V.bauGeld('mittsommer', 'grillplatz', 3), 60, 'höchste Stufe zählt');
+  assert.equal(V.bauGeld('mittsommer', 'grillplatz', 0), 0);
+});
+
+test('Sturmklar merkt sich den Bonus fürs Nachspiel, ohne Vorbereitung nicht', () => {
+  for (const klar of [true, false]) {
+    const { ctx, state } = neu();
+    const plan = { id: 'sturm', startDay: state.day, endDay: state.day };
+    if (klar) V.sturmklar(state, ctx, plan);
+    V.abendHook({ state, ctx, events: [], addIncome: () => {} }, { laufend: () => plan });
+    assert.equal(state.modules.vorbereitung?.nachspiel?.sturm != null, klar);
+  }
+});
+
+test('Ergebnistexte der neuen Ereignisse ohne Platzhalter', () => {
+  for (const art of ['mittsommer', 'heringstage', 'holzboote', 'hafenfest', 'hansewoche']) {
+    for (const f of [{ art, bau: {}, fehlt: [] }, { art, bau: { x: 50 }, fehlt: [] }, { art, bau: {}, fehlt: ['y'] }, { art, vorbereitet: true, plaetze: 3, teilnehmer: 0, startgeld: 0 }]) {
+      const t = V.ergebnisText(f, (id) => id.toUpperCase());
+      assert.ok(t.titel && t.text && t.symbol, JSON.stringify(f));
+      assert.doesNotMatch(t.text + t.titel, /undefined|NaN|null/);
+    }
+  }
+});
+
+test('Regatta: Segler nehmen bevorzugt die freigehaltenen Plätze (selbst und mit Büro)', () => {
+  const { ctx, state } = neu({ stufe: 4 });
+  const plan = { id: 'regatta', startDay: state.day + 1, endDay: state.day + 2 };
+  const r = V.regattaFreihalten(state, ctx, plan);
+  state.day = plan.startDay;
+  const t = ctx.typeById.S4;
+  const id = state.nextId++;
+  state.boats[id] = { id, typeId: 'S4', size: 'S', kind: t.kind, length: t.length[0], beam: t.beam[0], draft: t.draft[0], stationed: false, nights: 1, wishes: [], status: 'waiting', penalty: 0 };
+  state.queue.push(id);
+  assert.ok(r.plaetze.includes(sim.selfBerth(state, ctx, id)), 'selbst einfahren: freigehaltener Platz');
+  assert.ok(r.plaetze.includes(sim.fittingBerths(state, ctx, id)[0]), 'beste Box: freigehaltener Platz');
+  // Ein Motorboot nimmt sie nicht
+  const m = state.nextId++;
+  state.boats[m] = { ...state.boats[id], id: m, typeId: 'S1', kind: 'ruderboot' };
+  assert.ok(!r.plaetze.includes(sim.selfBerth(state, ctx, m)));
+  // Vor dem Start keine Vorliebe (gesperrt)
+  state.day = plan.startDay - 1;
+  assert.ok(!r.plaetze.includes(sim.selfBerth(state, ctx, id)));
+});

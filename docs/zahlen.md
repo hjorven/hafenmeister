@@ -144,4 +144,8 @@ Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab 
 | Sturm | 3 | 12 | 1 | 3 bis 30 | seaArrivals false; extraNights 1; satisfaction {outer:-1} |
 | Regatta | 3 | 14 | 2 | 6 bis 26 | arrivalFactor 1,6; kindFactor {jolle:3, segelyacht:3, mehrrumpf:2}; visitorFactor 1,5; serviceIncomeFactor 1,3; ratingBonus 0,25 |
 | Hafenfest | 4 | 20 | 1 | 10 bis 24 | arrivalFactor 1,3; kindFactor {traditionssegler:6}; sizeFactor {XL:2}; visitorFactor 2; serviceIncomeFactor 1,5; ratingBonus 0,25 |
+| Mittsommer | 2 | 33 | 1 | 14 bis 14 | arrivalFactor 1,15; visitorFactor 1,6; serviceIncomeFactor 1,3; extraNights 1 |
+| Heringstage | 2 | 33 | 2 | 5 bis 6 | visitorFactor 1,5; serviceIncomeFactor 1,2; kindFactor {M4:2} |
+| Holzboot-Treffen | 3 | 16 | 2 | 5 bis 28 | arrivalFactor 1,2; kindFactor {M2:5, S1:2}; visitorFactor 1,3; ratingBonus 0,15 |
+| Hanse-Woche | 5 | 33 | 4 | 21 bis 29 | arrivalFactor 1,5; kindFactor {traditionssegler:6, M2:2}; sizeFactor {XL:2, L:1.3}; visitorFactor 2,2; serviceIncomeFactor 1,6; ratingBonus 0,3 |
 

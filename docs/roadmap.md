@@ -1,6 +1,6 @@
 # Hafenmeister: Roadmap
 
-Stand: 14.11.2026 abends, abgeglichen mit `main` bei Commit `adc0086` (PR 295). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
+Stand: 14.11.2026 abends, abgeglichen mit `main` bei Commit `546f080` (PR 288). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
 
 **Verhältnis zu [plan.md](plan.md):** `plan.md` bleibt der einzige gültige Plan für Vision, Regeln und Entscheidungen. Diese Roadmap ist die **Arbeitsliste**: Sie sagt, was noch fehlt, was falsch ist, was weg soll, und welches Paket (welcher Thread) es erledigt. Wo die Roadmap eine Entscheidung aus `plan.md` ändern würde, steht das unter [Offene Fragen an Jorven](#offene-fragen-an-jorven) und gilt erst nach seiner Antwort; danach wird `plan.md` im selben PR angepasst.
 
@@ -246,7 +246,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | erledigt (PR 245) | P20 |
 | F15 | Krantage: Dauerlieger sichtbar ins Winterlager und zurück | erledigt (PR 245) | P20 |
 | F16 | Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv | offen | P40 |
-| F17 | Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage | offen | P24 |
+| F17 | Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage | erledigt (14.11.) | P24 |
 
 ### Langzeit
 
@@ -421,13 +421,13 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 |---|---|---|---|
 | G1 | Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren | erledigt (14.11.) | P24 |
 | G2 | Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen | erledigt (14.11.) | P24 |
-| G3 | Ereignisse mit Nachspiel | offen | P24 |
+| G3 | Ereignisse mit Nachspiel | erledigt (14.11.) | P24 |
 | G4 | Winter als Planungsbild (Bilanz, Winterarbeiten, Verträge) | erledigt (PR 245) | P20 |
 | G5 | Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind) | offen | P20 |
 | G6 | Ergebnis eines Ereignisses am Abend zeigen | erledigt (14.11.) | P24 |
-| G7 | Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand) | offen | P24 |
+| G7 | Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand) | erledigt (14.11.) | P24 |
 | G8 | Eine Zahlenliste für Ereignisse | erledigt | P06 |
-| G9 | Seltene große Tage, z. B. Hanse-Woche, zehn Tage vorher angekündigt | offen | P24 |
+| G9 | Seltene große Tage, z. B. Hanse-Woche, zehn Tage vorher angekündigt | erledigt (14.11.) | P24 |
 
 ### H Dauerlieger, Stammgäste und Tagestörn
 
