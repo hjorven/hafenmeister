@@ -341,7 +341,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | A7 | Selbst-Einfahren einstellbar: schnell, langsam, aus | erledigt (Einstellungen: Normal 8 s, Langsam 20 s, Nie) | P50 |
 | A8 | Abweisen und Wegfahren angleichen (= Ü13) | erledigt (PR 153) | P10 |
 | A9 | Bojenlieger über Nacht zahlen wenig und werden morgens zuerst bedient | erledigt (PR 153, `ECONOMY.warten.bojengeld`) | P10 |
-| A10 | Größenmischung je Stufe: an vollen Tagen ein bis zwei große Boote zu viel | offen | P17 |
+| A10 | Größenmischung je Stufe: an vollen Tagen ein bis zwei große Boote zu viel | erledigt (PR 287, `ECONOMY.platzMix`, `sim.sizeBerthFactors`) | P17 |
 
 ### B Wünsche, Versorgung, Liegegeld und Kassieren
 

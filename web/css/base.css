@@ -109,5 +109,5 @@ html, body {
   pointer-events: none;
   transition: opacity 0.4s;
 }
-.boot.done { opacity: 0; }
+.boot.done { opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0s 0.4s; } /* nach dem Ausblenden auch fuer Screenreader weg */
 .boot.error { color: var(--ink); background: var(--sand); padding: 24px; text-align: center; }

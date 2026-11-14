@@ -490,6 +490,31 @@ function makeBoat(fields) {
   };
 }
 
+/**
+ * Größenmischung nach Plätzen (A10, ECONOMY.platzMix): Faktor je Größe, wie gut der Hafen gerade Platz
+ * für diese Größe hat. Gezählt werden gebaute Plätze, an die die kleinste Bootsart der Größe passt,
+ * verglichen mit dem Bedarf (Ankünfte am Tag × Anteil × mittlere Nächte, mal extra[Größe] für Zuschläge
+ * wie Ruf oder Winterarbeiten). Höchstens 1.
+ */
+export function sizeBerthFactors(state, ctx, types = eligibleTypes(state, ctx), extra = {}) {
+  const pm = ctx.rules.sizeByBerths;
+  const out = {};
+  if (!pm) return out;
+  const mix = ctx.rules.sizeMix[state.stage] || {};
+  const n = ctx.rules.arrivalsPerDay[state.stage] || 0;
+  const plaetze = availableBerths(state, ctx).filter((b) => !b.reserved);
+  for (const [size, w] of Object.entries(mix)) {
+    const proben = types.filter((t) => t.size === size).map(smallestOf);
+    if (!proben.length) continue;
+    const probe = proben.reduce((a, b) => (b.length < a.length ? b : a));
+    const anzahl = plaetze.filter((b) => fits(probe, b, ctx.rules, state.stage)).length;
+    const [nMin, nMax] = range(ctx.rules.nightsBySize?.[size] ?? ctx.rules.nights);
+    const bedarf = n * w * (extra[size] ?? 1) * (nMin + nMax) / 2;
+    out[size] = bedarf > 0 ? Math.max(pm.mindestens, Math.min(1, (anzahl * pm.auslastung) / bedarf)) : 1;
+  }
+  return out;
+}
+
 /** Würfelt ein Boot für die aktuelle Ausbaustufe aus. Gibt null zurück, wenn keine Bootsart passt. */
 export function rollBoat(state, ctx, mods = modifiers(state, ctx)) {
   const types = eligibleTypes(state, ctx, mods);
@@ -502,8 +527,10 @@ export function rollBoat(state, ctx, mods = modifiers(state, ctx)) {
   const selten = draw ? new Set(draw.rare) : new Set();
   const seltenErlaubt = draw && rep >= draw.rareFrom;
   const sizeWeights = {};
+  // Nur so viele Boote einer Größe, wie der Hafen Plätze für sie hat (A10)
+  const platz = sizeBerthFactors(state, ctx, types, Object.fromEntries(Object.keys(mix).map((k) => [k, (mods.sizeFactor[k] ?? 1) * (gross[k] ?? 1)])));
   for (const [size, w] of Object.entries(mix)) {
-    if (types.some((t) => t.size === size)) sizeWeights[size] = w * (mods.sizeFactor[size] ?? 1) * (gross[size] ?? 1);
+    if (types.some((t) => t.size === size)) sizeWeights[size] = w * (mods.sizeFactor[size] ?? 1) * (gross[size] ?? 1) * (platz[size] ?? 1);
   }
   let boat = null;
   // Bis zu 8 Versuche, Maße zu würfeln, die an einen Platz des Hafens passen
@@ -581,6 +608,9 @@ function startDay(state, ctx, events) {
   for (const boat of mooredBoats(state)) {
     if (!boat.stationed) chargeFee(state, ctx, boat, mods, events);
   }
+  // Winter: keine Gäste. Wer über Nacht an einer Boje gewartet hat (rules.queue.overnight), fährt weiter,
+  // sonst fährt er mitten im Winter in eine Box (Feature-Test 14.11., Pulk am Kartenrand).
+  if (sea.winter) for (const id of [...state.queue]) if (state.boats[id]) turnAway(state, ctx, state.boats[id], events, 'winter');
   planTrips(state, ctx, mods, sea.winter);
   const rate = sea.winter ? 0 : arrivalRate(state, ctx, mods);
   // Ankünfte über den ganzen Tag: zwischen arrivalFrom und arrivalWindow (Anteile des Tages).
@@ -1098,10 +1128,13 @@ export function unstationBoat(state, ctx, boatId) {
 function turnAway(state, ctx, boat, events, why) {
   state.queue = state.queue.filter((id) => id !== boat.id);
   delete state.boats[boat.id];
-  state.stats.turnedAway++;
-  state.stats.turnedAwayToday++;
-  const weg = heute(state).weggefahren;
-  weg[why] = (weg[why] || 0) + 1;
+  // Winterbeginn: Wer über Nacht an der Boje lag, fährt ins Winterlager. Das zählt nicht als weggefahren.
+  if (why !== 'winter') {
+    state.stats.turnedAway++;
+    state.stats.turnedAwayToday++;
+    const weg = heute(state).weggefahren;
+    weg[why] = (weg[why] || 0) + 1;
+  }
   const rated = turnAwayRating(state, ctx, boat, why);
   events.push({ type: 'turnedAway', boatId: boat.id, reason: why, rated, ...(rated ? { rating: ctx.rules.turnAway.rating, guest: guestInfo(boat), day: state.day } : {}) });
 }
@@ -1114,7 +1147,7 @@ function turnAway(state, ctx, boat, events, why) {
  * @returns {boolean} ob eine Bewertung abgegeben wurde
  */
 function turnAwayRating(state, ctx, boat, why) {
-  if (why === 'queueFull' || why === 'rebuild' || !couldEverFit(state, ctx, boat)) return false;
+  if (why === 'queueFull' || why === 'rebuild' || why === 'winter' || !couldEverFit(state, ctx, boat)) return false;
   const ta = ctx.rules.turnAway;
   const rated = random(state) < ta.chance;
   if (rated) pushRating(state, ctx, ta.rating);

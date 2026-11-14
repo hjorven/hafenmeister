@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "47fac50"
+  "commit": "387c015"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -444,7 +444,8 @@
    "welle": 2,
    "prs": [
     237,
-    252
+    252,
+    287
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -2380,12 +2381,14 @@
   {
    "code": "A10",
    "text": "Größenmischung je Stufe: an vollen Tagen ein bis zwei große Boote zu viel",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 287, ECONOMY.platzMix, sim.sizeBerthFactors)",
    "pakete": [
     "P17"
    ],
-   "prs": [],
+   "prs": [
+    287
+   ],
    "abschnitt": "A Ankunft, Warten und Zuweisen"
   },
   {
@@ -4441,11 +4444,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 137,
+  "erledigt": 138,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 75,
+  "offen": 74,
   "entfaellt": 0,
   "alle": 219
  },
@@ -5029,6 +5032,29 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "Balancing: große Boote kommen nach Platzangebot (A10)",
+   "pr": 287,
+   "pakete": [
+    "P17"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "README und Plan auf den Stand vom 14.11.2026 (nach PR 285)",
+   "pr": 289,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Arbeitsplan: 252 und P24 Teil 1 gemergt, P17 nach PR 280 und A10",
+   "pr": 285,
+   "pakete": [
+    "P24",
+    "P17"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "Balancing: Liegegeld je angefangenem Meter (B10); Winterknöpfe quer fest unten",
    "pr": 252,
    "pakete": [
@@ -5098,30 +5124,6 @@
    "pr": 278,
    "pakete": [
     "P07"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Logbuch und Hafenchronik: Sammelalbum mit Pixelbildern, Chronik je Tag (P21)",
-   "pr": 274,
-   "pakete": [
-    "P21"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P55: Geduldsring, Auslastung an der Versorgung, Zeiger am Bildrand",
-   "pr": 269,
-   "pakete": [
-    "P55"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Fahrrinne in die offene See: jede Küste hat einen Seeweg",
-   "pr": 271,
-   "pakete": [
-    "P62"
    ]
   }
  ]

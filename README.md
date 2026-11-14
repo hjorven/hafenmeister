@@ -4,11 +4,19 @@ Ein gemütliches Aufbauspiel in 3D für den Browser: Du bist Hafenmeister, fäng
 
 **Spielen:** https://hjorven.github.io/hafenmeister/ (Pixel-Fassung: https://hjorven.github.io/hafenmeister/pixel/)
 
-## Stand (13.11.2026)
+## Stand (14.11.2026)
 
-Die Ostsee ist in allen sechs Stufen spielbar, vom Bootssteg bis zum Seehafen mit Abschlussziel. Jedes Spiel liegt in einer von zehn Geländeformen nach echten Häfen. Gebaut sind Zuweisen und Selbst-Einfahren, Liegegeld beim Festmachen, Bauen mit Vorschau, 20 Services und Angebote an Land, Dauerlieger, Stammgäste, Tagesziele, Wetter, Ereignisse mit Winter, Menschen im Hafen, Ton und Musik, Fotomodus, Speichern und eine Pixel-Oberfläche für alle Geräte. Bis zum Abschluss der Ostsee dauert es etwa 8,5 Stunden.
+Die Ostsee ist in allen sechs Stufen spielbar, vom Bootssteg bis zum Seehafen mit Abschlussziel. Jedes Spiel liegt in einer von zehn Geländeformen nach echten Häfen, mit eigenem Seeweg hinaus. Im Spiel sind unter anderem:
 
-Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arbeiten die Pakete der [Roadmap](docs/roadmap.md) die Funde aus Jorvens Überblick ab. Danach kommen die Nordsee und, als letzter Schritt, ein kleiner Online-Teil. Was sich für Spieler geändert hat, steht in [docs/aenderungen.md](docs/aenderungen.md).
+- **Kernspiel:** Zuweisen per Schleppleine oder Selbst-Einfahren in die nächste freie Box, Wunschplätze in Gold, Geduldsring an der Boje, Ankunftsvorschau, Liegegeld je Meter beim Festmachen, Hafenbüro mit Funk, Kassenautomat und Leitstelle (Sonderfälle bleiben beim Spieler).
+- **Rückmeldung:** Bewertungen über dem Boot, Gästebuch, Tagesabschluss am Abend, Auslastung an der Versorgung mit Schlange davor, Ruf mit Auszeichnung am Hafenmeisterhaus, Feier beim Stufenaufstieg und Endlosspiel nach dem Abschluss.
+- **Bauen:** Vorschau am Ort, Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen, erstes Bauwerk geschenkt, 20 Services und Angebote an Land.
+- **Hafenleben:** Dauerlieger mit Saisonvertrag, Stammgäste, Tagesziele zum Auswählen, Wetter, Ereignisse zum Vorbereiten (Sturm, Regatta), Winterpause mit Winterarbeiten und Krantagen, Logbuch als Sammelalbum mit Hafenchronik, Menschen im Hafen, Ton und Musik, Fotomodus.
+- **Technik:** mehrere Speicherplätze mit "Neues Spiel", Einstellungen für Sicht und Bewegung, Pixel-Oberfläche für alle Geräte, startet als Web-App auch offline.
+
+Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, rund 7,5 bis 8 Stunden bei normaler Geschwindigkeit.
+
+**Woran gerade gearbeitet wird:** Bootswege ohne Stau und ohne Fahrten über Land oder durch Stege (Welle 0), Feinschliff am Tempo des Aufstiegs, Ereignisse Teil 2, Erfolge und Anmeldung per Funk. Was als Nächstes kommt, steht im [Arbeitsplan](docs/arbeitsplan.md), alle offenen Punkte in der [Roadmap](docs/roadmap.md). Danach folgen die Nordsee, der Ausbau bis Stufe 20 und als letzter Schritt ein kleiner Online-Teil. Was sich für Spieler geändert hat, steht in [docs/aenderungen.md](docs/aenderungen.md).
 
 | Stufe | Name | Gastplätze |
 |---|---|---|
@@ -89,7 +97,7 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 | [P14](https://hjorven.github.io/hafenmeister/roadmap/#paket=P14) | Bewertungen und Gästebuch zeigen | **erledigt** | [#154](https://github.com/hjorven/hafenmeister/pull/154) [#233](https://github.com/hjorven/hafenmeister/pull/233) |
 | [P15](https://hjorven.github.io/hafenmeister/roadmap/#paket=P15) | Tagesabschluss am Abend zeigen | **erledigt** | [#159](https://github.com/hjorven/hafenmeister/pull/159) [#239](https://github.com/hjorven/hafenmeister/pull/239) |
 | [P16](https://hjorven.github.io/hafenmeister/roadmap/#paket=P16) | Aufstieg und Abschluss feiern, Endlosspiel | **erledigt** | [#156](https://github.com/hjorven/hafenmeister/pull/156) |
-| [P17](https://hjorven.github.io/hafenmeister/roadmap/#paket=P17) | Start und frühe Stufen straffen | teilweise | [#237](https://github.com/hjorven/hafenmeister/pull/237) [#252](https://github.com/hjorven/hafenmeister/pull/252) |
+| [P17](https://hjorven.github.io/hafenmeister/roadmap/#paket=P17) | Start und frühe Stufen straffen | teilweise | [#237](https://github.com/hjorven/hafenmeister/pull/237) [#252](https://github.com/hjorven/hafenmeister/pull/252) [#287](https://github.com/hjorven/hafenmeister/pull/287) |
 | [P18](https://hjorven.github.io/hafenmeister/roadmap/#paket=P18) | Ausbau in Bauabschnitten | **erledigt** | [#143](https://github.com/hjorven/hafenmeister/pull/143) [#232](https://github.com/hjorven/hafenmeister/pull/232) [#235](https://github.com/hjorven/hafenmeister/pull/235) |
 | [P19](https://hjorven.github.io/hafenmeister/roadmap/#paket=P19) | Ruf schwerer machen mit Wünschen je Bootsart | **erledigt** | [#244](https://github.com/hjorven/hafenmeister/pull/244) [#279](https://github.com/hjorven/hafenmeister/pull/279) |
 | [P20](https://hjorven.github.io/hafenmeister/roadmap/#paket=P20) | Winter mit Inhalt füllen | teilweise | [#245](https://github.com/hjorven/hafenmeister/pull/245) [#249](https://github.com/hjorven/hafenmeister/pull/249) |
@@ -187,6 +195,7 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 |---|---|
 | [docs/plan.md](docs/plan.md) | Spielplan (gilt): Vision, Regeln, Stufen, Schiffe, Services, Steuerung, Technik, Stand und Entscheidungen |
 | [docs/roadmap.md](docs/roadmap.md) | Arbeitsliste: was fehlt, was falsch ist, was weg soll, welches Paket es erledigt |
+| [docs/arbeitsplan.md](docs/arbeitsplan.md) | Was gerade läuft, bekannte Fehler, die nächsten Pakete |
 | [docs/aenderungen.md](docs/aenderungen.md) | Was ist neu im Spiel |
 | [docs/ui/oberflaeche.md](docs/ui/oberflaeche.md) | Oberfläche und Bedienung auf allen Geräten |
 | [docs/tests.md](docs/tests.md) | Tests vor jedem Merge, Testmodus und alle Adresszusätze |

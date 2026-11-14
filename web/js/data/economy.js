@@ -76,6 +76,11 @@ export const ECONOMY = {
     XL:  { grundpreis: 120, proMeter: 4.2, naechte: [1, 3] },
     XXL: { grundpreis: 0,   naechte: [1, 1] },  // kein Liegegeld, Einnahmen je Besuch (services)
   },
+  // Größenmischung nach Plätzen (A10): Boote einer Größe kommen seltener, wenn der Hafen für sie
+  // wenige Plätze hat (wer vorher funkt, hört "für 12 m sind wir voll"). Faktor je Größe:
+  // Plätze, an die die kleinste Bootsart der Größe passt, mal auslastung, geteilt durch den Bedarf
+  // (Ankünfte am Tag mal Anteil mal mittlere Nächte); höchstens 1, mindestens `mindestens`.
+  platzMix: { auslastung: 1.0, mindestens: 0.3 },
   wunschBonus: 0.25,          // Hafengeld = proMeter * Länge (aufgerundet) * (1 + wunschBonus * erfüllte Wünsche)
 
   // Kassieren (P12). Liegegeld wird beim Anlegen fällig. vorausNaechte: Gäste zahlen bis zu so viele
