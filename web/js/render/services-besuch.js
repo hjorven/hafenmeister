@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { FARBE, box, zyl, flagge, rumpf, mat, barkasseBoot } from './services-models.js';
 import { HAFEN } from '../data/harbor.js';
-import { AUFTRITTE, RUNDFAHRTEN, liegePunkt } from '../data/besuchswege.js';
+import { AUFTRITTE, RUNDFAHRTEN, liegePunkt, BESUCH_MODELL } from '../data/besuchswege.js';
 
 const U = 0.62;
 const W = (x, y) => new THREE.Vector3(x * U, 0, -y * U);
@@ -150,7 +150,7 @@ export function initBesuche(game, services) {
   });
 
   // XXL-Modelle des Schiffs-Threads (render/boats/xxl.js: game.boatTypes.xxl), sonst eigene Modelle
-  const XXL_ID = { kreuzfahrtschiff: 'XXL1-3', korvette: 'XXL2-2', minenjagdboot: 'XXL2-1' };
+  const XXL_ID = BESUCH_MODELL;
   function xxlModell(name) {
     try {
       const alt = game.boats?.xxl?.modell?.(name);

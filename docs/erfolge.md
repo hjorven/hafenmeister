@@ -4,7 +4,7 @@ Stand: 14.11.2026. Status: gebaut (Paket P22, Roadmap: I6 Erfolge als Dinge im H
 
 ## Was der Spieler sieht
 
-**Meldung.** Ein neuer Erfolg erscheint rechts oben als kleine Meldung: Symbol (Wimpel, Pokal), fette Zeile mit dem Titel, darunter, wofür es ihn gab. Am Handy hochkant nur Symbol und Titel. Dazu ein eigener Ton (zwei Glockenschläge, beim Pokal mit Schlussakkord). Kommen mehrere zugleich (Vorspulen), fasst eine Meldung sie zusammen ("4 neue Erfolge", der Pokal vorn). Die Meldung folgt der Meldungs-Ordnung (Vorrang 30: nach Feier, Kartenwahl, Tagesabschluss, Winter, Dauerliegern, Einstieg und Tipps; vor Logbuch und Gästebuch) und wartet, bis sie dran ist. Antippen öffnet den Reiter "Erfolge" im Logbuch. Die Stufenschilder haben keine eigene Meldung, der Aufstieg wird schon groß gefeiert.
+**Meldung.** Ein neuer Erfolg erscheint im gemeinsamen Meldeplatz (unten zwischen Zeit und Bauen, am Handy hochkant über den Knöpfen) als kleine Meldung: Symbol (Wimpel, Pokal), fette Zeile mit dem Titel, darunter, wofür es ihn gab. Am Handy hochkant nur Symbol und Titel. Dazu ein eigener Ton (zwei Glockenschläge, beim Pokal mit Schlussakkord). Kommen mehrere zugleich (Vorspulen), fasst eine Meldung sie zusammen ("4 neue Erfolge", der Pokal vorn). Die Meldung folgt der Meldungs-Ordnung (Vorrang 30: nach Feier, Kartenwahl, Tagesabschluss, Winter, Dauerliegern, Einstieg und Tipps; vor Logbuch und Gästebuch) und wartet, bis sie dran ist. Antippen öffnet den Reiter "Erfolge" im Logbuch. Die Stufenschilder haben keine eigene Meldung, der Aufstieg wird schon groß gefeiert.
 
 **Logbuch, Reiter "Erfolge".** Oben der Stand ("9 von 30 Erfolgen · im Hafen: 6 Wimpel, 1 Pokal, 2 Schilder") mit Balken. Darunter sechs Gruppen: Hafenbetrieb, Gäste und Ruf, Kasse, Ausbau, Logbuch, Jahreslauf. Erreichte Erfolge stehen hell mit Tag und Stufe, neue mit "neu"; offene sind ausgegraut und zeigen ihren Fortschritt ("7 / 25"). Der Reiter trägt einen Punkt, solange es Ungelesenes gibt, und die Zahl im Menü "Logbuch" zählt die neuen Erfolge mit.
 
@@ -57,7 +57,7 @@ Erreichbarkeit: `tests/erfolge.test.mjs` spielt zwei ganze Partien (geschickter 
 
 ## Wo es mit anderen kollidieren kann
 
-- **Gemeinsamer Meldeplatz** (Handy-Oberfläche): die Meldung meldet sich mit `anmelden?.()` an; bis der Platz auf main ist, steht sie rechts oben wie Logbuch und Gästebuch.
+- **Gemeinsamer Meldeplatz** (Handy-Oberfläche): die Meldung meldet sich mit `game.meldungen.anmelden` an, der Platz bestimmt Lage und Breite (PR 282). Die alte Lage in erfolge.css gilt nur ohne Meldeplatz.
 - **Neue Stufen (Welle 6, Stufe 7 bis 20)**: die Ehrentafel hat fünf Plätze (2 bis 6). Für mehr Stufen braucht es eine zweite Tafel oder ein anderes Ding; die Liste `ERFOLGE` lässt sich erweitern, gespeichert wird nur die id.
 - **Neue Dinge bei der Deko**: die drei Stücke suchen ihren Platz nach der Tagesziel-Deko; je mehr dort steht, desto weiter wandern sie.
 - **Tagesziele/Ereignisse**: Zähler hängen an `ziel:erreicht`, `wochenziel:erreicht`, `event:end` mit `event.id === 'sturm'`. Wer diese Namen ändert, muss sie hier nachziehen.

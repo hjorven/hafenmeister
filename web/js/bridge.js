@@ -8,6 +8,7 @@ import { HAFEN, platzInWelt } from './data/harbor.js';
 import { BOAT_CATALOG } from './data/boat-catalog.js';
 import { ECONOMY } from './data/economy.js';
 import { GROSSSCHIFF_BESUCHE } from './data/services.js';
+import { besuchModelle } from './data/besuchswege.js';
 
 const BOAT_FILES = ['./data/boats/s.js', './data/boats/m.js', './data/boats/l.js', './data/boats/xl.js', './data/boats/xxl.js'];
 
@@ -463,7 +464,22 @@ export async function initBridge(game) {
   // auch der Tag der offenen Tür des Marinestützpunkts zählt). Einziger Zähler: state.bigVisits.
   game.on('services:besuch', (b = {}) => {
     if (GROSSSCHIFF_BESUCHE.includes(b.art)) dispatch(sim.addBigVisit(state, ctx));
+    // Die Besuchsschiffe kommen ins Logbuch (sie legen nicht über die Spielregeln an)
+    for (const m of besuchModelle(b.id)) sichten(m);
   });
+  // Schiffe, die man sieht, ohne dass sie über die Spielregeln anlegen: Logbuch-Eintrag "gesichtet"
+  // (Großschiffe im Verkehr vor dem Hafen, render/boats/verkehr.js; Seenotkreuzer an der Station)
+  function sichten(modelId) {
+    const typeId = ctx.types.find((t) => t.models?.some((m) => m.id === modelId))?.id;
+    if (typeId) dispatch(sim.logbookSighting(state, ctx, typeId, modelId));
+  }
+  game.on('verkehr:gesichtet', (d = {}) => { if (/^XXL/.test(d.modell ?? '')) sichten(d.modell); });
+  // Seenotretter-Station: ab ihrer zweiten Stufe liegt dort der 20-m-Seenotkreuzer (render/services-models.js)
+  const seenotKreuzer = () => { if ((game.services?.stufeVon?.('seenotretter') ?? 0) >= 2) sichten('XXL3-1'); };
+  game.on('services:gebaut', (e = {}) => { if (e.id === 'seenotretter') seenotKreuzer(); });
+  game.on('ready', () => setTimeout(seenotKreuzer, 0));
+  game.on('sim:dayStart', seenotKreuzer);
+  game.on('spielstand-geladen', () => setTimeout(seenotKreuzer, 0));
   // Hafenmeister-Rundgang am Abend (render/people.js): Wer noch nicht bezahlt hat, zahlt jetzt (vier Fünftel kommen an)
   game.on('hafenmeister:halt', (d = {}) => {
     const id = boatIdOf(d.boot ?? d.id);

@@ -66,6 +66,11 @@ export function init(game) {
     return { group, types, groesse: g, id };
   }
 
+  // Großschiffe vor dem Hafen kommen als "gesichtet" ins Logbuch (bridge.js), sobald sie losfahren
+  function gesichtet(b) {
+    if (/^XXL/.test(b.modell)) game.emit('verkehr:gesichtet', { modell: b.modell });
+  }
+
   function anmelden(gebaut) {
     const anim = addBoat(game, gebaut.group, {
       id: gebaut.group.uuid,
@@ -200,6 +205,7 @@ export function init(game) {
       return false;
     }
     b.typ = 'meer';
+    gesichtet(b);
     const pts = [w.start, ...w.punkte];
     const { p, dir, weiter } = aufWeg(pts, fortschritt);
     b.anim.place(p.x, p.z, Math.atan2(-dir.z, dir.x));
@@ -241,6 +247,7 @@ export function init(game) {
     const b = anmelden(gebaut);
     b.typ = 'meer';
     b.bahn = bahn;
+    gesichtet(b);
     // Jedes Boot fährt die Bahn mit eigenem seitlichem Versatz, nicht alle auf derselben Linie
     const pts = versetzt(bahn.pts, -Math.random() * (bahn.versatz ?? VERSATZ_MAX));   // nach rechts, weg von der Gegenbahn
     const { p, dir, weiter } = aufBahn(pts, fortschritt);
