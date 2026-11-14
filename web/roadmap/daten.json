@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "d41221c"
+  "commit": "7befb73"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -489,9 +489,11 @@
    "id": "P19",
    "titel": "Ruf schwerer machen mit Wünschen je Bootsart",
    "inhalt": "Ü17, feeFactor, arrivalWeight, Kapazität sichtbar",
-   "thread": "Teil 1 erledigt (B7, C2, C3, C4, C6, F8, ruf.md); Teil 2 offen: C5, Kapazität sichtbar, B9",
+   "thread": "erledigt: Teil 1 (PR 244: B7, C2, C3, C4, C6, F8), Teil 2 (C5, B9, \"heute voll\"), ruf.md",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    244
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "Ü17",
@@ -505,7 +507,7 @@
     "Svc F8",
     "M3"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1664,8 +1666,8 @@
   {
    "code": "Ü17",
    "text": "Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus data/boats, spürbare Kapazität",
-   "status": "teilweise",
-   "statusText": "teils erledigt (P19 Teil 1): Wünsche je Bootsart, Ruf über drei Tage, Angebote als Wünsche, ruf.md; Kapazität sichtbar in Teil 2",
+   "status": "erledigt",
+   "statusText": "erledigt (P19): Wünsche je Bootsart, Ruf über drei Tage, Angebote als Wünsche, Kapazität sichtbar (Schild am Gebäude aus P55, \"heute voll\" in der Bootskarte), ruf.md",
    "pakete": [
     "P19"
    ],
@@ -2465,8 +2467,8 @@
   {
    "code": "B9",
    "text": "Wege zählen: weit vom Sanitärhaus zählt die Dusche halb",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 2): über 120 m zählt WC oder Dusche halb, ruf.md",
    "pakete": [
     "P19"
    ],
@@ -2544,8 +2546,8 @@
   {
    "code": "C5",
    "text": "Ruf als Auszeichnung mit Namen und Zeichen im Hafen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P19 Teil 2): drei Stufen mit Namen, Wimpel am Hafenmeisterhaus",
    "pakete": [
     "P19"
    ],
@@ -4288,8 +4290,8 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 11,
-    "teilweise": 3,
+    "erledigt": 12,
+    "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
     "offen": 1,
@@ -4410,8 +4412,8 @@
   }
  ],
  "gesamt": {
-  "erledigt": 21,
-  "teilweise": 7,
+  "erledigt": 22,
+  "teilweise": 6,
   "arbeit": 3,
   "frage": 0,
   "offen": 49,
@@ -4419,11 +4421,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 130,
-  "teilweise": 7,
+  "erledigt": 133,
+  "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 81,
+  "offen": 79,
   "entfaellt": 0,
   "alle": 219
  },
@@ -4923,6 +4925,20 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "P19 Teil 2: Wege zählen, Auszeichnung des Hafens, \"heute voll\" in der Bootskarte",
+   "pr": 279,
+   "pakete": [
+    "P19"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Tagesziel klappt nicht mehr auf, \"Als Nächstes\" eine Zeile und nur kurz",
+   "pr": 277,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "P55 L2: Schlange vor der Versorgung, wenn sie knapp oder voll ist",
    "pr": 275,
    "pakete": [
@@ -4994,18 +5010,6 @@
    "pakete": [
     "P66"
    ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Handy: Hilfe aufklappbar, Einstellungen kompakt, Baumenü niedriger",
-   "pr": 267,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "GitHub Actions absichern: Rechte je Job, SHAs, Secret-Scan (Audit C07)",
-   "pr": 264,
-   "pakete": []
   }
  ]
 }
