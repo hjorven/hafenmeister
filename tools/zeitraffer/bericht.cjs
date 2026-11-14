@@ -18,7 +18,7 @@ const ART = {
   land: 'Boot fährt über Land (Strand, Gelände)',
   steg: 'Boot fährt durch Steg oder Kai',
   fest: 'Boote stecken ineinander fest',
-  ueberlapp: 'Zwei liegende Boote überlappen',
+  ueberlapp: 'Boote überlappen (beide liegend, oder kurz in Fahrt ohne festzustecken)',
   haengt: 'Boot hängt (fährt, bewegt sich aber nicht)',
   sim: 'Spielregeln: Zustand hängt oder Geld falsch',
 };

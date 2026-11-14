@@ -62,7 +62,7 @@ Ein einfacher Bot über `game.sim` und `game.services`, wie der Spielertyp "gesc
 | Boot über Land | Mindestens 2 von 7 Rumpfpunkten (85 % der Größe) liegen laut `game.landschaft.istWasser` auf Land |
 | Boot durch Steg | Strahl von oben trifft `game.stege.group` an einem Rumpfpunkt (ein Punkt ist beim Festmachen erlaubt) |
 | Boote ineinander fest | Rümpfe überlappen und eines steht seit 30 Spielsekunden still, obwohl es fährt |
-| Liegende Boote überlappen | Zwei festgemachte Boote überlappen |
+| Boote überlappen | Zwei festgemachte Boote überlappen ("liegend"), oder zwei Boote berühren sich kurz in Fahrt, ohne festzustecken ("in Fahrt berührt", mit `+durchlass`, wenn eines gerade durchgelassen wird). Die Übersicht zählt beides getrennt |
 | Boot hängt | Boot ist in Fahrt, bewegt sich aber seit 5 Spielminuten nicht |
 | Spielregeln | Boot wartet, kommt aber 400 Spielsekunden lang nicht an der Boje an; Box bleibt nach der Abfahrt 400 Spielsekunden belegt; Geld keine Zahl oder negativ |
 | Aufstieg und Geld | Tag jedes Aufstiegs gegen die Erwartung aus `tools/balance.mjs`, fehlgeschlagene Käufe, Geldverlauf |
