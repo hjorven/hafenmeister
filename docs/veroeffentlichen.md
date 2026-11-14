@@ -29,7 +29,7 @@ Die Seite liegt in einem Unterordner (`/hafenmeister/`), nicht im Hauptverzeichn
 | `"start_url": "./"`, `"scope": "./"` im Manifest | `"start_url": "/"` | sonst startet die installierte App ins Leere |
 | Dateinamen genau so schreiben, wie sie heißen | `Main.js` statt `main.js` | Pages unterscheidet Groß- und Kleinschreibung, Windows nicht |
 
-Externe Bibliotheken per CDN mit fester Version (z.B. Three.js über die Import-Map) sind in Ordnung. Ein Build-Schritt ist nicht nötig.
+Bibliotheken liegen im Spiel selbst, nicht auf einem CDN (P61): Three.js steht in `web/vendor/three-<Version>/` und wird über die Import-Map mit `./vendor/...` eingebunden (Ziele in der Import-Map müssen mit `./` oder `../` beginnen). Aktualisieren: Version in `tests/package.json` ändern, `npm install` im Ordner `tests/`, dann `bash tools/three-holen.sh` und die Import-Maps nachziehen. `tests/offline.test.mjs` prüft das. Ein Build-Schritt für das Spiel ist nicht nötig; `tools/build-pages.sh` schreibt nur zusätzlich `offline-liste.json` (alle Spieldateien für den Offline-Start).
 
 Der Workflow prüft das vor jeder Veröffentlichung mit `tools/check-pages.sh` und bricht bei Fehlern ab.
 
