@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "30844ad"
+  "commit": "57fa0eb"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -509,7 +509,7 @@
    "id": "P20",
    "titel": "Winter mit Inhalt füllen",
    "inhalt": "Ü19, F14, F15, docs/ereignisse.md",
-   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, docs/winter.md); offen: F15, H5 Krantage, G5 mit dem Balancing",
+   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, docs/winter.md); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing",
    "welle": 2,
    "prs": [
     245
@@ -1908,12 +1908,14 @@
   {
    "code": "F15",
    "text": "Krantage: Dauerlieger sichtbar ins Winterlager und zurück",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 245)",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "Hafenleben"
   },
   {
@@ -3057,11 +3059,13 @@
    "code": "H5",
    "text": "Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land",
    "status": "offen",
-   "statusText": "offen",
+   "statusText": "teilweise (PR 245): im Winter im Winterlager; Segelmacher und Kran in der Saison offen",
    "pakete": [
     "P20"
    ],
-   "prs": [],
+   "prs": [
+    245
+   ],
    "abschnitt": "H Dauerlieger, Stammgäste und Tagestörn"
   },
   {
@@ -4384,11 +4388,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 111,
+  "erledigt": 112,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 98,
+  "offen": 97,
   "entfaellt": 0,
   "alle": 217
  },

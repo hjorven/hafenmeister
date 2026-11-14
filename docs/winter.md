@@ -1,6 +1,6 @@
 # Winter
 
-Stand: 14.11.2026 (Roadmap-Paket P20, erster Teil: G4, F14, I10, Ü19). Code: `web/js/features/winter.js`, Aussehen: `web/css/winter.css`, Zahlen: `ECONOMY.winterarbeiten` in `web/js/data/economy.js`, Tests: `tests/winter.test.mjs`, `tests/specs/winter.spec.mjs`.
+Stand: 14.11.2026 (Roadmap-Paket P20: G4, F14, F15, I10, Ü19, Teil von H5). Code: `web/js/features/winter.js`, Aussehen: `web/css/winter.css`, Zahlen: `ECONOMY.winterarbeiten` in `web/js/data/economy.js`, Tests: `tests/winter.test.mjs`, `tests/specs/winter.spec.mjs`.
 
 Eine Saison hat 30 Spieltage, danach kommen 3 Wintertage ohne Gäste. Bisher hat man den Winter nur vorgespult. Jetzt ist er die Zeit zum Planen.
 
@@ -30,6 +30,15 @@ Preise je Ausbaustufe in `ECONOMY.winterarbeiten` (Stufe 1: 40 bis 60 €, Stufe
 
 Neuer Hook in `sim.js`: `rating` fn({ ctx, boat }) gibt Anker zurück, die zur Platzart einer Bewertung dazukommen. Er wirkt auch in der Vorschau beim Zuweisen.
 
+## Krantage
+
+Am Saisonende gehen die Dauerlieger ins Winterlager (F15, H5): In der Nacht zum ersten Wintertag verlassen alle, die nicht gekündigt haben, ihre Box. Morgens legen sie nacheinander ab (gemeinsamer Ablegetakt der Boote) und fahren hinaus; die Box bleibt ihre. In der Nacht vor dem ersten Saisontag kommen sie zurück und legen morgens wieder an, noch bevor die ersten Gäste kommen. Wer gerade auf Törn ist, bleibt gleich bis zum Frühling weg. Gekündigte verlassen den Hafen wie bisher ganz.
+
+- Regeln in `features/dauerlieger.js` (Hook `night`): Platz bekommt `winterlager: true`, das Boot steht wie bei einem Törn in `p.boot`, `rueckNacht` ist der letzte Wintertag. Ereignisse `dauerAuslaufen`/`dauerEinlaufen` tragen `winterlager: true`.
+- Die Winterpause nennt, wie viele Boote im Winterlager liegen.
+- Wer im Winter einen Dauerplatz vermietet, dessen Boot bleibt bis zum Frühling im Hafen.
+- Ein gebautes Winterlager zeigt Boote auf Böcken unter Planen, der Travellift hebt Boote (beides aus `render/services-models.js`).
+
 ## Spielstand
 
 `state.modules.winter = { auftraege: [{ id, steg?, fuer, kosten, name }], gesehen, fruehling }`. `fuer` ist die Saison (Jahr), in der ein Auftrag wirkt; der Frühling räumt ältere weg. `gesehen` und `fruehling` merken, für welches Jahr die Karten schon kamen. Ältere Spielstände ohne Eintrag brauchen keine Umstellung. Wer einen Spielstand mitten im Winter lädt, bekommt die Karte einmal.
@@ -48,5 +57,5 @@ Neuer Hook in `sim.js`: `rating` fn({ ctx, boat }) gibt Anker zurück, die zur P
 
 ## Noch offen in P20
 
-- F15, H5: Krantage, Dauerlieger sichtbar ins Winterlager und zurück, im Winter an Land.
+- H5, zweiter Teil: Dauerlieger nutzen Segelmacher und Kran auch in der Saison.
 - G5: Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind); das sind Zahlen und kommt mit dem Balancing nach dem Stau-Fix der Boote.

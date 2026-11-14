@@ -271,6 +271,7 @@ export async function init(game) {
     const ziel = api.canAdvanceStage?.();
     const dauer = Object.values(s.modules?.dauer?.plaetze || {});
     const vertraege = dauer.filter((p) => !p.kuendigung).length;
+    const imLager = dauer.filter((p) => p.winterlager && p.boot).length;
     const winterTag = sim.season(s, c).day - c.rules.seasonDays;
     const bilanz = b.tage ? el('div', { class: 'hm-wi-block' },
       el('h3', { text: `Saison ${b.jahr}` }),
@@ -300,13 +301,16 @@ export async function init(game) {
       el('h3', { text: 'Nächste Saison' }),
       ziel?.goal ? zeile('Nächster Ausbau', ziel.goal.name ?? 'Hafen erweitern') : null,
       vertraege ? zeile('Dauerlieger mit Vertrag', String(vertraege)) : null,
+      imLager ? zeile('Im Winterlager', `${imLager} ${imLager === 1 ? 'Boot' : 'Boote'}, zurück zum Saisonbeginn`, 'leise') : null,
       zeile('Winter', `Tag ${winterTag} von ${c.rules.winterDays}`, 'leise'),
     );
     karte.replaceChildren(
       el('div', { class: 'hm-wi-kopf' },
         el('h2', { id: 'hm-wi-titel', text: `Winterpause, Jahr ${jahr()}` }),
         el('button', { type: 'button', class: 'hm-wi-zu', 'aria-label': 'Schließen', onclick: schliessen, text: '×' })),
-      el('p', { class: 'hm-wi-leise', text: 'Keine Gäste bis zum Frühling. Zeit, Bilanz zu ziehen und die nächste Saison vorzubereiten.' }),
+      el('p', { class: 'hm-wi-leise', text: imLager
+        ? 'Keine Gäste bis zum Frühling, die Dauerlieger sind im Winterlager. Zeit, Bilanz zu ziehen und die nächste Saison vorzubereiten.'
+        : 'Keine Gäste bis zum Frühling. Zeit, Bilanz zu ziehen und die nächste Saison vorzubereiten.' }),
       bilanz, arbeiten, naechste,
       el('div', { class: 'hm-wi-knoepfe' },
         el('button', { type: 'button', class: 'hm-knopf hm-primaer hm-px hm-wi-ja', onclick: ueberspringe, text: 'Winter überspringen' }),
