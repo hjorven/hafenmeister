@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "325ad88"
+  "commit": "65d4aea"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -127,7 +127,7 @@
    "id": "P04",
    "titel": "Abschlussziel Stufe 6 richtig zählen",
    "inhalt": "Ü4",
-   "thread": "erledigt (PR 113): ein Zähler state.bigVisits in bridge.js",
+   "thread": "erledigt (PR 139): ein Zähler state.bigVisits, Liste GROSSSCHIFF_BESUCHE in data/services.js (Vorarbeit PR 113)",
    "welle": 1,
    "prs": [
     113,
@@ -145,7 +145,7 @@
    "id": "P05",
    "titel": "Boote auf wegfallenden Plätzen regeln",
    "inhalt": "Ü5",
-   "thread": "bestehend: \"Spielregeln ohne Grafik umsetzen\"",
+   "thread": "erledigt (Ü5: advanceStage, Hook stageUp, Test in tests/dauerlieger.test.mjs); bestehend: \"Spielregeln ohne Grafik umsetzen\"",
    "welle": 1,
    "prs": [
     143,
@@ -195,9 +195,11 @@
    "id": "P07",
    "titel": "Tempo einheitlich regeln",
    "inhalt": "Ü7, Hilfetexte, docs/schiffsanimationen.md",
-   "thread": "bestehend: \"Gesamte Oberfläche neu überarbeiten\"",
+   "thread": "erledigt (Ü7, Tempo bleibt mit PR 257); bestehend: \"Gesamte Oberfläche neu überarbeiten\"",
    "welle": 1,
-   "prs": [],
+   "prs": [
+    257
+   ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
    "punkte": [
     "Ü7",
@@ -4996,14 +4998,14 @@
  ],
  "neueBilder": [
   45,
-  44,
   43,
-  42,
   41,
-  40,
   39,
   38,
-  37
+  37,
+  36,
+  34,
+  32
  ],
  "merges": [
   {

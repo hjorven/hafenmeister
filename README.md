@@ -41,12 +41,12 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 
 <table><tr>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P19"><img src="web/roadmap/bilder/p19-pr244-pc-wuensche-bootsart.jpg" alt="Wünsche je Bootsart auf der Ankunftskarte" width="100%"></a><br><sub>P19 · Wünsche je Bootsart auf der Ankunftskarte · PR 244</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P19"><img src="web/roadmap/bilder/p19-pr244-handy-gaestebuch-ruf.jpg" alt="Ruf schwerer: Gästebuch zeigt, was Gästen gefehlt hat" width="100%"></a><br><sub>P19 · Ruf schwerer: Gästebuch zeigt, was Gästen gefehlt hat · PR 244</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P55"><img src="web/roadmap/bilder/p55-pr269-pc-geduldsring.jpg" alt="Geduldsring und Wünsche an der Boje" width="100%"></a><br><sub>P55 · Geduldsring und Wünsche an der Boje · PR 269</sub></td>
-</tr><tr>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P55"><img src="web/roadmap/bilder/p55-pr269-handy-geduldsring.jpg" alt="Geduldsring über wartenden Booten" width="100%"></a><br><sub>P55 · Geduldsring über wartenden Booten · PR 269</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P21"><img src="web/roadmap/bilder/p21-pr274-handy-steckbrief.jpg" alt="Logbuch: Steckbrief eines Bootes" width="100%"></a><br><sub>P21 · Logbuch: Steckbrief eines Bootes · PR 274</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P21"><img src="web/roadmap/bilder/p21-pr274-pc-logbuch-album.jpg" alt="Logbuch: Sammelalbum aller Boote mit Pixelbildern" width="100%"></a><br><sub>P21 · Logbuch: Sammelalbum aller Boote mit Pixelbildern · PR 274</sub></td>
+</tr><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P66"><img src="web/roadmap/bilder/p66-pr262-zonen-und-seewege.jpg" alt="Zonen des Geländes und Seewege für die Wegsuche der Boote" width="100%"></a><br><sub>P66 · Zonen des Geländes und Seewege für die Wegsuche der Boote · PR 262</sub></td>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P07"><img src="web/roadmap/bilder/p07-pr257-handy-weiter-mit-3x.jpg" alt="Tempo bleibt: Knopf &quot;Weiter mit 3x&quot; mit Grund" width="100%"></a><br><sub>P07 · Tempo bleibt: Knopf &quot;Weiter mit 3x&quot; mit Grund · PR 257</sub></td>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P20"><img src="web/roadmap/bilder/p20-pr249-pc-winterpause.jpg" alt="Winterpause am PC: Saisonbilanz, Winterarbeiten, Winter überspringen" width="100%"></a><br><sub>P20 · Winterpause am PC: Saisonbilanz, Winterarbeiten, Winter überspringen · PR 249</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (2 von 5 erledigt)</summary>
@@ -71,7 +71,7 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 | [P04](https://hjorven.github.io/hafenmeister/roadmap/#paket=P04) | Abschlussziel Stufe 6 richtig zählen | **erledigt** | [#113](https://github.com/hjorven/hafenmeister/pull/113) [#139](https://github.com/hjorven/hafenmeister/pull/139) |
 | [P05](https://hjorven.github.io/hafenmeister/roadmap/#paket=P05) | Boote auf wegfallenden Plätzen regeln | **erledigt** | [#143](https://github.com/hjorven/hafenmeister/pull/143) [#232](https://github.com/hjorven/hafenmeister/pull/232) |
 | [P06](https://hjorven.github.io/hafenmeister/roadmap/#paket=P06) | Eine Quelle für alle Zahlen und echte Regeltests | **erledigt** |  |
-| [P07](https://hjorven.github.io/hafenmeister/roadmap/#paket=P07) | Tempo einheitlich regeln | **erledigt** |  |
+| [P07](https://hjorven.github.io/hafenmeister/roadmap/#paket=P07) | Tempo einheitlich regeln | **erledigt** | [#257](https://github.com/hjorven/hafenmeister/pull/257) |
 | [P08](https://hjorven.github.io/hafenmeister/roadmap/#paket=P08) | Doku auf den Stand bringen | **erledigt** | [#144](https://github.com/hjorven/hafenmeister/pull/144) [#177](https://github.com/hjorven/hafenmeister/pull/177) |
 | [P09](https://hjorven.github.io/hafenmeister/roadmap/#paket=P09) | Speicherplätze und Neues Spiel | **erledigt** | [#150](https://github.com/hjorven/hafenmeister/pull/150) |
 | [P54](https://hjorven.github.io/hafenmeister/roadmap/#paket=P54) | Ausfahrende Boote weichen wartenden Booten aus | entfällt |  |
