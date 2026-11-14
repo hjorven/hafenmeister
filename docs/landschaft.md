@@ -82,6 +82,17 @@ Die Kaifläche (`KAIFLAECHE`, x -150 bis 202, y -92 bis 6) schüttet der Ausbau 
 
 **Welche Form gilt:** `?gelaende=N&seed=S` in der Adresse (nur ansehen), sonst die im Spielstand (`modules.gelaende = { nr, seed }`), in Tests und ohne Browser Typ 1 mit Seed 1, in einem neuen Spiel Typ und Seed zufällig. Ältere Spielstände ohne Seed bekommen Seed 1. Im Spiel: `game.gelaende.aktuell()` (`{ nr, name, idee, seed, dreh, leuchttuerme, quelle }`), `game.gelaende.formen`. Einen Typ entfernen: seinen Eintrag aus `TYPEN` in `natur.js` löschen; Spielstände mit dieser Nummer bekommen Typ 1.
 
+## Zonen und Seezugänge (für die Wegsuche der Boote)
+
+`web/js/render/landschaft/zonen.js` (reines JS) sagt für jede Stelle, was sie ist. Im Spiel unter `game.gelaende`:
+
+- `game.gelaende.zonen(stufe)` liefert ein Raster `{ x0, y0, nx, ny, schritt, schrittM, zone, tiefe, bei(x, z), name(x, z), flaecheM2 }` über Hafen, Revier und Reede (Zelle 1,24 m). `game.gelaende.zone(x, z)` schlägt einen Weltpunkt darin nach (ein Feldzugriff). Außerhalb des Rasters gibt es nur Land oder See.
+- Zonen (`game.gelaende.ZONE`, Namen in `ZONE_NAME`), in dieser Rangfolge: `LAND`, `FLACH` (unter 1 m), `STEG` (Planken plus 1,5 m Sicherheitsabstand), `LIEGEPLATZ` (Box), `BOJEN` (Schwoikreis plus 2 m), `ANKER` (Ankerfeld), `DURCHFAHRT` (Engpass), `BECKEN` (Hafenwasser hinter der Durchfahrt, höchstens 260 m weit), `BINNEN` (anderes geschütztes Wasser), `SEE` (offene See).
+- Stege und Boxen kommen aus `HAFEN` zum Aufrufzeitpunkt (also mit dem aktuellen Stegbild), Bojen und Ankerfelder aus `game.landscape.warteplaetze`. Das Raster wird neu gebaut, sobald sich Stufe, Revier, Küste, Stegbild oder Warteplätze ändern.
+- `game.gelaende.seezugaenge(stufe, { tiefeM })` liefert Punkte auf See **außerhalb des Außenrings**, den keine Zoomstufe zeigt, rund um die Karte: `{ id, richtung, grad, x, z, laengeM, tiefeM, umweg, aufKarte, weg }`. `weg` führt nur über Wasser (mindestens `tiefeM` tief, Standard 2,5 m) bis vor die Einfahrt (`festePunkte(stufe).einfahrt.aussen`), sortiert nach Länge. `umweg` heißt: der Weg führt außen um das Land herum. In flachen Revieren (Bodden, Watt) wird die Tiefe auf 1,5 oder 1,0 m gesenkt und in `tiefeM` gemeldet. Ist ein Bodden ganz geschlossen, liegen die Zugänge in den fernsten Ecken des Binnenwassers (`aufKarte: true`).
+- Beide Rechnungen kosten beim ersten Aufruf 0,2 bis 0,6 s und werden gemerkt; am besten beim Laden einmal aufrufen.
+- Prüfung: `tests/zonen.test.mjs` (alle zehn Küstentypen). Bild: `/mnt/project-files/gelaende/vorschau/zonen/zonen-und-seewege.png`.
+
 **Rechenzeit:** `bauen()` vermisst die Karte zweimal (Ufer und offene See). Dafür genügt das Vorzeichen der Landigkeit; fern vom Hafen entscheidet `pflichtZeichen` es ohne die Pflichtbereiche auszurechnen. Das Ergebnis ist bitgenau dasselbe (350 Seeds verglichen), die Küstenberechnung braucht rund 37 Prozent weniger Zeit.
 
 **Prüfung:** `tests/gelaendeform.test.mjs` prüft alle Typen in beiden Revieren und ein paar Seeds je Typ (Engpass, Fahrwasser, Bojen, Ankerplätze, Liegeplatztiefen, Leuchttürme an Land, Wellenbrecher, Menschenwege an Land). Für viele Seeds:
