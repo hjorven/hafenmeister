@@ -21,11 +21,9 @@ Stand 14.11.2026, 21:15 UTC.
 |---|---|---|---|---|
 | Boote: Wartebojen neben den Stegen, Anfahrt von weit draußen, Stau im Becken | "Staus an Bojen und Ankerfeld auflösen" | P66 | PR seit 11 Uhr offen, muss fertig werden | 280 |
 | Gelände: Seewege, Seegatt für geschlossene Bodden | "Geländeform und Engpass neu bauen" | P62 | läuft | - |
-| Ereignisse Teil 2: neue Ereignisse (G3, F17) | "Ereignisse Sturm und Regatta einbauen" | P24 | Teil 1 gemergt (PR 281), Teil 2 läuft | - |
-| Ruhige Handy-Oberfläche: ein Meldeplatz | "Handy-Oberfläche neu und ruhig gestalten" | P07 (Folge) | PR offen | 282 |
-| Anmeldung per Funk | "Anmeldung per Funk einbauen" | P28 | erledigt | 288 |
-| Merges und Seitenbau beschleunigen | eigener Thread | Werkzeug | PR offen | 294 |
 | Schicht-Test, Feature-Test, Zeitraffer, Roadmap-Seite, Kamera | Prüf- und Pflege-Threads | - | laufen | 251, 296 |
+
+Seit 21:15 gemergt: ruhige Oberfläche mit einem Meldeplatz (PR 282), P28 Funk-Anmeldung (PR 288), P24 Teil 2 neue Ereignisse (PR 299), Zeitraffer-Pulk (PR 251), Pages gebündelt (PR 294), Folgefunde Einzeltest (PR 301).
 
 Seit 11:30 gemergt: A10 große Boote nach Platzangebot (PR 287), Fehler aus Jorvens Feature-Test (PR 290), P22 Erfolge (PR 295), Offline-Folge (PR 292), Auszeichnung im Gästebuch (PR 291), README und Plan (PR 289).
 
@@ -58,7 +56,7 @@ Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tem
 | 3 | **P28 Funk-Anmeldung** | erledigt (PR 288, `docs/funk-anmeldung.md`) | - | `ui/vorschau.js`, `sim.js`, Meldeplatz (PR 282) |
 | 4 | **P41 Statistik und Saisonbilanz** (neu) | nutzt die vorhandenen Daten (`state.stats.verlauf`, Einnahmen nach Quelle); fast nur eigene Dateien | - | Tagesabschluss-Tafel, Winterkarte (Saisonbilanz dort ergänzen statt doppeln) |
 | 5 | **P26 Überraschende Gesten** (neu) | Hafenhorn, Fernglas mit Steckbrief, Möwen, Glocke: macht den Hafen lebendig, berührt kaum Regeln | - | `audio.js`, Gesten (`ui/gesten.js`), Fotomodus |
-| 6 | **P24 Ereignisse Teil 2** (läuft) | neue Ereignisse F17 | - | Meldeplatz (PR 282) |
+| 6 | **P24 Ereignisse Teil 2** (erledigt, PR 299) | neue Ereignisse F17 | - | Meldeplatz (PR 282) |
 | 7 | **P27 Päckchen liegen** | voller Hafen wird zur Entscheidung | 1 | `sim.js`, `boat-view.js`, Wegsuche |
 | 8 | **P20-Rest Winter** (H5, G5) | Kernschleife über das Jahr fertig | 2 | `winter.js`, `economy.js` |
 | 9 | **P23 Services mit eigener Wirkung** | macht Stufe 4 bis 6 tiefer | 2 (Zahlen) | `render/services.js`, `data/services.js` |
@@ -69,6 +67,32 @@ Danach geht es weiter wie in [Abschnitt 5](#5-alles-weitere-bis-zum-ende) beschr
 **Startregel:** Jetzt starten: 2, 4, 5; 3 wieder aufnehmen; 1 zu Ende bringen. 7 und 10 nach 1, 8 und 9 nach 2. Nie zwei Threads gleichzeitig an `economy.js`. Alle neuen Meldungen gehen über den einen Meldeplatz aus PR 282.
 
 ---
+
+## 3a. Welle 0 abschließen und danach das Zusammenspiel prüfen
+
+**Wann ist Welle 0 fertig?** P63 und P65 sind erledigt, P64 (Umgebung je Küstentyp) ist mit PR 204, 211, 216 fertig, der Thread ist geschlossen. Offen sind:
+
+1. P66: PR 280 (Wartebojen neben den Stegen, Anfahrt von weit draußen) gemergt.
+2. P62: Thread "Geländeform und Engpass neu bauen" meldet seine letzte Arbeit (Seegatt für geschlossene Bodden) als gemergt.
+3. Abnahme laut Roadmap Abschnitt 14: eine Zeitraffer-Serie über alle 10 Küstentypen, PC und Handy, auf dem Stand nach 1 und 2. Grenze: kein Boot dauerhaft über Land oder durch Stege, keine Boote ineinander fest länger als ein paar Sekunden. Erst dann steht P62, P64, P66 in der Roadmap auf "erledigt".
+
+Der Planungs-Thread meldet dem Koordinator, sobald alle drei Punkte erfüllt sind.
+
+**Danach: Zusammenspiel-Prüfung (Jorven, 14.11. abends).** Drei Threads gleichzeitig, je Bereich einer. Ein einzelner Thread bräuchte für alles zu lange; drei getrennte Bereiche teilen kaum Dateien. Alle drei schreiben in eine gemeinsame Datei `docs/zusammenspiel.md` (je Bereich ein eigener Abschnitt, damit es keine Konflikte gibt). Grundlage sind die Ergebnisse der Threads "Spiel Schicht für Schicht von Grund auf testen" und "Ganzes Spiel im Zeitraffer durchtesten", damit nichts doppelt geprüft wird.
+
+| Thread | Bereich | Was geprüft wird |
+|---|---|---|
+| Zusammenspiel 1: Kernschleife und Regeln | Ankunft, Warten, Zuweisen, Selbst-Einfahren, Funk-Anmeldung, Wünsche, Liegegeld, Kassieren, Ruf und Bewertung, Hafenbüro, Dauerlieger, Stammgäste, Tagesziele, Tagesabschluss, Aufstieg, Bauen, Winter, Speichern und Laden | Alle Punkte der Welle 1 (P01 bis P09, P54) und der Welle 2 (P10 bis P22) einzeln am laufenden Spiel nachweisen: Was die Roadmap als erledigt führt, muss im Spiel so passieren. Dazu: Stufe 1 bis 6 durchspielen und zählen, wie oft jede Regel greift. |
+| Zusammenspiel 2: Oberfläche und Geräte | Handy hoch und quer, Tablet, PC; Meldeplatz, Einstieg, Hilfe, Einstellungen, Tempo, Bauen-Menü, Logbuch, Erfolge, Gästebuch, Fotomodus, Offline-Start | Jede Taste und jede Tafel auf jedem Gerät; nichts verdeckt etwas anderes; jeder Text stimmt mit dem, was passiert; nichts in Hilfe, Einstieg oder Doku, das es nicht gibt. |
+| Zusammenspiel 3: Welt, Boote, Ereignisse | 10 Küstentypen, 12 Stegbilder, Bootswege, Großschiffe und Services-Besuche, Ereignisse (Sturm, Regatta, Hanse-Woche, Mittsommer, Heringstage), Wetter, Tag und Nacht, Leistung am Handy | Jede Kombination aus Küstentyp und Stegbild einmal; jedes Ereignis einmal ausgelöst und vorbereitet; Bildrate je Wetter. |
+
+**Was jeder der drei Threads liefert:**
+
+- **Alle Features noch da:** eine Liste aller Features aus `roadmap.md` (Abschnitte 7 bis 9, Status "erledigt"), `docs/aenderungen.md` und `plan.md`; je Feature: im Spiel gesehen ja oder nein, mit Bild.
+- **Neue Features werden genutzt:** je Feature, ob es in einem normalen Spiel ohne Testadresse überhaupt vorkommt (zum Beispiel: Wie oft meldet sich ein Boot per Funk? Wird ein Erfolg in den ersten 30 Tagen erreicht? Kommt jedes Ereignis in einer Saison vor?). Ein Feature, das nie vorkommt, ist ein Fund.
+- **Welle 1 wirklich gefixt:** je Punkt Ü1 bis Ü7, C01 bis C07 und T1 bis T13 ein Nachweis im Spiel.
+- **Übersehen:** alles, was auffällt und in keiner Liste steht.
+- Kleine Funde beheben die Threads selbst, je Fund ein PR. Größere Funde kommen mit Priorität in Abschnitt 2 dieses Plans.
 
 ## 4. Berührungspunkte, auf die alle achten
 
@@ -171,6 +195,7 @@ Schon erledigt aus Jorvens Vorschlägen: F14, F15, F18, F26, F27 (Grundgerüst),
 
 | Datum | Änderung |
 |---|---|
+| 14.11.2026, 22:00 Uhr | P28, P24 Teil 2, ruhige Oberfläche gemergt; Abschnitt 3a: wann Welle 0 fertig ist und Zusammenspiel-Prüfung in drei Threads danach. |
 | 14.11.2026, 21:15 Uhr | A10, Feature-Test-Fehler und P22 gemergt; P17 startet jetzt (Schlussmessung nach PR 280); neu: P41, P26; P28 wieder aufnehmen. |
 | 14.11.2026, 11:45 Uhr | PR 252 und P24 Teil 1 gemergt; A10, P24 Teil 2, P28 und Schicht-Test laufen; P17 startet nach PR 280 und A10 und übernimmt Ü16. |
 | 14.11.2026, 11:30 Uhr | P19, P55, P21, P61, C07 erledigt; P24 Teil 1, P22, ruhige Handy-Oberfläche und Feature-Test-Fehler laufen; Bewertungsbefund gestrichen (seit P14 behoben); neue Nr. 9 und 10: P28, P27. |
