@@ -294,7 +294,7 @@ export async function init(game) {
   game.on('sim:reservationKept', (e) => {
     if (e?.boatId == null) return;
     bonusOffen.set(e.boatId, e.amount);
-    setTimeout(() => zeigeBonus(e.boatId), 30000);
+    setTimeout(() => zeigeBonus(e.boatId), 120000);   // Rückfall, falls die Ansicht nichts meldet (lange Anfahrt von See)
   });
   function zeigeBonus(id) {
     if (!bonusOffen.has(id)) return;
