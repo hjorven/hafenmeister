@@ -57,7 +57,7 @@ Zurzeit wird das Gelände mit den Bootswegen überarbeitet (Welle 0), danach arb
 | [P63](https://hjorven.github.io/hafenmeister/roadmap/#paket=P63) | Marinebasis und Anlagen neu platzieren | in Arbeit | [#172](https://github.com/hjorven/hafenmeister/pull/172) |
 | [P64](https://hjorven.github.io/hafenmeister/roadmap/#paket=P64) | Gelände abwechslungsreicher gestalten | in Arbeit | [#204](https://github.com/hjorven/hafenmeister/pull/204) [#211](https://github.com/hjorven/hafenmeister/pull/211) [#216](https://github.com/hjorven/hafenmeister/pull/216) |
 | [P65](https://hjorven.github.io/hafenmeister/roadmap/#paket=P65) | Wetter und Effekte flüssig machen | offen |  |
-| [P66](https://hjorven.github.io/hafenmeister/roadmap/#paket=P66) | Boote ums Gelände herum führen | in Arbeit | [#180](https://github.com/hjorven/hafenmeister/pull/180) [#181](https://github.com/hjorven/hafenmeister/pull/181) [#199](https://github.com/hjorven/hafenmeister/pull/199) [#228](https://github.com/hjorven/hafenmeister/pull/228) |
+| [P66](https://hjorven.github.io/hafenmeister/roadmap/#paket=P66) | Boote ums Gelände herum führen | in Arbeit | [#181](https://github.com/hjorven/hafenmeister/pull/181) [#199](https://github.com/hjorven/hafenmeister/pull/199) [#228](https://github.com/hjorven/hafenmeister/pull/228) [#240](https://github.com/hjorven/hafenmeister/pull/240) |
 
 </details>
 

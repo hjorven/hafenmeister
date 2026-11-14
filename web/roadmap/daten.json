@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "7ddc5c4"
+  "commit": "e6634ea"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1223,14 +1223,15 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
    "welle": 0,
    "prs": [
     81,
     180,
     181,
     199,
-    228
+    228,
+    240
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -4818,6 +4819,36 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "Tests: Pixeldichte 1 außer bei Bildschirmfotos, Geräte-Ausnahmen vor dem Laden überspringen",
+   "pr": 247,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Meldungs-Ordnung: Kartenwahl wartet hinter der Feier, Tipps nie über Zeit und Bauen",
+   "pr": 241,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 233 bei P14, PR 239 bei P15, Bilder fürs erste Bauwerk (P17)",
+   "pr": 243,
+   "pakete": [
+    "P14",
+    "P15",
+    "P17"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Boote: Auslaufende mit Vorrang, Zurücksetzen statt Durchlass, gemeinsamer Ablegetakt",
+   "pr": 240,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "Tests: Zeitlimit 90 s, Warten unabhängig vom Bildtakt",
    "pr": 242,
    "pakete": []
@@ -4876,39 +4907,6 @@
    "titel": "Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich",
    "pr": 234,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Bauen: Nachbesserungen zu PR 232 (Ausbau-Fähnchen, Rückgängig am ersten Kauf, Regionsziel)",
-   "pr": 235,
-   "pakete": [
-    "P18"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Boote: Abendstau, Pulk am Eingang, Ablegetakt und Seebrücke im Fahrwasser",
-   "pr": 228,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P14: Bewertungen über dem Boot und Gästebuch",
-   "pr": 154,
-   "pakete": [
-    "P14"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Bauen P18: Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen",
-   "pr": 232,
-   "pakete": [
-    "P18",
-    "P05"
-   ]
   }
  ]
 }
