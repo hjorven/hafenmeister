@@ -1174,3 +1174,17 @@ body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis .titel { grid-column: 1
 body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis .kurz { display: block; grid-column: 1; line-height: 1.3; opacity: 0.85; }
 body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis .knoepfe { grid-column: 2; grid-row: 1 / span 3; margin: 0; }
 body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis button { min-height: 40px; padding: 0 12px; }
+
+/* Handy quer (Feature-Test PR 261/267): Einstellungen und Hilfe sind Fenster. Statt halb über Zeit, Status und Bauen
+ * zu liegen, nutzen sie die ganze Höhe; die übrige Oberfläche tritt so lange zurück (nichts liegt halb verdeckt).
+ * Passt der Inhalt nicht, zeigt ein Verlauf unten, dass es weitergeht. */
+@media (max-height: 499px) and (orientation: landscape) {
+  .hm-neu #hm-einstellungen { top: calc(var(--hm-safe-top) + 6px) !important; }
+  .hm-neu #hm-einstellungen, .hm-neu #hm-hilfe { max-height: calc(100dvh - var(--hm-safe-top) - var(--hm-safe-bottom) - 12px) !important; overflow-y: auto; }
+  .hm-neu #hm-einstellungen::after {
+    content: ""; grid-column: 1 / -1; position: sticky; bottom: -8px; display: block; height: 18px; margin-top: -18px;
+    background: linear-gradient(rgba(255, 250, 240, 0), var(--hm-papier)); pointer-events: none;
+  }
+  body.hm-neu:has(#hm-einstellungen:not([hidden])) :is(#hud-bottom, #hm-seite, #hm-meldeplatz, .hm-status),
+  body.hm-neu:has(#hm-hilfe:not([hidden])) :is(#hud-bottom, #hm-seite, #hm-meldeplatz, .hm-status) { visibility: hidden; }
+}
