@@ -154,12 +154,12 @@ export function init(game) {
   function schritt() {
     const jetzt = performance.now();
     // Während der Feier (features/aufstieg.js) sind Blasen und Meldungen ausgeblendet und ihre Zeit steht
-    const dt = jetzt - letztesBild;
+    const seitBild = jetzt - letztesBild;
     letztesBild = jetzt;
     if (document.body.classList.contains('hm-feier-an')) {
-      for (const x of blasen.values()) x.t0 += dt;
-      for (const x of meldungen.values()) x.t0 += dt;
-      for (const x of warteschlange) x.seit += dt;
+      for (const x of blasen.values()) x.t0 += seitBild;
+      for (const x of meldungen.values()) x.t0 += seitBild;
+      for (const x of warteschlange) x.seit += seitBild;
       naechsteAb = Math.max(naechsteAb, jetzt + ABSTAND);
       letzterTakt = jetzt;   // die Leiste der Meldungen zählt die Feier nicht noch einmal
       if (blasen.size || warteschlange.length || meldungen.size) requestAnimationFrame(schritt);
