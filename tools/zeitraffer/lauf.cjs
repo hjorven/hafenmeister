@@ -154,7 +154,7 @@ const PROBE = () => {
   for (const b of bs) {
     const E = ecken(b, 0.85);
     const nl = E.filter(([x, z]) => !wasser(x, z)).length;
-    if (nl >= 2) out.land.push({ id: b.id, g: b.g, st: b.st, n: nl, p: [b.x, b.z] });
+    if (nl >= 2) out.land.push({ id: b.id, g: b.g, st: b.st + ':' + (b.a.task?.constructor?.name ?? '-'), n: nl, platz: b.platz, p: [b.x, b.z] });
     const ns = E.filter(([x, z]) => steg(x, z)).length;
     if (ns >= 1 && !(b.st === 'moored' && ns === 1)) out.steg.push({ id: b.id, g: b.g, st: b.st, n: ns, platz: b.platz, p: [b.x, b.z] });
     const alt = W.stand.get(b.a); const weg = alt ? Math.hypot(alt.x - b.x, alt.z - b.z) : 99;
@@ -166,7 +166,7 @@ const PROBE = () => {
       const grund = [t?.constructor?.name ?? 'ohne', a.wartetVorEngstelle ? 'engstelle' : '', a.blocked ? 'blockiert' : '', a.yieldF < 0.05 ? 'vorfahrt' : '', t?.pivot ? 'drehen' : '', t?.constructor?.name === 'WaitTask' ? 'warten' : ''].filter(Boolean).join('+') + (a.hinderer ? ` vor ${a.hinderer.moored ? 'liegt' : a.hinderer.state ?? 'fremd'}${a.hinderer.wartetVorEngstelle ? '+engstelle' : ''}` : '');
       // Kette der Hindernisse bis zum Kopf der Schlange (fuer die Ursache)
       const kette = []; let o = a.hinderer;
-      for (let i = 0; i < 30 && o && !kette.some((k) => k.o === o); i++) { kette.push({ o, t: `${o.id}:${o.moored ? 'liegt' : o.state ?? 'fremd'}:${o.task?.constructor?.name ?? '-'}:v${(o.speed ?? 0).toFixed(1)}:y${(o.yieldF ?? 1).toFixed(2)}${o.blocked ? ':bl' : ''}${o.wartetVorEngstelle ? ':eng' : ''}${o.ghost > 0 ? ':ghost' : ''}@${Math.round(o.x)},${Math.round(o.z)}` }); o = o.hinderer; }
+      for (let i = 0; i < 30 && o && !kette.some((k) => k.o === o); i++) { kette.push({ o, t: `${o.id}:${o.moored ? 'liegt' : o.state ?? 'fremd'}:${o.task?.constructor?.name ?? '-'}:v${(o.speed ?? 0).toFixed(1)}:y${(o.yieldF ?? 1).toFixed(2)}${o.blocked ? ':bl' : ''}${o.wartetVorEngstelle ? ':eng' : ''}${o.ghost > 0 ? ':ghost' : ''}${o.task?.pivot ? ':dreht' : ''}${Number.isFinite(o.room) ? ':r' + o.room.toFixed(1) : ''}${o.task?.eng ? ':e' + o.task.eng.map((e) => (e.frei ? 'F' : e.fertig ? 'x' : '-') + e.nr).join('') : ''}${o.zurueckgesetzt ? ':z' + o.zurueckgesetzt : ''}${o.durchlaesse ? ':d' + o.durchlaesse : ''}@${Math.round(o.x)},${Math.round(o.z)}` }); o = o.hinderer; }
       out.haengt.push({ id: b.id + ' ' + grund, g: b.g, st: b.st, s: Math.round(jetzt - still), p: [b.x, b.z], kette: kette.map((k) => k.t).join(' > ') + (o && kette.some((k) => k.o === o) ? ' > KREIS' : '') });
     }
   }
@@ -178,7 +178,7 @@ const PROBE = () => {
     if (a.st === 'moored' && b.st === 'moored') out.ueberlapp.push({ a: a.id, b: b.id, g: a.g + b.g, st: 'moored', p });
     else if ((sa != null && jetzt - sa > 30) || (sb != null && jetzt - sb > 30)) out.fest.push({ a: a.id, b: b.id, g: a.g + b.g, st: a.st + '/' + b.st, p });
     // in Fahrt ineinander (sichtbar, auch wenn es sich gleich wieder loest): Pulk oder Durchlass
-    else out.ueberlapp.push({ a: a.id, b: b.id, g: a.g + b.g, st: a.st + '/' + b.st, p });
+    else out.ueberlapp.push({ a: a.id, b: b.id, g: a.g + b.g, st: a.st + '/' + b.st + (a.a.ghost > 0 || b.a.ghost > 0 ? '+durchlass' : a.a.zeitraffer || b.a.zeitraffer ? '+zeitraffer' : ''), p });
   }
   // Sim: Boot wartet, kommt aber nie an der Boje an; Box bleibt nach Abfahrt belegt
   const st = S.state; const seen = new Set();

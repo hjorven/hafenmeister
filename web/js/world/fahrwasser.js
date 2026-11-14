@@ -664,7 +664,12 @@ export function hindernisseAusHafen(hafen, stufe, o = {}) {
     const dx = sb.kopf[0] - sb.fuss[0], dy = sb.kopf[1] - sb.fuss[1];
     const lang = Math.hypot(dx, dy);
     if (lang > 0) {
-      rechtecke.push({ id: 'Seebruecke', x: ((sb.fuss[0] + sb.kopf[0]) / 2) * U, z: (-(sb.fuss[1] + sb.kopf[1]) / 2) * U, h: Math.atan2(dy, dx), l: (lang + 4) * U, b: (sb.breite ?? 14) * U, art: 'gast' });
+      // Der Kopf (Plattform 9 x 7 m, render/buildings.js) reicht 3,5 m ueber den Kopfpunkt hinaus und
+      // ist breiter als der Steg: Rechteck vom Fuss (2 m an Land) bis 4,5 m hinter den Kopfpunkt.
+      const ux = dx / lang, uy = dy / lang;
+      const hinten = 2 / U, vorn = 4.5 / U;
+      const mx = (sb.fuss[0] - ux * hinten + sb.kopf[0] + ux * vorn) / 2, my = (sb.fuss[1] - uy * hinten + sb.kopf[1] + uy * vorn) / 2;
+      rechtecke.push({ id: 'Seebruecke', x: mx * U, z: -my * U, h: Math.atan2(dy, dx), l: (lang + hinten + vorn) * U, b: Math.max(sb.breite ?? 14, 10.5 / U) * U, art: 'gast' });
     }
   }
   return { linien, rechtecke };

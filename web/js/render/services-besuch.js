@@ -339,6 +339,46 @@ export function initBesuche(game, services) {
 
   // ------------------------------------------------------------------ Barkasse
   let bark = null;
+  // Rundfahrt ueber die Fahrwasserkarte: die Punkte aus data/besuchswege.js sind nur Wunschpunkte.
+  // Liegt einer an Land oder zu flach (Gelaende aus Seed), nimmt die Barkasse den naechsten freien
+  // Punkt in bis zu 40 m; zwischen den Punkten faehrt sie den Weg aus der Karte, nie ueber Land.
+  const barkWege = new Map();
+  game.on('fahrwasser:karte', () => barkWege.clear());
+  function barkassenWeg(r, L) {
+    const key = r.name + ':' + L.x.toFixed(1) + ':' + L.z.toFixed(1);
+    if (barkWege.has(key)) return barkWege.get(key);
+    const fw = game.fahrwasser;
+    const roh = [L, ...r.weg.map(([x, y]) => W(x, y)), L];
+    if (!fw?.weg || !fw?.befahrbar) return roh;
+    const B = 4.2, T = 1.8, rad = B / 2 + 1;
+    const freiBei = (p) => {
+      if (fw.befahrbar(p.x, p.z, rad, T)) return p;
+      for (let d = 4; d <= 40; d += 4) {
+        for (let k = 0; k < 12; k++) {
+          const a = (k / 12) * Math.PI * 2;
+          const q = new THREE.Vector3(p.x + Math.cos(a) * d, 0, p.z + Math.sin(a) * d);
+          if (fw.befahrbar(q.x, q.z, rad, T)) return q;
+        }
+      }
+      return null;
+    };
+    const out = [L.clone()];
+    const ziele = roh.slice(1);
+    for (let i = 0; i < ziele.length; i++) {
+      const letzt = i === ziele.length - 1;
+      const ziel = letzt ? L : freiBei(ziele[i]);
+      if (!ziel) continue;
+      const von = out[out.length - 1];
+      if (von.distanceTo(ziel) < 2) continue;
+      const w = fw.weg({ x: von.x, z: von.z }, { x: ziel.x, z: ziel.z }, { breiteM: B, tiefgangM: T });
+      if (w?.ok && w.punkte?.length) {
+        for (const q of w.punkte.slice(1)) out.push(new THREE.Vector3(q.x, 0, q.z));
+        if (out[out.length - 1].distanceTo(ziel) > 0.5) out.push(ziel.clone());
+      } else if (letzt) out.push(L.clone());          // zurueck zum Ponton immer
+    }
+    barkWege.set(key, out);
+    return out;
+  }
   function barkasseTick(dt, tagAnteil, winter) {
     const gebaut = services.stufeVon('barkasse') > 0;
     if (!gebaut) { if (bark) bark.group.visible = false; return; }
@@ -359,7 +399,7 @@ export function initBesuche(game, services) {
     const r = winter || sturm() ? null : RUNDFAHRTEN.find((q) => tagAnteil >= q.ab && tagAnteil < q.ab + q.dauer);
     let p = L, soll = 0;
     if (r) {
-      const pts = [L, ...r.weg.map(([x, y]) => W(x, y)), L];
+      const pts = barkassenWeg(r, L);
       const u = (tagAnteil - r.ab) / r.dauer;
       // langsam ablegen und anlegen, dazwischen gleichmaessig
       const a = 0.06, vmax = 1 / (1 - a);
