@@ -155,9 +155,21 @@ function startOfflineVorrat() {
   // Kurz warten, damit das Vorladen nicht mit den ersten Bildern des Spiels um das Netz streitet
   setTimeout(() => {
     container.ready
-      .then((reg) => reg.active?.postMessage({ typ: 'vorladen' }))
+      .then((reg) => reg.active?.postMessage({ typ: 'vorladen', dateien: geladeneDateien() }))
       .catch(() => {});
   }, 3000);
+}
+
+// Alle Dateien der eigenen Seite, die in dieser Sitzung geladen wurden (Rückfall für den Service
+// Worker, wenn offline-liste.json fehlt).
+function geladeneDateien() {
+  try {
+    const basis = new URL('./', document.baseURI).href;
+    const urls = [location.href.split('?')[0], ...performance.getEntriesByType('resource').map((e) => e.name)];
+    return [...new Set(urls.filter((u) => u.startsWith(basis)))];
+  } catch {
+    return [];
+  }
 }
 
 function watchForUpdate(reg, onUpdate) {
