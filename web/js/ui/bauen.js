@@ -928,11 +928,27 @@ export function init(game) {
     buildBtn.classList.toggle('bau-punkt', !!n?.leistbar);
     const imEinstieg = !!game.einstieg?.schritt?.();
     const aus = !n || offen || buildBtn.hidden || document.body.classList.contains('card-open') || imEinstieg || document.body.classList.contains('foto') || !!game.winter?.offen?.();
-    tipp.hidden = aus;
-    if (aus) return;
+    // Jorven 14.11.: Der Hinweis verdeckte zu viel. Er ist eine Zeile und steht nur kurz, wenn ein neues
+    // Ziel dran ist (tippZiel wechselt); danach erinnert nur der Punkt am Bauen-Knopf (bau-punkt).
+    const schluessel = n?.ziel ?? n?.text ?? '';
+    if (schluessel !== tippSchluessel) {
+      tippSchluessel = schluessel;
+      clearTimeout(tippTimer);
+      tippTimer = 0;
+      tippAbgelaufen = false;
+    }
+    tipp.hidden = aus || tippAbgelaufen;
+    if (tipp.hidden) return;
+    // Die Zeit läuft erst, wenn der Hinweis wirklich zu sehen ist
+    if (!tippTimer) tippTimer = setTimeout(() => { tippAbgelaufen = true; tipp.hidden = true; }, TIPP_DAUER);
     tipp.replaceChildren(el('span', { class: 'bau-tipp-titel' }, 'Als Nächstes'), el('span', { class: 'bau-tipp-text' }, n.text));
+    tipp.title = `Als Nächstes: ${n.text}`;
     platziereTipp();
   }
+  const TIPP_DAUER = 8000;
+  let tippSchluessel = null;
+  let tippTimer = 0;
+  let tippAbgelaufen = false;
   function platziereTipp() {
     if (tipp.hidden) return;
     const b = buildBtn.getBoundingClientRect();

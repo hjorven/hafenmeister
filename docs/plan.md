@@ -119,7 +119,7 @@ Seenotrettungsboote der kleineren Klassen gehören zu L4 (Arbeits- und Behörden
 
 **Für Version 1.0** baut jeder Schiffs-Thread je Art 2 Modelle, dazu Farbvarianten. Die übrigen Modelle kommen danach. Die Modelle werden aus Teilen zusammengesetzt, siehe [Baukasten](hafen-und-schiffe.md#5-baukasten-für-die-modelle).
 
-**Grundpreise pro Nacht** (Richtwerte; was gilt, steht in `web/js/data/economy.js`)
+**Grundpreise pro Nacht** (Richtwerte; was gilt, steht in `web/js/data/economy.js`; seit B10 je angefangenem Meter Bootslänge, die Tabelle nennt den Schnitt der Klasse)
 
 | Größe | Grundpreis |
 |---|---|

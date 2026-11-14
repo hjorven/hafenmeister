@@ -350,6 +350,8 @@ export async function initBridge(game) {
     // und was ein Platz bringt: { fee, wishesMet, wishes, anchors, snug } (ohne Platz: Grundwert)
     wunschPlaetze: (boatId) => sim.wishBerths(state, ctx, boatIdOf(boatId)),
     platzWert: (boatId, berthId = null) => sim.berthValue(state, ctx, boatIdOf(boatId), berthId == null ? null : berthIdOf(berthId)),
+    // Auszeichnung des Hafens (P19 C5): { level, name, up, down, best, next, days, hold }
+    auszeichnung: () => sim.award(state, ctx.rules),
   };
   game.sim = api;
 

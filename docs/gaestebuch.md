@@ -14,6 +14,7 @@ Roadmap-Paket P14 (Ü21, F18, C1, C9). Code: `web/js/ui/gaestebuch.js` (Oberflä
 **Gästebuch.** Öffnen: Ruf oben links antippen, Menü „Gästebuch“, Hafenmeister-Haus oder Hafenbüro antippen, am PC Taste `N` (`G` schaltet 8x). Schließen: X, `Esc`, daneben tippen.
 
 - Ruf groß mit Stern, daneben der Verlauf der letzten 30 Tage als Säulen (grün ab 4, gelb ab 3, rot darunter, gestrichelte Linie bei 4).
+- Unter dem Ruf-Verlauf: die Auszeichnung des Hafens mit Wimpel und was zur nächsten Stufe fehlt (P19 C5, [ruf.md](ruf.md)).
 - „Was Gästen gefehlt hat“: die drei häufigsten Gründe der unzufriedenen Gäste unter den letzten 20, jeweils „n von 20“ und ein Knopf, der das passende Bauwerk (`versorgung:<wunsch>`) oder den gewünschten Service (`angebot:<service>`, P19) im Baumenü zeigt, oder ab welcher Stufe es das gibt.
 - Die letzten 20 Bewertungen (der Ruf selbst ist seit P19 der Schnitt der letzten drei Tage, der Satz unten im Gästebuch nennt die Zahl): Note, Bootsname und Heimathafen, Tag, Platz, ein Satz des Gastes und darunter, warum (zum Beispiel „keine Dusche (2 Nächte) · bequemer Liegeplatz +0,5“).
 
