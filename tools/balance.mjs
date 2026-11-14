@@ -267,11 +267,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     let liegend = [];
     while (state.day === tag) {
       const events = sim.tick(state, ctx, prof.zuweisenAlle);
-<<<<<<< HEAD
-      beobachter?.(events, state, ctx);
-=======
       beobachter?.(state, ctx, events);
->>>>>>> origin/main
       if (!prof.nichts && state.phase === 'day') {
         // Mit Hafenbüro-Automatik weist der Spieler nur noch die Sonderfälle selbst zu
         const buero = sim.officeAutomatic(state, ctx);

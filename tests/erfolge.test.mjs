@@ -25,7 +25,7 @@ function partie(seed) {
   let st = null;
   const res = spiel(seed, 'geschickt', {
     maxTage: 900,
-    beobachter: (events, state, ctx) => {
+    beobachter: (state, ctx, events) => {
       st = state;
       const h = hilfe(state, ctx);
       E.zaehle(state, events, h);
