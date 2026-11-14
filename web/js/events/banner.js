@@ -147,6 +147,8 @@ export function initBanner(game) {
     show(EVENT_ICON[event.id] ?? 'wolke', `Heute: ${event.title}`, event.text, 5);
   });
   game.on('season', (s) => {
+    // Winterpause und Frühlingsgruß zeigt features/winter.js als eigene Karte
+    if (game.winter) return;
     if (s.part === 'winter') show('schnee', 'Winter', 'Die Boote gehen ins Winterlager. Keine Gäste, Zeit zum Bauen und Planen.', 6);
     else if (s.part === 'fruehling' && s.year > 1) show('sonne', `Saison ${s.year} beginnt`, 'Die ersten Boote kommen aus dem Winterlager.', 6);
   });

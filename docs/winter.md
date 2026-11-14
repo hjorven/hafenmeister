@@ -50,7 +50,9 @@ Am Saisonende gehen die Dauerlieger ins Winterlager (F15, H5): In der Nacht zum 
 ## Randfälle
 
 - Tagesabschluss, Feier und Kartenwahl gehen vor; die Winterkarte wartet ausgeblendet.
-- Die Karte endet über Zeit, Kassieren und Bauen (Höhe wird gemessen); im flachen Querformat steht sie rechts und lässt die linke Spalte frei.
+- Die Karte endet über Zeit, Kassieren und Bauen und beginnt unter den Knöpfen oben (Übersicht, Menü; beides wird gemessen). Im flachen Querformat steht sie rechts und lässt die linke Spalte frei.
+- Ist sie höher als der Platz, bleiben „Winter überspringen“ und „Hafen ansehen“ unten stehen; darüber steht „Weiter unten mehr“, bis ganz nach unten gewischt ist. Im flachen Querformat stehen die Knöpfe am Ende der Karte.
+- Im Winter stehen an den Gastboxen keine Grün-Rot-Schilder (`features/platzschilder.js`). Das Ereignis-Banner zeigt für Winter und Frühling nichts, das macht die Winterkarte.
 - Im Baumodus und Fotomodus ist sie ausgeblendet.
 - Ein Ausbau im Winter ändert die Preise der noch offenen Aufträge, beauftragte bleiben, wie sie sind.
 - Liegt die Zeit still (Pause), kommt die Karte trotzdem, sobald der Winter da ist.

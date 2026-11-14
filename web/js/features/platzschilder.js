@@ -19,6 +19,8 @@ export const BOX_ARTEN = new Set(['box', 'finger']);
  */
 export function farbe(state, ctx, berth) {
   if (!berth || !BOX_ARTEN.has(berth.kind)) return null;
+  // Im Winter kommen keine Gäste: kein Schild (docs/winter.md)
+  if (sim.season(state, ctx).winter) return null;
   const z = sim.berthState(state, ctx, berth.id);
   if (z === 'aus') return null;
   return z === 'frei' ? 'gruen' : 'rot';
