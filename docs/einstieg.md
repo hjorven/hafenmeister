@@ -32,7 +32,7 @@ Kein Tutorial mit Story, sondern Hinweis-Kreise: Ein leuchtender Kreis zeigt auf
 
 ## Hinweise beim ersten Mal
 
-Nach dem Einstieg erscheint jeder dieser Hinweise einmal pro Spielstand (gemerkt in `state.modules.einstieg.hinweise`), in derselben Blase mit dem Knopf „Verstanden“. Nach 20 s schließt er von selbst. Solange eine Karte, das Bauen oder der Fotomodus offen ist, wartet er.
+Nach dem Einstieg erscheint jeder dieser Hinweise einmal pro Spielstand (gemerkt in `state.modules.einstieg.hinweise`), in derselben Blase mit dem Knopf „Verstanden“. Nach 20 s im Bild schließt er von selbst; solange er wartet oder das Bild ruckelt, läuft diese Zeit nicht ab. Solange eine Karte, das Bauen oder der Fotomodus offen ist, wartet er.
 
 | Hinweis | Auslöser | Kreis |
 |---|---|---|
