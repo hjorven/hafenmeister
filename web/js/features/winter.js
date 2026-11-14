@@ -313,7 +313,7 @@ export async function init(game) {
         : 'Keine Gäste bis zum Frühling. Zeit, Bilanz zu ziehen und die nächste Saison vorzubereiten.' }),
       bilanz, arbeiten, naechste,
       el('div', { class: 'hm-wi-knoepfe' },
-        el('p', { class: 'hm-wi-mehr', 'aria-hidden': 'true', text: 'Weiter unten mehr, nach oben wischen' }),
+        el('p', { class: 'hm-wi-mehr', 'aria-hidden': 'true', text: matchMedia('(pointer: coarse)').matches ? 'Weiter unten mehr, nach oben wischen' : 'Weiter unten mehr, bitte scrollen' }),
         el('button', { type: 'button', class: 'hm-knopf hm-primaer hm-px hm-wi-ja', onclick: ueberspringe, text: 'Winter überspringen' }),
         el('button', { type: 'button', class: 'hm-knopf hm-px', onclick: schliessen, text: 'Hafen ansehen' })),
     );
@@ -354,6 +354,18 @@ export async function init(game) {
     // Oben: unter allen Knöpfen der oberen Leiste, die über der Karte stehen (Übersicht, Menü,
     // Kompass; im flachen Querformat stehen sie rechts oben, wo sonst die Karte liegt)
     karte.style.top = '';
+    karte.style.right = '';
+    // Flaches Querformat: Karte steht rechts; links von Bauen und Kassieren, damit sie bis unten reicht
+    if (matchMedia('(max-height: 500px)').matches) {
+      let links = Infinity;
+      for (const sel of ['#btn-build', '#btn-collect']) {
+        const e = document.querySelector(sel);
+        if (!e || e.offsetParent === null) continue;
+        const r = e.getBoundingClientRect();
+        if (r.width && r.left > h.left + h.width / 2) links = Math.min(links, r.left);
+      }
+      if (links < Infinity) karte.style.right = `${Math.round(h.right - links + 8)}px`;
+    }
     let k = karte.getBoundingClientRect();
     let oben = 0;
     for (const e of document.querySelectorAll('button, [role="button"]')) {
@@ -364,9 +376,9 @@ export async function init(game) {
     }
     if (oben) { karte.style.top = `${Math.round(oben)}px`; k = karte.getBoundingClientRect(); }
     let unten = h.bottom - 8;
-    for (const sel of ['#hm-zeit', '#btn-build', '#btn-collect', '#hud-bottom']) {
-      const e = document.querySelector(sel);
-      if (!e || e.offsetParent === null) continue;
+    // Untere Leiste einzeln: der Streifen selbst ist so breit wie das Bild, zählt nur, was darin steht
+    for (const e of document.querySelectorAll('#hm-zeit, #btn-build, #btn-collect, #hud-bottom > *')) {
+      if (e.offsetParent === null) continue;
       const r = e.getBoundingClientRect();
       if (r.width && r.right > k.left && r.left < k.right && r.top > k.top + 80) unten = Math.min(unten, r.top - 10);
     }

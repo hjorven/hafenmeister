@@ -20,6 +20,7 @@ export const VORRANG = {
   zettel: 70,          // ui/tagesabschluss.js, Morgen-Zettel
   auszeichnung: 60,    // features/auszeichnung.js, Karte nach dem Tagesabschluss (neue oder verlorene Auszeichnung)
   dauerWartet: 65,     // features/dauerlieger.js, Dauerlieger früher zurück (hat eine Frist bis zum Abend)
+  ereignis: 60,        // events/vorbereiten-ui.js, Sturm und Regatta vorbereiten, Ergebnis am Abend
   einstieg: 50,        // features/einstieg.js, Schritte des Einstiegs
   tipp: 45,            // features/einstieg.js, Tipps beim ersten Mal (kurz, gehen den Dauerplatz-Meldungen vor)
   dauer: 40,           // features/dauerlieger.js, andere Meldungen
