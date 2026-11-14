@@ -11,10 +11,10 @@ Stand: 12.11.2026 (Ist-Stand neu nach PR 144). Status: gilt. Gilt für jeden Pul
 5. **Prüfungen grün.** Vor dem Merge im Hauptordner, Ende mit `Alles grün.`:
 
 ```bash
-bash tests/pruefen.sh
+bash tests/pruefen.sh --schnell
 ```
 
-Dazu der Check „Spiel testen (Handy, Tablet, PC)“ im PR ([tests.md](tests.md)).
+Der Schnellmodus prüft im Browser nur das Handy hochkant; alle fünf Geräte prüft der Check „Spiel testen (Handy, Tablet, PC)“ im PR, der dazu grün sein muss ([tests.md](tests.md)).
 6. **Im Spiel angesehen.** Vor dem Merge die Änderung am Handy (hoch und quer) und am PC im laufenden Spiel ansehen, Formen, Kanten, Überdeckungen und Mittigkeit prüfen. Jorven testet selbst am iPhone über die Pages-Seite.
 7. **Für Spieler notiert.** Was man im Spiel sieht oder hört, bekommt eine Zeile in [aenderungen.md](aenderungen.md).
 

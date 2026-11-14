@@ -312,7 +312,7 @@ python3 -m http.server 8000 --directory web
 Danach `http://localhost:8000` öffnen. Vor jedem Merge (Anleitung in [tests.md](tests.md)):
 
 ```bash
-bash tests/pruefen.sh
+bash tests/pruefen.sh --schnell
 ```
 
 ## 13. Stand: Gebaut, Als Nächstes, Nach 1.0

@@ -1,12 +1,18 @@
 # Automatische Tests: startet das Spiel in Handy-, Tablet- und PC-Groesse (Playwright, Chromium)
 # und prueft Laden, Grundbedienung und Layout. Bildschirmfotos gibt es als Download im Lauf.
 # Anleitung: docs/tests.md
+#
+# Schnell gehalten (14.11.2026):
+# - Läuft bei Pull Requests, nicht noch einmal nach jedem Merge auf main (der PR war schon grün).
+#   main wird einmal nachts komplett geprüft, dazu jederzeit per Run workflow.
+# - Reine Doku-PRs (tools/ci-bereiche.sh) überspringen die Browser-Tests und die langen Simulationen.
+# - Die langsamen Geräte laufen in mehreren Teilen (Playwright --shard) parallel.
 name: Tests
 
 on:
   pull_request:
-  push:
-    branches: [main]
+  schedule:
+    - cron: "41 2 * * *"
   workflow_dispatch:
 
 # Workflow ohne Rechte, jeder Job liest nur den Code.
@@ -17,10 +23,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  bereiche:
+    # Wenige Sekunden: nur Doku geändert? Dann keine Browser-Tests und keine langen Simulationen.
+    name: Was hat sich geändert
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      nur_doku: ${{ steps.bereiche.outputs.nur_doku }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          # Für den Vergleich mit dem Ziel-Branch (tools/ci-bereiche.sh)
+          fetch-depth: 0
+
+      - name: Geänderte Dateien einordnen
+        id: bereiche
+        env:
+          EREIGNIS: ${{ github.event_name }}
+          BASIS: ${{ github.event.pull_request.base.sha }}
+          KOPF: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EREIGNIS" = "pull_request" ]; then
+            bash tools/ci-bereiche.sh "$BASIS" "$KOPF" >> "$GITHUB_OUTPUT"
+          else
+            echo "nur_doku=false" >> "$GITHUB_OUTPUT"
+          fi
+
   schnell:
     name: Pfade und Tests ohne Browser
+    needs: bereiche
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -36,20 +72,32 @@ jobs:
         run: bash tools/check-pages.sh web
 
       - name: Tests ohne Browser (node --test)
+        env:
+          NUR_DOKU: ${{ needs.bereiche.outputs.nur_doku }}
         run: |
-          shopt -s nullglob
-          dateien=(tests/*.test.mjs)
-          if [ ${#dateien[@]} -gt 0 ]; then node --test "${dateien[@]}"; else echo "Keine tests/*.test.mjs vorhanden."; fi
+          if [ "$NUR_DOKU" = "true" ]; then bash tests/node-tests.sh --ohne-langsame; else bash tests/node-tests.sh; fi
 
   geraet:
-    # Ein Job je Geraet, parallel. Zusammen sind es zu viele Tests fuer einen Job.
-    name: Spiel testen (${{ matrix.projekt }})
+    # Ein Job je Geraet bzw. Teil, parallel. Gemessen 14.11.2026 (Testzeit am Stück): pc 660 s,
+    # tablet 450 s, handy 345 s, tablet-quer 330 s, handy-quer 145 s. pc in drei, tablet in zwei
+    # Teilen: kein Job braucht so länger als rund 6 Minuten.
+    name: Spiel testen (${{ matrix.projekt }} ${{ matrix.teil }}/${{ matrix.teile }})
+    needs: bereiche
+    if: ${{ needs.bereiche.outputs.nur_doku != 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        projekt: [handy, handy-quer, tablet, tablet-quer, pc]
+        include:
+          - { projekt: handy, teil: 1, teile: 1 }
+          - { projekt: handy-quer, teil: 1, teile: 1 }
+          - { projekt: tablet, teil: 1, teile: 2 }
+          - { projekt: tablet, teil: 2, teile: 2 }
+          - { projekt: tablet-quer, teil: 1, teile: 1 }
+          - { projekt: pc, teil: 1, teile: 3 }
+          - { projekt: pc, teil: 2, teile: 3 }
+          - { projekt: pc, teil: 3, teile: 3 }
     permissions:
       contents: read
     defaults:
@@ -73,13 +121,17 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Tests ausführen
-        run: npx playwright test --project=${{ matrix.projekt }}
+        env:
+          PROJEKT: ${{ matrix.projekt }}
+          TEIL: ${{ matrix.teil }}
+          TEILE: ${{ matrix.teile }}
+        run: npx playwright test --project="$PROJEKT" --shard="$TEIL/$TEILE"
 
       - name: Bildschirmfotos hochladen
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: bildschirmfotos-${{ matrix.projekt }}
+          name: bildschirmfotos-${{ matrix.projekt }}-${{ matrix.teil }}
           path: tests/bildschirmfotos/
           if-no-files-found: ignore
           retention-days: 14
@@ -88,7 +140,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: testbericht-${{ matrix.projekt }}
+          name: testbericht-${{ matrix.projekt }}-${{ matrix.teil }}
           path: |
             tests/bericht/
             tests/test-results/
@@ -98,13 +150,21 @@ jobs:
   spiel:
     # Sammel-Check mit dem bisherigen Namen, damit eine Branch-Regel nur diesen einen Check braucht
     name: Spiel testen (Handy, Tablet, PC)
-    needs: [schnell, geraet]
+    needs: [bereiche, schnell, geraet]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Ergebnis aller Geräte
+        env:
+          BEREICHE: ${{ needs.bereiche.result }}
+          SCHNELL: ${{ needs.schnell.result }}
+          GERAET: ${{ needs.geraet.result }}
+          NUR_DOKU: ${{ needs.bereiche.outputs.nur_doku }}
         run: |
-          echo "schnell: ${{ needs.schnell.result }}, Geräte: ${{ needs.geraet.result }}"
-          test "${{ needs.schnell.result }}" = success
-          test "${{ needs.geraet.result }}" = success
+          echo "bereiche: $BEREICHE, schnell: $SCHNELL, Geräte: $GERAET, nur Doku: $NUR_DOKU"
+          test "$BEREICHE" = success
+          test "$SCHNELL" = success
+          # Reine Doku-PRs: Browser-Tests absichtlich übersprungen
+          if [ "$NUR_DOKU" = "true" ] && [ "$GERAET" = "skipped" ]; then exit 0; fi
+          test "$GERAET" = success

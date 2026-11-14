@@ -165,5 +165,5 @@ python3 -m http.server 8000 --directory web
 Danach `http://localhost:8000` öffnen. Vor dem Merge (siehe [tests.md](tests.md)):
 
 ```bash
-bash tests/pruefen.sh && bash tools/check-modules.sh && bash tools/check-pages.sh web
+bash tests/pruefen.sh --schnell && bash tools/check-modules.sh && bash tools/check-pages.sh web
 ```

@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "20c15f5"
+  "commit": "67a0e70"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -516,7 +516,9 @@
    "status": "erledigt",
    "bilder": [
     44,
-    45
+    45,
+    49,
+    50
    ]
   },
   {
@@ -570,16 +572,21 @@
    "id": "P22",
    "titel": "Erfolge einbauen",
    "inhalt": "plan.md 9",
-   "thread": "erledigt (30 Erfolge, Reiter im Logbuch, Dinge im Hafen, docs/erfolge.md)",
+   "thread": "erledigt (PR 295: 30 Erfolge, Reiter im Logbuch, Dinge im Hafen, docs/erfolge.md)",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    295
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "I6",
     "I7"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    51,
+    52
+   ]
   },
   {
    "id": "P23",
@@ -621,7 +628,8 @@
    "status": "teilweise",
    "bilder": [
     47,
-    48
+    48,
+    53
    ]
   },
   {
@@ -5045,20 +5053,113 @@
    "datum": "2026-11-14",
    "quelle": "ereignisse/vorbereiten-pc-1-sturm-angekuendigt.png",
    "nr": 48
+  },
+  {
+   "datei": "p19-pr279-handy-heute-voll.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Bootskarte am Handy: Wunsch \"Essen (heute voll)\"",
+   "pr": 279,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr279/279-voll-iphone.png",
+   "nr": 49
+  },
+  {
+   "datei": "p19-pr279-pc-heute-voll.jpg",
+   "pakete": [
+    "P19"
+   ],
+   "titel": "Bootskarte am PC: Wunsch \"WC (heute voll)\"",
+   "pr": 279,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr279/279-voll-pc.png",
+   "nr": 50
+  },
+  {
+   "datei": "p22-pr295-handy-erfolge.jpg",
+   "pakete": [
+    "P22"
+   ],
+   "titel": "Reiter Erfolge im Logbuch am Handy",
+   "pr": 295,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "erfolge/handy-erfolge.png",
+   "nr": 51
+  },
+  {
+   "datei": "p22-pr295-pc-wimpel-pokale.jpg",
+   "pakete": [
+    "P22"
+   ],
+   "titel": "Wimpelmast und Pokale im Hafen am PC",
+   "pr": 295,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "erfolge/pc-hafen-dinge.png",
+   "nr": 52
+  },
+  {
+   "datei": "p24-pr281-quer-regatta-vorbei.jpg",
+   "pakete": [
+    "P24"
+   ],
+   "titel": "Regatta vorbei: Ergebnis am Abend, Handy quer",
+   "pr": 281,
+   "geraet": "handy-quer",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr281/281-regatta-ergebnis-iphonequer.png",
+   "nr": 53
   }
  ],
  "neueBilder": [
-  48,
+  53,
+  52,
+  50,
   46,
   45,
   43,
   41,
   39,
-  38,
-  37,
-  36
+  38
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: P22 Erfolge mit PR 295 und Bildern, Regatta-Bild zu P24",
+   "pr": 296,
+   "pakete": [
+    "P22",
+    "P24"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Ruhige Oberfläche: ein Meldeplatz, eine Meldung zur Zeit, Pixelschrift auch für Zahlen",
+   "pr": 282,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Arbeitsplan: Stand 21:15, P17 startet, neu P41 und P26",
+   "pr": 298,
+   "pakete": [
+    "P17",
+    "P41",
+    "P26"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: Bilder zu P19 Teil 2 (heute voll, PR 279), Stand nach PR 291",
+   "pr": 293,
+   "pakete": [
+    "P19"
+   ]
+  },
   {
    "datum": "2026-11-14",
    "titel": "P22 Erfolge: 30 Erfolge, Reiter im Logbuch, Wimpel, Pokale und Ehrentafel im Hafen",
@@ -5116,38 +5217,6 @@
    "pakete": [
     "P24",
     "P17"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Balancing: Liegegeld je angefangenem Meter (B10); Winterknöpfe quer fest unten",
-   "pr": 252,
-   "pakete": [
-    "P17"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Tests: Tagesabschluss-Zettel im Browser prüfen, solange er sicher steht",
-   "pr": 284,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Ereignisse zum Vorbereiten: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend (P24 Teil 1)",
-   "pr": 281,
-   "pakete": [
-    "P24"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap: Funde aus dem Feature-Test behoben, PR 244 bis 279 eingetragen, Bilder für P19, P21, P55",
-   "pr": 276,
-   "pakete": [
-    "P19",
-    "P21",
-    "P55"
    ]
   }
  ]
