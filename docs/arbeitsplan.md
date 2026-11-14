@@ -63,7 +63,7 @@ Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tem
 | 6 | **P22 Erfolge** (läuft) | letztes offenes Welle-2-Paket | P21 (erledigt) | Aufstieg-Feier, Meldungs-Ordnung (PR 282) |
 | 7 | **P20-Rest Winter** (H5, G5) | Kernschleife über das Jahr fertig | 4 | `winter.js`, `economy.js` |
 | 8 | **P23 Services mit eigener Wirkung** (neu) | Welle 3, macht Stufe 4 bis 6 tiefer | 4 (Zahlen) | `render/services.js`, `data/services.js`, Besuchswege |
-| 9 | **P28 Anmeldung per Funk** (neu) | Welle 3, macht jede Ankunft planbarer; baut auf P11-Vorschau | - | `ui/vorschau.js`, `sim.js` |
+| 9 | **P28 Anmeldung per Funk** (neu) | erledigt (PR 288, `docs/funk-anmeldung.md`) | - | `ui/funk-anmeldung.js`, `ui/vorschau.js`, `sim.js` |
 | 10 | **P27 Päckchen liegen** (neu) | Welle 3, voller Hafen wird zur Entscheidung | 1 (Liegeplätze und Wege stabil) | `sim.js`, `boat-view.js`, Wegsuche |
 
 Danach geht es weiter wie in [Abschnitt 5](#5-alles-weitere-bis-zum-ende) beschrieben, bis Stufe 20 und Online.
