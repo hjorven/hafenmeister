@@ -44,6 +44,7 @@ import { random, randomInt } from '../random.js';
 import { STAMM } from './stammgaeste.js';
 import { BOOTSNAMEN } from '../data/bootsnamen.js';
 import { pixelBild } from '../ui/pixel-symbole.js';
+import { VORRANG } from '../ui/meldungen.js';
 import { ECONOMY } from '../data/economy.js';
 
 // Zahlen aus data/economy.js (ECONOMY.dauerlieger); die Werte hier gelten nur, wo dort etwas fehlt.
@@ -650,6 +651,8 @@ export async function init(game) {
       padding: 10px 12px; color: var(--hm-tinte, #283648); cursor: pointer; line-height: 1.35; }
     #dauer-hinweis:not(.hm-px) { background: #fffcf6; border: 2px solid #283648; }
     #dauer-hinweis[hidden], body.card-open #dauer-hinweis, #dauer-hinweis.zurueck { display: none; }
+    /* Steht der Hinweis, ruht "Als Nächstes" (ui/bauen.js): hochkant nimmt er dessen Platz unten ein */
+    .hm-neu:has(#dauer-hinweis:not([hidden]):not(.zurueck)) .bau-tipp { display: none; }
     #dauer-hinweis img, #dauer-hinweis svg { flex: none; width: 24px; height: 24px; image-rendering: pixelated; }
     #dauer-hinweis strong { display: block; font-weight: 600; }
     #dauer-hinweis span { display: block; font-size: max(13px, 0.875rem); }
@@ -671,6 +674,8 @@ export async function init(game) {
     body.append(t, p);
     hinweis.append(body);
     hinweis.hidden = false;
+    // Meldungs-Ordnung (ui/meldungen.js): höchstens eine Meldung zugleich, wichtigere zuerst
+    game.meldungen?.wunsch('dauer', hinweisArt === 'wartet' ? VORRANG.dauerWartet : VORRANG.dauer);
     platziereHinweis();
   }
   // Der Hinweis liegt nicht über der linken Spalte, dem Funk oder dem Ereignisschild:
@@ -686,11 +691,8 @@ export async function init(game) {
   const fensterOffen = () => document.body.classList.contains('card-open') || [...document.querySelectorAll(FENSTER)].some(sichtbar);
   function platziereHinweis() {
     if (hinweis.hidden) return;
-    // Ein Tipp (Einstieg, "beim ersten Mal") hat Vorrang: der Hinweis wartet, bis er weg ist. Der Tipp wartet
-    // seinerseits nur, solange dieser Hinweis sichtbar ist (einstieg.js), also blockieren sie sich nicht.
-    // Ausnahme: ein wartender Dauerlieger mit Frist bis zum Abend bleibt sichtbar.
-    const tippOffen = hinweisArt !== 'wartet' && [...document.querySelectorAll('.hm-tipp:not([hidden])')].some(sichtbar);
-    hinweis.classList.toggle('zurueck', fensterOffen() || tippOffen);
+    // Meldungs-Ordnung (ui/meldungen.js): Einstieg und Tipps gehen vor, ein wartender Dauerlieger mit Frist geht vor sie
+    hinweis.classList.toggle('zurueck', fensterOffen() || (game.meldungen ? !game.meldungen.darf('dauer') : false));
     if (hinweis.classList.contains('zurueck')) return;
     const h = host.getBoundingClientRect();
     const rand = 8;
@@ -736,22 +738,16 @@ export async function init(game) {
       if ((!passt(oben, l, w) || aufTipp) && hinweisArt !== 'wartet') hinweis.classList.add('zurueck');
       return;
     }
-    // Handy hochkant: unter der linken Spalte, möglichst nicht über einem Tipp
+    // Handy hochkant: unten über Zeit und Bauen, an der Stelle von "Als Nächstes" (ruht solange, CSS oben).
+    // Unter der linken Spalte lägen Wartebojen und Einfahrt, also das Spielgeschehen.
+    // Gleichzeitige Meldungen gibt es nicht mehr (ui/meldungen.js), ein Tipp steht also nie zugleich.
     const w = breit;
     const links = (h.width - w) / 2;
-    const unter = (liste) => Math.max(oben, ...liste.filter((r) => r.l < links + w && r.r > links).map((r) => r.u + rand));
-    const untenAlles = unter(hinder);
-    const untenSpalte = unter(hinder.filter((r) => !r.tipp));
-    setze(links, w, untenAlles);
-    if (passt(untenAlles, links, w)) return;
-    const ueberTipp = hinder.some((r) => r.tipp && r.l < links + w && r.r > links && r.o < untenSpalte + hinweis.offsetHeight && r.u > untenSpalte);
-    // Ein wartender Dauerlieger hat eine Frist bis zum Abend: dann notfalls über den Einstiegstipp oder
-    // eine aufgeklappte Tafel, aber nie über Spalte und Knöpfe. Andere Hinweise warten, bis Platz ist.
-    if (passt(untenSpalte, links, w) && (!ueberTipp || hinweisArt === 'wartet')) { setze(links, w, untenSpalte); return; }
-    if (hinweisArt === 'wartet') { setze(links, w, Math.max(rand, grenze(links, w) - hinweis.offsetHeight)); return; }
-    hinweis.classList.add('zurueck');
+    const unterSpalte = Math.max(oben, ...hinder.filter((r) => !r.tipp && r.l < links + w && r.r > links).map((r) => r.u + rand));
+    setze(links, w, Math.max(unterSpalte, grenze(links, w) - hinweis.offsetHeight));
   }
-  setInterval(platziereHinweis, 1000);
+  setInterval(platziereHinweis, 300);
+  game.on('meldungen:wechsel', () => platziereHinweis());
   window.addEventListener('resize', platziereHinweis);
   // Solange eine Karte offen ist, ist der Hinweis ausgeblendet und seine Zeit läuft nicht ab
   function weiter() {
@@ -763,7 +759,7 @@ export async function init(game) {
     if (wartende().length) { zeigeWartende(); return; }
     hinweisArt = null;
     const m = schlange.shift();
-    if (!m) { hinweis.hidden = true; return; }
+    if (!m) { hinweis.hidden = true; game.meldungen?.fertig('dauer'); return; }
     fuelle(m.symbol, m.titel, m.text);
     hinweisTimer = setTimeout(weiter, m.sekunden * 1000);
   }
@@ -1069,7 +1065,7 @@ export async function init(game) {
   });
   game.on('sim:select', ({ boatId }) => { if (boatId != null) { umlegen = null; offen = null; leuchtet = false; } });
   game.on('ui:cancel', schliessen);
-  game.on('spielstand-geladen', () => { alteErgaenzen(); schliessen(); schlange.length = 0; hinweisArt = null; hinweis.hidden = true; setTimeout(wartendeZeigen, 300); });
+  game.on('spielstand-geladen', () => { alteErgaenzen(); schliessen(); schlange.length = 0; hinweisArt = null; hinweis.hidden = true; game.meldungen?.fertig('dauer'); setTimeout(wartendeZeigen, 300); });
 
   game.dauerlieger = {
     machDauerplatz: (id) => api.dispatch(machDauerplatz(api.state, api.ctx, id).events),

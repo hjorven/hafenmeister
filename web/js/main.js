@@ -34,6 +34,7 @@ const MODULES = [
   './ui/bauen.js',
   './ui/fotomodus.js',
   './ui/vorschau.js',
+  './ui/meldungen.js',                 // Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich
   './audio/audio.js',
   './state.js',
   './events/events.js',
@@ -48,6 +49,7 @@ const MODULES = [
   './features/hilfe.js',
   './save/index.js',
   './ui/tagesabschluss.js',
+  './ui/gaestebuch.js',
   './ui/oberflaeche.js',
 ];
 

@@ -17,6 +17,7 @@
 // Schnittstelle: game.einstieg = { start(), beenden(), schritt() }; meldet 'einstieg:schritt' { schritt } bei jedem Wechsel und 'einstieg:ende' am Ende
 
 import { regelnBereit } from './regeln-bereit.js';
+import { VORRANG } from '../ui/meldungen.js';
 import { rulesFromEconomy } from '../sim.js';
 import { ECONOMY } from '../data/economy.js';
 
@@ -98,6 +99,14 @@ export const TEXTE = {
     kurz: 'Weitere Boote kommen. Vorspulen geht unten links mit dem Doppelpfeil.',
   },
   bauen: {
+    titel: 'Hafen ausbauen',
+    text: TOUCH
+      ? 'Mit dem Geld baust du neue Liegeplätze und Anlagen. Das erste Bauwerk, ein Toilettenhäuschen, ist geschenkt. Tipp auf „Bauen“: Die Zeit hält an, und du siehst erst eine Vorschau. Gekauft wird erst mit „Bauen für …“.'
+      : 'Mit dem Geld baust du neue Liegeplätze und Anlagen. Das erste Bauwerk, ein Toilettenhäuschen, ist geschenkt. Klick auf „Bauen“: Die Zeit hält an, und du siehst erst eine Vorschau. Gekauft wird erst mit „Bauen für …“.',
+    kurz: 'Das erste Bauwerk ist geschenkt: „Bauen“, Vorschau ansehen, dann „Bauen für …“.',
+  },
+  // Wie "bauen", wenn das geschenkte erste Bauwerk schon vorher gebaut wurde (ui/bauen.js, Roadmap J4)
+  bauenOhneGeschenk: {
     titel: 'Hafen ausbauen',
     text: TOUCH
       ? 'Mit dem Geld baust du neue Liegeplätze und Anlagen. Tipp auf „Bauen“: Die Zeit hält an, und du siehst erst eine Vorschau. Gekauft wird erst mit „Bauen für …“. Mit dem Ruf deiner Gäste wächst der Hafen.'
@@ -432,8 +441,12 @@ export async function init(game) {
       game.emit('sim:change', { reason: 'einstieg' });
     }
     if (id === 'willkommen') willkommenSeit = performance.now();
-    if (!id) { tipp.hidden = true; ring.hidden = true; return; }
-    const t = TEXTE[id];
+    // Meldungs-Ordnung (ui/meldungen.js): Zettel, Kartenwahl, Feier und Dauerplatz-Meldungen gehen vor
+    if (!id) { game.meldungen?.fertig('einstieg'); tipp.hidden = true; ring.hidden = true; return; }
+    game.meldungen?.wunsch('einstieg', id.startsWith('hinweis:') ? VORRANG.tipp : VORRANG.einstieg);
+    const st0 = game.sim?.state;
+    const geschenkWeg = !!st0?.modules?.bauen?.geschenk || (st0?.facilities?.wc || 0) > 0 || st0?.stage > 1;
+    const t = id === 'bauen' && geschenkWeg ? TEXTE.bauenOhneGeschenk : TEXTE[id];
     const nr = REIHENFOLGE.indexOf(id) + 1;
     const info = id === 'tempo' || id === 'bauen' || id === 'ziele';
     tipp.replaceChildren();
@@ -624,21 +637,24 @@ export async function init(game) {
     zeige(null);
     game.emit('einstieg:ende', {});
   }
+  const darf = () => !game.meldungen || game.meldungen.darf('einstieg');
   function hinweisTakt(e) {
     const ruhig = !document.body.classList.contains('card-open') && !document.body.classList.contains('building') && !document.body.classList.contains('foto') && !document.body.classList.contains('hm-feier-an');
     if (aktuell?.startsWith('hinweis:')) {
       if (performance.now() > hinweisBis) { schliesseHinweis(); return; }
-      tipp.hidden = !ruhig;
+      tipp.hidden = !ruhig || !darf();
+      // Solange eine andere Meldung vorgeht, läuft die Zeit des Tipps nicht ab
+      if (tipp.hidden) hinweisBis = Math.max(hinweisBis, performance.now() + 8000);
       const id = aktuell.slice(8);
       k = id === 'stufe' ? domKreis(document.getElementById('btn-build'), 6) : null;
-      ring.hidden = !k || !ruhig;
+      ring.hidden = !k || tipp.hidden;
       if (k) setzeKreis();
       if (!tipp.hidden) lege(k);
       return;
     }
-    // Nacheinander statt gleichzeitig: Dauerplatz-Meldung, Morgen-Zettel oder Feier zuerst ausreden lassen
-    const andere = ['#dauer-hinweis', '.hm-ta-zettel', '#hm-feier'].some((sel) => sichtbar(document.querySelector(sel)));
-    if (aktuell || !offeneHinweise.length || !ruhig || andere) return;
+    // Nacheinander statt gleichzeitig: erst anfangen, wenn keine wichtigere Meldung steht (ui/meldungen.js)
+    const frei = !game.meldungen || game.meldungen.stand().vorrang < VORRANG.tipp;
+    if (aktuell || !offeneHinweise.length || !ruhig || !frei) return;
     const id = offeneHinweise.shift();
     e.hinweise ||= [];
     e.hinweise.push(id);   // gilt als gesehen, auch wenn der Spieler gleich neu lädt
@@ -648,6 +664,7 @@ export async function init(game) {
   function zeigeHinweis(id) {
     const t = HINWEISE[id];
     aktuell = `hinweis:${id}`;
+    game.meldungen?.wunsch('einstieg', VORRANG.tipp);
     game.emit('einstieg:schritt', { schritt: aktuell });
     tipp.replaceChildren();
     const z = document.createElement('div'); z.className = 'zaehler'; z.textContent = 'Tipp';
@@ -694,14 +711,16 @@ export async function init(game) {
     if (!id) return;
     if (id === 'muenzen' && !k) zumBoot(zahlendeIds());
     // Ist die Bootskarte offen, sagt sie selbst, was zu tun ist; der Text würde nur die Stege verdecken
-    tipp.hidden = ziehen || (id === 'anlegen' && document.body.classList.contains('card-open'));
-    ring.hidden = !k || ziehen;
+    tipp.hidden = ziehen || (id === 'anlegen' && document.body.classList.contains('card-open')) || !darf();
+    ring.hidden = !k || ziehen || !darf();
     if (k) setzeKreis();
     if (!tipp.hidden) lege(k);
   }
 
   function frame(t) {
     requestAnimationFrame(frame);
+    // Kommt eine wichtigere Meldung (Zettel, Kartenwahl, Feier), tritt die Blase sofort zurück, nicht erst beim nächsten Takt
+    if (!tipp.hidden && !darf()) { tipp.hidden = true; ring.hidden = true; }
     if (t >= naechsteEntscheidung || ziehen !== zuletztZiehen) {
       naechsteEntscheidung = t + TAKT_MS;
       zuletztZiehen = ziehen;
@@ -717,6 +736,7 @@ export async function init(game) {
     setzeKreis();
   }
 
+  game.on('meldungen:wechsel', () => { if (!tipp.hidden && !darf()) { tipp.hidden = true; ring.hidden = true; } });
   game.on('sim:moored', () => schritt('anlegen'));
   game.on('sim:collected', () => schritt('muenzen'));
   document.getElementById('btn-build')?.addEventListener('click', () => { if (aktuell === 'bauen') schritt('bauen'); });

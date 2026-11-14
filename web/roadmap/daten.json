@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "13.11.2026",
-  "commit": "c4ffad3"
+  "datum": "14.11.2026",
+  "commit": "14a7d7d"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -96,11 +96,12 @@
    "id": "P03",
    "titel": "Einstieg an neue Oberfläche anpassen",
    "inhalt": "Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), docs/einstieg.md",
-   "thread": "bestehend: \"Einstieg für neue Spieler bauen\"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); offen: J4 mit P17, J5 nach P14",
+   "thread": "bestehend: \"Einstieg für neue Spieler bauen\"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); J4 mit P17 erledigt (PR 237); offen: J5 nach P14",
    "welle": 1,
    "prs": [
     112,
-    225
+    225,
+    237
    ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
    "punkte": [
@@ -146,7 +147,8 @@
    "thread": "bestehend: \"Spielregeln ohne Grafik umsetzen\"",
    "welle": 1,
    "prs": [
-    143
+    143,
+    232
    ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
    "punkte": [
@@ -154,7 +156,7 @@
     "D4",
     "O4"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -292,12 +294,13 @@
    "id": "P11",
    "titel": "Wünsche über dem Boot und Ankunftsvorschau",
    "inhalt": "Ü10",
-   "thread": "erledigt (PR 158, 227)",
+   "thread": "erledigt (PR 158, 227, 231)",
    "welle": 2,
    "prs": [
     146,
     158,
-    227
+    227,
+    231
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -364,10 +367,12 @@
   {
    "id": "P14",
    "titel": "Bewertungen und Gästebuch zeigen",
-   "inhalt": "Ü21, F18",
-   "thread": "neu",
+   "inhalt": "Ü21, F18, C1, C9; Note aus Wünschen 2,5 bis 5 (Befund P10)",
+   "thread": "erledigt (PR 154)",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    154
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "Ü21",
@@ -376,8 +381,11 @@
     "C9",
     "Bed P1"
    ],
-   "status": "teilweise",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    28,
+    29
+   ]
   },
   {
    "id": "P15",
@@ -426,7 +434,9 @@
    "inhalt": "Ü15, Ü16, Startwerte dokumentieren",
    "thread": "bestehend: \"Balancing für 94 Liegeplätze ausarbeiten\" (nach P06)",
    "welle": 2,
-   "prs": [],
+   "prs": [
+    237
+   ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
     "Ü15",
@@ -436,17 +446,19 @@
     "D3",
     "J4"
    ],
-   "status": "offen",
+   "status": "teilweise",
    "bilder": []
   },
   {
    "id": "P18",
    "titel": "Ausbau in Bauabschnitten",
    "inhalt": "Ü18, bautage nutzen oder löschen",
-   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"",
+   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Bauabschnitte, Baustelle über Nacht und Sparziel (PR 232), Nachbesserungen (PR 235)",
    "welle": 2,
    "prs": [
-    143
+    143,
+    232,
+    235
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -457,10 +469,12 @@
     "D7",
     "Bed P7"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": [
     18,
-    19
+    19,
+    30,
+    31
    ]
   },
   {
@@ -1120,7 +1134,7 @@
    "id": "P62",
    "titel": "Geländeform und Engpass neu bauen",
    "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
-   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224)",
+   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224, 229): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224), Land nördlich der Reede (PR 229)",
    "welle": 0,
    "prs": [
     179,
@@ -1130,7 +1144,8 @@
     210,
     211,
     216,
-    224
+    224,
+    229
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1203,13 +1218,14 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199): Ausweichen über freies Wasser, Fahrwasserkarte; Stau an der Einfahrt offen; übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "thread": "in Arbeit (PR 180, 181, 199, 228): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
    "welle": 0,
    "prs": [
     81,
     180,
     181,
-    199
+    199,
+    228
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1221,7 +1237,8 @@
    ],
    "status": "arbeit",
    "bilder": [
-    23
+    23,
+    32
    ]
   },
   {
@@ -1593,12 +1610,14 @@
   {
    "code": "Ü15",
    "text": "Weicher Start: 100 € Startgeld oder geschenktes WC",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 237): geschenktes Toilettenhäuschen beim ersten Bauen",
    "pakete": [
     "P17"
    ],
-   "prs": [],
+   "prs": [
+    237
+   ],
    "abschnitt": "Balancing (Ü15 bis Ü20)"
   },
   {
@@ -1626,12 +1645,14 @@
   {
    "code": "Ü18",
    "text": "Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 232)",
    "pakete": [
     "P18"
    ],
-   "prs": [],
+   "prs": [
+    232
+   ],
    "abschnitt": "Balancing (Ü15 bis Ü20)"
   },
   {
@@ -1661,12 +1682,14 @@
   {
    "code": "Ü21",
    "text": "Bewertung beim Ablegen über dem Boot zeigen, bei schlechter Note mit Symbol des fehlenden Wunsches",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 154)",
    "pakete": [
     "P14"
    ],
-   "prs": [],
+   "prs": [
+    154
+   ],
    "abschnitt": "Rückmeldung (Ü21 bis Ü23)"
   },
   {
@@ -1907,12 +1930,14 @@
   {
    "code": "F18",
    "text": "Gästebuch: letzte 20 Bewertungen am Hafenbüro",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 154)",
    "pakete": [
     "P14"
    ],
-   "prs": [],
+   "prs": [
+    154
+   ],
    "abschnitt": "Langzeit"
   },
   {
@@ -2437,12 +2462,14 @@
   {
    "code": "C1",
    "text": "Bewertung beim Ablegen zeigen (= Ü21)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 154)",
    "pakete": [
     "P14"
    ],
-   "prs": [],
+   "prs": [
+    154
+   ],
    "abschnitt": "C Ruf und Bewertung"
   },
   {
@@ -2525,34 +2552,40 @@
   {
    "code": "C9",
    "text": "Ruf-Verlauf mit den drei häufigsten Gründen für schlechte Noten",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 154)",
    "pakete": [
     "P14"
    ],
-   "prs": [],
+   "prs": [
+    154
+   ],
    "abschnitt": "C Ruf und Bewertung"
   },
   {
    "code": "D1",
    "text": "Ausbau in Bauabschnitten (= Ü18)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 232)",
    "pakete": [
     "P18"
    ],
-   "prs": [],
+   "prs": [
+    232
+   ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
   {
    "code": "D2",
    "text": "Über Nacht gebaut: abends Baustelle, morgens fertig",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 232, für die Bauabschnitte des Stufenausbaus)",
    "pakete": [
     "P18"
    ],
-   "prs": [],
+   "prs": [
+    232
+   ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
   {
@@ -2569,14 +2602,15 @@
   {
    "code": "D4",
    "text": "Wegfallende Plätze regeln (= Ü5), Hinweis im Baumenü",
-   "status": "teilweise",
-   "statusText": "Regel erledigt (PR 143); Daten für den Hinweis liefert game.sim.stageUpPreview(), Anzeige im Baumenü offen",
+   "status": "erledigt",
+   "statusText": "Regel erledigt (PR 143), Hinweis im Baumenü erledigt (PR 232)",
    "pakete": [
     "P05",
     "P18"
    ],
    "prs": [
-    143
+    143,
+    232
    ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
@@ -2605,12 +2639,14 @@
   {
    "code": "D7",
    "text": "Sparziel anheften, Balken neben dem Geld, Schild am Bauplatz",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 232)",
    "pakete": [
     "P18"
    ],
-   "prs": [],
+   "prs": [
+    232
+   ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
   {
@@ -3236,13 +3272,15 @@
   {
    "code": "J4",
    "text": "Erstes Bauen führen, Geld fürs WC geschenkt (= Ü15)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 237)",
    "pakete": [
     "P17",
     "P03"
    ],
-   "prs": [],
+   "prs": [
+    237
+   ],
    "abschnitt": "J Einstieg und Hilfe"
   },
   {
@@ -3719,12 +3757,14 @@
   {
    "code": "Bed P7",
    "text": "Letzten Kauf zehn Sekunden lang zurücknehmen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 232)",
    "pakete": [
     "P18"
    ],
-   "prs": [],
+   "prs": [
+    232
+   ],
    "abschnitt": "P Bedienung (hier \"Bed\")"
   },
   {
@@ -4168,8 +4208,8 @@
     "P54"
    ],
    "zaehler": {
-    "erledigt": 7,
-    "teilweise": 2,
+    "erledigt": 8,
+    "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
     "offen": 0,
@@ -4198,11 +4238,11 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 6,
-    "teilweise": 4,
+    "erledigt": 8,
+    "teilweise": 3,
     "arbeit": 0,
     "frage": 0,
-    "offen": 5,
+    "offen": 4,
     "entfaellt": 0,
     "alle": 15
    }
@@ -4320,20 +4360,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 14,
-  "teilweise": 8,
+  "erledigt": 17,
+  "teilweise": 6,
   "arbeit": 4,
   "frage": 0,
-  "offen": 54,
+  "offen": 53,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 95,
-  "teilweise": 8,
+  "erledigt": 107,
+  "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 113,
+  "offen": 102,
   "entfaellt": 0,
   "alle": 217
  },
@@ -4673,20 +4713,156 @@
    "datum": "2026-11-14",
    "quelle": "vorschau-p11/pc-weit-kleine-schilder.png",
    "nr": 27
+  },
+  {
+   "datei": "p14-pr154-pc-gaestebuch.jpg",
+   "pakete": [
+    "P14"
+   ],
+   "titel": "Gästebuch am Hafenbüro",
+   "pr": 154,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "gaestebuch/pc-gaestebuch.png",
+   "nr": 28
+  },
+  {
+   "datei": "p14-pr154-iphone-blasen-und-meldungen.jpg",
+   "pakete": [
+    "P14"
+   ],
+   "titel": "Bewertungen über dem Boot",
+   "pr": 154,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "gaestebuch/iphone-blasen-und-meldungen.png",
+   "nr": 29
+  },
+  {
+   "datei": "p18-pr232-p18-pc-baustelle.jpg",
+   "pakete": [
+    "P18"
+   ],
+   "titel": "Baustelle über Nacht",
+   "pr": 232,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "bauen/p18-pc-baustelle.png",
+   "nr": 30
+  },
+  {
+   "datei": "p18-pr232-p18-handy-baustelle.jpg",
+   "pakete": [
+    "P18"
+   ],
+   "titel": "Ausbau in Abschnitten",
+   "pr": 232,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "bauen/p18-handy-baustelle.png",
+   "nr": 31
+  },
+  {
+   "datei": "p66-pr228-pc-pulk-einfahrt.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Boote sammeln sich als Pulk an der Einfahrt",
+   "pr": 228,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr228/pulk-pc-g8-4242.png",
+   "nr": 32
   }
  ],
  "neueBilder": [
+  32,
+  31,
+  30,
+  29,
+  28,
   27,
   26,
   25,
-  24,
-  23,
-  22,
-  21,
-  20,
-  17
+  24
  ],
  "merges": [
+  {
+   "datum": "2026-11-14",
+   "titel": "Zeitraffer: robuster auf großem Gelände, Erwartung Stand PR 181",
+   "pr": 221,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 154, 228, 229, 231, 232 eingetragen, Bilder für P14 und P18",
+   "pr": 236,
+   "pakete": [
+    "P14",
+    "P18"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich",
+   "pr": 234,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Bauen: Nachbesserungen zu PR 232 (Ausbau-Fähnchen, Rückgängig am ersten Kauf, Regionsziel)",
+   "pr": 235,
+   "pakete": [
+    "P18"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Boote: Abendstau, Pulk am Eingang, Ablegetakt und Seebrücke im Fahrwasser",
+   "pr": 228,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "P14: Bewertungen über dem Boot und Gästebuch",
+   "pr": 154,
+   "pakete": [
+    "P14"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Bauen P18: Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen",
+   "pr": 232,
+   "pakete": [
+    "P18",
+    "P05"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Roadmap-Pflege: PR 224 bis 227 eingetragen, vier neue Bilder",
+   "pr": 230,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Land nördlich der Reede: kein kahler Block mehr, ruhige Farben im groben Netz",
+   "pr": 229,
+   "pakete": [
+    "P62"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Wunsch-Schilder nach Bildbreite in Metern: am Handy wieder in der Startansicht",
+   "pr": 231,
+   "pakete": [
+    "P11"
+   ]
+  },
   {
    "datum": "2026-11-14",
    "titel": "Dauerlieger-Hinweis wartet, solange ein Tipp sichtbar ist",
@@ -4702,73 +4878,6 @@
    "pakete": [
     "P11"
    ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Einstieg: Tipps neben der linken Spalte und nacheinander",
-   "pr": 225,
-   "pakete": [
-    "P03"
-   ]
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "See im Norden je Küstentyp: kleinere Pflicht-See, Seeweg hinaus, Kartenrand ohne Kanten",
-   "pr": 224,
-   "pakete": [
-    "P62"
-   ]
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Roadmap: Vorschaubilder je Paket, zuletzt gemergte PRs, Bildergalerie in der README",
-   "pr": 223,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Dauerlieger-Hinweis: Morgen-Zettel des Tagesabschlusses freilassen",
-   "pr": 219,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Roadmap interaktiv: Seite /roadmap/ mit Filter und Übersicht in der README",
-   "pr": 222,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Plan für Ausbau Stufe 7 bis 20 (Hafenverbund), Welle 6 in der Roadmap",
-   "pr": 220,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Dauerlieger-Hinweis: Reste nach PR 214 (Kartenwahl, Knöpfe unten)",
-   "pr": 218,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Nehrung bekommt verlässlich Strandkörbe und Seebrücke",
-   "pr": 216,
-   "pakete": [
-    "P62",
-    "P64"
-   ]
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Verärgert-Text nur für Boote im Bild",
-   "pr": 215,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-13",
-   "titel": "Tagesabschluss: \"Abends zeigen\" am iPhone quer nicht mehr abgeschnitten",
-   "pr": 217,
-   "pakete": []
   }
  ]
 }

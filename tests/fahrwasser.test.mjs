@@ -14,10 +14,11 @@ import { stegbildSetzen } from '../web/js/data/stegbild.js';
 import { baueKarte, route, hindernisseAusHafen, bootMass, erreichbar, befahrbar, freiBei, sichtlinie } from '../web/js/world/fahrwasser.js';
 import { ChannelLock, Engstellen } from '../web/js/render/boat-channel.js';
 import { FORMEN, formSetzen } from '../web/js/render/landschaft/formen.js';
+import { seebrueckeStrecke } from '../web/js/render/landschaft/strand.js';
 import { seeBahnen, seeRunde, rundeImWasser, versetzt, VERSATZ_MAX } from '../web/js/data/verkehr.js';
 
 const R = region('ostsee');
-const BEREICH = { x0: -300, x1: 320, z0: -340, z1: 140 };
+const BEREICH = { x0: -430.5, x1: 320, z0: -361, z1: 140 };   // wie boat-view.js
 const GRUNDBILD = structuredClone(HAFEN);
 const STEGBILD_NR = [0, ...STEGBILDER.varianten.map((_, i) => i + 1)];
 function mitStegbild(nr, fn) {
@@ -234,6 +235,65 @@ test('Engstelle: Konvoi bis drei, Gegenverkehr wartet, Reihenfolge bleibt', () =
   assert.equal(e.lock(1).leer, true);
   e.reset();
   assert.equal(e.locks.size, 0);
+});
+
+test('Engstelle: wer nicht mehr fragt, faellt aus der Schlange und haelt niemanden auf', () => {
+  const lock = new ChannelLock(3);
+  const a = { id: 'A' }, weg = { id: 'W' }, g = { id: 'G' };
+  assert.equal(lock.request(a, 'ein', 1), true);
+  assert.equal(lock.request(weg, 'aus', 2), false);           // wartet, wird dann entfernt (fragt nie wieder)
+  assert.equal(lock.request(g, 'ein', 3), false, 'Gegenverkehr wartet vorn in der Schlange');
+  lock.release(a);
+  assert.equal(lock.request(g, 'ein', 10), false, 'noch frisch: das wartende Boot bestimmt die Richtung');
+  assert.equal(lock.request(g, 'ein', 40), true, 'nach 20 Bildern ohne Nachfrage zaehlt es nicht mehr');
+});
+
+test('Fahrwasser: die Seebruecke (je Form und Seed an anderer Stelle) sperrt ihren Grundriss', () => {
+  let geprueft = 0;
+  try {
+    for (const { nr } of FORMEN) {
+      for (const seed of [1, 4]) {
+        formSetzen(nr, seed);
+        const st = 5;
+        const sb = seebrueckeStrecke(st, 'ostsee');
+        if (!sb) continue;
+        const g = gelaendeAbfrage(st, R);
+        // wie boat-view.js bereichMit: Raster waechst bis 20 m um eine weit draussen liegende Bruecke
+        const xs = [sb.fuss[0] * PLAN_M, sb.kopf[0] * PLAN_M], zs = [-sb.fuss[1] * PLAN_M, -sb.kopf[1] * PLAN_M];
+        const ab = (v, o) => o + Math.floor((v - o) / 1.5) * 1.5;
+        const bereich = { x0: Math.min(BEREICH.x0, ab(Math.min(...xs) - 20, BEREICH.x0)), x1: Math.max(BEREICH.x1, Math.max(...xs) + 20), z0: Math.min(BEREICH.z0, ab(Math.min(...zs) - 20, BEREICH.z0)), z1: Math.max(BEREICH.z1, Math.max(...zs) + 20) };
+        const k = baueKarte({ tiefe: g.tiefeBei, bereich, ...hindernisseAusHafen(HAFEN, st, { seebruecke: sb }), engRadius: 3.6 });
+        const dx = sb.kopf[0] - sb.fuss[0], dy = sb.kopf[1] - sb.fuss[1];
+        for (let i = 1; i <= 9; i++) {
+          const x = (sb.fuss[0] + (dx * i) / 10) * PLAN_M, z = -(sb.fuss[1] + (dy * i) / 10) * PLAN_M;
+          assert.equal(befahrbar(k, x, z, 0.5, 0), false, `Form ${nr} Seed ${seed}: Seebruecke bei ${x.toFixed(0)}, ${z.toFixed(0)} ist befahrbar`);
+        }
+        geprueft++;
+      }
+    }
+  } finally { formSetzen(1, 1); }
+  assert.ok(geprueft >= 3, `nur ${geprueft} Formen mit Seebruecke`);
+});
+
+test('Fahrwasser: Weg fuehrt um Boote an Boje und Anker herum, nicht hindurch', () => {
+  const k = baueKarte({ tiefe: () => 5, bereich: { x0: 0, x1: 120, z0: 0, z1: 80 }, engRadius: 3 });
+  const a = { x: 10, z: 40 }, b = { x: 110, z: 40 };
+  const liegt = { x: 60, z: 40, r: 5 };
+  const ohne = route(k, a, b, { r: 3, rMin: 2, t: 1.5 });
+  const mit = route(k, a, b, { r: 3, rMin: 2, t: 1.5, boote: [liegt] });
+  assert.ok(ohne.ok && mit.ok && mit.amZiel);
+  const naechster = (pts) => {
+    let d = Infinity, p = a;
+    for (const q of pts) {
+      const dx = q.x - p.x, dz = q.z - p.z, l2 = dx * dx + dz * dz;
+      const u = l2 ? Math.max(0, Math.min(1, ((liegt.x - p.x) * dx + (liegt.z - p.z) * dz) / l2)) : 0;
+      d = Math.min(d, Math.hypot(p.x + dx * u - liegt.x, p.z + dz * u - liegt.z));
+      p = q;
+    }
+    return d;
+  };
+  assert.ok(naechster(ohne.punkte) < liegt.r, 'ohne Boote geradeaus');
+  assert.ok(naechster(mit.punkte) >= liegt.r + 2, `mit Boot mindestens Rumpf plus Abstand daneben (${naechster(mit.punkte).toFixed(1)} m)`);
 });
 
 const BAHN_Y_MAX = 560;   // Pflicht-See vor der Einfahrt (natur.js SEE_NORD bis y 600) mit Abstand zum Rand

@@ -1,0 +1,304 @@
+/* Gästebuch und Bewertungsblasen (Roadmap P14). Wird von web/js/ui/gaestebuch.js geladen.
+ * Pixel-Rahmen und Farben aus oberflaeche.css (--rahmen-*, --hm-*, --px-stern). Beschreibung: docs/gaestebuch.md
+ */
+
+/* ------------------------------------------------------------ Symbole */
+.hm-gb-sym {
+  display: inline-block;
+  flex: none;
+  width: var(--hm-symbol, 24px);
+  height: var(--hm-symbol, 24px);
+  background: currentColor;
+  -webkit-mask: var(--gb-sym) center / contain no-repeat;
+  mask: var(--gb-sym) center / contain no-repeat;
+  font-style: normal;
+}
+.hm-gb-sym.stern {
+  background: var(--px-stern) center / contain no-repeat;
+  -webkit-mask: none;
+  mask: none;
+}
+
+/* Ruf oben links ist antippbar */
+.hm-neu #rep.hm-gb-auf { cursor: pointer; }
+.hm-neu #rep.hm-gb-auf:hover { background: var(--hm-mulde); }
+.hm-neu #rep.hm-gb-auf:focus-visible { outline: 3px dashed var(--hm-gold); outline-offset: 2px; }
+
+/* ------------------------------------------------------------ Blasen über ablegenden Booten */
+#hm-gb-blasen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 12;
+}
+body.foto #hm-gb-blasen, body.hm-gb-offen #hm-gb-blasen { display: none; }
+.hm-gb-blase {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px 2px 4px;
+  font-family: var(--hm-pixel, system-ui);
+  font-size: calc(var(--hm-schrift, 15px) + 3px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--hm-tinte, #24364a);
+  white-space: nowrap;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--hm-rahmen-breite, 6px 6px 8px);
+  border-image-source: var(--rahmen-papier);
+  border-image-slice: 3 3 4 3 fill;
+  border-image-width: var(--hm-rahmen-breite, 6px 6px 8px);
+  will-change: transform, opacity;
+  animation: hm-gb-auf 0.24s steps(4);
+}
+.hm-gb-blase.gut { border-image-source: var(--rahmen-gold); }
+.hm-gb-blase.schlecht { border-image-source: var(--rahmen-hell); }
+.hm-gb-blase .stern { width: 20px; height: 20px; }
+/* Fehlender Wunsch: Symbol in Tinte, darüber ein schmaler roter Schrägstrich (Symbol bleibt erkennbar) */
+.hm-gb-fehlt {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  margin-left: 2px;
+  width: 24px;
+  height: 24px;
+  color: var(--hm-tinte, #24364a);
+}
+.hm-gb-fehlt > .hm-gb-sym { grid-area: 1 / 1; width: 20px; height: 20px; }
+.hm-gb-strich {
+  grid-area: 1 / 1;
+  width: 28px;
+  height: 4px;
+  background: var(--hm-koralle, #ee6454);
+  box-shadow: 0 0 0 1px var(--hm-papier, #fffaf0);
+  transform: rotate(-45deg);
+}
+/* Meldung, wenn das ablegende Boot nicht im Bild ist: rechts oben unter Übersicht und Menü */
+#hm-gb-meldungen {
+  position: absolute;
+  z-index: 19;
+  top: calc(var(--hm-oben, 12px) + var(--hm-knopf, 48px) + 8px);
+  right: var(--hm-rechts, 12px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  pointer-events: none;
+}
+body.foto #hm-gb-meldungen, body.hm-gb-offen #hm-gb-meldungen, #hm-gb-meldungen[hidden] { display: none; }
+.hm-neu .hm-gb-meldung {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: min(260px, 60vw);
+  min-height: 36px;
+  padding: 0 8px 0 4px;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--hm-rahmen-breite, 6px 6px 8px);
+  border-image-source: var(--rahmen-papier);
+  border-image-slice: 3 3 4 3 fill;
+  border-image-width: var(--hm-rahmen-breite, 6px 6px 8px);
+  background: none;
+  color: var(--hm-tinte, #24364a);
+  font-family: var(--hm-pixel, system-ui);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  animation: hm-gb-rein 0.2s steps(3);
+}
+.hm-neu .hm-gb-meldung.gut { border-image-source: var(--rahmen-gold); }
+.hm-neu .hm-gb-meldung.schlecht { border-image-source: var(--rahmen-hell); }
+.hm-gb-meldung .stern { width: 18px; height: 18px; }
+.hm-gb-meldung-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; font-size: calc(var(--hm-schrift, 15px) - 2px); color: var(--hm-tinte-2, #5a6a7c); }
+@keyframes hm-gb-rein { from { transform: translateX(30%); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes hm-gb-auf {
+  0% { scale: 0.4; }
+  60% { scale: 1.15; }
+  100% { scale: 1; }
+}
+
+/* ------------------------------------------------------------ Gästebuch */
+.hm-gb-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--hm-safe-top, 0px) + 12px) calc(var(--hm-safe-right, 0px) + 12px) calc(var(--hm-safe-bottom, 0px) + 12px) calc(var(--hm-safe-left, 0px) + 12px);
+  background: rgba(10, 30, 45, 0.35);
+}
+.hm-gb-backdrop[hidden] { display: none; }
+.hm-neu .hm-gb {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: min(560px, 100%);
+  max-height: 100%;
+  padding: 0;
+  color: var(--hm-tinte, #24364a);
+  font-size: var(--hm-schrift, 15px);
+  animation: hm-auf 0.12s steps(3);
+}
+.hm-gb-kopf {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 6px 14px;
+  border-bottom: var(--hm-px, 2px) dotted rgba(36, 54, 74, 0.35);
+}
+.hm-gb-kopf h2 {
+  flex: 1;
+  margin: 0;
+  font-family: var(--hm-pixel, system-ui);
+  font-size: calc(var(--hm-schrift, 15px) + 6px);
+  font-weight: 700;
+}
+.hm-gb-kopf .kopf-sym { color: var(--hm-meer, #23897d); }
+.hm-gb-zu {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--hm-tinte, #24364a);
+  cursor: pointer;
+}
+.hm-gb-zu:hover { background: var(--hm-mulde, #e9dfca); }
+.hm-gb-koerper {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 14px 12px;
+}
+.hm-gb h3 {
+  margin: 14px 0 6px;
+  font-family: var(--hm-pixel, system-ui);
+  font-size: calc(var(--hm-schrift, 15px) + 1px);
+  font-weight: 600;
+}
+.hm-gb-klein { margin: 4px 0 0; color: var(--hm-tinte-2, #5a6a7c); font-size: calc(var(--hm-schrift, 15px) - 2px); }
+
+/* Ruf und Verlauf */
+.hm-gb-ruf {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: end;
+  gap: 4px 14px;
+}
+.hm-gb-ruf-zahl {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 0 6px;
+  font-family: var(--hm-pixel, system-ui);
+}
+.hm-gb-ruf-zahl b { font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; }
+.hm-gb-ruf-zahl .stern { width: 32px; height: 32px; }
+.hm-gb-ruf-zahl span { grid-column: 1 / -1; color: var(--hm-tinte-2, #5a6a7c); font-size: calc(var(--hm-schrift, 15px) - 2px); }
+.hm-gb-verlauf { min-width: 0; height: 64px; }
+.hm-gb-kurve { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.hm-gb-ruf .hm-gb-klein { grid-column: 1 / -1; }
+
+/* Häufigste Gründe */
+.hm-gb-gruende ol { list-style: none; margin: 0; padding: 0; }
+.hm-gb-gruende li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 6px 0;
+  border-top: var(--hm-px, 2px) dotted rgba(36, 54, 74, 0.25);
+}
+.hm-gb-gruende li:first-child { border-top: 0; }
+.hm-gb-gruende li > .hm-gb-sym { color: var(--hm-koralle, #ee6454); }
+.hm-gb-grund { flex: 1 1 140px; font-weight: 600; }
+.hm-gb-anzahl { color: var(--hm-tinte-2, #5a6a7c); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hm-gb-bauen {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--hm-rahmen-breite, 6px 6px 8px);
+  border-image-source: var(--rahmen-meer);
+  border-image-slice: 3 3 4 3 fill;
+  border-image-width: var(--hm-rahmen-breite, 6px 6px 8px);
+  background: none;
+  color: #fff;
+  font-family: var(--hm-pixel, system-ui);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.hm-gb-bauen:active { transform: translateY(var(--hm-px, 2px)); }
+.hm-gb-spaeter { color: var(--hm-tinte-2, #5a6a7c); font-size: calc(var(--hm-schrift, 15px) - 2px); white-space: nowrap; }
+
+/* Einträge */
+.hm-gb-liste ul { list-style: none; margin: 0; padding: 0; }
+.hm-gb-liste li {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: var(--hm-px, 2px) dotted rgba(36, 54, 74, 0.25);
+}
+.hm-gb-liste li:first-child { border-top: 0; }
+.hm-gb-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 36px;
+  font-family: var(--hm-pixel, system-ui);
+  font-variant-numeric: tabular-nums;
+  background: var(--hm-mulde, #e9dfca);
+}
+.hm-gb-note .stern { width: 18px; height: 18px; }
+.hm-gb-note b { font-size: calc(var(--hm-schrift, 15px) + 2px); }
+.hm-gb-liste li.gut .hm-gb-note { background: #f7e3a6; }
+.hm-gb-liste li.schlecht .hm-gb-note { background: #fbd9d3; }
+.hm-gb-text { min-width: 0; }
+.hm-gb-wer { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-gb-wer span { color: var(--hm-tinte-2, #5a6a7c); font-size: calc(var(--hm-schrift, 15px) - 2px); }
+.hm-gb-text q { display: block; margin-top: 2px; font-style: italic; quotes: "„" "“"; }
+.hm-gb-warum {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  color: var(--hm-tinte-2, #5a6a7c);
+  font-size: calc(var(--hm-schrift, 15px) - 2px);
+}
+.hm-gb-warum .hm-gb-sym { width: 18px; height: 18px; color: var(--hm-koralle, #ee6454); }
+.hm-gb-fuss { margin-top: 14px; }
+
+/* Handy: als Blatt von unten, fast volle Höhe */
+@media (max-width: 599px) and (orientation: portrait) {
+  .hm-gb-backdrop { align-items: flex-end; padding: calc(var(--hm-safe-top, 0px) + 48px) 0 0; }
+  .hm-neu .hm-gb { width: 100%; padding-bottom: var(--hm-safe-bottom, 0px); }
+  .hm-gb-liste li { grid-template-columns: 56px 1fr; }
+  .hm-gb-wer { white-space: normal; }
+  .hm-gb-meldung-name { display: none; }
+}
+/* Handy quer: wenig Höhe, Ruf und Gründe nebeneinander */
+@media (max-height: 499px) and (orientation: landscape) {
+  .hm-gb-backdrop { padding: calc(var(--hm-safe-top, 0px) + 6px) calc(var(--hm-safe-right, 0px) + 8px) 6px calc(var(--hm-safe-left, 0px) + 8px); }
+  .hm-neu .hm-gb { width: min(680px, 100%); }
+  .hm-gb-verlauf { height: 44px; }
+  .hm-gb-ruf-zahl b { font-size: 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-gb-blase, .hm-neu .hm-gb, .hm-neu .hm-gb-meldung { animation: none; }
+}
+

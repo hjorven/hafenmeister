@@ -268,11 +268,13 @@ class BoatAnimManager {
       b.yieldF = y;
       b.laneWant = lane;
       b.room = room;
-      b.hinderer = hinderer ?? (b.blocked ? b.hitsAt?.(b.x, b.z, b.heading) : null);
+      b.hinderer = hinderer ?? (b.blocked ? (b.hitsAt?.(b.x, b.z, b.heading) ?? b.stoesstAn ?? null) : null);
       // nie ewig blockieren: nach 12 s Stillstand kurz ohne Verkehrsregeln weiter, aber nur bei echter
       // gegenseitiger Blockade. Steht das Boot nur in einer Schlange hinter Booten, die selbst warten
       // (Engstelle, Box noch belegt) oder fahren, wartet es weiter und schiebt sich nie hinein.
-      b.blockedFor = (y < 0.08 || room < 0.6 || b.blocked) && b.speed < 0.1 ? b.blockedFor + dt : 0;
+      const steht = (y < 0.08 || room < 0.6 || b.blocked) && b.speed < 0.1;
+      b.blockedFor = steht ? b.blockedFor + dt : 0;
+      b.blockedTotal = steht ? (b.blockedTotal ?? 0) + dt : 0;   // wird beim Pruefen nicht zurueckgesetzt
       if (b.blockedFor > 12) {
         if (this.festgefahren(b)) { b.ghost = 4; b.durchlaesse = (b.durchlaesse ?? 0) + 1; }
         b.blockedFor = 0;
@@ -283,11 +285,17 @@ class BoatAnimManager {
   /** Haengt b in einem Kreis gegenseitiger Blockade fest (A wartet auf B wartet auf A)? */
   festgefahren(b) {
     let o = b.hinderer;
-    for (let i = 0; i < 8 && o; i++) {
+    // b haelt eine Engstelle frei (faehrt im Konvoi), o wartet vor genau dieser Engstelle auf die
+    // Freigabe: o kommt erst, wenn b durch ist, b erst, wenn o weg ist. Das ist eine Blockade.
+    const halten = [...this.engstellen.locks.values()].some((l) => l.aktiv.has(b));
+    for (let i = 0; i < 40 && o; i++) {         // abends stehen bis zu 30 Boote in einer Kette
       if (o === b) return true;                       // Kreis: niemand kommt weiter
+      if (halten && o.wartetVorEngstelle) return true;
       if (o instanceof Hindernis) return false;       // fremdes Schiff faehrt weiter, warten
-      if (!o.movingTask?.()) return !!(o.moored || o.state === 'waiting') && b.blockedFor > 30;   // liegt fest im Weg
-      if ((o.blockedFor ?? 0) < 1) return false;      // vorn faehrt es oder wartet auf Freigabe: Schlange
+      if (!o.movingTask?.()) return !!(o.moored || o.state === 'waiting') && (b.blockedTotal ?? 0) > 30;   // liegt fest im Weg
+      // vorn faehrt es: Schlange. Steht es (auch ohne eigene Vorfahrt-Sperre, z. B. beim Drehen),
+      // weiter der Kette folgen: fuehrt sie zurueck zu b, ist es ein Kreis.
+      if ((o.blockedFor ?? 0) < 1 && (o.speed ?? 0) > 0.1) return false;
       o = o.hinderer;
     }
     return false;
@@ -351,6 +359,8 @@ function manager(game) {
       setFrei: (fn) => { m.frei = fn || null; },
       setSicht: (fn) => { m.sicht = fn || null; },
       engstellenNeu: () => m.engstellen.reset(),
+      // Nur fuer Tests: Boote ohne Bild um dt Sekunden weiterbewegen
+      vorspulen: (dt) => m.tick(dt),
       get engstellen() { return m.engstellen; },
       get boats() { return [...m.boats]; },
       get sea() { return m.sea; },
@@ -526,12 +536,15 @@ class PathTask {
       const bis = e.ein - this.s;                          // Weg bis zur Engstelle
       if (bis > L * 2 + 10) continue;                      // noch weit weg: nicht anfragen
       const dir = e.richtung > 0 ? 'plus' : 'minus';
-      if (mgr.request(e.nr, b, dir)) { e.frei = true; b.wartetVorEngstelle = false; continue; }
-      // nach 45 s Warten trotzdem fahren (Fehlerfall, z. B. ein Boot wurde entfernt)
+      if (mgr.request(e.nr, b, dir, b.mgr.frame)) { e.frei = true; b.wartetVorEngstelle = false; continue; }
+      // nach 120 s Warten trotzdem fahren (Fehlerfall); dann auch nicht mehr in der Schlange stehen.
+      // Abends stehen bis zu 25 Boote an, die Schlange laeuft in Dreier-Konvois je Richtung; frueher
+      // (45 s) fuhren Wartende dem Gegenverkehr in die Engstelle und steckten dort Bug an Bug fest.
       this.wartet += dt;
-      if (this.wartet > 45) { e.fertig = true; continue; }
+      if (this.wartet > 120) { e.fertig = true; mgr.release(e.nr, b); b.wartetVorEngstelle = false; continue; }
       b.wartetVorEngstelle = true;
-      const halt = Math.max(0, bis - L * 0.5 - 2);
+      // mit Abstand vor der Engstelle warten, damit der entgegenkommende Konvoi herauskommt
+      const halt = Math.max(0, bis - L - 6);
       max = Math.min(max, Math.sqrt(2 * b.cfg.accel * 0.8 * halt));
     }
     return max;
@@ -610,6 +623,7 @@ class PathTask {
         nx = _v.x + Math.sin(hd) * b.lane; nz = _v.z + Math.cos(hd) * b.lane;
         const n2 = b.hitsAt(nx, nz, hd);
         if (n2 && n2 !== vorher) {
+          b.stoesstAn = n2;          // fuer traffic(): wer im Weg ist, auch wenn es kein Boot vorn ist
           this.s = s0; b.speed = 0;
           this.curve.getPointAt(this.len > 0 ? this.s / this.len : 1, _v);
           b.blocked = true;
@@ -673,6 +687,27 @@ class WaitTask {
   constructor(sec) { this.sec = sec; }
   start() { this.t = 0; }
   step(b, dt) { b.setSpeed(0, dt); b.advance(b.speed * dt); this.t += dt; return this.t >= this.sec; }
+}
+
+// Ankunft spaeter: das Boot ist bis dahin unsichtbar (zaehlt im Verkehr nicht) und erscheint erst,
+// wenn am Startpunkt kein anderes Boot liegt oder faehrt (hoechstens 60 s zusaetzlich).
+class EinfahrtWarten {
+  constructor(sec) { this.sec = sec; }
+  start(b) { this.t = 0; b.model.visible = false; }
+  step(b, dt) {
+    b.speed = 0;
+    this.t += dt;
+    if (this.t < this.sec) return false;
+    if (this.t < this.sec + 60) {
+      for (const o of b.mgr.alle()) {
+        if (o === b || o.model?.visible === false) continue;
+        const r = ((b.info.length ?? 10) + (o.info?.length ?? 10)) / 2 + 6;
+        if ((o.x - b.x) ** 2 + (o.z - b.z) ** 2 < r * r) return false;
+      }
+    }
+    b.model.visible = true;
+    return true;
+  }
 }
 
 // Auf ein Promise warten, hoechstens timeout Sekunden Spielzeit (z. B. game.people.anBord(id)).
@@ -933,9 +968,12 @@ class BoatAnim {
     // opts.waitFor: () => true, sobald der Platz frei ist (das vorige Boot hat ihn verlassen)
     if (opts.waitFor) this.push(new UntilTask(opts.waitFor, 120));
     // opts.verzoegerung: erst nach so vielen Sekunden losfahren (Ankuenfte nicht alle zugleich)
-    if (opts.verzoegerung > 0) this.push(new WaitTask(opts.verzoegerung));
+    // Ein ankommendes Boot (opts.einfahrt) ist waehrenddessen noch nicht zu sehen: es liegt sonst
+    // sichtbar am Startpunkt im Weg der anderen, und es taucht erst auf, wenn dort Platz ist.
+    if (opts.verzoegerung > 0) this.push(opts.einfahrt ? new EinfahrtWarten(opts.verzoegerung) : new WaitTask(opts.verzoegerung));
     if (this.moored) this.pushUndock({});
-    const b = normBerth(berth);
+    let b = normBerth(berth);
+    if (b.kind === 'buoy') b = { ...b, heading: this.bojenKurs(b) };
     const big = this.info.size === 'XL' || this.info.size === 'XXL';
     this.push(new CallTask((bt) => {
       bt.state = 'docking';
@@ -976,6 +1014,10 @@ class BoatAnim {
     this.push(new CallTask((bt) => {
       bt.moored = true;
       bt.state = 'moored';
+      // Fest an Box oder Boje (auch in einer Engstelle zwischen Stegen): Freigaben zurueckgeben,
+      // sonst haelt ein liegendes Boot den Gegenverkehr bis zum Ablegen auf
+      bt.mgr.engstellen.releaseAll(bt);
+      bt.wartetVorEngstelle = false;
       bt.emit('boat:moored', { berth: b.id });
       bt.finish(true);
     }));
@@ -986,7 +1028,9 @@ class BoatAnim {
   undock(points = [], opts = {}) {
     const p = this.begin();
     // opts.verzoegerung: erst nach so vielen Sekunden ablegen (abends nicht alle zugleich)
-    if (opts.verzoegerung > 0) this.push(new WaitTask(opts.verzoegerung));
+    // Nur wer fest liegt, wartet: ein Boot, das gerade unterwegs ist (z. B. abgewiesen auf dem Weg zur
+    // Boje), faehrt sofort weiter, sonst stuende es mitten im Fahrwasser und alle anderen dahinter.
+    if (opts.verzoegerung > 0 && this.moored) this.push(new WaitTask(opts.verzoegerung));
     if (this.moored) this.pushUndock(opts);
     if (points.length) {
       if (opts.sails) this.push(new CallTask((b) => b.setSails(true)));
@@ -1053,7 +1097,7 @@ class BoatAnim {
       if (b?.kind !== 'buoy' && (bt.info.size === 'XL' || bt.info.size === 'XXL')) bt.emit('boat:horn', { reason: 'leave' });
     }));
     this.push(new LinesTask(false));
-    this.push(new CallTask((bt) => { bt.moored = false; bt.state = 'leaving'; }));
+    this.push(new CallTask((bt) => { bt.moored = false; bt.state = 'leaving'; bt.ablegeOrt = b && b.kind !== 'buoy' ? { x: b.x, z: b.z, r: b.length / 2 + bt.info.length * 1.5 } : null; }));
     if (!b) return;
     const L = this.info.length, B = this.info.beam;
     const dx = Math.cos(b.heading), dz = -Math.sin(b.heading);
@@ -1097,13 +1141,30 @@ class BoatAnim {
     return { x: b.x, z: b.z };
   }
 
+  /** Anlaufrichtung an Boje oder Ankerplatz: gegen den Wind, aber liegt der Platz nah am Ufer, aus der
+   *  naechsten Richtung, aus der der ganze Anlauf auf freiem Wasser liegt (mgr.frei/mgr.sicht). */
+  bojenKurs(b) {
+    const frei = this.mgr.frei, sicht = this.mgr.sicht;
+    if (!frei) return b.heading;
+    const L = this.info.length, r = this.info.beam / 2 + 0.4, t = (this.info.draft ?? 1) + 0.2;
+    const ok = (h) => {
+      const ex = Math.cos(h), ez = -Math.sin(h);
+      const f = this.finalPose({ ...b, heading: h });
+      const a = { x: f.x - ex * L * 2.2, z: f.z - ez * L * 2.2 };
+      const m = { x: f.x - ex * L * 0.6, z: f.z - ez * L * 0.6 };
+      return frei(a.x, a.z, r, t) && frei(m.x, m.z, r, t) && (!sicht || sicht(a, f, r, t));
+    };
+    const h = [0, 0.5, -0.5, 1, -1, 1.5, -1.5, 2, -2, 2.6, -2.6, Math.PI].map((d) => b.heading + d).find(ok);
+    return h ?? b.heading;
+  }
+
   approachPoints(b) {
     const L = this.info.length, B = this.info.beam;
     const dx = Math.cos(b.heading), dz = -Math.sin(b.heading);
     const px = Math.sin(b.heading), pz = Math.cos(b.heading);
     const f = this.finalPose(b);
     if (b.kind === 'buoy') {
-      // gegen den Wind langsam an die Boje
+      // gegen den Wind langsam an die Boje (Richtung vorher mit bojenKurs geprueft)
       return [
         { x: f.x - dx * L * 2.2, z: f.z - dz * L * 2.2 },
         { x: f.x - dx * L * 0.6, z: f.z - dz * L * 0.6 },
@@ -1278,6 +1339,10 @@ class BoatAnim {
       if (this.ghost > 0 && !(o instanceof Hindernis)) continue;
       // in die eigene Box hinein: Nachbarn in ihren Boxen begrenzen die Box, nicht die Fahrt
       if (o.moored && o.berth && o.berth.kind !== 'buoy' && (this.task?.remaining ?? 1e9) < this.info.length * 1.5) continue;
+      // aus der eigenen Box heraus ebenso: wer gerade abgelegt hat und noch vor seiner Box ist, bleibt
+      // nicht an einem Nachbarn haengen (sonst stand er dort fuer immer, und alle hinter ihm auch)
+      const ab = this.ablegeOrt;
+      if (ab && this.state === 'leaving' && o.moored && o.berth && o.berth.kind !== 'buoy' && Math.hypot(this.x - ab.x, this.z - ab.z) < ab.r) continue;
       const p = o.pose();
       if (Math.hypot(p.x - x, p.z - z) > (this.info.length + o.info.length) / 2) continue;
       if (sat(A, hull(p.x, p.z, p.h, o.info.length * 0.92, o.info.beam * 0.92))) return o;

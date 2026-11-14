@@ -373,19 +373,23 @@ function routeMit(k, a, b, o) {
   const s = naechsteFreie(k, a.x, a.z, rMin, t);
   const g = naechsteFreie(k, b.x, b.z, rMin, t);
   if (s < 0 || g < 0) return { punkte: [{ x: b.x, z: b.z }], engstellen: [], ok: false, laenge: Math.hypot(b.x - a.x, b.z - a.z) };
-  let zellen = astern(k, s, g, r, t, o.mitte ?? 1, rMin);
+  // Boote, die gerade still liegen (an Boje oder Anker): Weg moeglichst aussen herum, nicht hindurch.
+  // Wer Start oder Ziel selbst ueberdeckt (Nachbar an der Boje), zaehlt nicht.
+  const boote = (o.boote ?? []).filter((q) => Math.hypot(q.x - a.x, q.z - a.z) > q.r + rMin && Math.hypot(q.x - b.x, q.z - b.z) > q.r + rMin);
+  const extra = boote.length ? bootKosten(k, boote, r) : null;
+  let zellen = astern(k, s, g, r, t, o.mitte ?? 1, rMin, extra);
   let zielErreicht = !!zellen;
   if (!zellen) {
     // Ziel liegt in einer abgeschnittenen Tasche (zwischen Stegen, hinter einer Mole): zur
     // naechsten vom Start erreichbaren Zelle fahren, den Rest erledigt das Anlegen.
     const g2 = naechsteErreichbare(k, s, b.x, b.z, rMin, t);
-    if (g2 >= 0) zellen = astern(k, s, g2, r, t, o.mitte ?? 1, rMin);
+    if (g2 >= 0) zellen = astern(k, s, g2, r, t, o.mitte ?? 1, rMin, extra);
   }
   if (!zellen) return { punkte: [{ x: b.x, z: b.z }], engstellen: [], ok: false, laenge: Math.hypot(b.x - a.x, b.z - a.z) };
   // Glaetten: nur Zellen behalten, zwischen denen eine freie Sichtlinie liegt
   // Bedarf je Zelle: r, aber nie mehr, als an dieser Stelle des gefundenen Wegs frei ist
   const bedarf = zellen.map((c) => Math.max(rMin, Math.min(r, k.frei[c])));
-  let pts = glaetten(k, zellen, bedarf, t).map(({ c, need }) => ({ ...mitte(k, c), need }));
+  let pts = glaetten(k, zellen, bedarf, t, boote).map(({ c, need }) => ({ ...mitte(k, c), need }));
   // Zielpunkt genau setzen, wenn die letzte Strecke dorthin frei ist (sonst endet der Weg davor)
   const letzter = pts[pts.length - 1];
   if (zielErreicht && sichtlinie(k, letzter, b, rMin - 0.05, t)) pts[pts.length - 1] = { x: b.x, z: b.z, need: Math.min(letzter.need, Math.max(rMin, freiBei(k, b.x, b.z))) };
@@ -400,7 +404,7 @@ function routeMit(k, a, b, o) {
   return { punkte: pts, engstellen: engstellenAuf(k, a, pts), ok: true, amZiel: zielErreicht, laenge };
 }
 
-function astern(k, s, g, r, t, mitteGewicht, rMin = r) {
+function astern(k, s, g, r, t, mitteGewicht, rMin = r, extra = null) {
   const { nx, nz, frei, tiefe, weich } = k;
   const n = nx * nz;
   const gx = g % nx, gz = (g - gx) / nx;
@@ -414,9 +418,9 @@ function astern(k, s, g, r, t, mitteGewicht, rMin = r) {
   // Kanalmitte bevorzugen: Zellen nah an einer Kante kosten mehr (bis 4 r)
   const zusatz = (c) => {
     const f = frei[c] - r;
-    if (f < 0) return 12 + 30 * (-f / Math.max(0.5, r - rMin)) + weich[c];   // enger als gewuenscht
+    if (f < 0) return 12 + 30 * (-f / Math.max(0.5, r - rMin)) + weich[c] + (extra?.get(c) ?? 0);   // enger als gewuenscht
     const kante = f < 3 * r ? mitteGewicht * (1 - f / (3 * r)) * 1.5 : 0;
-    return kante + weich[c];
+    return kante + weich[c] + (extra?.get(c) ?? 0);
   };
   let schritte = 0;
   while (h.size) {
@@ -481,7 +485,37 @@ export function sichtlinie(k, p, q, r, t = 0) {
 
 // Sichtlinien-Glaettung: von einer Zelle so weit wie moeglich geradeaus. Die Gerade darf nirgends
 // enger werden als der gefundene Weg dazwischen (need = kleinster Bedarf auf dem Stueck).
-function glaetten(k, zellen, bedarf, t) {
+// Zusatzkosten um still liegende Boote ({ x, z, r }): innen sehr teuer, bis r + 2 Bootsradien abfallend
+function bootKosten(k, boote, r) {
+  const m = new Map();
+  for (const q of boote) {
+    const innen = q.r + r, aussen = innen + r * 2;
+    for (let z = q.z - aussen; z <= q.z + aussen; z += k.zelle) {
+      for (let x = q.x - aussen; x <= q.x + aussen; x += k.zelle) {
+        const c = idx(k, x, z);
+        if (c < 0) continue;
+        const mc = mitte(k, c);
+        const d = Math.hypot(mc.x - q.x, mc.z - q.z);
+        if (d > aussen) continue;
+        const w = d <= innen ? 40 : 6 * (1 - (d - innen) / (aussen - innen));
+        if (w > (m.get(c) ?? 0)) m.set(c, w);
+      }
+    }
+  }
+  return m;
+}
+
+// Strecke p-q haelt Abstand need zu allen still liegenden Booten
+function abseits(boote, p, q, need) {
+  for (const b of boote) {
+    const dx = q.x - p.x, dz = q.z - p.z, l2 = dx * dx + dz * dz;
+    const u = l2 > 0 ? Math.max(0, Math.min(1, ((b.x - p.x) * dx + (b.z - p.z) * dz) / l2)) : 0;
+    if (Math.hypot(p.x + dx * u - b.x, p.z + dz * u - b.z) < b.r + need) return false;
+  }
+  return true;
+}
+
+function glaetten(k, zellen, bedarf, t, boote = []) {
   const out = [{ c: zellen[0], need: bedarf[0] }];
   if (zellen.length <= 2) { if (zellen.length === 2) out.push({ c: zellen[1], need: bedarf[1] }); return out; }
   let i = 0;
@@ -492,7 +526,9 @@ function glaetten(k, zellen, bedarf, t) {
       need = Math.min(need, bedarf[j]);
       // nur jede vierte Zelle (und die letzte) pruefen, das reicht fuer gerade Stuecke
       if (j !== zellen.length - 1 && (j - i) % 4 !== 0) continue;
-      if (sichtlinie(k, p, mitte(k, zellen[j]), need - 0.05, t)) { best = j; bestNeed = need; }
+      const q = mitte(k, zellen[j]);
+      // um Boote: nur kuerzen, wenn die Strecke nicht naeher heranfuehrt als der gefundene Weg
+      if (sichtlinie(k, p, q, need - 0.05, t) && (!boote.length || abseits(boote, p, q, need))) { best = j; bestNeed = need; }
       else if (j - best > 24) break;
     }
     out.push({ c: zellen[best], need: bestNeed });
@@ -593,7 +629,8 @@ export function bootMass(info) {
  * alle Liegeplaetze als Rechtecke. Planeinheiten werden in Weltmeter umgerechnet.
  * @param {object} hafen  HAFEN
  * @param {number} stufe
- * @param {object} [o]  nurIds: Set der Liegeplatz-ids, die als Rechteck zaehlen (sonst alle der Stufe)
+ * @param {object} [o]  nurIds: Set der Liegeplatz-ids, die als Rechteck zaehlen (sonst alle der Stufe);
+ *   grosseGaeste; seebruecke: Strecke aus render/landschaft/strand.js (seebrueckeStrecke) oder null
  */
 export function hindernisseAusHafen(hafen, stufe, o = {}) {
   const U = hafen.einheiten?.meterProEinheit ?? 0.62;
@@ -612,20 +649,24 @@ export function hindernisseAusHafen(hafen, stufe, o = {}) {
     const [x, y, richtung] = lage;
     rechtecke.push({ id: p.id, x: x * U, z: -y * U, h: (richtung * Math.PI) / 180, l: p.laenge * U, b: p.breite * U, art: p.art });
   }
-  // Liegewannen der grossen Gaeste (Kreuzfahrtschiff, Marine, Windjammer vor Anker) ab Stufe 6 und die
-  // Seebruecke ab Stufe 3: dort plant kein Gastboot seinen Weg, auch wenn gerade kein Schiff da ist.
-  const flaechen = [...(stufe >= 6 ? (o.grosseGaeste ?? GROSSE_GAESTE) : []), ...(stufe >= 3 ? [seebruecke(stufe)] : [])];
-  for (const g of flaechen) {
+  // Liegewannen der grossen Gaeste (Kreuzfahrtschiff, Marine, Windjammer vor Anker) ab Stufe 6: dort
+  // plant kein Gastboot seinen Weg, auch wenn gerade kein Schiff da ist.
+  for (const g of stufe >= 6 ? (o.grosseGaeste ?? GROSSE_GAESTE) : []) {
     const r = g.rechteck;
     if (!r) continue;
     rechtecke.push({ id: g.name, x: ((r.x0 + r.x1) / 2) * U, z: (-(r.y0 + r.y1) / 2) * U, h: Math.PI / 2, l: (r.y1 - r.y0) * U, b: (r.x1 - r.x0) * U, art: 'gast' });
   }
+  // Seebruecke: o.seebruecke = { fuss: [x, y], kopf: [x, y], breite } in Planeinheiten
+  // (render/landschaft/strand.js seebrueckeStrecke), je Kueste und Stufe anders gelegt, gedreht
+  // oder ganz ohne (null). Als Rechteck von Fuss bis Kopf, mit Pfaehlen.
+  const sb = o.seebruecke;
+  if (sb?.fuss && sb?.kopf) {
+    const dx = sb.kopf[0] - sb.fuss[0], dy = sb.kopf[1] - sb.fuss[1];
+    const lang = Math.hypot(dx, dy);
+    if (lang > 0) {
+      rechtecke.push({ id: 'Seebruecke', x: ((sb.fuss[0] + sb.kopf[0]) / 2) * U, z: (-(sb.fuss[1] + sb.kopf[1]) / 2) * U, h: Math.atan2(dy, dx), l: (lang + 4) * U, b: (sb.breite ?? 14) * U, art: 'gast' });
+    }
+  }
   return { linien, rechtecke };
 }
 
-// Seebruecke (render/buildings.js, id 'seebruecke'): Stufe 3 bis 5 bei x -170, ab Stufe 6 bei x -262,
-// jeweils von y 214 gut 50 m nach Norden, mit Pfaehlen etwa 14 Planeinheiten breit.
-function seebruecke(stufe) {
-  const x = stufe >= 6 ? -262 : -170;
-  return { name: 'Seebruecke', rechteck: { x0: x - 7, x1: x + 7, y0: 214, y1: 296 } };
-}

@@ -18,7 +18,6 @@ export const ECONOMY = {
     abendSekunden: 30,      // Abend, Kassieren
     saisonTage: 30,         // danach Winter
     winterTage: 3,          // keine Gäste
-    winterBautempo: 2,      // noch ungenutzt, wie stufen[].ausbau.bautage: Paket P18 nutzt oder löscht beides
     // Saisontage je Jahreszeit [von, bis]
     jahreszeiten: { fruehling: [1, 8], sommer: [9, 22], herbst: [23, 30] },
     erstesBootNach: 3,      // Sekunden: am ersten Tag eines neuen Spiels kommt gleich ein Boot
@@ -121,6 +120,10 @@ export const ECONOMY = {
     fenster: 20,              // Schnitt der letzten 20 Bewertungen
     sondergastBonus: 1,       // Sondergäste (Marine, Behörden, Traditionssegler) geben so viel extra
     ohneWunsch: 4,
+    // Note aus den Wünschen: keiner erfüllt = keiner, alle erfüllt = alle, dazwischen linear.
+    // keiner nicht unter abgewiesen.wertung: wer einen Platz bekam, ist nicht unzufriedener als
+    // wer weggeschickt wurde (Befund P10, vorher 1 + 4 * Anteil, entschieden in P14).
+    wunschNote: { keiner: 2.5, alle: 5 },
     // Ankünfte = Grundzahl * (0.75 + 0.125 * (Ruf - 1)): 1 Anker 0.75x, 3 Anker 1x, 5 Anker 1.25x
     ankunftBasis: 0.75,
     ankunftJeAnker: 0.125,
@@ -152,8 +155,9 @@ export const ECONOMY = {
     kuendigungsZuschlag: 0.2,  // sofort kündigen: Pacht der restlichen Tage zurück plus dieser Anteil der Saisonpacht
   },
   // Stammgäste (features/stammgaeste.js): Anteil der neuen Boote, die Stammgäste sind; ab so vielen
-  // Ankern kommt ein Gast wieder; Länge der Liste; ab diesem Besuch als Dauerlieger zu behalten
-  stammgaeste: { chance: 0.15, abBewertung: 4, maxListe: 40, dauerAbBesuch: 5 },
+  // Ankern kommt ein Gast wieder; Länge der Liste; ab diesem Besuch als Dauerlieger zu behalten;
+  // namenGedaechtnis: so viele zuletzt vergebene Bootsnamen kommen möglichst nicht gleich wieder
+  stammgaeste: { chance: 0.15, abBewertung: 4, maxListe: 40, dauerAbBesuch: 5, namenGedaechtnis: 30 },
   // Tagesziele (features/tagesziele.js, docs/neue-features.md Abschnitt 6). Morgens drei Karten
   // (leicht, mittel, schwer), der Spieler nimmt eine; es zählen nur eigene Handlungen.
   // geld: Belohnung eines leichten Ziels je Ausbaustufe. schwere: soll = Grundmenge mal Faktor,
@@ -191,7 +195,8 @@ export const ECONOMY = {
   // ziel: was man in dieser Stufe erreichen muss, um das Bauprojekt der nächsten Stufe zu
   // kaufen (gaeste = abgereiste Gäste in dieser Stufe, ruf = Mindestruf).
   // ausbau: das große Bauprojekt, das zur nächsten Stufe führt, mit den Plätzen, die es selbst
-  // bringt. Ersatz für umgebaute Plätze steckt im jeweiligen Stegprojekt (siehe unten).
+  // bringt. bautage: Nächte Bauzeit, zugleich Zahl der Bauabschnitte (höchstens drei, ui/bauen.js):
+  // jeder Abschnitt wird einzeln bezahlt und ist am nächsten Morgen fertig; 0 = sofort fertig. Ersatz für umgebaute Plätze steckt im jeweiligen Stegprojekt (siehe unten).
   stufen: [
     { stufe: 1, name: 'Bootssteg am See', ankuenfte: 4, mix: { S: 1 },
       ziel: { gaeste: 20, ruf: 2.5 },

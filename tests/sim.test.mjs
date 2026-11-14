@@ -231,10 +231,17 @@ test('Ruf: Schnitt der letzten 20, Faktor für Ankünfte', () => {
 });
 
 test('Bewertung: Komfort, Sondergast und Sturmschaden, begrenzt auf 1 bis 5', () => {
-  // Hälfte der Wünsche: 3 Anker, dazu der Komfort des Platzes
-  assert.equal(sim.rateBoat(ctx, { wishesMet: 1, wishesTotal: 2, berthId: 'D1', special: false, penalty: 0 }), Math.min(5, 3 + berth('D1').comfort * RULES.comfortBonus));
+  // Hälfte der Wünsche: Mitte zwischen "keiner erfüllt" und "alle erfüllt", dazu der Komfort des Platzes
+  const { noneMet: lo, allMet: hi } = ctx.rules.rating;
+  const r1 = (x) => Math.round(x * 10) / 10;
+  assert.equal(sim.rateBoat(ctx, { wishesMet: 1, wishesTotal: 2, berthId: 'D1', special: false, penalty: 0 }), r1(Math.min(5, (lo + hi) / 2 + berth('D1').comfort * RULES.comfortBonus)));
   assert.equal(sim.rateBoat(ctx, { wishesMet: 0, wishesTotal: 0, berthId: 'K1', special: true, penalty: 0 }), 5);
-  assert.equal(sim.rateBoat(ctx, { wishesMet: 0, wishesTotal: 3, berthId: 'A1', special: false, penalty: 1 }), 1);
+  assert.equal(sim.rateBoat(ctx, { wishesMet: 0, wishesTotal: 3, berthId: 'A1', special: false, penalty: 1 }), r1(Math.max(1, lo - 1)));
+  assert.equal(sim.rateBoat(ctx, { wishesMet: 0, wishesTotal: 3, berthId: 'A1', special: false, penalty: 3 }), 1);
+  // Wer einen Platz bekam, bewertet nie schlechter als ein weggeschickter Gast (Befund P10)
+  assert.ok(sim.rateBoat(ctx, { wishesMet: 0, wishesTotal: 2, berthId: 'A1', special: false, penalty: 0 }) >= ctx.rules.turnAway.rating);
+  // Boot ohne Wunschliste (alte Spielstände, Proben) stürzt nicht ab
+  assert.equal(sim.rateBoat(ctx, { berthId: 'A1' }), ctx.rules.rating.noWishes);
 });
 
 test('Hafenbüro: Stufe 1 Knopf, Stufe 2 kassiert selbst, Leitstelle weist selbst zu', () => {

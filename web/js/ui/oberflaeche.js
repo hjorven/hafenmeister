@@ -205,16 +205,33 @@ export function init(game) {
     if (!adv?.goal) return null;
     const g = adv.goal;
     const geld = sim.state.money;
-    const zeilen = [
-      { name: 'Gäste', ist: Math.min(adv.guests, g.guests), soll: g.guests, text: `${ganz(Math.min(adv.guests, g.guests))} von ${ganz(g.guests)}` },
-      { name: 'Ruf', ist: Math.min(adv.reputation, g.reputation), soll: g.reputation, text: `${num1(adv.reputation)} von ${num1(g.reputation)}` },
-      { name: 'Kasse', ist: Math.min(geld, g.cost), soll: g.cost, text: `${euro(Math.min(geld, g.cost))} von ${euro(g.cost)}` },
-    ];
+    // Ausbau in Bauabschnitten (ui/bauen.js, Roadmap P18): die Kasse zaehlt gegen den naechsten Abschnitt
+    const ab = game.bauen?.ausbau?.();
+    const abschnitte = ab && ab.n > 1;
+    const begonnen = abschnitte && (ab.fertig > 0 || ab.imBau);
+    const preis = abschnitte ? ab.preis : g.cost;
+    const nr = abschnitte ? Math.min(ab.n, ab.fertig + 1) : 1;
+    const kasse = { name: abschnitte ? `Kasse für Abschnitt ${nr}` : 'Kasse', ist: Math.min(geld, preis), soll: preis, text: `${euro(Math.min(geld, preis))} von ${euro(preis)}` };
+    const zeilen = begonnen
+      ? [
+        { name: 'Bauabschnitte', ist: ab.fertig, soll: ab.n, text: `${ab.fertig} von ${ab.n}${ab.imBau ? ', Baustelle läuft' : ''}` },
+        ab.imBau ? { name: 'Baustelle', ist: 0, soll: 1, text: 'morgen früh fertig' } : kasse,
+      ]
+      : [
+        { name: 'Gäste', ist: Math.min(adv.guests, g.guests), soll: g.guests, text: `${ganz(Math.min(adv.guests, g.guests))} von ${ganz(g.guests)}` },
+        { name: 'Ruf', ist: Math.min(adv.reputation, g.reputation), soll: g.reputation, text: `${num1(adv.reputation)} von ${num1(g.reputation)}` },
+        kasse,
+      ];
+    const bereit = begonnen ? !ab.imBau && geld >= preis
+      : abschnitte ? adv.missing.every((m) => m === 'money') && geld >= preis : adv.ok;
     return {
       titel: 'Ausbau',   // "Stufe 2" in Stufe 1 las sich wie die aktuelle Stufe
-      kopf: `Nächster Ausbau: ${g.name ?? 'Hafen erweitern'}`,
-      zeilen, fertig: adv.ok,
-      aktion: game.bauen?.oeffnen ? { text: adv.ok ? 'Jetzt ausbauen' : 'Im Baumenü ansehen', tun: () => game.bauen.oeffnen('hafen') } : null,
+      kopf: `Nächster Ausbau: ${g.name ?? 'Hafen erweitern'}${abschnitte ? `, Abschnitt ${nr} von ${ab.n}` : ''}`,
+      zeilen, fertig: bereit,
+      // Begonnener Ausbau: das Faehnchen zaehlt Abschnitte ("1/2"), nicht erfuellte Zeilen (las sich wie "nichts gebaut")
+      zahl: begonnen && !bereit ? `${ab.fertig}/${ab.n}` : undefined,
+      zahlText: begonnen && !bereit ? `${ab.fertig} von ${ab.n} Bauabschnitten fertig` : undefined,
+      aktion: game.bauen?.oeffnen ? { text: bereit ? 'Jetzt ausbauen' : 'Im Baumenü ansehen', tun: () => game.bauen.oeffnen('hafen') } : null,
     };
   }
 
@@ -233,7 +250,7 @@ export function init(game) {
       el('span', { class: 'hm-chip-text' }, d.titel),
       el('span', { class: 'hm-chip-zahl' }, d.zahl ?? (d.fertig ? 'bereit' : `${erfuellt}/${d.zeilen.length}`)),
     );
-    zielKnopf.setAttribute('aria-label', `${d.kopf}. ${erfuellt} von ${d.zeilen.length} erfüllt.`);
+    zielKnopf.setAttribute('aria-label', `${d.kopf}. ${d.zahlText ?? `${erfuellt} von ${d.zeilen.length} erfüllt`}.`);
     if (zielPanel.hidden) return;
     zielPanel.replaceChildren(
       el('p', { class: 'hm-klapp-kopf' }, d.kopf),
@@ -312,9 +329,14 @@ export function init(game) {
     if (auf) einstTafel.querySelector('.hm-schalter')?.focus({ preventScroll: true });
   }
   einstBtn.addEventListener('click', (e) => { e.stopPropagation(); klappeAndereZu('einstellungen'); einstAuf(einstTafel.hidden); });
+  // Passt das Menü nicht ganz ins Bild (Handy quer), zeigt ein Streifen unten, dass weitere Zeilen folgen
+  const mehrUnten = () => menue.classList.toggle('hm-mehr', !menue.hidden && menue.scrollTop + menue.clientHeight < menue.scrollHeight - 4);
+  menue.addEventListener('scroll', mehrUnten, { passive: true });
+  window.addEventListener('resize', mehrUnten);
   function menueAuf(auf) {
     menue.hidden = !auf;
     menueBtn.setAttribute('aria-expanded', String(auf));
+    if (auf) { menue.scrollTop = 0; mehrUnten(); }
   }
   menueBtn.addEventListener('click', (e) => { e.stopPropagation(); const auf = menue.hidden; klappeAndereZu('menue'); menueAuf(auf); });
   // Capture: Knöpfe anderer Module (Ton) stoppen ihren Klick, das Menü soll trotzdem zuklappen und nichts verdecken
@@ -424,6 +446,7 @@ export function init(game) {
   game.on('sim:seasonEnd', () => { zielSchluessel = ''; plane(); });
   game.on('sim:seasonStart', () => { zielSchluessel = ''; plane(); });
   game.on('spielstand-geladen', plane);
+  for (const ev of ['bauen:abschnitt', 'bauen:abschnittFertig', 'bauen:zurueck']) game.on(ev, plane);
   game.on('ready', () => { ordnen(); plane(); zeigeTempo(); setTimeout(ordnen, 600); });
   game.on('tap', () => klappeZu());
   plane();
