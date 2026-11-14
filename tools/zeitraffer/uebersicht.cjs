@@ -11,6 +11,8 @@ const zeilen = [];
 const ordner = fs.readdirSync(DIR, { withFileTypes: true }).filter((d) => d.isDirectory())
   .map((d) => d.name).sort((a, b) => (parseInt(a.replace(/\D/g, ''), 10) || 0) - (parseInt(b.replace(/\D/g, ''), 10) || 0));
 const anz = (R, k) => Object.keys(R.treffer?.[k] ?? {}).length;
+// ueberlapp: liegend (beide festgemacht) getrennt von kurzen Berührungen in Fahrt (seit PR 228 mitgezählt)
+const liegend = (R) => Object.keys(R.treffer?.ueberlapp ?? {}).filter((k) => k.endsWith(', moored)')).length;
 let commit = null;
 for (const o of ordner) {
   for (const f of fs.readdirSync(path.join(DIR, o)).filter((x) => /^ergebnis-.*\.json$/.test(x)).sort()) {
@@ -20,14 +22,14 @@ for (const o of ordner) {
     const ziel = v.find((x) => x.ziel?.ok);
     const tage = [2, 3, 4, 5, 6].map((s) => R.stufen.find((x) => x.stufe === s)?.tag ?? '-').join(' / ');
     const speichern = R.speichern.filter((s) => !s.gespeichert || s.abweichungen.length).length;
-    zeilen.push(`| ${o} | ${R.geraet} | ${tage} | ${ziel ? ziel.tag : `nein (Stufe ${letzt.stufe})`} | ${anz(R, 'steg')} | ${anz(R, 'land')} | ${anz(R, 'fest')} | ${anz(R, 'ueberlapp')} | ${anz(R, 'haengt')} | ${anz(R, 'sim')} | ${R.fehler.length} | ${speichern}/${R.speichern.length} | [Bericht](${o}/bericht.html) |`);
+    zeilen.push(`| ${o} | ${R.geraet} | ${tage} | ${ziel ? ziel.tag : `nein (Stufe ${letzt.stufe})`} | ${anz(R, 'steg')} | ${anz(R, 'land')} | ${anz(R, 'fest')} | ${liegend(R)} | ${anz(R, 'ueberlapp') - liegend(R)} | ${anz(R, 'haengt')} | ${anz(R, 'pulk')} (${Math.max(0, ...Object.values(R.treffer?.pulk ?? {}).map((t) => t.n || 0))}) | ${anz(R, 'lange')} | ${R.logbuch?.ende ? `${R.logbuch.ende.gesehen}/${R.logbuch.ende.gesamt} (XXL ${R.logbuch.ende.je.XXL?.gesehen ?? 0}/${R.logbuch.ende.je.XXL?.gesamt ?? 0})` : '-'} | ${anz(R, 'sim')} | ${R.fehler.length} | ${speichern}/${R.speichern.length} | [Bericht](${o}/bericht.html) |`);
   }
 }
 const md = [
   '# Zeitraffer-Serie', '',
   `Stand: ${commit ?? 'lokal'}. Je Zeile ein Lauf von Stufe 1 bis zum Ziel von Stufe 6. Zahlen bei den Prüfungen: verschiedene Boote oder Fälle mit Treffer.`, '',
-  '| Lauf | Gerät | Aufstieg an Tag (Stufe 2/3/4/5/6) | Ziel Stufe 6 an Tag | durch Steg | über Land | ineinander fest | liegend überlappt | hängt | Regeln | Konsolenfehler | Speichern abweichend | |',
-  '|---|---|---|---|---|---|---|---|---|---|---|---|---|',
+  '| Lauf | Gerät | Aufstieg an Tag (Stufe 2/3/4/5/6) | Ziel Stufe 6 an Tag | durch Steg | über Land | ineinander fest | liegend überlappt | in Fahrt berührt | hängt | Pulk-Tage (größter) | zu lange unterwegs | Logbuch | Regeln | Konsolenfehler | Speichern abweichend | |',
+  '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|',
   ...zeilen, '',
   'Erwartung aus tools/balance.mjs: Stufe 2/3/4/5/6 an Tag 14 / 52 / 94 / 145 / 206, Ziel an Tag 258 (Stand PR 181).', '',
 ];

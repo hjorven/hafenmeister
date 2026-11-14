@@ -56,6 +56,7 @@ const MODULES = [
   './ui/gaestebuch.js',
   './ui/logbuch.js',                   // Logbuch und Hafenchronik (P21)
   './features/erfolge.js',             // Erfolge, Reiter im Logbuch, Dinge im Hafen (P22)
+  './ui/funk-anmeldung.js',            // Anmeldung per Funk, Box freihalten (P28)
   './ui/oberflaeche.js',
 ];
 

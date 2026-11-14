@@ -28,7 +28,7 @@ Dependabot (`.github/dependabot.yml`) schlägt einmal im Monat einen gesammelten
 
 ## Secret-Scan
 
-`secret-scan.yml` lädt `gitleaks` in fester Version, prüft die SHA-256-Summe und durchsucht die ganze Git-Historie: bei jedem Pull Request, bei jedem Push auf `main`, montags früh und per Hand. Gefundene Werte erscheinen im Log geschwärzt.
+`secret-scan.yml` lädt `gitleaks` in fester Version, prüft die SHA-256-Summe und durchsucht die ganze Git-Historie: bei jedem Pull Request, bei jedem Push auf `main`, montags früh und per Hand. (Pages und Roadmap-Übersicht laufen seit 14.11.2026 gebündelt alle 30 Minuten statt nach jedem Push, Tests nur bei Pull Requests und nachts, siehe [veroeffentlichen.md](veroeffentlichen.md) und [tests.md](tests.md).) Gefundene Werte erscheinen im Log geschwärzt.
 
 Bei einem Fund:
 

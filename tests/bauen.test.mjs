@@ -89,3 +89,12 @@ test('Geschenktes erstes Bauwerk: kein Rat zum Sparen (Feature-Test 14.11.)', ()
   const wunsch = waehleSchritt({ geld: 28, eintraege: [vers('wc', 80)], bedarf: { ...leer(), offen: { wc: 3 } }, stufe: null, geschenk: 'versorgung:wc' });
   assert.doesNotMatch(wunsch.text, /sparen/);
 });
+
+test('Geschenktes erstes Bauwerk geht vor Stegausbau bei vollem Hafen (Einzeltest 14.11.)', () => {
+  const r = waehleSchritt({ geld: 20, eintraege: [steg('haken', 124, 2), vers('wc', 80)], bedarf: { ...leer(), weg: 3, belegt: 4, plaetze: 4 }, stufe: stufe(['guests']), geschenk: 'versorgung:wc' });
+  assert.equal(r.ziel, 'versorgung:wc');
+  assert.equal(r.leistbar, true);
+  assert.doesNotMatch(r.text, /sparen/);
+  const ohne = waehleSchritt({ geld: 20, eintraege: [steg('haken', 124, 2), vers('wc', 80)], bedarf: { ...leer(), weg: 3 }, stufe: stufe(['guests']) });
+  assert.equal(ohne.ziel, 'steg:haken');
+});

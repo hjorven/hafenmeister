@@ -48,13 +48,13 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 **Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
 
 <table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P24"><img src="web/roadmap/bilder/p24-pr281-quer-regatta-vorbei.jpg" alt="Regatta vorbei: Ergebnis am Abend, Handy quer" width="100%"></a><br><sub>P24 · Regatta vorbei: Ergebnis am Abend, Handy quer · PR 281</sub></td>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P22"><img src="web/roadmap/bilder/p22-pr295-pc-wimpel-pokale.jpg" alt="Wimpelmast und Pokale im Hafen am PC" width="100%"></a><br><sub>P22 · Wimpelmast und Pokale im Hafen am PC · PR 295</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P19"><img src="web/roadmap/bilder/p19-pr279-pc-heute-voll.jpg" alt="Bootskarte am PC: Wunsch &quot;WC (heute voll)&quot;" width="100%"></a><br><sub>P19 · Bootskarte am PC: Wunsch &quot;WC (heute voll)&quot; · PR 279</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P24"><img src="web/roadmap/bilder/p24-pr281-pc-sturm-angekuendigt.jpg" alt="Sturm angekündigt, Boote am offenen Stegkopf" width="100%"></a><br><sub>P24 · Sturm angekündigt, Boote am offenen Stegkopf · PR 281</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P55"><img src="web/roadmap/bilder/p55-pr275-handy-schlange-versorgung.jpg" alt="Schlange vor der Versorgung, wenn sie knapp ist" width="100%"></a><br><sub>P55 · Schlange vor der Versorgung, wenn sie knapp ist · PR 275</sub></td>
 </tr><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P55"><img src="web/roadmap/bilder/p55-pr275-handy-schlange-versorgung.jpg" alt="Schlange vor der Versorgung, wenn sie knapp ist" width="100%"></a><br><sub>P55 · Schlange vor der Versorgung, wenn sie knapp ist · PR 275</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P19"><img src="web/roadmap/bilder/p19-pr244-pc-wuensche-bootsart.jpg" alt="Wünsche je Bootsart auf der Ankunftskarte" width="100%"></a><br><sub>P19 · Wünsche je Bootsart auf der Ankunftskarte · PR 244</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P55"><img src="web/roadmap/bilder/p55-pr269-pc-geduldsring.jpg" alt="Geduldsring und Wünsche an der Boje" width="100%"></a><br><sub>P55 · Geduldsring und Wünsche an der Boje · PR 269</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P21"><img src="web/roadmap/bilder/p21-pr274-handy-steckbrief.jpg" alt="Logbuch: Steckbrief eines Bootes" width="100%"></a><br><sub>P21 · Logbuch: Steckbrief eines Bootes · PR 274</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (2 von 5 erledigt)</summary>
@@ -102,7 +102,7 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 | [P19](https://hjorven.github.io/hafenmeister/roadmap/#paket=P19) | Ruf schwerer machen mit Wünschen je Bootsart | **erledigt** | [#244](https://github.com/hjorven/hafenmeister/pull/244) [#279](https://github.com/hjorven/hafenmeister/pull/279) |
 | [P20](https://hjorven.github.io/hafenmeister/roadmap/#paket=P20) | Winter mit Inhalt füllen | teilweise | [#245](https://github.com/hjorven/hafenmeister/pull/245) [#249](https://github.com/hjorven/hafenmeister/pull/249) |
 | [P21](https://hjorven.github.io/hafenmeister/roadmap/#paket=P21) | Logbuch und Hafenchronik zeigen | **erledigt** | [#274](https://github.com/hjorven/hafenmeister/pull/274) |
-| [P22](https://hjorven.github.io/hafenmeister/roadmap/#paket=P22) | Erfolge einbauen | **erledigt** |  |
+| [P22](https://hjorven.github.io/hafenmeister/roadmap/#paket=P22) | Erfolge einbauen | **erledigt** | [#295](https://github.com/hjorven/hafenmeister/pull/295) |
 | [P55](https://hjorven.github.io/hafenmeister/roadmap/#paket=P55) | Versteckte Regeln im Hafen sichtbar machen | **erledigt** | [#269](https://github.com/hjorven/hafenmeister/pull/269) [#275](https://github.com/hjorven/hafenmeister/pull/275) |
 | [P61](https://hjorven.github.io/hafenmeister/roadmap/#paket=P61) | Spiel komplett offline startbar | **erledigt** | [#270](https://github.com/hjorven/hafenmeister/pull/270) |
 
@@ -225,7 +225,7 @@ python3 -m http.server 8000 --directory web
 Danach `http://localhost:8000` öffnen. Vor jedem Merge im Hauptordner:
 
 ```bash
-bash tests/pruefen.sh
+bash tests/pruefen.sh --schnell
 ```
 
 Am Ende muss `Alles grün.` stehen. Einzelheiten in [docs/tests.md](docs/tests.md).
