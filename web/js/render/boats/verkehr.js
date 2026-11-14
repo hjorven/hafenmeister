@@ -66,6 +66,11 @@ export function init(game) {
     return { group, types, groesse: g, id };
   }
 
+  // Großschiffe vor dem Hafen kommen als "gesichtet" ins Logbuch (bridge.js), sobald sie losfahren
+  function gesichtet(b) {
+    if (/^XXL/.test(b.modell)) game.emit('verkehr:gesichtet', { modell: b.modell });
+  }
+
   function anmelden(gebaut) {
     const anim = addBoat(game, gebaut.group, {
       id: gebaut.group.uuid,
@@ -158,7 +163,7 @@ export function init(game) {
 
   // --- Paddler am Ufer: hin und her, an den Enden kurz Pause
   function uferBoot() {
-    const u = uferStrecke(stufeAktiv);
+    const u = uferStrecke(stufeAktiv, undefined, [...(game.landscape?.warteplaetze?.bojen ?? []).map((o) => [o.px, o.py]), ...(game.landscape?.warteplaetze?.ankerbereiche ?? []).map((o) => [o.px, o.py, o.radius])]);
     if (!u) return;
     const gebaut = baue(zufall(FLOTTE.ufer));
     if (!gebaut) return;
@@ -172,7 +177,7 @@ export function init(game) {
   }
 
   function pendeln(b, richtung) {
-    const u = uferStrecke(stufeAktiv);
+    const u = uferStrecke(stufeAktiv, undefined, [...(game.landscape?.warteplaetze?.bojen ?? []).map((o) => [o.px, o.py]), ...(game.landscape?.warteplaetze?.ankerbereiche ?? []).map((o) => [o.px, o.py, o.radius])]);
     if (!u || !boote.has(b)) return;
     const ziel = welt(richtung > 0 ? u.x1 : u.x0, u.y + (Math.random() * 6 - 3));
     b.anim.sailTo([ziel], { stop: true }).then((ok) => {
@@ -200,6 +205,7 @@ export function init(game) {
       return false;
     }
     b.typ = 'meer';
+    gesichtet(b);
     const pts = [w.start, ...w.punkte];
     const { p, dir, weiter } = aufWeg(pts, fortschritt);
     b.anim.place(p.x, p.z, Math.atan2(-dir.z, dir.x));
@@ -241,6 +247,7 @@ export function init(game) {
     const b = anmelden(gebaut);
     b.typ = 'meer';
     b.bahn = bahn;
+    gesichtet(b);
     // Jedes Boot fährt die Bahn mit eigenem seitlichem Versatz, nicht alle auf derselben Linie
     const pts = versetzt(bahn.pts, -Math.random() * (bahn.versatz ?? VERSATZ_MAX));   // nach rechts, weg von der Gegenbahn
     const { p, dir, weiter } = aufBahn(pts, fortschritt);

@@ -8,6 +8,7 @@ import { pixelBild } from '../ui/pixel-symbole.js';
 const EVENT_ICON = {
   nebel: 'nebel', sommertag: 'sonne', sturm: 'sturm', regatta: 'regatta',
   hafenfest: 'fest', kreuzfahrttag: 'schiff',
+  mittsommer: 'feuer', heringstage: 'fisch', holzboote: 'holzboot', hansewoche: 'kogge',
 };
 
 const PART_NAME = { fruehling: 'Frühling', sommer: 'Sommer', herbst: 'Herbst', winter: 'Winter' };
@@ -39,28 +40,50 @@ export function initBanner(game) {
   banner.hidden = true;
   host.appendChild(banner);
 
-  let hideTimer = 0;
+  // Ankündigungen stehen im gemeinsamen Meldeplatz (ui/meldungen.js): immer nur eine Meldung zugleich.
+  // Mehrere Ankündigungen warten hier nacheinander; die Zeit einer Ankündigung läuft nur, solange sie steht.
+  const ID = 'ankuendigung';
+  const schlange = [];
+  let steht = null;          // { iconName, title, text, seconds, rest }
   function show(iconName, title, text, seconds = 7) {
+    if (steht?.title === title || schlange.some((m) => m.title === title)) return;
+    schlange.push({ iconName, title, text, seconds, rest: seconds });
+    if (schlange.length > 3) schlange.shift();
+    if (!steht) naechste();
+  }
+  function naechste() {
+    steht = schlange.shift() ?? null;
+    banner.classList.remove('leaving');
+    if (!steht) { banner.hidden = true; game.meldungen?.fertig(ID); return; }
     banner.replaceChildren();
-    banner.append(svgIcon(iconName));
+    banner.append(svgIcon(steht.iconName));
     const body = document.createElement('div');
     const t = document.createElement('strong');
-    t.textContent = title;
+    t.textContent = steht.title;
     const p = document.createElement('span');
-    p.textContent = text;
+    p.textContent = steht.text;
     body.append(t, p);
     banner.append(body);
     // Schild und Wetterbericht nie gleichzeitig: das neue Schild klappt den Bericht zu
     if (!panel.hidden) toggle(false);
     banner.hidden = false;
-    banner.classList.remove('leaving');
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => {
-      banner.classList.add('leaving');
-      setTimeout(() => { banner.hidden = true; }, 400);
-    }, seconds * 1000);
+    game.meldungen?.wunsch(ID, game.meldungen.VORRANG?.ankuendigung ?? 55);
   }
-  banner.addEventListener('click', () => { banner.hidden = true; });
+  let letzte = performance.now();
+  setInterval(() => {
+    const jetzt = performance.now();
+    const dt = Math.min(1, (jetzt - letzte) / 1000);
+    letzte = jetzt;
+    if (!steht) return;
+    const darf = !game.meldungen || game.meldungen.darf(ID);
+    banner.classList.toggle('zurueck', !darf);
+    if (!darf || document.hidden) return;
+    steht.rest -= dt;
+    if (steht.rest <= 0.4) banner.classList.add('leaving');
+    if (steht.rest <= 0) naechste();
+  }, 200);
+  // Antippen: weg, die nächste kommt
+  banner.addEventListener('click', () => naechste());
 
   // Wetterknopf mit aufklappbarem Bericht
   const chip = document.createElement('button');
@@ -81,11 +104,15 @@ export function initBanner(game) {
     chip.replaceChildren(svgIcon(iconFor(fc[0])));
     const next = fc.slice(1).find((e) => e.event);
     const label = document.createElement('span');
+    // Großes Ereignis (Hanse-Woche), lange vorher angekündigt: Tage bis dahin
+    const gross = game.events?.gross;
+    const grossIn = gross ? gross.startDay - fc[0].day : null;
     if (fc[0].event) label.textContent = fc[0].event.title;
     else if (next) label.textContent = `${dayLabel(next.day - fc[0].day)}: ${next.event.title}`;
+    else if (gross && grossIn > 0) label.textContent = `${gross.event.title} in ${grossIn} ${grossIn === 1 ? 'Tag' : 'Tagen'}`;
     else label.textContent = PART_NAME[fc[0].season.part] ?? '';
     chip.append(label);
-    chip.classList.toggle('has-news', !!next || !!fc[0].event);
+    chip.classList.toggle('has-news', !!next || !!fc[0].event || !!gross);
   }
 
   function renderPanel() {
@@ -115,6 +142,24 @@ export function initBanner(game) {
       row.append(txt);
       panel.append(row);
     });
+    // Großes Ereignis weiter in der Zukunft (Hanse-Woche, zehn Tage vorher angekündigt)
+    const gross = game.events?.gross;
+    const letzter = fc.length ? fc[fc.length - 1].day : 0;
+    if (gross?.event && gross.startDay > letzter) {
+      const row = document.createElement('div');
+      row.className = 'wp-row event';
+      row.append(svgIcon(EVENT_ICON[gross.event.id] ?? 'fest'));
+      const txt = document.createElement('div');
+      const t = document.createElement('strong');
+      t.textContent = `In ${gross.startDay - (fc[0]?.day ?? 0)} Tagen: ${gross.event.title}`;
+      const p = document.createElement('span');
+      p.textContent = gross.event.text;
+      txt.append(t, p);
+      const extra = game.vorbereitung?.zeile?.({ day: gross.startDay, event: gross.event });
+      if (extra) txt.append(extra);
+      row.append(txt);
+      panel.append(row);
+    }
   }
 
   function wxText(wx) {
@@ -128,9 +173,9 @@ export function initBanner(game) {
     panel.hidden = !open;
     chip.setAttribute('aria-expanded', String(open));
     if (open) {
-      // Bericht geöffnet: Ankündigung ausblenden, ihr Inhalt steht im Bericht
-      clearTimeout(hideTimer);
-      banner.hidden = true;
+      // Bericht geöffnet: Ankündigungen ausblenden, ihr Inhalt steht im Bericht
+      schlange.length = 0;
+      naechste();
       renderPanel();
     }
   }

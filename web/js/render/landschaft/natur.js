@@ -1,6 +1,6 @@
 // Hafenmeister: die natürliche Landschaft rund um den Hafen, je Spiel anders.
 //
-// Zehn Küstentypen (TYPEN), jeder mit eigener Abwandlung je Spielstand (seed). Ein Typ legt fest,
+// 15 Küstentypen (TYPEN; 11 bis 15 aus echten Karten), jeder mit eigener Abwandlung je Spielstand (seed). Ein Typ legt fest,
 // wie Küste, Inseln, Nehrungen, Flüsse und Buchten liegen; der Zufall verschiebt, biegt und verteilt.
 // Daraus entsteht eine "Landigkeit" L (Planeinheiten, ungefähr Abstand zur Uferlinie): L > 0 Land,
 // L < 0 Wasser. Höhen, Tiefen und Oberflächen rechnet gelaende.js daraus.
@@ -15,6 +15,8 @@
 // Alles andere ist frei: der Hafenausbau (gelaende.js) baggert und schüttet in höheren Stufen nach.
 //
 // Reines JavaScript ohne Three.js, damit Tests und Werkzeuge es in Node nutzen können.
+
+import { VORBILDER, VORBILD_WELT } from '../../data/kuesten-vorbilder.js';
 
 export const PLAN_M = 0.62;
 /** Ganze Welt in Planeinheiten (etwa 1,6 x 1,3 km). */
@@ -595,6 +597,51 @@ function inselhafen(r) {
   };
 }
 
+// ------------------------------------------------------------------ Fünf Küsten aus echten Karten
+// Jorven hat am 14.11.2026 Luftbilder von fünf Häfen geschickt. Küstenlinie und Höhen dieser Orte kommen
+// aus echten Karten- und Höhendaten (data/kuesten-vorbilder.js, erzeugt von tools/kuesten/vorbilder.py),
+// schon in Spielkoordinaten: Hafen bei (0, 0), See in +y, Maßstab je Ort so gewählt, dass Reede und Stege
+// ins echte Wasser passen. Der Seed ändert hier nur Kleinigkeiten (Uferrauheit, Bewuchs, Beiwerk).
+
+const _karten = new Map();
+/** Karte eines Vorbilds: Landigkeit L(px, py) und Höhe hoehe(px, py) in Metern (Spielmaßstab). */
+function karteVon(nr) {
+  if (_karten.has(nr)) return _karten.get(nr);
+  const v = VORBILDER[nr], W = VORBILD_WELT;
+  const bytes = (t) => Uint8Array.from(atob(t), (c) => c.charCodeAt(0));
+  const bits = bytes(v.land), n = v.nx * v.ny;
+  const nass = new Uint8Array(n);
+  for (let k = 0; k < n; k++) nass[k] = (bits[k >> 3] >> (7 - (k & 7))) & 1 ? 0 : 1;
+  const dL = chamfer(nass, v.nx, v.ny, 1), dW = chamfer(nass, v.nx, v.ny, 0);
+  const sdf = new Float32Array(n);
+  for (let k = 0; k < n; k++) sdf[k] = nass[k] ? -(dW[k] - 0.5) * v.s : (dL[k] - 0.5) * v.s;
+  const hoch = bytes(v.hoehe);
+  const lies = (f, nx, ny, s, px, py, mal) => {
+    const fx = clamp((px - W.x0) / s, 0, nx - 1.001), fy = clamp((py - W.y0) / s, 0, ny - 1.001);
+    const i = Math.floor(fx), j = Math.floor(fy), u = fx - i, w = fy - j, k = j * nx + i;
+    return (f[k] * (1 - u) * (1 - w) + f[k + 1] * u * (1 - w) + f[k + nx] * (1 - u) * w + f[k + nx + 1] * u * w) * mal;
+  };
+  const K = {
+    L: (px, py) => lies(sdf, v.nx, v.ny, v.s, px, py, 1),
+    hoehe: (px, py) => lies(hoch, v.hx, v.hy, v.sh, px, py, 0.5),
+  };
+  _karten.set(nr, K);
+  return K;
+}
+
+const ausKarte = (nr, stil, nah = null) => () => ({
+  karte: karteVon(nr), kueste: [[-1, 0], [1, 0]], rauheit: 2.5, rauKorn: 14,
+  hafen: { x: 0, y: 0, dreh: 0 }, stil, nah, leuchttuerme: [],
+});
+
+// Shilshole Bay: die Grundkarte kennt den Wellenbrecher nicht, er liegt wie in echt gut 150 m vor dem Ufer
+// und ist an beiden Enden offen. Nach Westen knickt er leicht zum Ufer (Liegewanne ab Stufe 6 bleibt frei).
+const shilsholeWall = (q) => {
+  const y = zw(q, 212, 216), pts = [];
+  for (let x = -600; x <= 631; x += 60) pts.push([x, y - 0.00003 * x * x - 0.2 * Math.max(0, -150 - x) + zw(q, -2, 2)]);
+  return { baender: [{ punkte: pts, halb: zw(q, 18, 20), duene: 0, fels: 2 }], leuchttuerme: [[610, y - 10]] };
+};
+
 export const TYPEN = [
   { nr: 1, name: 'Nehrung', idee: 'Lagune hinter einer gewundenen Nehrung mit Dünen, Seegatten und Salzwiesen.', bau: nehrung },
   { nr: 2, name: 'Offene Bucht', idee: 'Weite Bucht zwischen zwei bewaldeten Landzungen mit Steilufer, Felsen vor den Spitzen.', bau: offeneBucht },
@@ -606,6 +653,11 @@ export const TYPEN = [
   { nr: 8, name: 'Förde', idee: 'Lange, gewundene Förde mit bewaldeten Hängen, der Hafen an ihrem inneren Ende.', bau: foerde },
   { nr: 9, name: 'Strandhaken', idee: 'Eine Nehrung wächst um die Bucht herum und endet in einem Haken mit Leuchtturm.', bau: haken },
   { nr: 10, name: 'Inselhafen', idee: 'Der Hafen liegt auf einer Insel, über einen Sund sieht man das Festland.', bau: inselhafen },
+  { nr: 11, name: 'Marstrand', idee: 'Echte Karte: Hafen am Sund zwischen Marstrandsön und Koön an der schwedischen Westküste, Fels ringsum.', bau: ausKarte(11, { felsufer: 34, wald: 0.15, ufer: 'fels', tiefe: 1.3 }) },
+  { nr: 12, name: 'Punat', idee: 'Echte Karte: fast geschlossene Bucht auf Krk mit der Klosterinsel Košljun, schmale Mündung zur Adria.', bau: ausKarte(12, { wald: 0.8, ufer: 'steine', tiefe: 1.3 }) },
+  { nr: 13, name: 'Shilshole Bay', idee: 'Echte Karte: gerade Küste am Puget Sound, der Hafen hinter einem langen Wellenbrecher, Hang mit Wald dahinter.', bau: ausKarte(13, { wald: 0.6, ufer: 'sand' }, shilsholeWall) },
+  { nr: 14, name: 'Bucht von Kotor', idee: 'Echte Karte: Tivat in der Bucht von Kotor, weite Becken zwischen hohen Bergen, die Enge von Verige im Norden.', bau: ausKarte(14, { wald: 1, ufer: 'steine', tiefe: 1.6 }) },
+  { nr: 15, name: 'Porto Cervo', idee: 'Echte Karte: tief eingeschnittene Felsbucht an der Costa Smeralda, die Einfahrt nach Osten.', bau: ausKarte(15, { felsufer: 34, wald: 0.3, ufer: 'fels', tiefe: 1.2 }) },
 ];
 
 // ------------------------------------------------------------------ Aufbau und Abfrage
@@ -642,7 +694,7 @@ export function bauen(nr, seed = 1) {
 
   /** Landigkeit in Naturkoordinaten */
   function roh(X, Y) {
-    let L = ufer(X) - Y + rau * (fbm(X / korn, Y / korn, bseed) - 0.5) * 2;
+    let L = (p.karte ? p.karte.L(X, Y) : ufer(X) - Y) + rau * (fbm(X / korn, Y / korn, bseed) - 0.5) * 2;
     for (const b of baender) {
       if (weitWeg(X, Y, b.bb)) continue;
       const d = b.halb - abstandLinie(X, Y, b.punkte);
@@ -696,6 +748,7 @@ export function bauen(nr, seed = 1) {
   const n = nx * ny;
   const gRoh = new Float32Array(n), gDuene = new Float32Array(n), gFels = new Float32Array(n), gHallig = new Float32Array(n);
   const gWald = new Float32Array(n), gPlate = new Float32Array(n), gKanal = new Float32Array(n);
+  const gRelief = p.karte ? new Float32Array(n) : null;   // Höhen aus der echten Karte (Meter im Spielmaßstab)
   for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
     const k = j * nx + i;
     const px = x0 + i * S, py = y0 + j * S;
@@ -706,6 +759,7 @@ export function bauen(nr, seed = 1) {
       if (weitWeg(X, Y, b.bb)) continue;
       const d = abstandLinie(X, Y, b.punkte);
       if (d < b.halb + 4) duene = Math.max(duene, (b.duene ?? 1) * Math.max(0, 1 - d / b.halb));
+      if (b.fels && d < b.halb + 4) fels = Math.max(fels, b.fels);
     }
     for (const q of inseln) {
       if (weitWeg(X, Y, q.bb)) continue;
@@ -723,6 +777,7 @@ export function bauen(nr, seed = 1) {
       const d = abstandLinie(X, Y, q.punkte);
       if (d < q.halb + (q.tal || 0) + 6) kanal = Math.max(kanal, 1 - smooth(q.halb, q.halb + (q.tal || 0) + 6, d));
     }
+    if (gRelief) gRelief[k] = p.karte.hoehe(X, Y);
     gDuene[k] = duene; gFels[k] = fels; gHallig[k] = hallig; gWald[k] = wald; gPlate[k] = plate; gKanal[k] = kanal;
   }
   const lies = (f, px, py) => {
@@ -763,7 +818,8 @@ export function bauen(nr, seed = 1) {
       gid++;
     }
     const nichtOffen = new Uint8Array(n);
-    for (let k = 0; k < n; k++) nichtOffen[k] = gruppe[k] === beste && beste >= 0 ? 0 : 1;
+    // Küsten aus echten Karten: jedes breite Wasser, das bis an den Kartenrand reicht, gilt als offene See
+    for (let k = 0; k < n; k++) nichtOffen[k] = (p.karte ? gruppe[k] >= 0 : gruppe[k] === beste && beste >= 0) ? 0 : 1;
     return { nass, dL, dW, nichtOffen };
   };
   // Seeweg von der Reede in die offene See. Die Pflicht-See vor der Einfahrt ist nur so groß wie Reede,
@@ -779,6 +835,9 @@ export function bauen(nr, seed = 1) {
       return i >= 0 && j >= 0 && i < nx && j < ny && !masse.nichtOffen[j * nx + i];
     };
     if (offen(cx, cy)) return null;
+    // Küsten aus echten Karten bekommen kein gerades Seegatt: ihr Wasser hängt von Natur aus zusammen,
+    // den Weg hinaus findet und vertieft die Fahrrinne (gelaende.js)
+    if (p.karte) return null;
     let best = null;
     for (let grad = 0; grad <= 120; grad += 5) for (const vz of grad ? [1, -1] : [1]) {
       const a = (vz * grad * Math.PI) / 180, ex = Math.sin(a), ey = Math.cos(a);
@@ -815,6 +874,9 @@ export function bauen(nr, seed = 1) {
       L, d, offenAbstand: lies(dOffen, px, py) * S,
       duene: lies(gDuene, px, py), fels, hallig: lies(gHallig, px, py), wald: Math.max(stil.wald || 0, lies(gWald, px, py)),
       plate: lies(gPlate, px, py), kanal: lies(gKanal, px, py), stil,
+      // nur Küsten aus echten Karten: Geländehöhe und Gefälle (Meter Höhe je Planeinheit)
+      relief: gRelief ? lies(gRelief, px, py) : 0,
+      gefaelle: gRelief ? Math.hypot(lies(gRelief, px + 12, py) - lies(gRelief, px - 12, py), lies(gRelief, px, py + 12) - lies(gRelief, px, py - 12)) / 24 : 0,
     };
   }
 

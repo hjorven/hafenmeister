@@ -18,6 +18,7 @@ export const FARBE = {
   D: '#7d8b99', S: '#5d6a78',                                    // Sturmwolke
   b: '#3f8fd0', i: '#8fb8d0', f: '#9fb0bc',                      // Regen, Schnee, Nebel
   R: '#ee6454', B: '#3b6f8f', W: '#62b4c2', p: '#fffcf6',       // Koralle, Rumpf, Welle, Papier
+  H: '#9a6234', L: '#d49a5c',                                    // Holz dunkel, Holz hell
 };
 
 export const PIXEL = {
@@ -62,6 +63,11 @@ export const PIXEL = {
   // Hafenbüro: orange Raute = Sonderfall für den Spieler, goldene Raute = Vorschlag des Büros
   raute: ['.....kk.....', '....kssk....', '...kssssk...', '..kssssssk..', '.kssssssssk.', 'kssssppssssk', 'kssssppssssk', '.kssssssssk.', '..kssssssk..', '...kssssk...', '....kssk....', '.....kk.....'],
   rauteGold: ['.....kk.....', '....kggk....', '...kggggk...', '..kggggggk..', '.kggggggggk.', 'kggggppggggk', 'kggggppggggk', '.kggggggggk.', '..kggggggk..', '...kggggk...', '....kggk....', '.....kk.....'],
+  // Ereignisse P24: Mittsommerfeuer, Hering, Holzboot, Kogge (Hanse-Woche)
+  feuer: ['......y.....', '.....yy.....', '.....ysy....', '....sysy.y..', '...syyrsys..', '...srRyrRs..', '..srRyyyRs..', '..sRyyyyRs..', '...RRyyRR...', '.kHHkkkHHk..', 'kHHHk.kHHHk.', '.kk.....kk..'],
+  fisch: ['............', '............', '............', '...kkkkkk..k', '..kiiiiiikkk', '.kikiiiiiiik', 'kiiiiiiiiiik', 'kccccccccck.', '.kccccccckkk', '..kkkkkkk..k', '............', '............'],
+  holzboot: ['.....k......', '.....kp.....', '.....kpp....', '.....kppp...', '.....kpppp..', '.....kkkkkk.', '.....k......', 'kkkkkkkkkkkk', 'kLLLLLLLLLLk', '.kHHHHHHHHk.', '..kkkkkkkk..', 'WW.WWW.WWW.W'],
+  kogge: ['.....k......', '..kkkkkkk...', '..kpRpRpk...', '..kpRpRpk...', '..kpRpRpk...', '..kkkkkkk...', '.....k......', 'kk...k....kk', 'kHkkkkkkkkHk', 'kHHHHHHHHHHk', '.kHHHHHHHHk.', 'WW.WWW.WWW.W'],
   schiff: ['............', '......RR....', '......RR....', '...kkkkkkk..', '...kpBpBpk..', '.kkkkkkkkkk.', '.kpBpBpBpBk.', 'kkkkkkkkkkkk', 'kBBBBBBBBBBk', '.kBBBBBBBBk.', '..kkkkkkkk..', 'WW.WWW.WWW.W'],
 };
 
