@@ -209,7 +209,7 @@ Kleine Rückmeldungen: Haptik auf dem Handy (`navigator.vibrate`), wo verfügbar
 | Ostsee | Binnensee hinter einer Nehrung, Dünen, Kiefern, Schären-Felsen am Rand | Startregion, wie im Katalog, kaum Gezeiten |
 | Nordsee | Deich, Watt, Sielhafen, Priele | Gezeiten: bei Ebbe liegen Boote trocken, Tiefgang zählt doppelt |
 
-- **Erfolge** (geplant, P22): zum Beispiel „Alle drei Traditionssegler gleichzeitig im Hafen“, „Ein Abend mit 5,0 Ankern“.
+- **Erfolge** (gebaut, P22, docs/erfolge.md): 30 Erfolge in sechs Gruppen, zum Beispiel „Großer Bahnhof“ (zwei Traditionssegler zugleich im Hafen) und „Ein Abend mit 5 Sternen“. Sie stehen im Logbuch und als Wimpel, Pokale und Schilder beim Hafenmeisterhaus.
 - **Endlosmodus** nach dem Spielziel: jede Saison vier Saisonziele mit Sternen, Belohnung und Rang (im Spiel, P16, [aufstieg.md](aufstieg.md)); Bestenliste online (geplant, P58, Abschnitt 12).
 
 ### 9a. Neue Features (Entscheidung Jorven, 11.11.2026)

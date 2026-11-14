@@ -131,6 +131,7 @@ export const SOUNDS = {
   bauen: { label: 'Bauen (Hämmern)', wet: 0.15, gap: 0.3 },
   fertig: { label: 'Bau fertig', wet: 0.3, gap: 0.2 },
   stufe: { label: 'Neue Ausbaustufe', wet: 0.4, gap: 1 },
+  erfolg: { label: 'Erfolg (Wimpel, Pokal mit { gross: true })', wet: 0.35, gap: 0.6 },
   bewertung: { label: 'Bewertung (Anker)', wet: 0.25, gap: 0.1 },
   abgelehnt: { label: 'Boot fährt weiter', wet: 0.2, gap: 0.3 },
   fehler: { label: 'Geht nicht', wet: 0, gap: 0.15 },
@@ -1100,6 +1101,21 @@ HafenAudio.prototype._sfx = {
     play(392, t + 0.48, 0.7, 0.05);
     [1568, 2093, 2637, 3136].forEach((f, i) => this._tone(out, { f, t: t + 0.5 + i * 0.07, a: 0.002, d: 0.5, peak: 0.04 }));
     return 2;
+  },
+
+  erfolg(t, out, o) {
+    // Zwei helle Glockenschläge und ein Dreiklang nach oben; Pokal: dazu ein voller Schlussakkord
+    const glocke = (f, tt, peak) => {
+      this._tone(out, { f, t: tt, a: 0.002, d: 0.9, peak });
+      this._tone(out, { f: f * 2.76, t: tt, a: 0.002, d: 0.35, peak: peak * 0.3 });
+    };
+    glocke(1046.5, t, 0.09);
+    glocke(1318.51, t + 0.14, 0.09);
+    [783.99, 987.77, 1174.66].forEach((f, i) => this._tone(out, { type: 'triangle', f, t: t + 0.3 + i * 0.07, a: 0.004, d: 0.5, peak: 0.07 }));
+    if (!o?.gross) return 1.1;
+    [523.25, 659.25, 783.99, 1046.5].forEach((f) => this._tone(out, { type: 'triangle', f, t: t + 0.6, a: 0.01, d: 1.1, peak: 0.06 }));
+    glocke(2093, t + 0.62, 0.05);
+    return 1.9;
   },
 
   bewertung(t, out, o) {

@@ -453,8 +453,8 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | I3 | Belohnungen mischen (Geld, Anker, seltener Gast, Rabatt, Deko) | erledigt (PR 152) | P13 |
 | I4 | Wochenziel | erledigt (PR 152) | P13 |
 | I5 | Logbuch als Sammelalbum mit Schattenrissen | erledigt | P21 |
-| I6 | Erfolge als Dinge im Hafen (Pokal, Wimpel, Schild) | offen | P22 |
-| I7 | Meilensteine mit Ton und Bild | offen | P22 |
+| I6 | Erfolge als Dinge im Hafen (Pokal, Wimpel, Schild) | erledigt (Erfolgsmast, Pokaltreppe, Ehrentafel, docs/erfolge.md) | P22 |
+| I7 | Meilensteine mit Ton und Bild | erledigt (Meldung mit Symbol, Ton "erfolg") | P22 |
 | I8 | Richtiger Abschluss mit Kamerafahrt und Titel | erledigt (PR 156) | P16 |
 | I9 | Endlosspiel mit Saisonzielen | erledigt (PR 156) | P16 |
 | I10 | Ziele im Winter (Winterarbeiten) | erledigt (PR 245) | P20 |
@@ -665,7 +665,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P19 | Ruf schwerer machen mit Wünschen je Bootsart | Ü17, `feeFactor`, `arrivalWeight`, Kapazität sichtbar | `sim.js`, `data/boats/*.js`, `economy.js` | erledigt: Teil 1 (PR 244: B7, C2, C3, C4, C6, F8), Teil 2 (PR 279: C5, B9, "heute voll"), [ruf.md](ruf.md) |
 | P20 | Winter mit Inhalt füllen | Ü19, F14, F15, `docs/ereignisse.md` | `sim.js` (Jahreslauf), neues Feature-Modul, Travellift/Winterlager in `render/services.js` | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, 249, `docs/winter.md`); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing |
 | P21 | Logbuch und Hafenchronik zeigen | Logbuch (Note 1), F36, `sim:logbookNew` | neues Modul `web/js/ui/logbuch.js`, `state.js` | erledigt (PR 274, docs/logbuch.md, SAVE_VERSION 3) |
-| P22 | Erfolge einbauen | plan.md 9 | neues Feature-Modul | neu |
+| P22 | Erfolge einbauen | plan.md 9 | neues Feature-Modul | erledigt (30 Erfolge, Reiter im Logbuch, Dinge im Hafen, docs/erfolge.md) |
 
 ### Welle 3: Tiefe und Hafenleben (Extras)
 

@@ -26,7 +26,7 @@ Stand 14.11.2026, 11:30 UTC.
 | Fehler aus Jorvens Feature-Test | "Fehler aus Jorvens Feature-Test beheben" | Grundprobleme | läuft | - |
 | Anmeldung per Funk | "Anmeldung per Funk einbauen" | P28 | läuft | - |
 | Spiel Schicht für Schicht von Grund auf testen | eigener Thread | Prüfung | läuft | - |
-| Erfolge | Logbuch-Thread | P22 | läuft (nach P21) | - |
+| Erfolge | Logbuch-Thread | P22 | erledigt 14.11. (docs/erfolge.md) | - |
 | Große Boote nach Platzangebot (A10), danach Ü16 | Bauen-Thread | A10 | läuft; PR 252 (Liegegeld je Meter) gemergt | - |
 | Feature-Test, Zeitraffer-Test, Tests, Roadmap-Seite | Prüf- und Pflege-Threads | - | laufen; Zeitraffer-PR offen | 251, 276 |
 
@@ -62,7 +62,7 @@ Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tem
 | 3 | **A10 große Boote nach Platzangebot** (Bauen-Thread, läuft; PR 252 gemergt) | ändert das Tempo des Aufstiegs um +2 bis +6 Tage, muss vor P17 stehen | - | `economy.js`, `sim.js` (Ankünfte) |
 | 4 | **Balancing-Paket P17: Aufstieg angleichen, mit Ü15 und Ü16** (neu, startet nach PR 280 und A10) | Prio A: Rechnung und Zeitraffer auf höchstens 5 % zusammenbringen. Stand nach PR 252: geschickt 225 Tage, gemütlich 239 Tage, Stufe 2 gemütlich 36 Tage; danach mit A10 neu messen. Ü16 gehört zu P17, damit nur ein Thread an den Startwerten dreht | 1 (Stau verfälscht die Messung), 3 (A10) | `economy.js`, `tools/balance.mjs`, Einstieg (J5) |
 | 5 | **P24 Ereignisse** (Teil 1 gemergt, PR 281; Teil 2 mit G3 und F17 läuft) | erstes Extra, Thread kennt den Code | - | Wetterflagge, Meldungs-Ordnung (PR 282) |
-| 6 | **P22 Erfolge** (läuft) | letztes offenes Welle-2-Paket | P21 (erledigt) | Aufstieg-Feier, Meldungs-Ordnung (PR 282) |
+| 6 | **P22 Erfolge** (erledigt 14.11., docs/erfolge.md) | letztes offenes Welle-2-Paket | P21 (erledigt) | Aufstieg-Feier, Meldungs-Ordnung (PR 282) |
 | 7 | **P20-Rest Winter** (H5, G5) | Kernschleife über das Jahr fertig | 4 | `winter.js`, `economy.js` |
 | 8 | **P23 Services mit eigener Wirkung** (neu) | Welle 3, macht Stufe 4 bis 6 tiefer | 4 (Zahlen) | `render/services.js`, `data/services.js`, Besuchswege |
 | 9 | **P28 Anmeldung per Funk** (läuft) | Welle 3, macht jede Ankunft planbarer; baut auf P11-Vorschau | - | `ui/vorschau.js`, `sim.js` |

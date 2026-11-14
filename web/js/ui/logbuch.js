@@ -9,8 +9,9 @@
 //    Öffnen: Menü "Logbuch", Taste J.
 //
 // Schnittstelle: game.logbuch = { oeffnen(reiter?, modellId?), schliessen(), get offen, fortschritt(),
-//   chronik(), tagesSatz(tag), merken(merk) }   merken: Merkmal für die heutige Chronik-Zeile (für P22 Erfolge:
-//   game.logbuch.merken({ a: 'text', art: 'erfolg', text: 'Erfolg: ...' }))
+//   chronik(), tagesSatz(tag), merken(merk), reiter(def) }   merken: Merkmal für die heutige Chronik-Zeile
+//   (P22 Erfolge: game.logbuch.merken({ a: 'text', art: 'erfolg', text: 'Erfolg: ...' })).
+//   reiter({ id, name, teil(state, { el, zeichne }), zahl?() }): weiterer Reiter im Logbuch (P22: "Erfolge").
 // Ereignis: 'logbuch:neu' { key, typeId, modelId, art } für jedes neue Modell.
 
 import {
@@ -143,6 +144,8 @@ export function init(game) {
   // ---------------------------------------------------------------- Meldung "Neu im Logbuch"
   const leiste = el('div', { id: 'hm-lb-meldung', role: 'status', 'aria-live': 'polite', hidden: true });
   (document.getElementById('game') || document.body).append(leiste);
+  // Gemeinsamer Meldeplatz (ui/meldungen.js), sobald es ihn gibt: er legt Lage und Breite fest
+  game.meldungen?.anmelden?.('#hm-lb-meldung', MELDUNG_ID);
   const offeneMeldungen = [];             // neue Einträge, die noch gemeldet werden
   let jetzt = null;                       // { el, t0, n }
   let letzterTakt = 0;
@@ -210,7 +213,8 @@ export function init(game) {
   backdrop.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
 
   let offen = false;
-  let reiter = 'boote';                   // 'boote' | 'chronik'
+  let reiter = 'boote';                   // 'boote' | 'chronik' | id eines Zusatz-Reiters
+  const zusatz = [];                      // weitere Reiter: { id, name, teil, zahl }
   let groesse = 'S';
   let steckbrief = null;                  // Modell-ID oder null
   let chronikMehr = 1;                    // wie viele Kapitel gezeigt werden
@@ -220,7 +224,7 @@ export function init(game) {
     const s = st();
     if (!s) return;
     if (!offen) fokusVorher = document.activeElement;
-    if (r === 'boote' || r === 'chronik') reiter = r;
+    if (r === 'boote' || r === 'chronik' || zusatz.some((z) => z.id === r)) reiter = r;
     steckbrief = null;
     chronikMehr = 1;
     if (key) {
@@ -279,7 +283,13 @@ export function init(game) {
     return el('header', { class: 'hm-lb-kopf' },
       sym('logbuch', 'kopf-sym'),
       el('h2', { id: 'hm-lb-titel' }, 'Logbuch'),
-      el('div', { class: 'hm-lb-reiterleiste', role: 'tablist' }, tab('boote', 'Boote'), tab('chronik', 'Chronik')),
+      el('div', { class: 'hm-lb-reiterleiste', role: 'tablist' }, tab('boote', 'Boote'), tab('chronik', 'Chronik'),
+        zusatz.map((z) => {
+          const n = z.zahl?.() || 0;
+          const t = tab(z.id, z.name);
+          if (n) t.append(el('span', { class: 'hm-lb-punkt', 'aria-label': `${n} neu` }));
+          return t;
+        })),
       el('button', { type: 'button', class: 'hm-lb-zu', 'aria-label': 'Logbuch schließen', title: 'Schließen (Esc)', onclick: schliessen }, sym('zu')),
     );
   }
@@ -407,7 +417,8 @@ export function init(game) {
     if (!s) return;
     const koerperAlt = panel.querySelector('.hm-lb-koerper');
     const scroll = nachOben || steckbrief ? 0 : koerperAlt?.scrollTop ?? 0;
-    const inhalt = reiter === 'chronik' ? chronikTeil(s) : steckbrief ? steckbriefTeil(s) : boote(s);
+    const z = zusatz.find((x) => x.id === reiter);
+    const inhalt = z ? z.teil(s, { el, zeichne }) : reiter === 'chronik' ? chronikTeil(s) : steckbrief ? steckbriefTeil(s) : boote(s);
     const koerper = el('div', { class: 'hm-lb-koerper', role: 'tabpanel', 'aria-labelledby': `hm-lb-tab-${reiter}` }, ...inhalt);
     panel.replaceChildren(kopf(), koerper);
     koerper.scrollTop = scroll;
@@ -419,7 +430,7 @@ export function init(game) {
     el('i', { class: 'hm-sym', 'aria-hidden': 'true', style: '--sym: var(--px-lb-logbuch)' }), 'Logbuch', zahlEl);
   function menueZahl() {
     const s = st();
-    const n = s ? buchState(s).ungelesen.length : 0;
+    const n = s ? buchState(s).ungelesen.length + zusatz.reduce((a, z) => a + (z.zahl?.() || 0), 0) : 0;
     zahlEl.hidden = !n || offen;
     zahlEl.textContent = n ? `${n} neu` : '';
   }
@@ -461,6 +472,15 @@ export function init(game) {
       return merk?.length ? saetze({ merk, angelegt: 1 })[0] : '';
     },
     merken: (m) => merk(m),
+    reiter(def) {
+      if (!def?.id || typeof def.teil !== 'function' || zusatz.some((z) => z.id === def.id)) return;
+      zusatz.push(def);
+      menueZahl();
+      if (offen) zeichne();
+    },
+    // nurZahl: nur die Zahl im Menü (z. B. wenn ein Reiter seine Einträge als gelesen markiert)
+    neuZeichnen: ({ nurZahl = false } = {}) => { menueZahl(); if (offen && !nurZahl) zeichne(); },
+    get reiterJetzt() { return offen ? reiter : null; },
     LOGBUCH,
   };
 }

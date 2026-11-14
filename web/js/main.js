@@ -55,6 +55,7 @@ const MODULES = [
   './ui/tagesabschluss.js',
   './ui/gaestebuch.js',
   './ui/logbuch.js',                   // Logbuch und Hafenchronik (P21)
+  './features/erfolge.js',             // Erfolge, Reiter im Logbuch, Dinge im Hafen (P22)
   './ui/oberflaeche.js',
 ];
 
