@@ -99,6 +99,8 @@ export async function initVorbereiten(game) {
   karte.setAttribute('aria-live', 'polite');
   karte.hidden = true;
   host.appendChild(karte);
+  // Gemeinsamer Meldeplatz (ui/meldungen.js), sobald es ihn gibt: er übernimmt Lage und Breite
+  game.meldungen?.anmelden?.('#ev-vorbereiten', 'ereignis');
 
   // Die Karte geht nach einer Weile von selbst. Wartet sie hinter einer wichtigeren Meldung, steht ihre Uhr.
   let timer = 0;
@@ -217,7 +219,7 @@ export async function initVorbereiten(game) {
   function ordne() {
     if (karte.hidden) { clearInterval(nachsehen); nachsehen = 0; return; }
     karte.classList.remove('zurueck');
-    const frei = platziere();
+    const frei = game.meldungen?.imPlatz?.(karte) ? true : platziere();
     const darf = game.meldungen ? game.meldungen.darf('ereignis') : true;
     const zurueck = !darf || !frei || document.body.classList.contains('card-open');
     karte.classList.toggle('zurueck', zurueck);
