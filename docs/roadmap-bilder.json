@@ -407,6 +407,17 @@
    "geraet": "handy-quer",
    "datum": "2026-11-14",
    "quelle": "winter/wi-quer-2-auftrag.png"
+  },
+  {
+   "datei": "p20-pr249-pc-winterpause.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Winterpause am PC: Saisonbilanz, Winterarbeiten, Winter überspringen",
+   "pr": 249,
+   "geraet": "pc",
+   "datum": "2026-11-14",
+   "quelle": "feature-tests/pr249/245-krantag-pc.png"
   }
  ]
 }
