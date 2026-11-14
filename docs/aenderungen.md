@@ -6,6 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Der Hafen wächst sichtbar mit: Aus der Holzbude des Hafenmeisters wird ein Haus mit Ausguck und später mit Anbau, das Hafenbüro bekommt einen Seitenflügel und im Seehafen einen Lotsenturm mit drehendem Radar, Kiosk und Restaurant bekommen Terrasse und Obergeschoss, Wohnhäuser werden aufgestockt und an der Hafenstraße stehen Stadthäuser mit Läden. Das Dorf wächst vom alten Kern nach außen, und an der Landstraße entsteht Stufe für Stufe eine Häuserzeile. Beim Aufstieg wachsen neue Gebäude aus dem Boden.
 - Neu: Erfolge. 30 Erfolge vom ersten Festmachen bis zum Hafenmillionär melden sich rechts oben mit eigenem Ton und stehen im Logbuch unter "Erfolge" mit Fortschritt. Im Hafen wachsen dafür ein Mast mit bunten Wimpeln, eine Pokaltreppe und eine Ehrentafel mit einem Schild je Ausbaustufe. Alte Spielstände bekommen schon Erreichtes still nachgetragen.
 - Große Boote kommen nur so oft, wie der Hafen Plätze für sie hat: Vor dem Ausbau fahren deutlich weniger Yachten und Großsegler wieder weg, weil nichts frei ist (A10, 287).
 - Bootskarte: Ist die Versorgung für einen Wunsch heute schon voll, steht er rot da ("Wunsch: Dusche (heute voll)").
