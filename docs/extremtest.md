@@ -64,6 +64,7 @@ Ergebnis: `<out>/bericht.md` (Übersicht, Funde je Lage, Messungen, Verdeckung d
 
 | id | Lage | Was passiert |
 |---|---|---|
+| `bojen-erreichbar` | Erreichen Gäste sichtbar eine Boje? | Stufe 2 bis 6, normaler Spieltag ohne Eingriff: Anteil der Boote, die sichtbar an einer Boje liegen, bevor sie einfahren (nur dort kann man sie antippen). Fund unter der Hälfte |
 | `viele-boote` | 60 Boote auf einmal | Stufe 6, 60 Gastboote kommen innerhalb von 40 Spielsekunden von See, dazu der normale Verkehr. Bojen voll, Selbst-Einfahren, Abweisen |
 | `voll-sturm` | Voller Hafen bei Sturm | Stufe 6, alle Plätze belegt, Sturm, dazu 20 Ankömmlinge |
 | `alle-einfahren` | Alle fahren gleichzeitig ein | Für jede freie Box ein Boot, alle bekommen im selben Augenblick ihren Platz |
@@ -93,6 +94,7 @@ Neue Lage: einen Eintrag in `tests/extrem/lagen.cjs` (id, titel, was, adresse, l
 | Mensch im Wasser | Fund | Gezeichnete Figur steht mindestens 1 m vom Ufer im Wasser (`istWasser`), Füße unter 0,25 m, kein Steg, Kai, Gebäude oder Boot darunter. Zusammengefasst je 5-m-Feld |
 | Leine ohne Boot | Fund | Sichtbare Festmacher, deren Boot unsichtbar ist, Leinen ohne Besitzer, Leinen, die weiter als 1,6 Bootslängen plus 8 m reichen |
 | Großschiff über Land | Fund | Rumpf jedes sichtbaren Besuchsschiffs (Kreuzfahrt, Windjammer, Flotte) aus seiner Geometrie, 2 von 7 Punkten auf Land |
+| Boje nicht erreicht | Fund | Wartendes Boot zählt laut Spielregeln über 20 Spielsekunden als "an der Boje" (Geduld läuft), liegt im Bild aber nicht an einer Boje (unsichtbar draußen oder noch unterwegs) |
 | Spiel und Bild uneinig | Fund | Boot liegt laut Spielregeln, ist aber über 120 Spielsekunden nicht zu sehen |
 | Spielstand widersprüchlich | Fund | Platz doppelt belegt, Platz zeigt auf fehlendes Boot, Warteschlange zeigt ins Leere, Geld, Tag, Stufe, Uhr keine Zahl |
 | Kaputter Text | Fund | `NaN`, `undefined`, `Infinity`, `[object ...]`, `null €` irgendwo im sichtbaren Text |

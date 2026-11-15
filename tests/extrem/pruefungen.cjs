@@ -80,6 +80,18 @@ const PRUEFE = (opts = {}) => {
     // Kurz nach dem Anlegen-Befehl darf die Ansicht noch nachziehen
     if (G.time - W.simSeit.get(k) > 120) out.abgleich.push({ id: 'gast-' + b.id, st: `liegt laut Spiel in ${b.berthId}, ist aber nicht zu sehen`, p: null });
   }
+  // Wartende Boote: Das Spiel zählt sie als "an der Boje" (Geduld läuft, Selbst-Einfahren), sind sie dort
+  // auch zu sehen? Sonst kann der Spieler sie nicht antippen und zuweisen.
+  out.boje = [];
+  for (const b of Object.values(st.boats)) {
+    if (b.status !== 'waiting' || !b.atBuoy) continue;
+    const k = 'boje-' + b.id; seen.add(k);
+    const a = G.boatView?.boot?.(b.id);
+    const da = a && a.moored && a.berth?.kind === 'buoy' && !a.versteckt;
+    if (da) { W.simSeit.delete(k); continue; }
+    if (!W.simSeit.has(k)) W.simSeit.set(k, G.time);
+    if (G.time - W.simSeit.get(k) > 20) out.boje.push({ id: 'gast-' + b.id, g: b.size, st: a ? `${a.versteckt ? 'unsichtbar draußen' : a.state} bei ${Math.round(a.x)}/${Math.round(a.z)}` : 'ohne Bild', s: Math.round(G.time - W.simSeit.get(k)), p: a && !a.versteckt ? [a.x, a.z] : null });
+  }
   for (const k of [...W.simSeit.keys()]) if (!seen.has(k)) W.simSeit.delete(k);
   // Belegung: jeder Platz höchstens ein Boot, jedes liegende Boot steht in seinem Platz
   const proPlatz = {};

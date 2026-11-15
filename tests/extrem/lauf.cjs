@@ -51,7 +51,7 @@ if (LAGEN_WAHL) for (const id of LAGEN_WAHL) if (!LAGEN.some((l) => l.id === id)
 const { chromium } = ladePlaywright();
 const TOUCH = new Set(['handy', 'handyquer', 'tablet']);
 // Funde, die immer Fehler sind; der Rest steht als Hinweis im Bericht
-const FUND_ARTEN = ['fehler', 'land', 'steg', 'fest', 'ueberlapp', 'haengt', 'lange', 'sim', 'menschen', 'leinen', 'xxl', 'abgleich', 'text', 'regeln', 'ui', 'speichern'];
+const FUND_ARTEN = ['boje', 'fehler', 'land', 'steg', 'fest', 'ueberlapp', 'haengt', 'lange', 'sim', 'menschen', 'leinen', 'xxl', 'abgleich', 'text', 'regeln', 'ui', 'speichern'];
 
 // Testtempo (?testtempo=n, docs/zeitraffer.md): Spielzeit läuft n-mal so schnell wie bei 1x, in Schritten wie bei 8x.
 // Mit Software-Grafik (5 bis 12 Bilder/s) kommt das Spiel sonst in einer Lage kaum über ein paar Spielminuten.
@@ -177,7 +177,7 @@ async function lageLaufen({ browser, url, geraet, lage, v, q, zahlen }) {
     const q2 = await page.evaluate(`(${PRUEFE})(${JSON.stringify({ ui: o.ui !== false })})`);
     E.fps.push({ fps: +(p.fps || 0).toFixed(1), tempo: p.spielzeitJeSek ? +p.spielzeitJeSek.toFixed(1) : null, boote: p.n, menschen: q2.menschenZahl?.sichtbar ?? null });
     const alle = { ...p, ...q2 };
-    for (const k of ['land', 'steg', 'fest', 'ueberlapp', 'haengt', 'pulk', 'lange', 'sim', 'menschen', 'leinen', 'xxl', 'abgleich', 'text', 'regeln', 'ui']) {
+    for (const k of ['land', 'steg', 'fest', 'ueberlapp', 'haengt', 'pulk', 'lange', 'sim', 'boje', 'menschen', 'leinen', 'xxl', 'abgleich', 'text', 'regeln', 'ui']) {
       for (const e of alle[k] ?? []) {
         let art = k;
         if (k === 'ueberlapp' && e.st !== 'moored') art = 'beruehrt';
@@ -266,16 +266,27 @@ async function lageLaufen({ browser, url, geraet, lage, v, q, zahlen }) {
         const l = page.locator('#hm-menue button', { hasText: t.split(' ')[0] }).first();
         if (!(await l.isVisible().catch(() => false))) return false; await tippe(l); return true; } })),
       { name: 'Bootskarte', oeffne: async () => {
-        // Ein liegendes Boot in der Bildmitte suchen und echt antippen
+        // Ein Boot an der Boje suchen und echt antippen (vorher eins kommen lassen)
+        await page.evaluate(() => window.__ex.boote(2, 2));
+        // warten, bis eins an der Boje liegt, dann anhalten (sonst fährt es bei Testtempo gleich selbst ein)
+        const anBoje = () => { const G = window.hafenmeister; if (G.sim.waitingBoats().some((b) => { const a = G.boatView.boot(b.id); return a?.moored && a.berth?.kind === 'buoy' && !a.versteckt; })) { G.setPaused(true); return true; } return false; };
+        if (!(await page.waitForFunction(anBoje, null, { timeout: 45000, polling: 50 }).then(() => true).catch(() => false))) { E.hinweise.push('Bootskarte: 45 s lang kein Boot sichtbar an einer Boje'); return false; }
+        // Die Bojen liegen oft außerhalb der Startansicht: Kamera hin, wie ein Spieler es auch tut
+        await page.evaluate(() => { const G = window.hafenmeister; const a = G.sim.waitingBoats().map((x) => G.boatView.boot(x.id)).find((o) => o?.moored && o.berth?.kind === 'buoy' && !o.versteckt); if (a) G.camera.flyTo(a.x, a.z); });
+        await page.waitForTimeout(1800);
         const p = await page.evaluate(() => { const G = window.hafenmeister; const r = G.canvas.getBoundingClientRect(); let best = null;
-          for (const e of G.boatView?.boote ?? []) { if (e.zustand !== 'moored') continue; const v = new G.THREE.Vector3(e.anim.x, 0.5, e.anim.z).project(G.camera.camera);
+          // Karte gibt es für Boote an der Boje (liegende Boote kassieren beim Antippen)
+          const anBoje = new Set(G.sim.waitingBoats().filter((b) => { const o = G.boatView.boot(b.id); return o?.moored && o.berth?.kind === 'buoy'; }).map((b) => String(b.id)));
+          for (const e of G.boatView?.boote ?? []) { if (!anBoje.has(String(e.id))) continue; const v = new G.THREE.Vector3(e.anim.x, 0.5, e.anim.z).project(G.camera.camera);
             const x = r.left + (v.x + 1) / 2 * r.width, y = r.top + (1 - v.y) / 2 * r.height; const d = Math.hypot(x - r.left - r.width / 2, y - r.top - r.height / 2);
             if (x > 20 && y > 80 && x < r.right - 20 && y < r.bottom - 120 && (!best || d < best.d)) best = { x, y, d }; }
           return best; });
         if (!p) return false;
         if (touch) await page.touchscreen.tap(p.x, p.y); else await page.mouse.click(p.x, p.y);
         await page.waitForTimeout(500);
-        return page.evaluate(() => !document.getElementById('card')?.hidden);
+        const auf = await page.evaluate(() => !document.getElementById('card')?.hidden);
+        await page.evaluate(() => window.hafenmeister.setPaused(false));
+        return auf;
       } }];
     for (const tf of tafeln) {
       const ok = await tf.oeffne().catch(() => false);
