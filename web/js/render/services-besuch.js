@@ -426,5 +426,7 @@ export function initBesuche(game, services) {
     if (bark.fl) bark.fl.rotation.y = Math.sin(game.time * 2.6) * 0.4;
   }
 
-  return { gruppe, besucheHeute: () => [...heute.besuch], barkasse: () => bark?.group ?? null };
+  // Liegt der Besuch gerade am Platz? (P23 F7: Tagesgaeste gehen nur von Bord, solange das Schiff fest ist)
+  const amPlatz = (id) => heute.besuch.has(id) && (aktiv.get(id) ?? []).some((s) => s.group.visible && s.t < 0.002);
+  return { gruppe, besucheHeute: () => [...heute.besuch], barkasse: () => bark?.group ?? null, amPlatz };
 }

@@ -54,14 +54,14 @@ test('Liste zeigt nur Services der erreichten Hafenstufe', () => {
 test('Einnahmen: Tagesgeschaeft mit Wetter, Kunden mit Filter, keine laufenden Kosten', () => {
   const z = neuerZustand();
   R.bauen(z, 'bootsverleih', { stufe: 1 });
-  R.bauen(z, 'mastenkran', { stufe: 3, ruf: 3 });
-  const sonne = R.tagesabschluss(z, { tag: 1, wetter: 'sonne', boote: [...boote(10), ...boote(10, 'M', 'motor')] }, () => 0.99);
+  R.bauen(z, 'ausruester', { stufe: 3, ruf: 3 });
+  const sonne = R.tagesabschluss(z, { tag: 1, wetter: 'sonne', boote: boote(2) }, () => 0.99);
   const verleih = sonne.einnahmen.find((e) => e.id === 'bootsverleih');
   assert.equal(verleih.betrag, ECONOMY.services.bootsverleih.stufen[0].wirkung.proTag);
-  // 10 Segelboote x 0,08 = 0,8 Kunden, mit rng 0,99 abgerundet auf 0
-  assert.equal(sonne.einnahmen.find((e) => e.id === 'mastenkran'), undefined);
-  const mitKunde = R.tagesabschluss(z, { tag: 2, wetter: 'sonne', boote: boote(10) }, () => 0.1);
-  assert.equal(mitKunde.einnahmen.find((e) => e.id === 'mastenkran').betrag, 35);
+  // 2 Boote x 0,25 = 0,5 Kunden, mit rng 0,99 abgerundet auf 0
+  assert.equal(sonne.einnahmen.find((e) => e.id === 'ausruester'), undefined);
+  const mitKunde = R.tagesabschluss(z, { tag: 2, wetter: 'sonne', boote: boote(2) }, () => 0.1);
+  assert.equal(mitKunde.einnahmen.find((e) => e.id === 'ausruester').betrag, ECONOMY.services.ausruester.stufen[0].wirkung.kunden.preis);
   const sturm = R.tagesabschluss(z, { tag: 3, wetter: 'sturm', boote: [] }, () => 0.5);
   assert.equal(sturm.einnahmen.length, 0);
   assert.equal(sturm.summe, 0);

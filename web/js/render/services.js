@@ -18,12 +18,14 @@
 // Zum Ausprobieren: index.html?stufe=4 (Bauplaetze erscheinen, antippen, bauen) oder
 // index.html?stufe=5&services=alle (alles voll ausgebaut).
 import * as THREE from 'three';
-import { SERVICES, GROSSSCHIFF_BESUCHE } from '../data/services.js';
+import { SERVICES, GROSSSCHIFF_BESUCHE, DIENST_TEXTE } from '../data/services.js';
 import { erstelleRegeln, neuerZustand, mitZahlen } from '../services/rules.js';
 import { baueModell, tPier, tankstelle, LAND_Y, mat, FARBE } from './services-models.js';
 import { buendeln } from './buendeln.js';
 import { HAFEN } from '../data/harbor.js';
 import { initBesuche } from './services-besuch.js';
+import { initWirkung } from './services-wirkung.js';
+import { regelnBereit } from '../features/regeln-bereit.js';
 
 const U = 0.62;
 
@@ -173,7 +175,11 @@ export function init(game) {
     for (const s of R.katalog) {
       if (!sichtbar(s.id)) continue;
       zeigeAnlage(s.id, s.id === mitAnimationFuer);
-      const zeigePlatz = R.stufeVon(z, s.id) === 0 && s.abStufe <= stufe;
+      // Wahlplatz der ersten Stufe (Café oder Eisdiele): nur ein Schild, und keins mehr, sobald eines steht
+      const w1 = R.wahlplatz(s.id, 1);
+      const platzBelegt = w1 && w1.optionen.some((o) => o.id !== s.id && (R.stufeVon(z, o.id) >= o.stufe ||
+        (R.byId[o.id]?.abStufe <= stufe && w1.optionen.indexOf(o) < w1.optionen.findIndex((x) => x.id === s.id))));
+      const zeigePlatz = R.stufeVon(z, s.id) === 0 && s.abStufe <= stufe && !platzBelegt;
       const vorhanden = plaetze.get(s.id);
       if (zeigePlatz && !vorhanden) {
         const g = bauplatz(s.id);
@@ -209,11 +215,30 @@ export function init(game) {
     zeile('h3', 'svc-titel', aktuell ? aktuell.name : s.name);
     zeile('p', 'svc-text', s.kurz);
     if (n > 0 && s.stufen.length > 1) zeile('p', 'svc-stufe', `Ausbau ${n} von ${s.stufen.length}`);
-    if (z.summe[id]) zeile('p', 'svc-text', `Bisher eingenommen: ${euro(z.summe[id])}`);
+    // Bilanz (F9): bezahlt, verdient, bezahlt sich in etwa n Tagen
+    const bil = R.bilanz(z, id);
+    if (bil) {
+      const heute = z.heute?.je?.[id];
+      const b = document.createElement('dl');
+      b.className = 'svc-bilanz';
+      const paar = (k, v) => { const dt = document.createElement('dt'); dt.textContent = k; const dd = document.createElement('dd'); dd.textContent = v; b.append(dt, dd); };
+      paar('Gebaut für', euro(bil.bezahlt));
+      paar('Bisher verdient', euro(bil.verdient));
+      if (bil.proTag) paar('Im Schnitt', `${euro(bil.proTag)} am Tag`);
+      if (heute) paar('Zuletzt', heute.text.replace(/^[^:]*: /, ''));
+      box.appendChild(b);
+      zeile('p', bil.tage === 0 ? 'svc-bezahlt' : 'svc-text',
+        bil.tage === 0 ? 'Hat sich schon bezahlt gemacht.'
+          : bil.tage != null ? `Bezahlt sich in etwa ${bil.tage} ${bil.tage === 1 ? 'Saisontag' : 'Saisontagen'}.`
+            : bil.tageBisher ? 'Hat bisher nichts eingebracht.' : 'Die erste Abrechnung kommt heute Abend.');
+    }
     if (besuch) zeile('p', 'svc-text', `${besuch.text}: ${besuch.inTagen === 0 ? 'heute' : besuch.inTagen === 1 ? 'morgen' : `in ${besuch.inTagen} Tagen`}`);
     if (!p.fertig) {
-      const label = n === 0 ? `Bauen ${euro(p.kosten)}` : `${p.def.name} ${euro(p.kosten)}`;
+      const label = p.umbau ? `${p.def.name} statt ${p.umbau.name} ${euro(p.kosten)}` : n === 0 ? `Bauen ${euro(p.kosten)}` : `${p.def.name} ${euro(p.kosten)}`;
+      const sch = R.schaetzung(z, id, letzterTag);
       if (p.freigeschaltet) {
+        if (sch?.proTag > 0) zeile('p', 'svc-text', `Bringt an einem Tag wie gestern etwa ${euro(sch.proTag)} mehr${sch.tage ? `, bezahlt sich in etwa ${sch.tage} Tagen` : ''}.`);
+        if (p.umbau) zeile('p', 'svc-hinweis', p.umbau.auf > 0 ? `${p.umbau.platzName}: ${p.umbau.name} wird dafür zu ${p.umbau.aufName} zurückgebaut.` : `${p.umbau.platzName}: ${p.umbau.name} macht dafür Platz.`);
         const knopf = zeile('button', 'svc-bauen', label);
         knopf.type = 'button';
         knopf.disabled = !!p.geldFehlt;
@@ -224,6 +249,27 @@ export function init(game) {
         zeile('p', 'svc-hinweis', `Braucht: ${p.fehlt.join(', ')}`);
       }
     }
+    // Entweder-oder (F3): die andere Option am selben Platz, als Umbau
+    // Noch frei: Hinweis, dass hier nur eines von beiden passt
+    const oder = !p.fertig ? R.wahlAlternative(z, id, n + 1) : null;
+    if (oder && !oder.gebaut && !p.umbau) zeile('p', 'svc-oder', oder.text);
+    // Schon belegt: die andere Option als Umbau anbieten
+    for (const w of R.wahlen) {
+      const mein = w.optionen.find((o) => o.id === id);
+      if (!mein || n < mein.stufe) continue;
+      for (const o of w.optionen) {
+        if (o.id === id) continue;
+        const q = R.pruefe(z, o.id, kontext());
+        if (q.fertig || q.umbau?.id !== id) continue;
+        zeile('p', 'svc-oder', w.text);
+        if (q.freigeschaltet) {
+          const k2 = zeile('button', 'svc-umbau', `Umbauen: ${q.def.name} ${euro(q.kosten)}`);
+          k2.type = 'button';
+          k2.dataset.id = o.id;
+          k2.disabled = !!q.geldFehlt;
+        } else zeile('p', 'svc-hinweis', `Umbau zu ${q.def.name} braucht: ${q.fehlt.join(', ')}`);
+      }
+    }
     karte.replaceChildren(box);
     karte.hidden = false;
     document.body.classList.add('card-open');
@@ -231,6 +277,11 @@ export function init(game) {
     karte.querySelector('.svc-bauen')?.addEventListener('click', (e) => {
       e.stopPropagation();
       const r = bauen(id);
+      if (r.ok) schliessen();
+    });
+    for (const k of karte.querySelectorAll('.svc-umbau')) k.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const r = bauen(k.dataset.id);
       if (r.ok) schliessen();
     });
     game.emit('services:karte', { id });
@@ -262,15 +313,41 @@ export function init(game) {
     }
     aktualisiere(id);
     const s = R.byId[id];
-    game.emit('services:gebaut', { id, stufe: r.stufe, name: s.stufen[r.stufe - 1].name, kosten: r.kosten });
+    // Wahlplatz (F3): die andere Option ist zurueckgebaut, ihr Modell wechselt mit aktualisiere()
+    if (r.umbau) game.emit('services:umgebaut', { id: r.umbau.id, stufe: r.umbau.auf, statt: id });
+    game.emit('services:gebaut', { id, stufe: r.stufe, name: s.stufen[r.stufe - 1].name, kosten: r.kosten, umbau: r.umbau ?? null });
     game.emit('services:effekte', R.effekte(zustand()));
     return r;
   }
 
-  function abrechnen(tagDaten) {
+  // Wetter eines Tages wie im Balancing (tools/balance.mjs): Sturm, Regen (rain > 0,3) oder Sonne.
+  // Vorher kannte die Abrechnung im Spiel nur Sturm und Sonne, Regen wirkte nie (P23).
+  function wetterVon(tag) {
     const sturm = /sturm|storm/i.test(String(game.events?.current?.id ?? game.events?.current?.type ?? ''));
-    const daten = { tag: tagDaten?.tag ?? game.state?.tag ?? 1, winter, wetter: sturm ? 'sturm' : 'sonne', ...tagDaten };
+    if (sturm) return 'sturm';
+    let w = null;
+    try { w = game.events?.weather?.(tag); } catch { w = null; }
+    return (w?.rain ?? 0) > 0.3 ? 'regen' : 'sonne';
+  }
+
+  // Letzter Saisontag fuer die Schaetzung auf Karte und Baumenue (F9)
+  let letzterTag = null;
+  const ankuenfteHeute = [];
+  let tagesgaesteSchnitt = 0;
+
+  function abrechnen(tagDaten) {
+    const tag = tagDaten?.tag ?? game.state?.tag ?? 1;
+    const daten = { tag, winter, wetter: wetterVon(tag), ...tagDaten };
     const r = R.tagesabschluss(zustand(), daten);
+    // Bezahlte Dienste an den Booten der Spielregeln vermerken (zahlen nur einmal)
+    for (const d of r.dienstBezahlt ?? []) {
+      const b = game.sim?.state?.boats?.[d.boatId];
+      if (b?.dienste?.[d.id] === 'offen') b.dienste[d.id] = 'bezahlt';
+    }
+    if (!daten.winter) {
+      tagesgaesteSchnitt = tagesgaesteSchnitt * 0.75 + (r.tagesgaeste ?? 0) * 0.25;
+      letzterTag = { wetter: 'sonne', boote: daten.boote ?? [], ankuenfte: ankuenfteHeute.splice(0), tagesgaesteSchnitt };
+    }
     // Gutgeschrieben wird summe von den Spielregeln (js/bridge.js hoert auf services:abrechnung).
     for (const a of r.angekuendigt) game.emit('services:besuch-angekuendigt', a);
     for (const b of r.besuche) game.emit('services:besuch', b);
@@ -378,8 +455,14 @@ export function init(game) {
 
   // ------------------------------------------------------------------ Start
   if (alleZeigen) {
+    // Alles voll ausgebaut; auf Wahlplätzen die erste Option, mit ?wahl=2 die zweite (zum Ansehen der Modelle)
     const z = zustand();
     for (const s of R.katalog) z.gebaut[s.id] = s.stufen.length;
+    const nr = params.get('wahl') === '2' ? 1 : 0;
+    for (const w of R.wahlen) {
+      const weg = w.optionen[1 - nr];
+      if (weg.stufe - 1 > 0) z.gebaut[weg.id] = weg.stufe - 1; else delete z.gebaut[weg.id];
+    }
   }
   aktualisiere();
   game.on('ready', () => {
@@ -410,6 +493,12 @@ export function init(game) {
     // Nach Rücknahme eines Kaufs im Baumenü (ui/bauen.js stellt den Zustand wieder her, Roadmap P18)
     neuZeichnen: () => { aktualisiere(); game.emit('services:effekte', R.effekte(zustand())); },
     effekte: () => fuerSpielregeln(R.effekte(zustand())),
+    // P23: Bilanz und Schaetzung (F9), Satz zum Dienst eines Gastboots (F2), Wahlplaetze (F3)
+    bilanz: (id) => R.bilanz(zustand(), id),
+    schaetzung: (id) => R.schaetzung(zustand(), id, letzterTag),
+    dienstText: (boot) => dienstText(boot),
+    wahlen: () => R.wahlen,
+    _regeln: () => R,
     abrechnen,
     naechsteBesuche: () => R.naechsteBesuche(zustand(), kontext().tag),
     planeBesuch: (id, tag) => R.planeBesuch(zustand(), id, tag),
@@ -434,8 +523,48 @@ export function init(game) {
   k01Sperren();
   game.on('ready', k01Sperren);
 
+  // Liegeplatz an der Tankstelle (Welt, Südkante des Dienststegs), null ohne Tankstelle.
+  // Boote mit der Geschichte "Tanken" halten hier beim Ablegen kurz (render/boat-view.js).
+  api.tankPunkt = () => {
+    if (!tank?.group?.visible || !tank.group.parent) return null;
+    const p = tank.group.position;
+    // Südkante des Stegs (Welt +z): dort liegen die Boote längsseits
+    return { x: p.x, z: p.z + 1.6, seite: -1 };
+  };
+  // ------------------------------------------------------------------ Dienste an Gastbooten (F2)
+  // Morgens, wenn die Boote des Tages feststehen (Haken 'arrivals', nach den Bootsgeschichten, die die
+  // Naechte setzen), entscheidet sich, wer einen Dienst will (Mast legen, Radtour, Reparatur): Er bleibt
+  // laenger und zahlt am ersten Abend. game.sim gibt es erst nach dem Laden der Bootsdaten.
+  let dienstHaken = false;
+  function dienstEinhaengen() {
+    if (dienstHaken || !game.sim?.addHook) return;
+    dienstHaken = true;
+    game.sim.addHook('arrivals', ({ state, ctx, list }) => {
+      const wetter = wetterVon(state.day);
+      for (const boat of list ?? []) {
+        const typ = ctx?.typeById?.[boat.typeId];
+        const b = { id: boat.id, klasse: boat.size, antrieb: boat.motor ? 'motor' : typ?.sail ? 'segel' : 'ruder',
+          nights: boat.nights, special: boat.special, stationed: boat.stationed };
+        ankuenfteHeute.push({ klasse: b.klasse, antrieb: b.antrieb });
+        if (ankuenfteHeute.length > 200) ankuenfteHeute.shift();
+        const d = R.dienstBeiAnkunft(zustand(), b, { tag: state.day, wetter });
+        if (!d) continue;
+        boat.nights += d.naechte;
+        boat.dienste = { ...(boat.dienste ?? {}), [d.id]: 'offen' };
+      }
+    });
+  }
+  regelnBereit(game).then(dienstEinhaengen).catch(() => {});
+  function dienstText(boot) {
+    const id = Object.keys(boot?.dienste ?? {})[0];
+    if (!id || !DIENST_TEXTE[id]) return null;
+    const n = R.aktiveStufe(zustand(), id)?.wirkung?.dienst?.naechte ?? 1;
+    return `${DIENST_TEXTE[id]}, bleibt dafür ${n === 1 ? 'eine Nacht' : `${n} Nächte`} länger.`;
+  }
+
   game.services = api;
   api.besuche = initBesuche(game, api);
+  api.wirkung = initWirkung(game, api);
   return api;
 }
 
@@ -479,7 +608,14 @@ function injiziereStil() {
     .svc-hinweis { color: #9a4a3c; }
     .svc-bauen { margin-top: 10px; min-height: var(--tap, 44px); width: 100%; border: 0; border-radius: 10px;
       background: #509e80; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
-    .svc-bauen:disabled { background: #a8b4bc; cursor: default; }
+    .svc-bauen:disabled, .svc-umbau:disabled { background: #a8b4bc; cursor: default; }
+    .svc-umbau { margin-top: 6px; min-height: var(--tap, 44px); width: 100%; border: 2px solid #509e80; border-radius: 10px;
+      background: transparent; color: inherit; font: inherit; cursor: pointer; }
+    .svc-bilanz { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 8px 0 4px; font-size: 0.92rem; }
+    .svc-bilanz dt { opacity: 0.7; }
+    .svc-bilanz dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+    .svc-bezahlt { margin: 4px 0; font-size: 0.95rem; color: #3f7f62; }
+    .svc-oder { margin: 8px 0 2px; font-size: 0.9rem; line-height: 1.35; opacity: 0.85; }
   `;
   document.head.appendChild(st);
 }

@@ -54,7 +54,10 @@ function figurGeometrien() {
   koerper.translate(0, 0.7, 0);
   const kopf = new THREE.SphereGeometry(0.25, 8, 6);
   kopf.translate(0, 1.62, 0);
-  return { koerper, kopf };
+  // Tasche oder Seesack in der Hand (Bootsgeschichten: Crewwechsel, Einkauf), seitlich am Körper
+  const tasche = new THREE.BoxGeometry(0.22, 0.42, 0.5);
+  tasche.translate(0.42, 0.55, 0);
+  return { koerper, kopf, tasche };
 }
 
 export function init(game) {
@@ -64,15 +67,18 @@ export function init(game) {
   const matKopf = new THREE.MeshLambertMaterial({ color: '#ffffff', flatShading: true });
   const koerper = new THREE.InstancedMesh(geo.koerper, matKoerper, max);
   const kopf = new THREE.InstancedMesh(geo.kopf, matKopf, max);
-  for (const m of [koerper, kopf]) {
+  const matTasche = new THREE.MeshLambertMaterial({ color: '#ffffff', flatShading: true });
+  const tasche = new THREE.InstancedMesh(geo.tasche, matTasche, max);
+  for (const m of [koerper, kopf, tasche]) {
     m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     m.frustumCulled = false;
     m.count = 0;
   }
   const group = new THREE.Group();
   group.name = 'menschen';
-  group.add(koerper, kopf);
+  group.add(koerper, kopf, tasche);
   game.scene.add(group);
+  const TASCHEN = ['#2e3f5c', '#7a4a2a', '#b04a3c', '#3b6e5a', '#c8b58e'];
 
   // Schirmmuetze des Hafenmeisters (eine einzelne Figur, daher kein Instancing noetig)
   const muetze = new THREE.Group();
@@ -366,16 +372,37 @@ export function init(game) {
     if (a.folgt) return;   // Gruppenmitglieder machen, was die Gruppe macht
     if (a.typ === 'hafenmeister') return rundgangWeiter(a);
     const bootDaten = a.boot != null ? boote.get(a.boot) : null;
+    // Crewwechsel: wer aussteigt, geht mit Tasche in den Ort; wer zusteigt, geht an Bord
+    if (a.verlaesst) {
+      const heim = heimKnoten(netz.komp[a.node]);
+      a.verlaesst = false;
+      // gehört nicht mehr zur Crew: das Boot wartet beim Ablegen nicht auf ihn
+      if (bootDaten) bootDaten.agenten = bootDaten.agenten.filter((x) => x !== a);
+      a.boot = null;
+      a.typ = 'ort';
+      if (heim != null) return befehl(a, heim, 'weg');
+      return entfernen(a);
+    }
+    if (a.steigtZu && bootDaten) { a.steigtZu = false; return heimAnBord(a, bootDaten); }
+    if (a.steigtZu) return entfernen(a);
     if (bootDaten) {
       // Wer abends erst ankommt, geht trotzdem einmal an Land (Dusche, Toilette, Restaurant)
       if (bootDaten.ablegen || ((abend || bootDaten.abreise) && !a.bleibtAbends && !a.ersterGang)) return heimAnBord(a, bootDaten);
       if (a.zustand !== 'anbord' && Math.random() < P.ZURUECK_AN_BORD && a.ziel) return heimAnBord(a, bootDaten);
+    } else if (a.zielFest) {
+      // Gezielter Besuch (besucher(), Services P23): erst dorthin, danach nach Hause
+      const z = a.zielFest;
+      a.zielFest = null;
+      a.ziel = z;
+      a.besuche = 0;
+      return befehl(a, z.node, 'ziel');
     } else if (a.besuche <= 0 || (abend && Math.random() < 0.5)) {
       // Spaziergaenger geht nach Hause oder aus dem Bild, Badegaeste ueber die Duenen
       const heim = (a.typ === 'strand' ? netz.duenen : netz.zuhause).filter((n) => netz.komp[n] === netz.komp[a.node]);
       if (heim.length) return befehl(a, wahl(heim), 'weg');
       return entfernen(a);
     }
+    if (bootDaten && !abend && !bootDaten.abreise && inDenOrt(a, game.geschichten?.landgang?.(game.sim?.state?.boats?.[a.boot]))) return;
     let z = zielWaehlen(a);
     if (abend && bootDaten && a.bleibtAbends) {
       // abends ins Restaurant oder an den Grillplatz
@@ -428,6 +455,21 @@ export function init(game) {
       return;
     }
     if (wenn === 'halt') return haltAmBoot(a);
+    if (wenn === 'ort') {
+      // im Ort unterwegs (nicht zu sehen), mit Einkauf zurück
+      a.zustand = 'drinnen';
+      a.uhr = zufall(25, 60);
+      if (boote.get(a.boot)?.gepaeck === 'einkauf') a.tasche = neueTasche();
+      return;
+    }
+    if (wenn === 'versammlung') {
+      const v = a.versammlung;
+      a.versammlung = null;
+      a.zustand = 'verweilt';
+      a.uhr = v?.dauer ?? 30;
+      if (v) a.blick = Math.atan2(-(v.z - a.z), v.x - a.x);
+      return;
+    }
     if (wenn === 'vorbei') { a.zustand = 'steht'; a.uhr = 0; return; }
     if (wenn === 'feierabend') { a.zustand = 'drinnen'; a.uhr = 1e9; rundgangEnde(a); return; }
     const z = a.ziel;
@@ -507,6 +549,22 @@ export function init(game) {
 
   function entfernen(a) {
     a.zustand = 'entfernt';
+  }
+
+  // Platz fuer n neue Figuren schaffen, wenn die Hoechstzahl erreicht ist: zuerst Spaziergaenger und
+  // Badegaeste, die gerade drinnen sind, dann die, die nach Hause gehen, dann andere (keine Gruppenfuehrer).
+  function platzMachen(n) {
+    let frei = max - agenten.reduce((k, a) => k + (a.zustand !== 'entfernt' ? 1 : 0), 0);
+    if (frei >= n) return;
+    const rang = (a) => (a.zustand === 'drinnen' ? 0 : a.danach === 'weg' ? 1 : 2);
+    const kandidaten = agenten.filter((a) => (a.typ === 'ort' || a.typ === 'strand') && a.zustand !== 'entfernt' && !a.folger?.length)
+      .sort((x, y) => rang(x) - rang(y));
+    for (const a of kandidaten) {
+      if (frei >= n) break;
+      entfernen(a);
+      frei++;
+    }
+    for (let k = agenten.length - 1; k >= 0; k--) if (agenten[k].zustand === 'entfernt') agenten.splice(k, 1);
   }
 
   // ---------------------------------------------------------------- Hafenmeister-Rundgang
@@ -664,9 +722,12 @@ export function init(game) {
       a.ersterGang = true;
       b.agenten.push(a);
     }
+    gepaeckBeimAnlegen(b, id);
     // Tagesgaeste grosser Schiffe gehen als Gruppe in den Ort
     if (gaeste > 0) {
       const g = Math.max(1, Math.ceil(gaeste / P.BUENDEL));
+      // In Stufe 6 sind oft alle Figuren vergeben: Spaziergaenger machen Platz (P23 F7)
+      platzMachen(g);
       let fuehrer = null;
       for (let k = 0; k < g; k++) {
         const a = neueFigur({ boot: id, node: platz.node, klasse, sichtbar: false, buendel: P.BUENDEL });
@@ -677,6 +738,93 @@ export function init(game) {
         b.agenten.push(a);
       }
     }
+  }
+
+  // ---------------------------------------------------------------- Bootsgeschichten (P86)
+  // gepaeck 'aus': jemand geht mit Tasche von Bord in den Ort und kommt nicht wieder; 'ein': jemand
+  // kommt mit Tasche aus dem Ort und geht an Bord; 'wechsel': beides; 'einkauf': wer in den Ort geht,
+  // kommt mit einer Einkaufstasche zurück.
+  const geschichteVon = (id) => game.geschichten?.geschichte?.(game.sim?.state?.boats?.[id]) ?? null;
+  const neueTasche = () => new THREE.Color(wahl(TASCHEN));
+  function heimKnoten(komp) {
+    const heim = netz.zuhause.filter((n) => netz.komp[n] === komp);
+    return heim.length ? wahl(heim) : null;
+  }
+  function gepaeckBeimAnlegen(b, id) {
+    const g = geschichteVon(id)?.gepaeck;
+    if (!g) return;
+    b.gepaeck = g;
+    if ((g === 'aus' || g === 'wechsel') && b.agenten.length) {
+      const a = b.agenten[0];
+      a.tasche = neueTasche();
+      a.verlaesst = true;
+    }
+    if (g === 'ein' || g === 'wechsel') {
+      const start = heimKnoten(netz.komp[b.node]);
+      const a = start != null ? neueFigur({ boot: id, node: start, klasse: b.klasse }) : null;
+      if (a) {
+        a.tasche = neueTasche();
+        a.steigtZu = true;
+        a.zustand = 'steht';
+        a.uhr = zufall(4, 14);
+        a.besuche = 0;
+        b.agenten.push(a);
+      }
+    }
+  }
+  // In den Ort: zu einem Weg am Rand (Dorf, Straßenende), dort eine Weile "drinnen", dann zurück
+  function inDenOrt(a, landgang) {
+    if (!landgang?.ort || a.warImOrt) return false;
+    // Kurzhalter: nur, wenn noch genug Zeit bis zum Ablegen ist (Weg hin und zurück)
+    const boot = game.sim?.state?.boats?.[a.boot];
+    if (boot?.leaveClock != null && boot.leaveClock - (game.sim.state.clock ?? 0) < 90) return false;
+    const andere = Object.entries(landgang).reduce((s, [k, v]) => s + (k === 'ort' ? 0 : v), 0);
+    if (Math.random() > landgang.ort / (landgang.ort + andere + 10)) return false;
+    const ziel = heimKnoten(netz.komp[a.node]);
+    if (ziel == null || ziel === a.node) return false;
+    a.ziel = null;
+    a.warImOrt = true;
+    befehl(a, ziel, 'ort');
+    return true;
+  }
+
+  /**
+   * Leute versammeln sich an einem Punkt (Siegerehrung der Regatta am Segelclub): anzahl Menschen aus dem
+   * Ort und die Crews der Boote in boote kommen hin und bleiben dauer Sekunden. Gibt die Zahl zurück.
+   */
+  function versammeln({ x, z, anzahl = 8, dauer = 40, boote: ids = [] } = {}) {
+    if (!netz) return 0;
+    const ort = netz.naechster(x / U, -z / U, netz.flaechen.festland);
+    if (ort == null || ort < 0) return 0;
+    let n = 0;
+    const hin = (a) => {
+      a.ziel = null;
+      a.versammlung = { dauer: dauer * zufall(0.8, 1.2), x, z };
+      a.besuche = Math.min(a.besuche ?? 0, 1);
+      if (a.zustand === 'anbord' || a.zustand === 'drinnen') a.zustand = 'steht';
+      befehl(a, ort, 'versammlung');
+      n++;
+    };
+    for (const id of ids) {
+      const b = boote.get(String(id));
+      if (!b || b.ablegen) continue;
+      for (const a of b.agenten) if (a.zustand !== 'entfernt' && !a.verlaesst && netz.komp[a.node] === netz.komp[ort]) hin(a);
+    }
+    // Leute aus dem Ort kommen von den nächsten Wegen und Haustüren (nicht vom anderen Ende der Karte)
+    const o = netz.nodes[ort];
+    const nahe = netz.zuhause.filter((n) => netz.komp[n] === netz.komp[ort])
+      .sort((p, q) => Math.hypot(netz.nodes[p].x - o.x, netz.nodes[p].y - o.y) - Math.hypot(netz.nodes[q].x - o.x, netz.nodes[q].y - o.y))
+      .slice(0, 4);
+    for (let k = 0; k < anzahl; k++) {
+      const start = nahe.length ? wahl(nahe) : null;
+      if (start == null) break;
+      const a = neueFigur({ node: start, typ: 'ort' });
+      if (!a) break;
+      a.zustand = 'steht';
+      a.besuche = 0;
+      hin(a);
+    }
+    return n;
   }
 
   function tagesgaesteVon(id) {
@@ -886,7 +1034,7 @@ export function init(game) {
 
   // ---------------------------------------------------------------- Zeichnen
   function zeichnen() {
-    let n = 0;
+    let n = 0, nt = 0;
     const zeit = game.time;
     for (const a of agenten) {
       if (a.zustand === 'entfernt' || a.zustand === 'drinnen' || a.zustand === 'anbord' || a.zustand === 'wartet-start' && a.node === boote.get(a.boot)?.node) continue;
@@ -905,8 +1053,16 @@ export function init(game) {
       kopf.setMatrixAt(n, mat);
       koerper.setColorAt(n, a.koerperFarbe);
       kopf.setColorAt(n, a.kopfFarbe);
+      if (a.tasche && !a.sitzt) {
+        tasche.setMatrixAt(nt, mat);
+        tasche.setColorAt(nt, a.tasche);
+        nt++;
+      }
       n++;
     }
+    tasche.count = nt;
+    tasche.instanceMatrix.needsUpdate = true;
+    if (tasche.instanceColor) tasche.instanceColor.needsUpdate = true;
     const hm = rundgang?.agent;
     const hmSichtbar = hm && (hm.zustand === 'geht' || hm.zustand === 'verweilt' || hm.zustand === 'steht');
     muetze.visible = !!hmSichtbar;
@@ -981,7 +1137,14 @@ export function init(game) {
   game.on('boot:ablegen', (info) => { const id = info?.id ?? info; wartend.delete(String(id)); bootLegtAb(id); });
   // Nachts abgerechnet, legt am Vormittag ab (Spielregeln: 'sim:departed', dann 'boot:ablegen')
   game.on('sim:departed', (e) => { const b = boote.get(String(e?.boatId ?? e?.id)); if (b) b.abreise = true; });
-  game.on('boat:cast-off', (info) => bootLegtAb(info?.id ?? info));
+  game.on('boat:cast-off', (info) => {
+    const id = info?.id ?? info;
+    bootLegtAb(id);
+    // Leinen los: wer noch an Land ist, hat es nicht mehr geschafft und ist trotzdem an Bord
+    // (sonst liefe er übers Wasser zur leeren Box)
+    const b = boote.get(String(id));
+    if (b) b.frist = 0;
+  });
   game.on('boat:left', (info) => bootWeg(info?.id ?? info));
   // Gekauftes Gebaeude: buildings.js stellt es im selben Ereignis auf, danach Netz erneuern
   game.on('build', () => { if (netz) queueMicrotask(netzErneuern); });
@@ -1057,10 +1220,35 @@ export function init(game) {
     zeichnen();
   });
 
+  // Leute aus dem Ort gehen gezielt zu einem Ziel (art wie in data/people.js ZIELE, z. B. 'raeucherei')
+  // und danach wieder nach Hause. Nacheinander im Abstand von abstand Sekunden Spielzeit.
+  // Liefert die Zahl der Figuren, die losgehen (0, wenn es das Ziel nicht gibt).
+  function besucher(art, anzahl, { abstand = 2.5 } = {}) {
+    if (!netz || !(anzahl > 0)) return 0;
+    const ziele = netz.ziele.filter((z) => z.art === art || z.id === `service-${art}`);
+    if (!ziele.length) return 0;
+    platzMachen(anzahl);
+    let n = 0;
+    for (let k = 0; k < anzahl; k++) {
+      const z = wahl(ziele);
+      const heim = netz.zuhause.filter((x) => netz.komp[x] === netz.komp[z.node]);
+      if (!heim.length) break;
+      const a = neueFigur({ node: wahl(heim), typ: 'besuch' });
+      if (!a) break;
+      a.zustand = 'steht';
+      a.uhr = k * abstand;
+      a.zielFest = z;
+      n++;
+    }
+    return n;
+  }
+
   const api = {
     group,
     netz: null,
+    besucher,
     anBord,
+    versammeln,
     bootAngelegt,
     bootLegtAb,
     rundgangStarten,

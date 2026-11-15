@@ -31,7 +31,15 @@ const tempo = {
   acht: (t) => t.page.getByRole('button', { name: 'Achtfach vorspulen' }),
 };
 async function setzeTempo(t, art) {
-  await t.sp.knopf(tempo[art](t));
+  const k = tempo[art](t);
+  if (!(await k.isVisible().catch(() => false))) {
+    // Zeitleiste nicht da: was liegt offen? (am Handy ersetzt die Bootskarte die Leiste)
+    const offen = await t.G(() => ({ body: document.body.className, karte: !document.getElementById('card')?.hidden, zeit: !!document.getElementById('hm-zeit')?.getBoundingClientRect().width }));
+    const zu = await fensterZu(t);
+    if (!(await k.isVisible().catch(() => false))) await t.page.keyboard.press('Escape').catch(() => {});
+    await t.hinweis('Zeitleiste nicht sichtbar', `vor "${art}": ${JSON.stringify(offen)}; geschlossen ${zu.join(', ') || 'nichts'}`, { bild: true });
+  }
+  await t.sp.knopf(k);
   const soll = { pause: null, normal: 1, drei: 3, acht: 8 }[art];
   const ok = await t.bis((s) => (s == null ? window.hafenmeister.paused : !window.hafenmeister.paused && window.hafenmeister.speed === s), soll, 5000);
   return ok;
@@ -47,6 +55,8 @@ async function fensterZu(t) {
     // Offene Bootskarte (nach Antippen eines Boots): am Handy ersetzt sie die Leisten, also über ihr Kreuz schließen
     const bootskarte = t.page.locator('#card:not(.bau-karte):visible .hm-zu, #card:not(.bau-karte):visible button[aria-label*="chließen"]').first();
     if (await bootskarte.isVisible().catch(() => false)) { await t.sp.knopf(bootskarte); zu.push('Bootskarte'); await t.warte(300); continue; }
+    const feier = t.page.locator('#hm-feier:not([hidden]) .hm-feier-weiter');
+    if (await feier.isVisible().catch(() => false)) { await t.sp.knopf(feier); zu.push('Feier'); await t.warte(600); continue; }
     const tipp = t.page.getByRole('button', { name: 'Verstanden' }).first();
     if (await tipp.isVisible().catch(() => false)) {
       const titel = await tipp.evaluate((b) => b.closest('section, div[class*="tipp"], div[class*="karte"], [role="dialog"]')?.querySelector('h1,h2,h3,strong,b,[class*="titel"]')?.textContent?.trim() ?? 'Tipp').catch(() => 'Tipp');
@@ -139,6 +149,7 @@ const S1 = {
 async function kamera(t) {
   const cam = () => window.hafenmeister.camera;
   const lies = () => { const c = window.hafenmeister.camera; return { x: c.target.x, z: c.target.z, w: c.viewWidth }; };
+  await fensterZu(t);
   await t.sp.knopf(t.page.locator('#btn-overview'));
   await t.kameraRuhig();
   const c0 = await t.G(lies);
@@ -196,9 +207,14 @@ async function bootKommt(t, z, { erstes = false } = {}) {
   }
   if (!info) {
     // Kein neues Boot mit freier Box: Hafen voll (kein Fehler) oder es kommt gar keins (Fehler)
-    const lage = await t.G(() => { const S = window.hafenmeister.sim; return { wartend: S.waitingBoats().length, liegend: S.mooredBoats().length }; });
+    const lage = await t.G((t0) => { const G = window.hafenmeister; const S = G.sim; const zaehl = {};
+      for (const b of Object.values(S.state.boats)) { const k = `${b.status}${b.atBuoy ? '@boje' : ''}`; zaehl[k] = (zaehl[k] || 0) + 1; }
+      return { wartend: S.waitingBoats().length, liegend: S.mooredBoats().length, zaehl, spielzeit: Math.round(G.time - t0), phase: S.state.phase, tag: S.state.day,
+        winter: !!S.season?.()?.winter, geplant: (S.state.upcoming || []).length, ereignis: G.events?.current?.id ?? null, frei: S.waitingBoats().map((b) => `${b.id}:${b.size}:${(S.passendePlaetze(b.id) || []).length}`).join(' ') }; }, tStart);
+    if (lage.winter) { await t.hinweis('Winter', `Tag ${lage.tag}: keine Gastboote im Winter`, { bild: false }); return null; }
+    if (!lage.wartend && !lage.geplant) { await t.hinweis('Keine Ankünfte mehr heute', `Tag ${lage.tag}, ${lage.phase}: alle Boote des Tages sind da; Boote ${JSON.stringify(lage.zaehl)}`, { bild: false }); return null; }
     if (lage.wartend > 0) await t.hinweis('Hafen voll', `${lage.wartend} Boote warten, ${lage.liegend} liegen, keine passende freie Box in 150 s`);
-    else await t.punkt('ein Boot kommt an die Boje', false, 'in 150 s Echtzeit kein neues Boot an einer Boje', { schwere: 'A' });
+    else await t.punkt('ein Boot kommt an die Boje', false, `in 150 s Echtzeit (${lage.spielzeit} s Spielzeit, Tag ${lage.tag}, ${lage.phase}) kein neues Boot an einer Boje, ${lage.geplant} noch geplant; Boote ${JSON.stringify(lage.zaehl)}${lage.ereignis ? `, Ereignis ${lage.ereignis}` : ''}`, { schwere: 'A' });
     return null;
   }
   z.bekannt.push(String(info.id));
@@ -255,8 +271,19 @@ async function anlegen(t, boot, platz, { tempo: art = 'drei' } = {}) {
     const w = o?.getWorldPosition(new G.THREE.Vector3());
     return { t: G.time, abstand: w && p ? Math.hypot(w.x - p.x, w.z - p.z) : null };
   }, [boot.id, platz]);
+  const warum = fest ? '' : await t.G(([id, tz]) => {
+    const G = window.hafenmeister; const b = G.sim.state.boats?.[id];
+    const ev = window.__st.ereignisse.filter((e) => e.t >= tz - 5 && String(e.d?.boatId ?? e.d?.id ?? e.d?.boot ?? '').replace(/^b/, '') === String(id)).map((e) => `${e.n}@${Math.round(e.t - tz)}${e.d?.berth ? ':' + e.d.berth : ''}`);
+    const anim = (G.boatAnim?.boats || []).find?.((a) => String(a.id ?? a.boat?.id).replace(/^b/, '') === String(id));
+    return `; Spielzeit ${Math.round(G.time - tz)} s, sim status ${b?.status ?? 'weg'} Platz ${b?.berth ?? '-'}, Anim ${anim ? (anim.state ?? anim.mode ?? 'da') : 'keine'}, Ereignisse ${ev.join(' ') || 'keine'}`;
+  }, [boot.id, tz]);
+  // Bekannter Fund F2: Kurzhalter wird abgerechnet und fährt weg, bevor er sichtbar festmacht (Schwere B, Lauf geht weiter)
+  if (!fest && /sim:departed/.test(warum)) {
+    await t.punkt('Kurzhalter macht fest, bevor er wieder abreist (F2)', false, `Boot ${boot.id} -> ${platz}${warum}`, { schwere: 'B' });
+    return null;
+  }
   await t.punkt('Boot fährt in die Box und macht fest', fest && lage2.abstand != null && lage2.abstand < 4,
-    `${fest ? `nach ${Math.round(lage2.t - tz)} s Spielzeit` : 'kein Festmachen in 120 s Echtzeit'}, ${lage2.abstand?.toFixed(1)} m von der Boxmitte`, { schwere: 'A' });
+    `${fest ? `nach ${Math.round(lage2.t - tz)} s Spielzeit` : 'kein Festmachen in 120 s Echtzeit'}, ${lage2.abstand?.toFixed(1)} m von der Boxmitte${warum}`, { schwere: 'A' });
   return fest ? platz : null;
 }
 
@@ -277,7 +304,11 @@ async function kassieren(t, z, boot) {
   await t.punkt('Münze über dem Boot nach dem Festmachen', da, warum, { schwere: 'A' });
   if (!da) return false;
   const lage = await insBild(t, (id) => [window.__st.muenzeSchirm(id)], boot.id);
-  if (!lage.ok) { await t.punkt('Münze frei im Bild', false, JSON.stringify(lage.p)); return false; }
+  if (!lage.ok) {
+    const offen = await t.G((id) => window.hafenmeister.sim.state.boats[id]?.pendingFee ?? 0, boot.id);
+    if (offen <= 0) { await t.hinweis('Münze schon kassiert', `Boot ${boot.id}: Rundgang oder Büro war schneller`, { bild: false }); return true; }
+    await t.punkt('Münze frei im Bild', false, JSON.stringify(lage.p)); return false;
+  }
   const vorher = await t.G((id) => ({ geld: window.hafenmeister.sim.state.money, offen: window.hafenmeister.sim.state.boats[id]?.pendingFee ?? 0, anzeige: document.getElementById('money')?.textContent }), boot.id);
   // Inzwischen vom Rundgang kassiert? Dann fliegt die Münze gerade weg, Streichen bringt nichts
   if (vorher.offen <= 0) { await t.hinweis('Münze schon kassiert', `Boot ${boot.id}: Rundgang oder Büro war schneller`, { bild: false }); return true; }
@@ -414,4 +445,4 @@ async function speichernLaden(t, z) {
 const S7 = { nr: 7, name: 'Speichern und Laden', paket: 'P09', neu: speichernLaden, wieder: speichernLaden };
 
 const SCHICHTEN = [S1, S2, S3, S4, S5, S6, S7];
-module.exports = { SCHICHTEN, setzeTempo, insBild, fensterZu, leinwandBild, rundlauf, laden, STAND, bootKommt, ziehenUndAnlegen, anlegen, kassieren, bootslage, oberflaeche };
+module.exports = { BOOTSLAGE, SCHICHTEN, setzeTempo, insBild, fensterZu, leinwandBild, rundlauf, laden, STAND, bootKommt, ziehenUndAnlegen, anlegen, kassieren, bootslage, oberflaeche };

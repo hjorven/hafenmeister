@@ -178,6 +178,19 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   const plan = mitEreignissen ? createScheduler({ seed }) : null;
   // Bootsgeschichten wie im Spiel (geschichten/geschichten.js): Anlass je Boot, besondere Tage, Tagestörns
   geschichtenEinhaengen(ctx, sim, { umfeld: (st, tag = st.day) => { const w = plan?.weather?.(tag); return { ereignis: w?.event ?? null, wetter: wetterWorte(w) }; } });
+  // Dienste der Services wie im Spiel (render/services.js, Haken 'arrivals'): Mast legen,
+  // Radtour, Reparatur verlängern den Aufenthalt und werden am ersten Abend bezahlt (P23)
+  const wetterAm = (tag) => (plan?.weather?.(tag)?.event === 'sturm' ? 'sturm' : (plan && (plan.weather(tag).rain ?? 0) > 0.3) ? 'regen' : 'sonne');
+  sim.addHook(ctx, 'arrivals', ({ state: st, ctx: c, list }) => {
+    for (const boat of list ?? []) {
+      const b = { id: boat.id, klasse: boat.size, antrieb: boat.motor ? 'motor' : c.typeById[boat.typeId]?.sail ? 'segel' : 'ruder',
+        nights: boat.nights, special: boat.special, stationed: boat.stationed };
+      const d = SVC.dienstBeiAnkunft(svc, b, { tag: st.day, wetter: wetterAm(st.day) });
+      if (!d) continue;
+      boat.nights += d.naechte;
+      boat.dienste = { ...(boat.dienste ?? {}), [d.id]: 'offen' };
+    }
+  });
   const gebaeude = () => {
     const b = { ...state.buildings, ...svc.gebaut };
     if (effekte.freischalten.includes('regatta') || svc.gebaut.segelclub) b.segelclub = Math.max(b.segelclub ?? 0, 1);
@@ -236,6 +249,8 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     for (const s of SERVICES) {
       const pr = SVC.pruefe(svc, s.id, { stufe: state.stage, ruf: rufWert() });
       if (!pr.freigeschaltet) continue;
+      // Entweder-oder (P23 F3): einmal gewählt, wird nicht wieder umgebaut
+      if (pr.umbau) continue;
       // In der letzten Stufe zählen Besuche großer Schiffe: Anleger mit Besuchen zuerst
       // (auf sie wird gespart wie auf einen fehlenden Steg)
       const besuch = !E.stufen[state.stage - 1].ausbau && GROSSSCHIFF_BESUCHE.includes(pr.def?.wirkung?.besuch?.art);
@@ -323,7 +338,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
           for (const w of b?.wishes ?? []) if (!ev.wishesMet.includes(w)) unerfuellt[w] = (unerfuellt[w] || 0) + 1;
         } else if (ev.type === 'evening') {
           liegend = sim.mooredBoats(state).filter((b) => !b.stationed)
-            .map((b) => ({ klasse: b.size, antrieb: b.motor ? 'motor' : 'segel' }));
+            .map((b) => ({ id: b.id, klasse: b.size, antrieb: b.motor ? 'motor' : 'segel', ...(b.dienste ? { dienste: { ...b.dienste } } : {}) }));
           if (!prof.nichts) sim.collectAll(state, ctx, true);
         }
       }
@@ -336,6 +351,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     }
     const wetter = plan?.current?.id === 'sturm' ? 'sturm' : (plan && (plan.weather(tag).rain ?? 0) > 0.3) ? 'regen' : 'sonne';
     const abschluss = SVC.tagesabschluss(svc, { tag, winter, wetter, boote: liegend }, r);
+    for (const d of abschluss.dienstBezahlt) { const b = state.boats[d.boatId]; if (b?.dienste?.[d.id] === 'offen') b.dienste[d.id] = 'bezahlt'; }
     sim.addIncome(state, abschluss.summe);
     // Besuche großer Schiffe (Kreuzfahrtschiff, Flottenbesuch) zählen in der letzten Stufe
     if (!E.stufen[state.stage - 1].ausbau) {

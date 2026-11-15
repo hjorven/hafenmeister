@@ -90,7 +90,11 @@ export async function initBridge(game) {
   ctx.ansichtMeldetBoje = () => !!game.boatsVisible;
   // Kurzhalt: Die Ansicht meldet sichtbares Festmachen ('boat:moored'), erst dann läuft die Liegezeit
   ctx.ansichtMeldetFest = () => !!game.boatsVisible;
-  game.on('boat:moored', (d) => { if (state && d?.id != null) sim.shortStayDocked(state, ctx, d.id); });
+  // (nur am Liegeplatz, nicht an der Warteboje oder im Ankerfeld)
+  game.on('boat:moored', (d) => {
+    const b = state && d?.id != null ? state.boats[d.id] : null;
+    if (b && d.berth != null && b.berthId != null && String(b.berthId).startsWith(String(d.berth))) sim.shortStayDocked(state, ctx, d.id);
+  });
   // Päckchen (P27): Die Ansicht (render/paeckchen.js) prüft, ob das Boot außen frei im Wasser läge.
   // Ohne Ansicht (Tests, Balancing) gilt jeder Päckchenplatz als frei.
   // Platz zugeparkt: ein Boot außen im Päckchen liegt in seinem Anfahrweg (nur mit Ansicht)
@@ -192,6 +196,8 @@ export async function initBridge(game) {
             ruf: sim.reputation(state),
             boote: sim.mooredBoats(state).map((b) => ({
               id: b.id, art: b.typeId, kind: b.kind, klasse: b.size, antrieb: b.motor ? 'motor' : ctx.typeById[b.typeId]?.sail ? 'segel' : 'ruder',
+              // Dienste der Services (P23: Mast legen, Radtour, Reparatur), am ersten Abend bezahlt
+              ...(b.dienste ? { dienste: { ...b.dienste } } : {}),
             })),
           });
           break;
