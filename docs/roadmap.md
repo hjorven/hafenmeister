@@ -157,9 +157,9 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Wünsche als Symbole über dem Boot | plan.md 3 | erledigt (PR 158) | P11 |
 | Hafenbüro lässt Sonderfälle beim Spieler | plan.md 3 | gebaut (PR 146) | P02 |
 | Vorspulen 2x, 3x erst mit Hafenbüro | plan.md 3, 14 | ersetzt durch Pause, 1x, 3x, 8x ab Start (Jorven bestätigt) | P07 |
-| Hafenhorn gedrückt halten (Sammelkassieren) | plan.md 8, Ton fertig | bauen | P26 |
-| Fernglas mit Steckbrief (Doppeltipp) | plan.md 8 | bauen | P26 |
-| Möwen aufscheuchen, Wellenring, Glocke | plan.md 8 | bauen | P26 |
+| Hafenhorn gedrückt halten (Sammelkassieren) | plan.md 8, Ton fertig | erledigt (P26) | P26 |
+| Fernglas mit Steckbrief (Doppeltipp) | plan.md 8 | erledigt (P26) | P26 |
+| Möwen aufscheuchen, Wellenring, Glocke | plan.md 8 | erledigt (P26) | P26 |
 | Logbuch mit Bild | plan.md 9 | erledigt (docs/logbuch.md) | P21 |
 | Erfolge | plan.md 9 | bauen | P22 |
 | Endlosmodus nach Abschluss | plan.md 9, 12 | gebaut: Saisonziele (PR 156, docs/aufstieg.md) | P16 |
@@ -209,7 +209,7 @@ Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätz
 | `docs/services.md` | Stufennamen, Zählung der Großschiffbesuche (Zählung erledigt, P04) | P04; P08 erledigt (PR 177) (Statuszeile, Mindestruf und Deckel in `balancing.md`) |
 | `docs/ereignisse.md` | Winter "mit wenig Ankünften" | P20 |
 | `docs/speichern.md` | Exportformat HM1 fehlt | P09 (erledigt: Abschnitte "Ein Speicherweg", "Speicherplätze", "Versionen") |
-| `web/js/audio/README.md` | nennt Hafenhorn-Ereignis, das kein Modul sendet | P26 |
+| `web/js/audio/README.md` | nennt Hafenhorn-Ereignis, das kein Modul sendet | P26, erledigt (`ui/hafengesten.js` sendet es) |
 | `docs/schiffsanimationen.md` | "Mit der Sonne vorspulen" (erledigt, P07) | P07 |
 | `docs/ui/pc.md`, `tablet.md`, `handy.md` | vom 11.11., teils durch `oberflaeche.md` ersetzt | P08, erledigt (PR 177): nach `docs/archiv/ui/` verschoben, Gültiges steht in `oberflaeche.md` |
 | übrige (`grundgeruest.md`, `tests.md`, `veroeffentlichen.md`, `landschaft.md`, `stegbilder.md`, `pixel-art.md`, `schiffe-xl.md`, `schiffe/groesse-l.md`, `hafen-und-schiffe.md`, `vorbilder.md`) | geprüft, Statuszeilen ergänzt, `grundgeruest.md` auf den Stand gebracht | P08, erledigt (PR 177) |
@@ -490,9 +490,9 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 |---|---|---|---|
 | L1 | Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel | offen | P46 |
 | L2 | Figuren als Anzeige (Schlange vor der Dusche, volle Tische) | erledigt (P55, Schlange vor WC, Dusche, Kiosk und Restaurant, wenn knapp oder voll; `render/people.js`) | P55 |
-| L3 | Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles | offen | P26 |
-| L4 | Fernglas mit Steckbrief | offen | P26 |
-| L5 | Möwen antippen, Glocke am Steg | offen | P26 |
+| L3 | Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles | erledigt | P26 |
+| L4 | Fernglas mit Steckbrief | erledigt | P26 |
+| L5 | Möwen antippen, Glocke am Steg | erledigt (Glocke steht am Hafenmeisterhaus) | P26 |
 | L6 | Fotoaufträge und Postkarte (= F22) | offen | P43 |
 
 ### M Zahlen und Daten
@@ -674,7 +674,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P23 | Services mit eigener Wirkung | Services nicht nur "€ pro Tag" | bestehend: "Services und Sonderanlagen einbauen" |
 | P24 | Ereignisse zum Vorbereiten und neue Ereignisse | Vorwarnung mit Handlungsmöglichkeit, F17 | Teil 1 erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend), Teil 2 offen; bestehend: "Ereignisse Sturm und Regatta einbauen" |
 | P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | neu |
-| P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | neu |
+| P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | erledigt (docs/hafengesten.md) |
 | P27 | Päckchen liegen bei vollem Hafen | F1 | neu |
 | P28 | Anmeldung per Funk | F2 (nutzt P11) | erledigt (PR 288, `docs/funk-anmeldung.md`) |
 | P29 | Baggern für tiefere Liegeplätze | F7 | neu |

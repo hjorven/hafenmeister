@@ -139,6 +139,10 @@ export const SOUNDS = {
   glocke: { label: 'Schiffsglocke', wet: 0.35, gap: 0.5 },
   horn: { label: 'Schiffshorn', wet: 0.3, gap: 0.25 },
   hafenhorn: { label: 'Hafenhorn (Kassieren)', wet: 0.45, gap: 0.8 },
+  glockenschlag: { label: 'Ein Schlag der Hafenglocke (antippen)', wet: 0.4, gap: 0.12 },
+  moewen: { label: 'Möwen fliegen auf', wet: 0.3, gap: 0.6 },
+  plaetschern: { label: 'Leises Plätschern (Wellenring)', wet: 0.25, gap: 0.25 },
+  fernglas: { label: 'Fernglas ansetzen', wet: 0.1, gap: 0.4 },
   sturmwarnung: { label: 'Sturmwarnung', wet: 0.4, gap: 2 },
   regatta: { label: 'Regatta-Startschuss', wet: 0.5, gap: 1 },
   seenot: { label: 'Seenotretter läuft aus', wet: 0.3, gap: 2 },
@@ -1197,6 +1201,64 @@ HafenAudio.prototype._sfx = {
     // tiefer Grundton für Fülle, auf Handy-Lautsprechern kaum hörbar, auf Kopfhörern schön
     this._tone(out, { f: 73.42, t, a: 0.15, hold: len, d: 0.6, peak: 0.12 });
     return len + 1.4;
+  },
+
+  glockenschlag(t, out, o) {
+    // Ein einzelner Schlag der Hafenglocke (P26), etwas tiefer als die Schiffsglocke. opts.staerke 0..1
+    const k = clamp(o.staerke ?? 1, 0.3, 1);
+    return this._metal(out, t, 880 * (1 + rand(-0.01, 0.01)), [1, 2.0, 2.4, 3.0, 4.1], [1, 0.55, 0.35, 0.25, 0.15], [1.9, 1.2, 0.9, 0.6, 0.4], 0.12 * k);
+  },
+
+  moewen(t, out, o) {
+    // Möwen fliegen auf (P26): Flügelschlag und mehrere Rufe durcheinander. opts.anzahl 1..12
+    const n = clamp(Math.round(o.anzahl || 4), 1, 12);
+    let len = 0;
+    // Flügel: kurze, dumpfe Rauschstöße, erst dicht, dann lockerer
+    for (let i = 0; i < 6 + n; i++) {
+      const tt = t + i * rand(0.05, 0.09) + (i > 6 ? 0.2 : 0);
+      len = Math.max(len, tt - t + this._burst(out, { t: tt, a: 0.004, d: 0.07, peak: 0.07, f: rand(500, 900), q: 0.9 }));
+    }
+    // Rufe: zwei bis fünf Möwen, jede zwei bis vier Mal, leicht verschoben
+    const rufer = clamp(Math.round(1 + n / 2), 2, 5);
+    for (let r = 0; r < rufer; r++) {
+      const f0 = rand(1200, 1700);
+      let tt = t + 0.12 + r * rand(0.08, 0.3);
+      const calls = 2 + Math.floor(rand(0, 3));
+      for (let i = 0; i < calls; i++) {
+        const long = i === 0 ? rand(0.25, 0.4) : rand(0.12, 0.22);
+        const f = f0 * rand(0.96, 1.04);
+        const g = this._env(out, tt, 0.02, 0.05 / Math.sqrt(rufer), long);
+        const bp = this._filter(g, 'bandpass', 1900, 1.8);
+        const end = tt + long + 0.1;
+        for (const [type, mul, det] of [['sawtooth', 1, 0], ['triangle', 2, 8]]) {
+          const osc = this._osc(bp, type, f * mul * 0.82, tt, end, det);
+          osc.frequency.exponentialRampToValueAtTime(f * mul, tt + 0.04);
+          osc.frequency.exponentialRampToValueAtTime(f * mul * 0.62, tt + long);
+        }
+        tt += long + rand(0.06, 0.16);
+        len = Math.max(len, tt - t);
+      }
+    }
+    return len + 0.3;
+  },
+
+  plaetschern(t, out, o) {
+    // Leises Plätschern für den Wellenring (P26): zwei, drei weiche Tropfen und ein Schwapp
+    const k = clamp(o.staerke ?? 1, 0.2, 1);
+    let len = this._burst(out, { kind: 'brown', t, a: 0.02, d: 0.45, peak: 0.12 * k, ftype: 'lowpass', f: 420 });
+    for (let i = 0; i < 3; i++) {
+      const tt = t + 0.04 + i * rand(0.07, 0.14);
+      const f = rand(700, 1100);
+      len = Math.max(len, tt - t + this._tone(out, { f, t: tt, a: 0.002, d: 0.08, peak: 0.045 * k, glide: f * 1.9, glideT: 0.06 }));
+    }
+    return len;
+  },
+
+  fernglas(t, out) {
+    // Fernglas ansetzen (P26): leises Klicken und ein kurzes Surren der Scharfstellung
+    this._burst(out, { t, a: 0.001, d: 0.03, peak: 0.12, f: 3200, q: 2 });
+    this._burst(out, { t: t + 0.09, a: 0.001, d: 0.025, peak: 0.08, f: 2600, q: 2 });
+    return 0.15 + this._burst(out, { t: t + 0.15, a: 0.04, hold: 0.12, d: 0.12, peak: 0.03, f: 1400, fTo: 2400, q: 6 });
   },
 
   sturmwarnung(t, out) {

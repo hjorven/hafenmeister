@@ -60,7 +60,7 @@ Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tem
 | 2 | **P17 Balancing: Aufstieg angleichen, Ü15, Ü16** (neu, startet jetzt) | Prio A; A10 ist gemergt. Rechnung (`tools/balance.mjs`) und Regeln jetzt angleichen, Schlussmessung im Zeitraffer nach PR 280 | Schlussmessung nach 1 | `economy.js` (einziger Thread dort), `docs/zahlen.md`, Einstieg (J5) |
 | 3 | **P28 Funk-Anmeldung** | erledigt (PR 288, `docs/funk-anmeldung.md`) | - | `ui/vorschau.js`, `sim.js`, Meldeplatz (PR 282) |
 | 4 | **P41 Statistik und Saisonbilanz** (neu) | nutzt die vorhandenen Daten (`state.stats.verlauf`, Einnahmen nach Quelle); fast nur eigene Dateien | - | Tagesabschluss-Tafel, Winterkarte (Saisonbilanz dort ergänzen statt doppeln) |
-| 5 | **P26 Überraschende Gesten** (neu) | Hafenhorn, Fernglas mit Steckbrief, Möwen, Glocke: macht den Hafen lebendig, berührt kaum Regeln | - | `audio.js`, Gesten (`ui/gesten.js`), Fotomodus |
+| 5 | **P26 Überraschende Gesten** (erledigt, docs/hafengesten.md) | Hafenhorn, Fernglas mit Steckbrief, Möwen, Glocke: macht den Hafen lebendig, berührt kaum Regeln | - | `audio.js`, Gesten (`ui/gesten.js`), Fotomodus |
 | 6 | **P24 Ereignisse Teil 2** (erledigt, PR 299) | neue Ereignisse F17 | - | Meldeplatz (PR 282) |
 | 7 | **P27 Päckchen liegen** | voller Hafen wird zur Entscheidung | 1 | `sim.js`, `boat-view.js`, Wegsuche |
 | 8 | **P20-Rest Winter** (H5, G5) | Kernschleife über das Jahr fertig | 2 | `winter.js`, `economy.js` |
