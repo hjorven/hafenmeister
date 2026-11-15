@@ -78,13 +78,15 @@ export const ECONOMY = {
 
   // Kurzhalt (docs/bootsgeschichten.md 3.2): Boote, die nur kurz anlegen (WC, Brötchen, Tanken, Eis)
   // und am selben Tag wieder ablegen. anteil je Stufe, bleibt = Liegezeit als Tagesanteil [min, max],
-  // preis = Tagesliegegeld als Anteil vom Nachtpreis, spaetestens = Tagesanteil, zu dem alle weg sind.
+  // preis = Tagesliegegeld als Anteil vom Nachtpreis, spaetestens = Tagesanteil, ab dem keiner mehr
+  // einfährt und zu dem alle weg sind, sichtbar = Mindestliegezeit ab dem sichtbaren Festmachen.
   // Ein Kurzhalter zählt beim Ablegen als Gast und bewertet wie ein Übernachter.
   kurzhalt: {
     anteil: { 1: 0.45, 2: 0.4, 3: 0.4, 4: 0.38, 5: 0.35, 6: 0.35 },
     bleibt: [0.12, 0.5],
     preis: 0.4,
     spaetestens: 0.97,
+    sichtbar: 0.06,
     klassen: ['S', 'M', 'L'],
   },
 

@@ -88,6 +88,9 @@ export async function initBridge(game) {
   const platzById = Object.fromEntries(HAFEN.plaetze.map((p) => [p.id, p]));
   // Die 3D-Ansicht meldet, wann ein Boot an der Boje fest ist (render/boat-view.js setzt game.boatsVisible)
   ctx.ansichtMeldetBoje = () => !!game.boatsVisible;
+  // Kurzhalt: Die Ansicht meldet sichtbares Festmachen ('boat:moored'), erst dann läuft die Liegezeit
+  ctx.ansichtMeldetFest = () => !!game.boatsVisible;
+  game.on('boat:moored', (d) => { if (state && d?.id != null) sim.shortStayDocked(state, ctx, d.id); });
   // Päckchen (P27): Die Ansicht (render/paeckchen.js) prüft, ob das Boot außen frei im Wasser läge.
   // Ohne Ansicht (Tests, Balancing) gilt jeder Päckchenplatz als frei.
   // Platz zugeparkt: ein Boot außen im Päckchen liegt in seinem Anfahrweg (nur mit Ansicht)

@@ -44,7 +44,7 @@ export function rulesFromEconomy(E = ECONOMY) {
   // Bootsgeschichten (web/js/geschichten/regeln.js): Zahlen je Anlass, unverändert durchgereicht
   r.stories = E.geschichten ?? null;
   const kh = E.kurzhalt;
-  r.shortStay = kh ? { share: kh.anteil || {}, stay: kh.bleibt || [0.1, 0.3], fee: kh.preis ?? 0.5, latest: kh.spaetestens ?? 0.97, sizes: kh.klassen || null } : null;
+  r.shortStay = kh ? { share: kh.anteil || {}, stay: kh.bleibt || [0.1, 0.3], fee: kh.preis ?? 0.5, latest: kh.spaetestens ?? 0.97, minVisible: kh.sichtbar ?? 0.06, sizes: kh.klassen || null } : null;
   r.wishBonus = E.wunschBonus ?? 0;
   r.sizeByBerths = E.platzMix ?? null;
   // Kassieren: Anteil beim Rundgang und nachts, Vorauszahlung, Trinkgeld für den langen Strich
