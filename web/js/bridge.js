@@ -86,6 +86,8 @@ export async function initBridge(game) {
   // Entfernung von der Warteboje eines Boots zu einem Liegeplatz (Weltkoordinaten), damit sich
   // Gäste beim Selbst-Einfahren die nächste freie Box suchen. Ohne Landschaft: Reihenfolge am Steg.
   const platzById = Object.fromEntries(HAFEN.plaetze.map((p) => [p.id, p]));
+  // Die 3D-Ansicht meldet, wann ein Boot an der Boje fest ist (render/boat-view.js setzt game.boatsVisible)
+  ctx.ansichtMeldetBoje = () => !!game.boatsVisible;
   ctx.berthDistance = (boat, berth, st) => {
     const boje = game.landscape?.warteplaetze?.bojen?.[boat.waitSpot ?? 0];
     const p = platzById[berth.id];
@@ -428,6 +430,11 @@ export async function initBridge(game) {
     } else if (pick.type === 'berth' && selected != null) {
       api.assign(selected, pick.id);
     }
+  });
+  // 3D-Ansicht meldet: ankommendes Boot ist von See her in der Karte (zählt für das Selbst-Einfahren bei Andrang)
+  game.on('boat:im-revier', (d = {}) => {
+    const id = boatIdOf(d.id ?? null);
+    if (id != null) sim.markInHarbor(state, ctx, id);
   });
   // 3D-Ansicht meldet: Boot ist an der Warteboje fest, ab jetzt zählt seine Geduld
   game.on('boot:an-boje', (d = {}) => {

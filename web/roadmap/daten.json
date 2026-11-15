@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "15.11.2026",
-  "commit": "75cfbdc"
+  "commit": "7024db5"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1164,10 +1164,11 @@
    "id": "P59",
    "titel": "Stege umbauen und Varianten wählen",
    "inhalt": "D5, D6, D9 (neue Gastplätze in Stufe 6)",
-   "thread": "teilweise (PR 321: D5, D6 Doppelboxen; D9 neue Gastplätze in Stufe 6 offen, stege-umbauen.md)",
+   "thread": "erledigt (PR 321 Doppelboxen, PR 326 Yachtsteg, stege-umbauen.md)",
    "welle": 3,
    "prs": [
-    321
+    321,
+    326
    ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
@@ -1175,10 +1176,12 @@
     "D6",
     "D9"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": [
     63,
-    64
+    64,
+    65,
+    66
    ]
   },
   {
@@ -2769,12 +2772,14 @@
   {
    "code": "D9",
    "text": "Neue Gastplätze in Stufe 6 (Superyacht-Steg oder Stadtkai)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 326): Yachtsteg vor der Westmole, zwei XL-Plätze",
    "pakete": [
     "P59"
    ],
-   "prs": [],
+   "prs": [
+    326
+   ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
   {
@@ -4394,8 +4399,8 @@
     "P59"
    ],
    "zaehler": {
-    "erledigt": 4,
-    "teilweise": 3,
+    "erledigt": 5,
+    "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
     "offen": 12,
@@ -4482,8 +4487,8 @@
   }
  ],
  "gesamt": {
-  "erledigt": 31,
-  "teilweise": 7,
+  "erledigt": 32,
+  "teilweise": 6,
   "arbeit": 1,
   "frage": 0,
   "offen": 41,
@@ -4491,11 +4496,11 @@
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 155,
+  "erledigt": 156,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 55,
+  "offen": 54,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5279,9 +5284,34 @@
    "datum": "2026-11-15",
    "quelle": "vorschau/p59/p59-pc-3-kat.png",
    "nr": 64
+  },
+  {
+   "datei": "p59-pr326-handy-yachtsteg-vorschau.jpg",
+   "pakete": [
+    "P59"
+   ],
+   "titel": "Yachtsteg bauen: Vorschau am Handy",
+   "pr": 326,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "vorschau/p59/yachtsteg-handy-vorschau.png",
+   "nr": 65
+  },
+  {
+   "datei": "p59-pr326-pc-yachten-am-yachtsteg.jpg",
+   "pakete": [
+    "P59"
+   ],
+   "titel": "Große Yachten am Yachtsteg (PC)",
+   "pr": 326,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "vorschau/p59/yachtsteg-yachten.png",
+   "nr": 66
   }
  ],
  "neueBilder": [
+  66,
   64,
   62,
   60,
@@ -5289,10 +5319,43 @@
   56,
   55,
   53,
-  52,
-  50
+  52
  ],
  "merges": [
+  {
+   "datum": "2026-11-15",
+   "titel": "Roadmap-Pflege: Bilder zum Yachtsteg (P59 Teil 2, PR 326)",
+   "pr": 328,
+   "pakete": [
+    "P59"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Härtetest: Extremlagen im echten Spiel prüfen (tests/extrem/)",
+   "pr": 324,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Boote: Geduld ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall",
+   "pr": 327,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Yachtsteg in Stufe 6: zwei neue Plätze für große Yachten (P59 Teil 2)",
+   "pr": 326,
+   "pakete": [
+    "P59"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Längere Tage, Kurzhalt, 65 Bootsgeschichten und Regatta draußen",
+   "pr": 319,
+   "pakete": []
+  },
   {
    "datum": "2026-11-15",
    "titel": "Roadmap-Pflege: P26 (PR 322), P17 (PR 318) eingetragen, Bilder zu P26 und P59",
@@ -5347,40 +5410,6 @@
     "P33",
     "P41"
    ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Menschen laufen auf dem echten Gelände jeder Küste",
-   "pr": 316,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Handy quer: Startansicht enger um den Hafen und mittig",
-   "pr": 307,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Statistik der letzten 30 Tage und Saisonbilanz in der Winterpause (P41)",
-   "pr": 315,
-   "pakete": [
-    "P41"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Liegende Boote umlegen (P33): halten und ziehen, zweites Umlegen kostet Bewertung",
-   "pr": 314,
-   "pakete": [
-    "P33"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Schichttest: Spiel Schicht für Schicht über die echte Oberfläche prüfen",
-   "pr": 313,
-   "pakete": []
   }
  ]
 }

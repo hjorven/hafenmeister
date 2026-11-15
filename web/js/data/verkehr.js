@@ -195,9 +195,11 @@ export function rundeImWasser(r, tiefeBei, { innen = 18, minTiefe = 1.2, meide =
     }
     return true;
   };
-  for (const dx of [0, 30, -30, 60, -60]) {
+  // Erst nahe der Grundlage, dann weiter weg (etwa im Watt, wenn das Ankerfeld das tiefe Wasser
+  // der Grundlage braucht, gelaende.js seitenLage)
+  for (const dx of [0, 30, -30, 60, -60, 90, -90, 120, -120, 160, -160]) {
     for (const s of [1, 0.85, 0.7, 0.55]) {
-      for (const dy of [0, 8, -8]) {
+      for (const dy of [0, 8, -8, 20, -20, 36, -36, 54]) {
         const q = { ...r, cx: r.cx + dx, cy: r.cy + dy, rx: r.rx * s, ry: Math.max(innen + 3, r.ry * s) };
         if (passt(q)) return q;
       }

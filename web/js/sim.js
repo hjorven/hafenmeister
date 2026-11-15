@@ -1283,8 +1283,16 @@ export function selfEnter(state, ctx) {
     // Ruhiger Betrieb: Das Boot liegt erst kurz an der Boje, Zeit für den Spieler, es zu lenken.
     // Andrang (mehr als die Hälfte der Bojen vergeben): Die Zeit zählt schon ab Ankunft im Revier,
     // das Boot hält von der Anfahrt aus direkt auf die Box zu und gibt seine Boje frei.
-    const since = b.atBuoy ? Math.min(b.atBuoySince, rush ? b.waitingSince : b.atBuoySince) : rush ? b.waitingSince : null;
-    if (since == null || state.clock - since < after) continue;
+    // Mit 3D-Ansicht zaehlt "im Revier" erst, wenn das Boot von See her in der Karte ist (die Anfahrt
+    // dauert dort Minuten, 'boot:im-revier'); sonst fuehre es schon weit draussen "selbst ein".
+    const revier = ctx.ansichtMeldetBoje?.() ? b.revierSeit ?? null : b.waitingSince;
+    // Andrang mit Ansicht: im Revier etwas laenger Zeit fuer den Spieler (queue.rushViewFactor x after),
+    // damit man ein ankommendes Boot noch antippen und lenken kann
+    const rushAfter = ctx.ansichtMeldetBoje?.() ? after * (ctx.rules.queue.rushViewFactor ?? 1) : after;
+    const bojeAb = b.atBuoy ? b.atBuoySince : Infinity;
+    const revierAb = rush && revier != null ? revier + rushAfter - after : Infinity;
+    const since = Math.min(bojeAb, revierAb);
+    if (!Number.isFinite(since) || state.clock - since < after) continue;
     const best = selfBerth(state, ctx, id);
     if (best) {
       b.selfEntered = true;
@@ -1519,6 +1527,14 @@ export function settleWaiting(state) {
   }
   // Abreisende Boote zeigt die 3D-Ansicht nach dem Laden nicht mehr, ihre Boxen sind frei.
   state.leaving = {};
+}
+
+/** Die 3D-Ansicht meldet: das wartende Boot ist von See her im Revier (in der Karte). */
+export function markInHarbor(state, ctx, boatId) {
+  const boat = state.boats[boatId];
+  if (!boat || boat.status !== 'waiting' || boat.revierSeit != null) return { ok: false, events: [] };
+  boat.revierSeit = state.clock;
+  return { ok: true, events: [] };
 }
 
 export function markAtBuoy(state, ctx, boatId) {
@@ -2143,7 +2159,10 @@ function queueStep(state, ctx, events, countPatience) {
       b.atBuoy = true;
       b.atBuoySince = b.waitingSince;
     }
-    if (!b.atBuoy && state.clock - b.waitingSince >= (queue.approachMax ?? 0)) {
+    // Mit 3D-Ansicht meldet sie die Boje ('boot:an-boje'), die Anfahrt von See dauert dort Minuten:
+    // die Geduld laeuft erst ab sichtbarer Boje. Ohne Ansicht (Tests, Balancing) gilt approachMax.
+    const anfahrt = ctx.ansichtMeldetBoje?.() ? (queue.approachMaxView ?? queue.approachMax) : queue.approachMax;
+    if (!b.atBuoy && state.clock - b.waitingSince >= (anfahrt ?? 0)) {
       events.push(...markAtBuoy(state, ctx, id).events);
     }
     // Wer eine frei gehaltene Box hat, wartet auf sie (sie wird gerade noch abgelegt) und fährt nicht weg
