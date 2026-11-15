@@ -54,19 +54,27 @@ Für andere Module gilt: Positionen von Stegen und Plätzen immer aus `HAFEN` od
 
 ## Befehle
 
-Varianten neu erzeugen (etwa 3 Minuten), etwa nach einer Änderung am Gelände oder an harbor.js:
-
-```bash
-node tools/stegbilder/erzeugen.mjs
-```
-
-Prüfen, ob die Datei noch zu Generator und Gelände passt:
+Prüfen, ob jede Variante in `web/js/data/stegbilder.js` noch alle Regeln hält (rund 15 Sekunden), etwa nach einer Änderung am Gelände, an Bojen, am Ankerfeld oder an harbor.js. Geprüft werden Stufe 1 bis 5 und Stufe 6 mit dem Yachtsteg:
 
 ```bash
 node tools/stegbilder/erzeugen.mjs --pruefen
 ```
 
-Tests (Plätze gleich, alle Prüfungen, Tiefe, Wahl der Variante):
+Datei fortschreiben: Varianten, die alle Prüfungen bestehen, bleiben mit ihrer Nummer, nur durchgefallene werden durch neue, möglichst andere ersetzt (bis rund 3 Minuten, wenn etwas ersetzt wird):
+
+```bash
+node tools/stegbilder/erzeugen.mjs
+```
+
+Alle 12 Varianten neu suchen (rund 7 Minuten). Das ändert die Stege in laufenden Spielen, weil Spielstände nur die Nummer ihres Stegbilds kennen; nur nehmen, wenn es dafür einen Grund gibt:
+
+```bash
+node tools/stegbilder/erzeugen.mjs --alle-neu
+```
+
+Warum fortschreiben statt neu erzeugen: Derselbe Startwert ergibt nach jeder Änderung an Gelände oder Hindernissen ein etwas anderes Bild. Die Datei wird deshalb nicht mehr mit dem Generator verglichen, sondern nur mit den Regeln (P83, 15.11.2026). Doppelboxen (P59) zählt der Generator nicht mit, sie entstehen im Spiel aus den Boxen jedes Stegbilds.
+
+Tests (Plätze gleich, alle Prüfungen in Stufe 1 bis 6, Tiefe, Generator findet neue Varianten, Wahl der Variante):
 
 ```bash
 node --test tests/stegbilder.test.mjs

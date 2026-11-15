@@ -1,8 +1,14 @@
 // Erzeugt Stegbilder (Varianten der Stege A, B, C mit Stichsteg CS und D) und schreibt sie nach
 // web/js/data/stegbilder.js. Beschreibung: docs/stegbilder.md
 //
-//   node tools/stegbilder/erzeugen.mjs            # Varianten suchen, pruefen, Datei schreiben
-//   node tools/stegbilder/erzeugen.mjs --pruefen  # nur pruefen, ob die Datei zu Generator und Gelaende passt
+//   node tools/stegbilder/erzeugen.mjs            # bestehende Varianten pruefen, nur durchgefallene ersetzen
+//   node tools/stegbilder/erzeugen.mjs --pruefen  # nur pruefen, ob jede Variante der Datei alle Regeln haelt
+//   node tools/stegbilder/erzeugen.mjs --alle-neu # alle Varianten neu suchen (aendert alte Spielstaende!)
+//   --protokoll                                   # jeden Startwert mit Grund ausgeben
+//
+// Spielstaende merken sich nur die Nummer ihres Stegbilds (modules.stegbild.nr). Damit ein laufendes
+// Spiel seine Stege behaelt, bleibt jede Variante der Datei, solange sie alle Pruefungen besteht, auch
+// wenn derselbe Startwert heute (anderes Gelaende, andere Hindernisse) etwas anderes ergeben wuerde.
 //
 // Ablauf je Variante (fester Startwert, also immer gleiches Ergebnis):
 //   1. Jeder Steg waechst Segment fuer Segment vom Ufer aus. Nach jedem Segment wird gezaehlt, wie
@@ -22,7 +28,13 @@ import { HAFEN } from '../../web/js/data/harbor.js';
 import { punkt, suedufer } from '../../web/js/render/landschaft/gelaende.js';
 import { region } from '../../web/js/render/landschaft/regionen.js';
 import { K, schneiden, aufLinie, linienLaenge, zufall, streckenFlaeche } from './geometrie.mjs';
+import { varianteSetzen } from '../../web/js/data/stegbild.js';
 import { pruefeStegbild, platzFlaechen, festeHindernisse, zusammenfassen, gassenTiefe, stichproben, PFAHL, MIN_TIEFE } from './pruefen.mjs';
+
+// Doppelboxen (P59, data/doppelboxen.js) entstehen erst im Spiel aus den Einzelboxen jedes Stegbilds
+// neu. Der Generator arbeitet deshalb nur mit den Einzelboxen, sonst zaehlt er die Paare als eigene
+// Boxen mit und kein Steg C passt mehr (Fund aus PR 329).
+export const GRUND = { ...HAFEN, plaetze: HAFEN.plaetze.filter((p) => !p.doppel) };
 
 const HIER = path.dirname(fileURLToPath(import.meta.url));
 const ZIEL = path.join(HIER, '..', '..', 'web', 'js', 'data', 'stegbilder.js');
@@ -30,6 +42,10 @@ const ZIEL = path.join(HIER, '..', '..', 'web', 'js', 'data', 'stegbilder.js');
 export const VARIIERT = ['A', 'B', 'C', 'CS', 'D'];
 const STUFEN = [1, 2, 3, 4, 5];
 const ANZAHL = 12;            // so viele Varianten kommen ins Spiel
+// Stufen ueber 5 uebernehmen die Stege der Stufe 5 (data/stegbild.js). Dort kommt in Stufe 6 der
+// Yachtsteg Y (P59, PR 326) dazu; seine Plaetze muessen bei jedem Stegbild erreichbar bleiben.
+const OBEN = Object.keys(HAFEN.stufen).map(Number).filter((n) => n > 5);
+const OBEN_STEGE = ['Y'];
 const KANDIDATEN = 1500;       // so viele Startwerte werden versucht
 
 // Box: Laenge, Breite (Planeinheiten) wie hafen_von_oben.SIZE
@@ -189,8 +205,8 @@ export class Bauplatz {
   constructor(seed) {
     this.seed = seed;
     this.rnd = zufall(seed * 7919 + 17);
-    this.hafen = kopie(HAFEN);
-    this.reihen = grundReihenfolge(HAFEN);
+    this.hafen = kopie(GRUND);
+    this.reihen = grundReihenfolge(GRUND);
     this.benutzt = new Map();      // Knick -> wie oft in dieser Variante
     this.merkmale = {};
     // alle variierten Stege aus dem Arbeitsstand nehmen
@@ -655,7 +671,7 @@ export function variante(seed, { protokoll = false } = {}) {
 /** Aus einem fertigen Arbeitsstand die Daten fuer web/js/data/stegbilder.js ziehen. */
 export function alsDaten(hafen, nr, seed, merkmale) {
   const stufen = {};
-  const grund = Object.fromEntries(HAFEN.plaetze.map((p) => [p.id, p]));
+  const grund = Object.fromEntries(GRUND.plaetze.map((p) => [p.id, p]));
   const zuFlach = [];
   for (const n of STUFEN) {
     const st = hafen.stufen[String(n)];
@@ -727,9 +743,23 @@ function alsModul(daten) {
   return `${KOPF}\nexport const STEGBILDER = ${JSON.stringify(daten)};\n\nexport default STEGBILDER;\n`;
 }
 
-export function erzeugeAlle({ protokoll = false } = {}) {
+/**
+ * Prueft eine Variante (Form wie STEGBILDER.varianten[i]) so, wie das Spiel sie setzt: Stufe 1 bis 5
+ * alle Regeln fuer A, B, C, CS, D; Stufe 6 dazu der Yachtsteg. Rueckgabe: Fehlerliste.
+ */
+export function variantePruefen(daten) {
+  const h = varianteSetzen(kopie(HAFEN), daten, VARIIERT);
+  return [
+    ...pruefeStegbild(h, { stege: VARIIERT, stufen: STUFEN }),
+    ...pruefeStegbild(h, { stege: [...VARIIERT, ...OBEN_STEGE], stufen: OBEN }),
+  ];
+}
+
+/** Startwerte durchprobieren, bis genug Varianten alle Pruefungen bestehen. */
+export function kandidaten({ protokoll = false, genug = ANZAHL * 3, bis = KANDIDATEN, ohne = [] } = {}) {
   const gut = [];
-  for (let seed = 1; seed <= KANDIDATEN; seed++) {
+  for (let seed = 1; seed <= bis; seed++) {
+    if (ohne.includes(seed)) continue;
     const v = variante(seed, { protokoll });
     if (!v.hafen) continue;
     const fehler = pruefeStegbild(v.hafen, { stege: VARIIERT, stufen: STUFEN });
@@ -742,42 +772,89 @@ export function erzeugeAlle({ protokoll = false } = {}) {
       if (protokoll) console.log(`Startwert ${seed}: zu flach`, probe.zuFlach.slice(0, 4).join(', '));
       continue;
     }
-    gut.push({ seed, hafen: v.hafen, merkmale: v.merkmale });
+    delete probe.zuFlach;
+    const oben = variantePruefen(probe).filter((f) => f.stufe > 5);
+    if (oben.length) {
+      if (protokoll) console.log(`Startwert ${seed}: Stufe 6`, zusammenfassen(oben, 4));
+      continue;
+    }
+    gut.push(probe);
     if (protokoll) console.log(`Startwert ${seed}: bestanden (${gut.length})`);
-    if (gut.length >= ANZAHL * 3) break;
+    if (gut.length >= genug) break;
   }
-  // die verschiedensten auswaehlen (weitester Punkt zuerst)
+  return gut;
+}
+
+/** Aus gut so viele waehlen, dass zusammen mit schon die verschiedensten im Spiel sind. */
+function auswahl(gut, anzahl, schon = []) {
   const wahl = [];
-  if (gut.length) wahl.push(gut[0]);
-  while (wahl.length < Math.min(ANZAHL, gut.length)) {
+  const dabei = () => [...schon, ...wahl];
+  while (wahl.length < Math.min(anzahl, gut.length)) {
     let best = null, bd = -1;
     for (const g of gut) {
       if (wahl.includes(g)) continue;
-      const d = Math.min(...wahl.map((w) => abstand(w, g)));
+      const d = dabei().length ? Math.min(...dabei().map((w) => abstand(w, g))) : 0;
       if (d > bd) { bd = d; best = g; }
     }
     wahl.push(best);
   }
-  wahl.sort((a, b) => a.seed - b.seed);
-  return {
-    format: 1,
-    grundbild: HAFEN.id,
-    stege: VARIIERT,
-    varianten: wahl.map((g, i) => { const d = alsDaten(g.hafen, i + 1, g.seed, g.merkmale); delete d.zuFlach; return d; }),
-    kandidaten: gut.length,
-  };
+  return wahl;
+}
+
+const dateiKopf = (varianten, kandidatenZahl) => ({ format: 1, grundbild: HAFEN.id, stege: VARIIERT, varianten, kandidaten: kandidatenZahl });
+
+/** Alle Varianten neu (alte Spielstaende bekommen dann andere Stege). */
+export function erzeugeAlle({ protokoll = false } = {}) {
+  const gut = kandidaten({ protokoll });
+  const wahl = auswahl(gut, ANZAHL).sort((a, b) => a.seed - b.seed);
+  return dateiKopf(wahl.map((g, i) => ({ ...g, nr: i + 1 })), gut.length);
+}
+
+/**
+ * Bestehende Datei fortschreiben: jede Variante, die alle Pruefungen besteht, bleibt mit ihrer Nummer.
+ * Nur durchgefallene (oder fehlende bis ANZAHL) werden durch neue, moeglichst andere Varianten ersetzt.
+ */
+export function fortschreiben(alt, { protokoll = false } = {}) {
+  const bleibt = [], ersetzen = [];
+  for (let nr = 1; nr <= ANZAHL; nr++) {
+    const v = alt?.varianten?.[nr - 1];
+    const fehler = v ? variantePruefen(v) : [{ text: 'fehlt' }];
+    if (fehler.length) {
+      ersetzen.push(nr);
+      if (v) console.log(`Variante ${nr} faellt durch:\n${zusammenfassen(fehler, 5)}`);
+    } else bleibt.push(v);
+  }
+  if (!ersetzen.length) return { daten: alt, ersetzt: [] };
+  const gut = kandidaten({ protokoll, genug: Math.max(ANZAHL, ersetzen.length * 3), ohne: bleibt.map((v) => v.seed) });
+  const neu = auswahl(gut, ersetzen.length, bleibt);
+  if (neu.length < ersetzen.length) throw new Error(`Nur ${neu.length} neue Varianten gefunden, ${ersetzen.length} gebraucht.`);
+  const varianten = [...alt?.varianten ?? []];
+  ersetzen.forEach((nr, i) => { varianten[nr - 1] = { ...neu[i], nr }; });
+  return { daten: dateiKopf(varianten.slice(0, ANZAHL), gut.length), ersetzt: ersetzen };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const protokoll = process.argv.includes('--protokoll');
-  const daten = erzeugeAlle({ protokoll });
-  const text = alsModul(daten);
+  const { STEGBILDER } = await import('../../web/js/data/stegbilder.js');
   if (process.argv.includes('--pruefen')) {
-    const alt = fs.existsSync(ZIEL) ? fs.readFileSync(ZIEL, 'utf8') : '';
-    if (alt !== text) { console.log('web/js/data/stegbilder.js ist veraltet. Neu erzeugen mit: node tools/stegbilder/erzeugen.mjs'); process.exit(1); }
-    console.log('web/js/data/stegbilder.js ist aktuell.');
+    let durch = 0;
+    STEGBILDER.varianten.forEach((v, i) => {
+      const fehler = variantePruefen(v);
+      if (fehler.length) { durch++; console.log(`Variante ${i + 1} (Startwert ${v.seed}) faellt durch:\n${zusammenfassen(fehler, 8)}`); }
+    });
+    if (STEGBILDER.varianten.length !== ANZAHL) { durch++; console.log(`${STEGBILDER.varianten.length} statt ${ANZAHL} Varianten.`); }
+    if (durch) { console.log('Neu erzeugen mit: node tools/stegbilder/erzeugen.mjs'); process.exit(1); }
+    console.log(`web/js/data/stegbilder.js ist aktuell: alle ${ANZAHL} Varianten bestehen alle Pruefungen (Stufe 1 bis ${Math.max(...STUFEN, ...OBEN)}).`);
+  } else if (process.argv.includes('--alle-neu')) {
+    const daten = erzeugeAlle({ protokoll });
+    fs.writeFileSync(ZIEL, alsModul(daten));
+    console.log(`web/js/data/stegbilder.js geschrieben: ${daten.varianten.length} neue Varianten aus ${daten.kandidaten} bestandenen Kandidaten.`);
   } else {
-    fs.writeFileSync(ZIEL, text);
-    console.log(`web/js/data/stegbilder.js geschrieben: ${daten.varianten.length} Varianten aus ${daten.kandidaten} bestandenen Kandidaten.`);
+    const { daten, ersetzt } = fortschreiben(STEGBILDER, { protokoll });
+    if (!ersetzt.length) console.log(`Alle ${ANZAHL} Varianten bestehen weiter, web/js/data/stegbilder.js bleibt.`);
+    else {
+      fs.writeFileSync(ZIEL, alsModul(daten));
+      console.log(`web/js/data/stegbilder.js geschrieben: Variante ${ersetzt.join(', ')} neu, die anderen bleiben.`);
+    }
   }
 }
