@@ -76,16 +76,17 @@ Reihenfolge abgeleitet aus [roadmap.md](roadmap.md), [arbeitsplan.md](arbeitspla
 | 10 | Bauen | P18, J4 | Bauliste, Vorschau, Bestätigen bezahlt genau den Preis, Zeit steht im Baumodus, Spiel läuft danach weiter | gebaut |
 | 11 | Tagesziele | P13 | Tafel mit drei Karten, Wahl wirkt | gebaut |
 | 12 | Tagesabschluss | P15 | Karte oder Zettel nach dem Tag, Summe stimmt, verdeckt Zeit und Bauen nicht, "Weiter" schließt | gebaut |
-| 13 | Wartebojen und Ankerfeld | P66 | mehrere wartende Boote zugleich, getrennte Ein- und Ausfahrt, nichts überlappt | geplant |
-| 14 | Bewertung und Gästebuch | P14 | Bewertung nach der Abreise, Gästebuch öffnet aus dem Menü | geplant |
-| 15 | Hafenbüro und Funk | P02, P28 | Büro bauen, "Alle kassieren" abends, Funk-Vorschläge | geplant |
-| 16 | Dauerlieger | P01 | Dauerlieger aufnehmen, fährt tagsüber raus, abends zurück | geplant |
-| 17 | Aufstieg | P16, P18 | Ausbau bis zur nächsten Stufe, Umbau der Stege, Feier | geplant |
-| 18 | Ruf und Wünsche | P19 | Ruf steigt und fällt sichtbar, Wünsche über dem Boot | geplant |
-| 19 | Winter | P20 | Winter beginnt, Hafen ruht, Frühling kommt | geplant |
-| 20 | Ereignisse | P24 | Sturm und Regatta angekündigt, Vorbereiten wirkt | geplant |
-| 21 | Logbuch und Chronik | P21 | Einträge passen zu dem, was passiert ist | geplant |
-| 22 | Services und Stufe 6 | P23, P04 | Anlagen bauen, Großschiffe, Abschlussziel | geplant |
+| 13 | Menü | Abnahme, P50 | jeder Menüeintrag öffnet oder schaltet etwas sichtbar und lässt sich wieder schließen; Menü passt ins Bild | gebaut |
+| 14 | Wartebojen und Ankerfeld | P66 | mehrere wartende Boote zugleich, getrennte Ein- und Ausfahrt, nichts überlappt | geplant |
+| 15 | Bewertung und Gästebuch | P14 | Bewertung nach der Abreise, Gästebuch öffnet aus dem Menü | geplant |
+| 16 | Hafenbüro und Funk | P02, P28 | Büro bauen, "Alle kassieren" abends, Funk-Vorschläge | geplant |
+| 17 | Dauerlieger | P01 | Dauerlieger aufnehmen, fährt tagsüber raus, abends zurück | geplant |
+| 18 | Aufstieg | P16, P18 | Ausbau bis zur nächsten Stufe, Umbau der Stege, Feier | geplant |
+| 19 | Ruf und Wünsche | P19 | Ruf steigt und fällt sichtbar, Wünsche über dem Boot | geplant |
+| 20 | Winter | P20 | Winter beginnt, Hafen ruht, Frühling kommt | geplant |
+| 21 | Ereignisse | P24 | Sturm und Regatta angekündigt, Vorbereiten wirkt | geplant |
+| 22 | Logbuch und Chronik | P21 | Einträge passen zu dem, was passiert ist | geplant |
+| 23 | Services und Stufe 6 | P23, P04 | Anlagen bauen, Großschiffe, Abschlussziel | geplant |
 
 ## Ergebnisse
 
@@ -93,12 +94,22 @@ Neueste Läufe oben. Bilder und vollständige Berichte liegen im Projektordner u
 
 | Datum | Stand | Gerät | Schichten | Prüfpunkte | Funde | Bemerkung |
 |---|---|---|---|---|---|---|
-| 14.11. | `af90cb9` | pc | 1 bis 7 | 69 | 0 | Kern stabil |
+| 15.11. | `af90cb9` | alle fünf | 1 bis 13 | 84 bis 300 | siehe Funde | Serie 1: Kern auf allen Geräten stabil; Funde in 8 bis 13 großteils Testfehler (behoben), F1 echt |
+| 14.11. | `af90cb9` | pc, handy, handyquer, tablet, tabletquer | 1 bis 7 | 62 bis 72 | 0 | Kern stabil (nach Testkorrekturen) |
 
 ## Funde
 
 | Nr | Schicht | Gerät | Fund | Schwere | Bild | Zuständig | Stand |
 |---|---|---|---|---|---|---|---|
+| F1 | 12 mit 3, 8 | pc, tablet | Die Karte "Tag n geschafft" liegt oben in der Mitte über Wartebojen und Stegkopf, bis zu 14 s, während das Spiel läuft; wartende Boote und Ziel-Boxen sind verdeckt | C bis B | `schichttest/2026-11-15-af90cb9/f1-pc-tagesabschluss-ueber-bojen.jpg` | an Koordinator gemeldet | offen |
+
+Keine Fehler, aber gut zu wissen (Hinweise):
+
+- Am Handy und Tablet hochkant ersetzt die Bootskarte nach dem Antippen eines wartenden Boots die untere Leiste samt Bauen und Tempo (`f2-tablet-bootskarte-verdeckt-leisten.jpg`). Gewollt (`ui/input-touch.js`: genau ein Einfahren-Knopf, am Handy in der Karte), der Spieler schließt die Karte über das Kreuz.
+- Am Abend kassiert der Rundgang des Hafenmeisters liegen gebliebene Münzen selbst ("7 € statt 9 €"). Bei 3x und 8x ist er oft schneller als der Spieler.
+- Stufe 1 ist nach zwei bis drei Tagen voll (4 Boxen, 2 davon erst nach dem Ausbau). Dann warten Boote ohne freie Box; das ist Spielregel, kein Fehler.
+
+Testfehler, die in Serie 1 auffielen und im Werkzeug behoben sind: Ereignisse mit Kreisbezügen, `boat:moored` an der Boje, Rundgang kassiert bei 3x vor dem Strich, Bootskarte statt Knopf am Boot, Logbuch-Fenster nicht erkannt, Tempo-Messung bei unter 10 Bildern je Sekunde.
 
 ## Wo es mit anderen kollidieren kann
 
