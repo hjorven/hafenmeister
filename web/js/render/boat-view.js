@@ -654,15 +654,68 @@ export function init(game) {
     }
     return out.map((e) => ({ ...zellMitte(k, e.c), nx: e.nx, nz: e.nz }));
   }
-  // Vom Kartenrand weiter hinaus, bis man es nicht mehr sieht (hoechstens 150 m)
+  // Vom Kartenrand weiter hinaus, bis man es nicht mehr sieht (hoechstens 24 Schritte zu 15 m).
   // Nur ueber Wasser mit mindestens t Tiefe (ausserhalb der Karte kennt nur das Gelaende die Tiefe).
-  function hinaus(p, L, t = 1) {
-    const tief = (x, z) => (game.landscape?.tiefeBei?.(x, z) ?? 99) >= t;
-    const q = { x: p.x, z: p.z };
-    const weiter = () => tief(q.x + p.nx * 15, q.z + p.nz * 15) && tief(q.x + p.nx * 7.5, q.z + p.nz * 7.5);
-    for (let i = 0; i < 10 && game.boatAnim.imBild?.(q.x, q.z, L + 6) && weiter(); i++) { q.x += p.nx * 15; q.z += p.nz * 15; }
-    if (q.x !== p.x || q.z !== p.z || !(p.nx || p.nz) || !weiter()) return q;
-    return { x: p.x + p.nx * 15, z: p.z + p.nz * 15 };
+  // B: Rumpfbreite. Geprueft wird die ganze Breite (plus 1 m), nicht nur die Mittellinie: Ein 13 m
+  // breites Schiff streifte sonst eine Sandbank neben seinem Kurs (Haertetest 15.11., Korvette).
+  // Der Kurs folgt dem tiefen Wasser bis 60 Grad schraeg zum Rand (schraeges Seegatt im Bodden),
+  // bleibt aber immer nach draussen gerichtet.
+  // Ergebnis: Punkte nach p (ohne p); leer, wenn es von p aus nicht weitergeht.
+  function hinaus(p, L, t = 1, B = 0) {
+    const h = B > 0 ? B / 2 + 1 : 0;
+    const tief1 = (x, z) => (game.landscape?.tiefeBei?.(x, z) ?? 99) >= t;
+    const frei = (x, z, ux, uz) => tief1(x, z) && (!h || (tief1(x - uz * h, z + ux * h) && tief1(x + uz * h, z - ux * h)));
+    if (!(p.nx || p.nz)) return [];
+    const out = [];
+    let q = { x: p.x, z: p.z }, ux = p.nx, uz = p.nz;
+    for (let i = 0; i < 24 && game.boatAnim.imBild?.(q.x, q.z, L + 6); i++) {
+      // Erst ein Kurs, auf dem auch der Bug (halbe Laenge voraus) im tiefen Wasser liegt, sonst kuerzer
+      let kurs = null;
+      for (const bug of [L / 2, L / 4, 0]) {
+        for (const w of [0, 20, -20, 40, -40, 60, -60]) {
+          const a = w * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+          const vx = ux * c - uz * s, vz = ux * s + uz * c;
+          if (vx * p.nx + vz * p.nz < 0.45) continue;
+          if (!frei(q.x + vx * 7.5, q.z + vz * 7.5, vx, vz)) continue;
+          let ok = true;
+          for (let d = 15; ok && d <= 15 + bug + 0.1; d += 8) ok = frei(q.x + vx * d, q.z + vz * d, vx, vz);
+          if (ok) { kurs = [vx, vz]; break; }
+        }
+        if (kurs) break;
+      }
+      if (!kurs) break;
+      [ux, uz] = kurs;
+      q = { x: q.x + ux * 15, z: q.z + uz * 15 };
+      out.push(q);
+    }
+    return out;
+  }
+  // Kuerzt den Weg ab Index ab: laesst Ecken aus, wo die gerade Linie samt Rumpfbreite (plus 1 m) im
+  // tiefen Wasser liegt. Nur am Ende des Wegs (Kartenrand und draussen, weit weg von Stegen, die das
+  // Gelaende nicht kennt). Sonst fuhr die Korvette im Bodden erst in die Ecke am Kartenrand und streifte
+  // dort das Ufer, bevor sie ins Seegatt drehte.
+  function eckenKappen(weg, ab, t, B) {
+    const h = B / 2 + 1;
+    const tief1 = (x, z) => (game.landscape?.tiefeBei?.(x, z) ?? 99) >= t;
+    const linieFrei = (a, b) => {
+      const d = Math.hypot(b.x - a.x, b.z - a.z);
+      if (d < 1) return true;
+      const ux = (b.x - a.x) / d, uz = (b.z - a.z) / d;
+      for (let s = 0; s <= d; s += 4) {
+        const x = a.x + ux * s, z = a.z + uz * s;
+        if (!tief1(x, z) || !tief1(x - uz * h, z + ux * h) || !tief1(x + uz * h, z - ux * h)) return false;
+      }
+      return true;
+    };
+    const out = weg.slice(0, ab + 1);
+    let i = ab;
+    while (i < weg.length - 1) {
+      let j = Math.min(weg.length - 1, i + 6);
+      while (j > i + 1 && !linieFrei(weg[i], weg[j])) j--;
+      out.push(weg[j]);
+      i = j;
+    }
+    return out;
   }
   // Liegeplaetze der Stufe in Weltmetern (Vorbeifahrer bleiben davon weg)
   function plaetzeWelt() {
@@ -696,12 +749,26 @@ export function init(game) {
       if (!rand.length) continue;
       const ziel = o.nahBei ?? von;
       rand.sort((a, b) => Math.hypot(a.x - ziel.x, a.z - ziel.z) - Math.hypot(b.x - ziel.x, b.z - ziel.z));
-      for (const p of rand.slice(0, 3)) {
+      // Lieber ein Ausgang, hinter dem das ganze Schiff frei aus dem Bild kommt; sonst der, hinter dem
+      // es am weitesten im tiefen Wasser hinaus kommt (nicht am Kartenrand stehen bleiben)
+      let notfall = null, notfallN = -1;
+      // die naechsten Ausgaenge und dazu welche rundum verteilt (der alte Seepunkt kann in einer Bucht liegen)
+      const weit = rand.slice(10);
+      const wahl = [...rand.slice(0, 10), ...Array.from({ length: Math.min(10, weit.length) }, (_, i) => weit[Math.floor(i * weit.length / Math.min(10, weit.length))])];
+      for (const p of wahl) {
         const w = route(k, von, p, { r: m.r, rMin: m.hart, t, rechts: 0, flachErlaubt: false });
         if (!w.ok || !w.amZiel) continue;
-        erg = [...w.punkte, hinaus(p, info.length, t)];
+        const raus = hinaus(p, info.length, t, info.beam);
+        const weg = eckenKappen([...w.punkte, ...raus], Math.max(0, w.punkte.length - 3), t, info.beam);
+        const ende = weg[weg.length - 1];
+        if (game.boatAnim.imBild?.(ende.x, ende.z, info.length + 6)) {
+          if (raus.length > notfallN) { notfall = weg; notfallN = raus.length; }
+          continue;
+        }
+        erg = weg;
         break;
       }
+      erg ??= notfall;
       if (erg) break;
     }
     seeWegCache.set(key, erg);
@@ -744,7 +811,10 @@ export function init(game) {
         for (let s = 1; s <= st; s++) pts.push({ x: p.x + (q.x - p.x) * s / st, z: p.z + (q.z - p.z) * s / st });
       }
       if (pts.some((p) => nah(p, abstand))) continue;
-      return { start: hinaus(a, L, m.t), punkte: [{ x: a.x, z: a.z }, ...w.punkte, hinaus(b, L, m.t)] };
+      const rein = hinaus(a, L, m.t, info.beam).reverse();
+      const start = rein.shift() ?? { x: a.x + a.nx * 15, z: a.z + a.nz * 15 };
+      const raus = hinaus(b, L, m.t, info.beam);
+      return { start, punkte: [...rein, { x: a.x, z: a.z }, ...w.punkte, ...(raus.length ? raus : [{ x: b.x + b.nx * 15, z: b.z + b.nz * 15 }])] };
     }
     return null;
   }
