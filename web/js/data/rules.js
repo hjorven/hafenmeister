@@ -161,7 +161,9 @@ export function rulesFromEconomy(E = ECONOMY) {
     spots: { ...(w.plaetze || {}) },
     patience: w.geduld,
     approachMax: w.anfahrtMax ?? 0,
+    approachMaxView: w.anfahrtMaxAnsicht ?? w.anfahrtMax ?? 0,
     selfEnterAfter: w.selbstEinfahrenNach ?? null,
+    rushViewFactor: w.andrangImBildFaktor ?? 1,
     overnight: !!w.ueberNacht,
     buoyFee: w.bojengeld ?? 0,   // Bojengeld über Nacht (P10)
   };

@@ -46,8 +46,10 @@ export const ECONOMY = {
     geduld: 30,
     plaetze: { 1: 3, 2: 6, 3: 5, 4: 7, 5: 8, 6: 8 },
     selbstEinfahrenNach: 8,   // Sekunden zum Selbstlenken, dann sucht sich das Boot selbst eine freie Box
+    andrangImBildFaktor: 2.5, // bei Andrang mit 3D-Ansicht: so viel länger im Revier, bevor das Boot ohne Boje selbst einfährt
     ueberNacht: true,         // wer abends noch wartet, bleibt über Nacht an der Boje (ohne Bewertung)
-    anfahrtMax: 35,           // meldet die 3D-Ansicht nichts, gilt ein Boot danach als an der Boje
+    anfahrtMax: 35,           // ohne 3D-Ansicht (Tests, Balancing) gilt ein Boot danach als an der Boje
+    anfahrtMaxAnsicht: 600,   // mit Ansicht meldet sie die Boje selbst; das hier ist nur die Notbremse (Anfahrt von See dauert Minuten)
     ausBoxMax: 20,            // ein abreisendes Boot gibt seine Box spätestens nach so vielen Sekunden frei
     vorschau: 3,              // so viele kommende Boote zeigt die Vorschau
     bojengeld: 0.2,           // Anteil des Grundpreises, den ein Boot für die Nacht an der Boje zahlt

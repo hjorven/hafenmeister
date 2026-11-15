@@ -814,42 +814,48 @@ function seitenLage(stufe, region) {
     : [(box.x0 + box.x1) / 2, box.y1];
   const R0 = stufe === 1 ? 44 : 50;
   const uferAb = Math.max(box.x1, ...(best?.lagen ?? []).map(([px]) => px));
-  const kand = [];
-  for (const f of [1, 0.8, 0.65]) {
-    const R = Math.round(R0 * f);
-    for (let px = -280; px <= 220; px += 12) for (let py = 0; py <= 220; py += 12) {
-      if (abKorridor(px, py) < R + halb + 6) continue;
-      // Uferstreifen (y 18, data/verkehr.js UFER): der Paddler braucht östlich der Stege und Bojen
-      // gut 20 Einheiten bis zum Ankerfeld (uferStrecke endet davor), sonst liegt das Feld weiter draußen
-      if (py - R < 34 && px - R - 10 < uferAb + 46 && px + R + 10 > box.x0) continue;
-      // Runde der Freizeitboote auf dem See (data/verkehr.js SEE_RUNDE) bleibt frei
-      const sr = SEE_RUNDE[stufe];
-      if (sr && Math.hypot(Math.max(sr.cx - sr.rx - px, 0, px - sr.cx - sr.rx), Math.max(sr.cy - sr.ry - py, 0, py - sr.cy - sr.ry)) < R + 14) continue;
-      if (best?.lagen.some(([bx, by]) => Math.hypot(bx - px, by - py) < R + 14)) continue;
-      const ex = Math.max(box.x0 - px, 0, px - box.x1), ey = Math.max(box.y0 - py, 0, py - box.y1);
-      if (Math.hypot(ex, ey) < R + 24) continue;
-      kand.push({ px, py, radius: R, k: Math.hypot(px - mitte[0], py - mitte[1]) + (R0 - R) * 12 });
-    }
-  }
-  kand.sort((p, q) => p.k - q.k);
+  // Erst mit freier Runde der Freizeitboote; findet sich so kein Feld (etwa im Watt, wo das tiefe
+  // Wasser genau dort liegt), ohne sie: die Runde weicht dann selbst den Ankerplätzen aus
+  // (render/boats/verkehr.js rundeImWasser mit meide) oder entfällt.
   let anker = null;
-  for (const c of kand) {
-    let ok = tief(c.px, c.py, 0) >= 2.2;
-    for (let k = 0; ok && k < 12; k++) {
-      const w = k / 12 * Math.PI * 2;
-      ok = tief(c.px + c.radius * 0.8 * Math.cos(w), c.py + c.radius * 0.8 * Math.sin(w), 0) >= 1.8
-        && tief(c.px + c.radius * 0.45 * Math.cos(w + 0.26), c.py + c.radius * 0.45 * Math.sin(w + 0.26), 0) >= 1.8;
+  for (const mitRunde of [true, false]) {
+    const kand = [];
+    for (const f of [1, 0.8, 0.65]) {
+      const R = Math.round(R0 * f);
+      for (let px = -280; px <= 220; px += 12) for (let py = 0; py <= 220; py += 12) {
+        if (abKorridor(px, py) < R + halb + 6) continue;
+        // Uferstreifen (y 18, data/verkehr.js UFER): der Paddler braucht östlich der Stege und Bojen
+        // gut 20 Einheiten bis zum Ankerfeld (uferStrecke endet davor), sonst liegt das Feld weiter draußen
+        if (py - R < 34 && px - R - 10 < uferAb + 46 && px + R + 10 > box.x0) continue;
+        // Runde der Freizeitboote auf dem See (data/verkehr.js SEE_RUNDE) bleibt frei
+        const sr = mitRunde && SEE_RUNDE[stufe];
+        if (sr && Math.hypot(Math.max(sr.cx - sr.rx - px, 0, px - sr.cx - sr.rx), Math.max(sr.cy - sr.ry - py, 0, py - sr.cy - sr.ry)) < R + 14) continue;
+        if (best?.lagen.some(([bx, by]) => Math.hypot(bx - px, by - py) < R + 14)) continue;
+        const ex = Math.max(box.x0 - px, 0, px - box.x1), ey = Math.max(box.y0 - py, 0, py - box.y1);
+        if (Math.hypot(ex, ey) < R + 24) continue;
+        kand.push({ px, py, radius: R, k: Math.hypot(px - mitte[0], py - mitte[1]) + (R0 - R) * 12 });
+      }
     }
-    if (!ok) continue;
-    // genug Ankerplätze in tiefem Wasser (Raster wie unten in warteplaetze)
-    const abstand = SCHWOIKREIS_M.M * 2 / PLAN_M, rr = c.radius - abstand * 0.45;
-    let n = 0;
-    for (let j = -4; j <= 4; j++) for (let i = -4; i <= 4; i++) {
-      const dx = (i + (j & 1 ? 0.5 : 0)) * abstand, dy = j * abstand * 0.866;
-      if (Math.hypot(dx, dy) <= rr && tief(c.px + dx, c.py + dy, SCHWOIKREIS_M.M) >= 1.6) n++;
+    kand.sort((p, q) => p.k - q.k);
+    for (const c of kand) {
+      let ok = tief(c.px, c.py, 0) >= 2.2;
+      for (let k = 0; ok && k < 12; k++) {
+        const w = k / 12 * Math.PI * 2;
+        ok = tief(c.px + c.radius * 0.8 * Math.cos(w), c.py + c.radius * 0.8 * Math.sin(w), 0) >= 1.8
+          && tief(c.px + c.radius * 0.45 * Math.cos(w + 0.26), c.py + c.radius * 0.45 * Math.sin(w + 0.26), 0) >= 1.8;
+      }
+      if (!ok) continue;
+      // genug Ankerplätze in tiefem Wasser (Raster wie unten in warteplaetze)
+      const abstand = SCHWOIKREIS_M.M * 2 / PLAN_M, rr = c.radius - abstand * 0.45;
+      let n = 0;
+      for (let j = -4; j <= 4; j++) for (let i = -4; i <= 4; i++) {
+        const dx = (i + (j & 1 ? 0.5 : 0)) * abstand, dy = j * abstand * 0.866;
+        if (Math.hypot(dx, dy) <= rr && tief(c.px + dx, c.py + dy, SCHWOIKREIS_M.M) >= 1.6) n++;
+      }
+      if (!anker || n > anker.n) anker = { px: c.px, py: c.py, radius: c.radius, n };
+      if (n >= 12) break;
     }
-    if (!anker || n > anker.n) anker = { px: c.px, py: c.py, radius: c.radius, n };
-    if (n >= 12) break;
+    if (anker && anker.n >= 8) break;
   }
   // zu wenig Plätze (flaches Revier, etwa Nordsee bei Niedrigwasser): alter Ankerkreis, dort ist sicher Wasser
   if (anker && anker.n < 8) anker = null;

@@ -4,6 +4,12 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 15.11.2026
+
+- Ankommende Boote lassen sich schon auf der Anfahrt antippen und zuweisen, sobald sie im Hafenrevier sind. Ihre Geduld läuft erst, wenn sie sichtbar an der Boje liegen; bei Andrang fahren sie erst nach rund 20 Sekunden im Revier selbst in eine Box (vorher zählten sie schon weit draußen als wartend).
+- Reist ein Gast ab, bevor er ganz festgemacht hat, ist seine Box frei, sobald er draußen ist (sie blieb vorher bis zu fünf Minuten belegt).
+- Im Watt und an einigen anderen Küsten liegt das Ankerfeld jetzt auch seitlich neben den Stegen statt vor der Einfahrt.
+
 ## 14.11.2026
 
 - Neue Ereignisse: Heringstage (mit Räucherei, im Frühling), Mittsommer (Saisontag 14, abends brennt am Grillplatz ein Feuer, viele Badegäste) und Holzboot-Treffen. Ab Stufe 5 kommt einmal im Jahr die Hanse-Woche, zehn Tage vorher angekündigt; zwei Tage vorher kannst du große Plätze freihalten, große Schiffe darauf zahlen Festgeld.

@@ -261,11 +261,32 @@ export function init(game) {
     for (const [id, e] of [...boats]) {
       // Abreisendes Boot liegt noch in seiner Box: die Spielregeln halten sie belegt, bis es draussen
       // ist ('boat:clear' unten), sonst zeigte die Platzkarte "frei" mit Boot darin
-      if (e.faehrt && inBox(e.anim)) game.emit('boot:noch-in-box', { id });
+      if (e.faehrt && inBox(e.anim)) {
+        // Wer unterwegs (noch nicht fest) abreist, legt nicht ab und meldet kein 'boat:clear': die
+        // Box ist frei, sobald das Boot sichtbar aus ihr heraus ist (sonst hielten die Spielregeln sie
+        // bis zum Deckel von 300 s belegt, Befund Balancing P17)
+        const b = e.anim.berth, L = e.anim.info.length ?? 8;
+        if (!e.anim.moored && e.anim.state === 'leaving' && Math.hypot(e.anim.x - b.x, e.anim.z - b.z) > (b.length ?? L) / 2 + L * 0.8) {
+          e.anim.berth = null;
+          e.anim.lines.length = 0;     // halb gelegte Leinen bleiben nicht am Steg haengen
+          game.emit('boot:aus-box', { id });
+        } else game.emit('boot:noch-in-box', { id });
+      }
+      if (verwaist(id, e)) {
+        // Boot ohne Auftrag, das die Spielregeln nicht mehr kennen (z. B. nach Vorspulen in den Winter
+        // abgewiesen, waehrend es noch unterwegs war): beim zweiten Blick hinaus fahren lassen
+        if (e.verwaist) { e.verwaist = false; faehrtWeg(id); } else e.verwaist = true;
+        continue;
+      }
+      e.verwaist = false;
       if (!e.faehrt || e.anim.berth || e.anim.state !== 'leaving') continue;
       if (!game.boatAnim.imBild?.(e.anim.x, e.anim.z, e.anim.info.length)) entferne(id);
     }
   });
+  function verwaist(id, e) {
+    if (e.faehrt || e.draussen || e.anim.moored || e.anim.state !== 'idle' || e.anim.task || e.anim.tasks.length) return false;
+    return !(game.sim?.boote ?? []).some((b) => b.id === id);
+  }
 
   // --- Ankerlicht: nachts brennt an Booten an Boje oder Anker ein weisses Licht oben am Mast --------
   const lichtGeo = new THREE.SphereGeometry(0.16, 8, 6);
@@ -777,7 +798,8 @@ export function init(game) {
   // und Anker zur Box): unmittelbar vor dem Leinenloswerfen fragt jedes Boot, ob es an der Reihe ist.
   // 6 bis 9 s Spielzeit Abstand, damit auch bei 8x und 'Alle einweisen' nie mehrere zugleich in die
   // Einfahrt fahren. Warten mehr als zehn Boote, rueckt der Takt auf 4 s (die Boxen muessen fuer die
-  // naechsten Gaeste frei werden). Wer wartet, liegt noch fest.
+  // naechsten Gaeste frei werden). Wer wartet, liegt noch fest. (Ein Takt je Steg liess ab Stufe 3 zu
+  // viele zugleich hinaus: Pulk an der Ausfahrt, Zeitraffer 15.11.)
   const takt = { naechst: -1e9, fragt: new Map() };
   function ablegeTakt(anim) {
     const jetzt = game.time ?? 0;
@@ -928,7 +950,8 @@ export function init(game) {
     e.anim.dock(warteplatz(boje, e.anim), { route: true });
   });
 
-  game.on('boot-faehrt', ({ id } = {}) => {
+  game.on('boot-faehrt', ({ id } = {}) => faehrtWeg(id));
+  function faehrtWeg(id) {
     const e = boats.get(id);
     if (!e) return;
     // niemand sieht es: gleich weg (spart Rueckstau beim schnellen Vorspulen)
@@ -946,7 +969,7 @@ export function init(game) {
     e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true, takt: ablegeTakt, see }).then((ok) => {
       if (ok && boats.get(id) === e) entferne(id);
     });
-  });
+  }
 
   // --- Muenzen ueber liegenden Booten (abends Hafengeld, eingestrichen ueber ui/gesten.js) ------
   const muenzen = new Map();          // bootId -> Mesh
@@ -1208,6 +1231,13 @@ export function init(game) {
     game.emit('boot:aus-box', { id: d.id });
   });
 
+  // Ankommendes Boot ist von See her in der Karte: ab jetzt laesst es sich antippen und zuweisen
+  // (bei Andrang faehrt es sonst nach kurzer Zeit selbst in eine Box, ohne je an der Boje zu liegen)
+  game.on('boat:im-revier', (d) => {
+    const e = boats.get(d?.id);
+    if (e?.pick) { e.anim.model.userData.pick = e.pick; e.pick = null; }
+  });
+
   // Boot ist sichtbar an der Boje fest: ab jetzt laeuft seine Geduld (Spielregeln)
   game.on('boat:moored', (d) => {
     const e = boats.get(d?.id);
@@ -1345,7 +1375,11 @@ export function init(game) {
       // Stufenausbau (nicht Laden): liegt das Boot sichtbar woanders, faehrt es hin statt zu springen
       const weit = Math.hypot((b.x ?? e.anim.x) - e.anim.x, (b.z ?? e.anim.z) - e.anim.z) > 1.5;
       if (!laden && weit && e.anim.model.visible !== false && (e.anim.moored || e.anim.state === 'moored')) e.anim.dock(b, { route: true });
-      else e.anim.moorAt(b);
+      else {
+        e.anim.moorAt(b);
+        // sofort an die Boje gelegt (Laden, Stufenwechsel): auch das ist "an der Boje" fuer die Spielregeln
+        if (!info.platz) game.emit('boot:an-boje', { id: info.id, boje: info.boje ?? 0 });
+      }
     }
     for (const id of [...muenzen.keys()]) if (!boats.has(id)) entferneMuenze(id);
     const st = game.sim?.state ?? game.state;
