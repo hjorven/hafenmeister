@@ -542,6 +542,9 @@ function sat(A, B) {
   return true;
 }
 
+// Marschfahrt auf dem Seeweg (Vielfaches des Fahrtempos, siehe PathTask.step)
+const SEE_TEMPO = 3;
+
 class PathTask {
   constructor(points, opts) { this.points = points; this.opts = opts; }
   start(b) {
@@ -651,6 +654,13 @@ class PathTask {
     const remaining = this.len - this.s;
     this.remaining = remaining;
     let target = cruise * b.yieldF;
+    // Draussen auf See (Seezugang) fahren Boote Marschfahrt, rund dreimal so schnell wie im Revier:
+    // die Anfahrt aus der Ferne dauert sonst Minuten, in denen der Spieler auf leere Bojen wartet
+    // (P17-Messung Stufe 4 bis 6). Zum Hafen hin (letzte 40 bis 190 m) gleitend zurueck aufs Revier-Tempo.
+    if (o.see) {
+      const hafenAb = o.rein ? remaining : this.s;
+      target *= 1 + (SEE_TEMPO - 1) * clamp((hafenAb - 40) / 150, 0, 1);
+    }
     if (this.eng) target = Math.min(target, this.engstelle(b, dt));
     if (o.stop !== false) {
       const brake = Math.max(0.05, b.cfg.accel * 0.6 * (o.brake ?? 1));
