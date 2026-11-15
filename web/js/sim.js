@@ -148,7 +148,9 @@ export function berthsFromHarbor(harbor, rules = RULES) {
       depth,
       ...kind,
       ...steg,
-      ...(requires[p.id] ? { requires: requires[p.id] } : {}),
+      ...(requires[p.id] ? { requires: requires[p.id] } : p.requires ? { requires: p.requires } : {}),
+      ...(p.ohne ? { ohne: [...p.ohne] } : {}),
+      ...(p.doppel ? { doppel: [...p.doppel] } : {}),
     };
   });
 }
@@ -308,7 +310,8 @@ export function berthDepth(berth, stage) {
 /** Ist der Liegeplatz im aktuellen Hafen vorhanden? */
 export function berthAvailable(state, berth) {
   const inStage = berth.stages ? berth.stages.includes(state.stage) : berth.stage <= state.stage;
-  return inStage && (!berth.requires || !!state.buildings[berth.requires]);
+  // ohne: Platz entfällt, solange einer dieser Umbauten steht (zwei Boxen als Doppelbox, P59)
+  return inStage && (!berth.requires || !!state.buildings[berth.requires]) && !berth.ohne?.some((k) => state.buildings[k]);
 }
 
 /** Alle Liegeplätze des aktuellen Hafens. */
@@ -2181,7 +2184,9 @@ export function regionGoal(state, ctx) {
   if (!goal || state.stage < ctx.rules.maxStage) return { active: false, ok: false, missing: ['stage'] };
   const rep = reputation(state);
   const visits = state.bigVisits || 0;
-  const open = ctx.berths.filter((b) => (b.stages ? b.stages.includes(state.stage) : b.stage <= state.stage) && !berthAvailable(state, b)).length;
+  // Doppelboxen (P59) sind ein Umbau, keine fehlenden Plätze; zusammengelegte Einzelboxen auch nicht
+  const open = ctx.berths.filter((b) => (b.stages ? b.stages.includes(state.stage) : b.stage <= state.stage) && !berthAvailable(state, b)
+    && !b.doppel && !b.ohne?.some((k) => state.buildings[k])).length;
   const missing = [];
   if (visits < (goal.bigVisits || 0)) missing.push('bigVisits');
   if (rep < (goal.reputation || 0)) missing.push('reputation');

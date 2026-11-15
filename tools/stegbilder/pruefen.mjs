@@ -215,7 +215,8 @@ export function pruefeStegbild(hafen, { stege = ['A', 'B', 'C', 'CS', 'D'], stuf
   for (const stufe of alleStufen) {
     const st = hafen.stufen[String(stufe)];
     if (!st) continue;
-    const plaetze = hafen.plaetze.filter((p) => p.lage[String(stufe)]).map((p) => ({ p, f: platzFlaechen(p, stufe, hafen) }));
+    // Doppelboxen (P59) liegen absichtlich auf ihren zwei Einzelboxen; es steht immer nur eines von beiden
+    const plaetze = hafen.plaetze.filter((p) => p.lage[String(stufe)] && !p.doppel).map((p) => ({ p, f: platzFlaechen(p, stufe, hafen) }));
     const linien = stegFlaechen(st);
     const fest = festeHindernisse(stufe);
     const melde = (p, regel, text) => fehler.push({ stufe, steg: p.steg, id: p.id, regel, text });

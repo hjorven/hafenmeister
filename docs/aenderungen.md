@@ -9,6 +9,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 - Tagesende ohne große Karte mitten im Bild: Es kommt nur der kleine Zettel mit der Tagessumme, antippen öffnet den Tagesabschluss (wer die Karte von selbst will, schaltet „Abends zeigen“ ein). Am Tablet hochkant steht die Bootskarte über Zeit und Bauen, beide bleiben bedienbar.
 - Neu: Liegende Boote umlegen. Ein Gast in seiner Box lässt sich jetzt kurz gedrückt halten, bis sich der Ring um den Finger füllt, und dann an der Leine in eine andere leuchtende Box ziehen; das Boot legt ab und fährt sichtbar hinüber. Liegegeld und Nächte bleiben, Strom in der neuen Box zählt ab dem nächsten Morgen. Einmal umlegen nimmt eine Crew hin, ab dem zweiten Mal kostet es einen halben Anker in ihrer Bewertung (das Schild sagt es vor dem Loslassen). Auch beim Ausbau legen Gäste von wegfallenden Plätzen jetzt um, statt abzureisen, solange eine passende Box frei ist, und den Gast auf einem Dauerplatz kann man ebenso wegziehen.
 - Die Menschen laufen jetzt auf dem echten Gelände jeder Küste: über Wege und Wiesen statt quer durch Felder, um Häuser herum, nie durch Wasser. Badegäste gehen nur dorthin, wo wirklich Sandstrand ist, an Fels- und Steilküsten bleiben sie am Ufer stehen und schauen aufs Wasser.
+- Neu: Doppelboxen. Ab Stufe 4 lassen sich im Baumenü unter "Stege" zwei Boxen am Hauptsteg zu einer breiten Box umbauen; dort passt dann auch ein Katamaran, der sonst nur an einen Stirnplatz passt. Zurückbauen geht auch, beides nur, wenn die Boxen frei sind (321).
 
 ## 14.11.2026
 
