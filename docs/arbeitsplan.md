@@ -37,14 +37,13 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 |---|---|---|---|
 | A | Pulk und "ineinander fest" beim gleichzeitigen Ablegen, vor allem Stufe 5 (Offene Bucht, Seed 11); mit dem 5-Minuten-Tag legen mehr Kurzhalter gleichzeitig ab | PR 327 "Noch offen", Härtetest 15.11. (Hinweis), Zeitraffer-Zwischenserie | P66, "Staus an Bojen" |
 | A | Welle-0-Abnahme fehlt: Zeitraffer-Serie über alle 15 Küsten nach dem Pulk-Fix | Abschnitt 3a | P66, Zeitraffer-Thread |
-| B | Kreuzfahrtschiff streift im Seegatt von Küste 4 das Ufer | Rest aus PR 329 | P84 (neu) |
 | B | Gäste erreichen ab Stufe 4 keine Boje: mit PR 327 behoben (Geduld erst ab sichtbarer Boje), im Härtetest noch nicht nachgemessen | Härtetest 15.11., PR 327 | P87 (neu) |
 | B | ~~`tools/stegbilder/erzeugen.mjs` findet seit den Doppelboxen keine Variante mehr~~ erledigt: Generator zählt Doppelboxen nicht mehr mit, prüft Stufe 6 mit Yachtsteg, die 12 Stegbilder bleiben | Hinweis in PR 329 | P83 erledigt |
 | B | `istWasser` und Bild stimmen am Durchstich nicht überall überein | Messlatte (`feature-tests/messlatte/README.md`) | P87 (neu) |
 | C | `tests/specs/leinen.spec.mjs` prüft nur Küstentyp 1 bis 10 | Gelände-Thread | P87 (neu) |
 | C | Winter: Jahreszeiten steuern nur Ereignisse, nicht Ankünfte und Wind (G5); Dauerlieger nutzen Kran und Segelmacher in der Saison nicht (H5-Rest) | Code: `jahreszeiten` nur in `data/events.js` | P20-Rest |
 
-Erledigt seit 14.11.: Menschen auf festen Koordinaten (PR 316), L-Boote ragen auf den Steg, XL-Raddampfer an K01, Korvette auf Küste 4 (alle PR 329), XXL-Logbuch nie erreicht (PR 323), Aufstieg weicht von der Rechnung ab (P17, PR 331: Rechnung Tag 103, Zeitraffer 99 bis 102), Box bleibt bei Abreise unterwegs belegt (PR 327), Kurzhalter legen vor dem Festmachen ab (PR 332). Früher erledigt: Fehler aus Jorvens Feature-Test (PR 290), C05, C06 (P61), C07, P02, P04, P12, P63, P65.
+Erledigt seit 14.11.: Großschiffe berühren auf keiner Küste mehr Land (P84), Menschen auf festen Koordinaten (PR 316), L-Boote ragen auf den Steg, XL-Raddampfer an K01, Korvette auf Küste 4 (alle PR 329), XXL-Logbuch nie erreicht (PR 323), Aufstieg weicht von der Rechnung ab (P17, PR 331: Rechnung Tag 103, Zeitraffer 99 bis 102), Box bleibt bei Abreise unterwegs belegt (PR 327), Kurzhalter legen vor dem Festmachen ab (PR 332). Früher erledigt: Fehler aus Jorvens Feature-Test (PR 290), C05, C06 (P61), C07, P02, P04, P12, P63, P65.
 
 ---
 
@@ -55,7 +54,7 @@ Leitlinie: Erst Welle 0 abschließen und die Prüfwerkzeuge auf den neuen Stand 
 | Nr | Paket | Warum jetzt | Hängt ab von | Kann kollidieren mit |
 |---|---|---|---|---|
 | 1 | **P66 Pulk beim Ablegen** (läuft) | Prio A, letzter Rest von Welle 0 | - | `render/boat-view.js`, `boat-anim.js`, Päckchen (Ablegereihenfolge), Kurzhalter |
-| 2 | **P84 Großschiffwege an allen 15 Küsten** (neu) | Rest aus PR 329, gehört zu Welle 0 | - | `render/services-besuch.js`, `boat-view.js` (`hinaus`, `seeWeg`): nur diese Stellen ändern, vor dem Merge auf P66 rebasen |
+| 2 | ~~P84 Großschiffwege an allen 15 Küsten~~ erledigt 15.11. | Rest aus PR 329, gehört zu Welle 0 | - | `render/services-besuch.js`, `boat-view.js` (`seeWeg`, neu `grosserSeeweg`) |
 | 3 | **P87 Prüfwerkzeuge auf 15 Küsten und den neuen Takt** (neu) | Welle-0-Abnahme braucht Tests, die alle Küsten kennen; Härtetest nach PR 327 bis 332 neu | - | nur `tests/`, `tools/zeitraffer/`, `feature-tests/` |
 | 4 | ~~**P83 Stegbild-Generator reparieren**~~ (erledigt 15.11., PR 336) | ohne ihn keine neuen Stege (P70) und kein Neuerzeugen nach Platzänderungen | - | `tools/stegbilder/`, `data/stegbilder.js` (Ausgabe muss für bestehende Spielstände gleich bleiben), `data/liegelage.js` |
 | 5 | **P23 Services mit eigener Wirkung** (neu) | macht Stufe 4 bis 6 tiefer; `economy.js` frei | - | `economy.js` (einziger dort), `render/services.js`, `data/services.js`, Ereignisse (G7-Boni aus PR 299) |
@@ -76,7 +75,7 @@ Danach geht es weiter wie in [Abschnitt 5](#5-alles-weitere-bis-zum-ende) beschr
 **Wann ist Welle 0 fertig?** P62, P63, P64 und P65 sind erledigt, PR 300 (fünf echte Küsten) ist gemergt, P66 hat PR 280, 327 und 332 gemergt. Offen sind (Stand 15.11., 09:30 UTC):
 
 1. P66: Pulk und "ineinander fest" beim gleichzeitigen Ablegen.
-2. P84: Großschiffe kommen auf allen 15 Küsten ohne Uferberührung hinaus (Kreuzfahrtschiff im Seegatt Küste 4).
+2. ~~P84: Großschiffe kommen auf allen 15 Küsten ohne Uferberührung hinaus~~ erledigt 15.11. (15 Küsten x 5 Seeds, 0 Funde).
 3. Abnahme laut Roadmap Abschnitt 14: Zeitraffer-Serie über alle 15 Küstentypen, PC und Handy, nach 1 und 2, mit den Werkzeugen aus P87. Grenze: kein Boot dauerhaft über Land oder durch Stege, keine Boote ineinander fest länger als ein paar Sekunden. Danach P66 und P84 in der Roadmap auf "erledigt".
 
 Der Planungs-Thread meldet dem Koordinator, sobald alle drei Punkte erfüllt sind.
