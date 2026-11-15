@@ -117,3 +117,17 @@ Alles über Schnittstellen, die das Spiel schon hat, im Browser per `page.evalua
 ## Ergebnisse
 
 Die Läufe stehen mit Bildern unter `/mnt/project-files/extremtest/`. Funde, die nicht im selben PR behoben wurden, stehen in docs/arbeitsplan.md.
+
+### 15.11.2026, erster voller Lauf (main `df9ca05`) und Gegenlauf nach PR 316/319
+
+Voller Lauf auf PC und Handy, alle 15 Küstentypen und 12 Stegbilder (`2026-11-15-df9ca05/`), Gegenlauf auf dem PC nach dem Einmergen von main (`2026-11-15-nach-main/`).
+
+- Ohne Befund: keine Konsolenfehler, kein kaputter Text, Speichern und Laden in allen Runden gleich, Geld 0 und 999 999 999 sauber.
+- Erledigt durch PR 316: Menschen liefen 2,5 m unter Wasser zwischen Kai und Land; im Gegenlauf kein Mensch mehr im Wasser.
+- Selbst behoben: Bewertungsblase am Bildrand ragte halb aus dem Bild (`web/js/ui/gaestebuch.js`).
+- Offen, in docs/arbeitsplan.md:
+  - Gäste erreichen ab Stufe 4 sichtbar keine Wartebojen mehr (sichtbar an Boje / angekommen im Gegenlauf: Stufe 2 10/24, Stufe 3 2/27, Stufe 4 bis 6 0/22 bis 0/30). Ursache: seit PR 280 starten Gäste rund 1 km draußen, `wartezeit.anfahrtMax` (35 s) setzt sie vorher auf "an der Boje", die Geduld läuft und sie fahren direkt ein.
+  - L-Boote ragen an Stegköpfen auf den Steg (B27, B28, B35, B36, C22 bis C24).
+  - XL-Raddampfer an K01 liegt unter der Seebrücke und auf dem Boot an FK01.
+  - Korvette (XXL) streift auf Küste 4 die Sandbank (2 bis 3 von 7 Rumpfpunkten auf Land).
+- Hinweise: Pulk und "ineinander fest" beim gleichzeitigen Auslaufen (gehört zu Fund A im Arbeitsplan); Geld 10^12 schiebt am Handy den Menüknopf aus dem Bild (unrealistisch).
