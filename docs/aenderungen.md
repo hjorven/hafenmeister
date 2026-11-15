@@ -4,6 +4,10 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 15.11.2026
+
+- Neu: Liegende Boote umlegen. Ein Gast in seiner Box lässt sich jetzt kurz gedrückt halten, bis sich der Ring um den Finger füllt, und dann an der Leine in eine andere leuchtende Box ziehen; das Boot legt ab und fährt sichtbar hinüber. Liegegeld und Nächte bleiben, Strom in der neuen Box zählt ab dem nächsten Morgen. Einmal umlegen nimmt eine Crew hin, ab dem zweiten Mal kostet es einen halben Anker in ihrer Bewertung (das Schild sagt es vor dem Loslassen). Auch beim Ausbau legen Gäste von wegfallenden Plätzen jetzt um, statt abzureisen, solange eine passende Box frei ist, und den Gast auf einem Dauerplatz kann man ebenso wegziehen.
+
 ## 14.11.2026
 
 - Neu: Stege nachrüsten. Im Baumenü unter "Stege" bekommt ein Steg Fingerstege (ab Stufe 3, Gäste dort bewerten um 0,5 Anker besser) oder Laternen (ab Stufe 2, 0,2 Anker, nachts leuchten sie). Vorschau mit Geisterbild am Steg. Stromsäulen stehen jetzt sichtbar an jedem Steg mit Strom (297).

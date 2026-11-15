@@ -885,7 +885,7 @@ export function init(game) {
     e.anim.dock(ziel, { route: true, einfahrt: true, verzoegerung: ankunftT - jetzt });
   });
 
-  game.on('boot-zugewiesen', ({ id, platz } = {}) => {
+  game.on('boot-zugewiesen', ({ id, platz, sofort = false } = {}) => {
     const neu = !boats.has(id);
     const e = boats.get(id) ?? (sucheInfo(id) && erzeuge(sucheInfo(id)));
     if (!e) return;
@@ -904,16 +904,17 @@ export function init(game) {
     // Ist die Box noch nicht frei und das Boot noch unterwegs zur Boje, faehrt es erst zur Boje
     // und wartet dort (nicht mitten im Fahrwasser, wo es anderen im Weg laege).
     if (!e.anim.moored && !platzFrei(platz, b, e.anim)) { e.spaeter = platz; return; }
-    fahreZu(e, platz, b);
+    fahreZu(e, platz, b, sofort);
   });
 
-  function fahreZu(e, platz, b) {
+  // sofort: vom Spieler umgelegt (P33), das Boot legt ohne gemeinsamen Ablegetakt gleich ab
+  function fahreZu(e, platz, b, sofort = false) {
     e.spaeter = null;
     e.anim.reserviert = null;
     // ab Stufe 3 von der Reede durch Einfahrt und Durchstich in den See.
     // Liegt noch ein Boot in der Box (es faehrt heute ab), wartet das neue, bis die Box frei ist.
     // von der Boje oder vom Anker los im gemeinsamen Ablegetakt (sonst bei 'Alle einweisen' ein Pulk)
-    e.anim.dock(b, { route: true, waitFor: () => platzFrei(platz, b, e.anim), takt: ablegeTakt });
+    e.anim.dock(b, { route: true, waitFor: () => platzFrei(platz, b, e.anim), takt: sofort ? null : ablegeTakt });
   }
 
   // Stufenausbau mit weniger Bojen (Spielregel settleWaitSpots): ein wartendes Boot verholt an eine

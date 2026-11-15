@@ -24,7 +24,7 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     typeById: Object.fromEntries(types.map((t) => [t.id, t])),
     berths: list,
     berthById: Object.fromEntries(list.map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [] },
+    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [] },
   };
 }
 
@@ -1030,8 +1030,17 @@ export function berthValue(state, ctx, boatId, berthId = null) {
   const fee = nightlyFee(state, ctx, boat, met.length, mods.priceFactor);
   const snug = !!berth && isSnug(state, ctx, boat, berth);
   const probe = { ...boat, wishesMet: boat.wishesMet + weight, wishesTotal: boat.wishesTotal + boat.wishes.length, berthId: berth?.id ?? null, snug, byHand: true };
+  // Liegt das Boot schon (Umlegen, P33): Liegegeld bleibt, das Umlegen zählt für die Crew
+  const relocate = boat.status === 'moored' && !!berth;
+  let malus = 0;
+  if (relocate) {
+    probe.umgelegt = (boat.umgelegt || 0) + 1;
+    malus = Math.round((relocatePenalty(ctx, probe) - relocatePenalty(ctx, boat)) * 100) / 100;
+  }
   const anchors = rateBoat(ctx, probe, mods.ratingBonus);
-  return { fee, wishesMet: met, wishes: [...boat.wishes], anchors, snug, comfort: (berth?.comfort || 0) > 0, far, full };
+  const out = { fee, wishesMet: met, wishes: [...boat.wishes], anchors, snug, comfort: (berth?.comfort || 0) > 0, far, full };
+  if (relocate) Object.assign(out, { relocate: true, malus, mal: probe.umgelegt });
+  return out;
 }
 
 /**
@@ -1832,6 +1841,67 @@ export function collectAll(state, ctx, force = false) {
  * penalty (Abzug, zum Beispiel ungeschützter Platz bei Sturm), missed ({ wunsch: Nächte ohne }),
  * value (Ergebnis wie rateBoat).
  */
+/** Abzug in Ankern, weil die Crew öfter umgelegt wurde, als sie hinnimmt (P33, rules.relocate). */
+export function relocatePenalty(ctx, boat) {
+  const r = ctx.rules.relocate;
+  if (!r || !boat) return 0;
+  return Math.max(0, (boat.umgelegt || 0) - (r.free ?? 1)) * (r.rating || 0);
+}
+
+/**
+ * Kann dieses liegende Boot gerade umgelegt werden (P33)? Nur Gäste, die sichtbar in ihrer Box
+ * liegen: nicht auf Tagestörn, keine Dauerlieger, Fischer oder Retter (deren Plätze verwalten
+ * eigene Module).
+ */
+export function canRelocate(state, boatId) {
+  const boat = state.boats[boatId];
+  return !!boat && boat.status === 'moored' && !boat.stationed && !boat.trip?.away && boat.berthId != null;
+}
+
+/** Freie Boxen, in die ein liegender Gast umgelegt werden kann (die beste zuerst, ohne seine eigene). */
+export function relocateTargets(state, ctx, boatId) {
+  if (!canRelocate(state, boatId)) return [];
+  const own = state.boats[boatId].berthId;
+  return fittingBerths(state, ctx, boatId).filter((id) => id !== own);
+}
+
+/**
+ * Liegenden Gast in eine andere freie Box umlegen (verholen, P33, F4). Er behält Nächte und
+ * Rechnung: Bezahltes Liegegeld bleibt, offenes bleibt offen. Wünsche an den Platz (Strom) gelten
+ * ab dem nächsten Morgen für die neue Box. Passgenau gilt neu. Jedes Umlegen zählt für die Crew
+ * (boat.umgelegt); ab dem zweiten Mal sinkt ihre Bewertung (rules.relocate).
+ * opts.grund: 'hand' (Spieler zieht), 'dauer' (Dauerlieger kommt zurück), 'umbau' (Stufenausbau)
+ * opts.zaehlt: false = zählt nicht (zum Beispiel Sturm: das Verholen schützt die Crew)
+ * @returns {{ ok: boolean, reason?: string, events: object[] }}
+ */
+export function relocateGuest(state, ctx, boatId, berthId, { grund = 'hand', zaehlt = true, unterwegs = false } = {}) {
+  const events = [];
+  const boat = state.boats[boatId];
+  if (!boat || boat.status !== 'moored' || boat.berthId == null) return { ok: false, reason: 'notMoored', events };
+  if (boat.stationed) return { ok: false, reason: 'stationed', events };
+  if (boat.trip?.away && !unterwegs) return { ok: false, reason: 'away', events };
+  if (berthId === boat.berthId) return { ok: false, reason: 'same', events };
+  const berth = ctx.berthById[berthId];
+  if (!berth || !berthAvailable(state, berth)) return { ok: false, reason: 'noBerth', events };
+  if (!isFree(state, berthId)) return { ok: false, reason: 'occupied', events };
+  const why = whyNotFit(boat, berth, ctx.rules, state.stage) || hookWhyNotFit(state, ctx, boat, berth);
+  if (why) return { ok: false, reason: why, events };
+  const from = boat.berthId;
+  if (state.berths[from] === boat.id) delete state.berths[from];
+  state.berths[berthId] = boat.id;
+  boat.berthId = berthId;
+  boat.snug = isSnug(state, ctx, boat, berth);
+  const vorher = relocatePenalty(ctx, boat);
+  if (zaehlt) boat.umgelegt = (boat.umgelegt || 0) + 1;
+  const malus = Math.round((relocatePenalty(ctx, boat) - vorher) * 100) / 100;
+  const ev = { type: 'relocated', boatId: boat.id, from, to: berthId, guest: true, grund, mal: boat.umgelegt || 0 };
+  if (malus > 0) ev.malus = malus;
+  if (boat.snug) ev.passgenau = true;
+  events.push(ev);
+  for (const fn of ctx.hooks.relocate || []) fn({ state, ctx, boat, from, to: berthId, grund, events });
+  return { ok: true, events };
+}
+
 export function ratingParts(ctx, boat, ratingBonus = 0) {
   const r = ctx.rules;
   const lo = r.rating.noneMet ?? r.rating.min;
@@ -1848,10 +1918,11 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   const byHand = boat.byHand ? r.handAssignBonus ?? 0 : 0;  // von Hand zugewiesen (P10)
   const funk = boat.funk?.kept ? r.funk?.rating ?? 0 : 0;   // angemeldet, Box frei gehalten (P28)
   const penalty = boat.penalty || 0;
-  const raw = base + comfort + special + snug + byHand + funk + ratingBonus - penalty;
+  const moved = relocatePenalty(ctx, boat);                   // zu oft umgelegt (P33)
+  const raw = base + comfort + special + snug + byHand + funk + ratingBonus - penalty - moved;
   const value = Math.round(Math.min(r.rating.max, Math.max(r.rating.min, raw)) * 10) / 10;
   return {
-    value, base, comfort, special, snug, byHand, funk, bonus: ratingBonus, penalty,
+    value, base, comfort, special, snug, byHand, funk, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0,
     wishes: [...(boat.wishes || [])], wishesMet: boat.wishesMet || 0, wishesTotal: boat.wishesTotal || 0, missed: { ...(boat.missed || {}) },
     far: { ...(boat.far || {}) },
   };
@@ -2188,29 +2259,34 @@ export function advanceStage(state, ctx, opts = {}) {
 
 /**
  * Was der nächste Stufenausbau für liegende Boote bedeutet (Hinweis im Baumenü):
- * gone = Plätze, die wegfallen, guests = Gäste, die dann abreisen, fixed = feste Boote, die umziehen.
+ * gone = Plätze, die wegfallen, guests = Gäste, die dann abreisen (kein passender Platz frei),
+ * moving = Gäste, die in eine andere Box umgelegt werden (P33), fixed = feste Boote, die umziehen.
+ * Rechnet den Ausbau an einer Kopie des Spielstands durch, damit Vorschau und Ausbau übereinstimmen.
  */
 export function stageUpPreview(state, ctx) {
   const next = state.stage + 1;
   const inStage = (b, st) => (b.stages ? b.stages.includes(st) : b.stage <= st);
   const gone = ctx.berths.filter((b) => berthAvailable(state, b) && !inStage(b, next)).map((b) => b.id);
-  const boats = gone.map((id) => state.boats[state.berths[id]]).filter(Boolean);
-  // Boote, deren Box bleibt, aber in der nächsten Stufe nicht mehr passt (flacher): sie legen um
-  const moving = mooredBoats(state)
-    .filter((b) => !gone.includes(b.berthId) && ctx.berthById[b.berthId] && fits(b, ctx.berthById[b.berthId], ctx.rules, state.stage) && !fits(b, ctx.berthById[b.berthId], ctx.rules, next))
-    .map((b) => b.id);
+  const fixed = gone.map((id) => state.boats[state.berths[id]]).filter((b) => b?.stationed).map((b) => b.id);
+  const copy = JSON.parse(JSON.stringify(state));
+  copy.stage = next;
+  // Ohne Hooks der Module: die Vorschau ändert nichts außerhalb der Kopie
+  const quiet = { ...ctx, hooks: { ...ctx.hooks, stageUp: [], relocate: [] } };
+  const events = [];
+  clearVanishedBerths(copy, quiet, state.stage, events);
   return {
     gone,
-    moving,
-    guests: boats.filter((b) => !b.stationed).map((b) => b.id),
-    fixed: boats.filter((b) => b.stationed).map((b) => b.id),
+    moving: events.filter((e) => e.type === 'relocated' && e.guest).map((e) => e.boatId),
+    guests: events.filter((e) => e.type === 'departed' && e.reason === 'rebuild').map((e) => e.boatId),
+    fixed,
   };
 }
 
 /**
  * Beim Stufenausbau werden manche Stege umgebaut, ihre alten Plätze gibt es dann nicht mehr
  * (zum Beispiel B01, B02 und der T-Kopf an Steg B ab Stufe 3). Damit dort kein Boot im Leeren liegt:
- * - Gäste reisen ab, bevor gebaut wird: abgerechnet, bewertet und gezählt wie bei jeder Abreise,
+ * - Gäste legen in eine freie passende Box um (P33, 'relocated' mit grund 'umbau'). Ist keine frei,
+ *   reisen sie ab, bevor gebaut wird: abgerechnet, bewertet und gezählt wie bei jeder Abreise,
  *   offenes Liegegeld wird noch kassiert, sie legen sofort ab.
  * - Fest liegende Boote (Dauerlieger, Seenotretter, Fischer) ziehen auf einen freien passenden Platz
  *   um ('relocated'). Findet sich keiner, verlassen sie den Hafen ('unstationed').
@@ -2236,28 +2312,24 @@ function clearVanishedBerths(state, ctx, from, events) {
     .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
     .sort((a, b) => (a.maxLength * a.maxBeam) - (b.maxLength * b.maxBeam) || String(a.id).localeCompare(String(b.id)))[0]?.id ?? null;
   const moves = [];
-  for (const boat of mooredBoats(state)) {
+  // Fest liegende Boote zuerst: Gäste können notfalls abreisen, Dauerlieger und Fischer nicht
+  const order = mooredBoats(state).sort((a, b) => Number(!!b.stationed) - Number(!!a.stationed));
+  for (const boat of order) {
     const berth = ctx.berthById[boat.berthId];
     const vanished = goneSet.has(boat.berthId);
     // Platz bleibt, passt aber nicht mehr (zum Beispiel flacher nach dem Umbau)
     const unfit = !vanished && berth && fits(boat, berth, ctx.rules, from) && !fits(boat, berth, ctx.rules, state.stage);
     if (!vanished && !unfit) continue;
     const old = boat.berthId;
-    if (!boat.stationed && unfit) {
-      delete state.berths[old];
+    if (!boat.stationed) {
+      // Der Hafenmeister legt den Gast um (P33): gleiche Nächte, gleiche Rechnung, neue Box.
+      // Das zählt für die Crew wie jedes Umlegen.
       const to = findGuestBerth(boat);
       if (to) {
-        // Der Hafenmeister bittet den Gast umzulegen: gleiche Nächte, gleiche Rechnung, neue Box
-        boat.berthId = to;
-        state.berths[to] = boat.id;
-        // umgelegt: passgenau gilt für die neue Box (P10)
-        boat.snug = isSnug(state, ctx, boat, ctx.berthById[to]);
-        events.push({ type: 'relocated', boatId: boat.id, from: old, to, guest: true });
-        continue;
+        const r = relocateGuest(state, ctx, boat.id, to, { grund: 'umbau', unterwegs: true });
+        if (r.ok) { events.push(...r.events); continue; }
       }
-      state.berths[old] = boat.id; // kein Platz frei: reist ab wie bei einem Platz, der wegfällt
-    }
-    if (!boat.stationed) {
+      // kein Platz frei: reist ab, abgerechnet, bewertet und gezählt wie bei jeder Abreise
       if (boat.pendingFee > 0) events.push(...collect(state, ctx, boat.id).events);
       endTrip(boat, events);
       const parts = ratingParts(ctx, boat, mods.ratingBonus);
