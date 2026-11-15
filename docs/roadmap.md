@@ -467,7 +467,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | J2 | Im Einstieg fährt das erste Boot nicht selbst ein | erledigt (PR 112, `holdBoat` bis zum ersten Anlegen; Kamera fährt zum Boot, wenn es außerhalb liegt) | P03 |
 | J3 | Münze gleich nach dem Anlegen erklären, auch den halben Preis | erledigt (PR 112, Anteil aus den Regeln) | P03 |
 | J4 | Erstes Bauen führen, Geld fürs WC geschenkt (= Ü15) | erledigt (PR 237) | P17, P03 |
-| J5 | Ruf am ersten Abreisenden erklären | offen | P03 (nach P14) |
+| J5 | Ruf am ersten Abreisenden erklären | erledigt (PR 335, P03-Rest, 15.11.: Tipp mit Kreis um den Ruf bei der ersten Bewertung nach dem Einstieg) | P03 (nach P14) |
 | J6 | Hinweise beim ersten Mal (kein Platz, Sturm, Winter, Stufenziel, Stammgast) | erledigt (kein Platz zweifach, Stufenziel, Stammgast; Sturm und Winter erklärt schon das Ereignisschild) | P03 |
 | J7 | Hilfe-Seite für alle Geräte mit sechs Bildern | erledigt (Menü „Hilfe“, `features/hilfe.js`) | P03 |
 | J8 | Einstieg im Menü wiederholen | erledigt (Knopf in der Hilfe) | P03 |
@@ -661,7 +661,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|---|
 | P01 | Dauerlieger zur echten Entscheidung machen | Ü1, Ü20, Doku Dauerlieger, Gast wird umgelegt (plan 9a) | `sim.js`, `features/dauerlieger.js`, `economy.js`, `tests/dauerlieger.test.mjs`, `docs/neue-features.md`, `docs/spielregeln.md` | erledigt (PR 149, 226) |
 | P02 | Hafenbüro mit eigenen Aufgaben ausbauen | Ü2, Ü11, A2, E1 bis E7, erledigt (PR 146) | `ui/hud.js`, `sim.js` (Automatik), `economy.js`, `ui/bauen.js` (Texte) | erledigt (PR 146) |
-| P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); J4 mit P17 erledigt (PR 237); offen: J5 nach P14 |
+| P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); J4 mit P17 erledigt (PR 237); J5 erledigt (PR 335, 15.11.): P03 fertig |
 | P04 | Abschlussziel Stufe 6 richtig zählen | Ü4 | `bridge.js`, `render/services.js`, `docs/services.md` | erledigt (PR 139): ein Zähler `state.bigVisits`, Liste `GROSSSCHIFF_BESUCHE` in `data/services.js` (Vorarbeit PR 113) |
 | P05 | Boote auf wegfallenden Plätzen regeln | Ü5 | `sim.js` (Stufenausbau), `tests/` | erledigt (Ü5: `advanceStage`, Hook `stageUp`, Test in `tests/dauerlieger.test.mjs`); bestehend: "Spielregeln ohne Grafik umsetzen" |
 | P06 | Eine Quelle für alle Zahlen und echte Regeltests (erledigt) | Ü6, Ü24 | `economy.js`, `data/rules.js`, `data/services.js`, `services/rules.js`, `data/events.js`, `tests/regeln.mjs` (statt `tests/helpers.mjs`, das ist der Browser-Helfer), alle Regeltests, `tools/zahlen.mjs`, `docs/zahlen.md`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" |
@@ -776,7 +776,7 @@ Lücken, die beim Abgleich der Doku mit dem Code (15.11.2026, `main` bei `c0d1d9
 
 | Paket | Titel (Thread) | Inhalt | Welle | Thread |
 |---|---|---|---|---|
-| P83 | Stegbild-Generator reparieren | `tools/stegbilder/erzeugen.mjs` findet seit den Doppelboxen (PR 321) keine Variante mehr ("Steg C passt nicht", Hinweis aus PR 329), `web/js/data/stegbilder.js` lässt sich nicht neu erzeugen. Generator an Doppelboxen, Liegelage (`data/liegelage.js`) und Yachtsteg anpassen, `--pruefen` in den Testlauf aufnehmen; Spiel und Speicherstände behalten ihre 12 Stegbilder | 1 | neu |
+| P83 | Stegbild-Generator reparieren | `tools/stegbilder/erzeugen.mjs` findet seit den Doppelboxen (PR 321) keine Variante mehr ("Steg C passt nicht", Hinweis aus PR 329), `web/js/data/stegbilder.js` lässt sich nicht neu erzeugen. Generator an Doppelboxen, Liegelage (`data/liegelage.js`) und Yachtsteg anpassen, `--pruefen` in den Testlauf aufnehmen; Spiel und Speicherstände behalten ihre 12 Stegbilder | 1 | erledigt (PR 336) |
 | P84 | Großschiffwege an allen 15 Küsten | Kreuzfahrtschiff streift im schrägen Seegatt von Küste 4 (Bodden) das Ufer (Rest aus PR 329). Rumpfprobe aus dem Härtetest (7 Punkte) als Test für alle Besuchsschiffe (Kreuzfahrt, Flotte, Windjammer, Seenotkreuzer) auf allen 15 Küsten und mehreren Seeds | 0 | neu |
 | P85 | Zusammenspiel nach Welle 0 prüfen | Jorvens Auftrag vom 14.11.: alle Features noch da, neue Features im normalen Spiel wirklich genutzt, Welle 1 wirklich gefixt, Übersehenes finden. Drei Threads (Kernschleife und Regeln; Oberfläche und Geräte; Welt, Boote, Ereignisse), gemeinsame Datei `docs/zusammenspiel.md` | 1 | neu, startet, sobald Welle 0 fertig ist |
 | P86 | Bootsgeschichten fertig erzählen | Regatta: Startsignal mit Ton, Siegerehrung am Segelclub, Ergebnis im Logbuch; Gepäck beim Crewwechsel sichtbar, Halt am Tanksteg, Gang "in den Ort" ([bootsgeschichten.md](bootsgeschichten.md), Abschnitt 5) | 3 | neu |

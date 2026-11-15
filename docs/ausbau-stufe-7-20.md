@@ -68,7 +68,7 @@ Seit der ersten Fassung hat sich im Spiel einiges geändert. Die Planung gilt we
 | Stufe 6 hat den Yachtsteg mit zwei XL-Plätzen (P59, PR 326) und Doppelboxen (PR 321) | Steg E in Stufe 7 ergänzt den Yachtsteg statt ihn zu ersetzen; Belegungsplan gilt auch für Doppelboxen |
 | Päckchen (P27, PR 330), Umlegen (P33, PR 314), Liegelage je Platz (`data/liegelage.js`, PR 329) | Neue Plätze ab Stufe 7 bekommen ihre Liegelage und werden von `tools/liegeplaetze/pruefen.mjs` geprüft; Päckchen auch an neuen Kais |
 | `SAVE_VERSION` ist weiter 3 (Logbuch) | Die Migration auf 4 für den Verbund (P73) gilt unverändert |
-| Stegbild-Generator erzeugt zurzeit keine Varianten (P83) | P70 (Steg E) startet erst nach P83, weil neue Stege durch den Generator müssen |
+| Stegbild-Generator wieder repariert (P83, 15.11.): findet Varianten, prüft Stufe 6 mit Yachtsteg, behält bestehende Stegbilder | Neue Stege (Steg E, P70) kommen als weitere Stufe in `tools/stegbilder/` dazu; `node tools/stegbilder/erzeugen.mjs --pruefen` muss danach alle 12 Varianten bestehen lassen |
 
 ## 4. Vorbilder aus dem echten Hafenleben
 

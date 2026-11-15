@@ -40,6 +40,9 @@ Nach dem Einstieg erscheint jeder dieser Hinweise einmal pro Spielstand (gemerkt
 | Kein Platz an den Bojen | `sim:turnedAway` mit `reason: 'queueFull'` | keiner |
 | Der Hafen kann wachsen | `sim:stageReady` | Knopf „Bauen“ |
 | Ein neuer Stammgast | `stammgast:neu` | keiner |
+| Versorgung für heute voll | `hafenzeichen:voll` | keiner |
+| Hafen voll: ins Päckchen | `paeckchen:moeglich` | keiner |
+| Gäste bewerten deinen Hafen (J5) | `gaestebuch:bewertung`, nur wenn der Einstieg schon fertig ist: Der Tipp steht dann, während die Blase über dem ablegenden Boot zu sehen ist. Eine Abreise mitten im Einstieg zählt nicht, sonst käme der Tipp viel später ohne Blase. Die Tage nennt der Text aus `economy.js` `ruf.tage`. | Ruf oben (`#rep`) |
 
 Sturm und Winter stehen nicht in der Liste: Beide erklärt das Ereignisschild (`events/banner.js`) bei jedem Auftreten.
 

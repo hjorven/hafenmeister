@@ -6,6 +6,7 @@ Stand: 15.11.2026 (bis PR 332). Status: gepflegt. Für Spielerinnen und Spieler:
 
 ## 15.11.2026
 
+- Legt nach dem Einstieg der erste Gast ab und zeigt seine Note, erklärt ein Tipp einmal, was der Ruf ist: Jeder Gast bewertet, bis 5 für erfüllte Wünsche und einen guten Platz, der Ruf oben ist der Schnitt der letzten zwei Tage. Ein Kreis zeigt auf den Ruf.
 - Kurzhalter legen erst ab, wenn sie sichtbar festgemacht haben, und liegen dann mindestens eine Weile. Kurz vor Abend fährt kein Kurzhalter mehr ein. Das erste Boot eines neuen Spiels kommt vom Bildrand und ist nach wenigen Sekunden da.
 - Neu: Päckchen. Ist für ein wartendes Boot keine Box frei, leuchten weiße Rahmen neben gleich großen oder größeren Booten an Stegköpfen. Dorthin gezogen, legt es sich längsseits daneben, mit Fendern und Leinen zum inneren Boot. Es zahlt das halbe Liegegeld, bleibt eine Nacht, und beide Crews geben einen halben Anker weniger. Das innere Boot kann erst ablegen, wenn das äußere fort oder in eine Box verholt ist.
 - Neuer Takt für das ganze Spiel: Eine Saison hat 16 lange Tage und 2 Wintertage. Alles, was man baut, kostet etwa die Hälfte, damit der Aufstieg in Echtzeit so lange dauert wie vorher (rund 100 Spieltage bis zum Seehafen). Ereignisse kommen passend zur kürzeren Saison: Regatta und Holzboot-Treffen dauern einen Tag, Mittsommer ist am Saisontag 7, die Hanse-Woche wird 5 Tage vorher angekündigt. Toilette, Dusche und Kiosk versorgen doppelt so viele Gäste, der Ruf richtet sich nach den letzten zwei Tagen (P17).

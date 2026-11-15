@@ -101,3 +101,25 @@ test('Einstieg: Blase und Kreis warten, solange das Baumenü offen ist', async (
   await page.evaluate(() => window.hafenmeister.bauen.schliessen());
   await expect(tipp).toBeVisible({ timeout: 30_000 });
 });
+
+test('Ruf beim ersten Abreisenden (J5): erst nach dem Einstieg, Kreis um den Ruf, Ruf bleibt frei', async ({ game }) => {
+  const { page } = game;
+  await bereit(page);
+  const tipp = page.locator('.hm-tipp');
+  // Eine Bewertung mitten im Einstieg merkt sich der Hinweis nicht: Er käme sonst viel später ohne Blase
+  await page.evaluate(() => window.hafenmeister.einstieg.start());
+  await page.evaluate(() => window.hafenmeister.emit('gaestebuch:bewertung', { id: 997, note: 4, zufrieden: true, imBild: true }));
+  await page.evaluate(() => window.hafenmeister.einstieg.beenden());
+  await page.waitForTimeout(1000);
+  await expect(tipp).not.toContainText('bewerten deinen Hafen');
+  // Die erste Bewertung nach dem Einstieg zeigt ihn, mit Kreis um den Ruf oben
+  await page.evaluate(() => window.hafenmeister.emit('gaestebuch:bewertung', { id: 996, note: 3.5, zufrieden: false, imBild: true }));
+  await expect(tipp).toBeVisible({ timeout: 30_000 });
+  await expect(tipp).toContainText('bewerten deinen Hafen');
+  await expect(page.locator('.hm-ring')).toBeVisible();
+  const rep = await page.locator('#rep').boundingBox();
+  const t = await tipp.boundingBox();
+  const ueber = !(t.x >= rep.x + rep.width || t.x + t.width <= rep.x || t.y >= rep.y + rep.height || t.y + t.height <= rep.y);
+  expect(ueber, 'Der Tipp verdeckt den Ruf nicht').toBe(false);
+  expect(await page.evaluate(() => window.hafenmeister.sim.state.modules.einstieg.hinweise)).toContain('ruf');
+});
