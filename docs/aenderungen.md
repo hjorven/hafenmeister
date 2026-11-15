@@ -11,6 +11,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
+- Schnellerer Anfang: Der Dorfhafen kostet 300 € statt 400 €, Steg B mit den ersten Boxen für größere Boote 450 € statt 700 €, und für den Durchstich reichen 90 statt 120 Gäste. Stufe 1 dauert so rund 10, Stufe 2 rund 30 Spieltage (P17).
 - Neu: Stege nachrüsten. Im Baumenü unter "Stege" bekommt ein Steg Fingerstege (ab Stufe 3, Gäste dort bewerten um 0,5 Anker besser) oder Laternen (ab Stufe 2, 0,2 Anker, nachts leuchten sie). Vorschau mit Geisterbild am Steg. Stromsäulen stehen jetzt sichtbar an jedem Steg mit Strom (297).
 - Der Hafen wächst sichtbar mit: Aus der Holzbude des Hafenmeisters wird ein Haus mit Ausguck und später mit Anbau, das Hafenbüro bekommt einen Seitenflügel und im Seehafen einen Lotsenturm mit drehendem Radar, Kiosk und Restaurant bekommen Terrasse und Obergeschoss, Wohnhäuser werden aufgestockt und an der Hafenstraße stehen Stadthäuser mit Läden. Das Dorf wächst vom alten Kern nach außen, und an der Landstraße entsteht Stufe für Stufe eine Häuserzeile. Beim Aufstieg wachsen neue Gebäude aus dem Boden.
 - Neu: Statistik (Menü oder Taste T). Säulen zeigen die Einnahmen der letzten 30 Tage nach Quelle und darunter, wie voll der Hafen jede Nacht war (Gäste und Dauerlieger). Antippen einer Säule zeigt den Tag und führt zu seinem Tagesabschluss; die Säulen im Tagesabschluss öffnen umgekehrt die Statistik. Dazu ein Hinweis, wenn der Hafen oft voll ist oder Boote weiterfahren, und eine Tabelle der vergangenen Saisons.
