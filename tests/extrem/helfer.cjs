@@ -56,6 +56,30 @@ const HELFER = async () => {
       else dispatch(ev);
       return k;
     },
+    // Päckchen (P27, docs/paeckchen.md): an jeden möglichen Päckchenplatz ein passendes Boot legen.
+    // Setzt einen vollen Hafen voraus (sonst ist eine Box frei und das Päckchen nicht erlaubt).
+    // liegen = false: alle fahren im selben Augenblick längsseits.
+    paeckchenFuellen(liegen = false) {
+      const s = st(); const c = ctx(); let k = 0; const ev = []; const plaetze = []; const boote = [];
+      const ids = Object.keys(c.berthById).filter((id) => sim.isRaftBerth(id));
+      for (const id of ids) {
+        for (let v = 0; v < 150; v++) {
+          const b = sim.rollBoat(s, c); if (!b) break;
+          b.id = s.nextId++;
+          b.origin = sim.boatOrigin(s, s.day * 7 + k + 500 + v);
+          b.status = 'waiting'; b.waitSpot = 0; b.waitingSince = s.clock; b.atBuoy = true; b.atBuoySince = s.clock;
+          s.boats[b.id] = b; s.queue.push(b.id);
+          const r = sim.assign(s, c, b.id, id, { hand: true });
+          if (r.ok) { k++; plaetze.push(id); boote.push(b.id); ev.push(...r.events); break; }
+          delete s.boats[b.id]; s.queue = s.queue.filter((x) => x !== b.id);
+        }
+      }
+      if (liegen) { G.emit('sim:change', { reason: 'load' }); G.emit('sim:berthState', { plaetze: sim.berthStates(s, c) }); }
+      else dispatch(ev);
+      return { plaetze: ids.length, belegt: k, liegen: plaetze, boote };
+    },
+    // Wie viele Boote liegen gerade außen im Päckchen
+    paeckchenZahl() { return Object.values(st().boats).filter((b) => b.paeckchen).length; },
     // Alle liegenden Gäste reisen am nächsten Morgen fast gleichzeitig ab
     allesAblegen(fenster = [0.02, 0.05]) {
       const s = st(); let k = 0;

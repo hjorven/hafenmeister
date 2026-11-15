@@ -87,6 +87,31 @@ const LAGEN = [
     },
   },
   {
+    id: 'paeckchen-voll',
+    titel: 'Päckchen im vollen Hafen',
+    was: 'Voller Hafen, an jeden möglichen Päckchenplatz fährt im selben Augenblick ein Boot längsseits (P27); am nächsten Morgen reisen alle fast gleichzeitig ab, außen vor innen. Kein Rumpf berührt Stege, Land oder andere Boote. Funde mit den Booten aus "päckchen.boote" gehen aufs Päckchen.',
+    adresse: '?services=alle',
+    varianten: (t) => (t.kurz ? [3] : [2, 3, 4, 6]).map((n) => ({ name: `stufe-${n}`, extra: `&stufe=${n}` })),
+    async lauf(t) {
+      t.messe('belegt', await t.ex('fuellen', true));
+      const p = await t.ex('paeckchenFuellen', false);
+      t.messe('päckchen', p);
+      if (!p.belegt) t.hinweis('kein Päckchenplatz frei');
+      // Tempo 1: Anlegen und eine Nacht genau ansehen (Testtempo 8 allein sind schon mehrere Spieltage je Minute)
+      await t.ex('tempo', 1);
+      await t.beobachte(dauer(t, 15), { bild: 5, probe: 2 });
+      t.messe('außen fest', await t.ex('paeckchenZahl'));
+      await t.beobachte(dauer(t, 30), { bild: 6, probe: 2 });
+      t.messe('außen nach der Nacht', await t.ex('paeckchenZahl'));
+      t.messe('reisen ab', await t.ex('allesAblegen'));
+      t.messe('morgen', await t.ex('naechsterMorgen'));
+      await t.beobachte(dauer(t, 45), { bild: 6, probe: 2 });
+      await t.ex('fensterZurueck');
+      t.messe('außen danach', await t.ex('paeckchenZahl'));
+      t.messe('danach', await t.ex('zustand'));
+    },
+  },
+  {
     id: 'grossschiffe-eng',
     titel: 'Großschiffe in engem Gelände',
     was: 'Stufe 6 mit allen Services, alle Großschiff-Besuche (Kreuzfahrt, Windjammer, Flotte) am selben Tag, in Bodden, Schären, Förde und Inselhafen.',
