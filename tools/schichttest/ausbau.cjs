@@ -19,6 +19,8 @@ async function einfahrenKnopf(t, z) {
   const wo = da ? await knopf.evaluate((el) => (el.classList.contains('hm-einfahren') ? 'am Boot' : 'in der Bootskarte')) : '';
   await t.punkt('Antippen zeigt einen Knopf zum Einfahren', da, wo, { schwere: 'B' });
   if (!da) return;
+  // Die Bootskarte gleitet am Handy von unten herein: erst prüfen, wenn sie steht
+  await t.page.waitForTimeout(700);
   const frei = await knopf.evaluate((el) => { const r = el.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; const e = document.elementFromPoint(x, y); return { ok: e === el || el.contains(e), x, y, drueber: e?.id || e?.className }; });
   await t.punkt('Knopf zum Einfahren frei antippbar', frei.ok, frei.ok ? '' : `verdeckt von ${frei.drueber}`);
   z.einfahrenWo ||= new Set(); z.einfahrenWo.add(wo);
@@ -234,7 +236,9 @@ async function tagesabschluss(t, z) {
       for (const b of G.sim.waitingBoats()) { const s = window.__st.bootSchirm(b.id); if (s && !s.frei && String(s.drueber).includes('tagesabschluss')) l.push(b.id); }
       for (const o of G.boatView?.bojen?.() ?? []) { const s = window.__st.schirm(o.x, 0.3, o.z); if (s && !window.__st.frei(s.x, s.y) && String(window.__st.wasLiegtDa(s.x, s.y)).includes('tagesabschluss')) l.push(o.id ?? 'boje'); }
       return l; });
-    await t.punkt('Tagesabschluss verdeckt keine Wartebojen oder wartenden Boote', bojen.length === 0, bojen.join(', '), { schwere: 'C' });
+    // Vom Spieler über den Zettel geöffnet: Überdecken ist dann gewollt, nur ein Hinweis (F1 galt der Karte, die von selbst kam)
+    if (zt) { if (bojen.length) await t.hinweis('Tagesabschluss offen über den Bojen', `selbst geöffnet; verdeckt ${bojen.join(', ')}`, { bild: false }); }
+    else await t.punkt('Tagesabschluss verdeckt keine Wartebojen oder wartenden Boote', bojen.length === 0, bojen.join(', '), { schwere: 'C' });
     await t.punkt('Tagesabschluss verdeckt weder Zeit noch Bauen', frei.every((f) => f.ok), frei.filter((f) => !f.ok).map((f) => f.id).join(', '));
     const weiter = t.page.locator('#hm-tagesabschluss .hm-ta-weiter:visible, #hm-tagesabschluss .hm-zu:visible').first();
     await t.sp.knopf(weiter);
@@ -299,7 +303,7 @@ async function menue(t) {
       const offenNoch = (await t.G(SICHTBAR)).filter((x) => x !== '#hm-menue' && !vorher.has(x));
       const fotoNoch = await t.G(() => document.body.className.includes('foto'));
       if (!offenNoch.length && !fotoNoch) break;
-      const zu = t.page.locator('.hm-zu:visible, button[aria-label*="chließen"]:visible, button:visible:text-is("Schließen"), button:visible:text-is("Fertig"), button:visible:text-is("Weiter")').first();
+      const zu = t.page.locator('.hm-zu:visible, button[aria-label*="chließen"]:visible, button:visible:text-is("Schließen"), button:visible:text-is("Fertig"), button:visible:text-is("Weiter"), button[aria-label*="beenden"]:visible, button:visible:text-is("Zurück")').first();
       if (i < 2 && await zu.count()) await t.sp.knopf(zu).catch(() => {});
       else if (i === 0 && !t.touch) await t.page.keyboard.press('Escape');
       else { const p = await t.G(() => window.__st.leererPunkt()); if (p) await t.sp.tippen(p.x, p.y); }
@@ -462,8 +466,14 @@ async function hafenbuero(t, z) {
   const abend = await t.bis(() => window.hafenmeister.sim.state.phase !== 'day' && window.hafenmeister.sim.mooredBoats().some((b) => b.pendingFee > 0), null, 240_000);
   await setzeTempo(t, 'pause');
   const knopf = t.page.locator('#btn-collect');
-  const da = abend && await knopf.isVisible().catch(() => false);
-  await t.punkt('abends erscheint "Kassieren" für alle Münzen', da, abend ? '' : 'kein Abend mit offenen Münzen', { bild: true, schwere: 'B' });
+  // Offene Münzen und sichtbarer Knopf im selben Moment (der Rundgang kassiert abends bei 8x oft vorher)
+  const lage = await t.G(() => {
+    const G = window.hafenmeister; const b = document.getElementById('btn-collect');
+    return { offen: G.sim.mooredBoats().reduce((a, x) => a + (x.pendingFee || 0), 0), sichtbar: !!b && !b.hidden && b.getBoundingClientRect().width > 0, office: G.sim.state.office };
+  });
+  if (abend && lage.offen <= 0) { await t.hinweis('Alle kassieren', 'Münzen schon vom Rundgang kassiert, bevor der Knopf geprüft wurde', { bild: false }); return; }
+  const da = abend && lage.sichtbar;
+  await t.punkt('abends erscheint "Kassieren" für alle Münzen', da, abend ? `offen ${lage.offen} €, Büro ${lage.office}` : 'kein Abend mit offenen Münzen', { bild: true, schwere: 'B' });
   if (da) {
     const g0 = await t.G(() => window.hafenmeister.sim.state.money);
     await t.sp.knopf(knopf);
