@@ -374,6 +374,13 @@ export const ECONOMY = {
     ] },
   },
 
+  // ---------------------------------------------------------------- Stege umbauen (P59)
+  // Doppelbox: zwei Heckpfahl-Boxen nebeneinander werden eine breite Box (data/doppelboxen.js,
+  // features/umbauen.js, docs/stege-umbauen.md). Nur für Klassen, deren breitere Boote sonst keine Box
+  // finden: In die Doppelbox der Klasse L passen Mehrrumpfboote (L2, bis 7,5 m breit, ab Stufe 4).
+  // kosten: Umbau zur Doppelbox, rueckbau: zurück zu zwei Boxen. Beide Boxen müssen dabei frei sein.
+  doppelbox: { klassen: ['L'], abStufe: 4, kosten: 2200, rueckbau: 500, maxBreite: 8 },
+
   // ---------------------------------------------------------------- Stege nachrüsten (P30)
   // Logik in web/js/features/nachruesten.js, Beschreibung in docs/nachruesten.md. Je Steg einmal.
   // kosten = grund + jePlatz[Klasse] für jeden betroffenen Gastplatz, der am Steg gerade liegt (auf 10 €

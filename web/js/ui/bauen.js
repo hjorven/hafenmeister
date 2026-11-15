@@ -199,7 +199,7 @@ export function init(game) {
       const stegKurz = a.name.slice(a.name.indexOf(' an ') + 4);
       out.push({
         key: `nachruesten:${a.art}:${a.steg}`, art: 'steg', nachruesten: a.art, steg: a.steg, id: `${a.art}-${a.steg}`, name: a.name, kosten: a.kosten,
-        gesperrt: a.gesperrt, ohneSchild: true,
+        gesperrt: a.gesperrt, ohneSchild: true, hebtNote: true,
         kurz: `+${anker} Anker`,
         nutzen: a.art === 'finger'
           ? [`Gäste an ${stegKurz} bewerten um ${anker} Anker besser: Sie steigen am Fingersteg bequem aus.`,
@@ -214,6 +214,31 @@ export function init(game) {
         },
         kaufen: () => game.nachruesten.kaufen(a.art, a.steg),
         stufeNeu: def.abStufe,
+      });
+    }
+
+    // Stege umbauen (P59): zwei Boxen zur Doppelbox und zurueck
+    for (const a of game.umbauen?.angebote?.() ?? []) {
+      const sname = HAFEN.stege?.[a.steg] ?? `Steg ${a.steg}`;
+      const umbau = a.art === 'umbau';
+      const neu = umbau ? game.umbauen.neuePassende(a.platz) : [];
+      const namen = [...new Set(neu.map((t) => t.name))];
+      const breit = Math.max(0, ...neu.map((t) => t.beam?.[1] ?? 0));
+      out.push({
+        key: `umbauen:${a.art}:${a.steg}`, art: 'steg', nachruesten: 'umbau', steg: a.steg, id: `${a.art}-${a.steg}`,
+        name: umbau ? `Doppelbox an ${sname}` : `Doppelbox an ${sname} zurückbauen`, kosten: a.kosten,
+        gesperrt: a.gesperrt, ohneSchild: true, keinRat: !umbau,
+        kurz: umbau ? 'breite Box' : '+1 Box',
+        bedarf: () => null,
+        nutzen: umbau
+          ? [`Zwei Boxen werden eine breite Box${namen.length ? `: Hier passt dann auch ein ${namen.join(' oder ein ')}${breit ? ` (bis ${num1(breit)} m breit)` : ''}` : ''}.`,
+            `Dafür fällt eine Box weg. ${a.gebaut ? `Schon ${a.gebaut} von ${a.moeglich} Doppelboxen an diesem Steg.` : `Möglich sind ${a.moeglich} an diesem Steg.`}`,
+            'Umgebaut wird nur, wenn beide Boxen frei sind.']
+          : ['Die breite Box wird wieder zu zwei Boxen: eine Box mehr für Boote ihrer Größe.',
+            'Geht nur, wenn die Doppelbox frei ist.'],
+        ort: () => plaetzeOrt(a.teile),
+        geist: () => game.umbauen.geist(umbau ? [a.platz] : a.teile),
+        kaufen: () => (umbau ? game.umbauen.umbauen(a.steg) : game.umbauen.rueckbauen(a.steg)),
       });
     }
 

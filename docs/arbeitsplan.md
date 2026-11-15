@@ -22,6 +22,7 @@ Stand 14.11.2026, 21:15 UTC.
 | Boote: Wartebojen neben den Stegen, Anfahrt von weit draußen, Stau im Becken | "Staus an Bojen und Ankerfeld auflösen" | P66 | PR seit 11 Uhr offen, muss fertig werden | 280 |
 | Gelände: Seewege, Seegatt für geschlossene Bodden | "Geländeform und Engpass neu bauen" | P62 | läuft | - |
 | Längere Tage (5 min) und Bootsgeschichten (50 Alltag + 14 Ereignis-Anlässe), echte Regatta, Plan docs/bootsgeschichten.md | "Längere Tage und Bootsgeschichten einbauen" | neu (Jorven 14.11.) | Plan fertig, Zahlen mit P17 abgestimmt, danach 5 Teil-PRs | - |
+| Stege umbauen: Doppelboxen für Katamarane (D5, D6), danach neue Gastplätze Stufe 6 (D9) | "Bauen mit Vorschau und Tiefe ausbauen" | P59 | Teil 1 im PR, Teil 2 folgt | 315 |
 | Schicht-Test, Feature-Test, Zeitraffer, Roadmap-Seite, Kamera | Prüf- und Pflege-Threads | - | laufen | 251, 296 |
 
 Seit 21:15 gemergt: ruhige Oberfläche mit einem Meldeplatz (PR 282), P28 Funk-Anmeldung (PR 288), P24 Teil 2 neue Ereignisse (PR 299), Zeitraffer-Pulk (PR 251), Pages gebündelt (PR 294), Folgefunde Einzeltest (PR 301).
@@ -140,7 +141,7 @@ Reihenfolge nach Wirkung auf die Kernschleife: erst was jede Ankunft und jedes Z
 | 11 | P25 | Stammgäste mit Wirkung, Gästepost | F37 |
 | 12 | P29 | Baggern für tiefere Liegeplätze | F7 |
 | 13 | P36 | Bojenfeld im See | F10 |
-| 14 | P59 | Stege umbauen und Varianten wählen | - |
+| 14 | P59 | Stege umbauen und Varianten wählen (Teil 1 Doppelboxen PR 315, Teil 2 D9 offen) | - |
 | 15 | P26 | Überraschende Gesten (Hafenhorn, Fernglas, Möwen, Glocke) | - |
 | 16 | P37 | Havarist einschleppen | F11 |
 | 17 | P38 | Eigenes Hafenfest | F12 |
@@ -199,6 +200,7 @@ Schon erledigt aus Jorvens Vorschlägen: F14, F15, F18, F26, F27 (Grundgerüst),
 
 | Datum | Änderung |
 |---|---|
+| 15.11.2026 | P59 übernommen vom Thread "Bauen mit Vorschau und Tiefe ausbauen": Teil 1 Doppelboxen (D5, D6), Teil 2 neue Gastplätze Stufe 6 (D9) danach. |
 | 15.11.2026, 02:30 Uhr | Neu: "Längere Tage und Bootsgeschichten einbauen" (Plan docs/bootsgeschichten.md): Tag 270 s, Kurzhalt ohne Nacht, Anlässe je Boot, echte Regatta; Zahlen mit P17. |
 | 15.11.2026, 02:10 Uhr | Zwischenserie nach PR 280 (Typ 1, 2): Pulk bleibt Prio A, Welle 0 noch nicht abnahmefähig; Fund XXL-Logbucheinträge nie erreicht. |
 | 14.11.2026, 22:10 Uhr | PR 280 gemergt, P62 und P64 erledigt; Welle-0-Abnahme über 15 Küsten nach Ankerfeld-Fix und PR 300; Menschen auf festen Koordinaten als Fund B. |

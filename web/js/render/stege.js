@@ -24,6 +24,12 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { HAFEN } from '../data/harbor.js';
 
 const U = HAFEN.einheiten?.meterProEinheit ?? 0.62;
+// Plätze nach id (HAFEN.plaetze wird beim Stegbild neu gesetzt, darum erst beim Aufruf lesen)
+let platzMap = { liste: null, map: null };
+const HAFEN_PLATZ = () => {
+  if (platzMap.liste !== HAFEN.plaetze) platzMap = { liste: HAFEN.plaetze, map: new Map(HAFEN.plaetze.map((p) => [p.id, p])) };
+  return platzMap.map;
+};
 const W = (x, y) => new THREE.Vector3(x * U, 0, -y * U);
 
 const FARBE = {
@@ -178,7 +184,15 @@ export function init(game) {
     return { state: sim.state, offen };
   }
   function platzStatus(id, z) {
-    if (!z) return { status: 'gebaut' };
+    if (!z) {
+      // Testansicht (?stufe=n): alles steht, nur Doppelboxen (P59) richten sich nach den Spielregeln
+      const p = HAFEN_PLATZ().get(id);
+      const bl = game.sim?.state?.buildings ?? {};
+      if (p?.doppel) return { status: bl[p.requires] ? 'gebaut' : 'aus' };
+      return { status: p?.ohne?.some((k) => bl[k]) ? 'aus' : 'gebaut' };
+    }
+    // Zwei Boxen als Doppelbox umgebaut (P59): die Einzelboxen stehen nicht mehr
+    if (berthById.get(id)?.ohne?.some((k) => z.state.buildings[k])) return { status: 'aus' };
     const req = berthById.get(id)?.requires;
     if (!req || z.state.buildings[req]) return { status: 'gebaut' };
     const pr = z.offen.get(req);
@@ -320,7 +334,8 @@ export function init(game) {
   function aufbauen(n) {
     const s = aktuelleStufe(n);
     const z = zustand();
-    const sig = s + '|' + (z ? Object.keys(z.state.buildings).filter((k) => z.state.buildings[k]).sort().join(',') + '|' + [...z.offen.keys()].sort().join(',') : 'alles');
+    const doppel = Object.keys(game.sim?.state?.buildings ?? {}).filter((k) => k.startsWith('doppel:') && game.sim.state.buildings[k]).sort().join(',');
+    const sig = s + '|' + (z ? Object.keys(z.state.buildings).filter((k) => z.state.buildings[k]).sort().join(',') + '|' + [...z.offen.keys()].sort().join(',') : 'alles|' + doppel);
     if (sig === signatur && gruppe) return;
     signatur = sig;
     stufe = s;
