@@ -370,6 +370,17 @@ export const ECONOMY = {
     ] },
   },
 
+  // ---------------------------------------------------------------- Stege nachrüsten (P30)
+  // Logik in web/js/features/nachruesten.js, Beschreibung in docs/nachruesten.md. Je Steg einmal.
+  // kosten = grund + jePlatz[Klasse] für jeden betroffenen Gastplatz, der am Steg gerade liegt (auf 10 €
+  // gerundet); Boxen späterer Ausbaustufen bekommen es gleich mit. anker: so viel besser bewerten Gäste
+  // an diesem Steg. nurArt: nur Plätze dieser Platzart (Fingerstege nur an Heckpfahl-Boxen).
+  nachruesten: {
+    // Wie ein Schwimmsteg mit Fingern (platzarten.finger.rufBonus)
+    finger: { name: 'Fingerstege', abStufe: 3, grund: 400, jePlatz: { S: 90, M: 140, L: 200 }, anker: 0.5, nurArt: 'box' },
+    licht:  { name: 'Steglaternen', abStufe: 2, grund: 150, jePlatz: { S: 20, M: 25, L: 30, XL: 40 }, anker: 0.2 },
+  },
+
   // ---------------------------------------------------------------- Kassieren
   // ---------------------------------------------------------------- Hafenbüro
   // Komfort, keine Einnahmen. Logik bei den Spielregeln (sim.js).
