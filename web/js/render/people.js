@@ -282,11 +282,18 @@ export function init(game) {
     return true;
   }
 
-  const tagesAnteil = () => game.sim?.tagesAnteil?.() ?? 0.5;
-  // Laenge eines ganzen Spieltags (Tag und Abend) in Sekunden Spielzeit
+  // Tagesanteil auf der Skala der Zeitfenster in data/people.js: 0 Morgen, 0,75 Abendbeginn, 1 Nacht,
+  // unabhängig davon, wie lang Tag und Abend in den Spielregeln sind (docs/bootsgeschichten.md: 270 s + 30 s)
+  const tagesAnteil = () => {
+    const r = game.sim?.ctx?.rules, st = game.sim?.state;
+    if (!r?.dayLength || !st) return game.sim?.tagesAnteil?.() ?? 0.5;
+    const c = st.clock ?? 0, abend = r.eveningLength || 1;
+    return c < r.dayLength ? 0.75 * (c / r.dayLength) : Math.min(1, 0.75 + 0.25 * ((c - r.dayLength) / abend));
+  };
+  // Sekunden Spielzeit je Einheit dieser Skala (tagsüber)
   const tagLaenge = () => {
     const r = game.sim?.ctx?.rules;
-    return r ? (r.dayLength ?? 90) + (r.eveningLength ?? 30) : 120;
+    return r?.dayLength ? r.dayLength / 0.75 : 120;
   };
   // Liegt die Ankunft im Zeitfenster des Ziels? Der Weg dauert bei einem Spieltag von zwei Minuten
   // spuerbar lange, deshalb zaehlt die geschaetzte Ankunft, nicht der Moment der Entscheidung.
@@ -321,13 +328,15 @@ export function init(game) {
     const komp = netz.komp[a.node];
     const vorliebe = P.VORLIEBE[a.typ] ?? {};
     const standard = a.typ === 'strand' ? 0.2 : 1;
+    // Bootsgeschichte (geschichten/geschichten.js): wer nur fürs WC kommt, geht zum WC
+    const landgang = a.boot != null ? game.geschichten?.landgang?.(game.sim?.state?.boats?.[a.boot]) : null;
     const gewicht = (z) => {
       const def = P.ZIELE[z.art];
       if (!def || netz.komp[z.node] !== komp) return 0;
       if (def.nurBadewetter && !badewetter()) return 0;
       if (!imZeitfenster(def, a, z, u)) return 0;
       if (z.node === a.node) return 0;
-      let g = def.gewicht * (vorliebe[z.art] ?? standard);
+      let g = def.gewicht * (vorliebe[z.art] ?? standard) * (landgang?.[z.art] ?? 1);
       // Leute aus dem Ort bleiben meist in der Naehe des Hafens (dort, wo man hinschaut)
       if (a.typ === 'ort') {
         const n = netz.nodes[z.node];

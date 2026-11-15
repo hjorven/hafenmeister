@@ -162,14 +162,16 @@ test('Fernglas folgt einem Boot, Möwen fliegen auf, Wellenringe auf dem Wasser'
   // Ein Boot im Hafen (nicht an der Boje), Spiel angehalten, damit es stillliegt
   const id = await page.evaluate(() => {
     const g = window.hafenmeister;
-    for (let i = 0; i < 2000 && !g.sim.mooredBoats().some((b) => !b.stationed); i++) {
+    // Kurzhalter (nights 0) legen am selben Tag wieder ab: ein Boot nehmen, das über Nacht bleibt
+    const bleibt = (b) => !b.stationed && b.nights >= 1;
+    for (let i = 0; i < 2000 && !g.sim.mooredBoats().some(bleibt); i++) {
       g.sim.fastForward(1);
       for (const w of g.sim.waitingBoats()) g.sim.autoEnter(w.id);
     }
     // Das Boot, das am nächsten an der Hafenmitte liegt (Ankerfeld und Außenplätze können außerhalb der Kamera-Grenzen liegen)
     const t = g.camera.target;
     const nah = (x) => { const m = g.boatView.boot(x.id)?.model; return m ? Math.hypot(m.position.x - t.x, m.position.z - t.z) : Infinity; };
-    const b = g.sim.mooredBoats().filter((x) => !x.stationed).sort((p, q) => nah(p) - nah(q))[0];
+    const b = g.sim.mooredBoats().filter(bleibt).sort((p, q) => nah(p) - nah(q))[0];
     return b ? b.id : null;
   });
   expect(id, 'kein Boot im Hafen').not.toBeNull();

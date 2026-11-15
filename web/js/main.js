@@ -48,6 +48,7 @@ const MODULES = [
   './features/auszeichnung.js',
   './features/platzschilder.js',
   './features/stammgaeste.js',
+  './geschichten/geschichten.js',      // Bootsgeschichten: Anlass je Boot (docs/bootsgeschichten.md)
   './features/tagesziele.js',
   './features/wetterflagge.js',
   './features/hafen-schauen.js',

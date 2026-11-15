@@ -605,6 +605,7 @@ body.hm-neu { font: 400 var(--hm-s)/1.4 var(--hm-pixel); color: var(--hm-tinte);
 .hm-neu .hm-karte-kopf { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
 .hm-neu .hm-karte-kopf > div { flex: 1 1 auto; min-width: 0; }
 .hm-neu .hm-karte-kopf .card-boatname { margin: 2px 0 0; }
+.hm-neu .hm-karte-kopf .card-geschichte { margin: 4px 0 0; font-style: italic; line-height: 1.25; opacity: 0.9; }
 .hm-neu .hm-zu {
   flex: none;
   display: grid;
@@ -1016,6 +1017,7 @@ body.hm-neu { font: 400 var(--hm-s)/1.4 var(--hm-pixel); color: var(--hm-tinte);
   .hm-neu #card h2 { font-size: calc(var(--hm-s) + 4px); }
   .hm-neu .hm-karte-kopf { margin-bottom: 2px; }
   .hm-neu .hm-karte-kopf .card-boatname { margin: 0; font-size: calc(var(--hm-s) - 2px); }
+  .hm-neu .hm-karte-kopf .card-geschichte { margin: 2px 0 0; font-size: calc(var(--hm-s) - 3px); }
   .hm-neu #card .hm-fakten { gap: 3px; margin: 2px 0 6px; }
   .hm-neu #card .hm-fakten li { padding: 0 6px; font-size: calc(var(--hm-s) - 2px); }
   .hm-neu #card p { margin-bottom: 4px; }
