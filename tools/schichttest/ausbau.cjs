@@ -2,7 +2,7 @@
 // Aufbau wie dort: neu(t, z) prüft die neue Funktion, wieder(t, z) wiederholt sie kurz nach jeder späteren Schicht.
 
 const K = require('./schichten.cjs');
-const { setzeTempo, insBild, fensterZu, bootKommt, anlegen, kassieren } = K;
+const { setzeTempo, insBild, fensterZu, bootKommt, anlegen, kassieren, BOOTSLAGE } = K;
 
 // ------------------------------------------------------------------ Schicht 8: Einfahren ohne Ziehen
 // a) Boot antippen, Knopf "Einfahren" am Boot; b) Boot gar nicht anfassen: nach 8 s fährt es selbst ein.
@@ -239,12 +239,12 @@ const S12 = { nr: 12, name: 'Tagesabschluss', paket: 'P15', neu: tagesabschluss,
 // Jorvens Regel "Fertig heißt spielbar": kein Knopf ohne Wirkung. Jeder Menüeintrag muss etwas öffnen
 // oder sichtbar umschalten, und was er öffnet, muss sich wieder schließen lassen.
 const SICHTBAR = () => {
-  // Alles, was sichtbar ist und mindestens 6 % des Bildes bedeckt (Fenster, Tafeln, Karten), außer der Spielfläche
+  // Alles, was sichtbar ist und mindestens 2,5 % des Bildes bedeckt (Fenster, Tafeln, Karten), außer der Spielfläche
   const flaeche = innerWidth * innerHeight; const out = [];
   for (const e of document.body.querySelectorAll('*')) {
     if (e.id === 'stage' || e.tagName === 'CANVAS' || e.id === 'game' || e.closest('[hidden]')) continue;
     const r = e.getBoundingClientRect();
-    if (r.width * r.height < 0.06 * flaeche || r.width * r.height > 0.98 * flaeche) continue;
+    if (r.width * r.height < 0.025 * flaeche || r.width * r.height > 0.98 * flaeche) continue;
     const cs = getComputedStyle(e);
     if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) < 0.05) continue;
     out.push(e.id ? '#' + e.id : '.' + String(e.className).split(' ')[0] || e.tagName);
@@ -301,5 +301,167 @@ async function menue(t) {
 }
 const S13 = { nr: 13, name: 'Menü: jeder Eintrag tut etwas', paket: 'Abnahme, P50', neu: menue, wieder: menue };
 
-const SCHICHTEN = [S8, S9, S10, S11, S12, S13];
+// ------------------------------------------------------------------ Schicht 14: Wartebojen und Ankerfeld
+// Eine Weile bei 8x nichts zuweisen: es sammeln sich Boote vor dem Hafen. Alle paar Sekunden prüfen,
+// dass nichts übereinander, über Land oder im Steg liegt und jedes wartende Boot seinen eigenen Platz hat.
+async function warteplaetze(t) {
+  await fensterZu(t);
+  await setzeTempo(t, 'acht');
+  const treffer = { ueber: new Map(), land: new Map(), doppelt: new Map() };
+  let maxWartend = 0, proben = 0;
+  for (let i = 0; i < 12; i++) {
+    await t.warte(4000);
+    const l = await t.G(BOOTSLAGE);
+    const w = await t.G(() => { const S = window.hafenmeister.sim; const ws = S.waitingBoats(); const orte = new Map();
+      for (const b of ws) { const k = b.waitSpot ?? null; if (k == null) continue; orte.set(k, [...(orte.get(k) || []), b.id]); }
+      return { n: ws.length, doppelt: [...orte.entries()].filter(([, v]) => v.length > 1).map(([k, v]) => `${k}: ${v.join('+')}`) }; });
+    proben++; maxWartend = Math.max(maxWartend, w.n);
+    for (const x of l.ueber) treffer.ueber.set(x, (treffer.ueber.get(x) || 0) + 1);
+    for (const x of [...l.land, ...l.steg]) treffer.land.set(x, (treffer.land.get(x) || 0) + 1);
+    for (const x of w.doppelt) treffer.doppelt.set(x, (treffer.doppelt.get(x) || 0) + 1);
+    if ((l.ueber.length || l.land.length || l.steg.length) && !treffer.bild) { await setzeTempo(t, 'pause'); treffer.bild = await t.bild('s14-ueberlappung'); await setzeTempo(t, 'acht'); }
+    await fensterZu(t);
+  }
+  await setzeTempo(t, 'normal');
+  const fmt = (m) => [...m.entries()].map(([k, v]) => `${k} (${v}x)`).join('; ').slice(0, 400);
+  await t.hinweis('Warteschlange', `${proben} Proben, bis zu ${maxWartend} Boote warten zugleich`, { bild: true });
+  await t.punkt('wartende und fahrende Boote nie übereinander', treffer.ueber.size === 0, fmt(treffer.ueber), { bild: false, schwere: 'B' });
+  await t.punkt('keine Boote über Land oder im Steg', treffer.land.size === 0, fmt(treffer.land), { bild: false, schwere: 'B' });
+  await t.punkt('jedes wartende Boot hat einen eigenen Warteplatz', treffer.doppelt.size === 0, fmt(treffer.doppelt), { bild: false, schwere: 'B' });
+}
+const S14 = { nr: 14, name: 'Wartebojen und Ankerfeld', paket: 'P66', neu: warteplaetze, wieder: warteplaetze };
+
+// ------------------------------------------------------------------ Schicht 15: Bewertung und Gästebuch
+async function gaestebuch(t) {
+  await fensterZu(t);
+  const n = await t.G(() => window.hafenmeister.gaestebuch?.eintraege?.()?.length ?? null);
+  const rep = t.page.locator('#rep');
+  await t.sp.knopf(rep);
+  const tafel = t.page.locator('#hm-gaestebuch');
+  const offen = await tafel.waitFor({ state: 'visible', timeout: 5000 }).then(() => true, () => false);
+  await t.punkt('Ruf oben antippen öffnet das Gästebuch', offen, `${n ?? '?'} Einträge`, { bild: true, schwere: 'B' });
+  if (!offen) return;
+  const text = (await tafel.textContent()).replace(/\s+/g, ' ');
+  const ruf = await t.G(() => window.hafenmeister.sim.reputation?.());
+  await t.punkt('Gästebuch zeigt Bewertungen, wenn Gäste abgereist sind', n === 0 || /[1-5],\d/.test(text), text.slice(0, 160), { bild: false, schwere: 'C' });
+  const zu = t.page.locator('#hm-gaestebuch .hm-zu, #hm-gaestebuch button[aria-label*="chließen"]').first();
+  if (await zu.count()) await t.sp.knopf(zu); else await t.page.keyboard.press('Escape');
+  const weg = await tafel.waitFor({ state: 'hidden', timeout: 4000 }).then(() => true, () => false);
+  await t.punkt('Gästebuch schließt', weg, `Ruf ${ruf}`);
+}
+const S15 = { nr: 15, name: 'Bewertung und Gästebuch', paket: 'P14', neu: gaestebuch, wieder: gaestebuch };
+
+// ------------------------------------------------------------------ Schicht 16: Aufstieg
+// Über Bauen, Reiter "Hafen", Zeile "hafen:stufe". Ist das Ziel noch nicht erreicht, wird bei 8x
+// weitergespielt (Boote fahren selbst ein, der Test streicht nichts) und erneut versucht.
+async function bauzeile(t, key) {
+  await t.sp.knopf(t.page.locator('#btn-build'));
+  await t.page.locator('#card.bau-karte').waitFor({ state: 'visible', timeout: 8000 }).catch(() => {});
+  let zeile = t.page.locator(`#card .bau-zeile[data-bau="${key}"]`);
+  if (!(await zeile.isVisible().catch(() => false))) {
+    const reiter = t.page.locator('#card .bau-tab', { hasText: 'Hafen' });
+    if (await reiter.isVisible().catch(() => false)) await t.sp.knopf(reiter);
+  }
+  zeile = t.page.locator(`#card .bau-zeile[data-bau="${key}"]`);
+  if (!(await zeile.isVisible().catch(() => false))) return { da: false };
+  const info = await zeile.evaluate((e) => ({ gesperrt: e.classList.contains('gesperrt'), text: e.textContent.replace(/\s+/g, ' ').trim() }));
+  return { da: true, zeile, ...info };
+}
+async function bauenSchliessen(t) {
+  for (const sel of ['#card .hud-btn:text-is("Fertig")', '#card .bau-zu', '#card .hud-btn:text-is("Schließen")']) {
+    const k = t.page.locator(sel).first();
+    if (await k.isVisible().catch(() => false)) { await t.sp.knopf(k); break; }
+  }
+  await t.page.locator('#card.bau-karte').waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+  await fensterZu(t);
+}
+async function aufstieg(t, z) {
+  await fensterZu(t);
+  const s0 = await t.G(() => window.hafenmeister.sim.state.stage);
+  let versuch = 0, z0 = null;
+  while (versuch < 8) {
+    const r = await bauzeile(t, 'hafen:stufe');
+    z0 = r;
+    if (r.da && !r.gesperrt) {
+      await t.sp.knopf(r.zeile);
+      const ja = t.page.locator('#card .bau-ja');
+      if (await ja.isEnabled().catch(() => false)) {
+        const text = await ja.textContent();
+        await t.bild('s16-ausbau-vorschau');
+        await t.sp.knopf(ja);
+        const hoch = await t.bis((s) => window.hafenmeister.sim.state.stage > s, s0, 20_000);
+        await bauenSchliessen(t);
+        const s1 = await t.G(() => window.hafenmeister.sim.state.stage);
+        await t.punkt('Ausbau auf die nächste Stufe über Bauen', hoch, `Stufe ${s0} -> ${s1}, "${text}"`, { bild: true, schwere: 'A' });
+        if (hoch) {
+          await t.warte(1500);
+          await fensterZu(t);
+          const l = await t.G(BOOTSLAGE);
+          await t.punkt('nach dem Umbau liegen keine Boote übereinander oder im Steg', l.ueber.length + l.steg.length + l.land.length === 0, [...l.ueber, ...l.steg, ...l.land].join('; '), { schwere: 'B' });
+          const liegen = await t.G(() => { const G = window.hafenmeister; return G.sim.mooredBoats().filter((b) => !G.stege?.platz?.(b.berthId)).map((b) => `${b.id}@${b.berthId}`); });
+          await t.punkt('jedes liegende Boot hat nach dem Umbau eine sichtbare Box', liegen.length === 0, liegen.join(', '), { schwere: 'B' });
+          z.stufeHoch = true;
+        }
+        return;
+      }
+    }
+    await bauenSchliessen(t);
+    // Noch nicht so weit: einen Spieltag bei 8x weiterspielen
+    versuch++;
+    const d = await t.G(() => window.hafenmeister.sim.state.day);
+    await setzeTempo(t, 'acht');
+    await t.bis((tag) => window.hafenmeister.sim.state.day > tag, d, 240_000);
+    await fensterZu(t);
+  }
+  await setzeTempo(t, 'normal');
+  await t.hinweis('Aufstieg nicht erreicht', `nach ${versuch} weiteren Tagen: ${z0?.da ? z0.text : 'keine Zeile "hafen:stufe"'}`);
+}
+const S16 = {
+  nr: 16, name: 'Aufstieg', paket: 'P16, P18', neu: aufstieg,
+  // Wiederholung: Bauliste zeigt den nächsten Ausbau mit Grund, warum er noch gesperrt ist
+  async wieder(t) {
+    const r = await bauzeile(t, 'hafen:stufe');
+    await t.punkt('Bauliste zeigt den nächsten Ausbau', r.da, r.da ? r.text.slice(0, 120) : 'keine Zeile', { bild: !r.da, schwere: 'C' });
+    await bauenSchliessen(t);
+  },
+};
+
+// ------------------------------------------------------------------ Schicht 17: Hafenbüro (Funk, Alle kassieren)
+async function hafenbuero(t, z) {
+  await fensterZu(t);
+  const o0 = await t.G(() => window.hafenmeister.sim.state.office);
+  if (o0 < 1) {
+    const r = await bauzeile(t, 'hafen:buero');
+    if (!r.da || r.gesperrt) { await bauenSchliessen(t); await t.hinweis('Hafenbüro', r.da ? r.text : 'keine Zeile "hafen:buero"'); return; }
+    await t.sp.knopf(r.zeile);
+    const ja = t.page.locator('#card .bau-ja');
+    const text = await ja.textContent().catch(() => '');
+    if (!(await ja.isEnabled().catch(() => false))) { await bauenSchliessen(t); await t.hinweis('Hafenbüro', `noch nicht bezahlbar: ${text}`); return; }
+    await t.sp.knopf(ja);
+    const ok = await t.bis(() => window.hafenmeister.sim.state.office >= 1, null, 8000);
+    await bauenSchliessen(t);
+    await t.punkt('Hafenbüro (Hafenmeister mit Funk) bauen', ok, text, { bild: true, schwere: 'A' });
+    if (!ok) return;
+  }
+  // Abends gibt es jetzt "Alle kassieren"
+  const d = await t.G(() => ({ tag: window.hafenmeister.sim.state.day }));
+  await setzeTempo(t, 'acht');
+  const abend = await t.bis(() => window.hafenmeister.sim.state.phase !== 'day' && window.hafenmeister.sim.mooredBoats().some((b) => b.pendingFee > 0), null, 240_000);
+  await setzeTempo(t, 'pause');
+  const knopf = t.page.locator('#btn-collect');
+  const da = abend && await knopf.isVisible().catch(() => false);
+  await t.punkt('abends erscheint "Kassieren" für alle Münzen', da, abend ? '' : 'kein Abend mit offenen Münzen', { bild: true, schwere: 'B' });
+  if (da) {
+    const g0 = await t.G(() => window.hafenmeister.sim.state.money);
+    await t.sp.knopf(knopf);
+    const ok = await t.bis((g) => window.hafenmeister.sim.state.money > g, g0, 5000);
+    const offen = await t.G(() => window.hafenmeister.sim.mooredBoats().filter((b) => b.pendingFee > 0).length);
+    await t.punkt('"Kassieren" sammelt alle Münzen ein', ok && offen === 0, `${offen} Boote noch offen`, { schwere: 'B' });
+  }
+  await setzeTempo(t, 'normal');
+  void d;
+}
+const S17 = { nr: 17, name: 'Hafenbüro', paket: 'P02', neu: hafenbuero, wieder: hafenbuero };
+
+const SCHICHTEN = [S8, S9, S10, S11, S12, S13, S14, S15, S16, S17];
 module.exports = { SCHICHTEN };
