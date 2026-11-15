@@ -524,7 +524,11 @@ export function sizeBerthFactors(state, ctx, types = eligibleTypes(state, ctx), 
     const probe = proben.reduce((a, b) => (b.length < a.length ? b : a));
     const anzahl = plaetze.filter((b) => fits(probe, b, ctx.rules, state.stage)).length;
     const [nMin, nMax] = range(ctx.rules.nightsBySize?.[size] ?? ctx.rules.nights);
-    const bedarf = n * w * (extra[size] ?? 1) * (nMin + nMax) / 2;
+    // Kurzhalter belegen eine Box nur einen Tagesanteil (docs/bootsgeschichten.md 3.2)
+    const sh = ctx.rules.shortStay;
+    const kurz = sh && (!sh.sizes || sh.sizes.includes(size)) ? sh.share?.[state.stage] ?? 0 : 0;
+    const naechte = (1 - kurz) * (nMin + nMax) / 2 + (kurz ? kurz * (sh.stay[0] + sh.stay[1]) / 2 : 0);
+    const bedarf = n * w * (extra[size] ?? 1) * naechte;
     out[size] = bedarf > 0 ? Math.max(pm.mindestens, Math.min(1, (anzahl * pm.auslastung) / bedarf)) : 1;
   }
   return out;
@@ -577,8 +581,29 @@ export function rollBoat(state, ctx, mods = modifiers(state, ctx)) {
     });
     if (couldEverFit(state, ctx, boat)) break;
   }
+  if (boat) rollShortStay(state, ctx, boat);
   for (const fn of ctx.hooks.arrival) fn({ state, ctx, boat });
   return boat;
+}
+
+/**
+ * Kurzhalt (docs/bootsgeschichten.md 3.2): Ein Teil der Boote legt nur kurz an und am selben Tag
+ * wieder ab. boat.nights = 0, boat.stay = Liegezeit als Tagesanteil. Module (Bootsgeschichten) können
+ * das im Hook 'arrival' überschreiben. Würfelt nur, wenn rules.shortStay gesetzt ist.
+ */
+function rollShortStay(state, ctx, boat) {
+  const sh = ctx.rules.shortStay;
+  if (!sh || boat.special || boat.stationed) return;
+  if (sh.sizes && !sh.sizes.includes(boat.size)) return;
+  const share = sh.share?.[state.stage] ?? 0;
+  if (!(share > 0) || random(state) >= share) return;
+  boat.nights = 0;
+  boat.stay = Math.round((sh.stay[0] + random(state) * (sh.stay[1] - sh.stay[0])) * 1000) / 1000;
+}
+
+/** Ist das Boot ein Kurzhalter (legt am selben Tag wieder ab)? */
+export function isShortStay(boat) {
+  return !!boat && !boat.stationed && boat.nights === 0;
 }
 
 /** Erwartete Ankünfte pro Tag bei aktuellem Ruf und aktuellen Modifikatoren. */
@@ -681,6 +706,7 @@ function startDay(state, ctx, events) {
     list.push(boat);
   }
   const end = from + window;
+  sortByArrivalWish(state, ctx, list);
   // Erster Tag eines neuen Spiels: Das erste Boot kommt gleich, damit niemand auf leeres Wasser schaut.
   const first = ctx.rules.firstArrivalAt;
   if (state.day === 1 && first != null) {
@@ -705,13 +731,30 @@ function startDay(state, ctx, events) {
 }
 
 /**
+ * Tagesrhythmus nach Anlass (docs/bootsgeschichten.md 3.3): Die Zeitpunkte würfelt placeArrivals
+ * gleichmäßig unregelmäßig, die Reihenfolge der Boote folgt ihrem Wunschzeitpunkt. Kurzhalter kommen
+ * eher vormittags und mittags, Übernachter eher nachmittags. boat.arrivalWish ([von, bis] als
+ * Tagesanteil) kann ein Modul im Hook 'arrival' setzen (Bootsgeschichten). Nur mit rules.shortStay.
+ */
+function sortByArrivalWish(state, ctx, list) {
+  const sh = ctx.rules.shortStay;
+  if (!sh || list.length < 2) return;
+  const key = new Map();
+  for (const b of list) {
+    const w = b.arrivalWish ?? (isShortStay(b) ? sh.arriveShort ?? [0.05, 0.6] : sh.arriveNight ?? [0.3, 1]);
+    key.set(b, w[0] + random(state) * (w[1] - w[0]));
+  }
+  list.sort((a, b) => key.get(a) - key.get(b));
+}
+
+/**
  * Herkunft eines Boots als Zahl von 0 bis unter 1 (Stelle entlang des Revierrands, die Ansicht
  * legt fest, wo das liegt). Aufeinanderfolgende Boote kommen aus deutlich verschiedenen Richtungen
  * (goldener Schnitt), je Spiel anders (Seed). Verbraucht keinen Zufall, damit Spielstände gleich bleiben.
  */
 export function boatOrigin(state, n) {
   const x = n * 0.6180339887498949 + ((state.seed >>> 0) % 9973) / 9973;
-  return Math.round((x - Math.floor(x)) * 1000) / 1000;
+  return (Math.round((x - Math.floor(x)) * 1000) % 1000) / 1000;
 }
 
 /**
@@ -942,6 +985,15 @@ function moor(state, ctx, boat, berthId, events, hand = false) {
     seen.push(key);
     events.push({ type: 'logbookNew', typeId: boat.typeId, modelId: boat.modelId, boatId: boat.id });
   }
+  // Kurzhalt: Ablegezeit ab jetzt, spätestens kurz vor Abend (wer abends noch einfährt, bleibt kurz)
+  if (isShortStay(boat)) {
+    const { dayLength, eveningLength } = ctx.rules;
+    const sh = ctx.rules.shortStay || {};
+    const want = state.clock + (boat.stay ?? 0.2) * dayLength;
+    const latest = state.phase === 'day' ? dayLength * (sh.latest ?? 0.97) : dayLength + eveningLength - 2;
+    boat.leaveClock = Math.round(Math.max(state.clock + 5, Math.min(want, latest)) * 10) / 10;
+    boat.moorDay = state.day;
+  }
   // Wie im echten Hafen: Das Liegegeld für die kommende Nacht wird gleich nach dem Anlegen fällig.
   if (!boat.stationed) chargeFee(state, ctx, boat, modifiers(state, ctx), events);
   if (kept) events.push(kept);
@@ -1030,7 +1082,9 @@ export function berthValue(state, ctx, boatId, berthId = null) {
     weight += weg.share;
     if (weg.far) far.push(w);
   }
-  const fee = nightlyFee(state, ctx, boat, met.length, mods.priceFactor);
+  const night = nightlyFee(state, ctx, boat, met.length, mods.priceFactor);
+  // Kurzhalter zahlen das Tagesliegegeld (Anteil vom Nachtpreis), wie chargeFee
+  const fee = isShortStay(boat) ? Math.max(1, Math.round(night * (ctx.rules.shortStay?.fee ?? 0.5))) : night;
   const snug = !!berth && isSnug(state, ctx, boat, berth);
   const probe = { ...boat, wishesMet: boat.wishesMet + weight, wishesTotal: boat.wishesTotal + boat.wishes.length, berthId: berth?.id ?? null, snug, byHand: true };
   // Liegt das Boot schon (Umlegen, P33): Liegegeld bleibt, das Umlegen zählt für die Crew
@@ -1355,7 +1409,8 @@ function turnAway(state, ctx, boat, events, why) {
   state.queue = state.queue.filter((id) => id !== boat.id);
   delete state.boats[boat.id];
   // Winterbeginn: Wer über Nacht an der Boje lag, fährt ins Winterlager. Das zählt nicht als weggefahren.
-  if (why !== 'winter') {
+  // Kurzhalter, die abends nicht mehr dran waren ('spaet'), brauchten den Halt nicht mehr.
+  if (why !== 'winter' && why !== 'spaet') {
     state.stats.turnedAway++;
     state.stats.turnedAwayToday++;
     const weg = heute(state).weggefahren;
@@ -1373,7 +1428,7 @@ function turnAway(state, ctx, boat, events, why) {
  * @returns {boolean} ob eine Bewertung abgegeben wurde
  */
 function turnAwayRating(state, ctx, boat, why) {
-  if (why === 'queueFull' || why === 'rebuild' || why === 'winter' || !couldEverFit(state, ctx, boat)) return false;
+  if (why === 'queueFull' || why === 'rebuild' || why === 'winter' || why === 'spaet' || !couldEverFit(state, ctx, boat)) return false;
   const ta = ctx.rules.turnAway;
   const rated = random(state) < ta.chance;
   if (rated) pushRating(state, ctx, ta.rating);
@@ -1680,6 +1735,8 @@ function startEvening(state, ctx, events) {
   if (!ctx.rules.queue.overnight) {
     for (const id of [...state.queue]) turnAway(state, ctx, state.boats[id], events, 'evening');
   }
+  // Kurzhalter, die noch an der Boje warten, brauchen den Halt nicht mehr und fahren weiter (ohne Bewertung)
+  for (const id of [...state.queue]) if (isShortStay(state.boats[id])) turnAway(state, ctx, state.boats[id], events, 'spaet');
 
   let visitors = 0;
   for (const boat of mooredBoats(state)) {
@@ -1755,6 +1812,21 @@ function chargeFee(state, ctx, boat, mods, events) {
   const metList = checkWishes(state, ctx, boat, mods);
   boat.feeDay = state.day;
   if (boat.paidThrough != null && state.day <= boat.paidThrough) return; // schon im Voraus bezahlt
+  if (isShortStay(boat)) {
+    // Tagesliegegeld: Anteil vom Nachtpreis, mindestens 1
+    const share = ctx.rules.shortStay?.fee ?? 0.5;
+    const full = nightlyFee(state, ctx, boat, metList.length, mods.priceFactor);
+    const base = nightlyFee(state, ctx, boat, 0, mods.priceFactor);
+    const fee = Math.max(1, Math.round(full * share));
+    const baseFee = Math.min(fee, Math.max(1, Math.round(base * share)));
+    boat.paidThrough = state.day;
+    boat.pendingFee += fee;
+    boat.paid = false;
+    events.push({ type: 'feeReady', boatId: boat.id, amount: fee, base: baseFee, bonus: fee - baseFee, nights: 0, kurz: true, wishesMet: metList });
+    const autoSizes0 = ctx.rules.office.autoCollectSizes;
+    if (state.office >= ctx.rules.office.autoCollect && (!autoSizes0 || autoSizes0.includes(boat.size))) events.push(...collect(state, ctx, boat.id).events);
+    return;
+  }
   const nights = boat.paidThrough == null ? Math.max(1, Math.min(ctx.rules.prepay || 1, boat.nights || 1)) : 1;
   const perNight = nightlyFee(state, ctx, boat, metList.length, mods.priceFactor);
   const basePerNight = Math.min(perNight, nightlyFee(state, ctx, boat, 0, mods.priceFactor));
@@ -1943,6 +2015,47 @@ function guestInfo(boat) {
   return g;
 }
 
+/**
+ * Gast reist ab: Bewertung, Gast zählt, Box wird frei, sobald das Boot heraus ist. leaveAt = Spieluhr
+ * (des nächsten Tages), zu der abgelegt wird; 0 = sofort. kurz: Kurzhalter am selben Tag.
+ */
+function departBoat(state, ctx, boat, mods, events, leaveAt, kurz) {
+  const parts = ratingParts(ctx, boat, mods.ratingBonus);
+  const rating = parts.value;
+  pushRating(state, ctx, rating);
+  const h = heute(state);
+  h.abgereist++;
+  if (kurz) h.kurzhalt = (h.kurzhalt || 0) + 1;
+  h.bewertungen.push(rating);
+  state.guests++;
+  state.stageGuests = (state.stageGuests || 0) + 1;
+  delete state.berths[boat.berthId];
+  delete state.boats[boat.id];
+  startLeaving(state, boat.id, boat.berthId, leaveAt);
+  const ev = { type: 'departed', boatId: boat.id, berthId: boat.berthId, typeId: boat.typeId, rating, leaveAt, parts, guest: guestInfo(boat), day: state.day };
+  if (kurz) ev.kurz = true;
+  events.push(ev);
+}
+
+/**
+ * Kurzhalter legen ab, sobald ihre Zeit um ist (nicht während eines Ausflugs). Münzen, die noch über
+ * dem Boot liegen, landen wie nachts in der Kasse des Vertrauens (Anteil des Rundgangs).
+ */
+function shortStayStep(state, ctx, events) {
+  let mods = null;
+  for (const boat of mooredBoats(state)) {
+    if (!isShortStay(boat) || boat.leaveClock == null || state.clock < boat.leaveClock || boat.trip?.away) continue;
+    if (boat.pendingFee > 0) {
+      const r = collectOnRound(state, ctx, boat.id, { night: true });
+      events.push(...r.events);
+      const amount = r.events[0]?.amount || 0;
+      if (amount > 0) events.push({ type: 'honestyBox', amount, boatId: boat.id, kurz: true });
+    }
+    mods ||= modifiers(state, ctx);
+    departBoat(state, ctx, boat, mods, events, 0, true);
+  }
+}
+
 function night(state, ctx, events) {
   const mods = modifiers(state, ctx);
   // Liegengebliebene Münzen (der Rundgang kam nicht mehr vorbei): der Hafenmeister holt sie
@@ -1972,25 +2085,16 @@ function night(state, ctx, events) {
       events.push({ type: 'buoyFee', amount: buoy, boats: state.queue.length, perBoat });
     }
   }
-  // Abreise
+  // Abreise (Kurzhalter, die noch liegen, legen spätestens jetzt ab)
   for (const boat of mooredBoats(state)) {
     if (boat.stationed) continue;
+    if (isShortStay(boat)) { departBoat(state, ctx, boat, mods, events, 0, true); continue; }
     boat.nights -= 1;
     if (boat.nights > 0) continue;
-    const parts = ratingParts(ctx, boat, mods.ratingBonus);
-    const rating = parts.value;
-    pushRating(state, ctx, rating);
-    heute(state).abgereist++;
-    heute(state).bewertungen.push(rating);
-    state.guests++;
-    state.stageGuests = (state.stageGuests || 0) + 1;
-    delete state.berths[boat.berthId];
-    delete state.boats[boat.id];
     // Abgerechnet wird nachts, abgelegt am nächsten Vormittag zu einer eigenen Zeit je Boot
     const w = ctx.rules.departWindow;
     const leaveAt = w ? Math.round((w[0] + random(state) * (w[1] - w[0])) * ctx.rules.dayLength * 10) / 10 : 0;
-    startLeaving(state, boat.id, boat.berthId, leaveAt);
-    events.push({ type: 'departed', boatId: boat.id, berthId: boat.berthId, typeId: boat.typeId, rating, leaveAt, parts, guest: guestInfo(boat), day: state.day });
+    departBoat(state, ctx, boat, mods, events, leaveAt, false);
   }
   for (const fn of ctx.hooks.night) fn({ state, ctx, events });
   const s = state.stats;
@@ -2082,6 +2186,7 @@ export function tick(state, ctx, dt) {
       }
       queueStep(state, ctx, events, true);
       tripStep(state, ctx, events);
+      shortStayStep(state, ctx, events);
       for (const fn of ctx.hooks.tick) fn({ state, ctx, events });
       if (state.clock >= dayLength) {
         for (const b of state.upcoming) dropReservation(b, events, 'evening');
@@ -2090,9 +2195,10 @@ export function tick(state, ctx, dt) {
       }
     } else if (state.clock >= dayLength + eveningLength) {
       night(state, ctx, events);
-    } else if (queue.overnight) {
+    } else {
       // Abends läuft keine Geduld ab, aber wer noch an der Boje liegt, kann weiter einfahren
-      queueStep(state, ctx, events, false);
+      if (queue.overnight) queueStep(state, ctx, events, false);
+      shortStayStep(state, ctx, events);
     }
   }
   return events;

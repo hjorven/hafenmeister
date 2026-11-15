@@ -7,9 +7,9 @@ Zahlen in economy.js ändern und die Datei neu schreiben. `tests/zahlen.test.mjs
 
 | Was | Wert |
 |---|---|
-| Tag / Abend | 90 s / 30 s |
+| Tag / Abend | 270 s / 30 s |
 | Saison / Winter | 30 / 3 Tage |
-| Ankünfte | 0,05 bis 0,95 des Tages, Abstand 3 bis 8 s, an vollen Tagen 4 s im Mittel |
+| Ankünfte | 0,05 bis 0,95 des Tages, Abstand 3 bis 12 s, an vollen Tagen 4 s im Mittel |
 | Abreise | 0,07 bis 0,3 des Tages |
 | Erstes Boot | nach 3 s |
 | Geduld an der Boje | 30 s, selbst einfahren nach 8 s |
@@ -18,12 +18,12 @@ Zahlen in economy.js ändern und die Datei neu schreiben. `tests/zahlen.test.mjs
 
 | Stufe | Name | Ankünfte/Tag | Mix | Ziel | Ausbau |
 |---|---|---|---|---|---|
-| 1 | Bootssteg am See | 4 | S 1 | 20 Gäste, Ruf 2,5 | Dorfhafen am See, 300 € |
-| 2 | Dorfhafen am See | 11 | S 0,45, M 0,55 | 90 Gäste, Ruf 3 | Durchstich zur Ostsee, 5.000 € |
-| 3 | Durchstich zur Ostsee | 16 | S 0,32, M 0,4, L 0,28 | 360 Gäste, Ruf 3,5 | Schwimmsteg D, 20.000 € |
-| 4 | Marina | 18 | S 0,24, M 0,34, L 0,42 | 560 Gäste, Ruf 3,8 | Außenhafen mit Kai, 42.000 € |
-| 5 | Küstenmarina | 20 | S 0,2, M 0,33, L 0,41, XL 0,06 | 840 Gäste, Ruf 4,2 | Pier für Großschiffe, 70.000 € |
-| 6 | Seehafen | 20 | S 0,18, M 0,32, L 0,42, XL 0,08 | 6 Großschiffbesuche, Ruf 4,5, alle Plätze | - |
+| 1 | Bootssteg am See | 8 | S 1 | 20 Gäste, Ruf 2,5 | Dorfhafen am See, 300 € |
+| 2 | Dorfhafen am See | 18 | S 0,45, M 0,55 | 90 Gäste, Ruf 3 | Durchstich zur Ostsee, 5.000 € |
+| 3 | Durchstich zur Ostsee | 25 | S 0,32, M 0,4, L 0,28 | 360 Gäste, Ruf 3,5 | Schwimmsteg D, 20.000 € |
+| 4 | Marina | 29 | S 0,24, M 0,34, L 0,42 | 560 Gäste, Ruf 3,8 | Außenhafen mit Kai, 42.000 € |
+| 5 | Küstenmarina | 31 | S 0,2, M 0,33, L 0,41, XL 0,06 | 840 Gäste, Ruf 4,2 | Pier für Großschiffe, 70.000 € |
+| 6 | Seehafen | 31 | S 0,18, M 0,32, L 0,42, XL 0,08 | 6 Großschiffbesuche, Ruf 4,5, alle Plätze | - |
 
 ## Liegegeld je Klasse
 

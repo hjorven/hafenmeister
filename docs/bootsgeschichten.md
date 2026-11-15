@@ -12,7 +12,7 @@ Projektregel bleibt: keine Dialoge, keine Figuren mit Namen. Eine Geschichte zei
 das Boot und seine Leute im Hafen tun, durch eine kurze Zeile auf der Bootskarte und einen Eintrag im
 Logbuch.
 
-Thread: "Längere Tage und Bootsgeschichten einbauen". Stand: Plan (Teil 0).
+Thread: "Längere Tage und Bootsgeschichten einbauen". Stand: Teil 0 Plan (PR 312) gemergt, Teil 1 Tage und Kurzhalt.
 
 ---
 
@@ -87,10 +87,11 @@ richtet seine Schlussmessung (`tools/balance.mjs`) darauf aus und legt die endg�
 
 | Größe | Heute | Vorschlag | Grund |
 |---|---|---|---|
-| `zeit.tagSekunden` | 90 | 270 | Wunsch Jorven: Tag etwa 5 min |
+| `zeit.tagSekunden` | 90 | 270 (umgesetzt) | Wunsch Jorven: Tag etwa 5 min |
+| `zeit.ankunftAbstandMax` | 8 | 12 (umgesetzt) | weniger dichtes Fenster im langen Tag, kein Fließband |
 | `zeit.abendSekunden` | 30 | 30 | Kassieren bleibt kurz |
-| Ankünfte je Stufe | 4/11/16/18/20/20 | 10/26/38/44/50/50 | etwa 2,5-fach; rund 40 % davon Kurzhalte |
-| Tagesliegegeld (neu) | - | 0,4 x Nachtpreis | Kurzhalter zahlen weniger, sind aber häufig |
+| Ankünfte je Stufe | 4/11/16/18/20/20 | 8/18/25/29/31/31 (umgesetzt) | Übernachter wie bisher, dazu rund 40 % Kurzhalte; mehr Übernachter passen nicht in die Boxen (A10-Test) |
+| Tagesliegegeld (neu) | - | 0,4 x Nachtpreis (umgesetzt, `kurzhalt.preis`) | Kurzhalter zahlen weniger, sind aber häufig |
 | Gast zählt für Stufenziel | bei Abreise | Kurzhalter zählt voll | einfach und sichtbar; Ziele steigen mit |
 | Stufenziele Gäste | 20/120/360/560/840 | P17 misst (Richtwert etwa x1,1) | Zielzeit je Stufe in Echtzeit wie heute |
 | Saison / Winter | 30 / 3 Tage | 16 / 2 Tage | eine Saison etwa 1,5 h Echtzeit statt 2,5 h |

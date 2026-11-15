@@ -282,11 +282,18 @@ export function init(game) {
     return true;
   }
 
-  const tagesAnteil = () => game.sim?.tagesAnteil?.() ?? 0.5;
-  // Laenge eines ganzen Spieltags (Tag und Abend) in Sekunden Spielzeit
+  // Tagesanteil auf der Skala der Zeitfenster in data/people.js: 0 Morgen, 0,75 Abendbeginn, 1 Nacht,
+  // unabhängig davon, wie lang Tag und Abend in den Spielregeln sind (docs/bootsgeschichten.md: 270 s + 30 s)
+  const tagesAnteil = () => {
+    const r = game.sim?.ctx?.rules, st = game.sim?.state;
+    if (!r?.dayLength || !st) return game.sim?.tagesAnteil?.() ?? 0.5;
+    const c = st.clock ?? 0, abend = r.eveningLength || 1;
+    return c < r.dayLength ? 0.75 * (c / r.dayLength) : Math.min(1, 0.75 + 0.25 * ((c - r.dayLength) / abend));
+  };
+  // Sekunden Spielzeit je Einheit dieser Skala (tagsüber)
   const tagLaenge = () => {
     const r = game.sim?.ctx?.rules;
-    return r ? (r.dayLength ?? 90) + (r.eveningLength ?? 30) : 120;
+    return r?.dayLength ? r.dayLength / 0.75 : 120;
   };
   // Liegt die Ankunft im Zeitfenster des Ziels? Der Weg dauert bei einem Spieltag von zwei Minuten
   // spuerbar lange, deshalb zaehlt die geschaetzte Ankunft, nicht der Moment der Entscheidung.

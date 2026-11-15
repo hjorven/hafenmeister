@@ -14,7 +14,7 @@ export const ECONOMY = {
 
   // ---------------------------------------------------------------- Zeit
   zeit: {
-    tagSekunden: 90,        // Tag, Boote laufen ein
+    tagSekunden: 270,       // Tag, Boote laufen ein (etwa 4,5 min, docs/bootsgeschichten.md)
     abendSekunden: 30,      // Abend, Kassieren
     saisonTage: 30,         // danach Winter
     winterTage: 3,          // keine Gäste
@@ -29,7 +29,7 @@ export const ECONOMY = {
     // an Regattatagen.
     ankunftVon: 0.05,      // etwa 7:15, damit nach dem ersten Boot kein Loch entsteht
     ankunftAbstand: 3,      // Sekunden Mindestabstand zwischen zwei Ankünften (kleiner, wenn der Tag sonst nicht reicht)
-    ankunftAbstandMax: 8,   // Sekunden, längster gewürfelter Abstand (bei wenigen Booten wird gestreckt)
+    ankunftAbstandMax: 12,  // Sekunden, längster gewürfelter Abstand (bei wenigen Booten wird gestreckt; 12 für den 270-s-Tag)
     ankunftDichte: 4,       // Sekunden je Boot im Mittel an den vollsten Tagen
     ankunftBis: 0.95,       // etwa 19:30
     abreiseVon: 0.07,       // etwa 7:30
@@ -65,6 +65,18 @@ export const ECONOMY = {
   // hinaus und kommen in dieselbe Box zurück (Box bleibt reserviert, Liegegeld zählt weiter).
   // raus und zurueck sind Anteile des Tages.
   tagestoern: { anteil: 0.35, raus: [0.12, 0.3], zurueck: [0.6, 0.85] },
+
+  // Kurzhalt (docs/bootsgeschichten.md 3.2): Boote, die nur kurz anlegen (WC, Brötchen, Tanken, Eis)
+  // und am selben Tag wieder ablegen. anteil je Stufe, bleibt = Liegezeit als Tagesanteil [min, max],
+  // preis = Tagesliegegeld als Anteil vom Nachtpreis, spaetestens = Tagesanteil, zu dem alle weg sind.
+  // Ein Kurzhalter zählt beim Ablegen als Gast und bewertet wie ein Übernachter.
+  kurzhalt: {
+    anteil: { 1: 0.45, 2: 0.4, 3: 0.4, 4: 0.38, 5: 0.35, 6: 0.35 },
+    bleibt: [0.12, 0.5],
+    preis: 0.4,
+    spaetestens: 0.97,
+    klassen: ['S', 'M', 'L'],
+  },
 
   // ---------------------------------------------------------------- Gäste
   klassen: {
@@ -269,23 +281,23 @@ export const ECONOMY = {
   // bringt. bautage: Nächte Bauzeit, zugleich Zahl der Bauabschnitte (höchstens drei, ui/bauen.js):
   // jeder Abschnitt wird einzeln bezahlt und ist am nächsten Morgen fertig; 0 = sofort fertig. Ersatz für umgebaute Plätze steckt im jeweiligen Stegprojekt (siehe unten).
   stufen: [
-    { stufe: 1, name: 'Bootssteg am See', ankuenfte: 4, mix: { S: 1 },
+    { stufe: 1, name: 'Bootssteg am See', ankuenfte: 8, mix: { S: 1 },
       ziel: { gaeste: 20, ruf: 2.5 },
       ausbau: { id: 'dorfhafen', name: 'Dorfhafen am See', kosten: 300, bautage: 0,
         plaetze: ['F01'] } },
-    { stufe: 2, name: 'Dorfhafen am See', ankuenfte: 11, mix: { S: 0.45, M: 0.55 },
+    { stufe: 2, name: 'Dorfhafen am See', ankuenfte: 18, mix: { S: 0.45, M: 0.55 },
       ziel: { gaeste: 90, ruf: 3.0 },
       ausbau: { id: 'durchstich', name: 'Durchstich zur Ostsee', kosten: 5000, bautage: 2,
         plaetze: ['B23', 'B24', 'B25', 'B26', 'F02'] } },
-    { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 16, mix: { S: 0.32, M: 0.40, L: 0.28 },
+    { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 25, mix: { S: 0.32, M: 0.40, L: 0.28 },
       ziel: { gaeste: 360, ruf: 3.5 },
       ausbau: { id: 'marina', name: 'Schwimmsteg D', kosten: 20000, bautage: 2,
         plaetze: ['D01', 'D02', 'D03', 'D04', 'D05', 'D06'] } },
-    { stufe: 4, name: 'Marina', ankuenfte: 18, mix: { S: 0.24, M: 0.34, L: 0.42 },
+    { stufe: 4, name: 'Marina', ankuenfte: 29, mix: { S: 0.24, M: 0.34, L: 0.42 },
       ziel: { gaeste: 560, ruf: 3.8 },
       ausbau: { id: 'aussenhafen', name: 'Außenhafen mit Kai', kosten: 42000, bautage: 3,
         plaetze: ['K01', 'FK01', 'FK02'] } },
-    { stufe: 5, name: 'Küstenmarina', ankuenfte: 20, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
+    { stufe: 5, name: 'Küstenmarina', ankuenfte: 31, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
       ziel: { gaeste: 840, ruf: 4.2 },
       // Die Pier bringt die Plätze der Großschiffe: Kreuzfahrtpier, Marineanleger, Liegeplatz des
       // Seenotrettungskreuzers. Sie sind fest vergeben, Gastboote legen dort nicht an.
@@ -294,7 +306,7 @@ export const ECONOMY = {
     // Stufe 6: Großschiffe (XXL) zahlen kein Liegegeld, sie kommen als Besuche über die Services
     // kreuzfahrtterminal, marineanleger und seenotretter und bringen Geld je Besuch.
     // Keine eigene Zahl für Tagesgäste (Entscheidung Jorven, 11.11.2026).
-    { stufe: 6, name: 'Seehafen', ankuenfte: 20, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
+    { stufe: 6, name: 'Seehafen', ankuenfte: 31, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
       // Abschluss der Region: so viele Besuche großer Schiffe (Kreuzfahrtschiff, Flottenbesuch)
       // in Stufe 6, dieser Ruf und alle Plätze gebaut. Alles davon sieht der Spieler im Hafen.
       ziel: { grossschiffBesuche: 6, ruf: 4.5, allePlaetze: true },

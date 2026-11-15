@@ -10,7 +10,7 @@
 // Meldet: game.emit('licht', zustand) bei jeder Lichtänderung (zustand.nacht 0..1 für Fensterlicht),
 //         game.emit('landschaft:geaendert', { stufe, region }) nach jedem Neubau des Geländes.
 import { erzeugeLandschaft, autoQualitaet } from './landschaft/index.js';
-import { uhrzeitAusSpielzeit } from './landschaft/zeit.js';
+import { uhrzeitAusSpielzeit, uhrzeitAusUhr } from './landschaft/zeit.js';
 import { bildAusSeed } from './landschaft/vielfalt.js';
 
 /**
@@ -105,7 +105,10 @@ export function init(game) {
     letzt = jetzt;
     land.aktualisiere(dt, jetzt / 1000);
     // Uhrzeit aus dem Spieltag der Spielregeln (tagesAnteil 0 Morgen bis 1 Nacht), sonst aus game.time
-    const ziel = feste ?? (game.sim?.tagesAnteil ? uhrzeitAusSpielzeit(game.sim.tagesAnteil() * 119.9) : uhrzeitAusSpielzeit(game.time));
+    const r = game.sim?.ctx?.rules;
+    const ziel = feste ?? (game.sim?.state && r?.dayLength
+      ? uhrzeitAusUhr(Math.min(game.sim.state.clock, r.dayLength + (r.eveningLength ?? 0) - 0.05), r.dayLength, r.eveningLength ?? 0)
+      : game.sim?.tagesAnteil ? uhrzeitAusSpielzeit(game.sim.tagesAnteil() * 119.9) : uhrzeitAusSpielzeit(game.time));
     // Weich nachführen, damit Vorspulen die Sonne sichtbar zieht statt zu springen
     let diff = ((ziel - anzeigeUhr + 36) % 24) - 12;
     anzeigeUhr = Math.abs(diff) > 6 || feste != null ? ziel : anzeigeUhr + diff * Math.min(1, dt * 6);

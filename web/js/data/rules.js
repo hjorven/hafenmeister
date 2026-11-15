@@ -39,6 +39,10 @@ export function rulesFromEconomy(E = ECONOMY) {
     r.nightsBySize[size] = k.naechte;
   }
   r.nights = [1, 1];   // nur für Bootsarten ohne Klasse in E.klassen
+  // Kurzhalt (docs/bootsgeschichten.md 3.2): Anteil der Boote je Stufe ohne Nacht, Liegezeit als
+  // Tagesanteil [min, max], Tagesliegegeld als Anteil vom Nachtpreis, spätestens um diesen Tagesanteil weg
+  const kh = E.kurzhalt;
+  r.shortStay = kh ? { share: kh.anteil || {}, stay: kh.bleibt || [0.1, 0.3], fee: kh.preis ?? 0.5, latest: kh.spaetestens ?? 0.97, sizes: kh.klassen || null } : null;
   r.wishBonus = E.wunschBonus ?? 0;
   r.sizeByBerths = E.platzMix ?? null;
   // Kassieren: Anteil beim Rundgang und nachts, Vorauszahlung, Trinkgeld für den langen Strich
