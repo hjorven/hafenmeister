@@ -27,9 +27,14 @@ async function hafenMitBuero(page) {
     while (st.office < 1) if (!g.sim.upgradeOffice()?.ok) st.office = 1;
     g.emit('sim:change', { reason: 'test' });
   });
-  await expect(page.locator('#hm-feier')).toBeHidden();
+  // Die Aufstiegsfeier kann unter Last erst nach dem Klick erscheinen: so lange "Weiter" drücken, bis sie zu ist
+  await expect.poll(() => page.evaluate(() => {
+    const f = document.getElementById('hm-feier');
+    if (f && !f.hidden && f.offsetParent !== null) { document.querySelector('.hm-feier-weiter')?.click(); return false; }
+    return true;
+  }), { timeout: 20_000, intervals: [250] }).toBe(true);
   await page.waitForFunction(() => window.hafenmeister.hafengesten.hornErlaubt() && !!window.hafenmeister.hafengesten.glockeOrt(),
-    null, { timeout: 15_000, polling: 200 });
+    null, { timeout: 30_000, polling: 200 });
   // Überblicksflug beim Laden und Kamerafahrt nach dem Aufstieg abwarten, sonst holen sie die Kamera zurück
   await page.waitForFunction(() => !document.body.classList.contains('hm-ueberblick'), null, { timeout: 30_000, polling: 200 });
   await kameraRuhig(page, 20_000);
@@ -63,18 +68,18 @@ const aufSchirm = (page, p) => page.evaluate(({ x, y, z }) => {
   return { x: r.left + (v.x + 1) / 2 * g.camera.screenW, y: r.top + (1 - v.y) / 2 * g.camera.screenH };
 }, p);
 
-// Finger oder Maustaste ms lang ruhig halten
+// Finger oder Maustaste ms lang ruhig halten (oder bis die Funktion ms() fertig ist)
 async function halten(page, p, ms, touch) {
   if (touch) {
     const cdp = await page.context().newCDPSession(page);
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: p.x, y: p.y, id: 1, radiusX: 4, radiusY: 4, force: 1 }] });
-    await page.waitForTimeout(ms);
+    await (typeof ms === 'function' ? ms() : page.waitForTimeout(ms));
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await cdp.detach();
   } else {
     await page.mouse.move(p.x, p.y);
     await page.mouse.down();
-    await page.waitForTimeout(ms);
+    await (typeof ms === 'function' ? ms() : page.waitForTimeout(ms));
     await page.mouse.up();
   }
 }
@@ -280,6 +285,8 @@ test('Fernglas folgt einem Boot, Möwen fliegen auf, Wellenringe auf dem Wasser'
     return null;
   });
   expect(w, 'kein freies Wasser im Bild').not.toBeNull();
-  await halten(page, w, 1300, touch);
+  // So lange halten, bis der zweite Ring kommt (normal nach 1,1 s). Unter Last kommen die Bilder im Test-Browser
+  // langsamer, darum mit Frist statt fester Haltezeit; ohne Wiederholung schlägt die Frist fehl.
+  await halten(page, w, () => page.waitForFunction(() => window.__ring >= 2, null, { timeout: 8_000 }).catch(() => {}), touch);
   expect(await page.evaluate(() => window.__ring), 'Wellenring kommt nicht oder nicht wiederholt').toBeGreaterThanOrEqual(2);
 });
