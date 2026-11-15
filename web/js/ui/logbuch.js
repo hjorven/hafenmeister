@@ -422,6 +422,11 @@ export function init(game) {
     const koerper = el('div', { class: 'hm-lb-koerper', role: 'tabpanel', 'aria-labelledby': `hm-lb-tab-${reiter}` }, ...inhalt);
     panel.replaceChildren(kopf(), koerper);
     koerper.scrollTop = scroll;
+    // schmale Leiste (Handy): der gewählte Reiter bleibt sichtbar
+    const leiste = panel.querySelector('.hm-lb-reiterleiste'), aktiv = leiste?.querySelector('[aria-selected="true"]');
+    if (leiste && aktiv && leiste.scrollWidth > leiste.clientWidth) {
+      leiste.scrollLeft = Math.max(0, aktiv.offsetLeft - leiste.offsetLeft - (leiste.clientWidth - aktiv.offsetWidth) / 2);
+    }
   }
 
   // ---------------------------------------------------------------- Menü

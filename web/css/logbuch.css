@@ -98,7 +98,12 @@
   font-weight: 700;
 }
 .hm-lb-kopf .kopf-sym { color: var(--hm-meer, #23897d); }
-.hm-lb-reiterleiste { flex: 1; display: flex; justify-content: center; gap: 4px; }
+.hm-lb-reiterleiste { flex: 1; min-width: 0; display: flex; justify-content: safe center; gap: 4px; }
+/* Viele Reiter (Boote, Chronik, Erfolge, Geschichten): die Leiste schiebt sich seitlich, Schließen bleibt sichtbar */
+.hm-lb-reiterleiste { overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+.hm-lb-reiterleiste::-webkit-scrollbar { display: none; }
+.hm-lb-reiter { flex-shrink: 0; }
+.hm-lb-zu { flex-shrink: 0; }
 .hm-lb-reiter, .hm-lb-groesse, .hm-lb-zurueck, .hm-lb-mehr {
   min-height: 40px;
   padding: 0 12px;
@@ -257,7 +262,8 @@
   .hm-neu .hm-lb { width: 100%; height: 100%; padding-bottom: var(--hm-safe-bottom, 0px); }
   .hm-lb-kopf h2 { display: none; }
   .hm-lb-kopf .kopf-sym { display: none; }
-  .hm-lb-reiterleiste { justify-content: flex-start; }
+  .hm-lb-reiterleiste { justify-content: flex-start; gap: 2px; }
+  .hm-lb-reiter { padding: 0 7px; }
   .hm-lb-raster { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
   .hm-lb-bild { width: 126px; height: 66px; max-width: 100%; }
   .hm-lb-bild.gross { width: 252px; height: auto; }
