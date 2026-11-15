@@ -1,7 +1,7 @@
 # Stege umbauen (P59)
 
 Stand: 15.11.2026. Status: gepflegt. Teil 1 Doppelboxen (PR 321), Teil 2 Yachtsteg in Stufe 6. Roadmap D5, D6, D9, Paket P59.
-Code: `web/js/data/doppelboxen.js` (Paare in den Hafendaten), `web/js/features/umbauen.js` (Regeln, Baumenü-Schnittstelle), Zahlen `ECONOMY.doppelbox`, Tests `tests/umbauen.test.mjs`.
+Code: `web/js/data/doppelboxen.js` (Paare in den Hafendaten), `web/js/features/umbauen.js` (Regeln, Baumenü-Schnittstelle), Zahlen `ECONOMY.doppelbox`, Tests `tests/umbauen.test.mjs` und `tests/yachtsteg.test.mjs`.
 
 ## Was der Spieler sieht
 
@@ -39,6 +39,7 @@ Lage und Gründe:
 - Gezeichnet in `skripte/konzeptbilder/hafen_von_oben.py` (Stufe 6, `YACHT_X`, `YACHT_Y`), exportiert mit `python3 skripte/liegeplaetze_export.py` nach `harbor.js` (Steg `Y`, Plätze `Y01`, `Y02`, Art `stirn`, Klasse XL). Stegbilder ändern ihn nicht, er liegt in jedem Spiel gleich.
 - Das Wasser dort ist die ausgebaggerte Liegewanne der Großschiffspier (8,5 m), es gibt also kein neues Gelände. Die Wurzel liegt auf der Fläche der Fischhalle und dem Wellenbrecher, auf allen zehn Küsten an Land.
 - Nur die Westseite hat Plätze: Zum Anlegen längsseits braucht eine große Yacht neben dem Platz rund 20 m freies Wasser. Zwischen Steg und Kreuzfahrtschiff ist das da, zwischen Steg und Westmole nicht. Mit vier Plätzen (beide Seiten) fand der Fahrwasser-Test für die Ostseite keinen Weg.
+- Die Seebrücke am Badestrand (render/landschaft/strand.js) meidet in Stufe 6 das Rechteck um den Yachtsteg (`yachtstegRechteck()`); vorher kreuzte sie ihn auf manchen Küsten vom Typ Nehrung. Findet sie dort keine andere Stelle, fehlt sie (5 von 106 geprüften Küsten).
 - Die kleine Seebahn der Vorbeifahrer biegt in Stufe 6 etwas weiter nördlich um den Stegkopf (`data/verkehr.js`).
 - Geprüft: Fahrwasser über alle 13 Stegbilder und 10 Geländeformen, Seebahnen, Kaufregel aller Stegprojekte jetzt bis Stufe 6.
 
