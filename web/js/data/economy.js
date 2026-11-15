@@ -78,6 +78,95 @@ export const ECONOMY = {
     klassen: ['S', 'M', 'L'],
   },
 
+  // Bootsgeschichten (docs/bootsgeschichten.md 4): Zahlen je Anlass, Texte und Bedingungen in
+  // data/geschichten.js. Ob ein Boot kurz, eine oder mehrere Nächte bleibt, entscheiden weiter
+  // kurzhalt und klassen; die Geschichte wählt nur unter den passenden Anlässen.
+  //   g        Gewicht beim Würfeln
+  //   kommt    bevorzugtes Ankunftsfenster [von, bis] als Tagesanteil (0 = 6:30, 1 = 19:00)
+  //   bleibt   nur Kurzhalt: Liegezeit als Tagesanteil [min, max] (statt kurzhalt.bleibt)
+  //   naechte  nur besondere Tage: Nächte [min, max], 0 = Kurzhalt (überschreibt die Klasse)
+  //   toern    Anteil der Tage mit Tagestörn (statt tagestoern.anteil), raus/zurueck als Tagesanteile
+  // wiederholTage: so lange zählt eine Geschichte als "neulich", abschnitte: Grenzen der
+  // Tagesabschnitte früh | vormittags | mittags | nachmittags | abends, merkliste: so viele
+  // Kombinationen (Geschichte, Herkunft, Crew, Detail) merkt sich das Spiel, keine kommt doppelt.
+  // besonders: Anteil der Boote an Ereignis- und Wettertagen, die einen Anlass des Tages haben.
+  geschichten: {
+    wiederholTage: 3,
+    abschnitte: [0.2, 0.44, 0.6, 0.92],
+    merkliste: 400,
+    besonders: 0.45,
+    neulich: 0.35,          // Gewichtsfaktor für Geschichten der letzten wiederholTage Tage
+    heuteSchon: 0.15,       // Gewichtsfaktor je Mal, das die Geschichte heute schon vorkam
+    anlaesse: {
+      wc:             { g: 8, kommt: [0.05, 0.85], bleibt: [0.12, 0.16] },
+      broetchen:      { g: 6, kommt: [0.02, 0.3],  bleibt: [0.12, 0.16] },
+      eis:            { g: 6, kommt: [0.35, 0.8],  bleibt: [0.15, 0.25] },
+      badepause:      { g: 5, kommt: [0.3, 0.75],  bleibt: [0.2, 0.4] },
+      ruderrast:      { g: 5, kommt: [0.1, 0.8],   bleibt: [0.12, 0.2] },
+      kaffee:         { g: 5, kommt: [0.25, 0.75], bleibt: [0.15, 0.25] },
+      mittag:         { g: 6, kommt: [0.3, 0.5],   bleibt: [0.2, 0.3] },
+      proviant:       { g: 5, kommt: [0.1, 0.6],   bleibt: [0.15, 0.3] },
+      fischbroetchen: { g: 5, kommt: [0.3, 0.7],   bleibt: [0.12, 0.2] },
+      wasser:         { g: 3, kommt: [0.1, 0.7],   bleibt: [0.12, 0.15] },
+      aussteigen:     { g: 3, kommt: [0.15, 0.6],  bleibt: [0.12, 0.2] },
+      zusteigen:      { g: 3, kommt: [0.15, 0.6],  bleibt: [0.2, 0.35] },
+      schauer:        { g: 8, kommt: [0.1, 0.8],   bleibt: [0.15, 0.3] },
+      stempel:        { g: 3, kommt: [0.2, 0.7],   bleibt: [0.12, 0.18] },
+      gassi:          { g: 3, kommt: [0.1, 0.8],   bleibt: [0.12, 0.2] },
+      wetterbericht:  { g: 3, kommt: [0.05, 0.4],  bleibt: [0.12, 0.2] },
+      tanken:         { g: 6, kommt: [0.1, 0.8],   bleibt: [0.12, 0.15] },
+      ersatzteil:     { g: 4, kommt: [0.15, 0.6],  bleibt: [0.15, 0.3] },
+      absaugen:       { g: 2, kommt: [0.1, 0.8],   bleibt: [0.12, 0.15] },
+      strandgang:     { g: 5, kommt: [0.3, 0.55],  bleibt: [0.35, 0.5] },
+      radausflug:     { g: 4, kommt: [0.1, 0.35],  bleibt: [0.4, 0.5] },
+      einkauf:        { g: 4, kommt: [0.15, 0.7],  bleibt: [0.15, 0.3] },
+      etappe:         { g: 8, kommt: [0.45, 0.95] },
+      spaet:          { g: 4, kommt: [0.8, 1] },
+      abendessen:     { g: 5, kommt: [0.55, 0.85] },
+      grillabend:     { g: 4, kommt: [0.5, 0.85] },
+      feierabend:     { g: 4, kommt: [0.75, 1] },
+      vereinsfahrt:   { g: 3, kommt: [0.5, 0.8] },
+      ueberfuehrung:  { g: 2, kommt: [0.6, 1] },
+      duschen:        { g: 5, kommt: [0.45, 0.9] },
+      charterstart:   { g: 3, kommt: [0.5, 0.85] },
+      abwettern:      { g: 6, kommt: [0.3, 0.8] },
+      seetage:        { g: 6, kommt: [0.3, 0.9] },
+      urlaub:         { g: 8, kommt: [0.4, 0.9], toern: { anteil: 0.5, raus: [0.12, 0.3], zurueck: [0.6, 0.85] } },
+      ortbesuch:      { g: 5, kommt: [0.35, 0.85] },
+      crewwechsel:    { g: 3, kommt: [0.3, 0.8] },
+      charterwechsel: { g: 3, kommt: [0.4, 0.8] },
+      reparatur:      { g: 3, kommt: [0.2, 0.8] },
+      mastlegen:      { g: 2, kommt: [0.2, 0.7] },
+      segelmacher:    { g: 2, kommt: [0.2, 0.7] },
+      werft:          { g: 2, kommt: [0.2, 0.6] },
+      wetterfenster:  { g: 3, kommt: [0.4, 0.9] },
+      langfahrt:      { g: 3, kommt: [0.4, 0.95] },
+      angeln:         { g: 4, kommt: [0.4, 0.9], toern: { anteil: 0.9, raus: [0.01, 0.06], zurueck: [0.35, 0.5] } },
+      radbasis:       { g: 3, kommt: [0.4, 0.9] },
+      voegel:         { g: 2, kommt: [0.4, 0.9], toern: { anteil: 0.7, raus: [0.02, 0.1], zurueck: [0.3, 0.45] } },
+      ausbildung:     { g: 3, kommt: [0.4, 0.8], toern: { anteil: 0.9, raus: [0.1, 0.2], zurueck: [0.6, 0.75] } },
+      familientage:   { g: 6, kommt: [0.4, 0.85] },
+      tagesfahrt:     { g: 6, kommt: [0.15, 0.4] },
+      restaurantbesuch: { g: 4, kommt: [0.4, 0.6], bleibt: [0.3, 0.45] },
+      klassiker:      { g: 3, kommt: [0.4, 0.85] },
+      schutz:         { g: 10, kommt: [0.05, 0.5], naechte: [1, 2] },
+      sturmschaden:   { g: 4, kommt: [0.3, 0.8], naechte: [2, 3] },
+      kneipentag:     { g: 6, kommt: [0.2, 0.8], naechte: [1, 2] },
+      nebelrein:      { g: 8, kommt: [0.3, 0.9] },
+      badegaeste:     { g: 10, kommt: [0.3, 0.7], naechte: [0, 0], bleibt: [0.2, 0.4] },
+      // Regatta: am Vorabend kommen, am Regattatag raus (toern), abends zurück, noch eine Nacht
+      regattateilnehmer: { g: 12, kommt: [0.45, 0.95], naechte: [2, 3], toern: { anteil: 1, raus: [0.03, 0.16], zurueck: [0.6, 0.82] } },
+      regattabegleit: { g: 2, kommt: [0.5, 0.9], naechte: [2, 2], toern: { anteil: 1, raus: [0.03, 0.06], zurueck: [0.75, 0.82] } },
+      regattazuschauer: { g: 3, kommt: [0.35, 0.6], naechte: [0, 0], bleibt: [0.15, 0.3] },
+      abendsonne:     { g: 6, kommt: [0.6, 0.95], naechte: [1, 1] },
+      festbesuch:     { g: 10, kommt: [0.3, 0.8], naechte: [1, 1] },
+      mittsommerfeuer: { g: 10, kommt: [0.6, 0.95], naechte: [1, 1] },
+      fischmarkt:     { g: 10, kommt: [0.15, 0.6], naechte: [0, 0], bleibt: [0.15, 0.3] },
+      holztreffen:    { g: 10, kommt: [0.3, 0.8], naechte: [1, 2] },
+      hansegast:      { g: 10, kommt: [0.3, 0.8], naechte: [1, 3] },
+    },
+  },
+
   // ---------------------------------------------------------------- Gäste
   klassen: {
     //      Grundpreis pro Nacht, Nächte [min, max]. Ob ein Boot Motor- oder Segelboot ist, steht im

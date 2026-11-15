@@ -1239,17 +1239,140 @@ export function init(game) {
     return welt(st >= 5 ? RUNDE[5] : st >= 3 ? RUNDE[3] : RUNDE[1]);
   };
 
+  // --- Regatta (docs/bootsgeschichten.md, Abschnitt 5): Bahn mit gelben Tonnen draussen vor dem
+  // Hafen. Startlinie in Lee, Luvtonne gegen den Wind; die Boote kreuzen zur Luvtonne, laufen vor dem
+  // Wind zurueck, zwei Runden, danach kreisen sie am Ziel, bis die Spielregeln sie heimschicken.
+  const regattaGruppe = new THREE.Group();
+  regattaGruppe.name = 'regattabahn';
+  game.scene.add(regattaGruppe);
+  const tonneGeo = new THREE.ConeGeometry(1.5, 3.4, 8).translate(0, 1.2, 0);
+  const tonneMat = new THREE.MeshLambertMaterial({ color: '#f5b400', flatShading: true });
+  const stangeGeo = new THREE.CylinderGeometry(0.07, 0.07, 3, 5).translate(0, 4.2, 0);
+  const flaggeGeo = new THREE.PlaneGeometry(1.4, 0.9).translate(0.7, 5.2, 0);
+  const flaggeMat = new THREE.MeshLambertMaterial({ color: '#d64541', side: THREE.DoubleSide });
+  let bahn = null;
+  const richtung = (a) => ({ x: Math.cos(a), z: -Math.sin(a) });
+  function regattaHeute() {
+    const st = game.sim?.state;
+    if (!st) return false;
+    const w = game.events?.weather?.(st.day);
+    return (w?.event ?? game.events?.current?.id) === 'regatta';
+  }
+  // Bahn fuer heute: freies, tiefes Wasser (wie die Tagestoerns), Schenkel so lang, wie Platz ist
+  function legeBahn() {
+    const tag = game.sim?.state?.day ?? 0;
+    if (bahn?.tag === tag && bahn.stufe === stufe()) return bahn;
+    const info = { length: 11, beam: 3.6, draft: 2, size: 'L' };
+    const k = karteJetzt();
+    const { r, t } = bootMass(info);
+    const mitte = rundePunkt(info, rundenWunsch(), 120);
+    const w = windFrom(), luvR = richtung(w), quer = richtung(w + Math.PI / 2);
+    const frei = (a, b) => {
+      const d = Math.hypot(b.x - a.x, b.z - a.z), n = Math.max(1, Math.ceil(d / 6));
+      for (let i = 0; i <= n; i++) if (!befahrbar(k, a.x + (b.x - a.x) * i / n, a.z + (b.z - a.z) * i / n, r, t)) return false;
+      return true;
+    };
+    let L = Math.max(30, Math.min(95, (mitte.frei ?? 60) * 0.9));
+    let neu = null;
+    for (let versuch = 0; versuch < 8 && !neu; versuch++, L *= 0.85) {
+      const luv = { x: mitte.x + luvR.x * L / 2, z: mitte.z + luvR.z * L / 2 };
+      const lee = { x: mitte.x - luvR.x * L / 2, z: mitte.z - luvR.z * L / 2 };
+      const start = { x: lee.x - luvR.x * 10 + quer.x * 14, z: lee.z - luvR.z * 10 + quer.z * 14 };
+      const schiff = { x: lee.x - luvR.x * 10 - quer.x * 14, z: lee.z - luvR.z * 10 - quer.z * 14 };
+      if (frei(lee, luv) && frei(start, schiff) && frei(start, luv) && frei(schiff, luv)) neu = { luv, lee, start, schiff, L };
+    }
+    bahn = neu ? { ...neu, tag, stufe: stufe(), luvR, quer } : { tag, stufe: stufe(), leer: true };
+    return bahn;
+  }
+  function zeigeBahn(an) {
+    const b = an ? legeBahn() : null;
+    const soll = b && !b.leer ? `${b.tag}|${b.stufe}` : '';
+    if (regattaGruppe.userData.sig === soll) return;
+    regattaGruppe.userData.sig = soll;
+    regattaGruppe.clear();
+    if (!soll) return;
+    [b.luv, b.lee, b.start, b.schiff].forEach((p, i) => {
+      const g = new THREE.Group();
+      g.add(new THREE.Mesh(tonneGeo, tonneMat));
+      // Startlinie: Flaggen an beiden Enden
+      if (i >= 2) g.add(new THREE.Mesh(stangeGeo, topMat), new THREE.Mesh(flaggeGeo, flaggeMat));
+      g.position.set(p.x, 0, p.z);
+      g.userData.phase = i * 2.3;
+      regattaGruppe.add(g);
+    });
+  }
+  let bahnPruef = 0;
+  game.onTick(() => {
+    const t = game.time;
+    if (t - bahnPruef > 1.5 || t < bahnPruef) { bahnPruef = t; zeigeBahn(regattaHeute()); }
+    for (const g of regattaGruppe.children) {
+      const ph = g.userData.phase;
+      g.position.y = Math.sin(t * 1.4 + ph) * 0.08 - 0.1;
+      g.rotation.x = Math.sin(t * 1.2 + ph) * 0.06;
+      g.rotation.z = Math.cos(t * 1.0 + ph) * 0.06;
+    }
+  });
+  // Kurs eines Teilnehmers: von der Startlinie im Zickzack (Kreuzen) zur Luvtonne, vor dem Wind zur
+  // Leetonne, noch einmal hinauf und zurueck ins Ziel. Jedes Boot kreuzt etwas anders (nr).
+  function regattaKurs(b, nr) {
+    const k = karteJetzt();
+    const seite = nr % 2 ? 1 : -1;
+    const breite = b.L * (0.22 + (nr % 3) * 0.06);
+    const um = (p, f) => ({ x: p.x + b.quer.x * f, z: p.z + b.quer.z * f });
+    const kreuz = (von, nach) => {
+      const pts = [];
+      for (const [a, s2] of [[0.3, 1], [0.6, -1], [0.85, 1]]) {
+        const q = um({ x: von.x + (nach.x - von.x) * a, z: von.z + (nach.z - von.z) * a }, seite * s2 * breite);
+        if (befahrbar(k, q.x, q.z, 3, 2)) pts.push(q);
+      }
+      return pts;
+    };
+    // Tonne auf der richtigen Seite runden: etwas aussen herum
+    const rundeLuv = [um(b.luv, -seite * 6), { x: b.luv.x + b.luvR.x * 7, z: b.luv.z + b.luvR.z * 7 }, um(b.luv, seite * 6)];
+    const rundeLee = [um(b.lee, seite * 6), { x: b.lee.x - b.luvR.x * 7, z: b.lee.z - b.luvR.z * 7 }, um(b.lee, -seite * 6)];
+    const linie = { x: (b.start.x + b.schiff.x) / 2 + b.quer.x * (nr % 5 - 2) * 4, z: (b.start.z + b.schiff.z) / 2 + b.quer.z * (nr % 5 - 2) * 4 };
+    return [linie, ...kreuz(linie, b.luv), ...rundeLuv, ...rundeLee, ...kreuz(b.lee, b.luv), ...rundeLuv,
+      { x: linie.x + b.luvR.x * 4, z: linie.z + b.luvR.z * 4 }];
+  }
+  let regattaNr = 0;
+  // Start nacheinander: wer an der Linie wartet, startet zu seiner Spielzeit (kein Pulk an der Tonne)
+  const startWarten = [];
+  game.onTick(() => {
+    const uhr = game.sim?.state?.clock;
+    if (uhr == null || !startWarten.length) return;
+    for (let i = startWarten.length - 1; i >= 0; i--) {
+      const w = startWarten[i];
+      if (uhr >= w.uhr || uhr < w.uhr - 600) { startWarten.splice(i, 1); w.los(); }
+    }
+  });
+  // Warteplatz vor der Startlinie: Boote verteilt in zwei Reihen, weit genug auseinander
+  function vorStartPunkt(b, nr, info) {
+    const k = karteJetzt(), { r, t } = bootMass(info);
+    for (let v = 0; v < 12; v++) {
+      const i = nr + v;
+      const p = { x: b.lee.x - b.luvR.x * (24 + (i % 2) * 16) + b.quer.x * ((i % 6) - 2.5) * 15,
+        z: b.lee.z - b.luvR.z * (24 + (i % 2) * 16) + b.quer.z * ((i % 6) - 2.5) * 15 };
+      if (befahrbar(k, p.x, p.z, r, t)) return p;
+    }
+    return { x: b.lee.x - b.luvR.x * 20, z: b.lee.z - b.luvR.z * 20 };
+  }
+
   game.on('dauer:auslaufen', ({ id, tage } = {}) => {
     const e = boats.get(id);
     if (!e) return;
     const n = draussenZahl++ % 4;
     const kreis = 18 + e.anim.info.length + n * 11;
     const runde = rundePunkt(e.anim.info, rundenWunsch(), kreis);
+    // Regattatag: Teilnehmer und Begleitboote fahren zur Bahn statt eine Runde zu drehen
+    const regatta = !tage && game.sim?.state?.boats?.[id]?.trip?.regatta && regattaHeute() ? legeBahn() : null;
+    const regattaOk = regatta && !regatta.leer;
     // mehrtaegiger Toern: hinaus auf See bis zu einem Seezugang wie die abreisenden Gaeste
     const zugang = tage > 0 ? waehleZugang(e.anim.info) : null;
     const raus = zugang ? [...seeTeil(zugang).see.reverse(), { x: zugang.x, z: zugang.z }] : null;
-    const ziel = raus ? raus[0] : tage > 0 ? (randPunkt(e.anim.info) ?? runde) : runde;
     const segel = e.anim.info.kind === 'sail';
+    const nr = regattaOk ? regattaNr++ : 0;
+    const vorStart = regattaOk ? vorStartPunkt(regatta, nr, e.anim.info) : null;
+    const ziel = regattaOk ? vorStart : raus ? raus[0] : tage > 0 ? (randPunkt(e.anim.info) ?? runde) : runde;
     const weg = [ziel];
     e.draussen = true;
     entferneMuenze(id, 0);
@@ -1259,6 +1382,25 @@ export function init(game) {
         // mehrtaegiger Toern: aus dem Bild, kommt mit 'dauer:einlaufen' zurueck
         e.faehrt = true;
         entferne(id);
+        return;
+      }
+      if (regattaOk) {
+        if (!segel) {
+          // Begleitboot: liegt am Startschiff und passt auf
+          e.anim.hold(regatta.schiff, { radius: 10 + (nr % 3) * 4, speed: e.anim.cfg.cruise * 0.4, sails: false, state: 'sailing' });
+          return;
+        }
+        // an der Linie kreuzen, bis das Boot dran ist; dann die Bahn abfahren
+        e.anim.hold(vorStart, { radius: 6, speed: e.anim.cfg.cruise * 0.35, sails: true, state: 'sailing' });
+        const uhr = game.sim?.state?.clock ?? 0;
+        startWarten.push({ uhr: uhr + 3 + (nr % 6) * 4, los: () => {
+          if (boats.get(id) !== e || !e.draussen) return;
+          e.anim.sailTo(regattaKurs(regatta, nr), { sails: true, speed: e.anim.cfg.cruise * (1.05 + (nr % 3) * 0.06) }).then((fertig) => {
+            if (!fertig || boats.get(id) !== e || !e.draussen) return;
+            // im Ziel: kreuzt gemuetlich hinter der Linie, bis es heimgeht
+            e.anim.hold(vorStart, { radius: 10 + (nr % 4) * 5, speed: e.anim.cfg.cruise * 0.5, sails: true, state: 'sailing' });
+          });
+        } });
         return;
       }
       // Tagestoern: grosse, gemuetliche Kreise unter Segeln oder Motor

@@ -328,13 +328,15 @@ export function init(game) {
     const komp = netz.komp[a.node];
     const vorliebe = P.VORLIEBE[a.typ] ?? {};
     const standard = a.typ === 'strand' ? 0.2 : 1;
+    // Bootsgeschichte (geschichten/geschichten.js): wer nur fürs WC kommt, geht zum WC
+    const landgang = a.boot != null ? game.geschichten?.landgang?.(game.sim?.state?.boats?.[a.boot]) : null;
     const gewicht = (z) => {
       const def = P.ZIELE[z.art];
       if (!def || netz.komp[z.node] !== komp) return 0;
       if (def.nurBadewetter && !badewetter()) return 0;
       if (!imZeitfenster(def, a, z, u)) return 0;
       if (z.node === a.node) return 0;
-      let g = def.gewicht * (vorliebe[z.art] ?? standard);
+      let g = def.gewicht * (vorliebe[z.art] ?? standard) * (landgang?.[z.art] ?? 1);
       // Leute aus dem Ort bleiben meist in der Naehe des Hafens (dort, wo man hinschaut)
       if (a.typ === 'ort') {
         const n = netz.nodes[z.node];

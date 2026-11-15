@@ -12,7 +12,7 @@ Projektregel bleibt: keine Dialoge, keine Figuren mit Namen. Eine Geschichte zei
 das Boot und seine Leute im Hafen tun, durch eine kurze Zeile auf der Bootskarte und einen Eintrag im
 Logbuch.
 
-Thread: "Längere Tage und Bootsgeschichten einbauen". Stand: Teil 0 Plan (PR 312) gemergt, Teil 1 Tage und Kurzhalt.
+Thread: "Längere Tage und Bootsgeschichten einbauen". Stand: Teil 0 Plan (PR 312) gemergt, Teil 1 Tage und Kurzhalt (PR 319), Teil 2 Geschichten Alltag und besondere Tage.
 
 ---
 
@@ -147,7 +147,7 @@ Jede Geschichte ist ein kleiner Ablaufplan aus Bausteinen, die es im Spiel sicht
      kommt nicht vor, damit nichts verspricht, was nicht geht ("Fertig heißt spielbar").
 - Alles über den Spielzufall (`random.js`), kein `Math.random` in den Regeln.
 
-### 4.3 Katalog Alltag (50)
+### 4.3 Katalog Alltag (51)
 
 S = klein, M = mittel, L = groß, XL = sehr groß. "Kurz" = Kurzhalt ohne Nacht.
 
@@ -223,6 +223,8 @@ S = klein, M = mittel, L = groß, XL = sehr groß. "Kurz" = Kurzhalt ohne Nacht.
 
 ### 4.4 Anlässe für besondere Tage (14)
 
+Umgesetzt (Teil 2): dazu "Sonnenuntergang" am Sommertag; "Regentag an Land" hängt am Regenwetter statt an einem Ereignis und braucht Gastronomie. Im Alltag zusätzlich "Ein paar Tage am Wasser" (Stufe 1, damit auch am See mehrtägige Gäste eine Geschichte haben).
+
 Kommen nur an den Tagen der Ereignisse aus P24 (`game.events`), ersetzen dort einen Teil der
 Alltagsgeschichten.
 
@@ -245,9 +247,9 @@ Alltagsgeschichten.
 
 ### 4.5 Sichtbar im Spiel
 
-- **Bootskarte**: eine Zeile unter dem Namen, zum Beispiel "Aus Kappeln. Nur kurz aufs WC, will mittags
-  weiter nach Schleimünde." Dazu ein kleiner Zeitstrich, wann das Boot wieder fährt (Kurzhalt) bzw. wie
-  viele Nächte.
+- **Bootskarte**: eine Zeile unter Name und Heimathafen, zum Beispiel "Nur kurz aufs WC, dann weiter nach
+  Schleimünde. Zu zweit an Bord." (umgesetzt). Die Herkunft steht schon als Heimathafen da (Stammgäste),
+  deshalb würfelt die Geschichte nur Ziel, Crew und Detail.
 - **Im Hafen**: Leute gehen gezielt dorthin, wo die Geschichte sie hinschickt; Gepäck beim Crewwechsel;
   Boot fährt zum Tanksteg; Tagestörn; Angler früh raus.
 - **Logbuch**: neue Seite "Geschichten": welche Anlässe man schon gesehen hat (x von 64). Das gibt
@@ -272,6 +274,36 @@ Alltagsgeschichten.
   Tagestörns um eine Route mit Wegpunkten. Startgeld und Ergebnis bleiben in `events/vorbereiten.js`.
 - **Abstimmung**: Wegsuche und Ablegen gehören "Staus an Bojen und Ankerfeld auflösen"; das Auslaufen
   vieler Boote zugleich wird mit dem Takt der Ausfahrt (`ablegeTakt`) gestaffelt, keine eigene Wegsuche.
+
+### 4.6 Umsetzung Teil 2 (Stand)
+
+- `web/js/geschichten/regeln.js` (rein): `waehle` im Hook `arrival`, `zeitenEntzerren` im neuen Hook
+  `arrivals`, `nachtragen` für Boote, die vor dem Einhängen gewürfelt wurden. Kurz/Nacht/Mehr entscheidet
+  weiter `kurzhalt` und die Klasse; die Geschichte wählt unter den passenden Anlässen. An Ereignis- und
+  Wettertagen kommt mit `geschichten.besonders` (45 %) ein Anlass des Tages, seltener, je öfter er schon kam.
+- Wiederholschutz: Gewicht x0,15 je Vorkommen heute, x0,35 für die letzten 3 Tage, keine Geschichte zweimal
+  im selben Tagesabschnitt (Tausch der Ankunftszeiten, Zeiten selbst bleiben), keine Kombination aus
+  Geschichte, Ziel, Crew und Detail doppelt (Merkliste 400).
+- Tagestörn je Geschichte (`boat.tripPlan`): Angler früh raus und mittags zurück, Segelschule übt tagsüber.
+- Menschen gehen nach `landgang` der Geschichte (Faktor auf die Zielwahl in `render/people.js`).
+- Logbuch-Reiter "Geschichten" mit x von 65 und "neu"-Zahl.
+- Noch offen: Gepäck beim Crewwechsel sichtbar, Tanksteg-Halt, Gang "in den Ort".
+
+### 5.1 Umsetzung Teil 3 (Stand)
+
+- Entscheidung: kein eigenes Modul `regatta-feld.js`. Die Bahn lebt in `render/boat-view.js` neben dem
+  Tagestörn, weil sie dieselben Helfer braucht (`rundePunkt`, `befahrbar`, `windFrom`, Ablegetakt) und keine
+  eigene Wegsuche bekommen soll.
+- Regeln: `geschichten/regeln.js` plant am Vorabend (Hook `night`) für alle Gäste mit mindestens einer
+  weiteren Nacht einen Regattatörn (`boat.tripPlan` mit `regatta: true`); `planTrips` in `sim.js` setzt
+  daraus `boat.trip.regatta`. Teilnehmer kommen am Vortag (Anlass "regattateilnehmer", Vorabend Regatta).
+- Bild: an Regattatagen liegen vier gelbe Tonnen auf dem freiesten Wasser vor dem Hafen (Luvtonne gegen den
+  Wind, Leetonne, Startlinie aus zwei Tonnen mit roter Flagge). Die Bahn wird je Tag einmal gelegt und
+  verkürzt, bis Tonnen und Schenkel befahrbar sind (mindestens 30 m).
+- Segelboote fahren zur Startlinie, kreuzen im Zickzack zur Luvtonne (jedes Boot auf eigener Seite und
+  Breite), runden, laufen zur Leetonne, zweite Runde, Ziel; danach kreisen sie hinter der Linie, bis
+  `dauer:einlaufen` sie heimholt. Motorboote (Begleitboote) kreisen am Startschiff.
+- Noch offen: Startsignal (Ton), Siegerehrung am Segelclub, Ergebnis im Logbuch.
 
 ## 6. Technik im Überblick
 

@@ -31,6 +31,7 @@ import { erstelleRegeln, mitZahlen, neuerZustand } from '../web/js/services/rule
 import { createScheduler } from '../web/js/events/scheduler.js';
 import { pruefeZahlen } from './zahlen.mjs';
 import { zufallAus } from '../web/js/random.js';
+import { installiere as geschichtenEinhaengen, wetterWorte } from '../web/js/geschichten/regeln.js';
 
 // Hat harbor.js für eine Stufe aus economy.js noch keine Plätze (Stufe 6 vor dem Export der
 // Pier), rechnet das Werkzeug mit den Plätzen der letzten Hafenstufe weiter und sagt das.
@@ -180,6 +181,8 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   sim.addHook(ctx, 'modifiers', () => ({ sizeFactor: effekte.gaeste, offers: { ...effekte.angebote } }));
   // Ereignisse (Nebel, Sommertag, Sturm, Regatta, Hafenfest, Winter) wie im Spiel
   const plan = mitEreignissen ? createScheduler({ seed }) : null;
+  // Bootsgeschichten wie im Spiel (geschichten/geschichten.js): Anlass je Boot, besondere Tage, Tagestörns
+  geschichtenEinhaengen(ctx, sim, { umfeld: (st, tag = st.day) => { const w = plan?.weather?.(tag); return { ereignis: w?.event ?? null, wetter: wetterWorte(w) }; } });
   const gebaeude = () => {
     const b = { ...state.buildings, ...svc.gebaut };
     if (effekte.freischalten.includes('regatta') || svc.gebaut.segelclub) b.segelclub = Math.max(b.segelclub ?? 0, 1);

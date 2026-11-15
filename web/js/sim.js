@@ -24,7 +24,7 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     typeById: Object.fromEntries(types.map((t) => [t.id, t])),
     berths: list,
     berthById: Object.fromEntries(list.map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [] },
+    hooks: { modifiers: [], arrival: [], arrivals: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [] },
   };
 }
 
@@ -37,6 +37,8 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
  *              Wunsch erfüllt, oder null (unbekannt). Weiter als rules.walk.far zählt der Wunsch nur
  *              zum Anteil rules.walk.share (P19 B9, features/wege.js kennt die Gebäude im Bild)
  *   arrival    fn({ state, ctx, boat }) darf das neue Boot ändern (zum Beispiel Wünsche)
+ *   arrivals   fn({ state, ctx, list }) morgens, nachdem die Ankunftszeiten des Tages verteilt sind
+ *              (darf Zeiten zwischen Booten tauschen, zum Beispiel gegen Wiederholung, Bootsgeschichten)
  *   evening    fn({ state, ctx, boats, addIncome, events }) am Abend nach dem Hafengeld
  *   night      fn({ state, ctx, events }) nach der Abreise, vor dem neuen Tag
  *   tick       fn({ state, ctx, events }) jede Spielsekunde tagsüber (zum Beispiel ein Dauerlieger,
@@ -722,6 +724,7 @@ function startDay(state, ctx, events) {
   } else {
     placeArrivals(list, from, end, ctx.rules, () => random(state));
   }
+  for (const fn of ctx.hooks.arrivals) fn({ state, ctx, list });
   // Herkunft in der Reihenfolge der Ankunft, damit zwei Boote hintereinander nie aus derselben Ecke kommen
   list.forEach((boat, i) => { boat.origin = boatOrigin(state, state.day * 7 + i); });
   state.upcoming = list;
@@ -1308,10 +1311,14 @@ function planTrips(state, ctx, mods, winter) {
   for (const boat of mooredBoats(state)) if (boat.trip) boat.trip = null;
   if (!t || winter || mods.seaArrivals === false) return;
   for (const boat of mooredBoats(state)) {
-    if (boat.stationed || boat.nights < 2 || boat.special) continue;
-    if (random(state) >= t.chance) continue;
+    // Bootsgeschichten können Anteil und Zeiten je Boot vorgeben (boat.tripPlan, zum Beispiel Angler früh
+    // raus); Regattaboote fahren auch am letzten Tag vor der Abreise (minNights 1)
+    const p = boat.tripPlan || t;
+    if (boat.stationed || boat.nights < (p.minNights ?? 2) || boat.special) continue;
+    if (random(state) >= (p.chance ?? t.chance)) continue;
     const at = (range) => Math.round((range[0] + random(state) * (range[1] - range[0])) * ctx.rules.dayLength);
-    boat.trip = { out: at(t.out), back: at(t.back), away: false };
+    boat.trip = { out: at(p.out ?? t.out), back: at(p.back ?? t.back), away: false };
+    if (p.regatta) boat.trip.regatta = true;
   }
 }
 
