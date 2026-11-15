@@ -127,7 +127,7 @@ Note 1 bis 5 aus dem Überblick. "nein" heißt: bleibt, wie es ist.
 | Wünsche und Versorgung | 3 | teilweise | P10, P11, P19 |
 | Liegegeld und Kassieren | 3 | ja | P12 |
 | Ausbaustufen und Ziele | 3 | teilweise | P16, P18 |
-| Services (20 Stück) | 3 | ja | P06, P23 |
+| Services (21 Stück, mit eigener Wirkung) | 4 | ja | P06, P23 (erledigt) |
 | Ereignisse und Wetter | 3 | teilweise | P06, P24 |
 | Stammgäste | 3 | teilweise | P25 |
 | Einstieg | 3 | ja | P03 |
@@ -406,14 +406,14 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
 | Svc F1 | Eine Liste, klare Stufennamen | erledigt | P06 |
-| Svc F2 | Jeder Service ändert das Spiel (Slip, Mastenkran, Fahrradverleih, Räucherei, Werft) | offen | P23 |
-| Svc F3 | Entweder-oder-Bauplätze (Café oder Eisdiele, Werfthalle oder Winterhalle) | offen | P23 |
+| Svc F2 | Jeder Service ändert das Spiel (Slip, Mastenkran, Fahrradverleih, Räucherei, Werft) | erledigt (P23): Trailerboote am Slip, Mast legen und Radtour verlängern den Aufenthalt, Werft holt Reparaturboote, Räucherei bekommt Abendgäste; Havaristen folgen mit P37 | P23 |
+| Svc F3 | Entweder-oder-Bauplätze (Café oder Eisdiele, Werfthalle oder Winterhalle) | erledigt (P23): drei Wahlplätze (dazu Kreuzfahrtterminal oder Marinestützpunkt), Umbau statt Sperre | P23 |
 | Svc F4 | Einnahmen zeigen: Münzen über Gebäuden, Tagesabschluss je Quelle | erledigt (PR 159) | P15 |
-| Svc F5 | Auslastung statt Festbetrag | offen | P23 |
+| Svc F5 | Auslastung statt Festbetrag | erledigt (P23): Bäcker, Café, Eisdiele, Räucherei, Fahrradverleih verdienen an den Crews im Hafen, Regen wirkt jetzt auch im Spiel | P23 |
 | Svc F6 | Abschlussziel reparieren, Stützpunkt bringt mehr Besuche (= Ü4) | erledigt (PR 139): ein Zähler; Stützpunkt Flottenbesuch alle 6 statt 10 Tage, mit Tag der offenen Tür | P04 |
-| Svc F7 | Große Schiffe als Ereignis mit Tagesgästen | offen | P23 |
+| Svc F7 | Große Schiffe als Ereignis mit Tagesgästen | erledigt (P23): Gruppen gehen vom Kreuzfahrtschiff und der Marine in den Ort, sechs Angebote verdienen mit | P23 |
 | Svc F8 | Mindestruf mit Sinn oder weg | erledigt (P19 Teil 1): bleibt, mit dem neuen Ruf ist er eine echte Hürde | P19 |
-| Svc F9 | Service-Karte mit Bilanz (verdient, bezahlt sich in n Tagen) | offen | P23 |
+| Svc F9 | Service-Karte mit Bilanz (verdient, bezahlt sich in n Tagen) | erledigt (P23): Bilanz auf der Karte, Schätzung für den nächsten Ausbau auch im Baumenü | P23 |
 
 ### G Ereignisse, Wetter, Jahreslauf und Winter
 
@@ -692,7 +692,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 
 | Paket | Titel (Thread) | Inhalt | Thread |
 |---|---|---|---|
-| P23 | Services mit eigener Wirkung | Services nicht nur "€ pro Tag" | bestehend: "Services und Sonderanlagen einbauen" |
+| P23 | Services mit eigener Wirkung | Services nicht nur "€ pro Tag" | erledigt (F2, F3, F5, F7, F9; [services.md](services.md#eigene-wirkung-roadmap-p23)) |
 | P24 | Ereignisse zum Vorbereiten und neue Ereignisse | Vorwarnung mit Handlungsmöglichkeit, F17 | erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend; PR 299: Heringstage, Mittsommer, Holzboot-Treffen, Hanse-Woche, Nachspiel, Services an Ereignistagen; Regatta mit Bahn draußen PR 319), [ereignisse.md](ereignisse.md) |
 | P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | neu |
 | P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | erledigt (PR 322, docs/hafengesten.md) |

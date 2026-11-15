@@ -10,13 +10,13 @@ Die Ostsee ist in allen sechs Stufen spielbar, vom Bootssteg bis zum Seehafen mi
 
 - **Kernspiel:** Boote kommen von weit draußen auf See und warten an Wartebojen seitlich der Stege; Zuweisen per Schleppleine oder Selbst-Einfahren in die nächste freie Box, Wunschplätze in Gold, Geduldsring an der Boje, Ankunftsvorschau und Anmeldung per Funk, Kurzhalter und Übernachter mit 65 Bootsgeschichten, Liegegeld je Meter beim Festmachen, liegende Boote umlegen, Päckchen bei vollem Hafen, Hafenbüro mit Funk, Kassenautomat und Leitstelle (Sonderfälle bleiben beim Spieler).
 - **Rückmeldung:** Bewertungen über dem Boot, Gästebuch, Tagesabschluss, Statistik und Saisonbilanz, Auslastung an der Versorgung mit Schlange davor, Ruf mit Auszeichnung am Hafenmeisterhaus, 30 Erfolge, Feier beim Stufenaufstieg und Endlosspiel nach dem Abschluss, ein ruhiger Meldeplatz für alle kurzen Meldungen.
-- **Bauen:** Vorschau am Ort, Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen, erstes Bauwerk geschenkt, Stege nachrüsten (Fingerstege, Laternen), Doppelboxen und Yachtsteg, 20 Services und Angebote an Land; Gebäude und Dorf wachsen sichtbar mit jeder Stufe.
+- **Bauen:** Vorschau am Ort, Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen, erstes Bauwerk geschenkt, Stege nachrüsten (Fingerstege, Laternen), Doppelboxen und Yachtsteg, 21 Services und Angebote an Land mit eigener Wirkung (Trailerboote am Slip, Mast legen, Radtour, Reparaturen, Tagesgäste großer Schiffe, Entweder-oder-Plätze, Bilanz auf der Karte); Gebäude und Dorf wachsen sichtbar mit jeder Stufe.
 - **Hafenleben:** Dauerlieger mit Saisonvertrag, Stammgäste, Tagesziele zum Auswählen, Wetter, neun Ereignisse zum Vorbereiten (Sturm, Regatta mit Bahn vor dem Hafen, Hanse-Woche, Mittsommer und andere), Winterpause mit Winterarbeiten und Krantagen, Logbuch als Sammelalbum mit Hafenchronik, Menschen auf dem echten Gelände, Gesten (Hafenhorn, Fernglas, Möwen, Glocke), Ton und Musik, Fotomodus.
 - **Technik:** bis zu 8 Speicherplätze mit "Neues Spiel", Einstellungen für Sicht und Bewegung, Pixel-Oberfläche für alle Geräte, freie Kamera, startet als Web-App auch offline.
 
 Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage, rund 8 bis 9,5 Stunden bei normaler Geschwindigkeit.
 
-**Woran gerade gearbeitet wird:** Welle 0 abschließen (kein Pulk beim gleichzeitigen Ablegen, Großschiffe sauber durch jedes Seegatt, Abnahme über alle 15 Küsten), danach die Zusammenspiel-Prüfung des ganzen Spiels. Daneben Services mit eigener Wirkung und die nächsten Pakete aus dem [Arbeitsplan](docs/arbeitsplan.md); alle offenen Punkte in der [Roadmap](docs/roadmap.md). Danach folgen die Nordsee, der Ausbau bis Stufe 20 ([Plan](docs/ausbau-stufe-7-20.md)) und als letzter Schritt ein kleiner Online-Teil. Was sich für Spieler geändert hat, steht in [docs/aenderungen.md](docs/aenderungen.md).
+**Woran gerade gearbeitet wird:** Welle 0 abschließen (kein Pulk beim gleichzeitigen Ablegen, Großschiffe sauber durch jedes Seegatt, Abnahme über alle 15 Küsten), danach die Zusammenspiel-Prüfung des ganzen Spiels. Daneben die nächsten Pakete aus dem [Arbeitsplan](docs/arbeitsplan.md); alle offenen Punkte in der [Roadmap](docs/roadmap.md). Danach folgen die Nordsee, der Ausbau bis Stufe 20 ([Plan](docs/ausbau-stufe-7-20.md)) und als letzter Schritt ein kleiner Online-Teil. Was sich für Spieler geändert hat, steht in [docs/aenderungen.md](docs/aenderungen.md).
 
 | Stufe | Name | Gastplätze |
 |---|---|---|
@@ -116,7 +116,7 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 
 | Paket | Titel | Status | PRs |
 |---|---|---|---|
-| [P23](https://hjorven.github.io/hafenmeister/roadmap/#paket=P23) | Services mit eigener Wirkung | offen |  |
+| [P23](https://hjorven.github.io/hafenmeister/roadmap/#paket=P23) | Services mit eigener Wirkung | erledigt |  |
 | [P24](https://hjorven.github.io/hafenmeister/roadmap/#paket=P24) | Ereignisse zum Vorbereiten und neue Ereignisse | **erledigt** | [#281](https://github.com/hjorven/hafenmeister/pull/281) [#299](https://github.com/hjorven/hafenmeister/pull/299) [#319](https://github.com/hjorven/hafenmeister/pull/319) [#331](https://github.com/hjorven/hafenmeister/pull/331) |
 | [P25](https://hjorven.github.io/hafenmeister/roadmap/#paket=P25) | Stammgäste mit Wirkung und Gästepost | offen |  |
 | [P26](https://hjorven.github.io/hafenmeister/roadmap/#paket=P26) | Überraschende Gesten fertig bauen | **erledigt** | [#322](https://github.com/hjorven/hafenmeister/pull/322) |

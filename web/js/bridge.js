@@ -192,6 +192,8 @@ export async function initBridge(game) {
             ruf: sim.reputation(state),
             boote: sim.mooredBoats(state).map((b) => ({
               id: b.id, art: b.typeId, kind: b.kind, klasse: b.size, antrieb: b.motor ? 'motor' : ctx.typeById[b.typeId]?.sail ? 'segel' : 'ruder',
+              // Dienste der Services (P23: Mast legen, Radtour, Reparatur), am ersten Abend bezahlt
+              ...(b.dienste ? { dienste: { ...b.dienste } } : {}),
             })),
           });
           break;
