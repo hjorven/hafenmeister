@@ -1,6 +1,6 @@
 # Balancing
 
-Stand: 14.11.2026, nach Paket P17 (Aufstieg angleichen, Ü15, Ü16). Gilt für die erste Region (deutsche Ostsee, Stufen 1 bis 6, 94 Gastplätze plus die festen Plätze der Großschiffe in Stufe 6).
+Stand: 15.11.2026, nach Paket P17 Teil 2 (neuer Tagesablauf: Tag 270 s plus 30 s Abend, Saison 16 + 2 Tage, Kurzhalt). Gilt für die erste Region (deutsche Ostsee, Stufen 1 bis 6).
 
 ## Wo die Zahlen liegen
 
@@ -40,31 +40,32 @@ node --test tests/*.test.mjs
 
 `--pruefen` ruft auch `tools/zahlen.mjs` auf und meldet jeden Liegeplatz aus `harbor.js`, der keinem Projekt gehört oder doppelt vergeben ist, und jedes Projekt, das in einer späteren Stufe Plätze verlieren würde. `--verlauf` zeigt Tag für Tag, was ein Spieler kauft und wie Geld und Ruf laufen. Hat `economy.js` mehr Stufen als `harbor.js`, rechnet das Werkzeug trotzdem und meldet die fehlenden Platz-ids als Hinweis.
 
-## Ergebnis (40 Läufe je Spielertyp, mit den echten Spielregeln)
+## Ergebnis (20 Läufe je Spielertyp, mit den echten Spielregeln)
 
-`tools/balance.mjs` spielt mit `web/js/sim.js` (über `rulesFromEconomy(ECONOMY)` aus `data/rules.js`), dem Bootskatalog, den Services (`web/js/services/rules.js`) und den Ereignissen (`web/js/events/scheduler.js`: Sturm, Regatta, Hafenfest, Nebel, mit Wetter). Seit P17 rechnet es auch die Zeit ein, die die 3D-Ansicht kostet (Anfahrt zur Boje, Ablegen aus der Box, siehe [Rechnung und Spiel](#rechnung-und-spiel)). Ein Spieltag dauert bei 1x 2 Minuten. „Mit Vorspulen“ nimmt an, dass die Hälfte der Zeit mit 4x läuft (Taste F am PC, Sonne ziehen am Handy).
+`tools/balance.mjs` spielt mit `web/js/sim.js` (über `rulesFromEconomy(ECONOMY)` aus `data/rules.js`), dem Bootskatalog, den Bootsgeschichten, den Services (`web/js/services/rules.js`) und den Ereignissen (`web/js/events/scheduler.js`). Es rechnet die Zeit der 3D-Ansicht ein (Anfahrt zur Boje, Ablegen aus der Box, siehe [Rechnung und Spiel](#rechnung-und-spiel)). Ein Spieltag dauert bei 1x 5 Minuten (270 s Tag, 30 s Abend). „Mit Vorspulen“ nimmt an, dass die Hälfte der Zeit mit 4x läuft.
 
 **Geschickter Spieler** (weist alle 5 Sekunden zu, nimmt immer den besten Platz, kauft jeden Tag)
 
-| Stufe | Name | Spieltage | 10 % bis 90 % | davon Sparen auf den Ausbau | Echtzeit 1x | mit Vorspulen |
-|---|---|---|---|---|---|---|
-| 1 | Bootssteg am See | 10 | 10 bis 12 | 3 | 20 min | 13 min |
-| 2 | Dorfhafen am See | 28 | 27 bis 30 | 12 | 56 min | 35 min |
-| 3 | Durchstich zur Ostsee | 39 | 38 bis 41 | 10 | 1 h 18 min | 49 min |
-| 4 | Marina | 44 | 43 bis 46 | 9 | 1 h 28 min | 55 min |
-| 5 | Küstenmarina | 58 | 56 bis 60 | 8 | 1 h 56 min | 1 h 13 min |
-| 6 | Seehafen bis zum Abschluss | 39 | 36 bis 43 | | 1 h 18 min | 49 min |
-| | **Gesamt** | **222** | 216 bis 226 | | **7 h 24 min** | **4 h 33 min** |
+| Stufe | Name | Spieltage | 10 % bis 90 % | davon Sparen | Leerlauf (Tage ohne Kauf) | Echtzeit 1x | mit Vorspulen |
+|---|---|---|---|---|---|---|---|
+| 1 | Bootssteg am See | 5 | 5 bis 6 | 1 | 2 | 25 min | 16 min |
+| 2 | Dorfhafen am See | 11 | 9 bis 13 | 3 | 3 | 55 min | 34 min |
+| 3 | Durchstich zur Ostsee | 21 | 19 bis 23 | 4 | 5 | 1 h 45 min | 1 h 06 min |
+| 4 | Marina | 22 | 21 bis 23 | 2 | 4 | 1 h 50 min | 1 h 09 min |
+| 5 | Küstenmarina | 25 | 24 bis 26 | 0 | 8 | 2 h 05 min | 1 h 18 min |
+| 6 | Seehafen bis zum Abschluss | 14 | 12 bis 16 | | 7 | 1 h 10 min | 44 min |
+| | **Gesamt** | **99** | 97 bis 103 | | | **8 h 15 min** | **5 h 06 min** |
 
-**Gemütlicher Spieler** (schaut nur alle 20 Sekunden auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz, kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus): Stufe 1 bis 6 in 9 / 30 / 42 / 44 / 58 / 49 Tagen, zusammen 233 Tage, 7 h 46 min bei 1x, 4 h 50 min mit Vorspulen.
+**Gemütlicher Spieler** (schaut nur alle 20 Sekunden auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz, kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus): 5 / 14 / 20 / 22 / 28 / 20 Tage, zusammen 113 Tage, rund 9 h 25 min bei 1x.
 
-**Wie der Bot im Zeitraffer** (`--spieler zeitraffer`: weist nie zu, kauft jeden Tag das Billigste zuerst, Services in Stufe 6 nach Preis statt nach Besuchen): 10 / 30 / 42 / 45 / 58 / 68 Tage, zusammen 256. Stufe 6 dauert bei ihm vier Wochen länger, weil er die Anleger für die großen Schiffe erst zuletzt kauft.
+**Wie der Bot im Zeitraffer** (`--spieler zeitraffer`: weist nie zu, kauft jeden Tag das Billigste zuerst): 5 / 12 / 20 / 22 / 25 / 16 Tage, zusammen 103.
 
-Vor P17 (gleiche Rechnung, alte Zahlen): geschickt 12 / 34 / 39 / 46 / 57 / 42 = 233 Tage, gemütlich 11 / 44 / 46 / 46 / 58 / 48 = 252 Tage. Die Stufen 1 und 2 sind jetzt zusammen 8 (geschickt) bis 16 Tage (gemütlich) kürzer, die erste halbe Stunde endet mit dem Dorfhafen.
+**Leerlauf:** Mit den langen Tagen gibt es fast jeden Tag etwas zu kaufen (2 bis 8 Tage ohne Kauf je Stufe, vorher 7 bis 34). Die längste Pause ohne Kauf liegt bei 7 Tagen (vorher 17).
 
-**Untätiger Spieler** zum Vergleich (weist nie zu, kassiert nie, kauft nichts, 20 Läufe): Bis Tag 30 kommen 510 € in die Kasse (nur die Kasse des Vertrauens), der Ruf fällt auf 1,9. Der geschickte Spieler hat bis dahin 2.127 € eingenommen. Spielen lohnt sich also deutlich, Nichtstun ruiniert aber auch nichts.
+**Verlauf von P17:** Vor P17 (90-s-Tag, Saison 30 + 3): geschickt 233, gemütlich 252 Spieltage, rund 7,5 bis 8,5 h. Teil 1 (PR 318, Ü16): 222 und 233 Tage. Mit dem neuen Tagesablauf ohne Anpassung (PR 319): 233 und 251 Tage, also 19 bis 21 h. Teil 2: 99 und 113 Tage, 8 bis 9,5 h, die Echtzeit wie vorher.
 
-**Leerlauf** (Saisontage einer Stufe ohne Kauf, Median, geschickter Spieler, nach P17): Stufe 1 7 von 10, Stufe 2 16 von 28, Stufe 3 25 von 39, Stufe 4 24 von 44, Stufe 5 34 von 58, Stufe 6 31 von 39. An gut der Hälfte der Tage gibt es nichts zu kaufen, nur zuzuweisen und zu kassieren; Stufe 2 hat seit P17 deutlich weniger Leerlauf (vorher 37 von 47).
+**Untätiger Spieler** zum Vergleich (weist nie zu, kassiert nie, kauft nichts, 20 Läufe): Nichtstun ruiniert nichts, bringt aber nur einen Bruchteil (`node tools/balance.mjs` meldet die Einnahmen bis Tag 30).
+
 
 **Einnahmen pro Tag** (Median, geschickter Spieler, mit Services und Ereignissen): Stufe 1 rund 50 €, Stufe 2 rund 160 €, Stufe 3 rund 1.000 €, Stufe 4 rund 2.000 €, Stufe 5 rund 3.500 €, Stufe 6 rund 6.300 €. Das Liegegeld kommt beim Anlegen, der Bot streicht es sofort ein.
 
@@ -88,12 +89,12 @@ Vor P17 (gleiche Rechnung, alte Zahlen): geschickt 12 / 34 / 39 / 46 / 57 / 42 =
 
 | Stufe | Boote pro Tag bei Ruf 3 | Ziel für die nächste Stufe | Großes Bauprojekt | Kosten |
 |---|---|---|---|---|
-| 1 Bootssteg am See | 4 (nur S) | 20 Gäste, Ruf 2,5 | Dorfhafen am See | 300 € |
-| 2 Dorfhafen am See | 11 | 90 Gäste, Ruf 3,0 | Durchstich zur Ostsee | 5.000 € |
-| 3 Durchstich zur Ostsee | 16 | 360 Gäste, Ruf 3,5 | Schwimmsteg D | 20.000 € |
-| 4 Marina | 18 | 560 Gäste, Ruf 3,8 | Außenhafen mit Kai | 42.000 € |
-| 5 Küstenmarina | 20 | 840 Gäste, Ruf 4,2 | Pier für Großschiffe (P01, MA01, MA02, SK01) | 70.000 € |
-| 6 Seehafen | 20 (keine neuen Gastplätze) | Abschluss: 6 Besuche großer Schiffe, Ruf 4,5, alle Plätze gebaut | | |
+| 1 Bootssteg am See | 8 (nur S) | 20 Gäste, Ruf 2,5 | Dorfhafen am See | 140 € |
+| 2 Dorfhafen am See | 18 | 90 Gäste, Ruf 3,0 | Durchstich zur Ostsee | 2.200 € |
+| 3 Durchstich zur Ostsee | 25 | 360 Gäste, Ruf 3,5 | Schwimmsteg D | 9.000 € |
+| 4 Marina | 29 | 560 Gäste, Ruf 3,8 | Außenhafen mit Kai | 19.000 € |
+| 5 Küstenmarina | 31 | 840 Gäste, Ruf 4,2 | Pier für Großschiffe (P01, MA01, MA02, SK01) | 31.500 € |
+| 6 Seehafen | 31 (Yachtsteg als letzte Gastplätze) | Abschluss: 6 Besuche großer Schiffe, Ruf 4,5, alle Plätze gebaut | | |
 
 Das Abschlussziel benutzt nur Dinge, die der Spieler im Hafen sieht: Geld, Ruf und die großen Schiffe, die einlaufen. Eine eigene Zahl für Tagesgäste gibt es nicht (Entscheidung Jorven, 11.11.2026). Gezählt werden Besuche von Kreuzfahrtschiffen und Flottenbesuche in Stufe 6.
 
@@ -142,40 +143,62 @@ Mit den Angeboten wird die Region drei Spieltage schneller fertig, die Spielzeit
 |---|---|---|
 | Startgeld | 0 € | `start.geld` |
 | Startplätze | A03 bis A06 (alter Steg, 4 Boxen für S) | `start.plaetze` |
-| Erstes Bauwerk | Toilettenhäuschen 80 €, beim ersten Öffnen von Bauen geschenkt (Ü15, PR 237) | `bauwerke.wc`, [bauen.md](bauen.md) |
+| Erstes Bauwerk | Toilettenhäuschen 35 €, beim ersten Öffnen von Bauen geschenkt (Ü15, PR 237) | `bauwerke.wc`, [bauen.md](bauen.md) |
 | Startruf | 3 Anker aus 5 Startbewertungen | `ruf.start`, `ruf.startBewertungen` |
 | Erstes Boot | nach 3 Sekunden | `zeit.erstesBootNach` |
-| Ausbau zur Stufe 2 | Dorfhafen am See 300 € (vorher 400 €) | `stufen[0].ausbau.kosten` |
+| Ausbau zur Stufe 2 | Dorfhafen am See 140 € (Teil 1: 300 €, davor 400 €) | `stufen[0].ausbau.kosten` |
 | Ziel Stufe 2 | 90 Gäste, Ruf 3,0 (vorher 120) | `stufen[1].ziel` |
-| Steg B (die ersten M-Boxen) | 450 € (vorher 700 €) | `stegprojekte` `b-steg` |
+| Steg B (die ersten M-Boxen) | 200 € (Teil 1: 450 €, davor 700 €) | `stegprojekte` `b-steg` |
 
 Entscheidungen (P17, 14.11.2026, Thread „Aufstieg ausbalancieren“): Kein Startgeld, weil das geschenkte Toilettenhäuschen den Start schon weich macht (Ü15). Stufe 2 war lang, weil die Hälfte der Boote (Größe M) anfangs keinen Platz findet und abdreht, bis Steg B gebaut ist; darum wird Steg B billiger und das Gästeziel kleiner. Spätere Stufen bleiben, wie sie sind: Sie liegen im Rahmen, ihr Abstand zum echten Spiel kommt aus dem Ablegen (unten).
+
+### Teil 2: neuer Tagesablauf (15.11.2026)
+
+Ein Tag dauert seit PR 319 rund 5 statt 2 Minuten, es kommen 2,5-mal so viele Boote (viele davon Kurzhalter ohne Nacht). Ziel war dieselbe Echtzeit bis zum Abschluss wie vorher (8 bis 9 h), also rund 100 Spieltage. Entscheidungen:
+
+| Was | Wert | Warum |
+|---|---|---|
+| Alle Baukosten (Ausbau, Stege, Bauwerke, Hafenbüro, Services, Winterarbeiten, Doppelbox, Rückbau) | x0,45, gerundet | Ein Liegeplatz bringt pro Nacht so viel wie vorher; eine Nacht dauert aber 2,5-mal so lange. Kosten senken ist der eine Hebel, der alles gleich verschiebt; höhere Liegegelder wären unecht (je Meter wie in echten Häfen). |
+| Saison / Winter | 16 / 2 Tage, Frühling 1 bis 4, Sommer 5 bis 12, Herbst 13 bis 16 | eine Saison dauert etwa 1,5 h statt 1 h |
+| Ereignisse | Abstände und Saisontage auf 16 Tage umgerechnet; Regatta und Holzboot-Treffen 1 Tag, Heringstage 1 Tag (Saisontag 3), Mittsommer Saisontag 7, Hanse-Woche 2 Tage mit 5 Tagen Ankündigung, ein ruhiger Tag dazwischen | Mit 2 Tagen Dauer und 2 Ruhetagen passte die Regatta nicht mehr zwischen die festen Feste (kam kaum noch vor). Jetzt knapp 8 Ereignisse je Saison, Regatta etwa zweimal |
+| Besuche großer Schiffe (`besuch.alleTage`) | x16/30 | gleich viele Besuche je Saison |
+| Ruf | über 2 statt 3 Tage, Auszeichnung nach 2 Abenden | ein Tag ist länger, der Ruf reagiert weiter spürbar |
+| Versorgung (`versorgt`) | x2 | mehr Gäste am Tag |
+| Wochenziele | 4 Tage, Gäste 0,6, zufrieden 0,35, Segler 0,2 | nicht in zwei Tagen zu schaffen |
+| Dauerlieger | Bewerber warten 5 Tage, Törns 1 bis 2 Tage | Saison kürzer |
+| Endlosspiel | Gästeziel 450 (+30, höchstens 650), Belohnung 2.300 / 4.500 €, mindestens 4 Resttage | 16-Tage-Saison, Kosten x0,45 |
+| Gästeziele der Stufen | unverändert 20 / 90 / 360 / 560 / 840 | Die Stufen dauern jetzt etwa so lange wie geplant; mehr Gäste am Tag gleichen die kürzere Stufe aus |
 
 ## Rechnung und Spiel
 
 Seit P17 wird die Rechnung regelmäßig mit dem echten Spiel im Browser verglichen. Der Bot im Zeitraffer (`tools/zeitraffer/lauf.cjs`) misst dabei je Stufe, wie lange Boote zur Boje fahren, an der Boje warten und beim Ablegen ihre Box halten (Feld `messung` in `ergebnis-<gerät>.json`, Spielsekunden am Tag). `tools/balance.mjs` übernimmt das in `ANSICHT`:
 
-| Messung (14.11., 5 Läufe: main Küste 1, PR 280 Küste 1, 3, 5, 8) | Stufe 1 | Stufe 2 | Stufe 3 | Stufe 4 | Stufe 5 | Stufe 6 |
+| Messung | Stufe 1 | Stufe 2 | Stufe 3 | Stufe 4 | Stufe 5 | Stufe 6 |
 |---|---|---|---|---|---|---|
-| Anfahrt bis zur Boje (s) | 15 bis 25 | 21 bis 26 | 17 bis 20 | 19 bis 21 | 22 bis 25 | 23 bis 25 |
-| Box beim Ablegen gehalten (s, Mittel) | 40 bis 47 | 56 bis 74 | 101 bis 126 | 101 bis 154 | 104 bis 154 | 106 bis 154 |
-| Ende der Region (Tag) | | | | | | 280 bis 303, Mittel 289 |
+| 14.11. (5 Läufe, alter Tag): Box beim Ablegen gehalten (s) | 40 bis 47 | 56 bis 74 | 101 bis 126 | 101 bis 154 | 104 bis 154 | 106 bis 154 |
+| 15.11. nach PR 327 (3 Läufe, Küste 1, 3, 5): Box beim Ablegen gehalten (s) | 30 bis 36 | 36 bis 39 | 33 bis 43 | 8 bis 48 | 12 bis 30 | 23 bis 45 |
+| 15.11.: Anfahrt bis zur Boje (s) | 30 bis 31 | 35 bis 43 | 34 bis 40 | 50 bis 84 | 166 bis 251 | 151 bis 609 |
 
-Ohne Ansicht gibt `sim.js` die Box nach `ausBoxMax` = 20 s frei. Im Spiel hält ein abreisendes Boot ab Stufe 3 seine Box oft länger als einen ganzen Spieltag, weil die Ansicht `boot:noch-in-box` meldet, solange das Boot sichtbar in der Box liegt (Stau beim Ausfahren). Das ist ein Fehler der Ansicht und an den Boote-Thread gegeben; er ist der Grund, warum der Zeitraffer bisher rund 30 bis 60 Tage länger brauchte als die Rechnung.
+Der Fehler beim Ablegen (Box blieb bis zu 300 s belegt) ist mit PR 327 behoben. `ANSICHT` in `tools/balance.mjs` rechnet jetzt mit Anfahrt 35 s und Ablegen 35 s.
 
-- Gerechnet wird mit dem Ziel nach dem Fix: Anfahrt 20 s, Ablegen 25 s (`ANSICHT.ablegen`).
-- `--ablegen-heute` rechnet mit dem heutigen Ablegen. Mit den alten Zahlen und dem Zeitraffer-Bot ergibt das 13 / 50 / 105 / 158 / 221 als Tag des Aufstiegs und Ende an Tag 299; gemessen im Spiel (Küste 1, Seed 11) 14 / 51 / 107 / 161 / 228 und Tag 290 (main) bzw. 11 / 52 / 108 / 163 / 226 und Tag 286 (PR 280).
-- Stufe 1 und 2 laufen im Spiel trotz des längeren Ablegens so schnell wie gerechnet (dort ist der Hafen selten voll), darum gilt `--ablegen-heute` erst ab Stufe 3.
-- Abgleich: `node tools/balance.mjs --spieler zeitraffer` gegen `node tools/zeitraffer/lauf.cjs` auf demselben Stand. Ziel: höchstens 5 % Abweichung beim Ende der Region.
+**Schlussmessung (15.11., P17 Teil 2):** Zeitraffer im Browser mit den neuen Zahlen, Bot wie `--spieler zeitraffer`:
+
+| | Aufstieg Stufe 2 / 3 / 4 / 5 / 6 an Tag | Ende der Region |
+|---|---|---|
+| Spiel, Küste 1 (Seed 11) | 6 / 20 / 41 / 63 / 89 | 100 |
+| Spiel, Küste 3 (Seed 5) | 6 / 20 / 41 / 62 / 87 | 99 |
+| Spiel, Küste 5 (Seed 7) | 7 / 22 / 42 / 65 / 92 | 102 |
+| Rechnung `--spieler zeitraffer` (20 Läufe, Median) | 6 / 18 / 38 / 60 / 85 | 103 |
+
+Abweichung beim Ende: Rechnung 103, Spiel im Mittel 100,3 Tage, also 2,7 %, innerhalb des Ziels von 5 %. Die Aufstiege in der Mitte liegen in der Rechnung 2 bis 4 Tage früher.
+
+**Auffällig (an den Boote-Thread):** Ab Stufe 4 brauchen Boote bis zur Warteboje im Mittel 50 bis 600 s, in Stufe 6 oft bis zur Notbremse `anfahrtMaxAnsicht` (600 s). Auf den Aufstieg wirkt sich das kaum aus (die Box wird beim Selbst-Einfahren schon vorher vergeben), im Bild sind es aber lange Anfahrten.
 
 ```bash
 node tools/balance.mjs --spieler zeitraffer
-node tools/balance.mjs --spieler zeitraffer --ablegen-heute
 node tools/balance.mjs --ohne-ansicht
-node tools/zeitraffer/lauf.cjs --geraet pc --minuten 100 --bild 9999 --gelaende 1 --seed 11 --out /tmp/zeitraffer
+node tools/zeitraffer/lauf.cjs --geraet pc --minuten 115 --bild 9999 --gelaende 1 --seed 11 --out /tmp/zeitraffer
 ```
-
-**Offen:** Die endgültige Kalibrierung und die Schlussmessung (höchstens 5 % Abweichung) kommen nach dem neuen Tagesablauf (längere Tage mit mehr Treiben, Thread „Längere Tage und Bootsgeschichten einbauen“, `docs/bootsgeschichten.md`) und nach dem Fix fürs Ablegen. Bis dahin sind die Zahlen der Stufen 3 bis 6 unverändert.
 
 ## Regeln im Spiel, die sonst nirgends stehen
 

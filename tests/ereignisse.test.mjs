@@ -3,6 +3,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createScheduler, seasonOf } from '../web/js/events/scheduler.js';
 import { EVENTS, DEFAULT_MODS } from '../web/js/data/events.js';
+import { ECONOMY } from '../web/js/data/economy.js';
+
+// Saison und Winter aus economy.js (P17: 16 + 2 Tage)
+const S = ECONOMY.zeit.saisonTage, W = ECONOMY.zeit.winterTage, Y = S + W;
+const EV = ECONOMY.ereignisse;
 
 function run(seed, days, ctx) {
   const s = createScheduler({ seed });
@@ -14,13 +19,14 @@ function run(seed, days, ctx) {
   return { s, log };
 }
 
-test('Jahreslauf: 30 Tage Saison, 3 Tage Winter', () => {
+test('Jahreslauf: Saison und Winter wie in economy.js', () => {
+  const j = ECONOMY.zeit.jahreszeiten;
   assert.equal(seasonOf(1).part, 'fruehling');
-  assert.equal(seasonOf(15).part, 'sommer');
-  assert.equal(seasonOf(30).part, 'herbst');
-  assert.equal(seasonOf(31).winter, true);
-  assert.equal(seasonOf(33).winterDay, 3);
-  assert.deepEqual([seasonOf(34).year, seasonOf(34).seasonDay], [2, 1]);
+  assert.equal(seasonOf(j.sommer[0]).part, 'sommer');
+  assert.equal(seasonOf(S).part, 'herbst');
+  assert.equal(seasonOf(S + 1).winter, true);
+  assert.equal(seasonOf(Y).winterDay, W);
+  assert.deepEqual([seasonOf(Y + 1).year, seasonOf(Y + 1).seasonDay], [2, 1]);
 });
 
 test('ohne Ereignis gelten die Standardwerte', () => {
@@ -31,7 +37,7 @@ test('ohne Ereignis gelten die Standardwerte', () => {
 
 test('jedes Ereignis wird vorher angekündigt, nie zwei gleichzeitig, nie im Winter', () => {
   for (let seed = 1; seed <= 30; seed++) {
-    const { log } = run(seed, 330, { stage: 6, buildings: { segelclub: 1, raeucherei: 1 } });
+    const { log } = run(seed, Y * 10, { stage: 6, buildings: { segelclub: 1, raeucherei: 1 } });
     const announced = new Map();
     let active = null;
     for (const c of log) {
@@ -72,7 +78,7 @@ test('Stufen und Bauwerke schalten Ereignisse frei', () => {
 test('Häufigkeit: alle Ereignisse kommen vor, keins dominiert', () => {
   const count = {};
   for (let seed = 1; seed <= 20; seed++) {
-    const { log } = run(seed, 330, { stage: 6, buildings: { segelclub: 1, raeucherei: 1 } });
+    const { log } = run(seed, Y * 10, { stage: 6, buildings: { segelclub: 1, raeucherei: 1 } });
     for (const c of log) if (c.type === 'start') count[c.event.id] = (count[c.event.id] ?? 0) + 1;
   }
   for (const def of EVENTS) assert.ok((count[def.id] ?? 0) > 0, `${def.id} kommt vor`);
@@ -99,10 +105,10 @@ test('Sturm: Seenotretter-Station mindert die Folgen', () => {
 
 test('Winter liefert Wintermodifikatoren und Schnee', () => {
   const s = createScheduler({ seed: 1 });
-  s.advanceTo(31, { stage: 1 });
+  s.advanceTo(S + 1, { stage: 1 });
   assert.equal(s.modifiers().winter, true);
   assert.ok(s.modifiers().arrivalFactor < 0.5);
-  assert.equal(s.weather(31).snow, 1);
+  assert.equal(s.weather(S + 1).snow, 1);
 });
 
 test('Speichern und Laden ergibt denselben Verlauf', () => {
@@ -149,40 +155,42 @@ test('Nachspiel: nach dem Sturm einen Tag mehr Boote, mit Bonus nur wenn vorbere
   assert.equal(s.modifiers({ vorbereitet: (id) => id === 'sturm' }).ratingBonus, 0.15);
   s.advanceTo(tag + 1, { stage: 3 });
   assert.equal(s.nachspiel, null, 'nach einem Tag vorbei');
-  assert.equal(s.modifiers().arrivalFactor, 1);
+  // Am Tag danach kann schon das nächste Ereignis laufen (kurze Saison, P17)
+  if (!s.current) assert.equal(s.modifiers().arrivalFactor, 1);
 });
 
-test('Mittsommer kommt jedes Jahr genau am Saisontag 14, Heringstage mit Räucherei am Tag 5', () => {
+test('Mittsommer kommt jedes Jahr genau an seinem Saisontag, Heringstage mit Räucherei an ihrem', () => {
   for (let seed = 1; seed <= 20; seed++) {
-    const { log } = run(seed, 33 * 5, { stage: 6, buildings: { segelclub: 1, raeucherei: 1 } });
+    const { log } = run(seed, Y * 5, { stage: 6, buildings: { segelclub: 1, raeucherei: 1 } });
     const ms = log.filter((c) => c.type === 'start' && c.event.id === 'mittsommer');
     assert.equal(ms.length, 5, `Mittsommer jedes Jahr (Samen ${seed})`);
-    for (const c of ms) assert.equal(seasonOf(c.day).seasonDay, 14);
+    for (const c of ms) assert.equal(seasonOf(c.day).seasonDay, EV.mittsommer.amTag);
     const hering = log.filter((c) => c.type === 'start' && c.event.id === 'heringstage');
     assert.ok(hering.length >= 4, `Heringstage fast jedes Jahr (Samen ${seed}: ${hering.length})`);
-    for (const c of hering) assert.equal(seasonOf(c.day).seasonDay, 5);
+    for (const c of hering) assert.equal(seasonOf(c.day).seasonDay, EV.heringstage.amTag);
   }
-  const ohne = run(1, 33 * 3, { stage: 6, buildings: { segelclub: 1 } });
+  const ohne = run(1, Y * 3, { stage: 6, buildings: { segelclub: 1 } });
   assert.ok(!ohne.log.some((c) => c.event?.id === 'heringstage'), 'Heringstage nur mit Räucherei');
 });
 
-test('Hanse-Woche: ab Stufe 5, zehn Tage vorher angekündigt, die anderen halten Abstand', () => {
+test('Hanse-Woche: ab Stufe 5, lange vorher angekündigt, die anderen halten Abstand', () => {
   for (let seed = 1; seed <= 20; seed++) {
-    const { s, log } = run(seed, 33 * 4, { stage: 5, buildings: { segelclub: 1 } });
+    const { s, log } = run(seed, Y * 4, { stage: 5, buildings: { segelclub: 1 } });
     const ann = log.filter((c) => c.type === 'announce' && c.event.id === 'hansewoche');
     const starts = log.filter((c) => c.type === 'start' && c.event.id === 'hansewoche');
     assert.ok(starts.length >= 3, `Hanse-Woche fast jedes Jahr (Samen ${seed})`);
-    for (const a of ann) assert.equal(a.startDay - a.day, 10, 'zehn Tage vorher');
+    for (const a of ann) assert.equal(a.startDay - a.day, EV.hansewoche.ankuendigen, 'Tage vorher wie in economy.js');
     // Kein anderes Ereignis in der Hanse-Woche oder direkt davor/danach
     for (const h of starts) {
       for (const c of log.filter((x) => x.type === 'start' && x.event.id !== 'hansewoche')) {
         const ende = c.endDay;
-        assert.ok(ende + 2 < h.day || c.day > h.endDay + 2, `${c.event.id} an Tag ${c.day} zu nah an der Hanse-Woche ${h.day}`);
+        const ruhe = EV.ablauf.ruhigeTage;
+        assert.ok(ende + ruhe < h.day || c.day > h.endDay + ruhe, `${c.event.id} an Tag ${c.day} zu nah an der Hanse-Woche ${h.day}`);
       }
     }
     assert.ok(s.save().gross === null || typeof s.save().gross === 'object');
   }
-  const r4 = run(1, 33 * 3, { stage: 4, buildings: { segelclub: 1 } });
+  const r4 = run(1, Y * 3, { stage: 4, buildings: { segelclub: 1 } });
   assert.ok(!r4.log.some((c) => c.event?.id === 'hansewoche'), 'erst ab Stufe 5');
 });
 

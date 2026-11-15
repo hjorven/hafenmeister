@@ -25,7 +25,7 @@ Vor dem Ausbau sagt die Vorschau, was mit Booten auf Plätzen passiert, die beim
 
 ## Erstes Bauwerk geschenkt
 
-Weicher Start (Roadmap Ü15, J4): Öffnet man in Stufe 1 ohne Toilette das erste Mal „Bauen“, legt das Spiel den Preis des Toilettenhäuschens (80 €, aus `economy.js`) als Geschenk in die Kasse und öffnet gleich dessen Vorschau. Ein grüner Kasten sagt, dass das Geld geschenkt ist, der Knopf „Bauen für 80 €“ leuchtet. Gekauft wird wie immer erst mit dem Knopf; „Zurück“ führt zur Liste, das Geschenk bleibt in der Kasse.
+Weicher Start (Roadmap Ü15, J4): Öffnet man in Stufe 1 ohne Toilette das erste Mal „Bauen“, legt das Spiel den Preis des Toilettenhäuschens (35 €, aus `economy.js`) als Geschenk in die Kasse und öffnet gleich dessen Vorschau. Ein grüner Kasten sagt, dass das Geld geschenkt ist, der Knopf „Bauen für 35 €“ leuchtet. Gekauft wird wie immer erst mit dem Knopf; „Zurück“ führt zur Liste, das Geschenk bleibt in der Kasse.
 
 - Einmal pro Spielstand (`state.modules.bauen.geschenk` = Betrag), auch wenn der Einstieg beendet wurde. Kein Geschenk, wenn schon eine Toilette steht oder der Hafen über Stufe 1 ist.
 - Im Tagesabschluss steht es unter „Sonstiges“ mit „Geschenk fürs erste Bauwerk“. Es zählt nicht als verdientes Geld (`stats.dayIncome`, `stats.totalIncome`), also nicht für Aufstieg, besten Tag oder Tagesziele.
@@ -95,7 +95,7 @@ Gekauft wird nur über `game.sim` (Stege, Versorgung, Hafenbüro, Ausbaustufe) u
 
 1. Spiel öffnen, ein paar Boote anlegen und kassieren.
 2. **Bauen** drücken: Schilder über den Bauplätzen, Liste mit vier Reitern.
-3. „Toilettenhäuschen“ antippen: Kamera fährt an Land, Geisterbild, Preis. **Bauen für 80 €**: Das Häuschen wächst aus dem Boden.
+3. „Toilettenhäuschen“ antippen: Kamera fährt an Land, Geisterbild, Preis. **Bauen für 35 €**: Das Häuschen wächst aus dem Boden.
 4. Baumodus schließen: Über dem Knopf steht der nächste Schritt, zum Beispiel „Noch 20 zufriedene Gäste bis zum Dorfhafen am See“.
 
 ## Offen
