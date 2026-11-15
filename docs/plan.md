@@ -149,14 +149,14 @@ Sondergäste (Behördenboote, Marineschiffe) zahlen wenig und heben den Ruf.
 
 Ein Bauwerk „versorgt n Boote“ heißt: pro Tag bekommen n Boote diesen Wunsch erfüllt; ein Schild am Gebäude zeigt die Auslastung, bei knapper Versorgung stehen Gäste Schlange (P55). Kosten und Kapazitäten stehen in `web/js/data/economy.js` und [balancing.md](balancing.md). Dazu wünschen sich manche Bootsarten Angebote wie Café, frische Brötchen, Segelclub oder Werft (P19). Weitere Wünsche (WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen am Steg) sind geplant (P31).
 
-**Services:** Gebäude, die keinen Wunsch erfüllen, sondern etwas Neues ins Spiel bringen. Jedes hat eine eigene kleine Animation. Im Spiel sind 20 Services mit ein bis drei Ausbaustufen, dazu die Angebote an Land (Bäcker, Hafencafé, Grillplatz, Fahrradverleih, Eisdiele); alle mit Stufen, Kosten und Wirkung in [services.md](services.md). Die Tabelle zeigt die wichtigsten:
+**Services:** Gebäude, die keinen Wunsch erfüllen, sondern etwas Neues ins Spiel bringen. Jedes hat eine eigene kleine Animation und eine eigene Wirkung im Spiel (P23): Dienste verlängern den Aufenthalt, Trailerboote kommen über Land, Angebote an Land verdienen nach Auslastung, große Schiffe bringen Tagesgäste in den Ort, an drei Wahlplätzen passt nur eine von zwei Anlagen, und die Karte zeigt, wann sich ein Bau bezahlt macht. Im Spiel sind 21 Services mit ein bis drei Ausbaustufen, dazu die Angebote an Land (Bäcker, Hafencafé, Grillplatz, Fahrradverleih, Eisdiele); alle mit Stufen, Kosten und Wirkung in [services.md](services.md). Die Tabelle zeigt die wichtigsten:
 
 | Service | Ab Stufe | Wirkung |
 |---|---|---|
 | Bootsverleih | 1 | kleines Einkommen pro Tag, Leihboote fahren über den See |
-| Slip | 2 | Trailerboote kommen über Land, zusätzliche S-Gäste ohne Liegeplatz |
+| Slip | 2 | Trailerboote kommen über Land, gehen am Slip ins Wasser und fahren eine Runde, ohne Liegeplatz |
 | Hafenmeisterbüro | 2 bis 4 | Stufe 1: Knopf "Kassieren" und Funk-Vorschau (vorher streicht man Münzen einzeln), 2: Kassenautomat für S und M, 3: Vorschläge und Nebenkosten (+10 % Liegegeld), 4: Leitstelle mit Automatik für Standardfälle |
-| Mastenkran | 3 | Segelboote aus dem Binnenland kommen, mehr M-Gäste |
+| Mastenkran | 3 | Segler lassen den Mast legen und bleiben eine Nacht länger, mehr M-Gäste |
 | Segelclub | 3 | Regatten möglich, mehr Jollen |
 | Seenotretter-Station | 4 | Sturm richtet weniger Schaden an, Rettungsboot rückt sichtbar aus |
 | Travellift und Werft | 4 | Reparaturaufträge bringen Geld außerhalb der Saison |
@@ -337,7 +337,7 @@ Stand dieses Abschnitts: 15.11.2026, jede Zeile am Code geprüft, `main` bei `c0
 - **Boote:** Anfahrt von weit draußen auf See aus verschiedenen Richtungen, Wartebojen seitlich neben den Stegen, Ankerfeld, Vorrang für Auslaufende (P66, PR 280, 327); Liegeplätze passgenau ohne Berührung von Steg, Kai, Land und Nachbarn ([liegeplaetze.md](liegeplaetze.md)); S, M, L, XL und XXL als 3D-Modelle, Einlaufen, Anlegen, Ablegen, Segel bergen, Vorbeifahrer, Kreuzfahrt- und Marinebesuche.
 - **Spielschleife Stufe 1 bis 6 an der Ostsee:** 5-Minuten-Tag mit Kurzhaltern und Übernachtern, 65 Bootsgeschichten, echte Liegeplatzdaten, 12 Stegbilder, Passregel, Selbst-Einfahren in die nächste freie Box (P10), Wunschplätze in Gold, Geduldsring, Ankunftsvorschau (P11), Anmeldung per Funk (P28), Liegegeld je Meter beim Festmachen mit Bezahlt-Wimpel, Grün-Rot-Schild an jeder Gastbox, Tagesausflüge, Hafenmeister-Rundgang, Umlegen liegender Boote (P33), Päckchen bei vollem Hafen (P27), Ruf über zwei Tage mit Wünschen je Bootsart und Auszeichnung (P19), Stufenziele, Abschlussziel Stufe 6 mit einem Zähler (P04), Boote auf wegfallenden Plätzen geregelt (P05).
 - **Hafenbüro (P02):** Funk mit Vorschau und Knopf "Kassieren", Kassenautomat für S und M, Vorschläge, Leitstelle; Sonderfälle bleiben beim Spieler.
-- **Bauen:** Baumodus mit Vorschau, Bestätigen und "Als Nächstes", Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen (P18), erstes Bauwerk geschenkt (J4), Stegprojekte, Stege nachrüsten mit Fingerstegen und Laternen (P30), Doppelboxen und Yachtsteg (P59), Versorgung, 20 Services, Angebote an Land, Großschiffpier; Gebäude, Dorf und Häuserzeile wachsen sichtbar je Stufe ([wachstum.md](wachstum.md)).
+- **Bauen:** Baumodus mit Vorschau, Bestätigen und "Als Nächstes", Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen (P18), erstes Bauwerk geschenkt (J4), Stegprojekte, Stege nachrüsten mit Fingerstegen und Laternen (P30), Doppelboxen und Yachtsteg (P59), Versorgung, 21 Services mit eigener Wirkung (P23: Dienste, Trailerboote, Tagesgäste, Entweder-oder-Plätze, Bilanz), Angebote an Land, Großschiffpier; Gebäude, Dorf und Häuserzeile wachsen sichtbar je Stufe ([wachstum.md](wachstum.md)).
 - **Rückmeldung:** Bewertungen über dem Boot und Gästebuch (P14), Tagesabschluss als Zettel mit Karte (P15), Statistik der letzten 30 Tage und Saisonbilanz (P41), Auslastung an der Versorgung mit Schlange und Zeiger am Bildrand (P55), Feier beim Stufenaufstieg und Endlosspiel (P16), Logbuch mit Hafenchronik und Geschichten (P21), 30 Erfolge mit Dingen im Hafen (P22), ein Meldeplatz für alle kurzen Meldungen.
 - **Hafenleben:** Dauerlieger mit Saisonvertrag und Obergrenze (P01), Stammgäste, Tagesziele zum Auswählen (P13), Wetter an der Flagge, neun Ereignisse zum Vorbereiten mit Ergebnis und Nachspiel, Regatta mit Bahn draußen (P24), Winterpause mit Winterarbeiten und Krantagen (P20), Menschen mit Wegfindung auf dem echten Gelände, Gesten Hafenhorn, Fernglas, Möwen, Wellenring und Glocke (P26), Ton und Musik, Fotomodus, Hafen schauen.
 - **Oberfläche und Technik:** Pixel-Oberfläche für alle Geräte, Tempo Pause, 1x, 3x, 8x ohne automatische Bremsung (P07), Einstieg mit Hinweisen und Hilfe (P03, J5 offen), Einstellungen für Sicht und Bewegung (P50), bis zu 8 Speicherplätze mit "Neues Spiel" (P09), eine Zahlenquelle `economy.js` mit Übersicht `docs/zahlen.md` (P06).
@@ -349,7 +349,7 @@ Stand dieses Abschnitts: 15.11.2026, jede Zeile am Code geprüft, `main` bei `c0
 
 - **Welle 0 abschließen:** Pulk beim gleichzeitigen Ablegen (P66), Großschiffwege an allen 15 Küsten (P84), danach Abnahme-Serie über 15 Küsten.
 - **Grundprobleme und Prüfung:** Zusammenspiel-Prüfung in drei Threads (P85), Prüfwerkzeuge auf 15 Küsten und den neuen Takt (P87), Rest des Einstiegs (J5) und des Winters (G5, H5, P20).
-- **Extras, Welle 3 und 4:** Services mit eigener Wirkung (P23), Bootsgeschichten fertig (P86), Wind (P34), neue Wünsche (P31), Preisstufe (P35), Flottillen (P32), Stammgäste mit Wirkung (P25), danach die übrigen Pakete P29 bis P53 und P60 in der Reihenfolge des [Arbeitsplans](arbeitsplan.md).
+- **Extras, Welle 3 und 4:** Bootsgeschichten fertig (P86), Wind (P34), neue Wünsche (P31), Preisstufe (P35), Flottillen (P32), Stammgäste mit Wirkung (P25), danach die übrigen Pakete P29 bis P53 und P60 in der Reihenfolge des [Arbeitsplans](arbeitsplan.md).
 
 ### Nach 1.0 (Welle 5 und 6)
 

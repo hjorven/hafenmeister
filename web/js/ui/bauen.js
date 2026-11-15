@@ -277,6 +277,7 @@ export function init(game) {
     }
 
     // Angebote (Services)
+    const schaetzText = (sch) => (sch?.proTag > 0 ? `Bringt an einem Tag wie gestern etwa ${sch.proTag} € mehr${sch.tage ? `, bezahlt sich in etwa ${sch.tage} Tagen` : ''}.` : null);
     for (const x of game.services?.liste?.() ?? []) {
       const p = x.naechste;
       if (!p || p.fertig || !p.def) continue;
@@ -285,12 +286,16 @@ export function init(game) {
       // Gäste wünschen sich manche Angebote (P19): das erste Bauen erfüllt den Wunsch
       const wunsch = x.stufe > 0 ? null : wunschFuerService(x.id);
       out.push({
-        key: `angebot:${x.id}`, art: 'angebot', id: x.id, name: x.stufe > 0 ? p.def.name : x.name, kosten: p.kosten,
+        key: `angebot:${x.id}`, art: 'angebot', id: x.id, name: `${x.stufe > 0 ? p.def.name : x.name}${p.umbau ? ` statt ${p.umbau.name}` : ''}`, kosten: p.kosten,
         ausbau: x.stufe > 0,
         gesperrt: p.freigeschaltet ? null : `braucht ${p.fehlt.join(', ')}`,
         kurz: '',
         wunsch,
-        nutzen: [x.kurz, w, wunsch ? `Gäste wünschen sich ${WUNSCH_TEXTE[wunsch].mit}, das hebt ihre Note.` : null].filter(Boolean),
+        // P23: Entweder-oder (F3) und Schätzung, was der Bau an einem Tag wie gestern bringt (F9)
+        nutzen: [x.kurz, w, wunsch ? `Gäste wünschen sich ${WUNSCH_TEXTE[wunsch].mit}, das hebt ihre Note.` : null,
+          p.umbau ? (p.umbau.auf > 0 ? `${p.umbau.platzName}: ${p.umbau.name} wird dafür zu ${p.umbau.aufName} zurückgebaut.` : `${p.umbau.platzName}: ${p.umbau.name} macht dafür Platz.`)
+            : x.oder && !x.oder.gebaut ? x.oder.text : null,
+          schaetzText(game.services.schaetzung?.(x.id))].filter(Boolean),
         ort: s ? () => serviceOrt(s, p.stufe) : null,
         modell: s ? { id: x.id, stufe: p.stufe } : null,
         kaufen: () => game.services.bauen(x.id),
