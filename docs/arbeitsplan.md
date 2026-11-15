@@ -54,7 +54,7 @@ Leitlinie: Erst Welle 0 abschließen und die Prüfwerkzeuge auf den neuen Stand 
 | Nr | Paket | Warum jetzt | Hängt ab von | Kann kollidieren mit |
 |---|---|---|---|---|
 | 1 | **P66 Pulk beim Ablegen** (läuft) | Prio A, letzter Rest von Welle 0 | - | `render/boat-view.js`, `boat-anim.js`, Päckchen (Ablegereihenfolge), Kurzhalter |
-| 2 | ~~P84 Großschiffwege an allen 15 Küsten~~ erledigt 15.11. | Rest aus PR 329, gehört zu Welle 0 | - | `render/services-besuch.js`, `boat-view.js` (`seeWeg`, neu `grosserSeeweg`) |
+| 2 | ~~P84 Großschiffwege an allen 15 Küsten~~ erledigt 15.11. (PR 341) | Rest aus PR 329, gehört zu Welle 0 | - | `render/services-besuch.js`, `boat-view.js` (`seeWeg`, neu `grosserSeeweg`) |
 | 3 | **P87 Prüfwerkzeuge auf 15 Küsten und den neuen Takt** (neu) | Welle-0-Abnahme braucht Tests, die alle Küsten kennen; Härtetest nach PR 327 bis 332 neu | - | nur `tests/`, `tools/zeitraffer/`, `feature-tests/` |
 | 4 | ~~**P83 Stegbild-Generator reparieren**~~ (erledigt 15.11., PR 336) | ohne ihn keine neuen Stege (P70) und kein Neuerzeugen nach Platzänderungen | - | `tools/stegbilder/`, `data/stegbilder.js` (Ausgabe muss für bestehende Spielstände gleich bleiben), `data/liegelage.js` |
 | 5 | **P23 Services mit eigener Wirkung** (neu) | macht Stufe 4 bis 6 tiefer; `economy.js` frei | - | `economy.js` (einziger dort), `render/services.js`, `data/services.js`, Ereignisse (G7-Boni aus PR 299) |
@@ -75,7 +75,7 @@ Danach geht es weiter wie in [Abschnitt 5](#5-alles-weitere-bis-zum-ende) beschr
 **Wann ist Welle 0 fertig?** P62, P63, P64 und P65 sind erledigt, PR 300 (fünf echte Küsten) ist gemergt, P66 hat PR 280, 327 und 332 gemergt. Offen sind (Stand 15.11., 09:30 UTC):
 
 1. P66: Pulk und "ineinander fest" beim gleichzeitigen Ablegen.
-2. ~~P84: Großschiffe kommen auf allen 15 Küsten ohne Uferberührung hinaus~~ erledigt 15.11. (15 Küsten x 5 Seeds, 0 Funde).
+2. ~~P84: Großschiffe kommen auf allen 15 Küsten ohne Uferberührung hinaus~~ erledigt 15.11. (PR 341) (15 Küsten x 5 Seeds, 0 Funde).
 3. Abnahme laut Roadmap Abschnitt 14: Zeitraffer-Serie über alle 15 Küstentypen, PC und Handy, nach 1 und 2, mit den Werkzeugen aus P87. Grenze: kein Boot dauerhaft über Land oder durch Stege, keine Boote ineinander fest länger als ein paar Sekunden. Danach P66 und P84 in der Roadmap auf "erledigt".
 
 Der Planungs-Thread meldet dem Koordinator, sobald alle drei Punkte erfüllt sind.
