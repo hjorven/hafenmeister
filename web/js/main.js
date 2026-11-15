@@ -36,6 +36,7 @@ const MODULES = [
   './ui/vorschau.js',
   './ui/meldungen.js',                 // Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich
   './ui/hafenzeichen.js',              // P55: Auslastung an Gebäuden, Zeiger am Rand zu wartenden Booten
+  './ui/hafengesten.js',               // P26: Hafenhorn, Fernglas, Möwen, Wellenring, Glocke
   './audio/audio.js',
   './state.js',
   './events/events.js',

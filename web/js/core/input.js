@@ -157,7 +157,8 @@ export function initInput(game) {
     pointers.delete(e.pointerId);
     if (e.type === 'pointerup' && tapCandidate && tapCandidate.id === e.pointerId &&
         performance.now() - tapCandidate.t < TAP_TIME) {
-      game.emit('tap', { x: p.x, y: p.y, world: cam.screenToWorld(p.x, p.y), pick: game.pick(p.x, p.y) });
+      // zeit: wann der Finger losließ (nicht wann das Ereignis verarbeitet wird), für Doppeltipps auf langsamen Geräten
+      game.emit('tap', { x: p.x, y: p.y, world: cam.screenToWorld(p.x, p.y), pick: game.pick(p.x, p.y), zeit: e.timeStamp });
     }
     tapCandidate = null;
     if (pointers.size < 2) {
