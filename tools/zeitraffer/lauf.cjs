@@ -308,10 +308,11 @@ const SNAP = () => {
   // dann mit Zeitraffer weiter (lädt denselben Spielstand noch einmal).
   const speichernPruefen = async (warum) => {
     // Nicht kurz vor dem Tageswechsel: dort springt schon ein Hauch Spielzeit nach dem Laden in den nächsten Tag
-    for (let i = 0; i < 20; i++) {
-      const knapp = await page.evaluate(() => { const S = window.hafenmeister.sim; const r = S.ctx.rules; return S.state.clock > r.dayLength + r.eveningLength - 3; });
-      if (!knapp) break;
-      await page.waitForTimeout(150);
+    // Prüfen und Anhalten in einem Schritt: zwischen zwei Aufrufen vergehen bei Tempo 500 leicht 60 Spielsekunden
+    for (let i = 0; i < 200; i++) {
+      const angehalten = await page.evaluate(() => { const G = window.hafenmeister; const S = G.sim; const r = S.ctx.rules; if (S.state.clock > r.dayLength + r.eveningLength - 3) return false; G.setPaused(true); return true; });
+      if (angehalten) break;
+      await page.waitForTimeout(20);
     }
     await page.evaluate(() => window.hafenmeister.setPaused(true));
     const vorher = await page.evaluate(`(${SNAP})()`);
