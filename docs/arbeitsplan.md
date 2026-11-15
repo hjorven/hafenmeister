@@ -35,11 +35,12 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 
 | Prio | Fehler | Beleg | Paket / Thread |
 |---|---|---|---|
-| A | Stau im Hafenbecken ab Stufe 3: je Lauf rund 300 Bootspaare ineinander fest und 430 hängende Boote, 90 % in Stufe 5 und 6 | Zeitraffer-Serie auf `5b00546`; nach PR 280 neu messen | P66, PR 280 |
+| A | Pulk und Stau: nach PR 280 (Serie `c589ca5`, Typ 1 und 2) an rund 90 Tagen je Partie ein Pulk mit bis zu 100 Booten auf 45 m; ineinander fest 42 bis 470, hängend 92 bis 323, in Fahrt berührt 1800 bis 3500 je Partie; über Land fast weg (1 bis 6). Typ 2 PC schlechter als vorher | Zeitraffer-Zwischenserie 15.11. 02:00 UTC, Typ 3 bis 10 folgen | P66, Boote-Thread (Ankerfeld-Fix plus Pulk) |
 | A | Boote noch über Land (rund 21 je Lauf) und durch Stege (rund 17 je Lauf), vor allem Typ 3 und 8 | dieselbe Serie | P66 mit P62 |
 | A | Aufstieg weicht von der Rechnung ab; nach PR 252: geschickt 225, gemütlich 239 Tage, Stufe 2 gemütlich 36 Tage; A10 (PR 287) verschiebt um +2 bis +6 Tage | Zeitraffer-Serien, `tools/balance.mjs` | Balancing-Paket P17 |
 | B | Menschen laufen auf festen Koordinaten (`people/netz.js`), nicht auf dem Seed-Gelände | Gelände-Thread, 14.11. | Zusammenspiel 3, oder eigener Thread "Menschen auf das Gelände stellen" |
 | C | `tests/specs/leinen.spec.mjs` prüft nur Küstentyp 1 bis 10 | Gelände-Thread | Leinen- oder Test-Thread nach PR 300 |
+| B | Logbuch: die 9 XXL-Einträge werden in keiner Partie erreicht (0/9), sonst 74 bis 76 von 89 | Zeitraffer-Zwischenserie | Logbuch-Thread prüft, ob XXL-Besuche im normalen Spiel vorkommen; sonst Einträge an echte Ereignisse binden |
 | B | `istWasser` und Bild stimmen am Durchstich nicht überall überein | Messlatte (`feature-tests/messlatte/README.md`) | P62 |
 | C | Winter: Rest von H5, G5 | roadmap.md P20 | P20-Rest nach P17 |
 
@@ -197,6 +198,7 @@ Schon erledigt aus Jorvens Vorschlägen: F14, F15, F18, F26, F27 (Grundgerüst),
 
 | Datum | Änderung |
 |---|---|
+| 15.11.2026, 02:10 Uhr | Zwischenserie nach PR 280 (Typ 1, 2): Pulk bleibt Prio A, Welle 0 noch nicht abnahmefähig; Fund XXL-Logbucheinträge nie erreicht. |
 | 14.11.2026, 22:10 Uhr | PR 280 gemergt, P62 und P64 erledigt; Welle-0-Abnahme über 15 Küsten nach Ankerfeld-Fix und PR 300; Menschen auf festen Koordinaten als Fund B. |
 | 14.11.2026, 22:00 Uhr | P28, P24 Teil 2, ruhige Oberfläche gemergt; Abschnitt 3a: wann Welle 0 fertig ist und Zusammenspiel-Prüfung in drei Threads danach. |
 | 14.11.2026, 21:15 Uhr | A10, Feature-Test-Fehler und P22 gemergt; P17 startet jetzt (Schlussmessung nach PR 280); neu: P41, P26; P28 wieder aufnehmen. |
