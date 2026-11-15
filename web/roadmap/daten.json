@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "15.11.2026",
-  "commit": "497c3eb"
+  "commit": "75cfbdc"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -441,12 +441,13 @@
    "id": "P17",
    "titel": "Start und frühe Stufen straffen",
    "inhalt": "Ü15, Ü16, Startwerte dokumentieren",
-   "thread": "bestehend: \"Balancing für 94 Liegeplätze ausarbeiten\" (nach P06)",
+   "thread": "erledigt bis auf die Schlussmessung im Zeitraffer nach dem Ablege-Fix (PR 318, Thread \"Aufstieg ausbalancieren\"; Rechnung und Spiel in docs/balancing.md)",
    "welle": 2,
    "prs": [
     237,
     252,
-    287
+    287,
+    318
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -657,17 +658,22 @@
    "id": "P26",
    "titel": "Überraschende Gesten fertig bauen",
    "inhalt": "Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), audio/README.md",
-   "thread": "neu",
+   "thread": "erledigt (PR 322, docs/hafengesten.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    322
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "L3",
     "L4",
     "L5"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    61,
+    62
+   ]
   },
   {
    "id": "P27",
@@ -1158,17 +1164,22 @@
    "id": "P59",
    "titel": "Stege umbauen und Varianten wählen",
    "inhalt": "D5, D6, D9 (neue Gastplätze in Stufe 6)",
-   "thread": "neu (stimmt sich mit \"Stegbild pro Spiel variieren\" ab)",
+   "thread": "teilweise (PR 321: D5, D6 Doppelboxen; D9 neue Gastplätze in Stufe 6 offen, stege-umbauen.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    321
+   ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
     "D5",
     "D6",
     "D9"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "teilweise",
+   "bilder": [
+    63,
+    64
+   ]
   },
   {
    "id": "P60",
@@ -1700,8 +1711,8 @@
   {
    "code": "Ü16",
    "text": "Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P17): Stufe 1 rund 10, Stufe 2 rund 30 Tage; Dorfhafen 300 €, Steg B 450 €, Ziel Stufe 2 90 Gäste",
    "pakete": [
     "P17"
    ],
@@ -2682,8 +2693,8 @@
   {
    "code": "D3",
    "text": "Frühe Stufen kürzen (= Ü16)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P17)",
    "pakete": [
     "P17"
    ],
@@ -2708,23 +2719,27 @@
   {
    "code": "D5",
    "text": "Zwei Varianten je Steg (viele schmale oder wenige breite Boxen)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 321): je Paar wählbar über Doppelboxen, stege-umbauen.md",
    "pakete": [
     "P59"
    ],
-   "prs": [],
+   "prs": [
+    321
+   ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
   {
    "code": "D6",
    "text": "Boxen umbauen (zwei schmale zu einer breiten)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 321): Doppelbox für Mehrrumpfboote ab Stufe 4, Rückbau möglich",
    "pakete": [
     "P59"
    ],
-   "prs": [],
+   "prs": [
+    321
+   ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
   {
@@ -3531,8 +3546,8 @@
   {
    "code": "L3",
    "text": "Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt",
    "pakete": [
     "P26"
    ],
@@ -3542,8 +3557,8 @@
   {
    "code": "L4",
    "text": "Fernglas mit Steckbrief",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt",
    "pakete": [
     "P26"
    ],
@@ -3553,8 +3568,8 @@
   {
    "code": "L5",
    "text": "Möwen antippen, Glocke am Steg",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (Glocke steht am Hafenmeisterhaus)",
    "pakete": [
     "P26"
    ],
@@ -4379,11 +4394,11 @@
     "P59"
    ],
    "zaehler": {
-    "erledigt": 3,
-    "teilweise": 2,
+    "erledigt": 4,
+    "teilweise": 3,
     "arbeit": 0,
     "frage": 0,
-    "offen": 14,
+    "offen": 12,
     "entfaellt": 0,
     "alle": 19
    }
@@ -4467,20 +4482,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 30,
-  "teilweise": 6,
+  "erledigt": 31,
+  "teilweise": 7,
   "arbeit": 1,
   "frage": 0,
-  "offen": 43,
+  "offen": 41,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 148,
+  "erledigt": 155,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 62,
+  "offen": 55,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5216,20 +5231,114 @@
    "datum": "2026-11-15",
    "quelle": "umlegen/pc-2-umgelegt.png",
    "nr": 60
+  },
+  {
+   "datei": "p26-pr322-handy-fernglas.jpg",
+   "pakete": [
+    "P26"
+   ],
+   "titel": "Fernglas mit Steckbrief am Handy",
+   "pr": 322,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "gesten/handy-fernglas.png",
+   "nr": 61
+  },
+  {
+   "datei": "p26-pr322-pc-hafenhorn.jpg",
+   "pakete": [
+    "P26"
+   ],
+   "titel": "Hafenhorn mit Wellenringen am PC",
+   "pr": 322,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "gesten/pc-hafenhorn.png",
+   "nr": 62
+  },
+  {
+   "datei": "p59-pr321-handy-doppelbox-vorschau.jpg",
+   "pakete": [
+    "P59"
+   ],
+   "titel": "Doppelbox bauen: Vorschau am Handy",
+   "pr": 321,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "vorschau/p59/p59-handy-1-vorschau.png",
+   "nr": 63
+  },
+  {
+   "datei": "p59-pr321-pc-kat-in-doppelbox.jpg",
+   "pakete": [
+    "P59"
+   ],
+   "titel": "Katamaran in der Doppelbox (PC)",
+   "pr": 321,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "vorschau/p59/p59-pc-3-kat.png",
+   "nr": 64
   }
  ],
  "neueBilder": [
+  64,
+  62,
   60,
   58,
   56,
   55,
   53,
   52,
-  50,
-  46,
-  45
+  50
  ],
  "merges": [
+  {
+   "datum": "2026-11-15",
+   "titel": "Roadmap-Pflege: P26 (PR 322), P17 (PR 318) eingetragen, Bilder zu P26 und P59",
+   "pr": 325,
+   "pakete": [
+    "P26",
+    "P17",
+    "P59"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Überraschende Gesten (P26): Hafenhorn, Fernglas, Möwen, Wellenring, Glocke",
+   "pr": 322,
+   "pakete": [
+    "P26"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Logbuch: alle neun Großschiffe erreichbar, ab Stufe 5 öfter vor dem Hafen",
+   "pr": 323,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Stege umbauen: Doppelboxen für Mehrrumpfboote (P59 Teil 1)",
+   "pr": 321,
+   "pakete": [
+    "P59"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Tagesabschluss nur als Zettel, Bootskarte am Tablet hochkant über Zeit und Bauen",
+   "pr": 320,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "P17: Aufstieg angleichen, Stufe 1 und 2 straffen (Ü16), Startwerte in economy.js",
+   "pr": 318,
+   "pakete": [
+    "P17"
+   ]
+  },
   {
    "datum": "2026-11-15",
    "titel": "Roadmap-Pflege: P33 (PR 314) und P41 (PR 315) mit PR-Nummern und Bildern",
@@ -5271,48 +5380,6 @@
    "datum": "2026-11-15",
    "titel": "Schichttest: Spiel Schicht für Schicht über die echte Oberfläche prüfen",
    "pr": 313,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Roadmap-Pflege: PR 280 (P66), 300 (P62), 305 (P21) eingetragen, Bild Wartebojen seitlich",
-   "pr": 311,
-   "pakete": [
-    "P66",
-    "P62",
-    "P21"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Zeitraffer: Speicherprüfung nicht mehr kurz vor Tagesende",
-   "pr": 309,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Stege nachrüsten (P30): Fingerstege und Laternen je Steg, Stromsäulen sichtbar",
-   "pr": 297,
-   "pakete": [
-    "P30"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Pages: 10 Minuten Sammelpause nach Merges, Zeitplan als Rückfall",
-   "pr": 310,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Plan: längere Tage und Bootsgeschichten (docs/bootsgeschichten.md)",
-   "pr": 312,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Arbeitsplan: Zwischenserie nach PR 280, Pulk bleibt Prio A",
-   "pr": 308,
    "pakete": []
   }
  ]
