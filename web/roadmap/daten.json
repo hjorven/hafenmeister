@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "15.11.2026",
-  "commit": "a93e005"
+  "commit": "a461158"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1596,12 +1596,14 @@
    "id": "P86",
    "titel": "Bootsgeschichten fertig erzählen",
    "inhalt": "Regatta: Startsignal mit Ton, Siegerehrung am Segelclub, Ergebnis im Logbuch; Gepäck beim Crewwechsel sichtbar, Halt am Tanksteg, Gang \"in den Ort\" (bootsgeschichten.md, Abschnitt 5)",
-   "thread": "neu",
+   "thread": "erledigt (PR 342)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    342
+   ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -4523,11 +4525,11 @@
     "P86"
    ],
    "zaehler": {
-    "erledigt": 8,
+    "erledigt": 9,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 12,
+    "offen": 11,
     "entfaellt": 0,
     "alle": 20
    }
@@ -4611,11 +4613,11 @@
   }
  ],
  "gesamt": {
-  "erledigt": 38,
+  "erledigt": 39,
   "teilweise": 2,
   "arbeit": 1,
   "frage": 0,
-  "offen": 44,
+  "offen": 43,
   "entfaellt": 1,
   "alle": 86
  },
@@ -5544,6 +5546,20 @@
  "merges": [
   {
    "datum": "2026-11-15",
+   "titel": "P86 Bootsgeschichten fertig erzählen",
+   "pr": 342,
+   "pakete": [
+    "P86"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Arbeitsplan: erst Welle 0 bis 2 (Grundgerüst) fertig, fünf offene Pakete",
+   "pr": 345,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
    "titel": "Roadmap-Pflege: P23 mit PR 340 und Bildern",
    "pr": 343,
    "pakete": [
@@ -5620,23 +5636,6 @@
    "pakete": [
     "P17",
     "P24"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "P27 Päckchen liegen: längsseits an ein liegendes Boot, wenn keine Box frei ist",
-   "pr": 330,
-   "pakete": [
-    "P27"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Liegeplätze passgenau: Boote liegen frei von Steg, Kai, Land und Nachbarn",
-   "pr": 329,
-   "pakete": [
-    "P83",
-    "P84"
    ]
   }
  ]
