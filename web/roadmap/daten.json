@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "15.11.2026",
-  "commit": "a461158"
+  "commit": "3f18e8e"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1610,15 +1610,16 @@
    "id": "P87",
    "titel": "Prüfwerkzeuge auf 15 Küsten und den neuen Takt",
    "inhalt": "Härtetest (tests/extrem/) nach PR 327 bis 332 neu laufen lassen und den Fund \"Gäste erreichen ab Stufe 4 keine Boje\" am Spiel bestätigen; tests/specs/leinen.spec.mjs auch für Küste 11 bis 15; istWasser und Bild am Durchstich angleichen (Messlatte); Zeitraffer-Grenzen auf den 5-Minuten-Tag",
-   "thread": "neu",
+   "thread": "erledigt (PR 338: Tests über alle Küsten aus formen.js, tools/zeitraffer/wasserbild.cjs und bildwasser.cjs, Grenzen für den 5-Minuten-Tag, Härtetest neu gelaufen; Funde in docs/arbeitsplan.md)",
    "welle": 1,
    "prs": [
     327,
-    332
+    332,
+    338
    ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   }
  ],
@@ -4460,11 +4461,11 @@
     "P87"
    ],
    "zaehler": {
-    "erledigt": 10,
+    "erledigt": 11,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 2,
+    "offen": 1,
     "entfaellt": 1,
     "alle": 13
    }
@@ -4613,11 +4614,11 @@
   }
  ],
  "gesamt": {
-  "erledigt": 39,
+  "erledigt": 40,
   "teilweise": 2,
   "arbeit": 1,
   "frage": 0,
-  "offen": 43,
+  "offen": 42,
   "entfaellt": 1,
   "alle": 86
  },
@@ -5546,6 +5547,20 @@
  "merges": [
   {
    "datum": "2026-11-15",
+   "titel": "P87: Prüfwerkzeuge auf 15 Küsten und den 5-Minuten-Tag",
+   "pr": 338,
+   "pakete": [
+    "P87"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Gesten-Test unter Last stabil (Wellenring, Aufstiegsfeier)",
+   "pr": 344,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
    "titel": "P86 Bootsgeschichten fertig erzählen",
    "pr": 342,
    "pakete": [
@@ -5618,24 +5633,6 @@
    "pakete": [
     "P27",
     "P17"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Kurzhalter: Liegezeit ab sichtbarem Festmachen, nach spaetestens keine Einfahrt; erstes Boot vom Bildrand",
-   "pr": 332,
-   "pakete": [
-    "P66",
-    "P87"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "P17 Teil 2: Zahlen auf den neuen Tagesablauf, Schlussmessung",
-   "pr": 331,
-   "pakete": [
-    "P17",
-    "P24"
    ]
   }
  ]
