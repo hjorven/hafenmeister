@@ -671,6 +671,50 @@
    "geraet": "pc",
    "datum": "2026-11-15",
    "quelle": "umlegen/pc-2-umgelegt.png"
+  },
+  {
+   "datei": "p26-pr322-handy-fernglas.jpg",
+   "pakete": [
+    "P26"
+   ],
+   "titel": "Fernglas mit Steckbrief am Handy",
+   "pr": 322,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "gesten/handy-fernglas.png"
+  },
+  {
+   "datei": "p26-pr322-pc-hafenhorn.jpg",
+   "pakete": [
+    "P26"
+   ],
+   "titel": "Hafenhorn mit Wellenringen am PC",
+   "pr": 322,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "gesten/pc-hafenhorn.png"
+  },
+  {
+   "datei": "p59-pr321-handy-doppelbox-vorschau.jpg",
+   "pakete": [
+    "P59"
+   ],
+   "titel": "Doppelbox bauen: Vorschau am Handy",
+   "pr": 321,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "vorschau/p59/p59-handy-1-vorschau.png"
+  },
+  {
+   "datei": "p59-pr321-pc-kat-in-doppelbox.jpg",
+   "pakete": [
+    "P59"
+   ],
+   "titel": "Katamaran in der Doppelbox (PC)",
+   "pr": 321,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "vorschau/p59/p59-pc-3-kat.png"
   }
  ]
 }
