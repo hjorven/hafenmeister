@@ -42,7 +42,7 @@ import * as vielfalt from '../render/landschaft/vielfalt.js';
 export const LAUFBEREICH = { x0: -420, x1: 430, y0: -200, y1: 520 };
 const FEIN = 3;              // Bodenraster
 const GROB = 2;              // Knoten je GROB x GROB Bodenzellen (6 Planeinheiten, 3,7 m)
-const TROCKEN = 0.12;        // Meter ueber dem Wasser, ab hier begehbar
+const TROCKEN = 0.2;         // Meter ueber dem Wasser, ab hier begehbar (darunter nasse Wiese und Pfuetzen)
 const STEIL = 0.55;          // Hoehe je Meter Weg, steiler geht niemand
 const ANSCHLUSS = 11;        // so weit darf ein Steg- oder Tuerende vom naechsten Laufknoten weg sein
 const RAND = 0.9;            // Abstand der Leute zu Hauswaenden (Meter)
@@ -300,6 +300,28 @@ export function baueNetz({ hafen, stufe, region = 'ostsee', gebaeude = [], hinde
         if (Math.abs(hh - hv) / (l / schritte * U) > STEIL) return Infinity;
         hv = hh;
       }
+    }
+    // Alle Zellen, die die Linie beruehrt (nicht nur die Proben): sonst schluepft eine schraege Linie
+    // zwischen zwei gesperrten Zellen hindurch (schmaler Graben, Hausecke)
+    let u = (ax - x0) / s + 0.5, v = (ay - y0) / s + 0.5;
+    const ue = (bx - x0) / s + 0.5, ve = (by - y0) / s + 0.5;
+    let ci = Math.floor(u), cj = Math.floor(v);
+    const ei = Math.floor(ue), ej = Math.floor(ve);
+    const du = ue - u, dv = ve - v;
+    const si = Math.sign(du), sj = Math.sign(dv);
+    const tdu = si ? Math.abs(1 / du) : Infinity, tdv = sj ? Math.abs(1 / dv) : Infinity;
+    let tu = si > 0 ? (ci + 1 - u) * tdu : si < 0 ? (u - ci) * tdu : Infinity;
+    let tv = sj > 0 ? (cj + 1 - v) * tdv : sj < 0 ? (v - cj) * tdv : Infinity;
+    for (let n = 0; n < 400; n++) {
+      if (ci < 0 || cj < 0 || ci >= nx || cj >= ny || !Number.isFinite(kost[cj * nx + ci])) return Infinity;
+      if (ci === ei && cj === ej) break;
+      if (Math.abs(tu - tv) < 1e-9) {
+        // genau durch eine Ecke: beide Nachbarn muessen frei sein
+        if (ci + si >= 0 && ci + si < nx && !Number.isFinite(kost[cj * nx + ci + si])) return Infinity;
+        if (cj + sj >= 0 && cj + sj < ny && !Number.isFinite(kost[(cj + sj) * nx + ci])) return Infinity;
+        ci += si; cj += sj; tu += tdu; tv += tdv;
+      } else if (tu < tv) { ci += si; tu += tdu; } else { cj += sj; tv += tdv; }
+      if (tu > 1 + 1e-9 && tv > 1 + 1e-9 && !(ci === ei && cj === ej)) break;
     }
     return max;
   }
