@@ -6,7 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 14.11.2026
 
-- Handy quer: Die Startansicht zeigt den Hafen groß und mittig, mit Einfahrt oben und nur einem schmalen Streifen Land unten, statt vor allem Felder.
+- Neu: Stege nachrüsten. Im Baumenü unter "Stege" bekommt ein Steg Fingerstege (ab Stufe 3, Gäste dort bewerten um 0,5 Anker besser) oder Laternen (ab Stufe 2, 0,2 Anker, nachts leuchten sie). Vorschau mit Geisterbild am Steg. Stromsäulen stehen jetzt sichtbar an jedem Steg mit Strom (297).
 - Der Hafen wächst sichtbar mit: Aus der Holzbude des Hafenmeisters wird ein Haus mit Ausguck und später mit Anbau, das Hafenbüro bekommt einen Seitenflügel und im Seehafen einen Lotsenturm mit drehendem Radar, Kiosk und Restaurant bekommen Terrasse und Obergeschoss, Wohnhäuser werden aufgestockt und an der Hafenstraße stehen Stadthäuser mit Läden. Das Dorf wächst vom alten Kern nach außen, und an der Landstraße entsteht Stufe für Stufe eine Häuserzeile. Beim Aufstieg wachsen neue Gebäude aus dem Boden.
 - Erfolge- und Logbuch-Meldung stehen im gemeinsamen Meldeplatz (volle Breite, gleiches Einblenden).
 - Logbuch: Die großen Schiffe kommen jetzt hinein, wenn man sie sieht: beim Besuch am Kreuzfahrt- oder Marineanleger, wenn sie vor dem Hafen vorbeifahren, und der Seenotkreuzer an der Station. Fischerplätze bekommen neue Kutter, und jede Saison wechseln sie, sodass alle fünf Fischkutter einmal da sind. Zwei Seenotkreuzer, die im Spiel nie auftauchen, stehen nicht mehr als ewiger Schattenriss im Logbuch.
@@ -45,6 +45,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 - Zwei Boote im Hafen tragen nie denselben Namen, und gerade abgereiste Namen kommen nicht gleich wieder. Auch die Boote des ersten geladenen Tags haben Namen (233).
 - Menü am Handy quer zweispaltig, damit alles ins Bild passt; ist es doch zu niedrig, zeigt ein Streifen unten, dass weitere Zeilen folgen (233).
 - Bewertungen von Booten außerhalb des Bildes warten, solange eine wichtigere Meldung steht (233).
+- Handy quer: Die Startansicht zeigt den Hafen groß und mittig, mit Einfahrt oben und nur einem schmalen Streifen Land unten, statt vor allem Felder.
 
 ## 13.11.2026
 

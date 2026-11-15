@@ -225,6 +225,8 @@ export function init(game) {
       for (const m of ringGroup.children) m.material = m === best ? ringMatHot : ringMatFuer(m.userData.platz);
       faerbeBoxen();
       tow.wert = neu ? game.sim?.platzWert?.(tow.boot, neu) ?? null : null;
+      // Nachgerüstete Stege (P30): Fingersteg, Licht stehen mit auf dem Schild
+      if (tow.wert) tow.wert = { ...tow.wert, extras: game.nachruesten?.platzTeile?.(neu) ?? [] };
       if (neu) { sound.play('leine-einrasten'); haptic(8); }
     }
     const w = game.camera.screenToWorld(tow.finger.x, tow.finger.y);
@@ -488,6 +490,7 @@ export function init(game) {
     const weit = new Set(w.far || []);
     const teile = [...(w.wishesMet || []).map((k) => `${WUNSCH[k] ?? k}${weit.has(k) ? ' weit' : ''}`)];
     if (w.comfort) teile.push('Fingersteg');
+    for (const t of w.extras || []) if (!teile.includes(t)) teile.push(t);
     if (w.snug) teile.push('passgenau');
     const z2 = teile.join(' · ');
     ctx.font = `700 15px ${SCHRIFT}`;

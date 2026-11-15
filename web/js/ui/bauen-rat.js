@@ -66,7 +66,7 @@ export function waehleSchritt({ geld, eintraege, bedarf, stufe, region = null, g
   const g = geschenk && offen.find((e) => e.key === geschenk);
   if (g) return { text: `${g.name} bauen. Das erste Bauwerk ist geschenkt.`, ziel: g.key, leistbar: true };
   // 2. Kein Platz: Boote weggeschickt oder Hafen fast voll
-  const stege = offen.filter((e) => e.art === 'steg');
+  const stege = offen.filter((e) => e.art === 'steg' && !e.nachruesten);
   const voll = bedarf.plaetze > 0 && bedarf.belegt / bedarf.plaetze >= 0.85;
   if (stege.length && (bedarf.weg >= 2 || voll)) {
     const e = meistePlaetze(stege);
@@ -91,6 +91,9 @@ export function waehleSchritt({ geld, eintraege, bedarf, stufe, region = null, g
     if (stufe.missing.includes('guests')) return { text: `Noch ${stufe.goal.guests - stufe.guests} zufriedene Gäste bis zum ${name}.`, ziel: e?.key ?? null, leistbar: false };
     if (stufe.missing.includes('reputation')) {
       const w = wuensche[0];
+      // Ohne offenen Wunsch hilft ein nachgeruesteter Steg (P30), wenn er sich leisten laesst
+      const nr = w ? null : offen.filter((x) => x.nachruesten && leistbar(x)).sort((a, b) => a.kosten - b.kosten)[0];
+      if (nr) return { text: `Ruf ${num1(stufe.goal.reputation)} nötig für ${name}. ${nr.name} heben die Bewertungen.`, ziel: nr.key, leistbar: true };
       const tipp = w ? ` Gäste vermissen ${WUNSCH[w[0]]}.` : ' Wünsche der Gäste erfüllen hilft.';
       return { text: `Ruf ${num1(stufe.goal.reputation)} nötig für ${name}.${tipp}`, ziel: e?.key ?? null, leistbar: false };
     }
