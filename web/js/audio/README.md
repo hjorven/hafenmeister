@@ -46,7 +46,7 @@ Optionen für jeden Effekt: `pan` (-1 links bis 1 rechts), `volume` (0 bis 1,5),
 | `stufe` | Hafen klingt größer, beim Aufstieg die Fanfare `stufe` (nicht beim Laden) |
 | `pause` | Musik und Hafen werden leiser, Effekte bleiben |
 | `ui:mute` | ohne Daten umschalten, mit `true`/`false` oder `{ stumm }` gezielt |
-| `ui:collect` mit `{ horn: true }` | Hafenhorn |
+| `ui:collect` mit `{ horn: true }` | Hafenhorn (gesendet von `ui/hafengesten.js`, wenn das Hafenmeisterhaus gedrückt gehalten wird) |
 | `ui:tow`, `ui:tow-end` | nichts, die Gesten-Module rufen ihre Klänge selbst auf |
 
 **Knopf:** `init` legt einen Knopf „Ton“ (`#btn-sound`) in `#hud-top`, der Stummschalter und Regler öffnet. Wer den Knopf selbst bauen will, ruft `init(game, { button: false })` auf und nutzt `game.audio.createPanel()` oder `game.audio.toggleMute()`.
@@ -83,6 +83,10 @@ Optionen für jeden Effekt: `pan` (-1 links bis 1 rechts), `volume` (0 bis 1,5),
 | `sturmwarnung` | Sturm angekündigt | |
 | `regatta` | Startschuss | |
 | `seenot` | Seenotretter läuft aus | |
+| `glockenschlag` | Hafenglocke am Hafenmeisterhaus angetippt | `staerke`: 0 bis 1 |
+| `moewen` | Möwen fliegen auf (Flügelschlag und Rufe) | `anzahl` |
+| `plaetschern` | Wellenring auf dem Wasser | `staerke` |
+| `fernglas` | Fernglas an (Klicken, Scharfstellen) | |
 
 ## Handy und Tablet
 

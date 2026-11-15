@@ -7,7 +7,9 @@
 //
 // Ereignisse (game.on(name, fn), pick = Ergebnis von game.pick oder null):
 //   'doubletap'    { x, y, world, pick }   zusaetzlich zoomt die Kamera weich hinein,
-//                                          ganz hineingezoomt geht es zur Uebersicht
+//                                          ganz hineingezoomt geht es zur Uebersicht.
+//                                          Setzt ein Zuhoerer erledigt = true (Fernglas,
+//                                          ui/hafengesten.js), bleibt das Zoomen aus.
 //   'longpress'    { x, y, world, pick }   Finger ruht 0,5 s; liegt er auf einem Boot,
 //                                          hupt es (Ereignis 'horn' an das Ton-Modul)
 //
@@ -47,7 +49,9 @@ export function init(game) {
     const now = performance.now();
     if (lastTap && now - lastTap.t < DOUBLE_TAP_MS && Math.hypot(t.x - lastTap.x, t.y - lastTap.y) < DOUBLE_TAP_PX) {
       lastTap = null;
-      game.emit('doubletap', { ...t, pick: t.pick ?? pick(t) });
+      const d = { ...t, pick: t.pick ?? pick(t) };
+      game.emit('doubletap', d);
+      if (d.erledigt) return;
       // ganz hineingezoomt: zurueck zur Uebersicht, sonst doppelt so nah
       if (cam.viewWidth !== undefined && cam.viewWidth <= cam.minWidth * 1.05) cam.reset();
       else smoothZoom(cam, 2, t.x, t.y);

@@ -102,12 +102,17 @@ Tipps zählen mit Fingertoleranz (22 bis 30 px), damit auch eine weit herausgezo
 | `M` | Ton aus und an |
 | `P` | Fotomodus |
 | `L` | Spielstand |
+| `H` | Möwen aufscheuchen |
 
 **Handy und Tablet** (`web/js/ui/input-touch.js`)
 
 | Eingabe | Wirkung |
 |---|---|
-| Doppeltipp | doppelt so nah, ganz hineingezoomt zurück zur Übersicht |
+| Doppeltipp | auf ein Boot im Hafen: Fernglas mit Steckbrief; sonst doppelt so nah, ganz hineingezoomt zurück zur Übersicht |
+| Hafenmeisterhaus gedrückt halten | Hafenhorn kassiert alle Münzen (ab Hafenbüro 1) |
+| Wasser gedrückt halten | Wellenringe und Plätschern |
+| Möwe antippen, Handy schütteln | Möwen fliegen auf (iPhone fragt beim ersten Mal nach Bewegung) |
+| Glocke am Hafenmeisterhaus antippen | Glocke läutet |
 | Boot im Hafen gedrückt halten | Boot hupt |
 | Zwei Finger drehen | Hafen drehen |
 | Vibration | kurz beim Einrasten der Leine und bei Münzen (nur Android, iOS kann das im Browser nicht) |
@@ -120,7 +125,7 @@ Gelöste Fälle aus den Handy-Tests, die beim Umbau erhalten bleiben müssen:
 - Der kleine Knopf "Einfahren" am Boot ist am Handy aus (`game.gesten.einfahrenAmBoot = false`), dort steht "Automatisch einfahren" in der Karte.
 - Kein Seitenzoom, kein Gummiband, kein Pull-to-Refresh, keine Textauswahl, kein Kontextmenü bei langem Druck. Ränder von Notch und Home-Leiste über `env(safe-area-inset-*)`.
 
-Ideen aus den alten Dokumenten (Fernglas, Hafenhorn, Wellenring, Möwen, Hupe und Glocke je Art, Abendrunde) sind Paket P26 und P46 bis P48 der [Roadmap](../roadmap.md). Noch nicht auf einem echten iPad mit Safari geprüft; Jorven testet am iPhone über die Pages-Seite.
+Fernglas, Hafenhorn, Wellenring, Möwen und Glocke sind gebaut (P26, [hafengesten.md](../hafengesten.md)); am PC gehen sie mit Doppelklick, Maus halten und Taste H. Hupe und Glocke je Art und die Abendrunde sind P46 bis P48 der [Roadmap](../roadmap.md). Noch nicht auf einem echten iPad mit Safari geprüft; Jorven testet am iPhone über die Pages-Seite.
 
 ## Farben
 
