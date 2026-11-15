@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "15.11.2026",
-  "commit": "c49050b"
+  "commit": "a93e005"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -601,9 +601,11 @@
    "id": "P23",
    "titel": "Services mit eigener Wirkung",
    "inhalt": "Services nicht nur \"€ pro Tag\"",
-   "thread": "bestehend: \"Services und Sonderanlagen einbauen\"",
+   "thread": "erledigt (PR 340; F2, F3, F5, F7, F9; services.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    340
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "Svc F2",
@@ -612,8 +614,11 @@
     "Svc F7",
     "Svc F9"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    73,
+    74
+   ]
   },
   {
    "id": "P24",
@@ -3013,8 +3018,8 @@
   {
    "code": "Svc F2",
    "text": "Jeder Service ändert das Spiel (Slip, Mastenkran, Fahrradverleih, Räucherei, Werft)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P23): Trailerboote am Slip, Mast legen und Radtour verlängern den Aufenthalt, Werft holt Reparaturboote, Räucherei bekommt Abendgäste; Havaristen folgen mit P37",
    "pakete": [
     "P23"
    ],
@@ -3024,8 +3029,8 @@
   {
    "code": "Svc F3",
    "text": "Entweder-oder-Bauplätze (Café oder Eisdiele, Werfthalle oder Winterhalle)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P23): drei Wahlplätze (dazu Kreuzfahrtterminal oder Marinestützpunkt), Umbau statt Sperre",
    "pakete": [
     "P23"
    ],
@@ -3048,8 +3053,8 @@
   {
    "code": "Svc F5",
    "text": "Auslastung statt Festbetrag",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P23): Bäcker, Café, Eisdiele, Räucherei, Fahrradverleih verdienen an den Crews im Hafen, Regen wirkt jetzt auch im Spiel",
    "pakete": [
     "P23"
    ],
@@ -3072,8 +3077,8 @@
   {
    "code": "Svc F7",
    "text": "Große Schiffe als Ereignis mit Tagesgästen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P23): Gruppen gehen vom Kreuzfahrtschiff und der Marine in den Ort, sechs Angebote verdienen mit",
    "pakete": [
     "P23"
    ],
@@ -3094,8 +3099,8 @@
   {
    "code": "Svc F9",
    "text": "Service-Karte mit Bilanz (verdient, bezahlt sich in n Tagen)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P23): Bilanz auf der Karte, Schätzung für den nächsten Ausbau auch im Baumenü",
    "pakete": [
     "P23"
    ],
@@ -4518,11 +4523,11 @@
     "P86"
    ],
    "zaehler": {
-    "erledigt": 7,
+    "erledigt": 8,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 13,
+    "offen": 12,
     "entfaellt": 0,
     "alle": 20
    }
@@ -4606,20 +4611,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 37,
+  "erledigt": 38,
   "teilweise": 2,
   "arbeit": 1,
   "frage": 0,
-  "offen": 45,
+  "offen": 44,
   "entfaellt": 1,
   "alle": 86
  },
  "punkteGesamt": {
-  "erledigt": 159,
+  "erledigt": 164,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 52,
+  "offen": 47,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5499,9 +5504,34 @@
    "datum": "2026-11-15",
    "quelle": "stegbilder/p83/pc-stegbild4-stufe6.png",
    "nr": 72
+  },
+  {
+   "datei": "p23-pr340-handy-karte-werft.jpg",
+   "pakete": [
+    "P23"
+   ],
+   "titel": "Werfthalle: Boote mit Schaden laufen gezielt ein",
+   "pr": 340,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "services/handy-karte-werft.png",
+   "nr": 73
+  },
+  {
+   "datei": "p23-pr340-pc-tagesgaeste-kreuzfahrt.jpg",
+   "pakete": [
+    "P23"
+   ],
+   "titel": "Tagesgäste vom Kreuzfahrtschiff, Heringstage bringen Räucherei und Fischhalle mehr",
+   "pr": 340,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "services/pc-tagesgaeste-kreuzfahrt.png",
+   "nr": 74
   }
  ],
  "neueBilder": [
+  74,
   72,
   70,
   68,
@@ -5509,10 +5539,31 @@
   65,
   63,
   61,
-  59,
-  57
+  59
  ],
  "merges": [
+  {
+   "datum": "2026-11-15",
+   "titel": "Roadmap-Pflege: P23 mit PR 340 und Bildern",
+   "pr": 343,
+   "pakete": [
+    "P23"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Schichttest: Schichten 14 bis 17, bessere Diagnose, Funde F2 und F3",
+   "pr": 339,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Services mit eigener Wirkung (P23)",
+   "pr": 340,
+   "pakete": [
+    "P23"
+   ]
+  },
   {
    "datum": "2026-11-15",
    "titel": "Roadmap-Pflege: J5/P03 (PR 335) und P83 (PR 336) mit Bildern",
@@ -5586,29 +5637,6 @@
    "pakete": [
     "P83",
     "P84"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Roadmap-Pflege: Bilder zum Yachtsteg (P59 Teil 2, PR 326)",
-   "pr": 328,
-   "pakete": [
-    "P59"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Härtetest: Extremlagen im echten Spiel prüfen (tests/extrem/)",
-   "pr": 324,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Boote: Geduld ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall",
-   "pr": 327,
-   "pakete": [
-    "P66",
-    "P87"
    ]
   }
  ]
