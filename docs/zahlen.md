@@ -97,28 +97,28 @@ Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab 
 | Bootsverleih | 1 | Ruderboote am Strand | 1 | 70 € | - | proTag 8; wetter {regen:0.3, sturm:0} |
 |  | 2 | Tretboote und Kanus | 2 | 400 € | - | proTag 25; wetter {regen:0.3, sturm:0}; ruf 0,03 |
 |  | 3 | SUP- und Jollenverleih | 3 | 1.200 € | - | proTag 95; wetter {regen:0.25, sturm:0}; ruf 0,06; gaeste {S:1.05} |
-| Slipanlage | 1 | Slipanlage | 2 | 320 € | - | proTag 16; wetter {regen:0.4, sturm:0}; kunden {anteil:0.1, preis:6, nur:{klasse:[S, M]}}; gaeste {S:1.1} |
-|  | 2 | Slip mit Trailerparkplatz | 3 | 720 € | - | proTag 60; wetter {regen:0.4, sturm:0}; kunden {anteil:0.12, preis:10, nur:{klasse:[S, M]}}; gaeste {S:1.05} |
-| Räucherei | 1 | Räucherkate | 2 | 540 € | - | proTag 20; kunden {anteil:0.15, preis:4}; ruf 0,05 |
-|  | 2 | Räucherei mit Fischladen | 4 | 3.600 € | - | proTag 60; kunden {anteil:0.2, preis:6}; ruf 0,08 |
-| Fischhalle | 1 | Fischhalle | 5 | 6.100 € | - | proTag 60; kunden {anteil:0.3, preis:5}; ruf 0,08; besucherFuerVersorgung 40 |
-|  | 2 | Fischhalle mit Fischmarkt | 5 | 7.200 € | - | proTag 260; kunden {anteil:0.4, preis:6}; ruf 0,12; besucherFuerVersorgung 90 |
+| Slipanlage | 1 | Slipanlage | 2 | 320 € | - | trailer {anzahl:4, preis:8, wetter:{regen:0.4, sturm:0}} |
+|  | 2 | Slip mit Trailerparkplatz | 3 | 720 € | - | trailer {anzahl:7, preis:12, wetter:{regen:0.4, sturm:0}} |
+| Räucherei | 1 | Räucherkate | 2 | 540 € | - | kunden {anteil:0.25, preis:5}; abendgaeste {anzahl:4, preis:4, wetter:{regen:0.5, sturm:0}}; ruf 0,05 |
+|  | 2 | Räucherei mit Fischladen | 4 | 3.600 € | - | kunden {anteil:0.3, preis:6}; abendgaeste {anzahl:10, preis:5, wetter:{regen:0.5, sturm:0}}; tagesgaeste 12; ruf 0,08 |
+| Fischhalle | 1 | Fischhalle | 5 | 6.100 € | - | proTag 60; kunden {anteil:0.3, preis:5}; tagesgaeste 20; ruf 0,08; besucherFuerVersorgung 40 |
+|  | 2 | Fischhalle mit Fischmarkt | 5 | 7.200 € | - | proTag 260; kunden {anteil:0.4, preis:6}; tagesgaeste 25; ruf 0,12; besucherFuerVersorgung 90 |
 | Bäcker | 1 | Brötchenservice | 1 | 35 € | - | kunden {anteil:0.3, preis:3}; ruf 0,03 |
-|  | 2 | Hafenbäcker | 3 | 1.400 € | - | proTag 30; kunden {anteil:0.4, preis:3}; ruf 0,06 |
-| Hafencafé | 1 | Hafencafé | 2 | 360 € | - | proTag 18; wetter {regen:0.5, sturm:0.3}; kunden {anteil:0.2, preis:4}; ruf 0,03 |
-|  | 2 | Café mit Terrasse | 3 | 2.200 € | - | proTag 70; wetter {regen:0.4, sturm:0.2}; kunden {anteil:0.3, preis:5}; ruf 0,06 |
+|  | 2 | Hafenbäcker | 3 | 1.400 € | - | kunden {anteil:0.6, preis:4}; tagesgaeste 6; ruf 0,06 |
+| Hafencafé | 1 | Hafencafé | 2 | 360 € | - | kunden {anteil:0.5, preis:5, wetter:{regen:0.7, sturm:0.4}}; tagesgaeste 12; ruf 0,03 |
+|  | 2 | Café mit Terrasse | 3 | 2.200 € | - | kunden {anteil:0.75, preis:5, wetter:{regen:0.6, sturm:0.3}}; tagesgaeste 15; ruf 0,06 |
 | Grillplatz | 1 | Grillplatz | 2 | 180 € | - | ruf 0,05 |
-| Fahrradverleih | 1 | Fahrradverleih | 3 | 900 € | - | proTag 25; wetter {regen:0.3, sturm:0}; kunden {anteil:0.15, preis:8} |
-| Eisdiele | 1 | Eisdiele | 4 | 2.200 € | - | proTag 90; wetter {regen:0.2, sturm:0}; kunden {anteil:0.25, preis:3}; ruf 0,03 |
+| Fahrradverleih | 1 | Fahrradverleih | 3 | 900 € | - | kunden {anteil:0.12, preis:8, wetter:{regen:0.3, sturm:0}}; dienst {anteil:0.18, nur:{klasse:[S, M, L], naechteMax:2}, naechte:1, preis:30, wetter:{regen:0.3, sturm:0}}; tagesgaeste 8 |
+| Eisdiele | 1 | Eisdiele | 4 | 2.200 € | - | kunden {anteil:1.1, preis:3.5, wetter:{regen:0.2, sturm:0}}; tagesgaeste 20; gaeste {S:1.1}; ruf 0,03 |
 | Segelclub | 1 | Segelclub | 3 | 2.200 € | - | proTag 20; ruf 0,08; gaeste {S:1.2}; freischalten [regatta] |
 |  | 2 | Segelschule | 4 | 6.500 € | - | proTag 120; wetter {regen:0.6, sturm:0}; ruf 0,12; gaeste {S:1.3, M:1.05}; freischalten [regatta] |
 |  | 3 | Regattaverein | 4 | 6.800 € | 3,8 | proTag 150; wetter {regen:0.6, sturm:0}; ruf 0,16; gaeste {S:1.15, M:1.1, L:1.05}; freischalten [regatta]; regatta 1,3 |
-| Mastenkran | 1 | Mastenkran | 3 | 1.800 € | - | kunden {anteil:0.08, preis:35, nur:{antrieb:segel}}; gaeste {M:1.2} |
+| Mastenkran | 1 | Mastenkran | 3 | 1.800 € | - | dienst {anteil:0.3, nur:{antrieb:segel, klasse:[M, L]}, naechte:1, preis:45}; gaeste {M:1.2} |
 | Bootsausrüster | 1 | Bootsausrüster | 3 | 2.000 € | - | kunden {anteil:0.25, preis:8} |
 |  | 2 | Yachtausrüster mit Motorenwerkstatt | 4 | 4.000 € | - | kunden {anteil:0.25, preis:24}; synergie [{id:travellift, faktor:1.15}]; ruf 0,04 |
-| Travellift und Werft | 1 | Bootsschuppen mit Werkstatt | 4 | 5.600 € | - | kunden {anteil:0.06, preis:120}; winter {proTag:400}; proTag 40 |
-|  | 2 | Travellift | 4 | 6.300 € | - | kunden {anteil:0.08, preis:170}; gaeste {L:1.1}; winter {proTag:600} |
-|  | 3 | Werfthalle mit Slipwagen | 4 | 11.500 € | 3,8 | kunden {anteil:0.1, preis:190}; gaeste {L:1.12}; ruf 0,08; winter {proTag:1100} |
+| Travellift und Werft | 1 | Bootsschuppen mit Werkstatt | 4 | 5.600 € | - | dienst {anteil:0.12, nur:{klasse:[M, L, XL]}, naechte:1, preis:220}; winter {proTag:400}; proTag 40 |
+|  | 2 | Travellift | 4 | 6.300 € | - | dienst {anteil:0.15, nur:{klasse:[M, L, XL]}, naechte:1, preis:300}; gaeste {L:1.1}; winter {proTag:600} |
+|  | 3 | Werfthalle mit Slipwagen | 4 | 11.500 € | 3,8 | dienst {anteil:0.2, nur:{klasse:[M, L, XL]}, naechte:2, preis:450}; gaeste {L:1.12}; ruf 0,08; winter {proTag:1100} |
 | Winterlager | 1 | Freilager mit Böcken | 4 | 4.500 € | - | winter {proTag:900} |
 |  | 2 | Winterlagerhalle | 5 | 12.000 € | - | winter {proTag:2200}; ruf 0,06; gaeste {L:1.05} |
 | Segelmacher | 1 | Segelmacherei | 4 | 3.400 € | - | kunden {anteil:0.07, preis:90, nur:{antrieb:segel}}; hafengeld {segel:1.15}; synergie [{id:mastenkran, faktor:1.2}] |

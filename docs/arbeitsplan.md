@@ -49,7 +49,7 @@ Erledigt seit 14.11.: Großschiffe berühren auf keiner Küste mehr Land (P84), 
 
 ## 3. Die nächsten Pakete, in dieser Reihenfolge
 
-Leitlinie: Erst Welle 0 abschließen und die Prüfwerkzeuge auf den neuen Stand bringen, dann das Zusammenspiel prüfen. Daneben Pakete, die wenig Dateien teilen. `economy.js` ist seit P17 frei: als Nächstes P23, danach P20-Rest.
+Leitlinie: Erst Welle 0 abschließen und die Prüfwerkzeuge auf den neuen Stand bringen, dann das Zusammenspiel prüfen. Daneben Pakete, die wenig Dateien teilen. `economy.js`: P23 ist fertig, als Nächstes P20-Rest.
 
 | Nr | Paket | Warum jetzt | Hängt ab von | Kann kollidieren mit |
 |---|---|---|---|---|
@@ -57,7 +57,7 @@ Leitlinie: Erst Welle 0 abschließen und die Prüfwerkzeuge auf den neuen Stand 
 | 2 | ~~P84 Großschiffwege an allen 15 Küsten~~ erledigt 15.11. (PR 341) | Rest aus PR 329, gehört zu Welle 0 | - | `render/services-besuch.js`, `boat-view.js` (`seeWeg`, neu `grosserSeeweg`) |
 | 3 | **P87 Prüfwerkzeuge auf 15 Küsten und den neuen Takt** (neu) | Welle-0-Abnahme braucht Tests, die alle Küsten kennen; Härtetest nach PR 327 bis 332 neu | - | nur `tests/`, `tools/zeitraffer/`, `feature-tests/` |
 | 4 | ~~**P83 Stegbild-Generator reparieren**~~ (erledigt 15.11., PR 336) | ohne ihn keine neuen Stege (P70) und kein Neuerzeugen nach Platzänderungen | - | `tools/stegbilder/`, `data/stegbilder.js` (Ausgabe muss für bestehende Spielstände gleich bleiben), `data/liegelage.js` |
-| 5 | **P23 Services mit eigener Wirkung** (neu) | macht Stufe 4 bis 6 tiefer; `economy.js` frei | - | `economy.js` (einziger dort), `render/services.js`, `data/services.js`, Ereignisse (G7-Boni aus PR 299) |
+| 5 | ~~P23 Services mit eigener Wirkung~~ erledigt (15.11.) | Dienste, Trailerboote, Abendgäste, Tagesgäste, Wahlplätze, Bilanz; Rechnung weiter 103 Tage | - | `economy.js` ist frei für P20-Rest |
 | 6 | **P86 Bootsgeschichten fertig erzählen** (Thread wartet) | kleine Lücken, die Jorven im Spiel sieht (Regatta ohne Startsignal und Sieger) | - | `geschichten/`, `render/boat-view.js` (Regattabahn), Logbuch, `audio.js` |
 | 7 | **P03-Rest J5** (erledigt 15.11.) | Ruf am ersten Abreisenden erklären, Einstieg damit fertig | - | `features/einstieg.js`, Meldeplatz |
 | 8 | **P20-Rest Winter** (G5, H5) | Jahreszeiten spürbar, Kran und Segelmacher für Dauerlieger | 5 (`economy.js`) | `sim.js` (Ankünfte je Jahreszeit), `winter.js`, Balancing-Messung danach |
@@ -98,7 +98,7 @@ Der Planungs-Thread meldet dem Koordinator, sobald alle drei Punkte erfüllt sin
 
 ## 4. Berührungspunkte, auf die alle achten
 
-- `web/js/data/economy.js`: Reihenfolge P23, P20-Rest, dann P34 oder P31 (P17, P19, 252 und A10 sind gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
+- `web/js/data/economy.js`: Reihenfolge P20-Rest, dann P34 oder P31 (P17, P19, P23, 252 und A10 sind gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
 - `web/js/sim.js`: kleine, getrennte Änderungen, vorher auf `main` rebasen, neue Regel mit eigenem Test.
 - Meldungs-Ordnung (höchstens eine schwebende Meldung, Tipps nie über Zeit und Bauen): P55, P22, P24 melden sich dort an, statt eigene Ebenen zu bauen.
 - `web/index.html`, `web/js/main.js`: nur eine `MODULES`-Zeile je neuem Modul; P61 ändert die Importmap und stimmt das im PR ab.
@@ -128,7 +128,7 @@ Reihenfolge nach Wirkung auf die Kernschleife: erst was jede Ankunft und jedes Z
 | Reihenfolge | Paket | Inhalt | Vorschläge |
 |---|---|---|---|
 | 1 | P24 | erledigt (PR 281, 299) | F17 |
-| 2 | P23 | Services mit eigener Wirkung | - |
+| 2 | P23 | erledigt (Services mit eigener Wirkung) | F2, F3, F5, F7, F9 |
 | 3 | P28 | erledigt (PR 288) | F2 |
 | 4 | P27 | erledigt (PR 330) | F1 |
 | 5 | P33 | erledigt (PR 314) | F4 |
