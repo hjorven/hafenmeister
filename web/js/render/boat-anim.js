@@ -1087,6 +1087,8 @@ class BoatAnim {
     // opts.see: Anfahrt von weit draussen auf See (Seezugang des Gelaendes, grobe Punkte ueber Wasser)
     // bis vor die Einfahrt; ab dort sucht der Fahrweg der Karte den Weg zum Platz.
     if (opts.see?.length) this.push(new PathTask(opts.see, { see: true, rein: true, stop: false }));
+    // Ankunft von See: jetzt im Revier (Spielregeln, Selbst-Einfahren bei Andrang)
+    if (opts.einfahrt) this.push(new CallTask((bt) => bt.emit('boat:im-revier')));
     // opts.vorruecken(boot) -> { x, z, h } | null: danach unbemerkt naeher heran (boat-view naeherStart)
     if (opts.vorruecken) this.push(new CallTask((bt) => {
       const p = opts.vorruecken(bt);
@@ -1153,6 +1155,8 @@ class BoatAnim {
     // Boje), faehrt sofort weiter, sonst stuende es mitten im Fahrwasser und alle anderen dahinter.
     if (opts.verzoegerung > 0 && this.moored) this.push(new WaitTask(opts.verzoegerung));
     if (this.moored) this.pushUndock(opts);
+    // noch nicht fest (beim Anlegen unterbrochen): halb gelegte Leinen los, sonst zoege das Boot sie mit
+    else if (this.lines.length) this.push(new CallTask((bt) => { bt.lines.length = 0; }));
     if (points.length) {
       if (opts.sails) this.push(new CallTask((b) => b.setSails(true)));
       this.push(new CallTask((b) => { b.state = 'leaving'; }));
@@ -1233,7 +1237,7 @@ class BoatAnim {
     // Wartete das Boot noch unsichtbar auf seine Einfahrt: im neuen Ablauf erst auftauchen, wenn am
     // Startpunkt Platz ist (ohne weitere Wartezeit)
     if (this.versteckt) this.push(new EinfahrtWarten(0));
-    if (see) this.push(new PathTask(see, { see: true, rein: true, stop: false }));
+    if (see) { this.push(new PathTask(see, { see: true, rein: true, stop: false })); this.push(new CallTask((bt) => bt.emit('boat:im-revier'))); }
     return new Promise((res) => { this._resolve = res; });
   }
   finish(ok) { const r = this._resolve; this._resolve = null; if (r) r(ok); }
