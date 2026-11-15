@@ -122,3 +122,51 @@ test('Kurzhalter bleiben einen Tagesanteil aus economy.js, große Schiffe nie', 
     }
   }
 });
+
+test('Mit Ansicht: Liegezeit läuft erst ab sichtbarem Festmachen, mindestens sichtbar', () => {
+  const vctx = { ...ctx, ansichtMeldetFest: () => true };
+  const s = quietState(1);
+  s.clock = 20;
+  const b = waitingBoat(s, { stay: 0.12 });
+  const berth = sim.fittingBerths(s, vctx, b.id)[0];
+  assert.ok(sim.assign(s, vctx, b.id, berth).ok);
+  assert.equal(b.wartetFest, true);
+  // lange Anfahrt: die alte Ablegezeit ist vorbei, das Boot ist aber noch nicht fest
+  sim.tick(s, vctx, b.leaveClock - s.clock + 3);
+  assert.ok(s.boats[b.id], 'legt nicht ab, bevor es fest ist');
+  assert.ok(sim.shortStayDocked(s, vctx, b.id));
+  const rest = b.leaveClock - s.clock;
+  assert.ok(rest >= rules.shortStay.minVisible * rules.dayLength - 0.1, `liegt sichtbar ${rest} s`);
+  const ev = sim.tick(s, vctx, rest + 0.5);
+  assert.ok(ev.some((e) => e.type === 'departed' && e.boatId === b.id && e.kurz));
+});
+
+test('Mit Ansicht: kommt nie die Meldung, legt das Boot trotzdem noch am selben Tag ab', () => {
+  const vctx = { ...ctx, ansichtMeldetFest: () => true };
+  const s = quietState(1);
+  s.clock = 20;
+  const b = waitingBoat(s, { stay: 0.12 });
+  assert.ok(sim.assign(s, vctx, b.id, sim.fittingBerths(s, vctx, b.id)[0]).ok);
+  sim.tick(s, vctx, rules.dayLength * 0.5);
+  assert.equal(s.boats[b.id], undefined);
+  assert.equal(s.phase, 'day');
+});
+
+test('Nach spätestens fährt kein Kurzhalter mehr ein, späte Kurzhalter tauschen die Ankunftszeit', () => {
+  const s = quietState(1);
+  s.clock = sim.shortStayCutoff(ctx) - 0.5;
+  const k = waitingBoat(s, { stay: 0.3 });
+  const n = waitingBoat(s, { nights: 1, stay: undefined });
+  sim.tick(s, ctx, 1);
+  assert.equal(s.boats[k.id], undefined, 'Kurzhalter fährt weiter');
+  assert.ok(s.boats[n.id], 'Übernachter wartet weiter');
+  assert.equal(s.stats.turnedAway, 0);
+  const cut = sim.shortStayCutoff(ctx) - rules.shortStay.stay[0] * rules.dayLength;
+  for (let seed = 1; seed <= 20; seed++) {
+    const t = createState({ seed, rules });
+    t.stage = 4;
+    t.day = 3;
+    sim.tick(t, ctx, 0);
+    for (const b of t.upcoming) if (b.nights === 0) assert.ok(b.arriveAt <= cut, `Kurzhalter kommt um ${b.arriveAt}`);
+  }
+});

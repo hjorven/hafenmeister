@@ -947,12 +947,19 @@ export function init(game) {
   // Beim Laden einmal rechnen (erster Aufruf kostet bis 0,6 s), nicht erst beim ersten Boot
   setTimeout(() => { zugaenge({ length: 8, beam: 3, draft: 1.2 }); zugaenge({ length: 30, beam: 8, draft: 3.5, size: 'XL' }); }, 0);
 
+  let erstesGezeigt = false;
+  game.on('sim:change', (d) => { if (d?.reason === 'new') erstesGezeigt = false; });
   game.on('boot-kommt', (info) => {
     if (!info || info.id == null) return;
     if (bojenStufe !== stufe()) baueBojen();
     const e = erzeuge(info);
     const ziel = warteplatz(info.boje ?? 0, e.anim);
-    const zugang = waehleZugang(e.anim.info, info.herkunft);
+    // Erstes Boot eines neuen Spiels (Jorven: nach wenigen Sekunden da): startet kurz vor dem Bildrand
+    // statt weit draussen am Seezugang. Alle anderen reisen von weit draussen an.
+    const st = game.sim?.state;
+    const erstes = !erstesGezeigt && st?.day === 1 && (st.clock ?? 0) < 30 && !(st.guests > 0);
+    erstesGezeigt = true;
+    const zugang = erstes ? null : waehleZugang(e.anim.info, info.herkunft);
     if (zugang) {
       const { see } = seeTeil(zugang);
       e.pick = e.anim.model.userData.pick;
@@ -976,7 +983,7 @@ export function init(game) {
     // Segelboote bergen die Segel vor der Boje (dock() erledigt das), dann Leine an die Boje.
     // Kommen mehrere im selben Augenblick, laufen sie nacheinander los (keine Wellen).
     const jetzt = game.time ?? 0;
-    ankunftT = Math.max(jetzt, ankunftT + 3 + Math.random() * 6);
+    ankunftT = erstes ? jetzt : Math.max(jetzt, ankunftT + 3 + Math.random() * 6);
     e.anim.dock(ziel, { route: true, einfahrt: true, verzoegerung: ankunftT - jetzt });
   });
 

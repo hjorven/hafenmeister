@@ -650,6 +650,46 @@ function rollShortStay(state, ctx, boat) {
   boat.stay = Math.round((sh.stay[0] + random(state) * (sh.stay[1] - sh.stay[0])) * 1000) / 1000;
 }
 
+/** Ab dieser Spielzeit fährt kein Kurzhalter mehr ein (Tagesanteil 'spaetestens'). */
+export function shortStayCutoff(ctx) {
+  return ctx.rules.dayLength * (ctx.rules.shortStay?.latest ?? 0.97);
+}
+
+/**
+ * Die Ansicht meldet: Kurzhalter ist sichtbar fest. Erst jetzt läuft seine Liegezeit, mindestens
+ * shortStay.minVisible (Tagesanteil), damit man ihn liegen sieht und die Münze einsammeln kann.
+ */
+export function shortStayDocked(state, ctx, boatId) {
+  const boat = state.boats[boatId];
+  if (!boat || !boat.wartetFest || boat.status !== 'moored' || !isShortStay(boat)) return false;
+  const { dayLength, eveningLength } = ctx.rules;
+  const sh = ctx.rules.shortStay || {};
+  delete boat.wartetFest;
+  const min = (sh.minVisible ?? 0.06) * dayLength;
+  const want = state.clock + Math.max(min, (boat.stay ?? 0.2) * dayLength);
+  const latest = state.phase === 'day' ? Math.max(shortStayCutoff(ctx), state.clock + min) : dayLength + eveningLength - 2;
+  boat.leaveClock = Math.round(Math.max(state.clock + 5, Math.min(want, latest)) * 10) / 10;
+  return true;
+}
+
+/**
+ * Kurzhalter, die erst nach 'spätestens' ankämen, tauschen die Ankunftszeit mit einem früheren
+ * Übernachter (die Zeiten selbst bleiben, also keine Wellen). Ohne Tauschpartner kommen sie heute nicht.
+ */
+function lateShortStays(state, ctx, list) {
+  if (!ctx.rules.shortStay) return;
+  const cut = shortStayCutoff(ctx) - (ctx.rules.shortStay.stay?.[0] ?? 0.1) * ctx.rules.dayLength;
+  const spaet = list.filter((b) => isShortStay(b) && b.arriveAt > cut);
+  if (!spaet.length) return;
+  const frueh = list.filter((b) => !isShortStay(b) && b.arriveAt <= cut && !b.funk && !b.stationed).sort((a, b) => b.arriveAt - a.arriveAt);
+  for (const b of spaet) {
+    const t = frueh.shift();
+    if (t) [b.arriveAt, t.arriveAt] = [t.arriveAt, b.arriveAt];
+    else list.splice(list.indexOf(b), 1);
+  }
+  list.sort((a, b) => a.arriveAt - b.arriveAt);
+}
+
 /** Ist das Boot ein Kurzhalter (legt am selben Tag wieder ab)? */
 export function isShortStay(boat) {
   return !!boat && !boat.stationed && boat.nights === 0;
@@ -772,6 +812,7 @@ function startDay(state, ctx, events) {
     placeArrivals(list, from, end, ctx.rules, () => random(state));
   }
   for (const fn of ctx.hooks.arrivals) fn({ state, ctx, list });
+  lateShortStays(state, ctx, list);
   // Herkunft in der Reihenfolge der Ankunft, damit zwei Boote hintereinander nie aus derselben Ecke kommen
   list.forEach((boat, i) => { boat.origin = boatOrigin(state, state.day * 7 + i); });
   state.upcoming = list;
@@ -1156,6 +1197,9 @@ function moor(state, ctx, boat, berthId, events, hand = false) {
     const latest = state.phase === 'day' ? dayLength * (sh.latest ?? 0.97) : dayLength + eveningLength - 2;
     boat.leaveClock = Math.round(Math.max(state.clock + 5, Math.min(want, latest)) * 10) / 10;
     boat.moorDay = state.day;
+    // Mit 3D-Ansicht läuft die Uhr erst, wenn das Boot sichtbar fest ist (shortStayDocked); die Anfahrt
+    // von Boje oder Ankerfeld kann länger dauern als der ganze Halt
+    if (ctx.ansichtMeldetFest?.()) { boat.wartetFest = true; boat.mooredClock = state.clock; }
   }
   // Wie im echten Hafen: Das Liegegeld für die kommende Nacht wird gleich nach dem Anlegen fällig.
   if (!boat.stationed) chargeFee(state, ctx, boat, modifiers(state, ctx), events);
@@ -2239,8 +2283,14 @@ function departBoat(state, ctx, boat, mods, events, leaveAt, kurz) {
  */
 function shortStayStep(state, ctx, events) {
   let mods = null;
+  // Nach 'spätestens' fährt kein Kurzhalter mehr ein: wer noch an der Boje wartet, fährt weiter (ohne Bewertung)
+  if (state.phase === 'day' && state.clock >= shortStayCutoff(ctx)) {
+    for (const id of [...state.queue]) if (isShortStay(state.boats[id])) turnAway(state, ctx, state.boats[id], events, 'spaet');
+  }
   for (const boat of mooredBoats(state)) {
     if (!isShortStay(boat) || boat.leaveClock == null || state.clock < boat.leaveClock || boat.trip?.away) continue;
+    // noch nicht sichtbar fest: warten (Notfall: nach einem Viertel Tag geht es trotzdem los)
+    if (boat.wartetFest && state.clock < (boat.mooredClock ?? 0) + ctx.rules.dayLength * 0.25 + (boat.stay ?? 0.2) * ctx.rules.dayLength) continue;
     if (boat.pendingFee > 0) {
       const r = collectOnRound(state, ctx, boat.id, { night: true });
       events.push(...r.events);
