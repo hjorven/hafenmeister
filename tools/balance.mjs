@@ -84,7 +84,9 @@ export function pruefen() {
       if (anzahl(n) < anzahl(n - 1)) fehler.push(`Stegprojekt ${p.id}: in Stufe ${n} ${anzahl(n)} statt ${anzahl(n - 1)} Plätze (Ersatz fehlt)`);
     }
   }
+  // Doppelboxen (P59) sind ein Umbau zweier Boxen, kein eigener Platz eines Projekts
   for (const p of HAFEN.plaetze) {
+    if (p.doppel) continue;
     if (!besitz.has(p.id)) fehler.push(`Platz ${p.id} (Stufen ${p.stufen.join(',')}) gehört zu keinem Projekt`);
   }
   // Je Stufe: Summe der Plätze wie im Katalog

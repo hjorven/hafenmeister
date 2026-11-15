@@ -160,6 +160,8 @@ export function init(game) {
     // 1. Unten in der Lücke zwischen den Knöpfen (Zeit | Kassieren | Bauen), wenn sie breit genug ist:
     //    PC, Tablet quer, Handy quer. Die Meldung steht dann wie ein Untertitel auf Höhe der Knöpfe.
     const knoepfe = rechteck('#hm-zeit, #btn-build, #btn-collect').sort((x, y) => x.left - y.left);
+    // Oberkante der unteren Knöpfe für andere Tafeln (Bootskarte am Tablet hochkant steht darüber, oberflaeche.css)
+    if (knoepfe.length) document.documentElement.style.setProperty('--hm-knopfkante', `${Math.round(h.bottom - Math.min(...knoepfe.map((r) => r.top)))}px`);
     let luecke = null;
     for (let i = 0; i + 1 < knoepfe.length; i++) {
       const l = knoepfe[i].right - h.left + rand;
@@ -195,7 +197,8 @@ export function init(game) {
     const steht = waehle(liste);
     // "Als Nächstes" (passiv) ist ein stehender Rat, keine wartende Meldung: zählt nicht mit
     const n = liste.filter((w) => ids.has(w.id) && w.id !== steht && !passiv.has(w.id)).length;
-    const zeigt = ids.has(steht) && n > 0;
+    // Nur an einer sichtbaren Meldung (eine offene Karte blendet die stehende Meldung aus, dann kein einsamer Zähler)
+    const zeigt = ids.has(steht) && n > 0 && [...platz.children].some((c) => c !== zahl && sichtbar(c));
     zahl.hidden = !zeigt;
     if (zeigt && zahl.textContent !== `+${n}`) zahl.textContent = `+${n}`;
     platz.dataset.steht = ids.has(steht) ? steht : '';

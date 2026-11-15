@@ -28,6 +28,8 @@ const MOVE_SLOP_PX = 10;
 
 const isTouchDevice = () => matchMedia('(pointer: coarse)').matches;
 const isPhone = () => matchMedia('(max-width: 599px), (max-height: 499px)').matches;
+// Tablet hochkant: die Bootskarte steht als Blatt über Zeit und Bauen (oberflaeche.css), Ansicht wie am Handy verschieben
+const isBlatt = () => isPhone() || matchMedia('(min-width: 600px) and (max-width: 899px) and (min-height: 500px)').matches;
 
 export function init(game) {
   const el = game.canvas;
@@ -118,7 +120,7 @@ export function init(game) {
     addEventListener('orientationchange', () => setTimeout(update, 300));
   }
 
-  // ---------- Boot gewaehlt: Stege frei halten (nur Handy) ----------
+  // ---------- Boot gewaehlt: Stege frei halten (Handy, Tablet hochkant) ----------
   // Die Bootskarte liegt unten ueber der Karte. Damit man die Stege darueber
   // antippen kann, wird die Karte knapp (CSS) und die Ansicht um die halbe
   // Kartenhoehe nach oben geschoben; beim Abwaehlen geht sie zurueck.
@@ -137,7 +139,7 @@ export function init(game) {
     .observe(cardEl, { attributes: true, attributeFilter: ['hidden'] });
   const onSelect = (boatId) => {
     if (towing) return;
-    const on = boatId != null && isPhone();
+    const on = boatId != null && isBlatt();
     if (!on) { release(); return; }
     document.body.classList.add('hm-boot-gewaehlt');
     if (shifted) return;

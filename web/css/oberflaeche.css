@@ -1188,3 +1188,23 @@ body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis button { min-height: 40
   body.hm-neu:has(#hm-einstellungen:not([hidden])) :is(#hud-bottom, #hm-seite, #hm-meldeplatz, .hm-status),
   body.hm-neu:has(#hm-hilfe:not([hidden])) :is(#hud-bottom, #hm-seite, #hm-meldeplatz, .hm-status) { visibility: hidden; }
 }
+
+/* Tablet hochkant (Schichttest 15.11.): Die Bootskarte steht als Blatt ÜBER Zeit und Bauen, statt die ganze untere
+ * Leiste zu ersetzen. Tempo und Bauen bleiben erreichbar, die Karte ist schmaler und gerahmt.
+ * --hm-knopfkante setzt ui/meldungen.js (Oberkante der unteren Knöpfe). */
+@media (min-width: 600px) and (max-width: 899px) and (min-height: 500px) {
+  .hm-neu #card {
+    left: 50%; right: auto;
+    bottom: calc(var(--hm-knopfkante, 110px) + 8px);
+    width: min(560px, calc(100% - var(--hm-links) - var(--hm-rechts)));
+    max-height: calc(100dvh - var(--hm-knopfkante, 110px) - var(--hm-oben) - var(--hm-knopf) - 24px);
+    padding: 12px 14px 10px;
+    border-bottom-width: calc(var(--hm-px) * 4);
+    transform: translate(-50%, 30px);
+  }
+  .hm-neu #card:not([hidden]) { transform: translate(-50%, 0); }
+  .hm-neu.card-open #hud-bottom { transform: none; opacity: 1; pointer-events: none; }
+  .hm-neu.card-open #hud-bottom > * { pointer-events: auto; }
+  .hm-neu.card-open #hm-meldeplatz { visibility: hidden; }
+  .hm-neu #card:not(.bau-karte) .card-actions { position: static; margin: 4px 0 0; padding: 0; }
+}
