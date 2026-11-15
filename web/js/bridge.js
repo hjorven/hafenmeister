@@ -90,7 +90,11 @@ export async function initBridge(game) {
   ctx.ansichtMeldetBoje = () => !!game.boatsVisible;
   // Kurzhalt: Die Ansicht meldet sichtbares Festmachen ('boat:moored'), erst dann läuft die Liegezeit
   ctx.ansichtMeldetFest = () => !!game.boatsVisible;
-  game.on('boat:moored', (d) => { if (state && d?.id != null) sim.shortStayDocked(state, ctx, d.id); });
+  // (nur am Liegeplatz, nicht an der Warteboje oder im Ankerfeld)
+  game.on('boat:moored', (d) => {
+    const b = state && d?.id != null ? state.boats[d.id] : null;
+    if (b && d.berth != null && b.berthId != null && String(b.berthId).startsWith(String(d.berth))) sim.shortStayDocked(state, ctx, d.id);
+  });
   // Päckchen (P27): Die Ansicht (render/paeckchen.js) prüft, ob das Boot außen frei im Wasser läge.
   // Ohne Ansicht (Tests, Balancing) gilt jeder Päckchenplatz als frei.
   // Platz zugeparkt: ein Boot außen im Päckchen liegt in seinem Anfahrweg (nur mit Ansicht)
