@@ -4,6 +4,10 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 15.11.2026
+
+- Neu: Liegende Boote umlegen. Ein Gast in seiner Box lässt sich jetzt kurz gedrückt halten, bis sich der Ring um den Finger füllt, und dann an der Leine in eine andere leuchtende Box ziehen; das Boot legt ab und fährt sichtbar hinüber. Liegegeld und Nächte bleiben, Strom in der neuen Box zählt ab dem nächsten Morgen. Einmal umlegen nimmt eine Crew hin, ab dem zweiten Mal kostet es einen halben Anker in ihrer Bewertung (das Schild sagt es vor dem Loslassen). Auch beim Ausbau legen Gäste von wegfallenden Plätzen jetzt um, statt abzureisen, solange eine passende Box frei ist, und den Gast auf einem Dauerplatz kann man ebenso wegziehen.
+
 ## 14.11.2026
 
 - Der Hafen wächst sichtbar mit: Aus der Holzbude des Hafenmeisters wird ein Haus mit Ausguck und später mit Anbau, das Hafenbüro bekommt einen Seitenflügel und im Seehafen einen Lotsenturm mit drehendem Radar, Kiosk und Restaurant bekommen Terrasse und Obergeschoss, Wohnhäuser werden aufgestockt und an der Hafenstraße stehen Stadthäuser mit Läden. Das Dorf wächst vom alten Kern nach außen, und an der Landstraße entsteht Stufe für Stufe eine Häuserzeile. Beim Aufstieg wachsen neue Gebäude aus dem Boden.

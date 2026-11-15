@@ -228,7 +228,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F1 | Päckchen liegen: bei vollem Hafen längsseits an ein gleich großes Boot, halbes Liegegeld, beide Crews einen halben Anker schlechter | offen | P27 |
 | F2 | Anmeldung per Funk: morgens melden sich ein bis zwei Boote an, Platz freihalten gibt Bonus | erledigt (PR 288, [funk-anmeldung.md](funk-anmeldung.md)) | P28 |
 | F3 | Flottillen: drei bis fünf Boote wollen am selben Steg liegen (Feld `group`) | offen | P32 |
-| F4 | Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung | offen | P33 |
+| F4 | Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung | erledigt (P33) | P33 |
 | F5 | Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld `exposed`) | offen | P34 |
 | F6 | Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison | offen | P35 |
 | F7 | Baggern: Wassertiefe je Steg als Bauprojekt | offen | P29 |
@@ -681,7 +681,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P30 | Stege nachrüsten | F8 | neu |
 | P31 | Neue Gästewünsche | F9 | neu |
 | P32 | Flottillen | F3, Gruppen-Ankunft | neu |
-| P33 | Liegende Boote umlegen | F4 | neu |
+| P33 | Liegende Boote umlegen | F4 | erledigt |
 | P34 | Wind im Hafen spürbar machen | F5, F35 | neu |
 | P35 | Preisstufe am Hafenbüro | F6 | neu |
 | P36 | Bojenfeld im See | F10 | neu |
