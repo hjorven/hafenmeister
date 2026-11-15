@@ -126,6 +126,7 @@ export function init(game) {
       case 'holz': y = deck('holz', 0.86); break;
       case 'schwimmsteg': y = deck('schwimmsteg', 0.46); break;
       case 'kai': y = deck('kai', 1.3); break;
+      case 'pier': y = deck('pier', 1.6); break;
       case 'mole': y = Math.max(1.4, hoeheLand(x, z)); break;
       case 'bruecke': y = 1.9; break;
       case 'boot': y = BORD_HOEHE[klasse] ?? 0.8; break;
@@ -141,6 +142,7 @@ export function init(game) {
     if (!b?.items) return [];
     const box = new THREE.Box3();
     const out = [];
+    const grundriss = () => [box.min.x / U, -box.max.z / U, box.max.x / U, -box.min.z / U];
     for (const it of b.items) {
       if (!it.mesh || !it.mesh.parent || !it.mesh.visible) continue;
       if (it.art === 'molenfeuer' || it.art === 'wellenbrecher' || it.art === 'bootsschuppen') continue;
@@ -151,6 +153,7 @@ export function init(game) {
         id: it.id, art: it.art,
         x: p.x / U, y: -p.z / U,
         halbBreite: (box.max.x - box.min.x) / 2 / U,
+        box: it.art === 'seebruecke' || it.art === 'strandkoerbe' ? null : grundriss(),
         dreh: it.mesh.rotation.y,
         tuer: e && it.art !== 'strandkoerbe' ? { x: e.x / U, y: -e.z / U } : null,
       });
@@ -161,16 +164,36 @@ export function init(game) {
       if (!id || !P.SERVICE_ZIELE.includes(id) || !c.visible) continue;
       box.setFromObject(c);
       out.push({ id: `service-${id}`, art: id, x: c.position.x / U, y: -c.position.z / U,
-        halbBreite: (box.max.x - box.min.x) / 2 / U, tuer: null });
+        halbBreite: (box.max.x - box.min.x) / 2 / U, box: null, tuer: null });
+    }
+    return out;
+  }
+
+  // Alles, was sonst an Land steht und im Weg ist: Teile der Gebaeude, Services und Anlagen (Werft, Winterlager,
+  // Fischhalle ...). Je Mesh der Grundriss, wenn es hoeher als 1 m ist; Flaches (Stege, Wege, Plaetze) zaehlt nicht,
+  // Riesiges (Gelaende, Wasserflaechen) auch nicht.
+  function hindernisListe() {
+    const out = [];
+    const box = new THREE.Box3();
+    for (const gruppe of [game.services?.gruppe, game.buildings?.group, game.scene?.getObjectByName?.('ziel-deko')]) {
+      if (!gruppe) continue;
+      gruppe.updateMatrixWorld?.(true);
+      gruppe.traverseVisible?.((o) => {
+        if (!o.isMesh || o.isInstancedMesh || !o.geometry) return;
+        box.setFromObject(o);
+        if (box.isEmpty() || box.max.y - box.min.y < 1) return;
+        const bx = box.max.x - box.min.x, bz = box.max.z - box.min.z;
+        if (bx > 45 || bz > 45 || bx * bz < 0.3) return;
+        out.push({ box: [box.min.x / U, -box.max.z / U, box.max.x / U, -box.min.z / U] });
+      });
     }
     return out;
   }
 
   function neuesNetz() {
-    const hoehe = (x, z) => game.landscape?.hoeheBei?.(x, z) ?? game.landschaft?.hoeheBei?.(x, z);
-    // Kueste je Gelaendeform und Seed: Nehrungsweg, Strand und Badestellen nur, wo wirklich Land ist
-    const istLand = (px, py) => { const h = hoehe(px * U, -py * U); return h == null || h > 0.05; };
-    netz = baueNetz({ hafen: HAFEN, stufe: Math.min(5, stufe), gebaeude: gebaeudeListe(), istLand });
+    // Gelaende je Kuestentyp und Seed: das Netz liegt nur auf trockenem, freiem Boden (people/netz.js)
+    const region = game.landscape?.region ?? game.landschaft?.region ?? game.state?.region ?? 'ostsee';
+    netz = baueNetz({ hafen: HAFEN, stufe, region: region === 'nordsee' ? 'nordsee' : 'ostsee', gebaeude: gebaeudeListe(), hindernisse: hindernisListe() });
     api.netz = netz;
   }
 
@@ -724,10 +747,12 @@ export function init(game) {
     const dx = (p1.x - p0.x) / len, dz = (p1.z - p0.z) / len;
     // seitlich versetzt, damit sich niemand genau auf derselben Linie bewegt (nicht an Bord-Enden)
     const art0 = netz.nodes[p0.n].art, art1 = netz.nodes[p1.n].art;
-    const seite = art0 === 'boot' || art1 === 'boot' ? 0 : art0 === 'land' && art1 === 'land' ? a.seite * 4 : a.seite;
+    const boden0 = art0 === 'land' || art0 === 'sand', boden1 = art1 === 'land' || art1 === 'sand';
+    const seite = art0 === 'boot' || art1 === 'boot' ? 0 : boden0 && boden1 ? a.seite * 1.8 : a.seite;
     tmp.x = p0.x + (p1.x - p0.x) * f - dz * seite;
     tmp.z = p0.z + (p1.z - p0.z) * f + dx * seite;
-    tmp.y = p0.y + (p1.y - p0.y) * f;
+    // Auf dem Boden der Hoehe folgen (gerade gezogene Wege sind lang und gehen ueber Kuppen)
+    tmp.y = boden0 && boden1 ? hoeheLand(tmp.x, tmp.z) : p0.y + (p1.y - p0.y) * f;
     a.x = tmp.x; a.y = tmp.y; a.z = tmp.z;
     a.blick = Math.atan2(-dz, dx);
   }
@@ -952,6 +977,8 @@ export function init(game) {
   // Gekauftes Gebaeude: buildings.js stellt es im selben Ereignis auf, danach Netz erneuern
   game.on('build', () => { if (netz) queueMicrotask(netzErneuern); });
   game.on('sim:change', (e) => { if (netz && e?.reason === 'load') queueMicrotask(netzErneuern); });
+  // Gelaende neu gebaut (Region, Kuestentyp beim Laden): Netz auf den neuen Boden legen
+  game.on('landschaft:geaendert', () => { if (netz) queueMicrotask(netzErneuern); });
   game.on('stufe', (n) => setStage(typeof n === 'object' ? n?.stufe ?? n?.stage : n));
   // Neues Angebot an Land (services.js stellt das Modell im selben Ereignis auf): Netz erneuern wie bei 'build'
   game.on('services:gebaut', ({ id } = {}) => {

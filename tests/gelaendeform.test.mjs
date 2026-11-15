@@ -187,7 +187,7 @@ test('Menschenwege (Nehrung, Strand, Badestellen) liegen in jeder Geländeform a
       for (const st of [1, 3, 5]) {
         const reg = REGIONEN.ostsee;
         const istLand = (x, y) => punkt(x, y, st, reg).h > 0.05;
-        const netz = baueNetz({ hafen: HAFEN, stufe: st, gebaeude: [], istLand });
+        const netz = baueNetz({ hafen: HAFEN, stufe: st, gebaeude: [] });
         for (const i of netz.duenen) {
           const n = netz.nodes[i];
           assert.ok(istLand(n.x, n.y), `Form ${F.nr} Stufe ${st}: Dünenweg bei (${n.x}, ${n.y}) im Wasser`);
