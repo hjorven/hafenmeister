@@ -348,7 +348,7 @@ Stand dieses Abschnitts: 15.11.2026, jede Zeile am Code geprüft, `main` bei `c0
 ### Als Nächstes
 
 - **Welle 0 abschließen:** Pulk beim gleichzeitigen Ablegen (P66), Großschiffwege an allen 15 Küsten (P84), danach Abnahme-Serie über 15 Küsten.
-- **Grundprobleme und Prüfung:** Zusammenspiel-Prüfung in drei Threads (P85), Prüfwerkzeuge auf 15 Küsten und den neuen Takt (P87), Stegbild-Generator reparieren (P83), Rest des Einstiegs (J5) und des Winters (G5, H5, P20).
+- **Grundprobleme und Prüfung:** Zusammenspiel-Prüfung in drei Threads (P85), Prüfwerkzeuge auf 15 Küsten und den neuen Takt (P87), Rest des Einstiegs (J5) und des Winters (G5, H5, P20).
 - **Extras, Welle 3 und 4:** Services mit eigener Wirkung (P23), Bootsgeschichten fertig (P86), Wind (P34), neue Wünsche (P31), Preisstufe (P35), Flottillen (P32), Stammgäste mit Wirkung (P25), danach die übrigen Pakete P29 bis P53 und P60 in der Reihenfolge des [Arbeitsplans](arbeitsplan.md).
 
 ### Nach 1.0 (Welle 5 und 6)

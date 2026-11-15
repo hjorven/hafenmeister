@@ -9,6 +9,7 @@ import { stegbildSetzen, stegbildWaehlen } from '../web/js/data/stegbild.js';
 import { punkt } from '../web/js/render/landschaft/gelaende.js';
 import { region } from '../web/js/render/landschaft/regionen.js';
 import { pruefeStegbild, zusammenfassen } from '../tools/stegbilder/pruefen.mjs';
+import { variantePruefen, kandidaten } from '../tools/stegbilder/erzeugen.mjs';
 
 const kopie = (o) => JSON.parse(JSON.stringify(o));
 const variante = (nr) => stegbildSetzen(kopie(HAFEN), nr);
@@ -49,6 +50,21 @@ test('jede Variante besteht alle Pruefungen (Ueberlappung, Gasse, Tiefe, Einfahr
     const fehler = pruefeStegbild(variante(nr), { stege: STEGBILDER.stege, stufen: [1, 2, 3, 4, 5] });
     assert.equal(fehler.length, 0, `Variante ${nr}:\n${zusammenfassen(fehler)}`);
   }
+});
+
+test('jede Variante besteht auch Stufe 6 mit Yachtsteg (wie erzeugen.mjs --pruefen)', () => {
+  for (let nr = 1; nr <= N; nr++) {
+    const fehler = variantePruefen(STEGBILDER.varianten[nr - 1]).filter((f) => f.stufe > 5);
+    assert.equal(fehler.length, 0, `Variante ${nr}:\n${zusammenfassen(fehler)}`);
+  }
+});
+
+test('Generator findet weiter neue Varianten (P83: Doppelboxen zaehlen nicht als eigene Boxen)', () => {
+  // Seit den Doppelboxen (PR 321) fand der Generator keine Variante mehr. Zwei bestandene unter den
+  // ersten 60 Startwerten reichen als Nachweis (heute: 7 und 12), die Suche endet nach der zweiten.
+  const gut = kandidaten({ genug: 2, bis: 60 });
+  assert.equal(gut.length, 2, `nur ${gut.length} bestandene Startwerte unter 1 bis 60`);
+  for (const v of gut) assert.equal(variantePruefen(v).length, 0, `Startwert ${v.seed}`);
 });
 
 test('Gelaende ist an jedem Platz jeder Variante so tief wie in den Daten (Toleranz 0,4 m)', () => {

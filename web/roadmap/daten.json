@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "15.11.2026",
-  "commit": "c0bc0c1"
+  "commit": "a345b63"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1543,15 +1543,16 @@
    "id": "P83",
    "titel": "Stegbild-Generator reparieren",
    "inhalt": "tools/stegbilder/erzeugen.mjs findet seit den Doppelboxen (PR 321) keine Variante mehr (\"Steg C passt nicht\", Hinweis aus PR 329), web/js/data/stegbilder.js lässt sich nicht neu erzeugen. Generator an Doppelboxen, Liegelage (data/liegelage.js) und Yachtsteg anpassen, --pruefen in den Testlauf aufnehmen; Spiel und Speicherstände behalten ihre 12 Stegbilder",
-   "thread": "neu",
+   "thread": "erledigt (PR 336)",
    "welle": 1,
    "prs": [
     321,
-    329
+    329,
+    336
    ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -4444,11 +4445,11 @@
     "P87"
    ],
    "zaehler": {
-    "erledigt": 8,
+    "erledigt": 9,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 3,
+    "offen": 2,
     "entfaellt": 1,
     "alle": 13
    }
@@ -4597,11 +4598,11 @@
   }
  ],
  "gesamt": {
-  "erledigt": 35,
+  "erledigt": 36,
   "teilweise": 3,
   "arbeit": 1,
   "frage": 0,
-  "offen": 46,
+  "offen": 45,
   "entfaellt": 1,
   "alle": 86
  },

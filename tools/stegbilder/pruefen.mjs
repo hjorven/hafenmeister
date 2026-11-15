@@ -133,9 +133,18 @@ export function stichproben(poly) {
 
 const RASTER = { x0: -175, x1: 215, y0: -20, y1: 182, z: 1 };
 
+/**
+ * Raster bis hinter den entferntesten Zielpunkt und das Ende jedes Stegs, damit Boote um Stegkoepfe
+ * herum fahren koennen (Yachtsteg Y in Stufe 6 reicht bis y 338, Y01/Y02 liegen an seiner Westseite).
+ */
+export function rasterFuer(punkte) {
+  const yMax = Math.max(RASTER.y1, ...punkte.map((q) => Math.ceil(q[1] + 30)));
+  return { ...RASTER, y1: yMax };
+}
+
 /** Abstandsfeld: Entfernung jeder Rasterzelle zum naechsten Hindernis (Planeinheiten). */
-function abstandsFeld(hindernisse, stufe, reg) {
-  const { x0, x1, y0, y1, z } = RASTER;
+export function abstandsFeld(hindernisse, stufe, reg, raster = RASTER) {
+  const { x0, x1, y0, y1, z } = raster;
   const W = Math.round((x1 - x0) / z), H = Math.round((y1 - y0) / z);
   const fest = new Uint8Array(W * H);
   for (let j = 0; j < H; j++) {
@@ -171,15 +180,25 @@ function abstandsFeld(hindernisse, stufe, reg) {
     if (j < H - 1) { v = Math.min(v, d[k + W] + a); if (i < W - 1) v = Math.min(v, d[k + W + 1] + b); if (i > 0) v = Math.min(v, d[k + W - 1] + b); }
     d[k] = v;
   }
-  return { d, W, H };
+  return { d, W, H, raster };
 }
 
-function erreichbar(feld, radius, start) {
-  const { d, W, H } = feld, { x0, y0, z } = RASTER;
+export function erreichbar(feld, radius, start) {
+  const { d, W, H } = feld, { x0, y0, z } = feld.raster;
   const frei = (k) => d[k] * z > radius;
   const seen = new Uint8Array(W * H);
   const si = Math.floor((start[0] - x0) / z), sj = Math.floor((start[1] - y0) / z);
-  const k0 = sj * W + si;
+  // Liegt am Seepunkt selbst etwas (etwa ein Platz der Stufe 6), zaehlt die freieste Zelle im Umkreis
+  // von 25 Planeinheiten als Start: Boote kommen aus dem offenen Wasser, nicht von genau diesem Punkt.
+  let k0 = sj * W + si;
+  if (!frei(k0)) {
+    const R = Math.round(25 / z);
+    for (let dj = -R; dj <= R; dj++) for (let di = -R; di <= R; di++) {
+      const ii = si + di, jj = sj + dj;
+      if (ii < 0 || jj < 0 || ii >= W || jj >= H || di * di + dj * dj > R * R) continue;
+      if (d[jj * W + ii] > d[k0]) k0 = jj * W + ii;
+    }
+  }
   if (!frei(k0)) return null;
   const q = [k0]; seen[k0] = 1;
   while (q.length) {
@@ -265,7 +284,7 @@ export function pruefeStegbild(hafen, { stege = ['A', 'B', 'C', 'CS', 'D'], stuf
     if (!einfahrt) continue;
     // Einfahrt: Abstandsfeld aus Land, allen Plaetzen, Stegen und festen Hindernissen
     const hind = [...plaetze.map((e) => e.f.platz), ...linien.map((l) => l.poly), ...fest.filter((h) => !h.name.startsWith('Fahrwasser') && !h.name.startsWith('Anker')).map((h) => h.poly)];
-    const feld = abstandsFeld(hind, stufe, reg);
+    const feld = abstandsFeld(hind, stufe, reg, rasterFuer([...plaetze.filter((e) => geprueft.has(e.p.steg)).map((e) => e.f.ziel), ...st.stege.flatMap((l) => l.punkte)]));
     const proKlasse = new Map();
     for (const { p, f } of plaetze) {
       if (!geprueft.has(p.steg)) continue;
