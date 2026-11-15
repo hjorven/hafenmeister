@@ -9,7 +9,7 @@
 // Optionen (alle optional):
 //   --geraet pc|handy|tablet|handyquer  Gerät (Standard pc)
 //   --tempo 500        Spielzeit je Echtzeit (Testschalter ?testtempo=, nur für Tests)
-//   --minuten 60       Höchstdauer in Echtzeit-Minuten
+//   --minuten 120      Höchstdauer in Echtzeit-Minuten (ganzes Spiel rund 115 min)
 //   --bild 10          alle n Sekunden Echtzeit ein Bildschirmfoto
 //   --stufe 1          Startstufe (1 = neues Spiel; ab 2 Testmodus ?stufe=n, der nicht speichert)
 //   --bis 6            Lauf endet, wenn diese Stufe erreicht und ihr Ziel erfüllt ist
@@ -30,12 +30,14 @@ const argv = process.argv.slice(2);
 const opt = (name, dflt) => { const i = argv.indexOf('--' + name); return i >= 0 ? argv[i + 1] : dflt; };
 const GERAET = opt('geraet', 'pc');
 const TEMPO = Number(opt('tempo', 500));
-const MINUTEN = Number(opt('minuten', 60));
+const MINUTEN = Number(opt('minuten', 120));   // ganzes Spiel rund 115 min (5-Minuten-Tag)
 const BILD_S = Number(opt('bild', 10));
 const START = Number(opt('stufe', 1));
 const BIS = Number(opt('bis', 6));
 const WEB = path.resolve(opt('web', path.join(REPO, 'web')));
 const OUT = path.resolve(opt('out', path.join(require('os').tmpdir(), 'zeitraffer')));
+// Saisonlänge für die Speicherprüfung (economy.js zeit.saisonTage, 16 seit PR 331)
+const SAISON = 16;
 const EXTRA = ['gelaende', 'seed', 'stegbild', 'landbild'].filter((k) => opt(k) != null).map((k) => `&${k}=${opt(k)}`).join('');
 
 function ladePlaywright() {
@@ -175,7 +177,9 @@ const PROBE = () => {
   const ecken = (b, k) => { const c = Math.cos(b.h), s = -Math.sin(b.h); const l = b.L * k / 2, w = b.B * k / 2;
     return [[1, 1], [1, -1], [-1, -1], [-1, 1], [1, 0], [-1, 0], [0, 0]].map(([i, j]) => [b.x + c * l * i - s * w * j, b.z + s * l * i + c * w * j]); };
   const sat = (A, B) => { A = A.slice(0, 4); B = B.slice(0, 4); for (const P of [A, B]) for (let i = 0; i < 4; i++) { const [x1, y1] = P[i], [x2, y2] = P[(i + 1) % 4]; const nx = y2 - y1, ny = x1 - x2; let a0 = 1e9, a1 = -1e9, b0 = 1e9, b1 = -1e9; for (const [x, y] of A) { const d = x * nx + y * ny; a0 = Math.min(a0, d); a1 = Math.max(a1, d); } for (const [x, y] of B) { const d = x * nx + y * ny; b0 = Math.min(b0, d); b1 = Math.max(b1, d); } if (a1 < b0 || b1 < a0) return false; } return true; };
-  const wasser = (x, z) => (G.landschaft?.istWasser ? G.landschaft.istWasser(x, z) : true);
+  // Land nur, wo Rechnung (istWasser) und Bild (gezeichnetes Netz, bildwasser.cjs) beide Land zeigen:
+  // am Ufer weichen sie um bis zu eine Rasterzelle ab (P87, docs/zeitraffer.md "Bild und istWasser")
+  const wasser = (x, z) => (G.landschaft?.istWasser ? G.landschaft.istWasser(x, z) : true) || window.__bildWasser?.(x, z) === true;
   const ziele = []; G.stege?.group?.traverse((o) => { if (o.isMesh && o.visible && !(o.material?.transparent && (o.material.opacity ?? 1) < 0.5)) ziele.push(o); });
   const steg = (x, z) => { W.ray.set(new T.Vector3(x, 20, z), new T.Vector3(0, -1, 0)); return W.ray.intersectObjects(ziele, false).find((t) => t.point.y > 0.15) || null; };
   const out = { land: [], steg: [], fest: [], ueberlapp: [], haengt: [], pulk: [], lange: [], sim: [], n: bs.length };
@@ -232,16 +236,21 @@ const PROBE = () => {
     if (u.innen > LANGE_S) out.lange.push({ id: b.id, g: b.g, st: b.st, s: Math.round(u.innen), platz: b.platz, p: [b.x, b.z] });
   }
   for (const k of [...W.unterwegs.keys()]) if (!lebt.has(k)) W.unterwegs.delete(k);
-  // Sim: Boot wartet, kommt aber nie an der Boje an; Box bleibt nach Abfahrt belegt
+  // Sim: Boot wartet, kommt aber nie an der Boje an; Box bleibt nach Abfahrt belegt.
+  // Grenzen für den 5-Minuten-Tag (P17 Teil 2, PR 331; P87): Die Anfahrt von See darf je nach
+  // Hafengröße Minuten dauern, ein Fund ist erst ein Boot, das fast die Notbremse braucht
+  // (queue.approachMaxView, economy.js anfahrtMaxAnsicht, 600 s). Ablegen dauert seit PR 327 höchstens
+  // rund 50 s, eine Box, die nach 120 s noch nicht frei ist, hängt.
   const st = S.state; const seen = new Set();
+  const ANFAHRT_S = 0.9 * (S.ctx.rules.queue?.approachMaxView || 600), BOX_S = 120;
   for (const b of Object.values(st.boats)) {
     if (b.status !== 'waiting' || b.atBuoy) continue;
     const k = 'anfahrt-' + b.id; seen.add(k); if (!W.simSeit.has(k)) W.simSeit.set(k, jetzt);
-    const d = jetzt - W.simSeit.get(k); if (d > 400) out.sim.push({ art: 'erreicht Boje nicht', id: b.id, g: b.size, s: Math.round(d) });
+    const d = jetzt - W.simSeit.get(k); if (d > ANFAHRT_S) out.sim.push({ art: 'erreicht Boje nicht', id: b.id, g: b.size, s: Math.round(d) });
   }
   for (const [pid, l] of Object.entries(st.leaving || {})) {
     const k = 'box-' + pid + '-' + l.boatId; seen.add(k); if (!W.simSeit.has(k)) W.simSeit.set(k, jetzt);
-    const d = jetzt - W.simSeit.get(k); if (d > 400) out.sim.push({ art: 'Box nach Abfahrt nicht frei', id: l.boatId, platz: pid, s: Math.round(d) });
+    const d = jetzt - W.simSeit.get(k); if (d > BOX_S) out.sim.push({ art: 'Box nach Abfahrt nicht frei', id: l.boatId, platz: pid, s: Math.round(d) });
   }
   for (const k of [...W.simSeit.keys()]) if (!seen.has(k)) W.simSeit.delete(k);
   // Geld
@@ -275,6 +284,7 @@ if (require.main !== module) return;
   const { s, url } = await serve(WEB);
   const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const ctx = await browser.newContext({ ...GERAETE[GERAET], deviceScaleFactor: 1, serviceWorkers: 'block' });
+  await ctx.addInitScript(require('./bildwasser.cjs').BILDWASSER);   // window.__bildWasser für PROBE
   const page = await ctx.newPage();
   const fehler = []; const warnungen = []; const fehlendeDateien = [];
   let R = null;
@@ -304,7 +314,7 @@ if (require.main !== module) return;
   await laden(query);
 
   const t0 = Date.now(); const ende = t0 + MINUTEN * 60000;
-  let naechstesBild = 0; let naechsteProbe = 0; let bildNr = 0; let letzteStufe = null; let speicherNachTag = 20;
+  let naechstesBild = 0; let naechsteProbe = 0; let bildNr = 0; let letzteStufe = null; let speicherNachTag = 10;   // dann jede Saison (16 Tage), rund sechsmal in einem Spiel von etwa 100 Tagen
   let letzteMessung = null; const messAbschnitte = [];
   const nahZaehler = {};
 
@@ -381,7 +391,7 @@ if (require.main !== module) return;
       // Speichern und Laden nach jedem Aufstieg (im Testmodus ?stufe=n speichert das Spiel nicht)
       if (START <= 1 && zustand.stufe > 1) await speichernPruefen(`nach Aufstieg auf Stufe ${zustand.stufe}`);
     }
-    if (START <= 1 && zustand.tag >= speicherNachTag) { speicherNachTag += 40; await speichernPruefen(`Tag ${zustand.tag}, mitten im Spiel (${zustand.phase})`); }
+    if (START <= 1 && zustand.tag >= speicherNachTag) { speicherNachTag += SAISON; await speichernPruefen(`Tag ${zustand.tag}, mitten im Spiel (${zustand.phase})`); }
 
     if (w >= naechsteProbe) {
       naechsteProbe = w + 2000;
