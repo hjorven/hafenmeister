@@ -51,6 +51,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 - Zwei Boote im Hafen tragen nie denselben Namen, und gerade abgereiste Namen kommen nicht gleich wieder. Auch die Boote des ersten geladenen Tags haben Namen (233).
 - Menü am Handy quer zweispaltig, damit alles ins Bild passt; ist es doch zu niedrig, zeigt ein Streifen unten, dass weitere Zeilen folgen (233).
 - Bewertungen von Booten außerhalb des Bildes warten, solange eine wichtigere Meldung steht (233).
+- Handy quer: Die Startansicht zeigt den Hafen groß und mittig, mit Einfahrt oben und nur einem schmalen Streifen Land unten, statt vor allem Felder.
 
 ## 13.11.2026
 
