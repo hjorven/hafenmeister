@@ -99,8 +99,10 @@ test('Tag 1: nur Boote der Stufe 1 kommen, verteilt auf den Tag', () => {
   for (const b of s.upcoming) {
     assert.equal(b.typeId, 'S1');
     assert.ok(b.arriveAt <= RULES.dayLength * RULES.arrivalWindow);
-    assert.ok(b.wishes.every((w) => w === 'wc'));
-    assert.ok(b.nights >= 1 && b.nights <= 3);
+    // WC oder ein Angebotswunsch der Stufe 1 (Brötchen)
+    assert.ok(b.wishes.every((w) => w === 'wc' || RULES.offerWishes?.[w]));
+    // Kurzhalter (docs/bootsgeschichten.md) bleiben keine Nacht, sondern einen Tagesanteil
+    assert.ok(b.nights === 0 ? b.stay > 0 && b.stay < 1 : b.nights >= 1 && b.nights <= 3);
   }
   assert.ok(sim.preview(s, ctx).length <= RULES.previewCount);
   const all = sim.tick(s, ctx, RULES.dayLength * RULES.arrivalWindow);

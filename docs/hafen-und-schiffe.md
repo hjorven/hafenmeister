@@ -27,6 +27,7 @@ Ein echtes Vorbild für diese Lage ist der Yachthafen Burgtiefe auf Fehmarn. Er 
 | 3 | Durchstich zur Ostsee | 54 (17 S, 23 M, 14 L) | Kanal durch die Nehrung, zwei Molen mit Molenfeuern, Fahrrinne, ausgebaggertes Becken, Hauptsteg C, Promenade, Mastenkran, Hafenbüro, Sanitärgebäude, Segelclub |
 | 4 | Marina | 76 (17 S, 27 M, 32 L) | Hauptsteg C mit Stichsteg, Schwimmsteg D, Tankstelle, Seenotretter, Travellift, Winterlager, Restaurant |
 | 5 | Küstenmarina | 94 (17 S, 33 M, 41 L, 3 XL) | Außenhafen mit West- und Ostmole, Kai, Fahrgastanleger, Fischereikai mit Fischhalle, Ansteuerungstonne, Gabelung an Steg D, Steg B verlängert |
+| 6 | Seehafen | 100 (17 S, 33 M, 41 L, 5 XL, 4 XXL) | Kreuzfahrtpier, Marinepier, Seenotkreuzer an der Westmole, Yachtsteg vor der Westmole (zwei XL-Plätze, P59) |
 
 Die Zahlen stammen aus den Zeichnungen. Tankstelle und Seenotretter sind keine Liegeplätze und nicht mitgezählt.
 

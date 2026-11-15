@@ -47,8 +47,9 @@ export const SEE = {
   ],
 };
 // Stufe 6: Kreuzfahrtpier P (x -150, Nord-Süd) und Marinepier MA (x -310, Nord-Süd), harbor.js.
-// Gleiche Bahnen wie Stufe 5.
-SEE[6] = SEE[5];
+// Gleiche Bahnen wie Stufe 5, nur biegt die ostwärtige kleine Bahn etwas weiter nördlich um den Kopf
+// des Yachtstegs (steg Y, x -30, bis y 338; Liegeplätze an der Westseite bis y 332).
+SEE[6] = SEE[5].map((b, i) => (i === 0 ? { ...b, pts: b.pts.map(([x, y]) => (x === -34 && y === 330 ? [-8, 350] : [x, y])) } : b));
 
 /**
  * Wo große Gäste der Services liegen (Plan-Einheiten), damit der Test die Bahnen davon fernhält.
@@ -156,9 +157,14 @@ export const FLOTTE = {
     2: ['L1-3', 'L3-1', 'L3-2', 'L4-3'],
     3: ['L2-1', 'L2-2', 'L4-2', 'L4-5'],
     4: ['XL1-1', 'XL1-2', 'XL1-3', 'XL1-4', 'XL1-5', 'XL2-1', 'XL2-2', 'XL2-3', 'XL2-4', 'XL2-5', 'XL3-1', 'XL3-2', 'XL3-3', 'XL3-4', 'XL3-5'],
-    5: ['XXL1-1', 'XXL1-2', 'XXL1-3', 'XXL2-1', 'XXL2-2', 'XXL2-3'],
+    // Großschiffe: Kreuzfahrt, Marine und die großen Seenotkreuzer der Nachbarstationen auf Kontrollfahrt
+    5: ['XXL1-1', 'XXL1-2', 'XXL1-3', 'XXL2-1', 'XXL2-2', 'XXL2-3', 'XXL3-2', 'XXL3-3'],
   },
 };
+// Wie oft ein Vorbeifahrer ab Stufe 5 ein Großschiff ist (statt eines zufälligen Modells aus dem ganzen Topf,
+// in dem die Großschiffe nur rund 6 von 100 wären). Noch nie gesehene Großschiffe kommen bevorzugt
+// (neu: Anteil), damit das Logbuch sich in absehbarer Zeit füllt (Zeitraffer-Fund 15.11.).
+export const GROSSSCHIFF = { anteil: 0.25, neu: 0.8 };
 export const bisStufe = (table, stufe) => Object.entries(table).filter(([k]) => +k <= stufe).flatMap(([, v]) => v);
 
 // Wie viele Boote gleichzeitig unterwegs sind

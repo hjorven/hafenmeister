@@ -58,7 +58,8 @@ export const HAFEN = {
   "FK": "Fischereikai",
   "P": "Kreuzfahrtpier",
   "MA": "Marineanleger",
-  "SK": "Seenotkreuzer"
+  "SK": "Seenotkreuzer",
+  "Y": "Yachtsteg"
  },
  "plaetze": [
   {
@@ -4374,6 +4375,52 @@ export const HAFEN = {
    "tiefe": {
     "6": 5.0
    }
+  },
+  {
+   "id": "Y01",
+   "steg": "Y",
+   "klasse": "XL",
+   "art": "stirn",
+   "laenge": 51.2,
+   "breite": 11.8,
+   "maxLaenge": 40.0,
+   "maxBreite": 8.0,
+   "stufen": [
+    6
+   ],
+   "lage": {
+    "6": [
+     -39.5,
+     250.1,
+     90
+    ]
+   },
+   "tiefe": {
+    "6": 8.5
+   }
+  },
+  {
+   "id": "Y02",
+   "steg": "Y",
+   "klasse": "XL",
+   "art": "stirn",
+   "laenge": 51.2,
+   "breite": 11.8,
+   "maxLaenge": 40.0,
+   "maxBreite": 8.0,
+   "stufen": [
+    6
+   ],
+   "lage": {
+    "6": [
+     -39.5,
+     307.3,
+     90
+    ]
+   },
+   "tiefe": {
+    "6": 8.5
+   }
   }
  ],
  "stufen": {
@@ -5389,9 +5436,9 @@ export const HAFEN = {
     "S": 17,
     "M": 33,
     "L": 41,
-    "XL": 3,
+    "XL": 5,
     "XXL": 4,
-    "gesamt": 98
+    "gesamt": 100
    },
    "plaetze": [
     "A03",
@@ -5491,7 +5538,9 @@ export const HAFEN = {
     "MA01",
     "MA02",
     "P01",
-    "SK01"
+    "SK01",
+    "Y01",
+    "Y02"
    ],
    "stege": [
     {
@@ -5743,6 +5792,21 @@ export const HAFEN = {
       [
        -310.0,
        390.0
+      ]
+     ]
+    },
+    {
+     "steg": "Y",
+     "bauart": "schwimmsteg",
+     "breite": 3.5,
+     "punkte": [
+      [
+       -30.0,
+       220.5
+      ],
+      [
+       -30.0,
+       338.0
       ]
      ]
     },

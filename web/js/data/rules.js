@@ -39,6 +39,12 @@ export function rulesFromEconomy(E = ECONOMY) {
     r.nightsBySize[size] = k.naechte;
   }
   r.nights = [1, 1];   // nur für Bootsarten ohne Klasse in E.klassen
+  // Kurzhalt (docs/bootsgeschichten.md 3.2): Anteil der Boote je Stufe ohne Nacht, Liegezeit als
+  // Tagesanteil [min, max], Tagesliegegeld als Anteil vom Nachtpreis, spätestens um diesen Tagesanteil weg
+  // Bootsgeschichten (web/js/geschichten/regeln.js): Zahlen je Anlass, unverändert durchgereicht
+  r.stories = E.geschichten ?? null;
+  const kh = E.kurzhalt;
+  r.shortStay = kh ? { share: kh.anteil || {}, stay: kh.bleibt || [0.1, 0.3], fee: kh.preis ?? 0.5, latest: kh.spaetestens ?? 0.97, sizes: kh.klassen || null } : null;
   r.wishBonus = E.wunschBonus ?? 0;
   r.sizeByBerths = E.platzMix ?? null;
   // Kassieren: Anteil beim Rundgang und nachts, Vorauszahlung, Trinkgeld für den langen Strich
@@ -92,6 +98,7 @@ export function rulesFromEconomy(E = ECONOMY) {
 
   // Ruf und Bewertung
   const f = E.ruf || {};
+  r.startMoney = E.start?.geld ?? 0;
   r.reputation = { window: f.hoechstens ?? f.fenster, days: f.tage ?? 0, minCount: f.mindestens ?? f.fenster, start: f.start, startSamples: f.startBewertungen ?? 0, min: ANKER_MIN, max: ANKER_MAX };
   r.rating = { noWishes: f.ohneWunsch, min: ANKER_MIN, max: ANKER_MAX, noneMet: f.wunschNote?.keiner ?? ANKER_MIN, allMet: f.wunschNote?.alle ?? ANKER_MAX };
   r.arrivalFactorAtRep = { 1: f.ankunftBasis, 5: f.ankunftBasis + 4 * f.ankunftJeAnker };
@@ -167,6 +174,8 @@ export function rulesFromEconomy(E = ECONOMY) {
   };
   // Passgenau zuweisen (P10)
   r.snug = E.passgenau ? { share: E.passgenau.hoechstensGroesser, rating: E.passgenau.ruf } : null;
+  // Liegende Boote umlegen (P33): so oft ohne Folgen, danach je Mal weniger Anker
+  r.relocate = E.umlegen ? { free: E.umlegen.freiMal, rating: E.umlegen.ruf } : null;
   r.leaveMax = w.ausBoxMax ?? 0;
   r.previewCount = w.vorschau ?? 0;
 

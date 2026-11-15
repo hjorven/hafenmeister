@@ -616,6 +616,105 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "funk-anmeldung/pc-box-frei-gehalten.png"
+  },
+  {
+   "datei": "p66-pr280-handy-bojen-seitlich.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Wartebojen seitlich neben den Stegen (Handy)",
+   "pr": 280,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "fahrwasser/bojen-seitlich/nachher-handy-0.png"
+  },
+  {
+   "datei": "p41-pr315-handy-statistik.jpg",
+   "pakete": [
+    "P41"
+   ],
+   "titel": "Statistik der letzten 30 Tage am Handy",
+   "pr": 315,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "statistik/statistik-handy.png"
+  },
+  {
+   "datei": "p41-pr315-pc-saisonbilanz.jpg",
+   "pakete": [
+    "P41"
+   ],
+   "titel": "Saisonbilanz in der Winterpause am PC",
+   "pr": 315,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "statistik/winter-pc.png"
+  },
+  {
+   "datei": "p33-pr314-handy-umlegen-ziehen.jpg",
+   "pakete": [
+    "P33"
+   ],
+   "titel": "Liegendes Boot halten und in eine andere Box ziehen (Handy)",
+   "pr": 314,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "umlegen/handy-2-ziehen.png"
+  },
+  {
+   "datei": "p33-pr314-pc-umgelegt.jpg",
+   "pakete": [
+    "P33"
+   ],
+   "titel": "Boot umgelegt (PC)",
+   "pr": 314,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "umlegen/pc-2-umgelegt.png"
+  },
+  {
+   "datei": "p26-pr322-handy-fernglas.jpg",
+   "pakete": [
+    "P26"
+   ],
+   "titel": "Fernglas mit Steckbrief am Handy",
+   "pr": 322,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "gesten/handy-fernglas.png"
+  },
+  {
+   "datei": "p26-pr322-pc-hafenhorn.jpg",
+   "pakete": [
+    "P26"
+   ],
+   "titel": "Hafenhorn mit Wellenringen am PC",
+   "pr": 322,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "gesten/pc-hafenhorn.png"
+  },
+  {
+   "datei": "p59-pr321-handy-doppelbox-vorschau.jpg",
+   "pakete": [
+    "P59"
+   ],
+   "titel": "Doppelbox bauen: Vorschau am Handy",
+   "pr": 321,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "vorschau/p59/p59-handy-1-vorschau.png"
+  },
+  {
+   "datei": "p59-pr321-pc-kat-in-doppelbox.jpg",
+   "pakete": [
+    "P59"
+   ],
+   "titel": "Katamaran in der Doppelbox (PC)",
+   "pr": 321,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "vorschau/p59/p59-pc-3-kat.png"
   }
  ]
 }

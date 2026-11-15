@@ -26,6 +26,7 @@ test('jede Variante hat dieselben Plaetze je Stufe wie das Grundbild', () => {
   for (let nr = 1; nr <= N; nr++) {
     const h = variante(nr);
     for (const p of h.plaetze) {
+      if (p.doppel) continue;   // Doppelboxen (P59) entstehen je Stegbild neu aus dessen Boxen
       const g = HAFEN.plaetze.find((q) => q.id === p.id);
       assert.deepEqual(Object.keys(p.lage).sort(), Object.keys(g.lage).sort(), `Variante ${nr} ${p.id}`);
       assert.equal(p.klasse, g.klasse); assert.equal(p.art, g.art);

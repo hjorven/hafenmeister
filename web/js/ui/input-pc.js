@@ -58,13 +58,19 @@ export function init(game) {
   const meters = (m) => (Number.isFinite(m) ? `${m.toLocaleString('de-DE', { maximumFractionDigits: 1 })} m` : '');
   const describe = (hit) => {
     if (!hit) return null;
-    if (game.describe) return game.describe(hit);
+    if (game.describe) { const t = game.describe(hit); if (t) return t; }
+    // Überraschende Gesten (ui/hafengesten.js): Büro und Glocke verraten, was sie können
+    if (hit.type === 'building' && hit.id === 'glocke') return 'Hafenglocke: anklicken';
+    if (hit.type === 'building' && (hit.id === 'hafenmeister' || hit.id === 'hafenbuero')) {
+      const name = hit.id === 'hafenbuero' ? 'Hafenbüro' : 'Hafenmeister';
+      return game.hafengesten?.hornErlaubt?.() ? `${name}: anklicken für das Gästebuch, gedrückt halten für das Hafenhorn (kassiert alles)` : `${name}: anklicken für das Gästebuch`;
+    }
     const b = (hit.type === 'boat' || hit.type === 'coin') ? boatOf(hit.id) : null;
     if (!b) return null;
     if (b.pendingFee > 0) return `${b.name}: ${Math.round(b.pendingFee)} € kassieren`;
     const head = [b.name, b.size && `(${b.size})`, meters(b.length)].filter(Boolean).join(' ');
     if (b.status === 'waiting') return `${head}. Ziehen oder doppelklicken`;
-    if (b.status === 'moored') return `${head}, noch ${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}`;
+    if (b.status === 'moored') return `${head}, ${b.nights === 0 ? 'nur kurz da' : `noch ${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}`}${game.sim?.umlegbar?.(b.id) ? '. Halten und ziehen zum Umlegen' : ''}. Doppelklick: Fernglas`;
     return head || null;
   };
   const visible = (el) => !!el && !el.hidden && !el.disabled && el.offsetParent !== null;
@@ -75,6 +81,7 @@ export function init(game) {
   // Hilfe: zeigt nur Kürzel, deren Funktion es gerade gibt
   const HELP = [
     ['Wartendes Boot ziehen', 'An der Schleppleine in einen leuchtenden Platz ziehen', () => true],
+    ['Liegendes Boot gedrückt halten, dann ziehen', 'In eine andere freie Box umlegen (ab dem zweiten Mal kostet es Bewertung)', () => !!game.sim?.umlegbar],
     ['Doppelklick auf wartendes Boot', 'Boot fährt selbst in den besten Platz', () => true],
     ['Maustaste halten und über Münzen streichen', 'Alles in einem Zug kassieren', () => true],
     ['Tempo-Knöpfe unten links', 'Pause, 1x, 3x, 8x', () => true],
@@ -87,10 +94,15 @@ export function init(game) {
     ['<kbd>B</kbd>', 'Bauen', () => visible(byId('btn-build'))],
     ['<kbd>N</kbd>', 'Gästebuch', () => !!game.gaestebuch],
     ['<kbd>J</kbd>', 'Logbuch und Chronik', () => !!game.logbuch],
+    ['<kbd>T</kbd>', 'Statistik der letzten 30 Tage', () => !!game.statistik],
     ['<kbd>Leertaste</kbd>', 'Pause', () => !!game.setPaused],
     ['<kbd>Esc</kbd> oder Rechtsklick', 'Abbrechen', () => true],
     ['Mausrad, <kbd>+</kbd> <kbd>-</kbd>', 'Zoomen zum Mauszeiger', () => true],
     ['Doppelklick auf Wasser oder Land', 'Näher heran', () => true],
+    ['Doppelklick auf ein Boot im Hafen', 'Fernglas: Kamera folgt dem Boot, dazu sein Steckbrief', () => !!game.fernglas],
+    ['Hafenmeister oder Hafenbüro gedrückt halten', 'Hafenhorn: alle Münzen auf einmal kassieren', () => !!game.hafengesten?.hornErlaubt?.()],
+    ['Maustaste auf dem Wasser gedrückt halten', 'Wellenringe', () => !!game.hafengesten],
+    ['<kbd>H</kbd>', 'Möwen aufscheuchen (einzelne auch anklicken)', () => !!game.hafengesten],
     ['Ziehen, <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>, Pfeiltasten', 'Karte verschieben', () => true],
     ['Rechte Maustaste ziehen nach links oder rechts, Umschalt + Mausrad, <kbd>Q</kbd> <kbd>E</kbd>', 'Hafen drehen', () => !!cam.rotateBy],
     ['Rechte Maustaste ziehen nach oben oder unten, Alt + Mausrad, <kbd>R</kbd> <kbd>V</kbd>, <kbd>Bild auf</kbd> <kbd>Bild ab</kbd>', 'Kamera neigen: flach über das Wasser oder steil von oben', () => !!cam.tiltFree],

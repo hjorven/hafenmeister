@@ -2,7 +2,7 @@
 
 Stand: 14.11.2026. Status: gebaut, läuft, gebündelt. Der veröffentlichte Stand steht unter https://hjorven.github.io/hafenmeister/version.txt .
 
-Das Spiel liegt im Ordner `web/` und wird gebündelt veröffentlicht: alle 30 Minuten (zur Minute 7 und 37) schaut der Workflow nach, ob sich seit der veröffentlichten Fassung etwas an der Seite geändert hat, und baut nur dann. Viele Merges hintereinander ergeben so einen einzigen Bau. Nach einem Merge ist die Änderung also spätestens nach rund 30 bis 40 Minuten online (GitHub startet Zeitpläne manchmal ein paar Minuten später). Adresse:
+Das Spiel liegt im Ordner `web/` und wird gebündelt veröffentlicht, nicht nach jedem Merge: Nach einem Merge, der die Seite betrifft, wartet der Workflow 10 Minuten. Kommt in der Zeit ein weiterer Merge, beginnt die Pause neu. Viele Merges hintereinander ergeben so einen Bau, rund 11 Minuten nach dem letzten. Zusätzlich schaut ein Zeitplan alle 30 Minuten nach, falls ständig gemergt wird (GitHub startet Zeitpläne nur nach Kräften, am 14.11. kam der erste erst nach knapp 4 Stunden). Gebaut wird nur, wenn sich seit der veröffentlichten Fassung wirklich etwas an der Seite geändert hat. Adresse:
 
 **https://hjorven.github.io/hafenmeister/**
 
@@ -16,7 +16,7 @@ Solange es `web/index.html` noch nicht gibt, erscheint dort eine Platzhalterseit
 
 ## Sofort veröffentlichen
 
-Unter https://github.com/hjorven/hafenmeister/actions/workflows/pages.yml auf **Run workflow** klicken (Branch `main`). Von Hand gestartet baut der Workflow immer, auch ohne Änderung. Dauer rund eine Minute.
+Unter https://github.com/hjorven/hafenmeister/actions/workflows/pages.yml auf **Run workflow** klicken (Branch `main`). Von Hand gestartet baut der Workflow immer, ohne Pause und auch ohne Änderung. Dauer rund eine Minute.
 
 Direkter Link: https://github.com/hjorven/hafenmeister/settings/pages
 
@@ -59,7 +59,7 @@ Auf Handy oder Tablet im selben WLAN testen: statt `localhost` die IP-Adresse de
 
 ## Wie es funktioniert
 
-- `.github/workflows/pages.yml`: läuft alle 30 Minuten oder per Hand. `tools/pages-geaendert.sh` liest den Commit aus der veröffentlichten `version.txt` und vergleicht mit `main` nur die Dateien, aus denen die Seite entsteht (`web/`, `docs/roadmap.md`, `docs/roadmap-bilder.json`, die Bau-Skripte in `tools/`, der Workflow). Keine Änderung: der Lauf endet nach wenigen Sekunden ohne Bau. Ist `version.txt` nicht erreichbar, wird sicherheitshalber gebaut. Nach dem Bau prüft der Workflow, dass `offline-liste.json` (P61) in der Seite steckt. Nur der Deploy-Job darf auf Pages schreiben; Regeln für Rechte und gepinnte Actions in [sicherheit.md](sicherheit.md).
+- `.github/workflows/pages.yml`: läuft nach Merges mit 10 Minuten Sammelpause, alle 30 Minuten nach Zeitplan oder per Hand. `tools/pages-geaendert.sh` liest den Commit aus der veröffentlichten `version.txt` und vergleicht mit `main` nur die Dateien, aus denen die Seite entsteht (`web/`, `docs/roadmap.md`, `docs/roadmap-bilder.json`, die Bau-Skripte in `tools/`, der Workflow). Keine Änderung: der Lauf endet nach wenigen Sekunden ohne Bau. Ist `version.txt` nicht erreichbar, wird sicherheitshalber gebaut. Nach dem Bau prüft der Workflow, dass `offline-liste.json` (P61) in der Seite steckt. Nur der Deploy-Job darf auf Pages schreiben; Regeln für Rechte und gepinnte Actions in [sicherheit.md](sicherheit.md).
 - `tools/build-pages.sh`: kopiert `web/` nach `_site/` (oder legt die Platzhalterseite an), ergänzt `.nojekyll` und `version.txt`.
 - `tools/check-pages.sh`: sucht absolute Pfade und Verweise auf Dateien, die es nicht gibt.
 

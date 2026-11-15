@@ -13,6 +13,9 @@
 //   node tools/balance.mjs --pruefen       nur Daten prüfen (Exit-Code 1 bei Fehlern)
 //   node tools/balance.mjs --json          Ergebnis als JSON (für CI oder Diagramme)
 //   node tools/balance.mjs --verlauf 1     Tagesprotokoll eines Laufs (Seed 1, geschickt)
+//   node tools/balance.mjs --spieler zeitraffer   wie der Bot im Zeitraffer (Vergleich mit dem Spiel)
+//   node tools/balance.mjs --ablegen-heute        Ablegen so langsam wie am 14.11. gemessen
+//   node tools/balance.mjs --ohne-ansicht         nur die Regeln, ohne Zeit der 3D-Ansicht
 //
 // Services kommen aus web/js/services/rules.js, Ereignisse sind nicht eingerechnet
 // (siehe docs/balancing.md).
@@ -28,6 +31,7 @@ import { erstelleRegeln, mitZahlen, neuerZustand } from '../web/js/services/rule
 import { createScheduler } from '../web/js/events/scheduler.js';
 import { pruefeZahlen } from './zahlen.mjs';
 import { zufallAus } from '../web/js/random.js';
+import { installiere as geschichtenEinhaengen, wetterWorte } from '../web/js/geschichten/regeln.js';
 
 // Hat harbor.js für eine Stufe aus economy.js noch keine Plätze (Stufe 6 vor dem Export der
 // Pier), rechnet das Werkzeug mit den Plätzen der letzten Hafenstufe weiter und sagt das.
@@ -81,7 +85,9 @@ export function pruefen() {
       if (anzahl(n) < anzahl(n - 1)) fehler.push(`Stegprojekt ${p.id}: in Stufe ${n} ${anzahl(n)} statt ${anzahl(n - 1)} Plätze (Ersatz fehlt)`);
     }
   }
+  // Doppelboxen (P59) sind ein Umbau zweier Boxen, kein eigener Platz eines Projekts
   for (const p of HAFEN.plaetze) {
+    if (p.doppel) continue;
     if (!besitz.has(p.id)) fehler.push(`Platz ${p.id} (Stufen ${p.stufen.join(',')}) gehört zu keinem Projekt`);
   }
   // Je Stufe: Summe der Plätze wie im Katalog
@@ -117,6 +123,22 @@ export function pruefen() {
 // Die echten Spielregeln (web/js/sim.js) mit den Zahlen aus economy.js, dazu die Services
 // (web/js/services/rules.js). Ein Bot spielt: weist Boote zu, kassiert, baut.
 const RULES = sim.rulesFromEconomy(E);
+
+// Was die 3D-Ansicht im echten Spiel an Zeit kostet und die Regeln allein nicht kennen (P17,
+// docs/balancing.md "Rechnung und Spiel"). Gemessen mit dem Zeitraffer im Browser (Messung im Bot von
+// tools/zeitraffer/lauf.cjs, Ergebnis "messung" in ergebnis-<gerät>.json).
+// - anfahrt: Sekunden von der Ankunft im Revier bis zur Warteboje (ohne Ansicht gilt anfahrtMax).
+// - ablegen: Sekunden, die ein abreisendes Boot seine Box hält, bis es sichtbar heraus ist. Ohne
+//   Ansicht wird die Box nach ausBoxMax frei. Gerechnet wird mit dem Ziel nach dem Fix im Boote-
+//   Thread (zügig heraus, wie im echten Hafen); --ablegen-heute nimmt die am 14.11. gemessenen Zeiten
+//   (Boote hängen ab Stufe 3 oft mehr als einen Spieltag in der Box, an den Boote-Thread gemeldet).
+// --ohne-ansicht rechnet nur die Regeln wie bis P17.
+export const ANSICHT = {
+  anfahrt: 20,
+  ablegen: { 1: 25, 2: 25, 3: 25, 4: 25, 5: 25, 6: 25 },
+  ablegenHeute: { 1: 20, 2: 20, 3: 115, 4: 140, 5: 145, 6: 100 },
+};
+const RULES_ANSICHT = { ...RULES, queue: { ...RULES.queue, approachMax: ANSICHT.anfahrt } };
 const SVC = erstelleRegeln(mitZahlen(SERVICES, E.services));
 const PLATZ = new Map(HAFEN.plaetze.map((p) => [p.id, p]));
 
@@ -126,17 +148,32 @@ const PROFILE = {
   // schaut nur alle 20 s auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz,
   // kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus
   gemuetlich: { zuweisenAlle: 20, kaufAlleTage: 2, auslassen: 0.35, fehlZuweisung: 0.25 },
+  // spielt wie der Bot im Zeitraffer (tools/zeitraffer/lauf.cjs): weist nie zu (Boote fahren selbst
+  // ein), kassiert sofort, kauft jeden Tag in derselben Reihenfolge wie der Bot. Dient zum Vergleich
+  // der Rechnung mit dem echten Spiel im Browser (docs/balancing.md, "Rechnung und Spiel").
+  zeitraffer: { zuweisenAlle: 1, kaufAlleTage: 1, auslassen: 0, fehlZuweisung: 0, keinZuweisen: true, kaufWieZeitraffer: true },
   // tut nichts: weist nie zu (Boote fahren nach selbstEinfahrenNach selbst ein), kassiert nie (nur die
   // Kasse des Vertrauens nachts), kauft nichts. Zeigt, was das Spiel ohne Spieler hergibt.
   untaetig: { zuweisenAlle: 5, kaufAlleTage: Infinity, auslassen: 1, fehlZuweisung: 0, nichts: true },
 };
 // Spielertypen im Bericht, die bis zum Abschluss spielen
 const SPIELER = ['geschickt', 'gemuetlich'];
+let MIT_ANSICHT = true;
+let ABLEGEN_HEUTE = false;
 
-export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true, beobachter = null } = {}) {
+export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true, beobachter = null, ansicht = MIT_ANSICHT } = {}) {
   const prof = PROFILE[profilName];
-  const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: RULES });
-  const state = createState({ seed, rules: RULES });
+  const regeln = ansicht ? RULES_ANSICHT : RULES;
+  const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: regeln });
+  const state = createState({ seed, rules: regeln });
+  // Wie die Ansicht im Spiel: abreisende Boote melden 'boot:noch-in-box', bis ihre Ablegezeit um ist
+  const ablegen = () => {
+    if (!ansicht) return;
+    const halten = (ABLEGEN_HEUTE ? ANSICHT.ablegenHeute : ANSICHT.ablegen)[state.stage] ?? 0;
+    for (const l of Object.values(state.leaving || {})) {
+      if (l.off && (l.total ?? 0) + RULES.leaveMax < halten) sim.holdLeaving(state, l.boatId);
+    }
+  };
   const r = rng(seed + 7919);
   const svc = neuerZustand();
   let effekte = SVC.effekte(svc);
@@ -144,6 +181,8 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   sim.addHook(ctx, 'modifiers', () => ({ sizeFactor: effekte.gaeste, offers: { ...effekte.angebote } }));
   // Ereignisse (Nebel, Sommertag, Sturm, Regatta, Hafenfest, Winter) wie im Spiel
   const plan = mitEreignissen ? createScheduler({ seed }) : null;
+  // Bootsgeschichten wie im Spiel (geschichten/geschichten.js): Anlass je Boot, besondere Tage, Tagestörns
+  geschichtenEinhaengen(ctx, sim, { umfeld: (st, tag = st.day) => { const w = plan?.weather?.(tag); return { ereignis: w?.event ?? null, wetter: wetterWorte(w) }; } });
   const gebaeude = () => {
     const b = { ...state.buildings, ...svc.gebaut };
     if (effekte.freischalten.includes('regatta') || svc.gebaut.segelclub) b.segelclub = Math.max(b.segelclub ?? 0, 1);
@@ -185,13 +224,13 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
       const vorhanden = new Set(sim.availableBerths(state, ctx).map((b) => PLATZ.get(b.id)?.klasse));
       const bedarf = [...klassen].some((k) => abgewiesen[k] > 0 || !vorhanden.has(k)) || (stirn && abgewiesen.stirn > 0);
       const letzteStufe = !E.stufen[state.stage - 1].ausbau;  // Abschluss braucht alle Plätze
-      o.push({ art: 'steg', id: p.id, kosten: p.cost, prio: bedarf ? 1 : letzteStufe ? 2 : 3,
+      o.push({ art: 'steg', id: p.id, kosten: p.cost, prio: prof.kaufWieZeitraffer ? 1 : bedarf ? 1 : letzteStufe ? 2 : 3,
         tu: () => sim.buildJettyProject(state, ctx, p.id).ok });
     }
     for (const k of Object.keys(RULES.facilities)) {
       const u = sim.facilityUpgrade(state, ctx, k);
       if (!u || u.reason === 'max' || u.reason === 'stage') continue;
-      o.push({ art: 'bauwerk', id: k, kosten: u.cost, prio: unerfuellt[k] > 0 ? 1 : 4,
+      o.push({ art: 'bauwerk', id: k, kosten: u.cost, prio: prof.kaufWieZeitraffer ? 3 : unerfuellt[k] > 0 ? 1 : 4,
         tu: () => sim.upgradeFacility(state, ctx, k).ok });
     }
     const on = state.office + 1;
@@ -205,7 +244,8 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
       // In der letzten Stufe zählen Besuche großer Schiffe: Anleger mit Besuchen zuerst
       // (auf sie wird gespart wie auf einen fehlenden Steg)
       const besuch = !E.stufen[state.stage - 1].ausbau && GROSSSCHIFF_BESUCHE.includes(pr.def?.wirkung?.besuch?.art);
-      o.push({ art: 'service', id: s.id, kosten: pr.kosten, prio: besuch ? 1 : 3, tu: () => {
+      const prioSvc = prof.kaufWieZeitraffer ? (state.stage >= RULES.maxStage ? 1 : 3) : besuch ? 1 : 3;
+      o.push({ art: 'service', id: s.id, kosten: pr.kosten, prio: prioSvc, tu: () => {
         if (!sim.spend(state, pr.kosten)) return false;
         SVC.bauen(svc, s.id, { stufe: state.stage, ruf: rufWert(), tag: state.day });
         effekte = SVC.effekte(svc);
@@ -238,7 +278,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
       }
       const alle = optionen();
       const dringend = alle.filter((o) => o.prio === 1).sort((a, b) => a.kosten - b.kosten)[0];
-      if (dringend && dringend.kosten > state.money) break;
+      if (!prof.kaufWieZeitraffer && dringend && dringend.kosten > state.money) break;
       const opts = alle.filter((o) => o.kosten <= state.money);
       if (!opts.length) break;
       opts.sort((a, b) => a.prio - b.prio || a.kosten - b.kosten);
@@ -266,9 +306,10 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     const winter = sim.season(state, ctx).winter;
     let liegend = [];
     while (state.day === tag) {
-      const events = sim.tick(state, ctx, prof.zuweisenAlle);
+      const events = [];
+      for (let t = 0; t < prof.zuweisenAlle; t++) { events.push(...sim.tick(state, ctx, 1)); ablegen(); }
       beobachter?.(state, ctx, events);
-      if (!prof.nichts && state.phase === 'day') {
+      if (!prof.nichts && !prof.keinZuweisen && state.phase === 'day') {
         // Mit Hafenbüro-Automatik weist der Spieler nur noch die Sonderfälle selbst zu
         const buero = sim.officeAutomatic(state, ctx);
         for (const id of [...state.queue]) {
@@ -388,6 +429,11 @@ function bericht(laeufe, json) {
 // Nur wenn direkt gestartet, nicht beim Import aus den Tests.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const args = process.argv.slice(2);
+  if (args.includes('--ohne-ansicht')) MIT_ANSICHT = false;
+  if (args.includes('--ablegen-heute')) ABLEGEN_HEUTE = true;
+  // --spieler zeitraffer: wie der Bot im Zeitraffer (zum Vergleich mit dem echten Spiel)
+  const sp = args.indexOf('--spieler');
+  if (sp >= 0) SPIELER.splice(0, SPIELER.length, ...args[sp + 1].split(','));
   const wert = (name, std) => { const i = args.indexOf(name); return i >= 0 ? Number(args[i + 1]) : std; };
   const fehler = pruefen();
   if (fehler.length) {

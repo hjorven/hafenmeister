@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "14.11.2026",
-  "commit": "19f4ad4"
+  "datum": "15.11.2026",
+  "commit": "75cfbdc"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -441,12 +441,13 @@
    "id": "P17",
    "titel": "Start und frühe Stufen straffen",
    "inhalt": "Ü15, Ü16, Startwerte dokumentieren",
-   "thread": "bestehend: \"Balancing für 94 Liegeplätze ausarbeiten\" (nach P06)",
+   "thread": "erledigt bis auf die Schlussmessung im Zeitraffer nach dem Ablege-Fix (PR 318, Thread \"Aufstieg ausbalancieren\"; Rechnung und Spiel in docs/balancing.md)",
    "welle": 2,
    "prs": [
     237,
     252,
-    287
+    287,
+    318
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -553,10 +554,11 @@
    "id": "P21",
    "titel": "Logbuch und Hafenchronik zeigen",
    "inhalt": "Logbuch (Note 1), F36, sim:logbookNew",
-   "thread": "erledigt (PR 274, docs/logbuch.md, SAVE_VERSION 3)",
+   "thread": "erledigt (PR 274, docs/logbuch.md, SAVE_VERSION 3; Großschiffe und Fischkutter im Logbuch PR 305)",
    "welle": 2,
    "prs": [
-    274
+    274,
+    305
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -656,17 +658,22 @@
    "id": "P26",
    "titel": "Überraschende Gesten fertig bauen",
    "inhalt": "Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), audio/README.md",
-   "thread": "neu",
+   "thread": "erledigt (PR 322, docs/hafengesten.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    322
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "L3",
     "L4",
     "L5"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    61,
+    62
+   ]
   },
   {
    "id": "P27",
@@ -719,14 +726,16 @@
    "id": "P30",
    "titel": "Stege nachrüsten",
    "inhalt": "F8",
-   "thread": "neu",
+   "thread": "erledigt (PR 297, nachruesten.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    297
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F8"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -763,15 +772,20 @@
    "id": "P33",
    "titel": "Liegende Boote umlegen",
    "inhalt": "F4",
-   "thread": "neu",
+   "thread": "erledigt (PR 314)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    314
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F4"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    59,
+    60
+   ]
   },
   {
    "id": "P34",
@@ -876,16 +890,21 @@
    "id": "P41",
    "titel": "Statistik und Saisonbilanz",
    "inhalt": "F19, F20",
-   "thread": "neu",
+   "thread": "erledigt (PR 315, Thread \"Statistik und Saisonbilanz zeigen\")",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    315
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F19",
     "F20"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    57,
+    58
+   ]
   },
   {
    "id": "P42",
@@ -1145,17 +1164,22 @@
    "id": "P59",
    "titel": "Stege umbauen und Varianten wählen",
    "inhalt": "D5, D6, D9 (neue Gastplätze in Stufe 6)",
-   "thread": "neu (stimmt sich mit \"Stegbild pro Spiel variieren\" ab)",
+   "thread": "teilweise (PR 321: D5, D6 Doppelboxen; D9 neue Gastplätze in Stufe 6 offen, stege-umbauen.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    321
+   ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
     "D5",
     "D6",
     "D9"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "teilweise",
+   "bilder": [
+    63,
+    64
+   ]
   },
   {
    "id": "P60",
@@ -1193,11 +1217,12 @@
    "id": "P62",
    "titel": "Geländeform und Engpass neu bauen",
    "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
-   "thread": "erledigt (PR 246, 271): zehn Küstentypen aus Seed, jede Küste mit Seeweg",
+   "thread": "erledigt (PR 246, 271, 300): zehn Küstentypen aus Seed, jede Küste mit Seeweg; fünf weitere Küsten nach echten Karten (PR 300)",
    "welle": 0,
    "prs": [
     246,
-    271
+    271,
+    300
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1273,7 +1298,7 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
    "welle": 0,
    "prs": [
     81,
@@ -1285,7 +1310,8 @@
     254,
     256,
     258,
-    262
+    262,
+    280
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1299,7 +1325,8 @@
    "bilder": [
     23,
     32,
-    39
+    39,
+    56
    ]
   },
   {
@@ -1684,8 +1711,8 @@
   {
    "code": "Ü16",
    "text": "Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P17): Stufe 1 rund 10, Stufe 2 rund 30 Tage; Dorfhafen 300 €, Steg B 450 €, Ziel Stufe 2 90 Gäste",
    "pakete": [
     "P17"
    ],
@@ -1841,8 +1868,8 @@
   {
    "code": "F4",
    "text": "Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P33)",
    "pakete": [
     "P33"
    ],
@@ -1885,12 +1912,14 @@
   {
    "code": "F8",
    "text": "Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "entfaellt",
+   "statusText": "erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasser mit P31, nachruesten.md",
    "pakete": [
     "P30"
    ],
-   "prs": [],
+   "prs": [
+    297
+   ],
    "abschnitt": "Kernspiel"
   },
   {
@@ -2012,8 +2041,8 @@
   {
    "code": "F19",
    "text": "Statistikseite: Belegung und Einnahmen der letzten 30 Tage, Einnahmen nach Quelle",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P41, Statistik)",
    "pakete": [
     "P41"
    ],
@@ -2023,8 +2052,8 @@
   {
    "code": "F20",
    "text": "Saisonbilanz nach dem Winter",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P41, Winterpause mit Quellen, Belegung, Vergleich)",
    "pakete": [
     "P41"
    ],
@@ -2664,8 +2693,8 @@
   {
    "code": "D3",
    "text": "Frühe Stufen kürzen (= Ü16)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P17)",
    "pakete": [
     "P17"
    ],
@@ -2690,23 +2719,27 @@
   {
    "code": "D5",
    "text": "Zwei Varianten je Steg (viele schmale oder wenige breite Boxen)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 321): je Paar wählbar über Doppelboxen, stege-umbauen.md",
    "pakete": [
     "P59"
    ],
-   "prs": [],
+   "prs": [
+    321
+   ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
   {
    "code": "D6",
    "text": "Boxen umbauen (zwei schmale zu einer breiten)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 321): Doppelbox für Mehrrumpfboote ab Stufe 4, Rückbau möglich",
    "pakete": [
     "P59"
    ],
-   "prs": [],
+   "prs": [
+    321
+   ],
    "abschnitt": "D Ausbaustufen, Stegprojekte und Baumodus"
   },
   {
@@ -3513,8 +3546,8 @@
   {
    "code": "L3",
    "text": "Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt",
    "pakete": [
     "P26"
    ],
@@ -3524,8 +3557,8 @@
   {
    "code": "L4",
    "text": "Fernglas mit Steckbrief",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt",
    "pakete": [
     "P26"
    ],
@@ -3535,8 +3568,8 @@
   {
    "code": "L5",
    "text": "Möwen antippen, Glocke am Steg",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (Glocke steht am Hafenmeisterhaus)",
    "pakete": [
     "P26"
    ],
@@ -4361,11 +4394,11 @@
     "P59"
    ],
    "zaehler": {
-    "erledigt": 1,
-    "teilweise": 2,
+    "erledigt": 4,
+    "teilweise": 3,
     "arbeit": 0,
     "frage": 0,
-    "offen": 16,
+    "offen": 12,
     "entfaellt": 0,
     "alle": 19
    }
@@ -4390,11 +4423,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 1,
+    "erledigt": 2,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 12,
+    "offen": 11,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4449,21 +4482,21 @@
   }
  ],
  "gesamt": {
-  "erledigt": 27,
-  "teilweise": 6,
+  "erledigt": 31,
+  "teilweise": 7,
   "arbeit": 1,
   "frage": 0,
-  "offen": 46,
+  "offen": 41,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 145,
+  "erledigt": 155,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 66,
-  "entfaellt": 0,
+  "offen": 55,
+  "entfaellt": 1,
   "alle": 219
  },
  "bilder": [
@@ -5138,100 +5171,215 @@
    "datum": "2026-11-14",
    "quelle": "funk-anmeldung/pc-box-frei-gehalten.png",
    "nr": 55
+  },
+  {
+   "datei": "p66-pr280-handy-bojen-seitlich.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Wartebojen seitlich neben den Stegen (Handy)",
+   "pr": 280,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "fahrwasser/bojen-seitlich/nachher-handy-0.png",
+   "nr": 56
+  },
+  {
+   "datei": "p41-pr315-handy-statistik.jpg",
+   "pakete": [
+    "P41"
+   ],
+   "titel": "Statistik der letzten 30 Tage am Handy",
+   "pr": 315,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "statistik/statistik-handy.png",
+   "nr": 57
+  },
+  {
+   "datei": "p41-pr315-pc-saisonbilanz.jpg",
+   "pakete": [
+    "P41"
+   ],
+   "titel": "Saisonbilanz in der Winterpause am PC",
+   "pr": 315,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "statistik/winter-pc.png",
+   "nr": 58
+  },
+  {
+   "datei": "p33-pr314-handy-umlegen-ziehen.jpg",
+   "pakete": [
+    "P33"
+   ],
+   "titel": "Liegendes Boot halten und in eine andere Box ziehen (Handy)",
+   "pr": 314,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "umlegen/handy-2-ziehen.png",
+   "nr": 59
+  },
+  {
+   "datei": "p33-pr314-pc-umgelegt.jpg",
+   "pakete": [
+    "P33"
+   ],
+   "titel": "Boot umgelegt (PC)",
+   "pr": 314,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "umlegen/pc-2-umgelegt.png",
+   "nr": 60
+  },
+  {
+   "datei": "p26-pr322-handy-fernglas.jpg",
+   "pakete": [
+    "P26"
+   ],
+   "titel": "Fernglas mit Steckbrief am Handy",
+   "pr": 322,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "gesten/handy-fernglas.png",
+   "nr": 61
+  },
+  {
+   "datei": "p26-pr322-pc-hafenhorn.jpg",
+   "pakete": [
+    "P26"
+   ],
+   "titel": "Hafenhorn mit Wellenringen am PC",
+   "pr": 322,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "gesten/pc-hafenhorn.png",
+   "nr": 62
+  },
+  {
+   "datei": "p59-pr321-handy-doppelbox-vorschau.jpg",
+   "pakete": [
+    "P59"
+   ],
+   "titel": "Doppelbox bauen: Vorschau am Handy",
+   "pr": 321,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "vorschau/p59/p59-handy-1-vorschau.png",
+   "nr": 63
+  },
+  {
+   "datei": "p59-pr321-pc-kat-in-doppelbox.jpg",
+   "pakete": [
+    "P59"
+   ],
+   "titel": "Katamaran in der Doppelbox (PC)",
+   "pr": 321,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "vorschau/p59/p59-pc-3-kat.png",
+   "nr": 64
   }
  ],
  "neueBilder": [
+  64,
+  62,
+  60,
+  58,
+  56,
   55,
   53,
   52,
-  50,
-  46,
-  45,
-  43,
-  41,
-  39
+  50
  ],
  "merges": [
   {
-   "datum": "2026-11-14",
-   "titel": "Hafen wächst sichtbar je Stufe: Gebäudemodelle je Ausbaustufe, Dorf und Häuserzeile wachsen mit",
-   "pr": 303,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Gelände: fünf Küsten aus echten Karten (Marstrand, Punat, Shilshole Bay, Kotor, Porto Cervo)",
-   "pr": 300,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Logbuch: Großschiffe gesichtet, Fischkutter wechseln, Meldungen im Meldeplatz",
-   "pr": 305,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Arbeitsplan und Roadmap: P62, P64 erledigt, Welle-0-Abnahme über 15 Küsten",
-   "pr": 306,
+   "datum": "2026-11-15",
+   "titel": "Roadmap-Pflege: P26 (PR 322), P17 (PR 318) eingetragen, Bilder zu P26 und P59",
+   "pr": 325,
    "pakete": [
-    "P62",
-    "P64"
+    "P26",
+    "P17",
+    "P59"
    ]
   },
   {
-   "datum": "2026-11-14",
-   "titel": "Boote: Wartebojen seitlich neben den Stegen, Anfahrt von weit draußen",
-   "pr": 280,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Arbeitsplan: wann Welle 0 fertig ist, Zusammenspiel-Prüfung in drei Threads",
-   "pr": 304,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: Bilder zu P28 Anmeldung per Funk (PR 288)",
-   "pr": 302,
+   "datum": "2026-11-15",
+   "titel": "Überraschende Gesten (P26): Hafenhorn, Fernglas, Möwen, Wellenring, Glocke",
+   "pr": 322,
    "pakete": [
-    "P28"
+    "P26"
    ]
   },
   {
-   "datum": "2026-11-14",
-   "titel": "P24 Teil 2: Hanse-Woche, Mittsommer, Heringstage, Holzboote, Bauten und Nachspiel",
-   "pr": 299,
-   "pakete": [
-    "P24"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Folgefunde Einzeltest: geschenktes WC zuerst, Bootskarte nennt den Münzbetrag",
-   "pr": 301,
+   "datum": "2026-11-15",
+   "titel": "Logbuch: alle neun Großschiffe erreichbar, ab Stufe 5 öfter vor dem Hafen",
+   "pr": 323,
    "pakete": []
   },
   {
-   "datum": "2026-11-14",
-   "titel": "Zeitraffer: Pulk erkennen, Überlappungen getrennt zählen",
-   "pr": 251,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P28: Anmeldung per Funk, Box freihalten mit Bonus",
-   "pr": 288,
+   "datum": "2026-11-15",
+   "titel": "Stege umbauen: Doppelboxen für Mehrrumpfboote (P59 Teil 1)",
+   "pr": 321,
    "pakete": [
-    "P28",
-    "P02"
+    "P59"
    ]
   },
   {
-   "datum": "2026-11-14",
-   "titel": "Pages gebündelt statt nach jedem Merge, PR-Tests schneller",
-   "pr": 294,
+   "datum": "2026-11-15",
+   "titel": "Tagesabschluss nur als Zettel, Bootskarte am Tablet hochkant über Zeit und Bauen",
+   "pr": 320,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "P17: Aufstieg angleichen, Stufe 1 und 2 straffen (Ü16), Startwerte in economy.js",
+   "pr": 318,
+   "pakete": [
+    "P17"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Roadmap-Pflege: P33 (PR 314) und P41 (PR 315) mit PR-Nummern und Bildern",
+   "pr": 317,
+   "pakete": [
+    "P33",
+    "P41"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Menschen laufen auf dem echten Gelände jeder Küste",
+   "pr": 316,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Handy quer: Startansicht enger um den Hafen und mittig",
+   "pr": 307,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Statistik der letzten 30 Tage und Saisonbilanz in der Winterpause (P41)",
+   "pr": 315,
+   "pakete": [
+    "P41"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Liegende Boote umlegen (P33): halten und ziehen, zweites Umlegen kostet Bewertung",
+   "pr": 314,
+   "pakete": [
+    "P33"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Schichttest: Spiel Schicht für Schicht über die echte Oberfläche prüfen",
+   "pr": 313,
    "pakete": []
   }
  ]

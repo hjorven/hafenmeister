@@ -16,6 +16,8 @@
 // gespeichert und exportiert wird. Kommt ein Spielstand mit anderem Stegbild herein (Import), wird
 // die Seite neu geladen, weil die Stege dann anders liegen.
 import { STEGBILDER } from './stegbilder.js';
+import { doppelboxenAnlegen } from './doppelboxen.js';
+import { ECONOMY } from './economy.js';
 
 const KEY = 'hafenmeister.stegbild';
 const SAVE_KEYS = ['hafenmeister.spielstand', 'hafenmeister.save'];
@@ -66,11 +68,12 @@ export function stegbildWaehlen({ url = globalThis.location?.search ?? '', s = s
 /**
  * Setzt Stegbild nr in ein HAFEN-Objekt (aendert es an Ort und Stelle). nr 0 laesst alles, wie es ist.
  * Stufen ueber der hoechsten Stufe der Variante (Stufe 6) uebernehmen deren Stege und Lagen.
+ * Danach entstehen die Doppelboxen (data/doppelboxen.js) passend zu diesem Bild neu.
  */
 export function stegbildSetzen(hafen, nr) {
   const v = STEGBILDER.varianten[nr - 1];
   hafen.stegbild = { nr: v ? nr : 0, stege: v ? [...STEGBILDER.stege] : [] };
-  if (!v) return hafen;
+  if (!v) { doppelboxenAnlegen(hafen, ECONOMY.doppelbox); return hafen; }
   const variiert = new Set(STEGBILDER.stege);
   const vStufen = Object.keys(v.stufen).map(Number);
   const hoechste = Math.max(...vStufen);
@@ -93,6 +96,8 @@ export function stegbildSetzen(hafen, nr) {
       if (t !== undefined) p.tiefe[key] = t;
     }
   }
+  // Doppelboxen (P59) aus den Boxen dieses Stegbilds
+  doppelboxenAnlegen(hafen, ECONOMY.doppelbox);
   return hafen;
 }
 
