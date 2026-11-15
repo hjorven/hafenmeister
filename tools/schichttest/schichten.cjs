@@ -44,6 +44,9 @@ async function fensterZu(t) {
   for (let i = 0; i < 4; i++) {
     const ta = t.page.locator('#hm-tagesabschluss:not([hidden]) .hm-ta-weiter');
     if (await ta.isVisible().catch(() => false)) { await t.sp.knopf(ta); zu.push('Tagesabschluss'); await t.warte(400); continue; }
+    // Offene Bootskarte (nach Antippen eines Boots): am Handy ersetzt sie die Leisten, also über ihr Kreuz schließen
+    const bootskarte = t.page.locator('#card:not(.bau-karte):visible .hm-zu, #card:not(.bau-karte):visible button[aria-label*="chließen"]').first();
+    if (await bootskarte.isVisible().catch(() => false)) { await t.sp.knopf(bootskarte); zu.push('Bootskarte'); await t.warte(300); continue; }
     const tipp = t.page.getByRole('button', { name: 'Verstanden' }).first();
     if (await tipp.isVisible().catch(() => false)) {
       const titel = await tipp.evaluate((b) => b.closest('section, div[class*="tipp"], div[class*="karte"], [role="dialog"]')?.querySelector('h1,h2,h3,strong,b,[class*="titel"]')?.textContent?.trim() ?? 'Tipp').catch(() => 'Tipp');
@@ -258,8 +261,13 @@ async function anlegen(t, boot, platz, { tempo: art = 'drei' } = {}) {
 }
 
 async function kassieren(t, z, boot) {
+  // Normales Tempo, bis die Münze da ist (bei 3x holt der Rundgang abends die Münze sonst zu schnell)
+  if (!(await t.G((id) => window.__st.muenzen().includes(String(id)), boot.id))) await setzeTempo(t, 'normal');
   const da = await t.bis((id) => window.__st.muenzen().includes(String(id)), boot.id, 30_000);
   await setzeTempo(t, 'pause');
+  // Schon bezahlt, ohne dass der Spieler gestrichen hat (Rundgang am Abend, Nachtkasse, Büro): kein Fehler
+  const anders = da ? null : await t.G((id) => { const e = window.__st.ereignisse.find((x) => x.n === 'sim:collected' && String(x.d?.boatId) === String(id)); return e ? { t: Math.round(e.t), hand: e.d?.hand ?? null, phase: window.hafenmeister.sim.state.phase } : null; }, boot.id);
+  if (anders && !anders.hand) { await t.hinweis('Münze schon kassiert', `Boot ${boot.id} wurde ohne Strich kassiert (Spielzeit ${anders.t}, Rundgang oder Büro)`, { bild: false }); return true; }
   // Zur Ursache: was sagen Regeln und Ereignisse zu diesem Boot?
   const warum = da ? '' : await t.G((id) => {
     const G = window.hafenmeister; const b = G.sim.state.boats[id];
@@ -271,6 +279,8 @@ async function kassieren(t, z, boot) {
   const lage = await insBild(t, (id) => [window.__st.muenzeSchirm(id)], boot.id);
   if (!lage.ok) { await t.punkt('Münze frei im Bild', false, JSON.stringify(lage.p)); return false; }
   const vorher = await t.G((id) => ({ geld: window.hafenmeister.sim.state.money, offen: window.hafenmeister.sim.state.boats[id]?.pendingFee ?? 0, anzeige: document.getElementById('money')?.textContent }), boot.id);
+  // Inzwischen vom Rundgang kassiert? Dann fliegt die Münze gerade weg, Streichen bringt nichts
+  if (vorher.offen <= 0) { await t.hinweis('Münze schon kassiert', `Boot ${boot.id}: Rundgang oder Büro war schneller`, { bild: false }); return true; }
   const m = lage.p[0];
   await t.sp.ziehen([{ x: m.x, y: m.y }, { x: m.x + 70, y: m.y + 10 }], { halten: 80, start: 60 });
   const ok = await t.bis(([g]) => window.hafenmeister.sim.state.money > g, [vorher.geld], 5000);
@@ -334,7 +344,7 @@ const S3 = {
 };
 const S4 = {
   nr: 4, name: 'Boot auf die Box ziehen und anlegen', paket: 'P02, P03',
-  async neu(t, z) { if (z.boot) z.platz = await ziehenUndAnlegen(t, z, z.boot); await bootslage(t); },
+  async neu(t, z) { if (z.boot) z.platz = await ziehenUndAnlegen(t, z, z.boot); await setzeTempo(t, 'pause'); await bootslage(t); },
   wieder: bootslage,
 };
 const S5 = {

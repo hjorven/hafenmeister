@@ -13,13 +13,15 @@ async function einfahrenKnopf(t, z) {
   if (!lage.ok) { await t.punkt('wartendes Boot frei im Bild', false, JSON.stringify(lage.p)); return; }
   const b = lage.p[0];
   await t.sp.tippen(b.x, b.y);
-  const knopf = t.page.locator('.hm-einfahren');
-  const da = await knopf.isVisible().catch(() => false) || await knopf.waitFor({ state: 'visible', timeout: 4000 }).then(() => true, () => false);
-  await t.punkt('Antippen zeigt den Knopf "Einfahren" am Boot', da, '', { schwere: 'B' });
+  // Genau ein Einfahren-Knopf: klein am Boot (PC, Tablet) oder groß in der Bootskarte (Handy), siehe ui/input-touch.js
+  const knopf = t.page.locator('.hm-einfahren:visible, #card button:visible:text-matches("einfahren", "i")').first();
+  const da = await knopf.waitFor({ state: 'visible', timeout: 4000 }).then(() => true, () => false);
+  const wo = da ? await knopf.evaluate((el) => (el.classList.contains('hm-einfahren') ? 'am Boot' : 'in der Bootskarte')) : '';
+  await t.punkt('Antippen zeigt einen Knopf zum Einfahren', da, wo, { schwere: 'B' });
   if (!da) return;
-  // Knopf liegt im Bild und nicht unter einer Leiste?
   const frei = await knopf.evaluate((el) => { const r = el.getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; const e = document.elementFromPoint(x, y); return { ok: e === el || el.contains(e), x, y, drueber: e?.id || e?.className }; });
-  await t.punkt('Knopf "Einfahren" frei antippbar', frei.ok, frei.ok ? '' : `verdeckt von ${frei.drueber}`);
+  await t.punkt('Knopf zum Einfahren frei antippbar', frei.ok, frei.ok ? '' : `verdeckt von ${frei.drueber}`);
+  z.einfahrenWo ||= new Set(); z.einfahrenWo.add(wo);
   await t.sp.knopf(knopf);
   const nach = await t.bis((id) => window.hafenmeister.sim.state.boats[id]?.status === 'moored', boot.id, 5000);
   const platz = await t.G((id) => window.hafenmeister.sim.state.boats[id]?.berthId, boot.id);
@@ -58,16 +60,22 @@ async function tempoMessen(t) {
   const rate = async (art) => {
     await setzeTempo(t, art);
     await t.warte(600);
-    const a = await t.G(() => ({ s: window.hafenmeister.time, w: performance.now() }));
+    const a = await t.G(() => { if (!window.__stZaehlt) { window.__stZaehlt = true; const f = () => { window.__stBilder = (window.__stBilder || 0) + 1; requestAnimationFrame(f); }; requestAnimationFrame(f); } return { s: window.hafenmeister.time, w: performance.now(), f: window.__stBilder || 0 }; });
     await t.warte(3000);
-    const b = await t.G(() => ({ s: window.hafenmeister.time, w: performance.now(), speed: window.hafenmeister.speed, paused: window.hafenmeister.paused }));
-    return { r: (b.s - a.s) / ((b.w - a.w) / 1000), speed: b.speed, paused: b.paused };
+    const b = await t.G(() => ({ s: window.hafenmeister.time, w: performance.now(), speed: window.hafenmeister.speed, paused: window.hafenmeister.paused, f: window.__stBilder || 0 }));
+    return { r: (b.s - a.s) / ((b.w - a.w) / 1000), speed: b.speed, paused: b.paused, fps: (b.f - a.f) / ((b.w - a.w) / 1000) };
   };
   const r1 = await rate('normal'); const r3 = await rate('drei'); const r8 = await rate('acht');
   const v3 = r3.r / r1.r, v8 = r8.r / r1.r;
-  await t.punkt('3x läuft dreimal so schnell wie 1x', v3 > 2.4 && v3 < 3.6, `${v3.toFixed(2)}-fach (1x: ${r1.r.toFixed(2)} Spielsekunden je Sekunde)`, { bild: false });
-  // Software-Grafik: bei wenigen Bildern je Sekunde begrenzt das Spiel den Schritt; 8x darf dann etwas darunter liegen
-  await t.punkt('8x läuft achtmal so schnell wie 1x', v8 > 6 && v8 < 9.6, `${v8.toFixed(2)}-fach`, { bild: false });
+  // Unter 10 Bildern je Sekunde begrenzt das Spiel den Zeitschritt je Bild auf 0,1 s (core/game.js): dann
+  // misst man die Software-Grafik dieses Rechners, nicht das Spiel. Das steht dann nur als Hinweis da.
+  const mess = async (name, v, soll, r) => {
+    const txt = `${v.toFixed(2)}-fach bei ${r.fps.toFixed(0)} Bildern je Sekunde (1x: ${r1.r.toFixed(2)} Spielsekunden je Sekunde, ${r1.fps.toFixed(0)} Bilder)`;
+    if (r.fps < 11 || r1.fps < 11) await t.hinweis(name + ' (zu wenig Bilder zum Messen)', txt, { bild: false });
+    else await t.punkt(name, v > soll * 0.8 && v < soll * 1.2, txt, { bild: false });
+  };
+  await mess('3x läuft dreimal so schnell wie 1x', v3, 3, r3);
+  await mess('8x läuft achtmal so schnell wie 1x', v8, 8, r8);
   // Tempo läuft durch: 20 s bei 8x, nichts bremst oder hält von selbst an (Jorven 14.11.)
   await setzeTempo(t, 'acht');
   const verlauf = [];
@@ -211,6 +219,13 @@ async function tagesabschluss(t, z) {
     await t.punkt('Tagessumme in der Karte stimmt mit den Spielregeln', euro == null || text.includes(euro), `Regeln ${summe} €, Karte "${text.slice(0, 120)}"`, { bild: false });
     // Verdeckt die Karte Zeit oder Bauen?
     const frei = await t.G(() => ['btn-build', 'btn-pause'].map((id) => { const e = document.getElementById(id); const r = e.getBoundingClientRect(); const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return { id, ok: e === top || e.contains(top) }; }));
+    // Liegt die Karte über den Wartebojen? (Übersicht, wie nach dem Start)
+    await t.sp.knopf(t.page.locator('#btn-overview')); await t.kameraRuhig();
+    const bojen = await t.G(() => { const G = window.hafenmeister; const l = [];
+      for (const b of G.sim.waitingBoats()) { const s = window.__st.bootSchirm(b.id); if (s && !s.frei && String(s.drueber).includes('tagesabschluss')) l.push(b.id); }
+      for (const o of G.boatView?.bojen?.() ?? []) { const s = window.__st.schirm(o.x, 0.3, o.z); if (s && !window.__st.frei(s.x, s.y) && String(window.__st.wasLiegtDa(s.x, s.y)).includes('tagesabschluss')) l.push(o.id ?? 'boje'); }
+      return l; });
+    await t.punkt('Tagesabschluss verdeckt keine Wartebojen oder wartenden Boote', bojen.length === 0, bojen.join(', '), { schwere: 'C' });
     await t.punkt('Tagesabschluss verdeckt weder Zeit noch Bauen', frei.every((f) => f.ok), frei.filter((f) => !f.ok).map((f) => f.id).join(', '));
     await t.sp.knopf(t.page.locator('#hm-tagesabschluss .hm-ta-weiter'));
     const zu = await karte.waitFor({ state: 'hidden', timeout: 5000 }).then(() => true, () => false);
@@ -224,12 +239,17 @@ const S12 = { nr: 12, name: 'Tagesabschluss', paket: 'P15', neu: tagesabschluss,
 // Jorvens Regel "Fertig heißt spielbar": kein Knopf ohne Wirkung. Jeder Menüeintrag muss etwas öffnen
 // oder sichtbar umschalten, und was er öffnet, muss sich wieder schließen lassen.
 const SICHTBAR = () => {
-  const sel = '[role="dialog"], [role="menu"], .hm-tafel-px, #card, .hm-ta, #hm-feier, .hm-fenster, .hm-panel, [class*="panel"], [class*="fenster"]';
-  return [...document.querySelectorAll(sel)].filter((e) => {
-    if (e.closest('[hidden]')) return false;
-    const r = e.getBoundingClientRect(); const cs = getComputedStyle(e);
-    return r.width > 40 && r.height > 40 && cs.visibility !== 'hidden' && cs.display !== 'none' && Number(cs.opacity) > 0.05;
-  }).map((e) => (e.id ? '#' + e.id : '.' + String(e.className).split(' ')[0]));
+  // Alles, was sichtbar ist und mindestens 6 % des Bildes bedeckt (Fenster, Tafeln, Karten), außer der Spielfläche
+  const flaeche = innerWidth * innerHeight; const out = [];
+  for (const e of document.body.querySelectorAll('*')) {
+    if (e.id === 'stage' || e.tagName === 'CANVAS' || e.id === 'game' || e.closest('[hidden]')) continue;
+    const r = e.getBoundingClientRect();
+    if (r.width * r.height < 0.06 * flaeche || r.width * r.height > 0.98 * flaeche) continue;
+    const cs = getComputedStyle(e);
+    if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) < 0.05) continue;
+    out.push(e.id ? '#' + e.id : '.' + String(e.className).split(' ')[0] || e.tagName);
+  }
+  return [...new Set(out)];
 };
 async function menue(t) {
   await fensterZu(t);
