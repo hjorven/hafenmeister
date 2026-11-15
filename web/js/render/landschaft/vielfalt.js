@@ -417,6 +417,62 @@ export function dorfPlan() {
   return _dorf;
 }
 
+/** Anteil der Dorfhäuser, die in einer Hafenstufe stehen (1 Badesteg: Fischerdorf, 6 Seehafen: Kleinstadt). */
+export const DORF_ANTEIL = [0, 0.4, 0.55, 0.7, 0.82, 0.93, 1];
+/** Höhere Häuser je Stufe: Anteil der innersten Häuser mit 2 bzw. 3 Geschossen. */
+const DORF_ZWEI = [0, 0, 0.1, 0.2, 0.35, 0.5, 0.6];
+const DORF_DREI = [0, 0, 0, 0, 0, 0.12, 0.25];
+
+/**
+ * Welche Häuser des Dorfplans in einer Stufe stehen und wie hoch: vom Kern an der Kreuzung nach außen.
+ * Die Reihenfolge hängt nur vom Plan ab, also sieht jede Stufe aus wie die vorige plus neue Häuser.
+ * @returns {Array<object>} Häuser aus dorfPlan().haeuser mit geschosse (1 bis 3)
+ */
+export function dorfWachstum(plan, stufe) {
+  const s = Math.max(1, Math.min(6, Math.round(stufe || 1)));
+  const [cx, cy] = plan.mitte;
+  const rang = plan.haeuser
+    .map((h, i) => ({ h, d: Math.hypot(h.px - cx, h.py - cy) + hash2(i, 17, bild.seed) * 14 }))
+    .sort((a, b) => a.d - b.d)
+    .map((e) => e.h);
+  const n = Math.ceil(rang.length * DORF_ANTEIL[s]);
+  const zwei = Math.round(rang.length * DORF_ZWEI[s]), drei = Math.round(rang.length * DORF_DREI[s]);
+  return rang.slice(0, n).map((h, i) => ({ ...h, geschosse: i < drei ? 3 : i < zwei ? 2 : 1 }));
+}
+
+/** Wie viele Häuser des Hafenorts je Stufe stehen (Index = Stufe). */
+export const HAFENORT_ANZAHL = [0, 0, 4, 9, 15, 22, 31];
+const HAFENORT_Y = -107;
+/**
+ * Bauplätze der Häuserzeile am Hafenort, nach Nähe zur Hafenmitte geordnet; die ersten
+ * HAFENORT_ANZAHL[stufe] stehen. Feste Reihenfolge, also kommt jede Stufe nur etwas dazu.
+ * Ob ein Platz wirklich bebaubar ist (Land, kein Weg, keine Baufläche), prüft setzeBewuchs.
+ */
+export function hafenortZeile(stufe) {
+  const s = Math.max(1, Math.min(6, Math.round(stufe || 1)));
+  const r = zufallAus(5150);
+  const plaetze = [];
+  for (let px = -330; px < 340;) {
+    const breite = 11 + r() * 4, laenge = 15 + r() * 5;
+    plaetze.push({ px: px + laenge / 2, py: HAFENORT_Y + (r() - 0.5) * 2, breite, laenge, z: r(), w: r() });
+    px += laenge + 3 + r() * 5;
+  }
+  const MITTE = -20;
+  plaetze.sort((a, b) => Math.abs(a.px - MITTE) - Math.abs(b.px - MITTE));
+  const n = HAFENORT_ANZAHL[s];
+  const arten = ['backstein', 'weiss', 'backstein', 'reet', 'weiss'];
+  return plaetze.slice(0, n).map((p, i) => {
+    // Nah an der Hafenmitte zuerst höher: ab Stufe 4 zweigeschossig, in Stufe 6 dreigeschossig
+    const nah = i < n * 0.4;
+    const geschosse = s >= 6 && i < n * 0.3 ? 3 : s >= 4 && nah ? 2 : 1;
+    return {
+      px: p.px, py: p.py, dreh: Math.PI / 2 + (p.w - 0.5) * 0.05,
+      breite: p.breite, laenge: p.laenge, geschosse,
+      art: geschosse >= 2 ? (p.z < 0.6 ? 'backstein' : 'weiss') : arten[Math.floor(p.z * arten.length)],
+    };
+  });
+}
+
 let _hoefe = null, _hoefeV = -1;
 /** Einzelhöfe in den Feldern: Wohnhaus, Scheune, ein paar Bäume. Planeinheiten. */
 export function hoefe() {

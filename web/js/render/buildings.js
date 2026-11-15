@@ -11,7 +11,8 @@
 //   game.buildings.setStage(n)      Ausbaustufe 1 bis 6, zeigt und verschiebt die Gebaeude (6 wie 5)
 //   game.buildings.setRegion(name)  'ostsee' | 'nordsee' (Gebaeude mischen DE, DK, SE)
 //   game.buildings.group            THREE.Group mit allem
-//   game.buildings.items            Liste { id, name, art, ab, bis, stil, mesh }
+//   game.buildings.items            Liste { id, name, art, ab, bis, stil, mesh, modelle, modell }
+//                                   mesh ist eine Huelle mit dem Modell der Stufe (modell.m) als Kind
 //   game.buildings.eingang(id)      { x, y, z, seite } 1 m vor der Tuer, null wenn nicht gebaut
 //   Ereignisse: game.on('stufe', n) und game.on('region', name) wirken wie die beiden Funktionen.
 //   Beim Start gelten game.state.stufe und game.state.region, falls vorhanden.
@@ -251,8 +252,11 @@ const BAU = {
   },
 
   // Bootsschuppen in Reihe, Giebel zum Wasser, grosses Tor (Smoegen, Sandhamn)
-  bootsschuppen(M, { anzahl = 3 } = {}) {
+  bootsschuppen(M, { anzahl = 3, versatz = 0 } = {}) {
     const g = new THREE.Group();
+    g.position.x = versatz;
+    const aussen = new THREE.Group();
+    aussen.add(g);
     for (let i = 0; i < anzahl; i++) {
       const s = haus({ l: 3.4, b: 5.0, h: 2.6, dachH: 1.8, wand: i === 1 ? M.wand : M.schuppen, dach: M.dach2, giebelZumWasser: true }, M);
       s.add(box(1.8, 2.0, 0.08, M.kante, 0, 0.2, -2.52));
@@ -261,7 +265,7 @@ const BAU = {
       s.position.z = (i % 2) * 0.4;
       g.add(s);
     }
-    return g;
+    return aussen;
   },
 
   wohnhaus(M, { l = 8, b = 6, h = 3.2, dachH = 3.0, wand = 'wand' } = {}) {
@@ -325,6 +329,137 @@ const BAU = {
     g.add(d);
     return g;
   },
+
+  // ---- Ausbaustufen: dieselben Gebaeude, sichtbar gewachsen (Vorbilder: Holzbude am Badesteg,
+  // Hafenmeisterhaus mit Anbau, Hafenamt mit Radarturm wie Warnemuende und Travemuende)
+
+  // Hafenmeisterbude der Stufe 2: kleine Holzbude mit Klappfenster, Schild und Flaggenmast
+  hafenmeisterBude(M) {
+    const g = haus({ l: 3.0, b: 2.4, h: 2.3, dachH: 1.1, wand: M.holz, dach: M.dach2 }, M);
+    g.add(box(1.2, 0.8, 0.08, M.glas, -0.5, 1.2, -1.22));
+    g.add(box(1.5, 0.08, 0.5, M.dach2, -0.5, 2.05, -1.42));
+    g.add(box(0.8, 1.8, 0.08, M.tuer, 0.85, 0.15, -1.22));
+    g.add(box(2.0, 0.42, 0.06, M.kante, 0, 2.55, -1.26));
+    g.add(box(1.4, 0.45, 0.4, M.planke, -0.4, 0, -2.2));
+    const mast = flaggenmast(M, 6);
+    mast.position.set(-2.3, 0, -1.6);
+    g.add(mast);
+    const ring = rettungsring(M);
+    ring.position.set(1.62, 1.4, 0);
+    ring.rotation.y = Math.PI / 2;
+    g.add(ring);
+    return g;
+  },
+
+  // Hafenmeisterhaus ab Stufe 5: Anbau mit Glasfront, hoeherer Ausguck mit Antenne, Fahrradstaender
+  hafenmeisterHaus(M) {
+    const g = BAU.hafenmeister(M);
+    const an = new THREE.Group();
+    an.add(box(3.4, 2.6, 3.0, M.wand2));
+    const d = pultdach(3.4, 3.0, 0.14, M.dach2);
+    d.position.y = 2.75;
+    an.add(d);
+    an.add(box(2.6, 1.6, 0.08, M.glas, 0, 0.6, -1.52));
+    an.position.set(3.9, 0, 0.2);
+    g.add(an);
+    g.add(cyl(0.05, 2.6, M.laterne, 0.6, 5.15, 0, 5));
+    g.add(box(0.9, 0.06, 0.06, M.laterne, 0.6, 7.2, 0));
+    for (let i = 0; i < 4; i++) g.add(box(0.06, 0.7, 1.4, M.laterne, -0.6 + i * 0.5, 0, 2.6));
+    return g;
+  },
+
+  // Kiosk ab Stufe 4: mit Holzterrasse, Tischen und Sonnenschirmen an der Ostseite
+  kioskTerrasse(M, opt = {}) {
+    const g = BAU.kiosk(M, opt);
+    const breit = opt.breit ?? 3.7;
+    const x0 = breit / 2 + 2.6;
+    g.add(box(4.6, 0.22, 4.6, M.planke, x0, 0, -0.4));
+    for (const [dx, dz] of [[-1.1, -1.5], [1.1, 0.6]]) {
+      g.add(cyl(0.5, 0.75, M.holz, x0 + dx, 0.22, dz, 8));
+      g.add(cyl(0.04, 2.0, M.weiss, x0 + dx, 0.97, dz, 5));
+      const schirm = new THREE.Mesh(new THREE.ConeGeometry(1.2, 0.5, 8), M.markise1);
+      schirm.position.set(x0 + dx, 2.9, dz);
+      g.add(schirm);
+    }
+    return g;
+  },
+
+  // Hafenbuero ab Stufe 5: Seitenfluegel nach Westen
+  hafenbueroFluegel(M) {
+    const g = BAU.hafenbuero(M);
+    const f = haus({ l: 5.2, b: 5.4, h: 3.6, dachH: 1.8, wand: M.wand, dach: M.dach }, M);
+    fenster(f, M, 5.2, 3.6, -2.72, 2, 1.4);
+    f.position.set(-6.9, 0, 0.4);
+    g.add(f);
+    return g;
+  },
+
+  // Hafenamt in Stufe 6: Hafenbuero mit Seitenfluegel und Lotsenturm samt Radar
+  hafenamt(M) {
+    const g = BAU.hafenbueroFluegel(M);
+    const turm = new THREE.Group();
+    turm.add(box(3.2, 12, 3.2, M.wand));
+    for (let i = 0; i < 3; i++) turm.add(box(0.9, 1.0, 0.08, M.glas, 0, 2.2 + i * 3, -1.62));
+    turm.add(box(4.2, 2.0, 4.2, M.glas, 0, 12, 0));
+    turm.add(box(4.6, 0.25, 4.6, M.dach2, 0, 14, 0));
+    turm.add(box(4.3, 0.15, 4.3, M.kante, 0, 11.9, 0));
+    turm.add(cyl(0.12, 1.4, M.laterne, 0, 14.25, 0, 6));
+    const radar = box(2.4, 0.22, 0.3, M.weiss, 0, 15.6, 0);
+    radar.userData.radar = true;
+    turm.add(radar);
+    turm.position.set(6.4, 0, 1.6);
+    g.add(turm);
+    return g;
+  },
+
+  // Restaurant in Stufe 6: Obergeschoss mit Dachterrasse und Gelaender
+  restaurantGross(M) {
+    const g = BAU.restaurant(M);
+    g.add(box(9.5, 2.8, 4.4, M.wand2, -2.6, 3.95, 2.2));
+    g.add(box(9.9, 0.3, 4.8, M.dach2, -2.6, 6.75, 2.2));
+    g.add(box(8.4, 1.4, 0.08, M.glas, -2.6, 4.6, -0.02));
+    g.add(box(5.2, 0.12, 5.6, M.planke, 5.2, 3.95, 1.6));
+    for (const [w, d, x, z] of [[5.2, 0.06, 5.2, -1.2], [0.06, 5.6, 7.8, 1.6]]) g.add(box(w, 0.9, d, M.weiss, x, 4.07, z));
+    const schirm = new THREE.Mesh(new THREE.ConeGeometry(1.5, 0.6, 8), M.schirm);
+    schirm.position.set(5.2, 6.4, 1.6);
+    g.add(schirm);
+    g.add(cyl(0.05, 2.3, M.weiss, 5.2, 4.07, 1.6, 5));
+    return g;
+  },
+
+  // Wohnhaus mit mehreren Geschossen (Aufstockung) und Gauben im Dach
+  wohnhausHoch(M, { l = 8, b = 6, geschosse = 2, wand = 'wand', gauben = 2 } = {}) {
+    const h = 3.0 * geschosse;
+    const dachH = 2.6 + geschosse * 0.3;
+    const g = haus({ l, b, h, dachH, wand: M[wand], dach: M.dach }, M);
+    for (let k = 0; k < geschosse; k++) fenster(g, M, l, h, -b / 2 - 0.02, 3, 1.1 + k * 3.0);
+    g.add(box(1.0, 1.9, 0.1, M.tuer, l / 2 - 1.2, 0.1, b / 2 + 0.02));
+    for (let i = 0; i < gauben; i++) {
+      const x = -l / 2 + (i + 0.5) * (l / gauben);
+      const gb = new THREE.Group();
+      gb.add(box(1.3, 1.1, 1.2, M.wand2));
+      gb.add(box(0.8, 0.6, 0.06, M.glas, 0, 0.25, -0.62));
+      const d = satteldach(1.3, 1.2, 0.6, M.dach, 0.12);
+      d.rotation.y = 0;
+      d.position.y = 1.1;
+      gb.add(d);
+      gb.position.set(x, h + dachH * 0.28, -b / 4 - 0.1);
+      g.add(gb);
+    }
+    return g;
+  },
+
+  // Stadthaus in Stufe 6: Traufhaus mit drei Geschossen, Laden mit Markise im Erdgeschoss
+  stadthaus(M, { l = 10, b = 7, wand = 'wand' } = {}) {
+    const g = BAU.wohnhausHoch(M, { l, b, geschosse: 3, wand, gauben: 3 });
+    g.add(box(l * 0.7, 1.4, 0.1, M.glas, -0.6, 0.5, b / 2 + 0.03));
+    for (let i = 0; i < 6; i++) {
+      const st = box(l * 0.7 / 6, 0.08, 1.1, i % 2 ? M.markise2 : M.markise1, -0.6 - l * 0.35 + (i + 0.5) * l * 0.7 / 6, 2.2, b / 2 + 0.5);
+      st.rotation.x = 0.35;
+      g.add(st);
+    }
+    return g;
+  },
 };
 
 // Schwimmwellenbrecher als Kette von Betonpontons entlang einer Linie (Burgtiefe, Hohe Duene)
@@ -358,26 +493,30 @@ function rnd(seed) {
 // dreh: Drehung um die Hochachse in Grad, 0 = Wasserseite nach Norden.
 const PLAN = [
   { id: 'toilette',      name: 'Toilette',          art: 'toilette',      ab: 1, p: { 1: [-95, -24], 3: [-95, -32] }, stil: 'falurot' },
-  { id: 'hafenmeister',  name: 'Hafenmeister',      art: 'hafenmeister',  ab: 2, p: { 2: [-72, -22], 3: [-72, -30] }, stil: 'weiss' },
+  { id: 'hafenmeister',  name: 'Hafenmeister',      art: 'hafenmeister',  ab: 2, p: { 2: [-72, -22], 3: [-72, -30] }, stil: 'weiss',
+    v: { 2: { art: 'hafenmeisterBude' }, 3: {}, 5: { art: 'hafenmeisterHaus' } } },
   { id: 'dusche',        name: 'Dusche',            art: 'dusche',        ab: 2, p: [-118, -36], stil: 'falurot' },
-  { id: 'kiosk',         name: 'Kiosk',             art: 'kiosk',         ab: 2, p: { 2: [-36, -24], 3: [-36, -30] }, stil: 'gelb' },
-  { id: 'schuppen-w',    name: 'Bootsschuppen',     art: 'bootsschuppen', ab: 2, p: [-157, -22], opt: { anzahl: 3 }, stil: 'falurot' },
-  { id: 'hafenbuero',    name: 'Hafenbüro',         art: 'hafenbuero',    ab: 3, p: [6, -32], stil: 'backstein' },
+  { id: 'kiosk',         name: 'Kiosk',             art: 'kiosk',         ab: 2, p: { 2: [-36, -24], 3: [-36, -30] }, stil: 'gelb', v: { 2: {}, 4: { art: 'kioskTerrasse' } } },
+  { id: 'schuppen-w',    name: 'Bootsschuppen',     art: 'bootsschuppen', ab: 2, p: [-157, -22], opt: { anzahl: 3 }, stil: 'falurot',
+    v: { 2: {}, 4: { opt: { anzahl: 4, versatz: 2.6 } } } },
+  { id: 'hafenbuero',    name: 'Hafenbüro',         art: 'hafenbuero',    ab: 3, p: [6, -32], stil: 'backstein',
+    v: { 3: {}, 5: { art: 'hafenbueroFluegel' }, 6: { art: 'hafenamt' } } },
   { id: 'sanitaer',      name: 'Sanitärgebäude',    art: 'sanitaer',      ab: 3, p: [-60, -54], stil: 'falurot' },
-  { id: 'restaurant',    name: 'Restaurant',        art: 'restaurant',    ab: 4, p: [48, -34], stil: 'reet' },
+  { id: 'restaurant',    name: 'Restaurant',        art: 'restaurant',    ab: 4, p: [48, -34], stil: 'reet', v: { 4: {}, 6: { art: 'restaurantGross' } } },
   { id: 'speicher',      name: 'Hafenspeicher',     art: 'speicher',      ab: 4, p: [112, -30], stil: 'backstein' },
   { id: 'speicher-kai',  name: 'Speicher am Kai',   art: 'speicher',      ab: 5, p: [56, 204], opt: { l: 8.6, b: 5.0 }, stil: 'backstein' },
   { id: 'fischbuden',    name: 'Fischbuden',        art: 'kiosk',         ab: 5, p: [108, 204], opt: { breit: 3.4, tief: 2.8 } },
   { id: 'fischbuden2',   name: 'Fischbuden',        art: 'kiosk',         ab: 5, p: [99, 204], opt: { breit: 3.4, tief: 2.8 } },
-  // Dorf hinter dem Hafen: waechst mit den Stufen
-  { id: 'haus-1', name: 'Wohnhaus', art: 'wohnhaus', ab: 1, p: [-150, -46], opt: { wand: 'wand' } },
-  { id: 'haus-2', name: 'Wohnhaus', art: 'wohnhaus', ab: 1, p: [-168, -40], opt: { wand: 'wand2', l: 7, dachH: 2.6 } },
-  { id: 'haus-3', name: 'Wohnhaus', art: 'wohnhaus', ab: 2, p: [-140, -62], opt: { wand: 'wand2' } },
-  { id: 'haus-4', name: 'Wohnhaus', art: 'wohnhaus', ab: 2, p: [-96, -62], opt: { wand: 'wand', l: 9 } },
+  // Ort hinter dem Hafen: waechst mit den Stufen. Neue Haeuser kommen dazu, alte werden aufgestockt
+  // (v: Modell ab dieser Stufe) und in Stufe 6 stehen an der Hafenstrasse Stadthaeuser mit Laeden.
+  { id: 'haus-1', name: 'Wohnhaus', art: 'wohnhaus', ab: 1, p: [-150, -46], opt: { wand: 'wand' }, v: { 1: {}, 4: { art: 'wohnhausHoch', opt: { wand: 'wand' } } } },
+  { id: 'haus-2', name: 'Wohnhaus', art: 'wohnhaus', ab: 1, p: [-168, -40], opt: { wand: 'wand2', l: 7, dachH: 2.6 }, v: { 1: {}, 5: { art: 'wohnhausHoch', opt: { wand: 'wand2', l: 7 } } } },
+  { id: 'haus-3', name: 'Wohnhaus', art: 'wohnhaus', ab: 2, p: [-140, -62], opt: { wand: 'wand2' }, v: { 2: {}, 5: { art: 'wohnhausHoch', opt: { wand: 'wand2' } } } },
+  { id: 'haus-4', name: 'Wohnhaus', art: 'wohnhaus', ab: 2, p: [-96, -62], opt: { wand: 'wand', l: 9 }, v: { 2: {}, 4: { art: 'wohnhausHoch', opt: { wand: 'wand', l: 9 } }, 6: { art: 'stadthaus', opt: { l: 9, b: 6 } } } },
   { id: 'haus-5', name: 'Wohnhaus', art: 'wohnhaus', ab: 3, p: [-232, -40], opt: { wand: 'wand' } },
-  { id: 'haus-6', name: 'Wohnhaus', art: 'wohnhaus', ab: 3, p: [-250, -56], opt: { wand: 'wand2', l: 7 } },
-  { id: 'haus-7', name: 'Wohnhaus', art: 'wohnhaus', ab: 4, p: [86, -62], opt: { wand: 'wand2', l: 10, b: 7, h: 6, dachH: 3.2 } },
-  { id: 'haus-8', name: 'Wohnhaus', art: 'wohnhaus', ab: 4, p: [64, -66], opt: { wand: 'wand', l: 10, b: 7, h: 6, dachH: 3.2 } },
+  { id: 'haus-6', name: 'Wohnhaus', art: 'wohnhaus', ab: 3, p: [-250, -56], opt: { wand: 'wand2', l: 7 }, v: { 3: {}, 6: { art: 'wohnhausHoch', opt: { wand: 'wand2', l: 7 } } } },
+  { id: 'haus-7', name: 'Wohnhaus', art: 'wohnhaus', ab: 4, p: [86, -62], opt: { wand: 'wand2', l: 10, b: 7, h: 6, dachH: 3.2 }, v: { 4: {}, 6: { art: 'stadthaus', opt: { wand: 'wand2' } } } },
+  { id: 'haus-8', name: 'Wohnhaus', art: 'wohnhaus', ab: 4, p: [64, -66], opt: { wand: 'wand', l: 10, b: 7, h: 6, dachH: 3.2 }, v: { 4: {}, 6: { art: 'stadthaus', opt: { wand: 'wand' } } } },
   { id: 'haus-9', name: 'Wohnhaus', art: 'wohnhaus', ab: 5, p: [-270, -36], opt: { wand: 'wand' } },
   // Molenfeuer auf den Molenkoepfen: einlaufend Gruen rechts (Westmole), Rot links (Ostmole)
   { id: 'feuer-gruen', name: 'Molenfeuer Grün', art: 'molenfeuer', ab: 3, p: { 3: [142, 274], 5: [96, 320] }, opt: { farbe: 'gruen' }, mole: true },
@@ -445,13 +584,25 @@ export function init(game) {
     return Number.isFinite(h) ? h : fallback;
   };
 
+  // Jedes Gebaeude ist eine Huelle (mesh) mit dem Modell der aktuellen Stufe als einzigem Kind.
+  // v: { stufe: { art?, opt? } } nennt die Modelle je Stufe (ab dieser Stufe); ohne v gibt es eins.
+  // Nur das aktive Modell haengt in der Huelle, damit Box3, Klicks und der Flaggenmast (Wimpel) stimmen.
   const items = PLAN.map((e, i) => {
     const stil = e.stil ?? STIL_FOLGE[i % STIL_FOLGE.length];
-    const mesh = BAU[e.art](SM[stil], e.opt ?? {});
+    const mesh = new THREE.Group();
     mesh.name = e.id;
     mesh.userData.pick = { type: 'building', id: e.id };
-    return { ...e, stil, mesh };
+    const stufenV = e.v ?? { [e.ab]: {} };
+    const modelle = Object.entries(stufenV).map(([ab, v]) => {
+      const m = BAU[v.art ?? e.art](SM[stil], v.opt ?? e.opt ?? {});
+      m.name = `${e.id}-${v.art ?? e.art}`;
+      m.userData.pick = { type: 'building', id: e.id };
+      return { ab: Number(ab), art: v.art ?? e.art, m };
+    }).sort((a, b) => a.ab - b.ab);
+    mesh.add(modelle[0].m);
+    return { ...e, stil, mesh, modelle, modell: modelle[0] };
   });
+  const modellIn = (it, n) => it.modelle?.reduce((best, mo) => (mo.ab <= n ? mo : best), it.modelle[0]) ?? null;
 
   const wb = wellenbrecher(M, WELLENBRECHER.map(([x, y]) => W(x, y)));
   wb.name = 'wellenbrecher';
@@ -460,16 +611,32 @@ export function init(game) {
 
   const lichter = [];
   const flaggen = [];
+  const radare = [];
   for (const it of items) {
-    it.mesh.traverse((o) => {
-      if (o.userData.blink) lichter.push(o.userData.blink);
-      if (o.userData.flagge) flaggen.push(o.userData.flagge);
-    });
+    for (const mo of it.modelle ?? [{ m: it.mesh }]) {
+      mo.m.traverse((o) => {
+        if (o.userData.blink) lichter.push(o.userData.blink);
+        if (o.userData.flagge) flaggen.push(o.userData.flagge);
+        if (o.userData.radar) radare.push(o);
+      });
+    }
   }
-  // Unbewegte Teile je Gebaeude und Material zu einem Mesh zusammenfassen (weniger Zeichenaufrufe).
-  // Wehende Flaggen bleiben einzeln; Farben haengen am Material und wechseln weiter mit Region und Nacht.
-  const wehend = new Set(flaggen);
-  for (const it of items) buendeln(it.mesh, null, undefined, { ausnehmen: (o) => wehend.has(o) });
+  // Unbewegte Teile je Modell und Material zu einem Mesh zusammenfassen (weniger Zeichenaufrufe).
+  // Wehende Flaggen und das Radar bleiben einzeln; Farben haengen am Material und wechseln weiter mit Region und Nacht.
+  const wehend = new Set([...flaggen, ...radare]);
+  for (const it of items) for (const mo of it.modelle ?? [{ m: it.mesh }]) buendeln(mo.m, null, undefined, { ausnehmen: (o) => wehend.has(o) });
+
+  // Wechselt ein Gebaeude mit der Stufe sein Modell, waechst das neue aus dem Boden (wie nach dem Bauen)
+  const wachsen = [];
+  function modellSetzen(it, n, zeigen) {
+    if (!it.modelle) return;
+    const mo = modellIn(it, n);
+    if (mo === it.modell) return;
+    it.mesh.remove(it.modell.m);
+    it.mesh.add(mo.m);
+    it.modell = mo;
+    if (zeigen && it.mesh.parent) { mo.m.scale.set(1, 0.02, 1); wachsen.push({ m: mo.m, t: 0 }); }
+  }
 
   // Versorgungsgebaeude stehen erst, wenn der Spieler sie gekauft hat (Bauen, ui/bauen.js).
   // Ansicht mit ?stufe=n (ohne Kaufen) zeigt alles, was zur Stufe gehoert.
@@ -483,9 +650,13 @@ export function init(game) {
   }
 
   let stufe = 1;
+  let bereit = false;
   function setStage(n) {
+    const vorher = stufe;
     stufe = Math.max(1, Math.min(6, Math.round(Number(n) || 1)));
     for (const it of items) {
+      const warDa = !!it.mesh.parent;
+      modellSetzen(it, stufe, bereit && warDa && stufe > vorher);
       const ort = stelle(it, stufe, regionName);
       const sichtbar = stufe >= it.ab && (it.bis == null || stufe <= it.bis) && gekauft(it) && (!it.p || !!ort);
       // Unsichtbares aus der Szene nehmen statt visible = false, damit game.pick es nicht trifft
@@ -522,6 +693,14 @@ export function init(game) {
       b.mat.color.copy(an ? b.an : b.aus);
     }
     for (const f of flaggen) f.rotation.y = Math.sin(zeit * 2.2 + f.id) * 0.25;
+    for (const r of radare) r.rotation.y = zeit * 1.6;
+    for (let i = wachsen.length - 1; i >= 0; i--) {
+      const w = wachsen[i];
+      w.t += dt;
+      const k = Math.min(1, w.t / 0.9);
+      w.m.scale.y = k >= 1 ? 1 : 0.02 + 0.98 * (1 - Math.pow(1 - k, 3)) * (1 + Math.sin(k * Math.PI) * 0.08);
+      if (k >= 1) wachsen.splice(i, 1);
+    }
     F.glas.color.set(FEST.glas).lerp(new THREE.Color(FEST.glasNacht), nacht * 0.9);
   });
 
@@ -543,7 +722,9 @@ export function init(game) {
     if (!ort) return null;
     const [xp, yp] = ort;
     const [x, z] = W(xp, yp);
-    return { x, z, y: it.mole ? hoehe(x, z, 1.4) : hoehe(x, z, 0.3), dreh: ort[2] ?? THREE.MathUtils.degToRad(it.dreh ?? 0), mesh: it.mesh };
+    // mesh: das Modell dieser Stufe (fuer die Bau-Vorschau), nicht unbedingt das stehende
+    const mo = it.modelle ? modellIn(it, n) : null;
+    return { x, z, y: it.mole ? hoehe(x, z, 1.4) : hoehe(x, z, 0.3), dreh: ort[2] ?? THREE.MathUtils.degToRad(it.dreh ?? 0), mesh: mo && mo !== it.modell ? mo.m : it.mesh };
   }
   // Welches Gebaeude zu welcher gekauften Versorgung gehoert: { gebaeudeId: { art, stufe } }
   const fuerKauf = (art, n) => Object.entries(KAUF).filter(([, k]) => k.art === art && k.stufe === n).map(([id]) => id);
@@ -556,7 +737,7 @@ export function init(game) {
   game.on('stufe', (n) => setStage(typeof n === 'object' ? n?.stufe : n));
   game.on('region', (r) => setRegion(typeof r === 'object' ? r?.name ?? r?.region : r));
   // Gelaendehoehe steht erst fest, wenn alle Module geladen sind
-  game.on('ready', () => setStage(stufe));
+  game.on('ready', () => { setStage(stufe); bereit = true; });
 
   const startStufe = new URLSearchParams(location.search).get('stufe');
   setStage(startStufe ?? game.state?.stufe ?? 1);

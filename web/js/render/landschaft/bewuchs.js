@@ -9,7 +9,7 @@ import { punkt, KERN, PLAN_M, hafenAbstand } from './gelaende.js';
 import { natur } from './formen.js';
 import { strandLagen } from './strand.js';
 import { verschmelze } from './terrain.js';
-import { aktuellesBild, waldBei, feldZeile, knickAn, dorfPlan, hoefe, freiAbstand, soelle, zufallAus, JAHRESZEIT_FARBEN } from './vielfalt.js';
+import { aktuellesBild, waldBei, feldZeile, knickAn, dorfPlan, dorfWachstum, hafenortZeile, hoefe, freiAbstand, soelle, zufallAus, JAHRESZEIT_FARBEN } from './vielfalt.js';
 
 const U = PLAN_M;
 const FELDARTEN = new Set(['raps', 'korn', 'acker', 'weide', 'wiese', 'gras']);
@@ -433,8 +433,11 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
         fluegel = baueFluegel(x, y + 10.1, z, -Math.PI / 2 + (m.px < 20 ? 0.6 : -0.6));
       }
     }
-    for (const h of plan.haeuser) {
-      haus(h.px, h.py, h.dreh, h.art, h.breite * U, h.laenge * U);
+    // Das Dorf wächst mit dem Hafen (dorfWachstum in vielfalt.js): erst der alte Kern an der Kreuzung,
+    // dann die Ränder; nahe der Mitte werden die Häuser höher (Aufstockung, später Stadthäuser).
+    for (const h of dorfWachstum(plan, stufe)) {
+      const art = h.geschosse >= 3 && h.art === 'reet' ? 'backstein' : h.art;
+      haus(h.px, h.py, h.dreh, art, h.breite * U, h.laenge * U, 3.2 + (h.geschosse - 1) * 2.6);
       // Gartenbaum hinter dem Haus
       if (rnd() < 0.6) {
         const w = h.dreh + Math.PI / 2 * (rnd() < 0.5 ? 1 : -1);
@@ -443,6 +446,13 @@ export function setzeBewuchs(region, stufe, q, gruppe, schatten) {
         if (p.typ === 'dorf' && p.h > 0.3 && freiAbstand(qx, qy, stufe) > 3) baum(qx, qy, p, { kiefer: 0 });
       }
     }
+  }
+  // ---- Hafenort: Häuserzeile an der Südseite der Landstraße (hinter der Allee), wächst mit der Hafenstufe von der
+  // Hafenmitte nach außen (Stufe 1 keine, Stufe 6 eine durchgehende Zeile). Nah am Hafen höher und
+  // dichter, außen kleine Häuser. Bauplätze der Services und Anlagen bleiben frei (freiAbstand).
+  if (pf.knicks || plan) {
+    const zeile = hafenortZeile(stufe);
+    for (const h of zeile) haus(h.px, h.py, h.dreh, h.art, h.breite * U, h.laenge * U, 3.2 + (h.geschosse - 1) * 2.6);
   }
   // ---- Allee an der Landstraße hinter dem Hafen (südliche Seite, die nördliche ist Baufläche).
   // Liegt am unteren Rand der Startansicht und zeigt dort schon, dass dahinter Land mit Bäumen beginnt.
