@@ -213,7 +213,7 @@ test('Fischkutter: freie Fischerplätze bekommen erst Kutter, die noch fehlen; z
   assert.ok(alle.size >= Math.min(modelle.length, 2 * erste.length));
 });
 
-test('Großschiffe: gesichtet kommen sie ins Logbuch, Modelle ohne Auftritt stehen nicht darin', async () => {
+test('Großschiffe: gesichtet kommen sie ins Logbuch, alle neun haben einen Auftritt', async () => {
   const { ctx, state } = await neu(6, 6);
   const ev = sim.logbookSighting(state, ctx, 'XXL1', 'XXL1-3');
   assert.deepEqual(ev.map((e) => e.type), ['logbookNew']);
@@ -226,7 +226,9 @@ test('Großschiffe: gesichtet kommen sie ins Logbuch, Modelle ohne Auftritt steh
   const kat = L.katalog(ctx.types);
   const xxl = kat.find((g) => g.size === 'XXL').arten.flatMap((a) => a.modelle.map((m) => m.id));
   assert.ok(xxl.includes('XXL1-3') && xxl.includes('XXL3-1'));
-  assert.ok(!xxl.includes('XXL3-2') && !xxl.includes('XXL3-3'), 'nie zu sehen, also nicht im Logbuch');
+  // Alle neun Großschiffe kommen im Spiel vor: Besuch, Station oder als Vorbeifahrer ab Stufe 5
+  assert.equal(xxl.length, 9, 'alle Großschiffe im Logbuch');
+  assert.ok(xxl.includes('XXL3-2') && xxl.includes('XXL3-3'), 'große Seenotkreuzer fahren vorbei');
   assert.ok(xxl.every((id) => L.kommtVor({ id, size: 'XXL' })));
   assert.equal(L.fortschritt(state, kat).je.XXL.gesehen, 1);
 });

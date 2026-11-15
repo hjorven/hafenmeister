@@ -14,7 +14,7 @@
 
 import { addBoat } from '../boat-anim.js';
 
-import { U, welt, SEE_X, SEE, SEE_RUNDE, FLOTTE, ANZAHL, aufBahn, seeBahnen, seeRunde as rundeGrund, rundeImWasser, bisStufe, uferStrecke, versetzt, VERSATZ_MAX } from '../../data/verkehr.js';
+import { U, welt, SEE_X, SEE, SEE_RUNDE, FLOTTE, ANZAHL, aufBahn, seeBahnen, seeRunde as rundeGrund, rundeImWasser, bisStufe, uferStrecke, versetzt, VERSATZ_MAX, GROSSSCHIFF } from '../../data/verkehr.js';
 
 // Reisegeschwindigkeit in m/s, gemütlich
 function tempo(info, id) {
@@ -64,6 +64,19 @@ export function init(game) {
     group.name = `verkehr-${id}`;
     group.userData.verkehr = true;
     return { group, types, groesse: g, id };
+  }
+
+  // Modell eines Vorbeifahrers auf See: ab Stufe 5 mit festem Anteil ein Großschiff (GROSSSCHIFF in
+  // data/verkehr.js), noch nie gesehene bevorzugt; sonst ein Modell der Art ohne Großschiffe.
+  function meerModell(art, xxlErlaubt = true) {
+    const xxl = bisStufe(FLOTTE.gross, stufeAktiv).filter((id) => id.startsWith('XXL'));
+    if (xxlErlaubt && xxl.length && Math.random() < GROSSSCHIFF.anteil) {
+      const lb = game.sim?.state?.logbook ?? {};
+      const neu = xxl.filter((id) => !(lb[id.split('-')[0]] ?? []).includes(id));
+      return zufall(neu.length && Math.random() < GROSSSCHIFF.neu ? neu : xxl);
+    }
+    const pool = bisStufe(FLOTTE[art], stufeAktiv).filter((id) => !id.startsWith('XXL'));
+    return zufall(pool.length ? pool : bisStufe(FLOTTE[art], stufeAktiv));
   }
 
   // Großschiffe vor dem Hafen kommen als "gesichtet" ins Logbuch (bridge.js), sobald sie losfahren
@@ -193,8 +206,7 @@ export function init(game) {
   function meerBoot(fortschritt = 0) {
     if (!game.fahrwasser?.vorbeiWeg) return meerBootBahn(fortschritt);
     const art = Math.random() < 0.6 ? 'klein' : 'gross';
-    const pool = bisStufe(FLOTTE[art], stufeAktiv);
-    const gebaut = baue(zufall(pool));
+    const gebaut = baue(meerModell(art));
     if (!gebaut) return false;
     const b = anmelden(gebaut);
     const w = game.fahrwasser.vorbeiWeg({ ...b.anim.info });
@@ -241,8 +253,7 @@ export function init(game) {
     if (!frei.length) frei = bahnen.filter((l) => bahnFrei(l, fortschritt));
     if (!frei.length) return false;
     const bahn = zufall(frei);
-    const pool = bisStufe(FLOTTE[bahn.art], stufeAktiv).filter((id) => bahn.xxl || !id.startsWith('XXL'));
-    const gebaut = baue(zufall(pool));
+    const gebaut = baue(meerModell(bahn.art, !!bahn.xxl));
     if (!gebaut) return false;
     const b = anmelden(gebaut);
     b.typ = 'meer';

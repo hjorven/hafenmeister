@@ -4,6 +4,10 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 15.11.2026
+
+- Logbuch: Große Schiffe fahren ab Stufe 5 öfter vor dem Hafen vorbei (jeder vierte Vorbeifahrer), noch nie gesehene zuerst. Auch die großen Seenotkreuzer der Nachbarstationen (28 m und 46 m) sind jetzt unterwegs, so lassen sich alle neun Großschiffe im Logbuch sammeln.
+
 ## 14.11.2026
 
 - Der Hafen wächst sichtbar mit: Aus der Holzbude des Hafenmeisters wird ein Haus mit Ausguck und später mit Anbau, das Hafenbüro bekommt einen Seitenflügel und im Seehafen einen Lotsenturm mit drehendem Radar, Kiosk und Restaurant bekommen Terrasse und Obergeschoss, Wohnhäuser werden aufgestockt und an der Hafenstraße stehen Stadthäuser mit Läden. Das Dorf wächst vom alten Kern nach außen, und an der Landstraße entsteht Stufe für Stufe eine Häuserzeile. Beim Aufstieg wachsen neue Gebäude aus dem Boden.
