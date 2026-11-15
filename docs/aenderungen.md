@@ -7,10 +7,16 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 ## 15.11.2026
 
 - Logbuch: Große Schiffe fahren ab Stufe 5 öfter vor dem Hafen vorbei (jeder vierte Vorbeifahrer), noch nie gesehene zuerst. Auch die großen Seenotkreuzer der Nachbarstationen (28 m und 46 m) sind jetzt unterwegs, so lassen sich alle neun Großschiffe im Logbuch sammeln.
+- Neu: Liegende Boote umlegen. Ein Gast in seiner Box lässt sich jetzt kurz gedrückt halten, bis sich der Ring um den Finger füllt, und dann an der Leine in eine andere leuchtende Box ziehen; das Boot legt ab und fährt sichtbar hinüber. Liegegeld und Nächte bleiben, Strom in der neuen Box zählt ab dem nächsten Morgen. Einmal umlegen nimmt eine Crew hin, ab dem zweiten Mal kostet es einen halben Anker in ihrer Bewertung (das Schild sagt es vor dem Loslassen). Auch beim Ausbau legen Gäste von wegfallenden Plätzen jetzt um, statt abzureisen, solange eine passende Box frei ist, und den Gast auf einem Dauerplatz kann man ebenso wegziehen.
+- Die Menschen laufen jetzt auf dem echten Gelände jeder Küste: über Wege und Wiesen statt quer durch Felder, um Häuser herum, nie durch Wasser. Badegäste gehen nur dorthin, wo wirklich Sandstrand ist, an Fels- und Steilküsten bleiben sie am Ufer stehen und schauen aufs Wasser.
 
 ## 14.11.2026
 
+- Schnellerer Anfang: Der Dorfhafen kostet 300 € statt 400 €, Steg B mit den ersten Boxen für größere Boote 450 € statt 700 €, und für den Durchstich reichen 90 statt 120 Gäste. Stufe 1 dauert so rund 10, Stufe 2 rund 30 Spieltage (P17).
+- Neu: Stege nachrüsten. Im Baumenü unter "Stege" bekommt ein Steg Fingerstege (ab Stufe 3, Gäste dort bewerten um 0,5 Anker besser) oder Laternen (ab Stufe 2, 0,2 Anker, nachts leuchten sie). Vorschau mit Geisterbild am Steg. Stromsäulen stehen jetzt sichtbar an jedem Steg mit Strom (297).
 - Der Hafen wächst sichtbar mit: Aus der Holzbude des Hafenmeisters wird ein Haus mit Ausguck und später mit Anbau, das Hafenbüro bekommt einen Seitenflügel und im Seehafen einen Lotsenturm mit drehendem Radar, Kiosk und Restaurant bekommen Terrasse und Obergeschoss, Wohnhäuser werden aufgestockt und an der Hafenstraße stehen Stadthäuser mit Läden. Das Dorf wächst vom alten Kern nach außen, und an der Landstraße entsteht Stufe für Stufe eine Häuserzeile. Beim Aufstieg wachsen neue Gebäude aus dem Boden.
+- Neu: Statistik (Menü oder Taste T). Säulen zeigen die Einnahmen der letzten 30 Tage nach Quelle und darunter, wie voll der Hafen jede Nacht war (Gäste und Dauerlieger). Antippen einer Säule zeigt den Tag und führt zu seinem Tagesabschluss; die Säulen im Tagesabschluss öffnen umgekehrt die Statistik. Dazu ein Hinweis, wenn der Hafen oft voll ist oder Boote weiterfahren, und eine Tabelle der vergangenen Saisons.
+- Winterpause: Die Saisonbilanz zeigt jetzt die Einnahmen nach Quelle, die Belegung im Schnitt und den Vergleich zur Saison davor, und sie bleibt auch am zweiten und dritten Wintertag vollständig (vorher fehlte dann der erste Saisontag).
 - Erfolge- und Logbuch-Meldung stehen im gemeinsamen Meldeplatz (volle Breite, gleiches Einblenden).
 - Logbuch: Die großen Schiffe kommen jetzt hinein, wenn man sie sieht: beim Besuch am Kreuzfahrt- oder Marineanleger, wenn sie vor dem Hafen vorbeifahren, und der Seenotkreuzer an der Station. Fischerplätze bekommen neue Kutter, und jede Saison wechseln sie, sodass alle fünf Fischkutter einmal da sind. Zwei Seenotkreuzer, die im Spiel nie auftauchen, stehen nicht mehr als ewiger Schattenriss im Logbuch.
 - Neue Ereignisse: Heringstage (mit Räucherei, im Frühling), Mittsommer (Saisontag 14, abends brennt am Grillplatz ein Feuer, viele Badegäste) und Holzboot-Treffen. Ab Stufe 5 kommt einmal im Jahr die Hanse-Woche, zehn Tage vorher angekündigt; zwei Tage vorher kannst du große Plätze freihalten, große Schiffe darauf zahlen Festgeld.
@@ -48,6 +54,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 - Zwei Boote im Hafen tragen nie denselben Namen, und gerade abgereiste Namen kommen nicht gleich wieder. Auch die Boote des ersten geladenen Tags haben Namen (233).
 - Menü am Handy quer zweispaltig, damit alles ins Bild passt; ist es doch zu niedrig, zeigt ein Streifen unten, dass weitere Zeilen folgen (233).
 - Bewertungen von Booten außerhalb des Bildes warten, solange eine wichtigere Meldung steht (233).
+- Handy quer: Die Startansicht zeigt den Hafen groß und mittig, mit Einfahrt oben und nur einem schmalen Streifen Land unten, statt vor allem Felder.
 
 ## 13.11.2026
 

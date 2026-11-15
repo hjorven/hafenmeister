@@ -400,7 +400,7 @@ test('Spielstand bleibt JSON (Speichern und Laden)', () => {
   assert.deepEqual(kopie.modules.dauer, state.modules.dauer);
 });
 
-test('Stufenausbau: Gäste auf wegfallenden Plätzen reisen ab, Dauerlieger ziehen samt Dauerplatz um', async () => {
+test('Stufenausbau: Gäste auf wegfallenden Plätzen legen um, Dauerlieger ziehen samt Dauerplatz um', async () => {
   const { ECONOMY } = await import('../web/js/data/economy.js');
   const rules = sim.rulesFromEconomy(ECONOMY);
   const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules });
@@ -439,12 +439,13 @@ test('Stufenausbau: Gäste auf wegfallenden Plätzen reisen ab, Dauerlieger zieh
   const r = sim.advanceStage(state, ctx);
   assert.ok(r.ok);
   assert.equal(state.stage, 3);
-  // Gast vom T-Kopf: abgerechnet, gezählt, legt sofort ab
-  const dep = r.events.find((e) => e.type === 'departed' && e.boatId === 9001);
-  assert.ok(dep && dep.leaveAt === 0 && dep.reason === 'rebuild');
-  assert.equal(state.boats[9001], undefined);
-  assert.equal(state.money, geld + offen);
-  assert.equal(state.guests, gaeste + 1);
+  // Gast vom T-Kopf: legt in eine freie Box um (P33), Rechnung bleibt offen, reist noch nicht ab
+  const um = r.events.find((e) => e.type === 'relocated' && e.boatId === 9001);
+  assert.ok(um && um.guest && um.grund === 'umbau' && um.from === 'B17');
+  assert.equal(state.boats[9001].berthId, um.to);
+  assert.equal(state.boats[9001].pendingFee, offen);
+  assert.equal(state.money, geld);
+  assert.equal(state.guests, gaeste);
   assert.equal(state.boats[9002].berthId, 'A03', 'Gast auf bleibendem Platz bleibt');
   // Dauerlieger im Hafen: umgezogen, Dauerplatz mit
   const zug = r.events.find((e) => e.type === 'relocated' && e.boatId === dauer.boatId);

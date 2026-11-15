@@ -57,6 +57,10 @@ export const ECONOMY = {
   // das Boot passt, bringt einen Viertelanker mehr. Gilt nur, wenn es verschieden große Boxen gibt.
   passgenau: { hoechstensGroesser: 0.2, ruf: 0.25 },
 
+  // Liegende Boote umlegen (P33, F4): Das erste Umlegen nimmt eine Crew hin, ab dem zweiten Mal
+  // kostet jedes weitere ruf Anker in ihrer Bewertung. Liegegeld bleibt, wie es bezahlt ist.
+  umlegen: { freiMal: 1, ruf: 0.5 },
+
   // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber
   // hinaus und kommen in dieselbe Box zurück (Box bleibt reserviert, Liegegeld zählt weiter).
   // raus und zurueck sind Anteile des Tages.
@@ -267,10 +271,10 @@ export const ECONOMY = {
   stufen: [
     { stufe: 1, name: 'Bootssteg am See', ankuenfte: 4, mix: { S: 1 },
       ziel: { gaeste: 20, ruf: 2.5 },
-      ausbau: { id: 'dorfhafen', name: 'Dorfhafen am See', kosten: 400, bautage: 0,
+      ausbau: { id: 'dorfhafen', name: 'Dorfhafen am See', kosten: 300, bautage: 0,
         plaetze: ['F01'] } },
     { stufe: 2, name: 'Dorfhafen am See', ankuenfte: 11, mix: { S: 0.45, M: 0.55 },
-      ziel: { gaeste: 120, ruf: 3.0 },
+      ziel: { gaeste: 90, ruf: 3.0 },
       ausbau: { id: 'durchstich', name: 'Durchstich zur Ostsee', kosten: 5000, bautage: 2,
         plaetze: ['B23', 'B24', 'B25', 'B26', 'F02'] } },
     { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 16, mix: { S: 0.32, M: 0.40, L: 0.28 },
@@ -303,13 +307,15 @@ export const ECONOMY = {
   // Ersatzplätze zum selben Projekt (zum Beispiel b-steg: B01, B02 in Stufe 2, ab Stufe 3 B19,
   // B20). Ein Projekt hat deshalb in jeder Stufe mindestens so viele Plätze wie beim Kauf.
   // tools/balance.mjs --pruefen prüft das gegen harbor.js.
-  start: { plaetze: ['A03', 'A04', 'A05', 'A06'] },   // der alte Steg, gratis
+  // Startwerte eines neuen Spiels (P17): der alte Steg gratis, kein Startgeld. Das erste Bauwerk
+  // (Toilettenhäuschen) schenkt der Einstieg beim ersten Öffnen von Bauen (Ü15, docs/bauen.md).
+  start: { plaetze: ['A03', 'A04', 'A05', 'A06'], geld: 0 },
   stegprojekte: [
     { id: 'a-haken',      stufe: 1, name: 'Haken an Steg A',          kosten: 180,
       plaetze: ['A01', 'A02', 'A12', 'A13'] },
     { id: 'a-knick',      stufe: 2, name: 'Steg A verlängern',        kosten: 500,
       plaetze: ['A07', 'A08', 'A09', 'A10', 'A11'] },
-    { id: 'b-steg',       stufe: 2, name: 'Steg B',                   kosten: 700,
+    { id: 'b-steg',       stufe: 2, name: 'Steg B',                   kosten: 450,
       plaetze: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B19', 'B20'] },
     { id: 'b-lang',       stufe: 2, name: 'Steg B verlängern',        kosten: 1400,
       plaetze: ['B09', 'B10', 'B11', 'B12', 'B13', 'B14', 'B15', 'B16', 'B21', 'B22'] },
@@ -368,6 +374,17 @@ export const ECONOMY = {
     strom: { name: 'Stromsäulen', stufen: [
       { name: 'Stromsäulen an Steg B', abStufe: 3, kosten: 2400, stege: ['B'] },
     ] },
+  },
+
+  // ---------------------------------------------------------------- Stege nachrüsten (P30)
+  // Logik in web/js/features/nachruesten.js, Beschreibung in docs/nachruesten.md. Je Steg einmal.
+  // kosten = grund + jePlatz[Klasse] für jeden betroffenen Gastplatz, der am Steg gerade liegt (auf 10 €
+  // gerundet); Boxen späterer Ausbaustufen bekommen es gleich mit. anker: so viel besser bewerten Gäste
+  // an diesem Steg. nurArt: nur Plätze dieser Platzart (Fingerstege nur an Heckpfahl-Boxen).
+  nachruesten: {
+    // Wie ein Schwimmsteg mit Fingern (platzarten.finger.rufBonus)
+    finger: { name: 'Fingerstege', abStufe: 3, grund: 400, jePlatz: { S: 90, M: 140, L: 200 }, anker: 0.5, nurArt: 'box' },
+    licht:  { name: 'Steglaternen', abStufe: 2, grund: 150, jePlatz: { S: 20, M: 25, L: 30, XL: 40 }, anker: 0.2 },
   },
 
   // ---------------------------------------------------------------- Kassieren

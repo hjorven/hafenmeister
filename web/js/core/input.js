@@ -44,6 +44,15 @@ export function initInput(game) {
       finger(id, { x: p.x, y: p.y });
       tapCandidate = null;   // kein Tipp aus einem übernommenen Finger
     },
+    // Umgekehrt: ui/gesten.js übernimmt einen Finger, der hier schon zählt (Boot gedrückt halten
+    // zum Umlegen, P33). Kein Tipp, kein Schwung, die Karte bleibt stehen.
+    abgeben(id) {
+      if (!pointers.has(id)) return;
+      pointers.delete(id);
+      tapCandidate = null;
+      velo = { x: 0, y: 0, t: 0 };
+      cam.stop?.();
+    },
   };
 
   function finger(id, p) {

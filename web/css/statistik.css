@@ -1,0 +1,155 @@
+/* Statistik (web/js/ui/statistik.js, docs/statistik.md, Roadmap P41)
+ * Karte über dem Hafen im Pixel-Stil der Oberfläche (Rahmen hm-px, Farben aus oberflaeche.css).
+ * Die Farben der Einnahmequellen gelten auch für den Streifen in der Winterpause (features/winter.js).
+ */
+
+:root {
+  --st-liegegeld: var(--hm-meer, #23897d);
+  --st-pacht: #3b6f8f;
+  --st-gastro: var(--hm-koralle, #ee6454);
+  --st-services: #9a6fb0;
+  --st-tagesziele: var(--hm-gold, #f2c14e);
+  --st-saisonziele: #c98a1e;
+  --st-sonstiges: #9fb0bc;
+  --st-gast: var(--hm-meer, #23897d);
+  --st-dauer: #3b6f8f;
+}
+[data-q] { --st-farbe: var(--st-sonstiges); }
+[data-q="liegegeld"] { --st-farbe: var(--st-liegegeld); }
+[data-q="pacht"] { --st-farbe: var(--st-pacht); }
+[data-q="gastro"] { --st-farbe: var(--st-gastro); }
+[data-q="services"] { --st-farbe: var(--st-services); }
+[data-q="tagesziele"] { --st-farbe: var(--st-tagesziele); }
+[data-q="saisonziele"] { --st-farbe: var(--st-saisonziele); }
+[data-q="gast"] { --st-farbe: var(--st-gast); }
+[data-q="dauer"] { --st-farbe: var(--st-dauer); }
+
+.hm-st {
+  position: absolute;
+  z-index: 33;
+  /* Lage und Höhe setzt ui/statistik.js (platziere): frei zwischen den Bedienknöpfen */
+  top: calc(var(--hm-oben, 12px) + var(--hm-knopf, 48px) + 10px);
+  left: 50%;
+  box-sizing: border-box;
+  width: min(460px, calc(100% - 2 * var(--hm-rand, 12px)));
+  max-height: calc(100% - var(--hm-oben, 12px) - var(--hm-knopf, 48px) - var(--hm-unten, 12px) - 90px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 12px 12px;
+  color: var(--hm-tinte, #24364a);
+  font-family: var(--hm-pixel);
+  font-size: var(--hm-schrift, 15px);
+  line-height: 1.25;
+  pointer-events: auto;
+}
+.hm-st[hidden] { display: none !important; }
+.hm-st.rein { animation: hm-st-rein 0.2s steps(4, end); }
+@keyframes hm-st-rein { from { opacity: 0; } to { opacity: 1; } }
+.hm-st button { font-family: var(--hm-pixel); }
+
+/* Kopf */
+.hm-st-kopf { display: flex; align-items: center; gap: 8px; }
+.hm-st-kopf > .hm-sym { color: var(--hm-meer, #23897d); }
+.hm-st-kopftext { flex: 1 1 auto; min-width: 0; }
+.hm-st-kopf h2 { margin: 0; font-size: calc(var(--hm-schrift, 15px) + 3px); font-weight: 700; line-height: 1.1; }
+.hm-st-kopf p { margin: 0; color: var(--hm-tinte-2, #5a6a7c); font-size: 13px; }
+.hm-st-leer { margin: 10px 0 4px; color: var(--hm-tinte-2, #5a6a7c); }
+
+/* Kennzahlen */
+.hm-st-kacheln { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0 2px; }
+.hm-st-kachel { display: flex; flex-direction: column; min-width: 0; padding: 4px 6px; background: var(--hm-mulde, #e9dfca); }
+.hm-st-kachel b { font-size: calc(var(--hm-schrift, 15px) + 1px); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-st-kachel span { color: var(--hm-tinte-2, #5a6a7c); font-size: 12px; line-height: 1.15; }
+
+.hm-st-block { margin-top: 10px; }
+.hm-st-block h3 {
+  margin: 0 0 4px;
+  color: var(--hm-tinte-2, #5a6a7c);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Säulen: je Tag ein Knopf, Stapel nach Quelle (Einnahmen) oder Gäste und Dauerlieger (Belegung) */
+.hm-st-diagramm {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  height: 84px;
+  padding: 0 0 2px;
+  border-bottom: 2px solid var(--hm-tinte-2, #5a6a7c);
+}
+.hm-st-belegung { height: 44px; border-top: 2px dotted var(--hm-mulde, #e9dfca); }
+.hm-st-saeule {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+}
+.hm-st-saeule.winter { background: repeating-linear-gradient(0deg, #e3eef5 0 4px, #f2f7fa 4px 8px); }
+.hm-st-saeule.neu { box-shadow: -2px 0 0 var(--hm-tinte-2, #5a6a7c); }
+.hm-st-saeule.an { background: #f7e3a6; box-shadow: inset 0 0 0 2px var(--hm-tinte, #24364a); }
+.hm-st-saeule.an.neu { box-shadow: inset 0 0 0 2px var(--hm-tinte, #24364a), -2px 0 0 var(--hm-tinte-2, #5a6a7c); }
+.hm-st-stapel { display: flex; flex-direction: column; justify-content: flex-end; width: 100%; height: 100%; }
+.hm-st-stapel i { display: block; flex: none; width: 100%; min-height: 0; background: var(--st-farbe); }
+.hm-st-geld .hm-st-stapel i:first-child { box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35); }
+.hm-st-belegung .hm-st-stapel i.gast { background: var(--st-gast); }
+.hm-st-belegung .hm-st-stapel i.dauer { background: var(--st-dauer); }
+.hm-st-saeule.laufend .hm-st-stapel { opacity: 0.55; }
+.hm-st-saeule.best .hm-st-stapel { box-shadow: 0 -3px 0 var(--hm-gold, #f2c14e); }
+.hm-st-saeule.voll .hm-st-stapel i.gast:first-child { box-shadow: inset 0 3px 0 var(--hm-koralle, #ee6454); }
+.hm-st-saeule:focus-visible { outline: 2px solid var(--hm-tinte, #24364a); outline-offset: 1px; }
+
+.hm-st-achse { display: flex; justify-content: space-between; gap: 6px; margin-top: 2px; color: var(--hm-tinte-2, #5a6a7c); font-size: 11.5px; }
+.hm-st-winter-legende { display: inline-flex; align-items: center; gap: 4px; }
+.hm-st-winter-legende i { display: inline-block; width: 10px; height: 10px; background: repeating-linear-gradient(0deg, #c9dce8 0 2px, #f2f7fa 2px 4px); }
+
+/* Legende: Farbfeld, Name, Betrag */
+.hm-st-legende { display: flex; flex-wrap: wrap; gap: 2px 10px; margin: 4px 0 0; font-size: 12.5px; }
+.hm-st-legende span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.hm-st-legende span > i { display: inline-block; width: 10px; height: 10px; background: var(--st-farbe); box-shadow: 0 0 0 1px var(--hm-tinte, #24364a); }
+.hm-st-legende small { color: var(--hm-tinte-2, #5a6a7c); font-size: 11.5px; }
+
+/* Gewählter Tag */
+.hm-st-tag { margin-top: 10px; padding: 6px 8px; background: var(--hm-mulde, #e9dfca); font-size: 13.5px; }
+.hm-st-tag p { margin: 0 0 2px; }
+.hm-st-tag-kopf { display: flex; justify-content: space-between; gap: 8px; }
+.hm-st-tag-kopf span { color: var(--hm-tinte-2, #5a6a7c); font-size: 12.5px; text-align: right; }
+.hm-st-tag .warn { color: #b0412f; }
+.hm-st-zum-tag { min-height: 40px; margin-top: 4px; font-size: 13.5px; }
+
+.hm-st-hinweis { margin: 10px 0 0; padding: 4px 8px; background: #f7e3a6; font-size: 13.5px; }
+
+/* Saisons */
+.hm-st-saisons { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.hm-st-saisons th { color: var(--hm-tinte-2, #5a6a7c); font-size: 12px; font-weight: 600; text-align: right; padding: 0 0 2px 6px; }
+.hm-st-saisons td { padding: 3px 0 3px 6px; text-align: right; border-top: 2px dotted var(--hm-mulde, #e9dfca); white-space: nowrap; }
+.hm-st-saisons td:first-child, .hm-st-saisons th:first-child { text-align: left; padding-left: 0; }
+.hm-st-saisons small, .hm-wi-zeile small { font-size: 11.5px; }
+.hm-st-saisons .auf { color: #2f7a3a; }
+.hm-st-saisons .ab { color: #b0412f; }
+
+/* Streifen nach Quelle (Winterpause, Saisonbilanz) */
+.hm-st-streifen { display: flex; height: 12px; margin: 4px 0 0; box-shadow: 0 0 0 2px var(--hm-tinte, #24364a); }
+.hm-st-streifen i { display: block; flex: 0 1 0; min-width: 2px; background: var(--st-farbe); }
+
+/* Handy: kleinere Säulen, Kacheln enger */
+@media (max-width: 640px), (max-height: 500px) {
+  .hm-st { padding: 6px 10px 10px; }
+  .hm-st-diagramm { height: 64px; gap: 1px; }
+  .hm-st-belegung { height: 34px; }
+  .hm-st-kachel b { font-size: var(--hm-schrift, 15px); }
+  .hm-st-kachel span { font-size: 11px; }
+  .hm-st-block { margin-top: 8px; }
+  .hm-st-legende { font-size: 12px; gap: 1px 8px; }
+}
+/* Handy quer: wenig Höhe, Säulen flacher */
+.hm-st.quer .hm-st-diagramm { height: 54px; }
+.hm-st.quer .hm-st-belegung { height: 28px; }

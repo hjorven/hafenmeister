@@ -178,7 +178,11 @@ export function init(game) {
       }
     }
     const netz = game.people?.netz;
-    if (netz?.adj) {
+    if (typeof netz?.strecken === 'function') {
+      // Laufnetz auf dem Gelaende (people/netz.js): die festen Wege (Stege, Molen, Anschluesse) frei halten,
+      // der Boden dazwischen ist ein Raster und braucht keinen eigenen Korridor
+      for (const [ax, ay, bx, by] of netz.strecken()) strecken.push({ ax: ax * U, az: -ay * U, bx: bx * U, bz: -by * U, r: 1.3 });
+    } else if (netz?.adj) {
       netz.adj.forEach((nb, i) => {
         for (const j of nb) {
           if (j < i) continue;

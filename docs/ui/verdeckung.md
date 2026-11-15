@@ -33,6 +33,7 @@ Geräte: Handy hoch (iPhone 13, 390 x 664), Handy quer (iPhone 13 quer), Tablet 
 | Bootskarte | 52 → **36** | 62 | 25 | 26 → **28** | 14 |
 | Aufstieg (Feier) | 100 | 100 | 100 | 100 | 100 |
 | Winterpause | 26 → **32** | 24 | 10 | 10 | 5 |
+| Statistik (P41, nach 13 Tagen) | **66** | **73** | 35 | 37 | 24 |
 | Kombi: Kartenwahl + Bootskarte | 52 → **39** | 67 → **63** | 24 → **27** | 40 | 25 → **23** |
 | Kombi: Tagesziel offen + Bootskarte | 52 → **45** | 73 → **60** | 27 | 36 → **39** | 19 → **21** |
 | Kombi: Ausbau offen + Bootskarte | 52 → **45** | 73 | 25 | 38 → **42** | 21 |

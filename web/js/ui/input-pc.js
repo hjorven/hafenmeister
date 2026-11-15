@@ -64,7 +64,7 @@ export function init(game) {
     if (b.pendingFee > 0) return `${b.name}: ${Math.round(b.pendingFee)} € kassieren`;
     const head = [b.name, b.size && `(${b.size})`, meters(b.length)].filter(Boolean).join(' ');
     if (b.status === 'waiting') return `${head}. Ziehen oder doppelklicken`;
-    if (b.status === 'moored') return `${head}, noch ${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}`;
+    if (b.status === 'moored') return `${head}, noch ${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}${game.sim?.umlegbar?.(b.id) ? '. Halten und ziehen zum Umlegen' : ''}`;
     return head || null;
   };
   const visible = (el) => !!el && !el.hidden && !el.disabled && el.offsetParent !== null;
@@ -75,6 +75,7 @@ export function init(game) {
   // Hilfe: zeigt nur Kürzel, deren Funktion es gerade gibt
   const HELP = [
     ['Wartendes Boot ziehen', 'An der Schleppleine in einen leuchtenden Platz ziehen', () => true],
+    ['Liegendes Boot gedrückt halten, dann ziehen', 'In eine andere freie Box umlegen (ab dem zweiten Mal kostet es Bewertung)', () => !!game.sim?.umlegbar],
     ['Doppelklick auf wartendes Boot', 'Boot fährt selbst in den besten Platz', () => true],
     ['Maustaste halten und über Münzen streichen', 'Alles in einem Zug kassieren', () => true],
     ['Tempo-Knöpfe unten links', 'Pause, 1x, 3x, 8x', () => true],
@@ -87,6 +88,7 @@ export function init(game) {
     ['<kbd>B</kbd>', 'Bauen', () => visible(byId('btn-build'))],
     ['<kbd>N</kbd>', 'Gästebuch', () => !!game.gaestebuch],
     ['<kbd>J</kbd>', 'Logbuch und Chronik', () => !!game.logbuch],
+    ['<kbd>T</kbd>', 'Statistik der letzten 30 Tage', () => !!game.statistik],
     ['<kbd>Leertaste</kbd>', 'Pause', () => !!game.setPaused],
     ['<kbd>Esc</kbd> oder Rechtsklick', 'Abbrechen', () => true],
     ['Mausrad, <kbd>+</kbd> <kbd>-</kbd>', 'Zoomen zum Mauszeiger', () => true],

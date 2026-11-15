@@ -24,7 +24,7 @@ export function createState({ seed, rules = RULES } = {}) {
     clock: 0, // Sekunden seit Tagesbeginn, Abend beginnt bei rules.dayLength
     stage: 1,
     region: 'ostsee', // 'ostsee', 'daenemark', 'schweden', 'nordsee'
-    money: 0,
+    money: rules.startMoney ?? 0, // Startgeld aus economy.js (start.geld)
     guests: 0, // abgereiste Gäste insgesamt
     stageGuests: 0, // abgereiste Gäste in der aktuellen Ausbaustufe
     ratings: Array(rep.startSamples).fill(rep.start), // letzte Bewertungen, neueste hinten
