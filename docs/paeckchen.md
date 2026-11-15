@@ -42,7 +42,8 @@ Ist der Hafen voll, legen sich Boote im echten Hafen längsseits an ein anderes 
 ## Gemessen
 
 - Stufen 2 bis 6, Stegbilder 0, 3, 5 und 9: Je Stufe sind ein bis drei Päckchenplätze frei (meist ein Stegkopf von B, C und D; die Kai-Plätze sperren sich gegenseitig das Ablegen und bleiben ohne Päckchen).
-- Ablauf im Spiel (Stufe 3, PC): Boot kommt von See, Ziehen auf den Rahmen, Anlegen, Nacht, Abreise außen vor innen: keine Rumpfberührung mit dem Päckchen.
+- Ablauf im Spiel (Stufe 3, PC und Handy, auch nach "Liegeplätze passgenau"): Boot kommt von See, Ziehen auf den Rahmen, Anlegen, Nacht, Abreise außen vor innen: keine Rumpfberührung mit dem Päckchen.
+- Härtetest-Lage `paeckchen-voll` (`node tests/extrem/lauf.cjs --lagen paeckchen-voll --out /tmp/extremtest`): Stufe 2, 3, 4 und 6 an PC und Handy, alle Päckchenplätze gleichzeitig belegt, alle außen fest, kein Fund mit einem Päckchenboot. Die übrigen Funde der Lage (Pulk beim Ablegen, Boot streift Steg beim Auslaufen, XL an K01) gibt es ohne Päckchen genauso.
 
 ## Mögliche Kollisionen mit anderen Paketen
 
