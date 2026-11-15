@@ -12,7 +12,7 @@
 // Liest nur: game.sim (state, ctx, preview, selected), game.boatView.boot(id) und die
 // Ereignisse 'sim:moored', 'sim:feeReady', 'boat:moored', 'sim:select'. Schreibt nichts in
 // den Spielstand. Schnittstelle: game.vorschau = { wunschSymbole, funkAn(), aktualisieren() }.
-import { uhrzeitAusSpielzeit } from '../render/landschaft/zeit.js';
+import { uhrzeitAusUhr } from '../render/landschaft/zeit.js';
 import { ringZustand, ringBild } from './geduldsring.js';
 import { ANGEBOT_BILDER } from './wunsch-bilder.js';
 
@@ -161,8 +161,8 @@ function umrissSvg(raster) {
 /** Ankunftszeit (Spielsekunden des Tages) als ungefähre Uhrzeit, auf zehn Minuten gerundet. */
 export function uhrzeitText(arriveAt, rules) {
   const tag = rules?.dayLength ?? 90, abend = rules?.eveningLength ?? 30;
-  const anteil = Math.max(0, Math.min(1, arriveAt / (tag + abend)));
-  let min = Math.round((uhrzeitAusSpielzeit(anteil * 119.9) * 60) / 10) * 10;
+  const t = Math.max(0, Math.min(tag + abend - 0.05, arriveAt));
+  let min = Math.round((uhrzeitAusUhr(t, tag, abend) * 60) / 10) * 10;
   min = ((min % 1440) + 1440) % 1440;
   return `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`;
 }

@@ -21,7 +21,8 @@ Stand 14.11.2026, 21:15 UTC.
 |---|---|---|---|---|
 | Boote: Wartebojen neben den Stegen, Anfahrt von weit draußen, Stau im Becken | "Staus an Bojen und Ankerfeld auflösen" | P66 | PR seit 11 Uhr offen, muss fertig werden | 280 |
 | Gelände: Seewege, Seegatt für geschlossene Bodden | "Geländeform und Engpass neu bauen" | P62 | läuft | - |
-| Längere Tage (5 min) und Bootsgeschichten (50 Alltag + 14 Ereignis-Anlässe), echte Regatta, Plan docs/bootsgeschichten.md | "Längere Tage und Bootsgeschichten einbauen" | neu (Jorven 14.11.) | Plan fertig, Zahlen mit P17 abgestimmt, danach 5 Teil-PRs | - |
+| Längere Tage (5 min) und Bootsgeschichten (50 Alltag + 14 Ereignis-Anlässe), echte Regatta, Plan docs/bootsgeschichten.md | "Längere Tage und Bootsgeschichten einbauen" | neu (Jorven 14.11.) | PR 319: Tag 270 s, Kurzhalt, 65 Geschichten mit Logbuch-Reiter, Regatta mit Bahn und Tonnen. Offen: Startsignal, Siegerehrung, Gepäck, Tanksteg-Halt | - |
+| Stege umbauen: Teil 2 Yachtsteg in Stufe 6 (D9), Teil 1 Doppelboxen gemergt (PR 321) | "Bauen mit Vorschau und Tiefe ausbauen" | P59 | Teil 2 im PR | 326 |
 | Schicht-Test, Feature-Test, Zeitraffer, Roadmap-Seite, Kamera | Prüf- und Pflege-Threads | - | laufen | 251, 296 |
 
 Seit 21:15 gemergt: ruhige Oberfläche mit einem Meldeplatz (PR 282), P28 Funk-Anmeldung (PR 288), P24 Teil 2 neue Ereignisse (PR 299), Zeitraffer-Pulk (PR 251), Pages gebündelt (PR 294), Folgefunde Einzeltest (PR 301).
@@ -39,7 +40,7 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 | A | Pulk und Stau: nach PR 280 (Serie `c589ca5`, Typ 1 und 2) an rund 90 Tagen je Partie ein Pulk mit bis zu 100 Booten auf 45 m; ineinander fest 42 bis 470, hängend 92 bis 323, in Fahrt berührt 1800 bis 3500 je Partie; über Land fast weg (1 bis 6). Typ 2 PC schlechter als vorher | Zeitraffer-Zwischenserie 15.11. 02:00 UTC, Typ 3 bis 10 folgen | P66, Boote-Thread (Ankerfeld-Fix plus Pulk) |
 | A | Boote noch über Land (rund 21 je Lauf) und durch Stege (rund 17 je Lauf), vor allem Typ 3 und 8 | dieselbe Serie | P66 mit P62 |
 | A | Aufstieg weicht von der Rechnung ab; nach PR 252: geschickt 225, gemütlich 239 Tage, Stufe 2 gemütlich 36 Tage; A10 (PR 287) verschiebt um +2 bis +6 Tage | Zeitraffer-Serien, `tools/balance.mjs` | Balancing-Paket P17 |
-| B | Menschen laufen auf festen Koordinaten (`people/netz.js`), nicht auf dem Seed-Gelände | Gelände-Thread, 14.11. | Zusammenspiel 3, oder eigener Thread "Menschen auf das Gelände stellen" |
+| B | Menschen laufen auf festen Koordinaten (`people/netz.js`), nicht auf dem Seed-Gelände | Gelände-Thread, 14.11. | erledigt 15.11. (Thread "Menschen auf das Gelände stellen", docs/menschen-wege.md) |
 | C | `tests/specs/leinen.spec.mjs` prüft nur Küstentyp 1 bis 10 | Gelände-Thread | Leinen- oder Test-Thread nach PR 300 |
 | B | Logbuch: die 9 XXL-Einträge werden in keiner Partie erreicht (0/9), sonst 74 bis 76 von 89 | Zeitraffer-Zwischenserie | Logbuch-Thread prüft, ob XXL-Besuche im normalen Spiel vorkommen; sonst Einträge an echte Ereignisse binden |
 | B | `istWasser` und Bild stimmen am Durchstich nicht überall überein | Messlatte (`feature-tests/messlatte/README.md`) | P62 |
@@ -59,7 +60,7 @@ Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tem
 | 2 | **P17 Balancing: Aufstieg angleichen, Ü15, Ü16** (neu, startet jetzt) | Prio A; A10 ist gemergt. Rechnung (`tools/balance.mjs`) und Regeln jetzt angleichen, Schlussmessung im Zeitraffer nach PR 280 | Schlussmessung nach 1 | `economy.js` (einziger Thread dort), `docs/zahlen.md`, Einstieg (J5) |
 | 3 | **P28 Funk-Anmeldung** | erledigt (PR 288, `docs/funk-anmeldung.md`) | - | `ui/vorschau.js`, `sim.js`, Meldeplatz (PR 282) |
 | 4 | **P41 Statistik und Saisonbilanz** (neu) | nutzt die vorhandenen Daten (`state.stats.verlauf`, Einnahmen nach Quelle); fast nur eigene Dateien | - | Tagesabschluss-Tafel, Winterkarte (Saisonbilanz dort ergänzen statt doppeln) |
-| 5 | **P26 Überraschende Gesten** (neu) | Hafenhorn, Fernglas mit Steckbrief, Möwen, Glocke: macht den Hafen lebendig, berührt kaum Regeln | - | `audio.js`, Gesten (`ui/gesten.js`), Fotomodus |
+| 5 | **P26 Überraschende Gesten** (erledigt, docs/hafengesten.md) | Hafenhorn, Fernglas mit Steckbrief, Möwen, Glocke: macht den Hafen lebendig, berührt kaum Regeln | - | `audio.js`, Gesten (`ui/gesten.js`), Fotomodus |
 | 6 | **P24 Ereignisse Teil 2** (erledigt, PR 299) | neue Ereignisse F17 | - | Meldeplatz (PR 282) |
 | 7 | **P27 Päckchen liegen** | voller Hafen wird zur Entscheidung | 1 | `sim.js`, `boat-view.js`, Wegsuche |
 | 8 | **P20-Rest Winter** (H5, G5) | Kernschleife über das Jahr fertig | 2 | `winter.js`, `economy.js` |
@@ -140,7 +141,7 @@ Reihenfolge nach Wirkung auf die Kernschleife: erst was jede Ankunft und jedes Z
 | 11 | P25 | Stammgäste mit Wirkung, Gästepost | F37 |
 | 12 | P29 | Baggern für tiefere Liegeplätze | F7 |
 | 13 | P36 | Bojenfeld im See | F10 |
-| 14 | P59 | Stege umbauen und Varianten wählen | - |
+| 14 | P59 | Stege umbauen und Varianten wählen (Doppelboxen PR 321, Yachtsteg PR 326) | - |
 | 15 | P26 | Überraschende Gesten (Hafenhorn, Fernglas, Möwen, Glocke) | - |
 | 16 | P37 | Havarist einschleppen | F11 |
 | 17 | P38 | Eigenes Hafenfest | F12 |
@@ -199,6 +200,9 @@ Schon erledigt aus Jorvens Vorschlägen: F14, F15, F18, F26, F27 (Grundgerüst),
 
 | Datum | Änderung |
 |---|---|
+| 15.11.2026 | P59 Teil 1 Doppelboxen gemergt (PR 321); Teil 2 Yachtsteg in Stufe 6 (D9) im PR. |
+| 15.11.2026 | P59 übernommen vom Thread "Bauen mit Vorschau und Tiefe ausbauen": Teil 1 Doppelboxen (D5, D6), Teil 2 neue Gastplätze Stufe 6 (D9) danach. |
+| 15.11.2026, 04:30 Uhr | "Längere Tage und Bootsgeschichten": Teil 1 bis 3 in PR 319 (lange Tage, Kurzhalt, 65 Geschichten, Regatta draußen). Stau in der Ausfahrt bei vielen gleichzeitigen Ausfahrten an "Staus an Bojen" gemeldet. |
 | 15.11.2026, 02:30 Uhr | Neu: "Längere Tage und Bootsgeschichten einbauen" (Plan docs/bootsgeschichten.md): Tag 270 s, Kurzhalt ohne Nacht, Anlässe je Boot, echte Regatta; Zahlen mit P17. |
 | 15.11.2026, 02:10 Uhr | Zwischenserie nach PR 280 (Typ 1, 2): Pulk bleibt Prio A, Welle 0 noch nicht abnahmefähig; Fund XXL-Logbucheinträge nie erreicht. |
 | 14.11.2026, 22:10 Uhr | PR 280 gemergt, P62 und P64 erledigt; Welle-0-Abnahme über 15 Küsten nach Ankerfeld-Fix und PR 300; Menschen auf festen Koordinaten als Fund B. |

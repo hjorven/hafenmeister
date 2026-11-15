@@ -44,7 +44,8 @@ export const leer = () => ({ weg: 0, offen: {}, belegt: 0, plaetze: 0, abend: fa
  * Liefert { text, ziel, leistbar } oder null.
  */
 export function waehleSchritt({ geld, eintraege, bedarf, stufe, region = null, geschenk = null }) {
-  const offen = eintraege.filter((e) => !e.gesperrt);
+  // keinRat: nie als naechsten Schritt vorschlagen (Rueckbau einer Doppelbox, P59)
+  const offen = eintraege.filter((e) => !e.gesperrt && !e.keinRat);
   // geschenk: Schluessel des ersten Bauwerks, dessen Geld beim Oeffnen des Baumenues geschenkt wird
   // (ui/bauen.js startGeschenk, Roadmap J4). Es gilt als leistbar, sonst raet die Tafel zum Sparen.
   const leistbar = (e) => e.key === geschenk || e.kosten <= geld;
@@ -92,7 +93,7 @@ export function waehleSchritt({ geld, eintraege, bedarf, stufe, region = null, g
     if (stufe.missing.includes('reputation')) {
       const w = wuensche[0];
       // Ohne offenen Wunsch hilft ein nachgeruesteter Steg (P30), wenn er sich leisten laesst
-      const nr = w ? null : offen.filter((x) => x.nachruesten && leistbar(x)).sort((a, b) => a.kosten - b.kosten)[0];
+      const nr = w ? null : offen.filter((x) => x.hebtNote && leistbar(x)).sort((a, b) => a.kosten - b.kosten)[0];
       if (nr) return { text: `Ruf ${num1(stufe.goal.reputation)} nötig für ${name}. ${nr.name} heben die Bewertungen.`, ziel: nr.key, leistbar: true };
       const tipp = w ? ` Gäste vermissen ${WUNSCH[w[0]]}.` : ' Wünsche der Gäste erfüllen hilft.';
       return { text: `Ruf ${num1(stufe.goal.reputation)} nötig für ${name}.${tipp}`, ziel: e?.key ?? null, leistbar: false };
@@ -138,6 +139,6 @@ export function umbauText(p) {
   if (gaeste) t.push(`${gaeste === 1 ? 'Ein Gast reist' : `${gaeste} Gäste reisen`} vorher ab und ${gaeste === 1 ? 'zahlt' : 'zahlen'} noch.`);
   if (fest) t.push(`${fest === 1 ? 'Ein Dauerlieger zieht' : `${fest} feste Boote ziehen`} auf einen freien Platz um.`);
   if (umlegen) t.push(`${umlegen === 1 ? 'Ein Boot legt' : `${umlegen} Boote legen`} in eine passende Box um.`);
-  if (gone && !gaeste && !fest) t.push('Gerade liegt dort niemand.');
+  if (gone && !gaeste && !fest && !umlegen) t.push('Gerade liegt dort niemand.');
   return t.join(' ');
 }

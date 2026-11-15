@@ -6,8 +6,10 @@
 // es nicht, die Module, die auf die Ereignisse hoeren, entscheiden, was passiert.
 //
 // Ereignisse (game.on(name, fn), pick = Ergebnis von game.pick oder null):
-//   'doubletap'    { x, y, world, pick }   zusaetzlich zoomt die Kamera weich hinein,
-//                                          ganz hineingezoomt geht es zur Uebersicht
+//   'doubletap'    { x, y, world, pick, vorher }   zusaetzlich zoomt die Kamera weich hinein,
+//                                          ganz hineingezoomt geht es zur Uebersicht.
+//                                          Setzt ein Zuhoerer erledigt = true (Fernglas,
+//                                          ui/hafengesten.js), bleibt das Zoomen aus.
 //   'longpress'    { x, y, world, pick }   Finger ruht 0,5 s; liegt er auf einem Boot,
 //                                          hupt es (Ereignis 'horn' an das Ton-Modul)
 //
@@ -28,6 +30,8 @@ const MOVE_SLOP_PX = 10;
 
 const isTouchDevice = () => matchMedia('(pointer: coarse)').matches;
 const isPhone = () => matchMedia('(max-width: 599px), (max-height: 499px)').matches;
+// Tablet hochkant: die Bootskarte steht als Blatt über Zeit und Bauen (oberflaeche.css), Ansicht wie am Handy verschieben
+const isBlatt = () => isPhone() || matchMedia('(min-width: 600px) and (max-width: 899px) and (min-height: 500px)').matches;
 
 export function init(game) {
   const el = game.canvas;
@@ -42,16 +46,20 @@ export function init(game) {
   // ---------- Doppeltipp: weich hineinzoomen ----------
   let lastTap = null;
   game.on('tap', (t) => {
-    const now = performance.now();
+    const now = t.zeit ?? performance.now();
     if (lastTap && now - lastTap.t < DOUBLE_TAP_MS && Math.hypot(t.x - lastTap.x, t.y - lastTap.y) < DOUBLE_TAP_PX) {
+      const erster = lastTap;
       lastTap = null;
-      game.emit('doubletap', { ...t, pick: t.pick ?? pick(t) });
+      // vorher: was unter dem ersten Tipp lag (die Ansicht kann nach dem ersten Tipp schon rücken, etwa wenn er ein Boot wählt)
+      const d = { ...t, pick: t.pick ?? pick(t), vorher: erster.pick ?? null };
+      game.emit('doubletap', d);
+      if (d.erledigt) return;
       // ganz hineingezoomt: zurueck zur Uebersicht, sonst doppelt so nah
       if (cam.viewWidth !== undefined && cam.viewWidth <= cam.minWidth * 1.05) cam.reset();
       else smoothZoom(cam, 2, t.x, t.y);
       return;
     }
-    lastTap = { t: now, x: t.x, y: t.y };
+    lastTap = { t: now, x: t.x, y: t.y, pick: t.pick ?? null };
   });
 
   // ---------- Langes Druecken ----------
@@ -118,7 +126,7 @@ export function init(game) {
     addEventListener('orientationchange', () => setTimeout(update, 300));
   }
 
-  // ---------- Boot gewaehlt: Stege frei halten (nur Handy) ----------
+  // ---------- Boot gewaehlt: Stege frei halten (Handy, Tablet hochkant) ----------
   // Die Bootskarte liegt unten ueber der Karte. Damit man die Stege darueber
   // antippen kann, wird die Karte knapp (CSS) und die Ansicht um die halbe
   // Kartenhoehe nach oben geschoben; beim Abwaehlen geht sie zurueck.
@@ -137,7 +145,7 @@ export function init(game) {
     .observe(cardEl, { attributes: true, attributeFilter: ['hidden'] });
   const onSelect = (boatId) => {
     if (towing) return;
-    const on = boatId != null && isPhone();
+    const on = boatId != null && isBlatt();
     if (!on) { release(); return; }
     document.body.classList.add('hm-boot-gewaehlt');
     if (shifted) return;

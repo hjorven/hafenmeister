@@ -271,7 +271,7 @@ export class CameraRig {
   }
 
   // Rechteck (Weltmeter, y = 0) so einpassen, dass es ganz im Bildschirmbereich frei liegt.
-  // Ist mehr Hoehe frei als noetig (Hochformat), liegt das Rechteck unten (Ufer unten,
+  // Ist im Hochformat mehr Hoehe frei als noetig, liegt das Rechteck unten (Ufer unten,
   // darueber Wasser), damit nicht der halbe Bildschirm Land zeigt.
   _passeEin(r, frei) {
     const ecken = [[r.minX, r.minZ], [r.maxX, r.minZ], [r.minX, r.maxZ], [r.maxX, r.maxZ]].map(([x, z]) => new THREE.Vector3(x, 0, z));
@@ -295,7 +295,9 @@ export class CameraRig {
       // Bildmitte des Rechtecks auf die Mitte des freien Bereichs (bzw. unten anlegen)
       const zielX = (frei.left + frei.right) / 2;
       const rectH = (y1 - y0) / s;
-      const zielY = rectH < availH - 1 ? frei.bottom - rectH / 2 : (frei.top + frei.bottom) / 2;
+      // Handy quer: mittig, unten anlegen wuerde den Hafen unter die Schilder oben schieben
+      const unten = rectH < availH - 1 && !this.handyQuer;
+      const zielY = unten ? frei.bottom - rectH / 2 : (frei.top + frei.bottom) / 2;
       const a = this.screenToWorld((x0 + x1) / 2, (y0 + y1) / 2);
       const b = this.screenToWorld(this.screenW / 2 + (zielX - this.screenW / 2) * s, this.screenH / 2 + (zielY - this.screenH / 2) * s);
       const c = this.screenToWorld(this.screenW / 2, this.screenH / 2);
@@ -308,6 +310,12 @@ export class CameraRig {
     }
     this._homeWidth = this.viewWidth;
     this._apply();
+  }
+
+  // Handy im Querformat: wenig Hoehe (unter 500 CSS-Pixel), Schilderspalte links.
+  // Startansicht dort enger um den Hafen (main.js startRect, polstern).
+  get handyQuer() {
+    return this.screenW > this.screenH && this.screenH < 500;
   }
 
   resize(width, height) {

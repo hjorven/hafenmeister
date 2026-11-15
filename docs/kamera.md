@@ -35,6 +35,19 @@ starten nur auf einem wartenden Boot oder einer Münze.
 - `rig.rand` = `game.gelaende.aussenRect()`: Der Blickpunkt hält seitlich mindestens 0,55
   Ausschnittbreiten Abstand zum Rand der Landschaft, so kommt deren Kante nie ins Bild.
 
+## Startansicht
+
+Die Startansicht (`rig.reset()`, Rechteck aus `startRect` in `main.js`) zeigt die Liegeplätze der
+Stufe, nahe Wartebojen, Bauplätze und Landmarken und links und rechts etwas Ufer. Übrige Tiefe
+kommt zu 70 % nach Norden (Wasser, Einfahrt), zu 30 % nach Süden. Im Hochformat liegt der Hafen
+unten im freien Bereich.
+
+Am Handy quer (`rig.handyQuer`) ist die Höhe knapp und das Ufer vor der Kamera wächst in der
+Schrägsicht stark an. Dort ist die Startansicht enger: Bauplätze an Land ziehen den Ausschnitt
+höchstens 15 m (oder ein Fünftel der Hafentiefe) nach Süden, das Ufer zur Seite reicht nur bis
+zur 1,2-fachen statt 1,6-fachen Hafenbreite, übrige Tiefe kommt zu 88 % nach Norden, und der
+Hafen liegt mittig. Test: `kamera.spec.mjs` "Handy quer: Startansicht zeigt den Hafen gross und mittig".
+
 ## Schnittstelle für Module
 
 ```js
@@ -48,6 +61,7 @@ rig.release()         // Ziehen beendet: Drehen und Neigen laufen mit Schwung au
 rig.fling(vx, vy)     // Verschieben mit Schwung (Pixel pro Sekunde); rig.stop() hält an
 rig.ausrichten()      // weich zu Norden oben und 50 Grad, Ort und Zoom bleiben
 rig.reset()           // Startansicht der Stufe
+rig.handyQuer         // Handy im Querformat (breiter als hoch, unter 500 px hoch)
 rig.setProjektion('ortho' | 'perspektive')
 rig.screenToWorld(x, y)   // Punkt auf dem Wasser, null über dem Horizont
 ```

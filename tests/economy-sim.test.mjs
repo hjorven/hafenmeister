@@ -124,10 +124,10 @@ test('Jedes kaufbare Stegprojekt bringt in der aktuellen Stufe Liegeplätze', as
   const c = S.createContext({ boatTypes: C, harbor: H, rules: S.rulesFromEconomy(E) });
   // Jedes Projekt ist in mindestens einer Stufe kaufbar
   for (const p of c.rules.jettyProjects) {
-    const stages = [1, 2, 3, 4, 5].filter((st) => st >= p.stage && S.projectHasBerths({ stage: st }, c, p.id));
+    const stages = [1, 2, 3, 4, 5, 6].filter((st) => st >= p.stage && S.projectHasBerths({ stage: st }, c, p.id));
     assert.ok(stages.length, `${p.id} hat in keiner Stufe Plätze`);
   }
-  for (let st = 1; st <= 5; st++) {
+  for (let st = 1; st <= 6; st++) {
     const s = cs({ seed: 1, rules: c.rules });
     s.stage = st;
     s.money = 1e7;

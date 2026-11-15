@@ -36,16 +36,19 @@ const MODULES = [
   './ui/vorschau.js',
   './ui/meldungen.js',                 // Meldungs-Ordnung: höchstens eine schwebende Meldung zugleich
   './ui/hafenzeichen.js',              // P55: Auslastung an Gebäuden, Zeiger am Rand zu wartenden Booten
+  './ui/hafengesten.js',               // P26: Hafenhorn, Fernglas, Möwen, Wellenring, Glocke
   './audio/audio.js',
   './state.js',
   './events/events.js',
   './features/dauerlieger.js',
   './features/winter.js',
   './features/nachruesten.js',         // P30: Fingerstege und Laternen an bestehenden Stegen
+  './features/umbauen.js',            // P59: zwei Boxen zur Doppelbox umbauen und zurück
   './features/versorgung.js',
   './features/auszeichnung.js',
   './features/platzschilder.js',
   './features/stammgaeste.js',
+  './geschichten/geschichten.js',      // Bootsgeschichten: Anlass je Boot (docs/bootsgeschichten.md)
   './features/tagesziele.js',
   './features/wetterflagge.js',
   './features/hafen-schauen.js',
@@ -58,6 +61,7 @@ const MODULES = [
   './ui/logbuch.js',                   // Logbuch und Hafenchronik (P21)
   './features/erfolge.js',             // Erfolge, Reiter im Logbuch, Dinge im Hafen (P22)
   './ui/funk-anmeldung.js',            // Anmeldung per Funk, Box freihalten (P28)
+  './ui/statistik.js',                 // Statistik der letzten 30 Tage, Saisons (P41)
   './ui/oberflaeche.js',
 ];
 
@@ -248,8 +252,14 @@ function startRect(game, stufe) {
   const grenze = Math.max(breiteFuer(r, fest) * 1.5, 50);
   const mx = (r.minX + r.maxX) / 2;
   const mz = (r.minZ + r.maxZ) / 2;
+  // Handy quer: Hoehe ist knapp. Bauplaetze an Land duerfen den Ausschnitt nur ein Stueck nach
+  // Sueden ziehen, sonst zeigt die Startansicht vor allem Felder und der Hafen rutscht nach oben.
+  const quer = !!cam.handyQuer;
+  const suedGrenze = r.maxZ + Math.max(15, 0.2 * (r.maxZ - r.minZ));
   const abstand = (e) => Math.hypot((e.minX + e.maxX) / 2 - mx, (e.minZ + e.maxZ) / 2 - mz);
-  for (const e of extras(game, stufe).sort((a, b) => abstand(a) - abstand(b))) {
+  for (const e0 of extras(game, stufe).sort((a, b) => abstand(a) - abstand(b))) {
+    if (quer && e0.minZ >= suedGrenze) continue;
+    const e = quer ? { ...e0, maxZ: Math.min(e0.maxZ, suedGrenze) } : e0;
     const neu = vereinige(r, e);
     if (breiteFuer(neu, fest) <= grenze) r = neu;
   }
@@ -260,8 +270,10 @@ function startRect(game, stufe) {
     if (u && Number.isFinite(u.minX + u.maxX + u.minZ + u.maxZ)) {
       const w = r.maxX - r.minX;
       const cx = (r.minX + r.maxX) / 2;
+      // Handy quer zeigt ohnehin viel Ufer zur Seite: dort nur wenig breiter, sonst wird der Hafen klein
+      const f = quer ? 0.6 : 0.8;
       r = vereinige(r, {
-        minX: Math.max(u.minX, cx - 0.8 * w), maxX: Math.min(u.maxX, cx + 0.8 * w),
+        minX: Math.max(u.minX, cx - f * w), maxX: Math.min(u.maxX, cx + f * w),
         // nur zur Seite: nach Sueden kaemen Baeume dicht vor die Kamera, nach Norden nur Wasser
         minZ: r.minZ, maxZ: r.maxZ,
       });
@@ -272,14 +284,18 @@ function startRect(game, stufe) {
 
 // Bleibt Tiefe uebrig (Hochformat), legt die Kamera das Suedufer an den unteren Rand und zeigt
 // oben viel leeres Wasser; mittig zeigt es unten viel Land. Der Ueberschuss kommt deshalb zu
-// 70 % nach Norden (Wasser, Einfahrt, ankommende Boote) und zu 30 % nach Sueden (Ufer).
+// 70 % nach Norden (Wasser, Einfahrt, ankommende Boote) und zu 30 % nach Sueden (Ufer),
+// am Handy quer zu 88 % nach Norden.
 function polstern(cam, r) {
   const ins = cam.insets || { top: 0, bottom: 0 };
   const w = Math.max(1, cam.screenW - (cam.insetRight || 0) - (cam.insetLeft || 0));
   const h = Math.max(1, cam.screenH - ins.top - ins.bottom);
   const sichtbar = breiteFuer(r, cam) / Math.sin(50 * Math.PI / 180) * (h / w);
   const rest = sichtbar - (r.maxZ - r.minZ);
-  return rest > 0 ? { ...r, minZ: r.minZ - rest * 0.7, maxZ: r.maxZ + rest * 0.3 } : r;
+  // Handy quer: das Ufer liegt nah vor der Kamera und waechst in der Schraegsicht stark an,
+  // deshalb kommt dort fast alles nach Norden (sonst zeigt die untere Haelfte nur Felder).
+  const sued = cam.handyQuer ? 0.12 : 0.3;
+  return rest > 0 ? { ...r, minZ: r.minZ - rest * (1 - sued), maxZ: r.maxZ + rest * sued } : r;
 }
 
 // Ueberblick beim Laden: Die Kamera zeigt zuerst die ganze Gelaendeform

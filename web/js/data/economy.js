@@ -14,7 +14,7 @@ export const ECONOMY = {
 
   // ---------------------------------------------------------------- Zeit
   zeit: {
-    tagSekunden: 90,        // Tag, Boote laufen ein
+    tagSekunden: 270,       // Tag, Boote laufen ein (etwa 4,5 min, docs/bootsgeschichten.md)
     abendSekunden: 30,      // Abend, Kassieren
     saisonTage: 30,         // danach Winter
     winterTage: 3,          // keine Gäste
@@ -29,7 +29,7 @@ export const ECONOMY = {
     // an Regattatagen.
     ankunftVon: 0.05,      // etwa 7:15, damit nach dem ersten Boot kein Loch entsteht
     ankunftAbstand: 3,      // Sekunden Mindestabstand zwischen zwei Ankünften (kleiner, wenn der Tag sonst nicht reicht)
-    ankunftAbstandMax: 8,   // Sekunden, längster gewürfelter Abstand (bei wenigen Booten wird gestreckt)
+    ankunftAbstandMax: 12,  // Sekunden, längster gewürfelter Abstand (bei wenigen Booten wird gestreckt; 12 für den 270-s-Tag)
     ankunftDichte: 4,       // Sekunden je Boot im Mittel an den vollsten Tagen
     ankunftBis: 0.95,       // etwa 19:30
     abreiseVon: 0.07,       // etwa 7:30
@@ -57,10 +57,115 @@ export const ECONOMY = {
   // das Boot passt, bringt einen Viertelanker mehr. Gilt nur, wenn es verschieden große Boxen gibt.
   passgenau: { hoechstensGroesser: 0.2, ruf: 0.25 },
 
+  // Liegende Boote umlegen (P33, F4): Das erste Umlegen nimmt eine Crew hin, ab dem zweiten Mal
+  // kostet jedes weitere ruf Anker in ihrer Bewertung. Liegegeld bleibt, wie es bezahlt ist.
+  umlegen: { freiMal: 1, ruf: 0.5 },
+
   // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber
   // hinaus und kommen in dieselbe Box zurück (Box bleibt reserviert, Liegegeld zählt weiter).
   // raus und zurueck sind Anteile des Tages.
   tagestoern: { anteil: 0.35, raus: [0.12, 0.3], zurueck: [0.6, 0.85] },
+
+  // Kurzhalt (docs/bootsgeschichten.md 3.2): Boote, die nur kurz anlegen (WC, Brötchen, Tanken, Eis)
+  // und am selben Tag wieder ablegen. anteil je Stufe, bleibt = Liegezeit als Tagesanteil [min, max],
+  // preis = Tagesliegegeld als Anteil vom Nachtpreis, spaetestens = Tagesanteil, zu dem alle weg sind.
+  // Ein Kurzhalter zählt beim Ablegen als Gast und bewertet wie ein Übernachter.
+  kurzhalt: {
+    anteil: { 1: 0.45, 2: 0.4, 3: 0.4, 4: 0.38, 5: 0.35, 6: 0.35 },
+    bleibt: [0.12, 0.5],
+    preis: 0.4,
+    spaetestens: 0.97,
+    klassen: ['S', 'M', 'L'],
+  },
+
+  // Bootsgeschichten (docs/bootsgeschichten.md 4): Zahlen je Anlass, Texte und Bedingungen in
+  // data/geschichten.js. Ob ein Boot kurz, eine oder mehrere Nächte bleibt, entscheiden weiter
+  // kurzhalt und klassen; die Geschichte wählt nur unter den passenden Anlässen.
+  //   g        Gewicht beim Würfeln
+  //   kommt    bevorzugtes Ankunftsfenster [von, bis] als Tagesanteil (0 = 6:30, 1 = 19:00)
+  //   bleibt   nur Kurzhalt: Liegezeit als Tagesanteil [min, max] (statt kurzhalt.bleibt)
+  //   naechte  nur besondere Tage: Nächte [min, max], 0 = Kurzhalt (überschreibt die Klasse)
+  //   toern    Anteil der Tage mit Tagestörn (statt tagestoern.anteil), raus/zurueck als Tagesanteile
+  // wiederholTage: so lange zählt eine Geschichte als "neulich", abschnitte: Grenzen der
+  // Tagesabschnitte früh | vormittags | mittags | nachmittags | abends, merkliste: so viele
+  // Kombinationen (Geschichte, Herkunft, Crew, Detail) merkt sich das Spiel, keine kommt doppelt.
+  // besonders: Anteil der Boote an Ereignis- und Wettertagen, die einen Anlass des Tages haben.
+  geschichten: {
+    wiederholTage: 3,
+    abschnitte: [0.2, 0.44, 0.6, 0.92],
+    merkliste: 400,
+    besonders: 0.45,
+    neulich: 0.35,          // Gewichtsfaktor für Geschichten der letzten wiederholTage Tage
+    heuteSchon: 0.15,       // Gewichtsfaktor je Mal, das die Geschichte heute schon vorkam
+    anlaesse: {
+      wc:             { g: 8, kommt: [0.05, 0.85], bleibt: [0.12, 0.16] },
+      broetchen:      { g: 6, kommt: [0.02, 0.3],  bleibt: [0.12, 0.16] },
+      eis:            { g: 6, kommt: [0.35, 0.8],  bleibt: [0.15, 0.25] },
+      badepause:      { g: 5, kommt: [0.3, 0.75],  bleibt: [0.2, 0.4] },
+      ruderrast:      { g: 5, kommt: [0.1, 0.8],   bleibt: [0.12, 0.2] },
+      kaffee:         { g: 5, kommt: [0.25, 0.75], bleibt: [0.15, 0.25] },
+      mittag:         { g: 6, kommt: [0.3, 0.5],   bleibt: [0.2, 0.3] },
+      proviant:       { g: 5, kommt: [0.1, 0.6],   bleibt: [0.15, 0.3] },
+      fischbroetchen: { g: 5, kommt: [0.3, 0.7],   bleibt: [0.12, 0.2] },
+      wasser:         { g: 3, kommt: [0.1, 0.7],   bleibt: [0.12, 0.15] },
+      aussteigen:     { g: 3, kommt: [0.15, 0.6],  bleibt: [0.12, 0.2] },
+      zusteigen:      { g: 3, kommt: [0.15, 0.6],  bleibt: [0.2, 0.35] },
+      schauer:        { g: 8, kommt: [0.1, 0.8],   bleibt: [0.15, 0.3] },
+      stempel:        { g: 3, kommt: [0.2, 0.7],   bleibt: [0.12, 0.18] },
+      gassi:          { g: 3, kommt: [0.1, 0.8],   bleibt: [0.12, 0.2] },
+      wetterbericht:  { g: 3, kommt: [0.05, 0.4],  bleibt: [0.12, 0.2] },
+      tanken:         { g: 6, kommt: [0.1, 0.8],   bleibt: [0.12, 0.15] },
+      ersatzteil:     { g: 4, kommt: [0.15, 0.6],  bleibt: [0.15, 0.3] },
+      absaugen:       { g: 2, kommt: [0.1, 0.8],   bleibt: [0.12, 0.15] },
+      strandgang:     { g: 5, kommt: [0.3, 0.55],  bleibt: [0.35, 0.5] },
+      radausflug:     { g: 4, kommt: [0.1, 0.35],  bleibt: [0.4, 0.5] },
+      einkauf:        { g: 4, kommt: [0.15, 0.7],  bleibt: [0.15, 0.3] },
+      etappe:         { g: 8, kommt: [0.45, 0.95] },
+      spaet:          { g: 4, kommt: [0.8, 1] },
+      abendessen:     { g: 5, kommt: [0.55, 0.85] },
+      grillabend:     { g: 4, kommt: [0.5, 0.85] },
+      feierabend:     { g: 4, kommt: [0.75, 1] },
+      vereinsfahrt:   { g: 3, kommt: [0.5, 0.8] },
+      ueberfuehrung:  { g: 2, kommt: [0.6, 1] },
+      duschen:        { g: 5, kommt: [0.45, 0.9] },
+      charterstart:   { g: 3, kommt: [0.5, 0.85] },
+      abwettern:      { g: 6, kommt: [0.3, 0.8] },
+      seetage:        { g: 6, kommt: [0.3, 0.9] },
+      urlaub:         { g: 8, kommt: [0.4, 0.9], toern: { anteil: 0.5, raus: [0.12, 0.3], zurueck: [0.6, 0.85] } },
+      ortbesuch:      { g: 5, kommt: [0.35, 0.85] },
+      crewwechsel:    { g: 3, kommt: [0.3, 0.8] },
+      charterwechsel: { g: 3, kommt: [0.4, 0.8] },
+      reparatur:      { g: 3, kommt: [0.2, 0.8] },
+      mastlegen:      { g: 2, kommt: [0.2, 0.7] },
+      segelmacher:    { g: 2, kommt: [0.2, 0.7] },
+      werft:          { g: 2, kommt: [0.2, 0.6] },
+      wetterfenster:  { g: 3, kommt: [0.4, 0.9] },
+      langfahrt:      { g: 3, kommt: [0.4, 0.95] },
+      angeln:         { g: 4, kommt: [0.4, 0.9], toern: { anteil: 0.9, raus: [0.01, 0.06], zurueck: [0.35, 0.5] } },
+      radbasis:       { g: 3, kommt: [0.4, 0.9] },
+      voegel:         { g: 2, kommt: [0.4, 0.9], toern: { anteil: 0.7, raus: [0.02, 0.1], zurueck: [0.3, 0.45] } },
+      ausbildung:     { g: 3, kommt: [0.4, 0.8], toern: { anteil: 0.9, raus: [0.1, 0.2], zurueck: [0.6, 0.75] } },
+      familientage:   { g: 6, kommt: [0.4, 0.85] },
+      tagesfahrt:     { g: 6, kommt: [0.15, 0.4] },
+      restaurantbesuch: { g: 4, kommt: [0.4, 0.6], bleibt: [0.3, 0.45] },
+      klassiker:      { g: 3, kommt: [0.4, 0.85] },
+      schutz:         { g: 10, kommt: [0.05, 0.5], naechte: [1, 2] },
+      sturmschaden:   { g: 4, kommt: [0.3, 0.8], naechte: [2, 3] },
+      kneipentag:     { g: 6, kommt: [0.2, 0.8], naechte: [1, 2] },
+      nebelrein:      { g: 8, kommt: [0.3, 0.9] },
+      badegaeste:     { g: 10, kommt: [0.3, 0.7], naechte: [0, 0], bleibt: [0.2, 0.4] },
+      // Regatta: am Vorabend kommen, am Regattatag raus (toern), abends zurück, noch eine Nacht
+      regattateilnehmer: { g: 12, kommt: [0.45, 0.95], naechte: [2, 3], toern: { anteil: 1, raus: [0.03, 0.16], zurueck: [0.6, 0.82] } },
+      regattabegleit: { g: 2, kommt: [0.5, 0.9], naechte: [2, 2], toern: { anteil: 1, raus: [0.03, 0.06], zurueck: [0.75, 0.82] } },
+      regattazuschauer: { g: 3, kommt: [0.35, 0.6], naechte: [0, 0], bleibt: [0.15, 0.3] },
+      abendsonne:     { g: 6, kommt: [0.6, 0.95], naechte: [1, 1] },
+      festbesuch:     { g: 10, kommt: [0.3, 0.8], naechte: [1, 1] },
+      mittsommerfeuer: { g: 10, kommt: [0.6, 0.95], naechte: [1, 1] },
+      fischmarkt:     { g: 10, kommt: [0.15, 0.6], naechte: [0, 0], bleibt: [0.15, 0.3] },
+      holztreffen:    { g: 10, kommt: [0.3, 0.8], naechte: [1, 2] },
+      hansegast:      { g: 10, kommt: [0.3, 0.8], naechte: [1, 3] },
+    },
+  },
 
   // ---------------------------------------------------------------- Gäste
   klassen: {
@@ -265,23 +370,23 @@ export const ECONOMY = {
   // bringt. bautage: Nächte Bauzeit, zugleich Zahl der Bauabschnitte (höchstens drei, ui/bauen.js):
   // jeder Abschnitt wird einzeln bezahlt und ist am nächsten Morgen fertig; 0 = sofort fertig. Ersatz für umgebaute Plätze steckt im jeweiligen Stegprojekt (siehe unten).
   stufen: [
-    { stufe: 1, name: 'Bootssteg am See', ankuenfte: 4, mix: { S: 1 },
+    { stufe: 1, name: 'Bootssteg am See', ankuenfte: 8, mix: { S: 1 },
       ziel: { gaeste: 20, ruf: 2.5 },
-      ausbau: { id: 'dorfhafen', name: 'Dorfhafen am See', kosten: 400, bautage: 0,
+      ausbau: { id: 'dorfhafen', name: 'Dorfhafen am See', kosten: 300, bautage: 0,
         plaetze: ['F01'] } },
-    { stufe: 2, name: 'Dorfhafen am See', ankuenfte: 11, mix: { S: 0.45, M: 0.55 },
-      ziel: { gaeste: 120, ruf: 3.0 },
+    { stufe: 2, name: 'Dorfhafen am See', ankuenfte: 18, mix: { S: 0.45, M: 0.55 },
+      ziel: { gaeste: 90, ruf: 3.0 },
       ausbau: { id: 'durchstich', name: 'Durchstich zur Ostsee', kosten: 5000, bautage: 2,
         plaetze: ['B23', 'B24', 'B25', 'B26', 'F02'] } },
-    { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 16, mix: { S: 0.32, M: 0.40, L: 0.28 },
+    { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 25, mix: { S: 0.32, M: 0.40, L: 0.28 },
       ziel: { gaeste: 360, ruf: 3.5 },
       ausbau: { id: 'marina', name: 'Schwimmsteg D', kosten: 20000, bautage: 2,
         plaetze: ['D01', 'D02', 'D03', 'D04', 'D05', 'D06'] } },
-    { stufe: 4, name: 'Marina', ankuenfte: 18, mix: { S: 0.24, M: 0.34, L: 0.42 },
+    { stufe: 4, name: 'Marina', ankuenfte: 29, mix: { S: 0.24, M: 0.34, L: 0.42 },
       ziel: { gaeste: 560, ruf: 3.8 },
       ausbau: { id: 'aussenhafen', name: 'Außenhafen mit Kai', kosten: 42000, bautage: 3,
         plaetze: ['K01', 'FK01', 'FK02'] } },
-    { stufe: 5, name: 'Küstenmarina', ankuenfte: 20, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
+    { stufe: 5, name: 'Küstenmarina', ankuenfte: 31, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
       ziel: { gaeste: 840, ruf: 4.2 },
       // Die Pier bringt die Plätze der Großschiffe: Kreuzfahrtpier, Marineanleger, Liegeplatz des
       // Seenotrettungskreuzers. Sie sind fest vergeben, Gastboote legen dort nicht an.
@@ -290,7 +395,7 @@ export const ECONOMY = {
     // Stufe 6: Großschiffe (XXL) zahlen kein Liegegeld, sie kommen als Besuche über die Services
     // kreuzfahrtterminal, marineanleger und seenotretter und bringen Geld je Besuch.
     // Keine eigene Zahl für Tagesgäste (Entscheidung Jorven, 11.11.2026).
-    { stufe: 6, name: 'Seehafen', ankuenfte: 20, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
+    { stufe: 6, name: 'Seehafen', ankuenfte: 31, mix: { S: 0.18, M: 0.32, L: 0.42, XL: 0.08 },
       // Abschluss der Region: so viele Besuche großer Schiffe (Kreuzfahrtschiff, Flottenbesuch)
       // in Stufe 6, dieser Ruf und alle Plätze gebaut. Alles davon sieht der Spieler im Hafen.
       ziel: { grossschiffBesuche: 6, ruf: 4.5, allePlaetze: true },
@@ -303,13 +408,15 @@ export const ECONOMY = {
   // Ersatzplätze zum selben Projekt (zum Beispiel b-steg: B01, B02 in Stufe 2, ab Stufe 3 B19,
   // B20). Ein Projekt hat deshalb in jeder Stufe mindestens so viele Plätze wie beim Kauf.
   // tools/balance.mjs --pruefen prüft das gegen harbor.js.
-  start: { plaetze: ['A03', 'A04', 'A05', 'A06'] },   // der alte Steg, gratis
+  // Startwerte eines neuen Spiels (P17): der alte Steg gratis, kein Startgeld. Das erste Bauwerk
+  // (Toilettenhäuschen) schenkt der Einstieg beim ersten Öffnen von Bauen (Ü15, docs/bauen.md).
+  start: { plaetze: ['A03', 'A04', 'A05', 'A06'], geld: 0 },
   stegprojekte: [
     { id: 'a-haken',      stufe: 1, name: 'Haken an Steg A',          kosten: 180,
       plaetze: ['A01', 'A02', 'A12', 'A13'] },
     { id: 'a-knick',      stufe: 2, name: 'Steg A verlängern',        kosten: 500,
       plaetze: ['A07', 'A08', 'A09', 'A10', 'A11'] },
-    { id: 'b-steg',       stufe: 2, name: 'Steg B',                   kosten: 700,
+    { id: 'b-steg',       stufe: 2, name: 'Steg B',                   kosten: 450,
       plaetze: ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B19', 'B20'] },
     { id: 'b-lang',       stufe: 2, name: 'Steg B verlängern',        kosten: 1400,
       plaetze: ['B09', 'B10', 'B11', 'B12', 'B13', 'B14', 'B15', 'B16', 'B21', 'B22'] },
@@ -337,6 +444,10 @@ export const ECONOMY = {
       plaetze: ['D12', 'D13', 'D14', 'D15', 'D16', 'D17', 'D18'] },
     { id: 'b-neu',        stufe: 5, name: 'Steg B verlängern',        kosten: 9000,
       plaetze: ['B29', 'B30', 'B31', 'B32', 'B33', 'B34'] },
+    // P59, D9: Yachtsteg im tiefen Wasser vor der Westmole, zwei Plätze längsseits für große Yachten
+    // und Traditionssegler (XL). Mehr XL-Plätze bringen mehr XL-Gäste (A10).
+    { id: 'yachtsteg',    stufe: 6, name: 'Yachtsteg',                kosten: 30000,
+      plaetze: ['Y01', 'Y02'] },
   ],
 
   // ---------------------------------------------------------------- Versorgung
@@ -369,6 +480,13 @@ export const ECONOMY = {
       { name: 'Stromsäulen an Steg B', abStufe: 3, kosten: 2400, stege: ['B'] },
     ] },
   },
+
+  // ---------------------------------------------------------------- Stege umbauen (P59)
+  // Doppelbox: zwei Heckpfahl-Boxen nebeneinander werden eine breite Box (data/doppelboxen.js,
+  // features/umbauen.js, docs/stege-umbauen.md). Nur für Klassen, deren breitere Boote sonst keine Box
+  // finden: In die Doppelbox der Klasse L passen Mehrrumpfboote (L2, bis 7,5 m breit, ab Stufe 4).
+  // kosten: Umbau zur Doppelbox, rueckbau: zurück zu zwei Boxen. Beide Boxen müssen dabei frei sein.
+  doppelbox: { klassen: ['L'], abStufe: 4, kosten: 2200, rueckbau: 500, maxBreite: 8 },
 
   // ---------------------------------------------------------------- Stege nachrüsten (P30)
   // Logik in web/js/features/nachruesten.js, Beschreibung in docs/nachruesten.md. Je Steg einmal.

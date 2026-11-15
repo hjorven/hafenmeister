@@ -119,7 +119,7 @@ test('Spielstand: Nachrüstungen überleben JSON, alte Stände ohne Eintrag gehe
 test('Als Nächstes: Nachrüsten zählt nicht als neuer Liegeplatz, hilft aber beim Ruf', () => {
   const e = (key, extra) => ({ key, name: key, kosten: 500, gesperrt: null, nutzen: [], ...extra });
   const eintraege = [
-    e('nachruesten:finger:A', { art: 'steg', nachruesten: 'finger', name: 'Fingerstege an Steg A' }),
+    e('nachruesten:finger:A', { art: 'steg', nachruesten: 'finger', hebtNote: true, name: 'Fingerstege an Steg A' }),
     e('hafen:stufe', { art: 'hafen', kosten: 9000 }),
   ];
   const bedarf = { weg: 3, offen: {}, belegt: 10, plaetze: 10, abend: true };

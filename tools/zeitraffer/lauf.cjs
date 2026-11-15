@@ -81,6 +81,19 @@ const BOT = () => {
   if (!W.ticker) W.ticker = G.onTick((dt) => {
     if (!dt) return;
     W.schritte++;
+    // Messung für tools/balance.mjs (P17, docs/balancing.md "Rechnung und Spiel"): wie lange Boote
+    // anfahren, an der Boje warten und beim Ablegen ihre Box halten, je Stufe in Spielsekunden.
+    { const st0 = S.state; const M = W.mess ||= {};
+      const m = M[st0.stage] ||= { sek: 0, ablegenSek: 0, ablegenN: 0, anfahrtSek: 0, bojeSek: 0, ank: 0, fest: 0, bisFestSek: 0, ab0: st0.stats?.turnedAway ?? 0, ein0: st0.stats?.totalIncome ?? 0, tag0: st0.day };
+      const seen = W.seen ||= new Map(); const lseen = W.lseen ||= new Set();
+      if (st0.phase === 'day') {
+        m.sek += dt;
+        for (const [bid, l] of Object.entries(st0.leaving || {})) if (l.off) { m.ablegenSek += dt; const k = bid + ':' + l.boatId; if (!lseen.has(k)) { lseen.add(k); m.ablegenN++; } }
+        for (const id of st0.queue) { const b = st0.boats[id]; if (!b) continue; if (!seen.has(id)) { seen.set(id, G.time); m.ank++; } if (b.atBuoy) m.bojeSek += dt; else m.anfahrtSek += dt; }
+      }
+      for (const [id, t] of seen) { const b = st0.boats[id]; if (!b || b.status !== 'waiting') { if (b && b.berthId != null) { m.fest++; m.bisFestSek += G.time - t; } seen.delete(id); } }
+      m.abgewiesen = (st0.stats?.turnedAway ?? 0) - m.ab0; m.einnahmen = (st0.stats?.totalIncome ?? 0) - m.ein0; m.tage = st0.day - m.tag0;
+    }
     const st = S.state; const r = S.ctx.rules;
     for (const b of Object.values(st.boats)) if (b.pendingFee > 0) S.collect(b.id);
     if (st.phase !== 'day') S.collectAll(true);
@@ -124,7 +137,7 @@ const BOT = () => {
     aufstieg: S.canAdvanceStage().missing ?? [],
     ereignis: ev?.id ?? null, winter: !!S.season()?.winter,
     abgewiesen: st.stats?.turnedAway ?? 0, einnahmen: st.stats?.totalIncome ?? 0,
-    botSchritte: W.schritte, kaeufe,
+    botSchritte: W.schritte, kaeufe, mess: W.mess,
   };
 };
 
@@ -288,6 +301,7 @@ const SNAP = () => {
 
   const t0 = Date.now(); const ende = t0 + MINUTEN * 60000;
   let naechstesBild = 0; let naechsteProbe = 0; let bildNr = 0; let letzteStufe = null; let speicherNachTag = 20;
+  let letzteMessung = null; const messAbschnitte = [];
   const nahZaehler = {};
 
   const bildschirmfoto = async (name, label) => {
@@ -346,6 +360,10 @@ const SNAP = () => {
     zustand.w = Math.round(w / 1000);
     for (const k of zustand.kaeufe) R.kaeufe.push({ stufe: zustand.stufe, ...k });
     delete zustand.kaeufe;
+    // Messung: nach jedem Neuladen beginnt der Bot von vorn, darum Abschnitte aufsummieren
+    if (letzteMessung && zustand.botSchritte < letzteMessung.schritte) messAbschnitte.push(letzteMessung.mess);
+    letzteMessung = { schritte: zustand.botSchritte, mess: zustand.mess };
+    delete zustand.mess;
     R.verlauf.push(zustand);
     if (zustand.ereignis) R.wetter[zustand.ereignis] = (R.wetter[zustand.ereignis] || 0) + 1;
     if (zustand.winter) R.wetter.winter = (R.wetter.winter || 0) + 1;
@@ -398,6 +416,12 @@ const SNAP = () => {
   }
   if (!R.ende) { const v = tz(); R.ende = `Zeit abgelaufen (${MINUTEN} min), erreicht: Stufe ${v?.stufe}, Tag ${v?.tag}`; }
   R.logbuch.ende = await page.evaluate(`(${LOGBUCH})()`).catch(() => null);
+  if (letzteMessung) messAbschnitte.push(letzteMessung.mess);
+  R.messung = {};
+  for (const ab of messAbschnitte) for (const [st, x] of Object.entries(ab || {})) {
+    const a = R.messung[st] ||= {};
+    for (const k of ['sek', 'ablegenSek', 'ablegenN', 'anfahrtSek', 'bojeSek', 'ank', 'fest', 'bisFestSek', 'abgewiesen', 'einnahmen', 'tage']) a[k] = (a[k] || 0) + (x[k] || 0);
+  }
   R.dauerMin = +((Date.now() - t0) / 60000).toFixed(1);
   R.fehler = fehler; R.warnungen = warnungen; R.fehlendeDateien = fehlendeDateien;
   fs.writeFileSync(path.join(OUT, `ergebnis-${GERAET}.json`), JSON.stringify(R, null, 1));
