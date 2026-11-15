@@ -39,7 +39,7 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 | A | Pulk und Stau: nach PR 280 (Serie `c589ca5`, Typ 1 und 2) an rund 90 Tagen je Partie ein Pulk mit bis zu 100 Booten auf 45 m; ineinander fest 42 bis 470, hängend 92 bis 323, in Fahrt berührt 1800 bis 3500 je Partie; über Land fast weg (1 bis 6). Typ 2 PC schlechter als vorher | Zeitraffer-Zwischenserie 15.11. 02:00 UTC, Typ 3 bis 10 folgen | P66, Boote-Thread (Ankerfeld-Fix plus Pulk) |
 | A | Boote noch über Land (rund 21 je Lauf) und durch Stege (rund 17 je Lauf), vor allem Typ 3 und 8 | dieselbe Serie | P66 mit P62 |
 | A | Aufstieg weicht von der Rechnung ab; nach PR 252: geschickt 225, gemütlich 239 Tage, Stufe 2 gemütlich 36 Tage; A10 (PR 287) verschiebt um +2 bis +6 Tage | Zeitraffer-Serien, `tools/balance.mjs` | Balancing-Paket P17 |
-| B | Menschen laufen auf festen Koordinaten (`people/netz.js`), nicht auf dem Seed-Gelände | Gelände-Thread, 14.11. | Zusammenspiel 3, oder eigener Thread "Menschen auf das Gelände stellen" |
+| B | Menschen laufen auf festen Koordinaten (`people/netz.js`), nicht auf dem Seed-Gelände | Gelände-Thread, 14.11. | erledigt 15.11. (Thread "Menschen auf das Gelände stellen", docs/menschen-wege.md) |
 | C | `tests/specs/leinen.spec.mjs` prüft nur Küstentyp 1 bis 10 | Gelände-Thread | Leinen- oder Test-Thread nach PR 300 |
 | B | Logbuch: die 9 XXL-Einträge werden in keiner Partie erreicht (0/9), sonst 74 bis 76 von 89 | Zeitraffer-Zwischenserie | Logbuch-Thread prüft, ob XXL-Besuche im normalen Spiel vorkommen; sonst Einträge an echte Ereignisse binden |
 | B | `istWasser` und Bild stimmen am Durchstich nicht überall überein | Messlatte (`feature-tests/messlatte/README.md`) | P62 |
