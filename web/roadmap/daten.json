@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "14.11.2026",
-  "commit": "19f4ad4"
+  "datum": "15.11.2026",
+  "commit": "7ce53af"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -553,10 +553,11 @@
    "id": "P21",
    "titel": "Logbuch und Hafenchronik zeigen",
    "inhalt": "Logbuch (Note 1), F36, sim:logbookNew",
-   "thread": "erledigt (PR 274, docs/logbuch.md, SAVE_VERSION 3)",
+   "thread": "erledigt (PR 274, docs/logbuch.md, SAVE_VERSION 3; Großschiffe und Fischkutter im Logbuch PR 305)",
    "welle": 2,
    "prs": [
-    274
+    274,
+    305
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -719,14 +720,16 @@
    "id": "P30",
    "titel": "Stege nachrüsten",
    "inhalt": "F8",
-   "thread": "neu",
+   "thread": "erledigt (PR 297, nachruesten.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    297
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F8"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1193,11 +1196,12 @@
    "id": "P62",
    "titel": "Geländeform und Engpass neu bauen",
    "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
-   "thread": "erledigt (PR 246, 271): zehn Küstentypen aus Seed, jede Küste mit Seeweg",
+   "thread": "erledigt (PR 246, 271, 300): zehn Küstentypen aus Seed, jede Küste mit Seeweg; fünf weitere Küsten nach echten Karten (PR 300)",
    "welle": 0,
    "prs": [
     246,
-    271
+    271,
+    300
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1273,7 +1277,7 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
    "welle": 0,
    "prs": [
     81,
@@ -1285,7 +1289,8 @@
     254,
     256,
     258,
-    262
+    262,
+    280
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1299,7 +1304,8 @@
    "bilder": [
     23,
     32,
-    39
+    39,
+    56
    ]
   },
   {
@@ -1885,12 +1891,14 @@
   {
    "code": "F8",
    "text": "Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "entfaellt",
+   "statusText": "erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasser mit P31, nachruesten.md",
    "pakete": [
     "P30"
    ],
-   "prs": [],
+   "prs": [
+    297
+   ],
    "abschnitt": "Kernspiel"
   },
   {
@@ -4361,11 +4369,11 @@
     "P59"
    ],
    "zaehler": {
-    "erledigt": 1,
+    "erledigt": 2,
     "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
-    "offen": 16,
+    "offen": 15,
     "entfaellt": 0,
     "alle": 19
    }
@@ -4449,11 +4457,11 @@
   }
  ],
  "gesamt": {
-  "erledigt": 27,
+  "erledigt": 28,
   "teilweise": 6,
   "arbeit": 1,
   "frage": 0,
-  "offen": 46,
+  "offen": 45,
   "entfaellt": 1,
   "alle": 81
  },
@@ -4462,8 +4470,8 @@
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 66,
-  "entfaellt": 0,
+  "offen": 65,
+  "entfaellt": 1,
   "alle": 219
  },
  "bilder": [
@@ -5138,9 +5146,22 @@
    "datum": "2026-11-14",
    "quelle": "funk-anmeldung/pc-box-frei-gehalten.png",
    "nr": 55
+  },
+  {
+   "datei": "p66-pr280-handy-bojen-seitlich.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Wartebojen seitlich neben den Stegen (Handy)",
+   "pr": 280,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "fahrwasser/bojen-seitlich/nachher-handy-0.png",
+   "nr": 56
   }
  ],
  "neueBilder": [
+  56,
   55,
   53,
   52,
@@ -5148,10 +5169,51 @@
   46,
   45,
   43,
-  41,
-  39
+  41
  ],
  "merges": [
+  {
+   "datum": "2026-11-15",
+   "titel": "Roadmap-Pflege: PR 280 (P66), 300 (P62), 305 (P21) eingetragen, Bild Wartebojen seitlich",
+   "pr": 311,
+   "pakete": [
+    "P66",
+    "P62",
+    "P21"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Zeitraffer: Speicherprüfung nicht mehr kurz vor Tagesende",
+   "pr": 309,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Stege nachrüsten (P30): Fingerstege und Laternen je Steg, Stromsäulen sichtbar",
+   "pr": 297,
+   "pakete": [
+    "P30"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Pages: 10 Minuten Sammelpause nach Merges, Zeitplan als Rückfall",
+   "pr": 310,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Plan: längere Tage und Bootsgeschichten (docs/bootsgeschichten.md)",
+   "pr": 312,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Arbeitsplan: Zwischenserie nach PR 280, Pulk bleibt Prio A",
+   "pr": 308,
+   "pakete": []
+  },
   {
    "datum": "2026-11-14",
    "titel": "Hafen wächst sichtbar je Stufe: Gebäudemodelle je Ausbaustufe, Dorf und Häuserzeile wachsen mit",
@@ -5162,13 +5224,17 @@
    "datum": "2026-11-14",
    "titel": "Gelände: fünf Küsten aus echten Karten (Marstrand, Punat, Shilshole Bay, Kotor, Porto Cervo)",
    "pr": 300,
-   "pakete": []
+   "pakete": [
+    "P62"
+   ]
   },
   {
    "datum": "2026-11-14",
    "titel": "Logbuch: Großschiffe gesichtet, Fischkutter wechseln, Meldungen im Meldeplatz",
    "pr": 305,
-   "pakete": []
+   "pakete": [
+    "P21"
+   ]
   },
   {
    "datum": "2026-11-14",
@@ -5183,55 +5249,14 @@
    "datum": "2026-11-14",
    "titel": "Boote: Wartebojen seitlich neben den Stegen, Anfahrt von weit draußen",
    "pr": 280,
-   "pakete": []
+   "pakete": [
+    "P66"
+   ]
   },
   {
    "datum": "2026-11-14",
    "titel": "Arbeitsplan: wann Welle 0 fertig ist, Zusammenspiel-Prüfung in drei Threads",
    "pr": 304,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: Bilder zu P28 Anmeldung per Funk (PR 288)",
-   "pr": 302,
-   "pakete": [
-    "P28"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P24 Teil 2: Hanse-Woche, Mittsommer, Heringstage, Holzboote, Bauten und Nachspiel",
-   "pr": 299,
-   "pakete": [
-    "P24"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Folgefunde Einzeltest: geschenktes WC zuerst, Bootskarte nennt den Münzbetrag",
-   "pr": 301,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Zeitraffer: Pulk erkennen, Überlappungen getrennt zählen",
-   "pr": 251,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P28: Anmeldung per Funk, Box freihalten mit Bonus",
-   "pr": 288,
-   "pakete": [
-    "P28",
-    "P02"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Pages gebündelt statt nach jedem Merge, PR-Tests schneller",
-   "pr": 294,
    "pakete": []
   }
  ]
