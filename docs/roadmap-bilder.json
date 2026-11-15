@@ -627,6 +627,50 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "fahrwasser/bojen-seitlich/nachher-handy-0.png"
+  },
+  {
+   "datei": "p41-pr315-handy-statistik.jpg",
+   "pakete": [
+    "P41"
+   ],
+   "titel": "Statistik der letzten 30 Tage am Handy",
+   "pr": 315,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "statistik/statistik-handy.png"
+  },
+  {
+   "datei": "p41-pr315-pc-saisonbilanz.jpg",
+   "pakete": [
+    "P41"
+   ],
+   "titel": "Saisonbilanz in der Winterpause am PC",
+   "pr": 315,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "statistik/winter-pc.png"
+  },
+  {
+   "datei": "p33-pr314-handy-umlegen-ziehen.jpg",
+   "pakete": [
+    "P33"
+   ],
+   "titel": "Liegendes Boot halten und in eine andere Box ziehen (Handy)",
+   "pr": 314,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "umlegen/handy-2-ziehen.png"
+  },
+  {
+   "datei": "p33-pr314-pc-umgelegt.jpg",
+   "pakete": [
+    "P33"
+   ],
+   "titel": "Boot umgelegt (PC)",
+   "pr": 314,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "umlegen/pc-2-umgelegt.png"
   }
  ]
 }
