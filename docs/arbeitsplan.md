@@ -21,6 +21,7 @@ Stand 14.11.2026, 21:15 UTC.
 |---|---|---|---|---|
 | Boote: Wartebojen neben den Stegen, Anfahrt von weit draußen, Stau im Becken | "Staus an Bojen und Ankerfeld auflösen" | P66 | PR seit 11 Uhr offen, muss fertig werden | 280 |
 | Gelände: Seewege, Seegatt für geschlossene Bodden | "Geländeform und Engpass neu bauen" | P62 | läuft | - |
+| Längere Tage (5 min) und Bootsgeschichten (50 Alltag + 14 Ereignis-Anlässe), echte Regatta, Plan docs/bootsgeschichten.md | "Längere Tage und Bootsgeschichten einbauen" | neu (Jorven 14.11.) | Plan fertig, Zahlen mit P17 abgestimmt, danach 5 Teil-PRs | - |
 | Schicht-Test, Feature-Test, Zeitraffer, Roadmap-Seite, Kamera | Prüf- und Pflege-Threads | - | laufen | 251, 296 |
 
 Seit 21:15 gemergt: ruhige Oberfläche mit einem Meldeplatz (PR 282), P28 Funk-Anmeldung (PR 288), P24 Teil 2 neue Ereignisse (PR 299), Zeitraffer-Pulk (PR 251), Pages gebündelt (PR 294), Folgefunde Einzeltest (PR 301).
@@ -198,6 +199,7 @@ Schon erledigt aus Jorvens Vorschlägen: F14, F15, F18, F26, F27 (Grundgerüst),
 
 | Datum | Änderung |
 |---|---|
+| 15.11.2026, 02:30 Uhr | Neu: "Längere Tage und Bootsgeschichten einbauen" (Plan docs/bootsgeschichten.md): Tag 270 s, Kurzhalt ohne Nacht, Anlässe je Boot, echte Regatta; Zahlen mit P17. |
 | 15.11.2026, 02:10 Uhr | Zwischenserie nach PR 280 (Typ 1, 2): Pulk bleibt Prio A, Welle 0 noch nicht abnahmefähig; Fund XXL-Logbucheinträge nie erreicht. |
 | 14.11.2026, 22:10 Uhr | PR 280 gemergt, P62 und P64 erledigt; Welle-0-Abnahme über 15 Küsten nach Ankerfeld-Fix und PR 300; Menschen auf festen Koordinaten als Fund B. |
 | 14.11.2026, 22:00 Uhr | P28, P24 Teil 2, ruhige Oberfläche gemergt; Abschnitt 3a: wann Welle 0 fertig ist und Zusammenspiel-Prüfung in drei Threads danach. |
