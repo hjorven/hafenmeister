@@ -35,7 +35,7 @@ export const NOCH_UNGELESEN = {
 };
 // Felder, die Ja/Nein sein dürfen. Alles andere ist eine Zahl, ein Text, eine Liste oder ein Objekt.
 const JA_NEIN = new Set(['ueberNacht', 'vorauskasse', 'strom', 'offen', 'gast', 'allePlaetze', 'nurMotor', 'seaArrivals', 'winter',
-  'C', 'CS', 'D', 'K', 'A', 'B', 'nurSegel']);
+  'C', 'CS', 'D', 'K', 'A', 'B', 'nurSegel', 'krantage']);
 
 function quelltexte() {
   const out = [];

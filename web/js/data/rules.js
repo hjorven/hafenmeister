@@ -28,6 +28,9 @@ export function rulesFromEconomy(E = ECONOMY) {
   r.arrivalDenseGap = z.ankunftDichte ?? r.arrivalMinGap;
   r.seasonDays = z.saisonTage;
   r.winterDays = z.winterTage ?? 0;
+  // Jahreszeiten (P20, G5): Saisontage je Jahreszeit und ihre Wirkung auf die Ankünfte
+  r.seasonParts = Object.entries(z.jahreszeiten || {}).map(([id, [from, to]]) => ({ id, from, to }));
+  r.seasonEffects = z.jahreszeitWirkung || {};
 
   // Hafengeld und Aufenthalt je Klasse
   r.baseFee = {};

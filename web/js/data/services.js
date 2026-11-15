@@ -53,6 +53,8 @@
 //   trailer                { anzahl, preis, wetter } Trailerboote kommen ueber Land, gehen am Slip ins Wasser,
 //                          fahren eine Runde und werden nachmittags wieder aufgeslippt. Kein Liegeplatz.
 //   abendgaeste            { anzahl, preis, wetter } Leute aus dem Ort kommen am Abend (Raeucherei)
+//   dauerlieger            P20 H5: { krantage, preis, nur } an erstem und letztem Saisontag je Dauerlieger,
+//                          { anteil, preis, nur } je Tag und Dauerlieger im Hafen, { winter } je Dauerlieger an Land
 //   tagesgaeste            Euro je 100 Tagesgaeste, wenn ein grosses Schiff (besuch mit gaeste) heute da ist
 //
 // Entweder-oder (F3): WAHLPLAETZE unten. Auf einem Wahlplatz passt nur eine der Optionen; wer die andere baut,

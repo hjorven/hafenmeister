@@ -291,9 +291,10 @@ export function createScheduler({ seed = 1, defs = EVENTS, schedule = SCHEDULE, 
       if (id) return { snow: 0, ...byId.get(id).weather, event: id, part: season.part };
       if (season.winter) return { ...year.winterWeather, event: null, part: 'winter' };
       const r = hashDay(st.seed, day);
-      // Frühling und Herbst etwas windiger und trüber als der Sommer
+      // Frühling und Herbst etwas windiger und trüber als der Sommer, der Herbst am windigsten (P20 G5)
       const rough = season.part === 'sommer' ? 0 : 0.15;
-      return { wind: 0.15 + rough + r * 0.35, fog: 0, rain: r > 0.85 ? 0.4 : 0, snow: 0, sun: 0.5 + (1 - r) * 0.5 - rough, event: null, part: season.part };
+      const wind = year.wind?.[season.part] ?? rough;
+      return { wind: Math.min(1, 0.15 + wind + r * 0.35), fog: 0, rain: r > 0.85 ? 0.4 : 0, snow: 0, sun: 0.5 + (1 - r) * 0.5 - rough, event: null, part: season.part };
     },
 
     // Wetterbericht: heute und die nächsten n Tage. Nur angekündigte Ereignisse erscheinen.
