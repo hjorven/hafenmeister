@@ -6,8 +6,9 @@
 // - Karte: Einnahmen je Quelle (Liegegeld, Pacht, Gastronomie, Services, Tagesziele), Ausgaben,
 //   Boote (angelegt, abgereist mit Bewertung, weitergefahren), Ruf vorher und nachher, bester Tag,
 //   die letzten sieben Tage als Balken und ein Hinweis, was morgen mehr bringt.
-// - Sie erscheint von selbst und schließt nach einer Weile wieder, solange niemand sie anfasst.
-//   Wer das nicht will, schaltet "Abends zeigen" aus; dann kommt nur ein kleiner Zettel mit der Summe.
+// - Am Tagesende kommt nur ein kleiner Zettel mit der Summe in den Meldeplatz (ui/meldungen.js); antippen öffnet
+//   die Karte. Von selbst erscheint die Karte nur, wer "Abends zeigen" einschaltet (Schichttest 15.11.: sie lag
+//   bis zu 14 s mitten über Bojen und Stegkopf, während das Spiel lief; Jorven: Meldungen klein an einer Stelle).
 // - Menü: "Tagesabschluss" öffnet die Karte jederzeit, mit Blättern durch die letzten Tage.
 // - Münzen über Gebäuden: Bei der Abrechnung der Services steigt über jeder Anlage eine Münze mit dem Betrag auf.
 //
@@ -65,7 +66,7 @@ function el(tag, attrs = {}, ...kids) {
 }
 
 function leseAuto() {
-  try { return localStorage.getItem(SPEICHER) !== 'aus'; } catch { return true; }
+  try { return localStorage.getItem(SPEICHER) === 'an'; } catch { return false; }
 }
 function schreibeAuto(an) {
   try { localStorage.setItem(SPEICHER, an ? 'an' : 'aus'); } catch { /* privates Fenster */ }
