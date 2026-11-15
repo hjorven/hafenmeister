@@ -3,11 +3,27 @@
 # Voraussetzung: Settings > Pages > Build and deployment > Source = "GitHub Actions".
 name: GitHub Pages
 
-# Gebündelt statt nach jedem Merge: Alle 30 Minuten schaut der Lauf nach, ob sich seit der
-# veröffentlichten Fassung (version.txt auf der Seite) etwas an der Seite geändert hat. Nur dann
-# wird gebaut. Viele Merges hintereinander ergeben so einen einzigen Bau.
-# Sofort veröffentlichen: Actions > GitHub Pages > Run workflow (baut immer).
+# Gebündelt statt nach jedem Merge:
+# - Nach einem Merge, der die Seite betrifft, wartet der Lauf 10 Minuten (Sammelpause). Kommt in der
+#   Zeit ein weiterer Merge, wird der wartende Lauf abgebrochen und die Pause beginnt neu. Viele
+#   Merges hintereinander ergeben so einen einzigen Bau, 10 Minuten nach dem letzten.
+# - Zusätzlich schaut ein Zeitplan alle 30 Minuten nach (GitHub startet Zeitpläne nur nach Kräften,
+#   manchmal Stunden später). Er fängt Dauer-Merge-Phasen ab, in denen die Pause nie abläuft.
+# - Gebaut wird nur, wenn sich seit der veröffentlichten Fassung (version.txt) etwas geändert hat.
+# Sofort veröffentlichen: Actions > GitHub Pages > Run workflow (baut immer, ohne Pause).
 on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - "docs/roadmap.md"
+      - "docs/roadmap-bilder.json"
+      - "tools/roadmap.mjs"
+      - "tools/build-pages.sh"
+      - "tools/offline-liste.mjs"
+      - "tools/check-pages.sh"
+      - "tools/pages-geaendert.sh"
+      - ".github/workflows/pages.yml"
   schedule:
     - cron: "7,37 * * * *"
   workflow_dispatch:
@@ -16,7 +32,7 @@ on:
 # Nur der Deploy-Job darf auf Pages schreiben (pages, id-token); der Build liest nur.
 permissions: {}
 
-# Laufen zwei Läufe gleichzeitig (Zeitplan und Run workflow), zählt nur der neueste.
+# Nur der neueste Lauf zählt: ein neuer Merge bricht einen wartenden oder laufenden Lauf ab.
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -26,10 +42,14 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       bauen: ${{ steps.pruefen.outputs.bauen }}
-    timeout-minutes: 10
+    timeout-minutes: 20
     permissions:
       contents: read
     steps:
+      - name: Sammelpause (10 Minuten auf weitere Merges warten)
+        if: github.event_name == 'push'
+        run: sleep 600
+
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
