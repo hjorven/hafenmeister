@@ -467,7 +467,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | J2 | Im Einstieg fährt das erste Boot nicht selbst ein | erledigt (PR 112, `holdBoat` bis zum ersten Anlegen; Kamera fährt zum Boot, wenn es außerhalb liegt) | P03 |
 | J3 | Münze gleich nach dem Anlegen erklären, auch den halben Preis | erledigt (PR 112, Anteil aus den Regeln) | P03 |
 | J4 | Erstes Bauen führen, Geld fürs WC geschenkt (= Ü15) | erledigt (PR 237) | P17, P03 |
-| J5 | Ruf am ersten Abreisenden erklären | offen | P03 (nach P14) |
+| J5 | Ruf am ersten Abreisenden erklären | erledigt (P03-Rest, 15.11.: Tipp mit Kreis um den Ruf bei der ersten Bewertung nach dem Einstieg) | P03 (nach P14) |
 | J6 | Hinweise beim ersten Mal (kein Platz, Sturm, Winter, Stufenziel, Stammgast) | erledigt (kein Platz zweifach, Stufenziel, Stammgast; Sturm und Winter erklärt schon das Ereignisschild) | P03 |
 | J7 | Hilfe-Seite für alle Geräte mit sechs Bildern | erledigt (Menü „Hilfe“, `features/hilfe.js`) | P03 |
 | J8 | Einstieg im Menü wiederholen | erledigt (Knopf in der Hilfe) | P03 |
@@ -661,7 +661,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|---|
 | P01 | Dauerlieger zur echten Entscheidung machen | Ü1, Ü20, Doku Dauerlieger, Gast wird umgelegt (plan 9a) | `sim.js`, `features/dauerlieger.js`, `economy.js`, `tests/dauerlieger.test.mjs`, `docs/neue-features.md`, `docs/spielregeln.md` | erledigt (PR 149, 226) |
 | P02 | Hafenbüro mit eigenen Aufgaben ausbauen | Ü2, Ü11, A2, E1 bis E7, erledigt (PR 146) | `ui/hud.js`, `sim.js` (Automatik), `economy.js`, `ui/bauen.js` (Texte) | erledigt (PR 146) |
-| P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); J4 mit P17 erledigt (PR 237); offen: J5 nach P14 |
+| P03 | Einstieg an neue Oberfläche anpassen | Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), `docs/einstieg.md` | `features/einstieg.js`, `docs/einstieg.md` | bestehend: "Einstieg für neue Spieler bauen"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); J4 mit P17 erledigt (PR 237); J5 erledigt (15.11.): P03 fertig |
 | P04 | Abschlussziel Stufe 6 richtig zählen | Ü4 | `bridge.js`, `render/services.js`, `docs/services.md` | erledigt (PR 139): ein Zähler `state.bigVisits`, Liste `GROSSSCHIFF_BESUCHE` in `data/services.js` (Vorarbeit PR 113) |
 | P05 | Boote auf wegfallenden Plätzen regeln | Ü5 | `sim.js` (Stufenausbau), `tests/` | erledigt (Ü5: `advanceStage`, Hook `stageUp`, Test in `tests/dauerlieger.test.mjs`); bestehend: "Spielregeln ohne Grafik umsetzen" |
 | P06 | Eine Quelle für alle Zahlen und echte Regeltests (erledigt) | Ü6, Ü24 | `economy.js`, `data/rules.js`, `data/services.js`, `services/rules.js`, `data/events.js`, `tests/regeln.mjs` (statt `tests/helpers.mjs`, das ist der Browser-Helfer), alle Regeltests, `tools/zahlen.mjs`, `docs/zahlen.md`, `docs/balancing.md` | bestehend: "Balancing für 94 Liegeplätze ausarbeiten" |

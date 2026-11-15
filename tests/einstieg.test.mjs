@@ -92,7 +92,8 @@ test('Hinweise beim ersten Mal: Zuordnung und nur einmal je Spielstand', () => {
   assert.equal(hinweisFuer('sim:turnedAway', { reason: 'rebuild' }), null, 'Umbau ist kein Fehler des Spielers');
   assert.equal(hinweisFuer('sim:stageReady', { stage: 2 }), 'stufe');
   assert.equal(hinweisFuer('stammgast:neu', {}), 'stammgast');
-  for (const id of ['geduld', 'voll', 'stufe', 'stammgast']) {
+  assert.equal(hinweisFuer('gaestebuch:bewertung', { id: 3, note: 4.5 }), 'ruf');
+  for (const id of ['geduld', 'voll', 'stufe', 'stammgast', 'ruf']) {
     assert.ok(HINWEISE[id].titel && HINWEISE[id].text && HINWEISE[id].kurz, id);
   }
   const e = einstiegState({});
@@ -117,4 +118,15 @@ test('Nur noch Tagesziele offen: Hinweis kommt am nächsten Morgen, danach nicht
   erledige(f, 'willkommen');
   assert.equal(naechsterSchritt(f, lage({ tag: 2 })), null, 'mitten im Einstieg endet er weiter nach einem Tag');
   assert.equal(f.fertig, true);
+});
+
+test('Ruf-Hinweis (J5) nennt die Tage, die die Regeln wirklich zählen', async () => {
+  const { RULES } = await import('../web/js/data/rules.js');
+  const { rufTageText } = await import('../web/js/features/einstieg.js');
+  assert.equal(rufTageText(1), 'von heute');
+  assert.equal(rufTageText(2), 'der letzten zwei Tage');
+  assert.equal(rufTageText(3), 'der letzten drei Tage');
+  const soll = rufTageText(RULES.reputation.days);
+  for (const t of [HINWEISE.ruf.text, HINWEISE.ruf.kurz]) assert.ok(t.includes(soll), t);
+  assert.ok(HINWEISE.ruf.text.includes(`höchstens ${RULES.reputation.max}`), 'Höchstnote im Text stimmt mit den Regeln');
 });
