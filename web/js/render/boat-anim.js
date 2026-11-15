@@ -117,6 +117,8 @@ function normBerth(b) {
     bollards: b.bollards,
     liege: b.liege ?? null,
     abstand: b.abstand,
+    paeckchen: b.paeckchen,
+    innenBoot: b.innenBoot,
     kreis: b.kreis,
   };
 }
@@ -1101,7 +1103,7 @@ class BoatAnim {
       const p = opts.vorruecken(bt);
       if (p && Number.isFinite(p.x)) { bt.x = p.x; bt.z = p.z; if (Number.isFinite(p.h)) bt.heading = p.h; }
     }));
-    if (this.moored) this.pushUndock({ takt: opts.takt });
+    if (this.moored) this.pushUndock({ takt: opts.takt, warte: opts.warte });
     let b = normBerth(berth);
     if (b.kind === 'buoy') b = { ...b, heading: this.bojenKurs(b) };
     const big = this.info.size === 'XL' || this.info.size === 'XXL';
@@ -1128,7 +1130,12 @@ class BoatAnim {
         brake = 2.2;
       }
     }
-    if (BOX_KINDS.has(b.kind) || b.kind === 'buoy' || !big) {
+    if (b.kind === 'paeckchen') {
+      // Paeckchen (P27): parallel neben das Boot innen, dann seitlich heran (Leinen ueber, heranholen),
+      // so streift der Rumpf das innere Boot beim Eindrehen nicht
+      this.push(new PathTask(pts, { speed: big ? undefined : speed, brake, harbor: big, route: opts.route, thrusters: this.info.size !== 'S' }));
+      this.push(new StraightTask(f, { sideways: true, thrusters: this.info.size !== 'S', speed: big ? 0.35 : 0.45, heading: b.heading }));
+    } else if (BOX_KINDS.has(b.kind) || b.kind === 'buoy' || !big) {
       this.push(new PathTask(pts, { speed, brake, route: opts.route, thrusters: b.kind !== 'buoy' && this.info.size !== 'S' && this.info.size !== 'M' }));
     } else {
       // Grosse Schiffe: parallel zur Kante stoppen, dann mit Querstrahlrudern seitlich heran
@@ -1259,6 +1266,8 @@ class BoatAnim {
     // opts.takt: (boot) => true, sobald dieses Boot an der Reihe ist (gemeinsamer Ablegetakt aller
     // Boote, render/boat-view.js); erst unmittelbar vor dem Leinenloswerfen gefragt
     if (opts.takt) this.push(new UntilTask((bt) => opts.takt(bt), 180));
+    // opts.warte: (boot) => true, sobald das Boot frei ist (Paeckchen: das aeussere Boot ist fort)
+    if (opts.warte) this.push(new UntilTask((bt) => opts.warte(bt), 240));
     this.push(new CallTask((bt) => {
       bt.state = 'casting-off';
       bt.emit('boat:cast-off', { berth: b?.id });
@@ -1284,10 +1293,12 @@ class BoatAnim {
       // seitlich frei kommen, dann voraus
       const out = -b.side;
       const big = this.info.size === 'XL' || this.info.size === 'XXL';
-      const off = big ? B * 1.2 : B * 0.6;
+      // Paeckchen (P27): weiter hinaus, damit Bug und Heck beim Drehen das Boot innen nicht streifen
+      const pk = b.kind === 'paeckchen';
+      const off = pk ? Math.max(B * 1.2 + 1, L * 0.5 - B * 0.5) : big ? B * 1.2 : B * 0.6;
       this.push(new StraightTask(
         { x: this.x + px * out * off, z: this.z + pz * out * off },
-        { sideways: true, thrusters: big, speed: big ? 0.35 : 0.3, heading: b.heading },
+        { sideways: true, thrusters: big || pk, speed: big ? 0.35 : pk ? 0.5 : 0.3, heading: b.heading },
       ));
     }
     this.push(new CallTask((bt) => { bt.fenderTarget = 0; bt.berth = null; bt.emit('boat:clear', { berth: b.id }); }));
@@ -1401,6 +1412,15 @@ class BoatAnim {
     }
     const out = -b.side;
     const big = this.info.size === 'XL' || this.info.size === 'XXL';
+    if (b.kind === 'paeckchen') {
+      // Paeckchen (P27): von hinten aussen parallel heran bis querab, der Rest seitlich (dock)
+      const off = B * 0.9 + 0.8;
+      return [
+        { x: f.x - dx * L * 1.6 + px * out * (off + B + 1), z: f.z - dz * L * 1.6 + pz * out * (off + B + 1) },
+        { x: f.x - dx * L * 0.35 + px * out * off, z: f.z - dz * L * 0.35 + pz * out * off },
+        { x: f.x + px * out * off, z: f.z + pz * out * off },
+      ];
+    }
     if (big) {
       // parallel zur Kante in einer Schiffsbreite Abstand
       const off = B * 1.2;
@@ -1491,8 +1511,9 @@ class BoatAnim {
 
   /** Steht o im Weg? Liefert { y: Tempofaktor, lane: Ausweichversatz } oder null. */
   blockedBy(o) {
-    // fest an Steg, Kai oder in der Box: die Anfahrwege sind dafuer gebaut
-    if (o.berth && o.berth.kind !== 'buoy' && (o.moored || o.state === 'casting-off')) return null;
+    // fest an Steg, Kai oder in der Box: die Anfahrwege sind dafuer gebaut. Ein Boot im Paeckchen
+    // (laengsseits aussen an einem anderen) ragt ins Fahrwasser: dem weichen Vorbeifahrende aus.
+    if (o.berth && o.berth.kind !== 'buoy' && o.berth.kind !== 'paeckchen' && (o.moored || o.state === 'casting-off')) return null;
     const dir = this.heading + (this.reverse ? Math.PI : 0);
     const fx = Math.cos(dir), fz = -Math.sin(dir);
     const p = o.pose();
@@ -1730,7 +1751,8 @@ class BoatAnim {
     const furled = this.sail < 0.05;
     for (const r of P.covers) r.o.visible = furled && (this.moored || r.o.name.toLowerCase().includes('jib'));
 
-    const side = this.berth && !BOX_KINDS.has(this.berth.kind) ? this.berth.side : 0;
+    // fenderBeide: ein anderes Boot liegt laengsseits aussen (Paeckchen, render/paeckchen.js)
+    const side = this.berth && !BOX_KINDS.has(this.berth.kind) && !this.fenderBeide ? this.berth.side : 0;
     for (const r of P.fenders) {
       const onSide = !side || Math.abs(r.p.z) < 0.01 || Math.sign(r.p.z) === side;
       const v = onSide ? this.fender : 0;

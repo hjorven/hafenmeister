@@ -187,7 +187,9 @@ export function init(game) {
     return { x: Math.cos(a) * ring * d, z: Math.sin(a) * ring * d };
   }
 
-  function platzBerth(platzId) {
+  // info: das Boot, das an den Platz soll (nur fuer Paeckchenplaetze 'B27+' noetig, P27)
+  function platzBerth(platzId, info = null) {
+    if (game.sim?.istPaeckchen?.(platzId)) return game.paeckchen?.berth?.(platzId, info) ?? null;
     const p = HAFEN.plaetze.find((q) => q.id === platzId);
     if (!p) return null;
     const st = stufe();
@@ -446,7 +448,7 @@ export function init(game) {
       z0: Math.min(BEREICH.z0, ab(Math.min(...zs) - 20, BEREICH.z0)), z1: Math.max(BEREICH.z1, Math.max(...zs) + 20),
     };
   }
-  let karte = null, karteSig = '', karteAlt = true;
+  let karte = null, karteSig = '', karteAlt = true, karteHindernisse = { linien: [], rechtecke: [] };
   const flaechen = new Map();         // Groessenklasse -> { r, t, sektoren }
   function karteJetzt() {
     const st = stufe();
@@ -473,6 +475,7 @@ export function init(game) {
       linien.push({ punkte: [k, { x: k.x + 0.01, z: k.z }], breite: 2 * (w * 0.95 + 0.9) });
     }
     karte = baueKarte({ tiefe, bereich: bereichMit(sb), ...h, linien, weich, engRadius: 5 });
+    karteHindernisse = { linien, rechtecke: h.rechtecke ?? [] };
     karteSig = sig;
     karteAlt = false;
     flaechen.clear();
@@ -981,7 +984,7 @@ export function init(game) {
     const neu = !boats.has(id);
     const e = boats.get(id) ?? (sucheInfo(id) && erzeuge(sucheInfo(id)));
     if (!e) return;
-    const b = platzBerth(platz);
+    const b = platzBerth(platz, e.anim.info);
     if (!b) return;
     if (neu) {
       // ohne vorheriges boot-kommt (z. B. Fischer nach dem Aufstieg, stationBoat): liegt gleich am Platz
@@ -999,6 +1002,9 @@ export function init(game) {
     fahreZu(e, platz, b, sofort);
   });
 
+  // Paeckchen (P27): Liegt aussen noch ein Boot an diesem, legt es erst ab, wenn das aeussere fort ist
+  const paeckchenFrei = (anim) => !game.paeckchen?.blockiert?.(anim.id);
+
   // sofort: vom Spieler umgelegt (P33), das Boot legt ohne gemeinsamen Ablegetakt gleich ab
   function fahreZu(e, platz, b, sofort = false) {
     e.spaeter = null;
@@ -1006,7 +1012,9 @@ export function init(game) {
     // ab Stufe 3 von der Reede durch Einfahrt und Durchstich in den See.
     // Liegt noch ein Boot in der Box (es faehrt heute ab), wartet das neue, bis die Box frei ist.
     // von der Boje oder vom Anker los im gemeinsamen Ablegetakt (sonst bei 'Alle einweisen' ein Pulk)
-    e.anim.dock(b, { route: true, waitFor: () => platzFrei(platz, b, e.anim), takt: sofort ? null : ablegeTakt });
+    // Paeckchen (P27): erst los, wenn das Boot innen fest liegt (sonst laege das aeussere ihm im Weg)
+    const frei = b.kind === 'paeckchen' ? () => platzFrei(platz, b, e.anim) && game.paeckchen?.innenFest?.(platz) !== false : () => platzFrei(platz, b, e.anim);
+    e.anim.dock(b, { route: true, waitFor: frei, takt: sofort ? null : ablegeTakt, warte: paeckchenFrei });
   }
 
   // Stufenausbau mit weniger Bojen (Spielregel settleWaitSpots): ein wartendes Boot verholt an eine
@@ -1037,7 +1045,7 @@ export function init(game) {
     entferneMuenze(id, 0);
     // Abends legen viele zugleich ab: gestaffelt, 3 bis 6 s Abstand, damit es wie geordneter
     // Verkehr aussieht und nicht wie ein Pulk an der Einfahrt (hoechstens 30 s Warten)
-    e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true, takt: ablegeTakt, see }).then((ok) => {
+    e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true, takt: ablegeTakt, see, warte: paeckchenFrei }).then((ok) => {
       if (ok && boats.get(id) === e) entferne(id);
     });
   }
@@ -1476,7 +1484,7 @@ export function init(game) {
     const weg = [ziel];
     e.draussen = true;
     entferneMuenze(id, 0);
-    e.anim.undock(weg, { sails: segel, route: true, takt: ablegeTakt, see: raus ? raus.slice(1) : undefined }).then((ok) => {
+    e.anim.undock(weg, { sails: segel, route: true, takt: ablegeTakt, see: raus ? raus.slice(1) : undefined, warte: paeckchenFrei }).then((ok) => {
       if (!ok || boats.get(id) !== e) return;
       if (tage > 0) {
         // mehrtaegiger Toern: aus dem Bild, kommt mit 'dauer:einlaufen' zurueck
@@ -1583,7 +1591,7 @@ export function init(game) {
       e.faehrt = false;
       if (e.anim.state !== 'idle' && e.anim.state !== 'moored') continue;   // faehrt gerade
       if (e.draussen) continue;                                          // Dauerlieger auf Runde
-      const b = info.platz ? platzBerth(info.platz) : warteplatz(info.boje ?? 0, e.anim);
+      const b = info.platz ? platzBerth(info.platz, e.anim.info) : warteplatz(info.boje ?? 0, e.anim);
       if (!b) continue;
       // Stufenausbau (nicht Laden): liegt das Boot sichtbar woanders, faehrt es hin statt zu springen
       const weit = Math.hypot((b.x ?? e.anim.x) - e.anim.x, (b.z ?? e.anim.z) - e.anim.z) > 1.5;
@@ -1620,6 +1628,12 @@ export function init(game) {
     get boote() { return [...boats.values()].map((e) => ({ id: e.info.id, zustand: e.anim.state, anim: e.anim })); },
     boot: (id) => boats.get(id)?.anim ?? null,
     bojen: () => bojenPos(),
+    // Liegeplatz in Weltkoordinaten wie beim Anlegen (Paeckchen, P27) und freies Wasser der Fahrwasser-Karte
+    platzBerth: (id, info = null) => platzBerth(id, info),
+    frei: (x, z, r, t = 0) => befahrbar(karteJetzt(), x, z, r, t),
+    // Stege, Molen und Platzrechtecke der aktuellen Karte (Weltkoordinaten, world/fahrwasser.js)
+    hindernisse: () => { karteJetzt(); return karteHindernisse; },
+    paeckchenFrei,
   };
 }
 

@@ -69,6 +69,7 @@ Ergebnis: `<out>/bericht.md` (Übersicht, Funde je Lage, Messungen, Verdeckung d
 | `voll-sturm` | Voller Hafen bei Sturm | Stufe 6, alle Plätze belegt, Sturm, dazu 20 Ankömmlinge |
 | `alle-einfahren` | Alle fahren gleichzeitig ein | Für jede freie Box ein Boot, alle bekommen im selben Augenblick ihren Platz |
 | `alle-ablegen` | Alle legen gleichzeitig ab | Voller Hafen, am nächsten Morgen reisen alle Gäste in einem Fenster von wenigen Spielsekunden ab |
+| `paeckchen-voll` | Päckchen im vollen Hafen | Stufe 2, 3, 4 und 6 mit vollem Hafen: an jeden möglichen Päckchenplatz fährt im selben Augenblick ein Boot längsseits (P27, docs/paeckchen.md), am nächsten Morgen reisen alle fast gleichzeitig ab, außen vor innen. Läuft mit Tempo 1, damit Anlegen und Ablegen genau beobachtet werden; Funde mit den Booten aus `päckchen.boote` gehen aufs Päckchen |
 | `grossschiffe-eng` | Großschiffe in engem Gelände | Alle Services, alle Großschiff-Besuche am selben Tag, in Bodden, Schären, Förde und Inselhafen (Varianten je Küstentyp) |
 | `gelaende-alle` | Alle Küstentypen und Stegbilder | Jeder Küstentyp (so viele, wie das Spiel gerade hat) mit eigenem Seed und wechselndem Stegbild, restliche Stegbilder auf Küste 1; Stufe 4 mit halbvollem Hafen und 30 Ankömmlingen |
 | `tempo8-lang` | Tempo 8x lange | Neues Spiel ab Tag 1, Knopf "Achtfach vorspulen", ohne Testtempo: Tage, Abende, Rundgang, Tagesabschluss |

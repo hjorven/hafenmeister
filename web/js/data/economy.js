@@ -63,6 +63,14 @@ export const ECONOMY = {
   // kostet jedes weitere ruf Anker in ihrer Bewertung. Liegegeld bleibt, wie es bezahlt ist.
   umlegen: { freiMal: 1, ruf: 0.5 },
 
+  // Päckchen (P27, F1): Ist für ein wartendes Boot keine passende Box frei, darf der Spieler es
+  // längsseits an ein liegendes Boot legen, das mindestens gleich groß ist (gleiche oder größere
+  // Klasse, höchstens laengeMehr Meter kürzer als das Gastboot), nur an Plätzen der platzarten
+  // (längsseits am Stegkopf, Kai, Yachtsteg) ab abStufe. Das äußere Boot zahlt den Anteil liegegeld,
+  // bleibt höchstens naechteHoechstens Nächte und gibt wie das innere Boot ruf Anker weniger.
+  // Wird das äußere in eine Box verholt, entfällt sein Abzug.
+  paeckchen: { abStufe: 2, platzarten: ['stirn', 'kai'], liegegeld: 0.5, ruf: 0.5, naechteHoechstens: 1, laengeMehr: 0.5 },
+
   // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber
   // hinaus und kommen in dieselbe Box zurück (Box bleibt reserviert, Liegegeld zählt weiter).
   // raus und zurueck sind Anteile des Tages.

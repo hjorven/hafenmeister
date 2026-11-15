@@ -152,6 +152,12 @@ export const HINWEISE = {
     text: 'Das Ziel dieser Stufe ist geschafft. Unter „Bauen“, Reiter „Hafen“, baust du die nächste Ausbaustufe, sobald das Geld reicht.',
     kurz: 'Ziel geschafft. Unter „Bauen“, Reiter „Hafen“, geht es zur nächsten Stufe.',
   },
+  // Päckchen (P27): kommt, sobald ein Boot an der Boje wartet, keine Box frei ist und es längsseits darf
+  paeckchen: {
+    titel: 'Hafen voll: ins Päckchen',
+    text: 'Für ein wartendes Boot ist keine Box frei. Zieh es auf den weißen Rahmen neben einem gleich großen oder größeren Boot: Es legt sich längsseits daneben, zahlt das halbe Liegegeld und bleibt eine Nacht. Beide Crews geben einen halben Anker weniger. Wird eine Box frei, kannst du es umlegen.',
+    kurz: 'Keine Box frei: Zieh das Boot auf den weißen Rahmen neben einem Boot. Halbes Liegegeld, eine Nacht.',
+  },
   stammgast: {
     titel: 'Ein neuer Stammgast',
     text: 'Ein Gast war sehr zufrieden und kommt wieder: gleiches Boot, gleicher Name, gleiche Wünsche. Ab dem fünften Besuch kannst du ihn als Dauerlieger behalten.',
@@ -165,6 +171,7 @@ export function hinweisFuer(name, d = {}) {
   if (name === 'sim:stageReady') return 'stufe';
   if (name === 'stammgast:neu') return 'stammgast';
   if (name === 'hafenzeichen:voll') return 'versorgung';
+  if (name === 'paeckchen:moeglich') return 'paeckchen';
   return null;
 }
 
@@ -664,7 +671,7 @@ export async function init(game) {
   // und höchstens 250 ms je Takt: Ruckelt das Bild (schwaches Gerät, Tab im Hintergrund), verfällt er nicht ungesehen.
   let hinweisRest = 0;
   let hinweisTaktZuletzt = 0;
-  for (const name of ['sim:turnedAway', 'sim:stageReady', 'stammgast:neu', 'hafenzeichen:voll']) {
+  for (const name of ['sim:turnedAway', 'sim:stageReady', 'stammgast:neu', 'hafenzeichen:voll', 'paeckchen:moeglich']) {
     game.on(name, (d) => { const e = st() && einstiegState(st()); if (e) merkeHinweis(e, hinweisFuer(name, d), offeneHinweise); });
   }
   function schliesseHinweis() {

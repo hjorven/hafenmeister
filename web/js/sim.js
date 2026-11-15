@@ -26,7 +26,8 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     types,
     typeById: Object.fromEntries(types.map((t) => [t.id, t])),
     berths: list,
-    berthById: Object.fromEntries(list.map((b) => [b.id, b])),
+    // Päckchenplätze (P27) stehen nur hier, nicht in berths: Listen, Schilder und Auslastung kennen sie nicht
+    berthById: Object.fromEntries([...list, ...raftBerths(list, r)].map((b) => [b.id, b])),
     hooks: { modifiers: [], arrival: [], arrivals: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [] },
   };
 }
@@ -426,6 +427,8 @@ export function hookWhyNotFit(state, ctx, boat, berth) {
   // Für ein angemeldetes Boot frei gehalten (Anmeldung per Funk, P28): nur dieses Boot passt
   const r = reservedFor(state, berth.id);
   if (r && r.id !== boat.id) return 'funk';
+  // Päckchen (P27): Ein Boot außen im Päckchen liegt im Anfahrweg dieses Platzes (die Ansicht weiß es)
+  if (!berth.raft && ctx.berthBlocked?.(berth.id, state)) return 'paeckchen';
   if (!boat.probe && !nachbarPasst(state, ctx, boat, berth)) return 'nachbar';
   for (const fn of ctx.hooks.fit || []) {
     const why = fn({ state, ctx, boat, berth });
@@ -1009,6 +1012,109 @@ function keepReservation(state, ctx, boat, berthId, events) {
 }
 
 // ---------------------------------------------------------------------------
+// Päckchen (P27, F1): Ist keine passende Box frei, darf ein Boot längsseits an ein liegendes Boot,
+// das mindestens gleich groß ist. Der Platz außen heißt wie der innere mit RAFT ('B27+'). Er steht in
+// ctx.berthById, aber nicht in ctx.berths (Listen, Schilder und Auslastung zählen ihn nicht).
+
+export const RAFT = '+';
+const SIZE_RANK = { S: 1, M: 2, L: 3, XL: 4, XXL: 5 };
+
+/** Ist das ein Päckchenplatz (außen an einem anderen Boot)? */
+export function isRaftBerth(berthId) {
+  return typeof berthId === 'string' && berthId.endsWith(RAFT);
+}
+
+/** Der innere Platz zu einem Päckchenplatz ('B27+' -> 'B27'), sonst null. */
+export function raftInner(berthId) {
+  return isRaftBerth(berthId) ? berthId.slice(0, -RAFT.length) : null;
+}
+
+/** Päckchenplätze zu allen Plätzen der Arten aus rules.raft.kinds (außen, ohne Strom und Komfort). */
+function raftBerths(list, rules) {
+  const k = rules.raft;
+  if (!k?.kinds?.length) return [];
+  return list.filter((b) => k.kinds.includes(b.kind) && !b.reserved).map((b) => ({
+    id: b.id + RAFT,
+    raft: b.id,
+    kind: 'paeckchen',
+    jetty: b.jetty,
+    size: b.size,
+    stages: b.stages ? [...b.stages] : undefined,
+    stage: b.stage,
+    // Länge und Tiefe wie innen (das Boot liegt weiter draußen, also nicht flacher); die Breite
+    // begrenzt der Platz nicht, darüber entscheidet die Ansicht (ctx.raftFits: Fahrwasser frei)
+    maxLength: b.maxLength,
+    maxBeam: 99,
+    depth: b.depth,
+    comfort: 0,
+    power: false,
+    exposed: !!b.exposed,
+    reserved: false,
+    ...(b.requires ? { requires: b.requires } : {}),
+    ...(b.ohne ? { ohne: [...b.ohne] } : {}),
+  }));
+}
+
+/** Boot-id außen an diesem Platz (inneren Platz angeben) oder null. */
+export function raftOuter(state, innerBerthId) {
+  return state.berths[innerBerthId + RAFT] ?? null;
+}
+
+/** Hält ein Boot außen (liegend oder gerade ablegend) das innere Boot an diesem Platz fest? */
+export function raftBlocked(state, innerBerthId) {
+  if (innerBerthId == null) return false;
+  return state.berths[innerBerthId + RAFT] != null || !!state.leaving?.[innerBerthId + RAFT];
+}
+
+/**
+ * Warum kann dieses wartende Boot nicht an diesen Päckchenplatz? null = es kann.
+ * 'raftOff' (keine Päckchen in dieser Stufe), 'boxFree' (eine passende Box ist frei),
+ * 'noInner' (innen liegt niemand), 'innerBusy' (innen: fest vergeben, Kurzhalter, Tagestörn, legt ab),
+ * 'occupied', 'bigger' (Gast größer als das Boot innen), 'draft', 'fairway' (die Ansicht sieht das Boot
+ * außen im Fahrwasser oder an Land), 'funk' und Gründe aus dem Hook 'fit'.
+ */
+export function raftWhyNot(state, ctx, boat, berthId) {
+  const k = ctx.rules.raft;
+  const berth = ctx.berthById[berthId];
+  if (!k || !berth?.raft || state.stage < k.from) return 'raftOff';
+  if (!boat || boat.stationed) return 'raftOff';
+  if (!berthAvailable(state, berth)) return 'noBerth';
+  if (fittingBerths(state, ctx, boat.id).length) return 'boxFree';
+  const innerId = state.berths[berth.raft];
+  const inner = state.boats[innerId];
+  if (!inner || inner.status !== 'moored' || inner.berthId !== berth.raft) return 'noInner';
+  if (inner.stationed || isShortStay(inner) || inner.trip || inner.paeckchen || state.leaving?.[berth.raft]) return 'innerBusy';
+  if (!isFree(state, berthId)) return 'occupied';
+  if ((SIZE_RANK[boat.size] ?? 9) > (SIZE_RANK[inner.size] ?? 0) || boat.length > inner.length + (k.slack ?? 0) + 1e-9) return 'bigger';
+  const why = whyNotFit(boat, berth, ctx.rules, state.stage);
+  if (why) return why;
+  const hook = hookWhyNotFit(state, ctx, boat, berth);
+  if (hook) return hook;
+  if (ctx.raftFits && !ctx.raftFits(berth.raft, boat, inner, state)) return 'fairway';
+  return null;
+}
+
+/** Päckchenplätze, an die dieses wartende Boot jetzt darf (nur wenn keine passende Box frei ist). */
+export function raftTargets(state, ctx, boatId) {
+  const boat = state.boats[boatId];
+  const k = ctx.rules.raft;
+  if (!k || !boat || boat.status !== 'waiting' || state.stage < k.from) return [];
+  if (fittingBerths(state, ctx, boatId).length) return [];
+  const out = [];
+  for (const b of availableBerths(state, ctx)) {
+    const id = b.id + RAFT;
+    if (!ctx.berthById[id] || !state.berths[b.id]) continue;
+    if (!raftWhyNot(state, ctx, boat, id)) out.push(id);
+  }
+  return out;
+}
+
+/** Abzug in Ankern fürs Päckchen (beide Crews, rules.raft.rating). */
+export function raftPenalty(ctx, boat) {
+  return boat?.paeckchen || boat?.paeckchenInnen ? ctx.rules.raft?.rating ?? 0 : 0;
+}
+
+// ---------------------------------------------------------------------------
 // Zuweisen
 
 // hand: Der Spieler hat die Box selbst gewählt (Ziehen, Antippen). Tagesziele zählen nur solche Boote.
@@ -1023,6 +1129,16 @@ function moor(state, ctx, boat, berthId, events, hand = false) {
   state.berths[berthId] = boat.id;
   if (!boat.stationed) heute(state).angelegt++;
   const ev = { type: 'moored', boatId: boat.id, berthId };
+  // Päckchen (P27): außen höchstens rules.raft.maxNights Nächte, beide Crews merken es sich
+  const inner = raftInner(berthId);
+  if (inner) {
+    boat.paeckchen = inner;
+    if (boat.nights > 0) boat.nights = Math.min(boat.nights, ctx.rules.raft?.maxNights ?? 1);
+    const innen = state.boats[state.berths[inner]];
+    if (innen) innen.paeckchenInnen = true;
+    ev.paeckchen = inner;
+    if (innen) ev.innen = innen.id;
+  }
   if (hand) ev.hand = true;
   if (boat.snug) ev.passgenau = true;
   events.push(ev);
@@ -1058,7 +1174,7 @@ export function assign(state, ctx, boatId, berthId, { hand = true } = {}) {
   if (!boat || boat.status !== 'waiting') return { ok: false, reason: 'notWaiting', events };
   if (!berth || !berthAvailable(state, berth)) return { ok: false, reason: 'noBerth', events };
   if (!isFree(state, berthId)) return { ok: false, reason: 'occupied', events };
-  const why = whyNotFit(boat, berth, ctx.rules, state.stage) || hookWhyNotFit(state, ctx, boat, berth);
+  const why = berth.raft ? raftWhyNot(state, ctx, boat, berthId) : whyNotFit(boat, berth, ctx.rules, state.stage) || hookWhyNotFit(state, ctx, boat, berth);
   if (why) return { ok: false, reason: why, events };
   // Vom Spieler eingewiesen, auch über "Einfahren lassen" (Bewertungsbonus rules.handAssignBonus);
   // Tagesziele zählen nur hand (selbst gewählte Box)
@@ -1129,11 +1245,13 @@ export function berthValue(state, ctx, boatId, berthId = null) {
     weight += weg.share;
     if (weg.far) far.push(w);
   }
-  const night = nightlyFee(state, ctx, boat, met.length, mods.priceFactor);
+  // Päckchen (P27): außen nur der Anteil rules.raft.fee, beide Crews geben weniger Anker
+  const raft = !!berth?.raft;
+  const night = nightlyFee(state, ctx, boat, met.length, mods.priceFactor * (raft ? ctx.rules.raft?.fee ?? 1 : 1));
   // Kurzhalter zahlen das Tagesliegegeld (Anteil vom Nachtpreis), wie chargeFee
   const fee = isShortStay(boat) ? Math.max(1, Math.round(night * (ctx.rules.shortStay?.fee ?? 0.5))) : night;
   const snug = !!berth && isSnug(state, ctx, boat, berth);
-  const probe = { ...boat, wishesMet: boat.wishesMet + weight, wishesTotal: boat.wishesTotal + boat.wishes.length, berthId: berth?.id ?? null, snug, byHand: true };
+  const probe = { ...boat, wishesMet: boat.wishesMet + weight, wishesTotal: boat.wishesTotal + boat.wishes.length, berthId: berth?.id ?? null, snug, byHand: true, paeckchen: raft ? berth.raft : boat.status === 'moored' && berth ? null : boat.paeckchen };
   // Liegt das Boot schon (Umlegen, P33): Liegegeld bleibt, das Umlegen zählt für die Crew
   const relocate = boat.status === 'moored' && !!berth;
   let malus = 0;
@@ -1143,6 +1261,7 @@ export function berthValue(state, ctx, boatId, berthId = null) {
   }
   const anchors = rateBoat(ctx, probe, mods.ratingBonus);
   const out = { fee, wishesMet: met, wishes: [...boat.wishes], anchors, snug, comfort: (berth?.comfort || 0) > 0, far, full };
+  if (raft) Object.assign(out, { paeckchen: berth.raft, malus: raftPenalty(ctx, probe) });
   if (relocate) Object.assign(out, { relocate: true, malus, mal: probe.umgelegt });
   return out;
 }
@@ -1366,7 +1485,7 @@ function planTrips(state, ctx, mods, winter) {
     // Bootsgeschichten können Anteil und Zeiten je Boot vorgeben (boat.tripPlan, zum Beispiel Angler früh
     // raus); Regattaboote fahren auch am letzten Tag vor der Abreise (minNights 1)
     const p = boat.tripPlan || t;
-    if (boat.stationed || boat.nights < (p.minNights ?? 2) || boat.special) continue;
+    if (boat.stationed || boat.nights < (p.minNights ?? 2) || boat.special || boat.paeckchen) continue;
     if (random(state) >= (p.chance ?? t.chance)) continue;
     const at = (range) => Math.round((range[0] + random(state) * (range[1] - range[0])) * ctx.rules.dayLength);
     boat.trip = { out: at(p.out ?? t.out), back: at(p.back ?? t.back), away: false };
@@ -1379,6 +1498,8 @@ function tripStep(state, ctx, events) {
     const t = boat.trip;
     if (!t) continue;
     if (!t.away && !t.done && state.clock >= t.out && state.clock < t.back) {
+      // Päckchen (P27): Wer außen liegt oder gerade ablegt, muss erst weg sein
+      if (raftBlocked(state, boat.berthId)) continue;
       t.away = true;
       events.push({ type: 'tripOut', boatId: boat.id, berthId: boat.berthId });
     } else if (t.away && state.clock >= t.back) endTrip(boat, events);
@@ -1876,6 +1997,8 @@ function checkWishes(state, ctx, boat, mods = modifiers(state, ctx)) {
  */
 function chargeFee(state, ctx, boat, mods, events) {
   if (boat.feeDay === state.day) return; // heute schon abgerechnet
+  // Päckchen (P27): außen zahlt nur den Anteil rules.raft.fee
+  if (isRaftBerth(boat.berthId) && ctx.rules.raft) mods = { ...mods, priceFactor: (mods.priceFactor ?? 1) * ctx.rules.raft.fee };
   const metList = checkWishes(state, ctx, boat, mods);
   boat.feeDay = state.day;
   if (boat.paidThrough != null && state.day <= boat.paidThrough) return; // schon im Voraus bezahlt
@@ -1997,7 +2120,7 @@ export function relocatePenalty(ctx, boat) {
  */
 export function canRelocate(state, boatId) {
   const boat = state.boats[boatId];
-  return !!boat && boat.status === 'moored' && !boat.stationed && !boat.trip?.away && boat.berthId != null;
+  return !!boat && boat.status === 'moored' && !boat.stationed && !boat.trip?.away && boat.berthId != null && !raftBlocked(state, boat.berthId);
 }
 
 /** Freie Boxen, in die ein liegender Gast umgelegt werden kann (die beste zuerst, ohne seine eigene). */
@@ -2023,8 +2146,9 @@ export function relocateGuest(state, ctx, boatId, berthId, { grund = 'hand', zae
   if (boat.stationed) return { ok: false, reason: 'stationed', events };
   if (boat.trip?.away && !unterwegs) return { ok: false, reason: 'away', events };
   if (berthId === boat.berthId) return { ok: false, reason: 'same', events };
+  if (raftBlocked(state, boat.berthId)) return { ok: false, reason: 'raftOuter', events };
   const berth = ctx.berthById[berthId];
-  if (!berth || !berthAvailable(state, berth)) return { ok: false, reason: 'noBerth', events };
+  if (!berth || !berthAvailable(state, berth) || berth.raft) return { ok: false, reason: 'noBerth', events };
   if (!isFree(state, berthId)) return { ok: false, reason: 'occupied', events };
   const why = whyNotFit(boat, berth, ctx.rules, state.stage) || hookWhyNotFit(state, ctx, boat, berth);
   if (why) return { ok: false, reason: why, events };
@@ -2033,12 +2157,16 @@ export function relocateGuest(state, ctx, boatId, berthId, { grund = 'hand', zae
   state.berths[berthId] = boat.id;
   boat.berthId = berthId;
   boat.snug = isSnug(state, ctx, boat, berth);
+  // Aus dem Päckchen in eine Box verholt (P27): der Abzug der äußeren Crew entfällt
+  const ausPaeckchen = isRaftBerth(from);
+  if (ausPaeckchen) boat.paeckchen = null;
   const vorher = relocatePenalty(ctx, boat);
-  if (zaehlt) boat.umgelegt = (boat.umgelegt || 0) + 1;
+  if (zaehlt && !ausPaeckchen) boat.umgelegt = (boat.umgelegt || 0) + 1;
   const malus = Math.round((relocatePenalty(ctx, boat) - vorher) * 100) / 100;
   const ev = { type: 'relocated', boatId: boat.id, from, to: berthId, guest: true, grund, mal: boat.umgelegt || 0 };
   if (malus > 0) ev.malus = malus;
   if (boat.snug) ev.passgenau = true;
+  if (ausPaeckchen) ev.ausPaeckchen = raftInner(from);
   events.push(ev);
   for (const fn of ctx.hooks.relocate || []) fn({ state, ctx, boat, from, to: berthId, grund, events });
   return { ok: true, events };
@@ -2061,10 +2189,11 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   const funk = boat.funk?.kept ? r.funk?.rating ?? 0 : 0;   // angemeldet, Box frei gehalten (P28)
   const penalty = boat.penalty || 0;
   const moved = relocatePenalty(ctx, boat);                   // zu oft umgelegt (P33)
-  const raw = base + comfort + special + snug + byHand + funk + ratingBonus - penalty - moved;
+  const raft = raftPenalty(ctx, boat);                        // im Päckchen gelegen (P27)
+  const raw = base + comfort + special + snug + byHand + funk + ratingBonus - penalty - moved - raft;
   const value = Math.round(Math.min(r.rating.max, Math.max(r.rating.min, raw)) * 10) / 10;
   return {
-    value, base, comfort, special, snug, byHand, funk, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0,
+    value, base, comfort, special, snug, byHand, funk, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
     wishes: [...(boat.wishes || [])], wishesMet: boat.wishesMet || 0, wishesTotal: boat.wishesTotal || 0, missed: { ...(boat.missed || {}) },
     far: { ...(boat.far || {}) },
   };
@@ -2153,16 +2282,22 @@ function night(state, ctx, events) {
     }
   }
   // Abreise (Kurzhalter, die noch liegen, legen spätestens jetzt ab)
+  // Päckchen (P27): Reist das innere Boot ab, muss das äußere vorher weg (es reist mit ab)
+  const innenFort = new Set();
+  for (const boat of mooredBoats(state)) {
+    if (!boat.stationed && !isRaftBerth(boat.berthId) && raftOuter(state, boat.berthId) != null && (isShortStay(boat) || boat.nights <= 1)) innenFort.add(boat.berthId);
+  }
   for (const boat of mooredBoats(state)) {
     if (boat.stationed) continue;
     if (isShortStay(boat)) { departBoat(state, ctx, boat, mods, events, 0, true); continue; }
     boat.nights -= 1;
-    if (boat.nights > 0) continue;
+    if (boat.nights > 0 && !(isRaftBerth(boat.berthId) && innenFort.has(raftInner(boat.berthId)))) continue;
     // Abgerechnet wird nachts, abgelegt am nächsten Vormittag zu einer eigenen Zeit je Boot
     const w = ctx.rules.departWindow;
     const leaveAt = w ? Math.round((w[0] + random(state) * (w[1] - w[0])) * ctx.rules.dayLength * 10) / 10 : 0;
     departBoat(state, ctx, boat, mods, events, leaveAt, false);
   }
+  raftDepartOrder(state, ctx);
   for (const fn of ctx.hooks.night) fn({ state, ctx, events });
   const s = state.stats;
   const bericht = tagesbericht(state, ctx);
@@ -2188,6 +2323,21 @@ function night(state, ctx, events) {
   state.queue.sort((a, b) => (state.boats[b]?.overnight || 0) - (state.boats[a]?.overnight || 0));
   startDay(state, ctx, events);
   if (canAdvanceStage(state, ctx).ok) events.push({ type: 'stageReady', stage: state.stage + 1 });
+}
+
+/**
+ * Päckchen (P27): Legen innen und außen am selben Morgen ab, legt das äußere zuerst ab und das
+ * innere frühestens rules.raft.gap Sekunden danach (die Ansicht wartet zusätzlich, bis außen frei ist).
+ */
+function raftDepartOrder(state, ctx) {
+  const gap = ctx.rules.raft?.gap ?? 20;
+  for (const [id, l] of Object.entries(state.leaving || {})) {
+    if (!isRaftBerth(id)) continue;
+    const innen = state.leaving[raftInner(id)];
+    if (!innen || innen.off) continue;
+    if (l.off || l.at <= 0) { innen.at = Math.max(innen.at, gap); continue; }
+    if (innen.at < l.at + gap) innen.at = Math.round((l.at + gap) * 10) / 10;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -2493,14 +2643,24 @@ function clearVanishedBerths(state, ctx, from, events) {
     .filter((b) => isFree(state, b.id) && fits(boat, b, ctx.rules, state.stage) && !hookWhyNotFit(state, ctx, boat, b))
     .sort((a, b) => (a.maxLength * a.maxBeam) - (b.maxLength * b.maxBeam) || String(a.id).localeCompare(String(b.id)))[0]?.id ?? null;
   const moves = [];
-  // Fest liegende Boote zuerst: Gäste können notfalls abreisen, Dauerlieger und Fischer nicht
-  const order = mooredBoats(state).sort((a, b) => Number(!!b.stationed) - Number(!!a.stationed));
-  for (const boat of order) {
+  // Fest liegende Boote zuerst: Gäste können notfalls abreisen, Dauerlieger und Fischer nicht.
+  // Danach die äußeren Boote im Päckchen (P27): Sie verholen in eine Box oder reisen ab, bevor das
+  // innere Boot umgelegt werden kann.
+  const rang = (b) => (b.stationed ? 0 : isRaftBerth(b.berthId) ? 1 : 2);
+  const order = mooredBoats(state).sort((a, b) => rang(a) - rang(b));
+  const mussWeg = (boat) => {
     const berth = ctx.berthById[boat.berthId];
-    const vanished = goneSet.has(boat.berthId);
     // Platz bleibt, passt aber nicht mehr (zum Beispiel flacher nach dem Umbau)
-    const unfit = !vanished && berth && fits(boat, berth, ctx.rules, from) && !fits(boat, berth, ctx.rules, state.stage);
-    if (!vanished && !unfit) continue;
+    return goneSet.has(boat.berthId) || !!(berth && fits(boat, berth, ctx.rules, from) && !fits(boat, berth, ctx.rules, state.stage));
+  };
+  for (const boat of order) {
+    let weg = mussWeg(boat);
+    // Außen im Päckchen: muss mit weg, wenn das innere Boot weg muss oder fehlt
+    if (!weg && isRaftBerth(boat.berthId)) {
+      const innen = state.boats[state.berths[raftInner(boat.berthId)]];
+      weg = !innen || goneSet.has(raftInner(boat.berthId)) || mussWeg(innen);
+    }
+    if (!weg) continue;
     const old = boat.berthId;
     if (!boat.stationed) {
       // Der Hafenmeister legt den Gast um (P33): gleiche Nächte, gleiche Rechnung, neue Box.
@@ -2551,10 +2711,13 @@ function clearVanishedBerths(state, ctx, from, events) {
 export function repairBerths(state, ctx) {
   const changes = [];
   const exists = (b) => b && berthAvailable(state, b);
-  for (const boat of mooredBoats(state)) {
+  // Päckchen (P27): äußere Boote zuletzt, sie brauchen ihr inneres Boot noch an seinem Platz
+  const innenDa = (berth) => !berth?.raft || state.boats[state.berths[berth.raft]]?.berthId === berth.raft;
+  const order = mooredBoats(state).sort((a, b) => Number(isRaftBerth(a.berthId)) - Number(isRaftBerth(b.berthId)));
+  for (const boat of order) {
     if (boat.stationed) continue;
     const berth = ctx.berthById[boat.berthId];
-    if (exists(berth) && fits(boat, berth, ctx.rules, state.stage)) continue;
+    if (exists(berth) && fits(boat, berth, ctx.rules, state.stage) && innenDa(berth)) continue;
     const old = boat.berthId;
     if (state.berths[old] === boat.id) delete state.berths[old];
     const to = availableBerths(state, ctx)
@@ -2563,6 +2726,7 @@ export function repairBerths(state, ctx) {
     if (to) {
       boat.berthId = to;
       state.berths[to] = boat.id;
+      if (isRaftBerth(old)) boat.paeckchen = null;
     } else {
       delete state.boats[boat.id];
     }

@@ -39,7 +39,7 @@ const EDGE_SPEED = 520;       // px pro Sekunde am äußersten Rand
 const HOLD_MS = 420;          // so lange ein liegendes Boot halten, bis es an der Leine hängt (P33)
 const HOLD_SHOW_MS = 120;     // erst danach zeigt sich der Ring um den Finger (kein Flackern beim Tippen)
 // Farben beim Zuweisen: Türkis passt, Gold passt und erfüllt einen Wunsch (P10, Review Ü9)
-export const FARBE = { passt: '#2a9d8f', wunsch: '#f2b01e', hell: '#c9fff6', wunschHell: '#ffe9a3' };
+export const FARBE = { passt: '#2a9d8f', wunsch: '#f2b01e', hell: '#c9fff6', wunschHell: '#ffe9a3', paeckchen: '#f4f1e6' };
 const SCHRIFT = '"Pixelify Sans", system-ui, sans-serif';
 const WUNSCH = new Proxy({}, { get: (_, k) => wunschKurz(k) });   // alle Wünsche, auch Angebote (P19)
 
@@ -97,15 +97,27 @@ export function init(game) {
   const ringMat = new THREE.MeshBasicMaterial({ color: FARBE.passt, transparent: true, opacity: 0.85, depthTest: false });
   const ringMatGold = new THREE.MeshBasicMaterial({ color: FARBE.wunsch, transparent: true, opacity: 0.9, depthTest: false });
   const ringMatHot = new THREE.MeshBasicMaterial({ color: '#ee6454', transparent: true, opacity: 0.95, depthTest: false });
+  // Päckchen (P27): Rahmen in Tauweiß neben dem Boot, an das man längsseits gehen kann
+  const ringMatPaeckchen = new THREE.MeshBasicMaterial({ color: FARBE.paeckchen, transparent: true, opacity: 0.9, depthTest: false });
   let gold = new Set();          // Plätze, die einen Wunsch des gezogenen Boots erfüllen (P10)
-  const ringMatFuer = (id) => (gold.has(id) ? ringMatGold : ringMat);
+  const istPaeckchen = (id) => !!game.sim?.istPaeckchen?.(id);
+  const ringMatFuer = (id) => (istPaeckchen(id) ? ringMatPaeckchen : gold.has(id) ? ringMatGold : ringMat);
+  // Rahmen um die Lage des Boots außen (Länge entlang x, Breite quer), 0,35 m breite Kante
+  function paeckchenRahmen(l) {
+    const a = l.length / 2 + 0.4, b = l.width / 2 + 0.4, k = 0.35;
+    const form = new THREE.Shape([new THREE.Vector2(-a, -b), new THREE.Vector2(a, -b), new THREE.Vector2(a, b), new THREE.Vector2(-a, b)]);
+    form.holes.push(new THREE.Path([new THREE.Vector2(-a + k, -b + k), new THREE.Vector2(-a + k, b - k), new THREE.Vector2(a - k, b - k), new THREE.Vector2(a - k, -b + k)]));
+    const g = new THREE.ShapeGeometry(form);
+    g.rotateX(-Math.PI / 2);
+    return g;
+  }
 
   // Mit Stegen in 3D leuchtet die Box selbst (render/stege.js, gleiche Form und Drehung wie der
   // Platz, nichts ragt darueber hinaus). Die Ringe bleiben unsichtbar als Fangpunkte zum Einrasten.
   const boxen = () => !!game.stege?.highlight;
   function faerbeBoxen() {
     if (!boxen()) return;
-    const ids = ringGroup.children.map((m) => m.userData.platz);
+    const ids = ringGroup.children.map((m) => m.userData.platz).filter((id) => !istPaeckchen(id));
     game.stege.highlight(ids, FARBE.passt);
     for (const id of ids) {
       const mat = game.stege.platz?.(id)?.mesh?.material;
@@ -116,12 +128,28 @@ export function init(game) {
       mat.opacity = hot ? 0.8 : 0.45;
     }
   }
-  function showRings(ids, boot = null) {
+  function leereRinge() {
+    for (const m of ringGroup.children) if (m.userData.paeckchen) m.geometry.dispose();
     ringGroup.clear();
+  }
+  function showRings(ids, boot = null) {
+    leereRinge();
     const g = boot != null ? game.sim?.wunschPlaetze?.(boot) : null;
     gold = new Set(Array.isArray(g) ? g : []);
     const stufe = game.state?.stufe ?? game.sim?.state?.stage ?? 1;
     for (const id of ids) {
+      if (istPaeckchen(id)) {
+        const l = game.paeckchen?.lage?.(id, boot);
+        if (!l) continue;
+        const r = new THREE.Mesh(paeckchenRahmen(l), ringMatFuer(id));
+        r.position.set(l.x, 0.12, l.z);
+        r.rotation.y = l.heading;
+        r.renderOrder = 10;
+        r.userData.platz = id;
+        r.userData.paeckchen = true;
+        ringGroup.add(r);
+        continue;
+      }
       const platz = HAFEN.plaetze.find((p) => p.id === id);
       const w = platz && platzInWelt(platz, stufe);
       if (!w) continue;
@@ -280,7 +308,7 @@ export function init(game) {
   function endTow(ok, abbruch = false) {
     const t = tow;
     tow = null;
-    ringGroup.clear();
+    leereRinge();
     gold = new Set();
     if (boxen()) game.stege.highlight([]);
     if (abbruch) {
@@ -581,8 +609,13 @@ export function init(game) {
     if (w.comfort) teile.push('Fingersteg');
     for (const t of w.extras || []) if (!teile.includes(t)) teile.push(t);
     if (w.snug) teile.push('passgenau');
+    let z3 = w.relocate && w.malus > 0 ? `${w.mal}. Mal umgelegt: −${String(w.malus).replace('.', ',')} Anker` : null;
+    // Päckchen (P27): längsseits an einem anderen Boot, halbes Liegegeld, beide Crews weniger Anker
+    if (w.paeckchen) {
+      teile.unshift('Päckchen · halbes Liegegeld');
+      if (w.malus > 0) z3 = `Beide Crews −${String(w.malus).replace('.', ',')} Anker`;
+    }
     const z2 = teile.join(' · ');
-    const z3 = w.relocate && w.malus > 0 ? `${w.mal}. Mal umgelegt: −${String(w.malus).replace('.', ',')} Anker` : null;
     ctx.font = `700 15px ${SCHRIFT}`;
     const breite = Math.max(ctx.measureText(z1).width, z2 ? ctx.measureText(z2).width : 0, z3 ? ctx.measureText(z3).width : 0) + 18;
     const hoehe = 26 + (z2 ? 18 : 0) + (z3 ? 18 : 0);
@@ -623,6 +656,8 @@ export function init(game) {
     texte.push({ text, x: s.x, y: s.y - 30, t: 0, dauer: 1.8, klein: true, farbe });
   };
   game.on('sim:moored', (e) => { if (e?.passgenau && e.hand) textAmBoot(e.boatId, 'Passgenau +¼ Anker', '#ffd76a'); });
+  // Päckchen (P27): kurz sagen, was das bedeutet
+  game.on('sim:moored', (e) => { if (e?.paeckchen) textAmBoot(e.boatId, 'Im Päckchen · halbes Liegegeld', '#f4f1e6'); });
   const aerger = (e) => { if (e?.rated) textAmBoot(e.boatId, `Verärgert: ${String(game.sim?.ctx?.rules?.turnAway?.rating ?? 2.5).replace('.', ',')} Anker`, '#ff9a8a', { nurImBild: true }); };
   game.on('sim:dismissed', aerger);
   // Bojengeld über Nacht (Review A9): kleiner Betrag über jedem Boot an der Boje

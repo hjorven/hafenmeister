@@ -88,6 +88,14 @@ export async function initBridge(game) {
   const platzById = Object.fromEntries(HAFEN.plaetze.map((p) => [p.id, p]));
   // Die 3D-Ansicht meldet, wann ein Boot an der Boje fest ist (render/boat-view.js setzt game.boatsVisible)
   ctx.ansichtMeldetBoje = () => !!game.boatsVisible;
+  // Päckchen (P27): Die Ansicht (render/paeckchen.js) prüft, ob das Boot außen frei im Wasser läge.
+  // Ohne Ansicht (Tests, Balancing) gilt jeder Päckchenplatz als frei.
+  // Platz zugeparkt: ein Boot außen im Päckchen liegt in seinem Anfahrweg (nur mit Ansicht)
+  ctx.berthBlocked = (berthId) => !!game.paeckchen?.zugeparkt?.(berthId);
+  ctx.raftFits = (innerBerthId, boat, inner, st) => {
+    const f = game.paeckchen?.passt;
+    return typeof f === 'function' ? f(innerBerthId, boat, inner, st) !== false : true;
+  };
   ctx.berthDistance = (boat, berth, st) => {
     const boje = game.landscape?.warteplaetze?.bojen?.[boat.waitSpot ?? 0];
     const p = platzById[berth.id];
@@ -149,7 +157,7 @@ export async function initBridge(game) {
       if (e.type === 'arrived' && state.boats[e.boatId]) game.emit('boot-kommt', bootInfo(state.boats[e.boatId]));
       if (e.type === 'moored' && state.boats[e.boatId]) {
         const info = bootInfo(state.boats[e.boatId]);
-        game.emit('boot-zugewiesen', { id: info.id, platz: info.platz });
+        game.emit('boot-zugewiesen', e.paeckchen ? { id: info.id, platz: info.platz, paeckchen: e.paeckchen, innen: e.innen ?? null } : { id: info.id, platz: info.platz });
         game.emit('boot:angelegt', info);
       }
       // Abreisende Gäste legen erst am Vormittag ab ('castOff'), abgerechnet sind sie schon nachts ('departed')
@@ -364,7 +372,18 @@ export async function initBridge(game) {
       if (!b) return Object.values(state.leaving || {}).some((l) => String(l.boatId) === String(id));
       return b.status === 'moored' && (b.stationed || (b.paid !== false && !(b.pendingFee > 0)));
     },
-    passendePlaetze: (boatId) => sim.fittingBerths(state, ctx, boatIdOf(boatId)),
+    // Freie passende Plätze; ist keiner frei, die Päckchenplätze (P27, 'B27+' = längsseits an B27)
+    passendePlaetze: (boatId) => {
+      const id = boatIdOf(boatId);
+      const l = sim.fittingBerths(state, ctx, id);
+      return l.length ? l : sim.raftTargets(state, ctx, id);
+    },
+    // Päckchen (P27): Ziele, Grund dagegen, wer außen liegt
+    paeckchenZiele: (boatId) => sim.raftTargets(state, ctx, boatIdOf(boatId)),
+    paeckchenGrund: (boatId, berthId) => sim.raftWhyNot(state, ctx, state.boats[boatIdOf(boatId)], berthIdOf(berthId)),
+    paeckchenAussen: (berthId) => sim.raftOuter(state, berthIdOf(berthId)),
+    istPaeckchen: (berthId) => sim.isRaftBerth(berthIdOf(berthId)),
+    paeckchenInnen: (berthId) => sim.raftInner(berthIdOf(berthId)),
     // Umlegen (P33): darf das liegende Boot gerade umgelegt werden, und wohin?
     umlegbar: (boatId) => sim.canRelocate(state, boatIdOf(boatId)),
     umlegeZiele: (boatId) => sim.relocateTargets(state, ctx, boatIdOf(boatId)),
@@ -423,7 +442,10 @@ export async function initBridge(game) {
     if (pick.type === 'boat') {
       const id = boatIdOf(pick.id);
       const boat = state.boats[id];
-      if (boat?.pendingFee > 0) api.collect(id);
+      // Päckchen (P27): Ist ein wartendes Boot gewählt und darf es längsseits an dieses, dorthin
+      const raft = boat?.status === 'moored' && selected != null && boat.berthId != null ? boat.berthId + sim.RAFT : null;
+      if (raft && sim.raftTargets(state, ctx, selected).includes(raft)) api.assign(selected, raft);
+      else if (boat?.pendingFee > 0) api.collect(id);
       else if (boat?.status === 'waiting') api.select(id);
     } else if (pick.type === 'coin') {
       api.collect(pick.id);

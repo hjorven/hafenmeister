@@ -6,6 +6,7 @@ Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im 
 
 ## 15.11.2026
 
+- Neu: Päckchen. Ist für ein wartendes Boot keine Box frei, leuchten weiße Rahmen neben gleich großen oder größeren Booten an Stegköpfen. Dorthin gezogen, legt es sich längsseits daneben, mit Fendern und Leinen zum inneren Boot. Es zahlt das halbe Liegegeld, bleibt eine Nacht, und beide Crews geben einen halben Anker weniger. Das innere Boot kann erst ablegen, wenn das äußere fort oder in eine Box verholt ist.
 - Ankommende Boote lassen sich schon auf der Anfahrt antippen und zuweisen, sobald sie im Hafenrevier sind. Ihre Geduld läuft erst, wenn sie sichtbar an der Boje liegen; bei Andrang fahren sie erst nach rund 20 Sekunden im Revier selbst in eine Box (vorher zählten sie schon weit draußen als wartend).
 - Reist ein Gast ab, bevor er ganz festgemacht hat, ist seine Box frei, sobald er draußen ist (sie blieb vorher bis zu fünf Minuten belegt).
 - Im Watt und an einigen anderen Küsten liegt das Ankerfeld jetzt auch seitlich neben den Stegen statt vor der Einfahrt.
