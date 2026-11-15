@@ -1,6 +1,6 @@
 # Hafenmeister: Roadmap
 
-Stand: 15.11.2026 nachts, abgeglichen mit `main` bei Commit `72565cc` (PR 324). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
+Stand: 15.11.2026 morgens, abgeglichen mit `main` bei Commit `5ebcad2` (PR 331). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
 
 **Verhältnis zu [plan.md](plan.md):** `plan.md` bleibt der einzige gültige Plan für Vision, Regeln und Entscheidungen. Diese Roadmap ist die **Arbeitsliste**: Sie sagt, was noch fehlt, was falsch ist, was weg soll, und welches Paket (welcher Thread) es erledigt. Wo die Roadmap eine Entscheidung aus `plan.md` ändern würde, steht das unter [Offene Fragen an Jorven](#offene-fragen-an-jorven) und gilt erst nach seiner Antwort; danach wird `plan.md` im selben PR angepasst.
 
@@ -660,7 +660,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P14 | Bewertungen und Gästebuch zeigen | Ü21, F18, C1, C9; Note aus Wünschen 2,5 bis 5 (Befund P10) | `ui/gaestebuch.js`, `ui/gaestebuch-daten.js`, `css/gaestebuch.css`, `sim.js` (`ratingParts`), `docs/gaestebuch.md` (boat-view.js unverändert) | erledigt (PR 154, 233) |
 | P15 | Tagesabschluss am Abend zeigen | Ü22 | neues Modul `web/js/ui/tagesabschluss.js`, `sim.js` (`sim:dayEnd`) | erledigt (PR 159, 239) |
 | P16 | Aufstieg und Abschluss feiern, Endlosspiel | Ü23, Endlosmodus | `features/aufstieg.js` (Kamerafahrt über die öffentlichen Felder des Rigs, kein Eingriff in `core/camera.js`), `css/aufstieg.css`, `economy.js` (`endlos`), Andockstelle in `ui/oberflaeche.js` | erledigt (PR 156) |
-| P17 | Start und frühe Stufen straffen | Ü15, Ü16, Startwerte dokumentieren | `economy.js`, `state.js`, `docs/balancing.md` | erledigt (PR 318 und Teil 2: neuer Tagesablauf, rund 100 Spieltage, Rechnung und Zeitraffer 2,7 % auseinander; `docs/balancing.md`) |
+| P17 | Start und frühe Stufen straffen | Ü15, Ü16, Startwerte dokumentieren | `economy.js`, `state.js`, `docs/balancing.md` | erledigt (PR 318 und Teil 2, PR 331: neuer Tagesablauf, rund 100 Spieltage, Rechnung und Zeitraffer 2,7 % auseinander; `docs/balancing.md`) |
 | P18 | Ausbau in Bauabschnitten | Ü18, `bautage` nutzen oder löschen | `ui/bauen.js`, `economy.js`, `sim.js`, Stegdarstellung | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Bauabschnitte, Baustelle über Nacht und Sparziel (PR 232), Nachbesserungen (PR 235) |
 | P19 | Ruf schwerer machen mit Wünschen je Bootsart | Ü17, `feeFactor`, `arrivalWeight`, Kapazität sichtbar | `sim.js`, `data/boats/*.js`, `economy.js` | erledigt: Teil 1 (PR 244: B7, C2, C3, C4, C6, F8), Teil 2 (PR 279: C5, B9, "heute voll"), [ruf.md](ruf.md) |
 | P20 | Winter mit Inhalt füllen | Ü19, F14, F15, `docs/ereignisse.md` | `sim.js` (Jahreslauf), neues Feature-Modul, Travellift/Winterlager in `render/services.js` | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, 249, `docs/winter.md`); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing |
@@ -675,7 +675,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P24 | Ereignisse zum Vorbereiten und neue Ereignisse | Vorwarnung mit Handlungsmöglichkeit, F17 | Teil 1 erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend), Teil 2 offen; bestehend: "Ereignisse Sturm und Regatta einbauen" |
 | P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | neu |
 | P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | erledigt (PR 322, docs/hafengesten.md) |
-| P27 | Päckchen liegen bei vollem Hafen | F1 | erledigt (docs/paeckchen.md) |
+| P27 | Päckchen liegen bei vollem Hafen | F1 | erledigt (PR 330, docs/paeckchen.md) |
 | P28 | Anmeldung per Funk | F2 (nutzt P11) | erledigt (PR 288, `docs/funk-anmeldung.md`) |
 | P29 | Baggern für tiefere Liegeplätze | F7 | neu |
 | P30 | Stege nachrüsten | F8 | erledigt (PR 297, [nachruesten.md](nachruesten.md)) |
