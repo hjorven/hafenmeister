@@ -71,10 +71,17 @@ export function stegbildWaehlen({ url = globalThis.location?.search ?? '', s = s
  * Danach entstehen die Doppelboxen (data/doppelboxen.js) passend zu diesem Bild neu.
  */
 export function stegbildSetzen(hafen, nr) {
-  const v = STEGBILDER.varianten[nr - 1];
-  hafen.stegbild = { nr: v ? nr : 0, stege: v ? [...STEGBILDER.stege] : [] };
+  return varianteSetzen(hafen, STEGBILDER.varianten[nr - 1], STEGBILDER.stege, nr);
+}
+
+/**
+ * Eine Variante (Form wie STEGBILDER.varianten[i]) auf hafen legen. Auch fuer den Generator
+ * (tools/stegbilder/erzeugen.mjs), der neue Varianten so pruefen kann, wie das Spiel sie setzt.
+ */
+export function varianteSetzen(hafen, v, stege, nr = v?.nr ?? 0) {
+  hafen.stegbild = { nr: v ? nr : 0, stege: v ? [...stege] : [] };
   if (!v) { doppelboxenAnlegen(hafen, ECONOMY.doppelbox); return hafen; }
-  const variiert = new Set(STEGBILDER.stege);
+  const variiert = new Set(stege);
   const vStufen = Object.keys(v.stufen).map(Number);
   const hoechste = Math.max(...vStufen);
   for (const key of Object.keys(hafen.stufen)) {

@@ -39,7 +39,7 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 | A | Welle-0-Abnahme fehlt: Zeitraffer-Serie über alle 15 Küsten nach dem Pulk-Fix | Abschnitt 3a | P66, Zeitraffer-Thread |
 | B | Kreuzfahrtschiff streift im Seegatt von Küste 4 das Ufer | Rest aus PR 329 | P84 (neu) |
 | B | Gäste erreichen ab Stufe 4 keine Boje: mit PR 327 behoben (Geduld erst ab sichtbarer Boje), im Härtetest noch nicht nachgemessen | Härtetest 15.11., PR 327 | P87 (neu) |
-| B | `tools/stegbilder/erzeugen.mjs` findet seit den Doppelboxen keine Variante mehr ("Steg C passt nicht"); die 12 Stegbilder im Spiel sind nicht betroffen, neue Stege (Stufe 7) aber blockiert | Hinweis in PR 329 | P83 (neu) |
+| B | ~~`tools/stegbilder/erzeugen.mjs` findet seit den Doppelboxen keine Variante mehr~~ erledigt: Generator zählt Doppelboxen nicht mehr mit, prüft Stufe 6 mit Yachtsteg, die 12 Stegbilder bleiben | Hinweis in PR 329 | P83 erledigt |
 | B | `istWasser` und Bild stimmen am Durchstich nicht überall überein | Messlatte (`feature-tests/messlatte/README.md`) | P87 (neu) |
 | C | `tests/specs/leinen.spec.mjs` prüft nur Küstentyp 1 bis 10 | Gelände-Thread | P87 (neu) |
 | C | Winter: Jahreszeiten steuern nur Ereignisse, nicht Ankünfte und Wind (G5); Dauerlieger nutzen Kran und Segelmacher in der Saison nicht (H5-Rest) | Code: `jahreszeiten` nur in `data/events.js` | P20-Rest |
@@ -57,7 +57,7 @@ Leitlinie: Erst Welle 0 abschließen und die Prüfwerkzeuge auf den neuen Stand 
 | 1 | **P66 Pulk beim Ablegen** (läuft) | Prio A, letzter Rest von Welle 0 | - | `render/boat-view.js`, `boat-anim.js`, Päckchen (Ablegereihenfolge), Kurzhalter |
 | 2 | **P84 Großschiffwege an allen 15 Küsten** (neu) | Rest aus PR 329, gehört zu Welle 0 | - | `render/services-besuch.js`, `boat-view.js` (`hinaus`, `seeWeg`): nur diese Stellen ändern, vor dem Merge auf P66 rebasen |
 | 3 | **P87 Prüfwerkzeuge auf 15 Küsten und den neuen Takt** (neu) | Welle-0-Abnahme braucht Tests, die alle Küsten kennen; Härtetest nach PR 327 bis 332 neu | - | nur `tests/`, `tools/zeitraffer/`, `feature-tests/` |
-| 4 | **P83 Stegbild-Generator reparieren** (neu) | ohne ihn keine neuen Stege (P70) und kein Neuerzeugen nach Platzänderungen | - | `tools/stegbilder/`, `data/stegbilder.js` (Ausgabe muss für bestehende Spielstände gleich bleiben), `data/liegelage.js` |
+| 4 | ~~**P83 Stegbild-Generator reparieren**~~ (erledigt 15.11., PR 336) | ohne ihn keine neuen Stege (P70) und kein Neuerzeugen nach Platzänderungen | - | `tools/stegbilder/`, `data/stegbilder.js` (Ausgabe muss für bestehende Spielstände gleich bleiben), `data/liegelage.js` |
 | 5 | **P23 Services mit eigener Wirkung** (neu) | macht Stufe 4 bis 6 tiefer; `economy.js` frei | - | `economy.js` (einziger dort), `render/services.js`, `data/services.js`, Ereignisse (G7-Boni aus PR 299) |
 | 6 | **P86 Bootsgeschichten fertig erzählen** (Thread wartet) | kleine Lücken, die Jorven im Spiel sieht (Regatta ohne Startsignal und Sieger) | - | `geschichten/`, `render/boat-view.js` (Regattabahn), Logbuch, `audio.js` |
 | 7 | **P03-Rest J5** (erledigt 15.11.) | Ruf am ersten Abreisenden erklären, Einstieg damit fertig | - | `features/einstieg.js`, Meldeplatz |
