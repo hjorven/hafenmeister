@@ -1,6 +1,6 @@
 # Arbeitsplan
 
-Stand: 14.11.2026, 21:15 UTC, abgeglichen mit `main` bei `adc0086` (PR 295). Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
+Stand: 15.11.2026, 09:30 UTC, abgeglichen mit `main` bei `c0d1d93` (PR 332), Statusangaben am Code geprüft. Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
 
 **Wozu diese Datei:** [roadmap.md](roadmap.md) sagt, *was* insgesamt noch fehlt (Pakete P01 bis P82). Dieser Arbeitsplan sagt, *was jetzt gerade* läuft, welche Fehler zuerst weg müssen und welche Pakete als Nächstes starten. [plan.md](plan.md) bleibt der gültige Plan für Vision und Regeln.
 
@@ -15,19 +15,17 @@ Stand: 14.11.2026, 21:15 UTC, abgeglichen mit `main` bei `adc0086` (PR 295). Gep
 
 ## 1. Was gerade überarbeitet wird
 
-Stand 14.11.2026, 21:15 UTC.
+Stand 15.11.2026, 09:30 UTC.
 
 | Thema | Thread | Paket | Stand | PR |
 |---|---|---|---|---|
-| Boote: Wartebojen neben den Stegen, Anfahrt von weit draußen, Stau im Becken | "Staus an Bojen und Ankerfeld auflösen" | P66 | PR seit 11 Uhr offen, muss fertig werden | 280 |
-| Gelände: Seewege, Seegatt für geschlossene Bodden | "Geländeform und Engpass neu bauen" | P62 | läuft | - |
-| Längere Tage (5 min) und Bootsgeschichten (50 Alltag + 14 Ereignis-Anlässe), echte Regatta, Plan docs/bootsgeschichten.md | "Längere Tage und Bootsgeschichten einbauen" | neu (Jorven 14.11.) | PR 319: Tag 270 s, Kurzhalt, 65 Geschichten mit Logbuch-Reiter, Regatta mit Bahn und Tonnen. Offen: Startsignal, Siegerehrung, Gepäck, Tanksteg-Halt | - |
-| Stege umbauen: Teil 2 Yachtsteg in Stufe 6 (D9), Teil 1 Doppelboxen gemergt (PR 321) | "Bauen mit Vorschau und Tiefe ausbauen" | P59 | Teil 2 im PR | 326 |
-| Schicht-Test, Feature-Test, Zeitraffer, Roadmap-Seite, Kamera | Prüf- und Pflege-Threads | - | laufen | 251, 296 |
+| Boote: Pulk und "ineinander fest" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht) | "Staus an Bojen und Ankerfeld auflösen" | P66 | läuft; PR 280, 327 und 332 gemergt | - |
+| Bootsgeschichten Rest: Startsignal, Siegerehrung, Regatta im Logbuch, Gepäck, Tanksteg, Gang in den Ort | "Längere Tage und Bootsgeschichten einbauen" | P86 | wartet auf eine Antwort | - |
+| Roadmap-Seite: P27 und P17 Teil 2 mit Bildern | "Roadmap interaktiv im Repo zeigen" | - | PR offen | 333 |
+| Doku auf Stand: Roadmap, Plan, README, Arbeitsplan, Ausbau 7 bis 20 | "Roadmap, Plan und README nachziehen" | - | PR folgt | - |
+| Schichttest, Zeitraffer, Feature-Einzeltest | Prüf-Threads | - | laufen | - |
 
-Seit 21:15 gemergt: ruhige Oberfläche mit einem Meldeplatz (PR 282), P28 Funk-Anmeldung (PR 288), P24 Teil 2 neue Ereignisse (PR 299), Zeitraffer-Pulk (PR 251), Pages gebündelt (PR 294), Folgefunde Einzeltest (PR 301).
-
-Seit 11:30 gemergt: A10 große Boote nach Platzangebot (PR 287), Fehler aus Jorvens Feature-Test (PR 290), P22 Erfolge (PR 295), Offline-Folge (PR 292), Auszeichnung im Gästebuch (PR 291), README und Plan (PR 289).
+Seit 14.11. 21:15 gemergt: P27 Päckchen (PR 330), P17 Teil 2 neuer Takt (PR 331), Kurzhalter und erstes Boot (PR 332), Liegeplätze passgenau (PR 329), Härtetest (PR 324), Geduld ab sichtbarer Boje (PR 327), P59 Doppelboxen und Yachtsteg (PR 321, 326), P26 Gesten (PR 322), Logbuch Großschiffe (PR 305, 323), längere Tage und Bootsgeschichten (PR 319), Tagesende als Zettel (PR 320), P17 Teil 1 (PR 318), Menschen auf dem Gelände (PR 316), P41 Statistik (PR 315), P33 Umlegen (PR 314), Schichttest (PR 313), P30 Stege nachrüsten (PR 297), Wachstum je Stufe (PR 303), fünf echte Küsten (PR 300), Wartebojen seitlich (PR 280).
 
 ---
 
@@ -37,57 +35,54 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 
 | Prio | Fehler | Beleg | Paket / Thread |
 |---|---|---|---|
-| A | Pulk und Stau: nach PR 280 (Serie `c589ca5`, Typ 1 und 2) an rund 90 Tagen je Partie ein Pulk mit bis zu 100 Booten auf 45 m; ineinander fest 42 bis 470, hängend 92 bis 323, in Fahrt berührt 1800 bis 3500 je Partie; über Land fast weg (1 bis 6). Typ 2 PC schlechter als vorher | Zeitraffer-Zwischenserie 15.11. 02:00 UTC, Typ 3 bis 10 folgen | P66, Boote-Thread (Ankerfeld-Fix plus Pulk) |
-| A | Boote noch über Land (rund 21 je Lauf) und durch Stege (rund 17 je Lauf), vor allem Typ 3 und 8 | dieselbe Serie | P66 mit P62 |
-| A | Aufstieg weicht von der Rechnung ab; nach PR 252: geschickt 225, gemütlich 239 Tage, Stufe 2 gemütlich 36 Tage; A10 (PR 287) verschiebt um +2 bis +6 Tage | Zeitraffer-Serien, `tools/balance.mjs` | Balancing-Paket P17 |
-| B | Menschen laufen auf festen Koordinaten (`people/netz.js`), nicht auf dem Seed-Gelände | Gelände-Thread, 14.11. | erledigt 15.11. (Thread "Menschen auf das Gelände stellen", docs/menschen-wege.md) |
-| A | Gäste erreichen ab Stufe 4 sichtbar keine Warteboje: sie starten seit PR 280 rund 1 km draußen, `wartezeit.anfahrtMax` (35 s) setzt sie vorher auf "an der Boje", Geduld läuft, sie fahren direkt ein. Sichtbar an Boje / angekommen: Stufe 2 10/24, Stufe 4 bis 6 0 | Härtetest 15.11., `docs/extremtest.md` Lage bojen-erreichbar | P66 / Boote-Thread mit P17 (`economy.js`) |
-| B | L-Boote ragen an Stegköpfen auf den Steg (B27, B28, B35, B36, C22 bis C24) | Härtetest 15.11., Nahbilder in `/mnt/project-files/extremtest/2026-11-15-df9ca05/` | erledigt 15.11. (Thread "Liegeplätze passgenau machen", docs/liegeplaetze.md) |
-| B | XL-Raddampfer an K01 liegt unter der Seebrücke, auf Land und auf dem Boot an FK01 | Härtetest 15.11., Lage viele-boote | erledigt 15.11. (Thread "Liegeplätze passgenau machen") |
-| C | Korvette (XXL) streift auf Küste 4 die Sandbank (2 bis 3 von 7 Rumpfpunkten auf Land) | Härtetest 15.11., Lage grossschiffe-eng | erledigt 15.11. (Thread "Liegeplätze passgenau machen") |
-| C | `tests/specs/leinen.spec.mjs` prüft nur Küstentyp 1 bis 10 | Gelände-Thread | Leinen- oder Test-Thread nach PR 300 |
-| B | Logbuch: die 9 XXL-Einträge werden in keiner Partie erreicht (0/9), sonst 74 bis 76 von 89 | Zeitraffer-Zwischenserie | Logbuch-Thread prüft, ob XXL-Besuche im normalen Spiel vorkommen; sonst Einträge an echte Ereignisse binden |
-| B | `istWasser` und Bild stimmen am Durchstich nicht überall überein | Messlatte (`feature-tests/messlatte/README.md`) | P62 |
-| C | Winter: Rest von H5, G5 | roadmap.md P20 | P20-Rest nach P17 |
+| A | Pulk und "ineinander fest" beim gleichzeitigen Ablegen, vor allem Stufe 5 (Offene Bucht, Seed 11); mit dem 5-Minuten-Tag legen mehr Kurzhalter gleichzeitig ab | PR 327 "Noch offen", Härtetest 15.11. (Hinweis), Zeitraffer-Zwischenserie | P66, "Staus an Bojen" |
+| A | Welle-0-Abnahme fehlt: Zeitraffer-Serie über alle 15 Küsten nach dem Pulk-Fix | Abschnitt 3a | P66, Zeitraffer-Thread |
+| B | Kreuzfahrtschiff streift im Seegatt von Küste 4 das Ufer | Rest aus PR 329 | P84 (neu) |
+| B | Gäste erreichen ab Stufe 4 keine Boje: mit PR 327 behoben (Geduld erst ab sichtbarer Boje), im Härtetest noch nicht nachgemessen | Härtetest 15.11., PR 327 | P87 (neu) |
+| B | `tools/stegbilder/erzeugen.mjs` findet seit den Doppelboxen keine Variante mehr ("Steg C passt nicht"); die 12 Stegbilder im Spiel sind nicht betroffen, neue Stege (Stufe 7) aber blockiert | Hinweis in PR 329 | P83 (neu) |
+| B | `istWasser` und Bild stimmen am Durchstich nicht überall überein | Messlatte (`feature-tests/messlatte/README.md`) | P87 (neu) |
+| C | `tests/specs/leinen.spec.mjs` prüft nur Küstentyp 1 bis 10 | Gelände-Thread | P87 (neu) |
+| C | Winter: Jahreszeiten steuern nur Ereignisse, nicht Ankünfte und Wind (G5); Dauerlieger nutzen Kran und Segelmacher in der Saison nicht (H5-Rest) | Code: `jahreszeiten` nur in `data/events.js` | P20-Rest |
+| C | Einstieg erklärt den Ruf nicht am ersten Abreisenden (J5) | `features/einstieg.js` | P03-Rest |
 
-Erledigt: Fehler aus Jorvens Feature-Test vom 14.11. (PR 290), Bewertung "1 + 4 x erfüllt/alle" (seit P14), C05, C06 (P61), C07, P02, P04, P12, P63, P65.
+Erledigt seit 14.11.: Menschen auf festen Koordinaten (PR 316), L-Boote ragen auf den Steg, XL-Raddampfer an K01, Korvette auf Küste 4 (alle PR 329), XXL-Logbuch nie erreicht (PR 323), Aufstieg weicht von der Rechnung ab (P17, PR 331: Rechnung Tag 103, Zeitraffer 99 bis 102), Box bleibt bei Abreise unterwegs belegt (PR 327), Kurzhalter legen vor dem Festmachen ab (PR 332). Früher erledigt: Fehler aus Jorvens Feature-Test (PR 290), C05, C06 (P61), C07, P02, P04, P12, P63, P65.
 
 ---
 
 ## 3. Die nächsten Pakete, in dieser Reihenfolge
 
-Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tempo durchlaufen. Sichtbarkeit (P55), Logbuch (P21) und Erfolge (P22) sind fertig. Jetzt: Grundprobleme abschließen, dann Inhalte, die wenig Dateien teilen.
+Leitlinie: Erst Welle 0 abschließen und die Prüfwerkzeuge auf den neuen Stand bringen, dann das Zusammenspiel prüfen. Daneben Pakete, die wenig Dateien teilen. `economy.js` ist seit P17 frei: als Nächstes P23, danach P20-Rest.
 
 | Nr | Paket | Warum jetzt | Hängt ab von | Kann kollidieren mit |
 |---|---|---|---|---|
-| 1 | **P66 PR 280 fertig machen** (läuft) | Prio A; liegt seit 10 Stunden offen und blockiert P27 und die Schlussmessung von P17 | - | P62, Stegbilder, XXL; danach Zeitraffer-Serie neu |
-| 2 | **P17 Balancing: Aufstieg angleichen, Ü15, Ü16** (neu, startet jetzt) | Prio A; A10 ist gemergt. Rechnung (`tools/balance.mjs`) und Regeln jetzt angleichen, Schlussmessung im Zeitraffer nach PR 280 | Schlussmessung nach 1 | `economy.js` (einziger Thread dort), `docs/zahlen.md`, Einstieg (J5) |
-| 3 | **P28 Funk-Anmeldung** | erledigt (PR 288, `docs/funk-anmeldung.md`) | - | `ui/vorschau.js`, `sim.js`, Meldeplatz (PR 282) |
-| 4 | **P41 Statistik und Saisonbilanz** (neu) | nutzt die vorhandenen Daten (`state.stats.verlauf`, Einnahmen nach Quelle); fast nur eigene Dateien | - | Tagesabschluss-Tafel, Winterkarte (Saisonbilanz dort ergänzen statt doppeln) |
-| 5 | **P26 Überraschende Gesten** (erledigt, docs/hafengesten.md) | Hafenhorn, Fernglas mit Steckbrief, Möwen, Glocke: macht den Hafen lebendig, berührt kaum Regeln | - | `audio.js`, Gesten (`ui/gesten.js`), Fotomodus |
-| 6 | **P24 Ereignisse Teil 2** (erledigt, PR 299) | neue Ereignisse F17 | - | Meldeplatz (PR 282) |
-| 7 | **P27 Päckchen liegen** (erledigt, docs/paeckchen.md) | voller Hafen wird zur Entscheidung | 1 | `sim.js`, `boat-view.js`, Wegsuche |
-| 8 | **P20-Rest Winter** (H5, G5) | Kernschleife über das Jahr fertig | 2 | `winter.js`, `economy.js` |
-| 9 | **P23 Services mit eigener Wirkung** | macht Stufe 4 bis 6 tiefer | 2 (Zahlen) | `render/services.js`, `data/services.js` |
-| 10 | **P33 Liegende Boote umlegen** | eigene Entscheidung im vollen Hafen | 1 | `sim.js`, `boat-view.js` |
+| 1 | **P66 Pulk beim Ablegen** (läuft) | Prio A, letzter Rest von Welle 0 | - | `render/boat-view.js`, `boat-anim.js`, Päckchen (Ablegereihenfolge), Kurzhalter |
+| 2 | **P84 Großschiffwege an allen 15 Küsten** (neu) | Rest aus PR 329, gehört zu Welle 0 | - | `render/services-besuch.js`, `boat-view.js` (`hinaus`, `seeWeg`): nur diese Stellen ändern, vor dem Merge auf P66 rebasen |
+| 3 | **P87 Prüfwerkzeuge auf 15 Küsten und den neuen Takt** (neu) | Welle-0-Abnahme braucht Tests, die alle Küsten kennen; Härtetest nach PR 327 bis 332 neu | - | nur `tests/`, `tools/zeitraffer/`, `feature-tests/` |
+| 4 | **P83 Stegbild-Generator reparieren** (neu) | ohne ihn keine neuen Stege (P70) und kein Neuerzeugen nach Platzänderungen | - | `tools/stegbilder/`, `data/stegbilder.js` (Ausgabe muss für bestehende Spielstände gleich bleiben), `data/liegelage.js` |
+| 5 | **P23 Services mit eigener Wirkung** (neu) | macht Stufe 4 bis 6 tiefer; `economy.js` frei | - | `economy.js` (einziger dort), `render/services.js`, `data/services.js`, Ereignisse (G7-Boni aus PR 299) |
+| 6 | **P86 Bootsgeschichten fertig erzählen** (Thread wartet) | kleine Lücken, die Jorven im Spiel sieht (Regatta ohne Startsignal und Sieger) | - | `geschichten/`, `render/boat-view.js` (Regattabahn), Logbuch, `audio.js` |
+| 7 | **P03-Rest J5** (neu, klein) | Ruf am ersten Abreisenden erklären, Einstieg damit fertig | - | `features/einstieg.js`, Meldeplatz |
+| 8 | **P20-Rest Winter** (G5, H5) | Jahreszeiten spürbar, Kran und Segelmacher für Dauerlieger | 5 (`economy.js`) | `sim.js` (Ankünfte je Jahreszeit), `winter.js`, Balancing-Messung danach |
+| 9 | **P85 Zusammenspiel nach Welle 0 prüfen** (drei Threads) | Jorvens Auftrag vom 14.11. | 1, 2, 3 und Abnahme-Serie | `docs/zusammenspiel.md`, kleine Fixes je Fund |
+| 10 | **P34 Wind im Hafen** oder **P31 Neue Gästewünsche** | nächste Tiefe für die Kernschleife | 5, 8 (`economy.js`) | `sim.js`, `economy.js`, Wünsche aus P19 |
 
 Danach geht es weiter wie in [Abschnitt 5](#5-alles-weitere-bis-zum-ende) beschrieben, bis Stufe 20 und Online.
 
-**Startregel:** Jetzt starten: 2, 4, 5; 3 wieder aufnehmen; 1 zu Ende bringen. 7 und 10 nach 1, 8 und 9 nach 2. Nie zwei Threads gleichzeitig an `economy.js`. Alle neuen Meldungen gehen über den einen Meldeplatz aus PR 282.
+**Startregel:** Jetzt starten: 2, 3, 4, 5, 7; 1 und 6 laufen weiter. 8 nach 5, 9 sobald Welle 0 abgenommen ist, 10 nach 8. Nie zwei Threads gleichzeitig an `economy.js`. Alle neuen Meldungen gehen über den einen Meldeplatz aus PR 282.
 
 ---
 
 ## 3a. Welle 0 abschließen und danach das Zusammenspiel prüfen
 
-**Wann ist Welle 0 fertig?** P62, P63, P64 und P65 sind erledigt, P66 hat PR 280 gemergt (Wartebojen, Anfahrt von weit draußen). Offen sind:
+**Wann ist Welle 0 fertig?** P62, P63, P64 und P65 sind erledigt, PR 300 (fünf echte Küsten) ist gemergt, P66 hat PR 280, 327 und 332 gemergt. Offen sind (Stand 15.11., 09:30 UTC):
 
-1. P66: Fix des Boote-Threads für den Ankerfeld-Rückfall (13 % der Seeds) und Restboote nach dem Winter.
-2. PR 300 (fünf neue Küstentypen 11 bis 15, nicht Welle 0, aber danach würfelt jedes neue Spiel aus 15 Küsten).
-3. Abnahme laut Roadmap Abschnitt 14: Zeitraffer-Serie über alle 15 Küstentypen, PC und Handy, nach 1 und 2. Grenze: kein Boot dauerhaft über Land oder durch Stege, keine Boote ineinander fest länger als ein paar Sekunden. Danach P66 in der Roadmap auf "erledigt".
+1. P66: Pulk und "ineinander fest" beim gleichzeitigen Ablegen.
+2. P84: Großschiffe kommen auf allen 15 Küsten ohne Uferberührung hinaus (Kreuzfahrtschiff im Seegatt Küste 4).
+3. Abnahme laut Roadmap Abschnitt 14: Zeitraffer-Serie über alle 15 Küstentypen, PC und Handy, nach 1 und 2, mit den Werkzeugen aus P87. Grenze: kein Boot dauerhaft über Land oder durch Stege, keine Boote ineinander fest länger als ein paar Sekunden. Danach P66 und P84 in der Roadmap auf "erledigt".
 
 Der Planungs-Thread meldet dem Koordinator, sobald alle drei Punkte erfüllt sind.
 
-**Danach: Zusammenspiel-Prüfung (Jorven, 14.11. abends).** Drei Threads gleichzeitig, je Bereich einer. Ein einzelner Thread bräuchte für alles zu lange; drei getrennte Bereiche teilen kaum Dateien. Alle drei schreiben in eine gemeinsame Datei `docs/zusammenspiel.md` (je Bereich ein eigener Abschnitt, damit es keine Konflikte gibt). Grundlage sind die Ergebnisse der Threads "Spiel Schicht für Schicht von Grund auf testen" und "Ganzes Spiel im Zeitraffer durchtesten", damit nichts doppelt geprüft wird.
+**Danach: Zusammenspiel-Prüfung (Jorven, 14.11. abends, Paket P85).** Drei Threads gleichzeitig, je Bereich einer. Ein einzelner Thread bräuchte für alles zu lange; drei getrennte Bereiche teilen kaum Dateien. Alle drei schreiben in eine gemeinsame Datei `docs/zusammenspiel.md` (je Bereich ein eigener Abschnitt, damit es keine Konflikte gibt). Grundlage sind die Ergebnisse der Threads "Spiel Schicht für Schicht von Grund auf testen" und "Ganzes Spiel im Zeitraffer durchtesten", damit nichts doppelt geprüft wird.
 
 | Thread | Bereich | Was geprüft wird |
 |---|---|---|
@@ -105,11 +100,13 @@ Der Planungs-Thread meldet dem Koordinator, sobald alle drei Punkte erfüllt sin
 
 ## 4. Berührungspunkte, auf die alle achten
 
-- `web/js/data/economy.js`: Reihenfolge P17 (mit Ü16), P20-Rest, P23 (P19, 252 und A10 sind gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
+- `web/js/data/economy.js`: Reihenfolge P23, P20-Rest, dann P34 oder P31 (P17, P19, 252 und A10 sind gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
 - `web/js/sim.js`: kleine, getrennte Änderungen, vorher auf `main` rebasen, neue Regel mit eigenem Test.
 - Meldungs-Ordnung (höchstens eine schwebende Meldung, Tipps nie über Zeit und Bauen): P55, P22, P24 melden sich dort an, statt eigene Ebenen zu bauen.
 - `web/index.html`, `web/js/main.js`: nur eine `MODULES`-Zeile je neuem Modul; P61 ändert die Importmap und stimmt das im PR ab.
-- Speichern: neue Felder (P21, P22) mit `SAVE_VERSION` und Migration; P21 hat Version 3 genommen (Logbuch), Welle 6 plant jetzt Version 4.
+- Speichern: neue Felder mit `SAVE_VERSION` und Migration; P21 hat Version 3 genommen (Logbuch), Welle 6 plant Version 4 (P73).
+- Liegeplätze: neue Plätze bekommen eine Lage in `data/liegelage.js` und müssen `node tools/liegeplaetze/pruefen.mjs` ohne Fund bestehen.
+- Nach großen Änderungen den Härtetest laufen lassen ([extremtest.md](extremtest.md)).
 - Nach jedem Merge, der Boote oder Gelände berührt: Zeitraffer-Serie und Messlatte erneut.
 
 ---
@@ -132,21 +129,22 @@ Reihenfolge nach Wirkung auf die Kernschleife: erst was jede Ankunft und jedes Z
 
 | Reihenfolge | Paket | Inhalt | Vorschläge |
 |---|---|---|---|
-| 1 | P24 | Ereignisse zum Vorbereiten, neue Ereignisse (Mittsommer, Holzboot-Treffen, Heringstage) | F17 |
+| 1 | P24 | erledigt (PR 281, 299) | F17 |
 | 2 | P23 | Services mit eigener Wirkung | - |
-| 3 | P28 | Anmeldung per Funk, Platz freihalten | F2 |
-| 4 | P27 | Päckchen liegen bei vollem Hafen | F1 |
-| 5 | P33 | Liegende Boote umlegen (verholen) | F4 |
+| 3 | P28 | erledigt (PR 288) | F2 |
+| 4 | P27 | erledigt (PR 330) | F1 |
+| 5 | P33 | erledigt (PR 314) | F4 |
 | 6 | P34 | Wind im Hafen spürbar, Windseite, Anlegen gegen den Wind | F5, F35 |
 | 7 | P31 | Neue Gästewünsche (WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen) | F9 |
-| 8 | P30 | Stege nachrüsten (Wasser, Strom, Fingerstege, Licht) | F8 |
+| 8 | P30 | erledigt (PR 297; Wasser kommt mit P31) | F8 |
 | 9 | P35 | Preisstufe am Hafenbüro | F6 |
 | 10 | P32 | Flottillen | F3 |
 | 11 | P25 | Stammgäste mit Wirkung, Gästepost | F37 |
 | 12 | P29 | Baggern für tiefere Liegeplätze | F7 |
 | 13 | P36 | Bojenfeld im See | F10 |
-| 14 | P59 | Stege umbauen und Varianten wählen (Doppelboxen PR 321, Yachtsteg PR 326) | - |
-| 15 | P26 | Überraschende Gesten (Hafenhorn, Fernglas, Möwen, Glocke) | - |
+| 14 | P59 | erledigt (Doppelboxen PR 321, Yachtsteg PR 326) | - |
+| 15 | P26 | erledigt (PR 322) | - |
+| 15a | P86 | Bootsgeschichten fertig erzählen (Regatta-Start und Sieger, Gepäck, Tanksteg) | - |
 | 16 | P37 | Havarist einschleppen | F11 |
 | 17 | P38 | Eigenes Hafenfest | F12 |
 | 18 | P39 | Jugendtraining am Segelclub | F13 |
@@ -156,9 +154,9 @@ Reihenfolge nach Wirkung auf die Kernschleife: erst was jede Ankunft und jedes Z
 
 | Paket | Inhalt | Vorschläge |
 |---|---|---|
-| P41 | Statistik und Saisonbilanz | F19, F20 |
+| P41 | erledigt (PR 315) | F19, F20 |
 | P44 | Hafenname und Flagge (mit Test gegen präparierte Namen, Audit C05) | F23, F27 |
-| P50 | Einstellungen für Sicht und Bewegung | F25 |
+| P50 | erledigt (Einstellungen im Menü) | F25 |
 | P47 | Große Ankünfte ankündigen | F31 |
 | P48 | Leinen annehmen beim Anlegen | F32 |
 | P46 | Ruhiger Abend, Serien-Akkord | F29, F30 |
@@ -196,7 +194,7 @@ Nach Abschnitt C und P57. Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md). Ni
 |---|---|
 | P58 | Online mit Supabase (Hafenname, Bestenliste, Gastboote), vorher Sicherheitsreview (Audit C08) |
 
-Schon erledigt aus Jorvens Vorschlägen: F14, F15, F18, F26, F27 (Grundgerüst), F28.
+Schon erledigt aus Jorvens Vorschlägen: F1, F2, F4, F8, F14, F15, F17, F18, F19, F20, F25, F26, F27 (Grundgerüst), F28, F36.
 
 ---
 
@@ -204,6 +202,7 @@ Schon erledigt aus Jorvens Vorschlägen: F14, F15, F18, F26, F27 (Grundgerüst),
 
 | Datum | Änderung |
 |---|---|
+| 15.11.2026, 09:30 Uhr | Ganzer Plan am Code abgeglichen (Thread "Roadmap, Plan und README nachziehen"): Abschnitte 1 bis 3 neu; P17, P27, P24 und viele andere erledigt; neue Pakete P83 Stegbild-Generator, P84 Großschiffwege, P85 Zusammenspiel, P86 Bootsgeschichten-Rest, P87 Prüfwerkzeuge; Startliste 2, 3, 4, 5, 7. |
 | 15.11.2026 | P59 Teil 1 Doppelboxen gemergt (PR 321); Teil 2 Yachtsteg in Stufe 6 (D9) im PR. |
 | 15.11.2026 | P59 übernommen vom Thread "Bauen mit Vorschau und Tiefe ausbauen": Teil 1 Doppelboxen (D5, D6), Teil 2 neue Gastplätze Stufe 6 (D9) danach. |
 | 15.11.2026, 04:30 Uhr | "Längere Tage und Bootsgeschichten": Teil 1 bis 3 in PR 319 (lange Tage, Kurzhalt, 65 Geschichten, Regatta draußen). Stau in der Ausfahrt bei vielen gleichzeitigen Ausfahrten an "Staus an Bojen" gemeldet. |

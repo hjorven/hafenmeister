@@ -1,6 +1,6 @@
 # Was ist neu im Spiel
 
-Stand: 13.11.2026. Status: gepflegt. Für Spielerinnen und Spieler: was sich im Spiel unter https://hjorven.github.io/hafenmeister/ geändert hat, neueste Einträge oben. Technische Einzelheiten stehen in den Pull Requests (Nummer in Klammern), offene Arbeit in der [Roadmap](roadmap.md).
+Stand: 15.11.2026 (bis PR 332). Status: gepflegt. Für Spielerinnen und Spieler: was sich im Spiel unter https://hjorven.github.io/hafenmeister/ geändert hat, neueste Einträge oben. Technische Einzelheiten stehen in den Pull Requests (Nummer in Klammern), offene Arbeit in der [Roadmap](roadmap.md).
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 

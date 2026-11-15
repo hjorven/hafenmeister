@@ -4,19 +4,19 @@ Ein gemütliches Aufbauspiel in 3D für den Browser: Du bist Hafenmeister, fäng
 
 **Spielen:** https://hjorven.github.io/hafenmeister/ (Pixel-Fassung: https://hjorven.github.io/hafenmeister/pixel/)
 
-## Stand (14.11.2026)
+## Stand (15.11.2026)
 
-Die Ostsee ist in allen sechs Stufen spielbar, vom Bootssteg bis zum Seehafen mit Abschlussziel. Jedes Spiel liegt in einer von zehn Geländeformen nach echten Häfen, mit eigenem Seeweg hinaus. Im Spiel sind unter anderem:
+Die Ostsee ist in allen sechs Stufen spielbar, vom Bootssteg bis zum Seehafen mit Abschlussziel und Endlosspiel. Jedes Spiel liegt an einer von 15 Küsten (zehn nach Vorbildern an Ost- und Nordsee, fünf aus echten Karten), mit eigenem Seeweg hinaus. Ein Spieltag dauert 5 Minuten. Im Spiel sind unter anderem:
 
-- **Kernspiel:** Zuweisen per Schleppleine oder Selbst-Einfahren in die nächste freie Box, Wunschplätze in Gold, Geduldsring an der Boje, Ankunftsvorschau, Liegegeld je Meter beim Festmachen, Hafenbüro mit Funk, Kassenautomat und Leitstelle (Sonderfälle bleiben beim Spieler).
-- **Rückmeldung:** Bewertungen über dem Boot, Gästebuch, Tagesabschluss am Abend, Auslastung an der Versorgung mit Schlange davor, Ruf mit Auszeichnung am Hafenmeisterhaus, Feier beim Stufenaufstieg und Endlosspiel nach dem Abschluss.
-- **Bauen:** Vorschau am Ort, Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen, erstes Bauwerk geschenkt, 20 Services und Angebote an Land.
-- **Hafenleben:** Dauerlieger mit Saisonvertrag, Stammgäste, Tagesziele zum Auswählen, Wetter, Ereignisse zum Vorbereiten (Sturm, Regatta), Winterpause mit Winterarbeiten und Krantagen, Logbuch als Sammelalbum mit Hafenchronik, Menschen im Hafen, Ton und Musik, Fotomodus.
-- **Technik:** mehrere Speicherplätze mit "Neues Spiel", Einstellungen für Sicht und Bewegung, Pixel-Oberfläche für alle Geräte, startet als Web-App auch offline.
+- **Kernspiel:** Boote kommen von weit draußen auf See und warten an Wartebojen seitlich der Stege; Zuweisen per Schleppleine oder Selbst-Einfahren in die nächste freie Box, Wunschplätze in Gold, Geduldsring an der Boje, Ankunftsvorschau und Anmeldung per Funk, Kurzhalter und Übernachter mit 65 Bootsgeschichten, Liegegeld je Meter beim Festmachen, liegende Boote umlegen, Päckchen bei vollem Hafen, Hafenbüro mit Funk, Kassenautomat und Leitstelle (Sonderfälle bleiben beim Spieler).
+- **Rückmeldung:** Bewertungen über dem Boot, Gästebuch, Tagesabschluss, Statistik und Saisonbilanz, Auslastung an der Versorgung mit Schlange davor, Ruf mit Auszeichnung am Hafenmeisterhaus, 30 Erfolge, Feier beim Stufenaufstieg und Endlosspiel nach dem Abschluss, ein ruhiger Meldeplatz für alle kurzen Meldungen.
+- **Bauen:** Vorschau am Ort, Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen, erstes Bauwerk geschenkt, Stege nachrüsten (Fingerstege, Laternen), Doppelboxen und Yachtsteg, 20 Services und Angebote an Land; Gebäude und Dorf wachsen sichtbar mit jeder Stufe.
+- **Hafenleben:** Dauerlieger mit Saisonvertrag, Stammgäste, Tagesziele zum Auswählen, Wetter, neun Ereignisse zum Vorbereiten (Sturm, Regatta mit Bahn vor dem Hafen, Hanse-Woche, Mittsommer und andere), Winterpause mit Winterarbeiten und Krantagen, Logbuch als Sammelalbum mit Hafenchronik, Menschen auf dem echten Gelände, Gesten (Hafenhorn, Fernglas, Möwen, Glocke), Ton und Musik, Fotomodus.
+- **Technik:** bis zu 8 Speicherplätze mit "Neues Spiel", Einstellungen für Sicht und Bewegung, Pixel-Oberfläche für alle Geräte, freie Kamera, startet als Web-App auch offline.
 
-Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, rund 7,5 bis 8 Stunden bei normaler Geschwindigkeit.
+Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage, rund 8 bis 9,5 Stunden bei normaler Geschwindigkeit.
 
-**Woran gerade gearbeitet wird:** Bootswege ohne Stau und ohne Fahrten über Land oder durch Stege (Welle 0), Feinschliff am Tempo des Aufstiegs, Ereignisse Teil 2, Erfolge und Anmeldung per Funk. Was als Nächstes kommt, steht im [Arbeitsplan](docs/arbeitsplan.md), alle offenen Punkte in der [Roadmap](docs/roadmap.md). Danach folgen die Nordsee, der Ausbau bis Stufe 20 und als letzter Schritt ein kleiner Online-Teil. Was sich für Spieler geändert hat, steht in [docs/aenderungen.md](docs/aenderungen.md).
+**Woran gerade gearbeitet wird:** Welle 0 abschließen (kein Pulk beim gleichzeitigen Ablegen, Großschiffe sauber durch jedes Seegatt, Abnahme über alle 15 Küsten), danach die Zusammenspiel-Prüfung des ganzen Spiels. Daneben Services mit eigener Wirkung und die nächsten Pakete aus dem [Arbeitsplan](docs/arbeitsplan.md); alle offenen Punkte in der [Roadmap](docs/roadmap.md). Danach folgen die Nordsee, der Ausbau bis Stufe 20 ([Plan](docs/ausbau-stufe-7-20.md)) und als letzter Schritt ein kleiner Online-Teil. Was sich für Spieler geändert hat, steht in [docs/aenderungen.md](docs/aenderungen.md).
 
 | Stufe | Name | Gastplätze |
 |---|---|---|
@@ -25,7 +25,7 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 | 3 | Durchstich zur Ostsee | 54 |
 | 4 | Marina | 76 |
 | 5 | Küstenmarina | 94 |
-| 6 | Seehafen | 94 plus Pier für Großschiffe |
+| 6 | Seehafen | 96 mit Yachtsteg, plus Pier für Großschiffe |
 
 <!-- roadmap:start -->
 <!-- Dieser Abschnitt wird aus docs/roadmap.md erzeugt (tools/roadmap.mjs). Bitte dort ändern, nicht hier. -->
@@ -196,9 +196,12 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 | [docs/plan.md](docs/plan.md) | Spielplan (gilt): Vision, Regeln, Stufen, Schiffe, Services, Steuerung, Technik, Stand und Entscheidungen |
 | [docs/roadmap.md](docs/roadmap.md) | Arbeitsliste: was fehlt, was falsch ist, was weg soll, welches Paket es erledigt |
 | [docs/arbeitsplan.md](docs/arbeitsplan.md) | Was gerade läuft, bekannte Fehler, die nächsten Pakete |
+| [docs/ausbau-stufe-7-20.md](docs/ausbau-stufe-7-20.md) | Planung: Stufe 7 bis 20 bis zum Hafenverbund (noch nicht im Spiel) |
+| [docs/balancing.md](docs/balancing.md) | Zahlen, Spielzeit je Stufe, Rechnung gegen Zeitraffer |
 | [docs/aenderungen.md](docs/aenderungen.md) | Was ist neu im Spiel |
 | [docs/ui/oberflaeche.md](docs/ui/oberflaeche.md) | Oberfläche und Bedienung auf allen Geräten |
 | [docs/tests.md](docs/tests.md) | Tests vor jedem Merge, Testmodus und alle Adresszusätze |
+| [docs/extremtest.md](docs/extremtest.md) | Härtetest in Extremlagen, nach großen Änderungen |
 | [docs/grundgeruest.md](docs/grundgeruest.md) | Technik: Spielobjekt, Module, Koordinaten, Dateibesitz |
 | [docs/abnahme.md](docs/abnahme.md) | Regel "Fertig heißt spielbar" |
 | [docs/hafen-und-schiffe.md](docs/hafen-und-schiffe.md) | Katalog: Hafen von oben, Liegeplätze, Einlaufen, Schiffsarten und Modelle |
@@ -213,7 +216,7 @@ Wo sich Dokumente widersprechen, gilt `docs/plan.md`. Alte Fassungen liegen in `
 | [web/pixel](web/pixel) | Die Pixel-Fassung |
 | [docs](docs) | Plan, Roadmap und Beschreibungen der Teile |
 | [tests](tests) | Automatische Tests für Handy, Tablet und PC |
-| [tools](tools) | Balancing-Simulation `balance.mjs`, Prüfskripte, Stegbilder erzeugen |
+| [tools](tools) | Balancing-Simulation `balance.mjs`, Zahlenübersicht `zahlen.mjs`, Roadmap-Seite `roadmap.mjs`, Liegeplatzprüfung, Zeitraffer, Stegbilder erzeugen |
 | [skripte](skripte) | Liegeplätze aus dem Hafenplan exportieren, Konzeptbilder |
 
 ## Lokal spielen und prüfen
