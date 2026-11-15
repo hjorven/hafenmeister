@@ -62,7 +62,7 @@ Leitlinie: Erst muss ein Spiel von Stufe 1 bis 6 ohne Stau und im erwarteten Tem
 | 4 | **P41 Statistik und Saisonbilanz** (neu) | nutzt die vorhandenen Daten (`state.stats.verlauf`, Einnahmen nach Quelle); fast nur eigene Dateien | - | Tagesabschluss-Tafel, Winterkarte (Saisonbilanz dort ergänzen statt doppeln) |
 | 5 | **P26 Überraschende Gesten** (erledigt, docs/hafengesten.md) | Hafenhorn, Fernglas mit Steckbrief, Möwen, Glocke: macht den Hafen lebendig, berührt kaum Regeln | - | `audio.js`, Gesten (`ui/gesten.js`), Fotomodus |
 | 6 | **P24 Ereignisse Teil 2** (erledigt, PR 299) | neue Ereignisse F17 | - | Meldeplatz (PR 282) |
-| 7 | **P27 Päckchen liegen** | voller Hafen wird zur Entscheidung | 1 | `sim.js`, `boat-view.js`, Wegsuche |
+| 7 | **P27 Päckchen liegen** (erledigt, docs/paeckchen.md) | voller Hafen wird zur Entscheidung | 1 | `sim.js`, `boat-view.js`, Wegsuche |
 | 8 | **P20-Rest Winter** (H5, G5) | Kernschleife über das Jahr fertig | 2 | `winter.js`, `economy.js` |
 | 9 | **P23 Services mit eigener Wirkung** | macht Stufe 4 bis 6 tiefer | 2 (Zahlen) | `render/services.js`, `data/services.js` |
 | 10 | **P33 Liegende Boote umlegen** | eigene Entscheidung im vollen Hafen | 1 | `sim.js`, `boat-view.js` |

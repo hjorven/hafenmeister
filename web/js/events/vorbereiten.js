@@ -73,6 +73,7 @@ function verhole(state, ctx, boat, to, events) {
   delete state.berths[from];
   state.berths[to] = boat.id;
   boat.berthId = to;
+  if (sim.isRaftBerth(from)) boat.paeckchen = null;   // aus dem Päckchen in eine Box (P27)
   boat.snug = sim.isSnug(state, ctx, boat, ctx.berthById[to]);
   events.push({ type: 'relocated', boatId: boat.id, from, to, guest: true, grund: 'sturm' });
 }
@@ -89,10 +90,12 @@ export function sturmklar(state, ctx, plan) {
   const events = [];
   let verholt = 0;
   let bleiben = 0;
-  // Größere Boote zuerst: für sie gibt es innen am wenigsten Plätze
-  const liste = draussen(state, ctx).sort((a, b) => (b.length * b.beam) - (a.length * a.beam));
+  // Größere Boote zuerst: für sie gibt es innen am wenigsten Plätze. Boote außen im Päckchen (P27)
+  // vor allen anderen, denn das innere kann erst weg, wenn das äußere fort ist.
+  const aussen = (b) => Number(sim.isRaftBerth(b.berthId));
+  const liste = draussen(state, ctx).sort((a, b) => aussen(b) - aussen(a) || (b.length * b.beam) - (a.length * a.beam));
   for (const boat of liste) {
-    const to = boat.trip?.away ? null : innenZiel(state, ctx, boat.id);
+    const to = boat.trip?.away || sim.raftBlocked(state, boat.berthId) ? null : innenZiel(state, ctx, boat.id);
     if (to) { verhole(state, ctx, boat, to, events); verholt++; } else bleiben++;
   }
   s.verholt = (s.verholt || 0) + verholt;

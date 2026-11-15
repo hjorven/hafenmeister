@@ -25,6 +25,7 @@ const MODULES = [
   './render/boats/verkehr.js',
   './render/boat-anim.js',
   './render/boat-view.js',
+  './render/paeckchen.js',             // P27: Päckchen, Boote längsseits an anderen Booten
   './render/people.js',
   './ui/input-pc.js',
   './ui/input-touch.js',
