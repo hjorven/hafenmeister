@@ -43,7 +43,6 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 | B | `istWasser` und Bild stimmen am Durchstich nicht überall überein | Messlatte (`feature-tests/messlatte/README.md`) | P87 (neu) |
 | C | `tests/specs/leinen.spec.mjs` prüft nur Küstentyp 1 bis 10 | Gelände-Thread | P87 (neu) |
 | C | Winter: Jahreszeiten steuern nur Ereignisse, nicht Ankünfte und Wind (G5); Dauerlieger nutzen Kran und Segelmacher in der Saison nicht (H5-Rest) | Code: `jahreszeiten` nur in `data/events.js` | P20-Rest |
-| C | Einstieg erklärt den Ruf nicht am ersten Abreisenden (J5) | `features/einstieg.js` | P03-Rest |
 
 Erledigt seit 14.11.: Menschen auf festen Koordinaten (PR 316), L-Boote ragen auf den Steg, XL-Raddampfer an K01, Korvette auf Küste 4 (alle PR 329), XXL-Logbuch nie erreicht (PR 323), Aufstieg weicht von der Rechnung ab (P17, PR 331: Rechnung Tag 103, Zeitraffer 99 bis 102), Box bleibt bei Abreise unterwegs belegt (PR 327), Kurzhalter legen vor dem Festmachen ab (PR 332). Früher erledigt: Fehler aus Jorvens Feature-Test (PR 290), C05, C06 (P61), C07, P02, P04, P12, P63, P65.
 
@@ -61,7 +60,7 @@ Leitlinie: Erst Welle 0 abschließen und die Prüfwerkzeuge auf den neuen Stand 
 | 4 | **P83 Stegbild-Generator reparieren** (neu) | ohne ihn keine neuen Stege (P70) und kein Neuerzeugen nach Platzänderungen | - | `tools/stegbilder/`, `data/stegbilder.js` (Ausgabe muss für bestehende Spielstände gleich bleiben), `data/liegelage.js` |
 | 5 | **P23 Services mit eigener Wirkung** (neu) | macht Stufe 4 bis 6 tiefer; `economy.js` frei | - | `economy.js` (einziger dort), `render/services.js`, `data/services.js`, Ereignisse (G7-Boni aus PR 299) |
 | 6 | **P86 Bootsgeschichten fertig erzählen** (Thread wartet) | kleine Lücken, die Jorven im Spiel sieht (Regatta ohne Startsignal und Sieger) | - | `geschichten/`, `render/boat-view.js` (Regattabahn), Logbuch, `audio.js` |
-| 7 | **P03-Rest J5** (neu, klein) | Ruf am ersten Abreisenden erklären, Einstieg damit fertig | - | `features/einstieg.js`, Meldeplatz |
+| 7 | **P03-Rest J5** (erledigt 15.11.) | Ruf am ersten Abreisenden erklären, Einstieg damit fertig | - | `features/einstieg.js`, Meldeplatz |
 | 8 | **P20-Rest Winter** (G5, H5) | Jahreszeiten spürbar, Kran und Segelmacher für Dauerlieger | 5 (`economy.js`) | `sim.js` (Ankünfte je Jahreszeit), `winter.js`, Balancing-Messung danach |
 | 9 | **P85 Zusammenspiel nach Welle 0 prüfen** (drei Threads) | Jorvens Auftrag vom 14.11. | 1, 2, 3 und Abnahme-Serie | `docs/zusammenspiel.md`, kleine Fixes je Fund |
 | 10 | **P34 Wind im Hafen** oder **P31 Neue Gästewünsche** | nächste Tiefe für die Kernschleife | 5, 8 (`economy.js`) | `sim.js`, `economy.js`, Wünsche aus P19 |
