@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "15.11.2026",
-  "commit": "7024db5"
+  "commit": "0c2ea3d"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -679,14 +679,14 @@
    "id": "P27",
    "titel": "Päckchen liegen bei vollem Hafen",
    "inhalt": "F1",
-   "thread": "neu",
+   "thread": "erledigt (docs/paeckchen.md)",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F1"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1836,8 +1836,8 @@
   {
    "code": "F1",
    "text": "Päckchen liegen: bei vollem Hafen längsseits an ein gleich großes Boot, halbes Liegegeld, beide Crews einen halben Anker schlechter",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P27, docs/paeckchen.md)",
    "pakete": [
     "P27"
    ],
@@ -4399,11 +4399,11 @@
     "P59"
    ],
    "zaehler": {
-    "erledigt": 5,
+    "erledigt": 6,
     "teilweise": 2,
     "arbeit": 0,
     "frage": 0,
-    "offen": 12,
+    "offen": 11,
     "entfaellt": 0,
     "alle": 19
    }
@@ -4487,20 +4487,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 32,
+  "erledigt": 33,
   "teilweise": 6,
   "arbeit": 1,
   "frage": 0,
-  "offen": 41,
+  "offen": 40,
   "entfaellt": 1,
   "alle": 81
  },
  "punkteGesamt": {
-  "erledigt": 156,
+  "erledigt": 157,
   "teilweise": 7,
   "arbeit": 0,
   "frage": 1,
-  "offen": 54,
+  "offen": 53,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5324,6 +5324,20 @@
  "merges": [
   {
    "datum": "2026-11-15",
+   "titel": "P27 Päckchen liegen: längsseits an ein liegendes Boot, wenn keine Box frei ist",
+   "pr": 330,
+   "pakete": [
+    "P27"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Liegeplätze passgenau: Boote liegen frei von Steg, Kai, Land und Nachbarn",
+   "pr": 329,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
    "titel": "Roadmap-Pflege: Bilder zum Yachtsteg (P59 Teil 2, PR 326)",
    "pr": 328,
    "pakete": [
@@ -5393,23 +5407,6 @@
    "titel": "Tagesabschluss nur als Zettel, Bootskarte am Tablet hochkant über Zeit und Bauen",
    "pr": 320,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "P17: Aufstieg angleichen, Stufe 1 und 2 straffen (Ü16), Startwerte in economy.js",
-   "pr": 318,
-   "pakete": [
-    "P17"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Roadmap-Pflege: P33 (PR 314) und P41 (PR 315) mit PR-Nummern und Bildern",
-   "pr": 317,
-   "pakete": [
-    "P33",
-    "P41"
-   ]
   }
  ]
 }
