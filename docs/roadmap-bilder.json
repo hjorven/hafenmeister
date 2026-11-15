@@ -57,17 +57,6 @@
    "quelle": "einstieg/v5-handy-willkommen.png"
   },
   {
-   "datei": "p03-pr112-hilfe-pc.jpg",
-   "pakete": [
-    "P03"
-   ],
-   "titel": "Hilfe am PC",
-   "pr": 112,
-   "geraet": "pc",
-   "datum": "2026-11-13",
-   "quelle": "einstieg/hilfe-pc.png"
-  },
-  {
    "datei": "p09-pr150-sp-neu-dialog-pc.jpg",
    "pakete": [
     "P09"
@@ -737,6 +726,83 @@
    "geraet": "pc",
    "datum": "2026-11-15",
    "quelle": "vorschau/p59/yachtsteg-yachten.png"
+  },
+  {
+   "datei": "p27-pr330-handy-paeckchen.jpg",
+   "pakete": [
+    "P27"
+   ],
+   "titel": "Päckchen: Boote längsseits an liegenden Booten (Handy)",
+   "pr": 330,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "paeckchen/p27-2-paeckchen-handy.png"
+  },
+  {
+   "datei": "p27-pr330-pc-paeckchen.jpg",
+   "pakete": [
+    "P27"
+   ],
+   "titel": "Zwei Boote im Päckchen, nah (PC)",
+   "pr": 330,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "paeckchen/p27-2-paeckchen-pc.png"
+  },
+  {
+   "datei": "p17-pr331-tagesablauf.jpg",
+   "pakete": [
+    "P17"
+   ],
+   "titel": "Neuer Tagesablauf: Echtzeit je Stufe vorher und nachher",
+   "pr": 331,
+   "geraet": "alle",
+   "datum": "2026-11-15",
+   "quelle": "balancing/p17-teil2-pc-tagesablauf.png"
+  },
+  {
+   "datei": "p03-pr335-handy-ruf-erklaert.jpg",
+   "pakete": [
+    "P03"
+   ],
+   "titel": "Tipp beim ersten Abreisenden: Gäste bewerten deinen Hafen",
+   "pr": 335,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "einstieg/j5-handy-ruf.png"
+  },
+  {
+   "datei": "p03-pr335-pc-ruf-erklaert.jpg",
+   "pakete": [
+    "P03"
+   ],
+   "titel": "Ruf-Tipp mit Kreis um die Sterne oben",
+   "pr": 335,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "einstieg/j5-pc-ruf.png"
+  },
+  {
+   "datei": "p83-pr336-handy-stegbild11-stufe5.jpg",
+   "pakete": [
+    "P83"
+   ],
+   "titel": "Stegbild 11 in Stufe 5, aus dem reparierten Generator",
+   "pr": 336,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "stegbilder/p83/handy-stegbild11-stufe5.png"
+  },
+  {
+   "datei": "p83-pr336-pc-stegbild4-stufe6.jpg",
+   "pakete": [
+    "P83"
+   ],
+   "titel": "Stegbild 4 in Stufe 6 mit Yachtsteg und Doppelboxen",
+   "pr": 336,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "stegbilder/p83/pc-stegbild4-stufe6.png"
   }
  ]
 }

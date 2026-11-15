@@ -113,7 +113,7 @@ const BOT = () => {
         }
         for (const x of G.services?.liste?.() ?? []) {
           const p = G.services.pruefe(x.id);
-          if (p && p.freigeschaltet && !p.fertig) o.push({ art: 'service', id: x.id, kosten: p.kosten, prio: st.stage >= r.maxStage ? 1 : 3, tu: () => !!G.services.bauen(x.id)?.ok });
+          if (p && p.freigeschaltet && !p.fertig && !p.umbau) o.push({ art: 'service', id: x.id, kosten: p.kosten, prio: st.stage >= r.maxStage ? 1 : 3, tu: () => !!G.services.bauen(x.id)?.ok });
         }
         let kauf = o.filter((x) => x.kosten <= st.money);
         if (nurGeld) kauf = kauf.filter((x) => x.prio === 1 && x.kosten <= 0.1 * check.goal.cost);

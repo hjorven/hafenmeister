@@ -14,7 +14,6 @@
 //   node tools/balance.mjs --json          Ergebnis als JSON (für CI oder Diagramme)
 //   node tools/balance.mjs --verlauf 1     Tagesprotokoll eines Laufs (Seed 1, geschickt)
 //   node tools/balance.mjs --spieler zeitraffer   wie der Bot im Zeitraffer (Vergleich mit dem Spiel)
-//   node tools/balance.mjs --ablegen-heute        Ablegen so langsam wie am 14.11. gemessen
 //   node tools/balance.mjs --ohne-ansicht         nur die Regeln, ohne Zeit der 3D-Ansicht
 //
 // Services kommen aus web/js/services/rules.js, Ereignisse sind nicht eingerechnet
@@ -126,17 +125,14 @@ const RULES = sim.rulesFromEconomy(E);
 
 // Was die 3D-Ansicht im echten Spiel an Zeit kostet und die Regeln allein nicht kennen (P17,
 // docs/balancing.md "Rechnung und Spiel"). Gemessen mit dem Zeitraffer im Browser (Messung im Bot von
-// tools/zeitraffer/lauf.cjs, Ergebnis "messung" in ergebnis-<gerät>.json).
+// tools/zeitraffer/lauf.cjs, Ergebnis "messung" in ergebnis-<gerät>.json), Stand 15.11. nach PR 327:
 // - anfahrt: Sekunden von der Ankunft im Revier bis zur Warteboje (ohne Ansicht gilt anfahrtMax).
-// - ablegen: Sekunden, die ein abreisendes Boot seine Box hält, bis es sichtbar heraus ist. Ohne
-//   Ansicht wird die Box nach ausBoxMax frei. Gerechnet wird mit dem Ziel nach dem Fix im Boote-
-//   Thread (zügig heraus, wie im echten Hafen); --ablegen-heute nimmt die am 14.11. gemessenen Zeiten
-//   (Boote hängen ab Stufe 3 oft mehr als einen Spieltag in der Box, an den Boote-Thread gemeldet).
-// --ohne-ansicht rechnet nur die Regeln wie bis P17.
+// - ablegen: Sekunden, die ein abreisendes Boot seine Box hält, bis es sichtbar heraus ist (ohne
+//   Ansicht wird die Box nach ausBoxMax frei).
+// --ohne-ansicht rechnet nur die Regeln.
 export const ANSICHT = {
-  anfahrt: 20,
-  ablegen: { 1: 25, 2: 25, 3: 25, 4: 25, 5: 25, 6: 25 },
-  ablegenHeute: { 1: 20, 2: 20, 3: 115, 4: 140, 5: 145, 6: 100 },
+  anfahrt: 35,
+  ablegen: { 1: 35, 2: 35, 3: 35, 4: 35, 5: 35, 6: 35 },
 };
 const RULES_ANSICHT = { ...RULES, queue: { ...RULES.queue, approachMax: ANSICHT.anfahrt } };
 const SVC = erstelleRegeln(mitZahlen(SERVICES, E.services));
@@ -159,7 +155,6 @@ const PROFILE = {
 // Spielertypen im Bericht, die bis zum Abschluss spielen
 const SPIELER = ['geschickt', 'gemuetlich'];
 let MIT_ANSICHT = true;
-let ABLEGEN_HEUTE = false;
 
 export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true, beobachter = null, ansicht = MIT_ANSICHT } = {}) {
   const prof = PROFILE[profilName];
@@ -169,7 +164,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   // Wie die Ansicht im Spiel: abreisende Boote melden 'boot:noch-in-box', bis ihre Ablegezeit um ist
   const ablegen = () => {
     if (!ansicht) return;
-    const halten = (ABLEGEN_HEUTE ? ANSICHT.ablegenHeute : ANSICHT.ablegen)[state.stage] ?? 0;
+    const halten = ANSICHT.ablegen[state.stage] ?? 0;
     for (const l of Object.values(state.leaving || {})) {
       if (l.off && (l.total ?? 0) + RULES.leaveMax < halten) sim.holdLeaving(state, l.boatId);
     }
@@ -183,6 +178,19 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   const plan = mitEreignissen ? createScheduler({ seed }) : null;
   // Bootsgeschichten wie im Spiel (geschichten/geschichten.js): Anlass je Boot, besondere Tage, Tagestörns
   geschichtenEinhaengen(ctx, sim, { umfeld: (st, tag = st.day) => { const w = plan?.weather?.(tag); return { ereignis: w?.event ?? null, wetter: wetterWorte(w) }; } });
+  // Dienste der Services wie im Spiel (render/services.js, Haken 'arrivals'): Mast legen,
+  // Radtour, Reparatur verlängern den Aufenthalt und werden am ersten Abend bezahlt (P23)
+  const wetterAm = (tag) => (plan?.weather?.(tag)?.event === 'sturm' ? 'sturm' : (plan && (plan.weather(tag).rain ?? 0) > 0.3) ? 'regen' : 'sonne');
+  sim.addHook(ctx, 'arrivals', ({ state: st, ctx: c, list }) => {
+    for (const boat of list ?? []) {
+      const b = { id: boat.id, klasse: boat.size, antrieb: boat.motor ? 'motor' : c.typeById[boat.typeId]?.sail ? 'segel' : 'ruder',
+        nights: boat.nights, special: boat.special, stationed: boat.stationed };
+      const d = SVC.dienstBeiAnkunft(svc, b, { tag: st.day, wetter: wetterAm(st.day) });
+      if (!d) continue;
+      boat.nights += d.naechte;
+      boat.dienste = { ...(boat.dienste ?? {}), [d.id]: 'offen' };
+    }
+  });
   const gebaeude = () => {
     const b = { ...state.buildings, ...svc.gebaut };
     if (effekte.freischalten.includes('regatta') || svc.gebaut.segelclub) b.segelclub = Math.max(b.segelclub ?? 0, 1);
@@ -241,6 +249,8 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     for (const s of SERVICES) {
       const pr = SVC.pruefe(svc, s.id, { stufe: state.stage, ruf: rufWert() });
       if (!pr.freigeschaltet) continue;
+      // Entweder-oder (P23 F3): einmal gewählt, wird nicht wieder umgebaut
+      if (pr.umbau) continue;
       // In der letzten Stufe zählen Besuche großer Schiffe: Anleger mit Besuchen zuerst
       // (auf sie wird gespart wie auf einen fehlenden Steg)
       const besuch = !E.stufen[state.stage - 1].ausbau && GROSSSCHIFF_BESUCHE.includes(pr.def?.wirkung?.besuch?.art);
@@ -328,7 +338,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
           for (const w of b?.wishes ?? []) if (!ev.wishesMet.includes(w)) unerfuellt[w] = (unerfuellt[w] || 0) + 1;
         } else if (ev.type === 'evening') {
           liegend = sim.mooredBoats(state).filter((b) => !b.stationed)
-            .map((b) => ({ klasse: b.size, antrieb: b.motor ? 'motor' : 'segel' }));
+            .map((b) => ({ id: b.id, klasse: b.size, antrieb: b.motor ? 'motor' : 'segel', ...(b.dienste ? { dienste: { ...b.dienste } } : {}) }));
           if (!prof.nichts) sim.collectAll(state, ctx, true);
         }
       }
@@ -341,6 +351,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     }
     const wetter = plan?.current?.id === 'sturm' ? 'sturm' : (plan && (plan.weather(tag).rain ?? 0) > 0.3) ? 'regen' : 'sonne';
     const abschluss = SVC.tagesabschluss(svc, { tag, winter, wetter, boote: liegend }, r);
+    for (const d of abschluss.dienstBezahlt) { const b = state.boats[d.boatId]; if (b?.dienste?.[d.id] === 'offen') b.dienste[d.id] = 'bezahlt'; }
     sim.addIncome(state, abschluss.summe);
     // Besuche großer Schiffe (Kreuzfahrtschiff, Flottenbesuch) zählen in der letzten Stufe
     if (!E.stufen[state.stage - 1].ausbau) {
@@ -430,7 +441,6 @@ function bericht(laeufe, json) {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const args = process.argv.slice(2);
   if (args.includes('--ohne-ansicht')) MIT_ANSICHT = false;
-  if (args.includes('--ablegen-heute')) ABLEGEN_HEUTE = true;
   // --spieler zeitraffer: wie der Bot im Zeitraffer (zum Vergleich mit dem echten Spiel)
   const sp = args.indexOf('--spieler');
   if (sp >= 0) SPIELER.splice(0, SPIELER.length, ...args[sp + 1].split(','));

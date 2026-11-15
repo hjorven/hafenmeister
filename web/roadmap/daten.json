@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "15.11.2026",
-  "commit": "7024db5"
+  "commit": "c49050b"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -97,12 +97,14 @@
    "id": "P03",
    "titel": "Einstieg an neue Oberfläche anpassen",
    "inhalt": "Ü3, Teil von Ü12 (Hälfte beim Rundgang erklären), docs/einstieg.md",
-   "thread": "bestehend: \"Einstieg für neue Spieler bauen\"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); J4 mit P17 erledigt (PR 237); offen: J5 nach P14",
+   "thread": "bestehend: \"Einstieg für neue Spieler bauen\"; PR 112 erledigt Ü3, J1 bis J3, Anteil beim Rundgang, Doku; J6 bis J8 und O7 erledigt; Tipps neben der linken Spalte und nacheinander (PR 225); J4 mit P17 erledigt (PR 237); J5 erledigt (PR 335, 15.11.): P03 fertig",
    "welle": 1,
    "prs": [
+    15,
     112,
     225,
-    237
+    237,
+    335
    ],
    "abschnitt": "Welle 1: Fehler und Fundament (Grundprobleme, nach Welle 0)",
    "punkte": [
@@ -117,11 +119,12 @@
     "J8",
     "O7"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": [
     4,
-    5,
-    25
+    24,
+    69,
+    70
    ]
   },
   {
@@ -210,7 +213,7 @@
    ],
    "status": "erledigt",
    "bilder": [
-    38
+    37
    ]
   },
   {
@@ -265,8 +268,8 @@
    ],
    "status": "erledigt",
    "bilder": [
-    6,
-    7
+    5,
+    6
    ]
   },
   {
@@ -294,7 +297,7 @@
    ],
    "status": "erledigt",
    "bilder": [
-    8
+    7
    ]
   },
   {
@@ -318,10 +321,10 @@
    ],
    "status": "erledigt",
    "bilder": [
+    8,
     9,
-    10,
-    26,
-    27
+    25,
+    26
    ]
   },
   {
@@ -344,8 +347,8 @@
    ],
    "status": "erledigt",
    "bilder": [
-    11,
-    12
+    10,
+    11
    ]
   },
   {
@@ -367,8 +370,8 @@
    ],
    "status": "erledigt",
    "bilder": [
-    13,
-    14
+    12,
+    13
    ]
   },
   {
@@ -391,8 +394,8 @@
    ],
    "status": "erledigt",
    "bilder": [
-    28,
-    29
+    27,
+    28
    ]
   },
   {
@@ -412,7 +415,7 @@
    ],
    "status": "erledigt",
    "bilder": [
-    15
+    14
    ]
   },
   {
@@ -433,21 +436,23 @@
    ],
    "status": "erledigt",
    "bilder": [
-    16,
-    17
+    15,
+    16
    ]
   },
   {
    "id": "P17",
    "titel": "Start und frühe Stufen straffen",
    "inhalt": "Ü15, Ü16, Startwerte dokumentieren",
-   "thread": "erledigt bis auf die Schlussmessung im Zeitraffer nach dem Ablege-Fix (PR 318, Thread \"Aufstieg ausbalancieren\"; Rechnung und Spiel in docs/balancing.md)",
+   "thread": "erledigt (PR 318 und Teil 2, PR 331: neuer Tagesablauf, rund 100 Spieltage, Rechnung und Zeitraffer 2,7 % auseinander; docs/balancing.md)",
    "welle": 2,
    "prs": [
     237,
     252,
     287,
-    318
+    318,
+    319,
+    331
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -458,10 +463,11 @@
     "D3",
     "J4"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": [
+    32,
     33,
-    34
+    68
    ]
   },
   {
@@ -486,10 +492,10 @@
    ],
    "status": "erledigt",
    "bilder": [
+    17,
     18,
-    19,
-    30,
-    31
+    29,
+    30
    ]
   },
   {
@@ -517,10 +523,10 @@
    ],
    "status": "erledigt",
    "bilder": [
+    43,
     44,
-    45,
-    49,
-    50
+    48,
+    49
    ]
   },
   {
@@ -545,9 +551,9 @@
    ],
    "status": "teilweise",
    "bilder": [
+    34,
     35,
-    36,
-    37
+    36
    ]
   },
   {
@@ -567,8 +573,8 @@
    ],
    "status": "erledigt",
    "bilder": [
-    40,
-    41
+    39,
+    40
    ]
   },
   {
@@ -587,8 +593,8 @@
    ],
    "status": "erledigt",
    "bilder": [
-    51,
-    52
+    50,
+    51
    ]
   },
   {
@@ -613,10 +619,13 @@
    "id": "P24",
    "titel": "Ereignisse zum Vorbereiten und neue Ereignisse",
    "inhalt": "Vorwarnung mit Handlungsmöglichkeit, F17",
-   "thread": "Teil 1 erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend), Teil 2 offen; bestehend: \"Ereignisse Sturm und Regatta einbauen\"",
+   "thread": "erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend; PR 299: Heringstage, Mittsommer, Holzboot-Treffen, Hanse-Woche, Nachspiel, Services an Ereignistagen; Regatta mit Bahn draußen PR 319), ereignisse.md",
    "welle": 3,
    "prs": [
-    281
+    281,
+    299,
+    319,
+    331
    ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
@@ -628,11 +637,11 @@
     "G7",
     "G9"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": [
+    46,
     47,
-    48,
-    53
+    52
    ]
   },
   {
@@ -671,23 +680,28 @@
    ],
    "status": "erledigt",
    "bilder": [
-    61,
-    62
+    60,
+    61
    ]
   },
   {
    "id": "P27",
    "titel": "Päckchen liegen bei vollem Hafen",
    "inhalt": "F1",
-   "thread": "neu",
+   "thread": "erledigt (PR 330, paeckchen.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    330
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F1"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    66,
+    67
+   ]
   },
   {
    "id": "P28",
@@ -704,8 +718,8 @@
    ],
    "status": "erledigt",
    "bilder": [
-    54,
-    55
+    53,
+    54
    ]
   },
   {
@@ -762,17 +776,16 @@
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
-    "F3",
-    "M3"
+    "F3"
    ],
-   "status": "teilweise",
+   "status": "offen",
    "bilder": []
   },
   {
    "id": "P33",
    "titel": "Liegende Boote umlegen",
    "inhalt": "F4",
-   "thread": "erledigt (PR 314)",
+   "thread": "erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen)",
    "welle": 3,
    "prs": [
     314
@@ -783,8 +796,8 @@
    ],
    "status": "erledigt",
    "bilder": [
-    59,
-    60
+    58,
+    59
    ]
   },
   {
@@ -902,8 +915,8 @@
    ],
    "status": "erledigt",
    "bilder": [
-    57,
-    58
+    56,
+    57
    ]
   },
   {
@@ -1120,9 +1133,9 @@
    ],
    "status": "erledigt",
    "bilder": [
+    41,
     42,
-    43,
-    46
+    45
    ]
   },
   {
@@ -1178,10 +1191,10 @@
    ],
    "status": "erledigt",
    "bilder": [
+    62,
     63,
     64,
-    65,
-    66
+    65
    ]
   },
   {
@@ -1220,10 +1233,11 @@
    "id": "P62",
    "titel": "Geländeform und Engpass neu bauen",
    "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
-   "thread": "erledigt (PR 246, 271, 300): zehn Küstentypen aus Seed, jede Küste mit Seeweg; fünf weitere Küsten nach echten Karten (PR 300)",
+   "thread": "erledigt (PR 246, 262, 271, 300): zehn Küstentypen aus Seed, jede Küste mit Seeweg, geschlossene Bodden mit Seegatt, Zonen und Seezugänge für die Wegsuche (PR 262); fünf weitere Küsten 11 bis 15 nach echten Karten (PR 300), ein neues Spiel würfelt aus 15",
    "welle": 0,
    "prs": [
     246,
+    262,
     271,
     300
    ],
@@ -1235,8 +1249,8 @@
    ],
    "status": "erledigt",
    "bilder": [
-    20,
-    24
+    19,
+    23
    ]
   },
   {
@@ -1275,8 +1289,8 @@
    ],
    "status": "erledigt",
    "bilder": [
-    21,
-    22
+    20,
+    21
    ]
   },
   {
@@ -1301,7 +1315,7 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280, 327, 332): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende (PR 240); Wartebojen seitlich, Anfahrt von weit draußen aus verschiedenen Richtungen (PR 280); Geduld erst ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall (PR 327); erstes Boot vom Bildrand (PR 332). Noch offen: Pulk und \"ineinander fest\" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht), Abnahme-Serie über alle 15 Küsten; übernimmt P54",
    "welle": 0,
    "prs": [
     81,
@@ -1314,7 +1328,9 @@
     256,
     258,
     262,
-    280
+    280,
+    327,
+    332
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1326,10 +1342,10 @@
    ],
    "status": "arbeit",
    "bilder": [
-    23,
-    32,
-    39,
-    56
+    22,
+    31,
+    38,
+    55
    ]
   },
   {
@@ -1503,10 +1519,12 @@
   {
    "id": "P81",
    "titel": "Stufe 19 Kanalhafen",
-   "inhalt": "Küstentyp 11 Kanal, Schleuse, Kanalverkehr",
+   "inhalt": "Küstentyp 16 Kanal (11 bis 15 sind seit PR 300 echte Küsten), Schleuse, Kanalverkehr",
    "thread": "neu",
    "welle": 6,
-   "prs": [],
+   "prs": [
+    300
+   ],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
    "status": "offen",
@@ -1520,6 +1538,78 @@
    "welle": 6,
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen",
+   "bilder": []
+  },
+  {
+   "id": "P83",
+   "titel": "Stegbild-Generator reparieren",
+   "inhalt": "tools/stegbilder/erzeugen.mjs findet seit den Doppelboxen (PR 321) keine Variante mehr (\"Steg C passt nicht\", Hinweis aus PR 329), web/js/data/stegbilder.js lässt sich nicht neu erzeugen. Generator an Doppelboxen, Liegelage (data/liegelage.js) und Yachtsteg anpassen, --pruefen in den Testlauf aufnehmen; Spiel und Speicherstände behalten ihre 12 Stegbilder",
+   "thread": "erledigt (PR 336)",
+   "welle": 1,
+   "prs": [
+    321,
+    329,
+    336
+   ],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
+   "punkte": [],
+   "status": "erledigt",
+   "bilder": [
+    71,
+    72
+   ]
+  },
+  {
+   "id": "P84",
+   "titel": "Großschiffwege an allen 15 Küsten",
+   "inhalt": "Kreuzfahrtschiff streift im schrägen Seegatt von Küste 4 (Bodden) das Ufer (Rest aus PR 329). Rumpfprobe aus dem Härtetest (7 Punkte) als Test für alle Besuchsschiffe (Kreuzfahrt, Flotte, Windjammer, Seenotkreuzer) auf allen 15 Küsten und mehreren Seeds",
+   "thread": "neu",
+   "welle": 0,
+   "prs": [
+    329
+   ],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
+   "punkte": [],
+   "status": "offen",
+   "bilder": []
+  },
+  {
+   "id": "P85",
+   "titel": "Zusammenspiel nach Welle 0 prüfen",
+   "inhalt": "Jorvens Auftrag vom 14.11.: alle Features noch da, neue Features im normalen Spiel wirklich genutzt, Welle 1 wirklich gefixt, Übersehenes finden. Drei Threads (Kernschleife und Regeln; Oberfläche und Geräte; Welt, Boote, Ereignisse), gemeinsame Datei docs/zusammenspiel.md",
+   "thread": "neu, startet, sobald Welle 0 fertig ist",
+   "welle": 1,
+   "prs": [],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
+   "punkte": [],
+   "status": "offen",
+   "bilder": []
+  },
+  {
+   "id": "P86",
+   "titel": "Bootsgeschichten fertig erzählen",
+   "inhalt": "Regatta: Startsignal mit Ton, Siegerehrung am Segelclub, Ergebnis im Logbuch; Gepäck beim Crewwechsel sichtbar, Halt am Tanksteg, Gang \"in den Ort\" (bootsgeschichten.md, Abschnitt 5)",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
+   "punkte": [],
+   "status": "offen",
+   "bilder": []
+  },
+  {
+   "id": "P87",
+   "titel": "Prüfwerkzeuge auf 15 Küsten und den neuen Takt",
+   "inhalt": "Härtetest (tests/extrem/) nach PR 327 bis 332 neu laufen lassen und den Fund \"Gäste erreichen ab Stufe 4 keine Boje\" am Spiel bestätigen; tests/specs/leinen.spec.mjs auch für Küste 11 bis 15; istWasser und Bild am Durchstich angleichen (Messlatte); Zeitraffer-Grenzen auf den 5-Minuten-Tag",
+   "thread": "neu",
+   "welle": 1,
+   "prs": [
+    327,
+    332
+   ],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
    "status": "offen",
    "bilder": []
@@ -1715,11 +1805,15 @@
    "code": "Ü16",
    "text": "Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken",
    "status": "erledigt",
-   "statusText": "erledigt (P17): Stufe 1 rund 10, Stufe 2 rund 30 Tage; Dorfhafen 300 €, Steg B 450 €, Ziel Stufe 2 90 Gäste",
+   "statusText": "erledigt (PR 318, 331): Ziel Stufe 2 90 Gäste; seit dem 5-Minuten-Tag (PR 319, 331) dauert Stufe 1 rund 5, Stufe 2 rund 11 bis 14 Spieltage, alles Bauen kostet etwa die Hälfte (Dorfhafen 140 €, Steg B 200 €)",
    "pakete": [
     "P17"
    ],
-   "prs": [],
+   "prs": [
+    318,
+    319,
+    331
+   ],
    "abschnitt": "Balancing (Ü15 bis Ü20)"
   },
   {
@@ -1836,12 +1930,14 @@
   {
    "code": "F1",
    "text": "Päckchen liegen: bei vollem Hafen längsseits an ein gleich großes Boot, halbes Liegegeld, beide Crews einen halben Anker schlechter",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 330, paeckchen.md): ab Stufe 2 an Stegköpfen, Kai und Yachtsteg, eine Nacht, außen legt zuerst ab",
    "pakete": [
     "P27"
    ],
-   "prs": [],
+   "prs": [
+    330
+   ],
    "abschnitt": "Kernspiel"
   },
   {
@@ -1872,11 +1968,13 @@
    "code": "F4",
    "text": "Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung",
    "status": "erledigt",
-   "statusText": "erledigt (P33)",
+   "statusText": "erledigt (PR 314): halten und ziehen, ab dem zweiten Mal −0,5 Anker",
    "pakete": [
     "P33"
    ],
-   "prs": [],
+   "prs": [
+    314
+   ],
    "abschnitt": "Kernspiel"
   },
   {
@@ -2021,11 +2119,13 @@
    "code": "F17",
    "text": "Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 299), dazu Hanse-Woche ab Stufe 5",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    299
+   ],
    "abschnitt": "Hafenleben"
   },
   {
@@ -3006,33 +3106,39 @@
    "code": "G1",
    "text": "Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 281)",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    281
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
    "code": "G2",
    "text": "Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 281)",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    281
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
    "code": "G3",
    "text": "Ereignisse mit Nachspiel",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 299)",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    299
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
@@ -3052,7 +3158,7 @@
    "code": "G5",
    "text": "Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind)",
    "status": "offen",
-   "statusText": "offen",
+   "statusText": "offen: Jahreszeiten (Frühling 1 bis 4, Sommer 5 bis 12, Herbst 13 bis 16) steuern bisher nur Ereignisse wie die Heringstage, nicht Ankünfte oder Wind",
    "pakete": [
     "P20"
    ],
@@ -3063,22 +3169,26 @@
    "code": "G6",
    "text": "Ergebnis eines Ereignisses am Abend zeigen",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 281)",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    281
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
    "code": "G7",
    "text": "Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand)",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 299)",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    299
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
@@ -3096,11 +3206,14 @@
    "code": "G9",
    "text": "Seltene große Tage, z. B. Hanse-Woche, zehn Tage vorher angekündigt",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 299): Hanse-Woche ab Stufe 5; seit der kürzeren Saison (PR 331) 5 Tage vorher angekündigt",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    299,
+    331
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
@@ -3405,12 +3518,14 @@
   {
    "code": "J5",
    "text": "Ruf am ersten Abreisenden erklären",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 335, P03-Rest, 15.11.: Tipp mit Kreis um den Ruf bei der ersten Bewertung nach dem Einstieg)",
    "pakete": [
     "P03"
    ],
-   "prs": [],
+   "prs": [
+    335
+   ],
    "abschnitt": "J Einstieg und Hilfe"
   },
   {
@@ -3616,13 +3731,12 @@
   },
   {
    "code": "M3",
-   "text": "Tote Daten anschließen (Gruppen, Wünsche je Art) oder löschen (Bauzeiten, Sonderboote, zweite Ereignisliste)",
-   "status": "teilweise",
-   "statusText": "teils erledigt: Sonderboote, Antriebsanteile je Klasse und zweite Ereignisliste gelöscht; Bauzeiten bleiben für P18, Gruppen und Wünsche je Art für P19, P32",
+   "text": "Tote Daten anschließen (Wünsche je Art) oder löschen (Bauzeiten, Sonderboote, zweite Ereignisliste)",
+   "status": "erledigt",
+   "statusText": "erledigt: Sonderboote, Antriebsanteile je Klasse und zweite Ereignisliste gelöscht, Bauzeiten sind die Bauabschnitte (P18), Wünsche je Art angeschlossen (P19)",
    "pakete": [
     "P06",
-    "P19",
-    "P32"
+    "P19"
    ],
    "prs": [],
    "abschnitt": "M Zahlen und Daten"
@@ -4307,16 +4421,17 @@
     "P63",
     "P64",
     "P65",
-    "P66"
+    "P66",
+    "P84"
    ],
    "zaehler": {
     "erledigt": 4,
     "teilweise": 0,
     "arbeit": 1,
     "frage": 0,
-    "offen": 0,
+    "offen": 1,
     "entfaellt": 0,
-    "alle": 5
+    "alle": 6
    }
   },
   {
@@ -4332,16 +4447,19 @@
     "P07",
     "P08",
     "P09",
-    "P54"
+    "P54",
+    "P83",
+    "P85",
+    "P87"
    ],
    "zaehler": {
-    "erledigt": 8,
-    "teilweise": 1,
+    "erledigt": 10,
+    "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 0,
+    "offen": 2,
     "entfaellt": 1,
-    "alle": 10
+    "alle": 13
    }
   },
   {
@@ -4365,8 +4483,8 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 13,
-    "teilweise": 2,
+    "erledigt": 14,
+    "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
     "offen": 0,
@@ -4396,16 +4514,17 @@
     "P38",
     "P39",
     "P40",
-    "P59"
+    "P59",
+    "P86"
    ],
    "zaehler": {
-    "erledigt": 5,
-    "teilweise": 2,
+    "erledigt": 7,
+    "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 12,
+    "offen": 13,
     "entfaellt": 0,
-    "alle": 19
+    "alle": 20
    }
   },
   {
@@ -4487,20 +4606,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 32,
-  "teilweise": 6,
+  "erledigt": 37,
+  "teilweise": 2,
   "arbeit": 1,
   "frage": 0,
-  "offen": 41,
+  "offen": 45,
   "entfaellt": 1,
-  "alle": 81
+  "alle": 86
  },
  "punkteGesamt": {
-  "erledigt": 156,
-  "teilweise": 7,
+  "erledigt": 159,
+  "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 54,
+  "offen": 52,
   "entfaellt": 1,
   "alle": 219
  },
@@ -4566,18 +4685,6 @@
    "nr": 4
   },
   {
-   "datei": "p03-pr112-hilfe-pc.jpg",
-   "pakete": [
-    "P03"
-   ],
-   "titel": "Hilfe am PC",
-   "pr": 112,
-   "geraet": "pc",
-   "datum": "2026-11-13",
-   "quelle": "einstieg/hilfe-pc.png",
-   "nr": 5
-  },
-  {
    "datei": "p09-pr150-sp-neu-dialog-pc.jpg",
    "pakete": [
     "P09"
@@ -4587,7 +4694,7 @@
    "geraet": "pc",
    "datum": "2026-11-12",
    "quelle": "feature-tests/pr150/sp-neu-dialog-pc.png",
-   "nr": 6
+   "nr": 5
   },
   {
    "datei": "p09-pr150-sp-neu-dialog-handy.jpg",
@@ -4599,7 +4706,7 @@
    "geraet": "handy",
    "datum": "2026-11-12",
    "quelle": "feature-tests/pr150/sp-neu-dialog-handy.png",
-   "nr": 7
+   "nr": 6
   },
   {
    "datei": "p10-pr153-zw-iphone-s3-b2-morgen.jpg",
@@ -4611,7 +4718,7 @@
    "geraet": "handy",
    "datum": "2026-11-13",
    "quelle": "feature-tests/pr153/zw-iphone-s3-b2-morgen.png",
-   "nr": 8
+   "nr": 7
   },
   {
    "datei": "p11-pr158-pc-wuensche-und-funk.jpg",
@@ -4623,7 +4730,7 @@
    "geraet": "pc",
    "datum": "2026-11-13",
    "quelle": "vorschau-p11/pc-wuensche-und-funk.png",
-   "nr": 9
+   "nr": 8
   },
   {
    "datei": "p11-pr158-handy-wuensche.jpg",
@@ -4635,7 +4742,7 @@
    "geraet": "handy",
    "datum": "2026-11-13",
    "quelle": "vorschau-p11/handy-wuensche.png",
-   "nr": 10
+   "nr": 9
   },
   {
    "datei": "p12-pr151-pc-betrag-und-rundgang.jpg",
@@ -4647,7 +4754,7 @@
    "geraet": "pc",
    "datum": "2026-11-13",
    "quelle": "kassieren/pc-betrag-und-rundgang.png",
-   "nr": 11
+   "nr": 10
   },
   {
    "datei": "p12-pr151-handy-betraege-gestapelt.jpg",
@@ -4659,7 +4766,7 @@
    "geraet": "handy",
    "datum": "2026-11-13",
    "quelle": "kassieren/handy-betraege-gestapelt.png",
-   "nr": 12
+   "nr": 11
   },
   {
    "datei": "p13-pr152-handy-karten-waehlen.jpg",
@@ -4671,7 +4778,7 @@
    "geraet": "handy",
    "datum": "2026-11-13",
    "quelle": "tagesziele/handy-karten-waehlen.png",
-   "nr": 13
+   "nr": 12
   },
   {
    "datei": "p13-pr152-pc-deko-am-hafenmeisterhaus.jpg",
@@ -4683,7 +4790,7 @@
    "geraet": "pc",
    "datum": "2026-11-13",
    "quelle": "tagesziele/pc-deko-am-hafenmeisterhaus.png",
-   "nr": 14
+   "nr": 13
   },
   {
    "datei": "p15-pr159-ta-sheet.jpg",
@@ -4695,7 +4802,7 @@
    "geraet": "alle",
    "datum": "2026-11-13",
    "quelle": "feature-tests/pr159/ta-sheet.png",
-   "nr": 15
+   "nr": 14
   },
   {
    "datei": "p16-pr156-pc-regionsabschluss.jpg",
@@ -4707,7 +4814,7 @@
    "geraet": "pc",
    "datum": "2026-11-13",
    "quelle": "aufstieg/pc-regionsabschluss.png",
-   "nr": 16
+   "nr": 15
   },
   {
    "datei": "p16-pr156-handy-aufstieg-stufe3.jpg",
@@ -4719,7 +4826,7 @@
    "geraet": "handy",
    "datum": "2026-11-13",
    "quelle": "aufstieg/handy-aufstieg-stufe3.png",
-   "nr": 17
+   "nr": 16
   },
   {
    "datei": "p18-pr143-pc-stufe3-strom.jpg",
@@ -4731,7 +4838,7 @@
    "geraet": "pc",
    "datum": "2026-11-12",
    "quelle": "bauen/pc-stufe3-strom.png",
-   "nr": 18
+   "nr": 17
   },
   {
    "datei": "p18-pr143-handy-stufe3-ablauf.jpg",
@@ -4743,7 +4850,7 @@
    "geraet": "handy",
    "datum": "2026-11-12",
    "quelle": "bauen/handy-stufe3-ablauf.png",
-   "nr": 19
+   "nr": 18
   },
   {
    "datei": "p62-pr195-kuesten-seed1.jpg",
@@ -4755,7 +4862,7 @@
    "geraet": "pc",
    "datum": "2026-11-13",
    "quelle": "gelaende/vorschau/neu/kuesten-seed1.png",
-   "nr": 20
+   "nr": 19
   },
   {
    "datei": "p64-pr211-deko-pc-g8-4242-s6.jpg",
@@ -4767,7 +4874,7 @@
    "geraet": "pc",
    "datum": "2026-11-13",
    "quelle": "feature-tests/pr211/deko-pc-g8-4242-s6.png",
-   "nr": 21
+   "nr": 20
   },
   {
    "datei": "p64-pr204-korb-pc-g6-1-seebruecke.jpg",
@@ -4779,7 +4886,7 @@
    "geraet": "pc",
    "datum": "2026-11-13",
    "quelle": "feature-tests/pr204/korb-pc-g6-1-seebruecke.png",
-   "nr": 22
+   "nr": 21
   },
   {
    "datei": "p66-pr180-handy-stufe4-final.jpg",
@@ -4791,7 +4898,7 @@
    "geraet": "handy",
    "datum": "2026-11-13",
    "quelle": "fahrwasser/handy-stufe4-final.png",
-   "nr": 23
+   "nr": 22
   },
   {
    "datei": "p62-pr224-k210-pc-g4-1-weit.jpg",
@@ -4803,7 +4910,7 @@
    "geraet": "pc",
    "datum": "2026-11-13",
    "quelle": "feature-tests/pr224/k210-pc-g4-1-weit.png",
-   "nr": 24
+   "nr": 23
   },
   {
    "datei": "p03-pr225-t-iphonequer-t1-1.jpg",
@@ -4815,7 +4922,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr225/t-iphonequer-t1-1.png",
-   "nr": 25
+   "nr": 24
   },
   {
    "datei": "p11-pr227-iphone-300m-kleine-schilder.jpg",
@@ -4827,7 +4934,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "vorschau-p11/iphone-300m-kleine-schilder.png",
-   "nr": 26
+   "nr": 25
   },
   {
    "datei": "p11-pr227-pc-weit-kleine-schilder.jpg",
@@ -4839,7 +4946,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "vorschau-p11/pc-weit-kleine-schilder.png",
-   "nr": 27
+   "nr": 26
   },
   {
    "datei": "p14-pr154-pc-gaestebuch.jpg",
@@ -4851,7 +4958,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "gaestebuch/pc-gaestebuch.png",
-   "nr": 28
+   "nr": 27
   },
   {
    "datei": "p14-pr154-iphone-blasen-und-meldungen.jpg",
@@ -4863,7 +4970,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "gaestebuch/iphone-blasen-und-meldungen.png",
-   "nr": 29
+   "nr": 28
   },
   {
    "datei": "p18-pr232-p18-pc-baustelle.jpg",
@@ -4875,7 +4982,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "bauen/p18-pc-baustelle.png",
-   "nr": 30
+   "nr": 29
   },
   {
    "datei": "p18-pr232-p18-handy-baustelle.jpg",
@@ -4887,7 +4994,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "bauen/p18-handy-baustelle.png",
-   "nr": 31
+   "nr": 30
   },
   {
    "datei": "p66-pr228-pc-pulk-einfahrt.jpg",
@@ -4899,7 +5006,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr228/pulk-pc-g8-4242.png",
-   "nr": 32
+   "nr": 31
   },
   {
    "datei": "p17-pr237-pc-erstes-bauwerk.jpg",
@@ -4911,7 +5018,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr237/237-vorschau-pc.png",
-   "nr": 33
+   "nr": 32
   },
   {
    "datei": "p17-pr237-iphone-erstes-bauwerk.jpg",
@@ -4923,7 +5030,7 @@
    "geraet": "iphone",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr237/237-vorschau-iphone.png",
-   "nr": 34
+   "nr": 33
   },
   {
    "datei": "p20-pr245-handy-winterpause.jpg",
@@ -4935,7 +5042,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "winter/wi-handy-1-karte.png",
-   "nr": 35
+   "nr": 34
   },
   {
    "datei": "p20-pr245-quer-winterarbeiten.jpg",
@@ -4947,7 +5054,7 @@
    "geraet": "handy-quer",
    "datum": "2026-11-14",
    "quelle": "winter/wi-quer-2-auftrag.png",
-   "nr": 36
+   "nr": 35
   },
   {
    "datei": "p20-pr249-pc-winterpause.jpg",
@@ -4959,7 +5066,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr249/245-krantag-pc.png",
-   "nr": 37
+   "nr": 36
   },
   {
    "datei": "p07-pr257-handy-weiter-mit-3x.jpg",
@@ -4971,7 +5078,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "tempo/tempo-handy.png",
-   "nr": 38
+   "nr": 37
   },
   {
    "datei": "p66-pr262-zonen-und-seewege.jpg",
@@ -4983,7 +5090,7 @@
    "geraet": "karte",
    "datum": "2026-11-14",
    "quelle": "gelaende/vorschau/zonen/zonen-und-seewege.png",
-   "nr": 39
+   "nr": 38
   },
   {
    "datei": "p21-pr274-pc-logbuch-album.jpg",
@@ -4995,7 +5102,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "logbuch/pc-boote.png",
-   "nr": 40
+   "nr": 39
   },
   {
    "datei": "p21-pr274-handy-steckbrief.jpg",
@@ -5007,7 +5114,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "logbuch/handy-steckbrief.png",
-   "nr": 41
+   "nr": 40
   },
   {
    "datei": "p55-pr269-handy-geduldsring.jpg",
@@ -5019,7 +5126,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "p55/handy-1-geduldsring.png",
-   "nr": 42
+   "nr": 41
   },
   {
    "datei": "p55-pr269-pc-geduldsring.jpg",
@@ -5031,7 +5138,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "p55/pc-1-geduldsring.png",
-   "nr": 43
+   "nr": 42
   },
   {
    "datei": "p19-pr244-handy-gaestebuch-ruf.jpg",
@@ -5043,7 +5150,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "p19/p19-buch-handy.png",
-   "nr": 44
+   "nr": 43
   },
   {
    "datei": "p19-pr244-pc-wuensche-bootsart.jpg",
@@ -5055,7 +5162,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "p19/p19-karte-pc.png",
-   "nr": 45
+   "nr": 44
   },
   {
    "datei": "p55-pr275-handy-schlange-versorgung.jpg",
@@ -5067,7 +5174,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "p55/handy-3-schlange.png",
-   "nr": 46
+   "nr": 45
   },
   {
    "datei": "p24-pr281-handy-sturmklar.jpg",
@@ -5079,7 +5186,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "ereignisse/vorbereiten-handy-1-sturm.png",
-   "nr": 47
+   "nr": 46
   },
   {
    "datei": "p24-pr281-pc-sturm-angekuendigt.jpg",
@@ -5091,7 +5198,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "ereignisse/vorbereiten-pc-1-sturm-angekuendigt.png",
-   "nr": 48
+   "nr": 47
   },
   {
    "datei": "p19-pr279-handy-heute-voll.jpg",
@@ -5103,7 +5210,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr279/279-voll-iphone.png",
-   "nr": 49
+   "nr": 48
   },
   {
    "datei": "p19-pr279-pc-heute-voll.jpg",
@@ -5115,7 +5222,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr279/279-voll-pc.png",
-   "nr": 50
+   "nr": 49
   },
   {
    "datei": "p22-pr295-handy-erfolge.jpg",
@@ -5127,7 +5234,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "erfolge/handy-erfolge.png",
-   "nr": 51
+   "nr": 50
   },
   {
    "datei": "p22-pr295-pc-wimpel-pokale.jpg",
@@ -5139,7 +5246,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "erfolge/pc-hafen-dinge.png",
-   "nr": 52
+   "nr": 51
   },
   {
    "datei": "p24-pr281-quer-regatta-vorbei.jpg",
@@ -5151,7 +5258,7 @@
    "geraet": "handy-quer",
    "datum": "2026-11-14",
    "quelle": "feature-tests/pr281/281-regatta-ergebnis-iphonequer.png",
-   "nr": 53
+   "nr": 52
   },
   {
    "datei": "p28-pr288-handy-funk-anmeldung.jpg",
@@ -5163,7 +5270,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "funk-anmeldung/handy-anmeldung.png",
-   "nr": 54
+   "nr": 53
   },
   {
    "datei": "p28-pr288-pc-box-frei-gehalten.jpg",
@@ -5175,7 +5282,7 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "funk-anmeldung/pc-box-frei-gehalten.png",
-   "nr": 55
+   "nr": 54
   },
   {
    "datei": "p66-pr280-handy-bojen-seitlich.jpg",
@@ -5187,7 +5294,7 @@
    "geraet": "handy",
    "datum": "2026-11-14",
    "quelle": "fahrwasser/bojen-seitlich/nachher-handy-0.png",
-   "nr": 56
+   "nr": 55
   },
   {
    "datei": "p41-pr315-handy-statistik.jpg",
@@ -5199,7 +5306,7 @@
    "geraet": "handy",
    "datum": "2026-11-15",
    "quelle": "statistik/statistik-handy.png",
-   "nr": 57
+   "nr": 56
   },
   {
    "datei": "p41-pr315-pc-saisonbilanz.jpg",
@@ -5211,7 +5318,7 @@
    "geraet": "pc",
    "datum": "2026-11-15",
    "quelle": "statistik/winter-pc.png",
-   "nr": 58
+   "nr": 57
   },
   {
    "datei": "p33-pr314-handy-umlegen-ziehen.jpg",
@@ -5223,7 +5330,7 @@
    "geraet": "handy",
    "datum": "2026-11-15",
    "quelle": "umlegen/handy-2-ziehen.png",
-   "nr": 59
+   "nr": 58
   },
   {
    "datei": "p33-pr314-pc-umgelegt.jpg",
@@ -5235,7 +5342,7 @@
    "geraet": "pc",
    "datum": "2026-11-15",
    "quelle": "umlegen/pc-2-umgelegt.png",
-   "nr": 60
+   "nr": 59
   },
   {
    "datei": "p26-pr322-handy-fernglas.jpg",
@@ -5247,7 +5354,7 @@
    "geraet": "handy",
    "datum": "2026-11-15",
    "quelle": "gesten/handy-fernglas.png",
-   "nr": 61
+   "nr": 60
   },
   {
    "datei": "p26-pr322-pc-hafenhorn.jpg",
@@ -5259,7 +5366,7 @@
    "geraet": "pc",
    "datum": "2026-11-15",
    "quelle": "gesten/pc-hafenhorn.png",
-   "nr": 62
+   "nr": 61
   },
   {
    "datei": "p59-pr321-handy-doppelbox-vorschau.jpg",
@@ -5271,7 +5378,7 @@
    "geraet": "handy",
    "datum": "2026-11-15",
    "quelle": "vorschau/p59/p59-handy-1-vorschau.png",
-   "nr": 63
+   "nr": 62
   },
   {
    "datei": "p59-pr321-pc-kat-in-doppelbox.jpg",
@@ -5283,7 +5390,7 @@
    "geraet": "pc",
    "datum": "2026-11-15",
    "quelle": "vorschau/p59/p59-pc-3-kat.png",
-   "nr": 64
+   "nr": 63
   },
   {
    "datei": "p59-pr326-handy-yachtsteg-vorschau.jpg",
@@ -5295,7 +5402,7 @@
    "geraet": "handy",
    "datum": "2026-11-15",
    "quelle": "vorschau/p59/yachtsteg-handy-vorschau.png",
-   "nr": 65
+   "nr": 64
   },
   {
    "datei": "p59-pr326-pc-yachten-am-yachtsteg.jpg",
@@ -5307,21 +5414,180 @@
    "geraet": "pc",
    "datum": "2026-11-15",
    "quelle": "vorschau/p59/yachtsteg-yachten.png",
+   "nr": 65
+  },
+  {
+   "datei": "p27-pr330-handy-paeckchen.jpg",
+   "pakete": [
+    "P27"
+   ],
+   "titel": "Päckchen: Boote längsseits an liegenden Booten (Handy)",
+   "pr": 330,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "paeckchen/p27-2-paeckchen-handy.png",
    "nr": 66
+  },
+  {
+   "datei": "p27-pr330-pc-paeckchen.jpg",
+   "pakete": [
+    "P27"
+   ],
+   "titel": "Zwei Boote im Päckchen, nah (PC)",
+   "pr": 330,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "paeckchen/p27-2-paeckchen-pc.png",
+   "nr": 67
+  },
+  {
+   "datei": "p17-pr331-tagesablauf.jpg",
+   "pakete": [
+    "P17"
+   ],
+   "titel": "Neuer Tagesablauf: Echtzeit je Stufe vorher und nachher",
+   "pr": 331,
+   "geraet": "alle",
+   "datum": "2026-11-15",
+   "quelle": "balancing/p17-teil2-pc-tagesablauf.png",
+   "nr": 68
+  },
+  {
+   "datei": "p03-pr335-handy-ruf-erklaert.jpg",
+   "pakete": [
+    "P03"
+   ],
+   "titel": "Tipp beim ersten Abreisenden: Gäste bewerten deinen Hafen",
+   "pr": 335,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "einstieg/j5-handy-ruf.png",
+   "nr": 69
+  },
+  {
+   "datei": "p03-pr335-pc-ruf-erklaert.jpg",
+   "pakete": [
+    "P03"
+   ],
+   "titel": "Ruf-Tipp mit Kreis um die Sterne oben",
+   "pr": 335,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "einstieg/j5-pc-ruf.png",
+   "nr": 70
+  },
+  {
+   "datei": "p83-pr336-handy-stegbild11-stufe5.jpg",
+   "pakete": [
+    "P83"
+   ],
+   "titel": "Stegbild 11 in Stufe 5, aus dem reparierten Generator",
+   "pr": 336,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "stegbilder/p83/handy-stegbild11-stufe5.png",
+   "nr": 71
+  },
+  {
+   "datei": "p83-pr336-pc-stegbild4-stufe6.jpg",
+   "pakete": [
+    "P83"
+   ],
+   "titel": "Stegbild 4 in Stufe 6 mit Yachtsteg und Doppelboxen",
+   "pr": 336,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "stegbilder/p83/pc-stegbild4-stufe6.png",
+   "nr": 72
   }
  ],
  "neueBilder": [
-  66,
-  64,
-  62,
-  60,
-  58,
-  56,
-  55,
-  53,
-  52
+  72,
+  70,
+  68,
+  67,
+  65,
+  63,
+  61,
+  59,
+  57
  ],
  "merges": [
+  {
+   "datum": "2026-11-15",
+   "titel": "Roadmap-Pflege: J5/P03 (PR 335) und P83 (PR 336) mit Bildern",
+   "pr": 337,
+   "pakete": [
+    "P03",
+    "P83"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Stegbild-Generator wieder lauffähig (P83)",
+   "pr": 336,
+   "pakete": [
+    "P83"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Einstieg: Ruf beim ersten Abreisenden erklären (J5)",
+   "pr": 335,
+   "pakete": [
+    "P03"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Doku auf Stand: Roadmap, Plan, README, Arbeitsplan, Ausbau 7 bis 20",
+   "pr": 334,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Roadmap-Pflege: P27 (PR 330) und P17 Teil 2 (PR 331) mit Bildern",
+   "pr": 333,
+   "pakete": [
+    "P27",
+    "P17"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Kurzhalter: Liegezeit ab sichtbarem Festmachen, nach spaetestens keine Einfahrt; erstes Boot vom Bildrand",
+   "pr": 332,
+   "pakete": [
+    "P66",
+    "P87"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "P17 Teil 2: Zahlen auf den neuen Tagesablauf, Schlussmessung",
+   "pr": 331,
+   "pakete": [
+    "P17",
+    "P24"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "P27 Päckchen liegen: längsseits an ein liegendes Boot, wenn keine Box frei ist",
+   "pr": 330,
+   "pakete": [
+    "P27"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Liegeplätze passgenau: Boote liegen frei von Steg, Kai, Land und Nachbarn",
+   "pr": 329,
+   "pakete": [
+    "P83",
+    "P84"
+   ]
+  },
   {
    "datum": "2026-11-15",
    "titel": "Roadmap-Pflege: Bilder zum Yachtsteg (P59 Teil 2, PR 326)",
@@ -5340,75 +5606,9 @@
    "datum": "2026-11-15",
    "titel": "Boote: Geduld ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall",
    "pr": 327,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Yachtsteg in Stufe 6: zwei neue Plätze für große Yachten (P59 Teil 2)",
-   "pr": 326,
    "pakete": [
-    "P59"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Längere Tage, Kurzhalt, 65 Bootsgeschichten und Regatta draußen",
-   "pr": 319,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Roadmap-Pflege: P26 (PR 322), P17 (PR 318) eingetragen, Bilder zu P26 und P59",
-   "pr": 325,
-   "pakete": [
-    "P26",
-    "P17",
-    "P59"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Überraschende Gesten (P26): Hafenhorn, Fernglas, Möwen, Wellenring, Glocke",
-   "pr": 322,
-   "pakete": [
-    "P26"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Logbuch: alle neun Großschiffe erreichbar, ab Stufe 5 öfter vor dem Hafen",
-   "pr": 323,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Stege umbauen: Doppelboxen für Mehrrumpfboote (P59 Teil 1)",
-   "pr": 321,
-   "pakete": [
-    "P59"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Tagesabschluss nur als Zettel, Bootskarte am Tablet hochkant über Zeit und Bauen",
-   "pr": 320,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "P17: Aufstieg angleichen, Stufe 1 und 2 straffen (Ü16), Startwerte in economy.js",
-   "pr": 318,
-   "pakete": [
-    "P17"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Roadmap-Pflege: P33 (PR 314) und P41 (PR 315) mit PR-Nummern und Bildern",
-   "pr": 317,
-   "pakete": [
-    "P33",
-    "P41"
+    "P66",
+    "P87"
    ]
   }
  ]

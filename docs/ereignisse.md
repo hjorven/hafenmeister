@@ -6,21 +6,21 @@ Stand: 14.11.2026. Status: gebaut. P24 fertig: Vorbereiten für Sturm und Regatt
 
 | Ereignis | Ab Stufe | Dauer | Etwa alle | Wirkung |
 |---|---|---|---|---|
-| Nebel | 1 | 1 Tag | 13 Tage | 30 % weniger Ankünfte, Gäste bleiben eine Nacht länger |
-| Sommertag | 1 | 1 Tag | 11 Tage (nur Saisontag 7 bis 24) | mehr kleine Boote und Badegäste, Kiosk verdient mehr |
-| Sturm | 3 | 1 Tag | 12 Tage | niemand läuft von See ein, Gäste bleiben eine Nacht länger, Gäste an offenen Plätzen (Stirnplätze am Stegkopf, Kai) -1 Anker; Seenotretter-Station mindert das |
-| Regatta | 3, mit Segelclub | 2 Tage, 2 Tage vorher angekündigt | 14 Tage | 1,6x Ankünfte, vor allem Segelboote, mehr Besucher, etwas Ruf |
-| Hafenfest | 4 | 1 Tag | 20 Tage (Hochsommer) | Traditionssegler und Marine, doppelt so viele Besucher, abends Feuerwerk |
-| Heringstage | 2, mit Räucherei | 2 Tage | einmal im Jahr, fest am Saisontag 5 | 1,5x Besucher, mehr Menschen im Ort; Räucherei und Fischhalle verdienen extra |
-| Mittsommer | 2 | 1 Tag | einmal im Jahr, fest am Saisontag 14 | 1,6x Besucher, doppelt so viele Badegäste, abends bleiben sie am Strand; Gäste bleiben eine Nacht länger; mit Grillplatz brennt abends das Mittsommerfeuer |
-| Holzboot-Treffen | 3 | 2 Tage | 16 Tage (Saisontag 5 bis 28) | Klassiker aus Holz (5x) und Ruderboote, Gäste bewerten etwas besser; mit Museumshafen auch Traditionssegler |
-| Hanse-Woche | 5 | 4 Tage, 10 Tage vorher angekündigt | einmal im Jahr (Saisontag 21 bis 29) | großes Fest: Traditionssegler, große Schiffe, 2,2x Besucher, Ruf, abends Feuerwerk |
+| Nebel | 1 | 1 Tag | 9 Tage | 30 % weniger Ankünfte, Gäste bleiben eine Nacht länger |
+| Sommertag | 1 | 1 Tag | 8 Tage (nur Saisontag 3 bis 14) | mehr kleine Boote und Badegäste, Kiosk verdient mehr |
+| Sturm | 3 | 1 Tag | 8 Tage | niemand läuft von See ein, Gäste bleiben eine Nacht länger, Gäste an offenen Plätzen (Stirnplätze am Stegkopf, Kai) -1 Anker; Seenotretter-Station mindert das |
+| Regatta | 3, mit Segelclub | 1 Tag (morgens raus, abends zurück), 2 Tage vorher angekündigt | 9 Tage | 1,6x Ankünfte, vor allem Segelboote, mehr Besucher, etwas Ruf |
+| Hafenfest | 4 | 1 Tag | 11 Tage (Hochsommer) | Traditionssegler und Marine, doppelt so viele Besucher, abends Feuerwerk |
+| Heringstage | 2, mit Räucherei | 1 Tag | einmal im Jahr, fest am Saisontag 3 | 1,5x Besucher, mehr Menschen im Ort; Räucherei und Fischhalle verdienen extra |
+| Mittsommer | 2 | 1 Tag | einmal im Jahr, fest am Saisontag 7 | 1,6x Besucher, doppelt so viele Badegäste, abends bleiben sie am Strand; Gäste bleiben eine Nacht länger; mit Grillplatz brennt abends das Mittsommerfeuer |
+| Holzboot-Treffen | 3 | 1 Tag | 11 Tage (Saisontag 3 bis 15) | Klassiker aus Holz (5x) und Ruderboote, Gäste bewerten etwas besser; mit Museumshafen auch Traditionssegler |
+| Hanse-Woche | 5 | 2 Tage, 5 Tage vorher angekündigt | einmal im Jahr (Saisontag 11 bis 15) | großes Fest: Traditionssegler, große Schiffe, 2,2x Besucher, Ruf, abends Feuerwerk |
 
 Kreuzfahrtschiffe, Marinebesuche und Ausflugsfahrten plant das Services-Modul als regelmäßige Besuche.
 
-**Leitlinien:** jedes Ereignis wird angekündigt, keins kostet Geld oder zerstört etwas, nie zwei gleichzeitig, danach mindestens zwei ruhige Tage. Im Schnitt 5 bis 6 Ereignisse pro Saison in Stufe 1 und 2, etwa 8 ab Stufe 3 (gemessen über vier Jahre und sechs Samen).
+**Leitlinien:** jedes Ereignis wird angekündigt, keins kostet Geld oder zerstört etwas, nie zwei gleichzeitig, danach mindestens ein ruhiger Tag. Seit P17 (16 Saisontage zu rund 5 Minuten) kommen ab Stufe 6 mit allen Bauten im Schnitt knapp 8 Ereignisse je Saison (Mittsommer, Heringstage und Hanse-Woche jedes Jahr, Regatta etwa zweimal, Sturm, Nebel, Sommertag, Holzboote und Hafenfest je etwa einmal; 20 Samen, 10 Jahre). Abstände in der Tabelle sind Spieltage, Stand P17.
 
-**Feste Tage und große Ereignisse (P24 Teil 2):** Mittsommer und Heringstage haben einen festen Saisontag (`amTag`), die anderen Ereignisse halten davor und danach Abstand. Ereignisse mit mindestens fünf Tagen Ankündigung (Hanse-Woche) haben im Planer einen eigenen Platz: Sie werden lange vorher angekündigt, die kleinen laufen bis kurz davor weiter. Der Wetterknopf zeigt "Hanse-Woche in 7 Tagen", der Wetterbericht hat eine Zeile dafür.
+**Feste Tage und große Ereignisse (P24 Teil 2):** Mittsommer und Heringstage haben einen festen Saisontag (`amTag`), die anderen Ereignisse halten davor und danach Abstand. Ereignisse mit mindestens fünf Tagen Ankündigung (Hanse-Woche) haben im Planer einen eigenen Platz: Sie werden lange vorher angekündigt, die kleinen laufen bis kurz davor weiter. Der Wetterknopf zeigt "Hanse-Woche in 4 Tagen", der Wetterbericht hat eine Zeile dafür.
 
 **Nachspiel (G3):** Nach Sturm, Regatta, Hafenfest und Hanse-Woche wirkt das Ereignis nach (`ECONOMY.ereignisse.nachspiel`): nach dem Sturm einen Tag 1,4x Ankünfte (wer draußen gewartet hat), nach der Regatta Nachzügler unter den Seglern, nach Hafenfest und Hanse-Woche zwei Tage mehr Besucher. Wer vorbereitet war (sturmklar, Plätze freigehalten), bekommt dazu einen kleinen Bewertungsbonus. Am Morgen kommt eine kurze Karte ("Nach dem Sturm").
 
@@ -35,7 +35,7 @@ Kreuzfahrtschiffe, Marinebesuche und Ausflugsfahrten plant das Services-Modul al
 
 **Mehr Menschen im Bild:** Ereignisse mit `menschen` (Mittsommer, Heringstage, Holzboot-Treffen, Hanse-Woche) lassen mehr Spaziergänger und Badegäste kommen (`render/people.js`), am Mittsommerabend bleiben dreimal so viele am Strand.
 
-**Jahreslauf:** 30 Saisontage (1 bis 8 Frühling, 9 bis 22 Sommer, 23 bis 30 Herbst), danach 3 Tage Winter mit Schnee, ohne Ereignisse, mit wenig Ankünften (`winter: true` in den Modifikatoren).
+**Jahreslauf:** 16 Saisontage (1 bis 4 Frühling, 5 bis 12 Sommer, 13 bis 16 Herbst; seit P17, ein Tag dauert jetzt rund 5 Minuten), danach 2 Tage Winter mit Schnee, ohne Ereignisse, mit wenig Ankünften (`winter: true` in den Modifikatoren).
 
 ## Vorbereiten (P24)
 

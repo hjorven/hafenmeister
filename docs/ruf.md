@@ -6,7 +6,7 @@ Stand: 14.11.2026. Status: gepflegt. Roadmap-Paket P19 ("Ruf schwerer machen mit
 
 Vorher lag ein guter Spieler ab Stufe 2 fast immer bei 4,9 bis 5 Sternen, weil jede Bewertung mit allen erfüllten Wünschen schon 5 gab und die Services noch bis zu 0,75 auf jede Bewertung legten. Der Ruf hatte damit keine Aufgabe. Jetzt:
 
-- Der Ruf reagiert auf das, was gerade im Hafen passiert (die letzten drei Tage).
+- Der Ruf reagiert auf das, was gerade im Hafen passiert (die letzten zwei Tage, seit PR 331; vorher drei).
 - Die volle Note gibt es nur mit gutem Platz, nicht schon mit den Grundwünschen.
 - Jede Bootsart will etwas anderes, und manche Gäste wünschen sich Angebote an Land.
 - Ein guter Ruf bringt etwas, das man sieht: mehr und größere Boote, ab 4,5 seltene Modelle.
@@ -15,7 +15,7 @@ Vorher lag ein guter Spieler ab Stufe 2 fast immer bei 4,9 bis 5 Sternen, weil j
 
 | Regel | Wert | Wo |
 |---|---|---|
-| Ruf | Schnitt aller Bewertungen der letzten 3 Tage (heute mitgezählt), mindestens der letzten 10; der Spielstand hebt höchstens 400 auf | `economy.js` `ruf.tage`, `ruf.mindestens`, `ruf.hoechstens`; `sim.js` `reputationRatings` |
+| Ruf | Schnitt aller Bewertungen der letzten 2 Tage (heute mitgezählt, seit PR 331), mindestens der letzten 10; der Spielstand hebt höchstens 400 auf | `economy.js` `ruf.tage`, `ruf.mindestens`, `ruf.hoechstens`; `sim.js` `reputationRatings` |
 | Tag jeder Bewertung | `state.ratingDays`, von hinten an `state.ratings` ausgerichtet; ältere Spielstände ohne Tage zählen nur zum Auffüllen | `sim.js` `pushRating`, `state.js` |
 | Note aus Wünschen | keiner erfüllt 2,5, alle erfüllt 4,5, linear dazwischen | `ruf.wunschNote` |
 | Gast ohne Wünsche | 4,5 (C4): der Platz entscheidet über den Rest | `ruf.ohneWunsch` |

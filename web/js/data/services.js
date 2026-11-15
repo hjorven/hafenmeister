@@ -43,6 +43,20 @@
 //   besuch                 { art, alleTage, ersterNach, dauer, einnahme, gaeste, ruf, text }
 //                          regelmaessiger Besuch mit Vorfreude: Die Oberflaeche kann "kommt in 3 Tagen" zeigen.
 //                          text kommt aus besuchText der Stufe hier.
+//
+// Eigene Wirkung im Spiel (Roadmap P23, F2, F5, F7), alles optional:
+//   dienst                 { anteil, nur, naechte, preis, wetter } Gastboote, die beim Ankommen diesen Dienst
+//                          wollen (Mast legen, Radtour, Reparatur): sie bleiben naechte Naechte laenger und zahlen
+//                          am ersten Abend im Hafen preis. nur wie bei kunden, dazu nur.naechteMax (nur Boote mit
+//                          hoechstens so vielen Naechten). wetter: Faktor auf anteil je Wetter des Ankunftstags.
+//                          Der Satz fuer die Bootskarte steht hier unter dienstText.
+//   trailer                { anzahl, preis, wetter } Trailerboote kommen ueber Land, gehen am Slip ins Wasser,
+//                          fahren eine Runde und werden nachmittags wieder aufgeslippt. Kein Liegeplatz.
+//   abendgaeste            { anzahl, preis, wetter } Leute aus dem Ort kommen am Abend (Raeucherei)
+//   tagesgaeste            Euro je 100 Tagesgaeste, wenn ein grosses Schiff (besuch mit gaeste) heute da ist
+//
+// Entweder-oder (F3): WAHLPLAETZE unten. Auf einem Wahlplatz passt nur eine der Optionen; wer die andere baut,
+// baut die erste dafuer zurueck (Umbau, keine Erstattung).
 
 import { ECONOMY } from './economy.js';
 
@@ -71,7 +85,7 @@ const TEXTE = [
   },
   {
     id: 'slip', name: 'Slipanlage', gruppe: 'handwerk',
-    kurz: 'Rampe ins Wasser. Trailerboote kommen über Land, ganz ohne Liegeplatz.',
+    kurz: 'Rampe ins Wasser. Trailerboote kommen über Land, fahren eine Runde und brauchen keinen Liegeplatz.',
     lage: { x: -127, y: -6, dreh: 0 }, radius: 7,
     stufen: [
       { name: 'Slipanlage' },
@@ -80,7 +94,7 @@ const TEXTE = [
   },
   {
     id: 'raeucherei', name: 'Räucherei', gruppe: 'freizeit',
-    kurz: 'Fischbrötchen am Steg. Gäste, die Räucherfisch wollen, sind zufrieden.',
+    kurz: 'Fischbrötchen am Steg. Abends kommen Leute aus dem Ort dazu.',
     lage: { x: -228, y: -21, dreh: 0 }, radius: 7,
     stufen: [
       { name: 'Räucherkate' },
@@ -112,7 +126,7 @@ const TEXTE = [
   },
   {
     id: 'hafencafe', name: 'Hafencafé', gruppe: 'an-land',
-    kurz: 'Kaffee und Kuchen am Nachmittag, mit Blick aufs Wasser.',
+    kurz: 'Kaffee und Kuchen am Nachmittag. Verdient an jeder Crew im Hafen, auch bei Regen.',
     lage: { x: -24, y: -14, dreh: 0 }, radius: 8,
     stufen: [
       { name: 'Hafencafé' },
@@ -129,7 +143,7 @@ const TEXTE = [
   },
   {
     id: 'fahrradverleih', name: 'Fahrradverleih', gruppe: 'an-land',
-    kurz: 'Räder für Landausflüge. Tagsüber ist der Ständer leer.',
+    kurz: 'Räder für Landausflüge. Manche Crews hängen für eine Radtour eine Nacht an.',
     lage: { x: -18, y: -32, dreh: 0 }, radius: 6,
     stufen: [
       { name: 'Fahrradverleih' },
@@ -137,8 +151,9 @@ const TEXTE = [
   },
   {
     id: 'eisdiele', name: 'Eisdiele', gruppe: 'an-land',
-    kurz: 'Eis am Nachmittag. Bei Sonne ist richtig was los.',
-    lage: { x: 96, y: -12, dreh: 0 }, radius: 6,
+    kurz: 'Eis am Nachmittag. Bei Sonne ist richtig was los, kleine Boote mit Familien kommen gern.',
+    // Steht auf dem Platz des Hafencafés: dort passt nur eines von beiden (WAHLPLAETZE)
+    lage: { x: -24, y: -14, dreh: 0 }, radius: 8,
     stufen: [
       { name: 'Eisdiele' },
     ],
@@ -157,7 +172,7 @@ const TEXTE = [
   },
   {
     id: 'mastenkran', name: 'Mastenkran', gruppe: 'handwerk',
-    kurz: 'Masten stellen und legen. Segelboote aus dem Binnenland kommen dazu.',
+    kurz: 'Masten stellen und legen. Segler, die den Mast legen lassen, bleiben eine Nacht länger.',
     lage: { x: 70, y: -2, dreh: 0 }, radius: 6,
     stufen: [
       { name: 'Mastenkran' },
@@ -176,7 +191,7 @@ const TEXTE = [
   // ------------------------------------------------------------------ Stufe 4: Marina
   {
     id: 'travellift', name: 'Travellift und Werft', gruppe: 'handwerk',
-    kurz: 'Reparaturaufträge, auch außerhalb der Saison. Die große Einnahmequelle der Marina.',
+    kurz: 'Boote mit Schaden laufen gezielt ein und bleiben, bis sie repariert sind. Im Winter Arbeit in der Halle.',
     lage: { x: 156, y: -6, dreh: 0 }, radius: 16,
     stufen: [
       { name: 'Bootsschuppen mit Werkstatt' },
@@ -247,7 +262,7 @@ const TEXTE = [
   },
   {
     id: 'kreuzfahrtterminal', name: 'Kreuzfahrtterminal', gruppe: 'grosse-schiffe',
-    kurz: 'Terminal an der Großschiffpier. Einmal pro Woche legt ein Kreuzfahrtschiff an.',
+    kurz: 'Terminal an der Großschiffpier. Alle paar Tage legt ein Kreuzfahrtschiff an, Tagesgäste strömen in den Ort.',
     // Terminal an der Wurzel der Kreuzfahrtpier (harbor.js Stufe 6, Steg P bei x -150, Nord-Sued), Busse an der Nehrungsstrasse
     lage: { x: -150, y: 212, dreh: 0 }, radius: 18,
     stufen: [
@@ -287,6 +302,29 @@ export function mitZahlen(texte, zahlen) {
     };
   });
 }
+
+// Satz fuer die Bootskarte, wenn ein Gast einen Dienst will (wirkung.dienst)
+export const DIENST_TEXTE = {
+  mastenkran: 'Lässt vorher am Mastenkran den Mast legen',
+  fahrradverleih: 'Hängt vorher eine Radtour ins Hinterland an',
+  travellift: 'Muss vorher mit einem Schaden in die Werft',
+};
+
+// Entweder-oder-Bauplaetze (Roadmap F3): An jedem Platz passt nur eine Option. optionen[].stufe ist die
+// Ausbaustufe des Service, ab der er den Platz belegt. Wer die andere Option baut, baut die erste auf
+// stufe - 1 zurueck (0 = abgerissen). wunschTeilen: Gaeste, die sich das eine wuenschen, sind mit dem
+// anderen auch zufrieden (sonst waere der Wunsch mit einer Wahl nie erfuellbar).
+export const WAHLPLAETZE = [
+  { id: 'strandplatz', name: 'Platz am Wasser', wunschTeilen: true,
+    text: 'Hier passt nur eines: Café für jedes Wetter oder Eisdiele für Sonnentage und Familien.',
+    optionen: [{ id: 'hafencafe', stufe: 1 }, { id: 'eisdiele', stufe: 1 }] },
+  { id: 'hallenplatz', name: 'Bauplatz für eine große Halle',
+    text: 'Die Gemeinde genehmigt nur eine große Halle: Werfthalle für Reparaturen in der Saison oder Winterlagerhalle für den Winter.',
+    optionen: [{ id: 'travellift', stufe: 3 }, { id: 'winterlager', stufe: 2 }] },
+  { id: 'grosshafen', name: 'Ausbau der Großschiffpiers',
+    text: 'Nur ein großer Ausbau hat Platz auf der Nehrung: Kreuzfahrtterminal oder Marinestützpunkt.',
+    optionen: [{ id: 'kreuzfahrtterminal', stufe: 2 }, { id: 'marineanleger', stufe: 2 }] },
+];
 
 export const SERVICE_TEXTE = TEXTE;
 export const SERVICES = mitZahlen(TEXTE, ECONOMY.services);

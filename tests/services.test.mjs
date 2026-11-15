@@ -54,14 +54,14 @@ test('Liste zeigt nur Services der erreichten Hafenstufe', () => {
 test('Einnahmen: Tagesgeschaeft mit Wetter, Kunden mit Filter, keine laufenden Kosten', () => {
   const z = neuerZustand();
   R.bauen(z, 'bootsverleih', { stufe: 1 });
-  R.bauen(z, 'mastenkran', { stufe: 3, ruf: 3 });
-  const sonne = R.tagesabschluss(z, { tag: 1, wetter: 'sonne', boote: [...boote(10), ...boote(10, 'M', 'motor')] }, () => 0.99);
+  R.bauen(z, 'ausruester', { stufe: 3, ruf: 3 });
+  const sonne = R.tagesabschluss(z, { tag: 1, wetter: 'sonne', boote: boote(2) }, () => 0.99);
   const verleih = sonne.einnahmen.find((e) => e.id === 'bootsverleih');
   assert.equal(verleih.betrag, ECONOMY.services.bootsverleih.stufen[0].wirkung.proTag);
-  // 10 Segelboote x 0,08 = 0,8 Kunden, mit rng 0,99 abgerundet auf 0
-  assert.equal(sonne.einnahmen.find((e) => e.id === 'mastenkran'), undefined);
-  const mitKunde = R.tagesabschluss(z, { tag: 2, wetter: 'sonne', boote: boote(10) }, () => 0.1);
-  assert.equal(mitKunde.einnahmen.find((e) => e.id === 'mastenkran').betrag, 35);
+  // 2 Boote x 0,25 = 0,5 Kunden, mit rng 0,99 abgerundet auf 0
+  assert.equal(sonne.einnahmen.find((e) => e.id === 'ausruester'), undefined);
+  const mitKunde = R.tagesabschluss(z, { tag: 2, wetter: 'sonne', boote: boote(2) }, () => 0.1);
+  assert.equal(mitKunde.einnahmen.find((e) => e.id === 'ausruester').betrag, ECONOMY.services.ausruester.stufen[0].wirkung.kunden.preis);
   const sturm = R.tagesabschluss(z, { tag: 3, wetter: 'sturm', boote: [] }, () => 0.5);
   assert.equal(sturm.einnahmen.length, 0);
   assert.equal(sturm.summe, 0);
@@ -93,19 +93,21 @@ test('Winter: nur Werft und Winterlager verdienen', () => {
 test('Kreuzfahrtschiff kommt regelmaessig, wird angekuendigt und weicht dem Sturm aus', () => {
   const z = neuerZustand();
   const k = { stufe: 6, ruf: 5, tag: 10 };
+  const bes = ECONOMY.services.kreuzfahrtterminal.stufen[0].wirkung.besuch;
+  const erster = 10 + bes.ersterNach;
   R.bauen(z, 'fahrgastanleger', k);
   R.bauen(z, 'kreuzfahrtterminal', k);
-  assert.equal(z.besuche.kreuzfahrtterminal, 13);
-  const vorher = R.tagesabschluss(z, { tag: 12, boote: [] }, () => 0);
-  assert.ok(vorher.angekuendigt.some((a) => a.id === 'kreuzfahrtterminal' && a.tag === 13));
-  const sturm = R.tagesabschluss(z, { tag: 13, wetter: 'sturm', boote: [] }, () => 0);
+  assert.equal(z.besuche.kreuzfahrtterminal, erster);
+  const vorher = R.tagesabschluss(z, { tag: erster - 1, boote: [] }, () => 0);
+  assert.ok(vorher.angekuendigt.some((a) => a.id === 'kreuzfahrtterminal' && a.tag === erster));
+  const sturm = R.tagesabschluss(z, { tag: erster, wetter: 'sturm', boote: [] }, () => 0);
   assert.equal(sturm.besuche.filter((b) => b.art === 'kreuzfahrt').length, 0);
-  const da = R.tagesabschluss(z, { tag: 14, boote: [] }, () => 0);
+  const da = R.tagesabschluss(z, { tag: erster + 1, boote: [] }, () => 0);
   const b = da.besuche.find((x) => x.art === 'kreuzfahrt');
-  assert.equal(b.einnahme, 6500);
-  assert.equal(z.besuche.kreuzfahrtterminal, 21);
+  assert.equal(b.einnahme, bes.einnahme);
+  assert.equal(z.besuche.kreuzfahrtterminal, erster + 1 + bes.alleTage);
   assert.equal(z.anzahl.kreuzfahrt, 1);            // Zähler für das Stufenziel, Sturmtag zählt nicht
-  assert.equal(R.naechsteBesuche(z, 14).find((x) => x.id === 'kreuzfahrtterminal').inTagen, 7);
+  assert.equal(R.naechsteBesuche(z, erster + 1).find((x) => x.id === 'kreuzfahrtterminal').inTagen, bes.alleTage);
 });
 
 test('Effekte: Ruf gedeckelt, Gaeste multipliziert, Freischaltungen', () => {
@@ -174,7 +176,7 @@ test('Angebote an Land: Bäcker ab Stufe 1, Café ab 2, Eisdiele erst ab 4', () 
   assert.ok(sonne > regen, `${sonne} > ${regen}`);
 });
 
-test('Windjammertreffen: dritte Stufe des Museumshafens erst in Stufe 6, Besuch alle 12 Tage für zwei Tage', () => {
+test('Windjammertreffen: dritte Stufe des Museumshafens erst in Stufe 6, Besuch regelmäßig für zwei Tage', () => {
   const z = neuerZustand();
   const k5 = { stufe: 5, ruf: 5, tag: 1, geld: 1e9 };
   R.bauen(z, 'museumshafen', k5);
@@ -183,11 +185,12 @@ test('Windjammertreffen: dritte Stufe des Museumshafens erst in Stufe 6, Besuch 
   assert.equal(R.pruefe(z, 'museumshafen', k5).ok, false);              // Treffen erst ab Hafenstufe 6
   const k6 = { stufe: 6, ruf: 5, tag: 10, geld: 1e9 };
   assert.equal(R.bauen(z, 'museumshafen', k6).ok, true);
-  assert.equal(z.besuche.museumshafen, 14);
-  const r = R.tagesabschluss(z, { tag: 14, boote: [] }, () => 0);
+  const wj = ECONOMY.services.museumshafen.stufen[2].wirkung.besuch;
+  assert.equal(z.besuche.museumshafen, 10 + wj.ersterNach);
+  const r = R.tagesabschluss(z, { tag: 10 + wj.ersterNach, boote: [] }, () => 0);
   const b = r.besuche.find((x) => x.art === 'windjammer');
   assert.equal(b.dauer, 2);
-  assert.equal(z.besuche.museumshafen, 26);
+  assert.equal(z.besuche.museumshafen, 10 + wj.ersterNach + wj.alleTage);
   assert.ok(R.effekte(z).freischalten.includes('traditionssegler'));
 });
 

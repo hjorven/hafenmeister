@@ -20,12 +20,21 @@ const REASON_LABEL = {
   size: 'Dieser Platz ist für andere Schiffsgrößen.',
   reserved: 'Dieser Platz ist fest vergeben.',
   funk: 'Diese Box ist für ein angemeldetes Boot frei gehalten.',
+  nachbar: 'Das Boot am Nachbarplatz lässt nicht genug Platz.',
   occupied: 'Der Platz ist schon belegt.',
   noBerth: 'Diesen Platz gibt es noch nicht.',
   noFreeBerth: 'Gerade ist kein passender Platz frei.',
   money: 'Dafür reicht das Geld noch nicht.',
   stage: 'Das gibt es erst in einer späteren Ausbaustufe.',
   max: 'Schon voll ausgebaut.',
+  // Päckchen (P27)
+  boxFree: 'Es ist noch eine passende Box frei.',
+  bigger: 'Ins Päckchen nur an ein gleich großes oder größeres Boot.',
+  innerBusy: 'An dieses Boot kann gerade niemand längsseits.',
+  noInner: 'Dort liegt kein Boot mehr.',
+  fairway: 'Dort läge das Boot im Fahrwasser.',
+  raftOff: 'Päckchen gibt es hier nicht.',
+  paeckchen: 'Ein Boot im Päckchen liegt im Weg zu diesem Platz.',
 };
 
 import { HAFEN, platzInWelt } from '../data/harbor.js';
@@ -220,7 +229,9 @@ export function init(game) {
           // Name am Heck und Heimathafen (features/stammgaeste.js), falls vorhanden
           b.bootsname ? el('p', { class: 'card-boatname' }, game.stammgaeste?.beschreibung(b) ?? `„${b.bootsname}“`) : null,
           // Anlass des Boots (Bootsgeschichten, geschichten/geschichten.js)
-          game.geschichten?.text(b) ? el('p', { class: 'card-geschichte' }, game.geschichten.text(b)) : null),
+          game.geschichten?.text(b) ? el('p', { class: 'card-geschichte' }, game.geschichten.text(b)) : null,
+          // Dienst eines Service (P23: Mast legen, Radtour, Reparatur): darum bleibt das Boot länger
+          game.services?.dienstText?.(b) ? el('p', { class: 'card-geschichte card-dienst' }, game.services.dienstText(b)) : null),
         el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Schließen', title: 'Schließen', onclick: schliessen }, 'Schließen')),
       el('ul', { class: 'hm-fakten', 'aria-label': 'Eckdaten' },
         el('li', { class: 'groesse', title: 'Größenklasse' }, `Größe ${b.size}`),
@@ -236,7 +247,10 @@ export function init(game) {
       wert ? el('p', { class: 'card-zahlt' }, zahltText(wert.fee, gold.length ? sim.platzWert(b.id, gold[0])?.fee ?? wert.fee : null, gold.length > 0 && gold.length >= fitting.length,
         b.nights === 0 ? 0 : Math.max(1, Math.min(sim.ctx.rules.prepay || 1, b.nights || 1)), !!sim.ctx.rules.tip?.sizes?.includes(b.size))) : null,
       el('p', { class: 'card-hint' }, !fitting.length
-        ? 'Gerade ist kein passender Platz frei.'
+        // Päckchen (P27): ist keine Box frei, darf es längsseits an ein gleich großes oder größeres Boot
+        ? ((sim.paeckchenZiele?.(b.id) ?? []).length
+          ? 'Keine Box frei. Ins Päckchen: auf ein Boot mit weißem Rahmen ziehen (halbes Liegegeld, eine Nacht).'
+          : 'Gerade ist kein passender Platz frei.')
         : [`${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length && gold.length >= fitting.length ? 'alle' : gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}.`,
           // Die Anleitung tritt am Handy zurück (der Einstieg erklärt das Ziehen), die Karte bleibt flach
           el('span', { class: 'card-wie' }, ` Zieh das Boot hin oder ${vorschlag ? 'nimm den Vorschlag an' : 'lass es einfahren'}.`)]),

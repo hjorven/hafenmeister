@@ -44,7 +44,7 @@ export function rulesFromEconomy(E = ECONOMY) {
   // Bootsgeschichten (web/js/geschichten/regeln.js): Zahlen je Anlass, unverändert durchgereicht
   r.stories = E.geschichten ?? null;
   const kh = E.kurzhalt;
-  r.shortStay = kh ? { share: kh.anteil || {}, stay: kh.bleibt || [0.1, 0.3], fee: kh.preis ?? 0.5, latest: kh.spaetestens ?? 0.97, sizes: kh.klassen || null } : null;
+  r.shortStay = kh ? { share: kh.anteil || {}, stay: kh.bleibt || [0.1, 0.3], fee: kh.preis ?? 0.5, latest: kh.spaetestens ?? 0.97, minVisible: kh.sichtbar ?? 0.06, sizes: kh.klassen || null } : null;
   r.wishBonus = E.wunschBonus ?? 0;
   r.sizeByBerths = E.platzMix ?? null;
   // Kassieren: Anteil beim Rundgang und nachts, Vorauszahlung, Trinkgeld für den langen Strich
@@ -178,6 +178,9 @@ export function rulesFromEconomy(E = ECONOMY) {
   r.snug = E.passgenau ? { share: E.passgenau.hoechstensGroesser, rating: E.passgenau.ruf } : null;
   // Liegende Boote umlegen (P33): so oft ohne Folgen, danach je Mal weniger Anker
   r.relocate = E.umlegen ? { free: E.umlegen.freiMal, rating: E.umlegen.ruf } : null;
+  // Päckchen (P27): längsseits an ein liegendes Boot, wenn keine Box frei ist
+  const pk = E.paeckchen;
+  r.raft = pk ? { from: pk.abStufe ?? 2, kinds: [...(pk.platzarten || [])], fee: pk.liegegeld ?? 1, rating: pk.ruf ?? 0, maxNights: pk.naechteHoechstens ?? 1, slack: pk.laengeMehr ?? 0 } : null;
   r.leaveMax = w.ausBoxMax ?? 0;
   r.previewCount = w.vorschau ?? 0;
 

@@ -385,7 +385,7 @@ def render(stage, seed=5):
     if stage >= 4:
         Cs = [(13, 2), (13, 70), (4, 124)]; H_.line(Cs, 'wood', 2.8); H_.line([(-21, 128), (28, 121)], 'wood', 2.8); br = [(13, 76), (58, 84)]; H_.line(br, 'wood', 2.4)
         H_.boxes(Cs[0], Cs[1], 1, 'L', a0=12, a1=2, jw=2.8); H_.boxes(Cs[0], Cs[1], -1, 'L', a0=12, a1=10, jw=2.8)
-        H_.boxes(Cs[1], Cs[2], 1, 'L', a0=4, a1=4, jw=2.8); H_.boxes(Cs[1], Cs[2], -1, 'L', a0=24, a1=4, jw=2.8)
+        H_.boxes(Cs[1], Cs[2], 1, 'L', a0=4, a1=4, jw=2.8); H_.boxes(Cs[1], Cs[2], -1, 'L', a0=21, a1=7, jw=2.8)
         H_.boxes(br[0], br[1], 1, 'M', a0=26, a1=1); H_.boxes(br[0], br[1], -1, 'M', a0=26, a1=1)
         H_.along((-21, 128), (28, 121), 1, [('cat', 12.5, 6.6, 'white', True), ('ketsch', 14, 4.2, 'navy', True)], jw=2.8, start=1)
         D = [(110, 2), (116, 60)]; H_.line(D, 'float', 3.0)
@@ -401,7 +401,7 @@ def render(stage, seed=5):
         H_.boxes(f1[0], f1[1], 1, 'L', a0=7, a1=2, jw=2.8, fingers=True); H_.boxes(f2[0], f2[1], 1, 'L', a0=31, a1=1, jw=2.8, fingers=True)
         H_.along((131, 83), (145, 104), -1, [('cat', 11.5, 6.2, 'white', True)], jw=4.4, start=2)
         H_.along((2, 229), (150, 229), 1, [('pax', 22, 5.8, 'white', True), ('tall', 36, 7.6, 'navy', True), ('super', 26, 6.2, 'white', True)], jw=0, cls='XL', start=2, gap=4)
-        H_.along((-3, 232), (-9, 280), -1, [('cutter', 11, 3.9, 'navy', True), ('trawler', 10, 3.7, 'red', True)], jw=9, cls='L', start=3, gap=3, scale_jw=False)
+        H_.along((-3, 232), (-9, 280), -1, [('cutter', 11, 3.9, 'navy', True), ('trawler', 10, 3.7, 'red', True)], jw=9, cls='L', start=12, gap=3, scale_jw=False)
     if stage >= 6:
         # Kreuzfahrtpier: Steg vom Strand weit hinaus, das Schiff liegt an der Ostseite (ragt ueber das Pierende hinaus)
         PW = (PIER_X, sea_s(PIER_X) - 4)

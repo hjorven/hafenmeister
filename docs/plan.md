@@ -1,6 +1,6 @@
 # Hafenmeister: Spielplan
 
-Stand: 14.11.2026, Version 3; Abschnitt 13 abgeglichen mit `main` nach PR 285. Status: Abschnitt 13 sagt, was gebaut ist, was als Nächstes kommt und was nach 1.0 kommt; in den Abschnitten 3 bis 12 ist alles, was noch nicht im Spiel ist, mit **(geplant, Pnn)** markiert (Pnn = Paket der [Roadmap](roadmap.md)). Dieses Dokument ist der einzige gültige Plan. Es fasst den alten Spielplan ([archiv/plan-v1.md](archiv/plan-v1.md)), [hafen-und-schiffe.md](hafen-und-schiffe.md) und die Bestandsaufnahme zusammen und nimmt Jorvens Vision vom 11.11.2026 auf. Wo etwas widerspricht, gilt dieses Dokument.
+Stand: 15.11.2026, Version 4; ganzes Dokument abgeglichen mit `main` bei `c0d1d93` (PR 332). Status: Abschnitt 13 sagt, was gebaut ist, was als Nächstes kommt und was nach 1.0 kommt; in den Abschnitten 3 bis 12 ist alles, was noch nicht im Spiel ist, mit **(geplant, Pnn)** markiert (Pnn = Paket der [Roadmap](roadmap.md)). Dieses Dokument ist der einzige gültige Plan. Es fasst den alten Spielplan ([archiv/plan-v1.md](archiv/plan-v1.md)), [hafen-und-schiffe.md](hafen-und-schiffe.md) und die Bestandsaufnahme zusammen und nimmt Jorvens Vision vom 11.11.2026 auf. Wo etwas widerspricht, gilt dieses Dokument.
 
 `hafen-und-schiffe.md` bleibt als **Katalog** bestehen: Stufenbilder, Liegeplatzarten, Einlaufen und die 80 Schiffsmodelle mit ihren Formen. Dieses Dokument verweist dorthin, statt es zu wiederholen.
 
@@ -8,7 +8,8 @@ Stand: 14.11.2026, Version 3; Abschnitt 13 abgeglichen mit `main` nach PR 285. S
 
 | Dokument | Inhalt |
 |---|---|
-| [roadmap.md](roadmap.md) | Arbeitsliste: was fehlt, was falsch ist, was weg soll, welches Paket es erledigt (Stand 12.11.2026) |
+| [roadmap.md](roadmap.md) | Arbeitsliste: was fehlt, was falsch ist, was weg soll, welches Paket es erledigt (laufend gepflegt, interaktiv unter https://hjorven.github.io/hafenmeister/roadmap/) |
+| [arbeitsplan.md](arbeitsplan.md) | Was gerade läuft, bekannte Fehler, welche Pakete als Nächstes starten |
 | [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) | Planung: Stufe 7 bis 20, vom Seehafen zum Hafenverbund (noch nicht im Spiel) |
 | [aenderungen.md](aenderungen.md) | Was ist neu im Spiel, für Spieler |
 | [ui/oberflaeche.md](ui/oberflaeche.md) | Oberfläche und Bedienung auf allen Geräten |
@@ -53,9 +54,9 @@ Ein kleines, gemütliches Aufbauspiel in 3D. Du fängst mit einem Badesteg an ei
 
 ## 3. Spielablauf
 
-Ein Spieltag dauert 2 Minuten bei normaler Geschwindigkeit: 90 Sekunden Tag, 30 Sekunden Abend. Tempo von Anfang an mit vier Knöpfen unten links: Pause, 1x, 3x, 8x; am PC schaltet Taste F 3x an und aus (Jorven, 12.11.2026: "Tempo so bleiben").
+Ein Spieltag dauert 5 Minuten bei normaler Geschwindigkeit: 270 Sekunden Tag, 30 Sekunden Abend (seit PR 319, Jorven 14.11.2026: längere Tage). Tempo von Anfang an mit vier Knöpfen unten links: Pause, 1x, 3x, 8x; am PC schaltet Taste F 3x an und aus (Jorven, 12.11.2026: "Tempo so bleiben"). Das Tempo läuft durch, bis der Spieler selbst etwas anderes wählt (Jorven, 14.11.2026).
 
-1. **Vormittags** legen die Gäste der Nacht ab, Dauerlieger fahren zum Tagestörn hinaus. **Ab Mittag** laufen neue Boote ein und warten an Wartebojen oder im Ankerfeld vor dem Hafen. Du tippst ein Boot an (oder ziehst es an der Schleppleine), die passenden Plätze leuchten, du tippst einen an. Tust du nichts, fährt das Boot nach 8 Sekunden selbst in eine passende freie Box. Wer abends noch wartet, bleibt über Nacht an der Boje.
+1. **Vormittags** legen die Gäste der Nacht ab, Dauerlieger fahren zum Tagestörn hinaus. **Den ganzen Tag** kommen neue Boote von weit draußen auf See aus verschiedenen Richtungen, nie über Land; vormittags und mittags vor allem **Kurzhalter** (WC, Brötchen, Eis, Tanken, ein Achtel bis ein halber Tag ohne Nacht), nachmittags eher Übernachter. Jedes Boot hat eine Geschichte, die die Bootskarte in einem Satz erzählt ([bootsgeschichten.md](bootsgeschichten.md)). Ankommende warten an Wartebojen seitlich neben den Stegen oder im Ankerfeld; schon auf der Anfahrt im Hafenrevier lassen sie sich antippen. Du tippst ein Boot an (oder ziehst es an der Schleppleine), die passenden Plätze leuchten, du tippst einen an. Tust du nichts, fährt das Boot nach 8 Sekunden an der Boje selbst in eine passende freie Box; die Geduld läuft erst, wenn es sichtbar an der Boje liegt. Wer abends noch wartet, bleibt über Nacht an der Boje, wartende Kurzhalter fahren abends ohne Ärger weiter.
 2. **Kassieren:** Liegegeld wird beim Anlegen fällig, Gäste zahlen alle Nächte auf einmal. Über dem Boot erscheint eine Münze, eingestrichen bekommt das Boot einen Bezahlt-Wimpel; streichst du sie selbst ein, fliegt ihr Wert hoch („22 € + 11 €“ mit Wunschbonus), ein langer Strich über viele Münzen bringt Trinkgeld. Was liegen bleibt, holt abends der Hafenmeister auf seinem Rundgang, er bringt aber nur vier Fünftel. Ab dem Hafenbüro (erste Stufe "Hafenmeister") gibt es den Knopf "Alle kassieren", ab dem Kassenautomaten kommt das Geld von selbst. Mit derselben Freischaltung kassiert das Hafenhorn alles: das Hafenmeisterhaus gedrückt halten (Abschnitt 8).
 3. **Jederzeit** kannst du bauen und ausbauen: Baumodus mit Vorschau und Bestätigung ([bauen.md](bauen.md)).
 
@@ -63,12 +64,15 @@ Ein Spieltag dauert 2 Minuten bei normaler Geschwindigkeit: 90 Sekunden Tag, 30 
 
 - Ein Boot passt an einen Platz, wenn es nicht länger und nicht breiter ist als der Platz und die Wassertiefe mindestens 0,3 m größer ist als sein Tiefgang. Rechnen muss niemand, es leuchten nur passende Stege.
 - Jedes Boot hat bis zu 3 Wünsche, als Symbole über dem wartenden Boot; beim Anlegen bekommt jeder erfüllte Wunsch einen Haken, jeder unerfüllte wird grau ([vorschau.md](vorschau.md)).
-- Hafengeld pro Nacht = Grundpreis der Art × (1 + 0,25 × erfüllte Wünsche). Die Zahlen stehen in `web/js/data/economy.js`, Erklärung in [balancing.md](balancing.md).
-- Boote bleiben 1 bis 3 Nächte.
-- Bei der Abreise bewertet jeder Gast mit 1 bis 5 Ankern: alle Wünsche erfüllt ergibt 5, keiner erfüllt ergibt 1, ein Boot ohne Wünsche gibt 4. Fingerplätze geben einen halben Anker extra.
-- **Ruf** ist der Schnitt der Bewertungen der letzten drei Tage, mindestens der letzten 10 (P19, [ruf.md](ruf.md)). Bei 1 Anker kommen halb so viele Boote, bei 3 normal viele, bei 5 anderthalbmal so viele.
+- Liegegeld pro Nacht = Preis je angefangenem Meter der Klasse × Faktor der Bootsart × (1 + 0,25 × erfüllte Wünsche) (B10, P19). Die Zahlen stehen in `web/js/data/economy.js`, Erklärung in [balancing.md](balancing.md).
+- Boote bleiben kurz (Kurzhalter, kleines Tagesliegegeld) oder 1 bis 3 Nächte. Gäste mit mehreren Nächten fahren tagsüber zum Törn hinaus, ihre Box bleibt reserviert.
+- Bei der Abreise bewertet jeder Gast mit 1 bis 5 Ankern: keiner seiner Wünsche erfüllt ergibt 2,5, alle erfüllt 4,5, ein Boot ohne Wünsche 4,5. Die volle Note gibt es nur mit gutem Platz: Fingersteg +0,5, passgenaue Box +0,25, von Hand eingewiesen +0,25 (P19, [ruf.md](ruf.md)). Liegt die Box weit vom WC oder der Dusche, zählt der Wunsch halb.
+- **Ruf** ist der Schnitt der Bewertungen der letzten zwei Tage, mindestens der letzten 10 (P19, seit PR 331 zwei statt drei Tage, [ruf.md](ruf.md)). Bei 1 Anker kommen drei Viertel so viele Boote, bei 3 normal viele, bei 5 ein Viertel mehr. Ab 4 kommen große Yachten öfter, ab 4,5 seltene Modelle; zwei Abende mit gutem Ruf bringen eine Auszeichnung mit Wimpel am Hafenmeisterhaus.
 - Wer keinen Platz bekommt, fährt weiter und drückt den Ruf leicht.
 - Ab Hafenbüro Stufe 1 zeigt der Funk die nächsten 3 Boote mit Umriss, Uhrzeit, Länge und Wünschen ([vorschau.md](vorschau.md)).
+- **Anmeldung per Funk** (P28): Ab Hafenbüro 1 melden sich morgens ein bis zwei Boote an. Hält der Spieler ihnen eine Box frei, fahren sie direkt hinein und zahlen einen Bonus ([funk-anmeldung.md](funk-anmeldung.md)).
+- **Umlegen** (P33): Ein liegender Gast lässt sich gedrückt halten und in eine andere Box ziehen; ab dem zweiten Mal kostet es einen halben Anker ([spielregeln.md](spielregeln.md)).
+- **Päckchen** (P27): Ist keine Box frei, legt sich ein Boot ab Stufe 2 längsseits an ein gleich großes oder größeres Boot an Stegkopf, Kai oder Yachtsteg: halbes Liegegeld, eine Nacht, beide Crews einen halben Anker weniger, außen legt zuerst ab ([paeckchen.md](paeckchen.md)).
 
 Die kleine Entscheidung, die das Spiel trägt: Gebe ich den Stirnplatz jetzt der Motoryacht, oder halte ich ihn für den Katamaran frei, der gleich kommt?
 
@@ -87,7 +91,7 @@ Die Stufen 1 bis 5 stehen mit Bildern und Liegeplätzen im [Katalog](hafen-und-s
 | 3 | Durchstich zur Ostsee | 54 | L | Durchstich mit Molen und Fahrrinne |
 | 4 | Marina | 76 | Mehrrumpf, Behördenboote | Schwimmsteg D |
 | 5 | Küstenmarina | 94 | XL | Außenhafen mit Kai |
-| 6 | Seehafen | 94 plus Großschiffsliegeplätze | XXL | Pier für Großschiffe |
+| 6 | Seehafen | 94, mit Yachtsteg 96, plus Großschiffsliegeplätze | XXL | Pier für Großschiffe |
 
 **Stufe 6: Seehafen (neu)**
 
@@ -143,16 +147,16 @@ Sondergäste (Behördenboote, Marineschiffe) zahlen wenig und heben den Ruf.
 | Strom | Liegeplatz an Schwimmsteg oder Kai | 3 |
 | Diesel | Tankstelle (nur Motorboote) | 4 |
 
-Ein Bauwerk „versorgt n Boote“ heißt: pro Abend bekommen n Boote diesen Wunsch erfüllt. Kosten und Kapazitäten stehen in `web/js/data/economy.js` und [balancing.md](balancing.md). Weitere Wünsche (WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen) sind geplant (P31).
+Ein Bauwerk „versorgt n Boote“ heißt: pro Tag bekommen n Boote diesen Wunsch erfüllt; ein Schild am Gebäude zeigt die Auslastung, bei knapper Versorgung stehen Gäste Schlange (P55). Kosten und Kapazitäten stehen in `web/js/data/economy.js` und [balancing.md](balancing.md). Dazu wünschen sich manche Bootsarten Angebote wie Café, frische Brötchen, Segelclub oder Werft (P19). Weitere Wünsche (WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen am Steg) sind geplant (P31).
 
-**Services:** Gebäude, die keinen Wunsch erfüllen, sondern etwas Neues ins Spiel bringen. Jedes hat eine eigene kleine Animation. Im Spiel sind 20 Services mit ein bis drei Ausbaustufen, dazu die Angebote an Land (Bäcker, Hafencafé, Grillplatz, Fahrradverleih, Eisdiele); alle mit Stufen, Kosten und Wirkung in [services.md](services.md). Die Tabelle zeigt die wichtigsten:
+**Services:** Gebäude, die keinen Wunsch erfüllen, sondern etwas Neues ins Spiel bringen. Jedes hat eine eigene kleine Animation und eine eigene Wirkung im Spiel (P23): Dienste verlängern den Aufenthalt, Trailerboote kommen über Land, Angebote an Land verdienen nach Auslastung, große Schiffe bringen Tagesgäste in den Ort, an drei Wahlplätzen passt nur eine von zwei Anlagen, und die Karte zeigt, wann sich ein Bau bezahlt macht. Im Spiel sind 21 Services mit ein bis drei Ausbaustufen, dazu die Angebote an Land (Bäcker, Hafencafé, Grillplatz, Fahrradverleih, Eisdiele); alle mit Stufen, Kosten und Wirkung in [services.md](services.md). Die Tabelle zeigt die wichtigsten:
 
 | Service | Ab Stufe | Wirkung |
 |---|---|---|
 | Bootsverleih | 1 | kleines Einkommen pro Tag, Leihboote fahren über den See |
-| Slip | 2 | Trailerboote kommen über Land, zusätzliche S-Gäste ohne Liegeplatz |
+| Slip | 2 | Trailerboote kommen über Land, gehen am Slip ins Wasser und fahren eine Runde, ohne Liegeplatz |
 | Hafenmeisterbüro | 2 bis 4 | Stufe 1: Knopf "Kassieren" und Funk-Vorschau (vorher streicht man Münzen einzeln), 2: Kassenautomat für S und M, 3: Vorschläge und Nebenkosten (+10 % Liegegeld), 4: Leitstelle mit Automatik für Standardfälle |
-| Mastenkran | 3 | Segelboote aus dem Binnenland kommen, mehr M-Gäste |
+| Mastenkran | 3 | Segler lassen den Mast legen und bleiben eine Nacht länger, mehr M-Gäste |
 | Segelclub | 3 | Regatten möglich, mehr Jollen |
 | Seenotretter-Station | 4 | Sturm richtet weniger Schaden an, Rettungsboot rückt sichtbar aus |
 | Travellift und Werft | 4 | Reparaturaufträge bringen Geld außerhalb der Saison |
@@ -165,19 +169,23 @@ Ein Bauwerk „versorgt n Boote“ heißt: pro Abend bekommen n Boote diesen Wun
 
 ## 7. Ereignisse und Jahreslauf
 
-Ereignisse werden einen Tag vorher angekündigt. Keines bestraft hart.
+Ereignisse werden vorher angekündigt, viele lassen sich vorbereiten (Sturm: Boote nach innen verholen; Regatta und Hanse-Woche: Plätze freihalten). Keines bestraft hart. Am Abend zeigt eine Karte das Ergebnis, danach gibt es ein Nachspiel (P24).
 
 | Ereignis | Ab Stufe | Was passiert |
 |---|---|---|
 | Sturm | 3 | Niemand läuft von See ein, Boote im See bleiben eine Nacht länger, die Seenotretter rücken aus |
-| Regatta | 3 (mit Segelclub) | Zwei Tage lang doppelt so viele Segelboote |
+| Regatta | 3 (mit Segelclub) | Einen Tag lang viele Segelboote, Bahn mit Tonnen vor dem Hafen, freigehaltene Plätze bringen Startgeld |
 | Hafenfest | 4 | Traditionssegler und ein Marinebesuch, viele Tagesgäste |
 | Nebel, Sommertag | 1 | weniger Ankünfte; mehr kleine Boote und Badegäste |
 | Kreuzfahrttag | 6 | Ein Kreuzfahrtschiff kommt, der Ort ist voll (Besuch über das Kreuzfahrtterminal) |
+| Mittsommer | 2 | Am Saisontag 7: abends Feuer am Grillplatz, viele Badegäste |
+| Heringstage | 2 (mit Räucherei) | Im Frühling: Heringsmarkt, Besucher im Ort |
+| Holzboot-Treffen | 3 | Holzklassiker und Ruderboote, mit Museumshafen Traditionssegler |
+| Hanse-Woche | 5 | Einmal im Jahr, 5 Tage vorher angekündigt: große Schiffe auf freigehaltenen Plätzen zahlen Festgeld |
 
-Einzelheiten in [ereignisse.md](ereignisse.md). Weitere Ereignisse (Mittsommer, Holzboot-Treffen, Heringstage) sind geplant (P24).
+Einzelheiten in [ereignisse.md](ereignisse.md). Gebaute Services (Räucherei, Museumshafen, Grillplatz und andere) machen Ereignisse größer und verdienen an Ereignistagen extra.
 
-**Jahreslauf:** Eine Saison hat 30 Spieltage. Danach kommt ein kurzer Winter von 3 Tagen mit Schnee und wenig Gästen; ein gebautes Winterlager verdient in dieser Zeit Geld. Das gibt dem langen Spiel einen Rhythmus und Abwechslung im Bild. Am ersten Wintertag kommt die Winterpause mit Saisonbilanz und Winterarbeiten, die die nächste Saison verbessern; der Winter lässt sich überspringen (`docs/winter.md`). Krantage folgen (P20).
+**Jahreslauf:** Eine Saison hat 16 Spieltage (Frühling 1 bis 4, Sommer 5 bis 12, Herbst 13 bis 16), danach kommt ein kurzer Winter von 2 Tagen mit Schnee und ohne Gäste; ein gebautes Winterlager verdient in dieser Zeit Geld (seit PR 331). Am ersten Wintertag kommt die Winterpause mit Saisonbilanz und Winterarbeiten, die die nächste Saison verbessern; der Winter lässt sich überspringen. Dauerlieger gehen an Krantagen ins Winterlager und kommen zum Saisonbeginn zurück ([winter.md](winter.md)). Dass sich die Jahreszeiten auch bei Ankünften und Wind anfühlen (G5), ist geplant (P20).
 
 ## 8. Steuerung, die positiv überrascht
 
@@ -188,7 +196,7 @@ Ziel: Jede Geste fühlt sich an wie mit echten Booten. Alle Gesten haben eine Al
 | Boot antippen, Platz antippen | Grundbedienung, funktioniert immer | gebaut |
 | Boot an der Schleppleine zum Platz ziehen | Das Boot hängt an einer Leine, über einem passenden Platz rastet sie ein, dann fährt es selbst hinein | gebaut |
 | Kassierstrich | Abends in einem Strich über alle Münzen streichen, jede klingt einen Ton höher | gebaut |
-| Zwei Finger drehen, rechte Maustaste | Hafen drehen, rastet in 45-Grad-Schritten ein | gebaut; frei neigen und drehen in Arbeit (Kamera-Thread, P47) |
+| Zwei Finger drehen und neigen, rechte Maustaste | Hafen frei drehen und neigen, Kompass zeigt Norden ([kamera.md](kamera.md)) | gebaut (PR 137) |
 | Boot gedrückt halten | Boot hupt | gebaut |
 | Hafenmeisterhaus gedrückt halten (Hafenhorn) | Ab Hafenbüro 1: Ring füllt sich, das Horn tutet, alle Münzen fliegen mit steigenden Tönen aufs Dach in die Kasse | gebaut (P26) |
 | Doppeltipp auf ein Boot (PC: Doppelklick) | Fernglas: Kamera fährt heran und folgt dem Boot, Steckbrief mit Pixelbild, Art, Maßen, Heimathafen, Stammgast, Knopf ins Logbuch. Wartende Boote haben ihre eigene Karte (PC-Doppelklick fährt sie ein) | gebaut (P26) |
@@ -201,7 +209,7 @@ Kleine Rückmeldungen: Haptik auf dem Handy (`navigator.vibrate`), wo verfügbar
 ## 9. Inhalt für lange Zeit
 
 - **Dauerlieger, Stammgäste und Tagesziele** (Abschnitt 9a) geben dem Alltag im Hafen Abwechslung.
-- **Logbuch** (P21, [logbuch.md](logbuch.md)): Jede Schiffsart und jedes Modell wird beim ersten Anlegen eingetragen, mit Pixelbild aus dem 3D-Modell, fehlende als Schattenriss. Dazu die Hafenchronik: jeder Tag eine Zeile. Bei fast 90 Modellen ein langes Sammelziel.
+- **Logbuch** (P21, [logbuch.md](logbuch.md)): Jede Schiffsart und jedes Modell wird beim ersten Anlegen eingetragen, mit Pixelbild aus dem 3D-Modell, fehlende als Schattenriss; große Schiffe zählen, wenn man sie sieht. Dazu die Hafenchronik (jeder Tag eine Zeile), der Reiter "Geschichten" mit 65 Bootsgeschichten und die Erfolge. Bei fast 90 Modellen ein langes Sammelziel.
 - **Zwei Hafenregionen (Entscheidung Jorven, 11.11.2026; Nordsee geplant, P57):** Ostsee und Nordsee. Keine länderspezifischen Regionen. Gebäude und Stimmung sind ein Mix aus deutschen, dänischen und schwedischen Häfen (rote Holzhäuser, Reetdächer, Backstein, Fachwerk), weil sich die Hafenkulturen nicht stark genug unterscheiden, um eigene Regionen zu tragen. Der erste Durchgang spielt an der Ostsee, nach dessen Abschluss wird die Nordsee frei.
 
 | Region | Landschaft | Besonderheit |
@@ -218,8 +226,8 @@ Alle sechs sind gebaut, Einzelheiten in [neue-features.md](neue-features.md). Hi
 
 | Feature | Was es ist |
 |---|---|
-| **Dauerlieger** | Ein Teil der Plätze wird fest vermietet. Dauerlieger zahlen pro Saison, fahren tagsüber hinaus zum Segeln oder Angeln und kommen abends zurück. Solange sie draußen sind, zeigt ihr Platz ein grünes Schild und darf für einen Gast genutzt werden (Rot-Grün-System echter Ostseehäfen). Kommt der Dauerlieger früher zurück, muss der Gast umgelegt werden. Das ist die zweite Einnahmequelle neben dem Hafengeld. Heute zahlen Dauerlieger pauschal 15 € pro Abend; Saisonpacht, festlegbare Dauerplätze und Umlegen sind geplant (P01). |
-| **Stammgäste** | Gäste, die zufrieden waren, kommen wieder, erkennbar am Bootsnamen und einem kleinen Symbol. Sie bringen Ruf, wenn sie ihren alten Platz bekommen (Ruf am alten Platz geplant, P25). |
+| **Dauerlieger** | Ein Teil der Plätze wird fest vermietet: Der Spieler gibt eine freie Box einem Bewerber (höchstens ein Viertel der Gastboxen), die Saisonpacht kommt im Voraus und ist auch bei Sturm sicher (P01). Dauerlieger fahren tagsüber hinaus zum Segeln oder Angeln und kommen abends zurück. Solange sie draußen sind, zeigt ihr Platz ein grünes Schild und darf für einen Gast genutzt werden (Rot-Grün-System echter Ostseehäfen). Kommt der Dauerlieger früher zurück, legt der Spieler den Gast um. Im Winter liegen sie im Winterlager. |
+| **Stammgäste** | Gäste, die zufrieden waren, kommen wieder, erkennbar am Bootsnamen und einem kleinen Symbol; ab dem 5. Besuch fragen sie nach einem Dauerplatz. Ruf am alten Platz, Lieblingsplatz, Treuewimpel und Gästepost sind geplant (P25). |
 | **Wetter an der Flagge** | Die Flagge am Hafenbüro zeigt Wind und Wetter für morgen. Wer hinsieht, kann sich auf Sturm oder Regatta vorbereiten. |
 | **Fotomodus** | Leisten ausblenden, Kamera frei drehen, Bild speichern. |
 | **Hafen schauen** | Nichts tun und zusehen: Die Kamera fährt langsam durch den Hafen, Musik läuft, das Spiel geht weiter. |
@@ -244,6 +252,7 @@ Pixel-Oberfläche über der 3D-Welt (PR 119, 134, 138), auf PC, Tablet und Handy
 
 - **Oben links:** Geld und Ruf. **Oben rechts:** Übersicht und Menü (Fotomodus, Ton, Spielstand, am PC Maus und Tastatur).
 - **Links:** Schilder für Wetter, Tagesziele und das Ziel der nächsten Stufe, je mit einer Tafel zum Aufklappen.
+- **Meldeplatz:** Kurze Meldungen (Ankündigungen, Tageserlös, Bewertungen, Tipps, Erfolge, Logbuch) stehen an genau einem Platz und nacheinander, am Handy unten über Zeit und Bauen ([meldungen.md](meldungen.md)).
 - **Unten links:** Tag, Himmelsbalken mit Sonne und Mond, Tempo Pause, 1x, 3x, 8x. **Unten Mitte:** Kassieren, nur wenn Münzen offen sind. **Unten rechts:** Bauen.
 - **Wartende Boote** liegen sichtbar an Wartebojen und im Ankerfeld, nicht in einer Leiste.
 - **Infokarte** (`#card`): auf großen Bildschirmen rechts, sonst als Blatt von unten, am Handy quer als Seitenblatt.
@@ -254,7 +263,7 @@ Pixel-Oberfläche über der 3D-Welt (PR 119, 134, 138), auf PC, Tablet und Handy
 
 **Stil:** Die Welt ist Flat Vector in 3D: flache Farben ohne Texturen, weiche lange Schatten als halbdurchsichtige Flächen, Pastellwasser mit kurzen weißen Wellenstrichen. Vorbild ist [02-flat-vector-max.png](stile/bilder/02-flat-vector-max.png). Die Oberfläche darüber ist im Pixel-Stil (Abschnitt 10). Daneben gibt es eine eigene **Pixel-Fassung** des ganzen Spiels unter https://hjorven.github.io/hafenmeister/pixel/ , nach festen Regeln gezeichnet statt gefiltert ([pixel-art.md](pixel-art.md)). Ob sie das Hauptspiel wird, entscheidet Jorven (offene Frage 9 der Roadmap); bis dahin bleibt sie eine eigene Fassung.
 
-**Kamera:** Schrägsicht, frei zoombar, drehbar mit Einrasten in 45-Grad-Schritten. Frei neigen und drehen (Jorvens Wunsch) baut der Kamera-Thread (P47).
+**Kamera:** Schrägsicht, frei zoombar, frei drehbar und neigbar (PR 137, [kamera.md](kamera.md)).
 
 **Animationen** (je mit Ton)
 
@@ -296,11 +305,11 @@ Die genaue Obergrenze steht je Schiffsart in den Schiffsdaten (Feld `crew: [min,
 
 Die Schnittstellen stehen in [grundgeruest.md](grundgeruest.md), das Veröffentlichen in [veroeffentlichen.md](veroeffentlichen.md).
 
-- **Three.js 0.187.0** per Import-Map, kein Build-Schritt, Ordner `web/` wird auf GitHub Pages veröffentlicht.
+- **Three.js 0.187.0** mitgeliefert unter `web/vendor/` (P61), per Import-Map, kein Build-Schritt, Ordner `web/` wird auf GitHub Pages veröffentlicht.
 - **Spielregeln getrennt von der Grafik:** `web/js/sim.js` kennt kein Three.js. So lässt sich das Balancing per Skript testen.
 - **Alle Zahlen in Daten-Dateien** unter `web/js/data/`.
 - **Leistung auf Handys:** Stege, Services und Gebäude gebündelt, keine Schattenberechnung, Pixeldichte höchstens 1,5.
-- **Speichern:** nach jedem Abend in `localStorage`, dazu Export und Import als Text ([speichern.md](speichern.md)). Mehrere Speicherplätze und "Neues Spiel" sind geplant (P09). Safari löscht Website-Daten nach 7 Tagen ohne Besuch, deshalb ist das Spiel als Web-App installierbar (Manifest und Service Worker), dann gilt das nicht.
+- **Speichern:** nach jedem Abend, jedem Kauf und Stufenaufstieg in `localStorage`, bis zu 8 Speicherplätze mit "Neues Spiel", Papierkorb, Probe-Kopie und Export als Datei (P09, [speichern.md](speichern.md)). Safari löscht Website-Daten nach 7 Tagen ohne Besuch, deshalb ist das Spiel als Web-App installierbar (Manifest und Service Worker, startet auch offline), dann gilt das nicht.
 - **Online mit Supabase** (Nach 1.0, als letzter Schritt, P58; nichts davon ist gebaut): Hafenname, Bestenliste, Gastboote mit den Hafennamen anderer Spieler als Heimathafen. Anonyme Anmeldung, Tabelle mit Präfix `hafen_`. SQL und Verbindung stehen in [archiv/plan-v1.md](archiv/plan-v1.md#11-online-mit-supabase). Die Supabase-Bibliothek wird mit fester Version eingebunden: `https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm`.
 
 **Lokal testen**
@@ -317,34 +326,35 @@ bash tests/pruefen.sh --schnell
 
 ## 13. Stand: Gebaut, Als Nächstes, Nach 1.0
 
-Stand dieses Abschnitts: 14.11.2026, abgeglichen mit `main` nach PR 285.
+Stand dieses Abschnitts: 15.11.2026, jede Zeile am Code geprüft, `main` bei `c0d1d93` (PR 332).
 
-**Reihenfolge (Jorven, seit 12.11.2026):** Zuerst Gelände und Bootswege (Welle 0), dann die Grundprobleme, dann die Kernschleife, zuletzt die Extras. Jeder Thread prüft sein Feature vor dem Weiterbauen sehr oft und mit Randfällen und schreibt auf, wo es mit anderen kollidieren kann. Was gerade läuft und was als Nächstes startet, steht im [Arbeitsplan](arbeitsplan.md); alle Punkte mit Paket und Status in der [Roadmap](roadmap.md) (interaktiv: https://hjorven.github.io/hafenmeister/roadmap/). Was für Spieler neu ist, steht in [aenderungen.md](aenderungen.md).
+**Reihenfolge (Jorven, seit 12.11.2026):** Zuerst Gelände und Bootswege (Welle 0), dann die Grundprobleme, dann die Kernschleife, zuletzt die Extras. Seit dem 13.11. laufen neue Pakete parallel, Welle 0 behält Vorrang. Jeder Thread prüft sein Feature vor dem Weiterbauen sehr oft und mit Randfällen und schreibt auf, wo es mit anderen kollidieren kann. Was gerade läuft und was als Nächstes startet, steht im [Arbeitsplan](arbeitsplan.md); alle Punkte mit Paket und Status in der [Roadmap](roadmap.md) (interaktiv: https://hjorven.github.io/hafenmeister/roadmap/). Was für Spieler neu ist, steht in [aenderungen.md](aenderungen.md).
 
 ### Gebaut (auf `main`, spielbar unter https://hjorven.github.io/hafenmeister/)
 
-- **Grundgerüst:** 3D-Szene, freie Kamera (Neigen, Drehen, Zoomen), Startansicht je Stufe und Gerät, Modul-Lader, GitHub Pages, Web-App mit Offline-Start (Three.js mitgeliefert, P61), automatische Tests auf Handy, Tablet und PC, abgesicherte GitHub Actions (Audit C07).
-- **Gelände (Welle 0):** zehn Geländeformen nach echten Häfen, jede mit Seeweg hinaus, Zonen und Seezugänge für die Wegsuche der Boote, Marinebasis und Anlagen neu platziert (P63), Wetter und Effekte flüssig (P65). Bootswege (P66), Geländeform (P62) und Abwechslung (P64) laufen noch.
-- **Spielschleife Stufe 1 bis 6 an der Ostsee:** echte Liegeplatzdaten, 12 Stegbilder, Passregel, Wartebojen und Ankerfeld, Selbst-Einfahren in die nächste freie Box (P10), Wunschplätze in Gold, Geduldsring, Ankunftsvorschau (P11), Tagesrhythmus, Liegegeld je Meter beim Festmachen mit Bezahlt-Wimpel, Grün-Rot-Schild an jeder Gastbox, Tagesausflüge, Hafenmeister-Rundgang, Ruf über drei Tage mit Auszeichnung (P19), Stufenziele, Abschlussziel Stufe 6 mit einem Zähler (P04), Boote auf wegfallenden Plätzen geregelt (P05).
-- **Hafenbüro (P02):** Funk mit Vorschau und Knopf "Kassieren", Kassenautomat für S und M, Leitstelle; Sonderfälle bleiben beim Spieler.
-- **Bauen:** Baumodus mit Vorschau, Bestätigen und "Als Nächstes", Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen (P18), erstes Bauwerk geschenkt (J4), Stegprojekte, Versorgung, 20 Services, Angebote an Land, Großschiffpier.
-- **Rückmeldung:** Bewertungen über dem Boot und Gästebuch (P14), Tagesabschluss (P15), Auslastung an der Versorgung mit Schlange und Zeiger am Bildrand (P55), Feier beim Stufenaufstieg und Endlosspiel (P16), Logbuch als Sammelalbum mit Hafenchronik (P21).
-- **Schiffe:** S, M, L, XL und XXL als 3D-Modelle, Einlaufen, Anlegen, Ablegen, Segel bergen, Vorbeifahrer, Kreuzfahrt- und Marinebesuche.
-- **Hafenleben:** Dauerlieger mit Saisonvertrag und Obergrenze (P01), Stammgäste, Tagesziele zum Auswählen (P13), Wetter an der Flagge, Ereignisse zum Vorbereiten (P24 Teil 1), Winterpause mit Winterarbeiten und Krantagen (P20), Menschen mit Wegfindung, Ton und Musik, Fotomodus, Hafen schauen.
-- **Oberfläche und Technik:** Pixel-Oberfläche für alle Geräte, Tempo Pause, 1x, 3x, 8x ohne automatische Bremsung (P07), Einstieg mit Hinweisen (P03, teilweise), Einstellungen für Sicht und Bewegung (P50), mehrere Speicherplätze mit "Neues Spiel" (P09), eine Zahlenquelle `economy.js` mit Übersicht `docs/zahlen.md` (P06).
+- **Grundgerüst:** 3D-Szene, freie Kamera (Neigen, Drehen, Zoomen), Startansicht je Stufe und Gerät, Modul-Lader, GitHub Pages, Web-App mit Offline-Start (Three.js mitgeliefert, P61), abgesicherte GitHub Actions (Audit C07).
+- **Gelände (Welle 0):** 15 Küsten, zehn erzeugte Küstentypen nach echten Häfen und fünf nach echten Karten (Marstrand, Punat, Shilshole Bay, Kotor, Porto Cervo), jede mit Seeweg hinaus, Bodden mit Seegatt (P62); Zonen und Seezugänge für die Wegsuche; Umgebung je Küste (P64); Marinebasis und Anlagen mit eigenen Piers (P63); Wetter und Effekte flüssig (P65). Bootswege (P66) laufen noch.
+- **Boote:** Anfahrt von weit draußen auf See aus verschiedenen Richtungen, Wartebojen seitlich neben den Stegen, Ankerfeld, Vorrang für Auslaufende (P66, PR 280, 327); Liegeplätze passgenau ohne Berührung von Steg, Kai, Land und Nachbarn ([liegeplaetze.md](liegeplaetze.md)); S, M, L, XL und XXL als 3D-Modelle, Einlaufen, Anlegen, Ablegen, Segel bergen, Vorbeifahrer, Kreuzfahrt- und Marinebesuche.
+- **Spielschleife Stufe 1 bis 6 an der Ostsee:** 5-Minuten-Tag mit Kurzhaltern und Übernachtern, 65 Bootsgeschichten, echte Liegeplatzdaten, 12 Stegbilder, Passregel, Selbst-Einfahren in die nächste freie Box (P10), Wunschplätze in Gold, Geduldsring, Ankunftsvorschau (P11), Anmeldung per Funk (P28), Liegegeld je Meter beim Festmachen mit Bezahlt-Wimpel, Grün-Rot-Schild an jeder Gastbox, Tagesausflüge, Hafenmeister-Rundgang, Umlegen liegender Boote (P33), Päckchen bei vollem Hafen (P27), Ruf über zwei Tage mit Wünschen je Bootsart und Auszeichnung (P19), Stufenziele, Abschlussziel Stufe 6 mit einem Zähler (P04), Boote auf wegfallenden Plätzen geregelt (P05).
+- **Hafenbüro (P02):** Funk mit Vorschau und Knopf "Kassieren", Kassenautomat für S und M, Vorschläge, Leitstelle; Sonderfälle bleiben beim Spieler.
+- **Bauen:** Baumodus mit Vorschau, Bestätigen und "Als Nächstes", Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen (P18), erstes Bauwerk geschenkt (J4), Stegprojekte, Stege nachrüsten mit Fingerstegen und Laternen (P30), Doppelboxen und Yachtsteg (P59), Versorgung, 21 Services mit eigener Wirkung (P23: Dienste, Trailerboote, Tagesgäste, Entweder-oder-Plätze, Bilanz), Angebote an Land, Großschiffpier; Gebäude, Dorf und Häuserzeile wachsen sichtbar je Stufe ([wachstum.md](wachstum.md)).
+- **Rückmeldung:** Bewertungen über dem Boot und Gästebuch (P14), Tagesabschluss als Zettel mit Karte (P15), Statistik der letzten 30 Tage und Saisonbilanz (P41), Auslastung an der Versorgung mit Schlange und Zeiger am Bildrand (P55), Feier beim Stufenaufstieg und Endlosspiel (P16), Logbuch mit Hafenchronik und Geschichten (P21), 30 Erfolge mit Dingen im Hafen (P22), ein Meldeplatz für alle kurzen Meldungen.
+- **Hafenleben:** Dauerlieger mit Saisonvertrag und Obergrenze (P01), Stammgäste, Tagesziele zum Auswählen (P13), Wetter an der Flagge, neun Ereignisse zum Vorbereiten mit Ergebnis und Nachspiel, Regatta mit Bahn draußen (P24), Winterpause mit Winterarbeiten und Krantagen (P20), Menschen mit Wegfindung auf dem echten Gelände, Gesten Hafenhorn, Fernglas, Möwen, Wellenring und Glocke (P26), Ton und Musik, Fotomodus, Hafen schauen.
+- **Oberfläche und Technik:** Pixel-Oberfläche für alle Geräte, Tempo Pause, 1x, 3x, 8x ohne automatische Bremsung (P07), Einstieg mit Hinweisen und Hilfe (P03, J5 offen), Einstellungen für Sicht und Bewegung (P50), bis zu 8 Speicherplätze mit "Neues Spiel" (P09), eine Zahlenquelle `economy.js` mit Übersicht `docs/zahlen.md` (P06).
+- **Prüfwerkzeuge:** automatische Tests auf Handy, Tablet und PC (`tests/pruefen.sh`), Zeitraffer, Schichttest, Härtetest in 16 Extremlagen (`tests/extrem/`), Liegeplatzprüfung (`tools/liegeplaetze/pruefen.mjs`).
 - **Pixel-Fassung** als eigene Seite unter `pixel/`.
-- **Balancing:** `tools/balance.mjs` mit den echten Regeln; zuletzt 225 bis 239 Spieltage bis zum Abschluss der Ostsee, rund 7,5 bis 8 Stunden bei 1x.
+- **Balancing:** `tools/balance.mjs` mit den echten Regeln; seit P17 Teil 2 (PR 331) rund 100 Spieltage bis zum Abschluss der Ostsee (geschickt 99, gemütlich 113), 8 bis 9,5 Stunden bei 1x; Rechnung und Zeitraffer liegen 2,7 % auseinander.
 
 ### Als Nächstes
 
-- **Grundprobleme:** Stau und Fahrten über Land oder durch Stege ab Stufe 3 (P66, P62), Tempo des Aufstiegs angleichen (P17 mit A10, Ü16), Fehler aus Jorvens Feature-Test, Rest des Einstiegs (P03) und des Winters (P20).
-- **Kernschleife:** Erfolge (P22, läuft).
-- **Extras, Welle 3 und 4:** Ereignisse Teil 2 (P24), Anmeldung per Funk (P28, läuft), Services mit eigener Wirkung (P23), Päckchen liegen (P27), danach die übrigen Pakete P25 bis P53, P59 und P60 in der Reihenfolge des [Arbeitsplans](arbeitsplan.md).
+- **Welle 0 abschließen:** Pulk beim gleichzeitigen Ablegen (P66), Großschiffwege an allen 15 Küsten (P84), danach Abnahme-Serie über 15 Küsten.
+- **Grundprobleme und Prüfung:** Zusammenspiel-Prüfung in drei Threads (P85), Prüfwerkzeuge auf 15 Küsten und den neuen Takt (P87), Rest des Einstiegs (J5) und des Winters (G5, H5, P20).
+- **Extras, Welle 3 und 4:** Bootsgeschichten fertig (P86), Wind (P34), neue Wünsche (P31), Preisstufe (P35), Flottillen (P32), Stammgäste mit Wirkung (P25), danach die übrigen Pakete P29 bis P53 und P60 in der Reihenfolge des [Arbeitsplans](arbeitsplan.md).
 
-### Nach 1.0 (Welle 5)
+### Nach 1.0 (Welle 5 und 6)
 
 - **Nordsee** mit Deich, Watt und Gezeiten (P57).
-- **Ausbau Stufe 7 bis 20** (Welle 6, P67 bis P82, geplant in [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md)): Der Heimathafen wächst bis Ausbaustufe 9 (Hafenstadt, Fährhafen, Werfthafen), danach übernimmt der Spieler weitere Häfen an Ost- und Nordsee und baut einen Hafenverbund mit Spezialhäfen, Offshore-Hafen, Kreuzfahrthafen, Großseglertreffen und Kanalhafen bis Stufe 20. Nichts davon ist im Spiel.
+- **Ausbau Stufe 7 bis 20** (Welle 6, P67 bis P82, geplant in [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md), am 15.11. an den neuen Takt angepasst): Der Heimathafen wächst bis Ausbaustufe 9 (Hafenstadt, Fährhafen, Werfthafen), danach übernimmt der Spieler weitere Häfen an Ost- und Nordsee und baut einen Hafenverbund mit Spezialhäfen, Offshore-Hafen, Kreuzfahrthafen, Großseglertreffen und Kanalhafen bis Stufe 20. Nichts davon ist im Spiel.
 - **Online** mit Hafenname, Bestenliste und Gastbooten anderer Spieler (P58), als letzter Schritt, erst alles lokal.
 
 ## 14. Entscheidungen
@@ -357,7 +367,7 @@ Stand dieses Abschnitts: 14.11.2026, abgeglichen mit `main` nach PR 285.
 | Wartende Boote | an Wartebojen oder im Ankerfeld, keine Leiste |
 | Liegegeld | beim Festmachen, bezahlte Boote tragen einen Wimpel |
 | Oberfläche | Pixel-Schilder statt weißer Leisten, Knöpfe in Daumenreichweite |
-| Kamera | frei neigen und drehen, am PC mit gedrückter Maus (in Arbeit, P47) |
+| Kamera | frei neigen und drehen, am PC mit gedrückter rechter Maustaste (PR 137) |
 | Vorspulen | Pause, 1x, 3x, 8x von Anfang an, Taste F für 3x (Jorven, 12.11.2026) |
 | Schauplatz | Zwei Regionen: Ostsee (Start) und Nordsee (danach). Gebäude als Mix aus deutschen, dänischen und schwedischen Häfen |
 | Dritte Zahl für Tagesgäste | nein. Tagesgäste bringen mehr Einnahmen und sind als Menschen im Hafen zu sehen |
@@ -370,6 +380,12 @@ Stand dieses Abschnitts: 14.11.2026, abgeglichen mit `main` nach PR 285.
 | Dauerlieger | Spieler legt fest, welche Boxen Dauerplätze sind, höchstens ein Viertel der Gastboxen, Saisonpacht im Voraus (12.11.2026, Einzelheiten Roadmap P01) |
 | Feature-Vorschläge aus dem Überblick | alle 42 werden gebaut ([roadmap.md](roadmap.md)) |
 | Online | als letzter Schritt, erst alles lokal |
+| Tempo beim Vorspulen | läuft durch, nichts bremst automatisch (14.11.2026) |
+| Woher Boote kommen | von außerhalb der ganz herausgezoomten Karte über See, nie über Land, aus verschiedenen Richtungen; Wartebojen seitlich, getrennte Wege für Ein- und Ausfahrt, Ausfahrende haben Vorrang (14.11.2026) |
+| Länge eines Spieltags | 5 Minuten, mit Kurzhaltern und Bootsgeschichten (14.11.2026, PR 319) |
+| Hafen je Stufe | Gebäude, Dorf und Häuserzeile wachsen sichtbar mit (14.11.2026, PR 303) |
+| Ausbau nach Stufe 6 | bis Stufe 20 als Hafenverbund, erst geplant, gebaut nach Welle 4 und Nordsee (13.11.2026) |
+| Warten auf Jorven | nichts wartet; Threads entscheiden selbst und schreiben es auf (12.11.2026) |
 
 **Noch offen:** Frage 9 (Stil und Rolle der Pixel-Fassung, siehe [Roadmap](roadmap.md#offene-fragen-an-jorven)). Die Arbeitsliste steht in [roadmap.md](roadmap.md).
 

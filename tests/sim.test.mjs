@@ -147,7 +147,9 @@ test('Hafenbüro mit Automatik weist wartende Boote zu; volle Bojen kosten keine
 
 test('Hafengeld wird beim Anlegen fällig: Wünsche, Kapazität der Toilette, Strom vom Platz', () => {
   const s = quietState({ stage: 3, money: 0 });
-  s.facilities.wc = 1; // versorgt 6 Boote am Tag
+  s.facilities.wc = 1;
+  // Die Toilette hat heute nur noch 6 Plätze frei (Kapazität aus economy.js)
+  s.served = { ...(s.served || {}), wc: sim.facilityCapacity(s, ctx, 'wc') - 6 };
   const boats = [];
   const fees = [];
   for (let i = 0; i < 7; i++) {
@@ -404,14 +406,15 @@ test('Hooks am Abend, in der Nacht und bei Ankunft', () => {
   assert.ok(s.stats.totalIncome >= 7);
 });
 
-test('Jahreslauf: 30 Tage Saison, 3 Tage Winter ohne Gäste', () => {
+test('Jahreslauf: Saison und Winter ohne Gäste wie in economy.js', () => {
   const s = createState({ seed: 4 });
+  const S = ECONOMY.zeit.saisonTage, W = ECONOMY.zeit.winterTage;
   assert.deepEqual(sim.season(s, ctx), { year: 1, day: 1, winter: false });
-  s.day = 31;
+  s.day = S + 1;
   assert.equal(sim.season(s, ctx).winter, true);
-  s.day = 34;
+  s.day = S + W + 1;
   assert.deepEqual(sim.season(s, ctx), { year: 2, day: 1, winter: false });
-  s.day = 31;
+  s.day = S + 1;
   const ev = sim.tick(s, ctx, 0);
   assert.equal(s.upcoming.length, 0);
   assert.equal(ev[0].winter, true);
@@ -439,7 +442,7 @@ test('Services kaufen: Stufe, Geld, Höchststufe', () => {
   assert.equal(sim.upgradeFacility(s, ctx, 'wc').reason, 'money');
   s.money = 1000;
   assert.equal(sim.upgradeFacility(s, ctx, 'wc').ok, true);
-  assert.equal(s.money, 920);
+  assert.equal(s.money, 1000 - ECONOMY.bauwerke.wc.stufen[0].kosten);
   assert.equal(sim.upgradeFacility(s, ctx, 'wc').reason, 'stage');
   assert.equal(sim.upgradeFacility(s, ctx, 'dusche').reason, 'stage');
   assert.equal(sim.facilityUpgrade(s, ctx, 'gibtsnicht'), null);

@@ -187,7 +187,9 @@ export function init(game) {
     return { x: Math.cos(a) * ring * d, z: Math.sin(a) * ring * d };
   }
 
-  function platzBerth(platzId) {
+  // info: das Boot, das an den Platz soll (nur fuer Paeckchenplaetze 'B27+' noetig, P27)
+  function platzBerth(platzId, info = null) {
+    if (game.sim?.istPaeckchen?.(platzId)) return game.paeckchen?.berth?.(platzId, info) ?? null;
     const p = HAFEN.plaetze.find((q) => q.id === platzId);
     if (!p) return null;
     const st = stufe();
@@ -446,7 +448,7 @@ export function init(game) {
       z0: Math.min(BEREICH.z0, ab(Math.min(...zs) - 20, BEREICH.z0)), z1: Math.max(BEREICH.z1, Math.max(...zs) + 20),
     };
   }
-  let karte = null, karteSig = '', karteAlt = true;
+  let karte = null, karteSig = '', karteAlt = true, karteHindernisse = { linien: [], rechtecke: [] };
   const flaechen = new Map();         // Groessenklasse -> { r, t, sektoren }
   function karteJetzt() {
     const st = stufe();
@@ -473,6 +475,7 @@ export function init(game) {
       linien.push({ punkte: [k, { x: k.x + 0.01, z: k.z }], breite: 2 * (w * 0.95 + 0.9) });
     }
     karte = baueKarte({ tiefe, bereich: bereichMit(sb), ...h, linien, weich, engRadius: 5 });
+    karteHindernisse = { linien, rechtecke: h.rechtecke ?? [] };
     karteSig = sig;
     karteAlt = false;
     flaechen.clear();
@@ -654,15 +657,68 @@ export function init(game) {
     }
     return out.map((e) => ({ ...zellMitte(k, e.c), nx: e.nx, nz: e.nz }));
   }
-  // Vom Kartenrand weiter hinaus, bis man es nicht mehr sieht (hoechstens 150 m)
+  // Vom Kartenrand weiter hinaus, bis man es nicht mehr sieht (hoechstens 24 Schritte zu 15 m).
   // Nur ueber Wasser mit mindestens t Tiefe (ausserhalb der Karte kennt nur das Gelaende die Tiefe).
-  function hinaus(p, L, t = 1) {
-    const tief = (x, z) => (game.landscape?.tiefeBei?.(x, z) ?? 99) >= t;
-    const q = { x: p.x, z: p.z };
-    const weiter = () => tief(q.x + p.nx * 15, q.z + p.nz * 15) && tief(q.x + p.nx * 7.5, q.z + p.nz * 7.5);
-    for (let i = 0; i < 10 && game.boatAnim.imBild?.(q.x, q.z, L + 6) && weiter(); i++) { q.x += p.nx * 15; q.z += p.nz * 15; }
-    if (q.x !== p.x || q.z !== p.z || !(p.nx || p.nz) || !weiter()) return q;
-    return { x: p.x + p.nx * 15, z: p.z + p.nz * 15 };
+  // B: Rumpfbreite. Geprueft wird die ganze Breite (plus 1 m), nicht nur die Mittellinie: Ein 13 m
+  // breites Schiff streifte sonst eine Sandbank neben seinem Kurs (Haertetest 15.11., Korvette).
+  // Der Kurs folgt dem tiefen Wasser bis 60 Grad schraeg zum Rand (schraeges Seegatt im Bodden),
+  // bleibt aber immer nach draussen gerichtet.
+  // Ergebnis: Punkte nach p (ohne p); leer, wenn es von p aus nicht weitergeht.
+  function hinaus(p, L, t = 1, B = 0) {
+    const h = B > 0 ? B / 2 + 1 : 0;
+    const tief1 = (x, z) => (game.landscape?.tiefeBei?.(x, z) ?? 99) >= t;
+    const frei = (x, z, ux, uz) => tief1(x, z) && (!h || (tief1(x - uz * h, z + ux * h) && tief1(x + uz * h, z - ux * h)));
+    if (!(p.nx || p.nz)) return [];
+    const out = [];
+    let q = { x: p.x, z: p.z }, ux = p.nx, uz = p.nz;
+    for (let i = 0; i < 24 && game.boatAnim.imBild?.(q.x, q.z, L + 6); i++) {
+      // Erst ein Kurs, auf dem auch der Bug (halbe Laenge voraus) im tiefen Wasser liegt, sonst kuerzer
+      let kurs = null;
+      for (const bug of [L / 2, L / 4, 0]) {
+        for (const w of [0, 20, -20, 40, -40, 60, -60]) {
+          const a = w * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+          const vx = ux * c - uz * s, vz = ux * s + uz * c;
+          if (vx * p.nx + vz * p.nz < 0.45) continue;
+          if (!frei(q.x + vx * 7.5, q.z + vz * 7.5, vx, vz)) continue;
+          let ok = true;
+          for (let d = 15; ok && d <= 15 + bug + 0.1; d += 8) ok = frei(q.x + vx * d, q.z + vz * d, vx, vz);
+          if (ok) { kurs = [vx, vz]; break; }
+        }
+        if (kurs) break;
+      }
+      if (!kurs) break;
+      [ux, uz] = kurs;
+      q = { x: q.x + ux * 15, z: q.z + uz * 15 };
+      out.push(q);
+    }
+    return out;
+  }
+  // Kuerzt den Weg ab Index ab: laesst Ecken aus, wo die gerade Linie samt Rumpfbreite (plus 1 m) im
+  // tiefen Wasser liegt. Nur am Ende des Wegs (Kartenrand und draussen, weit weg von Stegen, die das
+  // Gelaende nicht kennt). Sonst fuhr die Korvette im Bodden erst in die Ecke am Kartenrand und streifte
+  // dort das Ufer, bevor sie ins Seegatt drehte.
+  function eckenKappen(weg, ab, t, B) {
+    const h = B / 2 + 1;
+    const tief1 = (x, z) => (game.landscape?.tiefeBei?.(x, z) ?? 99) >= t;
+    const linieFrei = (a, b) => {
+      const d = Math.hypot(b.x - a.x, b.z - a.z);
+      if (d < 1) return true;
+      const ux = (b.x - a.x) / d, uz = (b.z - a.z) / d;
+      for (let s = 0; s <= d; s += 4) {
+        const x = a.x + ux * s, z = a.z + uz * s;
+        if (!tief1(x, z) || !tief1(x - uz * h, z + ux * h) || !tief1(x + uz * h, z - ux * h)) return false;
+      }
+      return true;
+    };
+    const out = weg.slice(0, ab + 1);
+    let i = ab;
+    while (i < weg.length - 1) {
+      let j = Math.min(weg.length - 1, i + 6);
+      while (j > i + 1 && !linieFrei(weg[i], weg[j])) j--;
+      out.push(weg[j]);
+      i = j;
+    }
+    return out;
   }
   // Liegeplaetze der Stufe in Weltmetern (Vorbeifahrer bleiben davon weg)
   function plaetzeWelt() {
@@ -696,12 +752,26 @@ export function init(game) {
       if (!rand.length) continue;
       const ziel = o.nahBei ?? von;
       rand.sort((a, b) => Math.hypot(a.x - ziel.x, a.z - ziel.z) - Math.hypot(b.x - ziel.x, b.z - ziel.z));
-      for (const p of rand.slice(0, 3)) {
+      // Lieber ein Ausgang, hinter dem das ganze Schiff frei aus dem Bild kommt; sonst der, hinter dem
+      // es am weitesten im tiefen Wasser hinaus kommt (nicht am Kartenrand stehen bleiben)
+      let notfall = null, notfallN = -1;
+      // die naechsten Ausgaenge und dazu welche rundum verteilt (der alte Seepunkt kann in einer Bucht liegen)
+      const weit = rand.slice(10);
+      const wahl = [...rand.slice(0, 10), ...Array.from({ length: Math.min(10, weit.length) }, (_, i) => weit[Math.floor(i * weit.length / Math.min(10, weit.length))])];
+      for (const p of wahl) {
         const w = route(k, von, p, { r: m.r, rMin: m.hart, t, rechts: 0, flachErlaubt: false });
         if (!w.ok || !w.amZiel) continue;
-        erg = [...w.punkte, hinaus(p, info.length, t)];
+        const raus = hinaus(p, info.length, t, info.beam);
+        const weg = eckenKappen([...w.punkte, ...raus], Math.max(0, w.punkte.length - 3), t, info.beam);
+        const ende = weg[weg.length - 1];
+        if (game.boatAnim.imBild?.(ende.x, ende.z, info.length + 6)) {
+          if (raus.length > notfallN) { notfall = weg; notfallN = raus.length; }
+          continue;
+        }
+        erg = weg;
         break;
       }
+      erg ??= notfall;
       if (erg) break;
     }
     seeWegCache.set(key, erg);
@@ -744,7 +814,10 @@ export function init(game) {
         for (let s = 1; s <= st; s++) pts.push({ x: p.x + (q.x - p.x) * s / st, z: p.z + (q.z - p.z) * s / st });
       }
       if (pts.some((p) => nah(p, abstand))) continue;
-      return { start: hinaus(a, L, m.t), punkte: [{ x: a.x, z: a.z }, ...w.punkte, hinaus(b, L, m.t)] };
+      const rein = hinaus(a, L, m.t, info.beam).reverse();
+      const start = rein.shift() ?? { x: a.x + a.nx * 15, z: a.z + a.nz * 15 };
+      const raus = hinaus(b, L, m.t, info.beam);
+      return { start, punkte: [...rein, { x: a.x, z: a.z }, ...w.punkte, ...(raus.length ? raus : [{ x: b.x + b.nx * 15, z: b.z + b.nz * 15 }])] };
     }
     return null;
   }
@@ -874,12 +947,19 @@ export function init(game) {
   // Beim Laden einmal rechnen (erster Aufruf kostet bis 0,6 s), nicht erst beim ersten Boot
   setTimeout(() => { zugaenge({ length: 8, beam: 3, draft: 1.2 }); zugaenge({ length: 30, beam: 8, draft: 3.5, size: 'XL' }); }, 0);
 
+  let erstesGezeigt = false;
+  game.on('sim:change', (d) => { if (d?.reason === 'new') erstesGezeigt = false; });
   game.on('boot-kommt', (info) => {
     if (!info || info.id == null) return;
     if (bojenStufe !== stufe()) baueBojen();
     const e = erzeuge(info);
     const ziel = warteplatz(info.boje ?? 0, e.anim);
-    const zugang = waehleZugang(e.anim.info, info.herkunft);
+    // Erstes Boot eines neuen Spiels (Jorven: nach wenigen Sekunden da): startet kurz vor dem Bildrand
+    // statt weit draussen am Seezugang. Alle anderen reisen von weit draussen an.
+    const st = game.sim?.state;
+    const erstes = !erstesGezeigt && st?.day === 1 && (st.clock ?? 0) < 30 && !(st.guests > 0);
+    erstesGezeigt = true;
+    const zugang = erstes ? null : waehleZugang(e.anim.info, info.herkunft);
     if (zugang) {
       const { see } = seeTeil(zugang);
       e.pick = e.anim.model.userData.pick;
@@ -903,7 +983,7 @@ export function init(game) {
     // Segelboote bergen die Segel vor der Boje (dock() erledigt das), dann Leine an die Boje.
     // Kommen mehrere im selben Augenblick, laufen sie nacheinander los (keine Wellen).
     const jetzt = game.time ?? 0;
-    ankunftT = Math.max(jetzt, ankunftT + 3 + Math.random() * 6);
+    ankunftT = erstes ? jetzt : Math.max(jetzt, ankunftT + 3 + Math.random() * 6);
     e.anim.dock(ziel, { route: true, einfahrt: true, verzoegerung: ankunftT - jetzt });
   });
 
@@ -911,7 +991,7 @@ export function init(game) {
     const neu = !boats.has(id);
     const e = boats.get(id) ?? (sucheInfo(id) && erzeuge(sucheInfo(id)));
     if (!e) return;
-    const b = platzBerth(platz);
+    const b = platzBerth(platz, e.anim.info);
     if (!b) return;
     if (neu) {
       // ohne vorheriges boot-kommt (z. B. Fischer nach dem Aufstieg, stationBoat): liegt gleich am Platz
@@ -929,6 +1009,9 @@ export function init(game) {
     fahreZu(e, platz, b, sofort);
   });
 
+  // Paeckchen (P27): Liegt aussen noch ein Boot an diesem, legt es erst ab, wenn das aeussere fort ist
+  const paeckchenFrei = (anim) => !game.paeckchen?.blockiert?.(anim.id);
+
   // sofort: vom Spieler umgelegt (P33), das Boot legt ohne gemeinsamen Ablegetakt gleich ab
   function fahreZu(e, platz, b, sofort = false) {
     e.spaeter = null;
@@ -936,7 +1019,9 @@ export function init(game) {
     // ab Stufe 3 von der Reede durch Einfahrt und Durchstich in den See.
     // Liegt noch ein Boot in der Box (es faehrt heute ab), wartet das neue, bis die Box frei ist.
     // von der Boje oder vom Anker los im gemeinsamen Ablegetakt (sonst bei 'Alle einweisen' ein Pulk)
-    e.anim.dock(b, { route: true, waitFor: () => platzFrei(platz, b, e.anim), takt: sofort ? null : ablegeTakt });
+    // Paeckchen (P27): erst los, wenn das Boot innen fest liegt (sonst laege das aeussere ihm im Weg)
+    const frei = b.kind === 'paeckchen' ? () => platzFrei(platz, b, e.anim) && game.paeckchen?.innenFest?.(platz) !== false : () => platzFrei(platz, b, e.anim);
+    e.anim.dock(b, { route: true, waitFor: frei, takt: sofort ? null : ablegeTakt, warte: paeckchenFrei });
   }
 
   // Stufenausbau mit weniger Bojen (Spielregel settleWaitSpots): ein wartendes Boot verholt an eine
@@ -967,7 +1052,7 @@ export function init(game) {
     entferneMuenze(id, 0);
     // Abends legen viele zugleich ab: gestaffelt, 3 bis 6 s Abstand, damit es wie geordneter
     // Verkehr aussieht und nicht wie ein Pulk an der Einfahrt (hoechstens 30 s Warten)
-    e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true, takt: ablegeTakt, see }).then((ok) => {
+    e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true, takt: ablegeTakt, see, warte: paeckchenFrei }).then((ok) => {
       if (ok && boats.get(id) === e) entferne(id);
     });
   }
@@ -1406,7 +1491,7 @@ export function init(game) {
     const weg = [ziel];
     e.draussen = true;
     entferneMuenze(id, 0);
-    e.anim.undock(weg, { sails: segel, route: true, takt: ablegeTakt, see: raus ? raus.slice(1) : undefined }).then((ok) => {
+    e.anim.undock(weg, { sails: segel, route: true, takt: ablegeTakt, see: raus ? raus.slice(1) : undefined, warte: paeckchenFrei }).then((ok) => {
       if (!ok || boats.get(id) !== e) return;
       if (tage > 0) {
         // mehrtaegiger Toern: aus dem Bild, kommt mit 'dauer:einlaufen' zurueck
@@ -1513,7 +1598,7 @@ export function init(game) {
       e.faehrt = false;
       if (e.anim.state !== 'idle' && e.anim.state !== 'moored') continue;   // faehrt gerade
       if (e.draussen) continue;                                          // Dauerlieger auf Runde
-      const b = info.platz ? platzBerth(info.platz) : warteplatz(info.boje ?? 0, e.anim);
+      const b = info.platz ? platzBerth(info.platz, e.anim.info) : warteplatz(info.boje ?? 0, e.anim);
       if (!b) continue;
       // Stufenausbau (nicht Laden): liegt das Boot sichtbar woanders, faehrt es hin statt zu springen
       const weit = Math.hypot((b.x ?? e.anim.x) - e.anim.x, (b.z ?? e.anim.z) - e.anim.z) > 1.5;
@@ -1550,6 +1635,12 @@ export function init(game) {
     get boote() { return [...boats.values()].map((e) => ({ id: e.info.id, zustand: e.anim.state, anim: e.anim })); },
     boot: (id) => boats.get(id)?.anim ?? null,
     bojen: () => bojenPos(),
+    // Liegeplatz in Weltkoordinaten wie beim Anlegen (Paeckchen, P27) und freies Wasser der Fahrwasser-Karte
+    platzBerth: (id, info = null) => platzBerth(id, info),
+    frei: (x, z, r, t = 0) => befahrbar(karteJetzt(), x, z, r, t),
+    // Stege, Molen und Platzrechtecke der aktuellen Karte (Weltkoordinaten, world/fahrwasser.js)
+    hindernisse: () => { karteJetzt(); return karteHindernisse; },
+    paeckchenFrei,
   };
 }
 
