@@ -350,3 +350,31 @@ test('Reede liegt an der offenen See: wo die Natur sie einschließt, führt ein 
   } finally { formSetzen(1, 1); }
   assert.ok(mitSeeweg >= 2, 'kein Küstentyp mit Seeweg geprüft');
 });
+
+// Funde aus dem Wasserbild-Vergleich (P87): Rechnung und gezeichnetes Netz dürfen nicht auseinanderlaufen.
+test('Stufe 6: kein Wasserspalt zwischen Nehrungsstraße und den Anlagenflächen dahinter', () => {
+  const R = REGIONEN.ostsee;
+  try {
+    for (const f of FORMEN) {
+      formSetzen(f.nr, f.nr * 13 + 1);
+      for (let x = -340; x <= 3; x += 1) {
+        if (punkt(x, 194, 6, R).h < 0 || punkt(x, 196.5, 6, R).h < 0) continue;
+        for (const y of [195.25, 195.6, 195.9, 196.2]) {
+          assert.ok(punkt(x, y, 6, R).h >= 0, `Küste ${f.nr}: Wasser bei ${x}/${y} zwischen Straße und Anlage`);
+        }
+      }
+    }
+  } finally { formSetzen(1, 1); }
+});
+
+test('Ab Stufe 3 bleibt am Hafenbecken kein schmaler Sandstreifen und kein einzelner Landpunkt stehen', () => {
+  const R = REGIONEN.ostsee;
+  try {
+    formSetzen(3, 40);
+    for (let y = 166; y <= 178; y++) for (let x = -80; x <= -56; x++) {
+      assert.ok(punkt(x, y, 3, R).h < 0, `Küste 3: Land bei ${x}/${y} im Hafenwasser`);
+    }
+    formSetzen(10, 131);
+    for (const st of STUFEN) assert.ok(punkt(-170, 70, st, R).h < 0, `Küste 10 Stufe ${st}: einzelner Landpunkt bei -170/70`);
+  } finally { formSetzen(1, 1); }
+});

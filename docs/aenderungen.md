@@ -6,6 +6,7 @@ Stand: 15.11.2026 (bis PR 332). Status: gepflegt. Für Spielerinnen und Spieler:
 
 ## 15.11.2026
 
+- Kleine Fehler am Ufer behoben: Im Seehafen (Stufe 6) klafft kein schmaler Wasserspalt mehr zwischen der Straße auf der Nehrung und den Anlagen dahinter, und ab Stufe 3 bleiben am Rand des Hafenbeckens keine unsichtbaren Sandstreifen oder einzelnen Landpunkte stehen. Was man als Wasser sieht, ist jetzt überall auch Wasser für die Boote.
 - Legt nach dem Einstieg der erste Gast ab und zeigt seine Note, erklärt ein Tipp einmal, was der Ruf ist: Jeder Gast bewertet, bis 5 für erfüllte Wünsche und einen guten Platz, der Ruf oben ist der Schnitt der letzten zwei Tage. Ein Kreis zeigt auf den Ruf.
 - Kurzhalter legen erst ab, wenn sie sichtbar festgemacht haben, und liegen dann mindestens eine Weile. Kurz vor Abend fährt kein Kurzhalter mehr ein. Das erste Boot eines neuen Spiels kommt vom Bildrand und ist nach wenigen Sekunden da.
 - Neu: Päckchen. Ist für ein wartendes Boot keine Box frei, leuchten weiße Rahmen neben gleich großen oder größeren Booten an Stegköpfen. Dorthin gezogen, legt es sich längsseits daneben, mit Fendern und Leinen zum inneren Boot. Es zahlt das halbe Liegegeld, bleibt eine Nacht, und beide Crews geben einen halben Anker weniger. Das innere Boot kann erst ablegen, wenn das äußere fort oder in eine Box verholt ist.
