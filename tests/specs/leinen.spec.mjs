@@ -40,8 +40,9 @@ function pruefer() {
       if (G.boatView.boot(a.id) !== a) grund.push('Boot gehoert zu keinem Spielboot');
       if (!a.berth) grund.push('Leinen ohne Liegeplatz');
       const art = String(a.berth?.id ?? '');
-      // fest in einer Box, ohne Auftrag (legt nicht gerade ab), aber die Spielregeln kennen es nicht
-      if (a.moored && !a.task && !a.tasks.length && art && !art.startsWith('boje') && !art.startsWith('anker')) {
+      // fest in einer Box, ohne Auftrag (legt nicht gerade ab), aber die Spielregeln kennen es nicht.
+      // Ausnahme Tankstelle (P86): ein abgereistes Boot macht dort auf dem Weg nach See kurz fest.
+      if (a.moored && !a.task && !a.tasks.length && art && art !== 'tankstelle' && !art.startsWith('boje') && !art.startsWith('anker')) {
         const geht = Object.values(st.leaving || {}).some((l) => String(l.boatId) === String(a.id));
         if (!st.boats[a.id] && !geht) grund.push('Spielregeln kennen das Boot nicht');
       }
