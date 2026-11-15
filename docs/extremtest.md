@@ -111,6 +111,7 @@ Alles über Schnittstellen, die das Spiel schon hat, im Browser per `page.evalua
 
 - Software-Grafik im Container: 5 bis 12 Bilder je Sekunde. Bildraten sagen wenig über echte Geräte, Vergleiche zwischen Lagen schon.
 - Die Lagen würfeln Boote; zwei Läufe zeigen nicht dieselben Einzelfunde. Wiederkehrende Funde (gleiche Stelle, gleiche Art) zählen.
+- Bei Testtempo rechnet das Spiel in großen Schritten. Lange Leinen beim Ablegen kamen im vollen Lauf am 15.11. nur so vor (81 Mal), mit `--testtempo 1` nie; sie stehen darum nur als Hinweis im Bericht. Verdächtiges immer mit `--testtempo 1 --lagen <id>` gegenprüfen.
 - `istWasser` und das Bild können am Ufer leicht abweichen, darum gilt für Menschen ein Meter Abstand vom Ufer.
 
 ## Ergebnisse

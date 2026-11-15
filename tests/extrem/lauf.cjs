@@ -181,6 +181,8 @@ async function lageLaufen({ browser, url, geraet, lage, v, q, zahlen }) {
       for (const e of alle[k] ?? []) {
         let art = k;
         if (k === 'ueberlapp' && e.st !== 'moored') art = 'beruehrt';
+        // Lange Leinen beim Ablegen kamen nur bei Testtempo vor (große Schritte), bei 3x nie: dann nur Hinweis
+        if (k === 'leinen' && !lage.echteZeit && TESTTEMPO > 1 && /reicht/.test(e.st)) art = 'leinenTempo';
         const key = k === 'sim' || k === 'regeln' ? `${e.art}${e.id != null ? ' ' + e.id : ''}${e.platz ? ' ' + e.platz : ''}${e.wert != null ? ' (' + e.wert + ')' : ''}`
           : (k === 'fest' || k === 'ueberlapp') ? `${e.a} + ${e.b} (${e.g}, ${e.st})` : `${e.id}${e.g ? ' (' + e.g + ')' : ''}: ${e.st ?? ''}${e.platz ? ', ' + e.platz : ''}`;
         const m = neu(art, key, { p: e.p?.map((x) => Math.round(x)) });

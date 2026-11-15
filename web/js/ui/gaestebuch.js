@@ -205,6 +205,9 @@ export function init(game) {
       // sanft zur neuen Lage gleiten statt springen
       x.versatz = x.versatz + ((p.y - bh - oben) - x.versatz) * 0.35;
       oben = p.y - bh - x.versatz;
+      // Boot am Bildrand: Blase ganz im Bild lassen statt halb abgeschnitten (Härtetest 15.11.)
+      links = Math.max(4, Math.min(links, (spiel?.width ?? innerWidth) - bw - 4));
+      oben = Math.max(4, Math.min(oben, (spiel?.height ?? innerHeight) - bh - 4));
       belegt.push({ links, rechts: links + bw, oben, unten: oben + bh });
       x.el.style.transform = `translate(${Math.round(links)}px, ${Math.round(oben)}px)`;
       const L = links + spiel.left, O = oben + spiel.top;

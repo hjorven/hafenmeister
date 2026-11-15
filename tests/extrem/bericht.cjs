@@ -13,6 +13,7 @@ const NAMEN = {
   abgleich: 'Spiel und Bild uneinig', text: 'Kaputte Zahl oder Text in der Oberfläche', regeln: 'Spielstand widersprüchlich',
   ui: 'Bedienung verdeckt oder abgeschnitten', speichern: 'Speichern und Laden',
   boje: 'Gilt als an der Boje, ist dort aber nicht zu sehen (über 20 Spielsekunden)',
+  leinenTempo: 'Lange Leine bei Testtempo (bei 3x nicht gesehen, mit --testtempo 1 gegenprüfen)',
   beruehrt: 'Boote berühren sich kurz in Fahrt', pulk: 'Pulk (12+ fahrende Boote auf 45 m)',
 };
 const FUND = new Set(['boje', 'fehler', 'land', 'steg', 'fest', 'ueberlapp', 'haengt', 'lange', 'sim', 'menschen', 'leinen', 'xxl', 'abgleich', 'text', 'regeln', 'ui', 'speichern']);
