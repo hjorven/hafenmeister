@@ -20,7 +20,7 @@ Stand 15.11.2026, 09:30 UTC.
 | Thema | Thread | Paket | Stand | PR |
 |---|---|---|---|---|
 | Boote: Pulk und "ineinander fest" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht) | "Staus an Bojen und Ankerfeld auflösen" | P66 | läuft; PR 280, 327 und 332 gemergt | - |
-| Bootsgeschichten Rest: Startsignal, Siegerehrung, Regatta im Logbuch, Gepäck, Tanksteg, Gang in den Ort | "Längere Tage und Bootsgeschichten einbauen" | P86 | wartet auf eine Antwort | - |
+| Bootsgeschichten Rest: Startsignal, Siegerehrung, Regatta im Logbuch, Gepäck, Tanksteg, Gang in den Ort | "Bootsgeschichten fertig erzählen" | P86 | fertig (PR folgt) | - |
 | Roadmap-Seite: P27 und P17 Teil 2 mit Bildern | "Roadmap interaktiv im Repo zeigen" | - | PR offen | 333 |
 | Doku auf Stand: Roadmap, Plan, README, Arbeitsplan, Ausbau 7 bis 20 | "Roadmap, Plan und README nachziehen" | - | PR folgt | - |
 | Schichttest, Zeitraffer, Feature-Einzeltest | Prüf-Threads | - | laufen | - |

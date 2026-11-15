@@ -1584,9 +1584,11 @@
    "id": "P86",
    "titel": "Bootsgeschichten fertig erzählen",
    "inhalt": "Regatta: Startsignal mit Ton, Siegerehrung am Segelclub, Ergebnis im Logbuch; Gepäck beim Crewwechsel sichtbar, Halt am Tanksteg, Gang \"in den Ort\" (bootsgeschichten.md, Abschnitt 5)",
-   "thread": "neu",
+   "thread": "fertig, PR 33x",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    33
+   ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
    "status": "offen",
