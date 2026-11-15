@@ -33,13 +33,13 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 
 **[Roadmap interaktiv ansehen](https://hjorven.github.io/hafenmeister/roadmap/)**: alle Pakete mit Filter nach Welle und Status, Suche und den Einzelpunkten je Paket. Quelle ist [docs/roadmap.md](docs/roadmap.md).
 
-<a href="https://hjorven.github.io/hafenmeister/roadmap/"><img src="docs/roadmap-fortschritt.svg" alt="Fortschritt der Roadmap: 33 von 80 Paketen erledigt" width="100%"></a>
+<a href="https://hjorven.github.io/hafenmeister/roadmap/"><img src="docs/roadmap-fortschritt.svg" alt="Fortschritt der Roadmap: 34 von 80 Paketen erledigt" width="100%"></a>
 
 | Welle | Thema | Fortschritt | erledigt | angefangen | offen |
 |---|---|---|---|---|---|
 | [0](https://hjorven.github.io/hafenmeister/roadmap/#welle=0) | Gelände und Bootswege | `█████████░` 90 % | 4 | 1 | 0 |
 | [1](https://hjorven.github.io/hafenmeister/roadmap/#welle=1) | Fehler und Fundament | `█████████░` 94 % | 8 | 1 | 0 |
-| [2](https://hjorven.github.io/hafenmeister/roadmap/#welle=2) | Kernschleife und Rückmeldung | `█████████░` 93 % | 13 | 2 | 0 |
+| [2](https://hjorven.github.io/hafenmeister/roadmap/#welle=2) | Kernschleife und Rückmeldung | `██████████` 97 % | 14 | 1 | 0 |
 | [3](https://hjorven.github.io/hafenmeister/roadmap/#welle=3) | Tiefe und Hafenleben | `████░░░░░░` 37 % | 6 | 2 | 11 |
 | [4](https://hjorven.github.io/hafenmeister/roadmap/#welle=4) | Langzeit, Spielgefühl, Welt | `██░░░░░░░░` 18 % | 2 | 1 | 11 |
 | [5](https://hjorven.github.io/hafenmeister/roadmap/#welle=5) | Regionen und Online | `░░░░░░░░░░` 0 % | 0 | 0 | 2 |
@@ -48,13 +48,13 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 **Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
 
 <table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P17"><img src="web/roadmap/bilder/p17-pr331-tagesablauf.jpg" alt="Neuer Tagesablauf: Echtzeit je Stufe vorher und nachher" width="100%"></a><br><sub>P17 · Neuer Tagesablauf: Echtzeit je Stufe vorher und nachher · PR 331</sub></td>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P27"><img src="web/roadmap/bilder/p27-pr330-pc-paeckchen.jpg" alt="Zwei Boote im Päckchen, nah (PC)" width="100%"></a><br><sub>P27 · Zwei Boote im Päckchen, nah (PC) · PR 330</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P59"><img src="web/roadmap/bilder/p59-pr326-pc-yachten-am-yachtsteg.jpg" alt="Große Yachten am Yachtsteg (PC)" width="100%"></a><br><sub>P59 · Große Yachten am Yachtsteg (PC) · PR 326</sub></td>
+</tr><tr>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P59"><img src="web/roadmap/bilder/p59-pr321-pc-kat-in-doppelbox.jpg" alt="Katamaran in der Doppelbox (PC)" width="100%"></a><br><sub>P59 · Katamaran in der Doppelbox (PC) · PR 321</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P26"><img src="web/roadmap/bilder/p26-pr322-pc-hafenhorn.jpg" alt="Hafenhorn mit Wellenringen am PC" width="100%"></a><br><sub>P26 · Hafenhorn mit Wellenringen am PC · PR 322</sub></td>
-</tr><tr>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P33"><img src="web/roadmap/bilder/p33-pr314-pc-umgelegt.jpg" alt="Boot umgelegt (PC)" width="100%"></a><br><sub>P33 · Boot umgelegt (PC) · PR 314</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P41"><img src="web/roadmap/bilder/p41-pr315-pc-saisonbilanz.jpg" alt="Saisonbilanz in der Winterpause am PC" width="100%"></a><br><sub>P41 · Saisonbilanz in der Winterpause am PC · PR 315</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P66"><img src="web/roadmap/bilder/p66-pr280-handy-bojen-seitlich.jpg" alt="Wartebojen seitlich neben den Stegen (Handy)" width="100%"></a><br><sub>P66 · Wartebojen seitlich neben den Stegen (Handy) · PR 280</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (4 von 5 erledigt)</summary>
@@ -86,7 +86,7 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 
 </details>
 
-<details><summary><b>Welle 2: Kernschleife und Rückmeldung</b> (13 von 15 erledigt)</summary>
+<details><summary><b>Welle 2: Kernschleife und Rückmeldung</b> (14 von 15 erledigt)</summary>
 
 | Paket | Titel | Status | PRs |
 |---|---|---|---|
@@ -97,7 +97,7 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 | [P14](https://hjorven.github.io/hafenmeister/roadmap/#paket=P14) | Bewertungen und Gästebuch zeigen | **erledigt** | [#154](https://github.com/hjorven/hafenmeister/pull/154) [#233](https://github.com/hjorven/hafenmeister/pull/233) |
 | [P15](https://hjorven.github.io/hafenmeister/roadmap/#paket=P15) | Tagesabschluss am Abend zeigen | **erledigt** | [#159](https://github.com/hjorven/hafenmeister/pull/159) [#239](https://github.com/hjorven/hafenmeister/pull/239) |
 | [P16](https://hjorven.github.io/hafenmeister/roadmap/#paket=P16) | Aufstieg und Abschluss feiern, Endlosspiel | **erledigt** | [#156](https://github.com/hjorven/hafenmeister/pull/156) |
-| [P17](https://hjorven.github.io/hafenmeister/roadmap/#paket=P17) | Start und frühe Stufen straffen | teilweise | [#237](https://github.com/hjorven/hafenmeister/pull/237) [#252](https://github.com/hjorven/hafenmeister/pull/252) [#287](https://github.com/hjorven/hafenmeister/pull/287) [#318](https://github.com/hjorven/hafenmeister/pull/318) |
+| [P17](https://hjorven.github.io/hafenmeister/roadmap/#paket=P17) | Start und frühe Stufen straffen | **erledigt** | [#252](https://github.com/hjorven/hafenmeister/pull/252) [#287](https://github.com/hjorven/hafenmeister/pull/287) [#318](https://github.com/hjorven/hafenmeister/pull/318) [#331](https://github.com/hjorven/hafenmeister/pull/331) |
 | [P18](https://hjorven.github.io/hafenmeister/roadmap/#paket=P18) | Ausbau in Bauabschnitten | **erledigt** | [#143](https://github.com/hjorven/hafenmeister/pull/143) [#232](https://github.com/hjorven/hafenmeister/pull/232) [#235](https://github.com/hjorven/hafenmeister/pull/235) |
 | [P19](https://hjorven.github.io/hafenmeister/roadmap/#paket=P19) | Ruf schwerer machen mit Wünschen je Bootsart | **erledigt** | [#244](https://github.com/hjorven/hafenmeister/pull/244) [#279](https://github.com/hjorven/hafenmeister/pull/279) |
 | [P20](https://hjorven.github.io/hafenmeister/roadmap/#paket=P20) | Winter mit Inhalt füllen | teilweise | [#245](https://github.com/hjorven/hafenmeister/pull/245) [#249](https://github.com/hjorven/hafenmeister/pull/249) |
@@ -116,7 +116,7 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 | [P24](https://hjorven.github.io/hafenmeister/roadmap/#paket=P24) | Ereignisse zum Vorbereiten und neue Ereignisse | teilweise | [#281](https://github.com/hjorven/hafenmeister/pull/281) |
 | [P25](https://hjorven.github.io/hafenmeister/roadmap/#paket=P25) | Stammgäste mit Wirkung und Gästepost | offen |  |
 | [P26](https://hjorven.github.io/hafenmeister/roadmap/#paket=P26) | Überraschende Gesten fertig bauen | **erledigt** | [#322](https://github.com/hjorven/hafenmeister/pull/322) |
-| [P27](https://hjorven.github.io/hafenmeister/roadmap/#paket=P27) | Päckchen liegen bei vollem Hafen | **erledigt** |  |
+| [P27](https://hjorven.github.io/hafenmeister/roadmap/#paket=P27) | Päckchen liegen bei vollem Hafen | **erledigt** | [#330](https://github.com/hjorven/hafenmeister/pull/330) |
 | [P28](https://hjorven.github.io/hafenmeister/roadmap/#paket=P28) | Anmeldung per Funk | **erledigt** | [#288](https://github.com/hjorven/hafenmeister/pull/288) |
 | [P29](https://hjorven.github.io/hafenmeister/roadmap/#paket=P29) | Baggern für tiefere Liegeplätze | offen |  |
 | [P30](https://hjorven.github.io/hafenmeister/roadmap/#paket=P30) | Stege nachrüsten | **erledigt** | [#297](https://github.com/hjorven/hafenmeister/pull/297) |

@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "15.11.2026",
-  "commit": "0c2ea3d"
+  "commit": "0e1383a"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -441,13 +441,14 @@
    "id": "P17",
    "titel": "Start und frühe Stufen straffen",
    "inhalt": "Ü15, Ü16, Startwerte dokumentieren",
-   "thread": "erledigt bis auf die Schlussmessung im Zeitraffer nach dem Ablege-Fix (PR 318, Thread \"Aufstieg ausbalancieren\"; Rechnung und Spiel in docs/balancing.md)",
+   "thread": "erledigt (PR 318 und Teil 2, PR 331: neuer Tagesablauf, rund 100 Spieltage, Rechnung und Zeitraffer 2,7 % auseinander; docs/balancing.md)",
    "welle": 2,
    "prs": [
     237,
     252,
     287,
-    318
+    318,
+    331
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -458,10 +459,11 @@
     "D3",
     "J4"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": [
     33,
-    34
+    34,
+    69
    ]
   },
   {
@@ -679,15 +681,20 @@
    "id": "P27",
    "titel": "Päckchen liegen bei vollem Hafen",
    "inhalt": "F1",
-   "thread": "erledigt (docs/paeckchen.md)",
+   "thread": "erledigt (PR 330, docs/paeckchen.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    330
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F1"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    67,
+    68
+   ]
   },
   {
    "id": "P28",
@@ -4365,8 +4372,8 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 13,
-    "teilweise": 2,
+    "erledigt": 14,
+    "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
     "offen": 0,
@@ -4487,8 +4494,8 @@
   }
  ],
  "gesamt": {
-  "erledigt": 33,
-  "teilweise": 6,
+  "erledigt": 34,
+  "teilweise": 5,
   "arbeit": 1,
   "frage": 0,
   "offen": 40,
@@ -5308,20 +5315,79 @@
    "datum": "2026-11-15",
    "quelle": "vorschau/p59/yachtsteg-yachten.png",
    "nr": 66
+  },
+  {
+   "datei": "p27-pr330-handy-paeckchen.jpg",
+   "pakete": [
+    "P27"
+   ],
+   "titel": "Päckchen: Boote längsseits an liegenden Booten (Handy)",
+   "pr": 330,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "paeckchen/p27-2-paeckchen-handy.png",
+   "nr": 67
+  },
+  {
+   "datei": "p27-pr330-pc-paeckchen.jpg",
+   "pakete": [
+    "P27"
+   ],
+   "titel": "Zwei Boote im Päckchen, nah (PC)",
+   "pr": 330,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "paeckchen/p27-2-paeckchen-pc.png",
+   "nr": 68
+  },
+  {
+   "datei": "p17-pr331-tagesablauf.jpg",
+   "pakete": [
+    "P17"
+   ],
+   "titel": "Neuer Tagesablauf: Echtzeit je Stufe vorher und nachher",
+   "pr": 331,
+   "geraet": "alle",
+   "datum": "2026-11-15",
+   "quelle": "balancing/p17-teil2-pc-tagesablauf.png",
+   "nr": 69
   }
  ],
  "neueBilder": [
+  69,
+  68,
   66,
   64,
   62,
   60,
   58,
   56,
-  55,
-  53,
-  52
+  55
  ],
  "merges": [
+  {
+   "datum": "2026-11-15",
+   "titel": "Roadmap-Pflege: P27 (PR 330) und P17 Teil 2 (PR 331) mit Bildern",
+   "pr": 333,
+   "pakete": [
+    "P27",
+    "P17"
+   ]
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "Kurzhalter: Liegezeit ab sichtbarem Festmachen, nach spaetestens keine Einfahrt; erstes Boot vom Bildrand",
+   "pr": 332,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
+   "titel": "P17 Teil 2: Zahlen auf den neuen Tagesablauf, Schlussmessung",
+   "pr": 331,
+   "pakete": [
+    "P17"
+   ]
+  },
   {
    "datum": "2026-11-15",
    "titel": "P27 Päckchen liegen: längsseits an ein liegendes Boot, wenn keine Box frei ist",
@@ -5387,26 +5453,6 @@
    "pakete": [
     "P26"
    ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Logbuch: alle neun Großschiffe erreichbar, ab Stufe 5 öfter vor dem Hafen",
-   "pr": 323,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Stege umbauen: Doppelboxen für Mehrrumpfboote (P59 Teil 1)",
-   "pr": 321,
-   "pakete": [
-    "P59"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Tagesabschluss nur als Zettel, Bootskarte am Tablet hochkant über Zeit und Bauen",
-   "pr": 320,
-   "pakete": []
   }
  ]
 }
