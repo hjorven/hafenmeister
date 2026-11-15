@@ -146,7 +146,7 @@ function serve(root) {
         }
       }
     } catch (e) {
-      R.funde.push({ schicht: aktuell, name: 'Testlauf abgebrochen', ok: false, detail: String(e.message).split('\n')[0].slice(0, 300), schwere: 'A', bild: await t.bild(`${aktuell}-abbruch`) });
+      R.funde.push({ schicht: aktuell, name: 'Testlauf abgebrochen', ok: false, detail: String(e.message).split('\n').filter((z) => z.trim()).slice(0, 6).join(' | ').slice(0, 600), schwere: 'A', bild: await t.bild(`${aktuell.replace(/\//g, "-")}-abbruch`) });
       console.log(`  ABBRUCH ${e.message.split('\n')[0]}`);
     }
     aktuell = `S${schicht.nr}`;

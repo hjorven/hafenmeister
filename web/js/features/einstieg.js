@@ -127,6 +127,14 @@ export const TEXTE = {
   },
 };
 
+// Über wie viele Tage der Ruf zählt, aus den Zahlen (data/economy.js ruf.tage über REGELN), für den Ruf-Hinweis
+const ZAHLWORT = ['', 'eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben'];
+export function rufTageText(tage) {
+  if (!(tage > 1)) return 'von heute';
+  return `der letzten ${ZAHLWORT[tage] ?? tage} Tage`;
+}
+const RUF_TAGE = rufTageText(REGELN.reputation?.days);
+
 /**
  * Hinweise beim ersten Mal (nach dem Einstieg, je einmal pro Spielstand). Sturm und Winter erklärt
  * schon das Ereignisschild (events/banner.js) bei jedem Auftreten, darum stehen sie hier nicht.
@@ -158,6 +166,13 @@ export const HINWEISE = {
     text: 'Für ein wartendes Boot ist keine Box frei. Zieh es auf den weißen Rahmen neben einem gleich großen oder größeren Boot: Es legt sich längsseits daneben, zahlt das halbe Liegegeld und bleibt eine Nacht. Beide Crews geben einen halben Anker weniger. Wird eine Box frei, kannst du es umlegen.',
     kurz: 'Keine Box frei: Zieh das Boot auf den weißen Rahmen neben einem Boot. Halbes Liegegeld, eine Nacht.',
   },
+  // Ruf (J5): beim ersten Gast, der nach dem Einstieg ablegt und seine Note in der Blase zeigt
+  ruf: {
+    titel: 'Gäste bewerten deinen Hafen',
+    text: `Beim Ablegen zeigt jeder Gast seine Note über dem Boot, höchstens 5. Erfüllte Wünsche, ein guter Platz und selbst einweisen bringen mehr, was gefehlt hat, steht durchgestrichen in der Blase. Dein Ruf oben ist der Schnitt aller Bewertungen ${RUF_TAGE}. Ein guter Ruf lockt mehr und größere Boote, manche Ausbauten brauchen ihn. ${TOUCH ? 'Tipp' : 'Klick'} auf den Ruf öffnet das Gästebuch.`,
+    // Am Meldeplatz unten steht nur kurz: Es muss allein erklären, was der Ruf ist und wie er entsteht
+    kurz: `Jeder Gast bewertet beim Ablegen, bis 5 für erfüllte Wünsche und einen guten Platz. Dein Ruf oben ist der Schnitt ${RUF_TAGE}.`,
+  },
   stammgast: {
     titel: 'Ein neuer Stammgast',
     text: 'Ein Gast war sehr zufrieden und kommt wieder: gleiches Boot, gleicher Name, gleiche Wünsche. Ab dem fünften Besuch kannst du ihn als Dauerlieger behalten.',
@@ -172,6 +187,7 @@ export function hinweisFuer(name, d = {}) {
   if (name === 'stammgast:neu') return 'stammgast';
   if (name === 'hafenzeichen:voll') return 'versorgung';
   if (name === 'paeckchen:moeglich') return 'paeckchen';
+  if (name === 'gaestebuch:bewertung') return 'ruf';
   return null;
 }
 
@@ -674,6 +690,12 @@ export async function init(game) {
   for (const name of ['sim:turnedAway', 'sim:stageReady', 'stammgast:neu', 'hafenzeichen:voll', 'paeckchen:moeglich']) {
     game.on(name, (d) => { const e = st() && einstiegState(st()); if (e) merkeHinweis(e, hinweisFuer(name, d), offeneHinweise); });
   }
+  // Ruf (J5): erst eine Bewertung nach dem Einstieg zählt. Der Tipp steht dann, während die Blase über
+  // dem ablegenden Boot noch zu sehen ist; eine Abreise mitten im Einstieg würde ihn erst viel später zeigen.
+  game.on('gaestebuch:bewertung', (d) => {
+    const e = st() && einstiegState(st());
+    if (e?.fertig) merkeHinweis(e, hinweisFuer('gaestebuch:bewertung', d), offeneHinweise);
+  });
   function schliesseHinweis() {
     if (!aktuell?.startsWith('hinweis:')) return;
     zeige(null);
@@ -691,7 +713,8 @@ export async function init(game) {
       // Solange eine andere Meldung vorgeht, wartet der Tipp ausgeblendet
       tipp.hidden = !ruhig || !darf();
       const id = aktuell.slice(8);
-      k = id === 'stufe' ? domKreis(document.getElementById('btn-build'), 6) : null;
+      const zielEl = id === 'stufe' ? document.getElementById('btn-build') : id === 'ruf' ? document.getElementById('rep') : null;
+      k = zielEl ? domKreis(zielEl, 6) : null;
       // Passt der Tipp nirgends hin, ohne Knöpfe zu verdecken, wartet er (seine Zeit läuft nicht ab)
       if (!tipp.hidden && !lege(k)) tipp.hidden = true;
       ring.hidden = !k || tipp.hidden;

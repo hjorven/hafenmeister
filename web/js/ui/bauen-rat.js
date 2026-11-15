@@ -23,12 +23,16 @@ export const FREI = {
 export function wirkungText(w = {}) {
   const t = [];
   if (w.proTag) t.push(`bringt ${euro(w.proTag)} pro Saisontag`);
-  if (w.kunden) t.push(`${Math.round(w.kunden.anteil * 100)} % der Gäste kaufen für ${euro(w.kunden.preis)}`);
+  // Auslastung (P23 F5): je mehr Crews im Hafen, desto mehr Kunden
+  if (w.kunden) t.push(w.kunden.anteil >= 1 ? `jede Crew im Hafen kauft für etwa ${euro(Math.round(w.kunden.anteil * w.kunden.preis))}` : `${Math.round(w.kunden.anteil * 100)} von 100 Crews im Hafen kaufen für ${euro(w.kunden.preis)}`);
+  if (w.dienst) t.push(`${Math.round(w.dienst.anteil * 100)} % der passenden Gäste bleiben ${w.dienst.naechte === 1 ? 'eine Nacht' : `${w.dienst.naechte} Nächte`} länger und zahlen ${euro(w.dienst.preis)}`);
+  if (w.trailer) t.push(`etwa ${w.trailer.anzahl} Trailerboote am Tag zahlen je ${euro(w.trailer.preis)} Slipgebühr`);
+  if (w.abendgaeste) t.push(`abends kommen etwa ${w.abendgaeste.anzahl} Gäste aus dem Ort`);
   for (const [k, f] of Object.entries(w.gaeste ?? {})) if (f > 1) t.push(`${Math.round((f - 1) * 100)} % mehr Boote der Größe ${k}`);
   if (w.hafengeld?.segel > 1) t.push(`Segelboote zahlen ${Math.round((w.hafengeld.segel - 1) * 100)} % mehr Hafengeld`);
   if (w.winter?.proTag) t.push(`im Winter ${euro(w.winter.proTag)} pro Tag`);
   // Tagesgaeste bekommen bewusst keine eigene Zahl (Entscheidung Jorven 2026-11-11)
-  if (w.tagesgaeste) t.push('lockt Besucher auf die Promenade');
+  if (w.tagesgaeste) t.push('verdient mit, wenn große Schiffe Tagesgäste bringen');
   if (w.sturmschutz) t.push('hilft bei Sturm, der Ruf leidet nicht');
   if (w.regatta) t.push('macht Regatten möglich');
   if (!t.length) return '';

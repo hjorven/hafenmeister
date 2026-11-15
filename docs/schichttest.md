@@ -1,6 +1,6 @@
 # Schichttest: das Spiel von Grund auf prüfen
 
-Stand: 14.11.2026. Gepflegt vom Thread "Spiel Schicht für Schicht von Grund auf testen".
+Stand: 15.11.2026. Gepflegt vom Thread "Spiel Schicht für Schicht von Grund auf testen".
 
 ## Wozu
 
@@ -77,12 +77,12 @@ Reihenfolge abgeleitet aus [roadmap.md](roadmap.md), [arbeitsplan.md](arbeitspla
 | 11 | Tagesziele | P13 | Tafel mit drei Karten, Wahl wirkt | gebaut |
 | 12 | Tagesabschluss | P15 | Karte oder Zettel nach dem Tag, Summe stimmt, verdeckt Zeit und Bauen nicht, "Weiter" schließt | gebaut |
 | 13 | Menü | Abnahme, P50 | jeder Menüeintrag öffnet oder schaltet etwas sichtbar und lässt sich wieder schließen; Menü passt ins Bild | gebaut |
-| 14 | Wartebojen und Ankerfeld | P66 | mehrere wartende Boote zugleich, getrennte Ein- und Ausfahrt, nichts überlappt | geplant |
-| 15 | Bewertung und Gästebuch | P14 | Bewertung nach der Abreise, Gästebuch öffnet aus dem Menü | geplant |
-| 16 | Hafenbüro und Funk | P02, P28 | Büro bauen, "Alle kassieren" abends, Funk-Vorschläge | geplant |
-| 17 | Dauerlieger | P01 | Dauerlieger aufnehmen, fährt tagsüber raus, abends zurück | geplant |
-| 18 | Aufstieg | P16, P18 | Ausbau bis zur nächsten Stufe, Umbau der Stege, Feier | geplant |
-| 19 | Ruf und Wünsche | P19 | Ruf steigt und fällt sichtbar, Wünsche über dem Boot | geplant |
+| 14 | Wartebojen und Ankerfeld | P66 | bei 8x zwölf Stichproben: wartende Boote überlappen nicht, liegen nicht auf Land oder Steg, keine Boje doppelt belegt | gebaut |
+| 15 | Bewertung und Gästebuch | P14 | Gästebuch öffnet über die Ruf-Anzeige, zeigt Einträge, schließt wieder | gebaut |
+| 16 | Aufstieg | P16, P18 | Ausbau "Hafen" über Bauen, nach dem Umbau Stufe +1, alle früheren Schichten danach noch einmal | gebaut |
+| 17 | Hafenbüro und Funk | P02, P28 | Büro bauen, abends "Alle kassieren" sammelt die Münzen ein | gebaut |
+| 18 | Ruf und Wünsche | P19 | Ruf steigt und fällt sichtbar, Wünsche über dem Boot | geplant |
+| 19 | Dauerlieger | P01 | Dauerlieger aufnehmen, fährt tagsüber raus, abends zurück | geplant |
 | 20 | Winter | P20 | Winter beginnt, Hafen ruht, Frühling kommt | geplant |
 | 21 | Ereignisse | P24 | Sturm und Regatta angekündigt, Vorbereiten wirkt | geplant |
 | 22 | Logbuch und Chronik | P21 | Einträge passen zu dem, was passiert ist | geplant |
@@ -94,6 +94,8 @@ Neueste Läufe oben. Bilder und vollständige Berichte liegen im Projektordner u
 
 | Datum | Stand | Gerät | Schichten | Prüfpunkte | Funde | Bemerkung |
 |---|---|---|---|---|---|---|
+| 15.11. | `b5baa80` | pc, handy, tablet (Serie 6) | 1 bis 17 | 86 bis 579 | F2, F3 | Handy und Tablet laufen durch alle 17 Schichten, PC hält an F3 und Tagesende ohne Ankünfte (Testfehler, behoben) |
+| 15.11. | `b5baa80` | alle fünf (Serie 5) | 1 bis 15 | 22 bis 473 | F2, F3 | F2 hält "Einfahren lassen" auf Handy und Tablet an; F1 nicht mehr aufgetreten (PR 320) |
 | 15.11. | `af90cb9` | alle fünf | 1 bis 13 | 84 bis 300 | siehe Funde | Serie 1: Kern auf allen Geräten stabil; Funde in 8 bis 13 großteils Testfehler (behoben), F1 echt |
 | 14.11. | `af90cb9` | pc, handy, handyquer, tablet, tabletquer | 1 bis 7 | 62 bis 72 | 0 | Kern stabil (nach Testkorrekturen) |
 
@@ -102,6 +104,10 @@ Neueste Läufe oben. Bilder und vollständige Berichte liegen im Projektordner u
 | Nr | Schicht | Gerät | Fund | Schwere | Bild | Zuständig | Stand |
 |---|---|---|---|---|---|---|---|
 | F1 | 12 mit 3, 8 | pc, tablet | Die Karte "Tag n geschafft" liegt oben in der Mitte über Wartebojen und Stegkopf, bis zu 14 s, während das Spiel läuft; wartende Boote und Ziel-Boxen sind verdeckt | C bis B | `schichttest/2026-11-15-af90cb9/f1-pc-tagesabschluss-ueber-bojen.jpg` | an Koordinator gemeldet | offen |
+| F2 | 8, 5 | handy, handyquer, tablet, tabletquer | Kurzhalter werden abgerechnet und fahren weg, bevor sie sichtbar festgemacht haben: die Ablegezeit (`leaveClock`, sim.js) zählt ab Zuweisung, mindestens 5 s; wer spät am Tag oder von weit draußen zugewiesen wird, ist noch beim Anfahren. Gemessen bei 3x: 5 von 19 Kurzhaltern (Handy), 2 von 13 (PC); keine Münze zum Streichen | B | `schichttest/2026-11-15-kurzhalt/` | "Längere Tage und Bootsgeschichten einbauen" (PR 319) | gemeldet 15.11. |
+| F3 | 3 | pc, tabletquer, handy | Erstes Boot wird nach 4 bis 5 s gemeldet, liegt aber erst nach 51 bis 60 s Spielzeit an der Boje (lange Anreise von außerhalb der Karte, Regel 14.11.); Regel "Erstes Boot nach wenigen Sekunden" damit verfehlt | C | - | Koordinator (Regelkonflikt) | gemeldet 15.11. |
+
+F1 ist mit PR 320 erledigt (Tagesabschluss erst als Zettel; die Karte öffnet nur, wenn man ihn antippt).
 
 Keine Fehler, aber gut zu wissen (Hinweise):
 

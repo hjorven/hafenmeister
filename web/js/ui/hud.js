@@ -229,7 +229,9 @@ export function init(game) {
           // Name am Heck und Heimathafen (features/stammgaeste.js), falls vorhanden
           b.bootsname ? el('p', { class: 'card-boatname' }, game.stammgaeste?.beschreibung(b) ?? `„${b.bootsname}“`) : null,
           // Anlass des Boots (Bootsgeschichten, geschichten/geschichten.js)
-          game.geschichten?.text(b) ? el('p', { class: 'card-geschichte' }, game.geschichten.text(b)) : null),
+          game.geschichten?.text(b) ? el('p', { class: 'card-geschichte' }, game.geschichten.text(b)) : null,
+          // Dienst eines Service (P23: Mast legen, Radtour, Reparatur): darum bleibt das Boot länger
+          game.services?.dienstText?.(b) ? el('p', { class: 'card-geschichte card-dienst' }, game.services.dienstText(b)) : null),
         el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Schließen', title: 'Schließen', onclick: schliessen }, 'Schließen')),
       el('ul', { class: 'hm-fakten', 'aria-label': 'Eckdaten' },
         el('li', { class: 'groesse', title: 'Größenklasse' }, `Größe ${b.size}`),

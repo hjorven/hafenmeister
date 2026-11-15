@@ -389,6 +389,13 @@ export function init(game) {
       // Wer abends erst ankommt, geht trotzdem einmal an Land (Dusche, Toilette, Restaurant)
       if (bootDaten.ablegen || ((abend || bootDaten.abreise) && !a.bleibtAbends && !a.ersterGang)) return heimAnBord(a, bootDaten);
       if (a.zustand !== 'anbord' && Math.random() < P.ZURUECK_AN_BORD && a.ziel) return heimAnBord(a, bootDaten);
+    } else if (a.zielFest) {
+      // Gezielter Besuch (besucher(), Services P23): erst dorthin, danach nach Hause
+      const z = a.zielFest;
+      a.zielFest = null;
+      a.ziel = z;
+      a.besuche = 0;
+      return befehl(a, z.node, 'ziel');
     } else if (a.besuche <= 0 || (abend && Math.random() < 0.5)) {
       // Spaziergaenger geht nach Hause oder aus dem Bild, Badegaeste ueber die Duenen
       const heim = (a.typ === 'strand' ? netz.duenen : netz.zuhause).filter((n) => netz.komp[n] === netz.komp[a.node]);
@@ -542,6 +549,22 @@ export function init(game) {
 
   function entfernen(a) {
     a.zustand = 'entfernt';
+  }
+
+  // Platz fuer n neue Figuren schaffen, wenn die Hoechstzahl erreicht ist: zuerst Spaziergaenger und
+  // Badegaeste, die gerade drinnen sind, dann die, die nach Hause gehen, dann andere (keine Gruppenfuehrer).
+  function platzMachen(n) {
+    let frei = max - agenten.reduce((k, a) => k + (a.zustand !== 'entfernt' ? 1 : 0), 0);
+    if (frei >= n) return;
+    const rang = (a) => (a.zustand === 'drinnen' ? 0 : a.danach === 'weg' ? 1 : 2);
+    const kandidaten = agenten.filter((a) => (a.typ === 'ort' || a.typ === 'strand') && a.zustand !== 'entfernt' && !a.folger?.length)
+      .sort((x, y) => rang(x) - rang(y));
+    for (const a of kandidaten) {
+      if (frei >= n) break;
+      entfernen(a);
+      frei++;
+    }
+    for (let k = agenten.length - 1; k >= 0; k--) if (agenten[k].zustand === 'entfernt') agenten.splice(k, 1);
   }
 
   // ---------------------------------------------------------------- Hafenmeister-Rundgang
@@ -703,6 +726,8 @@ export function init(game) {
     // Tagesgaeste grosser Schiffe gehen als Gruppe in den Ort
     if (gaeste > 0) {
       const g = Math.max(1, Math.ceil(gaeste / P.BUENDEL));
+      // In Stufe 6 sind oft alle Figuren vergeben: Spaziergaenger machen Platz (P23 F7)
+      platzMachen(g);
       let fuehrer = null;
       for (let k = 0; k < g; k++) {
         const a = neueFigur({ boot: id, node: platz.node, klasse, sichtbar: false, buendel: P.BUENDEL });
@@ -1195,9 +1220,33 @@ export function init(game) {
     zeichnen();
   });
 
+  // Leute aus dem Ort gehen gezielt zu einem Ziel (art wie in data/people.js ZIELE, z. B. 'raeucherei')
+  // und danach wieder nach Hause. Nacheinander im Abstand von abstand Sekunden Spielzeit.
+  // Liefert die Zahl der Figuren, die losgehen (0, wenn es das Ziel nicht gibt).
+  function besucher(art, anzahl, { abstand = 2.5 } = {}) {
+    if (!netz || !(anzahl > 0)) return 0;
+    const ziele = netz.ziele.filter((z) => z.art === art || z.id === `service-${art}`);
+    if (!ziele.length) return 0;
+    platzMachen(anzahl);
+    let n = 0;
+    for (let k = 0; k < anzahl; k++) {
+      const z = wahl(ziele);
+      const heim = netz.zuhause.filter((x) => netz.komp[x] === netz.komp[z.node]);
+      if (!heim.length) break;
+      const a = neueFigur({ node: wahl(heim), typ: 'besuch' });
+      if (!a) break;
+      a.zustand = 'steht';
+      a.uhr = k * abstand;
+      a.zielFest = z;
+      n++;
+    }
+    return n;
+  }
+
   const api = {
     group,
     netz: null,
+    besucher,
     anBord,
     versammeln,
     bootAngelegt,
