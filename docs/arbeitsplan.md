@@ -1,6 +1,6 @@
 # Arbeitsplan
 
-Stand: 15.11.2026, 09:30 UTC, abgeglichen mit `main` bei `c0d1d93` (PR 332), Statusangaben am Code geprüft. Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
+Stand: 15.11.2026, 11:00 UTC, abgeglichen mit `main` bei `a93e005` (PR 343), Statusangaben am Code geprüft. Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
 
 **Wozu diese Datei:** [roadmap.md](roadmap.md) sagt, *was* insgesamt noch fehlt (Pakete P01 bis P82). Dieser Arbeitsplan sagt, *was jetzt gerade* läuft, welche Fehler zuerst weg müssen und welche Pakete als Nächstes starten. [plan.md](plan.md) bleibt der gültige Plan für Vision und Regeln.
 
@@ -10,6 +10,26 @@ Stand: 15.11.2026, 09:30 UTC, abgeglichen mit `main` bei `c0d1d93` (PR 332), Sta
 - Erst Grundprobleme fixen, dann aufbauen. Neue Features werden mit den alten zusammen geprüft.
 - Nichts wartet auf Jorvens Entscheidungen: Threads entscheiden selbst und schreiben die Entscheidung in ihren PR.
 - Ein Paket je Thread, ein Branch je Thread, bis zu 20 Threads gleichzeitig. Threads mergen selbst, wenn `bash tests/pruefen.sh --schnell` mit "Alles grün." endet und der PR-Check grün ist.
+
+---
+
+## 0. Jetzt: Welle 0 bis 2 fertig machen (Jorven, 15.11.2026, 10:52)
+
+Jorven: "Vielleicht sollte erstmal Welle 0-2 fertig gemacht werden" und "Halt so, dass das Grundgerüst fertig ist." Welle 0 bis 2 ist das Grundgerüst. Ab jetzt starten **keine neuen Pakete aus Welle 3 und später**. Was dort schon läuft (P86 Bootsgeschichten, P23-Nacharbeit, P26 Gesten), darf fertig werden, solange es Welle 0 bis 2 nicht blockiert.
+
+Stand laut Roadmap-Seite (15.11., 11:00 UTC): Welle 0 4 von 6, Welle 1 10 von 12 (P54 entfällt, in P66 aufgegangen), Welle 2 14 von 15. Offen sind genau diese fünf Pakete:
+
+| Welle | Paket | Was konkret noch fehlt | Thread | Fertig, wenn |
+|---|---|---|---|---|
+| 0 | **P66 Boote ums Gelände herum führen** | Pulk und "ineinander fest" beim gleichzeitigen Ablegen vor den Stegen ab Stufe 5 (Offene Bucht, Seed 11): Einlaufende warten vor der Durchfahrt, solange Auslaufende anstehen (Einbahn-Freigabe nach Richtung) | "Staus an Bojen und Ankerfeld auflösen" (läuft) | Abnahme-Serie: keine Boote länger als ein paar Sekunden ineinander fest, kein Pulk über mehrere Minuten |
+| 0 | **P84 Großschiffwege an allen 15 Küsten** | Kreuzfahrtschiff streift im Seegatt von Küste 4 das Ufer; Rumpfprobe als Test für alle Besuchsschiffe auf 15 Küsten und mehreren Seeds | "Großschiffe sicher durch alle Küsten führen" (läuft) | Test grün auf 15 Küsten, Bild je Küste |
+| 1 | **P87 Prüfwerkzeuge auf 15 Küsten und den neuen Takt** | Härtetest nach PR 327 bis 332 neu; Fund "Gäste erreichen ab Stufe 4 keine Boje" am Spiel bestätigen; `leinen.spec.mjs` für Küste 11 bis 15; `istWasser` und Bild am Durchstich angleichen; Zeitraffer-Grenzen auf den 5-Minuten-Tag | "Prüfwerkzeuge auf alle Küsten bringen" (läuft) | alle Werkzeuge laufen auf 15 Küsten; Ergebnis an den Zeitraffer-Thread, damit die Abnahme-Serie mit den richtigen Grenzen misst |
+| 1 | **P85 Zusammenspiel prüfen** | Jorvens Auftrag vom 14.11., siehe Abschnitt 3a | drei neue Threads, siehe unten | `docs/zusammenspiel.md` vollständig, alle Funde behoben oder als Paket eingetragen |
+| 2 | **P20 Winter mit Inhalt füllen (Rest)** | G5: Jahreszeiten steuern Ankünfte und Wind (Frühling ruhig, Sommer voll, Herbst Wind), nicht nur Ereignisse; H5-Rest: Dauerlieger nutzen Kran und Segelmacher in der Saison | Bauen-Thread "Bauen mit Vorschau und Tiefe ausbauen" (P20-Rest läuft) | im Spiel sichtbar, danach eine Balancing-Messung (Rechnung und Zeitraffer weiter höchstens 5 % auseinander) |
+
+**P85 früher starten:** Die Bereiche Kernschleife und Oberfläche hängen nicht am Pulk. Darum starten "Zusammenspiel 1" und "Zusammenspiel 2" sofort. "Zusammenspiel 3: Welt, Boote, Ereignisse" startet, sobald P66 und P84 gemergt sind und die Abnahme-Serie läuft. Funde zu Booten und Wegen aus 1 und 2 gehen an den Boote-Thread statt selbst gefixt zu werden.
+
+**Wenn alle fünf erledigt sind,** ist Welle 0 bis 2 fertig; dann geht es mit Abschnitt 3 und 5 weiter.
 
 ---
 
@@ -67,7 +87,7 @@ Leitlinie: Erst Welle 0 abschließen und die Prüfwerkzeuge auf den neuen Stand 
 
 Danach geht es weiter wie in [Abschnitt 5](#5-alles-weitere-bis-zum-ende) beschrieben, bis Stufe 20 und Online.
 
-**Startregel:** Jetzt starten: 2, 3, 4, 5, 7; 1 und 6 laufen weiter. 8 nach 5, 9 sobald Welle 0 abgenommen ist, 10 nach 8. Nie zwei Threads gleichzeitig an `economy.js`. Alle neuen Meldungen gehen über den einen Meldeplatz aus PR 282.
+**Startregel (seit 15.11., 10:52):** Nur Welle 0 bis 2, siehe Abschnitt 0. 1, 2, 3, 8 laufen; 9 startet mit Zusammenspiel 1 und 2 sofort, Zusammenspiel 3 nach 1 und 2; 6 darf fertig werden; 10 und alles aus Abschnitt 5 erst, wenn Welle 0 bis 2 fertig ist. Nie zwei Threads gleichzeitig an `economy.js`. Alle neuen Meldungen gehen über den einen Meldeplatz aus PR 282.
 
 ---
 
@@ -201,6 +221,7 @@ Schon erledigt aus Jorvens Vorschlägen: F1, F2, F4, F8, F14, F15, F17, F18, F19
 
 | Datum | Änderung |
 |---|---|
+| 15.11.2026, 11:00 Uhr | Jorven: erst Welle 0 bis 2 fertig. Neuer Abschnitt 0 mit den fünf offenen Paketen (P66, P84, P87, P85, P20-Rest); keine neuen Pakete aus Welle 3 und später; Zusammenspiel 1 und 2 starten sofort. |
 | 15.11.2026, 09:30 Uhr | Ganzer Plan am Code abgeglichen (Thread "Roadmap, Plan und README nachziehen"): Abschnitte 1 bis 3 neu; P17, P27, P24 und viele andere erledigt; neue Pakete P83 Stegbild-Generator, P84 Großschiffwege, P85 Zusammenspiel, P86 Bootsgeschichten-Rest, P87 Prüfwerkzeuge; Startliste 2, 3, 4, 5, 7. |
 | 15.11.2026 | P59 Teil 1 Doppelboxen gemergt (PR 321); Teil 2 Yachtsteg in Stufe 6 (D9) im PR. |
 | 15.11.2026 | P59 übernommen vom Thread "Bauen mit Vorschau und Tiefe ausbauen": Teil 1 Doppelboxen (D5, D6), Teil 2 neue Gastplätze Stufe 6 (D9) danach. |
