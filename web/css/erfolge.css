@@ -20,7 +20,9 @@
 .hm-lb-reiter { position: relative; }
 .hm-lb-punkt { position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; background: var(--hm-gold, #ffd95a); box-shadow: 0 0 0 2px var(--hm-tinte, #24364a); }
 
-/* ------------------------------------------------------------ Meldung (rechts oben, wie Logbuch und Gästebuch) */
+/* ------------------------------------------------------------ Meldung
+ * Steht im gemeinsamen Meldeplatz (ui/meldungen.js, game.meldungen.anmelden); der Platz bestimmt Lage und Breite.
+ * Die Lage hier gilt nur ohne Meldeplatz (alte Oberfläche). */
 #hm-ef-meldung {
   position: absolute;
   z-index: 19;
@@ -63,6 +65,8 @@
   font-size: calc(var(--hm-schrift, 15px) - 2px);
   color: var(--hm-tinte-2, #5a6a7c);
 }
+/* Im Meldeplatz: volle Breite des Platzes, Einblenden wie die anderen Meldungen dort */
+.hm-neu #hm-meldeplatz .hm-ef-meldung { max-width: 100%; min-width: 0; animation: hm-mp-rein 0.24s steps(4, end); }
 @keyframes hm-ef-rein { from { transform: translateX(30%); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes hm-ef-glanz { 50% { transform: scale(1.25); } }
 

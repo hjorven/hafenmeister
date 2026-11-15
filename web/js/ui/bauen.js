@@ -149,6 +149,15 @@ export function init(game) {
     return { id: null, neu: false };
   }
 
+  // Mitte und Ausdehnung einer Gruppe von Liegeplaetzen (Strom, Nachruesten), plaetze zum Einfaerben
+  function plaetzeOrt(ids) {
+    const pl = ids.map((id) => game.stege?.platz?.(id)).filter(Boolean);
+    if (!pl.length) return null;
+    const xs = pl.map((p) => p.x), zs = pl.map((p) => p.z);
+    return { x: (Math.min(...xs) + Math.max(...xs)) / 2, z: (Math.min(...zs) + Math.max(...zs)) / 2,
+      breite: Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs), 20), plaetze: ids };
+  }
+
   function eintraege() {
     const sim = game.sim;
     const st = sim?.state;
@@ -183,6 +192,56 @@ export function init(game) {
       });
     }
 
+    // Stege nachruesten (P30): Fingerstege und Laternen an Stegen, die schon stehen
+    for (const a of game.nachruesten?.angebote?.() ?? []) {
+      const def = ECONOMY.nachruesten?.[a.art] ?? {};
+      const anker = num1(a.anker);
+      const stegKurz = a.name.slice(a.name.indexOf(' an ') + 4);
+      out.push({
+        key: `nachruesten:${a.art}:${a.steg}`, art: 'steg', nachruesten: a.art, steg: a.steg, id: `${a.art}-${a.steg}`, name: a.name, kosten: a.kosten,
+        gesperrt: a.gesperrt, ohneSchild: true, hebtNote: true,
+        kurz: `+${anker} Anker`,
+        nutzen: a.art === 'finger'
+          ? [`Gäste an ${stegKurz} bewerten um ${anker} Anker besser: Sie steigen am Fingersteg bequem aus.`,
+            `${a.plaetze.length === 1 ? 'Eine Box bekommt' : `${a.plaetze.length} Boxen bekommen`} einen Fingersteg, neue Boxen an diesem Steg gleich mit.`]
+          : [`Gäste an ${stegKurz} bewerten um ${anker} Anker besser: Abends ist der Steg hell.`,
+            `${Math.ceil(a.plaetze.length / 2)} Laternen für ${a.plaetze.length === 1 ? 'einen Platz' : `${a.plaetze.length} Plätze`}, nachts leuchten sie.`],
+        ort: () => plaetzeOrt(a.plaetze),
+        geist: () => game.nachruesten?.geist?.(a.art, a.steg),
+        bedarf: () => {
+          const n = game.sim.mooredBoats().filter((b) => !b.stationed && game.sim.ctx.berthById[b.berthId]?.jetty === a.steg).length;
+          return n ? `Gerade ${n === 1 ? 'liegt ein Gast' : `liegen ${n} Gäste`} an ${stegKurz}.` : null;
+        },
+        kaufen: () => game.nachruesten.kaufen(a.art, a.steg),
+        stufeNeu: def.abStufe,
+      });
+    }
+
+    // Stege umbauen (P59): zwei Boxen zur Doppelbox und zurueck
+    for (const a of game.umbauen?.angebote?.() ?? []) {
+      const sname = HAFEN.stege?.[a.steg] ?? `Steg ${a.steg}`;
+      const umbau = a.art === 'umbau';
+      const neu = umbau ? game.umbauen.neuePassende(a.platz) : [];
+      const namen = [...new Set(neu.map((t) => t.name))];
+      const breit = Math.max(0, ...neu.map((t) => t.beam?.[1] ?? 0));
+      out.push({
+        key: `umbauen:${a.art}:${a.steg}`, art: 'steg', nachruesten: 'umbau', steg: a.steg, id: `${a.art}-${a.steg}`,
+        name: umbau ? `Doppelbox an ${sname}` : `Doppelbox an ${sname} zurückbauen`, kosten: a.kosten,
+        gesperrt: a.gesperrt, ohneSchild: true, keinRat: !umbau,
+        kurz: umbau ? 'breite Box' : '+1 Box',
+        bedarf: () => null,
+        nutzen: umbau
+          ? [`Zwei Boxen werden eine breite Box${namen.length ? `: Hier passt dann auch ein ${namen.join(' oder ein ')}${breit ? ` (bis ${num1(breit)} m breit)` : ''}` : ''}.`,
+            `Dafür fällt eine Box weg. ${a.gebaut ? `Schon ${a.gebaut} von ${a.moeglich} Doppelboxen an diesem Steg.` : `Möglich sind ${a.moeglich} an diesem Steg.`}`,
+            'Umgebaut wird nur, wenn beide Boxen frei sind.']
+          : ['Die breite Box wird wieder zu zwei Boxen: eine Box mehr für Boote ihrer Größe.',
+            'Geht nur, wenn die Doppelbox frei ist.'],
+        ort: () => plaetzeOrt(a.teile),
+        geist: () => game.umbauen.geist(umbau ? [a.platz] : a.teile),
+        kaufen: () => (umbau ? game.umbauen.umbauen(a.steg) : game.umbauen.rueckbauen(a.steg)),
+      });
+    }
+
     // Versorgung
     for (const key of Object.keys(rules.facilities)) {
       const u = sim.facilityUpgrade(key);
@@ -195,18 +254,13 @@ export function init(game) {
       const nutzen = [];
       let wunsch = key;
       let ort = null;
+      let geist = null;
       if (key === 'strom') {
         const stege = ECONOMY.bauwerke?.strom?.stufen?.[u.level - 1]?.stege ?? [];
         wunsch = 'strom';
         nutzen.push(`Strom an Steg ${stege.join(', ')}: Gäste dort bekommen ihren Wunsch nach Strom erfüllt.`);
-        ort = () => {
-          const ids = gastPlaetze().filter((b) => stege.includes(b.jetty)).map((b) => b.id);
-          const pl = ids.map((id) => game.stege?.platz?.(id)).filter(Boolean);
-          if (!pl.length) return null;
-          const xs = pl.map((p) => p.x), zs = pl.map((p) => p.z);
-          return { x: (Math.min(...xs) + Math.max(...xs)) / 2, z: (Math.min(...zs) + Math.max(...zs)) / 2,
-            breite: Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs), 20), plaetze: ids };
-        };
+        ort = () => plaetzeOrt(gastPlaetze().filter((b) => stege.includes(b.jetty)).map((b) => b.id));
+        geist = () => game.nachruesten?.geist?.('strom', stege);
       } else {
         nutzen.push(jetzt ? `Versorgt ${neu} Boote am Tag statt ${jetzt}.` : `Versorgt ${neu} Boote am Tag.`);
         nutzen.push(`Jeder erfüllte Wunsch bringt ${Math.round((ECONOMY.wunschBonus ?? 0.25) * 100)} % mehr Hafengeld und bessere Bewertungen.`);
@@ -217,7 +271,7 @@ export function init(game) {
         key: `versorgung:${key}`, art: 'versorgung', id: key, name, kosten: u.cost, wunsch, stufeNeu: u.level,
         gesperrt: u.reason === 'stage' ? `ab Ausbaustufe ${f.fromStage[u.level]}` : null,
         kurz: WUNSCH_KURZ[key] ?? '',
-        nutzen, ort,
+        nutzen, ort, geist,
         kaufen: () => sim.upgradeFacility(key),
       });
     }
@@ -336,6 +390,7 @@ export function init(game) {
         // Erster Kauf des Tages: stats.heute entsteht erst beim Bezahlen, vorher waren die Ausgaben leer
         heuteTag: st.day, ausgaben: st.stats?.heute?.tag === st.day && st.stats.heute.ausgaben ? structuredClone(st.stats.heute.ausgaben) : {},
         services: st.modules?.services ? structuredClone(st.modules.services) : null,
+        nachruesten: structuredClone(st.modules?.nachruesten ?? {}),
         ausbau: speicher()?.ausbau ? structuredClone(speicher().ausbau) : null,
       };
     } catch { return null; }
@@ -356,6 +411,7 @@ export function init(game) {
     st.office = u.office;
     if (st.stats?.heute && st.stats.heute.tag === u.heuteTag) st.stats.heute.ausgaben = u.ausgaben;
     if (u.services && st.modules?.services) { ersetze(st.modules.services, u.services); game.services?.neuZeichnen?.(); }
+    if (u.nachruesten) { st.modules ||= {}; st.modules.nachruesten = u.nachruesten; game.emit('nachruesten:neu'); }
     speicher().ausbau = u.ausbau;
     zeigeBaustelle();
     for (const g of geaendert) game.emit('build', g);
@@ -589,7 +645,10 @@ export function init(game) {
     if (!ort) return;
     geist = new THREE.Group();
     geist.name = 'bauen-geist';
-    if (e.art === 'steg') {
+    const eigen = e.geist?.();
+    if (eigen) geist.add(eigen);
+    if (ort.plaetze) game.stege?.highlight?.(ort.plaetze, '#ffd23f');
+    if (e.art === 'steg' && !e.nachruesten) {
       game.stege?.group?.traverse((o) => {
         if (o.userData?.bauplatz !== e.id || !o.isMesh) return;
         const m = new THREE.Mesh(o.geometry, stegMat);
@@ -613,8 +672,6 @@ export function init(game) {
       g.rotation.y = l.dreh;
       if (!ort.neu) g.scale.setScalar(1.06);    // Ausbau: Huelle um das stehende Gebaeude
       geist.add(g);
-    } else if (ort.plaetze) {
-      game.stege?.highlight?.(ort.plaetze, '#ffd23f');
     }
     // Ring auf dem Boden, damit man die Stelle auch von weitem findet
     const r = Math.max(4, (ort.breite ?? 10) * 0.6);
@@ -703,6 +760,9 @@ export function init(game) {
     const pkt = [];
     for (const e of eintraege()) {
       if (e.gesperrt || !e.ort) continue;
+      // Nachruesten bekommt kein eigenes Schild und weitet den Rahmen nicht auf den ganzen Hafen
+      // (sonst steht der Hafen voller Schilder), ausser es ist gerade der empfohlene naechste Schritt
+      if (e.ohneSchild && e.key !== tippZiel) continue;
       const o = e.ort();
       if (o) pkt.push(o);
     }
@@ -779,6 +839,9 @@ export function init(game) {
     const geld = game.sim?.state?.money ?? 0;
     for (const e of liste) {
       if (e.gesperrt || !e.ort) continue;
+      // Nachruesten bekommt kein eigenes Schild und weitet den Rahmen nicht auf den ganzen Hafen
+      // (sonst steht der Hafen voller Schilder), ausser es ist gerade der empfohlene naechste Schritt
+      if (e.ohneSchild && e.key !== tippZiel) continue;
       const o = e.ort();
       if (!o) continue;
       const s = el('button', { type: 'button', class: `bau-schild${e.kosten > geld ? ' teuer' : ''}${e.key === tippZiel ? ' empfohlen' : ''}`, tabindex: '-1', title: `${e.name}, ${euro(e.kosten)}`,
@@ -1127,7 +1190,7 @@ export function init(game) {
     if (ort) {
       const y = Number.isFinite(game.landschaft?.hoeheBei?.(ort.x, ort.z)) ? Math.max(0, game.landschaft.hoeheBei(ort.x, ort.z)) : 0;
       welle(ort.x, ort.z, y);
-      const text = e.art === 'steg' ? (e.plaetzeNeu === 1 ? '+1 Liegeplatz' : `+${e.plaetzeNeu} Liegeplätze`) : e.art === 'versorgung' && e.wunsch !== 'strom' ? `${WUNSCH_KURZ[e.id]} für ${e.nutzen[0].match(/\d+/)?.[0] ?? ''} Boote` : e.name;
+      const text = e.nachruesten ? e.kurz : e.art === 'steg' ? (e.plaetzeNeu === 1 ? '+1 Liegeplatz' : `+${e.plaetzeNeu} Liegeplätze`) : e.art === 'versorgung' && e.wunsch !== 'strom' ? `${WUNSCH_KURZ[e.id]} für ${e.nutzen[0].match(/\d+/)?.[0] ?? ''} Boote` : e.name;
       fliege(text, ort.x, y, ort.z);
       if (ort.gebaeude && ort.neu) {
         const it = game.buildings.items.find((i) => i.id === ort.gebaeude);
@@ -1137,7 +1200,7 @@ export function init(game) {
     game.emit('bauen:gebaut', { key, name: e.name, kosten: vorher - game.sim.state.money || e.kosten });
     // Kleine Karte bleibt stehen, damit das neue Bauwerk sichtbar bleibt
     aktiv = null;
-    fertig = { name: e.name, text: e.art === 'steg' ? `${e.plaetzeNeu === 1 ? 'Ein neuer Liegeplatz ist' : `${e.plaetzeNeu} neue Liegeplätze sind`} frei.` : e.nutzen[0] ?? '' };
+    fertig = { name: e.name, text: e.art === 'steg' && !e.nachruesten ? `${e.plaetzeNeu === 1 ? 'Ein neuer Liegeplatz ist' : `${e.plaetzeNeu} neue Liegeplätze sind`} frei.` : e.nutzen[0] ?? '' };
     meldung = '';
     zeichne();
   }
@@ -1233,7 +1296,9 @@ export function init(game) {
   function zeichneVorschau(e, geld) {
     const b = bedarf();
     let bedarfText = null;
-    if (e.art === 'steg' && (b.weg || b.plaetze)) {
+    if (e.bedarf) {
+      bedarfText = e.bedarf();
+    } else if (e.art === 'steg' && (b.weg || b.plaetze)) {
       bedarfText = b.weg ? (b.weg === 1 ? 'Zuletzt ist 1 Boot weitergefahren, ohne anzulegen.' : `Zuletzt sind ${b.weg} Boote weitergefahren, ohne anzulegen.`) : `Abends waren ${b.belegt} von ${b.plaetze} Gastplätzen belegt.`;
     } else if (e.wunsch && b.offen[e.wunsch]) {
       bedarfText = b.offen[e.wunsch] === 1 ? `Zuletzt wollte 1 Gast ${WUNSCH[e.wunsch]} und bekam es nicht.` : `Zuletzt wollten ${b.offen[e.wunsch]} Gäste ${WUNSCH[e.wunsch]} und bekamen es nicht.`;

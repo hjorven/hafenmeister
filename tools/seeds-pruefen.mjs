@@ -1,5 +1,5 @@
 // Prüft viele Seeds je Küstentyp: Fahrwasser, Wartebojen, Ankerplätze, Liegeplatztiefen, Leuchttürme an Land, Seeweg.
-// Aufruf: node tools/seeds-pruefen.mjs [Seeds je Typ, Standard 50] [erster Seed, Standard 1]
+// Aufruf: node tools/seeds-pruefen.mjs [Seeds je Typ, Standard 50] [erster Seed, Standard 1] [Typen, z. B. 11,12; Standard alle]
 // Gibt jeden Seed aus, der durchfällt, und endet dann mit Fehlercode 1.
 import { FORMEN, formSetzen } from '../web/js/render/landschaft/formen.js';
 import { punkt, warteplaetze, warteplatzTiefe, leuchttuerme } from '../web/js/render/landschaft/gelaende.js';
@@ -9,9 +9,11 @@ import { HAFEN } from '../web/js/data/harbor.js';
 import { seezugaenge } from '../web/js/render/landschaft/zonen.js';
 
 const anzahl = Number(process.argv[2] || 50), ab = Number(process.argv[3] || 1);
+const nur = process.argv[4] ? process.argv[4].split(',').map(Number) : null;
 const fehler = [];
 const t0 = Date.now();
 for (const F of FORMEN) {
+  if (nur && !nur.includes(F.nr)) continue;
   for (let seed = ab; seed < ab + anzahl; seed++) {
     formSetzen(F.nr, seed);
     const f = [];
@@ -42,5 +44,5 @@ for (const F of FORMEN) {
   }
   console.log(`Typ ${F.nr} (${F.name}): ${anzahl} Seeds geprüft`);
 }
-console.log(`${FORMEN.length * anzahl} Seeds in ${((Date.now() - t0) / 1000).toFixed(0)} s, ${fehler.length} durchgefallen.`);
+console.log(`${(nur ? nur.length : FORMEN.length) * anzahl} Seeds in ${((Date.now() - t0) / 1000).toFixed(0)} s, ${fehler.length} durchgefallen.`);
 process.exit(fehler.length ? 1 : 0);

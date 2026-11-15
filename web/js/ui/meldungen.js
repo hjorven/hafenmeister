@@ -23,6 +23,7 @@
 export const VORRANG = {
   feier: 100,          // features/aufstieg.js, #hm-feier
   kartenwahl: 90,      // features/tagesziele.js, Kartenwahl am Morgen
+  statistik: 85,       // ui/statistik.js, vom Spieler geöffnet: Tagesabschluss und Winterpause warten dahinter
   abschluss: 80,       // ui/tagesabschluss.js, Karte
   winter: 75,          // features/winter.js, Winterpause und Frühlingsgruß
   zettel: 70,          // ui/tagesabschluss.js, Morgen-Zettel
@@ -44,6 +45,7 @@ export const VORRANG = {
 export const FENSTER = [
   { id: 'feier', sel: '#hm-feier', vorrang: VORRANG.feier },
   { id: 'kartenwahl', sel: '.hm-tafel > ul.tz-wahl', vorrang: VORRANG.kartenwahl },
+  { id: 'statistik', sel: '#hm-statistik', vorrang: VORRANG.statistik },
   { id: 'abschluss', sel: '#hm-tagesabschluss', vorrang: VORRANG.abschluss },
 ];
 
@@ -106,7 +108,7 @@ export function init(game) {
     }).filter(Boolean);
     // Das Wetter- und Ereignisschild oben (events/banner.js) legte sich über die Winterpause-Karte
     // (Feature-Test 14.11.): es tritt zurück, solange eine Karte steht, und kommt danach nicht wieder.
-    regeln.push(`${['winter', 'abschluss', 'kartenwahl', 'feier'].map((id) => `body[data-hm-meldung="${id}"] #event-banner`).join(',\n')} { visibility: hidden !important; pointer-events: none !important; }`);
+    regeln.push(`${['winter', 'abschluss', 'statistik', 'kartenwahl', 'feier'].map((id) => `body[data-hm-meldung="${id}"] #event-banner`).join(',\n')} { visibility: hidden !important; pointer-events: none !important; }`);
     const style = document.createElement('style');
     style.textContent = regeln.join('\n');
     document.head.append(style);
@@ -158,6 +160,8 @@ export function init(game) {
     // 1. Unten in der Lücke zwischen den Knöpfen (Zeit | Kassieren | Bauen), wenn sie breit genug ist:
     //    PC, Tablet quer, Handy quer. Die Meldung steht dann wie ein Untertitel auf Höhe der Knöpfe.
     const knoepfe = rechteck('#hm-zeit, #btn-build, #btn-collect').sort((x, y) => x.left - y.left);
+    // Oberkante der unteren Knöpfe für andere Tafeln (Bootskarte am Tablet hochkant steht darüber, oberflaeche.css)
+    if (knoepfe.length) document.documentElement.style.setProperty('--hm-knopfkante', `${Math.round(h.bottom - Math.min(...knoepfe.map((r) => r.top)))}px`);
     let luecke = null;
     for (let i = 0; i + 1 < knoepfe.length; i++) {
       const l = knoepfe[i].right - h.left + rand;
@@ -193,7 +197,8 @@ export function init(game) {
     const steht = waehle(liste);
     // "Als Nächstes" (passiv) ist ein stehender Rat, keine wartende Meldung: zählt nicht mit
     const n = liste.filter((w) => ids.has(w.id) && w.id !== steht && !passiv.has(w.id)).length;
-    const zeigt = ids.has(steht) && n > 0;
+    // Nur an einer sichtbaren Meldung (eine offene Karte blendet die stehende Meldung aus, dann kein einsamer Zähler)
+    const zeigt = ids.has(steht) && n > 0 && [...platz.children].some((c) => c !== zahl && sichtbar(c));
     zahl.hidden = !zeigt;
     if (zeigt && zahl.textContent !== `+${n}`) zahl.textContent = `+${n}`;
     platz.dataset.steht = ids.has(steht) ? steht : '';

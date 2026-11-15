@@ -23,6 +23,7 @@ import { ECONOMY } from '../data/economy.js';
 import { HAFEN } from '../data/harbor.js';
 import { regelnBereit } from './regeln-bereit.js';
 import { VORRANG } from '../ui/meldungen.js';
+import * as statistik from './statistik-daten.js';
 
 export const ARBEITEN = ECONOMY.winterarbeiten;
 
@@ -152,30 +153,12 @@ export function aufraeumen(state, ctx) {
 }
 
 /**
- * Bilanz der Saison aus state.stats.verlauf (die letzten 30 Tage, also genau eine Saison).
+ * Bilanz der Saison. Gemerkt in der Nacht des letzten Saisontags (features/statistik-daten.js, P41),
+ * sonst aus state.stats.verlauf gerechnet. Dazu Einnahmen je Quelle (quellen) und Belegung im Schnitt.
  * jahr: die Saison; ohne Angabe die gerade zu Ende gegangene (im Winter) oder laufende.
  */
 export function saisonBilanz(state, ctx, jahr = sim.season(state, ctx).year) {
-  const { seasonDays, winterDays } = ctx.rules;
-  const von = (jahr - 1) * (seasonDays + winterDays) + 1;
-  const bis = von + seasonDays - 1;
-  const tage = (state.stats?.verlauf || []).filter((t) => t && t.tag >= von && t.tag <= bis);
-  const sum = (f) => tage.reduce((a, t) => a + (Number(f(t)) || 0), 0);
-  const abgereist = sum((t) => t.abgereist);
-  const bewertet = sum((t) => (t.bewertung != null ? t.bewertung * t.abgereist : 0));
-  let best = null;
-  for (const t of tage) if ((t.summe || 0) > 0 && (!best || t.summe > best.summe)) best = { tag: t.tag - von + 1, summe: t.summe };
-  return {
-    jahr, tage: tage.length,
-    einnahmen: sum((t) => t.summe),
-    ausgaben: sum((t) => t.ausgabenSumme),
-    angelegt: sum((t) => t.angelegt),
-    abgereist,
-    bewertung: abgereist ? Math.round((bewertet / abgereist) * 10) / 10 : null,
-    weggefahren: sum((t) => t.weggefahrenSumme),
-    ruf: tage.length ? { vorher: tage[0].ruf?.vorher ?? null, nachher: tage[tage.length - 1].ruf?.nachher ?? null } : null,
-    besterTag: best,
-  };
+  return statistik.saison(state, ctx, jahr);
 }
 
 /** Hooks in einen Regel-Kontext hängen (Browser über game.sim.addHook, Tests über sim.addHook). */
@@ -273,15 +256,26 @@ export async function init(game) {
     const vertraege = dauer.filter((p) => !p.kuendigung).length;
     const imLager = dauer.filter((p) => p.winterlager && p.boot).length;
     const winterTag = sim.season(s, c).day - c.rules.seasonDays;
-    const bilanz = b.tage ? el('div', { class: 'hm-wi-block' },
+    // Saison davor zum Vergleich (gemerkt, P41)
+    const vor = b.jahr > 1 ? statistik.saisons(s).find((x) => x.jahr === b.jahr - 1) : null;
+    const plus = statistik.vergleich(b.einnahmen, vor?.einnahmen);
+    const quellen = statistik.quellenSumme([{ quellen: b.quellen || {} }]);
+    const bilanz = b.tage ? el('div', { class: 'hm-wi-block hm-wi-bilanz' },
       el('h3', { text: `Saison ${b.jahr}` }),
       zeile('Einnahmen', euro(b.einnahmen)),
+      plus != null ? zeile(`Gegenüber Saison ${vor.jahr}`, `${plus > 0 ? '+' : plus < 0 ? '−' : '±'} ${Math.abs(plus)} %`, plus > 0 ? 'auf' : plus < 0 ? 'ab' : 'leise') : null,
+      quellen.length > 1 ? el('div', { class: 'hm-st-streifen', role: 'img', 'aria-label': `Einnahmen nach Quelle: ${quellen.map((q) => `${q.name} ${Math.round(q.anteil * 100)} %`).join(', ')}` },
+        quellen.map((q) => el('i', { 'data-q': q.id, style: `flex-grow: ${q.summe}` }))) : null,
+      quellen.length > 1 ? el('p', { class: 'hm-st-legende' },
+        quellen.slice(0, 4).map((q) => el('span', { 'data-q': q.id }, el('i', { 'aria-hidden': 'true' }), `${q.name} ${euro(q.summe)}`))) : null,
       b.ausgaben > 0 ? zeile('Ausgaben', `− ${euro(b.ausgaben)}`) : null,
       zeile('Gäste angelegt', String(b.angelegt)),
+      b.belegung != null ? zeile('Belegung im Schnitt', `${Math.round(b.belegung * 100)} %${b.volleNaechte ? `, ${b.volleNaechte} ${b.volleNaechte === 1 ? 'Nacht' : 'Nächte'} voll` : ''}`) : null,
       b.bewertung != null ? zeile('Bewertung im Schnitt', `${anker(b.bewertung)} Anker`) : null,
       b.weggefahren > 0 ? zeile('Weitergefahren', `${b.weggefahren} Boote`, 'leise') : null,
       b.ruf?.vorher != null && b.ruf?.nachher != null ? zeile('Ruf', `${anker(b.ruf.vorher)} auf ${anker(b.ruf.nachher)}`) : null,
       b.besterTag ? zeile('Bester Tag', `Tag ${b.besterTag.tag}, ${euro(b.besterTag.summe)}`, 'leise') : null,
+      game.statistik ? el('button', { type: 'button', class: 'hm-knopf hm-px hm-wi-statistik', onclick: () => game.statistik.oeffnen() }, 'Statistik der letzten 30 Tage') : null,
     ) : null;
     const arbeiten = el('div', { class: 'hm-wi-block' },
       el('h3', { text: 'Winterarbeiten' }),
@@ -311,7 +305,7 @@ export async function init(game) {
       el('p', { class: 'hm-wi-leise', text: imLager
         ? 'Keine Gäste bis zum Frühling, die Dauerlieger sind im Winterlager. Zeit, Bilanz zu ziehen und die nächste Saison vorzubereiten.'
         : 'Keine Gäste bis zum Frühling. Zeit, Bilanz zu ziehen und die nächste Saison vorzubereiten.' }),
-      bilanz, arbeiten, naechste,
+      ...[bilanz, arbeiten, naechste].filter(Boolean),
       el('div', { class: 'hm-wi-knoepfe' },
         el('p', { class: 'hm-wi-mehr', 'aria-hidden': 'true', text: matchMedia('(pointer: coarse)').matches ? 'Weiter unten mehr, nach oben wischen' : 'Weiter unten mehr, bitte scrollen' }),
         el('button', { type: 'button', class: 'hm-knopf hm-primaer hm-px hm-wi-ja', onclick: ueberspringe, text: 'Winter überspringen' }),

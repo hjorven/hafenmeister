@@ -92,6 +92,7 @@ export function rulesFromEconomy(E = ECONOMY) {
 
   // Ruf und Bewertung
   const f = E.ruf || {};
+  r.startMoney = E.start?.geld ?? 0;
   r.reputation = { window: f.hoechstens ?? f.fenster, days: f.tage ?? 0, minCount: f.mindestens ?? f.fenster, start: f.start, startSamples: f.startBewertungen ?? 0, min: ANKER_MIN, max: ANKER_MAX };
   r.rating = { noWishes: f.ohneWunsch, min: ANKER_MIN, max: ANKER_MAX, noneMet: f.wunschNote?.keiner ?? ANKER_MIN, allMet: f.wunschNote?.alle ?? ANKER_MAX };
   r.arrivalFactorAtRep = { 1: f.ankunftBasis, 5: f.ankunftBasis + 4 * f.ankunftJeAnker };
@@ -169,6 +170,8 @@ export function rulesFromEconomy(E = ECONOMY) {
   };
   // Passgenau zuweisen (P10)
   r.snug = E.passgenau ? { share: E.passgenau.hoechstensGroesser, rating: E.passgenau.ruf } : null;
+  // Liegende Boote umlegen (P33): so oft ohne Folgen, danach je Mal weniger Anker
+  r.relocate = E.umlegen ? { free: E.umlegen.freiMal, rating: E.umlegen.ruf } : null;
   r.leaveMax = w.ausBoxMax ?? 0;
   r.previewCount = w.vorschau ?? 0;
 

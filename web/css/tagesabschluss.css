@@ -330,3 +330,8 @@ body.foto .hm-ta, body.foto .hm-ta-zettel, body.foto .hm-ta-muenzen { display: n
 .hm-ta.sehr-eng .hm-ta-zusatz { order: 0; flex-basis: auto; }
 .hm-ta-zettel.kurz .hm-ta-zettel-tag { display: none; }
 .hm-ta-zettel[style*="right: 8px"].rein { animation: none; }
+
+/* Säulen als Knopf zur Statistik (ui/statistik.js, P41) */
+button.hm-ta-zur-statistik { width: 100%; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
+button.hm-ta-zur-statistik:hover .hm-ta-saeule i, button.hm-ta-zur-statistik:focus-visible .hm-ta-saeule i { filter: brightness(1.08); }
+button.hm-ta-zur-statistik:focus-visible { outline: 2px solid var(--hm-tinte, #24364a); outline-offset: 2px; }

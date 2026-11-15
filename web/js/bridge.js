@@ -8,6 +8,7 @@ import { HAFEN, platzInWelt } from './data/harbor.js';
 import { BOAT_CATALOG } from './data/boat-catalog.js';
 import { ECONOMY } from './data/economy.js';
 import { GROSSSCHIFF_BESUCHE } from './data/services.js';
+import { besuchModelle } from './data/besuchswege.js';
 
 const BOAT_FILES = ['./data/boats/s.js', './data/boats/m.js', './data/boats/l.js', './data/boats/xl.js', './data/boats/xxl.js'];
 
@@ -158,7 +159,9 @@ export async function initBridge(game) {
         game.emit('boot:ablegen', { id: e.boatId });
       }
       // Stufenausbau: ein fest liegendes Boot zieht auf einen neuen Platz um
-      if (e.type === 'relocated') game.emit('boot-zugewiesen', { id: e.boatId, platz: e.to, umzug: true });
+      // Gast umgelegt (P33, Sturm): fährt sichtbar hinüber. Ist er gerade auf Tagestörn, kommt er abends
+      // gleich in die neue Box zurück. hand: vom Spieler gezogen, das Boot legt ohne Ablegetakt sofort ab.
+      if (e.type === 'relocated' && !state.boats[e.boatId]?.trip?.away) game.emit('boot-zugewiesen', { id: e.boatId, platz: e.to, umzug: true, sofort: e.grund === 'hand' || e.grund === 'dauer' });
       // Stufenausbau mit weniger Bojen: ein wartendes Boot verholt an eine andere Boje
       if (e.type === 'waitSpotChanged') game.emit('boot:boje', { id: e.boatId, boje: e.waitSpot });
       // Tagestörn eines Gastes: gleiche Ereignisse wie die Runde der Dauerlieger
@@ -227,6 +230,12 @@ export async function initBridge(game) {
       const r = sim.assign(state, ctx, boatIdOf(boatId), berthIdOf(berthId));
       if (r.ok) selected = null;
       else game.emit('sim:assignFailed', { boatId: boatIdOf(boatId), berthId: berthIdOf(berthId), reason: r.reason });
+      return r;
+    }),
+    // Liegenden Gast in eine andere freie Box umlegen (P33): Ziehen, Dauerlieger-Karte
+    umlegen: run((boatId, berthId) => {
+      const r = sim.relocateGuest(state, ctx, boatIdOf(boatId), berthIdOf(berthId), { grund: 'hand' });
+      if (!r.ok) game.emit('sim:relocateFailed', { boatId: boatIdOf(boatId), berthId: berthIdOf(berthId), reason: r.reason });
       return r;
     }),
     autoAssign: run(() => sim.autoAssign(state, ctx)),
@@ -356,6 +365,17 @@ export async function initBridge(game) {
       return b.status === 'moored' && (b.stationed || (b.paid !== false && !(b.pendingFee > 0)));
     },
     passendePlaetze: (boatId) => sim.fittingBerths(state, ctx, boatIdOf(boatId)),
+    // Umlegen (P33): darf das liegende Boot gerade umgelegt werden, und wohin?
+    umlegbar: (boatId) => sim.canRelocate(state, boatIdOf(boatId)),
+    umlegeZiele: (boatId) => sim.relocateTargets(state, ctx, boatIdOf(boatId)),
+    // Wie oft diese Crew schon umgelegt wurde, und was das nächste Umlegen an Ankern kostet
+    umlegeFolge: (boatId) => {
+      const b = state.boats[boatIdOf(boatId)];
+      if (!b) return null;
+      const jetzt = sim.relocatePenalty(ctx, b);
+      const naechst = sim.relocatePenalty(ctx, { ...b, umgelegt: (b.umgelegt || 0) + 1 });
+      return { mal: b.umgelegt || 0, malus: Math.round((naechst - jetzt) * 100) / 100 };
+    },
     // Zuweisen als Entscheidung (P10): Plätze, die einen Platz-Wunsch erfüllen (leuchten gold),
     // und was ein Platz bringt: { fee, wishesMet, wishes, anchors, snug } (ohne Platz: Grundwert)
     wunschPlaetze: (boatId) => sim.wishBerths(state, ctx, boatIdOf(boatId)),
@@ -464,13 +484,30 @@ export async function initBridge(game) {
   game.on('ui:tow-end', (d = {}) => {
     const boatId = boatIdOf(d.boot ?? d.boat ?? d.boatId) ?? selected;
     const berthId = berthIdOf(d.platz ?? d.berth ?? d.berthId ?? (d.pick?.type === 'berth' ? d.pick.id : null) ?? d.target);
-    if (boatId != null && berthId) api.assign(boatId, berthId);
+    if (boatId == null || !berthId) return;
+    if (state.boats[boatId]?.status === 'moored') api.umlegen(boatId, berthId);
+    else api.assign(boatId, berthId);
   });
   // Besuche großer Schiffe zählen für das Abschlussziel der Region (Liste in data/services.js,
   // auch der Tag der offenen Tür des Marinestützpunkts zählt). Einziger Zähler: state.bigVisits.
   game.on('services:besuch', (b = {}) => {
     if (GROSSSCHIFF_BESUCHE.includes(b.art)) dispatch(sim.addBigVisit(state, ctx));
+    // Die Besuchsschiffe kommen ins Logbuch (sie legen nicht über die Spielregeln an)
+    for (const m of besuchModelle(b.id)) sichten(m);
   });
+  // Schiffe, die man sieht, ohne dass sie über die Spielregeln anlegen: Logbuch-Eintrag "gesichtet"
+  // (Großschiffe im Verkehr vor dem Hafen, render/boats/verkehr.js; Seenotkreuzer an der Station)
+  function sichten(modelId) {
+    const typeId = ctx.types.find((t) => t.models?.some((m) => m.id === modelId))?.id;
+    if (typeId) dispatch(sim.logbookSighting(state, ctx, typeId, modelId));
+  }
+  game.on('verkehr:gesichtet', (d = {}) => { if (/^XXL/.test(d.modell ?? '')) sichten(d.modell); });
+  // Seenotretter-Station: ab ihrer zweiten Stufe liegt dort der 20-m-Seenotkreuzer (render/services-models.js)
+  const seenotKreuzer = () => { if ((game.services?.stufeVon?.('seenotretter') ?? 0) >= 2) sichten('XXL3-1'); };
+  game.on('services:gebaut', (e = {}) => { if (e.id === 'seenotretter') seenotKreuzer(); });
+  game.on('ready', () => setTimeout(seenotKreuzer, 0));
+  game.on('sim:dayStart', seenotKreuzer);
+  game.on('spielstand-geladen', () => setTimeout(seenotKreuzer, 0));
   // Hafenmeister-Rundgang am Abend (render/people.js): Wer noch nicht bezahlt hat, zahlt jetzt (vier Fünftel kommen an)
   game.on('hafenmeister:halt', (d = {}) => {
     const id = boatIdOf(d.boot ?? d.id);

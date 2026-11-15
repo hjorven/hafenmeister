@@ -6,8 +6,9 @@
 // - Karte: Einnahmen je Quelle (Liegegeld, Pacht, Gastronomie, Services, Tagesziele), Ausgaben,
 //   Boote (angelegt, abgereist mit Bewertung, weitergefahren), Ruf vorher und nachher, bester Tag,
 //   die letzten sieben Tage als Balken und ein Hinweis, was morgen mehr bringt.
-// - Sie erscheint von selbst und schließt nach einer Weile wieder, solange niemand sie anfasst.
-//   Wer das nicht will, schaltet "Abends zeigen" aus; dann kommt nur ein kleiner Zettel mit der Summe.
+// - Am Tagesende kommt nur ein kleiner Zettel mit der Summe in den Meldeplatz (ui/meldungen.js); antippen öffnet
+//   die Karte. Von selbst erscheint die Karte nur, wer "Abends zeigen" einschaltet (Schichttest 15.11.: sie lag
+//   bis zu 14 s mitten über Bojen und Stegkopf, während das Spiel lief; Jorven: Meldungen klein an einer Stelle).
 // - Menü: "Tagesabschluss" öffnet die Karte jederzeit, mit Blättern durch die letzten Tage.
 // - Münzen über Gebäuden: Bei der Abrechnung der Services steigt über jeder Anlage eine Münze mit dem Betrag auf.
 //
@@ -65,7 +66,7 @@ function el(tag, attrs = {}, ...kids) {
 }
 
 function leseAuto() {
-  try { return localStorage.getItem(SPEICHER) !== 'aus'; } catch { return true; }
+  try { return localStorage.getItem(SPEICHER) === 'an'; } catch { return false; }
 }
 function schreibeAuto(an) {
   try { localStorage.setItem(SPEICHER, an ? 'an' : 'aus'); } catch { /* privates Fenster */ }
@@ -138,7 +139,11 @@ export function init(game) {
     if (tage.length < 2) return null;
     const max = Math.max(1, ...tage.map((x) => x.summe));
     const bestTag = sim()?.state?.stats?.besterTag?.tag;
-    return el('div', { class: 'hm-ta-balken', role: 'img', 'aria-label': `Einnahmen der letzten ${tage.length} Tage` },
+    // Antippen öffnet die Statistik der letzten 30 Tage (ui/statistik.js, P41) mit diesem Tag
+    const statistik = game.statistik?.oeffnen ? () => { const tag = b.laufend ? null : b.tag; schliesse(); game.statistik.oeffnen(tag); } : null;
+    return el(statistik ? 'button' : 'div', statistik
+      ? { type: 'button', class: 'hm-ta-balken hm-ta-zur-statistik', title: 'Statistik der letzten 30 Tage', 'aria-label': `Einnahmen der letzten ${tage.length} Tage, Statistik öffnen`, onclick: statistik }
+      : { class: 'hm-ta-balken', role: 'img', 'aria-label': `Einnahmen der letzten ${tage.length} Tage` },
       ...tage.map((x) => el('div', { class: `hm-ta-saeule${x.tag === b.tag ? ' heute' : ''}${x.tag === bestTag ? ' best' : ''}`, title: `Tag ${x.tag}: ${euro(x.summe)}` },
         el('i', { style: { height: `${Math.max(4, Math.round((x.summe / max) * 100))}%` } }),
         el('span', {}, String(x.tag)))));

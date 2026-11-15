@@ -33,6 +33,7 @@ export const GRUND = {
   sturm:      { text: 'ungeschützt bei Sturm',      lang: 'Platz ohne Schutz bei Sturm',               sym: 'sturm' },
   stimmung:   { text: 'schlechte Stimmung',         lang: 'Schlechte Stimmung im Hafen',               sym: 'sturm' },
   umbau:      { text: 'musste wegen Umbau weg',     lang: 'Musste wegen Umbau früher ablegen',         sym: 'umbau' },
+  umgelegt:   { text: 'zu oft umgelegt',            lang: 'Mehrmals in eine andere Box umgelegt',      sym: 'umbau' },
   warten:     { text: 'zu lange gewartet',          lang: 'Zu lange an der Boje gewartet',             sym: 'warten' },
   abends:     { text: 'abends kein Platz',          lang: 'Abends noch immer ohne Liegeplatz',         sym: 'warten' },
   weggeschickt: { text: 'weggeschickt',            lang: 'Vom Hafenmeister weggeschickt',             sym: 'warten' },
@@ -82,6 +83,7 @@ export function gruendeAusAbreise(e) {
     for (const [key, n] of Object.entries(p.far || {})) if (n > 0 && GRUND[`weit:${key}`]) gruende.push({ key: `weit:${key}`, n });
     if (p.penalty > 0.001) gruende.push({ key: 'sturm', n: r2(p.penalty) });
     if (p.bonus < -0.001) gruende.push({ key: 'stimmung', n: r2(-p.bonus) });
+    if (p.moved > 0.001) gruende.push({ key: 'umgelegt', n: r2(p.moved) });   // P33
     if (p.wishesTotal > 0 && !missed.length && !Object.values(p.far || {}).some((n) => n > 0)) plus.push({ key: 'wuensche', wert: 0 });
     if (!p.wishes?.length) plus.push({ key: 'ohne', wert: 0 });
     if (p.comfort > 0.001) plus.push({ key: 'komfort', wert: r2(p.comfort) });
@@ -213,6 +215,7 @@ const SATZ = {
   sturm: ['Beim Sturm lagen wir ganz ungeschützt.', 'Unruhige Nacht, das Boot hat ordentlich gerissen.', 'Draußen am Steg bei Sturm: nie wieder.'],
   stimmung: ['Die Stimmung im Hafen war gedrückt.', 'Irgendwie war nichts los.'],
   umbau: ['Wegen der Baustelle mussten wir früher los.', 'Baulärm, und dann hieß es: Platz räumen.'],
+  umgelegt: ['Kaum fest, schon wieder Leinen los. Zweimal umgelegt!', 'Wir wurden hin und her geschickt wie ein Paket.'],
   warten: ['Ewig an der Boje gewartet, dann sind wir weiter.', 'Niemand hat uns einen Platz gegeben.'],
   abends: ['Abends immer noch kein Platz, wir sind weitergefahren.', 'Es wurde dunkel, und wir hingen noch an der Boje.'],
   abgewiesen: ['Kein Platz für uns.', 'Voll. Vielleicht nächstes Mal.'],
@@ -258,7 +261,7 @@ export function erklaerung(eintrag) {
     const def = GRUND[g.key];
     if (!def) continue;
     if (WUNSCH_KEYS.includes(g.key) || g.key.startsWith('weit:')) teile.push(g.n > 1 ? `${def.text} (${g.n} Nächte)` : def.text);
-    else if (g.key === 'sturm' || g.key === 'stimmung') teile.push(`${def.text} −${komma(g.n)}`);
+    else if (g.key === 'sturm' || g.key === 'stimmung' || g.key === 'umgelegt') teile.push(`${def.text} −${komma(g.n)}`);
     else teile.push(def.text);
   }
   for (const p of eintrag.plus || []) teile.push(p.wert ? `${PLUS[p.key]} +${komma(p.wert)}` : PLUS[p.key]);

@@ -145,3 +145,46 @@ test('Tippen beendet den Überblicksflug beim Laden', async ({ page, problems },
   expect(home.jetzt.w, 'nach dem Tippen bleibt der weite Ueberblick').toBeLessThan(ueber.w);
   expect(Math.abs(home.jetzt.w - home.home.w), 'nach dem Tippen nicht in der Startansicht').toBeLessThan(home.home.w * 0.02);
 });
+
+// Feature-Test-Fund (PR 281): Am Handy quer war die Startansicht ab Stufe 4 rund 620 m breit, der
+// Hafen klein in der Mitte, darunter fast nur Felder. Jetzt enger um den Hafen: die Liegeplaetze
+// fuellen ein deutlich hoeheres Band und liegen mittig (vorher 13 %, jetzt 17 bis 19 % der Hoehe).
+test('Handy quer: Startansicht zeigt den Hafen gross und mittig', async ({ page, problems }, testInfo) => {
+  test.skip(testInfo.project.name !== 'handy-quer', 'nur Handy quer');
+  void problems;
+  await page.goto('./?stufe=4&gelaende=4&seed=7&ueberblick=0');
+  await page.waitForFunction(() => document.getElementById('boot')?.classList.contains('done'), null, { timeout: 30_000 });
+  await ohneEinstieg(page);
+  // Die Stege der Stufe entstehen erst nach 'ready' und der Stufe aus ?stufe=: warten, bis die
+  // Zahl der Liegeplaetze eine Sekunde lang gleich bleibt, sonst misst der Test einen halben Hafen
+  const plaetze = () => page.evaluate(() => {
+    let n = 0;
+    window.hafenmeister.scene.traverseVisible((o) => { if (o.userData?.pick?.type === 'berth') n++; });
+    return n;
+  });
+  let vorher = -1;
+  for (let i = 0; i < 20; i++) {
+    const n = await plaetze();
+    if (n > 0 && n === vorher) break;
+    vorher = n;
+    await page.waitForTimeout(1000);
+  }
+  const r = await page.evaluate(() => {
+    const g = window.hafenmeister; const c = g.camera;
+    c.reset(); c.update(0);
+    const ys = [];
+    g.scene.traverseVisible((o) => {
+      if (o.userData?.pick?.type !== 'berth') return;
+      const v = o.getWorldPosition(new g.THREE.Vector3()).project(c.camera);
+      if (Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1) ys.push((1 - v.y) / 2);
+    });
+    ys.sort((a, b) => a - b);
+    const q = (k) => ys[Math.floor((ys.length - 1) * k)];
+    return { n: ys.length, p10: q(0.1), p50: q(0.5), p90: q(0.9) };
+  });
+  test.skip(r.n < 10, 'Liegeplaetze nicht auswertbar');
+  const pz = (v) => `${Math.round(v * 100)} %`;
+  expect(r.p90 - r.p10, `Liegeplaetze nur ${pz(r.p90 - r.p10)} der Hoehe: Hafen zu klein`).toBeGreaterThan(0.16);
+  expect(r.p50, `Liegeplaetze bei ${pz(r.p50)} der Hoehe`).toBeGreaterThan(0.4);
+  expect(r.p50, `Liegeplaetze bei ${pz(r.p50)} der Hoehe`).toBeLessThan(0.75);
+});

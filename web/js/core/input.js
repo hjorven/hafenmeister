@@ -44,6 +44,15 @@ export function initInput(game) {
       finger(id, { x: p.x, y: p.y });
       tapCandidate = null;   // kein Tipp aus einem übernommenen Finger
     },
+    // Umgekehrt: ui/gesten.js übernimmt einen Finger, der hier schon zählt (Boot gedrückt halten
+    // zum Umlegen, P33). Kein Tipp, kein Schwung, die Karte bleibt stehen.
+    abgeben(id) {
+      if (!pointers.has(id)) return;
+      pointers.delete(id);
+      tapCandidate = null;
+      velo = { x: 0, y: 0, t: 0 };
+      cam.stop?.();
+    },
   };
 
   function finger(id, p) {
@@ -148,7 +157,8 @@ export function initInput(game) {
     pointers.delete(e.pointerId);
     if (e.type === 'pointerup' && tapCandidate && tapCandidate.id === e.pointerId &&
         performance.now() - tapCandidate.t < TAP_TIME) {
-      game.emit('tap', { x: p.x, y: p.y, world: cam.screenToWorld(p.x, p.y), pick: game.pick(p.x, p.y) });
+      // zeit: wann der Finger losließ (nicht wann das Ereignis verarbeitet wird), für Doppeltipps auf langsamen Geräten
+      game.emit('tap', { x: p.x, y: p.y, world: cam.screenToWorld(p.x, p.y), pick: game.pick(p.x, p.y), zeit: e.timeStamp });
     }
     tapCandidate = null;
     if (pointers.size < 2) {

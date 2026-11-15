@@ -10,7 +10,7 @@ Am ersten Wintertag kommt von selbst die Karte „Winterpause, Jahr N“ (nach d
 
 | Teil | Inhalt |
 |---|---|
-| Saison N | Einnahmen (ohne Geschenke), Ausgaben, Gäste angelegt, Bewertung im Schnitt, weitergefahrene Boote, Ruf vorher und nachher, bester Tag. Aus `state.stats.verlauf` (die letzten 30 Tage, also genau eine Saison). |
+| Saison N | Einnahmen (ohne Geschenke), Vergleich zur Saison davor in Prozent, ein Streifen mit den Einnahmen nach Quelle und Legende, Ausgaben, Gäste angelegt, Belegung im Schnitt mit vollen Nächten, Bewertung im Schnitt, weitergefahrene Boote, Ruf vorher und nachher, bester Tag, Knopf „Statistik der letzten 30 Tage“. Die Bilanz wird in der Nacht des letzten Saisontags gemerkt (`state.modules.statistik.saisons`, P41, siehe [Statistik](statistik.md)), damit sie auch am zweiten und dritten Wintertag vollständig ist; fehlt sie (alter Spielstand), wird sie aus `state.stats.verlauf` gerechnet. |
 | Winterarbeiten | Zwei oder drei Aufträge zur Wahl, je mit Preis und Wirkung. „Beauftragen für …“ bucht die Ausgabe sofort (im Tagesabschluss „Winterarbeiten“). Jeder Auftrag geht einmal pro Winter. |
 | Nächste Saison | Nächster Ausbau, Dauerlieger mit Vertrag, welcher Wintertag ist. |
 | Knöpfe | „Winter überspringen“ spult bis zum ersten Frühlingsmorgen vor (Ü19). Die Nächte laufen ganz normal, Winterlager und Werft verdienen, nur der Tagesabschluss bleibt für die Wintertage still. „Hafen ansehen“ schließt die Karte. |

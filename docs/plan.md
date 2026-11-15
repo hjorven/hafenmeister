@@ -56,7 +56,7 @@ Ein kleines, gemütliches Aufbauspiel in 3D. Du fängst mit einem Badesteg an ei
 Ein Spieltag dauert 2 Minuten bei normaler Geschwindigkeit: 90 Sekunden Tag, 30 Sekunden Abend. Tempo von Anfang an mit vier Knöpfen unten links: Pause, 1x, 3x, 8x; am PC schaltet Taste F 3x an und aus (Jorven, 12.11.2026: "Tempo so bleiben").
 
 1. **Vormittags** legen die Gäste der Nacht ab, Dauerlieger fahren zum Tagestörn hinaus. **Ab Mittag** laufen neue Boote ein und warten an Wartebojen oder im Ankerfeld vor dem Hafen. Du tippst ein Boot an (oder ziehst es an der Schleppleine), die passenden Plätze leuchten, du tippst einen an. Tust du nichts, fährt das Boot nach 8 Sekunden selbst in eine passende freie Box. Wer abends noch wartet, bleibt über Nacht an der Boje.
-2. **Kassieren:** Liegegeld wird beim Anlegen fällig, Gäste zahlen alle Nächte auf einmal. Über dem Boot erscheint eine Münze, eingestrichen bekommt das Boot einen Bezahlt-Wimpel; streichst du sie selbst ein, fliegt ihr Wert hoch („22 € + 11 €“ mit Wunschbonus), ein langer Strich über viele Münzen bringt Trinkgeld. Was liegen bleibt, holt abends der Hafenmeister auf seinem Rundgang, er bringt aber nur vier Fünftel. Ab dem Hafenbüro (erste Stufe "Hafenmeister") gibt es den Knopf "Alle kassieren", ab dem Kassenautomaten kommt das Geld von selbst. Sammelkassieren mit dem Hafenhorn (Abschnitt 8) ist geplant (P26).
+2. **Kassieren:** Liegegeld wird beim Anlegen fällig, Gäste zahlen alle Nächte auf einmal. Über dem Boot erscheint eine Münze, eingestrichen bekommt das Boot einen Bezahlt-Wimpel; streichst du sie selbst ein, fliegt ihr Wert hoch („22 € + 11 €“ mit Wunschbonus), ein langer Strich über viele Münzen bringt Trinkgeld. Was liegen bleibt, holt abends der Hafenmeister auf seinem Rundgang, er bringt aber nur vier Fünftel. Ab dem Hafenbüro (erste Stufe "Hafenmeister") gibt es den Knopf "Alle kassieren", ab dem Kassenautomaten kommt das Geld von selbst. Mit derselben Freischaltung kassiert das Hafenhorn alles: das Hafenmeisterhaus gedrückt halten (Abschnitt 8).
 3. **Jederzeit** kannst du bauen und ausbauen: Baumodus mit Vorschau und Bestätigung ([bauen.md](bauen.md)).
 
 **Regeln**
@@ -190,11 +190,11 @@ Ziel: Jede Geste fühlt sich an wie mit echten Booten. Alle Gesten haben eine Al
 | Kassierstrich | Abends in einem Strich über alle Münzen streichen, jede klingt einen Ton höher | gebaut |
 | Zwei Finger drehen, rechte Maustaste | Hafen drehen, rastet in 45-Grad-Schritten ein | gebaut; frei neigen und drehen in Arbeit (Kamera-Thread, P47) |
 | Boot gedrückt halten | Boot hupt | gebaut |
-| Hafenhorn gedrückt halten | Kassiert alle Münzen, die Münzen fliegen hörbar in die Kasse | geplant (P26) |
-| Doppeltipp auf ein Boot | Fernglas: Kamera fährt heran und folgt dem Boot, Steckbrief mit Art, Länge, Heimathafen (heute zoomt Doppeltipp) | geplant (P26) |
-| Kurz am Handy schütteln oder Taste H | Möwen fliegen auf (reine Freude, kein Nutzen) | geplant (P26) |
-| Lange auf das Wasser drücken | Wellenring und leises Plätschern | geplant (P26) |
-| Glocke am Hafenbüro antippen | Glocke läutet | geplant (P26); Vorspulen läuft über die Tempo-Knöpfe |
+| Hafenmeisterhaus gedrückt halten (Hafenhorn) | Ab Hafenbüro 1: Ring füllt sich, das Horn tutet, alle Münzen fliegen mit steigenden Tönen aufs Dach in die Kasse | gebaut (P26) |
+| Doppeltipp auf ein Boot (PC: Doppelklick) | Fernglas: Kamera fährt heran und folgt dem Boot, Steckbrief mit Pixelbild, Art, Maßen, Heimathafen, Stammgast, Knopf ins Logbuch. Wartende Boote haben ihre eigene Karte (PC-Doppelklick fährt sie ein) | gebaut (P26) |
+| Möwe antippen, Handy schütteln oder Taste H | Möwen auf Dächern und Wasser fliegen auf, kreisen und landen wieder; Boote und das Hafenhorn scheuchen sie auch (reine Freude, kein Nutzen) | gebaut (P26) |
+| Lange auf das Wasser drücken | Wellenring und leises Plätschern, solange der Finger liegt | gebaut (P26) |
+| Glocke am Hafenmeisterhaus antippen | Glocke schwingt und läutet; abends schwingt sie leise von selbst | gebaut (P26); steht ab Hafenbüro 1. Vorspulen läuft über die Tempo-Knöpfe |
 
 Kleine Rückmeldungen: Haptik auf dem Handy (`navigator.vibrate`), wo verfügbar. Alle Gesten je Gerät stehen in [ui/oberflaeche.md](ui/oberflaeche.md#bedienung-je-gerät).
 

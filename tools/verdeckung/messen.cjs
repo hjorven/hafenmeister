@@ -31,6 +31,7 @@ const S = {
   'bootskarte': [boot],
   'aufstieg': ['window.hafenmeister.aufstieg.zeigeStufe(4)'],
   'winter': ['window.hafenmeister.winter.oeffnen()'],
+  'statistik': ['(() => { const g = window.hafenmeister; for (let i = 0; i < 24; i++) g.sim.fastForward(1e6); g.tagesabschluss?.schliesse?.(); g.statistik.oeffnen(); })()'],
   'kombi-wahl+boot': [boot, 'window.hafenmeister.tagesziele.oeffnen()'],
   'kombi-ziel+boot': ['window.hafenmeister.tagesziele.waehle(0)', klick('.hm-tafel > button'), boot],
   'kombi-stufe+boot': [boot, klick('#hm-ziel > button')],

@@ -3,6 +3,8 @@
 //   1. Schleppleine: ein wartendes Boot (Boje oder Ankerplatz vor dem Hafen) mit dem Finger greifen
 //      und auf einen leuchtenden Liegeplatz ziehen. Am Rand des Bildschirms läuft die Karte mit.
 //      Kurz antippen zeigt den Knopf "Einfahren": das Boot sucht sich selbst den besten Platz.
+//   1b. Umlegen (P33): ein liegendes Boot kurz gedrückt halten, bis der Ring um den Finger voll ist,
+//      dann an der Leine in eine andere leuchtende Box ziehen. Wer gleich zieht, verschiebt die Karte.
 //   2. Kassierstrich: abends mit einem Finger in einem Zug über die Münzen streichen.
 //      Jede Münze klingt einen Ton höher, am Ende ein kleiner Akkord.
 //   3. (entfallen) Vorspulen steuern jetzt die Tempo-Knöpfe in ui/oberflaeche.js,
@@ -14,6 +16,8 @@
 //   game.sim.passendePlaetze(bootId)   -> [platzId, ...] freie Plätze, an die es passt
 //   game.sim.wunschPlaetze(bootId)     -> [platzId, ...] davon die, die einen Platz-Wunsch erfüllen (gold)
 //   game.sim.platzWert(bootId, platzId) -> { fee, wishesMet, anchors, snug } für das Schild beim Einrasten
+//   game.sim.umlegbar(bootId)          -> true, wenn das liegende Boot umgelegt werden darf (P33)
+//   game.sim.umlegeZiele(bootId)       -> [platzId, ...] freie Boxen, in die es umgelegt werden kann
 // Gesendet werden:
 //   ui:tow        { boot, x, z, platz }   während des Ziehens (platz = eingerasteter Platz oder null)
 //   ui:tow-end    { boot, platz }         losgelassen, platz = null heißt abgebrochen
@@ -32,6 +36,8 @@ const TAP_SLOP = 10;          // px, ab hier wird aus einem Tipp ein Ziehen
 const SNAP_PX = 56;           // so nah muss der Finger am Platz sein, damit die Leine einrastet
 const EDGE_PX = 64;           // Randzone, in der die Karte beim Ziehen mitläuft
 const EDGE_SPEED = 520;       // px pro Sekunde am äußersten Rand
+const HOLD_MS = 420;          // so lange ein liegendes Boot halten, bis es an der Leine hängt (P33)
+const HOLD_SHOW_MS = 120;     // erst danach zeigt sich der Ring um den Finger (kein Flackern beim Tippen)
 // Farben beim Zuweisen: Türkis passt, Gold passt und erfüllt einen Wunsch (P10, Review Ü9)
 export const FARBE = { passt: '#2a9d8f', wunsch: '#f2b01e', hell: '#c9fff6', wunschHell: '#ffe9a3' };
 const SCHRIFT = '"Pixelify Sans", system-ui, sans-serif';
@@ -133,7 +139,8 @@ export function init(game) {
   }
 
   // ---------------------------------------------------------------- Zustand
-  let tow = null;      // { pid, boot, object, start, finger, moved, ziel, ringe }
+  let tow = null;      // { pid, boot, object, start, finger, moved, ziel, ringe, umlegen }
+  let halten = null;   // liegendes Boot gedrückt: { pid, boot, object, start, finger, t0 } (P33)
   let strich = null;   // { pid, pts, combo, done:Set }
   let chip = null;     // Knopf "Einfahren" { el, boot, object }
   const fliegend = []; // eingestrichene Münzen, die gerade wegfliegen
@@ -149,6 +156,11 @@ export function init(game) {
     const ids = game.sim?.passendePlaetze?.(boot);
     return Array.isArray(ids) ? ids : [];
   };
+  const umlegbar = (pick) => !!(pick && pick.type === 'boat' && game.sim?.umlegbar?.(pick.id));
+  const umlegeZiele = (boot) => {
+    const ids = game.sim?.umlegeZiele?.(boot);
+    return Array.isArray(ids) ? ids : [];
+  };
 
   // ---------------------------------------------------------------- Zeiger abfangen (vor core/input.js)
   // Capture-Listener am Elternelement laufen vor den Listenern am Canvas. Nur wenn ein Zeiger auf
@@ -158,6 +170,7 @@ export function init(game) {
     // Zweiter Finger: Leine oder Strich abbrechen und den ersten Finger an core/input.js
     // übergeben, damit Zoomen, Drehen und Neigen mit beiden Fingern sofort greifen
     if (tow) { const t = tow; endTow(false, true); game.input?.uebernehmen?.(t.pid, t.finger); return; }
+    if (halten) { halten = null; return; }
     if (strich) { const s = strich; endStrich(); game.input?.uebernehmen?.(s.pid, s.pts[s.pts.length - 1]); return; }
     if (e.button !== undefined && e.button > 0) return;
     sound.unlock();
@@ -175,15 +188,25 @@ export function init(game) {
     if (isWaiting(boat)) {
       grab(e);
       tow = { pid: e.pointerId, boot: boat.id, object: boat.object, start: p, finger: p, moved: false, ziel: null, ringe: [] };
+      return;
     }
+    // Liegendes Boot: noch nichts übernehmen. Die Karte darf sich wie immer verschieben lassen; erst
+    // wer still hält, nimmt das Boot an die Leine (onTick). Ein kurzer Tipp bleibt ein Tipp.
+    if (umlegbar(boat)) halten = { pid: e.pointerId, boot: boat.id, object: boat.object, start: p, finger: p, t0: performance.now() };
   }, true);
 
   host.addEventListener('pointermove', (e) => {
+    if (halten && e.pointerId === halten.pid) {
+      halten.finger = local(e);
+      if (Math.hypot(halten.finger.x - halten.start.x, halten.finger.y - halten.start.y) >= TAP_SLOP) halten = null;
+      return;
+    }
     if (tow && e.pointerId === tow.pid) { e.stopPropagation(); moveTow(local(e)); }
     else if (strich && e.pointerId === strich.pid) { e.stopPropagation(); moveStrich(local(e)); }
   }, true);
 
   const up = (e) => {
+    if (halten && e.pointerId === halten.pid) { halten = null; return; }
     if (tow && e.pointerId === tow.pid) { e.stopPropagation(); endTow(e.type === 'pointerup'); }
     else if (strich && e.pointerId === strich.pid) { e.stopPropagation(); endStrich(); }
   };
@@ -203,11 +226,32 @@ export function init(game) {
     if (!tow.moved) {
       tow.moved = true;
       hideChip();
-      tow.ringe = fittingBerths(tow.boot);
+      tow.ringe = tow.umlegen ? umlegeZiele(tow.boot) : fittingBerths(tow.boot);
       showRings(tow.ringe, tow.boot);
       sound.play('leine-greifen');
       haptic(10);
     }
+    updateSnap();
+  }
+
+  // Liegendes Boot lange genug gehalten: jetzt hängt es an der Leine (P33)
+  function greifeLiegendes() {
+    const h = halten;
+    halten = null;
+    const ziele = umlegeZiele(h.boot);
+    if (!ziele.length) {
+      // Nichts frei: sagen statt still nichts tun. Der Finger verschiebt weiter die Karte.
+      textAmBoot(h.boot, 'Keine passende Box frei', '#ffd76a');
+      haptic(6);
+      return;
+    }
+    game.input?.abgeben?.(h.pid);
+    try { canvas.setPointerCapture(h.pid); } catch { /* egal */ }
+    hideChip();
+    tow = { pid: h.pid, boot: h.boot, object: h.object, start: h.start, finger: h.finger, moved: true, ziel: null, ringe: ziele, umlegen: true, griff: performance.now() };
+    showRings(ziele, h.boot);
+    sound.play('leine-greifen');
+    haptic(18);
     updateSnap();
   }
 
@@ -225,6 +269,8 @@ export function init(game) {
       for (const m of ringGroup.children) m.material = m === best ? ringMatHot : ringMatFuer(m.userData.platz);
       faerbeBoxen();
       tow.wert = neu ? game.sim?.platzWert?.(tow.boot, neu) ?? null : null;
+      // Nachgerüstete Stege (P30): Fingersteg, Licht stehen mit auf dem Schild
+      if (tow.wert) tow.wert = { ...tow.wert, extras: game.nachruesten?.platzTeile?.(neu) ?? [] };
       if (neu) { sound.play('leine-einrasten'); haptic(8); }
     }
     const w = game.camera.screenToWorld(tow.finger.x, tow.finger.y);
@@ -238,6 +284,7 @@ export function init(game) {
     gold = new Set();
     if (boxen()) game.stege.highlight([]);
     if (abbruch) {
+      if (t.umlegen) { if (t.moved) game.emit('ui:tow-end', { boot: t.boot, platz: null, umlegen: true }); return; }
       // Zweiter Finger: Der Spieler will die Karte bewegen. Boot abwählen, sonst schiebt die
       // Bootskarte am Handy die Ansicht mitten in der Geste nach oben (ui/input-touch.js).
       if (game.sim?.selected === t.boot) game.sim.select?.(null);
@@ -252,7 +299,7 @@ export function init(game) {
       return;
     }
     const platz = ok ? t.ziel : null;
-    game.emit('ui:tow-end', { boot: t.boot, platz });
+    game.emit('ui:tow-end', { boot: t.boot, platz, ...(t.umlegen ? { umlegen: true } : {}) });
     if (platz) { sound.play('anlegen'); haptic(18); }
   }
 
@@ -361,6 +408,24 @@ export function init(game) {
     const dt = Math.min(0.1, (now - lastT) / 1000);
     lastT = now;
 
+    // Liegendes Boot lange genug gehalten: an die Leine nehmen (P33)
+    if (halten && !tow && now - halten.t0 >= HOLD_MS) greifeLiegendes();
+
+    // Während des Ziehens kann eine Box belegt werden (ein anderes Boot fährt selbst hinein):
+    // zweimal je Sekunde neu fragen, belegte Boxen verlöschen, statt beim Loslassen zu scheitern
+    if (tow?.moved && now - (tow.geprueft ?? 0) > 500) {
+      tow.geprueft = now;
+      const neu = tow.umlegen ? umlegeZiele(tow.boot) : fittingBerths(tow.boot);
+      if (neu.length !== tow.ringe.length || neu.some((id, i) => id !== tow.ringe[i])) {
+        tow.ringe = neu;
+        const ziel = tow.ziel;
+        showRings(neu, tow.boot);
+        if (ziel && !neu.includes(ziel)) { tow.ziel = null; tow.wert = null; }
+        for (const m of ringGroup.children) if (m.userData.platz === tow.ziel) m.material = ringMatHot;
+        updateSnap();
+      }
+    }
+
     // Am Rand mitlaufen, solange eine Leine gezogen wird
     if (tow?.moved) {
       const f = tow.finger;
@@ -408,7 +473,9 @@ export function init(game) {
     const H = canvas.clientHeight;
     if (!tow && auswahlGold.size && game.sim?.selected == null) auswahlGold = new Set();
     const sterne = tow?.moved ? gold : auswahlGold;
-    const etwas = !!tow?.moved || (strich && strich.pts.length > 1) || texte.length > 0 || sterne.size > 0;
+    const haltK = halten ? (performance.now() - halten.t0 - HOLD_SHOW_MS) / (HOLD_MS - HOLD_SHOW_MS) : -1;
+    const griffK = tow?.griff ? (performance.now() - tow.griff) / 250 : 1;
+    const etwas = !!tow?.moved || haltK > 0 || (strich && strich.pts.length > 1) || texte.length > 0 || sterne.size > 0;
     if (!etwas && leer) return;
     ctx.clearRect(0, 0, W, H);
     leer = !etwas;
@@ -422,6 +489,28 @@ export function init(game) {
       const s2 = toScreen(_stern.set(sp.x + 1, 0.5, sp.z));
       const k = Math.min(1.5, Math.max(0.6, Math.hypot(s2.x - s.x, s2.y - s.y) * 0.2));
       zeichnePixel(PIXEL.stern, s.x - 6 * k, s.y - 6 * k, k);
+    }
+
+    // Gedrückt halten: Ring um den Finger füllt sich (P33), in Pixelstufen wie die Oberfläche
+    if (haltK > 0) {
+      const f = halten.finger;
+      const k = Math.min(1, haltK);
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = 'rgba(40,54,72,0.55)';
+      ctx.beginPath(); ctx.arc(f.x, f.y, 30, 0, Math.PI * 2); ctx.stroke();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#fff4d6';
+      const stufen = Math.ceil(k * 12) / 12;
+      ctx.beginPath(); ctx.arc(f.x, f.y, 30, -Math.PI / 2, -Math.PI / 2 + stufen * Math.PI * 2); ctx.stroke();
+    }
+    // Gerade gegriffen: kurzer Ring, der aufgeht
+    if (tow?.umlegen && griffK < 1) {
+      const f = toScreen(tow.object.getWorldPosition(new THREE.Vector3()));
+      ctx.globalAlpha = 1 - griffK;
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#fff4d6';
+      ctx.beginPath(); ctx.arc(f.x, f.y, 20 + griffK * 40, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = 1;
     }
 
     if (tow?.moved) {
@@ -483,16 +572,20 @@ export function init(game) {
   // Platzwert beim Einrasten (Review A3): was die Box bringt, über der Box.
   // Erste Zeile Liegegeld und erwartete Anker, zweite Zeile erfüllte Wünsche und "passgenau".
   function drawWert(p, w, istGold) {
-    const z1 = `${w.fee} € · ${String(w.anchors.toFixed(1)).replace('.', ',')} Anker`;
+    const anker = `${String(w.anchors.toFixed(1)).replace('.', ',')} Anker`;
+    // Umlegen (P33): Liegegeld bleibt, wie es ist; ab dem zweiten Mal kostet es Anker
+    const z1 = w.relocate ? `Umlegen · ${anker}` : `${w.fee} € · ${anker}`;
     // weiter Weg zum WC oder zur Dusche (P19 B9): zählt nur halb, steht als "Dusche weit" da
     const weit = new Set(w.far || []);
     const teile = [...(w.wishesMet || []).map((k) => `${WUNSCH[k] ?? k}${weit.has(k) ? ' weit' : ''}`)];
     if (w.comfort) teile.push('Fingersteg');
+    for (const t of w.extras || []) if (!teile.includes(t)) teile.push(t);
     if (w.snug) teile.push('passgenau');
     const z2 = teile.join(' · ');
+    const z3 = w.relocate && w.malus > 0 ? `${w.mal}. Mal umgelegt: −${String(w.malus).replace('.', ',')} Anker` : null;
     ctx.font = `700 15px ${SCHRIFT}`;
-    const breite = Math.max(ctx.measureText(z1).width, z2 ? ctx.measureText(z2).width : 0) + 18;
-    const hoehe = z2 ? 44 : 26;
+    const breite = Math.max(ctx.measureText(z1).width, z2 ? ctx.measureText(z2).width : 0, z3 ? ctx.measureText(z3).width : 0) + 18;
+    const hoehe = 26 + (z2 ? 18 : 0) + (z3 ? 18 : 0);
     const W = canvas.clientWidth;
     const x = Math.min(Math.max(p.x - breite / 2, 6), Math.max(6, W - breite - 6));
     const y = Math.max(6, p.y - hoehe - 22);
@@ -508,6 +601,11 @@ export function init(game) {
       ctx.font = `600 13px ${SCHRIFT}`;
       ctx.fillStyle = istGold || w.snug ? '#ffd76a' : '#d9e2ea';
       ctx.fillText(z2, x + 10, y + 36);
+    }
+    if (z3) {
+      ctx.font = `600 13px ${SCHRIFT}`;
+      ctx.fillStyle = '#ff9a8a';
+      ctx.fillText(z3, x + 10, y + (z2 ? 54 : 36));
     }
   }
 
@@ -547,6 +645,26 @@ export function init(game) {
     }));
   }
   game.on('sim:turnedAway', aerger);
+  // Umgelegt (P33): kurz bestätigen, beim zweiten Mal sagen, was es kostet
+  game.on('sim:relocated', (e) => {
+    if (e?.grund !== 'hand') return;
+    if (e.malus > 0) textAmBoot(e.boatId, `${e.mal}. Mal umgelegt: −${String(e.malus).replace('.', ',')} Anker`, '#ff9a8a');
+    else if (e.passgenau) textAmBoot(e.boatId, 'Umgelegt, passgenau', '#ffd76a');
+    else textAmBoot(e.boatId, 'Umgelegt', '#c9fff6');
+  });
+  game.on('sim:relocateFailed', (e) => textAmBoot(e?.boatId, 'Dort geht es nicht', '#ff9a8a'));
+  // Das gehaltene Boot fährt gerade los (Tagestörn, Abreise): Leine los, nichts passiert
+  const losfahren = (d = {}) => {
+    const id = d.id ?? d.boatId;
+    if (halten && String(halten.boot) === String(id)) halten = null;
+    if (tow?.umlegen && String(tow.boot) === String(id)) {
+      const t = tow;
+      endTow(false, true);
+      game.input?.uebernehmen?.(t.pid, t.finger);
+    }
+  };
+  game.on('dauer:auslaufen', losfahren);
+  game.on('boot-faehrt', losfahren);
 
   // Leine mit etwas Durchhang, eingerastet straff
   function drawRope(a, b, straff) {
