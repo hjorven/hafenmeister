@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "15.11.2026",
-  "commit": "0e1383a"
+  "commit": "c0bc0c1"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -448,6 +448,7 @@
     252,
     287,
     318,
+    319,
     331
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
@@ -615,10 +616,13 @@
    "id": "P24",
    "titel": "Ereignisse zum Vorbereiten und neue Ereignisse",
    "inhalt": "Vorwarnung mit Handlungsmöglichkeit, F17",
-   "thread": "Teil 1 erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend), Teil 2 offen; bestehend: \"Ereignisse Sturm und Regatta einbauen\"",
+   "thread": "erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend; PR 299: Heringstage, Mittsommer, Holzboot-Treffen, Hanse-Woche, Nachspiel, Services an Ereignistagen; Regatta mit Bahn draußen PR 319), ereignisse.md",
    "welle": 3,
    "prs": [
-    281
+    281,
+    299,
+    319,
+    331
    ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
@@ -630,7 +634,7 @@
     "G7",
     "G9"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": [
     47,
     48,
@@ -681,7 +685,7 @@
    "id": "P27",
    "titel": "Päckchen liegen bei vollem Hafen",
    "inhalt": "F1",
-   "thread": "erledigt (PR 330, docs/paeckchen.md)",
+   "thread": "erledigt (PR 330, paeckchen.md)",
    "welle": 3,
    "prs": [
     330
@@ -769,17 +773,16 @@
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
-    "F3",
-    "M3"
+    "F3"
    ],
-   "status": "teilweise",
+   "status": "offen",
    "bilder": []
   },
   {
    "id": "P33",
    "titel": "Liegende Boote umlegen",
    "inhalt": "F4",
-   "thread": "erledigt (PR 314)",
+   "thread": "erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen)",
    "welle": 3,
    "prs": [
     314
@@ -1227,10 +1230,11 @@
    "id": "P62",
    "titel": "Geländeform und Engpass neu bauen",
    "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
-   "thread": "erledigt (PR 246, 271, 300): zehn Küstentypen aus Seed, jede Küste mit Seeweg; fünf weitere Küsten nach echten Karten (PR 300)",
+   "thread": "erledigt (PR 246, 262, 271, 300): zehn Küstentypen aus Seed, jede Küste mit Seeweg, geschlossene Bodden mit Seegatt, Zonen und Seezugänge für die Wegsuche (PR 262); fünf weitere Küsten 11 bis 15 nach echten Karten (PR 300), ein neues Spiel würfelt aus 15",
    "welle": 0,
    "prs": [
     246,
+    262,
     271,
     300
    ],
@@ -1308,7 +1312,7 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread \"Schiffsanimationen umsetzen\"",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280, 327, 332): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende (PR 240); Wartebojen seitlich, Anfahrt von weit draußen aus verschiedenen Richtungen (PR 280); Geduld erst ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall (PR 327); erstes Boot vom Bildrand (PR 332). Noch offen: Pulk und \"ineinander fest\" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht), Abnahme-Serie über alle 15 Küsten; übernimmt P54",
    "welle": 0,
    "prs": [
     81,
@@ -1321,7 +1325,9 @@
     256,
     258,
     262,
-    280
+    280,
+    327,
+    332
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1510,10 +1516,12 @@
   {
    "id": "P81",
    "titel": "Stufe 19 Kanalhafen",
-   "inhalt": "Küstentyp 11 Kanal, Schleuse, Kanalverkehr",
+   "inhalt": "Küstentyp 16 Kanal (11 bis 15 sind seit PR 300 echte Küsten), Schleuse, Kanalverkehr",
    "thread": "neu",
    "welle": 6,
-   "prs": [],
+   "prs": [
+    300
+   ],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
    "punkte": [],
    "status": "offen",
@@ -1527,6 +1535,74 @@
    "welle": 6,
    "prs": [],
    "abschnitt": "Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)",
+   "punkte": [],
+   "status": "offen",
+   "bilder": []
+  },
+  {
+   "id": "P83",
+   "titel": "Stegbild-Generator reparieren",
+   "inhalt": "tools/stegbilder/erzeugen.mjs findet seit den Doppelboxen (PR 321) keine Variante mehr (\"Steg C passt nicht\", Hinweis aus PR 329), web/js/data/stegbilder.js lässt sich nicht neu erzeugen. Generator an Doppelboxen, Liegelage (data/liegelage.js) und Yachtsteg anpassen, --pruefen in den Testlauf aufnehmen; Spiel und Speicherstände behalten ihre 12 Stegbilder",
+   "thread": "neu",
+   "welle": 1,
+   "prs": [
+    321,
+    329
+   ],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
+   "punkte": [],
+   "status": "offen",
+   "bilder": []
+  },
+  {
+   "id": "P84",
+   "titel": "Großschiffwege an allen 15 Küsten",
+   "inhalt": "Kreuzfahrtschiff streift im schrägen Seegatt von Küste 4 (Bodden) das Ufer (Rest aus PR 329). Rumpfprobe aus dem Härtetest (7 Punkte) als Test für alle Besuchsschiffe (Kreuzfahrt, Flotte, Windjammer, Seenotkreuzer) auf allen 15 Küsten und mehreren Seeds",
+   "thread": "neu",
+   "welle": 0,
+   "prs": [
+    329
+   ],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
+   "punkte": [],
+   "status": "offen",
+   "bilder": []
+  },
+  {
+   "id": "P85",
+   "titel": "Zusammenspiel nach Welle 0 prüfen",
+   "inhalt": "Jorvens Auftrag vom 14.11.: alle Features noch da, neue Features im normalen Spiel wirklich genutzt, Welle 1 wirklich gefixt, Übersehenes finden. Drei Threads (Kernschleife und Regeln; Oberfläche und Geräte; Welt, Boote, Ereignisse), gemeinsame Datei docs/zusammenspiel.md",
+   "thread": "neu, startet, sobald Welle 0 fertig ist",
+   "welle": 1,
+   "prs": [],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
+   "punkte": [],
+   "status": "offen",
+   "bilder": []
+  },
+  {
+   "id": "P86",
+   "titel": "Bootsgeschichten fertig erzählen",
+   "inhalt": "Regatta: Startsignal mit Ton, Siegerehrung am Segelclub, Ergebnis im Logbuch; Gepäck beim Crewwechsel sichtbar, Halt am Tanksteg, Gang \"in den Ort\" (bootsgeschichten.md, Abschnitt 5)",
+   "thread": "neu",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
+   "punkte": [],
+   "status": "offen",
+   "bilder": []
+  },
+  {
+   "id": "P87",
+   "titel": "Prüfwerkzeuge auf 15 Küsten und den neuen Takt",
+   "inhalt": "Härtetest (tests/extrem/) nach PR 327 bis 332 neu laufen lassen und den Fund \"Gäste erreichen ab Stufe 4 keine Boje\" am Spiel bestätigen; tests/specs/leinen.spec.mjs auch für Küste 11 bis 15; istWasser und Bild am Durchstich angleichen (Messlatte); Zeitraffer-Grenzen auf den 5-Minuten-Tag",
+   "thread": "neu",
+   "welle": 1,
+   "prs": [
+    327,
+    332
+   ],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
    "status": "offen",
    "bilder": []
@@ -1722,11 +1798,15 @@
    "code": "Ü16",
    "text": "Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken",
    "status": "erledigt",
-   "statusText": "erledigt (P17): Stufe 1 rund 10, Stufe 2 rund 30 Tage; Dorfhafen 300 €, Steg B 450 €, Ziel Stufe 2 90 Gäste",
+   "statusText": "erledigt (PR 318, 331): Ziel Stufe 2 90 Gäste; seit dem 5-Minuten-Tag (PR 319, 331) dauert Stufe 1 rund 5, Stufe 2 rund 11 bis 14 Spieltage, alles Bauen kostet etwa die Hälfte (Dorfhafen 140 €, Steg B 200 €)",
    "pakete": [
     "P17"
    ],
-   "prs": [],
+   "prs": [
+    318,
+    319,
+    331
+   ],
    "abschnitt": "Balancing (Ü15 bis Ü20)"
   },
   {
@@ -1844,11 +1924,13 @@
    "code": "F1",
    "text": "Päckchen liegen: bei vollem Hafen längsseits an ein gleich großes Boot, halbes Liegegeld, beide Crews einen halben Anker schlechter",
    "status": "erledigt",
-   "statusText": "erledigt (P27, docs/paeckchen.md)",
+   "statusText": "erledigt (PR 330, paeckchen.md): ab Stufe 2 an Stegköpfen, Kai und Yachtsteg, eine Nacht, außen legt zuerst ab",
    "pakete": [
     "P27"
    ],
-   "prs": [],
+   "prs": [
+    330
+   ],
    "abschnitt": "Kernspiel"
   },
   {
@@ -1879,11 +1961,13 @@
    "code": "F4",
    "text": "Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung",
    "status": "erledigt",
-   "statusText": "erledigt (P33)",
+   "statusText": "erledigt (PR 314): halten und ziehen, ab dem zweiten Mal −0,5 Anker",
    "pakete": [
     "P33"
    ],
-   "prs": [],
+   "prs": [
+    314
+   ],
    "abschnitt": "Kernspiel"
   },
   {
@@ -2028,11 +2112,13 @@
    "code": "F17",
    "text": "Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 299), dazu Hanse-Woche ab Stufe 5",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    299
+   ],
    "abschnitt": "Hafenleben"
   },
   {
@@ -3013,33 +3099,39 @@
    "code": "G1",
    "text": "Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 281)",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    281
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
    "code": "G2",
    "text": "Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 281)",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    281
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
    "code": "G3",
    "text": "Ereignisse mit Nachspiel",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 299)",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    299
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
@@ -3059,7 +3151,7 @@
    "code": "G5",
    "text": "Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind)",
    "status": "offen",
-   "statusText": "offen",
+   "statusText": "offen: Jahreszeiten (Frühling 1 bis 4, Sommer 5 bis 12, Herbst 13 bis 16) steuern bisher nur Ereignisse wie die Heringstage, nicht Ankünfte oder Wind",
    "pakete": [
     "P20"
    ],
@@ -3070,22 +3162,26 @@
    "code": "G6",
    "text": "Ergebnis eines Ereignisses am Abend zeigen",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 281)",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    281
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
    "code": "G7",
    "text": "Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand)",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 299)",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    299
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
@@ -3103,11 +3199,14 @@
    "code": "G9",
    "text": "Seltene große Tage, z. B. Hanse-Woche, zehn Tage vorher angekündigt",
    "status": "erledigt",
-   "statusText": "erledigt (14.11.)",
+   "statusText": "erledigt (PR 299): Hanse-Woche ab Stufe 5; seit der kürzeren Saison (PR 331) 5 Tage vorher angekündigt",
    "pakete": [
     "P24"
    ],
-   "prs": [],
+   "prs": [
+    299,
+    331
+   ],
    "abschnitt": "G Ereignisse, Wetter, Jahreslauf und Winter"
   },
   {
@@ -3623,13 +3722,12 @@
   },
   {
    "code": "M3",
-   "text": "Tote Daten anschließen (Gruppen, Wünsche je Art) oder löschen (Bauzeiten, Sonderboote, zweite Ereignisliste)",
-   "status": "teilweise",
-   "statusText": "teils erledigt: Sonderboote, Antriebsanteile je Klasse und zweite Ereignisliste gelöscht; Bauzeiten bleiben für P18, Gruppen und Wünsche je Art für P19, P32",
+   "text": "Tote Daten anschließen (Wünsche je Art) oder löschen (Bauzeiten, Sonderboote, zweite Ereignisliste)",
+   "status": "erledigt",
+   "statusText": "erledigt: Sonderboote, Antriebsanteile je Klasse und zweite Ereignisliste gelöscht, Bauzeiten sind die Bauabschnitte (P18), Wünsche je Art angeschlossen (P19)",
    "pakete": [
     "P06",
-    "P19",
-    "P32"
+    "P19"
    ],
    "prs": [],
    "abschnitt": "M Zahlen und Daten"
@@ -4314,16 +4412,17 @@
     "P63",
     "P64",
     "P65",
-    "P66"
+    "P66",
+    "P84"
    ],
    "zaehler": {
     "erledigt": 4,
     "teilweise": 0,
     "arbeit": 1,
     "frage": 0,
-    "offen": 0,
+    "offen": 1,
     "entfaellt": 0,
-    "alle": 5
+    "alle": 6
    }
   },
   {
@@ -4339,16 +4438,19 @@
     "P07",
     "P08",
     "P09",
-    "P54"
+    "P54",
+    "P83",
+    "P85",
+    "P87"
    ],
    "zaehler": {
     "erledigt": 8,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 0,
+    "offen": 3,
     "entfaellt": 1,
-    "alle": 10
+    "alle": 13
    }
   },
   {
@@ -4403,16 +4505,17 @@
     "P38",
     "P39",
     "P40",
-    "P59"
+    "P59",
+    "P86"
    ],
    "zaehler": {
-    "erledigt": 6,
-    "teilweise": 2,
+    "erledigt": 7,
+    "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 11,
+    "offen": 13,
     "entfaellt": 0,
-    "alle": 19
+    "alle": 20
    }
   },
   {
@@ -4494,17 +4597,17 @@
   }
  ],
  "gesamt": {
-  "erledigt": 34,
-  "teilweise": 5,
+  "erledigt": 35,
+  "teilweise": 3,
   "arbeit": 1,
   "frage": 0,
-  "offen": 40,
+  "offen": 46,
   "entfaellt": 1,
-  "alle": 81
+  "alle": 86
  },
  "punkteGesamt": {
-  "erledigt": 157,
-  "teilweise": 7,
+  "erledigt": 158,
+  "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
   "offen": 53,
@@ -5367,6 +5470,12 @@
  "merges": [
   {
    "datum": "2026-11-15",
+   "titel": "Doku auf Stand: Roadmap, Plan, README, Arbeitsplan, Ausbau 7 bis 20",
+   "pr": 334,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-15",
    "titel": "Roadmap-Pflege: P27 (PR 330) und P17 Teil 2 (PR 331) mit Bildern",
    "pr": 333,
    "pakete": [
@@ -5378,14 +5487,18 @@
    "datum": "2026-11-15",
    "titel": "Kurzhalter: Liegezeit ab sichtbarem Festmachen, nach spaetestens keine Einfahrt; erstes Boot vom Bildrand",
    "pr": 332,
-   "pakete": []
+   "pakete": [
+    "P66",
+    "P87"
+   ]
   },
   {
    "datum": "2026-11-15",
    "titel": "P17 Teil 2: Zahlen auf den neuen Tagesablauf, Schlussmessung",
    "pr": 331,
    "pakete": [
-    "P17"
+    "P17",
+    "P24"
    ]
   },
   {
@@ -5400,7 +5513,10 @@
    "datum": "2026-11-15",
    "titel": "Liegeplätze passgenau: Boote liegen frei von Steg, Kai, Land und Nachbarn",
    "pr": 329,
-   "pakete": []
+   "pakete": [
+    "P83",
+    "P84"
+   ]
   },
   {
    "datum": "2026-11-15",
@@ -5420,7 +5536,10 @@
    "datum": "2026-11-15",
    "titel": "Boote: Geduld ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall",
    "pr": 327,
-   "pakete": []
+   "pakete": [
+    "P66",
+    "P87"
+   ]
   },
   {
    "datum": "2026-11-15",
@@ -5434,7 +5553,10 @@
    "datum": "2026-11-15",
    "titel": "Längere Tage, Kurzhalt, 65 Bootsgeschichten und Regatta draußen",
    "pr": 319,
-   "pakete": []
+   "pakete": [
+    "P17",
+    "P24"
+   ]
   },
   {
    "datum": "2026-11-15",
@@ -5444,14 +5566,6 @@
     "P26",
     "P17",
     "P59"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Überraschende Gesten (P26): Hafenhorn, Fernglas, Möwen, Wellenring, Glocke",
-   "pr": 322,
-   "pakete": [
-    "P26"
    ]
   }
  ]
