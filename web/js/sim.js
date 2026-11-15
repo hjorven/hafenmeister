@@ -1467,7 +1467,12 @@ export function selfEnter(state, ctx) {
   const events = [];
   const after = ctx.rules.queue.selfEnterAfter;
   if (after == null) return events;
-  const rush = state.queue.length > waitSpotCount(state, ctx) / 2;
+  // Andrang: mehr Wartende als die halben Bojen. Mit Ansicht zaehlen nur Boote im Revier oder an der
+  // Boje; wer noch draussen auf See anfaehrt, macht die Bojen nicht voll (sonst fuhren ab Stufe 4 die
+  // ersten Boote im Revier immer direkt in eine Box und keines lag je sichtbar an der Boje, P87).
+  const ansicht = ctx.ansichtMeldetBoje?.();
+  const wartend = ansicht ? state.queue.filter((id) => state.boats[id]?.atBuoy || state.boats[id]?.revierSeit != null).length : state.queue.length;
+  const rush = wartend > waitSpotCount(state, ctx) / 2;
   const office = officeAutomatic(state, ctx);
   // Wer über Nacht an der Boje lag, wird morgens zuerst bedient
   const order = [...state.queue].sort((a, b) => (state.boats[b]?.overnight || 0) - (state.boats[a]?.overnight || 0));
