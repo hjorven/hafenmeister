@@ -444,6 +444,10 @@ export const ECONOMY = {
       plaetze: ['D12', 'D13', 'D14', 'D15', 'D16', 'D17', 'D18'] },
     { id: 'b-neu',        stufe: 5, name: 'Steg B verlängern',        kosten: 9000,
       plaetze: ['B29', 'B30', 'B31', 'B32', 'B33', 'B34'] },
+    // P59, D9: Yachtsteg im tiefen Wasser vor der Westmole, zwei Plätze längsseits für große Yachten
+    // und Traditionssegler (XL). Mehr XL-Plätze bringen mehr XL-Gäste (A10).
+    { id: 'yachtsteg',    stufe: 6, name: 'Yachtsteg',                kosten: 30000,
+      plaetze: ['Y01', 'Y02'] },
   ],
 
   // ---------------------------------------------------------------- Versorgung

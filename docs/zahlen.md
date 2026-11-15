@@ -57,6 +57,7 @@ Liegegeld je angefangenem Meter Bootslänge (B10); der Grundpreis ist der Schnit
 | Kai verlängern | 5 | 33.000 € | 2 |
 | Gabelung an Steg D | 5 | 24.000 € | 7 |
 | Steg B verlängern | 5 | 9.000 € | 6 |
+| Yachtsteg | 6 | 30.000 € | 2 |
 
 ## Versorgung
 
