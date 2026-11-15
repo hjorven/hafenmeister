@@ -253,8 +253,8 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
 | F18 | Gästebuch: letzte 20 Bewertungen am Hafenbüro | erledigt (PR 154) | P14 |
-| F19 | Statistikseite: Belegung und Einnahmen der letzten 30 Tage, Einnahmen nach Quelle | offen | P41 |
-| F20 | Saisonbilanz nach dem Winter | offen | P41 |
+| F19 | Statistikseite: Belegung und Einnahmen der letzten 30 Tage, Einnahmen nach Quelle | erledigt (P41, [Statistik](statistik.md)) | P41 |
+| F20 | Saisonbilanz nach dem Winter | erledigt (P41, Winterpause mit Quellen, Belegung, Vergleich) | P41 |
 | F21 | Herausforderungen mit Seed (nur Segler, kein Hafenbüro, doppelte Ankünfte) | offen | P42 |
 | F22 | Fotoaufträge und Postkarte | offen | P43 |
 | F23 | Hafenname und Flagge, sichtbar an Einfahrt und Mast | offen | P44 |
@@ -694,7 +694,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 
 | Paket | Titel (Thread) | Inhalt | Thread |
 |---|---|---|---|
-| P41 | Statistik und Saisonbilanz | F19, F20 | neu |
+| P41 | Statistik und Saisonbilanz | F19, F20 | erledigt (Thread "Statistik und Saisonbilanz zeigen") |
 | P42 | Herausforderungen, Wochenhafen und Hafen als Code | F21, F41, F42 (nach P09, P45) | neu |
 | P43 | Fotoaufträge und Postkarten | F22 | bestehend: "Spielschleife zusammenbauen und Vorschläge einbauen" (Fotomodus) |
 | P44 | Hafenname und Flagge | F23, F27 (Auswahl beim Start) | neu |
