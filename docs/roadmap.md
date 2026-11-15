@@ -1,6 +1,6 @@
 # Hafenmeister: Roadmap
 
-Stand: 15.11.2026 morgens, abgeglichen mit `main` bei Commit `5ebcad2` (PR 331). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
+Stand: 15.11.2026 vormittags, Status aller Pakete am Code geprüft und abgeglichen mit `main` bei Commit `c0d1d93` (PR 332). Der Status der Pakete wird laufend von den Threads und stündlich vom Thread "Roadmap interaktiv im Repo zeigen" nachgetragen. Erste Fassung vom 12.11.2026 abgeglichen bei `95aee94` (PR 138). Quelle: Jorvens Überblick "Hafenmeister: Spiel-Review und Vorschläge" vom 12.11.2026 (eigene Funde, Funde einer anderen KI, Vorschläge; Grundlage dort war Commit `1d37b64`, PR 132).
 
 **Verhältnis zu [plan.md](plan.md):** `plan.md` bleibt der einzige gültige Plan für Vision, Regeln und Entscheidungen. Diese Roadmap ist die **Arbeitsliste**: Sie sagt, was noch fehlt, was falsch ist, was weg soll, und welches Paket (welcher Thread) es erledigt. Wo die Roadmap eine Entscheidung aus `plan.md` ändern würde, steht das unter [Offene Fragen an Jorven](#offene-fragen-an-jorven) und gilt erst nach seiner Antwort; danach wird `plan.md` im selben PR angepasst.
 
@@ -21,7 +21,7 @@ bash tests/pruefen.sh --schnell
 
 **Reihenfolge seit 12.11.2026 abends (Jorven):**
 
-1. **Welle 0, Gelände:** Zuerst überarbeiten fünf Threads gemeinsam Gelände, Anlagen und Bootswege (Abschnitt 14, Pakete P62 bis P66). Sie stimmen sich untereinander ab. **Alle anderen Pakete ruhen, bis Welle 0 fertig ist.**
+1. **Welle 0, Gelände:** Zuerst überarbeiten fünf Threads gemeinsam Gelände, Anlagen und Bootswege (Abschnitt 14, Pakete P62 bis P66). Stand 15.11.: P62 bis P65 erledigt, P66 läuft noch (Pulk beim gleichzeitigen Ablegen, Abnahme-Serie über alle 15 Küsten). Seit Jorvens Auftrag vom 13.11. laufen Grundprobleme und neue Pakete parallel weiter, Welle 0 behält Vorrang.
 2. **Grundprobleme:** Danach Welle 1 (Fehler und Fundament) und die Technik-Befunde aus Abschnitt 15.
 3. **Kernschleife und Sichtbarkeit:** Welle 2.
 4. **Extras:** Welle 3 bis 5 (neue Features, Nordsee, Online).
@@ -51,7 +51,7 @@ Zwischen PR 132 und PR 138 kamen nur Grafik, Leistung und Oberfläche dazu (PR 1
 | Logbuch | `state.logbook` wird gefüllt, keine Anzeige | bestätigt |
 | Rundgang vor dem Abend | `web/js/data/people.js:88` `RUNDGANG_AB = 0.68` | bestätigt |
 
-Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 91 (Nebel), PR 112 (Einstieg), PR 137 (Kamera), PR 139 (Windjammertreffen, Barkasse).
+Offene PRs, die damals Punkte dieser Roadmap berührten: PR 81, 91, 112, 137, 139. Stand 15.11.2026 sind alle davon gemergt oder geschlossen; offene PRs stehen jetzt im [Arbeitsplan](arbeitsplan.md).
 
 ---
 
@@ -84,7 +84,7 @@ Offene PRs, die Punkte dieser Roadmap berühren: PR 81 (Vorbeifahrer, XXL), PR 9
 | Nr | Punkt | Status | Paket |
 |---|---|---|---|
 | Ü15 | Weicher Start: 100 € Startgeld oder geschenktes WC | erledigt (PR 237): geschenktes Toilettenhäuschen beim ersten Bauen | P17 |
-| Ü16 | Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken | erledigt (P17): Stufe 1 rund 10, Stufe 2 rund 30 Tage; Dorfhafen 300 €, Steg B 450 €, Ziel Stufe 2 90 Gäste | P17 |
+| Ü16 | Stufe 1 und 2 straffen (Stufe 2 dauert heute 47 Spieltage), Gästeziele senken | erledigt (PR 318, 331): Ziel Stufe 2 90 Gäste; seit dem 5-Minuten-Tag (PR 319, 331) dauert Stufe 1 rund 5, Stufe 2 rund 11 bis 14 Spieltage, alles Bauen kostet etwa die Hälfte (Dorfhafen 140 €, Steg B 200 €) | P17 |
 | Ü17 | Dem Ruf eine Aufgabe geben: Wünsche je Bootsart aus `data/boats`, spürbare Kapazität | erledigt (P19): Wünsche je Bootsart, Ruf über drei Tage, Angebote als Wünsche, Kapazität sichtbar (Schild am Gebäude aus P55, "heute voll" in der Bootskarte), [ruf.md](ruf.md) | P19 |
 | Ü18 | Sparphasen füllen: Ausbau in zwei bis drei Bauabschnitte, einzeln bezahlt, sichtbar wachsend | erledigt (PR 232) | P18 |
 | Ü19 | Winter nutzen: Zeitraffer vor Stufe 4 oder Winterarbeiten (F14) | erledigt (PR 245): Winterarbeiten und „Winter überspringen“ | P20 |
@@ -225,10 +225,10 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
-| F1 | Päckchen liegen: bei vollem Hafen längsseits an ein gleich großes Boot, halbes Liegegeld, beide Crews einen halben Anker schlechter | erledigt (P27, docs/paeckchen.md) | P27 |
+| F1 | Päckchen liegen: bei vollem Hafen längsseits an ein gleich großes Boot, halbes Liegegeld, beide Crews einen halben Anker schlechter | erledigt (PR 330, [paeckchen.md](paeckchen.md)): ab Stufe 2 an Stegköpfen, Kai und Yachtsteg, eine Nacht, außen legt zuerst ab | P27 |
 | F2 | Anmeldung per Funk: morgens melden sich ein bis zwei Boote an, Platz freihalten gibt Bonus | erledigt (PR 288, [funk-anmeldung.md](funk-anmeldung.md)) | P28 |
 | F3 | Flottillen: drei bis fünf Boote wollen am selben Steg liegen (Feld `group`) | offen | P32 |
-| F4 | Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung | erledigt (P33) | P33 |
+| F4 | Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung | erledigt (PR 314): halten und ziehen, ab dem zweiten Mal −0,5 Anker | P33 |
 | F5 | Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld `exposed`) | offen | P34 |
 | F6 | Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison | offen | P35 |
 | F7 | Baggern: Wassertiefe je Steg als Bauprojekt | offen | P29 |
@@ -246,7 +246,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | erledigt (PR 245) | P20 |
 | F15 | Krantage: Dauerlieger sichtbar ins Winterlager und zurück | erledigt (PR 245) | P20 |
 | F16 | Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv | offen | P40 |
-| F17 | Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage | erledigt (14.11.) | P24 |
+| F17 | Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage | erledigt (PR 299), dazu Hanse-Woche ab Stufe 5 | P24 |
 
 ### Langzeit
 
@@ -419,15 +419,15 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| G1 | Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren | erledigt (14.11.) | P24 |
-| G2 | Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen | erledigt (14.11.) | P24 |
-| G3 | Ereignisse mit Nachspiel | erledigt (14.11.) | P24 |
+| G1 | Vorbereiten: Ankündigungskarte, Boxen für das Ereignis sperren | erledigt (PR 281) | P24 |
+| G2 | Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen | erledigt (PR 281) | P24 |
+| G3 | Ereignisse mit Nachspiel | erledigt (PR 299) | P24 |
 | G4 | Winter als Planungsbild (Bilanz, Winterarbeiten, Verträge) | erledigt (PR 245) | P20 |
-| G5 | Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind) | offen | P20 |
-| G6 | Ergebnis eines Ereignisses am Abend zeigen | erledigt (14.11.) | P24 |
-| G7 | Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand) | erledigt (14.11.) | P24 |
+| G5 | Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind) | offen: Jahreszeiten (Frühling 1 bis 4, Sommer 5 bis 12, Herbst 13 bis 16) steuern bisher nur Ereignisse wie die Heringstage, nicht Ankünfte oder Wind | P20 |
+| G6 | Ergebnis eines Ereignisses am Abend zeigen | erledigt (PR 281) | P24 |
+| G7 | Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand) | erledigt (PR 299) | P24 |
 | G8 | Eine Zahlenliste für Ereignisse | erledigt | P06 |
-| G9 | Seltene große Tage, z. B. Hanse-Woche, zehn Tage vorher angekündigt | erledigt (14.11.) | P24 |
+| G9 | Seltene große Tage, z. B. Hanse-Woche, zehn Tage vorher angekündigt | erledigt (PR 299): Hanse-Woche ab Stufe 5; seit der kürzeren Saison (PR 331) 5 Tage vorher angekündigt | P24 |
 
 ### H Dauerlieger, Stammgäste und Tagestörn
 
@@ -501,7 +501,8 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 |---|---|---|---|
 | M1 | Eine führende Zahlendatei | erledigt | P06 |
 | M2 | Ersatzregeln abschaffen; prüfen, ob ein neues Spiel heute mit den Ersatzregeln startet | erledigt | P06 |
-| M3 | Tote Daten anschließen (Gruppen, Wünsche je Art) oder löschen (Bauzeiten, Sonderboote, zweite Ereignisliste) | teils erledigt: Sonderboote, Antriebsanteile je Klasse und zweite Ereignisliste gelöscht; Bauzeiten bleiben für P18, Gruppen und Wünsche je Art für P19, P32 | P06, P19, P32 |
+| M3 | Tote Daten anschließen (Wünsche je Art) oder löschen (Bauzeiten, Sonderboote, zweite Ereignisliste) | erledigt: Sonderboote, Antriebsanteile je Klasse und zweite Ereignisliste gelöscht, Bauzeiten sind die Bauabschnitte (P18), Wünsche je Art angeschlossen (P19) | P06, P19 |
+| M3b | Gruppen-Ankunft (Feld `group` in den Bootsdaten) anschließen | offen: kein Code liest das Feld | P32 |
 | M4 | Zahlenübersicht aus den Daten erzeugen | erledigt | P06 |
 | M5 | Prüfwerkzeug: ungelesene Felder, Ja/Nein statt Zahl, Stufe billiger als davor | erledigt | P06 |
 | M6 | Eine Sprache für Feldnamen | teils erledigt: Regel in `docs/balancing.md` (Daten deutsch, `sim.js` englisch, Übersetzung nur in `data/rules.js`) | P06 (schrittweise) |
@@ -589,13 +590,15 @@ Jorven (12.11.2026, Spieltest am Gaming-PC): Das Gelände wird komplett überarb
 
 | Paket | Titel (Thread) | Inhalt | Dateien | Thread |
 |---|---|---|---|---|
-| P62 | Geländeform und Engpass neu bauen | T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66 | `web/js/render/landscape.js`, `web/js/render/landschaft/*.js`, `web/js/data/harbor.js` (nur Wasserkanten) | erledigt (PR 246, 271, 300): zehn Küstentypen aus Seed, jede Küste mit Seeweg; fünf weitere Küsten nach echten Karten (PR 300) |
+| P62 | Geländeform und Engpass neu bauen | T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66 | `web/js/render/landscape.js`, `web/js/render/landschaft/*.js`, `web/js/data/harbor.js` (nur Wasserkanten) | erledigt (PR 246, 262, 271, 300): zehn Küstentypen aus Seed, jede Küste mit Seeweg, geschlossene Bodden mit Seegatt, Zonen und Seezugänge für die Wegsuche (PR 262); fünf weitere Küsten 11 bis 15 nach echten Karten (PR 300), ein neues Spiel würfelt aus 15 |
 | P63 | Marinebasis und Anlagen neu platzieren | T6, T7, T13: Marinebasis mit Zufahrt von See, Großschiffpier, Services und Bauplätze passend zum neuen Gelände, jede Anlage von Wasser oder Land erreichbar | `web/js/render/services.js`, `web/js/data/services.js`, `web/js/data/harbor.js` | erledigt (PR 167, 172): eigene Piers mit freien Wegen in jedem Stegbild |
 | P64 | Gelände abwechslungsreicher gestalten | T11: Wald, Wiesen, Schilf, Felsen, Höhen, Dorfrand, je nach Stufe und Stegbild; erst nach P62-Grundform | `web/js/render/landschaft/*.js` | erledigt (PR 204, 211, 216): Umgebung und Ufer je Küstentyp |
 | P65 | Wetter und Effekte flüssig machen | T1, T5, T12: Wetter (Regen, Nebel, Sturm, Schnee) ohne Ruckeln, Heckwelle auf beiden Seiten, Effekte ohne Artefakte; Messung je Wetter mit `feature-tests/leistung.cjs` | `web/js/render/landschaft/wasser.js`, Wetter- und Effektmodule, `web/js/render/boat-anim.js` (nur Heckwelle) | erledigt (PR 169): Wetter flüssig, Heckwelle auf beiden Seiten |
-| P66 | Boote ums Gelände herum führen | T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch "hafenmeister-engpass-fix" (`boat-channel.js`, `boat-routes.js`, Tests `boot-engpass`, `boot-routen`) | `web/js/render/boat-view.js`, `boat-anim.js`, neue `boat-channel.js`, `boat-routes.js`, `web/js/world/fahrwege.js`, `tests/` | in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende, Zurücksetzen statt Durchlass (PR 240); übernimmt P54 vom Thread "Schiffsanimationen umsetzen" |
+| P66 | Boote ums Gelände herum führen | T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch "hafenmeister-engpass-fix" (`boat-channel.js`, `boat-routes.js`, Tests `boot-engpass`, `boot-routen`) | `web/js/render/boat-view.js`, `boat-anim.js`, neue `boat-channel.js`, `boat-routes.js`, `web/js/world/fahrwege.js`, `tests/` | in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280, 327, 332): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende (PR 240); Wartebojen seitlich, Anfahrt von weit draußen aus verschiedenen Richtungen (PR 280); Geduld erst ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall (PR 327); erstes Boot vom Bildrand (PR 332). Noch offen: Pulk und "ineinander fest" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht), Abnahme-Serie über alle 15 Küsten; übernimmt P54 |
 
-Abstimmung: P62 legt zuerst die Wasserfläche fest; P63 und P66 bauen darauf. P65 misst die Leistung nach jeder Geländeänderung neu. Welle 0 ist fertig, wenn alle fünf Pakete auf `main` sind und auf allen Stufen und Stegbildern kein Boot Land, Stege oder andere Boote berührt.
+Abstimmung: P62 legt zuerst die Wasserfläche fest; P63 und P66 bauen darauf. P65 misst die Leistung nach jeder Geländeänderung neu. Welle 0 ist fertig, wenn alle Pakete der Welle (P62 bis P66 und P84) auf `main` sind und die Zeitraffer-Serie über alle 15 Küstentypen auf allen Stufen kein Boot dauerhaft über Land oder durch Stege und keine Boote länger als ein paar Sekunden ineinander fest zeigt (Ablauf in [arbeitsplan.md](arbeitsplan.md), Abschnitt 3a).
+
+**Stand Welle 0 (15.11.2026):** P62, P63, P64, P65 erledigt. P66 offen: Pulk beim gleichzeitigen Ablegen. P84 offen: Kreuzfahrtschiff streift im Seegatt von Küste 4 das Ufer. Die Abnahme-Serie über 15 Küsten steht noch aus. Gemeldet wird das Ende vom Planungs-Thread an den Koordinator.
 
 ### Berührungspunkte zwischen Paketen
 
@@ -605,7 +608,7 @@ Jeder Thread trägt hier ein, wo sein Paket mit anderen kollidieren kann (siehe 
 |---|---|---|---|
 | P62 | P63, P66, Stegbilder | Neue Uferlinie schneidet Stege, Bauplätze oder Bootswege | |
 | P63 | P66, P04, P62, Stegbilder, Vorbeifahrer | Anlage ohne Zufahrt, Großschiffe kommen nicht an den Pier; Kreuzfahrtschiff braucht Liegewanne bis y 520; Stegköpfe nördlich y 160 sperren die Barkasse; Bahnen im Westen kreuzen Großschiffe. Alles in `tests/besuchswege.test.mjs` und `tests/verkehr.test.mjs` | P63-PR |
-| P66 | Stegbilder (12 Varianten), XXL und Vorbeifahrer (PR 81) | Bootsweg durch eine Variante, Großschiff blockiert die Einfahrt | |
+| P66 | Stegbilder (12 Varianten), XXL und Vorbeifahrer (PR 81), P27 Päckchen, P33 Umlegen, Kurzhalter (PR 319) | Bootsweg durch eine Variante, Großschiff blockiert die Einfahrt; Päckchen sperrt den Anfahrweg eines Platzes (Grund `paeckchen`, PR 330); viele Kurzhalter legen gleichzeitig ab und bilden einen Pulk | PR 280, 327, 330 |
 
 ---
 
@@ -625,6 +628,24 @@ Ein Audit von außerhalb (`AUDIT-ISTSTAND.md`, ZIP-Stand mit PR 143) hat die Roa
 | C08 | Kein Supabase-Code vorhanden; vor dem Online-Start eigenes Sicherheitsreview (RLS je Tabelle, Rechte anonymer Nutzer, Rate Limits, serverseitige Prüfung) | ja | P58 |
 
 Weitere Ergänzungen aus Abschnitt 6 des Audits, alle P08 (Release-Vorbereitung): Secret-Scan in CI (erledigt 14.11., `secret-scan.yml` mit gitleaks), CSP und Sicherheits-Header der veröffentlichten Seite prüfen, Browser-Tests in CI als Pflicht vor jedem Release nachweisen, `SECURITY.md` mit Meldeweg, sobald das Spiel öffentlich genutzt wird.
+
+## 16. Neu seit dem Überblick
+
+Nicht aus Jorvens Review, sondern aus späteren Aufträgen und Spieltests. Alles hier ist auf `main` und im Spiel (Stand `c0d1d93`), Reste stehen als Paket in der Tabelle "Pakete aus den Funden vom 15.11.2026".
+
+| Was | Auftrag | Im Spiel | Rest |
+|---|---|---|---|
+| Längere Tage (5 statt 2 Minuten), Kurzhalter, 65 Bootsgeschichten, Regatta mit Bahn draußen | Jorven 14.11. | PR 312 (Plan), 319, 332 (Kurzhalter legen erst nach sichtbarem Festmachen ab, nach "spätestens" keine Einfahrt), [bootsgeschichten.md](bootsgeschichten.md) | P86 |
+| Neuer Takt: Saison 16 plus 2 Wintertage, Bauen etwa halb so teuer, rund 100 Spieltage bis zum Abschluss der Ostsee | Folge der langen Tage | PR 331, [balancing.md](balancing.md), [zahlen.md](zahlen.md) | - |
+| Hafen wächst sichtbar je Stufe (Gebäude, Dorf, Häuserzeile) | Jorven 14.11. | PR 303, [wachstum.md](wachstum.md) | - |
+| Menschen laufen auf dem echten Gelände jeder Küste | Fund Gelände-Thread | PR 316, [menschen-wege.md](menschen-wege.md) | - |
+| Liegeplätze passgenau (Boote frei von Steg, Kai, Land und Nachbarn), Großschiffe folgen tiefem Wasser | Härtetest 15.11. | PR 329, [liegeplaetze.md](liegeplaetze.md), Prüfung `node tools/liegeplaetze/pruefen.mjs` | P83, P84 |
+| Fünf Küsten nach echten Karten (11 Marstrand, 12 Punat, 13 Shilshole Bay, 14 Kotor, 15 Porto Cervo) | Gelände-Thread | PR 300, [landschaft.md](landschaft.md) | P87 (Tests auf 15 Küsten) |
+| Ruhige Oberfläche mit einem Meldeplatz, Pixelschrift für Zahlen | Jorven 14.11. | PR 282, [meldungen.md](meldungen.md) | - |
+| Tagesende nur als Zettel, Bootskarte am Tablet hochkant | Feature-Test | PR 320, [tagesabschluss.md](tagesabschluss.md) | - |
+| Logbuch: alle neun Großschiffe erreichbar, Fischkutter wechseln | Zeitraffer-Fund | PR 305, 323, [logbuch.md](logbuch.md) | - |
+| Härtetest in Extremlagen (16 Lagen, PC und Handy) | Prüf-Thread | PR 324, [extremtest.md](extremtest.md) | P87 |
+| Schichttest über die echte Oberfläche, Zeitraffer, Feature-Einzeltest | Jorven 12.11. | PR 251, 301, 309, 313, [schichttest.md](schichttest.md), [zeitraffer.md](zeitraffer.md) | P85 |
 
 ---
 
@@ -672,16 +693,16 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | Paket | Titel (Thread) | Inhalt | Thread |
 |---|---|---|---|
 | P23 | Services mit eigener Wirkung | Services nicht nur "€ pro Tag" | bestehend: "Services und Sonderanlagen einbauen" |
-| P24 | Ereignisse zum Vorbereiten und neue Ereignisse | Vorwarnung mit Handlungsmöglichkeit, F17 | Teil 1 erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend), Teil 2 offen; bestehend: "Ereignisse Sturm und Regatta einbauen" |
+| P24 | Ereignisse zum Vorbereiten und neue Ereignisse | Vorwarnung mit Handlungsmöglichkeit, F17 | erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend; PR 299: Heringstage, Mittsommer, Holzboot-Treffen, Hanse-Woche, Nachspiel, Services an Ereignistagen; Regatta mit Bahn draußen PR 319), [ereignisse.md](ereignisse.md) |
 | P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | neu |
 | P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | erledigt (PR 322, docs/hafengesten.md) |
-| P27 | Päckchen liegen bei vollem Hafen | F1 | erledigt (PR 330, docs/paeckchen.md) |
+| P27 | Päckchen liegen bei vollem Hafen | F1 | erledigt (PR 330, [paeckchen.md](paeckchen.md)) |
 | P28 | Anmeldung per Funk | F2 (nutzt P11) | erledigt (PR 288, `docs/funk-anmeldung.md`) |
 | P29 | Baggern für tiefere Liegeplätze | F7 | neu |
 | P30 | Stege nachrüsten | F8 | erledigt (PR 297, [nachruesten.md](nachruesten.md)) |
 | P31 | Neue Gästewünsche | F9 | neu |
 | P32 | Flottillen | F3, Gruppen-Ankunft | neu |
-| P33 | Liegende Boote umlegen | F4 | erledigt (PR 314) |
+| P33 | Liegende Boote umlegen | F4 | erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen) |
 | P34 | Wind im Hafen spürbar machen | F5, F35 | neu |
 | P35 | Preisstufe am Hafenbüro | F6 | neu |
 | P36 | Bojenfeld im See | F10 | neu |
@@ -724,7 +745,7 @@ Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen
 | P67 | Stufe-6-Annahmen lösen | `regionDone` an `verbund.abschlussStufe` statt `maxStage`, Grenzen in `vielfalt.js`, Schlüssel 7 bis 9 in `economy.js`, Tests mit Test-Stufe 7; nichts Sichtbares | Welle 2 | neu |
 | P68 | Leistung für große Häfen | Detailstufen für liegende Boote, gesammeltes Zeichnen, Leistungsbudget je Szene (Abschnitt 6.6 des Plans) | P67 | neu (mit Kamera-Thread) |
 | P69 | Bedienung großer Häfen | Zeiger zu wartenden Booten, Sprung zu Stegen | P55, P67 | neu |
-| P70 | Stufe 7 Hafenstadt | Yachthafen Ost (Steg E), Promenade, Belegungsplan je Steg; `harbor.js` Stufe 7, Gelände und Seeds geprüft | P67, P68, P69 | neu |
+| P70 | Stufe 7 Hafenstadt | Yachthafen Ost (Steg E), Promenade, Belegungsplan je Steg; `harbor.js` Stufe 7, Gelände und Seeds geprüft | P67, P68, P69, P83 | neu |
 | P71 | Stufe 8 Fährhafen | Fähranleger, Inselfähre nach Fahrplan | P70, P66 | neu |
 | P72 | Stufe 9 Werfthafen | Werft mit Schiffslift, großes Winterlager | P71, P20 | neu |
 | P73 | Stufe 10 Hafenverbund und Hafenkarten | `modules.verbund`, `SAVE_VERSION` 4 mit Migration (3 ist seit P21 das Logbuch), Übernahme alter Häfen, Kurzrechnung mit Abgleichstest, Standortwechsel | P72, P09 | neu |
@@ -735,7 +756,7 @@ Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen
 | P78 | Stufe 15 Offshore-Hafen | Windpark, Crew-Transfer-Katamarane, Serviceschiff | P77 | neu |
 | P79 | Stufe 16 Kreuzfahrthafen | zweite Pier, Wechselhafen | P73 | neu |
 | P80 | Stufe 17 und 18 Marinehafen und Großseglertreffen | Marinestützpunkt groß, jährliches Großseglertreffen | P79, P75 | neu |
-| P81 | Stufe 19 Kanalhafen | Küstentyp 11 Kanal, Schleuse, Kanalverkehr | P77, P80 | neu |
+| P81 | Stufe 19 Kanalhafen | Küstentyp 16 Kanal (11 bis 15 sind seit PR 300 echte Küsten), Schleuse, Kanalverkehr | P77, P80 | neu |
 | P82 | Stufe 20 Hafenimperium | Abschlussfeier, Endlosspiel über den Verbund, Schlussabgleich `tools/balance.mjs --bis 20` | P81 | neu |
 
 ### Zusätzliche Pakete aus den Detailpunkten
@@ -748,6 +769,18 @@ Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen
 | P61 | Spiel komplett offline startbar | N15, N16 | 2 | erledigt (PR 270), Thread "Spiel offline startbar machen" |
 
 P56 bleibt frei.
+
+### Pakete aus den Funden vom 15.11.2026
+
+Lücken, die beim Abgleich der Doku mit dem Code (15.11.2026, `main` bei `c0d1d93`) und in den PRs 324 bis 332 aufgefallen sind. Einzelheiten und Reihenfolge im [Arbeitsplan](arbeitsplan.md).
+
+| Paket | Titel (Thread) | Inhalt | Welle | Thread |
+|---|---|---|---|---|
+| P83 | Stegbild-Generator reparieren | `tools/stegbilder/erzeugen.mjs` findet seit den Doppelboxen (PR 321) keine Variante mehr ("Steg C passt nicht", Hinweis aus PR 329), `web/js/data/stegbilder.js` lässt sich nicht neu erzeugen. Generator an Doppelboxen, Liegelage (`data/liegelage.js`) und Yachtsteg anpassen, `--pruefen` in den Testlauf aufnehmen; Spiel und Speicherstände behalten ihre 12 Stegbilder | 1 | neu |
+| P84 | Großschiffwege an allen 15 Küsten | Kreuzfahrtschiff streift im schrägen Seegatt von Küste 4 (Bodden) das Ufer (Rest aus PR 329). Rumpfprobe aus dem Härtetest (7 Punkte) als Test für alle Besuchsschiffe (Kreuzfahrt, Flotte, Windjammer, Seenotkreuzer) auf allen 15 Küsten und mehreren Seeds | 0 | neu |
+| P85 | Zusammenspiel nach Welle 0 prüfen | Jorvens Auftrag vom 14.11.: alle Features noch da, neue Features im normalen Spiel wirklich genutzt, Welle 1 wirklich gefixt, Übersehenes finden. Drei Threads (Kernschleife und Regeln; Oberfläche und Geräte; Welt, Boote, Ereignisse), gemeinsame Datei `docs/zusammenspiel.md` | 1 | neu, startet, sobald Welle 0 fertig ist |
+| P86 | Bootsgeschichten fertig erzählen | Regatta: Startsignal mit Ton, Siegerehrung am Segelclub, Ergebnis im Logbuch; Gepäck beim Crewwechsel sichtbar, Halt am Tanksteg, Gang "in den Ort" ([bootsgeschichten.md](bootsgeschichten.md), Abschnitt 5) | 3 | neu |
+| P87 | Prüfwerkzeuge auf 15 Küsten und den neuen Takt | Härtetest (`tests/extrem/`) nach PR 327 bis 332 neu laufen lassen und den Fund "Gäste erreichen ab Stufe 4 keine Boje" am Spiel bestätigen; `tests/specs/leinen.spec.mjs` auch für Küste 11 bis 15; `istWasser` und Bild am Durchstich angleichen (Messlatte); Zeitraffer-Grenzen auf den 5-Minuten-Tag | 1 | neu |
 
 ### Abgleich mit der Reihenfolge im Überblick
 
