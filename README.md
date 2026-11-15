@@ -33,11 +33,11 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 
 **[Roadmap interaktiv ansehen](https://hjorven.github.io/hafenmeister/roadmap/)**: alle Pakete mit Filter nach Welle und Status, Suche und den Einzelpunkten je Paket. Quelle ist [docs/roadmap.md](docs/roadmap.md).
 
-<a href="https://hjorven.github.io/hafenmeister/roadmap/"><img src="docs/roadmap-fortschritt.svg" alt="Fortschritt der Roadmap: 25 von 80 Paketen erledigt" width="100%"></a>
+<a href="https://hjorven.github.io/hafenmeister/roadmap/"><img src="docs/roadmap-fortschritt.svg" alt="Fortschritt der Roadmap: 27 von 80 Paketen erledigt" width="100%"></a>
 
 | Welle | Thema | Fortschritt | erledigt | angefangen | offen |
 |---|---|---|---|---|---|
-| [0](https://hjorven.github.io/hafenmeister/roadmap/#welle=0) | Gelände und Bootswege | `███████░░░` 70 % | 2 | 3 | 0 |
+| [0](https://hjorven.github.io/hafenmeister/roadmap/#welle=0) | Gelände und Bootswege | `█████████░` 90 % | 4 | 1 | 0 |
 | [1](https://hjorven.github.io/hafenmeister/roadmap/#welle=1) | Fehler und Fundament | `█████████░` 94 % | 8 | 1 | 0 |
 | [2](https://hjorven.github.io/hafenmeister/roadmap/#welle=2) | Kernschleife und Rückmeldung | `█████████░` 93 % | 13 | 2 | 0 |
 | [3](https://hjorven.github.io/hafenmeister/roadmap/#welle=3) | Tiefe und Hafenleben | `█░░░░░░░░░` 11 % | 1 | 2 | 16 |
@@ -57,13 +57,13 @@ Nach der letzten Balancing-Rechnung dauert die Ostsee 225 bis 239 Spieltage, run
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P19"><img src="web/roadmap/bilder/p19-pr244-pc-wuensche-bootsart.jpg" alt="Wünsche je Bootsart auf der Ankunftskarte" width="100%"></a><br><sub>P19 · Wünsche je Bootsart auf der Ankunftskarte · PR 244</sub></td>
 </tr></table>
 
-<details><summary><b>Welle 0: Gelände und Bootswege</b> (2 von 5 erledigt)</summary>
+<details><summary><b>Welle 0: Gelände und Bootswege</b> (4 von 5 erledigt)</summary>
 
 | Paket | Titel | Status | PRs |
 |---|---|---|---|
-| [P62](https://hjorven.github.io/hafenmeister/roadmap/#paket=P62) | Geländeform und Engpass neu bauen | in Arbeit | [#224](https://github.com/hjorven/hafenmeister/pull/224) [#229](https://github.com/hjorven/hafenmeister/pull/229) [#246](https://github.com/hjorven/hafenmeister/pull/246) [#271](https://github.com/hjorven/hafenmeister/pull/271) |
+| [P62](https://hjorven.github.io/hafenmeister/roadmap/#paket=P62) | Geländeform und Engpass neu bauen | **erledigt** | [#246](https://github.com/hjorven/hafenmeister/pull/246) [#271](https://github.com/hjorven/hafenmeister/pull/271) |
 | [P63](https://hjorven.github.io/hafenmeister/roadmap/#paket=P63) | Marinebasis und Anlagen neu platzieren | **erledigt** | [#167](https://github.com/hjorven/hafenmeister/pull/167) [#172](https://github.com/hjorven/hafenmeister/pull/172) |
-| [P64](https://hjorven.github.io/hafenmeister/roadmap/#paket=P64) | Gelände abwechslungsreicher gestalten | in Arbeit | [#204](https://github.com/hjorven/hafenmeister/pull/204) [#211](https://github.com/hjorven/hafenmeister/pull/211) [#216](https://github.com/hjorven/hafenmeister/pull/216) |
+| [P64](https://hjorven.github.io/hafenmeister/roadmap/#paket=P64) | Gelände abwechslungsreicher gestalten | **erledigt** | [#204](https://github.com/hjorven/hafenmeister/pull/204) [#211](https://github.com/hjorven/hafenmeister/pull/211) [#216](https://github.com/hjorven/hafenmeister/pull/216) |
 | [P65](https://hjorven.github.io/hafenmeister/roadmap/#paket=P65) | Wetter und Effekte flüssig machen | **erledigt** | [#169](https://github.com/hjorven/hafenmeister/pull/169) |
 | [P66](https://hjorven.github.io/hafenmeister/roadmap/#paket=P66) | Boote ums Gelände herum führen | in Arbeit | [#254](https://github.com/hjorven/hafenmeister/pull/254) [#256](https://github.com/hjorven/hafenmeister/pull/256) [#258](https://github.com/hjorven/hafenmeister/pull/258) [#262](https://github.com/hjorven/hafenmeister/pull/262) |
 

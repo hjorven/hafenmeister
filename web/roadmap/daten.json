@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "14.11.2026",
-  "commit": "b762995"
+  "commit": "19f4ad4"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1193,18 +1193,9 @@
    "id": "P62",
    "titel": "Geländeform und Engpass neu bauen",
    "inhalt": "T10, Form von Ufer, Strand und Dünen so, dass Wasser und Land klar getrennt sind (T3, T8 von der Geländeseite), Durchstich breit genug für Gegenverkehr; liefert die Wasserfläche als Daten für P66",
-   "thread": "in Arbeit (PR 179, 184, 195, 204, 210, 211, 216, 224, 229, 246, 271): zehn Küstentypen aus Seed, kleinere Pflicht-See im Norden mit Seeweg (PR 224), Land nördlich der Reede (PR 229), Fahrrinne in die offene See an jeder Küste (PR 271)",
+   "thread": "erledigt (PR 246, 271): zehn Küstentypen aus Seed, jede Küste mit Seeweg",
    "welle": 0,
    "prs": [
-    179,
-    184,
-    195,
-    204,
-    210,
-    211,
-    216,
-    224,
-    229,
     246,
     271
    ],
@@ -1214,7 +1205,7 @@
     "T8",
     "T10"
    ],
-   "status": "arbeit",
+   "status": "erledigt",
    "bilder": [
     20,
     24
@@ -1243,7 +1234,7 @@
    "id": "P64",
    "titel": "Gelände abwechslungsreicher gestalten",
    "inhalt": "T11: Wald, Wiesen, Schilf, Felsen, Höhen, Dorfrand, je nach Stufe und Stegbild; erst nach P62-Grundform",
-   "thread": "in Arbeit (PR 204, 211, 216): Umgebung und Ufer je Küstentyp",
+   "thread": "erledigt (PR 204, 211, 216): Umgebung und Ufer je Küstentyp",
    "welle": 0,
    "prs": [
     204,
@@ -1254,7 +1245,7 @@
    "punkte": [
     "T11"
    ],
-   "status": "arbeit",
+   "status": "erledigt",
    "bilder": [
     21,
     22
@@ -4281,9 +4272,9 @@
     "P66"
    ],
    "zaehler": {
-    "erledigt": 2,
+    "erledigt": 4,
     "teilweise": 0,
-    "arbeit": 3,
+    "arbeit": 1,
     "frage": 0,
     "offen": 0,
     "entfaellt": 0,
@@ -4458,9 +4449,9 @@
   }
  ],
  "gesamt": {
-  "erledigt": 25,
+  "erledigt": 27,
   "teilweise": 6,
-  "arbeit": 3,
+  "arbeit": 1,
   "frage": 0,
   "offen": 46,
   "entfaellt": 1,
@@ -5163,6 +5154,45 @@
  "merges": [
   {
    "datum": "2026-11-14",
+   "titel": "Hafen wächst sichtbar je Stufe: Gebäudemodelle je Ausbaustufe, Dorf und Häuserzeile wachsen mit",
+   "pr": 303,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Gelände: fünf Küsten aus echten Karten (Marstrand, Punat, Shilshole Bay, Kotor, Porto Cervo)",
+   "pr": 300,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Logbuch: Großschiffe gesichtet, Fischkutter wechseln, Meldungen im Meldeplatz",
+   "pr": 305,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Arbeitsplan und Roadmap: P62, P64 erledigt, Welle-0-Abnahme über 15 Küsten",
+   "pr": 306,
+   "pakete": [
+    "P62",
+    "P64"
+   ]
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Boote: Wartebojen seitlich neben den Stegen, Anfahrt von weit draußen",
+   "pr": 280,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
+   "titel": "Arbeitsplan: wann Welle 0 fertig ist, Zusammenspiel-Prüfung in drei Threads",
+   "pr": 304,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-14",
    "titel": "Roadmap-Pflege: Bilder zu P28 Anmeldung per Funk (PR 288)",
    "pr": 302,
    "pakete": [
@@ -5203,55 +5233,6 @@
    "titel": "Pages gebündelt statt nach jedem Merge, PR-Tests schneller",
    "pr": 294,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: P22 Erfolge mit PR 295 und Bildern, Regatta-Bild zu P24",
-   "pr": 296,
-   "pakete": [
-    "P22",
-    "P24"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Ruhige Oberfläche: ein Meldeplatz, eine Meldung zur Zeit, Pixelschrift auch für Zahlen",
-   "pr": 282,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Arbeitsplan: Stand 21:15, P17 startet, neu P41 und P26",
-   "pr": 298,
-   "pakete": [
-    "P17",
-    "P41",
-    "P26"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Roadmap-Pflege: Bilder zu P19 Teil 2 (heute voll, PR 279), Stand nach PR 291",
-   "pr": 293,
-   "pakete": [
-    "P19"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "P22 Erfolge: 30 Erfolge, Reiter im Logbuch, Wimpel, Pokale und Ehrentafel im Hafen",
-   "pr": 295,
-   "pakete": [
-    "P22"
-   ]
-  },
-  {
-   "datum": "2026-11-14",
-   "titel": "Offline-Start auch ohne offline-liste.json (Folge zu P61)",
-   "pr": 292,
-   "pakete": [
-    "P61"
-   ]
   }
  ]
 }
