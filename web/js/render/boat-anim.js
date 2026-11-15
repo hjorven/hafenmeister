@@ -15,6 +15,7 @@
 // einem einzigen game.onTick an die Spielschleife.
 import * as THREE from 'three';
 import { Engstellen } from './boat-channel.js';
+import { liegeGeometrie, liegeVersatz } from '../data/liegelage.js';
 
 const U = 0.62;               // Meter je Planeinheit (wie main.js und harbor.js)
 const TAU = Math.PI * 2;
@@ -70,6 +71,11 @@ export function berthFromPlatz(platz, stufe, hafen) {
     const side = sideFromStege(hafen, stufe, platz.steg, px, py, heading);
     if (side) berth.side = side;
   }
+  // Genaue Lage je Bootsgroesse (data/liegelage.js): Bug vor dem Steg, Bordwand an der Stegkante,
+  // eigener Abschnitt am Steg. finalPose rechnet damit.
+  if (hafen) {
+    try { berth.liege = liegeGeometrie(hafen, stufe).get(platz.id) ?? null; } catch { berth.liege = null; }
+  }
   return berth;
 }
 
@@ -109,6 +115,7 @@ function normBerth(b) {
     side: b.side === -1 || b.side === 'port' ? -1 : 1,
     deck: b.deck ?? (b.kind === 'kai' || b.kind === 'pier' ? 1.5 : b.kind === 'buoy' ? 0.25 : 0.86),
     bollards: b.bollards,
+    liege: b.liege ?? null,
     abstand: b.abstand,
     paeckchen: b.paeckchen,
     innenBoot: b.innenBoot,
@@ -1305,7 +1312,13 @@ class BoatAnim {
       const r = bojenAbstand(b, L);
       return { x: b.x - dx * r, z: b.z - dz * r };
     }
+    const B = this.info.beam;
+    // Genaue Lage aus data/liegelage.js (Box: Bug mit Luft vor dem Steg, laengere Boote ragen achtern
+    // hinaus; laengsseits: Bordwand am Steg, im eigenen Abschnitt). Versatz in Planeinheiten.
+    const lg = b.liege && (Math.abs(((b.liege.u ? Math.atan2(b.liege.u[1], b.liege.u[0]) : b.heading) - b.heading + Math.PI * 3) % TAU - Math.PI) < 0.05) ? b.liege : null;
+    const v = lg ? liegeVersatz(lg, L, B) : null;
     if (BOX_KINDS.has(b.kind)) {
+      if (v) return { x: b.x + dx * v.a * U, z: b.z + dz * v.a * U };
       // Bug zum Steg, mit etwas Abstand zur Stegkante
       const fwd = Math.max(0, b.length / 2 - L / 2 - 0.3);
       return { x: b.x + dx * fwd, z: b.z + dz * fwd };
@@ -1315,7 +1328,12 @@ class BoatAnim {
     // des Kais bis zur halben Laenge oder quer bis zur Rumpfbreite
     const frei = this.mgr.frei, wasser = this.mgr.wasser;
     let x = b.x, z = b.z;
-    const B = this.info.beam;
+    if (v) {
+      // links vom Bug in Weltkoordinaten: (-sin h, -cos h)
+      x += (dx * v.a - Math.sin(b.heading) * v.q) * U;
+      z += (dz * v.a - Math.cos(b.heading) * v.q) * U;
+      b = { ...b, x, z };
+    }
     if (frei && rumpfAnLand(wasser, x, z, b.heading, L, B)) {
       const px = Math.sin(b.heading), pz = Math.cos(b.heading);
       suche: for (let d = 0.5; d <= Math.max(L / 2, B); d += 0.5) {

@@ -20,6 +20,7 @@ const REASON_LABEL = {
   size: 'Dieser Platz ist für andere Schiffsgrößen.',
   reserved: 'Dieser Platz ist fest vergeben.',
   funk: 'Diese Box ist für ein angemeldetes Boot frei gehalten.',
+  nachbar: 'Das Boot am Nachbarplatz lässt nicht genug Platz.',
   occupied: 'Der Platz ist schon belegt.',
   noBerth: 'Diesen Platz gibt es noch nicht.',
   noFreeBerth: 'Gerade ist kein passender Platz frei.',

@@ -199,12 +199,23 @@ export function initBesuche(game, services) {
       let von = kern[kern.length - 1].clone();
       const schritt = see.clone().sub(von);
       const n = Math.max(1, Math.ceil(schritt.length() / 5));
+      // Nur innerhalb der Fahrwasserkarte: ausserhalb gilt alles als frei, auch Land (Haertetest 15.11.:
+      // das Kreuzfahrtschiff sprang im Bodden quer ueber das Ufer bis hinter den Kartenrand)
+      const k = fw.karte;
+      const drin = (p) => !k || (p.x > k.x0 && p.x < k.x1 && p.z > k.z0 && p.z < k.z1);
+      // ... und nur so weit, dass der Bug (halbe Laenge voraus) noch im tiefen Wasser liegt
+      const u = schritt.clone().normalize();
+      const bugTief = (p) => (game.landscape?.tiefeBei?.(p.x + u.x * laenge / 2, p.z + u.z * laenge / 2) ?? 99) >= tief;
       let frei = fw.befahrbar(von.x, von.z, r, tief);
       for (let i = 1; i <= n && !frei; i++) {
-        von = kern[kern.length - 1].clone().addScaledVector(schritt, i / n);
+        const v = kern[kern.length - 1].clone().addScaledVector(schritt, i / n);
+        if (!drin(v) || !bugTief(v)) break;
+        von = v;
         frei = fw.befahrbar(von.x, von.z, r, tief);
       }
-      const draussen = frei && fw.seeWeg({ x: von.x, z: von.z }, {
+      // Nichts frei auf der Linie (das eigene Schiff liegt als Hindernis darauf): Weg ab dem letzten
+      // Punkt der Linie suchen, die Fahrwasserkarte nimmt dann die naechste freie Stelle
+      const draussen = fw.seeWeg({ x: von.x, z: von.z }, {
         breiteM: breite, laengeM: laenge, tiefgangM: tief, groesse: laenge > 60 ? 'XXL' : laenge > 24 ? 'XL' : 'L',
         nahBei: { x: see.x, z: see.z } });
       if (draussen?.length) {

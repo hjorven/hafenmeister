@@ -42,9 +42,9 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 | A | Aufstieg weicht von der Rechnung ab; nach PR 252: geschickt 225, gemütlich 239 Tage, Stufe 2 gemütlich 36 Tage; A10 (PR 287) verschiebt um +2 bis +6 Tage | Zeitraffer-Serien, `tools/balance.mjs` | Balancing-Paket P17 |
 | B | Menschen laufen auf festen Koordinaten (`people/netz.js`), nicht auf dem Seed-Gelände | Gelände-Thread, 14.11. | erledigt 15.11. (Thread "Menschen auf das Gelände stellen", docs/menschen-wege.md) |
 | A | Gäste erreichen ab Stufe 4 sichtbar keine Warteboje: sie starten seit PR 280 rund 1 km draußen, `wartezeit.anfahrtMax` (35 s) setzt sie vorher auf "an der Boje", Geduld läuft, sie fahren direkt ein. Sichtbar an Boje / angekommen: Stufe 2 10/24, Stufe 4 bis 6 0 | Härtetest 15.11., `docs/extremtest.md` Lage bojen-erreichbar | P66 / Boote-Thread mit P17 (`economy.js`) |
-| B | L-Boote ragen an Stegköpfen auf den Steg (B27, B28, B35, B36, C22 bis C24) | Härtetest 15.11., Nahbilder in `/mnt/project-files/extremtest/2026-11-15-df9ca05/` | Liegeplätze / P59 |
-| B | XL-Raddampfer an K01 liegt unter der Seebrücke, auf Land und auf dem Boot an FK01 | Härtetest 15.11., Lage viele-boote | Liegeplätze / Stegbilder |
-| C | Korvette (XXL) streift auf Küste 4 die Sandbank (2 bis 3 von 7 Rumpfpunkten auf Land) | Härtetest 15.11., Lage grossschiffe-eng | P62 / XXL |
+| B | L-Boote ragen an Stegköpfen auf den Steg (B27, B28, B35, B36, C22 bis C24) | Härtetest 15.11., Nahbilder in `/mnt/project-files/extremtest/2026-11-15-df9ca05/` | erledigt 15.11. (Thread "Liegeplätze passgenau machen", docs/liegeplaetze.md) |
+| B | XL-Raddampfer an K01 liegt unter der Seebrücke, auf Land und auf dem Boot an FK01 | Härtetest 15.11., Lage viele-boote | erledigt 15.11. (Thread "Liegeplätze passgenau machen") |
+| C | Korvette (XXL) streift auf Küste 4 die Sandbank (2 bis 3 von 7 Rumpfpunkten auf Land) | Härtetest 15.11., Lage grossschiffe-eng | erledigt 15.11. (Thread "Liegeplätze passgenau machen") |
 | C | `tests/specs/leinen.spec.mjs` prüft nur Küstentyp 1 bis 10 | Gelände-Thread | Leinen- oder Test-Thread nach PR 300 |
 | B | Logbuch: die 9 XXL-Einträge werden in keiner Partie erreicht (0/9), sonst 74 bis 76 von 89 | Zeitraffer-Zwischenserie | Logbuch-Thread prüft, ob XXL-Besuche im normalen Spiel vorkommen; sonst Einträge an echte Ereignisse binden |
 | B | `istWasser` und Bild stimmen am Durchstich nicht überall überein | Messlatte (`feature-tests/messlatte/README.md`) | P62 |
