@@ -616,6 +616,17 @@
    "geraet": "pc",
    "datum": "2026-11-14",
    "quelle": "funk-anmeldung/pc-box-frei-gehalten.png"
+  },
+  {
+   "datei": "p66-pr280-handy-bojen-seitlich.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Wartebojen seitlich neben den Stegen (Handy)",
+   "pr": 280,
+   "geraet": "handy",
+   "datum": "2026-11-14",
+   "quelle": "fahrwasser/bojen-seitlich/nachher-handy-0.png"
   }
  ]
 }
