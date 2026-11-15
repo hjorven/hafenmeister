@@ -188,12 +188,31 @@ test('Fernglas folgt einem Boot, Möwen fliegen auf, Wellenringe auf dem Wasser'
     const m = window.hafenmeister.boatView.boot(id).model;
     return { x: m.position.x, y: m.position.y + 0.8, z: m.position.z };
   }, id);
-  await zeige(page, { x: boot.x, z: boot.z }, 60);
-  const p = await aufSchirm(page, boot);
+  // Andere Module können die Kamera noch einmal fahren (Meldungen, Aufstieg): so lange zeigen, bis das Boot ruhig unter dem Punkt liegt
+  let p = null;
+  for (let i = 0; i < 6 && !p; i++) {
+    await zeige(page, { x: boot.x, z: boot.z }, 60);
+    await page.waitForTimeout(400);
+    const q = await aufSchirm(page, boot);
+    const r = await page.evaluate(({ q, id }) => {
+      const g = window.hafenmeister, c = g.canvas.getBoundingClientRect();
+      const pk = g.pick(q.x - c.left, q.y - c.top, { types: ['boat'] });
+      return pk?.type === 'boat' && String(pk.id) === String(id) && document.elementFromPoint(q.x, q.y) === g.canvas;
+    }, { q, id });
+    if (r) p = q;
+  }
+  expect(p, 'Boot nicht antippbar im Bild').not.toBeNull();
   if (touch) {
-    await page.touchscreen.tap(p.x, p.y);
-    await page.waitForTimeout(90);
-    await page.touchscreen.tap(p.x, p.y);
+    // Zwei Tipps direkt hintereinander als Pointer-Ereignisse im Spiel: Echte Touch-Eingaben über CDP warten im
+    // Test-Browser (SwiftShader) je Tipp auf ein Bild und kommen oft langsamer als die Doppeltipp-Grenze von 350 ms
+    await page.evaluate((p) => {
+      const c = window.hafenmeister.canvas;
+      for (let i = 0; i < 2; i++) {
+        const o = { pointerId: 70 + i, pointerType: 'touch', isPrimary: true, clientX: p.x, clientY: p.y, bubbles: true, button: 0, buttons: 1 };
+        c.dispatchEvent(new PointerEvent('pointerdown', o));
+        c.dispatchEvent(new PointerEvent('pointerup', { ...o, buttons: 0 }));
+      }
+    }, p);
   } else {
     await page.mouse.dblclick(p.x, p.y);
   }

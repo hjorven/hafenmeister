@@ -6,7 +6,7 @@
 // es nicht, die Module, die auf die Ereignisse hoeren, entscheiden, was passiert.
 //
 // Ereignisse (game.on(name, fn), pick = Ergebnis von game.pick oder null):
-//   'doubletap'    { x, y, world, pick }   zusaetzlich zoomt die Kamera weich hinein,
+//   'doubletap'    { x, y, world, pick, vorher }   zusaetzlich zoomt die Kamera weich hinein,
 //                                          ganz hineingezoomt geht es zur Uebersicht.
 //                                          Setzt ein Zuhoerer erledigt = true (Fernglas,
 //                                          ui/hafengesten.js), bleibt das Zoomen aus.
@@ -46,10 +46,12 @@ export function init(game) {
   // ---------- Doppeltipp: weich hineinzoomen ----------
   let lastTap = null;
   game.on('tap', (t) => {
-    const now = performance.now();
+    const now = t.zeit ?? performance.now();
     if (lastTap && now - lastTap.t < DOUBLE_TAP_MS && Math.hypot(t.x - lastTap.x, t.y - lastTap.y) < DOUBLE_TAP_PX) {
+      const erster = lastTap;
       lastTap = null;
-      const d = { ...t, pick: t.pick ?? pick(t) };
+      // vorher: was unter dem ersten Tipp lag (die Ansicht kann nach dem ersten Tipp schon rücken, etwa wenn er ein Boot wählt)
+      const d = { ...t, pick: t.pick ?? pick(t), vorher: erster.pick ?? null };
       game.emit('doubletap', d);
       if (d.erledigt) return;
       // ganz hineingezoomt: zurueck zur Uebersicht, sonst doppelt so nah
@@ -57,7 +59,7 @@ export function init(game) {
       else smoothZoom(cam, 2, t.x, t.y);
       return;
     }
-    lastTap = { t: now, x: t.x, y: t.y };
+    lastTap = { t: now, x: t.x, y: t.y, pick: t.pick ?? null };
   });
 
   // ---------- Langes Druecken ----------

@@ -1001,7 +1001,7 @@ export function init(game) {
   // Doppeltipp (input-touch.js, auch Doppelklick mit der Maus): erledigt = kein Hineinzoomen
   game.on('doubletap', (d = {}) => {
     if (baut()) return;
-    const pk = d.pick?.type === 'boat' ? d.pick : game.pick?.(d.x, d.y, { types: ['boat'] });
+    const pk = [d.pick, d.vorher].find((x) => x?.type === 'boat') ?? game.pick?.(d.x, d.y, { types: ['boat'] });
     if (pk?.type !== 'boat') return;
     if (fernglas.start(pk.id)) d.erledigt = true;
   });
