@@ -7,6 +7,24 @@ import { strandStelle } from './natur.js';
 import { punkt, PLAN_M } from './gelaende.js';
 import { REGIONEN } from './regionen.js';
 import { GROSSE_GAESTE } from '../../data/verkehr.js';
+import { HAFEN } from '../../data/harbor.js';
+
+/**
+ * Stufe 6: Rechteck um den Yachtsteg (steg Y) mit seinen Liegeplätzen, damit die Seebrücke ihn nicht kreuzt.
+ * Aus harbor.js, damit es zur Zeichnung passt. Boote dort sind längsseits (Bug nach Norden).
+ */
+export function yachtstegRechteck() {
+  const pts = [];
+  for (const p of HAFEN.plaetze ?? []) {
+    const l = p.steg === 'Y' && p.lage?.['6'];
+    if (!l) continue;
+    pts.push([l[0] - p.breite / 2, l[1] - p.laenge / 2], [l[0] + p.breite / 2, l[1] + p.laenge / 2]);
+  }
+  for (const l of HAFEN.stufen?.[6]?.stege ?? []) if (l.steg === 'Y') pts.push(...l.punkte);
+  if (!pts.length) return null;
+  const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
+  return { x0: Math.min(...xs) - 4, x1: Math.max(...xs) + 4, y0: Math.min(...ys), y1: Math.max(...ys) + 4 };
+}
 
 /** Wunschlagen in Planeinheiten: fest oder je Stufe (gilt ab dieser Stufe). */
 export const STRAND_PLAN = {
@@ -51,7 +69,7 @@ export function strandLagen(stufe, region = 'ostsee') {
     const spaeter = stufe < 6 ? strandLagen(6, region) : {};
     for (const [id, e] of Object.entries(STRAND_PLAN)) {
       const opt = { seebruecke: id === 'seebruecke', weit: id === 'seebruecke' ? 600 : 420, laenge: (e.laenge ?? 44) / PLAN_M + 14, meiden: vergeben, boden, stufe,
-        sperren: stufe >= 6 ? GROSSE_GAESTE.map((g) => g.rechteck).filter(Boolean) : [] };
+        sperren: stufe >= 6 ? [...GROSSE_GAESTE.map((g) => g.rechteck), yachtstegRechteck()].filter(Boolean) : [] };
       const [x, y] = wunsch(e.p, stufe);
       const s = (spaeter[id] && strandStelle(N, spaeter[id][0], spaeter[id][1], { ...opt, weit: 0, zuerst: spaeter[id][2] })) || strandStelle(N, x, y, opt);
       out[id] = s;

@@ -47,8 +47,9 @@ export const SEE = {
   ],
 };
 // Stufe 6: Kreuzfahrtpier P (x -150, Nord-Süd) und Marinepier MA (x -310, Nord-Süd), harbor.js.
-// Gleiche Bahnen wie Stufe 5.
-SEE[6] = SEE[5];
+// Gleiche Bahnen wie Stufe 5, nur biegt die ostwärtige kleine Bahn etwas weiter nördlich um den Kopf
+// des Yachtstegs (steg Y, x -30, bis y 338; Liegeplätze an der Westseite bis y 332).
+SEE[6] = SEE[5].map((b, i) => (i === 0 ? { ...b, pts: b.pts.map(([x, y]) => (x === -34 && y === 330 ? [-8, 350] : [x, y])) } : b));
 
 /**
  * Wo große Gäste der Services liegen (Plan-Einheiten), damit der Test die Bahnen davon fernhält.

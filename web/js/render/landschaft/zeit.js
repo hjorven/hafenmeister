@@ -4,6 +4,14 @@
  * Spielzeit in Sekunden -> Uhrzeit in Stunden, nach dem Spielplan:
  * ein Spieltag dauert 120 s, 90 s Tag und 30 s Abend, danach geht es mit dem Morgen weiter.
  */
+/**
+ * Uhrzeit aus der Spieluhr des Tages (Sekunden seit Morgen) mit der echten Tages- und Abendlänge der
+ * Spielregeln (docs/bootsgeschichten.md: 270 s Tag, 30 s Abend). Tag 6:30 bis 19:00, Abend bis 22:00.
+ */
+export function uhrzeitAusUhr(clock, tag = 90, abend = 30) {
+  return uhrzeitAusSpielzeit(clock, tag + abend, abend);
+}
+
 export function uhrzeitAusSpielzeit(sek, tagSek = 120, abendSek = 30) {
   const t = ((sek % tagSek) + tagSek) % tagSek;
   const tag = tagSek - abendSek;

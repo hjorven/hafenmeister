@@ -28,7 +28,7 @@ TOL = 0.5                      # rueckt ein Platz zwischen zwei Stufen um wenige
 STEGE = {
     'A': 'Steg A', 'B': 'Steg B', 'C': 'Hauptsteg C', 'CS': 'Stichsteg', 'D': 'Schwimmsteg D',
     'F': 'Fischersteg', 'K': 'Kai', 'FK': 'Fischereikai',
-    'P': 'Kreuzfahrtpier', 'MA': 'Marineanleger', 'SK': 'Seenotkreuzer',
+    'P': 'Kreuzfahrtpier', 'MA': 'Marineanleger', 'SK': 'Seenotkreuzer', 'Y': 'Yachtsteg',
 }
 # Stufe 6: Grossschiffe (Klasse XXL). Art und Steg haengen am gezeichneten Schiff.
 XXL_ART = {'cruise': ('pier', 'P'), 'navy': ('marine', 'MA'), 'tall': ('marine', 'MA'), 'srk': ('seenotretter', 'SK')}
@@ -36,7 +36,7 @@ XXL_ART = {'cruise': ('pier', 'P'), 'navy': ('marine', 'MA'), 'tall': ('marine',
 MAXMASS = {
     ('box', 'S'): (6.0, 2.4), ('box', 'M'): (9.0, 3.2), ('box', 'L'): (14.0, 4.5),
     ('finger', 'L'): (14.0, 4.5), ('stirn', 'M'): (14.0, 7.5), ('stirn', 'L'): (14.0, 7.5),
-    ('kai', 'XL'): (40.0, 8.0), ('fischer', 'M'): (9.0, 3.2), ('fischer', 'L'): (14.0, 4.5),
+    ('kai', 'XL'): (40.0, 8.0), ('stirn', 'XL'): (40.0, 8.0), ('fischer', 'M'): (9.0, 3.2), ('fischer', 'L'): (14.0, 4.5),
     # Stufe 6, abgestimmt mit dem XL/XXL-Thread (web/js/data/boats/xxl.js)
     ('pier', 'XXL'): (182.0, 30.0), ('marine', 'XXL'): (92.0, 14.0), ('seenotretter', 'XXL'): (48.0, 11.0),
 }
@@ -48,6 +48,7 @@ def steg_von(p0, p1):
     waagerecht = abs(p1[0] - p0[0]) > abs(p1[1] - p0[1])
     if my > 200 and mx < -250: return 'MA'      # Marinepier (Stufe 6)
     if my > 200 and mx < -60: return 'P'        # Grossschiffspier (Stufe 6)
+    if my > 200 and mx < -20: return 'Y'        # Yachtsteg (Stufe 6, P59)
     if my > 200 and mx > 160: return None      # Seenotretter
     if my > 200: return 'FK' if mx < 0 else 'K'
     if mx < -125: return 'F'
@@ -158,7 +159,7 @@ def exportieren():
         for pts, kind, wm in H.lines:
             if kind == 'finger': continue
             st = steg_von(pts[0], pts[-1])
-            if pts[0][1] > 170 and st not in ('P', 'MA'): st = None                # Tankstelle, Seenotretter
+            if pts[0][1] > 170 and st not in ('P', 'MA', 'Y'): st = None           # Tankstelle, Seenotretter
             if 140 < pts[0][0] < 170 and pts[0][1] < 30: st = None     # Travellift-Becken
             stege.append(dict(steg=st, bauart={'float': 'schwimmsteg', 'pier': 'pier'}.get(kind, 'holz'),
                               breite=r1(wm / K), punkte=[[r1(x), r1(y)] for x, y in pts]))

@@ -212,13 +212,15 @@ export function init(game) {
     const schliessen = () => { sim.select(null); closeCard(); };
     // Kurz und auf einen Blick: Name, Eckdaten als Schilder, ein Satz, zwei Knöpfe.
     // "Einfahren" steht immer groß in der Karte, auf jedem Gerät an derselben Stelle.
-    const nacht = `${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}`;
+    const nacht = b.nights === 0 ? 'Kurzer Halt' : `${b.nights} ${b.nights === 1 ? 'Nacht' : 'Nächte'}`;
     fill(card,
       el('div', { class: 'hm-karte-kopf' },
         el('div', {},
           el('h2', {}, b.name),
           // Name am Heck und Heimathafen (features/stammgaeste.js), falls vorhanden
-          b.bootsname ? el('p', { class: 'card-boatname' }, game.stammgaeste?.beschreibung(b) ?? `„${b.bootsname}“`) : null),
+          b.bootsname ? el('p', { class: 'card-boatname' }, game.stammgaeste?.beschreibung(b) ?? `„${b.bootsname}“`) : null,
+          // Anlass des Boots (Bootsgeschichten, geschichten/geschichten.js)
+          game.geschichten?.text(b) ? el('p', { class: 'card-geschichte' }, game.geschichten.text(b)) : null),
         el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Schließen', title: 'Schließen', onclick: schliessen }, 'Schließen')),
       el('ul', { class: 'hm-fakten', 'aria-label': 'Eckdaten' },
         el('li', { class: 'groesse', title: 'Größenklasse' }, `Größe ${b.size}`),
@@ -232,7 +234,7 @@ export function init(game) {
       sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length, sim.bueroAutomatik?.(b.size)),
       vorschlag ? el('p', { class: 'card-hint hm-vorschlag' }, pixelBild('rauteGold', 14), vorschlagText(b, vorschlag)) : null,
       wert ? el('p', { class: 'card-zahlt' }, zahltText(wert.fee, gold.length ? sim.platzWert(b.id, gold[0])?.fee ?? wert.fee : null, gold.length > 0 && gold.length >= fitting.length,
-        Math.max(1, Math.min(sim.ctx.rules.prepay || 1, b.nights || 1)), !!sim.ctx.rules.tip?.sizes?.includes(b.size))) : null,
+        b.nights === 0 ? 0 : Math.max(1, Math.min(sim.ctx.rules.prepay || 1, b.nights || 1)), !!sim.ctx.rules.tip?.sizes?.includes(b.size))) : null,
       el('p', { class: 'card-hint' }, !fitting.length
         ? 'Gerade ist kein passender Platz frei.'
         : [`${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length && gold.length >= fitting.length ? 'alle' : gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}.`,
@@ -635,8 +637,9 @@ export function init(game) {
  * "15 € pro Nacht" stand da, die Münze brachte 69 €).
  */
 export function zahltText(fee, wunschFee, alleGold, naechte = 1, trinkgeld = false) {
-  const n = Math.max(1, naechte);
-  const summe = (x) => (n > 1 ? `${x * n} € für ${n} Nächte (je ${x} €)` : `${x} € für eine Nacht`);
+  // naechte 0: Kurzhalt am selben Tag (Tagesliegegeld, docs/bootsgeschichten.md)
+  const n = naechte === 0 ? 1 : Math.max(1, naechte);
+  const summe = (x) => (naechte === 0 ? `${x} € für den kurzen Halt` : n > 1 ? `${x * n} € für ${n} Nächte (je ${x} €)` : `${x} € für eine Nacht`);
   const tg = trinkgeld ? ' Holst du die Münze selbst, gibt es Trinkgeld dazu.' : '';
   if (wunschFee == null) return `Zahlt beim Anlegen etwa ${summe(fee)}.${tg}`;
   if (alleGold) return `Zahlt beim Anlegen ${summe(wunschFee)}.${tg}`;

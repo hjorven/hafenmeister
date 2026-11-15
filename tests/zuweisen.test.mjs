@@ -197,7 +197,8 @@ test('Winterbeginn: Bojenlieger von der Nacht fahren weiter, ohne Bewertung und 
   const t = ev.find((e) => e.type === 'turnedAway' && e.boatId === alt.id);
   assert.equal(t?.reason, 'winter');
   assert.equal(t.rated, false);
-  const andere = ev.filter((e) => e.type === 'turnedAway' && e.reason !== 'winter').length;
+  // 'spaet': Kurzhalter, die abends nicht mehr dran waren, zählen auch nicht (docs/bootsgeschichten.md)
+  const andere = ev.filter((e) => e.type === 'turnedAway' && e.reason !== 'winter' && e.reason !== 'spaet').length;
   assert.equal(s.stats.turnedAway, weg + andere, 'Winter zählt nicht als weggefahren');
   assert.ok(ev.filter((e) => e.reason === 'winter').every((e) => e.rated === false));
   assert.equal(sim.waitingBoats(s).length, 0);

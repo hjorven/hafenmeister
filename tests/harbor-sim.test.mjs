@@ -142,6 +142,8 @@ test('Anbindung an game: Zustand, deutsche Namen, Ereignisse, Gesten', async () 
   const boat = game.sim.waitingBoats()[0];
   assert.ok(boat, 'ein Boot wartet');
   assert.equal(game.sim.wartet(boat.id), true);
+  // Kurzhalter (docs/bootsgeschichten.md) wären abends schon weg: dieses Boot übernachtet
+  if (game.state.boats[boat.id].nights === 0) game.state.boats[boat.id].nights = 1;
   const places = game.sim.passendePlaetze(`b${boat.id}`);
   assert.ok(places.length > 0);
   game.emit('ui:tow-end', { boot: boat.id, platz: places[0] });

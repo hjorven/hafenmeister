@@ -267,6 +267,9 @@ TITLES = {1: ('Stufe 1: Bootssteg am See', 'Ein kurzer Holzsteg am Binnensee. Ru
 # (Schiffe an beiden Seiten). Beide reichen ueber den Kartenrand der Zeichnung hinaus.
 PIER_X, PIER_Y = -150, 500
 MARINE_X, MARINE_Y = -310, 390
+# Yachtsteg (Stufe 6, Stegausbau 'yachtsteg'): an der Fischhalle vor der Westmole, Liegeplaetze nur an der
+# Westseite, damit grosse Yachten zwischen Steg und Kreuzfahrtschiff (bis x -99) Raum zum Anlegen haben
+YACHT_X, YACHT_Y = -30, 338
 
 def render(stage, seed=5):
     global X0, W
@@ -409,6 +412,11 @@ def render(stage, seed=5):
         H_.line([MW, (MARINE_X, MARINE_Y)], 'pier', 5.0)
         H_.along(MW, (MARINE_X, MARINE_Y), -1, [('navy', 90, 13, 'grey', True)], jw=5.0, cls='XXL', start=6)
         H_.along(MW, (MARINE_X, MARINE_Y), 1, [('tall', 88, 12, 'white', True)], jw=5.0, cls='XXL', start=6)
+        # Yachtsteg (P59, D9): Schwimmsteg vor der Westmole, an der Westseite zwei Liegeplaetze laengsseits
+        # fuer grosse Yachten und Traditionssegler (Klasse XL), Wurzel an der Fischhalle
+        YW = (YACHT_X, sea_s(YACHT_X) - 4)
+        H_.line([YW, (YACHT_X, YACHT_Y)], 'float', 3.5)
+        H_.along(YW, (YACHT_X, YACHT_Y), 1, [('super', 32, 7.4, 'white', True), ('tall', 32, 7.4, 'navy', False)], jw=3.5, cls='XL', start=4, gap=6)
         # Seenotrettungskreuzer an der Innenseite der Westmole, nahe der Einfahrt
         H_.along((18, 312), (96, 320), -1, [('srk', 46, 10, 'white', True)], jw=9, cls='XXL', start=1, gap=0, scale_jw=False)
     H_.render()
