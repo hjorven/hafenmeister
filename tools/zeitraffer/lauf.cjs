@@ -252,6 +252,10 @@ const SNAP = () => {
     services: JSON.stringify(G.services?.zustand?.()?.gebaut ?? null), ereignis: G.events?.current?.id ?? null };
 };
 
+// Andere Werkzeuge (tests/extrem/) nutzen dieselben Prüfungen: require('tools/zeitraffer/lauf.cjs') startet keinen Lauf
+module.exports = { BOT, PROBE, LOGBUCH, SNAP, serve, GERAETE, ladePlaywright };
+if (require.main !== module) return;
+
 // ------------------------------------------------------------------ Lauf
 (async () => {
   fs.mkdirSync(path.join(OUT, 'bilder'), { recursive: true });
