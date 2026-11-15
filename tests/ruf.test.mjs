@@ -192,7 +192,7 @@ test('Weiter Weg: nur für WC und Dusche, ohne Hook oder ohne Gebäude zählt al
   assert.equal(sim.walkShare(state, ctx2, berth, 'wc').share, 1, 'unbekannte Entfernung zählt voll');
 });
 
-test('Auszeichnung: drei Abende über der Marke, eine Stufe nach der anderen, zurück erst unter der Haltemarke', () => {
+test('Auszeichnung: genug Abende über der Marke, eine Stufe nach der anderen, zurück erst unter der Haltemarke', () => {
   const { ctx, state } = neu({ stufe: 4 });
   const a = ctx.rules.award;
   const abend = (ruf) => {
@@ -204,8 +204,8 @@ test('Auszeichnung: drei Abende über der Marke, eine Stufe nach der anderen, zu
     return ev;
   };
   assert.equal(sim.award(state, ctx.rules).level, 0);
-  abend(4.7); abend(4.7);
-  assert.equal(sim.award(state, ctx.rules).level, 0, 'nach zwei Abenden noch nicht');
+  for (let i = 1; i < a.days; i++) abend(4.7);
+  assert.equal(sim.award(state, ctx.rules).level, 0, 'einen Abend zu früh noch nicht');
   const ev = abend(4.7);
   assert.equal(ev[0]?.type, 'awardUp');
   assert.equal(ev[0].name, a.levels[0].name);
@@ -217,7 +217,7 @@ test('Auszeichnung: drei Abende über der Marke, eine Stufe nach der anderen, zu
   for (let i = 0; i < 5; i++) abend(a.levels[2].from - a.hold / 2);
   assert.equal(sim.award(state, ctx.rules).level, 3);
   // drei Abende darunter: eine Stufe zurück
-  abend(4.0); abend(4.0);
+  for (let i = 1; i < a.days; i++) abend(4.0);
   const runter = abend(4.0);
   assert.equal(runter[0]?.type, 'awardDown');
   assert.equal(runter[0].lost, a.levels[2].name);

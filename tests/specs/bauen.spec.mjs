@@ -1,6 +1,10 @@
 // Bauen mit Vorschau (docs/bauen.md): Baumodus öffnen, Vorschau, erst nach Bestätigen bezahlen,
 // das Gebäude steht danach im Hafen, der Hinweis "Als Nächstes" erscheint.
 import { test, expect, isTouchProject } from '../helpers.mjs';
+import { ECONOMY } from '../../web/js/data/economy.js';
+
+// Preis des Toilettenhäuschens aus economy.js (P17: Kosten x0,45)
+const WC = ECONOMY.bauwerke.wc.stufen[0].kosten;
 
 async function press(locator, testInfo) {
   if (isTouchProject(testInfo)) await locator.tap();
@@ -26,18 +30,18 @@ test('Bauen: Vorschau, Bestätigen, Gebäude steht', async ({ game }, testInfo) 
   // Erstes Bauwerk (Roadmap J4): Das Toilettenhaeuschen ist geschenkt, die Vorschau steht gleich offen
   await expect(page.locator('#card .bau-geschenk')).toBeVisible();
   const ja = page.locator('#card .bau-ja');
-  await expect(ja).toHaveText('Bauen für 80 €');
+  await expect(ja).toHaveText(`Bauen für ${WC} €`);
   await expect(ja).toHaveClass(/bau-leuchtet/);
   // Geschenk liegt in der Kasse, die Vorschau allein kostet nichts; es zaehlt nicht als Einnahme
-  expect(await page.evaluate(() => window.hafenmeister.sim.state.money)).toBe(380);
+  expect(await page.evaluate(() => window.hafenmeister.sim.state.money)).toBe(300 + WC);
   expect(await page.evaluate(() => window.hafenmeister.sim.state.stats.totalIncome)).toBe(0);
   // Zurueck zur Liste und ueber den Reiter wieder hin: dieselbe Vorschau, kein zweites Geschenk
   await press(page.locator('#card .hud-btn', { hasText: 'Zurück' }), testInfo);
   await expect(page.locator('#card .bau-tab')).toHaveCount(4);
   await press(page.locator('#card .bau-tab', { hasText: 'Versorgung' }), testInfo);
   await press(page.locator('#card [data-bau="versorgung:wc"]'), testInfo);
-  await expect(ja).toHaveText('Bauen für 80 €');
-  expect(await page.evaluate(() => window.hafenmeister.sim.state.money)).toBe(380);
+  await expect(ja).toHaveText(`Bauen für ${WC} €`);
+  expect(await page.evaluate(() => window.hafenmeister.sim.state.money)).toBe(300 + WC);
 
   await press(ja, testInfo);
   await expect(page.locator('#card h2')).toContainText('ist gebaut');

@@ -40,13 +40,14 @@ test('Ohne Toilette in Stufe 1: nur Steg und Werbung; ab Stufe 3 wechseln Sanit�
 });
 
 test('Auftrag kostet Geld, zählt als Ausgabe, geht nur einmal', () => {
-  const { ctx, state } = neu({ money: 100 });
+  const geld = ARBEITEN.steg.kosten[0] + ARBEITEN.werbung.kosten[0] - 1;   // reicht für einen Auftrag
+  const { ctx, state } = neu({ money: geld });
   const r = beauftrage(state, ctx, 'steg');
   assert.ok(r.ok);
-  assert.equal(state.money, 100 - ARBEITEN.steg.kosten[0]);
+  assert.equal(state.money, geld - ARBEITEN.steg.kosten[0]);
   assert.equal(beauftrage(state, ctx, 'steg').grund, 'schon');
   assert.equal(beauftrage(state, ctx, 'werbung').grund, 'geld');
-  assert.equal(state.money, 100 - ARBEITEN.steg.kosten[0]);
+  assert.equal(state.money, geld - ARBEITEN.steg.kosten[0]);
 });
 
 test('Wirkung erst in der nächsten Saison: Werbung im Frühling, Steg und Sanitär auf die Bewertung', () => {
@@ -108,15 +109,16 @@ test('Steg wechselt von Jahr zu Jahr zwischen den zwei größten', () => {
 
 test('Saisonbilanz aus dem Verlauf', () => {
   const { ctx, state } = neu();
-  state.stats.verlauf = Array.from({ length: 30 }, (_, i) => ({ tag: i + 1, summe: 10 * (i + 1), ausgabenSumme: i === 3 ? 80 : 0, angelegt: 2, abgereist: 2, bewertung: 4, weggefahrenSumme: i % 10 === 0 ? 1 : 0, ruf: { vorher: 3, nachher: 3.4 } }));
+  const S = ctx.rules.seasonDays;
+  state.stats.verlauf = Array.from({ length: S }, (_, i) => ({ tag: i + 1, summe: 10 * (i + 1), ausgabenSumme: i === 3 ? 80 : 0, angelegt: 2, abgereist: 2, bewertung: 4, weggefahrenSumme: i % 10 === 0 ? 1 : 0, ruf: { vorher: 3, nachher: 3.4 } }));
   const b = saisonBilanz(state, ctx);
   assert.equal(b.jahr, 1);
-  assert.equal(b.tage, 30);
-  assert.equal(b.einnahmen, 10 * 465);
+  assert.equal(b.tage, S);
+  assert.equal(b.einnahmen, 10 * S * (S + 1) / 2);
   assert.equal(b.ausgaben, 80);
-  assert.equal(b.angelegt, 60);
+  assert.equal(b.angelegt, 2 * S);
   assert.equal(b.bewertung, 4);
-  assert.equal(b.weggefahren, 3);
+  assert.equal(b.weggefahren, Math.ceil(S / 10));
   assert.deepEqual(b.ruf, { vorher: 3, nachher: 3.4 });
-  assert.deepEqual(b.besterTag, { tag: 30, summe: 300 });
+  assert.deepEqual(b.besterTag, { tag: S, summe: 10 * S });
 });

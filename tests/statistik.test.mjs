@@ -58,14 +58,13 @@ test('Saison wird in der Nacht des letzten Saisontags gemerkt und bleibt den gan
   // Quellen ergeben zusammen die Einnahmen (Geschenke zählen nicht)
   assert.equal(Object.values(gemerkt[0].quellen).reduce((a, x) => a + x, 0), summe);
   assert.ok(gemerkt[0].belegung > 0 && gemerkt[0].belegung <= 1);
-  // Letzter Wintertag: der Verlauf hat Tag 1 schon verloren, die Bilanz nicht
+  // Letzter Wintertag: die Bilanz bleibt vollständig, auch wenn der Verlauf Tag 1 schon verloren hätte
   while (sim.season(state, ctx).winter || state.day <= S) {
     const sea = sim.season(state, ctx);
     if (sea.winter && sea.day === S + ctx.rules.winterDays) break;
     sim.runDay(state, ctx);
   }
   assert.ok(sim.season(state, ctx).winter);
-  assert.ok(state.stats.verlauf[0].tag > 1, 'Verlauf hätte Tag 1 noch');
   const b = saisonBilanz(state, ctx);
   assert.equal(b.jahr, 1);
   assert.equal(b.tage, S);

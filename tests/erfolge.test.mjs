@@ -66,8 +66,9 @@ test('jeder Erfolg ist in einer simulierten Partie erreichbar, in sinnvoller Rei
     assert.ok(tag['tag-1'] < tag['tag-2']);
     assert.ok(tag['logbuch-1'] < tag['logbuch-2'] && tag['logbuch-2'] < tag['logbuch-3']);
     assert.ok(tag['stufe-2'] < tag['stufe-3'] && tag['stufe-5'] < tag['stufe-6']);
-    assert.ok(tag['ausgebucht'] > 10, 'ausgebucht nicht schon am alten Steg');
-    assert.ok(tag['tag-2'] > 100 && tag['gaeste-2'] > 60, 'Pokale kommen spät');
+    assert.ok(tag['ausgebucht'] >= tag['stufe-2'], 'ausgebucht nicht schon am alten Steg');
+    // Pokale erst in der zweiten Hälfte der Region (Tage relativ zum Abschluss, P17: lange Tage)
+    assert.ok(tag['tag-2'] > 0.5 * res.ende && tag['gaeste-2'] > 0.35 * res.ende, 'Pokale kommen spät');
     // Eingetragen mit Tag und Stufe
     const m = E.erfolgeState(state);
     assert.equal(m.erreicht['stufe-3'].stufe, 3);
