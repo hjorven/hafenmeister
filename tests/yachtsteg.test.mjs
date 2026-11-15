@@ -7,7 +7,7 @@ import { HAFEN } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
 import { ECONOMY } from '../web/js/data/economy.js';
 import { seebrueckeStrecke, yachtstegRechteck } from '../web/js/render/landschaft/strand.js';
-import { formSetzen } from '../web/js/render/landschaft/formen.js';
+import { formSetzen, FORMEN } from '../web/js/render/landschaft/formen.js';
 
 function neu(stage = 6) {
   const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: sim.rulesFromEconomy(ECONOMY) });
@@ -48,7 +48,7 @@ test('Stegausbau: in Stufe 6 kaufbar, bringt zwei XL-Plätze, Hafenziel zählt i
 test('Seebrücke kreuzt den Yachtsteg auf keiner Küste', () => {
   const r = yachtstegRechteck();
   assert.ok(r);
-  for (const reg of ['ostsee', 'nordsee']) for (let f = 1; f <= 10; f++) for (const seed of [1, 7, 8, 11]) {
+  for (const reg of ['ostsee', 'nordsee']) for (const { nr: f } of FORMEN) for (const seed of [1, 7, 8, 11]) {
     formSetzen(f, seed);
     const s = seebrueckeStrecke(6, reg);
     if (!s) continue;

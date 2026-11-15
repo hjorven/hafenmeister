@@ -119,6 +119,17 @@ Alles über Schnittstellen, die das Spiel schon hat, im Browser per `page.evalua
 
 Die Läufe stehen mit Bildern unter `/mnt/project-files/extremtest/`. Funde, die nicht im selben PR behoben wurden, stehen in docs/arbeitsplan.md.
 
+### 15.11.2026, zweiter voller Lauf nach PR 327 bis 332 (main `5dce72f`, P87)
+
+Voller Lauf auf PC und Handy, beide gleichzeitig, alle 15 Küsten und 12 Stegbilder (`/mnt/project-files/extremtest/2026-11-15-5dce72f-p87/`, dort `pc/bericht.md`, `handy/bericht.md`, Bilder und Videos). Gelaufen mit den Prüfregeln von vor P87; die Nachmessung `boje-pc/` schon mit der neuen Bojen-Messung.
+
+- Ohne Befund: Päckchen im vollen Hafen (alle Stufen, beide Geräte), voller Hafen bei Sturm am PC, Menüs am PC, keine Konsolenfehler.
+- **Wartebojen (Fund aus dem ersten Lauf):** besteht weiter. Sichtbar an einer Boje / angekommen: PC Stufe 2 3/10, Stufe 3 6/16, Stufe 4 1/7, Stufe 5 2/22, Stufe 6 0/11; Handy 8/18, 9/21, 4/17, 4/18, 7/18. Die alte Ursache (`anfahrtMax` setzt Boote draußen auf "an der Boje") ist mit PR 327 weg. Neu: `selfEnter` zählt als Andrang auch Boote, die noch Minuten auf See anfahren, darum fahren die ersten im Revier direkt aus der Anfahrt ein (Nachmessung mit neuer Messung: Stufe 4 PC 0 an der Boje, 4 direkt bei Andrang, 6 noch auf der Anfahrt). In docs/arbeitsplan.md für P66.
+- **Raddampfer (XL) an K01** fährt beim Einlaufen über die Westmole und beim Auslaufen über die Kaikante (Handy, `alle-einfahren`, `alle-ablegen`, `grossschiffe-eng/gelaende-10`, Nahbilder `handy-alle-einfahren-nah-land-1.jpg`, `handy-alle-ablegen-nah-land-1.jpg`). In docs/arbeitsplan.md für P84.
+- "Mensch im Wasser" in `tempo8-lang` waren Badegäste (Ziel `baden`, gewollt). Seit P87 zählt die Prüfung sie nicht mehr.
+- "Erreicht Boje nicht" (bis zu 6 Boote je Lage) galt noch mit der alten Grenze von 400 s; die Anfahrt von See dauert ab Stufe 4 Minuten. Seit P87 gilt 540 s (90 % der Notbremse).
+- Hinweise wie im ersten Lauf: Boote durch Steg beim Anlegen (PC 28 in 19 Lagen, Handy 44 in 25), "ineinander fest" und "zu lange unterwegs" vor allem am Handy beim gleichzeitigen Ablegen (gehört zu Fund A, P66). Am Handy liefen PC und Handy gleichzeitig, das Spiel war dort langsamer.
+
 ### 15.11.2026, erster voller Lauf (main `df9ca05`) und Gegenlauf nach PR 316/319
 
 Voller Lauf auf PC und Handy, alle 15 Küstentypen und 12 Stegbilder (`2026-11-15-df9ca05/`), Gegenlauf auf dem PC nach dem Einmergen von main (`2026-11-15-nach-main/`).

@@ -31,7 +31,7 @@ const md = [
   '| Lauf | Gerät | Aufstieg an Tag (Stufe 2/3/4/5/6) | Ziel Stufe 6 an Tag | durch Steg | über Land | ineinander fest | liegend überlappt | in Fahrt berührt | hängt | Pulk-Tage (größter) | zu lange unterwegs | Logbuch | Regeln | Konsolenfehler | Speichern abweichend | |',
   '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|',
   ...zeilen, '',
-  'Erwartung aus tools/balance.mjs: Stufe 2/3/4/5/6 an Tag 14 / 52 / 94 / 145 / 206, Ziel an Tag 258 (Stand PR 181).', '',
+  'Erwartung aus tools/balance.mjs (--spieler zeitraffer): Stufe 2/3/4/5/6 an Tag 6 / 18 / 38 / 60 / 85, Ziel an Tag 103 (Stand PR 331, 5-Minuten-Tag).', '',
 ];
 fs.writeFileSync(path.join(DIR, 'uebersicht.md'), md.join('\n'));
 console.log(md.join('\n'));

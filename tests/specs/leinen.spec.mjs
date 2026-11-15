@@ -5,6 +5,7 @@
 // Stufenaufstieg), brach der neue Befehl das Warten ab und das Modell blieb fuer immer unsichtbar,
 // die Leinen aber nicht.
 import { test, expect } from '../helpers.mjs';
+import { FORMEN } from '../../web/js/render/landschaft/formen.js';
 
 const BEREIT = () => window.hafenmeister?.boatView && window.hafenmeister?.sim?.state && window.hafenmeister.time > 0.1;
 
@@ -101,7 +102,8 @@ test.describe('Festmacherleinen', () => {
 
   // Viele Spieltage im Zeitraffer auf jedem Kuestentyp (abwechselnd Stufe 3 und 6, Boote fahren
   // selbst ein, Muenzen werden sofort eingestrichen): nirgends Leinen ohne sichtbares Boot.
-  for (let g = 1; g <= 10; g++) {
+  // alle Kuestentypen aus formen.js (1 bis 10 frei gebaut, ab 11 echte Orte), nicht fest verdrahtet
+  for (const { nr: g } of FORMEN) {
     const stufe = g % 2 ? 3 : 6;
     test(`Kuestentyp ${g}, Stufe ${stufe}: ueber viele Tage keine Leinen ohne Boot, keine freie Box mit Boot`, async ({ page, problems }) => {
       void problems;
