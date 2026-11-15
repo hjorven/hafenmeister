@@ -781,6 +781,28 @@
    "geraet": "pc",
    "datum": "2026-11-15",
    "quelle": "einstieg/j5-pc-ruf.png"
+  },
+  {
+   "datei": "p83-pr336-handy-stegbild11-stufe5.jpg",
+   "pakete": [
+    "P83"
+   ],
+   "titel": "Stegbild 11 in Stufe 5, aus dem reparierten Generator",
+   "pr": 336,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "stegbilder/p83/handy-stegbild11-stufe5.png"
+  },
+  {
+   "datei": "p83-pr336-pc-stegbild4-stufe6.jpg",
+   "pakete": [
+    "P83"
+   ],
+   "titel": "Stegbild 4 in Stufe 6 mit Yachtsteg und Doppelboxen",
+   "pr": 336,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "stegbilder/p83/pc-stegbild4-stufe6.png"
   }
  ]
 }
