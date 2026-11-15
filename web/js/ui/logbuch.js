@@ -9,7 +9,7 @@
 //    Öffnen: Menü "Logbuch", Taste J.
 //
 // Schnittstelle: game.logbuch = { oeffnen(reiter?, modellId?), schliessen(), get offen, fortschritt(),
-//   chronik(), tagesSatz(tag), merken(merk), reiter(def) }   merken: Merkmal für die heutige Chronik-Zeile
+//   chronik(), tagesSatz(tag), merken(merk), reiter(def), bilderFertig() }   merken: Merkmal für die heutige Chronik-Zeile
 //   (P22 Erfolge: game.logbuch.merken({ a: 'text', art: 'erfolg', text: 'Erfolg: ...' })).
 //   reiter({ id, name, teil(state, { el, zeichne }), zahl?() }): weiterer Reiter im Logbuch (P22: "Erfolge").
 // Ereignis: 'logbuch:neu' { key, typeId, modelId, art } für jedes neue Modell.
@@ -486,6 +486,8 @@ export function init(game) {
     // nurZahl: nur die Zahl im Menü (z. B. wenn ein Reiter seine Einträge als gelesen markiert)
     neuZeichnen: ({ nurZahl = false } = {}) => { menueZahl(); if (offen && !nurZahl) zeichne(); },
     get reiterJetzt() { return offen ? reiter : null; },
+    // Erfüllt sich, sobald alle Bilder des offenen Fensters gemalt und eingesetzt sind (Tests, Fotomodus)
+    bilderFertig: () => maler.wennFertig().then(() => new Promise((f) => setTimeout(f, 0))),
     LOGBUCH,
   };
 }
