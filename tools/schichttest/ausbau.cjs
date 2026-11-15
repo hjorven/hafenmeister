@@ -205,11 +205,20 @@ async function tagesabschluss(t, z) {
   const neu = await t.bis((tag) => window.hafenmeister.sim.state.day > tag, d0, 240_000);
   if (!neu) { await t.punkt('Tag endet', false, 'kein neuer Tag in 4 min', { schwere: 'A' }); return; }
   await setzeTempo(t, 'pause');
-  // Karte (PC, Tablet) oder Zettel (Handy)
+  // Karte oder Zettel (seit PR 320 überall erst der Zettel, Antippen öffnet die Karte). Der Zettel kann kurz
+  // warten, bis der Meldeplatz frei ist (ui/meldungen.js), darum bis zu 20 s Echtzeit.
   const karte = t.page.locator('#hm-tagesabschluss:not([hidden])');
-  const zettel = t.page.locator('.hm-ta-zettel, [class*="ta-zettel"]').first();
-  const k = await karte.isVisible().catch(() => false);
+  const zettel = t.page.locator('#hm-ta-zettel:not([hidden])');
+  await setzeTempo(t, 'normal');
+  await t.bis(() => !document.getElementById('hm-tagesabschluss')?.hidden || !document.getElementById('hm-ta-zettel')?.hidden, null, 20_000);
+  await setzeTempo(t, 'pause');
+  let k = await karte.isVisible().catch(() => false);
   const zt = !k && await zettel.isVisible().catch(() => false);
+  if (zt) {
+    await t.sp.knopf(zettel);
+    k = await karte.waitFor({ state: 'visible', timeout: 5000 }).then(() => true, () => false);
+    await t.punkt('Antippen des Zettels öffnet den Tagesabschluss', k, '', { schwere: 'B' });
+  }
   const bericht = await t.G(() => { const v = window.hafenmeister.sim.verlauf?.() ?? []; return v[v.length - 1] ?? null; });
   await t.punkt('Tagesabschluss erscheint nach dem Tag', k || zt, k ? 'Karte' : zt ? 'Zettel' : 'nichts', { bild: true, schwere: 'B' });
   if (k) {
@@ -227,9 +236,10 @@ async function tagesabschluss(t, z) {
       return l; });
     await t.punkt('Tagesabschluss verdeckt keine Wartebojen oder wartenden Boote', bojen.length === 0, bojen.join(', '), { schwere: 'C' });
     await t.punkt('Tagesabschluss verdeckt weder Zeit noch Bauen', frei.every((f) => f.ok), frei.filter((f) => !f.ok).map((f) => f.id).join(', '));
-    await t.sp.knopf(t.page.locator('#hm-tagesabschluss .hm-ta-weiter'));
+    const weiter = t.page.locator('#hm-tagesabschluss .hm-ta-weiter:visible, #hm-tagesabschluss .hm-zu:visible').first();
+    await t.sp.knopf(weiter);
     const zu = await karte.waitFor({ state: 'hidden', timeout: 5000 }).then(() => true, () => false);
-    await t.punkt('Tagesabschluss schließt mit "Weiter"', zu);
+    await t.punkt('Tagesabschluss schließt', zu);
   }
   await setzeTempo(t, 'normal');
 }
@@ -243,6 +253,8 @@ const SICHTBAR = () => {
   const flaeche = innerWidth * innerHeight; const out = [];
   for (const e of document.body.querySelectorAll('*')) {
     if (e.id === 'stage' || e.tagName === 'CANVAS' || e.id === 'game' || e.closest('[hidden]')) continue;
+    // Meldungen, die von selbst kommen und gehen (Wetter, Logbuch, Funk), zählen nicht als geöffnetes Fenster
+    if (e.closest('#event-banner, #hm-meldeplatz, #hm-lb-meldung, #hm-gb-meldungen, .hm-funk, [class*="funk"]')) continue;
     const r = e.getBoundingClientRect();
     if (r.width * r.height < 0.025 * flaeche || r.width * r.height > 0.98 * flaeche) continue;
     const cs = getComputedStyle(e);
@@ -288,8 +300,9 @@ async function menue(t) {
       const fotoNoch = await t.G(() => document.body.className.includes('foto'));
       if (!offenNoch.length && !fotoNoch) break;
       const zu = t.page.locator('.hm-zu:visible, button[aria-label*="chließen"]:visible, button:visible:text-is("Schließen"), button:visible:text-is("Fertig"), button:visible:text-is("Weiter")').first();
-      if (await zu.count()) await t.sp.knopf(zu).catch(() => {});
-      else await t.page.keyboard.press('Escape');
+      if (i < 2 && await zu.count()) await t.sp.knopf(zu).catch(() => {});
+      else if (i === 0 && !t.touch) await t.page.keyboard.press('Escape');
+      else { const p = await t.G(() => window.__st.leererPunkt()); if (p) await t.sp.tippen(p.x, p.y); }
       await t.warte(400);
     }
     const rest = (await t.G(SICHTBAR)).filter((x) => x !== '#hm-menue' && !vorher.has(x));
