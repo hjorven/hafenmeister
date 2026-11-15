@@ -5,6 +5,7 @@
 
 import { RULES, rulesFromEconomy } from './data/rules.js';
 import { random, randomInt, randomRange, randomWeighted, randomPick } from './random.js';
+import { liegeGeometrie, platzGrenzen, nachbarFrei } from './data/liegelage.js';
 
 // ---------------------------------------------------------------------------
 // Kontext: Daten einlesen und nachschlagbar machen
@@ -20,6 +21,8 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
   const list = (berths ?? (harbor ? berthsFromHarbor(harbor, r) : [])).map(normalizeBerth);
   return {
     rules: r,
+    // Für die Liegelage (data/liegelage.js): Boote längsseits, die Platz vom Nachbarn brauchen
+    harbor: harbor ?? null,
     types,
     typeById: Object.fromEntries(types.map((t) => [t.id, t])),
     berths: list,
@@ -148,6 +151,7 @@ export function berthsFromHarbor(harbor, rules = RULES) {
       maxLength: p.maxLaenge,
       maxBeam: p.maxBreite,
       depth,
+      ...grenzenVon(harbor, p),
       ...kind,
       ...steg,
       ...(requires[p.id] ? { requires: requires[p.id] } : p.requires ? { requires: p.requires } : {}),
@@ -155,6 +159,28 @@ export function berthsFromHarbor(harbor, rules = RULES) {
       ...(p.doppel ? { doppel: [...p.doppel] } : {}),
     };
   });
+}
+
+// Kürzere Höchstlänge je Stufe, wo ein längeres Boot an Steg, Pfahl oder festes Gerät stoßen würde
+// (data/liegelage.js platzGrenzen; zum Beispiel die letzte Box vor einem Stegkopf).
+function grenzenVon(harbor, p) {
+  const out = {};
+  for (const s of p.stufen ?? []) {
+    let g;
+    try { g = platzGrenzen(harbor, s).get(p.id); } catch { g = null; }
+    if (g && g.laenge < p.maxLaenge) out[s] = g.laenge;
+  }
+  return Object.keys(out).length ? { maxLengthAt: out } : {};
+}
+
+/** Höchstlänge eines Platzes in einer Stufe (maxLengthAt kürzt, wo ein Steg im Weg ist). */
+export function berthMaxLength(berth, stage = 99) {
+  const at = berth.maxLengthAt;
+  if (!at) return berth.maxLength;
+  if (at[stage] != null) return Math.min(berth.maxLength, at[stage]);
+  // ohne bekannte Stufe (Tests, Werkzeuge) die strengste Grenze
+  if (stage === 99) return Math.min(berth.maxLength, ...Object.values(at));
+  return berth.maxLength;
 }
 
 // ---------------------------------------------------------------------------
@@ -331,7 +357,7 @@ export function availableBerths(state, ctx) {
 export function whyNotFit(boat, berth, rules = RULES, stage = 99) {
   if (berth.reserved && !boat.stationed) return 'reserved';
   if (berth.sizes && !berth.sizes.includes(boat.size)) return 'size';
-  if (boat.length > berth.maxLength) return 'length';
+  if (boat.length > berthMaxLength(berth, stage)) return 'length';
   if (boat.beam > berth.maxBeam) return 'beam';
   // Kleine Rundung, damit 1.7 + 0.3 nicht an 2.0 scheitert
   if (boat.draft + rules.underKeelClearance > berthDepth(berth, stage) + 1e-9) return 'draft';
@@ -400,11 +426,29 @@ export function hookWhyNotFit(state, ctx, boat, berth) {
   // Für ein angemeldetes Boot frei gehalten (Anmeldung per Funk, P28): nur dieses Boot passt
   const r = reservedFor(state, berth.id);
   if (r && r.id !== boat.id) return 'funk';
+  if (!boat.probe && !nachbarPasst(state, ctx, boat, berth)) return 'nachbar';
   for (const fn of ctx.hooks.fit || []) {
     const why = fn({ state, ctx, boat, berth });
     if (why) return why;
   }
   return null;
+}
+
+// Längsseits am selben Steg (Kai, Yachtsteg): Ein Boot, das länger ist als sein Abschnitt, braucht Platz
+// vom Nachbarn. Es passt nur, wenn das Boot dort (oder das, das gerade ablegt) nicht im Weg ist.
+function nachbarPasst(state, ctx, boat, berth) {
+  if (!ctx.harbor || !(boat.length > 0) || berth.kind === 'box' || berth.kind === 'finger') return true;
+  let geo;
+  try { geo = liegeGeometrie(ctx.harbor, state.stage); } catch { return true; }
+  const g = geo.get(berth.id);
+  if (!g?.nachbarn?.length) return true;
+  const belegt = new Map();
+  for (const nid of g.nachbarn) {
+    const id = state.berths[nid] ?? state.leaving?.[nid]?.boatId;
+    const o = id != null && id !== boat.id ? state.boats[id] : null;
+    if (o && o.length > 0) belegt.set(nid, { length: o.length, beam: o.beam });
+  }
+  return !belegt.size || nachbarFrei(geo, berth.id, { length: boat.length, beam: boat.beam }, belegt);
 }
 
 /** Wie viele Wünsche des Boots dieser Platz selbst erfüllt (Strom, ruhige Lage und so weiter). */

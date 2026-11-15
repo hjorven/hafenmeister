@@ -127,7 +127,7 @@ Voller Lauf auf PC und Handy, alle 15 Küstentypen und 12 Stegbilder (`2026-11-1
 - Selbst behoben: Bewertungsblase am Bildrand ragte halb aus dem Bild (`web/js/ui/gaestebuch.js`).
 - Offen, in docs/arbeitsplan.md:
   - Gäste erreichen ab Stufe 4 sichtbar keine Wartebojen mehr (sichtbar an Boje / angekommen im Gegenlauf: Stufe 2 10/24, Stufe 3 2/27, Stufe 4 bis 6 0/22 bis 0/30). Ursache: seit PR 280 starten Gäste rund 1 km draußen, `wartezeit.anfahrtMax` (35 s) setzt sie vorher auf "an der Boje", die Geduld läuft und sie fahren direkt ein.
-  - L-Boote ragen an Stegköpfen auf den Steg (B27, B28, B35, B36, C22 bis C24).
-  - XL-Raddampfer an K01 liegt unter der Seebrücke und auf dem Boot an FK01.
-  - Korvette (XXL) streift auf Küste 4 die Sandbank (2 bis 3 von 7 Rumpfpunkten auf Land).
+  - L-Boote ragen an Stegköpfen auf den Steg (B27, B28, B35, B36, C22 bis C24) (erledigt mit den passgenauen Liegeplätzen, docs/liegeplaetze.md).
+  - XL-Raddampfer an K01 liegt unter der Seebrücke und auf dem Boot an FK01 (erledigt mit den passgenauen Liegeplätzen, docs/liegeplaetze.md).
+  - Korvette (XXL) streift auf Küste 4 die Sandbank (2 bis 3 von 7 Rumpfpunkten auf Land) (erledigt mit den passgenauen Liegeplätzen, docs/liegeplaetze.md).
 - Hinweise: Pulk und "ineinander fest" beim gleichzeitigen Auslaufen (gehört zu Fund A im Arbeitsplan); Geld 10^12 schiebt am Handy den Menüknopf aus dem Bild (unrealistisch).

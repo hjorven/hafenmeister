@@ -455,7 +455,9 @@ const RINNE5 = [[112, 304], [194, 300], [216, 360], [136, 360]];
 // Hafenbecken: überall zwischen den Stegen mindestens so tief, dass die größte Klasse der Stufe
 // von der Rinne bis vor jede Box kommt (Stufe 1-2: M 1,7 m, ab Stufe 3: L 2,4 m, jeweils mit Reserve).
 const HAFENBECKEN12 = [[-160, 14], [60, 14], [60, 150], [-160, 150]];
-const HAFENBECKEN3 = [[-150, 0], [208, 0], [214, 100], [204, 172], [60, 180], [-80, 168], [-150, 120]];
+// Westrand bei x -156: Die Stegbilder legen Steg A teils bis x -150, Heck eines Boots in der äußersten
+// Box ragt bis etwa -153 (tests/liegeplaetze.test.mjs, Schären und Flussmündung mit Fels am Beckenrand).
+const HAFENBECKEN3 = [[-150, 0], [208, 0], [214, 100], [204, 172], [60, 180], [-80, 168], [-156, 120], [-156, 12]];
 // Stufe 6: Liegeplatz der Barkasse östlich der Kaifläche (services.js barkasse, Wege in besuchswege.js)
 const BARKASSE6 = [[200, 0], [252, 0], [252, 150], [226, 178], [200, 178]];
 // Stufe 1 und 2: natürliche Rinne im See vor und hinter dem Seegatt (Mittellinie, halbe Breite)
