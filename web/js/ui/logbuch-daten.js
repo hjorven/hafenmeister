@@ -180,7 +180,19 @@ export function merken(state, merk, tag = state?.day) {
   const zeile = m.chronik.length && m.chronik[m.chronik.length - 1].tag === tag ? m.chronik[m.chronik.length - 1] : null;
   const liste = zeile ? zeile.merk : offeneMerk(state, tag);
   if (liste.some((x) => JSON.stringify(x) === schl)) return false;
-  if (liste.length >= LOGBUCH.maxMerk) return false;
+  if (liste.length >= LOGBUCH.maxMerk) {
+    // Tag ist voll: Wichtigeres (Regatta-Ergebnis, Aufstieg) verdrängt das Unwichtigste (z. B. ein neues Modell)
+    const rang = (x) => WICHTIG[x.a] ?? 20;
+    let k = -1;
+    liste.forEach((x, i) => { if (rang(x) > rang(sauber) && (k < 0 || rang(x) >= rang(liste[k]))) k = i; });
+    if (k < 0) return false;
+    if (zeile) zeile.merk.splice(k, 1);
+    else {
+      const weg = liste[k];
+      const i = m.offen.findIndex((x) => x.t === tag && JSON.stringify((({ t, ...r }) => r)(x)) === JSON.stringify(weg));
+      if (i >= 0) m.offen.splice(i, 1);
+    }
+  }
   if (zeile) zeile.merk.push(sauber); else m.offen.push({ t: tag, ...sauber });
   return true;
 }
