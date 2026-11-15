@@ -481,13 +481,20 @@ export function umlege(state, ctx, gastId, zielId) {
         : sim.whyNotFit(gast, berth, ctx.rules, state.stage) || sim.hookWhyNotFit(state, ctx, gast, berth) || 'occupied';
     return { ok: false, reason, events: [] };
   }
-  delete state.berths[platzId];
-  state.berths[zielId] = gast.id;
-  gast.berthId = zielId;
-  const p = dauerState(state).plaetze[platzId];
-  const events = [{ type: 'dauerUmgelegt', boatId: gast.id, from: platzId, berthId: zielId, unterwegs: !!gast.trip?.away, dauerId: p.bootId }];
-  legeAn(state, platzId, p, events);
-  return { ok: true, events };
+  // Dasselbe Umlegen wie beim Ziehen eines liegenden Boots (P33): zählt für die Crew, Liegegeld bleibt.
+  // Der Hook 'relocate' unten lässt danach den Dauerlieger einlaufen.
+  return sim.relocateGuest(state, ctx, gast.id, zielId, { grund: 'dauer', unterwegs: true });
+}
+
+/**
+ * Hook 'relocate' (P33): Wird der Gast, der auf einem Dauerplatz liegt, umgelegt (über die Karte
+ * oder indem der Spieler das Boot in eine andere Box zieht), legt der wartende Dauerlieger an.
+ */
+export function umlegeHook({ state, boat, from, to, events }) {
+  const p = dauerState(state).plaetze[from];
+  if (!p?.wartet || String(p.gastId) !== String(boat.id) || state.berths[from] != null) return;
+  events.push({ type: 'dauerUmgelegt', boatId: boat.id, from, berthId: to, unterwegs: !!boat.trip?.away, dauerId: p.bootId });
+  legeAn(state, from, p, events);
 }
 
 /** Abends: Wer heute nur eine Runde draußen war, ist zurück; wer noch wartet, ist verärgert (Hook 'evening'). */
@@ -620,7 +627,7 @@ export function ergaenzeAlteStaende(state, ctx) {
 
 /** Hooks in einen Regel-Kontext hängen (Browser über game.sim.addHook, Tests über sim.addHook). */
 export function haengeEin(addHook) {
-  const ab = [addHook('fit', fitHook), addHook('evening', abendHook), addHook('night', nachtHook), addHook('tick', tickHook), addHook('stageUp', stufenHook)];
+  const ab = [addHook('fit', fitHook), addHook('evening', abendHook), addHook('night', nachtHook), addHook('tick', tickHook), addHook('stageUp', stufenHook), addHook('relocate', umlegeHook)];
   return () => ab.forEach((f) => f());
 }
 
@@ -876,8 +883,8 @@ export async function init(game) {
     setTimeout(zeigeWartende, 0);
     if (!e.unterwegs) {
       // Rückfall: Ohne Meldung der 3D-Ansicht fährt der Dauerlieger nach 20 Sekunden herein
+      // Die Fahrt in die neue Box startet schon mit 'relocated' (bridge.js)
       nachGast.set(e.boatId, { id: e.dauerId, platzId: e.from, zeit: setTimeout(() => lassEin(e.boatId), 20000) });
-      game.emit('boot-zugewiesen', { id: e.boatId, platz: e.berthId });
     }
     game.emit('sim:berthState', { plaetze: sim.berthStates(api.state, api.ctx) });
   });
@@ -1063,7 +1070,7 @@ export async function init(game) {
       kopf(gast.name, `${bootsname(gast)} liegt auf Dauerplatz ${platzId}`),
       fakten(`Größe ${gast.size}`, `${gast.nights} ${gast.nights === 1 ? 'Nacht' : 'Nächte'}`),
       el('p', { class: 'card-hint' }, ziele.length
-        ? `${bootsname(dauerBoot)} ist früher zurück. Tippe auf einen leuchtenden Platz, dort legt der Gast neu an.`
+        ? `${bootsname(dauerBoot)} ist früher zurück. Tippe auf einen leuchtenden Platz oder halte den Gast gedrückt und zieh ihn hin.`
         : `${bootsname(dauerBoot)} ist früher zurück, aber gerade passt kein freier Platz. Mach einen Platz frei, sonst kündigt der Dauerlieger heute Abend.`),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
       el('div', { class: 'card-actions' }, knopf('Abbrechen', schliessen)),

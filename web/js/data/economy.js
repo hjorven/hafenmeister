@@ -57,6 +57,10 @@ export const ECONOMY = {
   // das Boot passt, bringt einen Viertelanker mehr. Gilt nur, wenn es verschieden große Boxen gibt.
   passgenau: { hoechstensGroesser: 0.2, ruf: 0.25 },
 
+  // Liegende Boote umlegen (P33, F4): Das erste Umlegen nimmt eine Crew hin, ab dem zweiten Mal
+  // kostet jedes weitere ruf Anker in ihrer Bewertung. Liegegeld bleibt, wie es bezahlt ist.
+  umlegen: { freiMal: 1, ruf: 0.5 },
+
   // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber
   // hinaus und kommen in dieselbe Box zurück (Box bleibt reserviert, Liegegeld zählt weiter).
   // raus und zurueck sind Anteile des Tages.

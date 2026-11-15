@@ -365,8 +365,9 @@ export function init(game) {
       );
       // Hinweis: Beim Umbau fallen Plätze weg, Gäste dort reisen ab, feste Boote ziehen um
       const umbau = sim.stageUpPreview?.();
-      if (umbau && umbau.guests.length + umbau.fixed.length > 0) {
+      if (umbau && umbau.guests.length + umbau.fixed.length + (umbau.moving?.length || 0) > 0) {
         const teile = [];
+        if (umbau.moving?.length) teile.push(`${umbau.moving.length} ${umbau.moving.length === 1 ? 'Gast legt' : 'Gäste legen'} um`);
         if (umbau.guests.length) teile.push(`${umbau.guests.length} ${umbau.guests.length === 1 ? 'Gast reist' : 'Gäste reisen'} ab`);
         if (umbau.fixed.length) teile.push(`${umbau.fixed.length} ${umbau.fixed.length === 1 ? 'festes Boot zieht' : 'feste Boote ziehen'} um`);
         stageLine.append(el('br'), `Beim Umbau fallen ${umbau.gone.length} Plätze weg: ${teile.join(', ')}.`);

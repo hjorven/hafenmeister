@@ -135,6 +135,6 @@ export function umbauText(p) {
   if (gaeste) t.push(`${gaeste === 1 ? 'Ein Gast reist' : `${gaeste} Gäste reisen`} vorher ab und ${gaeste === 1 ? 'zahlt' : 'zahlen'} noch.`);
   if (fest) t.push(`${fest === 1 ? 'Ein Dauerlieger zieht' : `${fest} feste Boote ziehen`} auf einen freien Platz um.`);
   if (umlegen) t.push(`${umlegen === 1 ? 'Ein Boot legt' : `${umlegen} Boote legen`} in eine passende Box um.`);
-  if (gone && !gaeste && !fest) t.push('Gerade liegt dort niemand.');
+  if (gone && !gaeste && !fest && !umlegen) t.push('Gerade liegt dort niemand.');
   return t.join(' ');
 }

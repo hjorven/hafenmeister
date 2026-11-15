@@ -167,6 +167,8 @@ export function rulesFromEconomy(E = ECONOMY) {
   };
   // Passgenau zuweisen (P10)
   r.snug = E.passgenau ? { share: E.passgenau.hoechstensGroesser, rating: E.passgenau.ruf } : null;
+  // Liegende Boote umlegen (P33): so oft ohne Folgen, danach je Mal weniger Anker
+  r.relocate = E.umlegen ? { free: E.umlegen.freiMal, rating: E.umlegen.ruf } : null;
   r.leaveMax = w.ausBoxMax ?? 0;
   r.previewCount = w.vorschau ?? 0;
 
