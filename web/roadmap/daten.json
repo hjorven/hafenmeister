@@ -1604,7 +1604,10 @@
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    75,
+    76
+   ]
   },
   {
    "id": "P87",
@@ -5531,9 +5534,34 @@
    "datum": "2026-11-15",
    "quelle": "services/pc-tagesgaeste-kreuzfahrt.png",
    "nr": 74
+  },
+  {
+   "datei": "p86-pr342-pc-tankstelle.jpg",
+   "pakete": [
+    "P86"
+   ],
+   "titel": "Fischkutter tankt an der Tankstelle",
+   "pr": 342,
+   "geraet": "pc",
+   "datum": "2026-11-16",
+   "quelle": "bootsgeschichten/p86-tankstelle-pc.png",
+   "nr": 75
+  },
+  {
+   "datei": "p86-pr342-handy-siegerehrung.jpg",
+   "pakete": [
+    "P86"
+   ],
+   "titel": "Siegerehrung nach der Regatta am Abend",
+   "pr": 342,
+   "geraet": "handy",
+   "datum": "2026-11-16",
+   "quelle": "bootsgeschichten/p86-siegerehrung-handy.png",
+   "nr": 76
   }
  ],
  "neueBilder": [
+  76,
   74,
   72,
   70,
@@ -5541,10 +5569,17 @@
   67,
   65,
   63,
-  61,
-  59
+  61
  ],
  "merges": [
+  {
+   "datum": "2026-11-16",
+   "titel": "Roadmap-Pflege: Bilder zu P86 (PR 342)",
+   "pr": 348,
+   "pakete": [
+    "P86"
+   ]
+  },
   {
    "datum": "2026-11-15",
    "titel": "P87: Prüfwerkzeuge auf 15 Küsten und den 5-Minuten-Tag",
@@ -5625,15 +5660,6 @@
    "titel": "Doku auf Stand: Roadmap, Plan, README, Arbeitsplan, Ausbau 7 bis 20",
    "pr": 334,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Roadmap-Pflege: P27 (PR 330) und P17 Teil 2 (PR 331) mit Bildern",
-   "pr": 333,
-   "pakete": [
-    "P27",
-    "P17"
-   ]
   }
  ]
 }

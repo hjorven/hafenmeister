@@ -48,13 +48,13 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 **Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
 
 <table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P86"><img src="web/roadmap/bilder/p86-pr342-handy-siegerehrung.jpg" alt="Siegerehrung nach der Regatta am Abend" width="100%"></a><br><sub>P86 · Siegerehrung nach der Regatta am Abend · PR 342</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P23"><img src="web/roadmap/bilder/p23-pr340-pc-tagesgaeste-kreuzfahrt.jpg" alt="Tagesgäste vom Kreuzfahrtschiff, Heringstage bringen Räucherei und Fischhalle mehr" width="100%"></a><br><sub>P23 · Tagesgäste vom Kreuzfahrtschiff, Heringstage bringen Räucherei und Fischhalle mehr · PR 340</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P83"><img src="web/roadmap/bilder/p83-pr336-pc-stegbild4-stufe6.jpg" alt="Stegbild 4 in Stufe 6 mit Yachtsteg und Doppelboxen" width="100%"></a><br><sub>P83 · Stegbild 4 in Stufe 6 mit Yachtsteg und Doppelboxen · PR 336</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P03"><img src="web/roadmap/bilder/p03-pr335-pc-ruf-erklaert.jpg" alt="Ruf-Tipp mit Kreis um die Sterne oben" width="100%"></a><br><sub>P03 · Ruf-Tipp mit Kreis um die Sterne oben · PR 335</sub></td>
 </tr><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P03"><img src="web/roadmap/bilder/p03-pr335-pc-ruf-erklaert.jpg" alt="Ruf-Tipp mit Kreis um die Sterne oben" width="100%"></a><br><sub>P03 · Ruf-Tipp mit Kreis um die Sterne oben · PR 335</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P17"><img src="web/roadmap/bilder/p17-pr331-tagesablauf.jpg" alt="Neuer Tagesablauf: Echtzeit je Stufe vorher und nachher" width="100%"></a><br><sub>P17 · Neuer Tagesablauf: Echtzeit je Stufe vorher und nachher · PR 331</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P27"><img src="web/roadmap/bilder/p27-pr330-pc-paeckchen.jpg" alt="Zwei Boote im Päckchen, nah (PC)" width="100%"></a><br><sub>P27 · Zwei Boote im Päckchen, nah (PC) · PR 330</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P59"><img src="web/roadmap/bilder/p59-pr326-pc-yachten-am-yachtsteg.jpg" alt="Große Yachten am Yachtsteg (PC)" width="100%"></a><br><sub>P59 · Große Yachten am Yachtsteg (PC) · PR 326</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (4 von 6 erledigt)</summary>
