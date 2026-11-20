@@ -799,6 +799,21 @@ class StraightTask {
   }
 }
 
+// Auf der Stelle auf einen Kurs drehen (grosse Schiffe mit Querstrahlrudern oder Schleppern)
+class DrehTask {
+  constructor(h) { this.h = h; }
+  start() { this.t = 0; }
+  step(b, dt) {
+    this.t += dt;
+    b.setSpeed(0, dt);
+    b.advance(b.speed * dt);
+    b.thrusters = 1;
+    b.steer(this.h, dt, 0.8);
+    if (Math.abs(wrapAngle(this.h - b.heading)) < 0.01 || this.t > 120) { b.thrusters = 0; return true; }
+    return false;
+  }
+}
+
 class WaitTask {
   constructor(sec) { this.sec = sec; }
   start() { this.t = 0; }
@@ -1138,8 +1153,16 @@ class BoatAnim {
     } else if (BOX_KINDS.has(b.kind) || b.kind === 'buoy' || !big) {
       this.push(new PathTask(pts, { speed, brake, route: opts.route, thrusters: b.kind !== 'buoy' && this.info.size !== 'S' && this.info.size !== 'M' }));
     } else {
-      // Grosse Schiffe: parallel zur Kante stoppen, dann mit Querstrahlrudern seitlich heran
-      this.push(new PathTask(pts, { harbor: true, route: opts.route }));
+      // Grosse Schiffe: parallel zur Kante stoppen, dann mit Querstrahlrudern seitlich heran.
+      // Liegt hinter dem Platz Land (Mole, Kaiecke), kaeme der Rumpf beim Anlauf von achtern darueber:
+      // dann von vorn kommen, auf freiem Wasser auf der Stelle drehen und rueckwaerts bis querab (P84).
+      const vonVorn = this.rumpfWegFrei(pts, b.heading) ? null : this.anlaufVonVorn(b, f);
+      if (vonVorn) {
+        this.push(new PathTask([...(opts.via ?? []), vonVorn.dreh], { harbor: true, route: opts.route }));
+        this.push(new DrehTask(b.heading));
+        if (vonVorn.linie) this.push(new StraightTask(vonVorn.linie, { sideways: true, thrusters: true, speed: 0.5, heading: b.heading }));
+        this.push(new StraightTask(vonVorn.querab, { reverse: true, thrusters: true, speed: 0.6, heading: b.heading }));
+      } else this.push(new PathTask(pts, { harbor: true, route: opts.route }));
       this.push(new StraightTask(f, { sideways: true, thrusters: true, speed: 0.35, heading: b.heading }));
     }
     this.push(new CallTask((bt) => {
@@ -1296,10 +1319,25 @@ class BoatAnim {
       // Paeckchen (P27): weiter hinaus, damit Bug und Heck beim Drehen das Boot innen nicht streifen
       const pk = b.kind === 'paeckchen';
       const off = pk ? Math.max(B * 1.2 + 1, L * 0.5 - B * 0.5) : big ? B * 1.2 : B * 0.6;
-      this.push(new StraightTask(
-        { x: this.x + px * out * off, z: this.z + pz * out * off },
-        { sideways: true, thrusters: big || pk, speed: big ? 0.35 : pk ? 0.5 : 0.3, heading: b.heading },
-      ));
+      const querab = { x: this.x + px * out * off, z: this.z + pz * out * off };
+      this.push(new StraightTask(querab, { sideways: true, thrusters: big || pk, speed: big ? 0.35 : pk ? 0.5 : 0.3, heading: b.heading }));
+      // Grosse Schiffe fahren erst geradeaus an der Kante entlang frei, bevor sie abdrehen: sonst
+      // schwenkt das Heck gleich neben dem Platz ueber die Kaikante (P84)
+      if (big && !pk) {
+        const k = [1.2, 0.8, 0.5].find((kk) => this.rumpfWegFrei([querab, { x: querab.x + dx * L * kk, z: querab.z + dz * L * kk }], b.heading, true));
+        const vor = k ? { x: querab.x + dx * L * k, z: querab.z + dz * L * k } : querab;
+        if (k) this.push(new StraightTask(vor, { thrusters: false, speed: Math.min(1.2, this.cfg.harbor * 0.6), heading: b.heading }));
+        // Abdrehen erst, wo der ganze Drehkreis frei ist: sonst seitlich weiter hinaus (sonst schwenkt
+        // das Heck beim Abdrehen ueber die Kante)
+        if (this.mgr.frei) {
+          const t = (this.info.draft ?? 1) + 0.2, rd = Math.hypot(L / 2, B / 2) + 0.5;
+          const weiter = [0, 0.5, 1, 1.5, 2, 2.5, 3, 4].map((m) => B * m).find((o2) => {
+            const q = { x: vor.x + px * out * o2, z: vor.z + pz * out * o2 };
+            return this.mgr.frei(q.x, q.z, rd, t) && this.rumpfWegFrei([vor, q], b.heading, true);
+          });
+          if (weiter > 0) this.push(new StraightTask({ x: vor.x + px * out * weiter, z: vor.z + pz * out * weiter }, { sideways: true, thrusters: true, speed: 0.5, heading: b.heading }));
+        }
+      }
     }
     this.push(new CallTask((bt) => { bt.fenderTarget = 0; bt.berth = null; bt.emit('boat:clear', { berth: b.id }); }));
   }
@@ -1362,6 +1400,59 @@ class BoatAnim {
     };
     const h = [0, 0.5, -0.5, 1, -1, 1.5, -1.5, 2, -2, 2.6, -2.6, Math.PI].map((d) => b.heading + d).find(ok);
     return h ?? b.heading;
+  }
+
+  /** Liegt der Rumpf auf dem Anlauf (gerade Stuecke zwischen den Punkten, Kurs je Stueck, am letzten
+   *  Punkt mit dem Liegekurs; festerKurs: ueberall Liegekurs) ueberall auf freiem Wasser? Ohne Fahrwasserkarte: ja. */
+  rumpfWegFrei(pts, endKurs, festerKurs = false) {
+    const frei = this.mgr.frei;
+    if (!frei || pts.length < 2) return true;
+    // Rumpf als Punktraster (Mitte und beide Seiten, alle 2 m, die gerundeten Enden ausgenommen), kein
+    // Punkt auf Land, Steg oder Platzrechteck der Karte und genug Tiefe. Die Karte zeichnet Molen und
+    // Stege etwas breiter: ein Heck, das am Platz bis an die Mole reicht, zaehlt nicht.
+    const L = this.info.length, hb = this.info.beam / 2 - 0.4, t = (this.info.draft ?? 1) + 0.2;
+    const rumpf = (x, z, h) => {
+      const ex = Math.cos(h), ez = -Math.sin(h);
+      for (let u = -L / 2 + 3; u <= L / 2 - 2.99; u += 2) {
+        for (const v of [-hb, 0, hb]) if (!frei(x + ex * u - ez * v, z + ez * u + ex * v, 0.3, t)) return false;
+      }
+      return true;
+    };
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], c = pts[i], len = Math.hypot(c.x - a.x, c.z - a.z);
+      const h = len > 0.5 && !festerKurs ? Math.atan2(-(c.z - a.z), c.x - a.x) : endKurs;
+      for (let s = 0; s <= len; s += 3) if (!rumpf(a.x + ((c.x - a.x) * s) / (len || 1), a.z + ((c.z - a.z) * s) / (len || 1), h)) return false;
+    }
+    const e = pts[pts.length - 1];
+    return rumpf(e.x, e.z, endKurs);
+  }
+
+  /** Anlauf von vorn fuer grosse Schiffe: Drehpunkt voraus (Drehkreis frei), von dort rueckwaerts mit
+   *  Liegekurs bis querab vom Platz. null, wenn auch das nicht frei ist. */
+  anlaufVonVorn(b, f) {
+    const frei = this.mgr.frei;
+    if (!frei) return null;
+    const L = this.info.length, B = this.info.beam, t = (this.info.draft ?? 1) + 0.2;
+    const dx = Math.cos(b.heading), dz = -Math.sin(b.heading);
+    const px = Math.sin(b.heading), pz = Math.cos(b.heading);
+    const out = -b.side, off = B * 1.2;
+    const querab = { x: f.x + px * out * off, z: f.z + pz * out * off };
+    // Drehpunkt voraus und etwas weiter draussen; nach dem Drehen erst seitlich auf die Linie querab,
+    // dann rueckwaerts heran (so bleibt der Rumpf von Stegen gegenueber frei)
+    let best = null;
+    for (let k = 0.9; k <= 3.01; k += 0.15) {
+      for (let e = 0; e <= B * 4.01; e += B / 2) {
+        const linie = { x: querab.x + dx * L * k, z: querab.z + dz * L * k };
+        const dreh = { x: linie.x + px * out * e, z: linie.z + pz * out * e };
+        if (!frei(dreh.x, dreh.z, Math.hypot(L / 2, B / 2) + 1, t)) continue;
+        const weg = e > 0.1 ? [dreh, linie, querab] : [dreh, querab];
+        if (!this.rumpfWegFrei(weg, b.heading, true)) continue;
+        const kosten = k * L + e * 1.5;
+        if (!best || kosten < best.kosten) best = { kosten, dreh, linie: e > 0.1 ? linie : null, querab };
+      }
+    }
+    if (best) return best;
+    return null;
   }
 
   approachPoints(b) {
