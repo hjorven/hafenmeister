@@ -4,7 +4,7 @@ Jorvens Auftrag vom 14.11.2026: Prüfen, ob alles im Zusammenspiel funktioniert,
 
 ## Oberfläche und Geräte (Zusammenspiel 2)
 
-Stand 20.11.2026, Thread "Zusammenspiel prüfen: Oberfläche und Geräte". Geprüft auf `main` nach PR 345, im laufenden Spiel (`?stufe=3&seed=7`, Ostsee, Tag 1) auf fünf Geräten: iPhone 13 hochkant (390 x 664) und quer (750 x 342), Galaxy Tab S4 hochkant (712 x 1138) und quer, PC 1440 x 900.
+Stand 20.11.2026 (Nachfund F4 am selben Abend), Thread "Zusammenspiel prüfen: Oberfläche und Geräte". Geprüft auf `main` nach PR 345, im laufenden Spiel (`?stufe=3&seed=7`, Ostsee, Tag 1) auf fünf Geräten: iPhone 13 hochkant (390 x 664) und quer (750 x 342), Galaxy Tab S4 hochkant (712 x 1138) und quer, PC 1440 x 900.
 
 ### Wie geprüft wurde
 
@@ -43,6 +43,7 @@ Server für alle Werkzeuge: `bash tools/build-pages.sh && (cd tests && node serv
 | 10 | Statistik am ersten Tag: zwei große leere gelbe Kästen ohne Erklärung | alle | Ein Satz, bis die ersten Boote zahlen (`ui/statistik.js`) |
 | 11 | Tagesziel-Karten trennen kurze Wörter ("Wunsch Es-sen") | Handy | Silbentrennung erst ab Wörtern mit 8 Buchstaben (`features/tagesziele.js`) |
 | 12 | Doku `ui/oberflaeche.md`: Menü-Liste ohne Tagesabschluss, Statistik, Hilfe, Einstellungen, Gästebuch, Logbuch; Tastenliste ohne G, K, N, J, T, R, V; Satz "Ziffern bleiben in der Systemschrift" (seit PR 282 falsch) | Doku | nachgezogen |
+| 13 | Nachfund aus dem Schichttest (F4, 20.11.): Die Funk-Liste rechts lag über den Wartebojen am Kartenrand, ein wartendes Boot ließ sich in der Übersicht nicht antippen | Tablet quer (alle Geräte möglich) | Liegt ein wartendes Boot unter der Liste, wird sie durchlässig: blass, Tipps gehen hindurch zum Boot, der Kopf "Funk" bleibt bedienbar. Nachgemessen: Tipp auf das Boot unter der Liste trifft jetzt das Spiel (`ui/vorschau.js`, Bild `zusammenspiel/oberflaeche/f4-tabletquer-funk-durchlaessig.png`) |
 
 Bewusst so gelassen (kein Fund):
 
