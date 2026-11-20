@@ -269,6 +269,9 @@ class BoatAnimManager {
         if (o === b) continue;
         const hit = b.blockedBy(o);
         if (!hit) continue;
+        // Schon tief ineinander (nach einem Durchlass, beim Einblenden): nicht mehr aufeinander warten,
+        // sonst stehen beide fuer immer und die ganze Abendschlange dahinter (Pulk Stufe 5, Offene Bucht)
+        if (!(o instanceof Hindernis) && hit.gap < -0.5 * Math.min(b.info.length, o.info.length)) continue;
         // nie in ein anderes Boot hineinfahren, auch mit Vorfahrt nicht (Platz bis zum anderen Rumpf)
         room = Math.min(room, hit.gap);
         if (hit.gap < hGap) { hGap = hit.gap; hinderer = o; }
@@ -609,17 +612,20 @@ class PathTask {
       }
       if (e.fertig) continue;
       const bis = e.ein - this.s;                          // Weg bis zur Engstelle
-      if (bis > L * 2 + 10) continue;                      // noch weit weg: nicht anfragen
+      // Hafeneinfahrt: Einlaufende warten ein gutes Stueck davor, damit die herauskommenden Konvois
+      // frei aus der Einfahrt kommen (sonst stand die wartende Traube genau in deren Weg)
+      const vorlauf = e.einfahrt ? 30 : 6;
+      if (bis > L * 2 + 4 + vorlauf) continue;             // noch weit weg: nicht anfragen
       const dir = e.richtung > 0 ? 'plus' : 'minus';
       if (mgr.request(e.nr, b, dir, b.mgr.frame, b.state === 'leaving')) { e.frei = true; b.wartetVorEngstelle = false; continue; }
       // nach 120 s Warten trotzdem fahren (Fehlerfall); dann auch nicht mehr in der Schlange stehen.
       // Abends stehen bis zu 25 Boote an, die Schlange laeuft in Dreier-Konvois je Richtung; frueher
       // (45 s) fuhren Wartende dem Gegenverkehr in die Engstelle und steckten dort Bug an Bug fest.
       this.wartet += dt;
-      if (this.wartet > 120) { e.fertig = true; mgr.release(e.nr, b); b.wartetVorEngstelle = false; continue; }
+      if (this.wartet > (e.einfahrt ? 300 : 120)) { e.fertig = true; mgr.release(e.nr, b); b.wartetVorEngstelle = false; continue; }
       b.wartetVorEngstelle = true;
       // mit Abstand vor der Engstelle warten, damit der entgegenkommende Konvoi herauskommt
-      const halt = Math.max(0, bis - L - 6);
+      const halt = Math.max(0, bis - L - vorlauf);
       max = Math.min(max, Math.sqrt(2 * b.cfg.accel * 0.8 * halt));
     }
     return max;

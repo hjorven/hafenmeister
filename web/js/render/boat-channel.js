@@ -55,15 +55,16 @@ export class ChannelLock {
 
 /** Alle Engstellen eines Reviers: je Nummer eine Freigabe. */
 export class Engstellen {
-  constructor(maxKonvoi = 3) { this.maxKonvoi = maxKonvoi; this.locks = new Map(); this.epoche = 0; }
+  // konvoi: abweichende Konvoigroesse je Nummer (breite Hafeneinfahrt, render/boat-view.js)
+  constructor(maxKonvoi = 3) { this.maxKonvoi = maxKonvoi; this.locks = new Map(); this.epoche = 0; this.konvoi = new Map(); }
   lock(nr) {
     let l = this.locks.get(nr);
-    if (!l) { l = new ChannelLock(this.maxKonvoi); this.locks.set(nr, l); }
+    if (!l) { l = new ChannelLock(this.konvoi.get(nr) ?? this.maxKonvoi); this.locks.set(nr, l); }
     return l;
   }
   request(nr, boat, richtung, bild = null, vorrang = false) { return this.lock(nr).request(boat, richtung, bild, vorrang); }
   release(nr, boat) { this.locks.get(nr)?.release(boat); }
   releaseAll(boat) { for (const l of this.locks.values()) l.release(boat); }
   /** Neue Karte (andere Stufe, neue Stege): alle Freigaben verfallen. */
-  reset() { this.locks.clear(); this.epoche++; }
+  reset() { this.locks.clear(); this.konvoi.clear(); this.epoche++; }
 }
