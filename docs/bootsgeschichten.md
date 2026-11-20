@@ -303,7 +303,24 @@ Alltagsgeschichten.
 - Segelboote fahren zur Startlinie, kreuzen im Zickzack zur Luvtonne (jedes Boot auf eigener Seite und
   Breite), runden, laufen zur Leetonne, zweite Runde, Ziel; danach kreisen sie hinter der Linie, bis
   `dauer:einlaufen` sie heimholt. Motorboote (Begleitboote) kreisen am Startschiff.
-- Noch offen: Startsignal (Ton), Siegerehrung am Segelclub, Ergebnis im Logbuch.
+- P86 (15.11.): Verfolgungsstart, das erste Boot startet mit dem Startschuss (Ton 'regatta', nur wenn die
+  Bahn im Bild ist), die anderen in festen Abständen. Der Erste im Ziel bekommt ein Horn. Abends
+  ('sim:evening') steht das Ergebnis in der Chronik ("Regatta mit 4 Booten: ... gewinnt vor ..."), und vor
+  der Tür des Segelclubs (sonst am Hafenmeister) versammeln sich die Crews und Leute aus dem Ort
+  (`game.people.versammeln`). Ein voller Chronik-Tag macht für Wichtigeres Platz (logbuch-daten.js).
+
+### 5.2 Gepäck, Tankstelle, Ort (P86)
+
+- Gepäck (`gepaeck` in data/geschichten.js): 'aus' = einer geht mit Tasche von Bord in den Ort und gehört
+  nicht mehr zur Crew; 'ein' = einer kommt mit Tasche aus dem Ort und geht an Bord; 'wechsel' = beides;
+  'einkauf' = wer im Ort war, kommt mit Tasche zurück. Taschen sind ein eigenes InstancedMesh in
+  render/people.js.
+- In den Ort (`landgang.ort`): die Crew geht zu einem Weg am Kartenrand oder einer Haustür (`netz.zuhause`)
+  und ist dort eine Weile nicht zu sehen. Kurzhalter gehen nur, wenn bis zum Ablegen noch genug Zeit ist.
+- Tankstelle: Boote mit der Geschichte "Tanken" legen beim Ablegen erst längsseits an der Tankstelle an
+  (`game.services.tankPunkt`), bleiben 12 Spielsekunden und fahren dann hinaus. Nur wenn die Tankstelle
+  steht, der Platz frei und das Boot im Bild ist.
+- Wer beim Leinenlos noch an Land ist, ist trotzdem an Bord (vorher lief er übers Wasser zur leeren Box).
 
 ## 6. Technik im Überblick
 

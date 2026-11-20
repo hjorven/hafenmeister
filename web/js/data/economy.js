@@ -587,33 +587,36 @@ export const ECONOMY = {
     ] },
     slip: { abStufe: 2, stufen: [   // Slipanlage
       // Slipanlage
-      { kosten: 320, wirkung: { proTag: 16, wetter: { regen: 0.4, sturm: 0 }, kunden: { anteil: 0.1, preis: 6, nur: { klasse: ['S', 'M'] } }, gaeste: { S: 1.1 } } },
+      // P23: Trailerboote kommen über Land, gehen am Slip ins Wasser, kein Liegeplatz (Slipgebühr je Boot)
+      { kosten: 320, wirkung: { trailer: { anzahl: 4, preis: 8, wetter: { regen: 0.4, sturm: 0 } } } },
       // Slip mit Trailerparkplatz
-      { kosten: 720, abStufe: 3, wirkung: { proTag: 60, wetter: { regen: 0.4, sturm: 0 }, kunden: { anteil: 0.12, preis: 10, nur: { klasse: ['S', 'M'] } }, gaeste: { S: 1.05 } } },
+      { kosten: 720, abStufe: 3, wirkung: { trailer: { anzahl: 7, preis: 12, wetter: { regen: 0.4, sturm: 0 } } } },
     ] },
     raeucherei: { abStufe: 2, stufen: [   // Räucherei
       // Räucherkate
-      { kosten: 540, wirkung: { proTag: 20, kunden: { anteil: 0.15, preis: 4 }, ruf: 0.05 } },
+      // P23: verdient an den Crews im Hafen, abends kommen Leute aus dem Ort dazu
+      { kosten: 540, wirkung: { kunden: { anteil: 0.25, preis: 5 }, abendgaeste: { anzahl: 4, preis: 4, wetter: { regen: 0.5, sturm: 0 } }, ruf: 0.05 } },
       // Räucherei mit Fischladen
-      { kosten: 3600, abStufe: 4, wirkung: { proTag: 60, kunden: { anteil: 0.2, preis: 6 }, ruf: 0.08 } },
+      { kosten: 3600, abStufe: 4, wirkung: { kunden: { anteil: 0.3, preis: 6 }, abendgaeste: { anzahl: 10, preis: 5, wetter: { regen: 0.5, sturm: 0 } }, tagesgaeste: 12, ruf: 0.08 } },
     ] },
     fischhalle: { abStufe: 5, stufen: [   // Fischhalle
       // Fischhalle
-      { kosten: 6100, braucht: [{ id: 'raeucherei', stufe: 1 }], wirkung: { proTag: 60, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.08, besucherFuerVersorgung: 40 } },
+      { kosten: 6100, braucht: [{ id: 'raeucherei', stufe: 1 }], wirkung: { proTag: 60, kunden: { anteil: 0.3, preis: 5 }, tagesgaeste: 20, ruf: 0.08, besucherFuerVersorgung: 40 } },
       // Fischhalle mit Fischmarkt
-      { kosten: 7200, wirkung: { proTag: 260, kunden: { anteil: 0.4, preis: 6 }, ruf: 0.12, besucherFuerVersorgung: 90 } },
+      { kosten: 7200, wirkung: { proTag: 260, kunden: { anteil: 0.4, preis: 6 }, tagesgaeste: 25, ruf: 0.12, besucherFuerVersorgung: 90 } },
     ] },
     baecker: { abStufe: 1, stufen: [   // Bäcker
       // Brötchenservice
       { kosten: 35, wirkung: { kunden: { anteil: 0.3, preis: 3 }, ruf: 0.03 } },
       // Hafenbäcker
-      { kosten: 1400, abStufe: 3, wirkung: { proTag: 30, kunden: { anteil: 0.4, preis: 3 }, ruf: 0.06 } },
+      { kosten: 1400, abStufe: 3, wirkung: { kunden: { anteil: 0.6, preis: 4 }, tagesgaeste: 6, ruf: 0.06 } },
     ] },
     hafencafe: { abStufe: 2, stufen: [   // Hafencafé
       // Hafencafé
-      { kosten: 360, wirkung: { proTag: 18, wetter: { regen: 0.5, sturm: 0.3 }, kunden: { anteil: 0.2, preis: 4 }, ruf: 0.03 } },
+      // P23 F5: nur noch nach Auslastung (Crews im Hafen), bei Regen sitzen die Leute drinnen
+      { kosten: 360, wirkung: { kunden: { anteil: 0.5, preis: 5, wetter: { regen: 0.7, sturm: 0.4 } }, tagesgaeste: 12, ruf: 0.03 } },
       // Café mit Terrasse
-      { kosten: 2200, abStufe: 3, wirkung: { proTag: 70, wetter: { regen: 0.4, sturm: 0.2 }, kunden: { anteil: 0.3, preis: 5 }, ruf: 0.06 } },
+      { kosten: 2200, abStufe: 3, wirkung: { kunden: { anteil: 0.75, preis: 5, wetter: { regen: 0.6, sturm: 0.3 } }, tagesgaeste: 15, ruf: 0.06 } },
     ] },
     grillplatz: { abStufe: 2, stufen: [   // Grillplatz
       // Grillplatz
@@ -621,11 +624,13 @@ export const ECONOMY = {
     ] },
     fahrradverleih: { abStufe: 3, stufen: [   // Fahrradverleih
       // Fahrradverleih
-      { kosten: 900, wirkung: { proTag: 25, wetter: { regen: 0.3, sturm: 0 }, kunden: { anteil: 0.15, preis: 8 } } },
+      // P23: Crews leihen Räder; manche hängen für eine Radtour eine Nacht an (dienst)
+      { kosten: 900, wirkung: { kunden: { anteil: 0.12, preis: 8, wetter: { regen: 0.3, sturm: 0 } }, dienst: { anteil: 0.18, nur: { klasse: ['S', 'M', 'L'], naechteMax: 2 }, naechte: 1, preis: 30, wetter: { regen: 0.3, sturm: 0 } }, tagesgaeste: 8 } },
     ] },
     eisdiele: { abStufe: 4, stufen: [   // Eisdiele
       // Eisdiele
-      { kosten: 2200, wirkung: { proTag: 90, wetter: { regen: 0.2, sturm: 0 }, kunden: { anteil: 0.25, preis: 3 }, ruf: 0.03 } },
+      // P23: steht auf dem Platz des Cafés (Entweder-oder), stark bei Sonne, kleine Familienboote kommen gern
+      { kosten: 2200, wirkung: { kunden: { anteil: 1.1, preis: 3.5, wetter: { regen: 0.2, sturm: 0 } }, tagesgaeste: 20, gaeste: { S: 1.1 }, ruf: 0.03 } },
     ] },
     segelclub: { abStufe: 3, stufen: [   // Segelclub
       // Segelclub
@@ -637,7 +642,8 @@ export const ECONOMY = {
     ] },
     mastenkran: { abStufe: 3, stufen: [   // Mastenkran
       // Mastenkran
-      { kosten: 1800, wirkung: { kunden: { anteil: 0.08, preis: 35, nur: { antrieb: 'segel' } }, gaeste: { M: 1.2 } } },
+      // P23: Segler lassen den Mast legen und bleiben dafür eine Nacht länger (dienst)
+      { kosten: 1800, wirkung: { dienst: { anteil: 0.3, nur: { antrieb: 'segel', klasse: ['M', 'L'] }, naechte: 1, preis: 45 }, gaeste: { M: 1.2 } } },
     ] },
     ausruester: { abStufe: 3, stufen: [   // Bootsausrüster
       // Bootsausrüster
@@ -647,11 +653,13 @@ export const ECONOMY = {
     ] },
     travellift: { abStufe: 4, stufen: [   // Travellift und Werft
       // Bootsschuppen mit Werkstatt
-      { kosten: 5600, braucht: [{ id: 'mastenkran', stufe: 1 }], wirkung: { kunden: { anteil: 0.06, preis: 120 }, winter: { proTag: 400 }, proTag: 40 } },
+      // P23: Boote mit Schaden kommen zur Reparatur und bleiben, bis sie fertig sind (dienst)
+      { kosten: 5600, braucht: [{ id: 'mastenkran', stufe: 1 }], wirkung: { dienst: { anteil: 0.12, nur: { klasse: ['M', 'L', 'XL'] }, naechte: 1, preis: 220 }, winter: { proTag: 400 }, proTag: 40 } },
       // Travellift
-      { kosten: 6300, wirkung: { kunden: { anteil: 0.08, preis: 170 }, gaeste: { L: 1.1 }, winter: { proTag: 600 } } },
+      { kosten: 6300, wirkung: { dienst: { anteil: 0.15, nur: { klasse: ['M', 'L', 'XL'] }, naechte: 1, preis: 300 }, gaeste: { L: 1.1 }, winter: { proTag: 600 } } },
       // Werfthalle mit Slipwagen
-      { kosten: 11500, ruf: 3.8, wirkung: { kunden: { anteil: 0.1, preis: 190 }, gaeste: { L: 1.12 }, ruf: 0.08, winter: { proTag: 1100 } } },
+      // Werfthalle oder Winterlagerhalle (Entweder-oder, data/services.js WAHLPLAETZE)
+      { kosten: 11500, ruf: 3.8, wirkung: { dienst: { anteil: 0.2, nur: { klasse: ['M', 'L', 'XL'] }, naechte: 2, preis: 450 }, gaeste: { L: 1.12 }, ruf: 0.08, winter: { proTag: 1100 } } },
     ] },
     winterlager: { abStufe: 4, stufen: [   // Winterlager
       // Freilager mit Böcken

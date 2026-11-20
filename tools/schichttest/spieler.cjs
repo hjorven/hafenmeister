@@ -186,7 +186,22 @@ function spieler(page, touch) {
       }
     },
     async knopf(locator) {
-      if (touch) await locator.tap({ timeout: 10_000 }); else await locator.click({ timeout: 10_000 });
+      try {
+        if (touch) await locator.tap({ timeout: 10_000 }); else await locator.click({ timeout: 10_000 });
+      } catch (e) {
+        // Woran liegt es? Bilder pro Sekunde (steht die Seite?) und ob der Knopf sich bewegt
+        const lage = await page.evaluate(() => new Promise((ok) => {
+          let n = 0; const t0 = performance.now();
+          const f = () => { n++; if (performance.now() - t0 < 1000) requestAnimationFrame(f); };
+          requestAnimationFrame(f);
+          setTimeout(() => ok({ bilderProSekunde: n, sichtbar: document.visibilityState }), 1500);
+        })).catch((x) => ({ fehler: String(x.message).slice(0, 80) }));
+        const b1 = await locator.boundingBox().catch(() => null);
+        await page.waitForTimeout(300);
+        const b2 = await locator.boundingBox().catch(() => null);
+        e.message = `${e.message.split('\n')[0]} | Seite ${JSON.stringify(lage)} | Knopf ${JSON.stringify(b1)} -> ${JSON.stringify(b2)}`;
+        throw e;
+      }
     },
     async ende() { if (cdp) { await cdp.detach().catch(() => {}); cdp = null; } },
   };

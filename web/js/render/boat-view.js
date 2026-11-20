@@ -1052,10 +1052,54 @@ export function init(game) {
     entferneMuenze(id, 0);
     // Abends legen viele zugleich ab: gestaffelt, 3 bis 6 s Abstand, damit es wie geordneter
     // Verkehr aussieht und nicht wie ein Pulk an der Einfahrt (hoechstens 30 s Warten)
+    // Bootsgeschichte "Tanken": erst an die Tankstelle, dort kurz fest, dann hinaus
+    const tank = tankHalt(e, id);
+    if (tank) {
+      // längsseits an den Tanksteg, Leinen fest, tanken, dann wie alle hinaus
+      e.anim.dock(tank, { route: true, takt: ablegeTakt, warte: paeckchenFrei }).then((ok) => {
+        if (!ok || boats.get(id) !== e) return;
+        nachSpielzeit(12, () => {
+          if (boats.get(id) !== e) return;
+          e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true, see }).then((ok2) => {
+            if (ok2 && boats.get(id) === e) entferne(id);
+          });
+        });
+      });
+      return;
+    }
     e.anim.undock(weg, { sails: e.anim.info.kind === 'sail', route: true, takt: ablegeTakt, see, warte: paeckchenFrei }).then((ok) => {
       if (ok && boats.get(id) === e) entferne(id);
     });
   }
+  // Geschichte merken, solange das Boot in den Spielregeln steht (Kurzhalter sind beim Ablegen schon gelöscht)
+  game.on('sim:moored', (d) => {
+    const e = boats.get(d?.boatId);
+    const g = game.geschichten?.geschichte?.(game.sim?.state?.boats?.[d?.boatId]);
+    if (e && g) e.geschichte = g;
+  });
+  // Tankstelle als Zwischenhalt: nur für die Geschichte "Tanken", nur wenn der Platz erreichbar ist
+  // und gerade kein anderes Boot dort liegt
+  function tankHalt(e, id) {
+    const g = game.geschichten?.geschichte?.(game.sim?.state?.boats?.[id]) ?? e.geschichte;
+    if (g?.id !== 'tanken') return null;
+    const p = game.services?.tankPunkt?.();
+    if (!p) return null;
+    const { r, t } = bootMass(e.anim.info);
+    const beam = e.anim.info.beam ?? 3;
+    const platz = { id: 'tankstelle', x: p.x, z: p.z + beam / 2, heading: 0, kind: 'kai', length: e.anim.info.length + 2, width: beam + 1, side: p.seite ?? 1 };
+    // vor dem Steg muss tiefes Wasser sein (ein Stück weiter draußen als die Liegelage, die am Steg selbst liegt)
+    if (!befahrbar(karteJetzt(), platz.x, platz.z + beam + 2, r, t)) return null;
+    if (game.boatAnim.boats.some((o) => o !== e.anim && Math.hypot(o.x - platz.x, o.z - platz.z) < (o.info.length + e.anim.info.length) / 2 + 2)) return null;
+    return platz;
+  }
+  // Rückruf nach Spielsekunden (läuft mit Zeitraffer und steht in der Pause)
+  const spaeter = [];
+  function nachSpielzeit(sek, fn) { spaeter.push({ bis: (game.time ?? 0) + sek, fn }); }
+  game.onTick(() => {
+    if (!spaeter.length) return;
+    const t = game.time ?? 0;
+    for (let i = spaeter.length - 1; i >= 0; i--) if (t >= spaeter[i].bis) spaeter.splice(i, 1)[0].fn();
+  });
 
   // --- Muenzen ueber liegenden Booten (abends Hafengeld, eingestrichen ueber ui/gesten.js) ------
   const muenzen = new Map();          // bootId -> Mesh
@@ -1450,6 +1494,30 @@ export function init(game) {
       { x: linie.x + b.luvR.x * 4, z: linie.z + b.luvR.z * 4 }];
   }
   let regattaNr = 0;
+  const regattaImBild = (b) => !!game.boatAnim.imBild?.((b.luv.x + b.lee.x) / 2, (b.luv.z + b.lee.z) / 2, b.L);
+  // Abends: Ergebnis ins Logbuch, Siegerehrung am Segelclub (oder am Hafenmeister), alle Crews kommen hin
+  game.on('sim:evening', () => {
+    const b = bahn;
+    const st = game.sim?.state;
+    if (!b || b.leer || !b.teilnehmer?.length || b.geehrt || b.tag !== st?.day) return;
+    b.geehrt = true;
+    const ziel = (b.ziel ?? []).filter((id) => st.boats[id]);
+    const rest = b.teilnehmer.filter((id) => !ziel.includes(id) && st.boats[id]);
+    const folge = [...ziel, ...rest];
+    if (!folge.length) return;
+    const name = (id) => { const x = st.boats[id]; return x?.bootsname ? `„${x.bootsname}“` : `die ${x?.name ?? 'Yacht'}`; };
+    const text = folge.length === 1
+      ? `Regatta: ${name(folge[0])} segelt allein die Bahn ab`
+      : `Regatta mit ${folge.length} Booten: ${name(folge[0])} gewinnt vor ${name(folge[1])}`;
+    game.logbuch?.merken?.({ a: 'text', text: text.charAt(0).toUpperCase() + text.slice(1) });
+    game.emit('regatta:ergebnis', { reihenfolge: folge, tag: st.day });
+    // Siegerehrung: am Segelclub, sonst vor dem Hafenmeister; Crews der Teilnehmer und Leute aus dem Ort
+    const club = game.services?.gruppe?.children?.find((c) => c.name === 'service-segelclub' && c.visible);
+    const hm = game.buildings?.items?.find((it) => it.art === 'hafenmeister' && it.mesh?.visible);
+    const ort = club?.position ?? hm?.mesh?.position;
+    // vor der Tür (Landseite, zur Kamera hin), nicht hinter dem Haus am Wasser
+    if (ort) game.people?.versammeln?.({ x: ort.x, z: ort.z + 9, anzahl: 6 + Math.min(6, folge.length), dauer: 70, boote: folge });
+  });
   // Start nacheinander: wer an der Linie wartet, startet zu seiner Spielzeit (kein Pulk an der Tonne)
   const startWarten = [];
   game.onTick(() => {
@@ -1508,10 +1576,19 @@ export function init(game) {
         // an der Linie kreuzen, bis das Boot dran ist; dann die Bahn abfahren
         e.anim.hold(vorStart, { radius: 6, speed: e.anim.cfg.cruise * 0.35, sails: true, state: 'sailing' });
         const uhr = game.sim?.state?.clock ?? 0;
+        // Verfolgungsstart: das erste Boot startet mit dem Startschuss, die anderen in festen Abständen
+        (regatta.teilnehmer ||= []).includes(id) || regatta.teilnehmer.push(id);
         startWarten.push({ uhr: uhr + 3 + (nr % 6) * 4, los: () => {
           if (boats.get(id) !== e || !e.draussen) return;
+          if (!regatta.gestartet) {
+            regatta.gestartet = true;
+            if (regattaImBild(regatta)) game.emit('sound', { name: 'regatta' });
+          }
           e.anim.sailTo(regattaKurs(regatta, nr), { sails: true, speed: e.anim.cfg.cruise * (1.05 + (nr % 3) * 0.06) }).then((fertig) => {
             if (!fertig || boats.get(id) !== e || !e.draussen) return;
+            // Zieleinlauf: Reihenfolge für die Siegerehrung, der Erste bekommt ein Horn
+            (regatta.ziel ||= []).includes(id) || regatta.ziel.push(id);
+            if (regatta.ziel.length === 1 && regattaImBild(regatta)) game.emit('horn', { groesse: 'M', stoesse: 2 });
             // im Ziel: kreuzt gemuetlich hinter der Linie, bis es heimgeht
             e.anim.hold(vorStart, { radius: 10 + (nr % 4) * 5, speed: e.anim.cfg.cruise * 0.5, sails: true, state: 'sailing' });
           });

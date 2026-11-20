@@ -5,6 +5,7 @@
 // Stufenaufstieg), brach der neue Befehl das Warten ab und das Modell blieb fuer immer unsichtbar,
 // die Leinen aber nicht.
 import { test, expect } from '../helpers.mjs';
+import { FORMEN } from '../../web/js/render/landschaft/formen.js';
 
 const BEREIT = () => window.hafenmeister?.boatView && window.hafenmeister?.sim?.state && window.hafenmeister.time > 0.1;
 
@@ -40,8 +41,9 @@ function pruefer() {
       if (G.boatView.boot(a.id) !== a) grund.push('Boot gehoert zu keinem Spielboot');
       if (!a.berth) grund.push('Leinen ohne Liegeplatz');
       const art = String(a.berth?.id ?? '');
-      // fest in einer Box, ohne Auftrag (legt nicht gerade ab), aber die Spielregeln kennen es nicht
-      if (a.moored && !a.task && !a.tasks.length && art && !art.startsWith('boje') && !art.startsWith('anker')) {
+      // fest in einer Box, ohne Auftrag (legt nicht gerade ab), aber die Spielregeln kennen es nicht.
+      // Ausnahme Tankstelle (P86): ein abgereistes Boot macht dort auf dem Weg nach See kurz fest.
+      if (a.moored && !a.task && !a.tasks.length && art && art !== 'tankstelle' && !art.startsWith('boje') && !art.startsWith('anker')) {
         const geht = Object.values(st.leaving || {}).some((l) => String(l.boatId) === String(a.id));
         if (!st.boats[a.id] && !geht) grund.push('Spielregeln kennen das Boot nicht');
       }
@@ -100,7 +102,8 @@ test.describe('Festmacherleinen', () => {
 
   // Viele Spieltage im Zeitraffer auf jedem Kuestentyp (abwechselnd Stufe 3 und 6, Boote fahren
   // selbst ein, Muenzen werden sofort eingestrichen): nirgends Leinen ohne sichtbares Boot.
-  for (let g = 1; g <= 10; g++) {
+  // alle Kuestentypen aus formen.js (1 bis 10 frei gebaut, ab 11 echte Orte), nicht fest verdrahtet
+  for (const { nr: g } of FORMEN) {
     const stufe = g % 2 ? 3 : 6;
     test(`Kuestentyp ${g}, Stufe ${stufe}: ueber viele Tage keine Leinen ohne Boot, keine freie Box mit Boot`, async ({ page, problems }) => {
       void problems;
