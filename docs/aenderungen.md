@@ -6,6 +6,7 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 20.11.2026
 
+- Bauen: Doppelbox und Zurückbauen stehen nur noch im Baumenü, wenn sie gerade etwas bringen. Die Doppelbox erscheint, wenn keine freie breite Box mehr da ist. Zurückbauen erscheint, wenn alle schmalen Boxen belegt sind.
 - Auf der Bodden-Küste fahren jetzt auch große Schiffe draußen vor dem Hafen vorbei, das Logbuch lässt sich dort wieder ganz füllen. Der Weg der Besuchsschiffe im Bodden wird viel schneller berechnet, das Spiel hakt beim Kreuzfahrttag nicht mehr.
 
 ## 15.11.2026
