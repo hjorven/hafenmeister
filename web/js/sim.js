@@ -1467,11 +1467,11 @@ export function selfEnter(state, ctx) {
   const events = [];
   const after = ctx.rules.queue.selfEnterAfter;
   if (after == null) return events;
-  // Andrang: mehr Wartende als die halben Bojen. Mit Ansicht zaehlen nur Boote im Revier oder an der
-  // Boje; wer noch draussen auf See anfaehrt, macht die Bojen nicht voll (sonst fuhren ab Stufe 4 die
+  // Andrang: mehr Wartende als die halben Bojen. Mit Ansicht zaehlen nur Boote, die an der Boje
+  // liegen; wer noch anfaehrt, macht die Bojen nicht voll (sonst fuhren ab Stufe 4 die
   // ersten Boote im Revier immer direkt in eine Box und keines lag je sichtbar an der Boje, P87).
   const ansicht = ctx.ansichtMeldetBoje?.();
-  const wartend = ansicht ? state.queue.filter((id) => state.boats[id]?.atBuoy || state.boats[id]?.revierSeit != null).length : state.queue.length;
+  const wartend = ansicht ? state.queue.filter((id) => state.boats[id]?.atBuoy).length : state.queue.length;
   const rush = wartend > waitSpotCount(state, ctx) / 2;
   const office = officeAutomatic(state, ctx);
   // Wer über Nacht an der Boje lag, wird morgens zuerst bedient
@@ -1672,8 +1672,19 @@ export function waitSpotCount(state, ctx) {
 
 /** Kleinste freie Nummer eines Warteplatzes (0 = erste Boje) oder null, wenn alle belegt sind. */
 export function freeWaitSpot(state, ctx) {
-  const used = new Set(waitingBoats(state).map((b) => b.waitSpot));
-  for (let i = 0; i < waitSpotCount(state, ctx); i++) if (!used.has(i)) return i;
+  const n = waitSpotCount(state, ctx);
+  let wartend = waitingBoats(state);
+  // Mit Ansicht belegt nur, wer im Revier oder an der Boje ist. Wer noch draussen auf See anfaehrt,
+  // haelt keine Boje frei (sonst waren ab Stufe 4 alle Bojen von Anfahrenden "belegt", fast kein Boot
+  // lag je sichtbar an einer Boje, und Neue fuhren direkt in eine Box oder drehten ab). Anfahrende
+  // hoechstens so viele, wie es Bojen gibt; die Ansicht legt ein Boot auf eine belegte Boje auf die
+  // naechste freie oder ins Ankerfeld.
+  if (ctx.ansichtMeldetBoje?.()) {
+    if (wartend.length >= 2 * n) return null;
+    wartend = wartend.filter((b) => b.atBuoy || b.revierSeit != null);
+  }
+  const used = new Set(wartend.map((b) => b.waitSpot));
+  for (let i = 0; i < n; i++) if (!used.has(i)) return i;
   return null;
 }
 
