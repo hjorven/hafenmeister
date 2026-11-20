@@ -118,7 +118,8 @@ export function erfolgeState(state) {
   return m;
 }
 const z = (s) => erfolgeState(s).z;
-const stammZahl = (s) => (Array.isArray(s.modules?.stamm?.liste) ? s.modules.stamm.liste.length : 0);
+// Echte Stammgäste: wiedergekommen (features/stammgaeste.js, ab dem 2. Besuch), nicht jeder zufriedene Gast
+const stammZahl = (s) => (Array.isArray(s.modules?.stamm?.liste) ? s.modules.stamm.liste.filter((g) => g.stamm ?? (g.besuche ?? 1) >= (ECONOMY.stammgaeste.stammAbBesuch ?? 2)).length : 0);
 const besterTag = (s) => Math.max(s.stats?.besterTag?.summe || 0, s.stats?.bestDayIncome || 0);
 
 /** Fortschritt eines Erfolgs als { ist, soll, fertig }. */
