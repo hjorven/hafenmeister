@@ -20,9 +20,9 @@ Zahlen in economy.js ändern und die Datei neu schreiben. `tests/zahlen.test.mjs
 |---|---|---|---|---|---|
 | 1 | Bootssteg am See | 8 | S 1 | 20 Gäste, Ruf 2,5 | Dorfhafen am See, 140 € |
 | 2 | Dorfhafen am See | 18 | S 0,45, M 0,55 | 90 Gäste, Ruf 3 | Durchstich zur Ostsee, 2.200 € |
-| 3 | Durchstich zur Ostsee | 25 | S 0,32, M 0,4, L 0,28 | 360 Gäste, Ruf 3,5 | Schwimmsteg D, 9.000 € |
-| 4 | Marina | 29 | S 0,24, M 0,34, L 0,42 | 560 Gäste, Ruf 3,8 | Außenhafen mit Kai, 19.000 € |
-| 5 | Küstenmarina | 31 | S 0,2, M 0,33, L 0,41, XL 0,06 | 840 Gäste, Ruf 4,2 | Pier für Großschiffe, 31.500 € |
+| 3 | Durchstich zur Ostsee | 25 | S 0,32, M 0,4, L 0,28 | 340 Gäste, Ruf 3,5 | Schwimmsteg D, 9.000 € |
+| 4 | Marina | 29 | S 0,24, M 0,34, L 0,42 | 530 Gäste, Ruf 3,8 | Außenhafen mit Kai, 19.000 € |
+| 5 | Küstenmarina | 31 | S 0,2, M 0,33, L 0,41, XL 0,06 | 740 Gäste, Ruf 4,2 | Pier für Großschiffe, 31.500 € |
 | 6 | Seehafen | 31 | S 0,18, M 0,32, L 0,42, XL 0,08 | 6 Großschiffbesuche, Ruf 4,5, alle Plätze | - |
 
 ## Liegegeld je Klasse

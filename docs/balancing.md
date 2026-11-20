@@ -91,9 +91,9 @@ node --test tests/*.test.mjs
 |---|---|---|---|---|
 | 1 Bootssteg am See | 8 (nur S) | 20 Gäste, Ruf 2,5 | Dorfhafen am See | 140 € |
 | 2 Dorfhafen am See | 18 | 90 Gäste, Ruf 3,0 | Durchstich zur Ostsee | 2.200 € |
-| 3 Durchstich zur Ostsee | 25 | 360 Gäste, Ruf 3,5 | Schwimmsteg D | 9.000 € |
-| 4 Marina | 29 | 560 Gäste, Ruf 3,8 | Außenhafen mit Kai | 19.000 € |
-| 5 Küstenmarina | 31 | 840 Gäste, Ruf 4,2 | Pier für Großschiffe (P01, MA01, MA02, SK01) | 31.500 € |
+| 3 Durchstich zur Ostsee | 25 | 340 Gäste, Ruf 3,5 | Schwimmsteg D | 9.000 € |
+| 4 Marina | 29 | 530 Gäste, Ruf 3,8 | Außenhafen mit Kai | 19.000 € |
+| 5 Küstenmarina | 31 | 740 Gäste, Ruf 4,2 | Pier für Großschiffe (P01, MA01, MA02, SK01) | 31.500 € |
 | 6 Seehafen | 31 (Yachtsteg als letzte Gastplätze) | Abschluss: 6 Besuche großer Schiffe, Ruf 4,5, alle Plätze gebaut | | |
 
 Das Abschlussziel benutzt nur Dinge, die der Spieler im Hafen sieht: Geld, Ruf und die großen Schiffe, die einlaufen. Eine eigene Zahl für Tagesgäste gibt es nicht (Entscheidung Jorven, 11.11.2026). Gezählt werden Besuche von Kreuzfahrtschiffen und Flottenbesuche in Stufe 6.
@@ -167,7 +167,7 @@ Ein Tag dauert seit PR 319 rund 5 statt 2 Minuten, es kommen 2,5-mal so viele Bo
 | Wochenziele | 4 Tage, Gäste 0,6, zufrieden 0,35, Segler 0,2 | nicht in zwei Tagen zu schaffen |
 | Dauerlieger | Bewerber warten 5 Tage, Törns 1 bis 2 Tage | Saison kürzer |
 | Endlosspiel | Gästeziel 450 (+30, höchstens 650), Belohnung 2.300 / 4.500 €, mindestens 4 Resttage | 16-Tage-Saison, Kosten x0,45 |
-| Gästeziele der Stufen | unverändert 20 / 90 / 360 / 560 / 840 | Die Stufen dauern jetzt etwa so lange wie geplant; mehr Gäste am Tag gleichen die kürzere Stufe aus |
+| Gästeziele der Stufen | unverändert 20 / 90 / 360 / 560 / 840 (seit 20.11.: 20 / 90 / 340 / 530 / 740, siehe Bauabschnitte unten) | Die Stufen dauern jetzt etwa so lange wie geplant; mehr Gäste am Tag gleichen die kürzere Stufe aus |
 
 ## Rechnung und Spiel
 
@@ -193,6 +193,14 @@ Der Fehler beim Ablegen (Box blieb bis zu 300 s belegt) ist mit PR 327 behoben. 
 Abweichung beim Ende: Rechnung 103, Spiel im Mittel 100,3 Tage, also 2,7 %, innerhalb des Ziels von 5 %. Die Aufstiege in der Mitte liegen in der Rechnung 2 bis 4 Tage früher.
 
 **Auffällig (an den Boote-Thread):** Ab Stufe 4 brauchen Boote bis zur Warteboje im Mittel 50 bis 600 s, in Stufe 6 oft bis zur Notbremse `anfahrtMaxAnsicht` (600 s). Auf den Aufstieg wirkt sich das kaum aus (die Box wird beim Selbst-Einfahren schon vorher vergeben), im Bild sind es aber lange Anfahrten.
+
+**Bauabschnitte und Jahreszeiten (20.11.):** Im Spiel läuft der Ausbau über das Bauen-Menü in Bauabschnitten (P18, `ausbau.bautage`, höchstens drei, jeder einzeln bezahlt und am nächsten Morgen fertig). Die Rechnung kannte das nicht; ein Spieler über das Bauen-Menü war rund 10 Spieltage langsamer (Zusammenspiel-Prüfung, K4). `tools/balance.mjs` baut jetzt genauso (morgens kaufen, nächster Abschnitt am nächsten Morgen, dazwischen nur kleine Käufe). Mit den Jahreszeiten (P20) ergab das 108 Spieltage. Ausgeglichen mit kleineren Gästezielen ab Stufe 3 (360/560/840 auf 340/530/740):
+
+| Rechnung (60 Läufe, Median) | vorher (P23) | mit Jahreszeiten | mit Bauabschnitten | nachgestellt |
+|---|---|---|---|---|
+| `--spieler zeitraffer` | 103 | 105 | 108 | 104 |
+| geschickt | 100 | 101 | 107 | 101 |
+| gemütlich | 111 | 113 | 121 | 119 |
 
 ```bash
 node tools/balance.mjs --spieler zeitraffer

@@ -6,6 +6,7 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 20.11.2026
 
+- Etwas weniger Gäste für den Aufstieg ab Stufe 3 (340 statt 360, 530 statt 560, 740 statt 840), weil der Ausbau über Nacht in Bauabschnitten und die ruhigen Jahreszeiten Zeit kosten. Ein Spiel bis zum Seehafen dauert so weiter rund 100 Spieltage.
 - Stammgast wird nur, wer wiederkommt: Ein zufriedener Gast merkt sich den Hafen, Stammgast ist er erst beim zweiten Besuch, wenn er wieder zufrieden abreist. Vorher wurde fast jeder Gast sofort Stammgast. Logbuch und die Erfolge „Kommt gern wieder“ und „Bekannte Gesichter“ (25 Stammgäste) zählen jetzt nur echte Stammgäste, und die bleiben auf der Liste.
 - Auf der Bodden-Küste fahren jetzt auch große Schiffe draußen vor dem Hafen vorbei, das Logbuch lässt sich dort wieder ganz füllen. Der Weg der Besuchsschiffe im Bodden wird viel schneller berechnet, das Spiel hakt beim Kreuzfahrttag nicht mehr.
 

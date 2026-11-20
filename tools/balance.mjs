@@ -265,9 +265,61 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     return o;
   };
 
+  // Ausbau in Bauabschnitten wie im Bauen-Menü (ui/bauen.js, P18): bautage Abschnitte (höchstens drei),
+  // jeder einzeln bezahlt und am nächsten Morgen fertig; der nächste lässt sich erst dann beauftragen.
+  // Bei einem Abschnitt geht der Ausbau sofort (wie sim.advanceStage im Spiel).
+  let bau = null;   // { stufe, fertig, imBau, seit, teile }
+  const ausbauTeile = () => {
+    const a = E.stufen[state.stage - 1]?.ausbau;
+    if (!a) return null;
+    const n = Math.max(1, Math.min(3, Math.round(a.bautage ?? 1)));
+    const teile = [];
+    let rest = a.kosten;
+    for (let i = 0; i < n; i++) { const k = i === n - 1 ? rest : Math.round(a.kosten / n / 100) * 100; teile.push(k); rest -= k; }
+    return teile;
+  };
+  const stufeErreicht = () => {
+    lauf.stufeTag[state.stage] = state.day;
+    protokoll?.push(`Tag ${state.day}: Stufe ${state.stage} erreicht`);
+  };
+  // Morgens: der Abschnitt von gestern ist fertig, der letzte schließt den Ausbau ab
+  const bauMorgens = () => {
+    if (!bau?.imBau || bau.seit >= state.day) return;
+    bau.fertig++;
+    bau.imBau = false;
+    if (bau.fertig >= bau.teile.length) {
+      bau = null;
+      if (sim.advanceStage(state, ctx, { prepaid: true }).ok) stufeErreicht();
+    }
+  };
+
   const einkaufen = () => {
+    // Gekauft wird morgens (nach dem Tageswechsel): der Abschnitt von gestern ist dann fertig
+    bauMorgens();
     for (let runde = 0; runde < 12; runde++) {
       const check = sim.canAdvanceStage(state, ctx);
+      const teile = ausbauTeile();
+      const begonnen = bau && bau.stufe === state.stage;
+      if (begonnen || (teile && teile.length > 1 && check.missing.every((m) => m === 'money'))) {
+        lauf.zielTag[state.stage] ??= state.day;
+        // Baustelle läuft: heute kein Abschnitt mehr, gespart wird für den nächsten
+        const nr = begonnen ? bau.fertig + (bau.imBau ? 1 : 0) : 0;
+        const kosten = teile[Math.min(nr, teile.length - 1)];
+        if (!(begonnen && bau.imBau) && state.money >= kosten) {
+          if (!nr) lauf.sparTage[state.stage] = state.day - lauf.zielTag[state.stage];
+          sim.spend(state, kosten, 'ausbau');
+          bau = { stufe: state.stage, fertig: nr, imBau: true, seit: state.day, teile };
+          protokoll?.push(`Tag ${state.day}: Bauabschnitt ${nr + 1} von ${teile.length} für ${kosten} €`);
+          lauf.kaeufe++;
+          continue;
+        }
+        // sparen auf den nächsten Abschnitt: nur Dringendes, das wenig kostet
+        const dring = optionen().filter((o) => o.prio === 1 && o.kosten <= 0.1 * kosten && o.kosten <= state.money);
+        if (!dring.length) break;
+        const d = dring.sort((a, b) => a.kosten - b.kosten)[0];
+        kaufe(d.art, d.id, d.kosten, d.tu());
+        continue;
+      }
       const nurGeld = check.missing.length === 1 && check.missing[0] === 'money';
       if (check.ok || nurGeld) {
         lauf.zielTag[state.stage] ??= state.day;
@@ -275,8 +327,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
           lauf.sparTage[state.stage] = state.day - lauf.zielTag[state.stage];
           sim.advanceStage(state, ctx);
           lauf.kaeufe++;
-          lauf.stufeTag[state.stage] = state.day;
-          protokoll?.push(`Tag ${state.day}: Stufe ${state.stage} erreicht`);
+          stufeErreicht();
           continue;
         }
         // sparen: nur noch Dringendes, das wenig kostet
