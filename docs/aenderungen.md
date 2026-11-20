@@ -4,6 +4,10 @@ Stand: 15.11.2026 (bis PR 332, dazu P23). Status: gepflegt. Für Spielerinnen un
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 20.11.2026
+
+- Auf der Bodden-Küste fahren jetzt auch große Schiffe draußen vor dem Hafen vorbei, das Logbuch lässt sich dort wieder ganz füllen. Der Weg der Besuchsschiffe im Bodden wird viel schneller berechnet, das Spiel hakt beim Kreuzfahrttag nicht mehr.
+
 ## 15.11.2026
 
 - Große Besuchsschiffe (Kreuzfahrtschiff, Korvette, Minenjagdboot, Traditionssegler, Ausflugsschiff) fahren jetzt an jeder Küste bis weit hinaus auf See, statt mitten im Bild zu verschwinden, und berühren dabei nirgends mehr das Ufer, auch nicht im engen Seegatt des Boddens, im Watt oder zwischen Inseln. Wer achteraus ablegt, setzt gerade aus der Pier zurück, dreht dort, wo genug Platz ist, auf der Stelle und läuft dann Bug voraus aus. In Kurven folgt der ganze Rumpf dem Weg.

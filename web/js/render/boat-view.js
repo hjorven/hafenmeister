@@ -919,7 +919,15 @@ export function init(game) {
   }
   // Stellen, an denen ein Rumpf L x B, der mit Bug und Heck auf dem Weg faehrt, Land beruehrt
   function rumpfAnLand(weg, L, B, g, abst) {
-    const tb = game.landscape.tiefeBei;
+    // Tiefe auf 1 m gerundet zwischenspeichern: die vielen Versuche eines Wegs fragen fast dieselben
+    // Stellen (im Bodden dauerte ein Seeweg sonst rund 10 s, jetzt unter 1 s)
+    const roh = game.landscape.tiefeBei, cache = (g.tiefeCache ||= new Map());
+    const tb = (x, z) => {
+      const xi = Math.round(x), zi = Math.round(z), key = (xi + 4096) * 8192 + (zi + 4096);
+      let v = cache.get(key);
+      if (v === undefined) { v = roh(xi, zi); cache.set(key, v); }
+      return v;
+    };
     const lang = [0];
     for (let i = 1; i < weg.length; i++) lang.push(lang[i - 1] + Math.hypot(weg[i].x - weg[i - 1].x, weg[i].z - weg[i - 1].z));
     const ges = lang[lang.length - 1];
@@ -1107,7 +1115,83 @@ export function init(game) {
       const rein = hinaus(a, L, m.t, info.beam).reverse();
       const start = rein.shift() ?? { x: a.x + a.nx * 15, z: a.z + a.nz * 15 };
       const raus = hinaus(b, L, m.t, info.beam);
-      return { start, punkte: [...rein, { x: a.x, z: a.z }, ...w.punkte, ...(raus.length ? raus : [{ x: b.x + b.nx * 15, z: b.z + b.nz * 15 }])] };
+      const weg = { start, punkte: [...rein, { x: a.x, z: a.z }, ...w.punkte, ...(raus.length ? raus : [{ x: b.x + b.nx * 15, z: b.z + b.nz * 15 }])] };
+      // Ausserhalb der Karte kennt die Wegsuche das Gelaende nicht (Kueste 4: das Stueck hinaus endete
+      // auf einer Sandbank): den ganzen Weg alle 4 m gegen flaches Wasser pruefen
+      if (game.landscape?.tiefeBei && !wegTief([weg.start, ...weg.punkte], Math.min(m.t, 1.5))) continue;
+      return weg;
+    }
+    return info.size === 'XXL' || L > 40 ? vorbeiWegDraussen(info, m) : null;
+  }
+
+  function wegTief(pts, t) {
+    const tb = game.landscape.tiefeBei;
+    for (let j = 1; j < pts.length; j++) {
+      const a = pts[j - 1], b = pts[j], n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.z - a.z) / 4));
+      for (let q = 0; q < n; q++) if (tb(a.x + (b.x - a.x) * q / n, a.z + (b.z - a.z) * q / n) < t) return false;
+    }
+    return true;
+  }
+  // Grosse Vorbeifahrer, wenn die Karte keinen Weg hat (Bodden: das Seegatt ist zu eng, beide Raender
+  // der Karte liegen im Bodden): draussen auf dem groben Raster von einem Rand des Aussenrings zu einem
+  // anderen, nicht durch die Fahrwasserkarte (dort liegt der Hafen), mit Abstand zum Ufer. Vorher kam
+  // auf Kueste 4 kein grosses Schiff vorbei, das Logbuch blieb bei 5 von 9 Schiffen (Abnahme 15.11.).
+  function vorbeiWegDraussen(info, m) {
+    if (!game.landscape?.tiefeBei || !game.gelaende?.aussenRect) return null;
+    const k = karteJetzt(), g = grobRaster(), { nx, nz, G } = g;
+    const L = info.length ?? 60, B = info.beam ?? 10;
+    // Draussen am Aussenring ist die See nur 3 bis 7 m tief (Kueste 4: ein schmaler Ring um den Bodden)
+    const abst = grobAbstand(g, Math.min(m.t, 3));
+    const hart = B / 2 + G / 2, wunsch = B / 2 + L / 4 + G;
+    const zx = (c) => g.x0 + (c % nx) * G, zz = (c) => g.z0 + Math.floor(c / nx) * G;
+    const inKarte = (x, z) => x > k.x0 - 20 && x < k.x1 + 20 && z > k.z0 - 20 && z < k.z1 + 20;
+    const ok = (c) => abst[c] >= hart && !inKarte(zx(c), zz(c));
+    const rand = [];
+    for (let i = 0; i < nx; i++) for (const j of [0, nz - 1]) if (abst[j * nx + i] >= hart + G) rand.push(j * nx + i);
+    for (let j = 1; j < nz - 1; j++) for (const i of [0, nx - 1]) if (abst[j * nx + i] >= hart + G) rand.push(j * nx + i);
+    if (rand.length < 2) return null;
+    const NB = [[1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1], [1, 1, Math.SQRT2], [1, -1, Math.SQRT2], [-1, 1, Math.SQRT2], [-1, -1, Math.SQRT2]];
+    for (let versuch = 0; versuch < 6; versuch++) {
+      const a = rand[Math.floor(Math.random() * rand.length)], b = rand[Math.floor(Math.random() * rand.length)];
+      if (Math.hypot(zx(a) - zx(b), zz(a) - zz(b)) < 600) continue;
+      const dist = new Float64Array(nx * nz).fill(Infinity), vor = new Int32Array(nx * nz).fill(-1);
+      const halde = [[0, a]];
+      dist[a] = 0;
+      const push = (d, c) => { halde.push([d, c]); let i = halde.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (halde[p][0] <= halde[i][0]) break; [halde[p], halde[i]] = [halde[i], halde[p]]; i = p; } };
+      const pop = () => { const top = halde[0], last = halde.pop(); if (halde.length) { halde[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let q = i; if (l < halde.length && halde[l][0] < halde[q][0]) q = l; if (r < halde.length && halde[r][0] < halde[q][0]) q = r; if (q === i) break; [halde[q], halde[i]] = [halde[i], halde[q]]; i = q; } } return top; };
+      let gefunden = false;
+      while (halde.length) {
+        const [d, c] = pop();
+        if (d > dist[c]) continue;
+        if (c === b) { gefunden = true; break; }
+        const i = c % nx, j = (c - i) / nx;
+        for (const [di, dj, w] of NB) {
+          const ii = i + di, jj = j + dj;
+          if (ii < 0 || jj < 0 || ii >= nx || jj >= nz) continue;
+          const q = jj * nx + ii;
+          if (!ok(q)) continue;
+          const nah = Math.max(0, wunsch - abst[q]) / wunsch;
+          const dq = d + w * (1 + 30 * nah * nah);
+          if (dq < dist[q]) { dist[q] = dq; vor[q] = c; push(dq, q); }
+        }
+      }
+      if (!gefunden) continue;
+      let pts = [];
+      for (let c = b; c >= 0; c = vor[c]) { pts.push({ x: zx(c), z: zz(c) }); if (c === a) break; }
+      pts.reverse();
+      // glaetten (gleitender Mittelwert), ein Punkt rueckt nur, wo das Wasser frei bleibt
+      const h = Math.max(2, Math.round(L / 30));
+      const frei = (p) => { const i = Math.round((p.x - g.x0) / G), j = Math.round((p.z - g.z0) / G); return i >= 0 && j >= 0 && i < nx && j < nz && ok(j * nx + i); };
+      for (let r = 0; r < 6; r++) {
+        pts = pts.map((p, i) => {
+          if (!i || i === pts.length - 1) return p;
+          let sx = 0, sz = 0, n = 0;
+          for (let q = Math.max(0, i - h); q <= Math.min(pts.length - 1, i + h); q++) { sx += pts[q].x; sz += pts[q].z; n++; }
+          const q = { x: sx / n, z: sz / n };
+          return frei(q) ? q : p;
+        });
+      }
+      return { start: pts[0], punkte: pts.slice(1) };
     }
     return null;
   }

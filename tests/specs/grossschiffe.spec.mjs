@@ -46,3 +46,31 @@ for (const [k, seed] of KUESTEN) {
     expect(funde, `Küste ${k}, Seed ${seed}`).toEqual([]);
   });
 }
+
+// Vorbeifahrende Großschiffe (render/boats/verkehr.js, fahrwasser.vorbeiWeg): Auf Küste 4 (Bodden) fand
+// die Karte keinen Weg, kein großes Schiff fuhr vorbei, das Logbuch blieb bei 5 von 9 Schiffen
+// (Abnahme 15.11.). Jetzt fahren sie draußen am Außenring vorbei, ohne flaches Wasser.
+test('Großschiffe fahren auch vor dem Bodden (Küste 4) vorbei', async ({ page, problems }, testInfo) => {
+  test.skip(testInfo.project.name !== 'pc', 'Wege ohne Bedienung, ein Gerät reicht');
+  test.setTimeout(150_000);
+  void problems;
+  await page.goto('./?stufe=6&gelaende=4&seed=1');
+  await page.waitForFunction(() => window.hafenmeister?.fahrwasser?.vorbeiWeg && window.hafenmeister?.landscape?.tiefeBei
+    && window.hafenmeister.time > 0.1, null, { timeout: 60_000 });
+  await page.evaluate(() => window.hafenmeister.setPaused?.(true));
+  const erg = await page.evaluate(() => {
+    const G = window.hafenmeister;
+    return [{ size: 'XXL', length: 180, beam: 29, draft: 7.2 }, { size: 'XXL', length: 90, beam: 12, draft: 5 },
+      { size: 'XXL', length: 28, beam: 6.6, draft: 1.9 }].map((info) => {
+      const w = G.fahrwasser.vorbeiWeg(info);
+      if (!w) return `${info.length} m: kein Weg`;
+      const P = [w.start, ...w.punkte];
+      for (let j = 1; j < P.length; j++) for (let s = 0; s < 1; s += 0.25) {
+        const x = P[j - 1].x + (P[j].x - P[j - 1].x) * s, z = P[j - 1].z + (P[j].z - P[j - 1].z) * s;
+        if (G.landscape.tiefeBei(x, z) < 1) return `${info.length} m: flach bei ${Math.round(x)}/${Math.round(z)}`;
+      }
+      return 'ok';
+    });
+  });
+  expect(erg).toEqual(['ok', 'ok', 'ok']);
+});
