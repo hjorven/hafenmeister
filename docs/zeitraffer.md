@@ -52,7 +52,7 @@ Sie steht dann in `/tmp/zr-serie/uebersicht.md`.
 
 ## Wer spielt
 
-Ein einfacher Bot über `game.sim` und `game.services`, wie der Spielertyp "geschickt" in `tools/balance.mjs`: Er kassiert jede Münze sofort, kauft jeden Morgen das Sinnvollste (Stege zuerst, dann Hafenbüro, Bauwerke, Services, in der letzten Stufe Services zuerst), spart, wenn für die nächste Stufe nur Geld fehlt, und steigt auf, sobald es geht. Boote weist er nicht zu, sie fahren selbst ein (Selbst-Einfahren nach 8 s). Die Bedienung über Knöpfe und Gesten prüfen die Tests in `tests/specs/`, nicht dieser Lauf.
+Ein einfacher Bot über `game.sim` und `game.services`, wie der Spielertyp "geschickt" in `tools/balance.mjs`: Er kassiert jede Münze sofort, kauft jeden Morgen das Sinnvollste (Stege zuerst, dann Hafenbüro, Bauwerke, Services, in der letzten Stufe Services zuerst), spart, wenn für die nächste Stufe nur Geld fehlt, und baut die nächste Stufe wie ein Mensch über das Bauen-Menü (`game.bauen`) aus: Hat der Ausbau mehrere Bauabschnitte, bezahlt er einen je Morgen, sobald das Geld für diesen Abschnitt reicht, und kauft dazwischen nur Dringendes, das höchstens ein Zehntel des Abschnitts kostet (wie `tools/balance.mjs` seit PR 361). Im Bericht stehen die Abschnitte als Kauf `abschnitt` mit `Stufe:Nr/Zahl`. Boote weist er nicht zu, sie fahren selbst ein (Selbst-Einfahren nach 8 s). Die Bedienung über Knöpfe und Gesten prüfen die Tests in `tests/specs/`, nicht dieser Lauf.
 
 ## Was geprüft wird
 
