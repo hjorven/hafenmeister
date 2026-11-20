@@ -262,7 +262,8 @@
   .hm-neu .hm-lb { width: 100%; height: 100%; padding-bottom: var(--hm-safe-bottom, 0px); }
   .hm-lb-kopf h2 { display: none; }
   .hm-lb-kopf .kopf-sym { display: none; }
-  .hm-lb-reiterleiste { justify-content: flex-start; gap: 2px; }
+  /* Vier Reiter passen hochkant nicht in eine Zeile; statt halb verdeckt seitlich zu schieben (Zusammenspiel 2) brechen sie um */
+  .hm-lb-reiterleiste { justify-content: flex-start; gap: 4px 2px; flex-wrap: wrap; overflow-x: visible; }
   .hm-lb-reiter { padding: 0 7px; }
   .hm-lb-raster { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
   .hm-lb-bild { width: 126px; height: 66px; max-width: 100%; }

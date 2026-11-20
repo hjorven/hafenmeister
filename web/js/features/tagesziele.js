@@ -597,7 +597,7 @@ const CSS = `
 .hm-tafel .tz-nehmen { display: flex; flex-direction: column; align-items: stretch; gap: 2px; width: 100%; min-width: 0;
   min-height: 0; margin: 0; padding: 6px 6px 6px; border: 0; border-radius: 6px; background: #fff; color: inherit;
   text-align: left; cursor: pointer; font: inherit; font-weight: 400; line-height: 1.2; }
-.hm-tafel .tz-nehmen .tz-text { flex: 1 1 auto; overflow-wrap: anywhere; hyphens: auto; }
+.hm-tafel .tz-nehmen .tz-text { flex: 1 1 auto; overflow-wrap: anywhere; hyphens: auto; hyphenate-limit-chars: 8 4 4; }   /* kein "Es-sen" (Zusammenspiel 2) */
 .hm-tafel .tz-nehmen-wort { margin-top: 4px; padding: 3px 0; text-align: center; background: #23897d; color: #fff; font-weight: 600; }
 .hm-tafel .tz-woche-kurz { display: flex; gap: 8px; align-items: baseline; }
 .hm-tafel .tz-woche-kurz > .tz-woche-text { flex: 1 1 auto; min-width: 0; }

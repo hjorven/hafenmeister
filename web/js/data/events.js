@@ -129,6 +129,8 @@ export const YEAR = {
   winterDays: Z.winterTage,
   parts: Object.entries(Z.jahreszeiten).map(([id, [from, to]]) => ({ id, from, to })),
   winterMods: E.winter.wirkung,
+  // Wind je Jahreszeit (P20 G5), Zuschlag auf das Alltagswetter
+  wind: Object.fromEntries(Object.entries(Z.jahreszeitWirkung || {}).map(([id, w]) => [id, w.wind ?? 0])),
   winterWeather: { wind: 0.3, fog: 0.2, rain: 0, snow: 1, sun: 0.3 },
 };
 

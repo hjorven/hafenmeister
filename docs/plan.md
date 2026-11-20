@@ -185,7 +185,7 @@ Ereignisse werden vorher angekündigt, viele lassen sich vorbereiten (Sturm: Boo
 
 Einzelheiten in [ereignisse.md](ereignisse.md). Gebaute Services (Räucherei, Museumshafen, Grillplatz und andere) machen Ereignisse größer und verdienen an Ereignistagen extra.
 
-**Jahreslauf:** Eine Saison hat 16 Spieltage (Frühling 1 bis 4, Sommer 5 bis 12, Herbst 13 bis 16), danach kommt ein kurzer Winter von 2 Tagen mit Schnee und ohne Gäste; ein gebautes Winterlager verdient in dieser Zeit Geld (seit PR 331). Am ersten Wintertag kommt die Winterpause mit Saisonbilanz und Winterarbeiten, die die nächste Saison verbessern; der Winter lässt sich überspringen. Dauerlieger gehen an Krantagen ins Winterlager und kommen zum Saisonbeginn zurück ([winter.md](winter.md)). Dass sich die Jahreszeiten auch bei Ankünften und Wind anfühlen (G5), ist geplant (P20).
+**Jahreslauf:** Eine Saison hat 16 Spieltage (Frühling 1 bis 4, Sommer 5 bis 12, Herbst 13 bis 16), danach kommt ein kurzer Winter von 2 Tagen mit Schnee und ohne Gäste; ein gebautes Winterlager verdient in dieser Zeit Geld (seit PR 331). Am ersten Wintertag kommt die Winterpause mit Saisonbilanz und Winterarbeiten, die die nächste Saison verbessern; der Winter lässt sich überspringen. Dauerlieger gehen an Krantagen ins Winterlager und kommen zum Saisonbeginn zurück ([winter.md](winter.md)). Die Jahreszeiten fühlen sich verschieden an (G5): Im Frühling kommen wenige Boote, im Sommer ist Hochsaison mit vollen Stegen und vielen kleinen Booten, im Herbst weht mehr Wind und es kommen die letzten Fahrtensegler. An den Krantagen und beim Segelmacher bringen Dauerlieger den Services Arbeit (H5).
 
 ## 8. Steuerung, die positiv überrascht
 
@@ -339,7 +339,7 @@ Stand dieses Abschnitts: 15.11.2026, jede Zeile am Code geprüft, `main` bei `c0
 - **Hafenbüro (P02):** Funk mit Vorschau und Knopf "Kassieren", Kassenautomat für S und M, Vorschläge, Leitstelle; Sonderfälle bleiben beim Spieler.
 - **Bauen:** Baumodus mit Vorschau, Bestätigen und "Als Nächstes", Ausbau in Abschnitten mit Baustelle über Nacht, Sparziel, Kauf zurücknehmen (P18), erstes Bauwerk geschenkt (J4), Stegprojekte, Stege nachrüsten mit Fingerstegen und Laternen (P30), Doppelboxen und Yachtsteg (P59), Versorgung, 21 Services mit eigener Wirkung (P23: Dienste, Trailerboote, Tagesgäste, Entweder-oder-Plätze, Bilanz), Angebote an Land, Großschiffpier; Gebäude, Dorf und Häuserzeile wachsen sichtbar je Stufe ([wachstum.md](wachstum.md)).
 - **Rückmeldung:** Bewertungen über dem Boot und Gästebuch (P14), Tagesabschluss als Zettel mit Karte (P15), Statistik der letzten 30 Tage und Saisonbilanz (P41), Auslastung an der Versorgung mit Schlange und Zeiger am Bildrand (P55), Feier beim Stufenaufstieg und Endlosspiel (P16), Logbuch mit Hafenchronik und Geschichten (P21), 30 Erfolge mit Dingen im Hafen (P22), ein Meldeplatz für alle kurzen Meldungen.
-- **Hafenleben:** Dauerlieger mit Saisonvertrag und Obergrenze (P01), Stammgäste, Tagesziele zum Auswählen (P13), Wetter an der Flagge, neun Ereignisse zum Vorbereiten mit Ergebnis und Nachspiel, Regatta mit Bahn draußen (P24), Winterpause mit Winterarbeiten und Krantagen (P20), Menschen mit Wegfindung auf dem echten Gelände, Gesten Hafenhorn, Fernglas, Möwen, Wellenring und Glocke (P26), Ton und Musik, Fotomodus, Hafen schauen.
+- **Hafenleben:** Dauerlieger mit Saisonvertrag und Obergrenze (P01), Stammgäste, Tagesziele zum Auswählen (P13), Wetter an der Flagge, neun Ereignisse zum Vorbereiten mit Ergebnis und Nachspiel, Regatta mit Bahn draußen (P24), Jahreszeiten mit eigener Wirkung, Winterpause mit Winterarbeiten und Krantagen, Dauerlieger als Kunden von Kran, Werft und Segelmacher (P20), Menschen mit Wegfindung auf dem echten Gelände, Gesten Hafenhorn, Fernglas, Möwen, Wellenring und Glocke (P26), Ton und Musik, Fotomodus, Hafen schauen.
 - **Oberfläche und Technik:** Pixel-Oberfläche für alle Geräte, Tempo Pause, 1x, 3x, 8x ohne automatische Bremsung (P07), Einstieg mit Hinweisen und Hilfe (P03, J5 offen), Einstellungen für Sicht und Bewegung (P50), bis zu 8 Speicherplätze mit "Neues Spiel" (P09), eine Zahlenquelle `economy.js` mit Übersicht `docs/zahlen.md` (P06).
 - **Prüfwerkzeuge:** automatische Tests auf Handy, Tablet und PC (`tests/pruefen.sh`), Zeitraffer, Schichttest, Härtetest in 16 Extremlagen (`tests/extrem/`), Liegeplatzprüfung (`tools/liegeplaetze/pruefen.mjs`).
 - **Pixel-Fassung** als eigene Seite unter `pixel/`.
@@ -348,7 +348,7 @@ Stand dieses Abschnitts: 15.11.2026, jede Zeile am Code geprüft, `main` bei `c0
 ### Als Nächstes
 
 - **Welle 0 abschließen:** Pulk beim gleichzeitigen Ablegen (P66), Großschiffwege an allen 15 Küsten (P84), danach Abnahme-Serie über 15 Küsten.
-- **Grundprobleme und Prüfung:** Zusammenspiel-Prüfung in drei Threads (P85), Prüfwerkzeuge auf 15 Küsten und den neuen Takt (P87), Rest des Einstiegs (J5) und des Winters (G5, H5, P20).
+- **Grundprobleme und Prüfung:** Zusammenspiel-Prüfung in drei Threads (P85), Prüfwerkzeuge auf 15 Küsten und den neuen Takt (P87), Rest des Einstiegs (J5).
 - **Extras, Welle 3 und 4:** Bootsgeschichten fertig (P86), Wind (P34), neue Wünsche (P31), Preisstufe (P35), Flottillen (P32), Stammgäste mit Wirkung (P25), danach die übrigen Pakete P29 bis P53 und P60 in der Reihenfolge des [Arbeitsplans](arbeitsplan.md).
 
 ### Nach 1.0 (Welle 5 und 6)
