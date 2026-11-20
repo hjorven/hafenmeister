@@ -59,7 +59,7 @@
 .hm-ta-summe.null { color: var(--hm-tinte-2, #5a6a7c); }
 .hm-ta-blaettern {
   flex: none;
-  width: 36px;
+  width: 40px;   /* Fingergröße (Zusammenspiel 2), vorher 36 */
   height: 40px;
   padding: 0;
   border: 0;
@@ -291,7 +291,7 @@ body.foto .hm-ta, body.foto .hm-ta-zettel, body.foto .hm-ta-muenzen { display: n
   .hm-ta-fuss { gap: 8px; }
   .hm-ta-auto { flex: 0 0 auto; font-size: 12px; white-space: nowrap; }
   .hm-ta-kopf h2 { font-size: var(--hm-schrift, 15px); }
-  .hm-ta-blaettern { width: 40px; height: 40px; }   /* Fingergröße (Zusammenspiel 2), vorher 34 hoch */
+  .hm-ta-blaettern { width: 40px; height: 40px; }   /* Fingergröße (Zusammenspiel 2), vorher 36 x 34 */
   .hm-ta-summe { font-size: calc(var(--hm-schrift, 15px) + 6px); }
   .hm-ta-balken { height: 34px; }
   .hm-ta-zettel { top: calc(var(--hm-oben, 8px) + 4px); }
@@ -312,7 +312,7 @@ body.foto .hm-ta, body.foto .hm-ta-zettel, body.foto .hm-ta-muenzen { display: n
 .hm-ta.eng .hm-ta-unter { display: none; }
 .hm-ta.eng .hm-ta-kopf h2 { font-size: var(--hm-schrift, 15px); }
 .hm-ta.eng .hm-ta-summe { font-size: calc(var(--hm-schrift, 15px) + 4px); }
-.hm-ta.eng .hm-ta-blaettern { height: 34px; width: 34px; }
+.hm-ta.eng .hm-ta-blaettern { height: 40px; width: 40px; }   /* Fingergröße (Zusammenspiel 2), vorher 34 */
 .hm-ta.eng .hm-ta-balken { height: 28px; margin-top: 6px; }
 .hm-ta.eng .hm-ta-boote { margin-top: 6px; }
 .hm-ta.eng .hm-ta-tipp { margin-top: 6px; }

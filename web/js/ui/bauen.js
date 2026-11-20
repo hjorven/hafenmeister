@@ -1557,7 +1557,7 @@ function stil() {
       #card.bau-karte .bau-rat, .bau-zahl { display: none; }
       .bau-liste { max-height: calc(100dvh - 150px); }
       .bau-tab { min-height: 36px; }
-      .bau-zeile { padding: 6px 10px; }
+      .bau-zeile { padding: 8px 10px; }
       #card.bau-karte .card-actions .hud-btn { min-height: 38px; }
     }
   `;

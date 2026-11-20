@@ -96,7 +96,7 @@
   .hm-neu.card-open #hm-seite * { pointer-events: auto !important; }
   /* Bauliste quer: kompakte Zeilen, gesperrte nur mit Name und Preis, damit fünf Einträge sichtbar sind */
   .hm-neu #card.bau-karte { gap: 6px; }
-  .hm-neu #card.bau-karte .bau-zeile { padding: 5px 10px; gap: 1px; }
+  .hm-neu #card.bau-karte .bau-zeile { padding: 7px 10px; gap: 1px; }   /* 40 px Fingerhöhe auch quer (Zusammenspiel 2) */
   .hm-neu #card.bau-karte .bau-zeile.gesperrt .bau-zeile-text { display: none; }
   .hm-neu #card.bau-karte .bau-liste { gap: 4px; }
   .hm-neu #card.bau-karte > .hud-btn:last-child { min-height: 38px; padding-block: 4px; }
