@@ -222,7 +222,9 @@ async function tagesabschluss(t, z) {
     await t.punkt('Antippen des Zettels öffnet den Tagesabschluss', k, '', { schwere: 'B' });
   }
   const bericht = await t.G(() => { const v = window.hafenmeister.sim.verlauf?.() ?? []; return v[v.length - 1] ?? null; });
-  await t.punkt('Tagesabschluss erscheint nach dem Tag', k || zt, k ? 'Karte' : zt ? 'Zettel' : 'nichts', { bild: true, schwere: 'B' });
+  const warum = (k || zt) ? '' : await t.G(() => { const G = window.hafenmeister; const z = document.getElementById('hm-ta-zettel');
+    return `; Meldeplatz ${JSON.stringify(G.meldungen?.stand?.())}, Zettel hidden=${z?.hidden} class="${z?.className}", body "${document.body.className}", Tag ${G.sim.state.day} ${G.sim.state.phase}, Winter ${!!G.sim.season?.()?.winter}, springt ${!!G.winter?.springt}`; });
+  await t.punkt('Tagesabschluss erscheint nach dem Tag', k || zt, (k ? 'Karte' : zt ? 'Zettel' : 'nichts') + warum, { bild: true, schwere: 'B' });
   if (k) {
     const text = (await karte.textContent()).replace(/\s+/g, ' ');
     const summe = bericht?.summe ?? bericht?.einnahmen ?? null;
@@ -306,7 +308,16 @@ async function menue(t) {
       const zu = t.page.locator('.hm-zu:visible, button[aria-label*="chließen"]:visible, button:visible:text-is("Schließen"), button:visible:text-is("Fertig"), button:visible:text-is("Weiter"), button[aria-label*="beenden"]:visible, button:visible:text-is("Zurück")').first();
       if (i < 2 && await zu.count()) await t.sp.knopf(zu).catch(() => {});
       else if (i === 0 && !t.touch) await t.page.keyboard.press('Escape');
-      else { const p = await t.G(() => window.__st.leererPunkt()); if (p) await t.sp.tippen(p.x, p.y); }
+      else {
+        // Daneben tippen: freies Wasser, sonst irgendeine Stelle außerhalb der offenen Fenster, die kein Knopf ist
+        const p = await t.G((offen) => window.__st.leererPunkt() || (() => {
+          for (let gy = 0.1; gy <= 0.9; gy += 0.05) for (let gx = 0.1; gx <= 0.9; gx += 0.1) {
+            const x = Math.round(innerWidth * gx), y = Math.round(innerHeight * gy); const e = document.elementFromPoint(x, y);
+            if (e && !offen.some((sel) => { try { return !!e.closest(sel); } catch { return false; } }) && !e.closest('button, a, input, [role="button"]')) return { x, y };
+          }
+          return null; })(), offenNoch);
+        if (p) await t.sp.tippen(p.x, p.y);
+      }
       await t.warte(400);
     }
     const rest = (await t.G(SICHTBAR)).filter((x) => x !== '#hm-menue' && !vorher.has(x));

@@ -18,7 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const { HILFEN, spieler } = require('./spieler.cjs');
-const SCHICHTEN = [...require('./schichten.cjs').SCHICHTEN, ...require('./ausbau.cjs').SCHICHTEN];
+const SCHICHTEN = [...require('./schichten.cjs').SCHICHTEN, ...require('./ausbau.cjs').SCHICHTEN, ...require('./ausbau2.cjs').SCHICHTEN];
 
 const REPO = path.resolve(__dirname, '..', '..');
 const argv = process.argv.slice(2);
@@ -154,6 +154,7 @@ function serve(root) {
       punkte: R.punkte.length - vorher.punkte, funde: R.funde.length - vorher.funde, fehler: R.fehler.length - vorher.fehler });
     if (R.funde.slice(vorher.funde).some((f) => f.schwere === 'A')) { console.log('  Schicht nicht stabil, Lauf endet hier.'); break; }
   }
+  if (t.sp.rueckfaelle) await t.hinweis('Knopf mit Rückfall gedrückt', `${t.sp.rueckfaelle}x reagierte ein ruhiger, sichtbarer Knopf nicht auf Playwright; Tippen in die Mitte half`, { bild: false });
   R.dauerMin = +((Date.now() - t0) / 60000).toFixed(1);
   await t.sp.ende();
   fs.writeFileSync(path.join(OUT, `ergebnis-${GERAET}.json`), JSON.stringify(R, null, 1));

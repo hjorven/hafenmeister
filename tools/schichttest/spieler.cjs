@@ -199,7 +199,15 @@ function spieler(page, touch) {
         const b1 = await locator.boundingBox().catch(() => null);
         await page.waitForTimeout(300);
         const b2 = await locator.boundingBox().catch(() => null);
-        e.message = `${e.message.split('\n')[0]} | Seite ${JSON.stringify(lage)} | Knopf ${JSON.stringify(b1)} -> ${JSON.stringify(b2)}`;
+        const log = [...new Set(e.message.split('\n').slice(1).map((z) => z.replace(/\x1b\[[0-9;]*m/g, '').trim()).filter((z) => /intercept|stable|visible|detached|outside/.test(z)))].slice(0, 4).join(' / ');
+        const box = await locator.boundingBox().catch(() => null);
+        if (box && /stable/.test(log) && !/intercept/.test(log)) {
+          const x = box.x + box.width / 2, y = box.y + box.height / 2;
+          if (touch) await sp.tippen(x, y); else { await page.mouse.click(x, y); }
+          sp.rueckfaelle = (sp.rueckfaelle || 0) + 1;
+          return;
+        }
+        e.message = `${e.message.split('\n')[0]} | ${log} | Seite ${JSON.stringify(lage)} | Knopf ${JSON.stringify(b1)} -> ${JSON.stringify(b2)}`;
         throw e;
       }
     },
