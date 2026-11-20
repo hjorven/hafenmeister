@@ -71,6 +71,14 @@ test('Umbau: kostet Geld, Einzelboxen weg, Doppelbox da; Rückbau macht es rück
   assert.ok(sim.berthAvailable(state, ctx.berthById[a.platz]));
   for (const id of a.teile) assert.equal(sim.berthAvailable(state, ctx.berthById[id]), false);
   assert.equal(sim.berthState(state, ctx, a.platz), 'frei');
+  // Eine freie Doppelbox reicht: kein weiterer Umbau im Menü, solange sie frei ist (Zusammenspiel K5)
+  assert.ok(!angebote(state, ctx).some((x) => x.art === 'umbau' && x.steg === a.steg));
+  // Rückbau erst, wenn die schmalen Boxen des Stegs alle belegt sind
+  assert.ok(!angebote(state, ctx).some((x) => x.art === 'rueckbau'));
+  for (const b of ctx.berths) {
+    if (b.jetty === a.steg && b.kind === 'box' && !b.doppel && sim.berthAvailable(state, b)) state.berths[b.id] = 'voll';
+  }
+  state.boats.voll = { id: 'voll', status: 'moored' };
   const rb = angebote(state, ctx).find((x) => x.art === 'rueckbau' && x.steg === a.steg);
   assert.equal(rb.platz, a.platz);
   assert.ok(bauen(state, ctx, 'rueckbau', a.steg).ok);
@@ -93,14 +101,16 @@ test('Belegte Boxen werden nicht umgebaut, ein anderes freies Paar schon', () =>
   assert.equal(bauen(state, ctx, 'umbau', a.steg).grund, 'belegt');
 });
 
-test('Belegte Doppelbox wird nicht zurückgebaut; ein Katamaran kann sie bekommen', () => {
+test('Belegte Doppelbox wird nicht zurückgebaut, dafür steht der nächste Umbau wieder im Menü', () => {
   const { ctx, state } = neu();
   const a = angebote(state, ctx).find((x) => x.art === 'umbau');
   assert.ok(bauen(state, ctx, 'umbau', a.steg).ok);
   state.berths[a.platz] = 'kat';
   state.boats.kat = { ...kat(ctx), status: 'moored', berthId: a.platz };
-  assert.equal(angebote(state, ctx).find((x) => x.art === 'rueckbau').gesperrt, 'Doppelbox belegt');
-  assert.equal(bauen(state, ctx, 'rueckbau', a.steg).grund, 'belegt');
+  assert.ok(!angebote(state, ctx).some((x) => x.art === 'rueckbau'), 'kein Rückbau-Eintrag für eine belegte Doppelbox');
+  assert.equal(bauen(state, ctx, 'rueckbau', a.steg).grund, 'unbekannt');
+  // Die einzige Doppelbox ist belegt: ein weiterer Umbau steht wieder im Menü
+  assert.ok(angebote(state, ctx).some((x) => x.art === 'umbau' && x.steg === a.steg && !x.gesperrt));
 });
 
 test('Stufe 3: Umbau sichtbar, aber gesperrt bis Stufe 4; Stufe 2: gar nicht', () => {
