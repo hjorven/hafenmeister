@@ -136,7 +136,7 @@ Note 1 bis 5 aus dem Überblick. "nein" heißt: bleibt, wie es ist.
 | Zuweisen von Hand | 2 | ja | P10 |
 | Ruf und Bewertung | 2 | ja | P14, P19 |
 | Hafenbüro (4 Stufen, PR 146) | 2 | ja | P02 |
-| Jahreslauf und Winter | 2 | ja | P20 |
+| Jahreslauf und Winter | 3 | ja | P20 (erledigt) |
 | Dauerlieger | 2 | ja | P01 |
 | Tagesziele | 2 | ja | P13 |
 | Abschlussziel Stufe 6 | 2 | ja | P04, P16 |
@@ -423,7 +423,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | G2 | Sturm ab Stufe 3 spürbar, Boote vorher nach innen verholen | erledigt (PR 281) | P24 |
 | G3 | Ereignisse mit Nachspiel | erledigt (PR 299) | P24 |
 | G4 | Winter als Planungsbild (Bilanz, Winterarbeiten, Verträge) | erledigt (PR 245) | P20 |
-| G5 | Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind) | offen: Jahreszeiten (Frühling 1 bis 4, Sommer 5 bis 12, Herbst 13 bis 16) steuern bisher nur Ereignisse wie die Heringstage, nicht Ankünfte oder Wind | P20 |
+| G5 | Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind) | erledigt (P20-Rest): Ankünfte Frühling 0,8, Sommer 1,2 mit mehr kleinen Booten, Herbst 0,9 mit mehr Fahrtenseglern und mehr Wind; Banner beim Wechsel ([winter.md](winter.md#jahreszeiten-g5)) | P20 |
 | G6 | Ergebnis eines Ereignisses am Abend zeigen | erledigt (PR 281) | P24 |
 | G7 | Ereignisse an Bauten binden (Räucherei, Museumshafen, Strand) | erledigt (PR 299) | P24 |
 | G8 | Eine Zahlenliste für Ereignisse | erledigt | P06 |
@@ -437,7 +437,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | H2 | Saisonvertrag im Voraus | erledigt (PR 149) | P01 |
 | H3 | Bewerber statt Verwandlung: Stammgäste und Einheimische fragen an | erledigt (PR 149) | P01 |
 | H4 | Obergrenze ein Viertel der Plätze | erledigt (PR 149) | P01 |
-| H5 | Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land | teilweise (PR 245): im Winter im Winterlager; Segelmacher und Kran in der Saison offen | P20 |
+| H5 | Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land | erledigt (PR 245 und P20-Rest): im Winter im Winterlager (zahlen dort je Tag), Krantage an Mastenkran und Travellift, Segelmacher-Aufträge in der Saison | P20 |
 | H6 | Lieblingsplatz eines Stammgasts | offen | P25 |
 | H7 | Sichtbare Treue: Wimpel je fünf Besuche | offen | P25 |
 | H8 | Stammgäste wachsen mit (Wünsche, größeres Boot) | offen | P25 |
@@ -685,7 +685,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P17 | Start und frühe Stufen straffen | Ü15, Ü16, Startwerte dokumentieren | `economy.js`, `state.js`, `docs/balancing.md` | erledigt (PR 318 und Teil 2, PR 331: neuer Tagesablauf, rund 100 Spieltage, Rechnung und Zeitraffer 2,7 % auseinander; `docs/balancing.md`) |
 | P18 | Ausbau in Bauabschnitten | Ü18, `bautage` nutzen oder löschen | `ui/bauen.js`, `economy.js`, `sim.js`, Stegdarstellung | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Bauabschnitte, Baustelle über Nacht und Sparziel (PR 232), Nachbesserungen (PR 235) |
 | P19 | Ruf schwerer machen mit Wünschen je Bootsart | Ü17, `feeFactor`, `arrivalWeight`, Kapazität sichtbar | `sim.js`, `data/boats/*.js`, `economy.js` | erledigt: Teil 1 (PR 244: B7, C2, C3, C4, C6, F8), Teil 2 (PR 279: C5, B9, "heute voll"), [ruf.md](ruf.md) |
-| P20 | Winter mit Inhalt füllen | Ü19, F14, F15, `docs/ereignisse.md` | `sim.js` (Jahreslauf), neues Feature-Modul, Travellift/Winterlager in `render/services.js` | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, 249, `docs/winter.md`); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing |
+| P20 | Winter mit Inhalt füllen | Ü19, F14, F15, `docs/ereignisse.md` | `sim.js` (Jahreslauf), neues Feature-Modul, Travellift/Winterlager in `render/services.js` | bestehend: "Bauen mit Vorschau und Tiefe ausbauen"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, 249, `docs/winter.md`); Krantage (F15, Teil von H5) im selben PR; erledigt mit P20-Rest: G5 Jahreszeiten, H5 Dauerlieger als Kunden ([winter.md](winter.md)) |
 | P21 | Logbuch und Hafenchronik zeigen | Logbuch (Note 1), F36, `sim:logbookNew` | neues Modul `web/js/ui/logbuch.js`, `state.js` | erledigt (PR 274, docs/logbuch.md, SAVE_VERSION 3; Großschiffe und Fischkutter im Logbuch PR 305) |
 | P22 | Erfolge einbauen | plan.md 9 | neues Feature-Modul | erledigt (PR 295: 30 Erfolge, Reiter im Logbuch, Dinge im Hafen, docs/erfolge.md) |
 

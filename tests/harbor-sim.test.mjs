@@ -184,7 +184,9 @@ test('Anbindung: Modifikatoren aus game.events und game.services', async () => {
   game.events = { modifiers: () => ({ arrivalFactor: 2 }) };
   game.services = { effekte: () => ({ priceFactor: 1.5 }) };
   const m = game.sim.modifiers();
-  assert.equal(m.arrivalFactor, 2);
+  // dazu die Jahreszeit (P20 G5)
+  const jz = sim.seasonEffect(game.state, game.sim.ctx)?.arrivalFactor ?? 1;
+  assert.ok(Math.abs(m.arrivalFactor - 2 * jz) < 1e-9, `${m.arrivalFactor}`);
   assert.equal(m.priceFactor, 1.5);
 });
 

@@ -3,7 +3,7 @@
 import { test, expect, ohneEinstieg } from '../helpers.mjs';
 
 test('Logbuch: Boote mit Bild, Steckbrief, Chronik und Meldung', async ({ game }) => {
-  test.setTimeout(150_000);
+  test.setTimeout(240_000);
   const { page } = game;
   await page.waitForFunction(() => !!window.hafenmeister.sim?.state && !!window.hafenmeister.logbuch, null, { timeout: 30_000, polling: 100 });
   await ohneEinstieg(page);
@@ -24,7 +24,13 @@ test('Logbuch: Boote mit Bild, Steckbrief, Chronik und Meldung', async ({ game }
   expect(stand.gesehen).toBeGreaterThan(0);
   expect(stand.gesamt).toBeGreaterThan(stand.gesehen);
   // Die Meldung "neu im Logbuch" steht oder hat gestanden (Meldungs-Ordnung)
-  await expect.poll(() => page.evaluate(() => document.querySelector('#hm-lb-meldung .hm-lb-meldung') !== null || document.getElementById('btn-logbuch')?.textContent.includes('neu')), { timeout: 15_000 }).toBe(true);
+  // (Unter Last kann die Karte des Tagesabschlusses vorn stehen; dann wartet die Meldung, die Einträge sind ungelesen.)
+  await expect.poll(() => page.evaluate(() => {
+    const g = window.hafenmeister;
+    return document.querySelector('#hm-lb-meldung .hm-lb-meldung') !== null
+      || !!g.meldungen?.stand?.().wartet.includes('logbuch')
+      || (g.sim.state.modules.logbuch?.ungelesen?.length ?? 0) > 0;
+  }), { timeout: 15_000 }).toBe(true);
 
   // Öffnen über das Menü
   await page.evaluate(() => window.hafenmeister.tagesabschluss?.schliesse?.());
@@ -33,11 +39,13 @@ test('Logbuch: Boote mit Bild, Steckbrief, Chronik und Meldung', async ({ game }
   const fenster = page.locator('#hm-logbuch');
   await expect(fenster).toBeVisible();
   await expect(fenster.locator('.hm-lb-stand-text b')).toHaveText(`${stand.gesehen} von ${stand.gesamt}`);
-  // Bilder: gesehene farbig, fehlende als Schattenriss, alle bekommen ein Bild
+  // Bilder: gesehene farbig, fehlende als Schattenriss, alle bekommen ein Bild. Gemalt wird je Frame
+  // ein Stück (logbuch-bild.js); unter Last dauert das: auf das Fertig-Signal warten, nicht auf eine feste Zeit.
+  await page.evaluate(() => window.hafenmeister.logbuch.bilderFertig());
   await expect.poll(() => page.evaluate(() => {
     const img = [...document.querySelectorAll('#hm-logbuch .hm-lb-bild')];
     return img.length > 0 && img.every((i) => i.src.startsWith('data:image/png'));
-  }), { timeout: 20_000 }).toBe(true);
+  }), { timeout: 10_000 }).toBe(true);
   // Steckbrief einer gesehenen Karte
   await fenster.locator('.hm-lb-karte:not(.fehlt)').first().click();
   await expect(fenster.locator('.hm-lb-steckbrief h3')).not.toBeEmpty();

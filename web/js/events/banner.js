@@ -121,7 +121,7 @@ export function initBanner(game) {
     const head = document.createElement('div');
     head.className = 'wp-head';
     const s = fc[0]?.season;
-    head.textContent = s ? (s.winter ? `Winter, Jahr ${s.year}` : `${PART_NAME[s.part]}, Tag ${s.seasonDay} von 30, Jahr ${s.year}`) : '';
+    head.textContent = s ? (s.winter ? `Winter, Jahr ${s.year}` : `${PART_NAME[s.part]}, Tag ${s.seasonDay} von ${game.sim?.ctx?.rules?.seasonDays ?? 16}, Jahr ${s.year}`) : '';
     panel.append(head);
     fc.forEach((e, i) => {
       const row = document.createElement('div');
@@ -196,10 +196,26 @@ export function initBanner(game) {
     show(EVENT_ICON[event.id] ?? 'wolke', event.teaser ?? `${dayLabel(startDay - day)}: ${event.title}`, event.text);
     chip.classList.remove('pulse'); void chip.offsetWidth; chip.classList.add('pulse');
   });
+  // Krantag (P20 H5): am ersten und letzten Saisontag kranen die Dauerlieger (services/rules.js)
+  game.on('services:abrechnung', (r) => {
+    const k = r?.krantag;
+    if (!k?.boote) return;
+    const eins = k.boote === 1;
+    const wer = eins ? 'Ein Dauerlieger' : `${k.boote} Dauerlieger`;
+    const was = k.art === 'fruehling' ? (eins ? 'ist wieder im Wasser' : 'sind wieder im Wasser') : (eins ? 'geht an Land' : 'gehen an Land');
+    show('muenze', 'Krantag', `${wer} ${was}: ${Math.round(k.betrag).toLocaleString('de-DE')} € für Kran und Werft.`, 6);
+  });
   game.on('event:start', ({ event }) => {
     show(EVENT_ICON[event.id] ?? 'wolke', `Heute: ${event.title}`, event.text, 5);
   });
+  let teilVorher = null;
   game.on('season', (s) => {
+    // Jahreszeiten spürbar (P20 G5): Wechsel in Sommer und Herbst kurz ansagen (nicht beim Laden)
+    const neu = teilVorher != null && teilVorher !== s.part;
+    teilVorher = s.part;
+    if (!neu && (s.part === 'sommer' || s.part === 'herbst')) return;
+    if (s.part === 'sommer') { show('sonne', 'Hochsaison', 'Sommer: Es kommen mehr Boote, viele kleine. Die Stege werden voll.', 6); return; }
+    if (s.part === 'herbst') { show('wolke', 'Herbst', 'Mehr Wind, weniger Boote. Jetzt kommen die letzten Fahrtensegler.', 6); return; }
     // Winterpause und Frühlingsgruß zeigt features/winter.js als eigene Karte
     if (game.winter) return;
     if (s.part === 'winter') show('schnee', 'Winter', 'Die Boote gehen ins Winterlager. Keine Gäste, Zeit zum Bauen und Planen.', 6);

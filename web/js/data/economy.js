@@ -20,6 +20,16 @@ export const ECONOMY = {
     winterTage: 2,          // keine Gäste
     // Saisontage je Jahreszeit [von, bis]
     jahreszeiten: { fruehling: [1, 4], sommer: [5, 12], herbst: [13, 16] },
+    // Jahreszeiten spürbar (P20, G5): Ankünfte und Bootsmischung je Jahreszeit, wie Modifikatoren
+    // (arrivalFactor mal, sizeFactor/kindFactor je Größe oder Bootsart mal). Im Mittel über die Saison
+    // etwa 1, damit der Aufstieg gleich lang bleibt. wind: Zuschlag auf das Alltagswetter (0 bis 1).
+    // Frühling ruhig (wenige Boote, kaum Jollen), Sommer Hochsaison (volle Stege, viele kleine Boote),
+    // Herbst Wind und die letzten Fahrtensegler (mehr Segelyachten, weniger Jollen und kleine Boote).
+    jahreszeitWirkung: {
+      fruehling: { arrivalFactor: 0.8, kindFactor: { jolle: 0.6 }, wind: 0.15 },
+      sommer:    { arrivalFactor: 1.2, sizeFactor: { S: 1.25 }, wind: 0 },
+      herbst:    { arrivalFactor: 0.9, sizeFactor: { S: 0.8 }, kindFactor: { segelyacht: 1.5, jolle: 0.5 }, wind: 0.3 },
+    },
     erstesBootNach: 3,      // Sekunden: am ersten Tag eines neuen Spiels kommt gleich ein Boot
     // Tagesrhythmus wie im echten Hafen, als Anteile des Tages (0 = Morgen, 1 = Abend):
     // vormittags legen die Gäste ab, neue kommen den ganzen Tag, die meisten am Nachmittag.
@@ -643,7 +653,9 @@ export const ECONOMY = {
     mastenkran: { abStufe: 3, stufen: [   // Mastenkran
       // Mastenkran
       // P23: Segler lassen den Mast legen und bleiben dafür eine Nacht länger (dienst)
-      { kosten: 1800, wirkung: { dienst: { anteil: 0.3, nur: { antrieb: 'segel', klasse: ['M', 'L'] }, naechte: 1, preis: 45 }, gaeste: { M: 1.2 } } },
+      { kosten: 1800, wirkung: { dienst: { anteil: 0.3, nur: { antrieb: 'segel', klasse: ['M', 'L'] }, naechte: 1, preis: 45 }, gaeste: { M: 1.2 },
+        // P20 H5: an den Krantagen (erster und letzter Saisontag) stellt bzw. legt jeder segelnde Dauerlieger den Mast
+        dauerlieger: { krantage: true, preis: 45, nur: { antrieb: 'segel' } } } },
     ] },
     ausruester: { abStufe: 3, stufen: [   // Bootsausrüster
       // Bootsausrüster
@@ -654,24 +666,31 @@ export const ECONOMY = {
     travellift: { abStufe: 4, stufen: [   // Travellift und Werft
       // Bootsschuppen mit Werkstatt
       // P23: Boote mit Schaden kommen zur Reparatur und bleiben, bis sie fertig sind (dienst)
-      { kosten: 5600, braucht: [{ id: 'mastenkran', stufe: 1 }], wirkung: { dienst: { anteil: 0.12, nur: { klasse: ['M', 'L', 'XL'] }, naechte: 1, preis: 220 }, winter: { proTag: 400 }, proTag: 40 } },
+      { kosten: 5600, braucht: [{ id: 'mastenkran', stufe: 1 }], wirkung: { dienst: { anteil: 0.12, nur: { klasse: ['M', 'L', 'XL'] }, naechte: 1, preis: 220 }, winter: { proTag: 400 }, proTag: 40,
+        // P20 H5: Dauerlieger lassen ihr Boot hier aus dem Wasser holen (letzter Saisontag) und einsetzen (erster)
+        dauerlieger: { krantage: true, preis: 60 } } },
       // Travellift
-      { kosten: 6300, wirkung: { dienst: { anteil: 0.15, nur: { klasse: ['M', 'L', 'XL'] }, naechte: 1, preis: 300 }, gaeste: { L: 1.1 }, winter: { proTag: 600 } } },
+      { kosten: 6300, wirkung: { dienst: { anteil: 0.15, nur: { klasse: ['M', 'L', 'XL'] }, naechte: 1, preis: 300 }, gaeste: { L: 1.1 }, winter: { proTag: 600 }, dauerlieger: { krantage: true, preis: 60 } } },
       // Werfthalle mit Slipwagen
       // Werfthalle oder Winterlagerhalle (Entweder-oder, data/services.js WAHLPLAETZE)
-      { kosten: 11500, ruf: 3.8, wirkung: { dienst: { anteil: 0.2, nur: { klasse: ['M', 'L', 'XL'] }, naechte: 2, preis: 450 }, gaeste: { L: 1.12 }, ruf: 0.08, winter: { proTag: 1100 } } },
+      { kosten: 11500, ruf: 3.8, wirkung: { dienst: { anteil: 0.2, nur: { klasse: ['M', 'L', 'XL'] }, naechte: 2, preis: 450 }, gaeste: { L: 1.12 }, ruf: 0.08, winter: { proTag: 1100 }, dauerlieger: { krantage: true, preis: 70 } } },
     ] },
     winterlager: { abStufe: 4, stufen: [   // Winterlager
       // Freilager mit Böcken
-      { kosten: 4500, braucht: [{ id: 'travellift', stufe: 2 }], wirkung: { winter: { proTag: 900 } } },
+      { kosten: 4500, braucht: [{ id: 'travellift', stufe: 2 }], wirkung: { winter: { proTag: 900 },
+        // P20 H5: je Dauerlieger im eigenen Winterlager und Wintertag
+        dauerlieger: { winter: 50 } } },
       // Winterlagerhalle
-      { kosten: 12000, abStufe: 5, wirkung: { winter: { proTag: 2200 }, ruf: 0.06, gaeste: { L: 1.05 } } },
+      { kosten: 12000, abStufe: 5, wirkung: { winter: { proTag: 2200 }, ruf: 0.06, gaeste: { L: 1.05 }, dauerlieger: { winter: 80 } } },
     ] },
     segelmacher: { abStufe: 4, stufen: [   // Segelmacher
       // Segelmacherei
-      { kosten: 3400, braucht: [{ id: 'segelclub', stufe: 1 }], wirkung: { kunden: { anteil: 0.07, preis: 90, nur: { antrieb: 'segel' } }, hafengeld: { segel: 1.15 }, synergie: [{ id: 'mastenkran', faktor: 1.2 }] } },
+      { kosten: 3400, braucht: [{ id: 'segelclub', stufe: 1 }], wirkung: { kunden: { anteil: 0.07, preis: 90, nur: { antrieb: 'segel' } }, hafengeld: { segel: 1.15 }, synergie: [{ id: 'mastenkran', faktor: 1.2 }],
+        // P20 H5: segelnde Dauerlieger bringen regelmäßig Segel (Anteil je Tag und Dauerlieger im Hafen)
+        dauerlieger: { anteil: 0.1, preis: 90, nur: { antrieb: 'segel' } } } },
       // Segelloft
-      { kosten: 5000, abStufe: 5, wirkung: { kunden: { anteil: 0.1, preis: 120, nur: { antrieb: 'segel' } }, hafengeld: { segel: 1.2 }, synergie: [{ id: 'mastenkran', faktor: 1.2 }, { id: 'segelclub', faktor: 1.1 }], ruf: 0.05 } },
+      { kosten: 5000, abStufe: 5, wirkung: { kunden: { anteil: 0.1, preis: 120, nur: { antrieb: 'segel' } }, hafengeld: { segel: 1.2 }, synergie: [{ id: 'mastenkran', faktor: 1.2 }, { id: 'segelclub', faktor: 1.1 }], ruf: 0.05,
+        dauerlieger: { anteil: 0.12, preis: 120, nur: { antrieb: 'segel' } } } },
     ] },
     seenotretter: { abStufe: 4, stufen: [   // Seenotretter-Station
       // Seenotrettungsboot
