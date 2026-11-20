@@ -1457,7 +1457,7 @@ function stil() {
     .bau-automatik .bau-schalter[aria-pressed="false"] { background: #eee6d2; color: #5b6670; }
     .bau-reiter { display: flex; gap: 2px; background: rgba(29, 50, 69, 0.07); border-radius: 12px; padding: 4px; }
     .bau-tab { flex: 1 1 auto; min-width: 0; white-space: nowrap; border: 0; border-radius: 9px; background: none; font: inherit; font-size: 0.8rem; font-weight: 600; color: #1d3245;
-      min-height: 38px; padding: 4px 6px; display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
+      min-height: 40px; padding: 4px 6px; display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
     .bau-tab[aria-selected="true"] { background: #fff; box-shadow: 0 1px 4px rgba(20, 40, 60, 0.15); }
     .bau-zahl { min-width: 16px; height: 16px; border-radius: 8px; background: #2a9d8f; color: #fff; font-size: 0.7rem; display: inline-grid; place-items: center; padding: 0 4px; }
     .bau-liste { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; max-height: min(46vh, 420px); padding: 8px 2px 0 0; }
@@ -1502,7 +1502,7 @@ function stil() {
     .bau-schild.empfohlen { outline: 3px solid #f2c14e; }
     .bau-schild.rand::after { display: none; }
     .bau-rueck { justify-self: center; margin-top: 6px; border: 0; background: none; color: #1d3245; font: inherit; font-size: 0.85rem;
-      text-decoration: underline; cursor: pointer; min-height: 32px; }
+      text-decoration: underline; cursor: pointer; min-height: 40px; padding: 0 12px; }   /* 10 s zum Treffen: Fingergröße (Zusammenspiel 2) */
     .bau-spar { border: 2px dashed #b8862a; background: #fff8e6; color: #6b4e12; border-radius: 10px; font: inherit; font-size: 0.85rem;
       font-weight: 700; min-height: 38px; padding: 6px 10px; cursor: pointer; }
     .bau-spar.an { border-style: solid; background: #f2c14e; color: #1d3245; }
@@ -1520,7 +1520,8 @@ function stil() {
     .bau-schild.punkt { width: 22px; height: 22px; padding: 0 !important; border-radius: 50%; place-items: center; }
     .bau-schild.punkt > span { display: none; }
     .bau-schild.punkt::before { content: '+'; font-weight: 800; font-size: 15px; line-height: 1; color: #2a7d63; }
-    .bau-schild.punkt::after { display: none; }
+    /* Punkt sieht 22 px groß aus, nimmt den Finger aber auf 40 px an (Zusammenspiel 2) */
+    .bau-schild.punkt::after { display: block; content: ''; left: -9px; top: -9px; right: -9px; bottom: -9px; margin: 0; border: 0; }
     .bau-schild.unten::after { bottom: auto; top: -5px; border-top: 0; border-bottom: 5px solid rgba(255, 252, 246, 0.95); }
     .bau-schild.rand::before { content: attr(data-pfeil); position: absolute; left: -6px; top: -8px; width: 20px; height: 20px;
       border-radius: 50%; background: #1d3245; color: #fff; font-size: 12px; line-height: 20px; text-align: center; }
@@ -1555,8 +1556,8 @@ function stil() {
     @media (max-height: 499px) {
       #card.bau-karte .bau-rat, .bau-zahl { display: none; }
       .bau-liste { max-height: calc(100dvh - 150px); }
-      .bau-tab { min-height: 32px; }
-      .bau-zeile { padding: 6px 10px; }
+      .bau-tab { min-height: 36px; }
+      .bau-zeile { padding: 8px 10px; }
       #card.bau-karte .card-actions .hud-btn { min-height: 38px; }
     }
   `;

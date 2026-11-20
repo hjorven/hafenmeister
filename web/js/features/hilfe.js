@@ -29,8 +29,8 @@ export const KARTEN = [
   {
     bild: 'tempo2', titel: 'Zeit',
     text: TOUCH
-      ? 'Unten links: Pause, 1x, 3x und 8x. Kommt ein Boot an die Boje, schaltet 8x von selbst zurück.'
-      : 'Unten links: Pause, 1x, 3x und 8x. Taste F schaltet 3x ein und aus. Kommt ein Boot an die Boje, schaltet 8x von selbst zurück.',
+      ? 'Unten links: Pause, 1x, 3x und 8x. Das Tempo bleibt, bis du selbst ein anderes wählst; nur Bauen und Spielstand halten die Zeit kurz an.'
+      : 'Unten links: Pause, 1x, 3x und 8x. Taste F schaltet 3x ein und aus, G 8x, die Leertaste pausiert. Das Tempo bleibt, bis du selbst ein anderes wählst; nur Bauen und Spielstand halten die Zeit kurz an.',
   },
   {
     bild: 'bauen', titel: 'Bauen',
@@ -38,7 +38,7 @@ export const KARTEN = [
   },
   {
     bild: 'ziele', titel: 'Tagesziele und Ausbau',
-    text: 'Links stehen drei kleine Ziele für den Tag, die etwas Geld bringen, und das Ziel der Ausbaustufe. Ist es geschafft, kann der Hafen wachsen.',
+    text: 'Links liegen jeden Morgen drei Tagesziele zur Wahl, leicht, mittel und schwer. Eins nimmst du; geschafft bringt es Geld, einen Bau-Gutschein, Deko oder besseren Ruf. Darunter steht das Ziel der Ausbaustufe: Ist es geschafft, kann der Hafen wachsen.',
   },
 ];
 

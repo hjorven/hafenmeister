@@ -335,9 +335,27 @@ export function init(game) {
   const ankuenfteHeute = [];
   let tagesgaesteSchnitt = 0;
 
+  // Dauerlieger mit Vertrag (P20 H5): im Hafen, auf Törn oder im Winterlager (features/dauerlieger.js)
+  function dauerliegerListe() {
+    const st = game.sim?.state;
+    const plaetze = st?.modules?.dauer?.plaetze;
+    if (!plaetze) return [];
+    const typ = game.sim?.ctx?.typeById ?? {};
+    const out = [];
+    for (const p of Object.values(plaetze)) {
+      const b = p.boot || st.boats?.[p.bootId];
+      if (!b) continue;
+      out.push({ klasse: b.size, antrieb: b.motor ? 'motor' : typ[b.typeId]?.sail ? 'segel' : 'ruder',
+        imHafen: !p.boot, winterlager: !!p.winterlager, kuendigung: p.kuendigung ?? null });
+    }
+    return out;
+  }
+
   function abrechnen(tagDaten) {
     const tag = tagDaten?.tag ?? game.state?.tag ?? 1;
-    const daten = { tag, winter, wetter: wetterVon(tag), ...tagDaten };
+    const jahr = game.events?.season?.(tag);
+    const daten = { tag, winter, wetter: wetterVon(tag), saisonTag: jahr?.seasonDay ?? null,
+      saisonTage: game.sim?.ctx?.rules?.seasonDays ?? null, dauerlieger: dauerliegerListe(), ...tagDaten };
     const r = R.tagesabschluss(zustand(), daten);
     // Bezahlte Dienste an den Booten der Spielregeln vermerken (zahlen nur einmal)
     for (const d of r.dienstBezahlt ?? []) {

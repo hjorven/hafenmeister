@@ -17,7 +17,7 @@
 //   game.emit('season', { year, seasonDay, winterDay, part, winter })  wenn die Jahreszeit wechselt
 // Abfrage:
 //   game.events.modifiers()  Wirkung heute für die Spielregeln
-//   game.events.season(day)  Jahreslauf: 30 Tage Saison, 3 Tage Winter
+//   game.events.season(day)  Jahreslauf: Saison und Winter (ECONOMY.zeit, 16 und 2 Tage)
 //   game.events.forecast(n), game.events.weather(day), game.events.current, game.events.planned
 //   game.events.gross (angekündigtes großes Ereignis), game.events.nachspiel (heute), game.events.bauStufe(id)
 //   game.events.save(), game.events.load(daten)

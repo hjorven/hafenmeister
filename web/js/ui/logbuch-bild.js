@@ -2,7 +2,7 @@
 // gerendert (game.boatTypes.<größe>.buildBoat), schräg von der Seite, Bug nach rechts. Fehlende Modelle
 // zeigen denselben Umriss als Schattenriss. Ohne WebGL gibt es den Umriss von oben aus ui/vorschau.js.
 //
-// bildMaler(game) -> { bild(modell, { schatten }) -> Promise<{ src, w, h }>, leeren() }
+// bildMaler(game) -> { bild(modell, { schatten }) -> Promise<{ src, w, h }>, schonDa, wennFertig() -> Promise, leeren() }
 // Gerendert wird in einen kleinen Zwischenspeicher (W x H Pixel, ohne Kantenglättung), danach bekommt das
 // Bild einen Tintenrand wie die Pixel-Symbole. Je Bild ein paar Millisekunden, verteilt auf mehrere Bilder.
 
@@ -19,6 +19,7 @@ export function bildMaler(game) {
   const cache = new Map();             // `${id}|hell` / `${id}|schatten` -> { src, w, h }
   const roh = new Map();               // id -> ImageData (Farbe mit Alpha, vor dem Rand)
   const warteschlange = [];
+  const wartende = [];                 // wennFertig(): Auflöser, sobald die Warteschlange leer ist
   let laeuft = false;
   let szene = null, kamera = null, ziel = null, puffer = null, leinwand = null;
 
@@ -203,7 +204,7 @@ export function bildMaler(game) {
       fertigDann(b);
     }
     if (warteschlange.length) requestAnimationFrame(arbeite);
-    else laeuft = false;
+    else { laeuft = false; for (const f of wartende.splice(0)) f(); }
   }
 
   /** Bild eines Modells (aus logbuch-daten katalog()). Gibt ein Promise auf { src, w, h }. */
@@ -221,5 +222,11 @@ export function bildMaler(game) {
     return cache.get(`${mo.id}|${schatten ? 's' : 'h'}`) ?? null;
   }
 
-  return { bild, schonDa, leeren: () => { cache.clear(); roh.clear(); } };
+  /** Promise, das sich erfüllt, sobald alle bestellten Bilder gemalt sind (sofort, wenn nichts offen ist). */
+  function wennFertig() {
+    if (!laeuft && !warteschlange.length) return Promise.resolve();
+    return new Promise((f) => wartende.push(f));
+  }
+
+  return { bild, schonDa, wennFertig, leeren: () => { cache.clear(); roh.clear(); } };
 }

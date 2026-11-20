@@ -21,6 +21,11 @@
 
 /* Ruf oben links ist antippbar */
 .hm-neu #rep.hm-gb-auf { cursor: pointer; }
+/* Am Touchgerät ist der Ruf nur etwa 25 px hoch; die Trefferfläche reicht über das ganze Statusschild (Zusammenspiel 2) */
+@media (pointer: coarse) {
+  .hm-neu #rep.hm-gb-auf { position: relative; }
+  .hm-neu #rep.hm-gb-auf::after { content: ''; position: absolute; inset: -10px -6px; }
+}
 .hm-neu #rep.hm-gb-auf:hover { background: var(--hm-mulde); }
 .hm-neu #rep.hm-gb-auf:focus-visible { outline: 3px dashed var(--hm-gold); outline-offset: 2px; }
 

@@ -80,7 +80,8 @@ test('Kein Fließband: Abstände unregelmäßig, keine lange Lücke bei vollem T
       const s = createState({ seed });
       s.stage = stufe;
       s.ratings = Array(RULES.reputation.window).fill(5);
-      s.day = 2;
+      // voller Tag: Hochsaison (P20 G5), im Frühling kommen weniger Boote mit längeren Abständen
+      s.day = RULES.seasonParts?.find((p) => p.id === 'sommer')?.from ?? 2;
       sim.tick(s, ctx, 0);
       const t = s.upcoming.map((b) => b.arriveAt);
       if (t.length < 12) continue;
