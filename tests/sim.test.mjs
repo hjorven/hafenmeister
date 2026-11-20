@@ -353,8 +353,10 @@ test('Modifikatoren werden kombiniert, fehlerhafte Quellen ignoriert', () => {
   console.error = () => {};
   const m = sim.modifiers(createState({ seed: 1 }), c);
   console.error = orig;
-  assert.equal(m.arrivalFactor, 3);
-  assert.equal(m.sizeFactor.L, 6);
+  // dazu die Jahreszeit (P20 G5), Tag 1 ist Frühling
+  const jz = sim.seasonEffect(createState({ seed: 1 }), c) ?? {};
+  assert.ok(Math.abs(m.arrivalFactor - 3 * (jz.arrivalFactor ?? 1)) < 1e-9, `${m.arrivalFactor}`);
+  assert.equal(m.sizeFactor.L, 6 * (jz.sizeFactor?.L ?? 1));
   assert.equal(m.ratingBonus, 0.75);
   assert.equal(m.unlock.kreuzfahrt, true);
   assert.equal(m.priceFactor, 1);

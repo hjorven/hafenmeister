@@ -219,6 +219,10 @@ export function zeitenEntzerren({ state, ctx, list }) {
   const tag = ctx.rules.dayLength || 1;
   const abs = (b) => abschnitt(b.arriveAt / tag, grenzen);
   const erster = state.day === 1 && ctx.rules.firstArrivalAt != null ? list[0] : null;
+  // Kurzhalter nicht hinter die Zeit legen, ab der sie nicht mehr einfahren (wie lateShortStays in sim.js)
+  const sh = ctx.rules.shortStay;
+  const spaet = sh ? tag * (sh.latest ?? 0.97) - (sh.stay?.[0] ?? 0.1) * tag : Infinity;
+  const kurz = (b) => !!b && !b.stationed && b.nights === 0;
   let getauscht = 0;
   for (let runde = 0; runde < 3; runde++) {
     let geaendert = false;
@@ -233,6 +237,7 @@ export function zeitenEntzerren({ state, ctx, list }) {
       for (let j = 0; j < list.length; j++) {
         const x = list[j];
         if (j === i || x === erster || x.story?.id === b.story.id) continue;
+        if ((kurz(b) && x.arriveAt > spaet) || (kurz(x) && b.arriveAt > spaet)) continue;
         const ax = abs(x);
         if (ax === a) continue;
         if (list.some((y) => y !== b && y.story?.id === b.story.id && abs(y) === ax)) continue;

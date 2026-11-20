@@ -113,16 +113,16 @@ Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab 
 | Segelclub | 1 | Segelclub | 3 | 2.200 € | - | proTag 20; ruf 0,08; gaeste {S:1.2}; freischalten [regatta] |
 |  | 2 | Segelschule | 4 | 6.500 € | - | proTag 120; wetter {regen:0.6, sturm:0}; ruf 0,12; gaeste {S:1.3, M:1.05}; freischalten [regatta] |
 |  | 3 | Regattaverein | 4 | 6.800 € | 3,8 | proTag 150; wetter {regen:0.6, sturm:0}; ruf 0,16; gaeste {S:1.15, M:1.1, L:1.05}; freischalten [regatta]; regatta 1,3 |
-| Mastenkran | 1 | Mastenkran | 3 | 1.800 € | - | dienst {anteil:0.3, nur:{antrieb:segel, klasse:[M, L]}, naechte:1, preis:45}; gaeste {M:1.2} |
+| Mastenkran | 1 | Mastenkran | 3 | 1.800 € | - | dienst {anteil:0.3, nur:{antrieb:segel, klasse:[M, L]}, naechte:1, preis:45}; gaeste {M:1.2}; dauerlieger {krantage:true, preis:45, nur:{antrieb:segel}} |
 | Bootsausrüster | 1 | Bootsausrüster | 3 | 2.000 € | - | kunden {anteil:0.25, preis:8} |
 |  | 2 | Yachtausrüster mit Motorenwerkstatt | 4 | 4.000 € | - | kunden {anteil:0.25, preis:24}; synergie [{id:travellift, faktor:1.15}]; ruf 0,04 |
-| Travellift und Werft | 1 | Bootsschuppen mit Werkstatt | 4 | 5.600 € | - | dienst {anteil:0.12, nur:{klasse:[M, L, XL]}, naechte:1, preis:220}; winter {proTag:400}; proTag 40 |
-|  | 2 | Travellift | 4 | 6.300 € | - | dienst {anteil:0.15, nur:{klasse:[M, L, XL]}, naechte:1, preis:300}; gaeste {L:1.1}; winter {proTag:600} |
-|  | 3 | Werfthalle mit Slipwagen | 4 | 11.500 € | 3,8 | dienst {anteil:0.2, nur:{klasse:[M, L, XL]}, naechte:2, preis:450}; gaeste {L:1.12}; ruf 0,08; winter {proTag:1100} |
-| Winterlager | 1 | Freilager mit Böcken | 4 | 4.500 € | - | winter {proTag:900} |
-|  | 2 | Winterlagerhalle | 5 | 12.000 € | - | winter {proTag:2200}; ruf 0,06; gaeste {L:1.05} |
-| Segelmacher | 1 | Segelmacherei | 4 | 3.400 € | - | kunden {anteil:0.07, preis:90, nur:{antrieb:segel}}; hafengeld {segel:1.15}; synergie [{id:mastenkran, faktor:1.2}] |
-|  | 2 | Segelloft | 5 | 5.000 € | - | kunden {anteil:0.1, preis:120, nur:{antrieb:segel}}; hafengeld {segel:1.2}; synergie [{id:mastenkran, faktor:1.2}, {id:segelclub, faktor:1.1}]; ruf 0,05 |
+| Travellift und Werft | 1 | Bootsschuppen mit Werkstatt | 4 | 5.600 € | - | dienst {anteil:0.12, nur:{klasse:[M, L, XL]}, naechte:1, preis:220}; winter {proTag:400}; proTag 40; dauerlieger {krantage:true, preis:60} |
+|  | 2 | Travellift | 4 | 6.300 € | - | dienst {anteil:0.15, nur:{klasse:[M, L, XL]}, naechte:1, preis:300}; gaeste {L:1.1}; winter {proTag:600}; dauerlieger {krantage:true, preis:60} |
+|  | 3 | Werfthalle mit Slipwagen | 4 | 11.500 € | 3,8 | dienst {anteil:0.2, nur:{klasse:[M, L, XL]}, naechte:2, preis:450}; gaeste {L:1.12}; ruf 0,08; winter {proTag:1100}; dauerlieger {krantage:true, preis:70} |
+| Winterlager | 1 | Freilager mit Böcken | 4 | 4.500 € | - | winter {proTag:900}; dauerlieger {winter:50} |
+|  | 2 | Winterlagerhalle | 5 | 12.000 € | - | winter {proTag:2200}; ruf 0,06; gaeste {L:1.05}; dauerlieger {winter:80} |
+| Segelmacher | 1 | Segelmacherei | 4 | 3.400 € | - | kunden {anteil:0.07, preis:90, nur:{antrieb:segel}}; hafengeld {segel:1.15}; synergie [{id:mastenkran, faktor:1.2}]; dauerlieger {anteil:0.1, preis:90, nur:{antrieb:segel}} |
+|  | 2 | Segelloft | 5 | 5.000 € | - | kunden {anteil:0.1, preis:120, nur:{antrieb:segel}}; hafengeld {segel:1.2}; synergie [{id:mastenkran, faktor:1.2}, {id:segelclub, faktor:1.1}]; ruf 0,05; dauerlieger {anteil:0.12, preis:120, nur:{antrieb:segel}} |
 | Seenotretter-Station | 1 | Seenotrettungsboot | 4 | 3.600 € | - | sturmschutz 0,5; ruf 0,15 |
 |  | 2 | Seenotrettungskreuzer | 6 | 9.000 € | - | sturmschutz 0,8; ruf 0,25; freischalten [seenotkreuzer]; Besuch alle 15 Tage, 900 € |
 | Fahrgastanleger | 1 | Fahrgastanleger | 5 | 9.400 € | - | freischalten [fahrgastschiff]; wetter {regen:0.6, sturm:0}; proTag 150; Besuch alle 1 Tage, 160 € |
