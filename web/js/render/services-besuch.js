@@ -86,27 +86,61 @@ const MODELL = { ausflugsschiff, kreuzfahrtschiff, korvette, minenjagdboot: () =
 
 const DAUER = 0.12;     // Anteil des Tages fuer eine Fahrt vom Liegeplatz nach See (ohne eigene 'fahrt')
 
-function wegLaenge(pts) {
-  let s = 0;
-  for (let i = 1; i < pts.length; i++) s += pts[i].distanceTo(pts[i - 1]);
-  return s;
+// Weit draussen (ausserhalb des Spielbereichs, wo man das Schiff hoechstens ganz herausgezoomt am Rand
+// sieht) faehrt ein Besuchsschiff viermal so schnell: Der Weg nach See reicht bis hinter den Aussenring
+// (boat-view.js grosserSeeweg), das Stueck im Bild soll aber so lange dauern wie vorher.
+let spielR = null;
+const WEIT = 60;
+function faktoren(pts) {
+  if (pts._f) return pts._f;
+  const f = [];
+  for (let i = 1; i < pts.length; i++) {
+    const x = (pts[i].x + pts[i - 1].x) / 2, z = (pts[i].z + pts[i - 1].z) / 2;
+    const weit = spielR && (x < spielR.minX - WEIT || x > spielR.maxX + WEIT || z < spielR.minZ - WEIT || z > spielR.maxZ + WEIT);
+    f.push(weit ? 0.25 : 1);
+  }
+  pts._f = f;
+  return f;
 }
 
-// Punkt und Fahrtrichtung bei Anteil t (0 = Liegeplatz, 1 = See)
+// Punkt und Fahrtrichtung bei Anteil t (0 = Liegeplatz, 1 = See); m = Meter entlang des Wegs
 function aufWeg(pts, t) {
-  const ziel = t * wegLaenge(pts);
+  const f = faktoren(pts);
+  let ges = 0;
+  // Wenden auf der Stelle dauert so lange wie eine Fahrt ueber 60 m
+  const dz = (i) => (pts._wende === i - 1 ? 60 : pts[i].distanceTo(pts[i - 1]) * f[i - 1]);
+  for (let i = 1; i < pts.length; i++) ges += dz(i);
+  const ziel = t * ges;
+  let s = 0, m = 0;
+  for (let i = 1; i < pts.length; i++) {
+    const d = pts[i].distanceTo(pts[i - 1]), z = dz(i);
+    if (s + z >= ziel || i === pts.length - 1) {
+      const k = z > 0 ? Math.max(0, Math.min(1, (ziel - s) / z)) : 0;
+      const p = pts[i - 1].clone().lerp(pts[i], k);
+      const r = pts[i].clone().sub(pts[i - 1]);
+      return { p, kurs: Math.atan2(-r.z, r.x), segment: i - 1, m: m + k * d, wende: pts._wende === i - 1 ? k : null };
+    }
+    s += z; m += d;
+  }
+  return { p: pts[0].clone(), kurs: 0, segment: 0, m: 0, wende: null };
+}
+
+// Punkt m Meter entlang des Wegs (an den Enden festgehalten)
+function punktBei(pts, m) {
   let s = 0;
   for (let i = 1; i < pts.length; i++) {
     const d = pts[i].distanceTo(pts[i - 1]);
-    if (s + d >= ziel || i === pts.length - 1) {
-      const k = d > 0 ? Math.min(1, (ziel - s) / d) : 0;
-      const p = pts[i - 1].clone().lerp(pts[i], k);
-      const r = pts[i].clone().sub(pts[i - 1]);
-      return { p, kurs: Math.atan2(-r.z, r.x), segment: i - 1 };
-    }
+    if (s + d >= m) return pts[i - 1].clone().lerp(pts[i], d > 0 ? Math.max(0, (m - s) / d) : 0);
     s += d;
   }
-  return { p: pts[0].clone(), kurs: 0, segment: 0 };
+  return pts[pts.length - 1].clone();
+}
+
+// Kurs eines Schiffs der Laenge l bei m Metern: Bug und Heck liegen auf dem Weg (die Sehne), so
+// schwenkt der Rumpf in einer Kurve nicht ueber den Weg hinaus wie bei einem nachlaufenden Kurs
+function sehne(pts, m, l) {
+  const a = punktBei(pts, m - l / 2), b = punktBei(pts, m + l / 2);
+  return Math.atan2(-(b.z - a.z), b.x - a.x);
 }
 
 const glatt = (x) => x * x * (3 - 2 * x);
@@ -186,6 +220,7 @@ export function initBesuche(game, services) {
   // Kartenrand, Ausgang nahe dem alten Seepunkt. So passt der Weg zu jeder Gelaendeform.
   // nachSee: so viele Wegstuecke gehoeren zum festen Teil (dort faehrt 'rueckwaerts' achteraus).
   function wege(d, laenge, breite) {
+    try { spielR = game.gelaende?.spielRect?.() ?? null; } catch { spielR = null; }
     const platz = liegePunkt(d);
     const fest = [platz, ...d.weg.slice(1)].map(([x, y]) => W(x, y));
     let weg = fest, nachSee = fest.length - 1;
@@ -196,8 +231,7 @@ export function initBesuche(game, services) {
       const tief = Math.min(3, 1 + breite * 0.2);
       const r = breite / 2 + 1;
       // Vom letzten Hafenpunkt Richtung See, bis das Schiff frei liegt (eigenes Rechteck, Pier)
-      let von = kern[kern.length - 1].clone();
-      const schritt = see.clone().sub(von);
+      const schritt = see.clone().sub(kern[kern.length - 1]);
       const n = Math.max(1, Math.ceil(schritt.length() / 5));
       // Nur innerhalb der Fahrwasserkarte: ausserhalb gilt alles als frei, auch Land (Haertetest 15.11.:
       // das Kreuzfahrtschiff sprang im Bodden quer ueber das Ufer bis hinter den Kartenrand)
@@ -206,22 +240,38 @@ export function initBesuche(game, services) {
       // ... und nur so weit, dass der Bug (halbe Laenge voraus) noch im tiefen Wasser liegt
       const u = schritt.clone().normalize();
       const bugTief = (p) => (game.landscape?.tiefeBei?.(p.x + u.x * laenge / 2, p.z + u.z * laenge / 2) ?? 99) >= tief;
-      let frei = fw.befahrbar(von.x, von.z, r, tief);
-      for (let i = 1; i <= n && !frei; i++) {
-        const v = kern[kern.length - 1].clone().addScaledVector(schritt, i / n);
-        if (!drin(v) || !bugTief(v)) break;
-        von = v;
-        frei = fw.befahrbar(von.x, von.z, r, tief);
+      // Wer achteraus ablegt, faehrt erst ein Stueck gerade aus seinem Platz, bevor der Weg nach See
+      // abbiegen darf: sonst glitt das Kreuzfahrtschiff seitlich ueber die Pier (Kueste 9). Wie weit,
+      // entscheidet der Rumpf: die erste Strecke (halbe Laenge plus Breite, ein Drittel, ein Sechstel),
+      // bei der er auf dem ganzen Weg kein Land beruehrt (Kueste 12: eine Insel kurz vor der Pier).
+      const start = kern[kern.length - 1];
+      const strecken = d.raus === 'rueckwaerts' && kern.length === 1 ? [laenge / 2 + breite, laenge / 3, laenge / 6] : [0];
+      let best = null;
+      for (const minWeg of strecken) {
+        let von = start.clone();
+        let frei = fw.befahrbar(von.x, von.z, r, tief);
+        for (let i = 1; i <= n && (!frei || von.distanceTo(start) < minWeg); i++) {
+          const v = start.clone().addScaledVector(schritt, i / n);
+          if (!drin(v) || !bugTief(v)) break;
+          von = v;
+          frei = fw.befahrbar(von.x, von.z, r, tief);
+        }
+        // Nichts frei auf der Linie (das eigene Schiff liegt als Hindernis darauf): Weg ab dem letzten
+        // Punkt der Linie suchen, die Fahrwasserkarte nimmt dann die naechste freie Stelle
+        const draussen = fw.seeWeg({ x: von.x, z: von.z }, {
+          breiteM: breite, laengeM: laenge, tiefgangM: tief, groesse: laenge > 60 ? 'XXL' : laenge > 24 ? 'XL' : 'L',
+          nahBei: { x: see.x, z: see.z } });
+        if (!draussen?.length) continue;
+        const vor = von.distanceTo(start) > 0.5 ? [...kern, von] : kern;
+        const w = [...vor, ...draussen.map((p) => new THREE.Vector3(p.x, 0, p.z))];
+        const an = strecken.length > 1 && fw.rumpfAnLand ? fw.rumpfAnLand(w, laenge, breite, tief).length : 0;
+        if (!best || an < best.an) best = { w, nachSee: vor.length - 1, an };
+        if (!an) break;
       }
-      // Nichts frei auf der Linie (das eigene Schiff liegt als Hindernis darauf): Weg ab dem letzten
-      // Punkt der Linie suchen, die Fahrwasserkarte nimmt dann die naechste freie Stelle
-      const draussen = fw.seeWeg({ x: von.x, z: von.z }, {
-        breiteM: breite, laengeM: laenge, tiefgangM: tief, groesse: laenge > 60 ? 'XXL' : laenge > 24 ? 'XL' : 'L',
-        nahBei: { x: see.x, z: see.z } });
-      if (draussen?.length) {
-        const vor = von.distanceTo(kern[kern.length - 1]) > 0.5 ? [...kern, von] : kern;
-        nachSee = vor.length - 1;
-        weg = [...vor, ...draussen.map((p) => new THREE.Vector3(p.x, 0, p.z))];
+      if (best) {
+        weg = best.w;
+        nachSee = best.nachSee;
+        if (d.raus === 'rueckwaerts') wendeEinbauen(weg, nachSee, laenge, tief);
       }
     }
     const ankunft = d.ankunft
@@ -229,9 +279,39 @@ export function initBesuche(game, services) {
       : [...weg].reverse();
     return { weg, ankunft, nachSee, wegAlt: false };
   }
+  // Wendeplatz fuer ein Schiff, das achteraus abgelegt hat: die erste Stelle auf dem Weg nach See, an der
+  // es sich um sich selbst drehen kann (freies Wasser im Umkreis der halben Laenge), sonst die Stelle mit
+  // dem meisten Platz. Bis dahin faehrt es weiter achteraus, dort dreht es auf der Stelle und faehrt dann
+  // Bug voraus hinaus. Der Punkt steht zweimal im Weg; weg._wende ist die Nummer des Wegstuecks dazwischen.
+  function wendeEinbauen(weg, ab, laenge, tief) {
+    const fw = game.fahrwasser;
+    if (!fw?.freiRadius) return;
+    const ziel = laenge / 2 + 3;
+    let best = null, bestR = -1, m = 0;
+    for (let i = ab; i < weg.length - 1 && m < 900; i++) {
+      const a = weg[i], b = weg[i + 1], d = a.distanceTo(b);
+      for (let s = 0; s < d; s += 5, m += 5) {
+        const p = a.clone().lerp(b, s / d);
+        const r = fw.freiRadius(p.x, p.z, tief);
+        if (r > bestR) { bestR = r; best = { i, p }; }
+        if (r >= ziel) { s = d; i = weg.length; }
+      }
+    }
+    if (!best) return;
+    weg.splice(best.i + 1, 0, best.p.clone(), best.p.clone());
+    weg._wende = best.i + 1;
+  }
   // Zum Pruefen (Konsole, Tests): alle Wege nach See, je Auftritt und Schiff, in Weltmetern
   game.besuchsWege = () => Object.fromEntries(Object.entries(AUFTRITTE).map(([id, a]) => [id,
     a.schiffe.map((d) => wege(d, ...(d.masse ?? [30, 8])).weg.map((p) => ({ x: p.x, z: p.z })))]));
+  // Zum Pruefen (tools/grossschiffe/pruefen.cjs): ganze Fahrten aller Besuchsschiffe mit den echten
+  // Modellmassen, ohne sie zu zeigen. Je Schiff Weg nach See, Ankunft und wie es dabei liegt.
+  game.besuchsFahrten = () => Object.entries(AUFTRITTE).flatMap(([id, a]) => schiffeFuer(id).map((s) => {
+    const w = wege(s.d, s.l, s.b);
+    return { id, modell: s.d.modell, l: s.l, b: s.b, raus: s.raus, rein: s.rein, nachSee: w.nachSee,
+      liegeKurs: s.liegeKurs, fahrt: (a.fahrt ?? DAUER),
+      weg: w.weg.map((p) => ({ x: p.x, z: p.z })), ankunft: w.ankunft.map((p) => ({ x: p.x, z: p.z })) };
+  }));
   // Neue Karte (Stufe, Gelaende, Stegbild): Wege neu, sobald das Schiff am Platz oder draussen ist
   game.on('fahrwasser:karte', () => { for (const l of aktiv.values()) for (const s of l) s.wegAlt = true; });
 
@@ -299,6 +379,69 @@ export function initBesuche(game, services) {
     });
   });
 
+  // Lage eines Besuchsschiffs aus s.t und s.modus; dreht s.kurs um dt Sekunden weiter
+  function pose(s, dt) {
+    let w, soll;
+    if (s.modus === 'rein') {
+      // Einlaufen auf dem eigenen Weg von See (u = 0) zum Platz (u = 1)
+      w = aufWeg(s.ankunft, 1 - s.t);
+      // Schiffe, die achteraus ablegen, kommen Bug voraus auf ihrer Ablegelinie herein: der Sehne folgen
+      // bis an den Platz (die Linie zeigt dort schon auf den Liegekurs)
+      const linie = s.raus === 'rueckwaerts' && !s.d.ankunft;
+      soll = s.rein === 'rueckwaerts' || (!linie && w.segment === s.ankunft.length - 2) ? s.liegeKurs : sehne(s.ankunft, w.m, s.l);
+    } else {
+      // Ablegen: im ersten Wegstueck mit dem Liegekurs, danach Bug voraus (oder ganz achteraus);
+      // achteraus nur im festen Teil im Hafen, draussen Bug voraus
+      w = aufWeg(s.weg, s.t);
+      const wende = s.weg._wende;
+      if (w.wende != null) {
+        // auf der Stelle von achteraus auf Bug voraus drehen
+        const a = sehne(s.weg, w.m, s.l) + Math.PI, b = sehne(s.weg, w.m + 0.01, s.l);
+        s.kurs = winkelZu(a, b, glatt(w.wende));
+        return w.p;
+      }
+      if (s.raus === 'rueckwaerts' && (wende != null ? w.segment < wende : w.segment < s.nachSee)) soll = sehne(s.weg, w.m, s.l) + Math.PI;
+      else if (w.segment === 0) soll = s.liegeKurs;
+      else soll = sehne(s.weg, w.m, s.l);
+    }
+    if (s.t < 0.002) soll = s.liegeKurs;
+    // Kleine Kursaenderungen folgen dem Weg sofort (der Weg ist auf die Rumpflaenge geprueft), grosse
+    // (Wenden nach dem Ablegen achteraus) dauern ein paar Sekunden
+    // Wer der Sehne folgt (achteraus Ablegende und ihr Einlaufen), dreht genau mit dem Weg: die Sehne
+    // aendert sich stetig, und nur so passt der Rumpf in ein enges Seegatt
+    const d = Math.abs(winkelZu(0, soll - s.kurs, 1));
+    const folgt = s.raus === 'rueckwaerts' && !s.d.ankunft;
+    s.kurs = winkelZu(s.kurs, soll, Math.min(1, dt * (folgt ? 12 : d < 0.4 ? 4 : 0.8)));
+    return mittig(s.modus === 'rein' ? s.ankunft : s.weg, w, s.l);
+  }
+  // In einer Kurve liegen Bug und Heck auf dem Weg, die Mitte des Rumpfs ein Stueck innen (Sehne). Das
+  // Schiff halb dorthin ruecken: dann weicht es an Bug, Heck und Mitte nur halb so weit vom Weg ab.
+  // An den Enden des Wegs (Liegeplatz, draussen) laeuft das aus.
+  function mittig(pts, w, l) {
+    const ges = pts._m ?? (pts._m = pts.reduce((a, p, i) => a + (i ? p.distanceTo(pts[i - 1]) : 0), 0));
+    const f = Math.max(0, Math.min(1, (Math.min(w.m, ges - w.m) - l / 2) / (l / 2)));
+    if (!f) return w.p;
+    const a = punktBei(pts, w.m - l / 2), b = punktBei(pts, w.m + l / 2);
+    return w.p.clone().lerp(a.add(b).multiplyScalar(0.5), 0.5 * f);
+  }
+  // Zum Pruefen (tools/grossschiffe/pruefen.cjs): ganze Fahrt eines Schiffs (Ein- und Auslaufen) in
+  // Schritten von dt Spielsekunden, genau wie im Spiel; Ergebnis je Schritt { x, z, kurs, l, b, art }
+  game.besuchsPosen = (dt = 0.1, TAG = 300) => Object.entries(AUFTRITTE).flatMap(([id, a]) => schiffeFuer(id).map((s0) => {
+    const s = { ...s0, ...wege(s0.d, s0.l, s0.b), kurs: s0.liegeKurs };
+    const n = Math.ceil(((a.fahrt ?? DAUER) * TAG) / dt), posen = [];
+    for (const [modus, von, bis] of [['rein', 1, 0], ['raus', 0, 1]]) {
+      s.modus = modus;
+      if (modus === 'raus') s.kurs = s.liegeKurs;
+      for (let i = 0; i <= n; i++) {
+        s.t = glatt(von + (bis - von) * i / n);
+        const p = pose(s, dt);
+        if (s.t < 0.999) posen.push({ x: p.x, z: p.z, kurs: s.kurs, art: modus });
+      }
+    }
+    return { id, modell: s.d.modell, l: s.l, b: s.b, posen,
+      weg: s.weg.map((p) => ({ x: p.x, z: p.z })), ankunft: s.ankunft.map((p) => ({ x: p.x, z: p.z })) };
+  }));
+
   game.onTick((dt) => {
     if (heute.tag !== (game.state?.tag ?? 1)) heute = besucheHeute();
     const tagAnteil = game.sim?.tagesAnteil?.() ?? ((game.time / 120) % 1);
@@ -318,21 +461,7 @@ export function initBesuche(game, services) {
         if (s.wegAlt && (s.t < 0.001 || s.t > 0.999)) Object.assign(s, wege(s.d, s.l, s.b));
         s.group.visible = s.t < 0.999;
         if (!s.group.visible) continue;
-        let p, soll;
-        if (s.modus === 'rein') {
-          // Einlaufen auf dem eigenen Weg von See (u = 0) zum Platz (u = 1)
-          const w = aufWeg(s.ankunft, 1 - s.t);
-          p = w.p;
-          soll = s.rein === 'rueckwaerts' || w.segment === s.ankunft.length - 2 ? s.liegeKurs : w.kurs;
-        } else {
-          // Ablegen: im ersten Wegstueck mit dem Liegekurs, danach Bug voraus (oder ganz achteraus)
-          const w = aufWeg(s.weg, s.t);
-          p = w.p;
-          // achteraus nur im festen Teil im Hafen, draussen Bug voraus
-          soll = (s.raus === 'rueckwaerts' && w.segment < s.nachSee) || w.segment === 0 ? s.liegeKurs : w.kurs;
-        }
-        if (s.t < 0.002) soll = s.liegeKurs;
-        s.kurs = winkelZu(s.kurs, soll, Math.min(1, dt * 0.8));
+        const p = pose(s, dt);
         s.group.position.set(p.x, Math.sin(game.time * 0.9 + p.x) * 0.08, p.z);
         s.group.rotation.y = s.kurs;
         if (s.radar) s.radar.rotation.y = game.time * 1.5;

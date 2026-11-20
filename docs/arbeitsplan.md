@@ -22,7 +22,7 @@ Stand 20.11.2026: Welle 0 4 von 6, Welle 1 11 von 12 (P87 erledigt, P54 entfäll
 | Welle | Paket | Was konkret noch fehlt | Thread | Fertig, wenn |
 |---|---|---|---|---|
 | 0 | **P66 Boote ums Gelände herum führen** | Pulk und "ineinander fest" beim gleichzeitigen Ablegen ab Stufe 5: laut Abnahme-Serie (0f078c3, Typ 1 bis 4) in Stufe 5 und 6 260 bis 980 feste Paare und an 100 bis 155 Tagen ein Pulk, Stufe 1 bis 4 fast im Ziel. Plan des Threads: Einlaufende warten vor der Durchfahrt, solange Auslaufende anstehen (Einbahn-Freigabe nach Richtung). Seit 15.11. kein neuer Stand | "Staus an Bojen und Ankerfeld auflösen" (wieder aufnehmen) | Abnahme-Serie mit den Grenzen aus P87: keine Boote länger als ein paar Sekunden ineinander fest, kein Pulk über mehrere Minuten |
-| 0 | **P84 Großschiffwege an allen 15 Küsten** | fertig gebaut in PR 341 (Test `grossschiffe.spec.mjs`), aber seit 15.11. offen mit Konflikt nur in `docs/arbeitsplan.md` und `docs/aenderungen.md`; dazu prüfen, dass auf Küste 4 alle Großschiffe kommen (Logbuch dort nur 5 von 9 XXL) | "Großschiffe sicher durch alle Küsten führen" (wieder aufnehmen) | PR 341 auf `main`, Test grün auf 15 Küsten |
+| 0 | **P84 Großschiffwege an allen 15 Küsten** | Teil 1 erledigt (PR 341: kein Ufer mehr, 15 Küsten x 5 Seeds; Küste 4: große Vorbeifahrer fahren draußen am Außenring, alle 9 XXL erreichbar). Teil 2: Großschiffe verholen mit Schleppern an einen freien Drehkreis statt über Pier, Ankerplatz der Traditionssegler und Wartebojen zu schwenken; Raddampfer an K01 über Mole und Kaikante | "Großschiffe sicher durch alle Küsten führen" (läuft) | Test grün auf 15 Küsten, Bild je Küste |
 | 1 | **P87 Prüfwerkzeuge auf 15 Küsten und den neuen Takt** | erledigt (PR 338) | - | - |
 | 1 | **P85 Zusammenspiel prüfen** | noch nicht gestartet (`docs/zusammenspiel.md` fehlt); Auftrag siehe Abschnitt 3a | drei neue Threads: Teil 1 und 2 sofort, Teil 3 nach P66 und P84 | `docs/zusammenspiel.md` vollständig, alle Funde behoben oder als Paket eingetragen |
 | 2 | **P20 Winter mit Inhalt füllen (Rest)** | fertig gebaut in PR 347 (G5 Jahreszeiten, H5 Dauerlieger nutzen den Hafen), seit 15.11. offen mit Konflikt nur in `docs/arbeitsplan.md`; danach Balancing-Messung | Bauen-Thread (wieder aufnehmen) | PR 347 auf `main`, Rechnung und Zeitraffer weiter höchstens 5 % auseinander |
@@ -55,14 +55,13 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 |---|---|---|---|
 | A | Pulk und "ineinander fest" beim gleichzeitigen Ablegen, vor allem Stufe 5 (Offene Bucht, Seed 11); mit dem 5-Minuten-Tag legen mehr Kurzhalter gleichzeitig ab | PR 327 "Noch offen", Härtetest 15.11. (Hinweis), Zeitraffer-Zwischenserie | P66, "Staus an Bojen" |
 | A | Welle-0-Abnahme fehlt: Zeitraffer-Serie über alle 15 Küsten nach dem Pulk-Fix | Abschnitt 3a | P66, Zeitraffer-Thread |
-| B | Kreuzfahrtschiff streift im Seegatt von Küste 4 das Ufer | Rest aus PR 329 | P84 (neu) |
 | B | Raddampfer (XL) an K01 fährt beim Einlaufen über die Westmole und beim Auslaufen über die Kaikante (Handy, mehrere Küsten) | Härtetest 15.11. nach P87, Nahbilder `handy-alle-einfahren-nah-land-1.jpg`, `handy-alle-ablegen-nah-land-1.jpg` in `/mnt/project-files/extremtest/2026-11-15-5dce72f-p87/handy/bilder/` | P84 |
 | B | Gäste liegen ab Stufe 4 kaum sichtbar an einer Warteboje (nachgemessen nach PR 327 bis 332: Stufe 4 und 6 am PC 0 an der Boje). Ursache jetzt: `selfEnter` in `sim.js` zählt als Andrang (mehr als die Hälfte der Bojen vergeben) auch Boote, die noch Minuten draußen auf See anfahren; darum fahren die ersten im Revier direkt aus der Anfahrt ein. Vorschlag: Andrang nur aus Booten im Revier oder an der Boje zählen | Härtetest 15.11. nach P87 (`bojen-erreichbar`, misst jetzt an Boje / direkt bei Andrang / unterwegs getrennt), docs/extremtest.md | P66, "Staus an Bojen" |
 | B | ~~`tools/stegbilder/erzeugen.mjs` findet seit den Doppelboxen keine Variante mehr~~ erledigt: Generator zählt Doppelboxen nicht mehr mit, prüft Stufe 6 mit Yachtsteg, die 12 Stegbilder bleiben | Hinweis in PR 329 | P83 erledigt |
 | C | Rechnung und Bild des Geländes weichen an drei Stellen um mehr als eine Rasterzelle ab, alle schmaler als 2 m: Stufe 6 alle Küsten ein 0,5 m breiter Wasser-Riss in der Rechnung bei Plan-y 196 (x -170 bis -27, im Bild Land); Küste 3 eine 1,5 m breite Sandbank in der Rechnung im Hafenwasser (Welt x -40, z -106, im Bild Wasser); Küste 10 ein einzelner Landpunkt (Welt x -105, z -43). Am Durchstich stimmen beide (P87) | `node tools/zeitraffer/wasserbild.cjs --kuesten 1-15 --stufen 3-6`, docs/zeitraffer.md "Bild und istWasser" | Gelände-Thread |
 | C | ~~Winter: Jahreszeiten steuern nur Ereignisse (G5); Dauerlieger nutzen Kran und Segelmacher nicht (H5-Rest)~~ erledigt 15.11. | Code: `jahreszeiten` nur in `data/events.js` | P20-Rest |
 
-Erledigt seit 14.11.: Menschen auf festen Koordinaten (PR 316), L-Boote ragen auf den Steg, XL-Raddampfer an K01, Korvette auf Küste 4 (alle PR 329), XXL-Logbuch nie erreicht (PR 323), Aufstieg weicht von der Rechnung ab (P17, PR 331: Rechnung Tag 103, Zeitraffer 99 bis 102), Box bleibt bei Abreise unterwegs belegt (PR 327), Kurzhalter legen vor dem Festmachen ab (PR 332). Früher erledigt: Fehler aus Jorvens Feature-Test (PR 290), C05, C06 (P61), C07, P02, P04, P12, P63, P65.
+Erledigt seit 14.11.: Großschiffe berühren auf keiner Küste mehr Land (P84), Menschen auf festen Koordinaten (PR 316), L-Boote ragen auf den Steg, XL-Raddampfer an K01, Korvette auf Küste 4 (alle PR 329), XXL-Logbuch nie erreicht (PR 323), Aufstieg weicht von der Rechnung ab (P17, PR 331: Rechnung Tag 103, Zeitraffer 99 bis 102), Box bleibt bei Abreise unterwegs belegt (PR 327), Kurzhalter legen vor dem Festmachen ab (PR 332). Früher erledigt: Fehler aus Jorvens Feature-Test (PR 290), C05, C06 (P61), C07, P02, P04, P12, P63, P65.
 
 ---
 
@@ -73,7 +72,7 @@ Leitlinie: Erst Welle 0 abschließen und die Prüfwerkzeuge auf den neuen Stand 
 | Nr | Paket | Warum jetzt | Hängt ab von | Kann kollidieren mit |
 |---|---|---|---|---|
 | 1 | **P66 Pulk beim Ablegen** (läuft) | Prio A, letzter Rest von Welle 0 | - | `render/boat-view.js`, `boat-anim.js`, Päckchen (Ablegereihenfolge), Kurzhalter |
-| 2 | **P84 Großschiffwege an allen 15 Küsten** (neu) | Rest aus PR 329, gehört zu Welle 0 | - | `render/services-besuch.js`, `boat-view.js` (`hinaus`, `seeWeg`): nur diese Stellen ändern, vor dem Merge auf P66 rebasen |
+| 2 | P84 Großschiffwege an allen 15 Küsten: ~~Teil 1 Landberührung~~ erledigt 15.11. (PR 341); Teil 2 (Verholen mit Schleppern, Raddampfer an K01) läuft | Rest aus PR 329, gehört zu Welle 0 | - | `render/services-besuch.js`, `boat-view.js` (`seeWeg`, `grosserSeeweg`) |
 | 3 | ~~**P87 Prüfwerkzeuge auf 15 Küsten und den neuen Takt**~~ erledigt (PR 338) | Welle-0-Abnahme braucht Tests, die alle Küsten kennen; Härtetest nach PR 327 bis 332 neu | - | nur `tests/`, `tools/zeitraffer/`, `feature-tests/` |
 | 4 | ~~**P83 Stegbild-Generator reparieren**~~ (erledigt 15.11., PR 336) | ohne ihn keine neuen Stege (P70) und kein Neuerzeugen nach Platzänderungen | - | `tools/stegbilder/`, `data/stegbilder.js` (Ausgabe muss für bestehende Spielstände gleich bleiben), `data/liegelage.js` |
 | 5 | ~~P23 Services mit eigener Wirkung~~ erledigt (15.11.) | Dienste, Trailerboote, Abendgäste, Tagesgäste, Wahlplätze, Bilanz; Rechnung weiter 103 Tage | - | `economy.js` ist frei für P20-Rest |
@@ -94,7 +93,7 @@ Danach geht es weiter wie in [Abschnitt 5](#5-alles-weitere-bis-zum-ende) beschr
 **Wann ist Welle 0 fertig?** P62, P63, P64 und P65 sind erledigt, PR 300 (fünf echte Küsten) ist gemergt, P66 hat PR 280, 327 und 332 gemergt. Offen sind (Stand 15.11., 09:30 UTC):
 
 1. P66: Pulk und "ineinander fest" beim gleichzeitigen Ablegen.
-2. P84: Großschiffe kommen auf allen 15 Küsten ohne Uferberührung hinaus (Kreuzfahrtschiff im Seegatt Küste 4).
+2. ~~P84: Großschiffe kommen auf allen 15 Küsten ohne Uferberührung hinaus~~ erledigt 15.11. (PR 341) (15 Küsten x 5 Seeds, 0 Funde).
 3. Abnahme laut Roadmap Abschnitt 14: Zeitraffer-Serie über alle 15 Küstentypen, PC und Handy, nach 1 und 2, mit den Werkzeugen aus P87. Grenze: kein Boot dauerhaft über Land oder durch Stege, keine Boote ineinander fest länger als ein paar Sekunden. Danach P66 und P84 in der Roadmap auf "erledigt".
 
 Der Planungs-Thread meldet dem Koordinator, sobald alle drei Punkte erfüllt sind.
