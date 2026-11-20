@@ -178,8 +178,9 @@ Seit P17 wird die Rechnung regelmäßig mit dem echten Spiel im Browser verglich
 | 14.11. (5 Läufe, alter Tag): Box beim Ablegen gehalten (s) | 40 bis 47 | 56 bis 74 | 101 bis 126 | 101 bis 154 | 104 bis 154 | 106 bis 154 |
 | 15.11. nach PR 327 (3 Läufe, Küste 1, 3, 5): Box beim Ablegen gehalten (s) | 30 bis 36 | 36 bis 39 | 33 bis 43 | 8 bis 48 | 12 bis 30 | 23 bis 45 |
 | 15.11.: Anfahrt bis zur Boje (s) | 30 bis 31 | 35 bis 43 | 34 bis 40 | 50 bis 84 | 166 bis 251 | 151 bis 609 |
+| 20.11. nach P66 (PR 351, Marschfahrt auf See): Anfahrt bis zur Boje (s) | 23 bis 31 | 23 bis 31 | 23 bis 31 | 54 | 87 | 92 |
 
-Der Fehler beim Ablegen (Box blieb bis zu 300 s belegt) ist mit PR 327 behoben. `ANSICHT` in `tools/balance.mjs` rechnet jetzt mit Anfahrt 35 s und Ablegen 35 s.
+Der Fehler beim Ablegen (Box blieb bis zu 300 s belegt) ist mit PR 327 behoben. `ANSICHT` in `tools/balance.mjs` rechnet mit Ablegen 35 s und seit 20.11. mit der Anfahrt je Stufe: 25 / 28 / 31 / 54 / 87 / 92 s (vorher pauschal 35 s).
 
 **Schlussmessung (15.11., P17 Teil 2):** Zeitraffer im Browser mit den neuen Zahlen, Bot wie `--spieler zeitraffer`:
 
@@ -201,6 +202,8 @@ Abweichung beim Ende: Rechnung 103, Spiel im Mittel 100,3 Tage, also 2,7 %, inne
 | `--spieler zeitraffer` | 103 | 105 | 108 | 104 |
 | geschickt | 100 | 101 | 107 | 101 |
 | gemütlich | 111 | 113 | 121 | 119 |
+
+Danach Anfahrt je Stufe nach P66 (25 bis 92 s statt pauschal 35 s), gemessen auf `main` mit PR 351: zeitraffer 105 (Stufen 5 / 15 / 21 / 24 / 27 / 14, 10 % bis 90 %: 103 bis 110), geschickt 101, gemütlich 119. Die längere Anfahrt in großen Häfen kostet kaum Tage, weil die Box beim Selbst-Einfahren schon vergeben ist. Ziel rund 100 Spieltage, Abweichung für zeitraffer und geschickt höchstens 5 %. Der gemütliche Spieler braucht wie vorher länger.
 
 ```bash
 node tools/balance.mjs --spieler zeitraffer

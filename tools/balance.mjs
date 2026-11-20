@@ -126,15 +126,16 @@ const RULES = sim.rulesFromEconomy(E);
 // Was die 3D-Ansicht im echten Spiel an Zeit kostet und die Regeln allein nicht kennen (P17,
 // docs/balancing.md "Rechnung und Spiel"). Gemessen mit dem Zeitraffer im Browser (Messung im Bot von
 // tools/zeitraffer/lauf.cjs, Ergebnis "messung" in ergebnis-<gerät>.json), Stand 15.11. nach PR 327:
-// - anfahrt: Sekunden von der Ankunft im Revier bis zur Warteboje (ohne Ansicht gilt anfahrtMax).
+// - anfahrt: Sekunden je Stufe von der Ankunft im Revier bis zur Warteboje (ohne Ansicht gilt
+//   anfahrtMax). Stand 20.11. nach P66 (PR 351, Marschfahrt auf See): Stufe 1 bis 3 rund 23 bis 31 s,
+//   Stufe 4 54 s, Stufe 5 87 s, Stufe 6 92 s.
 // - ablegen: Sekunden, die ein abreisendes Boot seine Box hält, bis es sichtbar heraus ist (ohne
 //   Ansicht wird die Box nach ausBoxMax frei).
 // --ohne-ansicht rechnet nur die Regeln.
 export const ANSICHT = {
-  anfahrt: 35,
+  anfahrt: { 1: 25, 2: 28, 3: 31, 4: 54, 5: 87, 6: 92 },
   ablegen: { 1: 35, 2: 35, 3: 35, 4: 35, 5: 35, 6: 35 },
 };
-const RULES_ANSICHT = { ...RULES, queue: { ...RULES.queue, approachMax: ANSICHT.anfahrt } };
 const SVC = erstelleRegeln(mitZahlen(SERVICES, E.services));
 const PLATZ = new Map(HAFEN.plaetze.map((p) => [p.id, p]));
 
@@ -158,12 +159,14 @@ let MIT_ANSICHT = true;
 
 export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true, beobachter = null, ansicht = MIT_ANSICHT } = {}) {
   const prof = PROFILE[profilName];
-  const regeln = ansicht ? RULES_ANSICHT : RULES;
+  // Mit Ansicht: eigene Warteschlangen-Regeln je Spiel, die Anfahrt folgt der Stufe (siehe ablegen())
+  const regeln = ansicht ? { ...RULES, queue: { ...RULES.queue, approachMax: ANSICHT.anfahrt[1] } } : RULES;
   const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: regeln });
   const state = createState({ seed, rules: regeln });
   // Wie die Ansicht im Spiel: abreisende Boote melden 'boot:noch-in-box', bis ihre Ablegezeit um ist
   const ablegen = () => {
     if (!ansicht) return;
+    ctx.rules.queue.approachMax = ANSICHT.anfahrt[state.stage] ?? ANSICHT.anfahrt[6];
     const halten = ANSICHT.ablegen[state.stage] ?? 0;
     for (const l of Object.values(state.leaving || {})) {
       if (l.off && (l.total ?? 0) + RULES.leaveMax < halten) sim.holdLeaving(state, l.boatId);

@@ -12,6 +12,13 @@ Ab Stufe 4 steht im Baumenü unter **Stege** je Steg mit großen Boxen:
 
 Vorschau wie bei allem Bauen: Die Kamera fährt hin, die zwei Boxen leuchten gelb, die breite Box liegt als Umriss darüber. Umgebaut wird nur, wenn beide Boxen frei sind (niemand liegt dort, legt gerade ab, hat sie über Funk reserviert oder fest gepachtet), zurückgebaut nur, wenn die Doppelbox frei ist. So muss nie ein Boot umziehen. Ist alles belegt, steht der Eintrag gesperrt mit "Alle Boxen belegt". Rückgängig im Baumenü gilt auch hier.
 
+Damit das Baumenü nicht dauerhaft zwei Einträge je Steg zeigt (Zusammenspiel-Fund K5, 20.11.):
+
+- **Doppelbox** steht nur im Menü, solange an diesem Steg keine Doppelbox frei ist. Eine freie Doppelbox reicht für den nächsten Katamaran; erst wenn sie belegt ist, erscheint der nächste Umbau.
+- **Zurückbauen** steht nur im Menü, wenn eine Doppelbox frei ist und zugleich alle schmalen Boxen des Stegs belegt sind. Nur dann fehlt gerade eine schmale Box.
+
+Jeder Umbau und Rückbau kostet, weil am Steg wirklich gebaut wird (Dalben setzen oder ziehen).
+
 In Stufe 3 steht der Umbau schon gesperrt in der Liste ("ab Ausbaustufe 4"), weil Mehrrumpfboote ab Stufe 4 kommen.
 
 D5 ("viele schmale oder wenige breite Boxen") ist damit je Steg frei wählbar: Jedes Paar lässt sich einzeln umbauen, von außen nach innen.

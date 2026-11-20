@@ -133,7 +133,7 @@ export function zonenRaster(stufe, region, o = {}) {
       if (test(x0 + i * schritt, y0 + j * schritt)) zone[k] = code;
     }
   };
-  const w = o.warteplaetze ?? warteplaetze(stufe);
+  const w = o.warteplaetze ?? warteplaetze(stufe, reg);
   for (const a of w.ankerbereiche ?? []) male(a.px - a.radius, a.py - a.radius, a.px + a.radius, a.py + a.radius, (px, py) => Math.hypot(px - a.px, py - a.py) <= a.radius, ZONE.ANKER, true);
   for (const b of w.bojen ?? []) {
     const r = (6 + BOJEN_ABSTAND_M) / PLAN_M;
