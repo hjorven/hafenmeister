@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "20.11.2026",
-  "commit": "2cad20f"
+  "commit": "580efb7"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1322,7 +1322,7 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280, 327, 332): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende (PR 240); Wartebojen seitlich, Anfahrt von weit draußen aus verschiedenen Richtungen (PR 280); Geduld erst ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall (PR 327); erstes Boot vom Bildrand (PR 332). Noch offen: Pulk und \"ineinander fest\" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht), Abnahme-Serie über alle 15 Küsten; übernimmt P54",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280, 327, 332, 351): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende (PR 240); Wartebojen seitlich, Anfahrt von weit draußen aus verschiedenen Richtungen (PR 280); Geduld erst ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall (PR 327); erstes Boot vom Bildrand (PR 332); Anfahrt kürzer, Boote sichtbar an der Boje, Einfahrt als Einbahn gegen den Pulk (PR 351). Noch offen: Pulk und \"ineinander fest\" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht), Abnahme-Serie über alle 15 Küsten; übernimmt P54",
    "welle": 0,
    "prs": [
     81,
@@ -1337,7 +1337,8 @@
     262,
     280,
     327,
-    332
+    332,
+    351
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1572,7 +1573,7 @@
    "id": "P84",
    "titel": "Großschiffwege an allen 15 Küsten",
    "inhalt": "Kreuzfahrtschiff streift im schrägen Seegatt von Küste 4 (Bodden) das Ufer (Rest aus PR 329). Rumpfprobe aus dem Härtetest (7 Punkte) als Test für alle Besuchsschiffe (Kreuzfahrt, Flotte, Windjammer, Seenotkreuzer) auf allen 15 Küsten und mehreren Seeds",
-   "thread": "erledigt (PR 341): vorher 34 Berührungen auf 9 von 15 Küsten, jetzt 0 auf 15 Küsten x 5 Seeds (node tools/grossschiffe/pruefen.cjs, tests/specs/grossschiffe.spec.mjs). Seeweg bis hinter den Außenring auf grobem Raster, Wendeplatz, Rumpf folgt dem Weg (schiffsanimationen.md, Großschiffwege). Der Seenotkreuzer fährt nur im Hafen (kein Seeweg). Teil 2 läuft: Rumpf auch gegen Stege, Liegeplätze und Wartebojen (Verholen mit Schleppern), Raddampfer an K01",
+   "thread": "erledigt (PR 341): vorher 34 Berührungen auf 9 von 15 Küsten, jetzt 0 auf 15 Küsten x 5 Seeds (node tools/grossschiffe/pruefen.cjs, tests/specs/grossschiffe.spec.mjs). Seeweg bis hinter den Außenring auf grobem Raster, Wendeplatz, Rumpf folgt dem Weg (schiffsanimationen.md, Großschiffwege). Der Seenotkreuzer fährt nur im Hafen (kein Seeweg). Teil 2 erledigt (20.11.): Kreuzfahrtschiff und Marine verholen mit Schleppern an einen freien Drehkreis (fremde Liegewannen zählen 20-fach), Raddampfer an K01 kommt von vorn und geht rückwärts an den Kai, legt geradeaus ab; Prüfwerkzeug zählt Stege, Plätze, Wannen und Bojen als Hinweis. Rest: 3 von 45 Läufen streift das Kreuzfahrtschiff die eigene Pier (zu enges Becken)",
    "welle": 0,
    "prs": [
     329,
@@ -1587,10 +1588,11 @@
    "id": "P85",
    "titel": "Zusammenspiel nach Welle 0 prüfen",
    "inhalt": "Jorvens Auftrag vom 14.11.: alle Features noch da, neue Features im normalen Spiel wirklich genutzt, Welle 1 wirklich gefixt, Übersehenes finden. Drei Threads (Kernschleife und Regeln; Oberfläche und Geräte; Welt, Boote, Ereignisse), gemeinsame Datei docs/zusammenspiel.md",
-   "thread": "teilweise: Teil 2 Oberfläche und Geräte erledigt (PR 352, docs/zusammenspiel.md); Kernschleife und Welt laufen",
+   "thread": "teilweise: Teil 1 Kernschleife und Regeln erledigt (PR 354, Funde K1 bis K5), Teil 2 Oberfläche und Geräte erledigt (PR 352), beide in docs/zusammenspiel.md; Welt läuft",
    "welle": 1,
    "prs": [
-    352
+    352,
+    354
    ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
@@ -5618,6 +5620,56 @@
  "merges": [
   {
    "datum": "2026-11-20",
+   "titel": "Roadmap-Pflege: P66 mit PR 351",
+   "pr": 360,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Großschiffe verholen, Raddampfer an K01 ohne Mole (P84 Teil 2)",
+   "pr": 359,
+   "pakete": [
+    "P84"
+   ]
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Funk-Liste wird über wartenden Booten durchlässig (Schichttest F4)",
+   "pr": 358,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Zusammenspiel 1: Kernschleife und Regeln im ganzen Spiel gezählt (P85)",
+   "pr": 354,
+   "pakete": [
+    "P85"
+   ]
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Schichttest: Schichten 18 bis 20 (Dauerlieger, Logbuch, Winter) und Serie 8",
+   "pr": 357,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "P66: Anfahrt kürzer, Boote sichtbar an der Boje, Einfahrt als Einbahn gegen den Pulk",
+   "pr": 351,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Doppelbox und Rückbau nur im Baumenü, wenn sie etwas bringen (Zusammenspiel K5)",
+   "pr": 356,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-20",
    "titel": "Roadmap-Pflege: P85 Teil 2 (PR 352) mit Bildern",
    "pr": 355,
    "pakete": [
@@ -5654,59 +5706,6 @@
    "pr": 341,
    "pakete": [
     "P84"
-   ]
-  },
-  {
-   "datum": "2026-11-20",
-   "titel": "Jahreszeiten spürbar, Dauerlieger nutzen den Hafen (P20-Rest: G5, H5)",
-   "pr": 347,
-   "pakete": [
-    "P20"
-   ]
-  },
-  {
-   "datum": "2026-11-20",
-   "titel": "Logbuch-Test unter Last stabil: auf das Fertig-Signal der Bilder warten",
-   "pr": 346,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-20",
-   "titel": "Arbeitsplan: Stand 20.11., drei fertige PRs warten, P66 und P85 offen",
-   "pr": 349,
-   "pakete": [
-    "P66",
-    "P85"
-   ]
-  },
-  {
-   "datum": "2026-11-16",
-   "titel": "Roadmap-Pflege: Bilder zu P86 (PR 342)",
-   "pr": 348,
-   "pakete": [
-    "P86"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "P87: Prüfwerkzeuge auf 15 Küsten und den 5-Minuten-Tag",
-   "pr": 338,
-   "pakete": [
-    "P87"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Gesten-Test unter Last stabil (Wellenring, Aufstiegsfeier)",
-   "pr": 344,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "P86 Bootsgeschichten fertig erzählen",
-   "pr": 342,
-   "pakete": [
-    "P86"
    ]
   }
  ]

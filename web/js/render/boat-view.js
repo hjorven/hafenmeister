@@ -879,10 +879,20 @@ export function init(game) {
     // Heck auf dem Weg). Beruehrt er irgendwo Land, die Stelle sperren und neu suchen (hoechstens viermal),
     // sonst bleibt der Weg mit den wenigsten Beruehrungen.
     const L = info.length ?? 30;
-    for (const rand of [2 + g.G / 2, 2, 0.5]) {
-      const sperren = [];
+    // Wartebojen und Ankerplaetze (dort liegen wartende Boote) umfahren, wie der Durchgangsverkehr in
+    // verkehr.js; nur wenn es so gar keinen Weg gibt, ohne sie
+    const wp = game.landscape?.warteplaetze ?? {};
+    const warte = [
+      ...(wp.bojen ?? []).map((b) => ({ x: b.x, z: b.z, r: 10 + B / 2 })),
+      ...(wp.ankerplaetze ?? []).map((a) => ({ x: a.x, z: a.z, r: (a.schwoikreisM ?? 8) + 4 + B / 2 })),
+    ].filter((q) => Math.hypot(q.x - von.x, q.z - von.z) > q.r + Math.max(24, B * 1.5));
+    // Mit Wartebojen nur kurz suchen und nur einen Weg ohne Beruehrung nehmen (sonst kostet es im engen
+    // Bodden viele Sekunden), danach wie bisher ohne sie
+    for (const [rand, basis] of [[2 + g.G / 2, warte], [2, warte], [2 + g.G / 2, []], [2, []], [0.5, []]]) {
+      const sperren = [...basis];
+      const mitWarte = basis.length > 0;
       let best = null, bestN = Infinity;
-      for (let versuch = 0; versuch < 5; versuch++) {
+      for (let versuch = 0; versuch < (mitWarte ? 2 : 5); versuch++) {
         const w = grosserSeewegMit(von, info, m, g, abst, t, B / 2 + rand, sperren);
         if (!w) break;
         const an = rumpfAnLand([{ x: von.x, z: von.z }, ...w], L, B, g, abst);
@@ -900,7 +910,7 @@ export function init(game) {
         if (!bestN) break;
         for (const p of an.slice(0, 6)) sperren.push({ x: p.x, z: p.z, r: 12 });
       }
-      if (best) return best;
+      if (best && (!mitWarte || bestN === 0)) return best;
     }
     return null;
   }

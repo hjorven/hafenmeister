@@ -108,7 +108,9 @@ function aufWeg(pts, t) {
   const f = faktoren(pts);
   let ges = 0;
   // Wenden auf der Stelle dauert so lange wie eine Fahrt ueber 60 m
-  const dz = (i) => (pts._wende === i - 1 ? 60 : pts[i].distanceTo(pts[i - 1]) * f[i - 1]);
+  // Verholen (Schlepper ziehen das Schiff quer vom Platz) geht halb so schnell wie Fahren
+  const dreh = (j) => pts._wende === j || !!pts._wenden?.includes(j);
+  const dz = (i) => (dreh(i - 1) ? 60 : pts[i].distanceTo(pts[i - 1]) * f[i - 1] * (pts._verholen && i === 1 ? 2 : 1));
   for (let i = 1; i < pts.length; i++) ges += dz(i);
   const ziel = t * ges;
   let s = 0, m = 0;
@@ -118,7 +120,7 @@ function aufWeg(pts, t) {
       const k = z > 0 ? Math.max(0, Math.min(1, (ziel - s) / z)) : 0;
       const p = pts[i - 1].clone().lerp(pts[i], k);
       const r = pts[i].clone().sub(pts[i - 1]);
-      return { p, kurs: Math.atan2(-r.z, r.x), segment: i - 1, m: m + k * d, wende: pts._wende === i - 1 ? k : null };
+      return { p, kurs: Math.atan2(-r.z, r.x), segment: i - 1, m: m + k * d, wende: dreh(i - 1) ? k : null };
     }
     s += z; m += d;
   }
@@ -140,6 +142,12 @@ function punktBei(pts, m) {
 // schwenkt der Rumpf in einer Kurve nicht ueber den Weg hinaus wie bei einem nachlaufenden Kurs
 function sehne(pts, m, l) {
   const a = punktBei(pts, m - l / 2), b = punktBei(pts, m + l / 2);
+  return Math.atan2(-(b.z - a.z), b.x - a.x);
+}
+
+// Sehne nur auf dem Teil des Wegs zwischen lo und hi Metern (zwischen zwei Drehpunkten)
+function sehneZw(pts, m, l, lo, hi = Infinity) {
+  const a = punktBei(pts, Math.max(lo, Math.min(hi - 0.5, m - l / 2))), b = punktBei(pts, Math.min(hi, Math.max(lo + 0.5, m + l / 2)));
   return Math.atan2(-(b.z - a.z), b.x - a.x);
 }
 
@@ -245,6 +253,13 @@ export function initBesuche(game, services) {
       // entscheidet der Rumpf: die erste Strecke (halbe Laenge plus Breite, ein Drittel, ein Sechstel),
       // bei der er auf dem ganzen Weg kein Land beruehrt (Kueste 12: eine Insel kurz vor der Pier).
       const start = kern[kern.length - 1];
+      // Achteraus Ablegende (Kreuzfahrtschiff, Korvette, Minenjagdboot) verholen zuerst mit Schleppern an
+      // eine Stelle, an der sie frei drehen koennen (Haertetest 15.11.: sonst schwenkte der Rumpf beim
+      // Abbiegen ueber die eigene Pier und den Ankerplatz der Traditionssegler)
+      if (d.raus === 'rueckwaerts' && kern.length === 1) {
+        const v = verholWeg(start, THREE.MathUtils.degToRad(d.liegeKurs ?? 0), laenge, breite, tief, see);
+        if (v) return { weg: v, ankunft: [...v].reverse(), nachSee: 1, wegAlt: false };
+      }
       const strecken = d.raus === 'rueckwaerts' && kern.length === 1 ? [laenge / 2 + breite, laenge / 3, laenge / 6] : [0];
       let best = null;
       for (const minWeg of strecken) {
@@ -278,6 +293,180 @@ export function initBesuche(game, services) {
       ? [...d.ankunft.slice(0, -1).map(([x, y]) => W(x, y)), weg[0]]
       : [...weg].reverse();
     return { weg, ankunft, nachSee, wegAlt: false };
+  }
+  // Verholen (P84, Haertetest 15.11.): Schlepper ziehen das Schiff mit unveraendertem Kurs (quer und
+  // laengs) vom Platz an eine freie Stelle p. Dort dreht es auf der Stelle und faehrt
+  //  a) Bug voraus nach See, wenn bei p ein ganzer Drehkreis frei ist (halbe Laenge: Ufer, Stege, Plaetze,
+  //     die Liegewannen der anderen Grossschiffe), sonst
+  //  b) achteraus weiter (Bug zum Hafen) bis zum ersten freien Drehkreis draussen, dreht dort und faehrt
+  //     Bug voraus. Fuer b) wird jede Fahrt durchgerechnet (genau wie verholPose sie faehrt) und die
+  //     genommen, bei der der Rumpf nichts beruehrt (sonst die mit den wenigsten Beruehrungen).
+  // Vorher schwenkte der Rumpf beim Abbiegen ueber die eigene Pier und den Ankerplatz der Traditionssegler.
+  // Ergebnis: Weg [Platz, p, p, ...] mit _verholen, _wenden (Nummern der Drehstuecke) oder null.
+  function drinR(r, x, z, rand) {
+    const hx = Math.cos(r.h), hz = -Math.sin(r.h), dx = x - r.x, dz = z - r.z;
+    return Math.abs(dx * hx + dz * hz) <= r.l / 2 + rand && Math.abs(-dx * hz + dz * hx) <= r.b / 2 + rand;
+  }
+  // je Karte zwischengespeichert (die Suche dauert im engen Bodden einige hundert Millisekunden)
+  const verholCache = new Map();
+  function verholWeg(start, kursL, L, B, tief, see) {
+    const fw = game.fahrwasser, k = fw?.karte, roh = game.landscape?.tiefeBei;
+    if (!fw?.freiRadius || !fw.seeWeg || !k?.sperre || !roh) return null;
+    const schluessel = [start.x, start.z, kursL, L, B, tief, see.x, see.z].map((v) => v.toFixed(2)).join('|');
+    const alt = verholCache.get(schluessel);
+    if (alt && alt.k === k) return alt.weg ? kopie(alt.weg) : null;
+    const weg = verholWegNeu(start, kursL, L, B, tief, see, fw, k, roh);
+    verholCache.set(schluessel, { k, weg });
+    return weg ? kopie(weg) : null;
+  }
+  function kopie(w) {
+    const n = w.map((p) => p.clone());
+    n._verholen = w._verholen; n._wenden = w._wenden;
+    return n;
+  }
+  function verholWegNeu(start, kursL, L, B, tief, see, fw, k, roh) {
+    // Tiefe auf 1 m gerundet zwischenspeichern (der Rumpf fragt dieselben Stellen viele Male)
+    const tc = new Map();
+    const tiefeBei = (x, z) => {
+      const xi = Math.round(x), zi = Math.round(z), key = (xi + 4096) * 8192 + (zi + 4096);
+      let v = tc.get(key);
+      if (v === undefined) { v = roh(xi, zi); tc.set(key, v); }
+      return v;
+    };
+    const fx = Math.cos(kursL), fz = -Math.sin(kursL);
+    // Eigener Platz: der Rumpf am Platz (laengs 6 m Rand) und die eigene Liegewanne (data/verkehr.js
+    // GROSSE_GAESTE; Korvette und Minenjagdboot teilen sich eine, der Platz des anderen bleibt gesperrt)
+    const gaeste = (game.boatView?.hindernisse?.()?.rechtecke ?? []).filter((r) => r.art === 'gast');
+    const wanne = gaeste.filter((r) => drinR(r, start.x, start.z, 0));
+    // fremde Liegewannen und Seebruecke: dort liegt vielleicht gerade ein anderes Grossschiff vor Anker
+    const fremd = gaeste.filter((r) => !wanne.includes(r));
+    const eigen = (x, z) => {
+      const dx = x - start.x, dz = z - start.z;
+      if (Math.abs(dx * fx + dz * fz) < L / 2 + 6 && Math.abs(-dx * fz + dz * fx) < B / 2 + 1.5) return true;
+      return wanne.some((r) => drinR(r, x, z, 1));
+    };
+    const zelle = (x, z) => {
+      const i = Math.floor((x - k.x0) / k.zelle), j = Math.floor((z - k.z0) / k.zelle);
+      return i >= 0 && j >= 0 && i < k.nx && j < k.nz ? j * k.nx + i : -1;
+    };
+    const du = Math.min(4, L / 6), dv = Math.max(2, B / 4);
+    // Wartebojen und Ankerplaetze (dort liegen wartende Boote)
+    const wp = game.landscape?.warteplaetze ?? {};
+    const bojen = [...(wp.bojen ?? []), ...(wp.ankerplaetze ?? [])].map((q) => ({ x: q.x, z: q.z, r: (q.schwoikreisM ?? 4) + 2 }));
+    // Beruehrungen eines Rumpfs mit Mitte (cx, cz) und Kurs h: Land, Steg/Platz (ausser dem eigenen), Bojen
+    const rumpf = (cx, cz, h, bisEins = false) => {
+      const ux = Math.cos(h), uz = -Math.sin(h);
+      let n = 0;
+      for (const q of bojen) {
+        const dx = q.x - cx, dz = q.z - cz;
+        if (Math.abs(dx * ux + dz * uz) < L / 2 + q.r && Math.abs(-dx * uz + dz * ux) < B / 2 + q.r) { n += 3; if (bisEins) return n; }
+      }
+      for (let u = -L / 2; u <= L / 2 + 0.01; u += du) for (let v = -B / 2; v <= B / 2 + 0.01; v += dv) {
+        const x = cx + ux * u - uz * v, z = cz + uz * u + ux * v;
+        const c = zelle(x, z);
+        // Land wiegt viel schwerer als ein Steg: ein Weg mit Landberuehrung wird nie genommen
+        if (tiefeBei(x, z) < 0.5) { n += 1000; if (bisEins) return n; } else if (c >= 0 && k.sperre[c] === 1 && !eigen(x, z)) {
+          n += fremd.some((r) => drinR(r, x, z, 0.5)) ? 20 : 1;
+          if (bisEins) return n;
+        }
+      }
+      return n;
+    };
+    const R = L / 2 + 3;
+    // Drehkreis: freiRadius kennt Stege und Plaetze nur innerhalb der Fahrwasserkarte (ein Drehpunkt knapp
+    // ausserhalb wuerde ueber eine Pier am Kartenrand drehen), daher den Kreis selbst pruefen
+    const kreisFrei = (cx, cz) => {
+      if (fw.freiRadius(cx, cz, tief) < R) return false;
+      for (let x = cx - R; x <= cx + R; x += 3) for (let z = cz - R; z <= cz + R; z += 3) {
+        if ((x - cx) ** 2 + (z - cz) ** 2 > R * R) continue;
+        const c = zelle(x, z);
+        // Land und Molen, dazu Stege, Plaetze und fremde Liegewannen (dort ankert vielleicht gerade ein
+        // Traditionssegler): der Rumpf schwenkt beim Drehen ueber die ganze Kreisflaeche
+        if (c >= 0 && (k.hart[c] || (k.sperre[c] && !eigen(x, z)))) return false;
+      }
+      return true;
+    };
+    const verholFrei = (c) => {
+      const n = Math.ceil(c.dd / 4);
+      for (let i = 1; i <= n; i++) if (rumpf(start.x + (c.x - start.x) * i / n, start.z + (c.z - start.z) * i / n, kursL, true)) return false;
+      return true;
+    };
+    const opt = { breiteM: B, laengeM: L, tiefgangM: tief, groesse: L > 60 ? 'XXL' : L > 24 ? 'XL' : 'L', nahBei: { x: see.x, z: see.z } };
+    const V = (q) => new THREE.Vector3(q.x, 0, q.z);
+    // Kandidaten fuer p im 10-m-Raster bis 400 m vom Platz, naechste zuerst
+    const kand = [{ x: start.x, z: start.z, dd: 0 }];
+    for (let a = -400; a <= 400; a += 10) for (let b = -400; b <= 400; b += 10) {
+      const dd = Math.hypot(a, b);
+      if (dd > 0 && dd <= 400 && tiefeBei(start.x + a, start.z + b) >= tief) kand.push({ x: start.x + a, z: start.z + b, dd });
+    }
+    kand.sort((p, q) => p.dd - q.dd);
+    // a) Drehkreis bei p
+    let n = 0;
+    for (const c of kand) {
+      if (n >= 400) break;
+      if (c.dd > 300) break;
+      if (!kreisFrei(c.x, c.z)) continue;
+      n++;
+      if (!verholFrei(c)) continue;
+      const draussen = fw.seeWeg({ x: c.x, z: c.z }, opt);
+      if (!draussen?.length) continue;
+      const weg = [start.clone(), V(c), V(c), ...draussen.map(V)];
+      weg._verholen = true;
+      weg._wenden = [1];
+      return weg;
+    }
+    // b) achteraus weiter bis zum Drehkreis draussen; jede Fahrt durchrechnen
+    // Kandidaten: quer (ab vom Platz und zur Pier hin) und laengs (achteraus) versetzt, mit gleichem Kurs
+    let best = null;
+    const draussenB = fw.seeWeg({ x: start.x, z: start.z }, opt) ?? null;
+    if (!draussenB?.length) return null;
+    const kandB = [];
+    for (const a of [0, -10, -20, -40, -60, -90, -120]) for (const b of [0, 10, -10, 20, -20, 30, -30, 45, -45]) {
+      // a: laengs (negativ = achteraus, Richtung See), b: quer
+      const x = start.x + fx * a - fz * b, z = start.z + fz * a + fx * b;
+      kandB.push({ x, z, dd: Math.hypot(a, b) });
+    }
+    kandB.sort((p, q) => p.dd - q.dd);
+    for (const c of kandB) {
+      if (tiefeBei(c.x, c.z) < tief || !verholFrei(c)) continue;
+      // an den Weg nach See haengen: ab dessen Punkt, der am naechsten liegt
+      let iN = 0, dN = Infinity;
+      for (let i = 0; i < draussenB.length; i++) {
+        const d = Math.hypot(draussenB[i].x - c.x, draussenB[i].z - c.z);
+        if (d < dN) { dN = d; iN = i; }
+      }
+      const draussen = draussenB.slice(Math.min(iN + 1, draussenB.length - 1));
+      const weg = [start.clone(), V(c), V(c), ...draussen.map(V)];
+      // zweiter Drehpunkt: erster freier Drehkreis auf dem Weg (bis 900 m), sonst der freieste
+      let dreh = null, drehR = -1, m = 0;
+      for (let i = 2; i < weg.length - 1 && m < 900 && !dreh?.ok; i++) {
+        const a = weg[i], b = weg[i + 1], d = a.distanceTo(b);
+        for (let s = 0; s < d && m < 900; s += 5, m += 5) {
+          const q = a.clone().lerp(b, s / d);
+          if (s + m < L / 2) continue;
+          if (kreisFrei(q.x, q.z)) { dreh = { i, q, ok: true }; break; }
+          const r = fw.freiRadius(q.x, q.z, tief);
+          if (r > drehR) { drehR = r; dreh = { i, q }; }
+        }
+      }
+      if (!dreh) continue;
+      weg.splice(dreh.i + 1, 0, dreh.q.clone(), dreh.q.clone());
+      weg._verholen = true;
+      weg._wenden = [1, dreh.i + 1];
+      // durchrechnen
+      const s = { weg, l: L, b: B, liegeKurs: kursL, kurs: kursL, modus: 'raus', t: 0 };
+      let an = 0;
+      for (let i = 0; i <= 120; i++) {
+        s.t = i / 120;
+        const p = verholPose(s);
+        if (dreh.ok && i > 0 && aufWeg(weg, s.t).segment > dreh.i + 1) break;
+        an += rumpf(p.x, p.z, s.kurs);
+      }
+      if (!best || an < best.an) best = { weg, an };
+      if (!an) break;
+    }
+    // Mit Landberuehrung lieber der alte Weg (gerade zurueck, Wende draussen), der ist auf Land geprueft
+    return best && best.an < 1000 ? best.weg : null;
   }
   // Wendeplatz fuer ein Schiff, das achteraus abgelegt hat: die erste Stelle auf dem Weg nach See, an der
   // es sich um sich selbst drehen kann (freies Wasser im Umkreis der halben Laenge), sonst die Stelle mit
@@ -382,6 +571,7 @@ export function initBesuche(game, services) {
   // Lage eines Besuchsschiffs aus s.t und s.modus; dreht s.kurs um dt Sekunden weiter
   function pose(s, dt) {
     let w, soll;
+    if (s.weg._verholen) return verholPose(s);
     if (s.modus === 'rein') {
       // Einlaufen auf dem eigenen Weg von See (u = 0) zum Platz (u = 1)
       w = aufWeg(s.ankunft, 1 - s.t);
@@ -414,6 +604,48 @@ export function initBesuche(game, services) {
     s.kurs = winkelZu(s.kurs, soll, Math.min(1, dt * (folgt ? 12 : d < 0.4 ? 4 : 0.8)));
     return mittig(s.modus === 'rein' ? s.ankunft : s.weg, w, s.l);
   }
+  // Verholte Schiffe (verholWeg): auf der Verholstrecke mit dem Liegekurs, an den Drehpunkten auf der
+  // Stelle drehen, dazwischen der Sehne folgen (achteraus: Bug zum Hafen). Ein- und Auslaufen nutzen
+  // denselben Weg (s.t: 0 = am Platz, 1 = draussen); beim Einlaufen zeigt der Bug immer zum Hafen.
+  function verholPose(s) {
+    const W = s.weg;
+    const w = aufWeg(W, s.t);
+    const rein = s.modus === 'rein';
+    if (!W._mw) {
+      // Meter jedes Drehpunkts entlang des Wegs, Gesamtlaenge
+      const lang = [0];
+      for (let i = 1; i < W.length; i++) lang.push(lang[i - 1] + W[i].distanceTo(W[i - 1]));
+      W._mw = W._wenden.map((j) => lang[j]);
+      W._m = lang[lang.length - 1];
+    }
+    if (w.segment === 0 || s.t < 0.002) { s.kurs = s.liegeKurs; return w.p; }
+    const [m1, m2] = W._mw;
+    const achteraus = W._wenden.length > 1;
+    const PI = Math.PI;
+    // Kurs nach einem Drehpunkt, mit dem Abschnitt bis zum naechsten
+    const aus1 = sehneZw(W, m1, s.l, m1, achteraus ? m2 : Infinity);
+    if (w.wende != null) {
+      const k = glatt(w.wende);
+      if (w.segment === W._wenden[0]) {
+        const ziel = rein || achteraus ? aus1 + PI : aus1;
+        s.kurs = winkelZu(s.liegeKurs, ziel, k);
+      } else {
+        // innen achteraus (Bug zum Hafen), draussen Bug voraus; beim Einlaufen draussen auch Bug zum Hafen
+        const innen = sehneZw(W, m2, s.l, m1, m2) + PI, aus2 = sehneZw(W, m2, s.l, m2);
+        s.kurs = winkelZu(innen, rein ? aus2 + PI : aus2, k);
+      }
+      return w.p;
+    }
+    const zweiter = achteraus && w.m > m2;
+    const lo = zweiter ? m2 : m1, hi = achteraus && !zweiter ? m2 : W._m;
+    const h = sehneZw(W, w.m, s.l, lo, hi);
+    s.kurs = h + (rein || (achteraus && !zweiter) ? PI : 0);
+    // halb zur Sehnenmitte ruecken wie mittig(), nur innerhalb des Abschnitts
+    const f = Math.max(0, Math.min(1, (Math.min(w.m - lo, hi - w.m) - s.l / 2) / (s.l / 2)));
+    if (!f) return w.p;
+    const a = punktBei(W, Math.max(lo, w.m - s.l / 2)), b = punktBei(W, Math.min(hi, w.m + s.l / 2));
+    return w.p.clone().lerp(a.add(b).multiplyScalar(0.5), 0.5 * f);
+  }
   // In einer Kurve liegen Bug und Heck auf dem Weg, die Mitte des Rumpfs ein Stueck innen (Sehne). Das
   // Schiff halb dorthin ruecken: dann weicht es an Bug, Heck und Mitte nur halb so weit vom Weg ab.
   // An den Enden des Wegs (Liegeplatz, draussen) laeuft das aus.
@@ -438,7 +670,7 @@ export function initBesuche(game, services) {
         if (s.t < 0.999) posen.push({ x: p.x, z: p.z, kurs: s.kurs, art: modus });
       }
     }
-    return { id, modell: s.d.modell, l: s.l, b: s.b, posen,
+    return { id, modell: s.d.modell, l: s.l, b: s.b, posen, verholt: s.weg._verholen ? (s.weg._wenden?.length ? 'achteraus' : 'drehkreis') : null,
       weg: s.weg.map((p) => ({ x: p.x, z: p.z })), ankunft: s.ankunft.map((p) => ({ x: p.x, z: p.z })) };
   }));
 
