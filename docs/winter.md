@@ -1,8 +1,8 @@
 # Winter
 
-Stand: 14.11.2026 (Roadmap-Paket P20: G4, F14, F15, I10, Ü19, Teil von H5). Code: `web/js/features/winter.js`, Aussehen: `web/css/winter.css`, Zahlen: `ECONOMY.winterarbeiten` in `web/js/data/economy.js`, Tests: `tests/winter.test.mjs`, `tests/specs/winter.spec.mjs`.
+Stand: 15.11.2026 (Roadmap-Paket P20: G4, G5, F14, F15, H5, I10, Ü19; P20 ist fertig). Code: `web/js/features/winter.js`, Aussehen: `web/css/winter.css`, Zahlen: `ECONOMY.winterarbeiten` in `web/js/data/economy.js`, Tests: `tests/winter.test.mjs`, `tests/specs/winter.spec.mjs`.
 
-Eine Saison hat 30 Spieltage, danach kommen 3 Wintertage ohne Gäste. Bisher hat man den Winter nur vorgespult. Jetzt ist er die Zeit zum Planen.
+Eine Saison hat 16 Spieltage, danach kommen 2 Wintertage ohne Gäste (P17). Bisher hat man den Winter nur vorgespult. Jetzt ist er die Zeit zum Planen, und die Jahreszeiten davor fühlen sich verschieden an.
 
 ## Winterpause
 
@@ -57,7 +57,24 @@ Am Saisonende gehen die Dauerlieger ins Winterlager (F15, H5): In der Nacht zum 
 - Ein Ausbau im Winter ändert die Preise der noch offenen Aufträge, beauftragte bleiben, wie sie sind.
 - Liegt die Zeit still (Pause), kommt die Karte trotzdem, sobald der Winter da ist.
 
-## Noch offen in P20
+## Jahreszeiten (G5)
 
-- H5, zweiter Teil: Dauerlieger nutzen Segelmacher und Kran auch in der Saison.
-- G5: Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind); das sind Zahlen und kommt mit dem Balancing nach dem Stau-Fix der Boote.
+Frühling (Saisontag 1 bis 4), Sommer (5 bis 12) und Herbst (13 bis 16) wirken auf die Ankünfte wie ein Modifikator, bevor Ereignisse und Services dazukommen (`sim.seasonEffect`, Zahlen in `ECONOMY.zeit.jahreszeitWirkung`):
+
+| Jahreszeit | Ankünfte | Bootsmischung | Wind im Alltagswetter |
+|---|---|---|---|
+| Frühling | 0,8 | weniger Jollen (0,6) | +0,15 |
+| Sommer | 1,2 | mehr kleine Boote (S 1,25) | +0 |
+| Herbst | 0,9 | weniger kleine Boote (S 0,8), weniger Jollen (0,5), mehr Segelyachten (1,5): die letzten Fahrtensegler | +0,3 |
+
+Im Mittel über die Saison kommen etwa so viele Boote wie vorher (1,025); weil im Sommer nicht jedes Boot einen Platz findet, dauert der Aufstieg in der Rechnung 105 statt 103 Spieltage (`node tools/balance.mjs --spieler zeitraffer`). Beim Wechsel in den Sommer sagt das Banner „Hochsaison“, beim Wechsel in den Herbst „Herbst: mehr Wind, weniger Boote“ (nicht beim Laden). Wind, Wolken und Laub folgen der Jahreszeit schon länger (`events/scheduler.js`, `render/landschaft/`). Der Wetterbericht zählt „Tag n von 16“.
+
+## Dauerlieger nutzen den Hafen (H5)
+
+Dauerlieger bringen den Services Arbeit (Zahlen als `dauerlieger` in `ECONOMY.services`, Regeln in `services/rules.js`):
+
+- **Krantage** (erster und letzter Saisontag): Am Mastenkran stellt bzw. legt jeder segelnde Dauerlieger seinen Mast (45 €), der Travellift holt jedes Boot heraus bzw. setzt es ein (60 €, Werfthalle 70 €). Wer gekündigt hat, geht im Herbst nicht ins Winterlager. Abends sagt ein Banner „Krantag: n Dauerlieger sind wieder im Wasser“ bzw. „gehen an Land“ mit dem Betrag.
+- **Segelmacher**: Jeder segelnde Dauerlieger im Hafen bringt mit Anteil 0,1 (Segelloft 0,12) am Tag einen Auftrag (90 bzw. 120 €).
+- **Winterlager**: je Dauerlieger an Land und Wintertag 50 € (Halle 80 €), zusätzlich zum festen Wintergeschäft.
+
+Die Service-Karte zeigt die Aufträge im Abschnitt „Zuletzt“ (zum Beispiel „Krantag: 6 Dauerlieger“). Die Tagesdaten bekommen dafür `dauerlieger: [{ klasse, antrieb, imHafen, winterlager, kuendigung }]`, `saisonTag` und `saisonTage` (`render/services.js`). Tests: `tests/jahreszeiten.test.mjs`.

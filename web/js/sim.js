@@ -205,7 +205,9 @@ export const DEFAULT_MODIFIERS = Object.freeze({
 /** Alle Modifikatoren zusammengerechnet: Faktoren werden multipliziert, Zahlen addiert. */
 export function modifiers(state, ctx) {
   const m = structuredClone({ ...DEFAULT_MODIFIERS, satisfaction: { ...DEFAULT_MODIFIERS.satisfaction } });
-  for (const fn of ctx.hooks.modifiers) {
+  // Jahreszeit (P20, G5) wirkt wie ein Modifikator vor allen anderen
+  const jz = seasonEffect(state, ctx);
+  for (const fn of [() => jz, ...ctx.hooks.modifiers]) {
     let p;
     try {
       p = fn(state, ctx);
@@ -701,6 +703,21 @@ export function arrivalRate(state, ctx, mods = modifiers(state, ctx)) {
   return base * reputationFactor(reputation(state), ctx.rules) * mods.arrivalFactor;
 }
 
+/** Jahreszeit eines Tages: 'fruehling', 'sommer', 'herbst' oder 'winter' (rules.seasonParts, P20 G5). */
+export function seasonPart(state, ctx) {
+  const s = season(state, ctx);
+  if (s.winter) return 'winter';
+  return ctx.rules.seasonParts?.find((p) => s.day >= p.from && s.day <= p.to)?.id ?? 'sommer';
+}
+
+/** Wirkung der Jahreszeit auf die Ankünfte (rules.seasonEffects), als Modifikator oder null. */
+export function seasonEffect(state, ctx) {
+  const e = ctx.rules.seasonEffects?.[seasonPart(state, ctx)];
+  if (!e) return null;
+  const { wind, ...mods } = e;
+  return mods;
+}
+
 /** Jahreslauf: Jahr (ab 1), Tag in der Saison (ab 1) und ob gerade Winter ist. */
 export function season(state, ctx) {
   const { seasonDays, winterDays } = ctx.rules;
@@ -811,6 +828,9 @@ function startDay(state, ctx, events) {
   } else {
     placeArrivals(list, from, end, ctx.rules, () => random(state));
   }
+  // Erst späte Kurzhalter tauschen, dann die Module (Geschichten entzerren die Tagesabschnitte auf den
+  // endgültigen Zeiten); ein zweiter Durchgang fängt Kurzhalter, die ein Modul spät gelegt hat.
+  lateShortStays(state, ctx, list);
   for (const fn of ctx.hooks.arrivals) fn({ state, ctx, list });
   lateShortStays(state, ctx, list);
   // Herkunft in der Reihenfolge der Ankunft, damit zwei Boote hintereinander nie aus derselben Ecke kommen

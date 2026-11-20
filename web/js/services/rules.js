@@ -8,6 +8,7 @@
 //   summe    = Einnahmen seit Spielbeginn je Service (fuer die Baukarte und Erfolge)
 //   bezahlt  = Baukosten bisher je Service (Bilanz auf der Karte, P23 F9; fehlt in alten Spielstaenden)
 //   verlauf  = Einnahmen der letzten Saisontage je Service (Bilanz: "bezahlt sich in etwa n Tagen")
+//   krantag  = letzte Krantag-Einnahme je Service (P20 H5), zählt in der Bilanz anteilig statt im Tagesschnitt
 //   heute    = { tag, je: { id: { betrag, teile } } } letzte Abrechnung (Karte: "Heute: 14 Kunden")
 //
 // Kontext beim Bauen: { stufe, ruf, geld }   stufe = Ausbaustufe des Hafens 1 bis 6, ruf 0 bis 5
@@ -183,10 +184,26 @@ export function erstelleRegeln(katalog = SERVICES, wahlplaetze = WAHLPLAETZE) {
     let betrag = 0, kunden = 0, trailer = 0, abendgaeste = 0;
     const teile = [];
     const wf = (tab) => tab?.[wetter] ?? 1;
+    // Dauerlieger (P20 H5): tag.dauerlieger = [{ klasse, antrieb, imHafen, winterlager, kuendigung }]
+    const dl = w.dauerlieger;
+    const dauer = (tag.dauerlieger ?? []).filter((d) => !dl?.nur || passt(d, dl.nur));
+    let dauerlieger = 0;
     if (tag.winter) {
       // Im Winter laufen nur Winterlager und Werft, alles andere ruht.
       if (w.winter?.proTag) { betrag += w.winter.proTag; teile.push('Winter'); }
-      return { betrag, teile, kunden, trailer, abendgaeste };
+      if (dl?.winter) {
+        dauerlieger = dauer.filter((d) => d.winterlager).length;
+        if (dauerlieger) { betrag += dauerlieger * dl.winter; teile.push(`${dauerlieger} Dauerlieger an Land`); }
+      }
+      return { betrag, teile, kunden, trailer, abendgaeste, dauerlieger };
+    }
+    if (dl?.krantage && krantag(tag)) {
+      // Erster Saisontag: Boote und Masten kommen wieder hinein; letzter: heraus (nicht wer gekündigt hat)
+      dauerlieger = dauer.filter((d) => !(d.kuendigung && krantag(tag) === 'herbst')).length;
+      if (dauerlieger) { betrag += dauerlieger * dl.preis; teile.push(`Krantag: ${dauerlieger} Dauerlieger`); }
+    } else if (dl?.anteil) {
+      dauerlieger = zufallsRunden(dauer.filter((d) => d.imHafen).length * dl.anteil, rng);
+      if (dauerlieger) { betrag += dauerlieger * dl.preis; teile.push(dauerlieger === 1 ? '1 Dauerlieger' : `${dauerlieger} Dauerlieger`); }
     }
     if (w.proTag) {
       const f = wf(w.wetter);
@@ -215,7 +232,15 @@ export function erstelleRegeln(katalog = SERVICES, wahlplaetze = WAHLPLAETZE) {
       const ein = (tg / 100) * w.tagesgaeste * wf(w.wetter);
       if (ein > 0) { betrag += ein; teile.push('Tagesgäste'); }
     }
-    return { betrag, teile, kunden, trailer, abendgaeste };
+    return { betrag, teile, kunden, trailer, abendgaeste, dauerlieger };
+  }
+
+  // Krantag (P20 H5): 'fruehling' am ersten Saisontag, 'herbst' am letzten, sonst null
+  function krantag(tag) {
+    if (tag.winter || !tag.saisonTag) return null;
+    if (tag.saisonTag === 1) return 'fruehling';
+    if (tag.saisonTage && tag.saisonTag === tag.saisonTage) return 'herbst';
+    return null;
   }
 
   // Trailerboote und Abendgaeste: feste Zahl je Tag und Service (nicht aus rng), damit die Ansicht schon
@@ -288,8 +313,16 @@ export function erstelleRegeln(katalog = SERVICES, wahlplaetze = WAHLPLAETZE) {
       const r = ertrag(z, id, st.wirkung ?? {}, tag, rng, tagesgaeste);
       if (r.betrag > 0) plus(id, r.betrag, r.teile.join(', '));
       const m = {};
-      for (const k of ['kunden', 'trailer', 'abendgaeste']) if (r[k]) m[k] = r[k];
+      for (const k of ['kunden', 'trailer', 'abendgaeste', 'dauerlieger']) if (r[k]) m[k] = r[k];
       if (Object.keys(m).length) out.mengen[id] = m;
+      // Krantag (P20 H5): für die Meldung im Spiel
+      if (r.dauerlieger && st.wirkung?.dauerlieger?.krantage && krantag(tag)) {
+        (out.krantag ??= { art: krantag(tag), boote: 0, betrag: 0, services: [] });
+        out.krantag.boote = Math.max(out.krantag.boote, r.dauerlieger);
+        out.krantag.betrag += r.dauerlieger * st.wirkung.dauerlieger.preis;
+        (out.krantagJe ??= {})[id] = r.dauerlieger * st.wirkung.dauerlieger.preis;
+        out.krantag.services.push(id);
+      }
     }
 
     // 3. Dienste an Gastbooten (F2): jedes Boot zahlt seinen Dienst am ersten Abend im Hafen
@@ -319,9 +352,13 @@ export function erstelleRegeln(katalog = SERVICES, wahlplaetze = WAHLPLAETZE) {
     z.heute = { tag: tag.tag, winter: !!tag.winter, je: Object.fromEntries(out.einnahmen.map((e) => [e.id, { betrag: e.betrag, text: e.text }])) };
     if (!tag.winter) {
       z.verlauf ??= {};
+      // Krantage (P20 H5) kommen nur zweimal je Saison: nicht in den Tagesschnitt, sondern anteilig (bilanz)
+      const kran = out.mengen && krantag(tag) ? out.krantagJe ?? {} : {};
+      for (const [id, b] of Object.entries(kran)) (z.krantag ??= {})[id] = b;
+      if (tag.saisonTage) z.saisonTage = tag.saisonTage;
       for (const id of Object.keys(z.gebaut)) {
         const v = (z.verlauf[id] ??= []);
-        v.push(out.einnahmen.find((e) => e.id === id)?.betrag ?? 0);
+        v.push(Math.max(0, (out.einnahmen.find((e) => e.id === id)?.betrag ?? 0) - (kran[id] ?? 0)));
         while (v.length > VERLAUF_TAGE) v.shift();
       }
     }
@@ -364,7 +401,9 @@ export function erstelleRegeln(katalog = SERVICES, wahlplaetze = WAHLPLAETZE) {
     const bezahlt = (z.bezahlt ?? bezahltAlt(z))[id] ?? 0;
     const verdient = z.summe[id] ?? 0;
     const v = z.verlauf?.[id] ?? [];
-    const proTag = v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+    // dazu die Krantage (zwei je Saison, P20 H5) anteilig je Saisontag
+    const kran = z.krantag?.[id] ? (2 * z.krantag[id]) / (z.saisonTage || 16) : 0;
+    const proTag = v.length ? v.reduce((a, b) => a + b, 0) / v.length + kran : null;
     const rest = Math.max(0, bezahlt - verdient);
     const tage = rest === 0 ? 0 : proTag > 0 ? Math.ceil(rest / proTag) : null;
     return { bezahlt, verdient, proTag: proTag == null ? null : Math.round(proTag), tage, tageBisher: v.length };

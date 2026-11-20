@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "15.11.2026",
-  "commit": "3f18e8e"
+  "datum": "20.11.2026",
+  "commit": "010247e"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -533,11 +533,12 @@
    "id": "P20",
    "titel": "Winter mit Inhalt füllen",
    "inhalt": "Ü19, F14, F15, docs/ereignisse.md",
-   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, 249, docs/winter.md); Krantage (F15, Teil von H5) im selben PR; offen: Rest von H5, G5 mit dem Balancing",
+   "thread": "bestehend: \"Bauen mit Vorschau und Tiefe ausbauen\"; Winterpause, Winterarbeiten, Winter überspringen (PR 245, 249, docs/winter.md); Krantage (F15, Teil von H5) im selben PR; erledigt mit P20-Rest (PR 347): G5 Jahreszeiten, H5 Dauerlieger als Kunden (winter.md)",
    "welle": 2,
    "prs": [
     245,
-    249
+    249,
+    347
    ],
    "abschnitt": "Welle 2: Kernschleife und Rückmeldung (nach den Grundproblemen)",
    "punkte": [
@@ -549,11 +550,12 @@
     "H5",
     "I10"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": [
     34,
     35,
-    36
+    36,
+    77
    ]
   },
   {
@@ -1570,14 +1572,15 @@
    "id": "P84",
    "titel": "Großschiffwege an allen 15 Küsten",
    "inhalt": "Kreuzfahrtschiff streift im schrägen Seegatt von Küste 4 (Bodden) das Ufer (Rest aus PR 329). Rumpfprobe aus dem Härtetest (7 Punkte) als Test für alle Besuchsschiffe (Kreuzfahrt, Flotte, Windjammer, Seenotkreuzer) auf allen 15 Küsten und mehreren Seeds",
-   "thread": "neu",
+   "thread": "erledigt (PR 341): vorher 34 Berührungen auf 9 von 15 Küsten, jetzt 0 auf 15 Küsten x 5 Seeds (node tools/grossschiffe/pruefen.cjs, tests/specs/grossschiffe.spec.mjs). Seeweg bis hinter den Außenring auf grobem Raster, Wendeplatz, Rumpf folgt dem Weg (schiffsanimationen.md, Großschiffwege). Der Seenotkreuzer fährt nur im Hafen (kein Seeweg). Teil 2 läuft: Rumpf auch gegen Stege, Liegeplätze und Wartebojen (Verholen mit Schleppern), Raddampfer an K01",
    "welle": 0,
    "prs": [
-    329
+    329,
+    341
    ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -3168,8 +3171,8 @@
   {
    "code": "G5",
    "text": "Jahreszeiten spürbar (Frühling ruhig, Sommer voll, Herbst Wind)",
-   "status": "offen",
-   "statusText": "offen: Jahreszeiten (Frühling 1 bis 4, Sommer 5 bis 12, Herbst 13 bis 16) steuern bisher nur Ereignisse wie die Heringstage, nicht Ankünfte oder Wind",
+   "status": "erledigt",
+   "statusText": "erledigt (P20-Rest): Ankünfte Frühling 0,8, Sommer 1,2 mit mehr kleinen Booten, Herbst 0,9 mit mehr Fahrtenseglern und mehr Wind; Banner beim Wechsel (winter.md)",
    "pakete": [
     "P20"
    ],
@@ -3282,8 +3285,8 @@
   {
    "code": "H5",
    "text": "Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land",
-   "status": "offen",
-   "statusText": "teilweise (PR 245): im Winter im Winterlager; Segelmacher und Kran in der Saison offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 245 und P20-Rest): im Winter im Winterlager (zahlen dort je Tag), Krantage an Mastenkran und Travellift, Segelmacher-Aufträge in der Saison",
    "pakete": [
     "P20"
    ],
@@ -4436,11 +4439,11 @@
     "P84"
    ],
    "zaehler": {
-    "erledigt": 4,
+    "erledigt": 5,
     "teilweise": 0,
     "arbeit": 1,
     "frage": 0,
-    "offen": 1,
+    "offen": 0,
     "entfaellt": 0,
     "alle": 6
    }
@@ -4494,8 +4497,8 @@
     "P61"
    ],
    "zaehler": {
-    "erledigt": 14,
-    "teilweise": 1,
+    "erledigt": 15,
+    "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
     "offen": 0,
@@ -4617,20 +4620,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 40,
-  "teilweise": 2,
+  "erledigt": 42,
+  "teilweise": 1,
   "arbeit": 1,
   "frage": 0,
-  "offen": 42,
+  "offen": 41,
   "entfaellt": 1,
   "alle": 86
  },
  "punkteGesamt": {
-  "erledigt": 164,
+  "erledigt": 166,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 47,
+  "offen": 45,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5558,9 +5561,22 @@
    "datum": "2026-11-16",
    "quelle": "bootsgeschichten/p86-siegerehrung-handy.png",
    "nr": 76
+  },
+  {
+   "datei": "p20-pr347-handy-hochsaison.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Hochsaison im Sommer: mehr Boote, volle Stege",
+   "pr": 347,
+   "geraet": "handy",
+   "datum": "2026-11-20",
+   "quelle": "winter/handy-hochsaison.png",
+   "nr": 77
   }
  ],
  "neueBilder": [
+  77,
   76,
   74,
   72,
@@ -5568,10 +5584,56 @@
   68,
   67,
   65,
-  63,
-  61
+  63
  ],
  "merges": [
+  {
+   "datum": "2026-11-20",
+   "titel": "Roadmap-Pflege: P20-Rest (PR 347) mit Bild",
+   "pr": 353,
+   "pakete": [
+    "P20"
+   ]
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Gelände: Rechnung und gezeichnetes Wasser stimmen überein (Funde aus P87)",
+   "pr": 350,
+   "pakete": [
+    "P87"
+   ]
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Großschiffwege an allen 15 Küsten (P84 Teil 1)",
+   "pr": 341,
+   "pakete": [
+    "P84"
+   ]
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Jahreszeiten spürbar, Dauerlieger nutzen den Hafen (P20-Rest: G5, H5)",
+   "pr": 347,
+   "pakete": [
+    "P20"
+   ]
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Logbuch-Test unter Last stabil: auf das Fertig-Signal der Bilder warten",
+   "pr": 346,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Arbeitsplan: Stand 20.11., drei fertige PRs warten, P66 und P85 offen",
+   "pr": 349,
+   "pakete": [
+    "P66",
+    "P85"
+   ]
+  },
   {
    "datum": "2026-11-16",
    "titel": "Roadmap-Pflege: Bilder zu P86 (PR 342)",
@@ -5615,51 +5677,6 @@
    "pakete": [
     "P23"
    ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Schichttest: Schichten 14 bis 17, bessere Diagnose, Funde F2 und F3",
-   "pr": 339,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Services mit eigener Wirkung (P23)",
-   "pr": 340,
-   "pakete": [
-    "P23"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Roadmap-Pflege: J5/P03 (PR 335) und P83 (PR 336) mit Bildern",
-   "pr": 337,
-   "pakete": [
-    "P03",
-    "P83"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Stegbild-Generator wieder lauffähig (P83)",
-   "pr": 336,
-   "pakete": [
-    "P83"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Einstieg: Ruf beim ersten Abreisenden erklären (J5)",
-   "pr": 335,
-   "pakete": [
-    "P03"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Doku auf Stand: Roadmap, Plan, README, Arbeitsplan, Ausbau 7 bis 20",
-   "pr": 334,
-   "pakete": []
   }
  ]
 }

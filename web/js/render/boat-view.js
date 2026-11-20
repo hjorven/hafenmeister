@@ -17,7 +17,7 @@ import { HAFEN } from '../data/harbor.js';
 import { wimpelAn } from './wimpel-regel.js';
 import { seebrueckeStrecke } from './landschaft/strand.js';
 import { molen } from './landschaft/gelaende.js';
-import { baueKarte, route, hindernisseAusHafen, bootMass, erreichbar, befahrbar, sichtlinie, zellMitte, einfahrtAlsEinbahn } from '../world/fahrwasser.js';
+import { baueKarte, route, hindernisseAusHafen, bootMass, erreichbar, befahrbar, sichtlinie, zellMitte, freiBei, einfahrtAlsEinbahn } from '../world/fahrwasser.js';
 
 const U = HAFEN.einheiten?.meterProEinheit ?? 0.62;
 
@@ -645,6 +645,11 @@ export function init(game) {
     befahrbar: (x, z, radiusM = 2, tiefgangM = 0) => befahrbar(karteJetzt(), x, z, radiusM, tiefgangM),
     randPunkt: (info) => randPunkt(info),
     seeWeg: (von, o) => seeWeg(von, o),
+    // Freies Wasser rund um (x, z) in Metern bei mindestens tiefgangM Tiefe: Stege, Molen und Ufer aus der
+    // Karte, weiter draussen das Gelaende (grobes Raster). Fuer Wendeplaetze grosser Schiffe.
+    freiRadius: (x, z, tiefgangM = 2) => freiRadius(x, z, tiefgangM),
+    // Zum Pruefen: Stellen, an denen ein Rumpf L x B auf diesem Weg (Bug und Heck auf dem Weg) Land beruehrt
+    rumpfAnLand: (weg, L, B, tiefgangM = 3) => { const g = grobRaster(); return rumpfAnLand(weg, L, B, g, grobAbstand(g, tiefgangM)); },
     vorbeiWeg: (info) => vorbeiWeg(info),
   };
 
@@ -758,7 +763,10 @@ export function init(game) {
     if (seeWegCache.has(key)) return seeWegCache.get(key)?.map((p) => ({ ...p })) ?? null;
     if (seeWegCache.size > 64) seeWegCache.clear();
     const m = masse(info);
-    let erg = null;
+    // Grosse Schiffe (Besuche der Services): ganzer Weg bis hinter den Aussenring ueber das grobe Raster,
+    // unabhaengig von der Kamera. Der alte Weg (Kartenrand und ein Stueck hinaus) bleibt Rueckfall.
+    let erg = grosserSeeweg(von, info, m);
+    if (erg) { seeWegCache.set(key, erg); return erg.map((p) => ({ ...p })); }
     for (const t of [m.t, Math.min(m.t, 2.5)]) {
       const ok = erreichbar(k, von.x, von.z, m.hart, t);
       const rand = randZellen(k, ok);
@@ -789,6 +797,296 @@ export function init(game) {
     }
     seeWegCache.set(key, erg);
     return erg?.map((p) => ({ ...p })) ?? null;
+  }
+
+  // --- Grosse Schiffe nach See (Paket P84) ---
+  // Die Fahrwasserkarte endet kurz hinter dem Hafen. Dahinter kennt nur das Gelaende die Tiefe. Fuer
+  // Kreuzfahrtschiff, Korvette, Minenjagdboot, Traditionssegler und Ausflugsschiff sucht ein grobes
+  // Raster (8 m) ueber den ganzen Aussenring (game.gelaende.aussenRect) den Weg bis an dessen Rand,
+  // also weit hinter jede Zoomstufe. Im Raster zaehlt der Abstand zum Ufer (Rumpfbreite plus Rand,
+  // lieber ein Viertel der Laenge, damit ein 180 m Schiff nicht am Ufer entlang schrammt); innerhalb
+  // der Fahrwasserkarte entscheidet wie bisher die Karte (Stege, Molen, Pier).
+  // Vorher (Haertetest 15.11., P84): der Weg endete am Kartenrand, wo die Kamera gerade hinsah, das
+  // Schiff drehte dort quer, streifte im Bodden-Seegatt das Ufer und verschwand mitten im Bild.
+  let grob = null;
+  function grobRaster() {
+    const sig = `${karteSig}|${game.landscape?.stufe ?? ''}`;
+    if (grob?.sig === sig) return grob;
+    const r = game.gelaende?.aussenRect?.() ?? { minX: -992, maxX: 992, minZ: -868, maxZ: 992 };
+    const G = 8, x0 = r.minX, z0 = r.minZ;
+    const nx = Math.max(2, Math.floor((r.maxX - r.minX) / G) + 1), nz = Math.max(2, Math.floor((r.maxZ - r.minZ) / G) + 1);
+    const tiefe = new Float32Array(nx * nz);
+    const tb = game.landscape?.tiefeBei;
+    for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) tiefe[j * nx + i] = tb ? tb(x0 + i * G, z0 + j * G) : 99;
+    // Kleine Sandinseln und Steine (Watt, Schaeren) fallen durch ein 8-m-Raster. Wo es in der Naehe
+    // flacher als 8 m ist, darum vier Proben mehr je Zelle und die flachste zaehlt.
+    if (tb) {
+      const nah = new Uint8Array(nx * nz);
+      for (let j = 1; j < nz - 1; j++) for (let i = 1; i < nx - 1; i++) {
+        const c = j * nx + i;
+        if (tiefe[c] < 8 || tiefe[c - 1] < 8 || tiefe[c + 1] < 8 || tiefe[c - nx] < 8 || tiefe[c + nx] < 8) nah[c] = 1;
+      }
+      const o = G / 3;
+      for (let c = 0; c < nah.length; c++) {
+        if (!nah[c] || tiefe[c] <= 0) continue;
+        const x = x0 + (c % nx) * G, z = z0 + Math.floor(c / nx) * G;
+        tiefe[c] = Math.min(tiefe[c], tb(x - o, z - o), tb(x + o, z - o), tb(x - o, z + o), tb(x + o, z + o));
+      }
+    }
+    grob = { sig, G, x0, z0, nx, nz, tiefe, abst: new Map() };
+    return grob;
+  }
+  // Abstand jeder Rasterzelle zur naechsten Stelle flacher als t, in Metern (Chamfer wie die Karte)
+  function grobAbstand(g, t) {
+    const key = t.toFixed(1);
+    if (g.abst.has(key)) return g.abst.get(key);
+    const { nx, nz } = g, d = new Float32Array(nx * nz), S = Math.SQRT2;
+    for (let c = 0; c < d.length; c++) d[c] = g.tiefe[c] < t ? 0 : 1e9;
+    for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
+      const c = j * nx + i; let v = d[c];
+      if (!v) continue;
+      if (i > 0) v = Math.min(v, d[c - 1] + 1);
+      if (j > 0) { v = Math.min(v, d[c - nx] + 1); if (i > 0) v = Math.min(v, d[c - nx - 1] + S); if (i < nx - 1) v = Math.min(v, d[c - nx + 1] + S); }
+      d[c] = v;
+    }
+    for (let j = nz - 1; j >= 0; j--) for (let i = nx - 1; i >= 0; i--) {
+      const c = j * nx + i; let v = d[c];
+      if (!v) continue;
+      if (i < nx - 1) v = Math.min(v, d[c + 1] + 1);
+      if (j < nz - 1) { v = Math.min(v, d[c + nx] + 1); if (i < nx - 1) v = Math.min(v, d[c + nx + 1] + S); if (i > 0) v = Math.min(v, d[c + nx - 1] + S); }
+      d[c] = v;
+    }
+    // Rasterpunkt zu Uferkante: eine halbe Zelle abziehen (das Ufer liegt irgendwo zwischen zwei Punkten)
+    for (let c = 0; c < d.length; c++) d[c] = d[c] >= 1e9 ? 999 : Math.max(0, (d[c] - 0.5) * g.G);
+    g.abst.set(key, d);
+    return d;
+  }
+  function freiRadius(x, z, t) {
+    const g = grobRaster(), a = grobAbstand(g, t);
+    const i = Math.round((x - g.x0) / g.G), j = Math.round((z - g.z0) / g.G);
+    const grobR = i < 0 || j < 0 || i >= g.nx || j >= g.nz ? 999 : a[j * g.nx + i];
+    return Math.min(grobR, freiBei(karteJetzt(), x, z));
+  }
+  function grosserSeeweg(von, info, m) {
+    if (!game.landscape?.tiefeBei || !game.gelaende?.aussenRect) return null;
+    const g = grobRaster();
+    const B = info.beam ?? 8;
+    const t = m.t;
+    const abst = grobAbstand(g, t);
+    // hart: Rumpf plus Rand (Rasterfehler eingerechnet); wunsch: so weit weg vom Ufer faehrt es lieber.
+    // Erst mit vollem Rand, sonst knapper (enge Seegatts): lieber knapp als gar kein Weg
+    // Danach den ganzen Rumpf entlang des Wegs nachrechnen (wie services-besuch.js ihn faehrt: Bug und
+    // Heck auf dem Weg). Beruehrt er irgendwo Land, die Stelle sperren und neu suchen (hoechstens viermal),
+    // sonst bleibt der Weg mit den wenigsten Beruehrungen.
+    const L = info.length ?? 30;
+    for (const rand of [2 + g.G / 2, 2, 0.5]) {
+      const sperren = [];
+      let best = null, bestN = Infinity;
+      for (let versuch = 0; versuch < 5; versuch++) {
+        const w = grosserSeewegMit(von, info, m, g, abst, t, B / 2 + rand, sperren);
+        if (!w) break;
+        const an = rumpfAnLand([{ x: von.x, z: von.z }, ...w], L, B, g, abst);
+        if (an.length < bestN) { best = w; bestN = an.length; }
+        if (!an.length) break;
+        // Erst den Weg an diesen Stellen seitlich vom Land wegruecken (enge Durchfahrt zwischen zwei
+        // Sandbaenken), sonst die Stelle sperren und einen anderen Weg suchen
+        let w2 = [{ x: von.x, z: von.z }, ...w];
+        for (let r = 0; r < 6; r++) {
+          const an2 = rumpfAnLand(w2, L, B, g, abst);
+          if (an2.length < bestN) { best = w2.slice(1); bestN = an2.length; }
+          if (!an2.length) break;
+          w2 = abruecken(w2, an2, L, B, g, abst, t);
+        }
+        if (!bestN) break;
+        for (const p of an.slice(0, 6)) sperren.push({ x: p.x, z: p.z, r: 12 });
+      }
+      if (best) return best;
+    }
+    return null;
+  }
+  // Weg seitlich von Beruehrungsstellen wegruecken (weich ueber eine Schiffslaenge auslaufend); ein Punkt
+  // rueckt nur dorthin, wo das Wasser tief genug ist
+  function abruecken(weg, an, L, B, g, abst, t) {
+    const lang = [0];
+    for (let i = 1; i < weg.length; i++) lang.push(lang[i - 1] + Math.hypot(weg[i].x - weg[i - 1].x, weg[i].z - weg[i - 1].z));
+    const schub = weg.map(() => ({ x: 0, z: 0, n: 0 }));
+    for (const c of an) {
+      const fehlt = B / 2 + 3 - Math.abs(c.v);
+      if (fehlt <= 0) continue;
+      const s = c.v > 0 ? -1 : 1;
+      for (let i = 1; i < weg.length - 1; i++) {
+        const d = Math.abs(lang[i] - c.m);
+        if (d > L / 2) continue;
+        const w = 0.5 * (1 + Math.cos(Math.PI * d / (L / 2)));
+        const sx = c.nx * s * fehlt * w, sz = c.nz * s * fehlt * w;
+        if (Math.hypot(sx, sz) > Math.hypot(schub[i].x, schub[i].z)) schub[i] = { x: sx, z: sz };
+      }
+    }
+    return weg.map((p, i) => {
+      const q = { x: p.x + schub[i].x, z: p.z + schub[i].z };
+      if (q.x === p.x && q.z === p.z) return p;
+      const ii = Math.round((q.x - g.x0) / g.G), jj = Math.round((q.z - g.z0) / g.G);
+      const tief = game.landscape.tiefeBei(q.x, q.z) >= t && (ii < 0 || jj < 0 || ii >= g.nx || jj >= g.nz || abst[jj * g.nx + ii] > 0);
+      return tief ? q : p;
+    });
+  }
+  // Stellen, an denen ein Rumpf L x B, der mit Bug und Heck auf dem Weg faehrt, Land beruehrt
+  function rumpfAnLand(weg, L, B, g, abst) {
+    // Tiefe auf 1 m gerundet zwischenspeichern: die vielen Versuche eines Wegs fragen fast dieselben
+    // Stellen (im Bodden dauerte ein Seeweg sonst rund 10 s, jetzt unter 1 s)
+    const roh = game.landscape.tiefeBei, cache = (g.tiefeCache ||= new Map());
+    const tb = (x, z) => {
+      const xi = Math.round(x), zi = Math.round(z), key = (xi + 4096) * 8192 + (zi + 4096);
+      let v = cache.get(key);
+      if (v === undefined) { v = roh(xi, zi); cache.set(key, v); }
+      return v;
+    };
+    const lang = [0];
+    for (let i = 1; i < weg.length; i++) lang.push(lang[i - 1] + Math.hypot(weg[i].x - weg[i - 1].x, weg[i].z - weg[i - 1].z));
+    const ges = lang[lang.length - 1];
+    const bei = (m) => {
+      m = Math.max(0, Math.min(ges, m));
+      let i = 1;
+      while (i < weg.length - 1 && lang[i] < m) i++;
+      const d = lang[i] - lang[i - 1] || 1, k = (m - lang[i - 1]) / d;
+      return { x: weg[i - 1].x + (weg[i].x - weg[i - 1].x) * k, z: weg[i - 1].z + (weg[i].z - weg[i - 1].z) * k };
+    };
+    const out = [];
+    for (let m = 0; m <= ges; m += 4) {
+      const a = bei(m - L / 2), b = bei(m + L / 2), p = bei(m);
+      const d = Math.hypot(b.x - a.x, b.z - a.z) || 1, fx = (b.x - a.x) / d, fz = (b.z - a.z) / d;
+      const f = Math.max(0, Math.min(1, (Math.min(m, ges - m) - L / 2) / (L / 2)));
+      const cx = p.x + ((a.x + b.x) / 2 - p.x) * 0.5 * f, cz = p.z + ((a.z + b.z) / 2 - p.z) * 0.5 * f;
+      // weit weg von allem Flachen: nichts zu pruefen (das spart fast alle Proben)
+      const i = Math.round((cx - g.x0) / g.G), j = Math.round((cz - g.z0) / g.G);
+      if (i >= 0 && j >= 0 && i < g.nx && j < g.nz && abst[j * g.nx + i] > L / 2 + B) continue;
+      // Rumpf alle 3 m in beide Richtungen (kleine Sandinseln sind kaum groesser)
+      const nu = Math.ceil(L / 3), nv = Math.max(1, Math.ceil(B / 3));
+      let fund = null;
+      for (let iu = 0; iu <= nu && !fund; iu++) for (let iv = 0; iv <= nv; iv++) {
+        const u = (iu / nu - 0.5) * L, v = (iv / nv - 0.5) * B;
+        const x = cx + fx * u - fz * v, z = cz + fz * u + fx * v;
+        // nur dort genau nachsehen, wo das Raster flaches Wasser in der Naehe kennt
+        const ii = Math.round((x - g.x0) / g.G), jj = Math.round((z - g.z0) / g.G);
+        if (ii >= 0 && jj >= 0 && ii < g.nx && jj < g.nz && abst[jj * g.nx + ii] > 1.5 * g.G) continue;
+        if (tb(x, z) < 0.5) { fund = { x, z }; break; }
+      }
+      if (fund) {
+        // wie weit seitlich von der Rumpfmitte (positiv: links in Fahrtrichtung)
+        const v = (fund.x - cx) * -fz + (fund.z - cz) * fx;
+        out.push({ ...fund, m, v, nx: -fz, nz: fx });
+      }
+    }
+    return out;
+  }
+  function grosserSeewegMit(von, info, m, g, abst, t, hartGrob, sperren = []) {
+    const k = karteJetzt();
+    const L = info.length ?? 30, B = info.beam ?? 8;
+    const { nx, nz, G } = g;
+    const hart = m.hart, wunsch = B / 2 + L / 4 + G;
+    const inKarte = (x, z) => x > k.x0 + 2 && x < k.x1 - 2 && z > k.z0 + 2 && z < k.z1 - 2;
+    const zelleX = (c) => g.x0 + (c % nx) * G, zelleZ = (c) => g.z0 + Math.floor(c / nx) * G;
+    const frei = (x, z) => {
+      if (inKarte(x, z)) return befahrbar(k, x, z, hart, t);
+      const i = Math.round((x - g.x0) / G), j = Math.round((z - g.z0) / G);
+      if (i < 0 || j < 0 || i >= nx || j >= nz) return true;
+      return abst[j * nx + i] >= hartGrob;
+    };
+    const i0 = Math.round((von.x - g.x0) / G), j0 = Math.round((von.z - g.z0) / G);
+    if (i0 < 1 || j0 < 1 || i0 >= nx - 1 || j0 >= nz - 1) return null;
+    // Die ersten Meter vom Liegeplatz weg duerfen durch das eigene Schiff (Hindernis in der Karte), das
+    // Wasser muss trotzdem tief genug sein
+    const nahStart = (x, z) => Math.hypot(x - von.x, z - von.z) < Math.max(24, B * 1.5);
+    const n = nx * nz;
+    const ok = new Uint8Array(n);
+    // Platz je Zelle fuer die Kosten: draussen Abstand zum Ufer, in der Karte auch zu Stegen, Molen, Pier
+    const platz = new Float32Array(n);
+    for (let c = 0; c < n; c++) {
+      const x = zelleX(c), z = zelleZ(c);
+      platz[c] = inKarte(x, z) ? Math.min(abst[c], freiBei(k, x, z)) : abst[c];
+      if (nahStart(x, z)) ok[c] = g.tiefe[c] >= t ? 1 : 0;
+      else ok[c] = frei(x, z) && !sperren.some((q) => Math.hypot(q.x - x, q.z - z) < q.r) ? 1 : 0;
+    }
+    // Dijkstra vom Start zum Rand des Rasters (dort ist offene See, weit hinter jeder Zoomstufe)
+    const dist = new Float64Array(n).fill(Infinity), vor = new Int32Array(n).fill(-1);
+    const halde = [];
+    const push = (d, c) => { halde.push([d, c]); let i = halde.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (halde[p][0] <= halde[i][0]) break; [halde[p], halde[i]] = [halde[i], halde[p]]; i = p; } };
+    const pop = () => { const top = halde[0], last = halde.pop(); if (halde.length) { halde[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let mm = i; if (l < halde.length && halde[l][0] < halde[mm][0]) mm = l; if (r < halde.length && halde[r][0] < halde[mm][0]) mm = r; if (mm === i) break; [halde[mm], halde[i]] = [halde[i], halde[mm]]; i = mm; } } return top; };
+    const c0 = j0 * nx + i0;
+    ok[c0] = 1; dist[c0] = 0; push(0, c0);
+    const NB = [[1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1], [1, 1, Math.SQRT2], [1, -1, Math.SQRT2], [-1, 1, Math.SQRT2], [-1, -1, Math.SQRT2]];
+    let ziel = -1;
+    while (halde.length) {
+      const [d, c] = pop();
+      if (d > dist[c]) continue;
+      const i = c % nx, j = (c - i) / nx;
+      if (i === 0 || j === 0 || i === nx - 1 || j === nz - 1) { ziel = c; break; }
+      for (const [di, dj, w] of NB) {
+        const q = (j + dj) * nx + i + di;
+        if (!ok[q]) continue;
+        // naeher am Ufer als gewuenscht kostet mehr: das Schiff haelt sich in der Mitte des Fahrwassers
+        const nah = Math.max(0, wunsch - platz[q]) / wunsch;
+        const dq = d + w * (1 + 30 * nah * nah);
+        if (dq >= dist[q]) continue;
+        dist[q] = dq; vor[q] = c; push(dq, q);
+      }
+    }
+    if (ziel < 0) return null;
+    const roh = [];
+    for (let c = ziel; c >= 0 && c !== c0; c = vor[c]) roh.push({ x: zelleX(c), z: zelleZ(c) });
+    roh.reverse();
+    // Glaetten: Ein langes Schiff braucht einen Weg ohne Knicke. Bug und Heck liegen auf dem Weg
+    // (services-besuch.js sehne), an einem Knick schwenkt die Mitte weit nach innen. Darum alle 4 m ein
+    // Punkt und dann mehrmals gleitender Mittelwert ueber eine Schiffslaenge; wo ein Punkt dabei zu nah
+    // an Ufer, Steg oder Mole kaeme, bleibt er, wo er war. Anfang (Liegeplatz) und Ende bleiben fest.
+    const roh4 = [];
+    const pts = [{ x: von.x, z: von.z }, ...roh];
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], b = pts[i], d = Math.hypot(b.x - a.x, b.z - a.z), n = Math.max(1, Math.round(d / 4));
+      for (let q = i === 1 ? 0 : 1; q <= n; q++) roh4.push({ x: a.x + (b.x - a.x) * q / n, z: a.z + (b.z - a.z) * q / n });
+    }
+    // in der Karte 2 m mehr Rand als beim Suchen: in der Kurve rueckt die Rumpfmitte nach innen
+    const ok1 = (p) => nahStart(p.x, p.z) || (inKarte(p.x, p.z) ? befahrbar(k, p.x, p.z, hart + 2, t) : frei(p.x, p.z));
+    const h = Math.max(3, Math.round(Math.max(L, 40) / 8));
+    let glatt = roh4;
+    // lange Schiffe oefter: ihre Kurven muessen weiter ausholen
+    for (let runde = 0, n = 6 + Math.round(L / 30); runde < n; runde++) {
+      const neu = glatt.map((p, i) => {
+        if (i === 0 || i === glatt.length - 1) return p;
+        const a = Math.max(0, i - h), b = Math.min(glatt.length - 1, i + h);
+        let sx = 0, sz = 0;
+        for (let j = a; j <= b; j++) { sx += glatt[j].x; sz += glatt[j].z; }
+        const q = { x: sx / (b - a + 1), z: sz / (b - a + 1) };
+        // geht der ganze Schritt nicht, dann ein Teil davon (sonst bleiben Stufen aus dem Raster stehen)
+        for (const f of [1, 0.6, 0.3]) {
+          const r = { x: p.x + (q.x - p.x) * f, z: p.z + (q.z - p.z) * f };
+          if (ok1(r)) return r;
+        }
+        return p;
+      });
+      glatt = neu;
+    }
+    // Ausduennen: Punkte weglassen, die fast auf der Linie liegen (unter 0,3 m daneben)
+    const out = [];
+    let a = 0;
+    while (a < glatt.length - 1) {
+      let b = a + 1;
+      while (b + 1 < glatt.length && b - a < 25) {
+        const p = glatt[a], q = glatt[b + 1], d = Math.hypot(q.x - p.x, q.z - p.z) || 1;
+        let ok = true;
+        for (let j = a + 1; j <= b && ok; j++) ok = Math.abs((glatt[j].x - p.x) * (q.z - p.z) - (glatt[j].z - p.z) * (q.x - p.x)) / d < 0.3;
+        if (!ok) break;
+        b++;
+      }
+      out.push(glatt[b]);
+      a = b;
+    }
+    // Zum Schluss noch eine Schiffslaenge geradeaus weiter hinaus (ganz aus dem Aussenring)
+    if (out.length >= 2) {
+      const p = out[out.length - 1], q = out[out.length - 2], d = Math.hypot(p.x - q.x, p.z - q.z) || 1;
+      out.push({ x: p.x + (p.x - q.x) / d * L, z: p.z + (p.z - q.z) / d * L });
+    }
+    return out;
   }
 
   /**
@@ -830,7 +1128,83 @@ export function init(game) {
       const rein = hinaus(a, L, m.t, info.beam).reverse();
       const start = rein.shift() ?? { x: a.x + a.nx * 15, z: a.z + a.nz * 15 };
       const raus = hinaus(b, L, m.t, info.beam);
-      return { start, punkte: [...rein, { x: a.x, z: a.z }, ...w.punkte, ...(raus.length ? raus : [{ x: b.x + b.nx * 15, z: b.z + b.nz * 15 }])] };
+      const weg = { start, punkte: [...rein, { x: a.x, z: a.z }, ...w.punkte, ...(raus.length ? raus : [{ x: b.x + b.nx * 15, z: b.z + b.nz * 15 }])] };
+      // Ausserhalb der Karte kennt die Wegsuche das Gelaende nicht (Kueste 4: das Stueck hinaus endete
+      // auf einer Sandbank): den ganzen Weg alle 4 m gegen flaches Wasser pruefen
+      if (game.landscape?.tiefeBei && !wegTief([weg.start, ...weg.punkte], Math.min(m.t, 1.5))) continue;
+      return weg;
+    }
+    return info.size === 'XXL' || L > 40 ? vorbeiWegDraussen(info, m) : null;
+  }
+
+  function wegTief(pts, t) {
+    const tb = game.landscape.tiefeBei;
+    for (let j = 1; j < pts.length; j++) {
+      const a = pts[j - 1], b = pts[j], n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.z - a.z) / 4));
+      for (let q = 0; q < n; q++) if (tb(a.x + (b.x - a.x) * q / n, a.z + (b.z - a.z) * q / n) < t) return false;
+    }
+    return true;
+  }
+  // Grosse Vorbeifahrer, wenn die Karte keinen Weg hat (Bodden: das Seegatt ist zu eng, beide Raender
+  // der Karte liegen im Bodden): draussen auf dem groben Raster von einem Rand des Aussenrings zu einem
+  // anderen, nicht durch die Fahrwasserkarte (dort liegt der Hafen), mit Abstand zum Ufer. Vorher kam
+  // auf Kueste 4 kein grosses Schiff vorbei, das Logbuch blieb bei 5 von 9 Schiffen (Abnahme 15.11.).
+  function vorbeiWegDraussen(info, m) {
+    if (!game.landscape?.tiefeBei || !game.gelaende?.aussenRect) return null;
+    const k = karteJetzt(), g = grobRaster(), { nx, nz, G } = g;
+    const L = info.length ?? 60, B = info.beam ?? 10;
+    // Draussen am Aussenring ist die See nur 3 bis 7 m tief (Kueste 4: ein schmaler Ring um den Bodden)
+    const abst = grobAbstand(g, Math.min(m.t, 3));
+    const hart = B / 2 + G / 2, wunsch = B / 2 + L / 4 + G;
+    const zx = (c) => g.x0 + (c % nx) * G, zz = (c) => g.z0 + Math.floor(c / nx) * G;
+    const inKarte = (x, z) => x > k.x0 - 20 && x < k.x1 + 20 && z > k.z0 - 20 && z < k.z1 + 20;
+    const ok = (c) => abst[c] >= hart && !inKarte(zx(c), zz(c));
+    const rand = [];
+    for (let i = 0; i < nx; i++) for (const j of [0, nz - 1]) if (abst[j * nx + i] >= hart + G) rand.push(j * nx + i);
+    for (let j = 1; j < nz - 1; j++) for (const i of [0, nx - 1]) if (abst[j * nx + i] >= hart + G) rand.push(j * nx + i);
+    if (rand.length < 2) return null;
+    const NB = [[1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1], [1, 1, Math.SQRT2], [1, -1, Math.SQRT2], [-1, 1, Math.SQRT2], [-1, -1, Math.SQRT2]];
+    for (let versuch = 0; versuch < 6; versuch++) {
+      const a = rand[Math.floor(Math.random() * rand.length)], b = rand[Math.floor(Math.random() * rand.length)];
+      if (Math.hypot(zx(a) - zx(b), zz(a) - zz(b)) < 600) continue;
+      const dist = new Float64Array(nx * nz).fill(Infinity), vor = new Int32Array(nx * nz).fill(-1);
+      const halde = [[0, a]];
+      dist[a] = 0;
+      const push = (d, c) => { halde.push([d, c]); let i = halde.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (halde[p][0] <= halde[i][0]) break; [halde[p], halde[i]] = [halde[i], halde[p]]; i = p; } };
+      const pop = () => { const top = halde[0], last = halde.pop(); if (halde.length) { halde[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let q = i; if (l < halde.length && halde[l][0] < halde[q][0]) q = l; if (r < halde.length && halde[r][0] < halde[q][0]) q = r; if (q === i) break; [halde[q], halde[i]] = [halde[i], halde[q]]; i = q; } } return top; };
+      let gefunden = false;
+      while (halde.length) {
+        const [d, c] = pop();
+        if (d > dist[c]) continue;
+        if (c === b) { gefunden = true; break; }
+        const i = c % nx, j = (c - i) / nx;
+        for (const [di, dj, w] of NB) {
+          const ii = i + di, jj = j + dj;
+          if (ii < 0 || jj < 0 || ii >= nx || jj >= nz) continue;
+          const q = jj * nx + ii;
+          if (!ok(q)) continue;
+          const nah = Math.max(0, wunsch - abst[q]) / wunsch;
+          const dq = d + w * (1 + 30 * nah * nah);
+          if (dq < dist[q]) { dist[q] = dq; vor[q] = c; push(dq, q); }
+        }
+      }
+      if (!gefunden) continue;
+      let pts = [];
+      for (let c = b; c >= 0; c = vor[c]) { pts.push({ x: zx(c), z: zz(c) }); if (c === a) break; }
+      pts.reverse();
+      // glaetten (gleitender Mittelwert), ein Punkt rueckt nur, wo das Wasser frei bleibt
+      const h = Math.max(2, Math.round(L / 30));
+      const frei = (p) => { const i = Math.round((p.x - g.x0) / G), j = Math.round((p.z - g.z0) / G); return i >= 0 && j >= 0 && i < nx && j < nz && ok(j * nx + i); };
+      for (let r = 0; r < 6; r++) {
+        pts = pts.map((p, i) => {
+          if (!i || i === pts.length - 1) return p;
+          let sx = 0, sz = 0, n = 0;
+          for (let q = Math.max(0, i - h); q <= Math.min(pts.length - 1, i + h); q++) { sx += pts[q].x; sz += pts[q].z; n++; }
+          const q = { x: sx / n, z: sz / n };
+          return frei(q) ? q : p;
+        });
+      }
+      return { start: pts[0], punkte: pts.slice(1) };
     }
     return null;
   }
