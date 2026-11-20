@@ -803,6 +803,50 @@
    "geraet": "pc",
    "datum": "2026-11-15",
    "quelle": "stegbilder/p83/pc-stegbild4-stufe6.png"
+  },
+  {
+   "datei": "p23-pr340-handy-karte-werft.jpg",
+   "pakete": [
+    "P23"
+   ],
+   "titel": "Werfthalle: Boote mit Schaden laufen gezielt ein",
+   "pr": 340,
+   "geraet": "handy",
+   "datum": "2026-11-15",
+   "quelle": "services/handy-karte-werft.png"
+  },
+  {
+   "datei": "p23-pr340-pc-tagesgaeste-kreuzfahrt.jpg",
+   "pakete": [
+    "P23"
+   ],
+   "titel": "Tagesgäste vom Kreuzfahrtschiff, Heringstage bringen Räucherei und Fischhalle mehr",
+   "pr": 340,
+   "geraet": "pc",
+   "datum": "2026-11-15",
+   "quelle": "services/pc-tagesgaeste-kreuzfahrt.png"
+  },
+  {
+   "datei": "p86-pr342-pc-tankstelle.jpg",
+   "pakete": [
+    "P86"
+   ],
+   "titel": "Fischkutter tankt an der Tankstelle",
+   "pr": 342,
+   "geraet": "pc",
+   "datum": "2026-11-16",
+   "quelle": "bootsgeschichten/p86-tankstelle-pc.png"
+  },
+  {
+   "datei": "p86-pr342-handy-siegerehrung.jpg",
+   "pakete": [
+    "P86"
+   ],
+   "titel": "Siegerehrung nach der Regatta am Abend",
+   "pr": 342,
+   "geraet": "handy",
+   "datum": "2026-11-16",
+   "quelle": "bootsgeschichten/p86-siegerehrung-handy.png"
   }
  ]
 }

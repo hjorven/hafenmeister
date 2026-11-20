@@ -109,7 +109,7 @@ export function init(game) {
     halten.timer = setTimeout(() => {
       if (halten?.art !== 'wasser') return;
       halten.aktiv = true;
-      halten.naechster = jetzt + RING_TAKT;
+      halten.naechster = performance.now() / 1000 + RING_TAKT;   // jetzt stammt vom letzten Bild
       wellenring(halten.welt.x, halten.welt.z, 1);
     }, WASSER_MS);
   });
@@ -266,7 +266,7 @@ export function init(game) {
   }
   function tickRinge(dt) {
     if (halten?.aktiv && halten.art === 'wasser' && jetzt >= halten.naechster) {
-      halten.naechster = jetzt + RING_TAKT;
+      halten.naechster = performance.now() / 1000 + RING_TAKT;   // jetzt stammt vom letzten Bild
       wellenring(halten.welt.x, halten.welt.z, 0.7);
     }
     for (let i = ringe.length - 1; i >= 0; i--) {

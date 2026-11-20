@@ -30,19 +30,33 @@ const LAGEN = [
   {
     id: 'bojen-erreichbar',
     titel: 'Erreichen Gäste sichtbar eine Boje?',
-    was: 'Je Stufe 2 bis 6 ein normaler Spieltag ohne Eingriff: Wie viele Boote der Warteschlange liegen sichtbar an einer Boje, bevor sie zugewiesen werden oder selbst einfahren? Nur dort kann man sie antippen.',
+    was: 'Je Stufe 2 bis 6 ein normaler Spieltag ohne Eingriff: Wie viele Boote der Warteschlange liegen sichtbar an einer Boje, wie viele fahren bei Andrang direkt aus der Anfahrt ein, wie viele nichts davon? Fund, wenn mehr als ein Viertel nichts davon tut oder kein Boot an einer Boje liegt.',
     adresse: '',
     varianten: (t) => (t.kurz ? [2, 5] : [2, 3, 4, 5, 6]).map((n) => ({ name: `stufe-${n}`, extra: `?stufe=${n}` })),
     async lauf(t) {
-      await t.page.evaluate(() => { const G = window.hafenmeister; const a = window.__boje = { ank: new Set(), boje: new Set(), selbst: 0, versteckt: 0 };
+      // Je Boot der Warteschlange das Ergebnis: sichtbar an einer Boje, bei Andrang direkt aus der Anfahrt
+      // in die Box (sim.js selfEnter: mehr als die Hälfte der Bojen vergeben, Absicht seit PR 280), am Ende
+      // noch unterwegs, oder nichts davon (ohne Boje zugewiesen, weitergefahren oder verschwunden).
+      await t.page.evaluate(() => { const G = window.hafenmeister; const a = window.__boje = { ank: new Set(), boje: new Set(), selbst: new Set(), versteckt: 0 };
         G.on('sim:arrived', (e) => { if (!e.direct) a.ank.add(e.boatId); });
         G.on('boot:an-boje', (e) => a.boje.add(e.id));
-        G.on('sim:selfEntered', () => a.selbst++);
+        G.on('sim:selfEntered', (e) => a.selbst.add(e.boatId));
         G.onTick(() => { a.versteckt = Math.max(a.versteckt, G.boatAnim.boats.filter((x) => x.versteckt).length); }); });
       await t.beobachte(dauer(t, 60), { bild: 20 });
-      const r = await t.page.evaluate(() => { const a = window.__boje; return { ankommen: a.ank.size, sichtbarAnBoje: [...a.ank].filter((i) => a.boje.has(i)).length, selbstEingefahren: a.selbst, hoechstensUnsichtbarDraussen: a.versteckt }; });
+      const r = await t.page.evaluate(() => {
+        const a = window.__boje; const st = window.hafenmeister.sim.state; const ank = [...a.ank];
+        const anBoje = ank.filter((i) => a.boje.has(i));
+        const direkt = ank.filter((i) => !a.boje.has(i) && a.selbst.has(i));
+        const unterwegs = ank.filter((i) => !a.boje.has(i) && !a.selbst.has(i) && st.boats[i]?.status === 'waiting');
+        return { ankommen: ank.length, sichtbarAnBoje: anBoje.length, direktBeiAndrang: direkt.length, nochUnterwegs: unterwegs.length,
+          ohneBoje: ank.length - anBoje.length - direkt.length - unterwegs.length, selbstEingefahren: a.selbst.size, hoechstensUnsichtbarDraussen: a.versteckt };
+      });
       t.messe('Bojen', r);
-      if (r.ankommen >= 6 && r.sichtbarAnBoje < r.ankommen / 2) t.fund('boje', `nur ${r.sichtbarAnBoje} von ${r.ankommen} Booten der Warteschlange lagen sichtbar an einer Boje (${r.selbstEingefahren} selbst eingefahren)`);
+      // Fund: Boote, die weder an einer Boje lagen noch bei Andrang direkt einfuhren noch unterwegs sind
+      // (P87: die alte Regel "weniger als die Hälfte an der Boje" zählte die gewollte Andrang-Einfahrt mit)
+      const fertig = r.ankommen - r.nochUnterwegs;
+      if (fertig >= 6 && r.ohneBoje > fertig / 4) t.fund('boje', `${r.ohneBoje} von ${fertig} Booten der Warteschlange lagen nie sichtbar an einer Boje und fuhren auch nicht bei Andrang direkt ein`);
+      if (fertig >= 6 && r.sichtbarAnBoje === 0) t.fund('boje', `kein Boot von ${fertig} lag sichtbar an einer Boje (${r.direktBeiAndrang} direkt bei Andrang)`);
     },
   },
   {

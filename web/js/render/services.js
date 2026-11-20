@@ -523,6 +523,14 @@ export function init(game) {
   k01Sperren();
   game.on('ready', k01Sperren);
 
+  // Liegeplatz an der Tankstelle (Welt, Südkante des Dienststegs), null ohne Tankstelle.
+  // Boote mit der Geschichte "Tanken" halten hier beim Ablegen kurz (render/boat-view.js).
+  api.tankPunkt = () => {
+    if (!tank?.group?.visible || !tank.group.parent) return null;
+    const p = tank.group.position;
+    // Südkante des Stegs (Welt +z): dort liegen die Boote längsseits
+    return { x: p.x, z: p.z + 1.6, seite: -1 };
+  };
   // ------------------------------------------------------------------ Dienste an Gastbooten (F2)
   // Morgens, wenn die Boote des Tages feststehen (Haken 'arrivals', nach den Bootsgeschichten, die die
   // Naechte setzen), entscheidet sich, wer einen Dienst will (Mast legen, Radtour, Reparatur): Er bleibt
