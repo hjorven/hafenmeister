@@ -116,6 +116,7 @@ async function lageLaufen({ browser, url, geraet, lage, v, q, zahlen }) {
   const E = { id: lage.id, variante: v?.name ?? null, titel: lage.titel, was: lage.was, adresse: q, geraet,
     funde: {}, hinweise: [], messungen: {}, bilder: [], nahbilder: [], fps: [], verdeckung: [], speichern: [], abbruch: null };
   const ctx = await browser.newContext({ ...GERAETE[geraet], deviceScaleFactor: 1, serviceWorkers: 'block' });
+  await ctx.addInitScript(require('../../tools/zeitraffer/bildwasser.cjs').BILDWASSER);   // window.__bildWasser für die Land- und Wasserprüfungen
   const page = await ctx.newPage();
   const ort = () => E._ort || 'Start';
   page.on('console', (m) => { if (m.type() === 'error') neu('fehler', m.text().slice(0, 300), { wann: ort() }); });
