@@ -21,7 +21,7 @@ for (const F of FORMEN) {
       const reg = REGIONEN[R];
       for (const st of [1, 2, 3, 4, 5, 6]) {
         for (const [px, py] of festePunkte(st).fahrwasser) if (-punkt(px, py, st, reg).h < (st <= 2 ? 1.6 : 3)) f.push(`${R} Stufe ${st} Fahrwasser ${px},${py}`);
-        const w = warteplaetze(st);
+        const w = warteplaetze(st, reg);
         for (const b of w.bojen) if (-punkt(b.px, b.py, st, reg).h <= 1.2) f.push(`${R} Stufe ${st} Boje ${b.id}`);
         for (const a of w.ankerplaetze) if (-punkt(a.px, a.py, st, reg).h <= 1.0) f.push(`${R} Stufe ${st} Anker ${a.id}`);
         // ganzer Schwoikreis im Wasser, nicht nur die Mitte
