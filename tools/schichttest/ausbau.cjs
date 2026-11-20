@@ -320,7 +320,12 @@ async function menue(t) {
       }
       await t.warte(400);
     }
-    const rest = (await t.G(SICHTBAR)).filter((x) => x !== '#hm-menue' && !vorher.has(x));
+    let rest = (await t.G(SICHTBAR)).filter((x) => x !== '#hm-menue' && !vorher.has(x));
+    // Der Möwen-Tipp kommt, wenn das Danebentippen eine Möwe aufscheucht; er gehört nicht zum Menüeintrag
+    if (rest.some((x) => x.includes('hm-gesten-tipp'))) {
+      await t.hinweis('Möwen-Tipp beim Schließen', `nach "${e.text}" scheuchte das Danebentippen eine Möwe auf`, { bild: false });
+      rest = rest.filter((x) => !x.includes('hm-gesten-tipp'));
+    }
     if (wirkt) await t.punkt(`"${e.text}" lässt sich wieder schließen`, rest.length === 0, rest.join(', '), { schwere: 'B' });
     if (ton !== ton2) { await auf(); await t.sp.knopf(knopf); await t.warte(300); }   // Ton zurückschalten
     if (await t.page.locator('#hm-menue').isVisible().catch(() => false)) await t.sp.knopf(t.page.locator('#btn-menu'));

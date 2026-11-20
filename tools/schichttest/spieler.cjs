@@ -207,7 +207,21 @@ function spieler(page, touch) {
           sp.rueckfaelle = (sp.rueckfaelle || 0) + 1;
           return;
         }
-        e.message = `${e.message.split('\n')[0]} | ${log} | Seite ${JSON.stringify(lage)} | Knopf ${JSON.stringify(b1)} -> ${JSON.stringify(b2)}`;
+        // Was liegt an der Knopfmitte oben? (z. B. Karte gerade im Aus- oder Einblenden)
+        const oben = box ? await page.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y);
+          return e ? `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : ''}${e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/).slice(0, 2).join('.') : ''}` : null; },
+        [box.x + box.width / 2, box.y + box.height / 2]).catch(() => null) : null;
+        // Einmal nachfassen: kurz verdeckt (Übergang) ist kein Fehler, dauerhaft verdeckt schon
+        if (box && !sp._nachfassen) {
+          sp._nachfassen = true;
+          try {
+            await page.waitForTimeout(800);
+            if (touch) await locator.tap({ timeout: 5000 }); else await locator.click({ timeout: 5000 });
+            sp.nachgefasst = (sp.nachgefasst || 0) + 1;
+            return;
+          } catch { /* bleibt ein Fehler */ } finally { sp._nachfassen = false; }
+        }
+        e.message = `${e.message.split('\n')[0]} | ${log} | oben: ${oben} | Seite ${JSON.stringify(lage)} | Knopf ${JSON.stringify(b1)} -> ${JSON.stringify(b2)}`;
         throw e;
       }
     },

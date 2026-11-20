@@ -21,6 +21,14 @@ async function dauerlieger(t, z) {
   if (!n) { await t.hinweis('Dauerlieger', 'keine Anfrage in zwei Spieltagen', { bild: false }); return; }
   await fensterZu(t);
   const vorher = await t.G(() => ({ geld: window.hafenmeister.sim.state.money, plaetze: Object.keys(window.hafenmeister.sim.state.modules?.dauer?.plaetze || {}) }));
+  // Hafen voll: bei 8x warten, bis eine Box frei wird (Abreisen am Nachmittag), höchstens 3 min
+  const FREI = () => Object.values(window.hafenmeister.sim.platzZustaende?.() || {}).includes('frei');
+  if (!(await t.G(FREI))) {
+    await setzeTempo(t, 'acht');
+    await t.bis(() => Object.values(window.hafenmeister.sim.platzZustaende?.() || {}).includes('frei'), null, 180_000);
+    await setzeTempo(t, 'pause');
+    await fensterZu(t);
+  }
   // Freie Boxen der Reihe nach antippen, bis eine Karte mit Bewerbern kommt
   const frei = await t.G(() => Object.entries(window.hafenmeister.sim.platzZustaende?.() || {}).filter(([, s]) => s === 'frei').map(([id]) => id));
   let platz = null, gewaehlt = null;
@@ -68,20 +76,25 @@ async function logbuch(t) {
   const offen = await fenster.waitFor({ state: 'visible', timeout: 5000 }).then(() => true, () => false);
   await t.punkt('Logbuch öffnet aus dem Menü', offen, '', { bild: true, schwere: 'B' });
   if (!offen) return;
-  const reiter = await t.page.locator('#hm-logbuch [role="tab"]').all();
+  // Das Logbuch baut sich beim Reiterwechsel neu auf: Reiter jedes Mal frisch suchen (nur die Hauptreiter, nicht die Größen-Chips)
+  const REITER = '#hm-logbuch .hm-lb-reiterleiste [role="tab"]';
+  const anzahl = await t.page.locator(REITER).count();
   const leer = [];
-  for (const r of reiter) {
+  for (let i = 0; i < anzahl; i++) {
+    const r = t.page.locator(REITER).nth(i);
+    await r.scrollIntoViewIfNeeded().catch(() => {});
     await t.sp.knopf(r);
     await t.warte(300);
-    const name = (await r.textContent()).replace(/\s+/g, ' ').trim();
+    const name = (await t.page.locator(REITER).nth(i).textContent()).replace(/\s+/g, ' ').trim();
+    const gewaehlt = await t.page.locator(REITER).nth(i).getAttribute('aria-selected');
     const inhalt = await t.page.locator('#hm-logbuch [role="tabpanel"]').first().textContent().catch(() => '');
-    if (!inhalt || inhalt.replace(/\s+/g, '').length < 10) leer.push(name);
+    if (gewaehlt !== 'true' || !inhalt || inhalt.replace(/\s+/g, '').length < 10) leer.push(name);
   }
-  await t.punkt('jeder Reiter zeigt etwas', reiter.length > 0 && leer.length === 0, `${reiter.length} Reiter${leer.length ? `, leer: ${leer.join(', ')}` : ''}`, { bild: leer.length > 0, schwere: 'C' });
+  await t.punkt('jeder Reiter zeigt etwas', anzahl > 0 && leer.length === 0, `${anzahl} Reiter${leer.length ? `, leer oder nicht gewählt: ${leer.join(', ')}` : ''}`, { bild: leer.length > 0, schwere: 'C' });
   // Gesehene Bootsarten (Regeln) stehen im Logbuch
   const arten = await t.G(() => Object.keys(window.hafenmeister.sim.state.logbook || {}).length);
   await t.punkt('Logbuch kennt die gesehenen Bootsarten', arten > 0, `${arten} Arten in den Regeln`, { bild: false, schwere: 'B' });
-  const zu = t.page.locator('#hm-logbuch .hm-zu:visible, #hm-logbuch button[aria-label*="chließen"]:visible').first();
+  const zu = t.page.locator('#hm-logbuch .hm-lb-zu:visible, #hm-logbuch button[aria-label*="chließen"]:visible').first();
   if (await zu.count()) await t.sp.knopf(zu); else if (!t.touch) await t.page.keyboard.press('Escape');
   const weg = await fenster.waitFor({ state: 'hidden', timeout: 4000 }).then(() => true, () => false);
   await t.punkt('Logbuch schließt wieder', weg, '', { schwere: 'B' });

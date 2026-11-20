@@ -155,6 +155,7 @@ function serve(root) {
     if (R.funde.slice(vorher.funde).some((f) => f.schwere === 'A')) { console.log('  Schicht nicht stabil, Lauf endet hier.'); break; }
   }
   if (t.sp.rueckfaelle) await t.hinweis('Knopf mit Rückfall gedrückt', `${t.sp.rueckfaelle}x reagierte ein ruhiger, sichtbarer Knopf nicht auf Playwright; Tippen in die Mitte half`, { bild: false });
+  if (t.sp.nachgefasst) await t.hinweis('Knopf erst beim zweiten Versuch gedrückt', `${t.sp.nachgefasst}x war ein Knopf kurz verdeckt (Übergang) und ging nach 0,8 s`, { bild: false });
   R.dauerMin = +((Date.now() - t0) / 60000).toFixed(1);
   await t.sp.ende();
   fs.writeFileSync(path.join(OUT, `ergebnis-${GERAET}.json`), JSON.stringify(R, null, 1));
