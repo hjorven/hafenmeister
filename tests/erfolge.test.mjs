@@ -88,7 +88,10 @@ test('Erfolge aus der Oberfläche: Tagesziele, Wochenziel, Sturm, Stammgäste, A
   E.zaehleExtra(state, 'sturm');
   const neu = E.pruefen(state, h).map((e) => e.id);
   assert.ok(neu.includes('tagesziele') && neu.includes('wochenziel') && neu.includes('sturm'));
-  state.modules.stamm = { liste: Array.from({ length: Z.stammgaeste[1] }, (_, i) => ({ stammId: i })) };
+  // Erstbesucher zählen nicht (Zusammenspiel K2), nur wiedergekommene Stammgäste
+  state.modules.stamm = { liste: Array.from({ length: Z.stammgaeste[1] }, (_, i) => ({ stammId: i, besuche: 1, stamm: false })) };
+  assert.ok(!E.pruefen(state, h).some((e) => e.id === 'stammgast'));
+  state.modules.stamm = { liste: Array.from({ length: Z.stammgaeste[1] }, (_, i) => ({ stammId: i, besuche: 2, stamm: true })) };
   assert.deepEqual(E.pruefen(state, h).map((e) => e.id).sort(), ['stammgaeste', 'stammgast']);
   E.zaehle(state, [{ type: 'regionDone', region: 'ostsee', day: 5 }]);
   assert.deepEqual(E.pruefen(state, h).map((e) => e.id), ['region']);

@@ -5,7 +5,7 @@ import * as sim from '../web/js/sim.js';
 import { createState } from '../web/js/state.js';
 import { HAFEN } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
-import { STAMM, haengeEin, stammState, beschreibung, nachtHook, namenNachtragen, freierName } from '../web/js/features/stammgaeste.js';
+import { STAMM, haengeEin, stammState, stammZahl, beschreibung, nachtHook, namenNachtragen, freierName } from '../web/js/features/stammgaeste.js';
 import { BOOTSNAMEN } from '../web/js/data/bootsnamen.js';
 import * as dauer from '../web/js/features/dauerlieger.js';
 
@@ -67,7 +67,7 @@ test('zufriedene Gäste werden Stammgäste und kommen wieder', () => {
   for (const g of s.liste) assert.ok(g.bootsname && g.heimathafen && g.typeId);
 });
 
-test('nur Bewertungen ab 4 Ankern machen Stammgäste', () => {
+test('nur Bewertungen ab 4 Ankern merken sich den Hafen, Stammgast erst beim Wiederkommen', () => {
   const state = createState({ seed: 1 });
   const s = stammState(state);
   s.abend = {
@@ -77,7 +77,38 @@ test('nur Bewertungen ab 4 Ankern machen Stammgäste', () => {
   const events = [{ type: 'departed', boatId: 1, rating: 4.5 }, { type: 'departed', boatId: 2, rating: 3 }];
   nachtHook({ state, events });
   assert.deepEqual(s.liste.map((g) => g.bootsname), ['Möwe']);
-  assert.ok(events.some((e) => e.type === 'stammgastNeu'));
+  // Zusammenspiel K2: der erste zufriedene Besuch macht noch keinen Stammgast
+  assert.ok(!events.some((e) => e.type === 'stammgastNeu'));
+  assert.equal(stammZahl(state), 0);
+  // Kommt wieder und ist zufrieden: jetzt Stammgast, genau einmal gemeldet
+  const id = s.liste[0].stammId;
+  s.abend = { 3: { stammId: id, bootsname: 'Möwe', besuche: 2 } };
+  const ev2 = [{ type: 'departed', boatId: 3, rating: 5 }];
+  nachtHook({ state, events: ev2 });
+  assert.ok(ev2.some((e) => e.type === 'stammgastNeu' && e.bootsname === 'Möwe'));
+  assert.equal(stammZahl(state), 1);
+  s.abend = { 4: { stammId: id, bootsname: 'Möwe', besuche: 3 } };
+  const ev3 = [{ type: 'departed', boatId: 4, rating: 5 }];
+  nachtHook({ state, events: ev3 });
+  assert.ok(!ev3.some((e) => e.type === 'stammgastNeu'));
+  // Wiedergekommen, aber unzufrieden: kein Stammgast
+  s.liste.push({ stammId: 77, bootsname: 'Butt', besuche: 1, zuletzt: 1, stamm: false });
+  s.abend = { 5: { stammId: 77, bootsname: 'Butt', besuche: 2 } };
+  nachtHook({ state, events: [{ type: 'departed', boatId: 5, rating: 3 }] });
+  assert.equal(stammZahl(state), 1);
+});
+
+test('volle Liste: echte Stammgäste bleiben, zufriedene Erstbesucher rücken nach', () => {
+  const state = createState({ seed: 1 });
+  const s = stammState(state);
+  for (let i = 0; i < STAMM.maxListe; i++) s.liste.push({ stammId: 100 + i, bootsname: `B${i}`, besuche: i < 10 ? 3 : 1, zuletzt: 1, stamm: i < 10 });
+  s.naechsteId = 500;
+  s.abend = Object.fromEntries(Array.from({ length: 20 }, (_, i) => [i + 1, { stammId: null, bootsname: `N${i}`, besuche: 1 }]));
+  state.day = 9;
+  nachtHook({ state, events: Array.from({ length: 20 }, (_, i) => ({ type: 'departed', boatId: i + 1, rating: 5 })) });
+  assert.equal(s.liste.length, STAMM.maxListe);
+  assert.equal(stammZahl(state), 10, 'alle zehn Stammgäste sind noch da');
+  assert.equal(s.liste.filter((g) => g.zuletzt === 9).length, 20);
 });
 
 test('zweimal unzufrieden: Stammgast kommt nicht mehr', () => {

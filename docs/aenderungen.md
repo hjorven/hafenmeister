@@ -6,6 +6,8 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 20.11.2026
 
+- Etwas weniger Gäste für den Aufstieg ab Stufe 3 (340 statt 360, 530 statt 560, 740 statt 840), weil der Ausbau über Nacht in Bauabschnitten und die ruhigen Jahreszeiten Zeit kosten. Ein Spiel bis zum Seehafen dauert so weiter rund 100 Spieltage. Die Rechnung kennt jetzt auch die Bauabschnitte und die längere Anfahrt großer Häfen.
+- Stammgast wird nur, wer wiederkommt: Ein zufriedener Gast merkt sich den Hafen, Stammgast ist er erst beim zweiten Besuch, wenn er wieder zufrieden abreist. Vorher wurde fast jeder Gast sofort Stammgast. Logbuch und die Erfolge „Kommt gern wieder“ und „Bekannte Gesichter“ (25 Stammgäste) zählen jetzt nur echte Stammgäste, und die bleiben auf der Liste.
 - Der Raddampfer am Kai K01 fährt nicht mehr über die Mole: er kommt von vorn, dreht draußen auf der Stelle und setzt rückwärts an den Kai. Beim Ablegen fährt er erst geradeaus an der Kante entlang und dreht dann ab.
 - Kreuzfahrtschiff, Korvette und Minenjagdboot werden mit Schleppern verholt und drehen dort, wo Platz ist, statt über Pier und Ankerplatz zu schwenken.
 - Die Hafeneinfahrt zwischen den Molen (ab Stufe 3) ist jetzt eine Einbahn: Boote fahren in kleinen Gruppen je Richtung hindurch, wer hinaus will, zuerst. Einlaufende warten ein Stück vor der Einfahrt, bis die Auslaufenden draußen sind. Morgens und abends stehen so keine Trauben mehr Bug an Bug in der Einfahrt, und zwei Boote, die sich ineinander verkeilt hatten, kommen wieder frei.

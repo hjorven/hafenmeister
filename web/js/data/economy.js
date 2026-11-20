@@ -339,10 +339,12 @@ export const ECONOMY = {
     seglerAnteil: 0.7,         // Anteil Segler unter den Bewerbern (wenn möglich)
     kuendigungsZuschlag: 0.2,  // sofort kündigen: Pacht der restlichen Tage zurück plus dieser Anteil der Saisonpacht
   },
-  // Stammgäste (features/stammgaeste.js): Anteil der neuen Boote, die Stammgäste sind; ab so vielen
-  // Ankern kommt ein Gast wieder; Länge der Liste; ab diesem Besuch als Dauerlieger zu behalten;
-  // namenGedaechtnis: so viele zuletzt vergebene Bootsnamen kommen möglichst nicht gleich wieder
-  stammgaeste: { chance: 0.15, abBewertung: 4, maxListe: 40, dauerAbBesuch: 5, namenGedaechtnis: 30 },
+  // Stammgäste (features/stammgaeste.js): Anteil der neuen Boote, die Wiederkehrer sind; ab so vielen
+  // Ankern merkt sich ein Gast den Hafen und kann wiederkommen; Stammgast ist er erst ab dem Besuch
+  // stammAbBesuch (Zusammenspiel K2: sonst wird fast jeder Gast sofort Stammgast); Länge der Liste
+  // (Stammgäste gehen vor, dann die zuletzt zufriedenen Gäste); ab diesem Besuch als Dauerlieger zu
+  // behalten; namenGedaechtnis: so viele zuletzt vergebene Bootsnamen kommen möglichst nicht gleich wieder
+  stammgaeste: { chance: 0.15, abBewertung: 4, stammAbBesuch: 2, maxListe: 40, dauerAbBesuch: 5, namenGedaechtnis: 30 },
   // Tagesziele (features/tagesziele.js, docs/neue-features.md Abschnitt 6). Morgens drei Karten
   // (leicht, mittel, schwer), der Spieler nimmt eine; es zählen nur eigene Handlungen.
   // geld: Belohnung eines leichten Ziels je Ausbaustufe. schwere: soll = Grundmenge mal Faktor,
@@ -401,15 +403,15 @@ export const ECONOMY = {
       ausbau: { id: 'durchstich', name: 'Durchstich zur Ostsee', kosten: 2200, bautage: 2,
         plaetze: ['B23', 'B24', 'B25', 'B26', 'F02'] } },
     { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 25, mix: { S: 0.32, M: 0.40, L: 0.28 },
-      ziel: { gaeste: 360, ruf: 3.5 },
+      ziel: { gaeste: 340, ruf: 3.5 },
       ausbau: { id: 'marina', name: 'Schwimmsteg D', kosten: 9000, bautage: 2,
         plaetze: ['D01', 'D02', 'D03', 'D04', 'D05', 'D06'] } },
     { stufe: 4, name: 'Marina', ankuenfte: 29, mix: { S: 0.24, M: 0.34, L: 0.42 },
-      ziel: { gaeste: 560, ruf: 3.8 },
+      ziel: { gaeste: 530, ruf: 3.8 },
       ausbau: { id: 'aussenhafen', name: 'Außenhafen mit Kai', kosten: 19000, bautage: 3,
         plaetze: ['K01', 'FK01', 'FK02'] } },
     { stufe: 5, name: 'Küstenmarina', ankuenfte: 31, mix: { S: 0.20, M: 0.33, L: 0.41, XL: 0.06 },
-      ziel: { gaeste: 840, ruf: 4.2 },
+      ziel: { gaeste: 740, ruf: 4.2 },
       // Die Pier bringt die Plätze der Großschiffe: Kreuzfahrtpier, Marineanleger, Liegeplatz des
       // Seenotrettungskreuzers. Sie sind fest vergeben, Gastboote legen dort nicht an.
       ausbau: { id: 'grossschiffpier', name: 'Pier für Großschiffe', kosten: 31500, bautage: 4,
