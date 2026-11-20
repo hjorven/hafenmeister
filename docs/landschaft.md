@@ -236,3 +236,21 @@ node --test tests/gelaende-vielfalt.test.mjs
 ```
 
 Prüft unter anderem: Wassertiefe an allen Liegeplätzen passt zu den Hafendaten, Wartebojen liegen in jedem Revier auch bei Niedrigwasser tief genug, Wege liegen an Land, die Uhrzeit läuft über den Spieltag ohne Sprung zurück, das vereinfachte Geländenetz hat keine Risse und deckt die ganze Fläche.
+
+### Rechnung und Bild stimmen überein (Entscheidung 15.11.2026, Gelände-Thread)
+
+Die Geländeformel `punkt()` wird an jeder Stelle genau gerechnet, das gezeichnete Netz hat nur alle 2 bis 3 m einen Punkt. Alles, was schmaler ist als eine Netzzelle, sieht der Spieler nicht, die Boote aber schon. Entschieden ist: Solche Stellen werden in der Formel beseitigt, nicht das Netz verfeinert (das kostet auf dem Handy Leistung) und nicht im Messwerkzeug ausgenommen. Dafür gelten in `gelaende.js` fünf kleine Regeln:
+
+- Einzelne Landpunkte (Landigkeit unter 1, vier Nachbarn im Abstand 2,5 nass) zählen als Wasser.
+- Ab Stufe 3 wird ein Rest Naturland von unter 20 Einheiten Breite zwischen Hafenbecken und natürlichem Wasser mit abgetragen.
+- Ab Stufe 3 wird flaches Naturwasser im Keil östlich neben der Kaifläche (bis 8 Einheiten, hinter der Beckenkante) verfüllt.
+- In Stufe 6 ist die Nehrungsstraße auf der Seeseite eine Einheit breiter gerechnet als gezeichnet und schließt so an die Anlagenflächen ab y 196 an. Zum Hafen hin bleibt die gezeichnete Breite, dort liegen Gassen.
+- In Stufe 6 wird eine flache Wasserpfütze zwischen Straße und Naturland dahinter (bis 9 Einheiten, Landigkeit über -5) zu Strand.
+
+Gemessen wird mit dem Werkzeug aus P87:
+
+```bash
+node tools/zeitraffer/wasserbild.cjs --kuesten 1-15 --stufen 3-6
+```
+
+Erwartete letzte Zeile: "Bild und istWasser stimmen überall bis auf den Rasterrand überein."
