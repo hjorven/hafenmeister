@@ -23,7 +23,7 @@ Aussehen: kleine Pixel-Schilder statt weißer Leisten. Jedes Element ist ein eig
 |---|---|---|
 | Status `.hm-status` | oben links | Geld (Münze), Ruf (Stern) |
 | Werkzeuge `.hm-werkzeuge` | oben rechts | Übersicht, Menü (`#btn-menu`) |
-| Menü `#hm-menue` | klappt unter dem Menü-Knopf auf | Fotomodus, Ton, Spielstand, Maus und Tastatur (nur PC) |
+| Menü `#hm-menue` | klappt unter dem Menü-Knopf auf | Tagesabschluss, Statistik, Fotomodus, Ton, Spielstand, Hilfe, Maus und Tastatur (nur PC), Einstellungen, Gästebuch, Logbuch (Reihenfolge: Liste `MENUE` in `oberflaeche.js`, Gästebuch und Logbuch hängen sich selbst an) |
 | Seite `#hm-seite` | links unter dem Status | Wetter, Tagesziele, Ziel der nächsten Stufe (`#hm-ziel`); jedes Schild klappt eine Tafel auf, immer nur eine |
 | Zeit `#hm-zeit` | unten links | Tag und Tageszeit, Himmelsbalken mit Sonne/Mond, Knöpfe Pause, 1x, 3x, 8x |
 | Kassieren `#btn-collect` | unten Mitte (Handy hochkant: eigene Zeile darüber) | nur abends mit offenen Münzen |
@@ -92,6 +92,10 @@ Tipps zählen mit Fingertoleranz (22 bis 30 px), damit auch eine weit herausgezo
 | `1` bis `9`, `Tab` | wartendes Boot wählen, bei offener Karte deren Knopf |
 | `Enter` | gewähltes Boot einfahren lassen |
 | `F` | 3x an und aus |
+| `G` | 8x an und aus |
+| `K` | Kassieren (wenn der Knopf da ist) |
+| `N`, `J`, `T` | Gästebuch, Logbuch, Statistik |
+| `R` `V`, `Bild auf` `Bild ab` | Kamera neigen |
 | `Leertaste` | Pause |
 | `B` | Bauen |
 | `Esc` | Abbrechen |
@@ -174,7 +178,7 @@ Dazu ein Knopf "Ton und Musik einstellen", der das Ton-Fenster mit getrennten Re
 - Module dürfen `game.speed` nicht selbst ändern.
 - PC: <kbd>F</kbd> 3x an und aus, <kbd>G</kbd> 8x an und aus, <kbd>K</kbd> Kassieren, <kbd>Leertaste</kbd> Pause.
 
-Schrift: alles in Pixelify Sans, auch Fließtext und Modul-Stile (`.hm-neu *` mit `!important` in `oberflaeche.css`); Ziffern und Euro bleiben über `unicode-range` in der Systemschrift. Kleine Texte nicht unter etwa 13 px.
+Schrift: alles in Pixelify Sans, auch Fließtext, Ziffern, Euro und Modul-Stile (`.hm-neu *` mit `!important` in `oberflaeche.css`); seit PR 282 ohne `unicode-range`, das Euro-Zeichen ist neu gezeichnet ([ruhe.md](ruhe.md)). Kleine Texte nicht unter etwa 13 px.
 
 Schriftgrößen in Regeln immer als `var(--hm-s)` schreiben, nicht `var(--hm-schrift)`, sonst wirkt "Größere Schrift" nicht.
 

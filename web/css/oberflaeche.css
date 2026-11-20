@@ -1075,7 +1075,7 @@ body.hm-neu { font: 400 var(--hm-s)/1.4 var(--hm-pixel); color: var(--hm-tinte);
   .hm-neu .hm-schalter-text strong { font-size: calc(var(--hm-s) - 1px); }
   .hm-neu .hm-schalter-text span { font-size: calc(var(--hm-s) - 4px); line-height: 1.2; }
   .hm-neu .hm-wahl { gap: 3px; padding: 4px 2px; border: 0; border-top: var(--hm-px) dotted rgba(36, 54, 74, 0.25); background: none; }
-  .hm-neu .hm-wahl-stufen button { min-height: 36px; }
+  .hm-neu .hm-wahl-stufen button { min-height: 40px; }   /* Fingergröße (Zusammenspiel 2), vorher 36 */
 }
 @media (max-height: 499px) and (orientation: landscape) {
   .hm-neu #hm-einstellungen { width: min(560px, calc(100vw - var(--hm-links) - var(--hm-rechts))); grid-template-columns: 1fr 1fr; column-gap: 12px; }
