@@ -187,8 +187,9 @@ export async function init(game) {
           : `Tag ${tage[0].tag} bis ${tage.at(-1).laufend ? `heute (Tag ${tage.at(-1).tag})` : tage.at(-1).tag}`)),
       el('button', { type: 'button', class: 'hm-zu hm-st-zu', 'aria-label': 'Statistik schließen', title: 'Schließen (Esc)', onclick: schliessen }));
 
-    if (!tage.length) {
-      karte.replaceChildren(kopf, el('p', { class: 'hm-st-leer' }, 'Die Statistik füllt sich ab dem ersten Abend.'));
+    // Nur der laufende erste Tag ohne Einnahmen: statt zwei leerer Kästen ein Satz (Zusammenspiel 2)
+    if (!tage.length || (tage.length === 1 && tage[0].laufend && !z.summe)) {
+      karte.replaceChildren(kopf, el('p', { class: 'hm-st-leer' }, 'Die Statistik füllt sich, sobald die ersten Boote zahlen, und zeigt ab dem ersten Abend auch die Belegung.'));
       return;
     }
 
