@@ -199,6 +199,35 @@ function engstellen(k, r) {
   return { id, liste: liste.filter((e) => !e.klein) };
 }
 
+/**
+ * Hafeneinfahrt als Einbahn-Abschnitt (wie eine Engstelle, aber breit): Zwischen den Molenkoepfen a
+ * und b (Weltmeter) und tief Meter zu beiden Seiten werden alle befahrbaren Zellen eine eigene
+ * Engstelle. Boote fahren dort in Konvois je Richtung, Auslaufende zuerst (Hafenregel); sonst trafen
+ * sich abends Dutzende Ein- und Auslaufende Bug an Bug in der Einfahrt (Pulk Stufe 5). Gibt die
+ * Nummer zurueck (oder -1, wenn dort kein Wasser ist).
+ */
+export function einfahrtAlsEinbahn(k, a, b, tiefe = 14) {
+  const dx = b.x - a.x, dz = b.z - a.z, l = Math.hypot(dx, dz) || 1;
+  const ux = dx / l, uz = dz / l, nx_ = -uz, nz_ = ux;
+  const nr = k.eng.liste.reduce((m, e) => Math.max(m, e.nr + 1), 0);
+  let zellen = 0;
+  const xs = [a.x, b.x].map((v) => v), zs = [a.z, b.z];
+  const x0 = Math.min(...xs) - tiefe, x1 = Math.max(...xs) + tiefe, z0 = Math.min(...zs) - tiefe, z1 = Math.max(...zs) + tiefe;
+  for (let z = z0; z <= z1; z += k.zelle * 0.5) {
+    for (let x = x0; x <= x1; x += k.zelle * 0.5) {
+      const c = idx(k, x, z);
+      if (c < 0 || k.eng.id[c] >= 0 || k.frei[c] < 1) continue;
+      const rx = x - a.x, rz = z - a.z, along = rx * ux + rz * uz, quer = rx * nx_ + rz * nz_;
+      if (along < 0 || along > l || Math.abs(quer) > tiefe) continue;
+      k.eng.id[c] = nr;
+      zellen++;
+    }
+  }
+  if (!zellen) return -1;
+  k.eng.liste.push({ nr, x: (a.x + b.x) / 2, z: (a.z + b.z) / 2, ax: nx_, az: nz_, laenge: 2 * tiefe, zellen, einfahrt: true });
+  return nr;
+}
+
 function weitInDerNaehe(k, c, grenze, radius) {
   const n = Math.ceil(radius / k.zelle);
   const i0 = c % k.nx, j0 = (c - i0) / k.nx;
@@ -602,7 +631,7 @@ function engstellenAuf(k, a, pts) {
           if (vor) { akt = vor; akt.zuletzt = ss; continue; }
           const eng = k.eng.liste.find((q) => q.nr === e);
           const dir = (p.x - px) * eng.ax + (p.z - pz) * eng.az;
-          akt = { nr: e, ein: ss, zuletzt: ss, aus: ss, richtung: dir >= 0 ? 1 : -1 };
+          akt = { nr: e, ein: ss, zuletzt: ss, aus: ss, richtung: dir >= 0 ? 1 : -1, ...(eng.einfahrt ? { einfahrt: true } : {}) };
           out.push(akt);
         }
       }

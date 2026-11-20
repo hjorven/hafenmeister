@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "20.11.2026",
-  "commit": "010247e"
+  "commit": "2cad20f"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1587,13 +1587,18 @@
    "id": "P85",
    "titel": "Zusammenspiel nach Welle 0 prüfen",
    "inhalt": "Jorvens Auftrag vom 14.11.: alle Features noch da, neue Features im normalen Spiel wirklich genutzt, Welle 1 wirklich gefixt, Übersehenes finden. Drei Threads (Kernschleife und Regeln; Oberfläche und Geräte; Welt, Boote, Ereignisse), gemeinsame Datei docs/zusammenspiel.md",
-   "thread": "neu, startet, sobald Welle 0 fertig ist",
+   "thread": "teilweise: Teil 2 Oberfläche und Geräte erledigt (PR 352, docs/zusammenspiel.md); Kernschleife und Welt laufen",
    "welle": 1,
-   "prs": [],
+   "prs": [
+    352
+   ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
-   "status": "offen",
-   "bilder": []
+   "status": "teilweise",
+   "bilder": [
+    78,
+    79
+   ]
   },
   {
    "id": "P86",
@@ -4468,10 +4473,10 @@
    ],
    "zaehler": {
     "erledigt": 11,
-    "teilweise": 0,
+    "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 1,
+    "offen": 0,
     "entfaellt": 1,
     "alle": 13
    }
@@ -4621,10 +4626,10 @@
  ],
  "gesamt": {
   "erledigt": 42,
-  "teilweise": 1,
+  "teilweise": 2,
   "arbeit": 1,
   "frage": 0,
-  "offen": 41,
+  "offen": 40,
   "entfaellt": 1,
   "alle": 86
  },
@@ -5573,9 +5578,34 @@
    "datum": "2026-11-20",
    "quelle": "winter/handy-hochsaison.png",
    "nr": 77
+  },
+  {
+   "datei": "p85-pr352-handy-grund.jpg",
+   "pakete": [
+    "P85"
+   ],
+   "titel": "Zusammenspiel Oberfläche: Grundansicht am Handy",
+   "pr": 352,
+   "geraet": "handy",
+   "datum": "2026-11-20",
+   "quelle": "zusammenspiel/oberflaeche/handy-grund.png",
+   "nr": 78
+  },
+  {
+   "datei": "p85-pr352-pc-bauen.jpg",
+   "pakete": [
+    "P85"
+   ],
+   "titel": "Zusammenspiel Oberfläche: Bauen am PC",
+   "pr": 352,
+   "geraet": "pc",
+   "datum": "2026-11-20",
+   "quelle": "zusammenspiel/oberflaeche/pc-bauen.png",
+   "nr": 79
   }
  ],
  "neueBilder": [
+  79,
   77,
   76,
   74,
@@ -5583,10 +5613,25 @@
   70,
   68,
   67,
-  65,
-  63
+  65
  ],
  "merges": [
+  {
+   "datum": "2026-11-20",
+   "titel": "Roadmap-Pflege: P85 Teil 2 (PR 352) mit Bildern",
+   "pr": 355,
+   "pakete": [
+    "P85"
+   ]
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Zusammenspiel 2: Oberfläche und Geräte geprüft, 12 Funde behoben (P85)",
+   "pr": 352,
+   "pakete": [
+    "P85"
+   ]
+  },
   {
    "datum": "2026-11-20",
    "titel": "Roadmap-Pflege: P20-Rest (PR 347) mit Bild",
@@ -5662,20 +5707,6 @@
    "pr": 342,
    "pakete": [
     "P86"
-   ]
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Arbeitsplan: erst Welle 0 bis 2 (Grundgerüst) fertig, fünf offene Pakete",
-   "pr": 345,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-15",
-   "titel": "Roadmap-Pflege: P23 mit PR 340 und Bildern",
-   "pr": 343,
-   "pakete": [
-    "P23"
    ]
   }
  ]

@@ -51,32 +51,39 @@ export function neuePassende(state, ctx, d) {
 }
 
 /**
- * Was gerade geht, je Steg höchstens ein Umbau und ein Rückbau:
+ * Was gerade sinnvoll ist, je Steg höchstens ein Umbau und ein Rückbau:
  * { art: 'umbau'|'rueckbau', steg, platz (Doppelbox-id), teile: [ids], kosten, gesperrt, gebaut, moeglich }
- * gesperrt: 'ab Ausbaustufe n', 'alle Boxen belegt', 'Doppelbox belegt' oder null.
+ * gesperrt: 'ab Ausbaustufe n', 'alle Boxen belegt' oder null.
+ * Damit das Baumenü nicht dauerhaft zwei Einträge je Steg zeigt (Zusammenspiel K5):
+ * - Umbau nur, solange an diesem Steg keine Doppelbox frei ist (eine freie reicht für den nächsten Katamaran).
+ * - Rückbau nur, wenn eine Doppelbox frei ist und zugleich alle schmalen Boxen des Stegs belegt sind
+ *   (dann fehlen gerade schmale Boxen).
  */
 export function angebote(state, ctx) {
   if (!REGELN) return [];
   const je = {};
   for (const p of paare(state, ctx)) (je[p.platz.jetty] ||= []).push(p);
+  const klassen = REGELN.klassen ?? ['L'];
   const out = [];
   for (const [steg, liste] of Object.entries(je)) {
     const gebaut = liste.filter((p) => p.gebaut);
     const offen = liste.filter((p) => !p.gebaut);
     const stufe = state.stage < REGELN.abStufe ? `ab Ausbaustufe ${REGELN.abStufe}` : null;
     if (state.stage + 1 < REGELN.abStufe) continue;
-    if (offen.length) {
+    const freieDoppel = gebaut.filter((p) => frei(state, ctx, p.platz.id));
+    if (offen.length && !freieDoppel.length) {
       // Von außen nach innen: das letzte Paar zuerst, das erste mit zwei freien Boxen
       const wahl = [...offen].reverse().find((p) => p.teile.every((t) => frei(state, ctx, t.id)));
       const p = wahl ?? offen[offen.length - 1];
       out.push({ art: 'umbau', steg, platz: p.platz.id, teile: p.teile.map((t) => t.id), kosten: REGELN.kosten,
         gesperrt: stufe ?? (wahl ? null : 'alle Boxen belegt'), gebaut: gebaut.length, moeglich: liste.length });
     }
-    if (gebaut.length) {
-      const wahl = gebaut.find((p) => frei(state, ctx, p.platz.id));
-      const p = wahl ?? gebaut[0];
+    const schmalFrei = ctx.berths.some((b) => b.jetty === steg && b.kind === 'box' && !b.doppel && klassen.includes(b.size)
+      && sim.berthAvailable(state, b) && frei(state, ctx, b.id));
+    if (freieDoppel.length && !schmalFrei) {
+      const p = freieDoppel[0];
       out.push({ art: 'rueckbau', steg, platz: p.platz.id, teile: p.teile.map((t) => t.id), kosten: REGELN.rueckbau,
-        gesperrt: wahl ? null : 'Doppelbox belegt', gebaut: gebaut.length, moeglich: liste.length });
+        gesperrt: null, gebaut: gebaut.length, moeglich: liste.length });
     }
   }
   return out;

@@ -17,7 +17,7 @@ import { HAFEN } from '../data/harbor.js';
 import { wimpelAn } from './wimpel-regel.js';
 import { seebrueckeStrecke } from './landschaft/strand.js';
 import { molen } from './landschaft/gelaende.js';
-import { baueKarte, route, hindernisseAusHafen, bootMass, erreichbar, befahrbar, sichtlinie, zellMitte, freiBei } from '../world/fahrwasser.js';
+import { baueKarte, route, hindernisseAusHafen, bootMass, erreichbar, befahrbar, sichtlinie, zellMitte, freiBei, einfahrtAlsEinbahn } from '../world/fahrwasser.js';
 
 const U = HAFEN.einheiten?.meterProEinheit ?? 0.62;
 
@@ -448,6 +448,9 @@ export function init(game) {
       z0: Math.min(BEREICH.z0, ab(Math.min(...zs) - 20, BEREICH.z0)), z1: Math.max(BEREICH.z1, Math.max(...zs) + 20),
     };
   }
+  // Einfahrt zwischen den Molen (Einbahn-Abschnitt): so viele Boote je Richtung zugleich
+  const EINFAHRT_KONVOI = 6;
+  let einfahrtNr = -1;
   let karte = null, karteSig = '', karteAlt = true, karteHindernisse = { linien: [], rechtecke: [] };
   const flaechen = new Map();         // Groessenklasse -> { r, t, sektoren }
   function karteJetzt() {
@@ -475,11 +478,21 @@ export function init(game) {
       linien.push({ punkte: [k, { x: k.x + 0.01, z: k.z }], breite: 2 * (w * 0.95 + 0.9) });
     }
     karte = baueKarte({ tiefe, bereich: bereichMit(sb), ...h, linien, weich, engRadius: 5 });
+    // Hafeneinfahrt zwischen den Koepfen von West- und Ostmole: Einbahn mit Konvois, Auslaufende zuerst
+    einfahrtNr = -1;
+    if (st >= 3) {
+      const [west, ost] = molen(st);
+      if (west && ost) {
+        const kopf = (m) => { const [px, py] = m.punkte[m.punkte.length - 1]; return { x: px * 0.62, z: -py * 0.62 }; };
+        einfahrtNr = einfahrtAlsEinbahn(karte, kopf(west), kopf(ost), 16);
+      }
+    }
     karteHindernisse = { linien, rechtecke: h.rechtecke ?? [] };
     karteSig = sig;
     karteAlt = false;
     flaechen.clear();
     game.boatAnim.engstellenNeu?.();
+    if (einfahrtNr >= 0) game.boatAnim.engstellen?.konvoi?.set(einfahrtNr, EINFAHRT_KONVOI);
     game.emit('fahrwasser:karte', { stufe: st, engstellen: karte.eng.liste.length });
     return karte;
   }
