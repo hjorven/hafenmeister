@@ -847,6 +847,17 @@
    "geraet": "handy",
    "datum": "2026-11-16",
    "quelle": "bootsgeschichten/p86-siegerehrung-handy.png"
+  },
+  {
+   "datei": "p20-pr347-handy-hochsaison.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Hochsaison im Sommer: mehr Boote, volle Stege",
+   "pr": 347,
+   "geraet": "handy",
+   "datum": "2026-11-20",
+   "quelle": "winter/handy-hochsaison.png"
   }
  ]
 }
