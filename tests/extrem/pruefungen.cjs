@@ -9,7 +9,12 @@ const PRUEFE = (opts = {}) => {
   const G = window.hafenmeister; const T = G.THREE; const S = G.sim; const st = S.state;
   const W = window.__exp ||= { ray: new T.Raycaster(), simSeit: new Map() };
   const out = { menschen: [], leinen: [], xxl: [], abgleich: [], text: [], ui: [], regeln: [] };
-  const wasser = (x, z) => (G.landschaft?.istWasser ? G.landschaft.istWasser(x, z) : true);
+  // Rechnung (istWasser) und Bild (gezeichnetes Netz, tools/zeitraffer/bildwasser.cjs) weichen am Ufer um
+  // bis zu eine Rasterzelle ab; ein Fund zählt nur, wo beide dasselbe zeigen (P87).
+  const rechnung = (x, z) => (G.landschaft?.istWasser ? G.landschaft.istWasser(x, z) : true);
+  const bildW = (x, z) => window.__bildWasser?.(x, z) ?? null;
+  const wasser = (x, z) => rechnung(x, z) || bildW(x, z) === true;        // Land nur, wenn beide Land sagen
+  const nass = (x, z) => rechnung(x, z) && bildW(x, z) !== false;          // Wasser nur, wenn beide Wasser sagen
 
   // ---------------------------------------------------------------- Menschen im Wasser
   // Gezeichnet wird, wer nicht drinnen, an Bord oder entfernt ist (people.js zeichnen()).
@@ -22,9 +27,11 @@ const PRUEFE = (opts = {}) => {
   for (const a of ag) {
     if (['entfernt', 'drinnen', 'anbord', 'wartet-start'].includes(a.zustand)) continue;
     if (!Number.isFinite(a.x) || !Number.isFinite(a.z)) { out.menschen.push({ id: 'mensch-' + (a.id ?? '?'), st: 'Position keine Zahl', p: null }); continue; }
-    if (!wasser(a.x, a.z)) continue;
-    // Uferlinie: erst mindestens 1 m im Wasser zählt (Bild und istWasser weichen am Ufer leicht ab)
-    if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([i, j]) => !wasser(a.x + i, a.z + j))) continue;
+    // Badegäste gehen absichtlich ins flache Wasser (people/netz.js Ziel 'baden'), das ist kein Fund
+    if (a.ziel?.art === 'baden') continue;
+    if (!nass(a.x, a.z)) continue;
+    // Uferlinie: erst mindestens 1 m im Wasser zählt (Wellensaum, Figur steht auf der Kante)
+    if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([i, j]) => !nass(a.x + i, a.z + j))) continue;
     if (a.y > 0.25 || traegt(a.x, a.z)) continue;
     // Nach Ort (5-m-Raster) zusammengefasst: ein Weg unter Wasser ist ein Fund, nicht zwanzig
     const ortKey = `${Math.round(a.x / 5) * 5}/${Math.round(a.z / 5) * 5}`;
