@@ -594,9 +594,12 @@ export async function init(game) {
   // ---------------------------------------------------------------- Ablauf
   function schritt(id) {
     const e = einstiegState(st());
+    const warFertig = e.fertig;
     erledige(e, id);
     if (id === aktuell) zeige(null);
-    if (e.fertig) game.emit('einstieg:ende', {});
+    // Nur beim Übergang melden: nach dem Einstieg ruft jedes Anlegen und Kassieren schritt() weiter auf
+    // (Zusammenspiel-Zähllauf: sonst rund 6000 'einstieg:ende' je Spiel, jedes rechnet den Bau-Tipp neu)
+    if (e.fertig && !warFertig) game.emit('einstieg:ende', {});
   }
   function beenden() {
     const e = einstiegState(st());
