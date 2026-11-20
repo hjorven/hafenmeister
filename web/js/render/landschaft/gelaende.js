@@ -488,7 +488,9 @@ export function punkt(px, py, stufe, region) {
   const ausgebaut = stufe >= 3 && px >= -150 && px <= 202;
   const F = gelaendeform();
   const N = F.natur;
-  const q = N.probe(px, py);
+  let q = N.probe(px, py);
+  // Einzelne Landpunkte im Wasser (Landigkeit knapp über null, ringsum Wasser) sind Rechenkrümel, kein Land
+  if (q.L >= 0 && q.L < 1 && N.landig(px - 2.5, py) < 0 && N.landig(px + 2.5, py) < 0 && N.landig(px, py - 2.5) < 0 && N.landig(px, py + 2.5) < 0) q = { ...q, L: -0.5, d: -0.5 };
   const ln = seeNord(px), ms = meerSued(px);   // nur noch Maße für Seegatt und Durchstich
   const seeOffen = q.L < 0 ? 1 - smooth(0, 60, q.offenAbstand) : 0;
   const see = seeOffen;
@@ -625,9 +627,19 @@ export function punkt(px, py, stufe, region) {
   // ---------------- Bauprojekte, die Wasser und Land verändern
   if (stufe <= 2 && h < 0 && py < 160) h = baggern(h, px, py, HAFENBECKEN12, 1.9, 8);
   if (stufe >= 3) {
+    // Flaches Naturwasser, das als schmaler Keil östlich neben der Kaifläche hinter der Beckenkante liegt, wird
+    // verfüllt: sonst gräbt das Becken dort einen wenige Meter breiten Schlitz, den das gezeichnete Netz nicht zeigt
+    if (h < 0 && px > KAIFLAECHE.x1 && px <= KAIFLAECHE.x1 + 8 && py <= 0 && py > KAIFLAECHE.y0 && q.L > -6) { h = 0.3; typ = 'sand'; }
     const vorher = h;
     if (py > 6 || h < 0 || (py > stegUfer(px) && px >= -150 && px <= 208)) {
       h = graben(h, px, py, HAFENBECKEN3, 2.6, 30);
+      // Schmaler Rest Naturland zwischen dem ausgehobenen Becken und dem natürlichen Wasser dahinter (unter
+      // 20 Einheiten breit) wird mit abgetragen, sonst bleibt eine Sandbank im Hafenwasser stehen, die das
+      // gezeichnete Netz gar nicht zeigt
+      if (h >= 0 && q.L >= 0 && q.L < 20 && py > 20) {
+        const a = polyAbstand(px, py, HAFENBECKEN3);
+        if (a >= 0 && a + q.L < 20) h = -0.6 - 0.04 * (20 - a - q.L);
+      }
       h = graben(h, px, py, stufe >= 4 ? BECKEN4 : BECKEN3, 3.5 + 0.4 * wob, 14);
       if (stufe >= 4) h = graben(h, px, py, BECKEN4_WEST, 2.6, 12);
       if (stufe < 5) h = graben(h, px, py, RINNE34, 4.4, 6);
@@ -701,9 +713,14 @@ export function punkt(px, py, stufe, region) {
   }
   if (stufe >= 6 && px < 4 && (h >= 0 || py > 150)) {
     const w = strasseNehrung();
-    if (abstandZuLinie(px, py, w.punkte) < w.breite / 2) {
+    // Auf der Seeseite eine Einheit breiter als gezeichnet: schließt den Spalt zu den Anlagenflächen, die bei
+    // y 196 beginnen. Zum Hafen hin bleibt es bei der gezeichneten Breite (dort liegen Gassen vor den Boxen)
+    if (abstandZuLinie(px, py, w.punkte) < w.breite / 2 + (py > 194 ? 1 : 0)) {
       typ = 'weg';
       if (py > 150) h = Math.max(0.6, Math.min(h, 1.0));   // auf der Nehrung eben, am Seeufer aufgeschüttet
+    } else if (h < 0 && py > 194 && abstandZuLinie(px, py, w.punkte) < w.breite / 2 + 9 && q.L > -5) {
+      // Flache Wasserpfütze zwischen Straße und dem Naturland gleich dahinter: als Strand verfüllt
+      h = 0.3; typ = 'sand';
     }
   }
   // Reviere mit Gezeiten: Bauwerke und Hinterland liegen höher, der flache Strand nicht

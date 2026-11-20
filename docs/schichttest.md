@@ -81,11 +81,11 @@ Reihenfolge abgeleitet aus [roadmap.md](roadmap.md), [arbeitsplan.md](arbeitspla
 | 15 | Bewertung und Gästebuch | P14 | Gästebuch öffnet über die Ruf-Anzeige, zeigt Einträge, schließt wieder | gebaut |
 | 16 | Aufstieg | P16, P18 | Ausbau "Hafen" über Bauen, nach dem Umbau Stufe +1, alle früheren Schichten danach noch einmal | gebaut |
 | 17 | Hafenbüro und Funk | P02, P28 | Büro bauen, abends "Alle kassieren" sammelt die Münzen ein | gebaut |
-| 18 | Ruf und Wünsche | P19 | Ruf steigt und fällt sichtbar, Wünsche über dem Boot | geplant |
-| 19 | Dauerlieger | P01 | Dauerlieger aufnehmen, fährt tagsüber raus, abends zurück | geplant |
-| 20 | Winter | P20 | Winter beginnt, Hafen ruht, Frühling kommt | geplant |
-| 21 | Ereignisse | P24 | Sturm und Regatta angekündigt, Vorbereiten wirkt | geplant |
-| 22 | Logbuch und Chronik | P21 | Einträge passen zu dem, was passiert ist | geplant |
+| 18 | Dauerlieger | P01 | ab Stufe 2 auf eine Anfrage warten, freie Box antippen, Bewerber wählen: Platz wird Dauerplatz; danach liegt dort kein Gast | gebaut |
+| 19 | Logbuch | P21 | über das Menü öffnen, jeden Reiter antippen (Inhalt nicht leer), gesehene Bootsarten stehen drin, schließt wieder | gebaut |
+| 20 | Winter | P20 | bei 8x bis zum Winter: Winterpause-Karte, keine Gastboote, "Winter überspringen" führt in den Frühling | gebaut |
+| 21 | Ruf und Wünsche | P19 | Ruf steigt und fällt sichtbar, Wünsche über dem Boot | geplant |
+| 22 | Ereignisse | P24 | Sturm und Regatta angekündigt, Vorbereiten wirkt | geplant |
 | 23 | Services und Stufe 6 | P23, P04 | Anlagen bauen, Großschiffe, Abschlussziel | geplant |
 
 ## Ergebnisse
@@ -94,6 +94,7 @@ Neueste Läufe oben. Bilder und vollständige Berichte liegen im Projektordner u
 
 | Datum | Stand | Gerät | Schichten | Prüfpunkte | Funde | Bemerkung |
 |---|---|---|---|---|---|---|
+| 20.11. | `64cbe84` | handy, tablet, tabletquer (Serie 8) | 1 bis 19 | 193 bis 653 | F4, F5 | Handy und Tablet quer bis Schicht 19; Logbuch-Reiter brach als Testfehler ab (Logbuch baut sich beim Reiterwechsel neu auf, behoben). Tablet hielt in Schicht 10 an einem kurz verdeckten "Verstanden" (Werkzeug fasst jetzt einmal nach) |
 | 15.11. | `b5baa80` | pc, handy, tablet (Serie 6) | 1 bis 17 | 86 bis 579 | F2, F3 | Handy und Tablet laufen durch alle 17 Schichten, PC hält an F3 und Tagesende ohne Ankünfte (Testfehler, behoben) |
 | 15.11. | `b5baa80` | alle fünf (Serie 5) | 1 bis 15 | 22 bis 473 | F2, F3 | F2 hält "Einfahren lassen" auf Handy und Tablet an; F1 nicht mehr aufgetreten (PR 320) |
 | 15.11. | `af90cb9` | alle fünf | 1 bis 13 | 84 bis 300 | siehe Funde | Serie 1: Kern auf allen Geräten stabil; Funde in 8 bis 13 großteils Testfehler (behoben), F1 echt |
@@ -104,21 +105,7 @@ Neueste Läufe oben. Bilder und vollständige Berichte liegen im Projektordner u
 | Nr | Schicht | Gerät | Fund | Schwere | Bild | Zuständig | Stand |
 |---|---|---|---|---|---|---|---|
 | F1 | 12 mit 3, 8 | pc, tablet | Die Karte "Tag n geschafft" liegt oben in der Mitte über Wartebojen und Stegkopf, bis zu 14 s, während das Spiel läuft; wartende Boote und Ziel-Boxen sind verdeckt | C bis B | `schichttest/2026-11-15-af90cb9/f1-pc-tagesabschluss-ueber-bojen.jpg` | an Koordinator gemeldet | offen |
-| F2 | 8, 5 | handy, handyquer, tablet, tabletquer | Kurzhalter werden abgerechnet und fahren weg, bevor sie sichtbar festgemacht haben: die Ablegezeit (`leaveClock`, sim.js) zählt ab Zuweisung, mindestens 5 s; wer spät am Tag oder von weit draußen zugewiesen wird, ist noch beim Anfahren. Gemessen bei 3x: 5 von 19 Kurzhaltern (Handy), 2 von 13 (PC); keine Münze zum Streichen | B | `schichttest/2026-11-15-kurzhalt/` | "Längere Tage und Bootsgeschichten einbauen" (PR 319) | gemeldet 15.11. |
+| F2 | 8, 5 | handy, handyquer, tablet, tabletquer | Kurzhalter werden abgerechnet und fahren weg, bevor sie sichtbar festgemacht haben: die Ablegezeit (`leaveClock`, sim.js) zählt ab Zuweisung, mindestens 5 s; wer spät am Tag oder von weit draußen zugewiesen wird, ist noch beim Anfahren. Gemessen bei 3x: 5 von 19 Kurzhaltern (Handy), 2 von 13 (PC); keine Münze zum Streichen | B | `schichttest/2026-11-15-kurzhalt/` | "Längere Tage und Bootsgeschichten einbauen" (PR 319) | erledigt (PR 332) |
 | F3 | 3 | pc, tabletquer, handy | Erstes Boot wird nach 4 bis 5 s gemeldet, liegt aber erst nach 51 bis 60 s Spielzeit an der Boje (lange Anreise von außerhalb der Karte, Regel 14.11.); Regel "Erstes Boot nach wenigen Sekunden" damit verfehlt | C | - | Koordinator (Regelkonflikt) | gemeldet 15.11. |
-
-F1 ist mit PR 320 erledigt (Tagesabschluss erst als Zettel; die Karte öffnet nur, wenn man ihn antippt).
-
-Keine Fehler, aber gut zu wissen (Hinweise):
-
-- Am Handy und Tablet hochkant ersetzt die Bootskarte nach dem Antippen eines wartenden Boots die untere Leiste samt Bauen und Tempo (`f2-tablet-bootskarte-verdeckt-leisten.jpg`). Gewollt (`ui/input-touch.js`: genau ein Einfahren-Knopf, am Handy in der Karte), der Spieler schließt die Karte über das Kreuz.
-- Am Abend kassiert der Rundgang des Hafenmeisters liegen gebliebene Münzen selbst ("7 € statt 9 €"). Bei 3x und 8x ist er oft schneller als der Spieler.
-- Stufe 1 ist nach zwei bis drei Tagen voll (4 Boxen, 2 davon erst nach dem Ausbau). Dann warten Boote ohne freie Box; das ist Spielregel, kein Fehler.
-
-Testfehler, die in Serie 1 auffielen und im Werkzeug behoben sind: Ereignisse mit Kreisbezügen, `boat:moored` an der Boje, Rundgang kassiert bei 3x vor dem Strich, Bootskarte statt Knopf am Boot, Logbuch-Fenster nicht erkannt, Tempo-Messung bei unter 10 Bildern je Sekunde.
-
-## Wo es mit anderen kollidieren kann
-
-- Neue Fenster oder Tipps, die sich über den Hafen legen ("Verstanden"), schließt der Test vor jeder Handlung und schreibt sie als Hinweis in den Bericht. Kommt ein neues Fenster ohne "Verstanden" oder "Weiter", bleibt der Test daran hängen: dann `fensterZu` in `schichten.cjs` ergänzen.
-- Der Test findet Knöpfe über ihre Namen (`#btn-pause`, `#btn-overview`, `#btn-build`, "Normale Geschwindigkeit", "Dreifach vorspulen", "Achtfach vorspulen", "Einstieg beenden", `.hm-einfahren`, `#card .bau-ja`, `.tz-karte`, `#hm-tagesabschluss .hm-ta-weiter`). Wer sie umbenennt, passt `tools/schichttest/` im selben PR an.
-- Ereignisnamen, auf die der Test hört: `boot:an-boje`, `boot-kommt`, `boat:moored` (mit `berth`), `sim:selfEntered`, `ui:tow-end`, `sim:dayEnd`, `ziel:gewaehlt`.
+| F4 | 17 mit 8, 13 mit 5 | tabletquer | Die Funk-Liste rechts (Anmeldungen) liegt über den Wartebojen am rechten Kartenrand; ein wartendes Boot ist in der Übersicht nicht frei antippbar (verdeckt von `#hm-funk`) | C | `schichttest/2026-11-20-64cbe84/f4-tabletquer-funk-ueber-bojen.jpg` | Koordinator (Funk-Anmeldung) | gemeldet 20.11. |
+| F5 | 18 mit 4 | handy | Zwei Gastboote überlappen beim Anlegen (eines legt an, das andere liegt schon); bekannt aus P66 | C | `schichttest/2026-11-20-64cbe84/f5-handy-boote-uebereinander.jpg` | "Staus an Bojen und Ankerfeld auflösen" (P66) | bekannt |

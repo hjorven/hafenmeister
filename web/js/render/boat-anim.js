@@ -269,6 +269,9 @@ class BoatAnimManager {
         if (o === b) continue;
         const hit = b.blockedBy(o);
         if (!hit) continue;
+        // Schon tief ineinander (nach einem Durchlass, beim Einblenden): nicht mehr aufeinander warten,
+        // sonst stehen beide fuer immer und die ganze Abendschlange dahinter (Pulk Stufe 5, Offene Bucht)
+        if (!(o instanceof Hindernis) && hit.gap < -0.5 * Math.min(b.info.length, o.info.length)) continue;
         // nie in ein anderes Boot hineinfahren, auch mit Vorfahrt nicht (Platz bis zum anderen Rumpf)
         room = Math.min(room, hit.gap);
         if (hit.gap < hGap) { hGap = hit.gap; hinderer = o; }
@@ -542,6 +545,9 @@ function sat(A, B) {
   return true;
 }
 
+// Marschfahrt auf dem Seeweg (Vielfaches des Fahrtempos, siehe PathTask.step)
+const SEE_TEMPO = 3;
+
 class PathTask {
   constructor(points, opts) { this.points = points; this.opts = opts; }
   start(b) {
@@ -606,17 +612,20 @@ class PathTask {
       }
       if (e.fertig) continue;
       const bis = e.ein - this.s;                          // Weg bis zur Engstelle
-      if (bis > L * 2 + 10) continue;                      // noch weit weg: nicht anfragen
+      // Hafeneinfahrt: Einlaufende warten ein gutes Stueck davor, damit die herauskommenden Konvois
+      // frei aus der Einfahrt kommen (sonst stand die wartende Traube genau in deren Weg)
+      const vorlauf = e.einfahrt ? 30 : 6;
+      if (bis > L * 2 + 4 + vorlauf) continue;             // noch weit weg: nicht anfragen
       const dir = e.richtung > 0 ? 'plus' : 'minus';
       if (mgr.request(e.nr, b, dir, b.mgr.frame, b.state === 'leaving')) { e.frei = true; b.wartetVorEngstelle = false; continue; }
       // nach 120 s Warten trotzdem fahren (Fehlerfall); dann auch nicht mehr in der Schlange stehen.
       // Abends stehen bis zu 25 Boote an, die Schlange laeuft in Dreier-Konvois je Richtung; frueher
       // (45 s) fuhren Wartende dem Gegenverkehr in die Engstelle und steckten dort Bug an Bug fest.
       this.wartet += dt;
-      if (this.wartet > 120) { e.fertig = true; mgr.release(e.nr, b); b.wartetVorEngstelle = false; continue; }
+      if (this.wartet > (e.einfahrt ? 300 : 120)) { e.fertig = true; mgr.release(e.nr, b); b.wartetVorEngstelle = false; continue; }
       b.wartetVorEngstelle = true;
       // mit Abstand vor der Engstelle warten, damit der entgegenkommende Konvoi herauskommt
-      const halt = Math.max(0, bis - L - 6);
+      const halt = Math.max(0, bis - L - vorlauf);
       max = Math.min(max, Math.sqrt(2 * b.cfg.accel * 0.8 * halt));
     }
     return max;
@@ -651,6 +660,13 @@ class PathTask {
     const remaining = this.len - this.s;
     this.remaining = remaining;
     let target = cruise * b.yieldF;
+    // Draussen auf See (Seezugang) fahren Boote Marschfahrt, rund dreimal so schnell wie im Revier:
+    // die Anfahrt aus der Ferne dauert sonst Minuten, in denen der Spieler auf leere Bojen wartet
+    // (P17-Messung Stufe 4 bis 6). Zum Hafen hin (letzte 40 bis 190 m) gleitend zurueck aufs Revier-Tempo.
+    if (o.see) {
+      const hafenAb = o.rein ? remaining : this.s;
+      target *= 1 + (SEE_TEMPO - 1) * clamp((hafenAb - 40) / 150, 0, 1);
+    }
     if (this.eng) target = Math.min(target, this.engstelle(b, dt));
     if (o.stop !== false) {
       const brake = Math.max(0.05, b.cfg.accel * 0.6 * (o.brake ?? 1));

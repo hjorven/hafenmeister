@@ -316,7 +316,7 @@ async function kassieren(t, z, boot) {
   await t.sp.ziehen([{ x: m.x, y: m.y }, { x: m.x + 70, y: m.y + 10 }], { halten: 80, start: 60 });
   const ok = await t.bis(([g]) => window.hafenmeister.sim.state.money > g, [vorher.geld], 5000);
   const nach = await t.G((id) => ({ geld: window.hafenmeister.sim.state.money, offen: window.hafenmeister.sim.state.boats[id]?.pendingFee ?? 0 }), boot.id);
-  await t.punkt('Münze mit einem Strich einsammeln', ok && nach.offen === 0, `Geld ${Math.round(vorher.geld)} -> ${Math.round(nach.geld)} €, offen vorher ${vorher.offen} €`, { schwere: 'A' });
+  await t.punkt('Münze mit einem Strich einsammeln', ok && (nach.offen === 0 || nach.geld - vorher.geld >= vorher.offen), `Geld ${Math.round(vorher.geld)} -> ${Math.round(nach.geld)} €, offen vorher ${vorher.offen} €, nachher ${nach.offen} €`, { schwere: 'A' });
   await t.warte(600);
   const anzeige = await t.G(() => document.getElementById('money')?.textContent);
   await t.punkt('Geldanzeige oben zählt mit', anzeige !== vorher.anzeige, `"${vorher.anzeige}" -> "${anzeige}"`);

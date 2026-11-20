@@ -847,6 +847,39 @@
    "geraet": "handy",
    "datum": "2026-11-16",
    "quelle": "bootsgeschichten/p86-siegerehrung-handy.png"
+  },
+  {
+   "datei": "p20-pr347-handy-hochsaison.jpg",
+   "pakete": [
+    "P20"
+   ],
+   "titel": "Hochsaison im Sommer: mehr Boote, volle Stege",
+   "pr": 347,
+   "geraet": "handy",
+   "datum": "2026-11-20",
+   "quelle": "winter/handy-hochsaison.png"
+  },
+  {
+   "datei": "p85-pr352-handy-grund.jpg",
+   "pakete": [
+    "P85"
+   ],
+   "titel": "Zusammenspiel Oberfläche: Grundansicht am Handy",
+   "pr": 352,
+   "geraet": "handy",
+   "datum": "2026-11-20",
+   "quelle": "zusammenspiel/oberflaeche/handy-grund.png"
+  },
+  {
+   "datei": "p85-pr352-pc-bauen.jpg",
+   "pakete": [
+    "P85"
+   ],
+   "titel": "Zusammenspiel Oberfläche: Bauen am PC",
+   "pr": 352,
+   "geraet": "pc",
+   "datum": "2026-11-20",
+   "quelle": "zusammenspiel/oberflaeche/pc-bauen.png"
   }
  ]
 }

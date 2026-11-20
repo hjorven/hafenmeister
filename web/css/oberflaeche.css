@@ -561,6 +561,8 @@ body.hm-neu { font: 400 var(--hm-s)/1.4 var(--hm-pixel); color: var(--hm-tinte);
   clip-path: polygon(0 0, 14px 0, 14px 2px, 12px 2px, 12px 4px, 10px 4px, 10px 6px, 8px 6px, 8px 8px, 6px 8px, 6px 6px, 4px 6px, 4px 4px, 2px 4px, 2px 2px, 0 2px);
 }
 .hm-neu .bau-schild.empfohlen::after { background: #b8862a; }
+/* Punkt (Schild ohne Platz für Text): kein Zeiger, dafür 40 px Trefferfläche um den 22-px-Punkt (Zusammenspiel 2) */
+.hm-neu .bau-schild.punkt::after { left: -9px; top: -9px; right: -9px; bottom: -9px; width: auto; height: auto; margin: 0; background: none; clip-path: none; transform: none; }
 .hm-neu .bau-schild.unten::after { top: calc(-8px - var(--hm-px) * 3); transform: rotate(180deg); border: 0; }
 .hm-neu .bau-schild.empfohlen { outline: 0; border-image-source: var(--rahmen-gold); }
 .hm-neu .bau-schild-preis { color: var(--hm-meer); }
@@ -1075,7 +1077,7 @@ body.hm-neu { font: 400 var(--hm-s)/1.4 var(--hm-pixel); color: var(--hm-tinte);
   .hm-neu .hm-schalter-text strong { font-size: calc(var(--hm-s) - 1px); }
   .hm-neu .hm-schalter-text span { font-size: calc(var(--hm-s) - 4px); line-height: 1.2; }
   .hm-neu .hm-wahl { gap: 3px; padding: 4px 2px; border: 0; border-top: var(--hm-px) dotted rgba(36, 54, 74, 0.25); background: none; }
-  .hm-neu .hm-wahl-stufen button { min-height: 36px; }
+  .hm-neu .hm-wahl-stufen button { min-height: 40px; }   /* Fingergröße (Zusammenspiel 2), vorher 36 */
 }
 @media (max-height: 499px) and (orientation: landscape) {
   .hm-neu #hm-einstellungen { width: min(560px, calc(100vw - var(--hm-links) - var(--hm-rechts))); grid-template-columns: 1fr 1fr; column-gap: 12px; }
@@ -1209,4 +1211,6 @@ body.hm-neu[data-hm-meldeplatz="unten"] .hm-tipp.hinweis button { min-height: 40
   .hm-neu.card-open #hud-bottom > * { pointer-events: auto; }
   .hm-neu.card-open #hm-meldeplatz { visibility: hidden; }
   .hm-neu #card:not(.bau-karte) .card-actions { position: static; margin: 4px 0 0; padding: 0; }
+  /* Baumenü höchstens halb so hoch, sonst deckt die lange Liste den ganzen Hafen mit den Bauplätzen zu (Zusammenspiel 2) */
+  .hm-neu #card.bau-karte { max-height: min(50dvh, calc(100dvh - var(--hm-knopfkante, 110px) - var(--hm-oben) - var(--hm-knopf) - 24px)); }
 }

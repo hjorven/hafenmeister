@@ -251,6 +251,12 @@ body.hm-ruhig .hm-wunsch.hm-geduld.eilig { animation: none; background-color: #f
   display: flex; flex-direction: column; align-items: stretch; gap: 4px; width: 124px; font-family: var(--hm-pixel); pointer-events: auto; }
 #hm-funk[hidden], body.foto #hm-funk, body.building #hm-funk, body.card-open #hm-funk { display: none !important; }
 #hm-funk.verdeckt { visibility: hidden; pointer-events: none; }
+/* Liegt ein wartendes Boot unter der Liste (Tablet quer: Bojen am rechten Rand), wird sie durchlässig:
+   blass und ohne Zeiger, das Boot lässt sich durch sie hindurch antippen. Der Kopf "Funk" bleibt bedienbar. */
+#hm-funk.durchlaessig, #hm-funk.durchlaessig .hm-funk-liste * { pointer-events: none; }
+#hm-funk.durchlaessig .hm-funk-liste { opacity: 0.35; }
+#hm-funk.durchlaessig .hm-funk-kopf { pointer-events: auto; }
+#hm-funk.durchlaessig .hm-funk-satz { display: none; }
 #hm-funk .hm-funk-boot.platzlos { display: none; }
 #hm-funk .hm-funk-kopf { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 30px; padding: 0 6px; font-weight: 600; font-size: 13px; cursor: pointer; }
 #hm-funk .hm-funk-kopf .hm-sym { width: 18px; height: 18px; }
@@ -450,6 +456,28 @@ export function init(game) {
       r.verdeckt = bedienelement(x, y - h / 2) || bedienelement(x - w, y - h / 2) || bedienelement(x + w, y - h / 2);
     }
   }
+  // Funk-Liste über einem wartenden Boot (Schichttest F4, Tablet quer): durchlässig machen, damit das Boot
+  // antippbar bleibt. Gemessen wird der Rumpf (knapp über dem Wasser), mit 10 px Rand um die Liste.
+  function funkDurchlaessig() {
+    const funkEl = document.getElementById('hm-funk');
+    if (!funkEl) return;
+    let drunter = false;
+    const liste = funkEl.querySelector('.hm-funk-liste');
+    const canvas = game.renderer?.domElement;
+    if (!funkEl.hidden && !funkEl.classList.contains('zu') && liste && canvas) {
+      const f = liste.getBoundingClientRect();
+      const rc = canvas.getBoundingClientRect();
+      if (f.width > 0 && f.height > 0) {
+        for (const b of game.sim?.waitingBoats?.() ?? []) {
+          const p = projiziere(game.boatView?.boot?.(b.id), 0.5);
+          if (!p) continue;
+          const x = rc.left + (p.x + 1) / 2 * rc.width, y = rc.top + (1 - p.y) / 2 * rc.height;
+          if (x > f.left - 10 && x < f.right + 10 && y > f.top - 10 && y < f.bottom + 10) { drunter = true; break; }
+        }
+      }
+    }
+    if (funkEl.classList.contains('durchlaessig') !== drunter) funkEl.classList.toggle('durchlaessig', drunter);
+  }
   // Geduldsring einer Wartereihe: Bild nur tauschen, wenn sich der Schritt oder die Farbe ändert
   function geduldZeigen(id, r) {
     const ring = r.ring ??= r.node.querySelector('.hm-geduld');
@@ -468,7 +496,7 @@ export function init(game) {
   }
   game.onTick?.((dt) => {
     abgleichT += dt || 0.016;
-    if (abgleichT > 0.25 || dt === 0) { abgleichT = 0; wartendeAbgleichen(); verdeckungPruefen(); }
+    if (abgleichT > 0.25 || dt === 0) { abgleichT = 0; wartendeAbgleichen(); verdeckungPruefen(); funkDurchlaessig(); }
     if (!reihen.size) return;
     const canvas = game.renderer?.domElement;
     if (!canvas) return;
