@@ -470,7 +470,10 @@ export async function initBridge(game) {
   // 3D-Ansicht meldet: Boot ist an der Warteboje fest, ab jetzt zählt seine Geduld
   game.on('boot:an-boje', (d = {}) => {
     const id = boatIdOf(d.id ?? d.boot ?? d);
-    if (id != null) dispatch(sim.markAtBuoy(state, ctx, id).events);
+    // platz: wo das Boot wirklich liegt ('boje-2', 'anker-0'); die Regeln merken sich die echte Boje
+    const platz = typeof d.platz === 'string' ? d.platz : null;
+    const spot = platz?.startsWith('boje-') ? Number(platz.slice(5)) : platz?.startsWith('anker-') ? null : undefined;
+    if (id != null) dispatch(sim.markAtBuoy(state, ctx, id, spot).events);
   });
   // 3D-Ansicht meldet: abreisendes Boot ist aus der Box heraus, der Platz ist wieder frei
   game.on('boot:aus-box', (d = {}) => {
