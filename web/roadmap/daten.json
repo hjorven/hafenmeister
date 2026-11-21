@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "21.11.2026",
-  "commit": "5059c59"
+  "commit": "414b094"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1589,7 +1589,7 @@
    "id": "P85",
    "titel": "Zusammenspiel nach Welle 0 prüfen",
    "inhalt": "Jorvens Auftrag vom 14.11.: alle Features noch da, neue Features im normalen Spiel wirklich genutzt, Welle 1 wirklich gefixt, Übersehenes finden. Drei Threads (Kernschleife und Regeln; Oberfläche und Geräte; Welt, Boote, Ereignisse), gemeinsame Datei docs/zusammenspiel.md",
-   "thread": "teilweise: Teil 1 Kernschleife und Regeln erledigt (PR 354, Funde K1 bis K5), Teil 2 Oberfläche und Geräte erledigt (PR 352), beide in docs/zusammenspiel.md; Teil 3 Welt: Ausbauten je Küste geprüft (Abschnitt \"Ausbauten je Küste\", Fund W1 Durchstich nur auf Nehrungsküsten, PR 366), Rest von Teil 3 (Stegbilder, Ereignisse, Wetter, Leistung) offen",
+   "thread": "erledigt: Teil 1 Kernschleife und Regeln erledigt (PR 354, Funde K1 bis K5), Teil 2 Oberfläche und Geräte erledigt (PR 352), beide in docs/zusammenspiel.md; Teil 3 Welt: Ausbauten je Küste geprüft (Abschnitt \"Ausbauten je Küste\", Fund W1 Durchstich nur auf Nehrungsküsten), Stegbilder je Küste, Ereignisse und Bildrate je Wetter geprüft (PR 366 und Folge-PR, Fund S1 behoben; Aufstiegsname nach Küste)",
    "welle": 1,
    "prs": [
     352,
@@ -5648,57 +5648,6 @@
  "merges": [
   {
    "datum": "2026-11-21",
-   "titel": "Roadmap-Pflege: P66 mit PR 372",
-   "pr": 376,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Gesten-Test wartet auf Signale statt fester Zeiten (Fernglas, Möwen, Wellenring)",
-   "pr": 374,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Schichttest: Schichten 21 bis 23 (Ruf, Ereignisse, Angebote) und Serie 11",
-   "pr": 371,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "P66: Vorbeifahrer sperren die Einfahrt nicht mehr dauerhaft, Winter-Sprung ohne Geisterboote",
-   "pr": 372,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Roadmap-Pflege: P85 Teil 3 (PR 366) mit Bildern",
-   "pr": 370,
-   "pakete": [
-    "P85"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Arbeitsplan: Stand 21.11., Welle 0 bis 2 bis auf P66-Pulk und P85 Teil 3 fertig",
-   "pr": 369,
-   "pakete": [
-    "P66",
-    "P85"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Erfolge-Meldung unter Last stabil: zählt Bildzeit, hält unter Zeiger oder Fokus",
-   "pr": 368,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-21",
    "titel": "Ausbauten je Küste: Durchstich nur auf Nehrungsküsten (P85 Teil 3)",
    "pr": 366,
    "pakete": [
@@ -5728,6 +5677,56 @@
    "titel": "Zeitraffer-Bot baut den Ausbau über das Bauen-Menü in Bauabschnitten",
    "pr": 363,
    "pakete": []
+  },
+  {
+   "datum": "2026-11-21",
+   "titel": "Stammgäste erst beim Wiederkommen, Bauabschnitte und Anfahrt in der Rechnung (Zusammenspiel K2, K4)",
+   "pr": 361,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Roadmap-Pflege: P66 mit PR 351",
+   "pr": 360,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Großschiffe verholen, Raddampfer an K01 ohne Mole (P84 Teil 2)",
+   "pr": 359,
+   "pakete": [
+    "P84"
+   ]
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Funk-Liste wird über wartenden Booten durchlässig (Schichttest F4)",
+   "pr": 358,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Zusammenspiel 1: Kernschleife und Regeln im ganzen Spiel gezählt (P85)",
+   "pr": 354,
+   "pakete": [
+    "P85"
+   ]
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "Schichttest: Schichten 18 bis 20 (Dauerlieger, Logbuch, Winter) und Serie 8",
+   "pr": 357,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-20",
+   "titel": "P66: Anfahrt kürzer, Boote sichtbar an der Boje, Einfahrt als Einbahn gegen den Pulk",
+   "pr": 351,
+   "pakete": [
+    "P66"
+   ]
   }
  ]
 }

@@ -6,6 +6,7 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 21.11.2026
 
+- Auf manchen Küsten (vor allem Schären und Steilküste) lag bei einigen Steganordnungen Fels oder flaches Wasser direkt vor Boxen am Ende von Steg A und am Kopf von Steg B. Dort ist jetzt immer genug Wasser zum Ein- und Ausparken.
 - Boote einigen sich bei einer Begegnung: Stehen sich zwei im Weg, legen sie einmal fest, wer fährt und wer wartet, und bleiben dabei, bis sie aneinander vorbei sind. Wer hinaus will, fährt weiter zuerst. Vorher wechselte die Vorfahrt mit jedem Meter, und beide zuckten voreinander oder blieben stecken.
 - Entgegenkommern weichen Boote schon einige Sekunden vor der Begegnung nach Steuerbord aus, statt erst kurz vor dem Bug des anderen zu bremsen.
 - Der Hinweis „Als Nächstes“ am Bauen-Knopf ist nach dem ersten Bauwerk wieder zu sehen. Er wartete hinter der Erfolgsmeldung und war abgelaufen, bevor er an die Reihe kam.
