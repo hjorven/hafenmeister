@@ -183,7 +183,17 @@ export function init(game) {
     const links = Math.max(0, ...rechteck('#hm-seite > *').map((r) => r.right - h.left));
     const oben = Math.max(0, ...rechteck('#hud-top .hm-status, #hud-top .hm-werkzeuge').map((r) => r.bottom - h.top));
     const breiteOben = Math.min(440, h.width - 2 * (links + rand));
-    const art = luecke ? 'luecke' : breiteOben >= 300 && h.height >= 700 ? 'oben' : 'unten';
+    // Niedrige Querformate (Handy quer, unter 500 px): immer oben zwischen den Spalten. Über den Knöpfen
+    // stünde eine Karte mitten im Hafen, sobald Kassieren die Lücke unten schließt (Schichttest F8), und ein
+    // Wechsel zwischen unten und oben je nach Kassieren-Knopf wäre unruhig.
+    // Dort ist die Lücke zwischen linker Spalte und Funk-Liste rechts (ui/vorschau.js) nicht mittig: Mitte und Breite
+    // aus beiden Kanten, nicht spiegelbildlich zur linken Spalte.
+    const niedrig = h.height < 500 && h.width > h.height;
+    const rechtsKante = Math.min(h.width, ...rechteck('#hm-funk').map((r) => r.left - h.left));
+    const obenL = links + rand;
+    const obenR = rechtsKante - rand;
+    const breiteNiedrig = Math.min(440, obenR - obenL);
+    const art = niedrig && breiteNiedrig >= 300 ? 'oben' : luecke ? 'luecke' : breiteOben >= 300 && h.height >= 700 ? 'oben' : 'unten';
     platz.classList.toggle('unten', art !== 'oben');
     // Auch für die Tipps des Einstiegs (features/einstieg.js), die dann an derselben Stelle stehen
     const merk = art === 'oben' ? 'oben' : 'unten';
@@ -198,6 +208,10 @@ export function init(game) {
       wurzel.setProperty('--hm-mp-unten', `${Math.round(h.bottom - kante + rand)}px`);
       wurzel.setProperty('--hm-mp-breite', `${Math.round(Math.min(440, h.width - 2 * 12))}px`);
       wurzel.setProperty('--hm-mp-mitte', '50%');
+    } else if (niedrig) {
+      wurzel.setProperty('--hm-mp-oben', `${Math.round(oben + rand)}px`);
+      wurzel.setProperty('--hm-mp-breite', `${Math.round(breiteNiedrig)}px`);
+      wurzel.setProperty('--hm-mp-mitte', `${Math.round((obenL + obenR) / 2)}px`);
     } else {
       wurzel.setProperty('--hm-mp-oben', `${Math.round(oben + rand)}px`);
       wurzel.setProperty('--hm-mp-breite', `${Math.round(breiteOben)}px`);
