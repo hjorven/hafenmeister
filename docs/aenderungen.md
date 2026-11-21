@@ -7,6 +7,10 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 ## 21.11.2026
 
 - Auf manchen Küsten (vor allem Schären und Steilküste) lag bei einigen Steganordnungen Fels oder flaches Wasser direkt vor Boxen am Ende von Steg A und am Kopf von Steg B. Dort ist jetzt immer genug Wasser zum Ein- und Ausparken.
+- Der Hinweis „Als Nächstes“ am Bauen-Knopf ist nach dem ersten Bauwerk wieder zu sehen. Er wartete hinter der Erfolgsmeldung und war abgelaufen, bevor er an die Reihe kam.
+- Nach „Winter überspringen“ liegt jedes Boot sofort dort, wo es hingehört. Vorher fuhren Boote von vor dem Winter im Frühling noch durch den Hafen, auch durch Stege und über neue Gäste in ihrer Box.
+- Vorbeifahrer draußen vor der Einfahrt sperren den Hafen nicht mehr: Verkeilen sich zwei von ihnen oder bleibt einer länger als 40 Sekunden stehen, macht er Platz und fährt weiter. Vorher konnten zwei solche Boote tagelang vor der Einfahrt stehen bleiben, und alle abreisenden Gäste stauten sich dahinter.
+- Eine Warteboje bleibt belegt, bis das Boot daran wirklich abgelegt hat. Vorher steuerte das nächste Boot dieselbe Boje schon an und lag kurz auf dem anderen.
 - Der Ausbau zu Stufe 3 heißt nur noch dort „Durchstich zur Ostsee“, wo wirklich eine Nehrung vor dem Hafen liegt (Nehrung, Shilshole Bay, manche Flussmündungen). Auf allen anderen Küsten liegt der Hafen schon am offenen Wasser; dort heißt er „Molen und Wellenbrecher“ und die Stufe „Hafen hinter der Mole“. Kosten und Wirkung bleiben gleich.
 - Menschen laufen nur noch über Stege, die wirklich gebaut sind. Vorher gingen Spaziergänger und Crews auch über die hellen Bauplätze noch nicht gekaufter Stege und Stegverlängerungen, vor allem in den ersten Stufen. Mit jedem gebauten Stegprojekt und jedem Ausbau kommen die neuen Stege sofort dazu.
 
