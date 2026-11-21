@@ -1,6 +1,6 @@
 # Arbeitsplan
 
-Stand: 21.11.2026, 15:30 UTC, abgeglichen mit `main` bei `ae9e34f` (PR 384), Statusangaben am Code geprüft. Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
+Stand: 21.11.2026, 23:00 UTC, abgeglichen mit `main` bei `699a7d0` (PR 388), Statusangaben am Code geprüft. Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
 
 **Wozu diese Datei:** [roadmap.md](roadmap.md) sagt, *was* insgesamt noch fehlt (Pakete P01 bis P82). Dieser Arbeitsplan sagt, *was jetzt gerade* läuft, welche Fehler zuerst weg müssen und welche Pakete als Nächstes starten. [plan.md](plan.md) bleibt der gültige Plan für Vision und Regeln.
 
@@ -13,21 +13,18 @@ Stand: 21.11.2026, 15:30 UTC, abgeglichen mit `main` bei `ae9e34f` (PR 384), Sta
 
 ---
 
-## 0. Jetzt: Welle 0 bis 2 fertig machen (Jorven, 15.11.2026, 10:52)
+## 0. Welle 0 bis 2 sind fertig und abgenommen (21.11.2026)
 
-Jorven: "Vielleicht sollte erstmal Welle 0-2 fertig gemacht werden" und "Halt so, dass das Grundgerüst fertig ist." Welle 0 bis 2 ist das Grundgerüst. Ab jetzt starten **keine neuen Pakete aus Welle 3 und später**. Was dort schon läuft (P86 Bootsgeschichten, P23-Nacharbeit, P26 Gesten), darf fertig werden, solange es Welle 0 bis 2 nicht blockiert.
+Jorvens Auftrag vom 15.11. ("erst Welle 0 bis 2 fertig, das Grundgerüst") ist erfüllt. Die Abnahme-Serie auf `ae9e34f` (15 Küsten, PC Seed 11 und Handy Seed 22, 30 Läufe; Bericht `zeitraffer/2026-11-21-ae9e34f/abnahme.md` im Projektordner):
 
-Stand 21.11.2026, 15:30 UTC: **Welle 0 bis 2 sind gebaut.** P66 ist erledigt (PR 351, 372, 375, 378, 381, Roadmap PR 384), P85 Teil 3 ebenso (PR 366, 373). Es fehlt nur noch die Messung:
+- Alle 30 Läufe erreichen das Ziel von Stufe 6, an Tag 102 bis 115, im Mittel Tag 108 (Rechnung 105).
+- 0 Konsolenfehler, Speichern ohne Abweichung in 351 Prüfungen.
+- Kein Boot fährt dauerhaft über Land oder durch einen Steg (jede Stelle höchstens 3 Prüfungen).
+- Ineinander fest in Stufe 1 bis 4 fast überall 0; in Stufe 5 und 6 in 23 von 30 Läufen höchstens 8, kein Paar länger als 5 Prüfungen. Summe am PC Stufe 5 und 6: fest 203 statt 1081 vor P66, hängt 72 statt 1471.
 
-| Was | Stand | Thread | Fertig, wenn |
-|---|---|---|---|
-| **Welle-0-Abnahme** | Küste 1 bis 6 auf b331ce2 (PC, Seed 11): fest und hängend fast überall 0 (vorher bis 89 und 198), über Land höchstens 10, durch Steg höchstens 7, Ziel Stufe 6 an Tag 103 bis 110 (Rechnung 105), 0 Konsolenfehler, Speichern ohne Abweichung. Küste 7 bis 15 und Handy laufen | "Ganzes Spiel im Zeitraffer durchtesten" | alle 15 Küsten, PC und Handy, ohne Dauerstau; dann ist das Grundgerüst abgenommen |
+Reste (kurz, nicht dauerhaft) gehen in das neue Paket **P88 Engstellen nach ihrer Länge regeln** (Prio B): Küste 14, 15, 3 vor der Einfahrt, Küste 4 im Seegatt, Großschiff-Vortritt.
 
-Bekannte Reste aus P66, bewusst als Prio B offen gelassen (Abschnitt 2): Offene Bucht in Stufe 5 und 6 noch 19 bis 61 feste Paare vor der Einfahrt; Mole beim Wechsel auf Stufe 5 eine Probe lang unter fahrenden Booten; Vorbeifahrer gelegentlich dicht an Großschiffen; Großschiff-Vortritt (zwei Fassungen gemessen und verworfen).
-
-**P85 früher starten:** Die Bereiche Kernschleife und Oberfläche hängen nicht am Pulk. Darum starten "Zusammenspiel 1" und "Zusammenspiel 2" sofort. "Zusammenspiel 3: Welt, Boote, Ereignisse" startet, sobald P66 und P84 gemergt sind und die Abnahme-Serie läuft. Funde zu Booten und Wegen aus 1 und 2 gehen an den Boote-Thread statt selbst gefixt zu werden.
-
-**Wenn alle fünf erledigt sind,** ist Welle 0 bis 2 fertig; dann geht es mit Abschnitt 3 und 5 weiter.
+Die Sperre für neue Pakete aus Welle 3 und später ist aufgehoben. Die Reihenfolge steht in Abschnitt 3.
 
 ---
 
@@ -63,24 +60,22 @@ Erledigt seit 14.11.: Großschiffe berühren auf keiner Küste mehr Land (P84), 
 
 ## 3. Die nächsten Pakete, in dieser Reihenfolge
 
-Leitlinie: Erst Welle 0 abschließen und die Prüfwerkzeuge auf den neuen Stand bringen, dann das Zusammenspiel prüfen. Daneben Pakete, die wenig Dateien teilen. `economy.js`: P23 und P20-Rest sind fertig, als Nächstes P34 oder P31.
+Stand 21.11.2026, 23:00 UTC. Leitlinie: Welle 3 nach Wirkung auf die Kernschleife (Ankunft, Zuweisen, Liegen, Abreise), dann Anlagen und seltene Höhepunkte. Pakete, die `economy.js` ändern, laufen nacheinander.
 
 | Nr | Paket | Warum jetzt | Hängt ab von | Kann kollidieren mit |
 |---|---|---|---|---|
-| 1 | **P66 Pulk beim Ablegen** (läuft) | Prio A, letzter Rest von Welle 0 | - | `render/boat-view.js`, `boat-anim.js`, Päckchen (Ablegereihenfolge), Kurzhalter |
-| 2 | ~~P84 Großschiffwege an allen 15 Küsten~~ erledigt 20.11. (PR 341 und Teil 2) | Rest aus PR 329, gehört zu Welle 0 | - | `render/services-besuch.js`, `boat-view.js`, `boat-anim.js` |
-| 3 | ~~**P87 Prüfwerkzeuge auf 15 Küsten und den neuen Takt**~~ erledigt (PR 338) | Welle-0-Abnahme braucht Tests, die alle Küsten kennen; Härtetest nach PR 327 bis 332 neu | - | nur `tests/`, `tools/zeitraffer/`, `feature-tests/` |
-| 4 | ~~**P83 Stegbild-Generator reparieren**~~ (erledigt 15.11., PR 336) | ohne ihn keine neuen Stege (P70) und kein Neuerzeugen nach Platzänderungen | - | `tools/stegbilder/`, `data/stegbilder.js` (Ausgabe muss für bestehende Spielstände gleich bleiben), `data/liegelage.js` |
-| 5 | ~~P23 Services mit eigener Wirkung~~ erledigt (15.11.) | Dienste, Trailerboote, Abendgäste, Tagesgäste, Wahlplätze, Bilanz; Rechnung weiter 103 Tage | - | `economy.js` ist frei für P20-Rest |
-| 6 | **P86 Bootsgeschichten fertig erzählen** (Thread wartet) | kleine Lücken, die Jorven im Spiel sieht (Regatta ohne Startsignal und Sieger) | - | `geschichten/`, `render/boat-view.js` (Regattabahn), Logbuch, `audio.js` |
-| 7 | **P03-Rest J5** (erledigt 15.11.) | Ruf am ersten Abreisenden erklären, Einstieg damit fertig | - | `features/einstieg.js`, Meldeplatz |
-| 8 | ~~P20-Rest Winter (G5, H5)~~ erledigt (15.11.) | Jahreszeiten wirken auf Ankünfte und Wind, Dauerlieger als Kunden von Kran, Werft, Segelmacher, Winterlager; Rechnung 105 Tage | 5 | `economy.js` frei für P34 oder P31 |
-| 9 | **P85 Zusammenspiel nach Welle 0 prüfen** (drei Threads) | Jorvens Auftrag vom 14.11. | 1, 2, 3 und Abnahme-Serie | `docs/zusammenspiel.md`, kleine Fixes je Fund |
-| 10 | **P34 Wind im Hafen** oder **P31 Neue Gästewünsche** | nächste Tiefe für die Kernschleife | 5, 8 (`economy.js`) | `sim.js`, `economy.js`, Wünsche aus P19 |
+| 1 | **P34 Wind im Hafen spürbar machen** (F5, F35) | Starkwind macht Außenplätze unruhig, große Boote legen lieber gegen den Wind an: jede Zuweisung bekommt eine zweite Überlegung | - | `sim.js` (Bewertung, Anlegezeit), `economy.js`, Wetterflagge, Jahreszeiten (P20) |
+| 2 | **P32 Flottillen** (F3) | drei bis fünf Boote wollen zusammen an einen Steg: neue Entscheidung beim Zuweisen, nutzt Funk-Anmeldung (P28) | - | `sim.js` (Ankünfte, Feld `group`), Wegsuche (Konvois aus P66), `ui/vorschau.js` |
+| 3 | **P25 Stammgäste mit Wirkung und Gästepost** (F37) | Ruf am alten Platz, Gästepost im Hafenbüro: Stammgäste sind seit K2 selten und sollen etwas bringen | - | `features/stammgaeste.js`, Logbuch, Gästebuch |
+| 4 | **P88 Engstellen nach ihrer Länge regeln** (Prio B) | Reste der Welle-0-Abnahme | - | `boat-view.js`, `boat-anim.js` (Boote-Thread), danach Zeitraffer-Serie |
+| 5 | **P31 Neue Gästewünsche** (F9) | WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | 1 (`economy.js`) | Wünsche aus P19, Services (P23), Bauen-Menü |
+| 6 | **P35 Preisstufe am Hafenbüro** (F6) | günstig, normal, gehoben, eine Entscheidung je Saison | 5 (`economy.js`) | Hafenbüro, Ruf, Balancing-Messung danach |
+| 7 | **P29 Baggern** (F7) und **P36 Bojenfeld** (F10) | Ausbau mit eigener Entscheidung | 6 | Gelände (Tiefe), Liegeplätze |
+| 8 | **P37 Havarist**, **P38 Hafenfest**, **P39 Jugendtraining**, **P40 Seltene Besucher** | Höhepunkte, wenig Berührung untereinander | - | Ereignisse (P24), Meldeplatz, Logbuch |
 
-Danach geht es weiter wie in [Abschnitt 5](#5-alles-weitere-bis-zum-ende) beschrieben, bis Stufe 20 und Online.
+**Startregel:** Jetzt starten: 1, 2, 3, 4. 5 nach 1, 6 nach 5, 7 nach 6. 8 einzeln, sobald Plätze frei sind. Nach jedem Paket, das Boote oder Zahlen ändert: Zeitraffer-Stichprobe über 5 Küsten, nach jedem dritten die ganze Serie. Alle neuen Meldungen über den einen Meldeplatz.
 
-**Startregel (seit 15.11., 10:52):** Nur Welle 0 bis 2, siehe Abschnitt 0. 1, 2, 3, 8 laufen; 9 startet mit Zusammenspiel 1 und 2 sofort, Zusammenspiel 3 nach 1 und 2; 6 darf fertig werden; 10 und alles aus Abschnitt 5 erst, wenn Welle 0 bis 2 fertig ist. Nie zwei Threads gleichzeitig an `economy.js`. Alle neuen Meldungen gehen über den einen Meldeplatz aus PR 282.
+Danach Welle 4 (Abschnitt 5, C), dann Nordsee (P57), dann Welle 6 (Stufe 7 bis 20), Online zuletzt.
 
 ---
 
@@ -214,6 +209,7 @@ Schon erledigt aus Jorvens Vorschlägen: F1, F2, F4, F8, F14, F15, F17, F18, F19
 
 | Datum | Änderung |
 |---|---|
+| 21.11.2026, 23:00 Uhr | Welle 0 bis 2 abgenommen (Serie `ae9e34f`, 30 Läufe). Reste als P88. Sperre aufgehoben, Welle 3 startet mit P34, P32, P25, P88. |
 | 21.11.2026, 15:30 Uhr | P66 und P85 erledigt, Welle 0 bis 2 gebaut; nur die Abnahme-Serie läuft noch. P66-Reste als Prio B. |
 | 21.11.2026, 01:45 Uhr | P84, P20-Rest, P85 Teil 1 und 2 erledigt; offen nur P66 Pulk beim Ablegen, P85 Teil 3 und die Welle-0-Abnahme. |
 | 20.11.2026, 20:10 Uhr | Abgleich nach fünf Tagen Stillstand: P87 erledigt; P84 (PR 341), P20-Rest (PR 347) und Logbuch (PR 346) fertig, aber offen; P66 Pulk und P85 ohne Stand. Startliste: Threads wieder aufnehmen, P85 Teil 1 und 2 neu. |
