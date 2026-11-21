@@ -6,6 +6,8 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 21.11.2026
 
+- Vor der Hafeneinfahrt und überall in offenem Wasser fahren ein- und auslaufende Boote jetzt auf zwei getrennten Bahnen mit bis zu 24 Metern Abstand, jede Richtung rechts. Zur Einfahrt und in engen Fahrwassern rücken die Bahnen allmählich zusammen. Vorher fuhren beide Ströme mit nur 6 Metern Abstand aufeinander zu, und die Schlange der Einlaufenden stand im Weg der Auslaufenden.
+- Jedes wartende Boot gehört zu der Boje, an der es wirklich liegt. War seine Boje noch belegt und es nahm die nächste freie oder ankerte, führte der Hafen es weiter unter der alten Bojennummer, zusammen mit dem Boot, das dort lag.
 - Der Paddler am Ufer fährt nur noch dort, wo wirklich Wasser ist. Auf manchen Küsten (zum Beispiel Offene Bucht in Stufe 2) paddelte er über die Wiese.
 - Wer vor einer Engstelle oder der Einfahrt auf freie Fahrt wartet, hält sich rechts am Rand, und wer dahinter ansteht, ebenso. Die Mitte bleibt frei für die Boote, die herauskommen.
 - In langen, engen Fahrwassern (zum Beispiel Küste 14) fahren auslaufende Boote nicht mehr durcheinander hindurch: Wer nur vor der nächsten Engstelle ansteht, gilt als Schlange und nicht mehr als Blockade.

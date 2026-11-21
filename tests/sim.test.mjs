@@ -893,3 +893,22 @@ test('A10 mit echtem Hafen: wenig gebaut heißt seltener, ausgebaut kommt die vo
   const voll = sim.applyTestStage(createState({ seed: 4, rules: echt.rules }), echt, 3);
   for (const v of Object.values(sim.sizeBerthFactors(voll, echt))) assert.equal(v, 1);
 });
+
+test('Die Ansicht meldet die echte Boje: zwei Wartende teilen keine Bojennummer', () => {
+  const s = quietState();
+  const make = (id) => ({ ...waitingBoat(createState({ seed: id })), id, status: 'waiting', waitSpot: 1, atBuoy: false, atBuoySince: null });
+  s.boats[301] = make(301); s.boats[302] = make(302); s.boats[303] = make(303);
+  s.queue = [301, 302, 303];
+  // 301 liegt an Boje 1; 302 fand sie belegt und liegt an Boje 2; 303 ankert
+  sim.markAtBuoy(s, ctx, 301, 1);
+  sim.markAtBuoy(s, ctx, 302, 2);
+  sim.markAtBuoy(s, ctx, 303, null);
+  assert.deepEqual([s.boats[301].waitSpot, s.boats[302].waitSpot, s.boats[303].waitSpot], [1, 2, null]);
+  assert.equal(s.boats[302].atBuoy, true);
+  // eine Boje, an der schon ein anderes Boot liegt, wird nicht doppelt vergeben
+  sim.markAtBuoy(s, ctx, 302, 1);
+  assert.equal(s.boats[302].waitSpot, 2);
+  // ohne Angabe (alte Meldung) bleibt die Nummer
+  sim.markAtBuoy(s, ctx, 301);
+  assert.equal(s.boats[301].waitSpot, 1);
+});

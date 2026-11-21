@@ -1782,9 +1782,18 @@ export function markInHarbor(state, ctx, boatId) {
   return { ok: true, events: [] };
 }
 
-export function markAtBuoy(state, ctx, boatId) {
+// spot: an welcher Boje das Boot wirklich liegt (Nummer), null = im Ankerfeld; undefined = unbekannt.
+// Die Ansicht legt ein Boot auf die naechste freie Boje oder ins Ankerfeld, wenn seine Boje noch
+// belegt ist. Ohne diese Rueckmeldung trugen zwei wartende Boote dieselbe Bojennummer (Schichttest).
+export function markAtBuoy(state, ctx, boatId, spot) {
   const boat = state.boats[boatId];
-  if (!boat || boat.status !== 'waiting' || boat.atBuoy) return { ok: false, events: [] };
+  if (!boat || boat.status !== 'waiting') return { ok: false, events: [] };
+  if (spot === null) boat.waitSpot = null;
+  else if (Number.isInteger(spot) && spot >= 0 && spot < waitSpotCount(state, ctx)) {
+    const besetzt = waitingBoats(state).some((o) => o !== boat && o.atBuoy && o.waitSpot === spot);
+    if (!besetzt) boat.waitSpot = spot;
+  }
+  if (boat.atBuoy) return { ok: false, events: [] };
   boat.atBuoy = true;
   boat.atBuoySince = state.clock;
   return { ok: true, events: [{ type: 'atBuoy', boatId }] };
