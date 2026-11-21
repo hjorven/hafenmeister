@@ -2063,19 +2063,22 @@ export function init(game) {
   }
 
   // Alle Boote aus dem Spielstand sofort an ihre Plaetze legen (Start, Laden, neues Spiel)
-  function abgleich(laden = false) {
+  // sprung: die Spielzeit ist um Tage gesprungen (Winter ueberspringen): niemand faehrt mehr zu Ende,
+  // sonst faehrt ein Boot von vor dem Winter durch den Steg und ueber den neuen Gast in seiner Box (F7)
+  function abgleich(laden = false, sprung = false) {
     baueBojen();
     const liste = game.sim?.boote ?? [];
     const ids = new Set(liste.map((b) => b.id));
     // Boote, die gerade abfahren, fahren zu Ende (sie sind in den Regeln schon weg)
     // Nachts abgerechnete Gaeste (sim:departed) liegen bis zum Ablegen am Vormittag noch in der Box,
     // nach dem Laden eines Spielstands sind sie weg (PR 108).
-    for (const [id, e] of [...boats]) if (!ids.has(id) && !e.faehrt && !e.draussen && (laden || !e.abgerechnet)) entferne(id);
+    for (const [id, e] of [...boats]) if (!ids.has(id) && (sprung || (!e.faehrt && !e.draussen)) && (laden || !e.abgerechnet)) entferne(id);
     for (const info of liste) {
       const e = erzeuge(info);
       e.info = { ...e.info, ...info };
       e.faehrt = false;
-      if (e.anim.state !== 'idle' && e.anim.state !== 'moored') continue;   // faehrt gerade
+      if (sprung && !e.draussen && e.anim.state !== 'idle' && e.anim.state !== 'moored') e.anim.cancel();
+      else if (e.anim.state !== 'idle' && e.anim.state !== 'moored') continue;   // faehrt gerade
       if (e.draussen) continue;                                          // Dauerlieger auf Runde
       const b = info.platz ? platzBerth(info.platz, e.anim.info) : warteplatz(info.boje ?? 0, e.anim);
       if (!b) continue;
@@ -2109,6 +2112,7 @@ export function init(game) {
   game.on('spielstand-geladen', () => setTimeout(() => abgleich(true), 0));
   game.on('sim:change', (d) => { if (d?.reason === 'load' || d?.reason === 'new') abgleich(true); });
   game.on('stufe', () => { if (bojenStufe) abgleich(); });
+  game.on('winter:uebersprungen', () => abgleich(true, true));
 
   game.boatView = {
     get boote() { return [...boats.values()].map((e) => ({ id: e.info.id, zustand: e.anim.state, anim: e.anim })); },
