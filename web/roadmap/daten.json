@@ -1322,7 +1322,7 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280, 327, 332, 351, 372, 375, 378): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende (PR 240); Wartebojen seitlich, Anfahrt von weit draußen aus verschiedenen Richtungen (PR 280); Geduld erst ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall (PR 327); erstes Boot vom Bildrand (PR 332); Anfahrt kürzer, Boote sichtbar an der Boje, Einfahrt als Einbahn gegen den Pulk (PR 351); Vorbeifahrer sperren die Einfahrt nicht mehr dauerhaft, Winter-Sprung ohne Geisterboote (PR 372); Boote einigen sich bei Begegnungen und weichen früher aus (PR 375); Wartende halten sich rechts, eine Schlange vor der nächsten Engstelle gilt nicht mehr als Blockade (PR 378). Noch offen: Pulk und \"ineinander fest\" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht), Abnahme-Serie über alle 15 Küsten; übernimmt P54",
+   "thread": "erledigt (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280, 327, 332, 351, 372, 375, 378, 381): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende (PR 240); Wartebojen seitlich, Anfahrt von weit draußen aus verschiedenen Richtungen (PR 280); Geduld erst ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall (PR 327); erstes Boot vom Bildrand (PR 332); Anfahrt kürzer, Boote sichtbar an der Boje, Einfahrt als Einbahn gegen den Pulk (PR 351); Vorbeifahrer sperren die Einfahrt nicht mehr dauerhaft, Winter-Sprung ohne Geisterboote (PR 372); Boote einigen sich bei Begegnungen und weichen früher aus (PR 375); Wartende halten sich rechts, eine Schlange vor der nächsten Engstelle gilt nicht mehr als Blockade (PR 378). Noch offen: Pulk und \"ineinander fest\" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht), Abnahme-Serie über alle 15 Küsten; übernimmt P54 Abschluss 21.11.: Boote einigen sich bei Begegnungen und weichen früher aus (PR 375); Wartende vor Engstellen halten sich rechts, Schlange vor der nächsten Engstelle gilt nicht als Blockade (PR 378, Küste 14 fest 42 bis 90 statt 182 bis 377); Paddler am Ufer nur im Wasser (PR 381). Offene Punkte (Prio B, nicht mehr Teil der Abnahme): Offene Bucht Stufe 5 und 6 noch 19 bis 61 feste Paare vor der Einfahrt in 12 Minuten Zeitraffer; beim Wechsel auf Stufe 5 liegt die neue Mole eine Probe lang unter fahrenden Booten; Vorbeifahrer fahren im engen Fahrwasser gelegentlich dicht an Großschiffen in Fahrt vorbei (zwei Versuche gemessen und verworfen: Großschiff-Vorfahrt vor Gästen machte Knoten im Bodden-Seegatt, mehr Abstand für Vorbeifahrer war nicht eindeutig besser).",
    "welle": 0,
    "prs": [
     81,
@@ -1341,7 +1341,8 @@
     351,
     372,
     375,
-    378
+    378,
+    381
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -1351,7 +1352,7 @@
     "T8",
     "T9"
    ],
-   "status": "arbeit",
+   "status": "teilweise",
    "bilder": [
     30,
     37,
@@ -4454,8 +4455,8 @@
    ],
    "zaehler": {
     "erledigt": 5,
-    "teilweise": 0,
-    "arbeit": 1,
+    "teilweise": 1,
+    "arbeit": 0,
     "frage": 0,
     "offen": 0,
     "entfaellt": 0,
@@ -4635,8 +4636,8 @@
  ],
  "gesamt": {
   "erledigt": 42,
-  "teilweise": 2,
-  "arbeit": 1,
+  "teilweise": 3,
+  "arbeit": 0,
   "frage": 0,
   "offen": 40,
   "entfaellt": 1,
@@ -5651,6 +5652,20 @@
  "merges": [
   {
    "datum": "2026-11-21",
+   "titel": "Schichttest: Serie 12 nach dem Pulk-Fix, Winter und Auszeichnung in den Wiederholungen",
+   "pr": 382,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-21",
+   "titel": "Paddler am Ufer fährt nur im Wasser",
+   "pr": 381,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-21",
    "titel": "Roadmap-Pflege: P66 Wartende rechts (PR 378)",
    "pr": 379,
    "pakete": [
@@ -5725,21 +5740,6 @@
    "pakete": [
     "P85"
    ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Arbeitsplan: Stand 21.11., Welle 0 bis 2 bis auf P66-Pulk und P85 Teil 3 fertig",
-   "pr": 369,
-   "pakete": [
-    "P66",
-    "P85"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Erfolge-Meldung unter Last stabil: zählt Bildzeit, hält unter Zeiger oder Fokus",
-   "pr": 368,
-   "pakete": []
   }
  ]
 }
