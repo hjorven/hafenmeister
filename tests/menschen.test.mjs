@@ -107,6 +107,36 @@ test('Einstieg liegt dicht am Boot (am eigenen Steg)', () => {
   }
 });
 
+test('Nur gebaute Stege im Netz: ungebaute Stege und Plätze fehlen (gebaut aus game.stege.gebaut())', () => {
+  formSetzen(1);
+  const st = HAFEN.stufen['3'];
+  // Steg C steht noch nicht, Steg B nur zur Hälfte
+  const b = st.stege.find((l) => l.steg === 'B');
+  const [bx0, by0] = b.punkte[0], [bx1, by1] = b.punkte[1];
+  const halb = [(bx0 + bx1) / 2, (by0 + by1) / 2];
+  const stege = [
+    ...st.stege.filter((l) => l.steg && l.steg !== 'C' && l.steg !== 'B'),
+    { ...b, punkte: [b.punkte[0], halb] },
+  ];
+  const plaetze = new Set(HAFEN.plaetze.filter((p) => p.lage['3'] && p.steg === 'A').map((p) => p.id));
+  const alles = baueNetz({ hafen: HAFEN, stufe: 3, gebaeude: GEB });
+  const netz = baueNetz({ hafen: HAFEN, stufe: 3, gebaeude: GEB, gebaut: { stege, plaetze } });
+  const aufSteg = (n) => ['holz', 'schwimmsteg', 'kai', 'pier'].includes(n.art);
+  const c = st.stege.filter((l) => l.steg === 'C').flatMap((l) => l.punkte);
+  const cx0 = Math.min(...c.map((p) => p[0])) - 3, cx1 = Math.max(...c.map((p) => p[0])) + 3;
+  const beiC = (n) => aufSteg(n) && n.x >= cx0 && n.x <= cx1 && n.y > 12;
+  assert.ok(alles.nodes.some(beiC), 'ohne gebaut liegt Steg C im Netz');
+  assert.equal(netz.nodes.filter(beiC).length, 0, 'Knoten auf dem ungebauten Steg C');
+  // Steg B endet an der Hälfte: kein Knoten dahinter
+  const hinterHalb = (n) => aufSteg(n) && Math.abs(n.x - bx0) < 3 && n.y > halb[1] + 1 && n.y <= by1 + 1;
+  assert.ok(alles.nodes.some(hinterHalb), 'ohne gebaut reicht Steg B bis zum Ende');
+  assert.equal(netz.nodes.filter(hinterHalb).length, 0, 'Knoten hinter dem gebauten Ende von Steg B');
+  assert.deepEqual([...netz.plaetze.keys()].filter((id) => !plaetze.has(id)), [], 'nur gebaute Plätze');
+  assert.ok(netz.plaetze.size > 0 && netz.plaetze.size < alles.plaetze.size);
+  // Die Aussicht liegt am gebauten Ende, nicht am Kopf des geplanten Stegs
+  for (const z of netz.ziele.filter((q) => q.art === 'aussicht')) assert.ok(!beiC(netz.nodes[z.node]) && !hinterHalb(netz.nodes[z.node]));
+});
+
 test('Wege werden gerade gezogen, bleiben aber auf dem Weg', () => {
   formSetzen(1, 1);
   const netz = baueNetz({ hafen: HAFEN, stufe: 3, gebaeude: GEB });

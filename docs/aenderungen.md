@@ -4,6 +4,10 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 21.11.2026
+
+- Menschen laufen nur noch über Stege, die wirklich gebaut sind. Vorher gingen Spaziergänger und Crews auch über die hellen Bauplätze noch nicht gekaufter Stege und Stegverlängerungen, vor allem in den ersten Stufen. Mit jedem gebauten Stegprojekt und jedem Ausbau kommen die neuen Stege sofort dazu.
+
 ## 20.11.2026
 
 - Etwas weniger Gäste für den Aufstieg ab Stufe 3 (340 statt 360, 530 statt 560, 740 statt 840), weil der Ausbau über Nacht in Bauabschnitten und die ruhigen Jahreszeiten Zeit kosten. Ein Spiel bis zum Seehafen dauert so weiter rund 100 Spieltage. Die Rechnung kennt jetzt auch die Bauabschnitte und die längere Anfahrt großer Häfen.

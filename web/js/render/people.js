@@ -196,10 +196,16 @@ export function init(game) {
     return out;
   }
 
+  let netzStege = null;   // Stand der Stege (game.stege.gebaut().sig), aus dem das Netz gebaut ist
   function neuesNetz() {
     // Gelaende je Kuestentyp und Seed: das Netz liegt nur auf trockenem, freiem Boden (people/netz.js)
     const region = game.landscape?.region ?? game.landschaft?.region ?? game.state?.region ?? 'ostsee';
-    netz = baueNetz({ hafen: HAFEN, stufe, region: region === 'nordsee' ? 'nordsee' : 'ostsee', gebaeude: gebaeudeListe(), hindernisse: hindernisListe() });
+    // Nur was wirklich steht (render/stege.js): ungebaute Stege, Bauplaetze und Stegprojekte spaeterer
+    // Stufen betritt niemand. Passt die Stufe der Stege noch nicht, folgt das Ereignis 'stege' gleich.
+    const gb = game.stege?.gebaut?.();
+    const gebaut = gb && gb.stufe === stufe ? gb : null;
+    netzStege = gebaut?.sig ?? null;
+    netz = baueNetz({ hafen: HAFEN, stufe, region: region === 'nordsee' ? 'nordsee' : 'ostsee', gebaeude: gebaeudeListe(), hindernisse: hindernisListe(), gebaut });
     api.netz = netz;
   }
 
@@ -1148,6 +1154,11 @@ export function init(game) {
   game.on('boat:left', (info) => bootWeg(info?.id ?? info));
   // Gekauftes Gebaeude: buildings.js stellt es im selben Ereignis auf, danach Netz erneuern
   game.on('build', () => { if (netz) queueMicrotask(netzErneuern); });
+  // Stegprojekt gebaut, Stufenausbau, Spielstand geladen: render/stege.js meldet den neuen Stand
+  game.on('stege', () => queueMicrotask(() => {
+    const gb = game.stege?.gebaut?.();
+    if (netz && gb && gb.stufe === stufe && gb.sig !== netzStege) netzErneuern();
+  }));
   game.on('sim:change', (e) => { if (netz && e?.reason === 'load') queueMicrotask(netzErneuern); });
   // Gelaende neu gebaut (Region, Kuestentyp beim Laden): Netz auf den neuen Boden legen
   game.on('landschaft:geaendert', () => { if (netz) queueMicrotask(netzErneuern); });
@@ -1253,6 +1264,8 @@ export function init(game) {
     bootLegtAb,
     rundgangStarten,
     rundgang: null,
+    // Stand der Stege, aus dem das Wegenetz gebaut ist (gleich game.stege.gebaut().sig, sobald es passt)
+    netzStand: () => netzStege,
     anzahl: () => {
       const lebend = agenten.filter((a) => a.zustand !== 'entfernt');
       return { figuren: lebend.length, menschen: lebend.reduce((s, a) => s + a.buendel, 0), sichtbar: koerper.count };

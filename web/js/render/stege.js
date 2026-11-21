@@ -19,6 +19,10 @@
 //   game.sim). Kaufbare Stegprojekte erscheinen als heller Bauplatz mit pick { type: 'buildsite',
 //   id: projektId }; Antippen oeffnet die Bauen-Karte. Projekte spaeterer Stufen sind unsichtbar.
 //   game.stege.bauplaetze() liefert die ids der sichtbaren Bauplaetze.
+//   game.stege.gebaut()     was wirklich steht: { stufe, sig, stege: [{ steg, bauart, punkte }],
+//                           plaetze: Set der gebauten Platz-ids }. Nur Teilstuecke, die gebaut sind
+//                           (Bauplaetze und Projekte spaeterer Stufen fehlen). Die Fussgaenger
+//                           (people/netz.js) laufen nur darauf. Ereignis 'stege' meldet jede Aenderung.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { HAFEN } from '../data/harbor.js';
@@ -322,6 +326,7 @@ export function init(game) {
   // ---------------------------------------------------------------- Aufbau
   let bauplaetze = [];
   let signatur = '';
+  let gebaut = null;
   let markiert = { ids: [], farbe: '#ffd23f' };
 
   function aktuelleStufe(n) {
@@ -392,6 +397,20 @@ export function init(game) {
         }
       });
     });
+    // Was steht, fuer die Wege der Fussgaenger: nur gebaute Teilstuecke und gebaute Plaetze
+    const gebauteStege = [];
+    linien.forEach((linie, i) => {
+      const r = bereich[i];
+      if (r.bis <= 0) return;
+      gebauteStege.push({ ...linie, punkte: r.bis >= r.gesamt - 0.01 ? linie.punkte : teilLinie(linie.punkte, 0, r.bis) });
+    });
+    gebaut = {
+      stufe: Number(stufe),
+      sig: s + '|' + gebauteStege.map((l) => (l.steg ?? '') + l.punkte.map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(';')).join('/')
+        + '|' + liste.filter((e) => e.st.status === 'gebaut').map((e) => e.p.id).join(','),
+      stege: gebauteStege,
+      plaetze: new Set(liste.filter((e) => e.st.status === 'gebaut').map((e) => e.p.id)),
+    };
     // 3. Zeichnen: Gebautes als Steg, Kaufbares als heller Bauplatz dahinter
     linien.forEach((linie, i) => {
       const g = new THREE.Group();
@@ -452,6 +471,7 @@ export function init(game) {
     group: root, setStage, highlight, deckHoehe, stage: 0,
     platz: (id) => plaetze.get(id) ?? null,
     bauplaetze: () => [...new Set(bauplaetze.map((m) => m.userData.bauplatz))],
+    gebaut: () => gebaut,
   };
   game.stege = api;
   game.on('stufe', (n) => aufbauen(typeof n === 'object' ? n?.stufe : n));
