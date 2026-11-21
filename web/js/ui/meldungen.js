@@ -85,6 +85,13 @@ export function init(game) {
     return r.width > 0 && r.height > 0;
   };
 
+  // Nimmt Platz ein, auch wenn gerade unsichtbar (visibility: hidden)
+  const liegt = (e) => {
+    if (!e || e.hidden || e.closest('[hidden]') || getComputedStyle(e).display === 'none') return false;
+    const r = e.getBoundingClientRect();
+    return r.width > 0 && r.height > 0;
+  };
+
   function alle() {
     const liste = [...wuensche.values()];
     if (typeof document !== 'undefined') {
@@ -159,7 +166,11 @@ export function init(game) {
     const wurzel = document.documentElement.style;
     // 1. Unten in der Lücke zwischen den Knöpfen (Zeit | Kassieren | Bauen), wenn sie breit genug ist:
     //    PC, Tablet quer, Handy quer. Die Meldung steht dann wie ein Untertitel auf Höhe der Knöpfe.
-    const knoepfe = rechteck('#hm-zeit, #btn-build, #btn-collect').sort((x, y) => x.left - y.left);
+    // Auch die gerade versteckte Zeitsteuerung zählt (offene Tafel links, ui-phone.css): sie kommt beim Schließen
+    // sofort zurück, und die Meldung darf dann nicht bis zum nächsten Takt auf Pause und Tempo liegen (Schichttest F6).
+    const knoepfe = [...document.querySelectorAll('#hm-zeit, #btn-build, #btn-collect')]
+      .filter((e) => (e.id === 'hm-zeit' ? liegt(e) : sichtbar(e))).map((e) => e.getBoundingClientRect())
+      .sort((x, y) => x.left - y.left);
     // Oberkante der unteren Knöpfe für andere Tafeln (Bootskarte am Tablet hochkant steht darüber, oberflaeche.css)
     if (knoepfe.length) document.documentElement.style.setProperty('--hm-knopfkante', `${Math.round(h.bottom - Math.min(...knoepfe.map((r) => r.top)))}px`);
     let luecke = null;
