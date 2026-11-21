@@ -48,6 +48,11 @@ const UNBEKANNT = {
   raster: ['............', '...######...', '..##....##..', '..##....##..', '.......##...', '......##....', '.....##.....', '.....##.....', '............', '.....##.....', '.....##.....', '............'],
 };
 const HAKEN = ['......', '.....#', '....##', '#..##.', '####..', '.##...'];
+// Wiederkehrer und Stammgast (P25): kleiner Doppelstander, wie der Treuewimpel am Boot (render/stammgast-zeichen.js)
+export const STAMM_ZEICHEN = {
+  farbe: '#23395d',
+  raster: ['............', '.#..........', '.#######....', '.#########..', '.##########.', '.########...', '.#######....', '.##########.', '.#########..', '.#######....', '.#..........', '.#..........'],
+};
 
 export const wunschBild = (key) => WUNSCH[key] ?? UNBEKANNT;
 export const wunschName = (key) => WUNSCH[key]?.name ?? String(key);
@@ -310,6 +315,7 @@ export function init(game) {
   style.id = 'hm-vorschau-stil';
   style.textContent = CSS + Object.entries(WUNSCH).map(([k, w]) => `.hm-wunsch[data-w="${k}"] { --f: ${w.farbe}; --g: ${svgUrl(rasterSvg(w.raster))}; }`).join('\n') +
     `\n.hm-wunsch { --f: ${UNBEKANNT.farbe}; --g: ${svgUrl(rasterSvg(UNBEKANNT.raster))}; }` +
+    `\n.hm-wunsch.hm-stamm { --f: ${STAMM_ZEICHEN.farbe}; --g: ${svgUrl(rasterSvg(STAMM_ZEICHEN.raster))}; }` +
     `\n:root { --haken: ${svgUrl(rasterSvg(HAKEN))}; --px-funk: ${svgUrl(rasterSvg(FUNK_RASTER, '#000'))}; }`;
   document.head.append(style);
 
@@ -340,6 +346,14 @@ export function init(game) {
       const ring = el('i', 'hm-wunsch hm-geduld');
       ring.title = 'Geduld: so lange wartet das Boot noch an der Boje';
       node.append(ring);
+      // Wiederkehrer und Stammgast (P25): kleiner Stander gleich hinter dem Ring
+      const b = st()?.boats?.[id];
+      if (b?.stammId && b.besuche > 1) {
+        const z = el('i', 'hm-wunsch hm-stamm');
+        z.dataset.w = 'stamm';
+        z.title = b.stamm ? `Stammgast, ${b.besuche}. Besuch` : `Kommt wieder, ${b.besuche}. Besuch`;
+        node.append(z);
+      }
     }
     wuensche.forEach((w, i) => {
       const s = symbol(w, erfuellt ? (erfuellt.has(w) ? 'ja' : 'nein') : '');
@@ -375,7 +389,7 @@ export function init(game) {
       const a = game.boatView?.boot?.(id);
       if (!a || (a.berth && a.berth.kind !== 'buoy')) continue;
       soll.add(id);
-      const key = (b.wishes ?? []).join(',');
+      const key = (b.wishes ?? []).join(',') + (b.stammId && b.besuche > 1 ? '|stamm' : '');
       const r = reihen.get(id);
       if (r && r.art === 'warten' && r.key === key) continue;
       if (r) entferneReihe(id);

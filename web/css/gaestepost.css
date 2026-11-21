@@ -1,0 +1,137 @@
+/* Gästepost und Stammgäste (Roadmap P25). Wird von web/js/ui/gaestepost.js geladen.
+ * Pixel-Rahmen und Farben aus oberflaeche.css (--rahmen-*, --hm-*). Beschreibung: docs/stammgaeste.md
+ */
+
+.hm-post-sym {
+  display: inline-block;
+  flex: none;
+  width: var(--hm-symbol, 24px);
+  height: var(--hm-symbol, 24px);
+  background: currentColor;
+  -webkit-mask: var(--post-sym) center / contain no-repeat;
+  mask: var(--post-sym) center / contain no-repeat;
+  font-style: normal;
+  vertical-align: middle;
+}
+
+/* ------------------------------------------------------------ Pinnwand im Gästebuch */
+.hm-gb-post h3 { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.hm-gb-post h3 .hm-post-sym { color: #23395d; }
+.hm-gb-post h3.hm-post-unter { margin-top: 12px; }
+.hm-post-karten { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.hm-post-karte {
+  padding: 6px 10px 8px;
+  background: #fbf3dc;
+  border-left: calc(var(--hm-px, 2px) * 3) solid #c9b48a;
+  box-shadow: 0 var(--hm-px, 2px) 0 rgba(36, 54, 74, 0.18);
+}
+.hm-post-karte.neu { border-left-color: #23395d; }
+.hm-post-karte.verpasst { opacity: 0.7; }
+.hm-post-kopf { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 4px; }
+.hm-post-kopf > span:not(.hm-post-stand) { color: var(--hm-tinte-2, #5a6a7c); font-size: calc(var(--hm-schrift, 15px) - 2px); }
+.hm-post-stand {
+  margin-left: auto;
+  padding: 0 6px;
+  background: #dfe8f3;
+  color: #23395d;
+  font-family: var(--hm-pixel, system-ui);
+  font-size: calc(var(--hm-schrift, 15px) - 2px);
+  white-space: nowrap;
+}
+.hm-post-stand.da { background: #cfe9e3; color: #1d6b61; }
+.hm-post-stand.verpasst { background: var(--hm-mulde, #e9dfca); color: var(--hm-tinte-2, #5a6a7c); }
+.hm-post-karte q { display: block; margin-top: 3px; font-style: italic; quotes: "„" "“"; }
+
+.hm-post-stamm { list-style: none; margin: 0; padding: 0; }
+.hm-post-stamm li {
+  display: grid;
+  grid-template-columns: minmax(28px, auto) 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-top: var(--hm-px, 2px) dotted rgba(36, 54, 74, 0.25);
+}
+.hm-post-stamm li:first-child { border-top: 0; }
+.hm-post-wimpel { display: flex; gap: 0; color: #23395d; }
+.hm-post-wimpel .hm-post-sym { width: 18px; height: 18px; margin-right: -4px; }
+.hm-post-wimpel .hm-post-sym.leer { opacity: 0.35; }
+.hm-post-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-post-zahl { color: var(--hm-tinte-2, #5a6a7c); font-size: calc(var(--hm-schrift, 15px) - 2px); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------ Brief am Ruf, Zahl im Menü */
+.hm-neu .hm-post-brief {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 0 4px;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: #23395d;
+  cursor: pointer;
+  animation: hm-post-wippen 1.6s steps(2) infinite;
+}
+.hm-neu .hm-post-brief .hm-post-sym { width: 18px; height: 18px; }
+/* Am Touchgerät größere Trefferfläche, ohne das Schild zu verbreitern */
+@media (pointer: coarse) {
+  .hm-neu .hm-post-brief { position: relative; }
+  .hm-neu .hm-post-brief::after { content: ''; position: absolute; inset: -12px -8px; }
+}
+.hm-post-zahl-menue {
+  margin-left: auto;
+  padding: 0 6px;
+  background: #23395d;
+  color: #fff;
+  font-size: calc(var(--hm-schrift, 15px) - 3px);
+}
+.hm-post-zahl-menue[hidden] { display: none; }
+@keyframes hm-post-wippen { 50% { transform: translateY(-2px); } }
+
+/* ------------------------------------------------------------ Meldung „Post von ...“
+ * Steht im gemeinsamen Meldeplatz (ui/meldungen.js); die Lage hier gilt nur ohne Meldeplatz. */
+#hm-post-meldung {
+  position: absolute;
+  z-index: 19;
+  top: calc(var(--hm-oben, 12px) + var(--hm-knopf, 48px) + 8px);
+  right: var(--hm-rechts, 12px);
+  pointer-events: none;
+}
+#hm-post-meldung[hidden], body.foto #hm-post-meldung, body.hm-gb-offen #hm-post-meldung, body.hm-feier-an #hm-post-meldung { display: none; }
+.hm-neu .hm-post-meldung {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(320px, 76vw);
+  padding: 2px 10px 2px 6px;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--hm-rahmen-breite, 6px 6px 8px);
+  border-image-source: var(--rahmen-papier, var(--rahmen-gold));
+  border-image-slice: 3 3 4 3 fill;
+  border-image-width: var(--hm-rahmen-breite, 6px 6px 8px);
+  background: none;
+  color: var(--hm-tinte, #24364a);
+  font-family: var(--hm-pixel, system-ui);
+  text-align: left;
+  cursor: pointer;
+}
+.hm-post-meldung .hm-post-sym.gross { width: 30px; height: 30px; color: #23395d; }
+.hm-post-meldung-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
+.hm-post-meldung-text b { font-size: calc(var(--hm-schrift, 15px) - 1px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-post-meldung-text span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: calc(var(--hm-schrift, 15px) - 2px); color: var(--hm-tinte-2, #5a6a7c); }
+.hm-neu #hm-meldeplatz .hm-post-meldung { max-width: 100%; animation: hm-mp-rein 0.24s steps(4, end); }
+
+/* Karte eines Stammgasts: Lieblingsplatz und was neu ist (ui/hud.js, features/stammgaeste.js hinweise) */
+.hm-neu .card-stamm { color: #23395d; }
+.hm-neu .card-stamm.belegt { color: var(--hm-tinte-2, #5a6a7c); }
+
+/* Handy hochkant: Name darf umbrechen, Zahl darunter */
+@media (max-width: 599px) and (orientation: portrait) {
+  .hm-post-stamm li { grid-template-columns: minmax(28px, auto) 1fr; }
+  .hm-post-name { white-space: normal; }
+  .hm-post-zahl { grid-column: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-neu .hm-post-brief { animation: none; }
+}

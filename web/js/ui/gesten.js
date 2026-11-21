@@ -617,6 +617,7 @@ export function init(game) {
     if (w.comfort) teile.push('Fingersteg');
     for (const t of w.extras || []) if (!teile.includes(t)) teile.push(t);
     if (w.snug) teile.push('passgenau');
+    if (w.lieblingsplatz) teile.unshift('Lieblingsplatz');   // Stammgast (P25)
     let z3 = w.relocate && w.malus > 0 ? `${w.mal}. Mal umgelegt: −${String(w.malus).replace('.', ',')} Anker` : null;
     // Päckchen (P27): längsseits an einem anderen Boot, halbes Liegegeld, beide Crews weniger Anker
     if (w.paeckchen) {

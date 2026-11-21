@@ -129,7 +129,7 @@ Note 1 bis 5 aus dem Überblick. "nein" heißt: bleibt, wie es ist.
 | Ausbaustufen und Ziele | 3 | teilweise | P16, P18 |
 | Services (21 Stück, mit eigener Wirkung) | 4 | ja | P06, P23 (erledigt) |
 | Ereignisse und Wetter | 3 | teilweise | P06, P24 |
-| Stammgäste | 3 | teilweise | P25 |
+| Stammgäste | 3 | ja | P25 (erledigt) |
 | Einstieg | 3 | ja | P03 |
 | Tempo und Vorspulen | 3 | ja | P07 |
 | Tests | 3 | ja | P06 |
@@ -169,7 +169,7 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Bauzeit der Ausbauten, Winter-Bautempo (`bautage`, `winterBautempo`) | economy.js | erledigt (PR 232): `bautage` = Bauabschnitte, `winterBautempo` gelöscht | P18 |
 | `ECONOMY.ereignisse` (Sturm alle 10 Tage, Hafenfest 1.500 €) | economy.js | eine Quelle, Rest löschen | P06 (erledigt) |
 | Gruppen-Ankunft, Wünsche je Bootsart, `feeFactor`, `arrivalWeight` | data/boats/*.js | Wünsche, `feeFactor`, `arrivalWeight` erledigt (P19 Teil 1); Gruppen offen | P19, P32 (Gruppen) |
-| Stammgast bringt Ruf am alten Platz | plan.md 9a | bauen | P25 |
+| Stammgast bringt Ruf am alten Platz | plan.md 9a | erledigt: Lieblingsplatz +0,5 Anker ([stammgaeste.md](stammgaeste.md)) | P25 |
 | Dauerlieger zahlen pro Saison, Gast wird umgelegt | plan.md 9a | bauen | P01 |
 | Tagesziel-Belohnung in Ruf, Ziele wie "Drei Segelboote mit Dusche" | plan.md 9a | gebaut (PR 152) | P13 |
 | Tretboote und Kanus nur als Kulisse | plan.md 14 (im Spiel zahlender Gast S2, 6 €) | entfällt: bleiben in Stufe 1 Gäste, plan.md angepasst | |
@@ -291,7 +291,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
 | F36 | Hafenchronik: jeder Tag eine Zeile | erledigt | P21 |
-| F37 | Gästepost von Stammgästen, hängt im Hafenbüro | offen | P25 |
+| F37 | Gästepost von Stammgästen, hängt im Hafenbüro | erledigt: Ankündigung und Empfehlung, Pinnwand im Gästebuch | P25 |
 | F38 | Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten | offen | P51 |
 
 ### Welt
@@ -370,7 +370,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | C5 | Ruf als Auszeichnung mit Namen und Zeichen im Hafen | erledigt (P19 Teil 2): drei Stufen mit Namen, Wimpel am Hafenmeisterhaus | P19 |
 | C6 | Ruf lockt andere Gäste (ab 4 große Yachten, ab 4,5 seltene Modelle) | erledigt (P19 Teil 1, `ruf.lockt`) | P19 |
 | C7 | Warnen, bevor es Anker kostet (Gebäude blinkt bei fast ausgebuchter Dusche) | erledigt (P55: Schild knapp orange und blinkend, voll rot, Tipp beim ersten Mal) | P55 |
-| C8 | Stammgäste zählen beim Ruf doppelt | offen | P25 |
+| C8 | Stammgäste zählen beim Ruf doppelt | erledigt (P25) | P25 |
 | C9 | Ruf-Verlauf mit den drei häufigsten Gründen für schlechte Noten | erledigt (PR 154) | P14 |
 
 ### D Ausbaustufen, Stegprojekte und Baumodus
@@ -438,9 +438,9 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | H3 | Bewerber statt Verwandlung: Stammgäste und Einheimische fragen an | erledigt (PR 149) | P01 |
 | H4 | Obergrenze ein Viertel der Plätze | erledigt (PR 149) | P01 |
 | H5 | Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land | erledigt (PR 245 und P20-Rest): im Winter im Winterlager (zahlen dort je Tag), Krantage an Mastenkran und Travellift, Segelmacher-Aufträge in der Saison | P20 |
-| H6 | Lieblingsplatz eines Stammgasts | offen | P25 |
-| H7 | Sichtbare Treue: Wimpel je fünf Besuche | offen | P25 |
-| H8 | Stammgäste wachsen mit (Wünsche, größeres Boot) | offen | P25 |
+| H6 | Lieblingsplatz eines Stammgasts | erledigt (P25): Box des letzten zufriedenen Besuchs, Stander über der Box | P25 |
+| H7 | Sichtbare Treue: Wimpel je fünf Besuche | erledigt (P25): Doppelstander am Heck | P25 |
+| H8 | Stammgäste wachsen mit (Wünsche, größeres Boot) | erledigt (P25) | P25 |
 | H9 | Leere Box während eines Tagestörns für einen Tagesgast | offen | P25 |
 | H10 | Dauerlieger vor Vertragsende kündigen kostet | erledigt (PR 149) | P01 |
 
@@ -695,7 +695,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|
 | P23 | Services mit eigener Wirkung | Services nicht nur "€ pro Tag" | erledigt (PR 340; F2, F3, F5, F7, F9; [services.md](services.md#eigene-wirkung-roadmap-p23)) |
 | P24 | Ereignisse zum Vorbereiten und neue Ereignisse | Vorwarnung mit Handlungsmöglichkeit, F17 | erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend; PR 299: Heringstage, Mittsommer, Holzboot-Treffen, Hanse-Woche, Nachspiel, Services an Ereignistagen; Regatta mit Bahn draußen PR 319), [ereignisse.md](ereignisse.md) |
-| P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | neu |
+| P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | Teil 1 und 2 gebaut ([stammgaeste.md](stammgaeste.md)), H9 folgt |
 | P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | erledigt (PR 322, docs/hafengesten.md) |
 | P27 | Päckchen liegen bei vollem Hafen | F1 | erledigt (PR 330, [paeckchen.md](paeckchen.md)) |
 | P28 | Anmeldung per Funk | F2 (nutzt P11) | erledigt (PR 288, `docs/funk-anmeldung.md`) |

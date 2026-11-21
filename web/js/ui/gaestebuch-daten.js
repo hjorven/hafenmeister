@@ -55,6 +55,7 @@ export const PLUS = {
   passgenau: 'Box passt genau',
   vonHand:  'vom Hafenmeister eingewiesen',
   bonus:    'Fest im Hafen',
+  stammPlatz: 'wieder am Lieblingsplatz',
 };
 
 const WUNSCH_KEYS = ['wc', 'dusche', 'essen', 'strom', 'diesel', ...Object.keys(ANGEBOT_TEXTE)];
@@ -91,6 +92,7 @@ export function gruendeAusAbreise(e) {
     if (p.snug > 0.001) plus.push({ key: 'passgenau', wert: r2(p.snug) });
     if (p.byHand > 0.001) plus.push({ key: 'vonHand', wert: r2(p.byHand) });
     if (p.bonus > 0.001) plus.push({ key: 'bonus', wert: r2(p.bonus) });
+    if (p.stammPlatz > 0.001) plus.push({ key: 'stammPlatz', wert: r2(p.stammPlatz) });   // P25
   }
   if (e.reason === 'rebuild') gruende.push({ key: 'umbau', n: 1 });
   return { gruende, plus };
@@ -186,7 +188,8 @@ export function rufErklaerung(state) {
   const n = sim.reputationRatings(state).length;
   const tage = days === 1 ? 'von heute' : `der letzten ${days} Tage`;
   return `Dein Ruf ist der Schnitt aller Bewertungen ${tage}, mindestens der letzten ${minCount} (gerade ${n}). `
-    + 'Ab 4 Sternen kommen Gäste als Stammgast wieder, ein guter Ruf lockt mehr und größere Boote an.';
+    + 'Ab 4 Sternen kommen Gäste gern wieder; wer zweimal zufrieden war, ist Stammgast und zählt beim Ruf doppelt. '
+    + 'Ein guter Ruf lockt mehr und größere Boote an.';
 }
 
 /** Ruf-Verlauf mit dem heutigen Stand am Ende: [{ tag, ruf, heute? }]. */
@@ -227,6 +230,7 @@ const SATZ = {
   'weit:wc': ['Bis zum Klo war es ein halber Landgang.', 'Nachts so weit zum WC laufen, nein danke.'],
   'weit:dusche': ['Nach der Dusche waren wir auf dem Rückweg schon wieder verschwitzt.', 'Die Dusche war am anderen Ende des Hafens.'],
   stamm: (n) => `Schon unser ${n}. Besuch hier.`,
+  stammPlatz: ['Und wieder an unserem alten Platz!', 'Unsere Box war frei, wie schön.', 'Der Hafenmeister kennt unseren Platz.'],
 };
 for (const [k, t] of Object.entries(ANGEBOT_TEXTE)) SATZ[k] = t.saetze;
 
@@ -243,6 +247,7 @@ export function satz(eintrag) {
   else if (eintrag.gruende[0] && SATZ[eintrag.gruende[0].key]) text = wahl(SATZ[eintrag.gruende[0].key], eintrag);
   else text = wahl(SATZ.mittel, eintrag);
   if ((eintrag.boot?.besuche ?? 1) > 1 && eintrag.art === 'abreise') text += ` ${SATZ.stamm(eintrag.boot.besuche)}`;
+  if (eintrag.plus?.some((p) => p.key === 'stammPlatz')) text += ` ${wahl(SATZ.stammPlatz, eintrag, 3)}`;
   return text;
 }
 

@@ -31,6 +31,8 @@ import { createScheduler } from '../web/js/events/scheduler.js';
 import { pruefeZahlen } from './zahlen.mjs';
 import { zufallAus } from '../web/js/random.js';
 import { installiere as geschichtenEinhaengen, wetterWorte } from '../web/js/geschichten/regeln.js';
+import { haengeEin as stammEinhaengen } from '../web/js/features/stammgaeste.js';
+import { haengeEin as postEinhaengen } from '../web/js/features/gaestepost.js';
 
 // Hat harbor.js für eine Stufe aus economy.js noch keine Plätze (Stufe 6 vor dem Export der
 // Pier), rechnet das Werkzeug mit den Plätzen der letzten Hafenstufe weiter und sagt das.
@@ -179,8 +181,11 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   sim.addHook(ctx, 'modifiers', () => ({ sizeFactor: effekte.gaeste, offers: { ...effekte.angebote } }));
   // Ereignisse (Nebel, Sommertag, Sturm, Regatta, Hafenfest, Winter) wie im Spiel
   const plan = mitEreignissen ? createScheduler({ seed }) : null;
+  // Stammgäste und Gästepost wie im Spiel (P25): Reihenfolge wie MODULES (Stammgäste, Geschichten, ..., Gästepost)
+  stammEinhaengen((n, f) => sim.addHook(ctx, n, f));
   // Bootsgeschichten wie im Spiel (geschichten/geschichten.js): Anlass je Boot, besondere Tage, Tagestörns
   geschichtenEinhaengen(ctx, sim, { umfeld: (st, tag = st.day) => { const w = plan?.weather?.(tag); return { ereignis: w?.event ?? null, wetter: wetterWorte(w) }; } });
+  postEinhaengen((n, f) => sim.addHook(ctx, n, f));
   // Dienste der Services wie im Spiel (render/services.js, Haken 'arrivals'): Mast legen,
   // Radtour, Reparatur verlängern den Aufenthalt und werden am ersten Abend bezahlt (P23)
   const wetterAm = (tag) => (plan?.weather?.(tag)?.event === 'sturm' ? 'sturm' : (plan && (plan.weather(tag).rain ?? 0) > 0.3) ? 'regen' : 'sonne');

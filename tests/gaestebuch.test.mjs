@@ -26,6 +26,8 @@ function spiele(state, ctx, tage) {
 
 test('Gästebuch zeigt die letzten 20 Noten, der Ruf ist der Schnitt der letzten drei Tage', () => {
   const { ctx, state } = neu();
+  // Stammgäste zählen beim Ruf doppelt (P25, tests/stammgaeste.test.mjs); hier eine Note je Gast
+  ctx.rules.regular.reputationWeight = 1;
   spiele(state, ctx, 40);
   const e = G.buchState(state).eintraege;
   assert.equal(e.length, G.GAESTEBUCH.maxEintraege);
