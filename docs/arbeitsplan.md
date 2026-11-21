@@ -65,7 +65,7 @@ Stand 21.11.2026, 23:00 UTC. Leitlinie: Welle 3 nach Wirkung auf die Kernschleif
 | Nr | Paket | Warum jetzt | Hängt ab von | Kann kollidieren mit |
 |---|---|---|---|---|
 | 1 | **P34 Wind im Hafen spürbar machen** (F5, F35) | Starkwind macht Außenplätze unruhig, große Boote legen lieber gegen den Wind an: jede Zuweisung bekommt eine zweite Überlegung | - | `sim.js` (Bewertung, Anlegezeit), `economy.js`, Wetterflagge, Jahreszeiten (P20) |
-| 2 | **P32 Flottillen** (F3) | drei bis fünf Boote wollen zusammen an einen Steg: neue Entscheidung beim Zuweisen, nutzt Funk-Anmeldung (P28) | - | `sim.js` (Ankünfte, Feld `group`), Wegsuche (Konvois aus P66), `ui/vorschau.js` |
+| 2 | ~~**P32 Flottillen** (F3)~~ erledigt | drei bis fünf Boote wollen zusammen an einen Steg: neue Entscheidung beim Zuweisen, nutzt Funk-Anmeldung (P28) | - | `sim.js` (Ankünfte, Feld `group`), Wegsuche (Konvois aus P66), `ui/vorschau.js` |
 | 3 | **P25 Stammgäste mit Wirkung und Gästepost** (F37) | Ruf am alten Platz, Gästepost im Hafenbüro: Stammgäste sind seit K2 selten und sollen etwas bringen | - | `features/stammgaeste.js`, Logbuch, Gästebuch |
 | 4 | **P88 Engstellen nach ihrer Länge regeln** (Prio B), Teil 1 erledigt (PR 390) | Teil 1: Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m). Darum getrennte Bahnen in offenem Wasser statt längenabhängiger Werte. Stufe 5 über 15 Küsten: 14 gleich oder besser (Küste 14 rund 3500 auf 1300 Proben, Küste 9 1851 auf 539, Bodden 1150 auf 620). Rest: Großschiff-Vortritt, Segler der Seerunde in der Schlange, Küste 15 | - | `boat-view.js`, `boat-anim.js` (Boote-Thread), danach Zeitraffer-Stichprobe |
 | 5 | **P31 Neue Gästewünsche** (F9) | WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | 1 (`economy.js`) | Wünsche aus P19, Services (P23), Bauen-Menü |
@@ -145,7 +145,7 @@ Reihenfolge nach Wirkung auf die Kernschleife: erst was jede Ankunft und jedes Z
 | 7 | P31 | Neue Gästewünsche (WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen) | F9 |
 | 8 | P30 | erledigt (PR 297; Wasser kommt mit P31) | F8 |
 | 9 | P35 | Preisstufe am Hafenbüro | F6 |
-| 10 | P32 | Flottillen | F3 |
+| 10 | P32 | erledigt (Flottillen, [flottillen.md](flottillen.md)) | F3 |
 | 11 | P25 | Stammgäste mit Wirkung, Gästepost | F37 |
 | 12 | P29 | Baggern für tiefere Liegeplätze | F7 |
 | 13 | P36 | Bojenfeld im See | F10 |
