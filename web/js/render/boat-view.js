@@ -126,7 +126,8 @@ export function init(game) {
       }
       // Wer noch sichtbar an einer Boje liegt (gerade zugewiesen, legt erst ab), belegt sie weiter:
       // sonst steuert das naechste Boot dieselbe Boje an und liegt kurz auf ihm (Schichttest F5)
-      if (o.model?.visible !== false && (o.speed ?? 0) < 0.5) {
+      // (nur Boote, die gerade losfahren: wer fest in seiner Box nahe einer Boje liegt, belegt sie nicht)
+      if (o.model?.visible !== false && (o.speed ?? 0) < 0.5 && !o.moored && o.state !== 'idle' && o.state !== 'moored') {
         for (let i = 0; i < list.length; i++) if (Math.hypot(list[i].x - o.x, list[i].z - o.z) < o.info.length / 2 + 6) belegt.add(i);
       }
     }
