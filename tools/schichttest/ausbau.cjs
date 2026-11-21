@@ -86,7 +86,8 @@ async function tempoMessen(t) {
   await t.punkt('8x läuft durch, ohne von selbst zu bremsen', verlauf.every((v) => v === '8'), `Verlauf ${verlauf.join(' ')}${zu.length ? `, Fenster: ${zu.join(', ')}` : ''}`);
   if (!t.touch) {
     // PC: Leertaste hält an und lässt weiterlaufen, Taste F schaltet 3x
-    await t.page.locator('#stage').focus().catch(() => {});
+    // Leertaste auf einem Knopf drückt den Knopf (gewollt, ui/input-pc.js): erst Fokus vom zuletzt geklickten Knopf nehmen
+    await t.G(() => document.activeElement?.blur?.());
     await t.page.keyboard.press('Space');
     const p = await t.G(() => window.hafenmeister.paused);
     await t.page.keyboard.press('Space');
@@ -224,6 +225,9 @@ async function tagesabschluss(t, z) {
   const bericht = await t.G(() => { const v = window.hafenmeister.sim.verlauf?.() ?? []; return v[v.length - 1] ?? null; });
   const warum = (k || zt) ? '' : await t.G(() => { const G = window.hafenmeister; const z = document.getElementById('hm-ta-zettel');
     return `; Meldeplatz ${JSON.stringify(G.meldungen?.stand?.())}, Zettel hidden=${z?.hidden} class="${z?.className}", body "${document.body.className}", Tag ${G.sim.state.day} ${G.sim.state.phase}, Winter ${!!G.sim.season?.()?.winter}, springt ${!!G.winter?.springt}`; });
+  // Im Winter steht die Winterbilanz vorn (Meldeplatz: Winter vor Zettel), der Zettel wartet dahinter
+  const winterVorn = !(k || zt) && await t.G(() => window.hafenmeister.meldungen?.stand?.()?.steht === 'winter' && !document.getElementById('hm-winter')?.hidden);
+  if (winterVorn) { await t.hinweis('Tagesabschluss wartet hinter der Winterbilanz', warum.slice(2), { bild: false }); return; }
   await t.punkt('Tagesabschluss erscheint nach dem Tag', k || zt, (k ? 'Karte' : zt ? 'Zettel' : 'nichts') + warum, { bild: true, schwere: 'B' });
   if (k) {
     const text = (await karte.textContent()).replace(/\s+/g, ' ');
@@ -387,12 +391,12 @@ const S15 = { nr: 15, name: 'Bewertung und Gästebuch', paket: 'P14', neu: gaest
 // ------------------------------------------------------------------ Schicht 16: Aufstieg
 // Über Bauen, Reiter "Hafen", Zeile "hafen:stufe". Ist das Ziel noch nicht erreicht, wird bei 8x
 // weitergespielt (Boote fahren selbst ein, der Test streicht nichts) und erneut versucht.
-async function bauzeile(t, key) {
+async function bauzeile(t, key, reiterName = 'Hafen') {
   await t.sp.knopf(t.page.locator('#btn-build'));
   await t.page.locator('#card.bau-karte').waitFor({ state: 'visible', timeout: 8000 }).catch(() => {});
   let zeile = t.page.locator(`#card .bau-zeile[data-bau="${key}"]`);
   if (!(await zeile.isVisible().catch(() => false))) {
-    const reiter = t.page.locator('#card .bau-tab', { hasText: 'Hafen' });
+    const reiter = t.page.locator('#card .bau-tab', { hasText: reiterName });
     if (await reiter.isVisible().catch(() => false)) await t.sp.knopf(reiter);
   }
   zeile = t.page.locator(`#card .bau-zeile[data-bau="${key}"]`);
@@ -503,4 +507,4 @@ async function hafenbuero(t, z) {
 const S17 = { nr: 17, name: 'Hafenbüro', paket: 'P02', neu: hafenbuero, wieder: hafenbuero };
 
 const SCHICHTEN = [S8, S9, S10, S11, S12, S13, S14, S15, S16, S17];
-module.exports = { SCHICHTEN };
+module.exports = { SCHICHTEN, bauzeile, bauenSchliessen };
