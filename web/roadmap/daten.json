@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "21.11.2026",
-  "commit": "ec2fa7a"
+  "commit": "bd852f7"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1322,7 +1322,7 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280, 327, 332, 351, 372, 375): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende (PR 240); Wartebojen seitlich, Anfahrt von weit draußen aus verschiedenen Richtungen (PR 280); Geduld erst ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall (PR 327); erstes Boot vom Bildrand (PR 332); Anfahrt kürzer, Boote sichtbar an der Boje, Einfahrt als Einbahn gegen den Pulk (PR 351); Vorbeifahrer sperren die Einfahrt nicht mehr dauerhaft, Winter-Sprung ohne Geisterboote (PR 372); Boote einigen sich bei Begegnungen und weichen früher aus (PR 375). Noch offen: Pulk und \"ineinander fest\" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht), Abnahme-Serie über alle 15 Küsten; übernimmt P54",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280, 327, 332, 351, 372, 375, 378): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende (PR 240); Wartebojen seitlich, Anfahrt von weit draußen aus verschiedenen Richtungen (PR 280); Geduld erst ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall (PR 327); erstes Boot vom Bildrand (PR 332); Anfahrt kürzer, Boote sichtbar an der Boje, Einfahrt als Einbahn gegen den Pulk (PR 351); Vorbeifahrer sperren die Einfahrt nicht mehr dauerhaft, Winter-Sprung ohne Geisterboote (PR 372); Boote einigen sich bei Begegnungen und weichen früher aus (PR 375); Wartende halten sich rechts, eine Schlange vor der nächsten Engstelle gilt nicht mehr als Blockade (PR 378). Noch offen: Pulk und \"ineinander fest\" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht), Abnahme-Serie über alle 15 Küsten; übernimmt P54",
    "welle": 0,
    "prs": [
     81,
@@ -1340,7 +1340,8 @@
     332,
     351,
     372,
-    375
+    375,
+    378
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
@@ -5650,6 +5651,22 @@
  "merges": [
   {
    "datum": "2026-11-21",
+   "titel": "Roadmap-Pflege: P66 Wartende rechts (PR 378)",
+   "pr": 379,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-21",
+   "titel": "P66: Wartende halten sich rechts, Schlange vor der nächsten Engstelle ist keine Blockade",
+   "pr": 378,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-21",
    "titel": "Roadmap-Pflege: P66 Ausweichen (PR 375), P85 Teil 3 fertig (PR 373)",
    "pr": 377,
    "pakete": [
@@ -5722,20 +5739,6 @@
    "datum": "2026-11-21",
    "titel": "Erfolge-Meldung unter Last stabil: zählt Bildzeit, hält unter Zeiger oder Fokus",
    "pr": 368,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Ausbauten je Küste: Durchstich nur auf Nehrungsküsten (P85 Teil 3)",
-   "pr": 366,
-   "pakete": [
-    "P85"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Einfahren-Knopf bleibt im Bild, Meldeplatz rechnet die Zeitsteuerung immer mit (Schichttest F6)",
-   "pr": 367,
    "pakete": []
   }
  ]
