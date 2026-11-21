@@ -113,6 +113,8 @@ async function laden(t, z, { neu = false } = {}) {
 }
 
 async function oberflaeche(t) {
+  // Leisten gleiten nach dem Schließen einer Karte zurück (0,2 s, unter Last länger): erst messen, wenn sie stehen
+  await t.bis(() => !document.getAnimations().some((a) => a.playState === 'running' && a.effect?.target?.closest?.('#hud-bottom, #hm-meldeplatz, #hm-seite')), null, 3000);
   const raus = await t.G(() => window.__st.ausDemBild());
   await t.punkt('Knöpfe und Anzeigen ganz im Bild', raus.length === 0, raus.map((r) => `${r.was} bei ${r.r.join(',')}`).join('; '));
   const werte = await leinwandBild(t);

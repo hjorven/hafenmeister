@@ -228,7 +228,7 @@ function spieler(page, touch) {
             return;
           } catch { /* bleibt ein Fehler */ } finally { sp._nachfassen = false; }
         }
-        e.message = `${e.message.split('\n')[0]} | ${log} | oben: ${oben} | Seite ${JSON.stringify(lage)} | Knopf ${JSON.stringify(b1)} -> ${JSON.stringify(b2)}`;
+        e.message = `${e.message.split('\n')[0]} | ${log} | oben: ${oben} | Seite ${JSON.stringify(lage)} | Knopf ${String(locator).slice(0, 160)} ${JSON.stringify(b1)} -> ${JSON.stringify(b2)}`;
         throw e;
       }
     },
