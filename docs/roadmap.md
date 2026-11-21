@@ -229,7 +229,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F2 | Anmeldung per Funk: morgens melden sich ein bis zwei Boote an, Platz freihalten gibt Bonus | erledigt (PR 288, [funk-anmeldung.md](funk-anmeldung.md)) | P28 |
 | F3 | Flottillen: drei bis fünf Boote wollen am selben Steg liegen (Feld `group`) | offen | P32 |
 | F4 | Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung | erledigt (PR 314): halten und ziehen, ab dem zweiten Mal −0,5 Anker | P33 |
-| F5 | Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld `exposed`) | erledigt ([wind.md](wind.md)): Windlage je Platz aus Wellenweg gegen den Wind des Tages, ab Stufe 2, Zeichen beim Ziehen | P34 |
+| F5 | Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld `exposed`) | erledigt (PR 392, [wind.md](wind.md)): Windlage je Platz aus Wellenweg gegen den Wind des Tages, ab Stufe 2, Zeichen beim Ziehen | P34 |
 | F6 | Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison | offen | P35 |
 | F7 | Baggern: Wassertiefe je Steg als Bauprojekt | offen | P29 |
 | F8 | Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar | erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasser mit P31, [nachruesten.md](nachruesten.md) | P30 |
@@ -284,7 +284,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 |---|---|---|---|
 | F33 | Signalflaggen als Wunschanzeige, Lexikon im Logbuch | offen | P49 |
 | F34 | Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter) | offen | P49 |
-| F35 | Wind beim Anlegen: große Boote brauchen länger, bevorzugen Plätze gegen den Wind | erledigt ([wind.md](wind.md)): L und XL mit Rückenwind langsamer und −0,25 Anker, Büro wählt Bug gegen den Wind | P34 |
+| F35 | Wind beim Anlegen: große Boote brauchen länger, bevorzugen Plätze gegen den Wind | erledigt (PR 392, [wind.md](wind.md)): L und XL mit Rückenwind langsamer und −0,25 Anker, Büro wählt Bug gegen den Wind | P34 |
 
 ### Geschichten
 
@@ -704,7 +704,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P31 | Neue Gästewünsche | F9 | neu |
 | P32 | Flottillen | F3, Gruppen-Ankunft | neu |
 | P33 | Liegende Boote umlegen | F4 | erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen) |
-| P34 | Wind im Hafen spürbar machen | F5, F35 | erledigt ([wind.md](wind.md)) |
+| P34 | Wind im Hafen spürbar machen | F5, F35 | erledigt (PR 392, [wind.md](wind.md)) |
 | P35 | Preisstufe am Hafenbüro | F6 | neu |
 | P36 | Bojenfeld im See | F10 | neu |
 | P37 | Havarist einschleppen | F11 | neu |
