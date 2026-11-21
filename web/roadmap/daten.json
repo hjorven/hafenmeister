@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "20.11.2026",
-  "commit": "580efb7"
+  "datum": "21.11.2026",
+  "commit": "cf13ad5"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1588,7 +1588,7 @@
    "id": "P85",
    "titel": "Zusammenspiel nach Welle 0 prüfen",
    "inhalt": "Jorvens Auftrag vom 14.11.: alle Features noch da, neue Features im normalen Spiel wirklich genutzt, Welle 1 wirklich gefixt, Übersehenes finden. Drei Threads (Kernschleife und Regeln; Oberfläche und Geräte; Welt, Boote, Ereignisse), gemeinsame Datei docs/zusammenspiel.md",
-   "thread": "teilweise: Teil 1 Kernschleife und Regeln erledigt (PR 354, Funde K1 bis K5), Teil 2 Oberfläche und Geräte erledigt (PR 352), beide in docs/zusammenspiel.md; Welt läuft",
+   "thread": "teilweise: Teil 1 Kernschleife und Regeln erledigt (PR 354, Funde K1 bis K5), Teil 2 Oberfläche und Geräte erledigt (PR 352), beide in docs/zusammenspiel.md; Teil 3 Welt: Ausbauten je Küste geprüft (Abschnitt \"Ausbauten je Küste\", Fund W1 Durchstich nur auf Nehrungsküsten), Rest von Teil 3 (Stegbilder, Ereignisse, Wetter, Leistung) offen",
    "welle": 1,
    "prs": [
     352,
@@ -5619,6 +5619,59 @@
  ],
  "merges": [
   {
+   "datum": "2026-11-21",
+   "titel": "Arbeitsplan: Stand 21.11., Welle 0 bis 2 bis auf P66-Pulk und P85 Teil 3 fertig",
+   "pr": 369,
+   "pakete": [
+    "P66",
+    "P85"
+   ]
+  },
+  {
+   "datum": "2026-11-21",
+   "titel": "Erfolge-Meldung unter Last stabil: zählt Bildzeit, hält unter Zeiger oder Fokus",
+   "pr": 368,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-21",
+   "titel": "Ausbauten je Küste: Durchstich nur auf Nehrungsküsten (P85 Teil 3)",
+   "pr": 366,
+   "pakete": [
+    "P85"
+   ]
+  },
+  {
+   "datum": "2026-11-21",
+   "titel": "Einfahren-Knopf bleibt im Bild, Meldeplatz rechnet die Zeitsteuerung immer mit (Schichttest F6)",
+   "pr": 367,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-21",
+   "titel": "Menschen laufen nur über gebaute Stege",
+   "pr": 365,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-21",
+   "titel": "Zeitraffer: Erwartung nach PR 361 und Vergleich Spiel gegen Rechnung",
+   "pr": 364,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-21",
+   "titel": "Zeitraffer-Bot baut den Ausbau über das Bauen-Menü in Bauabschnitten",
+   "pr": 363,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-21",
+   "titel": "Stammgäste erst beim Wiederkommen, Bauabschnitte und Anfahrt in der Rechnung (Zusammenspiel K2, K4)",
+   "pr": 361,
+   "pakete": []
+  },
+  {
    "datum": "2026-11-20",
    "titel": "Roadmap-Pflege: P66 mit PR 351",
    "pr": 360,
@@ -5646,66 +5699,6 @@
    "pr": 354,
    "pakete": [
     "P85"
-   ]
-  },
-  {
-   "datum": "2026-11-20",
-   "titel": "Schichttest: Schichten 18 bis 20 (Dauerlieger, Logbuch, Winter) und Serie 8",
-   "pr": 357,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-20",
-   "titel": "P66: Anfahrt kürzer, Boote sichtbar an der Boje, Einfahrt als Einbahn gegen den Pulk",
-   "pr": 351,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-20",
-   "titel": "Doppelbox und Rückbau nur im Baumenü, wenn sie etwas bringen (Zusammenspiel K5)",
-   "pr": 356,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-20",
-   "titel": "Roadmap-Pflege: P85 Teil 2 (PR 352) mit Bildern",
-   "pr": 355,
-   "pakete": [
-    "P85"
-   ]
-  },
-  {
-   "datum": "2026-11-20",
-   "titel": "Zusammenspiel 2: Oberfläche und Geräte geprüft, 12 Funde behoben (P85)",
-   "pr": 352,
-   "pakete": [
-    "P85"
-   ]
-  },
-  {
-   "datum": "2026-11-20",
-   "titel": "Roadmap-Pflege: P20-Rest (PR 347) mit Bild",
-   "pr": 353,
-   "pakete": [
-    "P20"
-   ]
-  },
-  {
-   "datum": "2026-11-20",
-   "titel": "Gelände: Rechnung und gezeichnetes Wasser stimmen überein (Funde aus P87)",
-   "pr": 350,
-   "pakete": [
-    "P87"
-   ]
-  },
-  {
-   "datum": "2026-11-20",
-   "titel": "Großschiffwege an allen 15 Küsten (P84 Teil 1)",
-   "pr": 341,
-   "pakete": [
-    "P84"
    ]
   }
  ]
