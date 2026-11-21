@@ -244,17 +244,6 @@
    "quelle": "feature-tests/pr204/korb-pc-g6-1-seebruecke.png"
   },
   {
-   "datei": "p66-pr180-handy-stufe4-final.jpg",
-   "pakete": [
-    "P66"
-   ],
-   "titel": "Fahrwasser am Handy",
-   "pr": 180,
-   "geraet": "handy",
-   "datum": "2026-11-13",
-   "quelle": "fahrwasser/handy-stufe4-final.png"
-  },
-  {
    "datei": "p62-pr224-k210-pc-g4-1-weit.jpg",
    "pakete": [
     "P62"
@@ -860,17 +849,6 @@
    "quelle": "winter/handy-hochsaison.png"
   },
   {
-   "datei": "p85-pr352-handy-grund.jpg",
-   "pakete": [
-    "P85"
-   ],
-   "titel": "Zusammenspiel Oberfläche: Grundansicht am Handy",
-   "pr": 352,
-   "geraet": "handy",
-   "datum": "2026-11-20",
-   "quelle": "zusammenspiel/oberflaeche/handy-grund.png"
-  },
-  {
    "datei": "p85-pr352-pc-bauen.jpg",
    "pakete": [
     "P85"
@@ -902,6 +880,28 @@
    "geraet": "pc",
    "datum": "2026-11-21",
    "quelle": "kuesten-ausbau/pc-k2-molen-und-wellenbrecher.png"
+  },
+  {
+   "datei": "p66-pr375-handy-ausweichen.jpg",
+   "pakete": [
+    "P66"
+   ],
+   "titel": "Boote weichen sich früher aus und einigen sich bei Begegnungen",
+   "pr": 375,
+   "geraet": "handy",
+   "datum": "2026-11-21",
+   "quelle": "p66/ausweichen/handy-2.png"
+  },
+  {
+   "datei": "p85-pr373-pc-ereignisse.jpg",
+   "pakete": [
+    "P85"
+   ],
+   "titel": "Zusammenspiel Teil 3: Ereignisse laufen auf jeder Küste",
+   "pr": 373,
+   "geraet": "pc",
+   "datum": "2026-11-21",
+   "quelle": "kuesten-ausbau/teil2/ereignisse-laeuft-pc.jpg"
   }
  ]
 }
