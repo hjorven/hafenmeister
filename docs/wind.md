@@ -6,7 +6,7 @@ Paket P34 aus der [Roadmap](roadmap.md), Features F5 (Windseite) und F35 (Wind b
 
 - **Wetterbericht:** Ab frischem Wind steht die Richtung dabei („Starkwind aus Nordwest“). An Starkwindtagen sagt der Bericht, was das heißt: offene Plätze werden unruhig, geschützte Boxen bringen Anker. Weil der Bericht drei Tage vorausschaut, kann man planen.
 - **Ansage am Morgen:** Am ersten Starkwindtag einer Wetterlage (oder wenn der Wind um 45 Grad oder mehr dreht) kommt eine Ansage im Meldeplatz. An Folgetagen mit gleicher Lage nicht noch einmal.
-- **Beim Ziehen eines Boots:** Über den passenden Boxen stehen kleine Pixel-Schilder. Schild = geschützt, Welle = offen und unruhig, Windlinien = für große Boote Wind von achtern. Die Bootskarte erklärt die Zeichen in einem Satz.
+- **Beim Ziehen eines Boots:** Über den passenden Boxen stehen kleine Pixel-Schilder. Schild = geschützt, Welle = offen und unruhig, Windlinien = für große Boote Wind von achtern. Es stehen nur die Ausnahmen: Gilt ein Zeichen für mehr als die Hälfte der passenden Boxen (Bodden bei Ostwind: fast alles offen), fällt es weg, damit das Bild frei bleibt. Die Bootskarte erklärt die Zeichen in einem Satz.
 - **Im Bild:** Boote krängen und schwojen in Windrichtung (Bojen, Ankerfeld, Regattakurs), der Seegang wächst mit dem Wind, draußen schaukeln die Boote stärker als hinter Mole und Land. Die Wellenstriche im Wasser laufen mit dem Wind, der Windsack am Flaggenmast zeigt nach Lee.
 - **Gästebuch:** „unruhig im Wind gelegen −0,5“, „Anleger mit Rückenwind −0,25“, „ruhig gelegen trotz Starkwind +0,5“, mit eigenen Sätzen der Gäste.
 

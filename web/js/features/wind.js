@@ -203,9 +203,16 @@ export function init(game) {
     const r = rules(), state = game.sim?.state, boot = state?.boats?.[bootId];
     if (!r || !boot) return;
     sichereLagen();
-    for (const id of game.sim.fittingBerths?.(bootId) ?? []) {
-      const art = platzZeichen(state, r, heute, boot, id, lageVon, bugVon);
-      if (!art) continue;
+    const passend = game.sim.fittingBerths?.(bootId) ?? [];
+    const arten = new Map(passend.map((id) => [id, platzZeichen(state, r, heute, boot, id, lageVon, bugVon)]));
+    // Nur die Ausnahmen zeigen: Liegt mehr als die Hälfte der passenden Boxen offen (Bodden bei Ostwind),
+    // steht über ihnen kein Zeichen, nur über den geschützten. So bleibt das Bild frei.
+    const anzahl = {};
+    for (const a of arten.values()) if (a) anzahl[a] = (anzahl[a] || 0) + 1;
+    const zuViel = (a) => anzahl[a] > passend.length / 2;
+    for (const id of passend) {
+      const art = arten.get(id);
+      if (!art || zuViel(art)) continue;
       const sp = game.stege?.platz?.(id);
       const w = sp ?? platzInWelt(HAFEN.plaetze.find((p) => p.id === id), stufe());
       if (!w) continue;
