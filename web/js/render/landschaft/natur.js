@@ -148,7 +148,8 @@ export const SEE_NORD = { x0: -400, x1: 440, y0: 245, y1: 600 };
 export const BEDARF = {
   wasser: {
     kaesten: [
-      { x0: -152, x1: -16, y0: 6, y1: 110, rund: 22 },   // Stege, Liegeplätze und Bojen Stufe 1 und 2
+      { x0: -172, x1: -2, y0: 6, y1: 110, rund: 22 },   // Stege, Liegeplätze und Bojen Stufe 1 und 2 mit der Gasse vor jeder Box (P85: mit x -152 bis -16 lag auf Schären, Steilküste und Bucht Land in der Gasse am Westende von Steg A und am Kopf von Steg B)
+      { x0: -172, x1: -100, y0: 100, y1: 150, rund: 22 },  // Zufahrt um den Kopf von Steg A zu den Boxen an seiner Westseite (P85: Schären, Stegbild 11)
       { x0: -90, x1: 68, y0: 6, y1: 30, rund: 10 },      // Uferstrecke
       RUNDE12,
     ],
