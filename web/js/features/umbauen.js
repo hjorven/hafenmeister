@@ -22,6 +22,9 @@ export const REGELN = ECONOMY.doppelbox ?? null;
 
 export const stegName = (id) => HAFEN.stege?.[id] ?? `Steg ${id}`;
 const frei = (state, ctx, id) => sim.berthState(state, ctx, id) === 'frei';
+// Zum Umbauen frei: Ein Dauerplatz ist es nie, auch wenn sein Boot gerade auf Törn oder im Winterlager ist
+// (dann meldet berthState 'frei', weil Gäste dort kurz liegen dürfen; das Boot kommt aber an diese Box zurück).
+const umbaubar = (state, ctx, id) => frei(state, ctx, id) && !state.modules?.dauer?.plaetze?.[id];
 const inStufe = (state, b) => (b.stages ? b.stages.includes(state.stage) : b.stage <= state.stage);
 
 /** Doppelboxen der aktuellen Stufe, deren Einzelboxen es gibt: [{ platz, teile: [a, b], gebaut }] */
@@ -71,17 +74,18 @@ export function angebote(state, ctx) {
     const stufe = state.stage < REGELN.abStufe ? `ab Ausbaustufe ${REGELN.abStufe}` : null;
     if (state.stage + 1 < REGELN.abStufe) continue;
     const freieDoppel = gebaut.filter((p) => frei(state, ctx, p.platz.id));
+    const rueckbaubar = freieDoppel.filter((p) => umbaubar(state, ctx, p.platz.id));
     if (offen.length && !freieDoppel.length) {
       // Von außen nach innen: das letzte Paar zuerst, das erste mit zwei freien Boxen
-      const wahl = [...offen].reverse().find((p) => p.teile.every((t) => frei(state, ctx, t.id)));
+      const wahl = [...offen].reverse().find((p) => p.teile.every((t) => umbaubar(state, ctx, t.id)));
       const p = wahl ?? offen[offen.length - 1];
       out.push({ art: 'umbau', steg, platz: p.platz.id, teile: p.teile.map((t) => t.id), kosten: REGELN.kosten,
         gesperrt: stufe ?? (wahl ? null : 'alle Boxen belegt'), gebaut: gebaut.length, moeglich: liste.length });
     }
     const schmalFrei = ctx.berths.some((b) => b.jetty === steg && b.kind === 'box' && !b.doppel && klassen.includes(b.size)
       && sim.berthAvailable(state, b) && frei(state, ctx, b.id));
-    if (freieDoppel.length && !schmalFrei) {
-      const p = freieDoppel[0];
+    if (rueckbaubar.length && !schmalFrei) {
+      const p = rueckbaubar[0];
       out.push({ art: 'rueckbau', steg, platz: p.platz.id, teile: p.teile.map((t) => t.id), kosten: REGELN.rueckbau,
         gesperrt: null, gebaut: gebaut.length, moeglich: liste.length });
     }

@@ -10,7 +10,7 @@ Ab Stufe 4 steht im Baumenü unter **Stege** je Steg mit großen Boxen:
 - **Doppelbox an Hauptsteg C** (2.200 €): Zwei Boxen nebeneinander werden eine breite Box. Darin passt ein Mehrrumpfboot (bis 7,5 m breit), das sonst nur an einen Stirnplatz passt. Dafür fällt eine Box weg. Die Karte sagt, wie viele Doppelboxen an diesem Steg schon stehen und wie viele möglich sind.
 - **Doppelbox an Hauptsteg C zurückbauen** (500 €): Die breite Box wird wieder zu zwei Boxen.
 
-Vorschau wie bei allem Bauen: Die Kamera fährt hin, die zwei Boxen leuchten gelb, die breite Box liegt als Umriss darüber. Umgebaut wird nur, wenn beide Boxen frei sind (niemand liegt dort, legt gerade ab, hat sie über Funk reserviert oder fest gepachtet), zurückgebaut nur, wenn die Doppelbox frei ist. So muss nie ein Boot umziehen. Ist alles belegt, steht der Eintrag gesperrt mit "Alle Boxen belegt". Rückgängig im Baumenü gilt auch hier.
+Vorschau wie bei allem Bauen: Die Kamera fährt hin, die zwei Boxen leuchten gelb, die breite Box liegt als Umriss darüber. Umgebaut wird nur, wenn beide Boxen frei sind (niemand liegt dort, legt gerade ab, hat sie über Funk reserviert oder fest gepachtet; ein Dauerplatz bleibt auch dann stehen, wenn sein Boot gerade auf Törn oder im Winterlager ist), zurückgebaut nur, wenn die Doppelbox frei und kein Dauerplatz ist. So muss nie ein Boot umziehen. Ist alles belegt, steht der Eintrag gesperrt mit "Alle Boxen belegt". Rückgängig im Baumenü gilt auch hier.
 
 Damit das Baumenü nicht dauerhaft zwei Einträge je Steg zeigt (Zusammenspiel-Fund K5, 20.11.):
 
