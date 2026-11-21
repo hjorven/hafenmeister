@@ -337,6 +337,8 @@ async function menue(t) {
       if (await ok.isVisible().catch(() => false)) await t.sp.knopf(ok);
       rest = rest.filter((x) => !x.includes('hm-auszeichnung') && x !== '.');
     }
+    // Der Kassieren-Knopf erscheint, sobald Liegegeld bereitliegt: kein Fenster des Menüeintrags
+    rest = rest.filter((x) => x !== '#btn-collect');
     if (wirkt) await t.punkt(`"${e.text}" lässt sich wieder schließen`, rest.length === 0, rest.join(', '), { schwere: 'B' });
     if (ton !== ton2) { await auf(); await t.sp.knopf(knopf); await t.warte(300); }   // Ton zurückschalten
     if (await t.page.locator('#hm-menue').isVisible().catch(() => false)) await t.sp.knopf(t.page.locator('#btn-menu'));
