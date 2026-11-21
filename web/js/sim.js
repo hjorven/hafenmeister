@@ -6,6 +6,7 @@
 import { RULES, rulesFromEconomy } from './data/rules.js';
 import { random, randomInt, randomRange, randomWeighted, randomPick } from './random.js';
 import { liegeGeometrie, platzGrenzen, nachbarFrei } from './data/liegelage.js';
+import { FLOTTILLEN_ARTEN, FLOTTILLEN_NAMEN } from './data/flottillen.js';
 
 // ---------------------------------------------------------------------------
 // Kontext: Daten einlesen und nachschlagbar machen
@@ -472,7 +473,7 @@ function berthScore(state, ctx, boat, berth) {
 
 /** Zusätzliche Vorliebe für einen Platz aus den Hooks 'score' (0 ohne Hooks) */
 function hookScore(state, ctx, boat, berth) {
-  let n = 0;
+  let n = flotillaScore(state, ctx, boat, berth);
   for (const fn of ctx.hooks.score ?? []) n += fn({ state, ctx, boat, berth }) || 0;
   return n;
 }
@@ -511,7 +512,9 @@ export function eligibleTypes(state, ctx, mods = modifiers(state, ctx)) {
   );
 }
 
-function rollWishes(state, ctx, type) {
+// rnd: eigene Zahlenfolge (Flottillen, ohne Spielzufall); ohne Angabe der Spielzufall
+function rollWishes(state, ctx, type, rnd = null) {
+  const zufall = rnd ?? (() => random(state));
   const { rules } = ctx;
   if (type.noWishes) return [];
   // Wünsche der Stufe, die diese Bootsart haben kann (type.wishes aus data/boats, Roadmap P19 B7)
@@ -521,14 +524,14 @@ function rollWishes(state, ctx, type) {
       && (!eigene || eigene.includes(w)),
   );
   const [lo, hi] = rules.wishCountBySize?.[type.size] || rules.wishCount[state.stage] || [0, 0];
-  const n = Math.min(pool.length, randomInt(state, lo, hi));
+  const n = Math.min(pool.length, rnd ? lo + Math.floor(zufall() * (hi - lo + 1)) : randomInt(state, lo, hi));
   const left = [...pool];
   const out = [];
-  for (let i = 0; i < n; i++) out.push(left.splice(Math.floor(random(state) * left.length), 1)[0]);
+  for (let i = 0; i < n; i++) out.push(left.splice(Math.floor(zufall() * left.length), 1)[0]);
   // Dazu manchmal ein Wunsch an ein Angebot an Land (rules.offerWishes, P19 C3)
   const angebote = offerWishPool(state, ctx, type);
-  if (angebote.length && random(state) < (rules.offerWishShare?.[state.stage] ?? 0)) {
-    out.push(angebote[Math.floor(random(state) * angebote.length)]);
+  if (angebote.length && zufall() < (rules.offerWishShare?.[state.stage] ?? 0)) {
+    out.push(angebote[Math.floor(zufall() * angebote.length)]);
   }
   return out;
 }
@@ -683,7 +686,8 @@ function lateShortStays(state, ctx, list) {
   const cut = shortStayCutoff(ctx) - (ctx.rules.shortStay.stay?.[0] ?? 0.1) * ctx.rules.dayLength;
   const spaet = list.filter((b) => isShortStay(b) && b.arriveAt > cut);
   if (!spaet.length) return;
-  const frueh = list.filter((b) => !isShortStay(b) && b.arriveAt <= cut && !b.funk && !b.stationed).sort((a, b) => b.arriveAt - a.arriveAt);
+  // Flottillen (P32) tauschen nicht: ihr Konvoi bleibt zusammen
+  const frueh = list.filter((b) => !isShortStay(b) && b.arriveAt <= cut && !b.funk && !b.flotte && !b.stationed).sort((a, b) => b.arriveAt - a.arriveAt);
   for (const b of spaet) {
     const t = frueh.shift();
     if (t) [b.arriveAt, t.arriveAt] = [t.arriveAt, b.arriveAt];
@@ -805,14 +809,34 @@ function startDay(state, ctx, events) {
   const maxN = dense > 0 ? Math.max(1, Math.floor(window / dense)) : Infinity;
   const n = Math.min(maxN, Math.floor(rate) + (random(state) < rate - Math.floor(rate) ? 1 : 0));
   const list = [];
-  for (let i = 0; i < n; i++) {
+  // Flottille (P32): ersetzt so viele Boote des Tages, wie sie Boote hat (nie mehr als ins Fenster passen)
+  const flotte = state.day > 1 ? planFlotilla(state, ctx, mods, sea.winter) : null;
+  const normal = flotte ? Math.max(0, Math.min(n, maxN - flotte.length) - flotte.length) : n;
+  for (let i = 0; i < normal; i++) {
     const boat = rollBoat(state, ctx, mods);
     if (!boat) break;
     boat.id = state.nextId++;
     list.push(boat);
   }
-  const end = from + window;
+  if (flotte) {
+    for (const b of flotte) b.id = state.nextId++;
+    for (const b of flotte) b.flotte.id = flotte[0].id;
+    // Module sehen die Boote der Flottille wie jedes neue Boot (Bootsname, Geschichte ...); was die
+    // Gruppe ausmacht (Art, Maße, Wünsche, Nächte), bleibt danach gleich
+    for (const b of flotte) {
+      const fest = { typeId: b.typeId, modelId: b.modelId, name: b.name, size: b.size, kind: b.kind, length: b.length, beam: b.beam, draft: b.draft, motor: b.motor, wishes: [...b.wishes], nights: b.nights, flotte: b.flotte };
+      for (const fn of ctx.hooks.arrival) fn({ state, ctx, boat: b });
+      Object.assign(b, fest);
+      for (const k of ['stay', 'arrivalWish', 'tripPlan', 'stammId', 'story']) delete b[k];
+      if (b.besuche > 1) b.besuche = 1;
+    }
+  }
+  // Die Flottille nimmt im Tageslauf einen Platz ein (ihr erstes Boot); die übrigen folgen nach den
+  // Modulen im Konvoi, alle Späteren rücken um die Länge des Konvois nach hinten (expandFlotilla)
+  const konvoi = flotte ? (flotte.length - 1) * ctx.rules.flotilla.gap : 0;
+  const end = from + window - konvoi;
   sortByArrivalWish(state, ctx, list);
+  if (flotte) list.splice(Math.min(list.length, Math.round(list.length * (ctx.rules.flotilla.from + hash01(state, 22) * (ctx.rules.flotilla.to - ctx.rules.flotilla.from)))), 0, flotte[0]);
   // Erster Tag eines neuen Spiels: Das erste Boot kommt gleich, damit niemand auf leeres Wasser schaut.
   const first = ctx.rules.firstArrivalAt;
   if (state.day === 1 && first != null) {
@@ -827,14 +851,23 @@ function startDay(state, ctx, events) {
     placeArrivals(list.slice(1), Math.min(calm, end), end, ctx.rules, () => random(state));
   } else {
     placeArrivals(list, from, end, ctx.rules, () => random(state));
+    if (flotte) expandFlotilla(state, ctx, list, flotte);
   }
   // Erst späte Kurzhalter tauschen, dann die Module (Geschichten entzerren die Tagesabschnitte auf den
   // endgültigen Zeiten); ein zweiter Durchgang fängt Kurzhalter, die ein Modul spät gelegt hat.
   lateShortStays(state, ctx, list);
   for (const fn of ctx.hooks.arrivals) fn({ state, ctx, list });
   lateShortStays(state, ctx, list);
+  // Flottille: alle bleiben gleich lange (die längste Nacht zählt, zum Beispiel wegen eines Dienstes)
+  if (flotte) {
+    const nights = Math.max(1, ...flotte.map((b) => b.nights || 1));
+    for (const b of flotte) { b.nights = nights; delete b.stay; }
+  }
   // Herkunft in der Reihenfolge der Ankunft, damit zwei Boote hintereinander nie aus derselben Ecke kommen
   list.forEach((boat, i) => { boat.origin = boatOrigin(state, state.day * 7 + i); });
+  // Eine Flottille kommt aus derselben Richtung (Konvoi)
+  const spitze = list.find((b) => b.flotte);
+  if (spitze) for (const b of list) if (b.flotte) b.origin = spitze.origin;
   state.upcoming = list;
   state.scheduledDay = state.day;
   events.push({ type: 'dayStart', day: state.day, stage: state.stage, expected: list.length, winter: sea.winter, year: sea.year });
@@ -944,7 +977,9 @@ function announce(state, ctx, events) {
   if (!announcementsOpen(state, ctx)) return;
   const f = ctx.rules.funk;
   const ab = (f.leadShare ?? 0) * ctx.rules.dayLength;
-  const pool = state.upcoming.filter((b) => !b.stationed && b.arriveAt >= ab);
+  const pool = state.upcoming.filter((b) => !b.stationed && !b.flotte && b.arriveAt >= ab);
+  // Eine Flottille (P32) meldet sich immer an, als Gruppe
+  announceFlotilla(state, ctx, events);
   if (!pool.length) return;
   const n = Math.min(pool.length, hash01(state, 1) < (f.twoShare ?? 0) ? 2 : 1);
   const ids = [];
@@ -1070,6 +1105,345 @@ function keepReservation(state, ctx, boat, berthId, events) {
   addIncome(state, amount, 'liegegeld', 'funk');
   boat.funk.bonus = amount;
   return { type: 'reservationKept', boatId: boat.id, berthId, amount };
+}
+
+// ---------------------------------------------------------------------------
+// Flottillen (P32, docs/flottillen.md)
+//
+// An manchen Tagen (rules.flotilla.share je Stufe) kommen drei bis fünf Boote einer Art zusammen
+// (Feld group der Bootsdaten): ein Segelverein, eine Charterflotte, ein Klassikertreffen. Sie fahren im
+// Konvoi ein (rules.flotilla.gap Sekunden Abstand, gleiche Herkunft) und wollen am selben Steg liegen.
+// Liegen alle an einem Steg, gibt jede Crew rules.flotilla.together Anker mehr; wird die Gruppe aufgeteilt
+// oder ein Boot weggeschickt, rules.flotilla.apart weniger. Die Flottille ersetzt Boote des Tages (es kommen
+// nicht mehr Gäste), Art, Größe, Modelle und Maße kommen aus Seed und Tag (verbraucht keinen Spielzufall).
+// Jedes Boot trägt boat.flotte = { id, name, n, nr, art, palette } (id = Boot-id des ersten Boots), daraus
+// ergibt sich alles andere; der Spielstand braucht kein eigenes Feld.
+
+const FLOTTE_SCORE = 5000;   // Vorliebe für den Steg der Gruppe, mehr als jeder Platz-Wunsch (1000 je Wunsch)
+
+/** Steg eines Platzes: Feld jetty, sonst die Buchstaben vor der Nummer ('C12' -> 'C'). */
+export function jettyOf(berth) {
+  if (!berth) return null;
+  return berth.jetty ?? String(berth.raft ?? berth.id).match(/^[A-Za-z]+/)?.[0] ?? String(berth.id);
+}
+
+/** Folge fester Zahlen aus Seed, Tag und Salz (wie hash01, verbraucht keinen Spielzufall). */
+function hashFolge(state, salt) {
+  let i = 0;
+  return () => hash01(state, salt + 131 * i++);
+}
+
+/** Bootsarten, die heute als Flottille kommen können (group bis mindestens 3, Texte in data/flottillen.js). */
+export function flotillaTypes(state, ctx, mods = modifiers(state, ctx)) {
+  return eligibleTypes(state, ctx, mods).filter((t) => FLOTTILLEN_ARTEN[t.id] && range(t.group ?? 1)[1] >= 3 && !t.special);
+}
+
+/** Wie viele gebaute Plätze je Steg ein Boot dieser Maße nehmen kann (frei oder belegt). */
+function jettyCapacity(state, ctx, probe) {
+  const out = new Map();
+  for (const b of availableBerths(state, ctx)) {
+    if (b.reserved || !fits(probe, b, ctx.rules, state.stage)) continue;
+    const j = jettyOf(b);
+    out.set(j, (out.get(j) || 0) + 1);
+  }
+  return out;
+}
+
+/** Morgens: Flottille des Tages auswürfeln (oder null). Boote ohne id, sortiert nach Platz im Konvoi. */
+function planFlotilla(state, ctx, mods, winter) {
+  const f = ctx.rules.flotilla;
+  if (!f || winter || state.stage < f.fromStage) return null;
+  const stufen = Object.keys(f.share).map(Number);
+  const share = f.share[state.stage] ?? f.share[Math.max(...stufen)] ?? 0;
+  if (!(hash01(state, 21) < share)) return null;
+  const rnd = hashFolge(state, 300);
+  const mix = ctx.rules.sizeMix[state.stage] || {};
+  let types = flotillaTypes(state, ctx, mods).filter((t) => (mix[t.size] ?? 0) > 0);
+  const zahl = (lo, hi) => lo + Math.floor(rnd() * (hi - lo + 1));
+  const masz = (lo, hi) => Math.round((lo + rnd() * (hi - lo)) * 10) / 10;
+  while (types.length) {
+    const gewicht = types.map((t) => (t.weight || 1) * (mix[t.size] ?? 0));
+    let r = rnd() * gewicht.reduce((a, b) => a + b, 0);
+    let i = 0;
+    while (i < types.length - 1 && (r -= gewicht[i]) >= 0) i++;
+    const type = types[i];
+    types = types.filter((t) => t !== type);
+    const [gMin, gMax] = range(type.group);
+    // Mittleres Boot der Art: an so viele Plätze eines Stegs muss die Gruppe passen
+    const probe = { size: type.size, length: (type.length[0] + type.length[1]) / 2, beam: (type.beam[0] + type.beam[1]) / 2, draft: (type.draft[0] + type.draft[1]) / 2 };
+    const platz = Math.max(0, ...jettyCapacity(state, ctx, probe).values());
+    const n = Math.min(zahl(gMin, gMax), platz);
+    if (n < Math.max(3, gMin)) continue;
+    const art = FLOTTILLEN_ARTEN[type.id];
+    const selten = new Set(ctx.rules.reputationDraw?.rare ?? []);
+    const models = type.models.filter((m) => (m.minStage ?? type.minStage) <= state.stage && !selten.has(m.id));
+    const fest = art.gleichesModell && models.length ? models[Math.floor(rnd() * models.length)] : null;
+    const [nMin, nMax] = range(type.nights ?? ctx.rules.nightsBySize?.[type.size] ?? ctx.rules.nights);
+    const nights = Math.max(1, zahl(nMin, nMax));
+    const wishes = rollWishes(state, ctx, type, rnd);
+    const name = FLOTTILLEN_NAMEN[Math.floor(hash01(state, 23) * FLOTTILLEN_NAMEN.length)];
+    const palette = Math.floor(hash01(state, 24) * 4);
+    const boote = [];
+    for (let k = 0; k < n; k++) {
+      let boat = null;
+      for (let versuch = 0; versuch < 8; versuch++) {
+        const model = fest ?? (models.length ? models[Math.floor(rnd() * models.length)] : null);
+        const dim = (key) => (model && model[key] != null ? model[key] : masz(...type[key]));
+        boat = makeBoat({
+          typeId: type.id, modelId: model ? model.id : null, name: model ? model.name : type.name,
+          size: type.size, kind: type.kind, length: dim('length'), beam: dim('beam'), draft: dim('draft'),
+          motor: type.motor, special: false, dayVisitors: type.dayVisitors, wishes: [...wishes], nights,
+          flotte: { id: null, name, n, nr: k, art: type.id, palette },
+        });
+        if (couldEverFit(state, ctx, boat)) break;
+        boat = null;
+      }
+      if (boat) boote.push(boat);
+    }
+    if (boote.length < 3) continue;
+    for (const b of boote) b.flotte.n = boote.length;
+    return boote;
+  }
+  return null;
+}
+
+/**
+ * Nach dem Verteilen der Ankunftszeiten: Hinter dem ersten Boot der Flottille kommen die übrigen im
+ * Konvoi (rules.flotilla.gap), alle Boote danach rücken um die Länge des Konvois nach hinten (so bleibt
+ * zu allen anderen der Mindestabstand). Module, die danach Zeiten tauschen, lassen Flottillen aus.
+ */
+function expandFlotilla(state, ctx, list, flotte) {
+  const f = ctx.rules.flotilla;
+  const spitze = flotte[0];
+  if (!list.includes(spitze)) return;
+  const t0 = spitze.arriveAt;
+  const konvoi = (flotte.length - 1) * f.gap;
+  for (const b of list) if (b !== spitze && b.arriveAt > t0) b.arriveAt = Math.round((b.arriveAt + konvoi) * 10) / 10;
+  flotte.forEach((b, i) => {
+    b.arriveAt = Math.round((t0 + i * f.gap) * 10) / 10;
+    if (i > 0) list.push(b);
+  });
+  list.sort((a, b) => a.arriveAt - b.arriveAt || (a.flotte?.nr ?? 0) - (b.flotte?.nr ?? 0));
+}
+
+/** Alle Boote einer Flottille, die heute erwartet werden oder da sind (wartend oder liegend). */
+export function flotillaMembers(state, flotteId) {
+  const out = (state.upcoming || []).filter((b) => b?.flotte?.id === flotteId);
+  for (const b of Object.values(state.boats || {})) if (b?.flotte?.id === flotteId) out.push(b);
+  return out.sort((a, b) => a.flotte.nr - b.flotte.nr);
+}
+
+/** Flottillen des Tages (Ids der Gruppen, die erwartet werden oder da sind). */
+export function flotillaIds(state) {
+  const ids = new Set();
+  for (const b of state.upcoming || []) if (b?.flotte) ids.add(b.flotte.id);
+  for (const b of Object.values(state.boats || {})) if (b?.flotte) ids.add(b.flotte.id);
+  return [...ids];
+}
+
+/**
+ * Lage einer Flottille: wie viele da sind, liegen, warten, an welchen Stegen.
+ * together: true (alle n liegen an einem Steg), false (aufgeteilt oder ein Boot weggeschickt),
+ * null (noch offen, nicht alle liegen).
+ */
+export function flotillaState(state, ctx, flotteId) {
+  const alle = flotillaMembers(state, flotteId);
+  if (!alle.length) return null;
+  const ref = alle[0].flotte;
+  const stege = {};
+  let liegen = 0, warten = 0, erwartet = 0;
+  for (const b of alle) {
+    if (b.status === 'moored') {
+      liegen++;
+      const j = jettyOf(ctx.berthById[b.berthId]);
+      stege[j] = (stege[j] || 0) + 1;
+    } else if (b.status === 'waiting') warten++;
+    else erwartet++;
+  }
+  const zerrissen = alle.some((b) => b.flotte.zerrissen);
+  const namen = Object.keys(stege);
+  const together = zerrissen || namen.length > 1 ? false : liegen === ref.n ? true : null;
+  return { id: flotteId, name: ref.name, art: ref.art, n: ref.n, da: alle.length, liegen, warten, erwartet, stege, steg: namen.length === 1 ? namen[0] : null, together, zerrissen };
+}
+
+/** Ein Boot der Flottille fährt ohne Platz: die Gruppe ist auseinander (die anderen merken es sich). */
+function breakFlotilla(state, boat, events) {
+  if (!boat?.flotte) return;
+  const rest = flotillaMembers(state, boat.flotte.id).filter((b) => b !== boat && b.id !== boat.id);
+  for (const b of rest) b.flotte.zerrissen = true;
+  if (rest.length && !boat.flotte.gemeldet) {
+    for (const b of rest) b.flotte.gemeldet = true;
+    events.push({ type: 'flotillaSplit', flotte: boat.flotte.id, name: boat.flotte.name, boatId: boat.id, zerrissen: true, stege: {} });
+  }
+}
+
+/** Nachts vor der Abreise: jede Crew einer Flottille merkt sich, ob die Gruppe zusammen liegt. */
+function rateFlotillas(state, ctx) {
+  for (const id of flotillaIds(state)) {
+    const st = flotillaState(state, ctx, id);
+    if (!st) continue;
+    // Noch nicht alle da oder fest: wer jetzt liegt, liegt nicht mit der ganzen Gruppe zusammen.
+    // Sind die übrigen schon abgereist (Päckchen: höchstens eine Nacht), bleibt die Wertung von vorher.
+    const wert = st.together ?? (st.warten + st.erwartet > 0 ? false : null);
+    if (wert == null) continue;
+    for (const b of flotillaMembers(state, id)) if (b.status === 'moored') b.flotte.zusammen = wert;
+  }
+}
+
+/** Freie Plätze je Steg, die dieses Boot jetzt nehmen könnte (ohne Platzwahl, keine Rekursion). */
+// klasse: nur Plätze der Größenklasse des Boots zählen (Stege, die für diese Boote gebaut sind)
+function freeByJetty(state, ctx, boat, klasse = false) {
+  const out = new Map();
+  for (const b of availableBerths(state, ctx)) {
+    if (klasse && b.size !== boat.size) continue;
+    if (!isFree(state, b.id) || !fits(boat, b, ctx.rules, state.stage) || hookWhyNotFit(state, ctx, boat, b)) continue;
+    const j = jettyOf(b);
+    out.set(j, (out.get(j) || 0) + 1);
+  }
+  return out;
+}
+
+/**
+ * Stege, an denen ein Boot der Flottille liegen möchte: der Steg, an dem schon andere aus der Gruppe
+ * liegen (bei mehreren der mit den meisten); liegt noch keins, alle Stege mit genug freien Plätzen für
+ * alle, die noch keinen haben (sonst der mit den meisten). Leere Menge, wenn nichts passt; null ohne Flottille.
+ */
+export function flotillaTargets(state, ctx, boat) {
+  if (!boat?.flotte) return null;
+  const alle = flotillaMembers(state, boat.flotte.id);
+  const key = `${boat.id}|${state.day}|${state.clock}|${state.stage}|${Object.keys(state.berths).length}|${alle.map((b) => `${b.status}${b.berthId ?? ''}${b.funk?.platz ?? ''}`).join(',')}`;
+  const cache = ctx.flotteCache ?? (ctx.flotteCache = new Map());
+  if (cache.has(key)) return cache.get(key);
+  const stege = new Map();
+  for (const b of alle) {
+    if (b === boat || b.id === boat.id || b.status !== 'moored') continue;
+    const j = jettyOf(ctx.berthById[b.berthId]);
+    stege.set(j, (stege.get(j) || 0) + 1);
+  }
+  let out;
+  if (stege.size) {
+    const best = Math.max(...stege.values());
+    out = new Set([...stege].filter(([, n]) => n === best).map(([j]) => j));
+  } else {
+    const offen = alle.filter((b) => b.status !== 'moored' || b.id === boat.id).length;
+    // Am liebsten an einem Steg ihrer Größe (Kajütboote an den M-Steg, nicht in die großen Boxen)
+    const passend = freeByJetty(state, ctx, boat, true);
+    const frei = freeByJetty(state, ctx, boat);
+    const genugPassend = [...passend].filter(([, n]) => n >= offen).map(([j]) => j);
+    const genug = genugPassend.length ? genugPassend : [...frei].filter(([, n]) => n >= offen).map(([j]) => j);
+    const best = Math.max(0, ...frei.values());
+    out = new Set(genug.length ? genug : best > 0 ? [...frei].filter(([, n]) => n === best).map(([j]) => j) : []);
+  }
+  if (cache.size > 200) cache.clear();
+  cache.set(key, out);
+  return out;
+}
+
+/** Vorliebe bei der Platzwahl (Selbst-Einfahren, Vorschlag des Büros): Steg der Gruppe zuerst. */
+function flotillaScore(state, ctx, boat, berth) {
+  if (!boat?.flotte || !ctx.rules.flotilla) return 0;
+  const ziel = flotillaTargets(state, ctx, boat);
+  return ziel?.has(jettyOf(berth)) ? FLOTTE_SCORE : 0;
+}
+
+/** Erwartete Wertung, wenn dieses Boot an diesen Platz kommt (für das Schild beim Einrasten). */
+function flotillaExpect(state, ctx, boat, berth) {
+  const st = flotillaState(state, ctx, boat.flotte.id);
+  if (!st) return null;
+  const j = jettyOf(berth);
+  let andere = 0, fremd = 0;
+  for (const b of flotillaMembers(state, boat.flotte.id)) {
+    if (b.id === boat.id || b.status !== 'moored') continue;
+    if (jettyOf(ctx.berthById[b.berthId]) === j) andere++;
+    else fremd++;
+  }
+  return { zusammen: !st.zerrissen && fremd === 0, steg: j, dort: andere, woanders: fremd, n: st.n, name: st.name };
+}
+
+/** Flottille per Funk angemeldet (alle Boote haben boat.funk). */
+function announceFlotilla(state, ctx, events) {
+  const boote = state.upcoming.filter((b) => b.flotte && !b.funk && !b.stationed);
+  if (!boote.length) return;
+  for (const b of boote) b.funk = { platz: null };
+  events.push({ type: 'announced', boatIds: boote.map((b) => b.id), flotte: boote[0].flotte.id });
+}
+
+/**
+ * Stege, an denen man der angemeldeten Flottille alle Boxen frei halten kann, der beste zuerst:
+ * [{ jetty, plaetze: { bootId: platzId } }]. Die eigenen Reservierungen der Gruppe zählen dabei nicht.
+ */
+export function flotillaReservable(state, ctx, flotteId) {
+  const boote = flotillaMembers(state, flotteId).filter((b) => b.funk && (b.status === 'expected' || b.status === 'waiting'));
+  if (!boote.length) return [];
+  const alt = boote.map((b) => b.funk.platz);
+  for (const b of boote) b.funk.platz = null;
+  try {
+    // Größte zuerst, damit die kleinen nicht die großen Boxen nehmen
+    const order = [...boote].sort((a, b) => b.length - a.length || b.beam - a.beam || a.flotte.nr - b.flotte.nr);
+    const frei = new Map(order.map((b) => [b.id, reservableBerths(state, ctx, b.id)]));
+    const stege = new Set(availableBerths(state, ctx).map(jettyOf));
+    const out = [];
+    for (const j of stege) {
+      const plaetze = {};
+      const vergeben = new Set();
+      let wert = 0;
+      let ok = true;
+      for (const b of order) {
+        const p = frei.get(b.id).find((id) => !vergeben.has(id) && jettyOf(ctx.berthById[id]) === j);
+        if (!p) { ok = false; break; }
+        plaetze[b.id] = p;
+        vergeben.add(p);
+        wert += berthScore(state, ctx, b, ctx.berthById[p]);
+      }
+      if (ok) out.push({ jetty: j, plaetze, wert });
+    }
+    return out.sort((a, b) => b.wert - a.wert || String(a.jetty).localeCompare(String(b.jetty))).map(({ jetty, plaetze }) => ({ jetty, plaetze }));
+  } finally {
+    boote.forEach((b, i) => { b.funk.platz = alt[i]; });
+  }
+}
+
+/** Der ganzen Flottille Boxen an einem Steg frei halten (ohne jetty: am besten Steg). */
+export function reserveFlotilla(state, ctx, flotteId, jetty = null) {
+  const events = [];
+  const wahl = flotillaReservable(state, ctx, flotteId);
+  const o = jetty != null ? wahl.find((w) => w.jetty === jetty) : wahl[0];
+  if (!o) return { ok: false, reason: jetty != null ? 'notReservable' : 'noFreeBerth', events };
+  for (const b of flotillaMembers(state, flotteId)) {
+    const ziel = o.plaetze[b.id];
+    if (!ziel || !b.funk) continue;
+    if (b.funk.platz === ziel) continue;
+    if (b.funk.platz) events.push({ type: 'reservationReleased', boatId: b.id, berthId: b.funk.platz, reason: 'moved' });
+    b.funk.platz = ziel;
+    events.push({ type: 'reserved', boatId: b.id, berthId: ziel, flotte: flotteId });
+  }
+  events.push({ type: 'flotillaReserved', flotte: flotteId, jetty: o.jetty, berthIds: Object.values(o.plaetze) });
+  return { ok: true, jetty: o.jetty, berthIds: Object.values(o.plaetze), events };
+}
+
+/** Frei gehaltene Boxen der ganzen Flottille wieder freigeben. */
+export function releaseFlotilla(state, ctx, flotteId) {
+  const events = [];
+  for (const b of flotillaMembers(state, flotteId)) {
+    if (b.funk?.platz && (b.status === 'expected' || b.status === 'waiting')) dropReservation(b, events, 'released');
+  }
+  return { ok: events.length > 0, events };
+}
+
+/**
+ * Nach dem Festmachen oder Umlegen eines Boots der Flottille: liegen alle zusammen, 'flotillaComplete';
+ * ist die Gruppe zum ersten Mal aufgeteilt, einmal 'flotillaSplit' (für Oberfläche und Logbuch).
+ */
+function flotillaMoored(state, ctx, boat, events) {
+  if (!boat?.flotte) return;
+  const st = flotillaState(state, ctx, boat.flotte.id);
+  if (!st) return;
+  if (st.together === true) {
+    events.push({ type: 'flotillaComplete', flotte: st.id, name: st.name, n: st.n, jetty: st.steg, boatId: boat.id });
+  } else if (st.together === false && !boat.flotte.gemeldet) {
+    for (const b of flotillaMembers(state, st.id)) b.flotte.gemeldet = true;
+    events.push({ type: 'flotillaSplit', flotte: st.id, name: st.name, boatId: boat.id, stege: { ...st.stege }, zerrissen: st.zerrissen });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1202,6 +1576,7 @@ function moor(state, ctx, boat, berthId, events, hand = false) {
   }
   if (hand) ev.hand = true;
   if (boat.snug) ev.passgenau = true;
+  if (boat.flotte) ev.flotte = boat.flotte.id;
   events.push(ev);
   const seen = (state.logbook[boat.typeId] ||= []);
   const key = boat.modelId ?? boat.typeId;
@@ -1224,6 +1599,7 @@ function moor(state, ctx, boat, berthId, events, hand = false) {
   // Wie im echten Hafen: Das Liegegeld für die kommende Nacht wird gleich nach dem Anlegen fällig.
   if (!boat.stationed) chargeFee(state, ctx, boat, modifiers(state, ctx), events);
   if (kept) events.push(kept);
+  flotillaMoored(state, ctx, boat, events);
 }
 
 /**
@@ -1274,6 +1650,9 @@ export function berthWishesMet(state, ctx, boat, berth) {
 export function wishBerths(state, ctx, boatId) {
   const boat = state.boats[boatId];
   if (!boat) return [];
+  // Flottille (P32): gold leuchten die Plätze am Steg, an dem die Gruppe zusammen liegen kann
+  const ziel = ctx.rules.flotilla ? flotillaTargets(state, ctx, boat) : null;
+  if (ziel) return fittingBerths(state, ctx, boatId).filter((id) => ziel.has(jettyOf(ctx.berthById[id])));
   return fittingBerths(state, ctx, boatId).filter((id) => berthWishesMet(state, ctx, boat, ctx.berthById[id]).length > 0);
 }
 
@@ -1323,8 +1702,12 @@ export function berthValue(state, ctx, boatId, berthId = null) {
     probe.umgelegt = (boat.umgelegt || 0) + 1;
     malus = Math.round((relocatePenalty(ctx, probe) - relocatePenalty(ctx, boat)) * 100) / 100;
   }
+  // Flottille (P32): zusammen mit der Gruppe oder getrennt
+  const flotte = boat.flotte && berth && ctx.rules.flotilla ? flotillaExpect(state, ctx, boat, berth) : null;
+  if (flotte) probe.flotte = { ...boat.flotte, zusammen: flotte.zusammen };
   const anchors = rateBoat(ctx, probe, mods.ratingBonus);
   const out = { fee, wishesMet: met, wishes: [...boat.wishes], anchors, snug, comfort: (berth?.comfort || 0) > 0, far, full };
+  if (flotte) out.flotte = { ...flotte, wert: flotte.zusammen ? ctx.rules.flotilla.together : -ctx.rules.flotilla.apart };
   if (raft) Object.assign(out, { paeckchen: berth.raft, malus: raftPenalty(ctx, probe) });
   if (relocate) Object.assign(out, { relocate: true, malus, mal: probe.umgelegt });
   return out;
@@ -1358,7 +1741,9 @@ export function officeProposals(state, ctx) {
     const boat = state.boats[id];
     if (!boat || boat.status !== 'waiting' || waitsForReservation(state, ctx, boat)) continue;
     const fitting = fittingBerths(state, ctx, id);
-    if (!fitting.length || officeSpecialCase(state, ctx, id, fitting)) continue;
+    // Für eine Flottille schlägt das Büro trotzdem vor (Steg der Gruppe), weist aber nicht selbst zu
+    const sonder = fitting.length ? officeSpecialCase(state, ctx, id, fitting) : null;
+    if (!fitting.length || (sonder && sonder !== 'flottille')) continue;
     const frei = fitting.find((p) => !vergeben.has(p));
     if (!frei) continue;
     out[id] = frei;
@@ -1409,6 +1794,8 @@ export function officeSpecialCase(state, ctx, boatId, fitting = null) {
   if (sp.kinds?.includes(boat.kind)) return 'mehrrumpf';
   if (sp.sizes?.includes(boat.size)) return 'gross';
   if (sp.specialGuests && boat.special) return 'sondergast';
+  // Flottille (P32): die Gruppe soll zusammen liegen, das entscheidet der Spieler (mit frei gehaltener Box nicht)
+  if (sp.flotilla && boat.flotte && !boat.funk?.platz && ctx.rules.flotilla) return 'flottille';
   // Nur noch eine passende Box: jedes Mal neu bewertet. Ist sie belegt, gibt es nichts zu
   // entscheiden; werden mehr frei, ist das Boot wieder ein Standardfall für die Leitstelle.
   // Warten mehrere Boote auf dieselbe Box, gibt die Leitstelle sie dem, der am längsten wartet
@@ -1655,6 +2042,7 @@ export function unstationBoat(state, ctx, boatId) {
 
 function turnAway(state, ctx, boat, events, why) {
   dropReservation(boat, events, why);
+  breakFlotilla(state, boat, events);
   state.queue = state.queue.filter((id) => id !== boat.id);
   delete state.boats[boat.id];
   // Winterbeginn: Wer über Nacht an der Boje lag, fährt ins Winterlager. Das zählt nicht als weggefahren.
@@ -1710,7 +2098,7 @@ export function freeWaitSpot(state, ctx) {
 
 function arrive(state, ctx, boat, events) {
   state.boats[boat.id] = boat;
-  const spot = freeWaitSpot(state, ctx);
+  let spot = freeWaitSpot(state, ctx);
   // Angemeldet und Box frei gehalten (P28): Das Boot fährt ohne Halt an der Boje in seine Box
   const res = reservedBerthReady(state, ctx, boat);
   if (res) {
@@ -1723,6 +2111,9 @@ function arrive(state, ctx, boat, events) {
     moor(state, ctx, boat, res, events);
     return;
   }
+  // Flottille (P32): Sind alle Bojen belegt, gehen die Boote der Gruppe trotzdem vor Anker (die Ansicht
+  // legt sie auf die nächste freie Boje oder ins Ankerfeld); eine Flottille dreht nicht einzeln ab
+  if (spot == null && boat.flotte && ctx.rules.flotilla) spot = state.queue.length % Math.max(1, waitSpotCount(state, ctx));
   if (spot == null) {
     // Alle Bojen belegt: Wer eine passende freie Box sieht, hält direkt darauf zu statt abzudrehen
     const direct = ctx.rules.queue.selfEnterAfter != null ? selfBerth(state, ctx, boat.id) : null;
@@ -1842,6 +2233,7 @@ export function dismiss(state, ctx, boatId) {
   if (!boat || boat.status !== 'waiting') return { ok: false, events: [] };
   const pre = [];
   dropReservation(boat, pre, 'dismissed');
+  breakFlotilla(state, boat, pre);
   state.queue = state.queue.filter((id) => id !== boatId);
   delete state.boats[boatId];
   const weg = heute(state).weggefahren;
@@ -2257,6 +2649,7 @@ export function relocateGuest(state, ctx, boatId, berthId, { grund = 'hand', zae
   if (boat.snug) ev.passgenau = true;
   if (ausPaeckchen) ev.ausPaeckchen = raftInner(from);
   events.push(ev);
+  flotillaMoored(state, ctx, boat, events);
   for (const fn of ctx.hooks.relocate || []) fn({ state, ctx, boat, from, to: berthId, grund, events });
   return { ok: true, events };
 }
@@ -2276,13 +2669,15 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   const snug = boat.snug && r.snug ? r.snug.rating : 0;     // Päckchen/eng liegen
   const byHand = boat.byHand ? r.handAssignBonus ?? 0 : 0;  // von Hand zugewiesen (P10)
   const funk = boat.funk?.kept ? r.funk?.rating ?? 0 : 0;   // angemeldet, Box frei gehalten (P28)
+  // Flottille (P32): alle an einem Steg oder aufgeteilt
+  const flotte = boat.flotte?.zusammen === true ? r.flotilla?.together ?? 0 : boat.flotte?.zusammen === false ? -(r.flotilla?.apart ?? 0) : 0;
   const penalty = boat.penalty || 0;
   const moved = relocatePenalty(ctx, boat);                   // zu oft umgelegt (P33)
   const raft = raftPenalty(ctx, boat);                        // im Päckchen gelegen (P27)
-  const raw = base + comfort + special + snug + byHand + funk + ratingBonus - penalty - moved - raft;
+  const raw = base + comfort + special + snug + byHand + funk + flotte + ratingBonus - penalty - moved - raft;
   const value = Math.round(Math.min(r.rating.max, Math.max(r.rating.min, raw)) * 10) / 10;
   return {
-    value, base, comfort, special, snug, byHand, funk, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
+    value, base, comfort, special, snug, byHand, funk, flotte, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
     wishes: [...(boat.wishes || [])], wishesMet: boat.wishesMet || 0, wishesTotal: boat.wishesTotal || 0, missed: { ...(boat.missed || {}) },
     far: { ...(boat.far || {}) },
   };
@@ -2376,6 +2771,8 @@ function night(state, ctx, events) {
       events.push({ type: 'buoyFee', amount: buoy, boats: state.queue.length, perBoat });
     }
   }
+  // Flottillen (P32): Liegt die Gruppe zusammen? Vor der Abreise, solange alle noch da sind
+  rateFlotillas(state, ctx);
   // Abreise (Kurzhalter, die noch liegen, legen spätestens jetzt ab)
   // Päckchen (P27): Reist das innere Boot ab, muss das äußere vorher weg (es reist mit ab)
   const innenFort = new Set();

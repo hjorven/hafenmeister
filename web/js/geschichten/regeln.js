@@ -236,7 +236,8 @@ export function zeitenEntzerren({ state, ctx, list }) {
       let best = -1, bestD = Infinity;
       for (let j = 0; j < list.length; j++) {
         const x = list[j];
-        if (j === i || x === erster || x.story?.id === b.story.id) continue;
+        // Flottillen (P32) kommen im Konvoi, ihre Zeiten bleiben
+        if (j === i || x === erster || x.flotte || x.story?.id === b.story.id) continue;
         if ((kurz(b) && x.arriveAt > spaet) || (kurz(x) && b.arriveAt > spaet)) continue;
         const ax = abs(x);
         if (ax === a) continue;
@@ -256,6 +257,26 @@ export function zeitenEntzerren({ state, ctx, list }) {
     if (!geaendert) break;
   }
   return getauscht;
+}
+
+/**
+ * Was zeitenEntzerren nicht tauschen konnte (kein freier Partner, zum Beispiel weil eine Flottille ihre
+ * Zeiten behält, P32): das zweite Boot bekommt eine andere Alltagsgeschichte, Aufenthalt und Wünsche
+ * bleiben. Höchstens acht Versuche je Boot. @returns {number} Zahl der neu gewählten Geschichten
+ */
+export function doppelteNeuWaehlen({ state, ctx, list, mods, umfeld = {} }) {
+  const grenzen = ctx.rules.stories?.abschnitte;
+  if (!grenzen) return 0;
+  const tag = ctx.rules.dayLength || 1;
+  const abs = (b) => abschnitt(b.arriveAt / tag, grenzen);
+  const doppelt = (b) => list.some((x) => x !== b && list.indexOf(x) < list.indexOf(b) && x.story?.id === b.story?.id && abs(x) === abs(b));
+  let n = 0;
+  for (const b of list) {
+    if (!b.story || !doppelt(b)) continue;
+    for (let versuch = 0; versuch < 8 && doppelt(b); versuch++) waehle({ state, ctx, boat: b, mods, umfeld, nurText: true });
+    n++;
+  }
+  return n;
 }
 
 /** Text für die Bootskarte: "Nur kurz aufs WC, dann weiter nach Schleimünde. Zu zweit an Bord." */
@@ -293,7 +314,10 @@ export function installiere(ctx, sim, { umfeld = () => ({}) } = {}) {
     if (!boat) return;
     waehle({ state, ctx: c, boat, mods: sim.modifiers(state, c), umfeld: lies(state) });
   });
-  const ab2 = sim.addHook(ctx, 'arrivals', zeitenEntzerren);
+  const ab2 = sim.addHook(ctx, 'arrivals', ({ state, ctx: c, list }) => {
+    zeitenEntzerren({ state, ctx: c, list });
+    doppelteNeuWaehlen({ state, ctx: c, list, mods: sim.modifiers(state, c), umfeld: lies(state) });
+  });
   // Nachts: Regattaboote bekommen für einen Regattatag morgen ihren Ausflug zur Bahn
   const ab3 = sim.addHook(ctx, 'night', ({ state, ctx: c }) => regattaPlanen(state, c, lies(state).morgen));
   return () => { ab1(); ab2(); ab3(); };

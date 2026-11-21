@@ -119,6 +119,7 @@ export async function init(game) {
   let ziel = null;                // Box, die die Meldung nennt; leuchtet, solange die Meldung steht
   let gewaehltVorher = null;
   const markiere = (platzId) => { ziel = platzId; };
+  const zielSchluessel = (z) => (Array.isArray(z) ? z.join(',') : z);
   /** Box im Bild gold leuchten lassen, nur solange die Meldung steht und kein Boot gewählt ist (das hat Vorrang). */
   function leuchte(platzId) {
     const gewaehlt = sim.selected;
@@ -126,14 +127,78 @@ export async function init(game) {
     if (gewaehltVorher != null && gewaehlt == null) markiert = null;
     gewaehltVorher = gewaehlt;
     if (gewaehlt != null) { markiert = null; return; }
-    if (markiert === platzId) return;
-    if (platzId == null && markiert == null) return;
-    markiert = platzId;
-    game.stege?.highlight?.(platzId ? [platzId] : [], '#ffd23f');
+    const k = zielSchluessel(platzId) ?? null;
+    if (markiert === k) return;
+    if (k == null && markiert == null) return;
+    markiert = k;
+    game.stege?.highlight?.(Array.isArray(platzId) ? platzId : platzId ? [platzId] : [], '#ffd23f');
   }
+  // Flottille (P32): eine Meldung für die ganze Gruppe, Boxen an einem Steg frei halten
+  const flotteBoote = (fid) => angemeldet().filter((x) => x.flotte?.id === fid);
+  function zeichneFlotte(b, erzwingen) {
+    const fid = b.flotte.id;
+    const boote = flotteBoote(fid);
+    const wahl = sim.flotteFreihaltbar(fid);
+    const gehalten = boote.filter((x) => x.funk?.platz).map((x) => x.funk.platz);
+    const sig = JSON.stringify(['f', fid, aktuell.art, aktuell.auswahl, gehalten, wahl.map((w) => w.jetty), boote.length, erledigt.size]);
+    if (!erzwingen && sig === zeichen) return null;
+    zeichen = sig;
+    const titel = document.createElement('strong');
+    const satz = document.createElement('span');
+    satz.className = 'fa-satz';
+    const knoepfe = document.createElement('div');
+    knoepfe.className = 'fa-knoepfe';
+    const art = sim.flottillenArt?.(b.flotte.art);
+    const n = boote.length;
+    const bonus = boote.reduce((a, x) => a + (sim.funkBonus(x.id) || 0), 0);
+    const laengen = boote.map((x) => x.length);
+    const lang = Math.min(...laengen) === Math.max(...laengen) ? meter(laengen[0]) : `${meter(Math.min(...laengen))} bis ${meter(Math.max(...laengen))}`;
+    const w = b.wishes?.length ? `, möchten ${liste(b.wishes.map(wunschName))}` : '';
+    const name = `„${b.flotte.name}“`;
+    const steg = gehalten.length ? sim.flottillenSteg?.(gehalten[0]) : null;
+    if (gehalten.length && (aktuell.art === 'bestaetigt' || gehalten.length === n)) {
+      titel.textContent = `Steg ${steg} ist für die Flottille frei gehalten`;
+      satz.textContent = `${name}: ${n} ${art?.mehrzahl ?? 'Boote'} kommen gegen ${uhrzeitText(b.arriveAt, rules())} im Konvoi und fahren direkt in ${gehalten.length === 1 ? 'Box' : 'die Boxen'} ${liste(gehalten)}. Bonus beim Einlaufen: ${euro(bonus)}.`;
+      markiere(gehalten);
+      knoepfe.append(knopf('Gut', true, () => fertig()));
+      if (wahl.length > 1) knoepfe.append(knopf('Anderer Steg', false, andereBox));
+      knoepfe.append(knopf('Freigeben', false, freigeben));
+    } else {
+      titel.textContent = `Funk: Flottille ${name} meldet sich an`;
+      satz.textContent = `${art?.anlass ?? 'Flottille'}, ${n} ${art?.mehrzahl ?? 'Boote'}, ${lang}, gegen ${uhrzeitText(b.arriveAt, rules())}, wollen zusammen an einem Steg liegen${w}.`;
+      if (wahl.length) {
+        const i = (aktuell.auswahl ?? 0) % wahl.length;
+        const o = wahl[i];
+        markiere(Object.values(o.plaetze));
+        satz.textContent += ` Steg ${o.jetty} frei halten (${n} Boxen)? Bonus ${euro(bonus)}.`;
+        knoepfe.append(knopf(`Steg ${o.jetty} freihalten`, true, () => halten(o.jetty)));
+        if (wahl.length > 1) knoepfe.append(knopf('Anderer', false, () => { aktuell.auswahl = i + 1; zeigePlatz(Object.values(wahl[(i + 1) % wahl.length].plaetze)[0]); zeichne(); }));
+        knoepfe.append(knopf('Nein', false, () => fertig()));
+      } else {
+        markiere(null);
+        satz.textContent += ` An keinem Steg sind gerade ${n} passende Boxen frei.`;
+        knoepfe.append(knopf('Gut', true, () => fertig()));
+      }
+    }
+    return [titel, satz, knoepfe];
+  }
+
   function zeichne(erzwingen = false) {
     const b = aktuell && boot(aktuell.id);
     if (!b) { box.replaceChildren(); zeichen = ''; markiere(null); return; }
+    if (b.flotte) {
+      const teile = zeichneFlotte(b, erzwingen);
+      if (!teile) return;
+      const sym = document.createElement('i');
+      sym.className = 'hm-sym';
+      sym.setAttribute('aria-hidden', 'true');
+      sym.style.setProperty('--sym', 'var(--px-funk)');
+      const text = document.createElement('div');
+      text.className = 'fa-text';
+      text.append(...teile);
+      box.replaceChildren(sym, text);
+      return;
+    }
     const freiListe = sim.freihaltbar(b.id);
     const sig = JSON.stringify([b.id, aktuell.art, aktuell.auswahl, b.funk?.platz, freiListe.slice(0, 8), angemeldet().length, erledigt.size]);
     if (!erzwingen && sig === zeichen) return;
@@ -196,6 +261,16 @@ export async function init(game) {
   function halten(platzId) {
     const b = aktuell && boot(aktuell.id);
     if (!b) return;
+    if (b.flotte) {
+      const r = sim.flotteFreihalten(b.flotte.id, platzId);
+      if (!r?.ok) { aktuell.auswahl = 0; zeichne(true); return; }
+      aktuell.art = 'bestaetigt';
+      aktuell.sichtbar = 0;
+      zeigePlatz(r.berthIds[0]);
+      game.emit('funk:freigehalten', { id: b.id, platz: r.berthIds[0], flotte: b.flotte.id, plaetze: r.berthIds });
+      zeichne(true);
+      return;
+    }
     const r = sim.freihalten(b.id, platzId);
     if (!r?.ok) { aktuell.auswahl = 0; zeichne(); return; }
     aktuell.art = 'bestaetigt';
@@ -208,6 +283,18 @@ export async function init(game) {
   function andereBox() {
     const b = aktuell && boot(aktuell.id);
     if (!b) return;
+    if (b.flotte) {
+      const jetzt = flotteBoote(b.flotte.id).find((x) => x.funk?.platz)?.funk.platz;
+      const steg = jetzt ? sim.flottillenSteg?.(jetzt) : null;
+      const wahl = sim.flotteFreihaltbar(b.flotte.id).filter((w) => w.jetty !== steg);
+      if (!wahl.length) return;
+      const i = (aktuell.auswahl ?? 0) % wahl.length;
+      aktuell.auswahl = i + 1;
+      const r = sim.flotteFreihalten(b.flotte.id, wahl[i].jetty);
+      if (r?.ok) { zeigePlatz(r.berthIds[0]); aktuell.art = 'bestaetigt'; aktuell.sichtbar = 0; }
+      zeichne(true);
+      return;
+    }
     const frei = sim.freihaltbar(b.id).filter((p) => p !== b.funk?.platz);
     if (!frei.length) return;
     const i = (aktuell.auswahl ?? 0) % frei.length;
@@ -219,12 +306,16 @@ export async function init(game) {
 
   function freigeben() {
     const b = aktuell && boot(aktuell.id);
-    if (b) sim.freigeben(b.id);
+    if (b?.flotte) sim.flotteFreigeben(b.flotte.id);
+    else if (b) sim.freigeben(b.id);
     fertig();
   }
 
   function fertig() {
     if (aktuell) erledigt.add(aktuell.id);
+    // Flottille: die Meldung galt der ganzen Gruppe
+    const fb = aktuell && boot(aktuell.id);
+    if (fb?.flotte) for (const x of flotteBoote(fb.flotte.id)) erledigt.add(x.id);
     schliessen();
     naechste();
   }
