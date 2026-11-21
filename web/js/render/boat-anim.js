@@ -466,6 +466,8 @@ function manager(game) {
       // Fahrwege aus der Karte: fn(boat, ziel, opts) => { punkte, engstellen }. Neue Karte: engstellenNeu().
       setRouter: (fn) => { m.router = fn || null; },
       setFrei: (fn) => { m.frei = fn || null; },
+      // (x, z, r, tiefe) => true, wenn dort freies Wasser ist (aus der Fahrwasserkarte), oder null
+      get frei() { return m.frei; },
       setSicht: (fn) => { m.sicht = fn || null; },
       engstellenNeu: () => m.engstellen.reset(),
       // Nur fuer Tests: Boote ohne Bild um dt Sekunden weiterbewegen
