@@ -111,7 +111,7 @@ Hinweise zur Messung:
 
 ## Oberfläche und Geräte (Zusammenspiel 2)
 
-Stand 20.11.2026 (Nachfund F4 am selben Abend), Thread "Zusammenspiel prüfen: Oberfläche und Geräte". Geprüft auf `main` nach PR 345, im laufenden Spiel (`?stufe=3&seed=7`, Ostsee, Tag 1) auf fünf Geräten: iPhone 13 hochkant (390 x 664) und quer (750 x 342), Galaxy Tab S4 hochkant (712 x 1138) und quer, PC 1440 x 900.
+Stand 20.11.2026 (Nachfunde F4 am selben Abend, F6 am 21.11.), Thread "Zusammenspiel prüfen: Oberfläche und Geräte". Geprüft auf `main` nach PR 345, im laufenden Spiel (`?stufe=3&seed=7`, Ostsee, Tag 1) auf fünf Geräten: iPhone 13 hochkant (390 x 664) und quer (750 x 342), Galaxy Tab S4 hochkant (712 x 1138) und quer, PC 1440 x 900.
 
 ### Wie geprüft wurde
 
@@ -151,6 +151,7 @@ Server für alle Werkzeuge: `bash tools/build-pages.sh && (cd tests && node serv
 | 11 | Tagesziel-Karten trennen kurze Wörter ("Wunsch Es-sen") | Handy | Silbentrennung erst ab Wörtern mit 8 Buchstaben (`features/tagesziele.js`) |
 | 12 | Doku `ui/oberflaeche.md`: Menü-Liste ohne Tagesabschluss, Statistik, Hilfe, Einstellungen, Gästebuch, Logbuch; Tastenliste ohne G, K, N, J, T, R, V; Satz "Ziffern bleiben in der Systemschrift" (seit PR 282 falsch) | Doku | nachgezogen |
 | 13 | Nachfund aus dem Schichttest (F4, 20.11.): Die Funk-Liste rechts lag über den Wartebojen am Kartenrand, ein wartendes Boot ließ sich in der Übersicht nicht antippen | Tablet quer (alle Geräte möglich) | Liegt ein wartendes Boot unter der Liste, wird sie durchlässig: blass, Tipps gehen hindurch zum Boot, der Kopf "Funk" bleibt bedienbar. Nachgemessen: Tipp auf das Boot unter der Liste trifft jetzt das Spiel (`ui/vorschau.js`, Bild `zusammenspiel/oberflaeche/f4-tabletquer-funk-durchlaessig.png`) |
+| 14 | Nachfund aus dem Schichttest (F6, 21.11.): Am Handy hochkant (Pixel 7) lag die Funk-Anmeldung halb über der Zeitsteuerung, und der Knopf "Einfahren" ragte rechts aus dem Bild, wenn das Boot am Rand wartete | Handy hoch | Der Knopf "Einfahren" bleibt immer ganz im Bild, mindestens 8 px vom Rand; liegt das Boot ganz oben, steht er darunter (`ui/gesten.js`). Ragte er hinaus, wurde die Seite breiter, das Handy zoomte heraus und die Zeitsteuerung rutschte unter die Meldung (im Schichttest: Seite 431 x 878 statt 412 x 839, Zeit bei 809 bis 855). Zusätzlich rechnet der Meldeplatz die Zeitsteuerung auch dann mit, wenn sie hinter einer offenen Tafel links kurz versteckt ist, damit die Meldung beim Schließen nicht auf Pause und Tempo steht (`ui/meldungen.js`). Nachgemessen am Pixel 7: Knopf am rechten Rand 289 bis 404 von 412, am linken 8 bis 123; Meldung endet bei 728, Zeitsteuerung beginnt bei 736, alle vier Zeitknöpfe frei antippbar |
 
 Bewusst so gelassen (kein Fund):
 
@@ -179,3 +180,80 @@ Die Grundansicht liegt am Handy bei 30 und 28 %, wie nach PR 261 und 282 (32 und
 ### Bilder
 
 Alle Bilder liegen in den Projektdateien unter `zusammenspiel/oberflaeche/`: je Gerät Grundansicht, Menü, Bauen, Logbuch, Hilfe, Einstellungen, Tagesziel-Wahl (`<gerät>-<lage>.png`), dazu die Bilder aller gedrückten Wege (`wege/<gerät>/`, Liste in `wege/<gerät>/bericht.json`).
+
+---
+
+## Ausbauten je Küste (Zusammenspiel 3, Teil 1)
+
+Stand 21.11.2026, Thread "Unnötige Ausbauten je Küste finden". Jorvens Frage vom 21.11.: Werden auf manchen Karten manche Ausbauten gar nicht gebraucht, oder tun sie dort nichts? Sein Beispiel aus einem neuen Spiel: Den Durchstich zur Ostsee gibt es durch die neuen Küsten nicht überall, oder er wird dort nicht gebraucht.
+
+### Wie geprüft wurde
+
+| Prüfung | Werkzeug | Umfang |
+|---|---|---|
+| Was der Ausbau zu Stufe 3 auf jeder Küste baut: Liegt am Engpass Land (Nehrung) oder schon offenes Wasser? | `node tools/zusammenspiel/kuesten.mjs --seeds 1-24` | 15 Küsten x 24 Seeds |
+| Tiefenkarte Stufe 2 und 3 je Küste (Land, flaches Wasser, offene See, geschütztes Wasser) | Rechnung über `gelaende.js punkt()` | 15 Küsten, Seed 1 |
+| Stufe 6 mit allen Services im laufenden Spiel: Steht jedes Gebäude an Land, jede Anlage am Wasser, jede Pier im tiefen Wasser? | `?stufe=6&services=alle&gelaende=N&seed=1`, Übersicht, PC | 15 Küsten |
+| Erreichen die Besuchsschiffe der Services (Kreuzfahrtschiff, Korvette, Minenjagdboot, Traditionssegler, Ausflugsschiff) ihre Pier ohne Land? | `node tools/grossschiffe/pruefen.cjs --kuesten 1-15 --seeds 1,3` | 15 Küsten x 2 Seeds |
+| Hängt die Wirkung eines Ausbaus im Code von der Küste ab? | Lesen: `data/economy.js`, `sim.js`, `ui/bauen.js`, `render/services*.js` | alle Bauten |
+
+### Ergebnis: der Durchstich
+
+Nur auf zwei Küsten trennt eine Nehrung den Hafen vom Meer. Auf allen anderen liegt der Hafen schon in Stufe 1 und 2 am offenen Wasser; dort sticht der Ausbau nichts durch, sondern baut im Bild Molen und einen Wellenbrecher vor den Hafen (`wellenbrecher()` in `gelaende.js` setzt ihn nur über Wasser).
+
+| Küste | Durchstich (Seeds von 24) | Molen und Wellenbrecher | Wellenbrecher in Stufe 3 (min bis max) |
+|---|---|---|---|
+| 1 Nehrung | 20 | 4 | 0 bis 3 |
+| 2 Offene Bucht | 0 | 24 | 2 bis 2 |
+| 3 Flussmündung | 4 | 20 | 1 bis 2 |
+| 4 Bodden | 0 | 24 | 2 bis 2 |
+| 5 Schären | 0 | 24 | 1 bis 5 |
+| 6 Steilküste | 0 | 24 | 2 bis 3 |
+| 7 Watt | 0 | 24 | 2 bis 2 |
+| 8 Förde | 0 | 24 | 2 bis 2 |
+| 9 Strandhaken | 0 | 24 | 1 bis 2 |
+| 10 Inselhafen | 0 | 24 | 2 bis 2 |
+| 11 Marstrand | 0 | 24 | 2 bis 2 |
+| 12 Punat | 0 | 24 | 2 bis 2 |
+| 13 Shilshole Bay | 24 | 0 | 0 bis 1 |
+| 14 Bucht von Kotor | 0 | 24 | 2 bis 2 |
+| 15 Porto Cervo | 0 | 24 | 3 bis 3 |
+
+Gebraucht wird der Ausbau trotzdem auf jeder Küste: Er macht die Einfahrt 4 m tief (vorher 2,2 m im Seegatt), erst danach kommen L-Yachten; er bringt die Plätze B23 bis B26 und F02 und führt zu Stufe 3. Falsch war nur der Name.
+
+**Entscheidung (Thread, 21.11.):** Das Spiel misst beim Laden, ob am Engpass auf beiden Seiten Land liegt (`engpassArt()` in `render/landschaft/formen.js`: westlich x 40 bis 140 und östlich x 216 bis 316 im Band y 184 bis 236 je mindestens die Hälfte der Spalten Land). Wenn ja, bleibt es beim "Durchstich zur Ostsee". Sonst heißt der Ausbau "Molen und Wellenbrecher" und Stufe 3 "Hafen hinter der Mole" (`nameOffen` in `data/economy.js`, gelesen über `data/kuestennamen.js`). Das gilt im Baumenü samt Bauschild und "Als Nächstes", beim Aufstieg, in der Winterkarte und in der Spielstand-Zeile. Kosten, Bauabschnitte und Wirkung bleiben gleich. Test: `tests/kuestennamen.test.mjs`.
+
+![Küste 2 Offene Bucht, Stufe 2: Baumenü mit "Molen und Wellenbrecher, Abschnitt 1 von 2"](zusammenspiel/kuesten-bauen-k2-pc.jpg)
+
+### Ausbau x Küste
+
+"ja" heißt: auf dieser Küste sichtbar am richtigen Ort und mit derselben Wirkung wie auf Küste 1. Die Regeln der Bauten (Liegegeld, Wünsche, Kunden, Besuche, Ruf) hängen im Code nirgends von der Küste ab; ob ein Bau auf einer Küste Sinn ergibt, entscheidet darum, ob er dort steht, wo er hingehört, und ob die Schiffe, die er bringt, ihn erreichen.
+
+| Ausbau | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | Anmerkung |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Dorfhafen (Stufe 2) | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | Uferstreifen der Stege ist auf jeder Küste Pflicht (`natur.js` BEDARF) |
+| Durchstich zur Ostsee (Stufe 3) | ja | M | ja/M | M | M | M | M | M | M | M | M | M | ja | M | M | M = heißt jetzt "Molen und Wellenbrecher"; Wirkung überall gleich |
+| Schwimmsteg D (Stufe 4) | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | |
+| Außenhafen mit Kai (Stufe 5) | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | wird auf allen Küsten als Hafeninsel mit Kai vor dem Hafen aufgeschüttet |
+| Pier für Großschiffe (Stufe 6) | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | Schiffswege siehe unten |
+| Stegprojekte A bis D, Kai, Yachtsteg | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | Liegeplätze überall gleich, Tiefe geprüft von `node tools/liegeplaetze/pruefen.mjs` |
+| Toilette, Dusche, Gastronomie, Stromsäulen | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | Wünsche aller Klassen, unabhängig von der Küste |
+| Tankstelle | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | Motorboote kommen auf jeder Küste; die Bootsmischung hängt nur an Stufe und Jahreszeit |
+| Bootsverleih, Slipanlage | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | Slip am Steg-Ufer (Pflichtbereich) |
+| Räucherei, Fischhalle, Bäcker, Café, Grillplatz, Eisdiele, Fahrradverleih | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | an Land hinter dem Hafen, Flächen planiert (`anlagen-flaechen.js`) |
+| Segelclub, Mastenkran, Ausrüster, Werft, Winterlager, Segelmacher | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | |
+| Hafenbüro (alle Stufen), Steglaternen, Fingerstege, Doppelbox | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | |
+| Seenotretter, Fahrgastanleger, Barkasse, Museumshafen, Kreuzfahrtterminal, Marineanleger | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | ja | Besuchsschiffe, siehe unten |
+
+### Funde
+
+| Nr | Fund | Was passiert ist |
+|---|---|---|
+| W1 | Der Ausbau zu Stufe 3 hieß auf 13 von 15 Küsten "Durchstich zur Ostsee", obwohl dort keine Nehrung ist und er Molen und einen Wellenbrecher ins offene Wasser baut. | behoben in diesem PR: Name je Küste (siehe oben) |
+| W2 | Text der Wahl "Ausbau der Großschiffpiers": "Nur ein großer Ausbau hat Platz auf der Nehrung". Eine Nehrung gibt es auf den meisten Küsten nicht. | Text: "Platz an den Großschiffpiers" (`data/services.js`) |
+| W3 | Der Schwimmwellenbrecher vor den Stegen (ab Stufe 4, kein Kauf, kommt mit der Stufe) liegt auf Küste 13 hinter dem natürlichen Wellenbrecher von Shilshole Bay, schützt dort also doppelt. | bewusst so gelassen: kostet nichts, schadet nicht, gehört zum Bild der Marina |
+| W4 | Kommen die Besuchsschiffe (Kreuzfahrtschiff, Korvette, Minenjagdboot, Traditionssegler, Ausflugsschiff, XL-Yachten) auf jeder Küste ohne Land an ihre Pier? `tools/grossschiffe/pruefen.cjs --kuesten 1-15 --seeds 1,3`: **0 Funde**, kein Rumpfpunkt auf Land, alle 7 Schiffe auf allen 30 Läufen. Hinweise bleiben nur beim Verholen mit Schleppern: Das Kreuzfahrtschiff streift achteraus die eigene Pier P oder die Liegewanne (Küste 11, 12, 14, 15 je Seed 3), auf Küste 15 Seed 3 kreuzen Korvette und Minenjagdboot die Wanne des Kreuzfahrtschiffs. | an den Großschiff-Thread (P84-Rest, wie schon dort notiert); Pier und Schiffe haben auf jeder Küste ihre Wirkung |
+
+Kein Bau ist auf einer Küste ohne Wirkung. Gestrichen oder ausgeblendet wurde nichts.
+
+Noch offen aus Teil 3 (Welt, Boote, Ereignisse): jede Kombination aus Küste und Stegbild, jedes Ereignis einmal ausgelöst, Bildrate je Wetter am Handy.

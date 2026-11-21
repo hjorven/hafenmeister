@@ -19,6 +19,7 @@
 import { TYPEN, bauen, WELT, BEREICH } from './natur.js';
 import { zonenRaster, seezugaenge, fahrrinneWelt, ZONE, ZONE_NAME } from './zonen.js';
 import { HAFEN } from '../../data/harbor.js';
+import { engpassQuelle } from '../../data/kuestennamen.js';
 
 export const FORMEN = TYPEN.map(({ nr, name, idee }) => ({ nr, name, idee }));
 /** Höchster Seed, den das Spiel auswürfelt (jeder ganzzahlige Seed ab 1 ist gültig). */
@@ -64,6 +65,29 @@ export function gelaendeform() { return form; }
 
 /** Die Landschaft der gültigen Form (natur.js, bauen). */
 export function natur() { return form.natur; }
+
+/**
+ * Liegt der Engpass bei x 178 in Land (Nehrung oder Landzunge auf beiden Seiten)? Dann ist der Ausbau zu
+ * Stufe 3 ein Durchstich ('durchstich'). Liegt der Hafen schon am offenen Wasser, baut er Molen und
+ * Wellenbrecher ('einfahrt'). Gemessen westlich (x 40 bis 140) und östlich (x 216 bis 316) des Engpasses
+ * im Band der Nehrung (y 184 bis 236): Zählt auf beiden Seiten mindestens die Hälfte der Spalten Land,
+ * gilt 'durchstich'. Ergebnis je Form gemerkt. Tabelle aller Küsten: docs/zusammenspiel.md.
+ */
+export function engpassArt(f = form) {
+  if (f._engpass) return f._engpass;
+  const N = f.natur;
+  const anteil = (x0, x1) => {
+    let n = 0, l = 0;
+    for (let x = x0; x <= x1; x += 4) {
+      n++;
+      for (let y = 184; y <= 236; y += 4) if (N.landig(x, y) > 0) { l++; break; }
+    }
+    return l / n;
+  };
+  f._engpass = anteil(40, 140) >= 0.5 && anteil(216, 316) >= 0.5 ? 'durchstich' : 'einfahrt';
+  return f._engpass;
+}
+engpassQuelle(() => engpassArt());
 
 /** Setzt Form und Seed direkt (Tests, Vorschau, Werkzeuge). Unbekannte Nummern geben Form 1. */
 export function formSetzen(nr, seed = 1) {

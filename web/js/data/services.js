@@ -324,7 +324,7 @@ export const WAHLPLAETZE = [
     text: 'Die Gemeinde genehmigt nur eine große Halle: Werfthalle für Reparaturen in der Saison oder Winterlagerhalle für den Winter.',
     optionen: [{ id: 'travellift', stufe: 3 }, { id: 'winterlager', stufe: 2 }] },
   { id: 'grosshafen', name: 'Ausbau der Großschiffpiers',
-    text: 'Nur ein großer Ausbau hat Platz auf der Nehrung: Kreuzfahrtterminal oder Marinestützpunkt.',
+    text: 'Nur ein großer Ausbau hat Platz an den Großschiffpiers: Kreuzfahrtterminal oder Marinestützpunkt.',
     optionen: [{ id: 'kreuzfahrtterminal', stufe: 2 }, { id: 'marineanleger', stufe: 2 }] },
 ];
 
