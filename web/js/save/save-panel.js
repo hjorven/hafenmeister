@@ -14,7 +14,7 @@ import {
 } from './pwa.js';
 import { STEGBILDER } from '../data/stegbilder.js';
 import { HAFEN } from '../data/harbor.js';
-import { ECONOMY } from '../data/economy.js';
+import { stufenName as kuestenStufenName } from '../data/kuestennamen.js';
 import { FORMEN } from '../render/landschaft/formen.js';
 
 const CSS = `
@@ -167,7 +167,7 @@ function mb(bytes) {
 }
 
 function stufenName(n) {
-  return ECONOMY?.stufen?.[n - 1]?.name ?? `Stufe ${n}`;
+  return kuestenStufenName(n);
 }
 
 export function infoText(info) {
