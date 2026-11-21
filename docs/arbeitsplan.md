@@ -1,6 +1,6 @@
 # Arbeitsplan
 
-Stand: 20.11.2026, 20:10 UTC, abgeglichen mit `main` bei `0925b3e` (PR 348), Statusangaben am Code geprüft. Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
+Stand: 21.11.2026, 01:45 UTC, abgeglichen mit `main` bei `6d31a63` (PR 368), Statusangaben am Code geprüft. Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
 
 **Wozu diese Datei:** [roadmap.md](roadmap.md) sagt, *was* insgesamt noch fehlt (Pakete P01 bis P82). Dieser Arbeitsplan sagt, *was jetzt gerade* läuft, welche Fehler zuerst weg müssen und welche Pakete als Nächstes starten. [plan.md](plan.md) bleibt der gültige Plan für Vision und Regeln.
 
@@ -17,15 +17,13 @@ Stand: 20.11.2026, 20:10 UTC, abgeglichen mit `main` bei `0925b3e` (PR 348), Sta
 
 Jorven: "Vielleicht sollte erstmal Welle 0-2 fertig gemacht werden" und "Halt so, dass das Grundgerüst fertig ist." Welle 0 bis 2 ist das Grundgerüst. Ab jetzt starten **keine neuen Pakete aus Welle 3 und später**. Was dort schon läuft (P86 Bootsgeschichten, P23-Nacharbeit, P26 Gesten), darf fertig werden, solange es Welle 0 bis 2 nicht blockiert.
 
-Stand 20.11.2026: Welle 0 4 von 6, Welle 1 11 von 12 (P87 erledigt, P54 entfällt), Welle 2 14 von 15. Offen sind diese Pakete:
+Stand 21.11.2026, 01:45 UTC: Fast alles aus Welle 0 bis 2 ist auf `main`. Erledigt seit dem 20.11.: P84 Großschiffwege (PR 341, 359), P20-Rest Jahreszeiten und Dauerlieger (PR 347), P85 Teil 1 Kernschleife (PR 354, Funde K1 bis K5 behoben mit PR 351, 356, 361) und Teil 2 Oberfläche (PR 352, 12 Funde behoben, F4 und F6 aus dem Schichttest mit PR 358, 367), Gelände-Rechnung gleich gezeichnetem Wasser (PR 350), P66 Einbahn an der Einfahrt (PR 351). Offen sind nur noch:
 
 | Welle | Paket | Was konkret noch fehlt | Thread | Fertig, wenn |
 |---|---|---|---|---|
-| 0 | **P66 Boote ums Gelände herum führen** | Pulk und "ineinander fest" beim gleichzeitigen Ablegen ab Stufe 5: laut Abnahme-Serie (0f078c3, Typ 1 bis 4) in Stufe 5 und 6 260 bis 980 feste Paare und an 100 bis 155 Tagen ein Pulk, Stufe 1 bis 4 fast im Ziel. Plan des Threads: Einlaufende warten vor der Durchfahrt, solange Auslaufende anstehen (Einbahn-Freigabe nach Richtung). Seit 15.11. kein neuer Stand | "Staus an Bojen und Ankerfeld auflösen" (wieder aufnehmen) | Abnahme-Serie mit den Grenzen aus P87: keine Boote länger als ein paar Sekunden ineinander fest, kein Pulk über mehrere Minuten |
-| 0 | **P84 Großschiffwege an allen 15 Küsten** | Teil 1 erledigt (PR 341: kein Ufer mehr, 15 Küsten x 5 Seeds; Küste 4: große Vorbeifahrer fahren draußen am Außenring, alle 9 XXL erreichbar). Teil 2: Großschiffe verholen mit Schleppern an einen freien Drehkreis statt über Pier, Ankerplatz der Traditionssegler und Wartebojen zu schwenken; Raddampfer an K01 über Mole und Kaikante | "Großschiffe sicher durch alle Küsten führen" (läuft) | Test grün auf 15 Küsten, Bild je Küste |
-| 1 | **P87 Prüfwerkzeuge auf 15 Küsten und den neuen Takt** | erledigt (PR 338) | - | - |
-| 1 | **P85 Zusammenspiel prüfen** | noch nicht gestartet (`docs/zusammenspiel.md` fehlt); Auftrag siehe Abschnitt 3a | drei neue Threads: Teil 1 und 2 sofort, Teil 3 nach P66 und P84 | `docs/zusammenspiel.md` vollständig, alle Funde behoben oder als Paket eingetragen |
-| 2 | **P20 Winter mit Inhalt füllen (Rest)** | fertig gebaut in PR 347 (G5 Jahreszeiten, H5 Dauerlieger nutzen den Hafen), seit 15.11. offen mit Konflikt nur in `docs/arbeitsplan.md`; danach Balancing-Messung | Bauen-Thread (wieder aufnehmen) | PR 347 auf `main`, Rechnung und Zeitraffer weiter höchstens 5 % auseinander |
+| 0 | **P66 Boote ums Gelände herum führen** | Abnahme-Serie auf `64cbe84` (vor PR 351, 15 Küsten, PC Seed 11): Ziel an Tag 99 bis 109 (Rechnung 103), über Land und durch Steg fast weg (höchstens 17), aber in Stufe 5 und 6 noch 16 bis 214 feste Paare und an rund 40 Tagen ein Pulk beim Ablegen mit bis zu 119 Booten. Schlimmste Stellen: Küste 14 Einfahrt, Küste 15 Schlange hinter dem Kreuzfahrer in der Zufahrt, Küste 6 und 2. Gegenprobe Küste 2 nach PR 351: fest 0/6, hängt 0/3 | "Staus an Bojen und Ankerfeld auflösen" (läuft) | neue Abnahme-Serie auf `main` nach dem Pulk-Fix: keine Boote länger als ein paar Sekunden ineinander fest, kein Pulk über mehrere Minuten |
+| 1 | **P85 Zusammenspiel Teil 3: Welt, Boote, Ereignisse** | Teil 1 (Ausbauten je Küste) erledigt (PR 366); offen: jede Kombination aus Küste und Stegbild, jedes Ereignis einmal ausgelöst und vorbereitet, Bildrate je Wetter am Handy | Thread "Zusammenspiel prüfen: Welt, Boote, Ereignisse" (läuft) | Abschnitt in `docs/zusammenspiel.md` vollständig, Funde behoben oder als Paket eingetragen |
+| - | **Welle-0-Abnahme** | ganze Serie über 15 Küsten, PC und Handy, auf `main` nach P66 | "Ganzes Spiel im Zeitraffer durchtesten" | Grenzen wie oben; danach P66 und P85 in der Roadmap auf "erledigt" |
 
 **P85 früher starten:** Die Bereiche Kernschleife und Oberfläche hängen nicht am Pulk. Darum starten "Zusammenspiel 1" und "Zusammenspiel 2" sofort. "Zusammenspiel 3: Welt, Boote, Ereignisse" startet, sobald P66 und P84 gemergt sind und die Abnahme-Serie läuft. Funde zu Booten und Wegen aus 1 und 2 gehen an den Boote-Thread statt selbst gefixt zu werden.
 
@@ -35,15 +33,14 @@ Stand 20.11.2026: Welle 0 4 von 6, Welle 1 11 von 12 (P87 erledigt, P54 entfäll
 
 ## 1. Was gerade überarbeitet wird
 
-Stand 20.11.2026, 20:10 UTC. Seit dem 15.11. mittags ist nichts mehr gemergt worden außer P87 (PR 338), P86 (PR 342) und Testpflege (PR 344, 348); die Threads sind stehen geblieben. Drei fertige PRs warten:
+Stand 21.11.2026, 01:45 UTC. Keine liegenden PRs mehr: 341, 346, 347 sind gemergt.
 
-| PR | Paket | Zustand | Was zu tun ist |
+| Thema | Thread | Paket | Stand |
 |---|---|---|---|
-| 341 | P84 Großschiffwege an allen 15 Küsten | Konflikt nur in `docs/arbeitsplan.md`, `docs/aenderungen.md` | Thread wieder aufnehmen: auf `main` bringen, `bash tests/pruefen.sh --schnell`, mergen |
-| 347 | P20-Rest (G5, H5) | Konflikt nur in `docs/arbeitsplan.md` | Bauen-Thread wieder aufnehmen: auf `main` bringen, prüfen, mergen, danach Balancing-Messung |
-| 346 | Logbuch-Test unter Last, Meldungen im Meldeplatz | ohne Konflikt | Logbuch-Thread wieder aufnehmen: prüfen, mergen |
-
-Ohne PR: P66 Pulk-Fix (Boote-Thread, letzter Stand 15.11. 05:34: Einbahn-Freigabe an der Durchfahrt geplant), Abnahme-Serie Welle 0 (Zeitraffer, Typ 1 bis 4 gemessen, Typ 5 bis 15 offen).
+| Pulk beim Ablegen in Stufe 5 und 6, Küste 14, 15, 6, 2 | "Staus an Bojen und Ankerfeld auflösen" | P66 | PR 351 gemergt, misst gezielt an Typ 6 und 2 |
+| Welt, Boote, Ereignisse im Zusammenspiel | "Zusammenspiel prüfen: Welt, Boote, Ereignisse" | P85 Teil 3 | Ausbauten je Küste gemergt (PR 366) |
+| Abnahme-Serie | Zeitraffer | - | Serie `64cbe84` fertig (`zeitraffer/2026-11-20-64cbe84/` im Projektordner); neue Serie nach dem Pulk-Fix |
+| Schichttest, Feature-Einzeltest, Roadmap-Seite | Prüf- und Pflege-Threads | - | laufen |
 
 ---
 
@@ -55,7 +52,7 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 |---|---|---|---|
 | A | Pulk und "ineinander fest" beim gleichzeitigen Ablegen, vor allem Stufe 5 (Offene Bucht, Seed 11); mit dem 5-Minuten-Tag legen mehr Kurzhalter gleichzeitig ab | PR 327 "Noch offen", Härtetest 15.11. (Hinweis), Zeitraffer-Zwischenserie | P66, "Staus an Bojen" |
 | A | Welle-0-Abnahme fehlt: Zeitraffer-Serie über alle 15 Küsten nach dem Pulk-Fix | Abschnitt 3a | P66, Zeitraffer-Thread |
-| B | Raddampfer (XL) an K01 fährt beim Einlaufen über die Westmole und beim Auslaufen über die Kaikante (Handy, mehrere Küsten) | Härtetest 15.11. nach P87, Nahbilder `handy-alle-einfahren-nah-land-1.jpg`, `handy-alle-ablegen-nah-land-1.jpg` in `/mnt/project-files/extremtest/2026-11-15-5dce72f-p87/handy/bilder/` | P84 |
+| B | Raddampfer (XL) an K01 fährt beim Einlaufen über die Westmole und beim Auslaufen über die Kaikante (Handy, mehrere Küsten) | Härtetest 15.11. nach P87, Nahbilder `handy-alle-einfahren-nah-land-1.jpg`, `handy-alle-ablegen-nah-land-1.jpg` in `/mnt/project-files/extremtest/2026-11-15-5dce72f-p87/handy/bilder/` | P84, erledigt 20.11. |
 | B | Gäste liegen ab Stufe 4 kaum sichtbar an einer Warteboje (nachgemessen nach PR 327 bis 332: Stufe 4 und 6 am PC 0 an der Boje). Ursache jetzt: `selfEnter` in `sim.js` zählt als Andrang (mehr als die Hälfte der Bojen vergeben) auch Boote, die noch Minuten draußen auf See anfahren; darum fahren die ersten im Revier direkt aus der Anfahrt ein. Vorschlag: Andrang nur aus Booten im Revier oder an der Boje zählen | Härtetest 15.11. nach P87 (`bojen-erreichbar`, misst jetzt an Boje / direkt bei Andrang / unterwegs getrennt), docs/extremtest.md | P66, "Staus an Bojen" |
 | B | ~~`tools/stegbilder/erzeugen.mjs` findet seit den Doppelboxen keine Variante mehr~~ erledigt: Generator zählt Doppelboxen nicht mehr mit, prüft Stufe 6 mit Yachtsteg, die 12 Stegbilder bleiben | Hinweis in PR 329 | P83 erledigt |
 | erledigt | Rechnung und Bild des Geländes wichen an drei Stellen um mehr als eine Rasterzelle ab (Riss Stufe 6 bei Plan-y 196, Sandbank Küste 3, Landpunkt Küste 10). Behoben in der Geländeformel, dazu zwei weitere Stellen (Keil neben der Kaifläche Küste 5, Pfütze hinter der Nehrungsstraße Küste 1). Das Werkzeug meldet über 15 Küsten und Stufe 3 bis 6 keine Abweichung mehr; Entscheidung in docs/landschaft.md "Rechnung und Bild stimmen überein" | `node tools/zeitraffer/wasserbild.cjs --kuesten 1-15 --stufen 3-6` | Gelände-Thread |
@@ -72,7 +69,7 @@ Leitlinie: Erst Welle 0 abschließen und die Prüfwerkzeuge auf den neuen Stand 
 | Nr | Paket | Warum jetzt | Hängt ab von | Kann kollidieren mit |
 |---|---|---|---|---|
 | 1 | **P66 Pulk beim Ablegen** (läuft) | Prio A, letzter Rest von Welle 0 | - | `render/boat-view.js`, `boat-anim.js`, Päckchen (Ablegereihenfolge), Kurzhalter |
-| 2 | P84 Großschiffwege an allen 15 Küsten: ~~Teil 1 Landberührung~~ erledigt 15.11. (PR 341); Teil 2 (Verholen mit Schleppern, Raddampfer an K01) läuft | Rest aus PR 329, gehört zu Welle 0 | - | `render/services-besuch.js`, `boat-view.js` (`seeWeg`, `grosserSeeweg`) |
+| 2 | ~~P84 Großschiffwege an allen 15 Küsten~~ erledigt 20.11. (PR 341 und Teil 2) | Rest aus PR 329, gehört zu Welle 0 | - | `render/services-besuch.js`, `boat-view.js`, `boat-anim.js` |
 | 3 | ~~**P87 Prüfwerkzeuge auf 15 Küsten und den neuen Takt**~~ erledigt (PR 338) | Welle-0-Abnahme braucht Tests, die alle Küsten kennen; Härtetest nach PR 327 bis 332 neu | - | nur `tests/`, `tools/zeitraffer/`, `feature-tests/` |
 | 4 | ~~**P83 Stegbild-Generator reparieren**~~ (erledigt 15.11., PR 336) | ohne ihn keine neuen Stege (P70) und kein Neuerzeugen nach Platzänderungen | - | `tools/stegbilder/`, `data/stegbilder.js` (Ausgabe muss für bestehende Spielstände gleich bleiben), `data/liegelage.js` |
 | 5 | ~~P23 Services mit eigener Wirkung~~ erledigt (15.11.) | Dienste, Trailerboote, Abendgäste, Tagesgäste, Wahlplätze, Bilanz; Rechnung weiter 103 Tage | - | `economy.js` ist frei für P20-Rest |
@@ -218,6 +215,7 @@ Schon erledigt aus Jorvens Vorschlägen: F1, F2, F4, F8, F14, F15, F17, F18, F19
 
 | Datum | Änderung |
 |---|---|
+| 21.11.2026, 01:45 Uhr | P84, P20-Rest, P85 Teil 1 und 2 erledigt; offen nur P66 Pulk beim Ablegen, P85 Teil 3 und die Welle-0-Abnahme. |
 | 20.11.2026, 20:10 Uhr | Abgleich nach fünf Tagen Stillstand: P87 erledigt; P84 (PR 341), P20-Rest (PR 347) und Logbuch (PR 346) fertig, aber offen; P66 Pulk und P85 ohne Stand. Startliste: Threads wieder aufnehmen, P85 Teil 1 und 2 neu. |
 | 15.11.2026, 11:00 Uhr | Jorven: erst Welle 0 bis 2 fertig. Neuer Abschnitt 0 mit den fünf offenen Paketen (P66, P84, P87, P85, P20-Rest); keine neuen Pakete aus Welle 3 und später; Zusammenspiel 1 und 2 starten sofort. |
 | 15.11.2026, 09:30 Uhr | Ganzer Plan am Code abgeglichen (Thread "Roadmap, Plan und README nachziehen"): Abschnitte 1 bis 3 neu; P17, P27, P24 und viele andere erledigt; neue Pakete P83 Stegbild-Generator, P84 Großschiffwege, P85 Zusammenspiel, P86 Bootsgeschichten-Rest, P87 Prüfwerkzeuge; Startliste 2, 3, 4, 5, 7. |

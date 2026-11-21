@@ -65,7 +65,7 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 | [P63](https://hjorven.github.io/hafenmeister/roadmap/#paket=P63) | Marinebasis und Anlagen neu platzieren | **erledigt** | [#167](https://github.com/hjorven/hafenmeister/pull/167) [#172](https://github.com/hjorven/hafenmeister/pull/172) |
 | [P64](https://hjorven.github.io/hafenmeister/roadmap/#paket=P64) | Gelände abwechslungsreicher gestalten | **erledigt** | [#204](https://github.com/hjorven/hafenmeister/pull/204) [#211](https://github.com/hjorven/hafenmeister/pull/211) [#216](https://github.com/hjorven/hafenmeister/pull/216) |
 | [P65](https://hjorven.github.io/hafenmeister/roadmap/#paket=P65) | Wetter und Effekte flüssig machen | **erledigt** | [#169](https://github.com/hjorven/hafenmeister/pull/169) |
-| [P66](https://hjorven.github.io/hafenmeister/roadmap/#paket=P66) | Boote ums Gelände herum führen | in Arbeit | [#262](https://github.com/hjorven/hafenmeister/pull/262) [#280](https://github.com/hjorven/hafenmeister/pull/280) [#327](https://github.com/hjorven/hafenmeister/pull/327) [#332](https://github.com/hjorven/hafenmeister/pull/332) |
+| [P66](https://hjorven.github.io/hafenmeister/roadmap/#paket=P66) | Boote ums Gelände herum führen | in Arbeit | [#280](https://github.com/hjorven/hafenmeister/pull/280) [#327](https://github.com/hjorven/hafenmeister/pull/327) [#332](https://github.com/hjorven/hafenmeister/pull/332) [#351](https://github.com/hjorven/hafenmeister/pull/351) |
 | [P84](https://hjorven.github.io/hafenmeister/roadmap/#paket=P84) | Großschiffwege an allen 15 Küsten | **erledigt** | [#329](https://github.com/hjorven/hafenmeister/pull/329) [#341](https://github.com/hjorven/hafenmeister/pull/341) |
 
 </details>
@@ -85,7 +85,7 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 | [P09](https://hjorven.github.io/hafenmeister/roadmap/#paket=P09) | Speicherplätze und Neues Spiel | **erledigt** | [#150](https://github.com/hjorven/hafenmeister/pull/150) |
 | [P54](https://hjorven.github.io/hafenmeister/roadmap/#paket=P54) | Ausfahrende Boote weichen wartenden Booten aus | entfällt |  |
 | [P83](https://hjorven.github.io/hafenmeister/roadmap/#paket=P83) | Stegbild-Generator reparieren | **erledigt** | [#321](https://github.com/hjorven/hafenmeister/pull/321) [#329](https://github.com/hjorven/hafenmeister/pull/329) [#336](https://github.com/hjorven/hafenmeister/pull/336) |
-| [P85](https://hjorven.github.io/hafenmeister/roadmap/#paket=P85) | Zusammenspiel nach Welle 0 prüfen | teilweise | [#352](https://github.com/hjorven/hafenmeister/pull/352) |
+| [P85](https://hjorven.github.io/hafenmeister/roadmap/#paket=P85) | Zusammenspiel nach Welle 0 prüfen | teilweise | [#352](https://github.com/hjorven/hafenmeister/pull/352) [#354](https://github.com/hjorven/hafenmeister/pull/354) |
 | [P87](https://hjorven.github.io/hafenmeister/roadmap/#paket=P87) | Prüfwerkzeuge auf 15 Küsten und den neuen Takt | **erledigt** | [#327](https://github.com/hjorven/hafenmeister/pull/327) [#332](https://github.com/hjorven/hafenmeister/pull/332) [#338](https://github.com/hjorven/hafenmeister/pull/338) |
 
 </details>

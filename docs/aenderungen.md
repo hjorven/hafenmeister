@@ -4,8 +4,17 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 21.11.2026
+
+- Der Ausbau zu Stufe 3 heißt nur noch dort „Durchstich zur Ostsee“, wo wirklich eine Nehrung vor dem Hafen liegt (Nehrung, Shilshole Bay, manche Flussmündungen). Auf allen anderen Küsten liegt der Hafen schon am offenen Wasser; dort heißt er „Molen und Wellenbrecher“ und die Stufe „Hafen hinter der Mole“. Kosten und Wirkung bleiben gleich.
+- Menschen laufen nur noch über Stege, die wirklich gebaut sind. Vorher gingen Spaziergänger und Crews auch über die hellen Bauplätze noch nicht gekaufter Stege und Stegverlängerungen, vor allem in den ersten Stufen. Mit jedem gebauten Stegprojekt und jedem Ausbau kommen die neuen Stege sofort dazu.
+
 ## 20.11.2026
 
+- Etwas weniger Gäste für den Aufstieg ab Stufe 3 (340 statt 360, 530 statt 560, 740 statt 840), weil der Ausbau über Nacht in Bauabschnitten und die ruhigen Jahreszeiten Zeit kosten. Ein Spiel bis zum Seehafen dauert so weiter rund 100 Spieltage. Die Rechnung kennt jetzt auch die Bauabschnitte und die längere Anfahrt großer Häfen.
+- Stammgast wird nur, wer wiederkommt: Ein zufriedener Gast merkt sich den Hafen, Stammgast ist er erst beim zweiten Besuch, wenn er wieder zufrieden abreist. Vorher wurde fast jeder Gast sofort Stammgast. Logbuch und die Erfolge „Kommt gern wieder“ und „Bekannte Gesichter“ (25 Stammgäste) zählen jetzt nur echte Stammgäste, und die bleiben auf der Liste.
+- Der Raddampfer am Kai K01 fährt nicht mehr über die Mole: er kommt von vorn, dreht draußen auf der Stelle und setzt rückwärts an den Kai. Beim Ablegen fährt er erst geradeaus an der Kante entlang und dreht dann ab.
+- Kreuzfahrtschiff, Korvette und Minenjagdboot werden mit Schleppern verholt und drehen dort, wo Platz ist, statt über Pier und Ankerplatz zu schwenken.
 - Die Hafeneinfahrt zwischen den Molen (ab Stufe 3) ist jetzt eine Einbahn: Boote fahren in kleinen Gruppen je Richtung hindurch, wer hinaus will, zuerst. Einlaufende warten ein Stück vor der Einfahrt, bis die Auslaufenden draußen sind. Morgens und abends stehen so keine Trauben mehr Bug an Bug in der Einfahrt, und zwei Boote, die sich ineinander verkeilt hatten, kommen wieder frei.
 - Ab Stufe 4 liegen ankommende Gäste wieder sichtbar an den Wartebojen, bevor sie selbst in eine Box fahren (Offene Bucht Stufe 5: vorher erreichte rund jeder vierte Gast eine Boje, jetzt fast alle). Vorher hielten Boote, die noch draußen auf See waren, die Bojen besetzt und zählten als Andrang; Neue fuhren deshalb direkt durch oder drehten ab. Hängt ein Boot auf der Anfahrt fest, gilt es nach spätestens zweieinhalb Minuten als angekommen.
 - Draußen auf See fahren ankommende und abreisende Boote jetzt Marschfahrt, rund dreimal so schnell wie im Hafen, und werden zur Einfahrt hin gleitend langsamer. In großen Häfen (ab Stufe 4) sind sie so deutlich früher an der Boje; vorher brauchten manche mehrere Minuten über die freie See.

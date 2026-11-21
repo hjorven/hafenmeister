@@ -21,6 +21,7 @@
 
 import * as sim from '../sim.js';
 import { ECONOMY } from '../data/economy.js';
+import { stufenName as kuestenStufenName } from '../data/kuestennamen.js';
 import { SERVICES } from '../data/services.js';
 import { regelnBereit } from './regeln-bereit.js';
 import { pixelBild } from '../ui/pixel-symbole.js';
@@ -540,7 +541,7 @@ export async function init(game) {
   }
 
   function stufenName(n) {
-    return ECONOMY.stufen?.find((s) => s.stufe === n)?.name || `Stufe ${n}`;
+    return kuestenStufenName(n);
   }
 
   function naechstesZiel(to) {

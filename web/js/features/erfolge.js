@@ -10,7 +10,7 @@
 // - Logbuch, Reiter "Erfolge": alle Erfolge nach Gruppen, erreichte mit Tag, offene mit Fortschritt.
 // - Alte Spielstände ohne Erfolge: was schon erreicht ist, wird beim Laden still nachgetragen (keine Meldungsflut).
 //
-// Schnittstelle: game.erfolge = { ansicht(), dinge(), erreicht(id), oeffnen(), pruefen(), aufbauen() }
+// Schnittstelle: game.erfolge = { ansicht(), dinge(), erreicht(id), oeffnen(), pruefen(), aufbauen(), meldungHaelt() }
 // Ereignis: 'erfolg:neu' { id, titel, ding, gruppe }
 
 import * as sim from '../sim.js';
@@ -39,7 +39,7 @@ function el(tag, attrs = {}, ...kids) {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
     if (k === 'class') e.className = v;
-    else if (k === 'onclick') e.addEventListener('click', v);
+    else if (/^on[a-z]+$/.test(k) && typeof v === 'function') e.addEventListener(k.slice(2), v);
     else if (k === 'style') e.setAttribute('style', v);
     else if (v !== false && v != null) e.setAttribute(k, v === true ? '' : v);
   }
@@ -186,10 +186,15 @@ export function init(game) {
       type: 'button', class: `hm-ef-meldung ${erstes.ding}`, title: 'Erfolge im Logbuch ansehen',
       'aria-label': `Erfolg: ${kopf}. ${zeile} Erfolge ansehen`,
       onclick: () => { schliesseMeldung(); oeffnen(); },
+      // Wer die Meldung liest (Zeiger darüber oder Fokus darauf), dem läuft sie nicht weg
+      onpointerenter: () => { if (jetzt) jetzt.halt = true; },
+      onpointerleave: () => { if (jetzt) jetzt.halt = false; },
+      onfocus: () => { if (jetzt) jetzt.halt = true; },
+      onblur: () => { if (jetzt) jetzt.halt = false; },
     }, el('span', { class: 'hm-ef-feld' }, sym(erstes)), el('span', { class: 'hm-ef-meldung-text' }, el('small', {}, liste.length > 1 ? 'Erfolge' : erstes.ding === 'pokal' ? 'Pokal' : 'Erfolg'), el('b', {}, kopf), el('span', {}, zeile)));
     leiste.replaceChildren(knopf);
     leiste.hidden = false;
-    jetzt = { t0: performance.now() };
+    jetzt = { lauf: 0 };   // gelaufene Zeit in ms, nur während die Meldung frei steht
     game.audio?.sfx?.('erfolg', { gross: liste.some((x) => x.ding === 'pokal') });
   }
   function schliesseMeldung() {
@@ -200,14 +205,16 @@ export function init(game) {
   }
   function takt() {
     const t = performance.now();
-    const dt = t - letzterTakt;
+    // Je Bild höchstens 100 ms: Ruckelt das Gerät (oder hängt der Tab), steht die Meldung entsprechend
+    // länger, statt in wenigen Bildern abzulaufen
+    const dt = Math.min(100, t - letzterTakt);
     letzterTakt = t;
     const frei = darf();
     if (jetzt) {
-      if (!frei) { jetzt.t0 += dt; leiste.hidden = true; }
-      else {
-        leiste.hidden = false;
-        if (t - jetzt.t0 > MELDUNG_DAUER) schliesseMeldung();
+      leiste.hidden = !frei;
+      if (frei && !jetzt.halt) {
+        jetzt.lauf += dt;
+        if (jetzt.lauf > MELDUNG_DAUER) schliesseMeldung();
       }
     } else if (offeneMeldungen.length && frei) zeigeMeldung();
     if (jetzt || offeneMeldungen.length) requestAnimationFrame(takt);
@@ -272,6 +279,8 @@ export function init(game) {
     ansicht: () => (st() ? ansicht(st(), h()) : []),
     dinge: () => (st() ? dinge(st()) : null),
     erreicht: (id) => !!(st() && erfolgeState(st()).erreicht[id]),
+    // Steht gerade eine Meldung, die wegen Zeiger oder Fokus nicht abläuft? (Tests)
+    meldungHaelt: () => !!jetzt?.halt,
     pruefen: pruefeJetzt,
     oeffnen,
     aufbauen: dingeAufbauen,   // Dinge im Hafen neu aufstellen (Tests, Fotomodus)

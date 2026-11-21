@@ -40,6 +40,7 @@ rm -rf /tmp/st-web && cp -r web /tmp/st-web && for g in pc handy handyquer table
 | `--geraet` | `pc` | `pc` (1440 x 900, Maus), `handy` (Pixel 7), `handyquer`, `tablet` (Galaxy Tab S4), `tabletquer`; alle außer `pc` mit Touch |
 | `--bis n` | alle | letzte Schicht |
 | `--nur a,b` | - | nur diese Schichten, ohne Wiederholung der früheren (zum Nachprüfen eines Funds) |
+| `--wieder k` | alle | nach jeder Schicht nur den Kern (1 bis 7) und die k letzten Schichten wiederholen; mit allen 23 Schichten dauert ein voller Lauf am Handy über zwei Stunden, `--wieder 4` hält ihn unter zwei |
 | `--gelaende n`, `--seed s`, `--stegbild n` | Spielstart wie ein neuer Spieler | Ausgangslage über die Adresse |
 | `--web dir` | `web/` | Ordner mit dem Spiel |
 | `--out dir` | `/tmp/schichttest` | Ausgabe: `bilder/`, `ergebnis-<gerät>.json`, `bericht-<gerät>.md` |
@@ -84,9 +85,9 @@ Reihenfolge abgeleitet aus [roadmap.md](roadmap.md), [arbeitsplan.md](arbeitspla
 | 18 | Dauerlieger | P01 | ab Stufe 2 auf eine Anfrage warten, freie Box antippen, Bewerber wählen: Platz wird Dauerplatz; danach liegt dort kein Gast | gebaut |
 | 19 | Logbuch | P21 | über das Menü öffnen, jeden Reiter antippen (Inhalt nicht leer), gesehene Bootsarten stehen drin, schließt wieder | gebaut |
 | 20 | Winter | P20 | bei 8x bis zum Winter: Winterpause-Karte, keine Gastboote, "Winter überspringen" führt in den Frühling | gebaut |
-| 21 | Ruf und Wünsche | P19 | Ruf steigt und fällt sichtbar, Wünsche über dem Boot | geplant |
-| 22 | Ereignisse | P24 | Sturm und Regatta angekündigt, Vorbereiten wirkt | geplant |
-| 23 | Services und Stufe 6 | P23, P04 | Anlagen bauen, Großschiffe, Abschlussziel | geplant |
+| 21 | Ruf und Wünsche | P19 | Stern oben zeigt den Ruf aus den Regeln, ein Spieltag bringt neue Bewertungen, die Bootskarte nennt die Wünsche des Boots | gebaut |
+| 22 | Ereignisse und Wetter | P24, P20 | Wetterbericht öffnet und schließt, bei 8x bis zu einem Ereignis: angekündigt per Schild oder Wetterknopf, "Vorbereiten" wirkt (ab Stufe 3) | gebaut |
+| 23 | Angebote (Services) | P23 | über Bauen, Reiter "Angebote" das günstigste freie Angebot bauen; bleibt gebaut | gebaut |
 
 ## Ergebnisse
 
@@ -94,6 +95,8 @@ Neueste Läufe oben. Bilder und vollständige Berichte liegen im Projektordner u
 
 | Datum | Stand | Gerät | Schichten | Prüfpunkte | Funde | Bemerkung |
 |---|---|---|---|---|---|---|
+| 21.11. | `b1d5251` | pc, handy, tabletquer (Serie 10) | 1 bis 23 | 455 bis 971 | F5, F6 | Handy erstmals durch alle 23 Schichten (118 min, Abbruch erst beim Zeitlimit); Tablet quer bis 20, PC bis 16 (Knopf verschwand beim Klicken, offen). Testfehler behoben: Leertaste auf zuletzt geklicktem Knopf, Knöpfe in rollbarer Winterbilanz, Zettel hinter der Winterbilanz, Winter mitten in Schicht 22 |
+| 21.11. | `b1d5251` | pc, handyquer, tablet (Serie 11, `--wieder 4`) | 1 bis 23 | 159 bis 707 | F5, F7 | PC (95 min) und Handy quer (79 min) durch alle 23 Schichten (Abbruch von PC in Schicht 16 aus Serie 10 nicht wieder aufgetreten); Tablet brach in Schicht 10 ab, weil drei Läufe parallel nur 5 Bilder pro Sekunde schafften (Testumgebung, kein Spielfehler). Handy quer: Funk-Anmeldung lag über Boot und Box nach Verschieben der Karte (wie F4) |
 | 20.11. | `64cbe84` | handy, tablet, tabletquer (Serie 8) | 1 bis 19 | 193 bis 653 | F4, F5 | Handy und Tablet quer bis Schicht 19; Logbuch-Reiter brach als Testfehler ab (Logbuch baut sich beim Reiterwechsel neu auf, behoben). Tablet hielt in Schicht 10 an einem kurz verdeckten "Verstanden" (Werkzeug fasst jetzt einmal nach) |
 | 15.11. | `b5baa80` | pc, handy, tablet (Serie 6) | 1 bis 17 | 86 bis 579 | F2, F3 | Handy und Tablet laufen durch alle 17 Schichten, PC hält an F3 und Tagesende ohne Ankünfte (Testfehler, behoben) |
 | 15.11. | `b5baa80` | alle fünf (Serie 5) | 1 bis 15 | 22 bis 473 | F2, F3 | F2 hält "Einfahren lassen" auf Handy und Tablet an; F1 nicht mehr aufgetreten (PR 320) |
@@ -108,4 +111,6 @@ Neueste Läufe oben. Bilder und vollständige Berichte liegen im Projektordner u
 | F2 | 8, 5 | handy, handyquer, tablet, tabletquer | Kurzhalter werden abgerechnet und fahren weg, bevor sie sichtbar festgemacht haben: die Ablegezeit (`leaveClock`, sim.js) zählt ab Zuweisung, mindestens 5 s; wer spät am Tag oder von weit draußen zugewiesen wird, ist noch beim Anfahren. Gemessen bei 3x: 5 von 19 Kurzhaltern (Handy), 2 von 13 (PC); keine Münze zum Streichen | B | `schichttest/2026-11-15-kurzhalt/` | "Längere Tage und Bootsgeschichten einbauen" (PR 319) | erledigt (PR 332) |
 | F3 | 3 | pc, tabletquer, handy | Erstes Boot wird nach 4 bis 5 s gemeldet, liegt aber erst nach 51 bis 60 s Spielzeit an der Boje (lange Anreise von außerhalb der Karte, Regel 14.11.); Regel "Erstes Boot nach wenigen Sekunden" damit verfehlt | C | - | Koordinator (Regelkonflikt) | gemeldet 15.11. |
 | F4 | 17 mit 8, 13 mit 5 | tabletquer | Die Funk-Liste rechts (Anmeldungen) liegt über den Wartebojen am rechten Kartenrand; ein wartendes Boot ist in der Übersicht nicht frei antippbar (verdeckt von `#hm-funk`) | C | `schichttest/2026-11-20-64cbe84/f4-tabletquer-funk-ueber-bojen.jpg` | Koordinator (Funk-Anmeldung) | gemeldet 20.11. |
-| F5 | 18 mit 4 | handy | Zwei Gastboote überlappen beim Anlegen (eines legt an, das andere liegt schon); bekannt aus P66 | C | `schichttest/2026-11-20-64cbe84/f5-handy-boote-uebereinander.jpg` | "Staus an Bojen und Ankerfeld auflösen" (P66) | bekannt |
+| F5 | 18 mit 4, 14 | handy, pc, tabletquer | Zwei Gastboote überlappen beim Anlegen oder Ablegen, und zwei wartende Boote teilen sich kurz eine Boje (in jeder Serie mehrfach); bekannt aus P66 | C | `schichttest/2026-11-20-64cbe84/f5-handy-boote-uebereinander.jpg` | "Staus an Bojen und Ankerfeld auflösen" (P66) | bekannt |
+| F6 | 21 mit 1 | handy | Die Funk-Anmeldung unten verdeckt die Zeitleiste (Pause und Tempo halb dahinter), und der Knopf "Einfahren" am Boot ragt am rechten Rand aus dem Bild, wenn das Boot am Rand wartet | C | `schichttest/2026-11-21-b1d5251/f6-handy-funk-ueber-zeitleiste-einfahren-rand.jpg` | Koordinator (Funk-Anmeldung, Bootskarte) | erledigt (PR 367) |
+| F7 | 20 mit 4 | handyquer | Im Winter fährt ein ablegendes Gastboot (`leaving`) durch einen Steg und über ein liegendes Boot | C | - | "Staus an Bojen und Ankerfeld auflösen" (Ausweichen) | gemeldet 21.11. |

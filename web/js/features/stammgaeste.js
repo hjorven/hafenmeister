@@ -2,7 +2,9 @@
 // Beschreibung in docs/neue-features.md, Abschnitt 4. Keine Figuren, keine Texte, nur Boote.
 //
 // - Jedes ankommende Gastboot bekommt einen Namen (boat.bootsname) und einen Heimathafen.
-// - Wer bei der Abreise mit 4 oder mehr Ankern bewertet, wird Stammgast (höchstens 40, die ältesten fallen raus).
+// - Wer bei der Abreise mit 4 oder mehr Ankern bewertet, merkt sich den Hafen (Liste, höchstens 40) und kann
+//   wiederkommen. Stammgast ist er erst, wenn er wiederkommt und wieder zufrieden abreist (ab dem 2. Besuch,
+//   STAMM.stammAbBesuch). Beim Kürzen der Liste bleiben Stammgäste vor den übrigen, sonst die zuletzt dagewesenen.
 // - Ein neues Boot ist mit 15 Prozent Wahrscheinlichkeit ein Stammgast: gleiche Art, gleiches Modell,
 //   gleicher Name, gleiche Wünsche wie beim letzten Mal. boat.stammId und boat.besuche (Nummer dieses Besuchs).
 // - Ab dem 5. Besuch kann man einen liegenden Stammgast als Dauerlieger behalten (dauerlieger.js).
@@ -135,19 +137,35 @@ export function nachtHook({ state, events }) {
       alt.besuche = snap.besuche;
       alt.zuletzt = state.day;
       if (e.rating < STAMM.abBewertung) alt.verstimmt = (alt.verstimmt || 0) + 1;
-      if (alt.verstimmt >= 2) s.liste = s.liste.filter((g) => g !== alt);   // zweimal unzufrieden: kommt nicht mehr
+      if (alt.verstimmt >= 2) { s.liste = s.liste.filter((g) => g !== alt); continue; }   // zweimal unzufrieden: kommt nicht mehr
+      // Wiedergekommen und zufrieden: jetzt ein echter Stammgast (einmal je Boot)
+      if (e.rating >= STAMM.abBewertung && !alt.stamm && alt.besuche >= stammAb()) {
+        alt.stamm = true;
+        events.push({ type: 'stammgastNeu', stammId: alt.stammId, bootsname: alt.bootsname });
+      }
       continue;
     }
     if (e.rating < STAMM.abBewertung) continue;
-    const neu = { ...snap, stammId: s.naechsteId++, besuche: 1, zuletzt: state.day };
-    s.liste.push(neu);
-    events.push({ type: 'stammgastNeu', stammId: neu.stammId, bootsname: neu.bootsname });
+    s.liste.push({ ...snap, stammId: s.naechsteId++, besuche: 1, zuletzt: state.day, stamm: false });
   }
   s.abend = {};
   if (s.liste.length > STAMM.maxListe) {
-    s.liste.sort((a, b) => b.zuletzt - a.zuletzt);
+    s.liste.sort((a, b) => istStamm(b) - istStamm(a) || b.zuletzt - a.zuletzt);
     s.liste.length = STAMM.maxListe;
   }
+}
+
+const stammAb = () => STAMM.stammAbBesuch ?? 2;
+
+/** Ist der Eintrag ein echter Stammgast (wiedergekommen)? Ältere Spielstände ohne Merker zählen nach Besuchen. */
+export function istStamm(g) {
+  return !!g && (g.stamm ?? (g.besuche ?? 1) >= stammAb());
+}
+
+/** Zahl der echten Stammgäste (Erfolge, Statistik). */
+export function stammZahl(state) {
+  const l = state?.modules?.stamm?.liste;
+  return Array.isArray(l) ? l.filter(istStamm).length : 0;
 }
 
 export function haengeEin(addHook) {

@@ -10,6 +10,8 @@
 //   --geraet pc|handy|handyquer|tablet|tabletquer   Gerät (Standard pc)
 //   --bis n         letzte Schicht (Standard: alle)
 //   --nur a,b       nur diese Schichten (Nummern), ohne die Wiederholung der früheren
+//   --wieder k      nach jeder Schicht nur den Kern (1 bis 7) und die k letzten Schichten wiederholen
+//                   (Standard: alle; ab etwa 20 Schichten dauert ein Lauf sonst über zwei Stunden)
 //   --seed s / --gelaende n / --stegbild n   Ausgangslage (werden an die Adresse gehängt)
 //   --web web       Ordner mit dem Spiel (Standard web/ im Repo); für lange Läufe eine Kopie nehmen
 //   --out dir       Ausgabeordner: bilder/, ergebnis-<gerät>.json, bericht-<gerät>.md
@@ -25,6 +27,7 @@ const argv = process.argv.slice(2);
 const opt = (name, dflt) => { const i = argv.indexOf('--' + name); return i >= 0 ? argv[i + 1] : dflt; };
 const GERAET = opt('geraet', 'pc');
 const BIS = Number(opt('bis', SCHICHTEN.length));
+const WIEDER = opt('wieder') != null ? Number(opt('wieder')) : Infinity;
 const NUR = opt('nur') ? opt('nur').split(',').map(Number) : null;
 const WEB = path.resolve(opt('web', path.join(REPO, 'web')));
 const OUT = path.resolve(opt('out', path.join(require('os').tmpdir(), 'schichttest')));
@@ -139,7 +142,9 @@ function serve(root) {
       await schicht.neu(t, zustand);
       // Alle bisherigen Schichten noch einmal (Wechselwirkungen), außer bei --nur
       if (!NUR) {
-        for (const alt of laufListe.filter((x) => x.nr < schicht.nr && x.wieder)) {
+        const frueher = laufListe.filter((x) => x.nr < schicht.nr && x.wieder);
+        const spaeter = frueher.filter((x) => x.nr > 7).slice(-WIEDER);
+        for (const alt of frueher.filter((x) => x.nr <= 7 || spaeter.includes(x))) {
           aktuell = `S${schicht.nr}/S${alt.nr}`;
           console.log(` wieder Schicht ${alt.nr}: ${alt.name}`);
           await alt.wieder(t, zustand);

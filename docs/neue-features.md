@@ -66,9 +66,9 @@ Eine echte Marina hat nicht nur Gastplätze, sondern feste Plätze mit Dauerlieg
 
 Gebaut: `web/js/features/stammgaeste.js`, Namen in `web/js/data/bootsnamen.js`, Tests in `tests/stammgaeste.test.mjs`.
 
-Jedes Gastboot hat einen Namen am Heck und einen Heimathafen (echte Häfen an Ostsee und Nordsee). Namen sind im Hafen eindeutig, die zuletzt vergebenen kommen möglichst nicht gleich wieder. Gäste, die mit 4 oder 5 Ankern bewerten, werden Stammgäste.
+Jedes Gastboot hat einen Namen am Heck und einen Heimathafen (echte Häfen an Ostsee und Nordsee). Namen sind im Hafen eindeutig, die zuletzt vergebenen kommen möglichst nicht gleich wieder. Gäste, die mit 4 oder 5 Ankern bewerten, merken sich den Hafen und können wiederkommen. Stammgast sind sie erst, wenn sie wiederkommen und wieder zufrieden abreisen (ab dem 2. Besuch, `ECONOMY.stammgaeste.stammAbBesuch`); vorher wurde fast jeder Gast sofort Stammgast, rund 1500 je Spiel (Zusammenspiel-Prüfung, 20.11.). Die Liste hält höchstens 40 Boote, echte Stammgäste bleiben beim Kürzen vor den Erstbesuchern. Logbuch und die Erfolge „Kommt gern wieder“ und „Bekannte Gesichter“ zählen nur echte Stammgäste.
 
-- Ein neues Boot ist mit 15 Prozent Wahrscheinlichkeit ein Stammgast: gleiche Art, gleiches Modell, gleicher Name und dieselben Wünsche wie beim letzten Mal, so dass man sich vorbereiten kann.
+- Ein neues Boot ist mit 15 Prozent Wahrscheinlichkeit ein Wiederkehrer von der Liste: gleiche Art, gleiches Modell, gleicher Name und dieselben Wünsche wie beim letzten Mal, so dass man sich vorbereiten kann.
 - In der Warteleiste steht „Stammgast“ am Boot, auf der Bootskarte „„Möwe“ aus Kappeln · Stammgast, 3. Besuch“.
 - Wer zweimal unzufrieden abreist, kommt nicht mehr. Die Liste hat höchstens 40 Boote, die am längsten nicht mehr da waren, fallen raus.
 - Ab dem 5. Besuch (und ab Stufe 2): den liegenden Stammgast antippen, „Als Dauerlieger behalten“. Er bleibt an seinem Platz.

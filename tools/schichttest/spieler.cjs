@@ -121,6 +121,13 @@ const HILFEN = () => {
       const cs = getComputedStyle(el);
       if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) < 0.05) continue;
       if (el.closest('[hidden], [aria-hidden="true"]')) continue;
+      // In einer rollbaren Tafel (z. B. Winterbilanz) erreicht man den Knopf durch Wischen
+      let rollbar = false;
+      for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+        const o = getComputedStyle(p).overflowY;
+        if ((o === 'auto' || o === 'scroll') && p.scrollHeight > p.clientHeight + 2) { rollbar = true; break; }
+      }
+      if (rollbar) continue;
       const ueber = Math.max(0, -r.left) + Math.max(0, r.right - innerWidth) + Math.max(0, -r.top) + Math.max(0, r.bottom - innerHeight);
       if (ueber > 3) out.push({ was: (el.id ? '#' + el.id : '.' + String(el.className).split(' ')[0]) + ' "' + (el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 30) + '"', r: [Math.round(r.left), Math.round(r.top), Math.round(r.right), Math.round(r.bottom)] });
     }

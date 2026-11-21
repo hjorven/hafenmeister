@@ -126,15 +126,16 @@ const RULES = sim.rulesFromEconomy(E);
 // Was die 3D-Ansicht im echten Spiel an Zeit kostet und die Regeln allein nicht kennen (P17,
 // docs/balancing.md "Rechnung und Spiel"). Gemessen mit dem Zeitraffer im Browser (Messung im Bot von
 // tools/zeitraffer/lauf.cjs, Ergebnis "messung" in ergebnis-<gerät>.json), Stand 15.11. nach PR 327:
-// - anfahrt: Sekunden von der Ankunft im Revier bis zur Warteboje (ohne Ansicht gilt anfahrtMax).
+// - anfahrt: Sekunden je Stufe von der Ankunft im Revier bis zur Warteboje (ohne Ansicht gilt
+//   anfahrtMax). Stand 20.11. nach P66 (PR 351, Marschfahrt auf See): Stufe 1 bis 3 rund 23 bis 31 s,
+//   Stufe 4 54 s, Stufe 5 87 s, Stufe 6 92 s.
 // - ablegen: Sekunden, die ein abreisendes Boot seine Box hält, bis es sichtbar heraus ist (ohne
 //   Ansicht wird die Box nach ausBoxMax frei).
 // --ohne-ansicht rechnet nur die Regeln.
 export const ANSICHT = {
-  anfahrt: 35,
+  anfahrt: { 1: 25, 2: 28, 3: 31, 4: 54, 5: 87, 6: 92 },
   ablegen: { 1: 35, 2: 35, 3: 35, 4: 35, 5: 35, 6: 35 },
 };
-const RULES_ANSICHT = { ...RULES, queue: { ...RULES.queue, approachMax: ANSICHT.anfahrt } };
 const SVC = erstelleRegeln(mitZahlen(SERVICES, E.services));
 const PLATZ = new Map(HAFEN.plaetze.map((p) => [p.id, p]));
 
@@ -158,12 +159,14 @@ let MIT_ANSICHT = true;
 
 export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true, beobachter = null, ansicht = MIT_ANSICHT } = {}) {
   const prof = PROFILE[profilName];
-  const regeln = ansicht ? RULES_ANSICHT : RULES;
+  // Mit Ansicht: eigene Warteschlangen-Regeln je Spiel, die Anfahrt folgt der Stufe (siehe ablegen())
+  const regeln = ansicht ? { ...RULES, queue: { ...RULES.queue, approachMax: ANSICHT.anfahrt[1] } } : RULES;
   const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: regeln });
   const state = createState({ seed, rules: regeln });
   // Wie die Ansicht im Spiel: abreisende Boote melden 'boot:noch-in-box', bis ihre Ablegezeit um ist
   const ablegen = () => {
     if (!ansicht) return;
+    ctx.rules.queue.approachMax = ANSICHT.anfahrt[state.stage] ?? ANSICHT.anfahrt[6];
     const halten = ANSICHT.ablegen[state.stage] ?? 0;
     for (const l of Object.values(state.leaving || {})) {
       if (l.off && (l.total ?? 0) + RULES.leaveMax < halten) sim.holdLeaving(state, l.boatId);
@@ -265,9 +268,61 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     return o;
   };
 
+  // Ausbau in Bauabschnitten wie im Bauen-Menü (ui/bauen.js, P18): bautage Abschnitte (höchstens drei),
+  // jeder einzeln bezahlt und am nächsten Morgen fertig; der nächste lässt sich erst dann beauftragen.
+  // Bei einem Abschnitt geht der Ausbau sofort (wie sim.advanceStage im Spiel).
+  let bau = null;   // { stufe, fertig, imBau, seit, teile }
+  const ausbauTeile = () => {
+    const a = E.stufen[state.stage - 1]?.ausbau;
+    if (!a) return null;
+    const n = Math.max(1, Math.min(3, Math.round(a.bautage ?? 1)));
+    const teile = [];
+    let rest = a.kosten;
+    for (let i = 0; i < n; i++) { const k = i === n - 1 ? rest : Math.round(a.kosten / n / 100) * 100; teile.push(k); rest -= k; }
+    return teile;
+  };
+  const stufeErreicht = () => {
+    lauf.stufeTag[state.stage] = state.day;
+    protokoll?.push(`Tag ${state.day}: Stufe ${state.stage} erreicht`);
+  };
+  // Morgens: der Abschnitt von gestern ist fertig, der letzte schließt den Ausbau ab
+  const bauMorgens = () => {
+    if (!bau?.imBau || bau.seit >= state.day) return;
+    bau.fertig++;
+    bau.imBau = false;
+    if (bau.fertig >= bau.teile.length) {
+      bau = null;
+      if (sim.advanceStage(state, ctx, { prepaid: true }).ok) stufeErreicht();
+    }
+  };
+
   const einkaufen = () => {
+    // Gekauft wird morgens (nach dem Tageswechsel): der Abschnitt von gestern ist dann fertig
+    bauMorgens();
     for (let runde = 0; runde < 12; runde++) {
       const check = sim.canAdvanceStage(state, ctx);
+      const teile = ausbauTeile();
+      const begonnen = bau && bau.stufe === state.stage;
+      if (begonnen || (teile && teile.length > 1 && check.missing.every((m) => m === 'money'))) {
+        lauf.zielTag[state.stage] ??= state.day;
+        // Baustelle läuft: heute kein Abschnitt mehr, gespart wird für den nächsten
+        const nr = begonnen ? bau.fertig + (bau.imBau ? 1 : 0) : 0;
+        const kosten = teile[Math.min(nr, teile.length - 1)];
+        if (!(begonnen && bau.imBau) && state.money >= kosten) {
+          if (!nr) lauf.sparTage[state.stage] = state.day - lauf.zielTag[state.stage];
+          sim.spend(state, kosten, 'ausbau');
+          bau = { stufe: state.stage, fertig: nr, imBau: true, seit: state.day, teile };
+          protokoll?.push(`Tag ${state.day}: Bauabschnitt ${nr + 1} von ${teile.length} für ${kosten} €`);
+          lauf.kaeufe++;
+          continue;
+        }
+        // sparen auf den nächsten Abschnitt: nur Dringendes, das wenig kostet
+        const dring = optionen().filter((o) => o.prio === 1 && o.kosten <= 0.1 * kosten && o.kosten <= state.money);
+        if (!dring.length) break;
+        const d = dring.sort((a, b) => a.kosten - b.kosten)[0];
+        kaufe(d.art, d.id, d.kosten, d.tu());
+        continue;
+      }
       const nurGeld = check.missing.length === 1 && check.missing[0] === 'money';
       if (check.ok || nurGeld) {
         lauf.zielTag[state.stage] ??= state.day;
@@ -275,8 +330,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
           lauf.sparTage[state.stage] = state.day - lauf.zielTag[state.stage];
           sim.advanceStage(state, ctx);
           lauf.kaeufe++;
-          lauf.stufeTag[state.stage] = state.day;
-          protokoll?.push(`Tag ${state.day}: Stufe ${state.stage} erreicht`);
+          stufeErreicht();
           continue;
         }
         // sparen: nur noch Dringendes, das wenig kostet

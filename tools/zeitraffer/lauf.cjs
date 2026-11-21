@@ -18,7 +18,8 @@
 //   --out dir          Ausgabeordner (Standard /tmp/zeitraffer: Bilder, ergebnis-<gerät>.json)
 //
 // Spieler ist ein einfacher Bot über game.sim (wie tools/balance.mjs "geschickt"): kassiert jede
-// Münze sofort, kauft jeden Morgen das Sinnvollste, spart auf die nächste Stufe und steigt auf.
+// Münze sofort, kauft jeden Morgen das Sinnvollste, spart auf die nächste Stufe und baut sie wie ein
+// Mensch über das Bauen-Menü aus (game.bauen, bei mehreren Bauabschnitten einer je Morgen).
 // Boote fahren selbst ein (Selbst-Einfahren nach 8 s), der Bot weist nichts zu.
 
 const fs = require('fs');
@@ -101,10 +102,8 @@ const BOT = () => {
     if (st.phase !== 'day') S.collectAll(true);
     if (st.day !== W.tag && st.phase === 'day') {
       W.tag = st.day;
-      for (let runde = 0; runde < 15; runde++) {
-        const check = S.canAdvanceStage();
-        if (check.ok) { const a = S.advanceStage(); W.kaeufe.push({ art: 'stufe', id: st.stage, ok: !!a.ok, tag: st.day }); continue; }
-        const nurGeld = check.missing?.length === 1 && check.missing[0] === 'money';
+      // Was das Spiel gerade zum Kauf anbietet (ohne den Ausbau der Stufe)
+      const optionen = () => {
         const o = [];
         for (const p of S.openJettyProjects()) o.push({ art: 'steg', id: p.id, kosten: p.cost, prio: 1, tu: () => S.buildJettyProject(p.id).ok });
         const on = st.office + 1;
@@ -117,14 +116,45 @@ const BOT = () => {
           const p = G.services.pruefe(x.id);
           if (p && p.freigeschaltet && !p.fertig && !p.umbau) o.push({ art: 'service', id: x.id, kosten: p.kosten, prio: st.stage >= r.maxStage ? 1 : 3, tu: () => !!G.services.bauen(x.id)?.ok });
         }
-        let kauf = o.filter((x) => x.kosten <= st.money);
+        return o;
+      };
+      const kaufe = (k) => { const ok = k.tu(); W.kaeufe.push({ art: k.art, id: k.id, kosten: k.kosten, ok, tag: st.day, stufe: st.stage }); return ok; };
+      // Ausbau der Stufe wie ein Mensch über das Bauen-Menü (ui/bauen.js, P18): bei mehreren
+      // Bauabschnitten jeder einzeln bezahlt, über Nacht gebaut, der nächste erst am nächsten Morgen.
+      // Der Bot kauft morgens, der Abschnitt von gestern ist dann schon fertig ('day:start').
+      const stufenEintrag = () => G.bauen?.eintraege?.().find((x) => x.key === 'hafen:stufe') ?? null;
+      for (let runde = 0; runde < 15; runde++) {
+        const check = S.canAdvanceStage();
+        const ab = G.bauen?.ausbau?.() ?? null;
+        const begonnen = !!ab && ab.n > 1 && (ab.fertig > 0 || ab.imBau);
+        const nurGeld = check.missing?.length > 0 && check.missing.every((m) => m === 'money');
+        if (begonnen || (ab && ab.n > 1 && nurGeld)) {
+          // Baustelle läuft: heute kein Abschnitt mehr, gespart wird für den nächsten
+          if (!ab.imBau && st.money >= ab.preis) {
+            const e = stufenEintrag();
+            const a = e && !e.gesperrt ? e.kaufen() : null;
+            W.kaeufe.push({ art: 'abschnitt', id: `${st.stage}:${ab.fertig + 1}/${ab.n}`, kosten: ab.preis, ok: !!a?.ok, tag: st.day, stufe: st.stage });
+            if (a?.ok) continue;
+            break;
+          }
+          const dring = optionen().filter((x) => x.prio === 1 && x.kosten <= 0.1 * ab.preis && x.kosten <= st.money).sort((a, b) => a.kosten - b.kosten);
+          if (!dring.length || !kaufe(dring[0])) break;
+          continue;
+        }
+        if (check.ok) {
+          const e = stufenEintrag();
+          const a = e && !e.gesperrt ? e.kaufen() : S.advanceStage();
+          W.kaeufe.push(ab && ab.n > 1
+            ? { art: 'abschnitt', id: `${st.stage}:1/${ab.n}`, kosten: ab.preis, ok: !!a?.ok, tag: st.day, stufe: st.stage }
+            : { art: 'stufe', id: st.stage, ok: !!a?.ok, tag: st.day });
+          if (a?.ok) continue;
+          break;
+        }
+        let kauf = optionen().filter((x) => x.kosten <= st.money);
         if (nurGeld) kauf = kauf.filter((x) => x.prio === 1 && x.kosten <= 0.1 * check.goal.cost);
         if (!kauf.length) break;
         kauf.sort((a, b) => a.prio - b.prio || a.kosten - b.kosten);
-        const k = kauf[0];
-        const ok = k.tu();
-        W.kaeufe.push({ art: k.art, id: k.id, kosten: k.kosten, ok, tag: st.day, stufe: st.stage });
-        if (!ok) break;
+        if (!kaufe(kauf[0])) break;
       }
     }
   });
