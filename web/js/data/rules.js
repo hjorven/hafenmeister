@@ -185,6 +185,13 @@ export function rulesFromEconomy(E = ECONOMY) {
   // Päckchen (P27): längsseits an ein liegendes Boot, wenn keine Box frei ist
   const pk = E.paeckchen;
   r.raft = pk ? { from: pk.abStufe ?? 2, kinds: [...(pk.platzarten || [])], fee: pk.liegegeld ?? 1, rating: pk.ruf ?? 0, maxNights: pk.naechteHoechstens ?? 1, slack: pk.laengeMehr ?? 0 } : null;
+  // Wind im Hafen (P34): Windlage der Plätze bei Starkwind, große Boote mit Rückenwind (features/wind.js)
+  const wi = E.wind;
+  r.wind = wi ? {
+    strong: wi.stark, from: wi.abStufe ?? 1, exposed: wi.unruhig ?? 0, sheltered: wi.geschuetzt ?? 0,
+    tailwind: wi.rueckenwind ?? 0, tailwindBelow: wi.rueckenwindAb ?? -0.5, headwindFrom: wi.gegenWindAb ?? 0.5,
+    sizes: [...(wi.grosse || [])], score: { ...(wi.wahl || {}) },
+  } : null;
   r.leaveMax = w.ausBoxMax ?? 0;
   r.previewCount = w.vorschau ?? 0;
 

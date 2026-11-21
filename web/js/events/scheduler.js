@@ -17,6 +17,7 @@
 // vorher angekündigt, die kleinen laufen bis kurz davor weiter und halten Abstand (minGapDays).
 import { EVENTS, DEFAULT_MODS, SCHEDULE, YEAR } from '../data/events.js';
 import { random } from '../random.js';
+import { windRichtung } from '../world/wind.js';
 
 // Jahreslauf: aus der Tagesnummer (ab 1) Jahr, Saisontag und Jahreszeit berechnen.
 export function seasonOf(day, year = YEAR) {
@@ -288,13 +289,15 @@ export function createScheduler({ seed = 1, defs = EVENTS, schedule = SCHEDULE, 
     weather(day = st.day) {
       const id = eventOn(day);
       const season = seasonOf(day || 1, year);
-      if (id) return { snow: 0, ...byId.get(id).weather, event: id, part: season.part };
-      if (season.winter) return { ...year.winterWeather, event: null, part: 'winter' };
+      // Windrichtung (P34): aus Seed und Tag, Wetterlagen über mehrere Tage, Sturm aus West bis Nordwest
+      const richtung = windRichtung(st.seed, day || 1, year.windRichtung ?? {}, id);
+      if (id) return { snow: 0, ...byId.get(id).weather, event: id, part: season.part, richtung };
+      if (season.winter) return { ...year.winterWeather, event: null, part: 'winter', richtung };
       const r = hashDay(st.seed, day);
       // Frühling und Herbst etwas windiger und trüber als der Sommer, der Herbst am windigsten (P20 G5)
       const rough = season.part === 'sommer' ? 0 : 0.15;
       const wind = year.wind?.[season.part] ?? rough;
-      return { wind: Math.min(1, 0.15 + wind + r * 0.35), fog: 0, rain: r > 0.85 ? 0.4 : 0, snow: 0, sun: 0.5 + (1 - r) * 0.5 - rough, event: null, part: season.part };
+      return { wind: Math.min(1, 0.15 + wind + r * 0.35), fog: 0, rain: r > 0.85 ? 0.4 : 0, snow: 0, sun: 0.5 + (1 - r) * 0.5 - rough, event: null, part: season.part, richtung };
     },
 
     // Wetterbericht: heute und die nächsten n Tage. Nur angekündigte Ereignisse erscheinen.

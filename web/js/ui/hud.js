@@ -231,7 +231,9 @@ export function init(game) {
           // Anlass des Boots (Bootsgeschichten, geschichten/geschichten.js)
           game.geschichten?.text(b) ? el('p', { class: 'card-geschichte' }, game.geschichten.text(b)) : null,
           // Dienst eines Service (P23: Mast legen, Radtour, Reparatur): darum bleibt das Boot länger
-          game.services?.dienstText?.(b) ? el('p', { class: 'card-geschichte card-dienst' }, game.services.dienstText(b)) : null),
+          game.services?.dienstText?.(b) ? el('p', { class: 'card-geschichte card-dienst' }, game.services.dienstText(b)) : null,
+          // Starkwind (P34): was Schild, Welle und Windlinien über den Boxen bedeuten
+          game.wind?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind' }, game.wind.kartenSatz(b)) : null),
         el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Schließen', title: 'Schließen', onclick: schliessen }, 'Schließen')),
       el('ul', { class: 'hm-fakten', 'aria-label': 'Eckdaten' },
         el('li', { class: 'groesse', title: 'Größenklasse' }, `Größe ${b.size}`),

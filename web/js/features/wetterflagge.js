@@ -19,6 +19,8 @@ export function zeichen(forecast) {
   const id = (w) => w?.event?.id ?? w?.event ?? null;
   return {
     wind: Math.max(0, Math.min(1, heute?.weather?.wind ?? heute?.wind ?? 0.2)),
+    // Richtung, aus der der Wind kommt (P34, Grad wie boat-anim: 0 = Osten, 90 = Norden)
+    richtung: Number.isFinite(heute?.weather?.richtung) ? heute.weather.richtung : 180,
     sturmMorgen: id(morgen) === 'sturm',
     regatta: id(heute) === 'regatta' || id(morgen) === 'regatta',
   };
@@ -101,13 +103,18 @@ export async function init(game) {
   }
 
   let t = 0;
+  let dreh = (stand.richtung * Math.PI) / 180 + Math.PI;
   game.onTick((dt) => {
     t += dt || 0.016;
     // Windsack: bei Flaute hängt er (fast senkrecht), bei Sturm steht er waagerecht und zittert
     const w = stand.wind;
     const winkel = -Math.PI / 2 + w * (Math.PI / 2) * 0.95;
     gelenk.rotation.z = winkel + Math.sin(t * (2 + w * 8)) * (0.03 + w * 0.08);
-    gelenk.rotation.y = 0.4 + Math.sin(t * 0.3) * 0.15;
+    // Der Sack zeigt nach Lee: lokal +x, gedreht um die Hochachse auf die Richtung, in die der Wind weht
+    const ziel = (stand.richtung * Math.PI) / 180 + Math.PI;
+    let d = ((ziel - dreh + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+    dreh += d * Math.min(1, (dt || 0.016) * 1.5);
+    gelenk.rotation.y = dreh + Math.sin(t * 0.3) * (0.15 - w * 0.08);
     sack.children.forEach((teil, i) => { teil.rotation.x = Math.sin(t * (3 + w * 10) + i) * 0.08 * w; });
     wimpel.children.forEach((f, i) => { f.rotation.x = Math.sin(t * 6 + i) * 0.3 * (0.3 + w); });
   });

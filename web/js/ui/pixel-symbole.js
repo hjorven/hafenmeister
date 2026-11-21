@@ -69,6 +69,10 @@ export const PIXEL = {
   fisch: ['............', '............', '............', '...kkkkkk..k', '..kiiiiiikkk', '.kikiiiiiiik', 'kiiiiiiiiiik', 'kccccccccck.', '.kccccccckkk', '..kkkkkkk..k', '............', '............'],
   holzboot: ['.....k......', '.....kp.....', '.....kpp....', '.....kppp...', '.....kpppp..', '.....kkkkkk.', '.....k......', 'kkkkkkkkkkkk', 'kLLLLLLLLLLk', '.kHHHHHHHHk.', '..kkkkkkkk..', 'WW.WWW.WWW.W'],
   kogge: ['.....k......', '..kkkkkkk...', '..kpRpRpk...', '..kpRpRpk...', '..kpRpRpk...', '..kkkkkkk...', '.....k......', 'kk...k....kk', 'kHkkkkkkkkHk', 'kHHHHHHHHHHk', '.kHHHHHHHHk.', 'WW.WWW.WWW.W'],
+  // Wind (P34): Windlinien für den Wetterbericht, Welle = unruhiger Platz, Schild = geschützter Platz
+  wind: ['............', '.......kk...', '......k..k..', '.........k..', '.kkkkkkkkk..', '............', 'kkkkkkkkkkk.', '..........k.', '.kkkkkk..k..', '.......kk...', '............', '............'],
+  welle: ['............', '......pp....', '....kpWWp...', '...kWWWWWk..', '..kWWkkkWWk.', '.kWWk...kWk.', '.kWk.....k..', 'kWWk........', 'kWWWkk..kkk.', '.kWWWWkkWWWk', '..kkkkkkkkk.', '............'],
+  windschutz: ['............', '..kkkkkkkk..', '.kWWWWWWWWk.', '.kWWWWWWWpk.', '.kWWWWWWppk.', '.kWpWWWppWk.', '.kWppWppWWk.', '..kWpppWWk..', '..kWWpWWWk..', '...kWWWWk...', '....kWWk....', '.....kk.....'],
   schiff: ['............', '......RR....', '......RR....', '...kkkkkkk..', '...kpBpBpk..', '.kkkkkkkkkk.', '.kpBpBpBpBk.', 'kkkkkkkkkkkk', 'kBBBBBBBBBBk', '.kBBBBBBBBk.', '..kkkkkkkk..', 'WW.WWW.WWW.W'],
 };
 
