@@ -20,6 +20,9 @@
 //   gebaeude     [{ id, art, x, y, tuer?: {x, y}, box?: [x0, y0, x1, y1] }] stehende Gebaeude (Ziele und Hindernisse)
 //   hindernisse  [{ box: [x0, y0, x1, y1] } | { kreis: [x, y, r] } | { haus: { px, py, dreh, breite, laenge } }] weitere
 //   boden(x, y)  optional { h, typ } statt punkt(); istLand(x, y) optional zusaetzlicher Filter (Tests)
+//   gebaut       optional { stege: [{ steg, bauart, punkte }], plaetze: Set } aus game.stege.gebaut(): nur diese
+//                Stegstuecke und Plaetze kommen ins Netz (ungebaute Stege und Bauplaetze betritt niemand).
+//                Ohne gebaut gelten alle Stege und Plaetze der Stufe (Testansicht ?stufe=n, Tests).
 //   netz.nodes[i]        { x, y, art }  art: land, sand, wasser, holz, schwimmsteg, kai, pier, mole, bruecke, boot
 //   netz.komp[i]         Nummer der zusammenhaengenden Flaeche
 //   netz.weg(a, b)       Liste von Knoten-Indizes von a nach b (A*, gerade gezogen), oder null
@@ -112,7 +115,7 @@ export function bodenRaster(stufe, region = 'ostsee', boden = null) {
 }
 
 // ------------------------------------------------------------------ Netz
-export function baueNetz({ hafen, stufe, region = 'ostsee', gebaeude = [], hindernisse = [], boden = null, istLand = null }) {
+export function baueNetz({ hafen, stufe, region = 'ostsee', gebaeude = [], hindernisse = [], boden = null, istLand = null, gebaut = null }) {
   stufe = stufeVon(stufe);
   const reg = regionVon(region);
   const B = bodenRaster(stufe, reg, boden);
@@ -188,8 +191,8 @@ export function baueNetz({ hafen, stufe, region = 'ostsee', gebaeude = [], hinde
     return { h: hd, d: best.d };
   };
 
-  for (const l of st?.stege ?? []) {
-    if (!l.steg) continue;   // Dienststege (Tankstelle, Seenotretter, Travellift)
+  for (const l of gebaut?.stege ?? st?.stege ?? []) {
+    if (!l.steg || !(l.punkte?.length >= 2)) continue;   // Dienststege (Tankstelle, Seenotretter, Travellift)
     const art = ['holz', 'schwimmsteg', 'kai', 'pier'].includes(l.bauart) ? l.bauart : 'holz';
     linie(l.punkte.map((p) => [p[0], p[1]]), art, l.steg);
   }
@@ -242,6 +245,7 @@ export function baueNetz({ hafen, stufe, region = 'ostsee', gebaeude = [], hinde
   // ---------------------------------------------------------------- Liegeplaetze
   const plaetzeRoh = [];
   for (const p of hafen.plaetze) {
+    if (gebaut?.plaetze && !gebaut.plaetze.has(p.id)) continue;
     const lage = p.lage[String(stufe)];
     if (!lage) continue;
     const [x, y, richtung] = lage;
