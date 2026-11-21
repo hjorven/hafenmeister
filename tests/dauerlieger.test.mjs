@@ -588,3 +588,68 @@ test('Krantage: Gekündigte gehen nicht ins Winterlager, sie verlassen den Hafen
   while (!sim.season(state, ctx).winter) sim.runDay(state, ctx);
   assert.equal(dauerState(state).plaetze[platz], undefined);
 });
+
+/** Stufe 2 mit Dauerliegern auf den genannten Plätzen; die Boote in "weg" sind auf Törn. */
+function ausbauMitDauerliegern(plaetze, weg) {
+  const rules = sim.rulesFromEconomy(ECONOMY);
+  const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules });
+  ctx.rules.queue.selfEnterAfter = null;
+  haengeEin((name, fn) => sim.addHook(ctx, name, fn));
+  const state = sim.applyTestStage(createState({ seed: 3, rules }), ctx, 2);
+  state.testmodus = false;
+  sim.tick(state, ctx, 0);
+  const boote = {};
+  for (const platz of plaetze) {
+    bewerberFuerPlatz(state, ctx, platz);
+    const r = machDauerplatz(state, ctx, platz);
+    assert.ok(r.ok, platz);
+    boote[platz] = r.boatId;
+  }
+  for (const platz of weg) aufToern(state, platz, state.day + 3);
+  state.money = 1e6; state.guests = 1e4; state.stageGuests = 1e4; state.ratings = Array(20).fill(5);
+  const r = sim.advanceStage(state, ctx);
+  assert.ok(r.ok);
+  return { ctx, state, boote, events: r.events };
+}
+
+/** Jedes Dauerboot im Hafen liegt auf seinem eigenen Dauerplatz, kein Platz ist doppelt vergeben. */
+function pruefeDauerplaetze(state) {
+  const d = dauerState(state).plaetze;
+  for (const b of Object.values(state.boats)) {
+    if (!b.dauer) continue;
+    assert.equal(d[b.berthId]?.bootId, b.id, `Dauerboot ${b.id} liegt auf ${b.berthId} ohne eigenen Dauerplatz`);
+  }
+  const ids = Object.values(d).map((p) => p.bootId);
+  assert.equal(new Set(ids).size, ids.length);
+}
+
+test('Stufenausbau: Dauerlieger wird nicht auf den Platz eines Dauerliegers gelegt, der auf Törn ist', () => {
+  // B01 fällt in Stufe 3 weg, B03 bleibt; das Boot von B03 ist auf Törn, die Box sieht frei aus
+  const { ctx, state, boote, events } = ausbauMitDauerliegern(['B01', 'B03'], ['B03']);
+  assert.ok(!ctx.berthById.B01.stages.includes(3) && ctx.berthById.B03.stages.includes(3));
+  const d = dauerState(state).plaetze;
+  assert.equal(d.B03.bootId, boote.B03, 'B03 bleibt der Platz des Boots auf Törn');
+  assert.equal(state.berths.B03, undefined, 'niemand liegt auf B03');
+  const boot = state.boats[boote.B01];
+  assert.ok(boot && boot.berthId !== 'B03');
+  const zug = events.filter((e) => e.type === 'relocated' && e.boatId === boote.B01);
+  assert.equal(zug.length, 1);
+  assert.equal(zug[0].to, boot.berthId);
+  assert.equal(state.berths[boot.berthId], boot.id);
+  pruefeDauerplaetze(state);
+  assert.ok(!events.some((e) => e.type === 'dauerAufgehoben'));
+  // Das Boot von B03 kommt wirklich zurück
+  for (let i = 0; i < 5; i++) sim.runDay(state, ctx);
+  assert.ok(!dauerState(state).plaetze.B03.boot, 'Boot von B03 ist zurück');
+  pruefeDauerplaetze(state);
+});
+
+test('Stufenausbau: zwei Dauerlieger auf Törn bekommen zwei verschiedene neue Plätze', () => {
+  const { ctx, state, boote, events } = ausbauMitDauerliegern(['B01', 'B02'], ['B01', 'B02']);
+  assert.ok(!ctx.berthById.B02.stages.includes(3));
+  assert.ok(!events.some((e) => e.type === 'dauerAufgehoben'), 'kein Dauerplatz endet, es sind genug Plätze frei');
+  const d = dauerState(state).plaetze;
+  const neu1 = Object.keys(d).find((id) => d[id].bootId === boote.B01);
+  const neu2 = Object.keys(d).find((id) => d[id].bootId === boote.B02);
+  assert.ok(neu1 && neu2 && neu1 !== neu2);
+});

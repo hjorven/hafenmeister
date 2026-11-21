@@ -40,6 +40,7 @@ function namenImHafen(state, ausser) {
   for (const b of [...Object.values(state.boats || {}), ...(state.upcoming || [])]) {
     if (b && b !== ausser && b.bootsname) n.add(b.bootsname);
   }
+  for (const b of dauerBooteWeg(state)) if (b.bootsname) n.add(b.bootsname);
   return n;
 }
 
@@ -74,8 +75,15 @@ export function freierName(state, wuerfel, ausser = null) {
   return name;
 }
 
+/** Boote von Dauerliegern, die auf Törn oder im Winterlager sind: Sie stehen nicht in state.boats. */
+function dauerBooteWeg(state) {
+  return Object.values(state.modules?.dauer?.plaetze || {}).map((p) => p.boot).filter(Boolean);
+}
+
 function anwesend(state) {
   const ids = new Set();
+  // Ein Stammgast, der als Dauerlieger geblieben ist, kommt nicht noch einmal als Gast, solange er weg ist
+  for (const b of dauerBooteWeg(state)) if (b.stammId) ids.add(b.stammId);
   for (const b of Object.values(state.boats)) if (b.stammId) ids.add(b.stammId);
   for (const b of state.upcoming || []) if (b.stammId) ids.add(b.stammId);
   return ids;

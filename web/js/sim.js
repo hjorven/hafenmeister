@@ -2715,11 +2715,12 @@ function clearVanishedBerths(state, ctx, from, events) {
   const goneSet = new Set(gone);
   const mods = modifiers(state, ctx);
   // like: der alte Platz. War er fest vergeben (Fischer, Retter), kommt nur ein Platz derselben Art in Frage.
-  const findBerth = (boat, like = null) => {
+  // ausser: Plätze, die nicht in Frage kommen (Set von Platz-Ids), zum Beispiel Dauerplätze abwesender Boote
+  const findBerth = (boat, like = null, ausser = null) => {
     const slack = (b) => b.maxLength * b.maxBeam - boat.length * boat.beam;
     const probe = { ...boat, stationed: true };
     const list = availableBerths(state, ctx)
-      .filter((b) => isFree(state, b.id) && fits(probe, b, ctx.rules, state.stage))
+      .filter((b) => isFree(state, b.id) && !ausser?.has(b.id) && fits(probe, b, ctx.rules, state.stage))
       .filter((b) => (like?.reserved ? b.reserved && b.kind === like.kind : !b.reserved))
       .sort((a, b) => slack(a) - slack(b) || String(a.id).localeCompare(String(b.id)));
     return list[0]?.id ?? null;

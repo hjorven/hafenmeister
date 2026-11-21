@@ -251,7 +251,8 @@ export function init(game) {
 
   // ---------------------------------------------------------------- Figuren
   function neueFigur({ boot = null, node, klasse = 'M', sichtbar = true, buendel = 1, typ = boot == null ? 'ort' : 'crew' }) {
-    if (agenten.length >= max) return null;
+    // Eine Figur bleibt für den Hafenmeister frei: Sein Rundgang darf bei vollem Hafen nicht ausfallen
+    if (agenten.length >= (typ === 'hafenmeister' ? max : max - 1)) return null;
     const a = {
       boot, klasse, buendel, typ, sitzt: false,
       node,                  // letzter erreichter Knoten
@@ -634,6 +635,10 @@ export function init(game) {
     let start = netz.naechster(halte[0].x, halte[0].y, netz.flaechen.festland);
     if (start == null || start < 0) start = bueroKnoten();
     if (start == null || start < 0) return false;
+    // Sind alle Figuren vergeben (voller Hafen ab Stufe 4), macht ein Spaziergänger Platz; reicht das
+    // nicht, nimmt er die für ihn frei gehaltene Figur (neueFigur). Der Rundgang fiele sonst genau
+    // dann aus, wenn die meisten Münzen offen sind.
+    platzMachen(1);
     const a = neueFigur({ node: start, typ: 'hafenmeister' });
     if (!a) return false;
     a.koerperFarbe = new THREE.Color('#2e3f5c');
@@ -715,7 +720,7 @@ export function init(game) {
     const [mn, mx] = crewFuer({ groesse, art: info.art ?? info.kind, modell: info.modell ?? info.model });
     const menschen = info.crew ?? ganz(mn, mx);
     const gaeste = Number(info.tagesgaeste ?? tagesgaesteVon(id)) || 0;
-    const b = { id, platz: platz.id, node: platz.node, klasse, menschen: menschen + gaeste, agenten: [], ablegen: false, warten: [] };
+    const b = { id, platz: platz.id, node: platz.node, klasse, crew: menschen, menschen: menschen + gaeste, agenten: [], ablegen: false, warten: [] };
     boote.set(id, b);
 
     const n = figurenFuer(menschen);
@@ -1138,6 +1143,16 @@ export function init(game) {
     if (!info) return;
     const w = wartend.get(String(info.id));
     wartend.delete(String(info.id));
+    // Von Box zu Box (Umlegen, Umzug beim Stufenausbau, Tankstopp): boat-anim meldet 'boat:cast-off', aber
+    // kein 'boat:left'. Die Crew gehört dann noch zum alten Platz; am neuen Platz beginnt sie von vorn.
+    const alt = boote.get(String(info.id));
+    const neuerPlatz = netz?.plaetze.get(w?.info?.platz ?? info.berth);
+    if (alt && neuerPlatz && (alt.ablegen || alt.platz !== neuerPlatz.id)) {
+      const crew = alt.crew;
+      bootWeg(alt.id);
+      bootAngelegt({ ...(w?.info ?? {}), ...info, platz: neuerPlatz.id, groesse: w?.info?.groesse ?? info.size, crew: w?.info?.crew ?? crew });
+      return;
+    }
     bootAngelegt({ ...(w?.info ?? {}), ...info, platz: w?.info?.platz ?? info.berth, groesse: w?.info?.groesse ?? info.size });
   });
   game.on('boot:ablegen', (info) => { const id = info?.id ?? info; wartend.delete(String(id)); bootLegtAb(id); });

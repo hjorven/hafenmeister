@@ -101,6 +101,40 @@ test('Belegte Boxen werden nicht umgebaut, ein anderes freies Paar schon', () =>
   assert.equal(bauen(state, ctx, 'umbau', a.steg).grund, 'belegt');
 });
 
+test('Dauerplatz, dessen Boot auf Törn ist, wird nicht umgebaut (Boot käme an eine Box zurück, die es nicht mehr gibt)', () => {
+  const { ctx, state } = neu();
+  const a = angebote(state, ctx).find((x) => x.art === 'umbau');
+  const p = paare(state, ctx).filter((x) => x.platz.jetty === a.steg);
+  // Der Dauerlieger der ersten Wahl ist auf Törn: Box leer, für Gäste kurz frei, aber fest gepachtet
+  const boot = { id: 'dl', stationed: true, dauer: true, status: 'away' };
+  state.modules = { dauer: { plaetze: { [a.teile[0]]: { bootId: 'dl', boot, rueckNacht: state.day + 2 } } } };
+  assert.equal(sim.berthState(state, ctx, a.teile[0]), 'frei');
+  const b = angebote(state, ctx).find((x) => x.art === 'umbau' && x.steg === a.steg);
+  assert.notEqual(b.platz, a.platz, 'ein anderes Paar wird angeboten');
+  assert.ok(!b.teile.includes(a.teile[0]));
+  // Kein anderes Paar frei: gesperrt statt Umbau der gepachteten Box
+  for (const x of p) if (x.platz.id !== a.platz) state.berths[x.teile[0].id] = 'belegt';
+  state.boats.belegt = { id: 'belegt', status: 'moored' };
+  const c = angebote(state, ctx).find((x) => x.art === 'umbau' && x.steg === a.steg);
+  assert.equal(c.gesperrt, 'alle Boxen belegt');
+  assert.equal(bauen(state, ctx, 'umbau', a.steg).grund, 'belegt');
+  assert.ok(sim.berthAvailable(state, ctx.berthById[a.teile[0]]), 'die gepachtete Box gibt es noch');
+});
+
+test('Doppelbox als Dauerplatz wird nicht zurückgebaut, auch wenn ihr Boot auf Törn ist', () => {
+  const { ctx, state } = neu();
+  const a = angebote(state, ctx).find((x) => x.art === 'umbau');
+  assert.ok(bauen(state, ctx, 'umbau', a.steg).ok);
+  for (const b of ctx.berths) {
+    if (b.jetty === a.steg && b.kind === 'box' && !b.doppel && sim.berthAvailable(state, b)) state.berths[b.id] = 'voll';
+  }
+  state.boats.voll = { id: 'voll', status: 'moored' };
+  assert.ok(angebote(state, ctx).some((x) => x.art === 'rueckbau' && x.steg === a.steg));
+  state.modules = { dauer: { plaetze: { [a.platz]: { bootId: 'dl', boot: { id: 'dl', stationed: true }, rueckNacht: state.day + 2 } } } };
+  assert.ok(!angebote(state, ctx).some((x) => x.art === 'rueckbau' && x.steg === a.steg));
+  assert.equal(bauen(state, ctx, 'rueckbau', a.steg).grund, 'unbekannt');
+});
+
 test('Belegte Doppelbox wird nicht zurückgebaut, dafür steht der nächste Umbau wieder im Menü', () => {
   const { ctx, state } = neu();
   const a = angebote(state, ctx).find((x) => x.art === 'umbau');
