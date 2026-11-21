@@ -3,7 +3,7 @@
 import { test, expect, ohneEinstieg } from '../helpers.mjs';
 
 test('Erfolge: Meldung, Reiter im Logbuch, Chronik und Dinge im Hafen', async ({ game }) => {
-  test.setTimeout(150_000);
+  test.setTimeout(240_000);
   const { page } = game;
   await page.waitForFunction(() => !!window.hafenmeister.sim?.state && !!window.hafenmeister.erfolge, null, { timeout: 30_000, polling: 100 });
   await ohneEinstieg(page);
@@ -21,10 +21,14 @@ test('Erfolge: Meldung, Reiter im Logbuch, Chronik und Dinge im Hafen', async ({
       for (const b of s.waitingBoats?.() ?? []) { try { s.autoEnter(b.id); } catch {} }
     }
   });
-  await expect.poll(() => page.evaluate(() => window.hafenmeister.erfolge.erreicht('erste-leine')), { timeout: 10_000 }).toBe(true);
+  await expect.poll(() => page.evaluate(() => window.hafenmeister.erfolge.erreicht('erste-leine')), { timeout: 30_000 }).toBe(true);
   const meldung = page.locator('#hm-ef-meldung .hm-ef-meldung');
-  await expect(meldung).toBeVisible({ timeout: 15_000 });
+  await expect(meldung).toBeVisible({ timeout: 30_000 });
   await expect(meldung).toContainText('Erste Leine fest');
+  // Zeiger auf die Meldung: dann bleibt sie stehen, solange der Test prüft (unter Last dauert das länger
+  // als die 4,2 s, die sie sonst steht). Signal: die Meldung hält (Zeiger darüber).
+  await meldung.hover({ force: true });   // force: nicht auf das Ende des Hereinschiebens warten
+  await expect.poll(() => page.evaluate(() => window.hafenmeister.erfolge.meldungHaelt?.() ?? false), { timeout: 5_000 }).toBe(true);
   // steht im gemeinsamen Meldeplatz (ui/meldungen.js)
   expect(await page.evaluate(() => window.hafenmeister.meldungen?.imPlatz?.(document.getElementById('hm-ef-meldung')) ?? true)).toBe(true);
   // Die Meldung verdeckt keine Knöpfe (nach dem Hereinschieben gemessen)

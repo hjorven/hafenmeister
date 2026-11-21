@@ -880,6 +880,28 @@
    "geraet": "pc",
    "datum": "2026-11-20",
    "quelle": "zusammenspiel/oberflaeche/pc-bauen.png"
+  },
+  {
+   "datei": "p85-pr366-handy-durchstich.jpg",
+   "pakete": [
+    "P85"
+   ],
+   "titel": "Ausbau je Küste: Durchstich zur Ostsee nur auf der Nehrung",
+   "pr": 366,
+   "geraet": "handy",
+   "datum": "2026-11-21",
+   "quelle": "kuesten-ausbau/handy-k1-durchstich.png"
+  },
+  {
+   "datei": "p85-pr366-pc-molen.jpg",
+   "pakete": [
+    "P85"
+   ],
+   "titel": "Ausbau je Küste: Molen und Wellenbrecher auf der offenen Bucht",
+   "pr": 366,
+   "geraet": "pc",
+   "datum": "2026-11-21",
+   "quelle": "kuesten-ausbau/pc-k2-molen-und-wellenbrecher.png"
   }
  ]
 }
