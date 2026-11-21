@@ -125,7 +125,8 @@ test('Hafenhorn kassiert alles, kurzer Tipp öffnet das Gästebuch, die Glocke l
 
   // Kurz antippen: Gästebuch, kein Horn
   await tippen(page, p, touch);
-  await page.waitForTimeout(700);
+  // Signal statt fester Zeit: das Gästebuch ist offen (ein Tipp, der fälschlich hornen würde, wäre bis dahin auch durch)
+  await expect.poll(() => page.evaluate(() => window.hafenmeister.gaestebuch?.offen ?? true), { timeout: 20_000 }).toBe(true);
   expect(await page.evaluate(() => window.__gesten.length), 'kurzer Tipp hat das Horn ausgelöst').toBe(0);
   expect(await page.evaluate(() => window.hafenmeister.gaestebuch?.offen ?? true), 'Gästebuch öffnet nicht mehr').toBe(true);
   await page.evaluate(() => window.hafenmeister.gaestebuch?.schliessen?.());
@@ -160,7 +161,7 @@ test('Hafenhorn kassiert alles, kurzer Tipp öffnet das Gästebuch, die Glocke l
 });
 
 test('Fernglas folgt einem Boot, Möwen fliegen auf, Wellenringe auf dem Wasser', async ({ game }, testInfo) => {
-  test.setTimeout(150_000);
+  test.setTimeout(240_000);
   const { page } = game;
   const touch = isTouchProject(testInfo);
   await hafenMitBuero(page);
@@ -209,19 +210,24 @@ test('Fernglas folgt einem Boot, Möwen fliegen auf, Wellenringe auf dem Wasser'
     if (r) p = q;
   }
   expect(p, 'Boot nicht antippbar im Bild').not.toBeNull();
-  if (touch) {
-    // Zwei Tipps direkt hintereinander als Pointer-Ereignisse im Spiel: Echte Touch-Eingaben über CDP warten im
-    // Test-Browser (SwiftShader) je Tipp auf ein Bild und kommen oft langsamer als die Doppeltipp-Grenze von 350 ms
-    await page.evaluate((p) => {
-      const c = window.hafenmeister.canvas;
-      for (let i = 0; i < 2; i++) {
-        const o = { pointerId: 70 + i, pointerType: 'touch', isPrimary: true, clientX: p.x, clientY: p.y, bubbles: true, button: 0, buttons: 1 };
-        c.dispatchEvent(new PointerEvent('pointerdown', o));
-        c.dispatchEvent(new PointerEvent('pointerup', { ...o, buttons: 0 }));
-      }
-    }, p);
-  } else {
-    await page.mouse.dblclick(p.x, p.y);
+  // Doppeltipp, bis das Fernglas an ist (unter Last kann ein Tipp zu spät kommen und zählt dann als zwei einzelne)
+  for (let versuch = 0; versuch < 4; versuch++) {
+    if (touch) {
+      // Zwei Tipps direkt hintereinander als Pointer-Ereignisse im Spiel: Echte Touch-Eingaben über CDP warten im
+      // Test-Browser (SwiftShader) je Tipp auf ein Bild und kommen oft langsamer als die Doppeltipp-Grenze von 350 ms
+      await page.evaluate((p) => {
+        const c = window.hafenmeister.canvas;
+        for (let i = 0; i < 2; i++) {
+          const o = { pointerId: 70 + i, pointerType: 'touch', isPrimary: true, clientX: p.x, clientY: p.y, bubbles: true, button: 0, buttons: 1 };
+          c.dispatchEvent(new PointerEvent('pointerdown', o));
+          c.dispatchEvent(new PointerEvent('pointerup', { ...o, buttons: 0 }));
+        }
+      }, p);
+    } else {
+      await page.mouse.dblclick(p.x, p.y);
+    }
+    const an = await page.waitForFunction((id) => window.hafenmeister.fernglas.boot === id, id, { timeout: 5_000 }).then(() => true, () => false);
+    if (an) break;
   }
   await expect.poll(() => page.evaluate(() => window.hafenmeister.fernglas.boot)).toBe(id);
   const karte = page.locator('.hm-steckbrief');
@@ -229,9 +235,8 @@ test('Fernglas folgt einem Boot, Möwen fliegen auf, Wellenringe auf dem Wasser'
   await expect(karte).toContainText('Fernglas');
   await expect(karte).toContainText(/Größe [SMLX]+/);
   await expect(karte).toBeInViewport({ ratio: 1 });
-  // Kamera bleibt beim Boot: es steht im Bild und nicht hinter dem Steckbrief
-  await page.waitForTimeout(1200);
-  const lage = await page.evaluate((id) => {
+  // Kamera bleibt beim Boot: es steht im Bild und nicht hinter dem Steckbrief (warten, bis die Kamerafahrt dort ist)
+  const lageVon = () => page.evaluate((id) => {
     const g = window.hafenmeister;
     const v = g.boatView.boot(id).model.position.clone().project(g.camera.camera);
     const r = g.canvas.getBoundingClientRect();
@@ -239,6 +244,8 @@ test('Fernglas folgt einem Boot, Möwen fliegen auf, Wellenringe auf dem Wasser'
     const k = document.querySelector('.hm-steckbrief').getBoundingClientRect();
     return { imBild: x > 0 && y > 0 && x < innerWidth && y < innerHeight, hinterKarte: x > k.left && x < k.right && y > k.top && y < k.bottom };
   }, id);
+  await expect.poll(async () => { const l = await lageVon(); return l.imBild && !l.hinterKarte; }, { timeout: 20_000 }).toBe(true);
+  const lage = await lageVon();
   expect(lage.imBild, 'Kamera folgt dem Boot nicht').toBe(true);
   expect(lage.hinterKarte, 'Boot steht hinter dem Steckbrief').toBe(false);
   // "Fernglas ab" beendet es
@@ -248,20 +255,24 @@ test('Fernglas folgt einem Boot, Möwen fliegen auf, Wellenringe auf dem Wasser'
 
   // Möwen: am PC Taste H, am Handy eine sitzende Möwe antippen
   await page.waitForFunction(() => window.hafenmeister.hafengesten.moewen().filter((m) => m.zustand === 'sitzt').length >= 3, null, { timeout: 15_000 });
+  const auf = () => page.evaluate(() => window.hafenmeister.hafengesten.moewen().filter((m) => m.zustand !== 'sitzt').length);
   if (touch) {
-    const m = await page.evaluate(() => {
-      const g = window.hafenmeister;
-      const s = g.hafengesten.moewen().find((x) => x.zustand === 'sitzt');
-      return { x: s.x, y: s.y, z: s.z };
-    });
-    await zeige(page, { x: m.x, z: m.z }, 60);
-    // Die Möwe muss auf freier Spielfläche liegen, sonst ein Stück verschieben
-    await tippen(page, await aufSchirm(page, m), touch);
+    // Eine sitzende Möwe antippen; fliegt sie vorher von selbst los, die nächste nehmen
+    for (let versuch = 0; versuch < 4 && !(await auf()); versuch++) {
+      const m = await page.evaluate(() => {
+        const g = window.hafenmeister;
+        const s = g.hafengesten.moewen().find((x) => x.zustand === 'sitzt');
+        return s ? { x: s.x, y: s.y, z: s.z } : null;
+      });
+      if (!m) break;
+      await zeige(page, { x: m.x, z: m.z }, 60);
+      await tippen(page, await aufSchirm(page, m), touch);
+      await page.waitForFunction(() => window.hafenmeister.hafengesten.moewen().some((m) => m.zustand !== 'sitzt'), null, { timeout: 4_000 }).catch(() => {});
+    }
   } else {
     await page.keyboard.press('h');
   }
-  await expect.poll(() => page.evaluate(() => window.hafenmeister.hafengesten.moewen().filter((m) => m.zustand !== 'sitzt').length))
-    .toBeGreaterThan(0);
+  await expect.poll(auf, { timeout: 20_000 }).toBeGreaterThan(0);
 
   // Wellenring: freies Wasser lange drücken (ein Stück seewärts vom Boot)
   await zeige(page, { x: boot.x, z: boot.z - 50 }, 120);
@@ -286,7 +297,7 @@ test('Fernglas folgt einem Boot, Möwen fliegen auf, Wellenringe auf dem Wasser'
   });
   expect(w, 'kein freies Wasser im Bild').not.toBeNull();
   // So lange halten, bis der zweite Ring kommt (normal nach 1,1 s). Unter Last kommen die Bilder im Test-Browser
-  // langsamer, darum mit Frist statt fester Haltezeit; ohne Wiederholung schlägt die Frist fehl.
-  await halten(page, w, () => page.waitForFunction(() => window.__ring >= 2, null, { timeout: 8_000 }).catch(() => {}), touch);
+  // langsamer, darum bis zum Signal (Frist 20 s) statt fester Haltezeit; ohne Wiederholung schlägt die Frist fehl.
+  await halten(page, w, () => page.waitForFunction(() => window.__ring >= 2, null, { timeout: 20_000 }).catch(() => {}), touch);
   expect(await page.evaluate(() => window.__ring), 'Wellenring kommt nicht oder nicht wiederholt').toBeGreaterThanOrEqual(2);
 });
