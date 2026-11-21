@@ -199,3 +199,26 @@ test('freierName: zuletzt vergebene Namen kommen nicht gleich wieder, volle List
   assert.match(n, / II$/);
   assert.ok(!BOOTSNAMEN.includes(n));
 });
+
+test('Stammgast, der als Dauerlieger geblieben und gerade auf Törn ist, kommt nicht zugleich als Gast', () => {
+  const { ctx, state } = neu(5, 3);
+  spiele(state, ctx, 30);
+  const s = stammState(state);
+  assert.ok(s.liste.length > 0);
+  const g = s.liste[0];
+  s.liste = [g];
+  for (const b of [...Object.values(state.boats), ...state.upcoming]) if (b.stammId === g.stammId) delete b.stammId;
+  // Sein Boot ist Dauerlieger und auf Törn: Es steht nur noch am Dauerplatz, nicht in state.boats
+  state.modules.dauer = state.modules.dauer || { plaetze: {} };
+  state.modules.dauer.plaetze = state.modules.dauer.plaetze || {};
+  const frei = sim.availableBerths(state, ctx).find((b) => state.berths[b.id] == null && !b.reserved).id;
+  state.modules.dauer.plaetze[frei] = { bootId: 'dl', boot: { id: 'dl', stammId: g.stammId, bootsname: g.bootsname, stationed: true, dauer: true }, rueckNacht: state.day + 1000 };
+  for (let i = 0; i < 40; i++) {
+    sim.runDay(state, ctx);
+    sim.collectAll(state, ctx, true);
+    for (const b of [...Object.values(state.boats), ...state.upcoming]) {
+      assert.notEqual(b.stammId, g.stammId, `Tag ${state.day}: ${g.bootsname} kommt als Gast, obwohl das Boot Dauerlieger auf Törn ist`);
+      if (b.id !== 'dl') assert.notEqual(b.bootsname, g.bootsname);
+    }
+  }
+});
