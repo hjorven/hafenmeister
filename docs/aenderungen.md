@@ -6,6 +6,8 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 21.11.2026
 
+- Vorbeifahrer draußen vor der Einfahrt sperren den Hafen nicht mehr: Verkeilen sich zwei von ihnen oder bleibt einer länger als 40 Sekunden stehen, macht er Platz und fährt weiter. Vorher konnten zwei solche Boote tagelang vor der Einfahrt stehen bleiben, und alle abreisenden Gäste stauten sich dahinter.
+- Eine Warteboje bleibt belegt, bis das Boot daran wirklich abgelegt hat. Vorher steuerte das nächste Boot dieselbe Boje schon an und lag kurz auf dem anderen.
 - Der Ausbau zu Stufe 3 heißt nur noch dort „Durchstich zur Ostsee“, wo wirklich eine Nehrung vor dem Hafen liegt (Nehrung, Shilshole Bay, manche Flussmündungen). Auf allen anderen Küsten liegt der Hafen schon am offenen Wasser; dort heißt er „Molen und Wellenbrecher“ und die Stufe „Hafen hinter der Mole“. Kosten und Wirkung bleiben gleich.
 - Menschen laufen nur noch über Stege, die wirklich gebaut sind. Vorher gingen Spaziergänger und Crews auch über die hellen Bauplätze noch nicht gekaufter Stege und Stegverlängerungen, vor allem in den ersten Stufen. Mit jedem gebauten Stegprojekt und jedem Ausbau kommen die neuen Stege sofort dazu.
 

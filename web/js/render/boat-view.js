@@ -124,6 +124,11 @@ export function init(game) {
         if (id.startsWith('boje-')) belegt.add(Number(id.slice(5)));
         if (id.startsWith('anker-')) anker.add(Number(id.slice(6)));
       }
+      // Wer noch sichtbar an einer Boje liegt (gerade zugewiesen, legt erst ab), belegt sie weiter:
+      // sonst steuert das naechste Boot dieselbe Boje an und liegt kurz auf ihm (Schichttest F5)
+      if (o.model?.visible !== false && (o.speed ?? 0) < 0.5) {
+        for (let i = 0; i < list.length; i++) if (Math.hypot(list[i].x - o.x, list[i].z - o.z) < o.info.length / 2 + 6) belegt.add(i);
+      }
     }
     const reserviere = (b) => { if (selbst) selbst.reserviert = b.id; return b; };
     const w = Math.max(0, Math.min(list.length - 1, nr | 0));
