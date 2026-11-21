@@ -6,6 +6,7 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 21.11.2026
 
+- Der Hinweis „Als Nächstes“ am Bauen-Knopf ist nach dem ersten Bauwerk wieder zu sehen. Er wartete hinter der Erfolgsmeldung und war abgelaufen, bevor er an die Reihe kam.
 - Nach „Winter überspringen“ liegt jedes Boot sofort dort, wo es hingehört. Vorher fuhren Boote von vor dem Winter im Frühling noch durch den Hafen, auch durch Stege und über neue Gäste in ihrer Box.
 - Vorbeifahrer draußen vor der Einfahrt sperren den Hafen nicht mehr: Verkeilen sich zwei von ihnen oder bleibt einer länger als 40 Sekunden stehen, macht er Platz und fährt weiter. Vorher konnten zwei solche Boote tagelang vor der Einfahrt stehen bleiben, und alle abreisenden Gäste stauten sich dahinter.
 - Eine Warteboje bleibt belegt, bis das Boot daran wirklich abgelegt hat. Vorher steuerte das nächste Boot dieselbe Boje schon an und lag kurz auf dem anderen.
