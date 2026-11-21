@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "21.11.2026",
-  "commit": "a1e8531"
+  "commit": "414b094"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1322,7 +1322,7 @@
    "id": "P66",
    "titel": "Boote ums Gelände herum führen",
    "inhalt": "T2, T3, T4, T8, T9 und P54: Bootswege nur über Wasser, um Stege und Land herum, kein Steckenbleiben und Zittern, Ankünfte einzeln und aus zufälligen Richtungen der offenen See, Engpass-Regel; Ausgangspunkt ist der Patch \"hafenmeister-engpass-fix\" (boat-channel.js, boat-routes.js, Tests boot-engpass, boot-routen)",
-   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280, 327, 332, 351): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende (PR 240); Wartebojen seitlich, Anfahrt von weit draußen aus verschiedenen Richtungen (PR 280); Geduld erst ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall (PR 327); erstes Boot vom Bildrand (PR 332); Anfahrt kürzer, Boote sichtbar an der Boje, Einfahrt als Einbahn gegen den Pulk (PR 351). Noch offen: Pulk und \"ineinander fest\" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht), Abnahme-Serie über alle 15 Küsten; übernimmt P54",
+   "thread": "in Arbeit (PR 180, 181, 199, 228, 240, 254, 256, 258, 262, 280, 327, 332, 351, 372): Ausweichen über freies Wasser, Fahrwasserkarte; Abendstau, Pulk am Eingang und Ablegetakt (PR 228); Vorrang für Auslaufende (PR 240); Wartebojen seitlich, Anfahrt von weit draußen aus verschiedenen Richtungen (PR 280); Geduld erst ab sichtbarer Boje, Box frei bei Abreise unterwegs, Ankerfeld seltener im Rückfall (PR 327); erstes Boot vom Bildrand (PR 332); Anfahrt kürzer, Boote sichtbar an der Boje, Einfahrt als Einbahn gegen den Pulk (PR 351); Vorbeifahrer sperren die Einfahrt nicht mehr dauerhaft, Winter-Sprung ohne Geisterboote (PR 372). Noch offen: Pulk und \"ineinander fest\" beim gleichzeitigen Ablegen (Stufe 5, Offene Bucht), Abnahme-Serie über alle 15 Küsten; übernimmt P54",
    "welle": 0,
    "prs": [
     81,
@@ -1338,7 +1338,8 @@
     280,
     327,
     332,
-    351
+    351,
+    372
    ],
    "abschnitt": "Pakete der Welle 0",
    "punkte": [
