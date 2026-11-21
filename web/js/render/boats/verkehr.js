@@ -280,6 +280,9 @@ export function init(game) {
   }
 
   // --- Ausweichen: Boot vor dem Bug? Dann anhalten, bis es weg ist (höchstens 45 s).
+  // so lange darf ein Vorbeifahrer vor dem Hafen stillstehen (Spielsekunden)
+  const STEHT_MAX = 40;
+
   function vorDemBug(b) {
     const a = b.anim;
     const ch = Math.cos(a.heading), sh = Math.sin(a.heading);
@@ -325,6 +328,18 @@ export function init(game) {
       const halt = b.wartet < 45 && vorDemBug(b);
       b.wartet = halt ? b.wartet + dt : Math.max(0, b.wartet - dt * 0.5);
       b.anim.cfg.cruise = halt ? 0 : b.v;
+      // Vorbeifahrer duerfen den Hafenverkehr nie dauerhaft sperren: Steht einer lange (zwei haben sich
+      // verkeilt, oder er steckt in der Schlange vor der Einfahrt), verschwindet er, wenn ihn niemand
+      // sieht, sonst faehrt er einmal durch. Vorher stand die ganze Abendschlange tagelang dahinter.
+      if (b.typ === 'meer') {
+        b.steht = b.anim.speed < 0.1 ? (b.steht ?? 0) + dt : 0;
+        if (b.steht > STEHT_MAX) {
+          b.steht = 0;
+          if (!game.boatAnim.imBild?.(b.anim.x, b.anim.z, b.anim.info.length)) { entferne(b); continue; }
+          b.anim.ghost = 8;
+          b.wartet = 45;
+        }
+      }
     }
     naechstes -= dt;
     if (naechstes <= 0) {
