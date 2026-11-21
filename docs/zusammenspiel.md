@@ -111,7 +111,7 @@ Hinweise zur Messung:
 
 ## Oberfläche und Geräte (Zusammenspiel 2)
 
-Stand 20.11.2026 (Nachfund F4 am selben Abend), Thread "Zusammenspiel prüfen: Oberfläche und Geräte". Geprüft auf `main` nach PR 345, im laufenden Spiel (`?stufe=3&seed=7`, Ostsee, Tag 1) auf fünf Geräten: iPhone 13 hochkant (390 x 664) und quer (750 x 342), Galaxy Tab S4 hochkant (712 x 1138) und quer, PC 1440 x 900.
+Stand 20.11.2026 (Nachfunde F4 am selben Abend, F6 am 21.11.), Thread "Zusammenspiel prüfen: Oberfläche und Geräte". Geprüft auf `main` nach PR 345, im laufenden Spiel (`?stufe=3&seed=7`, Ostsee, Tag 1) auf fünf Geräten: iPhone 13 hochkant (390 x 664) und quer (750 x 342), Galaxy Tab S4 hochkant (712 x 1138) und quer, PC 1440 x 900.
 
 ### Wie geprüft wurde
 
@@ -151,6 +151,7 @@ Server für alle Werkzeuge: `bash tools/build-pages.sh && (cd tests && node serv
 | 11 | Tagesziel-Karten trennen kurze Wörter ("Wunsch Es-sen") | Handy | Silbentrennung erst ab Wörtern mit 8 Buchstaben (`features/tagesziele.js`) |
 | 12 | Doku `ui/oberflaeche.md`: Menü-Liste ohne Tagesabschluss, Statistik, Hilfe, Einstellungen, Gästebuch, Logbuch; Tastenliste ohne G, K, N, J, T, R, V; Satz "Ziffern bleiben in der Systemschrift" (seit PR 282 falsch) | Doku | nachgezogen |
 | 13 | Nachfund aus dem Schichttest (F4, 20.11.): Die Funk-Liste rechts lag über den Wartebojen am Kartenrand, ein wartendes Boot ließ sich in der Übersicht nicht antippen | Tablet quer (alle Geräte möglich) | Liegt ein wartendes Boot unter der Liste, wird sie durchlässig: blass, Tipps gehen hindurch zum Boot, der Kopf "Funk" bleibt bedienbar. Nachgemessen: Tipp auf das Boot unter der Liste trifft jetzt das Spiel (`ui/vorschau.js`, Bild `zusammenspiel/oberflaeche/f4-tabletquer-funk-durchlaessig.png`) |
+| 14 | Nachfund aus dem Schichttest (F6, 21.11.): Am Handy hochkant (Pixel 7) lag die Funk-Anmeldung halb über der Zeitsteuerung, und der Knopf "Einfahren" ragte rechts aus dem Bild, wenn das Boot am Rand wartete | Handy hoch | Der Knopf "Einfahren" bleibt immer ganz im Bild, mindestens 8 px vom Rand; liegt das Boot ganz oben, steht er darunter (`ui/gesten.js`). Ragte er hinaus, wurde die Seite breiter, das Handy zoomte heraus und die Zeitsteuerung rutschte unter die Meldung (im Schichttest: Seite 431 x 878 statt 412 x 839, Zeit bei 809 bis 855). Zusätzlich rechnet der Meldeplatz die Zeitsteuerung auch dann mit, wenn sie hinter einer offenen Tafel links kurz versteckt ist, damit die Meldung beim Schließen nicht auf Pause und Tempo steht (`ui/meldungen.js`). Nachgemessen am Pixel 7: Knopf am rechten Rand 289 bis 404 von 412, am linken 8 bis 123; Meldung endet bei 728, Zeitsteuerung beginnt bei 736, alle vier Zeitknöpfe frei antippbar |
 
 Bewusst so gelassen (kein Fund):
 

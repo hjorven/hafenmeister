@@ -354,7 +354,15 @@ export function init(game) {
     if (!chip) return;
     const pos = chip.object.getWorldPosition(new THREE.Vector3());
     const s = toScreen(pos);
-    chip.el.style.transform = `translate(${Math.round(s.x)}px, ${Math.round(s.y)}px) translate(-50%, -150%)`;
+    // Ganz im Bild halten (Schichttest F6): Boote warten oft am Rand, der Knopf ragte dann halb hinaus.
+    // Liegt das Boot zu weit oben, steht der Knopf unter dem Boot statt darüber.
+    const w = chip.el.offsetWidth || 120, h = chip.el.offsetHeight || 44, rand = 8;
+    const W = game.camera.screenW, H = game.camera.screenH;
+    const x = Math.min(Math.max(s.x, w / 2 + rand), Math.max(w / 2 + rand, W - w / 2 - rand));
+    let y = s.y - 1.5 * h;
+    if (y < rand) y = s.y + 0.5 * h;
+    y = Math.min(Math.max(y, rand), Math.max(rand, H - h - rand));
+    chip.el.style.transform = `translate(${Math.round(x - w / 2)}px, ${Math.round(y)}px)`;
   }
   game.on('tap', (d) => { if (chip && d?.pick?.id !== chip.boot) hideChip(); });
   game.on('ui:cancel', hideChip);
