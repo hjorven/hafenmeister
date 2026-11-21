@@ -12,9 +12,9 @@ const EINBETTEN = process.argv.includes('--einbetten');
 const laeufe = fs.readdirSync(DIR).filter((f) => /^ergebnis-.*\.json$/.test(f)).map((f) => JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8')));
 if (!laeufe.length) { console.error('Keine ergebnis-*.json in ' + DIR); process.exit(1); }
 
-// Erwartung aus tools/balance.mjs (--spieler zeitraffer, Median, Stand PR 331: 5-Minuten-Tag, Saison 16 + 2,
-// docs/balancing.md "Rechnung und Spiel"): Tag, an dem die Stufe erreicht ist
-const ERWARTET = { 2: 6, 3: 18, 4: 38, 5: 60, 6: 85, ziel: 103 };
+// Erwartung aus tools/balance.mjs (--spieler zeitraffer, Median, docs/balancing.md "Rechnung und Spiel"):
+// Tag, an dem die Stufe erreicht ist. Stand PR 361 mit Bauabschnitten: Stufen 5 / 15 / 21 / 24 / 27 / 14 Tage, zusammen 105
+const ERWARTET = { 2: 6, 3: 21, 4: 42, 5: 66, 6: 93, ziel: 105 };
 const ART = {
   land: 'Boot fährt über Land (Strand, Gelände)',
   steg: 'Boot fährt durch Steg oder Kai',

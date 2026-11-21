@@ -205,6 +205,16 @@ Abweichung beim Ende: Rechnung 103, Spiel im Mittel 100,3 Tage, also 2,7 %, inne
 
 Danach Anfahrt je Stufe nach P66 (25 bis 92 s statt pauschal 35 s), gemessen auf `main` mit PR 351: zeitraffer 105 (Stufen 5 / 15 / 21 / 24 / 27 / 14, 10 % bis 90 %: 103 bis 110), geschickt 101, gemütlich 119. Die längere Anfahrt in großen Häfen kostet kaum Tage, weil die Box beim Selbst-Einfahren schon vergeben ist. Ziel rund 100 Spieltage, Abweichung für zeitraffer und geschickt höchstens 5 %. Der gemütliche Spieler braucht wie vorher länger.
 
+**Vergleich mit dem Spiel nach PR 361 und 363 (21.11.):** Der Zeitraffer-Bot baut seit PR 363 wie die Rechnung über das Bauen-Menü in Bauabschnitten. Ein ganzer Lauf auf `main` d4ae902 (PC, Küste 2, Seed 11):
+
+| | Aufstieg Stufe 2 / 3 / 4 / 5 / 6 an Tag | Ende der Region |
+|---|---|---|
+| Spiel, Küste 2 (Seed 11), mit Bauabschnitten | 7 / 18 / 43 / 67 / 95 | 104 |
+| Spiel, Küste 2 (Seed 11), vorher (64cbe84, Ausbau in einem Stück) | 6 / 16 / 40 / 62 / 89 | 100 |
+| Rechnung `--spieler zeitraffer` (60 Läufe, Median) | 6 / 21 / 42 / 66 / 93 | 105 |
+
+Das Ende liegt 1 Tag (1 %) vor der Rechnung. Stufe 2 ist im Spiel 4 Tage kürzer (11 statt 15), Stufe 3 4 Tage länger (25 statt 21), Stufe 6 5 Tage kürzer (9 statt 14); die übrigen Stufen stimmen auf 1 Tag. Die Bauabschnitte kosten im Spiel 4 Tage gegenüber dem Ausbau in einem Stück. Im Spiel sind die Winterpausen alle 18 Tage (Tag 17 bis 18, 35 bis 36, 53 bis 54, 71 bis 72, 89 bis 90) mitgezählt; die Rechnung zählt kein Kalenderende mit Winter und liegt trotzdem gleichauf.
+
 ```bash
 node tools/balance.mjs --spieler zeitraffer
 node tools/balance.mjs --ohne-ansicht
