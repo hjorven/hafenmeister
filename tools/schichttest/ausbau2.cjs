@@ -310,4 +310,4 @@ async function angeboteWieder(t, z) {
 const S23 = { nr: 23, name: 'Angebote (Services)', paket: 'P23', neu: angebote, wieder: angeboteWieder };
 
 const SCHICHTEN = [S18, S19, S20, S21, S22, S23];
-module.exports = { SCHICHTEN };
+module.exports = { SCHICHTEN, winterWeg };

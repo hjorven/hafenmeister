@@ -330,6 +330,13 @@ async function menue(t) {
       await t.hinweis('Möwen-Tipp beim Schließen', `nach "${e.text}" scheuchte das Danebentippen eine Möwe auf`, { bild: false });
       rest = rest.filter((x) => !x.includes('hm-gesten-tipp'));
     }
+    // Eine Auszeichnung (z. B. "Gastlicher Hafen") kann am Abend genau jetzt erscheinen; sie gehört nicht zum Menüeintrag
+    if (rest.some((x) => x.includes('hm-auszeichnung'))) {
+      await t.hinweis('Auszeichnung beim Schließen', `nach "${e.text}" erschien eine Auszeichnung`, { bild: false });
+      const ok = t.page.locator('#hm-auszeichnung button').first();
+      if (await ok.isVisible().catch(() => false)) await t.sp.knopf(ok);
+      rest = rest.filter((x) => !x.includes('hm-auszeichnung') && x !== '.');
+    }
     if (wirkt) await t.punkt(`"${e.text}" lässt sich wieder schließen`, rest.length === 0, rest.join(', '), { schwere: 'B' });
     if (ton !== ton2) { await auf(); await t.sp.knopf(knopf); await t.warte(300); }   // Ton zurückschalten
     if (await t.page.locator('#hm-menue').isVisible().catch(() => false)) await t.sp.knopf(t.page.locator('#btn-menu'));

@@ -144,6 +144,8 @@ function serve(root) {
       if (!NUR) {
         const frueher = laufListe.filter((x) => x.nr < schicht.nr && x.wieder);
         const spaeter = frueher.filter((x) => x.nr > 7).slice(-WIEDER);
+        // Winterbilanz deckt den ganzen Bildschirm ab; außer in der Winter-Schicht selbst erst wegtippen
+        if (schicht.nr !== 20) await require('./ausbau2.cjs').winterWeg(t);
         for (const alt of frueher.filter((x) => x.nr <= 7 || spaeter.includes(x))) {
           aktuell = `S${schicht.nr}/S${alt.nr}`;
           console.log(` wieder Schicht ${alt.nr}: ${alt.name}`);
