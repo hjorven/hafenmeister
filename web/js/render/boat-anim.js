@@ -196,6 +196,7 @@ class BoatAnimManager {
   constructor(game) {
     this.game = game;
     this.boats = new Set();
+    this.absprachen = new Map();                      // Begegnung zweier Boote: wer faehrt (vorfahrt)
     this.hindernisse = new Set();                     // fremde Schiffe (Besuchsschiffe der Services)
     this.router = null;                               // (boat, ziel) => { punkte, engstellen }, setzt boat-view.js
     this.frei = null;                                 // (x, z, r) => true, wenn dort freies Wasser ist
@@ -265,6 +266,7 @@ class BoatAnimManager {
         continue;
       }
       let y = 1, lane = 0, room = Infinity, hinderer = null, hGap = Infinity;
+      let folgtWarter = false;
       for (const o of andere) {
         if (o === b) continue;
         const hit = b.blockedBy(o);
@@ -273,9 +275,11 @@ class BoatAnimManager {
         // sonst stehen beide fuer immer und die ganze Abendschlange dahinter (Pulk Stufe 5, Offene Bucht)
         if (!(o instanceof Hindernis) && hit.gap < -0.5 * Math.min(b.info.length, o.info.length)) continue;
         // nie in ein anderes Boot hineinfahren, auch mit Vorfahrt nicht (Platz bis zum anderen Rumpf)
+        if (hit.frueh) { if (Math.abs(hit.lane) > Math.abs(lane)) lane = hit.lane; continue; }
+        if (hit.lane === 0 && o.warteSpur) folgtWarter = true;
         room = Math.min(room, hit.gap);
         if (hit.gap < hGap) { hGap = hit.gap; hinderer = o; }
-        if (o.movingTask() && o.ghost <= 0 && o.blockedBy(b) && b.priorityOver(o)) {
+        if (o.movingTask() && o.ghost <= 0 && o.blockedBy(b) && this.vorfahrt(b, o)) {
           // beide stehen sich im Weg: wer Vorfahrt hat, faehrt und weicht dabei aus, das andere wartet
           if (hit.lane && Math.abs(hit.lane) > Math.abs(lane)) lane = hit.lane;
           continue;
@@ -283,6 +287,11 @@ class BoatAnimManager {
         y = Math.min(y, hit.y);
         if (hit.lane && Math.abs(hit.lane) > Math.abs(lane)) lane = hit.lane;
       }
+      // Wer vor einer Engstelle auf Freigabe wartet (und wer hinter ihm ansteht), haelt sich rechts am
+      // Rand: die Mitte bleibt frei fuer den Konvoi, der herauskommt. Sonst stand die Schlange der
+      // Einlaufenden genau im Weg der Auslaufenden (Kueste 14, Stufe 5 und 6).
+      b.warteSpur = b.state !== 'leaving' && (b.wartetVorEngstelle || folgtWarter);
+      if (b.warteSpur) lane = Math.max(lane, b.info.beam + WARTE_SPUR_M);
       b.yieldF = y;
       b.laneWant = lane;
       b.room = room;
@@ -306,6 +315,29 @@ class BoatAnimManager {
   }
 
   /**
+   * Zwei Boote stehen sich im Weg: sie einigen sich einmal, wer faehrt und wer wartet, und bleiben
+   * dabei, bis sie aneinander vorbei sind (drei Sekunden ohne Begegnung). Ohne das wechselte die
+   * Vorfahrt mit jedem Meter Restweg, und beide zuckten voreinander hin und her oder standen.
+   * Gibt true zurueck, wenn a faehrt.
+   */
+  vorfahrt(a, o) {
+    if (!(a instanceof BoatAnim) || !(o instanceof BoatAnim)) return a.priorityOver(o);
+    const jetzt = this.game.time ?? 0;
+    const [p, q] = String(a.id) < String(o.id) ? [a, o] : [o, a];
+    const key = `${p.id}|${q.id}`;
+    // Wer hinaus will, behaelt immer Vorrang: legt einer inzwischen ab, neu einigen
+    const raus = (p.state === 'leaving' ? 1 : 0) + (q.state === 'leaving' ? 2 : 0);
+    let e = this.absprachen.get(key);
+    if (!e || jetzt > e.bis || e.raus !== raus) {
+      e = { vor: a.priorityOver(o) ? a : o, raus, bis: 0 };
+      this.absprachen.set(key, e);
+      if (this.absprachen.size > 400) for (const [k, v] of this.absprachen) if (jetzt > v.bis) this.absprachen.delete(k);
+    }
+    e.bis = jetzt + 3;
+    return e.vor === a;
+  }
+
+  /**
    * Haengt b in einem Kreis gegenseitiger Blockade fest (A wartet auf B wartet auf A)?
    * Gibt dann die Boote der Kette zurueck (b zuerst), sonst null.
    */
@@ -314,10 +346,12 @@ class BoatAnimManager {
     const kette = [b];
     // b haelt eine Engstelle frei (faehrt im Konvoi), o wartet vor genau dieser Engstelle auf die
     // Freigabe: o kommt erst, wenn b durch ist, b erst, wenn o weg ist. Das ist eine Blockade.
-    const halten = [...this.engstellen.locks.values()].some((l) => l.aktiv.has(b));
+    const halten = new Set([...this.engstellen.locks].filter(([, l]) => l.aktiv.has(b)).map(([nr]) => nr));
     for (let i = 0; i < 40 && o; i++) {         // abends stehen bis zu 30 Boote in einer Kette
       if (o === b) return kette;                      // Kreis: niemand kommt weiter
-      if (halten && o.wartetVorEngstelle) return kette.concat([o]);
+      // (nur dieselbe Engstelle: wartet o vor der naechsten, ist das eine Schlange, keine Blockade.
+      // Sonst fuhr im langen Fahrwasser der Kueste 14 ein Auslaufender durch den anderen hindurch.)
+      if (o.wartetVorEngstelle && halten.has(o.wartetVorNr)) return kette.concat([o]);
       if (o instanceof Hindernis) return null;        // fremdes Schiff faehrt weiter, warten
       if (!o.movingTask?.()) return (o.moored || o.state === 'waiting') && (b.blockedTotal ?? 0) > 30 ? kette : null;   // liegt fest im Weg
       // vorn faehrt es: Schlange. Steht es (auch ohne eigene Vorfahrt-Sperre, z. B. beim Drehen),
@@ -432,6 +466,8 @@ function manager(game) {
       // Fahrwege aus der Karte: fn(boat, ziel, opts) => { punkte, engstellen }. Neue Karte: engstellenNeu().
       setRouter: (fn) => { m.router = fn || null; },
       setFrei: (fn) => { m.frei = fn || null; },
+      // (x, z, r, tiefe) => true, wenn dort freies Wasser ist (aus der Fahrwasserkarte), oder null
+      get frei() { return m.frei; },
       setSicht: (fn) => { m.sicht = fn || null; },
       engstellenNeu: () => m.engstellen.reset(),
       // Nur fuer Tests: Boote ohne Bild um dt Sekunden weiterbewegen
@@ -547,6 +583,8 @@ function sat(A, B) {
 
 // Marschfahrt auf dem Seeweg (Vielfaches des Fahrtempos, siehe PathTask.step)
 const SEE_TEMPO = 3;
+const WARTE_SPUR_M = 2.5;          // so weit (plus Bootsbreite) haelt sich rechts, wer vor einer Engstelle wartet
+const VORAUS_S = 4;                // so viele Sekunden vor einer Begegnung beginnt das Ausweichen
 
 class PathTask {
   constructor(points, opts) { this.points = points; this.opts = opts; }
@@ -624,6 +662,7 @@ class PathTask {
       this.wartet += dt;
       if (this.wartet > (e.einfahrt ? 300 : 120)) { e.fertig = true; mgr.release(e.nr, b); b.wartetVorEngstelle = false; continue; }
       b.wartetVorEngstelle = true;
+      b.wartetVorNr = e.nr;
       // mit Abstand vor der Engstelle warten, damit der entgegenkommende Konvoi herauskommt
       const halt = Math.max(0, bis - L - vorlauf);
       max = Math.min(max, Math.sqrt(2 * b.cfg.accel * 0.8 * halt));
@@ -1635,11 +1674,15 @@ class BoatAnim {
     const L = this.info.length / 2, B = this.info.beam / 2;
     const gap = ahead - oAhead - L;
     const look = 1.5 + this.speed * 1.6 + (this.speed * this.speed) / (2 * this.cfg.accel);
-    if (gap > look) return null;
-    const clear = B + oLat + 0.5;
-    if (Math.abs(lat) > clear) return null;
     const oMoving = o.speed > 0.15 || !!o.movingTask();
     const oDir = p.h + (o.reverse ? Math.PI : 0);
+    // Vorausschauen: einem Entgegenkommer weicht das Boot schon einige Sekunden vor der Begegnung nach
+    // Steuerbord aus (noch ohne zu bremsen), statt erst kurz vor seinem Bug
+    const entgegen = oMoving && Math.cos(oDir - dir) < -0.5;
+    if (gap > look + (entgegen ? (this.speed + (o.speed ?? 0)) * VORAUS_S : 0)) return null;
+    const clear = B + oLat + 0.5;
+    if (Math.abs(lat) > clear) return null;
+    if (gap > look) return { y: 1, lane: clamp(this.lane + (clear - Math.abs(lat) + 0.3), 0, clear + 0.8), gap, frueh: true };
     if (oMoving && Math.cos(oDir - dir) > 0.4) {
       // hinterherfahren: Abstand halten
       return { y: clamp((gap - 1.2) / (1.5 + this.info.length * 0.4), 0, 1), lane: 0, gap };

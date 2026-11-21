@@ -175,8 +175,27 @@ export function init(game) {
   }
 
   // --- Paddler am Ufer: hin und her, an den Enden kurz Pause
-  function uferBoot() {
+  // Die Strecke aus data/verkehr.js liegt im Grundbild im Wasser; im Gelaende aus Seed (z. B. Offene
+  // Bucht, Stufe 2) kann ein Stueck davon Wiese sein. Darum nur das laengste Stueck nehmen, das mit
+  // etwas Abstand im Wasser liegt; ist es kuerzer als 20 Planeinheiten, gibt es keinen Paddler.
+  function uferFrei() {
     const u = uferStrecke(stufeAktiv, undefined, [...(game.landscape?.warteplaetze?.bojen ?? []).map((o) => [o.px, o.py]), ...(game.landscape?.warteplaetze?.ankerbereiche ?? []).map((o) => [o.px, o.py, o.radius])]);
+    const frei = game.boatAnim?.frei;
+    if (!u || !frei) return u;
+    let best = null, von = null;
+    for (let x = u.x0; x <= u.x1 + 0.01; x += 2) {
+      const ok = [-3, 0, 3].every((dy) => { const p = welt(x, u.y + dy); return frei(p.x, p.z, 2, 0.6); });
+      if (ok && von == null) von = x;
+      if ((!ok || x + 2 > u.x1) && von != null) {
+        const bis = ok ? x : x - 2;
+        if (!best || bis - von > best.x1 - best.x0) best = { x0: von, x1: bis, y: u.y };
+        von = null;
+      }
+    }
+    return best && best.x1 - best.x0 >= 20 ? best : null;
+  }
+  function uferBoot() {
+    const u = uferFrei();
     if (!u) return;
     const gebaut = baue(zufall(FLOTTE.ufer));
     if (!gebaut) return;
@@ -190,7 +209,7 @@ export function init(game) {
   }
 
   function pendeln(b, richtung) {
-    const u = uferStrecke(stufeAktiv, undefined, [...(game.landscape?.warteplaetze?.bojen ?? []).map((o) => [o.px, o.py]), ...(game.landscape?.warteplaetze?.ankerbereiche ?? []).map((o) => [o.px, o.py, o.radius])]);
+    const u = uferFrei();
     if (!u || !boote.has(b)) return;
     const ziel = welt(richtung > 0 ? u.x1 : u.x0, u.y + (Math.random() * 6 - 3));
     b.anim.sailTo([ziel], { stop: true }).then((ok) => {
@@ -308,7 +327,7 @@ export function init(game) {
     stufeAktiv = stufe();
     const nSee = ANZAHL.see[stufeAktiv] ?? 0;
     for (let i = 0; i < nSee; i++) seeBoot(i);
-    if (uferStrecke(stufeAktiv)) uferBoot();
+    if (uferFrei()) uferBoot();
     // Beim Start schon ein paar Boote unterwegs, verteilt auf der Bahn
     const nMeer = Math.min(3, ANZAHL.meer[stufeAktiv] ?? 3);
     for (let i = 0; i < nMeer; i++) meerBoot(0.15 + 0.7 * Math.random());
