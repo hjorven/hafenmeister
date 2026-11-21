@@ -196,6 +196,7 @@ class BoatAnimManager {
   constructor(game) {
     this.game = game;
     this.boats = new Set();
+    this.absprachen = new Map();                      // Begegnung zweier Boote: wer faehrt (vorfahrt)
     this.hindernisse = new Set();                     // fremde Schiffe (Besuchsschiffe der Services)
     this.router = null;                               // (boat, ziel) => { punkte, engstellen }, setzt boat-view.js
     this.frei = null;                                 // (x, z, r) => true, wenn dort freies Wasser ist
@@ -273,9 +274,10 @@ class BoatAnimManager {
         // sonst stehen beide fuer immer und die ganze Abendschlange dahinter (Pulk Stufe 5, Offene Bucht)
         if (!(o instanceof Hindernis) && hit.gap < -0.5 * Math.min(b.info.length, o.info.length)) continue;
         // nie in ein anderes Boot hineinfahren, auch mit Vorfahrt nicht (Platz bis zum anderen Rumpf)
+        if (hit.frueh) { if (Math.abs(hit.lane) > Math.abs(lane)) lane = hit.lane; continue; }
         room = Math.min(room, hit.gap);
         if (hit.gap < hGap) { hGap = hit.gap; hinderer = o; }
-        if (o.movingTask() && o.ghost <= 0 && o.blockedBy(b) && b.priorityOver(o)) {
+        if (o.movingTask() && o.ghost <= 0 && o.blockedBy(b) && this.vorfahrt(b, o)) {
           // beide stehen sich im Weg: wer Vorfahrt hat, faehrt und weicht dabei aus, das andere wartet
           if (hit.lane && Math.abs(hit.lane) > Math.abs(lane)) lane = hit.lane;
           continue;
@@ -303,6 +305,29 @@ class BoatAnimManager {
         b.blockedFor = 0;
       }
     }
+  }
+
+  /**
+   * Zwei Boote stehen sich im Weg: sie einigen sich einmal, wer faehrt und wer wartet, und bleiben
+   * dabei, bis sie aneinander vorbei sind (drei Sekunden ohne Begegnung). Ohne das wechselte die
+   * Vorfahrt mit jedem Meter Restweg, und beide zuckten voreinander hin und her oder standen.
+   * Gibt true zurueck, wenn a faehrt.
+   */
+  vorfahrt(a, o) {
+    if (!(a instanceof BoatAnim) || !(o instanceof BoatAnim)) return a.priorityOver(o);
+    const jetzt = this.game.time ?? 0;
+    const [p, q] = String(a.id) < String(o.id) ? [a, o] : [o, a];
+    const key = `${p.id}|${q.id}`;
+    // Wer hinaus will, behaelt immer Vorrang: legt einer inzwischen ab, neu einigen
+    const raus = (p.state === 'leaving' ? 1 : 0) + (q.state === 'leaving' ? 2 : 0);
+    let e = this.absprachen.get(key);
+    if (!e || jetzt > e.bis || e.raus !== raus) {
+      e = { vor: a.priorityOver(o) ? a : o, raus, bis: 0 };
+      this.absprachen.set(key, e);
+      if (this.absprachen.size > 400) for (const [k, v] of this.absprachen) if (jetzt > v.bis) this.absprachen.delete(k);
+    }
+    e.bis = jetzt + 3;
+    return e.vor === a;
   }
 
   /**
@@ -547,6 +572,7 @@ function sat(A, B) {
 
 // Marschfahrt auf dem Seeweg (Vielfaches des Fahrtempos, siehe PathTask.step)
 const SEE_TEMPO = 3;
+const VORAUS_S = 4;                // so viele Sekunden vor einer Begegnung beginnt das Ausweichen
 
 class PathTask {
   constructor(points, opts) { this.points = points; this.opts = opts; }
@@ -1635,11 +1661,15 @@ class BoatAnim {
     const L = this.info.length / 2, B = this.info.beam / 2;
     const gap = ahead - oAhead - L;
     const look = 1.5 + this.speed * 1.6 + (this.speed * this.speed) / (2 * this.cfg.accel);
-    if (gap > look) return null;
-    const clear = B + oLat + 0.5;
-    if (Math.abs(lat) > clear) return null;
     const oMoving = o.speed > 0.15 || !!o.movingTask();
     const oDir = p.h + (o.reverse ? Math.PI : 0);
+    // Vorausschauen: einem Entgegenkommer weicht das Boot schon einige Sekunden vor der Begegnung nach
+    // Steuerbord aus (noch ohne zu bremsen), statt erst kurz vor seinem Bug
+    const entgegen = oMoving && Math.cos(oDir - dir) < -0.5;
+    if (gap > look + (entgegen ? (this.speed + (o.speed ?? 0)) * VORAUS_S : 0)) return null;
+    const clear = B + oLat + 0.5;
+    if (Math.abs(lat) > clear) return null;
+    if (gap > look) return { y: 1, lane: clamp(this.lane + (clear - Math.abs(lat) + 0.3), 0, clear + 0.8), gap, frueh: true };
     if (oMoving && Math.cos(oDir - dir) > 0.4) {
       // hinterherfahren: Abstand halten
       return { y: clamp((gap - 1.2) / (1.5 + this.info.length * 0.4), 0, 1), lane: 0, gap };

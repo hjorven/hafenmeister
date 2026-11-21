@@ -6,6 +6,8 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 21.11.2026
 
+- Boote einigen sich bei einer Begegnung: Stehen sich zwei im Weg, legen sie einmal fest, wer fährt und wer wartet, und bleiben dabei, bis sie aneinander vorbei sind. Wer hinaus will, fährt weiter zuerst. Vorher wechselte die Vorfahrt mit jedem Meter, und beide zuckten voreinander oder blieben stecken.
+- Entgegenkommern weichen Boote schon einige Sekunden vor der Begegnung nach Steuerbord aus, statt erst kurz vor dem Bug des anderen zu bremsen.
 - Der Hinweis „Als Nächstes“ am Bauen-Knopf ist nach dem ersten Bauwerk wieder zu sehen. Er wartete hinter der Erfolgsmeldung und war abgelaufen, bevor er an die Reihe kam.
 - Nach „Winter überspringen“ liegt jedes Boot sofort dort, wo es hingehört. Vorher fuhren Boote von vor dem Winter im Frühling noch durch den Hafen, auch durch Stege und über neue Gäste in ihrer Box.
 - Vorbeifahrer draußen vor der Einfahrt sperren den Hafen nicht mehr: Verkeilen sich zwei von ihnen oder bleibt einer länger als 40 Sekunden stehen, macht er Platz und fährt weiter. Vorher konnten zwei solche Boote tagelang vor der Einfahrt stehen bleiben, und alle abreisenden Gäste stauten sich dahinter.
