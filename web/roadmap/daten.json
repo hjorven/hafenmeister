@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "21.11.2026",
-  "commit": "cf13ad5"
+  "commit": "e8de74b"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1588,18 +1588,21 @@
    "id": "P85",
    "titel": "Zusammenspiel nach Welle 0 prüfen",
    "inhalt": "Jorvens Auftrag vom 14.11.: alle Features noch da, neue Features im normalen Spiel wirklich genutzt, Welle 1 wirklich gefixt, Übersehenes finden. Drei Threads (Kernschleife und Regeln; Oberfläche und Geräte; Welt, Boote, Ereignisse), gemeinsame Datei docs/zusammenspiel.md",
-   "thread": "teilweise: Teil 1 Kernschleife und Regeln erledigt (PR 354, Funde K1 bis K5), Teil 2 Oberfläche und Geräte erledigt (PR 352), beide in docs/zusammenspiel.md; Teil 3 Welt: Ausbauten je Küste geprüft (Abschnitt \"Ausbauten je Küste\", Fund W1 Durchstich nur auf Nehrungsküsten), Rest von Teil 3 (Stegbilder, Ereignisse, Wetter, Leistung) offen",
+   "thread": "teilweise: Teil 1 Kernschleife und Regeln erledigt (PR 354, Funde K1 bis K5), Teil 2 Oberfläche und Geräte erledigt (PR 352), beide in docs/zusammenspiel.md; Teil 3 Welt: Ausbauten je Küste geprüft (Abschnitt \"Ausbauten je Küste\", Fund W1 Durchstich nur auf Nehrungsküsten, PR 366), Rest von Teil 3 (Stegbilder, Ereignisse, Wetter, Leistung) offen",
    "welle": 1,
    "prs": [
     352,
-    354
+    354,
+    366
    ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
    "status": "teilweise",
    "bilder": [
     78,
-    79
+    79,
+    80,
+    81
    ]
   },
   {
@@ -5604,9 +5607,34 @@
    "datum": "2026-11-20",
    "quelle": "zusammenspiel/oberflaeche/pc-bauen.png",
    "nr": 79
+  },
+  {
+   "datei": "p85-pr366-handy-durchstich.jpg",
+   "pakete": [
+    "P85"
+   ],
+   "titel": "Ausbau je Küste: Durchstich zur Ostsee nur auf der Nehrung",
+   "pr": 366,
+   "geraet": "handy",
+   "datum": "2026-11-21",
+   "quelle": "kuesten-ausbau/handy-k1-durchstich.png",
+   "nr": 80
+  },
+  {
+   "datei": "p85-pr366-pc-molen.jpg",
+   "pakete": [
+    "P85"
+   ],
+   "titel": "Ausbau je Küste: Molen und Wellenbrecher auf der offenen Bucht",
+   "pr": 366,
+   "geraet": "pc",
+   "datum": "2026-11-21",
+   "quelle": "kuesten-ausbau/pc-k2-molen-und-wellenbrecher.png",
+   "nr": 81
   }
  ],
  "neueBilder": [
+  81,
   79,
   77,
   76,
@@ -5614,10 +5642,17 @@
   72,
   70,
   68,
-  67,
-  65
+  67
  ],
  "merges": [
+  {
+   "datum": "2026-11-21",
+   "titel": "Roadmap-Pflege: P85 Teil 3 (PR 366) mit Bildern",
+   "pr": 370,
+   "pakete": [
+    "P85"
+   ]
+  },
   {
    "datum": "2026-11-21",
    "titel": "Arbeitsplan: Stand 21.11., Welle 0 bis 2 bis auf P66-Pulk und P85 Teil 3 fertig",
@@ -5692,14 +5727,6 @@
    "titel": "Funk-Liste wird über wartenden Booten durchlässig (Schichttest F4)",
    "pr": 358,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-20",
-   "titel": "Zusammenspiel 1: Kernschleife und Regeln im ganzen Spiel gezählt (P85)",
-   "pr": 354,
-   "pakete": [
-    "P85"
-   ]
   }
  ]
 }
