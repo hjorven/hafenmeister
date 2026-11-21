@@ -456,6 +456,8 @@ export function init(game) {
   }
   // Einfahrt zwischen den Molen (Einbahn-Abschnitt): so viele Boote je Richtung zugleich
   const EINFAHRT_KONVOI = 6;
+  // In offenem Wasser liegen die Bahnen der Ein- und der Auslaufenden so weit auseinander (Meter)
+  const BAHN_ABSTAND_M = 24;
   let einfahrtNr = -1;
   let karte = null, karteSig = '', karteAlt = true, karteHindernisse = { linien: [], rechtecke: [] };
   const flaechen = new Map();         // Groessenklasse -> { r, t, sektoren }
@@ -638,7 +640,7 @@ export function init(game) {
       const liegt = (o.moored && o.berth?.kind === 'buoy') || o.state === 'waiting';
       if (liegt) boote.push({ x: o.x, z: o.z, r: o.info.length / 2 + 1 });
     }
-    return route(k, { x: boot.x, z: boot.z }, ziel, { r, rMin, t, rechts, boote });
+    return route(k, { x: boot.x, z: boot.z }, ziel, { r, rMin, t, rechts, rechtsWeit: BAHN_ABSTAND_M / 2, boote });
   });
 
   // Fuer andere Module (Besuchsschiffe der Services, Tests): Wege und freie Punkte in Weltmetern
@@ -1796,7 +1798,7 @@ export function init(game) {
       return;
     }
     // die Spielregeln kennen nur ihre eigene Bojennummer
-    game.emit('boot:an-boje', { id: d.id, boje: e.info.boje ?? 0 });
+    game.emit('boot:an-boje', { id: d.id, boje: e.info.boje ?? 0, platz: art });
   });
 
   // --- Dauerlieger: morgens eine Runde draussen, abends zurueck an denselben Platz ----------
@@ -2100,7 +2102,7 @@ export function init(game) {
       else {
         e.anim.moorAt(b);
         // sofort an die Boje gelegt (Laden, Stufenwechsel): auch das ist "an der Boje" fuer die Spielregeln
-        if (!info.platz) game.emit('boot:an-boje', { id: info.id, boje: info.boje ?? 0 });
+        if (!info.platz) game.emit('boot:an-boje', { id: info.id, boje: info.boje ?? 0, platz: String(b.id ?? '') });
       }
     }
     for (const id of [...muenzen.keys()]) if (!boats.has(id)) entferneMuenze(id);

@@ -345,3 +345,29 @@ test('Vorbeifahrer: Bahnen und Runde auf dem Binnensee liegen in jeder Gelaendef
     }
   } finally { formSetzen(1); }
 });
+
+test('Getrennte Bahnen: in offenem Wasser liegen Hin- und Rueckweg weit auseinander, in der Durchfahrt nicht', () => {
+  // weites Becken, in der Mitte eine Mauer mit 16 m breiter Durchfahrt
+  const tiefe = (x, z) => (Math.abs(z) < 2 && Math.abs(x) > 8 ? -1 : 3);
+  const k = baueKarte({ tiefe, bereich: { x0: -80, x1: 80, z0: -100, z1: 100 }, zelle: 1, engRadius: 3 });
+  const a = { x: 0, z: -90 }, b = { x: 0, z: 90 };
+  const dicht = (weg) => { const out = []; let p = weg[0]; for (const q of weg.slice(1)) { const n = Math.ceil(Math.hypot(q.x - p.x, q.z - p.z) / 2); for (let i = 1; i <= n; i++) out.push({ x: p.x + ((q.x - p.x) * i) / n, z: p.z + ((q.z - p.z) * i) / n }); p = q; } return out; };
+  const abstand = (p, weg) => Math.min(...weg.map((q) => Math.hypot(p.x - q.x, p.z - q.z)));
+  const paar = (o) => ({ hin: route(k, a, b, o), her: route(k, b, a, o) });
+  const neu = paar({ r: 3, t: 1, rechts: 3, rechtsWeit: 12 });
+  assert.ok(neu.hin.ok && neu.her.ok, 'Weg gefunden');
+  const herD = dicht([b, ...neu.her.punkte]);
+  const offen = neu.hin.punkte.filter((p) => Math.abs(p.z) > 40 && Math.abs(p.z) < 70);
+  assert.ok(offen.length >= 2, 'Punkte in offenem Wasser');
+  for (const p of offen) assert.ok(abstand(p, herD) > 14, `offen ${abstand(p, herD).toFixed(1)} m bei z ${p.z.toFixed(0)}`);
+  // in der Durchfahrt ruecken die Bahnen zusammen, und alles bleibt befahrbar
+  for (const w of [neu.hin, neu.her]) for (const p of w.punkte) assert.ok(befahrbar(k, p.x, p.z, 2.9, 1), `Punkt ${p.x.toFixed(1)},${p.z.toFixed(1)} frei`);
+  for (const p of neu.hin.punkte.filter((q) => Math.abs(q.z) < 3)) assert.ok(Math.abs(p.x) < 6, 'in der Durchfahrt nah der Mitte');
+  // der Versatz aendert sich allmaehlich: kein Sprung quer zur Fahrt
+  let vor = a;
+  for (const p of neu.hin.punkte) { assert.ok(Math.abs(p.x - vor.x) <= Math.abs(p.z - vor.z) * 0.8 + 3.5, `kein Quersprung bei z ${p.z.toFixed(0)}`); vor = p; }
+  // ohne rechtsWeit bleibt es beim alten Versatz
+  const alt = paar({ r: 3, t: 1, rechts: 3 });
+  const altD = dicht([b, ...alt.her.punkte]);
+  for (const p of alt.hin.punkte.filter((q) => Math.abs(q.z) > 40 && Math.abs(q.z) < 70)) assert.ok(abstand(p, altD) < 8, 'ohne rechtsWeit hoechstens 6 m');
+});

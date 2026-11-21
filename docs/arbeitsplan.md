@@ -1,6 +1,6 @@
 # Arbeitsplan
 
-Stand: 21.11.2026, 23:00 UTC, abgeglichen mit `main` bei `699a7d0` (PR 388), Statusangaben am Code geprüft. Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
+Stand: 21.11.2026, 23:30 UTC, abgeglichen mit `main` bei `b2dfea0` (PR 390), Statusangaben am Code geprüft. Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
 
 **Wozu diese Datei:** [roadmap.md](roadmap.md) sagt, *was* insgesamt noch fehlt (Pakete P01 bis P82). Dieser Arbeitsplan sagt, *was jetzt gerade* läuft, welche Fehler zuerst weg müssen und welche Pakete als Nächstes starten. [plan.md](plan.md) bleibt der gültige Plan für Vision und Regeln.
 
@@ -67,7 +67,7 @@ Stand 21.11.2026, 23:00 UTC. Leitlinie: Welle 3 nach Wirkung auf die Kernschleif
 | 1 | **P34 Wind im Hafen spürbar machen** (F5, F35) | Starkwind macht Außenplätze unruhig, große Boote legen lieber gegen den Wind an: jede Zuweisung bekommt eine zweite Überlegung | - | `sim.js` (Bewertung, Anlegezeit), `economy.js`, Wetterflagge, Jahreszeiten (P20) |
 | 2 | **P32 Flottillen** (F3) | drei bis fünf Boote wollen zusammen an einen Steg: neue Entscheidung beim Zuweisen, nutzt Funk-Anmeldung (P28) | - | `sim.js` (Ankünfte, Feld `group`), Wegsuche (Konvois aus P66), `ui/vorschau.js` |
 | 3 | **P25 Stammgäste mit Wirkung und Gästepost** (F37) | Ruf am alten Platz, Gästepost im Hafenbüro: Stammgäste sind seit K2 selten und sollen etwas bringen | - | `features/stammgaeste.js`, Logbuch, Gästebuch |
-| 4 | **P88 Engstellen nach ihrer Länge regeln** (Prio B) | Reste der Welle-0-Abnahme | - | `boat-view.js`, `boat-anim.js` (Boote-Thread), danach Zeitraffer-Serie |
+| 4 | **P88 Engstellen nach ihrer Länge regeln** (Prio B), Teil 1 erledigt (PR 390) | Teil 1: Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m). Darum getrennte Bahnen in offenem Wasser statt längenabhängiger Werte. Stufe 5 über 15 Küsten: 14 gleich oder besser (Küste 14 rund 3500 auf 1300 Proben, Küste 9 1851 auf 539, Bodden 1150 auf 620). Rest: Großschiff-Vortritt, Segler der Seerunde in der Schlange, Küste 15 | - | `boat-view.js`, `boat-anim.js` (Boote-Thread), danach Zeitraffer-Stichprobe |
 | 5 | **P31 Neue Gästewünsche** (F9) | WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | 1 (`economy.js`) | Wünsche aus P19, Services (P23), Bauen-Menü |
 | 6 | **P35 Preisstufe am Hafenbüro** (F6) | günstig, normal, gehoben, eine Entscheidung je Saison | 5 (`economy.js`) | Hafenbüro, Ruf, Balancing-Messung danach |
 | 7 | **P29 Baggern** (F7) und **P36 Bojenfeld** (F10) | Ausbau mit eigener Entscheidung | 6 | Gelände (Tiefe), Liegeplätze |
@@ -209,6 +209,7 @@ Schon erledigt aus Jorvens Vorschlägen: F1, F2, F4, F8, F14, F15, F17, F18, F19
 
 | Datum | Änderung |
 |---|---|
+| 21.11.2026, 23:30 Uhr | P88 Teil 1 gemergt (PR 390): getrennte Bahnen vor der Einfahrt, 14 von 15 Küsten gleich oder besser. Rest bleibt beim Boote-Thread. |
 | 21.11.2026, 23:00 Uhr | Welle 0 bis 2 abgenommen (Serie `ae9e34f`, 30 Läufe). Reste als P88. Sperre aufgehoben, Welle 3 startet mit P34, P32, P25, P88. |
 | 21.11.2026, 15:30 Uhr | P66 und P85 erledigt, Welle 0 bis 2 gebaut; nur die Abnahme-Serie läuft noch. P66-Reste als Prio B. |
 | 21.11.2026, 01:45 Uhr | P84, P20-Rest, P85 Teil 1 und 2 erledigt; offen nur P66 Pulk beim Ablegen, P85 Teil 3 und die Welle-0-Abnahme. |
