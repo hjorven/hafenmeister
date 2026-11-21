@@ -3,6 +3,7 @@
 // steht in ECONOMY. Hier steht nur, wie aus ECONOMY die Regeln für sim.js werden, dazu ein paar
 // feste Begriffe (Ruf geht von 1 bis 5 Anker, Wunsch "strom" erfüllt der Liegeplatz).
 import { ECONOMY } from './economy.js';
+import { ausbauName } from './kuestennamen.js';
 
 // Feste Begriffe, keine Balancing-Zahlen
 const ANKER_MIN = 1;
@@ -127,7 +128,7 @@ export function rulesFromEconomy(E = ECONOMY) {
       r.regionGoal = { bigVisits: s.ziel.grossschiffBesuche, reputation: s.ziel.ruf, allBerths: !!s.ziel.allePlaetze };
     }
     if (s.ausbau) {
-      r.stageGoals[s.stufe] = { guests: s.ziel.gaeste, reputation: s.ziel.ruf, cost: s.ausbau.kosten, project: s.ausbau.id, name: s.ausbau.name, perStage: true };
+      r.stageGoals[s.stufe] = { guests: s.ziel.gaeste, reputation: s.ziel.ruf, cost: s.ausbau.kosten, project: s.ausbau.id, get name() { return ausbauName(s); }, perStage: true };
     }
   }
   r.maxStage = stages.length ? Math.max(...stages) : 1;

@@ -400,9 +400,11 @@ export const ECONOMY = {
         plaetze: ['F01'] } },
     { stufe: 2, name: 'Dorfhafen am See', ankuenfte: 18, mix: { S: 0.45, M: 0.55 },
       ziel: { gaeste: 90, ruf: 3.0 },
-      ausbau: { id: 'durchstich', name: 'Durchstich zur Ostsee', kosten: 2200, bautage: 2,
+      // nameOffen: Name auf Küsten, an denen der Hafen schon am offenen Wasser liegt (keine Nehrung am
+      // Engpass, data/kuestennamen.js). Dort baut das Projekt Molen und Wellenbrecher statt eines Durchstichs.
+      ausbau: { id: 'durchstich', name: 'Durchstich zur Ostsee', nameOffen: 'Molen und Wellenbrecher', kosten: 2200, bautage: 2,
         plaetze: ['B23', 'B24', 'B25', 'B26', 'F02'] } },
-    { stufe: 3, name: 'Durchstich zur Ostsee', ankuenfte: 25, mix: { S: 0.32, M: 0.40, L: 0.28 },
+    { stufe: 3, name: 'Durchstich zur Ostsee', nameOffen: 'Hafen hinter der Mole', ankuenfte: 25, mix: { S: 0.32, M: 0.40, L: 0.28 },
       ziel: { gaeste: 340, ruf: 3.5 },
       ausbau: { id: 'marina', name: 'Schwimmsteg D', kosten: 9000, bautage: 2,
         plaetze: ['D01', 'D02', 'D03', 'D04', 'D05', 'D06'] } },
