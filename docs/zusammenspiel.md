@@ -251,6 +251,8 @@ Gebraucht wird der Ausbau trotzdem auf jeder Küste: Er macht die Einfahrt 4 m t
 | W1 | Der Ausbau zu Stufe 3 hieß auf 13 von 15 Küsten "Durchstich zur Ostsee", obwohl dort keine Nehrung ist und er Molen und einen Wellenbrecher ins offene Wasser baut. | behoben in diesem PR: Name je Küste (siehe oben) |
 | W2 | Text der Wahl "Ausbau der Großschiffpiers": "Nur ein großer Ausbau hat Platz auf der Nehrung". Eine Nehrung gibt es auf den meisten Küsten nicht. | Text: "Platz an den Großschiffpiers" (`data/services.js`) |
 | W3 | Der Schwimmwellenbrecher vor den Stegen (ab Stufe 4, kein Kauf, kommt mit der Stufe) liegt auf Küste 13 hinter dem natürlichen Wellenbrecher von Shilshole Bay, schützt dort also doppelt. | bewusst so gelassen: kostet nichts, schadet nicht, gehört zum Bild der Marina |
-| W4 | Ob die Großschiffe auf allen Küsten ohne Uferberührung an ihre Pier kommen | siehe unten |
+| W4 | Kommen die Besuchsschiffe (Kreuzfahrtschiff, Korvette, Minenjagdboot, Traditionssegler, Ausflugsschiff, XL-Yachten) auf jeder Küste ohne Land an ihre Pier? `tools/grossschiffe/pruefen.cjs --kuesten 1-15 --seeds 1,3`: **0 Funde**, kein Rumpfpunkt auf Land, alle 7 Schiffe auf allen 30 Läufen. Hinweise bleiben nur beim Verholen mit Schleppern: Das Kreuzfahrtschiff streift achteraus die eigene Pier P oder die Liegewanne (Küste 11, 12, 14, 15 je Seed 3), auf Küste 15 Seed 3 kreuzen Korvette und Minenjagdboot die Wanne des Kreuzfahrtschiffs. | an den Großschiff-Thread (P84-Rest, wie schon dort notiert); Pier und Schiffe haben auf jeder Küste ihre Wirkung |
 
 Kein Bau ist auf einer Küste ohne Wirkung. Gestrichen oder ausgeblendet wurde nichts.
+
+Noch offen aus Teil 3 (Welt, Boote, Ereignisse): jede Kombination aus Küste und Stegbild, jedes Ereignis einmal ausgelöst, Bildrate je Wetter am Handy.
