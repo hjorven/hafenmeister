@@ -1357,6 +1357,7 @@ export function init(game) {
     if (bojenStufe !== stufe()) baueBojen();
     const e = erzeuge(info);
     const ziel = warteplatz(info.boje ?? 0, e.anim);
+    e.ziel = ziel;
     // Erstes Boot eines neuen Spiels (Jorven: nach wenigen Sekunden da): startet kurz vor dem Bildrand
     // statt weit draussen am Seezugang. Alle anderen reisen von weit draussen an.
     const st = game.sim?.state;
@@ -2081,6 +2082,18 @@ export function init(game) {
       if (sprung && !e.draussen && e.anim.state !== 'idle' && e.anim.state !== 'moored') e.anim.cancel();
       else if (e.anim.state !== 'idle' && e.anim.state !== 'moored') continue;   // faehrt gerade
       if (e.draussen) continue;                                          // Dauerlieger auf Runde
+      // In der Anfahrt von See (Warten auf die Einfahrt, Seeweg) steht der Zustand noch auf 'idle':
+      // Beim Stufenaufstieg faehrt das Boot weiter, statt an die Boje zu springen. Liegt die Boje
+      // jetzt woanders, bekommt es den neuen Kurs. Laden und Wintersprung setzen weiter hart.
+      if (!laden && !sprung && !e.anim.moored && e.anim.state === 'idle' && (e.anim.task || e.anim.tasks?.length)) {
+        const neu = info.platz ? null : warteplatz(info.boje ?? 0, e.anim);
+        if (neu && e.ziel && Number.isFinite(neu.x) && Number.isFinite(e.ziel.x)
+          && Math.hypot(neu.x - e.ziel.x, neu.z - e.ziel.z) > 1.5) {
+          e.ziel = neu;
+          e.anim.dock(neu, { route: true, einfahrt: true });
+        }
+        continue;
+      }
       const b = info.platz ? platzBerth(info.platz, e.anim.info) : warteplatz(info.boje ?? 0, e.anim);
       if (!b) continue;
       // Stufenausbau (nicht Laden): liegt das Boot sichtbar woanders, faehrt es hin statt zu springen
@@ -2088,6 +2101,8 @@ export function init(game) {
       if (!laden && weit && e.anim.model.visible !== false && (e.anim.moored || e.anim.state === 'moored')) e.anim.dock(b, { route: true });
       else {
         e.anim.moorAt(b);
+        // moorAt bricht die Anfahrt ab, 'boat:moored' kommt dann nicht mehr: Antippen hier zurückgeben
+        if (e.pick) { e.anim.model.userData.pick = e.pick; e.pick = null; }
         // sofort an die Boje gelegt (Laden, Stufenwechsel): auch das ist "an der Boje" fuer die Spielregeln
         if (!info.platz) game.emit('boot:an-boje', { id: info.id, boje: info.boje ?? 0 });
       }
