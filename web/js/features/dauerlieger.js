@@ -600,19 +600,47 @@ export function nachtHook({ state, ctx, events }) {
  * Liegt das Boot im Hafen, haben die Regeln es schon umgelegt (moves); ist es auf Törn, bekommt es
  * hier einen neuen freien Platz, an den es zurückkommt. Gibt es keinen, endet der Dauerplatz.
  */
-export function stufenHook({ state, gone, moves, findBerth, events }) {
+export function stufenHook({ state, ctx, gone, moves, findBerth, events }) {
   const d = dauerState(state);
+  // Erst alle wegfallenden Dauerplätze austragen, dann neu vergeben. Ein Dauerplatz, dessen Boot auf Törn
+  // oder im Winterlager ist, sieht für die Regeln wie eine freie Box aus: Darum kommt hier nie ein Platz
+  // in Frage, der schon Dauerplatz ist (auch nicht einer, der in dieser Schleife gerade vergeben wurde).
+  const alte = [];
   for (const alt of gone) {
-    const p = d.plaetze[alt];
-    if (!p) continue;
+    if (!d.plaetze[alt]) continue;
+    alte.push([alt, d.plaetze[alt]]);
     delete d.plaetze[alt];
+  }
+  const vergeben = () => new Set(Object.keys(d.plaetze));
+  const aufgehoben = (p, alt) => events.push({ type: 'dauerAufgehoben', boatId: p.bootId, berthId: alt, grund: 'umbau' });
+  for (const [alt, p] of alte) {
     const umzug = moves.find((m) => m.from === alt && m.boatId === p.bootId);
-    const neu = umzug?.to ?? (p.boot ? findBerth(p.boot) : null);
+    let neu = umzug?.to ?? null;
+    if (umzug && d.plaetze[neu]) {
+      // Die Regeln haben das liegende Boot auf den Platz eines abwesenden Dauerliegers gelegt: weiterlegen
+      const boot = state.boats[p.bootId];
+      const frei = boot ? findBerth(boot, null, vergeben()) : null;
+      if (boot && frei) {
+        delete state.berths[neu];
+        state.berths[frei] = boot.id;
+        boot.berthId = frei;
+        const gemeldet = events.find((e) => e.type === 'relocated' && e.boatId === boot.id && e.to === neu);
+        if (gemeldet) gemeldet.to = frei;
+        umzug.to = frei;
+        neu = frei;
+      } else {
+        // Wirklich kein Platz: Das Boot fährt ab, damit keines ohne Vertrag auf fremdem Dauerplatz liegt
+        if (boot) events.push(...sim.unstationBoat(state, ctx, boot.id).events.map((e) => ({ ...e, reason: 'rebuild' })));
+        neu = null;
+      }
+    } else if (!umzug) {
+      neu = p.boot ? findBerth(p.boot, null, vergeben()) : null;
+    }
     if (neu && !d.plaetze[neu]) {
       d.plaetze[neu] = p;
       events.push({ type: 'dauerUmzug', boatId: p.bootId, from: alt, berthId: neu });
     } else {
-      events.push({ type: 'dauerAufgehoben', boatId: p.bootId, berthId: alt, grund: 'umbau' });
+      aufgehoben(p, alt);
     }
   }
 }
