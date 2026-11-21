@@ -6,6 +6,7 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 21.11.2026
 
+- Auf manchen Küsten (vor allem Schären und Steilküste) lag bei einigen Steganordnungen Fels oder flaches Wasser direkt vor Boxen am Ende von Steg A und am Kopf von Steg B. Dort ist jetzt immer genug Wasser zum Ein- und Ausparken.
 - Der Ausbau zu Stufe 3 heißt nur noch dort „Durchstich zur Ostsee“, wo wirklich eine Nehrung vor dem Hafen liegt (Nehrung, Shilshole Bay, manche Flussmündungen). Auf allen anderen Küsten liegt der Hafen schon am offenen Wasser; dort heißt er „Molen und Wellenbrecher“ und die Stufe „Hafen hinter der Mole“. Kosten und Wirkung bleiben gleich.
 - Menschen laufen nur noch über Stege, die wirklich gebaut sind. Vorher gingen Spaziergänger und Crews auch über die hellen Bauplätze noch nicht gekaufter Stege und Stegverlängerungen, vor allem in den ersten Stufen. Mit jedem gebauten Stegprojekt und jedem Ausbau kommen die neuen Stege sofort dazu.
 

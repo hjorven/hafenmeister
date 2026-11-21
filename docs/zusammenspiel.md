@@ -257,3 +257,94 @@ Gebraucht wird der Ausbau trotzdem auf jeder Küste: Er macht die Einfahrt 4 m t
 Kein Bau ist auf einer Küste ohne Wirkung. Gestrichen oder ausgeblendet wurde nichts.
 
 Noch offen aus Teil 3 (Welt, Boote, Ereignisse): jede Kombination aus Küste und Stegbild, jedes Ereignis einmal ausgelöst, Bildrate je Wetter am Handy.
+
+---
+
+## Stegbilder, Ereignisse und Bildrate (Zusammenspiel 3, Teil 2)
+
+Stand 21.11.2026, Thread "Unnötige Ausbauten je Küste finden", Auftrag des Koordinators: Rest von Teil 3 (Stegbilder je Küste, Ereignisse, Bildrate je Wetter). An `sim.js` wurde nichts geändert.
+
+### Stegbilder je Küste
+
+Jedes neue Spiel würfelt Küste, Seed und Stegbild unabhängig voneinander. Geprüft wurde jede Kombination aus den 12 Stegbildern, den 15 Küsten und den Seeds 1 bis 7 (1260 Fälle), mit den Regeln des Stegbild-Generators (keine Überlappung, Gasse vor jeder Box 1,5 Bootslängen frei, Platz mindestens 0,5 m tief, freie Einfahrt vom offenen Wasser) und der Liegeplatzprüfung (liegendes Boot frei von Land, Steg und Nachbarn), in jeder Stufe 1 bis 6.
+
+```bash
+for f in $(seq 1 15); do for s in 1 2 3 4 5 6 7; do node tools/zusammenspiel/stegbilder-kuesten.mjs --form $f --seed $s; done; done
+```
+
+| | vorher | nachher |
+|---|---|---|
+| Fälle mit Fund | 55 von 1260 | 0 von 1260 |
+| betroffene Küsten | 1, 2, 3, 4, 5 Schären (18 von 84), 6 Steilküste (15 von 84), 7, 9 | keine |
+| betroffene Stegbilder | 1, 5, 11, auf den Schären auch 4 und 8 | keine |
+| Art | Land oder Flachwasser in der Gasse vor A09 bis A11 und A15 bis A18 (Westende von Steg A) und B13 bis B15 (Kopf von Steg B); auf den Schären mit Stegbild 11 kam ein S-Boot gar nicht bis vor A15, A17, A18 | |
+
+Das Grundbild (Stegbild 0) hat auf jeder Küste dieselben 67 Gassen-Hinweise an Steg C ab Stufe 3; es wird nur in Tests und alten Spielständen benutzt, ist älter als die Generator-Regeln und hat sich durch den Fix nicht verändert.
+
+**Fund S1, behoben:** Das Pflicht-Wasser, das jede Küste vor den Stegen freihalten muss (`BEDARF.wasser` in `render/landschaft/natur.js`), reichte nur von x -152 bis -16. Die Boxen am Westende von Steg A und am Kopf von Steg B liegen bei einigen Stegbildern so, dass ihre Gasse darüber hinausreicht; wo die Küste dort Felsen oder einen Hang hatte, musste ein Boot beim Ausparken über Land. Jetzt reicht das Pflicht-Wasser von x -172 bis -2, dazu eine Zufahrt um den Kopf von Steg A (x -172 bis -100, y 100 bis 150). Gegenproben: `node tools/seeds-pruefen.mjs` (750 Seeds, 0 durchgefallen), `node tools/liegeplaetze/pruefen.mjs` (0 Funde), `node tools/stegbilder/erzeugen.mjs --pruefen`, Großschiffwege (siehe unten), `tests/gelaendeform.test.mjs`, `tests/gelaende-vielfalt.test.mjs`, `tests/landschaft.test.mjs`.
+
+### Ereignisse
+
+**Im normalen Spiel:** Der Ereignisplan (`events/scheduler.js`) wurde für 200 Spielstände über 110 Spieltage gerechnet, mit dem Aufstieg eines echten Spiels aus Zusammenspiel 1 (Stufe 2 ab Tag 6, 3 ab 22, 4 ab 45, 5 ab 69, 6 ab 100) und einer Räucherei ab Tag 10 und einem Segelclub ab Tag 30. Jedes Ereignis kommt in jedem der 200 Spiele vor.
+
+```bash
+node tools/zusammenspiel/ereignisse.mjs --spiele 200
+```
+
+| Ereignis | in Spielen (von 200) | je Spiel im Mittel | erstes Mal (Median Tag) |
+|---|---|---|---|
+| nebel | 200 | 7.3 | 9 |
+| sommertag | 200 | 5.2 | 6 |
+| sturm | 200 | 4.4 | 29 |
+| regatta | 200 | 7.6 | 32 |
+| hafenfest | 200 | 1.8 | 63 |
+| mittsommer | 200 | 5.7 | 7 |
+| heringstage | 200 | 5.0 | 21 |
+| holzboote | 200 | 3.2 | 41 |
+| hansewoche | 200 | 2.0 | 83 |
+
+Spät kommen nur die Ereignisse, die eine Stufe oder einen Bau brauchen: Regatta (Segelclub) um Tag 32, Holzboot-Treffen (Stufe 3) um Tag 41, Hafenfest (Stufe 4) um Tag 63 und die Hanse-Woche (Stufe 5) um Tag 83, im Mittel zweimal je Spiel.
+
+**Im laufenden Spiel:** Jedes Ereignis wurde einmal angekündigt, vorbereitet (wo eine Karte kommt) und gestartet, Stufe 6 mit allen Services auf Küste 2, am PC (`node tools/zusammenspiel/ereignisse-im-spiel.cjs <ordner> pc 2`).
+
+| Ereignis | Karte am Vortag | Vorbereitet mit | Wirkung auf die Regeln am Tag (Auszug) | Fehler |
+|---|---|---|---|---|
+| Nebel | keine | - | 0,7-mal so viele Ankünfte | 0 |
+| Sommertag | keine | - | 1,25-mal Ankünfte, doppelt so viele S-Boote, 1,5-mal Besucher | 0 |
+| Sturm | "Morgen Sturm" | Sturmklar machen | keine Ankünfte von See, offene Plätze -0,2 Anker (mit Seenotretter Stufe 2 statt -1) | 0 |
+| Regatta | "Morgen Regatta" | Plätze freihalten | 1,6-mal Ankünfte, dreimal Jollen und Segelyachten, Bewertung +0,25 | 0 |
+| Hafenfest | keine | - | 1,3-mal Ankünfte, sechsmal Traditionssegler, dreimal Besucher | 0 |
+| Mittsommer | "Morgen: Mittsommer" (Grillplatz, Eisdiele) | Hinweis | 1,6-mal Besucher, eine Nacht länger | 0 |
+| Heringstage | "Morgen: Heringstage" (Räucherei, Fischhalle) | Hinweis | 1,5-mal Besucher, doppelt so viele Fischkutter | 0 |
+| Holzboot-Treffen | "Morgen: Holzboot-Treffen" | Hinweis | fünfmal Holzboote, dreimal Traditionssegler | 0 |
+| Hanse-Woche | "Morgen: Hanse-Woche" (zwei Tage vorher: Plätze freihalten) | Hinweis | 1,5-mal Ankünfte, sechsmal Traditionssegler, Bewertung +0,3 | 0 |
+
+Jedes Ereignis steht während des Tages in der linken Spalte und ändert die Regeln. Die Ereignisse hängen nicht von der Küste ab (keine Regel fragt nach der Landschaft), darum genügt eine Küste.
+
+![Alle neun Ereignisse im laufenden Spiel, PC, Stufe 6, Küste 2](zusammenspiel/ereignisse-laeuft-pc.jpg)
+
+### Bildrate je Wetter und Tageszeit
+
+Handy hochkant (iPhone 13), Küste 2, Wetter direkt gesetzt, 6 s bei Tempo 1 gezählt (`node tools/zusammenspiel/bildrate.cjs handy 6 2`). Im Container rechnet die Grafik in Software (SwiftShader); die Zahlen sagen wenig über ein echtes iPhone, der Vergleich zwischen den Lagen schon.
+
+| Lage | Stufe 2 | Stufe 6, alle Services |
+|---|---|---|
+| klar, Mittag | 17,1 | 9,9 |
+| Regen | 16,1 | 10,0 |
+| Nebel | 17,4 | 9,9 |
+| Sturm | 16,6 | 9,9 |
+| Schnee (Winter) | 16,8 | 9,5 |
+| Abend | 16,6 | 9,6 |
+| Nacht | 17,6 | 8,5 |
+
+Kein Wetter kostet merklich Bildrate (höchstens 6 % weniger als klar). Die Nacht in Stufe 6 kostet rund 14 % (Lichter von Stegen, Molenfeuern und Gebäuden); was Bildrate kostet, ist die Größe des Hafens, nicht das Wetter. Kein Fund.
+
+### Funde Teil 2
+
+| Nr | Fund | Was passiert ist |
+|---|---|---|
+| S1 | Land oder Flachwasser in der Gasse vor Boxen an Steg A und B auf 55 von 1260 Kombinationen aus Küste, Seed und Stegbild | behoben (Pflicht-Wasser breiter, siehe oben) |
+| E1 | Ereignisse: alle neun kommen in jedem Spiel vor, Karten und Vorbereitung funktionieren, keine Fehler | kein Fund |
+| B1 | Bildrate: kein Wetter kostet merklich; Nacht in Stufe 6 rund 14 % | kein Fund |
+
+Damit ist P85 Teil 3 vollständig.
