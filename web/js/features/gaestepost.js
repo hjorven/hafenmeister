@@ -93,7 +93,7 @@ function freundesName(state, k) {
 
 /** Hook 'arrival': am angekündigten Tag wird das erste passende Boot zum angekündigten Stammgast. */
 export function ankunftHook({ state, ctx, boat }) {
-  if (!POST || boat.stationed || boat.stammId != null || boat.special || boat.freundVon) return;
+  if (!POST || boat.stationed || boat.stammId != null || boat.special || boat.freundVon || boat.flotte) return;
   const p = state.modules?.post;
   if (!p?.karten?.length) return;
   const s = stammState(state);

@@ -90,6 +90,15 @@ Liegegeld je angefangenem Meter Bootslänge (B10); der Grundpreis ist der Schnit
 
 Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab der Stufe mit nebenkosten: 10 % auf jedes kassierte Liegegeld. Von Hand eingewiesen: +0,25 Anker. Sonderfälle fahren nach 25 s selbst ein.
 
+## Flottillen
+
+| Was | Wert |
+|---|---|
+| ab Hafenstufe | 3 |
+| Tage mit Flottille | Stufe 3: 15 %, Stufe 4: 20 %, Stufe 5: 22 %, Stufe 6: 25 % |
+| Ankunft | 0,35 bis 0,75 des Tages, im Konvoi alle 2,5 s |
+| Bewertung je Crew | alle an einem Steg +0,5 Anker, aufgeteilt −0,5 Anker |
+
 ## Services
 
 | Service | Stufe | Name | ab Hafenstufe | Kosten | Mindestruf | Wirkung |

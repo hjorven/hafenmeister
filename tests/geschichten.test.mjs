@@ -50,7 +50,8 @@ test('Jedes neue Boot hat eine passende Geschichte, Art passt zur Aufenthaltsdau
     for (let tag = 0; tag < 3; tag++) {
       sim.runDay(s, ctx);
       for (const b of s.upcoming) {
-        if (b.special || b.size === 'XXL') continue;
+        // Flottillen (P32): die Gruppe ist ihre Geschichte (Bootskarte nennt Anlass und Namen)
+        if (b.special || b.size === 'XXL' || b.flotte) continue;
         assert.ok(b.story, `Boot ${b.typeId} Stufe ${stufe} ohne Geschichte`);
         const g = G.BY_ID[b.story.id];
         assert.ok(g.abStufe <= stufe, `${g.id} erst ab Stufe ${g.abStufe}`);

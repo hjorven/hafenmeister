@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "21.11.2026",
-  "commit": "02b8a5c"
+  "datum": "22.11.2026",
+  "commit": "b2dfea0"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -778,14 +778,14 @@
    "id": "P32",
    "titel": "Flottillen",
    "inhalt": "F3, Gruppen-Ankunft",
-   "thread": "neu",
+   "thread": "erledigt (Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md)",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F3"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1998,8 +1998,8 @@
   {
    "code": "F3",
    "text": "Flottillen: drei bis fünf Boote wollen am selben Steg liegen (Feld group)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P32, flottillen.md)",
    "pakete": [
     "P32"
    ],
@@ -4561,11 +4561,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 9,
+    "erledigt": 10,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 12,
+    "offen": 11,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4649,20 +4649,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 44,
+  "erledigt": 45,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 41,
+  "offen": 40,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 166,
+  "erledigt": 167,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 45,
+  "offen": 44,
   "entfaellt": 1,
   "alle": 219
  },

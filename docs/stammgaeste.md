@@ -74,4 +74,6 @@ wie das Spiel.
 - **Stufenausbau und Umbau**: Gibt es den Lieblingsplatz nicht mehr oder passt das Boot nicht mehr hinein,
   zeigt die Karte nichts, es gibt keinen Abzug.
 - **Päckchen** zählen nie als Lieblingsplatz.
+- **Flottillen (P32)**: Boote einer Flottille werden nie zum Stammgast und lösen keine angekündigte Karte
+  ein; sie bekommen nur Bootsnamen. Art, Maße, Wünsche und Nächte gehören der Gruppe.
 - **Gästebuch-Test**: zählt seit C8 mit Gewicht 1 (eine Bewertung je Gast).

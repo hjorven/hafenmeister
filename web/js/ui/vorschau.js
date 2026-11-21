@@ -196,8 +196,25 @@ export function funkDaten(state, ctx, liste) {
       // Anmeldung per Funk (P28): angemeldet, und welche Box frei gehalten ist
       angemeldet: !!b.funk,
       platz: b.funk?.platz ?? null,
+      // Flottille (P32): die Gruppe steht als eine Karte im Funk
+      flotte: b.flotte ? { id: b.flotte.id, n: b.flotte.n, nr: b.flotte.nr, name: b.flotte.name } : null,
     };
   });
+}
+
+/** Eine Karte je Flottille: nur das erste noch erwartete Boot der Gruppe bleibt, mit der Zahl der übrigen. */
+export function flottenZusammenfassen(daten) {
+  const gesehen = new Map();
+  const out = [];
+  for (const d of daten) {
+    if (!d.flotte) { out.push(d); continue; }
+    const k = gesehen.get(d.flotte.id);
+    if (k) { k.flotteRest++; if (d.platz && !k.flottePlaetze.includes(d.platz)) k.flottePlaetze.push(d.platz); continue; }
+    const neu = { ...d, flotteRest: 1, flottePlaetze: d.platz ? [d.platz] : [] };
+    gesehen.set(d.flotte.id, neu);
+    out.push(neu);
+  }
+  return out;
 }
 
 /**
@@ -221,6 +238,11 @@ const listeText = (l) => (l.length <= 1 ? l.join('') : `${l.slice(0, -1).join(',
 export function funkSatz(d) {
   const w = d.wuensche.length ? `, möchte ${listeText(d.wuensche.map(wunschName))}` : ', ohne Wünsche';
   const a = d.platz ? `, angemeldet, Box ${d.platz} frei gehalten` : d.angemeldet ? ', hat sich angemeldet' : '';
+  if (d.flotte) {
+    const n = d.flotteRest ?? d.flotte.n;
+    const boxen = d.flottePlaetze?.length ? `, Boxen ${listeText(d.flottePlaetze)} frei gehalten` : d.angemeldet ? ', hat sich angemeldet' : '';
+    return `Flottille „${d.flotte.name}“: ${n} × ${d.name}, ${d.zeit === 'gleich' ? 'gleich da' : `gegen ${d.zeit}`}, wollen zusammen an einen Steg${w}${boxen}`;
+  }
   return `${d.name}, ${meter(d.laenge)} lang, ${d.zeit === 'gleich' ? 'gleich da' : `gegen ${d.zeit}`}${w}${a}`;
 }
 
@@ -283,6 +305,8 @@ body.hm-ruhig .hm-wunsch.hm-geduld.eilig { animation: none; background-color: #f
 #hm-funk .hm-funk-boot.angemeldet.gehalten { outline: 2px solid #d9a514; }
 #hm-funk .hm-funk-marke { font: 700 11px/1 var(--hm-text, inherit); padding: 2px 4px; background: #3f7cc4; color: #fff; }
 #hm-funk .hm-funk-boot.gehalten .hm-funk-marke { background: #d9a514; color: #24364a; }
+#hm-funk .hm-funk-marke.hm-funk-flotte { background: #23897d; color: #fff; }
+#hm-funk .hm-funk-boot.gehalten .hm-funk-marke.hm-funk-flotte { background: #d9a514; color: #24364a; }
 #hm-funk .hm-funk-boot.neu { animation: hm-funk-neu .5s steps(4) both; }
 @keyframes hm-funk-neu { from { transform: translateX(14px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (max-width: 540px), (max-height: 420px) {
@@ -637,8 +661,8 @@ export function init(game) {
     const winter = frei && sim()?.season?.()?.winter;
     funk.hidden = !frei || !!winter;
     if (funk.hidden) { funkSchluessel = ''; return; }
-    const daten = funkDaten(s, ctx, funkListe(sim()?.preview?.() ?? [], sim()?.angemeldet?.() ?? []));
-    const schluessel = JSON.stringify([s?.phase, daten.map((d) => [d.id, d.zeit, d.wuensche, d.angemeldet, d.platz])]);
+    const daten = flottenZusammenfassen(funkDaten(s, ctx, funkListe(sim()?.preview?.() ?? [], sim()?.angemeldet?.() ?? [])));
+    const schluessel = JSON.stringify([s?.phase, daten.map((d) => [d.id, d.zeit, d.wuensche, d.angemeldet, d.platz, d.flotteRest, d.flottePlaetze])]);
     if (schluessel === funkSchluessel) return;
     funkSchluessel = schluessel;
     const vorher = bekannt;
@@ -667,7 +691,8 @@ export function init(game) {
       const w = el('span', 'hm-funk-wuensche');
       for (const x of d.wuensche) w.append(symbol(x));
       b.append(img, zeile, w);
-      if (d.angemeldet) b.append(el('span', 'hm-funk-marke', d.platz ? `Box ${d.platz}` : 'angemeldet'));
+      if (d.flotte) b.append(el('span', 'hm-funk-marke hm-funk-flotte', `Flottille ×${d.flotteRest}`));
+      else if (d.angemeldet) b.append(el('span', 'hm-funk-marke', d.platz ? `Box ${d.platz}` : 'angemeldet'));
       // Angemeldete Boote: Antippen öffnet die Anmeldung (Box freihalten), sonst der Satz dazu
       b.addEventListener('click', (e) => { e.stopPropagation(); if (!(d.angemeldet && game.funkAnmeldung?.zeige(d.id))) zeigeSatz(d, b); });
       return b;

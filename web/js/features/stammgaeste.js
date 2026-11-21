@@ -86,8 +86,9 @@ function anwesend(state) {
 export function ankunftHook({ state, ctx, boat }) {
   if (boat.stationed) return;
   const s = stammState(state);
-  // ohneStamm: gerade wird ein neuer Gast gewürfelt (Freunde eines Stammgasts, features/gaestepost.js)
-  if (s.liste.length && !s.ohneStamm && random(state) < STAMM.chance) {
+  // ohneStamm: gerade wird ein neuer Gast gewürfelt (Freunde eines Stammgasts, features/gaestepost.js).
+  // Boote einer Flottille (P32) bekommen nur Namen: Art, Maße und Wünsche gehören der Gruppe.
+  if (s.liste.length && !s.ohneStamm && !boat.flotte && random(state) < STAMM.chance) {
     const da = anwesend(state);
     const mods = sim.modifiers(state, ctx);
     const erlaubt = new Set(sim.eligibleTypes(state, ctx, mods).map((t) => t.id));
