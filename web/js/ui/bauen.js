@@ -1010,7 +1010,19 @@ export function init(game) {
     tipp.hidden = aus || tippAbgelaufen;
     if (tipp.hidden) return;
     // Die Zeit läuft erst, wenn der Hinweis wirklich zu sehen ist
-    if (!tippTimer) tippTimer = setTimeout(() => { tippAbgelaufen = true; tipp.hidden = true; }, TIPP_DAUER);
+    // (wartet er am Meldeplatz hinter einer anderen Meldung, Klasse .zurueck, läuft sie nicht: sonst war
+    // er nach dem ersten Bauwerk hinter dem Erfolg "Grundstein" schon abgelaufen, bevor man ihn sah)
+    if (!tippTimer) {
+      let rest = TIPP_DAUER;
+      tippTimer = setInterval(() => {
+        if (tipp.hidden || tipp.classList.contains('zurueck')) return;
+        rest -= 250;
+        if (rest > 0) return;
+        clearInterval(tippTimer);
+        tippAbgelaufen = true;
+        tipp.hidden = true;
+      }, 250);
+    }
     tipp.replaceChildren(el('span', { class: 'bau-tipp-titel' }, 'Als Nächstes'), el('span', { class: 'bau-tipp-text' }, n.text));
     tipp.title = `Als Nächstes: ${n.text}`;
     platziereTipp();

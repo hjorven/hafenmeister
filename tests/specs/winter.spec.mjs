@@ -62,6 +62,14 @@ test('Winterpause: Bilanz, Winterarbeit, Winter überspringen', async ({ game },
   await press(ueber, testInfo);
   const r = await page.evaluate(() => { const g = window.hafenmeister; return { winter: g.sim.ctx && g.events?.season?.(g.sim.state.day)?.winter, tag: g.sim.state.day }; });
   expect(r.tag).toBe(await page.evaluate(() => { const c = window.hafenmeister.sim.ctx.rules; return c.seasonDays + c.winterDays + 1; }));
+  // Nach dem Sprung liegt jedes Gastboot dort, wo die Regeln es haben: niemand von vor dem Winter fährt
+  // noch durch den Hafen (Schichttest F7: ablegendes Boot fuhr durch Steg und neuen Gast)
+  const alt = await page.evaluate(() => {
+    const g = window.hafenmeister;
+    const ids = new Set((g.sim.boote ?? []).map((b) => b.id));
+    return [...g.boatAnim.boats].filter((a) => typeof a.id === 'number' && !ids.has(a.id)).map((a) => `${a.id}/${a.state}`);
+  });
+  expect(alt, 'Boote von vor dem Winter sind noch im Bild').toEqual([]);
   // Die Kartenwahl der Tagesziele geht vor (Meldungs-Ordnung), danach kommt der Gruß zum Saisonbeginn
   const nehmen = page.locator('.hm-tafel > ul.tz-wahl .tz-nehmen').first();
   if (await nehmen.isVisible().catch(() => false)) await press(nehmen, testInfo);
