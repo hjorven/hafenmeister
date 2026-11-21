@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "21.11.2026",
-  "commit": "dfc7c0f"
+  "commit": "a1e8531"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1578,6 +1578,60 @@
    "prs": [
     329,
     341
+   ],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
+   "punkte": [],
+   "status": "erledigt",
+   "bilder": []
+  },
+  {
+   "id": "P85",
+   "titel": "Zusammenspiel nach Welle 0 prüfen",
+   "inhalt": "Jorvens Auftrag vom 14.11.: alle Features noch da, neue Features im normalen Spiel wirklich genutzt, Welle 1 wirklich gefixt, Übersehenes finden. Drei Threads (Kernschleife und Regeln; Oberfläche und Geräte; Welt, Boote, Ereignisse), gemeinsame Datei docs/zusammenspiel.md",
+   "thread": "erledigt: Teil 1 Kernschleife und Regeln erledigt (PR 354, Funde K1 bis K5), Teil 2 Oberfläche und Geräte erledigt (PR 352), beide in docs/zusammenspiel.md; Teil 3 Welt: Ausbauten je Küste geprüft (Abschnitt \"Ausbauten je Küste\", Fund W1 Durchstich nur auf Nehrungsküsten), Stegbilder je Küste, Ereignisse und Bildrate je Wetter geprüft (PR 366 und Folge-PR, Fund S1 behoben; Aufstiegsname nach Küste)",
+   "welle": 1,
+   "prs": [
+    352,
+    354,
+    366
+   ],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
+   "punkte": [],
+   "status": "teilweise",
+   "bilder": [
+    78,
+    79,
+    80,
+    81
+   ]
+  },
+  {
+   "id": "P86",
+   "titel": "Bootsgeschichten fertig erzählen",
+   "inhalt": "Regatta: Startsignal mit Ton, Siegerehrung am Segelclub, Ergebnis im Logbuch; Gepäck beim Crewwechsel sichtbar, Halt am Tanksteg, Gang \"in den Ort\" (bootsgeschichten.md, Abschnitt 5)",
+   "thread": "erledigt (PR 342)",
+   "welle": 3,
+   "prs": [
+    342
+   ],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
+   "punkte": [],
+   "status": "erledigt",
+   "bilder": [
+    75,
+    76
+   ]
+  },
+  {
+   "id": "P87",
+   "titel": "Prüfwerkzeuge auf 15 Küsten und den neuen Takt",
+   "inhalt": "Härtetest (tests/extrem/) nach PR 327 bis 332 neu laufen lassen und den Fund \"Gäste erreichen ab Stufe 4 keine Boje\" am Spiel bestätigen; tests/specs/leinen.spec.mjs auch für Küste 11 bis 15; istWasser und Bild am Durchstich angleichen (Messlatte); Zeitraffer-Grenzen auf den 5-Minuten-Tag",
+   "thread": "erledigt (PR 338: Tests über alle Küsten aus formen.js, tools/zeitraffer/wasserbild.cjs und bildwasser.cjs, Grenzen für den 5-Minuten-Tag, Härtetest neu gelaufen; Funde in docs/arbeitsplan.md)",
+   "welle": 1,
+   "prs": [
+    327,
+    332,
+    338
    ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
@@ -4418,16 +4472,18 @@
     "P08",
     "P09",
     "P54",
-    "P83"
+    "P83",
+    "P85",
+    "P87"
    ],
    "zaehler": {
-    "erledigt": 10,
-    "teilweise": 0,
+    "erledigt": 11,
+    "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
     "offen": 0,
     "entfaellt": 1,
-    "alle": 11
+    "alle": 13
    }
   },
   {
@@ -4482,16 +4538,17 @@
     "P38",
     "P39",
     "P40",
-    "P59"
+    "P59",
+    "P86"
    ],
    "zaehler": {
-    "erledigt": 8,
+    "erledigt": 9,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
     "offen": 11,
     "entfaellt": 0,
-    "alle": 19
+    "alle": 20
    }
   },
   {
@@ -4573,13 +4630,13 @@
   }
  ],
  "gesamt": {
-  "erledigt": 40,
-  "teilweise": 1,
+  "erledigt": 42,
+  "teilweise": 2,
   "arbeit": 1,
   "frage": 0,
   "offen": 40,
   "entfaellt": 1,
-  "alle": 83
+  "alle": 86
  },
  "punkteGesamt": {
   "erledigt": 166,
@@ -5493,7 +5550,9 @@
   },
   {
    "datei": "p86-pr342-pc-tankstelle.jpg",
-   "pakete": [],
+   "pakete": [
+    "P86"
+   ],
    "titel": "Fischkutter tankt an der Tankstelle",
    "pr": 342,
    "geraet": "pc",
@@ -5503,7 +5562,9 @@
   },
   {
    "datei": "p86-pr342-handy-siegerehrung.jpg",
-   "pakete": [],
+   "pakete": [
+    "P86"
+   ],
    "titel": "Siegerehrung nach der Regatta am Abend",
    "pr": 342,
    "geraet": "handy",
@@ -5525,7 +5586,9 @@
   },
   {
    "datei": "p85-pr352-handy-grund.jpg",
-   "pakete": [],
+   "pakete": [
+    "P85"
+   ],
    "titel": "Zusammenspiel Oberfläche: Grundansicht am Handy",
    "pr": 352,
    "geraet": "handy",
@@ -5535,7 +5598,9 @@
   },
   {
    "datei": "p85-pr352-pc-bauen.jpg",
-   "pakete": [],
+   "pakete": [
+    "P85"
+   ],
    "titel": "Zusammenspiel Oberfläche: Bauen am PC",
    "pr": 352,
    "geraet": "pc",
@@ -5545,7 +5610,9 @@
   },
   {
    "datei": "p85-pr366-handy-durchstich.jpg",
-   "pakete": [],
+   "pakete": [
+    "P85"
+   ],
    "titel": "Ausbau je Küste: Durchstich zur Ostsee nur auf der Nehrung",
    "pr": 366,
    "geraet": "handy",
@@ -5555,7 +5622,9 @@
   },
   {
    "datei": "p85-pr366-pc-molen.jpg",
-   "pakete": [],
+   "pakete": [
+    "P85"
+   ],
    "titel": "Ausbau je Küste: Molen und Wellenbrecher auf der offenen Bucht",
    "pr": 366,
    "geraet": "pc",
@@ -5580,7 +5649,9 @@
    "datum": "2026-11-21",
    "titel": "Ausbauten je Küste: Durchstich nur auf Nehrungsküsten (P85 Teil 3)",
    "pr": 366,
-   "pakete": []
+   "pakete": [
+    "P85"
+   ]
   },
   {
    "datum": "2026-11-21",
@@ -5638,7 +5709,9 @@
    "datum": "2026-11-20",
    "titel": "Zusammenspiel 1: Kernschleife und Regeln im ganzen Spiel gezählt (P85)",
    "pr": 354,
-   "pakete": []
+   "pakete": [
+    "P85"
+   ]
   },
   {
    "datum": "2026-11-20",
