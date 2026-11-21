@@ -6,6 +6,8 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 21.11.2026
 
+- Wer vor einer Engstelle oder der Einfahrt auf freie Fahrt wartet, hält sich rechts am Rand, und wer dahinter ansteht, ebenso. Die Mitte bleibt frei für die Boote, die herauskommen.
+- In langen, engen Fahrwassern (zum Beispiel Küste 14) fahren auslaufende Boote nicht mehr durcheinander hindurch: Wer nur vor der nächsten Engstelle ansteht, gilt als Schlange und nicht mehr als Blockade.
 - Auf manchen Küsten (vor allem Schären und Steilküste) lag bei einigen Steganordnungen Fels oder flaches Wasser direkt vor Boxen am Ende von Steg A und am Kopf von Steg B. Dort ist jetzt immer genug Wasser zum Ein- und Ausparken.
 - Boote einigen sich bei einer Begegnung: Stehen sich zwei im Weg, legen sie einmal fest, wer fährt und wer wartet, und bleiben dabei, bis sie aneinander vorbei sind. Wer hinaus will, fährt weiter zuerst. Vorher wechselte die Vorfahrt mit jedem Meter, und beide zuckten voreinander oder blieben stecken.
 - Entgegenkommern weichen Boote schon einige Sekunden vor der Begegnung nach Steuerbord aus, statt erst kurz vor dem Bug des anderen zu bremsen.
