@@ -48,6 +48,14 @@ body.card-open #hm-funk-anmeldung { display: none !important; }
 #hm-funk-anmeldung .fa-knoepfe .hm-knopf:not(.hm-px) { background: #fffcf6; border: 2px solid #283648; }
 #hm-funk-anmeldung .fa-knoepfe .hm-primaer { flex: 1 1 auto; }
 @media (max-width: 420px) { #hm-funk-anmeldung .fa-knoepfe .hm-knopf { padding: 4px 8px; font-size: 13px; } }
+/* Niedrige Bildschirme (Handy quer): flacher, damit die Karte nicht ein Drittel des Hafens samt Münzen verdeckt (Schichttest F8) */
+@media (max-height: 500px) {
+  #hm-funk-anmeldung { gap: 8px; padding: 6px 10px; line-height: 1.2; }
+  #hm-funk-anmeldung > .hm-sym { width: 20px; height: 20px; margin-top: 0; }
+  #hm-funk-anmeldung .fa-satz { font-size: 12px; }
+  #hm-funk-anmeldung .fa-knoepfe { margin-top: 4px; }
+  #hm-funk-anmeldung .fa-knoepfe .hm-knopf { min-height: 32px; padding: 2px 10px; font-size: 13px; }
+}
 #hm-funk-anmeldung .fa-zaehler { position: absolute; right: 8px; top: 6px; font-size: 12px; color: var(--hm-tinte-2, #5a6a7c); }
 `;
 
