@@ -32,6 +32,15 @@ const S = {
   'aufstieg': ['window.hafenmeister.aufstieg.zeigeStufe(4)'],
   'winter': ['window.hafenmeister.winter.oeffnen()'],
   'statistik': ['(() => { const g = window.hafenmeister; for (let i = 0; i < 24; i++) g.sim.fastForward(1e6); g.tagesabschluss?.schliesse?.(); g.statistik.oeffnen(); })()'],
+  // Funk-Anmeldung (P28): Büro bis zur Anmeldung ausbauen, bis zum ersten angemeldeten Boot laufen lassen (Schichttest F8)
+  'funk': [`(async () => { const g = window.hafenmeister; g.sim.state.money = 1e7;
+    for (let i = 0; i < 8 && !g.sim.anmeldungFrei(); i++) g.sim.upgradeOffice();
+    g.speed = 8; for (let i = 0; i < 900 && !g.sim.angemeldet().length; i++) await new Promise(r => setTimeout(r, 100));
+    const a = g.sim.angemeldet(); if (a.length) g.funkAnmeldung.zeige(a[0].id);
+    // Morgen-Zettel und Ankündigung gehen vor: laufen lassen, bis die Anmeldung wirklich steht
+    const e = document.getElementById('hm-funk-anmeldung'); g.speed = 1;
+    for (let i = 0; i < 300 && !(e && !e.hidden && e.getBoundingClientRect().height > 0 && getComputedStyle(e).visibility !== 'hidden'); i++) await new Promise(r => setTimeout(r, 100));
+    g.speed = 0; })()`],
   'kombi-wahl+boot': [boot, 'window.hafenmeister.tagesziele.oeffnen()'],
   'kombi-ziel+boot': ['window.hafenmeister.tagesziele.waehle(0)', klick('.hm-tafel > button'), boot],
   'kombi-stufe+boot': [boot, klick('#hm-ziel > button')],
