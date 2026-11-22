@@ -34,7 +34,7 @@ const zufall = (a, b) => a + Math.random() * (b - a);
 // Schlange vor der Versorgung (Paket P55, Roadmap L2): Ist die Versorgung heute knapp oder voll
 // (game.sim.auslastung, ui/hafenzeichen.js), gehen Gäste nicht gleich hinein, sondern stellen sich
 // vor der Tür an. Welches Ziel zu welcher Versorgung gehört:
-const VERSORGUNG = { toilette: 'wc', sanitaer: 'wc', dusche: 'dusche', kiosk: 'essen', restaurant: 'essen' };
+const VERSORGUNG = { toilette: 'wc', sanitaer: 'wc', dusche: 'dusche', kiosk: 'essen', restaurant: 'essen', waschhaus: 'waesche' };
 const SCHLANGE_ABSTAND = 1.1;    // Meter zwischen zwei Wartenden
 const SCHLANGE_MAX = 6;          // mehr stellen sich nicht an, sie gehen gleich hinein
 /** Wie lange jemand ansteht (Sekunden Spielzeit): knapp kurz, voll länger. */

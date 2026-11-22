@@ -6,6 +6,7 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 22.11.2026
 
+- Neue Gästewünsche, in jeder Ausbaustufe mindestens einer: Frischwasser ab Stufe 2 (Wasserhähne je Steg nachrüsten, grüne Zapfstellen am Steg), WLAN ab Stufe 3 (Mast am Hafenbüro), Waschmaschine ab Stufe 4 für Crews, die mindestens drei Nächte bleiben (Waschhaus mit Wäscheleine, später Waschsalon), Absaugstation für den Bordtank ab Stufe 5 (auf dem Steg der Tankstelle) und eine Hafenrundfahrt mit der Barkasse im Seehafen. Neue Schilder über den Booten, eigene Sätze im Gästebuch, "Als Nächstes" schlägt sie vor.
 - Eigenes Hafenfest ab Stufe 3: Einmal je Saison setzt du selbst ein Fest an (Wetterbericht, "Fest planen"). Du wählst den Tag und was dazugehört: Wimpelketten über den Stegen, eine Kapelle auf der Bühne mit Festmusik, Marktstände mit Standgeld, Feuerwerk am Abend. Die Vorbereitung kostet sofort Geld, absagen geht bis zum Vorabend für die Hälfte zurück. Am Festtag kommen Boote von überall, der Hafen wird voll, und wer im Päckchen liegt, bewertet deshalb nicht schlechter. Abends kommt die Bilanz. Das zufällige Hafenfest gibt es dafür nicht mehr.
 - Ein Vorbeifahrer oder Segler, hinter dem ein Gast oder Dauerlieger seit ein paar Sekunden festhängt, fährt sofort weiter und macht Platz. Vorher blieb er bis zu 40 Sekunden stehen, und in großen Häfen (Stufe 6, zum Beispiel Küste 14) stapelte sich dahinter die ganze Anfahrt von See.
 

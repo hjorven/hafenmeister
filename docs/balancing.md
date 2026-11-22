@@ -246,6 +246,7 @@ Stand `main` nach PR 160 (P06), nachgeprüft im Code. Die Pakete in der rechten 
 - Der Bot kassiert immer alles sofort, auch ohne Hafenbüro.
 - Mit Hafenbüro-Automatik weist der Bot nur noch die Sonderfälle selbst zu (`sim.officeSpecialCase`).
 - Stammgäste und Gästepost (P25, `features/stammgaeste.js`, `features/gaestepost.js`) hängen wie im Spiel ein: Ruf doppelt, Lieblingsplatz, Freunde als zusätzliche Ankunft. Messung 21.11. (`--spieler zeitraffer`, 60 Läufe): vorher und nachher Median 105 Spieltage, also keine Verschiebung.
+- Neue Gästewünsche (P31, [gaestewuensche.md](gaestewuensche.md)): Frischwasser, WLAN, Waschmaschine, Absaugstation und Hafenrundfahrt. Der Bot kauft Wasserhähne an Stegen (`features/nachruesten.js` hängt wie im Spiel ein, Fingerstege und Laternen kauft er weiter nicht). Messung 22.11. (40 Läufe): zeitraffer 105 auf 110, geschickt 101 auf 104, gemütlich 119 auf 123. Das sind rund drei gespielte Tage; der Zeitraffer endet damit knapp nach dem Winter nach Tag 108 statt knapp davor. Ohne die neuen Bauwerke läge er wieder bei 105.
 - Das Abschlussziel von Stufe 6 prüft im Spiel `sim.regionGoal()` (Meldung `sim:regionDone`), im Werkzeug `tools/balance.mjs` mit denselben Zahlen.
 
 ## Was noch auffällt

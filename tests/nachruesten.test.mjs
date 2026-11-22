@@ -23,11 +23,11 @@ test('Zahlen stehen in economy.js: Fingerstege und Laternen', () => {
   assert.ok(ARTEN.licht.abStufe <= ARTEN.finger.abStufe);
 });
 
-test('Stufe 1: nichts zu kaufen, Laternen erscheinen gesperrt für Stufe 2', () => {
+test('Stufe 1: nichts zu kaufen, Laternen und Wasserhähne erscheinen gesperrt für Stufe 2', () => {
   const { ctx, state } = neu({ stage: 1 });
   const a = angebote(state, ctx);
   assert.ok(a.length > 0);
-  assert.ok(a.every((x) => x.art === 'licht' && x.gesperrt === 'ab Ausbaustufe 2'), JSON.stringify(a));
+  assert.ok(a.every((x) => (x.art === 'licht' || x.art === 'wasser') && x.gesperrt === 'ab Ausbaustufe 2'), JSON.stringify(a));
   assert.equal(kaufen(state, ctx, 'licht', a[0].steg).grund, 'stufe');
 });
 

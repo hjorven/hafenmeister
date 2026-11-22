@@ -1,7 +1,7 @@
 // Hafengebaeude und Hafenzubehoer als 3D-Modelle im Flat-Stil.
 // Gehoert dem Thread "Haefen mit echten Satellitenbildern vergleichen". Vorbilder: docs/vorbilder.md
 //
-// Enthalten: Toilette, Hafenmeister, Dusche, Kiosk, Hafenbuero, Sanitaergebaeude, Restaurant,
+// Enthalten: Toilette, Hafenmeister, Dusche, Kiosk, Hafenbuero, Sanitaergebaeude, Restaurant, WLAN-Mast, Waschhaus,
 // Hafenspeicher, Fischbuden, Bootsschuppen-Reihe, Wohnhaeuser, Molenfeuer,
 // Strandkoerbe, Seebruecke, Schwimmwellenbrecher.
 // Nicht enthalten (Thread "Services und Sonderanlagen"): Bootsverleih, Slip, Segelclub, Mastenkran,
@@ -168,6 +168,51 @@ const BAU = {
     d.position.y = 2.75;
     g.add(d);
     for (let i = 0; i < 4; i++) g.add(box(0.8, 1.9, 0.08, M.kante, -2.1 + i * 1.4, 0.1, -1.88));
+    return g;
+  },
+
+  // WLAN-Mast (P31): schlanker Gittermast mit drei weißen Sektorantennen und Blinklicht oben
+  funkmast(M) {
+    const g = new THREE.Group();
+    g.add(box(1.2, 0.3, 1.2, M.beton));
+    g.add(cyl(0.12, 7.2, M.stein, 0, 0.3, 0, 6, 0.08));
+    for (let i = 0; i < 6; i++) {
+      const s = box(0.04, 0.04, 0.5, M.stein, 0, 0.9 + i * 1.05, 0);
+      s.rotation.y = i * 1.05;
+      g.add(s);
+    }
+    for (let i = 0; i < 3; i++) {
+      const a = box(0.22, 0.9, 0.12, M.weiss, 0, 6.2, 0);
+      const w = (i / 3) * Math.PI * 2;
+      a.position.x = Math.cos(w) * 0.22;
+      a.position.z = Math.sin(w) * 0.22;
+      a.rotation.y = -w;
+      g.add(a);
+    }
+    const lampe = new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 4), new THREE.MeshBasicMaterial({ color: '#ff5a4a' }));
+    lampe.position.y = 7.6;
+    lampe.userData.blink = { mat: lampe.material, an: new THREE.Color('#ff5a4a'), aus: new THREE.Color('#5a1a16'), periode: 2.4 };
+    g.add(lampe);
+    // kleiner Verteilerkasten am Fuß
+    g.add(box(0.6, 0.9, 0.35, M.kante, 0.7, 0.3, -0.5));
+    return g;
+  },
+
+  // Waschhaus (P31): kleines Holzhaus mit Bullaugen-Fenstern (Waschmaschinen) und Wäscheleine
+  waschhaus(M, { l = 4.2, b = 3.2 } = {}) {
+    const g = haus({ l, b, h: 2.5, dachH: 1.2, wand: M.wand2, dach: M.dach2 }, M);
+    g.add(box(0.9, 1.9, 0.08, M.tuer, -l / 2 + 0.8, 0.15, -b / 2 - 0.02));
+    const n = Math.max(2, Math.round((l - 2) / 1));
+    for (let i = 0; i < n; i++) {
+      const r = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.08, 10), M.glas);
+      r.rotation.x = Math.PI / 2;
+      r.position.set(-l / 2 + 1.9 + i * 1.0, 1.4, -b / 2 - 0.03);
+      g.add(r);
+    }
+    // Wäscheleine zwischen zwei Pfosten an der Seite, drei Tücher
+    for (const z of [-1.2, 1.2]) g.add(cyl(0.05, 1.9, M.holz, l / 2 + 1.2, 0, z, 5));
+    g.add(box(0.03, 0.03, 2.4, M.kante, l / 2 + 1.2, 1.8, 0));
+    [M.markise1, M.weiss, M.kiste].forEach((m, i) => g.add(box(0.05, 0.55, 0.5, m, l / 2 + 1.2, 1.25, -0.7 + i * 0.7)));
     return g;
   },
 
@@ -502,6 +547,10 @@ const PLAN = [
   { id: 'hafenbuero',    name: 'Hafenbüro',         art: 'hafenbuero',    ab: 3, p: [6, -32], stil: 'backstein',
     v: { 3: {}, 5: { art: 'hafenbueroFluegel' }, 6: { art: 'hafenamt' } } },
   { id: 'sanitaer',      name: 'Sanitärgebäude',    art: 'sanitaer',      ab: 3, p: [-60, -54], stil: 'falurot' },
+  // Neue Wünsche (P31): WLAN-Mast am Hafenbüro, Waschhaus und Waschsalon beim Sanitärgebäude
+  { id: 'wlan-mast',     name: 'WLAN-Mast',         art: 'funkmast',      ab: 3, p: [24, -26], stil: 'weiss' },
+  { id: 'waschhaus',     name: 'Waschhaus',         art: 'waschhaus',     ab: 4, p: [-40, -58], stil: 'weiss' },
+  { id: 'waschsalon',    name: 'Waschsalon',        art: 'waschhaus',     ab: 5, p: [-24, -58], opt: { l: 6.4, b: 4.2 }, stil: 'gelb' },
   { id: 'restaurant',    name: 'Restaurant',        art: 'restaurant',    ab: 4, p: [48, -34], stil: 'reet', v: { 4: {}, 6: { art: 'restaurantGross' } } },
   { id: 'speicher',      name: 'Hafenspeicher',     art: 'speicher',      ab: 4, p: [112, -30], stil: 'backstein' },
   { id: 'speicher-kai',  name: 'Speicher am Kai',   art: 'speicher',      ab: 5, p: [56, 204], opt: { l: 8.6, b: 5.0 }, stil: 'backstein' },
@@ -563,6 +612,9 @@ const KAUF = {
   restaurant: { art: 'essen', stufe: 3 },
   hafenmeister: { art: 'office', stufe: 1 },
   hafenbuero: { art: 'office', stufe: 3 },
+  'wlan-mast': { art: 'wlan', stufe: 1 },
+  waschhaus: { art: 'waesche', stufe: 1 },
+  waschsalon: { art: 'waesche', stufe: 2 },
 };
 
 // ------------------------------------------------------------------ Modul

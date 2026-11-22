@@ -244,11 +244,19 @@ export const ECONOMY = {
 
   wuensche: {
     //      ab Stufe, welche Klassen ihn haben können, Bauwerk, das ihn erfüllt
+    // durch 'platz': der Liegeplatz erfüllt ihn (eigenschaft: power = Strom, water = Wasserhahn am Steg).
+    // abNaechte: nur Gäste, die mindestens so viele Nächte bleiben, haben diesen Wunsch.
+    // Welche Bootsart welchen Wunsch haben kann, steht zusätzlich in data/boats (wishes).
     wc:     { abStufe: 1, klassen: ['S', 'M', 'L', 'XL'], durch: 'wc' },
     dusche: { abStufe: 2, klassen: ['S', 'M', 'L', 'XL'], durch: 'dusche' },
     essen:  { abStufe: 2, klassen: ['S', 'M', 'L', 'XL'], durch: 'essen' },
-    strom:  { abStufe: 3, klassen: ['M', 'L', 'XL'], durch: 'platz' },   // Platz mit Strom
+    // Neue Wünsche (P31, docs/gaestewuensche.md): je Ausbaustufe mindestens einer
+    wasser: { abStufe: 2, klassen: ['M', 'L', 'XL'], durch: 'platz', eigenschaft: 'water' },   // Wasserhahn am Steg (nachruesten.wasser)
+    strom:  { abStufe: 3, klassen: ['M', 'L', 'XL'], durch: 'platz', eigenschaft: 'power' },   // Platz mit Strom
+    wlan:   { abStufe: 3, klassen: ['M', 'L', 'XL'], durch: 'wlan' },
     diesel: { abStufe: 4, klassen: ['S', 'M', 'L', 'XL'], durch: 'diesel', nurMotor: true },
+    waesche: { abStufe: 4, klassen: ['M', 'L', 'XL'], durch: 'waesche', abNaechte: 3 },
+    absaugen: { abStufe: 5, klassen: ['M', 'L', 'XL'], durch: 'absaugen' },
   },
   // Wie viele Wünsche ein Boot hat: [min, max] je Klasse (gekappt auf verfügbare Wünsche)
   wunschAnzahl: { S: [0, 2], M: [1, 2], L: [1, 3], XL: [2, 3], XXL: [0, 0] },
@@ -271,6 +279,7 @@ export const ECONOMY = {
       eis:         { service: 'eisdiele',       abStufe: 4, klassen: ['S', 'M', 'L'] },
       werft:       { service: 'travellift',     abStufe: 4, klassen: ['L', 'XL'] },
       segelmacher: { service: 'segelmacher',    abStufe: 4, klassen: ['M', 'L', 'XL'], nurSegel: true },
+      barkasse:    { service: 'barkasse',       abStufe: 6, klassen: ['M', 'L', 'XL'] },   // P31: Hafenrundfahrt im Seehafen
     },
   },
 
@@ -534,6 +543,21 @@ export const ECONOMY = {
       { name: 'Zapfsäule',      abStufe: 4, kosten: 2700, versorgt: 30 },
       { name: 'Bootstankstelle', abStufe: 5, kosten: 6100, versorgt: 80 },
     ] },
+    // Neue Wünsche (P31): WLAN, Waschmaschine, Absaugstation für Bordtoiletten
+    // versorgt nach dem Bedarf in der Rechnung (tools/balance.mjs, höchstens rund 18 WLAN-, 17 Absaug- und
+    // 10 Wäsche-Gäste am Tag): die erste Stufe reicht für den Anfang, die zweite für den vollen Hafen.
+    wlan: { name: 'WLAN', stufen: [
+      { name: 'WLAN am Hafenbüro',           abStufe: 3, kosten: 400,  versorgt: 12 },
+      { name: 'WLAN-Antennen an den Stegen', abStufe: 4, kosten: 1200, versorgt: 40 },
+    ] },
+    waesche: { name: 'Wäscherei', stufen: [
+      { name: 'Waschmaschine und Trockner',  abStufe: 4, kosten: 600,  versorgt: 6 },
+      { name: 'Waschsalon',                  abStufe: 5, kosten: 1400, versorgt: 20 },
+    ] },
+    absaugen: { name: 'Absaugstation', stufen: [
+      { name: 'Absaugstation',               abStufe: 5, kosten: 900,  versorgt: 12 },
+      { name: 'Zweite Absaugstation',        abStufe: 6, kosten: 1800, versorgt: 30 },
+    ] },
     // Strom an den Holzstegen A und B (C, D, Kai haben ihn von Anfang an)
     strom: { name: 'Stromsäulen', stufen: [
       { name: 'Stromsäulen an Steg B', abStufe: 3, kosten: 1100, stege: ['B'] },
@@ -556,6 +580,8 @@ export const ECONOMY = {
     // Wie ein Schwimmsteg mit Fingern (platzarten.finger.rufBonus)
     finger: { name: 'Fingerstege', abStufe: 3, grund: 400, jePlatz: { S: 90, M: 140, L: 200 }, anker: 0.5, nurArt: 'box' },
     licht:  { name: 'Steglaternen', abStufe: 2, grund: 150, jePlatz: { S: 20, M: 25, L: 30, XL: 40 }, anker: 0.2 },
+    // P31: Wasserhähne erfüllen den Wunsch Frischwasser (wuensche.wasser) für alle Plätze des Stegs
+    wasser: { name: 'Wasserhähne', abStufe: 2, grund: 90, jePlatz: { S: 10, M: 15, L: 20, XL: 30 }, anker: 0, wunsch: 'wasser' },
   },
 
   // ---------------------------------------------------------------- Kassieren
