@@ -33,14 +33,14 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 
 **[Roadmap interaktiv ansehen](https://hjorven.github.io/hafenmeister/roadmap/)**: alle Pakete mit Filter nach Welle und Status, Suche und den Einzelpunkten je Paket. Quelle ist [docs/roadmap.md](docs/roadmap.md).
 
-<a href="https://hjorven.github.io/hafenmeister/roadmap/"><img src="docs/roadmap-fortschritt.svg" alt="Fortschritt der Roadmap: 46 von 86 Paketen erledigt" width="100%"></a>
+<a href="https://hjorven.github.io/hafenmeister/roadmap/"><img src="docs/roadmap-fortschritt.svg" alt="Fortschritt der Roadmap: 47 von 86 Paketen erledigt" width="100%"></a>
 
 | Welle | Thema | Fortschritt | erledigt | angefangen | offen |
 |---|---|---|---|---|---|
 | [0](https://hjorven.github.io/hafenmeister/roadmap/#welle=0) | Gelände und Bootswege | `██████████` 100 % | 6 | 0 | 0 |
 | [1](https://hjorven.github.io/hafenmeister/roadmap/#welle=1) | Fehler und Fundament | `██████████` 100 % | 12 | 0 | 0 |
 | [2](https://hjorven.github.io/hafenmeister/roadmap/#welle=2) | Kernschleife und Rückmeldung | `██████████` 100 % | 15 | 0 | 0 |
-| [3](https://hjorven.github.io/hafenmeister/roadmap/#welle=3) | Tiefe und Hafenleben | `██████░░░░` 57 % | 11 | 2 | 8 |
+| [3](https://hjorven.github.io/hafenmeister/roadmap/#welle=3) | Tiefe und Hafenleben | `██████░░░░` 60 % | 12 | 1 | 8 |
 | [4](https://hjorven.github.io/hafenmeister/roadmap/#welle=4) | Langzeit, Spielgefühl, Welt | `██░░░░░░░░` 18 % | 2 | 1 | 11 |
 | [5](https://hjorven.github.io/hafenmeister/roadmap/#welle=5) | Regionen und Online | `░░░░░░░░░░` 0 % | 0 | 0 | 2 |
 | [6](https://hjorven.github.io/hafenmeister/roadmap/#welle=6) | Ausbau Stufe 7 bis 20 | `░░░░░░░░░░` 0 % | 0 | 0 | 16 |
@@ -112,7 +112,7 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 
 </details>
 
-<details><summary><b>Welle 3: Tiefe und Hafenleben</b> (11 von 21 erledigt)</summary>
+<details><summary><b>Welle 3: Tiefe und Hafenleben</b> (12 von 21 erledigt)</summary>
 
 | Paket | Titel | Status | PRs |
 |---|---|---|---|
@@ -136,7 +136,7 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 | [P40](https://hjorven.github.io/hafenmeister/roadmap/#paket=P40) | Seltene Besucher | offen |  |
 | [P59](https://hjorven.github.io/hafenmeister/roadmap/#paket=P59) | Stege umbauen und Varianten wählen | **erledigt** | [#321](https://github.com/hjorven/hafenmeister/pull/321) [#326](https://github.com/hjorven/hafenmeister/pull/326) |
 | [P86](https://hjorven.github.io/hafenmeister/roadmap/#paket=P86) | Bootsgeschichten fertig erzählen | **erledigt** | [#342](https://github.com/hjorven/hafenmeister/pull/342) |
-| [P88](https://hjorven.github.io/hafenmeister/roadmap/#paket=P88) | Engstellen nach ihrer Länge regeln | in Arbeit | [#390](https://github.com/hjorven/hafenmeister/pull/390) [#400](https://github.com/hjorven/hafenmeister/pull/400) |
+| [P88](https://hjorven.github.io/hafenmeister/roadmap/#paket=P88) | Engstellen nach ihrer Länge regeln | **erledigt** | [#390](https://github.com/hjorven/hafenmeister/pull/390) [#400](https://github.com/hjorven/hafenmeister/pull/400) |
 
 </details>
 

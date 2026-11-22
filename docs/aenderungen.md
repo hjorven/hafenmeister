@@ -6,6 +6,7 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 22.11.2026
 
+- Auch draußen auf See fahren an- und abreisende Boote auf zwei getrennten Bahnen. Vorher trafen sich beide Richtungen eines Seewegs in einem Punkt am Kartenrand; lag der nah an der Einfahrt (zum Beispiel Küste 15), verkeilten sie sich dort.
 - Ein Vorbeifahrer oder Segler, hinter dem ein Gast oder Dauerlieger seit ein paar Sekunden festhängt, fährt sofort weiter und macht Platz. Vorher blieb er bis zu 40 Sekunden stehen, und in großen Häfen (Stufe 6, zum Beispiel Küste 14) stapelte sich dahinter die ganze Anfahrt von See.
 
 ## 21.11.2026

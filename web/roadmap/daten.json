@@ -1659,8 +1659,8 @@
   {
    "id": "P88",
    "titel": "Engstellen nach ihrer Länge regeln",
-   "inhalt": "Reste aus P66 (Abnahme Welle 0 auf ae9e34f, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Dazu Großschiff-Vortritt. Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Teil 2 (22.11.): Vorbeifahrer und Segler, die ein Hafenboot aufhalten, fahren sofort weiter (Küste 14 Stufe 6: Ankommende stapelten sich in 3 von 8 Läufen draußen auf See, danach in 0 von 4). Großschiff-Vortritt in drei Fassungen gemessen und verworfen (Größenregel Boot gegen Boot, Abstand der Vorbeifahrer, Vortritt an der Einfahrt: Großschiffe warteten jeweils länger oder es gab neue Knoten). Rest: Küste 15, Ankommende gleicher Richtung fahren auf dem Seeweg teils ineinander",
-   "thread": "in Arbeit (PR 390, 400)",
+   "inhalt": "Reste aus P66 (Abnahme Welle 0 auf ae9e34f, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Der Großschiff-Vortritt ist gestrichen (siehe unten). Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Teil 2 (22.11.): Vorbeifahrer und Segler, die ein Hafenboot aufhalten, fahren sofort weiter (Küste 14 Stufe 6: Ankommende stapelten sich in 3 von 8 Läufen draußen auf See, danach in 0 von 4). Teil 3 (22.11.): Auch der Seeweg hat je Richtung eine eigene Bahn; vorher trafen sich An- und Abreisende eines Seezugangs im selben Übergabepunkt am Kartenrand (Küste 15 Stufe 5: fest 16 und 14 statt 116 und 32; Bodden 2 statt 33; Küste 14 Stufe 6: Ankommende ineinander 155 und 460 statt 630 bis 10600). Großschiff-Vortritt gestrichen (Koordinator 22.11.), drei Fassungen gemessen und verworfen: Größenregel Boot gegen Boot (Bodden-Seegatt fest 208 statt 14 bis 38), größerer Abstand der Vorbeifahrer zu fahrenden Großschiffen (Bodden 0 statt 4 nahe Vorbeifahrten, Nehrung 4 statt 1), Vortritt an der Einfahrt (Küste 14 Stufe 6: Großschiffe 86 und 92 lange Proben statt 14 und 6). Abnahme durch die nächste Zeitraffer-Serie",
+   "thread": "erledigt (PR 390, 400 und Teil 3)",
    "welle": 3,
    "prs": [
     390,
@@ -1668,7 +1668,7 @@
    ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
-   "status": "arbeit",
+   "status": "erledigt",
    "bilder": [
     82
    ]
@@ -4582,9 +4582,9 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 11,
+    "erledigt": 12,
     "teilweise": 1,
-    "arbeit": 1,
+    "arbeit": 0,
     "frage": 0,
     "offen": 8,
     "entfaellt": 0,
@@ -4670,9 +4670,9 @@
   }
  ],
  "gesamt": {
-  "erledigt": 46,
+  "erledigt": 47,
   "teilweise": 2,
-  "arbeit": 1,
+  "arbeit": 0,
   "frage": 0,
   "offen": 37,
   "entfaellt": 1,
@@ -5747,6 +5747,12 @@
  "merges": [
   {
    "datum": "2026-11-22",
+   "titel": "Zeitraffer zählt Flottillen je Stufe",
+   "pr": 403,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: P88 Teil 2 (PR 400)",
    "pr": 404,
    "pakete": [
@@ -5834,14 +5840,6 @@
    "pr": 393,
    "pakete": [
     "P32"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Arbeitsplan: P88 Teil 1 (PR 390) nachgetragen",
-   "pr": 391,
-   "pakete": [
-    "P88"
    ]
   }
  ]
