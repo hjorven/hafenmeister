@@ -16,6 +16,7 @@ warten ausgeblendet, ihre Zeit läuft solange nicht ab, und sie kommen danach. D
 | 65 | Dauerlieger früher zurück (hat eine Frist bis zum Abend) | `features/dauerlieger.js` |
 | 57 | Anmeldung per Funk: Box freihalten? (`#hm-funk-anmeldung`) | `ui/funk-anmeldung.js` |
 | 60 | Sturm und Regatta vorbereiten (`#ev-vorbereiten`), Ergebnis am Abend des letzten Ereignistags | `events/vorbereiten-ui.js` |
+| 58 | Jugendtraining: Box fürs Trainerboot, Auslaufen, Zurück (`#hm-jugend`) | `ui/jugend-meldung.js` |
 | 50 | Schritte des Einstiegs | `features/einstieg.js` |
 | 45 | Tipps beim ersten Mal | `features/einstieg.js` |
 | 40 | Andere Dauerplatz-Meldungen | `features/dauerlieger.js` |

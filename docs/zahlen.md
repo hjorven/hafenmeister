@@ -134,9 +134,9 @@ Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab 
 | Grillplatz | 1 | Grillplatz | 2 | 180 € | - | ruf 0,05 |
 | Fahrradverleih | 1 | Fahrradverleih | 3 | 900 € | - | kunden {anteil:0.12, preis:8, wetter:{regen:0.3, sturm:0}}; dienst {anteil:0.18, nur:{klasse:[S, M, L], naechteMax:2}, naechte:1, preis:30, wetter:{regen:0.3, sturm:0}}; tagesgaeste 8 |
 | Eisdiele | 1 | Eisdiele | 4 | 2.200 € | - | kunden {anteil:1.1, preis:3.5, wetter:{regen:0.2, sturm:0}}; tagesgaeste 20; gaeste {S:1.1}; ruf 0,03 |
-| Segelclub | 1 | Segelclub | 3 | 2.200 € | - | proTag 20; ruf 0,08; gaeste {S:1.2}; freischalten [regatta] |
-|  | 2 | Segelschule | 4 | 6.500 € | - | proTag 120; wetter {regen:0.6, sturm:0}; ruf 0,12; gaeste {S:1.3, M:1.05}; freischalten [regatta] |
-|  | 3 | Regattaverein | 4 | 6.800 € | 3,8 | proTag 150; wetter {regen:0.6, sturm:0}; ruf 0,16; gaeste {S:1.15, M:1.1, L:1.05}; freischalten [regatta]; regatta 1,3 |
+| Segelclub | 1 | Segelclub | 3 | 2.200 € | - | proTag 20; ruf 0,08; gaeste {S:1.2}; freischalten [regatta]; jugend 5 |
+|  | 2 | Segelschule | 4 | 6.500 € | - | proTag 120; wetter {regen:0.6, sturm:0}; ruf 0,12; gaeste {S:1.3, M:1.05}; freischalten [regatta]; jugend 8 |
+|  | 3 | Regattaverein | 4 | 6.800 € | 3,8 | proTag 150; wetter {regen:0.6, sturm:0}; ruf 0,16; gaeste {S:1.15, M:1.1, L:1.05}; freischalten [regatta]; regatta 1,3; jugend 11 |
 | Mastenkran | 1 | Mastenkran | 3 | 1.800 € | - | dienst {anteil:0.3, nur:{antrieb:segel, klasse:[M, L]}, naechte:1, preis:45}; gaeste {M:1.2}; dauerlieger {krantage:true, preis:45, nur:{antrieb:segel}} |
 | Bootsausrüster | 1 | Bootsausrüster | 3 | 2.000 € | - | kunden {anteil:0.25, preis:8} |
 |  | 2 | Yachtausrüster mit Motorenwerkstatt | 4 | 4.000 € | - | kunden {anteil:0.25, preis:24}; synergie [{id:travellift, faktor:1.15}]; ruf 0,04 |
@@ -159,6 +159,17 @@ Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab 
 |  | 2 | Kreuzfahrtterminal | 6 | 54.000 € | 4,5 | freischalten [kreuzfahrtschiff]; ruf 0,1; Besuch alle 2 Tage, 9.500 € |
 | Marineanleger | 1 | Marineanleger | 6 | 22.500 € | 4 | freischalten [marine]; sturmschutz 0,1; Besuch alle 5 Tage, 3.600 € |
 |  | 2 | Marinestützpunkt | 6 | 45.000 € | 4,6 | proTag 450; freischalten [marine]; sturmschutz 0,2; ruf 0,08; Besuch alle 3 Tage, 4.200 € |
+
+## Jugendtraining
+
+| Was | Wert |
+|---|---|
+| braucht | Segelclub und Slipanlage |
+| Trainingstage | jeden 4. Saisontag ab dem 3.; nicht bei Sturm, Starkwind oder Regatta |
+| Zeit | ins Wasser bei 0,25 des Tages, ohne Bild 0,4 des Tages draußen |
+| Trainerboot | S3-3, 4,8 m, braucht eine Box für den Tag |
+| Belohnung | +0,2 Anker für jeden Gast im Hafen, Beitrag 15 € / 25 € / 40 € |
+| Gruppe je Ausbau | 1: 5 Optis; 2: 6 Optis und 2 Jollen; 3: 8 Optis und 3 Jollen |
 
 ## Ereignisse
 

@@ -35,6 +35,8 @@ export function wirkungText(w = {}) {
   if (w.tagesgaeste) t.push('verdient mit, wenn große Schiffe Tagesgäste bringen');
   if (w.sturmschutz) t.push('hilft bei Sturm, der Ruf leidet nicht');
   if (w.regatta) t.push('macht Regatten möglich');
+  // Jugendtraining (P39): Optis und Jollen segeln an festen Tagen aus, wenn auch die Slipanlage steht
+  if (w.jugend && ECONOMY.jugendtraining) t.push(`mit Slipanlage segelt jeden ${ECONOMY.jugendtraining.alle}. Tag die Jugend mit ${w.jugend} Booten aus dem Hafen`);
   if (!t.length) return '';
   const s = t.join(', ');
   return s[0].toUpperCase() + s.slice(1) + '.';

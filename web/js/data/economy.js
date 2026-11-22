@@ -725,11 +725,12 @@ export const ECONOMY = {
     ] },
     segelclub: { abStufe: 3, stufen: [   // Segelclub
       // Segelclub
-      { kosten: 2200, wirkung: { proTag: 20, ruf: 0.08, gaeste: { S: 1.2 }, freischalten: ['regatta'] } },
+      // jugend: Boote der Jugendgruppe (P39, gleich optis + jollen in ECONOMY.jugendtraining.gruppe), braucht die Slipanlage
+      { kosten: 2200, wirkung: { proTag: 20, ruf: 0.08, gaeste: { S: 1.2 }, freischalten: ['regatta'], jugend: 5 } },
       // Segelschule
-      { kosten: 6500, abStufe: 4, wirkung: { proTag: 120, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.12, gaeste: { S: 1.3, M: 1.05 }, freischalten: ['regatta'] } },
+      { kosten: 6500, abStufe: 4, wirkung: { proTag: 120, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.12, gaeste: { S: 1.3, M: 1.05 }, freischalten: ['regatta'], jugend: 8 } },
       // Regattaverein
-      { kosten: 6800, abStufe: 4, ruf: 3.8, wirkung: { proTag: 150, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.16, gaeste: { S: 1.15, M: 1.1, L: 1.05 }, freischalten: ['regatta'], regatta: 1.3 } },
+      { kosten: 6800, abStufe: 4, ruf: 3.8, wirkung: { proTag: 150, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.16, gaeste: { S: 1.15, M: 1.1, L: 1.05 }, freischalten: ['regatta'], regatta: 1.3, jugend: 11 } },
     ] },
     mastenkran: { abStufe: 3, stufen: [   // Mastenkran
       // Mastenkran
@@ -928,6 +929,28 @@ export const ECONOMY = {
     sanitaer: { kosten: [20, 70, 200, 500, 990, 1600], bonus: 0.2, wuensche: ['wc', 'dusche'] },
     // Hafenbecken ausbaggern: große Boote kommen öfter (Faktor je Klasse), ab Stufe 3
     baggern:  { abStufe: 3, kosten: [0, 0, 400, 990, 1900, 3100], faktor: 1.25, klassen: ['L', 'XL'] },
+  },
+
+  // ---------------------------------------------------------------- Jugendtraining (P39, F13)
+  // Mit Segelclub und Slipanlage segeln an festen Tagen Optimisten (ab der Segelschule auch Jollen) als
+  // Gruppe aus dem Hafen, trainieren draußen und kommen zurück. Das Trainerboot braucht für den Tag eine
+  // Box, die der Spieler vergibt. Logik features/jugendtraining.js, Beschreibung docs/jugendtraining.md.
+  jugendtraining: {
+    braucht: { segelclub: 1, slip: 1 },   // gebaute Stufe je Service
+    alle: 4,             // jeden 4. Saisontag ...
+    ersterTag: 3,        // ... ab dem 3. (Saisontag 3, 7, 11, 15, 19, 23, 27)
+    beginn: 0.25,        // Tagesanteil: die Gruppe geht am Slip ins Wasser (das Bild holt sie bis 0,82 zurück)
+    dauer: 0.4,          // so lange ist sie draußen, wenn niemand zusieht (Regeln ohne Bild)
+    notfall: 0.65,       // mit Bild: so lange nach dem Beginn zählt sie spätestens als zurück (falls das Bild hängt)
+    // Trainerboot: Festrumpf-Schlauchboot (data/boats/s.js S3-3)
+    trainerboot: { modell: 'S3-3', laenge: 4.8, breite: 2.0, tiefgang: 0.4 },
+    ruf: 0.2,            // Anker für jeden Gast, der beim Zurückkommen im Hafen liegt
+    // je Ausbau des Segelclubs: Gruppe und was der Verein für die Box zahlt (am Tag des Trainings)
+    gruppe: [
+      { optis: 5, jollen: 0, beitrag: 15, eltern: 4 },   // Segelclub
+      { optis: 6, jollen: 2, beitrag: 25, eltern: 6 },   // Segelschule
+      { optis: 8, jollen: 3, beitrag: 40, eltern: 8 },   // Regattaverein
+    ],
   },
 
   // ---------------------------------------------------------------- Endlosspiel (P16)
