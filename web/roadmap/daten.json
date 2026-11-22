@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "62be3ee"
+  "commit": "70f3af0"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -840,15 +840,20 @@
    "id": "P35",
    "titel": "Preisstufe am Hafenbüro",
    "inhalt": "F6",
-   "thread": "erledigt (preisstufe.md: günstig, normal, gehoben; Faustregel für die Bots, Zeitraffer wieder nahe 105)",
+   "thread": "erledigt (PR 413, preisstufe.md: günstig, normal, gehoben; Faustregel für die Bots, Zeitraffer wieder nahe 105)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    413
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F6"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    94,
+    95
+   ]
   },
   {
    "id": "P36",
@@ -5832,9 +5837,34 @@
    "datum": "2026-11-22",
    "quelle": "besucher/02-pc-funk-koenigsyacht.png",
    "nr": 93
+  },
+  {
+   "datei": "p35-pr413-handy-preistafel.jpg",
+   "pakete": [
+    "P35"
+   ],
+   "titel": "Preistafel im Gästebuch: günstig, normal, gehoben",
+   "pr": 413,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "preisstufe/handy-3-gehoben.png",
+   "nr": 94
+  },
+  {
+   "datei": "p35-pr413-pc-tafel.jpg",
+   "pakete": [
+    "P35"
+   ],
+   "titel": "Preistafel am Hafenbüro",
+   "pr": 413,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "preisstufe/pc-4-tafel.png",
+   "nr": 95
   }
  ],
  "neueBilder": [
+  95,
   93,
   91,
   90,
@@ -5842,105 +5872,106 @@
   86,
   84,
   82,
-  81,
-  80
+  81
  ],
  "merges": [
   {
    "datum": "2026-11-22",
-   "titel": "P31 Neue Gästewünsche: Frischwasser, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt",
-   "pr": 406,
+   "titel": "Roadmap-Pflege: P35 Preisstufe (PR 413) mit Bildern",
+   "pr": 418,
    "pakete": [
-    "P31"
+    "P35"
    ]
   },
   {
    "datum": "2026-11-22",
-   "titel": "P38: Eigenes Hafenfest ansetzen",
-   "pr": 405,
+   "titel": "P35 Preisstufe am Hafenbüro: günstig, normal, gehoben",
+   "pr": 413,
    "pakete": [
-    "P38"
+    "P35"
    ]
   },
   {
    "datum": "2026-11-22",
-   "titel": "Zeitraffer zählt Flottillen je Stufe",
-   "pr": 403,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P88 Teil 2 (PR 400)",
-   "pr": 404,
+   "titel": "Roadmap-Pflege: P39 (PR 412), P32-Rest (PR 414), P40 (PR 416) mit Bildern",
+   "pr": 417,
    "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Arbeitsplan: P88 Teil 2, Großschiff-Vortritt gestrichen",
-   "pr": 402,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P88 Teil 2: Vorbeifahrer machen Platz, sobald sie ein Hafenboot aufhalten",
-   "pr": 400,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Arbeitsplan: Stand nach P34, P32, P25, P88 Teil 1; Flottillen-Quote Prio B; P37 und P38 starten",
-   "pr": 401,
-   "pakete": [
-    "P34",
+    "P39",
     "P32",
-    "P25",
-    "P88",
-    "P37",
-    "P38"
+    "P40"
    ]
   },
   {
    "datum": "2026-11-22",
-   "titel": "Schichttest: Schicht 24 Flottillen, Fundorte bei Überlappungen",
-   "pr": 399,
+   "titel": "P40 Seltene Besucher: besondere Schiffe am Ehrenplatz, Schwäne, Schweinswal, Fotos im Logbuch",
+   "pr": 416,
+   "pakete": [
+    "P40"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Schichttest: Schicht 25 Wind und 26 Stammgäste, Wetterbericht nennt Starkwind an Regentagen",
+   "pr": 415,
    "pakete": []
   },
   {
    "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P25 Stammgäste Teil 1 und 2 (PR 394) mit Bildern",
-   "pr": 398,
-   "pakete": [
-    "P25"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Wind im Hafen (P34, F5 und F35)",
-   "pr": 392,
-   "pakete": [
-    "P34"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P32 Flottillen (PR 393) mit Bildern",
-   "pr": 396,
+   "titel": "Flottillen halten beim Selbst-Einfahren zusammen (P32-Rest)",
+   "pr": 414,
    "pakete": [
     "P32"
    ]
   },
   {
    "datum": "2026-11-22",
-   "titel": "P25 Stammgäste mit Wirkung und Gästepost",
-   "pr": 394,
+   "titel": "P39 Jugendtraining am Segelclub",
+   "pr": 412,
    "pakete": [
-    "P25"
+    "P39"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Neuer Fischkutter erscheint erst, wenn der alte abgelegt hat",
+   "pr": 411,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P38 Hafenfest (PR 405) mit Bildern",
+   "pr": 409,
+   "pakete": [
+    "P38"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Arbeitsplan: P31, P38, P88 erledigt; Flottillen-Rest, P35, P37, P39 starten",
+   "pr": 410,
+   "pakete": [
+    "P31",
+    "P38",
+    "P88",
+    "P35",
+    "P37",
+    "P39"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P88 Teil 3: eigene Bahn je Richtung auch auf dem Seeweg",
+   "pr": 407,
+   "pakete": [
+    "P88"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P31 Neue Gästewünsche: Frischwasser, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt",
+   "pr": 406,
+   "pakete": [
+    "P31"
    ]
   }
  ]
