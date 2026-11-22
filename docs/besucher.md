@@ -30,6 +30,10 @@ Ab und zu kommt ein besonderes Schiff in den Hafen: ein Weltumsegler, ein Museum
 - Schnittstelle: `game.besucher = { zeige(bootId), heute(), ausloesen(art), motive(), imBild(art), fotografiere(), fortschritt(), meldung() }`. Ereignisse `besucher:neu`, `besucher:foto`, Regel-Ereignis `sim:besucherZuschauer { boatId, art, berthId, geld }`.
 - Tests: `tests/besucher.test.mjs` (Häufigkeit, Stufen, Abstand, Winter, Seed, Ehrenplatz, Freihalten, Schaulustige, kein Stammgast, Ausprobieren, Funk, Tiere, Erfolge, Speichern und kaputte Stände).
 
+## Hafentiere (P51)
+
+Hafenkatze, Hafenhund und Graureiher wohnen im Hafen und nutzen Fotoknopf, Logbuch-Reiter (Gruppe „Hafentiere“) und Spielstand dieses Pakets. Beschreibung: [hafentiere.md](hafentiere.md).
+
 ## Entscheidungen
 
 - Der Ehrenplatz ist kein neues Gebäude, sondern die Plätze, die es schon gibt (Stegkopf, Kai). So passt er in jedes Stegbild und jede Küste, und die Entscheidung ist echt: den besten Platz für einen Tag freihalten oder belegen.

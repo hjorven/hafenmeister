@@ -99,6 +99,9 @@ export const ERFOLGE = [
     stand: (s) => zahl(besucherFort(s).tierFotos, 2) },
   { id: 'fotoalbum', gruppe: 'sammeln', ding: 'pokal', titel: 'Fotoalbum', text: 'Alle sechs seltenen Besucher fürs Logbuch fotografiert.',
     stand: (s) => zahl(besucherFort(s).fotos, besucherFort(s).gesamt) },
+  // Hafentiere (P51, docs/hafentiere.md)
+  { id: 'hafenfreunde', gruppe: 'sammeln', ding: 'wimpel', titel: 'Hafenfreunde', text: 'Hafenkatze, Hafenhund und Graureiher fürs Logbuch fotografiert.',
+    stand: (s) => zahl(besucherFort(s).hafentierFotos, besucherFort(s).hafentiereGesamt) },
   { id: 'traditionssegler', gruppe: 'sammeln', ding: 'wimpel', titel: 'Großer Bahnhof', text: `${Z.traditionssegler} Traditionssegler zugleich im Hafen.`,
     stand: (s) => zahl(Object.values(s.boats || {}).filter((b) => b?.typeId === 'XL1' && b.status === 'moored').length, Z.traditionssegler) },
   // ---------------------------------------------------------------- Jahreslauf
