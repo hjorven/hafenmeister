@@ -179,9 +179,11 @@ export function initBanner(game) {
   }
 
   function wxText(wx) {
-    if (wx.rain > 0.3) return 'Schauer';
-    // Windrichtung (P34): ab frischem Wind mit Himmelsrichtung, damit man die Windseite planen kann
-    if (wx.wind >= (ECONOMY.wind?.stark ?? 0.55)) return `Starkwind aus ${richtungsName(wx.richtung ?? 180)}`;
+    // Windrichtung (P34): ab frischem Wind mit Himmelsrichtung, damit man die Windseite planen kann,
+    // auch an Regentagen (sonst stand dort nur „Schauer“ und die Richtung fehlte zum Starkwind-Satz)
+    const stark = wx.wind >= (ECONOMY.wind?.stark ?? 0.55);
+    if (wx.rain > 0.3) return stark ? `Schauer, Starkwind aus ${richtungsName(wx.richtung ?? 180)}` : 'Schauer';
+    if (stark) return `Starkwind aus ${richtungsName(wx.richtung ?? 180)}`;
     if (wx.wind > 0.5) return `frischer Wind aus ${richtungsName(wx.richtung ?? 180)}`;
     if (wx.sun > 0.75) return 'sonnig';
     return 'heiter bis wolkig';
