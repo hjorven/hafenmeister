@@ -689,6 +689,11 @@ export function initBesuche(game, services) {
         const ziel = glatt(Math.max(0, Math.min(1, t)));
         if (ziel > s.t + 1e-6) s.modus = 'raus';
         else if (ziel < s.t - 1e-6) s.modus = 'rein';
+        // Große Ankünfte (P47, features/grosse-ankunft.js): das Schiff beginnt draußen mit dem Einlaufen.
+        // Nicht, wenn es (nach dem Laden) schon fast am Platz ist.
+        if (s.t >= 0.999 && ziel < 0.999 && ziel > 0.3 && !a.jedenTag) {
+          game.emit('besuch:einlaufen', { id, art: a.art, modell: s.d.modell, laenge: s.l, gruppe: s.group, amPlatz: () => s.t < 0.002 });
+        }
         s.t = ziel;
         if (s.wegAlt && (s.t < 0.001 || s.t > 0.999)) Object.assign(s, wege(s.d, s.l, s.b));
         s.group.visible = s.t < 0.999;

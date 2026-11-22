@@ -73,7 +73,8 @@ export async function init(game) {
     takt = 0;
     if (api.waitingBoats().length) api.autoAssign();
     api.collectAll(true);
-    if (!foto.rundflugAktiv) foto.rundflug(true);
+    // Während der Kamerafahrt einer großen Ankunft (P47, features/grosse-ankunft.js) ruht der Rundflug
+    if (!foto.rundflugAktiv && !game.ankunft?.laeuft) foto.rundflug(true);
   });
 
   game.on('sim:change', sichtbar);
