@@ -2,6 +2,7 @@
 // Kennt weder Three.js noch das DOM. Der Spielstand ist reines JSON.
 
 import { RULES } from './data/rules.js';
+import { flaggeAusSeed, flaggeSauber, hafenNameSauber } from './data/hafenflagge.js';
 
 export const SAVE_VERSION = 1;
 
@@ -19,6 +20,7 @@ export function createState({ seed, rules = RULES } = {}) {
     seed: s,
     rng: s,
     harborName: '', // Name des Hafens, setzt der Speicherplatz (save/plaetze.js)
+    flagge: flaggeAusSeed(s), // eigene Hafenflagge (P44, data/hafenflagge.js), neue Häfen bekommen eine aus dem Seed
     day: 1,
     phase: 'day', // 'day' oder 'evening'
     clock: 0, // Sekunden seit Tagesbeginn, Abend beginnt bei rules.dayLength
@@ -82,6 +84,8 @@ function migrate(data) {
 
 function validate(data) {
   const fresh = createState({ seed: 0 });
+  // Hafenflagge (P44): nur bekannte Muster, Farben und Zeichen; fehlt sie, kommt die Flagge zum Seed
+  data.flagge = flaggeSauber(data.flagge, Number.isFinite(data.seed) ? data.seed : 0);
   // Felder, ohne die nichts geht. Alle anderen fehlenden Felder werden mit Startwerten ergänzt.
   for (const key of ['day', 'stage', 'money', 'boats', 'berths', 'ratings']) {
     if (!(key in data)) throw new Error(`Spielstand unvollständig: ${key} fehlt`);
@@ -149,7 +153,8 @@ function tiefPruefen(data) {
   }
   data.queue = data.queue.filter((id) => data.boats[id]);
   data.upcoming = data.upcoming.filter((u) => u !== null && (typeof u === 'object' || data.boats[u]));
-  data.harborName = String(data.harborName ?? '').replace(/[\u0000-\u001f\u007f<>]/g, '').slice(0, 32);
+  // Hafenname: nur Text aus erlaubten Zeichen, höchstens 32 Zeichen (Audit C05, data/hafenflagge.js)
+  data.harborName = hafenNameSauber(typeof data.harborName === 'string' ? data.harborName : '', '');
 }
 
 // Speichern im Browser, Speicherplätze, Export und Import: web/js/save/ (ein Speicherweg,

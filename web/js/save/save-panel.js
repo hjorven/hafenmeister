@@ -16,6 +16,8 @@ import { STEGBILDER } from '../data/stegbilder.js';
 import { HAFEN } from '../data/harbor.js';
 import { stufenName as kuestenStufenName } from '../data/kuestennamen.js';
 import { FORMEN } from '../render/landschaft/formen.js';
+import { flaggenBaukasten } from '../ui/hafenflagge.js';
+import { flaggeAusSeed } from '../data/hafenflagge.js';
 
 const CSS = `
 .hm-save-backdrop{position:fixed;inset:0;background:rgba(20,34,50,.5);display:flex;
@@ -111,7 +113,7 @@ body:not(.hm-neu) .hm-sp-kueste .hm-sp-k[aria-checked=true]{background:var(--sp-
 .hm-neu #hm-seite .hm-probe-chip{border-image-source:var(--rahmen-gold)}
 `;
 
-function ensureStyle() {
+export function ensureStyle() {
   if (document.getElementById('hm-save-style')) return;
   const s = document.createElement('style');
   s.id = 'hm-save-style';
@@ -546,6 +548,7 @@ export function openSavePanel(opts) {
   let neuStegbild = 0; // 0 = Zufall
   let neuGelaende = 0; // 0 = Zufall
   let neuEinstieg = null;
+  let neuFlagge = null; // eigene Flagge (P44), Start: gewürfelt
 
   function zeichneNeu() {
     titel.textContent = 'Neues Spiel';
@@ -564,6 +567,11 @@ export function openSavePanel(opts) {
     const wuerfel = knopf('Anderer Name', () => { neuName = opts.namensVorschlag(); input.value = neuName; });
     inhalt.append(el('h3', {}, el('label', { for: 'hm-neu-name' }, 'Name des Hafens')),
       el('div', { class: 'hm-sp-namezeile' }, input, wuerfel));
+
+    // Flagge (P44): weht später am Hafenmast und am Schild an der Einfahrt
+    if (!neuFlagge) neuFlagge = flaggeAusSeed(Math.floor(Math.random() * 2 ** 32));
+    const baukasten = flaggenBaukasten({ flagge: neuFlagge, beiAenderung: (f) => { neuFlagge = f; } });
+    inhalt.append(el('h3', {}, 'Flagge'), baukasten.element);
 
     // Stegbild
     const anzahl = Math.min(opts.stegbildAnzahl() || STEGBILDER.varianten.length, STEGBILDER.varianten.length);
@@ -629,7 +637,7 @@ export function openSavePanel(opts) {
       const anz = Math.max(1, anzahl);
       const nr = neuStegbild || (anzahl ? 1 + Math.floor(Math.random() * anz) : 0);
       const form = neuGelaende || FORMEN[Math.floor(Math.random() * FORMEN.length)]?.nr || 1;
-      opts.neuesSpiel({ name: P.nameSauber(neuName), stegbild: nr, gelaende: form, einstieg: neuEinstieg });
+      opts.neuesSpiel({ name: P.nameSauber(neuName), stegbild: nr, gelaende: form, einstieg: neuEinstieg, flagge: neuFlagge });
     }, 'Das neue Spiel konnte nicht angelegt werden.'), 'hm-primaer breit');
     los.id = 'hm-neu-los';
     los.disabled = voll;

@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "ae7b08d"
+  "commit": "214f0aa"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1015,7 +1015,7 @@
    "id": "P44",
    "titel": "Hafenname und Flagge",
    "inhalt": "F23, F27 (Auswahl beim Start)",
-   "thread": "neu",
+   "thread": "erledigt (Thread \"Hafenname und eigene Flagge geben\", Hafenflagge)",
    "welle": 4,
    "prs": [],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
@@ -1024,7 +1024,7 @@
     "F27",
     "C05"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1137,15 +1137,20 @@
    "id": "P51",
    "titel": "Hafentiere",
    "inhalt": "F38",
-   "thread": "bestehend: \"Menschen im Hafen herumlaufen lassen\"",
+   "thread": "erledigt (PR 435, docs/hafentiere.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    435
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F38"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    110,
+    111
+   ]
   },
   {
    "id": "P52",
@@ -2308,8 +2313,8 @@
   {
    "code": "F23",
    "text": "Hafenname und Flagge, sichtbar an Einfahrt und Mast",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P44, Hafenflagge)",
    "pakete": [
     "P44"
    ],
@@ -2351,9 +2356,9 @@
   },
   {
    "code": "F27",
-   "text": "Neues Spiel mit Auswahl: Hafenname, Stegbild, später Herausforderung oder Revier",
+   "text": "Neues Spiel mit Auswahl: Hafenname, Flagge, Stegbild, später Herausforderung oder Revier",
    "status": "erledigt",
-   "statusText": "erledigt für Name, Stegbild, Küste, Einführung; Herausforderung und Revier folgen",
+   "statusText": "erledigt für Name, Flagge, Stegbild, Küste, Einführung; Herausforderung und Revier folgen",
    "pakete": [
     "P09",
     "P44"
@@ -2480,8 +2485,8 @@
   {
    "code": "F38",
    "text": "Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (hafentiere.md): wohnen im Hafen, Tagesablauf, Antippen, Foto ins Logbuch, Erfolg Hafenfreunde",
    "pakete": [
     "P51"
    ],
@@ -4493,7 +4498,7 @@
   },
   {
    "code": "C05",
-   "text": "HTML per innerHTML (render/services.js, ui/input-pc.js): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, textContent oder Escapen, dazu Test mit präparierten Namen",
+   "text": "HTML per innerHTML (render/services.js, ui/input-pc.js): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, textContent oder Escapen, dazu Test mit präparierten Namen. Hafenname erledigt mit P44 (hafenNameSauber, nur textContent/Canvas, tests/hafenflagge.test.mjs)",
    "status": null,
    "statusText": "",
    "pakete": [
@@ -4676,11 +4681,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 5,
-    "teilweise": 1,
+    "erledigt": 7,
+    "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 8,
+    "offen": 7,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4735,20 +4740,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 58,
-  "teilweise": 2,
+  "erledigt": 60,
+  "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 26,
+  "offen": 25,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 189,
+  "erledigt": 191,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 23,
+  "offen": 21,
   "entfaellt": 1,
   "alle": 219
  },
@@ -6072,9 +6077,34 @@
    "datum": "2026-11-22",
    "quelle": "leinen/annehmen/handy-1-symbol.png",
    "nr": 109
+  },
+  {
+   "datei": "p51-pr435-pc-hafenkatze.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Hafenkatze auf dem Steg",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-5-katze-herz.png",
+   "nr": 110
+  },
+  {
+   "datei": "p51-pr435-pc-reiher.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Graureiher am Ufer",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-3-reiher.png",
+   "nr": 111
   }
  ],
  "neueBilder": [
+  111,
   109,
   107,
   105,
@@ -6082,10 +6112,33 @@
   101,
   99,
   97,
-  95,
-  93
+  95
  ],
  "merges": [
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P51 Hafentiere (PR 435) mit Bildern",
+   "pr": 437,
+   "pakete": [
+    "P51"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P44: Eigener Hafenname und eigene Flagge",
+   "pr": 429,
+   "pakete": [
+    "P44"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P51 Hafentiere: Hafenkatze, Hafenhund und Graureiher (F38)",
+   "pr": 435,
+   "pakete": [
+    "P51"
+   ]
+  },
   {
    "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: P47 Große Ankünfte (PR 428) und P48 Leinen (PR 430) mit Bildern",
@@ -6158,30 +6211,6 @@
    "pr": 424,
    "pakete": [
     "P37"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P37: Havarist einschleppen",
-   "pr": 408,
-   "pakete": [
-    "P37"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: Bilder für P29 Baggern (PR 420)",
-   "pr": 423,
-   "pakete": [
-    "P29"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P29 Baggern: Stege ausbaggern, Niedrigwasser bei Westwind",
-   "pr": 420,
-   "pakete": [
-    "P29"
    ]
   }
  ]

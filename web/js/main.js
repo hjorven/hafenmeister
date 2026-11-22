@@ -78,6 +78,7 @@ const MODULES = [
   './render/signalflaggen.js',         // P49: Signalflaggen als Wunschanzeige, Positionslichter (docs/signalflaggen.md)
   './features/hafenwissen.js',         // P49: Hafenwissen sammeln, Lexikon im Logbuch (docs/signalflaggen.md)
   './ui/statistik.js',                 // Statistik der letzten 30 Tage, Saisons (P41)
+  './features/hafenflagge.js',         // P44: Hafenname und eigene Flagge, Mast, Schilder, Fenster
   './ui/oberflaeche.js',
 ];
 
