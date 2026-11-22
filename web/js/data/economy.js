@@ -600,6 +600,15 @@ export const ECONOMY = {
     ],
   },
 
+  // ---------------------------------------------------------------- Leinen annehmen (P48)
+  // Logik in web/js/features/leinen.js, Beschreibung in docs/leinen.md. Fährt ein Gast an seinen Platz am Steg
+  // oder Kai, steht dort ein Leinen-Symbol. Wer es antippt, nimmt die Leinen an, die Crew gibt
+  // trinkgeld (Euro je Klasse). Kein Abzug ohne Hilfe, die Crew macht dann selbst fest.
+  // abstandM: ab so vielen Metern vor dem Platz steht das Symbol; gleichzeitig: höchstens so viele
+  // Symbole zugleich; warteSek: so lange (echte Sekunden) hält die Crew die erste Leine bereit, bis
+  // Tempo warteBisTempo (bei 8x wartet niemand, und es kommen keine neuen Symbole).
+  leinen: { trinkgeld: { S: 2, M: 3, L: 6, XL: 12, XXL: 20 }, abstandM: 60, gleichzeitig: 2, warteSek: 1.4, warteBisTempo: 3 },
+
   // ---------------------------------------------------------------- Stege nachrüsten (P30)
   // Logik in web/js/features/nachruesten.js, Beschreibung in docs/nachruesten.md. Je Steg einmal.
   // kosten = grund + jePlatz[Klasse] für jeden betroffenen Gastplatz, der am Steg gerade liegt (auf 10 €
