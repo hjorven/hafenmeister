@@ -75,6 +75,7 @@ const MODULES = [
   './features/havarie.js',             // P37: Havarist einschleppen (Bild und Meldung lädt das Modul selbst)
   './features/stimmung.js',            // P46: ruhiger Abend mit Lichterketten, Serien-Akkord (docs/stimmung.md)
   './features/leinen.js',              // P48: Leinen annehmen beim Anlegen (docs/leinen.md)
+  './features/spaetankoemmling.js',    // P53: Spätankömmling läuft nachts mit Lichtern ein (docs/spaetankoemmling.md)
   './ui/statistik.js',                 // Statistik der letzten 30 Tage, Saisons (P41)
   './ui/oberflaeche.js',
 ];

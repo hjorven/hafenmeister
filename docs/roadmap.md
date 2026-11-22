@@ -299,7 +299,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
 | F39 | Naturecke: Schilfgürtel erhalten oder bebauen, nicht umkehrbar | offen | P52 |
-| F40 | Spätankömmling: nachts läuft ein Boot mit Lichtern ein | offen | P53 |
+| F40 | Spätankömmling: nachts läuft ein Boot mit Lichtern ein | erledigt ([spaetankoemmling.md](spaetankoemmling.md)): an manchen Abenden kommt der letzte Übernachter im Dunkeln mit Taschenlampe und Positionslichtern, Meldung, Schein an der Box, die Nacht wartet bis er fest ist, ein Viertel Anker Dank | P53 |
 
 ### Teilen ohne Server
 
@@ -728,7 +728,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P50 | Einstellungen für Sicht und Bewegung | F25 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
 | P51 | Hafentiere | F38 | erledigt (docs/hafentiere.md) |
 | P52 | Naturecke am Schilf | F39 | bestehend: "Landschaft und Wasser gestalten" |
-| P53 | Spätankömmling in der Nacht | F40 | neu |
+| P53 | Spätankömmling in der Nacht | F40 | erledigt (docs/spaetankoemmling.md) |
 
 ### Welle 5: Regionen und Online (Extras)
 
