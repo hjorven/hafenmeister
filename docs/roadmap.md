@@ -115,7 +115,7 @@ Note 1 bis 5 aus dem Überblick. "nein" heißt: bleibt, wie es ist.
 |---|---|---|---|
 | Baumodus mit Vorschau und Rat | 5 | nein | (P18 baut darauf auf) |
 | Tagesrhythmus | 4 | nein | |
-| Passregel | 4 | nein | (P29 Baggern gibt ihr einen Hebel) |
+| Passregel | 4 | nein | (P29 Baggern gibt ihr einen Hebel: ausgebaggerte Stege und Niedrigwasser) |
 | Stegprojekte | 4 | teilweise | P05 |
 | Tagestörn der Gäste | 4 | nein | |
 | Grün-Rot-Schilder | 4 | nein | (P50 Form zusätzlich zur Farbe, erledigt) |
@@ -231,7 +231,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F4 | Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung | erledigt (PR 314): halten und ziehen, ab dem zweiten Mal −0,5 Anker | P33 |
 | F5 | Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld `exposed`) | erledigt (PR 392, [wind.md](wind.md)): Windlage je Platz aus Wellenweg gegen den Wind des Tages, ab Stufe 2, Zeichen beim Ziehen | P34 |
 | F6 | Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison | erledigt (P35, [preisstufe.md](preisstufe.md)): Preistafel im Gästebuch und Aufsteller am Hafenmeisterhaus, einmal je Saison und nach jedem Ausbau, Gäste schreiben über die Preise | P35 |
-| F7 | Baggern: Wassertiefe je Steg als Bauprojekt | offen | P29 |
+| F7 | Baggern: Wassertiefe je Steg als Bauprojekt | erledigt (P29, PR 420, [baggern.md](baggern.md)): je Steg ab Stufe 2 im Bauen-Menü, Bagger mit Schute, dazu Niedrigwasser bei starkem Westwind, an dem knapp liegende Boote im Schlick sitzen | P29 |
 | F8 | Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar | erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasserhähne seit P31, [nachruesten.md](nachruesten.md) | P30 |
 | F9 | Neue Wünsche: WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | erledigt (P31, [gaestewuensche.md](gaestewuensche.md)): Frischwasser über Wasserhähne am Steg (Stufe 2), WLAN (3), Waschmaschine ab 3 Nächten (4), Absaugstation (5), Hafenrundfahrt mit der Barkasse (6); Brötchen seit P19 | P31 |
 | F10 | Bojenfeld: billige Muringbojen im See für kleine Boote ohne Wünsche | erledigt (P36, [bojenfeld.md](bojenfeld.md)): 6 Bojen ab Stufe 2, 6 weitere ab Stufe 4, Lage je Küste im tiefen Wasser, Boote S und M bis 9 m, 60 % Liegegeld, ohne Strom und Wasser, letzte Wahl für Büro und Selbst-Einfahren, kein Dauerplatz | P36 |
@@ -699,7 +699,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | erledigt (PR 322, docs/hafengesten.md) |
 | P27 | Päckchen liegen bei vollem Hafen | F1 | erledigt (PR 330, [paeckchen.md](paeckchen.md)) |
 | P28 | Anmeldung per Funk | F2 (nutzt P11) | erledigt (PR 288, `docs/funk-anmeldung.md`) |
-| P29 | Baggern für tiefere Liegeplätze | F7 | neu |
+| P29 | Baggern für tiefere Liegeplätze | F7 | erledigt (PR 420, [baggern.md](baggern.md): Steg ausbaggern im Bauen-Menü, Niedrigwasser bei Westwind) |
 | P30 | Stege nachrüsten | F8 | erledigt (PR 297, [nachruesten.md](nachruesten.md)) |
 | P31 | Neue Gästewünsche | F9, B8 | erledigt ([gaestewuensche.md](gaestewuensche.md): Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt) |
 | P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md); beim Selbst-Einfahren zusammen (PR 414); Rest Prio B: Boxen frei halten, gemeinsam weiterfahren) |

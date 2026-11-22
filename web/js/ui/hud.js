@@ -18,6 +18,7 @@ const REASON_LABEL = {
   length: 'Das Boot ist zu lang für diesen Platz.',
   beam: 'Das Boot ist zu breit für diesen Platz.',
   draft: 'Hier ist das Wasser zu flach für dieses Boot.',
+  niedrigwasser: 'Heute ist Niedrigwasser: Hier bleibt gerade zu wenig Wasser unter dem Kiel.',
   size: 'Dieser Platz ist für andere Schiffsgrößen.',
   reserved: 'Dieser Platz ist fest vergeben.',
   funk: 'Diese Box ist für ein angemeldetes Boot frei gehalten.',
@@ -242,7 +243,9 @@ export function init(game) {
           // Flottille (P32): wer dazugehört und was die Gruppe will
           flotte ? el('p', { class: 'card-geschichte card-flotte' }, flotteKopf(b, flotte)) : null,
           // Starkwind (P34): was Schild, Welle und Windlinien über den Boxen bedeuten
-          game.wind?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind' }, game.wind.kartenSatz(b)) : null),
+          game.wind?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind' }, game.wind.kartenSatz(b)) : null,
+          // Niedrigwasser (P29): Kiel im Schlick
+          game.baggern?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind' }, game.baggern.kartenSatz(b)) : null),
         el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Schließen', title: 'Schließen', onclick: schliessen }, 'Schließen')),
       el('ul', { class: 'hm-fakten', 'aria-label': 'Eckdaten' },
         el('li', { class: 'groesse', title: 'Größenklasse' }, `Größe ${b.size}`),
@@ -649,8 +652,15 @@ export function init(game) {
     schedule();
     return boatId;
   });
-  game.on('sim:assignFailed', ({ reason }) => {
+  game.on('sim:assignFailed', ({ reason, berthId, boatId }) => {
     note = REASON_LABEL[reason] ?? '';
+    // Baggern (P29): Lässt sich der Steg ausbaggern und passt das Boot dann, sagt die Karte es
+    if ((reason === 'draft' || reason === 'niedrigwasser') && berthId != null) {
+      const steg = game.sim?.ctx?.berthById?.[berthId]?.jetty;
+      const a = steg && game.baggern?.angebote?.().find((x) => x.steg === steg);
+      const boot = game.sim?.state?.boats?.[boatId];
+      if (a && a.plaetze.includes(berthId) && !(boot?.draft > a.bisTiefgang + (game.baggern?.pegel?.() ?? 0) + 1e-9)) note += ` Ausbaggern im Baumenü macht ${a.name.replace(/ ausbaggern$/, '')} tiefer.`;
+    }
     if (cardMode === 'boat') schedule();
   });
   game.on('ui:cancel', () => {

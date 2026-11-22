@@ -229,6 +229,33 @@ export function init(game) {
       });
     }
 
+    // Stege ausbaggern (P29): tieferes Wasser fuer Boote mit mehr Tiefgang
+    const liste = (w) => (w.length <= 1 ? w.join('') : `${w.slice(0, Math.min(w.length, 3) - 1).join(', ')} und ${w[Math.min(w.length, 3) - 1]}`);
+    for (const a of game.baggern?.angebote?.() ?? []) {
+      const sname = HAFEN.stege?.[a.steg] ?? `Steg ${a.steg}`;
+      const namen = [...new Set(a.neu.map((t) => t.typ))];
+      const n = a.plaetze.length;
+      out.push({
+        key: `baggern:${a.steg}`, art: 'steg', nachruesten: 'baggern', baggern: true, steg: a.steg, id: `baggern-${a.steg}`,
+        name: a.name, kosten: a.kosten, gesperrt: null, ohneSchild: true, vermisst: a.flach,
+        fertigTitel: `${sname} ist ausgebaggert`,
+        fertigText: `${n === 1 ? 'Ein Platz ist' : `${n} Plätze sind`} jetzt mindestens ${num1(a.tiefe)} m tief. Der Bagger arbeitet noch kurz, die tiefe Rinne bleibt.`,
+        kurz: `${num1(a.tiefe)} m tief`,
+        nutzen: [
+          `An ${a.zuFlach === a.alle ? (a.alle === 1 ? 'diesem Platz' : `allen ${a.alle} Plätzen`) : `${a.zuFlach} von ${a.alle} Plätzen`} ist das Wasser zu flach für ${liste(namen)}. Danach ${namen.length === 1 ? 'hat es' : 'haben sie'} an jedem Platz genug Wasser unter dem Kiel.`,
+          `${n === 1 ? 'Ein Platz wird' : `${n} Plätze werden`} mindestens ${num1(a.tiefe)} m tief, genug für Boote bis ${num1(a.bisTiefgang)} m Tiefgang.`,
+          a.spaeter ? `Mit Ausbaustufe ${a.spaeter} wird es hier ohnehin so tief.` : 'Neue Plätze an diesem Steg sind gleich mit tief.',
+        ],
+        ort: () => plaetzeOrt(a.plaetze),
+        geist: () => game.baggern?.geist?.(a.steg),
+        bedarf: () => {
+          const f = game.baggern?.flach?.(a.steg) ?? 0;
+          return f ? `Zuletzt ${f === 1 ? 'fuhr ein Boot' : `fuhren ${f} Boote`} weiter, ${f === 1 ? 'das' : 'die'} an ${sname} nur zu wenig Wasser unter dem Kiel ${f === 1 ? 'hatte' : 'hatten'}.` : null;
+        },
+        kaufen: () => game.baggern.kaufen(a.steg),
+      });
+    }
+
     // Stege umbauen (P59): zwei Boxen zur Doppelbox und zurueck
     for (const a of game.umbauen?.angebote?.() ?? []) {
       const sname = HAFEN.stege?.[a.steg] ?? `Steg ${a.steg}`;
@@ -432,6 +459,7 @@ export function init(game) {
         heuteTag: st.day, ausgaben: st.stats?.heute?.tag === st.day && st.stats.heute.ausgaben ? structuredClone(st.stats.heute.ausgaben) : {},
         services: st.modules?.services ? structuredClone(st.modules.services) : null,
         nachruesten: structuredClone(st.modules?.nachruesten ?? {}),
+        baggern: st.modules?.baggern ? structuredClone(st.modules.baggern) : null,
         ausbau: speicher()?.ausbau ? structuredClone(speicher().ausbau) : null,
       };
     } catch { return null; }
@@ -453,6 +481,7 @@ export function init(game) {
     if (st.stats?.heute && st.stats.heute.tag === u.heuteTag) st.stats.heute.ausgaben = u.ausgaben;
     if (u.services && st.modules?.services) { ersetze(st.modules.services, u.services); game.services?.neuZeichnen?.(); }
     if (u.nachruesten) { st.modules ||= {}; st.modules.nachruesten = u.nachruesten; game.emit('nachruesten:neu'); }
+    if (u.baggern) { st.modules ||= {}; st.modules.baggern = u.baggern; }
     speicher().ausbau = u.ausbau;
     zeigeBaustelle();
     for (const g of geaendert) game.emit('build', g);
@@ -1253,7 +1282,7 @@ export function init(game) {
     game.emit('bauen:gebaut', { key, name: e.name, kosten: vorher - game.sim.state.money || e.kosten });
     // Kleine Karte bleibt stehen, damit das neue Bauwerk sichtbar bleibt
     aktiv = null;
-    fertig = { name: e.name, text: e.ueberlauf ? `${e.plaetzeNeu} Muringbojen liegen im See. Kleine Boote können dort festmachen, ohne Strom und Wasser.` : e.art === 'steg' && !e.nachruesten ? `${e.plaetzeNeu === 1 ? 'Ein neuer Liegeplatz ist' : `${e.plaetzeNeu} neue Liegeplätze sind`} frei.` : e.nutzen[0] ?? '' };
+    fertig = { name: e.name, text: e.fertigText ?? (e.ueberlauf ? `${e.plaetzeNeu} Muringbojen liegen im See. Kleine Boote können dort festmachen, ohne Strom und Wasser.` : e.art === 'steg' && !e.nachruesten ? `${e.plaetzeNeu === 1 ? 'Ein neuer Liegeplatz ist' : `${e.plaetzeNeu} neue Liegeplätze sind`} frei.` : e.nutzen[0] ?? ''), ...(e.fertigTitel ? { titel: e.fertigTitel } : {}) };
     meldung = '';
     zeichne();
   }
