@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "e0957cc"
+  "commit": "62be3ee"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -783,10 +783,11 @@
    "id": "P32",
    "titel": "Flottillen",
    "inhalt": "F3, Gruppen-Ankunft",
-   "thread": "erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md; Rest Prio B: beim Selbst-Einfahren zusammen, Boxen frei halten, gemeinsam weiterfahren)",
+   "thread": "erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md; beim Selbst-Einfahren zusammen (PR 414); Rest Prio B: Boxen frei halten, gemeinsam weiterfahren)",
    "welle": 3,
    "prs": [
-    393
+    393,
+    414
    ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
@@ -795,7 +796,8 @@
    "status": "erledigt",
    "bilder": [
     83,
-    84
+    84,
+    91
    ]
   },
   {
@@ -899,29 +901,39 @@
    "id": "P39",
    "titel": "Jugendtraining am Segelclub",
    "inhalt": "F13",
-   "thread": "erledigt (jugendtraining.md)",
+   "thread": "erledigt (PR 412, jugendtraining.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    412
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F13"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    89,
+    90
+   ]
   },
   {
    "id": "P40",
    "titel": "Seltene Besucher",
    "inhalt": "F16 (nach P21)",
-   "thread": "erledigt (docs/besucher.md)",
+   "thread": "erledigt (PR 416, docs/besucher.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    416
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F16"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    92,
+    93
+   ]
   },
   {
    "id": "P41",
@@ -5760,18 +5772,78 @@
    "datum": "2026-11-22",
    "quelle": "hafenfest/pc-s4-5a-buehne.png",
    "nr": 88
+  },
+  {
+   "datei": "p39-pr412-pc-slip.jpg",
+   "pakete": [
+    "P39"
+   ],
+   "titel": "Jugendtraining: Jollen am Slip des Segelclubs",
+   "pr": 412,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "jugendtraining/pc-2-slip.png",
+   "nr": 89
+  },
+  {
+   "datei": "p39-pr412-pc-kurs.jpg",
+   "pakete": [
+    "P39"
+   ],
+   "titel": "Jugendtraining: Optis segeln ihren Kurs vor dem Hafen",
+   "pr": 412,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "jugendtraining/pc-3-kurs.png",
+   "nr": 90
+  },
+  {
+   "datei": "p32-pr414-pc-einfahrt.jpg",
+   "pakete": [
+    "P32"
+   ],
+   "titel": "Flottille fährt geschlossen ein und legt nebeneinander an",
+   "pr": 414,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "flottillen-zusammen/pc-flottille-einfahrt.png",
+   "nr": 91
+  },
+  {
+   "datei": "p40-pr416-pc-besucherschiffe.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Seltene Besucher: vier besondere Schiffe",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/01-vier-schiffe.png",
+   "nr": 92
+  },
+  {
+   "datei": "p40-pr416-pc-koenigsyacht.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Königsyacht meldet sich per Funk, Ehrenplatz freihalten",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/02-pc-funk-koenigsyacht.png",
+   "nr": 93
   }
  ],
  "neueBilder": [
+  93,
+  91,
+  90,
   88,
   86,
   84,
   82,
   81,
-  80,
-  79,
-  77,
-  76
+  80
  ],
  "merges": [
   {
