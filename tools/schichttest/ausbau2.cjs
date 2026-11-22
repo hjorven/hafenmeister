@@ -1,7 +1,7 @@
 // Schichttest: Schichten ab 18 (Dauerlieger, Logbuch, Winter). Aufbau wie in ausbau.cjs:
 // neu(t, z) prüft die neue Funktion, wieder(t, z) wiederholt sie kurz nach jeder späteren Schicht.
 
-const { setzeTempo, insBild, fensterZu } = require('./schichten.cjs');
+const { setzeTempo, insBild, fensterZu, ziehenUndAnlegen } = require('./schichten.cjs');
 const { bauzeile, bauenSchliessen } = require('./ausbau.cjs');
 
 // ------------------------------------------------------------------ Schicht 18: Dauerlieger
@@ -309,5 +309,80 @@ async function angeboteWieder(t, z) {
 }
 const S23 = { nr: 23, name: 'Angebote (Services)', paket: 'P23', neu: angebote, wieder: angeboteWieder };
 
-const SCHICHTEN = [S18, S19, S20, S21, S22, S23];
+// ------------------------------------------------------------------ Schicht 24: Flottillen (P32)
+// Ab Stufe 3 kommen an manchen Tagen drei bis fünf Boote einer Art zusammen und wollen an einen Steg.
+// Bei 8x bis zu einer Flottille an den Bojen spielen, ein Boot antippen (Karte nennt die Gruppe),
+// dann alle Boote von Hand an Boxen desselben Stegs ziehen: die Gruppe liegt danach zusammen.
+const FLOTTE_DA = () => { const S = window.hafenmeister.sim; const ws = S.waitingBoats().filter((b) => b.flotte && b.atBuoy && window.__st.bootObjekt(b.id));
+  if (!ws.length) return false; const f = ws[0].flotte; const lage = S.flottille?.(ws[0].id);
+  return { id: f.id, name: f.name, n: f.n, anBoje: ws.filter((b) => b.flotte.id === f.id).map((b) => String(b.id)), lage }; };
+async function flottillen(t, z) {
+  await fensterZu(t);
+  await winterWeg(t);
+  const stufe = await t.G(() => window.hafenmeister.sim.state.stage);
+  if (stufe < 3) { await t.hinweis('Flottillen', `erst ab Stufe 3 (jetzt ${stufe})`, { bild: false }); return; }
+  // Bei 8x spielen, bis eine Flottille an den Bojen liegt (höchstens 10 min, an 15 bis 25 % der Tage)
+  let f = await t.G(FLOTTE_DA);
+  const t0 = Date.now();
+  while (!f && Date.now() - t0 < 10 * 60_000) {
+    await setzeTempo(t, 'acht');
+    // Früh bremsen: sobald eine Flottille unterwegs ist oder heute gleich kommt (bei 8x läge ein Boot nur Bruchteile
+    // einer Sekunde an der Boje, bevor es selbst einfährt)
+    const bald = await t.bis(() => { const S = window.hafenmeister.sim; const st = S.state;
+      return S.waitingBoats().some((b) => b.flotte) || (st.upcoming || []).some((b) => b.flotte && b.arriveAt <= st.clock + 20); }, null, 60_000);
+    if (bald) { await setzeTempo(t, 'normal'); await t.bis(() => window.hafenmeister.sim.waitingBoats().some((b) => b.flotte && b.atBuoy), null, 90_000); }
+    await setzeTempo(t, 'pause');
+    if (!(await winterWeg(t))) await fensterZu(t);
+    f = await t.G(FLOTTE_DA);
+  }
+  if (!f) { await t.hinweis('Flottillen', 'in 10 min bei 8x keine Flottille an den Bojen', { bild: false }); return; }
+  await setzeTempo(t, 'pause');
+  await t.hinweis('Flottille', `${f.name}: ${f.n} Boote, ${f.anBoje.length} an den Bojen`, { bild: true });
+  // Antippen: die Bootskarte nennt die Gruppe
+  const erstes = f.anBoje[0];
+  const lage = await insBild(t, (bid) => [window.__st.bootSchirm(bid)], erstes);
+  if (lage.ok) {
+    await t.sp.tippen(lage.p[0].x, lage.p[0].y);
+    const karte = await t.bis(() => document.body.classList.contains('card-boat') && !document.getElementById('card').hidden, null, 4000);
+    const txt = await t.G(() => document.getElementById('card')?.textContent || '');
+    await t.punkt('Bootskarte nennt die Flottille', karte && txt.includes(f.name), karte ? `"${f.name}" ${txt.includes(f.name) ? 'steht' : 'fehlt'} in der Karte` : 'Karte ging nicht auf', { bild: true, schwere: 'C' });
+    await fensterZu(t);
+  } else await t.hinweis('Flottille', `Boot ${erstes} nicht frei im Bild`);
+  // Wie ein Spieler: jedes Boot der Gruppe, sobald es an der Boje liegt, an denselben Steg ziehen.
+  // Zielsteg: wo schon ein Boot der Gruppe liegt, sonst der Steg mit den meisten freien passenden Boxen.
+  const NAECHSTES = (fid) => { const S = window.hafenmeister.sim; const m = S.flottillenMitglieder(fid);
+    const liegt = m.find((b) => b.status === 'moored'); const steg = liegt ? S.flottillenSteg(liegt.berthId) : null;
+    const b = m.find((x) => x.status === 'waiting' && x.atBuoy && window.__st.bootObjekt(x.id)); if (!b) return { offen: m.filter((x) => x.status !== 'moored').length };
+    const je = {}; for (const p of S.passendePlaetze(b.id) || []) { const j = S.flottillenSteg(p); (je[j] ||= []).push(p); }
+    const wahl = steg ?? Object.entries(je).sort((a, c) => c[1].length - a[1].length)[0]?.[0] ?? null;
+    return { id: String(b.id), steg: wahl, frei: wahl ? je[wahl] || [] : [], offen: m.filter((x) => x.status !== 'moored').length }; };
+  let gezogen = 0, keinPlatz = 0;
+  const t1 = Date.now();
+  while (Date.now() - t1 < 150_000) {
+    const n = await t.G(NAECHSTES, f.id);
+    if (!n.offen) break;
+    if (!n.id) { await setzeTempo(t, 'normal'); await t.warte(800); continue; }
+    await setzeTempo(t, 'pause');
+    if (!n.frei.length) { keinPlatz++; await t.hinweis('Flottille', `Boot ${n.id}: keine freie passende Box an Steg ${n.steg}`, { bild: keinPlatz === 1 }); await setzeTempo(t, 'normal'); await t.warte(3000); continue; }
+    const platz = await ziehenUndAnlegen(t, z, { id: n.id, groesse: '' }, { nur: n.frei, warten: false });
+    if (platz) gezogen++; else { await setzeTempo(t, 'normal'); await t.warte(1500); }
+  }
+  // Alle fest und zusammen an einem Steg?
+  await setzeTempo(t, 'drei');
+  const LAGE = (fid) => { const S = window.hafenmeister.sim; const m = S.flottillenMitglieder(fid); return m.length ? S.flottille(m[0].id) : null; };
+  let ende = await t.G(LAGE, f.id);
+  for (let i = 0; i < 60 && ende && ende.liegen < ende.n && !ende.zerrissen; i++) { await t.warte(1000); ende = (await t.G(LAGE, f.id)) || ende; }
+  await setzeTempo(t, 'pause');
+  await t.punkt('Flottille liegt zusammen an einem Steg', !!ende && ende.together === true, ende ? `${gezogen} von Hand gezogen, Stege ${JSON.stringify(ende.stege)}, liegen ${ende.liegen}/${ende.n}${ende.zerrissen ? ', zerrissen' : ''}` : 'Flottille nicht mehr da', { bild: true, schwere: 'B' });
+  z.flotte = f.id;
+}
+async function flottillenWieder(t, z) {
+  if (z.flotte == null) return;
+  const l = await t.G((fid) => { const S = window.hafenmeister.sim; const m = S.flottillenMitglieder(fid); return m.length ? S.flottille(m[0].id) : null; }, z.flotte);
+  if (!l) return;   // abgereist
+  await t.punkt('Flottille bleibt zusammen', !l.zerrissen && Object.keys(l.stege).length <= 1, `Stege ${JSON.stringify(l.stege)}${l.zerrissen ? ', zerrissen' : ''}`, { bild: false, schwere: 'B' });
+}
+const S24 = { nr: 24, name: 'Flottillen', paket: 'P32', neu: flottillen, wieder: flottillenWieder };
+
+const SCHICHTEN = [S18, S19, S20, S21, S22, S23, S24];
 module.exports = { SCHICHTEN, winterWeg };
