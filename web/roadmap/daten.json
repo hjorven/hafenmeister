@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "9e312b8"
+  "commit": "0eec7fa"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1067,14 +1067,14 @@
    "id": "P47",
    "titel": "Große Ankünfte ankündigen",
    "inhalt": "F31",
-   "thread": "bestehend: \"Kamera frei neigen und drehen\"",
+   "thread": "erledigt (Thread \"Große Ankünfte ankündigen\", docs/grosse-ankuenfte.md)",
    "welle": 4,
    "prs": [],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F31"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2391,8 +2391,8 @@
   {
    "code": "F31",
    "text": "Große Ankünfte mit Horn, Kamera schwenkt auf Wunsch zur Einfahrt",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P47): Kreuzfahrt, Flotte, Windjammer und seltene Besucher tuten beim Einlaufen, Meldung mit Ansehen, kurze Kamerafahrt nur wenn der Spieler nichts tut, Einstellung Mit Kamera/Nur Horn/Aus, docs/grosse-ankuenfte.md",
    "pakete": [
     "P47"
    ],
@@ -4666,11 +4666,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 5,
+    "erledigt": 6,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 9,
+    "offen": 8,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4725,20 +4725,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 58,
+  "erledigt": 59,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 27,
+  "offen": 26,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 189,
+  "erledigt": 190,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 23,
+  "offen": 22,
   "entfaellt": 1,
   "alle": 219
  },
