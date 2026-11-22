@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "d30853f"
+  "commit": "253ae2b"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -880,14 +880,14 @@
    "id": "P38",
    "titel": "Eigenes Hafenfest ansetzen",
    "inhalt": "F12",
-   "thread": "neu",
+   "thread": "erledigt (hafenfest.md)",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F12"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2120,8 +2120,8 @@
   {
    "code": "F12",
    "text": "Eigenes Hafenfest einmal pro Saison ansetzen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P38, hafenfest.md): Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk, Bilanz am Abend",
    "pakete": [
     "P38"
    ],
@@ -3053,7 +3053,7 @@
    "code": "E8",
    "text": "Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste)",
    "status": "teilweise",
-   "statusText": "teilweise: Reservierungen erledigt (P28, PR 288); Havaristen und Feste kommen mit P37, P38",
+   "statusText": "teilweise: Reservierungen erledigt (P28, PR 288), eigene Feste erledigt (P38); Havaristen kommen mit P37",
    "pakete": [
     "P02"
    ],
@@ -4582,11 +4582,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 12,
+    "erledigt": 13,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 8,
+    "offen": 7,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4670,20 +4670,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 47,
+  "erledigt": 48,
   "teilweise": 2,
   "arbeit": 0,
   "frage": 0,
-  "offen": 37,
+  "offen": 36,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 174,
+  "erledigt": 175,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 37,
+  "offen": 36,
   "entfaellt": 1,
   "alle": 219
  },

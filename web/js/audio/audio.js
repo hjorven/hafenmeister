@@ -13,6 +13,7 @@
 //   audio.horn('L');              // Schiffshorn nach Größe
 //   audio.setPhase('abend');      // 'tag' | 'abend' | 'nacht'
 //   audio.setWeather('sturm');    // 'ruhig' | 'wind' | 'sturm'
+//   audio.setFest(true);          // Festmusik (Hafenfest mit Musik, P38), tags und abends
 //   audio.setHarbor({ stufe: 3, boote: 12 });
 //   audio.setVolume('musik', 0.4);
 //   audio.toggleMute();
@@ -94,6 +95,11 @@ const MUSIK = {
   sturm: {
     e: 0.19, pad: 0.03, pluck: 0, bass: 0.13, pulse: true, melody: 0.5, scale: PENTA_MOLL,
     chords: [[62, MOLL], [70, DUR], [65, DUR], [69, DUR]],
+  },
+  // Hafenfest (P38, features/hafenfest.js): Kapelle auf der Bühne, schneller und zum Schunkeln
+  fest: {
+    e: 0.16, pad: 0.025, pluck: 1, bass: 0.22, pulse: true, melody: 1, scale: PENTA_DUR,
+    chords: [[62, DUR], [67, DUR], [69, DUR], [62, DUR], [67, DUR], [62, DUR], [69, DUR], [62, DUR]],
   },
 };
 
@@ -282,6 +288,13 @@ class HafenAudio {
     this.state.phase = phase;
     if (this._mus) this._mus.pendingChange = true;
     this._emit();
+  }
+
+  /** Hafenfest mit Musik (P38): tags und abends spielt die Festmusik */
+  setFest(an) {
+    if (!!an === !!this.state.fest) return;
+    this.state.fest = !!an;
+    if (this._mus) this._mus.pendingChange = true;
   }
 
   setWeather(wetter) {
@@ -799,7 +812,9 @@ class HafenAudio {
   }
 
   _musProg() {
-    return this.state.wetter === 'sturm' ? MUSIK.sturm : MUSIK[this.state.phase];
+    if (this.state.wetter === 'sturm') return MUSIK.sturm;
+    if (this.state.fest && this.state.phase !== 'nacht') return MUSIK.fest;
+    return MUSIK[this.state.phase];
   }
 
   _musAudible() {
