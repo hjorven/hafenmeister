@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "37d8756"
+  "commit": "63f9f4f"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -783,10 +783,11 @@
    "id": "P32",
    "titel": "Flottillen",
    "inhalt": "F3, Gruppen-Ankunft",
-   "thread": "erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md; Rest Prio B: beim Selbst-Einfahren zusammen, Boxen frei halten, gemeinsam weiterfahren)",
+   "thread": "erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md; beim Selbst-Einfahren zusammen (PR 414); Rest Prio B: Boxen frei halten, gemeinsam weiterfahren)",
    "welle": 3,
    "prs": [
-    393
+    393,
+    414
    ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
@@ -795,7 +796,8 @@
    "status": "erledigt",
    "bilder": [
     83,
-    84
+    84,
+    91
    ]
   },
   {
@@ -899,29 +901,39 @@
    "id": "P39",
    "titel": "Jugendtraining am Segelclub",
    "inhalt": "F13",
-   "thread": "erledigt (jugendtraining.md)",
+   "thread": "erledigt (PR 412, jugendtraining.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    412
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F13"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    89,
+    90
+   ]
   },
   {
    "id": "P40",
    "titel": "Seltene Besucher",
    "inhalt": "F16 (nach P21)",
-   "thread": "neu",
+   "thread": "erledigt (PR 416, docs/besucher.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    416
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F16"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    92,
+    93
+   ]
   },
   {
    "id": "P41",
@@ -2173,8 +2185,8 @@
   {
    "code": "F16",
    "text": "Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P40): vier Schiffe mit Ehrenplatz, Schwäne und Schweinswal, Fotos im Logbuch-Reiter „Besucher“, vier Erfolge, docs/besucher.md",
    "pakete": [
     "P40"
    ],
@@ -4587,11 +4599,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 15,
+    "erledigt": 16,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 5,
+    "offen": 4,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4675,20 +4687,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 50,
+  "erledigt": 51,
   "teilweise": 2,
   "arbeit": 0,
   "frage": 0,
-  "offen": 34,
+  "offen": 33,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 178,
+  "erledigt": 179,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 33,
+  "offen": 32,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5760,20 +5772,155 @@
    "datum": "2026-11-22",
    "quelle": "hafenfest/pc-s4-5a-buehne.png",
    "nr": 88
+  },
+  {
+   "datei": "p39-pr412-pc-slip.jpg",
+   "pakete": [
+    "P39"
+   ],
+   "titel": "Jugendtraining: Jollen am Slip des Segelclubs",
+   "pr": 412,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "jugendtraining/pc-2-slip.png",
+   "nr": 89
+  },
+  {
+   "datei": "p39-pr412-pc-kurs.jpg",
+   "pakete": [
+    "P39"
+   ],
+   "titel": "Jugendtraining: Optis segeln ihren Kurs vor dem Hafen",
+   "pr": 412,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "jugendtraining/pc-3-kurs.png",
+   "nr": 90
+  },
+  {
+   "datei": "p32-pr414-pc-einfahrt.jpg",
+   "pakete": [
+    "P32"
+   ],
+   "titel": "Flottille fährt geschlossen ein und legt nebeneinander an",
+   "pr": 414,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "flottillen-zusammen/pc-flottille-einfahrt.png",
+   "nr": 91
+  },
+  {
+   "datei": "p40-pr416-pc-besucherschiffe.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Seltene Besucher: vier besondere Schiffe",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/01-vier-schiffe.png",
+   "nr": 92
+  },
+  {
+   "datei": "p40-pr416-pc-koenigsyacht.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Königsyacht meldet sich per Funk, Ehrenplatz freihalten",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/02-pc-funk-koenigsyacht.png",
+   "nr": 93
   }
  ],
  "neueBilder": [
+  93,
+  91,
+  90,
   88,
   86,
   84,
   82,
   81,
-  80,
-  79,
-  77,
-  76
+  80
  ],
  "merges": [
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P39 (PR 412), P32-Rest (PR 414), P40 (PR 416) mit Bildern",
+   "pr": 417,
+   "pakete": [
+    "P39",
+    "P32",
+    "P40"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P40 Seltene Besucher: besondere Schiffe am Ehrenplatz, Schwäne, Schweinswal, Fotos im Logbuch",
+   "pr": 416,
+   "pakete": [
+    "P40"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Schichttest: Schicht 25 Wind und 26 Stammgäste, Wetterbericht nennt Starkwind an Regentagen",
+   "pr": 415,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Flottillen halten beim Selbst-Einfahren zusammen (P32-Rest)",
+   "pr": 414,
+   "pakete": [
+    "P32"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P39 Jugendtraining am Segelclub",
+   "pr": 412,
+   "pakete": [
+    "P39"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Neuer Fischkutter erscheint erst, wenn der alte abgelegt hat",
+   "pr": 411,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P38 Hafenfest (PR 405) mit Bildern",
+   "pr": 409,
+   "pakete": [
+    "P38"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Arbeitsplan: P31, P38, P88 erledigt; Flottillen-Rest, P35, P37, P39 starten",
+   "pr": 410,
+   "pakete": [
+    "P31",
+    "P38",
+    "P88",
+    "P35",
+    "P37",
+    "P39"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P88 Teil 3: eigene Bahn je Richtung auch auf dem Seeweg",
+   "pr": 407,
+   "pakete": [
+    "P88"
+   ]
+  },
   {
    "datum": "2026-11-22",
    "titel": "P31 Neue Gästewünsche: Frischwasser, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt",
@@ -5795,81 +5942,6 @@
    "titel": "Zeitraffer zählt Flottillen je Stufe",
    "pr": 403,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P88 Teil 2 (PR 400)",
-   "pr": 404,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Arbeitsplan: P88 Teil 2, Großschiff-Vortritt gestrichen",
-   "pr": 402,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P88 Teil 2: Vorbeifahrer machen Platz, sobald sie ein Hafenboot aufhalten",
-   "pr": 400,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Arbeitsplan: Stand nach P34, P32, P25, P88 Teil 1; Flottillen-Quote Prio B; P37 und P38 starten",
-   "pr": 401,
-   "pakete": [
-    "P34",
-    "P32",
-    "P25",
-    "P88",
-    "P37",
-    "P38"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Schichttest: Schicht 24 Flottillen, Fundorte bei Überlappungen",
-   "pr": 399,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P25 Stammgäste Teil 1 und 2 (PR 394) mit Bildern",
-   "pr": 398,
-   "pakete": [
-    "P25"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Wind im Hafen (P34, F5 und F35)",
-   "pr": 392,
-   "pakete": [
-    "P34"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P32 Flottillen (PR 393) mit Bildern",
-   "pr": 396,
-   "pakete": [
-    "P32"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P25 Stammgäste mit Wirkung und Gästepost",
-   "pr": 394,
-   "pakete": [
-    "P25"
-   ]
   }
  ]
 }
