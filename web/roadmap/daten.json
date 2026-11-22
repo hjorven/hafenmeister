@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "73074f4"
+  "commit": "9e312b8"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1058,7 +1058,10 @@
     "L1"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    104,
+    105
+   ]
   },
   {
    "id": "P47",
@@ -1078,14 +1081,14 @@
    "id": "P48",
    "titel": "Leinen annehmen beim Anlegen",
    "inhalt": "F32",
-   "thread": "bestehend: \"Schiffsanimationen umsetzen\"",
+   "thread": "erledigt (Thread \"Leinen beim Anlegen annehmen lassen\", leinen.md)",
    "welle": 4,
    "prs": [],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F32"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2399,8 +2402,8 @@
   {
    "code": "F32",
    "text": "Leinen annehmen: Symbol am Steg, Antippen bringt Trinkgeld",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (leinen.md): Tau am Steg, Festmacher fängt die Leine, Töne je Leine, Trinkgeld 2 bis 20 €",
    "pakete": [
     "P48"
    ],
@@ -4663,11 +4666,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 4,
+    "erledigt": 5,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 10,
+    "offen": 9,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4722,20 +4725,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 57,
+  "erledigt": 58,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 28,
+  "offen": 27,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 188,
+  "erledigt": 189,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 24,
+  "offen": 23,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5987,9 +5990,34 @@
    "datum": "2026-11-22",
    "quelle": "gaestewuensche/p31-handy-waschhaus.png",
    "nr": 103
+  },
+  {
+   "datei": "p46-pr427-pc-lichterketten.jpg",
+   "pakete": [
+    "P46"
+   ],
+   "titel": "Ruhiger Abend: Lichterketten an den Stegen",
+   "pr": 427,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "stimmung/pc-2-lichterketten-an.png",
+   "nr": 104
+  },
+  {
+   "datei": "p46-pr427-handy-abend.jpg",
+   "pakete": [
+    "P46"
+   ],
+   "titel": "Abendstimmung im großen Hafen",
+   "pr": 427,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "stimmung/handy-1-lichterketten-stufe6.png",
+   "nr": 105
   }
  ],
  "neueBilder": [
+  105,
   103,
   101,
   99,
@@ -5997,8 +6025,7 @@
   95,
   93,
   91,
-  90,
-  88
+  90
  ],
  "merges": [
   {
