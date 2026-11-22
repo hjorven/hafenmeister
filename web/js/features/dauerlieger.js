@@ -640,6 +640,7 @@ const GRUND = {
   length: 'Das Boot ist zu lang für diesen Platz.',
   beam: 'Das Boot ist zu breit für diesen Platz.',
   draft: 'Hier ist das Wasser zu flach für dieses Boot.',
+  niedrigwasser: 'Heute ist Niedrigwasser: Hier bleibt gerade zu wenig Wasser unter dem Kiel.',
   size: 'Dieser Platz ist für andere Schiffsgrößen.',
   reserved: 'Dieser Platz ist fest vergeben.',
   occupied: 'Der Platz ist schon belegt.',

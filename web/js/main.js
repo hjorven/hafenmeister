@@ -46,6 +46,7 @@ const MODULES = [
   './features/winter.js',
   './features/nachruesten.js',         // P30: Fingerstege und Laternen an bestehenden Stegen
   './features/umbauen.js',            // P59: zwei Boxen zur Doppelbox umbauen und zurück
+  './features/baggern.js',            // P29: Stege ausbaggern für Boote mit mehr Tiefgang
   './features/versorgung.js',
   './features/auszeichnung.js',
   './features/platzschilder.js',

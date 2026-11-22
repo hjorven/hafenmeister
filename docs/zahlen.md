@@ -105,6 +105,16 @@ Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab 
 | Große Boote | L, XL: Wind von achtern (Kosinus unter -0,5) −0,25 Anker, Anlegen mit 60 % Tempo |
 | Richtungen | west 24 %, suedwest 20 %, nordwest 14 %, sued 8 %, nord 8 %, ost 10 %, nordost 8 %, suedost 8 %; Wetterlage 3 Tage, ±20 Grad je Tag, Sturm aus west, nordwest |
 
+## Baggern
+
+| Was | Wert |
+|---|---|
+| ab Hafenstufe | 2 |
+| Zieltiefe je Platzgröße | S 1,2 m, M 2 m, L 2,5 m |
+| Platzarten | box, stirn, finger |
+| Kosten je Steg | 160 € plus je flachem Platz und Meter Tiefe: S 80 €, M 110 €, L 150 € |
+| Niedrigwasser | ab Stufe 2, Wind aus west, suedwest, nordwest ab Stärke 0,55: Pegel 0,3 bis 0,6 m tiefer; wer auf Grund sitzt −0,3 Anker |
+
 ## Flottillen
 
 | Was | Wert |

@@ -123,6 +123,8 @@ const BOT = () => {
         // Wasserhähne am Steg (P31): wie Versorgung, über das Bauen-Menü
         for (const e of G.bauen?.eintraege?.() ?? []) {
           if (e.nachruesten === 'wasser' && !e.gesperrt) o.push({ art: 'nachruesten', id: e.key, kosten: e.kosten, prio: 3, tu: () => !!e.kaufen()?.ok });
+          // Baggern (P29) wie "Als Nächstes": wenn mindestens zwei Boote an diesem Steg zu wenig Wasser hatten
+          if (e.baggern && !e.gesperrt && (e.vermisst ?? 0) >= 2) o.push({ art: 'baggern', id: e.key, kosten: e.kosten, prio: e.vermisst >= 3 ? 1 : 2, tu: () => !!e.kaufen()?.ok });
         }
         for (const x of G.services?.liste?.() ?? []) {
           const p = G.services.pruefe(x.id);

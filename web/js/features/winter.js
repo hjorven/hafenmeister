@@ -76,8 +76,8 @@ export function angebote(state, ctx) {
   const dritte = baggern && (!sanitaer || jahr % 2 === 0) ? 'baggern' : sanitaer ? 'sanitaer' : null;
   if (dritte === 'baggern') {
     liste.push({ id: 'baggern', fuer, kosten: ARBEITEN.baggern.kosten[i],
-      name: 'Hafenbecken ausbaggern',
-      text: `Mehr Wasser unter dem Kiel: Boote der Größe ${ARBEITEN.baggern.klassen.join(' und ')} kommen die ganze Saison ${Math.round((ARBEITEN.baggern.faktor - 1) * 100)} % öfter.` });
+      name: 'Fahrrinne ausbaggern',
+      text: `Tiefere Zufahrt: Boote der Größe ${ARBEITEN.baggern.klassen.join(' und ')} kommen die ganze Saison ${Math.round((ARBEITEN.baggern.faktor - 1) * 100)} % öfter.` });
   } else if (dritte === 'sanitaer') {
     liste.push({ id: 'sanitaer', fuer, kosten: ARBEITEN.sanitaer.kosten[i],
       name: 'Sanitär winterfest machen',
@@ -91,7 +91,7 @@ export function fertigText(a) {
   if (a.id === 'steg') return `${stegName(a.steg)} überholt: ${anker(ARBEITEN.steg.bonus)} Anker mehr für Gäste dort`;
   if (a.id === 'werbung') return `Frühjahrswerbung: mehr Boote bis Saisontag ${ARBEITEN.werbung.bisTag}`;
   if (a.id === 'sanitaer') return `Sanitär winterfest: ${anker(ARBEITEN.sanitaer.bonus)} Anker mehr für Gäste mit Wunsch Toilette oder Dusche`;
-  if (a.id === 'baggern') return `Hafenbecken ausgebaggert: mehr Boote der Größe ${ARBEITEN.baggern.klassen.join(' und ')}`;
+  if (a.id === 'baggern') return `Fahrrinne ausgebaggert: mehr Boote der Größe ${ARBEITEN.baggern.klassen.join(' und ')}`;
   return a.name ?? a.id;
 }
 

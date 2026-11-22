@@ -335,14 +335,99 @@ export function reputationFactor(rep, rules = RULES) {
 // ---------------------------------------------------------------------------
 // Liegeplätze und Passregel
 
-/** Wassertiefe eines Platzes in einer Ausbaustufe (Baggern macht Plätze tiefer). */
+/**
+ * Wassertiefe eines Platzes in einer Ausbaustufe. Der Stufenausbau baggert das Becken (Tiefe je Stufe
+ * aus data/harbor.js), dazu kann der Spieler einzelne Stege ausbaggern (P29, berth.gebaggert, siehe syncDredge).
+ */
 export function berthDepth(berth, stage) {
+  return Math.max(naturalDepth(berth, stage), berth.gebaggert || 0);
+}
+
+/** Wassertiefe ohne ausgebaggerten Steg (nur die Stufe). */
+export function naturalDepth(berth, stage) {
   if (typeof berth.depth === 'number') return berth.depth;
   if (!berth.depth) return 0;
   if (berth.depth[stage] != null) return berth.depth[stage];
   // Nächste bekannte Stufe darunter
   const known = Object.keys(berth.depth).map(Number).filter((s) => s <= stage).sort((a, b) => b - a);
   return known.length ? berth.depth[known[0]] : 0;
+}
+
+// ---------------------------------------------------------------------------
+// Baggern (P29, docs/baggern.md): Ein ausgebaggerter Steg steht als state.buildings['bagger:B'] im Spielstand.
+// Seine Gastplätze der Platzarten rules.dredge.kinds sind dann mindestens rules.dredge.depth[Klasse] tief,
+// auch Plätze, die später an diesem Steg dazukommen. Die Passregel (whyNotFit) bekommt keinen Spielstand,
+// darum trägt syncDredge die Tiefe als berth.gebaggert an die Plätze des Kontexts. tick() ruft es bei jedem
+// Schritt (kostet nur einen Blick auf die Bauten), Bauen, Rückgängig und Laden rufen es sofort.
+
+export const DREDGE_PREFIX = 'bagger:';
+
+/** Zieltiefe eines Platzes, wenn sein Steg ausgebaggert wird (0: Baggern ändert hier nichts). */
+export function dredgeTarget(rules, berth) {
+  const d = rules?.dredge;
+  if (!d || !berth?.jetty || berth.reserved || berth.raft) return 0;
+  if (d.kinds && !d.kinds.includes(berth.kind)) return 0;
+  return d.depth?.[berth.size] ?? 0;
+}
+
+/**
+ * Stege, an denen dieses Boot einen freien Platz hätte, wenn der Steg ausgebaggert wäre (P29): Der Platz ist
+ * frei und passt in allem außer der Tiefe. Für das Baumenü ("Boote fanden kein tiefes Wasser").
+ */
+export function dredgeWouldHelp(state, ctx, boat) {
+  const d = ctx.rules.dredge;
+  if (!d || !boat || boat.stationed || state.stage < (d.fromStage ?? 1)) return [];
+  const fertig = new Set(dredgedJetties(state));
+  const out = new Set();
+  const lvl = waterLevel(ctx);
+  const clr = ctx.rules.underKeelClearance ?? 0;
+  for (const b of availableBerths(state, ctx)) {
+    if (out.has(b.jetty) || fertig.has(b.jetty) || !isFree(state, b.id)) continue;
+    const t = dredgeTarget(ctx.rules, b);
+    if (!(t > 0)) continue;
+    // Zu flach: immer (Passregel) oder heute bei Niedrigwasser
+    const why = whyNotFit(boat, b, ctx.rules, state.stage);
+    const heute = why === null && boat.draft + clr > berthDepth(b, state.stage) + lvl + 1e-9;
+    if (why !== 'draft' && !heute) continue;
+    // Passt in allem anderen, und ausgebaggert wäre genug Wasser (auch heute)
+    if (whyNotFit(boat, { ...b, gebaggert: 99 }, ctx.rules, state.stage) || boat.draft + clr > t + lvl + 1e-9) continue;
+    const h = hookWhyNotFit(state, ctx, boat, b);
+    if (h && h !== 'niedrigwasser') continue;
+    out.add(b.jetty);
+  }
+  return [...out].sort();
+}
+
+/**
+ * Wasserstand gegenüber Mittelwasser in Metern, höchstens 0 (P29: Niedrigwasser bei starkem Westwind,
+ * features/baggern.js setzt ctx.waterLevel jeden Tag aus dem Wetter). Gilt für neue Zuweisungen über den
+ * Hook 'fit' (Grund 'niedrigwasser'), nicht für die Passregel selbst: Beim Laden muss niemand umziehen.
+ */
+export function waterLevel(ctx) {
+  return Math.min(0, Number(ctx?.waterLevel) || 0);
+}
+
+/** Ausgebaggerte Stege laut Spielstand. */
+export function dredgedJetties(state) {
+  const out = [];
+  for (const k of Object.keys(state?.buildings || {})) if (k.startsWith(DREDGE_PREFIX) && state.buildings[k]) out.push(k.slice(DREDGE_PREFIX.length));
+  return out.sort();
+}
+
+/** Tiefe aus dem Spielstand an die Plätze tragen (berth.gebaggert). Gibt true zurück, wenn sich etwas änderte. */
+export function syncDredge(state, ctx) {
+  const stege = dredgedJetties(state);
+  const key = stege.join(',');
+  if (ctx._dredgeKey === key && ctx._dredgeState === state) return false;
+  ctx._dredgeKey = key;
+  ctx._dredgeState = state;
+  const set = new Set(stege);
+  for (const b of ctx.berths) {
+    const t = set.has(b.jetty) ? dredgeTarget(ctx.rules, b) : 0;
+    if (t > 0) b.gebaggert = t;
+    else delete b.gebaggert;
+  }
+  return true;
 }
 
 /** Ist der Liegeplatz im aktuellen Hafen vorhanden? */
@@ -2141,6 +2226,8 @@ function turnAway(state, ctx, boat, events, why, gruppe = true) {
   // liegt schon ein Teil, ist die Gruppe zerrissen
   const weiter = gruppe && boat.flotte && !flotillaMembers(state, boat.flotte.id).some((b) => b.status === 'moored');
   if (!weiter && gruppe) breakFlotilla(state, boat, events);
+  // Baggern (P29): Hätte ein ausgebaggerter Steg dem Boot einen freien Platz gegeben?
+  const zuFlach = why === 'winter' || why === 'spaet' || why === 'rebuild' ? [] : dredgeWouldHelp(state, ctx, boat);
   state.queue = state.queue.filter((id) => id !== boat.id);
   delete state.boats[boat.id];
   // Winterbeginn: Wer über Nacht an der Boje lag, fährt ins Winterlager. Das zählt nicht als weggefahren.
@@ -2152,7 +2239,7 @@ function turnAway(state, ctx, boat, events, why, gruppe = true) {
     weg[why] = (weg[why] || 0) + 1;
   }
   const rated = turnAwayRating(state, ctx, boat, why);
-  events.push({ type: 'turnedAway', boatId: boat.id, reason: why, rated, ...(rated ? { rating: ctx.rules.turnAway.rating, guest: guestInfo(boat), day: state.day } : {}) });
+  events.push({ type: 'turnedAway', boatId: boat.id, reason: why, rated, ...(rated ? { rating: ctx.rules.turnAway.rating, guest: guestInfo(boat), day: state.day } : {}), ...(zuFlach.length ? { zuFlach } : {}) });
   if (weiter) flotillaGoesOn(state, ctx, boat, events, why);
 }
 
@@ -2342,12 +2429,13 @@ export function dismiss(state, ctx, boatId) {
   const pre = [];
   dropReservation(boat, pre, 'dismissed');
   breakFlotilla(state, boat, pre);
+  const zuFlach = dredgeWouldHelp(state, ctx, boat);   // P29: wäre an einem ausgebaggerten Steg Platz gewesen?
   state.queue = state.queue.filter((id) => id !== boatId);
   delete state.boats[boatId];
   const weg = heute(state).weggefahren;
   weg.weggeschickt = (weg.weggeschickt || 0) + 1;
   const rated = turnAwayRating(state, ctx, boat, 'dismissed');
-  return { ok: true, events: [...pre, { type: 'dismissed', boatId, rated, ...(rated ? { rating: ctx.rules.turnAway.rating, guest: guestInfo(boat), day: state.day } : {}) }] };
+  return { ok: true, events: [...pre, { type: 'dismissed', boatId, rated, ...(rated ? { rating: ctx.rules.turnAway.rating, guest: guestInfo(boat), day: state.day } : {}), ...(zuFlach.length ? { zuFlach } : {}) }] };
 }
 
 // ---------------------------------------------------------------------------
@@ -2819,6 +2907,7 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   return {
     value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, jugend, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
     wind, windLage: boat.windLage ?? null, windRuecken: !!boat.windRuecken,
+    aufGrund: boat.aufGrund != null,                           // bei Niedrigwasser im Schlick gelegen (P29, Abzug über Hook 'rating')
     preis, preisstufe: boat.preisstufe ?? null,
     wishes: [...(boat.wishes || [])], wishesMet: boat.wishesMet || 0, wishesTotal: boat.wishesTotal || 0, missed: { ...(boat.missed || {}) },
     far: { ...(boat.far || {}) },
@@ -3017,6 +3106,7 @@ function queueStep(state, ctx, events, countPatience) {
  */
 export function tick(state, ctx, dt) {
   const events = [];
+  syncDredge(state, ctx);
   if (state.scheduledDay !== state.day) startDay(state, ctx, events);
   const { dayLength, eveningLength, queue } = ctx.rules;
   let rest = Math.max(0, dt);
@@ -3203,6 +3293,7 @@ export function applyTestStage(state, ctx, stage) {
 }
 
 export function advanceStage(state, ctx, opts = {}) {
+  syncDredge(state, ctx);   // P29: ausgebaggerte Stege des Spielstands zählen (auch direkt nach dem Laden)
   // prepaid: Ausbau in Bauabschnitten (ui/bauen.js, Roadmap P18) ist schon abschnittsweise bezahlt
   // und begonnen; der letzte Abschnitt schliesst ihn ab, ohne Ziel und Kasse erneut zu pruefen.
   const goal = ctx.rules.stageGoals[state.stage];
@@ -3230,6 +3321,7 @@ export function advanceStage(state, ctx, opts = {}) {
  * Rechnet den Ausbau an einer Kopie des Spielstands durch, damit Vorschau und Ausbau übereinstimmen.
  */
 export function stageUpPreview(state, ctx) {
+  syncDredge(state, ctx);   // P29: ausgebaggerte Stege des Spielstands zählen (auch direkt nach dem Laden)
   const next = state.stage + 1;
   const inStage = (b, st) => (b.stages ? b.stages.includes(st) : b.stage <= st);
   const gone = ctx.berths.filter((b) => berthAvailable(state, b) && !inStage(b, next)).map((b) => b.id);
@@ -3344,6 +3436,7 @@ function clearVanishedBerths(state, ctx, from, events) {
  * Gibt die Liste der Änderungen zurück: [{ boatId, from, to }] (to = null: abgereist).
  */
 export function repairBerths(state, ctx) {
+  syncDredge(state, ctx);   // P29: ausgebaggerte Stege des Spielstands zählen (auch direkt nach dem Laden)
   const changes = [];
   const exists = (b) => b && berthAvailable(state, b);
   // Päckchen (P27): äußere Boote zuletzt, sie brauchen ihr inneres Boot noch an seinem Platz

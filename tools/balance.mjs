@@ -37,6 +37,7 @@ import { haengeEin as postEinhaengen } from '../web/js/features/gaestepost.js';
 import { haengeEin as preisEinhaengen, waehle as preisWaehlen, darfWaehlen as preisDarf, klugeWahl as preisKlug } from '../web/js/features/preisstufe-regeln.js';
 import { haengeEin as besucherEinhaengen } from '../web/js/features/besucher-regeln.js';
 import { haengeEin as nachruestEinhaengen, angebote as nachruestAngebote, kaufen as nachruestKaufen } from '../web/js/features/nachruesten.js';
+import { angebote as baggerAngebote, kaufen as baggerKaufen, merken as baggerMerken, haengeEin as baggerEinhaengen } from '../web/js/features/baggern.js';
 
 // Hat harbor.js für eine Stufe aus economy.js noch keine Plätze (Stufe 6 vor dem Export der
 // Pier), rechnet das Werkzeug mit den Plätzen der letzten Hafenstufe weiter und sagt das.
@@ -196,6 +197,8 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   besucherEinhaengen((n, f) => sim.addHook(ctx, n, f), (k, d) => sim.addService(ctx, k, d));   // P40: seltene Besucher
   // Stege nachrüsten wie im Spiel (features/nachruesten.js): Wasserhähne erfüllen den Wunsch Frischwasser (P31)
   nachruestEinhaengen((n, f) => sim.addHook(ctx, n, f), () => state);
+  // Baggern und Niedrigwasser wie im Spiel (features/baggern.js, P29): Pegel jeden Morgen aus dem Wetter
+  baggerEinhaengen((n, f) => sim.addHook(ctx, n, f), plan ? (tag) => plan.weather(tag) : null);
   // Preisstufe wie im Spiel (features/preisstufe.js); gewählt wird mit --preis jede Saison neu
   preisEinhaengen((n, f) => sim.addHook(ctx, n, f));
   // Dienste der Services wie im Spiel (render/services.js, Haken 'arrivals'): Mast legen,
@@ -268,6 +271,12 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
       const w = E.nachruesten[a.art].wunsch;
       o.push({ art: 'nachruesten', id: `${a.art}:${a.steg}`, kosten: a.kosten, prio: prof.kaufWieZeitraffer ? 3 : unerfuellt[w] > 0 ? 1 : 4,
         tu: () => nachruestKaufen(state, ctx, a.art, a.steg).ok });
+    }
+    // Baggern (P29): wie "Als Nächstes" im Spiel (ui/bauen-rat.js), wenn mindestens zwei Boote an einem
+    // flachen Steg Platz gehabt hätten
+    for (const a of baggerAngebote(state, ctx)) {
+      if (a.flach < 2) continue;
+      o.push({ art: 'baggern', id: a.steg, kosten: a.kosten, prio: a.flach >= 3 ? 1 : 2, tu: () => baggerKaufen(state, ctx, a.steg).ok });
     }
     const on = state.office + 1;
     if (RULES.office.cost[on] && state.stage >= RULES.office.fromStage[on]) {
@@ -412,6 +421,8 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
       for (const ev of events) {
         if (ev.type === 'turnedAway') {
           abgewiesen.alle = (abgewiesen.alle || 0) + 1;
+          // Baggern (P29): wie features/baggern.js im Spiel mitzählen, wer an einem flachen Steg Platz gehabt hätte
+          if (ev.zuFlach) baggerMerken(state, ev.zuFlach);
         } else if (ev.type === 'feeReady') {
           const b = state.boats[ev.boatId];
           for (const w of b?.wishes ?? []) if (!ev.wishesMet.includes(w)) unerfuellt[w] = (unerfuellt[w] || 0) + 1;

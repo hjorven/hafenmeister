@@ -584,6 +584,19 @@ export const ECONOMY = {
     wasser: { name: 'Wasserhähne', abStufe: 2, grund: 90, jePlatz: { S: 10, M: 15, L: 20, XL: 30 }, anker: 0, wunsch: 'wasser' },
   },
 
+  // ---------------------------------------------------------------- Baggern (P29)
+  // Logik in web/js/features/baggern.js, Regel in sim.js (syncDredge), Beschreibung in docs/baggern.md.
+  // Je Steg einmal: seine Gastplätze (Platzarten arten) werden mindestens ziel[Klasse] Meter tief. Ein
+  // Boot passt, wenn das Wasser 0,3 m tiefer ist als sein Tiefgang (passregel), also nach dem Baggern an
+  // M-Plätzen bis 1,7 m Tiefgang. kosten = grund + jeMeter[Klasse] für jeden Meter, den ein Gastplatz
+  // tiefer wird (auf 10 € gerundet). Plätze, die später an diesem Steg dazukommen, sind gleich mit tief.
+  // Angeboten wird nur, wo danach eine Bootsart der Stufe passt, die es vorher nicht tat.
+  // niedrigwasser: Starker Wind (ab ab, Sturm zählt als 1) aus diesen Richtungen senkt den Pegel um tiefe[0]
+  // bis tiefe[1] Meter (je stärker, desto mehr). Dann passt ein Boot nur, wo auch heute 0,3 m unter dem Kiel
+  // bleiben; wer schon liegt und den Grund berührt, bewertet um anker schlechter. Ab abStufe, nicht im Winter.
+  baggern: { abStufe: 2, ziel: { S: 1.2, M: 2.0, L: 2.5 }, arten: ['box', 'stirn', 'finger'], grund: 160, jeMeter: { S: 80, M: 110, L: 150 },
+    niedrigwasser: { abStufe: 2, richtungen: ['west', 'suedwest', 'nordwest'], ab: 0.55, tiefe: [0.3, 0.6], anker: 0.3 } },
+
   // ---------------------------------------------------------------- Kassieren
   // ---------------------------------------------------------------- Hafenbüro
   // Komfort, keine Einnahmen. Logik bei den Spielregeln (sim.js).
@@ -947,7 +960,8 @@ export const ECONOMY = {
     werbung:  { kosten: [20, 80, 220, 580, 1200, 1900], faktor: 1.25, bisTag: 4 },
     // Sanitär winterfest machen: Gäste mit Wunsch Toilette oder Dusche bewerten um bonus Anker besser
     sanitaer: { kosten: [20, 70, 200, 500, 990, 1600], bonus: 0.2, wuensche: ['wc', 'dusche'] },
-    // Hafenbecken ausbaggern: große Boote kommen öfter (Faktor je Klasse), ab Stufe 3
+    // Fahrrinne ausbaggern: große Boote kommen öfter (Faktor je Klasse), ab Stufe 3. Nicht verwechseln mit
+    // dem Ausbaggern einzelner Stege (baggern, P29), das Plätze tiefer macht
     baggern:  { abStufe: 3, kosten: [0, 0, 400, 990, 1900, 3100], faktor: 1.25, klassen: ['L', 'XL'] },
   },
 

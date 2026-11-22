@@ -60,6 +60,8 @@ export function rulesFromEconomy(E = ECONOMY) {
     ? { from: ka.strichTrinkgeld.abMuenzen, perCoin: ka.strichTrinkgeld.jeMuenze, max: ka.strichTrinkgeld.hoechstens }
     : null;
   r.underKeelClearance = E.passregel?.wasserUnterKiel ?? 0;
+  // Baggern (P29): Zieltiefe je Größenklasse für ausgebaggerte Stege, nur diese Platzarten, ab dieser Stufe
+  r.dredge = E.baggern ? { depth: { ...E.baggern.ziel }, kinds: [...(E.baggern.arten ?? [])], fromStage: E.baggern.abStufe ?? 1 } : null;
 
   // Wünsche
   const stages = (E.stufen || []).map((s) => s.stufe);
