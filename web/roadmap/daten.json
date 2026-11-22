@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "a52a85a"
+  "commit": "9f8aa02"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -738,15 +738,20 @@
    "id": "P29",
    "titel": "Baggern für tiefere Liegeplätze",
    "inhalt": "F7",
-   "thread": "neu",
+   "thread": "erledigt (PR 420, baggern.md: Steg ausbaggern im Bauen-Menü, Niedrigwasser bei Westwind)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    420
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F7"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    98,
+    99
+   ]
   },
   {
    "id": "P30",
@@ -2090,12 +2095,14 @@
   {
    "code": "F7",
    "text": "Baggern: Wassertiefe je Steg als Bauprojekt",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P29, PR 420, baggern.md): je Steg ab Stufe 2 im Bauen-Menü, Bagger mit Schute, dazu Niedrigwasser bei starkem Westwind, an dem knapp liegende Boote im Schlick sitzen",
    "pakete": [
     "P29"
    ],
-   "prs": [],
+   "prs": [
+    420
+   ],
    "abschnitt": "Kernspiel"
   },
   {
@@ -4609,11 +4616,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 18,
+    "erledigt": 19,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 2,
+    "offen": 1,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4697,20 +4704,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 53,
+  "erledigt": 54,
   "teilweise": 2,
   "arbeit": 0,
   "frage": 0,
-  "offen": 31,
+  "offen": 30,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 181,
+  "erledigt": 182,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 30,
+  "offen": 29,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5890,9 +5897,34 @@
    "datum": "2026-11-22",
    "quelle": "bojenfeld/pc-boot-auf-boje-ziehen.png",
    "nr": 97
+  },
+  {
+   "datei": "p29-pr420-pc-bagger.jpg",
+   "pakete": [
+    "P29"
+   ],
+   "titel": "Bagger vertieft einen Steg auf 2,0 m",
+   "pr": 420,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "baggern/pc-3-bagger.png",
+   "nr": 98
+  },
+  {
+   "datei": "p29-pr420-pc-schlick.jpg",
+   "pakete": [
+    "P29"
+   ],
+   "titel": "Niedrigwasser bei Westwind: Boote liegen im Schlick",
+   "pr": 420,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "baggern/pc-6-schlick.png",
+   "nr": 99
   }
  ],
  "neueBilder": [
+  99,
   97,
   95,
   93,
@@ -5900,10 +5932,25 @@
   90,
   88,
   86,
-  84,
-  82
+  84
  ],
  "merges": [
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: Bilder für P29 Baggern (PR 420)",
+   "pr": 423,
+   "pakete": [
+    "P29"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P29 Baggern: Stege ausbaggern, Niedrigwasser bei Westwind",
+   "pr": 420,
+   "pakete": [
+    "P29"
+   ]
+  },
   {
    "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: P36 Bojenfeld (PR 421) mit Bildern",
@@ -5980,20 +6027,6 @@
    "pr": 412,
    "pakete": [
     "P39"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Neuer Fischkutter erscheint erst, wenn der alte abgelegt hat",
-   "pr": 411,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P38 Hafenfest (PR 405) mit Bildern",
-   "pr": 409,
-   "pakete": [
-    "P38"
    ]
   }
  ]
