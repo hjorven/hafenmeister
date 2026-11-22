@@ -73,6 +73,7 @@ const FRAGMENT = /* glsl */ `
   uniform float uZeit;
   uniform float uPegel;
   uniform float uWind;
+  uniform vec2 uWindDir;      // Richtung, in die der Wind weht (Weltmeter x, z), Einheitsvektor (P34)
   uniform vec3 uSee[5];
   uniform vec3 uBinnen[5];
   uniform vec3 uSchaum;
@@ -126,9 +127,10 @@ const FRAGMENT = /* glsl */ `
     float linie = 1.0 - smoothstep(0.0, aa * 1.6, abs(d - 2.0));
     col = mix(col, col * 0.9, linie * 0.5);
 
-    // Wellenstriche: kurze Striche in versetzten Zellen, wandern mit dem Wind nach Osten
+    // Wellenstriche: kurze Striche in versetzten Zellen, liegen in Windrichtung und wandern mit dem Wind (P34)
     float wind = uWind;
-    vec2 p = vWelt.xz + vec2(uZeit * (0.5 + 1.6 * wind), 0.0);
+    vec2 wq = vec2(-uWindDir.y, uWindDir.x);
+    vec2 p = vec2(dot(vWelt.xz, uWindDir) - uZeit * (0.5 + 1.6 * wind), dot(vWelt.xz, wq));
     vec2 zelle = vec2(7.5, 2.8);
     float reihe = floor(p.y / zelle.y);
     p.x += hash(vec2(reihe, 3.1)) * zelle.x;
@@ -184,6 +186,7 @@ export function erzeugeWasser(region) {
     uZeit: { value: 0 },
     uPegel: { value: 0 },
     uWind: { value: 0.3 },
+    uWindDir: { value: new THREE.Vector2(1, 0) },
     uSee: { value: farben(region.wasser.see) },
     uBinnen: { value: farben(region.wasser.binnen) },
     uSchaum: { value: new THREE.Color(region.wasser.schaum) },
@@ -223,6 +226,11 @@ export function erzeugeWasser(region) {
       mesh.position.y = m;
     },
     setzeWind(w) { uniforms.uWind.value = w; },
+    /** Windrichtung in Grad, aus der der Wind kommt (0 = Osten, 90 = Norden, wie boat-anim setWind). */
+    setzeWindRichtung(grad) {
+      const r = (grad * Math.PI) / 180;
+      uniforms.uWindDir.value.set(-Math.cos(r), Math.sin(r));
+    },
     setzeLicht(tint, nacht) {
       uniforms.uTint.value.copy(tint);
       uniforms.uNacht.value = nacht;

@@ -129,7 +129,7 @@ Note 1 bis 5 aus dem Überblick. "nein" heißt: bleibt, wie es ist.
 | Ausbaustufen und Ziele | 3 | teilweise | P16, P18 |
 | Services (21 Stück, mit eigener Wirkung) | 4 | ja | P06, P23 (erledigt) |
 | Ereignisse und Wetter | 3 | teilweise | P06, P24 |
-| Stammgäste | 3 | teilweise | P25 |
+| Stammgäste | 3 | ja | P25 (erledigt) |
 | Einstieg | 3 | ja | P03 |
 | Tempo und Vorspulen | 3 | ja | P07 |
 | Tests | 3 | ja | P06 |
@@ -169,7 +169,7 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Bauzeit der Ausbauten, Winter-Bautempo (`bautage`, `winterBautempo`) | economy.js | erledigt (PR 232): `bautage` = Bauabschnitte, `winterBautempo` gelöscht | P18 |
 | `ECONOMY.ereignisse` (Sturm alle 10 Tage, Hafenfest 1.500 €) | economy.js | eine Quelle, Rest löschen | P06 (erledigt) |
 | Gruppen-Ankunft, Wünsche je Bootsart, `feeFactor`, `arrivalWeight` | data/boats/*.js | Wünsche, `feeFactor`, `arrivalWeight` erledigt (P19 Teil 1); Gruppen erledigt (P32) | P19, P32 (Gruppen) |
-| Stammgast bringt Ruf am alten Platz | plan.md 9a | bauen | P25 |
+| Stammgast bringt Ruf am alten Platz | plan.md 9a | erledigt: Lieblingsplatz +0,5 Anker ([stammgaeste.md](stammgaeste.md)) | P25 |
 | Dauerlieger zahlen pro Saison, Gast wird umgelegt | plan.md 9a | bauen | P01 |
 | Tagesziel-Belohnung in Ruf, Ziele wie "Drei Segelboote mit Dusche" | plan.md 9a | gebaut (PR 152) | P13 |
 | Tretboote und Kanus nur als Kulisse | plan.md 14 (im Spiel zahlender Gast S2, 6 €) | entfällt: bleiben in Stufe 1 Gäste, plan.md angepasst | |
@@ -229,7 +229,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F2 | Anmeldung per Funk: morgens melden sich ein bis zwei Boote an, Platz freihalten gibt Bonus | erledigt (PR 288, [funk-anmeldung.md](funk-anmeldung.md)) | P28 |
 | F3 | Flottillen: drei bis fünf Boote wollen am selben Steg liegen (Feld `group`) | erledigt (P32, [flottillen.md](flottillen.md)) | P32 |
 | F4 | Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung | erledigt (PR 314): halten und ziehen, ab dem zweiten Mal −0,5 Anker | P33 |
-| F5 | Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld `exposed`) | offen | P34 |
+| F5 | Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld `exposed`) | erledigt (PR 392, [wind.md](wind.md)): Windlage je Platz aus Wellenweg gegen den Wind des Tages, ab Stufe 2, Zeichen beim Ziehen | P34 |
 | F6 | Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison | offen | P35 |
 | F7 | Baggern: Wassertiefe je Steg als Bauprojekt | offen | P29 |
 | F8 | Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar | erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasser mit P31, [nachruesten.md](nachruesten.md) | P30 |
@@ -284,14 +284,14 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 |---|---|---|---|
 | F33 | Signalflaggen als Wunschanzeige, Lexikon im Logbuch | offen | P49 |
 | F34 | Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter) | offen | P49 |
-| F35 | Wind beim Anlegen: große Boote brauchen länger, bevorzugen Plätze gegen den Wind | offen | P34 |
+| F35 | Wind beim Anlegen: große Boote brauchen länger, bevorzugen Plätze gegen den Wind | erledigt (PR 392, [wind.md](wind.md)): L und XL mit Rückenwind langsamer und −0,25 Anker, Büro wählt Bug gegen den Wind | P34 |
 
 ### Geschichten
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
 | F36 | Hafenchronik: jeder Tag eine Zeile | erledigt | P21 |
-| F37 | Gästepost von Stammgästen, hängt im Hafenbüro | offen | P25 |
+| F37 | Gästepost von Stammgästen, hängt im Hafenbüro | erledigt: Ankündigung und Empfehlung, Pinnwand im Gästebuch | P25 |
 | F38 | Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten | offen | P51 |
 
 ### Welt
@@ -370,7 +370,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | C5 | Ruf als Auszeichnung mit Namen und Zeichen im Hafen | erledigt (P19 Teil 2): drei Stufen mit Namen, Wimpel am Hafenmeisterhaus | P19 |
 | C6 | Ruf lockt andere Gäste (ab 4 große Yachten, ab 4,5 seltene Modelle) | erledigt (P19 Teil 1, `ruf.lockt`) | P19 |
 | C7 | Warnen, bevor es Anker kostet (Gebäude blinkt bei fast ausgebuchter Dusche) | erledigt (P55: Schild knapp orange und blinkend, voll rot, Tipp beim ersten Mal) | P55 |
-| C8 | Stammgäste zählen beim Ruf doppelt | offen | P25 |
+| C8 | Stammgäste zählen beim Ruf doppelt | erledigt (P25) | P25 |
 | C9 | Ruf-Verlauf mit den drei häufigsten Gründen für schlechte Noten | erledigt (PR 154) | P14 |
 
 ### D Ausbaustufen, Stegprojekte und Baumodus
@@ -438,9 +438,9 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | H3 | Bewerber statt Verwandlung: Stammgäste und Einheimische fragen an | erledigt (PR 149) | P01 |
 | H4 | Obergrenze ein Viertel der Plätze | erledigt (PR 149) | P01 |
 | H5 | Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land | erledigt (PR 245 und P20-Rest): im Winter im Winterlager (zahlen dort je Tag), Krantage an Mastenkran und Travellift, Segelmacher-Aufträge in der Saison | P20 |
-| H6 | Lieblingsplatz eines Stammgasts | offen | P25 |
-| H7 | Sichtbare Treue: Wimpel je fünf Besuche | offen | P25 |
-| H8 | Stammgäste wachsen mit (Wünsche, größeres Boot) | offen | P25 |
+| H6 | Lieblingsplatz eines Stammgasts | erledigt (P25): Box des letzten zufriedenen Besuchs, Stander über der Box | P25 |
+| H7 | Sichtbare Treue: Wimpel je fünf Besuche | erledigt (P25): Doppelstander am Heck | P25 |
+| H8 | Stammgäste wachsen mit (Wünsche, größeres Boot) | erledigt (P25) | P25 |
 | H9 | Leere Box während eines Tagestörns für einen Tagesgast | offen | P25 |
 | H10 | Dauerlieger vor Vertragsende kündigen kostet | erledigt (PR 149) | P01 |
 
@@ -695,16 +695,16 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|
 | P23 | Services mit eigener Wirkung | Services nicht nur "€ pro Tag" | erledigt (PR 340; F2, F3, F5, F7, F9; [services.md](services.md#eigene-wirkung-roadmap-p23)) |
 | P24 | Ereignisse zum Vorbereiten und neue Ereignisse | Vorwarnung mit Handlungsmöglichkeit, F17 | erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend; PR 299: Heringstage, Mittsommer, Holzboot-Treffen, Hanse-Woche, Nachspiel, Services an Ereignistagen; Regatta mit Bahn draußen PR 319), [ereignisse.md](ereignisse.md) |
-| P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | neu |
+| P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | teilweise: Teil 1 und 2 gebaut (PR 394, [stammgaeste.md](stammgaeste.md)), H9 folgt |
 | P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | erledigt (PR 322, docs/hafengesten.md) |
 | P27 | Päckchen liegen bei vollem Hafen | F1 | erledigt (PR 330, [paeckchen.md](paeckchen.md)) |
 | P28 | Anmeldung per Funk | F2 (nutzt P11) | erledigt (PR 288, `docs/funk-anmeldung.md`) |
 | P29 | Baggern für tiefere Liegeplätze | F7 | neu |
 | P30 | Stege nachrüsten | F8 | erledigt (PR 297, [nachruesten.md](nachruesten.md)) |
 | P31 | Neue Gästewünsche | F9 | neu |
-| P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md)) |
+| P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md)) |
 | P33 | Liegende Boote umlegen | F4 | erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen) |
-| P34 | Wind im Hafen spürbar machen | F5, F35 | neu |
+| P34 | Wind im Hafen spürbar machen | F5, F35 | erledigt (PR 392, [wind.md](wind.md)) |
 | P35 | Preisstufe am Hafenbüro | F6 | neu |
 | P36 | Bojenfeld im See | F10 | neu |
 | P37 | Havarist einschleppen | F11 | neu |

@@ -28,7 +28,7 @@ const NAMENS_LISTEN = [
   /^klassen$/, /^wuensche$/, /^wunschAnzahl$/, /^platzarten$/, /^stromAnSteg$/, /^bauwerke$/, /^services$/,
   /^ereignisse$/, /^warten\.plaetze$/, /^stufen\.\d+\.mix$/, /\.gaeste$/, /\.wetter$/, /\.hafengeld$/,
   /^ereignisse\.\w+\.wirkung\.(sizeFactor|kindFactor|satisfaction)$/, /^tagesziele\.(geld|schwere|ziele|grossAb)$/,
-  /^zeit\.jahreszeiten$/, /\.ankunftFaktor$/, /^angebotWunsch\.wuensche$/, /^ruf\.lockt\.grosse$/,
+  /^zeit\.jahreszeiten$/, /\.ankunftFaktor$/, /^angebotWunsch\.wuensche$/, /^ruf\.lockt\.grosse$/, /^wind\.richtungen$/,
 ];
 // Felder, die bewusst noch niemand liest (mit Paket, das sie anschließt oder löscht)
 export const NOCH_UNGELESEN = {
@@ -135,6 +135,16 @@ export function tabellen() {
       + `Nebenkosten ab der Stufe mit nebenkosten: ${pz(hb.nebenkosten?.anteil)} auf jedes kassierte Liegegeld. `
       + `Von Hand eingewiesen: +${String(hb.vonHandBonus ?? 0).replace('.', ',')} Anker. `
       + `Sonderfälle fahren nach ${hb.sonderfaelle?.selbstEinfahrenNach ?? '-'} s selbst ein.`, '');
+  }
+  if (E.wind) {
+    const w = E.wind;
+    const k = (x) => String(x).replace('.', ',');
+    t.push('## Wind', '', tabelle(['Was', 'Wert'], [
+      ['Starkwind', `ab Windstärke ${k(w.stark)}, Windlage zählt ab Stufe ${w.abStufe} (nicht am Sturmtag)`],
+      ['Windlage', `offen ab ${w.offenAb} m Wellenweg (−${k(w.unruhig)} Anker), geschützt bis ${w.geschuetztBis} m (+${k(w.geschuetzt)} Anker), Schwimmsteg dämpft auf ${Math.round(w.stegDaempfung * 100)} %`],
+      ['Große Boote', `${w.grosse.join(', ')}: Wind von achtern (Kosinus unter ${k(w.rueckenwindAb)}) −${k(w.rueckenwind)} Anker, Anlegen mit ${Math.round(w.anlegenTempo * 100)} % Tempo`],
+      ['Richtungen', `${Object.entries(w.richtungen).map(([r, a]) => `${r} ${Math.round(a * 100)} %`).join(', ')}; Wetterlage ${w.wetterlageTage} Tage, ±${w.streuung} Grad je Tag, Sturm aus ${w.sturmAus.join(', ')}`],
+    ]), '');
   }
   if (E.flottillen) {
     const f = E.flottillen;

@@ -4,6 +4,8 @@
 
 // Symbole im Pixel-Stil der Oberfläche (ui/pixel-symbole.js), keine Emojis
 import { pixelBild } from '../ui/pixel-symbole.js';
+import { richtungsName } from '../world/wind.js';
+import { ECONOMY } from '../data/economy.js';
 
 const EVENT_ICON = {
   nebel: 'nebel', sommertag: 'sonne', sturm: 'sturm', regatta: 'regatta',
@@ -18,6 +20,7 @@ function iconFor(entry) {
   const wx = entry.weather;
   if (wx.snow > 0.5) return 'schnee';
   if (wx.rain > 0.3) return 'regen';
+  if (wx.wind >= (ECONOMY.wind?.stark ?? 0.55)) return 'wind';
   return wx.sun > 0.6 ? 'sonne' : 'wolke';
 }
 
@@ -131,6 +134,13 @@ export function initBanner(game) {
       const t = document.createElement('strong');
       t.textContent = `${dayLabel(i)}: ${e.event ? e.event.title : (e.season.winter ? 'Winterruhe' : wxText(e.weather))}`;
       txt.append(t);
+      // Starkwind (P34): was er im Hafen bedeutet
+      const windSatz = !e.event && !e.season.winter ? game.wind?.berichtSatz?.(e.weather, e.day) : null;
+      if (windSatz) {
+        const p = document.createElement('span');
+        p.textContent = windSatz;
+        txt.append(p);
+      }
       if (e.event) {
         const p = document.createElement('span');
         p.textContent = e.event.text;
@@ -164,7 +174,9 @@ export function initBanner(game) {
 
   function wxText(wx) {
     if (wx.rain > 0.3) return 'Schauer';
-    if (wx.wind > 0.5) return 'frischer Wind';
+    // Windrichtung (P34): ab frischem Wind mit Himmelsrichtung, damit man die Windseite planen kann
+    if (wx.wind >= (ECONOMY.wind?.stark ?? 0.55)) return `Starkwind aus ${richtungsName(wx.richtung ?? 180)}`;
+    if (wx.wind > 0.5) return `frischer Wind aus ${richtungsName(wx.richtung ?? 180)}`;
     if (wx.sun > 0.75) return 'sonnig';
     return 'heiter bis wolkig';
   }
@@ -185,6 +197,8 @@ export function initBanner(game) {
 
   const refresh = () => { renderChip(); if (!panel.hidden) renderPanel(); };
   game.on('weather', refresh);
+  // Für andere Module (Wind P34): Ankündigung im Meldeplatz, gleiche Form wie Ereignisse
+  game.banner = { zeige: (icon, titel, text, sek) => show(icon, titel, text, sek) };
   game.on('event:loaded', refresh);
 
   game.on('event:announce', ({ event, startDay, day }) => {

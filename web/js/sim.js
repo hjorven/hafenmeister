@@ -263,13 +263,17 @@ export function reputation(state, rules = RULES) {
   return r.length ? r.reduce((a, b) => a + b, 0) / r.length : 3;
 }
 
-function pushRating(state, ctx, value) {
+// boat: wer bewertet; echte Stammgäste (boat.stamm, features/stammgaeste.js) zählen rules.regular.reputationWeight-fach (P25 C8)
+function pushRating(state, ctx, value, boat = null) {
   const { window, min, max } = ctx.rules.reputation;
   // Tage von hinten ausrichten: ältere Bewertungen ohne Tag behalten keinen
   const tage = (state.ratingDays ||= []);
   if (tage.length > state.ratings.length) tage.splice(0, tage.length - state.ratings.length);
-  state.ratings.push(Math.min(max, Math.max(min, value)));
-  tage.push(state.day);
+  const mal = boat?.stamm ? Math.max(1, Math.round(ctx.rules.regular?.reputationWeight ?? 1)) : 1;
+  for (let i = 0; i < mal; i++) {
+    state.ratings.push(Math.min(max, Math.max(min, value)));
+    tage.push(state.day);
+  }
   while (state.ratings.length > window) state.ratings.shift();
   while (tage.length > state.ratings.length) tage.shift();
 }
@@ -1707,6 +1711,7 @@ export function berthValue(state, ctx, boatId, berthId = null) {
   if (flotte) probe.flotte = { ...boat.flotte, zusammen: flotte.zusammen };
   const anchors = rateBoat(ctx, probe, mods.ratingBonus);
   const out = { fee, wishesMet: met, wishes: [...boat.wishes], anchors, snug, comfort: (berth?.comfort || 0) > 0, far, full };
+  if (berth && boat.lieblingsplatz != null && berth.id === boat.lieblingsplatz) out.lieblingsplatz = true;   // P25
   if (flotte) out.flotte = { ...flotte, wert: flotte.zusammen ? ctx.rules.flotilla.together : -ctx.rules.flotilla.apart };
   if (raft) Object.assign(out, { paeckchen: berth.raft, malus: raftPenalty(ctx, probe) });
   if (relocate) Object.assign(out, { relocate: true, malus, mal: probe.umgelegt });
@@ -2068,7 +2073,7 @@ function turnAwayRating(state, ctx, boat, why) {
   if (why === 'queueFull' || why === 'rebuild' || why === 'winter' || why === 'spaet' || !couldEverFit(state, ctx, boat)) return false;
   const ta = ctx.rules.turnAway;
   const rated = random(state) < ta.chance;
-  if (rated) pushRating(state, ctx, ta.rating);
+  if (rated) pushRating(state, ctx, ta.rating, boat);
   return rated;
 }
 
@@ -2654,6 +2659,21 @@ export function relocateGuest(state, ctx, boatId, berthId, { grund = 'hand', zae
   return { ok: true, events };
 }
 
+/**
+ * Wind (P34, features/wind.js setzt die Felder am Boot): boat.windLage 'offen' (bei Starkwind unruhig
+ * gelegen) oder 'geschuetzt' (ruhig gelegen), boat.windRuecken (großes Boot musste mit Rückenwind
+ * anlegen). Anker dazu, negativ = weniger (rules.wind).
+ */
+export function windRating(ctx, boat) {
+  const w = ctx.rules.wind;
+  if (!w || !boat) return 0;
+  let n = 0;
+  if (boat.windLage === 'offen') n -= w.exposed || 0;
+  else if (boat.windLage === 'geschuetzt') n += w.sheltered || 0;
+  if (boat.windRuecken) n -= w.tailwind || 0;
+  return n;
+}
+
 export function ratingParts(ctx, boat, ratingBonus = 0) {
   const r = ctx.rules;
   const lo = r.rating.noneMet ?? r.rating.min;
@@ -2674,10 +2694,14 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   const penalty = boat.penalty || 0;
   const moved = relocatePenalty(ctx, boat);                   // zu oft umgelegt (P33)
   const raft = raftPenalty(ctx, boat);                        // im Päckchen gelegen (P27)
-  const raw = base + comfort + special + snug + byHand + funk + flotte + ratingBonus - penalty - moved - raft;
+  // Stammgast wieder an seinem Lieblingsplatz (P25, plan 9a "Ruf am alten Platz")
+  const stammPlatz = boat.lieblingsplatz != null && boat.berthId === boat.lieblingsplatz ? r.regular?.favouriteBonus ?? 0 : 0;
+  const wind = windRating(ctx, boat);                         // Windlage bei Starkwind (P34)
+  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + ratingBonus - penalty - moved - raft + wind;
   const value = Math.round(Math.min(r.rating.max, Math.max(r.rating.min, raw)) * 10) / 10;
   return {
-    value, base, comfort, special, snug, byHand, funk, flotte, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
+    value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
+    wind, windLage: boat.windLage ?? null, windRuecken: !!boat.windRuecken,
     wishes: [...(boat.wishes || [])], wishesMet: boat.wishesMet || 0, wishesTotal: boat.wishesTotal || 0, missed: { ...(boat.missed || {}) },
     far: { ...(boat.far || {}) },
   };
@@ -2691,7 +2715,7 @@ export function rateBoat(ctx, boat, ratingBonus = 0) {
 /** Kurzbeschreibung eines Gastes für Bewertungsereignisse (Gästebuch). */
 function guestInfo(boat) {
   const g = { typeId: boat.typeId, modelId: boat.modelId, name: boat.name, size: boat.size, kind: boat.kind };
-  for (const k of ['bootsname', 'heimathafen', 'stammId', 'besuche']) if (boat[k] != null) g[k] = boat[k];
+  for (const k of ['bootsname', 'heimathafen', 'stammId', 'besuche', 'stamm', 'lieblingsplatz']) if (boat[k] != null) g[k] = boat[k];
   return g;
 }
 
@@ -2702,7 +2726,7 @@ function guestInfo(boat) {
 function departBoat(state, ctx, boat, mods, events, leaveAt, kurz) {
   const parts = ratingParts(ctx, boat, mods.ratingBonus);
   const rating = parts.value;
-  pushRating(state, ctx, rating);
+  pushRating(state, ctx, rating, boat);
   const h = heute(state);
   h.abgereist++;
   if (kurz) h.kurzhalt = (h.kurzhalt || 0) + 1;

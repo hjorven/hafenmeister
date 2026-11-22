@@ -211,6 +211,7 @@ class BoatAnimManager {
     this.sea = 0.25;                                  // 0 = glatt, 1 = Sturm
     this.wind = { from: (250 * Math.PI) / 180, strength: 0.5 };  // aus Westsuedwest
     this.shelter = defaultShelter;                    // (x, z) => 0..1, Landschaft darf ersetzen
+    this.anlegeFaktor = null;                         // (info, berth) => Tempo-Faktor beim Anlegen (Wind P34)
     this.frame = 0;
     this.lowPower = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
 
@@ -454,6 +455,8 @@ function manager(game) {
       setSea: (l) => m.setSea(l),
       setWind: (d, s) => m.setWind(d, s),
       setShelter: (fn) => { m.shelter = fn || defaultShelter; },
+      // Wind beim Anlegen (P34, features/wind.js): (info, berth) => Faktor fürs Tempo der letzten Meter (1 = normal)
+      setAnlegeFaktor: (fn) => { m.anlegeFaktor = fn || null; },
       berthFromPlatz,
       // Fremdes Schiff (z. B. Kreuzfahrtschiff der Services) als Hindernis anmelden: Boote weichen aus,
       // warten davor und fahren nie hinein. Gibt eine Funktion zum Abmelden zurueck.
@@ -1191,6 +1194,9 @@ class BoatAnim {
     // Kleine Boote sollen nach dem Zuweisen in wenigen Sekunden am Platz sein: Tempo nach Weglaenge,
     // zuegig beschleunigen und kraeftig abbremsen.
     let speed = opts.speed, brake = 1;
+    // Wind (P34): große Boote mit Wind von achtern legen bei Starkwind vorsichtiger an
+    let wf = 1;
+    try { wf = clamp(Number(this.mgr.anlegeFaktor?.(this.info, b)) || 1, 0.2, 1); } catch { wf = 1; }
     if (speed === undefined) {
       if (big) speed = this.cfg.harbor;
       else {
@@ -1199,6 +1205,7 @@ class BoatAnim {
         speed = clamp(len / (opts.seconds ?? 8), this.cfg.cruise, this.cfg.cruise * 2.4);
         brake = 2.2;
       }
+      if (wf < 1) { speed *= wf; brake = Math.max(1, brake * wf); }
     }
     if (b.kind === 'paeckchen') {
       // Paeckchen (P27): parallel neben das Boot innen, dann seitlich heran (Leinen ueber, heranholen),
@@ -1217,8 +1224,8 @@ class BoatAnim {
         this.push(new DrehTask(b.heading));
         if (vonVorn.linie) this.push(new StraightTask(vonVorn.linie, { sideways: true, thrusters: true, speed: 0.5, heading: b.heading }));
         this.push(new StraightTask(vonVorn.querab, { reverse: true, thrusters: true, speed: 0.6, heading: b.heading }));
-      } else this.push(new PathTask(pts, { harbor: true, route: opts.route }));
-      this.push(new StraightTask(f, { sideways: true, thrusters: true, speed: 0.35, heading: b.heading }));
+      } else this.push(new PathTask(pts, { harbor: true, route: opts.route, ...(wf < 1 ? { speed: this.cfg.harbor * wf } : {}) }));
+      this.push(new StraightTask(f, { sideways: true, thrusters: true, speed: 0.35 * wf, heading: b.heading }));
     }
     this.push(new CallTask((bt) => {
       bt.heading = wrapAngle(bt.heading);

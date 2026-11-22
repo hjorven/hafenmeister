@@ -104,6 +104,9 @@ export function rulesFromEconomy(E = ECONOMY) {
   const f = E.ruf || {};
   r.startMoney = E.start?.geld ?? 0;
   r.reputation = { window: f.hoechstens ?? f.fenster, days: f.tage ?? 0, minCount: f.mindestens ?? f.fenster, start: f.start, startSamples: f.startBewertungen ?? 0, min: ANKER_MIN, max: ANKER_MAX };
+  // Stammgäste (P25, features/stammgaeste.js): Gewicht beim Ruf (C8) und Anker am Lieblingsplatz (H6)
+  const sg = E.stammgaeste || {};
+  r.regular = { reputationWeight: sg.rufGewicht ?? 1, favouriteBonus: sg.platzBonus ?? 0 };
   r.rating = { noWishes: f.ohneWunsch, min: ANKER_MIN, max: ANKER_MAX, noneMet: f.wunschNote?.keiner ?? ANKER_MIN, allMet: f.wunschNote?.alle ?? ANKER_MAX };
   r.arrivalFactorAtRep = { 1: f.ankunftBasis, 5: f.ankunftBasis + 4 * f.ankunftJeAnker };
   r.turnAway = { chance: f.abgewiesen?.chance ?? 0, rating: f.abgewiesen?.wertung ?? ANKER_MIN };
@@ -185,6 +188,13 @@ export function rulesFromEconomy(E = ECONOMY) {
   // Päckchen (P27): längsseits an ein liegendes Boot, wenn keine Box frei ist
   const pk = E.paeckchen;
   r.raft = pk ? { from: pk.abStufe ?? 2, kinds: [...(pk.platzarten || [])], fee: pk.liegegeld ?? 1, rating: pk.ruf ?? 0, maxNights: pk.naechteHoechstens ?? 1, slack: pk.laengeMehr ?? 0 } : null;
+  // Wind im Hafen (P34): Windlage der Plätze bei Starkwind, große Boote mit Rückenwind (features/wind.js)
+  const wi = E.wind;
+  r.wind = wi ? {
+    strong: wi.stark, from: wi.abStufe ?? 1, exposed: wi.unruhig ?? 0, sheltered: wi.geschuetzt ?? 0,
+    tailwind: wi.rueckenwind ?? 0, tailwindBelow: wi.rueckenwindAb ?? -0.5, headwindFrom: wi.gegenWindAb ?? 0.5,
+    sizes: [...(wi.grosse || [])], score: { ...(wi.wahl || {}) },
+  } : null;
   r.leaveMax = w.ausBoxMax ?? 0;
   r.previewCount = w.vorschau ?? 0;
 
