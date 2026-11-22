@@ -291,22 +291,10 @@ function segelclub(stufe, { ufer = 6 } = {}) {
   // Jollen auf Slipwagen vor dem Haus
   const farben = [FARBE.white, FARBE.red, FARBE.yellow, FARBE.navy, FARBE.white];
   for (let i = 0; i < 5; i++) rumpf(g, 2.4, 1.15, 0.4, farben[i], -9 + i * 2, LAND_Y + 0.35, -9, Math.PI / 2);
-  // Jollensteg
-  steg(g, 4, -6, 4, -(ufer + 16), 1.4);
-  const optis = [];
-  if (stufe >= 2) {
-    // Optimisten der Segelschule im Kreis
-    for (let i = 0; i < 6; i++) {
-      const o = rumpf(g, 2.3, 1.1, 0.4, FARBE.white, 0, 0, 0);
-      zyl(o, 0.04, 2.6, FARBE.white, 0.5, 0.3, 0, 4);
-      const s = add(o, new THREE.PlaneGeometry(1.6, 1.6), FARBE.sail, -0.2, 1.8, 0);
-      s.material = new THREE.MeshLambertMaterial({ color: i === 0 ? FARBE.red : FARBE.sail, side: THREE.DoubleSide });
-      s.rotation.z = 0.5;
-      optis.push(o);
-    }
-    // Motorboot des Trainers
-    optis.push(rumpf(g, 4.5, 1.9, 0.6, FARBE.grey, 0, 0, 0));
-  }
+  // Jollensteg (nur, wenn das Wasser nah genug ist; sonst lag er an Land)
+  if (ufer < 14) steg(g, 4, -6, 4, -(ufer + 16), 1.4);
+  // Die Optimisten der Segelschule segeln beim Jugendtraining wirklich (P39, render/jugend-bild.js):
+  // über den Slip ins Wasser und aus dem Hafen. Vorher fuhren sie hier im Kreis, oft über die Wiese.
   if (stufe >= 3) {
     // Startturm mit Signalflaggen
     box(g, 2.4, 4.5, 2.4, FARBE.wood, 9, LAND_Y, -2);
@@ -319,13 +307,6 @@ function segelclub(stufe, { ufer = 6 } = {}) {
     group: g,
     update(dt, t) {
       flaggen.forEach((f, i) => wehen(f, t, i));
-      optis.forEach((o, i) => {
-        const trainer = i === 6;
-        const a = t * 0.08 + (i / 6) * Math.PI * 2;
-        const rx = trainer ? 10 : 14, rz = trainer ? 5 : 7;
-        o.position.set(Math.cos(a) * rx, Math.sin(t * 1.5 + i) * 0.05, -(ufer + 26) + Math.sin(a) * rz);
-        o.rotation.y = -a - Math.PI / 2;
-      });
     },
   };
 }
@@ -1028,6 +1009,36 @@ export function tankstelle(stufe) {
       lichter.forEach((l, i) => { l.visible = Math.sin(t * 2.4 + i * 1.7) > -0.3; });
       schlaeuche.forEach((s, i) => { s.rotation.x = Math.sin(t * 0.9 + i) * 0.12; });
     },
+  };
+}
+
+// Absaugstation (P31, Versorgung "absaugen"): grüner Pumpenschrank auf dem Dienststeg, Saugschlauch auf
+// einer Trommel, Schild mit Tropfen. Stufe 2 bekommt einen zweiten Schrank. Gleiches Deck wie die Tankstelle.
+export function absaugstation(stufe) {
+  const g = new THREE.Group();
+  const DECK = 0.46;
+  const trommeln = [];
+  const schrank = (x) => {
+    box(g, 0.9, 1.3, 0.6, '#3f7a4f', x, DECK, -0.4);
+    box(g, 0.96, 0.12, 0.66, FARBE.white, x, DECK + 1.3, -0.4);
+    box(g, 0.5, 0.5, 0.04, FARBE.white, x, DECK + 0.7, -0.72);
+    box(g, 0.2, 0.26, 0.05, '#3f7a4f', x, DECK + 0.82, -0.75);
+    const t = new THREE.Group();
+    t.position.set(x + 0.62, DECK + 0.55, -0.4);
+    add(t, new THREE.CylinderGeometry(0.32, 0.32, 0.2, 10), FARBE.ink, 0, 0, 0).rotation.z = Math.PI / 2;
+    add(t, new THREE.TorusGeometry(0.24, 0.06, 4, 10), '#d8c64a', 0, 0, 0).rotation.y = Math.PI / 2;
+    g.add(t);
+    trommeln.push(t);
+  };
+  schrank(0);
+  if (stufe >= 2) schrank(-2.2);
+  // Pfosten mit Schild "Absaugung"
+  zyl(g, 0.05, 2.4, FARBE.white, 1.4, DECK, 0.25, 5);
+  box(g, 0.9, 0.5, 0.06, '#3f7a4f', 1.4, DECK + 1.9, 0.25);
+  g.traverse((o) => { if (o !== g) o.userData.fest = true; });
+  return {
+    group: g,
+    update(dt, t) { trommeln.forEach((tr, i) => { tr.rotation.x = Math.sin(t * 0.6 + i) * 0.05; }); },
   };
 }
 

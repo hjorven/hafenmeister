@@ -15,7 +15,7 @@ import {
   erklaerung, zufrieden, rufErklaerung,
 } from './gaestebuch-daten.js';
 import { VORRANG } from './meldungen.js';
-import { ANGEBOT_BILDER } from './wunsch-bilder.js';
+import { ANGEBOT_BILDER, NEUE_BILDER } from './wunsch-bilder.js';
 import { ANGEBOT_TEXTE } from '../data/wuensche-texte.js';
 
 // ------------------------------------------------------------------ Pixel-Symbole (12 x 12, wie ui/oberflaeche.js)
@@ -34,7 +34,7 @@ const PIXEL = {
 };
 
 // Wünsche an Angebote an Land (P19): dieselben Bilder wie über dem Boot (ui/wunsch-bilder.js)
-for (const [k, b] of Object.entries(ANGEBOT_BILDER)) PIXEL[k] = b.raster;
+for (const [k, b] of Object.entries({ ...ANGEBOT_BILDER, ...NEUE_BILDER })) PIXEL[k] = b.raster;
 
 function pixelSvg(raster) {
   const h = raster.length;
@@ -339,10 +339,21 @@ export function init(game) {
     return el('p', { class: 'hm-gb-klein hm-gb-auszeichnung' }, bild, el('span', {}, t));
   }
 
+  // Wasserhähne gibt es je Steg (P31): der Steg, an dem gerade die meisten Gäste liegen, sonst der erste
+  function wasserZiel() {
+    let liste = [];
+    try { liste = game.bauen?.eintraege?.().filter((x) => x.nachruesten === 'wasser' && !x.gesperrt) ?? []; } catch { liste = []; }
+    if (!liste.length) return null;
+    const sim = game.sim;
+    const n = (steg) => sim?.mooredBoats?.().filter((b) => !b.stationed && sim.ctx.berthById[b.berthId]?.jetty === steg).length ?? 0;
+    return [...liste].sort((a, b) => n(b.steg) - n(a.steg))[0].key;
+  }
+
   function bauKnopf(key) {
     // Versorgung baut das Bauwerk, ein Angebotswunsch den Service (P19)
     // weiter Weg (P19 B9): das Sanitärgebäude (WC Stufe 3) bringt WC und Dusche an eine zweite Stelle
     const ziel = { wc: 'versorgung:wc', dusche: 'versorgung:dusche', essen: 'versorgung:essen', diesel: 'versorgung:diesel', strom: 'versorgung:strom',
+      wlan: 'versorgung:wlan', waesche: 'versorgung:waesche', absaugen: 'versorgung:absaugen', wasser: wasserZiel(),
       'weit:wc': 'versorgung:wc', 'weit:dusche': 'versorgung:wc' }[key]
       ?? (ANGEBOT_TEXTE[key] ? `angebot:${ANGEBOT_TEXTE[key].service}` : null);
     if (!ziel || !game.bauen?.eintraege) return null;

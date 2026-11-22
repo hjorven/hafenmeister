@@ -33,6 +33,7 @@ import { zufallAus } from '../web/js/random.js';
 import { installiere as geschichtenEinhaengen, wetterWorte } from '../web/js/geschichten/regeln.js';
 import { haengeEin as stammEinhaengen } from '../web/js/features/stammgaeste.js';
 import { haengeEin as postEinhaengen } from '../web/js/features/gaestepost.js';
+import { haengeEin as nachruestEinhaengen, angebote as nachruestAngebote, kaufen as nachruestKaufen } from '../web/js/features/nachruesten.js';
 
 // Hat harbor.js für eine Stufe aus economy.js noch keine Plätze (Stufe 6 vor dem Export der
 // Pier), rechnet das Werkzeug mit den Plätzen der letzten Hafenstufe weiter und sagt das.
@@ -186,6 +187,8 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   // Bootsgeschichten wie im Spiel (geschichten/geschichten.js): Anlass je Boot, besondere Tage, Tagestörns
   geschichtenEinhaengen(ctx, sim, { umfeld: (st, tag = st.day) => { const w = plan?.weather?.(tag); return { ereignis: w?.event ?? null, wetter: wetterWorte(w) }; } });
   postEinhaengen((n, f) => sim.addHook(ctx, n, f));
+  // Stege nachrüsten wie im Spiel (features/nachruesten.js): Wasserhähne erfüllen den Wunsch Frischwasser (P31)
+  nachruestEinhaengen((n, f) => sim.addHook(ctx, n, f), () => state);
   // Dienste der Services wie im Spiel (render/services.js, Haken 'arrivals'): Mast legen,
   // Radtour, Reparatur verlängern den Aufenthalt und werden am ersten Abend bezahlt (P23)
   const wetterAm = (tag) => (plan?.weather?.(tag)?.event === 'sturm' ? 'sturm' : (plan && (plan.weather(tag).rain ?? 0) > 0.3) ? 'regen' : 'sonne');
@@ -248,6 +251,14 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
       if (!u || u.reason === 'max' || u.reason === 'stage') continue;
       o.push({ art: 'bauwerk', id: k, kosten: u.cost, prio: prof.kaufWieZeitraffer ? 3 : unerfuellt[k] > 0 ? 1 : 4,
         tu: () => sim.upgradeFacility(state, ctx, k).ok });
+    }
+    // Wasserhähne (P31) an Stegen, an denen Gäste liegen, die Frischwasser wollen; Fingerstege und Laternen
+    // kauft der Bot nicht (sie heben nur Anker, die Rechnung bleibt vorsichtig)
+    for (const a of nachruestAngebote(state, ctx)) {
+      if (a.gesperrt || !E.nachruesten?.[a.art]?.wunsch) continue;
+      const w = E.nachruesten[a.art].wunsch;
+      o.push({ art: 'nachruesten', id: `${a.art}:${a.steg}`, kosten: a.kosten, prio: prof.kaufWieZeitraffer ? 3 : unerfuellt[w] > 0 ? 1 : 4,
+        tu: () => nachruestKaufen(state, ctx, a.art, a.steg).ok });
     }
     const on = state.office + 1;
     if (RULES.office.cost[on] && state.stage >= RULES.office.fromStage[on]) {

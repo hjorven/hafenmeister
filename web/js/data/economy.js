@@ -244,11 +244,19 @@ export const ECONOMY = {
 
   wuensche: {
     //      ab Stufe, welche Klassen ihn haben können, Bauwerk, das ihn erfüllt
+    // durch 'platz': der Liegeplatz erfüllt ihn (eigenschaft: power = Strom, water = Wasserhahn am Steg).
+    // abNaechte: nur Gäste, die mindestens so viele Nächte bleiben, haben diesen Wunsch.
+    // Welche Bootsart welchen Wunsch haben kann, steht zusätzlich in data/boats (wishes).
     wc:     { abStufe: 1, klassen: ['S', 'M', 'L', 'XL'], durch: 'wc' },
     dusche: { abStufe: 2, klassen: ['S', 'M', 'L', 'XL'], durch: 'dusche' },
     essen:  { abStufe: 2, klassen: ['S', 'M', 'L', 'XL'], durch: 'essen' },
-    strom:  { abStufe: 3, klassen: ['M', 'L', 'XL'], durch: 'platz' },   // Platz mit Strom
+    // Neue Wünsche (P31, docs/gaestewuensche.md): je Ausbaustufe mindestens einer
+    wasser: { abStufe: 2, klassen: ['M', 'L', 'XL'], durch: 'platz', eigenschaft: 'water' },   // Wasserhahn am Steg (nachruesten.wasser)
+    strom:  { abStufe: 3, klassen: ['M', 'L', 'XL'], durch: 'platz', eigenschaft: 'power' },   // Platz mit Strom
+    wlan:   { abStufe: 3, klassen: ['M', 'L', 'XL'], durch: 'wlan' },
     diesel: { abStufe: 4, klassen: ['S', 'M', 'L', 'XL'], durch: 'diesel', nurMotor: true },
+    waesche: { abStufe: 4, klassen: ['M', 'L', 'XL'], durch: 'waesche', abNaechte: 3 },
+    absaugen: { abStufe: 5, klassen: ['M', 'L', 'XL'], durch: 'absaugen' },
   },
   // Wie viele Wünsche ein Boot hat: [min, max] je Klasse (gekappt auf verfügbare Wünsche)
   wunschAnzahl: { S: [0, 2], M: [1, 2], L: [1, 3], XL: [2, 3], XXL: [0, 0] },
@@ -271,6 +279,7 @@ export const ECONOMY = {
       eis:         { service: 'eisdiele',       abStufe: 4, klassen: ['S', 'M', 'L'] },
       werft:       { service: 'travellift',     abStufe: 4, klassen: ['L', 'XL'] },
       segelmacher: { service: 'segelmacher',    abStufe: 4, klassen: ['M', 'L', 'XL'], nurSegel: true },
+      barkasse:    { service: 'barkasse',       abStufe: 6, klassen: ['M', 'L', 'XL'] },   // P31: Hafenrundfahrt im Seehafen
     },
   },
 
@@ -534,6 +543,21 @@ export const ECONOMY = {
       { name: 'Zapfsäule',      abStufe: 4, kosten: 2700, versorgt: 30 },
       { name: 'Bootstankstelle', abStufe: 5, kosten: 6100, versorgt: 80 },
     ] },
+    // Neue Wünsche (P31): WLAN, Waschmaschine, Absaugstation für Bordtoiletten
+    // versorgt nach dem Bedarf in der Rechnung (tools/balance.mjs, höchstens rund 18 WLAN-, 17 Absaug- und
+    // 10 Wäsche-Gäste am Tag): die erste Stufe reicht für den Anfang, die zweite für den vollen Hafen.
+    wlan: { name: 'WLAN', stufen: [
+      { name: 'WLAN am Hafenbüro',           abStufe: 3, kosten: 400,  versorgt: 12 },
+      { name: 'WLAN-Antennen an den Stegen', abStufe: 4, kosten: 1200, versorgt: 40 },
+    ] },
+    waesche: { name: 'Wäscherei', stufen: [
+      { name: 'Waschmaschine und Trockner',  abStufe: 4, kosten: 600,  versorgt: 6 },
+      { name: 'Waschsalon',                  abStufe: 5, kosten: 1400, versorgt: 20 },
+    ] },
+    absaugen: { name: 'Absaugstation', stufen: [
+      { name: 'Absaugstation',               abStufe: 5, kosten: 900,  versorgt: 12 },
+      { name: 'Zweite Absaugstation',        abStufe: 6, kosten: 1800, versorgt: 30 },
+    ] },
     // Strom an den Holzstegen A und B (C, D, Kai haben ihn von Anfang an)
     strom: { name: 'Stromsäulen', stufen: [
       { name: 'Stromsäulen an Steg B', abStufe: 3, kosten: 1100, stege: ['B'] },
@@ -556,6 +580,8 @@ export const ECONOMY = {
     // Wie ein Schwimmsteg mit Fingern (platzarten.finger.rufBonus)
     finger: { name: 'Fingerstege', abStufe: 3, grund: 400, jePlatz: { S: 90, M: 140, L: 200 }, anker: 0.5, nurArt: 'box' },
     licht:  { name: 'Steglaternen', abStufe: 2, grund: 150, jePlatz: { S: 20, M: 25, L: 30, XL: 40 }, anker: 0.2 },
+    // P31: Wasserhähne erfüllen den Wunsch Frischwasser (wuensche.wasser) für alle Plätze des Stegs
+    wasser: { name: 'Wasserhähne', abStufe: 2, grund: 90, jePlatz: { S: 10, M: 15, L: 20, XL: 30 }, anker: 0, wunsch: 'wasser' },
   },
 
   // ---------------------------------------------------------------- Kassieren
@@ -699,11 +725,12 @@ export const ECONOMY = {
     ] },
     segelclub: { abStufe: 3, stufen: [   // Segelclub
       // Segelclub
-      { kosten: 2200, wirkung: { proTag: 20, ruf: 0.08, gaeste: { S: 1.2 }, freischalten: ['regatta'] } },
+      // jugend: Boote der Jugendgruppe (P39, gleich optis + jollen in ECONOMY.jugendtraining.gruppe), braucht die Slipanlage
+      { kosten: 2200, wirkung: { proTag: 20, ruf: 0.08, gaeste: { S: 1.2 }, freischalten: ['regatta'], jugend: 5 } },
       // Segelschule
-      { kosten: 6500, abStufe: 4, wirkung: { proTag: 120, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.12, gaeste: { S: 1.3, M: 1.05 }, freischalten: ['regatta'] } },
+      { kosten: 6500, abStufe: 4, wirkung: { proTag: 120, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.12, gaeste: { S: 1.3, M: 1.05 }, freischalten: ['regatta'], jugend: 8 } },
       // Regattaverein
-      { kosten: 6800, abStufe: 4, ruf: 3.8, wirkung: { proTag: 150, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.16, gaeste: { S: 1.15, M: 1.1, L: 1.05 }, freischalten: ['regatta'], regatta: 1.3 } },
+      { kosten: 6800, abStufe: 4, ruf: 3.8, wirkung: { proTag: 150, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.16, gaeste: { S: 1.15, M: 1.1, L: 1.05 }, freischalten: ['regatta'], regatta: 1.3, jugend: 11 } },
     ] },
     mastenkran: { abStufe: 3, stufen: [   // Mastenkran
       // Mastenkran
@@ -815,10 +842,28 @@ export const ECONOMY = {
                  // Vorbereiten (events/vorbereiten.js): so viele Plätze je Stufe für Segler freihalten,
                  // jedes Segelboot darauf zahlt einmal Startgeld je Klasse (Klassen ohne Betrag nehmen nicht teil)
                  vorbereiten: { plaetze: { 3: 3, 4: 4, 5: 5, 6: 6 }, startgeld: { S: 8, M: 15, L: 25 } } },
-    hafenfest: { abStufe: 4, alleTage: 11, dauer: 1, vorrang: 4, saison: [5, 13],
-                 // Traditionssegler (XL) kommen erst ab Stufe 5, vorher nur mehr Boote und Besucher
-                 wirkung: { arrivalFactor: 1.3, kindFactor: { traditionssegler: 6 }, sizeFactor: { XL: 2 },
-                   visitorFactor: 2, serviceIncomeFactor: 1.5, ratingBonus: 0.25 } },
+    // Hafenfest (P38, F12): kommt nicht von selbst (selbst), der Spieler setzt es einmal je Saison an
+    // (features/hafenfest.js). saison: erlaubte Saisontage. Traditionssegler (XL) kommen erst ab Stufe 5.
+    hafenfest: { abStufe: 3, selbst: true, alleTage: 18, dauer: 1, vorrang: 4, saison: [3, 15],
+                 wirkung: { arrivalFactor: 1.5, kindFactor: { traditionssegler: 6 }, sizeFactor: { XL: 2 },
+                   visitorFactor: 1.6, serviceIncomeFactor: 1.3, ratingBonus: 0.1 },
+                 menschen: { ort: 1.5, abends: { ort: 1.6 } },
+                 // eigen: vorlauf = frühestens so viele Tage nach heute. kosten je Ausbaustufe 1 bis 6, beim
+                 // Ansetzen bezahlt (Tagesabschluss: Ausgaben "Hafenfest"); absagen bis zum Vorabend gibt
+                 // erstattung (Anteil) zurück. Teile wirken zusätzlich zur Wirkung oben: Faktoren
+                 // multiplizieren sich, ratingBonus und extraNights zählen dazu. menschen: mehr Leute an Land.
+                 // standgeld: Markt bringt abends Geld je Ausbaustufe (Einnahmen: Sonstiges, "hafenfest").
+                 eigen: {
+                   vorlauf: 2, erstattung: 0.5,
+                   kosten: [0, 0, 150, 350, 600, 900],
+                   teile: {
+                     schmuck:   { kosten: [0, 0, 80, 180, 320, 480], wirkung: { ratingBonus: 0.25 } },
+                     musik:     { kosten: [0, 0, 120, 260, 450, 650], wirkung: { visitorFactor: 1.5 }, menschen: 1.4 },
+                     markt:     { kosten: [0, 0, 100, 220, 380, 560], standgeld: [0, 0, 160, 340, 560, 820],
+                                  wirkung: { serviceIncomeFactor: 1.3 } },
+                     feuerwerk: { kosten: [0, 0, 180, 380, 650, 950], wirkung: { extraNights: 1 } },
+                   },
+                 } },
     // ---- Neue Ereignisse (P24, F17) und Bindung an Bauten (G7) ----------------------------------
     // menschen: mehr Spaziergänger (ort) und Badegäste (strand) im Bild (render/people.js), abends: wer bleibt.
     // bauten: gebaute Services machen das Ereignis größer. Je Bau und Ereignistag abends Geld (proTag je
@@ -884,6 +929,28 @@ export const ECONOMY = {
     sanitaer: { kosten: [20, 70, 200, 500, 990, 1600], bonus: 0.2, wuensche: ['wc', 'dusche'] },
     // Hafenbecken ausbaggern: große Boote kommen öfter (Faktor je Klasse), ab Stufe 3
     baggern:  { abStufe: 3, kosten: [0, 0, 400, 990, 1900, 3100], faktor: 1.25, klassen: ['L', 'XL'] },
+  },
+
+  // ---------------------------------------------------------------- Jugendtraining (P39, F13)
+  // Mit Segelclub und Slipanlage segeln an festen Tagen Optimisten (ab der Segelschule auch Jollen) als
+  // Gruppe aus dem Hafen, trainieren draußen und kommen zurück. Das Trainerboot braucht für den Tag eine
+  // Box, die der Spieler vergibt. Logik features/jugendtraining.js, Beschreibung docs/jugendtraining.md.
+  jugendtraining: {
+    braucht: { segelclub: 1, slip: 1 },   // gebaute Stufe je Service
+    alle: 4,             // jeden 4. Saisontag ...
+    ersterTag: 3,        // ... ab dem 3. (Saisontag 3, 7, 11, 15, 19, 23, 27)
+    beginn: 0.25,        // Tagesanteil: die Gruppe geht am Slip ins Wasser (das Bild holt sie bis 0,82 zurück)
+    dauer: 0.4,          // so lange ist sie draußen, wenn niemand zusieht (Regeln ohne Bild)
+    notfall: 0.65,       // mit Bild: so lange nach dem Beginn zählt sie spätestens als zurück (falls das Bild hängt)
+    // Trainerboot: Festrumpf-Schlauchboot (data/boats/s.js S3-3)
+    trainerboot: { modell: 'S3-3', laenge: 4.8, breite: 2.0, tiefgang: 0.4 },
+    ruf: 0.2,            // Anker für jeden Gast, der beim Zurückkommen im Hafen liegt
+    // je Ausbau des Segelclubs: Gruppe und was der Verein für die Box zahlt (am Tag des Trainings)
+    gruppe: [
+      { optis: 5, jollen: 0, beitrag: 15, eltern: 4 },   // Segelclub
+      { optis: 6, jollen: 2, beitrag: 25, eltern: 6 },   // Segelschule
+      { optis: 8, jollen: 3, beitrag: 40, eltern: 8 },   // Regattaverein
+    ],
   },
 
   // ---------------------------------------------------------------- Endlosspiel (P16)

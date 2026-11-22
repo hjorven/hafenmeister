@@ -197,11 +197,16 @@ export function init(game) {
       const def = ECONOMY.nachruesten?.[a.art] ?? {};
       const anker = num1(a.anker);
       const stegKurz = a.name.slice(a.name.indexOf(' an ') + 4);
+      // Wasserhähne (P31): wirken über den Wunsch Frischwasser, nicht über Anker
+      const wunsch = def.wunsch ?? null;
       out.push({
         key: `nachruesten:${a.art}:${a.steg}`, art: 'steg', nachruesten: a.art, steg: a.steg, id: `${a.art}-${a.steg}`, name: a.name, kosten: a.kosten,
-        gesperrt: a.gesperrt, ohneSchild: true, hebtNote: true,
-        kurz: `+${anker} Anker`,
-        nutzen: a.art === 'finger'
+        gesperrt: a.gesperrt, ohneSchild: true, hebtNote: !wunsch, wunsch,
+        kurz: wunsch ? `+${WUNSCH_KURZ[wunsch] ?? wunsch}` : `+${anker} Anker`,
+        nutzen: wunsch
+          ? [`Gäste an ${stegKurz} mit dem Wunsch ${WUNSCH_KURZ[wunsch] ?? wunsch} zapfen es direkt am Platz: ${Math.round((ECONOMY.wunschBonus ?? 0.25) * 100)} % mehr Hafengeld und bessere Bewertungen.`,
+            `${Math.ceil(a.plaetze.length / 2) === 1 ? 'Eine Zapfstelle' : `${Math.ceil(a.plaetze.length / 2)} Zapfstellen`} für ${a.plaetze.length === 1 ? 'einen Platz' : `${a.plaetze.length} Plätze`}, neue Plätze an diesem Steg gleich mit.`]
+          : a.art === 'finger'
           ? [`Gäste an ${stegKurz} bewerten um ${anker} Anker besser: Sie steigen am Fingersteg bequem aus.`,
             `${a.plaetze.length === 1 ? 'Eine Box bekommt' : `${a.plaetze.length} Boxen bekommen`} einen Fingersteg, neue Boxen an diesem Steg gleich mit.`]
           : [`Gäste an ${stegKurz} bewerten um ${anker} Anker besser: Abends ist der Steg hell.`,
@@ -209,7 +214,14 @@ export function init(game) {
         ort: () => plaetzeOrt(a.plaetze),
         geist: () => game.nachruesten?.geist?.(a.art, a.steg),
         bedarf: () => {
-          const n = game.sim.mooredBoats().filter((b) => !b.stationed && game.sim.ctx.berthById[b.berthId]?.jetty === a.steg).length;
+          const hier = game.sim.mooredBoats().filter((b) => !b.stationed && game.sim.ctx.berthById[b.berthId]?.jetty === a.steg);
+          if (wunsch) {
+            const w = hier.filter((b) => b.wishes?.includes(wunsch)).length;
+            const offen = bedarf().offen?.[wunsch] ?? 0;
+            if (w) return `Gerade ${w === 1 ? 'liegt ein Gast' : `liegen ${w} Gäste`} an ${stegKurz}, ${w === 1 ? 'der sich' : 'die sich'} ${WUNSCH[wunsch]} ${w === 1 ? 'wünscht' : 'wünschen'}.`;
+            return offen ? `Zuletzt ${offen === 1 ? 'wollte 1 Gast' : `wollten ${offen} Gäste`} ${WUNSCH[wunsch]} und ${offen === 1 ? 'bekam' : 'bekamen'} es nicht.` : null;
+          }
+          const n = hier.length;
           return n ? `Gerade ${n === 1 ? 'liegt ein Gast' : `liegen ${n} Gäste`} an ${stegKurz}.` : null;
         },
         kaufen: () => game.nachruesten.kaufen(a.art, a.steg),
@@ -266,6 +278,8 @@ export function init(game) {
         nutzen.push(`Jeder erfüllte Wunsch bringt ${Math.round((ECONOMY.wunschBonus ?? 0.25) * 100)} % mehr Hafengeld und bessere Bewertungen.`);
         const g = versorgungGebaeude(key, u.level);
         if (g.id) ort = () => ({ ...gebaeudeOrt(g.id), neu: g.neu });
+        // Absaugstation (P31) steht auf dem Dienststeg der Tankstelle (render/services.js)
+        else if (key === 'absaugen') ort = () => { const o = game.services?.absaugOrt?.(); return o ? { ...o, y: 0.5, breite: 12 } : null; };
       }
       out.push({
         key: `versorgung:${key}`, art: 'versorgung', id: key, name, kosten: u.cost, wunsch, stufeNeu: u.level,

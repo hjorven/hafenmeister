@@ -29,7 +29,7 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     berths: list,
     // Päckchenplätze (P27) stehen nur hier, nicht in berths: Listen, Schilder und Auslastung kennen sie nicht
     berthById: Object.fromEntries([...list, ...raftBerths(list, r)].map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], arrivals: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [] },
+    hooks: { modifiers: [], arrival: [], arrivals: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [], berthHas: [] },
   };
 }
 
@@ -38,6 +38,8 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
  *   modifiers  fn(state, ctx) -> Teil von DEFAULT_MODIFIERS, wird jeden Tag und bei jeder Ankunft gelesen
  *   rating     fn({ ctx, boat }) -> Anker, die zur Platzart (comfort) einer Bewertung dazukommen
  *              (zum Beispiel ein im Winter überholter Steg, features/winter.js)
+ *   berthHas   fn({ state, ctx, berth, prop }) -> true, wenn ein Modul dem Platz diese Eigenschaft gibt
+ *              (zum Beispiel 'water' an einem Steg mit Wasserhähnen, features/nachruesten.js, P31)
  *   walk       fn({ state, ctx, berth, wish }) -> Meter vom Platz zum nächsten Gebäude, das den
  *              Wunsch erfüllt, oder null (unbekannt). Weiter als rules.walk.far zählt der Wunsch nur
  *              zum Anteil rules.walk.share (P19 B9, features/wege.js kennt die Gebäude im Bild)
@@ -424,8 +426,9 @@ export function berthHas(state, ctx, berth, prop) {
   if (berth[prop]) return true;
   if (prop === 'power') {
     const building = ctx.rules.jettyPowerBuildings?.[berth.jetty];
-    return !!(building && state.facilities[building] > 0);
+    if (building && state.facilities[building] > 0) return true;
   }
+  for (const fn of ctx.hooks.berthHas || []) if (fn({ state, ctx, berth, prop })) return true;
   return false;
 }
 
@@ -640,8 +643,19 @@ export function rollBoat(state, ctx, mods = modifiers(state, ctx)) {
     if (couldEverFit(state, ctx, boat)) break;
   }
   if (boat) rollShortStay(state, ctx, boat);
+  if (boat) dropStayWishes(ctx, boat);
   for (const fn of ctx.hooks.arrival) fn({ state, ctx, boat });
   return boat;
+}
+
+/**
+ * Wünsche nur für längere Aufenthalte (rules.wishMinNights, P31: Waschmaschine ab 3 Nächten): Wer kürzer
+ * bleibt, verliert den Wunsch wieder. Ändert nur boat.wishes, verbraucht keinen Zufall.
+ */
+export function dropStayWishes(ctx, boat) {
+  const min = ctx.rules.wishMinNights;
+  if (!min || !boat?.wishes?.length) return;
+  boat.wishes = boat.wishes.filter((w) => !(min[w] > 0) || (boat.nights || 0) >= min[w]);
 }
 
 /**
@@ -1202,7 +1216,7 @@ function planFlotilla(state, ctx, mods, winter) {
         if (couldEverFit(state, ctx, boat)) break;
         boat = null;
       }
-      if (boat) boote.push(boat);
+      if (boat) { dropStayWishes(ctx, boat); boote.push(boat); }
     }
     if (boote.length < 3) continue;
     for (const b of boote) b.flotte.n = boote.length;
@@ -2697,10 +2711,11 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   // Stammgast wieder an seinem Lieblingsplatz (P25, plan 9a "Ruf am alten Platz")
   const stammPlatz = boat.lieblingsplatz != null && boat.berthId === boat.lieblingsplatz ? r.regular?.favouriteBonus ?? 0 : 0;
   const wind = windRating(ctx, boat);                         // Windlage bei Starkwind (P34)
-  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + ratingBonus - penalty - moved - raft + wind;
+  const jugend = boat.jugend ? r.youth?.rating ?? 0 : 0;      // dem Jugendtraining zugesehen (P39)
+  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + jugend + ratingBonus - penalty - moved - raft + wind;
   const value = Math.round(Math.min(r.rating.max, Math.max(r.rating.min, raw)) * 10) / 10;
   return {
-    value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
+    value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, jugend, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
     wind, windLage: boat.windLage ?? null, windRuecken: !!boat.windRuecken,
     wishes: [...(boat.wishes || [])], wishesMet: boat.wishesMet || 0, wishesTotal: boat.wishesTotal || 0, missed: { ...(boat.missed || {}) },
     far: { ...(boat.far || {}) },
