@@ -10,7 +10,7 @@ Stand: 14.11.2026. Status: gebaut. P24 fertig: Vorbereiten für Sturm und Regatt
 | Sommertag | 1 | 1 Tag | 8 Tage (nur Saisontag 3 bis 14) | mehr kleine Boote und Badegäste, Kiosk verdient mehr |
 | Sturm | 3 | 1 Tag | 8 Tage | niemand läuft von See ein, Gäste bleiben eine Nacht länger, Gäste an offenen Plätzen (Stirnplätze am Stegkopf, Kai) -1 Anker; Seenotretter-Station mindert das |
 | Regatta | 3, mit Segelclub | 1 Tag (morgens raus, abends zurück), 2 Tage vorher angekündigt | 9 Tage | 1,6x Ankünfte, vor allem Segelboote, mehr Besucher, etwas Ruf |
-| Hafenfest | 4 | 1 Tag | 11 Tage (Hochsommer) | Traditionssegler und Marine, doppelt so viele Besucher, abends Feuerwerk |
+| Hafenfest | 3 | 1 Tag | einmal je Saison, wenn der Spieler es ansetzt (P38, [hafenfest.md](hafenfest.md)) | 1,5x Ankünfte, mehr Besucher; Schmuck, Musik, Marktstände und Feuerwerk dazu buchbar |
 | Heringstage | 2, mit Räucherei | 1 Tag | einmal im Jahr, fest am Saisontag 3 | 1,5x Besucher, mehr Menschen im Ort; Räucherei und Fischhalle verdienen extra |
 | Mittsommer | 2 | 1 Tag | einmal im Jahr, fest am Saisontag 7 | 1,6x Besucher, doppelt so viele Badegäste, abends bleiben sie am Strand; Gäste bleiben eine Nacht länger; mit Grillplatz brennt abends das Mittsommerfeuer |
 | Holzboot-Treffen | 3 | 1 Tag | 11 Tage (Saisontag 3 bis 15) | Klassiker aus Holz (5x) und Ruderboote, Gäste bewerten etwas besser; mit Museumshafen auch Traditionssegler |
@@ -18,7 +18,7 @@ Stand: 14.11.2026. Status: gebaut. P24 fertig: Vorbereiten für Sturm und Regatt
 
 Kreuzfahrtschiffe, Marinebesuche und Ausflugsfahrten plant das Services-Modul als regelmäßige Besuche.
 
-**Leitlinien:** jedes Ereignis wird angekündigt, keins kostet Geld oder zerstört etwas, nie zwei gleichzeitig, danach mindestens ein ruhiger Tag. Seit P17 (16 Saisontage zu rund 5 Minuten) kommen ab Stufe 6 mit allen Bauten im Schnitt knapp 8 Ereignisse je Saison (Mittsommer, Heringstage und Hanse-Woche jedes Jahr, Regatta etwa zweimal, Sturm, Nebel, Sommertag, Holzboote und Hafenfest je etwa einmal; 20 Samen, 10 Jahre). Abstände in der Tabelle sind Spieltage, Stand P17.
+**Leitlinien:** jedes Ereignis wird angekündigt, keins kostet Geld oder zerstört etwas, nie zwei gleichzeitig, danach mindestens ein ruhiger Tag. Ausnahme seit P38: Das Hafenfest kommt nicht von selbst (`selbst: true`), der Spieler setzt es an und bezahlt die Vorbereitung; die anderen Ereignisse halten Abstand dazu (eigener Platz `eigen` im Planer). Seit P17 (16 Saisontage zu rund 5 Minuten) kommen ab Stufe 6 mit allen Bauten im Schnitt knapp 8 Ereignisse je Saison (Mittsommer, Heringstage und Hanse-Woche jedes Jahr, Regatta etwa zweimal, Sturm, Nebel, Sommertag, Holzboote und Hafenfest je etwa einmal; 20 Samen, 10 Jahre). Abstände in der Tabelle sind Spieltage, Stand P17.
 
 **Feste Tage und große Ereignisse (P24 Teil 2):** Mittsommer und Heringstage haben einen festen Saisontag (`amTag`), die anderen Ereignisse halten davor und danach Abstand. Ereignisse mit mindestens fünf Tagen Ankündigung (Hanse-Woche) haben im Planer einen eigenen Platz: Sie werden lange vorher angekündigt, die kleinen laufen bis kurz davor weiter. Der Wetterknopf zeigt "Hanse-Woche in 4 Tagen", der Wetterbericht hat eine Zeile dafür.
 

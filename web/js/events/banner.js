@@ -107,8 +107,8 @@ export function initBanner(game) {
     chip.replaceChildren(svgIcon(iconFor(fc[0])));
     const next = fc.slice(1).find((e) => e.event);
     const label = document.createElement('span');
-    // Großes Ereignis (Hanse-Woche), lange vorher angekündigt: Tage bis dahin
-    const gross = game.events?.gross;
+    // Großes Ereignis (Hanse-Woche), lange vorher angekündigt, oder das eigene Hafenfest (P38): Tage bis dahin
+    const gross = game.events?.gross ?? game.events?.eigen;
     const grossIn = gross ? gross.startDay - fc[0].day : null;
     if (fc[0].event) label.textContent = fc[0].event.title;
     else if (next) label.textContent = `${dayLabel(next.day - fc[0].day)}: ${next.event.title}`;
@@ -148,6 +148,9 @@ export function initBanner(game) {
         // Vorbereiten (events/vorbereiten-ui.js): Sturmklar machen, Plätze für die Regatta freihalten
         const extra = game.vorbereitung?.zeile?.(e);
         if (extra) txt.append(extra);
+        // Eigenes Hafenfest (features/hafenfest.js): was gebucht ist, Absagen
+        const fest = game.hafenfest?.zeile?.(e);
+        if (fest) txt.append(fest);
       }
       row.append(txt);
       panel.append(row);
@@ -170,6 +173,9 @@ export function initBanner(game) {
       row.append(txt);
       panel.append(row);
     }
+    // Eigenes Hafenfest (P38): angesetzt und weiter weg, oder Knopf zum Ansetzen
+    const fest = game.hafenfest?.berichtZeile?.(letzter);
+    if (fest) panel.append(fest);
   }
 
   function wxText(wx) {

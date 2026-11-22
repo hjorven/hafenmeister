@@ -22,6 +22,7 @@
 // Felder in EVENTS (für events/scheduler.js):
 //   stage, every, duration, weight, requires, season, announceDays, mods, protect { building, factor },
 //   amTag (fester Saisontag), gross (eigener Platz im Planer, lange vorher angekündigt), menschen, bauten,
+//   selbst (kommt nicht von selbst, der Spieler setzt es an: Hafenfest P38), eigen (Zahlen dazu),
 //   nachspiel { tage, mods, modsVorbereitet, title, text }
 
 // Standardwerte, wenn nichts los ist. Die Sim liest diese Felder, alle sind optional.
@@ -73,8 +74,8 @@ const TEXTE = [
   {
     id: 'hafenfest',
     title: 'Hafenfest',
-    teaser: 'Morgen ist Hafenfest',
-    text: 'Traditionssegler laufen ein, viele Tagesgäste an Land. Abends Feuerwerk.',
+    teaser: 'Morgen ist dein Hafenfest',
+    text: 'Dein Hafenfest: Boote kommen von überall, viele Besucher an Land. Der Hafen wird voll.',
     weather: { wind: 0.3, fog: 0, rain: 0, sun: 0.9 },
     evening: 'feuerwerk',
   },
@@ -164,6 +165,9 @@ export function mitZahlen(texte, zahlen) {
     if (z.amTag) def.amTag = z.amTag;
     if (z.menschen) def.menschen = z.menschen;
     if (z.bauten) def.bauten = z.bauten;
+    // Eigenes Fest (P38): plant sich nicht selbst, der Spieler setzt es an (features/hafenfest.js)
+    if (z.selbst) def.selbst = true;
+    if (z.eigen) def.eigen = z.eigen;
     const n = zahlen.nachspiel?.[t.id];
     if (n) def.nachspiel = { tage: n.tage, mods: n.wirkung ?? {}, modsVorbereitet: n.wirkungVorbereitet ?? null, ...(NACHSPIEL_TEXTE[t.id] ?? {}) };
     return def;
