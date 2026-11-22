@@ -935,6 +935,28 @@
    "geraet": "pc",
    "datum": "2026-11-22",
    "quelle": "flottillen/pc-zusammen.png"
+  },
+  {
+   "datei": "p25-pr394-handy-pinnwand.jpg",
+   "pakete": [
+    "P25"
+   ],
+   "titel": "Gästepost an der Pinnwand im Hafenbüro, Stammgäste mit Lieblingsbox",
+   "pr": 394,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "stammgaeste/handy-pinnwand.png"
+  },
+  {
+   "datei": "p25-pr394-pc-stammgast.jpg",
+   "pakete": [
+    "P25"
+   ],
+   "titel": "Stammgast meldet sich an und wünscht seinen alten Platz",
+   "pr": 394,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "stammgaeste/pc-stammgast-wartet.png"
   }
  ]
 }
