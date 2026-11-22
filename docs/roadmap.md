@@ -129,7 +129,7 @@ Note 1 bis 5 aus dem Überblick. "nein" heißt: bleibt, wie es ist.
 | Ausbaustufen und Ziele | 3 | teilweise | P16, P18 |
 | Services (21 Stück, mit eigener Wirkung) | 4 | ja | P06, P23 (erledigt) |
 | Ereignisse und Wetter | 3 | teilweise | P06, P24 |
-| Stammgäste | 3 | teilweise | P25 |
+| Stammgäste | 3 | ja | P25 (erledigt) |
 | Einstieg | 3 | ja | P03 |
 | Tempo und Vorspulen | 3 | ja | P07 |
 | Tests | 3 | ja | P06 |
@@ -169,7 +169,7 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Bauzeit der Ausbauten, Winter-Bautempo (`bautage`, `winterBautempo`) | economy.js | erledigt (PR 232): `bautage` = Bauabschnitte, `winterBautempo` gelöscht | P18 |
 | `ECONOMY.ereignisse` (Sturm alle 10 Tage, Hafenfest 1.500 €) | economy.js | eine Quelle, Rest löschen | P06 (erledigt) |
 | Gruppen-Ankunft, Wünsche je Bootsart, `feeFactor`, `arrivalWeight` | data/boats/*.js | Wünsche, `feeFactor`, `arrivalWeight` erledigt (P19 Teil 1); Gruppen erledigt (P32) | P19, P32 (Gruppen) |
-| Stammgast bringt Ruf am alten Platz | plan.md 9a | bauen | P25 |
+| Stammgast bringt Ruf am alten Platz | plan.md 9a | erledigt: Lieblingsplatz +0,5 Anker ([stammgaeste.md](stammgaeste.md)) | P25 |
 | Dauerlieger zahlen pro Saison, Gast wird umgelegt | plan.md 9a | bauen | P01 |
 | Tagesziel-Belohnung in Ruf, Ziele wie "Drei Segelboote mit Dusche" | plan.md 9a | gebaut (PR 152) | P13 |
 | Tretboote und Kanus nur als Kulisse | plan.md 14 (im Spiel zahlender Gast S2, 6 €) | entfällt: bleiben in Stufe 1 Gäste, plan.md angepasst | |
@@ -291,7 +291,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
 | F36 | Hafenchronik: jeder Tag eine Zeile | erledigt | P21 |
-| F37 | Gästepost von Stammgästen, hängt im Hafenbüro | offen | P25 |
+| F37 | Gästepost von Stammgästen, hängt im Hafenbüro | erledigt: Ankündigung und Empfehlung, Pinnwand im Gästebuch | P25 |
 | F38 | Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten | offen | P51 |
 
 ### Welt
@@ -370,7 +370,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | C5 | Ruf als Auszeichnung mit Namen und Zeichen im Hafen | erledigt (P19 Teil 2): drei Stufen mit Namen, Wimpel am Hafenmeisterhaus | P19 |
 | C6 | Ruf lockt andere Gäste (ab 4 große Yachten, ab 4,5 seltene Modelle) | erledigt (P19 Teil 1, `ruf.lockt`) | P19 |
 | C7 | Warnen, bevor es Anker kostet (Gebäude blinkt bei fast ausgebuchter Dusche) | erledigt (P55: Schild knapp orange und blinkend, voll rot, Tipp beim ersten Mal) | P55 |
-| C8 | Stammgäste zählen beim Ruf doppelt | offen | P25 |
+| C8 | Stammgäste zählen beim Ruf doppelt | erledigt (P25) | P25 |
 | C9 | Ruf-Verlauf mit den drei häufigsten Gründen für schlechte Noten | erledigt (PR 154) | P14 |
 
 ### D Ausbaustufen, Stegprojekte und Baumodus
@@ -438,9 +438,9 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | H3 | Bewerber statt Verwandlung: Stammgäste und Einheimische fragen an | erledigt (PR 149) | P01 |
 | H4 | Obergrenze ein Viertel der Plätze | erledigt (PR 149) | P01 |
 | H5 | Dauerlieger nutzen Kran, Winterlager, Segelmacher; im Winter an Land | erledigt (PR 245 und P20-Rest): im Winter im Winterlager (zahlen dort je Tag), Krantage an Mastenkran und Travellift, Segelmacher-Aufträge in der Saison | P20 |
-| H6 | Lieblingsplatz eines Stammgasts | offen | P25 |
-| H7 | Sichtbare Treue: Wimpel je fünf Besuche | offen | P25 |
-| H8 | Stammgäste wachsen mit (Wünsche, größeres Boot) | offen | P25 |
+| H6 | Lieblingsplatz eines Stammgasts | erledigt (P25): Box des letzten zufriedenen Besuchs, Stander über der Box | P25 |
+| H7 | Sichtbare Treue: Wimpel je fünf Besuche | erledigt (P25): Doppelstander am Heck | P25 |
+| H8 | Stammgäste wachsen mit (Wünsche, größeres Boot) | erledigt (P25) | P25 |
 | H9 | Leere Box während eines Tagestörns für einen Tagesgast | offen | P25 |
 | H10 | Dauerlieger vor Vertragsende kündigen kostet | erledigt (PR 149) | P01 |
 
@@ -695,14 +695,14 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|
 | P23 | Services mit eigener Wirkung | Services nicht nur "€ pro Tag" | erledigt (PR 340; F2, F3, F5, F7, F9; [services.md](services.md#eigene-wirkung-roadmap-p23)) |
 | P24 | Ereignisse zum Vorbereiten und neue Ereignisse | Vorwarnung mit Handlungsmöglichkeit, F17 | erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend; PR 299: Heringstage, Mittsommer, Holzboot-Treffen, Hanse-Woche, Nachspiel, Services an Ereignistagen; Regatta mit Bahn draußen PR 319), [ereignisse.md](ereignisse.md) |
-| P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | neu |
+| P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | Teil 1 und 2 gebaut ([stammgaeste.md](stammgaeste.md)), H9 folgt |
 | P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | erledigt (PR 322, docs/hafengesten.md) |
 | P27 | Päckchen liegen bei vollem Hafen | F1 | erledigt (PR 330, [paeckchen.md](paeckchen.md)) |
 | P28 | Anmeldung per Funk | F2 (nutzt P11) | erledigt (PR 288, `docs/funk-anmeldung.md`) |
 | P29 | Baggern für tiefere Liegeplätze | F7 | neu |
 | P30 | Stege nachrüsten | F8 | erledigt (PR 297, [nachruesten.md](nachruesten.md)) |
 | P31 | Neue Gästewünsche | F9 | neu |
-| P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md)) |
+| P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md)) |
 | P33 | Liegende Boote umlegen | F4 | erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen) |
 | P34 | Wind im Hafen spürbar machen | F5, F35 | erledigt (PR 392, [wind.md](wind.md)) |
 | P35 | Preisstufe am Hafenbüro | F6 | neu |
@@ -782,7 +782,7 @@ Lücken, die beim Abgleich der Doku mit dem Code (15.11.2026, `main` bei `c0d1d9
 | P85 | Zusammenspiel nach Welle 0 prüfen | Jorvens Auftrag vom 14.11.: alle Features weiter vorhanden, neue Features im normalen Spiel wirklich genutzt, Welle 1 wirklich gefixt, Übersehenes finden. Drei Threads (Kernschleife und Regeln; Oberfläche und Geräte; Welt, Boote, Ereignisse), gemeinsame Datei `docs/zusammenspiel.md` | 1 | erledigt: Teil 1 Kernschleife und Regeln erledigt (PR 354, Funde K1 bis K5), Teil 2 Oberfläche und Geräte erledigt (PR 352), beide in `docs/zusammenspiel.md`; Teil 3 Welt: Ausbauten je Küste geprüft (Abschnitt "Ausbauten je Küste", Fund W1 Durchstich nur auf Nehrungsküsten), Stegbilder je Küste, Ereignisse und Bildrate je Wetter geprüft (PR 366 und 373, Fund S1 behoben; Aufstiegsname nach Küste) |
 | P86 | Bootsgeschichten fertig erzählen | Regatta: Startsignal mit Ton, Siegerehrung am Segelclub, Ergebnis im Logbuch; Gepäck beim Crewwechsel sichtbar, Halt am Tanksteg, Gang "in den Ort" ([bootsgeschichten.md](bootsgeschichten.md), Abschnitt 5) | 3 | erledigt (PR 342) |
 | P87 | Prüfwerkzeuge auf 15 Küsten und den neuen Takt | Härtetest (`tests/extrem/`) nach PR 327 bis 332 neu laufen lassen und den Fund "Gäste erreichen ab Stufe 4 keine Boje" am Spiel bestätigen; `tests/specs/leinen.spec.mjs` auch für Küste 11 bis 15; `istWasser` und Bild am Durchstich angleichen (Messlatte); Zeitraffer-Grenzen auf den 5-Minuten-Tag | 1 | erledigt (PR 338: Tests über alle Küsten aus `formen.js`, `tools/zeitraffer/wasserbild.cjs` und `bildwasser.cjs`, Grenzen für den 5-Minuten-Tag, Härtetest neu gelaufen; Funde in docs/arbeitsplan.md) |
-| P88 | Engstellen nach ihrer Länge regeln | Reste aus P66 (Abnahme Welle 0 auf `ae9e34f`, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Dazu Großschiff-Vortritt. Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Noch zu tun: Großschiff-Vortritt, Segler der Seerunde in der Schlange, Rest Küste 15 | 3 | teilweise |
+| P88 | Engstellen nach ihrer Länge regeln | Reste aus P66 (Abnahme Welle 0 auf `ae9e34f`, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Dazu Großschiff-Vortritt. Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Noch zu tun: Großschiff-Vortritt, Segler der Seerunde in der Schlange, Rest Küste 15 | 3 | in Arbeit (PR 390) |
 
 ### Abgleich mit der Reihenfolge im Überblick
 

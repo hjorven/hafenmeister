@@ -902,6 +902,39 @@
    "geraet": "pc",
    "datum": "2026-11-21",
    "quelle": "kuesten-ausbau/teil2/ereignisse-laeuft-pc.jpg"
+  },
+  {
+   "datei": "p88-pr390-pc-bahnen.jpg",
+   "pakete": [
+    "P88"
+   ],
+   "titel": "Getrennte Bahnen für Ein- und Auslaufende vor der Einfahrt",
+   "pr": 390,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "p66/bahnen/nachher-pc-1.png"
+  },
+  {
+   "datei": "p32-pr393-handy-zusammen.jpg",
+   "pakete": [
+    "P32"
+   ],
+   "titel": "Flottille zusammen an einen Steg ziehen: Bonus im Hinweis",
+   "pr": 393,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "flottillen/handy-zusammen.png"
+  },
+  {
+   "datei": "p32-pr393-pc-zusammen.jpg",
+   "pakete": [
+    "P32"
+   ],
+   "titel": "Flottille wird gemeinsam an einen Steg zugewiesen",
+   "pr": 393,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "flottillen/pc-zusammen.png"
   }
  ]
 }

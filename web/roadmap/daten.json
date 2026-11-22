@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "b2dfea0"
+  "commit": "ec3d361"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -655,7 +655,7 @@
    "id": "P25",
    "titel": "Stammgäste mit Wirkung und Gästepost",
    "inhalt": "Ruf am alten Platz (plan 9a), F37",
-   "thread": "neu",
+   "thread": "Teil 1 und 2 gebaut (stammgaeste.md), H9 folgt",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
@@ -667,7 +667,7 @@
     "H8",
     "H9"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -778,15 +778,20 @@
    "id": "P32",
    "titel": "Flottillen",
    "inhalt": "F3, Gruppen-Ankunft",
-   "thread": "erledigt (Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md)",
+   "thread": "erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    393
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F3"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    83,
+    84
+   ]
   },
   {
    "id": "P33",
@@ -1648,13 +1653,17 @@
    "id": "P88",
    "titel": "Engstellen nach ihrer Länge regeln",
    "inhalt": "Reste aus P66 (Abnahme Welle 0 auf ae9e34f, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Dazu Großschiff-Vortritt. Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Noch zu tun: Großschiff-Vortritt, Segler der Seerunde in der Schlange, Rest Küste 15",
-   "thread": "teilweise",
+   "thread": "in Arbeit (PR 390)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    390
+   ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
-   "status": "offen",
-   "bilder": []
+   "status": "arbeit",
+   "bilder": [
+    82
+   ]
   }
  ],
  "punkte": [
@@ -2385,8 +2394,8 @@
   {
    "code": "F37",
    "text": "Gästepost von Stammgästen, hängt im Hafenbüro",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt: Ankündigung und Empfehlung, Pinnwand im Gästebuch",
    "pakete": [
     "P25"
    ],
@@ -2788,8 +2797,8 @@
   {
    "code": "C8",
    "text": "Stammgäste zählen beim Ruf doppelt",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P25)",
    "pakete": [
     "P25"
    ],
@@ -3326,8 +3335,8 @@
   {
    "code": "H6",
    "text": "Lieblingsplatz eines Stammgasts",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P25): Box des letzten zufriedenen Besuchs, Stander über der Box",
    "pakete": [
     "P25"
    ],
@@ -3337,8 +3346,8 @@
   {
    "code": "H7",
    "text": "Sichtbare Treue: Wimpel je fünf Besuche",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P25): Doppelstander am Heck",
    "pakete": [
     "P25"
    ],
@@ -3348,8 +3357,8 @@
   {
    "code": "H8",
    "text": "Stammgäste wachsen mit (Wünsche, größeres Boot)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P25)",
    "pakete": [
     "P25"
    ],
@@ -4561,11 +4570,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 10,
+    "erledigt": 11,
     "teilweise": 0,
-    "arbeit": 0,
+    "arbeit": 1,
     "frage": 0,
-    "offen": 11,
+    "offen": 9,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4649,20 +4658,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 45,
+  "erledigt": 46,
   "teilweise": 1,
-  "arbeit": 0,
+  "arbeit": 1,
   "frage": 0,
-  "offen": 40,
+  "offen": 38,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 167,
+  "erledigt": 172,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 44,
+  "offen": 39,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5650,20 +5659,104 @@
    "datum": "2026-11-21",
    "quelle": "kuesten-ausbau/teil2/ereignisse-laeuft-pc.jpg",
    "nr": 81
+  },
+  {
+   "datei": "p88-pr390-pc-bahnen.jpg",
+   "pakete": [
+    "P88"
+   ],
+   "titel": "Getrennte Bahnen für Ein- und Auslaufende vor der Einfahrt",
+   "pr": 390,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "p66/bahnen/nachher-pc-1.png",
+   "nr": 82
+  },
+  {
+   "datei": "p32-pr393-handy-zusammen.jpg",
+   "pakete": [
+    "P32"
+   ],
+   "titel": "Flottille zusammen an einen Steg ziehen: Bonus im Hinweis",
+   "pr": 393,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "flottillen/handy-zusammen.png",
+   "nr": 83
+  },
+  {
+   "datei": "p32-pr393-pc-zusammen.jpg",
+   "pakete": [
+    "P32"
+   ],
+   "titel": "Flottille wird gemeinsam an einen Steg zugewiesen",
+   "pr": 393,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "flottillen/pc-zusammen.png",
+   "nr": 84
   }
  ],
  "neueBilder": [
+  84,
+  82,
   81,
   80,
   79,
   77,
   76,
   75,
-  73,
-  71,
-  69
+  73
  ],
  "merges": [
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P32 Flottillen (PR 393) mit Bildern",
+   "pr": 396,
+   "pakete": [
+    "P32"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P25 Stammgäste mit Wirkung und Gästepost",
+   "pr": 394,
+   "pakete": [
+    "P25"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P88 in Arbeit (PR 390) mit Bild",
+   "pr": 395,
+   "pakete": [
+    "P88"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P32 Flottillen: drei bis fünf Boote wollen zusammen an einen Steg",
+   "pr": 393,
+   "pakete": [
+    "P32"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Arbeitsplan: P88 Teil 1 (PR 390) nachgetragen",
+   "pr": 391,
+   "pakete": [
+    "P88"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P88 Teil 1: getrennte Bahnen vor der Einfahrt, echte Boje in den Regeln",
+   "pr": 390,
+   "pakete": [
+    "P88"
+   ]
+  },
   {
    "datum": "2026-11-21",
    "titel": "Arbeitsplan: Welle 0 bis 2 abgenommen, Welle 3 startet; P88 Engstellen",
@@ -5709,51 +5802,6 @@
    "pr": 384,
    "pakete": [
     "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Funk-Anmeldung auf Handy quer flacher (Schichttest F8)",
-   "pr": 383,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Schichttest: Serie 12 nach dem Pulk-Fix, Winter und Auszeichnung in den Wiederholungen",
-   "pr": 382,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Paddler am Ufer fährt nur im Wasser",
-   "pr": 381,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Roadmap-Pflege: P66 Wartende rechts (PR 378)",
-   "pr": 379,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "P66: Wartende halten sich rechts, Schlange vor der nächsten Engstelle ist keine Blockade",
-   "pr": 378,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Roadmap-Pflege: P66 Ausweichen (PR 375), P85 Teil 3 fertig (PR 373)",
-   "pr": 377,
-   "pakete": [
-    "P66",
-    "P85"
    ]
   }
  ]

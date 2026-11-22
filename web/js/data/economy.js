@@ -363,7 +363,21 @@ export const ECONOMY = {
   // stammAbBesuch (Zusammenspiel K2: sonst wird fast jeder Gast sofort Stammgast); Länge der Liste
   // (Stammgäste gehen vor, dann die zuletzt zufriedenen Gäste); ab diesem Besuch als Dauerlieger zu
   // behalten; namenGedaechtnis: so viele zuletzt vergebene Bootsnamen kommen möglichst nicht gleich wieder
-  stammgaeste: { chance: 0.15, abBewertung: 4, stammAbBesuch: 2, maxListe: 40, dauerAbBesuch: 5, namenGedaechtnis: 30 },
+  // P25 (docs/stammgaeste.md): rufGewicht = so oft zählt die Bewertung eines echten Stammgasts beim Ruf (C8);
+  // platzBonus = Anker extra, wenn er wieder an seinem Lieblingsplatz liegt (plan 9a, H6), platzVorliebe =
+  // so viel zählt der Lieblingsplatz bei der Platzwahl (ein erfüllter Platz-Wunsch zählt 1000); wimpelJe =
+  // ein Treuewimpel je so vielen Besuchen (H7); wachsen (H8): ab Besuch abBesuch mit Wahrscheinlichkeit
+  // chance ein größeres Modell oder ein Wunsch mehr (höchstens maxWuensche)
+  stammgaeste: {
+    chance: 0.15, abBewertung: 4, stammAbBesuch: 2, maxListe: 40, dauerAbBesuch: 5, namenGedaechtnis: 30,
+    rufGewicht: 2, platzBonus: 0.5, platzVorliebe: 500, wimpelJe: 5,
+    wachsen: { abBesuch: 3, chance: 0.25, maxWuensche: 4 },
+    // Gästepost (F37, features/gaestepost.js): nach einem zufriedenen Besuch schreibt ein Stammgast mit
+    // Wahrscheinlichkeit chance eine Karte, die nach unterwegs Tagen ankommt. Anteil empfehlung: Freunde
+    // kommen besuchFreunde Tage nach der Karte (ein Boot mehr), sonst kündigt er sich an und kommt
+    // besuchNach Tage nach der Karte selbst. Pinnwand hält höchstens pinnwand Karten.
+    post: { chance: 0.2, unterwegs: [1, 3], empfehlung: 0.4, besuchNach: [2, 5], besuchFreunde: [1, 2], pinnwand: 12 },
+  },
   // Tagesziele (features/tagesziele.js, docs/neue-features.md Abschnitt 6). Morgens drei Karten
   // (leicht, mittel, schwer), der Spieler nimmt eine; es zählen nur eigene Handlungen.
   // geld: Belohnung eines leichten Ziels je Ausbaustufe. schwere: soll = Grundmenge mal Faktor,

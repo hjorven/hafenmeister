@@ -26,6 +26,7 @@ const MODULES = [
   './render/boat-anim.js',
   './render/boat-view.js',
   './render/paeckchen.js',             // P27: Päckchen, Boote längsseits an anderen Booten
+  './render/stammgast-zeichen.js',     // P25: Treuewimpel am Heck, Lieblingsplatz eines Stammgasts
   './render/people.js',
   './ui/input-pc.js',
   './ui/input-touch.js',
@@ -60,6 +61,7 @@ const MODULES = [
   './save/index.js',
   './ui/tagesabschluss.js',
   './ui/gaestebuch.js',
+  './ui/gaestepost.js',                // P25: Gästepost an der Pinnwand im Hafenbüro, Stammgäste-Liste
   './ui/logbuch.js',                   // Logbuch und Hafenchronik (P21)
   './features/erfolge.js',             // Erfolge, Reiter im Logbuch, Dinge im Hafen (P22)
   './ui/funk-anmeldung.js',            // Anmeldung per Funk, Box freihalten (P28)

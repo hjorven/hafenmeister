@@ -417,7 +417,9 @@ export function init(game) {
     const fuss = el('p', { class: 'hm-gb-klein hm-gb-fuss' },
       rufErklaerung(state()));
 
-    const koerper = el('div', { class: 'hm-gb-koerper' }, rufTeil, gruendeTeil, listeTeil, fuss);
+    // Pinnwand mit Gästepost und Stammgästen (P25, ui/gaestepost.js), ganz oben
+    const pinnwand = game.gaestepost?.abschnitt?.() ?? null;
+    const koerper = el('div', { class: 'hm-gb-koerper' }, pinnwand, rufTeil, gruendeTeil, listeTeil, fuss);
     const scroll = panel.querySelector('.hm-gb-koerper')?.scrollTop ?? 0;
     panel.replaceChildren(kopf, koerper);
     koerper.scrollTop = scroll;
