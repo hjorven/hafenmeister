@@ -97,6 +97,12 @@ export const seegattHalb = (py) => Math.min(34, 20 + 0.03 * (py - 205) ** 2);
 export const SEEGATT_TIEFE = 2.2;
 
 /** Molen je Stufe als Linienzüge in Planeinheiten, mit Breite. Ab Stufe 3 dazu Wellenbrecher (wellenbrecher). */
+/**
+ * Schwimmwellenbrecher im See ab Stufe 4 (Kette von Betonpontons, render/buildings.js zeichnet ihn),
+ * Öffnung nach Osten zum Fahrwasser. Planeinheiten; breite in Planeinheiten (2,6 m).
+ */
+export const SCHWIMMWELLENBRECHER = { ab: 4, punkte: [[-150, 136], [-95, 150], [-30, 154], [30, 148]], breite: 4.2 };
+
 export function molen(stufe) {
   const fest = stufe >= 5 ? [
     { name: 'Westmole', punkte: [[-2, 224], [-10, 282], [18, 312], [96, 320]], breite: 9 },

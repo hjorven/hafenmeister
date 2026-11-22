@@ -234,7 +234,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F7 | Baggern: Wassertiefe je Steg als Bauprojekt | offen | P29 |
 | F8 | Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar | erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasserhähne seit P31, [nachruesten.md](nachruesten.md) | P30 |
 | F9 | Neue Wünsche: WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | erledigt (P31, [gaestewuensche.md](gaestewuensche.md)): Frischwasser über Wasserhähne am Steg (Stufe 2), WLAN (3), Waschmaschine ab 3 Nächten (4), Absaugstation (5), Hafenrundfahrt mit der Barkasse (6); Brötchen seit P19 | P31 |
-| F10 | Bojenfeld: billige Muringbojen im See für kleine Boote ohne Wünsche | offen | P36 |
+| F10 | Bojenfeld: billige Muringbojen im See für kleine Boote ohne Wünsche | erledigt (P36, [bojenfeld.md](bojenfeld.md)): 6 Bojen ab Stufe 2, 6 weitere ab Stufe 4, Lage je Küste im tiefen Wasser, Boote S und M bis 9 m, 60 % Liegegeld, ohne Strom und Wasser, letzte Wahl für Büro und Selbst-Einfahren, kein Dauerplatz | P36 |
 
 ### Hafenleben
 
@@ -706,7 +706,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P33 | Liegende Boote umlegen | F4 | erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen) |
 | P34 | Wind im Hafen spürbar machen | F5, F35 | erledigt (PR 392, [wind.md](wind.md)) |
 | P35 | Preisstufe am Hafenbüro | F6 | erledigt (PR 413, [preisstufe.md](preisstufe.md): günstig, normal, gehoben; Faustregel für die Bots, Zeitraffer wieder nahe 105) |
-| P36 | Bojenfeld im See | F10 | neu |
+| P36 | Bojenfeld im See | F10 | erledigt ([bojenfeld.md](bojenfeld.md)) |
 | P37 | Havarist einschleppen | F11 | neu |
 | P38 | Eigenes Hafenfest ansetzen | F12 | erledigt (PR 405, [hafenfest.md](hafenfest.md)) |
 | P39 | Jugendtraining am Segelclub | F13 | erledigt (PR 412, [jugendtraining.md](jugendtraining.md)) |

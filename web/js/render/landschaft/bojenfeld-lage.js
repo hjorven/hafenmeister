@@ -3,7 +3,7 @@
 // bojenfeldLage(region) sucht je Küste, Seed und Stegbild einen Block aus Bojen in einem Raster
 // (ECONOMY.bojenfeld.abstand Planeinheiten), der in allen Stufen ab abStufe passt:
 // - tief genug für das größte erlaubte Boot im ganzen Schwoikreis (auch bei Niedrigwasser),
-// - weit genug weg von Stegen, Liegeplätzen, Diensten und Molen aller Stufen,
+// - weit genug weg von Stegen, Liegeplätzen, Diensten, Molen und dem Schwimmwellenbrecher aller Stufen,
 // - nicht im Korridor von den Stegen zum Seegatt (natur().route) und nicht in der Runde der Freizeitboote,
 // - nicht auf den Wartebojen, im Ankerfeld oder am Uferstreifen des Paddlers der Stufe 2,
 // - südlich der Nehrung (nie im Außenhafen oder an der Großschiffspier).
@@ -13,7 +13,7 @@
 // Ergebnis: [[px, py], ...] in Planeinheiten (Länge ECONOMY.bojenfeld.bojen gesamt) oder [] ohne Platz.
 // data/bojenfeld.js legt daraus die Liegeplätze BF01 ... an (Lage über bojenfeldQuelle).
 
-import { punkt, warteplaetze, molen, pricken, PLAN_M } from './gelaende.js';
+import { punkt, warteplaetze, molen, pricken, PLAN_M, SCHWIMMWELLENBRECHER } from './gelaende.js';
 import { gelaendeform, beiFormwechsel } from './formen.js';
 import { region as regionNach } from './regionen.js';
 import { SEE_RUNDE, UFER } from '../../data/verkehr.js';
@@ -51,6 +51,9 @@ export function hindernisse(region, lockern = {}) {
     for (const d of st?.dienste ?? []) linien.push({ punkte: [[d.x, d.y]], rand: Math.max(d.laenge ?? 0, d.breite ?? 0) / 2 + P.stegAbstand });
     if (s >= 3) for (const m of molen(s)) linien.push({ punkte: m.punkte, rand: m.breite / 2 + P.stegAbstand });
   }
+  // Schwimmwellenbrecher (ab Stufe 4, render/buildings.js): dort legt niemand an, darum reicht der
+  // Schwoikreis plus 2 m (das Boot an der Boje stößt nie dagegen)
+  if (stufen.some((s) => s >= SCHWIMMWELLENBRECHER.ab)) linien.push({ punkte: SCHWIMMWELLENBRECHER.punkte, rand: SCHWIMMWELLENBRECHER.breite / 2 + (P.schwoikreisM + 2) / PLAN_M });
   const gesehen = new Set();
   for (const p of HAFEN.plaetze) {
     if (p.art === 'boje') continue;
