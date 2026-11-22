@@ -92,8 +92,9 @@ export function pruefen() {
     }
   }
   // Doppelboxen (P59) sind ein Umbau zweier Boxen, kein eigener Platz eines Projekts
+  // Das Bojenfeld (P36) ist eigener Ausbau (ECONOMY.bojenfeld, features/bojenfeld.js), kein Stegprojekt
   for (const p of HAFEN.plaetze) {
-    if (p.doppel) continue;
+    if (p.doppel || p.art === 'boje') continue;
     if (!besitz.has(p.id)) fehler.push(`Platz ${p.id} (Stufen ${p.stufen.join(',')}) gehört zu keinem Projekt`);
   }
   // Je Stufe: Summe der Plätze wie im Katalog

@@ -78,7 +78,9 @@ export function waehleSchritt({ geld, eintraege, bedarf, stufe, region = null, g
     return mit(tief, `Zuletzt ${tief.vermisst} Boote mit zu viel Tiefgang weitergefahren. ${tief.name} hilft.`);
   }
   // 2. Kein Platz: Boote weggeschickt oder Hafen fast voll
-  const stege = offen.filter((e) => e.art === 'steg' && !e.nachruesten);
+  // Bojenfeld (P36, ueberlauf) nur, wenn es keinen Steg mehr zu bauen gibt
+  const stegeAlle = offen.filter((e) => e.art === 'steg' && !e.nachruesten);
+  const stege = stegeAlle.some((e) => !e.ueberlauf) ? stegeAlle.filter((e) => !e.ueberlauf) : stegeAlle;
   const voll = bedarf.plaetze > 0 && bedarf.belegt / bedarf.plaetze >= 0.85;
   if (stege.length && (bedarf.weg >= 2 || voll)) {
     const e = meistePlaetze(stege);

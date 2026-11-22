@@ -236,7 +236,8 @@ export function initJugendBild(game) {
     let zug = [];
     try { zug = (game.gelaende?.seezugaenge?.(stufe(), { tiefeM: 2 }) ?? []).filter((z) => !z.umweg && z.weg?.length >= 2); } catch { zug = []; }
     const w = game.landscape?.warteplaetze ?? {};
-    const kreise = [...(w.bojen ?? []).map((o) => ({ x: o.x, z: o.z, r: 26 })), ...(w.ankerbereiche ?? []).map((o) => ({ x: o.x, z: o.z, r: (o.radiusM ?? 30) + 16 }))];
+    const kreise = [...(w.bojen ?? []).map((o) => ({ x: o.x, z: o.z, r: 26 })), ...(w.ankerbereiche ?? []).map((o) => ({ x: o.x, z: o.z, r: (o.radiusM ?? 30) + 16 })),
+      ...(game.landscape?.bojenfeld ?? []).map((o) => ({ x: o.x, z: o.z, r: 24 }))];   // Bojenfeld (P36)
     const wege = zug.map((z) => z.weg);
     const stege = stegPunkte();
     const R = KURS_R + 6;

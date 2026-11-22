@@ -281,6 +281,28 @@ export function init(game) {
       });
     }
 
+    // Bojenfeld (P36): Muringbojen im See, für kleine Boote, billig und billiger im Liegegeld
+    for (const a of game.bojenfeld?.angebote?.() ?? []) {
+      const bf = ECONOMY.bojenfeld ?? {};
+      const anteil = Math.round((bf.liegegeld ?? 1) * 100);
+      const gebaut = (game.bojenfeld.bojen?.() ?? []).length;
+      out.push({
+        key: `bojenfeld:${a.id}`, art: 'steg', id: a.id, ueberlauf: true,
+        name: a.erweitern ? 'Bojenfeld erweitern' : 'Bojenfeld im See', kosten: a.kosten,
+        gesperrt: a.gesperrt, plaetzeNeu: a.bojen.length, ohneSchild: true,
+        kurz: `+${a.bojen.length} Bojen`,
+        nutzen: [
+          `${a.bojen.length} Muringbojen im See${gebaut ? `, dazu die ${gebaut}, die schon liegen` : ''}: Plätze für Boote bis ${String(bf.maxLaenge ?? 9).replace(".", ",")} m lang. Strom und Wasser gibt es dort nicht.`,
+          `Gäste an der Boje zahlen ${anteil} % vom Hafengeld. Büro und Gäste nehmen eine Boje erst, wenn keine Box passt.`,
+          'Die Bojen liegen offen im See: Bei Sturm und Starkwind schaukelt es dort.',
+        ],
+        bedarf: () => null,
+        ort: () => game.bojenfeld.ort(a.id),
+        geist: () => game.bojenfeld.geist(a.id),
+        kaufen: () => game.bojenfeld.kaufen(a.id),
+      });
+    }
+
     // Versorgung
     for (const key of Object.keys(rules.facilities)) {
       const u = sim.facilityUpgrade(key);
@@ -1250,7 +1272,7 @@ export function init(game) {
     if (ort) {
       const y = Number.isFinite(game.landschaft?.hoeheBei?.(ort.x, ort.z)) ? Math.max(0, game.landschaft.hoeheBei(ort.x, ort.z)) : 0;
       welle(ort.x, ort.z, y);
-      const text = e.nachruesten ? e.kurz : e.art === 'steg' ? (e.plaetzeNeu === 1 ? '+1 Liegeplatz' : `+${e.plaetzeNeu} Liegeplätze`) : e.art === 'versorgung' && e.wunsch !== 'strom' ? `${WUNSCH_KURZ[e.id]} für ${e.nutzen[0].match(/\d+/)?.[0] ?? ''} Boote` : e.name;
+      const text = e.nachruesten || e.ueberlauf ? e.kurz : e.art === 'steg' ? (e.plaetzeNeu === 1 ? '+1 Liegeplatz' : `+${e.plaetzeNeu} Liegeplätze`) : e.art === 'versorgung' && e.wunsch !== 'strom' ? `${WUNSCH_KURZ[e.id]} für ${e.nutzen[0].match(/\d+/)?.[0] ?? ''} Boote` : e.name;
       fliege(text, ort.x, y, ort.z);
       if (ort.gebaeude && ort.neu) {
         const it = game.buildings.items.find((i) => i.id === ort.gebaeude);
@@ -1260,7 +1282,7 @@ export function init(game) {
     game.emit('bauen:gebaut', { key, name: e.name, kosten: vorher - game.sim.state.money || e.kosten });
     // Kleine Karte bleibt stehen, damit das neue Bauwerk sichtbar bleibt
     aktiv = null;
-    fertig = { name: e.name, text: e.fertigText ?? (e.art === 'steg' && !e.nachruesten ? `${e.plaetzeNeu === 1 ? 'Ein neuer Liegeplatz ist' : `${e.plaetzeNeu} neue Liegeplätze sind`} frei.` : e.nutzen[0] ?? ''), ...(e.fertigTitel ? { titel: e.fertigTitel } : {}) };
+    fertig = { name: e.name, text: e.fertigText ?? (e.ueberlauf ? `${e.plaetzeNeu} Muringbojen liegen im See. Kleine Boote können dort festmachen, ohne Strom und Wasser.` : e.art === 'steg' && !e.nachruesten ? `${e.plaetzeNeu === 1 ? 'Ein neuer Liegeplatz ist' : `${e.plaetzeNeu} neue Liegeplätze sind`} frei.` : e.nutzen[0] ?? ''), ...(e.fertigTitel ? { titel: e.fertigTitel } : {}) };
     meldung = '';
     zeichne();
   }

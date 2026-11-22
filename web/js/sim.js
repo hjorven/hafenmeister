@@ -150,8 +150,9 @@ export function berthsFromHarbor(harbor, rules = RULES) {
       kind: p.art,
       jetty: p.steg,
       size: p.klasse,
-      stages: [...p.stufen],
-      stage: Math.min(...p.stufen),
+      // Bojenfeld (P36): Stufen nach den Regeln, auch wenn die Lage im Gelände noch nicht feststeht
+      stages: [...(p.stufenRegel ?? p.stufen)],
+      stage: Math.min(...(p.stufenRegel ?? p.stufen)),
       maxLength: p.maxLaenge,
       maxBeam: p.maxBreite,
       depth,
@@ -566,6 +567,8 @@ function berthScore(state, ctx, boat, berth) {
 /** Zusätzliche Vorliebe für einen Platz aus den Hooks 'score' (0 ohne Hooks) */
 function hookScore(state, ctx, boat, berth) {
   let n = flotillaScore(state, ctx, boat, berth) - flotillaHoldScore(state, ctx, boat, berth);
+  // Bojenfeld (P36): Büro, "Einfahren lassen" und Selbst-Einfahren nehmen eine Boje erst, wenn keine Box passt
+  if (berth.kind === 'boje') n -= ctx.rules.buoyField?.lastChoice ?? 0;
   for (const fn of ctx.hooks.score ?? []) n += fn({ state, ctx, boat, berth }) || 0;
   return n;
 }
@@ -1868,7 +1871,8 @@ export function berthValue(state, ctx, boatId, berthId = null) {
   }
   // Päckchen (P27): außen nur der Anteil rules.raft.fee, beide Crews geben weniger Anker
   const raft = !!berth?.raft;
-  const night = nightlyFee(state, ctx, boat, met.length, mods.priceFactor * (raft ? ctx.rules.raft?.fee ?? 1 : 1));
+  // Bojenfeld (P36): an der Boje nur der Anteil feeFactor
+  const night = nightlyFee(state, ctx, boat, met.length, mods.priceFactor * (raft ? ctx.rules.raft?.fee ?? 1 : 1) * (berth?.feeFactor ?? 1));
   // Kurzhalter zahlen das Tagesliegegeld (Anteil vom Nachtpreis), wie chargeFee
   const fee = isShortStay(boat) ? Math.max(1, Math.round(night * (ctx.rules.shortStay?.fee ?? 0.5))) : night;
   const snug = !!berth && isSnug(state, ctx, boat, berth);
@@ -2676,6 +2680,9 @@ function chargeFee(state, ctx, boat, mods, events) {
   if (boat.feeDay === state.day) return; // heute schon abgerechnet
   // Päckchen (P27): außen zahlt nur den Anteil rules.raft.fee
   if (isRaftBerth(boat.berthId) && ctx.rules.raft) mods = { ...mods, priceFactor: (mods.priceFactor ?? 1) * ctx.rules.raft.fee };
+  // Bojenfeld (P36): an der Boje zahlt der Gast nur den Anteil feeFactor
+  const fb = ctx.berthById[boat.berthId]?.feeFactor;
+  if (fb != null && fb !== 1) mods = { ...mods, priceFactor: (mods.priceFactor ?? 1) * fb };
   const metList = checkWishes(state, ctx, boat, mods);
   boat.feeDay = state.day;
   if (boat.paidThrough != null && state.day <= boat.paidThrough) return; // schon im Voraus bezahlt
@@ -3236,8 +3243,9 @@ export function regionGoal(state, ctx) {
   const rep = reputation(state);
   const visits = state.bigVisits || 0;
   // Doppelboxen (P59) sind ein Umbau, keine fehlenden Plätze; zusammengelegte Einzelboxen auch nicht
+  // Das Bojenfeld (P36) ist eine freie Entscheidung, kein fehlender Platz
   const open = ctx.berths.filter((b) => (b.stages ? b.stages.includes(state.stage) : b.stage <= state.stage) && !berthAvailable(state, b)
-    && !b.doppel && !b.ohne?.some((k) => state.buildings[k])).length;
+    && !b.doppel && !b.ohne?.some((k) => state.buildings[k]) && b.kind !== 'boje').length;
   const missing = [];
   if (visits < (goal.bigVisits || 0)) missing.push('bigVisits');
   if (rep < (goal.reputation || 0)) missing.push('reputation');

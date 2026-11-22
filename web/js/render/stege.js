@@ -89,6 +89,27 @@ export function init(game) {
 
   // Unsichtbare Platzflaeche: wird erst gezeichnet, wenn jemand sie einfaerbt (opacity > 0).
   // Andere Module setzen nur opacity, deshalb schaltet der Setter die Sichtbarkeit mit.
+  // Bojenfeld (P36): Muringbojen
+  const BOJE_R = 5.5;
+  const bojeFlaecheGeo = new THREE.CircleGeometry(BOJE_R, 28).rotateX(-Math.PI / 2);
+  const bojeKugelGeo = new THREE.SphereGeometry(0.55, 12, 9);
+  const bojeBandGeo = new THREE.CylinderGeometry(0.565, 0.565, 0.22, 12).translate(0, 0.08, 0);
+  const bojeRingGeo = new THREE.TorusGeometry(0.2, 0.05, 6, 12);
+  M.bojeWeiss = new THREE.MeshLambertMaterial({ color: '#f4f1ea', flatShading: true });
+  M.bojeBlau = new THREE.MeshLambertMaterial({ color: '#2f5d8a', flatShading: true });
+  M.bojeRing = new THREE.MeshLambertMaterial({ color: '#8a8f96', flatShading: true });
+  let bojen = [];
+  game.onTick?.(() => {
+    if (!bojen.length) return;
+    const t = game.time ?? performance.now() / 1000;
+    for (const b of bojen) {
+      const ph = b.userData.phase;
+      b.position.y = Math.sin(t * 1.5 + ph) * 0.05 - 0.05;
+      b.rotation.x = Math.sin(t * 1.2 + ph) * 0.07;
+      b.rotation.z = Math.cos(t * 1.05 + ph) * 0.07;
+    }
+  });
+
   function platzMaterial() {
     const m = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0, depthWrite: false });
     let wert = 0;
@@ -192,7 +213,7 @@ export function init(game) {
       // Testansicht (?stufe=n): alles steht, nur Doppelboxen (P59) richten sich nach den Spielregeln
       const p = HAFEN_PLATZ().get(id);
       const bl = game.sim?.state?.buildings ?? {};
-      if (p?.doppel) return { status: bl[p.requires] ? 'gebaut' : 'aus' };
+      if (p?.doppel || p?.art === 'boje') return { status: bl[p.requires] ? 'gebaut' : 'aus' };
       return { status: p?.ohne?.some((k) => bl[k]) ? 'aus' : 'gebaut' };
     }
     // Zwei Boxen als Doppelbox umgebaut (P59): die Einzelboxen stehen nicht mehr
@@ -237,6 +258,9 @@ export function init(game) {
       return;
     }
 
+    // Bojenfeld (P36): Muringboje im See, runde Flaeche (das Boot schwojt um die Boje)
+    if (p.art === 'boje') { muringboje(p, c, g); return; }
+
     // Flaeche zum Antippen und Einfaerben
     const flMat = platzMaterial();
     const fl = new THREE.Mesh(new THREE.PlaneGeometry(L * 0.96, B * 0.92), flMat);
@@ -275,6 +299,28 @@ export function init(game) {
       g.add(pf);
     }
     plaetze.set(p.id, { id: p.id, x: c.x, z: c.z, richtung, laenge: L, breite: B, art: p.art, mesh: fl });
+  }
+
+  // Muringboje: weiße Kugel mit blauem Band und Aufnahmering, darunter die runde Flaeche zum Antippen und
+  // Einfaerben (Radius etwa der Schwoikreis eines kleinen Boots). Die Boje steht in der Mitte.
+  function muringboje(p, c, g) {
+    const fl = new THREE.Mesh(bojeFlaecheGeo, platzMaterial());
+    fl.position.set(c.x, 0.06, c.z);
+    fl.userData.pick = { type: 'berth', id: p.id };
+    fl.renderOrder = 2;
+    g.add(fl);
+    const boje = new THREE.Group();
+    boje.name = `muringboje-${p.id}`;
+    const ball = new THREE.Mesh(bojeKugelGeo, M.bojeWeiss);
+    const band = new THREE.Mesh(bojeBandGeo, M.bojeBlau);
+    const ring = new THREE.Mesh(bojeRingGeo, M.bojeRing);
+    ring.position.y = 0.62;
+    boje.add(ball, band, ring);
+    boje.position.set(c.x, -0.05, c.z);
+    boje.userData.phase = (p.nr ?? 0) * 1.3;
+    g.add(boje);
+    bojen.push(boje);
+    plaetze.set(p.id, { id: p.id, x: c.x, z: c.z, richtung: 0, laenge: 2 * BOJE_R, breite: 2 * BOJE_R, art: p.art, mesh: fl });
   }
 
   // ---------------------------------------------------------------- Steglinien kuerzen
@@ -339,8 +385,10 @@ export function init(game) {
   function aufbauen(n) {
     const s = aktuelleStufe(n);
     const z = zustand();
-    const doppel = Object.keys(game.sim?.state?.buildings ?? {}).filter((k) => k.startsWith('doppel:') && game.sim.state.buildings[k]).sort().join(',');
-    const sig = s + '|' + (z ? Object.keys(z.state.buildings).filter((k) => z.state.buildings[k]).sort().join(',') + '|' + [...z.offen.keys()].sort().join(',') : 'alles|' + doppel);
+    const doppel = Object.keys(game.sim?.state?.buildings ?? {}).filter((k) => (k.startsWith('doppel:') || k.startsWith('bojenfeld-')) && game.sim.state.buildings[k]).sort().join(',');
+    // Bojenfeld (P36): Lage hängt vom Gelände ab (neues Spiel auf anderer Küste)
+    const bf = HAFEN.plaetze.find((p) => p.art === 'boje')?.lage?.[s]?.slice(0, 2).join(',') ?? '-';
+    const sig = s + '|' + bf + '|' + (z ? Object.keys(z.state.buildings).filter((k) => z.state.buildings[k]).sort().join(',') + '|' + [...z.offen.keys()].sort().join(',') : 'alles|' + doppel);
     if (sig === signatur && gruppe) return;
     signatur = sig;
     stufe = s;
@@ -351,6 +399,7 @@ export function init(game) {
     gruppe = new THREE.Group();
     plaetze = new Map();
     bauplaetze = [];
+    bojen = [];
     const linien = HAFEN.stufen[stufe].stege;
 
     // Plaetze der Stufe mit Zustand, jeder Platz gehoert zur naechsten Linie seines Stegs

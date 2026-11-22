@@ -99,6 +99,12 @@ export function rulesFromEconomy(E = ECONOMY) {
     if (p.offen) k.exposed = true;
     r.berthKinds[kind] = k;
   }
+  // Bojenfeld (P36): Muringbojen im See für kleine Boote, ohne Wunscherfüllung, billiger, offen, als letzte Wahl
+  const bf = E.bojenfeld;
+  if (bf) {
+    r.berthKinds.boje = { ...(r.berthKinds.boje || {}), exposed: true, sizes: [...(bf.klassen || ['S', 'M'])], feeFactor: bf.liegegeld ?? 1 };
+    r.buoyField = { from: bf.abStufe ?? 2, fee: bf.liegegeld ?? 1, sizes: [...(bf.klassen || ['S', 'M'])], lastChoice: bf.letzteWahl ?? 5000 };
+  }
   r.berthJetties = Object.fromEntries(Object.keys(E.stromAnSteg || {}).filter((k) => E.stromAnSteg[k]).map((k) => [k, { power: true }]));
   // Strom an weiteren Stegen über ein Bauwerk (zum Beispiel Stromsäulen an Steg B)
   r.jettyPowerBuildings = {};

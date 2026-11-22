@@ -60,7 +60,9 @@ async function fensterZu(t) {
     const tipp = t.page.getByRole('button', { name: 'Verstanden' }).first();
     if (await tipp.isVisible().catch(() => false)) {
       const titel = await tipp.evaluate((b) => b.closest('section, div[class*="tipp"], div[class*="karte"], [role="dialog"]')?.querySelector('h1,h2,h3,strong,b,[class*="titel"]')?.textContent?.trim() ?? 'Tipp').catch(() => 'Tipp');
-      await t.sp.knopf(tipp); zu.push(`Tipp "${titel}"`); await t.warte(300); continue;
+      // Tipps blenden sich nach einigen Sekunden selbst aus: verschwand er beim Tippen, ist er zu
+      try { await t.sp.knopf(tipp); } catch (e) { if (await tipp.isVisible().catch(() => false)) throw e; }
+      zu.push(`Tipp "${titel}"`); await t.warte(300); continue;
     }
     break;
   }

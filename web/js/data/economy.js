@@ -571,6 +571,35 @@ export const ECONOMY = {
   // kosten: Umbau zur Doppelbox, rueckbau: zurück zu zwei Boxen. Beide Boxen müssen dabei frei sein.
   doppelbox: { klassen: ['L'], abStufe: 4, kosten: 990, rueckbau: 220, maxBreite: 8 },
 
+  // ---------------------------------------------------------------- Bojenfeld (P36, F10)
+  // Muringbojen im See (data/bojenfeld.js, features/bojenfeld.js, docs/bojenfeld.md): billig gebaut,
+  // nur für Boote bis maxLaenge/maxBreite (Klassen S und M). Wünsche am Steg (Strom, Wasser) bleiben dort
+  // unerfüllt; gedacht für Gäste ohne Wünsche, die sonst keinen Platz fänden.
+  // Gäste zahlen den Anteil liegegeld vom Hafengeld; ein Bojenplatz liegt offen (Sturm, Starkwind).
+  // abschnitte: Bauabschnitte nacheinander (bojen je Abschnitt, ab Ausbaustufe, kosten).
+  // tiefe: Wassertiefe, mit der die Passregel rechnet (Tiefgang + 0,3 m); die Lage wird so gesucht, dass
+  // der ganze Schwoikreis (schwoikreisM) in jeder Stufe mindestens tiefe + tiefeReserve tief ist.
+  // abstaende: Abstand der Bojen im Raster in Planeinheiten (0,62 m), erst der weite, sonst der enge.
+  // stegAbstand, platzAbstand, korridorAbstand: Abstand zu Stegen, Liegeplätzen und dem Weg zum Seegatt
+  // (Planeinheiten); nordGrenze: höchstens so weit nach Norden (nie im Außenhafen oder an der Großschiffspier).
+  bojenfeld: {
+    abStufe: 2,
+    abschnitte: [
+      { bojen: 6, abStufe: 2, kosten: 240 },
+      { bojen: 6, abStufe: 4, kosten: 900 },
+    ],
+    klasse: 'M', klassen: ['S', 'M'], maxLaenge: 9, maxBreite: 3.4,
+    tiefe: 1.6, tiefeReserve: 0.2, schwoikreisM: 10,
+    liegegeld: 0.6,
+    abstand: 22, abstaende: [22, 19],
+    stegAbstand: 30, platzAbstand: 24, korridorAbstand: 14, nordGrenze: 205,
+    // Findet sich so kein Feld (enger See, Schären), nacheinander mit diesen Werten statt der obigen
+    lockern: [
+      { stegAbstand: 24, platzAbstand: 20, korridorAbstand: 8, schwoikreisM: 8 },
+      { stegAbstand: 20, platzAbstand: 16, korridorAbstand: 4, schwoikreisM: 7, abstaende: [19, 17], tiefeReserve: 0.1 },
+    ],
+  },
+
   // ---------------------------------------------------------------- Stege nachrüsten (P30)
   // Logik in web/js/features/nachruesten.js, Beschreibung in docs/nachruesten.md. Je Steg einmal.
   // kosten = grund + jePlatz[Klasse] für jeden betroffenen Gastplatz, der am Steg gerade liegt (auf 10 €

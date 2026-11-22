@@ -243,6 +243,8 @@ function bewerberRunde(state, ctx, tag, events) {
 export function kannDauerplatz(state, ctx, platzId) {
   const berth = ctx.berthById[platzId];
   if (!berth || !sim.berthAvailable(state, berth)) return { ok: false, reason: 'noBerth' };
+  // Bojenfeld (P36): Muringbojen sind Gastplätze für eine Nacht oder zwei, kein Dauerplatz
+  if (berth.kind === 'boje') return { ok: false, reason: 'boje' };
   if (state.stage < regeln(ctx).abStufe) return { ok: false, reason: 'stage' };
   if (istDauerplatz(state, platzId)) return { ok: false, reason: 'schon' };
   if (berth.reserved) return { ok: false, reason: 'reserved' };
@@ -315,6 +317,7 @@ export function machDauerplatz(state, ctx, platzId, bewerberId = null) {
 export function kannBehalten(state, ctx, platzId) {
   const boot = state.boats[state.berths[platzId]];
   if (!boot || boot.stationed || boot.status !== 'moored' || boot.trip?.away) return false;
+  if (ctx.berthById[platzId]?.kind === 'boje') return false;   // Bojenfeld (P36): kein Dauerplatz
   if (state.stage < regeln(ctx).abStufe || istDauerplatz(state, platzId)) return false;
   if (anzahl(state) >= hoechstZahl(state, ctx)) return false;
   return (boot.besuche ?? 0) >= STAMM.dauerAbBesuch;
@@ -323,7 +326,7 @@ export function kannBehalten(state, ctx, platzId) {
 /** Steht ein Stammgast hier, der Dauerlieger werden könnte, nur ist kein Dauerplatz mehr frei? */
 export function behaltenVoll(state, ctx, platzId) {
   const boot = state.boats[state.berths[platzId]];
-  return !!boot && !boot.stationed && boot.status === 'moored' && state.stage >= regeln(ctx).abStufe
+  return !!boot && ctx.berthById[platzId]?.kind !== 'boje' && !boot.stationed && boot.status === 'moored' && state.stage >= regeln(ctx).abStufe
     && !istDauerplatz(state, platzId) && (boot.besuche ?? 0) >= STAMM.dauerAbBesuch
     && anzahl(state) >= hoechstZahl(state, ctx);
 }
