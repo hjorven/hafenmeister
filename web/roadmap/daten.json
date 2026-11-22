@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "253ae2b"
+  "commit": "a7fe70f"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -767,8 +767,8 @@
   {
    "id": "P31",
    "titel": "Neue Gästewünsche",
-   "inhalt": "F9",
-   "thread": "neu",
+   "inhalt": "F9, B8",
+   "thread": "erledigt (gaestewuensche.md: Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt)",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
@@ -776,7 +776,7 @@
     "F9",
     "B8"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -880,15 +880,20 @@
    "id": "P38",
    "titel": "Eigenes Hafenfest ansetzen",
    "inhalt": "F12",
-   "thread": "erledigt (hafenfest.md)",
+   "thread": "erledigt (PR 405, hafenfest.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    405
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F12"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    87,
+    88
+   ]
   },
   {
    "id": "P39",
@@ -2075,7 +2080,7 @@
    "code": "F8",
    "text": "Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar",
    "status": "entfaellt",
-   "statusText": "erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasser mit P31, nachruesten.md",
+   "statusText": "erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasserhähne seit P31, nachruesten.md",
    "pakete": [
     "P30"
    ],
@@ -2087,8 +2092,8 @@
   {
    "code": "F9",
    "text": "Neue Wünsche: WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P31, gaestewuensche.md): Frischwasser über Wasserhähne am Steg (Stufe 2), WLAN (3), Waschmaschine ab 3 Nächten (4), Absaugstation (5), Hafenrundfahrt mit der Barkasse (6); Brötchen seit P19",
    "pakete": [
     "P31"
    ],
@@ -2684,8 +2689,8 @@
   {
    "code": "B8",
    "text": "Neue Wünsche in späten Stufen, je Stufe mindestens einer (= F9)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P31): jede Stufe 1 bis 6 hat mindestens einen neuen Wunsch, Test in tests/gaestewuensche.test.mjs",
    "pakete": [
     "P31"
    ],
@@ -4582,11 +4587,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 13,
+    "erledigt": 14,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 7,
+    "offen": 6,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4670,20 +4675,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 48,
+  "erledigt": 49,
   "teilweise": 2,
   "arbeit": 0,
   "frage": 0,
-  "offen": 36,
+  "offen": 35,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 175,
+  "erledigt": 177,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 36,
+  "offen": 34,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5731,9 +5736,34 @@
    "datum": "2026-11-22",
    "quelle": "stammgaeste/pc-stammgast-wartet.png",
    "nr": 86
+  },
+  {
+   "datei": "p38-pr405-pc-planer.jpg",
+   "pakete": [
+    "P38"
+   ],
+   "titel": "Hafenfest ansetzen: Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk",
+   "pr": 405,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenfest/pc-s4-2-planer.png",
+   "nr": 87
+  },
+  {
+   "datei": "p38-pr405-pc-festtag.jpg",
+   "pakete": [
+    "P38"
+   ],
+   "titel": "Festtag am Hafen: Bühne, Marktstände und Wimpel",
+   "pr": 405,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenfest/pc-s4-5a-buehne.png",
+   "nr": 88
   }
  ],
  "neueBilder": [
+  88,
   86,
   84,
   82,
@@ -5741,10 +5771,54 @@
   80,
   79,
   77,
-  76,
-  75
+  76
  ],
  "merges": [
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P38 Hafenfest (PR 405) mit Bildern",
+   "pr": 409,
+   "pakete": [
+    "P38"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Arbeitsplan: P31, P38, P88 erledigt; Flottillen-Rest, P35, P37, P39 starten",
+   "pr": 410,
+   "pakete": [
+    "P31",
+    "P38",
+    "P88",
+    "P35",
+    "P37",
+    "P39"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P88 Teil 3: eigene Bahn je Richtung auch auf dem Seeweg",
+   "pr": 407,
+   "pakete": [
+    "P88"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P31 Neue Gästewünsche: Frischwasser, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt",
+   "pr": 406,
+   "pakete": [
+    "P31"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P38: Eigenes Hafenfest ansetzen",
+   "pr": 405,
+   "pakete": [
+    "P38"
+   ]
+  },
   {
    "datum": "2026-11-22",
    "titel": "Zeitraffer zählt Flottillen je Stufe",
@@ -5800,46 +5874,6 @@
    "pr": 398,
    "pakete": [
     "P25"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Wind im Hafen (P34, F5 und F35)",
-   "pr": 392,
-   "pakete": [
-    "P34"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P32 Flottillen (PR 393) mit Bildern",
-   "pr": 396,
-   "pakete": [
-    "P32"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P25 Stammgäste mit Wirkung und Gästepost",
-   "pr": 394,
-   "pakete": [
-    "P25"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P88 in Arbeit (PR 390) mit Bild",
-   "pr": 395,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P32 Flottillen: drei bis fünf Boote wollen zusammen an einen Steg",
-   "pr": 393,
-   "pakete": [
-    "P32"
    ]
   }
  ]
