@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import { zeichen } from '../web/js/features/wetterflagge.js';
 
 test('ruhiger Tag: kein Wimpel, keine Leine, Wind aus der Vorhersage', () => {
-  const z = zeichen([{ day: 3, event: null, weather: { wind: 0.3 } }, { day: 4, event: null, weather: { wind: 0.2 } }]);
-  assert.deepEqual(z, { wind: 0.3, sturmMorgen: false, regatta: false });
+  const z = zeichen([{ day: 3, event: null, weather: { wind: 0.3, richtung: 135 } }, { day: 4, event: null, weather: { wind: 0.2 } }]);
+  assert.deepEqual(z, { wind: 0.3, richtung: 135, sturmMorgen: false, regatta: false });
 });
 
 test('Sturm morgen: rote Wimpel', () => {
@@ -19,6 +19,6 @@ test('Regatta heute oder morgen: Signalflaggen', () => {
 });
 
 test('ohne Vorhersage: leichter Wind, sonst nichts', () => {
-  assert.deepEqual(zeichen(null), { wind: 0.2, sturmMorgen: false, regatta: false });
+  assert.deepEqual(zeichen(null), { wind: 0.2, richtung: 180, sturmMorgen: false, regatta: false });
   assert.equal(zeichen([{ weather: { wind: 3 } }]).wind, 1);
 });
