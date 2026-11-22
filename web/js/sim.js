@@ -995,7 +995,8 @@ function announce(state, ctx, events) {
   if (!announcementsOpen(state, ctx)) return;
   const f = ctx.rules.funk;
   const ab = (f.leadShare ?? 0) * ctx.rules.dayLength;
-  const pool = state.upcoming.filter((b) => !b.stationed && !b.flotte && b.arriveAt >= ab);
+  // Schon angemeldete Boote (seltener Besuch, P40) zählen nicht mit
+  const pool = state.upcoming.filter((b) => !b.stationed && !b.flotte && !b.funk && b.arriveAt >= ab);
   // Eine Flottille (P32) meldet sich immer an, als Gruppe
   announceFlotilla(state, ctx, events);
   if (!pool.length) return;

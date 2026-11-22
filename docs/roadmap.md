@@ -245,7 +245,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F13 | Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub | offen | P39 |
 | F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | erledigt (PR 245) | P20 |
 | F15 | Krantage: Dauerlieger sichtbar ins Winterlager und zurück | erledigt (PR 245) | P20 |
-| F16 | Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv | offen | P40 |
+| F16 | Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv | erledigt (P40): vier Schiffe mit Ehrenplatz, Schwäne und Schweinswal, Fotos im Logbuch-Reiter „Besucher“, vier Erfolge, docs/besucher.md | P40 |
 | F17 | Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage | erledigt (PR 299), dazu Hanse-Woche ab Stufe 5 | P24 |
 
 ### Langzeit
@@ -710,7 +710,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P37 | Havarist einschleppen | F11 | neu |
 | P38 | Eigenes Hafenfest ansetzen | F12 | erledigt ([hafenfest.md](hafenfest.md)) |
 | P39 | Jugendtraining am Segelclub | F13 | neu |
-| P40 | Seltene Besucher | F16 (nach P21) | neu |
+| P40 | Seltene Besucher | F16 (nach P21) | erledigt (docs/besucher.md) |
 
 ### Welle 4: Langzeit, Spielgefühl, Welt (Extras)
 

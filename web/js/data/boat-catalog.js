@@ -8,6 +8,7 @@ import * as M from './boats/m.js';
 import * as L from './boats/l.js';
 import * as XL from './boats/xl.js';
 import * as XXL from './boats/xxl.js';
+import * as BESUCHER from './boats/besucher.js';   // P40: seltene Besucher (nur über features/besucher-regeln.js)
 
 const ERSATZ = [
   // Größe S
@@ -45,7 +46,7 @@ function ausDatei(mod) {
 // Ersatzkatalog und Datendateien gemischt (gleiche id: die Datei gewinnt, fehlende Felder aus dem
 // Ersatz). So rechnen Spiel, Tests und tools/balance.mjs mit denselben Arten, Modellen und Gästeprofilen
 // (wishes, feeFactor, arrivalWeight, Roadmap P19).
-const DATEIEN = [S, M, L, XL, XXL].flatMap(ausDatei);
+const DATEIEN = [S, M, L, XL, XXL, BESUCHER].flatMap(ausDatei);
 const byId = new Map(ERSATZ.map((t) => [t.id, t]));
 for (const t of DATEIEN) byId.set(t.id, { ...(byId.get(t.id) || {}), ...t });
 export const BOAT_CATALOG = [...byId.values()];

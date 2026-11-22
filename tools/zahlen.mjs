@@ -155,6 +155,19 @@ export function tabellen() {
       ['Bewertung je Crew', `alle an einem Steg +${zahl(f.zusammen)} Anker, aufgeteilt −${zahl(f.getrennt)} Anker`],
     ]), '');
   }
+  if (E.besucher) {
+    const b = E.besucher;
+    const pz = (v) => `${Math.round(v * 100)} %`;
+    t.push('## Seltene Besucher', '', tabelle(['Was', 'Wert'], [
+      ['Tage mit Besuch', `${Object.entries(b.anteil).map(([k, v]) => `Stufe ${k}: ${pz(v)}`).join(', ')}; mindestens ${b.pause} Tage Abstand, nie am ersten Tag, nie im Winter`],
+      ['Noch nie gesehen', `${zahl(b.neuGewicht)}-faches Gewicht bei der Wahl`],
+      ['Ankunft', `${zahl(b.ankunft[0])} bis ${zahl(b.ankunft[1])} des Tages`],
+      ...Object.entries(b.schiffe).map(([art, d]) => [art, `ab Stufe ${d.abStufe}, ${d.naechte} ${d.naechte === 1 ? 'Nacht' : 'Nächte'}, Gewicht ${zahl(d.gewicht)}, Wünsche ${d.wuensche.join(', ')}${d.tagesgaeste ? `, ${d.tagesgaeste} Tagesgäste` : ''}`]),
+      ['Schaulustige am Ehrenplatz', `je Abend ${b.zuschauer.geld.map((g, i) => `Stufe ${i + 1}: ${euro(g)}`).join(', ')}; ${Object.entries(b.zuschauer.faktor).map(([a, f]) => `${a} ×${zahl(f)}`).join(', ')}; ${b.zuschauer.leute} Leute`],
+      ...Object.entries(b.tiere).map(([art, d]) => [art, `ab Stufe ${d.abStufe}, an ${pz(d.anteil)} der Tage, Saisontag ${d.saison[0]} bis ${d.saison[1]}, ${zahl(d.zeit[0])} bis ${zahl(d.zeit[1])} des Tages, ${d.dauer} s im Bild`]),
+      ['Foto', `Motiv mindestens ${pz(b.foto.mindestGroesse)} der kürzeren Bildseite, ${pz(b.foto.rand)} Rand frei`],
+    ]), '');
+  }
   t.push('## Services', '', tabelle(['Service', 'Stufe', 'Name', 'ab Hafenstufe', 'Kosten', 'Mindestruf', 'Wirkung'], SERVICES.flatMap((s) =>
     s.stufen.map((st, i) => [i === 0 ? s.name : '', i + 1, st.name, st.abStufe ?? s.abStufe, euro(st.kosten), st.ruf != null ? zahl(st.ruf) : '-',
       wirkungText(st.wirkung) + (st.wirkung.besuch ? `; Besuch alle ${st.wirkung.besuch.alleTage} Tage, ${euro(st.wirkung.besuch.einnahme)}` : '')]))), '');

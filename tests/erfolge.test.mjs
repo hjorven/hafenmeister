@@ -37,7 +37,9 @@ function partie(seed) {
 
 // Diese Erfolge kommen aus Modulen der Oberfläche (Tagesziele, Stammgäste, Ereignisse) oder erst im
 // Endlosspiel nach dem Abschluss; sie werden unten einzeln geprüft.
-const NICHT_IN_PARTIE = ['tagesziele', 'wochenziel', 'stammgast', 'stammgaeste', 'sturm', 'gesamt-2', 'region', 'fuenf-anker'];
+// Seltene Besucher (P40) kommen aus features/besucher.js (Hooks und Fotomodus), eigener Test in tests/besucher.test.mjs.
+const NICHT_IN_PARTIE = ['tagesziele', 'wochenziel', 'stammgast', 'stammgaeste', 'sturm', 'gesamt-2', 'region', 'fuenf-anker',
+  'hoher-besuch', 'seltene-schiffe', 'tierfreund', 'fotoalbum'];
 
 test('Liste: eindeutige ids, gültige Gruppen und Dinge, Schilder für Stufe 2 bis 6', () => {
   const ids = E.ERFOLGE.map((e) => e.id);

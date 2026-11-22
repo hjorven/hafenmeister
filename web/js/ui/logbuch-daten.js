@@ -23,6 +23,9 @@
 
 import { FLOTTE } from '../data/verkehr.js';
 import { BESUCH_MODELL } from '../data/besuchswege.js';
+import { TYPES as BESUCHER_TYPEN } from '../data/boats/besucher.js';
+
+const BESUCHER_ARTEN = new Set(BESUCHER_TYPEN.map((t) => t.id));
 
 export const LOGBUCH = {
   maxChronik: 2000,       // Tage, die die Chronik höchstens aufhebt (etwa 15 Spieljahre)
@@ -115,7 +118,8 @@ export function katalog(types) {
   const out = [];
   for (const g of GROESSEN) {
     const arten = liste
-      .filter((t) => t && String(t.size).toUpperCase() === g)
+      // Seltene Besucher (P40) haben einen eigenen Reiter (features/besucher.js)
+      .filter((t) => t && !t.besucher && String(t.size).toUpperCase() === g)
       .sort((a, b) => String(a.id).localeCompare(String(b.id), 'de', { numeric: true }))
       .map((t) => {
         const models = Array.isArray(t.models) && t.models.length ? t.models : [{ id: t.id, name: t.name }];
@@ -278,6 +282,8 @@ export function verarbeite(state, events, hilfe = {}) {
   for (const [i, e] of liste.entries()) {
     let tag = tagVon(i);
     if (e.type === 'logbookNew') {
+      // Seltene Besucher (P40) stehen im eigenen Reiter, features/besucher.js meldet sie
+      if (BESUCHER_ARTEN.has(e.typeId)) continue;
       const names = hilfe.namen?.(e.typeId, e.modelId) ?? {};
       const boot = e.boatId != null ? hilfe.boot?.(e.boatId) ?? state.boats?.[e.boatId] : null;
       const vorher = (state.logbook?.[e.typeId] || []).length;
