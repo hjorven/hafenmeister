@@ -254,6 +254,8 @@ export function rulesFromEconomy(E = ECONOMY) {
     fromStage: fl.abStufe, share: { ...fl.anteil }, from: fl.fruehestens, to: fl.spaetestens, gap: fl.abstand,
     together: fl.zusammen, apart: fl.getrennt,
   } : null;
+  // Jugendtraining (P39, features/jugendtraining.js): Anker für Gäste, die der Gruppe zugesehen haben
+  r.youth = E.jugendtraining ? { rating: E.jugendtraining.ruf } : null;
   return r;
 }
 
