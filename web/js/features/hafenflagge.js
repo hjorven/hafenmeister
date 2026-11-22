@@ -77,6 +77,10 @@ export function schildMalen(canvas, { name, flagge, zeile = '' }) {
 
 export async function init(game) {
   fensterInit(game);   // Fenster "Name und Flagge" und Menüeintrag
+  // Antippen von Mast oder Schild öffnet "Name und Flagge" (gleich zu Beginn, nicht erst nach der Platzsuche)
+  game.on('tap', ({ pick: p } = {}) => {
+    if (p?.type === 'building' && p.id === 'hafenflagge') game.hafenflagge?.oeffnen?.();
+  });
   const lambert = (c, extra = {}) => new THREE.MeshLambertMaterial({ color: c, ...extra });
   const M = { weiss: lambert('#f6f3ec'), gold: lambert('#e9c46a'), holz: lambert(HOLZ), fuss: lambert('#c9c2b4'), tinte: lambert(TINTE) };
 
@@ -401,9 +405,5 @@ export async function init(game) {
   game.on('stufe', () => setTimeout(einfahrtStellen, 80));
   (game.landschaft ?? game.landscape)?.beiNeubau?.(() => setTimeout(einfahrtStellen, 80));
 
-  // Antippen öffnet "Name und Flagge"
-  game.on('tap', ({ pick: p } = {}) => {
-    if (p?.type === 'building' && p.id === 'hafenflagge') game.hafenflagge?.oeffnen?.();
-  });
 
 }

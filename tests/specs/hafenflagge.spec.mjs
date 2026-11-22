@@ -33,7 +33,8 @@ test('Name und Flagge: präparierter Name bleibt Text, Flagge wird gespeichert',
   expect(r.x + r.width).toBeLessThanOrEqual(vp.width + 1);
   expect(r.y + r.height).toBeLessThanOrEqual(vp.height + 1);
 
-  // Präparierter Name
+  // Präparierter Name (vorher zählen, wie viele Bilder und Skripte die Seite selbst hat)
+  const vorher = await page.evaluate(() => document.querySelectorAll('img, script').length);
   const boese = '<img src=x onerror="window.__xss=1">Haff<script>window.__xss=2</script>';
   await page.locator('#hm-hafen-name').fill(boese);
   await expect(page.locator('.hm-fl-name-rest')).toContainText('Wird gespeichert als');
@@ -55,11 +56,13 @@ test('Name und Flagge: präparierter Name bleibt Text, Flagge wird gespeichert',
     flagge: window.hafenmeister.sim.state.flagge,
     titel: document.title,
     xss: window.__xss ?? null,
-    bilder: document.querySelectorAll('img[src="x"], script:not([src])').length,
+    bilder: document.querySelectorAll('img[src="x"]').length,
+    alle: document.querySelectorAll('img, script').length,
     mast: window.hafenmeister.hafenflaggeBild.mast.visible,
   }));
   expect(nach.xss).toBeNull();
   expect(nach.bilder).toBe(0);
+  expect(nach.alle).toBe(vorher);
   expect(nach.name).not.toMatch(/[<>"]/);
   expect(nach.name).toContain('Haff');
   expect([...nach.name].length).toBeLessThanOrEqual(32);
