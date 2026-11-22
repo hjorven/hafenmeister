@@ -935,7 +935,7 @@ export const ECONOMY = {
   // Kai), dazu schwimmen manchmal Schwäne oder ein Schweinswal durchs Bild. Alles ist Fotomotiv für das
   // Logbuch. Logik in web/js/features/besucher-regeln.js, Beschreibung in docs/besucher.md.
   // Zufall aus Seed und Tag (kein Spielzufall): Zeitraffer und Rechnung bleiben gleich.
-  besucher: {
+  seltenerBesuch: {
     // Anteil der Saisontage mit einem besonderen Schiff je Stufe (nie am ersten Tag, nie im Winter)
     anteil: { 1: 0, 2: 0.1, 3: 0.12, 4: 0.12, 5: 0.12, 6: 0.12 },
     pause: 3,               // mindestens so viele Tage zwischen zwei Schiffen

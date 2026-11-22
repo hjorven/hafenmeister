@@ -55,5 +55,5 @@ export const MODELS = [
 
 export const MODEL_BY_ID = Object.fromEntries(MODELS.map((m) => [m.id, m]));
 
-/** Modell eines Besuchers (Schlüssel wie in ECONOMY.besucher.schiffe). */
+/** Modell eines Besuchers (Schlüssel wie in ECONOMY.seltenerBesuch.schiffe). */
 export const MODELL_VON = Object.fromEntries(MODELS.map((m) => [m.besucher, m]));

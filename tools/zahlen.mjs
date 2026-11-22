@@ -155,8 +155,8 @@ export function tabellen() {
       ['Bewertung je Crew', `alle an einem Steg +${zahl(f.zusammen)} Anker, aufgeteilt −${zahl(f.getrennt)} Anker`],
     ]), '');
   }
-  if (E.besucher) {
-    const b = E.besucher;
+  if (E.seltenerBesuch) {
+    const b = E.seltenerBesuch;
     const pz = (v) => `${Math.round(v * 100)} %`;
     t.push('## Seltene Besucher', '', tabelle(['Was', 'Wert'], [
       ['Tage mit Besuch', `${Object.entries(b.anteil).map(([k, v]) => `Stufe ${k}: ${pz(v)}`).join(', ')}; mindestens ${b.pause} Tage Abstand, nie am ersten Tag, nie im Winter`],

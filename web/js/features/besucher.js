@@ -6,7 +6,7 @@
 //   Meldung    morgens "Funk: Die Königsyacht meldet sich an" mit Ehrenplatz freihalten (wie P28), später
 //              "liegt am Ehrenplatz" mit Ansehen und Foto, Tiere "Schwanenfamilie im Hafen" (Meldeplatz)
 //   Foto       im Fotomodus (P) ein Knopf "Königsyacht ins Logbuch", sobald ein Motiv im Bild ist
-//              (Rand und Mindestgröße aus ECONOMY.besucher.foto). Ein kleines Bild kommt ins Logbuch.
+//              (Rand und Mindestgröße aus ECONOMY.seltenerBesuch.foto). Ein kleines Bild kommt ins Logbuch.
 //   Logbuch    Reiter "Besucher": sechs Motive mit Foto, Bild des Modells oder Schattenriss mit Hinweis
 //   Chronik    Zeilen in der Hafenchronik, Erfolge über 'besucher:neu' (features/erfolge-daten.js)
 // Zum Ausprobieren: ?besucher=weltumsegler|museumsschiff|forschungsschiff|koenigsyacht|schwaene|schweinswal
@@ -107,10 +107,17 @@ body.card-open #hm-besucher { display: none !important; }
   #hm-besucher .bs-knoepfe .hm-knopf { min-height: 32px; padding: 2px 10px; font-size: 13px; }
 }
 .hm-foto-leiste button.hm-bs-foto { background: #fde49a; }
-.hm-foto-leiste button.hm-bs-foto.bereit { background: ${GOLD}; box-shadow: 0 0 0 3px #24364a, 0 0 0 5px ${GOLD}; }
-.hm-foto-leiste button.hm-bs-foto.fertig { background: #9fd8a8; }
+.hm-foto-leiste button.hm-bs-foto.bereit { background: ${GOLD} !important; color: #24364a !important; }
+.hm-foto-leiste button.hm-bs-foto.fertig { background: #9fd8a8 !important; color: #24364a !important; }
 .hm-foto-leiste button.hm-bs-foto .bs-kurz { display: none; }
+/* Pixel-Oberfläche (css/oberflaeche.css): Rahmen statt Hintergrund */
+.hm-neu .hm-foto-leiste button.hm-bs-foto.bereit { border-image-source: var(--rahmen-gold); background: none !important; color: var(--hm-tinte, #24364a) !important; }
+.hm-neu .hm-foto-leiste button.hm-bs-foto.fertig { border-image-source: var(--rahmen-meer); background: none !important; color: #fff !important; }
 @media (max-width: 599px) {
+  /* Mit dem Logbuch-Knopf hat die Leiste einen Knopf mehr: enger setzen, notfalls umbrechen, nie über den Rand */
+  .hm-foto-leiste { left: 0; right: 0; transform: none; margin-inline: auto; width: fit-content; max-width: calc(100% - 16px);
+    box-sizing: border-box; gap: 4px; padding: 6px; flex-wrap: wrap; justify-content: center; }
+  .hm-foto-leiste button { padding: 0 8px; font-size: 13px; }
   .hm-foto-leiste button.hm-bs-foto .bs-lang { display: none; }
   .hm-foto-leiste button.hm-bs-foto .bs-kurz { display: inline; }
 }
@@ -287,8 +294,8 @@ async function start(game) {
       fotoKnopf.replaceChildren(a, b);
       fotoKnopf.setAttribute('aria-label', label);
     };
-    if (best) setze(`${t.titel} ins Logbuch`, 'Ins Logbuch', `Foto: ${t.titel} ins Logbuch`);
-    else setze(`${t.artikel === 'die' ? 'Zur' : 'Zum'} ${t.titel}`, 'Motiv suchen', `${t.titel} ins Bild holen`);
+    if (best) setze(`${t.titel} ins Logbuch`, 'Logbuch', `Foto: ${t.titel} ins Logbuch`);
+    else setze(`${t.artikel === 'die' ? 'Zur' : 'Zum'} ${t.titel}`, 'Suchen', `${t.titel} ins Bild holen`);
   }
 
   /** Foto des besten Motivs im Bild ins Logbuch. Ohne Motiv im Bild fliegt die Kamera hin. Gibt die Art zurück. */

@@ -23,7 +23,7 @@ import { ECONOMY } from '../data/economy.js';
 import { MODELL_VON } from '../data/boats/besucher.js';
 import { SCHIFF_TEXTE, TIER_TEXTE, MOTIVE, istTier } from '../data/besucher.js';
 
-export const BES = ECONOMY.besucher;
+export const BES = ECONOMY.seltenerBesuch;
 export const EHRENPLATZ = 'ehrenplatz';
 export const PLATZ_EIGENSCHAFT = 'ehrenplatz';
 const istObjekt = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
