@@ -1031,6 +1031,36 @@ export function tankstelle(stufe) {
   };
 }
 
+// Absaugstation (P31, Versorgung "absaugen"): grüner Pumpenschrank auf dem Dienststeg, Saugschlauch auf
+// einer Trommel, Schild mit Tropfen. Stufe 2 bekommt einen zweiten Schrank. Gleiches Deck wie die Tankstelle.
+export function absaugstation(stufe) {
+  const g = new THREE.Group();
+  const DECK = 0.46;
+  const trommeln = [];
+  const schrank = (x) => {
+    box(g, 0.9, 1.3, 0.6, '#3f7a4f', x, DECK, -0.4);
+    box(g, 0.96, 0.12, 0.66, FARBE.white, x, DECK + 1.3, -0.4);
+    box(g, 0.5, 0.5, 0.04, FARBE.white, x, DECK + 0.7, -0.72);
+    box(g, 0.2, 0.26, 0.05, '#3f7a4f', x, DECK + 0.82, -0.75);
+    const t = new THREE.Group();
+    t.position.set(x + 0.62, DECK + 0.55, -0.4);
+    add(t, new THREE.CylinderGeometry(0.32, 0.32, 0.2, 10), FARBE.ink, 0, 0, 0).rotation.z = Math.PI / 2;
+    add(t, new THREE.TorusGeometry(0.24, 0.06, 4, 10), '#d8c64a', 0, 0, 0).rotation.y = Math.PI / 2;
+    g.add(t);
+    trommeln.push(t);
+  };
+  schrank(0);
+  if (stufe >= 2) schrank(-2.2);
+  // Pfosten mit Schild "Absaugung"
+  zyl(g, 0.05, 2.4, FARBE.white, 1.4, DECK, 0.25, 5);
+  box(g, 0.9, 0.5, 0.06, '#3f7a4f', 1.4, DECK + 1.9, 0.25);
+  g.traverse((o) => { if (o !== g) o.userData.fest = true; });
+  return {
+    group: g,
+    update(dt, t) { trommeln.forEach((tr, i) => { tr.rotation.x = Math.sin(t * 0.6 + i) * 0.05; }); },
+  };
+}
+
 export const MODELLE = {
   bootsverleih, slip, raeucherei, fischhalle, segelclub, mastenkran, ausruester, travellift, winterlager,
   segelmacher, seenotretter, fahrgastanleger, museumshafen, kreuzfahrtterminal, marineanleger,

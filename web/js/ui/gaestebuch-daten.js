@@ -14,7 +14,7 @@
 
 import * as sim from '../sim.js';
 import { RULES } from '../data/rules.js';
-import { ANGEBOT_TEXTE } from '../data/wuensche-texte.js';
+import { ANGEBOT_TEXTE, VERSORGUNG_TEXTE } from '../data/wuensche-texte.js';
 
 export const GAESTEBUCH = {
   maxEintraege: 20,     // so viele Bewertungen zeigt das Gästebuch (der Ruf zählt die letzten Tage, economy.js ruf.tage)
@@ -46,8 +46,8 @@ export const GRUND = {
   'weit:dusche': { text: 'weiter Weg zur Dusche',    lang: 'Weiter Weg zur Dusche',                      sym: 'dusche' },
 };
 
-// Wünsche an Angebote an Land (P19 C3): Texte aus data/wuensche-texte.js, Symbol wie der Wunsch
-for (const [k, t] of Object.entries(ANGEBOT_TEXTE)) GRUND[k] = { text: t.fehlt, lang: t.lang, sym: k };
+// Wünsche an Angebote an Land (P19 C3) und neue Wünsche (P31): Texte aus data/wuensche-texte.js, Symbol wie der Wunsch
+for (const [k, t] of Object.entries({ ...VERSORGUNG_TEXTE, ...ANGEBOT_TEXTE })) GRUND[k] ??= { text: t.fehlt, lang: t.lang, sym: k };
 
 /** Was die Note hebt. */
 export const PLUS = {
@@ -63,7 +63,7 @@ export const PLUS = {
   havarie:  'in Not aufgenommen',
 };
 
-const WUNSCH_KEYS = ['wc', 'dusche', 'essen', 'strom', 'diesel', ...Object.keys(ANGEBOT_TEXTE)];
+const WUNSCH_KEYS = [...Object.keys(VERSORGUNG_TEXTE), ...Object.keys(ANGEBOT_TEXTE)];
 
 export function buchState(state) {
   state.modules ||= {};
@@ -247,7 +247,7 @@ const SATZ = {
   havarie: ['Ohne euch wären wir noch da draußen. Danke für den Schlepp!', 'Hilflos vor der Einfahrt getrieben, und ihr habt uns reingeholt. Danke!', 'In Not aufgenommen, das vergessen wir nicht.'],
   stammPlatz: ['Und wieder an unserem alten Platz!', 'Unsere Box war frei, wie schön.', 'Der Hafenmeister kennt unseren Platz.'],
 };
-for (const [k, t] of Object.entries(ANGEBOT_TEXTE)) SATZ[k] = t.saetze;
+for (const [k, t] of Object.entries({ ...VERSORGUNG_TEXTE, ...ANGEBOT_TEXTE })) if (t.saetze) SATZ[k] ??= t.saetze;
 
 
 /** Ein Satz im Gästebuch, zum Beispiel "Eine warme Dusche hätte gutgetan." */

@@ -47,9 +47,9 @@ const C = {
 // Gästeprofil je Art (Roadmap P19): wishes = Wünsche, die diese Art haben kann (Schnitt mit den Wünschen
 // der Stufe), feeFactor = Liegegeld mal Grundpreis M, arrivalWeight = wie oft sie unter den M-Booten kommt.
 export const TYPES = [
-  { id: 'M1', name: 'Kleinkreuzer', fromStage: 2, crew: [2, 4], length: [6, 8.5], beam: [2.2, 2.8], draft: [0.3, 1.4], wishes: ['wc', 'dusche', 'essen', 'strom'], feeFactor: 1.0, arrivalWeight: 3, group: [3, 5] },
-  { id: 'M2', name: 'Klassiker aus Holz', fromStage: 3, crew: [2, 4], length: [7, 9], beam: [2.0, 2.8], draft: [1.1, 1.5], wishes: ['wc', 'dusche', 'essen'], feeFactor: 1.0, arrivalWeight: 1, group: [3, 4] },
-  { id: 'M3', name: 'Kajütmotorboot', fromStage: 2, crew: [2, 5], length: [6.5, 9], beam: [2.5, 3.2], draft: [0.6, 0.9], wishes: ['wc', 'dusche', 'strom', 'diesel'], feeFactor: 1.1, arrivalWeight: 2, group: [3, 4] },
+  { id: 'M1', name: 'Kleinkreuzer', fromStage: 2, crew: [2, 4], length: [6, 8.5], beam: [2.2, 2.8], draft: [0.3, 1.4], wishes: ['wc', 'dusche', 'essen', 'strom', 'wasser'], feeFactor: 1.0, arrivalWeight: 3, group: [3, 5] },
+  { id: 'M2', name: 'Klassiker aus Holz', fromStage: 3, crew: [2, 4], length: [7, 9], beam: [2.0, 2.8], draft: [1.1, 1.5], wishes: ['wc', 'dusche', 'essen', 'wasser'], feeFactor: 1.0, arrivalWeight: 1, group: [3, 4] },
+  { id: 'M3', name: 'Kajütmotorboot', fromStage: 2, crew: [2, 5], length: [6.5, 9], beam: [2.5, 3.2], draft: [0.6, 0.9], wishes: ['wc', 'dusche', 'strom', 'diesel', 'wasser', 'wlan', 'absaugen'], feeFactor: 1.1, arrivalWeight: 2, group: [3, 4] },
   { id: 'M4', name: 'Fischerboot', fromStage: 2, crew: [2, 5], length: [6, 9], beam: [2.4, 3.2], draft: [0.6, 1.0], wishes: [], feeFactor: 1.0, arrivalWeight: 1 },
 ];
 

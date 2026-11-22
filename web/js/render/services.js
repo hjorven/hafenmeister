@@ -20,7 +20,7 @@
 import * as THREE from 'three';
 import { SERVICES, GROSSSCHIFF_BESUCHE, DIENST_TEXTE } from '../data/services.js';
 import { erstelleRegeln, neuerZustand, mitZahlen } from '../services/rules.js';
-import { baueModell, tPier, tankstelle, LAND_Y, mat, FARBE } from './services-models.js';
+import { baueModell, tPier, tankstelle, absaugstation, LAND_Y, mat, FARBE } from './services-models.js';
 import { buendeln } from './buendeln.js';
 import { HAFEN } from '../data/harbor.js';
 import { initBesuche } from './services-besuch.js';
@@ -432,6 +432,39 @@ export function init(game) {
   game.on('stufe', () => queueMicrotask(() => zeigeTankstelle(false)));
   game.on('ready', () => zeigeTankstelle(false));
 
+  // ------------------------------------------------------------------ Absaugstation (Versorgung "absaugen", P31)
+  // Steht auf demselben Dienststeg wie die Tankstelle, ein Stück weiter westlich, auch ohne Tankstelle.
+  const ABSAUG_STUFE = { 1: 5, 2: 6 };
+  const ABSAUG_VERSATZ = -9;                     // Planeinheiten nach Westen von der Tankstelle
+  let absaug = null;
+  function absaugStufe() {
+    if (testStufe) return testStufe >= ABSAUG_STUFE[2] ? 2 : testStufe >= ABSAUG_STUFE[1] ? 1 : 0;
+    return Number(game.sim?.state?.facilities?.absaugen) || 0;
+  }
+  function absaugLage() {
+    const l = tankLage();
+    return l ? { x: l.x + ABSAUG_VERSATZ, y: l.y } : null;
+  }
+  function zeigeAbsaugstation(mitAnimation) {
+    const n = absaugStufe();
+    if (absaug && absaug.stufe === n) return;
+    if (absaug) { gruppe.remove(absaug.group); entsorge(absaug.group); absaug = null; }
+    const lage = n > 0 ? absaugLage() : null;
+    if (!lage) return;
+    const m = absaugstation(n);
+    buendeln(m.group, m.update);
+    m.group.position.set(lage.x * U, 0, -lage.y * U);
+    m.group.rotation.y = Math.PI;
+    m.group.name = 'service-absaugstation';
+    gruppe.add(m.group);
+    absaug = { stufe: n, group: m.group, update: m.update, pop: mitAnimation ? 0 : 1 };
+    if (mitAnimation) m.group.scale.set(1, 0.01, 1);
+  }
+  game.on('build', (e) => { if (!e || e.id === 'absaugen' || e.key === 'absaugen') zeigeAbsaugstation(true); });
+  game.on('sim:change', () => zeigeAbsaugstation(false));
+  game.on('stufe', () => queueMicrotask(() => zeigeAbsaugstation(false)));
+  game.on('ready', () => zeigeAbsaugstation(false));
+
   game.on('tag:ende', (d) => abrechnen(d));
   game.on('day:start', (d) => { winter = !!d?.winter; });
   game.on('sturm', () => {
@@ -447,12 +480,13 @@ export function init(game) {
   // ------------------------------------------------------------------ Animation
   game.onTick((dt, g) => {
     const t = g.time;
-    if (tank) {
-      tank.update(dt, t);
-      if (tank.pop < 1) {
-        tank.pop = Math.min(1, tank.pop + dt / 0.9);
-        const p = tank.pop;
-        tank.group.scale.set(1, Math.max(0.01, 1 + 2.2 * Math.pow(p - 1, 3) + 1.2 * Math.pow(p - 1, 2)), 1);
+    for (const x of [tank, absaug]) {
+      if (!x) continue;
+      x.update(dt, t);
+      if (x.pop < 1) {
+        x.pop = Math.min(1, x.pop + dt / 0.9);
+        const p = x.pop;
+        x.group.scale.set(1, Math.max(0.01, 1 + 2.2 * Math.pow(p - 1, 3) + 1.2 * Math.pow(p - 1, 2)), 1);
       }
     }
     for (const a of anlagen.values()) {
@@ -502,6 +536,8 @@ export function init(game) {
   const api = {
     katalog: R.katalog,
     zustand,
+    // Lage der Absaugstation in Welt-Metern (P31, für die Bau-Vorschau), null ohne Dienststeg
+    absaugOrt: () => { const l = absaugLage(); return l ? { x: l.x * U, z: -l.y * U } : null; },
     liste: () => R.liste(zustand(), kontext()).filter((x) => sichtbar(x.id)),
     pruefe: (id) => R.pruefe(zustand(), id, kontext()),
     stufeVon: (id) => R.stufeVon(zustand(), id),

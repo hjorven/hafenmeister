@@ -120,6 +120,10 @@ const BOT = () => {
           const u = S.facilityUpgrade(k);
           if (u && u.available) o.push({ art: 'bauwerk', id: k, kosten: u.cost, prio: 3, tu: () => S.upgradeFacility(k).ok });
         }
+        // Wasserhähne am Steg (P31): wie Versorgung, über das Bauen-Menü
+        for (const e of G.bauen?.eintraege?.() ?? []) {
+          if (e.nachruesten === 'wasser' && !e.gesperrt) o.push({ art: 'nachruesten', id: e.key, kosten: e.kosten, prio: 3, tu: () => !!e.kaufen()?.ok });
+        }
         for (const x of G.services?.liste?.() ?? []) {
           const p = G.services.pruefe(x.id);
           if (p && p.freigeschaltet && !p.fertig && !p.umbau) o.push({ art: 'service', id: x.id, kosten: p.kosten, prio: st.stage >= r.maxStage ? 1 : 3, tu: () => !!G.services.bauen(x.id)?.ok });

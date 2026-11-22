@@ -13,7 +13,7 @@ const SONDERFALL_LABEL = {
   einzigerPlatz: 'Nur eine Box passt',
   flottille: 'Flottille',
 };
-const FACILITY_LABEL = { wc: 'Toilette', dusche: 'Dusche', essen: 'Kiosk', diesel: 'Tankstelle' };
+const FACILITY_LABEL = { wc: 'Toilette', dusche: 'Dusche', essen: 'Kiosk', diesel: 'Tankstelle', wlan: 'WLAN', waesche: 'Wäscherei', absaugen: 'Absaugstation' };
 const REASON_LABEL = {
   length: 'Das Boot ist zu lang für diesen Platz.',
   beam: 'Das Boot ist zu breit für diesen Platz.',
