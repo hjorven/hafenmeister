@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="760" height="358" viewBox="0 0 760 358" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif">
 <rect width="760" height="358" rx="10" fill="#f4efe3" stroke="#d8cdb4"/>
-<text x="20" y="32" font-size="19" font-weight="700" fill="#16324a">Roadmap: 55 von 86 Paketen erledigt</text>
-<text x="20" y="54" font-size="13" fill="#4a5d6c">2 teilweise, 0 in Arbeit, 29 offen, 1 zusammengelegt · Stand 22.11.2026</text>
+<text x="20" y="32" font-size="19" font-weight="700" fill="#16324a">Roadmap: 57 von 86 Paketen erledigt</text>
+<text x="20" y="54" font-size="13" fill="#4a5d6c">2 teilweise, 0 in Arbeit, 27 offen, 1 zusammengelegt · Stand 22.11.2026</text>
 <text x="20" y="91" font-size="13" fill="#16324a">Welle 0: Gelände und Bootswege</text>
 <rect x="330" y="78" width="340" height="18" rx="4" fill="#e3dccb"/>
 <rect x="330.0" y="78" width="340.0" height="18" fill="#23897d"/>
@@ -22,9 +22,9 @@
 <text x="682" y="193" font-size="13" fill="#16324a">20/21</text>
 <text x="20" y="227" font-size="13" fill="#16324a">Welle 4: Langzeit, Spielgefühl, Welt</text>
 <rect x="330" y="214" width="340" height="18" rx="4" fill="#e3dccb"/>
-<rect x="330.0" y="214" width="48.6" height="18" fill="#23897d"/>
-<rect x="378.6" y="214" width="24.3" height="18" fill="#e8b23a"/>
-<text x="682" y="227" font-size="13" fill="#16324a">2/14</text>
+<rect x="330.0" y="214" width="97.1" height="18" fill="#23897d"/>
+<rect x="427.1" y="214" width="24.3" height="18" fill="#e8b23a"/>
+<text x="682" y="227" font-size="13" fill="#16324a">4/14</text>
 <text x="20" y="261" font-size="13" fill="#16324a">Welle 5: Regionen und Online</text>
 <rect x="330" y="248" width="340" height="18" rx="4" fill="#e3dccb"/>
 <text x="682" y="261" font-size="13" fill="#16324a">0/2</text>

@@ -276,7 +276,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F29 | Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer | erledigt (PR 427, [stimmung.md](stimmung.md)): Lichterketten an allen Stegen gehen vom Land nach außen an, Glockentöne, wärmere Abendmusik bis zum Morgen | P46 |
 | F30 | Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord | erledigt (PR 427, [stimmung.md](stimmung.md)): Grundton, Terz, Akkord passend zur Musik, goldene Noten über der Box, ohne Zeitgrenze | P46 |
 | F31 | Große Ankünfte mit Horn, Kamera schwenkt auf Wunsch zur Einfahrt | erledigt (P47): Kreuzfahrt, Flotte, Windjammer und seltene Besucher tuten beim Einlaufen, Meldung mit Ansehen, kurze Kamerafahrt nur wenn der Spieler nichts tut, Einstellung Mit Kamera/Nur Horn/Aus, docs/grosse-ankuenfte.md | P47 |
-| F32 | Leinen annehmen: Symbol am Steg, Antippen bringt Trinkgeld | offen | P48 |
+| F32 | Leinen annehmen: Symbol am Steg, Antippen bringt Trinkgeld | erledigt ([leinen.md](leinen.md)): Tau am Steg, Festmacher fängt die Leine, Töne je Leine, Trinkgeld 2 bis 20 € | P48 |
 
 ### Seemannschaft
 
@@ -723,7 +723,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P45 | Kreativmodus | F24 | neu |
 | P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | erledigt (PR 427, Thread "Ruhigen Abend und Serien-Akkord bauen") |
 | P47 | Große Ankünfte ankündigen | F31 | erledigt (Thread "Große Ankünfte ankündigen", docs/grosse-ankuenfte.md) |
-| P48 | Leinen annehmen beim Anlegen | F32 | bestehend: "Schiffsanimationen umsetzen" |
+| P48 | Leinen annehmen beim Anlegen | F32 | erledigt (Thread "Leinen beim Anlegen annehmen lassen", [leinen.md](leinen.md)) |
 | P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | neu |
 | P50 | Einstellungen für Sicht und Bewegung | F25 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
 | P51 | Hafentiere | F38 | bestehend: "Menschen im Hafen herumlaufen lassen" |

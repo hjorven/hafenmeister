@@ -74,6 +74,7 @@ const MODULES = [
   './features/grosse-ankunft.js',      // P47: Horn und kurze Kamerafahrt, wenn ein großes Schiff einläuft
   './features/havarie.js',             // P37: Havarist einschleppen (Bild und Meldung lädt das Modul selbst)
   './features/stimmung.js',            // P46: ruhiger Abend mit Lichterketten, Serien-Akkord (docs/stimmung.md)
+  './features/leinen.js',              // P48: Leinen annehmen beim Anlegen (docs/leinen.md)
   './ui/statistik.js',                 // Statistik der letzten 30 Tage, Saisons (P41)
   './ui/oberflaeche.js',
 ];

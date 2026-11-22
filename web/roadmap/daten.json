@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "7c379ce"
+  "commit": "13e520d"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1046,17 +1046,22 @@
    "id": "P46",
    "titel": "Ruhiger Abend und Serien-Akkord",
    "inhalt": "F29, F30",
-   "thread": "bestehend: \"Ton und Musik hinzufügen\"",
+   "thread": "erledigt (PR 427, Thread \"Ruhigen Abend und Serien-Akkord bauen\")",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F29",
     "F30",
     "L1"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    104,
+    105
+   ]
   },
   {
    "id": "P47",
@@ -1076,14 +1081,14 @@
    "id": "P48",
    "titel": "Leinen annehmen beim Anlegen",
    "inhalt": "F32",
-   "thread": "bestehend: \"Schiffsanimationen umsetzen\"",
+   "thread": "erledigt (Thread \"Leinen beim Anlegen annehmen lassen\", leinen.md)",
    "welle": 4,
    "prs": [],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F32"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2360,23 +2365,27 @@
   {
    "code": "F29",
    "text": "Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 427, stimmung.md): Lichterketten an allen Stegen gehen vom Land nach außen an, Glockentöne, wärmere Abendmusik bis zum Morgen",
    "pakete": [
     "P46"
    ],
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "Spielgefühl"
   },
   {
    "code": "F30",
    "text": "Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 427, stimmung.md): Grundton, Terz, Akkord passend zur Musik, goldene Noten über der Box, ohne Zeitgrenze",
    "pakete": [
     "P46"
    ],
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "Spielgefühl"
   },
   {
@@ -2393,8 +2402,8 @@
   {
    "code": "F32",
    "text": "Leinen annehmen: Symbol am Steg, Antippen bringt Trinkgeld",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (leinen.md): Tau am Steg, Festmacher fängt die Leine, Töne je Leine, Trinkgeld 2 bis 20 €",
    "pakete": [
     "P48"
    ],
@@ -3751,12 +3760,14 @@
   {
    "code": "L1",
    "text": "Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 427): Stammgast und Stufenziel neu, die anderen klangen schon",
    "pakete": [
     "P46"
    ],
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "L Hafenleben, Ton und Fotomodus"
   },
   {
@@ -4655,11 +4666,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 2,
+    "erledigt": 4,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 11,
+    "offen": 9,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4714,20 +4725,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 55,
+  "erledigt": 57,
   "teilweise": 2,
   "arbeit": 0,
   "frage": 0,
-  "offen": 29,
+  "offen": 27,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 184,
+  "erledigt": 188,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 28,
+  "offen": 24,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5979,9 +5990,34 @@
    "datum": "2026-11-22",
    "quelle": "gaestewuensche/p31-handy-waschhaus.png",
    "nr": 103
+  },
+  {
+   "datei": "p46-pr427-pc-lichterketten.jpg",
+   "pakete": [
+    "P46"
+   ],
+   "titel": "Ruhiger Abend: Lichterketten an den Stegen",
+   "pr": 427,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "stimmung/pc-2-lichterketten-an.png",
+   "nr": 104
+  },
+  {
+   "datei": "p46-pr427-handy-abend.jpg",
+   "pakete": [
+    "P46"
+   ],
+   "titel": "Abendstimmung im großen Hafen",
+   "pr": 427,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "stimmung/handy-1-lichterketten-stufe6.png",
+   "nr": 105
   }
  ],
  "neueBilder": [
+  105,
   103,
   101,
   99,
@@ -5989,10 +6025,33 @@
   95,
   93,
   91,
-  90,
-  88
+  90
  ],
  "merges": [
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: Bilder für P46 Ruhiger Abend (PR 427)",
+   "pr": 431,
+   "pakete": [
+    "P46"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P48 Leinen annehmen beim Anlegen (F32)",
+   "pr": 430,
+   "pakete": [
+    "P48"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P46: Ruhiger Abend mit Lichterketten und Serien-Akkord (F29, F30, L1)",
+   "pr": 427,
+   "pakete": [
+    "P46"
+   ]
+  },
   {
    "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: P31 Gästewünsche (PR 406) mit Bildern",
@@ -6065,32 +6124,6 @@
    "titel": "Schichttest: zwei Testfehler aus Serie 14 auf dem Tablet",
    "pr": 419,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P35 Preisstufe (PR 413) mit Bildern",
-   "pr": 418,
-   "pakete": [
-    "P35"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P35 Preisstufe am Hafenbüro: günstig, normal, gehoben",
-   "pr": 413,
-   "pakete": [
-    "P35"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P39 (PR 412), P32-Rest (PR 414), P40 (PR 416) mit Bildern",
-   "pr": 417,
-   "pakete": [
-    "P39",
-    "P32",
-    "P40"
-   ]
   }
  ]
 }
