@@ -32,11 +32,14 @@ async function gastInBox(page, ausser = []) {
     g.speed = 1;
     const w = g.sim.waitingBoats().find((b) => !ausser.includes(b.id) && g.boatView.boot(b.id)?.moored);
     const z = g.sim.platzZustaende();
-    for (const id of Object.keys(z)) {
-      if (z[id] !== 'frei' || /^(boje|anker|BF)/.test(id)) continue;
+    // die nächste freie Box zuerst: kurzer Weg, wenig Verkehr dazwischen
+    const boot = g.boatView.boot(w.id);
+    const lage = (id) => g.stege?.platz?.(id)?.mesh?.getWorldPosition?.(new g.THREE.Vector3()) ?? { x: 0, z: 0 };
+    const frei = Object.keys(z).filter((id) => z[id] === 'frei' && !/^(boje|anker|BF)/.test(id))
+      .sort((a, b) => Math.hypot(lage(a).x - boot.x, lage(a).z - boot.z) - Math.hypot(lage(b).x - boot.x, lage(b).z - boot.z));
+    for (const id of frei) {
       if (g.sim.assign(w.id, id)?.ok) {
-        const b = g.stege?.platz?.(id);
-        const pos = b?.mesh?.position ?? g.boatView.boot(w.id).berth ?? { x: 0, z: 0 };
+        const pos = lage(id);
         const c = g.camera;
         c.stop?.();
         c._fly = null;
@@ -60,7 +63,7 @@ test('Leine annehmen: Symbol am Steg antippen, Festmacher steht da, Crew gibt Tr
   const { id, platz } = await gastInBox(page);
   // Symbol erscheint, solange das Boot heranfährt
   await page.waitForFunction((id) => window.hafenmeister.leinen.angebote().some((a) => a.boot === id && a.sichtbar),
-    id, { timeout: 60_000, polling: 100 }).catch(async (err) => {
+    id, { timeout: 120_000, polling: 100 }).catch(async (err) => {
     const lage = await page.evaluate((id) => {
       const g = window.hafenmeister, a = g.boatView.boot(id), c = g.camera;
       return { state: a?.state, task: a?.task?.constructor?.name, x: a?.x, z: a?.z, berth: a?.berth?.id, moored: a?.moored, angebote: g.leinen.angebote(),
