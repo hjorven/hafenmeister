@@ -169,6 +169,17 @@ export function tabellen() {
   t.push('## Services', '', tabelle(['Service', 'Stufe', 'Name', 'ab Hafenstufe', 'Kosten', 'Mindestruf', 'Wirkung'], SERVICES.flatMap((s) =>
     s.stufen.map((st, i) => [i === 0 ? s.name : '', i + 1, st.name, st.abStufe ?? s.abStufe, euro(st.kosten), st.ruf != null ? zahl(st.ruf) : '-',
       wirkungText(st.wirkung) + (st.wirkung.besuch ? `; Besuch alle ${st.wirkung.besuch.alleTage} Tage, ${euro(st.wirkung.besuch.einnahme)}` : '')]))), '');
+  if (E.jugendtraining) {
+    const j = E.jugendtraining;
+    t.push('## Jugendtraining', '', tabelle(['Was', 'Wert'], [
+      ['braucht', Object.keys(j.braucht).map((k) => SERVICES.find((s) => s.id === k)?.name ?? k).join(' und ')],
+      ['Trainingstage', `jeden ${j.alle}. Saisontag ab dem ${j.ersterTag}.; nicht bei Sturm, Starkwind oder Regatta`],
+      ['Zeit', `ins Wasser bei ${zahl(j.beginn)} des Tages, ohne Bild ${zahl(j.dauer)} des Tages draußen`],
+      ['Trainerboot', `${j.trainerboot.modell}, ${zahl(j.trainerboot.laenge)} m, braucht eine Box für den Tag`],
+      ['Belohnung', `+${zahl(j.ruf)} Anker für jeden Gast im Hafen, Beitrag ${j.gruppe.map((g) => euro(g.beitrag)).join(' / ')}`],
+      ['Gruppe je Ausbau', j.gruppe.map((g, i) => `${i + 1}: ${g.optis} Optis${g.jollen ? ` und ${g.jollen} Jollen` : ''}`).join('; ')],
+    ]), '');
+  }
   t.push('## Ereignisse', '', tabelle(['Ereignis', 'ab Stufe', 'alle Tage', 'Dauer', 'Saison', 'Wirkung'], EVENTS.map((e) => [
     e.title, e.stage, e.every, e.duration, e.season.join(' bis '), wirkungText(e.mods)])), '');
   return t.join('\n');

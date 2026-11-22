@@ -63,6 +63,7 @@ export const PLUS = {
   windgeschuetzt: 'ruhig gelegen trotz Starkwind',
   stammPlatz: 'wieder am Lieblingsplatz',
   preis:    'faire Preise',
+  jugend:   'Jugendtraining zugesehen',
 };
 
 const WUNSCH_KEYS = [...Object.keys(VERSORGUNG_TEXTE), ...Object.keys(ANGEBOT_TEXTE)];
@@ -108,6 +109,7 @@ export function gruendeAusAbreise(e) {
     // Preisstufe (P35): günstig lobt, gehoben zieht ab (mehr, wenn Wünsche fehlten)
     if (p.preis > 0.001) plus.push({ key: 'preis', wert: r2(p.preis) });
     else if (p.preis < -0.001) gruende.push({ key: 'teuer', n: r2(-p.preis) });
+    if (p.jugend > 0.001) plus.push({ key: 'jugend', wert: r2(p.jugend) });   // P39
   }
   if (e.reason === 'rebuild') gruende.push({ key: 'umbau', n: 1 });
   return { gruende, plus };

@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "532d8e3"
+  "commit": "cc06f99"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -899,14 +899,14 @@
    "id": "P39",
    "titel": "Jugendtraining am Segelclub",
    "inhalt": "F13",
-   "thread": "neu",
+   "thread": "erledigt (jugendtraining.md)",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F13"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2136,8 +2136,8 @@
   {
    "code": "F13",
    "text": "Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P39, jugendtraining.md): jeden 4. Saisontag Optis und Jollen über den Slip hinaus, Dreieckskurs vor den Stegen, Trainerboot braucht eine Box (feste Trainerbox möglich), wartende Boote halten das Fahrwasser frei, Beitrag und +0,2 Anker für zusehende Gäste",
    "pakete": [
     "P39"
    ],
@@ -4587,11 +4587,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 15,
+    "erledigt": 16,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 5,
+    "offen": 4,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4675,20 +4675,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 50,
+  "erledigt": 51,
   "teilweise": 2,
   "arbeit": 0,
   "frage": 0,
-  "offen": 34,
+  "offen": 33,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 178,
+  "erledigt": 179,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 33,
+  "offen": 32,
   "entfaellt": 1,
   "alle": 219
  },

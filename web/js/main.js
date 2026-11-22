@@ -56,6 +56,7 @@ const MODULES = [
   './features/wind.js',                // P34: Wind im Hafen, Windlage der Plätze, Anlegen gegen den Wind
   './features/hafenfest.js',           // P38: eigenes Hafenfest einmal je Saison (docs/hafenfest.md)
   './features/preisstufe.js',          // P35: Preisstufe am Hafenbüro, einmal je Saison (docs/preisstufe.md)
+  './features/jugendtraining.js',      // P39: Jugendtraining am Segelclub (docs/jugendtraining.md)
   './features/hafen-schauen.js',
   './features/einstieg.js',
   './features/aufstieg.js',
