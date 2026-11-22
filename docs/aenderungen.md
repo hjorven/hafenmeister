@@ -4,6 +4,10 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 22.11.2026
+
+- Ein Vorbeifahrer oder Segler, hinter dem ein Gast oder Dauerlieger seit ein paar Sekunden festhängt, fährt sofort weiter und macht Platz. Vorher blieb er bis zu 40 Sekunden stehen, und in großen Häfen (Stufe 6, zum Beispiel Küste 14) stapelte sich dahinter die ganze Anfahrt von See.
+
 ## 21.11.2026
 
 - Flottillen ab Stufe 3: An manchen Tagen kommen drei bis fünf Boote zusammen, etwa ein Segelverein auf Geschwaderfahrt oder eine Charterflottille. Sie laufen im Konvoi ein und wollen am selben Steg liegen (Boxen leuchten gold). Liegen alle zusammen, gibt jede Crew einen halben Anker mehr; aufgeteilt oder weggeschickt einen halben weniger. Mit Hafenbüro meldet sich die Gruppe per Funk an, und ein Tipp hält ihr einen ganzen Steg frei.
