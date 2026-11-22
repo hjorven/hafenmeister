@@ -31,7 +31,7 @@ const WIEDER = opt('wieder') != null ? Number(opt('wieder')) : Infinity;
 const NUR = opt('nur') ? opt('nur').split(',').map(Number) : null;
 const WEB = path.resolve(opt('web', path.join(REPO, 'web')));
 const OUT = path.resolve(opt('out', path.join(require('os').tmpdir(), 'schichttest')));
-const EXTRA = ['seed', 'gelaende', 'stegbild'].filter((k) => opt(k) != null).map((k) => `${k}=${opt(k)}`);
+const EXTRA = ['seed', 'gelaende', 'stegbild', 'stufe'].filter((k) => opt(k) != null).map((k) => `${k}=${opt(k)}`);
 
 function ladePlaywright() {
   for (const p of [path.join(REPO, 'tests', 'node_modules', '@playwright', 'test'), 'playwright', '@playwright/test']) {

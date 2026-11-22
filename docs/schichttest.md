@@ -42,6 +42,7 @@ rm -rf /tmp/st-web && cp -r web /tmp/st-web && for g in pc handy handyquer table
 | `--nur a,b` | - | nur diese Schichten, ohne Wiederholung der früheren (zum Nachprüfen eines Funds) |
 | `--wieder k` | alle | nach jeder Schicht nur den Kern (1 bis 7) und die k letzten Schichten wiederholen; mit allen 23 Schichten dauert ein voller Lauf am Handy über zwei Stunden, `--wieder 4` hält ihn unter zwei |
 | `--gelaende n`, `--seed s`, `--stegbild n` | Spielstart wie ein neuer Spieler | Ausgangslage über die Adresse |
+| `--stufe n` | Start in Stufe n (Testadresse `?stufe=n`) | zum Probieren einzelner Schichten mit `--nur 1,24`, nicht für Serien |
 | `--web dir` | `web/` | Ordner mit dem Spiel |
 | `--out dir` | `/tmp/schichttest` | Ausgabe: `bilder/`, `ergebnis-<gerät>.json`, `bericht-<gerät>.md` |
 
@@ -88,6 +89,7 @@ Reihenfolge abgeleitet aus [roadmap.md](roadmap.md), [arbeitsplan.md](arbeitspla
 | 21 | Ruf und Wünsche | P19 | Stern oben zeigt den Ruf aus den Regeln, ein Spieltag bringt neue Bewertungen, die Bootskarte nennt die Wünsche des Boots | gebaut |
 | 22 | Ereignisse und Wetter | P24, P20 | Wetterbericht öffnet und schließt, bei 8x bis zu einem Ereignis: angekündigt per Schild oder Wetterknopf, "Vorbereiten" wirkt (ab Stufe 3) | gebaut |
 | 23 | Angebote (Services) | P23 | über Bauen, Reiter "Angebote" das günstigste freie Angebot bauen; bleibt gebaut | gebaut |
+| 24 | Flottillen | P32 | ab Stufe 3 bei 8x bis zu einer Flottille spielen (kurz vor der Ankunft auf 1x), ein Boot antippen: Karte nennt die Gruppe; jedes Boot, sobald es an der Boje liegt, an denselben Steg ziehen (oder selbst einfahren lassen); danach liegt die Gruppe zusammen an einem Steg; bleibt zusammen | gebaut |
 
 ## Ergebnisse
 
