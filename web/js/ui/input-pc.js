@@ -84,6 +84,7 @@ export function init(game) {
     ['Liegendes Boot gedrückt halten, dann ziehen', 'In eine andere freie Box umlegen (ab dem zweiten Mal kostet es Bewertung)', () => !!game.sim?.umlegbar],
     ['Doppelklick auf wartendes Boot', 'Boot fährt selbst in den besten Platz', () => true],
     ['Maustaste halten und über Münzen streichen', 'Alles in einem Zug kassieren', () => true],
+    ['Tau-Symbol am Steg anklicken', 'Leinen annehmen, die Crew gibt Trinkgeld', () => !!game.leinen],
     ['Tempo-Knöpfe unten links', 'Pause, 1x, 3x, 8x', () => true],
     ['<kbd>F</kbd>', '3x an und aus', () => true],
     ['<kbd>G</kbd>', '8x an und aus', () => !!game.oberflaeche?.tempo],
