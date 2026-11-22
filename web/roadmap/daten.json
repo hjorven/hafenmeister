@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "8eb84f5"
+  "commit": "d9ca7df"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1137,14 +1137,14 @@
    "id": "P51",
    "titel": "Hafentiere",
    "inhalt": "F38",
-   "thread": "bestehend: \"Menschen im Hafen herumlaufen lassen\"",
+   "thread": "erledigt (docs/hafentiere.md)",
    "welle": 4,
    "prs": [],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F38"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2480,8 +2480,8 @@
   {
    "code": "F38",
    "text": "Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (hafentiere.md): wohnen im Hafen, Tagesablauf, Antippen, Foto ins Logbuch, Erfolg Hafenfreunde",
    "pakete": [
     "P51"
    ],
@@ -4676,11 +4676,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 6,
+    "erledigt": 7,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 8,
+    "offen": 7,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4735,20 +4735,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 59,
+  "erledigt": 60,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 26,
+  "offen": 25,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 190,
+  "erledigt": 191,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 22,
+  "offen": 21,
   "entfaellt": 1,
   "alle": 219
  },

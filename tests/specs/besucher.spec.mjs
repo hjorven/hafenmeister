@@ -82,11 +82,13 @@ test('Seltene Besucher: Königsyacht am Ehrenplatz, Foto ins Logbuch', async ({ 
   const fenster = page.locator('#hm-logbuch');
   await expect(fenster).toBeVisible();
   await expect(fenster.locator('#hm-lb-tab-besucher')).toHaveAttribute('aria-selected', 'true');
-  await expect(fenster.locator('.hm-bs-karte')).toHaveCount(6);
+  // Sechs seltene Besucher und drei Hafentiere (P51)
+  await expect(fenster.locator('.hm-bs-karte')).toHaveCount(9);
   const karte = fenster.locator('.hm-bs-karte[data-besucher="koenigsyacht"]');
   await expect(karte).toHaveClass(/foto/);
   await expect(karte).toContainText('Königsyacht');
-  await expect(fenster.locator('.hm-bs-karte.fehlt')).toHaveCount(5);
+  const selten = ':not([data-besucher="katze"]):not([data-besucher="hund"]):not([data-besucher="reiher"])';
+  await expect(fenster.locator(`.hm-bs-karte.fehlt${selten}`)).toHaveCount(5);
   await karte.click();
   await expect(fenster.locator('.hm-bs-steckbrief')).toContainText('Lag am Ehrenplatz');
   await page.keyboard.press('Escape');

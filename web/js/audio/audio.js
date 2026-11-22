@@ -164,6 +164,9 @@ export const SOUNDS = {
   abendruhe: { label: 'Ruhiger Abend (Lichterketten an)', wet: 0.55, gap: 3 },
   stammgast: { label: 'Neuer Stammgast', wet: 0.4, gap: 1 },
   stufenziel: { label: 'Stufenziel erreicht', wet: 0.4, gap: 2 },
+  miau: { label: 'Hafenkatze miaut (antippen)', wet: 0.15, gap: 0.5 },
+  wuff: { label: 'Hafenhund bellt (antippen)', wet: 0.2, gap: 0.5 },
+  reiher: { label: 'Graureiher fliegt auf', wet: 0.3, gap: 0.8 },
 };
 
 // Schiffshörner: kleine Boote hoch und kurz, große tief und lang
@@ -1296,6 +1299,56 @@ HafenAudio.prototype._sfx = {
       const tt = t + 0.04 + i * rand(0.07, 0.14);
       const f = rand(700, 1100);
       len = Math.max(len, tt - t + this._tone(out, { f, t: tt, a: 0.002, d: 0.08, peak: 0.045 * k, glide: f * 1.9, glideT: 0.06 }));
+    }
+    return len;
+  },
+
+  miau(t, out, o) {
+    // Hafenkatze (P51): ein weiches "Miau", Tonhöhe steigt und fällt, Formant über ein Bandpassfilter
+    const f0 = (o.hoehe ?? 1) * rand(520, 600);
+    const len = rand(0.42, 0.55);
+    const g = this._env(out, t, 0.04, 0.06, len, 0.05);
+    const bp = this._filter(g, 'bandpass', 1300, 1.4);
+    const end = t + len + 0.15;
+    for (const [type, mul] of [['sawtooth', 1], ['triangle', 2]]) {
+      const osc = this._osc(bp, type, f0 * mul * 0.8, t, end);
+      osc.frequency.exponentialRampToValueAtTime(f0 * mul * 1.25, t + len * 0.35);
+      osc.frequency.exponentialRampToValueAtTime(f0 * mul * 0.7, t + len);
+    }
+    // Mund öffnet sich: Filter wandert hoch und wieder runter
+    bp.frequency.setValueAtTime(800, t);
+    bp.frequency.exponentialRampToValueAtTime(1900, t + len * 0.4);
+    bp.frequency.exponentialRampToValueAtTime(900, t + len);
+    return len + 0.2;
+  },
+
+  wuff(t, out, o) {
+    // Hafenhund (P51): zwei kurze Beller, tiefer Ton mit Rauschen
+    const n = clamp(Math.round(o.anzahl || 2), 1, 3);
+    let len = 0;
+    for (let i = 0; i < n; i++) {
+      const tt = t + i * rand(0.22, 0.3);
+      const f = rand(240, 290);
+      len = Math.max(len, tt - t + this._tone(out, { type: 'sawtooth', f: f * 1.3, t: tt, a: 0.008, d: 0.12, peak: 0.05, glide: f * 0.8, glideT: 0.12 }));
+      this._burst(out, { t: tt, a: 0.004, d: 0.1, peak: 0.08, f: 700, q: 1.2, fTo: 400 });
+    }
+    return len + 0.1;
+  },
+
+  reiher(t, out) {
+    // Graureiher (P51): heiseres "Kraak" und ein paar schwere Flügelschläge
+    const g = this._env(out, t, 0.01, 0.05, 0.3, 0.06);
+    const bp = this._filter(g, 'bandpass', 900, 2.2);
+    const end = t + 0.45;
+    for (const det of [0, 35]) {
+      const osc = this._osc(bp, 'sawtooth', 330, t, end, det);
+      osc.frequency.exponentialRampToValueAtTime(240, t + 0.35);
+    }
+    this._burst(out, { t, a: 0.005, d: 0.28, peak: 0.05, f: 1100, q: 1.5 });
+    let len = 0.45;
+    for (let i = 0; i < 4; i++) {
+      const tt = t + 0.3 + i * 0.26;
+      len = Math.max(len, tt - t + this._burst(out, { kind: 'brown', t: tt, a: 0.02, d: 0.14, peak: 0.07, ftype: 'lowpass', f: 380 }));
     }
     return len;
   },

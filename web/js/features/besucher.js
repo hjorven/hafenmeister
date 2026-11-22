@@ -15,10 +15,11 @@
 
 import * as R from './besucher-regeln.js';
 import { regelnBereit } from './regeln-bereit.js';
-import { SCHIFF_TEXTE, TIER_TEXTE, MOTIVE, istTier, texteVon } from '../data/besucher.js';
+import { SCHIFF_TEXTE, TIER_TEXTE, MOTIVE, HAFENTIER_TEXTE, HAFENTIERE, istTier, istHafentier, texteVon } from '../data/besucher.js';
 import { MODELL_VON, TYPES } from '../data/boats/besucher.js';
 import { init as modelleInit } from '../render/boats/besucher.js';
 import { init as tiereInit } from '../render/besucher-tiere.js';
+import { init as hafentiereInit } from '../render/hafentiere.js';
 import { VORRANG } from '../ui/meldungen.js';
 import { uhrzeitText } from '../ui/vorschau.js';
 import { bildMaler, BILD } from '../ui/logbuch-bild.js';
@@ -28,6 +29,7 @@ const MELDUNG_ID = 'besucher';
 const SICHTBAR_S = 22;        // so lange steht eine Meldung ohne Entscheidung (nur sichtbare Zeit zählt)
 const KURZ_S = 7;             // Bestätigungen und kurze Meldungen
 const GOLD = '#ffd23f';
+const HAFENTIER_ERKENNEN_PX = 16;  // Hafentier gilt als gesehen, wenn sein Motivkreis so groß im Bild ist (Radius in Pixeln)
 
 const euro = (n) => `${Math.round(n).toLocaleString('de-DE')} €`;
 const gross = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -75,10 +77,59 @@ const TIER_RASTER = {
     '............................',
     '............................',
   ],
+  // Hafentiere (P51)
+  katze: [
+    '............................',
+    '............................',
+    '..........k..k..............',
+    '.........ksksk..............',
+    '.........kssssk.............',
+    '.........kskssk.............',
+    '.........kssssk.............',
+    '..........kssk..............',
+    '.........kssssk.............',
+    '........ksssssskk...........',
+    '........kwssssssssk.....kk..',
+    '........kwwsssssssskkkkksk..',
+    'LLLLLLLLkkkkkkkkkkkkkkkkkLLL',
+    'HHHHHHHHHHHHHHHHHHHHHHHHHHHH',
+  ],
+  hund: [
+    '............................',
+    '............................',
+    '...................kkk......',
+    '..................kHwwk.....',
+    '..................kwwkwkkk..',
+    '...k..............kwwwwwwk..',
+    '...kk.............kwwwwkkk..',
+    '....kkkkkkkkkkkkkkkwwwk.....',
+    '.....kwwwwHHHwwwwwwwwk......',
+    '.....kwwwHHHHwwwwwwwwk......',
+    '.....kwwkkkkkkkkkkwwk.......',
+    '.....kwk.kwk....kwk.kwk.....',
+    'LLLLLkkkLkkkLLLLkkkLkkkLLLLL',
+    'HHHHHHHHHHHHHHHHHHHHHHHHHHHH',
+  ],
+  reiher: [
+    '.............kk.............',
+    '............kkwwk...........',
+    '...........k.kwkwyyyyy......',
+    '..............kwwk..........',
+    '..............kwk...........',
+    '.............kwwk...........',
+    '............kwwk............',
+    '.....kkkkkkkkwwk............',
+    '...kkDDDDDDDDDwk............',
+    '..kDDDDDDDDDDDDk............',
+    '...kkDDDDDDDDkk.............',
+    '......kkk..k.k..............',
+    'WWWWWWWWWWWkWkWWWWWWWWWWWWWW',
+    '..WWWW....WWWW......WWWW....',
+  ],
 };
 const svgUrl = (svg) => `data:image/svg+xml,${encodeURIComponent(svg)}`;
 function tierBild(art, schatten) {
-  const r = TIER_RASTER[art];
+  const r = TIER_RASTER[art].map((z) => z.padEnd(28, '.').slice(0, 28));
   const zeilen = schatten ? r.map((z) => z.replace(/[^.W]/g, 'k').replace(/W/g, '.')) : r;
   return svgUrl(pixelSvg(zeilen));
 }
@@ -138,6 +189,7 @@ export function init(game) {
   modelleInit(game);
   if (typeof document === 'undefined') return;
   tiereInit(game);
+  hafentiereInit(game);
   start(game).catch((e) => console.error('Besucher (P40):', e));
 }
 
@@ -183,6 +235,8 @@ async function start(game) {
       const m = game.besucherTiere.motiv(art);
       if (m) out.push({ art, x: m.x, y: 0.4, z: m.z, r: m.r, sichtbar: m.sichtbar });
     }
+    // Hafentiere (P51): immer da, nach den seltenen Besuchern
+    for (const m of game.hafentiere?.motive?.() || []) out.push({ ...m, hafentier: true });
     return out;
   }
 
@@ -207,12 +261,14 @@ async function start(game) {
     return { nx: p.x, ny: p.y, rad, W, H, drin, genug, ok: drin && genug && zuSehen };
   }
 
+  let gesucht = null;             // { art, bis }: dorthin flog die Kamera zuletzt ("Suchen"), das zählt zuerst
   function bestesMotiv() {
     let best = null;
+    const such = gesucht && performance.now() < gesucht.bis ? gesucht.art : null;
     for (const m of motive()) {
       const k = imBild(m);
       if (!k?.ok) continue;
-      const wert = k.rad - Math.hypot(k.nx, k.ny) * 50;
+      const wert = k.rad - Math.hypot(k.nx, k.ny) * 50 + (m.art === such ? 1e4 : 0);
       if (!best || wert > best.wert) best = { m, k, wert };
     }
     return best;
@@ -248,11 +304,14 @@ async function start(game) {
   function fliegeZu(m, nah = false) {
     const cam = game.camera;
     if (!m || !cam?.flyTo) return;
+    gesucht = { art: m.art, bis: performance.now() + 15000 };
+    // Hafentiere (P51) halten fürs Foto kurz still
+    if (m.hafentier) game.hafentiere?.halte?.(m.art);
     cam.flyTo(m.x, m.z);
     if (!nah || !cam.zoomAt || !(cam.viewWidth > 0)) return;
     const W = cam.screenW ?? innerWidth;
     const H = cam.screenH ?? innerHeight;
-    const breite = Math.max(40, (2 * m.r * W) / (0.16 * Math.min(W, H)));
+    const breite = Math.max(m.nahBreite ?? 40, (2 * m.r * W) / (0.16 * Math.min(W, H)));
     if (cam.viewWidth > breite) cam.zoomAt(cam.viewWidth / breite);
   }
 
@@ -271,16 +330,24 @@ async function start(game) {
   fotoKnopfBauen();
   game.on('foto:an', () => { fotoKnopfBauen(); fotoKnopfZeichnen(); });
 
+  /** Wohin "Suchen" fliegt: zuerst ein seltener Besucher, sonst ein Hafentier ohne Foto (P51). */
+  function suchZiel(liste = motive()) {
+    const fotos = st() ? R.besState(st()).fotos : {};
+    return liste.find((m) => !m.hafentier) ?? liste.find((m) => !fotos[m.art]) ?? null;
+  }
+
   function fotoKnopfZeichnen() {
     if (!fotoKnopf) return;
     const da = st() && game.foto?.aktiv ? motive() : [];
-    fotoKnopf.hidden = !da.length;
-    if (!da.length) return;
+    const best = da.length ? bestesMotiv() : null;
+    const ziel = best ? null : suchZiel(da);
+    // Hafentiere mit Foto, die nicht im Bild sind, brauchen keinen Knopf (sie sind ja immer da)
+    fotoKnopf.hidden = !best && !ziel;
+    if (fotoKnopf.hidden) return;
     if (performance.now() < fotoFertigBis) return;
-    const best = bestesMotiv();
     fotoKnopf.classList.remove('fertig');
     fotoKnopf.classList.toggle('bereit', !!best);
-    const t = texteVon((best?.m ?? da[0]).art);
+    const t = texteVon((best?.m ?? ziel).art);
     // Lang auf breiten Bildschirmen, kurz auf dem Handy (die Leiste hat dort nur eine Zeile)
     const setze = (lang, kurz, label) => {
       if (fotoKnopf.dataset.text === lang) return;
@@ -304,7 +371,7 @@ async function start(game) {
     if (!s) return null;
     const best = bestesMotiv();
     if (!best) {
-      const m = motive()[0];
+      const m = suchZiel();
       fliegeZu(m, true);
       return null;
     }
@@ -585,6 +652,17 @@ async function start(game) {
         }
       }
     }
+    // Hafentiere (P51): gesehen, sobald man nah genug ist, dass man sie erkennt (einmal je Tag)
+    for (const m of game.hafentiere?.motive?.() || []) {
+      if (b.gesehen[m.art]?.zuletzt === s.day) continue;
+      const k = imBild(m);
+      if (!k || !k.drin || k.rad < HAFENTIER_ERKENNEN_PX) continue;
+      if (R.hafentierGesehen(s, m.art)) {
+        game.emit('besucher:neu', { art: m.art });
+        game.logbuch?.merken?.({ a: 'text', art: 'besucher', text: HAFENTIER_TEXTE[m.art].chronik });
+        game.logbuch?.neuZeichnen?.({ nurZahl: true });
+      }
+    }
     if (game.foto?.aktiv) fotoKnopfZeichnen();
     // Meldung
     if (aktuell?.typ === 'anmeldung') {
@@ -625,7 +703,7 @@ async function start(game) {
     const foto = b.fotos[art]?.bild;
     const da = !!b.gesehen[art];
     if (foto) img.src = foto;
-    else if (istTier(art)) { img.src = tierBild(art, !da); if (!da) img.classList.add('schatten'); }
+    else if (istTier(art) || istHafentier(art)) { img.src = tierBild(art, !da); if (!da) img.classList.add('schatten'); }
     else {
       if (!da) img.classList.add('schatten');
       const mo = modellVon(art);
@@ -652,15 +730,15 @@ async function start(game) {
     const g = b.gesehen[art];
     const f = b.fotos[art];
     const fakten = [];
-    if (g) fakten.push(`Zuerst gesehen: ${tagText(g.tag)}${g.stufe ? `, Stufe ${g.stufe}` : ''}. ${g.mal > 1 ? `${g.mal}-mal da gewesen.` : ''}`);
-    if (!istTier(art) && g) fakten.push(g.ehrenplatz ? 'Lag am Ehrenplatz.' : 'Lag noch nie am Ehrenplatz.');
+    if (g) fakten.push(`Zuerst gesehen: ${tagText(g.tag)}${g.stufe ? `, Stufe ${g.stufe}` : ''}. ${g.mal > 1 ? (istHafentier(art) ? `An ${g.mal} Tagen gesehen.` : `${g.mal}-mal da gewesen.`) : ''}`);
+    if (!istTier(art) && !istHafentier(art) && g) fakten.push(g.ehrenplatz ? 'Lag am Ehrenplatz.' : 'Lag noch nie am Ehrenplatz.');
     fakten.push(f ? `Foto vom ${tagText(f.tag)}.` : g ? 'Noch kein Foto: im Fotomodus (P) ins Bild holen.' : t.hinweis);
     return [el('div', { class: 'hm-lb-steckbrief hm-bs-steckbrief' },
       el('div', { class: 'hm-lb-sb-leiste' },
         el('button', { type: 'button', class: 'hm-lb-zurueck', onclick: () => { steckbrief = null; zeichneNeu(); } }, 'Alle Besucher')),
       el('div', { class: 'hm-lb-sb-bild' }, bildVon(art, s, true)),
       el('h3', {}, g ? t.titel : '???'),
-      g ? el('p', {}, istTier(art) ? t.kommt : `${t.kommt} ${t.platz}`) : null,
+      g ? el('p', {}, istTier(art) || istHafentier(art) ? t.kommt : `${t.kommt} ${t.platz}`) : null,
       el('p', { class: 'hm-bs-fakten' }, fakten.join(' ')))];
   }
 
@@ -669,12 +747,14 @@ async function start(game) {
     if (steckbrief) return steckbriefTeil(s, steckbrief, zeichneNeu);
     const b = R.besState(s);
     const f = R.fortschritt(s);
+    // Seltene Besucher und Hafentiere (P51) zusammen
+    const gesehen = f.gesehen + (f.hafentiere ?? 0), gesamt = f.gesamt + (f.hafentiereGesamt ?? 0), fotos = f.fotos + (f.hafentierFotos ?? 0);
     const oben = el('div', { class: 'hm-lb-stand' },
-      el('div', { class: 'hm-lb-stand-text' }, el('b', {}, `${f.gesehen} von ${f.gesamt}`), el('span', {}, ` Besuchern gesehen · ${f.fotos} ${f.fotos === 1 ? 'Foto' : 'Fotos'}`)),
-      el('div', { class: 'hm-lb-balken', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': String(f.gesamt), 'aria-valuenow': String(f.fotos), 'aria-label': 'Fotos im Logbuch' },
-        el('i', { style: `width: ${Math.round((f.fotos / f.gesamt) * 1000) / 10}%` })));
+      el('div', { class: 'hm-lb-stand-text' }, el('b', {}, `${gesehen} von ${gesamt}`), el('span', {}, ` gesehen · ${fotos} ${fotos === 1 ? 'Foto' : 'Fotos'}`)),
+      el('div', { class: 'hm-lb-balken', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': String(gesamt), 'aria-valuenow': String(fotos), 'aria-label': 'Fotos im Logbuch' },
+        el('i', { style: `width: ${Math.round((fotos / gesamt) * 1000) / 10}%` })));
     const teile = [oben];
-    const gruppen = [['Seltene Schiffe', MOTIVE.filter((a) => !istTier(a))], ['Tiere', MOTIVE.filter(istTier)]];
+    const gruppen = [['Hafentiere', HAFENTIERE], ['Seltene Schiffe', MOTIVE.filter((a) => !istTier(a))], ['Seltene Tiere', MOTIVE.filter(istTier)]];
     const gesehenJetzt = [];
     for (const [name, arten] of gruppen) {
       const raster = el('ul', { class: 'hm-lb-raster' });
@@ -699,7 +779,7 @@ async function start(game) {
       const n = arten.filter((a) => b.fotos[a]).length;
       teile.push(el('section', { class: 'hm-lb-art' }, el('h3', {}, el('span', {}, name), el('span', { class: 'hm-lb-zahl' }, `${n}/${arten.length} Fotos`)), raster));
     }
-    teile.push(el('p', { class: 'hm-lb-klein' }, 'Seltene Besucher kommen nur ab und zu. Im Fotomodus (P) bringt der goldene Knopf das Motiv ins Logbuch, sobald es groß genug im Bild ist.'));
+    teile.push(el('p', { class: 'hm-lb-klein' }, 'Die Hafentiere wohnen im Hafen: heranzoomen, antippen, fotografieren. Seltene Besucher kommen nur ab und zu. Im Fotomodus (P) bringt der goldene Knopf das Motiv ins Logbuch, sobald es groß genug im Bild ist.'));
     if (gesehenJetzt.length) setTimeout(() => { b.neu = b.neu.filter((a) => !gesehenJetzt.includes(a)); game.logbuch?.neuZeichnen?.({ nurZahl: true }); }, 0);
     return teile;
   }
