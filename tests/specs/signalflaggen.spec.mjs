@@ -43,7 +43,13 @@ test('Signalflaggen wehen, ein Bau holt sie ein, das Lexikon zeigt sie', async (
   if (nach.kap >= nach.wollen) expect(nach.mitW).toBe(0);
 
   // Lexikon im Logbuch
-  await page.evaluate(() => window.hafenmeister.hafenwissen.oeffnen('flagge-P'));
+  // Ob schon ein Boot den Blauen Peter gesetzt hat, hängt vom Takt ab; darum hier sicher sammeln.
+  // Ein noch fehlender Eintrag zeigt nur den Hinweis (???), nicht den Namen.
+  await page.evaluate(() => {
+    const hw = window.hafenmeister.hafenwissen;
+    hw.sammeln('flagge-P');
+    hw.oeffnen('flagge-P');
+  });
   const panel = page.locator('#hm-logbuch');
   await expect(panel).toBeVisible();
   await expect(panel.locator('#hm-lb-tab-wissen')).toHaveAttribute('aria-selected', 'true');
