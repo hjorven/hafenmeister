@@ -7,7 +7,7 @@
 //   mit     im Satz "wünscht sich ..." ("eine Dusche", "ein Café")
 //   fehlt   Grund im Gästebuch ("keine Dusche")
 //   lang    ausführlich ("Keine Dusche frei")
-//   saetze  was der Gast ins Gästebuch schreibt, wenn es fehlte
+//   saetze  was der Gast ins Gästebuch schreibt, wenn es fehlte (Angebote und neue Wünsche aus P31)
 //   service Angebot, das den Wunsch erfüllt (nur Angebotswünsche)
 
 export const VERSORGUNG_TEXTE = {
@@ -16,6 +16,15 @@ export const VERSORGUNG_TEXTE = {
   essen:  { kurz: 'Essen',  mit: 'etwas zu essen',  fehlt: 'nichts zu essen',     lang: 'Nichts zu essen im Hafen' },
   strom:  { kurz: 'Strom',  mit: 'Strom am Platz',  fehlt: 'kein Strom am Platz', lang: 'Kein Strom am Liegeplatz' },
   diesel: { kurz: 'Diesel', mit: 'Diesel',          fehlt: 'kein Diesel',         lang: 'Kein Diesel zu bekommen' },
+  // Neue Wünsche (P31, docs/gaestewuensche.md), mit eigenen Sätzen fürs Gästebuch
+  wasser: { kurz: 'Wasser', mit: 'Frischwasser am Platz', fehlt: 'kein Wasser am Steg', lang: 'Kein Wasserhahn am Steg',
+    saetze: ['Den Wassertank mussten wir mit Kanistern füllen.', 'Kein Wasserhahn am Steg, das Deck blieb salzig.', 'Frischwasser am Platz hätte uns gereicht.'] },
+  wlan: { kurz: 'WLAN', mit: 'WLAN', fehlt: 'kein WLAN', lang: 'Kein WLAN im Hafen',
+    saetze: ['Kein WLAN, der Wetterbericht kam nicht durch.', 'Wir wollten Fotos nach Hause schicken, aber kein Netz.', 'WLAN gab es nicht oder es war voll.'] },
+  waesche: { kurz: 'Wäsche', mit: 'eine Waschmaschine', fehlt: 'keine Waschmaschine', lang: 'Keine Waschmaschine frei',
+    saetze: ['Nach einer Woche an Bord: keine Waschmaschine.', 'Die Wäsche stapelt sich, und kein Trockner da.', 'Eine Waschmaschine hätte uns gerettet.'] },
+  absaugen: { kurz: 'Absaugen', mit: 'eine Absaugstation', fehlt: 'keine Absaugstation', lang: 'Keine Absaugstation für den Fäkalientank',
+    saetze: ['Der Tank war voll und keine Absaugstation da.', 'Ohne Absaugstation mussten wir weiter.', 'Eine Absaugstation gehört in jeden guten Hafen.'] },
 };
 
 export const ANGEBOT_TEXTE = {
@@ -41,6 +50,9 @@ export const ANGEBOT_TEXTE = {
     saetze: ['Ruder klemmte, und keine Werft weit und breit.', 'Für die Reparatur müssen wir woanders hin.'] },
   segelmacher: { service: 'segelmacher', kurz: 'Segelmacher', mit: 'einen Segelmacher', fehlt: 'kein Segelmacher', lang: 'Kein Segelmacher für das Segel',
     saetze: ['Das Segel ist eingerissen, kein Segelmacher hier.', 'Mit dem kaputten Segel geht es nun weiter.'] },
+  // P31: Im Seehafen wollen Crews die großen Schiffe auch vom Wasser aus sehen
+  barkasse: { service: 'barkasse', kurz: 'Barkasse', mit: 'eine Hafenrundfahrt', fehlt: 'keine Hafenrundfahrt', lang: 'Keine Barkasse für eine Hafenrundfahrt',
+    saetze: ['So viele große Schiffe, aber keine Hafenrundfahrt.', 'Die Kinder wollten mit der Barkasse fahren.'] },
 };
 
 /** Alle Wunschtexte (Versorgung, Strom und Angebote). */

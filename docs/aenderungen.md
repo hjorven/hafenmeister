@@ -4,6 +4,10 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 22.11.2026
+
+- Neue Gästewünsche, in jeder Ausbaustufe mindestens einer: Frischwasser ab Stufe 2 (Wasserhähne je Steg nachrüsten, grüne Zapfstellen am Steg), WLAN ab Stufe 3 (Mast am Hafenbüro), Waschmaschine ab Stufe 4 für Crews, die mindestens drei Nächte bleiben (Waschhaus mit Wäscheleine, später Waschsalon), Absaugstation für den Bordtank ab Stufe 5 (auf dem Steg der Tankstelle) und eine Hafenrundfahrt mit der Barkasse im Seehafen. Neue Schilder über den Booten, eigene Sätze im Gästebuch, "Als Nächstes" schlägt sie vor.
+
 ## 21.11.2026
 
 - Flottillen ab Stufe 3: An manchen Tagen kommen drei bis fünf Boote zusammen, etwa ein Segelverein auf Geschwaderfahrt oder eine Charterflottille. Sie laufen im Konvoi ein und wollen am selben Steg liegen (Boxen leuchten gold). Liegen alle zusammen, gibt jede Crew einen halben Anker mehr; aufgeteilt oder weggeschickt einen halben weniger. Mit Hafenbüro meldet sich die Gruppe per Funk an, und ein Tipp hält ihr einen ganzen Steg frei.

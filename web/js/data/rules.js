@@ -81,7 +81,9 @@ export function rulesFromEconomy(E = ECONOMY) {
   r.offerWishShare = { ...(aw.anteil || {}) };
   r.offerWishes = Object.fromEntries(Object.entries(aw.wuensche || {}).map(([k, w]) => [k,
     { service: w.service, minStage: w.abStufe ?? 1, sizes: w.klassen ?? null, sailOnly: !!w.nurSegel }]));
-  r.berthWishes = Object.fromEntries(Object.entries(E.wuensche || {}).filter(([, w]) => w.durch === 'platz').map(([k]) => [k, 'power']));
+  r.berthWishes = Object.fromEntries(Object.entries(E.wuensche || {}).filter(([, w]) => w.durch === 'platz').map(([k, w]) => [k, w.eigenschaft ?? 'power']));
+  // Wünsche nur für längere Aufenthalte (P31: Waschmaschine ab 3 Nächten)
+  r.wishMinNights = Object.fromEntries(Object.entries(E.wuensche || {}).filter(([, w]) => w.abNaechte > 0).map(([k, w]) => [k, w.abNaechte]));
 
   // Liegeplätze: Platzarten, Strom an Stegen
   r.comfortBonus = 1;   // comfort eines Platzes ist direkt der Bonus in Ankern (platzarten.rufBonus)

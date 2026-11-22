@@ -77,6 +77,12 @@ Liegegeld je angefangenem Meter Bootslänge (B10); der Grundpreis ist der Schnit
 |  | 4 | Restaurant mit Terrasse | 5 | 11.000 € | 200 |
 | Tankstelle | 1 | Zapfsäule | 4 | 2.700 € | 30 |
 |  | 2 | Bootstankstelle | 5 | 6.100 € | 80 |
+| WLAN | 1 | WLAN am Hafenbüro | 3 | 400 € | 12 |
+|  | 2 | WLAN-Antennen an den Stegen | 4 | 1.200 € | 40 |
+| Wäscherei | 1 | Waschmaschine und Trockner | 4 | 600 € | 6 |
+|  | 2 | Waschsalon | 5 | 1.400 € | 20 |
+| Absaugstation | 1 | Absaugstation | 5 | 900 € | 12 |
+|  | 2 | Zweite Absaugstation | 6 | 1.800 € | 30 |
 | Stromsäulen | 1 | Stromsäulen an Steg B | 3 | 1.100 € | - |
 
 ## Hafenbüro

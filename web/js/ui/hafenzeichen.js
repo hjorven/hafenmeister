@@ -219,6 +219,7 @@ export function init(game) {
 
   function zielFuer(key) {
     if (key === 'diesel') return game.scene?.getObjectByName?.(TANKSTELLE) ?? null;
+    if (key === 'absaugen') return game.scene?.getObjectByName?.('service-absaugstation') ?? null;
     const B = game.buildings;
     if (!B?.fuerKauf || !B.items) return null;
     // das höchste stehende Gebäude dieser Versorgung (Sanitärgebäude vor Toilette, Restaurant vor Kiosk)

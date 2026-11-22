@@ -36,7 +36,7 @@ Wer früh kauft, zahlt weniger und bekommt spätere Boxen umsonst. Das ist gewol
 ## Entscheidungen
 
 - **Strom für Steg A** gibt es nicht: An Steg A liegen nur Boote der Größe S, und Strom wünschen sich nur M, L und XL (`wuensche.strom.klassen`). Säulen dort würden nichts tun. Strom bleibt für Steg B in der Versorgung, die Säulen sind jetzt sichtbar.
-- **Wasser am Steg** kommt mit P31: Erst der Gästewunsch "Frischwasser" gibt Wasseranschlüssen eine Wirkung. P31 kann die Säulen um einen Wasserhahn erweitern und `nachruesten` um eine Art `wasser` mit `berthProp`.
+- **Wasser am Steg** (seit P31, [gaestewuensche.md](gaestewuensche.md)): Nachrüstung **Wasserhähne** ab Stufe 2 an jedem Gaststeg (90 € plus 10 bis 30 € je Platz). Sie erfüllt den Gästewunsch Frischwasser über die Platz-Eigenschaft `water` (Hook `berthHas` der Spielregeln), kein Anker-Bonus. Am Steg steht eine grüne Zapfstelle mit Schlauch an jedem zweiten Platz, die Platzwahl (Gold, Büro, Selbst-Einfahren) zieht diese Plätze für Gäste mit Wasserwunsch vor.
 - Die Boni laufen über den Hook `rating` der Spielregeln, nicht über `berth.comfort`. Die Platzwahl des Hafenbüros (`berthScore`) bevorzugt nachgerüstete Boxen darum nicht von selbst; die erwartete Note im Ziehschild (`berthValue`) enthält den Bonus.
 
 ## Spielstand

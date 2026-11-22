@@ -138,7 +138,9 @@ Jede Geschichte ist ein kleiner Ablaufplan aus Bausteinen, die es im Spiel sicht
   passend zur Stufe; Stufe 1 und 2 nur Orte am See), Crew (allein, zu zweit, Familie, Gruppe, Verein),
   Detail (was genau gebraucht wird). Das ergibt mehrere tausend Kombinationen.
 - Regeln (`state.modules.geschichten.zuletzt`):
-  1. Dieselbe Geschichte höchstens einmal je Tagesabschnitt und Tag.
+  1. Dieselbe Geschichte höchstens einmal je Tagesabschnitt und Tag. Lässt sich ein Doppelter weder tauschen
+     noch neu wählen (alle passenden Geschichten kommen im Abschnitt schon vor, volle Häfen ab Stufe 5),
+     bleibt er stehen; das trifft rund 1 von 2000 Booten (Befund P31).
   2. Dieselbe Geschichte im selben Abschnitt frühestens wieder nach 3 Tagen; zu anderer Zeit früher.
   3. Dieselbe vollständige Kombination (Geschichte + Herkunft + Crew + Detail) nie zweimal im Spielstand
      (Merkliste der letzten 400, als kurze Schlüssel).

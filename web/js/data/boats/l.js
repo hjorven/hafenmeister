@@ -17,7 +17,7 @@ export const SIZE = 'L';
 export const TYPES = [
   {
     id: 'L1', name: 'Fahrtenyacht', fromStage: 3,
-    wishes: ['wc', 'dusche', 'essen', 'strom'], feeFactor: 1.0, arrivalWeight: 3,
+    wishes: ['wc', 'dusche', 'essen', 'strom', 'wasser', 'wlan', 'waesche', 'absaugen'], feeFactor: 1.0, arrivalWeight: 3,
     length: [9.5, 14], beam: [3.2, 4.3], draft: [1.6, 2.1],
     crew: [2, 6],
     group: [3, 5],
@@ -26,7 +26,7 @@ export const TYPES = [
   },
   {
     id: 'L2', name: 'Mehrrumpfboot', fromStage: 4,
-    wishes: ['dusche', 'essen', 'strom'], feeFactor: 1.5, arrivalWeight: 1,
+    wishes: ['dusche', 'essen', 'strom', 'wasser', 'wlan', 'waesche'], feeFactor: 1.5, arrivalWeight: 1,
     length: [10, 13], beam: [6, 7.5], draft: [1.0, 1.3],
     crew: [2, 8],
     mooring: 'stirn',
@@ -34,7 +34,7 @@ export const TYPES = [
   },
   {
     id: 'L3', name: 'Motoryacht', fromStage: 3,
-    wishes: ['dusche', 'essen', 'strom', 'diesel'], feeFactor: 1.2, arrivalWeight: 2,
+    wishes: ['dusche', 'essen', 'strom', 'diesel', 'wasser', 'wlan', 'absaugen'], feeFactor: 1.2, arrivalWeight: 2,
     length: [10, 14], beam: [3.6, 4.5], draft: [0.9, 1.3],
     crew: [2, 6],
     group: [3, 4],
