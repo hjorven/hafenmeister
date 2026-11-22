@@ -75,7 +75,7 @@ Stand 22.11.2026, 03:40 UTC. Leitlinie: Welle 3 nach Wirkung auf die Kernschleif
 | 7 | **P29 Baggern** (F7) und **P36 Bojenfeld** (F10) | Ausbau mit eigener Entscheidung | 6 | Gelände (Tiefe), Liegeplätze |
 | 8 | **P37 Havarist**, ~~**P38 Hafenfest**~~ erledigt (PR 405), **P39 Jugendtraining**, **P40 Seltene Besucher** | Höhepunkte, wenig Berührung untereinander | - | Ereignisse (P24), Meldeplatz, Logbuch |
 
-**Startregel:** 1, 2, 4, 5 und P38 fertig, P25 (H9) läuft. Jetzt starten: der kurze Flottillen-Rest (Prio B, `sim.js`), P35 Preisstufe (hält ab jetzt `economy.js`), P37 Havarist, P39 Jugendtraining. Danach 7 (nach P35) und P40. Die ganze Zeitraffer-Serie über 15 Küsten läuft jetzt auf `73f388f` und nimmt P88 ab. Nach jedem Paket, das Boote oder Zahlen ändert: Zeitraffer-Stichprobe über 5 Küsten, nach jedem dritten die ganze Serie. Alle neuen Meldungen über den einen Meldeplatz.
+**Startregel:** 1, 2, 4, 5 und P38 fertig, P25 (H9) läuft. Jetzt starten: der kurze Flottillen-Rest (Prio B, `sim.js`), ~~P35 Preisstufe~~ (erledigt), P37 Havarist, P39 Jugendtraining. Danach 7 und P40. Die ganze Zeitraffer-Serie über 15 Küsten läuft jetzt auf `73f388f` und nimmt P88 ab. Nach jedem Paket, das Boote oder Zahlen ändert: Zeitraffer-Stichprobe über 5 Küsten, nach jedem dritten die ganze Serie. Alle neuen Meldungen über den einen Meldeplatz.
 
 Danach Welle 4 (Abschnitt 5, C), dann Nordsee (P57), dann Welle 6 (Stufe 7 bis 20), Online zuletzt.
 
