@@ -708,7 +708,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P35 | Preisstufe am Hafenbüro | F6 | neu |
 | P36 | Bojenfeld im See | F10 | neu |
 | P37 | Havarist einschleppen | F11 | neu |
-| P38 | Eigenes Hafenfest ansetzen | F12 | erledigt ([hafenfest.md](hafenfest.md)) |
+| P38 | Eigenes Hafenfest ansetzen | F12 | erledigt (PR 405, [hafenfest.md](hafenfest.md)) |
 | P39 | Jugendtraining am Segelclub | F13 | neu |
 | P40 | Seltene Besucher | F16 (nach P21) | neu |
 
