@@ -1210,6 +1210,28 @@
    "geraet": "handy",
    "datum": "2026-11-22",
    "quelle": "leinen/annehmen/handy-1-symbol.png"
+  },
+  {
+   "datei": "p51-pr435-pc-hafenkatze.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Hafenkatze auf dem Steg",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-5-katze-herz.png"
+  },
+  {
+   "datei": "p51-pr435-pc-reiher.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Graureiher am Ufer",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-3-reiher.png"
   }
  ]
 }

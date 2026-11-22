@@ -130,7 +130,7 @@ test('Katalog und Fortschritt: alle Modelle aller Größen, gesehene werden gez�
 });
 
 test('Spielstand Version 2 wird Version 3: Logbuch bleibt, letzte Tage kommen in die Chronik', async () => {
-  assert.equal(SAVE_VERSION, 3);
+  assert.ok(SAVE_VERSION >= 3);   // seit P44 Version 4 (Flagge), der Umbau von 2 nach 3 gilt weiter
   const { ctx, state } = await neu(9, 2);
   spiele(state, ctx, 34);
   // So sah ein Stand vor P21 aus: kein modules.logbuch
