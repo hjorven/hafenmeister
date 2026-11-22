@@ -726,7 +726,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P48 | Leinen annehmen beim Anlegen | F32 | erledigt (PR 430, Thread "Leinen beim Anlegen annehmen lassen", [leinen.md](leinen.md)) |
 | P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | neu |
 | P50 | Einstellungen für Sicht und Bewegung | F25 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
-| P51 | Hafentiere | F38 | erledigt (docs/hafentiere.md) |
+| P51 | Hafentiere | F38 | erledigt (PR 435, docs/hafentiere.md) |
 | P52 | Naturecke am Schilf | F39 | bestehend: "Landschaft und Wasser gestalten" |
 | P53 | Spätankömmling in der Nacht | F40 | neu |
 
