@@ -18,11 +18,12 @@
 import { hasSave, loadGame, rohText, SAVE_VERSION, requestPersistentStorage, storageAvailable } from './storage.js';
 import { startPwa } from './pwa.js';
 import {
-  openSavePanel, openStart, showExportReminderIfDue, showUpdateBanner, showKaputtMeldung, showOhneSpeicherMeldung,
+  openSavePanel, openStart, ensureStyle, showExportReminderIfDue, showUpdateBanner, showKaputtMeldung, showOhneSpeicherMeldung,
 } from './save-panel.js';
 import * as plaetze from './plaetze.js';
 import { neuerSeed, FORMEN } from '../render/landschaft/formen.js';
 import { createState, deserialize } from '../state.js';
+import { flaggeSauber } from '../data/hafenflagge.js';
 
 // Für den Fall, dass index.html die Zeilen noch nicht hat. Doppelt schadet nicht.
 function ensureHeadLinks() {
@@ -142,9 +143,11 @@ export function init(game) {
   }
 
   /** Neuen Hafen anlegen und starten. stegbild: 1 bis n, gelaende: Küstenform 1 bis 10, einstieg: Einführung zeigen. */
-  function neuesSpielAnlegen({ name, stegbild, gelaende, einstieg = true }) {
+  function neuesSpielAnlegen({ name, stegbild, gelaende, einstieg = true, flagge = null }) {
     const st = createState();
-    st.harborName = name;
+    st.harborName = plaetze.nameSauber(name);
+    // Eigene Flagge aus dem Fenster (P44), sonst die Flagge zum Seed aus createState
+    if (flagge) st.flagge = flaggeSauber(flagge, st.seed);
     st.modules = st.modules ?? {};
     if (Number.isInteger(stegbild) && stegbild >= 1) st.modules.stegbild = { nr: stegbild };
     // Küste: gewählte Form oder eine zufällige, immer mit eigenem Seed (sonst erbte das neue Spiel die alte Küste)
@@ -212,6 +215,36 @@ export function init(game) {
     neuesSpiel: () => panel('neu'),
     probeKopie,
     platz: () => { const e = plaetze.aktiverPlatz(); return e ? { ...e } : null; },
+    /** Stil der Spielstand-Fenster (für andere Fenster im selben Aussehen, z. B. ui/hafenflagge.js). */
+    stil: () => ensureStyle(),
+    /**
+     * Hafen umbenennen (P44): Verzeichnis, Spielstand und Fenstertitel. Gibt den gespeicherten Namen
+     * zurück (sauber, und eindeutig unter den Plätzen). Im Testmodus nur für diese Sitzung.
+     */
+    umbenennen(name) {
+      const st = aktuell();
+      const e = plaetze.aktiverPlatz();
+      let n;
+      if (st && !st.testmodus && e) {
+        n = plaetze.umbenennen(e.id, name);
+        st.harborName = n;
+        speichern(st);
+      } else {
+        n = plaetze.nameSauber(name, st?.harborName || 'Mein Hafen');
+        if (st) st.harborName = n;
+      }
+      game.emit('spielstand-name', n);
+      return n;
+    },
+    /** Eigene Flagge setzen (P44). Gibt die geprüfte Flagge zurück. */
+    flaggeSetzen(flagge) {
+      const st = aktuell();
+      if (!st) return null;
+      st.flagge = flaggeSauber(flagge, st.seed);
+      if (!st.testmodus) speichern(st);
+      game.emit('hafenflagge', st.flagge);
+      return st.flagge;
+    },
     plaetze: () => plaetze.verzeichnis(),
   };
 

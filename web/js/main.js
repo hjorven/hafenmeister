@@ -73,6 +73,7 @@ const MODULES = [
   './features/besucher.js',            // Seltene Besucher, Ehrenplatz, Fotomotive (P40)
   './features/havarie.js',             // P37: Havarist einschleppen (Bild und Meldung lädt das Modul selbst)
   './ui/statistik.js',                 // Statistik der letzten 30 Tage, Saisons (P41)
+  './features/hafenflagge.js',         // P44: Hafenname und eigene Flagge, Mast, Schilder, Fenster
   './ui/oberflaeche.js',
 ];
 

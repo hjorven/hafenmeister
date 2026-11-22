@@ -9,9 +9,10 @@
 // nicht. Darum gibt es zusätzlich Export und Import als Datei.
 
 import { aufbauenAusAltstand } from '../ui/logbuch-daten.js';
+import { flaggeSauber } from '../data/hafenflagge.js';
 
 export const SAVE_FORMAT = 'hafenmeister-spielstand';
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 // Der Spielstand des gerade aktiven Speicherplatzes liegt immer unter KEY_SAVE (auch
 // data/stegbild.js liest ihn dort vor dem Start). Die anderen Plätze: save/plaetze.js.
@@ -38,6 +39,9 @@ const MIGRATIONS = {
   // Version 3 (November 2026, P21): Logbuch und Hafenchronik in modules.logbuch. Was schon im Logbuch
   // steht, bleibt (ohne Tag), die letzten Tage aus stats.verlauf werden als Chronik nachgetragen.
   2: (game) => aufbauenAusAltstand(game),
+  // Version 4 (November 2026, P44): eigene Hafenflagge in game.flagge. Ältere Häfen bekommen die
+  // Flagge, die zu ihrem Seed gehört (jeder Hafen eine andere, immer dieselbe); änderbar im Spiel.
+  3: (game) => ({ ...game, flagge: flaggeSauber(game.flagge, Number.isFinite(game.seed) ? game.seed : 0) }),
 };
 
 export class SaveError extends Error {

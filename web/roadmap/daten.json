@@ -1010,7 +1010,7 @@
    "id": "P44",
    "titel": "Hafenname und Flagge",
    "inhalt": "F23, F27 (Auswahl beim Start)",
-   "thread": "neu",
+   "thread": "erledigt (Thread \"Hafenname und eigene Flagge geben\", Hafenflagge)",
    "welle": 4,
    "prs": [],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
@@ -1019,7 +1019,7 @@
     "F27",
     "C05"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2288,8 +2288,8 @@
   {
    "code": "F23",
    "text": "Hafenname und Flagge, sichtbar an Einfahrt und Mast",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P44, Hafenflagge)",
    "pakete": [
     "P44"
    ],
@@ -2331,9 +2331,9 @@
   },
   {
    "code": "F27",
-   "text": "Neues Spiel mit Auswahl: Hafenname, Stegbild, später Herausforderung oder Revier",
+   "text": "Neues Spiel mit Auswahl: Hafenname, Flagge, Stegbild, später Herausforderung oder Revier",
    "status": "erledigt",
-   "statusText": "erledigt für Name, Stegbild, Küste, Einführung; Herausforderung und Revier folgen",
+   "statusText": "erledigt für Name, Flagge, Stegbild, Küste, Einführung; Herausforderung und Revier folgen",
    "pakete": [
     "P09",
     "P44"
@@ -4467,7 +4467,7 @@
   },
   {
    "code": "C05",
-   "text": "HTML per innerHTML (render/services.js, ui/input-pc.js): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, textContent oder Escapen, dazu Test mit präparierten Namen",
+   "text": "HTML per innerHTML (render/services.js, ui/input-pc.js): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, textContent oder Escapen, dazu Test mit präparierten Namen. Hafenname erledigt mit P44 (hafenNameSauber, nur textContent/Canvas, tests/hafenflagge.test.mjs)",
    "status": null,
    "statusText": "",
    "pakete": [
@@ -4650,8 +4650,8 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 2,
-    "teilweise": 1,
+    "erledigt": 3,
+    "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
     "offen": 11,
@@ -4709,8 +4709,8 @@
   }
  ],
  "gesamt": {
-  "erledigt": 55,
-  "teilweise": 2,
+  "erledigt": 56,
+  "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
   "offen": 29,
@@ -4718,11 +4718,11 @@
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 184,
+  "erledigt": 185,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 28,
+  "offen": 27,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5966,6 +5966,17 @@
  "merges": [
   {
    "datum": "2026-11-22",
+   "titel": "Arbeitsplan: Welle 3 gebaut, Welle 4 startet mit P48, P47, P46, P44",
+   "pr": 425,
+   "pakete": [
+    "P48",
+    "P47",
+    "P46",
+    "P44"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: Bilder für P37 Havarist einschleppen (PR 408)",
    "pr": 424,
    "pakete": [
@@ -6051,12 +6062,6 @@
    "pakete": [
     "P40"
    ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Schichttest: Schicht 25 Wind und 26 Stammgäste, Wetterbericht nennt Starkwind an Regentagen",
-   "pr": 415,
-   "pakete": []
   }
  ]
 }

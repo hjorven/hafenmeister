@@ -61,6 +61,7 @@ export function init(game) {
     if (game.describe) { const t = game.describe(hit); if (t) return t; }
     // Überraschende Gesten (ui/hafengesten.js): Büro und Glocke verraten, was sie können
     if (hit.type === 'building' && hit.id === 'glocke') return 'Hafenglocke: anklicken';
+    if (hit.type === 'building' && hit.id === 'hafenflagge') return 'Hafenflagge: anklicken für Name und Flagge';
     if (hit.type === 'building' && (hit.id === 'hafenmeister' || hit.id === 'hafenbuero')) {
       const name = hit.id === 'hafenbuero' ? 'Hafenbüro' : 'Hafenmeister';
       return game.hafengesten?.hornErlaubt?.() ? `${name}: anklicken für das Gästebuch, gedrückt halten für das Hafenhorn (kassiert alles)` : `${name}: anklicken für das Gästebuch`;
