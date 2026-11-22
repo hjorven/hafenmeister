@@ -21,7 +21,7 @@
 import * as sim from '../sim.js';
 import { ECONOMY } from '../data/economy.js';
 import { MODELL_VON } from '../data/boats/besucher.js';
-import { SCHIFF_TEXTE, TIER_TEXTE, MOTIVE, istTier } from '../data/besucher.js';
+import { SCHIFF_TEXTE, TIER_TEXTE, MOTIVE, ALLE_MOTIVE, HAFENTIERE, istTier } from '../data/besucher.js';
 
 export const BES = ECONOMY.seltenerBesuch;
 export const EHRENPLATZ = 'ehrenplatz';
@@ -47,16 +47,16 @@ export function saeubern(state) {
   const s = besState(state);
   for (const k of Object.keys(s.gesehen)) {
     const e = s.gesehen[k];
-    if (!MOTIVE.includes(k) || !istObjekt(e)) { delete s.gesehen[k]; continue; }
-    s.gesehen[k] = { tag: Number.isInteger(e.tag) ? e.tag : null, stufe: Number.isInteger(e.stufe) ? e.stufe : null, mal: Number.isInteger(e.mal) && e.mal > 0 ? e.mal : 1, ...(e.ehrenplatz ? { ehrenplatz: true } : {}) };
+    if (!ALLE_MOTIVE.includes(k) || !istObjekt(e)) { delete s.gesehen[k]; continue; }
+    s.gesehen[k] = { tag: Number.isInteger(e.tag) ? e.tag : null, stufe: Number.isInteger(e.stufe) ? e.stufe : null, mal: Number.isInteger(e.mal) && e.mal > 0 ? e.mal : 1, ...(e.ehrenplatz ? { ehrenplatz: true } : {}), ...(Number.isInteger(e.zuletzt) ? { zuletzt: e.zuletzt } : {}) };
   }
   for (const k of Object.keys(s.fotos)) {
     const f = s.fotos[k];
-    if (!MOTIVE.includes(k) || !istObjekt(f)) { delete s.fotos[k]; continue; }
+    if (!ALLE_MOTIVE.includes(k) || !istObjekt(f)) { delete s.fotos[k]; continue; }
     const bild = typeof f.bild === 'string' && f.bild.startsWith('data:image/') && f.bild.length < 60000 ? f.bild : null;
     s.fotos[k] = { tag: Number.isInteger(f.tag) ? f.tag : null, ...(bild ? { bild } : {}) };
   }
-  s.neu = [...new Set(s.neu.filter((a) => MOTIVE.includes(a)))];
+  s.neu = [...new Set(s.neu.filter((a) => ALLE_MOTIVE.includes(a)))];
   s.tiere.liste = s.tiere.liste.filter((t) => istObjekt(t) && TIER_TEXTE[t.art] && Number.isFinite(t.at) && Number.isFinite(t.dauer));
   if (s.heute && (!SCHIFF_TEXTE[s.heute.art] || !Number.isInteger(s.heute.tag))) s.heute = null;
   return s;
@@ -326,6 +326,17 @@ export function sehen(state, s, art) {
   return true;
 }
 
+/** Hafentier (P51) gesehen: höchstens einmal je Tag zählen. Gibt true zurück, wenn es zum ersten Mal ist. */
+export function hafentierGesehen(state, art) {
+  if (!HAFENTIERE.includes(art)) return false;
+  const s = besState(state);
+  const g = s.gesehen[art];
+  if (g && g.zuletzt === state.day) return false;
+  const neu = sehen(state, s, art);
+  s.gesehen[art].zuletzt = state.day;
+  return neu;
+}
+
 /** Tier gesehen (einmal je Tag zählen). */
 export function tierGesehen(state, art) {
   const s = besState(state);
@@ -338,7 +349,7 @@ export function tierGesehen(state, art) {
 /** Foto ins Logbuch. bild: kleines JPEG als data-URL (oder null). Gibt true zurück, wenn es das erste Foto ist. */
 export function fotoMerken(state, art, bild = null) {
   const s = besState(state);
-  if (!MOTIVE.includes(art)) return false;
+  if (!ALLE_MOTIVE.includes(art)) return false;
   if (!s.gesehen[art]) sehen(state, s, art);
   const erstes = !s.fotos[art];
   const ok = typeof bild === 'string' && bild.startsWith('data:image/') && bild.length < 60000;
@@ -379,5 +390,9 @@ export function fortschritt(state) {
     schiffeGesamt: schiffe.length,
     ehrenplatz: schiffe.filter((a) => s.gesehen[a]?.ehrenplatz).length,
     tierFotos: MOTIVE.filter((a) => istTier(a) && s.fotos[a]).length,
+    // Hafentiere (P51): eigene Zählung, das Fotoalbum bleibt bei den sechs seltenen Besuchern
+    hafentiere: HAFENTIERE.filter((a) => s.gesehen[a]).length,
+    hafentierFotos: HAFENTIERE.filter((a) => s.fotos[a]).length,
+    hafentiereGesamt: HAFENTIERE.length,
   };
 }

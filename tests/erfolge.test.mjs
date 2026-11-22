@@ -39,7 +39,7 @@ function partie(seed) {
 // Endlosspiel nach dem Abschluss; sie werden unten einzeln geprüft.
 // Seltene Besucher (P40) kommen aus features/besucher.js (Hooks und Fotomodus), eigener Test in tests/besucher.test.mjs.
 const NICHT_IN_PARTIE = ['tagesziele', 'wochenziel', 'stammgast', 'stammgaeste', 'sturm', 'gesamt-2', 'region', 'fuenf-anker',
-  'hoher-besuch', 'seltene-schiffe', 'tierfreund', 'fotoalbum'];
+  'hoher-besuch', 'seltene-schiffe', 'tierfreund', 'fotoalbum', 'hafenfreunde'];
 
 test('Liste: eindeutige ids, gültige Gruppen und Dinge, Schilder für Stufe 2 bis 6', () => {
   const ids = E.ERFOLGE.map((e) => e.id);
