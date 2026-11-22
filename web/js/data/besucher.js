@@ -74,8 +74,36 @@ export const TIER_TEXTE = {
   },
 };
 
-/** Reihenfolge im Logbuch: erst die Schiffe nach Stufe, dann die Tiere. */
+// Hafentiere (Paket P51, Roadmap F38, docs/hafentiere.md): wohnen im Hafen und sind jeden Tag da,
+// man muss sie nur finden (heranzoomen). Grafik und Verhalten: render/hafentiere.js.
+//   stufe   ab welcher Ausbaustufe es da ist
+export const HAFENTIER_TEXTE = {
+  katze: {
+    titel: 'Hafenkatze', artikel: 'die', stufe: 1,
+    kommt: 'Wohnt am Hafenbüro, schaut morgens bei den Booten vorbei und schläft mittags in der Sonne. Nachts leuchten ihre Augen.',
+    chronik: 'Im Hafen entdeckt: die Hafenkatze. Sie wohnt am Hafenbüro.',
+    hinweis: 'Wohnt am Hafenbüro. Heranzoomen, sie ist klein.',
+  },
+  hund: {
+    titel: 'Hafenhund', artikel: 'der', stufe: 2,
+    kommt: 'Begrüßt jedes Boot, das festmacht, und geht abends mit dem Hafenmeister über die Stege.',
+    chronik: 'Im Hafen entdeckt: der Hafenhund. Er begrüßt jedes Boot.',
+    hinweis: 'Ab Stufe 2. Ist dort, wo gerade ein Boot festmacht.',
+  },
+  reiher: {
+    titel: 'Graureiher', artikel: 'der', stufe: 1,
+    kommt: 'Steht reglos im flachen Wasser am Ufer und fischt. Kommt ein Boot zu nah, fliegt er auf.',
+    chronik: 'Im Hafen entdeckt: ein Graureiher, er fischt am Ufer.',
+    hinweis: 'Tagsüber im flachen Wasser am Ufer. Fliegt auf, wenn Boote zu nah kommen.',
+  },
+};
+export const HAFENTIERE = Object.keys(HAFENTIER_TEXTE);
+
+/** Reihenfolge im Logbuch: erst die Schiffe nach Stufe, dann die Tiere. Nur seltene Besucher (Fotoalbum). */
 export const MOTIVE = ['weltumsegler', 'museumsschiff', 'forschungsschiff', 'koenigsyacht', 'schwaene', 'schweinswal'];
+/** Alle Fotomotive mit Eintrag im Spielstand (seltene Besucher und Hafentiere). */
+export const ALLE_MOTIVE = [...MOTIVE, ...HAFENTIERE];
 
 export const istTier = (art) => art in TIER_TEXTE;
-export const texteVon = (art) => SCHIFF_TEXTE[art] ?? TIER_TEXTE[art] ?? null;
+export const istHafentier = (art) => art in HAFENTIER_TEXTE;
+export const texteVon = (art) => SCHIFF_TEXTE[art] ?? TIER_TEXTE[art] ?? HAFENTIER_TEXTE[art] ?? null;

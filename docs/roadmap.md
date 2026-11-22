@@ -292,7 +292,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 |---|---|---|---|
 | F36 | Hafenchronik: jeder Tag eine Zeile | erledigt | P21 |
 | F37 | Gästepost von Stammgästen, hängt im Hafenbüro | erledigt: Ankündigung und Empfehlung, Pinnwand im Gästebuch | P25 |
-| F38 | Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten | offen | P51 |
+| F38 | Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten | erledigt ([hafentiere.md](hafentiere.md)): wohnen im Hafen, Tagesablauf, Antippen, Foto ins Logbuch, Erfolg Hafenfreunde | P51 |
 
 ### Welt
 
@@ -726,7 +726,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P48 | Leinen annehmen beim Anlegen | F32 | erledigt (Thread "Leinen beim Anlegen annehmen lassen", [leinen.md](leinen.md)) |
 | P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | neu |
 | P50 | Einstellungen für Sicht und Bewegung | F25 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
-| P51 | Hafentiere | F38 | bestehend: "Menschen im Hafen herumlaufen lassen" |
+| P51 | Hafentiere | F38 | erledigt (docs/hafentiere.md) |
 | P52 | Naturecke am Schilf | F39 | bestehend: "Landschaft und Wasser gestalten" |
 | P53 | Spätankömmling in der Nacht | F40 | neu |
 
