@@ -74,6 +74,10 @@ export const PIXEL = {
   welle: ['............', '......pp....', '....kpWWp...', '...kWWWWWk..', '..kWWkkkWWk.', '.kWWk...kWk.', '.kWk.....k..', 'kWWk........', 'kWWWkk..kkk.', '.kWWWWkkWWWk', '..kkkkkkkkk.', '............'],
   windschutz: ['............', '..kkkkkkkk..', '.kWWWWWWWWk.', '.kWWWWWWWpk.', '.kWWWWWWppk.', '.kWpWWWppWk.', '.kWppWppWWk.', '..kWpppWWk..', '..kWWpWWWk..', '...kWWWWk...', '....kWWk....', '.....kk.....'],
   schiff: ['............', '......RR....', '......RR....', '...kkkkkkk..', '...kpBpBpk..', '.kkkkkkkkkk.', '.kpBpBpBpBk.', 'kkkkkkkkkkkk', 'kBBBBBBBBBBk', '.kBBBBBBBBk.', '..kkkkkkkk..', 'WW.WWW.WWW.W'],
+  // Preisstufe (P35): Münzstapel für günstig, normal, gehoben
+  preis1: ['............', '............', '............', '............', '............', '............', '............', '............', '..oooooooo..', '.ohhgggggho.', '.oddddddddo.', '..oooooooo..'],
+  preis2: ['............', '............', '............', '............', '............', '..oooooooo..', '.ohhgggggho.', '.oddddddddo.', '..oooooooo..', '.ohhgggggho.', '.oddddddddo.', '..oooooooo..'],
+  preis3: ['............', '............', '..oooooooo..', '.ohhgggggho.', '.oddddddddo.', '..oooooooo..', '.ohhgggggho.', '.oddddddddo.', '..oooooooo..', '.ohhgggggho.', '.oddddddddo.', '..oooooooo..'],
 };
 
 // Raster -> SVG-Text. '#' wird schwarz (für Masken), Buchstaben bekommen ihre Farbe.

@@ -114,6 +114,32 @@ Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab 
 | Ankunft | 0,35 bis 0,75 des Tages, im Konvoi alle 2,5 s |
 | Bewertung je Crew | alle an einem Steg +0,5 Anker, aufgeteilt −0,5 Anker |
 
+## Preisstufe
+
+Am Hafenbüro ab Hafenbüro-Stufe 1, eine Wahl je Saison (im Winter für die kommende) und nach jedem Ausbau, Start: normal.
+
+| Stufe | Liegegeld | Ankünfte | Klassen | Anker | Anspruch |
+|---|---|---|---|---|---|
+| guenstig | −10 % | +20 % | S +15 % | +0,25 | Nachsicht bis +0,5 Anker, wenn kein Wunsch erfüllt |
+| normal | - | - | - | - | - |
+| gehoben | +30 % | −15 % | S −20 %, L +20 % | −0,25 | bis −1 Anker, wenn kein Wunsch erfüllt |
+
+## Seltene Besucher
+
+| Was | Wert |
+|---|---|
+| Tage mit Besuch | Stufe 1: 0 %, Stufe 2: 10 %, Stufe 3: 12 %, Stufe 4: 12 %, Stufe 5: 12 %, Stufe 6: 12 %; mindestens 3 Tage Abstand, nie am ersten Tag, nie im Winter |
+| Noch nie gesehen | 4-faches Gewicht bei der Wahl |
+| Ankunft | 0,3 bis 0,7 des Tages |
+| weltumsegler | ab Stufe 2, 3 Nächte, Gewicht 1, Wünsche ehrenplatz, wasser, dusche, waesche |
+| museumsschiff | ab Stufe 3, 2 Nächte, Gewicht 1, Wünsche ehrenplatz, wasser, 12 Tagesgäste |
+| forschungsschiff | ab Stufe 4, 2 Nächte, Gewicht 1, Wünsche ehrenplatz, strom, wlan |
+| koenigsyacht | ab Stufe 5, 1 Nacht, Gewicht 0,7, Wünsche ehrenplatz, strom, wasser, essen |
+| Schaulustige am Ehrenplatz | je Abend Stufe 1: 0 €, Stufe 2: 30 €, Stufe 3: 60 €, Stufe 4: 110 €, Stufe 5: 180 €, Stufe 6: 260 €; koenigsyacht ×2, museumsschiff ×1,5; 10 Leute |
+| schwaene | ab Stufe 1, an 15 % der Tage, Saisontag 2 bis 13, 0,1 bis 0,55 des Tages, 160 s im Bild |
+| schweinswal | ab Stufe 3, an 12 % der Tage, Saisontag 1 bis 16, 0,1 bis 0,6 des Tages, 100 s im Bild |
+| Foto | Motiv mindestens 6 % der kürzeren Bildseite, 8 % Rand frei |
+
 ## Services
 
 | Service | Stufe | Name | ab Hafenstufe | Kosten | Mindestruf | Wirkung |

@@ -55,6 +55,7 @@ const MODULES = [
   './features/wetterflagge.js',
   './features/wind.js',                // P34: Wind im Hafen, Windlage der Plätze, Anlegen gegen den Wind
   './features/hafenfest.js',           // P38: eigenes Hafenfest einmal je Saison (docs/hafenfest.md)
+  './features/preisstufe.js',          // P35: Preisstufe am Hafenbüro, einmal je Saison (docs/preisstufe.md)
   './features/jugendtraining.js',      // P39: Jugendtraining am Segelclub (docs/jugendtraining.md)
   './features/hafen-schauen.js',
   './features/einstieg.js',
@@ -67,6 +68,7 @@ const MODULES = [
   './ui/logbuch.js',                   // Logbuch und Hafenchronik (P21)
   './features/erfolge.js',             // Erfolge, Reiter im Logbuch, Dinge im Hafen (P22)
   './ui/funk-anmeldung.js',            // Anmeldung per Funk, Box freihalten (P28)
+  './features/besucher.js',            // Seltene Besucher, Ehrenplatz, Fotomotive (P40)
   './ui/statistik.js',                 // Statistik der letzten 30 Tage, Saisons (P41)
   './ui/oberflaeche.js',
 ];

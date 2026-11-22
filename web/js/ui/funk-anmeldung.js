@@ -86,7 +86,8 @@ export async function init(game) {
   let aktuell = null;             // { id, art: 'frage' | 'bestaetigt', auswahl: Index in freihaltbar, sichtbar: s }
   let gewuenscht = false;
 
-  const angemeldet = () => (sim.anmeldungFrei() ? sim.angemeldet() : []);
+  // Seltene Besucher (P40) melden sich mit eigener Meldung an (features/besucher.js)
+  const angemeldet = () => (sim.anmeldungFrei() ? sim.angemeldet().filter((b) => !b.besucher) : []);
   const boot = (id) => angemeldet().find((b) => b.id === id) ?? null;
   const winter = () => !!sim.season()?.winter;
 

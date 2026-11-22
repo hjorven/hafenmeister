@@ -596,6 +596,7 @@ export function init(game) {
     game.sim.addHook('arrivals', ({ state, ctx, list }) => {
       const wetter = wetterVon(state.day);
       for (const boat of list ?? []) {
+        if (boat.besucher) continue;   // seltener Besuch (P40) bleibt so lange, wie er geplant ist
         const typ = ctx?.typeById?.[boat.typeId];
         const b = { id: boat.id, klasse: boat.size, antrieb: boat.motor ? 'motor' : typ?.sail ? 'segel' : 'ruder',
           nights: boat.nights, special: boat.special, stationed: boat.stationed };

@@ -169,6 +169,10 @@ Ein Tag dauert seit PR 319 rund 5 statt 2 Minuten, es kommen 2,5-mal so viele Bo
 | Endlosspiel | Gästeziel 450 (+30, höchstens 650), Belohnung 2.300 / 4.500 €, mindestens 4 Resttage | 16-Tage-Saison, Kosten x0,45 |
 | Gästeziele der Stufen | unverändert 20 / 90 / 360 / 560 / 840 (seit 20.11.: 20 / 90 / 340 / 530 / 740, siehe Bauabschnitte unten) | Die Stufen dauern jetzt etwa so lange wie geplant; mehr Gäste am Tag gleichen die kürzere Stufe aus |
 
+## Preisstufe (P35, 22.11.2026)
+
+Seit P35 wählen die Spielertypen zeitraffer und geschickt die Preisstufe nach der Faustregel (`klugeWahl`, [preisstufe.md](preisstufe.md)), gemütlich lässt sie auf normal. Median 30 Läufe: zeitraffer 108 (vorher 110), geschickt 104 (105), gemütlich 128 (128). `node tools/balance.mjs --preis normal` rechnet wie vor P35.
+
 ## Rechnung und Spiel
 
 Seit P17 wird die Rechnung regelmäßig mit dem echten Spiel im Browser verglichen. Der Bot im Zeitraffer (`tools/zeitraffer/lauf.cjs`) misst dabei je Stufe, wie lange Boote zur Boje fahren, an der Boje warten und beim Ablegen ihre Box halten (Feld `messung` in `ergebnis-<gerät>.json`, Spielsekunden am Tag). `tools/balance.mjs` übernimmt das in `ANSICHT`:

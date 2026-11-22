@@ -37,6 +37,8 @@ export const GRUND = {
   // Wind (P34): bei Starkwind an einem offenen Platz, großes Boot mit Wind von achtern angelegt
   unruhig:    { text: 'unruhig im Wind gelegen',    lang: 'Starkwind stand voll auf dem offenen Platz', sym: 'sturm' },
   rueckenwind: { text: 'Anleger mit Rückenwind',    lang: 'Bei Starkwind mit Wind von achtern angelegt', sym: 'sturm' },
+  // Preisstufe (P35): gehobene Preise, aber nicht alles da
+  teuer:      { text: 'zu teuer für das Gebotene',  lang: 'Hohe Preise, aber nicht alles da',          sym: 'teuer' },
   warten:     { text: 'zu lange gewartet',          lang: 'Zu lange an der Boje gewartet',             sym: 'warten' },
   abends:     { text: 'abends kein Platz',          lang: 'Abends noch immer ohne Liegeplatz',         sym: 'warten' },
   weggeschickt: { text: 'weggeschickt',            lang: 'Vom Hafenmeister weggeschickt',             sym: 'warten' },
@@ -60,6 +62,7 @@ export const PLUS = {
   bonus:    'Fest im Hafen',
   windgeschuetzt: 'ruhig gelegen trotz Starkwind',
   stammPlatz: 'wieder am Lieblingsplatz',
+  preis:    'faire Preise',
   jugend:   'Jugendtraining zugesehen',
 };
 
@@ -103,6 +106,9 @@ export function gruendeAusAbreise(e) {
     if (p.bonus > 0.001) plus.push({ key: 'bonus', wert: r2(p.bonus) });
     if (p.windLage === 'geschuetzt' && RULES.wind?.sheltered) plus.push({ key: 'windgeschuetzt', wert: r2(RULES.wind.sheltered) });
     if (p.stammPlatz > 0.001) plus.push({ key: 'stammPlatz', wert: r2(p.stammPlatz) });   // P25
+    // Preisstufe (P35): günstig lobt, gehoben zieht ab (mehr, wenn Wünsche fehlten)
+    if (p.preis > 0.001) plus.push({ key: 'preis', wert: r2(p.preis) });
+    else if (p.preis < -0.001) gruende.push({ key: 'teuer', n: r2(-p.preis) });
     if (p.jugend > 0.001) plus.push({ key: 'jugend', wert: r2(p.jugend) });   // P39
   }
   if (e.reason === 'rebuild') gruende.push({ key: 'umbau', n: 1 });
@@ -244,6 +250,8 @@ const SATZ = {
   'weit:wc': ['Bis zum Klo war es ein halber Landgang.', 'Nachts so weit zum WC laufen, nein danke.'],
   'weit:dusche': ['Nach der Dusche waren wir auf dem Rückweg schon wieder verschwitzt.', 'Die Dusche war am anderen Ende des Hafens.'],
   stamm: (n) => `Schon unser ${n}. Besuch hier.`,
+  teuer: ['Für das Geld hätten wir mehr erwartet.', 'Stolze Preise für das, was geboten wird.', 'Teuer ist es hier, und dann fehlt auch noch was.'],
+  preis: ['Faire Preise, gerne wieder.', 'Günstig und nett, was will man mehr.', 'Für das Liegegeld bekommt man hier viel.'],
   stammPlatz: ['Und wieder an unserem alten Platz!', 'Unsere Box war frei, wie schön.', 'Der Hafenmeister kennt unseren Platz.'],
 };
 for (const [k, t] of Object.entries({ ...VERSORGUNG_TEXTE, ...ANGEBOT_TEXTE })) if (t.saetze) SATZ[k] ??= t.saetze;
@@ -258,6 +266,7 @@ export function satz(eintrag) {
   else if (eintrag.note >= 4.5) text = wahl(SATZ.sehrGut, eintrag);
   else if (eintrag.plus?.some((p) => p.key === 'komfort') && eintrag.note >= 4) text = wahl(SATZ.komfort, eintrag);
   else if (eintrag.plus?.some((p) => p.key === 'windgeschuetzt') && eintrag.note >= 4) text = wahl(SATZ.windgeschuetzt, eintrag);
+  else if (eintrag.plus?.some((p) => p.key === 'preis') && eintrag.note >= 4) text = wahl(SATZ.preis, eintrag);
   else if (eintrag.note >= 4) text = wahl(SATZ.gut, eintrag);
   else if (eintrag.gruende[0] && SATZ[eintrag.gruende[0].key]) text = wahl(SATZ[eintrag.gruende[0].key], eintrag);
   else text = wahl(SATZ.mittel, eintrag);
@@ -281,7 +290,7 @@ export function erklaerung(eintrag) {
     const def = GRUND[g.key];
     if (!def) continue;
     if (WUNSCH_KEYS.includes(g.key) || g.key.startsWith('weit:')) teile.push(g.n > 1 ? `${def.text} (${g.n} Nächte)` : def.text);
-    else if (['sturm', 'stimmung', 'umgelegt', 'unruhig', 'rueckenwind'].includes(g.key)) teile.push(`${def.text} −${komma(g.n)}`);
+    else if (['sturm', 'stimmung', 'umgelegt', 'unruhig', 'rueckenwind', 'teuer'].includes(g.key)) teile.push(`${def.text} −${komma(g.n)}`);
     else teile.push(def.text);
   }
   for (const p of eintrag.plus || []) teile.push(p.wert ? `${PLUS[p.key]} +${komma(p.wert)}` : PLUS[p.key]);

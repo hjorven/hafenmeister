@@ -995,7 +995,8 @@ function announce(state, ctx, events) {
   if (!announcementsOpen(state, ctx)) return;
   const f = ctx.rules.funk;
   const ab = (f.leadShare ?? 0) * ctx.rules.dayLength;
-  const pool = state.upcoming.filter((b) => !b.stationed && !b.flotte && b.arriveAt >= ab);
+  // Schon angemeldete Boote (seltener Besuch, P40) zählen nicht mit
+  const pool = state.upcoming.filter((b) => !b.stationed && !b.flotte && !b.funk && b.arriveAt >= ab);
   // Eine Flottille (P32) meldet sich immer an, als Gruppe
   announceFlotilla(state, ctx, events);
   if (!pool.length) return;
@@ -2776,6 +2777,18 @@ export function windRating(ctx, boat) {
   return n;
 }
 
+/**
+ * Preisstufe (P35, features/preisstufe-regeln.js setzt boat.preisstufe bei der Ankunft): faire Preise loben
+ * die Gäste (rating), wer viel zahlt, erwartet viel (demand mal Anteil der unerfüllten Wünsche).
+ */
+export function priceRating(ctx, boat) {
+  const l = ctx.rules.priceLevels?.levels?.[boat?.preisstufe];
+  if (!l) return 0;
+  let n = l.rating || 0;
+  if (l.demand && boat.wishesTotal > 0) n -= l.demand * Math.max(0, 1 - (boat.wishesMet || 0) / boat.wishesTotal);
+  return Math.round(n * 100) / 100;
+}
+
 export function ratingParts(ctx, boat, ratingBonus = 0) {
   const r = ctx.rules;
   const lo = r.rating.noneMet ?? r.rating.min;
@@ -2800,11 +2813,13 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   const stammPlatz = boat.lieblingsplatz != null && boat.berthId === boat.lieblingsplatz ? r.regular?.favouriteBonus ?? 0 : 0;
   const wind = windRating(ctx, boat);                         // Windlage bei Starkwind (P34)
   const jugend = boat.jugend ? r.youth?.rating ?? 0 : 0;      // dem Jugendtraining zugesehen (P39)
-  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + jugend + ratingBonus - penalty - moved - raft + wind;
+  const preis = priceRating(ctx, boat);                       // Preisstufe (P35)
+  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + jugend + ratingBonus - penalty - moved - raft + wind + preis;
   const value = Math.round(Math.min(r.rating.max, Math.max(r.rating.min, raw)) * 10) / 10;
   return {
     value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, jugend, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
     wind, windLage: boat.windLage ?? null, windRuecken: !!boat.windRuecken,
+    preis, preisstufe: boat.preisstufe ?? null,
     wishes: [...(boat.wishes || [])], wishesMet: boat.wishesMet || 0, wishesTotal: boat.wishesTotal || 0, missed: { ...(boat.missed || {}) },
     far: { ...(boat.far || {}) },
   };
