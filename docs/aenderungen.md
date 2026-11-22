@@ -6,6 +6,9 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 22.11.2026
 
+- Signalflaggen: Gäste setzen für jeden Wunsch eine echte Signalflagge an Steuerbord (W für WC, D für Dusche, S für Strom ...). In der Box wehen nur noch die Wünsche, die fehlen; baust du das Passende, holt die Crew die Flagge ein. Vor dem Auslaufen weht der Blaue Peter, nach Sonnenuntergang kommen alle Flaggen herunter. In der Bootskarte steht die Flagge neben jedem Wunsch.
+- Positionslichter: Boote, die abends oder nachts fahren, zeigen Rot an Backbord, Grün an Steuerbord und Weiß am Heck.
+- Hafenwissen: Neuer Reiter „Wissen“ im Logbuch mit allen Signalflaggen, Seezeichen, Feuern und Lichtern und Knoten. Gesammelt wird, was im eigenen Hafen vorkommt (zum Beispiel der Palstek an der Muringboje oder der Rundtörn beim Einschleppen), mit Meldung und Zeile in der Chronik.
 - Ruhiger Abend: An allen Stegen hängen jetzt Lichterketten. Ist abends alles kassiert und wartet kein Boot mehr, für das eine Box frei wäre, gehen sie an, vom Land nach außen Birne für Birne, drei leise Glockentöne klingen und die Musik wird wärmer. Die Lichter brennen bis zum Morgen.
 - Serien-Akkord: Ziehst du drei Boote hintereinander passgenau in ihre Box, klingt erst ein Ton, dann ein zweiter und beim dritten ein ganzer Akkord, passend zur Musik. Über der Box steigen goldene Noten auf. Es gibt keine Zeitgrenze; eine Box, die nicht passgenau ist, fängt die Serie leise neu an.
 - Neue Klänge, wenn ein Gast zum Stammgast wird und wenn das Ziel der Ausbaustufe erreicht ist.

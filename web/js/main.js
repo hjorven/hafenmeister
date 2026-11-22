@@ -73,6 +73,8 @@ const MODULES = [
   './features/besucher.js',            // Seltene Besucher, Ehrenplatz, Fotomotive (P40)
   './features/havarie.js',             // P37: Havarist einschleppen (Bild und Meldung lädt das Modul selbst)
   './features/stimmung.js',            // P46: ruhiger Abend mit Lichterketten, Serien-Akkord (docs/stimmung.md)
+  './render/signalflaggen.js',         // P49: Signalflaggen als Wunschanzeige, Positionslichter (docs/signalflaggen.md)
+  './features/hafenwissen.js',         // P49: Hafenwissen sammeln, Lexikon im Logbuch (docs/signalflaggen.md)
   './ui/statistik.js',                 // Statistik der letzten 30 Tage, Saisons (P41)
   './ui/oberflaeche.js',
 ];
