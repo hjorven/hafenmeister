@@ -48,13 +48,13 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 **Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
 
 <table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P35"><img src="web/roadmap/bilder/p35-pr413-pc-tafel.jpg" alt="Preistafel am Hafenbüro" width="100%"></a><br><sub>P35 · Preistafel am Hafenbüro · PR 413</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P40"><img src="web/roadmap/bilder/p40-pr416-pc-koenigsyacht.jpg" alt="Königsyacht meldet sich per Funk, Ehrenplatz freihalten" width="100%"></a><br><sub>P40 · Königsyacht meldet sich per Funk, Ehrenplatz freihalten · PR 416</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P32"><img src="web/roadmap/bilder/p32-pr414-pc-einfahrt.jpg" alt="Flottille fährt geschlossen ein und legt nebeneinander an" width="100%"></a><br><sub>P32 · Flottille fährt geschlossen ein und legt nebeneinander an · PR 414</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P39"><img src="web/roadmap/bilder/p39-pr412-pc-kurs.jpg" alt="Jugendtraining: Optis segeln ihren Kurs vor dem Hafen" width="100%"></a><br><sub>P39 · Jugendtraining: Optis segeln ihren Kurs vor dem Hafen · PR 412</sub></td>
 </tr><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P39"><img src="web/roadmap/bilder/p39-pr412-pc-kurs.jpg" alt="Jugendtraining: Optis segeln ihren Kurs vor dem Hafen" width="100%"></a><br><sub>P39 · Jugendtraining: Optis segeln ihren Kurs vor dem Hafen · PR 412</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P38"><img src="web/roadmap/bilder/p38-pr405-pc-festtag.jpg" alt="Festtag am Hafen: Bühne, Marktstände und Wimpel" width="100%"></a><br><sub>P38 · Festtag am Hafen: Bühne, Marktstände und Wimpel · PR 405</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P25"><img src="web/roadmap/bilder/p25-pr394-pc-stammgast.jpg" alt="Stammgast meldet sich an und wünscht seinen alten Platz" width="100%"></a><br><sub>P25 · Stammgast meldet sich an und wünscht seinen alten Platz · PR 394</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P32"><img src="web/roadmap/bilder/p32-pr393-pc-zusammen.jpg" alt="Flottille wird gemeinsam an einen Steg zugewiesen" width="100%"></a><br><sub>P32 · Flottille wird gemeinsam an einen Steg zugewiesen · PR 393</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (6 von 6 erledigt)</summary>
@@ -128,7 +128,7 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 | [P32](https://hjorven.github.io/hafenmeister/roadmap/#paket=P32) | Flottillen | **erledigt** | [#393](https://github.com/hjorven/hafenmeister/pull/393) [#414](https://github.com/hjorven/hafenmeister/pull/414) |
 | [P33](https://hjorven.github.io/hafenmeister/roadmap/#paket=P33) | Liegende Boote umlegen | **erledigt** | [#314](https://github.com/hjorven/hafenmeister/pull/314) |
 | [P34](https://hjorven.github.io/hafenmeister/roadmap/#paket=P34) | Wind im Hafen spürbar machen | **erledigt** | [#392](https://github.com/hjorven/hafenmeister/pull/392) |
-| [P35](https://hjorven.github.io/hafenmeister/roadmap/#paket=P35) | Preisstufe am Hafenbüro | **erledigt** |  |
+| [P35](https://hjorven.github.io/hafenmeister/roadmap/#paket=P35) | Preisstufe am Hafenbüro | **erledigt** | [#413](https://github.com/hjorven/hafenmeister/pull/413) |
 | [P36](https://hjorven.github.io/hafenmeister/roadmap/#paket=P36) | Bojenfeld im See | offen |  |
 | [P37](https://hjorven.github.io/hafenmeister/roadmap/#paket=P37) | Havarist einschleppen | offen |  |
 | [P38](https://hjorven.github.io/hafenmeister/roadmap/#paket=P38) | Eigenes Hafenfest ansetzen | **erledigt** | [#405](https://github.com/hjorven/hafenmeister/pull/405) |
