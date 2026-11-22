@@ -42,12 +42,12 @@ test('Sonnenuntergang: Auftrag, goldener Knopf im Fotomodus, Postkarte mit Honor
     const k = await page.locator(sel).boundingBox().catch(() => null);
     if (k && kasten) expect(ueberlappt(kasten, k), `Meldung über ${sel}`).toBe(false);
   }
-  // Erst ein paar Boote sichtbar festmachen lassen (8x), dann Abend: gezählt wird, was im Bild liegt
-  await page.evaluate(() => window.hafenmeister.oberflaeche?.tempo?.(8));
-  await expect.poll(() => page.evaluate(() => window.hafenmeister.boatView.boote.filter((b) => b.anim.moored && b.anim.berth?.kind !== 'buoy').length),
-    { timeout: 60_000 }).toBeGreaterThanOrEqual(4);
-  await page.evaluate(() => window.hafenmeister.oberflaeche?.tempo?.(1));
+  // Abend vorspulen; die Boote, die in den Regeln schon liegen, sofort an ihre Plätze legen wie beim Laden
+  // (vorgespult fahren sie sonst noch, und auf langsamen CI-Rechnern dauert das Hinfahren Minuten)
   await uhr(page, 19.3);
+  await page.evaluate(() => window.hafenmeister.emit('sim:change', { reason: 'load' }));
+  await expect.poll(() => page.evaluate(() => window.hafenmeister.boatView.boote.filter((b) => b.anim.moored && b.anim.berth?.kind !== 'buoy').length),
+    { timeout: 15_000 }).toBeGreaterThanOrEqual(4);
   await page.locator('#btn-pause').click();
   await page.evaluate(() => window.hafenmeister.foto.an());
   const knopf = page.locator('.hm-fa-foto');
