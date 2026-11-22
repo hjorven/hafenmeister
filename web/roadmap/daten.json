@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "70f3af0"
+  "commit": "a52a85a"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -859,15 +859,20 @@
    "id": "P36",
    "titel": "Bojenfeld im See",
    "inhalt": "F10",
-   "thread": "neu",
+   "thread": "erledigt (PR 421, bojenfeld.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    421
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F10"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    96,
+    97
+   ]
   },
   {
    "id": "P37",
@@ -2120,8 +2125,8 @@
   {
    "code": "F10",
    "text": "Bojenfeld: billige Muringbojen im See für kleine Boote ohne Wünsche",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P36, bojenfeld.md): 6 Bojen ab Stufe 2, 6 weitere ab Stufe 4, Lage je Küste im tiefen Wasser, Boote S und M bis 9 m, 60 % Liegegeld, ohne Strom und Wasser, letzte Wahl für Büro und Selbst-Einfahren, kein Dauerplatz",
    "pakete": [
     "P36"
    ],
@@ -4604,11 +4609,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 17,
+    "erledigt": 18,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 3,
+    "offen": 2,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4692,20 +4697,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 52,
+  "erledigt": 53,
   "teilweise": 2,
   "arbeit": 0,
   "frage": 0,
-  "offen": 32,
+  "offen": 31,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 180,
+  "erledigt": 181,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 31,
+  "offen": 30,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5861,9 +5866,34 @@
    "datum": "2026-11-22",
    "quelle": "preisstufe/pc-4-tafel.png",
    "nr": 95
+  },
+  {
+   "datei": "p36-pr421-pc-bojenfeld.jpg",
+   "pakete": [
+    "P36"
+   ],
+   "titel": "Bojenfeld im See mit Booten an Muringbojen",
+   "pr": 421,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "bojenfeld/pc-bojenfeld-stufe4.png",
+   "nr": 96
+  },
+  {
+   "datei": "p36-pr421-pc-boje-ziehen.jpg",
+   "pakete": [
+    "P36"
+   ],
+   "titel": "Boot auf eine Muringboje ziehen",
+   "pr": 421,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "bojenfeld/pc-boot-auf-boje-ziehen.png",
+   "nr": 97
   }
  ],
  "neueBilder": [
+  97,
   95,
   93,
   91,
@@ -5871,10 +5901,31 @@
   88,
   86,
   84,
-  82,
-  81
+  82
  ],
  "merges": [
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P36 Bojenfeld (PR 421) mit Bildern",
+   "pr": 422,
+   "pakete": [
+    "P36"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P36 Bojenfeld im See",
+   "pr": 421,
+   "pakete": [
+    "P36"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Schichttest: zwei Testfehler aus Serie 14 auf dem Tablet",
+   "pr": 419,
+   "pakete": []
+  },
   {
    "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: P35 Preisstufe (PR 413) mit Bildern",
@@ -5943,35 +5994,6 @@
    "pr": 409,
    "pakete": [
     "P38"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Arbeitsplan: P31, P38, P88 erledigt; Flottillen-Rest, P35, P37, P39 starten",
-   "pr": 410,
-   "pakete": [
-    "P31",
-    "P38",
-    "P88",
-    "P35",
-    "P37",
-    "P39"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P88 Teil 3: eigene Bahn je Richtung auch auf dem Seeweg",
-   "pr": 407,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P31 Neue Gästewünsche: Frischwasser, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt",
-   "pr": 406,
-   "pakete": [
-    "P31"
    ]
   }
  ]
