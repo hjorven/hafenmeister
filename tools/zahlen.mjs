@@ -147,6 +147,17 @@ export function tabellen() {
       ['Richtungen', `${Object.entries(w.richtungen).map(([r, a]) => `${r} ${Math.round(a * 100)} %`).join(', ')}; Wetterlage ${w.wetterlageTage} Tage, ±${w.streuung} Grad je Tag, Sturm aus ${w.sturmAus.join(', ')}`],
     ]), '');
   }
+  if (E.baggern) {
+    const b = E.baggern;
+    const nw = b.niedrigwasser;
+    t.push('## Baggern', '', tabelle(['Was', 'Wert'], [
+      ['ab Hafenstufe', b.abStufe],
+      ['Zieltiefe je Platzgröße', Object.entries(b.ziel).map(([g, m]) => `${g} ${zahl(m)} m`).join(', ')],
+      ['Platzarten', b.arten.join(', ')],
+      ['Kosten je Steg', `${euro(b.grund)} plus je flachem Platz und Meter Tiefe: ${Object.entries(b.jeMeter).map(([g, e]) => `${g} ${euro(e)}`).join(', ')}`],
+      ...(nw ? [['Niedrigwasser', `Stufe ${nw.abStufe} bis ${nw.bisStufe ?? 6}, Wind aus ${nw.richtungen.join(', ')} ab Stärke ${zahl(nw.ab)}: Pegel ${zahl(nw.tiefe[0])} bis ${zahl(nw.tiefe[1])} m tiefer; wer auf Grund sitzt −${zahl(nw.anker)} Anker`]] : []),
+    ]), '');
+  }
   if (E.flottillen) {
     const f = E.flottillen;
     t.push('## Flottillen', '', tabelle(['Was', 'Wert'], [

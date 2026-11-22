@@ -14,6 +14,7 @@
 
 import * as sim from '../sim.js';
 import { RULES } from '../data/rules.js';
+import { ECONOMY } from '../data/economy.js';
 import { ANGEBOT_TEXTE, VERSORGUNG_TEXTE } from '../data/wuensche-texte.js';
 
 export const GAESTEBUCH = {
@@ -37,6 +38,8 @@ export const GRUND = {
   // Wind (P34): bei Starkwind an einem offenen Platz, großes Boot mit Wind von achtern angelegt
   unruhig:    { text: 'unruhig im Wind gelegen',    lang: 'Starkwind stand voll auf dem offenen Platz', sym: 'sturm' },
   rueckenwind: { text: 'Anleger mit Rückenwind',    lang: 'Bei Starkwind mit Wind von achtern angelegt', sym: 'sturm' },
+  // Baggern (P29): bei Niedrigwasser mit dem Kiel im Schlick gelegen
+  schlick:    { text: 'bei Niedrigwasser im Schlick', lang: 'Bei Niedrigwasser saß der Kiel im Schlick', sym: 'sturm' },
   // Preisstufe (P35): gehobene Preise, aber nicht alles da
   teuer:      { text: 'zu teuer für das Gebotene',  lang: 'Hohe Preise, aber nicht alles da',          sym: 'teuer' },
   warten:     { text: 'zu lange gewartet',          lang: 'Zu lange an der Boje gewartet',             sym: 'warten' },
@@ -97,9 +100,12 @@ export function gruendeAusAbreise(e) {
     const wr = RULES.wind;
     if (p.windLage === 'offen' && wr?.exposed) gruende.push({ key: 'unruhig', n: r2(wr.exposed) });
     if (p.windRuecken && wr?.tailwind) gruende.push({ key: 'rueckenwind', n: r2(wr.tailwind) });
+    // Baggern (P29): der Abzug steckt über den Hook 'rating' in p.comfort
+    const schlick = p.aufGrund ? ECONOMY.baggern?.niedrigwasser?.anker ?? 0 : 0;
+    if (schlick) gruende.push({ key: 'schlick', n: r2(schlick) });
     if (p.wishesTotal > 0 && !missed.length && !Object.values(p.far || {}).some((n) => n > 0)) plus.push({ key: 'wuensche', wert: 0 });
     if (!p.wishes?.length) plus.push({ key: 'ohne', wert: 0 });
-    if (p.comfort > 0.001) plus.push({ key: 'komfort', wert: r2(p.comfort) });
+    if (p.comfort + schlick > 0.001) plus.push({ key: 'komfort', wert: r2(p.comfort + schlick) });
     if (p.special > 0.001) plus.push({ key: 'sonder', wert: r2(p.special) });
     if (p.snug > 0.001) plus.push({ key: 'passgenau', wert: r2(p.snug) });
     if (p.byHand > 0.001) plus.push({ key: 'vonHand', wert: r2(p.byHand) });
@@ -238,6 +244,7 @@ const SATZ = {
   umgelegt: ['Kaum fest, schon wieder Leinen los. Zweimal umgelegt!', 'Wir wurden hin und her geschickt wie ein Paket.'],
   unruhig: ['Der Wind stand voll auf unserem Platz, an Schlaf war nicht zu denken.', 'Die ganze Nacht Geschaukel und knarrende Leinen.', 'Draußen am Steg bei dem Wind: unruhig.'],
   rueckenwind: ['Anlegen mit dem Wind im Rücken, das war knapp.', 'Mit Rückenwind in die Box, da schwitzt der Skipper.'],
+  schlick: ['Bei dem Westwind saßen wir morgens im Schlick fest.', 'Das Wasser lief weg, und unser Kiel steckte im Modder.', 'Zu flach hier bei Niedrigwasser, das Boot lag schief.'],
   windgeschuetzt: ['Draußen pfiff es, wir lagen ganz ruhig.', 'Trotz Starkwind eine ruhige Nacht, toller Platz.'],
   warten: ['Ewig an der Boje gewartet, dann sind wir weiter.', 'Niemand hat uns einen Platz gegeben.'],
   abends: ['Abends immer noch kein Platz, wir sind weitergefahren.', 'Es wurde dunkel, und wir hingen noch an der Boje.'],
@@ -290,7 +297,7 @@ export function erklaerung(eintrag) {
     const def = GRUND[g.key];
     if (!def) continue;
     if (WUNSCH_KEYS.includes(g.key) || g.key.startsWith('weit:')) teile.push(g.n > 1 ? `${def.text} (${g.n} Nächte)` : def.text);
-    else if (['sturm', 'stimmung', 'umgelegt', 'unruhig', 'rueckenwind', 'teuer'].includes(g.key)) teile.push(`${def.text} −${komma(g.n)}`);
+    else if (['sturm', 'stimmung', 'umgelegt', 'unruhig', 'rueckenwind', 'schlick', 'teuer'].includes(g.key)) teile.push(`${def.text} −${komma(g.n)}`);
     else teile.push(def.text);
   }
   for (const p of eintrag.plus || []) teile.push(p.wert ? `${PLUS[p.key]} +${komma(p.wert)}` : PLUS[p.key]);
