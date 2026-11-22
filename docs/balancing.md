@@ -245,6 +245,7 @@ Stand `main` nach PR 160 (P06), nachgeprüft im Code. Die Pakete in der rechten 
 - Ereignisse kommen aus `events/scheduler.js` mit demselben Startwert wie das Spiel. Sturm kostet Ankünfte, Regatta und Hafenfest bringen mehr, das Wetter geht in die Services ein.
 - Der Bot kassiert immer alles sofort, auch ohne Hafenbüro.
 - Mit Hafenbüro-Automatik weist der Bot nur noch die Sonderfälle selbst zu (`sim.officeSpecialCase`).
+- Stammgäste und Gästepost (P25, `features/stammgaeste.js`, `features/gaestepost.js`) hängen wie im Spiel ein: Ruf doppelt, Lieblingsplatz, Freunde als zusätzliche Ankunft. Messung 21.11. (`--spieler zeitraffer`, 60 Läufe): vorher und nachher Median 105 Spieltage, also keine Verschiebung.
 - Das Abschlussziel von Stufe 6 prüft im Spiel `sim.regionGoal()` (Meldung `sim:regionDone`), im Werkzeug `tools/balance.mjs` mit denselben Zahlen.
 
 ## Was noch auffällt

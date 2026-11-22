@@ -36,6 +36,7 @@ export const VORRANG = {
   tipp: 45,            // features/einstieg.js, Tipps beim ersten Mal (kurz, gehen den Dauerplatz-Meldungen vor)
   dauer: 40,           // features/dauerlieger.js, andere Meldungen
   erfolg: 30,          // features/erfolge.js, neuer Erfolg (kurz)
+  post: 24,            // ui/gaestepost.js, Post von einem Stammgast an der Pinnwand (kurz)
   logbuch: 22,         // ui/logbuch.js, neues Bootsmodell im Logbuch (kurz)
   gaestebuch: 20,      // ui/gaestebuch.js, Bewertung eines Boots außerhalb des Bildes (kurz)
   bautipp: 10,         // ui/bauen.js, "Als Nächstes" (hält dieses Modul selbst, solange #bau-tipp nicht hidden ist)

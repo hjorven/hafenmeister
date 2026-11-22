@@ -5,7 +5,7 @@ import * as sim from '../web/js/sim.js';
 import { createState } from '../web/js/state.js';
 import { HAFEN } from '../web/js/data/harbor.js';
 import { BOAT_CATALOG } from '../web/js/data/boat-catalog.js';
-import { STAMM, haengeEin, stammState, stammZahl, beschreibung, nachtHook, namenNachtragen, freierName } from '../web/js/features/stammgaeste.js';
+import { STAMM, haengeEin, stammState, stammZahl, beschreibung, nachtHook, namenNachtragen, freierName, ankunftHook, wachsen, treuewimpel, hinweise, platzHook } from '../web/js/features/stammgaeste.js';
 import { BOOTSNAMEN } from '../web/js/data/bootsnamen.js';
 import * as dauer from '../web/js/features/dauerlieger.js';
 
@@ -124,7 +124,9 @@ test('zweimal unzufrieden: Stammgast kommt nicht mehr', () => {
 
 test('Beschreibung für die Karte', () => {
   assert.equal(beschreibung({ bootsname: 'Möwe', heimathafen: 'Kappeln', besuche: 1 }), '„Möwe“ aus Kappeln');
-  assert.equal(beschreibung({ bootsname: 'Möwe', heimathafen: 'Kappeln', besuche: 3 }), '„Möwe“ aus Kappeln · Stammgast, 3. Besuch');
+  assert.equal(beschreibung({ bootsname: 'Möwe', heimathafen: 'Kappeln', besuche: 3, stamm: true }), '„Möwe“ aus Kappeln · Stammgast, 3. Besuch');
+  // wiedergekommen, aber noch kein Stammgast (erst nach dem zweiten zufriedenen Besuch)
+  assert.equal(beschreibung({ bootsname: 'Möwe', heimathafen: 'Kappeln', besuche: 2 }), '„Möwe“ aus Kappeln · kommt wieder, 2. Besuch');
   assert.equal(beschreibung({}), '');
 });
 
@@ -198,4 +200,195 @@ test('freierName: zuletzt vergebene Namen kommen nicht gleich wieder, volle List
   const n = freierName(state, 0.5);
   assert.match(n, / II$/);
   assert.ok(!BOOTSNAMEN.includes(n));
+});
+
+// ------------------------------------------------------------------ P25: Stammgäste mit Wirkung
+
+/** Stammgast auf die Liste setzen und als nächstes Boot schicken (chance 1). */
+function stammKommt(state, ctx, eintrag) {
+  const s = stammState(state);
+  // Name, den kein Boot im Hafen trägt (sonst kommt der Stammgast heute nicht)
+  s.liste = [{ stammId: 1, bootsname: 'Probefahrt', heimathafen: 'Kiel', besuche: 2, zuletzt: 1, stamm: true, ...eintrag }];
+  const alt = STAMM.chance;
+  STAMM.chance = 1;
+  try { return sim.rollBoat(state, ctx); } finally { STAMM.chance = alt; }
+}
+
+function sBoot(ctx) {
+  const t = ctx.types.find((x) => x.size === 'S' && !x.special && x.models?.length);
+  const m = t.models[0];
+  return { typeId: t.id, modelId: m.id, name: m.name, size: 'S', kind: t.kind, motor: t.motor, length: m.length, beam: m.beam, draft: m.draft, wishes: [] };
+}
+
+test('C8: echte Stammgäste zählen beim Ruf doppelt, Wiederkehrer ohne Stammstatus einfach', () => {
+  const { ctx, state } = neu(5);
+  state.ratings = [];
+  state.ratingDays = [];
+  const b = stammKommt(state, ctx, sBoot(ctx));
+  assert.equal(b.stamm, true);
+  assert.equal(b.stammId, 1);
+  // Gewicht unmittelbar prüfen: ein Gast mit stamm zählt rufGewicht-mal
+  const r0 = state.ratings.length;
+  const gast = { id: 99, stamm: true, wishes: [], wishesMet: 0, wishesTotal: 0, berthId: null, status: 'waiting', size: 'S', length: 3, beam: 1.2, draft: 0.3 };
+  state.boats[99] = gast;
+  state.queue.push(99);
+  const altChance = ctx.rules.turnAway.chance;
+  ctx.rules.turnAway.chance = 1;
+  sim.dismiss(state, ctx, 99);
+  ctx.rules.turnAway.chance = altChance;
+  assert.equal(state.ratings.length - r0, STAMM.rufGewicht);
+  const r1 = state.ratings.length;
+  const fremd = { ...gast, id: 98, stamm: undefined };
+  state.boats[98] = fremd;
+  state.queue.push(98);
+  ctx.rules.turnAway.chance = 1;
+  sim.dismiss(state, ctx, 98);
+  ctx.rules.turnAway.chance = altChance;
+  assert.equal(state.ratings.length - r1, 1);
+});
+
+test('H6: Lieblingsplatz wird gemerkt, bringt Anker und wird bei der Platzwahl bevorzugt', () => {
+  const state = createState({ seed: 1 });
+  const s = stammState(state);
+  // Zufrieden in A03: Erstbesucher merkt sich die Box
+  s.abend = { 1: { stammId: null, bootsname: 'Möwe', heimathafen: 'Kiel', typeId: 'S1', wishes: [], besuche: 1, platz: 'A03' } };
+  nachtHook({ state, events: [{ type: 'departed', boatId: 1, rating: 4.5 }] });
+  assert.equal(s.liste[0].lieblingsplatz, 'A03');
+  assert.ok(!('platz' in s.liste[0]));
+  // Nächster Besuch zufrieden in A05: neuer Lieblingsplatz; unzufrieden in A07: bleibt A05
+  const id = s.liste[0].stammId;
+  s.abend = { 2: { stammId: id, bootsname: 'Möwe', besuche: 2, platz: 'A05' } };
+  nachtHook({ state, events: [{ type: 'departed', boatId: 2, rating: 4 }] });
+  assert.equal(s.liste[0].lieblingsplatz, 'A05');
+  s.abend = { 3: { stammId: id, bootsname: 'Möwe', besuche: 3, platz: 'A07' } };
+  nachtHook({ state, events: [{ type: 'departed', boatId: 3, rating: 3 }] });
+  assert.equal(s.liste[0].lieblingsplatz, 'A05');
+  // Päckchen merkt sich niemand
+  s.abend = { 4: { stammId: null, bootsname: 'Butt', besuche: 1, platz: null } };
+  nachtHook({ state, events: [{ type: 'departed', boatId: 4, rating: 5 }] });
+  assert.equal(s.liste.find((g) => g.bootsname === 'Butt').lieblingsplatz, null);
+
+  // Anker: am Lieblingsplatz platzBonus mehr, sonst gleich
+  const { ctx } = neu(3);
+  const boot = { wishes: [], wishesMet: 0, wishesTotal: 0, berthId: 'A03', lieblingsplatz: 'A03', penalty: 0 };
+  const ohne = sim.ratingParts(ctx, { ...boot, lieblingsplatz: null });
+  const mit = sim.ratingParts(ctx, boot);
+  assert.equal(mit.stammPlatz, STAMM.platzBonus);
+  assert.ok(Math.abs(Math.min(5, ohne.value + STAMM.platzBonus) - mit.value) < 0.051);
+  assert.equal(sim.ratingParts(ctx, { ...boot, berthId: 'A04' }).stammPlatz, 0);
+  // Platzwahl: unter gleich guten Boxen gewinnt der Lieblingsplatz, ein Platz-Wunsch zählt mehr
+  assert.equal(platzHook({ boat: { lieblingsplatz: 'A03' }, berth: { id: 'A03' } }), STAMM.platzVorliebe);
+  assert.equal(platzHook({ boat: { lieblingsplatz: 'A03' }, berth: { id: 'A04' } }), 0);
+  assert.ok(STAMM.platzVorliebe < 1000);
+});
+
+test('H6 im Spiel: Büro und Einfahren nehmen den freien Lieblingsplatz, Platzwert zeigt ihn', () => {
+  const { ctx, state } = neu(8);
+  sim.tick(state, ctx, 0);
+  const frei = sim.availableBerths(state, ctx).filter((b) => sim.isFree(state, b.id) && b.size === 'S');
+  assert.ok(frei.length >= 2);
+  const ziel = frei[frei.length - 1].id;
+  const b = stammKommt(state, ctx, { ...sBoot(ctx), lieblingsplatz: ziel, besuche: 1 });   // 2. Besuch: wächst noch nicht
+  b.id = 5000; b.status = 'waiting'; b.wishes = [];
+  state.boats[b.id] = b;
+  const liste = sim.fittingBerths(state, ctx, b.id);
+  assert.equal(liste[0], ziel, 'Lieblingsplatz steht vorn');
+  const wert = sim.berthValue(state, ctx, b.id, ziel);
+  assert.equal(wert.lieblingsplatz, true);
+  assert.ok(wert.anchors > sim.berthValue(state, ctx, b.id, liste[1]).anchors);
+  const h = hinweise(state, ctx, b);
+  assert.equal(h[0].art, 'platz');
+  assert.match(h[0].text, new RegExp(`Box ${ziel} ist frei`));
+  // belegt: Hinweis sagt es, kein Fehler
+  state.berths[ziel] = 1234;
+  assert.match(hinweise(state, ctx, b)[0].text, /belegt/);
+  delete state.berths[ziel];
+  // Box gibt es nicht (mehr): kein Hinweis
+  b.lieblingsplatz = 'Z99';
+  assert.equal(hinweise(state, ctx, b).length, 0);
+});
+
+test('H7: ein Treuewimpel je fünf Besuche, nicht für Erstbesucher und Dauerlieger', () => {
+  assert.equal(treuewimpel({ stammId: 1, besuche: 4 }), 0);
+  assert.equal(treuewimpel({ stammId: 1, besuche: 5 }), 1);
+  assert.equal(treuewimpel({ stammId: 1, besuche: 14 }), 2);
+  assert.equal(treuewimpel({ stammId: 1, besuche: 15 }), 3);
+  assert.equal(treuewimpel({ besuche: 9 }), 0);
+  assert.equal(treuewimpel({ stammId: 1, besuche: 10, dauer: true }), 0);
+  assert.equal(treuewimpel(null), 0);
+});
+
+test('H8: Stammgäste wachsen mit (größeres Modell oder ein Wunsch mehr) und behalten es', () => {
+  const { ctx, state } = neu(11, 3);
+  const alt = STAMM.wachsen.chance;
+  STAMM.wachsen.chance = 1;
+  try {
+    // Kleinstes Modell einer Art mit mehreren Modellen: wird größer, gleiche Art
+    const t = ctx.types.find((x) => !x.special && (x.models || []).filter((m) => (m.minStage ?? x.minStage) <= 3).length >= 2 && x.minStage <= 3 && x.size === 'M');
+    const ms = t.models.filter((m) => (m.minStage ?? t.minStage) <= 3).sort((a, b) => a.length - b.length);
+    const boot = { id: 1, typeId: t.id, modelId: ms[0].id, name: ms[0].name, size: t.size, kind: t.kind, motor: t.motor, length: ms[0].length, beam: ms[0].beam, draft: ms[0].draft, wishes: [], besuche: STAMM.wachsen.abBesuch, stammId: 3 };
+    const g = wachsen(state, ctx, boot);
+    assert.equal(g?.art, 'boot');
+    assert.ok(boot.length > ms[0].length);
+    assert.equal(boot.vorher, undefined);
+    assert.equal(g.vorher, ms[0].name);
+    assert.ok(sim.couldEverFit(state, ctx, boot));
+    // Vor abBesuch wächst niemand
+    const jung = { ...boot, length: ms[0].length, besuche: STAMM.wachsen.abBesuch - 1 };
+    assert.equal(wachsen(state, ctx, jung), null);
+    // Größtes Modell ohne größere Art: ein Wunsch mehr, höchstens maxWuensche
+    const gross = ctx.types.filter((x) => !x.special && !x.noWishes && x.minStage <= 3 && x.size === 'L')[0];
+    const gm = [...gross.models].filter((m) => (m.minStage ?? gross.minStage) <= 3).sort((a, b) => b.length - a.length)[0];
+    const b2 = { id: 2, typeId: gross.id, modelId: gm.id, name: gm.name, size: 'L', kind: gross.kind, motor: gross.motor, length: gm.length, beam: gm.beam, draft: gm.draft, wishes: [], besuche: 6, stammId: 4 };
+    let r = wachsen(state, ctx, b2);
+    // Entweder größere Art (XL derselben Bootsart) oder ein Wunsch
+    assert.ok(r, 'wächst');
+    if (r.art === 'wunsch') assert.equal(b2.wishes.length, 1);
+    b2.wishes = ['wc', 'dusche', 'essen', 'strom'].slice(0, STAMM.wachsen.maxWuensche);
+    b2.length = 999;   // kein größeres Modell
+    b2.typeId = gross.id; b2.size = 'L';
+    const vorherW = b2.wishes.length;
+    r = wachsen(state, ctx, b2);
+    if (r?.art !== 'boot') assert.equal(b2.wishes.length, vorherW, 'nicht mehr als maxWuensche');
+  } finally { STAMM.wachsen.chance = alt; }
+  // Das gewachsene Boot steht nach der Abreise auf der Liste (kommt so wieder)
+  const s = stammState(state);
+  s.liste = [{ stammId: 9, bootsname: 'Möwe', typeId: 'S1', modelId: 'a', name: 'Jolle', size: 'S', length: 4, wishes: [], besuche: 3, zuletzt: 1, stamm: true }];
+  s.abend = { 7: { stammId: 9, bootsname: 'Möwe', typeId: 'M1', modelId: 'b', name: 'Kajütboot', size: 'M', kind: 'motor', motor: true, length: 7, beam: 2.5, draft: 0.7, wishes: ['strom'], besuche: 4, platz: 'B02' } };
+  nachtHook({ state, events: [{ type: 'departed', boatId: 7, rating: 4.5 }] });
+  const e = s.liste[0];
+  assert.deepEqual([e.typeId, e.size, e.length, e.wishes, e.besuche, e.lieblingsplatz], ['M1', 'M', 7, ['strom'], 4, 'B02']);
+});
+
+test('P25: Stammgäste über viele Tage im Spiel, Spielstand bleibt JSON, alles passt in den Hafen', () => {
+  for (const seed of [2, 9, 31]) {
+    const { ctx, state } = neu(seed, 3);
+    let gewachsen = 0, amPlatz = 0, stammAbreisen = 0;
+    for (let tag = 0; tag < 60; tag++) {
+      sim.tick(state, ctx, 0);
+      for (const b of state.upcoming) {
+        if (b.gewachsen) gewachsen++;
+        assert.ok(sim.couldEverFit(state, ctx, b), `${b.name} passt`);
+        if (b.stamm) assert.ok(b.stammId);
+      }
+      const vorher = state.ratings.length;
+      const ev = sim.runDay(state, ctx);
+      // C8: jede Bewertung eines echten Stammgasts steht zweimal in den Ruf-Bewertungen
+      const soll = ev.filter((e) => typeof e.rating === 'number' && (e.type === 'departed' || e.rated))
+        .reduce((n, e) => n + (e.guest?.stamm ? STAMM.rufGewicht : 1), 0);
+      if (vorher + soll < ctx.rules.reputation.window) assert.equal(state.ratings.length - vorher, soll, `Tag ${state.day}`);
+      for (const e of ev) {
+        if (e.type !== 'departed' || !e.guest?.stamm) continue;
+        stammAbreisen++;
+        if (e.parts.stammPlatz > 0) amPlatz++;
+      }
+      sim.collectAll(state, ctx, true);
+      assert.ok(state.ratings.length <= ctx.rules.reputation.window);
+    }
+    const kopie = JSON.parse(JSON.stringify(state));
+    assert.deepEqual(kopie.modules.stamm, state.modules.stamm);
+    assert.ok(stammAbreisen > 0, `Seed ${seed}: Stammgäste reisen ab`);
+    assert.ok(amPlatz > 0, `Seed ${seed}: Büro legt Stammgäste an ihren Lieblingsplatz (${amPlatz}/${stammAbreisen})`);
+    void gewachsen;
+  }
 });

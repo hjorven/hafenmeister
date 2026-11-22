@@ -227,7 +227,7 @@ Alle sechs sind gebaut, Einzelheiten in [neue-features.md](neue-features.md). Hi
 | Feature | Was es ist |
 |---|---|
 | **Dauerlieger** | Ein Teil der Plätze wird fest vermietet: Der Spieler gibt eine freie Box einem Bewerber (höchstens ein Viertel der Gastboxen), die Saisonpacht kommt im Voraus und ist auch bei Sturm sicher (P01). Dauerlieger fahren tagsüber hinaus zum Segeln oder Angeln und kommen abends zurück. Solange sie draußen sind, zeigt ihr Platz ein grünes Schild und darf für einen Gast genutzt werden (Rot-Grün-System echter Ostseehäfen). Kommt der Dauerlieger früher zurück, legt der Spieler den Gast um. Im Winter liegen sie im Winterlager. |
-| **Stammgäste** | Gäste, die zufrieden waren, kommen wieder, erkennbar am Bootsnamen und einem kleinen Symbol; ab dem 5. Besuch fragen sie nach einem Dauerplatz. Ruf am alten Platz, Lieblingsplatz, Treuewimpel und Gästepost sind geplant (P25). |
+| **Stammgäste** | Gäste, die zufrieden waren, kommen wieder, erkennbar am Bootsnamen und einem kleinen Symbol; ab dem 5. Besuch fragen sie nach einem Dauerplatz. Sie zählen beim Ruf doppelt, haben einen Lieblingsplatz (+0,5 Anker), tragen je fünf Besuche einen Treuewimpel, wachsen mit und schreiben Post an die Pinnwand im Hafenbüro ([stammgaeste.md](stammgaeste.md), P25). |
 | **Wetter an der Flagge** | Die Flagge am Hafenbüro zeigt Wind und Wetter für morgen. Wer hinsieht, kann sich auf Sturm oder Regatta vorbereiten. |
 | **Fotomodus** | Leisten ausblenden, Kamera frei drehen, Bild speichern. |
 | **Hafen schauen** | Nichts tun und zusehen: Die Kamera fährt langsam durch den Hafen, Musik läuft, das Spiel geht weiter. |
