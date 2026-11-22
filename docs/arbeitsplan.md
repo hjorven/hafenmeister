@@ -36,7 +36,7 @@ Stand 22.11.2026, 03:40 UTC. Gemergt seit der Abnahme: P88 Teil 1 (PR 390), P34 
 |---|---|---|---|
 | Neue Gästewünsche | "Neue Gästewünsche bauen" | P31 | läuft, hält `economy.js` |
 | Stammgäste und Gästepost | "Stammgäste und Gästepost bauen" | P25 | Teil 1 und 2 gemergt, H9 folgt |
-| Engstellen, Rest | "Staus an Bojen und Ankerfeld auflösen" | P88 | Teil 1 (PR 390) und Teil 2 (PR 400, Vorbeifahrer machen Hafenbooten Platz) gemergt; Rest Küste 15 und ineinander fahrende Ankommende auf dem Seeweg |
+| Engstellen | "Staus an Bojen und Ankerfeld auflösen" | P88 | erledigt (PR 390, 400, 407: eigene Bahn je Richtung auch auf dem Seeweg, Küste 15 fest 16/14 statt 116/32, Bodden 2 statt 33); Abnahme mit der nächsten ganzen Zeitraffer-Serie |
 | Stichproben und Serien | Zeitraffer | - | Stichprobe nach P32 und PR 390 auf `0893c44` sauber (5 Läufe, Ziel Tag 105 bis 110, 0 Fehler) |
 | Schichttest, Roadmap-Seite | Prüf- und Pflege-Threads | - | Schicht 24 Flottillen (PR 399) |
 
@@ -69,7 +69,7 @@ Stand 22.11.2026, 03:40 UTC. Leitlinie: Welle 3 nach Wirkung auf die Kernschleif
 | 1 | ~~**P34 Wind im Hafen spürbar machen** (F5, F35)~~ erledigt (PR 392) | Starkwind macht Außenplätze unruhig, große Boote legen lieber gegen den Wind an: jede Zuweisung bekommt eine zweite Überlegung | - | `sim.js` (Bewertung, Anlegezeit), `economy.js`, Wetterflagge, Jahreszeiten (P20) |
 | 2 | ~~**P32 Flottillen** (F3)~~ erledigt (PR 393), Rest als Prio B | drei bis fünf Boote wollen zusammen an einen Steg: neue Entscheidung beim Zuweisen, nutzt Funk-Anmeldung (P28) | - | `sim.js` (Ankünfte, Feld `group`), Wegsuche (Konvois aus P66), `ui/vorschau.js` |
 | 3 | **P25 Stammgäste mit Wirkung und Gästepost** (F37), Teil 1 und 2 gemergt (PR 394), H9 läuft | Ruf am alten Platz, Gästepost im Hafenbüro: Stammgäste sind seit K2 selten und sollen etwas bringen | - | `features/stammgaeste.js`, Logbuch, Gästebuch |
-| 4 | **P88 Engstellen nach ihrer Länge regeln** (Prio B), Teil 1 erledigt (PR 390) | Teil 1: Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m). Darum getrennte Bahnen in offenem Wasser statt längenabhängiger Werte. Stufe 5 über 15 Küsten: 14 gleich oder besser (Küste 14 rund 3500 auf 1300 Proben, Küste 9 1851 auf 539, Bodden 1150 auf 620). Teil 2 (PR 400): Vorbeifahrer machen Platz, sobald sie ein Hafenboot aufhalten. Großschiff-Vortritt ist gestrichen: drei Fassungen gemessen, keine half (Entscheidung Planung 22.11.). Rest: Küste 15, ineinander fahrende Ankommende auf dem Seeweg | - | `boat-view.js`, `boat-anim.js` (Boote-Thread), danach Zeitraffer-Stichprobe |
+| 4 | ~~**P88 Engstellen nach ihrer Länge regeln** (Prio B)~~ erledigt (PR 390, 400, 407) | Teil 1: Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m). Darum getrennte Bahnen in offenem Wasser statt längenabhängiger Werte. Stufe 5 über 15 Küsten: 14 gleich oder besser (Küste 14 rund 3500 auf 1300 Proben, Küste 9 1851 auf 539, Bodden 1150 auf 620). Teil 2 (PR 400): Vorbeifahrer machen Platz, sobald sie ein Hafenboot aufhalten. Großschiff-Vortritt ist gestrichen: drei Fassungen gemessen, keine half (Entscheidung Planung 22.11.). Teil 3 (PR 407): eigene Bahn je Richtung auch auf dem Seeweg, Küste 15 fest 16/14 statt 116/32 | - | `boat-view.js`, `boat-anim.js` (Boote-Thread), danach Zeitraffer-Stichprobe |
 | 5 | **P31 Neue Gästewünsche** (F9), läuft | WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | 1 (`economy.js`) | Wünsche aus P19, Services (P23), Bauen-Menü |
 | 6 | **P35 Preisstufe am Hafenbüro** (F6) | günstig, normal, gehoben, eine Entscheidung je Saison | 5 (`economy.js`) | Hafenbüro, Ruf, Balancing-Messung danach |
 | 7 | **P29 Baggern** (F7) und **P36 Bojenfeld** (F10) | Ausbau mit eigener Entscheidung | 6 | Gelände (Tiefe), Liegeplätze |
@@ -211,6 +211,7 @@ Schon erledigt aus Jorvens Vorschlägen: F1, F2, F4, F8, F14, F15, F17, F18, F19
 
 | Datum | Änderung |
 |---|---|
+| 22.11.2026, 05:00 Uhr | P88 erledigt (PR 407). Abnahme mit der ganzen Zeitraffer-Serie nach P31. |
 | 22.11.2026, 03:50 Uhr | P88 Teil 2 gemergt (PR 400). Großschiff-Vortritt aus P88 gestrichen (drei Fassungen ohne Wirkung). |
 | 22.11.2026, 03:40 Uhr | P34, P32, P25 Teil 1 und 2, P88 Teil 1 gemergt; P31 läuft. Flottillen-Quote als Prio B. Neu starten: P37, P38. Ganze Serie nach P31. |
 | 21.11.2026, 23:30 Uhr | P88 Teil 1 gemergt (PR 390): getrennte Bahnen vor der Einfahrt, 14 von 15 Küsten gleich oder besser. Rest bleibt beim Boote-Thread. |
