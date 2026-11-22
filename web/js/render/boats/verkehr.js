@@ -109,6 +109,7 @@ export function init(game) {
   const meideRunde = (ls) => [
     ...(ls.warteplaetze?.bojen ?? []).map((b) => ({ x: b.x, z: b.z, r: 10 })),
     ...(ls.warteplaetze?.ankerplaetze ?? []).map((a) => ({ x: a.x, z: a.z, r: (a.schwoikreisM ?? 8) + 4 })),
+    ...(ls.bojenfeld ?? []).map((b) => ({ x: b.x, z: b.z, r: 12 })),   // Bojenfeld (P36)
   ];
   function seeRunde(st) {
     const ls = game.landscape;

@@ -686,6 +686,8 @@ export function hindernisseAusHafen(hafen, stufe, o = {}) {
   }));
   const rechtecke = [];
   for (const p of hafen.plaetze ?? []) {
+    // Bojenfeld (P36): Muringbojen sind kein Rechteck am Steg, die Ansicht legt dort weiche Zonen hin
+    if (p.art === 'boje') continue;
     const lage = p.lage?.[stufe] ?? p.lage?.[String(stufe)];
     if (!lage) continue;
     if (o.nurIds && !o.nurIds.has(p.id)) continue;

@@ -24,6 +24,7 @@
 import * as THREE from 'three';
 import { buendeln } from './buendeln.js';
 import { STRAND_PLAN, strandLagen } from './landschaft/strand.js';
+import { SCHWIMMWELLENBRECHER } from './landschaft/gelaende.js';
 
 const U = 0.62;
 const W = (xp, yp) => [xp * U, -yp * U];
@@ -580,7 +581,7 @@ const PLAN = [
 ];
 
 // Schwimmwellenbrecher im See ab Stufe 4, Oeffnung nach Osten zum Fahrwasser
-const WELLENBRECHER = [[-150, 136], [-95, 150], [-30, 154], [30, 148]];
+const WELLENBRECHER = SCHWIMMWELLENBRECHER.punkte;
 
 // Strandkörbe und Seebrücke gehören an einen echten Strand: Ihre Lage kommt aus landschaft/strand.js (je Küste
 // und Stufe gesucht, die Wunschlage steht dort), p in PLAN sagt hier nur, dass sie einen Platz brauchen.
