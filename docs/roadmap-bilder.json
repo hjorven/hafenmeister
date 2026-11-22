@@ -1012,6 +1012,28 @@
    "geraet": "pc",
    "datum": "2026-11-22",
    "quelle": "flottillen-zusammen/pc-flottille-einfahrt.png"
+  },
+  {
+   "datei": "p40-pr416-pc-besucherschiffe.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Seltene Besucher: vier besondere Schiffe",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/01-vier-schiffe.png"
+  },
+  {
+   "datei": "p40-pr416-pc-koenigsyacht.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Königsyacht meldet sich per Funk, Ehrenplatz freihalten",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/02-pc-funk-koenigsyacht.png"
   }
  ]
 }

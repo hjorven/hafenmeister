@@ -143,7 +143,8 @@ export function abendHook({ state, boats }) {
   const s = stammState(state);
   s.abend = {};
   for (const b of boats) {
-    if (b.stationed || !b.bootsname) continue;
+    // Seltene Besucher (P40) kommen nicht als Stammgast wieder: sie sind ein Ereignis
+    if (b.stationed || !b.bootsname || b.besucher) continue;
     s.abend[b.id] = {
       stammId: b.stammId ?? null, bootsname: b.bootsname, heimathafen: b.heimathafen, typeId: b.typeId,
       modelId: b.modelId, name: b.name, size: b.size, kind: b.kind, motor: !!b.motor,
