@@ -55,7 +55,15 @@ Ab Stufe 3 setzt du einmal je Saison selbst ein Hafenfest an. Du wählst den Tag
 
 ## Balancing
 
-Das zufällige Hafenfest kam vorher ab Stufe 4 etwa einmal je Saison. Jetzt kommt es nur, wenn der Spieler es ansetzt; die Rechnung (`tools/balance.mjs`) setzt keins an. Ergebnis siehe Abschnitt "Messung" unten.
+Das zufällige Hafenfest kam vorher ab Stufe 4 etwa einmal je Saison. Jetzt kommt es nur, wenn der Spieler es ansetzt; die Rechnung (`tools/balance.mjs`) setzt keins an. Gemessen am 22.11.2026 mit `node tools/balance.mjs --laeufe 30` und `--spieler zeitraffer` (Median der Spieltage bis zum Regionsabschluss):
+
+| Spielertyp | vorher | nachher |
+|---|---|---|
+| zeitraffer | 105 | 105 |
+| geschickt | 101 | 101 |
+| gemütlich | 119 | 121 |
+
+Das Ziel von rund 105 Tagen bleibt. Wer das Fest ansetzt, ist etwas schneller: Am Festtag lagen im Browser-Durchlauf (Stufe 4, alle Teile, 1.390 €) 45 Boote im Hafen statt rund 21 bis 26 an normalen Abenden, dazu 340 € Standgeld und eine Nacht länger für alle Crews.
 
 ## Prüfen
 
