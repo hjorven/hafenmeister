@@ -359,10 +359,11 @@ async function warteplaetze(t) {
     await t.warte(4000);
     const l = await t.G(BOOTSLAGE);
     const w = await t.G(() => { const S = window.hafenmeister.sim; const ws = S.waitingBoats(); const orte = new Map();
-      for (const b of ws) { const k = b.waitSpot ?? null; if (k == null) continue; orte.set(k, [...(orte.get(k) || []), b.id]); }
+      for (const b of ws) { const k = b.waitSpot ?? null; if (k == null || !b.atBuoy) continue; /* nur liegende Boote: seit PR 390 echte Boje, Anfahrende tragen eine vorläufige Nummer */ orte.set(k, [...(orte.get(k) || []), b.id]); }
       return { n: ws.length, doppelt: [...orte.entries()].filter(([, v]) => v.length > 1).map(([k, v]) => `${k}: ${v.join('+')}`) }; });
     proben++; maxWartend = Math.max(maxWartend, w.n);
     for (const x of l.ueber) treffer.ueber.set(x, (treffer.ueber.get(x) || 0) + 1);
+    for (const o of l.ueberOrt || []) if (!treffer.ort?.has(o.key)) (treffer.ort ??= new Map()).set(o.key, o.text);
     for (const x of [...l.land, ...l.steg]) treffer.land.set(x, (treffer.land.get(x) || 0) + 1);
     for (const x of w.doppelt) treffer.doppelt.set(x, (treffer.doppelt.get(x) || 0) + 1);
     if ((l.ueber.length || l.land.length || l.steg.length) && !treffer.bild) { await setzeTempo(t, 'pause'); treffer.bild = await t.bild('s14-ueberlappung'); await setzeTempo(t, 'acht'); }
@@ -371,7 +372,7 @@ async function warteplaetze(t) {
   await setzeTempo(t, 'normal');
   const fmt = (m) => [...m.entries()].map(([k, v]) => `${k} (${v}x)`).join('; ').slice(0, 400);
   await t.hinweis('Warteschlange', `${proben} Proben, bis zu ${maxWartend} Boote warten zugleich`, { bild: true });
-  await t.punkt('wartende und fahrende Boote nie übereinander', treffer.ueber.size === 0, fmt(treffer.ueber), { bild: false, schwere: 'B' });
+  await t.punkt('wartende und fahrende Boote nie übereinander', treffer.ueber.size === 0, [fmt(treffer.ueber), ...(treffer.ort ? [...treffer.ort.values()] : [])].join(' | '), { bild: false, schwere: 'B' });
   await t.punkt('keine Boote über Land oder im Steg', treffer.land.size === 0, fmt(treffer.land), { bild: false, schwere: 'B' });
   await t.punkt('jedes wartende Boot hat einen eigenen Warteplatz', treffer.doppelt.size === 0, fmt(treffer.doppelt), { bild: false, schwere: 'B' });
 }

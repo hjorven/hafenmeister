@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "ec3d361"
+  "commit": "d30853f"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -655,9 +655,11 @@
    "id": "P25",
    "titel": "Stammgäste mit Wirkung und Gästepost",
    "inhalt": "Ruf am alten Platz (plan 9a), F37",
-   "thread": "Teil 1 und 2 gebaut (stammgaeste.md), H9 folgt",
+   "thread": "teilweise: Teil 1 und 2 gebaut (PR 394, stammgaeste.md), H9 folgt",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    394
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F37",
@@ -667,8 +669,11 @@
     "H8",
     "H9"
    ],
-   "status": "erledigt",
-   "bilder": []
+   "status": "teilweise",
+   "bilder": [
+    85,
+    86
+   ]
   },
   {
    "id": "P26",
@@ -816,15 +821,17 @@
    "id": "P34",
    "titel": "Wind im Hafen spürbar machen",
    "inhalt": "F5, F35",
-   "thread": "neu",
+   "thread": "erledigt (PR 392, wind.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    392
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F5",
     "F35"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1652,11 +1659,12 @@
   {
    "id": "P88",
    "titel": "Engstellen nach ihrer Länge regeln",
-   "inhalt": "Reste aus P66 (Abnahme Welle 0 auf ae9e34f, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Dazu Großschiff-Vortritt. Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Noch zu tun: Großschiff-Vortritt, Segler der Seerunde in der Schlange, Rest Küste 15",
-   "thread": "in Arbeit (PR 390)",
+   "inhalt": "Reste aus P66 (Abnahme Welle 0 auf ae9e34f, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Dazu Großschiff-Vortritt. Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Teil 2 (22.11.): Vorbeifahrer und Segler, die ein Hafenboot aufhalten, fahren sofort weiter (Küste 14 Stufe 6: Ankommende stapelten sich in 3 von 8 Läufen draußen auf See, danach in 0 von 4). Großschiff-Vortritt in drei Fassungen gemessen und verworfen (Größenregel Boot gegen Boot, Abstand der Vorbeifahrer, Vortritt an der Einfahrt: Großschiffe warteten jeweils länger oder es gab neue Knoten). Rest: Küste 15, Ankommende gleicher Richtung fahren auf dem Seeweg teils ineinander",
+   "thread": "in Arbeit (PR 390, 400)",
    "welle": 3,
    "prs": [
-    390
+    390,
+    400
    ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
@@ -2031,12 +2039,14 @@
   {
    "code": "F5",
    "text": "Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld exposed)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 392, wind.md): Windlage je Platz aus Wellenweg gegen den Wind des Tages, ab Stufe 2, Zeichen beim Ziehen",
    "pakete": [
     "P34"
    ],
-   "prs": [],
+   "prs": [
+    392
+   ],
    "abschnitt": "Kernspiel"
   },
   {
@@ -2372,12 +2382,14 @@
   {
    "code": "F35",
    "text": "Wind beim Anlegen: große Boote brauchen länger, bevorzugen Plätze gegen den Wind",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 392, wind.md): L und XL mit Rückenwind langsamer und −0,25 Anker, Büro wählt Bug gegen den Wind",
    "pakete": [
     "P34"
    ],
-   "prs": [],
+   "prs": [
+    392
+   ],
    "abschnitt": "Seemannschaft"
   },
   {
@@ -4571,10 +4583,10 @@
    ],
    "zaehler": {
     "erledigt": 11,
-    "teilweise": 0,
+    "teilweise": 1,
     "arbeit": 1,
     "frage": 0,
-    "offen": 9,
+    "offen": 8,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4659,19 +4671,19 @@
  ],
  "gesamt": {
   "erledigt": 46,
-  "teilweise": 1,
+  "teilweise": 2,
   "arbeit": 1,
   "frage": 0,
-  "offen": 38,
+  "offen": 37,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 172,
+  "erledigt": 174,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 39,
+  "offen": 37,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5695,9 +5707,34 @@
    "datum": "2026-11-22",
    "quelle": "flottillen/pc-zusammen.png",
    "nr": 84
+  },
+  {
+   "datei": "p25-pr394-handy-pinnwand.jpg",
+   "pakete": [
+    "P25"
+   ],
+   "titel": "Gästepost an der Pinnwand im Hafenbüro, Stammgäste mit Lieblingsbox",
+   "pr": 394,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "stammgaeste/handy-pinnwand.png",
+   "nr": 85
+  },
+  {
+   "datei": "p25-pr394-pc-stammgast.jpg",
+   "pakete": [
+    "P25"
+   ],
+   "titel": "Stammgast meldet sich an und wünscht seinen alten Platz",
+   "pr": 394,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "stammgaeste/pc-stammgast-wartet.png",
+   "nr": 86
   }
  ],
  "neueBilder": [
+  86,
   84,
   82,
   81,
@@ -5705,10 +5742,68 @@
   79,
   77,
   76,
-  75,
-  73
+  75
  ],
  "merges": [
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P88 Teil 2 (PR 400)",
+   "pr": 404,
+   "pakete": [
+    "P88"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Arbeitsplan: P88 Teil 2, Großschiff-Vortritt gestrichen",
+   "pr": 402,
+   "pakete": [
+    "P88"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P88 Teil 2: Vorbeifahrer machen Platz, sobald sie ein Hafenboot aufhalten",
+   "pr": 400,
+   "pakete": [
+    "P88"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Arbeitsplan: Stand nach P34, P32, P25, P88 Teil 1; Flottillen-Quote Prio B; P37 und P38 starten",
+   "pr": 401,
+   "pakete": [
+    "P34",
+    "P32",
+    "P25",
+    "P88",
+    "P37",
+    "P38"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Schichttest: Schicht 24 Flottillen, Fundorte bei Überlappungen",
+   "pr": 399,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P25 Stammgäste Teil 1 und 2 (PR 394) mit Bildern",
+   "pr": 398,
+   "pakete": [
+    "P25"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Wind im Hafen (P34, F5 und F35)",
+   "pr": 392,
+   "pakete": [
+    "P34"
+   ]
+  },
   {
    "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: P32 Flottillen (PR 393) mit Bildern",
@@ -5747,61 +5842,6 @@
    "pr": 391,
    "pakete": [
     "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P88 Teil 1: getrennte Bahnen vor der Einfahrt, echte Boje in den Regeln",
-   "pr": 390,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Arbeitsplan: Welle 0 bis 2 abgenommen, Welle 3 startet; P88 Engstellen",
-   "pr": 389,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Meldungen auf Handy quer oben zwischen den Spalten (Schichttest F8-Rest, F9 geprüft)",
-   "pr": 388,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Schichttest: Serie 13 nach P66, Messung erst nach dem Zurückgleiten der Leisten",
-   "pr": 387,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Roadmap: P66 und P85 zeigen erledigt (Reste als Prio B ausgelagert)",
-   "pr": 386,
-   "pakete": [
-    "P66",
-    "P85"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Arbeitsplan: Welle 0 bis 2 gebaut, Abnahme-Serie läuft, P66-Reste als Prio B",
-   "pr": 385,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Roadmap: P66 erledigt, offene Punkte genannt",
-   "pr": 384,
-   "pakete": [
-    "P66"
    ]
   }
  ]

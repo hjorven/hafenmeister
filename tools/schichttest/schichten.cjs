@@ -236,8 +236,8 @@ async function bootKommt(t, z, { erstes = false } = {}) {
   return info;
 }
 
-async function ziehenUndAnlegen(t, z, boot) {
-  const plaetze = await t.G((id) => window.hafenmeister.sim.passendePlaetze(id) || [], boot.id);
+async function ziehenUndAnlegen(t, z, boot, { nur = null, warten = true } = {}) {
+  const plaetze = (await t.G((id) => window.hafenmeister.sim.passendePlaetze(id) || [], boot.id)).filter((p) => !nur || nur.includes(p));
   if (!plaetze.length) { await t.punkt('freie passende Box für das wartende Boot', false, `Boot ${boot.id} (${boot.groesse}) hat keine passende freie Box`, { schwere: 'B' }); return null; }
   // Box nahe am Boot, die mit dem Boot zusammen frei ins Bild passt
   let platz = null; let lage = null;
@@ -260,6 +260,7 @@ async function ziehenUndAnlegen(t, z, boot) {
   const ok = nach && nach.status === 'moored' && nach.platz === platz;
   await t.punkt('Boot mit der Leine auf die Box ziehen', ok, ok ? `Boot ${boot.id} -> ${platz}` : `losgelassen auf ${platz}: Leine ${zug ? 'eingerastet auf ' + zug.platz : 'nicht gegriffen'}, Boot danach ${JSON.stringify(nach)}`, { schwere: 'A' });
   if (!ok) return null;
+  if (!warten) return platz;   // mehrere Boote nacheinander ziehen (Flottille), Festmachen prüft der Aufrufer
   return anlegen(t, boot, platz);
 }
 
@@ -352,7 +353,7 @@ const BOOTSLAGE = () => {
   const ziele = []; G.stege?.group?.traverse((o) => { if (o.isMesh && o.visible && !(o.material?.transparent && (o.material.opacity ?? 1) < 0.5)) ziele.push(o); });
   const ray = new T.Raycaster();
   const steg = (x, z) => { ray.set(new T.Vector3(x, 20, z), new T.Vector3(0, -1, 0)); return ray.intersectObjects(ziele, false).some((h) => h.point.y > 0.15); };
-  const out = { n: bs.length, land: [], steg: [], ueber: [] };
+  const out = { n: bs.length, land: [], steg: [], ueber: [], ueberOrt: [] };
   for (const b of bs) {
     const E = ecken(b, 0.85);
     if (E.filter(([x, z]) => !wasser(x, z)).length >= 2) out.land.push(`${b.id} (${b.st})`);
@@ -361,13 +362,22 @@ const BOOTSLAGE = () => {
   }
   for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
     const a = bs[i], b = bs[j]; if (Math.hypot(a.x - b.x, a.z - b.z) > (a.L + b.L) / 2) continue;
-    if (sat(ecken(a, 0.85), ecken(b, 0.85))) out.ueber.push(`${a.id} + ${b.id} (${a.st}/${b.st})`);
+    if (sat(ecken(a, 0.85), ecken(b, 0.85))) {
+      const key = `${a.id} + ${b.id} (${a.st}/${b.st})`;
+      out.ueber.push(key);
+      // Fundort für den Boote-Thread: Küste, Seed, Stegbild, Stufe, Zeit, Lage und Platz jedes Boots
+      const sb = (x) => { const n = /^gast-(\d+)/.exec(x.id); const sbt = n ? G.sim.state.boats?.[n[1]] ?? (G.sim.state.boats || []).find?.((y) => String(y.id) === n[1]) : null;
+        return `${x.id} ${x.st} bei x ${x.x.toFixed(1)} z ${x.z.toFixed(1)} Kurs ${Math.round((x.h * 180 / Math.PI) % 360)}°${sbt?.berthId ? ' Platz ' + sbt.berthId : ''}${sbt?.waitSpot != null ? ' Warteplatz ' + sbt.waitSpot : ''}`; };
+      const ort = G.gelaende?.aktuell?.() ?? {}; const st = G.sim.state;
+      const zeit = G.sim.tagesAnteil ? `, ${st.phase ?? ''} Tagesanteil ${G.sim.tagesAnteil().toFixed(2)}, Spielzeit ${Math.round(G.time ?? 0)} s` : '';
+      out.ueberOrt.push({ key, text: `Küste ${ort.nr ?? '?'} Seed ${ort.seed ?? '?'} Stegbild ${st.modules?.stegbild?.nr ?? '?'} Stufe ${st.stage} Tag ${st.day}${zeit}: ${sb(a)}; ${sb(b)}` });
+    }
   }
   return out;
 };
 async function bootslage(t) {
   const l = await t.G(BOOTSLAGE);
-  await t.punkt('Boote nicht übereinander', l.ueber.length === 0, l.ueber.join('; '), { schwere: 'B' });
+  await t.punkt('Boote nicht übereinander', l.ueber.length === 0, l.ueberOrt.map((o) => o.text).join(' | ') || l.ueber.join('; '), { schwere: 'B' });
   await t.punkt('Boote nicht über Land oder im Steg', l.land.length + l.steg.length === 0, [...l.land.map((x) => 'Land ' + x), ...l.steg.map((x) => 'Steg ' + x)].join('; '), { schwere: 'B' });
 }
 
