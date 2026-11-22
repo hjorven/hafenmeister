@@ -94,13 +94,14 @@ const BOT = () => {
         for (const [bid, l] of Object.entries(st0.leaving || {})) if (l.off) { m.ablegenSek += dt; const k = bid + ':' + l.boatId; if (!lseen.has(k)) { lseen.add(k); m.ablegenN++; } }
         for (const id of st0.queue) { const b = st0.boats[id]; if (!b) continue; if (!seen.has(id)) { seen.set(id, G.time); m.ank++; } if (b.atBuoy) m.bojeSek += dt; else m.anfahrtSek += dt; }
       }
-      // Flottillen (P32): angekommene Gruppen, zusammen gelegt, getrennt oder zerrissen
+      // Flottillen (P32): angekommene Gruppen, zusammen gelegt, getrennt oder zerrissen, als Ganzes weitergefahren
       const fseen = W.fseen ||= new Set();
       for (const b of Object.values(st0.boats)) if (b.flotte?.id && !fseen.has(b.flotte.id)) { fseen.add(b.flotte.id); m.flotten = (m.flotten || 0) + 1; }
       if (!W.flHoert && G.on) {
         W.flHoert = true;
         G.on('sim:flotillaComplete', () => { const mm = W.mess?.[S.state.stage]; if (mm) mm.flZusammen = (mm.flZusammen || 0) + 1; });
         G.on('sim:flotillaSplit', () => { const mm = W.mess?.[S.state.stage]; if (mm) mm.flGetrennt = (mm.flGetrennt || 0) + 1; });
+        G.on('sim:flotillaLeft', () => { const mm = W.mess?.[S.state.stage]; if (mm) mm.flWeiter = (mm.flWeiter || 0) + 1; });
       }
       for (const [id, t] of seen) { const b = st0.boats[id]; if (!b || b.status !== 'waiting') { if (b && b.berthId != null) { m.fest++; m.bisFestSek += G.time - t; } seen.delete(id); } }
       m.abgewiesen = (st0.stats?.turnedAway ?? 0) - m.ab0; m.einnahmen = (st0.stats?.totalIncome ?? 0) - m.ein0; m.tage = st0.day - m.tag0;
@@ -485,7 +486,7 @@ if (require.main !== module) return;
   R.messung = {};
   for (const ab of messAbschnitte) for (const [st, x] of Object.entries(ab || {})) {
     const a = R.messung[st] ||= {};
-    for (const k of ['sek', 'ablegenSek', 'ablegenN', 'anfahrtSek', 'bojeSek', 'ank', 'fest', 'bisFestSek', 'abgewiesen', 'einnahmen', 'tage', 'flotten', 'flZusammen', 'flGetrennt']) a[k] = (a[k] || 0) + (x[k] || 0);
+    for (const k of ['sek', 'ablegenSek', 'ablegenN', 'anfahrtSek', 'bojeSek', 'ank', 'fest', 'bisFestSek', 'abgewiesen', 'einnahmen', 'tage', 'flotten', 'flZusammen', 'flGetrennt', 'flWeiter']) a[k] = (a[k] || 0) + (x[k] || 0);
   }
   R.dauerMin = +((Date.now() - t0) / 60000).toFixed(1);
   R.fehler = fehler; R.warnungen = warnungen; R.fehlendeDateien = fehlendeDateien;
