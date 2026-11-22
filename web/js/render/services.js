@@ -110,7 +110,7 @@ export function init(game) {
     m.group.name = `service-${id}`;
     m.group.userData.pick = { type: 'building', id };
     gruppe.add(m.group);
-    const a = { stufe: n, group: m.group, update: m.update, einsatz: m.einsatz, pop: mitAnimation ? 0 : 1 };
+    const a = { stufe: n, group: m.group, update: m.update, einsatz: m.einsatz, boot: m.boot ?? null, pop: mitAnimation ? 0 : 1 };
     if (mitAnimation) m.group.scale.set(1, 0.01, 1);
     anlagen.set(id, a);
   }
@@ -551,6 +551,9 @@ export function init(game) {
     bilanz: (id) => R.bilanz(zustand(), id),
     schaetzung: (id) => R.schaetzung(zustand(), id, letzterTag),
     dienstText: (boot) => dienstText(boot),
+    // P37: Rettungsboot der Seenotretter-Station (THREE.Group am Liegeplatz) oder null; features/havarie.js
+    // blendet es aus, solange eine Kopie einen Havaristen einschleppt
+    seenotBoot: () => anlagen.get('seenotretter')?.boot ?? null,
     wahlen: () => R.wahlen,
     _regeln: () => R,
     abrechnen,

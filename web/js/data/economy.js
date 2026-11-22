@@ -712,6 +712,27 @@ export const ECONOMY = {
     getrennt: 0.5,
   },
 
+  // ---------------------------------------------------------------- Havaristen (P37, docs/havarie.md)
+  // Ein Boot mit Schaden (Motor, Ruder, Leine in der Schraube, Mast) treibt vor der Einfahrt. Der Spieler gibt
+  // ihm eine Box, ein Helfer (Fischer, Arbeitsboot oder das Rettungsboot der Seenotretter-Station) schleppt es
+  // hinein. Es zahlt Liegegeld und Schlepplohn, bewertet besser und wird gleich Stammgast; mit Werft bleibt es
+  // zur Reparatur länger (Dienst der Werft). Auswahl aus Seed und Tag, verbraucht keinen Spielzufall.
+  //   anteil      Anteil der Tage mit einem Havaristen je Hafenstufe (ab abStufe)
+  //   pause       so viele Tage mindestens von einem Havaristen zum nächsten
+  //   fruehestens, spaetestens  wann er auftaucht (Tagesanteil)
+  //   frist       so viele Sekunden steht die Meldung sichtbar, dann holt ihn ein fremder Helfer
+  //   anker       Anker mehr auf seine Bewertung (in Not aufgenommen)
+  //   schlepplohn Betrag je Klasse, den er für den Schlepp zahlt (Tagesabschluss: Sonstiges)
+  havarie: {
+    abStufe: 2,
+    anteil: { 2: 0.1, 3: 0.12, 4: 0.12, 5: 0.12, 6: 0.12 },
+    pause: 3,
+    fruehestens: 0.12, spaetestens: 0.55,
+    frist: 45,
+    anker: 1,
+    schlepplohn: { S: 30, M: 60, L: 90 },
+  },
+
   // ---------------------------------------------------------------- Services
   // Format abgestimmt mit dem Services-Thread (web/js/data/services.js hat Startwerte, was
   // hier steht, überschreibt sie). services[id] = { abStufe, stufen: [ { name, kosten,

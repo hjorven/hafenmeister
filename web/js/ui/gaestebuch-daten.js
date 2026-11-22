@@ -67,6 +67,7 @@ export const PLUS = {
   stammPlatz: 'wieder am Lieblingsplatz',
   preis:    'faire Preise',
   jugend:   'Jugendtraining zugesehen',
+  havarie:  'in Not aufgenommen',
 };
 
 const WUNSCH_KEYS = [...Object.keys(VERSORGUNG_TEXTE), ...Object.keys(ANGEBOT_TEXTE)];
@@ -116,6 +117,7 @@ export function gruendeAusAbreise(e) {
     if (p.preis > 0.001) plus.push({ key: 'preis', wert: r2(p.preis) });
     else if (p.preis < -0.001) gruende.push({ key: 'teuer', n: r2(-p.preis) });
     if (p.jugend > 0.001) plus.push({ key: 'jugend', wert: r2(p.jugend) });   // P39
+    if (p.havarie > 0.001) plus.push({ key: 'havarie', wert: r2(p.havarie) });   // P37: eingeschleppter Havarist
   }
   if (e.reason === 'rebuild') gruende.push({ key: 'umbau', n: 1 });
   return { gruende, plus };
@@ -259,6 +261,7 @@ const SATZ = {
   stamm: (n) => `Schon unser ${n}. Besuch hier.`,
   teuer: ['Für das Geld hätten wir mehr erwartet.', 'Stolze Preise für das, was geboten wird.', 'Teuer ist es hier, und dann fehlt auch noch was.'],
   preis: ['Faire Preise, gerne wieder.', 'Günstig und nett, was will man mehr.', 'Für das Liegegeld bekommt man hier viel.'],
+  havarie: ['Ohne euch wären wir noch da draußen. Danke für den Schlepp!', 'Hilflos vor der Einfahrt getrieben, und ihr habt uns reingeholt. Danke!', 'In Not aufgenommen, das vergessen wir nicht.'],
   stammPlatz: ['Und wieder an unserem alten Platz!', 'Unsere Box war frei, wie schön.', 'Der Hafenmeister kennt unseren Platz.'],
 };
 for (const [k, t] of Object.entries({ ...VERSORGUNG_TEXTE, ...ANGEBOT_TEXTE })) if (t.saetze) SATZ[k] ??= t.saetze;
@@ -279,6 +282,8 @@ export function satz(eintrag) {
   else text = wahl(SATZ.mittel, eintrag);
   if ((eintrag.boot?.besuche ?? 1) > 1 && eintrag.art === 'abreise') text += ` ${SATZ.stamm(eintrag.boot.besuche)}`;
   if (eintrag.plus?.some((p) => p.key === 'stammPlatz')) text += ` ${wahl(SATZ.stammPlatz, eintrag, 3)}`;
+  // P37: eingeschleppter Havarist dankt, wenn sonst nichts fehlte; sonst steht der Dank vor der Klage
+  if (eintrag.plus?.some((p) => p.key === 'havarie')) text = haupt ? `${wahl(SATZ.havarie, eintrag, 5)} ${text}` : wahl(SATZ.havarie, eintrag, 5);
   return text;
 }
 

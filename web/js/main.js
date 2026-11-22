@@ -71,6 +71,7 @@ const MODULES = [
   './features/erfolge.js',             // Erfolge, Reiter im Logbuch, Dinge im Hafen (P22)
   './ui/funk-anmeldung.js',            // Anmeldung per Funk, Box freihalten (P28)
   './features/besucher.js',            // Seltene Besucher, Ehrenplatz, Fotomotive (P40)
+  './features/havarie.js',             // P37: Havarist einschleppen (Bild und Meldung lädt das Modul selbst)
   './ui/statistik.js',                 // Statistik der letzten 30 Tage, Saisons (P41)
   './ui/oberflaeche.js',
 ];

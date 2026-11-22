@@ -273,6 +273,8 @@ export function rulesFromEconomy(E = ECONOMY) {
   } : null;
   // Jugendtraining (P39, features/jugendtraining.js): Anker für Gäste, die der Gruppe zugesehen haben
   r.youth = E.jugendtraining ? { rating: E.jugendtraining.ruf } : null;
+  // Havaristen (P37, features/havarie.js): Anker mehr auf die Bewertung eines eingeschleppten Boots
+  r.havarie = E.havarie ? { rating: E.havarie.anker } : null;
   return r;
 }
 

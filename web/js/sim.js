@@ -607,8 +607,8 @@ export function eligibleTypes(state, ctx, mods = modifiers(state, ctx)) {
   );
 }
 
-// rnd: eigene Zahlenfolge (Flottillen, ohne Spielzufall); ohne Angabe der Spielzufall
-function rollWishes(state, ctx, type, rnd = null) {
+// rnd: eigene Zahlenfolge (Flottillen, Havaristen, ohne Spielzufall); ohne Angabe der Spielzufall
+export function rollWishes(state, ctx, type, rnd = null) {
   const zufall = rnd ?? (() => random(state));
   const { rules } = ctx;
   if (type.noWishes) return [];
@@ -2909,10 +2909,11 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   const wind = windRating(ctx, boat);                         // Windlage bei Starkwind (P34)
   const jugend = boat.jugend ? r.youth?.rating ?? 0 : 0;      // dem Jugendtraining zugesehen (P39)
   const preis = priceRating(ctx, boat);                       // Preisstufe (P35)
-  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + jugend + ratingBonus - penalty - moved - raft + wind + preis;
+  const havarie = boat.havarie ? r.havarie?.rating ?? 0 : 0;  // in Not eingeschleppt (P37)
+  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + jugend + havarie + ratingBonus - penalty - moved - raft + wind + preis;
   const value = Math.round(Math.min(r.rating.max, Math.max(r.rating.min, raw)) * 10) / 10;
   return {
-    value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, jugend, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
+    value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, jugend, havarie, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
     wind, windLage: boat.windLage ?? null, windRuecken: !!boat.windRuecken,
     aufGrund: boat.aufGrund != null,                           // bei Niedrigwasser im Schlick gelegen (P29, Abzug über Hook 'rating')
     preis, preisstufe: boat.preisstufe ?? null,

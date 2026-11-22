@@ -167,6 +167,15 @@ export function tabellen() {
       ['Bewertung je Crew', `alle an einem Steg +${zahl(f.zusammen)} Anker, aufgeteilt −${zahl(f.getrennt)} Anker`],
     ]), '');
   }
+  if (E.havarie) {
+    const h = E.havarie;
+    t.push('## Havaristen', '', tabelle(['Was', 'Wert'], [
+      ['ab Hafenstufe', h.abStufe],
+      ['Tage mit Havarist', `${Object.entries(h.anteil).map(([k, v]) => `Stufe ${k}: ${Math.round(v * 100)} %`).join(', ')}; mindestens ${h.pause} Tage Pause`],
+      ['Notruf', `${zahl(h.fruehestens)} bis ${zahl(h.spaetestens)} des Tages, ${h.frist} s Zeit für die Antwort`],
+      ['Belohnung', `+${zahl(h.anker)} Anker, Schlepplohn ${Object.entries(h.schlepplohn).map(([k, v]) => `${k} ${euro(v)}`).join(', ')}, sofort Stammgast`],
+    ]), '');
+  }
   if (E.preisstufe) {
     const ps = E.preisstufe;
     const pz = (f) => (f === 1 ? '-' : `${f > 1 ? '+' : '−'}${Math.round(Math.abs(f - 1) * 100)} %`);
