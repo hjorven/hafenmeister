@@ -1122,6 +1122,28 @@
    "geraet": "handy",
    "datum": "2026-11-22",
    "quelle": "havarie/handy-1-notruf.png"
+  },
+  {
+   "datei": "p31-pr406-pc-absaugstation.jpg",
+   "pakete": [
+    "P31"
+   ],
+   "titel": "Absaugstation am Service-Steg",
+   "pr": 406,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "gaestewuensche/p31-pc-service-absaugstation.png"
+  },
+  {
+   "datei": "p31-pr406-handy-waschhaus.jpg",
+   "pakete": [
+    "P31"
+   ],
+   "titel": "Waschhaus an Land",
+   "pr": 406,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "gaestewuensche/p31-handy-waschhaus.png"
   }
  ]
 }
