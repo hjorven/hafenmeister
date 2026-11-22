@@ -200,6 +200,7 @@ export function init(game) {
       if (q === 'sonstiges' && d?.hansewoche) klein = [klein, `Festgeld der Hanse-Woche ${euro(d.hansewoche)}`].filter(Boolean).join(', ');
       // features/hafenfest-regeln.js (P38): Standgeld der Marktstände, Erstattung beim Absagen
       if (q === 'sonstiges' && d?.hafenfest) klein = [klein, `Standgeld beim Hafenfest ${euro(d.hafenfest)}`].filter(Boolean).join(', ');
+      if (q === 'sonstiges' && d?.postkarte) klein = [klein, `Honorar für Postkarten ${euro(d.postkarte)}`].filter(Boolean).join(', ');   // features/fotoauftraege.js (P43)
       if (q === 'sonstiges' && d?.festAbgesagt) klein = [klein, `Hafenfest abgesagt, zurück ${euro(d.festAbgesagt)}`].filter(Boolean).join(', ');
       if (q === 'tagesziele' && b.ziele?.gesamt) zusatz = `${b.ziele.erledigt} von ${b.ziele.gesamt}`;
       einnahmen.append(zeile(QUELLE_NAME[q] ?? q, euro(b.einnahmen[q]), { klein, zusatz }));

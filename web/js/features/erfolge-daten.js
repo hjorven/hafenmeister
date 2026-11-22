@@ -19,6 +19,7 @@ import * as sim from '../sim.js';
 import { ECONOMY } from '../data/economy.js';
 import { katalog as logbuchKatalog, fortschritt as logbuchFortschritt } from '../ui/logbuch-daten.js';
 import { fortschritt as besucherFortschritt } from './besucher-regeln.js';
+import { fortschritt as postkartenFortschritt } from './fotoauftraege-regeln.js';
 
 const istObjekt = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
@@ -99,6 +100,9 @@ export const ERFOLGE = [
     stand: (s) => zahl(besucherFort(s).tierFotos, 2) },
   { id: 'fotoalbum', gruppe: 'sammeln', ding: 'pokal', titel: 'Fotoalbum', text: 'Alle sechs seltenen Besucher fürs Logbuch fotografiert.',
     stand: (s) => zahl(besucherFort(s).fotos, besucherFort(s).gesamt) },
+  // Fotoaufträge (P43, docs/fotoauftraege.md): state.modules.fotoauftraege, geschrieben von features/fotoauftraege.js
+  { id: 'postkarten', gruppe: 'sammeln', ding: 'wimpel', titel: 'Postkartenständer', text: 'Alle zwölf Postkarten für den Verlag fotografiert.',
+    stand: (s) => { const f = postkartenFortschritt(s); return zahl(f.karten, f.gesamt); } },
   { id: 'traditionssegler', gruppe: 'sammeln', ding: 'wimpel', titel: 'Großer Bahnhof', text: `${Z.traditionssegler} Traditionssegler zugleich im Hafen.`,
     stand: (s) => zahl(Object.values(s.boats || {}).filter((b) => b?.typeId === 'XL1' && b.status === 'moored').length, Z.traditionssegler) },
   // ---------------------------------------------------------------- Jahreslauf

@@ -1078,6 +1078,28 @@ export const ECONOMY = {
     ],
   },
 
+  // ---------------------------------------------------------------- Fotoaufträge und Postkarten (P43)
+  // Logik in web/js/features/fotoauftraege-regeln.js, Beschreibung in docs/fotoauftraege.md.
+  // Ein Postkartenverlag bestellt ab und zu ein Foto; im Fotomodus (P) wird es zur Postkarte, der Verlag
+  // zahlt einmal ein Honorar. Der Zeitraffer-Bot fotografiert nie, das Balancing bleibt gleich.
+  fotoauftraege: {
+    abTag: 2,                 // erster Auftrag frühestens am Morgen dieses Spieltags (Tag 1 gehört dem Einstieg)
+    dauerTage: 3,             // so viele Spieltage gilt ein Auftrag, der erste mitgezählt
+    pauseTage: 1,             // danach so viele Tage ohne neuen Auftrag
+    // Honorar je Ausbaustufe, etwa ein gutes mittleres Tagesziel
+    honorar: { 1: 25, 2: 45, 3: 80, 4: 120, 5: 170, 6: 240 },
+    sonderFaktor: 1.5,        // Sonderauftrag für einen besonderen Tag (Besuch, Großschiff, Ereignis)
+    nachdruckFaktor: 0.5,     // Motiv schon als Postkarte da: Nachdruck mit neuem Bild
+    // Bild: Motiv mindestens so weit vom Rand (Anteil der halben Bildbreite), Mindestgröße (Anteil der kürzeren Seite)
+    foto: { rand: 0.1, mindestGroesse: 0.07 },
+    abend: [18.5, 21.5],      // Uhrzeit für den Sonnenuntergang
+    morgen: [6.5, 8.5],       // Uhrzeit für die Morgenstimmung
+    mindestBoote: 3,          // so viele Boote mindestens im Bild (Stimmungsbilder)
+    vollerSteg: { mindestPlaetze: 4 },
+    ganzerHafen: { anteil: 0.85, mindestBoote: 4 },
+    anlegen: { abstand: 50 }, // Meter bis zum Platz
+  },
+
   // ---------------------------------------------------------------- Endlosspiel (P16)
   // Nach dem Abschluss der Region geht das Spiel weiter: jede Saison neue Saisonziele.
   // Logik in web/js/features/aufstieg.js, Beschreibung in docs/aufstieg.md.

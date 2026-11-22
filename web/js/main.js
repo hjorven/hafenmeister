@@ -72,6 +72,7 @@ const MODULES = [
   './ui/funk-anmeldung.js',            // Anmeldung per Funk, Box freihalten (P28)
   './features/besucher.js',            // Seltene Besucher, Ehrenplatz, Fotomotive (P40)
   './features/grosse-ankunft.js',      // P47: Horn und kurze Kamerafahrt, wenn ein großes Schiff einläuft
+  './features/fotoauftraege.js',       // P43: Fotoaufträge und Postkarten (docs/fotoauftraege.md)
   './features/havarie.js',             // P37: Havarist einschleppen (Bild und Meldung lädt das Modul selbst)
   './features/stimmung.js',            // P46: ruhiger Abend mit Lichterketten, Serien-Akkord (docs/stimmung.md)
   './features/leinen.js',              // P48: Leinen annehmen beim Anlegen (docs/leinen.md)
