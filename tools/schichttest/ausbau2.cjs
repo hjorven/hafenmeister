@@ -149,7 +149,7 @@ const S20 = { nr: 20, name: 'Winter', paket: 'P20', neu: winter, wieder: winterW
 // und der Stern folgt. Ein wartendes Boot mit Wunsch zeigt ihn in seiner Karte.
 const RUF = () => { const G = window.hafenmeister; const n = G.sim.reputation();
   const el = document.querySelector('#hud-rep, #rep, .hm-ruf, [aria-label^="Ruf "]');
-  return { ruf: n, soll: n.toFixed(1).replace('.', ','), text: el ? el.textContent.replace(/\s+/g, '').trim() : null,
+  return { ruf: n, soll: n.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),   /* wie die Anzeige runden (3,15 -> 3,2; toFixed gab 3,1) */ text: el ? el.textContent.replace(/\s+/g, '').trim() : null,
     bewertungen: (G.sim.state.ratings || []).length, tag: G.sim.state.day }; };
 async function rufPruefen(t, name) {
   const r = await t.G(RUF);
