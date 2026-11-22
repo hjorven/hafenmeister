@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "aa63986"
+  "commit": "37d8756"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -783,7 +783,7 @@
    "id": "P32",
    "titel": "Flottillen",
    "inhalt": "F3, Gruppen-Ankunft",
-   "thread": "erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md)",
+   "thread": "erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md; Rest Prio B: beim Selbst-Einfahren zusammen, Boxen frei halten, gemeinsam weiterfahren)",
    "welle": 3,
    "prs": [
     393
@@ -5776,27 +5776,6 @@
  "merges": [
   {
    "datum": "2026-11-22",
-   "titel": "Arbeitsplan: P31, P38, P88 erledigt; Flottillen-Rest, P35, P37, P39 starten",
-   "pr": 410,
-   "pakete": [
-    "P31",
-    "P38",
-    "P88",
-    "P35",
-    "P37",
-    "P39"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P88 Teil 3: eigene Bahn je Richtung auch auf dem Seeweg",
-   "pr": 407,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
    "titel": "P31 Neue Gästewünsche: Frischwasser, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt",
    "pr": 406,
    "pakete": [
@@ -5874,6 +5853,22 @@
    "pr": 392,
    "pakete": [
     "P34"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P32 Flottillen (PR 393) mit Bildern",
+   "pr": 396,
+   "pakete": [
+    "P32"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P25 Stammgäste mit Wirkung und Gästepost",
+   "pr": 394,
+   "pakete": [
+    "P25"
    ]
   }
  ]
