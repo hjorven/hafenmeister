@@ -706,7 +706,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P33 | Liegende Boote umlegen | F4 | erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen) |
 | P34 | Wind im Hafen spürbar machen | F5, F35 | erledigt (PR 392, [wind.md](wind.md)) |
 | P35 | Preisstufe am Hafenbüro | F6 | erledigt (PR 413, [preisstufe.md](preisstufe.md): günstig, normal, gehoben; Faustregel für die Bots, Zeitraffer wieder nahe 105) |
-| P36 | Bojenfeld im See | F10 | erledigt ([bojenfeld.md](bojenfeld.md)) |
+| P36 | Bojenfeld im See | F10 | erledigt (PR 421, [bojenfeld.md](bojenfeld.md)) |
 | P37 | Havarist einschleppen | F11 | neu |
 | P38 | Eigenes Hafenfest ansetzen | F12 | erledigt (PR 405, [hafenfest.md](hafenfest.md)) |
 | P39 | Jugendtraining am Segelclub | F13 | erledigt (PR 412, [jugendtraining.md](jugendtraining.md)) |
