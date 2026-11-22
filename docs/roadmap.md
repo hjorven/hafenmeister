@@ -273,8 +273,8 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
-| F29 | Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer | offen | P46 |
-| F30 | Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord | offen | P46 |
+| F29 | Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer | erledigt (PR 427, [stimmung.md](stimmung.md)): Lichterketten an allen Stegen gehen vom Land nach außen an, Glockentöne, wärmere Abendmusik bis zum Morgen | P46 |
+| F30 | Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord | erledigt (PR 427, [stimmung.md](stimmung.md)): Grundton, Terz, Akkord passend zur Musik, goldene Noten über der Box, ohne Zeitgrenze | P46 |
 | F31 | Große Ankünfte mit Horn, Kamera schwenkt auf Wunsch zur Einfahrt | offen | P47 |
 | F32 | Leinen annehmen: Symbol am Steg, Antippen bringt Trinkgeld | offen | P48 |
 
@@ -488,7 +488,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| L1 | Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel | offen | P46 |
+| L1 | Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel | erledigt (PR 427): Stammgast und Stufenziel neu, die anderen klangen schon | P46 |
 | L2 | Figuren als Anzeige (Schlange vor der Dusche, volle Tische) | erledigt (P55, Schlange vor WC, Dusche, Kiosk und Restaurant, wenn knapp oder voll; `render/people.js`) | P55 |
 | L3 | Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles | erledigt | P26 |
 | L4 | Fernglas mit Steckbrief | erledigt | P26 |
@@ -721,7 +721,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P43 | Fotoaufträge und Postkarten | F22 | bestehend: "Spielschleife zusammenbauen und Vorschläge einbauen" (Fotomodus) |
 | P44 | Hafenname und Flagge | F23, F27 (Auswahl beim Start) | neu |
 | P45 | Kreativmodus | F24 | neu |
-| P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | bestehend: "Ton und Musik hinzufügen" |
+| P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | erledigt (PR 427, Thread "Ruhigen Abend und Serien-Akkord bauen") |
 | P47 | Große Ankünfte ankündigen | F31 | bestehend: "Kamera frei neigen und drehen" |
 | P48 | Leinen annehmen beim Anlegen | F32 | bestehend: "Schiffsanimationen umsetzen" |
 | P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | neu |
