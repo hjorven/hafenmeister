@@ -423,10 +423,15 @@ export function init(game) {
     panel.replaceChildren(kopf(), koerper);
     koerper.scrollTop = scroll;
     // schmale Leiste (Handy): der gewählte Reiter bleibt sichtbar
-    const leiste = panel.querySelector('.hm-lb-reiterleiste'), aktiv = leiste?.querySelector('[aria-selected="true"]');
-    if (leiste && aktiv && leiste.scrollWidth > leiste.clientWidth) {
-      leiste.scrollLeft = Math.max(0, aktiv.offsetLeft - leiste.offsetLeft - (leiste.clientWidth - aktiv.offsetWidth) / 2);
-    }
+    // (auch ein Bild später: beim Öffnen ist das Fenster beim ersten Zeichnen noch nicht ausgelegt)
+    const mitte = () => {
+      const leiste = panel.querySelector('.hm-lb-reiterleiste'), aktiv = leiste?.querySelector('[aria-selected="true"]');
+      if (leiste && aktiv && leiste.scrollWidth > leiste.clientWidth) {
+        leiste.scrollLeft = Math.max(0, aktiv.offsetLeft - leiste.offsetLeft - (leiste.clientWidth - aktiv.offsetWidth) / 2);
+      }
+    };
+    mitte();
+    requestAnimationFrame(mitte);
   }
 
   // ---------------------------------------------------------------- Menü

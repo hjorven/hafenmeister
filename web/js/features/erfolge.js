@@ -118,7 +118,7 @@ export function init(game) {
   game.on('ziel:erreicht', () => extra('ziel'));
   game.on('wochenziel:erreicht', () => extra('woche'));
   game.on('event:end', (e) => { const ev = e?.event; if ((typeof ev === 'object' ? ev?.id : ev) === 'sturm') extra('sturm'); });
-  for (const n of ['logbuch:neu', 'stammgast:neu', 'bauen:gebaut', 'services:gebaut', 'stufe']) game.on(n, bald);
+  for (const n of ['logbuch:neu', 'stammgast:neu', 'bauen:gebaut', 'services:gebaut', 'stufe', 'besucher:neu']) game.on(n, bald);
   game.on('spielstand-geladen', () => { ruhig = true; offeneMeldungen.length = 0; schliesseMeldung(); bald(); dingeAufbauen(); });
 
   function verkuende(e) {

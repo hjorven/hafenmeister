@@ -695,7 +695,7 @@ export function init(game) {
       if (d.flotte) b.append(el('span', 'hm-funk-marke hm-funk-flotte', `Flottille ×${d.flotteRest}`));
       else if (d.angemeldet) b.append(el('span', 'hm-funk-marke', d.platz ? `Box ${d.platz}` : 'angemeldet'));
       // Angemeldete Boote: Antippen öffnet die Anmeldung (Box freihalten), sonst der Satz dazu
-      b.addEventListener('click', (e) => { e.stopPropagation(); if (!(d.angemeldet && game.funkAnmeldung?.zeige(d.id))) zeigeSatz(d, b); });
+      b.addEventListener('click', (e) => { e.stopPropagation(); if (!(d.angemeldet && (game.besucher?.zeige?.(d.id) || game.funkAnmeldung?.zeige(d.id)))) zeigeSatz(d, b); });
       return b;
     }));
     kuerzen();
