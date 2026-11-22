@@ -255,8 +255,11 @@ export function initEffects(game) {
   });
 
   const updateFireworks = () => {
-    const ev = game.events?.current?.event;
-    fireworks = !!ev && ev.evening === 'feuerwerk' && game.events.phase === 'abend';
+    const cur = game.events?.current;
+    const ev = cur?.event;
+    // Eigenes Hafenfest (P38): Feuerwerk nur, wenn gebucht (current.evening statt event.evening)
+    const abend = cur && 'evening' in cur ? cur.evening : ev?.evening;
+    fireworks = !!ev && abend === 'feuerwerk' && game.events.phase === 'abend';
   };
   game.on('event:phase', updateFireworks);
   game.on('event:start', updateFireworks);

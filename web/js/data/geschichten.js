@@ -324,7 +324,7 @@ export const GESCHICHTEN = [
     landgang: { aussicht: 20, seebruecke: 10, strand: 6 },
     texte: ['Will den Sonnenuntergang vom Steg aus sehen und bleibt über Nacht.', 'Ein Abend wie gemalt: bleibt bis morgen.'],
     logbuch: 'An einem Sommertag kamen Gäste nur für den Sonnenuntergang.' },
-  { id: 'festbesuch', art: 'besonders', ereignis: 'hafenfest', titel: 'Zum Hafenfest', groessen: ALLE, abStufe: 4,
+  { id: 'festbesuch', art: 'besonders', ereignis: 'hafenfest', titel: 'Zum Hafenfest', groessen: ALLE, abStufe: 3,
     landgang: { ort: 10, kiosk: 10, restaurant: 8, grillplatz: 8 },
     texte: ['Kommt extra zum Hafenfest.', 'Hat vom Fest gehört und will dabei sein.'],
     logbuch: 'Zum Hafenfest kamen Boote von überall.' },

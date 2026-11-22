@@ -54,6 +54,7 @@ const MODULES = [
   './features/tagesziele.js',
   './features/wetterflagge.js',
   './features/wind.js',                // P34: Wind im Hafen, Windlage der Plätze, Anlegen gegen den Wind
+  './features/hafenfest.js',           // P38: eigenes Hafenfest einmal je Saison (docs/hafenfest.md)
   './features/hafen-schauen.js',
   './features/einstieg.js',
   './features/aufstieg.js',
