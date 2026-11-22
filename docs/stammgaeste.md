@@ -49,23 +49,27 @@ Wo man sie sieht:
 
 ## Tagesgast in der Box eines Tagestörns (H9)
 
-Fährt ein Dauerlieger morgens zu einer Runde hinaus (Tagestörn, `dauerlieger.tagestoernChance`), ist seine
-Box bis zum Abend frei, aber nur für einen **kurzen Halt** (Boote ohne Übernachtung, `sim.isShortStay`):
+Fährt ein Dauerlieger morgens zu einer Runde hinaus (Tagestörn, `dauerlieger.tagestoernChance`), kommt er am
+Nachmittag zurück (`dauerlieger.tagestoernZurueck`, 62 bis 85 Prozent des Tages). Bis dahin ist seine Box frei,
+aber nur für einen **kurzen Halt** (Boote ohne Übernachtung, `sim.isShortStay`), der vor der Rückkehr wieder
+fort ist (Liegezeit plus `dauerlieger.kurzVorlauf` für An- und Abfahrt):
 
 - Das Schild bleibt rot, ein Gast über Nacht passt nicht hinein. Zieht man ihn trotzdem hin, steht
-  „Der Dauerlieger ist nur auf Tagestörn. Bis zum Abend darf hier nur ein Boot für einen kurzen Halt liegen.“
+  „Der Dauerlieger ist nur auf Tagestörn. Bis zu seiner Rückkehr darf hier nur ein Boot für einen kurzen Halt
+  liegen.“ Kurz vor der Rückkehr: „Der Dauerlieger kommt bald von seinem Tagestörn zurück.“
 - Ein kurzer Halt rastet ein wie in jeder freien Box, auch Büro und „Einfahren lassen“ nehmen die Box.
-  Die Platzkarte sagt: „Auf Tagestörn, abends zurück. Bis dahin darf ein Boot für einen kurzen Halt hier festmachen.“
-- Kurze Halte legen am Nachmittag ab. Abends legt der Dauerlieger an. Legt der Gast gerade noch ab, wartet
-  das Boot und kommt in der Nacht, ohne Kündigung. Bleibt jemand über Nacht (Sturm), wird aus dem Tagestörn
-  ein Törn bis zur nächsten Nacht.
+  Die Platzkarte sagt: „Auf Tagestörn, am Nachmittag zurück. Bis dahin darf ein Boot für einen kurzen Halt hier festmachen.“
+- Liegt zur Rückkehr noch ein kurzer Halt in der Box (er kam spät an), kreist der Dauerlieger draußen weiter und
+  fährt erst herein, wenn die Box frei ist: kein Stau vor der Box, kein Hinweis zum Umlegen, kein Ärger.
+  Spätestens abends (Hook 'eveningTick' in `sim.js`, läuft nur abends) oder in der Nacht liegt er wieder.
+  Bleibt jemand über Nacht (Sturm), wird aus dem Tagestörn ein Törn bis zur nächsten Nacht.
 
 Entschieden (Thread): H9 gilt nur für Dauerlieger. Gäste auf Tagestörn haben ihre Box für die Nacht bezahlt
 und kommen in dieselbe Box zurück (echter-hafen.md), die bleibt reserviert.
 
 Technik: Der Tagestörn löst das Boot nachts aus den Regeln wie ein mehrtägiger Törn (`p.boot`,
-`p.rueckNacht` = Vortag, `p.tagestoern`); `fitHook` gibt dann `dauerTag` für alle außer kurzen Halten,
-`abendHook` legt an. `aufTagestoern(state, platzId)`; `draussenBis` zählt nur mehrtägige Törns.
+`p.rueckNacht` = Vortag, `p.tagestoern`, `p.zurueckUm`); `fitHook` gibt dann `dauerTag` für alle außer kurzen
+Halten (`dauerBald`, wenn er zu spät fort wäre), `tickHook` legt ab `p.zurueckUm` an, sobald die Box frei ist. `aufTagestoern(state, platzId)`; `draussenBis` zählt nur mehrtägige Törns.
 Alte Spielstände mit Tagestörn ohne gelöstes Boot laufen weiter wie vorher.
 
 ## Technik

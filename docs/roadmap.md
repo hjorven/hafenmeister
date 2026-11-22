@@ -441,7 +441,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | H6 | Lieblingsplatz eines Stammgasts | erledigt (P25): Box des letzten zufriedenen Besuchs, Stander über der Box | P25 |
 | H7 | Sichtbare Treue: Wimpel je fünf Besuche | erledigt (P25): Doppelstander am Heck | P25 |
 | H8 | Stammgäste wachsen mit (Wünsche, größeres Boot) | erledigt (P25) | P25 |
-| H9 | Leere Box während eines Tagestörns für einen Tagesgast | erledigt (P25): Box eines Dauerliegers auf Tagestörn nimmt bis zum Abend einen kurzen Halt ([stammgaeste.md](stammgaeste.md)) | P25 |
+| H9 | Leere Box während eines Tagestörns für einen Tagesgast | erledigt (P25): Box eines Dauerliegers auf Tagestörn nimmt bis zur Rückkehr am Nachmittag einen kurzen Halt ([stammgaeste.md](stammgaeste.md)) | P25 |
 | H10 | Dauerlieger vor Vertragsende kündigen kostet | erledigt (PR 149) | P01 |
 
 ### I Tagesziele, Logbuch, Abschluss und Endlosspiel

@@ -29,7 +29,7 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     berths: list,
     // Päckchenplätze (P27) stehen nur hier, nicht in berths: Listen, Schilder und Auslastung kennen sie nicht
     berthById: Object.fromEntries([...list, ...raftBerths(list, r)].map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], arrivals: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [] },
+    hooks: { modifiers: [], arrival: [], arrivals: [], evening: [], eveningTick: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [] },
   };
 }
 
@@ -2918,6 +2918,7 @@ export function tick(state, ctx, dt) {
       // Abends läuft keine Geduld ab, aber wer noch an der Boje liegt, kann weiter einfahren
       if (queue.overnight) queueStep(state, ctx, events, false);
       shortStayStep(state, ctx, events);
+      for (const fn of ctx.hooks.eveningTick) fn({ state, ctx, events });
     }
   }
   return events;

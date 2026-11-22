@@ -326,7 +326,9 @@ export const ECONOMY = {
     vorauskasse: true,         // true: Saisonpacht im Voraus (Rest der Saison, dann jede Saison neu);
                                // false: jeden Abend anteilGastpreis des Gastpreises
     hoechstAnteil: 0.25,       // höchstens ein Viertel der Plätze (fest vergebene zählen nicht)
-    tagestoernChance: 0.4,     // je Tag: morgens raus, abends zurück
+    tagestoernChance: 0.4,     // je Tag: morgens raus, am Nachmittag zurück
+    tagestoernZurueck: [0.62, 0.85],  // dann zu diesem Anteil des Tages (liegt noch ein kurzer Halt in der Box: sobald sie frei ist)
+    kurzVorlauf: 0.08,         // H9: ein kurzer Halt darf in die Box, wenn er so viel Tag vor der Rückkehr fort ist
     toernChance: 0.12,         // je Tag: Törn über mehrere Tage, Platz frei für Gäste
     toernTage: [1, 2],
     frueherZurueck: 0.35,      // Anteil der Törns, von denen das Boot schon am Nachmittag des letzten Tages zurückkommt

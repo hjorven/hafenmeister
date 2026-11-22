@@ -645,7 +645,7 @@ test('H9: abends ist der Dauerlieger zurück, der kurze Halt ist dann fort', () 
   assert.ok(!ev.some((e) => e.type === 'dauerKuendigung'));
 });
 
-test('H9: legt der kurze Halt abends noch ab, kommt der Dauerlieger nachts, ohne Kündigung', () => {
+test('H9: legt der kurze Halt abends noch ab, kommt der Dauerlieger danach, ohne Kündigung', () => {
   const { ctx, state } = neu(7);
   nurTagestoern(ctx);
   UMWELT.sturm = () => false;
@@ -659,6 +659,25 @@ test('H9: legt der kurze Halt abends noch ab, kommt der Dauerlieger nachts, ohne
   assert.equal(aufTagestoern(state, platz), true, 'Box noch nicht frei: Boot bleibt draußen');
   assert.ok(!abend.some((e) => e.type === 'dauerKuendigung'));
   assert.equal(p.kuendigung, null);
+  // Noch am Abend: sobald die Box frei ist, legt er an
+  const spaet = [];
+  ctx.hooks.eveningTick.forEach((fn) => fn({ state, ctx, events: spaet }));
+  assert.equal(aufTagestoern(state, platz), true, 'solange der Gast ablegt, wartet er');
+  delete state.leaving[platz];
+  ctx.hooks.eveningTick.forEach((fn) => fn({ state, ctx, events: spaet }));
+  assert.ok(spaet.some((e) => e.type === 'dauerEinlaufen' && e.boatId === boatId));
+  assert.equal(state.berths[platz], boatId);
+});
+
+test('H9: verpasst er auch den Abend, kommt er in der Nacht', () => {
+  const { ctx, state } = neu(7);
+  nurTagestoern(ctx);
+  UMWELT.sturm = () => false;
+  const platz = freierPlatz(state, ctx);
+  const { boatId } = machDauerplatz(state, ctx, platz);
+  sim.runDay(state, ctx);
+  state.leaving = { ...(state.leaving || {}), [platz]: { boatId: 4242, at: 0 } };
+  ctx.hooks.evening.forEach((fn) => fn({ state, ctx, events: [] }));
   delete state.leaving[platz];
   const nacht = [];
   ctx.hooks.night.forEach((fn) => fn({ state, ctx, events: nacht }));
@@ -682,7 +701,7 @@ test('H9: bleibt jemand über Nacht in der Box, wird ein Törn bis morgen Nacht 
 
 test('H9: über viele Tage nie zwei Boote in der Box, der Dauerlieger kommt immer wieder', () => {
   const { ctx, state } = neu(9);
-  ctx.rules.dauer = { ...ctx.rules.dauer, toernChance: 0.1, tagestoernChance: 0.6 };
+  ctx.rules.dauer = { ...ctx.rules.dauer, toernChance: 0, tagestoernChance: 0.6 };
   const platz = freierPlatz(state, ctx);
   const { boatId } = machDauerplatz(state, ctx, platz);
   let raus = 0;
@@ -715,4 +734,53 @@ test('H9: Spielstand von vor H9 (Tagestörn ohne gelöstes Boot) läuft weiter w
   assert.equal(p.tagestoern, false);
   assert.equal(state.berths[platz], boatId);
   assert.ok(ev.some((e) => e.type === 'dauerEinlaufen' && e.tagestoern));
+});
+
+test('H9: am Nachmittag zurück, ein kurzer Halt nur, wenn er vorher fort ist', () => {
+  const { ctx, state } = neu(11);
+  nurTagestoern(ctx);
+  UMWELT.sturm = () => false;
+  const platz = freierPlatz(state, ctx);
+  const { boatId } = machDauerplatz(state, ctx, platz);
+  sim.runDay(state, ctx);
+  const p = dauerState(state).plaetze[platz];
+  const R = regeln(ctx);
+  assert.ok(p.zurueckUm >= R.tagestoernZurueck[0] && p.zurueckUm <= R.tagestoernZurueck[1], `zurueckUm ${p.zurueckUm}`);
+  const tag = ctx.rules.dayLength;
+  const berth = ctx.berthById[platz];
+  // Ein kurzer Halt, der erst nach der Rückkehr fort wäre, passt nicht
+  state.clock = (p.zurueckUm - 0.1) * tag;
+  assert.equal(fitHook({ state, ctx, boat: { stationed: false, nights: 0, stay: 0.2 }, berth }), 'dauerBald');
+  state.clock = (p.zurueckUm - 0.3) * tag;
+  assert.equal(fitHook({ state, ctx, boat: { stationed: false, nights: 0, stay: 0.2 }, berth }), null);
+  // Bis zur Rückkehr spielen: er legt am Nachmittag an, nicht erst abends
+  state.clock = 1;
+  let ev = [];
+  let n = 0;
+  while (!state.boats[boatId] && state.phase === 'day' && n++ < 5000) ev = ev.concat(sim.tick(state, ctx, 1));
+  assert.equal(state.phase, 'day');
+  assert.ok(state.clock >= p.zurueckUm * tag - 1 || state.clock >= (dauerState(state).plaetze[platz].zurueckUm ?? 0) * tag - 1);
+  assert.equal(state.berths[platz], boatId);
+  assert.ok(ev.some((e) => e.type === 'dauerEinlaufen' && e.tagestoern));
+});
+
+test('H9: liegt zur Rückkehr noch ein kurzer Halt in der Box, wartet er, bis sie frei ist', () => {
+  const { ctx, state } = neu(12);
+  nurTagestoern(ctx);
+  UMWELT.sturm = () => false;
+  const platz = freierPlatz(state, ctx);
+  const { boatId } = machDauerplatz(state, ctx, platz);
+  sim.runDay(state, ctx);
+  const p = dauerState(state).plaetze[platz];
+  const kurz = gastAuf(state, ctx, platz, 0);
+  state.clock = p.zurueckUm * ctx.rules.dayLength + 1;
+  const ev = [];
+  ctx.hooks.tick.forEach((fn) => fn({ state, ctx, events: ev }));
+  assert.equal(state.berths[platz], kurz, 'der kurze Halt bleibt, bis er ablegt');
+  assert.ok(!ev.some((e) => e.type === 'dauerWartet'), 'kein Hinweis zum Umlegen: der Gast legt ohnehin ab');
+  delete state.berths[platz];
+  state.boats[kurz].status = 'away';
+  ctx.hooks.tick.forEach((fn) => fn({ state, ctx, events: ev }));
+  assert.equal(state.berths[platz], boatId);
+  assert.equal(p.kuendigung, null);
 });
