@@ -33,14 +33,14 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 
 **[Roadmap interaktiv ansehen](https://hjorven.github.io/hafenmeister/roadmap/)**: alle Pakete mit Filter nach Welle und Status, Suche und den Einzelpunkten je Paket. Quelle ist [docs/roadmap.md](docs/roadmap.md).
 
-<a href="https://hjorven.github.io/hafenmeister/roadmap/"><img src="docs/roadmap-fortschritt.svg" alt="Fortschritt der Roadmap: 54 von 86 Paketen erledigt" width="100%"></a>
+<a href="https://hjorven.github.io/hafenmeister/roadmap/"><img src="docs/roadmap-fortschritt.svg" alt="Fortschritt der Roadmap: 55 von 86 Paketen erledigt" width="100%"></a>
 
 | Welle | Thema | Fortschritt | erledigt | angefangen | offen |
 |---|---|---|---|---|---|
 | [0](https://hjorven.github.io/hafenmeister/roadmap/#welle=0) | Gelände und Bootswege | `██████████` 100 % | 6 | 0 | 0 |
 | [1](https://hjorven.github.io/hafenmeister/roadmap/#welle=1) | Fehler und Fundament | `██████████` 100 % | 12 | 0 | 0 |
 | [2](https://hjorven.github.io/hafenmeister/roadmap/#welle=2) | Kernschleife und Rückmeldung | `██████████` 100 % | 15 | 0 | 0 |
-| [3](https://hjorven.github.io/hafenmeister/roadmap/#welle=3) | Tiefe und Hafenleben | `█████████░` 93 % | 19 | 1 | 1 |
+| [3](https://hjorven.github.io/hafenmeister/roadmap/#welle=3) | Tiefe und Hafenleben | `██████████` 98 % | 20 | 1 | 0 |
 | [4](https://hjorven.github.io/hafenmeister/roadmap/#welle=4) | Langzeit, Spielgefühl, Welt | `██░░░░░░░░` 18 % | 2 | 1 | 11 |
 | [5](https://hjorven.github.io/hafenmeister/roadmap/#welle=5) | Regionen und Online | `░░░░░░░░░░` 0 % | 0 | 0 | 2 |
 | [6](https://hjorven.github.io/hafenmeister/roadmap/#welle=6) | Ausbau Stufe 7 bis 20 | `░░░░░░░░░░` 0 % | 0 | 0 | 16 |
@@ -48,13 +48,13 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 **Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
 
 <table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P37"><img src="web/roadmap/bilder/p37-pr408-handy-notruf.jpg" alt="Notruf: Box für den Havaristen wählen" width="100%"></a><br><sub>P37 · Notruf: Box für den Havaristen wählen · PR 408</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P29"><img src="web/roadmap/bilder/p29-pr420-pc-schlick.jpg" alt="Niedrigwasser bei Westwind: Boote liegen im Schlick" width="100%"></a><br><sub>P29 · Niedrigwasser bei Westwind: Boote liegen im Schlick · PR 420</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P36"><img src="web/roadmap/bilder/p36-pr421-pc-boje-ziehen.jpg" alt="Boot auf eine Muringboje ziehen" width="100%"></a><br><sub>P36 · Boot auf eine Muringboje ziehen · PR 421</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P35"><img src="web/roadmap/bilder/p35-pr413-pc-tafel.jpg" alt="Preistafel am Hafenbüro" width="100%"></a><br><sub>P35 · Preistafel am Hafenbüro · PR 413</sub></td>
 </tr><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P35"><img src="web/roadmap/bilder/p35-pr413-pc-tafel.jpg" alt="Preistafel am Hafenbüro" width="100%"></a><br><sub>P35 · Preistafel am Hafenbüro · PR 413</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P40"><img src="web/roadmap/bilder/p40-pr416-pc-koenigsyacht.jpg" alt="Königsyacht meldet sich per Funk, Ehrenplatz freihalten" width="100%"></a><br><sub>P40 · Königsyacht meldet sich per Funk, Ehrenplatz freihalten · PR 416</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P32"><img src="web/roadmap/bilder/p32-pr414-pc-einfahrt.jpg" alt="Flottille fährt geschlossen ein und legt nebeneinander an" width="100%"></a><br><sub>P32 · Flottille fährt geschlossen ein und legt nebeneinander an · PR 414</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P39"><img src="web/roadmap/bilder/p39-pr412-pc-kurs.jpg" alt="Jugendtraining: Optis segeln ihren Kurs vor dem Hafen" width="100%"></a><br><sub>P39 · Jugendtraining: Optis segeln ihren Kurs vor dem Hafen · PR 412</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (6 von 6 erledigt)</summary>
@@ -112,7 +112,7 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 
 </details>
 
-<details><summary><b>Welle 3: Tiefe und Hafenleben</b> (19 von 21 erledigt)</summary>
+<details><summary><b>Welle 3: Tiefe und Hafenleben</b> (20 von 21 erledigt)</summary>
 
 | Paket | Titel | Status | PRs |
 |---|---|---|---|
@@ -130,7 +130,7 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 | [P34](https://hjorven.github.io/hafenmeister/roadmap/#paket=P34) | Wind im Hafen spürbar machen | **erledigt** | [#392](https://github.com/hjorven/hafenmeister/pull/392) |
 | [P35](https://hjorven.github.io/hafenmeister/roadmap/#paket=P35) | Preisstufe am Hafenbüro | **erledigt** | [#413](https://github.com/hjorven/hafenmeister/pull/413) |
 | [P36](https://hjorven.github.io/hafenmeister/roadmap/#paket=P36) | Bojenfeld im See | **erledigt** | [#421](https://github.com/hjorven/hafenmeister/pull/421) |
-| [P37](https://hjorven.github.io/hafenmeister/roadmap/#paket=P37) | Havarist einschleppen | offen |  |
+| [P37](https://hjorven.github.io/hafenmeister/roadmap/#paket=P37) | Havarist einschleppen | **erledigt** | [#408](https://github.com/hjorven/hafenmeister/pull/408) |
 | [P38](https://hjorven.github.io/hafenmeister/roadmap/#paket=P38) | Eigenes Hafenfest ansetzen | **erledigt** | [#405](https://github.com/hjorven/hafenmeister/pull/405) |
 | [P39](https://hjorven.github.io/hafenmeister/roadmap/#paket=P39) | Jugendtraining am Segelclub | **erledigt** | [#412](https://github.com/hjorven/hafenmeister/pull/412) |
 | [P40](https://hjorven.github.io/hafenmeister/roadmap/#paket=P40) | Seltene Besucher | **erledigt** | [#416](https://github.com/hjorven/hafenmeister/pull/416) |

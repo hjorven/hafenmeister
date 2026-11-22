@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "9f8aa02"
+  "commit": "d77eba3"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -883,15 +883,20 @@
    "id": "P37",
    "titel": "Havarist einschleppen",
    "inhalt": "F11",
-   "thread": "neu",
+   "thread": "erledigt (PR 408, havarie.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    408
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F11"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    100,
+    101
+   ]
   },
   {
    "id": "P38",
@@ -2143,8 +2148,8 @@
   {
    "code": "F11",
    "text": "Havarist wird eingeschleppt, braucht sofort einen Platz, Ruf und neuer Stammgast",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P37, havarie.md): Notruf im Meldeplatz, Box wählen, Fischer, Arbeitsboot oder Seenotretter schleppen ihn herein; Schlepplohn, +1 Anker, sofort Stammgast, Werft repariert",
    "pakete": [
     "P37"
    ],
@@ -3086,8 +3091,8 @@
   {
    "code": "E8",
    "text": "Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste)",
-   "status": "teilweise",
-   "statusText": "teilweise: Reservierungen erledigt (P28, PR 288), eigene Feste erledigt (P38); Havaristen kommen mit P37",
+   "status": "erledigt",
+   "statusText": "erledigt: Reservierungen (P28, PR 288), Havaristen (P37), eigene Feste (P38)",
    "pakete": [
     "P02"
    ],
@@ -3111,7 +3116,7 @@
    "code": "Svc F2",
    "text": "Jeder Service ändert das Spiel (Slip, Mastenkran, Fahrradverleih, Räucherei, Werft)",
    "status": "erledigt",
-   "statusText": "erledigt (P23): Trailerboote am Slip, Mast legen und Radtour verlängern den Aufenthalt, Werft holt Reparaturboote, Räucherei bekommt Abendgäste; Havaristen folgen mit P37",
+   "statusText": "erledigt (P23): Trailerboote am Slip, Mast legen und Radtour verlängern den Aufenthalt, Werft holt Reparaturboote, Räucherei bekommt Abendgäste; Werft repariert eingeschleppte Havaristen (P37)",
    "pakete": [
     "P23"
    ],
@@ -4616,11 +4621,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 19,
+    "erledigt": 20,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 1,
+    "offen": 0,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4704,20 +4709,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 54,
+  "erledigt": 55,
   "teilweise": 2,
   "arbeit": 0,
   "frage": 0,
-  "offen": 30,
+  "offen": 29,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 182,
-  "teilweise": 6,
+  "erledigt": 184,
+  "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 29,
+  "offen": 28,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5921,9 +5926,34 @@
    "datum": "2026-11-22",
    "quelle": "baggern/pc-6-schlick.png",
    "nr": 99
+  },
+  {
+   "datei": "p37-pr408-pc-schlepp.jpg",
+   "pakete": [
+    "P37"
+   ],
+   "titel": "Havarist wird in den Hafen geschleppt",
+   "pr": 408,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "havarie/pc-3-schlepp.png",
+   "nr": 100
+  },
+  {
+   "datei": "p37-pr408-handy-notruf.jpg",
+   "pakete": [
+    "P37"
+   ],
+   "titel": "Notruf: Box für den Havaristen wählen",
+   "pr": 408,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "havarie/handy-1-notruf.png",
+   "nr": 101
   }
  ],
  "neueBilder": [
+  101,
   99,
   97,
   95,
@@ -5931,10 +5961,25 @@
   91,
   90,
   88,
-  86,
-  84
+  86
  ],
  "merges": [
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: Bilder für P37 Havarist einschleppen (PR 408)",
+   "pr": 424,
+   "pakete": [
+    "P37"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P37: Havarist einschleppen",
+   "pr": 408,
+   "pakete": [
+    "P37"
+   ]
+  },
   {
    "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: Bilder für P29 Baggern (PR 420)",
@@ -6012,22 +6057,6 @@
    "titel": "Schichttest: Schicht 25 Wind und 26 Stammgäste, Wetterbericht nennt Starkwind an Regentagen",
    "pr": 415,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Flottillen halten beim Selbst-Einfahren zusammen (P32-Rest)",
-   "pr": 414,
-   "pakete": [
-    "P32"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P39 Jugendtraining am Segelclub",
-   "pr": 412,
-   "pakete": [
-    "P39"
-   ]
   }
  ]
 }
