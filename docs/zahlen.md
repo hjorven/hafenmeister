@@ -90,6 +90,15 @@ Liegegeld je angefangenem Meter Bootslänge (B10); der Grundpreis ist der Schnit
 
 Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab der Stufe mit nebenkosten: 10 % auf jedes kassierte Liegegeld. Von Hand eingewiesen: +0,25 Anker. Sonderfälle fahren nach 25 s selbst ein.
 
+## Wind
+
+| Was | Wert |
+|---|---|
+| Starkwind | ab Windstärke 0,55, Windlage zählt ab Stufe 2 (nicht am Sturmtag) |
+| Windlage | offen ab 90 m Wellenweg (−0,5 Anker), geschützt bis 35 m (+0,5 Anker), Schwimmsteg dämpft auf 60 % |
+| Große Boote | L, XL: Wind von achtern (Kosinus unter -0,5) −0,25 Anker, Anlegen mit 60 % Tempo |
+| Richtungen | west 24 %, suedwest 20 %, nordwest 14 %, sued 8 %, nord 8 %, ost 10 %, nordost 8 %, suedost 8 %; Wetterlage 3 Tage, ±20 Grad je Tag, Sturm aus west, nordwest |
+
 ## Flottillen
 
 | Was | Wert |

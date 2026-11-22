@@ -240,7 +240,9 @@ export function init(game) {
           // Dienst eines Service (P23: Mast legen, Radtour, Reparatur): darum bleibt das Boot länger
           game.services?.dienstText?.(b) ? el('p', { class: 'card-geschichte card-dienst' }, game.services.dienstText(b)) : null,
           // Flottille (P32): wer dazugehört und was die Gruppe will
-          flotte ? el('p', { class: 'card-geschichte card-flotte' }, flotteKopf(b, flotte)) : null),
+          flotte ? el('p', { class: 'card-geschichte card-flotte' }, flotteKopf(b, flotte)) : null,
+          // Starkwind (P34): was Schild, Welle und Windlinien über den Boxen bedeuten
+          game.wind?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind' }, game.wind.kartenSatz(b)) : null),
         el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Schließen', title: 'Schließen', onclick: schliessen }, 'Schließen')),
       el('ul', { class: 'hm-fakten', 'aria-label': 'Eckdaten' },
         el('li', { class: 'groesse', title: 'Größenklasse' }, `Größe ${b.size}`),

@@ -53,6 +53,7 @@ const MODULES = [
   './geschichten/geschichten.js',      // Bootsgeschichten: Anlass je Boot (docs/bootsgeschichten.md)
   './features/tagesziele.js',
   './features/wetterflagge.js',
+  './features/wind.js',                // P34: Wind im Hafen, Windlage der Plätze, Anlegen gegen den Wind
   './features/hafen-schauen.js',
   './features/einstieg.js',
   './features/aufstieg.js',

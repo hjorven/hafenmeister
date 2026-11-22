@@ -81,6 +81,25 @@ export const ECONOMY = {
   // Wird das äußere in eine Box verholt, entfällt sein Abzug.
   paeckchen: { abStufe: 2, platzarten: ['stirn', 'kai'], liegegeld: 0.5, ruf: 0.5, naechteHoechstens: 1, laengeMehr: 0.5 },
 
+  // Wind im Hafen (P34, F5 und F35, docs/wind.md). Die Windstärke des Tages (0 bis 1) kommt aus dem
+  // Wetter (zeit.jahreszeitWirkung.wind, Ereignisse), die Richtung aus richtungen: eine Wetterlage hält
+  // wetterlageTage Tage, jeder Tag dreht bis streuung Grad davon weg, Sturm kommt aus sturmAus.
+  // Windlage eines Platzes: Wellenweg gegen den Wind bis Land, Mole oder Kai (Schwimmstege dämpfen um
+  // stegDaempfung). Ab offenAb Metern liegt der Platz offen, bis geschuetztBis geschützt.
+  // Ab stark (Starkwind) und ab abStufe: Gast an offenem Platz gibt unruhig Anker weniger, an
+  // geschütztem geschuetzt Anker mehr (Sturmtage nicht, dort gilt das Sturm-Ereignis).
+  // Große Boote (grosse): mit dem Wind von achtern (Kosinus Bug zu Wind unter rueckenwindAb) legen sie
+  // bei Starkwind langsamer an (anlegenTempo) und geben rueckenwind Anker weniger; Bug gegen den Wind
+  // (ab gegenWindAb) ist leicht. wahl: Vorliebe der Platzwahl von Büro und "Einfahren lassen".
+  wind: {
+    stark: 0.55, abStufe: 2, unruhig: 0.5, geschuetzt: 0.5,
+    offenAb: 90, geschuetztBis: 35, stegDaempfung: 0.6,
+    grosse: ['L', 'XL'], rueckenwind: 0.25, rueckenwindAb: -0.5, gegenWindAb: 0.5, anlegenTempo: 0.6,
+    wahl: { geschuetzt: 40, offen: -40, gegenWind: 30 },
+    richtungen: { west: 0.24, suedwest: 0.2, nordwest: 0.14, sued: 0.08, nord: 0.08, ost: 0.1, nordost: 0.08, suedost: 0.08 },
+    wetterlageTage: 3, streuung: 20, sturmAus: ['west', 'nordwest'],
+  },
+
   // Tagestörn: Gäste mit 2 oder mehr Nächten fahren mit dieser Wahrscheinlichkeit tagsüber
   // hinaus und kommen in dieselbe Box zurück (Box bleibt reserviert, Liegegeld zählt weiter).
   // raus und zurueck sind Anteile des Tages.
