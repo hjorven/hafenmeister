@@ -1078,6 +1078,28 @@
    "geraet": "pc",
    "datum": "2026-11-22",
    "quelle": "bojenfeld/pc-boot-auf-boje-ziehen.png"
+  },
+  {
+   "datei": "p29-pr420-pc-bagger.jpg",
+   "pakete": [
+    "P29"
+   ],
+   "titel": "Bagger vertieft einen Steg auf 2,0 m",
+   "pr": 420,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "baggern/pc-3-bagger.png"
+  },
+  {
+   "datei": "p29-pr420-pc-schlick.jpg",
+   "pakete": [
+    "P29"
+   ],
+   "titel": "Niedrigwasser bei Westwind: Boote liegen im Schlick",
+   "pr": 420,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "baggern/pc-6-schlick.png"
   }
  ]
 }
