@@ -941,7 +941,7 @@ class CallTask {
 class LinesTask {
   constructor(on) { this.on = on; }
   start(b) {
-    this.i = 0; this.t = 0; this.told = -1;
+    this.i = 0; this.t = 0; this.told = -1; this.halt = 0;
     if (this.on) b.makeLines();
     this.n = b.lines.length;
     this.order = this.on ? b.lines.map((_, i) => i) : b.lines.map((_, i) => this.n - 1 - i);
@@ -951,7 +951,14 @@ class LinesTask {
       if (!this.on) b.lines.length = 0;
       return true;
     }
-    const dur = this.on ? 0.5 : 0.35;
+    // Leinen annehmen (P48, features/leinen.js): Vor der ersten Leine wartet die Crew kurz, ob jemand
+    // am Steg sie annimmt (b.leinenHalten(), höchstens 20 s Spielzeit). Mit Helfer gehen die Leinen zügiger.
+    if (this.on && this.told === -1 && this.halt < 20 && b.leinenHalten?.()) {
+      this.halt += dt;
+      b.setSpeed(0, dt);
+      return false;
+    }
+    const dur = this.on ? (b.leinenHelfer ? 0.32 : 0.5) : 0.35;
     const line = b.lines[this.order[this.i]];
     if (this.told !== this.i) { this.told = this.i; b.emit('boat:line', { on: this.on, index: this.order[this.i] }); }
     this.t += dt;
@@ -1593,25 +1600,30 @@ class BoatAnim {
   // Festmacher je nach Platzart: Box = 2 Vorleinen zum Steg, 2 Achterleinen zu den Pfaehlen;
   // laengsseits = Vor- und Achterleine, ab 9 m dazu zwei Springs.
   makeLines() {
-    const b = this.berth;
     this.lines.length = 0;
-    if (!b) return;
+    this.lines.push(...this.linienFuer(this.berth));
+  }
+
+  /** Festmacher für einen Liegeplatz: [{ from (am Boot, lokal), to (Welt), p: 0, slack }], ohne das Boot zu ändern. */
+  linienFuer(b) {
+    const lines = [];
+    if (!b) return lines;
     const L = this.info.length, B = this.info.beam, c = this.cleat;
     const f = this.finalPose(b);
     const dx = Math.cos(b.heading), dz = -Math.sin(b.heading);
     const px = Math.sin(b.heading), pz = Math.cos(b.heading);
     const at = (along, across, y) => new THREE.Vector3(b.x + dx * along + px * across, y, b.z + dz * along + pz * across);
     const atF = (along, across, y) => new THREE.Vector3(f.x + dx * along + px * across, y, f.z + dz * along + pz * across);
-    const add = (from, to, slack = 1) => { if (this.lines.length < MAX_LINES) this.lines.push({ from, to, p: 0, slack }); };
+    const add = (from, to, slack = 1) => { if (lines.length < MAX_LINES) lines.push({ from, to, p: 0, slack }); };
 
     if (b.kind === 'buoy') {
       add(c.bow, new THREE.Vector3(b.x, b.deck, b.z), 1.2);
-      return;
+      return lines;
     }
     if (b.bollards?.length) {
       // eigene Poller vom Liegeplatz: abwechselnd Bug und Heck
       b.bollards.forEach((p, i) => add(i % 2 ? c.stern : c.bow, new THREE.Vector3(p.x, p.y ?? b.deck, p.z)));
-      return;
+      return lines;
     }
     if (BOX_KINDS.has(b.kind)) {
       const half = b.length / 2;
@@ -1621,7 +1633,7 @@ class BoatAnim {
       const sternTo = b.kind === 'finger' ? half - 1.2 : half;
       add(c.sternPort ?? c.stern, at(-sternTo, -b.width / 2, b.kind === 'finger' ? b.deck : 1.0), 1.2);
       add(c.sternStbd ?? c.stern, at(-sternTo, b.width / 2, b.kind === 'finger' ? b.deck : 1.0), 1.2);
-      return;
+      return lines;
     }
     const s = b.side;
     const edge = s * (B / 2 + Math.max(0.6, B * 0.15));
@@ -1633,6 +1645,7 @@ class BoatAnim {
       add(mid, atF(-L * 0.3, edge, b.deck), 0.5);
       add(mid, atF(L * 0.3, edge, b.deck), 0.5);
     }
+    return lines;
   }
 
   emit(name, data = {}) {

@@ -1144,6 +1144,28 @@
    "geraet": "handy",
    "datum": "2026-11-22",
    "quelle": "gaestewuensche/p31-handy-waschhaus.png"
+  },
+  {
+   "datei": "p46-pr427-pc-lichterketten.jpg",
+   "pakete": [
+    "P46"
+   ],
+   "titel": "Ruhiger Abend: Lichterketten an den Stegen",
+   "pr": 427,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "stimmung/pc-2-lichterketten-an.png"
+  },
+  {
+   "datei": "p46-pr427-handy-abend.jpg",
+   "pakete": [
+    "P46"
+   ],
+   "titel": "Abendstimmung im großen Hafen",
+   "pr": 427,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "stimmung/handy-1-lichterketten-stufe6.png"
   }
  ]
 }
