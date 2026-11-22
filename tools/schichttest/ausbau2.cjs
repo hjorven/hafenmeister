@@ -324,7 +324,7 @@ async function flottillen(t, z) {
   // Bei 8x spielen, bis eine Flottille an den Bojen liegt (höchstens 10 min, an 15 bis 25 % der Tage)
   let f = await t.G(FLOTTE_DA);
   const t0 = Date.now();
-  while (!f && Date.now() - t0 < 10 * 60_000) {
+  while (!f && Date.now() - t0 < 20 * 60_000) {
     await setzeTempo(t, 'acht');
     // Früh bremsen: sobald eine Flottille unterwegs ist oder heute gleich kommt (bei 8x läge ein Boot nur Bruchteile
     // einer Sekunde an der Boje, bevor es selbst einfährt)
@@ -335,19 +335,30 @@ async function flottillen(t, z) {
     if (!(await winterWeg(t))) await fensterZu(t);
     f = await t.G(FLOTTE_DA);
   }
-  if (!f) { await t.hinweis('Flottillen', 'in 10 min bei 8x keine Flottille an den Bojen', { bild: false }); return; }
+  if (!f) { await t.hinweis('Flottillen', 'in 20 min bei 8x keine Flottille an den Bojen', { bild: false }); return; }
   await setzeTempo(t, 'pause');
   await t.hinweis('Flottille', `${f.name}: ${f.n} Boote, ${f.anBoje.length} an den Bojen`, { bild: true });
   // Antippen: die Bootskarte nennt die Gruppe
   const erstes = f.anBoje[0];
-  const lage = await insBild(t, (bid) => [window.__st.bootSchirm(bid)], erstes);
+  await setzeTempo(t, 'pause');
+  // Die Bojen ab Stufe 3 liegen draußen am Seegatt, oft am Bildrand neben dem Zeiger: Boot erst in die Bildmitte holen
+  const MITTIG = (bid) => { const p = window.__st.bootSchirm(bid); if (!p) return [p];
+    const innen = p.x > innerWidth * 0.2 && p.x < innerWidth * 0.8 && p.y > innerHeight * 0.2 && p.y < innerHeight * 0.8; return [{ ...p, frei: p.frei && innen }]; };
+  let lage = await insBild(t, MITTIG, erstes, 6);
   if (lage.ok) {
-    await t.sp.tippen(lage.p[0].x, lage.p[0].y);
-    const karte = await t.bis(() => document.body.classList.contains('card-boat') && !document.getElementById('card').hidden, null, 4000);
+    // Zweiter Versuch mit frischer Lage: ein kleines Boot verfehlt man leicht
+    let karte = false;
+    for (let v = 0; v < 2 && !karte && lage.ok; v++) {
+      if (v) lage = await insBild(t, MITTIG, erstes, 6);
+      if (!lage.ok) break;
+      await t.sp.tippen(lage.p[0].x, lage.p[0].y);
+      karte = await t.bis(() => document.body.classList.contains('card-boat') && !document.getElementById('card').hidden, null, 4000);
+    }
     const txt = await t.G(() => document.getElementById('card')?.textContent || '');
-    await t.punkt('Bootskarte nennt die Flottille', karte && txt.includes(f.name), karte ? `"${f.name}" ${txt.includes(f.name) ? 'steht' : 'fehlt'} in der Karte` : 'Karte ging nicht auf', { bild: true, schwere: 'C' });
+    const sonst = karte ? '' : await t.G(() => `Karte ging nicht auf (Körper: ${document.body.className || '-'}, Karte ${document.getElementById('card')?.hidden ? 'zu' : 'offen'}, gewählt ${window.hafenmeister.sim.selected ?? '-'})`);
+    await t.punkt('Bootskarte nennt die Flottille', karte && txt.includes(f.name), karte ? `"${f.name}" ${txt.includes(f.name) ? 'steht' : 'fehlt'} in der Karte` : `${sonst}, Tipp bei ${Math.round(lage.p?.[0]?.x)},${Math.round(lage.p?.[0]?.y)}`, { bild: true, schwere: 'C' });
     await fensterZu(t);
-  } else await t.hinweis('Flottille', `Boot ${erstes} nicht frei im Bild`);
+  } else await t.hinweis('Flottille', `Boot ${erstes} nicht frei in der Bildmitte`);
   // Wie ein Spieler: jedes Boot der Gruppe, sobald es an der Boje liegt, an denselben Steg ziehen.
   // Zielsteg: wo schon ein Boot der Gruppe liegt, sonst der Steg mit den meisten freien passenden Boxen.
   const NAECHSTES = (fid) => { const S = window.hafenmeister.sim; const m = S.flottillenMitglieder(fid);
@@ -368,10 +379,15 @@ async function flottillen(t, z) {
     if (platz) gezogen++; else { await setzeTempo(t, 'normal'); await t.warte(1500); }
   }
   // Alle fest und zusammen an einem Steg?
+  // Nachzügler fahren selbst ein: nach Spielzeit warten (bis 300 s), nicht nach Echtzeit (der PC läuft unter Last mit 3 Bildern/s)
   await setzeTempo(t, 'drei');
   const LAGE = (fid) => { const S = window.hafenmeister.sim; const m = S.flottillenMitglieder(fid); return m.length ? S.flottille(m[0].id) : null; };
   let ende = await t.G(LAGE, f.id);
-  for (let i = 0; i < 60 && ende && ende.liegen < ende.n && !ende.zerrissen; i++) { await t.warte(1000); ende = (await t.G(LAGE, f.id)) || ende; }
+  const tz = await t.G(() => window.hafenmeister.time);
+  const t2 = Date.now();
+  while (ende && ende.liegen < ende.n && !ende.zerrissen && Date.now() - t2 < 240_000 && (await t.G(() => window.hafenmeister.time)) - tz < 300) {
+    await t.warte(1000); ende = (await t.G(LAGE, f.id)) || ende;
+  }
   await setzeTempo(t, 'pause');
   await t.punkt('Flottille liegt zusammen an einem Steg', !!ende && ende.together === true, ende ? `${gezogen} von Hand gezogen, Stege ${JSON.stringify(ende.stege)}, liegen ${ende.liegen}/${ende.n}${ende.zerrissen ? ', zerrissen' : ''}` : 'Flottille nicht mehr da', { bild: true, schwere: 'B' });
   z.flotte = f.id;
@@ -384,5 +400,157 @@ async function flottillenWieder(t, z) {
 }
 const S24 = { nr: 24, name: 'Flottillen', paket: 'P32', neu: flottillen, wieder: flottillenWieder };
 
-const SCHICHTEN = [S18, S19, S20, S21, S22, S23, S24];
+// ------------------------------------------------------------------ Schicht 25: Wind (P34)
+// Ab Stufe 2 an einem Starkwindtag: Ansage am Morgen, Wetterbericht mit Richtung, beim Ziehen Zeichen über den Boxen
+// (nur die Ausnahmen, passend zu den Regeln), das festgemachte Boot merkt sich die Windlage seiner Box.
+const WIND_HEUTE = () => { const G = window.hafenmeister; const w = G.wind; if (!w) return null; const h = w.heute; const st = G.sim.state;
+  return { tag: st.day, stufe: st.stage, stark: w.stark(), zaehlt: w.stark() && h.event !== 'sturm' && st.stage >= (G.sim.ctx.rules.wind?.from ?? 1), richtung: h.richtung, wind: h.wind, event: h.event }; };
+async function wind(t, z) {
+  await fensterZu(t);
+  await winterWeg(t);
+  let h = await t.G(WIND_HEUTE);
+  if (!h) { await t.punkt('Wind ist im Spiel (game.wind)', false, '', { schwere: 'B' }); return; }
+  if (h.stufe < 2) { await t.hinweis('Wind', `Starkwind wirkt erst ab Stufe 2 (jetzt ${h.stufe})`, { bild: false }); return; }
+  // Ansagen mitschreiben (der Meldeplatz zeigt sie nur 8 s)
+  await t.G(() => { const G = window.hafenmeister; window.__wb ||= []; if (G.banner && !G.banner.__st) { const z0 = G.banner.zeige; G.banner.zeige = (...a) => { window.__wb.push({ tag: G.sim.state.day, icon: a[0], titel: a[1] }); return z0(...a); }; G.banner.__st = true; } });
+  const tagStart = h.tag;
+  // Bis zu 15 min bei 8x spielen, bis ein Starkwindtag kommt, an dem die Windlage zählt (nicht Sturm)
+  const t0 = Date.now();
+  while (!h.zaehlt && Date.now() - t0 < 15 * 60_000) {
+    await setzeTempo(t, 'acht');
+    await t.bis((d) => { const G = window.hafenmeister; return G.sim.state.day > d && G.sim.state.phase !== 'night'; }, h.tag, 300_000);
+    await setzeTempo(t, 'pause');
+    if (!(await winterWeg(t))) await fensterZu(t);
+    h = await t.G(WIND_HEUTE);
+  }
+  if (!h.zaehlt) { await t.hinweis('Wind', `in 15 min bei 8x kein Starkwindtag (zuletzt Tag ${h.tag}, Wind ${h.wind?.toFixed(2)}${h.event ? ', ' + h.event : ''})`, { bild: false }); return; }
+  await t.hinweis('Starkwind', `Tag ${h.tag}, Stärke ${h.wind.toFixed(2)}, aus ${Math.round(h.richtung)} Grad`, { bild: true });
+  // Ansage: am ersten Starkwindtag einer Lage oder nach Drehung um 45 Grad
+  const ans = await t.G((tag) => { const G = window.hafenmeister; const r = G.sim.ctx.rules.wind; const v = G.events?.weather?.(tag - 1);
+    const heute = G.wind.heute; const gestern = v && v.wind >= r.strong && v.event !== 'sturm' && G.sim.state.stage >= (r.from ?? 1);
+    const dreh = v ? Math.abs((((heute.richtung - (v.richtung ?? 180)) % 360) + 540) % 360 - 180) : 999;
+    const lagen = [...G.wind.lagen().values()].some((x) => x.lage === 'offen' || x.lage === 'geschuetzt');
+    return { soll: lagen && (!gestern || dreh >= 45), ist: (window.__wb || []).filter((x) => x.tag === tag && /Starkwind aus/.test(x.titel || '')).map((x) => x.titel) }; }, h.tag);
+  if (ans.soll && h.tag > tagStart) await t.punkt('Ansage am Morgen nennt den Starkwind', ans.ist.length > 0, ans.ist.join(' | ') || 'keine Ansage', { bild: false, schwere: 'C' });
+  // Wetterbericht nennt die Richtung
+  const chip = t.page.locator('#weather-chip');
+  if (await chip.isVisible().catch(() => false)) {
+    await t.sp.knopf(chip);
+    const auf = await t.page.locator('#weather-panel').waitFor({ state: 'visible', timeout: 3000 }).then(() => true, () => false);
+    const txt = auf ? (await t.page.locator('#weather-panel').textContent()).replace(/\s+/g, ' ') : '';
+    await t.punkt('Wetterbericht nennt Starkwind mit Richtung', /Starkwind aus \S+/.test(txt), txt.slice(0, 160), { bild: true, schwere: 'C' });
+    if (auf) await t.sp.knopf(chip);
+    await fensterZu(t);
+  }
+  // Ein wartendes Boot ziehen; Zeichen beim Ziehen mitschreiben
+  await t.G(() => { const G = window.hafenmeister; if (!window.__wzAn) { window.__wzAn = true; G.on('ui:tow', (e) => { window.__wz = { boot: String(e?.boot), z: G.wind.zeichenImBild }; }); } window.__wz = null; });
+  await setzeTempo(t, 'drei');
+  const id = await t.page.waitForFunction(() => { const S = window.hafenmeister.sim;
+    const b = S.waitingBoats().find((x) => x.atBuoy && !x.flotte && x.nights > 0 && (S.passendePlaetze(x.id) || []).length && window.__st.bootObjekt(x.id));
+    return b ? String(b.id) : false; }, null, { timeout: 120_000, polling: 100 }).then((x) => x.jsonValue(), () => null);
+  await setzeTempo(t, 'pause');
+  if (!id) { await t.hinweis('Wind', 'in 120 s kein wartendes Boot mit freier Box', { bild: false }); return; }
+  const wahl = await t.G((bid) => { const G = window.hafenmeister; const ps = G.sim.passendePlaetze(bid) || [];
+    const l = ps.map((p) => ({ p, lage: G.wind.lage(p)?.lage ?? null })); const g = l.filter((x) => x.lage === 'geschuetzt');
+    return { liste: (g.length ? g : l).map((x) => x.p), zahl: { geschuetzt: g.length, offen: l.filter((x) => x.lage === 'offen').length, alle: l.length } }; }, id);
+  await t.hinweis('Windlage der freien Boxen', `${wahl.zahl.alle} passend, ${wahl.zahl.geschuetzt} geschützt, ${wahl.zahl.offen} offen`, { bild: false });
+  const platz = await ziehenUndAnlegen(t, z, { id, groesse: '' }, { nur: wahl.liste });
+  await setzeTempo(t, 'pause');
+  const wz = await t.G(() => window.__wz);
+  if (wz && wz.boot.replace(/^b/, '') === id) {
+    const falsch = await t.G(([bid, zs]) => zs.filter((x) => window.hafenmeister.wind.zeichen(bid, x.platz) !== x.art).map((x) => `${x.platz}:${x.art}`), [id, wz.z]);
+    await t.punkt('Zeichen beim Ziehen passen zur Windlage', falsch.length === 0, `${wz.z.length} Zeichen (${wz.z.map((x) => x.art).join(', ') || 'keine'})${falsch.length ? ', falsch: ' + falsch.join(' ') : ''}`, { bild: false, schwere: 'C' });
+  } else await t.hinweis('Wind', 'Ziehen ohne ui:tow mitgeschrieben', { bild: false });
+  if (!platz) return;
+  // Einige Spielsekunden laufen lassen: die Regeln merken sich die Lage einmal je Spielsekunde
+  await setzeTempo(t, 'normal');
+  await t.warte(3000);
+  await setzeTempo(t, 'pause');
+  const l = await t.G(([bid, p]) => { const G = window.hafenmeister; const b = G.sim.state.boats[bid]; return { lage: G.wind.lage(p)?.lage ?? null, gemerkt: b?.windLage ?? null, status: b?.status, platz: b?.berthId, stark: G.wind.stark() }; }, [id, platz]);
+  if (l.status === 'moored' && l.platz === platz && l.stark) {
+    const soll = l.lage === 'offen' || l.lage === 'geschuetzt' ? l.lage : null;
+    await t.punkt('Boot merkt sich die Windlage seiner Box', l.gemerkt === soll, `Box ${platz}: Lage ${l.lage}, am Boot ${l.gemerkt}`, { bild: false, schwere: 'B' });
+    z.wind = { tag: h.tag, richtung: h.richtung, boot: id, platz, lage: soll };
+  }
+}
+async function windWieder(t, z) {
+  if (!z.wind) return;
+  const l = await t.G(([bid, p]) => { const G = window.hafenmeister; const b = G.sim.state.boats[bid];
+    return { tag: G.sim.state.day, richtung: G.wind?.heute?.richtung, da: b?.status === 'moored' && b.berthId === p, gemerkt: b?.windLage ?? null }; }, [z.wind.boot, z.wind.platz]);
+  if (l.tag !== z.wind.tag) return;
+  await t.punkt('Windrichtung bleibt am selben Tag gleich', l.richtung === z.wind.richtung, `${z.wind.richtung} -> ${l.richtung}`, { bild: false, schwere: 'C' });
+  if (l.da) await t.punkt('Windlage bleibt am Boot', l.gemerkt === z.wind.lage, `${z.wind.lage} -> ${l.gemerkt}`, { bild: false, schwere: 'C' });
+}
+const S25 = { nr: 25, name: 'Wind', paket: 'P34', neu: wind, wieder: windWieder };
+
+// ------------------------------------------------------------------ Schicht 26: Stammgäste und Gästepost (P25)
+// Brief neben dem Ruf bei ungelesener Post, Pinnwand im Gästebuch mit Karten und Stammgästen; ein wiederkehrendes
+// Boot antippen (Karte nennt den Besuch), ist sein Lieblingsplatz frei, dorthin ziehen.
+const STAMM_LAGE = () => { const G = window.hafenmeister; const s = G.sim.state; const liste = s.modules?.stamm?.liste || [];
+  return { stamm: liste.filter((g) => g.stamm ?? (g.besuche ?? 1) >= 2).length, liste: liste.length, post: G.gaestepost?.karten?.()?.length ?? (s.modules?.post?.karten || []).length,
+    ungelesen: G.gaestepost?.ungelesen?.() ?? 0, brief: !!document.querySelector('.hm-post-brief') }; };
+async function pinnwand(t, name) {
+  await fensterZu(t);
+  const v = await t.G(STAMM_LAGE);
+  if (v.ungelesen) await t.punkt('Brief neben dem Ruf zeigt neue Post', v.brief, `${v.ungelesen} ungelesen`, { bild: !v.brief, schwere: 'C' });
+  await t.sp.knopf(t.page.locator('#rep'));
+  const offen = await t.page.locator('#hm-gaestebuch').waitFor({ state: 'visible', timeout: 4000 }).then(() => true, () => false);
+  const p = await t.G(() => { const w = document.getElementById('hm-pinnwand'); const h = [...(w?.querySelectorAll('h3') || [])].map((e) => e.textContent).join(' ');
+    const m = /Stammgäste \((\d+)\)/.exec(h); return { da: !!w, stamm: m ? Number(m[1]) : 0, karten: w ? w.querySelectorAll('.hm-post-karte').length : 0 }; });
+  await t.punkt(name, offen && p.da && p.stamm === v.stamm && p.karten === v.post, `Pinnwand ${p.da ? 'da' : 'fehlt'}: ${p.stamm} Stammgäste (Regeln ${v.stamm}), ${p.karten} Karten (Regeln ${v.post}), Liste ${v.liste}`, { bild: true, schwere: 'B' });
+  const nachher = await t.G(STAMM_LAGE);
+  if (v.ungelesen) await t.punkt('Post gilt nach dem Öffnen als gelesen', nachher.ungelesen === 0, `${v.ungelesen} -> ${nachher.ungelesen}`, { bild: false, schwere: 'C' });
+  if (offen) {
+    await t.sp.knopf(t.page.locator('#hm-gaestebuch .hm-gb-zu, #hm-gaestebuch button[aria-label*="chließen"]').first());
+    const zu = await t.page.locator('#hm-gaestebuch').waitFor({ state: 'hidden', timeout: 3000 }).then(() => true, () => false);
+    if (!zu) await t.punkt('Gästebuch schließt', false, '', { schwere: 'B' });
+  }
+  await fensterZu(t);
+}
+async function stammgaeste(t, z) {
+  await fensterZu(t);
+  await winterWeg(t);
+  if (!(await t.G(() => !!window.hafenmeister.stammgaeste))) { await t.punkt('Stammgäste sind im Spiel', false, '', { schwere: 'B' }); return; }
+  await pinnwand(t, 'Pinnwand im Gästebuch zeigt Stammgäste und Post wie die Regeln');
+  // Bis zu 8 min bei 8x, bis ein wiederkehrendes Boot an der Boje liegt; früh bremsen, wenn eins gleich kommt
+  const DA = () => { const S = window.hafenmeister.sim; const b = S.waitingBoats().find((x) => x.besuche > 1 && x.atBuoy && !x.dauer && window.__st.bootObjekt(x.id)); return b ? String(b.id) : null; };
+  let id = await t.G(DA);
+  const t0 = Date.now();
+  while (!id && Date.now() - t0 < 8 * 60_000) {
+    await setzeTempo(t, 'acht');
+    const bald = await t.bis(() => { const S = window.hafenmeister.sim; const st = S.state;
+      return S.waitingBoats().some((b) => b.besuche > 1 && !b.dauer) || (st.upcoming || []).some((b) => b.besuche > 1 && b.arriveAt <= st.clock + 20); }, null, 60_000);
+    if (bald) { await setzeTempo(t, 'normal'); await t.bis(() => window.hafenmeister.sim.waitingBoats().some((b) => b.besuche > 1 && b.atBuoy), null, 90_000); }
+    await setzeTempo(t, 'pause');
+    if (!(await winterWeg(t))) await fensterZu(t);
+    id = await t.G(DA);
+  }
+  if (!id) { await t.hinweis('Stammgäste', 'in 8 min bei 8x kein wiederkehrendes Boot an der Boje', { bild: false }); return; }
+  const lage = await insBild(t, (bid) => [window.__st.bootSchirm(bid)], id);
+  if (!lage.ok) { await t.hinweis('Stammgäste', `Boot ${id} nicht frei im Bild`); return; }
+  await t.sp.tippen(lage.p[0].x, lage.p[0].y);
+  const karte = await t.bis(() => document.body.classList.contains('card-boat') && !document.getElementById('card').hidden, null, 4000);
+  const k = await t.G((bid) => { const G = window.hafenmeister; const b = G.sim.state.boats[bid]; const txt = document.getElementById('card')?.textContent || '';
+    const h = G.stammgaeste.hinweise(b); return { besuche: b.besuche, stamm: !!b.stamm, txt: txt.replace(/\s+/g, ' '), hinweise: h.map((x) => x.text), platz: h.find((x) => x.art === 'platz' && x.frei)?.platz ?? null }; }, id);
+  const soll = k.stamm ? `Stammgast, ${k.besuche}. Besuch` : `kommt wieder, ${k.besuche}. Besuch`;
+  await t.punkt('Bootskarte nennt den Besuch', karte && k.txt.includes(soll), `"${soll}" ${k.txt.includes(soll) ? 'steht' : 'fehlt'}: ${k.txt.slice(0, 120)}`, { bild: true, schwere: 'C' });
+  if (k.hinweise.length) await t.punkt('Bootskarte zeigt die Stammgast-Hinweise', k.hinweise.every((x) => k.txt.includes(x)), k.hinweise.join(' | '), { bild: false, schwere: 'C' });
+  await fensterZu(t);
+  z.stamm = { boot: id, besuche: k.besuche };
+  if (!k.platz) return;
+  const platz = await ziehenUndAnlegen(t, z, { id, groesse: '' }, { nur: [k.platz] });
+  await setzeTempo(t, 'pause');
+  if (!platz) return;
+  const n = await t.G((bid) => { const G = window.hafenmeister; return G.stammgaeste.hinweise(G.sim.state.boats[bid]).map((x) => x.text); }, id);
+  await t.punkt('Stammgast liegt an seinem Lieblingsplatz', n.some((x) => x.startsWith('Liegt an seinem Lieblingsplatz')), `Box ${platz}: ${n.join(' | ')}`, { bild: true, schwere: 'C' });
+}
+async function stammWieder(t, z) {
+  await pinnwand(t, 'Pinnwand stimmt weiter mit den Regeln');
+  if (!z.stamm) return;
+  const b = await t.G((bid) => window.hafenmeister.sim.state.boats[bid]?.besuche ?? null, z.stamm.boot);
+  if (b != null) await t.punkt('Besuchszahl bleibt am Boot', b === z.stamm.besuche, `${z.stamm.besuche} -> ${b}`, { bild: false, schwere: 'C' });
+}
+const S26 = { nr: 26, name: 'Stammgäste und Gästepost', paket: 'P25', neu: stammgaeste, wieder: stammWieder };
+
+const SCHICHTEN = [S18, S19, S20, S21, S22, S23, S24, S25, S26];
 module.exports = { SCHICHTEN, winterWeg };
