@@ -103,6 +103,9 @@ export const ERFOLGE = [
   // Fotoaufträge (P43, docs/fotoauftraege.md): state.modules.fotoauftraege, geschrieben von features/fotoauftraege.js
   { id: 'postkarten', gruppe: 'sammeln', ding: 'wimpel', titel: 'Postkartenständer', text: 'Alle zwölf Postkarten für den Verlag fotografiert.',
     stand: (s) => { const f = postkartenFortschritt(s); return zahl(f.karten, f.gesamt); } },
+  // Hafentiere (P51, docs/hafentiere.md)
+  { id: 'hafenfreunde', gruppe: 'sammeln', ding: 'wimpel', titel: 'Hafenfreunde', text: 'Hafenkatze, Hafenhund und Graureiher fürs Logbuch fotografiert.',
+    stand: (s) => zahl(besucherFort(s).hafentierFotos, besucherFort(s).hafentiereGesamt) },
   { id: 'traditionssegler', gruppe: 'sammeln', ding: 'wimpel', titel: 'Großer Bahnhof', text: `${Z.traditionssegler} Traditionssegler zugleich im Hafen.`,
     stand: (s) => zahl(Object.values(s.boats || {}).filter((b) => b?.typeId === 'XL1' && b.status === 'moored').length, Z.traditionssegler) },
   // ---------------------------------------------------------------- Jahreslauf

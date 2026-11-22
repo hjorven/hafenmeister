@@ -77,7 +77,7 @@ Das Honorar steht im Tagesabschluss unter „Sonstiges“ als „Honorar für Po
 
 ## Erfolg
 
-„Postkartenständer“ (Wimpel, Gruppe Sammeln): alle zwölf Postkarten. Damit hängen 23 von 24 Wimpeln am Mast.
+„Postkartenständer“ (Wimpel, Gruppe Sammeln): alle zwölf Postkarten. Mit „Hafenfreunde“ aus P51 hängen jetzt alle 24 Wimpel am Mast.
 
 ## Technik
 
@@ -130,8 +130,8 @@ sein, zum Beispiel:
   auf dem Handy bricht sie in zwei Zeilen um (Regel aus P40).
 - **Logbuch:** sechster Reiter (Boote, Chronik, Erfolge, Geschichten, Besucher, Postkarten). Am PC scrollt die Reiterleiste, auf dem Handy bricht sie in drei Zeilen um; ein weiterer Reiter (P49 Wissen) macht es noch enger.
 - **Meldeplatz:** Vorrang 26, die Meldung wartet hinter Einstieg und Tipps. Am ersten Spieltag kommt nie ein Auftrag.
-- **Erfolge:** ein neuer Wimpel, 23 von 24 Plätzen am Mast. Ein weiteres Paket mit Wimpel (z. B. P49 oder P51)
-  muss prüfen, ob noch Platz ist (Test „Erfolgsmast hat 24 Plätze“).
+- **Erfolge:** ein neuer Wimpel; zusammen mit „Hafenfreunde“ (P51) sind alle 24 Plätze am Mast belegt. Ein weiteres
+  Paket mit Wimpel braucht einen größeren Mast oder ein anderes Ding (Test „Erfolgsmast hat 24 Plätze“).
 - **P44 Hafenname:** Der Gruß auf der Postkarte nimmt `game.hafenname.name`, `game.hafenName`,
   `state.hafen.name` oder `state.modules.hafenname.name`, sonst den Hafennamen der Region. Wenn P44 einen anderen
   Ort wählt, hier eine Zeile in `hafenName()` ergänzen.
