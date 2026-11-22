@@ -82,20 +82,27 @@ test('Nur Horn: Kamera bleibt, "Ansehen" fährt hin, Berührung beendet die Fahr
   }
   const ansehen = meldung.locator('.hm-primaer');
   await expect(ansehen).toHaveText('Ansehen');
+  const start = await page.evaluate(() => { const c = window.hafenmeister.camera.target; return { x: c.x, z: c.z }; });
   await ansehen.click();
   await expect.poll(() => page.evaluate(() => window.hafenmeister.ankunft.laeuft)).toBe(true);
-  await page.waitForTimeout(800);
-  // Spieler fasst die Karte an: Fahrt aus, die Kamera bleibt beim Schiff
+  // Erst ankommen lassen (das Spiel steht, das Schiff auch); auf langsamen Rechnern dauert der Anflug länger
+  const abstandZumSchiff = () => page.evaluate(() => {
+    const g = window.hafenmeister;
+    const s = g.ankunft.aktuelle()[0]?.pos;
+    const c = g.camera.target;
+    return s ? Math.hypot(s.x - c.x, s.z - c.z) : 999;
+  });
+  await expect.poll(abstandZumSchiff, { timeout: 20_000 }).toBeLessThan(40);
+  // Spieler fasst die Karte an: Fahrt aus, die Kamera bleibt, wo sie ist, und fährt nicht zurück
   const mitte = { x: (page.viewportSize().width / 2) | 0, y: (page.viewportSize().height * 0.35) | 0 };
   if (projekt.startsWith('handy') || projekt.startsWith('tablet')) await page.touchscreen.tap(mitte.x, mitte.y);
   else await page.mouse.wheel(0, -40);
   await expect.poll(() => page.evaluate(() => window.hafenmeister.ankunft.laeuft)).toBe(false);
-  const lage = await page.evaluate(() => {
-    const g = window.hafenmeister;
-    const s = g.ankunft.aktuelle()[0]?.pos;
-    const c = g.camera.target;
-    return s ? Math.hypot(s.x - c.x, s.z - c.z) : 0;
-  });
-  // nicht zurück an die Startansicht (die liegt rund 270 m entfernt)
-  expect(lage).toBeLessThan(150);
+  await kameraRuhig(page);
+  const ort = () => page.evaluate(() => { const c = window.hafenmeister.camera.target; return { x: c.x, z: c.z }; });
+  const a = await ort();
+  await page.waitForTimeout(2500);
+  const b = await ort();
+  expect(Math.hypot(b.x - a.x, b.z - a.z)).toBeLessThan(2);
+  expect(Math.hypot(b.x - start.x, b.z - start.z)).toBeGreaterThan(100);
 });
