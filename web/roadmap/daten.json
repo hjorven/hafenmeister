@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "7c379ce"
+  "commit": "551cc54"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1046,16 +1046,18 @@
    "id": "P46",
    "titel": "Ruhiger Abend und Serien-Akkord",
    "inhalt": "F29, F30",
-   "thread": "bestehend: \"Ton und Musik hinzufügen\"",
+   "thread": "erledigt (PR 427, Thread \"Ruhigen Abend und Serien-Akkord bauen\")",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F29",
     "F30",
     "L1"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2360,23 +2362,27 @@
   {
    "code": "F29",
    "text": "Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 427, stimmung.md): Lichterketten an allen Stegen gehen vom Land nach außen an, Glockentöne, wärmere Abendmusik bis zum Morgen",
    "pakete": [
     "P46"
    ],
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "Spielgefühl"
   },
   {
    "code": "F30",
    "text": "Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 427, stimmung.md): Grundton, Terz, Akkord passend zur Musik, goldene Noten über der Box, ohne Zeitgrenze",
    "pakete": [
     "P46"
    ],
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "Spielgefühl"
   },
   {
@@ -3751,12 +3757,14 @@
   {
    "code": "L1",
    "text": "Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 427): Stammgast und Stufenziel neu, die anderen klangen schon",
    "pakete": [
     "P46"
    ],
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "L Hafenleben, Ton und Fotomodus"
   },
   {
@@ -4655,11 +4663,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 2,
+    "erledigt": 3,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 11,
+    "offen": 10,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4714,20 +4722,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 55,
+  "erledigt": 56,
   "teilweise": 2,
   "arbeit": 0,
   "frage": 0,
-  "offen": 29,
+  "offen": 28,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 184,
+  "erledigt": 187,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 28,
+  "offen": 25,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5995,6 +6003,14 @@
  "merges": [
   {
    "datum": "2026-11-22",
+   "titel": "P46: Ruhiger Abend mit Lichterketten und Serien-Akkord (F29, F30, L1)",
+   "pr": 427,
+   "pakete": [
+    "P46"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: P31 Gästewünsche (PR 406) mit Bildern",
    "pr": 426,
    "pakete": [
@@ -6080,16 +6096,6 @@
    "pr": 413,
    "pakete": [
     "P35"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P39 (PR 412), P32-Rest (PR 414), P40 (PR 416) mit Bildern",
-   "pr": 417,
-   "pakete": [
-    "P39",
-    "P32",
-    "P40"
    ]
   }
  ]
