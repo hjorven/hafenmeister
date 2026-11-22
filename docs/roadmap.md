@@ -702,7 +702,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P29 | Baggern für tiefere Liegeplätze | F7 | neu |
 | P30 | Stege nachrüsten | F8 | erledigt (PR 297, [nachruesten.md](nachruesten.md)) |
 | P31 | Neue Gästewünsche | F9 | neu |
-| P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md)) |
+| P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md)) |
 | P33 | Liegende Boote umlegen | F4 | erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen) |
 | P34 | Wind im Hafen spürbar machen | F5, F35 | neu |
 | P35 | Preisstufe am Hafenbüro | F6 | neu |
