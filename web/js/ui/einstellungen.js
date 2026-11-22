@@ -8,6 +8,7 @@
 //   links                 hand-links         Touch: Bauen links, Zeit rechts (Linkshänder)
 //   einfahren             (keine)            Boote fahren selbst ein: normal (8 s), langsam (20 s), aus (roadmap A7)
 //                                            setzt game.sim.ctx.rules.queue.selfEnterAfter
+//   ankuenfte             (keine)            Große Ankünfte (P47): Mit Kamera, nur Horn, aus
 //
 // Schnittstelle: game.einstellungen = { wert(name), setze(name, an), alle() }, Ereignis 'einstellungen' { name, an, alle }
 // Die Tafel öffnet ui/oberflaeche.js aus dem Menü (Eintrag "Einstellungen").
@@ -27,6 +28,11 @@ export const WAHLEN = [
     name: 'einfahren', titel: 'Boote fahren selbst ein', text: 'Wie lange ein Boot an der Boje auf dich wartet, bevor es sich selbst eine freie Box sucht.',
     stufen: [['normal', 'Normal'], ['langsam', 'Langsam'], ['aus', 'Nie']],
   },
+  {
+    // P47 (features/grosse-ankunft.js): Großschiffe und seltene Besucher tuten beim Einlaufen, die Kamera fährt kurz hin
+    name: 'ankuenfte', titel: 'Große Ankünfte', text: 'Wenn ein großes Schiff einläuft: Horn und eine kurze Kamerafahrt, nur wenn du gerade nichts tust.',
+    stufen: [['kamera', 'Mit Kamera'], ['horn', 'Nur Horn'], ['aus', 'Aus']],
+  },
 ];
 const LANGSAM = 2.5;   // Faktor auf ECONOMY.warten.selbstEinfahrenNach (8 s -> 20 s)
 
@@ -39,7 +45,7 @@ function schreiben(werte) {
 
 export function initEinstellungen(game) {
   const systemRuhig = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-  const werte = { formen: false, ruhig: systemRuhig, gross: false, links: false, einfahren: 'normal', ...lesen() };
+  const werte = { formen: false, ruhig: systemRuhig, gross: false, links: false, einfahren: 'normal', ankuenfte: 'kamera', ...lesen() };
 
   // Selbst-Einfahren: Grundwert aus den Regeln merken, dann je nach Wahl verlängern oder abschalten
   let grundwert;

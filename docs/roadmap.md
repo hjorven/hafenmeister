@@ -275,7 +275,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 |---|---|---|---|
 | F29 | Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer | offen | P46 |
 | F30 | Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord | offen | P46 |
-| F31 | Große Ankünfte mit Horn, Kamera schwenkt auf Wunsch zur Einfahrt | offen | P47 |
+| F31 | Große Ankünfte mit Horn, Kamera schwenkt auf Wunsch zur Einfahrt | erledigt (P47): Kreuzfahrt, Flotte, Windjammer und seltene Besucher tuten beim Einlaufen, Meldung mit Ansehen, kurze Kamerafahrt nur wenn der Spieler nichts tut, Einstellung Mit Kamera/Nur Horn/Aus, docs/grosse-ankuenfte.md | P47 |
 | F32 | Leinen annehmen: Symbol am Steg, Antippen bringt Trinkgeld | offen | P48 |
 
 ### Seemannschaft
@@ -722,7 +722,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P44 | Hafenname und Flagge | F23, F27 (Auswahl beim Start) | neu |
 | P45 | Kreativmodus | F24 | neu |
 | P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | bestehend: "Ton und Musik hinzufügen" |
-| P47 | Große Ankünfte ankündigen | F31 | bestehend: "Kamera frei neigen und drehen" |
+| P47 | Große Ankünfte ankündigen | F31 | erledigt (Thread "Große Ankünfte ankündigen", docs/grosse-ankuenfte.md) |
 | P48 | Leinen annehmen beim Anlegen | F32 | bestehend: "Schiffsanimationen umsetzen" |
 | P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | neu |
 | P50 | Einstellungen für Sicht und Bewegung | F25 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
