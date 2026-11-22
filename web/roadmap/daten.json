@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "b8ff810"
+  "commit": "d30853f"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1660,10 +1660,11 @@
    "id": "P88",
    "titel": "Engstellen nach ihrer Länge regeln",
    "inhalt": "Reste aus P66 (Abnahme Welle 0 auf ae9e34f, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Dazu Großschiff-Vortritt. Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Teil 2 (22.11.): Vorbeifahrer und Segler, die ein Hafenboot aufhalten, fahren sofort weiter (Küste 14 Stufe 6: Ankommende stapelten sich in 3 von 8 Läufen draußen auf See, danach in 0 von 4). Großschiff-Vortritt in drei Fassungen gemessen und verworfen (Größenregel Boot gegen Boot, Abstand der Vorbeifahrer, Vortritt an der Einfahrt: Großschiffe warteten jeweils länger oder es gab neue Knoten). Rest: Küste 15, Ankommende gleicher Richtung fahren auf dem Seeweg teils ineinander",
-   "thread": "in Arbeit (PR 390)",
+   "thread": "in Arbeit (PR 390, 400)",
    "welle": 3,
    "prs": [
-    390
+    390,
+    400
    ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
@@ -5746,6 +5747,49 @@
  "merges": [
   {
    "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P88 Teil 2 (PR 400)",
+   "pr": 404,
+   "pakete": [
+    "P88"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Arbeitsplan: P88 Teil 2, Großschiff-Vortritt gestrichen",
+   "pr": 402,
+   "pakete": [
+    "P88"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P88 Teil 2: Vorbeifahrer machen Platz, sobald sie ein Hafenboot aufhalten",
+   "pr": 400,
+   "pakete": [
+    "P88"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Arbeitsplan: Stand nach P34, P32, P25, P88 Teil 1; Flottillen-Quote Prio B; P37 und P38 starten",
+   "pr": 401,
+   "pakete": [
+    "P34",
+    "P32",
+    "P25",
+    "P88",
+    "P37",
+    "P38"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Schichttest: Schicht 24 Flottillen, Fundorte bei Überlappungen",
+   "pr": 399,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: P25 Stammgäste Teil 1 und 2 (PR 394) mit Bildern",
    "pr": 398,
    "pakete": [
@@ -5798,45 +5842,6 @@
    "pr": 391,
    "pakete": [
     "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P88 Teil 1: getrennte Bahnen vor der Einfahrt, echte Boje in den Regeln",
-   "pr": 390,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Arbeitsplan: Welle 0 bis 2 abgenommen, Welle 3 startet; P88 Engstellen",
-   "pr": 389,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Meldungen auf Handy quer oben zwischen den Spalten (Schichttest F8-Rest, F9 geprüft)",
-   "pr": 388,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Schichttest: Serie 13 nach P66, Messung erst nach dem Zurückgleiten der Leisten",
-   "pr": 387,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Roadmap: P66 und P85 zeigen erledigt (Reste als Prio B ausgelagert)",
-   "pr": 386,
-   "pakete": [
-    "P66",
-    "P85"
    ]
   }
  ]
