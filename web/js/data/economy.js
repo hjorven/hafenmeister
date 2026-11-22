@@ -576,7 +576,8 @@ export const ECONOMY = {
     klassen: ['XL', 'XXL'],      // große Schiffe
     // weitere Fälle: 'sondergast' (Traditionssegler, Behördenboote, sondergast in den Bootsdaten)
     // und 'einzigerPlatz' (nur noch genau eine passende freie Box)
-    auch: ['sondergast', 'einzigerPlatz'],
+    // 'flottille': Boote einer Flottille (P32) ohne frei gehaltene Box, die Gruppe soll zusammen liegen
+    auch: ['sondergast', 'einzigerPlatz', 'flottille'],
     selbstEinfahrenNach: 25,
   } },
 
@@ -590,6 +591,23 @@ export const ECONOMY = {
   //   bonusAnteil  Bonus beim Einlaufen in die frei gehaltene Box, Anteil des Liegegelds einer Nacht
   //   ruf          so viele Anker mehr in der Bewertung des Gastes
   funkAnmeldung: { fruehestens: 0.35, zweiAnteil: 0.4, bonusAnteil: 0.5, ruf: 0.25 },
+
+  // ---------------------------------------------------------------- Flottillen (P32, docs/flottillen.md)
+  // Drei bis fünf Boote einer Art (Feld group in den Bootsdaten) kommen zusammen im Konvoi und wollen am
+  // selben Steg liegen. Liegen alle an einem Steg, gibt jede Crew zusammen Anker mehr, wird die Gruppe
+  // aufgeteilt (oder ein Boot weggeschickt), getrennt Anker weniger. Die Flottille ersetzt Boote des Tages,
+  // es kommen nicht mehr Gäste. Auswahl aus Seed und Tag, verbraucht keinen Spielzufall.
+  //   anteil      Anteil der Tage mit einer Flottille je Hafenstufe (ab abStufe)
+  //   fruehestens, spaetestens  Ankunft des ersten Boots als Tagesanteil
+  //   abstand     Sekunden Spielzeit zwischen zwei Booten im Konvoi
+  flottillen: {
+    abStufe: 3,
+    anteil: { 3: 0.15, 4: 0.2, 5: 0.22, 6: 0.25 },
+    fruehestens: 0.35, spaetestens: 0.75,
+    abstand: 2.5,
+    zusammen: 0.5,
+    getrennt: 0.5,
+  },
 
   // ---------------------------------------------------------------- Services
   // Format abgestimmt mit dem Services-Thread (web/js/data/services.js hat Startwerte, was

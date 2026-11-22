@@ -31,7 +31,10 @@ export class ChannelLock {
     // kein Boot der Gegenrichtung wartet (niemand ueberholt den Gegenverkehr) - ausser es hat selbst
     // Vorrang und der Wartende nicht.
     if (richtung !== this.richtung) return false;
-    if (this.aktiv.size >= this.maxKonvoi) return false;
+    // Flottille (P32): Ist ein Boot derselben Gruppe gerade in der Engstelle, darf der Rest des Konvois
+    // mit, auch über die Konvoigröße hinaus (höchstens fünf mehr), damit die Gruppe nicht zerfällt
+    const gruppe = boat?.flotte != null && [...this.aktiv].some((a) => a?.flotte === boat.flotte);
+    if (this.aktiv.size >= this.maxKonvoi + (gruppe ? 5 : 0)) return false;
     for (const e of this.queue) {
       if (e.boat === boat) break;
       if (e.richtung !== richtung && (e.vorrang || !vorrang)) return false;

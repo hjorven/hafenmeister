@@ -146,6 +146,15 @@ export function tabellen() {
       ['Richtungen', `${Object.entries(w.richtungen).map(([r, a]) => `${r} ${Math.round(a * 100)} %`).join(', ')}; Wetterlage ${w.wetterlageTage} Tage, ±${w.streuung} Grad je Tag, Sturm aus ${w.sturmAus.join(', ')}`],
     ]), '');
   }
+  if (E.flottillen) {
+    const f = E.flottillen;
+    t.push('## Flottillen', '', tabelle(['Was', 'Wert'], [
+      ['ab Hafenstufe', f.abStufe],
+      ['Tage mit Flottille', Object.entries(f.anteil).map(([k, v]) => `Stufe ${k}: ${Math.round(v * 100)} %`).join(', ')],
+      ['Ankunft', `${zahl(f.fruehestens)} bis ${zahl(f.spaetestens)} des Tages, im Konvoi alle ${zahl(f.abstand)} s`],
+      ['Bewertung je Crew', `alle an einem Steg +${zahl(f.zusammen)} Anker, aufgeteilt −${zahl(f.getrennt)} Anker`],
+    ]), '');
+  }
   t.push('## Services', '', tabelle(['Service', 'Stufe', 'Name', 'ab Hafenstufe', 'Kosten', 'Mindestruf', 'Wirkung'], SERVICES.flatMap((s) =>
     s.stufen.map((st, i) => [i === 0 ? s.name : '', i + 1, st.name, st.abStufe ?? s.abStufe, euro(st.kosten), st.ruf != null ? zahl(st.ruf) : '-',
       wirkungText(st.wirkung) + (st.wirkung.besuch ? `; Besuch alle ${st.wirkung.besuch.alleTage} Tage, ${euro(st.wirkung.besuch.einnahme)}` : '')]))), '');

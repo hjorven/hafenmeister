@@ -68,7 +68,9 @@ test('Keine Wellen: in jeder Stufe, bei Ruf 5 und an Regattatagen mindestens der
         s.day = 2;
         sim.tick(s, c, 0);
         const t = s.upcoming.map((b) => b.arriveAt);
-        for (let i = 1; i < t.length; i++) assert.ok(t[i] - t[i - 1] >= gap - 0.05, `Stufe ${stufe}, Faktor ${faktor}: ${t[i - 1]} -> ${t[i]}`);
+        // Ausnahme: eine Flottille (P32) kommt gewollt dicht im Konvoi
+        const konvoi = (i) => s.upcoming[i].flotte && s.upcoming[i - 1].flotte?.id === s.upcoming[i].flotte.id;
+        for (let i = 1; i < t.length; i++) assert.ok(konvoi(i) || t[i] - t[i - 1] >= gap - 0.05, `Stufe ${stufe}, Faktor ${faktor}: ${t[i - 1]} -> ${t[i]}`);
       }
     }
   }

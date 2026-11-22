@@ -11,6 +11,7 @@ const SONDERFALL_LABEL = {
   gross: 'Großes Schiff',
   sondergast: 'Sondergast',
   einzigerPlatz: 'Nur eine Box passt',
+  flottille: 'Flottille',
 };
 const FACILITY_LABEL = { wc: 'Toilette', dusche: 'Dusche', essen: 'Kiosk', diesel: 'Tankstelle' };
 const REASON_LABEL = {
@@ -198,7 +199,7 @@ export function init(game) {
               }
             },
           },
-          `${b.size} ${b.name}${b.besuche > 1 ? ' · Stammgast' : ''}${sim.sonderfall?.(b.id) ? ' · für dich' : ''}`,
+          `${b.size} ${b.name}${b.flotte ? ' · Flottille' : ''}${b.besuche > 1 ? ' · Stammgast' : ''}${sim.sonderfall?.(b.id) ? ' · für dich' : ''}`,
         ),
       ),
     );
@@ -218,6 +219,10 @@ export function init(game) {
     const platzWunsch = b.wishes.filter((w) => sim.ctx.rules.berthWishes?.[w]).map((w) => WISH_LABEL[w] ?? w);
     const vorschlag = sim.vorschlag?.(b.id) ?? null;
     vorschlagZeigen(vorschlag);
+    const flotte = b.flotte ? sim.flottille?.(b.id) ?? null : null;
+    // Stege, an denen die Gruppe zusammen liegen kann (dort leuchten die Plätze gold)
+    const flotteStege = flotte ? [...new Set(gold.map((p) => sim.flottillenSteg?.(p)).filter(Boolean))] : [];
+    const flotteSteg = flotteStege.length ? (flotteStege.length === 1 ? `Steg ${flotteStege[0]}` : `den Stegen ${flotteStege.slice(0, -1).join(', ')} und ${flotteStege.at(-1)}`) : null;
     const schliessen = () => { sim.select(null); closeCard(); };
     // Kurz und auf einen Blick: Name, Eckdaten als Schilder, ein Satz, zwei Knöpfe.
     // "Einfahren" steht immer groß in der Karte, auf jedem Gerät an derselben Stelle.
@@ -232,6 +237,8 @@ export function init(game) {
           game.geschichten?.text(b) ? el('p', { class: 'card-geschichte' }, game.geschichten.text(b)) : null,
           // Dienst eines Service (P23: Mast legen, Radtour, Reparatur): darum bleibt das Boot länger
           game.services?.dienstText?.(b) ? el('p', { class: 'card-geschichte card-dienst' }, game.services.dienstText(b)) : null,
+          // Flottille (P32): wer dazugehört und was die Gruppe will
+          flotte ? el('p', { class: 'card-geschichte card-flotte' }, flotteKopf(b, flotte)) : null,
           // Starkwind (P34): was Schild, Welle und Windlinien über den Boxen bedeuten
           game.wind?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind' }, game.wind.kartenSatz(b)) : null),
         el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Schließen', title: 'Schließen', onclick: schliessen }, 'Schließen')),
@@ -244,7 +251,8 @@ export function init(game) {
         ...b.wishes.map((w) => (wert?.full?.includes(w)
           ? el('li', { class: 'wunsch voll', title: 'Für heute ist diese Versorgung voll' }, `Wunsch: ${WISH_LABEL[w] ?? w} (heute voll)`)
           : el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`)))),
-      sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length, sim.bueroAutomatik?.(b.size)),
+      flotte ? el('p', { class: 'card-hint hm-flotte' }, pixelBild('rauteGold', 14), flotteLage(flotte, flotteSteg, sim.sonderfall?.(b.id) === 'flottille' && sim.bueroAutomatik?.(b.size))) : null,
+      flotte ? null : sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length, sim.bueroAutomatik?.(b.size)),
       vorschlag ? el('p', { class: 'card-hint hm-vorschlag' }, pixelBild('rauteGold', 14), vorschlagText(b, vorschlag)) : null,
       wert ? el('p', { class: 'card-zahlt' }, zahltText(wert.fee, gold.length ? sim.platzWert(b.id, gold[0])?.fee ?? wert.fee : null, gold.length > 0 && gold.length >= fitting.length,
         b.nights === 0 ? 0 : Math.max(1, Math.min(sim.ctx.rules.prepay || 1, b.nights || 1)), !!sim.ctx.rules.tip?.sizes?.includes(b.size))) : null,
@@ -253,7 +261,9 @@ export function init(game) {
         ? ((sim.paeckchenZiele?.(b.id) ?? []).length
           ? 'Keine Box frei. Ins Päckchen: auf ein Boot mit weißem Rahmen ziehen (halbes Liegegeld, eine Nacht).'
           : 'Gerade ist kein passender Platz frei.')
-        : [`${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${platzWunsch.length ? `, ${gold.length && gold.length >= fitting.length ? 'alle' : gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}.`,
+        : [`${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${flotte
+          ? (flotteSteg ? `, ${gold.length && gold.length >= fitting.length ? 'alle' : gold.length} gold an ${flotteSteg}` : '')
+          : platzWunsch.length ? `, ${gold.length && gold.length >= fitting.length ? 'alle' : gold.length} gold mit ${platzWunsch.join(' und ')}` : ''}.`,
           // Die Anleitung tritt am Handy zurück (der Einstieg erklärt das Ziehen), die Karte bleibt flach
           el('span', { class: 'card-wie' }, ` Zieh das Boot hin oder ${vorschlag ? 'nimm den Vorschlag an' : 'lass es einfahren'}.`)]),
       note ? el('p', { class: 'card-note', role: 'status' }, note) : null,
@@ -266,6 +276,23 @@ export function init(game) {
         el('button', { type: 'button', class: 'hud-btn hm-gefahr', onclick: () => { sim.dismiss(b.id); closeCard(); } }, 'Abweisen'),
       ),
     );
+  }
+
+  // Flottille (P32): Kopfzeile und Lage der Gruppe
+  function flotteKopf(b, f) {
+    const art = sim0()?.flottillenArt?.(f.art);
+    return `Flottille „${f.name}“${art ? `, ${art.anlass}` : ''}: ${f.n} ${art?.mehrzahl ?? 'Boote'}, ${b.flotte.nr + 1}. im Konvoi.`;
+  }
+  function flotteLage(f, steg, leitstelle) {
+    const r = sim0()?.ctx?.rules?.flotilla;
+    const anker = (x) => String(Math.round(x * 100) / 100).replace('.', ',');
+    let satz;
+    if (f.zerrissen) satz = `Ein Boot der Gruppe ist weitergefahren: jede Crew gibt ${anker(r?.apart ?? 0.5)} Anker weniger.`;
+    else if (f.together === false) satz = `Die Gruppe liegt schon getrennt (Steg ${Object.keys(f.stege).join(' und ')}): jede Crew gibt ${anker(r?.apart ?? 0.5)} Anker weniger.`;
+    else if (f.liegen > 0) satz = `${f.liegen} von ${f.n} liegen an Steg ${f.steg}. Alle dorthin: jede Crew gibt ${anker(r?.together ?? 0.5)} Anker mehr.`;
+    else satz = `Wollen zusammen an einem Steg liegen${steg ? `, an ${steg} ist Platz für alle` : ''}: jede Crew gibt dann ${anker(r?.together ?? 0.5)} Anker mehr, getrennt ${anker(r?.apart ?? 0.5)} weniger.`;
+    const sek = game.sim?.ctx?.rules?.office?.special?.selfEnterAfter;
+    return leitstelle && sek ? `${satz} Die Leitstelle lässt dir die Wahl, sonst fahren sie nach ${sek} s selbst ein.` : satz;
   }
 
   // Vorschlag des Hafenbüros (ab Bürostufe 3): beste Box, welche Wünsche sie erfüllt

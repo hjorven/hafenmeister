@@ -231,6 +231,7 @@ export function rulesFromEconomy(E = ECONOMY) {
       sizes: sf.klassen ?? [],
       specialGuests: (sf.auch ?? []).includes('sondergast'),
       onlyBerth: (sf.auch ?? []).includes('einzigerPlatz'),
+      flotilla: (sf.auch ?? []).includes('flottille'),
       selfEnterAfter: sf.selbstEinfahrenNach ?? null,
     };
   }
@@ -242,6 +243,12 @@ export function rulesFromEconomy(E = ECONOMY) {
   // Anmeldung per Funk (P28)
   const fa = E.funkAnmeldung;
   r.funk = fa ? { leadShare: fa.fruehestens, twoShare: fa.zweiAnteil, bonusShare: fa.bonusAnteil, rating: fa.ruf } : null;
+  // Flottillen (P32)
+  const fl = E.flottillen;
+  r.flotilla = fl ? {
+    fromStage: fl.abStufe, share: { ...fl.anteil }, from: fl.fruehestens, to: fl.spaetestens, gap: fl.abstand,
+    together: fl.zusammen, apart: fl.getrennt,
+  } : null;
   return r;
 }
 
