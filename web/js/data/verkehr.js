@@ -120,6 +120,7 @@ export function uferStrecke(stufe, hafen = HAFEN, meiden = []) {
   const nahe = [];
   for (const l of hafen.stufen?.[String(stufe)]?.stege ?? []) for (const [x, y] of l.punkte) if (y < 70) nahe.push(x);
   for (const p of hafen.plaetze ?? []) {
+    if (p.art === 'boje') continue;   // Bojenfeld (P36) hält selbst Abstand zum Uferstreifen
     const l = p.stufen?.includes(stufe) ? p.lage?.[String(stufe)] : null;
     if (l && l[1] < 70) nahe.push(l[0]);
   }

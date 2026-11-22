@@ -8,6 +8,8 @@ import { baueGelaende, QUALITAET } from './terrain.js';
 import { erzeugeWasser, baueTiefentextur, FERN } from './wasser.js';
 import { erzeugeTageslicht } from './tageslicht.js';
 import { setzeBild, aktuellesBild, setzeFreiQuellen } from './vielfalt.js';
+import { bojenfeldRegion, bojenfeldWelt } from './bojenfeld-lage.js';
+import { ECONOMY } from '../../data/economy.js';
 
 /** Schätzt die passende Qualitätsstufe für das Gerät. */
 export function autoQualitaet() {
@@ -94,6 +96,7 @@ export function erzeugeLandschaft(szene, { region = REGION_STANDARD, stufe = 1, 
   const licht = erzeugeTageslicht(szene, { schatten: QUALITAET[q].schatten });
   let reg = regionNach(region);
   let regionName = region;
+  bojenfeldRegion(reg);   // Lage des Bojenfelds (P36) für die Region des Spiels
   const wasser = erzeugeWasser(reg);
   gruppe.add(wasser.mesh);
 
@@ -157,6 +160,8 @@ export function erzeugeLandschaft(szene, { region = REGION_STANDARD, stufe = 1, 
     get wege() { return wege; },
     /** Wartebojen und Ankerbereiche der aktuellen Stufe in Weltmetern. */
     get warteplaetze() { return warte.daten; },
+    /** Bojenfeld (P36): Lage aller möglichen Muringbojen in Weltmetern [{ id, px, py, x, z }], vor abStufe []. */
+    get bojenfeld() { return aktStufe >= (ECONOMY.bojenfeld?.abStufe ?? 2) ? bojenfeldWelt(reg) : []; },
     /** Bodenhöhe in Metern (unter Wasser negativ, bezogen auf mittleren Wasserstand). */
     /** Feste Punkte der aktuellen Stufe in Weltmetern: engpass, einfahrt, fahrwasser, molenkoepfe, bauflaechen (karte.js). */
     get punkte() { return punkte; },
@@ -180,6 +185,7 @@ export function erzeugeLandschaft(szene, { region = REGION_STANDARD, stufe = 1, 
       if (name === regionName) return;
       regionName = name;
       reg = regionNach(name);
+      bojenfeldRegion(reg);
       baue();
     },
     setzePegel(m) {
