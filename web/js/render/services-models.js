@@ -291,22 +291,10 @@ function segelclub(stufe, { ufer = 6 } = {}) {
   // Jollen auf Slipwagen vor dem Haus
   const farben = [FARBE.white, FARBE.red, FARBE.yellow, FARBE.navy, FARBE.white];
   for (let i = 0; i < 5; i++) rumpf(g, 2.4, 1.15, 0.4, farben[i], -9 + i * 2, LAND_Y + 0.35, -9, Math.PI / 2);
-  // Jollensteg
-  steg(g, 4, -6, 4, -(ufer + 16), 1.4);
-  const optis = [];
-  if (stufe >= 2) {
-    // Optimisten der Segelschule im Kreis
-    for (let i = 0; i < 6; i++) {
-      const o = rumpf(g, 2.3, 1.1, 0.4, FARBE.white, 0, 0, 0);
-      zyl(o, 0.04, 2.6, FARBE.white, 0.5, 0.3, 0, 4);
-      const s = add(o, new THREE.PlaneGeometry(1.6, 1.6), FARBE.sail, -0.2, 1.8, 0);
-      s.material = new THREE.MeshLambertMaterial({ color: i === 0 ? FARBE.red : FARBE.sail, side: THREE.DoubleSide });
-      s.rotation.z = 0.5;
-      optis.push(o);
-    }
-    // Motorboot des Trainers
-    optis.push(rumpf(g, 4.5, 1.9, 0.6, FARBE.grey, 0, 0, 0));
-  }
+  // Jollensteg (nur, wenn das Wasser nah genug ist; sonst lag er an Land)
+  if (ufer < 14) steg(g, 4, -6, 4, -(ufer + 16), 1.4);
+  // Die Optimisten der Segelschule segeln beim Jugendtraining wirklich (P39, render/jugend-bild.js):
+  // über den Slip ins Wasser und aus dem Hafen. Vorher fuhren sie hier im Kreis, oft über die Wiese.
   if (stufe >= 3) {
     // Startturm mit Signalflaggen
     box(g, 2.4, 4.5, 2.4, FARBE.wood, 9, LAND_Y, -2);
@@ -319,13 +307,6 @@ function segelclub(stufe, { ufer = 6 } = {}) {
     group: g,
     update(dt, t) {
       flaggen.forEach((f, i) => wehen(f, t, i));
-      optis.forEach((o, i) => {
-        const trainer = i === 6;
-        const a = t * 0.08 + (i / 6) * Math.PI * 2;
-        const rx = trainer ? 10 : 14, rz = trainer ? 5 : 7;
-        o.position.set(Math.cos(a) * rx, Math.sin(t * 1.5 + i) * 0.05, -(ufer + 26) + Math.sin(a) * rz);
-        o.rotation.y = -a - Math.PI / 2;
-      });
     },
   };
 }

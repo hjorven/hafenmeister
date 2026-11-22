@@ -242,7 +242,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 |---|---|---|---|
 | F11 | Havarist wird eingeschleppt, braucht sofort einen Platz, Ruf und neuer Stammgast | offen | P37 |
 | F12 | Eigenes Hafenfest einmal pro Saison ansetzen | erledigt (P38, [hafenfest.md](hafenfest.md)): Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk, Bilanz am Abend | P38 |
-| F13 | Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub | offen | P39 |
+| F13 | Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub | erledigt (P39, [jugendtraining.md](jugendtraining.md)): jeden 4. Saisontag Optis und Jollen über den Slip hinaus, Dreieckskurs vor den Stegen, Trainerboot braucht eine Box (feste Trainerbox möglich), wartende Boote halten das Fahrwasser frei, Beitrag und +0,2 Anker für zusehende Gäste | P39 |
 | F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | erledigt (PR 245) | P20 |
 | F15 | Krantage: Dauerlieger sichtbar ins Winterlager und zurück | erledigt (PR 245) | P20 |
 | F16 | Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv | erledigt (P40): vier Schiffe mit Ehrenplatz, Schwäne und Schweinswal, Fotos im Logbuch-Reiter „Besucher“, vier Erfolge, docs/besucher.md | P40 |
@@ -702,14 +702,14 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P29 | Baggern für tiefere Liegeplätze | F7 | neu |
 | P30 | Stege nachrüsten | F8 | erledigt (PR 297, [nachruesten.md](nachruesten.md)) |
 | P31 | Neue Gästewünsche | F9, B8 | erledigt ([gaestewuensche.md](gaestewuensche.md): Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt) |
-| P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md)) |
+| P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md); Rest Prio B: beim Selbst-Einfahren zusammen, Boxen frei halten, gemeinsam weiterfahren) |
 | P33 | Liegende Boote umlegen | F4 | erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen) |
 | P34 | Wind im Hafen spürbar machen | F5, F35 | erledigt (PR 392, [wind.md](wind.md)) |
 | P35 | Preisstufe am Hafenbüro | F6 | neu |
 | P36 | Bojenfeld im See | F10 | neu |
 | P37 | Havarist einschleppen | F11 | neu |
 | P38 | Eigenes Hafenfest ansetzen | F12 | erledigt (PR 405, [hafenfest.md](hafenfest.md)) |
-| P39 | Jugendtraining am Segelclub | F13 | neu |
+| P39 | Jugendtraining am Segelclub | F13 | erledigt ([jugendtraining.md](jugendtraining.md)) |
 | P40 | Seltene Besucher | F16 (nach P21) | erledigt (docs/besucher.md) |
 
 ### Welle 4: Langzeit, Spielgefühl, Welt (Extras)
