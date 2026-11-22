@@ -1100,6 +1100,28 @@
    "geraet": "pc",
    "datum": "2026-11-22",
    "quelle": "baggern/pc-6-schlick.png"
+  },
+  {
+   "datei": "p37-pr408-pc-schlepp.jpg",
+   "pakete": [
+    "P37"
+   ],
+   "titel": "Havarist wird in den Hafen geschleppt",
+   "pr": 408,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "havarie/pc-3-schlepp.png"
+  },
+  {
+   "datei": "p37-pr408-handy-notruf.jpg",
+   "pakete": [
+    "P37"
+   ],
+   "titel": "Notruf: Box für den Havaristen wählen",
+   "pr": 408,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "havarie/handy-1-notruf.png"
   }
  ]
 }
