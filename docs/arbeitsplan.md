@@ -71,7 +71,7 @@ Stand 22.11.2026, 03:40 UTC. Leitlinie: Welle 3 nach Wirkung auf die Kernschleif
 | 3 | **P25 Stammgäste mit Wirkung und Gästepost** (F37), Teil 1 und 2 gemergt (PR 394), H9 läuft | Ruf am alten Platz, Gästepost im Hafenbüro: Stammgäste sind seit K2 selten und sollen etwas bringen | - | `features/stammgaeste.js`, Logbuch, Gästebuch |
 | 4 | **P88 Engstellen nach ihrer Länge regeln** (Prio B), Teil 1 erledigt (PR 390) | Teil 1: Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m). Darum getrennte Bahnen in offenem Wasser statt längenabhängiger Werte. Stufe 5 über 15 Küsten: 14 gleich oder besser (Küste 14 rund 3500 auf 1300 Proben, Küste 9 1851 auf 539, Bodden 1150 auf 620). Teil 2 (PR 400): Vorbeifahrer machen Platz, sobald sie ein Hafenboot aufhalten. Großschiff-Vortritt ist gestrichen: drei Fassungen gemessen, keine half (Entscheidung Planung 22.11.). Rest: Küste 15, ineinander fahrende Ankommende auf dem Seeweg | - | `boat-view.js`, `boat-anim.js` (Boote-Thread), danach Zeitraffer-Stichprobe |
 | 5 | **P31 Neue Gästewünsche** (F9), läuft | WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | 1 (`economy.js`) | Wünsche aus P19, Services (P23), Bauen-Menü |
-| 6 | **P35 Preisstufe am Hafenbüro** (F6) | günstig, normal, gehoben, eine Entscheidung je Saison | 5 (`economy.js`) | Hafenbüro, Ruf, Balancing-Messung danach |
+| 6 | ~~**P35 Preisstufe am Hafenbüro** (F6)~~ erledigt ([preisstufe.md](preisstufe.md)) | günstig, normal, gehoben, eine Entscheidung je Saison und nach jedem Ausbau; Bots wählen nach Faustregel | 5 (`economy.js`) | Hafenbüro, Ruf, Balancing-Messung danach |
 | 7 | **P29 Baggern** (F7) und **P36 Bojenfeld** (F10) | Ausbau mit eigener Entscheidung | 6 | Gelände (Tiefe), Liegeplätze |
 | 8 | **P37 Havarist**, **P38 Hafenfest**, **P39 Jugendtraining**, **P40 Seltene Besucher** | Höhepunkte, wenig Berührung untereinander | - | Ereignisse (P24), Meldeplatz, Logbuch |
 
@@ -109,7 +109,7 @@ Der Planungs-Thread meldet dem Koordinator, sobald alle drei Punkte erfüllt sin
 
 ## 4. Berührungspunkte, auf die alle achten
 
-- `web/js/data/economy.js`: jetzt P31, danach P35 (P34, P17, P19, P20, P23, 252 und A10 sind gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
+- `web/js/data/economy.js`: frei (P31 und P35 gemergt; P34, P17, P19, P20, P23, 252 und A10 sind gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
 - `web/js/sim.js`: kleine, getrennte Änderungen, vorher auf `main` rebasen, neue Regel mit eigenem Test.
 - Meldungs-Ordnung (höchstens eine schwebende Meldung, Tipps nie über Zeit und Bauen): P55, P22, P24 melden sich dort an, statt eigene Ebenen zu bauen.
 - `web/index.html`, `web/js/main.js`: nur eine `MODULES`-Zeile je neuem Modul; P61 ändert die Importmap und stimmt das im PR ab.
@@ -146,7 +146,7 @@ Reihenfolge nach Wirkung auf die Kernschleife: erst was jede Ankunft und jedes Z
 | 6 | P34 | Wind im Hafen spürbar, Windseite, Anlegen gegen den Wind | F5, F35 |
 | 7 | P31 | Neue Gästewünsche (WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen) | F9 |
 | 8 | P30 | erledigt (PR 297; Wasser kommt mit P31) | F8 |
-| 9 | P35 | Preisstufe am Hafenbüro | F6 |
+| 9 | P35 | erledigt (Preisstufe, [preisstufe.md](preisstufe.md)) | F6 |
 | 10 | P32 | erledigt (Flottillen, [flottillen.md](flottillen.md)) | F3 |
 | 11 | P25 | Stammgäste mit Wirkung, Gästepost | F37 |
 | 12 | P29 | Baggern für tiefere Liegeplätze | F7 |

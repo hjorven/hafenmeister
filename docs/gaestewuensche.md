@@ -56,7 +56,7 @@ Die neuen Wünsche kosten rund drei Spieltage: Bevor WLAN, Wäscherei und Absaug
 
 ## Kollisionen und Berührungspunkte
 
-- **P35 Preisstufe** (danach, `economy.js`): Liegegeld und Wunschbonus wirken auf die neuen Wünsche genauso.
+- **P35 Preisstufe** (gemergt, [preisstufe.md](preisstufe.md)): Liegegeld und Wunschbonus wirken auf die neuen Wünsche genauso; bei gehoben zählen fehlende neue Wünsche zum Anspruch.
 - **P25 Stammgäste**: Wer wiederkommt, kann einen Wunsch mehr haben (`stammgaeste.wachsen`), auch einen neuen. Die Waschmaschine fällt beim Wiederkommen nicht weg, wenn der Stammgast kürzer bleibt (Wachsen läuft nach `dropStayWishes`).
 - **P32 Flottillen**: Die Gruppe teilt ihre Wünsche; bleibt sie kürzer als 3 Nächte, verliert jedes Boot den Wäschewunsch.
 - **P27 Päckchen**: Ein Päckchenlieger außen bekommt das Wasser des Stegs mit (Schlauch über das Nachbarboot). Er bleibt nur eine Nacht, sein Wäschewunsch vom Ankommen bleibt trotzdem stehen.

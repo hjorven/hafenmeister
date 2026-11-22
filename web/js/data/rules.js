@@ -248,6 +248,15 @@ export function rulesFromEconomy(E = ECONOMY) {
   // Anmeldung per Funk (P28)
   const fa = E.funkAnmeldung;
   r.funk = fa ? { leadShare: fa.fruehestens, twoShare: fa.zweiAnteil, bonusShare: fa.bonusAnteil, rating: fa.ruf } : null;
+  // Preisstufe (P35, features/preisstufe-regeln.js): Faktoren je Stufe, Anker auf die Bewertung
+  const ps = E.preisstufe;
+  r.priceLevels = ps ? {
+    fromOffice: ps.abBuero ?? 1,
+    start: ps.start ?? 'normal',
+    levels: Object.fromEntries(Object.entries(ps.stufen || {}).map(([id, l]) => [id, {
+      fee: l.liegegeld ?? 1, arrivals: l.ankuenfte ?? 1, sizes: { ...(l.klassen || {}) }, rating: l.ruf ?? 0, demand: l.anspruch ?? 0,
+    }])),
+  } : null;
   // Flottillen (P32)
   const fl = E.flottillen;
   r.flotilla = fl ? {

@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "d30853f"
+  "commit": "5860b64"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -767,8 +767,8 @@
   {
    "id": "P31",
    "titel": "Neue Gästewünsche",
-   "inhalt": "F9",
-   "thread": "neu",
+   "inhalt": "F9, B8",
+   "thread": "erledigt (gaestewuensche.md: Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt)",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
@@ -776,7 +776,7 @@
     "F9",
     "B8"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -838,14 +838,14 @@
    "id": "P35",
    "titel": "Preisstufe am Hafenbüro",
    "inhalt": "F6",
-   "thread": "neu",
+   "thread": "erledigt (preisstufe.md: günstig, normal, gehoben; Faustregel für die Bots, Zeitraffer wieder nahe 105)",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F6"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -880,14 +880,14 @@
    "id": "P38",
    "titel": "Eigenes Hafenfest ansetzen",
    "inhalt": "F12",
-   "thread": "neu",
+   "thread": "erledigt (hafenfest.md)",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F12"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2052,8 +2052,8 @@
   {
    "code": "F6",
    "text": "Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P35, preisstufe.md): Preistafel im Gästebuch und Aufsteller am Hafenmeisterhaus, einmal je Saison und nach jedem Ausbau, Gäste schreiben über die Preise",
    "pakete": [
     "P35"
    ],
@@ -2075,7 +2075,7 @@
    "code": "F8",
    "text": "Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar",
    "status": "entfaellt",
-   "statusText": "erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasser mit P31, nachruesten.md",
+   "statusText": "erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasserhähne seit P31, nachruesten.md",
    "pakete": [
     "P30"
    ],
@@ -2087,8 +2087,8 @@
   {
    "code": "F9",
    "text": "Neue Wünsche: WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P31, gaestewuensche.md): Frischwasser über Wasserhähne am Steg (Stufe 2), WLAN (3), Waschmaschine ab 3 Nächten (4), Absaugstation (5), Hafenrundfahrt mit der Barkasse (6); Brötchen seit P19",
    "pakete": [
     "P31"
    ],
@@ -2120,8 +2120,8 @@
   {
    "code": "F12",
    "text": "Eigenes Hafenfest einmal pro Saison ansetzen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P38, hafenfest.md): Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk, Bilanz am Abend",
    "pakete": [
     "P38"
    ],
@@ -2684,8 +2684,8 @@
   {
    "code": "B8",
    "text": "Neue Wünsche in späten Stufen, je Stufe mindestens einer (= F9)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P31): jede Stufe 1 bis 6 hat mindestens einen neuen Wunsch, Test in tests/gaestewuensche.test.mjs",
    "pakete": [
     "P31"
    ],
@@ -3053,7 +3053,7 @@
    "code": "E8",
    "text": "Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste)",
    "status": "teilweise",
-   "statusText": "teilweise: Reservierungen erledigt (P28, PR 288); Havaristen und Feste kommen mit P37, P38",
+   "statusText": "teilweise: Reservierungen erledigt (P28, PR 288), eigene Feste erledigt (P38); Havaristen kommen mit P37",
    "pakete": [
     "P02"
    ],
@@ -4582,11 +4582,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 11,
+    "erledigt": 14,
     "teilweise": 1,
     "arbeit": 1,
     "frage": 0,
-    "offen": 8,
+    "offen": 5,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4670,20 +4670,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 46,
+  "erledigt": 49,
   "teilweise": 2,
   "arbeit": 1,
   "frage": 0,
-  "offen": 37,
+  "offen": 34,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 174,
+  "erledigt": 178,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 37,
+  "offen": 33,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5747,6 +5747,28 @@
  "merges": [
   {
    "datum": "2026-11-22",
+   "titel": "P31 Neue Gästewünsche: Frischwasser, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt",
+   "pr": 406,
+   "pakete": [
+    "P31"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P38: Eigenes Hafenfest ansetzen",
+   "pr": 405,
+   "pakete": [
+    "P38"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Zeitraffer zählt Flottillen je Stufe",
+   "pr": 403,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: P88 Teil 2 (PR 400)",
    "pr": 404,
    "pakete": [
@@ -5818,30 +5840,6 @@
    "pr": 394,
    "pakete": [
     "P25"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P88 in Arbeit (PR 390) mit Bild",
-   "pr": 395,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P32 Flottillen: drei bis fünf Boote wollen zusammen an einen Steg",
-   "pr": 393,
-   "pakete": [
-    "P32"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Arbeitsplan: P88 Teil 1 (PR 390) nachgetragen",
-   "pr": 391,
-   "pakete": [
-    "P88"
    ]
   }
  ]

@@ -31,6 +31,8 @@ const PIXEL = {
   warten: ['............', '...######...', '..#......#..', '.#...#....#.', '.#...#....#.', '.#...#....#.', '.#...####.#.', '.#........#.', '.#........#.', '..#......#..', '...######...', '............'],
   buch: ['............', '.####..####.', '#....##....#', '#.##.##.##.#', '#....##....#', '#.##.##.##.#', '#....##....#', '#.##.##.##.#', '#....##....#', '#....##....#', '.####..####.', '............'],
   zu: ['............', '.##......##.', '.###....###.', '..###..###..', '...######...', '....####....', '....####....', '...######...', '..###..###..', '.###....###.', '.##......##.', '............'],
+  // Preisstufe (P35): Münze mit Pfeil nach oben, zu teuer für das Gebotene
+  teuer: ['......#.....', '.....###....', '....#####...', '......#.....', '..oooooooo..', '.oyyyyyyyyo.', '.oyyo##oyyo.', '.oyyyyyyyyo.', '.oyyo##oyyo.', '.oyyyyyyyyo.', '..oooooooo..', '............'],
 };
 
 // Wünsche an Angebote an Land (P19): dieselben Bilder wie über dem Boot (ui/wunsch-bilder.js)
@@ -430,7 +432,9 @@ export function init(game) {
 
     // Pinnwand mit Gästepost und Stammgästen (P25, ui/gaestepost.js), ganz oben
     const pinnwand = game.gaestepost?.abschnitt?.() ?? null;
-    const koerper = el('div', { class: 'hm-gb-koerper' }, pinnwand, rufTeil, gruendeTeil, listeTeil, fuss);
+    // Preistafel am Hafenbüro (P35, features/preisstufe.js): gleich unter der Pinnwand
+    const preise = game.preisstufe?.abschnitt?.() ?? null;
+    const koerper = el('div', { class: 'hm-gb-koerper' }, pinnwand, preise, rufTeil, gruendeTeil, listeTeil, fuss);
     const scroll = panel.querySelector('.hm-gb-koerper')?.scrollTop ?? 0;
     panel.replaceChildren(kopf, koerper);
     koerper.scrollTop = scroll;

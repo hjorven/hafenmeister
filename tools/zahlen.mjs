@@ -28,7 +28,8 @@ const NAMENS_LISTEN = [
   /^klassen$/, /^wuensche$/, /^wunschAnzahl$/, /^platzarten$/, /^stromAnSteg$/, /^bauwerke$/, /^services$/,
   /^ereignisse$/, /^warten\.plaetze$/, /^stufen\.\d+\.mix$/, /\.gaeste$/, /\.wetter$/, /\.hafengeld$/,
   /^ereignisse\.\w+\.wirkung\.(sizeFactor|kindFactor|satisfaction)$/, /^tagesziele\.(geld|schwere|ziele|grossAb)$/,
-  /^zeit\.jahreszeiten$/, /\.ankunftFaktor$/, /^angebotWunsch\.wuensche$/, /^ruf\.lockt\.grosse$/, /^wind\.richtungen$/,
+  /^preisstufe\.stufen$/, /^preisstufe\.stufen\.\w+\.klassen$/, /^zeit\.jahreszeiten$/,
+  /\.ankunftFaktor$/, /^angebotWunsch\.wuensche$/, /^ruf\.lockt\.grosse$/, /^wind\.richtungen$/,
 ];
 // Felder, die bewusst noch niemand liest (mit Paket, das sie anschließt oder löscht)
 export const NOCH_UNGELESEN = {
@@ -154,6 +155,16 @@ export function tabellen() {
       ['Ankunft', `${zahl(f.fruehestens)} bis ${zahl(f.spaetestens)} des Tages, im Konvoi alle ${zahl(f.abstand)} s`],
       ['Bewertung je Crew', `alle an einem Steg +${zahl(f.zusammen)} Anker, aufgeteilt −${zahl(f.getrennt)} Anker`],
     ]), '');
+  }
+  if (E.preisstufe) {
+    const ps = E.preisstufe;
+    const pz = (f) => (f === 1 ? '-' : `${f > 1 ? '+' : '−'}${Math.round(Math.abs(f - 1) * 100)} %`);
+    const ak = (n) => (n ? `${n > 0 ? '+' : '−'}${zahl(Math.abs(n))}` : '-');
+    t.push('## Preisstufe', '', `Am Hafenbüro ab Hafenbüro-Stufe ${ps.abBuero}, eine Wahl je Saison (im Winter für die kommende) und nach jedem Ausbau, Start: ${ps.start}.`, '',
+      tabelle(['Stufe', 'Liegegeld', 'Ankünfte', 'Klassen', 'Anker', 'Anspruch'], Object.entries(ps.stufen).map(([id, l]) => [
+        id, pz(l.liegegeld), pz(l.ankuenfte), Object.entries(l.klassen ?? {}).map(([k, f]) => `${k} ${pz(f)}`).join(', ') || '-', ak(l.ruf),
+        l.anspruch > 0 ? `bis −${zahl(l.anspruch)} Anker, wenn kein Wunsch erfüllt` : l.anspruch < 0 ? `Nachsicht bis +${zahl(-l.anspruch)} Anker, wenn kein Wunsch erfüllt` : '-',
+      ])), '');
   }
   t.push('## Services', '', tabelle(['Service', 'Stufe', 'Name', 'ab Hafenstufe', 'Kosten', 'Mindestruf', 'Wirkung'], SERVICES.flatMap((s) =>
     s.stufen.map((st, i) => [i === 0 ? s.name : '', i + 1, st.name, st.abStufe ?? s.abStufe, euro(st.kosten), st.ruf != null ? zahl(st.ruf) : '-',
