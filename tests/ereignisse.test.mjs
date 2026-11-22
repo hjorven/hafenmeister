@@ -81,7 +81,9 @@ test('Häufigkeit: alle Ereignisse kommen vor, keins dominiert', () => {
     const { log } = run(seed, Y * 10, { stage: 6, buildings: { segelclub: 1, raeucherei: 1 } });
     for (const c of log) if (c.type === 'start') count[c.event.id] = (count[c.event.id] ?? 0) + 1;
   }
-  for (const def of EVENTS) assert.ok((count[def.id] ?? 0) > 0, `${def.id} kommt vor`);
+  // Das Hafenfest setzt der Spieler selbst an (P38, tests/hafenfest.test.mjs)
+  for (const def of EVENTS.filter((d) => !d.selbst)) assert.ok((count[def.id] ?? 0) > 0, `${def.id} kommt vor`);
+  assert.equal(count.hafenfest ?? 0, 0, 'Hafenfest kommt nicht von selbst');
   const perSeason = Object.values(count).reduce((a, b) => a + b, 0) / 20 / 10;
   assert.ok(perSeason >= 4 && perSeason <= 10, `Ereignisse pro Saison: ${perSeason}`);
 });

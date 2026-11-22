@@ -965,7 +965,8 @@ export function init(game) {
   // Ereignisse mit vielen Besuchern (Mittsommer, Heringstage, Hanse-Woche, ECONOMY.ereignisse.<id>.menschen):
   // mehr Spaziergänger und Badegäste, abends bleiben mehr (Mittsommer: am Strand)
   function festFaktor(typ) {
-    const m = game.events?.current?.event?.menschen;
+    // Eigenes Hafenfest (P38): mit Musik mehr Leute (current.menschen statt event.menschen)
+    const m = game.events?.current?.menschen ?? game.events?.current?.event?.menschen;
     if (!m) return 1;
     return (abend ? m.abends?.[typ] ?? m[typ] : m[typ]) ?? 1;
   }

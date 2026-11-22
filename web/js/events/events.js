@@ -20,6 +20,7 @@
 //   game.events.season(day)  Jahreslauf: Saison und Winter (ECONOMY.zeit, 16 und 2 Tage)
 //   game.events.forecast(n), game.events.weather(day), game.events.current, game.events.planned
 //   game.events.gross (angekündigtes großes Ereignis), game.events.nachspiel (heute), game.events.bauStufe(id)
+//   game.events.eigen (angesetztes eigenes Hafenfest, P38)
 //   game.events.save(), game.events.load(daten)
 //
 // Mit den Spielregeln (sim.js) folgt das Modul game.state.day und game.state.phase; der eigene
@@ -196,6 +197,8 @@ export function init(game) {
     },
     bauStufe,
     get gross() { return scheduler.gross; },
+    /** Vom Spieler angesetztes Hafenfest (P38, features/hafenfest.js), solange es noch kommt */
+    get eigen() { return scheduler.eigen; },
     get nachspiel() { return scheduler.nachspiel; },
     weather: (day) => scheduler.weather(day),
     forecast: (n) => scheduler.forecast(n),

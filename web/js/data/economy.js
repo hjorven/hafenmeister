@@ -841,10 +841,28 @@ export const ECONOMY = {
                  // Vorbereiten (events/vorbereiten.js): so viele Plätze je Stufe für Segler freihalten,
                  // jedes Segelboot darauf zahlt einmal Startgeld je Klasse (Klassen ohne Betrag nehmen nicht teil)
                  vorbereiten: { plaetze: { 3: 3, 4: 4, 5: 5, 6: 6 }, startgeld: { S: 8, M: 15, L: 25 } } },
-    hafenfest: { abStufe: 4, alleTage: 11, dauer: 1, vorrang: 4, saison: [5, 13],
-                 // Traditionssegler (XL) kommen erst ab Stufe 5, vorher nur mehr Boote und Besucher
-                 wirkung: { arrivalFactor: 1.3, kindFactor: { traditionssegler: 6 }, sizeFactor: { XL: 2 },
-                   visitorFactor: 2, serviceIncomeFactor: 1.5, ratingBonus: 0.25 } },
+    // Hafenfest (P38, F12): kommt nicht von selbst (selbst), der Spieler setzt es einmal je Saison an
+    // (features/hafenfest.js). saison: erlaubte Saisontage. Traditionssegler (XL) kommen erst ab Stufe 5.
+    hafenfest: { abStufe: 3, selbst: true, alleTage: 18, dauer: 1, vorrang: 4, saison: [3, 15],
+                 wirkung: { arrivalFactor: 1.5, kindFactor: { traditionssegler: 6 }, sizeFactor: { XL: 2 },
+                   visitorFactor: 1.6, serviceIncomeFactor: 1.3, ratingBonus: 0.1 },
+                 menschen: { ort: 1.5, abends: { ort: 1.6 } },
+                 // eigen: vorlauf = frühestens so viele Tage nach heute. kosten je Ausbaustufe 1 bis 6, beim
+                 // Ansetzen bezahlt (Tagesabschluss: Ausgaben "Hafenfest"); absagen bis zum Vorabend gibt
+                 // erstattung (Anteil) zurück. Teile wirken zusätzlich zur Wirkung oben: Faktoren
+                 // multiplizieren sich, ratingBonus und extraNights zählen dazu. menschen: mehr Leute an Land.
+                 // standgeld: Markt bringt abends Geld je Ausbaustufe (Einnahmen: Sonstiges, "hafenfest").
+                 eigen: {
+                   vorlauf: 2, erstattung: 0.5,
+                   kosten: [0, 0, 150, 350, 600, 900],
+                   teile: {
+                     schmuck:   { kosten: [0, 0, 80, 180, 320, 480], wirkung: { ratingBonus: 0.25 } },
+                     musik:     { kosten: [0, 0, 120, 260, 450, 650], wirkung: { visitorFactor: 1.5 }, menschen: 1.4 },
+                     markt:     { kosten: [0, 0, 100, 220, 380, 560], standgeld: [0, 0, 160, 340, 560, 820],
+                                  wirkung: { serviceIncomeFactor: 1.3 } },
+                     feuerwerk: { kosten: [0, 0, 180, 380, 650, 950], wirkung: { extraNights: 1 } },
+                   },
+                 } },
     // ---- Neue Ereignisse (P24, F17) und Bindung an Bauten (G7) ----------------------------------
     // menschen: mehr Spaziergänger (ort) und Badegäste (strand) im Bild (render/people.js), abends: wer bleibt.
     // bauten: gebaute Services machen das Ereignis größer. Je Bau und Ereignistag abends Geld (proTag je

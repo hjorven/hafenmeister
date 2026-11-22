@@ -241,7 +241,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
 | F11 | Havarist wird eingeschleppt, braucht sofort einen Platz, Ruf und neuer Stammgast | offen | P37 |
-| F12 | Eigenes Hafenfest einmal pro Saison ansetzen | offen | P38 |
+| F12 | Eigenes Hafenfest einmal pro Saison ansetzen | erledigt (P38, [hafenfest.md](hafenfest.md)): Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk, Bilanz am Abend | P38 |
 | F13 | Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub | offen | P39 |
 | F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | erledigt (PR 245) | P20 |
 | F15 | Krantage: Dauerlieger sichtbar ins Winterlager und zurück | erledigt (PR 245) | P20 |
@@ -399,7 +399,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | E5 | Automatik je Größenklasse an oder aus | erledigt (PR 146) | P02 |
 | E6 | Von Hand eingewiesene Gäste geben einen Viertelanker mehr | erledigt (PR 146) | P02 |
 | E7 | Volle Automatik erst ab Hafenstufe 4 und teurer | erledigt (PR 146) | P02 |
-| E8 | Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste) | teilweise: Reservierungen erledigt (P28, PR 288); Havaristen und Feste kommen mit P37, P38 | P02 (verknüpft P28, P37, P38) |
+| E8 | Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste) | teilweise: Reservierungen erledigt (P28, PR 288), eigene Feste erledigt (P38); Havaristen kommen mit P37 | P02 (verknüpft P28, P37, P38) |
 
 ### F Services und Angebote (hier "Svc")
 
@@ -708,7 +708,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P35 | Preisstufe am Hafenbüro | F6 | neu |
 | P36 | Bojenfeld im See | F10 | neu |
 | P37 | Havarist einschleppen | F11 | neu |
-| P38 | Eigenes Hafenfest ansetzen | F12 | neu |
+| P38 | Eigenes Hafenfest ansetzen | F12 | erledigt ([hafenfest.md](hafenfest.md)) |
 | P39 | Jugendtraining am Segelclub | F13 | neu |
 | P40 | Seltene Besucher | F16 (nach P21) | neu |
 
