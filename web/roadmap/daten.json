@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "0eec7fa"
+  "commit": "8eb84f5"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1067,29 +1067,39 @@
    "id": "P47",
    "titel": "Große Ankünfte ankündigen",
    "inhalt": "F31",
-   "thread": "erledigt (Thread \"Große Ankünfte ankündigen\", docs/grosse-ankuenfte.md)",
+   "thread": "erledigt (PR 428, Thread \"Große Ankünfte ankündigen\", docs/grosse-ankuenfte.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    428
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F31"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    106,
+    107
+   ]
   },
   {
    "id": "P48",
    "titel": "Leinen annehmen beim Anlegen",
    "inhalt": "F32",
-   "thread": "erledigt (Thread \"Leinen beim Anlegen annehmen lassen\", leinen.md)",
+   "thread": "erledigt (PR 430, Thread \"Leinen beim Anlegen annehmen lassen\", leinen.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    430
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F32"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    108,
+    109
+   ]
   },
   {
    "id": "P49",
@@ -6014,18 +6024,66 @@
    "datum": "2026-11-22",
    "quelle": "stimmung/handy-1-lichterketten-stufe6.png",
    "nr": 105
+  },
+  {
+   "datei": "p47-pr428-pc-kreuzfahrt.jpg",
+   "pakete": [
+    "P47"
+   ],
+   "titel": "Kreuzfahrtschiff läuft ein: Meldung und Kamerafahrt",
+   "pr": 428,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "ankuenfte/pc-kreuzfahrt-2-kamerafahrt.png",
+   "nr": 106
+  },
+  {
+   "datei": "p47-pr428-handy-koenigsyacht.jpg",
+   "pakete": [
+    "P47"
+   ],
+   "titel": "Königsyacht wird angekündigt",
+   "pr": 428,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "ankuenfte/handy-koenigsyacht.png",
+   "nr": 107
+  },
+  {
+   "datei": "p48-pr430-pc-trinkgeld.jpg",
+   "pakete": [
+    "P48"
+   ],
+   "titel": "Leine angenommen: Festmacher und Trinkgeld",
+   "pr": 430,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "leinen/annehmen/pc-3-trinkgeld.png",
+   "nr": 108
+  },
+  {
+   "datei": "p48-pr430-handy-symbol.jpg",
+   "pakete": [
+    "P48"
+   ],
+   "titel": "\"Leine annehmen\" an den Boxen",
+   "pr": 430,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "leinen/annehmen/handy-1-symbol.png",
+   "nr": 109
   }
  ],
  "neueBilder": [
+  109,
+  107,
   105,
   103,
   101,
   99,
   97,
   95,
-  93,
-  91,
-  90
+  93
  ],
  "merges": [
   {

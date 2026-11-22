@@ -1166,6 +1166,50 @@
    "geraet": "handy",
    "datum": "2026-11-22",
    "quelle": "stimmung/handy-1-lichterketten-stufe6.png"
+  },
+  {
+   "datei": "p47-pr428-pc-kreuzfahrt.jpg",
+   "pakete": [
+    "P47"
+   ],
+   "titel": "Kreuzfahrtschiff läuft ein: Meldung und Kamerafahrt",
+   "pr": 428,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "ankuenfte/pc-kreuzfahrt-2-kamerafahrt.png"
+  },
+  {
+   "datei": "p47-pr428-handy-koenigsyacht.jpg",
+   "pakete": [
+    "P47"
+   ],
+   "titel": "Königsyacht wird angekündigt",
+   "pr": 428,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "ankuenfte/handy-koenigsyacht.png"
+  },
+  {
+   "datei": "p48-pr430-pc-trinkgeld.jpg",
+   "pakete": [
+    "P48"
+   ],
+   "titel": "Leine angenommen: Festmacher und Trinkgeld",
+   "pr": 430,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "leinen/annehmen/pc-3-trinkgeld.png"
+  },
+  {
+   "datei": "p48-pr430-handy-symbol.jpg",
+   "pakete": [
+    "P48"
+   ],
+   "titel": "\"Leine annehmen\" an den Boxen",
+   "pr": 430,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "leinen/annehmen/handy-1-symbol.png"
   }
  ]
 }

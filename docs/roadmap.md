@@ -722,8 +722,8 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P44 | Hafenname und Flagge | F23, F27 (Auswahl beim Start) | erledigt (Thread "Hafenname und eigene Flagge geben", [Hafenflagge](hafenflagge.md)) |
 | P45 | Kreativmodus | F24 | neu |
 | P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | erledigt (PR 427, Thread "Ruhigen Abend und Serien-Akkord bauen") |
-| P47 | Große Ankünfte ankündigen | F31 | erledigt (Thread "Große Ankünfte ankündigen", docs/grosse-ankuenfte.md) |
-| P48 | Leinen annehmen beim Anlegen | F32 | erledigt (Thread "Leinen beim Anlegen annehmen lassen", [leinen.md](leinen.md)) |
+| P47 | Große Ankünfte ankündigen | F31 | erledigt (PR 428, Thread "Große Ankünfte ankündigen", docs/grosse-ankuenfte.md) |
+| P48 | Leinen annehmen beim Anlegen | F32 | erledigt (PR 430, Thread "Leinen beim Anlegen annehmen lassen", [leinen.md](leinen.md)) |
 | P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | neu |
 | P50 | Einstellungen für Sicht und Bewegung | F25 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
 | P51 | Hafentiere | F38 | bestehend: "Menschen im Hafen herumlaufen lassen" |
