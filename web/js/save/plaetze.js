@@ -23,6 +23,7 @@
 import {
   speicher, wrap, unwrap, loadGame, saveGame, altenStandLesen, KEY_SAVE, KEY_BACKUP, SaveError,
 } from './storage.js';
+import { hafenNameSauber, zeichenKuerzen } from '../data/hafenflagge.js';
 
 export const KEY_INDEX = 'hafenmeister.plaetze';
 export const KEY_ALT = 'hafenmeister.save'; // alter zweiter Speicherweg aus state.js
@@ -105,9 +106,9 @@ export function infoAus(game) {
   };
 }
 
+/** Sauberer Hafenname (Regeln in data/hafenflagge.js, Audit C05). */
 export function nameSauber(name, ersatz = 'Mein Hafen') {
-  const n = String(name ?? '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX);
-  return n || ersatz;
+  return hafenNameSauber(name, ersatz);
 }
 
 /** Name, der noch nicht vergeben ist: "Möwenhafen", sonst "Möwenhafen 2" ... */
@@ -115,7 +116,7 @@ function freierName(index, wunsch) {
   const namen = new Set(index.plaetze.map((p) => p.name));
   if (!namen.has(wunsch)) return wunsch;
   for (let i = 2; ; i++) {
-    const n = `${wunsch.slice(0, NAME_MAX - 3)} ${i}`;
+    const n = `${zeichenKuerzen(wunsch, NAME_MAX - 1 - String(i).length)} ${i}`;
     if (!namen.has(n)) return n;
   }
 }
@@ -132,6 +133,8 @@ function verzeichnisLesen() {
     if (!v || typeof v !== 'object' || !Array.isArray(v.plaetze)) return null;
     v.plaetze = v.plaetze.filter((p) => p && typeof p.id === 'string');
     v.papierkorb = Array.isArray(v.papierkorb) ? v.papierkorb.filter((p) => p && typeof p.id === 'string') : [];
+    // Namen nur als sauberer Text (Audit C05), auch wenn jemand das Verzeichnis von Hand geändert hat
+    for (const p of [...v.plaetze, ...v.papierkorb]) p.name = hafenNameSauber(p.name);
     if (!Number.isInteger(v.naechste) || v.naechste < 1) v.naechste = v.plaetze.length + 1;
     if (!v.plaetze.some((p) => p.id === v.aktiv)) v.aktiv = v.plaetze[0]?.id ?? null;
     return v;

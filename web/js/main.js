@@ -76,6 +76,7 @@ const MODULES = [
   './features/stimmung.js',            // P46: ruhiger Abend mit Lichterketten, Serien-Akkord (docs/stimmung.md)
   './features/leinen.js',              // P48: Leinen annehmen beim Anlegen (docs/leinen.md)
   './ui/statistik.js',                 // Statistik der letzten 30 Tage, Saisons (P41)
+  './features/hafenflagge.js',         // P44: Hafenname und eigene Flagge, Mast, Schilder, Fenster
   './ui/oberflaeche.js',
 ];
 

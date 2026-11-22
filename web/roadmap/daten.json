@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "ae7b08d"
+  "commit": "d9ca7df"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1015,7 +1015,7 @@
    "id": "P44",
    "titel": "Hafenname und Flagge",
    "inhalt": "F23, F27 (Auswahl beim Start)",
-   "thread": "neu",
+   "thread": "erledigt (Thread \"Hafenname und eigene Flagge geben\", Hafenflagge)",
    "welle": 4,
    "prs": [],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
@@ -1024,7 +1024,7 @@
     "F27",
     "C05"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1137,14 +1137,14 @@
    "id": "P51",
    "titel": "Hafentiere",
    "inhalt": "F38",
-   "thread": "bestehend: \"Menschen im Hafen herumlaufen lassen\"",
+   "thread": "erledigt (docs/hafentiere.md)",
    "welle": 4,
    "prs": [],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F38"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2308,8 +2308,8 @@
   {
    "code": "F23",
    "text": "Hafenname und Flagge, sichtbar an Einfahrt und Mast",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P44, Hafenflagge)",
    "pakete": [
     "P44"
    ],
@@ -2351,9 +2351,9 @@
   },
   {
    "code": "F27",
-   "text": "Neues Spiel mit Auswahl: Hafenname, Stegbild, später Herausforderung oder Revier",
+   "text": "Neues Spiel mit Auswahl: Hafenname, Flagge, Stegbild, später Herausforderung oder Revier",
    "status": "erledigt",
-   "statusText": "erledigt für Name, Stegbild, Küste, Einführung; Herausforderung und Revier folgen",
+   "statusText": "erledigt für Name, Flagge, Stegbild, Küste, Einführung; Herausforderung und Revier folgen",
    "pakete": [
     "P09",
     "P44"
@@ -2480,8 +2480,8 @@
   {
    "code": "F38",
    "text": "Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (hafentiere.md): wohnen im Hafen, Tagesablauf, Antippen, Foto ins Logbuch, Erfolg Hafenfreunde",
    "pakete": [
     "P51"
    ],
@@ -4493,7 +4493,7 @@
   },
   {
    "code": "C05",
-   "text": "HTML per innerHTML (render/services.js, ui/input-pc.js): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, textContent oder Escapen, dazu Test mit präparierten Namen",
+   "text": "HTML per innerHTML (render/services.js, ui/input-pc.js): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, textContent oder Escapen, dazu Test mit präparierten Namen. Hafenname erledigt mit P44 (hafenNameSauber, nur textContent/Canvas, tests/hafenflagge.test.mjs)",
    "status": null,
    "statusText": "",
    "pakete": [
@@ -4676,11 +4676,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 5,
-    "teilweise": 1,
+    "erledigt": 7,
+    "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 8,
+    "offen": 7,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4735,20 +4735,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 58,
-  "teilweise": 2,
+  "erledigt": 60,
+  "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 26,
+  "offen": 25,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 189,
+  "erledigt": 191,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 23,
+  "offen": 21,
   "entfaellt": 1,
   "alle": 219
  },
@@ -6088,61 +6088,6 @@
  "merges": [
   {
    "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P47 Große Ankünfte (PR 428) und P48 Leinen (PR 430) mit Bildern",
-   "pr": 434,
-   "pakete": [
-    "P47",
-    "P48"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Zeitraffer zählt Flottillen, die als Ganzes weiterfahren",
-   "pr": 432,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P47 Große Ankünfte: Horn, Meldung und kurze Kamerafahrt",
-   "pr": 428,
-   "pakete": [
-    "P47"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: Bilder für P46 Ruhiger Abend (PR 427)",
-   "pr": 431,
-   "pakete": [
-    "P46"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P48 Leinen annehmen beim Anlegen (F32)",
-   "pr": 430,
-   "pakete": [
-    "P48"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P46: Ruhiger Abend mit Lichterketten und Serien-Akkord (F29, F30, L1)",
-   "pr": 427,
-   "pakete": [
-    "P46"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P31 Gästewünsche (PR 406) mit Bildern",
-   "pr": 426,
-   "pakete": [
-    "P31"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
    "titel": "Arbeitsplan: Welle 3 gebaut, Welle 4 startet mit P48, P47, P46, P44",
    "pr": 425,
    "pakete": [
@@ -6182,6 +6127,62 @@
    "pr": 420,
    "pakete": [
     "P29"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P36 Bojenfeld (PR 421) mit Bildern",
+   "pr": 422,
+   "pakete": [
+    "P36"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P36 Bojenfeld im See",
+   "pr": 421,
+   "pakete": [
+    "P36"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Schichttest: zwei Testfehler aus Serie 14 auf dem Tablet",
+   "pr": 419,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P35 Preisstufe (PR 413) mit Bildern",
+   "pr": 418,
+   "pakete": [
+    "P35"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P35 Preisstufe am Hafenbüro: günstig, normal, gehoben",
+   "pr": 413,
+   "pakete": [
+    "P35"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P39 (PR 412), P32-Rest (PR 414), P40 (PR 416) mit Bildern",
+   "pr": 417,
+   "pakete": [
+    "P39",
+    "P32",
+    "P40"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P40 Seltene Besucher: besondere Schiffe am Ehrenplatz, Schwäne, Schweinswal, Fotos im Logbuch",
+   "pr": 416,
+   "pakete": [
+    "P40"
    ]
   }
  ]
