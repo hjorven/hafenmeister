@@ -48,7 +48,7 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 
 | Prio | Fehler | Beleg | Paket / Thread |
 |---|---|---|---|
-| B | Flottillen landen ohne Spieler selten zusammen: von 7 bis 15 Gruppen je Spiel liegen nur rund ein Fünftel gemeinsam, die Hälfte wird getrennt, obwohl das Selbst-Einfahren laut [flottillen.md](flottillen.md) zuerst den Steg der Gruppe sucht (`flotillaTargets` in `sim.js`). Zu klären: ob Boote in andere Größenklassen ausweichen müssen oder ob das Ziel beim Selbst-Einfahren verloren geht. Zusammenlegen bleibt Spieleraufgabe, aber wer frei fährt, soll den Steg der Gruppe nehmen, wenn dort Platz ist | Zeitraffer-Stichprobe `0893c44` (22.11.): PC 1 3/10 zusammen, PC 8 2/15, PC 14 2/13, Handy 2 4/14, Handy 15 1/13 | P32-Rest, kurzer Thread, startet jetzt (P31 gemergt) |
+| B | Flottillen landen ohne Spieler selten zusammen: von 7 bis 15 Gruppen je Spiel liegen nur rund ein Fünftel gemeinsam, die Hälfte wird getrennt, obwohl das Selbst-Einfahren laut [flottillen.md](flottillen.md) zuerst den Steg der Gruppe sucht (`flotillaTargets` in `sim.js`). Zu klären: ob Boote in andere Größenklassen ausweichen müssen oder ob das Ziel beim Selbst-Einfahren verloren geht. Zusammenlegen bleibt Spieleraufgabe, aber wer frei fährt, soll den Steg der Gruppe nehmen, wenn dort Platz ist | Zeitraffer-Stichprobe `0893c44` (22.11.): PC 1 3/10 zusammen, PC 8 2/15, PC 14 2/13, Handy 2 4/14, Handy 15 1/13 | P32-Rest, kurzer Thread, startet jetzt (P31 gemergt) **Erledigt 22.11.** (Thread "Flottillen beim Selbst-Einfahren zusammenhalten"): Gruppe hält Boxen am Steg frei, teilt sich ohne Platz für alle nicht auf und fährt gemeinsam weiter; Browser Stufe 4: 8 von 11 zusammen, 0 getrennt (vorher 2 von 8, 6 getrennt) |
 | B | Reste aus P66: Offene Bucht Stufe 5 und 6 noch 19 bis 61 feste Paare vor der Einfahrt (80/-240, 80/-200); Mole beim Wechsel auf Stufe 5 kurz unter fahrenden Booten; Vorbeifahrer dicht an Großschiffen; Großschiff-Vortritt fehlt | Boote-Thread nach PR 381 und 384, Abnahme-Serie b331ce2 | nach der Abnahme als eigenes kleines Paket, wenn die Serie es bestätigt |
 | B | Raddampfer (XL) an K01 fährt beim Einlaufen über die Westmole und beim Auslaufen über die Kaikante (Handy, mehrere Küsten) | Härtetest 15.11. nach P87, Nahbilder `handy-alle-einfahren-nah-land-1.jpg`, `handy-alle-ablegen-nah-land-1.jpg` in `/mnt/project-files/extremtest/2026-11-15-5dce72f-p87/handy/bilder/` | P84, erledigt 20.11. |
 | B | Gäste liegen ab Stufe 4 kaum sichtbar an einer Warteboje (nachgemessen nach PR 327 bis 332: Stufe 4 und 6 am PC 0 an der Boje). Ursache jetzt: `selfEnter` in `sim.js` zählt als Andrang (mehr als die Hälfte der Bojen vergeben) auch Boote, die noch Minuten draußen auf See anfahren; darum fahren die ersten im Revier direkt aus der Anfahrt ein. Vorschlag: Andrang nur aus Booten im Revier oder an der Boje zählen | Härtetest 15.11. nach P87 (`bojen-erreichbar`, misst jetzt an Boje / direkt bei Andrang / unterwegs getrennt), docs/extremtest.md | P66, "Staus an Bojen" |
@@ -71,11 +71,11 @@ Stand 22.11.2026, 03:40 UTC. Leitlinie: Welle 3 nach Wirkung auf die Kernschleif
 | 3 | **P25 Stammgäste mit Wirkung und Gästepost** (F37), Teil 1 und 2 gemergt (PR 394), H9 läuft | Ruf am alten Platz, Gästepost im Hafenbüro: Stammgäste sind seit K2 selten und sollen etwas bringen | - | `features/stammgaeste.js`, Logbuch, Gästebuch |
 | 4 | ~~**P88 Engstellen nach ihrer Länge regeln** (Prio B)~~ erledigt (PR 390, 400, 407) | Teil 1: Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m). Darum getrennte Bahnen in offenem Wasser statt längenabhängiger Werte. Stufe 5 über 15 Küsten: 14 gleich oder besser (Küste 14 rund 3500 auf 1300 Proben, Küste 9 1851 auf 539, Bodden 1150 auf 620). Teil 2 (PR 400): Vorbeifahrer machen Platz, sobald sie ein Hafenboot aufhalten. Großschiff-Vortritt ist gestrichen: drei Fassungen gemessen, keine half (Entscheidung Planung 22.11.). Teil 3 (PR 407): eigene Bahn je Richtung auch auf dem Seeweg, Küste 15 fest 16/14 statt 116/32 | - | `boat-view.js`, `boat-anim.js` (Boote-Thread), danach Zeitraffer-Stichprobe |
 | 5 | ~~**P31 Neue Gästewünsche** (F9)~~ erledigt (PR 406) | WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | 1 (`economy.js`) | Wünsche aus P19, Services (P23), Bauen-Menü |
-| 6 | **P35 Preisstufe am Hafenbüro** (F6) | günstig, normal, gehoben, eine Entscheidung je Saison | 5 (`economy.js`) | Hafenbüro, Ruf, Balancing-Messung danach |
-| 7 | **P29 Baggern** (F7) und **P36 Bojenfeld** (F10) | Ausbau mit eigener Entscheidung | 6 | Gelände (Tiefe), Liegeplätze |
-| 8 | **P37 Havarist**, ~~**P38 Hafenfest**~~ erledigt (PR 405), **P39 Jugendtraining**, **P40 Seltene Besucher** | Höhepunkte, wenig Berührung untereinander | - | Ereignisse (P24), Meldeplatz, Logbuch |
+| 6 | ~~**P35 Preisstufe am Hafenbüro** (F6)~~ erledigt ([preisstufe.md](preisstufe.md)) | günstig, normal, gehoben, eine Entscheidung je Saison und nach jedem Ausbau; Bots wählen nach Faustregel | 5 (`economy.js`) | Hafenbüro, Ruf, Balancing-Messung danach |
+| 7 | **P29 Baggern** (F7) und ~~**P36 Bojenfeld** (F10)~~ erledigt ([bojenfeld.md](bojenfeld.md)) | Ausbau mit eigener Entscheidung | 6 | Gelände (Tiefe), Liegeplätze |
+| 8 | **P37 Havarist**, ~~**P38 Hafenfest**~~ erledigt (PR 405), **P39 Jugendtraining**, ~~**P40 Seltene Besucher**~~ erledigt (docs/besucher.md) | Höhepunkte, wenig Berührung untereinander | - | Ereignisse (P24), Meldeplatz, Logbuch |
 
-**Startregel:** 1, 2, 4, 5 und P38 fertig, P25 (H9) läuft. Jetzt starten: der kurze Flottillen-Rest (Prio B, `sim.js`), P35 Preisstufe (hält ab jetzt `economy.js`), P37 Havarist, P39 Jugendtraining. Danach 7 (nach P35) und P40. Die ganze Zeitraffer-Serie über 15 Küsten läuft jetzt auf `73f388f` und nimmt P88 ab. Nach jedem Paket, das Boote oder Zahlen ändert: Zeitraffer-Stichprobe über 5 Küsten, nach jedem dritten die ganze Serie. Alle neuen Meldungen über den einen Meldeplatz.
+**Startregel:** 1, 2, 4, 5 und P38 fertig, P25 (H9) läuft. Jetzt starten: der kurze Flottillen-Rest (Prio B, `sim.js`), ~~P35 Preisstufe~~ (erledigt), P37 Havarist, P39 Jugendtraining. Danach 7 und P40. Die ganze Zeitraffer-Serie über 15 Küsten läuft jetzt auf `73f388f` und nimmt P88 ab. Nach jedem Paket, das Boote oder Zahlen ändert: Zeitraffer-Stichprobe über 5 Küsten, nach jedem dritten die ganze Serie. Alle neuen Meldungen über den einen Meldeplatz.
 
 Danach Welle 4 (Abschnitt 5, C), dann Nordsee (P57), dann Welle 6 (Stufe 7 bis 20), Online zuletzt.
 
@@ -109,7 +109,7 @@ Der Planungs-Thread meldet dem Koordinator, sobald alle drei Punkte erfüllt sin
 
 ## 4. Berührungspunkte, auf die alle achten
 
-- `web/js/data/economy.js`: jetzt P35, danach P29/P36 (P31, P34, P17, P19, P20, P23, 252 und A10 sind gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
+- `web/js/data/economy.js`: frei für P29 (P36, P35, P31, P34, P17, P19, P20, P23, 252 und A10 sind gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
 - `web/js/sim.js`: kleine, getrennte Änderungen, vorher auf `main` rebasen, neue Regel mit eigenem Test.
 - Meldungs-Ordnung (höchstens eine schwebende Meldung, Tipps nie über Zeit und Bauen): P55, P22, P24 melden sich dort an, statt eigene Ebenen zu bauen.
 - `web/index.html`, `web/js/main.js`: nur eine `MODULES`-Zeile je neuem Modul; P61 ändert die Importmap und stimmt das im PR ab.
@@ -146,11 +146,11 @@ Reihenfolge nach Wirkung auf die Kernschleife: erst was jede Ankunft und jedes Z
 | 6 | P34 | Wind im Hafen spürbar, Windseite, Anlegen gegen den Wind | F5, F35 |
 | 7 | P31 | Neue Gästewünsche (WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen) | F9 |
 | 8 | P30 | erledigt (PR 297; Wasser kommt mit P31) | F8 |
-| 9 | P35 | Preisstufe am Hafenbüro | F6 |
+| 9 | P35 | erledigt (Preisstufe, [preisstufe.md](preisstufe.md)) | F6 |
 | 10 | P32 | erledigt (Flottillen, [flottillen.md](flottillen.md)) | F3 |
 | 11 | P25 | Stammgäste mit Wirkung, Gästepost | F37 |
 | 12 | P29 | Baggern für tiefere Liegeplätze | F7 |
-| 13 | P36 | Bojenfeld im See | F10 |
+| 13 | P36 | erledigt (Bojenfeld im See, [bojenfeld.md](bojenfeld.md)) | F10 |
 | 14 | P59 | erledigt (Doppelboxen PR 321, Yachtsteg PR 326) | - |
 | 15 | P26 | erledigt (PR 322) | - |
 | 15a | P86 | Bootsgeschichten fertig erzählen (Regatta-Start und Sieger, Gepäck, Tanksteg) | - |

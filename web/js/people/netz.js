@@ -246,6 +246,7 @@ export function baueNetz({ hafen, stufe, region = 'ostsee', gebaeude = [], hinde
   const plaetzeRoh = [];
   for (const p of hafen.plaetze) {
     if (gebaut?.plaetze && !gebaut.plaetze.has(p.id)) continue;
+    if (p.art === 'boje') continue;   // Bojenfeld (P36): kein Steg, die Crew bleibt an Bord
     const lage = p.lage[String(stufe)];
     if (!lage) continue;
     const [x, y, richtung] = lage;

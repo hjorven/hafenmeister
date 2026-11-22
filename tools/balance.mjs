@@ -15,6 +15,7 @@
 //   node tools/balance.mjs --verlauf 1     Tagesprotokoll eines Laufs (Seed 1, geschickt)
 //   node tools/balance.mjs --spieler zeitraffer   wie der Bot im Zeitraffer (Vergleich mit dem Spiel)
 //   node tools/balance.mjs --ohne-ansicht         nur die Regeln, ohne Zeit der 3D-Ansicht
+//   node tools/balance.mjs --preis gehoben        Preisstufe für alle so wählen (P35; sonst je Profil, siehe PROFILE)
 //
 // Services kommen aus web/js/services/rules.js, Ereignisse sind nicht eingerechnet
 // (siehe docs/balancing.md).
@@ -33,6 +34,8 @@ import { zufallAus } from '../web/js/random.js';
 import { installiere as geschichtenEinhaengen, wetterWorte } from '../web/js/geschichten/regeln.js';
 import { haengeEin as stammEinhaengen } from '../web/js/features/stammgaeste.js';
 import { haengeEin as postEinhaengen } from '../web/js/features/gaestepost.js';
+import { haengeEin as preisEinhaengen, waehle as preisWaehlen, darfWaehlen as preisDarf, klugeWahl as preisKlug } from '../web/js/features/preisstufe-regeln.js';
+import { haengeEin as besucherEinhaengen } from '../web/js/features/besucher-regeln.js';
 import { haengeEin as nachruestEinhaengen, angebote as nachruestAngebote, kaufen as nachruestKaufen } from '../web/js/features/nachruesten.js';
 
 // Hat harbor.js für eine Stufe aus economy.js noch keine Plätze (Stufe 6 vor dem Export der
@@ -88,8 +91,9 @@ export function pruefen() {
     }
   }
   // Doppelboxen (P59) sind ein Umbau zweier Boxen, kein eigener Platz eines Projekts
+  // Das Bojenfeld (P36) ist eigener Ausbau (ECONOMY.bojenfeld, features/bojenfeld.js), kein Stegprojekt
   for (const p of HAFEN.plaetze) {
-    if (p.doppel) continue;
+    if (p.doppel || p.art === 'boje') continue;
     if (!besitz.has(p.id)) fehler.push(`Platz ${p.id} (Stufen ${p.stufen.join(',')}) gehört zu keinem Projekt`);
   }
   // Je Stufe: Summe der Plätze wie im Katalog
@@ -144,14 +148,14 @@ const PLATZ = new Map(HAFEN.plaetze.map((p) => [p.id, p]));
 
 const PROFILE = {
   // weist alle 5 s zu, wählt den besten Platz, kauft jeden Tag
-  geschickt: { zuweisenAlle: 5, kaufAlleTage: 1, auslassen: 0, fehlZuweisung: 0 },
+  geschickt: { zuweisenAlle: 5, kaufAlleTage: 1, auslassen: 0, fehlZuweisung: 0, preis: 'klug' },
   // schaut nur alle 20 s auf die Einfahrt, nimmt jedes vierte Mal irgendeinen passenden Platz,
   // kauft jeden zweiten Tag und lässt ein Drittel der Gelegenheiten aus
   gemuetlich: { zuweisenAlle: 20, kaufAlleTage: 2, auslassen: 0.35, fehlZuweisung: 0.25 },
   // spielt wie der Bot im Zeitraffer (tools/zeitraffer/lauf.cjs): weist nie zu (Boote fahren selbst
   // ein), kassiert sofort, kauft jeden Tag in derselben Reihenfolge wie der Bot. Dient zum Vergleich
   // der Rechnung mit dem echten Spiel im Browser (docs/balancing.md, "Rechnung und Spiel").
-  zeitraffer: { zuweisenAlle: 1, kaufAlleTage: 1, auslassen: 0, fehlZuweisung: 0, keinZuweisen: true, kaufWieZeitraffer: true },
+  zeitraffer: { zuweisenAlle: 1, kaufAlleTage: 1, auslassen: 0, fehlZuweisung: 0, keinZuweisen: true, kaufWieZeitraffer: true, preis: 'klug' },
   // tut nichts: weist nie zu (Boote fahren nach selbstEinfahrenNach selbst ein), kassiert nie (nur die
   // Kasse des Vertrauens nachts), kauft nichts. Zeigt, was das Spiel ohne Spieler hergibt.
   untaetig: { zuweisenAlle: 5, kaufAlleTage: Infinity, auslassen: 1, fehlZuweisung: 0, nichts: true },
@@ -159,6 +163,9 @@ const PROFILE = {
 // Spielertypen im Bericht, die bis zum Abschluss spielen
 const SPIELER = ['geschickt', 'gemuetlich'];
 let MIT_ANSICHT = true;
+// Preisstufe (P35): ohne --preis wählt jeder Spielertyp nach seinem Profil (preis: 'klug' = Faustregel
+// preisstufe-regeln.js klugeWahl je Saison, sonst bleibt normal). --preis normal|guenstig|gehoben|klug gilt für alle.
+let PREIS = null;
 
 export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true, beobachter = null, ansicht = MIT_ANSICHT } = {}) {
   const prof = PROFILE[profilName];
@@ -187,8 +194,11 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   // Bootsgeschichten wie im Spiel (geschichten/geschichten.js): Anlass je Boot, besondere Tage, Tagestörns
   geschichtenEinhaengen(ctx, sim, { umfeld: (st, tag = st.day) => { const w = plan?.weather?.(tag); return { ereignis: w?.event ?? null, wetter: wetterWorte(w) }; } });
   postEinhaengen((n, f) => sim.addHook(ctx, n, f));
+  besucherEinhaengen((n, f) => sim.addHook(ctx, n, f), (k, d) => sim.addService(ctx, k, d));   // P40: seltene Besucher
   // Stege nachrüsten wie im Spiel (features/nachruesten.js): Wasserhähne erfüllen den Wunsch Frischwasser (P31)
   nachruestEinhaengen((n, f) => sim.addHook(ctx, n, f), () => state);
+  // Preisstufe wie im Spiel (features/preisstufe.js); gewählt wird mit --preis jede Saison neu
+  preisEinhaengen((n, f) => sim.addHook(ctx, n, f));
   // Dienste der Services wie im Spiel (render/services.js, Haken 'arrivals'): Mast legen,
   // Radtour, Reparatur verlängern den Aufenthalt und werden am ersten Abend bezahlt (P23)
   const wetterAm = (tag) => (plan?.weather?.(tag)?.event === 'sturm' ? 'sturm' : (plan && (plan.weather(tag).rain ?? 0) > 0.3) ? 'regen' : 'sonne');
@@ -432,6 +442,14 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     if (zielErreicht()) { lauf.ende = state.day; break; }
     const kaeufeVorher = lauf.kaeufe;
     if (state.day % prof.kaufAlleTage === 0) einkaufen();
+    const preisArt = PREIS ?? prof.preis ?? 'normal';
+    if (preisArt !== 'normal') {
+      const d = preisDarf(state, ctx);
+      if (d.ok && !d.heuteNoch && (state.modules?.preisstufe?.jahr !== d.jahr || d.ausbau)) {
+        const w = preisArt === 'klug' ? preisKlug(state, ctx) : preisArt;
+        if (preisWaehlen(state, ctx, w).ok) protokoll?.push(`Tag ${state.day}: Preisstufe ${w} für Saison ${d.jahr}`);
+      }
+    }
     // Leerlauf: ein Saisontag, an dem der Spieler nichts kaufen konnte (nur zuweisen, kassieren, warten)
     if (!prof.nichts && !winter && lauf.kaeufe === kaeufeVorher) {
       lauf.leerlauf[state.stage] = (lauf.leerlauf[state.stage] || 0) + 1;
@@ -514,6 +532,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   // --spieler zeitraffer: wie der Bot im Zeitraffer (zum Vergleich mit dem echten Spiel)
   const sp = args.indexOf('--spieler');
   if (sp >= 0) SPIELER.splice(0, SPIELER.length, ...args[sp + 1].split(','));
+  const pr = args.indexOf('--preis');
+  if (pr >= 0) PREIS = args[pr + 1];
   const wert = (name, std) => { const i = args.indexOf(name); return i >= 0 ? Number(args[i + 1]) : std; };
   const fehler = pruefen();
   if (fehler.length) {

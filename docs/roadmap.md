@@ -230,11 +230,11 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F3 | Flottillen: drei bis fünf Boote wollen am selben Steg liegen (Feld `group`) | erledigt (P32, [flottillen.md](flottillen.md)) | P32 |
 | F4 | Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung | erledigt (PR 314): halten und ziehen, ab dem zweiten Mal −0,5 Anker | P33 |
 | F5 | Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld `exposed`) | erledigt (PR 392, [wind.md](wind.md)): Windlage je Platz aus Wellenweg gegen den Wind des Tages, ab Stufe 2, Zeichen beim Ziehen | P34 |
-| F6 | Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison | offen | P35 |
+| F6 | Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison | erledigt (P35, [preisstufe.md](preisstufe.md)): Preistafel im Gästebuch und Aufsteller am Hafenmeisterhaus, einmal je Saison und nach jedem Ausbau, Gäste schreiben über die Preise | P35 |
 | F7 | Baggern: Wassertiefe je Steg als Bauprojekt | offen | P29 |
 | F8 | Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar | erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasserhähne seit P31, [nachruesten.md](nachruesten.md) | P30 |
 | F9 | Neue Wünsche: WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | erledigt (P31, [gaestewuensche.md](gaestewuensche.md)): Frischwasser über Wasserhähne am Steg (Stufe 2), WLAN (3), Waschmaschine ab 3 Nächten (4), Absaugstation (5), Hafenrundfahrt mit der Barkasse (6); Brötchen seit P19 | P31 |
-| F10 | Bojenfeld: billige Muringbojen im See für kleine Boote ohne Wünsche | offen | P36 |
+| F10 | Bojenfeld: billige Muringbojen im See für kleine Boote ohne Wünsche | erledigt (P36, [bojenfeld.md](bojenfeld.md)): 6 Bojen ab Stufe 2, 6 weitere ab Stufe 4, Lage je Küste im tiefen Wasser, Boote S und M bis 9 m, 60 % Liegegeld, ohne Strom und Wasser, letzte Wahl für Büro und Selbst-Einfahren, kein Dauerplatz | P36 |
 
 ### Hafenleben
 
@@ -242,10 +242,10 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 |---|---|---|---|
 | F11 | Havarist wird eingeschleppt, braucht sofort einen Platz, Ruf und neuer Stammgast | erledigt (P37, [havarie.md](havarie.md)): Notruf im Meldeplatz, Box wählen, Fischer, Arbeitsboot oder Seenotretter schleppen ihn herein; Schlepplohn, +1 Anker, sofort Stammgast, Werft repariert | P37 |
 | F12 | Eigenes Hafenfest einmal pro Saison ansetzen | erledigt (P38, [hafenfest.md](hafenfest.md)): Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk, Bilanz am Abend | P38 |
-| F13 | Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub | offen | P39 |
+| F13 | Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub | erledigt (P39, [jugendtraining.md](jugendtraining.md)): jeden 4. Saisontag Optis und Jollen über den Slip hinaus, Dreieckskurs vor den Stegen, Trainerboot braucht eine Box (feste Trainerbox möglich), wartende Boote halten das Fahrwasser frei, Beitrag und +0,2 Anker für zusehende Gäste | P39 |
 | F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | erledigt (PR 245) | P20 |
 | F15 | Krantage: Dauerlieger sichtbar ins Winterlager und zurück | erledigt (PR 245) | P20 |
-| F16 | Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv | offen | P40 |
+| F16 | Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv | erledigt (P40): vier Schiffe mit Ehrenplatz, Schwäne und Schweinswal, Fotos im Logbuch-Reiter „Besucher“, vier Erfolge, docs/besucher.md | P40 |
 | F17 | Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage | erledigt (PR 299), dazu Hanse-Woche ab Stufe 5 | P24 |
 
 ### Langzeit
@@ -702,15 +702,15 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P29 | Baggern für tiefere Liegeplätze | F7 | neu |
 | P30 | Stege nachrüsten | F8 | erledigt (PR 297, [nachruesten.md](nachruesten.md)) |
 | P31 | Neue Gästewünsche | F9, B8 | erledigt ([gaestewuensche.md](gaestewuensche.md): Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt) |
-| P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md)) |
+| P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md); beim Selbst-Einfahren zusammen (PR 414); Rest Prio B: Boxen frei halten, gemeinsam weiterfahren) |
 | P33 | Liegende Boote umlegen | F4 | erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen) |
 | P34 | Wind im Hafen spürbar machen | F5, F35 | erledigt (PR 392, [wind.md](wind.md)) |
-| P35 | Preisstufe am Hafenbüro | F6 | neu |
-| P36 | Bojenfeld im See | F10 | neu |
-| P37 | Havarist einschleppen | F11 | erledigt ([havarie.md](havarie.md)) |
-| P38 | Eigenes Hafenfest ansetzen | F12 | erledigt ([hafenfest.md](hafenfest.md)) |
-| P39 | Jugendtraining am Segelclub | F13 | neu |
-| P40 | Seltene Besucher | F16 (nach P21) | neu |
+| P35 | Preisstufe am Hafenbüro | F6 | erledigt (PR 413, [preisstufe.md](preisstufe.md): günstig, normal, gehoben; Faustregel für die Bots, Zeitraffer wieder nahe 105) |
+| P36 | Bojenfeld im See | F10 | erledigt (PR 421, [bojenfeld.md](bojenfeld.md)) |
+| P37 | Havarist einschleppen | F11 | erledigt (PR 408, [havarie.md](havarie.md)) |
+| P38 | Eigenes Hafenfest ansetzen | F12 | erledigt (PR 405, [hafenfest.md](hafenfest.md)) |
+| P39 | Jugendtraining am Segelclub | F13 | erledigt (PR 412, [jugendtraining.md](jugendtraining.md)) |
+| P40 | Seltene Besucher | F16 (nach P21) | erledigt (PR 416, docs/besucher.md) |
 
 ### Welle 4: Langzeit, Spielgefühl, Welt (Extras)
 

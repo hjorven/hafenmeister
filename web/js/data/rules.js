@@ -97,6 +97,12 @@ export function rulesFromEconomy(E = ECONOMY) {
     if (p.offen) k.exposed = true;
     r.berthKinds[kind] = k;
   }
+  // Bojenfeld (P36): Muringbojen im See für kleine Boote, ohne Wunscherfüllung, billiger, offen, als letzte Wahl
+  const bf = E.bojenfeld;
+  if (bf) {
+    r.berthKinds.boje = { ...(r.berthKinds.boje || {}), exposed: true, sizes: [...(bf.klassen || ['S', 'M'])], feeFactor: bf.liegegeld ?? 1 };
+    r.buoyField = { from: bf.abStufe ?? 2, fee: bf.liegegeld ?? 1, sizes: [...(bf.klassen || ['S', 'M'])], lastChoice: bf.letzteWahl ?? 5000 };
+  }
   r.berthJetties = Object.fromEntries(Object.keys(E.stromAnSteg || {}).filter((k) => E.stromAnSteg[k]).map((k) => [k, { power: true }]));
   // Strom an weiteren Stegen über ein Bauwerk (zum Beispiel Stromsäulen an Steg B)
   r.jettyPowerBuildings = {};
@@ -248,12 +254,23 @@ export function rulesFromEconomy(E = ECONOMY) {
   // Anmeldung per Funk (P28)
   const fa = E.funkAnmeldung;
   r.funk = fa ? { leadShare: fa.fruehestens, twoShare: fa.zweiAnteil, bonusShare: fa.bonusAnteil, rating: fa.ruf } : null;
+  // Preisstufe (P35, features/preisstufe-regeln.js): Faktoren je Stufe, Anker auf die Bewertung
+  const ps = E.preisstufe;
+  r.priceLevels = ps ? {
+    fromOffice: ps.abBuero ?? 1,
+    start: ps.start ?? 'normal',
+    levels: Object.fromEntries(Object.entries(ps.stufen || {}).map(([id, l]) => [id, {
+      fee: l.liegegeld ?? 1, arrivals: l.ankuenfte ?? 1, sizes: { ...(l.klassen || {}) }, rating: l.ruf ?? 0, demand: l.anspruch ?? 0,
+    }])),
+  } : null;
   // Flottillen (P32)
   const fl = E.flottillen;
   r.flotilla = fl ? {
     fromStage: fl.abStufe, share: { ...fl.anteil }, from: fl.fruehestens, to: fl.spaetestens, gap: fl.abstand,
     together: fl.zusammen, apart: fl.getrennt,
   } : null;
+  // Jugendtraining (P39, features/jugendtraining.js): Anker für Gäste, die der Gruppe zugesehen haben
+  r.youth = E.jugendtraining ? { rating: E.jugendtraining.ruf } : null;
   // Havaristen (P37, features/havarie.js): Anker mehr auf die Bewertung eines eingeschleppten Boots
   r.havarie = E.havarie ? { rating: E.havarie.anker } : null;
   return r;

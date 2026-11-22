@@ -957,6 +957,127 @@
    "geraet": "pc",
    "datum": "2026-11-22",
    "quelle": "stammgaeste/pc-stammgast-wartet.png"
+  },
+  {
+   "datei": "p38-pr405-pc-planer.jpg",
+   "pakete": [
+    "P38"
+   ],
+   "titel": "Hafenfest ansetzen: Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk",
+   "pr": 405,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenfest/pc-s4-2-planer.png"
+  },
+  {
+   "datei": "p38-pr405-pc-festtag.jpg",
+   "pakete": [
+    "P38"
+   ],
+   "titel": "Festtag am Hafen: Bühne, Marktstände und Wimpel",
+   "pr": 405,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenfest/pc-s4-5a-buehne.png"
+  },
+  {
+   "datei": "p39-pr412-pc-slip.jpg",
+   "pakete": [
+    "P39"
+   ],
+   "titel": "Jugendtraining: Jollen am Slip des Segelclubs",
+   "pr": 412,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "jugendtraining/pc-2-slip.png"
+  },
+  {
+   "datei": "p39-pr412-pc-kurs.jpg",
+   "pakete": [
+    "P39"
+   ],
+   "titel": "Jugendtraining: Optis segeln ihren Kurs vor dem Hafen",
+   "pr": 412,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "jugendtraining/pc-3-kurs.png"
+  },
+  {
+   "datei": "p32-pr414-pc-einfahrt.jpg",
+   "pakete": [
+    "P32"
+   ],
+   "titel": "Flottille fährt geschlossen ein und legt nebeneinander an",
+   "pr": 414,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "flottillen-zusammen/pc-flottille-einfahrt.png"
+  },
+  {
+   "datei": "p40-pr416-pc-besucherschiffe.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Seltene Besucher: vier besondere Schiffe",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/01-vier-schiffe.png"
+  },
+  {
+   "datei": "p40-pr416-pc-koenigsyacht.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Königsyacht meldet sich per Funk, Ehrenplatz freihalten",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/02-pc-funk-koenigsyacht.png"
+  },
+  {
+   "datei": "p35-pr413-handy-preistafel.jpg",
+   "pakete": [
+    "P35"
+   ],
+   "titel": "Preistafel im Gästebuch: günstig, normal, gehoben",
+   "pr": 413,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "preisstufe/handy-3-gehoben.png"
+  },
+  {
+   "datei": "p35-pr413-pc-tafel.jpg",
+   "pakete": [
+    "P35"
+   ],
+   "titel": "Preistafel am Hafenbüro",
+   "pr": 413,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "preisstufe/pc-4-tafel.png"
+  },
+  {
+   "datei": "p36-pr421-pc-bojenfeld.jpg",
+   "pakete": [
+    "P36"
+   ],
+   "titel": "Bojenfeld im See mit Booten an Muringbojen",
+   "pr": 421,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "bojenfeld/pc-bojenfeld-stufe4.png"
+  },
+  {
+   "datei": "p36-pr421-pc-boje-ziehen.jpg",
+   "pakete": [
+    "P36"
+   ],
+   "titel": "Boot auf eine Muringboje ziehen",
+   "pr": 421,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "bojenfeld/pc-boot-auf-boje-ziehen.png"
   }
  ]
 }

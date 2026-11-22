@@ -131,6 +131,13 @@ const BOT = () => {
         return o;
       };
       const kaufe = (k) => { const ok = k.tu(); W.kaeufe.push({ art: k.art, id: k.id, kosten: k.kosten, ok, tag: st.day, stufe: st.stage }); return ok; };
+      // Preisstufe (P35) wie geschickt in tools/balance.mjs: je Saison und nach jedem Ausbau nach der Faustregel (klugeWahl)
+      const pd = G.preisstufe?.darf?.();
+      if (pd?.ok && !pd.heuteNoch && (st.modules?.preisstufe?.jahr !== pd.jahr || pd.ausbau)) {
+        const w = G.preisstufe.klug();
+        const pr = G.preisstufe.waehle(w);
+        W.kaeufe.push({ art: 'preis', id: w, kosten: 0, ok: !!pr?.ok, tag: st.day, stufe: st.stage });
+      }
       // Ausbau der Stufe wie ein Mensch über das Bauen-Menü (ui/bauen.js, P18): bei mehreren
       // Bauabschnitten jeder einzeln bezahlt, über Nacht gebaut, der nächste erst am nächsten Morgen.
       // Der Bot kauft morgens, der Abschnitt von gestern ist dann schon fertig ('day:start').

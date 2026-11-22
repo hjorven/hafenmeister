@@ -16,7 +16,9 @@ warten ausgeblendet, ihre Zeit läuft solange nicht ab, und sie kommen danach. D
 | 65 | Dauerlieger früher zurück (hat eine Frist bis zum Abend) | `features/dauerlieger.js` |
 | 62 | Notruf: Havarist treibt vor der Einfahrt, Box geben? (`#hm-havarie`, Frist 45 s) | `ui/havarie-meldung.js` |
 | 57 | Anmeldung per Funk: Box freihalten? (`#hm-funk-anmeldung`) | `ui/funk-anmeldung.js` |
+| 56 | Preistafel: Preise festlegen (`#hm-preis-karte`), beim Freischalten, im Winter und nach einem Ausbau | `features/preisstufe.js` |
 | 60 | Sturm und Regatta vorbereiten (`#ev-vorbereiten`), Ergebnis am Abend des letzten Ereignistags | `events/vorbereiten-ui.js` |
+| 58 | Jugendtraining: Box fürs Trainerboot, Auslaufen, Zurück (`#hm-jugend`) | `ui/jugend-meldung.js` |
 | 50 | Schritte des Einstiegs | `features/einstieg.js` |
 | 45 | Tipps beim ersten Mal | `features/einstieg.js` |
 | 40 | Andere Dauerplatz-Meldungen | `features/dauerlieger.js` |

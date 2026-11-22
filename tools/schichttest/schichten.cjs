@@ -60,7 +60,9 @@ async function fensterZu(t) {
     const tipp = t.page.getByRole('button', { name: 'Verstanden' }).first();
     if (await tipp.isVisible().catch(() => false)) {
       const titel = await tipp.evaluate((b) => b.closest('section, div[class*="tipp"], div[class*="karte"], [role="dialog"]')?.querySelector('h1,h2,h3,strong,b,[class*="titel"]')?.textContent?.trim() ?? 'Tipp').catch(() => 'Tipp');
-      await t.sp.knopf(tipp); zu.push(`Tipp "${titel}"`); await t.warte(300); continue;
+      // Tipps blenden sich nach einigen Sekunden selbst aus: verschwand er beim Tippen, ist er zu
+      try { await t.sp.knopf(tipp); } catch (e) { if (await tipp.isVisible().catch(() => false)) throw e; }
+      zu.push(`Tipp "${titel}"`); await t.warte(300); continue;
     }
     break;
   }
@@ -258,6 +260,10 @@ async function ziehenUndAnlegen(t, z, boot, { nur = null, warten = true } = {}) 
   const zug = await t.G((id) => { const e = window.__st.ereignisse.filter((x) => x.n === 'ui:tow-end' && String(x.d?.boot).replace(/^b/, '') === String(id)).pop(); return e ? e.d : null; }, boot.id);
   const nach = await t.G((id) => { const b = window.hafenmeister.sim.state.boats[id]; return b ? { status: b.status, platz: b.berthId } : null; }, boot.id);
   const ok = nach && nach.status === 'moored' && nach.platz === platz;
+  // Nach 8 s an der Boje fährt ein unberührtes Boot selbst ein; kam das vor dem Greifen (Karte verschieben bei wenigen
+  // Bildern je Sekunde), ist das Spielregel, kein Fehler der Leine
+  const selbst = !ok && !zug && (await t.G((id) => window.hafenmeister.sim.state.boats[id]?.selfEntered === true, boot.id));
+  if (selbst) { await t.hinweis('Boot fuhr selbst ein', `Boot ${boot.id} fuhr selbst nach ${nach?.platz}, bevor die Leine griff`, { bild: false }); return null; }
   await t.punkt('Boot mit der Leine auf die Box ziehen', ok, ok ? `Boot ${boot.id} -> ${platz}` : `losgelassen auf ${platz}: Leine ${zug ? 'eingerastet auf ' + zug.platz : 'nicht gegriffen'}, Boot danach ${JSON.stringify(nach)}`, { schwere: 'A' });
   if (!ok) return null;
   if (!warten) return platz;   // mehrere Boote nacheinander ziehen (Flottille), Festmachen prüft der Aufrufer
@@ -345,7 +351,8 @@ const BOOTSLAGE = () => {
   const gast = new Map((G.boatView?.boote ?? []).map((e) => [e.anim, e.id]));
   const bs = (G.boatAnim?.boats ?? []).filter((a) => a.model?.parent && a.model.visible !== false && a.info).map((a) => ({
     a, id: gast.has(a) ? 'gast-' + gast.get(a) : 'verkehr-' + String(a.model.name || '?').replace(/^verkehr-/, ''),
-    st: a.state, x: a.x, z: a.z, h: a.heading, L: a.info.length, B: a.info.beam ?? a.info.length * 0.33 }));
+    // Bojenlieger schwojen: der Rumpf liegt bei pose(), nicht bei x/z (Hinweis aus dem Boote-Thread, P88)
+    st: a.state, x: a.pose ? a.pose().x : a.x, z: a.pose ? a.pose().z : a.z, h: a.heading, L: a.info.length, B: a.info.beam ?? a.info.length * 0.33 }));
   const ecken = (b, k) => { const c = Math.cos(b.h), s = -Math.sin(b.h); const l = b.L * k / 2, w = b.B * k / 2;
     return [[1, 1], [1, -1], [-1, -1], [-1, 1]].map(([i, j]) => [b.x + c * l * i - s * w * j, b.z + s * l * i + c * w * j]); };
   const sat = (A, B) => { for (const P of [A, B]) for (let i = 0; i < 4; i++) { const [x1, y1] = P[i], [x2, y2] = P[(i + 1) % 4]; const nx = y2 - y1, ny = x1 - x2; let a0 = 1e9, a1 = -1e9, b0 = 1e9, b1 = -1e9; for (const [x, y] of A) { const d = x * nx + y * ny; a0 = Math.min(a0, d); a1 = Math.max(a1, d); } for (const [x, y] of B) { const d = x * nx + y * ny; b0 = Math.min(b0, d); b1 = Math.max(b1, d); } if (a1 < b0 || b1 < a0) return false; } return true; };

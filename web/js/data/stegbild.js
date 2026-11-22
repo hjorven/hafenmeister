@@ -17,6 +17,7 @@
 // die Seite neu geladen, weil die Stege dann anders liegen.
 import { STEGBILDER } from './stegbilder.js';
 import { doppelboxenAnlegen } from './doppelboxen.js';
+import { bojenfeldAnlegen } from './bojenfeld.js';
 import { ECONOMY } from './economy.js';
 
 const KEY = 'hafenmeister.stegbild';
@@ -80,7 +81,7 @@ export function stegbildSetzen(hafen, nr) {
  */
 export function varianteSetzen(hafen, v, stege, nr = v?.nr ?? 0) {
   hafen.stegbild = { nr: v ? nr : 0, stege: v ? [...stege] : [] };
-  if (!v) { doppelboxenAnlegen(hafen, ECONOMY.doppelbox); return hafen; }
+  if (!v) { doppelboxenAnlegen(hafen, ECONOMY.doppelbox); bojenfeldAnlegen(hafen); return hafen; }
   const variiert = new Set(stege);
   const vStufen = Object.keys(v.stufen).map(Number);
   const hoechste = Math.max(...vStufen);
@@ -105,6 +106,8 @@ export function varianteSetzen(hafen, v, stege, nr = v?.nr ?? 0) {
   }
   // Doppelboxen (P59) aus den Boxen dieses Stegbilds
   doppelboxenAnlegen(hafen, ECONOMY.doppelbox);
+  // Bojenfeld (P36): Liegeplätze BF01 ..., Lage aus dem Gelände
+  bojenfeldAnlegen(hafen);
   return hafen;
 }
 

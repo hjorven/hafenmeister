@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "253ae2b"
+  "commit": "a52a85a"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -767,8 +767,8 @@
   {
    "id": "P31",
    "titel": "Neue Gästewünsche",
-   "inhalt": "F9",
-   "thread": "neu",
+   "inhalt": "F9, B8",
+   "thread": "erledigt (gaestewuensche.md: Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt)",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
@@ -776,17 +776,18 @@
     "F9",
     "B8"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
    "id": "P32",
    "titel": "Flottillen",
    "inhalt": "F3, Gruppen-Ankunft",
-   "thread": "erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md)",
+   "thread": "erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md; beim Selbst-Einfahren zusammen (PR 414); Rest Prio B: Boxen frei halten, gemeinsam weiterfahren)",
    "welle": 3,
    "prs": [
-    393
+    393,
+    414
    ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
@@ -795,7 +796,8 @@
    "status": "erledigt",
    "bilder": [
     83,
-    84
+    84,
+    91
    ]
   },
   {
@@ -838,29 +840,39 @@
    "id": "P35",
    "titel": "Preisstufe am Hafenbüro",
    "inhalt": "F6",
-   "thread": "neu",
+   "thread": "erledigt (PR 413, preisstufe.md: günstig, normal, gehoben; Faustregel für die Bots, Zeitraffer wieder nahe 105)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    413
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F6"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    94,
+    95
+   ]
   },
   {
    "id": "P36",
    "titel": "Bojenfeld im See",
    "inhalt": "F10",
-   "thread": "neu",
+   "thread": "erledigt (PR 421, bojenfeld.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    421
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F10"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    96,
+    97
+   ]
   },
   {
    "id": "P37",
@@ -880,43 +892,58 @@
    "id": "P38",
    "titel": "Eigenes Hafenfest ansetzen",
    "inhalt": "F12",
-   "thread": "erledigt (hafenfest.md)",
+   "thread": "erledigt (PR 405, hafenfest.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    405
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F12"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    87,
+    88
+   ]
   },
   {
    "id": "P39",
    "titel": "Jugendtraining am Segelclub",
    "inhalt": "F13",
-   "thread": "neu",
+   "thread": "erledigt (PR 412, jugendtraining.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    412
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F13"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    89,
+    90
+   ]
   },
   {
    "id": "P40",
    "titel": "Seltene Besucher",
    "inhalt": "F16 (nach P21)",
-   "thread": "neu",
+   "thread": "erledigt (PR 416, docs/besucher.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    416
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F16"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    92,
+    93
+   ]
   },
   {
    "id": "P41",
@@ -2052,8 +2079,8 @@
   {
    "code": "F6",
    "text": "Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P35, preisstufe.md): Preistafel im Gästebuch und Aufsteller am Hafenmeisterhaus, einmal je Saison und nach jedem Ausbau, Gäste schreiben über die Preise",
    "pakete": [
     "P35"
    ],
@@ -2075,7 +2102,7 @@
    "code": "F8",
    "text": "Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar",
    "status": "entfaellt",
-   "statusText": "erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasser mit P31, nachruesten.md",
+   "statusText": "erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasserhähne seit P31, nachruesten.md",
    "pakete": [
     "P30"
    ],
@@ -2087,8 +2114,8 @@
   {
    "code": "F9",
    "text": "Neue Wünsche: WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P31, gaestewuensche.md): Frischwasser über Wasserhähne am Steg (Stufe 2), WLAN (3), Waschmaschine ab 3 Nächten (4), Absaugstation (5), Hafenrundfahrt mit der Barkasse (6); Brötchen seit P19",
    "pakete": [
     "P31"
    ],
@@ -2098,8 +2125,8 @@
   {
    "code": "F10",
    "text": "Bojenfeld: billige Muringbojen im See für kleine Boote ohne Wünsche",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P36, bojenfeld.md): 6 Bojen ab Stufe 2, 6 weitere ab Stufe 4, Lage je Küste im tiefen Wasser, Boote S und M bis 9 m, 60 % Liegegeld, ohne Strom und Wasser, letzte Wahl für Büro und Selbst-Einfahren, kein Dauerplatz",
    "pakete": [
     "P36"
    ],
@@ -2131,8 +2158,8 @@
   {
    "code": "F13",
    "text": "Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P39, jugendtraining.md): jeden 4. Saisontag Optis und Jollen über den Slip hinaus, Dreieckskurs vor den Stegen, Trainerboot braucht eine Box (feste Trainerbox möglich), wartende Boote halten das Fahrwasser frei, Beitrag und +0,2 Anker für zusehende Gäste",
    "pakete": [
     "P39"
    ],
@@ -2168,8 +2195,8 @@
   {
    "code": "F16",
    "text": "Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P40): vier Schiffe mit Ehrenplatz, Schwäne und Schweinswal, Fotos im Logbuch-Reiter „Besucher“, vier Erfolge, docs/besucher.md",
    "pakete": [
     "P40"
    ],
@@ -2684,8 +2711,8 @@
   {
    "code": "B8",
    "text": "Neue Wünsche in späten Stufen, je Stufe mindestens einer (= F9)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P31): jede Stufe 1 bis 6 hat mindestens einen neuen Wunsch, Test in tests/gaestewuensche.test.mjs",
    "pakete": [
     "P31"
    ],
@@ -4582,11 +4609,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 13,
+    "erledigt": 18,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 7,
+    "offen": 2,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4670,20 +4697,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 48,
+  "erledigt": 53,
   "teilweise": 2,
   "arbeit": 0,
   "frage": 0,
-  "offen": 36,
+  "offen": 31,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 175,
+  "erledigt": 181,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 36,
+  "offen": 30,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5731,115 +5758,242 @@
    "datum": "2026-11-22",
    "quelle": "stammgaeste/pc-stammgast-wartet.png",
    "nr": 86
+  },
+  {
+   "datei": "p38-pr405-pc-planer.jpg",
+   "pakete": [
+    "P38"
+   ],
+   "titel": "Hafenfest ansetzen: Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk",
+   "pr": 405,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenfest/pc-s4-2-planer.png",
+   "nr": 87
+  },
+  {
+   "datei": "p38-pr405-pc-festtag.jpg",
+   "pakete": [
+    "P38"
+   ],
+   "titel": "Festtag am Hafen: Bühne, Marktstände und Wimpel",
+   "pr": 405,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenfest/pc-s4-5a-buehne.png",
+   "nr": 88
+  },
+  {
+   "datei": "p39-pr412-pc-slip.jpg",
+   "pakete": [
+    "P39"
+   ],
+   "titel": "Jugendtraining: Jollen am Slip des Segelclubs",
+   "pr": 412,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "jugendtraining/pc-2-slip.png",
+   "nr": 89
+  },
+  {
+   "datei": "p39-pr412-pc-kurs.jpg",
+   "pakete": [
+    "P39"
+   ],
+   "titel": "Jugendtraining: Optis segeln ihren Kurs vor dem Hafen",
+   "pr": 412,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "jugendtraining/pc-3-kurs.png",
+   "nr": 90
+  },
+  {
+   "datei": "p32-pr414-pc-einfahrt.jpg",
+   "pakete": [
+    "P32"
+   ],
+   "titel": "Flottille fährt geschlossen ein und legt nebeneinander an",
+   "pr": 414,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "flottillen-zusammen/pc-flottille-einfahrt.png",
+   "nr": 91
+  },
+  {
+   "datei": "p40-pr416-pc-besucherschiffe.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Seltene Besucher: vier besondere Schiffe",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/01-vier-schiffe.png",
+   "nr": 92
+  },
+  {
+   "datei": "p40-pr416-pc-koenigsyacht.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Königsyacht meldet sich per Funk, Ehrenplatz freihalten",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/02-pc-funk-koenigsyacht.png",
+   "nr": 93
+  },
+  {
+   "datei": "p35-pr413-handy-preistafel.jpg",
+   "pakete": [
+    "P35"
+   ],
+   "titel": "Preistafel im Gästebuch: günstig, normal, gehoben",
+   "pr": 413,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "preisstufe/handy-3-gehoben.png",
+   "nr": 94
+  },
+  {
+   "datei": "p35-pr413-pc-tafel.jpg",
+   "pakete": [
+    "P35"
+   ],
+   "titel": "Preistafel am Hafenbüro",
+   "pr": 413,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "preisstufe/pc-4-tafel.png",
+   "nr": 95
+  },
+  {
+   "datei": "p36-pr421-pc-bojenfeld.jpg",
+   "pakete": [
+    "P36"
+   ],
+   "titel": "Bojenfeld im See mit Booten an Muringbojen",
+   "pr": 421,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "bojenfeld/pc-bojenfeld-stufe4.png",
+   "nr": 96
+  },
+  {
+   "datei": "p36-pr421-pc-boje-ziehen.jpg",
+   "pakete": [
+    "P36"
+   ],
+   "titel": "Boot auf eine Muringboje ziehen",
+   "pr": 421,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "bojenfeld/pc-boot-auf-boje-ziehen.png",
+   "nr": 97
   }
  ],
  "neueBilder": [
+  97,
+  95,
+  93,
+  91,
+  90,
+  88,
   86,
   84,
-  82,
-  81,
-  80,
-  79,
-  77,
-  76,
-  75
+  82
  ],
  "merges": [
   {
    "datum": "2026-11-22",
-   "titel": "Zeitraffer zählt Flottillen je Stufe",
-   "pr": 403,
+   "titel": "Roadmap-Pflege: P36 Bojenfeld (PR 421) mit Bildern",
+   "pr": 422,
+   "pakete": [
+    "P36"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P36 Bojenfeld im See",
+   "pr": 421,
+   "pakete": [
+    "P36"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Schichttest: zwei Testfehler aus Serie 14 auf dem Tablet",
+   "pr": 419,
    "pakete": []
   },
   {
    "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P88 Teil 2 (PR 400)",
-   "pr": 404,
+   "titel": "Roadmap-Pflege: P35 Preisstufe (PR 413) mit Bildern",
+   "pr": 418,
    "pakete": [
-    "P88"
+    "P35"
    ]
   },
   {
    "datum": "2026-11-22",
-   "titel": "Arbeitsplan: P88 Teil 2, Großschiff-Vortritt gestrichen",
-   "pr": 402,
+   "titel": "P35 Preisstufe am Hafenbüro: günstig, normal, gehoben",
+   "pr": 413,
    "pakete": [
-    "P88"
+    "P35"
    ]
   },
   {
    "datum": "2026-11-22",
-   "titel": "P88 Teil 2: Vorbeifahrer machen Platz, sobald sie ein Hafenboot aufhalten",
-   "pr": 400,
+   "titel": "Roadmap-Pflege: P39 (PR 412), P32-Rest (PR 414), P40 (PR 416) mit Bildern",
+   "pr": 417,
    "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Arbeitsplan: Stand nach P34, P32, P25, P88 Teil 1; Flottillen-Quote Prio B; P37 und P38 starten",
-   "pr": 401,
-   "pakete": [
-    "P34",
+    "P39",
     "P32",
-    "P25",
-    "P88",
-    "P37",
-    "P38"
+    "P40"
    ]
   },
   {
    "datum": "2026-11-22",
-   "titel": "Schichttest: Schicht 24 Flottillen, Fundorte bei Überlappungen",
-   "pr": 399,
+   "titel": "P40 Seltene Besucher: besondere Schiffe am Ehrenplatz, Schwäne, Schweinswal, Fotos im Logbuch",
+   "pr": 416,
+   "pakete": [
+    "P40"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Schichttest: Schicht 25 Wind und 26 Stammgäste, Wetterbericht nennt Starkwind an Regentagen",
+   "pr": 415,
    "pakete": []
   },
   {
    "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P25 Stammgäste Teil 1 und 2 (PR 394) mit Bildern",
-   "pr": 398,
-   "pakete": [
-    "P25"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Wind im Hafen (P34, F5 und F35)",
-   "pr": 392,
-   "pakete": [
-    "P34"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P32 Flottillen (PR 393) mit Bildern",
-   "pr": 396,
+   "titel": "Flottillen halten beim Selbst-Einfahren zusammen (P32-Rest)",
+   "pr": 414,
    "pakete": [
     "P32"
    ]
   },
   {
    "datum": "2026-11-22",
-   "titel": "P25 Stammgäste mit Wirkung und Gästepost",
-   "pr": 394,
+   "titel": "P39 Jugendtraining am Segelclub",
+   "pr": 412,
    "pakete": [
-    "P25"
+    "P39"
    ]
   },
   {
    "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P88 in Arbeit (PR 390) mit Bild",
-   "pr": 395,
-   "pakete": [
-    "P88"
-   ]
+   "titel": "Neuer Fischkutter erscheint erst, wenn der alte abgelegt hat",
+   "pr": 411,
+   "pakete": []
   },
   {
    "datum": "2026-11-22",
-   "titel": "P32 Flottillen: drei bis fünf Boote wollen zusammen an einen Steg",
-   "pr": 393,
+   "titel": "Roadmap-Pflege: P38 Hafenfest (PR 405) mit Bildern",
+   "pr": 409,
    "pakete": [
-    "P32"
+    "P38"
    ]
   }
  ]

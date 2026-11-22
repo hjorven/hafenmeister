@@ -28,7 +28,8 @@ const NAMENS_LISTEN = [
   /^klassen$/, /^wuensche$/, /^wunschAnzahl$/, /^platzarten$/, /^stromAnSteg$/, /^bauwerke$/, /^services$/,
   /^ereignisse$/, /^warten\.plaetze$/, /^stufen\.\d+\.mix$/, /\.gaeste$/, /\.wetter$/, /\.hafengeld$/,
   /^ereignisse\.\w+\.wirkung\.(sizeFactor|kindFactor|satisfaction)$/, /^tagesziele\.(geld|schwere|ziele|grossAb)$/,
-  /^zeit\.jahreszeiten$/, /\.ankunftFaktor$/, /^angebotWunsch\.wuensche$/, /^ruf\.lockt\.grosse$/, /^wind\.richtungen$/,
+  /^preisstufe\.stufen$/, /^preisstufe\.stufen\.\w+\.klassen$/, /^zeit\.jahreszeiten$/,
+  /\.ankunftFaktor$/, /^angebotWunsch\.wuensche$/, /^ruf\.lockt\.grosse$/, /^wind\.richtungen$/,
 ];
 // Felder, die bewusst noch niemand liest (mit Paket, das sie anschließt oder löscht)
 export const NOCH_UNGELESEN = {
@@ -164,9 +165,43 @@ export function tabellen() {
       ['Belohnung', `+${zahl(h.anker)} Anker, Schlepplohn ${Object.entries(h.schlepplohn).map(([k, v]) => `${k} ${euro(v)}`).join(', ')}, sofort Stammgast`],
     ]), '');
   }
+  if (E.preisstufe) {
+    const ps = E.preisstufe;
+    const pz = (f) => (f === 1 ? '-' : `${f > 1 ? '+' : '−'}${Math.round(Math.abs(f - 1) * 100)} %`);
+    const ak = (n) => (n ? `${n > 0 ? '+' : '−'}${zahl(Math.abs(n))}` : '-');
+    t.push('## Preisstufe', '', `Am Hafenbüro ab Hafenbüro-Stufe ${ps.abBuero}, eine Wahl je Saison (im Winter für die kommende) und nach jedem Ausbau, Start: ${ps.start}.`, '',
+      tabelle(['Stufe', 'Liegegeld', 'Ankünfte', 'Klassen', 'Anker', 'Anspruch'], Object.entries(ps.stufen).map(([id, l]) => [
+        id, pz(l.liegegeld), pz(l.ankuenfte), Object.entries(l.klassen ?? {}).map(([k, f]) => `${k} ${pz(f)}`).join(', ') || '-', ak(l.ruf),
+        l.anspruch > 0 ? `bis −${zahl(l.anspruch)} Anker, wenn kein Wunsch erfüllt` : l.anspruch < 0 ? `Nachsicht bis +${zahl(-l.anspruch)} Anker, wenn kein Wunsch erfüllt` : '-',
+      ])), '');
+  }
+  if (E.seltenerBesuch) {
+    const b = E.seltenerBesuch;
+    const pz = (v) => `${Math.round(v * 100)} %`;
+    t.push('## Seltene Besucher', '', tabelle(['Was', 'Wert'], [
+      ['Tage mit Besuch', `${Object.entries(b.anteil).map(([k, v]) => `Stufe ${k}: ${pz(v)}`).join(', ')}; mindestens ${b.pause} Tage Abstand, nie am ersten Tag, nie im Winter`],
+      ['Noch nie gesehen', `${zahl(b.neuGewicht)}-faches Gewicht bei der Wahl`],
+      ['Ankunft', `${zahl(b.ankunft[0])} bis ${zahl(b.ankunft[1])} des Tages`],
+      ...Object.entries(b.schiffe).map(([art, d]) => [art, `ab Stufe ${d.abStufe}, ${d.naechte} ${d.naechte === 1 ? 'Nacht' : 'Nächte'}, Gewicht ${zahl(d.gewicht)}, Wünsche ${d.wuensche.join(', ')}${d.tagesgaeste ? `, ${d.tagesgaeste} Tagesgäste` : ''}`]),
+      ['Schaulustige am Ehrenplatz', `je Abend ${b.zuschauer.geld.map((g, i) => `Stufe ${i + 1}: ${euro(g)}`).join(', ')}; ${Object.entries(b.zuschauer.faktor).map(([a, f]) => `${a} ×${zahl(f)}`).join(', ')}; ${b.zuschauer.leute} Leute`],
+      ...Object.entries(b.tiere).map(([art, d]) => [art, `ab Stufe ${d.abStufe}, an ${pz(d.anteil)} der Tage, Saisontag ${d.saison[0]} bis ${d.saison[1]}, ${zahl(d.zeit[0])} bis ${zahl(d.zeit[1])} des Tages, ${d.dauer} s im Bild`]),
+      ['Foto', `Motiv mindestens ${pz(b.foto.mindestGroesse)} der kürzeren Bildseite, ${pz(b.foto.rand)} Rand frei`],
+    ]), '');
+  }
   t.push('## Services', '', tabelle(['Service', 'Stufe', 'Name', 'ab Hafenstufe', 'Kosten', 'Mindestruf', 'Wirkung'], SERVICES.flatMap((s) =>
     s.stufen.map((st, i) => [i === 0 ? s.name : '', i + 1, st.name, st.abStufe ?? s.abStufe, euro(st.kosten), st.ruf != null ? zahl(st.ruf) : '-',
       wirkungText(st.wirkung) + (st.wirkung.besuch ? `; Besuch alle ${st.wirkung.besuch.alleTage} Tage, ${euro(st.wirkung.besuch.einnahme)}` : '')]))), '');
+  if (E.jugendtraining) {
+    const j = E.jugendtraining;
+    t.push('## Jugendtraining', '', tabelle(['Was', 'Wert'], [
+      ['braucht', Object.keys(j.braucht).map((k) => SERVICES.find((s) => s.id === k)?.name ?? k).join(' und ')],
+      ['Trainingstage', `jeden ${j.alle}. Saisontag ab dem ${j.ersterTag}.; nicht bei Sturm, Starkwind oder Regatta`],
+      ['Zeit', `ins Wasser bei ${zahl(j.beginn)} des Tages, ohne Bild ${zahl(j.dauer)} des Tages draußen`],
+      ['Trainerboot', `${j.trainerboot.modell}, ${zahl(j.trainerboot.laenge)} m, braucht eine Box für den Tag`],
+      ['Belohnung', `+${zahl(j.ruf)} Anker für jeden Gast im Hafen, Beitrag ${j.gruppe.map((g) => euro(g.beitrag)).join(' / ')}`],
+      ['Gruppe je Ausbau', j.gruppe.map((g, i) => `${i + 1}: ${g.optis} Optis${g.jollen ? ` und ${g.jollen} Jollen` : ''}`).join('; ')],
+    ]), '');
+  }
   t.push('## Ereignisse', '', tabelle(['Ereignis', 'ab Stufe', 'alle Tage', 'Dauer', 'Saison', 'Wirkung'], EVENTS.map((e) => [
     e.title, e.stage, e.every, e.duration, e.season.join(' bis '), wirkungText(e.mods)])), '');
   return t.join('\n');

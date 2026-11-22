@@ -680,6 +680,8 @@ export function init(game) {
   const flotteR = () => game.sim?.ctx?.rules?.flotilla;
   game.on('sim:flotillaComplete', (e) => { if (e?.boatId != null) textAmBoot(e.boatId, `Flottille zusammen an Steg ${e.jetty} +${ankerText(flotteR()?.together ?? 0.5)} Anker`, '#ffd76a'); });
   game.on('sim:flotillaSplit', (e) => { if (e?.boatId != null && !e.zerrissen) textAmBoot(e.boatId, `Flottille getrennt −${ankerText(flotteR()?.apart ?? 0.5)} Anker je Crew`, '#ff9a8a'); });
+  // Kein Steg hatte Platz für alle: die Gruppe fährt zusammen weiter, statt sich aufzuteilen
+  game.on('sim:flotillaLeft', (e) => { if (e?.boatId != null) textAmBoot(e.boatId, 'Flottille fährt weiter: kein Steg für alle frei', '#ff9a8a', { nurImBild: true }); });
   const aerger = (e) => { if (e?.rated) textAmBoot(e.boatId, `Verärgert: ${String(game.sim?.ctx?.rules?.turnAway?.rating ?? 2.5).replace('.', ',')} Anker`, '#ff9a8a', { nurImBild: true }); };
   game.on('sim:dismissed', aerger);
   // Bojengeld über Nacht (Review A9): kleiner Betrag über jedem Boot an der Boje

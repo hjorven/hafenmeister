@@ -288,6 +288,110 @@ test('Selbst einfahren und Vorschlag des Büros halten die Gruppe zusammen, die 
   }
 });
 
+/** Füllboot (nicht aus der Flottille) mit derselben Größe wie vorlage in die Box legen. */
+function fuellen(s, berthId, vorlage) {
+  const id = s.nextId++;
+  s.boats[id] = { id, typeId: vorlage.typeId, name: 'Füller', size: vorlage.size, length: vorlage.length, beam: vorlage.beam, draft: vorlage.draft, wishes: [], nights: 2, status: 'moored', arriveAt: 0, waitingSince: null, berthId, held: false, wishesMet: 0, wishesTotal: 0, pendingFee: 0, penalty: 0 };
+  s.berths[berthId] = id;
+  return id;
+}
+
+test('Teil der Gruppe liegt: fremde Gäste und das Büro lassen die Boxen am Steg der Gruppe frei', () => {
+  const { s, boote } = morgenMitFlottille({ ab: 30 });
+  const fid = boote[0].flotte.id;
+  bisAlleDa(s, boote);
+  const erstes = s.boats[boote[0].id];
+  const p1 = sim.wishBerths(s, ctx, erstes.id)[0];
+  sim.assign(s, ctx, erstes.id, p1);
+  const steg = sim.jettyOf(ctx.berthById[p1]);
+  // Am Steg der Gruppe nur noch so viele passende Boxen frei lassen, wie die Gruppe braucht
+  const offen = boote.length - 1;
+  const frei = () => sim.fittingBerths(s, ctx, boote[1].id).filter((p) => sim.jettyOf(ctx.berthById[p]) === steg);
+  for (const p of frei().slice(offen)) fuellen(s, p, erstes);
+  assert.equal(frei().length, offen);
+  // Ein fremder Gast derselben Art wartet an der Boje: er nimmt eine Box an einem anderen Steg
+  const gast = { ...s.boats[boote[1].id], id: s.nextId++, flotte: undefined, name: 'Gast', status: 'waiting', atBuoy: true, atBuoySince: s.clock, waitSpot: 0 };
+  delete gast.flotte;
+  s.boats[gast.id] = gast;
+  const wahl = sim.selfBerth(s, ctx, gast.id);
+  assert.ok(wahl, 'eine andere Box passt');
+  assert.notEqual(sim.jettyOf(ctx.berthById[wahl]), steg, 'Gast nimmt der Flottille keine Box weg');
+  assert.notEqual(sim.jettyOf(ctx.berthById[sim.fittingBerths(s, ctx, gast.id)[0]]), steg, 'Büro schlägt sie auch nicht vor');
+  // Boote der Flottille selbst nehmen genau diese Boxen, nebeneinander
+  const w2 = sim.selfBerth(s, ctx, boote[1].id);
+  assert.equal(sim.jettyOf(ctx.berthById[w2]), steg);
+  // Sind die übrigen alle fest, gibt es nichts mehr frei zu halten
+  for (const b of boote.slice(1)) sim.assign(s, ctx, b.id, sim.wishBerths(s, ctx, b.id)[0]);
+  assert.equal(sim.flotillaState(s, ctx, fid).together, true);
+});
+
+test('Selbst einfahren: das zweite Boot legt sich neben das erste, nicht ans andere Stegende', () => {
+  let neben = 0, gesamt = 0;
+  for (let ab = 1; ab < 300 && gesamt < 12; ab += 17) {
+    const { s, boote } = morgenMitFlottille({ ab });
+    bisAlleDa(s, boote);
+    const p1 = sim.selfBerth(s, ctx, boote[0].id);
+    sim.assign(s, ctx, boote[0].id, p1);
+    const p2 = sim.selfBerth(s, ctx, boote[1].id);
+    const nachbarn = sim.fittingBerths(s, ctx, boote[1].id).filter((p) => sim.jettyOf(ctx.berthById[p]) === sim.jettyOf(ctx.berthById[p1]));
+    if (nachbarn.length < 2) continue;
+    gesamt++;
+    const nr = (p) => Number(String(p).replace(/\D+/g, ''));
+    const best = Math.min(...nachbarn.map((p) => Math.abs(nr(p) - nr(p1))));
+    if (Math.abs(nr(p2) - nr(p1)) <= best + 1) neben++;
+  }
+  assert.ok(gesamt >= 6, `nur ${gesamt} Fälle`);
+  assert.ok(neben >= gesamt - 1, `${neben} von ${gesamt} nebeneinander`);
+});
+
+test('Kein Steg hat Platz für alle: die Flottille teilt sich nicht von selbst auf und fährt gemeinsam weiter', () => {
+  const { s, boote } = morgenMitFlottille({ ab: 60 });
+  const fid = boote[0].flotte.id;
+  bisAlleDa(s, boote);
+  // An jedem Steg höchstens eine passende Box frei lassen
+  const erstes = s.boats[boote[0].id];
+  const gesehen = new Set();
+  for (const p of sim.fittingBerths(s, ctx, erstes.id)) {
+    const j = sim.jettyOf(ctx.berthById[p]);
+    if (!gesehen.has(j)) { gesehen.add(j); continue; }
+    fuellen(s, p, erstes);
+  }
+  assert.ok(sim.fittingBerths(s, ctx, erstes.id).length >= 1, 'einzelne Boxen sind frei');
+  const ev = [];
+  for (let i = 0; i < 400 && sim.flotillaMembers(s, fid).length; i++) ev.push(...sim.tick(s, ctx, 1));
+  const eigene = (t) => ereignis(ev, t).filter((e) => boote.some((b) => b.id === e.boatId));
+  assert.equal(eigene('moored').length + eigene('selfEntered').length, 0, 'keins fährt allein ein');
+  assert.equal(eigene('turnedAway').length, boote.length, 'alle fahren weiter');
+  assert.equal(ereignis(ev, 'flotillaSplit').length, 0, 'nicht als getrennt gezählt');
+  const weiter = ereignis(ev, 'flotillaLeft');
+  assert.equal(weiter.length, 1);
+  assert.equal(weiter[0].flotte, fid);
+  assert.equal(sim.flotillaMembers(s, fid).length, 0);
+});
+
+test('Spieler legt ein Boot von Hand: die übrigen fahren dann selbst an denselben Steg', () => {
+  const { s, boote } = morgenMitFlottille({ ab: 60 });
+  const fid = boote[0].flotte.id;
+  bisAlleDa(s, boote);
+  const erstes = s.boats[boote[0].id];
+  // Wie oben: kein Steg für alle, aber einer bekommt durch den Spieler genug (er räumt zwei Boxen)
+  const gesehen = new Map();
+  for (const p of sim.fittingBerths(s, ctx, erstes.id)) {
+    const j = sim.jettyOf(ctx.berthById[p]);
+    gesehen.set(j, (gesehen.get(j) || 0) + 1);
+    if (gesehen.get(j) > 1) fuellen(s, p, erstes);
+  }
+  const p1 = sim.fittingBerths(s, ctx, erstes.id)[0];
+  const steg = sim.jettyOf(ctx.berthById[p1]);
+  // Spieler macht am Steg Platz für alle: Füller dort entfernen
+  for (const [b, id] of Object.entries(s.berths)) if (s.boats[id]?.name === 'Füller' && sim.jettyOf(ctx.berthById[b]) === steg) { delete s.berths[b]; delete s.boats[id]; }
+  sim.assign(s, ctx, erstes.id, p1);
+  for (let i = 0; i < 400 && sim.flotillaState(s, ctx, fid)?.liegen < boote.length; i++) sim.tick(s, ctx, 1);
+  const st = sim.flotillaState(s, ctx, fid);
+  assert.equal(st.liegen, boote.length);
+  assert.equal(st.together, true);
+});
+
 test('Funk: Flottille meldet sich als Gruppe an, Steg frei halten, alle fahren direkt hinein mit Bonus', () => {
   const { s, ev, boote } = morgenMitFlottille({ office: 1 });
   const fid = boote[0].flotte.id;

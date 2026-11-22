@@ -19,7 +19,8 @@ function neu({ seed = 3, stufe = 4, offers = {}, ruf = null } = {}) {
 }
 
 test('Bootsdaten: Regeln, Spiel und Werkzeuge kennen dieselben Arten mit Modellen und Gästeprofil', () => {
-  for (const t of BOAT_CATALOG.filter((x) => ['S', 'M', 'L', 'XL'].includes(x.size))) {
+  // Seltene Besucher (P40) kommen nie über den Ankunftswürfel: ohne arrivalWeight, eigene Modelle
+  for (const t of BOAT_CATALOG.filter((x) => ['S', 'M', 'L', 'XL'].includes(x.size) && !x.besucher)) {
     assert.ok(Array.isArray(t.wishes), `${t.id} hat wishes`);
     assert.ok(t.feeFactor > 0, `${t.id} hat feeFactor`);
     assert.ok(t.arrivalWeight > 0, `${t.id} hat arrivalWeight`);

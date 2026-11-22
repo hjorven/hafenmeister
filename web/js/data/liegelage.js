@@ -141,6 +141,7 @@ export function liegeGeometrie(hafen, stufe) {
   const luft = LUFT_M / U;
   const out = new Map();
   for (const p of hafen?.plaetze ?? []) {
+    if (p.art === 'boje') continue;   // Bojenfeld (P36): Boot schwojt an der Boje, keine Lage am Steg
     const l = lageIn(p, stufe);
     if (!l) continue;
     const u = [Math.cos(l[2] * RAD), Math.sin(l[2] * RAD)];
