@@ -240,7 +240,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
-| F11 | Havarist wird eingeschleppt, braucht sofort einen Platz, Ruf und neuer Stammgast | offen | P37 |
+| F11 | Havarist wird eingeschleppt, braucht sofort einen Platz, Ruf und neuer Stammgast | erledigt (P37, [havarie.md](havarie.md)): Notruf im Meldeplatz, Box wählen, Fischer, Arbeitsboot oder Seenotretter schleppen ihn herein; Schlepplohn, +1 Anker, sofort Stammgast, Werft repariert | P37 |
 | F12 | Eigenes Hafenfest einmal pro Saison ansetzen | erledigt (P38, [hafenfest.md](hafenfest.md)): Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk, Bilanz am Abend | P38 |
 | F13 | Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub | offen | P39 |
 | F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | erledigt (PR 245) | P20 |
@@ -399,14 +399,14 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | E5 | Automatik je Größenklasse an oder aus | erledigt (PR 146) | P02 |
 | E6 | Von Hand eingewiesene Gäste geben einen Viertelanker mehr | erledigt (PR 146) | P02 |
 | E7 | Volle Automatik erst ab Hafenstufe 4 und teurer | erledigt (PR 146) | P02 |
-| E8 | Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste) | teilweise: Reservierungen erledigt (P28, PR 288), eigene Feste erledigt (P38); Havaristen kommen mit P37 | P02 (verknüpft P28, P37, P38) |
+| E8 | Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste) | erledigt: Reservierungen (P28, PR 288), Havaristen (P37), eigene Feste (P38) | P02 (verknüpft P28, P37, P38) |
 
 ### F Services und Angebote (hier "Svc")
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
 | Svc F1 | Eine Liste, klare Stufennamen | erledigt | P06 |
-| Svc F2 | Jeder Service ändert das Spiel (Slip, Mastenkran, Fahrradverleih, Räucherei, Werft) | erledigt (P23): Trailerboote am Slip, Mast legen und Radtour verlängern den Aufenthalt, Werft holt Reparaturboote, Räucherei bekommt Abendgäste; Havaristen folgen mit P37 | P23 |
+| Svc F2 | Jeder Service ändert das Spiel (Slip, Mastenkran, Fahrradverleih, Räucherei, Werft) | erledigt (P23): Trailerboote am Slip, Mast legen und Radtour verlängern den Aufenthalt, Werft holt Reparaturboote, Räucherei bekommt Abendgäste; Werft repariert eingeschleppte Havaristen (P37) | P23 |
 | Svc F3 | Entweder-oder-Bauplätze (Café oder Eisdiele, Werfthalle oder Winterhalle) | erledigt (P23): drei Wahlplätze (dazu Kreuzfahrtterminal oder Marinestützpunkt), Umbau statt Sperre | P23 |
 | Svc F4 | Einnahmen zeigen: Münzen über Gebäuden, Tagesabschluss je Quelle | erledigt (PR 159) | P15 |
 | Svc F5 | Auslastung statt Festbetrag | erledigt (P23): Bäcker, Café, Eisdiele, Räucherei, Fahrradverleih verdienen an den Crews im Hafen, Regen wirkt jetzt auch im Spiel | P23 |
@@ -707,7 +707,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P34 | Wind im Hafen spürbar machen | F5, F35 | erledigt (PR 392, [wind.md](wind.md)) |
 | P35 | Preisstufe am Hafenbüro | F6 | neu |
 | P36 | Bojenfeld im See | F10 | neu |
-| P37 | Havarist einschleppen | F11 | neu |
+| P37 | Havarist einschleppen | F11 | erledigt ([havarie.md](havarie.md)) |
 | P38 | Eigenes Hafenfest ansetzen | F12 | erledigt ([hafenfest.md](hafenfest.md)) |
 | P39 | Jugendtraining am Segelclub | F13 | neu |
 | P40 | Seltene Besucher | F16 (nach P21) | neu |

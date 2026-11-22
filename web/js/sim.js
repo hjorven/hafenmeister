@@ -516,8 +516,8 @@ export function eligibleTypes(state, ctx, mods = modifiers(state, ctx)) {
   );
 }
 
-// rnd: eigene Zahlenfolge (Flottillen, ohne Spielzufall); ohne Angabe der Spielzufall
-function rollWishes(state, ctx, type, rnd = null) {
+// rnd: eigene Zahlenfolge (Flottillen, Havaristen, ohne Spielzufall); ohne Angabe der Spielzufall
+export function rollWishes(state, ctx, type, rnd = null) {
   const zufall = rnd ?? (() => random(state));
   const { rules } = ctx;
   if (type.noWishes) return [];
@@ -2697,10 +2697,11 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   // Stammgast wieder an seinem Lieblingsplatz (P25, plan 9a "Ruf am alten Platz")
   const stammPlatz = boat.lieblingsplatz != null && boat.berthId === boat.lieblingsplatz ? r.regular?.favouriteBonus ?? 0 : 0;
   const wind = windRating(ctx, boat);                         // Windlage bei Starkwind (P34)
-  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + ratingBonus - penalty - moved - raft + wind;
+  const havarie = boat.havarie ? r.havarie?.rating ?? 0 : 0;  // in Not eingeschleppt (P37)
+  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + havarie + ratingBonus - penalty - moved - raft + wind;
   const value = Math.round(Math.min(r.rating.max, Math.max(r.rating.min, raw)) * 10) / 10;
   return {
-    value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
+    value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, havarie, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
     wind, windLage: boat.windLage ?? null, windRuecken: !!boat.windRuecken,
     wishes: [...(boat.wishes || [])], wishesMet: boat.wishesMet || 0, wishesTotal: boat.wishesTotal || 0, missed: { ...(boat.missed || {}) },
     far: { ...(boat.far || {}) },

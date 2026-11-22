@@ -6,6 +6,7 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 22.11.2026
 
+- Havaristen ab Stufe 2: An manchen Tagen treibt ein Boot mit Motorschaden, Leine in der Schraube, Ruderschaden oder Mastbruch vor der Einfahrt. Eine Meldung fragt nach einer Box, passende Boxen leuchten gold. Ein Fischer, später das Arbeitsboot oder die Seenotretter schleppen ihn an der Leine herein, die letzten Meter verholt die Crew selbst. Dafür gibt es Schlepplohn, einen Anker mehr auf der Bewertung, einen neuen Stammgast und, mit Werft, einen Reparaturauftrag. Ablehnen kostet nichts.
 - Eigenes Hafenfest ab Stufe 3: Einmal je Saison setzt du selbst ein Fest an (Wetterbericht, "Fest planen"). Du wählst den Tag und was dazugehört: Wimpelketten über den Stegen, eine Kapelle auf der Bühne mit Festmusik, Marktstände mit Standgeld, Feuerwerk am Abend. Die Vorbereitung kostet sofort Geld, absagen geht bis zum Vorabend für die Hälfte zurück. Am Festtag kommen Boote von überall, der Hafen wird voll, und wer im Päckchen liegt, bewertet deshalb nicht schlechter. Abends kommt die Bilanz. Das zufällige Hafenfest gibt es dafür nicht mehr.
 - Ein Vorbeifahrer oder Segler, hinter dem ein Gast oder Dauerlieger seit ein paar Sekunden festhängt, fährt sofort weiter und macht Platz. Vorher blieb er bis zu 40 Sekunden stehen, und in großen Häfen (Stufe 6, zum Beispiel Küste 14) stapelte sich dahinter die ganze Anfahrt von See.
 

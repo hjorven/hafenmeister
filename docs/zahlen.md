@@ -108,6 +108,15 @@ Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab 
 | Ankunft | 0,35 bis 0,75 des Tages, im Konvoi alle 2,5 s |
 | Bewertung je Crew | alle an einem Steg +0,5 Anker, aufgeteilt −0,5 Anker |
 
+## Havaristen
+
+| Was | Wert |
+|---|---|
+| ab Hafenstufe | 2 |
+| Tage mit Havarist | Stufe 2: 10 %, Stufe 3: 12 %, Stufe 4: 12 %, Stufe 5: 12 %, Stufe 6: 12 %; mindestens 3 Tage Pause |
+| Notruf | 0,12 bis 0,55 des Tages, 45 s Zeit für die Antwort |
+| Belohnung | +1 Anker, Schlepplohn S 30 €, M 60 €, L 90 €, sofort Stammgast |
+
 ## Services
 
 | Service | Stufe | Name | ab Hafenstufe | Kosten | Mindestruf | Wirkung |

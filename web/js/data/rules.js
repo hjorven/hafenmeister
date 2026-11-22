@@ -252,6 +252,8 @@ export function rulesFromEconomy(E = ECONOMY) {
     fromStage: fl.abStufe, share: { ...fl.anteil }, from: fl.fruehestens, to: fl.spaetestens, gap: fl.abstand,
     together: fl.zusammen, apart: fl.getrennt,
   } : null;
+  // Havaristen (P37, features/havarie.js): Anker mehr auf die Bewertung eines eingeschleppten Boots
+  r.havarie = E.havarie ? { rating: E.havarie.anker } : null;
   return r;
 }
 

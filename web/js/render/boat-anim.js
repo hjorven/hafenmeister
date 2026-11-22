@@ -1667,6 +1667,8 @@ class BoatAnim {
     // fest an Steg, Kai oder in der Box: die Anfahrwege sind dafuer gebaut. Ein Boot im Paeckchen
     // (laengsseits aussen an einem anderen) ragt ins Fahrwasser: dem weichen Vorbeifahrende aus.
     if (o.berth && o.berth.kind !== 'buoy' && o.berth.kind !== 'paeckchen' && (o.moored || o.state === 'casting-off')) return null;
+    // Schleppverband (P37, render/havarie-bild.js): Helfer und Havarist an derselben Leine stehen sich nie im Weg
+    if (o.angehaengtAn === this || this.angehaengtAn === o) return null;
     const dir = this.heading + (this.reverse ? Math.PI : 0);
     const fx = Math.cos(dir), fz = -Math.sin(dir);
     const p = o.pose();
@@ -1708,6 +1710,7 @@ class BoatAnim {
     const A = hull(x, z, h, this.info.length * 0.92, this.info.beam * 0.92);
     for (const o of this.mgr.alle()) {
       if (o === this || o.model.visible === false || o.ghost > 0) continue;
+      if (o.angehaengtAn === this || this.angehaengtAn === o) continue;   // Schleppverband (P37)
       // im Notfall-Durchlass nur durch Boote, nie durch ein grosses fremdes Schiff
       if (this.ghost > 0 && !(o instanceof Hindernis)) continue;
       // in die eigene Box hinein: Nachbarn in ihren Boxen begrenzen die Box, nicht die Fahrt

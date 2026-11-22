@@ -30,6 +30,7 @@ export const VORRANG = {
   auszeichnung: 60,    // features/auszeichnung.js, Karte nach dem Tagesabschluss (neue oder verlorene Auszeichnung)
   dauerWartet: 65,     // features/dauerlieger.js, Dauerlieger früher zurück (hat eine Frist bis zum Abend)
   ereignis: 60,        // events/vorbereiten-ui.js, Sturm und Regatta vorbereiten, Ergebnis am Abend
+  havarie: 62,         // ui/havarie-meldung.js, Havarist treibt vor der Einfahrt (Box geben? hat eine Frist)
   funk: 57,            // ui/funk-anmeldung.js, Boot meldet sich per Funk an (Box freihalten?)
   einstieg: 50,        // features/einstieg.js, Schritte des Einstiegs
   ankuendigung: 55,    // events/banner.js, Ereignisse und Saison ("Heute: Sommertag", "Morgen: Regatta")

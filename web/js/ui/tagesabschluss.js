@@ -196,6 +196,7 @@ export function init(game) {
       }
       if (q === 'sonstiges' && d?.startgeschenk) klein = 'Geschenk fürs erste Bauwerk';
       if (q === 'sonstiges' && d?.regatta) klein = [klein, `Startgeld der Regatta ${euro(d.regatta)}`].filter(Boolean).join(', ');   // events/vorbereiten.js
+      if (q === 'sonstiges' && d?.havarie) klein = [klein, `Schlepplohn für Havaristen ${euro(d.havarie)}`].filter(Boolean).join(', ');   // features/havarie.js (P37)
       if (q === 'sonstiges' && d?.hansewoche) klein = [klein, `Festgeld der Hanse-Woche ${euro(d.hansewoche)}`].filter(Boolean).join(', ');
       // features/hafenfest-regeln.js (P38): Standgeld der Marktstände, Erstattung beim Absagen
       if (q === 'sonstiges' && d?.hafenfest) klein = [klein, `Standgeld beim Hafenfest ${euro(d.hafenfest)}`].filter(Boolean).join(', ');
