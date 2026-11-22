@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "d77eba3"
+  "commit": "7c379ce"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -773,16 +773,21 @@
    "id": "P31",
    "titel": "Neue Gästewünsche",
    "inhalt": "F9, B8",
-   "thread": "erledigt (gaestewuensche.md: Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt)",
+   "thread": "erledigt (PR 406, gaestewuensche.md: Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    406
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F9",
     "B8"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    102,
+    103
+   ]
   },
   {
    "id": "P32",
@@ -5950,9 +5955,34 @@
    "datum": "2026-11-22",
    "quelle": "havarie/handy-1-notruf.png",
    "nr": 101
+  },
+  {
+   "datei": "p31-pr406-pc-absaugstation.jpg",
+   "pakete": [
+    "P31"
+   ],
+   "titel": "Absaugstation am Service-Steg",
+   "pr": 406,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "gaestewuensche/p31-pc-service-absaugstation.png",
+   "nr": 102
+  },
+  {
+   "datei": "p31-pr406-handy-waschhaus.jpg",
+   "pakete": [
+    "P31"
+   ],
+   "titel": "Waschhaus an Land",
+   "pr": 406,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "gaestewuensche/p31-handy-waschhaus.png",
+   "nr": 103
   }
  ],
  "neueBilder": [
+  103,
   101,
   99,
   97,
@@ -5960,10 +5990,28 @@
   93,
   91,
   90,
-  88,
-  86
+  88
  ],
  "merges": [
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P31 Gästewünsche (PR 406) mit Bildern",
+   "pr": 426,
+   "pakete": [
+    "P31"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Arbeitsplan: Welle 3 gebaut, Welle 4 startet mit P48, P47, P46, P44",
+   "pr": 425,
+   "pakete": [
+    "P48",
+    "P47",
+    "P46",
+    "P44"
+   ]
+  },
   {
    "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: Bilder für P37 Havarist einschleppen (PR 408)",
@@ -6043,20 +6091,6 @@
     "P32",
     "P40"
    ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P40 Seltene Besucher: besondere Schiffe am Ehrenplatz, Schwäne, Schweinswal, Fotos im Logbuch",
-   "pr": 416,
-   "pakete": [
-    "P40"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Schichttest: Schicht 25 Wind und 26 Stammgäste, Wetterbericht nennt Starkwind an Regentagen",
-   "pr": 415,
-   "pakete": []
   }
  ]
 }

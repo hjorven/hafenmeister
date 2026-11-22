@@ -273,8 +273,8 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
-| F29 | Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer | offen | P46 |
-| F30 | Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord | offen | P46 |
+| F29 | Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer | erledigt (PR 427, [stimmung.md](stimmung.md)): Lichterketten an allen Stegen gehen vom Land nach außen an, Glockentöne, wärmere Abendmusik bis zum Morgen | P46 |
+| F30 | Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord | erledigt (PR 427, [stimmung.md](stimmung.md)): Grundton, Terz, Akkord passend zur Musik, goldene Noten über der Box, ohne Zeitgrenze | P46 |
 | F31 | Große Ankünfte mit Horn, Kamera schwenkt auf Wunsch zur Einfahrt | erledigt (P47): Kreuzfahrt, Flotte, Windjammer und seltene Besucher tuten beim Einlaufen, Meldung mit Ansehen, kurze Kamerafahrt nur wenn der Spieler nichts tut, Einstellung Mit Kamera/Nur Horn/Aus, docs/grosse-ankuenfte.md | P47 |
 | F32 | Leinen annehmen: Symbol am Steg, Antippen bringt Trinkgeld | offen | P48 |
 
@@ -488,7 +488,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| L1 | Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel | offen | P46 |
+| L1 | Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel | erledigt (PR 427): Stammgast und Stufenziel neu, die anderen klangen schon | P46 |
 | L2 | Figuren als Anzeige (Schlange vor der Dusche, volle Tische) | erledigt (P55, Schlange vor WC, Dusche, Kiosk und Restaurant, wenn knapp oder voll; `render/people.js`) | P55 |
 | L3 | Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles | erledigt | P26 |
 | L4 | Fernglas mit Steckbrief | erledigt | P26 |
@@ -701,7 +701,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P28 | Anmeldung per Funk | F2 (nutzt P11) | erledigt (PR 288, `docs/funk-anmeldung.md`) |
 | P29 | Baggern für tiefere Liegeplätze | F7 | erledigt (PR 420, [baggern.md](baggern.md): Steg ausbaggern im Bauen-Menü, Niedrigwasser bei Westwind) |
 | P30 | Stege nachrüsten | F8 | erledigt (PR 297, [nachruesten.md](nachruesten.md)) |
-| P31 | Neue Gästewünsche | F9, B8 | erledigt ([gaestewuensche.md](gaestewuensche.md): Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt) |
+| P31 | Neue Gästewünsche | F9, B8 | erledigt (PR 406, [gaestewuensche.md](gaestewuensche.md): Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt) |
 | P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md); beim Selbst-Einfahren zusammen (PR 414); Rest Prio B: Boxen frei halten, gemeinsam weiterfahren) |
 | P33 | Liegende Boote umlegen | F4 | erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen) |
 | P34 | Wind im Hafen spürbar machen | F5, F35 | erledigt (PR 392, [wind.md](wind.md)) |
@@ -721,7 +721,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P43 | Fotoaufträge und Postkarten | F22 | bestehend: "Spielschleife zusammenbauen und Vorschläge einbauen" (Fotomodus) |
 | P44 | Hafenname und Flagge | F23, F27 (Auswahl beim Start) | neu |
 | P45 | Kreativmodus | F24 | neu |
-| P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | bestehend: "Ton und Musik hinzufügen" |
+| P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | erledigt (PR 427, Thread "Ruhigen Abend und Serien-Akkord bauen") |
 | P47 | Große Ankünfte ankündigen | F31 | erledigt (Thread "Große Ankünfte ankündigen", docs/grosse-ankuenfte.md) |
 | P48 | Leinen annehmen beim Anlegen | F32 | bestehend: "Schiffsanimationen umsetzen" |
 | P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | neu |
