@@ -1341,6 +1341,29 @@ export function init(game) {
     }
     return { see: see.length ? see : [pts[0]], uebergabe: see[see.length - 1] ?? pts[0] };
   }
+  // Seeweg in Fahrtrichtung nach Steuerbord versetzen (halber Bahnabstand), so weit dort tiefes Wasser
+  // ist. An- und Abreisende desselben Seezugangs fahren so auf zwei Bahnen statt Bug auf Bug auf einer
+  // Linie und treffen sich nicht mehr alle im selben Uebergabepunkt (Kueste 15: Knoten 100 m vor der Einfahrt).
+  function seeBahn(pts) {
+    if (!pts || pts.length < 2) return pts;
+    const k = karteJetzt();
+    const tief = (x, z) => (game.landscape?.tiefeBei?.(x, z) ?? 99) >= 2.5;
+    const ok = (x, z) => {
+      const drin = x > k.x0 + 20 && x < k.x1 - 20 && z > k.z0 + 20 && z < k.z1 - 20;
+      return drin ? befahrbar(k, x, z, 4, 2) : tief(x, z);
+    };
+    return pts.map((q, i) => {
+      const a = pts[Math.max(0, i - 1)], c = pts[Math.min(pts.length - 1, i + 1)];
+      const dx = c.x - a.x, dz = c.z - a.z, l = Math.hypot(dx, dz);
+      if (l < 0.5) return q;
+      const sx = -dz / l, sz = dx / l;
+      for (let off = BAHN_ABSTAND_M / 2; off > 1.5; off *= 0.6) {
+        // auch ein Stueck weiter aussen muss Wasser sein (Abstand zum Ufer)
+        if (ok(q.x + sx * off, q.z + sz * off) && ok(q.x + sx * (off + 6), q.z + sz * (off + 6))) return { ...q, x: q.x + sx * off, z: q.z + sz * off };
+      }
+      return q;
+    });
+  }
   function waehleZugang(info, herkunft) {
     const l = zugaenge(info);
     if (!l.length) return null;
@@ -1373,7 +1396,7 @@ export function init(game) {
     const zugang = erstes ? null : vorige ? vorige.zugang : waehleZugang(e.anim.info, info.herkunft);
     if (fl && flottenAnfahrt.size > 20) flottenAnfahrt.clear();
     if (zugang) {
-      const { see } = seeTeil(zugang);
+      const see = seeBahn(seeTeil(zugang).see);
       e.pick = e.anim.model.userData.pick;
       delete e.anim.model.userData.pick;
       e.anim.place(zugang.x, zugang.z, Math.atan2(-(see[0].z - zugang.z), see[0].x - zugang.x));
@@ -1460,7 +1483,7 @@ export function init(game) {
     if (!game.boatAnim.imBild?.(e.anim.x, e.anim.z, e.anim.info.length)) { entferne(id); return; }
     // hinaus bis vor die Einfahrt und weiter auf See zu einem Seezugang (dort verschwindet es)
     const zugang = waehleZugang(e.anim.info);
-    const raus = zugang ? [...seeTeil(zugang).see.reverse(), { x: zugang.x, z: zugang.z }] : null;
+    const raus = zugang ? seeBahn([...seeTeil(zugang).see.reverse(), { x: zugang.x, z: zugang.z }]) : null;
     const ziel = raus ? raus[0] : (randPunkt(e.anim.info) ?? { x: e.anim.x, z: e.anim.z - 300 });
     const weg = [ziel];
     const see = raus ? raus.slice(1) : undefined;
@@ -1967,7 +1990,7 @@ export function init(game) {
     const regattaOk = regatta && !regatta.leer;
     // mehrtaegiger Toern: hinaus auf See bis zu einem Seezugang wie die abreisenden Gaeste
     const zugang = tage > 0 ? waehleZugang(e.anim.info) : null;
-    const raus = zugang ? [...seeTeil(zugang).see.reverse(), { x: zugang.x, z: zugang.z }] : null;
+    const raus = zugang ? seeBahn([...seeTeil(zugang).see.reverse(), { x: zugang.x, z: zugang.z }]) : null;
     const segel = e.anim.info.kind === 'sail';
     const nr = regattaOk ? regattaNr++ : 0;
     const vorStart = regattaOk ? vorStartPunkt(regatta, nr, e.anim.info) : null;
@@ -2053,7 +2076,7 @@ export function init(game) {
     const b = platzBerth(platzId ?? e.info.platz);
     if (!b) return;
     // Liegt noch ein Gast in der Box (er wird gerade umgelegt oder legt morgens ab), erst warten
-    e.anim.dock(b, { route: true, seconds: 30, waitFor: () => platzFrei(platzId ?? e.info.platz, b, e.anim), see: zurueck ? seeTeil(zurueck).see : undefined });
+    e.anim.dock(b, { route: true, seconds: 30, waitFor: () => platzFrei(platzId ?? e.info.platz, b, e.anim), see: zurueck ? seeBahn(seeTeil(zurueck).see) : undefined });
   });
 
   /** Ist die Box frei? Kein anderes Boot hat sie als Platz, und keins steht noch in ihr. */
