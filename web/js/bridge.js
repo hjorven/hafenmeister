@@ -9,6 +9,7 @@ import { BOAT_CATALOG } from './data/boat-catalog.js';
 import { ECONOMY } from './data/economy.js';
 import { GROSSSCHIFF_BESUCHE } from './data/services.js';
 import { besuchModelle } from './data/besuchswege.js';
+import { FLOTTILLEN_ARTEN } from './data/flottillen.js';
 
 const BOAT_FILES = ['./data/boats/s.js', './data/boats/m.js', './data/boats/l.js', './data/boats/xl.js', './data/boats/xxl.js'];
 
@@ -146,7 +147,9 @@ export async function initBridge(game) {
   // Kurzbeschreibung eines Boots für Grafik und Figuren
   function bootInfo(b) {
     return {
-      id: b.id, groesse: b.size, art: b.typeId, modell: b.modelId, palette: b.id % 4, name: b.name, herkunft: b.origin ?? null,
+      // Flottille (P32): alle Boote der Gruppe in denselben Farben
+      id: b.id, groesse: b.size, art: b.typeId, modell: b.modelId, palette: b.flotte ? b.flotte.palette ?? b.flotte.id % 4 : b.id % 4, name: b.name, herkunft: b.origin ?? null,
+      flotte: b.flotte ? { id: b.flotte.id, nr: b.flotte.nr, n: b.flotte.n, name: b.flotte.name } : null,
       platz: b.berthId, boje: b.waitSpot, zustand: b.status === 'moored' ? 'liegt' : b.status === 'waiting' ? 'wartet' : 'kommt',
       bezahlt: b.status === 'moored' ? (b.stationed ? true : b.paid !== false && !(b.pendingFee > 0)) : false, offen: b.pendingFee || 0,
     };
@@ -342,6 +345,18 @@ export async function initBridge(game) {
     freigeben: run((boatId) => sim.releaseBerth(state, ctx, boatIdOf(boatId))),
     freigehaltenFuer: (berthId) => sim.reservedFor(state, berthIdOf(berthId)),
     funkBonus: (boatId) => sim.reservationBonus(state, ctx, sim.announcedBoats(state).find((b) => b.id === boatIdOf(boatId)) ?? state.boats[boatIdOf(boatId)]),
+    // Flottillen (P32, docs/flottillen.md): Lage der Gruppe eines Boots, Stege der Gruppe, Funk für alle
+    flottille: (boatId) => {
+      const id = boatIdOf(boatId);
+      const b = state.boats[id] ?? state.upcoming.find((x) => x.id === id);
+      return b?.flotte ? sim.flotillaState(state, ctx, b.flotte.id) : null;
+    },
+    flottillenArt: (art) => FLOTTILLEN_ARTEN[art] ?? null,
+    flottillenSteg: (berthId) => sim.jettyOf(ctx.berthById[berthIdOf(berthId)]),
+    flottillenMitglieder: (flotteId) => sim.flotillaMembers(state, Number(flotteId)),
+    flotteFreihaltbar: (flotteId) => sim.flotillaReservable(state, ctx, Number(flotteId)),
+    flotteFreihalten: run((flotteId, jetty = null) => sim.reserveFlotilla(state, ctx, Number(flotteId), jetty)),
+    flotteFreigeben: run((flotteId) => sim.releaseFlotilla(state, ctx, Number(flotteId))),
     season: () => sim.season(state, ctx),
     canAdvanceStage: () => sim.canAdvanceStage(state, ctx),
     facilityUpgrade: (key) => sim.facilityUpgrade(state, ctx, key),
@@ -470,7 +485,10 @@ export async function initBridge(game) {
   // 3D-Ansicht meldet: Boot ist an der Warteboje fest, ab jetzt zählt seine Geduld
   game.on('boot:an-boje', (d = {}) => {
     const id = boatIdOf(d.id ?? d.boot ?? d);
-    if (id != null) dispatch(sim.markAtBuoy(state, ctx, id).events);
+    // platz: wo das Boot wirklich liegt ('boje-2', 'anker-0'); die Regeln merken sich die echte Boje
+    const platz = typeof d.platz === 'string' ? d.platz : null;
+    const spot = platz?.startsWith('boje-') ? Number(platz.slice(5)) : platz?.startsWith('anker-') ? null : undefined;
+    if (id != null) dispatch(sim.markAtBuoy(state, ctx, id, spot).events);
   });
   // 3D-Ansicht meldet: abreisendes Boot ist aus der Box heraus, der Platz ist wieder frei
   game.on('boot:aus-box', (d = {}) => {

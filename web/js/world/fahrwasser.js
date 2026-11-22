@@ -424,7 +424,7 @@ function routeMit(k, a, b, o) {
   if (zielErreicht && sichtlinie(k, letzter, b, rMin - 0.05, t)) pts[pts.length - 1] = { x: b.x, z: b.z, need: Math.min(letzter.need, Math.max(rMin, freiBei(k, b.x, b.z))) };
   else zielErreicht = false;          // Ziel selbst liegt nicht frei: Weg endet davor
   pts = verdichten(pts, Math.max(8, r * 3));
-  if (o.rechts) pts = rechtsHalten(k, pts, o.rechts, t);
+  if (o.rechts) pts = rechtsHalten(k, pts, o.rechts, t, o.rechtsWeit ?? 0);
   pts = pts.map((p) => ({ x: p.x, z: p.z }));
   // Startpunkt (Zelle des Starts) nicht wiederholen, wenn das Boot schon dort ist
   if (pts.length > 1 && Math.hypot(pts[0].x - a.x, pts[0].z - a.z) < k.zelle * 1.5) pts.shift();
@@ -580,27 +580,41 @@ function verdichten(pts, maxL) {
 }
 
 // Nach Steuerbord versetzen, so weit das freie Wasser es erlaubt. Erster und letzter Punkt bleiben.
-function rechtsHalten(k, pts, d, t) {
-  const out = pts.map((p) => ({ ...p }));
-  for (let i = 1; i < pts.length - 1; i++) {
+// weit: in offenem Wasser bis zu so vielen Metern (zwei getrennte Bahnen fuer Ein- und Auslaufende,
+// vor der Hafeneinfahrt fuhren sonst beide Stroeme mit 6 m Abstand aufeinander zu und verkeilten sich).
+// Je enger das Wasser, desto kleiner der Versatz; unter 2,5 d freiem Wasser bleibt es bei d.
+function rechtsHalten(k, pts, d, t, weit = 0) {
+  const n = pts.length;
+  const seite = new Array(n).fill(null), off = new Array(n).fill(0);
+  for (let i = 1; i < n - 1; i++) {
     const a = pts[i - 1], c = pts[i + 1];
     const dx = c.x - a.x, dz = c.z - a.z, l = Math.hypot(dx, dz) || 1;
     // Steuerbord zur Fahrtrichtung (dx, dz) ist (-dz, dx) in x/z
-    const sx = -dz / l, sz = dx / l;
-    let off = d;
-    while (off > 0.4) {
-      const q = { x: pts[i].x + sx * off, z: pts[i].z + sz * off, need: pts[i].need };
-      if (befahrbar(k, q.x, q.z, pts[i].need + 0.5, t)) { out[i] = q; break; }
-      off *= 0.6;
-    }
+    seite[i] = { x: -dz / l, z: dx / l };
+    let o = d;
+    if (weit > d) o = Math.max(d, Math.min(weit, (freiBei(k, pts[i].x, pts[i].z) - pts[i].need) * 0.4));
+    while (o > 0.4 && !befahrbar(k, pts[i].x + seite[i].x * o, pts[i].z + seite[i].z * o, pts[i].need + 0.5, t)) o *= 0.6;
+    off[i] = o > 0.4 ? o : 0;
   }
-  // Der Versatz darf keine Strecke enger machen: sonst Punkt zurueck auf die Mitte
-  for (let n = 0; n < 12; n++) {
+  // Der Versatz aendert sich von Punkt zu Punkt nur allmaehlich (hoechstens ein Drittel der Strecke),
+  // sonst schwenkte die Bahn vor einer engen Stelle quer durch den Gegenverkehr
+  if (weit > d) {
+    const lauf = (i, j) => { const m = Math.hypot(pts[i].x - pts[j].x, pts[i].z - pts[j].z) / 3; if (off[i] > off[j] + m) off[i] = Math.max(Math.min(d, off[i]), off[j] + m); };
+    for (let i = 1; i < n - 1; i++) lauf(i, i - 1);
+    for (let i = n - 2; i >= 1; i--) lauf(i, i + 1);
+  }
+  const punkt = (i) => (off[i] > 0 ? { ...pts[i], x: pts[i].x + seite[i].x * off[i], z: pts[i].z + seite[i].z * off[i] } : pts[i]);
+  const out = pts.map((_, i) => punkt(i));
+  // Der Versatz darf keine Strecke enger machen: sonst Versatz der beiden Punkte verkleinern, zuletzt
+  // zurueck auf die Mitte
+  for (let lauf = 0; lauf < 24; lauf++) {
     let geaendert = false;
-    for (let i = 1; i < out.length; i++) {
-      if (out[i - 1] === pts[i - 1] && out[i] === pts[i]) continue;
+    for (let i = 1; i < n; i++) {
+      if (!off[i - 1] && !off[i]) continue;
       const need = Math.min(pts[i - 1].need, pts[i].need) - 0.05;
-      if (!sichtlinie(k, out[i - 1], out[i], need, t)) { out[i - 1] = pts[i - 1]; out[i] = pts[i]; geaendert = true; }
+      if (sichtlinie(k, out[i - 1], out[i], need, t)) continue;
+      for (const q of [i - 1, i]) { off[q] = off[q] > d * 1.01 ? Math.max(d, off[q] * 0.6) : 0; out[q] = punkt(q); }
+      geaendert = true;
     }
     if (!geaendert) break;
   }

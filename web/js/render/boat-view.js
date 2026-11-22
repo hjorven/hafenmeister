@@ -456,6 +456,8 @@ export function init(game) {
   }
   // Einfahrt zwischen den Molen (Einbahn-Abschnitt): so viele Boote je Richtung zugleich
   const EINFAHRT_KONVOI = 6;
+  // In offenem Wasser liegen die Bahnen der Ein- und der Auslaufenden so weit auseinander (Meter)
+  const BAHN_ABSTAND_M = 24;
   let einfahrtNr = -1;
   let karte = null, karteSig = '', karteAlt = true, karteHindernisse = { linien: [], rechtecke: [] };
   const flaechen = new Map();         // Groessenklasse -> { r, t, sektoren }
@@ -638,7 +640,7 @@ export function init(game) {
       const liegt = (o.moored && o.berth?.kind === 'buoy') || o.state === 'waiting';
       if (liegt) boote.push({ x: o.x, z: o.z, r: o.info.length / 2 + 1 });
     }
-    return route(k, { x: boot.x, z: boot.z }, ziel, { r, rMin, t, rechts, boote });
+    return route(k, { x: boot.x, z: boot.z }, ziel, { r, rMin, t, rechts, rechtsWeit: BAHN_ABSTAND_M / 2, boote });
   });
 
   // Fuer andere Module (Besuchsschiffe der Services, Tests): Wege und freie Punkte in Weltmetern
@@ -1292,6 +1294,9 @@ export function init(game) {
   // verschiedenen Richtungen, nie ueber Land (game.gelaende.seezugaenge, Gelaende-Thread). Ohne
   // Seezugaenge (aeltere Gelaende, Tests) bleibt der Start am Kartenrand.
   let letzterZugang = null;
+  // Flottillen (P32): die Boote einer Gruppe kommen im Konvoi über denselben Seezugang, kurz hintereinander
+  const KONVOI_ABSTAND = 2.4;
+  const flottenAnfahrt = new Map();   // Flottillen-id -> { zugang, t }
   function zugaenge(info) {
     const f = game.gelaende?.seezugaenge;
     if (typeof f !== 'function') return [];
@@ -1362,7 +1367,11 @@ export function init(game) {
     const st = game.sim?.state;
     const erstes = !erstesGezeigt && st?.day === 1 && (st.clock ?? 0) < 30 && !(st.guests > 0);
     erstesGezeigt = true;
-    const zugang = erstes ? null : waehleZugang(e.anim.info, info.herkunft);
+    const fl = info.flotte ?? null;
+    e.anim.flotte = fl?.id ?? null;
+    const vorige = fl ? flottenAnfahrt.get(fl.id) ?? null : null;
+    const zugang = erstes ? null : vorige ? vorige.zugang : waehleZugang(e.anim.info, info.herkunft);
+    if (fl && flottenAnfahrt.size > 20) flottenAnfahrt.clear();
     if (zugang) {
       const { see } = seeTeil(zugang);
       e.pick = e.anim.model.userData.pick;
@@ -1370,10 +1379,13 @@ export function init(game) {
       e.anim.place(zugang.x, zugang.z, Math.atan2(-(see[0].z - zugang.z), see[0].x - zugang.x));
       if (e.anim.info.kind === 'sail') e.anim.setSails(true);
       const jetzt = game.time ?? 0;
-      ankunftT = Math.max(jetzt, ankunftT + 3 + Math.random() * 6);
+      // Flottille: dicht hinter dem Boot davor, sonst mit eigenem Abstand
+      ankunftT = vorige ? Math.max(jetzt, vorige.t + KONVOI_ABSTAND) : Math.max(jetzt, ankunftT + 3 + Math.random() * 6);
+      if (fl) flottenAnfahrt.set(fl.id, { zugang, t: ankunftT });
       // Ab der Einfahrt springt das Boot, solange es niemand sieht, bis kurz vor den Bildrand (wie
-      // ohne Seezugang): die Anfahrt im Revier dauert so bei jeder Kamera etwa gleich lang
-      const vorruecken = (a) => (game.boatAnim.imBild?.(a.x, a.z, a.info.length + 6) ? null : naeherStart(a.info, { x: a.x, z: a.z }, ziel));
+      // ohne Seezugang): die Anfahrt im Revier dauert so bei jeder Kamera etwa gleich lang.
+      // Eine Flottille springt nicht (sonst landeten alle an derselben Stelle und der Konvoi zerfiele).
+      const vorruecken = fl ? undefined : (a) => (game.boatAnim.imBild?.(a.x, a.z, a.info.length + 6) ? null : naeherStart(a.info, { x: a.x, z: a.z }, ziel));
       e.anim.dock(ziel, { route: true, einfahrt: true, verzoegerung: ankunftT - jetzt, see, vorruecken });
       return;
     }
@@ -1386,7 +1398,8 @@ export function init(game) {
     // Segelboote bergen die Segel vor der Boje (dock() erledigt das), dann Leine an die Boje.
     // Kommen mehrere im selben Augenblick, laufen sie nacheinander los (keine Wellen).
     const jetzt = game.time ?? 0;
-    ankunftT = erstes ? jetzt : Math.max(jetzt, ankunftT + 3 + Math.random() * 6);
+    ankunftT = erstes ? jetzt : vorige ? Math.max(jetzt, vorige.t + KONVOI_ABSTAND) : Math.max(jetzt, ankunftT + 3 + Math.random() * 6);
+    if (fl) flottenAnfahrt.set(fl.id, { zugang: null, t: ankunftT });
     e.anim.dock(ziel, { route: true, einfahrt: true, verzoegerung: ankunftT - jetzt });
   });
 
@@ -1785,7 +1798,7 @@ export function init(game) {
       return;
     }
     // die Spielregeln kennen nur ihre eigene Bojennummer
-    game.emit('boot:an-boje', { id: d.id, boje: e.info.boje ?? 0 });
+    game.emit('boot:an-boje', { id: d.id, boje: e.info.boje ?? 0, platz: art });
   });
 
   // --- Dauerlieger: morgens eine Runde draussen, abends zurueck an denselben Platz ----------
@@ -2089,7 +2102,7 @@ export function init(game) {
       else {
         e.anim.moorAt(b);
         // sofort an die Boje gelegt (Laden, Stufenwechsel): auch das ist "an der Boje" fuer die Spielregeln
-        if (!info.platz) game.emit('boot:an-boje', { id: info.id, boje: info.boje ?? 0 });
+        if (!info.platz) game.emit('boot:an-boje', { id: info.id, boje: info.boje ?? 0, platz: String(b.id ?? '') });
       }
     }
     for (const id of [...muenzen.keys()]) if (!boats.has(id)) entferneMuenze(id);

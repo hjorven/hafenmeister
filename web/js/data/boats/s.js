@@ -23,7 +23,7 @@ export const TYPES = [
   {
     id: 'S2', crew: [1, 3], name: 'Paddel- und Tretboot', fromStage: 1,
     length: [2.5, 5.2], beam: [0.6, 1.8], draft: [0.1, 0.1],
-    propulsion: 'paddel', feeFactor: 0.6, nights: [1, 1], group: [1, 3],
+    propulsion: 'paddel', feeFactor: 0.6, nights: [1, 1], group: [3, 4],
     wishes: ['wc', 'essen'], arrivalWeight: 2,
     note: 'zahlen wenig und bleiben meist nur eine Nacht, kommen aber oft zu mehreren',
   },

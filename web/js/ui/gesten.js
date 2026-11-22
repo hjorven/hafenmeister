@@ -605,6 +605,9 @@ export function init(game) {
     }
   }
 
+  // Dezimal statt Bruchzeichen: ½ sieht in der Pixelschrift wie ⅛ aus
+  const ankerText = (x) => String(Math.round(x * 100) / 100).replace('.', ',');
+
   // Platzwert beim Einrasten (Review A3): was die Box bringt, über der Box.
   // Erste Zeile Liegegeld und erwartete Anker, zweite Zeile erfüllte Wünsche und "passgenau".
   function drawWert(p, w, istGold) {
@@ -622,6 +625,12 @@ export function init(game) {
     if (w.paeckchen) {
       teile.unshift('Päckchen · halbes Liegegeld');
       if (w.malus > 0) z3 = `Beide Crews −${String(w.malus).replace('.', ',')} Anker`;
+    }
+    // Flottille (P32): zusammen mit der Gruppe oder getrennt
+    if (w.flotte) {
+      const a = ankerText(Math.abs(w.flotte.wert));
+      if (w.flotte.zusammen) teile.unshift(`Flottille zusammen +${a}`);
+      else z3 = z3 ? `${z3} · Flottille getrennt −${a}` : `Flottille getrennt: −${a} Anker`;
     }
     const z2 = teile.join(' · ');
     ctx.font = `700 15px ${SCHRIFT}`;
@@ -666,6 +675,10 @@ export function init(game) {
   game.on('sim:moored', (e) => { if (e?.passgenau && e.hand) textAmBoot(e.boatId, 'Passgenau +¼ Anker', '#ffd76a'); });
   // Päckchen (P27): kurz sagen, was das bedeutet
   game.on('sim:moored', (e) => { if (e?.paeckchen) textAmBoot(e.boatId, 'Im Päckchen · halbes Liegegeld', '#f4f1e6'); });
+  // Flottille (P32): alle an einem Steg oder aufgeteilt
+  const flotteR = () => game.sim?.ctx?.rules?.flotilla;
+  game.on('sim:flotillaComplete', (e) => { if (e?.boatId != null) textAmBoot(e.boatId, `Flottille zusammen an Steg ${e.jetty} +${ankerText(flotteR()?.together ?? 0.5)} Anker`, '#ffd76a'); });
+  game.on('sim:flotillaSplit', (e) => { if (e?.boatId != null && !e.zerrissen) textAmBoot(e.boatId, `Flottille getrennt −${ankerText(flotteR()?.apart ?? 0.5)} Anker je Crew`, '#ff9a8a'); });
   const aerger = (e) => { if (e?.rated) textAmBoot(e.boatId, `Verärgert: ${String(game.sim?.ctx?.rules?.turnAway?.rating ?? 2.5).replace('.', ',')} Anker`, '#ff9a8a', { nurImBild: true }); };
   game.on('sim:dismissed', aerger);
   // Bojengeld über Nacht (Review A9): kleiner Betrag über jedem Boot an der Boje

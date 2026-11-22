@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "21.11.2026",
-  "commit": "282371c"
+  "datum": "22.11.2026",
+  "commit": "b2dfea0"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -778,14 +778,14 @@
    "id": "P32",
    "titel": "Flottillen",
    "inhalt": "F3, Gruppen-Ankunft",
-   "thread": "neu",
+   "thread": "erledigt (Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md)",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F3"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -1643,6 +1643,18 @@
    "punkte": [],
    "status": "erledigt",
    "bilder": []
+  },
+  {
+   "id": "P88",
+   "titel": "Engstellen nach ihrer Länge regeln",
+   "inhalt": "Reste aus P66 (Abnahme Welle 0 auf ae9e34f, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Dazu Großschiff-Vortritt. Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Noch zu tun: Großschiff-Vortritt, Segler der Seerunde in der Schlange, Rest Küste 15",
+   "thread": "teilweise",
+   "welle": 3,
+   "prs": [],
+   "abschnitt": "Pakete aus den Funden vom 15.11.2026",
+   "punkte": [],
+   "status": "offen",
+   "bilder": []
   }
  ],
  "punkte": [
@@ -1986,8 +1998,8 @@
   {
    "code": "F3",
    "text": "Flottillen: drei bis fünf Boote wollen am selben Steg liegen (Feld group)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P32, flottillen.md)",
    "pakete": [
     "P32"
    ],
@@ -4545,16 +4557,17 @@
     "P39",
     "P40",
     "P59",
-    "P86"
+    "P86",
+    "P88"
    ],
    "zaehler": {
-    "erledigt": 9,
+    "erledigt": 10,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
     "offen": 11,
     "entfaellt": 0,
-    "alle": 20
+    "alle": 21
    }
   },
   {
@@ -4636,20 +4649,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 44,
+  "erledigt": 45,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
   "offen": 40,
   "entfaellt": 1,
-  "alle": 86
+  "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 166,
+  "erledigt": 167,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 45,
+  "offen": 44,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5653,6 +5666,28 @@
  "merges": [
   {
    "datum": "2026-11-21",
+   "titel": "Arbeitsplan: Welle 0 bis 2 abgenommen, Welle 3 startet; P88 Engstellen",
+   "pr": 389,
+   "pakete": [
+    "P88"
+   ]
+  },
+  {
+   "datum": "2026-11-21",
+   "titel": "Meldungen auf Handy quer oben zwischen den Spalten (Schichttest F8-Rest, F9 geprüft)",
+   "pr": 388,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-21",
+   "titel": "Schichttest: Serie 13 nach P66, Messung erst nach dem Zurückgleiten der Leisten",
+   "pr": 387,
+   "pakete": [
+    "P66"
+   ]
+  },
+  {
+   "datum": "2026-11-21",
    "titel": "Roadmap: P66 und P85 zeigen erledigt (Reste als Prio B ausgelagert)",
    "pr": 386,
    "pakete": [
@@ -5719,30 +5754,6 @@
    "pakete": [
     "P66",
     "P85"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Zusammenspiel 3 Teil 2: Stegbilder je Küste, Ereignisse, Bildrate je Wetter (P85 Teil 3 fertig)",
-   "pr": 373,
-   "pakete": [
-    "P85"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "P66: Boote einigen sich bei Begegnungen und weichen früher aus",
-   "pr": 375,
-   "pakete": [
-    "P66"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Roadmap-Pflege: P66 mit PR 372",
-   "pr": 376,
-   "pakete": [
-    "P66"
    ]
   }
  ]
