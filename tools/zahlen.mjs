@@ -155,7 +155,7 @@ export function tabellen() {
       ['Zieltiefe je Platzgröße', Object.entries(b.ziel).map(([g, m]) => `${g} ${zahl(m)} m`).join(', ')],
       ['Platzarten', b.arten.join(', ')],
       ['Kosten je Steg', `${euro(b.grund)} plus je flachem Platz und Meter Tiefe: ${Object.entries(b.jeMeter).map(([g, e]) => `${g} ${euro(e)}`).join(', ')}`],
-      ...(nw ? [['Niedrigwasser', `ab Stufe ${nw.abStufe}, Wind aus ${nw.richtungen.join(', ')} ab Stärke ${zahl(nw.ab)}: Pegel ${zahl(nw.tiefe[0])} bis ${zahl(nw.tiefe[1])} m tiefer; wer auf Grund sitzt −${zahl(nw.anker)} Anker`]] : []),
+      ...(nw ? [['Niedrigwasser', `Stufe ${nw.abStufe} bis ${nw.bisStufe ?? 6}, Wind aus ${nw.richtungen.join(', ')} ab Stärke ${zahl(nw.ab)}: Pegel ${zahl(nw.tiefe[0])} bis ${zahl(nw.tiefe[1])} m tiefer; wer auf Grund sitzt −${zahl(nw.anker)} Anker`]] : []),
     ]), '');
   }
   if (E.flottillen) {

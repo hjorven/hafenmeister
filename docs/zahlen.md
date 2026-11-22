@@ -113,7 +113,7 @@ Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab 
 | Zieltiefe je Platzgröße | S 1,2 m, M 2 m, L 2,5 m |
 | Platzarten | box, stirn, finger |
 | Kosten je Steg | 160 € plus je flachem Platz und Meter Tiefe: S 80 €, M 110 €, L 150 € |
-| Niedrigwasser | ab Stufe 2, Wind aus west, suedwest, nordwest ab Stärke 0,55: Pegel 0,3 bis 0,6 m tiefer; wer auf Grund sitzt −0,3 Anker |
+| Niedrigwasser | Stufe 2 bis 5, Wind aus west, suedwest, nordwest ab Stärke 0,55: Pegel 0,3 bis 0,6 m tiefer; wer auf Grund sitzt −0,3 Anker |
 
 ## Flottillen
 

@@ -186,6 +186,11 @@ test('Niedrigwasser: tiefes Boot findet heute keine knappe Box, ausgebaggerte Bo
   // Nächster Tag ohne neues Wetter: Pegel gilt nicht mehr
   state.day++;
   assert.equal(B.pegelHeute(state), 0);
+  // Im Seehafen (über bisStufe) gibt es kein Niedrigwasser, auf Stufe 1 auch nicht
+  state.stage = E.niedrigwasser.bisStufe + 1;
+  assert.equal(B.setzePegel(state, ctx, { wind: 1, richtung: 180 }), 0);
+  state.stage = 1;
+  assert.equal(B.setzePegel(state, ctx, { wind: 1, richtung: 180 }), 0);
   remove();
 });
 

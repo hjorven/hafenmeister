@@ -21,7 +21,7 @@ Paket P29 aus der [Roadmap](roadmap.md), Feature F7 (Wassertiefe je Steg als Bau
 
 **Wann es sich lohnt.** Ohne Niedrigwasser band die Tiefe fast nie: In 6 Testspielen fuhr kein einziges Boot wegen zu viel Tiefgang weiter, die tiefen Plätze außen reichten, abgewiesen wurde wegen voller Stege. Deshalb (bewusste Abweichung vom Plan, der nur die Bauaufgabe nannte) kam das Niedrigwasser dazu, wie es die westliche Ostsee bei Westwind wirklich kennt.
 
-**Niedrigwasser.** `features/baggern.js wasserstand(wetter)`: ab Stufe 2, Wind aus `richtungen` ab Stärke `ab` (Sturm zählt als 1) senkt den Pegel zwischen `tiefe[0]` und `tiefe[1]` Metern, je nach Windstärke. Der Pegel steht in `state.modules.baggern.pegel` und in `ctx.waterLevel`.
+**Niedrigwasser.** `features/baggern.js wasserstand(wetter)`: in Stufe 2 bis 5 (`abStufe` bis `bisStufe`), Wind aus `richtungen` ab Stärke `ab` (Sturm zählt als 1) senkt den Pegel zwischen `tiefe[0]` und `tiefe[1]` Metern, je nach Windstärke. Der Pegel steht in `state.modules.baggern.pegel` und in `ctx.waterLevel`.
 - Hook `fit` (Grund `niedrigwasser`): Neue Zuweisungen brauchen Tiefgang plus 0,3 m plus Pegelsenkung. Das steht bewusst nicht in `whyNotFit`, damit `repairBerths` keine liegenden Boote vertreibt.
 - Hook `tick`: Wer schon liegt und jetzt zu tief geht, bekommt einmal am Tag `boat.aufGrund` und das Ereignis `aufGrund`. Lag er an einem nicht ausgebaggerten Steg, den Baggern tief genug machen würde, zählt das für den Hinweis.
 - Hook `rating`: `anker` weniger beim Ablegen. Im Gästebuch eigener Grund `schlick`.
@@ -33,6 +33,18 @@ Paket P29 aus der [Roadmap](roadmap.md), Feature F7 (Wassertiefe je Steg als Bau
 - `node --test tests/baggern.test.mjs` (Zahlen, Angebot je Stufe und Stegbild, Kauf, Geld, Rückgängig, Laden mit frischem Kontext, Stufenaufstieg, reservierte Plätze, Niedrigwasser, Schlick, Gästebuch, Zähler, „Als Nächstes“)
 - Im Spiel: `?stufe=3` und Bauen, Reiter Stege; `?niedrigwasser=jetzt` setzt für den heutigen Tag starken Westwind.
 - Balancing: Die Bots in `tools/balance.mjs` und im Zeitraffer kaufen Baggern, sobald mindestens zwei Boote wegen der Tiefe weitergefahren sind.
+
+## Messung
+
+`node tools/balance.mjs --laeufe 40` und `--spieler zeitraffer`, je 40 Läufe, gegen `main` vor P29 (Median Spieltage bis Abschluss Stufe 6):
+
+| Spieler | main | mit P29 |
+|---|---|---|
+| geschickt | 103 | 102 |
+| zeitraffer | 107 | 108 |
+| gemütlich | 123 | 128 |
+
+Die Bots kaufen Steg B für 340 bis 480 € um Tag 22 bis 34. Gemütlich erreicht Stufe 6 gleich schnell (Median Tag 108 in beiden), die 5 Tage entstehen allein in Stufe 6, auch wenn Niedrigwasser dort und in Stufe 5 ganz fehlt. Je Spiel schwankt die Dauer von Stufe 6 bei gemütlich um bis zu 38 Tage in beide Richtungen, sobald sich irgendetwas am Verlauf ändert (6 Großschiffe und Ruf 4,5 zum selben Zeitpunkt). Das ist ein Befund für das Balancing, kein Effekt des Baggerns.
 
 ## Zusammenspiel
 

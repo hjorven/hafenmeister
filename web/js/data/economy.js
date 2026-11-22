@@ -593,9 +593,10 @@ export const ECONOMY = {
   // Angeboten wird nur, wo danach eine Bootsart der Stufe passt, die es vorher nicht tat.
   // niedrigwasser: Starker Wind (ab ab, Sturm zählt als 1) aus diesen Richtungen senkt den Pegel um tiefe[0]
   // bis tiefe[1] Meter (je stärker, desto mehr). Dann passt ein Boot nur, wo auch heute 0,3 m unter dem Kiel
-  // bleiben; wer schon liegt und den Grund berührt, bewertet um anker schlechter. Ab abStufe, nicht im Winter.
+  // bleiben; wer schon liegt und den Grund berührt, bewertet um anker schlechter. Von abStufe bis bisStufe, nicht im Winter (im Seehafen
+  // hält die Hafenverwaltung die Tiefe, dort hilft Baggern auch nicht mehr).
   baggern: { abStufe: 2, ziel: { S: 1.2, M: 2.0, L: 2.5 }, arten: ['box', 'stirn', 'finger'], grund: 160, jeMeter: { S: 80, M: 110, L: 150 },
-    niedrigwasser: { abStufe: 2, richtungen: ['west', 'suedwest', 'nordwest'], ab: 0.55, tiefe: [0.3, 0.6], anker: 0.3 } },
+    niedrigwasser: { abStufe: 2, bisStufe: 5, richtungen: ['west', 'suedwest', 'nordwest'], ab: 0.55, tiefe: [0.3, 0.6], anker: 0.3 } },
 
   // ---------------------------------------------------------------- Kassieren
   // ---------------------------------------------------------------- Hafenbüro

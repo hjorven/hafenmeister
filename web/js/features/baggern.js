@@ -193,7 +193,8 @@ export function pegelHeute(state) {
 /** Wetter des Tages da: Pegel merken und in den Regel-Kontext tragen. Gibt den Pegel zurück. */
 export function setzePegel(state, ctx, wx) {
   if (!state) return 0;
-  const m = (state.stage ?? 1) >= (NW?.abStufe ?? 99) ? wasserstand(wx) : 0;
+  const st = state.stage ?? 1;
+  const m = st >= (NW?.abStufe ?? 99) && st <= (NW?.bisStufe ?? 99) ? wasserstand(wx) : 0;
   baggerState(state).pegel = { tag: state.day, m };
   if (ctx) ctx.waterLevel = m;
   return m;
