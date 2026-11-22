@@ -88,7 +88,7 @@ Antippen öffnet den Eintrag: bei Flaggen die Bedeutung im Hafen, Merkhilfe und 
 ## Wo es mit anderen kollidieren kann
 
 - **P48 Leinen annehmen:** Klampenschlag wird beim Festmachen gesammelt (`sim:moored`), unabhängig davon, wer die Leine nimmt. Keine gemeinsamen Dateien.
-- **P44 Hafenflagge:** eigene Flagge am Hafenmast, keine Berührung. Der Treuewimpel (P25) hängt am Heck, die Signalflaggen mittschiffs an Steuerbord.
+- **P44 Hafenflagge:** eigene Flagge am Hafenmast, keine Berührung. Gefunden beim Zusammenführen: `hafenflagge.spec.mjs` zählte alle `img` der Seite; die Meldung "Neu im Hafenwissen" bringt ein data:-Bild mit, das kommt und geht. Der Test zählt jetzt nur Skripte und Bilder ohne data:-Adresse. Der Treuewimpel (P25) hängt am Heck, die Signalflaggen mittschiffs an Steuerbord.
 - **Logbuch:** sechster Reiter "Wissen"; am Handy hochkant brechen die Reiter in zwei Zeilen um (wie vorher bei fünf). P43 (Fotoaufträge) bringt eventuell einen weiteren Reiter.
 - **Meldeplatz:** neuer Vorrang `wissen: 21` in `ui/meldungen.js`.
 - **Wünsche:** Ein neuer Wunsch braucht eine Flagge in `WUNSCH_FLAGGE`, sonst zeigt das Boot für ihn keine; der Test prüft das.
