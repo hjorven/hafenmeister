@@ -50,7 +50,7 @@ python3 -m http.server 8000 --directory web
 
 ## Zusammenspiel mit anderen Paketen
 
-- **P46 Serien-Akkord:** Auch der Serien-Akkord klingt beim Festmachen. Wer ihn baut, sollte prüfen, dass beide Akkorde nicht gleichzeitig zu dicht klingen (der Leinen-Akkord ist `strich-ende` 0,12 s nach dem Festmachen).
+- **P46 Serien-Akkord (`features/stimmung.js`):** klingt beim Zuweisen ('sim:moored'), der Leinen-Akkord erst beim sichtbaren Festmachen ('boat:moored'), Sekunden später. Geprüft nach dem Merge von P46: beide überlagern sich nicht. Die Lichterketten von P46 hängen an den Stegen, der Festmacher steht davor.
 - **Münze und Wunschergebnis:** Beim Festmachen erscheinen über dem Boot die Münze und die Wunschsymbole (`ui/vorschau.js`); der Trinkgeld-Betrag steht über dem Festmacher am Steg, also daneben, nicht darüber.
 - **Staus vor den Stegen:** Steckt ein Boot lange im Verkehr fest, wartet der Festmacher so lange am Steg. Das Trinkgeld kommt, sobald das Boot fest ist.
 - **Menschen im Hafen:** Die Crew geht nach dem Festmachen an Land und läuft dabei am Festmacher vorbei; er ist keine Figur aus `render/people.js` und nicht im Wegenetz.
