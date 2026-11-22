@@ -1426,6 +1426,17 @@ export function init(game) {
     e.anim.dock(ziel, { route: true, einfahrt: true, verzoegerung: ankunftT - jetzt });
   });
 
+  // Neue fest stationierte Boote, deren Platz noch vom Vorgaenger verlassen wird (siehe boot-zugewiesen)
+  const spaeterZeigen = [];
+  game.onTick(() => {
+    for (let i = spaeterZeigen.length - 1; i >= 0; i--) {
+      const w = spaeterZeigen[i];
+      if (!boats.has(w.e.anim.id) || (game.time ?? 0) > w.bis || !w.imWeg()) {
+        if (boats.has(w.e.anim.id) && w.e.anim.versteckt) w.e.anim.verstecken(false);
+        spaeterZeigen.splice(i, 1);
+      }
+    }
+  });
   game.on('boot-zugewiesen', ({ id, platz, sofort = false } = {}) => {
     const neu = !boats.has(id);
     const e = boats.get(id) ?? (sucheInfo(id) && erzeuge(sucheInfo(id)));
@@ -1435,6 +1446,15 @@ export function init(game) {
     if (neu) {
       // ohne vorheriges boot-kommt (z. B. Fischer nach dem Aufstieg, stationBoat): liegt gleich am Platz
       e.anim.moorAt(b);
+      // Liegt dort noch sichtbar ein anderes Boot, das gerade ablegt (Fischerwechsel zur neuen Saison),
+      // erscheint das neue erst, wenn der Platz wirklich frei ist. Vorher lag es kurz auf dem alten.
+      const imWeg = () => [...game.boatAnim.boats].some((o) => {
+        if (o === e.anim || o.model.visible === false) return false;
+        const d = Math.hypot(o.x - e.anim.x, o.z - e.anim.z);
+        // derselbe Platz (liegt noch oder zieht gerade heraus), nicht der Nachbar in der Nebenbox
+        return (String(o.berth?.id ?? '') === String(b.id) && d < (o.info.length + e.anim.info.length) / 2 + 1) || (!o.moored && d < 3);
+      });
+      if (imWeg()) { e.anim.verstecken(true); spaeterZeigen.push({ e, imWeg, bis: (game.time ?? 0) + 60 }); }
       return;
     }
     // Ein Boot ohne Auftrag (nach dem Laden) liegt an der Boje. Kam es gerade erst (boot-kommt im
