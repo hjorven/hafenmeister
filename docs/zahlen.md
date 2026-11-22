@@ -114,6 +114,16 @@ Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab 
 | Ankunft | 0,35 bis 0,75 des Tages, im Konvoi alle 2,5 s |
 | Bewertung je Crew | alle an einem Steg +0,5 Anker, aufgeteilt −0,5 Anker |
 
+## Preisstufe
+
+Am Hafenbüro ab Hafenbüro-Stufe 1, eine Wahl je Saison (im Winter für die kommende) und nach jedem Ausbau, Start: normal.
+
+| Stufe | Liegegeld | Ankünfte | Klassen | Anker | Anspruch |
+|---|---|---|---|---|---|
+| guenstig | −10 % | +20 % | S +15 % | +0,25 | Nachsicht bis +0,5 Anker, wenn kein Wunsch erfüllt |
+| normal | - | - | - | - | - |
+| gehoben | +30 % | −15 % | S −20 %, L +20 % | −0,25 | bis −1 Anker, wenn kein Wunsch erfüllt |
+
 ## Seltene Besucher
 
 | Was | Wert |

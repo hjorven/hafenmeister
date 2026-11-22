@@ -632,6 +632,26 @@ export const ECONOMY = {
   //   ruf          so viele Anker mehr in der Bewertung des Gastes
   funkAnmeldung: { fruehestens: 0.35, zweiAnteil: 0.4, bonusAnteil: 0.5, ruf: 0.25 },
 
+  // ---------------------------------------------------------------- Preisstufe (P35, docs/preisstufe.md)
+  // Am Hafenbüro legt der Spieler einmal je Saison die Preisliste fest: günstig, normal oder gehoben.
+  // Frei ab Hafenbüro-Stufe abBuero (1 = "Hafenmeister mit Funk"). Im Winter gilt die Wahl für die
+  // kommende Saison. Am Tag der Wahl darf er noch umentscheiden, danach erst wieder in der nächsten Saison.
+  //   liegegeld  Faktor auf das Liegegeld (wie priceFactor der Ereignisse)
+  //   ankuenfte  Faktor auf die Ankünfte des Tages
+  //   klassen    Faktor je Bootsklasse (günstig lockt kleine Boote, gehoben große Yachten)
+  //   ruf        Anker auf jede Bewertung (faire Preise loben die Gäste, hohe merken sie)
+  //   anspruch   Anker weniger mal Anteil der unerfüllten Wünsche (wer viel zahlt, erwartet viel);
+  //              negativ: Nachsicht, bei günstigen Preisen sehen Gäste fehlende Wünsche eher nach
+  preisstufe: {
+    abBuero: 1,
+    start: 'normal',
+    stufen: {
+      guenstig: { liegegeld: 0.9, ankuenfte: 1.2, klassen: { S: 1.15 }, ruf: 0.25, anspruch: -0.5 },
+      normal:   { liegegeld: 1, ankuenfte: 1, ruf: 0, anspruch: 0 },
+      gehoben:  { liegegeld: 1.3, ankuenfte: 0.85, klassen: { S: 0.8, L: 1.2 }, ruf: -0.25, anspruch: 1 },
+    },
+  },
+
   // ---------------------------------------------------------------- Flottillen (P32, docs/flottillen.md)
   // Drei bis fünf Boote einer Art (Feld group in den Bootsdaten) kommen zusammen im Konvoi und wollen am
   // selben Steg liegen. Liegen alle an einem Steg, gibt jede Crew zusammen Anker mehr, wird die Gruppe

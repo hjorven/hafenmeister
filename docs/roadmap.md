@@ -230,7 +230,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F3 | Flottillen: drei bis fünf Boote wollen am selben Steg liegen (Feld `group`) | erledigt (P32, [flottillen.md](flottillen.md)) | P32 |
 | F4 | Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung | erledigt (PR 314): halten und ziehen, ab dem zweiten Mal −0,5 Anker | P33 |
 | F5 | Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld `exposed`) | erledigt (PR 392, [wind.md](wind.md)): Windlage je Platz aus Wellenweg gegen den Wind des Tages, ab Stufe 2, Zeichen beim Ziehen | P34 |
-| F6 | Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison | offen | P35 |
+| F6 | Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison | erledigt (P35, [preisstufe.md](preisstufe.md)): Preistafel im Gästebuch und Aufsteller am Hafenmeisterhaus, einmal je Saison und nach jedem Ausbau, Gäste schreiben über die Preise | P35 |
 | F7 | Baggern: Wassertiefe je Steg als Bauprojekt | offen | P29 |
 | F8 | Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar | erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasserhähne seit P31, [nachruesten.md](nachruesten.md) | P30 |
 | F9 | Neue Wünsche: WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | erledigt (P31, [gaestewuensche.md](gaestewuensche.md)): Frischwasser über Wasserhähne am Steg (Stufe 2), WLAN (3), Waschmaschine ab 3 Nächten (4), Absaugstation (5), Hafenrundfahrt mit der Barkasse (6); Brötchen seit P19 | P31 |
@@ -705,7 +705,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md); beim Selbst-Einfahren zusammen (PR 414); Rest Prio B: Boxen frei halten, gemeinsam weiterfahren) |
 | P33 | Liegende Boote umlegen | F4 | erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen) |
 | P34 | Wind im Hafen spürbar machen | F5, F35 | erledigt (PR 392, [wind.md](wind.md)) |
-| P35 | Preisstufe am Hafenbüro | F6 | neu |
+| P35 | Preisstufe am Hafenbüro | F6 | erledigt ([preisstufe.md](preisstufe.md): günstig, normal, gehoben; Faustregel für die Bots, Zeitraffer wieder nahe 105) |
 | P36 | Bojenfeld im See | F10 | neu |
 | P37 | Havarist einschleppen | F11 | neu |
 | P38 | Eigenes Hafenfest ansetzen | F12 | erledigt (PR 405, [hafenfest.md](hafenfest.md)) |
