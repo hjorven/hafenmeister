@@ -41,7 +41,7 @@ Danach `http://localhost:8000` öffnen, auf dem PC und mit den Geräte-Werkzeuge
 | Stammgäste, Wetterflagge, Fotomodus, Hafen schauen, Tagesziele | funktioniert |
 | Einstieg | halb: verweist noch auf die gelöschte Sonne (P03, PR 112) |
 | Ereignisse, Winter | funktioniert; Winterpause mit Bilanz, Winterarbeiten und „Winter überspringen“ (`docs/winter.md`); Krantage: Dauerlieger über den Winter im Winterlager |
-| Menschen, Ton, Musik | funktioniert |
+| Menschen, Ton, Musik | funktioniert; ruhiger Abend mit Lichterketten und Serien-Akkord (P46, docs/stimmung.md) |
 | Speichern, Export, Web-App | funktioniert; ein Speicherplatz, zweiter alter Speicherweg (P09) |
 | Pixel-Fassung `pixel/` | funktioniert als eigene Seite |
 | Nordsee | nur Landschaft zum Ansehen (`?revier=nordsee`), keine eigenen Regeln (P57) |

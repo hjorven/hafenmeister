@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "d77eba3"
+  "commit": "73074f4"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -773,16 +773,21 @@
    "id": "P31",
    "titel": "Neue Gästewünsche",
    "inhalt": "F9, B8",
-   "thread": "erledigt (gaestewuensche.md: Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt)",
+   "thread": "erledigt (PR 406, gaestewuensche.md: Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    406
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F9",
     "B8"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    102,
+    103
+   ]
   },
   {
    "id": "P32",
@@ -1041,16 +1046,18 @@
    "id": "P46",
    "titel": "Ruhiger Abend und Serien-Akkord",
    "inhalt": "F29, F30",
-   "thread": "bestehend: \"Ton und Musik hinzufügen\"",
+   "thread": "erledigt (PR 427, Thread \"Ruhigen Abend und Serien-Akkord bauen\")",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F29",
     "F30",
     "L1"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2355,23 +2362,27 @@
   {
    "code": "F29",
    "text": "Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 427, stimmung.md): Lichterketten an allen Stegen gehen vom Land nach außen an, Glockentöne, wärmere Abendmusik bis zum Morgen",
    "pakete": [
     "P46"
    ],
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "Spielgefühl"
   },
   {
    "code": "F30",
    "text": "Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 427, stimmung.md): Grundton, Terz, Akkord passend zur Musik, goldene Noten über der Box, ohne Zeitgrenze",
    "pakete": [
     "P46"
    ],
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "Spielgefühl"
   },
   {
@@ -3746,12 +3757,14 @@
   {
    "code": "L1",
    "text": "Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 427): Stammgast und Stufenziel neu, die anderen klangen schon",
    "pakete": [
     "P46"
    ],
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "L Hafenleben, Ton und Fotomodus"
   },
   {
@@ -4650,11 +4663,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 3,
+    "erledigt": 4,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 11,
+    "offen": 10,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4709,20 +4722,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 56,
+  "erledigt": 57,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 29,
+  "offen": 28,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 185,
+  "erledigt": 188,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 27,
+  "offen": 24,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5950,9 +5963,34 @@
    "datum": "2026-11-22",
    "quelle": "havarie/handy-1-notruf.png",
    "nr": 101
+  },
+  {
+   "datei": "p31-pr406-pc-absaugstation.jpg",
+   "pakete": [
+    "P31"
+   ],
+   "titel": "Absaugstation am Service-Steg",
+   "pr": 406,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "gaestewuensche/p31-pc-service-absaugstation.png",
+   "nr": 102
+  },
+  {
+   "datei": "p31-pr406-handy-waschhaus.jpg",
+   "pakete": [
+    "P31"
+   ],
+   "titel": "Waschhaus an Land",
+   "pr": 406,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "gaestewuensche/p31-handy-waschhaus.png",
+   "nr": 103
   }
  ],
  "neueBilder": [
+  103,
   101,
   99,
   97,
@@ -5960,8 +5998,7 @@
   93,
   91,
   90,
-  88,
-  86
+  88
  ],
  "merges": [
   {
