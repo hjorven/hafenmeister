@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "a7fe70f"
+  "commit": "aa63986"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -899,14 +899,14 @@
    "id": "P39",
    "titel": "Jugendtraining am Segelclub",
    "inhalt": "F13",
-   "thread": "neu",
+   "thread": "erledigt (jugendtraining.md)",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F13"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2136,8 +2136,8 @@
   {
    "code": "F13",
    "text": "Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P39, jugendtraining.md): jeden 4. Saisontag Optis und Jollen über den Slip hinaus, Dreieckskurs vor den Stegen, Trainerboot braucht eine Box (feste Trainerbox möglich), wartende Boote halten das Fahrwasser frei, Beitrag und +0,2 Anker für zusehende Gäste",
    "pakete": [
     "P39"
    ],
@@ -4587,11 +4587,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 14,
+    "erledigt": 15,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 6,
+    "offen": 5,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4675,20 +4675,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 49,
+  "erledigt": 50,
   "teilweise": 2,
   "arbeit": 0,
   "frage": 0,
-  "offen": 35,
+  "offen": 34,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 177,
+  "erledigt": 178,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 34,
+  "offen": 33,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5776,14 +5776,6 @@
  "merges": [
   {
    "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P38 Hafenfest (PR 405) mit Bildern",
-   "pr": 409,
-   "pakete": [
-    "P38"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
    "titel": "Arbeitsplan: P31, P38, P88 erledigt; Flottillen-Rest, P35, P37, P39 starten",
    "pr": 410,
    "pakete": [
@@ -5874,6 +5866,14 @@
    "pr": 398,
    "pakete": [
     "P25"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Wind im Hafen (P34, F5 und F35)",
+   "pr": 392,
+   "pakete": [
+    "P34"
    ]
   }
  ]

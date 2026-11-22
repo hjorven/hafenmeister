@@ -60,6 +60,7 @@ export const PLUS = {
   bonus:    'Fest im Hafen',
   windgeschuetzt: 'ruhig gelegen trotz Starkwind',
   stammPlatz: 'wieder am Lieblingsplatz',
+  jugend:   'Jugendtraining zugesehen',
 };
 
 const WUNSCH_KEYS = [...Object.keys(VERSORGUNG_TEXTE), ...Object.keys(ANGEBOT_TEXTE)];
@@ -102,6 +103,7 @@ export function gruendeAusAbreise(e) {
     if (p.bonus > 0.001) plus.push({ key: 'bonus', wert: r2(p.bonus) });
     if (p.windLage === 'geschuetzt' && RULES.wind?.sheltered) plus.push({ key: 'windgeschuetzt', wert: r2(RULES.wind.sheltered) });
     if (p.stammPlatz > 0.001) plus.push({ key: 'stammPlatz', wert: r2(p.stammPlatz) });   // P25
+    if (p.jugend > 0.001) plus.push({ key: 'jugend', wert: r2(p.jugend) });   // P39
   }
   if (e.reason === 'rebuild') gruende.push({ key: 'umbau', n: 1 });
   return { gruende, plus };
