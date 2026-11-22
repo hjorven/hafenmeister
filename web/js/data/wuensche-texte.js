@@ -25,6 +25,9 @@ export const VERSORGUNG_TEXTE = {
     saetze: ['Nach einer Woche an Bord: keine Waschmaschine.', 'Die Wäsche stapelt sich, und kein Trockner da.', 'Eine Waschmaschine hätte uns gerettet.'] },
   absaugen: { kurz: 'Absaugen', mit: 'eine Absaugstation', fehlt: 'keine Absaugstation', lang: 'Keine Absaugstation für den Fäkalientank',
     saetze: ['Der Tank war voll und keine Absaugstation da.', 'Ohne Absaugstation mussten wir weiter.', 'Eine Absaugstation gehört in jeden guten Hafen.'] },
+  // Seltene Besucher (P40, docs/besucher.md): längsseits am Stegkopf (Stirnplatz) oder am Kai, wo alle es sehen
+  ehrenplatz: { kurz: 'Ehrenplatz', mit: 'einen Ehrenplatz am Stegkopf oder Kai', fehlt: 'kein Ehrenplatz', lang: 'Nicht am Stegkopf oder Kai gelegen',
+    saetze: ['Wir hätten gern vorn am Stegkopf gelegen, wo uns alle sehen.', 'Zwischen den Booten in der Box hat uns kaum jemand bemerkt.', 'Ein Platz am Kopf des Stegs hätte gepasst.'] },
 };
 
 export const ANGEBOT_TEXTE = {

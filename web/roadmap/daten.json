@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "5d7ecba"
+  "commit": "e0957cc"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -913,14 +913,14 @@
    "id": "P40",
    "titel": "Seltene Besucher",
    "inhalt": "F16 (nach P21)",
-   "thread": "neu",
+   "thread": "erledigt (docs/besucher.md)",
    "welle": 3,
    "prs": [],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F16"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2173,8 +2173,8 @@
   {
    "code": "F16",
    "text": "Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P40): vier Schiffe mit Ehrenplatz, Schwäne und Schweinswal, Fotos im Logbuch-Reiter „Besucher“, vier Erfolge, docs/besucher.md",
    "pakete": [
     "P40"
    ],
@@ -4587,11 +4587,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 16,
+    "erledigt": 17,
     "teilweise": 1,
     "arbeit": 0,
     "frage": 0,
-    "offen": 4,
+    "offen": 3,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4675,20 +4675,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 51,
+  "erledigt": 52,
   "teilweise": 2,
   "arbeit": 0,
   "frage": 0,
-  "offen": 33,
+  "offen": 32,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 179,
+  "erledigt": 180,
   "teilweise": 6,
   "arbeit": 0,
   "frage": 1,
-  "offen": 32,
+  "offen": 31,
   "entfaellt": 1,
   "alle": 219
  },

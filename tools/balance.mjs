@@ -35,6 +35,7 @@ import { installiere as geschichtenEinhaengen, wetterWorte } from '../web/js/ges
 import { haengeEin as stammEinhaengen } from '../web/js/features/stammgaeste.js';
 import { haengeEin as postEinhaengen } from '../web/js/features/gaestepost.js';
 import { haengeEin as preisEinhaengen, waehle as preisWaehlen, darfWaehlen as preisDarf, klugeWahl as preisKlug } from '../web/js/features/preisstufe-regeln.js';
+import { haengeEin as besucherEinhaengen } from '../web/js/features/besucher-regeln.js';
 import { haengeEin as nachruestEinhaengen, angebote as nachruestAngebote, kaufen as nachruestKaufen } from '../web/js/features/nachruesten.js';
 
 // Hat harbor.js für eine Stufe aus economy.js noch keine Plätze (Stufe 6 vor dem Export der
@@ -192,6 +193,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   // Bootsgeschichten wie im Spiel (geschichten/geschichten.js): Anlass je Boot, besondere Tage, Tagestörns
   geschichtenEinhaengen(ctx, sim, { umfeld: (st, tag = st.day) => { const w = plan?.weather?.(tag); return { ereignis: w?.event ?? null, wetter: wetterWorte(w) }; } });
   postEinhaengen((n, f) => sim.addHook(ctx, n, f));
+  besucherEinhaengen((n, f) => sim.addHook(ctx, n, f), (k, d) => sim.addService(ctx, k, d));   // P40: seltene Besucher
   // Stege nachrüsten wie im Spiel (features/nachruesten.js): Wasserhähne erfüllen den Wunsch Frischwasser (P31)
   nachruestEinhaengen((n, f) => sim.addHook(ctx, n, f), () => state);
   // Preisstufe wie im Spiel (features/preisstufe.js); gewählt wird mit --preis jede Saison neu

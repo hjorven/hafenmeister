@@ -951,6 +951,37 @@ export const ECONOMY = {
     baggern:  { abStufe: 3, kosten: [0, 0, 400, 990, 1900, 3100], faktor: 1.25, klassen: ['L', 'XL'] },
   },
 
+  // ---------------------------------------------------------------- Seltene Besucher (P40, F16)
+  // Selten läuft ein besonderes Schiff ein und will einen Ehrenplatz (längsseits am Stegkopf oder am
+  // Kai), dazu schwimmen manchmal Schwäne oder ein Schweinswal durchs Bild. Alles ist Fotomotiv für das
+  // Logbuch. Logik in web/js/features/besucher-regeln.js, Beschreibung in docs/besucher.md.
+  // Zufall aus Seed und Tag (kein Spielzufall): Zeitraffer und Rechnung bleiben gleich.
+  seltenerBesuch: {
+    // Anteil der Saisontage mit einem besonderen Schiff je Stufe (nie am ersten Tag, nie im Winter)
+    anteil: { 1: 0, 2: 0.1, 3: 0.12, 4: 0.12, 5: 0.12, 6: 0.12 },
+    pause: 3,               // mindestens so viele Tage zwischen zwei Schiffen
+    neuGewicht: 4,          // ein Schiff, das noch nie im Hafen war, kommt so viel öfter
+    ankunft: [0.3, 0.7],    // Ankunft im Tag (Anteil der Tageslänge), lieber nachmittags
+    // Schiffe: ab Stufe, Nächte, Wünsche (ehrenplatz = Stirnplatz am Stegkopf oder Kai; die anderen nur,
+    // wenn die Stufe sie kennt), Gewicht beim Auswählen, Leute an Bord, die zum Schauen kommen (Tagesgäste)
+    schiffe: {
+      weltumsegler:     { abStufe: 2, naechte: 3, wuensche: ['ehrenplatz', 'wasser', 'dusche', 'waesche'], gewicht: 1, tagesgaeste: 0 },
+      museumsschiff:    { abStufe: 3, naechte: 2, wuensche: ['ehrenplatz', 'wasser'], gewicht: 1, tagesgaeste: 12 },
+      forschungsschiff: { abStufe: 4, naechte: 2, wuensche: ['ehrenplatz', 'strom', 'wlan'], gewicht: 1, tagesgaeste: 0 },
+      koenigsyacht:     { abStufe: 5, naechte: 1, wuensche: ['ehrenplatz', 'strom', 'wasser', 'essen'], gewicht: 0.7, tagesgaeste: 0 },
+    },
+    // Schaulustige: Liegt das Schiff am Ehrenplatz, kommen Leute aus dem Ort schauen und kaufen ein.
+    // geld je Abend und Stufe 1 bis 6 (Quelle sonstiges), leute = Figuren am Platz (nur Bild).
+    zuschauer: { geld: [0, 30, 60, 110, 180, 260], leute: 10, faktor: { koenigsyacht: 2, museumsschiff: 1.5 } },   // faktor: so viel mehr Schaulustige
+    // Tiere als Fotomotiv: ab Stufe, Anteil der Tage, erlaubte Saisontage, Uhrzeit (Anteil des Tages), Dauer in Spielsekunden
+    tiere: {
+      schwaene:    { abStufe: 1, anteil: 0.15, saison: [2, 13], zeit: [0.1, 0.55], dauer: 160 },
+      schweinswal: { abStufe: 3, anteil: 0.12, saison: [1, 16], zeit: [0.1, 0.6], dauer: 100 },
+    },
+    // Foto für das Logbuch: das Motiv muss im Bild sein (Mitte des Bildes, Rand frei) und groß genug
+    foto: { rand: 0.08, mindestGroesse: 0.06 },
+  },
+
   // ---------------------------------------------------------------- Jugendtraining (P39, F13)
   // Mit Segelclub und Slipanlage segeln an festen Tagen Optimisten (ab der Segelschule auch Jollen) als
   // Gruppe aus dem Hafen, trainieren draußen und kommen zurück. Das Trainerboot braucht für den Tag eine
