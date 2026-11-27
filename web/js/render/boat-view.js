@@ -17,7 +17,7 @@ import { HAFEN } from '../data/harbor.js';
 import { ECONOMY } from '../data/economy.js';
 import { wimpelAn } from './wimpel-regel.js';
 import { seebrueckeStrecke } from './landschaft/strand.js';
-import { molen } from './landschaft/gelaende.js';
+import { molen, SCHWIMMWELLENBRECHER } from './landschaft/gelaende.js';
 import { baueKarte, route, hindernisseAusHafen, bootMass, erreichbar, befahrbar, sichtlinie, zellMitte, freiBei, einfahrtAlsEinbahn } from '../world/fahrwasser.js';
 
 const U = HAFEN.einheiten?.meterProEinheit ?? 0.62;
@@ -495,6 +495,12 @@ export function init(game) {
       linien.push({ punkte: pts, breite: w * 0.9 });
       const k = pts[pts.length - 1];
       linien.push({ punkte: [k, { x: k.x + 0.01, z: k.z }], breite: 2 * (w * 0.95 + 0.9) });
+    }
+    // Schwimmwellenbrecher ab Stufe 4 (Pontonkette, render/buildings.js): hart, sonst fuhren Boote hindurch.
+    // Dieselbe Kurve wie das Modell (Spline durch die Punkte), die Pontons sind 2,6 m breit.
+    if (st >= SCHWIMMWELLENBRECHER.ab) {
+      const kurve = new THREE.CatmullRomCurve3(SCHWIMMWELLENBRECHER.punkte.map(([px, py]) => new THREE.Vector3(px * 0.62, 0, -py * 0.62)));
+      linien.push({ punkte: kurve.getSpacedPoints(40).map((q) => ({ x: q.x, z: q.z })), breite: SCHWIMMWELLENBRECHER.breite * 0.62 });
     }
     karte = baueKarte({ tiefe, bereich: bereichMit(sb), ...h, linien, weich, engRadius: 5 });
     // Hafeneinfahrt zwischen den Koepfen von West- und Ostmole: Einbahn mit Konvois, Auslaufende zuerst

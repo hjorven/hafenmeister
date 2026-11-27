@@ -100,8 +100,10 @@ export const SEEGATT_TIEFE = 2.2;
 /**
  * Schwimmwellenbrecher im See ab Stufe 4 (Kette von Betonpontons, render/buildings.js zeichnet ihn),
  * Öffnung nach Osten zum Fahrwasser. Planeinheiten; breite in Planeinheiten (2,6 m).
+ * Er endet westlich von Steg C: weiter östlich lag er je nach Stegbild nur 1 bis 9 m vor dem Stegkopf
+ * und mitten auf den Kopfplätzen, dort blieb kein Fahrwasser (er ist ein Hindernis in render/boat-view.js).
  */
-export const SCHWIMMWELLENBRECHER = { ab: 4, punkte: [[-150, 136], [-95, 150], [-30, 154], [30, 148]], breite: 4.2 };
+export const SCHWIMMWELLENBRECHER = { ab: 4, punkte: [[-150, 136], [-110, 147], [-80, 151]], breite: 4.2 };
 
 export function molen(stufe) {
   const fest = stufe >= 5 ? [

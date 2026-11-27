@@ -4,6 +4,10 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 27.11.2026
+
+- Schwimmwellenbrecher: Ab Stufe 4 fahren die Boote um den Schwimmwellenbrecher herum statt durch ihn hindurch. Er ist kürzer und endet jetzt westlich der Stege B und C; vorher reichte er je nach Stegbild bis an den Kopf von Steg C und lag auf dessen Kopfplätzen.
+
 ## 22.11.2026
 
 - Eigener Hafenname und eigene Flagge: Beim Neuen Spiel baust du dir eine Flagge (zehn Muster, elf Farben, zehn Zeichen oder einfach "Würfeln"). Sie weht am Hafenmast beim Hafenmeister mit dem Wind, darunter steht ein Schild mit dem Hafennamen, und an der Einfahrt begrüßt ein Schild "Willkommen in ..." die Boote. Name und Flagge änderst du jederzeit im Menü unter "Name und Flagge" oder durch Antippen von Mast oder Schild. Ältere Häfen haben eine eigene Flagge bekommen.
