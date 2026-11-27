@@ -201,6 +201,7 @@ export function init(game) {
       // features/hafenfest-regeln.js (P38): Standgeld der Marktstände, Erstattung beim Absagen
       if (q === 'sonstiges' && d?.hafenfest) klein = [klein, `Standgeld beim Hafenfest ${euro(d.hafenfest)}`].filter(Boolean).join(', ');
       if (q === 'sonstiges' && d?.festAbgesagt) klein = [klein, `Hafenfest abgesagt, zurück ${euro(d.festAbgesagt)}`].filter(Boolean).join(', ');
+      if (q === 'sonstiges' && d?.parkplatz) klein = [klein, `Parkplatz am Ufer ${euro(d.parkplatz)}`].filter(Boolean).join(', ');   // features/naturecke.js (P52)
       if (q === 'tagesziele' && b.ziele?.gesamt) zusatz = `${b.ziele.erledigt} von ${b.ziele.gesamt}`;
       einnahmen.append(zeile(QUELLE_NAME[q] ?? q, euro(b.einnahmen[q]), { klein, zusatz }));
     }

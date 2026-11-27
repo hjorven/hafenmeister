@@ -602,6 +602,8 @@ export function init(game) {
     const w = r ? Math.max(r.maxX - r.minX, r.maxZ - r.minZ) : 200;
     const plaetze = [...(n.plaetze?.values?.() ?? [])].map((p) => ({ x: p.x * U, z: -p.y * U }));
     const spots = [];
+    // Naturecke (P52): am Rand des Schilfgürtels steht der Reiher am liebsten
+    for (const p of game.naturecke?.reiherPlaetze?.() ?? []) spots.push({ x: p.x, y: -0.22, z: p.z, blick: p.blick, art: 'schilf' });
     const frei = (x, z) => plaetze.every((p) => Math.hypot(p.x - x, p.z - z) > 16) && spots.every((s) => Math.hypot(s.x - x, s.z - z) > 10);
     for (let k = 0; k < 2400 && spots.length < 14; k++) {
       const a = (k * 2.399963) % (Math.PI * 2);
@@ -649,6 +651,9 @@ export function init(game) {
     if (!kand.length) return null;
     // Lieber nicht zu weit, aber auch nicht gleich nebenan
     kand.sort((a, b) => Math.abs(Math.hypot(a.x - t.x, a.z - t.z) - 60) - Math.abs(Math.hypot(b.x - t.x, b.z - t.z) - 60));
+    // Am Schilf der Naturecke (P52) lieber als anderswo, wenn er nicht gerade von dort kommt
+    const schilf = kand.filter((s) => s.art === 'schilf');
+    if (!weg && schilf.length && t.spot?.art !== 'schilf' && Math.random() < 0.6) return wahl(schilf);
     return weg ? kand[0] : wahl(kand.slice(0, 4));
   }
   function schlafplatz(n) {
@@ -919,7 +924,7 @@ export function init(game) {
     if (platz && Math.random() < 0.8) begruessen = String(platz);
   });
   // Stufe gewechselt oder Spiel geladen: Orte neu bestimmen
-  for (const ev of ['stufe', 'build', 'stege', 'landschaft:geaendert']) game.on(ev, () => { if (orte) orte.reiherSpots = null; });
+  for (const ev of ['stufe', 'build', 'stege', 'landschaft:geaendert', 'naturecke:lage', 'naturecke:wahl']) game.on(ev, () => { if (orte) orte.reiherSpots = null; });
   game.on('sim:change', (e) => {
     if (e?.reason === 'load' || e?.reason === 'new') { for (const t of Object.values(tiere)) { t.zustand = 'weg'; t.pfad = null; t.flug = null; t.warDa = false; } fellSeed = null; }
   });

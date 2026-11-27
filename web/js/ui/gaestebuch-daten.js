@@ -68,6 +68,7 @@ export const PLUS = {
   preis:    'faire Preise',
   jugend:   'Jugendtraining zugesehen',
   havarie:  'in Not aufgenommen',
+  natur:    'Abend am Schilf',
   spaet:    'nachts noch aufgenommen',
   schoen:   'schöner Hafen',
 };
@@ -108,7 +109,10 @@ export function gruendeAusAbreise(e) {
     if (schlick) gruende.push({ key: 'schlick', n: r2(schlick) });
     if (p.wishesTotal > 0 && !missed.length && !Object.values(p.far || {}).some((n) => n > 0)) plus.push({ key: 'wuensche', wert: 0 });
     if (!p.wishes?.length) plus.push({ key: 'ohne', wert: 0 });
-    if (p.comfort + schlick > 0.001) plus.push({ key: 'komfort', wert: r2(p.comfort + schlick) });
+    // Naturecke (P52): der Bonus steckt über den Hook 'rating' in p.comfort, eigener Pluspunkt
+    const natur = p.natur ? ECONOMY.naturecke?.schuetzen?.anker ?? 0 : 0;
+    if (p.comfort + schlick - natur > 0.001) plus.push({ key: 'komfort', wert: r2(p.comfort + schlick - natur) });
+    if (natur > 0.001) plus.push({ key: 'natur', wert: r2(natur) });
     if (p.special > 0.001) plus.push({ key: 'sonder', wert: r2(p.special) });
     if (p.snug > 0.001) plus.push({ key: 'passgenau', wert: r2(p.snug) });
     if (p.byHand > 0.001) plus.push({ key: 'vonHand', wert: r2(p.byHand) });
