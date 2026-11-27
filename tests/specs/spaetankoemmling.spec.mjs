@@ -29,6 +29,9 @@ test('Spätankömmling: Meldung, Lampe im Dunkeln, Box mit Schein, Nacht wartet,
     const p = (g.sim.passendePlaetze(id) ?? []).filter((x) => !String(x).includes('+'));
     g.sim.assign(id, p[0]);
   }, id);
+  // Der Weg von der Reede bis zur Box dauert auf Stufe 3 bis zu 90 s Spielzeit: mit 3x laufen lassen, wie ein
+  // Spieler, der wartet (auf langsamen Testrechnern läuft die Spielzeit bei 1x langsamer als die Uhr)
+  await page.evaluate(() => { window.hafenmeister.speed = 3; });
   // Die Nacht wartet: der Morgen kommt erst, wenn er fest ist
   await page.waitForFunction(() => window.hafenmeister.sim.nachtHalt() > 0, null, { timeout: 120_000, polling: 200 });
   expect(await page.evaluate(() => window.hafenmeister.sim.state.day)).toBe(tag);
