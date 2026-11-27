@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "27.11.2026",
-  "commit": "1c957fe"
+  "commit": "f7e42f9"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1121,7 +1121,10 @@
     "F34"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    114,
+    115
+   ]
   },
   {
    "id": "P50",
@@ -1289,14 +1292,16 @@
    "id": "P60",
    "titel": "Hafen verschönern",
    "inhalt": "D8",
-   "thread": "neu",
+   "thread": "erledigt (PR 441, verschoenern.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    441
+   ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
     "D8"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2999,8 +3004,8 @@
   {
    "code": "D8",
    "text": "Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P60): Reiter Deko im Baumenü mit Bänken, Kübeln, Bäumen, Laternen in Abschnitten und Anstrich der Hafenhäuser, Wirkung auf jede Bewertung; Mast schon mit P44, verschoenern.md",
    "pakete": [
     "P60"
    ],
@@ -4688,11 +4693,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 8,
+    "erledigt": 9,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 6,
+    "offen": 5,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4747,20 +4752,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 61,
+  "erledigt": 62,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 24,
+  "offen": 23,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 193,
+  "erledigt": 194,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 19,
+  "offen": 18,
   "entfaellt": 1,
   "alle": 219
  },
@@ -6132,9 +6137,34 @@
    "datum": "2026-11-22",
    "quelle": "hafenflagge/handy-2-flagge-bauen.png",
    "nr": 113
+  },
+  {
+   "datei": "p49-pr433-pc-flaggen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Signalflaggen zeigen die Wünsche der Boote",
+   "pr": 433,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/pc-flaggen-segelboot.png",
+   "nr": 114
+  },
+  {
+   "datei": "p49-pr433-handy-wissen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Logbuch-Reiter Wissen mit Signalflaggen",
+   "pr": 433,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/handy-lexikon.png",
+   "nr": 115
   }
  ],
  "neueBilder": [
+  115,
   113,
   111,
   109,
@@ -6142,10 +6172,25 @@
   105,
   103,
   101,
-  99,
-  97
+  99
  ],
  "merges": [
+  {
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: Bilder für P49 Signalflaggen (PR 433)",
+   "pr": 442,
+   "pakete": [
+    "P49"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "P60: Hafen verschönern mit Bänken, Kübeln, Bäumen, Laternen und Anstrich",
+   "pr": 441,
+   "pakete": [
+    "P60"
+   ]
+  },
   {
    "datum": "2026-11-27",
    "titel": "Roadmap-Pflege: P44 Hafenname und Flagge (PR 429) mit Bildern",
@@ -6223,22 +6268,6 @@
    "pr": 430,
    "pakete": [
     "P48"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P46: Ruhiger Abend mit Lichterketten und Serien-Akkord (F29, F30, L1)",
-   "pr": 427,
-   "pakete": [
-    "P46"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P31 Gästewünsche (PR 406) mit Bildern",
-   "pr": 426,
-   "pakete": [
-    "P31"
    ]
   }
  ]
