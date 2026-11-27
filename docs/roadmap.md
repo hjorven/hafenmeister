@@ -727,7 +727,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | erledigt (PR 433, Thread "Signalflaggen ins Spiel bringen", [signalflaggen.md](signalflaggen.md)) |
 | P50 | Einstellungen für Sicht und Bewegung | F25 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
 | P51 | Hafentiere | F38 | erledigt (PR 435, docs/hafentiere.md) |
-| P52 | Naturecke am Schilf | F39 | erledigt (docs/naturecke.md) |
+| P52 | Naturecke am Schilf | F39 | erledigt (PR 440, docs/naturecke.md) |
 | P53 | Spätankömmling in der Nacht | F40 | erledigt (PR 439, docs/spaetankoemmling.md) |
 
 ### Welle 5: Regionen und Online (Extras)
