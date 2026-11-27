@@ -37,7 +37,7 @@ test('Bauen: Vorschau, Bestätigen, Gebäude steht', async ({ game }, testInfo) 
   expect(await page.evaluate(() => window.hafenmeister.sim.state.stats.totalIncome)).toBe(0);
   // Zurueck zur Liste und ueber den Reiter wieder hin: dieselbe Vorschau, kein zweites Geschenk
   await press(page.locator('#card .hud-btn', { hasText: 'Zurück' }), testInfo);
-  await expect(page.locator('#card .bau-tab')).toHaveCount(4);
+  await expect(page.locator('#card .bau-tab')).toHaveCount(5);   // Stege, Versorgung, Angebote, Hafen, Deko (P60)
   await press(page.locator('#card .bau-tab', { hasText: 'Versorgung' }), testInfo);
   await press(page.locator('#card [data-bau="versorgung:wc"]'), testInfo);
   await expect(ja).toHaveText(`Bauen für ${WC} €`);
@@ -58,7 +58,7 @@ test('Bauen: Vorschau, Bestätigen, Gebäude steht', async ({ game }, testInfo) 
 
   // Wieder oeffnen: kein Geschenk mehr, die Liste kommt
   await press(page.locator('#btn-build'), testInfo);
-  await expect(page.locator('#card .bau-tab')).toHaveCount(4);
+  await expect(page.locator('#card .bau-tab')).toHaveCount(5);   // Stege, Versorgung, Angebote, Hafen, Deko (P60)
   await expect(page.locator('#card .bau-geschenk')).toHaveCount(0);
   expect(await page.evaluate(() => window.hafenmeister.sim.state.money)).toBe(300);
 });
