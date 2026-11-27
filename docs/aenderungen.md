@@ -4,6 +4,10 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 27.11.2026
+
+- Schwimmwellenbrecher: Ab Stufe 4 fahren die Boote um den Schwimmwellenbrecher herum statt durch ihn hindurch. Er ist kürzer und endet jetzt westlich der Stege B und C; vorher reichte er je nach Stegbild bis an den Kopf von Steg C und lag auf dessen Kopfplätzen.
+
 ## 22.11.2026
 
 - Spätankömmling: An manchen Abenden kommt das letzte Boot des Tages erst im Dunkeln. Eine kurze Meldung sagt, wer kommt, am Bug schwenkt eine Taschenlampe über das Wasser, an der Box, in die du es ziehst, liegt ein warmer Lichtschein. Solange es noch unterwegs ist und eine Box frei ist, wartet die Nacht auf das Boot; liegt es fest, brennt Licht in der Kajüte und der Morgen kommt. Dafür gibt es einen Viertel Anker mehr in der Bewertung.
