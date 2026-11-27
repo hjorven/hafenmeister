@@ -4,6 +4,10 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 **Regel für alle Threads:** Wer etwas mergt, das man im Spiel sieht oder hört, trägt hier im selben PR eine Zeile unter dem heutigen Datum ein. Eine Zeile pro Änderung, in Spielersprache, ohne Dateinamen.
 
+## 27.11.2026
+
+- Schwimmwellenbrecher: Ab Stufe 4 fahren die Boote um den Schwimmwellenbrecher herum statt durch ihn hindurch. Er ist kürzer und endet jetzt westlich der Stege B und C; vorher reichte er je nach Stegbild bis an den Kopf von Steg C und lag auf dessen Kopfplätzen.
+
 ## 22.11.2026
 
 - Naturecke am Schilf: Neben dem Hafen wächst jetzt ein Schilfgürtel mit Rohrkolben und Blässhühnern, im Frühling und Sommer singt der Rohrsänger und abends quaken Frösche. Ab Stufe 2 entscheidest du im Baumenü (Reiter Hafen) einmal und für immer: schützen (300 €, Bohlenweg mit Beobachtungshütte, Haubentaucher ziehen ein, jeder Gast nach einem Abend im Hafen bewertet +0,1 Anker) oder bebauen (900 €, Park- und Trailerplatz, bringt jeden Abend in der Saison Geld, mehr mit höherer Stufe und mehr Gästen). Der Graureiher fischt am liebsten am Schilf.
