@@ -48,13 +48,13 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 **Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
 
 <table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P52"><img src="web/roadmap/bilder/p52-pr440-handy-schuetzen.jpg" alt="Schilf schützen oder Ufer bebauen" width="100%"></a><br><sub>P52 · Schilf schützen oder Ufer bebauen · PR 440</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P60"><img src="web/roadmap/bilder/p60-pr441-handy-baenke.jpg" alt="Bänke am Wasser bauen" width="100%"></a><br><sub>P60 · Bänke am Wasser bauen · PR 441</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P53"><img src="web/roadmap/bilder/p53-pr439-handy-kajuete.jpg" alt="Licht in der Kajüte nach dem Festmachen" width="100%"></a><br><sub>P53 · Licht in der Kajüte nach dem Festmachen · PR 439</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P49"><img src="web/roadmap/bilder/p49-pr433-handy-wissen.jpg" alt="Logbuch-Reiter Wissen mit Signalflaggen" width="100%"></a><br><sub>P49 · Logbuch-Reiter Wissen mit Signalflaggen · PR 433</sub></td>
 </tr><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P49"><img src="web/roadmap/bilder/p49-pr433-handy-wissen.jpg" alt="Logbuch-Reiter Wissen mit Signalflaggen" width="100%"></a><br><sub>P49 · Logbuch-Reiter Wissen mit Signalflaggen · PR 433</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P44"><img src="web/roadmap/bilder/p44-pr429-handy-flagge-bauen.jpg" alt="Name und Flagge im Baukasten" width="100%"></a><br><sub>P44 · Name und Flagge im Baukasten · PR 429</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P51"><img src="web/roadmap/bilder/p51-pr435-pc-reiher.jpg" alt="Graureiher am Ufer" width="100%"></a><br><sub>P51 · Graureiher am Ufer · PR 435</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P48"><img src="web/roadmap/bilder/p48-pr430-handy-symbol.jpg" alt="&quot;Leine annehmen&quot; an den Boxen" width="100%"></a><br><sub>P48 · &quot;Leine annehmen&quot; an den Boxen · PR 430</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (6 von 6 erledigt)</summary>
@@ -155,7 +155,7 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 | [P49](https://hjorven.github.io/hafenmeister/roadmap/#paket=P49) | Signalflaggen und Hafenwissen | **erledigt** | [#433](https://github.com/hjorven/hafenmeister/pull/433) |
 | [P50](https://hjorven.github.io/hafenmeister/roadmap/#paket=P50) | Einstellungen für Sicht und Bewegung | **erledigt** |  |
 | [P51](https://hjorven.github.io/hafenmeister/roadmap/#paket=P51) | Hafentiere | **erledigt** | [#435](https://github.com/hjorven/hafenmeister/pull/435) |
-| [P52](https://hjorven.github.io/hafenmeister/roadmap/#paket=P52) | Naturecke am Schilf | **erledigt** |  |
+| [P52](https://hjorven.github.io/hafenmeister/roadmap/#paket=P52) | Naturecke am Schilf | **erledigt** | [#440](https://github.com/hjorven/hafenmeister/pull/440) |
 | [P53](https://hjorven.github.io/hafenmeister/roadmap/#paket=P53) | Spätankömmling in der Nacht | **erledigt** | [#439](https://github.com/hjorven/hafenmeister/pull/439) |
 | [P60](https://hjorven.github.io/hafenmeister/roadmap/#paket=P60) | Hafen verschönern | **erledigt** | [#441](https://github.com/hjorven/hafenmeister/pull/441) |
 

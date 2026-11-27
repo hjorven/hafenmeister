@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "27.11.2026",
-  "commit": "1bfea19"
+  "datum": "28.11.2026",
+  "commit": "5468462"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1166,15 +1166,20 @@
    "id": "P52",
    "titel": "Naturecke am Schilf",
    "inhalt": "F39",
-   "thread": "erledigt (docs/naturecke.md)",
+   "thread": "erledigt (PR 440, docs/naturecke.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    440
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F39"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    120,
+    121
+   ]
   },
   {
    "id": "P53",
@@ -6217,9 +6222,34 @@
    "datum": "2026-11-27",
    "quelle": "verschoenern/handy-2-vorschau-baenke.png",
    "nr": 119
+  },
+  {
+   "datei": "p52-pr440-pc-schilf.jpg",
+   "pakete": [
+    "P52"
+   ],
+   "titel": "Naturecke: Schilfgürtel am Ufer",
+   "pr": 440,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "naturecke/s2-natur.png",
+   "nr": 120
+  },
+  {
+   "datei": "p52-pr440-handy-schuetzen.jpg",
+   "pakete": [
+    "P52"
+   ],
+   "titel": "Schilf schützen oder Ufer bebauen",
+   "pr": 440,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "naturecke/handy-schutz.jpg",
+   "nr": 121
   }
  ],
  "neueBilder": [
+  121,
   119,
   117,
   115,
@@ -6227,10 +6257,17 @@
   111,
   109,
   107,
-  105,
-  103
+  105
  ],
  "merges": [
+  {
+   "datum": "2026-11-28",
+   "titel": "Roadmap-Pflege: P52 Naturecke (PR 440) mit Bildern",
+   "pr": 445,
+   "pakete": [
+    "P52"
+   ]
+  },
   {
    "datum": "2026-11-27",
    "titel": "P52: Naturecke am Schilf (schützen oder bebauen)",
@@ -6316,15 +6353,6 @@
    "pr": 435,
    "pakete": [
     "P51"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P47 Große Ankünfte (PR 428) und P48 Leinen (PR 430) mit Bildern",
-   "pr": 434,
-   "pakete": [
-    "P47",
-    "P48"
    ]
   }
  ]
