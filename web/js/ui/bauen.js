@@ -33,6 +33,7 @@ const REITER = [
   { id: 'versorgung', name: 'Versorgung' },
   { id: 'angebot', name: 'Angebote' },
   { id: 'hafen', name: 'Hafen' },
+  { id: 'deko', name: 'Deko' },   // P60: Hafen verschönern (features/verschoenern.js)
 ];
 function el(tag, attrs = {}, ...kinder) {
   const e = document.createElement(tag);
@@ -156,6 +157,58 @@ export function init(game) {
     const xs = pl.map((p) => p.x), zs = pl.map((p) => p.z);
     return { x: (Math.min(...xs) + Math.max(...xs)) / 2, z: (Math.min(...zs) + Math.max(...zs)) / 2,
       breite: Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs), 20), plaetze: ids };
+  }
+
+  // Eintrag im Reiter "Deko" (P60, features/verschoenern.js, docs/verschoenern.md)
+  const DEKO_TEXT = {
+    baenke: ['Bänke am Wasser', 'Mehr Bänke am Wasser', 'Leute aus dem Ort und Crews setzen sich darauf und schauen aufs Wasser.'],
+    kuebel: ['Blumenkübel', 'Mehr Blumenkübel', 'Bunte Blumen an den Wegen und Häusern, im Winter mit Tannengrün.'],
+    baeume: ['Bäume', 'Mehr Bäume', 'Linden an den Wegen. Sie wachsen in ein paar Tagen zu voller Größe, das Laub wechselt mit der Jahreszeit.'],
+    laternen: ['Laternen am Weg', 'Mehr Laternen am Weg', 'Abends und nachts warmes Licht an Land, wo die Leute gehen.'],
+  };
+  function dekoEintrag(a) {
+    const V = game.verschoenern;
+    const ankerText = (x) => String(Math.round(x * 100) / 100).replace('.', ',');
+    const gesamt = ankerText(V.bonus?.() ?? 0);
+    if (a.art === 'anstrich') {
+      const farbe = V.farben.find((f) => f.id === V.wahl());
+      const jetzt = V.farben.find((f) => f.id === a.farbe);
+      return {
+        key: 'deko:anstrich', art: 'deko', id: 'anstrich', name: a.erster ? 'Hafenhäuser streichen' : 'Hafenhäuser neu streichen', kosten: a.kosten,
+        gesperrt: a.gesperrt, ohneSchild: true, keinRat: !a.erster,
+        kurz: farbe?.name ?? '',
+        auswahl: { titel: 'Farbe', optionen: V.farben, wert: () => V.wahl(), setze: (id) => V.wahl(id) },
+        nutzen: [
+          a.erster
+            ? `Alle Hafenhäuser bekommen einen frischen Anstrich in ${farbe?.name ?? 'der gewählten Farbe'}. Gäste bewerten den Hafen um ${ankerText(a.anker)} Anker besser.`
+            : `Die Hafenhäuser sind ${jetzt?.name ?? 'gestrichen'}. Ein neuer Anstrich ändert nur die Farbe, einmal je Saison.`,
+          'Häuser, die später dazukommen, bekommen die Farbe gleich mit.',
+        ],
+        fertigTitel: 'Frisch gestrichen',
+        fertigText: `Die Hafenhäuser leuchten jetzt in ${farbe?.name ?? 'neuer Farbe'}.`,
+        bedarf: () => null,
+        ort: () => V.ort('anstrich'),
+        geist: () => V.geist('anstrich'),
+        kaufen: () => V.kaufen('anstrich', V.wahl()),
+      };
+    }
+    const t = DEKO_TEXT[a.art] ?? [a.art, a.art, ''];
+    const [ein, mehr] = V.worte?.[a.art] ?? [a.art, a.art];
+    return {
+      key: `deko:${a.art}`, art: 'deko', id: a.art, name: a.erster ? t[0] : t[1], kosten: a.kosten,
+      gesperrt: a.gesperrt, ohneSchild: true, hebtNote: true,
+      kurz: `+${a.stueck} ${a.stueck === 1 ? ein : mehr}`,
+      nutzen: [
+        `${a.stueck} ${a.stueck === 1 ? ein : mehr}. ${t[2]}`,
+        `Gäste bewerten den Hafen um ${ankerText(a.anker)} Anker besser${gesamt !== '0' ? `, mit allen Verschönerungen zusammen dann um ${ankerText((V.bonus?.() ?? 0) + a.anker)}` : ''}.`,
+      ],
+      fertigTitel: a.art === 'baeume' ? 'Bäume gepflanzt' : a.art === 'kuebel' ? 'Blumenkübel stehen' : a.art === 'baenke' ? 'Bänke stehen' : 'Laternen stehen',
+      fertigText: a.art === 'baeume' ? 'Die jungen Bäume wachsen in den nächsten Tagen.' : a.art === 'laternen' ? 'Am Abend gehen sie an.' : a.art === 'baenke' ? 'Bald setzt sich jemand.' : 'Die Gäste freut es.',
+      bedarf: () => null,
+      ort: () => V.ort(a.art),
+      geist: () => V.geist(a.art),
+      kaufen: () => V.kaufen(a.art),
+    };
   }
 
   function eintraege() {
@@ -302,6 +355,9 @@ export function init(game) {
         kaufen: () => game.bojenfeld.kaufen(a.id),
       });
     }
+
+    // Hafen verschönern (P60): Bänke, Kübel, Bäume, Laternen in Abschnitten, Anstrich der Hafenhäuser
+    for (const a of game.verschoenern?.angebote?.() ?? []) out.push(dekoEintrag(a));
 
     // Versorgung
     for (const key of Object.keys(rules.facilities)) {
@@ -460,6 +516,7 @@ export function init(game) {
         services: st.modules?.services ? structuredClone(st.modules.services) : null,
         nachruesten: structuredClone(st.modules?.nachruesten ?? {}),
         baggern: st.modules?.baggern ? structuredClone(st.modules.baggern) : null,
+        verschoenern: structuredClone(st.modules?.verschoenern ?? {}),
         ausbau: speicher()?.ausbau ? structuredClone(speicher().ausbau) : null,
       };
     } catch { return null; }
@@ -482,6 +539,7 @@ export function init(game) {
     if (u.services && st.modules?.services) { ersetze(st.modules.services, u.services); game.services?.neuZeichnen?.(); }
     if (u.nachruesten) { st.modules ||= {}; st.modules.nachruesten = u.nachruesten; game.emit('nachruesten:neu'); }
     if (u.baggern) { st.modules ||= {}; st.modules.baggern = u.baggern; }
+    if (u.verschoenern) { st.modules ||= {}; st.modules.verschoenern = u.verschoenern; game.emit('verschoenern:neu'); }
     speicher().ausbau = u.ausbau;
     zeigeBaustelle();
     for (const g of geaendert) game.emit('build', g);
@@ -757,6 +815,7 @@ export function init(game) {
   function entferneGeist() {
     if (geist) {
       welt.remove(geist);
+      geist.traverse((o) => { try { o.userData?.weg?.(); } catch { /* egal */ } });   // P60: Anstrich-Vorschau zurück
       geist.traverse((o) => { if (o.userData?.ring) o.geometry.dispose(); });
       geist = null;
     }
@@ -814,7 +873,7 @@ export function init(game) {
   // Stelle so anfahren, dass sie mitten im freien Bereich neben bzw. ueber der Karte liegt
   function zeigeOrt(ort) {
     if (!rig?.screenToWorld || !ort) return;
-    const w = Math.max(80, Math.min(160, (ort.breite ?? 20) * 2.6));
+    const w = Math.max(ort.nah ? 36 : 80, Math.min(160, (ort.breite ?? 20) * 2.6));   // nah: Anstrich (P60), Wände sehen
     const sw = rig.screenW, sh = rig.screenH;
     const r = card.hidden ? null : card.getBoundingClientRect();
     const c = game.canvas.getBoundingClientRect();
@@ -1272,7 +1331,7 @@ export function init(game) {
     if (ort) {
       const y = Number.isFinite(game.landschaft?.hoeheBei?.(ort.x, ort.z)) ? Math.max(0, game.landschaft.hoeheBei(ort.x, ort.z)) : 0;
       welle(ort.x, ort.z, y);
-      const text = e.nachruesten || e.ueberlauf ? e.kurz : e.art === 'steg' ? (e.plaetzeNeu === 1 ? '+1 Liegeplatz' : `+${e.plaetzeNeu} Liegeplätze`) : e.art === 'versorgung' && e.wunsch !== 'strom' ? `${WUNSCH_KURZ[e.id]} für ${e.nutzen[0].match(/\d+/)?.[0] ?? ''} Boote` : e.name;
+      const text = e.nachruesten || e.ueberlauf || e.art === 'deko' ? e.kurz : e.art === 'steg' ? (e.plaetzeNeu === 1 ? '+1 Liegeplatz' : `+${e.plaetzeNeu} Liegeplätze`) : e.art === 'versorgung' && e.wunsch !== 'strom' ? `${WUNSCH_KURZ[e.id]} für ${e.nutzen[0].match(/\d+/)?.[0] ?? ''} Boote` : e.name;
       fliege(text, ort.x, y, ort.z);
       if (ort.gebaeude && ort.neu) {
         const it = game.buildings.items.find((i) => i.id === ort.gebaeude);
@@ -1403,6 +1462,7 @@ export function init(game) {
         el('h2', {}, e.name),
         el('span', { class: 'bau-kasse' }, `Kasse ${euro(geld)}`)),
       geschenkText ? el('p', { class: 'bau-geschenk', role: 'status' }, geschenkText) : null,
+      e.auswahl ? auswahlZeile(e) : null,
       el('ul', { class: 'bau-nutzen' }, e.nutzen.map((t) => el('li', {}, t))),
       e.fortschritt ? el('div', { class: 'bau-fortschritt' }, e.fortschritt.map((f) =>
         el('div', { class: 'bau-balken-zeile' },
@@ -1418,6 +1478,17 @@ export function init(game) {
         knopf,
         el('button', { type: 'button', class: 'hud-btn', onclick: () => { aktiv = null; meldung = ''; entferneGeist(); zeichne(); requestAnimationFrame(uebersicht); game.audio?.sfx?.('abbrechen'); } }, 'Zurück')),
     );
+  }
+
+  // Auswahl in der Vorschau (P60 Anstrich: Farbe), Tippen zeigt sie gleich im Hafen
+  function auswahlZeile(e) {
+    const a = e.auswahl;
+    const wert = a.wert();
+    return el('div', { class: 'bau-auswahl', role: 'radiogroup', 'aria-label': a.titel },
+      ...a.optionen.map((o) => el('button', { type: 'button', class: 'bau-farbe', role: 'radio', 'data-farbe': o.id,
+        'aria-checked': o.id === wert ? 'true' : 'false', title: o.name,
+        onclick: () => { a.setze(o.id); game.audio?.sfx?.('klick'); const n = eintraege().find((x) => x.key === e.key); if (n) { zeigeGeist(n, n.ort?.()); zeichne(); } } },
+        el('span', { class: 'bau-farbe-punkt', style: `background:${o.farbe}` }), el('span', { class: 'bau-farbe-name' }, o.name))));
   }
 
   // ------------------------------------------------------------------ Ereignisse
@@ -1532,8 +1603,12 @@ function stil() {
     .bau-automatik .bau-schalter { flex: 1 1 0; min-width: 0; max-width: 120px; white-space: nowrap; min-height: 40px; padding: 6px 10px; border: 2px solid #1d3245;
       border-radius: 6px; background: #2a9d8f; color: #fff; font-weight: 600; }
     .bau-automatik .bau-schalter[aria-pressed="false"] { background: #eee6d2; color: #5b6670; }
-    .bau-reiter { display: flex; gap: 2px; background: rgba(29, 50, 69, 0.07); border-radius: 12px; padding: 4px; }
-    .bau-tab { flex: 1 1 auto; min-width: 0; white-space: nowrap; border: 0; border-radius: 9px; background: none; font: inherit; font-size: 0.8rem; font-weight: 600; color: #1d3245;
+    .bau-auswahl { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+    .bau-farbe { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 10px 4px 6px; border: 2px solid rgba(29, 50, 69, 0.18); border-radius: 10px; background: #fff; font: inherit; font-size: 0.8rem; color: #1d3245; cursor: pointer; }
+    .bau-farbe[aria-checked="true"] { border-color: #1d3245; box-shadow: 0 1px 4px rgba(20, 40, 60, 0.2); font-weight: 700; }
+    .bau-farbe-punkt { width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.25); flex: 0 0 auto; }
+    .bau-reiter { display: flex; flex-wrap: wrap; gap: 2px; background: rgba(29, 50, 69, 0.07); border-radius: 12px; padding: 4px; }
+    .bau-tab { flex: 1 1 auto; min-width: max-content; white-space: nowrap; border: 0; border-radius: 9px; background: none; font: inherit; font-size: 0.8rem; font-weight: 600; color: #1d3245;
       min-height: 40px; padding: 4px 6px; display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
     .bau-tab[aria-selected="true"] { background: #fff; box-shadow: 0 1px 4px rgba(20, 40, 60, 0.15); }
     .bau-zahl { min-width: 16px; height: 16px; border-radius: 8px; background: #2a9d8f; color: #fff; font-size: 0.7rem; display: inline-grid; place-items: center; padding: 0 4px; }
