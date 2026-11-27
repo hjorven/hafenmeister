@@ -23,7 +23,7 @@ const LAGE = {
   wimpel:       { x: 8.0,  z: 8.0, dreh: 0 },
 };
 // Gruppen der Szene, deren Teile an Land im Weg stehen (Boote, Menschen, Wetter zählen nicht)
-const SZENE_GRUPPEN = ['landschaft', 'gebaeude', 'services', 'wetterflagge'];
+const SZENE_GRUPPEN = ['landschaft', 'gebaeude', 'services', 'wetterflagge', 'verschoenern'];   // verschoenern: P60 Bänke, Bäume, Laternen
 const RADIUS = { kuebel: 1.6, bank: 1.3, laterne: 0.6, rettungsring: 0.7, anker: 1.1, fischkisten: 1.3, tonne: 0.9, wimpel: 1.6 };
 const U = 0.62;   // Planeinheit in Metern (data/harbor.js)
 

@@ -622,6 +622,26 @@ export const ECONOMY = {
     wasser: { name: 'Wasserhähne', abStufe: 2, grund: 90, jePlatz: { S: 10, M: 15, L: 20, XL: 30 }, anker: 0, wunsch: 'wasser' },
   },
 
+  // ---------------------------------------------------------------- Hafen verschönern (P60, D8)
+  // Logik in web/js/features/verschoenern.js, Beschreibung in docs/verschoenern.md. Im Baumenü, Reiter "Deko".
+  // Jede Art wird in Abschnitten gebaut (stueck je Abschnitt, ab Ausbaustufe, kosten). Die Stücke suchen
+  // sich selbst einen Platz an Land (Bänke am Wasser, Laternen und Bäume an den Wegen, Kübel bei den Häusern).
+  // anker: so viel besser bewertet jeder Gast den Hafen je gebautem Abschnitt (alle Arten zusammen).
+  // anstrich: Hafenhäuser in einer Farbe streichen, einmal je Saison (kosten je Ausbaustufe 1 bis 6);
+  // der erste Anstrich hebt die Bewertung um anker, ein neuer Anstrich ändert nur die Farbe.
+  verschoenern: {
+    anker: 0.03,
+    arten: {
+      baenke:   { name: 'Bänke am Wasser', abschnitte: [{ stueck: 2, abStufe: 1, kosten: 40 }, { stueck: 3, abStufe: 3, kosten: 650 }, { stueck: 3, abStufe: 5, kosten: 3400 }] },
+      kuebel:   { name: 'Blumenkübel', abschnitte: [{ stueck: 3, abStufe: 1, kosten: 30 }, { stueck: 4, abStufe: 3, kosten: 480 }, { stueck: 4, abStufe: 5, kosten: 2700 }] },
+      baeume:   { name: 'Bäume', abschnitte: [{ stueck: 3, abStufe: 2, kosten: 180 }, { stueck: 4, abStufe: 4, kosten: 1600 }, { stueck: 4, abStufe: 6, kosten: 4800 }] },
+      laternen: { name: 'Laternen am Weg', abschnitte: [{ stueck: 3, abStufe: 2, kosten: 240 }, { stueck: 4, abStufe: 4, kosten: 1900 }, { stueck: 4, abStufe: 6, kosten: 5200 }] },
+    },
+    // Bäume wachsen nach dem Pflanzen so viele Spieltage, bis sie ausgewachsen sind
+    baumWachsTage: 3,
+    anstrich: { abStufe: 2, anker: 0.04, kosten: [60, 90, 600, 1500, 3000, 4500] },
+  },
+
   // ---------------------------------------------------------------- Baggern (P29)
   // Logik in web/js/features/baggern.js, Regel in sim.js (syncDredge), Beschreibung in docs/baggern.md.
   // Je Steg einmal: seine Gastplätze (Platzarten arten) werden mindestens ziel[Klasse] Meter tief. Ein

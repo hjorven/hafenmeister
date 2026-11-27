@@ -69,6 +69,7 @@ export const PLUS = {
   jugend:   'Jugendtraining zugesehen',
   havarie:  'in Not aufgenommen',
   natur:    'Abend am Schilf',
+  schoen:   'schöner Hafen',
 };
 
 const WUNSCH_KEYS = [...Object.keys(VERSORGUNG_TEXTE), ...Object.keys(ANGEBOT_TEXTE)];
@@ -122,6 +123,7 @@ export function gruendeAusAbreise(e) {
     else if (p.preis < -0.001) gruende.push({ key: 'teuer', n: r2(-p.preis) });
     if (p.jugend > 0.001) plus.push({ key: 'jugend', wert: r2(p.jugend) });   // P39
     if (p.havarie > 0.001) plus.push({ key: 'havarie', wert: r2(p.havarie) });   // P37: eingeschleppter Havarist
+    if (p.schoen > 0.001) plus.push({ key: 'schoen', wert: r2(p.schoen) });   // P60: Bänke, Bäume, Laternen, Anstrich
   }
   if (e.reason === 'rebuild') gruende.push({ key: 'umbau', n: 1 });
   return { gruende, plus };
@@ -266,6 +268,7 @@ const SATZ = {
   teuer: ['Für das Geld hätten wir mehr erwartet.', 'Stolze Preise für das, was geboten wird.', 'Teuer ist es hier, und dann fehlt auch noch was.'],
   preis: ['Faire Preise, gerne wieder.', 'Günstig und nett, was will man mehr.', 'Für das Liegegeld bekommt man hier viel.'],
   havarie: ['Ohne euch wären wir noch da draußen. Danke für den Schlepp!', 'Hilflos vor der Einfahrt getrieben, und ihr habt uns reingeholt. Danke!', 'In Not aufgenommen, das vergessen wir nicht.'],
+  schoen: ['Schön gemacht, der Hafen. Da bleibt man gern noch einen Tag.', 'Ein richtig hübscher Hafen, da macht schon der Landgang Spaß.', 'Hübsch gemacht hier, man fühlt sich gleich wohl.'],
   stammPlatz: ['Und wieder an unserem alten Platz!', 'Unsere Box war frei, wie schön.', 'Der Hafenmeister kennt unseren Platz.'],
 };
 for (const [k, t] of Object.entries({ ...VERSORGUNG_TEXTE, ...ANGEBOT_TEXTE })) if (t.saetze) SATZ[k] ??= t.saetze;
@@ -281,6 +284,7 @@ export function satz(eintrag) {
   else if (eintrag.plus?.some((p) => p.key === 'komfort') && eintrag.note >= 4) text = wahl(SATZ.komfort, eintrag);
   else if (eintrag.plus?.some((p) => p.key === 'windgeschuetzt') && eintrag.note >= 4) text = wahl(SATZ.windgeschuetzt, eintrag);
   else if (eintrag.plus?.some((p) => p.key === 'preis') && eintrag.note >= 4) text = wahl(SATZ.preis, eintrag);
+  else if (eintrag.plus?.some((p) => p.key === 'schoen' && p.wert >= 0.15) && eintrag.note >= 4) text = wahl(SATZ.schoen, eintrag);
   else if (eintrag.note >= 4) text = wahl(SATZ.gut, eintrag);
   else if (eintrag.gruende[0] && SATZ[eintrag.gruende[0].key]) text = wahl(SATZ[eintrag.gruende[0].key], eintrag);
   else text = wahl(SATZ.mittel, eintrag);

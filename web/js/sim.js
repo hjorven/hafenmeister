@@ -29,7 +29,7 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     berths: list,
     // Päckchenplätze (P27) stehen nur hier, nicht in berths: Listen, Schilder und Auslastung kennen sie nicht
     berthById: Object.fromEntries([...list, ...raftBerths(list, r)].map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], arrivals: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [], berthHas: [] },
+    hooks: { modifiers: [], arrival: [], arrivals: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [], berthHas: [], schoen: [] },
   };
 }
 
@@ -38,6 +38,8 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
  *   modifiers  fn(state, ctx) -> Teil von DEFAULT_MODIFIERS, wird jeden Tag und bei jeder Ankunft gelesen
  *   rating     fn({ ctx, boat }) -> Anker, die zur Platzart (comfort) einer Bewertung dazukommen
  *              (zum Beispiel ein im Winter überholter Steg, features/winter.js)
+ *   schoen     fn({ ctx, boat }) -> Anker für einen schönen Hafen (P60, features/verschoenern.js), eigener
+ *              Teil der Bewertung (ratingParts().schoen, im Gästebuch "schöner Hafen")
  *   berthHas   fn({ state, ctx, berth, prop }) -> true, wenn ein Modul dem Platz diese Eigenschaft gibt
  *              (zum Beispiel 'water' an einem Steg mit Wasserhähnen, features/nachruesten.js, P31)
  *   walk       fn({ state, ctx, berth, wish }) -> Meter vom Platz zum nächsten Gebäude, das den
@@ -2912,10 +2914,15 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   const jugend = boat.jugend ? r.youth?.rating ?? 0 : 0;      // dem Jugendtraining zugesehen (P39)
   const preis = priceRating(ctx, boat);                       // Preisstufe (P35)
   const havarie = boat.havarie ? r.havarie?.rating ?? 0 : 0;  // in Not eingeschleppt (P37)
-  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + jugend + havarie + ratingBonus - penalty - moved - raft + wind + preis;
+  // Schöner Hafen (P60): Bänke, Kübel, Bäume, Laternen, Anstrich (features/verschoenern.js, Hook 'schoen')
+  let schoen = 0;
+  for (const fn of ctx.hooks?.schoen || []) {
+    try { schoen += Number(fn({ ctx, boat })) || 0; } catch (err) { console.error('Fehler im Hook schoen', err); }
+  }
+  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + jugend + havarie + schoen + ratingBonus - penalty - moved - raft + wind + preis;
   const value = Math.round(Math.min(r.rating.max, Math.max(r.rating.min, raw)) * 10) / 10;
   return {
-    value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, jugend, havarie, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
+    value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, jugend, havarie, schoen, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
     wind, windLage: boat.windLage ?? null, windRuecken: !!boat.windRuecken,
     aufGrund: boat.aufGrund != null,                           // bei Niedrigwasser im Schlick gelegen (P29, Abzug über Hook 'rating')
     natur: !!boat.natur,                                       // einen Abend an der geschützten Naturecke (P52, Bonus über Hook 'rating')

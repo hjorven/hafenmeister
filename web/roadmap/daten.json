@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "27.11.2026",
-  "commit": "716c0e2"
+  "commit": "b8e3d36"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1289,14 +1289,16 @@
    "id": "P60",
    "titel": "Hafen verschönern",
    "inhalt": "D8",
-   "thread": "neu",
+   "thread": "erledigt (PR 441, verschoenern.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    441
+   ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
     "D8"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2999,8 +3001,8 @@
   {
    "code": "D8",
    "text": "Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P60): Reiter Deko im Baumenü mit Bänken, Kübeln, Bäumen, Laternen in Abschnitten und Anstrich der Hafenhäuser, Wirkung auf jede Bewertung; Mast schon mit P44, verschoenern.md",
    "pakete": [
     "P60"
    ],
@@ -4688,11 +4690,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 9,
+    "erledigt": 10,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 5,
+    "offen": 4,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4747,20 +4749,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 62,
+  "erledigt": 63,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 23,
+  "offen": 22,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 194,
+  "erledigt": 195,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 18,
+  "offen": 17,
   "entfaellt": 1,
   "alle": 219
  },

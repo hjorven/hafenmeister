@@ -384,7 +384,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | D5 | Zwei Varianten je Steg (viele schmale oder wenige breite Boxen) | erledigt (PR 321): je Paar wählbar über Doppelboxen, [stege-umbauen.md](stege-umbauen.md) | P59 |
 | D6 | Boxen umbauen (zwei schmale zu einer breiten) | erledigt (PR 321): Doppelbox für Mehrrumpfboote ab Stufe 4, Rückbau möglich | P59 |
 | D7 | Sparziel anheften, Balken neben dem Geld, Schild am Bauplatz | erledigt (PR 232) | P18 |
-| D8 | Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe | offen | P60 |
+| D8 | Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe | erledigt (P60): Reiter Deko im Baumenü mit Bänken, Kübeln, Bäumen, Laternen in Abschnitten und Anstrich der Hafenhäuser, Wirkung auf jede Bewertung; Mast schon mit P44, [verschoenern.md](verschoenern.md) | P60 |
 | D9 | Neue Gastplätze in Stufe 6 (Superyacht-Steg oder Stadtkai) | erledigt (PR 326): Yachtsteg vor der Westmole, zwei XL-Plätze | P59 |
 | D10 | Stufenaufstieg feiern (= Ü23) | erledigt (PR 156) | P16 |
 
@@ -766,7 +766,7 @@ Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen
 |---|---|---|---|---|
 | P55 | Versteckte Regeln im Hafen sichtbar machen | A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen "hier ist etwas zu tun" | 2 | erledigt (PR 269 und 275, `docs/hafenzeichen.md`) |
 | P59 | Stege umbauen und Varianten wählen | D5, D6, D9 (neue Gastplätze in Stufe 6) | 3 | erledigt (PR 321 Doppelboxen, PR 326 Yachtsteg, [stege-umbauen.md](stege-umbauen.md)) |
-| P60 | Hafen verschönern | D8 | 4 | neu |
+| P60 | Hafen verschönern | D8 | 4 | erledigt (PR 441, [verschoenern.md](verschoenern.md)) |
 | P61 | Spiel komplett offline startbar | N15, N16 | 2 | erledigt (PR 270), Thread "Spiel offline startbar machen" |
 
 P56 bleibt frei.

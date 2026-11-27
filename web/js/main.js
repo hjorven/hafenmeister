@@ -49,6 +49,7 @@ const MODULES = [
   './features/baggern.js',            // P29: Stege ausbaggern für Boote mit mehr Tiefgang
   './features/bojenfeld.js',          // P36: Bojenfeld im See für kleine Boote (docs/bojenfeld.md)
   './features/naturecke.js',          // P52: Schilfgürtel am Ufer schützen oder bebauen (docs/naturecke.md)
+  './features/verschoenern.js',       // P60: Hafen verschönern, Reiter Deko im Baumenü (docs/verschoenern.md)
   './features/versorgung.js',
   './features/auszeichnung.js',
   './features/platzschilder.js',
