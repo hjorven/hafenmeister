@@ -1276,6 +1276,50 @@
    "geraet": "handy",
    "datum": "2026-11-27",
    "quelle": "signalflaggen/handy-lexikon.png"
+  },
+  {
+   "datei": "p53-pr439-pc-lampe.jpg",
+   "pakete": [
+    "P53"
+   ],
+   "titel": "Spätankömmling läuft nachts mit Lampe ein",
+   "pr": 439,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "spaetankoemmling/pc-2-lampe.png"
+  },
+  {
+   "datei": "p53-pr439-handy-kajuete.jpg",
+   "pakete": [
+    "P53"
+   ],
+   "titel": "Licht in der Kajüte nach dem Festmachen",
+   "pr": 439,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "spaetankoemmling/handy-4-kajuete.png"
+  },
+  {
+   "datei": "p60-pr441-pc-laternen.jpg",
+   "pakete": [
+    "P60"
+   ],
+   "titel": "Laternen, Bänke und Bäume am Abend",
+   "pr": 441,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "verschoenern/pc-7-nacht.png"
+  },
+  {
+   "datei": "p60-pr441-handy-baenke.jpg",
+   "pakete": [
+    "P60"
+   ],
+   "titel": "Bänke am Wasser bauen",
+   "pr": 441,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "verschoenern/handy-2-vorschau-baenke.png"
   }
  ]
 }
