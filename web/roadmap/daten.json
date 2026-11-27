@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "22.11.2026",
-  "commit": "d9ca7df"
+  "commit": "214f0aa"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1137,15 +1137,20 @@
    "id": "P51",
    "titel": "Hafentiere",
    "inhalt": "F38",
-   "thread": "erledigt (docs/hafentiere.md)",
+   "thread": "erledigt (PR 435, docs/hafentiere.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    435
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F38"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    110,
+    111
+   ]
   },
   {
    "id": "P52",
@@ -6072,9 +6077,34 @@
    "datum": "2026-11-22",
    "quelle": "leinen/annehmen/handy-1-symbol.png",
    "nr": 109
+  },
+  {
+   "datei": "p51-pr435-pc-hafenkatze.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Hafenkatze auf dem Steg",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-5-katze-herz.png",
+   "nr": 110
+  },
+  {
+   "datei": "p51-pr435-pc-reiher.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Graureiher am Ufer",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-3-reiher.png",
+   "nr": 111
   }
  ],
  "neueBilder": [
+  111,
   109,
   107,
   105,
@@ -6082,10 +6112,88 @@
   101,
   99,
   97,
-  95,
-  93
+  95
  ],
  "merges": [
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P51 Hafentiere (PR 435) mit Bildern",
+   "pr": 437,
+   "pakete": [
+    "P51"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P44: Eigener Hafenname und eigene Flagge",
+   "pr": 429,
+   "pakete": [
+    "P44"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P51 Hafentiere: Hafenkatze, Hafenhund und Graureiher (F38)",
+   "pr": 435,
+   "pakete": [
+    "P51"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P47 Große Ankünfte (PR 428) und P48 Leinen (PR 430) mit Bildern",
+   "pr": 434,
+   "pakete": [
+    "P47",
+    "P48"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Zeitraffer zählt Flottillen, die als Ganzes weiterfahren",
+   "pr": 432,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P47 Große Ankünfte: Horn, Meldung und kurze Kamerafahrt",
+   "pr": 428,
+   "pakete": [
+    "P47"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: Bilder für P46 Ruhiger Abend (PR 427)",
+   "pr": 431,
+   "pakete": [
+    "P46"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P48 Leinen annehmen beim Anlegen (F32)",
+   "pr": 430,
+   "pakete": [
+    "P48"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P46: Ruhiger Abend mit Lichterketten und Serien-Akkord (F29, F30, L1)",
+   "pr": 427,
+   "pakete": [
+    "P46"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P31 Gästewünsche (PR 406) mit Bildern",
+   "pr": 426,
+   "pakete": [
+    "P31"
+   ]
+  },
   {
    "datum": "2026-11-22",
    "titel": "Arbeitsplan: Welle 3 gebaut, Welle 4 startet mit P48, P47, P46, P44",
@@ -6103,86 +6211,6 @@
    "pr": 424,
    "pakete": [
     "P37"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P37: Havarist einschleppen",
-   "pr": 408,
-   "pakete": [
-    "P37"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: Bilder für P29 Baggern (PR 420)",
-   "pr": 423,
-   "pakete": [
-    "P29"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P29 Baggern: Stege ausbaggern, Niedrigwasser bei Westwind",
-   "pr": 420,
-   "pakete": [
-    "P29"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P36 Bojenfeld (PR 421) mit Bildern",
-   "pr": 422,
-   "pakete": [
-    "P36"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P36 Bojenfeld im See",
-   "pr": 421,
-   "pakete": [
-    "P36"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Schichttest: zwei Testfehler aus Serie 14 auf dem Tablet",
-   "pr": 419,
-   "pakete": []
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P35 Preisstufe (PR 413) mit Bildern",
-   "pr": 418,
-   "pakete": [
-    "P35"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P35 Preisstufe am Hafenbüro: günstig, normal, gehoben",
-   "pr": 413,
-   "pakete": [
-    "P35"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P39 (PR 412), P32-Rest (PR 414), P40 (PR 416) mit Bildern",
-   "pr": 417,
-   "pakete": [
-    "P39",
-    "P32",
-    "P40"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P40 Seltene Besucher: besondere Schiffe am Ehrenplatz, Schwäne, Schweinswal, Fotos im Logbuch",
-   "pr": 416,
-   "pakete": [
-    "P40"
    ]
   }
  ]
