@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "22.11.2026",
-  "commit": "214f0aa"
+  "datum": "27.11.2026",
+  "commit": "1c957fe"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1015,9 +1015,11 @@
    "id": "P44",
    "titel": "Hafenname und Flagge",
    "inhalt": "F23, F27 (Auswahl beim Start)",
-   "thread": "erledigt (Thread \"Hafenname und eigene Flagge geben\", Hafenflagge)",
+   "thread": "erledigt (PR 429, Thread \"Hafenname und eigene Flagge geben\", Hafenflagge)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    429
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F23",
@@ -1025,7 +1027,10 @@
     "C05"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    112,
+    113
+   ]
   },
   {
    "id": "P45",
@@ -1105,15 +1110,17 @@
    "id": "P49",
    "titel": "Signalflaggen und Hafenwissen",
    "inhalt": "F33, F34 (nach P21)",
-   "thread": "neu",
+   "thread": "erledigt (PR 433, Thread \"Signalflaggen ins Spiel bringen\", signalflaggen.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    433
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F33",
     "F34"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2428,8 +2435,8 @@
   {
    "code": "F33",
    "text": "Signalflaggen als Wunschanzeige, Lexikon im Logbuch",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (signalflaggen.md): Gäste setzen je Wunsch eine Flagge, erfüllte holen sie ein, Blauer Peter vor dem Auslaufen, Lexikon im Reiter Wissen",
    "pakete": [
     "P49"
    ],
@@ -2439,8 +2446,8 @@
   {
    "code": "F34",
    "text": "Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (signalflaggen.md): 13 Einträge zu Seezeichen, Feuer und Lichtern, Knoten, dazu Positionslichter an fahrenden Booten",
    "pakete": [
     "P49"
    ],
@@ -4681,11 +4688,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 7,
+    "erledigt": 8,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 7,
+    "offen": 6,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4740,20 +4747,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 60,
+  "erledigt": 61,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 25,
+  "offen": 24,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 191,
+  "erledigt": 193,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 21,
+  "offen": 19,
   "entfaellt": 1,
   "alle": 219
  },
@@ -6101,9 +6108,34 @@
    "datum": "2026-11-22",
    "quelle": "hafentiere/pc-3-reiher.png",
    "nr": 111
+  },
+  {
+   "datei": "p44-pr429-pc-hafenmast.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Eigene Flagge am Hafenmast",
+   "pr": 429,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/pc-3-hafenmast.png",
+   "nr": 112
+  },
+  {
+   "datei": "p44-pr429-handy-flagge-bauen.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Name und Flagge im Baukasten",
+   "pr": 429,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/handy-2-flagge-bauen.png",
+   "nr": 113
   }
  ],
  "neueBilder": [
+  113,
   111,
   109,
   107,
@@ -6111,10 +6143,25 @@
   103,
   101,
   99,
-  97,
-  95
+  97
  ],
  "merges": [
+  {
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: P44 Hafenname und Flagge (PR 429) mit Bildern",
+   "pr": 438,
+   "pakete": [
+    "P44"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "P49: Signalflaggen als Wunschanzeige, Positionslichter und Hafenwissen (F33, F34)",
+   "pr": 433,
+   "pakete": [
+    "P49"
+   ]
+  },
   {
    "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: P51 Hafentiere (PR 435) mit Bildern",
@@ -6192,25 +6239,6 @@
    "pr": 426,
    "pakete": [
     "P31"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Arbeitsplan: Welle 3 gebaut, Welle 4 startet mit P48, P47, P46, P44",
-   "pr": 425,
-   "pakete": [
-    "P48",
-    "P47",
-    "P46",
-    "P44"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: Bilder für P37 Havarist einschleppen (PR 408)",
-   "pr": 424,
-   "pakete": [
-    "P37"
    ]
   }
  ]
