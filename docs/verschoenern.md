@@ -1,6 +1,6 @@
 # Hafen verschönern (P60, D8)
 
-Stand: 22.11.2026. Status: gebaut. Paket P60 aus der [Roadmap](roadmap.md), Welle 4.
+Stand: 27.11.2026. Status: gebaut (PR 441). Paket P60 aus der [Roadmap](roadmap.md), Welle 4.
 
 Im Baumenü gibt es einen fünften Reiter **Deko**. Dort kauft man Bänke, Blumenkübel, Bäume, Laternen und einen Anstrich für die Hafenhäuser. Jede Verschönerung hebt die Bewertung aller Gäste ein wenig, und man sieht sie im Hafen: Leute setzen sich auf die Bänke, die Laternen gehen abends an, die Bäume wachsen und tragen Laub je Jahreszeit.
 
