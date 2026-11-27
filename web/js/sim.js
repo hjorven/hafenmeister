@@ -2760,6 +2760,8 @@ function checkWishes(state, ctx, boat, mods = modifiers(state, ctx)) {
   }
   boat.wishesMet += weight;
   boat.wishesTotal += boat.wishes.length;
+  // Was heute erfüllt ist (Signalflaggen P49: erfüllte Wünsche holt die Crew ein)
+  boat.erfuellt = [...metList];
   return metList;
 }
 

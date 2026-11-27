@@ -43,6 +43,7 @@ export const VORRANG = {
   erfolg: 30,          // features/erfolge.js, neuer Erfolg (kurz)
   post: 24,            // ui/gaestepost.js, Post von einem Stammgast an der Pinnwand (kurz)
   logbuch: 22,         // ui/logbuch.js, neues Bootsmodell im Logbuch (kurz)
+  wissen: 21,          // features/hafenwissen.js, neu im Hafenwissen: Signalflagge, Seezeichen, Licht, Knoten (kurz, P49)
   gaestebuch: 20,      // ui/gaestebuch.js, Bewertung eines Boots außerhalb des Bildes (kurz)
   bautipp: 10,         // ui/bauen.js, "Als Nächstes" (hält dieses Modul selbst, solange #bau-tipp nicht hidden ist)
 };
