@@ -69,6 +69,7 @@ export const PLUS = {
   jugend:   'Jugendtraining zugesehen',
   havarie:  'in Not aufgenommen',
   natur:    'Abend am Schilf',
+  spaet:    'nachts noch aufgenommen',
   schoen:   'schöner Hafen',
 };
 
@@ -123,6 +124,7 @@ export function gruendeAusAbreise(e) {
     else if (p.preis < -0.001) gruende.push({ key: 'teuer', n: r2(-p.preis) });
     if (p.jugend > 0.001) plus.push({ key: 'jugend', wert: r2(p.jugend) });   // P39
     if (p.havarie > 0.001) plus.push({ key: 'havarie', wert: r2(p.havarie) });   // P37: eingeschleppter Havarist
+    if (p.spaet > 0.001) plus.push({ key: 'spaet', wert: r2(p.spaet) });         // P53: Spätankömmling
     if (p.schoen > 0.001) plus.push({ key: 'schoen', wert: r2(p.schoen) });   // P60: Bänke, Bäume, Laternen, Anstrich
   }
   if (e.reason === 'rebuild') gruende.push({ key: 'umbau', n: 1 });
@@ -268,6 +270,7 @@ const SATZ = {
   teuer: ['Für das Geld hätten wir mehr erwartet.', 'Stolze Preise für das, was geboten wird.', 'Teuer ist es hier, und dann fehlt auch noch was.'],
   preis: ['Faire Preise, gerne wieder.', 'Günstig und nett, was will man mehr.', 'Für das Liegegeld bekommt man hier viel.'],
   havarie: ['Ohne euch wären wir noch da draußen. Danke für den Schlepp!', 'Hilflos vor der Einfahrt getrieben, und ihr habt uns reingeholt. Danke!', 'In Not aufgenommen, das vergessen wir nicht.'],
+  spaet: ['Spät in der Nacht noch eine Box bekommen. Danke!', 'Im Dunkeln eingelaufen, und alles hat geklappt.', 'Nachts noch so freundlich aufgenommen, das merken wir uns.'],
   schoen: ['Schön gemacht, der Hafen. Da bleibt man gern noch einen Tag.', 'Ein richtig hübscher Hafen, da macht schon der Landgang Spaß.', 'Hübsch gemacht hier, man fühlt sich gleich wohl.'],
   stammPlatz: ['Und wieder an unserem alten Platz!', 'Unsere Box war frei, wie schön.', 'Der Hafenmeister kennt unseren Platz.'],
 };
@@ -290,6 +293,8 @@ export function satz(eintrag) {
   else text = wahl(SATZ.mittel, eintrag);
   if ((eintrag.boot?.besuche ?? 1) > 1 && eintrag.art === 'abreise') text += ` ${SATZ.stamm(eintrag.boot.besuche)}`;
   if (eintrag.plus?.some((p) => p.key === 'stammPlatz')) text += ` ${wahl(SATZ.stammPlatz, eintrag, 3)}`;
+  // P53: Spätankömmling dankt für die Box in der Nacht, wenn sonst nichts fehlte
+  if (!haupt && eintrag.note >= 4 && eintrag.plus?.some((p) => p.key === 'spaet')) text = wahl(SATZ.spaet, eintrag, 7);
   // P37: eingeschleppter Havarist dankt, wenn sonst nichts fehlte; sonst steht der Dank vor der Klage
   if (eintrag.plus?.some((p) => p.key === 'havarie')) text = haupt ? `${wahl(SATZ.havarie, eintrag, 5)} ${text}` : wahl(SATZ.havarie, eintrag, 5);
   return text;
