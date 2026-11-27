@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "22.11.2026",
-  "commit": "214f0aa"
+  "datum": "27.11.2026",
+  "commit": "b8171b2"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1105,15 +1105,17 @@
    "id": "P49",
    "titel": "Signalflaggen und Hafenwissen",
    "inhalt": "F33, F34 (nach P21)",
-   "thread": "neu",
+   "thread": "erledigt (PR 433, Thread \"Signalflaggen ins Spiel bringen\", signalflaggen.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    433
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F33",
     "F34"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2428,8 +2430,8 @@
   {
    "code": "F33",
    "text": "Signalflaggen als Wunschanzeige, Lexikon im Logbuch",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (signalflaggen.md): Gäste setzen je Wunsch eine Flagge, erfüllte holen sie ein, Blauer Peter vor dem Auslaufen, Lexikon im Reiter Wissen",
    "pakete": [
     "P49"
    ],
@@ -2439,8 +2441,8 @@
   {
    "code": "F34",
    "text": "Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (signalflaggen.md): 13 Einträge zu Seezeichen, Feuer und Lichtern, Knoten, dazu Positionslichter an fahrenden Booten",
    "pakete": [
     "P49"
    ],
@@ -4681,11 +4683,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 8,
+    "erledigt": 9,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 6,
+    "offen": 5,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4740,20 +4742,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 61,
+  "erledigt": 62,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 24,
+  "offen": 23,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 192,
+  "erledigt": 194,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 20,
+  "offen": 18,
   "entfaellt": 1,
   "alle": 219
  },
