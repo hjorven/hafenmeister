@@ -282,8 +282,8 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
-| F33 | Signalflaggen als Wunschanzeige, Lexikon im Logbuch | offen | P49 |
-| F34 | Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter) | offen | P49 |
+| F33 | Signalflaggen als Wunschanzeige, Lexikon im Logbuch | erledigt ([signalflaggen.md](signalflaggen.md)): Gäste setzen je Wunsch eine Flagge, erfüllte holen sie ein, Blauer Peter vor dem Auslaufen, Lexikon im Reiter Wissen | P49 |
+| F34 | Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter) | erledigt ([signalflaggen.md](signalflaggen.md)): 13 Einträge zu Seezeichen, Feuer und Lichtern, Knoten, dazu Positionslichter an fahrenden Booten | P49 |
 | F35 | Wind beim Anlegen: große Boote brauchen länger, bevorzugen Plätze gegen den Wind | erledigt (PR 392, [wind.md](wind.md)): L und XL mit Rückenwind langsamer und −0,25 Anker, Büro wählt Bug gegen den Wind | P34 |
 
 ### Geschichten
@@ -724,7 +724,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | erledigt (PR 427, Thread "Ruhigen Abend und Serien-Akkord bauen") |
 | P47 | Große Ankünfte ankündigen | F31 | erledigt (PR 428, Thread "Große Ankünfte ankündigen", docs/grosse-ankuenfte.md) |
 | P48 | Leinen annehmen beim Anlegen | F32 | erledigt (PR 430, Thread "Leinen beim Anlegen annehmen lassen", [leinen.md](leinen.md)) |
-| P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | neu |
+| P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | erledigt (PR 433, Thread "Signalflaggen ins Spiel bringen", [signalflaggen.md](signalflaggen.md)) |
 | P50 | Einstellungen für Sicht und Bewegung | F25 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
 | P51 | Hafentiere | F38 | erledigt (PR 435, docs/hafentiere.md) |
 | P52 | Naturecke am Schilf | F39 | bestehend: "Landschaft und Wasser gestalten" |

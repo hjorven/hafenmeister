@@ -34,7 +34,9 @@ test('Name und Flagge: präparierter Name bleibt Text, Flagge wird gespeichert',
   expect(r.y + r.height).toBeLessThanOrEqual(vp.height + 1);
 
   // Präparierter Name (vorher zählen, wie viele Bilder und Skripte die Seite selbst hat)
-  const vorher = await page.evaluate(() => document.querySelectorAll('img, script').length);
+  // Bilder, die das Spiel selbst als data:-Bild zeigt (z. B. Meldung "Neu im Hafenwissen"), kommen und gehen; sie zählen nicht.
+  const FREMD = 'script, img:not([src^="data:"])';
+  const vorher = await page.evaluate((sel) => document.querySelectorAll(sel).length, FREMD);
   const boese = '<img src=x onerror="window.__xss=1">Haff<script>window.__xss=2</script>';
   await page.locator('#hm-hafen-name').fill(boese);
   await expect(page.locator('.hm-fl-name-rest')).toContainText('Wird gespeichert als');
@@ -51,15 +53,15 @@ test('Name und Flagge: präparierter Name bleibt Text, Flagge wird gespeichert',
   await press(ok, testInfo);
   await expect(fenster).toBeHidden();
 
-  const nach = await page.evaluate(() => ({
+  const nach = await page.evaluate((sel) => ({
     name: window.hafenmeister.sim.state.harborName,
     flagge: window.hafenmeister.sim.state.flagge,
     titel: document.title,
     xss: window.__xss ?? null,
     bilder: document.querySelectorAll('img[src="x"]').length,
-    alle: document.querySelectorAll('img, script').length,
+    alle: document.querySelectorAll(sel).length,
     mast: window.hafenmeister.hafenflaggeBild.mast.visible,
-  }));
+  }), FREMD);
   expect(nach.xss).toBeNull();
   expect(nach.bilder).toBe(0);
   expect(nach.alle).toBe(vorher);
