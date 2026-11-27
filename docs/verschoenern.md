@@ -67,4 +67,6 @@ Gemessen auf allen 15 Küsten (Seed 1 und 2, Stufe 1 bis 6): Jede Küste hat fü
 
 ## Geprüft
 
-Wird beim Abschluss des Pakets nachgetragen.
+- Platzsuche auf allen 15 Küsten, Seed 1 und Seed 2, jeweils Stufe 1 bis 6 mit `?verschoenern=alle`: 180 Fälle, jedes Stück, das die Stufe erlaubt, hat einen Platz an Land, jede Bank ist ein Ziel der Menschen, keine Fehler auf der Seite.
+- Im Spiel auf Handy (iPhone 13) und PC angesehen: Reiter passen aufs Handy, Vorschau mit Geisterbild und Raute, Kauf, Rückgängig, Farbwahl, Bank mit sitzender Person, Laub im Herbst, kahle Bäume im Winter, Laternen nachts.
+- `node --test tests/verschoenern.test.mjs` (9 Tests), `tests/specs/verschoenern.spec.mjs` auf PC und Handy, `bash tests/pruefen.sh --schnell`.
