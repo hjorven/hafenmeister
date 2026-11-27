@@ -1078,6 +1078,19 @@ export const ECONOMY = {
     ],
   },
 
+  // ---------------------------------------------------------------- Naturecke am Schilf (P52, F39)
+  // Neben dem Hafen wächst ein Schilfgürtel (Lage: render/landschaft/naturecke-lage.js). Ab abStufe entscheidet
+  // der Spieler einmal und endgültig (Baumenü, Reiter Hafen): schützen oder bebauen. Logik in
+  // features/naturecke-regeln.js, Beschreibung docs/naturecke.md.
+  // schuetzen: Bohlenweg mit Beobachtungshütte. Jeder Gast, der einen Abend im Hafen lag, bewertet um anker besser.
+  // bebauen: Ufer aufschütten, Park- und Trailerplatz. Jeden Abend in der Saison grund[Stufe] plus jeGast für
+  // jedes Gastboot, das an diesem Abend im Hafen liegt (Autos und Trailer der Crews).
+  naturecke: {
+    abStufe: 2,
+    schuetzen: { kosten: 300, anker: 0.1 },
+    bebauen: { kosten: 900, grund: [0, 0, 20, 50, 90, 140, 200], jeGast: 2 },
+  },
+
   // ---------------------------------------------------------------- Endlosspiel (P16)
   // Nach dem Abschluss der Region geht das Spiel weiter: jede Saison neue Saisonziele.
   // Logik in web/js/features/aufstieg.js, Beschreibung in docs/aufstieg.md.

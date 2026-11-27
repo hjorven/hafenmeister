@@ -199,6 +199,13 @@ export function tabellen() {
       ['Foto', `Motiv mindestens ${pz(b.foto.mindestGroesse)} der kürzeren Bildseite, ${pz(b.foto.rand)} Rand frei`],
     ]), '');
   }
+  if (E.naturecke) {
+    const n = E.naturecke;
+    t.push('## Naturecke am Schilf', '', `Ab Hafenstufe ${n.abStufe}, eine Wahl, nicht umkehrbar (docs/naturecke.md).`, '', tabelle(['Wahl', 'Kosten', 'Wirkung'], [
+      ['schützen', euro(n.schuetzen.kosten), `+${zahl(n.schuetzen.anker)} Anker für jeden Gast, der einen Abend in der Saison im Hafen lag`],
+      ['bebauen', euro(n.bebauen.kosten), `je Abend in der Saison ${n.bebauen.grund.map((g, i) => [i, g]).filter(([i]) => i >= n.abStufe).map(([i, g]) => `Stufe ${i}: ${euro(g)}`).join(', ')}, plus ${euro(n.bebauen.jeGast)} je Gastboot im Hafen`],
+    ]), '');
+  }
   t.push('## Services', '', tabelle(['Service', 'Stufe', 'Name', 'ab Hafenstufe', 'Kosten', 'Mindestruf', 'Wirkung'], SERVICES.flatMap((s) =>
     s.stufen.map((st, i) => [i === 0 ? s.name : '', i + 1, st.name, st.abStufe ?? s.abStufe, euro(st.kosten), st.ruf != null ? zahl(st.ruf) : '-',
       wirkungText(st.wirkung) + (st.wirkung.besuch ? `; Besuch alle ${st.wirkung.besuch.alleTage} Tage, ${euro(st.wirkung.besuch.einnahme)}` : '')]))), '');

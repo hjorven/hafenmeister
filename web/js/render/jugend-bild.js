@@ -169,6 +169,8 @@ export function initJugendBild(game) {
   game.scene.add(gruppe);
 
   const frei = (x, z, r, t) => {
+    // Schilfgürtel der Naturecke (P52): flach genug für Optis, aber dort segelt niemand hinein
+    if (game.naturecke?.imSchilf?.(x, z, r)) return false;
     const f = game.fahrwasser?.befahrbar;
     return typeof f === 'function' ? f(x, z, r, t) : true;
   };

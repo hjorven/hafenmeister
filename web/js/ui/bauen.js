@@ -381,6 +381,36 @@ export function init(game) {
       });
     }
 
+    // Naturecke am Schilf (P52): schützen oder bebauen, einmal und endgültig (kein Rückgängig)
+    const nr = ECONOMY.naturecke ?? {};
+    for (const a of game.naturecke?.angebote?.() ?? []) {
+      const schutz = a.id === 'schuetzen';
+      const anker = num1(nr.schuetzen?.anker ?? 0);
+      const g = nr.bebauen ?? {};
+      const proTag = (g.grund?.[Math.min(stufe, (g.grund?.length ?? 1) - 1)] ?? 0);
+      out.push({
+        key: `naturecke:${a.id}`, art: 'hafen', id: `naturecke-${a.id}`, kosten: a.kosten,
+        name: schutz ? 'Schilfgürtel schützen' : 'Ufer am Schilf bebauen',
+        gesperrt: a.gesperrt, ohneSchild: true, keinRat: true, endgueltig: true,
+        knopf: schutz ? 'Schützen' : 'Bebauen',
+        kurz: schutz ? `+${anker} Anker` : 'Parkplatz',
+        nutzen: schutz
+          ? ['Bohlenweg zur Beobachtungshütte, Haubentaucher ziehen ein, abends quaken Frösche.',
+            `Gäste nach einem Abend im Hafen: +${anker} Anker.`]
+          : ['Ufer aufschütten: Park- und Trailerplatz für die Crews.',
+            `Je Abend in der Saison ${euro(proTag)} plus ${euro(g.jeGast ?? 0)} je Gastboot, später mehr.`],
+        warnung: schutz
+          ? 'Nicht umkehrbar: bleibt für immer Natur.'
+          : 'Nicht umkehrbar: Schilf, Vögel und Frösche sind weg.',
+        fertigTitel: schutz ? 'Das Schilf steht unter Schutz' : 'Der Parkplatz am Ufer ist gebaut',
+        fertigText: schutz ? 'Der Bohlenweg steht. Ab heute Abend bewerten Gäste den Abend am Schilf.' : 'Ab heute Abend parken hier die Crews, das Geld kommt im Tagesabschluss unter Sonstiges.',
+        bedarf: () => null,
+        ort: () => game.naturecke.ort(),
+        geist: () => game.naturecke.geist(a.id),
+        kaufen: () => game.naturecke.entscheiden(a.id),
+      });
+    }
+
     // Naechste Ausbaustufe
     const adv = sim.canAdvanceStage();
     if (adv.goal) {
@@ -1252,7 +1282,7 @@ export function init(game) {
     entferneGeist();
     gefuehrt = null;
     // Zehn Sekunden lang zuruecknehmbar (Roadmap P18, Bed P7); nicht der Stufenausbau in einem Stueck
-    rueck = snap && (e.key !== 'hafen:stufe' || r.abschnitt) ? { ...snap, bis: performance.now() + RUECK_MS, name: e.name, kosten: vorher - game.sim.state.money } : null;
+    rueck = snap && !e.endgueltig && (e.key !== 'hafen:stufe' || r.abschnitt) ? { ...snap, bis: performance.now() + RUECK_MS, name: e.name, kosten: vorher - game.sim.state.money } : null;
     if (speicher()?.sparziel === key) { speicher().sparziel = null; zeigeSparziel(); }
     if (r.abschnitt) {
       // Bauabschnitt beauftragt: Baustelle zeigen, fertig wird er ueber Nacht
@@ -1394,7 +1424,7 @@ export function init(game) {
       ? el('button', { type: 'button', class: 'hud-btn bau-ja', disabled: true }, e.gesperrt[0].toUpperCase() + e.gesperrt.slice(1))
       : teuer
         ? el('button', { type: 'button', class: 'hud-btn bau-ja', disabled: true }, `Noch ${euro(e.kosten - geld)} sparen`)
-        : el('button', { type: 'button', class: `hud-btn bau-ja${gefuehrt === e.key ? ' bau-leuchtet' : ''}`, onclick: () => kaufen(e.key) }, `Bauen für ${euro(e.kosten)}`);
+        : el('button', { type: 'button', class: `hud-btn bau-ja${gefuehrt === e.key ? ' bau-leuchtet' : ''}`, onclick: () => kaufen(e.key) }, `${e.knopf ?? 'Bauen'} für ${euro(e.kosten)}`);
     const geschenkText = gefuehrt === e.key
       ? `Dein erstes Bauwerk: Das Geld dafür (${euro(speicher()?.geschenk || e.kosten)}) ist geschenkt und liegt schon in der Kasse. Bestätige mit „Bauen für ${euro(e.kosten)}“.`
       : null;
@@ -1410,6 +1440,7 @@ export function init(game) {
           el('span', { class: 'bau-balken' }, el('span', { style: `width:${Math.min(100, Math.round((f.ist / f.soll) * 100))}%` }))))) : null,
       bedarfText ? el('p', { class: 'bau-bedarf' }, bedarfText) : null,
       umbau ? el('p', { class: 'bau-bedarf bau-umbau' }, umbau) : null,
+      e.warnung ? el('p', { class: 'bau-bedarf bau-endgueltig', role: 'note' }, e.warnung) : null,
       el('p', { class: 'bau-preis' }, teuer || e.gesperrt ? `Preis ${euro(e.kosten)}` : `Preis ${euro(e.kosten)}, danach in der Kasse ${euro(geld - e.kosten)}`),
       meldung ? el('p', { class: 'card-note', role: 'status' }, meldung) : null,
       teuer && !e.gesperrt ? el('button', { type: 'button', class: `bau-spar${speicher()?.sparziel === e.key ? ' an' : ''}`, 'aria-pressed': speicher()?.sparziel === e.key ? 'true' : 'false', onclick: () => setzeSparziel(e.key) },
@@ -1558,6 +1589,7 @@ function stil() {
     @keyframes bau-leuchten { 0%, 100% { box-shadow: 0 0 0 2px rgba(242,193,78,.9), 0 0 10px 2px rgba(242,193,78,.5); } 50% { box-shadow: 0 0 0 4px rgba(242,193,78,.6), 0 0 18px 6px rgba(242,193,78,.35); } }
     @media (prefers-reduced-motion: reduce) { #card .bau-ja.bau-leuchtet { animation: none; box-shadow: 0 0 0 3px rgba(242,193,78,.9); } }
     .bau-bedarf { margin: 0; padding: 8px 10px; border-radius: 10px; background: #fff4dc; font-size: 0.9rem; line-height: 1.35; }
+    .bau-endgueltig { background: #fde3dc; color: #7a2414; font-weight: 600; }
     .bau-preis { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
     .bau-fortschritt { display: grid; gap: 6px; font-size: 0.86rem; }
     .bau-balken-zeile { display: grid; gap: 3px; }

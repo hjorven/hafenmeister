@@ -2916,6 +2916,7 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
     value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, jugend, havarie, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
     wind, windLage: boat.windLage ?? null, windRuecken: !!boat.windRuecken,
     aufGrund: boat.aufGrund != null,                           // bei Niedrigwasser im Schlick gelegen (P29, Abzug über Hook 'rating')
+    natur: !!boat.natur,                                       // einen Abend an der geschützten Naturecke (P52, Bonus über Hook 'rating')
     preis, preisstufe: boat.preisstufe ?? null,
     wishes: [...(boat.wishes || [])], wishesMet: boat.wishesMet || 0, wishesTotal: boat.wishesTotal || 0, missed: { ...(boat.missed || {}) },
     far: { ...(boat.far || {}) },

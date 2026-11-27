@@ -167,6 +167,8 @@ export const SOUNDS = {
   miau: { label: 'Hafenkatze miaut (antippen)', wet: 0.15, gap: 0.5 },
   wuff: { label: 'Hafenhund bellt (antippen)', wet: 0.2, gap: 0.5 },
   reiher: { label: 'Graureiher fliegt auf', wet: 0.3, gap: 0.8 },
+  rohrsaenger: { label: 'Teichrohrsänger im Schilf (Naturecke)', wet: 0.25, gap: 4 },
+  froesche: { label: 'Frösche am Abend (Naturecke)', wet: 0.3, gap: 5 },
 };
 
 // Schiffshörner: kleine Boote hoch und kurz, große tief und lang
@@ -1351,6 +1353,43 @@ HafenAudio.prototype._sfx = {
       len = Math.max(len, tt - t + this._burst(out, { kind: 'brown', t: tt, a: 0.02, d: 0.14, peak: 0.07, ftype: 'lowpass', f: 380 }));
     }
     return len;
+  },
+
+  rohrsaenger(t, out) {
+    // Teichrohrsänger (P52): schwatzende, rhythmische Reihe kurzer Silben ("tiri-tiri-tschrr-tschrr")
+    let len = 0;
+    const n = 7 + Math.floor(rand(0, 5));
+    let tt = t;
+    for (let i = 0; i < n; i++) {
+      const kratzig = i % 3 === 2;
+      const f = kratzig ? rand(2400, 2900) : rand(3300, 4600);
+      if (kratzig) len = Math.max(len, tt - t + this._burst(out, { t: tt, a: 0.004, d: 0.07, peak: 0.035, f, q: 4 }));
+      else {
+        for (let k = 0; k < 2; k++) {
+          const t2 = tt + k * 0.055;
+          len = Math.max(len, t2 - t + this._tone(out, { f, t: t2, a: 0.003, d: 0.045, peak: 0.022, glide: f * rand(0.75, 1.2), glideT: 0.04 }));
+        }
+      }
+      tt += rand(0.11, 0.17);
+    }
+    return len + 0.1;
+  },
+
+  froesche(t, out) {
+    // Frösche am Abend (P52): mehrere tiefe, knarrende Rufe durcheinander
+    let len = 0;
+    for (let i = 0; i < 5; i++) {
+      const tt = t + rand(0, 1.6);
+      const f = rand(150, 260);
+      for (let k = 0; k < 3; k++) {
+        const t2 = tt + k * 0.07;
+        const g = this._env(out, t2, 0.005, 0.02, 0.05, 0.02);
+        const bp = this._filter(g, 'bandpass', f * 4, 3);
+        this._osc(bp, 'square', f, t2, t2 + 0.09);
+        len = Math.max(len, t2 - t + 0.1);
+      }
+    }
+    return len + 0.1;
   },
 
   fernglas(t, out) {

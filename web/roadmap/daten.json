@@ -1156,14 +1156,14 @@
    "id": "P52",
    "titel": "Naturecke am Schilf",
    "inhalt": "F39",
-   "thread": "bestehend: \"Landschaft und Wasser gestalten\"",
+   "thread": "erledigt (docs/naturecke.md)",
    "welle": 4,
    "prs": [],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F39"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2496,8 +2496,8 @@
   {
    "code": "F39",
    "text": "Naturecke: Schilfgürtel erhalten oder bebauen, nicht umkehrbar",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (naturecke.md): Schilf auf allen 15 Küsten, schützen (Bohlenweg, Taucher, +0,1 Anker) oder bebauen (Parkplatz, Geld je Abend), ohne Rückgängig",
    "pakete": [
     "P52"
    ],
@@ -4681,11 +4681,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 7,
+    "erledigt": 8,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 7,
+    "offen": 6,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4740,20 +4740,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 60,
+  "erledigt": 61,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 25,
+  "offen": 24,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 191,
+  "erledigt": 192,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 21,
+  "offen": 20,
   "entfaellt": 1,
   "alle": 219
  },
