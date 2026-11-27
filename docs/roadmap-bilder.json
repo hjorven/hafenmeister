@@ -1254,6 +1254,28 @@
    "geraet": "handy",
    "datum": "2026-11-22",
    "quelle": "hafenflagge/handy-2-flagge-bauen.png"
+  },
+  {
+   "datei": "p49-pr433-pc-flaggen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Signalflaggen zeigen die Wünsche der Boote",
+   "pr": 433,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/pc-flaggen-segelboot.png"
+  },
+  {
+   "datei": "p49-pr433-handy-wissen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Logbuch-Reiter Wissen mit Signalflaggen",
+   "pr": 433,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/handy-lexikon.png"
   }
  ]
 }
