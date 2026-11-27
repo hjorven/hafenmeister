@@ -1320,6 +1320,28 @@
    "geraet": "handy",
    "datum": "2026-11-27",
    "quelle": "verschoenern/handy-2-vorschau-baenke.png"
+  },
+  {
+   "datei": "p52-pr440-pc-schilf.jpg",
+   "pakete": [
+    "P52"
+   ],
+   "titel": "Naturecke: Schilfgürtel am Ufer",
+   "pr": 440,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "naturecke/s2-natur.png"
+  },
+  {
+   "datei": "p52-pr440-handy-schuetzen.jpg",
+   "pakete": [
+    "P52"
+   ],
+   "titel": "Schilf schützen oder Ufer bebauen",
+   "pr": 440,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "naturecke/handy-schutz.jpg"
   }
  ]
 }
