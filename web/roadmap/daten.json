@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "27.11.2026",
-  "commit": "b8171b2"
+  "commit": "716c0e2"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1015,9 +1015,11 @@
    "id": "P44",
    "titel": "Hafenname und Flagge",
    "inhalt": "F23, F27 (Auswahl beim Start)",
-   "thread": "erledigt (Thread \"Hafenname und eigene Flagge geben\", Hafenflagge)",
+   "thread": "erledigt (PR 429, Thread \"Hafenname und eigene Flagge geben\", Hafenflagge)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    429
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F23",
@@ -1025,7 +1027,10 @@
     "C05"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    112,
+    113
+   ]
   },
   {
    "id": "P45",
@@ -6103,9 +6108,34 @@
    "datum": "2026-11-22",
    "quelle": "hafentiere/pc-3-reiher.png",
    "nr": 111
+  },
+  {
+   "datei": "p44-pr429-pc-hafenmast.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Eigene Flagge am Hafenmast",
+   "pr": 429,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/pc-3-hafenmast.png",
+   "nr": 112
+  },
+  {
+   "datei": "p44-pr429-handy-flagge-bauen.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Name und Flagge im Baukasten",
+   "pr": 429,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/handy-2-flagge-bauen.png",
+   "nr": 113
   }
  ],
  "neueBilder": [
+  113,
   111,
   109,
   107,
@@ -6113,8 +6143,7 @@
   103,
   101,
   99,
-  97,
-  95
+  97
  ],
  "merges": [
   {

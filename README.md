@@ -48,13 +48,13 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 **Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
 
 <table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P44"><img src="web/roadmap/bilder/p44-pr429-handy-flagge-bauen.jpg" alt="Name und Flagge im Baukasten" width="100%"></a><br><sub>P44 · Name und Flagge im Baukasten · PR 429</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P51"><img src="web/roadmap/bilder/p51-pr435-pc-reiher.jpg" alt="Graureiher am Ufer" width="100%"></a><br><sub>P51 · Graureiher am Ufer · PR 435</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P48"><img src="web/roadmap/bilder/p48-pr430-handy-symbol.jpg" alt="&quot;Leine annehmen&quot; an den Boxen" width="100%"></a><br><sub>P48 · &quot;Leine annehmen&quot; an den Boxen · PR 430</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P47"><img src="web/roadmap/bilder/p47-pr428-handy-koenigsyacht.jpg" alt="Königsyacht wird angekündigt" width="100%"></a><br><sub>P47 · Königsyacht wird angekündigt · PR 428</sub></td>
 </tr><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P47"><img src="web/roadmap/bilder/p47-pr428-handy-koenigsyacht.jpg" alt="Königsyacht wird angekündigt" width="100%"></a><br><sub>P47 · Königsyacht wird angekündigt · PR 428</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P46"><img src="web/roadmap/bilder/p46-pr427-handy-abend.jpg" alt="Abendstimmung im großen Hafen" width="100%"></a><br><sub>P46 · Abendstimmung im großen Hafen · PR 427</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P31"><img src="web/roadmap/bilder/p31-pr406-handy-waschhaus.jpg" alt="Waschhaus an Land" width="100%"></a><br><sub>P31 · Waschhaus an Land · PR 406</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P37"><img src="web/roadmap/bilder/p37-pr408-handy-notruf.jpg" alt="Notruf: Box für den Havaristen wählen" width="100%"></a><br><sub>P37 · Notruf: Box für den Havaristen wählen · PR 408</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (6 von 6 erledigt)</summary>
@@ -147,7 +147,7 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 | [P41](https://hjorven.github.io/hafenmeister/roadmap/#paket=P41) | Statistik und Saisonbilanz | **erledigt** | [#315](https://github.com/hjorven/hafenmeister/pull/315) |
 | [P42](https://hjorven.github.io/hafenmeister/roadmap/#paket=P42) | Herausforderungen, Wochenhafen und Hafen als Code | offen |  |
 | [P43](https://hjorven.github.io/hafenmeister/roadmap/#paket=P43) | Fotoaufträge und Postkarten | offen |  |
-| [P44](https://hjorven.github.io/hafenmeister/roadmap/#paket=P44) | Hafenname und Flagge | **erledigt** |  |
+| [P44](https://hjorven.github.io/hafenmeister/roadmap/#paket=P44) | Hafenname und Flagge | **erledigt** | [#429](https://github.com/hjorven/hafenmeister/pull/429) |
 | [P45](https://hjorven.github.io/hafenmeister/roadmap/#paket=P45) | Kreativmodus | offen |  |
 | [P46](https://hjorven.github.io/hafenmeister/roadmap/#paket=P46) | Ruhiger Abend und Serien-Akkord | **erledigt** | [#427](https://github.com/hjorven/hafenmeister/pull/427) |
 | [P47](https://hjorven.github.io/hafenmeister/roadmap/#paket=P47) | Große Ankünfte ankündigen | **erledigt** | [#428](https://github.com/hjorven/hafenmeister/pull/428) |
