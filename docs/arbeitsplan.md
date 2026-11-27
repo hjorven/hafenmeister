@@ -172,7 +172,7 @@ Reihenfolge nach Wirkung auf die Kernschleife: erst was jede Ankunft und jedes Z
 | P43 | Fotoaufträge und Postkarten | F22 |
 | P49 | Signalflaggen und Hafenwissen (nach P21) | F33, F34 |
 | P51, P52, P53 | Hafentiere, Naturecke, Spätankömmling | F38, F39, F40 |
-| P60 | Hafen verschönern | - |
+| P60 | Hafen verschönern (erledigt, [verschoenern.md](verschoenern.md)) | D8 |
 | P45 | Kreativmodus | F24 |
 | P42 | Herausforderungen, Wochenhafen, Hafen als Code (nach P09, P45) | F21, F41, F42 |
 

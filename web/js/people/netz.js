@@ -410,7 +410,7 @@ export function baueNetz({ hafen, stufe, region = 'ostsee', gebaeude = [], hinde
     const nd = Number.isFinite(kostenBei(tuer.x, tuer.y)) ? add(tuer.x, tuer.y, 'land') : gk;
     if (nd !== gk) link(nd, gk, 1);
     if (g.art === 'wohnhaus') zuhause.push(nd);
-    else ziele.push({ node: nd, art: g.art, id: g.id });
+    else ziele.push({ node: nd, art: g.art, id: g.id, ...(g.blick != null ? { blick: g.blick } : {}), ...(g.sitz ? { sitz: g.sitz } : {}) });
   }
   for (const hd of aussicht) ziele.push({ node: haken[hd], art: nodes[haken[hd]].art === 'bruecke' ? 'seebruecke' : 'aussicht', id: nodes[haken[hd]].art === 'bruecke' ? 'seebruecke' : null });
 
