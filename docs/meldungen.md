@@ -20,10 +20,12 @@ warten ausgeblendet, ihre Zeit läuft solange nicht ab, und sie kommen danach. D
 | 60 | Sturm und Regatta vorbereiten (`#ev-vorbereiten`), Ergebnis am Abend des letzten Ereignistags | `events/vorbereiten-ui.js` |
 | 58 | Jugendtraining: Box fürs Trainerboot, Auslaufen, Zurück (`#hm-jugend`) | `ui/jugend-meldung.js` |
 | 53 | Großes Schiff läuft ein (`#hm-ankunft`), während der Kamerafahrt 59 | `features/grosse-ankunft.js` |
+| 52 | Spätankömmling läuft im Dunkeln ein (`#hm-spaet`) | `features/spaetankoemmling.js` |
 | 50 | Schritte des Einstiegs | `features/einstieg.js` |
 | 45 | Tipps beim ersten Mal | `features/einstieg.js` |
 | 40 | Andere Dauerplatz-Meldungen | `features/dauerlieger.js` |
 | 24 | Post von einem Stammgast (`#hm-post-meldung`), antippen öffnet die Pinnwand im Gästebuch | `ui/gaestepost.js` |
+| 21 | Neu im Hafenwissen (`#hm-hw-meldung`): Signalflagge, Seezeichen, Licht oder Knoten, antippen öffnet den Eintrag | `features/hafenwissen.js` |
 | 20 | Bewertung eines Boots außerhalb des Bildes (`#hm-gb-meldungen`, die Blasen über Booten im Bild zählen nicht) | `ui/gaestebuch.js` |
 
 Bei gleichem Vorrang bleibt, wer zuerst da war.

@@ -282,8 +282,8 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
-| F33 | Signalflaggen als Wunschanzeige, Lexikon im Logbuch | offen | P49 |
-| F34 | Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter) | offen | P49 |
+| F33 | Signalflaggen als Wunschanzeige, Lexikon im Logbuch | erledigt ([signalflaggen.md](signalflaggen.md)): Gäste setzen je Wunsch eine Flagge, erfüllte holen sie ein, Blauer Peter vor dem Auslaufen, Lexikon im Reiter Wissen | P49 |
+| F34 | Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter) | erledigt ([signalflaggen.md](signalflaggen.md)): 13 Einträge zu Seezeichen, Feuer und Lichtern, Knoten, dazu Positionslichter an fahrenden Booten | P49 |
 | F35 | Wind beim Anlegen: große Boote brauchen länger, bevorzugen Plätze gegen den Wind | erledigt (PR 392, [wind.md](wind.md)): L und XL mit Rückenwind langsamer und −0,25 Anker, Büro wählt Bug gegen den Wind | P34 |
 
 ### Geschichten
@@ -299,7 +299,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
 | F39 | Naturecke: Schilfgürtel erhalten oder bebauen, nicht umkehrbar | offen | P52 |
-| F40 | Spätankömmling: nachts läuft ein Boot mit Lichtern ein | offen | P53 |
+| F40 | Spätankömmling: nachts läuft ein Boot mit Lichtern ein | erledigt ([spaetankoemmling.md](spaetankoemmling.md)): an manchen Abenden kommt der letzte Übernachter im Dunkeln mit Taschenlampe und Positionslichtern, Meldung, Schein an der Box, die Nacht wartet bis er fest ist, ein Viertel Anker Dank | P53 |
 
 ### Teilen ohne Server
 
@@ -384,7 +384,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | D5 | Zwei Varianten je Steg (viele schmale oder wenige breite Boxen) | erledigt (PR 321): je Paar wählbar über Doppelboxen, [stege-umbauen.md](stege-umbauen.md) | P59 |
 | D6 | Boxen umbauen (zwei schmale zu einer breiten) | erledigt (PR 321): Doppelbox für Mehrrumpfboote ab Stufe 4, Rückbau möglich | P59 |
 | D7 | Sparziel anheften, Balken neben dem Geld, Schild am Bauplatz | erledigt (PR 232) | P18 |
-| D8 | Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe | offen | P60 |
+| D8 | Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe | erledigt (P60): Reiter Deko im Baumenü mit Bänken, Kübeln, Bäumen, Laternen in Abschnitten und Anstrich der Hafenhäuser, Wirkung auf jede Bewertung; Mast schon mit P44, [verschoenern.md](verschoenern.md) | P60 |
 | D9 | Neue Gastplätze in Stufe 6 (Superyacht-Steg oder Stadtkai) | erledigt (PR 326): Yachtsteg vor der Westmole, zwei XL-Plätze | P59 |
 | D10 | Stufenaufstieg feiern (= Ü23) | erledigt (PR 156) | P16 |
 
@@ -719,16 +719,16 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P41 | Statistik und Saisonbilanz | F19, F20 | erledigt (PR 315, Thread "Statistik und Saisonbilanz zeigen") |
 | P42 | Herausforderungen, Wochenhafen und Hafen als Code | F21, F41, F42 (nach P09, P45) | neu |
 | P43 | Fotoaufträge und Postkarten | F22 | bestehend: "Spielschleife zusammenbauen und Vorschläge einbauen" (Fotomodus) |
-| P44 | Hafenname und Flagge | F23, F27 (Auswahl beim Start) | erledigt (Thread "Hafenname und eigene Flagge geben", [Hafenflagge](hafenflagge.md)) |
+| P44 | Hafenname und Flagge | F23, F27 (Auswahl beim Start) | erledigt (PR 429, Thread "Hafenname und eigene Flagge geben", [Hafenflagge](hafenflagge.md)) |
 | P45 | Kreativmodus | F24 | neu |
 | P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | erledigt (PR 427, Thread "Ruhigen Abend und Serien-Akkord bauen") |
 | P47 | Große Ankünfte ankündigen | F31 | erledigt (PR 428, Thread "Große Ankünfte ankündigen", docs/grosse-ankuenfte.md) |
 | P48 | Leinen annehmen beim Anlegen | F32 | erledigt (PR 430, Thread "Leinen beim Anlegen annehmen lassen", [leinen.md](leinen.md)) |
-| P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | neu |
+| P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | erledigt (PR 433, Thread "Signalflaggen ins Spiel bringen", [signalflaggen.md](signalflaggen.md)) |
 | P50 | Einstellungen für Sicht und Bewegung | F25 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
 | P51 | Hafentiere | F38 | erledigt (PR 435, docs/hafentiere.md) |
 | P52 | Naturecke am Schilf | F39 | bestehend: "Landschaft und Wasser gestalten" |
-| P53 | Spätankömmling in der Nacht | F40 | neu |
+| P53 | Spätankömmling in der Nacht | F40 | erledigt (docs/spaetankoemmling.md) |
 
 ### Welle 5: Regionen und Online (Extras)
 
@@ -766,7 +766,7 @@ Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen
 |---|---|---|---|---|
 | P55 | Versteckte Regeln im Hafen sichtbar machen | A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen "hier ist etwas zu tun" | 2 | erledigt (PR 269 und 275, `docs/hafenzeichen.md`) |
 | P59 | Stege umbauen und Varianten wählen | D5, D6, D9 (neue Gastplätze in Stufe 6) | 3 | erledigt (PR 321 Doppelboxen, PR 326 Yachtsteg, [stege-umbauen.md](stege-umbauen.md)) |
-| P60 | Hafen verschönern | D8 | 4 | neu |
+| P60 | Hafen verschönern | D8 | 4 | erledigt (PR 441, [verschoenern.md](verschoenern.md)) |
 | P61 | Spiel komplett offline startbar | N15, N16 | 2 | erledigt (PR 270), Thread "Spiel offline startbar machen" |
 
 P56 bleibt frei.

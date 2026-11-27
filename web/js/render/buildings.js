@@ -782,7 +782,33 @@ export function init(game) {
   // Welches Gebaeude zu welcher gekauften Versorgung gehoert: { gebaeudeId: { art, stufe } }
   const fuerKauf = (art, n) => Object.entries(KAUF).filter(([, k]) => k.art === art && k.stufe === n).map(([id]) => id);
 
-  const api = { group, items, eingang, setStage, setRegion, lage, fuerKauf, stage: stufe, region: regionName, regionen: REGIONEN };
+  // Anstrich der Hafenhaeuser (P60, features/verschoenern.js): die Wandfarbe aller Hafengebaeude (nicht
+  // Wohnhaeuser, Speicher aus Backstein, Molenfeuer) in einer Farbe; null stellt die Farben des Stils wieder her.
+  // Alle Modelle eines Gebaeudes (auch spaetere Stufen) bekommen das gemeinsame Material, neue Haeuser also gleich mit.
+  const ANSTRICH = new Set(['toilette', 'hafenmeister', 'dusche', 'kiosk', 'hafenbuero', 'sanitaer', 'waschhaus', 'restaurant', 'bootsschuppen']);
+  const anstrichMat = new THREE.MeshLambertMaterial({ color: '#ffffff', flatShading: true });
+  let anstrichFarbe = null;
+  const anstrichFuer = (id) => { const it = items.find((i) => i.id === id); return !!it && ANSTRICH.has(it.art) && !!it.modelle; };
+  function anstrich(farbe = null) {
+    anstrichFarbe = farbe || null;
+    if (anstrichFarbe) anstrichMat.color.set(anstrichFarbe);
+    for (const it of items) {
+      if (!ANSTRICH.has(it.art) || !it.modelle) continue;
+      const S = SM[it.stil];
+      for (const mo of it.modelle) {
+        // Wandmaterialien dieses Modells: Putz (wand, wand2), Holzbuden aus Holz, Schuppen
+        const waende = new Set([S?.wand, S?.wand2, ...(mo.art === 'toilette' || mo.art === 'hafenmeisterBude' ? [S?.holz] : []), ...(mo.art === 'bootsschuppen' ? [S?.schuppen] : [])].filter(Boolean));
+        mo.m.traverse((o) => {
+          if (!o.isMesh) return;
+          if (anstrichFarbe && waende.has(o.material)) { o.userData.wandVorher = o.material; o.material = anstrichMat; }
+          else if (!anstrichFarbe && o.userData.wandVorher) { o.material = o.userData.wandVorher; delete o.userData.wandVorher; }
+        });
+      }
+    }
+    return anstrichFarbe;
+  }
+
+  const api = { group, items, eingang, setStage, setRegion, lage, fuerKauf, anstrich, anstrichFuer, get anstrichFarbe() { return anstrichFarbe; }, stage: stufe, region: regionName, regionen: REGIONEN };
   game.buildings = api;
   // Gekaufte Versorgung (Toilette, Dusche, Kiosk, Hafenbuero) erscheint sofort
   game.on('build', () => setStage(stufe));

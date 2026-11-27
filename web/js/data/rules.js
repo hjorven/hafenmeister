@@ -275,6 +275,11 @@ export function rulesFromEconomy(E = ECONOMY) {
   r.youth = E.jugendtraining ? { rating: E.jugendtraining.ruf } : null;
   // Havaristen (P37, features/havarie.js): Anker mehr auf die Bewertung eines eingeschleppten Boots
   r.havarie = E.havarie ? { rating: E.havarie.anker } : null;
+  // Spätankömmling (P53, docs/spaetankoemmling.md): der letzte Übernachter kommt erst nachts
+  const sp = E.spaetankoemmling;
+  r.lateArrival = sp ? {
+    fromDay: sp.abTag, share: sp.anteil, at: [...sp.ankunft], kinds: [...sp.arten], rest: sp.rest, holdMax: sp.haltMax, rating: sp.anker,
+  } : null;
   return r;
 }
 

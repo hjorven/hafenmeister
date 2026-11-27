@@ -29,7 +29,7 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     berths: list,
     // Päckchenplätze (P27) stehen nur hier, nicht in berths: Listen, Schilder und Auslastung kennen sie nicht
     berthById: Object.fromEntries([...list, ...raftBerths(list, r)].map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], arrivals: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [], berthHas: [] },
+    hooks: { modifiers: [], arrival: [], arrivals: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [], berthHas: [], schoen: [] },
   };
 }
 
@@ -38,6 +38,8 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
  *   modifiers  fn(state, ctx) -> Teil von DEFAULT_MODIFIERS, wird jeden Tag und bei jeder Ankunft gelesen
  *   rating     fn({ ctx, boat }) -> Anker, die zur Platzart (comfort) einer Bewertung dazukommen
  *              (zum Beispiel ein im Winter überholter Steg, features/winter.js)
+ *   schoen     fn({ ctx, boat }) -> Anker für einen schönen Hafen (P60, features/verschoenern.js), eigener
+ *              Teil der Bewertung (ratingParts().schoen, im Gästebuch "schöner Hafen")
  *   berthHas   fn({ state, ctx, berth, prop }) -> true, wenn ein Modul dem Platz diese Eigenschaft gibt
  *              (zum Beispiel 'water' an einem Steg mit Wasserhähnen, features/nachruesten.js, P31)
  *   walk       fn({ state, ctx, berth, wish }) -> Meter vom Platz zum nächsten Gebäude, das den
@@ -969,6 +971,8 @@ function startDay(state, ctx, events) {
     const nights = Math.max(1, ...flotte.map((b) => b.nights || 1));
     for (const b of flotte) { b.nights = nights; delete b.stay; }
   }
+  // Spätankömmling (P53): der letzte Übernachter des Tages kommt an manchen Abenden erst nach Sonnenuntergang
+  planLateArrival(state, ctx, list, sea);
   // Herkunft in der Reihenfolge der Ankunft, damit zwei Boote hintereinander nie aus derselben Ecke kommen
   list.forEach((boat, i) => { boat.origin = boatOrigin(state, state.day * 7 + i); });
   // Eine Flottille kommt aus derselben Richtung (Konvoi)
@@ -1050,6 +1054,92 @@ export function placeArrivals(list, from, to, rules, rnd) {
 /** Die nächsten Boote, die heute noch kommen (für die Vorschau). */
 export function preview(state, ctx) {
   return state.upcoming.slice(0, ctx.rules.previewCount);
+}
+
+// ---------------------------------------------------------------------------
+// Spätankömmling (P53, docs/spaetankoemmling.md)
+//
+// An manchen Saisonabenden (rules.lateArrival.share, ab fromDay) kommt der letzte Übernachter des Tages
+// erst nach Sonnenuntergang (boat.spaet = Tag). Er bleibt dafür abends in state.upcoming und läuft
+// rules.lateArrival.at Sekunden nach Beginn des Abends ein. Solange er unterwegs ist und eine passende
+// Box frei ist, hält die Nacht kurz vor dem Morgen an (state.nachtHalt verlängert den Abend, höchstens
+// holdMax Sekunden): Die Uhr läuft weiter, nur der Morgen kommt später. Bekommt er noch in der Nacht
+// eine Box, gibt er rules.lateArrival.rating Anker mehr. Es kommt kein Boot mehr als sonst, die Auswahl
+// verbraucht keinen Spielzufall (Hash aus Seed und Tag).
+
+/** Ende des Abends (dann kommt die Nacht und der nächste Morgen), mit angehaltener Nacht. */
+export function eveningEnd(state, ctx) {
+  return ctx.rules.dayLength + ctx.rules.eveningLength + (state.nachtHalt || 0);
+}
+
+/** Uhr für Tageslicht und Tagesbalken: steht still, solange die Nacht anhält (Sekunden seit Morgen). */
+export function displayClock(state) {
+  return Math.max(0, (state.clock || 0) - (state.nachtHalt || 0));
+}
+
+function planLateArrival(state, ctx, list, sea) {
+  const s = ctx.rules.lateArrival;
+  // nicht am letzten Saisontag (morgen ist Winter, wer an der Boje wartet, müsste weiterfahren)
+  if (!s || sea.winter || sea.day >= ctx.rules.seasonDays || state.day < (s.fromDay ?? 1) || list.length < 2) return;
+  if (hash01(state, 41) >= (s.share ?? 0)) return;
+  // Das letzte Boot des Tages, wenn es ein gewöhnlicher Übernachter ist (keine Flottille, kein Besucher, kein
+  // Havarist, nichts Großes, kein Ruder- oder Tretboot). Nur das letzte: so bleibt im Tageslauf keine Lücke,
+  // nur der späte Nachmittag wird etwas ruhiger.
+  const boat = list.at(-1);
+  if (isShortStay(boat) || boat.stationed || boat.flotte || boat.besucher || boat.havarie || boat.jugend || boat.dauer) return;
+  if (s.kinds && !s.kinds.includes(boat.kind)) return;
+  const [von, bis] = s.at ?? [1, 4];
+  list.splice(list.indexOf(boat), 1);
+  boat.arriveAt = Math.round((ctx.rules.dayLength + von + hash01(state, 42) * (bis - von)) * 10) / 10;
+  boat.spaet = state.day;
+  list.push(boat);
+}
+
+/** Der Spätankömmling dieses Abends (erwartet, wartend oder schon in der Box), sonst null. */
+export function lateArrivalBoat(state) {
+  for (const b of state.upcoming || []) if (b.spaet === state.day) return b;
+  for (const b of Object.values(state.boats || {})) if (b.spaet === state.day) return b;
+  return null;
+}
+
+/**
+ * Wartet die Nacht noch auf den Spätankömmling? Ja, solange er noch draußen ist, auf der Anfahrt, an der
+ * Boje mit einer passenden freien Box, oder schon zugewiesen und noch nicht sichtbar fest.
+ * Findet er keinen Platz, wartet er wie jeder andere über Nacht an der Boje (dann hält nichts an).
+ */
+export function lateArrivalPending(state, ctx) {
+  const b = lateArrivalBoat(state);
+  if (!b) return false;
+  if (b.status === 'expected') return true;
+  if (b.status === 'waiting') {
+    if (!b.atBuoy || b.held) return true;
+    return !!reservedBerthReady(state, ctx, b) || fittingBerths(state, ctx, b.id).length > 0;
+  }
+  return b.status === 'moored' && b.spaetFest === false;
+}
+
+/** Die Ansicht meldet: der Spätankömmling ist sichtbar fest in seiner Box. */
+export function lateDocked(state, boatId) {
+  const b = state.boats[boatId];
+  if (!b || b.status !== 'moored' || b.spaetFest !== false) return false;
+  b.spaetFest = true;
+  return true;
+}
+
+/** Abends: Spätankömmling einlaufen lassen und, solange er unterwegs ist, die Nacht anhalten. */
+function lateArrivalStep(state, ctx, events, step) {
+  while (state.upcoming.length && state.upcoming[0].arriveAt <= state.clock) {
+    const b = state.upcoming.shift();
+    arrive(state, ctx, b, events);
+    if (state.boats[b.id]) events.push({ type: 'lateArrival', boatId: b.id });
+  }
+  const s = ctx.rules.lateArrival;
+  if (!s) return;
+  const halt = state.nachtHalt || 0;
+  if (halt >= (s.holdMax ?? 0) || state.clock + (s.rest ?? 3) < eveningEnd(state, ctx)) return;
+  if (!lateArrivalPending(state, ctx)) return;
+  if (!halt) events.push({ type: 'nightHold', boatId: lateArrivalBoat(state)?.id ?? null });
+  state.nachtHalt = Math.round((halt + Math.min(step, s.holdMax - halt)) * 1000) / 1000;
 }
 
 // ---------------------------------------------------------------------------
@@ -1745,6 +1835,12 @@ function moor(state, ctx, boat, berthId, events, hand = false) {
   state.berths[berthId] = boat.id;
   if (!boat.stationed) heute(state).angelegt++;
   const ev = { type: 'moored', boatId: boat.id, berthId };
+  // Spätankömmling (P53): noch in der Nacht aufgenommen; die Nacht wartet, bis er sichtbar fest ist
+  if (boat.spaet === state.day && state.phase === 'evening') {
+    boat.spaetDank = true;
+    if (ctx.ansichtMeldetFest?.()) boat.spaetFest = false;
+    ev.spaet = true;
+  }
   // Päckchen (P27): außen höchstens rules.raft.maxNights Nächte, beide Crews merken es sich
   const inner = raftInner(berthId);
   if (inner) {
@@ -2359,6 +2455,7 @@ export function settleWaiting(state) {
   for (const b of Object.values(state.boats || {})) {
     if (b.status === 'waiting' && !b.atBuoy) { b.atBuoy = true; b.atBuoySince = state.clock; }
     if (b.held) b.held = false; // nach dem Laden ist nichts ausgewählt
+    if (b.spaetFest === false) b.spaetFest = true; // nach dem Laden liegt er gleich in der Box (P53)
   }
   // Abreisende Boote zeigt die 3D-Ansicht nach dem Laden nicht mehr, ihre Boxen sind frei.
   state.leaving = {};
@@ -2665,6 +2762,8 @@ function checkWishes(state, ctx, boat, mods = modifiers(state, ctx)) {
   }
   boat.wishesMet += weight;
   boat.wishesTotal += boat.wishes.length;
+  // Was heute erfüllt ist (Signalflaggen P49: erfüllte Wünsche holt die Crew ein)
+  boat.erfuellt = [...metList];
   return metList;
 }
 
@@ -2910,10 +3009,16 @@ export function ratingParts(ctx, boat, ratingBonus = 0) {
   const jugend = boat.jugend ? r.youth?.rating ?? 0 : 0;      // dem Jugendtraining zugesehen (P39)
   const preis = priceRating(ctx, boat);                       // Preisstufe (P35)
   const havarie = boat.havarie ? r.havarie?.rating ?? 0 : 0;  // in Not eingeschleppt (P37)
-  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + jugend + havarie + ratingBonus - penalty - moved - raft + wind + preis;
+  const spaet = boat.spaetDank ? r.lateArrival?.rating ?? 0 : 0; // nachts noch aufgenommen (P53)
+  // Schöner Hafen (P60): Bänke, Kübel, Bäume, Laternen, Anstrich (features/verschoenern.js, Hook 'schoen')
+  let schoen = 0;
+  for (const fn of ctx.hooks?.schoen || []) {
+    try { schoen += Number(fn({ ctx, boat })) || 0; } catch (err) { console.error('Fehler im Hook schoen', err); }
+  }
+  const raw = base + comfort + special + snug + byHand + funk + flotte + stammPlatz + jugend + havarie + spaet + schoen + ratingBonus - penalty - moved - raft + wind + preis;
   const value = Math.round(Math.min(r.rating.max, Math.max(r.rating.min, raw)) * 10) / 10;
   return {
-    value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, jugend, havarie, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
+    value, base, comfort, special, snug, byHand, funk, flotte, stammPlatz, jugend, havarie, spaet, schoen, bonus: ratingBonus, penalty, moved, umgelegt: boat.umgelegt || 0, paeckchen: raft,
     wind, windLage: boat.windLage ?? null, windRuecken: !!boat.windRuecken,
     aufGrund: boat.aufGrund != null,                           // bei Niedrigwasser im Schlick gelegen (P29, Abzug über Hook 'rating')
     preis, preisstufe: boat.preisstufe ?? null,
@@ -3043,6 +3148,7 @@ function night(state, ctx, events) {
   state.day++;
   state.phase = 'day';
   state.clock = 0;
+  state.nachtHalt = 0;
   // Wer über Nacht an der Boje lag, macht morgens mit frischer Geduld weiter
   for (const id of state.queue) {
     const b = state.boats[id];
@@ -3142,16 +3248,24 @@ export function tick(state, ctx, dt) {
       shortStayStep(state, ctx, events);
       for (const fn of ctx.hooks.tick) fn({ state, ctx, events });
       if (state.clock >= dayLength) {
-        for (const b of state.upcoming) dropReservation(b, events, 'evening');
-        state.upcoming = []; // wer heute nicht mehr eingelaufen ist, kommt nicht
+        // wer heute nicht mehr eingelaufen ist, kommt nicht (außer dem Spätankömmling, P53)
+        const spaet = [];
+        for (const b of state.upcoming) {
+          if (b.spaet === state.day) spaet.push(b);
+          else dropReservation(b, events, 'evening');
+        }
+        state.upcoming = spaet;
         startEvening(state, ctx, events);
       }
-    } else if (state.clock >= dayLength + eveningLength) {
-      night(state, ctx, events);
     } else {
-      // Abends läuft keine Geduld ab, aber wer noch an der Boje liegt, kann weiter einfahren
-      if (queue.overnight) queueStep(state, ctx, events, false);
-      shortStayStep(state, ctx, events);
+      lateArrivalStep(state, ctx, events, step);
+      if (state.clock >= dayLength + eveningLength + (state.nachtHalt || 0)) {
+        night(state, ctx, events);
+      } else {
+        // Abends läuft keine Geduld ab, aber wer noch an der Boje liegt, kann weiter einfahren
+        if (queue.overnight) queueStep(state, ctx, events, false);
+        shortStayStep(state, ctx, events);
+      }
     }
   }
   return events;
@@ -3161,8 +3275,11 @@ export function tick(state, ctx, dt) {
 export function runDay(state, ctx) {
   // Die Ereignisse des Tagesbeginns (fest liegende Boote, Logbuch) gehören dazu
   const start = state.scheduledDay !== state.day ? tick(state, ctx, 0) : [];
-  const left = ctx.rules.dayLength + ctx.rules.eveningLength - state.clock;
-  return [...start, ...tick(state, ctx, left)];
+  const events = [...start];
+  // Spätankömmling (P53): Hält die Nacht an, kommt der Morgen später
+  const day = state.day;
+  for (let i = 0; i < 100 && state.day === day; i++) events.push(...tick(state, ctx, Math.max(0.001, eveningEnd(state, ctx) - state.clock)));
+  return events;
 }
 
 // ---------------------------------------------------------------------------

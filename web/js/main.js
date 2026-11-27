@@ -48,6 +48,7 @@ const MODULES = [
   './features/umbauen.js',            // P59: zwei Boxen zur Doppelbox umbauen und zurück
   './features/baggern.js',            // P29: Stege ausbaggern für Boote mit mehr Tiefgang
   './features/bojenfeld.js',          // P36: Bojenfeld im See für kleine Boote (docs/bojenfeld.md)
+  './features/verschoenern.js',       // P60: Hafen verschönern, Reiter Deko im Baumenü (docs/verschoenern.md)
   './features/versorgung.js',
   './features/auszeichnung.js',
   './features/platzschilder.js',
@@ -75,6 +76,9 @@ const MODULES = [
   './features/havarie.js',             // P37: Havarist einschleppen (Bild und Meldung lädt das Modul selbst)
   './features/stimmung.js',            // P46: ruhiger Abend mit Lichterketten, Serien-Akkord (docs/stimmung.md)
   './features/leinen.js',              // P48: Leinen annehmen beim Anlegen (docs/leinen.md)
+  './render/signalflaggen.js',         // P49: Signalflaggen als Wunschanzeige, Positionslichter (docs/signalflaggen.md)
+  './features/hafenwissen.js',         // P49: Hafenwissen sammeln, Lexikon im Logbuch (docs/signalflaggen.md)
+  './features/spaetankoemmling.js',    // P53: Spätankömmling läuft nachts mit Lichtern ein (docs/spaetankoemmling.md)
   './ui/statistik.js',                 // Statistik der letzten 30 Tage, Saisons (P41)
   './features/hafenflagge.js',         // P44: Hafenname und eigene Flagge, Mast, Schilder, Fenster
   './ui/oberflaeche.js',

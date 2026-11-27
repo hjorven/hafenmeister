@@ -1232,6 +1232,50 @@
    "geraet": "pc",
    "datum": "2026-11-22",
    "quelle": "hafentiere/pc-3-reiher.png"
+  },
+  {
+   "datei": "p44-pr429-pc-hafenmast.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Eigene Flagge am Hafenmast",
+   "pr": 429,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/pc-3-hafenmast.png"
+  },
+  {
+   "datei": "p44-pr429-handy-flagge-bauen.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Name und Flagge im Baukasten",
+   "pr": 429,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/handy-2-flagge-bauen.png"
+  },
+  {
+   "datei": "p49-pr433-pc-flaggen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Signalflaggen zeigen die Wünsche der Boote",
+   "pr": 433,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/pc-flaggen-segelboot.png"
+  },
+  {
+   "datei": "p49-pr433-handy-wissen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Logbuch-Reiter Wissen mit Signalflaggen",
+   "pr": 433,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/handy-lexikon.png"
   }
  ]
 }
