@@ -680,7 +680,7 @@ export function init(game) {
   updateSaveBtn();
   // Die Uhr läuft auch ohne Ereignis weiter (Tagesbalken)
   game.onTick(() => {
-    if (game.sim?.state) day.dataset.progress = String(Math.round((game.sim.state.clock / (game.sim.ctx.rules.dayLength + game.sim.ctx.rules.eveningLength)) * 100));
+    if (game.sim?.state) day.dataset.progress = String(Math.round(Math.min(1, (game.sim.state.clock - (game.sim.state.nachtHalt || 0)) / (game.sim.ctx.rules.dayLength + game.sim.ctx.rules.eveningLength)) * 100));
   });
   schedule();
 }

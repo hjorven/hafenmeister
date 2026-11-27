@@ -20,6 +20,7 @@ warten ausgeblendet, ihre Zeit läuft solange nicht ab, und sie kommen danach. D
 | 60 | Sturm und Regatta vorbereiten (`#ev-vorbereiten`), Ergebnis am Abend des letzten Ereignistags | `events/vorbereiten-ui.js` |
 | 58 | Jugendtraining: Box fürs Trainerboot, Auslaufen, Zurück (`#hm-jugend`) | `ui/jugend-meldung.js` |
 | 53 | Großes Schiff läuft ein (`#hm-ankunft`), während der Kamerafahrt 59 | `features/grosse-ankunft.js` |
+| 52 | Spätankömmling läuft im Dunkeln ein (`#hm-spaet`) | `features/spaetankoemmling.js` |
 | 50 | Schritte des Einstiegs | `features/einstieg.js` |
 | 45 | Tipps beim ersten Mal | `features/einstieg.js` |
 | 40 | Andere Dauerplatz-Meldungen | `features/dauerlieger.js` |

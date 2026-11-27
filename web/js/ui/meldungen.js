@@ -35,6 +35,7 @@ export const VORRANG = {
   funk: 57,            // ui/funk-anmeldung.js, Boot meldet sich per Funk an (Box freihalten?)
   jugend: 58,          // ui/jugend-meldung.js, Jugendtraining: Box fürs Trainerboot, Auslaufen, Zurück
   ankunft: 53,         // features/grosse-ankunft.js, großes Schiff läuft ein (kurz, P47)
+  spaet: 52,           // features/spaetankoemmling.js, Spätankömmling läuft im Dunkeln ein (kurz, P53)
   einstieg: 50,        // features/einstieg.js, Schritte des Einstiegs
   ankuendigung: 55,    // events/banner.js, Ereignisse und Saison ("Heute: Sommertag", "Morgen: Regatta")
   tipp: 45,            // features/einstieg.js, Tipps beim ersten Mal (kurz, gehen den Dauerplatz-Meldungen vor)

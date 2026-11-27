@@ -85,13 +85,15 @@ test('Kein Fließband: Abstände unregelmäßig, keine lange Lücke bei vollem T
       // voller Tag: Hochsaison (P20 G5), im Frühling kommen weniger Boote mit längeren Abständen
       s.day = RULES.seasonParts?.find((p) => p.id === 'sommer')?.from ?? 2;
       sim.tick(s, ctx, 0);
-      const t = s.upcoming.map((b) => b.arriveAt);
+      // Spätankömmling (P53): das letzte Boot kommt abends, der späte Nachmittag ist dann um einen Abstand ruhiger
+      const spaet = s.upcoming.some((b) => b.spaet);
+      const t = s.upcoming.filter((b) => !b.spaet).map((b) => b.arriveAt);
       if (t.length < 12) continue;
       const d = t.slice(1).map((x, i) => Math.round((x - t[i]) * 10) / 10);
       const from = RULES.dayLength * RULES.arrivalFrom;
       const bis = RULES.dayLength * RULES.arrivalWindow;
       assert.ok(t[0] - from <= RULES.arrivalMaxGap + 0.05, `Stufe ${stufe}: Loch am Anfang ${t[0]}`);
-      assert.ok(bis - t.at(-1) <= 2 * RULES.arrivalMaxGap, `Stufe ${stufe}: Loch am Ende ${t.at(-1)}`);
+      assert.ok(bis - t.at(-1) <= (spaet ? 3 : 2) * RULES.arrivalMaxGap, `Stufe ${stufe}: Loch am Ende ${t.at(-1)}`);
       // Bei weniger Booten als dem Höchstwert werden die Abstände etwas gestreckt
       assert.ok(Math.max(...d) <= 1.5 * RULES.arrivalMaxGap, `Stufe ${stufe}: Lücke ${d}`);
       // nicht im Takt: mindestens drei verschiedene Abstände (auf ganze Sekunden) und nicht alle gleich lang
