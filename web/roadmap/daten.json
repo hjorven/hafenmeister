@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "27.11.2026",
-  "commit": "b8e3d36"
+  "commit": "f7e42f9"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1121,7 +1121,10 @@
     "F34"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    114,
+    115
+   ]
   },
   {
    "id": "P50",
@@ -1163,14 +1166,14 @@
    "id": "P52",
    "titel": "Naturecke am Schilf",
    "inhalt": "F39",
-   "thread": "erledigt (docs/naturecke.md)",
+   "thread": "bestehend: \"Landschaft und Wasser gestalten\"",
    "welle": 4,
    "prs": [],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F39"
    ],
-   "status": "erledigt",
+   "status": "offen",
    "bilder": []
   },
   {
@@ -2505,8 +2508,8 @@
   {
    "code": "F39",
    "text": "Naturecke: Schilfgürtel erhalten oder bebauen, nicht umkehrbar",
-   "status": "erledigt",
-   "statusText": "erledigt (naturecke.md): Schilf auf allen 15 Küsten, schützen (Bohlenweg, Taucher, +0,1 Anker) oder bebauen (Parkplatz, Geld je Abend), ohne Rückgängig",
+   "status": "offen",
+   "statusText": "offen",
    "pakete": [
     "P52"
    ],
@@ -4690,11 +4693,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 10,
+    "erledigt": 9,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 4,
+    "offen": 5,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4749,20 +4752,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 63,
+  "erledigt": 62,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 22,
+  "offen": 23,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 195,
+  "erledigt": 194,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 17,
+  "offen": 18,
   "entfaellt": 1,
   "alle": 219
  },
@@ -6134,9 +6137,34 @@
    "datum": "2026-11-22",
    "quelle": "hafenflagge/handy-2-flagge-bauen.png",
    "nr": 113
+  },
+  {
+   "datei": "p49-pr433-pc-flaggen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Signalflaggen zeigen die Wünsche der Boote",
+   "pr": 433,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/pc-flaggen-segelboot.png",
+   "nr": 114
+  },
+  {
+   "datei": "p49-pr433-handy-wissen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Logbuch-Reiter Wissen mit Signalflaggen",
+   "pr": 433,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/handy-lexikon.png",
+   "nr": 115
   }
  ],
  "neueBilder": [
+  115,
   113,
   111,
   109,
@@ -6144,10 +6172,41 @@
   105,
   103,
   101,
-  99,
-  97
+  99
  ],
  "merges": [
+  {
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: Bilder für P49 Signalflaggen (PR 433)",
+   "pr": 442,
+   "pakete": [
+    "P49"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "P60: Hafen verschönern mit Bänken, Kübeln, Bäumen, Laternen und Anstrich",
+   "pr": 441,
+   "pakete": [
+    "P60"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: P44 Hafenname und Flagge (PR 429) mit Bildern",
+   "pr": 438,
+   "pakete": [
+    "P44"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "P49: Signalflaggen als Wunschanzeige, Positionslichter und Hafenwissen (F33, F34)",
+   "pr": 433,
+   "pakete": [
+    "P49"
+   ]
+  },
   {
    "datum": "2026-11-22",
    "titel": "Roadmap-Pflege: P51 Hafentiere (PR 435) mit Bildern",
@@ -6209,41 +6268,6 @@
    "pr": 430,
    "pakete": [
     "P48"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P46: Ruhiger Abend mit Lichterketten und Serien-Akkord (F29, F30, L1)",
-   "pr": 427,
-   "pakete": [
-    "P46"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P31 Gästewünsche (PR 406) mit Bildern",
-   "pr": 426,
-   "pakete": [
-    "P31"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Arbeitsplan: Welle 3 gebaut, Welle 4 startet mit P48, P47, P46, P44",
-   "pr": 425,
-   "pakete": [
-    "P48",
-    "P47",
-    "P46",
-    "P44"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: Bilder für P37 Havarist einschleppen (PR 408)",
-   "pr": 424,
-   "pakete": [
-    "P37"
    ]
   }
  ]
