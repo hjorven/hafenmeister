@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "27.11.2026",
-  "commit": "f7e42f9"
+  "commit": "1001581"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1180,15 +1180,20 @@
    "id": "P53",
    "titel": "Spätankömmling in der Nacht",
    "inhalt": "F40",
-   "thread": "neu",
+   "thread": "erledigt (PR 439, docs/spaetankoemmling.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    439
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F40"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    116,
+    117
+   ]
   },
   {
    "id": "P54",
@@ -1302,7 +1307,10 @@
     "D8"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    118,
+    119
+   ]
   },
   {
    "id": "P61",
@@ -2519,8 +2527,8 @@
   {
    "code": "F40",
    "text": "Spätankömmling: nachts läuft ein Boot mit Lichtern ein",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (spaetankoemmling.md): an manchen Abenden kommt der letzte Übernachter im Dunkeln mit Taschenlampe und Positionslichtern, Meldung, Schein an der Box, die Nacht wartet bis er fest ist, ein Viertel Anker Dank",
    "pakete": [
     "P53"
    ],
@@ -4693,11 +4701,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 9,
+    "erledigt": 10,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 5,
+    "offen": 4,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4752,20 +4760,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 62,
+  "erledigt": 63,
   "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 23,
+  "offen": 22,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 194,
+  "erledigt": 195,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 18,
+  "offen": 17,
   "entfaellt": 1,
   "alle": 219
  },
@@ -6161,20 +6169,91 @@
    "datum": "2026-11-27",
    "quelle": "signalflaggen/handy-lexikon.png",
    "nr": 115
+  },
+  {
+   "datei": "p53-pr439-pc-lampe.jpg",
+   "pakete": [
+    "P53"
+   ],
+   "titel": "Spätankömmling läuft nachts mit Lampe ein",
+   "pr": 439,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "spaetankoemmling/pc-2-lampe.png",
+   "nr": 116
+  },
+  {
+   "datei": "p53-pr439-handy-kajuete.jpg",
+   "pakete": [
+    "P53"
+   ],
+   "titel": "Licht in der Kajüte nach dem Festmachen",
+   "pr": 439,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "spaetankoemmling/handy-4-kajuete.png",
+   "nr": 117
+  },
+  {
+   "datei": "p60-pr441-pc-laternen.jpg",
+   "pakete": [
+    "P60"
+   ],
+   "titel": "Laternen, Bänke und Bäume am Abend",
+   "pr": 441,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "verschoenern/pc-7-nacht.png",
+   "nr": 118
+  },
+  {
+   "datei": "p60-pr441-handy-baenke.jpg",
+   "pakete": [
+    "P60"
+   ],
+   "titel": "Bänke am Wasser bauen",
+   "pr": 441,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "verschoenern/handy-2-vorschau-baenke.png",
+   "nr": 119
   }
  ],
  "neueBilder": [
+  119,
+  117,
   115,
   113,
   111,
   109,
   107,
   105,
-  103,
-  101,
-  99
+  103
  ],
  "merges": [
+  {
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: P53 Spätankömmling (PR 439) und P60 Verschönern (PR 441) mit Bildern",
+   "pr": 444,
+   "pakete": [
+    "P53",
+    "P60"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "Schwimmwellenbrecher ist ein Hindernis für die Boote und endet westlich von Steg B und C",
+   "pr": 443,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "P53 Spätankömmling: letztes Boot läuft nachts mit Lampe ein (F40)",
+   "pr": 439,
+   "pakete": [
+    "P53"
+   ]
+  },
   {
    "datum": "2026-11-27",
    "titel": "Roadmap-Pflege: Bilder für P49 Signalflaggen (PR 433)",
@@ -6245,30 +6324,6 @@
    "titel": "Zeitraffer zählt Flottillen, die als Ganzes weiterfahren",
    "pr": 432,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P47 Große Ankünfte: Horn, Meldung und kurze Kamerafahrt",
-   "pr": 428,
-   "pakete": [
-    "P47"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: Bilder für P46 Ruhiger Abend (PR 427)",
-   "pr": 431,
-   "pakete": [
-    "P46"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P48 Leinen annehmen beim Anlegen (F32)",
-   "pr": 430,
-   "pakete": [
-    "P48"
-   ]
   }
  ]
 }
