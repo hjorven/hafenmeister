@@ -165,7 +165,7 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Endlosmodus nach Abschluss | plan.md 9, 12 | gebaut: Saisonziele (PR 156, docs/aufstieg.md) | P16 |
 | Bestenliste, Online mit Supabase | plan.md 12, README | bauen, als letzter Schritt | P58 |
 | Nordsee mit Gezeiten, Schleuse, Trockenfallplätzen | plan.md 9, regionen.md | bauen, nach der Ostsee | P57 |
-| Revierfaktoren in `regions.js` (Hafengeld, Ankünfte, Startgeld, Schiffshäufigkeit) | regions.js | mit Nordsee bauen | P57 |
+| Revierfaktoren (Hafengeld, Ankünfte, Startgeld, Schiffshäufigkeit) | economy.js `nordsee` | Hafengeld, Ankünfte, Bootsarten gebaut (P57 Teil 1, docs/nordsee.md); Startgeld mit Teil 5 | P57 |
 | Bauzeit der Ausbauten, Winter-Bautempo (`bautage`, `winterBautempo`) | economy.js | erledigt (PR 232): `bautage` = Bauabschnitte, `winterBautempo` gelöscht | P18 |
 | `ECONOMY.ereignisse` (Sturm alle 10 Tage, Hafenfest 1.500 €) | economy.js | eine Quelle, Rest löschen | P06 (erledigt) |
 | Gruppen-Ankunft, Wünsche je Bootsart, `feeFactor`, `arrivalWeight` | data/boats/*.js | Wünsche, `feeFactor`, `arrivalWeight` erledigt (P19 Teil 1); Gruppen erledigt (P32) | P19, P32 (Gruppen) |
@@ -477,7 +477,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
 | K1 | Nordsee nach der Ostsee, Doku entsprechend kennzeichnen | entschieden (Welle 5); Doku gekennzeichnet (PR 177) | P08, P57 |
-| K2 | Gezeiten als Kernidee: Tiefgang nur bei Hochwasser | offen | P57 |
+| K2 | Gezeiten als Kernidee: Tiefgang nur bei Hochwasser | erledigt (P57 Teil 1: Zufahrt nur im Tidenfenster, Warten auf die Flut, docs/nordsee.md) | P57 |
 | K3 | Kleinster spielbarer Kern: eigene Karte, Pegel, Tiefgang-Fenster, Kutter | offen | P57 |
 | K4 | Trockenfallen als Platzart | offen | P57 |
 | K5 | Seekarte zum Wechseln, Spielstand und Ruf je Hafen | offen | P57 |
@@ -530,7 +530,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | O6 | Balancing meldet Leerlauf je Stufe | erledigt | P06 |
 | O7 | Test: jedes Hinweis-Ziel existiert, keine Texte zu Gelöschtem | erledigt (`tests/specs/einstieg.spec.mjs`) | P03 |
 | O8 | Doku-Zahlen aus den Daten prüfen | erledigt | P06 |
-| (Befund) | Prüfskript der Reviere läuft nicht im normalen Testlauf | offen | P57 |
+| (Befund) | Prüfskript der Reviere läuft nicht im normalen Testlauf | erledigt (P57 Teil 1: `tests/regionen.test.mjs` statt `tools/test-regionen.mjs`) | P57 |
 
 ### P Bedienung (hier "Bed")
 
@@ -734,7 +734,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 
 | Paket | Titel (Thread) | Inhalt | Thread |
 |---|---|---|---|
-| P57 | Nordsee mit Gezeiten spielbar machen | Revierfaktoren, Gezeiten, Schleuse, Trockenfallplätze, `docs/regionen.md` | bestehend: "Hafenregionen Ostsee und Nordsee gestalten" |
+| P57 | Nordsee mit Gezeiten spielbar machen | Revierfaktoren, Gezeiten, Schleuse, Trockenfallplätze, `docs/regionen.md` | läuft (Thread "Nordsee mit Gezeiten spielbar machen"): Teil 1 Gezeiten in den Regeln gebaut, Teile 2 bis 6 in Arbeit (docs/nordsee.md) |
 | P58 | Online mit Supabase | Hafenname, Bestenliste, Gastboote; erst wenn alles lokal fertig ist | neu, zuletzt |
 
 ### Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)

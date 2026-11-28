@@ -19,6 +19,7 @@ const REASON_LABEL = {
   beam: 'Das Boot ist zu breit für diesen Platz.',
   draft: 'Hier ist das Wasser zu flach für dieses Boot.',
   niedrigwasser: 'Heute ist Niedrigwasser: Hier bleibt gerade zu wenig Wasser unter dem Kiel.',
+  tide: 'Ebbe: In der Zufahrt ist zu wenig Wasser für dieses Boot. Es wartet auf die Flut.',
   size: 'Dieser Platz ist für andere Schiffsgrößen.',
   reserved: 'Dieser Platz ist fest vergeben.',
   funk: 'Diese Box ist für ein angemeldetes Boot frei gehalten.',
@@ -655,6 +656,11 @@ export function init(game) {
   });
   game.on('sim:assignFailed', ({ reason, berthId, boatId }) => {
     note = REASON_LABEL[reason] ?? '';
+    // Nordsee (P57): wann das Boot durch die Zufahrt kommt
+    if (reason === 'tide') {
+      const ab = game.gezeiten?.abUhr?.(boatId);
+      if (ab) note = `Ebbe: In der Zufahrt ist zu wenig Wasser für dieses Boot. Es läuft ab etwa ${ab} Uhr ein.`;
+    }
     // Baggern (P29): Lässt sich der Steg ausbaggern und passt das Boot dann, sagt die Karte es
     if ((reason === 'draft' || reason === 'niedrigwasser') && berthId != null) {
       const steg = game.sim?.ctx?.berthById?.[berthId]?.jetty;

@@ -5,7 +5,8 @@
 // Haefen (Entscheidung Jorven, 11.11.2026, docs/plan.md Abschnitt 9).
 // Neue Felder nur anhaengen. Aendert sich die Bedeutung eines Feldes, REVIER_FORMAT hochzaehlen.
 
-export const REVIER_FORMAT = 1;
+// 2 (P57): wasser.tide ist nur noch true/null, die Zahlen stehen in ECONOMY.nordsee
+export const REVIER_FORMAT = 2;
 
 export const REVIER_REIHENFOLGE = ['ostsee', 'nordsee'];
 
@@ -87,8 +88,9 @@ export const REVIERE = {
     wasser: {
       wellen: 0.45,
       farbeSchaum: '#f1f0e8',
-      // Tidenhub in Metern, Periode in Spieltagen (1 Spieltag = 2 Minuten), Spring-Nipp-Zyklus in Spieltagen
-      tide: { hub: 2.8, periodeTage: 1.035, springNippTage: 15, springFaktor: 0.2, phase: 0 },
+      // Ebbe und Flut: die Zahlen stehen in ECONOMY.nordsee.gezeiten (data/economy.js), die Rechnung in
+      // features/gezeiten-regeln.js (P57, docs/nordsee.md)
+      tide: true,
     },
     wetter: { windMittel: 5, sturm: 0.07, nebel: 0.1, regen: 0.18 },
     schiffe: {

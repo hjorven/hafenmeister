@@ -9,9 +9,10 @@ Stand: 12.11.2026 (Status ergänzt), Konzept vom 11.11.2026. Status: Ostsee geba
 | Teil | Stand |
 |---|---|
 | Ostsee: Landschaft, Stufen 1 bis 6, Regeln | gebaut, das ist das Spiel |
-| Revierdaten beider Reviere (`data/regions.js`), Rechenfunktionen für Wasserstand und Tidenfenster (`world/region.js`, Test `node tools/test-regionen.mjs`) | gebaut |
+| Revierdaten beider Reviere (`data/regions.js`, Test `tests/regionen.test.mjs`) | gebaut |
+| Ebbe und Flut in den Spielregeln: Zufahrt nur im Tidenfenster, Warten auf die Flut, Revierfaktoren (P57 Teil 1, [nordsee.md](nordsee.md)) | gebaut |
 | Nordsee-Landschaft mit Deich, Watt und Salzwiese zum Ansehen (`?revier=nordsee`) | gebaut, nur Bild |
-| Ebbe und Flut in den Spielregeln, Pegel am Kai, trockenfallendes Watt, Warten vor dem Siel | **geplant** (P57) |
+| Pegel am Kai, Boote heben und senken sich mit dem Wasser, Anzeige Hoch-/Niedrigwasser | **geplant** (P57) |
 | Trockenfallplätze, Schleuse als Bauprojekt | **geplant** (P57) |
 | Freischalten der Nordsee, eigener Spielstand je Revier, Startgeld aus dem Ostsee-Ruf | **geplant** (P57; die Bedingung in Abschnitt 4 ist noch nicht entschieden, siehe Roadmap) |
 | Revierfaktoren (`spiel`: Hafengeld, Ankünfte, Startgeld), besondere Dienste und Ereignisse je Revier | **geplant** (P57); die Regeln lesen sie heute nicht |
@@ -51,22 +52,9 @@ Die Vorbilder sind Anregungen. Die Häfen im Spiel bekommen erfundene Namen.
 - **Besondere Dienste:** Fischbrötchen, Krabbenverkauf, Wattführung, Inselfähre, Schleuse als großes Bauprojekt.
 - **Ereignisse:** Sturmflut, Kutterkorso, Krabbenfest, Kreuzfahrttag.
 
-## 3. Ebbe und Flut in der Nordsee (geplant)
+## 3. Ebbe und Flut in der Nordsee
 
-Nur die Nordsee hat einen spürbaren Tidenhub. In der Ostsee schwankt der Wasserstand so wenig, dass das Spiel ihn ignoriert.
-
-**Wasserstand:** Die Tiefen in den Hafendaten (`harbor.js` und später `web/js/data/harbors/<id>.js`) gelten wie auf einer Seekarte bei mittlerem Niedrigwasser. In der Nordsee kommt der aktuelle Wasserstand dazu, er liegt zwischen 0 (Niedrigwasser) und dem Tidenhub (Hochwasser):
-
-```
-wasserstand(t) = hub / 2 + hub / 2 * springNipp(t) * sin(2 * PI * (t / periode + phase))
-springNipp(t)  = 1 + springFaktor * cos(2 * PI * t / springNippPeriode)
-```
-
-Bei Springtide fällt das Wasser etwas unter 0, bei Nipptide bleibt es darüber. In der Ostsee ist der Wasserstand immer 0. Ein Hafen kann den Tidenhub seines Reviers mit einem eigenen Feld `gezeiten: { tidenhub }` in seinen Hafendaten überschreiben.
-
-`t` ist die Spielzeit in Spieltagen (ein Spieltag dauert 2 Minuten). Mit einer Periode von 1,035 Spieltagen kommt das Hochwasser jeden Tag etwas später, wie an der echten Küste.
-
-**Regel:** Ein Boot passt an einen Platz, wenn `tiefe + wasserstand >= tiefgang + 0,3`. Das ist die bekannte Regel aus [Hafen und Schiffe](hafen-und-schiffe.md), nur mit dem Wasserstand dazu.
+Nur die Nordsee hat einen spürbaren Tidenhub. In der Ostsee schwankt der Wasserstand so wenig, dass das Spiel ihn ignoriert. Regeln, Formel und Zahlen stehen in [nordsee.md](nordsee.md) (gebaut in P57 Teil 1): Die Tiefen gelten bei Niedrigwasser, die Tide folgt der Uhrzeit im Spiel, und ein Boot kommt nur durch die Zufahrt (Priel, später Schleuse), wenn genug Wasser über ihr steht.
 
 **Was der Spieler sieht und tut**
 
@@ -96,7 +84,7 @@ Jedes Revier ist ein Objekt in `REVIERE` (`web/js/data/regions.js`). Alle Felder
 | `licht` | je Tagesphase `tag` und `abend`: `himmel`, `sonne`, `boden`, `staerke`, `dunst` (Sichtweite in Metern, optional) |
 | `bauweise` | `waende` (Liste), `daecher` (Liste), `dachformen`, `holz`, `akzent`, `fensterAbend`, `fahne` |
 | `natur` | `baeume`, `pflanzen`, `tiere`, `deko`: Namen für Modelle, die die Landschaft oder Gebäude bauen |
-| `wasser` | `wellen` (0 bis 1), `farbeSchaum`, `tide` (`null` oder `{ hub, periodeTage, springNippTage, springFaktor, phase }`) |
+| `wasser` | `wellen` (0 bis 1), `farbeSchaum`, `tide` (`null` oder `true`; die Zahlen stehen seit `REVIER_FORMAT` 2 in `ECONOMY.nordsee.gezeiten`) |
 | `wetter` | `windMittel` (Beaufort), `sturm`, `nebel`, `regen`: Wahrscheinlichkeit je Spieltag |
 | `schiffe` | `haeufigkeit`: Faktor je Schiffsart (`S1` bis `XL3`, XXL mit Namen, fehlt = 1), `abStufe`: Abweichungen vom Katalog |
 | `spiel` | `hafengeld` und `ankuenfte` (Faktor), `naechte` ([min, max]), `abendAnteil` (Anteil des Abends am Spieltag), `startgeld` |
@@ -116,23 +104,16 @@ Jedes Revier ist ein Objekt in `REVIERE` (`web/js/data/regions.js`). Alle Felder
 |---|---|
 | `game.region.daten` | das aktuelle Revier aus `REVIERE` |
 | `game.region.setzen(id)` | Revier wechseln, sendet das Ereignis `region` mit der id |
-| `game.region.wasserstand()` | Wasserstand jetzt in Metern über mittlerem Niedrigwasser, ohne Tide immer 0 |
-| `game.region.tiefeJetzt(tiefe)` | Kartentiefe plus Wasserstand |
-| `game.region.passt(tiefgang, tiefe)` | passt das Boot gerade an diesen Platz |
-| `game.region.naechstesFenster(tiefgang, tiefe)` | in wie vielen Spieltagen genug Wasser da ist (0 = jetzt, `Infinity` = nie) |
+| `game.region.hatTide()` | hat das Revier Ebbe und Flut (Wasserstand und Zufahrt: `game.gezeiten`, [nordsee.md](nordsee.md)) |
 | `game.region.licht(phase)` | Lichtfarben für `tag` oder `abend` |
 
-Ereignisse: `region` mit der id als Text beim Start und beim Wechsel (wie in [grundgeruest.md](grundgeruest.md)), `pegel` mit Metern um die Wasserlinie für die Landschaft, `wasserstand` mit `{ hoehe, steigt }` etwa zweimal pro Sekunde, wenn das Revier eine Tide hat.
+Ereignisse: `region` mit der id als Text beim Start und beim Wechsel (wie in [grundgeruest.md](grundgeruest.md)). Den Pegel (`pegel`, Meter um die Wasserlinie für die Landschaft) und `gezeiten` (`{ hoehe, steigt, pegel }`) sendet seit P57 `features/gezeiten.js`, etwa zweimal pro Sekunde, nur in der Nordsee.
 
 Wechselt ein anderes Modul das Revier mit `game.emit('region', id)`, geht `game.region` mit. Beim Start gilt `game.state.region` aus dem Spielstand, falls vorhanden.
 
-Zum Ausprobieren: `index.html?revier=nordsee` startet in der Nordsee. Erlaubt sind `ostsee` und `nordsee`, statt `revier` geht auch `region`.
+Zum Ausprobieren: `index.html?revier=nordsee` startet in der Nordsee. Erlaubt sind `ostsee` und `nordsee`, statt `revier` geht auch `region`. Mit `?stufe=n` (Testmodus) gilt das Revier auch für die Spielregeln.
 
-Die reinen Rechenfunktionen (`wasserstand(revier, tage)`, `passt(...)`, `naechstesFenster(...)`) sind auch einzeln exportiert, damit Spielregeln und Tests sie ohne 3D nutzen können:
-
-```bash
-node tools/test-regionen.mjs
-```
+Test der Revierdaten: `node --test tests/regionen.test.mjs` (läuft im normalen Testlauf mit).
 
 ## 7. Wer was davon nutzt
 

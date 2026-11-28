@@ -158,6 +158,16 @@ export function tabellen() {
       ...(nw ? [['Niedrigwasser', `Stufe ${nw.abStufe} bis ${nw.bisStufe ?? 6}, Wind aus ${nw.richtungen.join(', ')} ab Stärke ${zahl(nw.ab)}: Pegel ${zahl(nw.tiefe[0])} bis ${zahl(nw.tiefe[1])} m tiefer; wer auf Grund sitzt −${zahl(nw.anker)} Anker`]] : []),
     ]), '');
   }
+  if (E.nordsee) {
+    const n = E.nordsee;
+    const g = n.gezeiten;
+    t.push('## Nordsee (Ebbe und Flut)', '', tabelle(['Was', 'Wert'], [
+      ['Revierfaktoren', `Hafengeld mal ${zahl(n.hafengeld)}, Ankünfte mal ${zahl(n.ankuenfte)}; Bootsarten mal ${Object.entries(n.arten).map(([a, f]) => `${a} ${zahl(f)}`).join(', ')}`],
+      ['Tide', `Hub ${zahl(g.hub)} m, Periode ${zahl(g.periodeStunden)} h, erstes Hochwasser ${zahl(g.hochwasserTag1)} Uhr, Spring und Nipp alle ${zahl(g.springNippTage)} Tage (±${Math.round(g.springFaktor * 100)} %)`],
+      ['Zufahrt bei Niedrigwasser', Object.entries(n.zufahrt).map(([s, m]) => `Stufe ${s}: ${zahl(m)} m`).join(', ')],
+      ['Skipper planen', `${Math.round(n.planen * 100)} % der Boote, die bei Ebbe kämen, legen ihre Ankunft ins Tidenfenster`],
+    ]), '');
+  }
   if (E.flottillen) {
     const f = E.flottillen;
     t.push('## Flottillen', '', tabelle(['Was', 'Wert'], [

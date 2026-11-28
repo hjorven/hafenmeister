@@ -29,7 +29,7 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
     berths: list,
     // Päckchenplätze (P27) stehen nur hier, nicht in berths: Listen, Schilder und Auslastung kennen sie nicht
     berthById: Object.fromEntries([...list, ...raftBerths(list, r)].map((b) => [b.id, b])),
-    hooks: { modifiers: [], arrival: [], arrivals: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [], berthHas: [], schoen: [] },
+    hooks: { modifiers: [], arrival: [], arrivals: [], evening: [], night: [], fit: [], stageUp: [], tick: [], rating: [], walk: [], score: [], relocate: [], berthHas: [], schoen: [], hold: [], departAt: [] },
   };
 }
 
@@ -56,6 +56,12 @@ export function createContext({ boatTypes = [], berths, harbor, rules = RULES } 
  *              freigehaltene Regattaplätze für Segler (events/vorbereiten.js)
  *   fit        fn({ state, ctx, boat, berth }) -> Grund (Text) oder null; zusätzliche Passregel
  *              für freie Plätze (zum Beispiel Dauerplätze, deren Boot gerade draußen ist)
+ *   hold       fn({ state, ctx, boat }) -> true, wenn ein ankommendes Boot gerade nicht einlaufen kann und
+ *              darauf wartet (zum Beispiel auf die Flut, features/gezeiten-regeln.js). Sind alle Bojen
+ *              belegt, geht es dann vor Anker, statt abzudrehen.
+ *   departAt   fn({ state, ctx, boat, at, tag }) -> Spieluhr (Sekunden des Tages tag), ab der das Boot
+ *              ablegen kann, oder nichts (= at). Nachts für die Abreise am nächsten Vormittag; für einen
+ *              Kurzhalter mit at = jetzt (eine spätere Zeit hält ihn in der Box, zum Beispiel bis die Flut kommt)
  *   stageUp    fn({ state, ctx, from, to, gone, moves, findBerth, events }) nach einem Stufenausbau:
  *              gone = Plätze, die es in der neuen Stufe nicht mehr gibt, moves = umgezogene feste
  *              Boote [{ boatId, from, to }], findBerth(boot) sucht einen freien passenden Platz
@@ -533,6 +539,22 @@ export function hookWhyNotFit(state, ctx, boat, berth) {
     if (why) return why;
   }
   return null;
+}
+
+/** Wartet dieses ankommende Boot auf etwas, das ein Modul bestimmt (Hook 'hold', zum Beispiel die Flut)? */
+export function holdsForHook(state, ctx, boat) {
+  for (const fn of ctx.hooks.hold || []) if (fn({ state, ctx, boat })) return true;
+  return false;
+}
+
+/** Ab wann (Spieluhr des Tages tag) dieses Boot ablegen kann, nach den Hooks 'departAt' (ohne Hooks: at). */
+export function departTime(state, ctx, boat, at, tag = state.day) {
+  let t = at;
+  for (const fn of ctx.hooks.departAt || []) {
+    const n = fn({ state, ctx, boat, at: t, tag });
+    if (Number.isFinite(n)) t = n;
+  }
+  return t;
 }
 
 // Längsseits am selben Steg (Kai, Yachtsteg): Ein Boot, das länger ist als sein Abschnitt, braucht Platz
@@ -2408,7 +2430,8 @@ function arrive(state, ctx, boat, events) {
   }
   // Flottille (P32): Sind alle Bojen belegt, gehen die Boote der Gruppe trotzdem vor Anker (die Ansicht
   // legt sie auf die nächste freie Boje oder ins Ankerfeld); eine Flottille dreht nicht einzeln ab
-  if (spot == null && boat.flotte && ctx.rules.flotilla) spot = state.queue.length % Math.max(1, waitSpotCount(state, ctx));
+  // Wartet das Boot auf etwas (Hook 'hold', zum Beispiel auf die Flut), geht es ebenso vor Anker
+  if (spot == null && ((boat.flotte && ctx.rules.flotilla) || holdsForHook(state, ctx, boat))) spot = state.queue.length % Math.max(1, waitSpotCount(state, ctx));
   if (spot == null) {
     // Alle Bojen belegt: Wer eine passende freie Box sieht, hält direkt darauf zu statt abzudrehen
     const direct = ctx.rules.queue.selfEnterAfter != null ? selfBerth(state, ctx, boat.id) : null;
@@ -3076,6 +3099,8 @@ function shortStayStep(state, ctx, events) {
     if (!isShortStay(boat) || boat.leaveClock == null || state.clock < boat.leaveClock || boat.trip?.away) continue;
     // noch nicht sichtbar fest: warten (Notfall: nach einem Viertel Tag geht es trotzdem los)
     if (boat.wartetFest && state.clock < (boat.mooredClock ?? 0) + ctx.rules.dayLength * 0.25 + (boat.stay ?? 0.2) * ctx.rules.dayLength) continue;
+    // Ein Modul hält das Boot noch in der Box (Hook 'departAt', zum Beispiel bis genug Wasser in der Zufahrt ist)
+    if (ctx.hooks.departAt?.length && departTime(state, ctx, boat, state.clock) > state.clock) continue;
     if (boat.pendingFee > 0) {
       const r = collectOnRound(state, ctx, boat.id, { night: true });
       events.push(...r.events);
@@ -3131,7 +3156,9 @@ function night(state, ctx, events) {
     if (boat.nights > 0 && !(isRaftBerth(boat.berthId) && innenFort.has(raftInner(boat.berthId)))) continue;
     // Abgerechnet wird nachts, abgelegt am nächsten Vormittag zu einer eigenen Zeit je Boot
     const w = ctx.rules.departWindow;
-    const leaveAt = w ? Math.round((w[0] + random(state) * (w[1] - w[0])) * ctx.rules.dayLength * 10) / 10 : 0;
+    let leaveAt = w ? Math.round((w[0] + random(state) * (w[1] - w[0])) * ctx.rules.dayLength * 10) / 10 : 0;
+    // Module können die Abreise verschieben (Hook 'departAt', zum Beispiel bis die Flut kommt)
+    if (ctx.hooks.departAt?.length) leaveAt = Math.round(departTime(state, ctx, boat, leaveAt, state.day + 1) * 10) / 10;
     departBoat(state, ctx, boat, mods, events, leaveAt, false);
   }
   raftDepartOrder(state, ctx);
