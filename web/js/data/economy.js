@@ -1191,6 +1191,11 @@ export const ECONOMY = {
     // Nur Boote ohne tiefen Kiel (arten) dürfen dort liegen; sie kommen nur hin und weg, wenn über der Plate
     // genug Wasser steht (Tiefgang plus Wasser unter dem Kiel). kreisM: Schwoikreis im Watt.
     // bonus: so viel mehr Anker in der Bewertung je Bootsart (Kutter fallen gern trocken, wie zu Hause).
+    // Schleuse (Ausbau zu Stufe 3 an Küsten mit Durchstich): Das Tor öffnet im Takt. Alle takt Sekunden
+    // Spielzeit steht es offen Sekunden lang offen; wer ein- oder ausläuft, wartet auf die nächste Schleusung.
+    // namen: Namen der Stufe 3 und ihres Ausbaus an der Nordsee (Durchstich / offene Küste mit Molen).
+    schleuse: { abStufe: 3, takt: 16, offen: 7,
+      namen: { ausbau: 'Durchstich mit Schleuse', ausbauOffen: 'Molen und Wellenbrecher', stufe: 'Hafen mit Schleuse', stufeOffen: 'Hafen hinter der Mole' } },
     trockenfallen: { suche: 0.2, platte: 0.55, kreisM: 7, arten: ['ruderboot', 'paddelboot', 'beiboot', 'jolle', 'motorboot', 'fischer'], bonus: { fischer: 0.3, motorboot: 0.1 } },
     // Zufahrt (Priel durchs Watt, ab Stufe 3 Fahrrinne und Schleuse): Wassertiefe bei Niedrigwasser je Stufe.
     // Ein- und Auslaufen geht nur, wenn zufahrt + Wasserstand >= Tiefgang + passregel.wasserUnterKiel.

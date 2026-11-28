@@ -9,6 +9,11 @@
 import { ECONOMY } from './economy.js';
 
 let quelle = () => 'durchstich';
+let revier = 'ostsee';
+
+/** Revier des Spiels (features/gezeiten.js meldet es): an der Nordsee heißen Stufe 3 und ihr Ausbau anders. */
+export function setzeRevier(r) { revier = r === 'nordsee' ? 'nordsee' : 'ostsee'; }
+const NAMEN_NORDSEE = ECONOMY.nordsee?.schleuse?.namen ?? null;
 
 /** formen.js: Funktion, die 'durchstich' (Nehrung am Engpass) oder 'einfahrt' (offenes Wasser) liefert. */
 export function engpassQuelle(f) { quelle = f; }
@@ -23,10 +28,12 @@ const offen = () => engpassArt() === 'einfahrt';
 /** Name der Ausbaustufe n, passend zur Küste. */
 export function stufenName(n) {
   const s = (ECONOMY.stufen || []).find((x) => x.stufe === n);
+  if (revier === 'nordsee' && NAMEN_NORDSEE && n === 3) return offen() ? NAMEN_NORDSEE.stufeOffen : NAMEN_NORDSEE.stufe;
   return (offen() && s?.nameOffen) || s?.name || `Stufe ${n}`;
 }
 
 /** Name des großen Bauprojekts, das aus Stufe s (Eintrag aus ECONOMY.stufen) herausführt. */
 export function ausbauName(s) {
+  if (revier === 'nordsee' && NAMEN_NORDSEE && s?.stufe === 2) return offen() ? NAMEN_NORDSEE.ausbauOffen : NAMEN_NORDSEE.ausbau;
   return (offen() && s?.ausbau?.nameOffen) || s?.ausbau?.name || null;
 }

@@ -21,6 +21,7 @@ import * as G from './gezeiten-regeln.js';
 import { regelnBereit } from './regeln-bereit.js';
 import { uhrzeitText } from '../ui/vorschau.js';
 import { pixelBild } from '../ui/pixel-symbole.js';
+import { setzeRevier } from '../data/kuestennamen.js';
 
 const meter = (x) => `${(Math.round(x * 10) / 10).toFixed(1).replace('.', ',')} m`;
 
@@ -53,7 +54,12 @@ export async function init(game) {
     chipText: () => (G.hatTide(st()) ? `${game.gezeiten.steigt() ? 'Flut' : 'Ebbe'} ${meter(game.gezeiten.wasserstand())}` : ''),
     berichtZeile,
     kartenSatz(b) {
-      if (!b || !G.hatTide(st()) || b.status !== 'waiting' || G.zufahrtOffen(st(), ctx(), b)) return null;
+      if (!b || !G.hatTide(st()) || b.status !== 'waiting') return null;
+      if (G.zufahrtOffen(st(), ctx(), b)) {
+        // Schleuse (Teil 4): Tor gerade zu
+        if (G.schleuseOffen(st())) return null;
+        return `Die Schleuse ist gerade zu. Mit der nächsten Schleusung um etwa ${uhrzeitText(G.naechsteSchleusung(st()), ctx().rules)} Uhr läuft es ein.`;
+      }
       const t = G.naechstesFenster(st(), ctx(), b);
       const tief = meter(b.draft);
       return t == null
@@ -133,6 +139,7 @@ export async function init(game) {
   let warte = 0;
   let warAktiv = false;
   const melde = () => {
+    setzeRevier(st()?.region);   // Namen der Stufe 3 und ihres Ausbaus (Schleuse) an der Nordsee
     const aktiv = G.hatTide(st());
     if (!aktiv) {
       if (warAktiv) game.emit('pegel', 0);

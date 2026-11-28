@@ -85,6 +85,7 @@ const MODULES = [
   './features/hafenflagge.js',         // P44: Hafenname und eigene Flagge, Mast, Schilder, Fenster
   './ui/oberflaeche.js',
   './features/gezeiten.js',            // P57: Nordsee mit Ebbe und Flut (Zufahrt, Pegel, docs/nordsee.md)
+  './render/schleuse.js',             // P57 Teil 4: Schleuse im Durchstich an der Nordsee (docs/nordsee.md)
 ];
 
 async function loadModules(game) {
