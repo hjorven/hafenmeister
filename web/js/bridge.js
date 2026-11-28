@@ -455,7 +455,13 @@ export async function initBridge(game) {
   // Testmodus ?stufe=n: frischer Spielstand dieser Stufe (alles bis dahin gebaut), der echte
   // gespeicherte Spielstand wird weder geladen noch überschrieben. Ohne Parameter wie gehabt.
   const testStufe = typeof location !== 'undefined' ? Number(new URLSearchParams(location.search).get('stufe')) : 0;
-  const testState = () => sim.applyTestStage(createState({ rules: ctx.rules }), ctx, testStufe);
+  // Mit ?revier=nordsee (oder ?region=) gilt das Revier im Testmodus auch für die Spielregeln (Ebbe und Flut, P57)
+  const testRevier = typeof location !== 'undefined' ? (new URLSearchParams(location.search).get('revier') ?? new URLSearchParams(location.search).get('region')) : null;
+  const testState = () => {
+    const st = sim.applyTestStage(createState({ rules: ctx.rules }), ctx, testStufe);
+    if (testRevier === 'ostsee' || testRevier === 'nordsee') st.region = testRevier;
+    return st;
+  };
   if (testStufe >= 1) setState(testState());
   else setState(loadSaved() ?? createState());
 

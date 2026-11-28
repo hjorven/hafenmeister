@@ -115,6 +115,15 @@ Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab 
 | Kosten je Steg | 160 € plus je flachem Platz und Meter Tiefe: S 80 €, M 110 €, L 150 € |
 | Niedrigwasser | Stufe 2 bis 5, Wind aus west, suedwest, nordwest ab Stärke 0,55: Pegel 0,3 bis 0,6 m tiefer; wer auf Grund sitzt −0,3 Anker |
 
+## Nordsee (Ebbe und Flut)
+
+| Was | Wert |
+|---|---|
+| Revierfaktoren | Hafengeld mal 1,15, Ankünfte mal 0,9; Bootsarten mal fischer 2, mehrrumpf 1,6, motorboot 1,2, segelyacht 0,8 |
+| Tide | Hub 2,8 m, Periode 12,42 h, erstes Hochwasser 9,5 Uhr, Spring und Nipp alle 14,8 Tage (±20 %) |
+| Zufahrt bei Niedrigwasser | Stufe 1: 0,3 m, Stufe 2: 0,5 m, Stufe 3: 1,4 m, Stufe 4: 1,8 m, Stufe 5: 2,4 m, Stufe 6: 2,8 m |
+| Skipper planen | 75 % der Boote, die bei Ebbe kämen, legen ihre Ankunft ins Tidenfenster |
+
 ## Flottillen
 
 | Was | Wert |

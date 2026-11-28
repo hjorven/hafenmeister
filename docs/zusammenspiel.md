@@ -348,3 +348,21 @@ Kein Wetter kostet merklich Bildrate (höchstens 6 % weniger als klar). Die Nach
 | B1 | Bildrate: kein Wetter kostet merklich; Nacht in Stufe 6 rund 14 % | kein Fund |
 
 Damit ist P85 Teil 3 vollständig.
+
+## Nordsee und Gezeiten (P57)
+
+Stand 28.11.2026, Teil 1 (Regeln). Was die Zufahrt im Tidenfenster mit anderen Features macht. Alles gilt nur in einem Nordsee-Hafen; die Ostsee ist Zahl für Zahl gleich (Test "ein ganzer Spieltag mit und ohne die Gezeiten-Hooks" in `tests/gezeiten.test.mjs`). Beschreibung: [nordsee.md](nordsee.md).
+
+| Mit | Was passiert | Stand |
+|---|---|---|
+| Selbst-Einfahren, Hafenbüro-Automatik, Zuweisen von Hand | gehen über den Hook `fit` (Grund `tide`); wer wartet, bleibt an der Boje, bis die Zufahrt offen ist, dann nacheinander | geprüft (Test) |
+| Geduld an der Boje | läuft nicht, solange die Zufahrt zu ist, beginnt danach neu (Hook `tick`) | geprüft (Test) |
+| Volle Bojen | wer auf die Flut wartet, ankert (neuer Hook `hold` in `sim.js`) | geprüft (Test) |
+| Funk-Anmeldung (P28) | die frei gehaltene Box wird erst bei genug Wasser angefahren (`reservedBerthReady` fragt den Hook `fit`) | im Code geprüft |
+| Päckchen (P27) | `raftWhyNot` fragt den Hook `fit`, also auch bei Ebbe kein Päckchen für ein Boot, das nicht hineinkommt | im Code geprüft |
+| Grün-Rot-Schild | bleibt grün (Probeboot ohne Tiefgang), die Box ist frei | geprüft (Test) |
+| Abreise, Kurzhalt | Ablegen erst im Tidenfenster (neuer Hook `departAt`); die Box bleibt so lange belegt | geprüft (Test) |
+| Tagestörn | in das Tidenfenster gelegt oder fällt aus; der Tagestörn der Dauerlieger (features/dauerlieger.js) kennt die Tide noch nicht | Rest für Teil 2 |
+| Bootsgeschichten (Zeiten tauschen) | die Gezeiten tauschen danach; im Browser hängt sich `features/gezeiten.js` als letztes Modul ein, im Balancing als letzter Hook | so eingerichtet |
+| Havarist (P37), Jugendtraining (P39), seltene Besucher (P40), Großschiffe (XXL) | von der Zufahrt ausgenommen (eigene Abläufe mit Fristen) | so entschieden |
+| Niedrigwasser bei Westwind (P29) | ein Ostsee-Vorgang (Westwind drückt das Wasser aus der westlichen Ostsee); in der Nordsee aus (`baggern.js` setzePegel), dort bestimmt die Tide den Wasserstand | behoben |

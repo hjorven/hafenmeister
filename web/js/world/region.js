@@ -1,59 +1,16 @@
-// Hafenmeister: aktuelles Revier, Wasserstand (Ebbe und Flut) und Lichtfarben.
+// Hafenmeister: aktuelles Revier und Lichtfarben.
 // Daten: js/data/regions.js, Beschreibung: docs/regionen.md
+// Ebbe und Flut (Wasserstand, Zufahrt, Pegel für die Landschaft) rechnet features/gezeiten-regeln.js aus der
+// Spieluhr, im Browser meldet features/gezeiten.js den Pegel (P57, docs/nordsee.md). Hier gibt es keine
+// zweite Gezeitenrechnung mehr.
 //
 // Ereignisse, die dieses Modul sendet:
 //   'region'  mit der id als Text ('ostsee' oder 'nordsee')
 //             -> Landschaft und Gebaeude faerben sich um
-//   'pegel'   mit Metern relativ zum mittleren Wasserstand (Wasserlinie der 3D-Szene, y = 0)
-//             -> Landschaft hebt und senkt die Wasserflaeche, nur in Revieren mit Tide
-//   'wasserstand' mit { hoehe, steigt, pegel }: hoehe in Metern ueber mittlerem Niedrigwasser
-//             (Bezug der Tiefen in den Hafendaten), fuer Spielregeln und Anzeige
 import { REVIERE, REVIER_REIHENFOLGE } from '../data/regions.js';
-
-export const SICHERHEIT = 0.3;              // Meter Wasser unter dem Kiel, wie in docs/hafen-und-schiffe.md
-export const SEKUNDEN_PRO_SPIELTAG = 120;   // docs/plan.md: ein Spieltag dauert 2 Minuten
 
 export function revier(id) {
   return REVIERE[id] ?? REVIERE[REVIER_REIHENFOLGE[0]];
-}
-
-// Wasserstand in Metern ueber mittlerem Niedrigwasser zur Spielzeit `tage` (in Spieltagen).
-// Ohne Tide immer 0. `hub` ueberschreibt den Tidenhub des Reviers (Feld gezeiten.tidenhub eines Hafens).
-export function wasserstand(r, tage, hub) {
-  const tide = r?.wasser?.tide;
-  if (!tide) return 0;
-  const h = hub ?? tide.hub;
-  const spring = 1 + tide.springFaktor * Math.cos((2 * Math.PI * tage) / tide.springNippTage);
-  return h / 2 + (h / 2) * spring * Math.sin(2 * Math.PI * (tage / tide.periodeTage + tide.phase));
-}
-
-// Wasserstand relativ zur mittleren Wasserlinie, fuer die 3D-Szene.
-export function pegel(r, tage, hub) {
-  const tide = r?.wasser?.tide;
-  if (!tide) return 0;
-  return wasserstand(r, tage, hub) - (hub ?? tide.hub) / 2;
-}
-
-// Steigt das Wasser gerade?
-export function steigt(r, tage, hub) {
-  return wasserstand(r, tage + 0.001, hub) > wasserstand(r, tage, hub);
-}
-
-// Passt ein Boot mit diesem Tiefgang jetzt an einen Platz mit dieser Kartentiefe?
-export function passt(r, tage, tiefgang, tiefe, hub) {
-  return tiefe + wasserstand(r, tage, hub) >= tiefgang + SICHERHEIT - 1e-9;
-}
-
-// In wie vielen Spieltagen ist genug Wasser da? 0 = jetzt, Infinity = in den naechsten 30 Tagen nie.
-// Sucht in Schritten von 1/240 Spieltag (eine halbe Spielsekunde).
-export function naechstesFenster(r, tage, tiefgang, tiefe, hub) {
-  if (passt(r, tage, tiefgang, tiefe, hub)) return 0;
-  if (!r?.wasser?.tide) return Infinity;
-  const schritt = 1 / 240;
-  for (let d = schritt; d <= 30; d += schritt) {
-    if (passt(r, tage + d, tiefgang, tiefe, hub)) return d;
-  }
-  return Infinity;
 }
 
 // Ist ein Revier frei? `stufen` = { revierId: erreichte Stufe }
@@ -74,29 +31,19 @@ function revierAusAdresse() {
 export function init(game) {
   const THREE = game.THREE;
   let aktuell = revier(revierAusAdresse() ?? REVIER_REIHENFOLGE[0]);
-  let hubHafen;          // optionaler Tidenhub des Hafens
-  let warte = 0;
-
-  const tage = () => game.time / SEKUNDEN_PRO_SPIELTAG;
 
   const region = {
     alle: REVIERE,
     reihenfolge: REVIER_REIHENFOLGE,
     get daten() { return aktuell; },
     get id() { return aktuell.id; },
-    setzen(id, { tidenhub } = {}) {
+    setzen(id) {
       if (!REVIERE[id]) { console.warn('Unbekanntes Revier:', id); return; }
       aktuell = REVIERE[id];
-      hubHafen = tidenhub;
       anwenden();
       game.emit('region', aktuell.id);
-      sendePegel();
     },
-    wasserstand: () => wasserstand(aktuell, tage(), hubHafen),
-    pegel: () => pegel(aktuell, tage(), hubHafen),
-    tiefeJetzt: (tiefe) => tiefe + wasserstand(aktuell, tage(), hubHafen),
-    passt: (tiefgang, tiefe) => passt(aktuell, tage(), tiefgang, tiefe, hubHafen),
-    naechstesFenster: (tiefgang, tiefe) => naechstesFenster(aktuell, tage(), tiefgang, tiefe, hubHafen),
+    // Ebbe und Flut: game.gezeiten (features/gezeiten.js)
     hatTide: () => !!aktuell.wasser.tide,
     licht: (phase = 'tag') => aktuell.licht[phase] ?? aktuell.licht.tag,
     istFrei: (id, stufen) => istFrei(revier(id), stufen),
@@ -113,32 +60,11 @@ export function init(game) {
     document.body.dataset.revier = aktuell.id;
   }
 
-  function sendePegel() {
-    if (!aktuell.wasser.tide) { game.emit('pegel', 0); return; }
-    const t = tage();
-    game.emit('pegel', pegel(aktuell, t, hubHafen));
-    game.emit('wasserstand', {
-      hoehe: wasserstand(aktuell, t, hubHafen),
-      steigt: steigt(aktuell, t, hubHafen),
-      pegel: pegel(aktuell, t, hubHafen),
-    });
-  }
-
-  game.onTick((dt) => {
-    if (!aktuell.wasser.tide || dt === 0) return;
-    warte -= dt;
-    if (warte > 0) return;
-    warte = 0.5;
-    sendePegel();
-  });
-
   // Wechselt jemand anderes das Revier (z. B. Spielregeln oder Spielstand), mitgehen ohne erneut zu senden.
   game.on('region', (id) => {
     if (id === aktuell.id || !REVIERE[id]) return;
     aktuell = REVIERE[id];
-    hubHafen = undefined;
     anwenden();
-    sendePegel();
   });
   game.on('phase', () => anwenden());
 
@@ -149,7 +75,6 @@ export function init(game) {
     if (!revierAusAdresse() && gespeichert && REVIERE[gespeichert]) aktuell = REVIERE[gespeichert];
     anwenden();
     game.emit('region', aktuell.id);
-    sendePegel();
   });
   anwenden();
 }

@@ -84,6 +84,7 @@ const MODULES = [
   './ui/statistik.js',                 // Statistik der letzten 30 Tage, Saisons (P41)
   './features/hafenflagge.js',         // P44: Hafenname und eigene Flagge, Mast, Schilder, Fenster
   './ui/oberflaeche.js',
+  './features/gezeiten.js',            // P57: Nordsee mit Ebbe und Flut (Zufahrt, Pegel, docs/nordsee.md)
 ];
 
 async function loadModules(game) {

@@ -1168,6 +1168,32 @@ export const ECONOMY = {
   // start = Ziel der ersten Saison, jeSaison = Zuwachs je weitere Saison, max = Obergrenze.
   // Beginnt das Endlosspiel mitten in der Saison, gelten die Zählziele anteilig für die
   // restlichen Tage; sind es weniger als mindestTage, beginnen die Ziele mit der nächsten Saison.
+  // ---------------------------------------------------------------- Nordsee (P57)
+  // Zweites Revier mit Ebbe und Flut. Regeln ohne Grafik: web/js/features/gezeiten-regeln.js, im Browser
+  // web/js/features/gezeiten.js; Beschreibung docs/nordsee.md. Alle Zahlen des Reviers stehen nur hier
+  // (andere Pakete ändern diesen Block nicht, P57 ändert nichts außerhalb davon).
+  // Alles wirkt nur in einem Nordsee-Hafen (state.region 'nordsee'); die Ostsee bleibt unverändert.
+  nordsee: {
+    // Revierfaktoren (wie Modifikatoren): Hafengeld und Zahl der Ankünfte mal, Bootsarten (type.kind) mal.
+    // An der Nordsee liegen mehr Kutter und Mehrrumpfboote (fallen gut trocken), weniger Kielyachten.
+    hafengeld: 1.15,
+    ankuenfte: 0.9,
+    arten: { fischer: 2.0, mehrrumpf: 1.6, motorboot: 1.2, segelyacht: 0.8 },
+    // Ebbe und Flut: Wasserstand in Metern über Seekartennull (mittleres Niedrigwasser). Die Tiefen der
+    // Hafendaten gelten bei Niedrigwasser. Die Uhrzeit im Spiel folgt dem Tageslauf (6:30 bis 19:00 Tag),
+    // nachts läuft die Tide in der kurzen Nacht weiter: Hochwasser kommt jeden Tag rund 50 Minuten später.
+    // springNippTage: einmal Spring- und Nipptide in so vielen Tagen; springFaktor: so viel mehr (Spring)
+    // oder weniger (Nipp) Hub als im Mittel.
+    gezeiten: { hub: 2.8, periodeStunden: 12.42, hochwasserTag1: 9.5, springNippTage: 14.8, springFaktor: 0.2 },
+    // Zufahrt (Priel durchs Watt, ab Stufe 3 Fahrrinne und Schleuse): Wassertiefe bei Niedrigwasser je Stufe.
+    // Ein- und Auslaufen geht nur, wenn zufahrt + Wasserstand >= Tiefgang + passregel.wasserUnterKiel.
+    // Wer nicht hindurch kann, wartet an der Boje (ohne Geduldverlust) oder bleibt in der Box, bis die Flut kommt.
+    zufahrt: { 1: 0.3, 2: 0.5, 3: 1.4, 4: 1.8, 5: 2.4, 6: 2.8 },
+    // So viele der Boote, deren Ankunft bei Niedrigwasser läge, legen sie ins Tidenfenster (Skipper planen
+    // mit dem Tidenkalender); die übrigen kommen zu früh und warten an der Boje auf die Flut.
+    planen: 0.75,
+  },
+
   endlos: {
     mindestTage: 4,
     ziele: {

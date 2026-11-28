@@ -16,6 +16,7 @@
 //   node tools/balance.mjs --spieler zeitraffer   wie der Bot im Zeitraffer (Vergleich mit dem Spiel)
 //   node tools/balance.mjs --ohne-ansicht         nur die Regeln, ohne Zeit der 3D-Ansicht
 //   node tools/balance.mjs --preis gehoben        Preisstufe für alle so wählen (P35; sonst je Profil, siehe PROFILE)
+//   node tools/balance.mjs --revier nordsee       Nordsee-Hafen mit Ebbe und Flut (P57, docs/nordsee.md)
 //
 // Services kommen aus web/js/services/rules.js, Ereignisse sind nicht eingerechnet
 // (siehe docs/balancing.md).
@@ -32,6 +33,7 @@ import { createScheduler } from '../web/js/events/scheduler.js';
 import { pruefeZahlen } from './zahlen.mjs';
 import { zufallAus } from '../web/js/random.js';
 import { installiere as geschichtenEinhaengen, wetterWorte } from '../web/js/geschichten/regeln.js';
+import { haengeEin as gezeitenEinhaengen } from '../web/js/features/gezeiten-regeln.js';
 import { haengeEin as stammEinhaengen } from '../web/js/features/stammgaeste.js';
 import { haengeEin as postEinhaengen } from '../web/js/features/gaestepost.js';
 import { haengeEin as preisEinhaengen, waehle as preisWaehlen, darfWaehlen as preisDarf, klugeWahl as preisKlug } from '../web/js/features/preisstufe-regeln.js';
@@ -167,6 +169,8 @@ let MIT_ANSICHT = true;
 // Preisstufe (P35): ohne --preis wählt jeder Spielertyp nach seinem Profil (preis: 'klug' = Faustregel
 // preisstufe-regeln.js klugeWahl je Saison, sonst bleibt normal). --preis normal|guenstig|gehoben|klug gilt für alle.
 let PREIS = null;
+// Revier (P57): 'ostsee' (Standard) oder 'nordsee' (Ebbe und Flut, features/gezeiten-regeln.js)
+let REVIER = 'ostsee';
 
 export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll = null, mitEreignissen = true, beobachter = null, ansicht = MIT_ANSICHT } = {}) {
   const prof = PROFILE[profilName];
@@ -174,6 +178,7 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
   const regeln = ansicht ? { ...RULES, queue: { ...RULES.queue, approachMax: ANSICHT.anfahrt[1] } } : RULES;
   const ctx = sim.createContext({ boatTypes: BOAT_CATALOG, harbor: HAFEN, rules: regeln });
   const state = createState({ seed, rules: regeln });
+  state.region = REVIER;
   // Wie die Ansicht im Spiel: abreisende Boote melden 'boot:noch-in-box', bis ihre Ablegezeit um ist
   const ablegen = () => {
     if (!ansicht) return;
@@ -229,6 +234,9 @@ export function spiel(seed, profilName = 'geschickt', { maxTage = 600, protokoll
     if (f !== 1) { m.visitorFactor *= f; m.serviceIncomeFactor *= f; }
     return m;
   });
+
+  // Ebbe und Flut wie im Spiel (features/gezeiten.js): als Letztes, nach den Bootsgeschichten (Hook 'arrivals')
+  gezeitenEinhaengen((n, f) => sim.addHook(ctx, n, f));
 
   const lauf = { stufeTag: { 1: 1 }, zielTag: {}, sparTage: {}, pausen: [], letzterKauf: 1, kaeufe: 0,
     einStufe: {}, ende: null, grossschiffBesuche: 0, leerlauf: {}, geldAmTag: {} };
@@ -545,6 +553,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   if (sp >= 0) SPIELER.splice(0, SPIELER.length, ...args[sp + 1].split(','));
   const pr = args.indexOf('--preis');
   if (pr >= 0) PREIS = args[pr + 1];
+  const rv = args.indexOf('--revier');
+  if (rv >= 0) REVIER = args[rv + 1];
   const wert = (name, std) => { const i = args.indexOf(name); return i >= 0 ? Number(args[i + 1]) : std; };
   const fehler = pruefen();
   if (fehler.length) {

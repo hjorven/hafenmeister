@@ -194,7 +194,8 @@ export function pegelHeute(state) {
 export function setzePegel(state, ctx, wx) {
   if (!state) return 0;
   const st = state.stage ?? 1;
-  const m = st >= (NW?.abStufe ?? 99) && st <= (NW?.bisStufe ?? 99) ? wasserstand(wx) : 0;
+  // Nur an der Ostsee: In der Nordsee bestimmt die Tide den Wasserstand (P57, features/gezeiten-regeln.js)
+  const m = state.region !== 'nordsee' && st >= (NW?.abStufe ?? 99) && st <= (NW?.bisStufe ?? 99) ? wasserstand(wx) : 0;
   baggerState(state).pegel = { tag: state.day, m };
   if (ctx) ctx.waterLevel = m;
   return m;
