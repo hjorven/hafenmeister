@@ -734,7 +734,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 
 | Paket | Titel (Thread) | Inhalt | Thread |
 |---|---|---|---|
-| P57 | Nordsee mit Gezeiten spielbar machen | Revierfaktoren, Gezeiten, Schleuse, Trockenfallplätze, `docs/regionen.md` | läuft (Thread "Nordsee mit Gezeiten spielbar machen"): Teil 1 Gezeiten in den Regeln (PR 448), Teil 2 Tide sichtbar und Teil 3 Trockenfallplätze (PR 450) gebaut, Teile 4 bis 6 in Arbeit (docs/nordsee.md) |
+| P57 | Nordsee mit Gezeiten spielbar machen | Revierfaktoren, Gezeiten, Schleuse, Trockenfallplätze, `docs/regionen.md` | läuft (Thread "Nordsee mit Gezeiten spielbar machen"): Teil 1 Gezeiten in den Regeln (PR 448), Teil 2 Tide sichtbar und Teil 3 Trockenfallplätze (PR 450), Teil 4 Schleuse (PR 452) gebaut, Teile 5 und 6 in Arbeit (docs/nordsee.md) |
 | P58 | Online mit Supabase | Hafenname, Bestenliste, Gastboote; erst wenn alles lokal fertig ist | neu, zuletzt |
 
 ### Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)
