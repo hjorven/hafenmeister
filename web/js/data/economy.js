@@ -1185,6 +1185,13 @@ export const ECONOMY = {
     // springNippTage: einmal Spring- und Nipptide in so vielen Tagen; springFaktor: so viel mehr (Spring)
     // oder weniger (Nipp) Hub als im Mittel.
     gezeiten: { hub: 2.8, periodeStunden: 12.42, hochwasserTag1: 9.5, springNippTage: 14.8, springFaktor: 0.2 },
+    // Trockenfallplätze (K4): an der Nordsee liegt das Bojenfeld auf einer Plate im Watt. suche: so viel Wasser
+    // (Meter unter dem mittleren Wasser) braucht der Ort mindestens, an dem das Feld liegt; platte: dort liegt
+    // der Grund der Plate (Meter unter dem mittleren Wasser), bei Niedrigwasser liegen die Boote trocken.
+    // Nur Boote ohne tiefen Kiel (arten) dürfen dort liegen; sie kommen nur hin und weg, wenn über der Plate
+    // genug Wasser steht (Tiefgang plus Wasser unter dem Kiel). kreisM: Schwoikreis im Watt.
+    // bonus: so viel mehr Anker in der Bewertung je Bootsart (Kutter fallen gern trocken, wie zu Hause).
+    trockenfallen: { suche: 0.2, platte: 0.55, kreisM: 7, arten: ['ruderboot', 'paddelboot', 'beiboot', 'jolle', 'motorboot', 'fischer'], bonus: { fischer: 0.3, motorboot: 0.1 } },
     // Zufahrt (Priel durchs Watt, ab Stufe 3 Fahrrinne und Schleuse): Wassertiefe bei Niedrigwasser je Stufe.
     // Ein- und Auslaufen geht nur, wenn zufahrt + Wasserstand >= Tiefgang + passregel.wasserUnterKiel.
     // Wer nicht hindurch kann, wartet an der Boje (ohne Geduldverlust) oder bleibt in der Box, bis die Flut kommt.

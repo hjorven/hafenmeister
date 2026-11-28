@@ -1,6 +1,6 @@
 # Nordsee mit Ebbe und Flut (P57)
 
-Stand: 28.11.2026. Status: **Teil 1 und 2 gebaut** (Gezeiten in den Spielregeln, Revierfaktoren, Tide sichtbar). Die übrigen Teile sind in Arbeit, siehe Abschnitt 6. Die Nordsee ist für Spieler noch nicht zu erreichen (nur `?revier=nordsee&stufe=n` zum Ausprobieren), bis Teil 5 (Freischalten und Seekarte) gemergt ist.
+Stand: 28.11.2026. Status: **Teil 1 bis 3 gebaut** (Gezeiten in den Spielregeln, Revierfaktoren, Tide sichtbar, Trockenfallplätze). Die übrigen Teile sind in Arbeit, siehe Abschnitt 7. Die Nordsee ist für Spieler noch nicht zu erreichen (nur `?revier=nordsee&stufe=n` zum Ausprobieren), bis Teil 5 (Freischalten und Seekarte) gemergt ist.
 
 Ergänzt [regionen.md](regionen.md) (Aussehen der Reviere) und Abschnitt 9 im [Spielplan](plan.md). Roadmap: P57, Punkte K2 bis K6.
 
@@ -59,7 +59,22 @@ Das Grün-Rot-Schild einer Box bleibt bei Ebbe grün: Die Box ist frei, nur die 
 
 Vorschaubilder: `nordsee/teil2-*.png` in den Projektdateien.
 
-## 4. Ausprobieren
+## 4. Trockenfallplätze (Teil 3)
+
+An der Nordsee liegt das Bojenfeld (P36, [bojenfeld.md](bojenfeld.md)) auf einer Plate im Watt: Im Baumenü heißt es "Trockenfallplätze im Watt" (später "Trockenfallplätze erweitern"), Preise und Bauabschnitte wie das Bojenfeld.
+
+| Regel | Was passiert |
+|---|---|
+| Wer darf dort liegen? | Nur Boote ohne tiefen Kiel: Ruder- und Paddelboote, Beiboote, Jollen, Motorboote, Kutter (`nordsee.trockenfallen.arten`). Kielyachten bekommen beim Ziehen den Grund `kiel`. Wie im Bojenfeld nur Klassen S und M. |
+| Wann hin und weg? | Nur, wenn über der Plate genug Wasser steht: Wasserstand minus Höhe der Plate über Seekartennull mindestens Tiefgang plus 0,3 m (Grund `platte`). Ablegen wird ins Fenster gelegt (Hook `departAt`), wie bei der Zufahrt. |
+| Bewertung | Kutter +0,3 Anker, Motorboote +0,1 Anker, wenn sie auf der Plate lagen (`nordsee.trockenfallen.bonus`). |
+| Liegegeld, letzte Wahl, offen bei Sturm | wie im Bojenfeld |
+
+Im Bild: Unter dem Bojenfeld liegt eine Schlickplate (`render/stege.js`, `platen`), auch wo noch keine Boje liegt. Bei Ebbe fällt sie trocken, die Bojen liegen auf dem Schlick, die Boote liegen leicht schräg darauf und schwojen nicht (`render/boat-anim.js`). Bei Flut steht Wasser darüber. Lage: `render/landschaft/bojenfeld-lage.js` sucht an der Nordsee Wasser mit mindestens `suche` Metern (sonst wie im Bojenfeld), die Plate liegt immer auf Höhe `platte`, damit Regeln und Bild dieselbe Höhe haben.
+
+Ausprobieren: `?revier=nordsee&stufe=4&bojenfeld=2`. Vorschaubilder: `nordsee/teil3-*.png`.
+
+## 5. Ausprobieren
 
 ```
 http://localhost:8000/?revier=nordsee&stufe=2
@@ -75,7 +90,7 @@ node tools/balance.mjs --laeufe 10 --revier nordsee
 
 Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, Ostsee 103. Einnahmen bis Tag 30 höher (Hafengeld mal 1,15), der Aufstieg gleich lang.
 
-## 5. Entscheidungen (P57, selbst getroffen und notiert)
+## 6. Entscheidungen (P57, selbst getroffen und notiert)
 
 | Frage | Entscheidung | Warum |
 |---|---|---|
@@ -83,15 +98,17 @@ Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, O
 | Ein oder zwei Hochwasser je Tag? | Echte Tide mit 12,42 Stunden auf die Uhrzeit im Spiel | Bei 12,5 Stunden Tageslicht gibt es jeden Tag mindestens ein Hochwasser, das jeden Tag später kommt. |
 | Wer wartet, verliert Geduld? | Nein, solange die Zufahrt zu ist. | Der Spieler kann nichts tun, Warten auf die Flut ist normal. |
 | Tidenzahlen in `regions.js` oder `economy.js`? | Nur in `economy.js` (`nordsee.gezeiten`), `regions.js` sagt nur noch, dass die Nordsee eine Tide hat (`REVIER_FORMAT` 2). Die zweite Gezeitenrechnung in `world/region.js` ist entfernt. | Eine Zahlendatei (Regel aus P06). |
+| Trockenfallplätze als eigene Platzart oder als Bojenfeld im Watt (K4)? | Das Bojenfeld liegt an der Nordsee auf einer Plate. | So wie in echten Wattenhäfen (Muringbojen, die trockenfallen). Bau, Lage, Liegegeld, Bauvorschau und Antippen gibt es schon; neu sind nur die Regeln für Kiel und Wasserstand und das Bild. Mehrrumpfboote (Klasse L) passen nicht auf die kleinen Bojenplätze, darum liegen dort Kutter und kleine Boote. |
+| Plate aus dem Gelände oder eigene Fläche? | Eigene Schlickfläche auf fester Höhe unter dem Bojenfeld. | Das Gelände hat an kaum einer Küste ein ebenes Watt in passender Höhe nahe den Stegen. Mit fester Höhe stimmen Regeln (Node, ohne Gelände) und Bild überein. |
 | `economy.js` für andere Pakete frei? | Alle Nordsee-Zahlen stehen im eigenen Block `ECONOMY.nordsee`; P57 ändert nichts außerhalb davon. | P45 und Welle 6 können parallel an `economy.js` arbeiten. |
 
-## 6. Teile
+## 7. Teile
 
 | Teil | Inhalt | Stand |
 |---|---|---|
 | 1 | Gezeiten in den Spielregeln, Zufahrt, Warten auf Flut, Abreise im Tidenfenster, Revierfaktoren, Balancing `--revier nordsee`, Reviertest im normalen Testlauf | gebaut |
 | 2 | Tide sichtbar: Boote und Schwimmstege heben und senken sich, Pegellatte, Pegel im Wetterknopf, Gezeiten im Wetterbericht, Bootskarte "ab etwa ... Uhr" | gebaut |
-| 3 | Trockenfallplätze (K4): das Bojenfeld liegt an der Nordsee auf einer Plate im Watt, nur für Boote ohne tiefen Kiel, Kutter liegen dort gern | in Arbeit |
+| 3 | Trockenfallplätze (K4): das Bojenfeld liegt an der Nordsee auf einer Plate im Watt, nur für Boote ohne tiefen Kiel, Kutter liegen dort gern | gebaut |
 | 4 | Schleuse als Ausbau zu Stufe 3 statt Durchstich | in Arbeit |
 | 5 | Freischalten ab Ostsee Stufe 5 (K6), Seekarte zum Wechseln, eigener Spielstand je Revier, Startgeld aus dem Ruf (K5) | in Arbeit |
 | 6 | Nordsee-Küsten: eigene Auswahl an Küstentypen für die Nordsee | in Arbeit |

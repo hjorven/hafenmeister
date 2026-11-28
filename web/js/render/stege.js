@@ -59,6 +59,8 @@ export function init(game) {
   // Nordsee (P57): Stege und Kai stehen um landPlus höher (über Springhochwasser), Pfähle reichen bis unter
   // Niedrigwasser. Liegeplatzflächen, Fingerstege und Bauplätze schwimmen mit dem Pegel (game.landscape.pegel).
   const hoch = () => (game.landscape?.region === 'nordsee' ? regionNach('nordsee').gelaende?.landPlus ?? 0 : 0);
+  // Nordsee (P57): Das Bojenfeld liegt auf einer Plate im Watt; Grund so viele Meter unter dem mittleren Wasser
+  const platte = () => (hoch() && ECONOMY.nordsee?.trockenfallen ? ECONOMY.nordsee.trockenfallen.platte : null);
   // Pfahl von unten bis oben (Meter in seiner Gruppe) strecken
   function strecken(m, geoHoehe, oben, unten) {
     const len = oben - unten;
@@ -116,7 +118,13 @@ export function init(game) {
     const t = game.time ?? performance.now() / 1000;
     for (const b of bojen) {
       const ph = b.userData.phase;
-      b.position.y = Math.sin(t * 1.5 + ph) * 0.05 - 0.05 + (game.landscape?.pegel ?? 0); // mit dem Pegel (Nordsee, P57)
+      // mit dem Pegel (Nordsee, P57); auf der Plate im Watt liegt die Boje bei Ebbe auf dem Grund
+      const pg = game.landscape?.pegel ?? 0;
+      if (b.userData.grund != null && pg < b.userData.grund + 0.05) {
+        b.position.y = b.userData.grund; b.rotation.set(0.25, 0, 0.12);
+        continue;
+      }
+      b.position.y = Math.sin(t * 1.5 + ph) * 0.05 - 0.05 + pg;
       b.rotation.x = Math.sin(t * 1.2 + ph) * 0.07;
       b.rotation.z = Math.cos(t * 1.05 + ph) * 0.07;
     }
@@ -325,11 +333,12 @@ export function init(game) {
   function muringboje(p, c, g) {
     const fl = new THREE.Mesh(bojeFlaecheGeo, platzMaterial());
     fl.position.set(c.x, 0.06, c.z);
-    schwimmend.push([fl, 0.06]);
+    schwimmend.push([fl, 0.06, platte() != null ? -platte() + 0.06 : null]);
     fl.userData.pick = { type: 'berth', id: p.id };
     fl.renderOrder = 2;
     g.add(fl);
     const boje = new THREE.Group();
+    if (platte() != null) boje.userData.grund = -platte() + 0.2;
     boje.name = `muringboje-${p.id}`;
     const ball = new THREE.Mesh(bojeKugelGeo, M.bojeWeiss);
     const band = new THREE.Mesh(bojeBandGeo, M.bojeBlau);
@@ -500,6 +509,7 @@ export function init(game) {
     });
 
     if (hoch()) pegellatte(gebauteStege, gruppe);
+    if (platte() != null) platen(gruppe);
 
     let nr = 0;
     let letzterSteg = null;
@@ -549,6 +559,33 @@ export function init(game) {
     latte.name = 'pegellatte';
     latte.userData.schwimmt = true;   // nicht mit den Stegen zusammenfassen
     g.add(latte);
+  }
+
+  // Nordsee (P57): Plate im Watt unter dem Bojenfeld (auch wo noch keine Boje liegt, sie ist Natur).
+  // Je Boje ein flacher Schlickhügel, oben eben auf Höhe -platte; bei Ebbe liegt er trocken, die Boote darauf.
+  const SCHLICK = mat('#a89270');
+  function platen(g) {
+    const pkte = HAFEN.plaetze.filter((p) => p.art === 'boje').map((p) => p.lage?.[stufe]).filter(Boolean);
+    if (!pkte.length) return;
+    const r = BOJE_R + 4;
+    const geos = pkte.map(([x, y], i) => {
+      const geo = new THREE.CylinderGeometry(r, r + 3, 1.2, 18, 1);
+      // etwas unregelmäßig, damit es nicht wie gestanzt aussieht
+      const pos = geo.attributes.position;
+      for (let k = 0; k < pos.count; k++) {
+        const w = Math.atan2(pos.getZ(k), pos.getX(k));
+        const f = 1 + 0.12 * Math.sin(w * 3 + i * 1.7) + 0.08 * Math.sin(w * 5 + i);
+        pos.setX(k, pos.getX(k) * f);
+        pos.setZ(k, pos.getZ(k) * f);
+      }
+      const v = W(x, y);
+      geo.translate(v.x, -platte() - 0.6, v.z);
+      return geo;
+    });
+    const m = new THREE.Mesh(mergeGeometries(geos), SCHLICK);
+    m.name = 'platen';
+    m.userData.schwimmt = true;
+    g.add(m);
   }
 
   // Noch nicht gekaufter Stegteil: heller, durchscheinender Umriss auf dem Wasser
@@ -603,7 +640,7 @@ export function init(game) {
     if (pg === pegelVor && !schwimmend.neu) return;
     pegelVor = pg;
     schwimmend.neu = false;
-    for (const [m, y] of schwimmend) m.position.y = y + pg;
+    for (const [m, y, boden] of schwimmend) m.position.y = boden != null ? Math.max(boden, y + pg) : y + pg;
   });
 
   // Bauplatz antippen oeffnet die Bauen-Karte (dort steht das Stegprojekt mit Preis)

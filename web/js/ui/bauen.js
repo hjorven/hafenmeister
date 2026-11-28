@@ -339,12 +339,18 @@ export function init(game) {
       const bf = ECONOMY.bojenfeld ?? {};
       const anteil = Math.round((bf.liegegeld ?? 1) * 100);
       const gebaut = (game.bojenfeld.bojen?.() ?? []).length;
+      const watt = !!game.gezeiten?.aktiv?.() && !!ECONOMY.nordsee?.trockenfallen;
       out.push({
         key: `bojenfeld:${a.id}`, art: 'steg', id: a.id, ueberlauf: true,
-        name: a.erweitern ? 'Bojenfeld erweitern' : 'Bojenfeld im See', kosten: a.kosten,
+        name: watt ? (a.erweitern ? 'Trockenfallplätze erweitern' : 'Trockenfallplätze im Watt') : a.erweitern ? 'Bojenfeld erweitern' : 'Bojenfeld im See', kosten: a.kosten,
         gesperrt: a.gesperrt, plaetzeNeu: a.bojen.length, ohneSchild: true,
         kurz: `+${a.bojen.length} Bojen`,
-        nutzen: [
+        nutzen: watt ? [
+          // Nordsee (P57, Trockenfallplätze): das Bojenfeld liegt auf einer Plate, die bei Ebbe trockenfällt
+          `${a.bojen.length} Muringbojen auf einer Plate im Watt${gebaut ? `, dazu die ${gebaut}, die schon liegen` : ''}: Bei Ebbe liegen die Boote dort auf dem Schlick. Nur für Boote ohne tiefen Kiel bis ${String(bf.maxLaenge ?? 9).replace('.', ',')} m: Kutter, Motorboote, Jollen, Ruder- und Paddelboote.`,
+          `Gäste dort zahlen ${anteil} % vom Hafengeld. Kutter liegen gern trocken und bewerten besser. Hin und weg geht es nur, wenn über der Plate genug Wasser steht.`,
+          'Büro und Gäste nehmen eine Boje erst, wenn keine Box passt. Strom und Wasser gibt es dort nicht.',
+        ] : [
           `${a.bojen.length} Muringbojen im See${gebaut ? `, dazu die ${gebaut}, die schon liegen` : ''}: Plätze für Boote bis ${String(bf.maxLaenge ?? 9).replace(".", ",")} m lang. Strom und Wasser gibt es dort nicht.`,
           `Gäste an der Boje zahlen ${anteil} % vom Hafengeld. Büro und Gäste nehmen eine Boje erst, wenn keine Box passt.`,
           'Die Bojen liegen offen im See: Bei Sturm und Starkwind schaukelt es dort.',

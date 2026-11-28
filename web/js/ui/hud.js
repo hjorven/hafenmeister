@@ -20,6 +20,8 @@ const REASON_LABEL = {
   draft: 'Hier ist das Wasser zu flach für dieses Boot.',
   niedrigwasser: 'Heute ist Niedrigwasser: Hier bleibt gerade zu wenig Wasser unter dem Kiel.',
   tide: 'Ebbe: In der Zufahrt ist zu wenig Wasser für dieses Boot. Es wartet auf die Flut.',
+  kiel: 'Die Plate fällt bei Ebbe trocken: Dort liegen nur Boote ohne tiefen Kiel (Kutter, Motorboote, Jollen, Ruder- und Paddelboote).',
+  platte: 'Über der Plate steht gerade zu wenig Wasser für dieses Boot. Erst wenn die Flut aufläuft, kommt es hierher.',
   size: 'Dieser Platz ist für andere Schiffsgrößen.',
   reserved: 'Dieser Platz ist fest vergeben.',
   funk: 'Diese Box ist für ein angemeldetes Boot frei gehalten.',

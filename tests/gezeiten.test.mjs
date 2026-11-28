@@ -205,3 +205,34 @@ test('Ostsee: ein ganzer Spieltag mit und ohne die Gezeiten-Hooks ist gleich', (
   for (const w of [a, b]) for (let i = 0; i < 700; i++) sim.tick(w.state, w.ctx, 1);
   assert.deepEqual(JSON.parse(JSON.stringify(a.state)), JSON.parse(JSON.stringify(b.state)));
 });
+
+test('Trockenfallplätze: Plate nur für Boote ohne Kiel, hin und weg nur bei Wasser über der Plate, Kutter liegen gern dort', () => {
+  const { ctx, state } = neu({ stage: 2 });
+  state.buildings['bojenfeld-1'] = 1;
+  state.day = 5;   // Niedrigwasser am Morgen, Hochwasser am Nachmittag
+  const plate = ctx.berths.find((b) => b.kind === 'boje');
+  assert.ok(plate, 'Bojenfeld in den Regeln');
+  const { lo, hi } = extrem(state, ctx);
+  const yacht = boot(state, { draft: 0.9, kind: 'segelyacht', length: 7, beam: 2.5 });
+  const kutter = boot(state, { draft: 0.8, kind: 'fischer', typeId: 'M3', length: 8, beam: 3 });
+  state.clock = hi;
+  assert.equal(G.fitTide({ state, ctx, boat: yacht, berth: plate }), 'kiel');
+  assert.equal(G.fitTide({ state, ctx, boat: kutter, berth: plate }), null);
+  state.clock = lo;
+  assert.equal(G.fitTide({ state, ctx, boat: kutter, berth: plate }), 'platte');
+  // Ostsee: das Bojenfeld bleibt wie es war
+  assert.equal(G.fitTide({ state: { ...state, region: 'ostsee' }, ctx, boat: yacht, berth: plate }), null);
+  // Liegt der Kutter auf der Plate, legt er erst bei genug Wasser darüber ab
+  Object.assign(kutter, { status: 'moored', berthId: plate.id, atBuoy: false });
+  state.queue = state.queue.filter((id) => id !== kutter.id);
+  state.berths[plate.id] = kutter.id;
+  const ab = G.ablegenBeiFlut({ state, ctx, boat: kutter, at: lo, tag: state.day });
+  assert.ok(ab > lo, 'Ablegen später');
+  assert.equal(G.platzOffen(state, ctx, kutter, plate, ab), true);
+  assert.equal(G.zufahrtOffen(state, ctx, kutter, ab), true);
+  // Bewertung: Kutter auf der Plate liegt gern dort
+  G.flutTick({ state, ctx });
+  assert.equal(kutter.trocken, true);
+  assert.ok(G.bonusTrocken(kutter) > 0);
+  assert.equal(G.bonusTrocken(yacht), 0);
+});

@@ -16,6 +16,7 @@
 import * as THREE from 'three';
 import { Engstellen } from './boat-channel.js';
 import { liegeGeometrie, liegeVersatz } from '../data/liegelage.js';
+import { ECONOMY } from '../data/economy.js';
 
 const U = 0.62;               // Meter je Planeinheit (wie main.js und harbor.js)
 const TAU = Math.PI * 2;
@@ -1888,7 +1889,20 @@ class BoatAnim {
     // Ebbe und Flut (Nordsee, P57): Boote schwimmen auf dem Wasser, das mit dem Pegel steigt und fällt
     const pegel = this.game.landscape?.pegel ?? 0;
     this.pegelY = pegel;
-    m.position.set(px + ch * sx, heave + pegel, pz - sh * sx);
+    let y = heave + pegel;
+    // Trockenfallplätze (Nordsee): an der Muringboje auf der Plate liegt das Boot bei Ebbe auf dem Schlick,
+    // leicht schräg, und schwojt nicht
+    const tf = ECONOMY.nordsee?.trockenfallen;
+    if (tf && this.moored && bb?.kind === 'buoy' && this.game.landscape?.region === 'nordsee') {
+      const grund = -tf.platte + (info.draft ?? 0.5) * 0.6;
+      if (y < grund) {
+        y = grund;
+        roll = 0.07 + 0.03 * Math.sin(this.ph[0] * 7);
+        pitch = 0.02;
+        yaw = bb.heading;
+      }
+    }
+    m.position.set(px + ch * sx, y, pz - sh * sx);
     m.rotation.set(roll, yaw, pitch);
 
     this.applyParts(step, t, lee, rel);

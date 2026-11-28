@@ -98,6 +98,11 @@ export function hindernisse(region, lockern = {}) {
   return { reg, stufen, linien, korridore, kreise, runden, P };
 }
 
+/** Nordsee (P57): Regeln für Trockenfallplätze (ECONOMY.nordsee.trockenfallen) oder null. */
+export function trockenfallen(reg) {
+  return reg?.id === 'nordsee' && reg?.gelaende?.gezeiten ? ECONOMY.nordsee?.trockenfallen ?? null : null;
+}
+
 function punktOk(px, py, h) {
   if (py > h.P.nordGrenze || py < -20) return false;
   for (const l of h.linien) {
@@ -114,14 +119,18 @@ function punktOk(px, py, h) {
   // tief genug im ganzen Schwoikreis, bei Niedrigwasser: Mitte in jeder Stufe, Kreis (8 Punkte) in der
   // ersten Stufe, beim Durchstich (3) und im Seehafen (6). Später kommt nur Land dazu (Molen, Kai) oder es
   // wird gebaggert; beides zeigen diese Stufen.
+  // Nordsee (P57): Trockenfallplätze auf einer Plate im Watt. Das Feld braucht nur Wasser (suche), die Plate
+  // auf Höhe platte legt render/trockenfallen.js darunter.
+  const tf = trockenfallen(h.reg);
   const ebbe = h.reg?.gelaende?.gezeiten || 0;
   const soll = h.P.tiefe + h.P.tiefeReserve + ebbe;
-  for (const s of h.stufen) if (-punkt(px, py, s, h.reg).h < soll) return false;
-  const r = h.P.schwoikreisM / PLAN_M;
+  const passt = (t) => t >= (tf ? tf.suche : soll);
+  for (const s of h.stufen) if (!passt(-punkt(px, py, s, h.reg).h)) return false;
+  const r = (tf ? tf.kreisM ?? h.P.schwoikreisM : h.P.schwoikreisM) / PLAN_M;
   for (const s of h.stufen.filter((x) => x === h.stufen[0] || x === 3 || x === 6)) {
     for (let k = 0; k < 8; k++) {
       const w = (k / 8) * Math.PI * 2;
-      if (-punkt(px + r * Math.cos(w), py + r * Math.sin(w), s, h.reg).h < soll) return false;
+      if (!passt(-punkt(px + r * Math.cos(w), py + r * Math.sin(w), s, h.reg).h)) return false;
     }
   }
   return true;

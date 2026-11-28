@@ -27,7 +27,7 @@ Ab Ausbaustufe 2 kannst du im See vor den Stegen Muringbojen auslegen. Sie sind 
 
 Findet sich so kein Feld, sucht es mit kleineren Abständen noch einmal (`lockern`, zwei Stufen). Hat eine Küste nur für einen Abschnitt Platz, gibt es dort nur den ersten; hat sie keinen, steht das Bojenfeld nicht im Baumenü.
 
-Gemessen (15 Küsten mit je 10 Seeds): Ostsee überall mindestens 6 Bojen, in 132 von 150 Fällen alle 12; nur 6 vor allem auf Schären (6 von 10 Seeds), Steilküste und Watt (je 3). Nordsee: 93 von 150 mit 12, 42 mit 6, 15 ohne Bojenfeld (Küste 14 bei allen Seeds, Schären bei 5), weil dort bei Niedrigwasser zu wenig Wasser bleibt. Die Nordsee kommt erst mit P57 ins Spiel; dann lohnt ein zweiter Blick. Die Suche dauert je Küste rund 0,2 bis 1 s und wird zwischengespeichert.
+Gemessen (15 Küsten mit je 10 Seeds): Ostsee überall mindestens 6 Bojen, in 132 von 150 Fällen alle 12; nur 6 vor allem auf Schären (6 von 10 Seeds), Steilküste und Watt (je 3). Nordsee: 93 von 150 mit 12, 42 mit 6, 15 ohne Bojenfeld (Küste 14 bei allen Seeds, Schären bei 5), weil dort bei Niedrigwasser zu wenig Wasser bleibt. An der Nordsee (P57) liegt das Bojenfeld als Trockenfallplätze auf einer Plate im Watt und braucht nur Wasser statt Tiefe: gemessen auf 15 Küsten mit je 10 Seeds 122 von 150 mit 12 Bojen, 28 mit 6, keine ohne (Regeln und Bild in [nordsee.md](nordsee.md), Abschnitt 4). Die Suche dauert je Küste rund 0,2 bis 1 s und wird zwischengespeichert.
 
 Die Wartebojen und Ankerfelder der Stufen 3 bis 6 liegen auf allen 15 Küsten (Seeds 1 bis 3, beide Reviere) mindestens 20 Planeinheiten vom Bojenfeld entfernt (`tests/bojenfeld.test.mjs` prüft Stufe 2 bis 6).
 

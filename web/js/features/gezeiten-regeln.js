@@ -14,12 +14,17 @@
 // - Skipper planen: Die meisten Boote, deren Ankunft bei zu wenig Wasser läge, tauschen ihre Ankunftszeit mit
 //   einem Boot, das dann hindurch kann (Hook 'arrivals'). Der Tageslauf bleibt so gleich dicht.
 // - Revierfaktoren (Hook 'modifiers'): Hafengeld, Ankünfte, Bootsarten.
+// - Trockenfallplätze (K4): Das Bojenfeld liegt an der Nordsee auf einer Plate im Watt (Grund nordsee.
+//   trockenfallen.platte unter dem mittleren Wasser). Nur Bootsarten ohne tiefen Kiel (Grund 'kiel'), hin und
+//   weg nur, wenn über der Plate genug Wasser steht (Grund 'platte', Ablegen im Fenster). Kutter und Motorboote
+//   bewerten die Plate besser (Hook 'rating', boat.trocken).
 import * as sim from '../sim.js';
 import { ECONOMY } from '../data/economy.js';
 import { uhrzeitAusUhr } from '../render/landschaft/zeit.js';
 
 export const NORDSEE = ECONOMY.nordsee ?? null;
 const G = NORDSEE?.gezeiten ?? null;
+const TF = NORDSEE?.trockenfallen ?? null;
 
 /** Hat dieser Hafen Ebbe und Flut? */
 export function hatTide(state) {
@@ -86,24 +91,52 @@ export function zufahrtOffen(state, ctx, boat, clock = uhr(state), tag = state.d
   return zufahrtTiefe(state) + wasserstand(state, ctx, clock, tag) >= braucht(ctx, boat) - 1e-9;
 }
 
+/** Liegeplatz auf der Plate im Watt (Bojenfeld an der Nordsee)? */
+export function istTrocken(state, berth) {
+  return !!TF && hatTide(state) && berth?.kind === 'boje';
+}
+
+/** Höhe der Plate über Seekartennull (Meter). */
+export function plattenHoehe() {
+  return TF && G ? G.hub / 2 - TF.platte : 0;
+}
+
+/** Darf diese Bootsart auf der Plate trockenfallen (kein tiefer Kiel)? */
+export function darfTrocken(boat) {
+  return !TF || (TF.arten ?? []).includes(boat?.kind);
+}
+
+/** Steht über der Plate genug Wasser für dieses Boot (andere Plätze: immer)? */
+export function platzOffen(state, ctx, boat, berth, clock = uhr(state), tag = state.day) {
+  if (!istTrocken(state, berth) || !(boat?.draft > 0)) return true;
+  return wasserstand(state, ctx, clock, tag) - plattenHoehe() >= braucht(ctx, boat) - 1e-9;
+}
+
+/** Kommt das Boot jetzt hinaus oder herein: Zufahrt und (liegt es auf der Plate) Wasser über der Plate. */
+export function kommtDurch(state, ctx, boat, clock = uhr(state), tag = state.day) {
+  if (!zufahrtOffen(state, ctx, boat, clock, tag)) return false;
+  const berth = boat?.berthId != null ? ctx?.berthById?.[boat.berthId] : null;
+  return platzOffen(state, ctx, boat, berth, clock, tag);
+}
+
 /** Boote, für die die Zufahrt nicht gilt: liegen fest, sind Probe, oder ein Modul führt sie selbst. */
 function ausgenommen(boat) {
   return !boat || boat.probe || boat.stationed || boat.havarie || boat.jugend || boat.besucher || boat.size === 'XXL';
 }
 
 /**
- * Erste Spieluhr ab `ab` (Sekunden des Tages tag), zu der die Zufahrt für dieses Boot offen ist, in Schritten
+ * Erste Spieluhr ab `ab` (Sekunden des Tages tag), zu der das Boot durchkommt (kommtDurch), in Schritten
  * von einer Sekunde bis `bis`. null, wenn sie bis dahin zu bleibt.
  */
 export function naechstesFenster(state, ctx, boat, ab = uhr(state), bis = tagLaenge(ctx) + abendLaenge(ctx), tag = state.day) {
-  if (zufahrtOffen(state, ctx, boat, ab, tag)) return ab;
-  for (let t = Math.ceil(ab); t <= bis; t++) if (zufahrtOffen(state, ctx, boat, t, tag)) return t;
+  if (kommtDurch(state, ctx, boat, ab, tag)) return ab;
+  for (let t = Math.ceil(ab); t <= bis; t++) if (kommtDurch(state, ctx, boat, t, tag)) return t;
   return null;
 }
 
 /** Bis wann (Spieluhr) die Zufahrt ab `ab` offen bleibt (höchstens bis). */
 export function fensterEnde(state, ctx, boat, ab, bis = tagLaenge(ctx) + abendLaenge(ctx), tag = state.day) {
-  for (let t = Math.ceil(ab); t <= bis; t++) if (!zufahrtOffen(state, ctx, boat, t, tag)) return t;
+  for (let t = Math.ceil(ab); t <= bis; t++) if (!kommtDurch(state, ctx, boat, t, tag)) return t;
   return bis;
 }
 
@@ -128,9 +161,17 @@ export function scheitel(state, ctx, tag = state.day) {
 // ---------------------------------------------------------------------------
 // Hooks
 
-/** Hook 'fit': Ankommende Boote laufen nur ein, wenn genug Wasser in der Zufahrt ist. */
-export function fitTide({ state, ctx, boat }) {
-  if (!hatTide(state) || ausgenommen(boat) || boat.status === 'moored') return null;
+/**
+ * Hook 'fit': Ankommende Boote laufen nur ein, wenn genug Wasser in der Zufahrt ist. Auf die Plate im Watt
+ * nur Boote ohne tiefen Kiel ('kiel') und nur bei genug Wasser darüber ('platte', auch beim Umlegen).
+ */
+export function fitTide({ state, ctx, boat, berth }) {
+  if (!hatTide(state) || ausgenommen(boat)) return null;
+  if (istTrocken(state, berth)) {
+    if (!darfTrocken(boat)) return 'kiel';
+    if (!platzOffen(state, ctx, boat, berth)) return 'platte';
+  }
+  if (boat.status === 'moored') return null;
   return zufahrtOffen(state, ctx, boat) ? null : 'tide';
 }
 
@@ -148,6 +189,11 @@ export function wartetAufFlut({ state, ctx, boat }) {
  */
 export function flutTick({ state, ctx }) {
   if (!hatTide(state)) return;
+  // Auf der Plate gelegen (für die Bewertung, Hook 'rating')
+  if (TF) for (const [bid, id] of Object.entries(state.berths)) {
+    const b = state.boats[id];
+    if (b && !b.trocken && istTrocken(state, ctx.berthById[bid])) b.trocken = true;
+  }
   for (const id of state.queue) {
     const b = state.boats[id];
     if (!b || ausgenommen(b)) continue;
@@ -167,6 +213,7 @@ export function flutTick({ state, ctx }) {
  */
 export function ablegenBeiFlut({ state, ctx, boat, at, tag }) {
   if (!hatTide(state) || ausgenommen(boat)) return at;
+  // kommtDurch prüft Zufahrt und Plate (liegt das Boot im Watt, braucht es dort genug Wasser)
   const spaet = tagLaenge(ctx) * 0.95;
   const t = naechstesFenster(state, ctx, boat, Math.max(0, at), spaet, tag);
   if (t != null) return t;
@@ -217,7 +264,7 @@ export function planeAnkuenfte({ state, ctx, list }) {
   for (const boat of Object.values(state.boats)) {
     const t = boat.trip;
     if (!t || t.away || boat.status !== 'moored' || ausgenommen(boat)) continue;
-    if (zufahrtOffen(state, ctx, boat, t.out) && zufahrtOffen(state, ctx, boat, t.back)) continue;
+    if (kommtDurch(state, ctx, boat, t.out) && kommtDurch(state, ctx, boat, t.back)) continue;
     const raus = naechstesFenster(state, ctx, boat, t.out, tagLaenge(ctx) * 0.6);
     const ende = raus != null ? fensterEnde(state, ctx, boat, raus, tagLaenge(ctx) * 0.95) : null;
     // mindestens ein Viertel Tag draußen, zurück im selben oder im nächsten Fenster
@@ -242,6 +289,11 @@ export function revierFaktoren(state) {
   };
 }
 
+/** Hook 'rating': Kutter (und Motorboote) liegen gern auf der Plate, wie zu Hause. */
+export function bonusTrocken(boat) {
+  return boat?.trocken ? TF?.bonus?.[boat.kind] ?? 0 : 0;
+}
+
 /**
  * Hooks in einen Regel-Kontext hängen (Browser über api.addHook, Werkzeuge über sim.addHook).
  * zustand() liefert den Spielstand (die Modifikatoren bekommen ihn als erstes Argument).
@@ -256,6 +308,7 @@ export function haengeEin(addHook) {
     addHook('departAt', ablegenBeiFlut),
     addHook('arrivals', planeAnkuenfte),
     addHook('modifiers', (state) => revierFaktoren(state)),
+    addHook('rating', ({ boat }) => bonusTrocken(boat)),
   ];
   return () => ab.forEach((f) => f?.());
 }
