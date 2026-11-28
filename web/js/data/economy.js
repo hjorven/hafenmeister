@@ -1196,6 +1196,10 @@ export const ECONOMY = {
     // namen: Namen der Stufe 3 und ihres Ausbaus an der Nordsee (Durchstich / offene Küste mit Molen).
     schleuse: { abStufe: 3, takt: 16, offen: 7,
       namen: { ausbau: 'Durchstich mit Schleuse', ausbauOffen: 'Molen und Wellenbrecher', stufe: 'Hafen mit Schleuse', stufeOffen: 'Hafen hinter der Mole' } },
+    // Freischalten und Start (Teil 5): Die Nordsee wird frei, sobald ein Ostsee-Hafen Stufe abStufe erreicht.
+    // Startgeld eines neuen Nordsee-Hafens aus dem Ruf des besten Ostsee-Hafens: je Anker geldJeAnker Euro,
+    // auf volle Hundert gerundet, mindestens geldMin, höchstens geldMax (save/reviere.js).
+    start: { abStufe: 5, geldJeAnker: 300, geldMin: 600, geldMax: 1500 },
     trockenfallen: { suche: 0.2, platte: 0.55, kreisM: 7, arten: ['ruderboot', 'paddelboot', 'beiboot', 'jolle', 'motorboot', 'fischer'], bonus: { fischer: 0.3, motorboot: 0.1 } },
     // Zufahrt (Priel durchs Watt, ab Stufe 3 Fahrrinne und Schleuse): Wassertiefe bei Niedrigwasser je Stufe.
     // Ein- und Auslaufen geht nur, wenn zufahrt + Wasserstand >= Tiefgang + passregel.wasserUnterKiel.

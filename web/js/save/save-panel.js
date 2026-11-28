@@ -93,6 +93,17 @@ img.hm-sp-bild{box-shadow:0 0 0 var(--sp-px) rgba(36,54,74,.35)}
 .hm-sp-steg[aria-checked=true]{outline:calc(var(--sp-px) * 2) solid var(--sp-tinte);outline-offset:2px}
 .hm-sp-steg[aria-checked=true]::after{content:"";position:absolute;right:4px;bottom:4px;width:12px;height:12px;
   background:var(--hm-gold,#f2c14e);box-shadow:0 0 0 2px var(--sp-tinte)}
+.hm-sp-seekarte{display:block;width:100%;max-width:360px;margin:4px auto 0;background:#e9dfca;
+  box-shadow:inset 0 0 0 var(--sp-px) rgba(36,54,74,.35)}
+.hm-sp-seekarte .land{fill:#b8cf94;stroke:#8f7a55;stroke-width:.8}
+.hm-sp-seekarte .wasser{fill:#7fbcc4;stroke:none}
+.hm-sp-revier{cursor:pointer;outline:none}
+.hm-sp-revier .name{font:9px var(--hm-pixel,'Pixelify Sans',sans-serif);fill:#24364a;pointer-events:none}
+.hm-sp-revier .schloss{font:7px var(--hm-pixel,'Pixelify Sans',sans-serif);fill:#24364a;opacity:.7;pointer-events:none}
+.hm-sp-revier.zu .wasser{fill:#a9b9bb}
+.hm-sp-revier[aria-checked=true] .wasser{fill:#4fa3b0;stroke:#24364a;stroke-width:1.6}
+.hm-sp-revier[aria-checked=true] .name{fill:#fffaf0}
+.hm-sp-revier:focus-visible .wasser{stroke:#f2c14e;stroke-width:2}
 .hm-sp-kueste{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px}
 .hm-sp-kueste .hm-sp-k{min-height:40px;font-size:14px}
 .hm-neu .hm-sp .hm-sp-kueste .hm-sp-k[aria-checked=true]{border-image-source:var(--rahmen-tinte);color:var(--sp-papier)}
@@ -168,13 +179,60 @@ function mb(bytes) {
   return `${(bytes / 1048576).toLocaleString('de-DE', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} MB`;
 }
 
-function stufenName(n) {
-  return kuestenStufenName(n);
+function stufenName(n, revier) {
+  return kuestenStufenName(n, revier);
 }
+
+export const REVIER_NAME = { ostsee: 'Ostsee', nordsee: 'Nordsee' };
 
 export function infoText(info) {
   if (!info) return 'Noch nicht gespielt';
-  return `Stufe ${info.stufe} ${stufenName(info.stufe)} · Tag ${info.tag} · ${geld(info.geld)}`;
+  const r = info.region === 'nordsee' ? 'nordsee' : 'ostsee';
+  // Das Revier nur nennen, wenn es nicht die Ostsee ist (alle alten Spielstände liegen an der Ostsee)
+  const vorne = r === 'nordsee' ? `${REVIER_NAME[r]} · ` : '';
+  return `${vorne}Stufe ${info.stufe} ${stufenName(info.stufe, r)} · Tag ${info.tag} · ${geld(info.geld)}`;
+}
+
+// Seekarte (P57 Teil 5): Nord- und Ostsee als kleine Pixelkarte, Deutschland unten, Jütland in der Mitte.
+// Ein Revier antippen wählt es; ein gesperrtes zeigt, wann es frei wird.
+const SEEKARTE_LAND = '0,100 0,74 22,70 40,72 52,64 56,40 60,22 68,14 76,20 74,40 70,56 80,62 96,66 110,62 128,60 146,66 160,62 160,100';
+const SEEKARTE_INSELN = ['84,58 90,54 94,58 88,62', '100,50 108,46 112,52 104,56', '18,64 24,62 26,66 20,67', '30,62 36,61 37,64 31,65'];
+export function seekarte({ wahl, frei, beiWahl }) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 160 100');
+  svg.setAttribute('class', 'hm-sp-seekarte');
+  svg.setAttribute('role', 'radiogroup');
+  svg.setAttribute('aria-label', 'Seekarte: Revier wählen');
+  svg.setAttribute('shape-rendering', 'crispEdges');
+  const neu = (tag, attrs, text) => {
+    const e = document.createElementNS(ns, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    if (text) e.textContent = text;
+    return e;
+  };
+  const meer = {
+    nordsee: '0,0 68,0 68,14 60,22 56,40 52,64 40,72 22,70 0,74',
+    ostsee: '68,0 160,0 160,62 146,66 128,60 110,62 96,66 80,62 70,56 74,40 76,20 68,14',
+  };
+  const knoepfe = {};
+  for (const [id, pts] of Object.entries(meer)) {
+    const g = neu('g', { role: 'radio', tabindex: '0', class: `hm-sp-revier${frei[id] ? '' : ' zu'}`, 'data-revier': id,
+      'aria-checked': String(wahl === id), 'aria-label': `${REVIER_NAME[id]}${frei[id] ? '' : ', noch gesperrt'}` });
+    g.append(neu('polygon', { points: pts, class: 'wasser' }));
+    const x = id === 'nordsee' ? 28 : 118, y = id === 'nordsee' ? 34 : 30;
+    g.append(neu('text', { x, y, 'text-anchor': 'middle', class: 'name' }, REVIER_NAME[id]));
+    if (!frei[id]) g.append(neu('text', { x, y: y + 12, 'text-anchor': 'middle', class: 'schloss' }, 'gesperrt'));
+    const waehlen = () => beiWahl(id);
+    g.addEventListener('click', waehlen);
+    g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); waehlen(); } });
+    knoepfe[id] = g;
+    svg.append(g);
+  }
+  svg.append(neu('polygon', { points: SEEKARTE_LAND, class: 'land' }));
+  for (const p of SEEKARTE_INSELN) svg.append(neu('polygon', { points: p, class: 'land' }));
+  const markieren = (w) => { for (const [id, g] of Object.entries(knoepfe)) g.setAttribute('aria-checked', String(w === id)); };
+  return { element: svg, markieren };
 }
 
 export function zuletzt(iso, now = Date.now()) {
@@ -549,6 +607,7 @@ export function openSavePanel(opts) {
   let neuGelaende = 0; // 0 = Zufall
   let neuEinstieg = null;
   let neuFlagge = null; // eigene Flagge (P44), Start: gewürfelt
+  let neuRevier = 'ostsee'; // P57 Teil 5: Revier des neuen Hafens (Seekarte)
 
   function zeichneNeu() {
     titel.textContent = 'Neues Spiel';
@@ -560,6 +619,31 @@ export function openSavePanel(opts) {
     const zurueck = el('button', { type: 'button', class: 'hm-sp-zurueck', onclick: () => { ansicht = 'liste'; say(''); zeichne(); } }, '< Zurück zu den Spielständen');
     inhalt.append(zurueck, msg);
     if (voll) say(`Alle ${P.MAX_PLAETZE} Plätze sind belegt. Lösche zuerst einen Hafen.`, true);
+
+    // Revier (P57 Teil 5): Seekarte mit Ostsee und Nordsee. Die Nordsee wird frei, sobald ein Hafen an der
+    // Ostsee die Stufe reviere.abStufe hat; ihr Startgeld kommt aus dem Ruf (save/reviere.js).
+    const rv = opts.reviere?.();
+    if (rv) {
+      if (!rv.frei[neuRevier]) neuRevier = 'ostsee';
+      const hinweis = el('p', { class: 'hm-sp-info', id: 'hm-neu-revier-info', style: 'margin-top:6px' });
+      const zeigeHinweis = (gesperrt = null) => {
+        if (gesperrt === 'nordsee') {
+          hinweis.textContent = `Die Nordsee wird frei, sobald einer deiner Häfen an der Ostsee Stufe ${rv.abStufe} erreicht (bisher Stufe ${rv.besteStufe || 1}).`;
+        } else if (neuRevier === 'nordsee') {
+          hinweis.textContent = `Ebbe und Flut, Watt und Kutter. Dein Ruf von der Ostsee bringt ${geld(rv.startgeld)} Startgeld mit.`;
+        } else {
+          hinweis.textContent = 'Ruhiges Wasser ohne Tide, Strand und Schären. Der Hafen beginnt mit einem alten Steg.';
+        }
+      };
+      const karte = seekarte({ wahl: neuRevier, frei: rv.frei, beiWahl: (id) => {
+        if (!rv.frei[id]) { zeigeHinweis(id); return; }
+        neuRevier = id;
+        karte.markieren(id);
+        zeigeHinweis();
+      } });
+      zeigeHinweis();
+      inhalt.append(el('h3', { id: 'hm-neu-revier' }, 'Revier'), karte.element, hinweis);
+    }
 
     // Name
     const input = el('input', { type: 'text', id: 'hm-neu-name', value: neuName, maxlength: String(P.NAME_MAX), autocomplete: 'off' });
@@ -637,7 +721,7 @@ export function openSavePanel(opts) {
       const anz = Math.max(1, anzahl);
       const nr = neuStegbild || (anzahl ? 1 + Math.floor(Math.random() * anz) : 0);
       const form = neuGelaende || FORMEN[Math.floor(Math.random() * FORMEN.length)]?.nr || 1;
-      opts.neuesSpiel({ name: P.nameSauber(neuName), stegbild: nr, gelaende: form, einstieg: neuEinstieg, flagge: neuFlagge });
+      opts.neuesSpiel({ name: P.nameSauber(neuName), stegbild: nr, gelaende: form, einstieg: neuEinstieg, flagge: neuFlagge, revier: neuRevier });
     }, 'Das neue Spiel konnte nicht angelegt werden.'), 'hm-primaer breit');
     los.id = 'hm-neu-los';
     los.disabled = voll;

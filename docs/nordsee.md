@@ -90,7 +90,20 @@ Im Bild (`render/schleuse.js`): zwei Schiebetore quer im Durchstich (Binnen- und
 
 Ausprobieren: `?revier=nordsee&stufe=3`. Vorschaubilder: `nordsee/teil4-*.png`.
 
-## 6. Ausprobieren
+## 6. Freischalten und Revierwahl (Teil 5)
+
+| Was | Wie |
+|---|---|
+| Freischalten (K6) | Die Nordsee wird frei, sobald einer deiner Häfen an der Ostsee Stufe 5 erreicht (`nordsee.start.abStufe`). Das gilt für das ganze Gerät: Der beste Ostsee-Stand (Stufe und Ruf) steht unter `hafenmeister.reviere` im Browser und bleibt, auch wenn der Hafen gelöscht wird. Spielstände aus der Zeit davor zählen über das Verzeichnis der Plätze sofort. Nordsee-Häfen, Testmodus und Probe-Kopien schalten nichts frei. |
+| Meldung | Beim ersten Mal kommt ein Hinweis "Die Nordsee ist frei" mit dem Weg dorthin (Spielstände, Neues Spiel). |
+| Seekarte | Im Fenster "Neues Spiel" steht oben eine kleine Pixelkarte mit Nord- und Ostsee. Antippen wählt das Revier; die gesperrte Nordsee sagt, ab wann sie frei ist und welche Stufe du bisher hast. |
+| Spielstand je Revier | Jeder Hafen merkt sich sein Revier (`state.region`), die Liste der Spielstände zeigt "Nordsee" vor der Stufe. Wechseln zwischen den Revieren heißt: anderen Hafen spielen. |
+| Startgeld (K5) | Ein neuer Nordsee-Hafen bekommt Startgeld aus dem Ruf des besten Ostsee-Hafens: je Anker 300 €, auf Hundert gerundet, 600 bis 1.500 € (`nordsee.start`). Bei 4,2 Ankern sind es 1.300 €. |
+| Namen | Stufe 3 heißt an der Nordsee "Hafen mit Schleuse" (offene Küste "Hafen hinter der Mole"), der Erfolg der Stufe "Zur Nordsee", der Pokal "Hafenmeister der Nordsee". Texte, die nur an der Ostsee stimmten, sind allgemein. |
+
+Code: `save/reviere.js` (ohne Browser testbar, `tests/reviere.test.mjs`), Seekarte in `save/save-panel.js`, Anlegen in `save/index.js`. Vorschaubilder: `nordsee/teil5-*.png`.
+
+## 7. Ausprobieren
 
 ```
 http://localhost:8000/?revier=nordsee&stufe=2
@@ -106,7 +119,7 @@ node tools/balance.mjs --laeufe 10 --revier nordsee
 
 Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, Ostsee 103. Einnahmen bis Tag 30 höher (Hafengeld mal 1,15), der Aufstieg gleich lang.
 
-## 7. Entscheidungen (P57, selbst getroffen und notiert)
+## 8. Entscheidungen (P57, selbst getroffen und notiert)
 
 | Frage | Entscheidung | Warum |
 |---|---|---|
@@ -117,9 +130,11 @@ Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, O
 | Trockenfallplätze als eigene Platzart oder als Bojenfeld im Watt (K4)? | Das Bojenfeld liegt an der Nordsee auf einer Plate. | So wie in echten Wattenhäfen (Muringbojen, die trockenfallen). Bau, Lage, Liegegeld, Bauvorschau und Antippen gibt es schon; neu sind nur die Regeln für Kiel und Wasserstand und das Bild. Mehrrumpfboote (Klasse L) passen nicht auf die kleinen Bojenplätze, darum liegen dort Kutter und kleine Boote. |
 | Plate aus dem Gelände oder eigene Fläche? | Eigene Schlickfläche auf fester Höhe unter dem Bojenfeld. | Das Gelände hat an kaum einer Küste ein ebenes Watt in passender Höhe nahe den Stegen. Mit fester Höhe stimmen Regeln (Node, ohne Gelände) und Bild überein. |
 | Schleuse als Wartezeit oder als Gewinn? | Beides: Die Schleuse ist der Grund für die tiefere Fahrrinne ab Stufe 3 (mehr Boote kommen bei jeder Tide hinein), kostet dafür kurze Wartezeiten im Takt. | Echte Sielhäfen mit Schleuse sind tideunabhängiger. Der Takt ist kurz (höchstens 9 s Wartezeit), damit es nicht nervt. |
+| Seekarte als eigenes Fenster oder im Fenster "Neues Spiel"? | Im Fenster "Neues Spiel", dazu "Nordsee" in der Liste der Spielstände. | Ein Revier wechselt man, indem man einen anderen Hafen spielt; ein eigenes Fenster hätte nur dieselben Häfen noch einmal gezeigt. |
+| Freischalten je Spielstand oder je Gerät? | Je Gerät, nur besser, nie schlechter. | Wer einmal Stufe 5 erreicht hat, soll die Nordsee nicht verlieren, wenn er den Hafen löscht. |
 | `economy.js` für andere Pakete frei? | Alle Nordsee-Zahlen stehen im eigenen Block `ECONOMY.nordsee`; P57 ändert nichts außerhalb davon. | P45 und Welle 6 können parallel an `economy.js` arbeiten. |
 
-## 8. Teile
+## 9. Teile
 
 | Teil | Inhalt | Stand |
 |---|---|---|
@@ -127,5 +142,5 @@ Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, O
 | 2 | Tide sichtbar: Boote und Schwimmstege heben und senken sich, Pegellatte, Pegel im Wetterknopf, Gezeiten im Wetterbericht, Bootskarte "ab etwa ... Uhr" | gebaut |
 | 3 | Trockenfallplätze (K4): das Bojenfeld liegt an der Nordsee auf einer Plate im Watt, nur für Boote ohne tiefen Kiel, Kutter liegen dort gern | gebaut |
 | 4 | Schleuse als Ausbau zu Stufe 3: Tor im Takt, Warten auf die Schleusung, Schiebetore im Bild, Namen an der Nordsee | gebaut |
-| 5 | Freischalten ab Ostsee Stufe 5 (K6), Seekarte zum Wechseln, eigener Spielstand je Revier, Startgeld aus dem Ruf (K5) | in Arbeit |
+| 5 | Freischalten ab Ostsee Stufe 5 (K6), Seekarte im Fenster "Neues Spiel", eigener Spielstand je Revier, Startgeld aus dem Ruf (K5), Namen und Texte je Revier | gebaut |
 | 6 | Nordsee-Küsten: eigene Auswahl an Küstentypen für die Nordsee | in Arbeit |

@@ -36,6 +36,7 @@ Bis zu 8 Häfen liegen nebeneinander im Browser (`web/js/save/plaetze.js`, Fenst
 | Schlüssel im localStorage | Inhalt |
 |---|---|
 | `hafenmeister.plaetze` | Verzeichnis: `{ format, aktiv, naechste, plaetze: [...], papierkorb: [...] }` |
+| `hafenmeister.reviere` | Bester Stand an der Ostsee `{ ostsee: { stufe, ruf } }` für die Nordsee (P57 Teil 5, `save/reviere.js`); nur besser, nie schlechter |
 | `hafenmeister.spielstand` | Stand des aktiven Hafens (Umschlag wie unten). `data/stegbild.js` und `render/landschaft/formen.js` lesen hier schon vor dem Start. |
 | `hafenmeister.spielstand.vorher` | Sicherung vor dem letzten Speichern des aktiven Hafens |
 | `hafenmeister.platz.<id>` | Stand jedes anderen Hafens und der Häfen im Papierkorb |

@@ -15,6 +15,7 @@
 // Die Prüfung läuft an festen Stellen (Ereignisse der Spielregeln, Ziele, Bauen); sie ist billig und
 // prüft immer alle noch offenen Erfolge.
 
+import { aktuellesRevier } from '../data/kuestennamen.js';
 import * as sim from '../sim.js';
 import { ECONOMY } from '../data/economy.js';
 import { katalog as logbuchKatalog, fortschritt as logbuchFortschritt } from '../ui/logbuch-daten.js';
@@ -36,7 +37,8 @@ export const GRUPPEN = {
 const zahl = (ist, soll) => ({ ist: Math.min(ist, soll), soll });
 const Z = ECONOMY.erfolge;
 const tsd = (n) => n.toLocaleString('de-DE');
-const STUFEN_NAME = { 2: 'Dorfhafen', 3: 'Zur Ostsee', 4: 'Marina', 5: 'Küstenmarina', 6: 'Seehafen' };
+// Stufe 3 und der Pokal heißen nach dem Revier des laufenden Spiels (P57 Teil 5)
+const STUFEN_NAME = { 2: 'Dorfhafen', get 3() { return aktuellesRevier() === 'nordsee' ? 'Zur Nordsee' : 'Zur Ostsee'; }, 4: 'Marina', 5: 'Küstenmarina', 6: 'Seehafen' };
 
 export const ERFOLGE = [
   // ---------------------------------------------------------------- Hafenbetrieb
@@ -78,10 +80,10 @@ export const ERFOLGE = [
   { id: 'grundstein', gruppe: 'ausbau', ding: 'wimpel', titel: 'Grundstein', text: 'Das erste Bauwerk steht.',
     stand: (s) => Object.values(s.facilities || {}).some((n) => n > 0) || Object.keys(s.buildings || {}).length > 0 || (s.office || 0) > 0 || (s.stage || 1) > 1 },
   ...[2, 3, 4, 5, 6].map((n) => ({
-    id: `stufe-${n}`, gruppe: 'ausbau', ding: 'schild', stufeSchild: n, titel: STUFEN_NAME[n], text: `Ausbaustufe ${n} erreicht.`,
+    id: `stufe-${n}`, gruppe: 'ausbau', ding: 'schild', stufeSchild: n, get titel() { return STUFEN_NAME[n]; }, text: `Ausbaustufe ${n} erreicht.`,
     stand: (s) => zahl(s.stage || 1, n),
   })),
-  { id: 'region', gruppe: 'ausbau', ding: 'pokal', titel: 'Hafenmeister der Ostsee', text: 'Das Ziel der letzten Stufe geschafft.',
+  { id: 'region', gruppe: 'ausbau', ding: 'pokal', get titel() { return aktuellesRevier() === 'nordsee' ? 'Hafenmeister der Nordsee' : 'Hafenmeister der Ostsee'; }, text: 'Das Ziel der letzten Stufe geschafft.',
     stand: (s) => !!s.regionDone || !!z(s).region },
   // ---------------------------------------------------------------- Logbuch
   ...Z.logbuch.map((n, i) => ({

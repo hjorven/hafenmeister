@@ -70,7 +70,7 @@ export const TIER_TEXTE = {
     titel: 'Schweinswal', artikel: 'der',
     kommt: 'Ein Schweinswal taucht vor der Einfahrt auf.',
     chronik: 'Vor der Einfahrt tauchte ein Schweinswal auf.',
-    hinweis: 'Ab Stufe 3, wenn der Hafen zur Ostsee offen ist. Selten.',
+    hinweis: 'Ab Stufe 3, wenn der Hafen zur See offen ist. Selten.',
   },
 };
 
