@@ -35,7 +35,7 @@ Stand 28.11.2026, 06:40 UTC. Welle 4 ist bis auf P43, P45 und P42 gebaut: P44 (P
 | Thema | Thread | Paket | Stand |
 |---|---|---|---|
 | Abnahme Welle 4 | Zeitraffer | - | Serie auf `f7e42f9` fertig (30 Läufe, Bericht `zeitraffer/2026-11-28-f7e42f9/abnahme.md` im Projektordner): Ziel PC Tag 104 bis 120 (Mittel 111,3), Handy 102 bis 121 (Mittel 111,4), Rechnung 110. Fest-Paare Summe PC 7 in Stufe 1-4 und 26 in Stufe 5-6, Handy 61 und 33. Ein Konsolenfehler (Ehrenplatz, behoben in PR 446). Flottillen: 123 von 458 zusammen, nur 12 getrennt, 231 fahren als Ganzes weiter: Flottillen-Rest erledigt |
-| Stau Handy Küste 3 und 14 | "Staus an Bojen und Ankerfeld auflösen" | P88-Nachlauf | erledigt (PR 456: höchstens 8 Auslaufende zugleich im Revier). Kleiner Rest für die nächste Serie: PC Küste 15 am ersten Wintertag 15 bis 17 feste Paare, Zieltag Küste 14 zweimal Tag 119/120 statt 112 |
+| Stau Handy Küste 3 und 14 | "Staus an Bojen und Ankerfeld auflösen" | P88-Nachlauf | erledigt (PR 456, Grenze mit PR 459 von 8 auf 11 Auslaufende zugleich im Revier, weil 8 Gäste und Zieltag kostete: Küste 14 jetzt Tag 111 statt 119 bis 123). Für die nächste Serie: Zieltag und Abgewiesen-Quote auf allen Küsten, PC Küste 15 am ersten Wintertag |
 | P25 H9 | - | P25 | Roadmap sagt "H9 folgt"; nicht mehr in Arbeit, startet mit der nächsten Liste |
 | Schichttest, Roadmap-Seite | Prüf- und Pflege-Threads | - | Schichten je neuem Paket |
 
@@ -208,6 +208,7 @@ Schon erledigt aus Jorvens Vorschlägen: F1 bis F20, F23, F25 bis F40 (F37 bis a
 
 | Datum | Änderung |
 |---|---|
+| 28.11.2026, 12:45 Uhr | Abfahrtsgrenze 11 statt 8 (PR 459). |
 | 28.11.2026, 10:50 Uhr | Stau Handy Küste 3/14 erledigt (PR 456). |
 | 28.11.2026, 06:40 Uhr | Welle 4 bis auf P43, P45, P42 gebaut; Serie `f7e42f9` sauber (Mittel Tag 111), Flottillen-Rest erledigt. Starten: Stau Handy Küste 3/14, P43, P25 H9, P57 Nordsee. |
 | 22.11.2026, 14:50 Uhr | Welle 3 gebaut (bis P25 H9), Serie `73f388f` sauber (Mittel Tag 109,4). Welle 4 startet mit P48, P47, P46, P44. Ganze Serie auf aktuellem `main`. |
