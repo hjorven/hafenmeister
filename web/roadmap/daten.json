@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "28.11.2026",
-  "commit": "71311a8"
+  "commit": "8036867"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1250,10 +1250,12 @@
    "id": "P57",
    "titel": "Nordsee mit Gezeiten spielbar machen",
    "inhalt": "Revierfaktoren, Gezeiten, Schleuse, Trockenfallplätze, docs/regionen.md",
-   "thread": "läuft (Thread \"Nordsee mit Gezeiten spielbar machen\"): Teil 1 Gezeiten in den Regeln gebaut, Teile 2 bis 6 in Arbeit (docs/nordsee.md)",
+   "thread": "läuft (Thread \"Nordsee mit Gezeiten spielbar machen\"): Teil 1 Gezeiten in den Regeln (PR 448), Teil 2 Tide sichtbar und Teil 3 Trockenfallplätze (PR 450) gebaut, Teile 4 bis 6 in Arbeit (docs/nordsee.md)",
    "welle": 5,
    "prs": [
-    177
+    177,
+    448,
+    450
    ],
    "abschnitt": "Welle 5: Regionen und Online (Extras)",
    "punkte": [
@@ -1265,7 +1267,10 @@
     "K6"
    ],
    "status": "erledigt",
-   "bilder": []
+   "bilder": [
+    125,
+    126
+   ]
   },
   {
    "id": "P58",
@@ -6289,9 +6294,34 @@
    "datum": "2026-11-28",
    "quelle": "stammgaeste/h9-handy-2-platzkarte.png",
    "nr": 124
+  },
+  {
+   "datei": "p57-pr450-pc-pegellatte.jpg",
+   "pakete": [
+    "P57"
+   ],
+   "titel": "Nordsee: Pegellatte und Tidenstand oben links",
+   "pr": 450,
+   "geraet": "pc",
+   "datum": "2026-11-28",
+   "quelle": "nordsee/teil2-pc-pegellatte-hochwasser.png",
+   "nr": 125
+  },
+  {
+   "datei": "p57-pr450-handy-trockenfallen.jpg",
+   "pakete": [
+    "P57"
+   ],
+   "titel": "Nordsee: Boot fällt bei Ebbe im Watt trocken",
+   "pr": 450,
+   "geraet": "handy",
+   "datum": "2026-11-28",
+   "quelle": "nordsee/teil3-handy-trockenfallen-ebbe.png",
+   "nr": 126
   }
  ],
  "neueBilder": [
+  126,
   124,
   123,
   121,
@@ -6299,10 +6329,25 @@
   117,
   115,
   113,
-  111,
-  109
+  111
  ],
  "merges": [
+  {
+   "datum": "2026-11-28",
+   "titel": "Roadmap-Pflege: P57 Nordsee Teil 1 bis 3 (PR 448, 450) mit Bildern",
+   "pr": 451,
+   "pakete": [
+    "P57"
+   ]
+  },
+  {
+   "datum": "2026-11-28",
+   "titel": "Nordsee Teil 2 und 3: Tide sichtbar, Trockenfallplätze im Watt (P57)",
+   "pr": 450,
+   "pakete": [
+    "P57"
+   ]
+  },
   {
    "datum": "2026-11-28",
    "titel": "Roadmap-Pflege: P43 Fotoaufträge (PR 436) und P25 H9 (PR 397) mit Bildern",
@@ -6384,22 +6429,6 @@
    "titel": "Schwimmwellenbrecher ist ein Hindernis für die Boote und endet westlich von Steg B und C",
    "pr": 443,
    "pakete": []
-  },
-  {
-   "datum": "2026-11-27",
-   "titel": "P53 Spätankömmling: letztes Boot läuft nachts mit Lampe ein (F40)",
-   "pr": 439,
-   "pakete": [
-    "P53"
-   ]
-  },
-  {
-   "datum": "2026-11-27",
-   "titel": "Roadmap-Pflege: Bilder für P49 Signalflaggen (PR 433)",
-   "pr": 442,
-   "pakete": [
-    "P49"
-   ]
   }
  ]
 }

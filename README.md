@@ -48,13 +48,13 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 **Neueste Bilder aus dem Spiel** (antippen öffnet das Paket):
 
 <table><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P57"><img src="web/roadmap/bilder/p57-pr450-handy-trockenfallen.jpg" alt="Nordsee: Boot fällt bei Ebbe im Watt trocken" width="100%"></a><br><sub>P57 · Nordsee: Boot fällt bei Ebbe im Watt trocken · PR 450</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P25"><img src="web/roadmap/bilder/p25-pr397-handy-tagestoern.jpg" alt="Dauerlieger auf Tagestörn: Box frei für einen kurzen Halt" width="100%"></a><br><sub>P25 · Dauerlieger auf Tagestörn: Box frei für einen kurzen Halt · PR 397</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P43"><img src="web/roadmap/bilder/p43-pr436-handy-postkarte.jpg" alt="Fotoauftrag auf dem Handy: fertige Postkarte mit Lohn" width="100%"></a><br><sub>P43 · Fotoauftrag auf dem Handy: fertige Postkarte mit Lohn · PR 436</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P52"><img src="web/roadmap/bilder/p52-pr440-handy-schuetzen.jpg" alt="Schilf schützen oder Ufer bebauen" width="100%"></a><br><sub>P52 · Schilf schützen oder Ufer bebauen · PR 440</sub></td>
 </tr><tr>
+<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P52"><img src="web/roadmap/bilder/p52-pr440-handy-schuetzen.jpg" alt="Schilf schützen oder Ufer bebauen" width="100%"></a><br><sub>P52 · Schilf schützen oder Ufer bebauen · PR 440</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P60"><img src="web/roadmap/bilder/p60-pr441-handy-baenke.jpg" alt="Bänke am Wasser bauen" width="100%"></a><br><sub>P60 · Bänke am Wasser bauen · PR 441</sub></td>
 <td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P53"><img src="web/roadmap/bilder/p53-pr439-handy-kajuete.jpg" alt="Licht in der Kajüte nach dem Festmachen" width="100%"></a><br><sub>P53 · Licht in der Kajüte nach dem Festmachen · PR 439</sub></td>
-<td width="33%" valign="top"><a href="https://hjorven.github.io/hafenmeister/roadmap/#paket=P49"><img src="web/roadmap/bilder/p49-pr433-handy-wissen.jpg" alt="Logbuch-Reiter Wissen mit Signalflaggen" width="100%"></a><br><sub>P49 · Logbuch-Reiter Wissen mit Signalflaggen · PR 433</sub></td>
 </tr></table>
 
 <details><summary><b>Welle 0: Gelände und Bootswege</b> (6 von 6 erledigt)</summary>
@@ -165,7 +165,7 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 
 | Paket | Titel | Status | PRs |
 |---|---|---|---|
-| [P57](https://hjorven.github.io/hafenmeister/roadmap/#paket=P57) | Nordsee mit Gezeiten spielbar machen | **erledigt** | [#177](https://github.com/hjorven/hafenmeister/pull/177) |
+| [P57](https://hjorven.github.io/hafenmeister/roadmap/#paket=P57) | Nordsee mit Gezeiten spielbar machen | **erledigt** | [#177](https://github.com/hjorven/hafenmeister/pull/177) [#448](https://github.com/hjorven/hafenmeister/pull/448) [#450](https://github.com/hjorven/hafenmeister/pull/450) |
 | [P58](https://hjorven.github.io/hafenmeister/roadmap/#paket=P58) | Online mit Supabase | offen |  |
 
 </details>
