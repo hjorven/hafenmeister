@@ -1375,6 +1375,28 @@
    "geraet": "handy",
    "datum": "2026-11-28",
    "quelle": "stammgaeste/h9-handy-2-platzkarte.png"
+  },
+  {
+   "datei": "p57-pr450-pc-pegellatte.jpg",
+   "pakete": [
+    "P57"
+   ],
+   "titel": "Nordsee: Pegellatte und Tidenstand oben links",
+   "pr": 450,
+   "geraet": "pc",
+   "datum": "2026-11-28",
+   "quelle": "nordsee/teil2-pc-pegellatte-hochwasser.png"
+  },
+  {
+   "datei": "p57-pr450-handy-trockenfallen.jpg",
+   "pakete": [
+    "P57"
+   ],
+   "titel": "Nordsee: Boot fällt bei Ebbe im Watt trocken",
+   "pr": 450,
+   "geraet": "handy",
+   "datum": "2026-11-28",
+   "quelle": "nordsee/teil3-handy-trockenfallen-ebbe.png"
   }
  ]
 }
