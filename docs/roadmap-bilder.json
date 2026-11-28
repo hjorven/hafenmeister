@@ -1342,6 +1342,39 @@
    "geraet": "handy",
    "datum": "2026-11-27",
    "quelle": "naturecke/handy-schutz.jpg"
+  },
+  {
+   "datei": "p43-pr436-pc-postkarte.jpg",
+   "pakete": [
+    "P43"
+   ],
+   "titel": "Postkarte aus dem Fotomodus: Auftrag erfüllt, Bild sichern",
+   "pr": 436,
+   "geraet": "pc",
+   "datum": "2026-11-28",
+   "quelle": "fotoauftraege/pc-n3-postkarte.png"
+  },
+  {
+   "datei": "p43-pr436-handy-postkarte.jpg",
+   "pakete": [
+    "P43"
+   ],
+   "titel": "Fotoauftrag auf dem Handy: fertige Postkarte mit Lohn",
+   "pr": 436,
+   "geraet": "handy",
+   "datum": "2026-11-28",
+   "quelle": "fotoauftraege/handy-n3-postkarte.png"
+  },
+  {
+   "datei": "p25-pr397-handy-tagestoern.jpg",
+   "pakete": [
+    "P25"
+   ],
+   "titel": "Dauerlieger auf Tagestörn: Box frei für einen kurzen Halt",
+   "pr": 397,
+   "geraet": "handy",
+   "datum": "2026-11-28",
+   "quelle": "stammgaeste/h9-handy-2-platzkarte.png"
   }
  ]
 }
