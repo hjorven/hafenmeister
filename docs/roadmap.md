@@ -718,7 +718,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|
 | P41 | Statistik und Saisonbilanz | F19, F20 | erledigt (PR 315, Thread "Statistik und Saisonbilanz zeigen") |
 | P42 | Herausforderungen, Wochenhafen und Hafen als Code | F21, F41, F42 (nach P09, P45) | neu |
-| P43 | Fotoaufträge und Postkarten | F22 | erledigt (Thread "Fotoaufträge ins Spiel bringen", [fotoauftraege.md](fotoauftraege.md)) |
+| P43 | Fotoaufträge und Postkarten | F22 | erledigt (PR 436, Thread "Fotoaufträge ins Spiel bringen", [fotoauftraege.md](fotoauftraege.md)) |
 | P44 | Hafenname und Flagge | F23, F27 (Auswahl beim Start) | erledigt (PR 429, Thread "Hafenname und eigene Flagge geben", [Hafenflagge](hafenflagge.md)) |
 | P45 | Kreativmodus | F24 | neu |
 | P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | erledigt (PR 427, Thread "Ruhigen Abend und Serien-Akkord bauen") |

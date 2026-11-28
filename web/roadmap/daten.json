@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "28.11.2026",
-  "commit": "5468462"
+  "commit": "71311a8"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -655,10 +655,11 @@
    "id": "P25",
    "titel": "Stammgäste mit Wirkung und Gästepost",
    "inhalt": "Ruf am alten Platz (plan 9a), F37",
-   "thread": "teilweise: Teil 1 und 2 gebaut (PR 394, stammgaeste.md), H9 folgt",
+   "thread": "erledigt: Teil 1 bis 3 gebaut, auch C8, H6 bis H9 (PR 394, PR 397, stammgaeste.md)",
    "welle": 3,
    "prs": [
-    394
+    394,
+    397
    ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
@@ -669,10 +670,11 @@
     "H8",
     "H9"
    ],
-   "status": "teilweise",
+   "status": "erledigt",
    "bilder": [
     85,
-    86
+    86,
+    124
    ]
   },
   {
@@ -1000,16 +1002,21 @@
    "id": "P43",
    "titel": "Fotoaufträge und Postkarten",
    "inhalt": "F22",
-   "thread": "bestehend: \"Spielschleife zusammenbauen und Vorschläge einbauen\" (Fotomodus)",
+   "thread": "erledigt (PR 436, Thread \"Fotoaufträge ins Spiel bringen\", fotoauftraege.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    436
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F22",
     "L6"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    122,
+    123
+   ]
   },
   {
    "id": "P44",
@@ -1243,7 +1250,7 @@
    "id": "P57",
    "titel": "Nordsee mit Gezeiten spielbar machen",
    "inhalt": "Revierfaktoren, Gezeiten, Schleuse, Trockenfallplätze, docs/regionen.md",
-   "thread": "bestehend: \"Hafenregionen Ostsee und Nordsee gestalten\"",
+   "thread": "läuft (Thread \"Nordsee mit Gezeiten spielbar machen\"): Teil 1 Gezeiten in den Regeln gebaut, Teile 2 bis 6 in Arbeit (docs/nordsee.md)",
    "welle": 5,
    "prs": [
     177
@@ -1257,7 +1264,7 @@
     "K5",
     "K6"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
@@ -2327,8 +2334,8 @@
   {
    "code": "F22",
    "text": "Fotoaufträge und Postkarte",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P43): Postkartenverlag bestellt Fotos, zwölf Motive (Sonnenuntergang, Anleger, voller Steg, Sonderaufträge an besonderen Tagen), Zettel und goldener Knopf im Fotomodus, Honorar, Reiter „Postkarten“ im Logbuch, Postkarte sichern, docs/fotoauftraege.md",
    "pakete": [
     "P43"
    ],
@@ -3473,8 +3480,8 @@
   {
    "code": "H9",
    "text": "Leere Box während eines Tagestörns für einen Tagesgast",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P25): Box eines Dauerliegers auf Tagestörn nimmt bis zur Rückkehr am Nachmittag einen kurzen Halt (stammgaeste.md)",
    "pakete": [
     "P25"
    ],
@@ -3734,8 +3741,8 @@
   {
    "code": "K2",
    "text": "Gezeiten als Kernidee: Tiefgang nur bei Hochwasser",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P57 Teil 1: Zufahrt nur im Tidenfenster, Warten auf die Flut, docs/nordsee.md)",
    "pakete": [
     "P57"
    ],
@@ -3857,8 +3864,8 @@
   {
    "code": "L6",
    "text": "Fotoaufträge und Postkarte (= F22)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P43, docs/fotoauftraege.md)",
    "pakete": [
     "P43"
    ],
@@ -4677,8 +4684,8 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 20,
-    "teilweise": 1,
+    "erledigt": 21,
+    "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
     "offen": 0,
@@ -4706,11 +4713,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 11,
+    "erledigt": 12,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 3,
+    "offen": 2,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4723,11 +4730,11 @@
     "P58"
    ],
    "zaehler": {
-    "erledigt": 0,
+    "erledigt": 1,
     "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 2,
+    "offen": 1,
     "entfaellt": 0,
     "alle": 2
    }
@@ -4765,20 +4772,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 64,
-  "teilweise": 1,
+  "erledigt": 67,
+  "teilweise": 0,
   "arbeit": 0,
   "frage": 0,
-  "offen": 21,
+  "offen": 19,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 196,
+  "erledigt": 200,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 16,
+  "offen": 12,
   "entfaellt": 1,
   "alle": 219
  },
@@ -6246,20 +6253,107 @@
    "datum": "2026-11-27",
    "quelle": "naturecke/handy-schutz.jpg",
    "nr": 121
+  },
+  {
+   "datei": "p43-pr436-pc-postkarte.jpg",
+   "pakete": [
+    "P43"
+   ],
+   "titel": "Postkarte aus dem Fotomodus: Auftrag erfüllt, Bild sichern",
+   "pr": 436,
+   "geraet": "pc",
+   "datum": "2026-11-28",
+   "quelle": "fotoauftraege/pc-n3-postkarte.png",
+   "nr": 122
+  },
+  {
+   "datei": "p43-pr436-handy-postkarte.jpg",
+   "pakete": [
+    "P43"
+   ],
+   "titel": "Fotoauftrag auf dem Handy: fertige Postkarte mit Lohn",
+   "pr": 436,
+   "geraet": "handy",
+   "datum": "2026-11-28",
+   "quelle": "fotoauftraege/handy-n3-postkarte.png",
+   "nr": 123
+  },
+  {
+   "datei": "p25-pr397-handy-tagestoern.jpg",
+   "pakete": [
+    "P25"
+   ],
+   "titel": "Dauerlieger auf Tagestörn: Box frei für einen kurzen Halt",
+   "pr": 397,
+   "geraet": "handy",
+   "datum": "2026-11-28",
+   "quelle": "stammgaeste/h9-handy-2-platzkarte.png",
+   "nr": 124
   }
  ],
  "neueBilder": [
+  124,
+  123,
   121,
   119,
   117,
   115,
   113,
   111,
-  109,
-  107,
-  105
+  109
  ],
  "merges": [
+  {
+   "datum": "2026-11-28",
+   "titel": "Roadmap-Pflege: P43 Fotoaufträge (PR 436) und P25 H9 (PR 397) mit Bildern",
+   "pr": 449,
+   "pakete": [
+    "P43",
+    "P25"
+   ]
+  },
+  {
+   "datum": "2026-11-28",
+   "titel": "Nordsee Teil 1: Ebbe und Flut in den Spielregeln (P57)",
+   "pr": 448,
+   "pakete": [
+    "P57"
+   ]
+  },
+  {
+   "datum": "2026-11-28",
+   "titel": "P25 Teil 3 (H9): Tagesgast in der Box eines Dauerliegers auf Tagestörn",
+   "pr": 397,
+   "pakete": [
+    "P25"
+   ]
+  },
+  {
+   "datum": "2026-11-28",
+   "titel": "P43 Fotoaufträge und Postkarten",
+   "pr": 436,
+   "pakete": [
+    "P43"
+   ]
+  },
+  {
+   "datum": "2026-11-28",
+   "titel": "Arbeitsplan: Welle 4 fast fertig, Serie f7e42f9; starten Stau Handy Küste 3/14, P43, P25 H9, P57",
+   "pr": 447,
+   "pakete": [
+    "P43",
+    "P25",
+    "P57"
+   ]
+  },
+  {
+   "datum": "2026-11-28",
+   "titel": "P40: Besucher am Ehrenplatz ohne vorheriges Einlaufen; Jugendtraining wartet am Slip höchstens 12 s",
+   "pr": 446,
+   "pakete": [
+    "P40"
+   ]
+  },
   {
    "datum": "2026-11-28",
    "titel": "Roadmap-Pflege: P52 Naturecke (PR 440) mit Bildern",
@@ -6305,54 +6399,6 @@
    "pr": 442,
    "pakete": [
     "P49"
-   ]
-  },
-  {
-   "datum": "2026-11-27",
-   "titel": "P60: Hafen verschönern mit Bänken, Kübeln, Bäumen, Laternen und Anstrich",
-   "pr": 441,
-   "pakete": [
-    "P60"
-   ]
-  },
-  {
-   "datum": "2026-11-27",
-   "titel": "Roadmap-Pflege: P44 Hafenname und Flagge (PR 429) mit Bildern",
-   "pr": 438,
-   "pakete": [
-    "P44"
-   ]
-  },
-  {
-   "datum": "2026-11-27",
-   "titel": "P49: Signalflaggen als Wunschanzeige, Positionslichter und Hafenwissen (F33, F34)",
-   "pr": 433,
-   "pakete": [
-    "P49"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P51 Hafentiere (PR 435) mit Bildern",
-   "pr": 437,
-   "pakete": [
-    "P51"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P44: Eigener Hafenname und eigene Flagge",
-   "pr": 429,
-   "pakete": [
-    "P44"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P51 Hafentiere: Hafenkatze, Hafenhund und Graureiher (F38)",
-   "pr": 435,
-   "pakete": [
-    "P51"
    ]
   }
  ]
