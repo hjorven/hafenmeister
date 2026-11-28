@@ -254,8 +254,9 @@ export function init(game) {
         el('li', { title: 'Aufenthalt' }, nacht),
         // Versorgung heute schon voll (Kapazität sichtbar, P19): steht gleich am Wunsch
         ...b.wishes.map((w) => (wert?.full?.includes(w)
-          ? el('li', { class: 'wunsch voll', title: 'Für heute ist diese Versorgung voll' }, `Wunsch: ${WISH_LABEL[w] ?? w} (heute voll)`)
-          : el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`)))),
+          ? el('li', { class: 'wunsch voll', title: 'Für heute ist diese Versorgung voll' }, game.hafenwissen?.flaggeBild?.(w), `Wunsch: ${WISH_LABEL[w] ?? w} (heute voll)`)
+          // Signalflagge des Wunschs (P49): dieselbe weht am Boot
+          : el('li', { class: 'wunsch', title: 'Wunsch' }, game.hafenwissen?.flaggeBild?.(w), `Wunsch: ${WISH_LABEL[w] ?? w}`)))),
       flotte ? el('p', { class: 'card-hint hm-flotte' }, pixelBild('rauteGold', 14), flotteLage(flotte, flotteSteg, sim.sonderfall?.(b.id) === 'flottille' && sim.bueroAutomatik?.(b.size))) : null,
       flotte ? null : sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length, sim.bueroAutomatik?.(b.size)),
       vorschlag ? el('p', { class: 'card-hint hm-vorschlag' }, pixelBild('rauteGold', 14), vorschlagText(b, vorschlag)) : null,
@@ -679,7 +680,7 @@ export function init(game) {
   updateSaveBtn();
   // Die Uhr läuft auch ohne Ereignis weiter (Tagesbalken)
   game.onTick(() => {
-    if (game.sim?.state) day.dataset.progress = String(Math.round((game.sim.state.clock / (game.sim.ctx.rules.dayLength + game.sim.ctx.rules.eveningLength)) * 100));
+    if (game.sim?.state) day.dataset.progress = String(Math.round(Math.min(1, (game.sim.state.clock - (game.sim.state.nachtHalt || 0)) / (game.sim.ctx.rules.dayLength + game.sim.ctx.rules.eveningLength)) * 100));
   });
   schedule();
 }

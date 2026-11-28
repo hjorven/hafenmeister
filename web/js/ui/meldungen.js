@@ -35,6 +35,7 @@ export const VORRANG = {
   funk: 57,            // ui/funk-anmeldung.js, Boot meldet sich per Funk an (Box freihalten?)
   jugend: 58,          // ui/jugend-meldung.js, Jugendtraining: Box fürs Trainerboot, Auslaufen, Zurück
   ankunft: 53,         // features/grosse-ankunft.js, großes Schiff läuft ein (kurz, P47)
+  spaet: 52,           // features/spaetankoemmling.js, Spätankömmling läuft im Dunkeln ein (kurz, P53)
   einstieg: 50,        // features/einstieg.js, Schritte des Einstiegs
   ankuendigung: 55,    // events/banner.js, Ereignisse und Saison ("Heute: Sommertag", "Morgen: Regatta")
   tipp: 45,            // features/einstieg.js, Tipps beim ersten Mal (kurz, gehen den Dauerplatz-Meldungen vor)
@@ -43,6 +44,7 @@ export const VORRANG = {
   fotoauftrag: 26,     // features/fotoauftraege.js, Fotoauftrag des Postkartenverlags, Erinnerung bei passendem Licht (P43)
   post: 24,            // ui/gaestepost.js, Post von einem Stammgast an der Pinnwand (kurz)
   logbuch: 22,         // ui/logbuch.js, neues Bootsmodell im Logbuch (kurz)
+  wissen: 21,          // features/hafenwissen.js, neu im Hafenwissen: Signalflagge, Seezeichen, Licht, Knoten (kurz, P49)
   gaestebuch: 20,      // ui/gaestebuch.js, Bewertung eines Boots außerhalb des Bildes (kurz)
   bautipp: 10,         // ui/bauen.js, "Als Nächstes" (hält dieses Modul selbst, solange #bau-tipp nicht hidden ist)
 };

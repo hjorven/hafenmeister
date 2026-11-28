@@ -39,9 +39,9 @@ export const NAEHE = 110;
 // (bei den Badegaesten 0.2: sie bleiben meist am Strand).
 export const VORLIEBE = {
   // Angebote an Land: Crews holen morgens Broetchen und sitzen abends am Grill, Badegaeste holen Eis
-  crew:   { strand: 0.6, baden: 0.6, baecker: 3, grillplatz: 2.5, eisdiele: 1.5, hafencafe: 1.5, waschhaus: 1.5 },
-  ort:    { waschhaus: 0, strand: 1.2, baden: 0.8, aussicht: 2.5, baecker: 1.5, hafencafe: 2, eisdiele: 2.5 },
-  strand: { strand: 8, baden: 6, strandkoerbe: 4, seebruecke: 3, kiosk: 2, aussicht: 1, eisdiele: 4, waschhaus: 0 },
+  crew:   { strand: 0.6, baden: 0.6, baecker: 3, grillplatz: 2.5, eisdiele: 1.5, hafencafe: 1.5, waschhaus: 1.5, bank: 0.6 },
+  ort:    { waschhaus: 0, strand: 1.2, baden: 0.8, aussicht: 2.5, baecker: 1.5, hafencafe: 2, eisdiele: 2.5, bank: 1.5 },
+  strand: { strand: 8, baden: 6, strandkoerbe: 4, seebruecke: 3, kiosk: 2, aussicht: 1, eisdiele: 4, waschhaus: 0, bank: 0.5 },
 };
 
 // Gehgeschwindigkeit in m/s (Spielzeit), je Person zufaellig im Bereich.
@@ -73,6 +73,8 @@ export const ZIELE = {
   fahrradverleih: { gewicht: 3, dauer: [6, 12],  drinnen: false, zeit: [0.12, 0.55] },
   grillplatz:     { gewicht: 6, dauer: [30, 80], drinnen: false, zeit: [0.6, 1.01], sitzen: true },
   raeucherei:     { gewicht: 4, dauer: [8, 18],  drinnen: false, zeit: [0.3, 0.7] },
+  // Bänke am Wasser (P60, features/verschoenern.js): sitzen auf der Sitzfläche (sitzHoehe m) mit Blick aufs Wasser
+  bank:           { gewicht: 0.8, dauer: [25, 70], drinnen: false, zeit: [0.08, 0.95], sitzen: true, sitzHoehe: 0.5 },   // je Bank
 };
 
 // Services, die als Ziel zaehlen (Art = id des Service)

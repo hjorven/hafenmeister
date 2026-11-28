@@ -94,7 +94,10 @@ export async function initBridge(game) {
   // (nur am Liegeplatz, nicht an der Warteboje oder im Ankerfeld)
   game.on('boat:moored', (d) => {
     const b = state && d?.id != null ? state.boats[d.id] : null;
-    if (b && d.berth != null && b.berthId != null && String(b.berthId).startsWith(String(d.berth))) sim.shortStayDocked(state, ctx, d.id);
+    if (b && d.berth != null && b.berthId != null && String(b.berthId).startsWith(String(d.berth))) {
+      sim.shortStayDocked(state, ctx, d.id);
+      sim.lateDocked(state, d.id); // Spätankömmling (P53): jetzt darf der Morgen kommen
+    }
   });
   // Päckchen (P27): Die Ansicht (render/paeckchen.js) prüft, ob das Boot außen frei im Wasser läge.
   // Ohne Ansicht (Tests, Balancing) gilt jeder Päckchenplatz als frei.
@@ -264,7 +267,7 @@ export async function initBridge(game) {
     // damit niemand Münzen oder Boote verpasst. Dauerhaft schneller: game.speed.
     fastForward(seconds) {
       const r = ctx.rules;
-      const end = state.phase === 'day' ? r.dayLength : r.dayLength + r.eveningLength;
+      const end = state.phase === 'day' ? r.dayLength : sim.eveningEnd(state, ctx);
       dispatch(sim.tick(state, ctx, Math.max(0, Math.min(seconds, end - state.clock))));
     },
     dismiss: run((boatId) => {
@@ -379,7 +382,12 @@ export async function initBridge(game) {
     auslastung: () => sim.facilityLoad(state, ctx),
     /** Anteil, den der Hafenmeister für liegengebliebene Münzen abliefert (0,8 = vier Fünftel). */
     rundgangAnteil: () => sim.roundShare(ctx),
-    tagesAnteil: () => Math.min(1, state.clock / (ctx.rules.dayLength + ctx.rules.eveningLength)),
+    // Spätankömmling (P53): solange die Nacht anhält, steht der Tagesanteil kurz vor 1
+    tagesAnteil: () => Math.min(1, sim.displayClock(state) / (ctx.rules.dayLength + ctx.rules.eveningLength)),
+    // Spätankömmling (P53, docs/spaetankoemmling.md)
+    spaet: () => sim.lateArrivalBoat(state),
+    spaetUnterwegs: () => sim.lateArrivalPending(state, ctx),
+    nachtHalt: () => state.nachtHalt || 0,
     wartet: (boatId) => state.boats[boatIdOf(boatId)]?.status === 'waiting',
     // Grün-Rot-Schild: 'frei' | 'belegt' | 'ausflug' | 'reserviert' | 'aus'
     platzZustand: (berthId) => sim.berthState(state, ctx, berthIdOf(berthId)),

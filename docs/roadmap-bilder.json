@@ -1210,6 +1210,138 @@
    "geraet": "handy",
    "datum": "2026-11-22",
    "quelle": "leinen/annehmen/handy-1-symbol.png"
+  },
+  {
+   "datei": "p51-pr435-pc-hafenkatze.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Hafenkatze auf dem Steg",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-5-katze-herz.png"
+  },
+  {
+   "datei": "p51-pr435-pc-reiher.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Graureiher am Ufer",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-3-reiher.png"
+  },
+  {
+   "datei": "p44-pr429-pc-hafenmast.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Eigene Flagge am Hafenmast",
+   "pr": 429,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/pc-3-hafenmast.png"
+  },
+  {
+   "datei": "p44-pr429-handy-flagge-bauen.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Name und Flagge im Baukasten",
+   "pr": 429,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/handy-2-flagge-bauen.png"
+  },
+  {
+   "datei": "p49-pr433-pc-flaggen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Signalflaggen zeigen die Wünsche der Boote",
+   "pr": 433,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/pc-flaggen-segelboot.png"
+  },
+  {
+   "datei": "p49-pr433-handy-wissen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Logbuch-Reiter Wissen mit Signalflaggen",
+   "pr": 433,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/handy-lexikon.png"
+  },
+  {
+   "datei": "p53-pr439-pc-lampe.jpg",
+   "pakete": [
+    "P53"
+   ],
+   "titel": "Spätankömmling läuft nachts mit Lampe ein",
+   "pr": 439,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "spaetankoemmling/pc-2-lampe.png"
+  },
+  {
+   "datei": "p53-pr439-handy-kajuete.jpg",
+   "pakete": [
+    "P53"
+   ],
+   "titel": "Licht in der Kajüte nach dem Festmachen",
+   "pr": 439,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "spaetankoemmling/handy-4-kajuete.png"
+  },
+  {
+   "datei": "p60-pr441-pc-laternen.jpg",
+   "pakete": [
+    "P60"
+   ],
+   "titel": "Laternen, Bänke und Bäume am Abend",
+   "pr": 441,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "verschoenern/pc-7-nacht.png"
+  },
+  {
+   "datei": "p60-pr441-handy-baenke.jpg",
+   "pakete": [
+    "P60"
+   ],
+   "titel": "Bänke am Wasser bauen",
+   "pr": 441,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "verschoenern/handy-2-vorschau-baenke.png"
+  },
+  {
+   "datei": "p52-pr440-pc-schilf.jpg",
+   "pakete": [
+    "P52"
+   ],
+   "titel": "Naturecke: Schilfgürtel am Ufer",
+   "pr": 440,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "naturecke/s2-natur.png"
+  },
+  {
+   "datei": "p52-pr440-handy-schuetzen.jpg",
+   "pakete": [
+    "P52"
+   ],
+   "titel": "Schilf schützen oder Ufer bebauen",
+   "pr": 440,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "naturecke/handy-schutz.jpg"
   }
  ]
 }

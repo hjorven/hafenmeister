@@ -30,6 +30,7 @@ const RUNDEN = 1;             // so viele Runden um die Bojen
 const TRAINER_SEITE = 6;      // so weit seitlich der Reihe fährt das Trainerboot
 const WARTEN_MAX = 15;        // so lange wartet die Spitze höchstens vor einem fahrenden Boot (Sekunden)
 const SAMMELN_MAX = 30;       // so lange wartet die Gruppe vor dem Slip höchstens auf das Trainerboot (Sekunden)
+const TRAILER_MAX = 12;       // so lange wartet die Reihe höchstens auf ein Trailerboot am Slip (Sekunden)
 const RUECK_BIS = 0.82;       // Tagesanteil, bis zu dem alle wieder am Slip sein sollen (danach eilen sie)
 const VORLAUF = 45;           // so viele Sekunden vor der Beginnzeit legt das Trainerboot ab und fährt zum Slip
 
@@ -169,6 +170,8 @@ export function initJugendBild(game) {
   game.scene.add(gruppe);
 
   const frei = (x, z, r, t) => {
+    // Schilfgürtel der Naturecke (P52): flach genug für Optis, aber dort segelt niemand hinein
+    if (game.naturecke?.imSchilf?.(x, z, r)) return false;
     const f = game.fahrwasser?.befahrbar;
     return typeof f === 'function' ? f(x, z, r, t) : true;
   };
@@ -501,7 +504,7 @@ export function initJugendBild(game) {
       wasser: idxS(wasserAb), kursAb: idxS(kursAb - 1), kursBis: idxS(kursBis - 1), slipEnde: st.laenge - (st.s[st.s.length - 1] - st.s[st.s.length - 2]),
       warten: 0, raus: false, rein: false, ende: false, zeit: 0,
       // Sammelpunkt: die Spitze ist ein Stück vom Slip draußen, alle Boote sind im Wasser
-      sammelBis: idxS(wasserAb) + versatz + 12, gesammelt: false, sammelWarten: 0,
+      sammelBis: idxS(wasserAb) + versatz + 12, gesammelt: false, sammelWarten: 0, trailerWarten: 0,
     };
   }
 
@@ -599,7 +602,10 @@ export function initJugendBild(game) {
     if (eilig) v *= 2.5;
     // Am Slip: warten, solange ein Trailerboot der Slipanlage auf der Rampe ist (sie teilen sich den Slip)
     const amSlipNaechstes = L.boote.some((b) => { const s = L.s - b.versatz; return (s > -2 && s < L.wasser + 3) || (s > L.slipEnde - 3 && s < st.laenge + 1); });
-    if (amSlipNaechstes && trailerAmSlip()) v = 0;
+    // Höchstens TRAILER_MAX am Stück: Trailerboote kreuzen manchmal lange direkt vor dem Slip, die Reihe
+    // bliebe sonst den ganzen Tag an Land stehen (Stegbild-abhängig, Fund aus dem PR-Check 28.11.)
+    if (amSlipNaechstes && L.trailerWarten < TRAILER_MAX && trailerAmSlip()) { L.trailerWarten += dt; v = 0; }
+    else if (!amSlipNaechstes) L.trailerWarten = 0;
     // Die Spitze wartet vor dem Slip, bis das Trainerboot da ist (höchstens SAMMELN_MAX Sekunden)
     if (L.s > L.sammelBis && !L.gesammelt) {
       const t = trainer?.anim;

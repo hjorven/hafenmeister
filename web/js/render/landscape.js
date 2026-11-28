@@ -107,7 +107,7 @@ export function init(game) {
     // Uhrzeit aus dem Spieltag der Spielregeln (tagesAnteil 0 Morgen bis 1 Nacht), sonst aus game.time
     const r = game.sim?.ctx?.rules;
     const ziel = feste ?? (game.sim?.state && r?.dayLength
-      ? uhrzeitAusUhr(Math.min(game.sim.state.clock, r.dayLength + (r.eveningLength ?? 0) - 0.05), r.dayLength, r.eveningLength ?? 0)
+      ? uhrzeitAusUhr(Math.min(game.sim.state.clock - (game.sim.state.nachtHalt || 0), r.dayLength + (r.eveningLength ?? 0) - 0.05), r.dayLength, r.eveningLength ?? 0)
       : game.sim?.tagesAnteil ? uhrzeitAusSpielzeit(game.sim.tagesAnteil() * 119.9) : uhrzeitAusSpielzeit(game.time));
     // Weich nachführen, damit Vorspulen die Sonne sichtbar zieht statt zu springen
     let diff = ((ziel - anzeigeUhr + 36) % 24) - 12;

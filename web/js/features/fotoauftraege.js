@@ -22,6 +22,7 @@ import * as sim from '../sim.js';
 import { regelnBereit } from './regeln-bereit.js';
 import { MOTIVE, MOTIV_IDS, FEHLT } from '../data/fotoauftraege.js';
 import { REVIERE } from '../data/regions.js';
+import { hafenNameSauber, flaggeSauber, flaggeZeichnen, FLAGGE_B, FLAGGE_H } from '../data/hafenflagge.js';
 import { VORRANG } from '../ui/meldungen.js';
 import { uhrzeitAusUhr } from '../render/landschaft/zeit.js';
 import { pixelBild, pixelSvg, PIXEL } from '../ui/pixel-symbole.js';
@@ -562,8 +563,9 @@ async function start(game) {
   // ------------------------------------------------------------------ Postkarte als Bild (Pop, Logbuch, Sichern)
   function hafenName() {
     const s = st();
-    const eigen = game.hafenname?.name ?? game.hafenName ?? s?.hafen?.name ?? s?.modules?.hafenname?.name;
-    if (typeof eigen === 'string' && eigen.trim()) return eigen.trim().slice(0, 40);
+    // Eigener Hafenname (P44): steht als harborName im Spielstand, immer durch hafenNameSauber (Audit C05)
+    const eigen = hafenNameSauber(s?.harborName, '');
+    if (eigen) return eigen;
     return REVIERE[s?.region]?.hafenname ?? REVIERE.ostsee.hafenname;
   }
   function karteEl(motiv, bild, { mitGruss = true } = {}) {
@@ -640,7 +642,18 @@ async function start(game) {
     g.fillStyle = '#24364a';
     g.textBaseline = 'middle';
     g.font = '40px "Pixelify Sans", system-ui, sans-serif';
-    g.fillText(`Grüße aus ${hafenName()}`, pad, pad + bh + 42, bw * 0.68);
+    // Eigene Hafenflagge (P44) vor dem Gruß
+    let gx = pad;
+    if (st()?.flagge) {
+      const fm = 3;
+      flaggeZeichnen(g, flaggeSauber(st().flagge, st().seed ?? 0), { x: pad, y: pad + bh + 42 - (FLAGGE_H * fm) / 2, massstab: fm });
+      g.strokeStyle = '#24364a';
+      g.lineWidth = 2;
+      g.strokeRect(pad - 1, pad + bh + 42 - (FLAGGE_H * fm) / 2 - 1, FLAGGE_B * fm + 2, FLAGGE_H * fm + 2);
+      gx = pad + FLAGGE_B * fm + 18;
+    }
+    g.fillStyle = '#24364a';
+    g.fillText(`Grüße aus ${hafenName()}`, gx, pad + bh + 42, bw * 0.68 - (gx - pad));
     g.font = '26px "Pixelify Sans", system-ui, sans-serif';
     g.fillStyle = '#5a6a7c';
     g.textAlign = 'right';

@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "22.11.2026",
-  "commit": "ae7b08d"
+  "datum": "28.11.2026",
+  "commit": "5468462"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1015,17 +1015,22 @@
    "id": "P44",
    "titel": "Hafenname und Flagge",
    "inhalt": "F23, F27 (Auswahl beim Start)",
-   "thread": "neu",
+   "thread": "erledigt (PR 429, Thread \"Hafenname und eigene Flagge geben\", Hafenflagge)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    429
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F23",
     "F27",
     "C05"
    ],
-   "status": "teilweise",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    112,
+    113
+   ]
   },
   {
    "id": "P45",
@@ -1105,16 +1110,21 @@
    "id": "P49",
    "titel": "Signalflaggen und Hafenwissen",
    "inhalt": "F33, F34 (nach P21)",
-   "thread": "neu",
+   "thread": "erledigt (PR 433, Thread \"Signalflaggen ins Spiel bringen\", signalflaggen.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    433
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F33",
     "F34"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    114,
+    115
+   ]
   },
   {
    "id": "P50",
@@ -1137,43 +1147,58 @@
    "id": "P51",
    "titel": "Hafentiere",
    "inhalt": "F38",
-   "thread": "bestehend: \"Menschen im Hafen herumlaufen lassen\"",
+   "thread": "erledigt (PR 435, docs/hafentiere.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    435
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F38"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    110,
+    111
+   ]
   },
   {
    "id": "P52",
    "titel": "Naturecke am Schilf",
    "inhalt": "F39",
-   "thread": "bestehend: \"Landschaft und Wasser gestalten\"",
+   "thread": "erledigt (PR 440, docs/naturecke.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    440
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F39"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    120,
+    121
+   ]
   },
   {
    "id": "P53",
    "titel": "Spätankömmling in der Nacht",
    "inhalt": "F40",
-   "thread": "neu",
+   "thread": "erledigt (PR 439, docs/spaetankoemmling.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    439
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F40"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    116,
+    117
+   ]
   },
   {
    "id": "P54",
@@ -1277,15 +1302,20 @@
    "id": "P60",
    "titel": "Hafen verschönern",
    "inhalt": "D8",
-   "thread": "neu",
+   "thread": "erledigt (PR 441, verschoenern.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    441
+   ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
     "D8"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    118,
+    119
+   ]
   },
   {
    "id": "P61",
@@ -2308,8 +2338,8 @@
   {
    "code": "F23",
    "text": "Hafenname und Flagge, sichtbar an Einfahrt und Mast",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P44, Hafenflagge)",
    "pakete": [
     "P44"
    ],
@@ -2351,9 +2381,9 @@
   },
   {
    "code": "F27",
-   "text": "Neues Spiel mit Auswahl: Hafenname, Stegbild, später Herausforderung oder Revier",
+   "text": "Neues Spiel mit Auswahl: Hafenname, Flagge, Stegbild, später Herausforderung oder Revier",
    "status": "erledigt",
-   "statusText": "erledigt für Name, Stegbild, Küste, Einführung; Herausforderung und Revier folgen",
+   "statusText": "erledigt für Name, Flagge, Stegbild, Küste, Einführung; Herausforderung und Revier folgen",
    "pakete": [
     "P09",
     "P44"
@@ -2423,8 +2453,8 @@
   {
    "code": "F33",
    "text": "Signalflaggen als Wunschanzeige, Lexikon im Logbuch",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (signalflaggen.md): Gäste setzen je Wunsch eine Flagge, erfüllte holen sie ein, Blauer Peter vor dem Auslaufen, Lexikon im Reiter Wissen",
    "pakete": [
     "P49"
    ],
@@ -2434,8 +2464,8 @@
   {
    "code": "F34",
    "text": "Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (signalflaggen.md): 13 Einträge zu Seezeichen, Feuer und Lichtern, Knoten, dazu Positionslichter an fahrenden Booten",
    "pakete": [
     "P49"
    ],
@@ -2480,8 +2510,8 @@
   {
    "code": "F38",
    "text": "Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (hafentiere.md): wohnen im Hafen, Tagesablauf, Antippen, Foto ins Logbuch, Erfolg Hafenfreunde",
    "pakete": [
     "P51"
    ],
@@ -2491,8 +2521,8 @@
   {
    "code": "F39",
    "text": "Naturecke: Schilfgürtel erhalten oder bebauen, nicht umkehrbar",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (naturecke.md): Schilf auf allen 15 Küsten, schützen (Bohlenweg, Taucher, +0,1 Anker) oder bebauen (Parkplatz, Geld je Abend), ohne Rückgängig",
    "pakete": [
     "P52"
    ],
@@ -2502,8 +2532,8 @@
   {
    "code": "F40",
    "text": "Spätankömmling: nachts läuft ein Boot mit Lichtern ein",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (spaetankoemmling.md): an manchen Abenden kommt der letzte Übernachter im Dunkeln mit Taschenlampe und Positionslichtern, Meldung, Schein an der Box, die Nacht wartet bis er fest ist, ein Viertel Anker Dank",
    "pakete": [
     "P53"
    ],
@@ -2987,8 +3017,8 @@
   {
    "code": "D8",
    "text": "Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P60): Reiter Deko im Baumenü mit Bänken, Kübeln, Bäumen, Laternen in Abschnitten und Anstrich der Hafenhäuser, Wirkung auf jede Bewertung; Mast schon mit P44, verschoenern.md",
    "pakete": [
     "P60"
    ],
@@ -4493,7 +4523,7 @@
   },
   {
    "code": "C05",
-   "text": "HTML per innerHTML (render/services.js, ui/input-pc.js): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, textContent oder Escapen, dazu Test mit präparierten Namen",
+   "text": "HTML per innerHTML (render/services.js, ui/input-pc.js): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, textContent oder Escapen, dazu Test mit präparierten Namen. Hafenname erledigt mit P44 (hafenNameSauber, nur textContent/Canvas, tests/hafenflagge.test.mjs)",
    "status": null,
    "statusText": "",
    "pakete": [
@@ -4676,11 +4706,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 5,
-    "teilweise": 1,
+    "erledigt": 11,
+    "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 8,
+    "offen": 3,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4735,20 +4765,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 58,
-  "teilweise": 2,
+  "erledigt": 64,
+  "teilweise": 1,
   "arbeit": 0,
   "frage": 0,
-  "offen": 26,
+  "offen": 21,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 189,
+  "erledigt": 196,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 23,
+  "offen": 16,
   "entfaellt": 1,
   "alle": 219
  },
@@ -6072,116 +6102,257 @@
    "datum": "2026-11-22",
    "quelle": "leinen/annehmen/handy-1-symbol.png",
    "nr": 109
+  },
+  {
+   "datei": "p51-pr435-pc-hafenkatze.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Hafenkatze auf dem Steg",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-5-katze-herz.png",
+   "nr": 110
+  },
+  {
+   "datei": "p51-pr435-pc-reiher.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Graureiher am Ufer",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-3-reiher.png",
+   "nr": 111
+  },
+  {
+   "datei": "p44-pr429-pc-hafenmast.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Eigene Flagge am Hafenmast",
+   "pr": 429,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/pc-3-hafenmast.png",
+   "nr": 112
+  },
+  {
+   "datei": "p44-pr429-handy-flagge-bauen.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Name und Flagge im Baukasten",
+   "pr": 429,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/handy-2-flagge-bauen.png",
+   "nr": 113
+  },
+  {
+   "datei": "p49-pr433-pc-flaggen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Signalflaggen zeigen die Wünsche der Boote",
+   "pr": 433,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/pc-flaggen-segelboot.png",
+   "nr": 114
+  },
+  {
+   "datei": "p49-pr433-handy-wissen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Logbuch-Reiter Wissen mit Signalflaggen",
+   "pr": 433,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/handy-lexikon.png",
+   "nr": 115
+  },
+  {
+   "datei": "p53-pr439-pc-lampe.jpg",
+   "pakete": [
+    "P53"
+   ],
+   "titel": "Spätankömmling läuft nachts mit Lampe ein",
+   "pr": 439,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "spaetankoemmling/pc-2-lampe.png",
+   "nr": 116
+  },
+  {
+   "datei": "p53-pr439-handy-kajuete.jpg",
+   "pakete": [
+    "P53"
+   ],
+   "titel": "Licht in der Kajüte nach dem Festmachen",
+   "pr": 439,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "spaetankoemmling/handy-4-kajuete.png",
+   "nr": 117
+  },
+  {
+   "datei": "p60-pr441-pc-laternen.jpg",
+   "pakete": [
+    "P60"
+   ],
+   "titel": "Laternen, Bänke und Bäume am Abend",
+   "pr": 441,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "verschoenern/pc-7-nacht.png",
+   "nr": 118
+  },
+  {
+   "datei": "p60-pr441-handy-baenke.jpg",
+   "pakete": [
+    "P60"
+   ],
+   "titel": "Bänke am Wasser bauen",
+   "pr": 441,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "verschoenern/handy-2-vorschau-baenke.png",
+   "nr": 119
+  },
+  {
+   "datei": "p52-pr440-pc-schilf.jpg",
+   "pakete": [
+    "P52"
+   ],
+   "titel": "Naturecke: Schilfgürtel am Ufer",
+   "pr": 440,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "naturecke/s2-natur.png",
+   "nr": 120
+  },
+  {
+   "datei": "p52-pr440-handy-schuetzen.jpg",
+   "pakete": [
+    "P52"
+   ],
+   "titel": "Schilf schützen oder Ufer bebauen",
+   "pr": 440,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "naturecke/handy-schutz.jpg",
+   "nr": 121
   }
  ],
  "neueBilder": [
+  121,
+  119,
+  117,
+  115,
+  113,
+  111,
   109,
   107,
-  105,
-  103,
-  101,
-  99,
-  97,
-  95,
-  93
+  105
  ],
  "merges": [
   {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P47 Große Ankünfte (PR 428) und P48 Leinen (PR 430) mit Bildern",
-   "pr": 434,
+   "datum": "2026-11-28",
+   "titel": "Roadmap-Pflege: P52 Naturecke (PR 440) mit Bildern",
+   "pr": 445,
    "pakete": [
-    "P47",
-    "P48"
+    "P52"
    ]
   },
   {
-   "datum": "2026-11-22",
-   "titel": "Zeitraffer zählt Flottillen, die als Ganzes weiterfahren",
-   "pr": 432,
+   "datum": "2026-11-27",
+   "titel": "P52: Naturecke am Schilf (schützen oder bebauen)",
+   "pr": 440,
+   "pakete": [
+    "P52"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: P53 Spätankömmling (PR 439) und P60 Verschönern (PR 441) mit Bildern",
+   "pr": 444,
+   "pakete": [
+    "P53",
+    "P60"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "Schwimmwellenbrecher ist ein Hindernis für die Boote und endet westlich von Steg B und C",
+   "pr": 443,
    "pakete": []
   },
   {
-   "datum": "2026-11-22",
-   "titel": "P47 Große Ankünfte: Horn, Meldung und kurze Kamerafahrt",
-   "pr": 428,
+   "datum": "2026-11-27",
+   "titel": "P53 Spätankömmling: letztes Boot läuft nachts mit Lampe ein (F40)",
+   "pr": 439,
    "pakete": [
-    "P47"
+    "P53"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: Bilder für P49 Signalflaggen (PR 433)",
+   "pr": 442,
+   "pakete": [
+    "P49"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "P60: Hafen verschönern mit Bänken, Kübeln, Bäumen, Laternen und Anstrich",
+   "pr": 441,
+   "pakete": [
+    "P60"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: P44 Hafenname und Flagge (PR 429) mit Bildern",
+   "pr": 438,
+   "pakete": [
+    "P44"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "P49: Signalflaggen als Wunschanzeige, Positionslichter und Hafenwissen (F33, F34)",
+   "pr": 433,
+   "pakete": [
+    "P49"
    ]
   },
   {
    "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: Bilder für P46 Ruhiger Abend (PR 427)",
-   "pr": 431,
+   "titel": "Roadmap-Pflege: P51 Hafentiere (PR 435) mit Bildern",
+   "pr": 437,
    "pakete": [
-    "P46"
+    "P51"
    ]
   },
   {
    "datum": "2026-11-22",
-   "titel": "P48 Leinen annehmen beim Anlegen (F32)",
-   "pr": 430,
+   "titel": "P44: Eigener Hafenname und eigene Flagge",
+   "pr": 429,
    "pakete": [
-    "P48"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P46: Ruhiger Abend mit Lichterketten und Serien-Akkord (F29, F30, L1)",
-   "pr": 427,
-   "pakete": [
-    "P46"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P31 Gästewünsche (PR 406) mit Bildern",
-   "pr": 426,
-   "pakete": [
-    "P31"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Arbeitsplan: Welle 3 gebaut, Welle 4 startet mit P48, P47, P46, P44",
-   "pr": 425,
-   "pakete": [
-    "P48",
-    "P47",
-    "P46",
     "P44"
    ]
   },
   {
    "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: Bilder für P37 Havarist einschleppen (PR 408)",
-   "pr": 424,
+   "titel": "P51 Hafentiere: Hafenkatze, Hafenhund und Graureiher (F38)",
+   "pr": 435,
    "pakete": [
-    "P37"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P37: Havarist einschleppen",
-   "pr": 408,
-   "pakete": [
-    "P37"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: Bilder für P29 Baggern (PR 420)",
-   "pr": 423,
-   "pakete": [
-    "P29"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P29 Baggern: Stege ausbaggern, Niedrigwasser bei Westwind",
-   "pr": 420,
-   "pakete": [
-    "P29"
+    "P51"
    ]
   }
  ]

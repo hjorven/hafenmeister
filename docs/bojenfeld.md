@@ -40,7 +40,7 @@ Die Wartebojen und Ankerfelder der Stufen 3 bis 6 liegen auf allen 15 Küsten (S
 
 ## Gefunden, nicht in diesem Paket
 
-- Der Schwimmwellenbrecher ab Stufe 4 (`SCHWIMMWELLENBRECHER` in `render/landschaft/gelaende.js`, gezeichnet von `render/buildings.js`) steht nicht in der Fahrwasser-Karte der Boote (`render/boat-view.js` kennt nur Stege und Molen). Boote können also durch ihn hindurchfahren. Das Bojenfeld hält Abstand zu ihm; für die Boote gehört er in den Boote-Thread.
+- Der Schwimmwellenbrecher ab Stufe 4 (`SCHWIMMWELLENBRECHER` in `render/landschaft/gelaende.js`, gezeichnet von `render/buildings.js`) steht seit dem 27.11. als hartes Hindernis in der Fahrwasser-Karte der Boote (`render/boat-view.js`, dieselbe Kurve wie das Modell). Er endet westlich von Steg B und C, damit vor deren Kopfplätzen Fahrwasser bleibt. Das Bojenfeld hält weiter Abstand zu ihm.
 
 ## Zum Ausprobieren
 

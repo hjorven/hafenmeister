@@ -304,8 +304,11 @@ export function verarbeite(state, ctx, events) {
     } else if (e.type === 'moored') {
       const ehren = istEhrenplatz(ctx.berthById[e.berthId]);
       if (heute) Object.assign(heute, { phase: 'fest', platz: e.berthId, ehrenplatz: ehren });
+      // 'arrived' kann fehlen oder in einem anderen Paket gekommen sein (zum Beispiel direkt in die frei
+      // gehaltene Box eingefahren, Laden mitten am Tag): dann zählt das Festmachen als gesehen
+      const neu = s.gesehen[art] ? false : sehen(state, s, art);
       if (ehren) s.gesehen[art].ehrenplatz = true;
-      out.push({ type: 'besucher', phase: 'fest', art, boatId: e.boatId, berthId: e.berthId, ehrenplatz: ehren });
+      out.push({ type: 'besucher', phase: 'fest', art, boatId: e.boatId, berthId: e.berthId, ehrenplatz: ehren, ...(neu ? { neu } : {}) });
     } else if (e.type === 'departed') {
       if (heute) heute.phase = 'abgereist';
       out.push({ type: 'besucher', phase: 'abgereist', art, boatId: e.boatId, rating: e.rating });

@@ -159,6 +159,15 @@ Am Hafenbüro ab Hafenbüro-Stufe 1, eine Wahl je Saison (im Winter für die kom
 | schweinswal | ab Stufe 3, an 12 % der Tage, Saisontag 1 bis 16, 0,1 bis 0,6 des Tages, 100 s im Bild |
 | Foto | Motiv mindestens 6 % der kürzeren Bildseite, 8 % Rand frei |
 
+## Naturecke am Schilf
+
+Ab Hafenstufe 2, eine Wahl, nicht umkehrbar (docs/naturecke.md).
+
+| Wahl | Kosten | Wirkung |
+|---|---|---|
+| schützen | 300 € | +0,1 Anker für jeden Gast, der einen Abend in der Saison im Hafen lag |
+| bebauen | 900 € | je Abend in der Saison Stufe 2: 20 €, Stufe 3: 50 €, Stufe 4: 90 €, Stufe 5: 140 €, Stufe 6: 200 €, plus 2 € je Gastboot im Hafen |
+
 ## Services
 
 | Service | Stufe | Name | ab Hafenstufe | Kosten | Mindestruf | Wirkung |
