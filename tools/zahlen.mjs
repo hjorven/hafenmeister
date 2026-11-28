@@ -166,6 +166,9 @@ export function tabellen() {
       ['Tide', `Hub ${zahl(g.hub)} m, Periode ${zahl(g.periodeStunden)} h, erstes Hochwasser ${zahl(g.hochwasserTag1)} Uhr, Spring und Nipp alle ${zahl(g.springNippTage)} Tage (±${Math.round(g.springFaktor * 100)} %)`],
       ['Zufahrt bei Niedrigwasser', Object.entries(n.zufahrt).map(([s, m]) => `Stufe ${s}: ${zahl(m)} m`).join(', ')],
       ['Skipper planen', `${Math.round(n.planen * 100)} % der Boote, die bei Ebbe kämen, legen ihre Ankunft ins Tidenfenster`],
+      ...(n.schleuse ? [
+        ['Schleuse (Ausbau zu Stufe 3, Küsten mit Durchstich)', `ab Stufe ${n.schleuse.abStufe}, Tor alle ${zahl(n.schleuse.takt)} s Spielzeit ${zahl(n.schleuse.offen)} s offen`],
+      ] : []),
       ...(n.trockenfallen ? [
         ['Trockenfallplätze (Bojenfeld im Watt)', `Plate ${zahl(n.trockenfallen.platte)} m unter dem mittleren Wasser, Ort mit mindestens ${zahl(n.trockenfallen.suche)} m Wasser, Schwoikreis ${zahl(n.trockenfallen.kreisM)} m`],
         ['Trockenfallen dürfen', n.trockenfallen.arten.join(', ')],

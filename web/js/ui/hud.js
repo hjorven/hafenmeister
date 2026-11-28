@@ -21,6 +21,7 @@ const REASON_LABEL = {
   niedrigwasser: 'Heute ist Niedrigwasser: Hier bleibt gerade zu wenig Wasser unter dem Kiel.',
   tide: 'Ebbe: In der Zufahrt ist zu wenig Wasser für dieses Boot. Es wartet auf die Flut.',
   kiel: 'Die Plate fällt bei Ebbe trocken: Dort liegen nur Boote ohne tiefen Kiel (Kutter, Motorboote, Jollen, Ruder- und Paddelboote).',
+  schleuse: 'Die Schleuse ist gerade zu. Mit der nächsten Schleusung läuft das Boot ein.',
   platte: 'Über der Plate steht gerade zu wenig Wasser für dieses Boot. Erst wenn die Flut aufläuft, kommt es hierher.',
   size: 'Dieser Platz ist für andere Schiffsgrößen.',
   reserved: 'Dieser Platz ist fest vergeben.',
@@ -273,7 +274,7 @@ export function init(game) {
         b.nights === 0 ? 0 : Math.max(1, Math.min(sim.ctx.rules.prepay || 1, b.nights || 1)), !!sim.ctx.rules.tip?.sizes?.includes(b.size))) : null,
       el('p', { class: 'card-hint' }, !fitting.length
         // Nordsee (P57): bei Ebbe ist die Zufahrt zu, nicht jede Box voll
-        ? (game.gezeiten?.kartenSatz?.(b) ? 'Sobald die Flut reicht, leuchten hier die passenden Plätze.'
+        ? (game.gezeiten?.kartenSatz?.(b) ? (game.gezeiten.offen(b.id) ? 'Sobald das Schleusentor öffnet, leuchten hier die passenden Plätze.' : 'Sobald die Flut reicht, leuchten hier die passenden Plätze.')
         // Päckchen (P27): ist keine Box frei, darf es längsseits an ein gleich großes oder größeres Boot
         : (sim.paeckchenZiele?.(b.id) ?? []).length
           ? 'Keine Box frei. Ins Päckchen: auf ein Boot mit weißem Rahmen ziehen (halbes Liegegeld, eine Nacht).'

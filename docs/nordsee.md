@@ -74,7 +74,23 @@ Im Bild: Unter dem Bojenfeld liegt eine Schlickplate (`render/stege.js`, `platen
 
 Ausprobieren: `?revier=nordsee&stufe=4&bojenfeld=2`. Vorschaubilder: `nordsee/teil3-*.png`.
 
-## 5. Ausprobieren
+## 5. Schleuse (Teil 4)
+
+An der Nordsee heißt der Ausbau zu Stufe 3 auf Küsten mit Durchstich "Durchstich mit Schleuse", die Stufe danach "Hafen mit Schleuse" (an offenen Küsten "Molen und Wellenbrecher" und "Hafen hinter der Mole", ohne Schleuse). Die Namen stehen in `nordsee.schleuse.namen`, `data/kuestennamen.js` wählt sie (`setzeRevier`).
+
+| Regel | Was passiert |
+|---|---|
+| Takt | Das Tor steht alle `takt` (16) Sekunden Spielzeit `offen` (7) Sekunden offen. Dazwischen wird geschleust. |
+| Ankommende | Ist die Zufahrt tief genug, das Tor aber zu, bekommt das Boot beim Ziehen den Grund `schleuse` ("Die Schleuse ist gerade zu. Mit der nächsten Schleusung um etwa ... Uhr läuft es ein."). Es wartet an der Boje (Hook `hold`), ohne Geduld zu verlieren, und läuft mit der nächsten Schleusung selbst ein. |
+| Ablegen, Tagestörn, Dauerlieger | Ablegen fällt auf die nächste Schleusung (Hook `departAt`), Dauerlieger kommen nur bei offenem Tor zurück. |
+| Ausgenommen | Großschiffe (XXL), Havarist im Schlepp, Optis über den Slip: eigene Abläufe wie bei der Zufahrt. |
+| Wozu die Schleuse? | Sie hält das Hafenbecken und macht die tiefere Fahrrinne ab Stufe 3 möglich (`nordsee.zufahrt`): Ab Stufe 3 kommen auch Kielyachten den größten Teil der Tide hinein (1,4 m statt 0,5 m bei Niedrigwasser), nur eben im Takt der Schleuse. |
+
+Im Bild (`render/schleuse.js`): zwei Schiebetore quer im Durchstich (Binnen- und Außenhaupt), die in Torkammern neben der Ostmauer rollen, je Haupt ein Signalmast mit Rot und Grün, ein Schleusenwärterhaus. Stemmtore wurden verworfen: Bei der lichten Weite des Durchstichs (rund 34 m) ragten die offenen Flügel aus der kurzen Kammer heraus, und große Seeschleusen der Nordseeküste haben ohnehin Schiebetore. Die Tore öffnen zur Schleusung und bleiben offen, solange ein Boot in der Kammer oder kurz davor ist. In der Konsole: `hafenmeister.schleuse.offen()`, `hafenmeister.schleuse.naechste()`.
+
+Ausprobieren: `?revier=nordsee&stufe=3`. Vorschaubilder: `nordsee/teil4-*.png`.
+
+## 6. Ausprobieren
 
 ```
 http://localhost:8000/?revier=nordsee&stufe=2
@@ -90,7 +106,7 @@ node tools/balance.mjs --laeufe 10 --revier nordsee
 
 Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, Ostsee 103. Einnahmen bis Tag 30 höher (Hafengeld mal 1,15), der Aufstieg gleich lang.
 
-## 6. Entscheidungen (P57, selbst getroffen und notiert)
+## 7. Entscheidungen (P57, selbst getroffen und notiert)
 
 | Frage | Entscheidung | Warum |
 |---|---|---|
@@ -100,15 +116,16 @@ Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, O
 | Tidenzahlen in `regions.js` oder `economy.js`? | Nur in `economy.js` (`nordsee.gezeiten`), `regions.js` sagt nur noch, dass die Nordsee eine Tide hat (`REVIER_FORMAT` 2). Die zweite Gezeitenrechnung in `world/region.js` ist entfernt. | Eine Zahlendatei (Regel aus P06). |
 | Trockenfallplätze als eigene Platzart oder als Bojenfeld im Watt (K4)? | Das Bojenfeld liegt an der Nordsee auf einer Plate. | So wie in echten Wattenhäfen (Muringbojen, die trockenfallen). Bau, Lage, Liegegeld, Bauvorschau und Antippen gibt es schon; neu sind nur die Regeln für Kiel und Wasserstand und das Bild. Mehrrumpfboote (Klasse L) passen nicht auf die kleinen Bojenplätze, darum liegen dort Kutter und kleine Boote. |
 | Plate aus dem Gelände oder eigene Fläche? | Eigene Schlickfläche auf fester Höhe unter dem Bojenfeld. | Das Gelände hat an kaum einer Küste ein ebenes Watt in passender Höhe nahe den Stegen. Mit fester Höhe stimmen Regeln (Node, ohne Gelände) und Bild überein. |
+| Schleuse als Wartezeit oder als Gewinn? | Beides: Die Schleuse ist der Grund für die tiefere Fahrrinne ab Stufe 3 (mehr Boote kommen bei jeder Tide hinein), kostet dafür kurze Wartezeiten im Takt. | Echte Sielhäfen mit Schleuse sind tideunabhängiger. Der Takt ist kurz (höchstens 9 s Wartezeit), damit es nicht nervt. |
 | `economy.js` für andere Pakete frei? | Alle Nordsee-Zahlen stehen im eigenen Block `ECONOMY.nordsee`; P57 ändert nichts außerhalb davon. | P45 und Welle 6 können parallel an `economy.js` arbeiten. |
 
-## 7. Teile
+## 8. Teile
 
 | Teil | Inhalt | Stand |
 |---|---|---|
 | 1 | Gezeiten in den Spielregeln, Zufahrt, Warten auf Flut, Abreise im Tidenfenster, Revierfaktoren, Balancing `--revier nordsee`, Reviertest im normalen Testlauf | gebaut |
 | 2 | Tide sichtbar: Boote und Schwimmstege heben und senken sich, Pegellatte, Pegel im Wetterknopf, Gezeiten im Wetterbericht, Bootskarte "ab etwa ... Uhr" | gebaut |
 | 3 | Trockenfallplätze (K4): das Bojenfeld liegt an der Nordsee auf einer Plate im Watt, nur für Boote ohne tiefen Kiel, Kutter liegen dort gern | gebaut |
-| 4 | Schleuse als Ausbau zu Stufe 3 statt Durchstich | in Arbeit |
+| 4 | Schleuse als Ausbau zu Stufe 3: Tor im Takt, Warten auf die Schleusung, Schiebetore im Bild, Namen an der Nordsee | gebaut |
 | 5 | Freischalten ab Ostsee Stufe 5 (K6), Seekarte zum Wechseln, eigener Spielstand je Revier, Startgeld aus dem Ruf (K5) | in Arbeit |
 | 6 | Nordsee-Küsten: eigene Auswahl an Küstentypen für die Nordsee | in Arbeit |

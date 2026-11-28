@@ -236,3 +236,30 @@ test('Trockenfallplätze: Plate nur für Boote ohne Kiel, hin und weg nur bei Wa
   assert.ok(G.bonusTrocken(kutter) > 0);
   assert.equal(G.bonusTrocken(yacht), 0);
 });
+
+test('Schleuse: ab Stufe 3 öffnet das Tor im Takt, Ankommende warten, Ablegen fällt in eine Schleusung', () => {
+  const { ctx, state } = neu({ stage: 3 });
+  const SL = ECONOMY.nordsee.schleuse;
+  state.day = 4;
+  const { hi } = extrem(state, ctx);
+  assert.equal(G.hatSchleuse(state), true);
+  assert.equal(G.hatSchleuse({ ...state, stage: 2 }), false);
+  assert.equal(G.hatSchleuse({ ...state, region: 'ostsee' }), false);
+  const zu = Math.floor(hi / SL.takt) * SL.takt + SL.offen + 1;   // Tor zu, Wasser hoch
+  const auf = Math.ceil(zu / SL.takt) * SL.takt;
+  assert.equal(G.schleuseOffen(state, zu), false);
+  assert.equal(G.schleuseOffen(state, auf), true);
+  assert.equal(G.naechsteSchleusung(state, zu), auf);
+  const flach = boot(state, { draft: 0.4 });
+  const box = sim.availableBerths(state, ctx).find((b) => b.kind !== 'boje' && sim.isFree(state, b.id) && sim.fits(flach, b, ctx.rules, state.stage));
+  state.clock = zu;
+  assert.equal(G.fitTide({ state, ctx, boat: flach, berth: box }), 'schleuse');
+  assert.equal(sim.holdsForHook(state, ctx, flach), true, 'wartet (ankert bei vollen Bojen)');
+  state.clock = auf;
+  assert.equal(G.fitTide({ state, ctx, boat: flach, berth: box }), null);
+  // Ablegen: auf die nächste Schleusung
+  Object.assign(flach, { status: 'moored', berthId: box.id, atBuoy: false });
+  assert.equal(G.ablegenBeiFlut({ state, ctx, boat: flach, at: zu, tag: state.day }), auf);
+  // Großschiffe und Havaristen haben eigene Abläufe
+  assert.equal(G.kommtDurch(state, ctx, { ...flach, size: 'XXL', berthId: null }, zu), true);
+});

@@ -18,13 +18,18 @@
 //   trockenfallen.platte unter dem mittleren Wasser). Nur Bootsarten ohne tiefen Kiel (Grund 'kiel'), hin und
 //   weg nur, wenn über der Plate genug Wasser steht (Grund 'platte', Ablegen im Fenster). Kutter und Motorboote
 //   bewerten die Plate besser (Hook 'rating', boat.trocken).
+// - Schleuse (Ausbau zu Stufe 3 an Küsten mit Durchstich): Das Tor öffnet im Takt (nordsee.schleuse).
+//   Ankommende warten an der Boje auf die nächste Schleusung (Grund 'schleuse', Hook 'hold'), Ablegen und
+//   Tagestörns werden auf die Schleusung gelegt (kommtDurch).
 import * as sim from '../sim.js';
 import { ECONOMY } from '../data/economy.js';
 import { uhrzeitAusUhr } from '../render/landschaft/zeit.js';
+import { engpassArt } from '../data/kuestennamen.js';
 
 export const NORDSEE = ECONOMY.nordsee ?? null;
 const G = NORDSEE?.gezeiten ?? null;
 const TF = NORDSEE?.trockenfallen ?? null;
+const SL = NORDSEE?.schleuse ?? null;
 
 /** Hat dieser Hafen Ebbe und Flut? */
 export function hatTide(state) {
@@ -112,9 +117,28 @@ export function platzOffen(state, ctx, boat, berth, clock = uhr(state), tag = st
   return wasserstand(state, ctx, clock, tag) - plattenHoehe() >= braucht(ctx, boat) - 1e-9;
 }
 
-/** Kommt das Boot jetzt hinaus oder herein: Zufahrt und (liegt es auf der Plate) Wasser über der Plate. */
+/** Hat dieser Hafen eine Schleuse (Nordsee, ab Stufe 3, Küste mit Durchstich)? */
+export function hatSchleuse(state) {
+  return !!SL && hatTide(state) && (state.stage ?? 1) >= (SL.abStufe ?? 3) && engpassArt() === 'durchstich';
+}
+
+/** Steht das Schleusentor zur Spieluhr clock offen? Ohne Schleuse immer. */
+export function schleuseOffen(state, clock = uhr(state)) {
+  if (!hatSchleuse(state)) return true;
+  const t = ((clock % SL.takt) + SL.takt) % SL.takt;
+  return t < SL.offen;
+}
+
+/** Nächste Spieluhr ab clock, zu der das Tor offen ist. */
+export function naechsteSchleusung(state, clock = uhr(state)) {
+  if (schleuseOffen(state, clock)) return clock;
+  return Math.ceil(clock / SL.takt) * SL.takt;
+}
+
+/** Kommt das Boot jetzt hinaus oder herein: Zufahrt, Schleuse und (liegt es auf der Plate) Wasser darüber. */
 export function kommtDurch(state, ctx, boat, clock = uhr(state), tag = state.day) {
   if (!zufahrtOffen(state, ctx, boat, clock, tag)) return false;
+  if (!ausgenommen(boat) && !schleuseOffen(state, clock)) return false;
   const berth = boat?.berthId != null ? ctx?.berthById?.[boat.berthId] : null;
   return platzOffen(state, ctx, boat, berth, clock, tag);
 }
@@ -166,13 +190,15 @@ export function scheitel(state, ctx, tag = state.day) {
  * nur Boote ohne tiefen Kiel ('kiel') und nur bei genug Wasser darüber ('platte', auch beim Umlegen).
  */
 export function fitTide({ state, ctx, boat, berth }) {
+  // Grund 'schleuse': das Tor ist gerade zu, die nächste Schleusung kommt gleich
   if (!hatTide(state) || ausgenommen(boat)) return null;
   if (istTrocken(state, berth)) {
     if (!darfTrocken(boat)) return 'kiel';
     if (!platzOffen(state, ctx, boat, berth)) return 'platte';
   }
   if (boat.status === 'moored') return null;
-  return zufahrtOffen(state, ctx, boat) ? null : 'tide';
+  if (!zufahrtOffen(state, ctx, boat)) return 'tide';
+  return schleuseOffen(state) ? null : 'schleuse';
 }
 
 /** Hook 'hold': Dieses ankommende Boot (oder ein Dauerlieger auf dem Rückweg) wartet auf die Flut. */
@@ -180,7 +206,7 @@ export function wartetAufFlut({ state, ctx, boat }) {
   // Dauerlieger (stationed) auf Törn draußen (status 'away') kommen auch nur bei genug Wasser zurück
   const draussen = boat?.stationed && boat.status === 'away' && !boat.havarie && boat.size !== 'XXL';
   if (!hatTide(state) || (ausgenommen(boat) && !draussen) || boat.status === 'moored') return false;
-  return !zufahrtOffen(state, ctx, boat);
+  return !zufahrtOffen(state, ctx, boat) || !schleuseOffen(state);
 }
 
 /**
