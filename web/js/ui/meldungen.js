@@ -41,6 +41,7 @@ export const VORRANG = {
   tipp: 45,            // features/einstieg.js, Tipps beim ersten Mal (kurz, gehen den Dauerplatz-Meldungen vor)
   dauer: 40,           // features/dauerlieger.js, andere Meldungen
   erfolg: 30,          // features/erfolge.js, neuer Erfolg (kurz)
+  fotoauftrag: 26,     // features/fotoauftraege.js, Fotoauftrag des Postkartenverlags, Erinnerung bei passendem Licht (P43)
   post: 24,            // ui/gaestepost.js, Post von einem Stammgast an der Pinnwand (kurz)
   logbuch: 22,         // ui/logbuch.js, neues Bootsmodell im Logbuch (kurz)
   wissen: 21,          // features/hafenwissen.js, neu im Hafenwissen: Signalflagge, Seezeichen, Licht, Knoten (kurz, P49)

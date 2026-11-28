@@ -26,7 +26,8 @@
 //   rueckNacht       Tag, in dessen Nacht das Boot zurückkommt (null = Boot ist da)
 //   frueherUm        Anteil des Tages, zu dem es am Tag rueckNacht schon zurückkommt (oder null)
 //   wartet, gastId   Boot ist früher zurück und wartet vor dem Hafen, weil Gast gastId noch im Platz liegt
-//   tagestoern       heute eine Runde draußen
+//   tagestoern       heute eine Runde draußen (H9: dann ist auch boot gesetzt, rueckNacht = Vortag; die
+//                    Box ist bis zum Abend frei für einen kurzen Halt, siehe fitHook)
 //   jahr, pacht      Saison (Jahr), für die bezahlt ist, und der Betrag
 //   kuendigung       null | 'spieler' | 'lieger' (verlässt den Hafen zum Saisonende)
 //   winterlager      über den Winter im Winterlager (Krantage, P20); kommt zum ersten Saisontag zurück
@@ -55,7 +56,9 @@ export const DAUER = {
   anteilGastpreis: 0.5,
   vorauskasse: true,
   hoechstAnteil: 0.25,
-  tagestoernChance: 0.4,   // Wahrscheinlichkeit pro Tag für eine Runde draußen (morgens raus, abends zurück)
+  tagestoernChance: 0.4,   // Wahrscheinlichkeit pro Tag für eine Runde draußen (morgens raus, nachmittags zurück)
+  tagestoernZurueck: [0.62, 0.85],
+  kurzVorlauf: 0.08,
   toernChance: 0.12,       // Wahrscheinlichkeit pro Tag für einen Törn über mehrere Tage
   toernTage: [1, 3],
   frueherZurueck: 0.35,
@@ -397,10 +400,16 @@ export function hebeAuf(state, ctx, platzId) {
   return { ok: true, events };
 }
 
-/** Ist das Boot gerade auf mehrtägigem Törn? Dann bis zu welcher Nacht? */
+/** Ist das Boot gerade auf mehrtägigem Törn? Dann bis zu welcher Nacht? (Tagestörn: null) */
 export function draussenBis(state, platzId) {
   const p = dauerState(state).plaetze[platzId];
-  return p && p.boot ? p.rueckNacht : null;
+  return p && p.boot && !p.tagestoern ? p.rueckNacht : null;
+}
+
+/** Ist das Boot heute nur auf Tagestörn (abends zurück, Box bis dahin frei für einen kurzen Halt, H9)? */
+export function aufTagestoern(state, platzId) {
+  const p = dauerState(state).plaetze[platzId];
+  return !!(p && p.boot && p.tagestoern);
 }
 
 /**
@@ -408,10 +417,19 @@ export function draussenBis(state, platzId) {
  * wenn er spätestens in der Nacht abreist, in der das Boot zurückkommt.
  * Ein Gast, der heute (Tag D) kommt und n Nächte bleibt, reist in der Nacht von Tag D + n - 1 ab.
  */
-export function fitHook({ state, boat, berth }) {
+export function fitHook({ state, ctx, boat, berth }) {
   const p = dauerState(state).plaetze[berth.id];
   if (!p || boat.stationed) return null;
   if (!p.boot || p.wartet) return 'dauer';   // Boot liegt da oder wartet schon vor dem Hafen
+  // Tagestörn (Roadmap H9): bis zum Abend darf nur ein Boot für einen kurzen Halt in die Box
+  // und nur, wenn er vor der Rückkehr wieder fort ist (Liegezeit plus Vorlauf für An- und Abfahrt)
+  if (p.tagestoern) {
+    if (!sim.isShortStay(boat) || state.day <= p.rueckNacht) return 'dauerTag';
+    const tag = ctx?.rules?.dayLength;
+    if (!tag || p.zurueckUm == null) return null;
+    const fort = state.clock + ((boat.stay ?? 0.2) + regeln(ctx).kurzVorlauf) * tag;
+    return fort <= p.zurueckUm * tag ? null : 'dauerBald';
+  }
   const abreiseNacht = state.day + (boat.nights ?? 1) - 1;
   return abreiseNacht <= p.rueckNacht ? null : 'dauerZurueck';
 }
@@ -424,8 +442,9 @@ function legeAn(state, platzId, p, events) {
   state.boats[boot.id] = boot;
   state.berths[platzId] = boot.id;
   const ausWinterlager = !!p.winterlager;
-  Object.assign(p, { boot: null, rueckNacht: null, frueherUm: null, wartet: false, gastId: null, winterlager: false });
-  events.push({ type: 'dauerEinlaufen', boatId: boot.id, berthId: platzId, tagestoern: false, ...(ausWinterlager ? { winterlager: true } : {}) });
+  const tagestoern = !!p.tagestoern;
+  Object.assign(p, { boot: null, rueckNacht: null, frueherUm: null, wartet: false, gastId: null, winterlager: false, tagestoern: false, zurueckUm: null });
+  events.push({ type: 'dauerEinlaufen', boatId: boot.id, berthId: platzId, tagestoern, ...(ausWinterlager ? { winterlager: true } : {}) });
 }
 
 /**
@@ -443,6 +462,11 @@ export function tickHook({ state, ctx, events }) {
     }
   }
   for (const [platzId, p] of Object.entries(dauerState(state).plaetze)) {
+    // Tagestörn (H9): am Nachmittag zurück, sobald die Box frei ist (ein kurzer Halt legt vorher ab)
+    if (p.tagestoern && p.boot) {
+      if (state.day > p.rueckNacht && p.zurueckUm != null && state.clock >= p.zurueckUm * ctx.rules.dayLength && sim.isFree(state, platzId)) legeAn(state, platzId, p, events);
+      continue;
+    }
     if (!p.boot || p.frueherUm == null || state.day < p.rueckNacht) continue;
     if (!p.wartet && state.clock < p.frueherUm * ctx.rules.dayLength) continue;
     if (sim.isFree(state, platzId)) { legeAn(state, platzId, p, events); continue; }
@@ -450,6 +474,16 @@ export function tickHook({ state, ctx, events }) {
     p.wartet = true;
     p.gastId = state.berths[platzId] ?? state.leaving?.[platzId]?.boatId ?? null;
     events.push({ type: 'dauerWartet', boatId: p.bootId, berthId: platzId, gastId: p.gastId });
+  }
+}
+
+/**
+ * Abends (Hook 'eveningTick', H9): Lag zum Abend noch ein kurzer Halt in der Box eines Tagestörns (er legt
+ * gerade ab), legt der Dauerlieger an, sobald die Box frei ist, statt bis zur Nacht draußen zu kreisen.
+ */
+export function abendTickHook({ state, events }) {
+  for (const [platzId, p] of Object.entries(dauerState(state).plaetze)) {
+    if (p.tagestoern && p.boot && sim.isFree(state, platzId)) legeAn(state, platzId, p, events);
   }
 }
 
@@ -500,10 +534,17 @@ export function umlegeHook({ state, boat, from, to, events }) {
   legeAn(state, from, p, events);
 }
 
-/** Abends: Wer heute nur eine Runde draußen war, ist zurück; wer noch wartet, ist verärgert (Hook 'evening'). */
+/**
+ * Abends: Wer heute nur eine Runde draußen war, ist zurück; wer noch wartet, ist verärgert (Hook 'evening').
+ * Tagestörn (H9): Ist die Box frei, legt das Boot an. Liegt noch der kurze Halt darin (er legt gerade ab),
+ * legt es an, sobald die Box frei ist (abendTickHook), spätestens in der Nacht (nachtHook), ohne Ärger.
+ */
 export function abendHook({ state, events }) {
   for (const [platzId, p] of Object.entries(dauerState(state).plaetze)) {
-    if (p.tagestoern) {
+    if (p.tagestoern && p.boot) {
+      if (sim.isFree(state, platzId)) legeAn(state, platzId, p, events);
+    } else if (p.tagestoern) {
+      // Spielstand von vor H9: das Boot blieb in den Regeln an seinem Platz
       p.tagestoern = false;
       events.push({ type: 'dauerEinlaufen', boatId: p.bootId, berthId: platzId, tagestoern: true });
     }
@@ -537,7 +578,7 @@ export function nachtHook({ state, ctx, events }) {
       if (p.kuendigung) continue;
       if (p.boot) {
         // schon auf Törn: bleibt gleich bis zum Frühling weg
-        Object.assign(p, { rueckNacht: Math.max(p.rueckNacht ?? 0, rueck), frueherUm: null, wartet: false, gastId: null, winterlager: true });
+        Object.assign(p, { rueckNacht: Math.max(p.rueckNacht ?? 0, rueck), frueherUm: null, wartet: false, gastId: null, winterlager: true, tagestoern: false });
         continue;
       }
       const boot = state.boats[p.bootId];
@@ -572,7 +613,8 @@ export function nachtHook({ state, ctx, events }) {
       if (p.rueckNacht > state.day) continue;
       // Ein Gast, der noch bleibt, hält den Platz: dann eine Nacht später. Ein Gast, der heute Nacht
       // abgerechnet wurde und erst morgens ablegen wollte (state.leaving), legt sofort ab (sim.js tick).
-      if (state.berths[platzId] != null) { p.rueckNacht = state.day + 1; p.frueherUm = null; continue; }
+      // Nach einem Tagestörn (H9) wird daraus ein Törn bis morgen Nacht: Gäste, die morgen abreisen, passen.
+      if (state.berths[platzId] != null) { p.rueckNacht = state.day + 1; p.frueherUm = null; p.tagestoern = false; continue; }
       legeAn(state, platzId, p, events);
       continue;
     }
@@ -592,7 +634,12 @@ export function nachtHook({ state, ctx, events }) {
         ? R.zurueckUm[0] + random(state) * (R.zurueckUm[1] - R.zurueckUm[0]) : null;
       events.push({ type: 'dauerAuslaufen', boatId: boot.id, berthId: platzId, tage });
     } else if (wurf < R.toernChance + R.tagestoernChance) {
-      p.tagestoern = true;
+      // Tagestörn: morgens raus, abends zurück. Bis dahin ist die Box frei für einen kurzen Halt (H9).
+      delete state.berths[platzId];
+      delete state.boats[boot.id];
+      boot.status = 'away';
+      const [von, bis] = R.tagestoernZurueck;
+      Object.assign(p, { boot, rueckNacht: state.day, frueherUm: null, tagestoern: true, zurueckUm: Math.round((von + random(state) * (bis - von)) * 1000) / 1000 });
       events.push({ type: 'dauerAuslaufen', boatId: boot.id, berthId: platzId, tage: 0 });
     }
   }
@@ -630,7 +677,7 @@ export function ergaenzeAlteStaende(state, ctx) {
 
 /** Hooks in einen Regel-Kontext hängen (Browser über game.sim.addHook, Tests über sim.addHook). */
 export function haengeEin(addHook) {
-  const ab = [addHook('fit', fitHook), addHook('evening', abendHook), addHook('night', nachtHook), addHook('tick', tickHook), addHook('stageUp', stufenHook), addHook('relocate', umlegeHook)];
+  const ab = [addHook('fit', fitHook), addHook('evening', abendHook), addHook('night', nachtHook), addHook('tick', tickHook), addHook('eveningTick', abendTickHook), addHook('stageUp', stufenHook), addHook('relocate', umlegeHook)];
   return () => ab.forEach((f) => f());
 }
 
@@ -650,6 +697,8 @@ const GRUND = {
   funk: 'Diese Box ist für ein angemeldetes Boot frei gehalten.',
   dauer: 'Das ist ein Dauerplatz.',
   dauerZurueck: 'Der Dauerlieger dieses Platzes kommt vorher zurück.',
+  dauerTag: 'Der Dauerlieger ist nur auf Tagestörn. Bis zu seiner Rückkehr darf hier nur ein Boot für einen kurzen Halt liegen.',
+  dauerBald: 'Der Dauerlieger kommt bald von seinem Tagestörn zurück.',
 };
 
 export async function init(game) {
@@ -695,6 +744,9 @@ export async function init(game) {
     #dauer-hinweis span { display: block; font-size: max(13px, 0.875rem); }
     #card .dauer-liste { flex-direction: column; align-items: stretch; }
     .hm-neu #card .dauer-liste .hud-btn, #card .dauer-liste .hud-btn { flex: 0 0 auto; min-height: 44px; text-align: left; white-space: normal; }
+    /* Handy hochkant: lange Knöpfe („Sofort kündigen (−127 €)“) brechen um statt abgeschnitten zu werden */
+    .hm-neu #card .dauer-aktionen, #card .dauer-aktionen { flex-wrap: wrap; }
+    .hm-neu #card:not(.bau-karte) .card-actions.dauer-aktionen .hud-btn, #card .dauer-aktionen .hud-btn { flex: 1 1 140px; min-width: 0; min-height: 44px; white-space: normal; }
   `;
   document.head.appendChild(stil);
   let hinweisTimer = 0;
@@ -1001,6 +1053,7 @@ export async function init(game) {
         zahl(),
       ));
       if (p.wartet) teile.push(el('p', { class: 'card-note' }, `Früher zurück und wartet vor dem Hafen. Lege den Gast ${bootsname(st.boats[p.gastId])} auf einen anderen Platz um.`));
+      else if (p.boot && p.tagestoern) teile.push(el('p', { class: 'card-hint' }, 'Auf Tagestörn, am Nachmittag zurück. Bis dahin darf ein Boot für einen kurzen Halt hier festmachen.'))
       else if (p.boot) teile.push(el('p', { class: 'card-hint' }, `Grün: auf Törn, zurück an Tag ${p.rueckNacht + 1}. Gäste, die vorher abreisen, dürfen hier liegen. Manche Dauerlieger kommen früher.`));
       else teile.push(el('p', { class: 'card-hint' }, 'Rot: Das Boot liegt hier. Die Pacht ist sicher, auch bei Sturm. Gäste und Ruf bringt der Platz nicht.'));
       if (p.kuendigung === 'lieger') teile.push(el('p', { class: 'card-note' }, 'Der Dauerlieger hat gekündigt und verlässt den Hafen zum Saisonende.'));
@@ -1016,7 +1069,7 @@ export async function init(game) {
         b.disabled = st.money < kosten.summe;
         aktionen.push(b);
       }
-      teile.push(el('div', { class: 'card-actions' }, ...aktionen));
+      teile.push(el('div', { class: 'card-actions dauer-aktionen' }, ...aktionen));
     } else if (behalten) {
       const boot = st.boats[st.berths[platzId]];
       const { tage } = pachtZeitraum(st, api.ctx);

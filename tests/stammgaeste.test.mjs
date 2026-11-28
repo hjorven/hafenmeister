@@ -147,7 +147,7 @@ test('ab dem 5. Besuch als Dauerlieger behalten', () => {
   assert.ok(dauer.istDauerplatz(state, platz.id));
   // Reist nachts nicht ab
   spiele(state, ctx, 3);
-  assert.ok(state.boats[900] || dauer.draussenBis(state, platz.id) != null);
+  assert.ok(state.boats[900] || dauer.draussenBis(state, platz.id) != null || dauer.aufTagestoern(state, platz.id));
 });
 
 test('Boote ohne Namen (vor dem Einhängen gewürfelt) bekommen Namen nach, ohne den Würfel zu bewegen', () => {

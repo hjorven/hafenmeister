@@ -354,7 +354,9 @@ export const ECONOMY = {
     vorauskasse: true,         // true: Saisonpacht im Voraus (Rest der Saison, dann jede Saison neu);
                                // false: jeden Abend anteilGastpreis des Gastpreises
     hoechstAnteil: 0.25,       // höchstens ein Viertel der Plätze (fest vergebene zählen nicht)
-    tagestoernChance: 0.4,     // je Tag: morgens raus, abends zurück
+    tagestoernChance: 0.4,     // je Tag: morgens raus, am Nachmittag zurück
+    tagestoernZurueck: [0.62, 0.85],  // dann zu diesem Anteil des Tages (liegt noch ein kurzer Halt in der Box: sobald sie frei ist)
+    kurzVorlauf: 0.08,         // H9: ein kurzer Halt darf in die Box, wenn er so viel Tag vor der Rückkehr fort ist
     toernChance: 0.12,         // je Tag: Törn über mehrere Tage, Platz frei für Gäste
     toernTage: [1, 2],
     frueherZurueck: 0.35,      // Anteil der Törns, von denen das Boot schon am Nachmittag des letzten Tages zurückkommt
@@ -1120,6 +1122,29 @@ export const ECONOMY = {
       { optis: 6, jollen: 2, beitrag: 25, eltern: 6 },   // Segelschule
       { optis: 8, jollen: 3, beitrag: 40, eltern: 8 },   // Regattaverein
     ],
+  },
+
+  // ---------------------------------------------------------------- Fotoaufträge und Postkarten (P43)
+  // Logik in web/js/features/fotoauftraege-regeln.js, Beschreibung in docs/fotoauftraege.md.
+  // Ein Postkartenverlag bestellt ab und zu ein Foto; im Fotomodus (P) wird es zur Postkarte, der Verlag
+  // zahlt einmal ein Honorar. Der Zeitraffer-Bot fotografiert nie, das Balancing bleibt gleich.
+  fotoauftraege: {
+    abTag: 2,                 // erster Auftrag frühestens am Morgen dieses Spieltags (Tag 1 gehört dem Einstieg)
+    dauerTage: 3,             // so viele Spieltage gilt ein Auftrag, der erste mitgezählt
+    pauseTage: 1,             // danach so viele Tage ohne neuen Auftrag
+    // Honorar je Ausbaustufe, etwa ein gutes mittleres Tagesziel
+    honorar: { 1: 25, 2: 45, 3: 80, 4: 120, 5: 170, 6: 240 },
+    sonderFaktor: 1.5,        // Sonderauftrag für einen besonderen Tag (Besuch, Großschiff, Ereignis)
+    nachdruckFaktor: 0.5,     // Motiv schon als Postkarte da: Nachdruck mit neuem Bild
+    // Bild: Motiv mindestens so weit vom Rand (Anteil der halben Bildbreite), Mindestgröße (Anteil der kürzeren Seite)
+    // regenMax: ab dieser Regenstärke (0 bis 1, Ereignis 'weather') gibt es kein Sonnenuntergangs- oder Morgenbild
+    foto: { rand: 0.1, mindestGroesse: 0.07, regenMax: 0.3 },
+    abend: [18.5, 21.5],      // Uhrzeit für den Sonnenuntergang
+    morgen: [6.5, 8.5],       // Uhrzeit für die Morgenstimmung
+    mindestBoote: 3,          // so viele Boote mindestens im Bild (Stimmungsbilder)
+    vollerSteg: { mindestPlaetze: 4 },
+    ganzerHafen: { anteil: 0.85, mindestBoote: 4 },
+    anlegen: { abstand: 50 }, // Meter bis zum Platz
   },
 
   // ---------------------------------------------------------------- Naturecke am Schilf (P52, F39)
