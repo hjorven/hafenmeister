@@ -441,7 +441,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | H6 | Lieblingsplatz eines Stammgasts | erledigt (P25): Box des letzten zufriedenen Besuchs, Stander über der Box | P25 |
 | H7 | Sichtbare Treue: Wimpel je fünf Besuche | erledigt (P25): Doppelstander am Heck | P25 |
 | H8 | Stammgäste wachsen mit (Wünsche, größeres Boot) | erledigt (P25) | P25 |
-| H9 | Leere Box während eines Tagestörns für einen Tagesgast | offen | P25 |
+| H9 | Leere Box während eines Tagestörns für einen Tagesgast | erledigt (P25): Box eines Dauerliegers auf Tagestörn nimmt bis zur Rückkehr am Nachmittag einen kurzen Halt ([stammgaeste.md](stammgaeste.md)) | P25 |
 | H10 | Dauerlieger vor Vertragsende kündigen kostet | erledigt (PR 149) | P01 |
 
 ### I Tagesziele, Logbuch, Abschluss und Endlosspiel
@@ -695,7 +695,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|
 | P23 | Services mit eigener Wirkung | Services nicht nur "€ pro Tag" | erledigt (PR 340; F2, F3, F5, F7, F9; [services.md](services.md#eigene-wirkung-roadmap-p23)) |
 | P24 | Ereignisse zum Vorbereiten und neue Ereignisse | Vorwarnung mit Handlungsmöglichkeit, F17 | erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend; PR 299: Heringstage, Mittsommer, Holzboot-Treffen, Hanse-Woche, Nachspiel, Services an Ereignistagen; Regatta mit Bahn draußen PR 319), [ereignisse.md](ereignisse.md) |
-| P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | teilweise: Teil 1 und 2 gebaut (PR 394, [stammgaeste.md](stammgaeste.md)), H9 folgt |
+| P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | erledigt: Teil 1 bis 3 gebaut, auch C8, H6 bis H9 (PR 394, PR 397, [stammgaeste.md](stammgaeste.md)) |
 | P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | erledigt (PR 322, docs/hafengesten.md) |
 | P27 | Päckchen liegen bei vollem Hafen | F1 | erledigt (PR 330, [paeckchen.md](paeckchen.md)) |
 | P28 | Anmeldung per Funk | F2 (nutzt P11) | erledigt (PR 288, `docs/funk-anmeldung.md`) |
