@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "28.11.2026",
-  "commit": "73d0ea6"
+  "commit": "e57a7f3"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1273,7 +1273,8 @@
    "bilder": [
     125,
     126,
-    127
+    127,
+    128
    ]
   },
   {
@@ -6338,9 +6339,22 @@
    "datum": "2026-11-28",
    "quelle": "nordsee/teil4-pc-schleuse-offen.png",
    "nr": 127
+  },
+  {
+   "datei": "p57-pr453-pc-seekarte.jpg",
+   "pakete": [
+    "P57"
+   ],
+   "titel": "Neues Spiel: Seekarte mit Ostsee und freigeschalteter Nordsee",
+   "pr": 453,
+   "geraet": "pc",
+   "datum": "2026-11-28",
+   "quelle": "nordsee/teil5-pc-seekarte-frei.png",
+   "nr": 128
   }
  ],
  "neueBilder": [
+  128,
   127,
   126,
   124,
@@ -6348,105 +6362,100 @@
   121,
   119,
   117,
-  115,
-  113
+  115
  ],
  "merges": [
   {
    "datum": "2026-11-28",
-   "titel": "Arbeitsplan: Welle 4 fast fertig, Serie f7e42f9; starten Stau Handy Küste 3/14, P43, P25 H9, P57",
-   "pr": 447,
+   "titel": "Roadmap-Pflege: P57 Nordsee Teil 5 Seekarte (PR 453) mit Bild",
+   "pr": 457,
    "pakete": [
-    "P43",
-    "P25",
     "P57"
    ]
   },
   {
    "datum": "2026-11-28",
-   "titel": "P40: Besucher am Ehrenplatz ohne vorheriges Einlaufen; Jugendtraining wartet am Slip höchstens 12 s",
-   "pr": 446,
+   "titel": "Nordsee Teil 6: eigene Küsten, Schleuse an allen Küsten (P57)",
+   "pr": 455,
    "pakete": [
-    "P40"
+    "P57"
    ]
   },
   {
    "datum": "2026-11-28",
-   "titel": "Roadmap-Pflege: P52 Naturecke (PR 440) mit Bildern",
-   "pr": 445,
-   "pakete": [
-    "P52"
-   ]
-  },
-  {
-   "datum": "2026-11-27",
-   "titel": "P52: Naturecke am Schilf (schützen oder bebauen)",
-   "pr": 440,
-   "pakete": [
-    "P52"
-   ]
-  },
-  {
-   "datum": "2026-11-27",
-   "titel": "Roadmap-Pflege: P53 Spätankömmling (PR 439) und P60 Verschönern (PR 441) mit Bildern",
-   "pr": 444,
-   "pakete": [
-    "P53",
-    "P60"
-   ]
-  },
-  {
-   "datum": "2026-11-27",
-   "titel": "Schwimmwellenbrecher ist ein Hindernis für die Boote und endet westlich von Steg B und C",
-   "pr": 443,
+   "titel": "Arbeitsplan: Stau Handy Küste 3/14 erledigt (PR 456)",
+   "pr": 458,
    "pakete": []
   },
   {
-   "datum": "2026-11-27",
-   "titel": "P53 Spätankömmling: letztes Boot läuft nachts mit Lampe ein (F40)",
-   "pr": 439,
+   "datum": "2026-11-28",
+   "titel": "Massenabfahrten: höchstens acht Auslaufende zugleich im Revier",
+   "pr": 456,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-28",
+   "titel": "Roadmap-Pflege: P57 Nordsee Teil 4 Schleuse (PR 452) mit Bild",
+   "pr": 454,
    "pakete": [
-    "P53"
+    "P57"
    ]
   },
   {
-   "datum": "2026-11-27",
-   "titel": "Roadmap-Pflege: Bilder für P49 Signalflaggen (PR 433)",
-   "pr": 442,
+   "datum": "2026-11-28",
+   "titel": "Nordsee Teil 5: Freischalten, Seekarte, Startgeld aus dem Ruf (P57)",
+   "pr": 453,
    "pakete": [
-    "P49"
+    "P57"
    ]
   },
   {
-   "datum": "2026-11-27",
-   "titel": "P60: Hafen verschönern mit Bänken, Kübeln, Bäumen, Laternen und Anstrich",
-   "pr": 441,
+   "datum": "2026-11-28",
+   "titel": "Nordsee Teil 4: Schleuse als Ausbau zu Stufe 3 (P57)",
+   "pr": 452,
    "pakete": [
-    "P60"
+    "P57"
    ]
   },
   {
-   "datum": "2026-11-27",
-   "titel": "Roadmap-Pflege: P44 Hafenname und Flagge (PR 429) mit Bildern",
-   "pr": 438,
+   "datum": "2026-11-28",
+   "titel": "Roadmap-Pflege: P57 Nordsee Teil 1 bis 3 (PR 448, 450) mit Bildern",
+   "pr": 451,
    "pakete": [
-    "P44"
+    "P57"
    ]
   },
   {
-   "datum": "2026-11-27",
-   "titel": "P49: Signalflaggen als Wunschanzeige, Positionslichter und Hafenwissen (F33, F34)",
-   "pr": 433,
+   "datum": "2026-11-28",
+   "titel": "Nordsee Teil 2 und 3: Tide sichtbar, Trockenfallplätze im Watt (P57)",
+   "pr": 450,
    "pakete": [
-    "P49"
+    "P57"
    ]
   },
   {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P51 Hafentiere (PR 435) mit Bildern",
-   "pr": 437,
+   "datum": "2026-11-28",
+   "titel": "Roadmap-Pflege: P43 Fotoaufträge (PR 436) und P25 H9 (PR 397) mit Bildern",
+   "pr": 449,
    "pakete": [
-    "P51"
+    "P43",
+    "P25"
+   ]
+  },
+  {
+   "datum": "2026-11-28",
+   "titel": "Nordsee Teil 1: Ebbe und Flut in den Spielregeln (P57)",
+   "pr": 448,
+   "pakete": [
+    "P57"
+   ]
+  },
+  {
+   "datum": "2026-11-28",
+   "titel": "P25 Teil 3 (H9): Tagesgast in der Box eines Dauerliegers auf Tagestörn",
+   "pr": 397,
+   "pakete": [
+    "P25"
    ]
   }
  ]
