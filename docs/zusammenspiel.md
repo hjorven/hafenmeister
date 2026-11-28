@@ -371,6 +371,9 @@ Stand 28.11.2026, Teil 1 (Regeln). Was die Zufahrt im Tidenfenster mit anderen F
 | Bootsgeschichten (Zeiten tauschen) | die Gezeiten tauschen danach; im Browser hängt sich `features/gezeiten.js` als letztes Modul ein, im Balancing als letzter Hook | so eingerichtet |
 | Havarist (P37), Jugendtraining (P39), seltene Besucher (P40), Großschiffe (XXL) | von der Zufahrt ausgenommen (eigene Abläufe mit Fristen) | so entschieden |
 | Niedrigwasser bei Westwind (P29) | ein Ostsee-Vorgang (Westwind drückt das Wasser aus der westlichen Ostsee); in der Nordsee aus (`baggern.js` setzePegel), dort bestimmt die Tide den Wasserstand | behoben |
+| Spielstände (P05), Probe-Kopie | jeder Hafen trägt sein Revier; Probe-Kopien und Testmodus schalten die Nordsee nicht frei; Verzeichnis zählt alte Stände mit | geprüft (Test, Bild) |
+| Einstieg, erstes Bauwerk geschenkt | gilt auch an der Nordsee; das Startgeld kommt dazu | im Bild geprüft |
+| Erfolge (Stufe 3, Pokal) | Titel folgen dem Revier des laufenden Spiels (`aktuellesRevier`) | im Code geprüft |
 | Schleuse (Teil 4) mit Selbst-Einfahren, Hafenbüro, Funk, Päckchen | alle fragen den Hook `fit`, der bei geschlossenem Tor `schleuse` sagt; Wartende halten ohne Geduldverlust und laufen mit der nächsten Schleusung ein | geprüft (Test) |
 | Schleuse mit Dauerliegern und Tagestörn | Rückkehr nur bei offenem Tor (`wartetAufFlut`), Ablegen auf die nächste Schleusung (`kommtDurch`) | geprüft (Test) |
 | Schleuse mit Großschiffen (P84), Havarist, Optis | ausgenommen; die Tore öffnen im Bild trotzdem, sobald irgendein fahrendes Boot in der Kammer oder kurz davor ist, damit nichts durch ein Tor fährt | so entschieden |

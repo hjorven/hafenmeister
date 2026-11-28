@@ -24,6 +24,8 @@ import * as plaetze from './plaetze.js';
 import { neuerSeed, FORMEN } from '../render/landschaft/formen.js';
 import { createState, deserialize } from '../state.js';
 import { flaggeSauber } from '../data/hafenflagge.js';
+import * as reviere from './reviere.js';
+import { speicher } from './storage.js';
 
 // Für den Fall, dass index.html die Zeilen noch nicht hat. Doppelt schadet nicht.
 function ensureHeadLinks() {
@@ -88,6 +90,10 @@ export function init(game) {
     if (!plaetze.diesesTabAktiv()) return false; // anderer Tab spielt: kein Fehler
     const ok = plaetze.speichernAktiv(zustand);
     speichernGeht = ok;
+    // P57 Teil 5: besten Ostsee-Stand merken; wird die Nordsee dadurch frei, einmal Bescheid sagen
+    try {
+      if (reviere.merken(speicher(), zustand, game.sim?.reputation?.() ?? 0, plaetze.verzeichnis())) game.emit('revier:frei', { revier: 'nordsee' });
+    } catch { /* ohne Speicher: Verzeichnis zählt */ }
     if (!ok && !ohneSpeicherGemeldet && document.readyState !== 'loading') {
       ohneSpeicherGemeldet = true;
       showOhneSpeicherMeldung({ getGame: aktuell, ...anhalten() });
@@ -143,8 +149,13 @@ export function init(game) {
   }
 
   /** Neuen Hafen anlegen und starten. stegbild: 1 bis n, gelaende: Küstenform 1 bis 10, einstieg: Einführung zeigen. */
-  function neuesSpielAnlegen({ name, stegbild, gelaende, einstieg = true, flagge = null }) {
+  function neuesSpielAnlegen({ name, stegbild, gelaende, einstieg = true, flagge = null, revier = 'ostsee' }) {
     const st = createState();
+    // Revier (P57 Teil 5): Nordsee nur, wenn sie frei ist; Startgeld aus dem Ruf des besten Ostsee-Hafens
+    if (revier === 'nordsee' && reviere.nordseeFrei(speicher(), plaetze.verzeichnis())) {
+      st.region = 'nordsee';
+      st.money = reviere.startgeldGemerkt(speicher());
+    }
     st.harborName = plaetze.nameSauber(name);
     // Eigene Flagge aus dem Fenster (P44), sonst die Flagge zum Seed aus createState
     if (flagge) st.flagge = flaggeSauber(flagge, st.seed);
@@ -174,6 +185,15 @@ export function init(game) {
     namensVorschlag,
     stegbildAnzahl: () => game.stegbild?.anzahl ?? 0,
     neuesSpiel: neuesSpielAnlegen,
+    reviere: () => {
+      const v = plaetze.verzeichnis();
+      return {
+        frei: { ostsee: true, nordsee: reviere.nordseeFrei(speicher(), v) },
+        abStufe: reviere.abStufe(),
+        besteStufe: reviere.besteOstseeStufe(speicher(), v),
+        startgeld: reviere.startgeldGemerkt(speicher()),
+      };
+    },
     wechseln: (id) => {
       const r = plaetze.platzLesen(id);
       if (!r) throw new Error('Dieser Hafen ist leer oder beschädigt.');
@@ -206,6 +226,12 @@ export function init(game) {
     plaetze.wechseln(id, null);
     neuStarten();
   }
+
+  // P57 Teil 5: Nordsee frei (erster Ostsee-Hafen auf Stufe reviere.abStufe)
+  game.on('revier:frei', () => {
+    setTimeout(() => game.banner?.zeige?.('welle', 'Die Nordsee ist frei',
+      'Unter Spielstände, Neues Spiel kannst du auf der Seekarte einen Hafen an der Nordsee gründen: Ebbe und Flut, Watt und Kutter. Dein Ruf bringt Startgeld mit.', 12), 1500);
+  });
 
   game.spielstand = {
     speichern,

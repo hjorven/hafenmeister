@@ -247,7 +247,7 @@ export const GESCHICHTEN = [
     logbuch: 'Ein Boot hat hier auf sein Wetterfenster gewartet.' },
   { id: 'langfahrt', art: 'mehr', titel: 'Auf großer Fahrt', groessen: ['M', 'L'], abStufe: 3, segel: true,
     landgang: { dusche: 8, ort: 8, restaurant: 6 },
-    texte: ['Seit Monaten unterwegs, ruht sich zwei Nächte aus.', 'Auf dem Weg um die Ostsee, hier wird Wäsche gewaschen.'],
+    texte: ['Seit Monaten unterwegs, ruht sich zwei Nächte aus.', 'Auf dem Weg rund um Skandinavien, hier wird Wäsche gewaschen.'],
     logbuch: 'Ein Langfahrtsegler hat hier Rast gemacht.' },
   { id: 'angeln', art: 'mehr', titel: 'Angeltörn', groessen: ['S', 'M'], abStufe: 2, motor: true,
     landgang: { kiosk: 6, baecker: 6 },
