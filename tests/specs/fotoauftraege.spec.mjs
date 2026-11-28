@@ -49,11 +49,17 @@ test('Sonnenuntergang: Auftrag, goldener Knopf im Fotomodus, Postkarte mit Honor
   await expect.poll(() => page.evaluate(() => window.hafenmeister.boatView.boote.filter((b) => b.anim.moored && b.anim.berth?.kind !== 'buoy').length),
     { timeout: 15_000 }).toBeGreaterThanOrEqual(4);
   await page.locator('#btn-pause').click();
+  // Regen: keine Sonne, Knopf nicht gold, Zettel sagt warum
+  await page.evaluate(() => window.hafenmeister.emit('weather', { rain: 0.8, snow: 0, fog: 0, wind: 0.3 }));
   await page.evaluate(() => window.hafenmeister.foto.an());
   const knopf = page.locator('.hm-fa-foto');
   const zettel = page.locator('#hm-fa-zettel');
   await expect(zettel).toBeVisible();
   await expect(zettel).toContainText('Sonnenuntergang');
+  await expect(zettel).toContainText('Regen');
+  await expect(knopf).not.toHaveClass(/bereit/);
+  // Es klart auf
+  await page.evaluate(() => window.hafenmeister.emit('weather', { rain: 0, snow: 0, fog: 0, wind: 0.3 }));
   // Bild passt (mindestens drei Boote): Knopf gold
   await expect.poll(() => page.evaluate(() => window.hafenmeister.fotoauftraege.pruefeBild('abendrot')), { timeout: 15_000 })
     .toEqual({ ok: true });

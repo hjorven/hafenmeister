@@ -32,8 +32,8 @@ Bild, wird es zur Postkarte, der Verlag zahlt einmal ein Honorar, und die Karte 
 
 | Motiv | Art | Wann es passt |
 |---|---|---|
-| Sonnenuntergang | wechselnd | 18:30 bis 21:30 Uhr, mindestens 3 Boote im Bild |
-| Morgenstimmung | wechselnd | 6:30 bis 8:30 Uhr, mindestens 3 Boote im Bild |
+| Sonnenuntergang | wechselnd | 18:30 bis 21:30 Uhr, kein Regen, mindestens 3 Boote im Bild |
+| Morgenstimmung | wechselnd | 6:30 bis 8:30 Uhr, kein Regen, mindestens 3 Boote im Bild |
 | Anleger | wechselnd | ein Boot auf den letzten 50 m vor seiner Box oder seinem Platz (nicht an Bojen), groß und mittig im Bild |
 | Voller Steg | wechselnd | ein Steg mit mindestens 4 Plätzen, alle belegt, ganz im Bild und groß genug |
 | Der ganze Hafen | wechselnd | mindestens 85 % der Liegeplätze im Bild, mindestens 4 Boote im Hafen |
@@ -136,3 +136,11 @@ sein, zum Beispiel:
   `state.hafen.name` oder `state.modules.hafenname.name`, sonst den Hafennamen der Region. Wenn P44 einen anderen
   Ort wählt, hier eine Zeile in `hafenName()` ergänzen.
 - **Speicher:** Postkarten und Besucherfotos (P40) liegen zusammen unter 1 MB je Spielstand.
+
+## Nachtrag 28.11.2026
+
+- **Regen:** Sonnenuntergang und Morgenstimmung brauchen trockenes Wetter. Ab Regenstärke `ECONOMY.fotoauftraege.foto.regenMax`
+  (0,3; Schnee zählt mit 0,6) sagt der Zettel „Bei Regen geht keine Sonne auf oder unter“, der Knopf bleibt grau, und die
+  Erinnerung an schönes Licht kommt nicht. Der Auftrag gilt drei Tage, es bleibt also Zeit für einen trockenen Abend.
+- **Hafenname und Flagge (P44):** Der Gruß nimmt `state.harborName` (immer durch `hafenNameSauber`), sonst den
+  Revier-Namen. Die gesicherte Postkarte zeigt die eigene Hafenflagge vor dem Gruß.

@@ -294,6 +294,12 @@ async function start(game) {
    * Passt das Bild gerade für dieses Motiv? { ok, grund, ziel?: { x, z, nah, ganz } }
    * grund: Schlüssel aus FEHLT. ziel: wohin "Suchen" die Kamera bringt.
    */
+  // Regenstärke heute (events/events.js); das Ereignis kann vor diesem Modul kommen, darum auch nachfragen
+  const regenAus = (w) => (w && typeof w === 'object' ? Math.max(w.rain ?? 0, (w.snow ?? 0) * 0.6) : null);
+  let regenWert = null;
+  game.on('weather', (w) => { const r = regenAus(w); if (r != null) regenWert = r; });
+  const regenJetzt = () => regenWert ?? regenAus(game.events?.weather?.(st()?.day ?? 1)) ?? 0;
+
   function pruefeBild(motiv) {
     const s = st();
     if (!s) return { ok: false, grund: 'fehlt' };
@@ -303,6 +309,8 @@ async function start(game) {
       case 'abendrot':
       case 'morgen': {
         if (!R.zeitPasst(motiv, stunde())) return { ok: false, grund: 'zeit' };
+        // Bei Regen oder Schneetreiben keine Sonne: kein Sonnenuntergang, keine Morgenstimmung
+        if (regenJetzt() >= F.foto.regenMax) return { ok: false, grund: 'regen' };
         return boote() >= F.mindestBoote ? { ok: true } : { ok: false, grund: 'boote', ziel: { ganz: true } };
       }
       case 'anlegen': {
@@ -780,6 +788,7 @@ async function start(game) {
       for (const motiv of ['abendrot', 'morgen']) {
         if (letzterTagErinnert[motiv] === s.day) continue;
         if (!R.offen(s).some((a) => a.motiv === motiv) || !R.zeitPasst(motiv, h)) continue;
+        if (regenJetzt() >= R.FA.foto.regenMax) continue;   // bei Regen keine Erinnerung an schönes Licht
         letzterTagErinnert[motiv] = s.day;
         melde({ typ: 'erinnerung', motiv });
       }

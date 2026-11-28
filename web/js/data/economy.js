@@ -1135,7 +1135,8 @@ export const ECONOMY = {
     sonderFaktor: 1.5,        // Sonderauftrag für einen besonderen Tag (Besuch, Großschiff, Ereignis)
     nachdruckFaktor: 0.5,     // Motiv schon als Postkarte da: Nachdruck mit neuem Bild
     // Bild: Motiv mindestens so weit vom Rand (Anteil der halben Bildbreite), Mindestgröße (Anteil der kürzeren Seite)
-    foto: { rand: 0.1, mindestGroesse: 0.07 },
+    // regenMax: ab dieser Regenstärke (0 bis 1, Ereignis 'weather') gibt es kein Sonnenuntergangs- oder Morgenbild
+    foto: { rand: 0.1, mindestGroesse: 0.07, regenMax: 0.3 },
     abend: [18.5, 21.5],      // Uhrzeit für den Sonnenuntergang
     morgen: [6.5, 8.5],       // Uhrzeit für die Morgenstimmung
     mindestBoote: 3,          // so viele Boote mindestens im Bild (Stimmungsbilder)

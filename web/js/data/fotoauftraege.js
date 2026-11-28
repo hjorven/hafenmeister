@@ -75,6 +75,7 @@ export const MOTIV_IDS = Object.keys(MOTIVE);
 /** Gründe im Fotomodus, warum das Bild gerade nicht zur Postkarte reicht (kurz, eine Zeile). */
 export const FEHLT = {
   zeit: 'Noch nicht die richtige Uhrzeit',
+  regen: 'Bei Regen geht keine Sonne auf oder unter. Warte, bis es aufklart',
   boote: 'Zu wenige Boote im Bild',
   anlegen: 'Gerade legt kein Boot im Bild an',
   klein: 'Näher heran',
