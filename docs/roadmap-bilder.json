@@ -1408,6 +1408,17 @@
    "geraet": "pc",
    "datum": "2026-11-28",
    "quelle": "nordsee/teil4-pc-schleuse-offen.png"
+  },
+  {
+   "datei": "p57-pr453-pc-seekarte.jpg",
+   "pakete": [
+    "P57"
+   ],
+   "titel": "Neues Spiel: Seekarte mit Ostsee und freigeschalteter Nordsee",
+   "pr": 453,
+   "geraet": "pc",
+   "datum": "2026-11-28",
+   "quelle": "nordsee/teil5-pc-seekarte-frei.png"
   }
  ]
 }
