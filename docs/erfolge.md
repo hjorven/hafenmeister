@@ -20,7 +20,7 @@ Jedes Stück erscheint mit seinem ersten Ding; ein neuer Erfolg lässt sein Ding
 
 ## Die Erfolge
 
-Schwellen stehen in `data/economy.js` unter `erfolge` (Zahlenregel). 30 Erfolge:
+Schwellen stehen in `data/economy.js` unter `erfolge` (Zahlenregel). Seit P43 kommt „Postkartenständer“ dazu (alle zwölf Postkarten, [fotoauftraege.md](fotoauftraege.md)). 30 Erfolge:
 
 | Gruppe | Erfolge |
 |---|---|

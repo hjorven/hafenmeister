@@ -256,7 +256,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F19 | Statistikseite: Belegung und Einnahmen der letzten 30 Tage, Einnahmen nach Quelle | erledigt (P41, [Statistik](statistik.md)) | P41 |
 | F20 | Saisonbilanz nach dem Winter | erledigt (P41, Winterpause mit Quellen, Belegung, Vergleich) | P41 |
 | F21 | Herausforderungen mit Seed (nur Segler, kein Hafenbüro, doppelte Ankünfte) | offen | P42 |
-| F22 | Fotoaufträge und Postkarte | offen | P43 |
+| F22 | Fotoaufträge und Postkarte | erledigt (P43): Postkartenverlag bestellt Fotos, zwölf Motive (Sonnenuntergang, Anleger, voller Steg, Sonderaufträge an besonderen Tagen), Zettel und goldener Knopf im Fotomodus, Honorar, Reiter „Postkarten“ im Logbuch, Postkarte sichern, docs/fotoauftraege.md | P43 |
 | F23 | Hafenname und Flagge, sichtbar an Einfahrt und Mast | erledigt (P44, [Hafenflagge](hafenflagge.md)) | P44 |
 | F24 | Kreativmodus als eigener Spielstand | offen | P45 |
 | F25 | Einstellungen: Schilder auch über die Form, weniger Bewegung, größere Schrift, Linkshänder am Handy | erledigt (Menü, Einstellungen; docs/ui/oberflaeche.md) | P50 |
@@ -493,7 +493,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | L3 | Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles | erledigt | P26 |
 | L4 | Fernglas mit Steckbrief | erledigt | P26 |
 | L5 | Möwen antippen, Glocke am Steg | erledigt (Glocke steht am Hafenmeisterhaus) | P26 |
-| L6 | Fotoaufträge und Postkarte (= F22) | offen | P43 |
+| L6 | Fotoaufträge und Postkarte (= F22) | erledigt (P43, docs/fotoauftraege.md) | P43 |
 
 ### M Zahlen und Daten
 
@@ -718,7 +718,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|
 | P41 | Statistik und Saisonbilanz | F19, F20 | erledigt (PR 315, Thread "Statistik und Saisonbilanz zeigen") |
 | P42 | Herausforderungen, Wochenhafen und Hafen als Code | F21, F41, F42 (nach P09, P45) | neu |
-| P43 | Fotoaufträge und Postkarten | F22 | bestehend: "Spielschleife zusammenbauen und Vorschläge einbauen" (Fotomodus) |
+| P43 | Fotoaufträge und Postkarten | F22 | erledigt (Thread "Fotoaufträge ins Spiel bringen", [fotoauftraege.md](fotoauftraege.md)) |
 | P44 | Hafenname und Flagge | F23, F27 (Auswahl beim Start) | erledigt (PR 429, Thread "Hafenname und eigene Flagge geben", [Hafenflagge](hafenflagge.md)) |
 | P45 | Kreativmodus | F24 | neu |
 | P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | erledigt (PR 427, Thread "Ruhigen Abend und Serien-Akkord bauen") |
