@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "28.11.2026",
-  "commit": "8036867"
+  "commit": "73d0ea6"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1272,7 +1272,8 @@
    "status": "erledigt",
    "bilder": [
     125,
-    126
+    126,
+    127
    ]
   },
   {
@@ -6325,9 +6326,22 @@
    "datum": "2026-11-28",
    "quelle": "nordsee/teil3-handy-trockenfallen-ebbe.png",
    "nr": 126
+  },
+  {
+   "datei": "p57-pr452-pc-schleuse.jpg",
+   "pakete": [
+    "P57"
+   ],
+   "titel": "Nordsee: Schleuse an der Hafeneinfahrt, Ausbau zu Stufe 3",
+   "pr": 452,
+   "geraet": "pc",
+   "datum": "2026-11-28",
+   "quelle": "nordsee/teil4-pc-schleuse-offen.png",
+   "nr": 127
   }
  ],
  "neueBilder": [
+  127,
   126,
   124,
   123,
@@ -6335,8 +6349,7 @@
   119,
   117,
   115,
-  113,
-  111
+  113
  ],
  "merges": [
   {
