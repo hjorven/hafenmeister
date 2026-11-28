@@ -68,7 +68,7 @@ hat, verliert vielleicht einen anderen Gast. Das ist die Entscheidung.
 - Meldeplatz (ui/meldungen.js): eine Meldung zur Zeit; die Funk-Meldung wartet hinter Zettel, Dauerlieger mit Frist und Ereignis.
 - `game.stege.highlight` teilt sich die Box-Markierung mit dem Zuweisen (ui/gesten.js); ein gewähltes Boot hat Vorrang.
 - P27 Päckchen, P32 Flottillen, P33 Verholen: eine frei gehaltene Box ist für sie belegt (`hookWhyNotFit` 'funk').
-- P35 Preisstufe: der Bonus rechnet mit `nightlyFee`, folgt also dem Preis.
+- P35 Preisstufe: der Bonus rechnet mit dem Grundpreis (`nightlyFee` ohne Preisstufe), folgt ihr also bewusst nicht ([preisstufe.md](preisstufe.md)).
 
 ## Prüfen
 

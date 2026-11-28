@@ -1,6 +1,6 @@
 # Arbeitsplan
 
-Stand: 21.11.2026, 23:30 UTC, abgeglichen mit `main` bei `b2dfea0` (PR 390), Statusangaben am Code geprüft. Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
+Stand: 28.11.2026, 06:40 UTC, abgeglichen mit `main` bei `66a0d73` (PR 446), Statusangaben am Code geprüft. Gepflegt vom Thread "Nächste Schritte laufend planen"; nach jedem größeren Merge nachgeführt.
 
 **Wozu diese Datei:** [roadmap.md](roadmap.md) sagt, *was* insgesamt noch fehlt (Pakete P01 bis P82). Dieser Arbeitsplan sagt, *was jetzt gerade* läuft, welche Fehler zuerst weg müssen und welche Pakete als Nächstes starten. [plan.md](plan.md) bleibt der gültige Plan für Vision und Regeln.
 
@@ -30,14 +30,14 @@ Die Sperre für neue Pakete aus Welle 3 und später ist aufgehoben. Die Reihenfo
 
 ## 1. Was gerade überarbeitet wird
 
-Stand 21.11.2026, 01:45 UTC. Keine liegenden PRs mehr: 341, 346, 347 sind gemergt.
+Stand 28.11.2026, 06:40 UTC. Welle 4 ist bis auf P43, P45 und P42 gebaut: P44 (PR 429), P46 (PR 427), P47 (PR 428), P48 (PR 430), P49 (PR 433), P51 (PR 435), P52 (PR 440), P53 (PR 439), P60 (PR 441). P40-Fehler am Ehrenplatz behoben (PR 446).
 
 | Thema | Thread | Paket | Stand |
 |---|---|---|---|
-| Pulk beim Ablegen in Stufe 5 und 6, Küste 14, 15, 6, 2 | "Staus an Bojen und Ankerfeld auflösen" | P66 | PR 351 gemergt, misst gezielt an Typ 6 und 2 |
-| Welt, Boote, Ereignisse im Zusammenspiel | "Zusammenspiel prüfen: Welt, Boote, Ereignisse" | P85 Teil 3 | Ausbauten je Küste gemergt (PR 366) |
-| Abnahme-Serie | Zeitraffer | - | Serie `64cbe84` fertig (`zeitraffer/2026-11-20-64cbe84/` im Projektordner); neue Serie nach dem Pulk-Fix |
-| Schichttest, Feature-Einzeltest, Roadmap-Seite | Prüf- und Pflege-Threads | - | laufen |
+| Abnahme Welle 4 | Zeitraffer | - | Serie auf `f7e42f9` fertig (30 Läufe, Bericht `zeitraffer/2026-11-28-f7e42f9/abnahme.md` im Projektordner): Ziel PC Tag 104 bis 120 (Mittel 111,3), Handy 102 bis 121 (Mittel 111,4), Rechnung 110. Fest-Paare Summe PC 7 in Stufe 1-4 und 26 in Stufe 5-6, Handy 61 und 33. Ein Konsolenfehler (Ehrenplatz, behoben in PR 446). Flottillen: 123 von 458 zusammen, nur 12 getrennt, 231 fahren als Ganzes weiter: Flottillen-Rest erledigt |
+| Stau Handy Küste 3 und 14 | "Staus an Bojen und Ankerfeld auflösen" | P88-Nachlauf | Küste 3: Stau vor der Molenöffnung Tag 64 bis 67; Küste 14: Bahnen stehen Tag 70; PC Küste 15 Stufe 5 Tag 89 kurz 17 Paare |
+| P25 H9 | - | P25 | Roadmap sagt "H9 folgt"; nicht mehr in Arbeit, startet mit der nächsten Liste |
+| Schichttest, Roadmap-Seite | Prüf- und Pflege-Threads | - | Schichten je neuem Paket |
 
 ---
 
@@ -47,6 +47,9 @@ Priorität A = stört jedes Spiel, vor allem anderen. B = stört sichtbar, vor n
 
 | Prio | Fehler | Beleg | Paket / Thread |
 |---|---|---|---|
+| erledigt | ~~Flottillen ohne Spieler getrennt~~: Serie `f7e42f9` nur noch 12 von 458 getrennt, 231 fahren als Ganzes weiter (Entscheidung in flottillen.md) | Zeitraffer 28.11. | P32-Rest (PR 414) |
+| B | Handy Küste 3 Stau vor der Molenöffnung Tag 64 bis 67 (fast alle 61 Fest-Paare am Handy in Stufe 1-4), Handy Küste 14 Bahnen stehen Tag 70 (hängt 17/33) | Serie `f7e42f9` | Boote-Thread |
+| C | PC Küste 14 Stufe 6: 243 Paare idle/idle überlappen kurz (Boote von See), ohne festzustecken | Serie `73f388f` | Boote-Thread bei Gelegenheit |
 | B | Reste aus P66: Offene Bucht Stufe 5 und 6 noch 19 bis 61 feste Paare vor der Einfahrt (80/-240, 80/-200); Mole beim Wechsel auf Stufe 5 kurz unter fahrenden Booten; Vorbeifahrer dicht an Großschiffen; Großschiff-Vortritt fehlt | Boote-Thread nach PR 381 und 384, Abnahme-Serie b331ce2 | nach der Abnahme als eigenes kleines Paket, wenn die Serie es bestätigt |
 | B | Raddampfer (XL) an K01 fährt beim Einlaufen über die Westmole und beim Auslaufen über die Kaikante (Handy, mehrere Küsten) | Härtetest 15.11. nach P87, Nahbilder `handy-alle-einfahren-nah-land-1.jpg`, `handy-alle-ablegen-nah-land-1.jpg` in `/mnt/project-files/extremtest/2026-11-15-5dce72f-p87/handy/bilder/` | P84, erledigt 20.11. |
 | B | Gäste liegen ab Stufe 4 kaum sichtbar an einer Warteboje (nachgemessen nach PR 327 bis 332: Stufe 4 und 6 am PC 0 an der Boje). Ursache jetzt: `selfEnter` in `sim.js` zählt als Andrang (mehr als die Hälfte der Bojen vergeben) auch Boote, die noch Minuten draußen auf See anfahren; darum fahren die ersten im Revier direkt aus der Anfahrt ein. Vorschlag: Andrang nur aus Booten im Revier oder an der Boje zählen | Härtetest 15.11. nach P87 (`bojen-erreichbar`, misst jetzt an Boje / direkt bei Andrang / unterwegs getrennt), docs/extremtest.md | P66, "Staus an Bojen" |
@@ -60,22 +63,18 @@ Erledigt seit 14.11.: Großschiffe berühren auf keiner Küste mehr Land (P84), 
 
 ## 3. Die nächsten Pakete, in dieser Reihenfolge
 
-Stand 21.11.2026, 23:00 UTC. Leitlinie: Welle 3 nach Wirkung auf die Kernschleife (Ankunft, Zuweisen, Liegen, Abreise), dann Anlagen und seltene Höhepunkte. Pakete, die `economy.js` ändern, laufen nacheinander.
+Stand 28.11.2026, 06:40 UTC. Welle 4 ist fast fertig (Abschnitt 5, C). Es bleiben drei Pakete und ein Rest. Danach kommt die Nordsee (P57), die als großes eigenes Paket schon jetzt starten kann, weil sie Gelände, Gezeiten und Schleuse betrifft und kaum die Welle-4-Pakete.
 
 | Nr | Paket | Warum jetzt | Hängt ab von | Kann kollidieren mit |
 |---|---|---|---|---|
-| 1 | **P34 Wind im Hafen spürbar machen** (F5, F35) | Starkwind macht Außenplätze unruhig, große Boote legen lieber gegen den Wind an: jede Zuweisung bekommt eine zweite Überlegung | - | `sim.js` (Bewertung, Anlegezeit), `economy.js`, Wetterflagge, Jahreszeiten (P20) |
-| 2 | ~~**P32 Flottillen** (F3)~~ erledigt | drei bis fünf Boote wollen zusammen an einen Steg: neue Entscheidung beim Zuweisen, nutzt Funk-Anmeldung (P28) | - | `sim.js` (Ankünfte, Feld `group`), Wegsuche (Konvois aus P66), `ui/vorschau.js` |
-| 3 | **P25 Stammgäste mit Wirkung und Gästepost** (F37) | Ruf am alten Platz, Gästepost im Hafenbüro: Stammgäste sind seit K2 selten und sollen etwas bringen | - | `features/stammgaeste.js`, Logbuch, Gästebuch |
-| 4 | **P88 Engstellen nach ihrer Länge regeln** (Prio B), Teil 1 erledigt (PR 390) | Teil 1: Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m). Darum getrennte Bahnen in offenem Wasser statt längenabhängiger Werte. Stufe 5 über 15 Küsten: 14 gleich oder besser (Küste 14 rund 3500 auf 1300 Proben, Küste 9 1851 auf 539, Bodden 1150 auf 620). Rest: Großschiff-Vortritt, Segler der Seerunde in der Schlange, Küste 15 | - | `boat-view.js`, `boat-anim.js` (Boote-Thread), danach Zeitraffer-Stichprobe |
-| 5 | **P31 Neue Gästewünsche** (F9) | WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | 1 (`economy.js`) | Wünsche aus P19, Services (P23), Bauen-Menü |
-| 6 | **P35 Preisstufe am Hafenbüro** (F6) | günstig, normal, gehoben, eine Entscheidung je Saison | 5 (`economy.js`) | Hafenbüro, Ruf, Balancing-Messung danach |
-| 7 | **P29 Baggern** (F7) und **P36 Bojenfeld** (F10) | Ausbau mit eigener Entscheidung | 6 | Gelände (Tiefe), Liegeplätze |
-| 8 | **P37 Havarist**, **P38 Hafenfest**, **P39 Jugendtraining**, **P40 Seltene Besucher** | Höhepunkte, wenig Berührung untereinander | - | Ereignisse (P24), Meldeplatz, Logbuch |
+| 1 | **Stau Handy Küste 3 und 14** (Prio B) | einzige auffällige Stellen der Serie `f7e42f9` | - | `boat-view.js`, `boat-anim.js` (Boote-Thread) |
+| 2 | **P43 Fotoaufträge und Postkarten** (F22) | gibt dem Fotomodus ein Ziel; P47 und P40 liefern die Motive | - | Fotomodus, Logbuch, Meldeplatz |
+| 3 | **P25 H9** | letzter Rest aus Welle 3 | - | `features/stammgaeste.js`, Gästepost |
+| 4 | **P57 Nordsee mit Gezeiten** | nächste Welle, groß: Gezeiten, Schleuse, Trockenfallplätze, eigene Küsten | - | Gelände, Wasserstand, Liegeplätze, `economy.js` |
+| 5 | **P45 Kreativmodus** | baut auf allen Bau- und Verschönern-Paketen auf (P60 fertig) | - | Speichern, Einstieg, Bauen, `economy.js` |
+| 6 | **P42 Herausforderungen, Wochenhafen, Hafen als Code** | Abschluss Welle 4, braucht P45 und P44 (Name) | 5 | Speichern, Einstieg |
 
-**Startregel:** Jetzt starten: 1, 2, 3, 4. 5 nach 1, 6 nach 5, 7 nach 6. 8 einzeln, sobald Plätze frei sind. Nach jedem Paket, das Boote oder Zahlen ändert: Zeitraffer-Stichprobe über 5 Küsten, nach jedem dritten die ganze Serie. Alle neuen Meldungen über den einen Meldeplatz.
-
-Danach Welle 4 (Abschnitt 5, C), dann Nordsee (P57), dann Welle 6 (Stufe 7 bis 20), Online zuletzt.
+**Startregel:** Jetzt starten: 1, 2, 3, 4. 5 nach 4, sobald `economy.js` frei ist (P57 hält es zuerst), 6 nach 5. Nach P43 und P25 H9 kurze Zeitraffer-Stichprobe, nach P57 die ganze Serie auch mit Nordsee-Küsten. Welle 6 (Stufe 7 bis 20) startet mit P67, sobald P57 gemergt ist; Online (P58) zuletzt.
 
 ---
 
@@ -107,7 +106,7 @@ Der Planungs-Thread meldet dem Koordinator, sobald alle drei Punkte erfüllt sin
 
 ## 4. Berührungspunkte, auf die alle achten
 
-- `web/js/data/economy.js`: als Nächstes P34 oder P31 (P17, P19, P20, P23, 252 und A10 sind gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
+- `web/js/data/economy.js`: frei (P29, P36, P35, P31, P34, P17, P19, P20, P23, 252 und A10 sind gemergt). Immer nur einer zur Zeit, danach `node tools/zahlen.mjs --schreiben` und `docs/zahlen.md` mitcommitten.
 - `web/js/sim.js`: kleine, getrennte Änderungen, vorher auf `main` rebasen, neue Regel mit eigenem Test.
 - Meldungs-Ordnung (höchstens eine schwebende Meldung, Tipps nie über Zeit und Bauen): P55, P22, P24 melden sich dort an, statt eigene Ebenen zu bauen.
 - `web/index.html`, `web/js/main.js`: nur eine `MODULES`-Zeile je neuem Modul; P61 ändert die Importmap und stimmt das im PR ab.
@@ -141,36 +140,36 @@ Reihenfolge nach Wirkung auf die Kernschleife: erst was jede Ankunft und jedes Z
 | 3 | P28 | erledigt (PR 288) | F2 |
 | 4 | P27 | erledigt (PR 330) | F1 |
 | 5 | P33 | erledigt (PR 314) | F4 |
-| 6 | P34 | Wind im Hafen spürbar, Windseite, Anlegen gegen den Wind | F5, F35 |
-| 7 | P31 | Neue Gästewünsche (WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen) | F9 |
+| 6 | P34 | erledigt (PR 392, [wind.md](wind.md)) | F5, F35 |
+| 7 | P31 | erledigt (PR 406, [gaestewuensche.md](gaestewuensche.md)) | F9 |
 | 8 | P30 | erledigt (PR 297; Wasser kommt mit P31) | F8 |
-| 9 | P35 | Preisstufe am Hafenbüro | F6 |
+| 9 | P35 | erledigt (Preisstufe, [preisstufe.md](preisstufe.md)) | F6 |
 | 10 | P32 | erledigt (Flottillen, [flottillen.md](flottillen.md)) | F3 |
-| 11 | P25 | Stammgäste mit Wirkung, Gästepost | F37 |
-| 12 | P29 | Baggern für tiefere Liegeplätze | F7 |
-| 13 | P36 | Bojenfeld im See | F10 |
+| 11 | P25 | Teil 1 und 2 gemergt (PR 394), H9 läuft | F37 |
+| 12 | P29 | erledigt (Baggern, [baggern.md](baggern.md)) | F7 |
+| 13 | P36 | erledigt (Bojenfeld im See, [bojenfeld.md](bojenfeld.md)) | F10 |
 | 14 | P59 | erledigt (Doppelboxen PR 321, Yachtsteg PR 326) | - |
 | 15 | P26 | erledigt (PR 322) | - |
-| 15a | P86 | Bootsgeschichten fertig erzählen (Regatta-Start und Sieger, Gepäck, Tanksteg) | - |
-| 16 | P37 | Havarist einschleppen | F11 |
-| 17 | P38 | Eigenes Hafenfest | F12 |
-| 18 | P39 | Jugendtraining am Segelclub | F13 |
-| 19 | P40 | Seltene Besucher (nach P21) | F16 |
+| 15a | P86 | erledigt (PR 342) | - |
+| 16 | P37 | erledigt (PR 408) | F11 |
+| 17 | P38 | erledigt (PR 405) | F12 |
+| 18 | P39 | erledigt (PR 412) | F13 |
+| 19 | P40 | erledigt (PR 416) | F16 |
 
 ### Abschnitt C: Langzeit, Spielgefühl, Welt (Welle 4)
 
 | Paket | Inhalt | Vorschläge |
 |---|---|---|
 | P41 | erledigt (PR 315) | F19, F20 |
-| P44 | Hafenname und Flagge (mit Test gegen präparierte Namen, Audit C05) | F23, F27 |
+| P44 | erledigt (PR 429) | F23, F27 |
 | P50 | erledigt (Einstellungen im Menü) | F25 |
-| P47 | Große Ankünfte ankündigen | F31 |
-| P48 | Leinen annehmen beim Anlegen | F32 |
-| P46 | Ruhiger Abend, Serien-Akkord | F29, F30 |
+| P47 | erledigt (PR 428) | F31 |
+| P48 | erledigt (PR 430) | F32 |
+| P46 | erledigt (PR 427) | F29, F30 |
 | P43 | Fotoaufträge und Postkarten | F22 |
-| P49 | Signalflaggen und Hafenwissen (nach P21) | F33, F34 |
-| P51, P52, P53 | Hafentiere, Naturecke, Spätankömmling | F38, F39, F40 |
-| P60 | Hafen verschönern | - |
+| P49 | erledigt (PR 433) | F33, F34 |
+| P51, P52, P53 | erledigt (PR 435, 440, 439) | F38, F39, F40 |
+| P60 | Hafen verschönern (erledigt, [verschoenern.md](verschoenern.md)) | D8 |
 | P45 | Kreativmodus | F24 |
 | P42 | Herausforderungen, Wochenhafen, Hafen als Code (nach P09, P45) | F21, F41, F42 |
 
@@ -201,7 +200,7 @@ Nach Abschnitt C und P57. Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md). Ni
 |---|---|
 | P58 | Online mit Supabase (Hafenname, Bestenliste, Gastboote), vorher Sicherheitsreview (Audit C08) |
 
-Schon erledigt aus Jorvens Vorschlägen: F1, F2, F4, F8, F14, F15, F17, F18, F19, F20, F25, F26, F27 (Grundgerüst), F28, F36.
+Schon erledigt aus Jorvens Vorschlägen: F1 bis F20, F23, F25 bis F40 (F37 bis auf P25 H9). Offen: F21, F22, F24, F41, F42 (P42, P43, P45).
 
 ---
 
@@ -209,6 +208,12 @@ Schon erledigt aus Jorvens Vorschlägen: F1, F2, F4, F8, F14, F15, F17, F18, F19
 
 | Datum | Änderung |
 |---|---|
+| 28.11.2026, 06:40 Uhr | Welle 4 bis auf P43, P45, P42 gebaut; Serie `f7e42f9` sauber (Mittel Tag 111), Flottillen-Rest erledigt. Starten: Stau Handy Küste 3/14, P43, P25 H9, P57 Nordsee. |
+| 22.11.2026, 14:50 Uhr | Welle 3 gebaut (bis P25 H9), Serie `73f388f` sauber (Mittel Tag 109,4). Welle 4 startet mit P48, P47, P46, P44. Ganze Serie auf aktuellem `main`. |
+| 22.11.2026, 05:05 Uhr | P31 (PR 406) und P38 (PR 405) gemergt. Starten: Flottillen-Rest, P35, P37, P39. Ganze Zeitraffer-Serie auf `73f388f`. |
+| 22.11.2026, 05:00 Uhr | P88 erledigt (PR 407). Abnahme mit der ganzen Zeitraffer-Serie nach P31. |
+| 22.11.2026, 03:50 Uhr | P88 Teil 2 gemergt (PR 400). Großschiff-Vortritt aus P88 gestrichen (drei Fassungen ohne Wirkung). |
+| 22.11.2026, 03:40 Uhr | P34, P32, P25 Teil 1 und 2, P88 Teil 1 gemergt; P31 läuft. Flottillen-Quote als Prio B. Neu starten: P37, P38. Ganze Serie nach P31. |
 | 21.11.2026, 23:30 Uhr | P88 Teil 1 gemergt (PR 390): getrennte Bahnen vor der Einfahrt, 14 von 15 Küsten gleich oder besser. Rest bleibt beim Boote-Thread. |
 | 21.11.2026, 23:00 Uhr | Welle 0 bis 2 abgenommen (Serie `ae9e34f`, 30 Läufe). Reste als P88. Sperre aufgehoben, Welle 3 startet mit P34, P32, P25, P88. |
 | 21.11.2026, 15:30 Uhr | P66 und P85 erledigt, Welle 0 bis 2 gebaut; nur die Abnahme-Serie läuft noch. P66-Reste als Prio B. |

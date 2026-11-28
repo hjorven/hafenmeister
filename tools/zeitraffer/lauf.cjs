@@ -94,6 +94,15 @@ const BOT = () => {
         for (const [bid, l] of Object.entries(st0.leaving || {})) if (l.off) { m.ablegenSek += dt; const k = bid + ':' + l.boatId; if (!lseen.has(k)) { lseen.add(k); m.ablegenN++; } }
         for (const id of st0.queue) { const b = st0.boats[id]; if (!b) continue; if (!seen.has(id)) { seen.set(id, G.time); m.ank++; } if (b.atBuoy) m.bojeSek += dt; else m.anfahrtSek += dt; }
       }
+      // Flottillen (P32): angekommene Gruppen, zusammen gelegt, getrennt oder zerrissen, als Ganzes weitergefahren
+      const fseen = W.fseen ||= new Set();
+      for (const b of Object.values(st0.boats)) if (b.flotte?.id && !fseen.has(b.flotte.id)) { fseen.add(b.flotte.id); m.flotten = (m.flotten || 0) + 1; }
+      if (!W.flHoert && G.on) {
+        W.flHoert = true;
+        G.on('sim:flotillaComplete', () => { const mm = W.mess?.[S.state.stage]; if (mm) mm.flZusammen = (mm.flZusammen || 0) + 1; });
+        G.on('sim:flotillaSplit', () => { const mm = W.mess?.[S.state.stage]; if (mm) mm.flGetrennt = (mm.flGetrennt || 0) + 1; });
+        G.on('sim:flotillaLeft', () => { const mm = W.mess?.[S.state.stage]; if (mm) mm.flWeiter = (mm.flWeiter || 0) + 1; });
+      }
       for (const [id, t] of seen) { const b = st0.boats[id]; if (!b || b.status !== 'waiting') { if (b && b.berthId != null) { m.fest++; m.bisFestSek += G.time - t; } seen.delete(id); } }
       m.abgewiesen = (st0.stats?.turnedAway ?? 0) - m.ab0; m.einnahmen = (st0.stats?.totalIncome ?? 0) - m.ein0; m.tage = st0.day - m.tag0;
     }
@@ -112,6 +121,12 @@ const BOT = () => {
           const u = S.facilityUpgrade(k);
           if (u && u.available) o.push({ art: 'bauwerk', id: k, kosten: u.cost, prio: 3, tu: () => S.upgradeFacility(k).ok });
         }
+        // Wasserhähne am Steg (P31): wie Versorgung, über das Bauen-Menü
+        for (const e of G.bauen?.eintraege?.() ?? []) {
+          if (e.nachruesten === 'wasser' && !e.gesperrt) o.push({ art: 'nachruesten', id: e.key, kosten: e.kosten, prio: 3, tu: () => !!e.kaufen()?.ok });
+          // Baggern (P29) wie "Als Nächstes": wenn mindestens zwei Boote an diesem Steg zu wenig Wasser hatten
+          if (e.baggern && !e.gesperrt && (e.vermisst ?? 0) >= 2) o.push({ art: 'baggern', id: e.key, kosten: e.kosten, prio: e.vermisst >= 3 ? 1 : 2, tu: () => !!e.kaufen()?.ok });
+        }
         for (const x of G.services?.liste?.() ?? []) {
           const p = G.services.pruefe(x.id);
           if (p && p.freigeschaltet && !p.fertig && !p.umbau) o.push({ art: 'service', id: x.id, kosten: p.kosten, prio: st.stage >= r.maxStage ? 1 : 3, tu: () => !!G.services.bauen(x.id)?.ok });
@@ -119,6 +134,13 @@ const BOT = () => {
         return o;
       };
       const kaufe = (k) => { const ok = k.tu(); W.kaeufe.push({ art: k.art, id: k.id, kosten: k.kosten, ok, tag: st.day, stufe: st.stage }); return ok; };
+      // Preisstufe (P35) wie geschickt in tools/balance.mjs: je Saison und nach jedem Ausbau nach der Faustregel (klugeWahl)
+      const pd = G.preisstufe?.darf?.();
+      if (pd?.ok && !pd.heuteNoch && (st.modules?.preisstufe?.jahr !== pd.jahr || pd.ausbau)) {
+        const w = G.preisstufe.klug();
+        const pr = G.preisstufe.waehle(w);
+        W.kaeufe.push({ art: 'preis', id: w, kosten: 0, ok: !!pr?.ok, tag: st.day, stufe: st.stage });
+      }
       // Ausbau der Stufe wie ein Mensch über das Bauen-Menü (ui/bauen.js, P18): bei mehreren
       // Bauabschnitten jeder einzeln bezahlt, über Nacht gebaut, der nächste erst am nächsten Morgen.
       // Der Bot kauft morgens, der Abschnitt von gestern ist dann schon fertig ('day:start').
@@ -464,7 +486,7 @@ if (require.main !== module) return;
   R.messung = {};
   for (const ab of messAbschnitte) for (const [st, x] of Object.entries(ab || {})) {
     const a = R.messung[st] ||= {};
-    for (const k of ['sek', 'ablegenSek', 'ablegenN', 'anfahrtSek', 'bojeSek', 'ank', 'fest', 'bisFestSek', 'abgewiesen', 'einnahmen', 'tage']) a[k] = (a[k] || 0) + (x[k] || 0);
+    for (const k of ['sek', 'ablegenSek', 'ablegenN', 'anfahrtSek', 'bojeSek', 'ank', 'fest', 'bisFestSek', 'abgewiesen', 'einnahmen', 'tage', 'flotten', 'flZusammen', 'flGetrennt', 'flWeiter']) a[k] = (a[k] || 0) + (x[k] || 0);
   }
   R.dauerMin = +((Date.now() - t0) / 60000).toFixed(1);
   R.fehler = fehler; R.warnungen = warnungen; R.fehlendeDateien = fehlendeDateien;

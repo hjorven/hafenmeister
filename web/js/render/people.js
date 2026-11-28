@@ -34,7 +34,7 @@ const zufall = (a, b) => a + Math.random() * (b - a);
 // Schlange vor der Versorgung (Paket P55, Roadmap L2): Ist die Versorgung heute knapp oder voll
 // (game.sim.auslastung, ui/hafenzeichen.js), gehen Gäste nicht gleich hinein, sondern stellen sich
 // vor der Tür an. Welches Ziel zu welcher Versorgung gehört:
-const VERSORGUNG = { toilette: 'wc', sanitaer: 'wc', dusche: 'dusche', kiosk: 'essen', restaurant: 'essen' };
+const VERSORGUNG = { toilette: 'wc', sanitaer: 'wc', dusche: 'dusche', kiosk: 'essen', restaurant: 'essen', waschhaus: 'waesche' };
 const SCHLANGE_ABSTAND = 1.1;    // Meter zwischen zwei Wartenden
 const SCHLANGE_MAX = 6;          // mehr stellen sich nicht an, sie gehen gleich hinein
 /** Wie lange jemand ansteht (Sekunden Spielzeit): knapp kurz, voll länger. */
@@ -172,6 +172,8 @@ export function init(game) {
       out.push({ id: `service-${id}`, art: id, x: c.position.x / U, y: -c.position.z / U,
         halbBreite: (box.max.x - box.min.x) / 2 / U, box: null, tuer: null });
     }
+    // Bänke am Wasser (P60, features/verschoenern.js): Sitzplatz mit Blick (blick wie a.blick)
+    for (const b of game.verschoenern?.ziele?.() ?? []) out.push(b);
     return out;
   }
 
@@ -181,7 +183,7 @@ export function init(game) {
   function hindernisListe() {
     const out = [];
     const box = new THREE.Box3();
-    for (const gruppe of [game.services?.gruppe, game.buildings?.group, game.scene?.getObjectByName?.('ziel-deko')]) {
+    for (const gruppe of [game.services?.gruppe, game.buildings?.group, game.scene?.getObjectByName?.('ziel-deko'), game.scene?.getObjectByName?.('verschoenern')]) {
       if (!gruppe) continue;
       gruppe.updateMatrixWorld?.(true);
       gruppe.traverseVisible?.((o) => {
@@ -491,12 +493,15 @@ export function init(game) {
     }
     a.zustand = art?.drinnen ? 'drinnen' : 'verweilt';
     a.sitzt = !!art?.sitzen;
+    a.sitzY = art?.sitzHoehe ?? 0;   // Bank (P60): auf der Sitzfläche statt auf dem Boden
+    // Nur sitzen, wer wirklich an der Bank ankommt (liegt der Knoten daneben, wird gestanden)
+    if (z?.sitz && Math.hypot(a.x - z.sitz.x, a.z - z.sitz.z) > 0.7) { a.sitzt = false; a.sitzY = 0; }
     a.uhr = art ? zufall(...art.dauer) : zufall(4, 8);
     // Angebot hat inzwischen zu (Weg war laenger als gedacht): kurz schauen, weitergehen
     if (art?.zeit) { const u = tagesAnteil(); if (u < art.zeit[0] || u >= art.zeit[1]) { a.uhr = zufall(2, 4); a.sitzt = false; } }
     if (abend && a.bleibtAbends && (z?.art === 'restaurant' || z?.art === 'grillplatz')) a.uhr = 1e9;
     // zum Wasser schauen (Norden ist -z)
-    if (!art?.drinnen) a.blick = Math.PI / 2 + zufall(-0.8, 0.8);
+    if (!art?.drinnen) a.blick = z?.blick ?? Math.PI / 2 + zufall(-0.8, 0.8);
   }
 
   // ---------------------------------------------------------------- Schlange vor der Versorgung (L2)
@@ -965,7 +970,8 @@ export function init(game) {
   // Ereignisse mit vielen Besuchern (Mittsommer, Heringstage, Hanse-Woche, ECONOMY.ereignisse.<id>.menschen):
   // mehr Spaziergänger und Badegäste, abends bleiben mehr (Mittsommer: am Strand)
   function festFaktor(typ) {
-    const m = game.events?.current?.event?.menschen;
+    // Eigenes Hafenfest (P38): mit Musik mehr Leute (current.menschen statt event.menschen)
+    const m = game.events?.current?.menschen ?? game.events?.current?.event?.menschen;
     if (!m) return 1;
     return (abend ? m.abends?.[typ] ?? m[typ] : m[typ]) ?? 1;
   }
@@ -1011,7 +1017,7 @@ export function init(game) {
         if (!a) return;
         if (typ === 'strand' && Math.random() < 0.6) {
           a.zustand = 'verweilt';
-          a.sitzt = true;
+          a.sitzt = true; a.sitzY = 0;
           a.blick = Math.PI / 2 + zufall(-0.8, 0.8);
           a.uhr = zufall(5, 60);
         } else {
@@ -1053,7 +1059,7 @@ export function init(game) {
       quat.multiply(kipp);
       const s = a.buendel > 1 ? 1.15 : 1;
       skala.set(s, s, s);
-      pos.set(a.x, a.y + hub - (a.sitzt ? 0.6 : 0), a.z);
+      pos.set(a.x, a.y + hub - (a.sitzt ? 0.6 - (a.sitzY || 0) : 0), a.z);
       mat.compose(pos, quat, skala);
       koerper.setMatrixAt(n, mat);
       kopf.setMatrixAt(n, mat);
@@ -1266,6 +1272,8 @@ export function init(game) {
     rundgang: null,
     // Stand der Stege, aus dem das Wegenetz gebaut ist (gleich game.stege.gebaut().sig, sobald es passt)
     netzStand: () => netzStege,
+    // Netz neu bauen, ohne dass jemand springt (P60: neue Bänke, Bäume, Laternen stehen an Land)
+    netzErneuern: () => { if (netz) queueMicrotask(netzErneuern); },
     anzahl: () => {
       const lebend = agenten.filter((a) => a.zustand !== 'entfernt');
       return { figuren: lebend.length, menschen: lebend.reduce((s, a) => s + a.buendel, 0), sichtbar: koerper.count };

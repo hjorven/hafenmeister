@@ -34,8 +34,8 @@ const QUELLE_TEXT = {
 };
 const REIHENFOLGE = ['liegegeld', 'pacht', 'gastro', 'services', 'tagesziele', 'sonstiges'];
 // Beim Rundgang und über Nacht zahlen Gäste nur einen Anteil (rules.uncollectedShare); Trinkgeld kommt mit P12
-const LIEGEGELD_TEXT = { kassiert: 'selbst eingestrichen', rundgang: 'beim Rundgang', nacht: 'über Nacht', strichtrinkgeld: 'Trinkgeld (Kassierstrich)', trinkgeld: 'Trinkgeld großer Boote', nebenkosten: 'Nebenkosten (Hafenbüro)', boje: 'Bojengeld über Nacht', funk: 'Bonus für frei gehaltene Boxen (Funk)' };
-const AUSGABE_NAME = { bau: 'Bauen', ausbau: 'Ausbau des Hafens', services: 'Services', pacht: 'Pacht zurückgezahlt', winter: 'Winterarbeiten' };
+const LIEGEGELD_TEXT = { kassiert: 'selbst eingestrichen', rundgang: 'beim Rundgang', nacht: 'über Nacht', strichtrinkgeld: 'Trinkgeld (Kassierstrich)', trinkgeld: 'Trinkgeld großer Boote', leinen: 'Trinkgeld (Leinen angenommen)', nebenkosten: 'Nebenkosten (Hafenbüro)', boje: 'Bojengeld über Nacht', funk: 'Bonus für frei gehaltene Boxen (Funk)' };
+const AUSGABE_NAME = { bau: 'Bauen', ausbau: 'Ausbau des Hafens', services: 'Services', pacht: 'Pacht zurückgezahlt', winter: 'Winterarbeiten', fest: 'Hafenfest vorbereiten' };
 // Pacht (features/dauerlieger.js): Saisonpacht im Voraus, sonst die abendliche Pacht der Fischer und Dienste
 const PACHT_TEXT = { saison: 'Saisonpacht im Voraus' };
 const WEG_TEXT = {
@@ -196,7 +196,12 @@ export function init(game) {
       }
       if (q === 'sonstiges' && d?.startgeschenk) klein = 'Geschenk fürs erste Bauwerk';
       if (q === 'sonstiges' && d?.regatta) klein = [klein, `Startgeld der Regatta ${euro(d.regatta)}`].filter(Boolean).join(', ');   // events/vorbereiten.js
+      if (q === 'sonstiges' && d?.havarie) klein = [klein, `Schlepplohn für Havaristen ${euro(d.havarie)}`].filter(Boolean).join(', ');   // features/havarie.js (P37)
       if (q === 'sonstiges' && d?.hansewoche) klein = [klein, `Festgeld der Hanse-Woche ${euro(d.hansewoche)}`].filter(Boolean).join(', ');
+      // features/hafenfest-regeln.js (P38): Standgeld der Marktstände, Erstattung beim Absagen
+      if (q === 'sonstiges' && d?.hafenfest) klein = [klein, `Standgeld beim Hafenfest ${euro(d.hafenfest)}`].filter(Boolean).join(', ');
+      if (q === 'sonstiges' && d?.festAbgesagt) klein = [klein, `Hafenfest abgesagt, zurück ${euro(d.festAbgesagt)}`].filter(Boolean).join(', ');
+      if (q === 'sonstiges' && d?.parkplatz) klein = [klein, `Parkplatz am Ufer ${euro(d.parkplatz)}`].filter(Boolean).join(', ');   // features/naturecke.js (P52)
       if (q === 'tagesziele' && b.ziele?.gesamt) zusatz = `${b.ziele.erledigt} von ${b.ziele.gesamt}`;
       einnahmen.append(zeile(QUELLE_NAME[q] ?? q, euro(b.einnahmen[q]), { klein, zusatz }));
     }

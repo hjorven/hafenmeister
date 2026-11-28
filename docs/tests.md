@@ -153,6 +153,7 @@ Alle Zusätze, die das Spiel versteht, an einer Stelle. Sie hängen an die Adres
 | `?demo=boote` | `boote` | Vorführung der Schiffsanimationen (Einlaufen, Anlegen, Ablegen) | `render/boat-anim.js` |
 | `?demo=boote-s` | `boote-s` | alle S-Boote an den Plätzen der Stufe 1 | `render/boats/s.js` |
 | `?leute=voll` | `voll` | jede Box der Stufe mit einer Crew belegen (Menschen-Test) | `render/people.js` |
+| `?bojenfeld=n` | `1`, `2` | nur im Testmodus (`?stufe=n`): so viele Abschnitte des Bojenfelds gleich bauen, soweit Stufe und Gelände es erlauben ([bojenfeld.md](bojenfeld.md)) | `features/bojenfeld.js` |
 
 **Pixel-Fassung** (`web/pixel/`, siehe [pixel-art.md](pixel-art.md))
 

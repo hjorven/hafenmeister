@@ -87,6 +87,15 @@ Optionen für jeden Effekt: `pan` (-1 links bis 1 rechts), `volume` (0 bis 1,5),
 | `moewen` | Möwen fliegen auf (Flügelschlag und Rufe) | `anzahl` |
 | `plaetschern` | Wellenring auf dem Wasser | `staerke` |
 | `fernglas` | Fernglas an (Klicken, Scharfstellen) | |
+| `serie` | Serie passgenauer Zuweisungen (P46): Grundton, Terz, Akkord passend zur Musik | `stufe`: 1 bis 3 |
+| `abendruhe` | Ruhiger Abend, Lichterketten gehen an (P46) | |
+| `stammgast` | Neuer Stammgast (P46, L1) | |
+| `stufenziel` | Ziel der Ausbaustufe erreicht (P46, L1) | |
+| `miau` | Hafenkatze angetippt (P51) | `hoehe` |
+| `wuff` | Hafenhund angetippt (P51) | `anzahl`: 1 bis 3 |
+| `reiher` | Graureiher fliegt auf (P51) | |
+
+**Ruhiger Abend (P46):** `audio.setRuhig(true)` spielt abends und nachts eine wärmere Musik (Septakkorde, langsamer, weichere Fläche). Tagsüber bleibt die Tagesmusik, Fest und Sturm gehen vor. `features/stimmung.js` schaltet sie ein und am Morgen aus ([docs/stimmung.md](../../../docs/stimmung.md)).
 
 ## Handy und Tablet
 

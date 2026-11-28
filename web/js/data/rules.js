@@ -60,6 +60,8 @@ export function rulesFromEconomy(E = ECONOMY) {
     ? { from: ka.strichTrinkgeld.abMuenzen, perCoin: ka.strichTrinkgeld.jeMuenze, max: ka.strichTrinkgeld.hoechstens }
     : null;
   r.underKeelClearance = E.passregel?.wasserUnterKiel ?? 0;
+  // Baggern (P29): Zieltiefe je Größenklasse für ausgebaggerte Stege, nur diese Platzarten, ab dieser Stufe
+  r.dredge = E.baggern ? { depth: { ...E.baggern.ziel }, kinds: [...(E.baggern.arten ?? [])], fromStage: E.baggern.abStufe ?? 1 } : null;
 
   // Wünsche
   const stages = (E.stufen || []).map((s) => s.stufe);
@@ -81,7 +83,9 @@ export function rulesFromEconomy(E = ECONOMY) {
   r.offerWishShare = { ...(aw.anteil || {}) };
   r.offerWishes = Object.fromEntries(Object.entries(aw.wuensche || {}).map(([k, w]) => [k,
     { service: w.service, minStage: w.abStufe ?? 1, sizes: w.klassen ?? null, sailOnly: !!w.nurSegel }]));
-  r.berthWishes = Object.fromEntries(Object.entries(E.wuensche || {}).filter(([, w]) => w.durch === 'platz').map(([k]) => [k, 'power']));
+  r.berthWishes = Object.fromEntries(Object.entries(E.wuensche || {}).filter(([, w]) => w.durch === 'platz').map(([k, w]) => [k, w.eigenschaft ?? 'power']));
+  // Wünsche nur für längere Aufenthalte (P31: Waschmaschine ab 3 Nächten)
+  r.wishMinNights = Object.fromEntries(Object.entries(E.wuensche || {}).filter(([, w]) => w.abNaechte > 0).map(([k, w]) => [k, w.abNaechte]));
 
   // Liegeplätze: Platzarten, Strom an Stegen
   r.comfortBonus = 1;   // comfort eines Platzes ist direkt der Bonus in Ankern (platzarten.rufBonus)
@@ -94,6 +98,12 @@ export function rulesFromEconomy(E = ECONOMY) {
     if (p.nurKlassen) k.sizes = [...p.nurKlassen];
     if (p.offen) k.exposed = true;
     r.berthKinds[kind] = k;
+  }
+  // Bojenfeld (P36): Muringbojen im See für kleine Boote, ohne Wunscherfüllung, billiger, offen, als letzte Wahl
+  const bf = E.bojenfeld;
+  if (bf) {
+    r.berthKinds.boje = { ...(r.berthKinds.boje || {}), exposed: true, sizes: [...(bf.klassen || ['S', 'M'])], feeFactor: bf.liegegeld ?? 1 };
+    r.buoyField = { from: bf.abStufe ?? 2, fee: bf.liegegeld ?? 1, sizes: [...(bf.klassen || ['S', 'M'])], lastChoice: bf.letzteWahl ?? 5000 };
   }
   r.berthJetties = Object.fromEntries(Object.keys(E.stromAnSteg || {}).filter((k) => E.stromAnSteg[k]).map((k) => [k, { power: true }]));
   // Strom an weiteren Stegen über ein Bauwerk (zum Beispiel Stromsäulen an Steg B)
@@ -246,11 +256,29 @@ export function rulesFromEconomy(E = ECONOMY) {
   // Anmeldung per Funk (P28)
   const fa = E.funkAnmeldung;
   r.funk = fa ? { leadShare: fa.fruehestens, twoShare: fa.zweiAnteil, bonusShare: fa.bonusAnteil, rating: fa.ruf } : null;
+  // Preisstufe (P35, features/preisstufe-regeln.js): Faktoren je Stufe, Anker auf die Bewertung
+  const ps = E.preisstufe;
+  r.priceLevels = ps ? {
+    fromOffice: ps.abBuero ?? 1,
+    start: ps.start ?? 'normal',
+    levels: Object.fromEntries(Object.entries(ps.stufen || {}).map(([id, l]) => [id, {
+      fee: l.liegegeld ?? 1, arrivals: l.ankuenfte ?? 1, sizes: { ...(l.klassen || {}) }, rating: l.ruf ?? 0, demand: l.anspruch ?? 0,
+    }])),
+  } : null;
   // Flottillen (P32)
   const fl = E.flottillen;
   r.flotilla = fl ? {
     fromStage: fl.abStufe, share: { ...fl.anteil }, from: fl.fruehestens, to: fl.spaetestens, gap: fl.abstand,
     together: fl.zusammen, apart: fl.getrennt,
+  } : null;
+  // Jugendtraining (P39, features/jugendtraining.js): Anker für Gäste, die der Gruppe zugesehen haben
+  r.youth = E.jugendtraining ? { rating: E.jugendtraining.ruf } : null;
+  // Havaristen (P37, features/havarie.js): Anker mehr auf die Bewertung eines eingeschleppten Boots
+  r.havarie = E.havarie ? { rating: E.havarie.anker } : null;
+  // Spätankömmling (P53, docs/spaetankoemmling.md): der letzte Übernachter kommt erst nachts
+  const sp = E.spaetankoemmling;
+  r.lateArrival = sp ? {
+    fromDay: sp.abTag, share: sp.anteil, at: [...sp.ankunft], kinds: [...sp.arten], rest: sp.rest, holdMax: sp.haltMax, rating: sp.anker,
   } : null;
   return r;
 }

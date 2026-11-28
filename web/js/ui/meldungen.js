@@ -30,7 +30,12 @@ export const VORRANG = {
   auszeichnung: 60,    // features/auszeichnung.js, Karte nach dem Tagesabschluss (neue oder verlorene Auszeichnung)
   dauerWartet: 65,     // features/dauerlieger.js, Dauerlieger früher zurück (hat eine Frist bis zum Abend)
   ereignis: 60,        // events/vorbereiten-ui.js, Sturm und Regatta vorbereiten, Ergebnis am Abend
+  besucher: 58,        // features/besucher.js, seltener Besuch meldet sich an, liegt am Ehrenplatz, Tiere (P40)
+  havarie: 62,         // ui/havarie-meldung.js, Havarist treibt vor der Einfahrt (Box geben? hat eine Frist)
   funk: 57,            // ui/funk-anmeldung.js, Boot meldet sich per Funk an (Box freihalten?)
+  jugend: 58,          // ui/jugend-meldung.js, Jugendtraining: Box fürs Trainerboot, Auslaufen, Zurück
+  ankunft: 53,         // features/grosse-ankunft.js, großes Schiff läuft ein (kurz, P47)
+  spaet: 52,           // features/spaetankoemmling.js, Spätankömmling läuft im Dunkeln ein (kurz, P53)
   einstieg: 50,        // features/einstieg.js, Schritte des Einstiegs
   ankuendigung: 55,    // events/banner.js, Ereignisse und Saison ("Heute: Sommertag", "Morgen: Regatta")
   tipp: 45,            // features/einstieg.js, Tipps beim ersten Mal (kurz, gehen den Dauerplatz-Meldungen vor)
@@ -38,6 +43,7 @@ export const VORRANG = {
   erfolg: 30,          // features/erfolge.js, neuer Erfolg (kurz)
   post: 24,            // ui/gaestepost.js, Post von einem Stammgast an der Pinnwand (kurz)
   logbuch: 22,         // ui/logbuch.js, neues Bootsmodell im Logbuch (kurz)
+  wissen: 21,          // features/hafenwissen.js, neu im Hafenwissen: Signalflagge, Seezeichen, Licht, Knoten (kurz, P49)
   gaestebuch: 20,      // ui/gaestebuch.js, Bewertung eines Boots außerhalb des Bildes (kurz)
   bautipp: 10,         // ui/bauen.js, "Als Nächstes" (hält dieses Modul selbst, solange #bau-tipp nicht hidden ist)
 };

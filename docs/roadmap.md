@@ -115,7 +115,7 @@ Note 1 bis 5 aus dem Überblick. "nein" heißt: bleibt, wie es ist.
 |---|---|---|---|
 | Baumodus mit Vorschau und Rat | 5 | nein | (P18 baut darauf auf) |
 | Tagesrhythmus | 4 | nein | |
-| Passregel | 4 | nein | (P29 Baggern gibt ihr einen Hebel) |
+| Passregel | 4 | nein | (P29 Baggern gibt ihr einen Hebel: ausgebaggerte Stege und Niedrigwasser) |
 | Stegprojekte | 4 | teilweise | P05 |
 | Tagestörn der Gäste | 4 | nein | |
 | Grün-Rot-Schilder | 4 | nein | (P50 Form zusätzlich zur Farbe, erledigt) |
@@ -230,22 +230,22 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F3 | Flottillen: drei bis fünf Boote wollen am selben Steg liegen (Feld `group`) | erledigt (P32, [flottillen.md](flottillen.md)) | P32 |
 | F4 | Liegende Boote umlegen (verholen), zweimal dieselbe Crew senkt die Bewertung | erledigt (PR 314): halten und ziehen, ab dem zweiten Mal −0,5 Anker | P33 |
 | F5 | Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld `exposed`) | erledigt (PR 392, [wind.md](wind.md)): Windlage je Platz aus Wellenweg gegen den Wind des Tages, ab Stufe 2, Zeichen beim Ziehen | P34 |
-| F6 | Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison | offen | P35 |
-| F7 | Baggern: Wassertiefe je Steg als Bauprojekt | offen | P29 |
-| F8 | Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar | erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasser mit P31, [nachruesten.md](nachruesten.md) | P30 |
-| F9 | Neue Wünsche: WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | offen | P31 |
-| F10 | Bojenfeld: billige Muringbojen im See für kleine Boote ohne Wünsche | offen | P36 |
+| F6 | Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison | erledigt (P35, [preisstufe.md](preisstufe.md)): Preistafel im Gästebuch und Aufsteller am Hafenmeisterhaus, einmal je Saison und nach jedem Ausbau, Gäste schreiben über die Preise | P35 |
+| F7 | Baggern: Wassertiefe je Steg als Bauprojekt | erledigt (P29, PR 420, [baggern.md](baggern.md)): je Steg ab Stufe 2 im Bauen-Menü, Bagger mit Schute, dazu Niedrigwasser bei starkem Westwind, an dem knapp liegende Boote im Schlick sitzen | P29 |
+| F8 | Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar | erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasserhähne seit P31, [nachruesten.md](nachruesten.md) | P30 |
+| F9 | Neue Wünsche: WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen | erledigt (P31, [gaestewuensche.md](gaestewuensche.md)): Frischwasser über Wasserhähne am Steg (Stufe 2), WLAN (3), Waschmaschine ab 3 Nächten (4), Absaugstation (5), Hafenrundfahrt mit der Barkasse (6); Brötchen seit P19 | P31 |
+| F10 | Bojenfeld: billige Muringbojen im See für kleine Boote ohne Wünsche | erledigt (P36, [bojenfeld.md](bojenfeld.md)): 6 Bojen ab Stufe 2, 6 weitere ab Stufe 4, Lage je Küste im tiefen Wasser, Boote S und M bis 9 m, 60 % Liegegeld, ohne Strom und Wasser, letzte Wahl für Büro und Selbst-Einfahren, kein Dauerplatz | P36 |
 
 ### Hafenleben
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
-| F11 | Havarist wird eingeschleppt, braucht sofort einen Platz, Ruf und neuer Stammgast | offen | P37 |
-| F12 | Eigenes Hafenfest einmal pro Saison ansetzen | offen | P38 |
-| F13 | Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub | offen | P39 |
+| F11 | Havarist wird eingeschleppt, braucht sofort einen Platz, Ruf und neuer Stammgast | erledigt (P37, [havarie.md](havarie.md)): Notruf im Meldeplatz, Box wählen, Fischer, Arbeitsboot oder Seenotretter schleppen ihn herein; Schlepplohn, +1 Anker, sofort Stammgast, Werft repariert | P37 |
+| F12 | Eigenes Hafenfest einmal pro Saison ansetzen | erledigt (P38, [hafenfest.md](hafenfest.md)): Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk, Bilanz am Abend | P38 |
+| F13 | Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub | erledigt (P39, [jugendtraining.md](jugendtraining.md)): jeden 4. Saisontag Optis und Jollen über den Slip hinaus, Dreieckskurs vor den Stegen, Trainerboot braucht eine Box (feste Trainerbox möglich), wartende Boote halten das Fahrwasser frei, Beitrag und +0,2 Anker für zusehende Gäste | P39 |
 | F14 | Winterarbeiten: drei kleine Aufträge, Komfortbonus für einen Steg | erledigt (PR 245) | P20 |
 | F15 | Krantage: Dauerlieger sichtbar ins Winterlager und zurück | erledigt (PR 245) | P20 |
-| F16 | Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv | offen | P40 |
+| F16 | Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv | erledigt (P40): vier Schiffe mit Ehrenplatz, Schwäne und Schweinswal, Fotos im Logbuch-Reiter „Besucher“, vier Erfolge, docs/besucher.md | P40 |
 | F17 | Mehr Ereignisse: Mittsommer, Holzboot-Treffen, Heringstage | erledigt (PR 299), dazu Hanse-Woche ab Stufe 5 | P24 |
 
 ### Langzeit
@@ -257,7 +257,7 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | F20 | Saisonbilanz nach dem Winter | erledigt (P41, Winterpause mit Quellen, Belegung, Vergleich) | P41 |
 | F21 | Herausforderungen mit Seed (nur Segler, kein Hafenbüro, doppelte Ankünfte) | offen | P42 |
 | F22 | Fotoaufträge und Postkarte | offen | P43 |
-| F23 | Hafenname und Flagge, sichtbar an Einfahrt und Mast | offen | P44 |
+| F23 | Hafenname und Flagge, sichtbar an Einfahrt und Mast | erledigt (P44, [Hafenflagge](hafenflagge.md)) | P44 |
 | F24 | Kreativmodus als eigener Spielstand | offen | P45 |
 | F25 | Einstellungen: Schilder auch über die Form, weniger Bewegung, größere Schrift, Linkshänder am Handy | erledigt (Menü, Einstellungen; docs/ui/oberflaeche.md) | P50 |
 
@@ -266,24 +266,24 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
 | F26 | Mehrere Speicherplätze: wechseln, neu, überschreiben, kopieren, umbenennen, löschen, als Datei | erledigt (bis 8 Plätze, Papierkorb, Gesamtdatei) | P09 |
-| F27 | Neues Spiel mit Auswahl: Hafenname, Stegbild, später Herausforderung oder Revier | erledigt für Name, Stegbild, Küste, Einführung; Herausforderung und Revier folgen | P09, P44 |
+| F27 | Neues Spiel mit Auswahl: Hafenname, Flagge, Stegbild, später Herausforderung oder Revier | erledigt für Name, Flagge, Stegbild, Küste, Einführung; Herausforderung und Revier folgen | P09, P44 |
 | F28 | Probe-Kopie für teure Ausbauten | erledigt | P09 |
 
 ### Spielgefühl
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
-| F29 | Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer | offen | P46 |
-| F30 | Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord | offen | P46 |
-| F31 | Große Ankünfte mit Horn, Kamera schwenkt auf Wunsch zur Einfahrt | offen | P47 |
-| F32 | Leinen annehmen: Symbol am Steg, Antippen bringt Trinkgeld | offen | P48 |
+| F29 | Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer | erledigt (PR 427, [stimmung.md](stimmung.md)): Lichterketten an allen Stegen gehen vom Land nach außen an, Glockentöne, wärmere Abendmusik bis zum Morgen | P46 |
+| F30 | Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord | erledigt (PR 427, [stimmung.md](stimmung.md)): Grundton, Terz, Akkord passend zur Musik, goldene Noten über der Box, ohne Zeitgrenze | P46 |
+| F31 | Große Ankünfte mit Horn, Kamera schwenkt auf Wunsch zur Einfahrt | erledigt (P47): Kreuzfahrt, Flotte, Windjammer und seltene Besucher tuten beim Einlaufen, Meldung mit Ansehen, kurze Kamerafahrt nur wenn der Spieler nichts tut, Einstellung Mit Kamera/Nur Horn/Aus, docs/grosse-ankuenfte.md | P47 |
+| F32 | Leinen annehmen: Symbol am Steg, Antippen bringt Trinkgeld | erledigt ([leinen.md](leinen.md)): Tau am Steg, Festmacher fängt die Leine, Töne je Leine, Trinkgeld 2 bis 20 € | P48 |
 
 ### Seemannschaft
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
-| F33 | Signalflaggen als Wunschanzeige, Lexikon im Logbuch | offen | P49 |
-| F34 | Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter) | offen | P49 |
+| F33 | Signalflaggen als Wunschanzeige, Lexikon im Logbuch | erledigt ([signalflaggen.md](signalflaggen.md)): Gäste setzen je Wunsch eine Flagge, erfüllte holen sie ein, Blauer Peter vor dem Auslaufen, Lexikon im Reiter Wissen | P49 |
+| F34 | Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter) | erledigt ([signalflaggen.md](signalflaggen.md)): 13 Einträge zu Seezeichen, Feuer und Lichtern, Knoten, dazu Positionslichter an fahrenden Booten | P49 |
 | F35 | Wind beim Anlegen: große Boote brauchen länger, bevorzugen Plätze gegen den Wind | erledigt (PR 392, [wind.md](wind.md)): L und XL mit Rückenwind langsamer und −0,25 Anker, Büro wählt Bug gegen den Wind | P34 |
 
 ### Geschichten
@@ -292,14 +292,14 @@ Jorven (12.11.2026): Jedes Feature wird komplett ausgebaut. Jedes bekommt ein ei
 |---|---|---|---|
 | F36 | Hafenchronik: jeder Tag eine Zeile | erledigt | P21 |
 | F37 | Gästepost von Stammgästen, hängt im Hafenbüro | erledigt: Ankündigung und Empfehlung, Pinnwand im Gästebuch | P25 |
-| F38 | Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten | offen | P51 |
+| F38 | Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten | erledigt ([hafentiere.md](hafentiere.md)): wohnen im Hafen, Tagesablauf, Antippen, Foto ins Logbuch, Erfolg Hafenfreunde | P51 |
 
 ### Welt
 
 | Nr | Feature | Status | Paket |
 |---|---|---|---|
-| F39 | Naturecke: Schilfgürtel erhalten oder bebauen, nicht umkehrbar | offen | P52 |
-| F40 | Spätankömmling: nachts läuft ein Boot mit Lichtern ein | offen | P53 |
+| F39 | Naturecke: Schilfgürtel erhalten oder bebauen, nicht umkehrbar | erledigt ([naturecke.md](naturecke.md)): Schilf auf allen 15 Küsten, schützen (Bohlenweg, Taucher, +0,1 Anker) oder bebauen (Parkplatz, Geld je Abend), ohne Rückgängig | P52 |
+| F40 | Spätankömmling: nachts läuft ein Boot mit Lichtern ein | erledigt ([spaetankoemmling.md](spaetankoemmling.md)): an manchen Abenden kommt der letzte Übernachter im Dunkeln mit Taschenlampe und Positionslichtern, Meldung, Schein an der Box, die Nacht wartet bis er fest ist, ein Viertel Anker Dank | P53 |
 
 ### Teilen ohne Server
 
@@ -354,7 +354,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | B5 | Langen Kassierstrich mit Trinkgeld belohnen; Knopf "Kassieren" erst mit Hafenbüro | erledigt: Strich-Trinkgeld (PR 151, `sim:strokeTip`), Knopf (PR 146) | P12, P02 |
 | B6 | Mehrere Nächte beim Anlegen auf einmal zahlen | erledigt (`ECONOMY.kassieren.vorausNaechte`, `boat.paidThrough`, größere Münze) | P12 |
 | B7 | Wünsche je Bootsart aus den Bootsdaten nutzen | erledigt (P19 Teil 1, `type.wishes`) | P19 |
-| B8 | Neue Wünsche in späten Stufen, je Stufe mindestens einer (= F9) | offen | P31 |
+| B8 | Neue Wünsche in späten Stufen, je Stufe mindestens einer (= F9) | erledigt (P31): jede Stufe 1 bis 6 hat mindestens einen neuen Wunsch, Test in `tests/gaestewuensche.test.mjs` | P31 |
 | B9 | Wege zählen: weit vom Sanitärhaus zählt die Dusche halb | erledigt (P19 Teil 2): über 120 m zählt WC oder Dusche halb, [ruf.md](ruf.md) | P19 |
 | B10 | Liegegeld nach Länge statt fest je Größe | erledigt (PR 252, `ECONOMY.klassen.proMeter`, `sim.baseNightlyFee`) | P17 |
 | B11 | Bezahlt-Zeichen am Bug | erledigt (PR 131) | |
@@ -384,7 +384,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | D5 | Zwei Varianten je Steg (viele schmale oder wenige breite Boxen) | erledigt (PR 321): je Paar wählbar über Doppelboxen, [stege-umbauen.md](stege-umbauen.md) | P59 |
 | D6 | Boxen umbauen (zwei schmale zu einer breiten) | erledigt (PR 321): Doppelbox für Mehrrumpfboote ab Stufe 4, Rückbau möglich | P59 |
 | D7 | Sparziel anheften, Balken neben dem Geld, Schild am Bauplatz | erledigt (PR 232) | P18 |
-| D8 | Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe | offen | P60 |
+| D8 | Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe | erledigt (P60): Reiter Deko im Baumenü mit Bänken, Kübeln, Bäumen, Laternen in Abschnitten und Anstrich der Hafenhäuser, Wirkung auf jede Bewertung; Mast schon mit P44, [verschoenern.md](verschoenern.md) | P60 |
 | D9 | Neue Gastplätze in Stufe 6 (Superyacht-Steg oder Stadtkai) | erledigt (PR 326): Yachtsteg vor der Westmole, zwei XL-Plätze | P59 |
 | D10 | Stufenaufstieg feiern (= Ü23) | erledigt (PR 156) | P16 |
 
@@ -399,14 +399,14 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 | E5 | Automatik je Größenklasse an oder aus | erledigt (PR 146) | P02 |
 | E6 | Von Hand eingewiesene Gäste geben einen Viertelanker mehr | erledigt (PR 146) | P02 |
 | E7 | Volle Automatik erst ab Hafenstufe 4 und teurer | erledigt (PR 146) | P02 |
-| E8 | Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste) | teilweise: Reservierungen erledigt (P28, PR 288); Havaristen und Feste kommen mit P37, P38 | P02 (verknüpft P28, P37, P38) |
+| E8 | Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste) | erledigt: Reservierungen (P28, PR 288), Havaristen (P37), eigene Feste (P38) | P02 (verknüpft P28, P37, P38) |
 
 ### F Services und Angebote (hier "Svc")
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
 | Svc F1 | Eine Liste, klare Stufennamen | erledigt | P06 |
-| Svc F2 | Jeder Service ändert das Spiel (Slip, Mastenkran, Fahrradverleih, Räucherei, Werft) | erledigt (P23): Trailerboote am Slip, Mast legen und Radtour verlängern den Aufenthalt, Werft holt Reparaturboote, Räucherei bekommt Abendgäste; Havaristen folgen mit P37 | P23 |
+| Svc F2 | Jeder Service ändert das Spiel (Slip, Mastenkran, Fahrradverleih, Räucherei, Werft) | erledigt (P23): Trailerboote am Slip, Mast legen und Radtour verlängern den Aufenthalt, Werft holt Reparaturboote, Räucherei bekommt Abendgäste; Werft repariert eingeschleppte Havaristen (P37) | P23 |
 | Svc F3 | Entweder-oder-Bauplätze (Café oder Eisdiele, Werfthalle oder Winterhalle) | erledigt (P23): drei Wahlplätze (dazu Kreuzfahrtterminal oder Marinestützpunkt), Umbau statt Sperre | P23 |
 | Svc F4 | Einnahmen zeigen: Münzen über Gebäuden, Tagesabschluss je Quelle | erledigt (PR 159) | P15 |
 | Svc F5 | Auslastung statt Festbetrag | erledigt (P23): Bäcker, Café, Eisdiele, Räucherei, Fahrradverleih verdienen an den Crews im Hafen, Regen wirkt jetzt auch im Spiel | P23 |
@@ -488,7 +488,7 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 
 | Kürzel | Punkt | Status | Paket |
 |---|---|---|---|
-| L1 | Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel | offen | P46 |
+| L1 | Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel | erledigt (PR 427): Stammgast und Stufenziel neu, die anderen klangen schon | P46 |
 | L2 | Figuren als Anzeige (Schlange vor der Dusche, volle Tische) | erledigt (P55, Schlange vor WC, Dusche, Kiosk und Restaurant, wenn knapp oder voll; `render/people.js`) | P55 |
 | L3 | Hafenhorn: langes Drücken aufs Hafenbüro kassiert alles | erledigt | P26 |
 | L4 | Fernglas mit Steckbrief | erledigt | P26 |
@@ -623,7 +623,7 @@ Ein Audit von außerhalb (`AUDIT-ISTSTAND.md`, ZIP-Stand mit PR 143) hat die Roa
 | C02 | Alter Speicherweg `hafenmeister.save` neben dem neuen; alter Weg nur noch für eine einmalige, getestete Übernahme lesen, dann Schreibpfad entfernen (= N14) | ja, `state.js:7` | P09 (erledigt) |
 | C03 | Spielstand-Import prüft verschachtelte Daten kaum: ein Schema für den ganzen Spielstand, IDs gegen Boots- und Platzdaten, Zahlen begrenzen, unbekannte Felder kontrolliert behandeln, erst nach vollständiger Prüfung übernehmen, Tests mit falschen Typen und Extremwerten | ja, `state.js` `validate` | P09 (erledigt: `state.js` prüft Typen, Grenzen und Verweise; Import erst nach Prüfung aller Häfen) |
 | C04 | Abnahmekriterium für P06: neue Spielstände, alle Regeltests und das Balancing nutzen dieselbe Regelkonfiguration | ja, `data/rules.js` besteht | P06 |
-| C05 | HTML per `innerHTML` (`render/services.js`, `ui/input-pc.js`): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, `textContent` oder Escapen, dazu Test mit präparierten Namen | ja | P08 (Sicherheit), Pflicht für P44 (Hafenname) und P09 (Import) |
+| C05 | HTML per `innerHTML` (`render/services.js`, `ui/input-pc.js`): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, `textContent` oder Escapen, dazu Test mit präparierten Namen. Hafenname erledigt mit P44 (`hafenNameSauber`, nur `textContent`/Canvas, tests/hafenflagge.test.mjs) | ja | P08 (Sicherheit), Pflicht für P44 (Hafenname) und P09 (Import) |
 | C06 | Three.js kommt von jsDelivr, Erststart hängt am CDN (= N15, N16) | erledigt (PR 270) | P61 |
 | C07 | GitHub Actions: Rechte je Job statt für den ganzen Workflow (`pages.yml` gibt `pages: write` und `id-token: write` auch dem Build), Actions auf Commit-SHAs pinnen, Dependabot prüfen | erledigt (P08-Rest, 14.11.): `permissions: {}` je Workflow, Rechte je Job, alle Actions auf SHAs, Dependabot für Actions, Regeln in [sicherheit.md](sicherheit.md) | P08 |
 | C08 | Kein Supabase-Code vorhanden; vor dem Online-Start eigenes Sicherheitsreview (RLS je Tabelle, Rechte anonymer Nutzer, Rate Limits, serverseitige Prüfung) | ja | P58 |
@@ -695,22 +695,22 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 |---|---|---|---|
 | P23 | Services mit eigener Wirkung | Services nicht nur "€ pro Tag" | erledigt (PR 340; F2, F3, F5, F7, F9; [services.md](services.md#eigene-wirkung-roadmap-p23)) |
 | P24 | Ereignisse zum Vorbereiten und neue Ereignisse | Vorwarnung mit Handlungsmöglichkeit, F17 | erledigt (PR 281: Sturm sturmklar machen, Regatta-Plätze freihalten, Ergebnis am Abend; PR 299: Heringstage, Mittsommer, Holzboot-Treffen, Hanse-Woche, Nachspiel, Services an Ereignistagen; Regatta mit Bahn draußen PR 319), [ereignisse.md](ereignisse.md) |
-| P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | erledigt: Teil 1 bis 3 gebaut, auch C8, H6 bis H9 ([stammgaeste.md](stammgaeste.md)) |
+| P25 | Stammgäste mit Wirkung und Gästepost | Ruf am alten Platz (plan 9a), F37 | erledigt: Teil 1 bis 3 gebaut, auch C8, H6 bis H9 (PR 394, PR 397, [stammgaeste.md](stammgaeste.md)) |
 | P26 | Überraschende Gesten fertig bauen | Hafenhorn gedrückt halten, Fernglas mit Steckbrief, Möwen, Wellenring, Glocke (plan 8), `audio/README.md` | erledigt (PR 322, docs/hafengesten.md) |
 | P27 | Päckchen liegen bei vollem Hafen | F1 | erledigt (PR 330, [paeckchen.md](paeckchen.md)) |
 | P28 | Anmeldung per Funk | F2 (nutzt P11) | erledigt (PR 288, `docs/funk-anmeldung.md`) |
-| P29 | Baggern für tiefere Liegeplätze | F7 | neu |
+| P29 | Baggern für tiefere Liegeplätze | F7 | erledigt (PR 420, [baggern.md](baggern.md): Steg ausbaggern im Bauen-Menü, Niedrigwasser bei Westwind) |
 | P30 | Stege nachrüsten | F8 | erledigt (PR 297, [nachruesten.md](nachruesten.md)) |
-| P31 | Neue Gästewünsche | F9 | neu |
-| P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md)) |
+| P31 | Neue Gästewünsche | F9, B8 | erledigt (PR 406, [gaestewuensche.md](gaestewuensche.md): Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt) |
+| P32 | Flottillen | F3, Gruppen-Ankunft | erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, [flottillen.md](flottillen.md); beim Selbst-Einfahren zusammen (PR 414); Rest Prio B: Boxen frei halten, gemeinsam weiterfahren) |
 | P33 | Liegende Boote umlegen | F4 | erledigt (PR 314, Ausbau und Dauerplätze nutzen dasselbe Umlegen) |
 | P34 | Wind im Hafen spürbar machen | F5, F35 | erledigt (PR 392, [wind.md](wind.md)) |
-| P35 | Preisstufe am Hafenbüro | F6 | neu |
-| P36 | Bojenfeld im See | F10 | neu |
-| P37 | Havarist einschleppen | F11 | neu |
-| P38 | Eigenes Hafenfest ansetzen | F12 | neu |
-| P39 | Jugendtraining am Segelclub | F13 | neu |
-| P40 | Seltene Besucher | F16 (nach P21) | neu |
+| P35 | Preisstufe am Hafenbüro | F6 | erledigt (PR 413, [preisstufe.md](preisstufe.md): günstig, normal, gehoben; Faustregel für die Bots, Zeitraffer wieder nahe 105) |
+| P36 | Bojenfeld im See | F10 | erledigt (PR 421, [bojenfeld.md](bojenfeld.md)) |
+| P37 | Havarist einschleppen | F11 | erledigt (PR 408, [havarie.md](havarie.md)) |
+| P38 | Eigenes Hafenfest ansetzen | F12 | erledigt (PR 405, [hafenfest.md](hafenfest.md)) |
+| P39 | Jugendtraining am Segelclub | F13 | erledigt (PR 412, [jugendtraining.md](jugendtraining.md)) |
+| P40 | Seltene Besucher | F16 (nach P21) | erledigt (PR 416, docs/besucher.md) |
 
 ### Welle 4: Langzeit, Spielgefühl, Welt (Extras)
 
@@ -719,16 +719,16 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 | P41 | Statistik und Saisonbilanz | F19, F20 | erledigt (PR 315, Thread "Statistik und Saisonbilanz zeigen") |
 | P42 | Herausforderungen, Wochenhafen und Hafen als Code | F21, F41, F42 (nach P09, P45) | neu |
 | P43 | Fotoaufträge und Postkarten | F22 | bestehend: "Spielschleife zusammenbauen und Vorschläge einbauen" (Fotomodus) |
-| P44 | Hafenname und Flagge | F23, F27 (Auswahl beim Start) | neu |
+| P44 | Hafenname und Flagge | F23, F27 (Auswahl beim Start) | erledigt (PR 429, Thread "Hafenname und eigene Flagge geben", [Hafenflagge](hafenflagge.md)) |
 | P45 | Kreativmodus | F24 | neu |
-| P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | bestehend: "Ton und Musik hinzufügen" |
-| P47 | Große Ankünfte ankündigen | F31 | bestehend: "Kamera frei neigen und drehen" |
-| P48 | Leinen annehmen beim Anlegen | F32 | bestehend: "Schiffsanimationen umsetzen" |
-| P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | neu |
+| P46 | Ruhiger Abend und Serien-Akkord | F29, F30 | erledigt (PR 427, Thread "Ruhigen Abend und Serien-Akkord bauen") |
+| P47 | Große Ankünfte ankündigen | F31 | erledigt (PR 428, Thread "Große Ankünfte ankündigen", docs/grosse-ankuenfte.md) |
+| P48 | Leinen annehmen beim Anlegen | F32 | erledigt (PR 430, Thread "Leinen beim Anlegen annehmen lassen", [leinen.md](leinen.md)) |
+| P49 | Signalflaggen und Hafenwissen | F33, F34 (nach P21) | erledigt (PR 433, Thread "Signalflaggen ins Spiel bringen", [signalflaggen.md](signalflaggen.md)) |
 | P50 | Einstellungen für Sicht und Bewegung | F25 | bestehend: "Gesamte Oberfläche neu überarbeiten" |
-| P51 | Hafentiere | F38 | bestehend: "Menschen im Hafen herumlaufen lassen" |
-| P52 | Naturecke am Schilf | F39 | bestehend: "Landschaft und Wasser gestalten" |
-| P53 | Spätankömmling in der Nacht | F40 | neu |
+| P51 | Hafentiere | F38 | erledigt (PR 435, docs/hafentiere.md) |
+| P52 | Naturecke am Schilf | F39 | erledigt (PR 440, docs/naturecke.md) |
+| P53 | Spätankömmling in der Nacht | F40 | erledigt (PR 439, docs/spaetankoemmling.md) |
 
 ### Welle 5: Regionen und Online (Extras)
 
@@ -766,7 +766,7 @@ Plan: [ausbau-stufe-7-20.md](ausbau-stufe-7-20.md) (13.11.2026). Der Heimathafen
 |---|---|---|---|---|
 | P55 | Versteckte Regeln im Hafen sichtbar machen | A4 Geduldsring, B1 Auslastung, C7 Warnung, L2 Figuren als Anzeige, Bed P3 Zeiger am Rand, Bed P10 Zeichen "hier ist etwas zu tun" | 2 | erledigt (PR 269 und 275, `docs/hafenzeichen.md`) |
 | P59 | Stege umbauen und Varianten wählen | D5, D6, D9 (neue Gastplätze in Stufe 6) | 3 | erledigt (PR 321 Doppelboxen, PR 326 Yachtsteg, [stege-umbauen.md](stege-umbauen.md)) |
-| P60 | Hafen verschönern | D8 | 4 | neu |
+| P60 | Hafen verschönern | D8 | 4 | erledigt (PR 441, [verschoenern.md](verschoenern.md)) |
 | P61 | Spiel komplett offline startbar | N15, N16 | 2 | erledigt (PR 270), Thread "Spiel offline startbar machen" |
 
 P56 bleibt frei.
@@ -782,7 +782,7 @@ Lücken, die beim Abgleich der Doku mit dem Code (15.11.2026, `main` bei `c0d1d9
 | P85 | Zusammenspiel nach Welle 0 prüfen | Jorvens Auftrag vom 14.11.: alle Features weiter vorhanden, neue Features im normalen Spiel wirklich genutzt, Welle 1 wirklich gefixt, Übersehenes finden. Drei Threads (Kernschleife und Regeln; Oberfläche und Geräte; Welt, Boote, Ereignisse), gemeinsame Datei `docs/zusammenspiel.md` | 1 | erledigt: Teil 1 Kernschleife und Regeln erledigt (PR 354, Funde K1 bis K5), Teil 2 Oberfläche und Geräte erledigt (PR 352), beide in `docs/zusammenspiel.md`; Teil 3 Welt: Ausbauten je Küste geprüft (Abschnitt "Ausbauten je Küste", Fund W1 Durchstich nur auf Nehrungsküsten), Stegbilder je Küste, Ereignisse und Bildrate je Wetter geprüft (PR 366 und 373, Fund S1 behoben; Aufstiegsname nach Küste) |
 | P86 | Bootsgeschichten fertig erzählen | Regatta: Startsignal mit Ton, Siegerehrung am Segelclub, Ergebnis im Logbuch; Gepäck beim Crewwechsel sichtbar, Halt am Tanksteg, Gang "in den Ort" ([bootsgeschichten.md](bootsgeschichten.md), Abschnitt 5) | 3 | erledigt (PR 342) |
 | P87 | Prüfwerkzeuge auf 15 Küsten und den neuen Takt | Härtetest (`tests/extrem/`) nach PR 327 bis 332 neu laufen lassen und den Fund "Gäste erreichen ab Stufe 4 keine Boje" am Spiel bestätigen; `tests/specs/leinen.spec.mjs` auch für Küste 11 bis 15; `istWasser` und Bild am Durchstich angleichen (Messlatte); Zeitraffer-Grenzen auf den 5-Minuten-Tag | 1 | erledigt (PR 338: Tests über alle Küsten aus `formen.js`, `tools/zeitraffer/wasserbild.cjs` und `bildwasser.cjs`, Grenzen für den 5-Minuten-Tag, Härtetest neu gelaufen; Funde in docs/arbeitsplan.md) |
-| P88 | Engstellen nach ihrer Länge regeln | Reste aus P66 (Abnahme Welle 0 auf `ae9e34f`, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Dazu Großschiff-Vortritt. Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Noch zu tun: Großschiff-Vortritt, Segler der Seerunde in der Schlange, Rest Küste 15 | 3 | in Arbeit (PR 390) |
+| P88 | Engstellen nach ihrer Länge regeln | Reste aus P66 (Abnahme Welle 0 auf `ae9e34f`, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Der Großschiff-Vortritt ist gestrichen (siehe unten). Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Teil 2 (22.11.): Vorbeifahrer und Segler, die ein Hafenboot aufhalten, fahren sofort weiter (Küste 14 Stufe 6: Ankommende stapelten sich in 3 von 8 Läufen draußen auf See, danach in 0 von 4). Teil 3 (22.11.): Auch der Seeweg hat je Richtung eine eigene Bahn; vorher trafen sich An- und Abreisende eines Seezugangs im selben Übergabepunkt am Kartenrand (Küste 15 Stufe 5: fest 16 und 14 statt 116 und 32; Bodden 2 statt 33; Küste 14 Stufe 6: Ankommende ineinander 155 und 460 statt 630 bis 10600). Großschiff-Vortritt gestrichen (Koordinator 22.11.), drei Fassungen gemessen und verworfen: Größenregel Boot gegen Boot (Bodden-Seegatt fest 208 statt 14 bis 38), größerer Abstand der Vorbeifahrer zu fahrenden Großschiffen (Bodden 0 statt 4 nahe Vorbeifahrten, Nehrung 4 statt 1), Vortritt an der Einfahrt (Küste 14 Stufe 6: Großschiffe 86 und 92 lange Proben statt 14 und 6). Abnahme durch die nächste Zeitraffer-Serie | 3 | erledigt (PR 390, 400 und Teil 3) |
 
 ### Abgleich mit der Reihenfolge im Überblick
 

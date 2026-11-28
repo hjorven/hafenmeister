@@ -35,6 +35,8 @@ export function wirkungText(w = {}) {
   if (w.tagesgaeste) t.push('verdient mit, wenn große Schiffe Tagesgäste bringen');
   if (w.sturmschutz) t.push('hilft bei Sturm, der Ruf leidet nicht');
   if (w.regatta) t.push('macht Regatten möglich');
+  // Jugendtraining (P39): Optis und Jollen segeln an festen Tagen aus, wenn auch die Slipanlage steht
+  if (w.jugend && ECONOMY.jugendtraining) t.push(`mit Slipanlage segelt jeden ${ECONOMY.jugendtraining.alle}. Tag die Jugend mit ${w.jugend} Booten aus dem Hafen`);
   if (!t.length) return '';
   const s = t.join(', ');
   return s[0].toUpperCase() + s.slice(1) + '.';
@@ -70,8 +72,15 @@ export function waehleSchritt({ geld, eintraege, bedarf, stufe, region = null, g
   // Geschenktes erstes Bauwerk geht allem anderen vor (kostet nichts, Gäste wünschen es sich; Einzeltest 14.11.)
   const g = geschenk && offen.find((e) => e.key === geschenk);
   if (g) return { text: `${g.name} bauen. Das erste Bauwerk ist geschenkt.`, ziel: g.key, leistbar: true };
+  // 2a. Zu flach (P29): Boote fuhren weiter, obwohl an einem ausgebaggerten Steg ein Platz frei gewesen waere
+  const tief = offen.filter((e) => e.baggern && (e.vermisst ?? 0) >= 2).sort((a, b) => b.vermisst - a.vermisst || a.kosten - b.kosten)[0];
+  if (tief && (tief.vermisst >= 3 || leistbar(tief))) {
+    return mit(tief, `Zuletzt ${tief.vermisst} Boote mit zu viel Tiefgang weitergefahren. ${tief.name} hilft.`);
+  }
   // 2. Kein Platz: Boote weggeschickt oder Hafen fast voll
-  const stege = offen.filter((e) => e.art === 'steg' && !e.nachruesten);
+  // Bojenfeld (P36, ueberlauf) nur, wenn es keinen Steg mehr zu bauen gibt
+  const stegeAlle = offen.filter((e) => e.art === 'steg' && !e.nachruesten);
+  const stege = stegeAlle.some((e) => !e.ueberlauf) ? stegeAlle.filter((e) => !e.ueberlauf) : stegeAlle;
   const voll = bedarf.plaetze > 0 && bedarf.belegt / bedarf.plaetze >= 0.85;
   if (stege.length && (bedarf.weg >= 2 || voll)) {
     const e = meistePlaetze(stege);

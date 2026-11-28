@@ -23,8 +23,8 @@ export const KARTEN = [
   {
     bild: 'muenze', titel: 'Liegegeld einstreichen',
     text: TOUCH
-      ? 'Liegt ein Boot fest, zahlt es: Tipp auf die Münze oder streich mit dem Finger über mehrere. Was liegen bleibt, holt abends der Hafenmeister, aber nicht ganz.'
-      : 'Liegt ein Boot fest, zahlt es: Klick auf die Münze oder fahr mit gedrückter Maustaste über mehrere. Was liegen bleibt, holt abends der Hafenmeister, aber nicht ganz.',
+      ? 'Liegt ein Boot fest, zahlt es: Tipp auf die Münze oder streich mit dem Finger über mehrere. Was liegen bleibt, holt abends der Hafenmeister, aber nicht ganz. Steht beim Anlegen ein Tau am Steg, tipp es an: Du nimmst die Leinen an, die Crew gibt Trinkgeld.'
+      : 'Liegt ein Boot fest, zahlt es: Klick auf die Münze oder fahr mit gedrückter Maustaste über mehrere. Was liegen bleibt, holt abends der Hafenmeister, aber nicht ganz. Steht beim Anlegen ein Tau am Steg, klick es an: Du nimmst die Leinen an, die Crew gibt Trinkgeld.',
   },
   {
     bild: 'tempo2', titel: 'Zeit',

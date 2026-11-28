@@ -109,6 +109,7 @@ export function init(game) {
   const meideRunde = (ls) => [
     ...(ls.warteplaetze?.bojen ?? []).map((b) => ({ x: b.x, z: b.z, r: 10 })),
     ...(ls.warteplaetze?.ankerplaetze ?? []).map((a) => ({ x: a.x, z: a.z, r: (a.schwoikreisM ?? 8) + 4 })),
+    ...(ls.bojenfeld ?? []).map((b) => ({ x: b.x, z: b.z, r: 12 })),   // Bojenfeld (P36)
   ];
   function seeRunde(st) {
     const ls = game.landscape;
@@ -338,7 +339,12 @@ export function init(game) {
     if (!dt) return;
     laufzeit += dt;
     if (stufe() !== stufeAktiv) aufbauen();
+    // Wer ein Boot des Hafens aufhaelt (Gast oder Dauerlieger steht seit Sekunden hinter ihm), macht
+    // sofort Platz: hinter einem stehenden Vorbeifahrer staute sich sonst die ganze Anfahrt von See
+    const haeltAuf = new Set();
+    for (const o of game.boatAnim?.boats ?? []) if (o.hinderer && (o.blockedFor ?? 0) > 3 && o.state !== 'sailing') haeltAuf.add(o.hinderer);
     for (const b of boote) {
+      if (haeltAuf.has(b.anim) && !(b.anim.ghost > 0)) { b.anim.ghost = 8; b.wartet = 45; b.treibtBis = b.treibtBis ? laufzeit : 0; }
       if (b.pauseBis && laufzeit >= b.pauseBis) { b.pauseBis = 0; pendeln(b, b.richtung); }
       if (b.treibtBis) {
         if (laufzeit < b.treibtBis) { b.anim.cfg.cruise = 0; continue; }

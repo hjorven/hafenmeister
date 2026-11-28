@@ -50,6 +50,7 @@
         <button class="s" data-v="tag">Tag</button>
         <button class="s" data-v="abend">Abend</button>
         <button class="s" data-v="nacht">Nacht</button>
+        <button class="s" id="ruhig" aria-pressed="false">Ruhiger Abend</button>
       </div>
     </section>
 
@@ -102,6 +103,7 @@
         : 'Ton ist noch aus. Irgendwo tippen oder klicken, dann startet er.';
       mark('phase', s.phase);
       mark('wetter', s.wetter);
+      document.getElementById('ruhig').setAttribute('aria-pressed', String(!!s.ruhig));
     });
     mark('phase', 'tag');
     mark('wetter', 'ruhig');
@@ -110,6 +112,8 @@
     document.querySelector('[data-group="phase"]').addEventListener('click', (e) => {
       if (e.target.dataset.v) audio.setPhase(e.target.dataset.v);
     });
+    // Ruhiger Abend (P46): wärmere Musik, nur abends und nachts hörbar
+    document.getElementById('ruhig').addEventListener('click', () => audio.setRuhig(!audio.state.ruhig));
     document.querySelector('[data-group="wetter"]').addEventListener('click', (e) => {
       if (e.target.dataset.v) audio.setWeather(e.target.dataset.v);
     });
@@ -135,7 +139,9 @@
       const b = document.createElement('button');
       b.className = 's';
       b.textContent = def.label;
-      b.addEventListener('click', () => audio.play(name, name === 'bewertung' ? { anker: 1 + Math.floor(Math.random() * 5) } : {}));
+      // Serie (P46): jeder Klick ist der nächste Schritt, der dritte ist der Akkord
+      let schritt = 0;
+      b.addEventListener('click', () => audio.play(name, name === 'bewertung' ? { anker: 1 + Math.floor(Math.random() * 5) } : name === 'serie' ? { stufe: (schritt = (schritt % 3) + 1) } : {}));
       sfx.appendChild(b);
     }
   </script>

@@ -13,6 +13,7 @@
 //   audio.horn('L');              // Schiffshorn nach Größe
 //   audio.setPhase('abend');      // 'tag' | 'abend' | 'nacht'
 //   audio.setWeather('sturm');    // 'ruhig' | 'wind' | 'sturm'
+//   audio.setFest(true);          // Festmusik (Hafenfest mit Musik, P38), tags und abends
 //   audio.setHarbor({ stufe: 3, boote: 12 });
 //   audio.setVolume('musik', 0.4);
 //   audio.toggleMute();
@@ -75,6 +76,8 @@ const TAGESZEIT = {
 
 const DUR = [0, 4, 7];
 const MOLL = [0, 3, 7];
+const DUR7 = [0, 4, 7, 11]; // großer Septakkord: weich und warm (ruhiger Abend)
+const MOLL7 = [0, 3, 7, 10];
 const PENTA_DUR = [62, 64, 66, 69, 71]; // D E Fis A H
 const PENTA_MOLL = [62, 65, 67, 69, 72]; // D F G A C
 
@@ -94,6 +97,17 @@ const MUSIK = {
   sturm: {
     e: 0.19, pad: 0.03, pluck: 0, bass: 0.13, pulse: true, melody: 0.5, scale: PENTA_MOLL,
     chords: [[62, MOLL], [70, DUR], [65, DUR], [69, DUR]],
+  },
+  // Ruhiger Abend (P46, features/stimmung.js): alles kassiert, alle versorgt. Langsamer, Septakkorde,
+  // weichere Fläche hinter einem tieferen Filter, sparsam gezupft
+  ruhig: {
+    e: 0.3, pad: 0.045, padCut: 650, pluck: 0.3, bass: 0.15, pulse: false, melody: 0.6, scale: PENTA_DUR,
+    chords: [[62, DUR7], [67, DUR7], [71, MOLL7], [69, DUR]],
+  },
+  // Hafenfest (P38, features/hafenfest.js): Kapelle auf der Bühne, schneller und zum Schunkeln
+  fest: {
+    e: 0.16, pad: 0.025, pluck: 1, bass: 0.22, pulse: true, melody: 1, scale: PENTA_DUR,
+    chords: [[62, DUR], [67, DUR], [69, DUR], [62, DUR], [67, DUR], [62, DUR], [69, DUR], [62, DUR]],
   },
 };
 
@@ -146,6 +160,15 @@ export const SOUNDS = {
   sturmwarnung: { label: 'Sturmwarnung', wet: 0.4, gap: 2 },
   regatta: { label: 'Regatta-Startschuss', wet: 0.5, gap: 1 },
   seenot: { label: 'Seenotretter läuft aus', wet: 0.3, gap: 2 },
+  serie: { label: 'Serie passgenau (schritt 1 bis 3, 3 = Akkord)', wet: 0.45, gap: 0.15 },
+  abendruhe: { label: 'Ruhiger Abend (Lichterketten an)', wet: 0.55, gap: 3 },
+  stammgast: { label: 'Neuer Stammgast', wet: 0.4, gap: 1 },
+  stufenziel: { label: 'Stufenziel erreicht', wet: 0.4, gap: 2 },
+  miau: { label: 'Hafenkatze miaut (antippen)', wet: 0.15, gap: 0.5 },
+  wuff: { label: 'Hafenhund bellt (antippen)', wet: 0.2, gap: 0.5 },
+  reiher: { label: 'Graureiher fliegt auf', wet: 0.3, gap: 0.8 },
+  rohrsaenger: { label: 'Teichrohrsänger im Schilf (Naturecke)', wet: 0.25, gap: 4 },
+  froesche: { label: 'Frösche am Abend (Naturecke)', wet: 0.3, gap: 5 },
 };
 
 // Schiffshörner: kleine Boote hoch und kurz, große tief und lang
@@ -282,6 +305,21 @@ class HafenAudio {
     this.state.phase = phase;
     if (this._mus) this._mus.pendingChange = true;
     this._emit();
+  }
+
+  /** Ruhiger Abend (P46): abends wärmere Musik, bis der nächste Tag beginnt */
+  setRuhig(an) {
+    if (!!an === !!this.state.ruhig) return;
+    this.state.ruhig = !!an;
+    if (this._mus) this._mus.pendingChange = true;
+    this._emit();
+  }
+
+  /** Hafenfest mit Musik (P38): tags und abends spielt die Festmusik */
+  setFest(an) {
+    if (!!an === !!this.state.fest) return;
+    this.state.fest = !!an;
+    if (this._mus) this._mus.pendingChange = true;
   }
 
   setWeather(wetter) {
@@ -799,7 +837,10 @@ class HafenAudio {
   }
 
   _musProg() {
-    return this.state.wetter === 'sturm' ? MUSIK.sturm : MUSIK[this.state.phase];
+    if (this.state.wetter === 'sturm') return MUSIK.sturm;
+    if (this.state.fest && this.state.phase !== 'nacht') return MUSIK.fest;
+    if (this.state.ruhig && this.state.phase !== 'tag') return MUSIK.ruhig;
+    return MUSIK[this.state.phase];
   }
 
   _musAudible() {
@@ -837,7 +878,7 @@ class HafenAudio {
 
     // Fläche: weiche, leicht verstimmte Sägezähne hinter einem Tiefpass
     const padLen = e * 6;
-    const lp = this._filter(out, 'lowpass', 900, 0.6);
+    const lp = this._filter(out, 'lowpass', p.padCut ?? 900, 0.6);
     for (const iv of quality) {
       const f = mtof(root - 12 + iv);
       const g = this._env(lp, t, 0.5, p.pad, 0.9, Math.max(0, padLen - 0.5));
@@ -930,6 +971,16 @@ class HafenAudio {
     idx = nearestIdx(bars[1][bars[1].length - 1].midi);
     bars.push(gen(6, idx, false), gen(7, idx, true));
     return bars;
+  }
+
+  /** Akkord für die Serie (P46): der, den die Musik gerade spielt, eine Lage über der Melodie; ohne Musik D-Dur. */
+  _serieAkkord() {
+    const m = this._mus;
+    const chords = m?.prog?.chords;
+    let [root, q] = chords?.length ? chords[((m.chord - 1) % chords.length + chords.length) % chords.length] : [62, DUR];
+    while (root < 74) root += 12;
+    while (root > 85) root -= 12;
+    return [root, q];
   }
 
   /** Flötenartige Stimme mit leichtem Vibrato. */
@@ -1254,6 +1305,93 @@ HafenAudio.prototype._sfx = {
     return len;
   },
 
+  miau(t, out, o) {
+    // Hafenkatze (P51): ein weiches "Miau", Tonhöhe steigt und fällt, Formant über ein Bandpassfilter
+    const f0 = (o.hoehe ?? 1) * rand(520, 600);
+    const len = rand(0.42, 0.55);
+    const g = this._env(out, t, 0.04, 0.06, len, 0.05);
+    const bp = this._filter(g, 'bandpass', 1300, 1.4);
+    const end = t + len + 0.15;
+    for (const [type, mul] of [['sawtooth', 1], ['triangle', 2]]) {
+      const osc = this._osc(bp, type, f0 * mul * 0.8, t, end);
+      osc.frequency.exponentialRampToValueAtTime(f0 * mul * 1.25, t + len * 0.35);
+      osc.frequency.exponentialRampToValueAtTime(f0 * mul * 0.7, t + len);
+    }
+    // Mund öffnet sich: Filter wandert hoch und wieder runter
+    bp.frequency.setValueAtTime(800, t);
+    bp.frequency.exponentialRampToValueAtTime(1900, t + len * 0.4);
+    bp.frequency.exponentialRampToValueAtTime(900, t + len);
+    return len + 0.2;
+  },
+
+  wuff(t, out, o) {
+    // Hafenhund (P51): zwei kurze Beller, tiefer Ton mit Rauschen
+    const n = clamp(Math.round(o.anzahl || 2), 1, 3);
+    let len = 0;
+    for (let i = 0; i < n; i++) {
+      const tt = t + i * rand(0.22, 0.3);
+      const f = rand(240, 290);
+      len = Math.max(len, tt - t + this._tone(out, { type: 'sawtooth', f: f * 1.3, t: tt, a: 0.008, d: 0.12, peak: 0.05, glide: f * 0.8, glideT: 0.12 }));
+      this._burst(out, { t: tt, a: 0.004, d: 0.1, peak: 0.08, f: 700, q: 1.2, fTo: 400 });
+    }
+    return len + 0.1;
+  },
+
+  reiher(t, out) {
+    // Graureiher (P51): heiseres "Kraak" und ein paar schwere Flügelschläge
+    const g = this._env(out, t, 0.01, 0.05, 0.3, 0.06);
+    const bp = this._filter(g, 'bandpass', 900, 2.2);
+    const end = t + 0.45;
+    for (const det of [0, 35]) {
+      const osc = this._osc(bp, 'sawtooth', 330, t, end, det);
+      osc.frequency.exponentialRampToValueAtTime(240, t + 0.35);
+    }
+    this._burst(out, { t, a: 0.005, d: 0.28, peak: 0.05, f: 1100, q: 1.5 });
+    let len = 0.45;
+    for (let i = 0; i < 4; i++) {
+      const tt = t + 0.3 + i * 0.26;
+      len = Math.max(len, tt - t + this._burst(out, { kind: 'brown', t: tt, a: 0.02, d: 0.14, peak: 0.07, ftype: 'lowpass', f: 380 }));
+    }
+    return len;
+  },
+
+  rohrsaenger(t, out) {
+    // Teichrohrsänger (P52): schwatzende, rhythmische Reihe kurzer Silben ("tiri-tiri-tschrr-tschrr")
+    let len = 0;
+    const n = 7 + Math.floor(rand(0, 5));
+    let tt = t;
+    for (let i = 0; i < n; i++) {
+      const kratzig = i % 3 === 2;
+      const f = kratzig ? rand(2400, 2900) : rand(3300, 4600);
+      if (kratzig) len = Math.max(len, tt - t + this._burst(out, { t: tt, a: 0.004, d: 0.07, peak: 0.035, f, q: 4 }));
+      else {
+        for (let k = 0; k < 2; k++) {
+          const t2 = tt + k * 0.055;
+          len = Math.max(len, t2 - t + this._tone(out, { f, t: t2, a: 0.003, d: 0.045, peak: 0.022, glide: f * rand(0.75, 1.2), glideT: 0.04 }));
+        }
+      }
+      tt += rand(0.11, 0.17);
+    }
+    return len + 0.1;
+  },
+
+  froesche(t, out) {
+    // Frösche am Abend (P52): mehrere tiefe, knarrende Rufe durcheinander
+    let len = 0;
+    for (let i = 0; i < 5; i++) {
+      const tt = t + rand(0, 1.6);
+      const f = rand(150, 260);
+      for (let k = 0; k < 3; k++) {
+        const t2 = tt + k * 0.07;
+        const g = this._env(out, t2, 0.005, 0.02, 0.05, 0.02);
+        const bp = this._filter(g, 'bandpass', f * 4, 3);
+        this._osc(bp, 'square', f, t2, t2 + 0.09);
+        len = Math.max(len, t2 - t + 0.1);
+      }
+    }
+    return len + 0.1;
+  },
+
   fernglas(t, out) {
     // Fernglas ansetzen (P26): leises Klicken und ein kurzes Surren der Scharfstellung
     this._burst(out, { t, a: 0.001, d: 0.03, peak: 0.12, f: 3200, q: 2 });
@@ -1284,6 +1422,57 @@ HafenAudio.prototype._sfx = {
       this._osc(lp, 'square', f, tt, tt + 0.5);
     }
     return 1.9 + this._sfx.horn.call(this, t + 1.9, out, { groesse: 'L', kurz: true, stoesse: 2 });
+  },
+
+  serie(t, out, o) {
+    // Serie passgenauer Zuweisungen (P46, F30): Schritt 1 Grundton, 2 Terz, 3 der ganze Akkord.
+    // Grundton aus dem Akkord, den die Musik gerade spielt, damit es zur Musik passt; er bleibt für
+    // die ganze Serie gleich, auch wenn die Musik inzwischen weitergeht.
+    const stufe = clamp(Math.round(o.stufe || 1), 1, 3);
+    if (stufe === 1 || !this._serie) this._serie = this._serieAkkord();
+    const [root, q] = this._serie;
+    const toene = [root, root + q[1], root + q[2], root + 12];
+    const glocke = (midi, tt, peak, d = 1.1) => {
+      const f = mtof(midi);
+      this._tone(out, { f, t: tt, a: 0.003, d, peak });
+      this._tone(out, { f: f * 4, t: tt, a: 0.002, d: d * 0.25, peak: peak * 0.12 });
+      this._tone(out, { type: 'triangle', f: f * 2, t: tt, a: 0.003, d: d * 0.5, peak: peak * 0.25 });
+    };
+    if (stufe === 1) { glocke(toene[0], t, 0.09); return 1.2; }
+    if (stufe === 2) { glocke(toene[0], t, 0.035, 0.6); glocke(toene[1], t + 0.07, 0.09); return 1.2; }
+    toene.forEach((m, i) => glocke(m, t + i * 0.09, 0.075, 1.4));
+    // danach klingt der ganze Akkord gemeinsam aus, eine Oktave tiefer und weich
+    for (const m of toene.slice(0, 3)) this._tone(out, { type: 'triangle', f: mtof(m - 12), t: t + 0.36, a: 0.05, d: 1.8, peak: 0.045 });
+    this._tone(out, { f: mtof(toene[3] + 12), t: t + 0.42, a: 0.002, d: 0.6, peak: 0.025 });
+    this._serie = null;
+    return 2.3;
+  },
+
+  abendruhe(t, out) {
+    // Ruhiger Abend (P46, F29): drei weiche Glockentöne nach unten, darunter ein warmer Septakkord
+    [86, 83, 78].forEach((m, i) => {
+      const f = mtof(m);
+      this._tone(out, { f, t: t + i * 0.32, a: 0.004, d: 1.6, peak: 0.06 });
+      this._tone(out, { f: f * 2.76, t: t + i * 0.32, a: 0.002, d: 0.4, peak: 0.012 });
+    });
+    for (const m of [62, 66, 69, 73]) this._tone(out, { type: 'triangle', f: mtof(m), t: t + 0.5, a: 0.4, d: 2.4, hold: 0.4, peak: 0.03 });
+    return 3.4;
+  },
+
+  stammgast(t, out) {
+    // Neuer Stammgast (L1): freundlicher Gruß, zwei Töne hoch und ein kleiner Nachschlag
+    this._tone(out, { type: 'triangle', f: mtof(74), t, a: 0.005, d: 0.25, peak: 0.1 });
+    this._tone(out, { type: 'triangle', f: mtof(81), t: t + 0.14, a: 0.005, d: 0.4, peak: 0.1 });
+    this._tone(out, { f: mtof(86), t: t + 0.32, a: 0.003, d: 0.6, peak: 0.06 });
+    return 1;
+  },
+
+  stufenziel(t, out) {
+    // Ziel der Ausbaustufe erreicht (L1): kurzes Signal, leiser als die Fanfare beim Ausbau selbst
+    [67, 71, 74].forEach((m, i) => this._tone(out, { type: 'triangle', f: mtof(m), t: t + i * 0.1, a: 0.004, d: 0.35, peak: 0.08 }));
+    this._tone(out, { type: 'triangle', f: mtof(79), t: t + 0.3, a: 0.01, d: 0.9, peak: 0.08 });
+    this._tone(out, { f: mtof(91), t: t + 0.32, a: 0.002, d: 0.5, peak: 0.025 });
+    return 1.3;
   },
 };
 

@@ -14,7 +14,8 @@
 
 import * as sim from '../sim.js';
 import { RULES } from '../data/rules.js';
-import { ANGEBOT_TEXTE } from '../data/wuensche-texte.js';
+import { ECONOMY } from '../data/economy.js';
+import { ANGEBOT_TEXTE, VERSORGUNG_TEXTE } from '../data/wuensche-texte.js';
 
 export const GAESTEBUCH = {
   maxEintraege: 20,     // so viele Bewertungen zeigt das Gästebuch (der Ruf zählt die letzten Tage, economy.js ruf.tage)
@@ -37,6 +38,10 @@ export const GRUND = {
   // Wind (P34): bei Starkwind an einem offenen Platz, großes Boot mit Wind von achtern angelegt
   unruhig:    { text: 'unruhig im Wind gelegen',    lang: 'Starkwind stand voll auf dem offenen Platz', sym: 'sturm' },
   rueckenwind: { text: 'Anleger mit Rückenwind',    lang: 'Bei Starkwind mit Wind von achtern angelegt', sym: 'sturm' },
+  // Baggern (P29): bei Niedrigwasser mit dem Kiel im Schlick gelegen
+  schlick:    { text: 'bei Niedrigwasser im Schlick', lang: 'Bei Niedrigwasser saß der Kiel im Schlick', sym: 'sturm' },
+  // Preisstufe (P35): gehobene Preise, aber nicht alles da
+  teuer:      { text: 'zu teuer für das Gebotene',  lang: 'Hohe Preise, aber nicht alles da',          sym: 'teuer' },
   warten:     { text: 'zu lange gewartet',          lang: 'Zu lange an der Boje gewartet',             sym: 'warten' },
   abends:     { text: 'abends kein Platz',          lang: 'Abends noch immer ohne Liegeplatz',         sym: 'warten' },
   weggeschickt: { text: 'weggeschickt',            lang: 'Vom Hafenmeister weggeschickt',             sym: 'warten' },
@@ -46,8 +51,8 @@ export const GRUND = {
   'weit:dusche': { text: 'weiter Weg zur Dusche',    lang: 'Weiter Weg zur Dusche',                      sym: 'dusche' },
 };
 
-// Wünsche an Angebote an Land (P19 C3): Texte aus data/wuensche-texte.js, Symbol wie der Wunsch
-for (const [k, t] of Object.entries(ANGEBOT_TEXTE)) GRUND[k] = { text: t.fehlt, lang: t.lang, sym: k };
+// Wünsche an Angebote an Land (P19 C3) und neue Wünsche (P31): Texte aus data/wuensche-texte.js, Symbol wie der Wunsch
+for (const [k, t] of Object.entries({ ...VERSORGUNG_TEXTE, ...ANGEBOT_TEXTE })) GRUND[k] ??= { text: t.fehlt, lang: t.lang, sym: k };
 
 /** Was die Note hebt. */
 export const PLUS = {
@@ -60,9 +65,15 @@ export const PLUS = {
   bonus:    'Fest im Hafen',
   windgeschuetzt: 'ruhig gelegen trotz Starkwind',
   stammPlatz: 'wieder am Lieblingsplatz',
+  preis:    'faire Preise',
+  jugend:   'Jugendtraining zugesehen',
+  havarie:  'in Not aufgenommen',
+  natur:    'Abend am Schilf',
+  spaet:    'nachts noch aufgenommen',
+  schoen:   'schöner Hafen',
 };
 
-const WUNSCH_KEYS = ['wc', 'dusche', 'essen', 'strom', 'diesel', ...Object.keys(ANGEBOT_TEXTE)];
+const WUNSCH_KEYS = [...Object.keys(VERSORGUNG_TEXTE), ...Object.keys(ANGEBOT_TEXTE)];
 
 export function buchState(state) {
   state.modules ||= {};
@@ -93,15 +104,28 @@ export function gruendeAusAbreise(e) {
     const wr = RULES.wind;
     if (p.windLage === 'offen' && wr?.exposed) gruende.push({ key: 'unruhig', n: r2(wr.exposed) });
     if (p.windRuecken && wr?.tailwind) gruende.push({ key: 'rueckenwind', n: r2(wr.tailwind) });
+    // Baggern (P29): der Abzug steckt über den Hook 'rating' in p.comfort
+    const schlick = p.aufGrund ? ECONOMY.baggern?.niedrigwasser?.anker ?? 0 : 0;
+    if (schlick) gruende.push({ key: 'schlick', n: r2(schlick) });
     if (p.wishesTotal > 0 && !missed.length && !Object.values(p.far || {}).some((n) => n > 0)) plus.push({ key: 'wuensche', wert: 0 });
     if (!p.wishes?.length) plus.push({ key: 'ohne', wert: 0 });
-    if (p.comfort > 0.001) plus.push({ key: 'komfort', wert: r2(p.comfort) });
+    // Naturecke (P52): der Bonus steckt über den Hook 'rating' in p.comfort, eigener Pluspunkt
+    const natur = p.natur ? ECONOMY.naturecke?.schuetzen?.anker ?? 0 : 0;
+    if (p.comfort + schlick - natur > 0.001) plus.push({ key: 'komfort', wert: r2(p.comfort + schlick - natur) });
+    if (natur > 0.001) plus.push({ key: 'natur', wert: r2(natur) });
     if (p.special > 0.001) plus.push({ key: 'sonder', wert: r2(p.special) });
     if (p.snug > 0.001) plus.push({ key: 'passgenau', wert: r2(p.snug) });
     if (p.byHand > 0.001) plus.push({ key: 'vonHand', wert: r2(p.byHand) });
     if (p.bonus > 0.001) plus.push({ key: 'bonus', wert: r2(p.bonus) });
     if (p.windLage === 'geschuetzt' && RULES.wind?.sheltered) plus.push({ key: 'windgeschuetzt', wert: r2(RULES.wind.sheltered) });
     if (p.stammPlatz > 0.001) plus.push({ key: 'stammPlatz', wert: r2(p.stammPlatz) });   // P25
+    // Preisstufe (P35): günstig lobt, gehoben zieht ab (mehr, wenn Wünsche fehlten)
+    if (p.preis > 0.001) plus.push({ key: 'preis', wert: r2(p.preis) });
+    else if (p.preis < -0.001) gruende.push({ key: 'teuer', n: r2(-p.preis) });
+    if (p.jugend > 0.001) plus.push({ key: 'jugend', wert: r2(p.jugend) });   // P39
+    if (p.havarie > 0.001) plus.push({ key: 'havarie', wert: r2(p.havarie) });   // P37: eingeschleppter Havarist
+    if (p.spaet > 0.001) plus.push({ key: 'spaet', wert: r2(p.spaet) });         // P53: Spätankömmling
+    if (p.schoen > 0.001) plus.push({ key: 'schoen', wert: r2(p.schoen) });   // P60: Bänke, Bäume, Laternen, Anstrich
   }
   if (e.reason === 'rebuild') gruende.push({ key: 'umbau', n: 1 });
   return { gruende, plus };
@@ -230,6 +254,7 @@ const SATZ = {
   umgelegt: ['Kaum fest, schon wieder Leinen los. Zweimal umgelegt!', 'Wir wurden hin und her geschickt wie ein Paket.'],
   unruhig: ['Der Wind stand voll auf unserem Platz, an Schlaf war nicht zu denken.', 'Die ganze Nacht Geschaukel und knarrende Leinen.', 'Draußen am Steg bei dem Wind: unruhig.'],
   rueckenwind: ['Anlegen mit dem Wind im Rücken, das war knapp.', 'Mit Rückenwind in die Box, da schwitzt der Skipper.'],
+  schlick: ['Bei dem Westwind saßen wir morgens im Schlick fest.', 'Das Wasser lief weg, und unser Kiel steckte im Modder.', 'Zu flach hier bei Niedrigwasser, das Boot lag schief.'],
   windgeschuetzt: ['Draußen pfiff es, wir lagen ganz ruhig.', 'Trotz Starkwind eine ruhige Nacht, toller Platz.'],
   warten: ['Ewig an der Boje gewartet, dann sind wir weiter.', 'Niemand hat uns einen Platz gegeben.'],
   abends: ['Abends immer noch kein Platz, wir sind weitergefahren.', 'Es wurde dunkel, und wir hingen noch an der Boje.'],
@@ -242,9 +267,14 @@ const SATZ = {
   'weit:wc': ['Bis zum Klo war es ein halber Landgang.', 'Nachts so weit zum WC laufen, nein danke.'],
   'weit:dusche': ['Nach der Dusche waren wir auf dem Rückweg schon wieder verschwitzt.', 'Die Dusche war am anderen Ende des Hafens.'],
   stamm: (n) => `Schon unser ${n}. Besuch hier.`,
+  teuer: ['Für das Geld hätten wir mehr erwartet.', 'Stolze Preise für das, was geboten wird.', 'Teuer ist es hier, und dann fehlt auch noch was.'],
+  preis: ['Faire Preise, gerne wieder.', 'Günstig und nett, was will man mehr.', 'Für das Liegegeld bekommt man hier viel.'],
+  havarie: ['Ohne euch wären wir noch da draußen. Danke für den Schlepp!', 'Hilflos vor der Einfahrt getrieben, und ihr habt uns reingeholt. Danke!', 'In Not aufgenommen, das vergessen wir nicht.'],
+  spaet: ['Spät in der Nacht noch eine Box bekommen. Danke!', 'Im Dunkeln eingelaufen, und alles hat geklappt.', 'Nachts noch so freundlich aufgenommen, das merken wir uns.'],
+  schoen: ['Schön gemacht, der Hafen. Da bleibt man gern noch einen Tag.', 'Ein richtig hübscher Hafen, da macht schon der Landgang Spaß.', 'Hübsch gemacht hier, man fühlt sich gleich wohl.'],
   stammPlatz: ['Und wieder an unserem alten Platz!', 'Unsere Box war frei, wie schön.', 'Der Hafenmeister kennt unseren Platz.'],
 };
-for (const [k, t] of Object.entries(ANGEBOT_TEXTE)) SATZ[k] = t.saetze;
+for (const [k, t] of Object.entries({ ...VERSORGUNG_TEXTE, ...ANGEBOT_TEXTE })) if (t.saetze) SATZ[k] ??= t.saetze;
 
 
 /** Ein Satz im Gästebuch, zum Beispiel "Eine warme Dusche hätte gutgetan." */
@@ -256,11 +286,17 @@ export function satz(eintrag) {
   else if (eintrag.note >= 4.5) text = wahl(SATZ.sehrGut, eintrag);
   else if (eintrag.plus?.some((p) => p.key === 'komfort') && eintrag.note >= 4) text = wahl(SATZ.komfort, eintrag);
   else if (eintrag.plus?.some((p) => p.key === 'windgeschuetzt') && eintrag.note >= 4) text = wahl(SATZ.windgeschuetzt, eintrag);
+  else if (eintrag.plus?.some((p) => p.key === 'preis') && eintrag.note >= 4) text = wahl(SATZ.preis, eintrag);
+  else if (eintrag.plus?.some((p) => p.key === 'schoen' && p.wert >= 0.15) && eintrag.note >= 4) text = wahl(SATZ.schoen, eintrag);
   else if (eintrag.note >= 4) text = wahl(SATZ.gut, eintrag);
   else if (eintrag.gruende[0] && SATZ[eintrag.gruende[0].key]) text = wahl(SATZ[eintrag.gruende[0].key], eintrag);
   else text = wahl(SATZ.mittel, eintrag);
   if ((eintrag.boot?.besuche ?? 1) > 1 && eintrag.art === 'abreise') text += ` ${SATZ.stamm(eintrag.boot.besuche)}`;
   if (eintrag.plus?.some((p) => p.key === 'stammPlatz')) text += ` ${wahl(SATZ.stammPlatz, eintrag, 3)}`;
+  // P53: Spätankömmling dankt für die Box in der Nacht, wenn sonst nichts fehlte
+  if (!haupt && eintrag.note >= 4 && eintrag.plus?.some((p) => p.key === 'spaet')) text = wahl(SATZ.spaet, eintrag, 7);
+  // P37: eingeschleppter Havarist dankt, wenn sonst nichts fehlte; sonst steht der Dank vor der Klage
+  if (eintrag.plus?.some((p) => p.key === 'havarie')) text = haupt ? `${wahl(SATZ.havarie, eintrag, 5)} ${text}` : wahl(SATZ.havarie, eintrag, 5);
   return text;
 }
 
@@ -279,7 +315,7 @@ export function erklaerung(eintrag) {
     const def = GRUND[g.key];
     if (!def) continue;
     if (WUNSCH_KEYS.includes(g.key) || g.key.startsWith('weit:')) teile.push(g.n > 1 ? `${def.text} (${g.n} Nächte)` : def.text);
-    else if (['sturm', 'stimmung', 'umgelegt', 'unruhig', 'rueckenwind'].includes(g.key)) teile.push(`${def.text} −${komma(g.n)}`);
+    else if (['sturm', 'stimmung', 'umgelegt', 'unruhig', 'rueckenwind', 'schlick', 'teuer'].includes(g.key)) teile.push(`${def.text} −${komma(g.n)}`);
     else teile.push(def.text);
   }
   for (const p of eintrag.plus || []) teile.push(p.wert ? `${PLUS[p.key]} +${komma(p.wert)}` : PLUS[p.key]);

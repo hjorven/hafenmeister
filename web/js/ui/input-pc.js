@@ -61,6 +61,7 @@ export function init(game) {
     if (game.describe) { const t = game.describe(hit); if (t) return t; }
     // Überraschende Gesten (ui/hafengesten.js): Büro und Glocke verraten, was sie können
     if (hit.type === 'building' && hit.id === 'glocke') return 'Hafenglocke: anklicken';
+    if (hit.type === 'building' && hit.id === 'hafenflagge') return 'Hafenflagge: anklicken für Name und Flagge';
     if (hit.type === 'building' && (hit.id === 'hafenmeister' || hit.id === 'hafenbuero')) {
       const name = hit.id === 'hafenbuero' ? 'Hafenbüro' : 'Hafenmeister';
       return game.hafengesten?.hornErlaubt?.() ? `${name}: anklicken für das Gästebuch, gedrückt halten für das Hafenhorn (kassiert alles)` : `${name}: anklicken für das Gästebuch`;
@@ -84,6 +85,7 @@ export function init(game) {
     ['Liegendes Boot gedrückt halten, dann ziehen', 'In eine andere freie Box umlegen (ab dem zweiten Mal kostet es Bewertung)', () => !!game.sim?.umlegbar],
     ['Doppelklick auf wartendes Boot', 'Boot fährt selbst in den besten Platz', () => true],
     ['Maustaste halten und über Münzen streichen', 'Alles in einem Zug kassieren', () => true],
+    ['Tau-Symbol am Steg anklicken', 'Leinen annehmen, die Crew gibt Trinkgeld', () => !!game.leinen],
     ['Tempo-Knöpfe unten links', 'Pause, 1x, 3x, 8x', () => true],
     ['<kbd>F</kbd>', '3x an und aus', () => true],
     ['<kbd>G</kbd>', '8x an und aus', () => !!game.oberflaeche?.tempo],

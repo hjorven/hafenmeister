@@ -244,11 +244,19 @@ export const ECONOMY = {
 
   wuensche: {
     //      ab Stufe, welche Klassen ihn haben können, Bauwerk, das ihn erfüllt
+    // durch 'platz': der Liegeplatz erfüllt ihn (eigenschaft: power = Strom, water = Wasserhahn am Steg).
+    // abNaechte: nur Gäste, die mindestens so viele Nächte bleiben, haben diesen Wunsch.
+    // Welche Bootsart welchen Wunsch haben kann, steht zusätzlich in data/boats (wishes).
     wc:     { abStufe: 1, klassen: ['S', 'M', 'L', 'XL'], durch: 'wc' },
     dusche: { abStufe: 2, klassen: ['S', 'M', 'L', 'XL'], durch: 'dusche' },
     essen:  { abStufe: 2, klassen: ['S', 'M', 'L', 'XL'], durch: 'essen' },
-    strom:  { abStufe: 3, klassen: ['M', 'L', 'XL'], durch: 'platz' },   // Platz mit Strom
+    // Neue Wünsche (P31, docs/gaestewuensche.md): je Ausbaustufe mindestens einer
+    wasser: { abStufe: 2, klassen: ['M', 'L', 'XL'], durch: 'platz', eigenschaft: 'water' },   // Wasserhahn am Steg (nachruesten.wasser)
+    strom:  { abStufe: 3, klassen: ['M', 'L', 'XL'], durch: 'platz', eigenschaft: 'power' },   // Platz mit Strom
+    wlan:   { abStufe: 3, klassen: ['M', 'L', 'XL'], durch: 'wlan' },
     diesel: { abStufe: 4, klassen: ['S', 'M', 'L', 'XL'], durch: 'diesel', nurMotor: true },
+    waesche: { abStufe: 4, klassen: ['M', 'L', 'XL'], durch: 'waesche', abNaechte: 3 },
+    absaugen: { abStufe: 5, klassen: ['M', 'L', 'XL'], durch: 'absaugen' },
   },
   // Wie viele Wünsche ein Boot hat: [min, max] je Klasse (gekappt auf verfügbare Wünsche)
   wunschAnzahl: { S: [0, 2], M: [1, 2], L: [1, 3], XL: [2, 3], XXL: [0, 0] },
@@ -271,6 +279,7 @@ export const ECONOMY = {
       eis:         { service: 'eisdiele',       abStufe: 4, klassen: ['S', 'M', 'L'] },
       werft:       { service: 'travellift',     abStufe: 4, klassen: ['L', 'XL'] },
       segelmacher: { service: 'segelmacher',    abStufe: 4, klassen: ['M', 'L', 'XL'], nurSegel: true },
+      barkasse:    { service: 'barkasse',       abStufe: 6, klassen: ['M', 'L', 'XL'] },   // P31: Hafenrundfahrt im Seehafen
     },
   },
 
@@ -536,6 +545,21 @@ export const ECONOMY = {
       { name: 'Zapfsäule',      abStufe: 4, kosten: 2700, versorgt: 30 },
       { name: 'Bootstankstelle', abStufe: 5, kosten: 6100, versorgt: 80 },
     ] },
+    // Neue Wünsche (P31): WLAN, Waschmaschine, Absaugstation für Bordtoiletten
+    // versorgt nach dem Bedarf in der Rechnung (tools/balance.mjs, höchstens rund 18 WLAN-, 17 Absaug- und
+    // 10 Wäsche-Gäste am Tag): die erste Stufe reicht für den Anfang, die zweite für den vollen Hafen.
+    wlan: { name: 'WLAN', stufen: [
+      { name: 'WLAN am Hafenbüro',           abStufe: 3, kosten: 400,  versorgt: 12 },
+      { name: 'WLAN-Antennen an den Stegen', abStufe: 4, kosten: 1200, versorgt: 40 },
+    ] },
+    waesche: { name: 'Wäscherei', stufen: [
+      { name: 'Waschmaschine und Trockner',  abStufe: 4, kosten: 600,  versorgt: 6 },
+      { name: 'Waschsalon',                  abStufe: 5, kosten: 1400, versorgt: 20 },
+    ] },
+    absaugen: { name: 'Absaugstation', stufen: [
+      { name: 'Absaugstation',               abStufe: 5, kosten: 900,  versorgt: 12 },
+      { name: 'Zweite Absaugstation',        abStufe: 6, kosten: 1800, versorgt: 30 },
+    ] },
     // Strom an den Holzstegen A und B (C, D, Kai haben ihn von Anfang an)
     strom: { name: 'Stromsäulen', stufen: [
       { name: 'Stromsäulen an Steg B', abStufe: 3, kosten: 1100, stege: ['B'] },
@@ -549,6 +573,44 @@ export const ECONOMY = {
   // kosten: Umbau zur Doppelbox, rueckbau: zurück zu zwei Boxen. Beide Boxen müssen dabei frei sein.
   doppelbox: { klassen: ['L'], abStufe: 4, kosten: 990, rueckbau: 220, maxBreite: 8 },
 
+  // ---------------------------------------------------------------- Bojenfeld (P36, F10)
+  // Muringbojen im See (data/bojenfeld.js, features/bojenfeld.js, docs/bojenfeld.md): billig gebaut,
+  // nur für Boote bis maxLaenge/maxBreite (Klassen S und M). Wünsche am Steg (Strom, Wasser) bleiben dort
+  // unerfüllt; gedacht für Gäste ohne Wünsche, die sonst keinen Platz fänden.
+  // Gäste zahlen den Anteil liegegeld vom Hafengeld; ein Bojenplatz liegt offen (Sturm, Starkwind).
+  // abschnitte: Bauabschnitte nacheinander (bojen je Abschnitt, ab Ausbaustufe, kosten).
+  // tiefe: Wassertiefe, mit der die Passregel rechnet (Tiefgang + 0,3 m); die Lage wird so gesucht, dass
+  // der ganze Schwoikreis (schwoikreisM) in jeder Stufe mindestens tiefe + tiefeReserve tief ist.
+  // abstaende: Abstand der Bojen im Raster in Planeinheiten (0,62 m), erst der weite, sonst der enge.
+  // stegAbstand, platzAbstand, korridorAbstand: Abstand zu Stegen, Liegeplätzen und dem Weg zum Seegatt
+  // (Planeinheiten); nordGrenze: höchstens so weit nach Norden (nie im Außenhafen oder an der Großschiffspier).
+  bojenfeld: {
+    abStufe: 2,
+    abschnitte: [
+      { bojen: 6, abStufe: 2, kosten: 240 },
+      { bojen: 6, abStufe: 4, kosten: 900 },
+    ],
+    klasse: 'M', klassen: ['S', 'M'], maxLaenge: 9, maxBreite: 3.4,
+    tiefe: 1.6, tiefeReserve: 0.2, schwoikreisM: 10,
+    liegegeld: 0.6,
+    abstand: 22, abstaende: [22, 19],
+    stegAbstand: 30, platzAbstand: 24, korridorAbstand: 14, nordGrenze: 205,
+    // Findet sich so kein Feld (enger See, Schären), nacheinander mit diesen Werten statt der obigen
+    lockern: [
+      { stegAbstand: 24, platzAbstand: 20, korridorAbstand: 8, schwoikreisM: 8 },
+      { stegAbstand: 20, platzAbstand: 16, korridorAbstand: 4, schwoikreisM: 7, abstaende: [19, 17], tiefeReserve: 0.1 },
+    ],
+  },
+
+  // ---------------------------------------------------------------- Leinen annehmen (P48)
+  // Logik in web/js/features/leinen.js, Beschreibung in docs/leinen.md. Fährt ein Gast an seinen Platz am Steg
+  // oder Kai, steht dort ein Leinen-Symbol. Wer es antippt, nimmt die Leinen an, die Crew gibt
+  // trinkgeld (Euro je Klasse). Kein Abzug ohne Hilfe, die Crew macht dann selbst fest.
+  // abstandM: ab so vielen Metern vor dem Platz steht das Symbol; gleichzeitig: höchstens so viele
+  // Symbole zugleich; warteSek: so lange (echte Sekunden) hält die Crew die erste Leine bereit, bis
+  // Tempo warteBisTempo (bei 8x wartet niemand, und es kommen keine neuen Symbole).
+  leinen: { trinkgeld: { S: 2, M: 3, L: 6, XL: 12, XXL: 20 }, abstandM: 60, gleichzeitig: 2, warteSek: 1.4, warteBisTempo: 3 },
+
   // ---------------------------------------------------------------- Stege nachrüsten (P30)
   // Logik in web/js/features/nachruesten.js, Beschreibung in docs/nachruesten.md. Je Steg einmal.
   // kosten = grund + jePlatz[Klasse] für jeden betroffenen Gastplatz, der am Steg gerade liegt (auf 10 €
@@ -558,7 +620,43 @@ export const ECONOMY = {
     // Wie ein Schwimmsteg mit Fingern (platzarten.finger.rufBonus)
     finger: { name: 'Fingerstege', abStufe: 3, grund: 400, jePlatz: { S: 90, M: 140, L: 200 }, anker: 0.5, nurArt: 'box' },
     licht:  { name: 'Steglaternen', abStufe: 2, grund: 150, jePlatz: { S: 20, M: 25, L: 30, XL: 40 }, anker: 0.2 },
+    // P31: Wasserhähne erfüllen den Wunsch Frischwasser (wuensche.wasser) für alle Plätze des Stegs
+    wasser: { name: 'Wasserhähne', abStufe: 2, grund: 90, jePlatz: { S: 10, M: 15, L: 20, XL: 30 }, anker: 0, wunsch: 'wasser' },
   },
+
+  // ---------------------------------------------------------------- Hafen verschönern (P60, D8)
+  // Logik in web/js/features/verschoenern.js, Beschreibung in docs/verschoenern.md. Im Baumenü, Reiter "Deko".
+  // Jede Art wird in Abschnitten gebaut (stueck je Abschnitt, ab Ausbaustufe, kosten). Die Stücke suchen
+  // sich selbst einen Platz an Land (Bänke am Wasser, Laternen und Bäume an den Wegen, Kübel bei den Häusern).
+  // anker: so viel besser bewertet jeder Gast den Hafen je gebautem Abschnitt (alle Arten zusammen).
+  // anstrich: Hafenhäuser in einer Farbe streichen, einmal je Saison (kosten je Ausbaustufe 1 bis 6);
+  // der erste Anstrich hebt die Bewertung um anker, ein neuer Anstrich ändert nur die Farbe.
+  verschoenern: {
+    anker: 0.03,
+    arten: {
+      baenke:   { name: 'Bänke am Wasser', abschnitte: [{ stueck: 2, abStufe: 1, kosten: 40 }, { stueck: 3, abStufe: 3, kosten: 650 }, { stueck: 3, abStufe: 5, kosten: 3400 }] },
+      kuebel:   { name: 'Blumenkübel', abschnitte: [{ stueck: 3, abStufe: 1, kosten: 30 }, { stueck: 4, abStufe: 3, kosten: 480 }, { stueck: 4, abStufe: 5, kosten: 2700 }] },
+      baeume:   { name: 'Bäume', abschnitte: [{ stueck: 3, abStufe: 2, kosten: 180 }, { stueck: 4, abStufe: 4, kosten: 1600 }, { stueck: 4, abStufe: 6, kosten: 4800 }] },
+      laternen: { name: 'Laternen am Weg', abschnitte: [{ stueck: 3, abStufe: 2, kosten: 240 }, { stueck: 4, abStufe: 4, kosten: 1900 }, { stueck: 4, abStufe: 6, kosten: 5200 }] },
+    },
+    // Bäume wachsen nach dem Pflanzen so viele Spieltage, bis sie ausgewachsen sind
+    baumWachsTage: 3,
+    anstrich: { abStufe: 2, anker: 0.04, kosten: [60, 90, 600, 1500, 3000, 4500] },
+  },
+
+  // ---------------------------------------------------------------- Baggern (P29)
+  // Logik in web/js/features/baggern.js, Regel in sim.js (syncDredge), Beschreibung in docs/baggern.md.
+  // Je Steg einmal: seine Gastplätze (Platzarten arten) werden mindestens ziel[Klasse] Meter tief. Ein
+  // Boot passt, wenn das Wasser 0,3 m tiefer ist als sein Tiefgang (passregel), also nach dem Baggern an
+  // M-Plätzen bis 1,7 m Tiefgang. kosten = grund + jeMeter[Klasse] für jeden Meter, den ein Gastplatz
+  // tiefer wird (auf 10 € gerundet). Plätze, die später an diesem Steg dazukommen, sind gleich mit tief.
+  // Angeboten wird nur, wo danach eine Bootsart der Stufe passt, die es vorher nicht tat.
+  // niedrigwasser: Starker Wind (ab ab, Sturm zählt als 1) aus diesen Richtungen senkt den Pegel um tiefe[0]
+  // bis tiefe[1] Meter (je stärker, desto mehr). Dann passt ein Boot nur, wo auch heute 0,3 m unter dem Kiel
+  // bleiben; wer schon liegt und den Grund berührt, bewertet um anker schlechter. Von abStufe bis bisStufe, nicht im Winter (im Seehafen
+  // hält die Hafenverwaltung die Tiefe, dort hilft Baggern auch nicht mehr).
+  baggern: { abStufe: 2, ziel: { S: 1.2, M: 2.0, L: 2.5 }, arten: ['box', 'stirn', 'finger'], grund: 160, jeMeter: { S: 80, M: 110, L: 150 },
+    niedrigwasser: { abStufe: 2, bisStufe: 5, richtungen: ['west', 'suedwest', 'nordwest'], ab: 0.55, tiefe: [0.3, 0.6], anker: 0.3 } },
 
   // ---------------------------------------------------------------- Kassieren
   // ---------------------------------------------------------------- Hafenbüro
@@ -608,6 +706,26 @@ export const ECONOMY = {
   //   ruf          so viele Anker mehr in der Bewertung des Gastes
   funkAnmeldung: { fruehestens: 0.35, zweiAnteil: 0.4, bonusAnteil: 0.5, ruf: 0.25 },
 
+  // ---------------------------------------------------------------- Preisstufe (P35, docs/preisstufe.md)
+  // Am Hafenbüro legt der Spieler einmal je Saison die Preisliste fest: günstig, normal oder gehoben.
+  // Frei ab Hafenbüro-Stufe abBuero (1 = "Hafenmeister mit Funk"). Im Winter gilt die Wahl für die
+  // kommende Saison. Am Tag der Wahl darf er noch umentscheiden, danach erst wieder in der nächsten Saison.
+  //   liegegeld  Faktor auf das Liegegeld (wie priceFactor der Ereignisse)
+  //   ankuenfte  Faktor auf die Ankünfte des Tages
+  //   klassen    Faktor je Bootsklasse (günstig lockt kleine Boote, gehoben große Yachten)
+  //   ruf        Anker auf jede Bewertung (faire Preise loben die Gäste, hohe merken sie)
+  //   anspruch   Anker weniger mal Anteil der unerfüllten Wünsche (wer viel zahlt, erwartet viel);
+  //              negativ: Nachsicht, bei günstigen Preisen sehen Gäste fehlende Wünsche eher nach
+  preisstufe: {
+    abBuero: 1,
+    start: 'normal',
+    stufen: {
+      guenstig: { liegegeld: 0.9, ankuenfte: 1.2, klassen: { S: 1.15 }, ruf: 0.25, anspruch: -0.5 },
+      normal:   { liegegeld: 1, ankuenfte: 1, ruf: 0, anspruch: 0 },
+      gehoben:  { liegegeld: 1.3, ankuenfte: 0.85, klassen: { S: 0.8, L: 1.2 }, ruf: -0.25, anspruch: 1 },
+    },
+  },
+
   // ---------------------------------------------------------------- Flottillen (P32, docs/flottillen.md)
   // Drei bis fünf Boote einer Art (Feld group in den Bootsdaten) kommen zusammen im Konvoi und wollen am
   // selben Steg liegen. Liegen alle an einem Steg, gibt jede Crew zusammen Anker mehr, wird die Gruppe
@@ -623,6 +741,51 @@ export const ECONOMY = {
     abstand: 2.5,
     zusammen: 0.5,
     getrennt: 0.5,
+  },
+
+  // ---------------------------------------------------------------- Havaristen (P37, docs/havarie.md)
+  // Ein Boot mit Schaden (Motor, Ruder, Leine in der Schraube, Mast) treibt vor der Einfahrt. Der Spieler gibt
+  // ihm eine Box, ein Helfer (Fischer, Arbeitsboot oder das Rettungsboot der Seenotretter-Station) schleppt es
+  // hinein. Es zahlt Liegegeld und Schlepplohn, bewertet besser und wird gleich Stammgast; mit Werft bleibt es
+  // zur Reparatur länger (Dienst der Werft). Auswahl aus Seed und Tag, verbraucht keinen Spielzufall.
+  //   anteil      Anteil der Tage mit einem Havaristen je Hafenstufe (ab abStufe)
+  //   pause       so viele Tage mindestens von einem Havaristen zum nächsten
+  //   fruehestens, spaetestens  wann er auftaucht (Tagesanteil)
+  //   frist       so viele Sekunden steht die Meldung sichtbar, dann holt ihn ein fremder Helfer
+  //   anker       Anker mehr auf seine Bewertung (in Not aufgenommen)
+  //   schlepplohn Betrag je Klasse, den er für den Schlepp zahlt (Tagesabschluss: Sonstiges)
+  havarie: {
+    abStufe: 2,
+    anteil: { 2: 0.1, 3: 0.12, 4: 0.12, 5: 0.12, 6: 0.12 },
+    pause: 3,
+    fruehestens: 0.12, spaetestens: 0.55,
+    frist: 45,
+    anker: 1,
+    schlepplohn: { S: 30, M: 60, L: 90 },
+  },
+
+  // ---------------------------------------------------------------- Spätankömmling (P53, docs/spaetankoemmling.md)
+  // An manchen Saisonabenden kommt der letzte Übernachter des Tages erst nach Sonnenuntergang: Er läuft
+  // mit Positionslichtern und Taschenlampe ein. Es kommt kein Boot mehr als sonst (das Boot ist eines
+  // der Boote des Tages, nur später), Auswahl aus Seed und Tag, verbraucht keinen Spielzufall.
+  //   abTag       frühestens an diesem Spieltag (Einstieg und erste Tage bleiben ruhig)
+  //   anteil      Anteil der Saisonabende, an denen einer kommen kann; es kommt nur, wenn das letzte Boot
+  //               des Tages ein passender Übernachter ist (so etwa jeder dritte Abend)
+  //   ankunft     [von, bis] Sekunden nach Beginn des Abends, wann er draußen auftaucht
+  //   arten       nur Boote mit Kajüte und Lichtern (kein Ruderboot, Tretboot oder Jolle in der Nacht, kein
+  //               großes Schiff; in Stufe 1 gibt es deshalb noch keinen Spätankömmling)
+  //   rest        so viele Sekunden vor dem Morgen hält die Nacht an (etwa 23 Uhr), solange er
+  //               noch unterwegs ist und eine passende Box frei ist
+  //   haltMax     höchstens so viele Sekunden Spielzeit hält die Nacht an
+  //   anker       Anker mehr auf seine Bewertung, wenn er noch in der Nacht eine Box bekommt
+  spaetankoemmling: {
+    abTag: 3,
+    anteil: 0.5,
+    ankunft: [1, 4],
+    arten: ['segelyacht', 'motorboot', 'motoryacht', 'mehrrumpf'],
+    rest: 4,
+    haltMax: 90,
+    anker: 0.25,
   },
 
   // ---------------------------------------------------------------- Services
@@ -701,11 +864,12 @@ export const ECONOMY = {
     ] },
     segelclub: { abStufe: 3, stufen: [   // Segelclub
       // Segelclub
-      { kosten: 2200, wirkung: { proTag: 20, ruf: 0.08, gaeste: { S: 1.2 }, freischalten: ['regatta'] } },
+      // jugend: Boote der Jugendgruppe (P39, gleich optis + jollen in ECONOMY.jugendtraining.gruppe), braucht die Slipanlage
+      { kosten: 2200, wirkung: { proTag: 20, ruf: 0.08, gaeste: { S: 1.2 }, freischalten: ['regatta'], jugend: 5 } },
       // Segelschule
-      { kosten: 6500, abStufe: 4, wirkung: { proTag: 120, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.12, gaeste: { S: 1.3, M: 1.05 }, freischalten: ['regatta'] } },
+      { kosten: 6500, abStufe: 4, wirkung: { proTag: 120, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.12, gaeste: { S: 1.3, M: 1.05 }, freischalten: ['regatta'], jugend: 8 } },
       // Regattaverein
-      { kosten: 6800, abStufe: 4, ruf: 3.8, wirkung: { proTag: 150, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.16, gaeste: { S: 1.15, M: 1.1, L: 1.05 }, freischalten: ['regatta'], regatta: 1.3 } },
+      { kosten: 6800, abStufe: 4, ruf: 3.8, wirkung: { proTag: 150, wetter: { regen: 0.6, sturm: 0 }, ruf: 0.16, gaeste: { S: 1.15, M: 1.1, L: 1.05 }, freischalten: ['regatta'], regatta: 1.3, jugend: 11 } },
     ] },
     mastenkran: { abStufe: 3, stufen: [   // Mastenkran
       // Mastenkran
@@ -817,10 +981,28 @@ export const ECONOMY = {
                  // Vorbereiten (events/vorbereiten.js): so viele Plätze je Stufe für Segler freihalten,
                  // jedes Segelboot darauf zahlt einmal Startgeld je Klasse (Klassen ohne Betrag nehmen nicht teil)
                  vorbereiten: { plaetze: { 3: 3, 4: 4, 5: 5, 6: 6 }, startgeld: { S: 8, M: 15, L: 25 } } },
-    hafenfest: { abStufe: 4, alleTage: 11, dauer: 1, vorrang: 4, saison: [5, 13],
-                 // Traditionssegler (XL) kommen erst ab Stufe 5, vorher nur mehr Boote und Besucher
-                 wirkung: { arrivalFactor: 1.3, kindFactor: { traditionssegler: 6 }, sizeFactor: { XL: 2 },
-                   visitorFactor: 2, serviceIncomeFactor: 1.5, ratingBonus: 0.25 } },
+    // Hafenfest (P38, F12): kommt nicht von selbst (selbst), der Spieler setzt es einmal je Saison an
+    // (features/hafenfest.js). saison: erlaubte Saisontage. Traditionssegler (XL) kommen erst ab Stufe 5.
+    hafenfest: { abStufe: 3, selbst: true, alleTage: 18, dauer: 1, vorrang: 4, saison: [3, 15],
+                 wirkung: { arrivalFactor: 1.5, kindFactor: { traditionssegler: 6 }, sizeFactor: { XL: 2 },
+                   visitorFactor: 1.6, serviceIncomeFactor: 1.3, ratingBonus: 0.1 },
+                 menschen: { ort: 1.5, abends: { ort: 1.6 } },
+                 // eigen: vorlauf = frühestens so viele Tage nach heute. kosten je Ausbaustufe 1 bis 6, beim
+                 // Ansetzen bezahlt (Tagesabschluss: Ausgaben "Hafenfest"); absagen bis zum Vorabend gibt
+                 // erstattung (Anteil) zurück. Teile wirken zusätzlich zur Wirkung oben: Faktoren
+                 // multiplizieren sich, ratingBonus und extraNights zählen dazu. menschen: mehr Leute an Land.
+                 // standgeld: Markt bringt abends Geld je Ausbaustufe (Einnahmen: Sonstiges, "hafenfest").
+                 eigen: {
+                   vorlauf: 2, erstattung: 0.5,
+                   kosten: [0, 0, 150, 350, 600, 900],
+                   teile: {
+                     schmuck:   { kosten: [0, 0, 80, 180, 320, 480], wirkung: { ratingBonus: 0.25 } },
+                     musik:     { kosten: [0, 0, 120, 260, 450, 650], wirkung: { visitorFactor: 1.5 }, menschen: 1.4 },
+                     markt:     { kosten: [0, 0, 100, 220, 380, 560], standgeld: [0, 0, 160, 340, 560, 820],
+                                  wirkung: { serviceIncomeFactor: 1.3 } },
+                     feuerwerk: { kosten: [0, 0, 180, 380, 650, 950], wirkung: { extraNights: 1 } },
+                   },
+                 } },
     // ---- Neue Ereignisse (P24, F17) und Bindung an Bauten (G7) ----------------------------------
     // menschen: mehr Spaziergänger (ort) und Badegäste (strand) im Bild (render/people.js), abends: wer bleibt.
     // bauten: gebaute Services machen das Ereignis größer. Je Bau und Ereignistag abends Geld (proTag je
@@ -884,8 +1066,75 @@ export const ECONOMY = {
     werbung:  { kosten: [20, 80, 220, 580, 1200, 1900], faktor: 1.25, bisTag: 4 },
     // Sanitär winterfest machen: Gäste mit Wunsch Toilette oder Dusche bewerten um bonus Anker besser
     sanitaer: { kosten: [20, 70, 200, 500, 990, 1600], bonus: 0.2, wuensche: ['wc', 'dusche'] },
-    // Hafenbecken ausbaggern: große Boote kommen öfter (Faktor je Klasse), ab Stufe 3
+    // Fahrrinne ausbaggern: große Boote kommen öfter (Faktor je Klasse), ab Stufe 3. Nicht verwechseln mit
+    // dem Ausbaggern einzelner Stege (baggern, P29), das Plätze tiefer macht
     baggern:  { abStufe: 3, kosten: [0, 0, 400, 990, 1900, 3100], faktor: 1.25, klassen: ['L', 'XL'] },
+  },
+
+  // ---------------------------------------------------------------- Seltene Besucher (P40, F16)
+  // Selten läuft ein besonderes Schiff ein und will einen Ehrenplatz (längsseits am Stegkopf oder am
+  // Kai), dazu schwimmen manchmal Schwäne oder ein Schweinswal durchs Bild. Alles ist Fotomotiv für das
+  // Logbuch. Logik in web/js/features/besucher-regeln.js, Beschreibung in docs/besucher.md.
+  // Zufall aus Seed und Tag (kein Spielzufall): Zeitraffer und Rechnung bleiben gleich.
+  seltenerBesuch: {
+    // Anteil der Saisontage mit einem besonderen Schiff je Stufe (nie am ersten Tag, nie im Winter)
+    anteil: { 1: 0, 2: 0.1, 3: 0.12, 4: 0.12, 5: 0.12, 6: 0.12 },
+    pause: 3,               // mindestens so viele Tage zwischen zwei Schiffen
+    neuGewicht: 4,          // ein Schiff, das noch nie im Hafen war, kommt so viel öfter
+    ankunft: [0.3, 0.7],    // Ankunft im Tag (Anteil der Tageslänge), lieber nachmittags
+    // Schiffe: ab Stufe, Nächte, Wünsche (ehrenplatz = Stirnplatz am Stegkopf oder Kai; die anderen nur,
+    // wenn die Stufe sie kennt), Gewicht beim Auswählen, Leute an Bord, die zum Schauen kommen (Tagesgäste)
+    schiffe: {
+      weltumsegler:     { abStufe: 2, naechte: 3, wuensche: ['ehrenplatz', 'wasser', 'dusche', 'waesche'], gewicht: 1, tagesgaeste: 0 },
+      museumsschiff:    { abStufe: 3, naechte: 2, wuensche: ['ehrenplatz', 'wasser'], gewicht: 1, tagesgaeste: 12 },
+      forschungsschiff: { abStufe: 4, naechte: 2, wuensche: ['ehrenplatz', 'strom', 'wlan'], gewicht: 1, tagesgaeste: 0 },
+      koenigsyacht:     { abStufe: 5, naechte: 1, wuensche: ['ehrenplatz', 'strom', 'wasser', 'essen'], gewicht: 0.7, tagesgaeste: 0 },
+    },
+    // Schaulustige: Liegt das Schiff am Ehrenplatz, kommen Leute aus dem Ort schauen und kaufen ein.
+    // geld je Abend und Stufe 1 bis 6 (Quelle sonstiges), leute = Figuren am Platz (nur Bild).
+    zuschauer: { geld: [0, 30, 60, 110, 180, 260], leute: 10, faktor: { koenigsyacht: 2, museumsschiff: 1.5 } },   // faktor: so viel mehr Schaulustige
+    // Tiere als Fotomotiv: ab Stufe, Anteil der Tage, erlaubte Saisontage, Uhrzeit (Anteil des Tages), Dauer in Spielsekunden
+    tiere: {
+      schwaene:    { abStufe: 1, anteil: 0.15, saison: [2, 13], zeit: [0.1, 0.55], dauer: 160 },
+      schweinswal: { abStufe: 3, anteil: 0.12, saison: [1, 16], zeit: [0.1, 0.6], dauer: 100 },
+    },
+    // Foto für das Logbuch: das Motiv muss im Bild sein (Mitte des Bildes, Rand frei) und groß genug
+    foto: { rand: 0.08, mindestGroesse: 0.06 },
+  },
+
+  // ---------------------------------------------------------------- Jugendtraining (P39, F13)
+  // Mit Segelclub und Slipanlage segeln an festen Tagen Optimisten (ab der Segelschule auch Jollen) als
+  // Gruppe aus dem Hafen, trainieren draußen und kommen zurück. Das Trainerboot braucht für den Tag eine
+  // Box, die der Spieler vergibt. Logik features/jugendtraining.js, Beschreibung docs/jugendtraining.md.
+  jugendtraining: {
+    braucht: { segelclub: 1, slip: 1 },   // gebaute Stufe je Service
+    alle: 4,             // jeden 4. Saisontag ...
+    ersterTag: 3,        // ... ab dem 3. (Saisontag 3, 7, 11, 15, 19, 23, 27)
+    beginn: 0.25,        // Tagesanteil: die Gruppe geht am Slip ins Wasser (das Bild holt sie bis 0,82 zurück)
+    dauer: 0.4,          // so lange ist sie draußen, wenn niemand zusieht (Regeln ohne Bild)
+    notfall: 0.65,       // mit Bild: so lange nach dem Beginn zählt sie spätestens als zurück (falls das Bild hängt)
+    // Trainerboot: Festrumpf-Schlauchboot (data/boats/s.js S3-3)
+    trainerboot: { modell: 'S3-3', laenge: 4.8, breite: 2.0, tiefgang: 0.4 },
+    ruf: 0.2,            // Anker für jeden Gast, der beim Zurückkommen im Hafen liegt
+    // je Ausbau des Segelclubs: Gruppe und was der Verein für die Box zahlt (am Tag des Trainings)
+    gruppe: [
+      { optis: 5, jollen: 0, beitrag: 15, eltern: 4 },   // Segelclub
+      { optis: 6, jollen: 2, beitrag: 25, eltern: 6 },   // Segelschule
+      { optis: 8, jollen: 3, beitrag: 40, eltern: 8 },   // Regattaverein
+    ],
+  },
+
+  // ---------------------------------------------------------------- Naturecke am Schilf (P52, F39)
+  // Neben dem Hafen wächst ein Schilfgürtel (Lage: render/landschaft/naturecke-lage.js). Ab abStufe entscheidet
+  // der Spieler einmal und endgültig (Baumenü, Reiter Hafen): schützen oder bebauen. Logik in
+  // features/naturecke-regeln.js, Beschreibung docs/naturecke.md.
+  // schuetzen: Bohlenweg mit Beobachtungshütte. Jeder Gast, der einen Abend im Hafen lag, bewertet um anker besser.
+  // bebauen: Ufer aufschütten, Park- und Trailerplatz. Jeden Abend in der Saison grund[Stufe] plus jeGast für
+  // jedes Gastboot, das an diesem Abend im Hafen liegt (Autos und Trailer der Crews).
+  naturecke: {
+    abStufe: 2,
+    schuetzen: { kosten: 300, anker: 0.1 },
+    bebauen: { kosten: 900, grund: [0, 0, 20, 50, 90, 140, 200], jeGast: 2 },
   },
 
   // ---------------------------------------------------------------- Endlosspiel (P16)

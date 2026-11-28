@@ -33,6 +33,7 @@ const REITER = [
   { id: 'versorgung', name: 'Versorgung' },
   { id: 'angebot', name: 'Angebote' },
   { id: 'hafen', name: 'Hafen' },
+  { id: 'deko', name: 'Deko' },   // P60: Hafen verschönern (features/verschoenern.js)
 ];
 function el(tag, attrs = {}, ...kinder) {
   const e = document.createElement(tag);
@@ -158,6 +159,58 @@ export function init(game) {
       breite: Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs), 20), plaetze: ids };
   }
 
+  // Eintrag im Reiter "Deko" (P60, features/verschoenern.js, docs/verschoenern.md)
+  const DEKO_TEXT = {
+    baenke: ['Bänke am Wasser', 'Mehr Bänke am Wasser', 'Leute aus dem Ort und Crews setzen sich darauf und schauen aufs Wasser.'],
+    kuebel: ['Blumenkübel', 'Mehr Blumenkübel', 'Bunte Blumen an den Wegen und Häusern, im Winter mit Tannengrün.'],
+    baeume: ['Bäume', 'Mehr Bäume', 'Linden an den Wegen. Sie wachsen in ein paar Tagen zu voller Größe, das Laub wechselt mit der Jahreszeit.'],
+    laternen: ['Laternen am Weg', 'Mehr Laternen am Weg', 'Abends und nachts warmes Licht an Land, wo die Leute gehen.'],
+  };
+  function dekoEintrag(a) {
+    const V = game.verschoenern;
+    const ankerText = (x) => String(Math.round(x * 100) / 100).replace('.', ',');
+    const gesamt = ankerText(V.bonus?.() ?? 0);
+    if (a.art === 'anstrich') {
+      const farbe = V.farben.find((f) => f.id === V.wahl());
+      const jetzt = V.farben.find((f) => f.id === a.farbe);
+      return {
+        key: 'deko:anstrich', art: 'deko', id: 'anstrich', name: a.erster ? 'Hafenhäuser streichen' : 'Hafenhäuser neu streichen', kosten: a.kosten,
+        gesperrt: a.gesperrt, ohneSchild: true, keinRat: !a.erster,
+        kurz: farbe?.name ?? '',
+        auswahl: { titel: 'Farbe', optionen: V.farben, wert: () => V.wahl(), setze: (id) => V.wahl(id) },
+        nutzen: [
+          a.erster
+            ? `Alle Hafenhäuser bekommen einen frischen Anstrich in ${farbe?.name ?? 'der gewählten Farbe'}. Gäste bewerten den Hafen um ${ankerText(a.anker)} Anker besser.`
+            : `Die Hafenhäuser sind ${jetzt?.name ?? 'gestrichen'}. Ein neuer Anstrich ändert nur die Farbe, einmal je Saison.`,
+          'Häuser, die später dazukommen, bekommen die Farbe gleich mit.',
+        ],
+        fertigTitel: 'Frisch gestrichen',
+        fertigText: `Die Hafenhäuser leuchten jetzt in ${farbe?.name ?? 'neuer Farbe'}.`,
+        bedarf: () => null,
+        ort: () => V.ort('anstrich'),
+        geist: () => V.geist('anstrich'),
+        kaufen: () => V.kaufen('anstrich', V.wahl()),
+      };
+    }
+    const t = DEKO_TEXT[a.art] ?? [a.art, a.art, ''];
+    const [ein, mehr] = V.worte?.[a.art] ?? [a.art, a.art];
+    return {
+      key: `deko:${a.art}`, art: 'deko', id: a.art, name: a.erster ? t[0] : t[1], kosten: a.kosten,
+      gesperrt: a.gesperrt, ohneSchild: true, hebtNote: true,
+      kurz: `+${a.stueck} ${a.stueck === 1 ? ein : mehr}`,
+      nutzen: [
+        `${a.stueck} ${a.stueck === 1 ? ein : mehr}. ${t[2]}`,
+        `Gäste bewerten den Hafen um ${ankerText(a.anker)} Anker besser${gesamt !== '0' ? `, mit allen Verschönerungen zusammen dann um ${ankerText((V.bonus?.() ?? 0) + a.anker)}` : ''}.`,
+      ],
+      fertigTitel: a.art === 'baeume' ? 'Bäume gepflanzt' : a.art === 'kuebel' ? 'Blumenkübel stehen' : a.art === 'baenke' ? 'Bänke stehen' : 'Laternen stehen',
+      fertigText: a.art === 'baeume' ? 'Die jungen Bäume wachsen in den nächsten Tagen.' : a.art === 'laternen' ? 'Am Abend gehen sie an.' : a.art === 'baenke' ? 'Bald setzt sich jemand.' : 'Die Gäste freut es.',
+      bedarf: () => null,
+      ort: () => V.ort(a.art),
+      geist: () => V.geist(a.art),
+      kaufen: () => V.kaufen(a.art),
+    };
+  }
+
   function eintraege() {
     const sim = game.sim;
     const st = sim?.state;
@@ -197,11 +250,16 @@ export function init(game) {
       const def = ECONOMY.nachruesten?.[a.art] ?? {};
       const anker = num1(a.anker);
       const stegKurz = a.name.slice(a.name.indexOf(' an ') + 4);
+      // Wasserhähne (P31): wirken über den Wunsch Frischwasser, nicht über Anker
+      const wunsch = def.wunsch ?? null;
       out.push({
         key: `nachruesten:${a.art}:${a.steg}`, art: 'steg', nachruesten: a.art, steg: a.steg, id: `${a.art}-${a.steg}`, name: a.name, kosten: a.kosten,
-        gesperrt: a.gesperrt, ohneSchild: true, hebtNote: true,
-        kurz: `+${anker} Anker`,
-        nutzen: a.art === 'finger'
+        gesperrt: a.gesperrt, ohneSchild: true, hebtNote: !wunsch, wunsch,
+        kurz: wunsch ? `+${WUNSCH_KURZ[wunsch] ?? wunsch}` : `+${anker} Anker`,
+        nutzen: wunsch
+          ? [`Gäste an ${stegKurz} mit dem Wunsch ${WUNSCH_KURZ[wunsch] ?? wunsch} zapfen es direkt am Platz: ${Math.round((ECONOMY.wunschBonus ?? 0.25) * 100)} % mehr Hafengeld und bessere Bewertungen.`,
+            `${Math.ceil(a.plaetze.length / 2) === 1 ? 'Eine Zapfstelle' : `${Math.ceil(a.plaetze.length / 2)} Zapfstellen`} für ${a.plaetze.length === 1 ? 'einen Platz' : `${a.plaetze.length} Plätze`}, neue Plätze an diesem Steg gleich mit.`]
+          : a.art === 'finger'
           ? [`Gäste an ${stegKurz} bewerten um ${anker} Anker besser: Sie steigen am Fingersteg bequem aus.`,
             `${a.plaetze.length === 1 ? 'Eine Box bekommt' : `${a.plaetze.length} Boxen bekommen`} einen Fingersteg, neue Boxen an diesem Steg gleich mit.`]
           : [`Gäste an ${stegKurz} bewerten um ${anker} Anker besser: Abends ist der Steg hell.`,
@@ -209,11 +267,45 @@ export function init(game) {
         ort: () => plaetzeOrt(a.plaetze),
         geist: () => game.nachruesten?.geist?.(a.art, a.steg),
         bedarf: () => {
-          const n = game.sim.mooredBoats().filter((b) => !b.stationed && game.sim.ctx.berthById[b.berthId]?.jetty === a.steg).length;
+          const hier = game.sim.mooredBoats().filter((b) => !b.stationed && game.sim.ctx.berthById[b.berthId]?.jetty === a.steg);
+          if (wunsch) {
+            const w = hier.filter((b) => b.wishes?.includes(wunsch)).length;
+            const offen = bedarf().offen?.[wunsch] ?? 0;
+            if (w) return `Gerade ${w === 1 ? 'liegt ein Gast' : `liegen ${w} Gäste`} an ${stegKurz}, ${w === 1 ? 'der sich' : 'die sich'} ${WUNSCH[wunsch]} ${w === 1 ? 'wünscht' : 'wünschen'}.`;
+            return offen ? `Zuletzt ${offen === 1 ? 'wollte 1 Gast' : `wollten ${offen} Gäste`} ${WUNSCH[wunsch]} und ${offen === 1 ? 'bekam' : 'bekamen'} es nicht.` : null;
+          }
+          const n = hier.length;
           return n ? `Gerade ${n === 1 ? 'liegt ein Gast' : `liegen ${n} Gäste`} an ${stegKurz}.` : null;
         },
         kaufen: () => game.nachruesten.kaufen(a.art, a.steg),
         stufeNeu: def.abStufe,
+      });
+    }
+
+    // Stege ausbaggern (P29): tieferes Wasser fuer Boote mit mehr Tiefgang
+    const liste = (w) => (w.length <= 1 ? w.join('') : `${w.slice(0, Math.min(w.length, 3) - 1).join(', ')} und ${w[Math.min(w.length, 3) - 1]}`);
+    for (const a of game.baggern?.angebote?.() ?? []) {
+      const sname = HAFEN.stege?.[a.steg] ?? `Steg ${a.steg}`;
+      const namen = [...new Set(a.neu.map((t) => t.typ))];
+      const n = a.plaetze.length;
+      out.push({
+        key: `baggern:${a.steg}`, art: 'steg', nachruesten: 'baggern', baggern: true, steg: a.steg, id: `baggern-${a.steg}`,
+        name: a.name, kosten: a.kosten, gesperrt: null, ohneSchild: true, vermisst: a.flach,
+        fertigTitel: `${sname} ist ausgebaggert`,
+        fertigText: `${n === 1 ? 'Ein Platz ist' : `${n} Plätze sind`} jetzt mindestens ${num1(a.tiefe)} m tief. Der Bagger arbeitet noch kurz, die tiefe Rinne bleibt.`,
+        kurz: `${num1(a.tiefe)} m tief`,
+        nutzen: [
+          `An ${a.zuFlach === a.alle ? (a.alle === 1 ? 'diesem Platz' : `allen ${a.alle} Plätzen`) : `${a.zuFlach} von ${a.alle} Plätzen`} ist das Wasser zu flach für ${liste(namen)}. Danach ${namen.length === 1 ? 'hat es' : 'haben sie'} an jedem Platz genug Wasser unter dem Kiel.`,
+          `${n === 1 ? 'Ein Platz wird' : `${n} Plätze werden`} mindestens ${num1(a.tiefe)} m tief, genug für Boote bis ${num1(a.bisTiefgang)} m Tiefgang.`,
+          a.spaeter ? `Mit Ausbaustufe ${a.spaeter} wird es hier ohnehin so tief.` : 'Neue Plätze an diesem Steg sind gleich mit tief.',
+        ],
+        ort: () => plaetzeOrt(a.plaetze),
+        geist: () => game.baggern?.geist?.(a.steg),
+        bedarf: () => {
+          const f = game.baggern?.flach?.(a.steg) ?? 0;
+          return f ? `Zuletzt ${f === 1 ? 'fuhr ein Boot' : `fuhren ${f} Boote`} weiter, ${f === 1 ? 'das' : 'die'} an ${sname} nur zu wenig Wasser unter dem Kiel ${f === 1 ? 'hatte' : 'hatten'}.` : null;
+        },
+        kaufen: () => game.baggern.kaufen(a.steg),
       });
     }
 
@@ -242,6 +334,31 @@ export function init(game) {
       });
     }
 
+    // Bojenfeld (P36): Muringbojen im See, für kleine Boote, billig und billiger im Liegegeld
+    for (const a of game.bojenfeld?.angebote?.() ?? []) {
+      const bf = ECONOMY.bojenfeld ?? {};
+      const anteil = Math.round((bf.liegegeld ?? 1) * 100);
+      const gebaut = (game.bojenfeld.bojen?.() ?? []).length;
+      out.push({
+        key: `bojenfeld:${a.id}`, art: 'steg', id: a.id, ueberlauf: true,
+        name: a.erweitern ? 'Bojenfeld erweitern' : 'Bojenfeld im See', kosten: a.kosten,
+        gesperrt: a.gesperrt, plaetzeNeu: a.bojen.length, ohneSchild: true,
+        kurz: `+${a.bojen.length} Bojen`,
+        nutzen: [
+          `${a.bojen.length} Muringbojen im See${gebaut ? `, dazu die ${gebaut}, die schon liegen` : ''}: Plätze für Boote bis ${String(bf.maxLaenge ?? 9).replace(".", ",")} m lang. Strom und Wasser gibt es dort nicht.`,
+          `Gäste an der Boje zahlen ${anteil} % vom Hafengeld. Büro und Gäste nehmen eine Boje erst, wenn keine Box passt.`,
+          'Die Bojen liegen offen im See: Bei Sturm und Starkwind schaukelt es dort.',
+        ],
+        bedarf: () => null,
+        ort: () => game.bojenfeld.ort(a.id),
+        geist: () => game.bojenfeld.geist(a.id),
+        kaufen: () => game.bojenfeld.kaufen(a.id),
+      });
+    }
+
+    // Hafen verschönern (P60): Bänke, Kübel, Bäume, Laternen in Abschnitten, Anstrich der Hafenhäuser
+    for (const a of game.verschoenern?.angebote?.() ?? []) out.push(dekoEintrag(a));
+
     // Versorgung
     for (const key of Object.keys(rules.facilities)) {
       const u = sim.facilityUpgrade(key);
@@ -266,6 +383,8 @@ export function init(game) {
         nutzen.push(`Jeder erfüllte Wunsch bringt ${Math.round((ECONOMY.wunschBonus ?? 0.25) * 100)} % mehr Hafengeld und bessere Bewertungen.`);
         const g = versorgungGebaeude(key, u.level);
         if (g.id) ort = () => ({ ...gebaeudeOrt(g.id), neu: g.neu });
+        // Absaugstation (P31) steht auf dem Dienststeg der Tankstelle (render/services.js)
+        else if (key === 'absaugen') ort = () => { const o = game.services?.absaugOrt?.(); return o ? { ...o, y: 0.5, breite: 12 } : null; };
       }
       out.push({
         key: `versorgung:${key}`, art: 'versorgung', id: key, name, kosten: u.cost, wunsch, stufeNeu: u.level,
@@ -315,6 +434,36 @@ export function init(game) {
         nutzen: (def?.schaltetFrei ?? []).map((k) => FREI[k]).filter(Boolean),
         ort: g.id ? () => ({ ...gebaeudeOrt(g.id), neu: g.neu }) : null,
         kaufen: () => sim.upgradeOffice(),
+      });
+    }
+
+    // Naturecke am Schilf (P52): schützen oder bebauen, einmal und endgültig (kein Rückgängig)
+    const nr = ECONOMY.naturecke ?? {};
+    for (const a of game.naturecke?.angebote?.() ?? []) {
+      const schutz = a.id === 'schuetzen';
+      const anker = num1(nr.schuetzen?.anker ?? 0);
+      const g = nr.bebauen ?? {};
+      const proTag = (g.grund?.[Math.min(stufe, (g.grund?.length ?? 1) - 1)] ?? 0);
+      out.push({
+        key: `naturecke:${a.id}`, art: 'hafen', id: `naturecke-${a.id}`, kosten: a.kosten,
+        name: schutz ? 'Schilfgürtel schützen' : 'Ufer am Schilf bebauen',
+        gesperrt: a.gesperrt, ohneSchild: true, keinRat: true, endgueltig: true,
+        knopf: schutz ? 'Schützen' : 'Bebauen',
+        kurz: schutz ? `+${anker} Anker` : 'Parkplatz',
+        nutzen: schutz
+          ? ['Bohlenweg zur Beobachtungshütte, Haubentaucher ziehen ein, abends quaken Frösche.',
+            `Gäste nach einem Abend im Hafen: +${anker} Anker.`]
+          : ['Ufer aufschütten: Park- und Trailerplatz für die Crews.',
+            `Je Abend in der Saison ${euro(proTag)} plus ${euro(g.jeGast ?? 0)} je Gastboot, später mehr.`],
+        warnung: schutz
+          ? 'Nicht umkehrbar: bleibt für immer Natur.'
+          : 'Nicht umkehrbar: Schilf, Vögel und Frösche sind weg.',
+        fertigTitel: schutz ? 'Das Schilf steht unter Schutz' : 'Der Parkplatz am Ufer ist gebaut',
+        fertigText: schutz ? 'Der Bohlenweg steht. Ab heute Abend bewerten Gäste den Abend am Schilf.' : 'Ab heute Abend parken hier die Crews, das Geld kommt im Tagesabschluss unter Sonstiges.',
+        bedarf: () => null,
+        ort: () => game.naturecke.ort(),
+        geist: () => game.naturecke.geist(a.id),
+        kaufen: () => game.naturecke.entscheiden(a.id),
       });
     }
 
@@ -396,6 +545,8 @@ export function init(game) {
         heuteTag: st.day, ausgaben: st.stats?.heute?.tag === st.day && st.stats.heute.ausgaben ? structuredClone(st.stats.heute.ausgaben) : {},
         services: st.modules?.services ? structuredClone(st.modules.services) : null,
         nachruesten: structuredClone(st.modules?.nachruesten ?? {}),
+        baggern: st.modules?.baggern ? structuredClone(st.modules.baggern) : null,
+        verschoenern: structuredClone(st.modules?.verschoenern ?? {}),
         ausbau: speicher()?.ausbau ? structuredClone(speicher().ausbau) : null,
       };
     } catch { return null; }
@@ -417,6 +568,8 @@ export function init(game) {
     if (st.stats?.heute && st.stats.heute.tag === u.heuteTag) st.stats.heute.ausgaben = u.ausgaben;
     if (u.services && st.modules?.services) { ersetze(st.modules.services, u.services); game.services?.neuZeichnen?.(); }
     if (u.nachruesten) { st.modules ||= {}; st.modules.nachruesten = u.nachruesten; game.emit('nachruesten:neu'); }
+    if (u.baggern) { st.modules ||= {}; st.modules.baggern = u.baggern; }
+    if (u.verschoenern) { st.modules ||= {}; st.modules.verschoenern = u.verschoenern; game.emit('verschoenern:neu'); }
     speicher().ausbau = u.ausbau;
     zeigeBaustelle();
     for (const g of geaendert) game.emit('build', g);
@@ -692,6 +845,7 @@ export function init(game) {
   function entferneGeist() {
     if (geist) {
       welt.remove(geist);
+      geist.traverse((o) => { try { o.userData?.weg?.(); } catch { /* egal */ } });   // P60: Anstrich-Vorschau zurück
       geist.traverse((o) => { if (o.userData?.ring) o.geometry.dispose(); });
       geist = null;
     }
@@ -749,7 +903,7 @@ export function init(game) {
   // Stelle so anfahren, dass sie mitten im freien Bereich neben bzw. ueber der Karte liegt
   function zeigeOrt(ort) {
     if (!rig?.screenToWorld || !ort) return;
-    const w = Math.max(80, Math.min(160, (ort.breite ?? 20) * 2.6));
+    const w = Math.max(ort.nah ? 36 : 80, Math.min(160, (ort.breite ?? 20) * 2.6));   // nah: Anstrich (P60), Wände sehen
     const sw = rig.screenW, sh = rig.screenH;
     const r = card.hidden ? null : card.getBoundingClientRect();
     const c = game.canvas.getBoundingClientRect();
@@ -1187,7 +1341,7 @@ export function init(game) {
     entferneGeist();
     gefuehrt = null;
     // Zehn Sekunden lang zuruecknehmbar (Roadmap P18, Bed P7); nicht der Stufenausbau in einem Stueck
-    rueck = snap && (e.key !== 'hafen:stufe' || r.abschnitt) ? { ...snap, bis: performance.now() + RUECK_MS, name: e.name, kosten: vorher - game.sim.state.money } : null;
+    rueck = snap && !e.endgueltig && (e.key !== 'hafen:stufe' || r.abschnitt) ? { ...snap, bis: performance.now() + RUECK_MS, name: e.name, kosten: vorher - game.sim.state.money } : null;
     if (speicher()?.sparziel === key) { speicher().sparziel = null; zeigeSparziel(); }
     if (r.abschnitt) {
       // Bauabschnitt beauftragt: Baustelle zeigen, fertig wird er ueber Nacht
@@ -1207,7 +1361,7 @@ export function init(game) {
     if (ort) {
       const y = Number.isFinite(game.landschaft?.hoeheBei?.(ort.x, ort.z)) ? Math.max(0, game.landschaft.hoeheBei(ort.x, ort.z)) : 0;
       welle(ort.x, ort.z, y);
-      const text = e.nachruesten ? e.kurz : e.art === 'steg' ? (e.plaetzeNeu === 1 ? '+1 Liegeplatz' : `+${e.plaetzeNeu} Liegeplätze`) : e.art === 'versorgung' && e.wunsch !== 'strom' ? `${WUNSCH_KURZ[e.id]} für ${e.nutzen[0].match(/\d+/)?.[0] ?? ''} Boote` : e.name;
+      const text = e.nachruesten || e.ueberlauf || e.art === 'deko' ? e.kurz : e.art === 'steg' ? (e.plaetzeNeu === 1 ? '+1 Liegeplatz' : `+${e.plaetzeNeu} Liegeplätze`) : e.art === 'versorgung' && e.wunsch !== 'strom' ? `${WUNSCH_KURZ[e.id]} für ${e.nutzen[0].match(/\d+/)?.[0] ?? ''} Boote` : e.name;
       fliege(text, ort.x, y, ort.z);
       if (ort.gebaeude && ort.neu) {
         const it = game.buildings.items.find((i) => i.id === ort.gebaeude);
@@ -1217,7 +1371,7 @@ export function init(game) {
     game.emit('bauen:gebaut', { key, name: e.name, kosten: vorher - game.sim.state.money || e.kosten });
     // Kleine Karte bleibt stehen, damit das neue Bauwerk sichtbar bleibt
     aktiv = null;
-    fertig = { name: e.name, text: e.art === 'steg' && !e.nachruesten ? `${e.plaetzeNeu === 1 ? 'Ein neuer Liegeplatz ist' : `${e.plaetzeNeu} neue Liegeplätze sind`} frei.` : e.nutzen[0] ?? '' };
+    fertig = { name: e.name, text: e.fertigText ?? (e.ueberlauf ? `${e.plaetzeNeu} Muringbojen liegen im See. Kleine Boote können dort festmachen, ohne Strom und Wasser.` : e.art === 'steg' && !e.nachruesten ? `${e.plaetzeNeu === 1 ? 'Ein neuer Liegeplatz ist' : `${e.plaetzeNeu} neue Liegeplätze sind`} frei.` : e.nutzen[0] ?? ''), ...(e.fertigTitel ? { titel: e.fertigTitel } : {}) };
     meldung = '';
     zeichne();
   }
@@ -1329,7 +1483,7 @@ export function init(game) {
       ? el('button', { type: 'button', class: 'hud-btn bau-ja', disabled: true }, e.gesperrt[0].toUpperCase() + e.gesperrt.slice(1))
       : teuer
         ? el('button', { type: 'button', class: 'hud-btn bau-ja', disabled: true }, `Noch ${euro(e.kosten - geld)} sparen`)
-        : el('button', { type: 'button', class: `hud-btn bau-ja${gefuehrt === e.key ? ' bau-leuchtet' : ''}`, onclick: () => kaufen(e.key) }, `Bauen für ${euro(e.kosten)}`);
+        : el('button', { type: 'button', class: `hud-btn bau-ja${gefuehrt === e.key ? ' bau-leuchtet' : ''}`, onclick: () => kaufen(e.key) }, `${e.knopf ?? 'Bauen'} für ${euro(e.kosten)}`);
     const geschenkText = gefuehrt === e.key
       ? `Dein erstes Bauwerk: Das Geld dafür (${euro(speicher()?.geschenk || e.kosten)}) ist geschenkt und liegt schon in der Kasse. Bestätige mit „Bauen für ${euro(e.kosten)}“.`
       : null;
@@ -1338,6 +1492,7 @@ export function init(game) {
         el('h2', {}, e.name),
         el('span', { class: 'bau-kasse' }, `Kasse ${euro(geld)}`)),
       geschenkText ? el('p', { class: 'bau-geschenk', role: 'status' }, geschenkText) : null,
+      e.auswahl ? auswahlZeile(e) : null,
       el('ul', { class: 'bau-nutzen' }, e.nutzen.map((t) => el('li', {}, t))),
       e.fortschritt ? el('div', { class: 'bau-fortschritt' }, e.fortschritt.map((f) =>
         el('div', { class: 'bau-balken-zeile' },
@@ -1345,6 +1500,7 @@ export function init(game) {
           el('span', { class: 'bau-balken' }, el('span', { style: `width:${Math.min(100, Math.round((f.ist / f.soll) * 100))}%` }))))) : null,
       bedarfText ? el('p', { class: 'bau-bedarf' }, bedarfText) : null,
       umbau ? el('p', { class: 'bau-bedarf bau-umbau' }, umbau) : null,
+      e.warnung ? el('p', { class: 'bau-bedarf bau-endgueltig', role: 'note' }, e.warnung) : null,
       el('p', { class: 'bau-preis' }, teuer || e.gesperrt ? `Preis ${euro(e.kosten)}` : `Preis ${euro(e.kosten)}, danach in der Kasse ${euro(geld - e.kosten)}`),
       meldung ? el('p', { class: 'card-note', role: 'status' }, meldung) : null,
       teuer && !e.gesperrt ? el('button', { type: 'button', class: `bau-spar${speicher()?.sparziel === e.key ? ' an' : ''}`, 'aria-pressed': speicher()?.sparziel === e.key ? 'true' : 'false', onclick: () => setzeSparziel(e.key) },
@@ -1353,6 +1509,17 @@ export function init(game) {
         knopf,
         el('button', { type: 'button', class: 'hud-btn', onclick: () => { aktiv = null; meldung = ''; entferneGeist(); zeichne(); requestAnimationFrame(uebersicht); game.audio?.sfx?.('abbrechen'); } }, 'Zurück')),
     );
+  }
+
+  // Auswahl in der Vorschau (P60 Anstrich: Farbe), Tippen zeigt sie gleich im Hafen
+  function auswahlZeile(e) {
+    const a = e.auswahl;
+    const wert = a.wert();
+    return el('div', { class: 'bau-auswahl', role: 'radiogroup', 'aria-label': a.titel },
+      ...a.optionen.map((o) => el('button', { type: 'button', class: 'bau-farbe', role: 'radio', 'data-farbe': o.id,
+        'aria-checked': o.id === wert ? 'true' : 'false', title: o.name,
+        onclick: () => { a.setze(o.id); game.audio?.sfx?.('klick'); const n = eintraege().find((x) => x.key === e.key); if (n) { zeigeGeist(n, n.ort?.()); zeichne(); } } },
+        el('span', { class: 'bau-farbe-punkt', style: `background:${o.farbe}` }), el('span', { class: 'bau-farbe-name' }, o.name))));
   }
 
   // ------------------------------------------------------------------ Ereignisse
@@ -1467,8 +1634,12 @@ function stil() {
     .bau-automatik .bau-schalter { flex: 1 1 0; min-width: 0; max-width: 120px; white-space: nowrap; min-height: 40px; padding: 6px 10px; border: 2px solid #1d3245;
       border-radius: 6px; background: #2a9d8f; color: #fff; font-weight: 600; }
     .bau-automatik .bau-schalter[aria-pressed="false"] { background: #eee6d2; color: #5b6670; }
-    .bau-reiter { display: flex; gap: 2px; background: rgba(29, 50, 69, 0.07); border-radius: 12px; padding: 4px; }
-    .bau-tab { flex: 1 1 auto; min-width: 0; white-space: nowrap; border: 0; border-radius: 9px; background: none; font: inherit; font-size: 0.8rem; font-weight: 600; color: #1d3245;
+    .bau-auswahl { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+    .bau-farbe { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 10px 4px 6px; border: 2px solid rgba(29, 50, 69, 0.18); border-radius: 10px; background: #fff; font: inherit; font-size: 0.8rem; color: #1d3245; cursor: pointer; }
+    .bau-farbe[aria-checked="true"] { border-color: #1d3245; box-shadow: 0 1px 4px rgba(20, 40, 60, 0.2); font-weight: 700; }
+    .bau-farbe-punkt { width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.25); flex: 0 0 auto; }
+    .bau-reiter { display: flex; flex-wrap: wrap; gap: 2px; background: rgba(29, 50, 69, 0.07); border-radius: 12px; padding: 4px; }
+    .bau-tab { flex: 1 1 auto; min-width: max-content; white-space: nowrap; border: 0; border-radius: 9px; background: none; font: inherit; font-size: 0.8rem; font-weight: 600; color: #1d3245;
       min-height: 40px; padding: 4px 6px; display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
     .bau-tab[aria-selected="true"] { background: #fff; box-shadow: 0 1px 4px rgba(20, 40, 60, 0.15); }
     .bau-zahl { min-width: 16px; height: 16px; border-radius: 8px; background: #2a9d8f; color: #fff; font-size: 0.7rem; display: inline-grid; place-items: center; padding: 0 4px; }
@@ -1493,6 +1664,7 @@ function stil() {
     @keyframes bau-leuchten { 0%, 100% { box-shadow: 0 0 0 2px rgba(242,193,78,.9), 0 0 10px 2px rgba(242,193,78,.5); } 50% { box-shadow: 0 0 0 4px rgba(242,193,78,.6), 0 0 18px 6px rgba(242,193,78,.35); } }
     @media (prefers-reduced-motion: reduce) { #card .bau-ja.bau-leuchtet { animation: none; box-shadow: 0 0 0 3px rgba(242,193,78,.9); } }
     .bau-bedarf { margin: 0; padding: 8px 10px; border-radius: 10px; background: #fff4dc; font-size: 0.9rem; line-height: 1.35; }
+    .bau-endgueltig { background: #fde3dc; color: #7a2414; font-weight: 600; }
     .bau-preis { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
     .bau-fortschritt { display: grid; gap: 6px; font-size: 0.86rem; }
     .bau-balken-zeile { display: grid; gap: 3px; }

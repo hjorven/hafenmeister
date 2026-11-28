@@ -13,11 +13,12 @@ const SONDERFALL_LABEL = {
   einzigerPlatz: 'Nur eine Box passt',
   flottille: 'Flottille',
 };
-const FACILITY_LABEL = { wc: 'Toilette', dusche: 'Dusche', essen: 'Kiosk', diesel: 'Tankstelle' };
+const FACILITY_LABEL = { wc: 'Toilette', dusche: 'Dusche', essen: 'Kiosk', diesel: 'Tankstelle', wlan: 'WLAN', waesche: 'Wäscherei', absaugen: 'Absaugstation' };
 const REASON_LABEL = {
   length: 'Das Boot ist zu lang für diesen Platz.',
   beam: 'Das Boot ist zu breit für diesen Platz.',
   draft: 'Hier ist das Wasser zu flach für dieses Boot.',
+  niedrigwasser: 'Heute ist Niedrigwasser: Hier bleibt gerade zu wenig Wasser unter dem Kiel.',
   size: 'Dieser Platz ist für andere Schiffsgrößen.',
   reserved: 'Dieser Platz ist fest vergeben.',
   funk: 'Diese Box ist für ein angemeldetes Boot frei gehalten.',
@@ -246,7 +247,9 @@ export function init(game) {
           // Flottille (P32): wer dazugehört und was die Gruppe will
           flotte ? el('p', { class: 'card-geschichte card-flotte' }, flotteKopf(b, flotte)) : null,
           // Starkwind (P34): was Schild, Welle und Windlinien über den Boxen bedeuten
-          game.wind?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind' }, game.wind.kartenSatz(b)) : null),
+          game.wind?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind' }, game.wind.kartenSatz(b)) : null,
+          // Niedrigwasser (P29): Kiel im Schlick
+          game.baggern?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind' }, game.baggern.kartenSatz(b)) : null),
         el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Schließen', title: 'Schließen', onclick: schliessen }, 'Schließen')),
       el('ul', { class: 'hm-fakten', 'aria-label': 'Eckdaten' },
         el('li', { class: 'groesse', title: 'Größenklasse' }, `Größe ${b.size}`),
@@ -255,8 +258,9 @@ export function init(game) {
         el('li', { title: 'Aufenthalt' }, nacht),
         // Versorgung heute schon voll (Kapazität sichtbar, P19): steht gleich am Wunsch
         ...b.wishes.map((w) => (wert?.full?.includes(w)
-          ? el('li', { class: 'wunsch voll', title: 'Für heute ist diese Versorgung voll' }, `Wunsch: ${WISH_LABEL[w] ?? w} (heute voll)`)
-          : el('li', { class: 'wunsch', title: 'Wunsch' }, `Wunsch: ${WISH_LABEL[w] ?? w}`)))),
+          ? el('li', { class: 'wunsch voll', title: 'Für heute ist diese Versorgung voll' }, game.hafenwissen?.flaggeBild?.(w), `Wunsch: ${WISH_LABEL[w] ?? w} (heute voll)`)
+          // Signalflagge des Wunschs (P49): dieselbe weht am Boot
+          : el('li', { class: 'wunsch', title: 'Wunsch' }, game.hafenwissen?.flaggeBild?.(w), `Wunsch: ${WISH_LABEL[w] ?? w}`)))),
       flotte ? el('p', { class: 'card-hint hm-flotte' }, pixelBild('rauteGold', 14), flotteLage(flotte, flotteSteg, sim.sonderfall?.(b.id) === 'flottille' && sim.bueroAutomatik?.(b.size))) : null,
       flotte ? null : sonderfallHinweis(sim.sonderfall?.(b.id), fitting.length, sim.bueroAutomatik?.(b.size)),
       vorschlag ? el('p', { class: 'card-hint hm-vorschlag' }, pixelBild('rauteGold', 14), vorschlagText(b, vorschlag)) : null,
@@ -653,8 +657,15 @@ export function init(game) {
     schedule();
     return boatId;
   });
-  game.on('sim:assignFailed', ({ reason }) => {
+  game.on('sim:assignFailed', ({ reason, berthId, boatId }) => {
     note = REASON_LABEL[reason] ?? '';
+    // Baggern (P29): Lässt sich der Steg ausbaggern und passt das Boot dann, sagt die Karte es
+    if ((reason === 'draft' || reason === 'niedrigwasser') && berthId != null) {
+      const steg = game.sim?.ctx?.berthById?.[berthId]?.jetty;
+      const a = steg && game.baggern?.angebote?.().find((x) => x.steg === steg);
+      const boot = game.sim?.state?.boats?.[boatId];
+      if (a && a.plaetze.includes(berthId) && !(boot?.draft > a.bisTiefgang + (game.baggern?.pegel?.() ?? 0) + 1e-9)) note += ` Ausbaggern im Baumenü macht ${a.name.replace(/ ausbaggern$/, '')} tiefer.`;
+    }
     if (cardMode === 'boat') schedule();
   });
   game.on('ui:cancel', () => {
@@ -673,7 +684,7 @@ export function init(game) {
   updateSaveBtn();
   // Die Uhr läuft auch ohne Ereignis weiter (Tagesbalken)
   game.onTick(() => {
-    if (game.sim?.state) day.dataset.progress = String(Math.round((game.sim.state.clock / (game.sim.ctx.rules.dayLength + game.sim.ctx.rules.eveningLength)) * 100));
+    if (game.sim?.state) day.dataset.progress = String(Math.round(Math.min(1, (game.sim.state.clock - (game.sim.state.nachtHalt || 0)) / (game.sim.ctx.rules.dayLength + game.sim.ctx.rules.eveningLength)) * 100));
   });
   schedule();
 }

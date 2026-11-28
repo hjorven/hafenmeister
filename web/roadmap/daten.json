@@ -1,7 +1,7 @@
 {
  "stand": {
-  "datum": "22.11.2026",
-  "commit": "ec3d361"
+  "datum": "28.11.2026",
+  "commit": "5468462"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -655,9 +655,11 @@
    "id": "P25",
    "titel": "Stammgäste mit Wirkung und Gästepost",
    "inhalt": "Ruf am alten Platz (plan 9a), F37",
-   "thread": "Teil 1 und 2 gebaut (stammgaeste.md), H9 folgt",
+   "thread": "teilweise: Teil 1 und 2 gebaut (PR 394, stammgaeste.md), H9 folgt",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    394
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F37",
@@ -667,8 +669,11 @@
     "H8",
     "H9"
    ],
-   "status": "erledigt",
-   "bilder": []
+   "status": "teilweise",
+   "bilder": [
+    85,
+    86
+   ]
   },
   {
    "id": "P26",
@@ -733,15 +738,20 @@
    "id": "P29",
    "titel": "Baggern für tiefere Liegeplätze",
    "inhalt": "F7",
-   "thread": "neu",
+   "thread": "erledigt (PR 420, baggern.md: Steg ausbaggern im Bauen-Menü, Niedrigwasser bei Westwind)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    420
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F7"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    98,
+    99
+   ]
   },
   {
    "id": "P30",
@@ -762,26 +772,32 @@
   {
    "id": "P31",
    "titel": "Neue Gästewünsche",
-   "inhalt": "F9",
-   "thread": "neu",
+   "inhalt": "F9, B8",
+   "thread": "erledigt (PR 406, gaestewuensche.md: Wasserhähne, WLAN, Waschmaschine, Absaugstation, Hafenrundfahrt)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    406
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F9",
     "B8"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    102,
+    103
+   ]
   },
   {
    "id": "P32",
    "titel": "Flottillen",
    "inhalt": "F3, Gruppen-Ankunft",
-   "thread": "erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md)",
+   "thread": "erledigt (PR 393: Konvoi, gemeinsamer Steg, Funk für die Gruppe, flottillen.md; beim Selbst-Einfahren zusammen (PR 414); Rest Prio B: Boxen frei halten, gemeinsam weiterfahren)",
    "welle": 3,
    "prs": [
-    393
+    393,
+    414
    ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
@@ -790,7 +806,8 @@
    "status": "erledigt",
    "bilder": [
     83,
-    84
+    84,
+    91
    ]
   },
   {
@@ -816,100 +833,132 @@
    "id": "P34",
    "titel": "Wind im Hafen spürbar machen",
    "inhalt": "F5, F35",
-   "thread": "neu",
+   "thread": "erledigt (PR 392, wind.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    392
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F5",
     "F35"
    ],
-   "status": "offen",
+   "status": "erledigt",
    "bilder": []
   },
   {
    "id": "P35",
    "titel": "Preisstufe am Hafenbüro",
    "inhalt": "F6",
-   "thread": "neu",
+   "thread": "erledigt (PR 413, preisstufe.md: günstig, normal, gehoben; Faustregel für die Bots, Zeitraffer wieder nahe 105)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    413
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F6"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    94,
+    95
+   ]
   },
   {
    "id": "P36",
    "titel": "Bojenfeld im See",
    "inhalt": "F10",
-   "thread": "neu",
+   "thread": "erledigt (PR 421, bojenfeld.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    421
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F10"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    96,
+    97
+   ]
   },
   {
    "id": "P37",
    "titel": "Havarist einschleppen",
    "inhalt": "F11",
-   "thread": "neu",
+   "thread": "erledigt (PR 408, havarie.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    408
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F11"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    100,
+    101
+   ]
   },
   {
    "id": "P38",
    "titel": "Eigenes Hafenfest ansetzen",
    "inhalt": "F12",
-   "thread": "neu",
+   "thread": "erledigt (PR 405, hafenfest.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    405
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F12"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    87,
+    88
+   ]
   },
   {
    "id": "P39",
    "titel": "Jugendtraining am Segelclub",
    "inhalt": "F13",
-   "thread": "neu",
+   "thread": "erledigt (PR 412, jugendtraining.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    412
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F13"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    89,
+    90
+   ]
   },
   {
    "id": "P40",
    "titel": "Seltene Besucher",
    "inhalt": "F16 (nach P21)",
-   "thread": "neu",
+   "thread": "erledigt (PR 416, docs/besucher.md)",
    "welle": 3,
-   "prs": [],
+   "prs": [
+    416
+   ],
    "abschnitt": "Welle 3: Tiefe und Hafenleben (Extras)",
    "punkte": [
     "F16"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    92,
+    93
+   ]
   },
   {
    "id": "P41",
@@ -966,17 +1015,22 @@
    "id": "P44",
    "titel": "Hafenname und Flagge",
    "inhalt": "F23, F27 (Auswahl beim Start)",
-   "thread": "neu",
+   "thread": "erledigt (PR 429, Thread \"Hafenname und eigene Flagge geben\", Hafenflagge)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    429
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F23",
     "F27",
     "C05"
    ],
-   "status": "teilweise",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    112,
+    113
+   ]
   },
   {
    "id": "P45",
@@ -997,60 +1051,80 @@
    "id": "P46",
    "titel": "Ruhiger Abend und Serien-Akkord",
    "inhalt": "F29, F30",
-   "thread": "bestehend: \"Ton und Musik hinzufügen\"",
+   "thread": "erledigt (PR 427, Thread \"Ruhigen Abend und Serien-Akkord bauen\")",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F29",
     "F30",
     "L1"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    104,
+    105
+   ]
   },
   {
    "id": "P47",
    "titel": "Große Ankünfte ankündigen",
    "inhalt": "F31",
-   "thread": "bestehend: \"Kamera frei neigen und drehen\"",
+   "thread": "erledigt (PR 428, Thread \"Große Ankünfte ankündigen\", docs/grosse-ankuenfte.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    428
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F31"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    106,
+    107
+   ]
   },
   {
    "id": "P48",
    "titel": "Leinen annehmen beim Anlegen",
    "inhalt": "F32",
-   "thread": "bestehend: \"Schiffsanimationen umsetzen\"",
+   "thread": "erledigt (PR 430, Thread \"Leinen beim Anlegen annehmen lassen\", leinen.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    430
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F32"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    108,
+    109
+   ]
   },
   {
    "id": "P49",
    "titel": "Signalflaggen und Hafenwissen",
    "inhalt": "F33, F34 (nach P21)",
-   "thread": "neu",
+   "thread": "erledigt (PR 433, Thread \"Signalflaggen ins Spiel bringen\", signalflaggen.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    433
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F33",
     "F34"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    114,
+    115
+   ]
   },
   {
    "id": "P50",
@@ -1073,43 +1147,58 @@
    "id": "P51",
    "titel": "Hafentiere",
    "inhalt": "F38",
-   "thread": "bestehend: \"Menschen im Hafen herumlaufen lassen\"",
+   "thread": "erledigt (PR 435, docs/hafentiere.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    435
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F38"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    110,
+    111
+   ]
   },
   {
    "id": "P52",
    "titel": "Naturecke am Schilf",
    "inhalt": "F39",
-   "thread": "bestehend: \"Landschaft und Wasser gestalten\"",
+   "thread": "erledigt (PR 440, docs/naturecke.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    440
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F39"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    120,
+    121
+   ]
   },
   {
    "id": "P53",
    "titel": "Spätankömmling in der Nacht",
    "inhalt": "F40",
-   "thread": "neu",
+   "thread": "erledigt (PR 439, docs/spaetankoemmling.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    439
+   ],
    "abschnitt": "Welle 4: Langzeit, Spielgefühl, Welt (Extras)",
    "punkte": [
     "F40"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    116,
+    117
+   ]
   },
   {
    "id": "P54",
@@ -1213,15 +1302,20 @@
    "id": "P60",
    "titel": "Hafen verschönern",
    "inhalt": "D8",
-   "thread": "neu",
+   "thread": "erledigt (PR 441, verschoenern.md)",
    "welle": 4,
-   "prs": [],
+   "prs": [
+    441
+   ],
    "abschnitt": "Zusätzliche Pakete aus den Detailpunkten",
    "punkte": [
     "D8"
    ],
-   "status": "offen",
-   "bilder": []
+   "status": "erledigt",
+   "bilder": [
+    118,
+    119
+   ]
   },
   {
    "id": "P61",
@@ -1652,15 +1746,16 @@
   {
    "id": "P88",
    "titel": "Engstellen nach ihrer Länge regeln",
-   "inhalt": "Reste aus P66 (Abnahme Welle 0 auf ae9e34f, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Dazu Großschiff-Vortritt. Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Noch zu tun: Großschiff-Vortritt, Segler der Seerunde in der Schlange, Rest Küste 15",
-   "thread": "in Arbeit (PR 390)",
+   "inhalt": "Reste aus P66 (Abnahme Welle 0 auf ae9e34f, 21.11.): Auslaufende warten vor der Einfahrt gegenseitig auf Vorfahrt (PC Küste 14 126 feste Proben in Stufe 5 und 6, Handy Küste 15 88, Handy Küste 3 83, PC Küste 15 25), im langen Bodden-Seegatt (Küste 4) läuft die Wartegrenze von 120 s ab und Boote stecken Bug an Bug. Konvoigröße und Wartegrenze je Engstelle aus ihrer Länge ableiten, eine feste Wartegrenze für alle verschlechtert andere Küsten (240 s gemessen und verworfen). Der Großschiff-Vortritt ist gestrichen (siehe unten). Messung über alle 15 Küsten, PC und Handy. Teil 1 (22.11.): Der Knoten sitzt an der Hafeneinfahrt, die auf allen Küsten gleich lang ist (32 m, schon Konvoi 6 und 300 s), nicht in einer langen Engstelle; darum getrennte Bahnen für Ein- und Auslaufende in offenem Wasser (bis 24 m Abstand) statt längenabhängiger Werte, gemessen über alle 15 Küsten. Teil 2 (22.11.): Vorbeifahrer und Segler, die ein Hafenboot aufhalten, fahren sofort weiter (Küste 14 Stufe 6: Ankommende stapelten sich in 3 von 8 Läufen draußen auf See, danach in 0 von 4). Teil 3 (22.11.): Auch der Seeweg hat je Richtung eine eigene Bahn; vorher trafen sich An- und Abreisende eines Seezugangs im selben Übergabepunkt am Kartenrand (Küste 15 Stufe 5: fest 16 und 14 statt 116 und 32; Bodden 2 statt 33; Küste 14 Stufe 6: Ankommende ineinander 155 und 460 statt 630 bis 10600). Großschiff-Vortritt gestrichen (Koordinator 22.11.), drei Fassungen gemessen und verworfen: Größenregel Boot gegen Boot (Bodden-Seegatt fest 208 statt 14 bis 38), größerer Abstand der Vorbeifahrer zu fahrenden Großschiffen (Bodden 0 statt 4 nahe Vorbeifahrten, Nehrung 4 statt 1), Vortritt an der Einfahrt (Küste 14 Stufe 6: Großschiffe 86 und 92 lange Proben statt 14 und 6). Abnahme durch die nächste Zeitraffer-Serie",
+   "thread": "erledigt (PR 390, 400 und Teil 3)",
    "welle": 3,
    "prs": [
-    390
+    390,
+    400
    ],
    "abschnitt": "Pakete aus den Funden vom 15.11.2026",
    "punkte": [],
-   "status": "arbeit",
+   "status": "erledigt",
    "bilder": [
     82
    ]
@@ -2031,19 +2126,21 @@
   {
    "code": "F5",
    "text": "Windseite: bei Starkwind Außenplätze unruhig, geschützte Plätze +0,5 Anker (Feld exposed)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 392, wind.md): Windlage je Platz aus Wellenweg gegen den Wind des Tages, ab Stufe 2, Zeichen beim Ziehen",
    "pakete": [
     "P34"
    ],
-   "prs": [],
+   "prs": [
+    392
+   ],
    "abschnitt": "Kernspiel"
   },
   {
    "code": "F6",
    "text": "Preisstufe am Hafenbüro: günstig, normal, gehoben, eine Entscheidung pro Saison",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P35, preisstufe.md): Preistafel im Gästebuch und Aufsteller am Hafenmeisterhaus, einmal je Saison und nach jedem Ausbau, Gäste schreiben über die Preise",
    "pakete": [
     "P35"
    ],
@@ -2053,19 +2150,21 @@
   {
    "code": "F7",
    "text": "Baggern: Wassertiefe je Steg als Bauprojekt",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P29, PR 420, baggern.md): je Steg ab Stufe 2 im Bauen-Menü, Bagger mit Schute, dazu Niedrigwasser bei starkem Westwind, an dem knapp liegende Boote im Schlick sitzen",
    "pakete": [
     "P29"
    ],
-   "prs": [],
+   "prs": [
+    420
+   ],
    "abschnitt": "Kernspiel"
   },
   {
    "code": "F8",
    "text": "Stege nachrüsten: Wasser, Strom für Steg A, Fingerstege, Beleuchtung, am Steg sichtbar",
    "status": "entfaellt",
-   "statusText": "erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasser mit P31, nachruesten.md",
+   "statusText": "erledigt (PR 297): Fingerstege und Steglaternen je Steg, Stromsäulen sichtbar; Strom für A entfällt (nur S-Boote), Wasserhähne seit P31, nachruesten.md",
    "pakete": [
     "P30"
    ],
@@ -2077,8 +2176,8 @@
   {
    "code": "F9",
    "text": "Neue Wünsche: WLAN, Waschmaschine, Frischwasser, Absaugstation, Brötchen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P31, gaestewuensche.md): Frischwasser über Wasserhähne am Steg (Stufe 2), WLAN (3), Waschmaschine ab 3 Nächten (4), Absaugstation (5), Hafenrundfahrt mit der Barkasse (6); Brötchen seit P19",
    "pakete": [
     "P31"
    ],
@@ -2088,8 +2187,8 @@
   {
    "code": "F10",
    "text": "Bojenfeld: billige Muringbojen im See für kleine Boote ohne Wünsche",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P36, bojenfeld.md): 6 Bojen ab Stufe 2, 6 weitere ab Stufe 4, Lage je Küste im tiefen Wasser, Boote S und M bis 9 m, 60 % Liegegeld, ohne Strom und Wasser, letzte Wahl für Büro und Selbst-Einfahren, kein Dauerplatz",
    "pakete": [
     "P36"
    ],
@@ -2099,8 +2198,8 @@
   {
    "code": "F11",
    "text": "Havarist wird eingeschleppt, braucht sofort einen Platz, Ruf und neuer Stammgast",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P37, havarie.md): Notruf im Meldeplatz, Box wählen, Fischer, Arbeitsboot oder Seenotretter schleppen ihn herein; Schlepplohn, +1 Anker, sofort Stammgast, Werft repariert",
    "pakete": [
     "P37"
    ],
@@ -2110,8 +2209,8 @@
   {
    "code": "F12",
    "text": "Eigenes Hafenfest einmal pro Saison ansetzen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P38, hafenfest.md): Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk, Bilanz am Abend",
    "pakete": [
     "P38"
    ],
@@ -2121,8 +2220,8 @@
   {
    "code": "F13",
    "text": "Jugendtraining: Opti-Gruppe mit Trainerboot, braucht Slip und Segelclub",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P39, jugendtraining.md): jeden 4. Saisontag Optis und Jollen über den Slip hinaus, Dreieckskurs vor den Stegen, Trainerboot braucht eine Box (feste Trainerbox möglich), wartende Boote halten das Fahrwasser frei, Beitrag und +0,2 Anker für zusehende Gäste",
    "pakete": [
     "P39"
    ],
@@ -2158,8 +2257,8 @@
   {
    "code": "F16",
    "text": "Seltene Besucher: Weltumsegler, Schweinswal, Schwäne; Logbuch und Fotomotiv",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P40): vier Schiffe mit Ehrenplatz, Schwäne und Schweinswal, Fotos im Logbuch-Reiter „Besucher“, vier Erfolge, docs/besucher.md",
    "pakete": [
     "P40"
    ],
@@ -2239,8 +2338,8 @@
   {
    "code": "F23",
    "text": "Hafenname und Flagge, sichtbar an Einfahrt und Mast",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P44, Hafenflagge)",
    "pakete": [
     "P44"
    ],
@@ -2282,9 +2381,9 @@
   },
   {
    "code": "F27",
-   "text": "Neues Spiel mit Auswahl: Hafenname, Stegbild, später Herausforderung oder Revier",
+   "text": "Neues Spiel mit Auswahl: Hafenname, Flagge, Stegbild, später Herausforderung oder Revier",
    "status": "erledigt",
-   "statusText": "erledigt für Name, Stegbild, Küste, Einführung; Herausforderung und Revier folgen",
+   "statusText": "erledigt für Name, Flagge, Stegbild, Küste, Einführung; Herausforderung und Revier folgen",
    "pakete": [
     "P09",
     "P44"
@@ -2306,30 +2405,34 @@
   {
    "code": "F29",
    "text": "Ruhiger Abend: alles kassiert und versorgt, Lichterketten an, Musik wärmer",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 427, stimmung.md): Lichterketten an allen Stegen gehen vom Land nach außen an, Glockentöne, wärmere Abendmusik bis zum Morgen",
    "pakete": [
     "P46"
    ],
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "Spielgefühl"
   },
   {
    "code": "F30",
    "text": "Serien ohne Druck: drei passgenaue Zuweisungen ergeben einen Akkord",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 427, stimmung.md): Grundton, Terz, Akkord passend zur Musik, goldene Noten über der Box, ohne Zeitgrenze",
    "pakete": [
     "P46"
    ],
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "Spielgefühl"
   },
   {
    "code": "F31",
    "text": "Große Ankünfte mit Horn, Kamera schwenkt auf Wunsch zur Einfahrt",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P47): Kreuzfahrt, Flotte, Windjammer und seltene Besucher tuten beim Einlaufen, Meldung mit Ansehen, kurze Kamerafahrt nur wenn der Spieler nichts tut, Einstellung Mit Kamera/Nur Horn/Aus, docs/grosse-ankuenfte.md",
    "pakete": [
     "P47"
    ],
@@ -2339,8 +2442,8 @@
   {
    "code": "F32",
    "text": "Leinen annehmen: Symbol am Steg, Antippen bringt Trinkgeld",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (leinen.md): Tau am Steg, Festmacher fängt die Leine, Töne je Leine, Trinkgeld 2 bis 20 €",
    "pakete": [
     "P48"
    ],
@@ -2350,8 +2453,8 @@
   {
    "code": "F33",
    "text": "Signalflaggen als Wunschanzeige, Lexikon im Logbuch",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (signalflaggen.md): Gäste setzen je Wunsch eine Flagge, erfüllte holen sie ein, Blauer Peter vor dem Auslaufen, Lexikon im Reiter Wissen",
    "pakete": [
     "P49"
    ],
@@ -2361,8 +2464,8 @@
   {
    "code": "F34",
    "text": "Hafenwissen zum Sammeln (Tonnen, Molenfeuer, Knoten, Lichter)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (signalflaggen.md): 13 Einträge zu Seezeichen, Feuer und Lichtern, Knoten, dazu Positionslichter an fahrenden Booten",
    "pakete": [
     "P49"
    ],
@@ -2372,12 +2475,14 @@
   {
    "code": "F35",
    "text": "Wind beim Anlegen: große Boote brauchen länger, bevorzugen Plätze gegen den Wind",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 392, wind.md): L und XL mit Rückenwind langsamer und −0,25 Anker, Büro wählt Bug gegen den Wind",
    "pakete": [
     "P34"
    ],
-   "prs": [],
+   "prs": [
+    392
+   ],
    "abschnitt": "Seemannschaft"
   },
   {
@@ -2405,8 +2510,8 @@
   {
    "code": "F38",
    "text": "Hafentiere: Katze, Hund, Reiher, im Fotomodus festhalten",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (hafentiere.md): wohnen im Hafen, Tagesablauf, Antippen, Foto ins Logbuch, Erfolg Hafenfreunde",
    "pakete": [
     "P51"
    ],
@@ -2416,8 +2521,8 @@
   {
    "code": "F39",
    "text": "Naturecke: Schilfgürtel erhalten oder bebauen, nicht umkehrbar",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (naturecke.md): Schilf auf allen 15 Küsten, schützen (Bohlenweg, Taucher, +0,1 Anker) oder bebauen (Parkplatz, Geld je Abend), ohne Rückgängig",
    "pakete": [
     "P52"
    ],
@@ -2427,8 +2532,8 @@
   {
    "code": "F40",
    "text": "Spätankömmling: nachts läuft ein Boot mit Lichtern ein",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (spaetankoemmling.md): an manchen Abenden kommt der letzte Übernachter im Dunkeln mit Taschenlampe und Positionslichtern, Meldung, Schein an der Box, die Nacht wartet bis er fest ist, ein Viertel Anker Dank",
    "pakete": [
     "P53"
    ],
@@ -2672,8 +2777,8 @@
   {
    "code": "B8",
    "text": "Neue Wünsche in späten Stufen, je Stufe mindestens einer (= F9)",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P31): jede Stufe 1 bis 6 hat mindestens einen neuen Wunsch, Test in tests/gaestewuensche.test.mjs",
    "pakete": [
     "P31"
    ],
@@ -2912,8 +3017,8 @@
   {
    "code": "D8",
    "text": "Verschönern: Bäume, Bänke, Laternen, Kübel, Mast, Farbe",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P60): Reiter Deko im Baumenü mit Bänken, Kübeln, Bäumen, Laternen in Abschnitten und Anstrich der Hafenhäuser, Wirkung auf jede Bewertung; Mast schon mit P44, verschoenern.md",
    "pakete": [
     "P60"
    ],
@@ -3040,8 +3145,8 @@
   {
    "code": "E8",
    "text": "Neue Aufgaben für den Hafenmeister (Reservierungen, Havaristen, Feste)",
-   "status": "teilweise",
-   "statusText": "teilweise: Reservierungen erledigt (P28, PR 288); Havaristen und Feste kommen mit P37, P38",
+   "status": "erledigt",
+   "statusText": "erledigt: Reservierungen (P28, PR 288), Havaristen (P37), eigene Feste (P38)",
    "pakete": [
     "P02"
    ],
@@ -3065,7 +3170,7 @@
    "code": "Svc F2",
    "text": "Jeder Service ändert das Spiel (Slip, Mastenkran, Fahrradverleih, Räucherei, Werft)",
    "status": "erledigt",
-   "statusText": "erledigt (P23): Trailerboote am Slip, Mast legen und Radtour verlängern den Aufenthalt, Werft holt Reparaturboote, Räucherei bekommt Abendgäste; Havaristen folgen mit P37",
+   "statusText": "erledigt (P23): Trailerboote am Slip, Mast legen und Radtour verlängern den Aufenthalt, Werft holt Reparaturboote, Räucherei bekommt Abendgäste; Werft repariert eingeschleppte Havaristen (P37)",
    "pakete": [
     "P23"
    ],
@@ -3695,12 +3800,14 @@
   {
    "code": "L1",
    "text": "Ton für Bewertung, Tagesziel, Stammgast, neues Modell, Stufenziel",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (PR 427): Stammgast und Stufenziel neu, die anderen klangen schon",
    "pakete": [
     "P46"
    ],
-   "prs": [],
+   "prs": [
+    427
+   ],
    "abschnitt": "L Hafenleben, Ton und Fotomodus"
   },
   {
@@ -4416,7 +4523,7 @@
   },
   {
    "code": "C05",
-   "text": "HTML per innerHTML (render/services.js, ui/input-pc.js): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, textContent oder Escapen, dazu Test mit präparierten Namen",
+   "text": "HTML per innerHTML (render/services.js, ui/input-pc.js): heute nur interne Texte; sobald Boots-, Hafen- oder importierte Namen hineinkommen, textContent oder Escapen, dazu Test mit präparierten Namen. Hafenname erledigt mit P44 (hafenNameSauber, nur textContent/Canvas, tests/hafenflagge.test.mjs)",
    "status": null,
    "statusText": "",
    "pakete": [
@@ -4570,11 +4677,11 @@
     "P88"
    ],
    "zaehler": {
-    "erledigt": 11,
-    "teilweise": 0,
-    "arbeit": 1,
+    "erledigt": 20,
+    "teilweise": 1,
+    "arbeit": 0,
     "frage": 0,
-    "offen": 9,
+    "offen": 0,
     "entfaellt": 0,
     "alle": 21
    }
@@ -4599,11 +4706,11 @@
     "P60"
    ],
    "zaehler": {
-    "erledigt": 2,
-    "teilweise": 1,
+    "erledigt": 11,
+    "teilweise": 0,
     "arbeit": 0,
     "frage": 0,
-    "offen": 11,
+    "offen": 3,
     "entfaellt": 0,
     "alle": 14
    }
@@ -4658,20 +4765,20 @@
   }
  ],
  "gesamt": {
-  "erledigt": 46,
+  "erledigt": 64,
   "teilweise": 1,
-  "arbeit": 1,
+  "arbeit": 0,
   "frage": 0,
-  "offen": 38,
+  "offen": 21,
   "entfaellt": 1,
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 172,
-  "teilweise": 6,
+  "erledigt": 196,
+  "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 39,
+  "offen": 16,
   "entfaellt": 1,
   "alle": 219
  },
@@ -5695,113 +5802,557 @@
    "datum": "2026-11-22",
    "quelle": "flottillen/pc-zusammen.png",
    "nr": 84
+  },
+  {
+   "datei": "p25-pr394-handy-pinnwand.jpg",
+   "pakete": [
+    "P25"
+   ],
+   "titel": "Gästepost an der Pinnwand im Hafenbüro, Stammgäste mit Lieblingsbox",
+   "pr": 394,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "stammgaeste/handy-pinnwand.png",
+   "nr": 85
+  },
+  {
+   "datei": "p25-pr394-pc-stammgast.jpg",
+   "pakete": [
+    "P25"
+   ],
+   "titel": "Stammgast meldet sich an und wünscht seinen alten Platz",
+   "pr": 394,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "stammgaeste/pc-stammgast-wartet.png",
+   "nr": 86
+  },
+  {
+   "datei": "p38-pr405-pc-planer.jpg",
+   "pakete": [
+    "P38"
+   ],
+   "titel": "Hafenfest ansetzen: Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk",
+   "pr": 405,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenfest/pc-s4-2-planer.png",
+   "nr": 87
+  },
+  {
+   "datei": "p38-pr405-pc-festtag.jpg",
+   "pakete": [
+    "P38"
+   ],
+   "titel": "Festtag am Hafen: Bühne, Marktstände und Wimpel",
+   "pr": 405,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenfest/pc-s4-5a-buehne.png",
+   "nr": 88
+  },
+  {
+   "datei": "p39-pr412-pc-slip.jpg",
+   "pakete": [
+    "P39"
+   ],
+   "titel": "Jugendtraining: Jollen am Slip des Segelclubs",
+   "pr": 412,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "jugendtraining/pc-2-slip.png",
+   "nr": 89
+  },
+  {
+   "datei": "p39-pr412-pc-kurs.jpg",
+   "pakete": [
+    "P39"
+   ],
+   "titel": "Jugendtraining: Optis segeln ihren Kurs vor dem Hafen",
+   "pr": 412,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "jugendtraining/pc-3-kurs.png",
+   "nr": 90
+  },
+  {
+   "datei": "p32-pr414-pc-einfahrt.jpg",
+   "pakete": [
+    "P32"
+   ],
+   "titel": "Flottille fährt geschlossen ein und legt nebeneinander an",
+   "pr": 414,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "flottillen-zusammen/pc-flottille-einfahrt.png",
+   "nr": 91
+  },
+  {
+   "datei": "p40-pr416-pc-besucherschiffe.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Seltene Besucher: vier besondere Schiffe",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/01-vier-schiffe.png",
+   "nr": 92
+  },
+  {
+   "datei": "p40-pr416-pc-koenigsyacht.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Königsyacht meldet sich per Funk, Ehrenplatz freihalten",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/02-pc-funk-koenigsyacht.png",
+   "nr": 93
+  },
+  {
+   "datei": "p35-pr413-handy-preistafel.jpg",
+   "pakete": [
+    "P35"
+   ],
+   "titel": "Preistafel im Gästebuch: günstig, normal, gehoben",
+   "pr": 413,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "preisstufe/handy-3-gehoben.png",
+   "nr": 94
+  },
+  {
+   "datei": "p35-pr413-pc-tafel.jpg",
+   "pakete": [
+    "P35"
+   ],
+   "titel": "Preistafel am Hafenbüro",
+   "pr": 413,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "preisstufe/pc-4-tafel.png",
+   "nr": 95
+  },
+  {
+   "datei": "p36-pr421-pc-bojenfeld.jpg",
+   "pakete": [
+    "P36"
+   ],
+   "titel": "Bojenfeld im See mit Booten an Muringbojen",
+   "pr": 421,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "bojenfeld/pc-bojenfeld-stufe4.png",
+   "nr": 96
+  },
+  {
+   "datei": "p36-pr421-pc-boje-ziehen.jpg",
+   "pakete": [
+    "P36"
+   ],
+   "titel": "Boot auf eine Muringboje ziehen",
+   "pr": 421,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "bojenfeld/pc-boot-auf-boje-ziehen.png",
+   "nr": 97
+  },
+  {
+   "datei": "p29-pr420-pc-bagger.jpg",
+   "pakete": [
+    "P29"
+   ],
+   "titel": "Bagger vertieft einen Steg auf 2,0 m",
+   "pr": 420,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "baggern/pc-3-bagger.png",
+   "nr": 98
+  },
+  {
+   "datei": "p29-pr420-pc-schlick.jpg",
+   "pakete": [
+    "P29"
+   ],
+   "titel": "Niedrigwasser bei Westwind: Boote liegen im Schlick",
+   "pr": 420,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "baggern/pc-6-schlick.png",
+   "nr": 99
+  },
+  {
+   "datei": "p37-pr408-pc-schlepp.jpg",
+   "pakete": [
+    "P37"
+   ],
+   "titel": "Havarist wird in den Hafen geschleppt",
+   "pr": 408,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "havarie/pc-3-schlepp.png",
+   "nr": 100
+  },
+  {
+   "datei": "p37-pr408-handy-notruf.jpg",
+   "pakete": [
+    "P37"
+   ],
+   "titel": "Notruf: Box für den Havaristen wählen",
+   "pr": 408,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "havarie/handy-1-notruf.png",
+   "nr": 101
+  },
+  {
+   "datei": "p31-pr406-pc-absaugstation.jpg",
+   "pakete": [
+    "P31"
+   ],
+   "titel": "Absaugstation am Service-Steg",
+   "pr": 406,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "gaestewuensche/p31-pc-service-absaugstation.png",
+   "nr": 102
+  },
+  {
+   "datei": "p31-pr406-handy-waschhaus.jpg",
+   "pakete": [
+    "P31"
+   ],
+   "titel": "Waschhaus an Land",
+   "pr": 406,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "gaestewuensche/p31-handy-waschhaus.png",
+   "nr": 103
+  },
+  {
+   "datei": "p46-pr427-pc-lichterketten.jpg",
+   "pakete": [
+    "P46"
+   ],
+   "titel": "Ruhiger Abend: Lichterketten an den Stegen",
+   "pr": 427,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "stimmung/pc-2-lichterketten-an.png",
+   "nr": 104
+  },
+  {
+   "datei": "p46-pr427-handy-abend.jpg",
+   "pakete": [
+    "P46"
+   ],
+   "titel": "Abendstimmung im großen Hafen",
+   "pr": 427,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "stimmung/handy-1-lichterketten-stufe6.png",
+   "nr": 105
+  },
+  {
+   "datei": "p47-pr428-pc-kreuzfahrt.jpg",
+   "pakete": [
+    "P47"
+   ],
+   "titel": "Kreuzfahrtschiff läuft ein: Meldung und Kamerafahrt",
+   "pr": 428,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "ankuenfte/pc-kreuzfahrt-2-kamerafahrt.png",
+   "nr": 106
+  },
+  {
+   "datei": "p47-pr428-handy-koenigsyacht.jpg",
+   "pakete": [
+    "P47"
+   ],
+   "titel": "Königsyacht wird angekündigt",
+   "pr": 428,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "ankuenfte/handy-koenigsyacht.png",
+   "nr": 107
+  },
+  {
+   "datei": "p48-pr430-pc-trinkgeld.jpg",
+   "pakete": [
+    "P48"
+   ],
+   "titel": "Leine angenommen: Festmacher und Trinkgeld",
+   "pr": 430,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "leinen/annehmen/pc-3-trinkgeld.png",
+   "nr": 108
+  },
+  {
+   "datei": "p48-pr430-handy-symbol.jpg",
+   "pakete": [
+    "P48"
+   ],
+   "titel": "\"Leine annehmen\" an den Boxen",
+   "pr": 430,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "leinen/annehmen/handy-1-symbol.png",
+   "nr": 109
+  },
+  {
+   "datei": "p51-pr435-pc-hafenkatze.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Hafenkatze auf dem Steg",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-5-katze-herz.png",
+   "nr": 110
+  },
+  {
+   "datei": "p51-pr435-pc-reiher.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Graureiher am Ufer",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-3-reiher.png",
+   "nr": 111
+  },
+  {
+   "datei": "p44-pr429-pc-hafenmast.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Eigene Flagge am Hafenmast",
+   "pr": 429,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/pc-3-hafenmast.png",
+   "nr": 112
+  },
+  {
+   "datei": "p44-pr429-handy-flagge-bauen.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Name und Flagge im Baukasten",
+   "pr": 429,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/handy-2-flagge-bauen.png",
+   "nr": 113
+  },
+  {
+   "datei": "p49-pr433-pc-flaggen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Signalflaggen zeigen die Wünsche der Boote",
+   "pr": 433,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/pc-flaggen-segelboot.png",
+   "nr": 114
+  },
+  {
+   "datei": "p49-pr433-handy-wissen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Logbuch-Reiter Wissen mit Signalflaggen",
+   "pr": 433,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/handy-lexikon.png",
+   "nr": 115
+  },
+  {
+   "datei": "p53-pr439-pc-lampe.jpg",
+   "pakete": [
+    "P53"
+   ],
+   "titel": "Spätankömmling läuft nachts mit Lampe ein",
+   "pr": 439,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "spaetankoemmling/pc-2-lampe.png",
+   "nr": 116
+  },
+  {
+   "datei": "p53-pr439-handy-kajuete.jpg",
+   "pakete": [
+    "P53"
+   ],
+   "titel": "Licht in der Kajüte nach dem Festmachen",
+   "pr": 439,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "spaetankoemmling/handy-4-kajuete.png",
+   "nr": 117
+  },
+  {
+   "datei": "p60-pr441-pc-laternen.jpg",
+   "pakete": [
+    "P60"
+   ],
+   "titel": "Laternen, Bänke und Bäume am Abend",
+   "pr": 441,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "verschoenern/pc-7-nacht.png",
+   "nr": 118
+  },
+  {
+   "datei": "p60-pr441-handy-baenke.jpg",
+   "pakete": [
+    "P60"
+   ],
+   "titel": "Bänke am Wasser bauen",
+   "pr": 441,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "verschoenern/handy-2-vorschau-baenke.png",
+   "nr": 119
+  },
+  {
+   "datei": "p52-pr440-pc-schilf.jpg",
+   "pakete": [
+    "P52"
+   ],
+   "titel": "Naturecke: Schilfgürtel am Ufer",
+   "pr": 440,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "naturecke/s2-natur.png",
+   "nr": 120
+  },
+  {
+   "datei": "p52-pr440-handy-schuetzen.jpg",
+   "pakete": [
+    "P52"
+   ],
+   "titel": "Schilf schützen oder Ufer bebauen",
+   "pr": 440,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "naturecke/handy-schutz.jpg",
+   "nr": 121
   }
  ],
  "neueBilder": [
-  84,
-  82,
-  81,
-  80,
-  79,
-  77,
-  76,
-  75,
-  73
+  121,
+  119,
+  117,
+  115,
+  113,
+  111,
+  109,
+  107,
+  105
  ],
  "merges": [
   {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P32 Flottillen (PR 393) mit Bildern",
-   "pr": 396,
+   "datum": "2026-11-28",
+   "titel": "Roadmap-Pflege: P52 Naturecke (PR 440) mit Bildern",
+   "pr": 445,
    "pakete": [
-    "P32"
+    "P52"
    ]
   },
   {
-   "datum": "2026-11-22",
-   "titel": "P25 Stammgäste mit Wirkung und Gästepost",
-   "pr": 394,
+   "datum": "2026-11-27",
+   "titel": "P52: Naturecke am Schilf (schützen oder bebauen)",
+   "pr": 440,
    "pakete": [
-    "P25"
+    "P52"
    ]
   },
   {
-   "datum": "2026-11-22",
-   "titel": "Roadmap-Pflege: P88 in Arbeit (PR 390) mit Bild",
-   "pr": 395,
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: P53 Spätankömmling (PR 439) und P60 Verschönern (PR 441) mit Bildern",
+   "pr": 444,
    "pakete": [
-    "P88"
+    "P53",
+    "P60"
    ]
   },
   {
-   "datum": "2026-11-22",
-   "titel": "P32 Flottillen: drei bis fünf Boote wollen zusammen an einen Steg",
-   "pr": 393,
-   "pakete": [
-    "P32"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "Arbeitsplan: P88 Teil 1 (PR 390) nachgetragen",
-   "pr": 391,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-22",
-   "titel": "P88 Teil 1: getrennte Bahnen vor der Einfahrt, echte Boje in den Regeln",
-   "pr": 390,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Arbeitsplan: Welle 0 bis 2 abgenommen, Welle 3 startet; P88 Engstellen",
-   "pr": 389,
-   "pakete": [
-    "P88"
-   ]
-  },
-  {
-   "datum": "2026-11-21",
-   "titel": "Meldungen auf Handy quer oben zwischen den Spalten (Schichttest F8-Rest, F9 geprüft)",
-   "pr": 388,
+   "datum": "2026-11-27",
+   "titel": "Schwimmwellenbrecher ist ein Hindernis für die Boote und endet westlich von Steg B und C",
+   "pr": 443,
    "pakete": []
   },
   {
-   "datum": "2026-11-21",
-   "titel": "Schichttest: Serie 13 nach P66, Messung erst nach dem Zurückgleiten der Leisten",
-   "pr": 387,
+   "datum": "2026-11-27",
+   "titel": "P53 Spätankömmling: letztes Boot läuft nachts mit Lampe ein (F40)",
+   "pr": 439,
    "pakete": [
-    "P66"
+    "P53"
    ]
   },
   {
-   "datum": "2026-11-21",
-   "titel": "Roadmap: P66 und P85 zeigen erledigt (Reste als Prio B ausgelagert)",
-   "pr": 386,
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: Bilder für P49 Signalflaggen (PR 433)",
+   "pr": 442,
    "pakete": [
-    "P66",
-    "P85"
+    "P49"
    ]
   },
   {
-   "datum": "2026-11-21",
-   "titel": "Arbeitsplan: Welle 0 bis 2 gebaut, Abnahme-Serie läuft, P66-Reste als Prio B",
-   "pr": 385,
+   "datum": "2026-11-27",
+   "titel": "P60: Hafen verschönern mit Bänken, Kübeln, Bäumen, Laternen und Anstrich",
+   "pr": 441,
    "pakete": [
-    "P66"
+    "P60"
    ]
   },
   {
-   "datum": "2026-11-21",
-   "titel": "Roadmap: P66 erledigt, offene Punkte genannt",
-   "pr": 384,
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: P44 Hafenname und Flagge (PR 429) mit Bildern",
+   "pr": 438,
    "pakete": [
-    "P66"
+    "P44"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "P49: Signalflaggen als Wunschanzeige, Positionslichter und Hafenwissen (F33, F34)",
+   "pr": 433,
+   "pakete": [
+    "P49"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P51 Hafentiere (PR 435) mit Bildern",
+   "pr": 437,
+   "pakete": [
+    "P51"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P44: Eigener Hafenname und eigene Flagge",
+   "pr": 429,
+   "pakete": [
+    "P44"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "P51 Hafentiere: Hafenkatze, Hafenhund und Graureiher (F38)",
+   "pr": 435,
+   "pakete": [
+    "P51"
    ]
   }
  ]

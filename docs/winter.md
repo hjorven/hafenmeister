@@ -24,7 +24,7 @@ Alle wirken die ganze nächste Saison (die Frühjahrswerbung nur im Frühling) u
 | Steg überholen | immer (Steg mit Gastplätzen; wechselt jährlich zwischen den zwei größten) | Gäste an diesem Steg bewerten 0,3 Anker besser | `rating` (zählt zur Platzart, `comfort`) |
 | Frühjahrswerbung in Segelvereinen | immer | Saisontag 1 bis 8: 25 % mehr Boote | `modifiers.arrivalFactor` |
 | Sanitär winterfest machen | wenn Toilette oder Dusche steht; ab Stufe 3 im Wechsel mit Baggern (ungerade Jahre) | Gäste mit Wunsch Toilette oder Dusche bewerten 0,2 Anker besser | `rating` |
-| Hafenbecken ausbaggern | ab Stufe 3 (gerade Jahre) | Boote der Größe L und XL kommen 25 % öfter | `modifiers.sizeFactor` |
+| Fahrrinne ausbaggern | ab Stufe 3 (gerade Jahre) | Boote der Größe L und XL kommen 25 % öfter | `modifiers.sizeFactor` |
 
 Preise je Ausbaustufe in `ECONOMY.winterarbeiten` (Stufe 1: 40 bis 60 €, Stufe 6: 3.600 bis 6.800 €). Am ersten Saisontag zeigt eine kleine Karte „Winterarbeiten fertig“, was jetzt wirkt (20 s, gezählt nur, solange sie zu sehen ist; die Kartenwahl der Tagesziele geht vor).
 

@@ -935,6 +935,413 @@
    "geraet": "pc",
    "datum": "2026-11-22",
    "quelle": "flottillen/pc-zusammen.png"
+  },
+  {
+   "datei": "p25-pr394-handy-pinnwand.jpg",
+   "pakete": [
+    "P25"
+   ],
+   "titel": "Gästepost an der Pinnwand im Hafenbüro, Stammgäste mit Lieblingsbox",
+   "pr": 394,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "stammgaeste/handy-pinnwand.png"
+  },
+  {
+   "datei": "p25-pr394-pc-stammgast.jpg",
+   "pakete": [
+    "P25"
+   ],
+   "titel": "Stammgast meldet sich an und wünscht seinen alten Platz",
+   "pr": 394,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "stammgaeste/pc-stammgast-wartet.png"
+  },
+  {
+   "datei": "p38-pr405-pc-planer.jpg",
+   "pakete": [
+    "P38"
+   ],
+   "titel": "Hafenfest ansetzen: Tag wählen, Schmuck, Musik, Marktstände, Feuerwerk",
+   "pr": 405,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenfest/pc-s4-2-planer.png"
+  },
+  {
+   "datei": "p38-pr405-pc-festtag.jpg",
+   "pakete": [
+    "P38"
+   ],
+   "titel": "Festtag am Hafen: Bühne, Marktstände und Wimpel",
+   "pr": 405,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenfest/pc-s4-5a-buehne.png"
+  },
+  {
+   "datei": "p39-pr412-pc-slip.jpg",
+   "pakete": [
+    "P39"
+   ],
+   "titel": "Jugendtraining: Jollen am Slip des Segelclubs",
+   "pr": 412,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "jugendtraining/pc-2-slip.png"
+  },
+  {
+   "datei": "p39-pr412-pc-kurs.jpg",
+   "pakete": [
+    "P39"
+   ],
+   "titel": "Jugendtraining: Optis segeln ihren Kurs vor dem Hafen",
+   "pr": 412,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "jugendtraining/pc-3-kurs.png"
+  },
+  {
+   "datei": "p32-pr414-pc-einfahrt.jpg",
+   "pakete": [
+    "P32"
+   ],
+   "titel": "Flottille fährt geschlossen ein und legt nebeneinander an",
+   "pr": 414,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "flottillen-zusammen/pc-flottille-einfahrt.png"
+  },
+  {
+   "datei": "p40-pr416-pc-besucherschiffe.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Seltene Besucher: vier besondere Schiffe",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/01-vier-schiffe.png"
+  },
+  {
+   "datei": "p40-pr416-pc-koenigsyacht.jpg",
+   "pakete": [
+    "P40"
+   ],
+   "titel": "Königsyacht meldet sich per Funk, Ehrenplatz freihalten",
+   "pr": 416,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "besucher/02-pc-funk-koenigsyacht.png"
+  },
+  {
+   "datei": "p35-pr413-handy-preistafel.jpg",
+   "pakete": [
+    "P35"
+   ],
+   "titel": "Preistafel im Gästebuch: günstig, normal, gehoben",
+   "pr": 413,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "preisstufe/handy-3-gehoben.png"
+  },
+  {
+   "datei": "p35-pr413-pc-tafel.jpg",
+   "pakete": [
+    "P35"
+   ],
+   "titel": "Preistafel am Hafenbüro",
+   "pr": 413,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "preisstufe/pc-4-tafel.png"
+  },
+  {
+   "datei": "p36-pr421-pc-bojenfeld.jpg",
+   "pakete": [
+    "P36"
+   ],
+   "titel": "Bojenfeld im See mit Booten an Muringbojen",
+   "pr": 421,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "bojenfeld/pc-bojenfeld-stufe4.png"
+  },
+  {
+   "datei": "p36-pr421-pc-boje-ziehen.jpg",
+   "pakete": [
+    "P36"
+   ],
+   "titel": "Boot auf eine Muringboje ziehen",
+   "pr": 421,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "bojenfeld/pc-boot-auf-boje-ziehen.png"
+  },
+  {
+   "datei": "p29-pr420-pc-bagger.jpg",
+   "pakete": [
+    "P29"
+   ],
+   "titel": "Bagger vertieft einen Steg auf 2,0 m",
+   "pr": 420,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "baggern/pc-3-bagger.png"
+  },
+  {
+   "datei": "p29-pr420-pc-schlick.jpg",
+   "pakete": [
+    "P29"
+   ],
+   "titel": "Niedrigwasser bei Westwind: Boote liegen im Schlick",
+   "pr": 420,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "baggern/pc-6-schlick.png"
+  },
+  {
+   "datei": "p37-pr408-pc-schlepp.jpg",
+   "pakete": [
+    "P37"
+   ],
+   "titel": "Havarist wird in den Hafen geschleppt",
+   "pr": 408,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "havarie/pc-3-schlepp.png"
+  },
+  {
+   "datei": "p37-pr408-handy-notruf.jpg",
+   "pakete": [
+    "P37"
+   ],
+   "titel": "Notruf: Box für den Havaristen wählen",
+   "pr": 408,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "havarie/handy-1-notruf.png"
+  },
+  {
+   "datei": "p31-pr406-pc-absaugstation.jpg",
+   "pakete": [
+    "P31"
+   ],
+   "titel": "Absaugstation am Service-Steg",
+   "pr": 406,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "gaestewuensche/p31-pc-service-absaugstation.png"
+  },
+  {
+   "datei": "p31-pr406-handy-waschhaus.jpg",
+   "pakete": [
+    "P31"
+   ],
+   "titel": "Waschhaus an Land",
+   "pr": 406,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "gaestewuensche/p31-handy-waschhaus.png"
+  },
+  {
+   "datei": "p46-pr427-pc-lichterketten.jpg",
+   "pakete": [
+    "P46"
+   ],
+   "titel": "Ruhiger Abend: Lichterketten an den Stegen",
+   "pr": 427,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "stimmung/pc-2-lichterketten-an.png"
+  },
+  {
+   "datei": "p46-pr427-handy-abend.jpg",
+   "pakete": [
+    "P46"
+   ],
+   "titel": "Abendstimmung im großen Hafen",
+   "pr": 427,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "stimmung/handy-1-lichterketten-stufe6.png"
+  },
+  {
+   "datei": "p47-pr428-pc-kreuzfahrt.jpg",
+   "pakete": [
+    "P47"
+   ],
+   "titel": "Kreuzfahrtschiff läuft ein: Meldung und Kamerafahrt",
+   "pr": 428,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "ankuenfte/pc-kreuzfahrt-2-kamerafahrt.png"
+  },
+  {
+   "datei": "p47-pr428-handy-koenigsyacht.jpg",
+   "pakete": [
+    "P47"
+   ],
+   "titel": "Königsyacht wird angekündigt",
+   "pr": 428,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "ankuenfte/handy-koenigsyacht.png"
+  },
+  {
+   "datei": "p48-pr430-pc-trinkgeld.jpg",
+   "pakete": [
+    "P48"
+   ],
+   "titel": "Leine angenommen: Festmacher und Trinkgeld",
+   "pr": 430,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "leinen/annehmen/pc-3-trinkgeld.png"
+  },
+  {
+   "datei": "p48-pr430-handy-symbol.jpg",
+   "pakete": [
+    "P48"
+   ],
+   "titel": "\"Leine annehmen\" an den Boxen",
+   "pr": 430,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "leinen/annehmen/handy-1-symbol.png"
+  },
+  {
+   "datei": "p51-pr435-pc-hafenkatze.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Hafenkatze auf dem Steg",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-5-katze-herz.png"
+  },
+  {
+   "datei": "p51-pr435-pc-reiher.jpg",
+   "pakete": [
+    "P51"
+   ],
+   "titel": "Graureiher am Ufer",
+   "pr": 435,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafentiere/pc-3-reiher.png"
+  },
+  {
+   "datei": "p44-pr429-pc-hafenmast.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Eigene Flagge am Hafenmast",
+   "pr": 429,
+   "geraet": "pc",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/pc-3-hafenmast.png"
+  },
+  {
+   "datei": "p44-pr429-handy-flagge-bauen.jpg",
+   "pakete": [
+    "P44"
+   ],
+   "titel": "Name und Flagge im Baukasten",
+   "pr": 429,
+   "geraet": "handy",
+   "datum": "2026-11-22",
+   "quelle": "hafenflagge/handy-2-flagge-bauen.png"
+  },
+  {
+   "datei": "p49-pr433-pc-flaggen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Signalflaggen zeigen die Wünsche der Boote",
+   "pr": 433,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/pc-flaggen-segelboot.png"
+  },
+  {
+   "datei": "p49-pr433-handy-wissen.jpg",
+   "pakete": [
+    "P49"
+   ],
+   "titel": "Logbuch-Reiter Wissen mit Signalflaggen",
+   "pr": 433,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "signalflaggen/handy-lexikon.png"
+  },
+  {
+   "datei": "p53-pr439-pc-lampe.jpg",
+   "pakete": [
+    "P53"
+   ],
+   "titel": "Spätankömmling läuft nachts mit Lampe ein",
+   "pr": 439,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "spaetankoemmling/pc-2-lampe.png"
+  },
+  {
+   "datei": "p53-pr439-handy-kajuete.jpg",
+   "pakete": [
+    "P53"
+   ],
+   "titel": "Licht in der Kajüte nach dem Festmachen",
+   "pr": 439,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "spaetankoemmling/handy-4-kajuete.png"
+  },
+  {
+   "datei": "p60-pr441-pc-laternen.jpg",
+   "pakete": [
+    "P60"
+   ],
+   "titel": "Laternen, Bänke und Bäume am Abend",
+   "pr": 441,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "verschoenern/pc-7-nacht.png"
+  },
+  {
+   "datei": "p60-pr441-handy-baenke.jpg",
+   "pakete": [
+    "P60"
+   ],
+   "titel": "Bänke am Wasser bauen",
+   "pr": 441,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "verschoenern/handy-2-vorschau-baenke.png"
+  },
+  {
+   "datei": "p52-pr440-pc-schilf.jpg",
+   "pakete": [
+    "P52"
+   ],
+   "titel": "Naturecke: Schilfgürtel am Ufer",
+   "pr": 440,
+   "geraet": "pc",
+   "datum": "2026-11-27",
+   "quelle": "naturecke/s2-natur.png"
+  },
+  {
+   "datei": "p52-pr440-handy-schuetzen.jpg",
+   "pakete": [
+    "P52"
+   ],
+   "titel": "Schilf schützen oder Ufer bebauen",
+   "pr": 440,
+   "geraet": "handy",
+   "datum": "2026-11-27",
+   "quelle": "naturecke/handy-schutz.jpg"
   }
  ]
 }

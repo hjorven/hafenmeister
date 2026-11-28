@@ -115,7 +115,7 @@ export function haefen(state) {
  * bei besonderen Tagen boat.nights, sicherer Wunsch in boat.wishes, boat.tripPlan.
  * @returns {string|null} id der Geschichte
  */
-export function waehle({ state, ctx, boat, mods, umfeld = {}, nurText = false }) {
+export function waehle({ state, ctx, boat, mods, umfeld = {}, nurText = false, ohne = null }) {
   const zahlen = ctx.rules.stories;
   if (!zahlen || !boat || boat.stationed || boat.special || boat.size === 'XXL') return null;
   const st = stand(state);
@@ -142,7 +142,8 @@ export function waehle({ state, ctx, boat, mods, umfeld = {}, nurText = false })
     }
   }
   if (!g) {
-    const alltag = GESCHICHTEN.filter((x) => x.art !== 'besonders' && passt(x, info));
+    // ohne: Geschichten, die nicht in Frage kommen (Nachtrag gegen Doppelte im selben Tagesabschnitt)
+    const alltag = GESCHICHTEN.filter((x) => x.art !== 'besonders' && passt(x, info) && !ohne?.has(x.id));
     g = gewichtet(state, alltag.map((x) => ({ g: x, w: gewicht(x) }))) ?? BY_ID[ERSATZ[ART_NACH_NAECHTEN(boat.nights)]];
   }
   if (!g) return null;
@@ -273,7 +274,11 @@ export function doppelteNeuWaehlen({ state, ctx, list, mods, umfeld = {} }) {
   let n = 0;
   for (const b of list) {
     if (!b.story || !doppelt(b)) continue;
-    for (let versuch = 0; versuch < 8 && doppelt(b); versuch++) waehle({ state, ctx, boat: b, mods, umfeld, nurText: true });
+    // Geschichten, die im Abschnitt dieses Boots schon vorkommen, scheiden aus (sonst trifft der Würfel
+    // bei wenigen passenden Geschichten oft wieder dieselbe, Befund P31). Kommen alle passenden schon vor
+    // (volle Häfen ab Stufe 5, kleine Boote mit wenigen Geschichten), bleibt die Ersatzgeschichte doppelt.
+    const ohne = new Set(list.filter((x) => x !== b && x.story && abs(x) === abs(b)).map((x) => x.story.id));
+    for (let versuch = 0; versuch < 8 && doppelt(b); versuch++) waehle({ state, ctx, boat: b, mods, umfeld, nurText: true, ohne });
     n++;
   }
   return n;

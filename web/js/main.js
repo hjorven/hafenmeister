@@ -46,6 +46,10 @@ const MODULES = [
   './features/winter.js',
   './features/nachruesten.js',         // P30: Fingerstege und Laternen an bestehenden Stegen
   './features/umbauen.js',            // P59: zwei Boxen zur Doppelbox umbauen und zurück
+  './features/baggern.js',            // P29: Stege ausbaggern für Boote mit mehr Tiefgang
+  './features/bojenfeld.js',          // P36: Bojenfeld im See für kleine Boote (docs/bojenfeld.md)
+  './features/naturecke.js',          // P52: Schilfgürtel am Ufer schützen oder bebauen (docs/naturecke.md)
+  './features/verschoenern.js',       // P60: Hafen verschönern, Reiter Deko im Baumenü (docs/verschoenern.md)
   './features/versorgung.js',
   './features/auszeichnung.js',
   './features/platzschilder.js',
@@ -54,6 +58,9 @@ const MODULES = [
   './features/tagesziele.js',
   './features/wetterflagge.js',
   './features/wind.js',                // P34: Wind im Hafen, Windlage der Plätze, Anlegen gegen den Wind
+  './features/hafenfest.js',           // P38: eigenes Hafenfest einmal je Saison (docs/hafenfest.md)
+  './features/preisstufe.js',          // P35: Preisstufe am Hafenbüro, einmal je Saison (docs/preisstufe.md)
+  './features/jugendtraining.js',      // P39: Jugendtraining am Segelclub (docs/jugendtraining.md)
   './features/hafen-schauen.js',
   './features/einstieg.js',
   './features/aufstieg.js',
@@ -65,7 +72,16 @@ const MODULES = [
   './ui/logbuch.js',                   // Logbuch und Hafenchronik (P21)
   './features/erfolge.js',             // Erfolge, Reiter im Logbuch, Dinge im Hafen (P22)
   './ui/funk-anmeldung.js',            // Anmeldung per Funk, Box freihalten (P28)
+  './features/besucher.js',            // Seltene Besucher, Ehrenplatz, Fotomotive (P40)
+  './features/grosse-ankunft.js',      // P47: Horn und kurze Kamerafahrt, wenn ein großes Schiff einläuft
+  './features/havarie.js',             // P37: Havarist einschleppen (Bild und Meldung lädt das Modul selbst)
+  './features/stimmung.js',            // P46: ruhiger Abend mit Lichterketten, Serien-Akkord (docs/stimmung.md)
+  './features/leinen.js',              // P48: Leinen annehmen beim Anlegen (docs/leinen.md)
+  './render/signalflaggen.js',         // P49: Signalflaggen als Wunschanzeige, Positionslichter (docs/signalflaggen.md)
+  './features/hafenwissen.js',         // P49: Hafenwissen sammeln, Lexikon im Logbuch (docs/signalflaggen.md)
+  './features/spaetankoemmling.js',    // P53: Spätankömmling läuft nachts mit Lichtern ein (docs/spaetankoemmling.md)
   './ui/statistik.js',                 // Statistik der letzten 30 Tage, Saisons (P41)
+  './features/hafenflagge.js',         // P44: Hafenname und eigene Flagge, Mast, Schilder, Fenster
   './ui/oberflaeche.js',
 ];
 

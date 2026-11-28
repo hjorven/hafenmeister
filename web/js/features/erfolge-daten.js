@@ -18,6 +18,7 @@
 import * as sim from '../sim.js';
 import { ECONOMY } from '../data/economy.js';
 import { katalog as logbuchKatalog, fortschritt as logbuchFortschritt } from '../ui/logbuch-daten.js';
+import { fortschritt as besucherFortschritt } from './besucher-regeln.js';
 
 const istObjekt = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 
@@ -89,6 +90,18 @@ export const ERFOLGE = [
   })),
   { id: 'alle-groessen', gruppe: 'sammeln', ding: 'wimpel', titel: 'Von klein bis groß', text: 'Je ein Boot der Größen S, M, L und XL im Logbuch.',
     stand: (s, h) => zahl(['S', 'M', 'L', 'XL'].filter((g) => (h.fortschritt?.je?.[g]?.gesehen ?? 0) > 0).length, 4) },
+  // Seltene Besucher (P40, docs/besucher.md): state.modules.besucher, geschrieben von features/besucher.js
+  { id: 'hoher-besuch', gruppe: 'sammeln', ding: 'wimpel', titel: 'Hoher Besuch', text: 'Ein seltener Besucher lag am Ehrenplatz.',
+    stand: (s) => besucherFort(s).ehrenplatz > 0 },
+  { id: 'seltene-schiffe', gruppe: 'sammeln', ding: 'wimpel', titel: 'Seltene Gäste', text: 'Alle vier besonderen Schiffe waren im Hafen.',
+    stand: (s) => zahl(besucherFort(s).schiffe, besucherFort(s).schiffeGesamt) },
+  { id: 'tierfreund', gruppe: 'sammeln', ding: 'wimpel', titel: 'Tierfreund', text: 'Schwäne und Schweinswal fürs Logbuch fotografiert.',
+    stand: (s) => zahl(besucherFort(s).tierFotos, 2) },
+  { id: 'fotoalbum', gruppe: 'sammeln', ding: 'pokal', titel: 'Fotoalbum', text: 'Alle sechs seltenen Besucher fürs Logbuch fotografiert.',
+    stand: (s) => zahl(besucherFort(s).fotos, besucherFort(s).gesamt) },
+  // Hafentiere (P51, docs/hafentiere.md)
+  { id: 'hafenfreunde', gruppe: 'sammeln', ding: 'wimpel', titel: 'Hafenfreunde', text: 'Hafenkatze, Hafenhund und Graureiher fürs Logbuch fotografiert.',
+    stand: (s) => zahl(besucherFort(s).hafentierFotos, besucherFort(s).hafentiereGesamt) },
   { id: 'traditionssegler', gruppe: 'sammeln', ding: 'wimpel', titel: 'Großer Bahnhof', text: `${Z.traditionssegler} Traditionssegler zugleich im Hafen.`,
     stand: (s) => zahl(Object.values(s.boats || {}).filter((b) => b?.typeId === 'XL1' && b.status === 'moored').length, Z.traditionssegler) },
   // ---------------------------------------------------------------- Jahreslauf
@@ -120,6 +133,7 @@ export function erfolgeState(state) {
 const z = (s) => erfolgeState(s).z;
 // Echte Stammgäste: wiedergekommen (features/stammgaeste.js, ab dem 2. Besuch), nicht jeder zufriedene Gast
 const stammZahl = (s) => (Array.isArray(s.modules?.stamm?.liste) ? s.modules.stamm.liste.filter((g) => g.stamm ?? (g.besuche ?? 1) >= (ECONOMY.stammgaeste.stammAbBesuch ?? 2)).length : 0);
+const besucherFort = (s) => besucherFortschritt(s);
 const besterTag = (s) => Math.max(s.stats?.besterTag?.summe || 0, s.stats?.bestDayIncome || 0);
 
 /** Fortschritt eines Erfolgs als { ist, soll, fertig }. */

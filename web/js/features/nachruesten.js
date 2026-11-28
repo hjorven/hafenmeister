@@ -4,12 +4,14 @@
 // - Fingerstege: Jede Heckpfahl-Box des Stegs bekommt einen schmalen Laufsteg an der Seite. Gäste
 //   steigen bequem aus und bewerten so viel besser wie an einem Schwimmsteg mit Fingern (Platzart finger).
 // - Steglaternen: Laternen entlang des Stegs, nachts leuchten sie. Gäste an diesem Steg bewerten besser.
+// - Wasserhähne (P31): Zapfstellen am Steg erfüllen den Gästewunsch Frischwasser (Platz-Eigenschaft 'water'
+//   über den Hook 'berthHas' der Spielregeln). Kein Anker-Bonus: Die Wirkung läuft über den Wunsch.
 // Strom gibt es weiter über die Versorgung (bauwerke.strom, Stromsäulen an Steg B). Die Säulen stehen jetzt
 // sichtbar am Steg, an jedem Steg mit Strom. Steg A hat nur kleine Boote, die keinen Strom wünschen, darum
-// keine Säulen dort. Wasser am Steg kommt mit dem Wunsch Frischwasser (P31), sonst täte es nichts.
+// keine Säulen dort. Wasser am Steg gibt es seit P31 mit dem Wunsch Frischwasser.
 //
 // Die Logik (alles außer init) läuft ohne Browser und ist in tests/nachruesten.test.mjs getestet.
-// Spielstand: state.modules.nachruesten = { finger: ['A', ...], licht: ['A', ...] }
+// Spielstand: state.modules.nachruesten = { finger: ['A', ...], licht: ['A', ...], wasser: ['C', ...] }
 // Zahlen: ECONOMY.nachruesten (data/economy.js). Wirkung über den Hook 'rating' der Spielregeln.
 // Schnittstelle: game.nachruesten = { angebote(), kaufen(art, steg), hat(art, steg), geist(art, stege),
 //   platzTeile(platzId) }
@@ -101,17 +103,26 @@ export function ankerBonus(state, ctx, boat) {
   return platzArten(state, berth).reduce((s, art) => s + (ARTEN[art].anker ?? 0), 0);
 }
 
+/** Platz-Eigenschaft aus einer Nachrüstung (P31: 'water' an Stegen mit Wasserhähnen). */
+export function platzHat(state, berth, prop) {
+  if (prop !== 'water' || !berth?.jetty) return false;
+  return hat(state, 'wasser', berth.jetty);
+}
+
 /** Hooks in einen Regel-Kontext hängen (Browser über game.sim.addHook, Tests über sim.addHook). */
 export function haengeEin(addHook, getState) {
-  const ab = [addHook('rating', ({ ctx, boat }) => { const s = getState(); return s ? ankerBonus(s, ctx, boat) : 0; })];
+  const ab = [
+    addHook('rating', ({ ctx, boat }) => { const s = getState(); return s ? ankerBonus(s, ctx, boat) : 0; }),
+    addHook('berthHas', ({ state, berth, prop }) => platzHat(getState() ?? state, berth, prop)),
+  ];
   return () => ab.forEach((f) => f());
 }
 
 // ---------------------------------------------------------------------------
 // Im Browser: Finger, Laternen und Stromsäulen am Steg, Geisterbild für die Vorschau
 
-const FARBE = { finger: '#e3e0d8', fingerRand: '#b9b4a8', pfahl: '#4f4852', mast: '#2f3a44', glas: '#fff1c2', saeule: '#f2f0ea', strom: '#3d7fd9' };
-const TEXT = { finger: 'Fingersteg', licht: 'Licht' };
+const FARBE = { finger: '#e3e0d8', fingerRand: '#b9b4a8', pfahl: '#4f4852', mast: '#2f3a44', glas: '#fff1c2', saeule: '#f2f0ea', strom: '#3d7fd9', wasser: '#2f8f6f', hahn: '#c9ccd2' };
+const TEXT = { finger: 'Fingersteg', licht: 'Licht', wasser: 'Wasser' };
 
 export async function init(game) {
   const schnittstelle = game.nachruesten = {
@@ -129,7 +140,7 @@ export async function init(game) {
   const M = {
     finger: mat(FARBE.finger), fingerRand: mat(FARBE.fingerRand), pfahl: mat(FARBE.pfahl), mast: mat(FARBE.mast),
     glas: mat(FARBE.glas, { emissive: new THREE.Color('#ffc65a'), emissiveIntensity: 0.15 }),
-    saeule: mat(FARBE.saeule), strom: mat(FARBE.strom),
+    saeule: mat(FARBE.saeule), strom: mat(FARBE.strom), wasser: mat(FARBE.wasser), hahn: mat(FARBE.hahn),
   };
   const schein = new THREE.MeshBasicMaterial({ color: '#ffd77a', transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
   const geistMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.55, depthWrite: false });
@@ -198,12 +209,29 @@ export async function init(game) {
     ];
   }
 
+  // Wasserzapfstelle (P31): grüner Pfosten mit Hahn und eingerolltem Schlauch, auf der anderen Seite als die
+  // Stromsäule, damit beide nebeneinander zu sehen sind
+  function wasserTeile(id) {
+    const l = lage(id);
+    if (!l) return [];
+    const { p, rad, bug, seite, c } = l;
+    const fuss = c.clone().addScaledVector(bug, p.laenge / 2 + 0.4).addScaledVector(seite, p.breite * 0.25);
+    const d = deck();
+    const hahn = fuss.clone().addScaledVector(bug, -0.12);
+    return [
+      teil(new THREE.CylinderGeometry(0.08, 0.1, 0.9, 6), M.wasser, fuss.clone().setY(d + 0.45)),
+      teil(new THREE.BoxGeometry(0.16, 0.06, 0.06), M.hahn, hahn.clone().setY(d + 0.78), rad + Math.PI / 2),
+      teil(new THREE.TorusGeometry(0.14, 0.04, 4, 10).rotateX(Math.PI / 2), M.wasser, hahn.clone().setY(d + 0.42)),
+    ];
+  }
+
   // Plätze eines Stegs in Reihenfolge der ids; Laternen und Säulen an jedem zweiten
   const jedeZweite = (ids) => [...ids].sort().filter((_, i) => i % 2 === 0);
   function teileFuer(art, ids, mitSchein = true) {
     if (art === 'finger') return ids.flatMap(fingerTeile);
     if (art === 'licht') return jedeZweite(ids).flatMap((id) => lichtTeile(id, mitSchein));
     if (art === 'strom') return jedeZweite(ids).flatMap(stromTeile);
+    if (art === 'wasser') return jedeZweite(ids).flatMap(wasserTeile);
     return [];
   }
   function gastPlaetze(steg, filter = () => true) {
@@ -234,6 +262,7 @@ export async function init(game) {
     const teile = [];
     for (const steg of n.finger ?? []) teile.push(...teileFuer('finger', gastPlaetze(steg, (b) => b.kind === (ARTEN.finger?.nurArt ?? 'box'))));
     for (const steg of n.licht ?? []) teile.push(...teileFuer('licht', gastPlaetze(steg)));
+    for (const steg of n.wasser ?? []) teile.push(...teileFuer('wasser', gastPlaetze(steg)));
     for (const steg of strom) teile.push(...teileFuer('strom', gastPlaetze(steg, (b) => sim.berthHas(s, ctx(), b, 'power'))));
     // Je Material ein Mesh: hunderte Einzelteile kosten sonst Bildzeit
     const jeMat = new Map();

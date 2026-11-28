@@ -169,6 +169,10 @@ Ein Tag dauert seit PR 319 rund 5 statt 2 Minuten, es kommen 2,5-mal so viele Bo
 | Endlosspiel | Gästeziel 450 (+30, höchstens 650), Belohnung 2.300 / 4.500 €, mindestens 4 Resttage | 16-Tage-Saison, Kosten x0,45 |
 | Gästeziele der Stufen | unverändert 20 / 90 / 360 / 560 / 840 (seit 20.11.: 20 / 90 / 340 / 530 / 740, siehe Bauabschnitte unten) | Die Stufen dauern jetzt etwa so lange wie geplant; mehr Gäste am Tag gleichen die kürzere Stufe aus |
 
+## Preisstufe (P35, 22.11.2026)
+
+Seit P35 wählen die Spielertypen zeitraffer und geschickt die Preisstufe nach der Faustregel (`klugeWahl`, [preisstufe.md](preisstufe.md)), gemütlich lässt sie auf normal. Median 30 Läufe: zeitraffer 108 (vorher 110), geschickt 104 (105), gemütlich 128 (128). `node tools/balance.mjs --preis normal` rechnet wie vor P35.
+
 ## Rechnung und Spiel
 
 Seit P17 wird die Rechnung regelmäßig mit dem echten Spiel im Browser verglichen. Der Bot im Zeitraffer (`tools/zeitraffer/lauf.cjs`) misst dabei je Stufe, wie lange Boote zur Boje fahren, an der Boje warten und beim Ablegen ihre Box halten (Feld `messung` in `ergebnis-<gerät>.json`, Spielsekunden am Tag). `tools/balance.mjs` übernimmt das in `ANSICHT`:
@@ -246,6 +250,7 @@ Stand `main` nach PR 160 (P06), nachgeprüft im Code. Die Pakete in der rechten 
 - Der Bot kassiert immer alles sofort, auch ohne Hafenbüro.
 - Mit Hafenbüro-Automatik weist der Bot nur noch die Sonderfälle selbst zu (`sim.officeSpecialCase`).
 - Stammgäste und Gästepost (P25, `features/stammgaeste.js`, `features/gaestepost.js`) hängen wie im Spiel ein: Ruf doppelt, Lieblingsplatz, Freunde als zusätzliche Ankunft. Messung 21.11. (`--spieler zeitraffer`, 60 Läufe): vorher und nachher Median 105 Spieltage, also keine Verschiebung.
+- Neue Gästewünsche (P31, [gaestewuensche.md](gaestewuensche.md)): Frischwasser, WLAN, Waschmaschine, Absaugstation und Hafenrundfahrt. Der Bot kauft Wasserhähne an Stegen (`features/nachruesten.js` hängt wie im Spiel ein, Fingerstege und Laternen kauft er weiter nicht). Messung 22.11. (40 Läufe): zeitraffer 105 auf 110, geschickt 101 auf 104, gemütlich 119 auf 123. Das sind rund drei gespielte Tage; der Zeitraffer endet damit knapp nach dem Winter nach Tag 108 statt knapp davor. Ohne die neuen Bauwerke läge er wieder bei 105.
 - Das Abschlussziel von Stufe 6 prüft im Spiel `sim.regionGoal()` (Meldung `sim:regionDone`), im Werkzeug `tools/balance.mjs` mit denselben Zahlen.
 
 ## Was noch auffällt

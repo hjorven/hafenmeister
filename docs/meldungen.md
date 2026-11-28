@@ -14,12 +14,18 @@ warten ausgeblendet, ihre Zeit läuft solange nicht ab, und sie kommen danach. D
 | 75 | Winterpause am ersten Wintertag und Gruß zum Saisonbeginn (`#hm-winter`) | `features/winter.js` |
 | 70 | Morgen-Zettel (`#hm-ta-zettel`) | `ui/tagesabschluss.js` |
 | 65 | Dauerlieger früher zurück (hat eine Frist bis zum Abend) | `features/dauerlieger.js` |
+| 62 | Notruf: Havarist treibt vor der Einfahrt, Box geben? (`#hm-havarie`, Frist 45 s) | `ui/havarie-meldung.js` |
 | 57 | Anmeldung per Funk: Box freihalten? (`#hm-funk-anmeldung`) | `ui/funk-anmeldung.js` |
+| 56 | Preistafel: Preise festlegen (`#hm-preis-karte`), beim Freischalten, im Winter und nach einem Ausbau | `features/preisstufe.js` |
 | 60 | Sturm und Regatta vorbereiten (`#ev-vorbereiten`), Ergebnis am Abend des letzten Ereignistags | `events/vorbereiten-ui.js` |
+| 58 | Jugendtraining: Box fürs Trainerboot, Auslaufen, Zurück (`#hm-jugend`) | `ui/jugend-meldung.js` |
+| 53 | Großes Schiff läuft ein (`#hm-ankunft`), während der Kamerafahrt 59 | `features/grosse-ankunft.js` |
+| 52 | Spätankömmling läuft im Dunkeln ein (`#hm-spaet`) | `features/spaetankoemmling.js` |
 | 50 | Schritte des Einstiegs | `features/einstieg.js` |
 | 45 | Tipps beim ersten Mal | `features/einstieg.js` |
 | 40 | Andere Dauerplatz-Meldungen | `features/dauerlieger.js` |
 | 24 | Post von einem Stammgast (`#hm-post-meldung`), antippen öffnet die Pinnwand im Gästebuch | `ui/gaestepost.js` |
+| 21 | Neu im Hafenwissen (`#hm-hw-meldung`): Signalflagge, Seezeichen, Licht oder Knoten, antippen öffnet den Eintrag | `features/hafenwissen.js` |
 | 20 | Bewertung eines Boots außerhalb des Bildes (`#hm-gb-meldungen`, die Blasen über Booten im Bild zählen nicht) | `ui/gaestebuch.js` |
 
 Bei gleichem Vorrang bleibt, wer zuerst da war.

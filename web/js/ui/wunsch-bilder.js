@@ -1,7 +1,7 @@
 // Pixel-Bilder der Wünsche an Angebote an Land (Roadmap P19 C3), 12 x 12 wie die Versorgung in
 // ui/vorschau.js: '#' ist die Glyphe, '.' ist leer. ui/vorschau.js zeigt sie als Schild über dem
 // Boot (weiß auf der Farbe), ui/gaestebuch.js als Grund im Gästebuch. Namen aus data/wuensche-texte.js.
-import { ANGEBOT_TEXTE } from '../data/wuensche-texte.js';
+import { ANGEBOT_TEXTE, VERSORGUNG_TEXTE } from '../data/wuensche-texte.js';
 
 const BILDER = {
   broetchen: { farbe: '#b9752f', raster: [
@@ -37,7 +37,34 @@ const BILDER = {
   segelmacher: { farbe: '#5a6a7c', raster: [
     '.....#......', '.....##.....', '.....###....', '.....####...', '.....#####..', '.....######.',
     '.....#......', '.....#.....#', '.....#....#.', '##########..', '.########...', '............'] },
+  // P31: Barkasse für die Hafenrundfahrt
+  barkasse: { farbe: '#1f4e79', raster: [
+    '............', '............', '.....#......', '....###.....', '...#####....', '...#.#.#....',
+    '...#####....', '############', '.##########.', '..########..', '............', '.#.#.#.#.#..'] },
+};
+
+// Neue Wünsche an die Versorgung (P31, docs/gaestewuensche.md): Wasserhahn, WLAN, Waschmaschine, Absaugstation
+const NEU = {
+  wasser: { farbe: '#1d8fc0', raster: [
+    '............', '..######....', '....##......', '.#######....', '.########...', '.##....##...',
+    '.......##...', '............', '.......##...', '......####..', '......####..', '.......##...'] },
+  wlan: { farbe: '#5b5fc7', raster: [
+    '............', '............', '..########..', '.##......##.', '#...####...#', '..##....##..',
+    '.#...##...#.', '....#..#....', '............', '.....##.....', '.....##.....', '............'] },
+  waesche: { farbe: '#8a6bb8', raster: [
+    '............', '.##########.', '.#.##.....#.', '.##########.', '.#........#.', '.#..####..#.',
+    '.#.#....#.#.', '.#.#.##.#.#.', '.#.#....#.#.', '.#..####..#.', '.##########.', '............'] },
+  absaugen: { farbe: '#6b7a3a', raster: [
+    '............', '..####......', '..#..#......', '..####..###.', '..####.#..#.', '..####.#..#.',
+    '..####.#....', '..####.#....', '..####.#....', '..####..##..', '.######.....', '............'] },
+  // P40: Ehrenplatz für seltene Besucher (Krone)
+  ehrenplatz: { farbe: '#b8860b', raster: [
+    '............', '............', '.#...##...#.', '.##..##..##.', '.###.##.###.', '.##########.',
+    '.##########.', '.##########.', '.##########.', '............', '.##########.', '............'] },
 };
 
 /** { key: { name, farbe, raster } } für jeden Angebotswunsch. */
 export const ANGEBOT_BILDER = Object.fromEntries(Object.entries(BILDER).map(([k, b]) => [k, { name: ANGEBOT_TEXTE[k]?.kurz ?? k, ...b }]));
+
+/** { key: { name, farbe, raster } } für die neuen Versorgungswünsche aus P31. */
+export const NEUE_BILDER = Object.fromEntries(Object.entries(NEU).map(([k, b]) => [k, { name: VERSORGUNG_TEXTE[k]?.kurz ?? k, ...b }]));
