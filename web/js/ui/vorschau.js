@@ -528,9 +528,15 @@ export function init(game) {
     const bild = ringBild(z);
     if (r.ringBild !== bild) { ring.style.setProperty('--ring', bild); r.ringBild = bild; }
     if (r.eilig !== z.eilig) { ring.classList.toggle('eilig', z.eilig); r.eilig = z.eilig; }
-    if (r.laeuft !== laeuft) {
+    // Nordsee (P57): wartet auf die Flut
+    const flut = laeuft ? null : game.sim?.state?.boats?.[id]?.flut;
+    const titel = laeuft ? 'Geduld: so lange wartet das Boot noch an der Boje'
+      : flut != null ? `Wartet auf die Flut${flut >= 0 ? `, läuft ab etwa ${uhrzeitText(flut, game.sim?.ctx?.rules)} Uhr ein` : ''}. Die Geduld ruht so lange.`
+      : 'Geduld ruht: abends und bis zum Vormittag nach einer Nacht an der Boje wartet das Boot ohne Eile';
+    if (r.titel !== titel) {
       r.laeuft = laeuft;
-      ring.title = laeuft ? 'Geduld: so lange wartet das Boot noch an der Boje' : 'Geduld ruht: abends und bis zum Vormittag nach einer Nacht an der Boje wartet das Boot ohne Eile';
+      r.titel = titel;
+      ring.title = titel;
     }
   }
   game.onTick?.((dt) => {

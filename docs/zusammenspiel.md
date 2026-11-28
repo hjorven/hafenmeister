@@ -362,7 +362,12 @@ Stand 28.11.2026, Teil 1 (Regeln). Was die Zufahrt im Tidenfenster mit anderen F
 | Päckchen (P27) | `raftWhyNot` fragt den Hook `fit`, also auch bei Ebbe kein Päckchen für ein Boot, das nicht hineinkommt | im Code geprüft |
 | Grün-Rot-Schild | bleibt grün (Probeboot ohne Tiefgang), die Box ist frei | geprüft (Test) |
 | Abreise, Kurzhalt | Ablegen erst im Tidenfenster (neuer Hook `departAt`); die Box bleibt so lange belegt | geprüft (Test) |
-| Tagestörn | in das Tidenfenster gelegt oder fällt aus; der Tagestörn der Dauerlieger (features/dauerlieger.js) kennt die Tide noch nicht | Rest für Teil 2 |
+| Tagestörn | in das Tidenfenster gelegt oder fällt aus | geprüft (Test) |
+| Dauerlieger auf Törn (P20, H9) | kommen nachmittags erst zurück, wenn genug Wasser in der Zufahrt ist (`dauerlieger.js` fragt den Hook `hold`); sonst abends wie bisher | geprüft (Test) |
+| Wetterflagge (Mast mit Windsack) | stand 2 m hinter dem landnächsten Platz von Steg A im Wasser (auch an der Ostsee), in der Nordsee bei Ebbe auf dem Grund; steht jetzt auf dem Kai (`wetterflagge.js`, erste Landstelle landwärts plus 1,2 m) | behoben |
+| Wetterbericht | Gezeiten stehen oben im Bericht, der Pegel im Wetterknopf; an der Ostsee unverändert | geprüft (Bild) |
+| Bojenfeld (P36) | an der Nordsee Trockenfallplätze: Hook `fit` sagt `kiel` (Kielboot) oder `platte` (zu wenig Wasser über der Plate), auch beim Umlegen; Ablegen im Fenster; Name und Text im Baumenü; Lage sucht nur Wasser, die Plate liegt darunter | geprüft (Test, Bild) |
+| Naturecke (P52) | hält Abstand zum Bojenfeld über `bojenfeldLage`; an der Nordsee liegt das Feld an anderer Stelle (Suche nach Wasser statt Tiefe), die Naturecke rechnet mit derselben Lage | im Code geprüft |
 | Bootsgeschichten (Zeiten tauschen) | die Gezeiten tauschen danach; im Browser hängt sich `features/gezeiten.js` als letztes Modul ein, im Balancing als letzter Hook | so eingerichtet |
 | Havarist (P37), Jugendtraining (P39), seltene Besucher (P40), Großschiffe (XXL) | von der Zufahrt ausgenommen (eigene Abläufe mit Fristen) | so entschieden |
 | Niedrigwasser bei Westwind (P29) | ein Ostsee-Vorgang (Westwind drückt das Wasser aus der westlichen Ostsee); in der Nordsee aus (`baggern.js` setzePegel), dort bestimmt die Tide den Wasserstand | behoben |

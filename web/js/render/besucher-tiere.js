@@ -267,7 +267,7 @@ export function init(game) {
     t.s += dt * SCHWAN_TEMPO * (1 - 0.6 * druck);
     for (const s of t.tiere) {
       const p = aufPfad(t.pfad, t.s - s.ab * 1.0);
-      s.obj.position.set(p.x, 0.02 + Math.sin(uhr * 1.6 + s.phase) * 0.03, p.z);
+      s.obj.position.set(p.x, 0.02 + Math.sin(uhr * 1.6 + s.phase) * 0.03 + (game.landscape?.pegel ?? 0), p.z);
       // Bug (+x im Modell) in Fahrtrichtung
       s.obj.rotation.y = -p.dir + Math.sin(uhr * 0.7 + s.phase) * 0.08;
     }

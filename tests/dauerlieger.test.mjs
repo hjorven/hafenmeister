@@ -784,3 +784,31 @@ test('H9: liegt zur Rückkehr noch ein kurzer Halt in der Box, wartet er, bis si
   assert.equal(state.berths[platz], boatId);
   assert.equal(p.kuendigung, null);
 });
+
+// ---------------------------------------------------------------- Nordsee (P57): Tagestörn im Tidenfenster
+
+test('P57: an der Nordsee kommt der Tagestörn erst zurück, wenn genug Wasser in der Zufahrt ist', async () => {
+  const G = await import('../web/js/features/gezeiten-regeln.js');
+  const { ctx, state } = neu(6);
+  G.haengeEin((name, fn) => sim.addHook(ctx, name, fn));
+  state.region = 'nordsee';
+  nurTagestoern(ctx);
+  UMWELT.sturm = () => false;
+  const platz = freierPlatz(state, ctx);
+  const { boatId } = machDauerplatz(state, ctx, platz);
+  sim.runDay(state, ctx);
+  assert.equal(aufTagestoern(state, platz), true);
+  const p = dauerState(state).plaetze[platz];
+  p.boot.draft = 2.0;   // tiefer Kiel: braucht viel Wasser in der Zufahrt der Stufe 2
+  let ev = [];
+  let n = 0;
+  while (state.phase === 'day' && aufTagestoern(state, platz) && n++ < 5000) {
+    ev = ev.concat(sim.tick(state, ctx, 1));
+    if (!aufTagestoern(state, platz) && state.phase === 'day') {
+      assert.equal(G.zufahrtOffen(state, ctx, state.boats[boatId]), true, `eingelaufen nur bei genug Wasser (Uhr ${state.clock}, Phase ${state.phase}, Wasser ${G.wasserstand(state, ctx).toFixed(2)})`);
+    }
+  }
+  // Tagsüber nie bei zu wenig Wasser; spätestens abends ist es zurück
+  while (state.phase === 'day' && n++ < 5000) ev = ev.concat(sim.tick(state, ctx, 1));
+  assert.equal(state.berths[platz], boatId);
+});

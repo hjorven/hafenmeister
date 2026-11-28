@@ -101,6 +101,7 @@ export function initBanner(game) {
   panel.hidden = true;
   host.appendChild(panel);
 
+  let tideText = '';
   function renderChip() {
     const fc = game.events?.forecast(2);
     if (!fc?.length) return;
@@ -115,6 +116,15 @@ export function initBanner(game) {
     else if (gross && grossIn > 0) label.textContent = `${gross.event.title} in ${grossIn} ${grossIn === 1 ? 'Tag' : 'Tagen'}`;
     else label.textContent = PART_NAME[fc[0].season.part] ?? '';
     chip.append(label);
+    // Nordsee (P57): Pegel im Knopf, "Flut 2,4 m" oder "Ebbe 0,8 m"
+    tideText = game.gezeiten?.chipText?.() ?? '';
+    if (tideText) {
+      const tide = document.createElement('span');
+      tide.className = 'hm-chip-zahl wp-tide-chip';
+      tide.textContent = tideText;
+      chip.append(tide);
+      chip.setAttribute('aria-label', `Wetterbericht, ${tideText}`);
+    } else chip.setAttribute('aria-label', 'Wetterbericht');
     chip.classList.toggle('has-news', !!next || !!fc[0].event || !!gross);
   }
 
@@ -126,6 +136,9 @@ export function initBanner(game) {
     const s = fc[0]?.season;
     head.textContent = s ? (s.winter ? `Winter, Jahr ${s.year}` : `${PART_NAME[s.part]}, Tag ${s.seasonDay} von ${game.sim?.ctx?.rules?.seasonDays ?? 16}, Jahr ${s.year}`) : '';
     panel.append(head);
+    // Nordsee (P57): Gezeiten heute, vor den Tagen
+    const tide = game.gezeiten?.berichtZeile?.();
+    if (tide) panel.append(tide);
     fc.forEach((e, i) => {
       const row = document.createElement('div');
       row.className = 'wp-row' + (e.event ? ' event' : '');
@@ -205,6 +218,14 @@ export function initBanner(game) {
 
   const refresh = () => { renderChip(); if (!panel.hidden) renderPanel(); };
   game.on('weather', refresh);
+  // Pegel ändert sich laufend: Knopf nur neu, wenn sich der Text ändert, offener Bericht höchstens alle 5 s
+  let tideBericht = 0;
+  game.on('gezeiten', () => {
+    if ((game.gezeiten?.chipText?.() ?? '') !== tideText) renderChip();
+    const jetzt = performance.now();
+    if (!panel.hidden && jetzt - tideBericht > 5000) { tideBericht = jetzt; renderPanel(); }
+  });
+  game.on('region', () => setTimeout(refresh, 0));
   // Für andere Module (Wind P34): Ankündigung im Meldeplatz, gleiche Form wie Ereignisse
   game.banner = { zeige: (icon, titel, text, sek) => show(icon, titel, text, sek) };
   game.on('event:loaded', refresh);

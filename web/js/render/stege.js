@@ -26,6 +26,8 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { HAFEN } from '../data/harbor.js';
+import { ECONOMY } from '../data/economy.js';
+import { region as regionNach } from './landschaft/regionen.js';
 
 const U = HAFEN.einheiten?.meterProEinheit ?? 0.62;
 // Plätze nach id (HAFEN.plaetze wird beim Stegbild neu gesetzt, darum erst beim Aufruf lesen)
@@ -54,6 +56,18 @@ export function init(game) {
 
   // Gemeinsame Geometrien
   const pfahlGeo = new THREE.CylinderGeometry(0.16, 0.16, 2.6, 6);
+  // Nordsee (P57): Stege und Kai stehen um landPlus höher (über Springhochwasser), Pfähle reichen bis unter
+  // Niedrigwasser. Liegeplatzflächen, Fingerstege und Bauplätze schwimmen mit dem Pegel (game.landscape.pegel).
+  const hoch = () => (game.landscape?.region === 'nordsee' ? regionNach('nordsee').gelaende?.landPlus ?? 0 : 0);
+  // Nordsee (P57): Das Bojenfeld liegt auf einer Plate im Watt; Grund so viele Meter unter dem mittleren Wasser
+  const platte = () => (hoch() && ECONOMY.nordsee?.trockenfallen ? ECONOMY.nordsee.trockenfallen.platte : null);
+  // Pfahl von unten bis oben (Meter in seiner Gruppe) strecken
+  function strecken(m, geoHoehe, oben, unten) {
+    const len = oben - unten;
+    m.scale.y = len / geoHoehe;
+    m.position.y = unten + len / 2;
+  }
+  const schwimmend = [];   // [mesh, Grundhöhe] folgen dem Pegel
   const dalbeGeo = new THREE.CylinderGeometry(0.18, 0.2, 3.2, 6);
   const kappeGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.18, 6);
   const pollerGeo = new THREE.CylinderGeometry(0.22, 0.28, 0.6, 8);
@@ -70,7 +84,7 @@ export function init(game) {
   function zusammenfassen(g) {
     const jeMat = new Map();
     for (const o of [...g.children]) {
-      if (!o.isMesh || !fest.has(o.material) || o.userData.pick || o.userData.bauplatz || o.children.length) continue;
+      if (!o.isMesh || !fest.has(o.material) || o.userData.pick || o.userData.bauplatz || o.userData.schwimmt || o.children.length) continue;
       o.updateMatrix();
       const geo = o.geometry.clone().applyMatrix4(o.matrix);
       if (!geo.index) continue;
@@ -104,7 +118,13 @@ export function init(game) {
     const t = game.time ?? performance.now() / 1000;
     for (const b of bojen) {
       const ph = b.userData.phase;
-      b.position.y = Math.sin(t * 1.5 + ph) * 0.05 - 0.05;
+      // mit dem Pegel (Nordsee, P57); auf der Plate im Watt liegt die Boje bei Ebbe auf dem Grund
+      const pg = game.landscape?.pegel ?? 0;
+      if (b.userData.grund != null && pg < b.userData.grund + 0.05) {
+        b.position.y = b.userData.grund; b.rotation.set(0.25, 0, 0.12);
+        continue;
+      }
+      b.position.y = Math.sin(t * 1.5 + ph) * 0.05 - 0.05 + pg;
       b.rotation.x = Math.sin(t * 1.2 + ph) * 0.07;
       b.rotation.z = Math.cos(t * 1.05 + ph) * 0.07;
     }
@@ -147,6 +167,7 @@ export function init(game) {
         for (const s of [1, -1]) {
           const pf = new THREE.Mesh(pfahlGeo, M.pfahl);
           pf.position.set(p.x + quer.x * s, -0.3, p.z + quer.z * s);
+          if (hoch()) strecken(pf, 2.6, 1.0, -2.2 - hoch());
           g.add(pf);
         }
       }
@@ -170,6 +191,7 @@ export function init(game) {
         const p = a.clone().addScaledVector(dir, (len * k) / n);
         const pf = new THREE.Mesh(dalbeGeo, M.pfahl);
         pf.position.set(p.x + quer.x, 0.1 + 1.6 - 0.6, p.z + quer.z);
+        if (hoch()) strecken(pf, 3.2, 2.7, -2.2 - hoch());
         g.add(pf);
       }
     }
@@ -248,6 +270,7 @@ export function init(game) {
       fl.rotation.x = -Math.PI / 2;
       fl.rotation.z = rad;
       fl.position.set(c.x, 0.05, c.z);
+      schwimmend.push([fl, 0.05]);
       fl.userData.pick = { type: 'buildsite', id: st.projekt.id };
       fl.userData.bauplatz = st.projekt.id;
       fl.renderOrder = 2;
@@ -267,6 +290,7 @@ export function init(game) {
     fl.rotation.x = -Math.PI / 2;
     fl.rotation.z = rad;
     fl.position.set(c.x, 0.06, c.z);
+    schwimmend.push([fl, 0.06]);
     fl.userData.pick = { type: 'berth', id: p.id };
     fl.renderOrder = 2;
     g.add(fl);
@@ -278,10 +302,11 @@ export function init(game) {
         const d = new THREE.Mesh(dalbeGeo, M.pfahl);
         d.position.copy(heck).addScaledVector(seite, B * s);
         d.position.y = 0.6;
+        if (hoch()) strecken(d, 3.2, 2.2 + hoch(), -2.2);
         g.add(d);
         const k = new THREE.Mesh(kappeGeo, M.kappe);
         k.position.copy(d.position);
-        k.position.y = 2.25;
+        k.position.y = 2.25 + hoch();
         g.add(k);
       }
     } else if (p.art === 'finger') {
@@ -292,10 +317,12 @@ export function init(game) {
       const f = new THREE.Mesh(new THREE.BoxGeometry(fl2, 0.14, 0.7), M.schwimm);
       f.position.set(mitte.x, 0.36, mitte.z);
       f.rotation.y = rad;
+      if (hoch()) { f.userData.schwimmt = true; schwimmend.push([f, 0.36]); }   // Nordsee: schwimmt mit dem Pegel
       g.add(f);
       const pf = new THREE.Mesh(dalbeGeo, M.pfahl);
       pf.position.copy(c).addScaledVector(bug, L / 2 - fl2).addScaledVector(seite, B * s);
       pf.position.y = 0.6;
+      if (hoch()) strecken(pf, 3.2, 2.2 + hoch(), -2.2);
       g.add(pf);
     }
     plaetze.set(p.id, { id: p.id, x: c.x, z: c.z, richtung, laenge: L, breite: B, art: p.art, mesh: fl });
@@ -306,10 +333,12 @@ export function init(game) {
   function muringboje(p, c, g) {
     const fl = new THREE.Mesh(bojeFlaecheGeo, platzMaterial());
     fl.position.set(c.x, 0.06, c.z);
+    schwimmend.push([fl, 0.06, platte() != null ? -platte() + 0.06 : null]);
     fl.userData.pick = { type: 'berth', id: p.id };
     fl.renderOrder = 2;
     g.add(fl);
     const boje = new THREE.Group();
+    if (platte() != null) boje.userData.grund = -platte() + 0.2;
     boje.name = `muringboje-${p.id}`;
     const ball = new THREE.Mesh(bojeKugelGeo, M.bojeWeiss);
     const band = new THREE.Mesh(bojeBandGeo, M.bojeBlau);
@@ -388,7 +417,7 @@ export function init(game) {
     const doppel = Object.keys(game.sim?.state?.buildings ?? {}).filter((k) => (k.startsWith('doppel:') || k.startsWith('bojenfeld-')) && game.sim.state.buildings[k]).sort().join(',');
     // Bojenfeld (P36): Lage hängt vom Gelände ab (neues Spiel auf anderer Küste)
     const bf = HAFEN.plaetze.find((p) => p.art === 'boje')?.lage?.[s]?.slice(0, 2).join(',') ?? '-';
-    const sig = s + '|' + bf + '|' + (z ? Object.keys(z.state.buildings).filter((k) => z.state.buildings[k]).sort().join(',') + '|' + [...z.offen.keys()].sort().join(',') : 'alles|' + doppel);
+    const sig = s + '|' + bf + '|' + hoch() + '|' + (z ? Object.keys(z.state.buildings).filter((k) => z.state.buildings[k]).sort().join(',') + '|' + [...z.offen.keys()].sort().join(',') : 'alles|' + doppel);
     if (sig === signatur && gruppe) return;
     signatur = sig;
     stufe = s;
@@ -400,6 +429,7 @@ export function init(game) {
     plaetze = new Map();
     bauplaetze = [];
     bojen = [];
+    schwimmend.length = 0;
     const linien = HAFEN.stufen[stufe].stege;
 
     // Plaetze der Stufe mit Zustand, jeder Platz gehoert zur naechsten Linie seines Stegs
@@ -468,8 +498,18 @@ export function init(game) {
       if (r.projekt && r.plan > r.bis + 0.5) geisterLinie(linie, teilLinie(linie.punkte, r.bis, r.plan), r.projekt, g);
       if (linie.steg && g.children.some((o) => !o.userData.bauplatz)) g.userData.pick = { type: 'jetty', id: linie.steg };
       zusammenfassen(g);
+      // Nordsee: Stege und Kai stehen höher, Geister-Stegteile liegen auf dem Wasser
+      if (hoch()) {
+        for (const o of g.children) {
+          if (o.userData.bauplatz) schwimmend.push([o, o.position.y]);
+          else o.position.y += hoch();
+        }
+      }
       gruppe.add(g);
     });
+
+    if (hoch()) pegellatte(gebauteStege, gruppe);
+    if (platte() != null) platen(gruppe);
 
     let nr = 0;
     let letzterSteg = null;
@@ -480,9 +520,72 @@ export function init(game) {
     }
     zusammenfassen(gruppe);
     root.add(gruppe);
+    schwimmend.neu = true;
     api.stage = Number(stufe);
     highlight(markiert.ids, markiert.farbe);
     game.emit('stege', { stufe: Number(stufe), plaetze: plaetze.size, bauplaetze: bauplaetze.length });
+  }
+
+  // Nordsee (P57): Pegellatte neben der Wurzel des ersten Stegs, rot-weiß je halber Meter, Ziffern als dunkle
+  // Striche je Meter. Das Wasser steigt und fällt sichtbar daran (Meter über Seekartennull wie die Anzeige).
+  const LATTE = { rot: mat('#d9503f'), weiss: mat('#f4f1ea'), strich: mat('#24364a') };
+  function pegellatte(stege, g) {
+    const linie = stege.find((l) => l.steg === 'A') ?? stege.find((l) => l.bauart !== 'kai');
+    if (!linie || linie.punkte.length < 2) return;
+    const a = W(...linie.punkte[0]), b = W(...linie.punkte[1]);
+    const d = b.clone().sub(a).setY(0).normalize();
+    const n = new THREE.Vector3(-d.z, 0, d.x);
+    const ort = a.clone().addScaledVector(d, 7).addScaledVector(n, Math.max(1.0, linie.breite * U) / 2 + 0.6);
+    // Seekartennull in der Szene: Mittelwasser (y = 0) minus halber Tidenhub
+    const null0 = -(ECONOMY.nordsee?.gezeiten?.hub ?? 2.8) / 2;
+    const teile = { rot: [], weiss: [], strich: [] };
+    for (let i = -1; i < 9; i++) {
+      const geo = new THREE.BoxGeometry(0.8, 0.5, 0.08);
+      geo.translate(0, null0 + i * 0.5 + 0.25, 0);
+      teile[i % 2 ? 'weiss' : 'rot'].push(geo);
+      if (i >= 0 && i % 2 === 0) {
+        const st = new THREE.BoxGeometry(0.84, 0.08, 0.1);
+        st.translate(0, null0 + i * 0.5, 0);
+        teile.strich.push(st);
+      }
+    }
+    const latte = new THREE.Group();
+    for (const [k, geos] of Object.entries(teile)) latte.add(new THREE.Mesh(mergeGeometries(geos), LATTE[k]));
+    const pfahl = new THREE.Mesh(new THREE.BoxGeometry(0.3, 7, 0.3), M.pfahl);
+    pfahl.position.set(0, null0 + 1.5, -0.2);
+    latte.add(pfahl);
+    latte.position.copy(ort);
+    latte.rotation.y = Math.atan2(d.x, d.z);
+    latte.name = 'pegellatte';
+    latte.userData.schwimmt = true;   // nicht mit den Stegen zusammenfassen
+    g.add(latte);
+  }
+
+  // Nordsee (P57): Plate im Watt unter dem Bojenfeld (auch wo noch keine Boje liegt, sie ist Natur).
+  // Je Boje ein flacher Schlickhügel, oben eben auf Höhe -platte; bei Ebbe liegt er trocken, die Boote darauf.
+  const SCHLICK = mat('#a89270');
+  function platen(g) {
+    const pkte = HAFEN.plaetze.filter((p) => p.art === 'boje').map((p) => p.lage?.[stufe]).filter(Boolean);
+    if (!pkte.length) return;
+    const r = BOJE_R + 4;
+    const geos = pkte.map(([x, y], i) => {
+      const geo = new THREE.CylinderGeometry(r, r + 3, 1.2, 18, 1);
+      // etwas unregelmäßig, damit es nicht wie gestanzt aussieht
+      const pos = geo.attributes.position;
+      for (let k = 0; k < pos.count; k++) {
+        const w = Math.atan2(pos.getZ(k), pos.getX(k));
+        const f = 1 + 0.12 * Math.sin(w * 3 + i * 1.7) + 0.08 * Math.sin(w * 5 + i);
+        pos.setX(k, pos.getX(k) * f);
+        pos.setZ(k, pos.getZ(k) * f);
+      }
+      const v = W(x, y);
+      geo.translate(v.x, -platte() - 0.6, v.z);
+      return geo;
+    });
+    const m = new THREE.Mesh(mergeGeometries(geos), SCHLICK);
+    m.name = 'platen';
+    m.userData.schwimmt = true;
+    g.add(m);
   }
 
   // Noch nicht gekaufter Stegteil: heller, durchscheinender Umriss auf dem Wasser
@@ -514,7 +617,8 @@ export function init(game) {
 
   // Hoehe der Laufoberflaeche ueber dem Wasser in Metern, z. B. fuer Fussgaenger
   const DECK = { holz: 0.86, schwimmsteg: 0.46, kai: 1.3 };
-  const deckHoehe = (bauart) => DECK[bauart] ?? DECK.holz;
+  // Nordsee (P57): alles um landPlus höher (über Springhochwasser)
+  const deckHoehe = (bauart) => (DECK[bauart] ?? DECK.holz) + hoch();
 
   const api = {
     group: root, setStage, highlight, deckHoehe, stage: 0,
@@ -528,6 +632,16 @@ export function init(game) {
   game.on('build', () => aufbauen());
   game.on('sim:change', () => aufbauen());
   game.on('ready', () => aufbauen());
+  game.on('region', () => setTimeout(() => aufbauen(), 0));
+  // Ebbe und Flut: Platzflächen, Fingerstege und Bauplätze schwimmen mit dem Pegel
+  let pegelVor = 0;
+  game.onTick(() => {
+    const pg = game.landscape?.pegel ?? 0;
+    if (pg === pegelVor && !schwimmend.neu) return;
+    pegelVor = pg;
+    schwimmend.neu = false;
+    for (const [m, y, boden] of schwimmend) m.position.y = boden != null ? Math.max(boden, y + pg) : y + pg;
+  });
 
   // Bauplatz antippen oeffnet die Bauen-Karte (dort steht das Stegprojekt mit Preis)
   game.on('tap', (e) => {

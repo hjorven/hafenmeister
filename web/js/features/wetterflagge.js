@@ -91,7 +91,15 @@ export async function init(game) {
     const a = HAFEN.plaetze.filter((p) => p.steg === 'A').map((p) => platzInWelt(p, stufe)).filter(Boolean);
     if (!a.length) { mast.visible = false; return; }
     const ufer = a.reduce((best, p) => (p.z > best.z ? p : best));
-    mast.position.set(ufer.x - 6, 0, ufer.z + 2);
+    // Auf festen Grund: vom Platz landwärts (Süden, +z) bis zur Kaikante, dann gut einen Meter auf den Kai.
+    // Früher stand der Mast 2 m hinter dem Platz im Wasser (in der Nordsee bei Ebbe sichtbar, P57).
+    const boden = (z) => game.landschaft?.hoeheBei?.(ufer.x - 6, z);
+    let z = ufer.z + 2, y = 0;
+    if (Number.isFinite(boden(z))) {
+      for (let i = 0; i < 40; i++, z += 0.5) if (boden(z) > 0.3) { z += 1.2; y = Math.max(0, boden(z) ?? 0); break; }
+      if (!(y > 0)) { z = ufer.z + 2; y = 0; }
+    }
+    mast.position.set(ufer.x - 6, y, z);
     mast.visible = true;
   }
 
@@ -121,6 +129,7 @@ export async function init(game) {
 
   for (const n of ['weather', 'event:announce', 'event:start', 'event:end', 'event:loaded', 'day:start']) game.on(n, aktualisiere);
   game.on('stufe', lage);
+  game.on('landschaft:geaendert', () => setTimeout(lage, 0));
   game.on('spielstand-geladen', () => { lage(); aktualisiere(); });
 
   // Antippen des Masts öffnet den Wetterbericht

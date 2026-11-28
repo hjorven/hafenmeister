@@ -20,6 +20,8 @@ const REASON_LABEL = {
   draft: 'Hier ist das Wasser zu flach für dieses Boot.',
   niedrigwasser: 'Heute ist Niedrigwasser: Hier bleibt gerade zu wenig Wasser unter dem Kiel.',
   tide: 'Ebbe: In der Zufahrt ist zu wenig Wasser für dieses Boot. Es wartet auf die Flut.',
+  kiel: 'Die Plate fällt bei Ebbe trocken: Dort liegen nur Boote ohne tiefen Kiel (Kutter, Motorboote, Jollen, Ruder- und Paddelboote).',
+  platte: 'Über der Plate steht gerade zu wenig Wasser für dieses Boot. Erst wenn die Flut aufläuft, kommt es hierher.',
   size: 'Dieser Platz ist für andere Schiffsgrößen.',
   reserved: 'Dieser Platz ist fest vergeben.',
   funk: 'Diese Box ist für ein angemeldetes Boot frei gehalten.',
@@ -250,7 +252,9 @@ export function init(game) {
           // Starkwind (P34): was Schild, Welle und Windlinien über den Boxen bedeuten
           game.wind?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind' }, game.wind.kartenSatz(b)) : null,
           // Niedrigwasser (P29): Kiel im Schlick
-          game.baggern?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind' }, game.baggern.kartenSatz(b)) : null),
+          game.baggern?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind' }, game.baggern.kartenSatz(b)) : null,
+          // Nordsee (P57): wartet auf die Flut
+          game.gezeiten?.kartenSatz?.(b) ? el('p', { class: 'card-geschichte card-wind card-tide' }, game.gezeiten.kartenSatz(b)) : null),
         el('button', { type: 'button', class: 'hm-zu', 'aria-label': 'Schließen', title: 'Schließen', onclick: schliessen }, 'Schließen')),
       el('ul', { class: 'hm-fakten', 'aria-label': 'Eckdaten' },
         el('li', { class: 'groesse', title: 'Größenklasse' }, `Größe ${b.size}`),
@@ -268,8 +272,10 @@ export function init(game) {
       wert ? el('p', { class: 'card-zahlt' }, zahltText(wert.fee, gold.length ? sim.platzWert(b.id, gold[0])?.fee ?? wert.fee : null, gold.length > 0 && gold.length >= fitting.length,
         b.nights === 0 ? 0 : Math.max(1, Math.min(sim.ctx.rules.prepay || 1, b.nights || 1)), !!sim.ctx.rules.tip?.sizes?.includes(b.size))) : null,
       el('p', { class: 'card-hint' }, !fitting.length
+        // Nordsee (P57): bei Ebbe ist die Zufahrt zu, nicht jede Box voll
+        ? (game.gezeiten?.kartenSatz?.(b) ? 'Sobald die Flut reicht, leuchten hier die passenden Plätze.'
         // Päckchen (P27): ist keine Box frei, darf es längsseits an ein gleich großes oder größeres Boot
-        ? ((sim.paeckchenZiele?.(b.id) ?? []).length
+        : (sim.paeckchenZiele?.(b.id) ?? []).length
           ? 'Keine Box frei. Ins Päckchen: auf ein Boot mit weißem Rahmen ziehen (halbes Liegegeld, eine Nacht).'
           : 'Gerade ist kein passender Platz frei.')
         : [`${fitting.length} passende ${fitting.length === 1 ? 'Platz leuchtet' : 'Plätze leuchten'}${flotte

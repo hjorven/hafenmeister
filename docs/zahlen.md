@@ -123,6 +123,9 @@ Trinkgeld beim Selbst-Abholen (L, XL, XXL): 15 % des Liegegelds. Nebenkosten ab 
 | Tide | Hub 2,8 m, Periode 12,42 h, erstes Hochwasser 9,5 Uhr, Spring und Nipp alle 14,8 Tage (±20 %) |
 | Zufahrt bei Niedrigwasser | Stufe 1: 0,3 m, Stufe 2: 0,5 m, Stufe 3: 1,4 m, Stufe 4: 1,8 m, Stufe 5: 2,4 m, Stufe 6: 2,8 m |
 | Skipper planen | 75 % der Boote, die bei Ebbe kämen, legen ihre Ankunft ins Tidenfenster |
+| Trockenfallplätze (Bojenfeld im Watt) | Plate 0,55 m unter dem mittleren Wasser, Ort mit mindestens 0,2 m Wasser, Schwoikreis 7 m |
+| Trockenfallen dürfen | ruderboot, paddelboot, beiboot, jolle, motorboot, fischer |
+| Bonus auf der Plate | fischer +0,3 Anker, motorboot +0,1 Anker |
 
 ## Flottillen
 

@@ -86,7 +86,7 @@ export function init(game) {
     const t = game.time;
     for (const b of bojenGruppe.children) {
       const ph = b.userData.phase;
-      b.position.y = Math.sin(t * 1.6 + ph) * 0.06 - 0.05;
+      b.position.y = Math.sin(t * 1.6 + ph) * 0.06 - 0.05 + (game.landscape?.pegel ?? 0); // mit dem Pegel (Nordsee, P57)
       b.rotation.x = Math.sin(t * 1.3 + ph) * 0.08;
       b.rotation.z = Math.cos(t * 1.1 + ph) * 0.08;
     }
@@ -1944,7 +1944,7 @@ export function init(game) {
     if (t - bahnPruef > 1.5 || t < bahnPruef) { bahnPruef = t; zeigeBahn(regattaHeute()); }
     for (const g of regattaGruppe.children) {
       const ph = g.userData.phase;
-      g.position.y = Math.sin(t * 1.4 + ph) * 0.08 - 0.1;
+      g.position.y = Math.sin(t * 1.4 + ph) * 0.08 - 0.1 + (game.landscape?.pegel ?? 0);
       g.rotation.x = Math.sin(t * 1.2 + ph) * 0.06;
       g.rotation.z = Math.cos(t * 1.0 + ph) * 0.06;
     }

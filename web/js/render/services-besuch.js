@@ -699,7 +699,7 @@ export function initBesuche(game, services) {
         s.group.visible = s.t < 0.999;
         if (!s.group.visible) continue;
         const p = pose(s, dt);
-        s.group.position.set(p.x, Math.sin(game.time * 0.9 + p.x) * 0.08, p.z);
+        s.group.position.set(p.x, Math.sin(game.time * 0.9 + p.x) * 0.08 + (game.landscape?.pegel ?? 0), p.z);
         s.group.rotation.y = s.kurs;
         if (s.radar) s.radar.rotation.y = game.time * 1.5;
         if (s.fl) s.fl.rotation.y = Math.sin(game.time * 2.2) * 0.35;
@@ -786,7 +786,7 @@ export function initBesuche(game, services) {
       soll = u < 0.01 || u > 0.99 ? 0 : w.kurs;
     }
     bark.kurs = winkelZu(bark.kurs, soll, Math.min(1, dt * 2.2));
-    bark.group.position.set(p.x, Math.sin(game.time * 1.3 + p.x) * 0.05, p.z);
+    bark.group.position.set(p.x, Math.sin(game.time * 1.3 + p.x) * 0.05 + (game.landscape?.pegel ?? 0), p.z);
     bark.group.rotation.y = bark.kurs;
     bark.group.rotation.z = r ? Math.sin(game.time * 1.7) * 0.015 : 0;
     if (bark.fl) bark.fl.rotation.y = Math.sin(game.time * 2.6) * 0.4;
