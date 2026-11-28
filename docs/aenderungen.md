@@ -7,6 +7,7 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 ## 28.11.2026
 
 - Legt ein seltener Besucher an, ohne dass er vorher an der Boje gewartet hat (zum Beispiel direkt in den frei gehaltenen Ehrenplatz), kommen jetzt trotzdem die Meldung „liegt am Ehrenplatz“, der Eintrag im Logbuch und die Schaulustigen. Vorher blieb das in diesem Fall aus.
+- Jugendtraining: Die Optis bleiben nicht mehr am Slip stehen, wenn ein Trailerboot der Slipanlage lange davor kreuzt. Sie warten höchstens kurz und laufen dann aus.
 
 ## 27.11.2026
 
