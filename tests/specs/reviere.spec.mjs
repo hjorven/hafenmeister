@@ -33,6 +33,9 @@ test('Seekarte: Nordsee erst gesperrt, ab Ostsee-Stufe 5 wählbar, neuer Hafen l
   await press(nordsee, testInfo);
   await expect(nordsee).toHaveAttribute('aria-checked', 'true');
   await expect(page.locator('#hm-neu-revier-info')).toContainText('1.300');
+  // Küsten der Nordsee: Zufall plus fünf (P57 Teil 6)
+  await expect(page.locator('#hm-neu-kuesten [data-gelaende]')).toHaveCount(6);
+  await expect(page.locator('#hm-neu-kuesten [data-gelaende="5"]')).toHaveCount(0);
   await page.locator('#hm-neu-name').fill('Wattsiel');
   const los = page.locator('#hm-neu-los');
   await los.scrollIntoViewIfNeeded();

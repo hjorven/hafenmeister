@@ -464,6 +464,9 @@ export function init(game) {
   }
   // Einfahrt zwischen den Molen (Einbahn-Abschnitt): so viele Boote je Richtung zugleich
   const EINFAHRT_KONVOI = 6;
+  // So viele Boote sind hoechstens zugleich im Revier am Auslaufen, bevor das naechste ablegt (gemessen
+  // Kueste 14, Tag 84 bis 88: 8 halbiert die stehenden Boote gegenueber ohne Grenze, 14 bringt wenig)
+  const AUSLAUFEND_MAX = 8;
   // In offenem Wasser liegen die Bahnen der Ein- und der Auslaufenden so weit auseinander (Meter)
   const BAHN_ABSTAND_M = 24;
   let einfahrtNr = -1;
@@ -1302,6 +1305,12 @@ export function init(game) {
     if (takt.naechst - jetzt > 30) takt.naechst = jetzt;     // Spielzeit neu (Laden, neues Spiel)
     takt.fragt.set(anim, jetzt);
     if (jetzt < takt.naechst) return false;
+    // Nicht noch mehr losschicken, solange schon viele Auslaufende im Revier unterwegs sind (Morgenabfahrt,
+    // Sturm, Saisonende): die Boote warten dann in ihrer Box statt in einer Schlange im Fahrwasser.
+    // Wer draussen auf dem Seeweg ist, zaehlt nicht mehr. (Laenger als 180 s wartet niemand: boat-anim.js.)
+    let unterwegs = 0;
+    for (const o of game.boatAnim.boats) if (o.state === 'leaving' && o.model.visible !== false && !o.task?.opts?.see) unterwegs++;
+    if (unterwegs >= AUSLAUFEND_MAX) return false;
     takt.fragt.delete(anim);
     let wartend = 0;
     for (const [a, t] of takt.fragt) { if (jetzt - t > 2) takt.fragt.delete(a); else wartend++; }

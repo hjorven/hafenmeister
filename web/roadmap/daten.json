@@ -1,7 +1,7 @@
 {
  "stand": {
   "datum": "28.11.2026",
-  "commit": "67dfd27"
+  "commit": "73d0ea6"
  },
  "quelle": "https://github.com/hjorven/hafenmeister/blob/main/docs/roadmap.md",
  "repo": "https://github.com/hjorven/hafenmeister",
@@ -1250,13 +1250,15 @@
    "id": "P57",
    "titel": "Nordsee mit Gezeiten spielbar machen",
    "inhalt": "Revierfaktoren, Gezeiten, Schleuse, Trockenfallplätze, docs/regionen.md",
-   "thread": "läuft (Thread \"Nordsee mit Gezeiten spielbar machen\"): Teil 1 Gezeiten in den Regeln (PR 448), Teil 2 Tide sichtbar und Teil 3 Trockenfallplätze (PR 450), Teil 4 Schleuse (PR 452) gebaut, Teile 5 und 6 in Arbeit (docs/nordsee.md)",
+   "thread": "erledigt: Teil 1 Gezeiten in den Regeln (PR 448), Teil 2 Tide sichtbar und Teil 3 Trockenfallplätze (PR 450), Teil 4 Schleuse (PR 452), Teil 5 Freischalten, Seekarte, Startgeld (PR 453), Teil 6 Nordsee-Küsten (PR 455); docs/nordsee.md",
    "welle": 5,
    "prs": [
     177,
     448,
     450,
-    452
+    452,
+    453,
+    455
    ],
    "abschnitt": "Welle 5: Regionen und Online (Extras)",
    "punkte": [
@@ -3759,8 +3761,8 @@
   {
    "code": "K3",
    "text": "Kleinster spielbarer Kern: eigene Karte, Pegel, Tiefgang-Fenster, Kutter",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P57: Pegel und Tidenfenster Teil 1 und 2, eigene Küsten Teil 6, mehr Kutter als Revierfaktor)",
    "pakete": [
     "P57"
    ],
@@ -3770,30 +3772,34 @@
   {
    "code": "K4",
    "text": "Trockenfallen als Platzart",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P57 Teil 3: Bojenfeld im Watt, PR 450)",
    "pakete": [
     "P57"
    ],
-   "prs": [],
+   "prs": [
+    450
+   ],
    "abschnitt": "K Reviere und Nordsee"
   },
   {
    "code": "K5",
    "text": "Seekarte zum Wechseln, Spielstand und Ruf je Hafen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P57 Teil 5: Seekarte im Fenster Neues Spiel, Revier je Spielstand, Startgeld aus dem Ruf, PR 453)",
    "pakete": [
     "P57"
    ],
-   "prs": [],
+   "prs": [
+    453
+   ],
    "abschnitt": "K Reviere und Nordsee"
   },
   {
    "code": "K6",
    "text": "Freischalten an einer Stelle festlegen",
-   "status": "offen",
-   "statusText": "offen",
+   "status": "erledigt",
+   "statusText": "erledigt (P57 Teil 5: ECONOMY.nordsee.start.abStufe, save/reviere.js)",
    "pakete": [
     "P57"
    ],
@@ -4788,11 +4794,11 @@
   "alle": 87
  },
  "punkteGesamt": {
-  "erledigt": 200,
+  "erledigt": 204,
   "teilweise": 5,
   "arbeit": 0,
   "frage": 1,
-  "offen": 12,
+  "offen": 8,
   "entfaellt": 1,
   "alle": 219
  },
@@ -6348,79 +6354,6 @@
  "merges": [
   {
    "datum": "2026-11-28",
-   "titel": "Roadmap-Pflege: P57 Nordsee Teil 4 Schleuse (PR 452) mit Bild",
-   "pr": 454,
-   "pakete": [
-    "P57"
-   ]
-  },
-  {
-   "datum": "2026-11-28",
-   "titel": "Nordsee Teil 5: Freischalten, Seekarte, Startgeld aus dem Ruf (P57)",
-   "pr": 453,
-   "pakete": [
-    "P57"
-   ]
-  },
-  {
-   "datum": "2026-11-28",
-   "titel": "Nordsee Teil 4: Schleuse als Ausbau zu Stufe 3 (P57)",
-   "pr": 452,
-   "pakete": [
-    "P57"
-   ]
-  },
-  {
-   "datum": "2026-11-28",
-   "titel": "Roadmap-Pflege: P57 Nordsee Teil 1 bis 3 (PR 448, 450) mit Bildern",
-   "pr": 451,
-   "pakete": [
-    "P57"
-   ]
-  },
-  {
-   "datum": "2026-11-28",
-   "titel": "Nordsee Teil 2 und 3: Tide sichtbar, Trockenfallplätze im Watt (P57)",
-   "pr": 450,
-   "pakete": [
-    "P57"
-   ]
-  },
-  {
-   "datum": "2026-11-28",
-   "titel": "Roadmap-Pflege: P43 Fotoaufträge (PR 436) und P25 H9 (PR 397) mit Bildern",
-   "pr": 449,
-   "pakete": [
-    "P43",
-    "P25"
-   ]
-  },
-  {
-   "datum": "2026-11-28",
-   "titel": "Nordsee Teil 1: Ebbe und Flut in den Spielregeln (P57)",
-   "pr": 448,
-   "pakete": [
-    "P57"
-   ]
-  },
-  {
-   "datum": "2026-11-28",
-   "titel": "P25 Teil 3 (H9): Tagesgast in der Box eines Dauerliegers auf Tagestörn",
-   "pr": 397,
-   "pakete": [
-    "P25"
-   ]
-  },
-  {
-   "datum": "2026-11-28",
-   "titel": "P43 Fotoaufträge und Postkarten",
-   "pr": 436,
-   "pakete": [
-    "P43"
-   ]
-  },
-  {
-   "datum": "2026-11-28",
    "titel": "Arbeitsplan: Welle 4 fast fertig, Serie f7e42f9; starten Stau Handy Küste 3/14, P43, P25 H9, P57",
    "pr": 447,
    "pakete": [
@@ -6443,6 +6376,77 @@
    "pr": 445,
    "pakete": [
     "P52"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "P52: Naturecke am Schilf (schützen oder bebauen)",
+   "pr": 440,
+   "pakete": [
+    "P52"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: P53 Spätankömmling (PR 439) und P60 Verschönern (PR 441) mit Bildern",
+   "pr": 444,
+   "pakete": [
+    "P53",
+    "P60"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "Schwimmwellenbrecher ist ein Hindernis für die Boote und endet westlich von Steg B und C",
+   "pr": 443,
+   "pakete": []
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "P53 Spätankömmling: letztes Boot läuft nachts mit Lampe ein (F40)",
+   "pr": 439,
+   "pakete": [
+    "P53"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: Bilder für P49 Signalflaggen (PR 433)",
+   "pr": 442,
+   "pakete": [
+    "P49"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "P60: Hafen verschönern mit Bänken, Kübeln, Bäumen, Laternen und Anstrich",
+   "pr": 441,
+   "pakete": [
+    "P60"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "Roadmap-Pflege: P44 Hafenname und Flagge (PR 429) mit Bildern",
+   "pr": 438,
+   "pakete": [
+    "P44"
+   ]
+  },
+  {
+   "datum": "2026-11-27",
+   "titel": "P49: Signalflaggen als Wunschanzeige, Positionslichter und Hafenwissen (F33, F34)",
+   "pr": 433,
+   "pakete": [
+    "P49"
+   ]
+  },
+  {
+   "datum": "2026-11-22",
+   "titel": "Roadmap-Pflege: P51 Hafentiere (PR 435) mit Bildern",
+   "pr": 437,
+   "pakete": [
+    "P51"
    ]
   }
  ]

@@ -6,6 +6,7 @@ Stand: 15.11.2026 (bis PR 340, dazu P20). Status: gepflegt. Für Spielerinnen un
 
 ## 28.11.2026
 
+- Morgenabfahrt, Sturm und Saisonende: Wollen sehr viele Boote zugleich auslaufen, legen sie jetzt nacheinander ab und warten so lange in ihrer Box. Es sind höchstens acht Auslaufende zugleich im Hafen unterwegs. Vorher bildeten sie auf langen Seewegen (am Handy auf Küste 14 und an der Flussmündung) eine stehende Schlange, in der sich aus- und einlaufende Boote verkeilten.
 - Legt ein seltener Besucher an, ohne dass er vorher an der Boje gewartet hat (zum Beispiel direkt in den frei gehaltenen Ehrenplatz), kommen jetzt trotzdem die Meldung „liegt am Ehrenplatz“, der Eintrag im Logbuch und die Schaulustigen. Vorher blieb das in diesem Fall aus.
 - Jugendtraining: Die Optis bleiben nicht mehr am Slip stehen, wenn ein Trailerboot der Slipanlage lange davor kreuzt. Sie warten höchstens kurz und laufen dann aus.
 

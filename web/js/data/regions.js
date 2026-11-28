@@ -6,7 +6,12 @@
 // Neue Felder nur anhaengen. Aendert sich die Bedeutung eines Feldes, REVIER_FORMAT hochzaehlen.
 
 // 2 (P57): wasser.tide ist nur noch true/null, die Zahlen stehen in ECONOMY.nordsee
-export const REVIER_FORMAT = 2;
+// 3 (P57 Teil 6): kuesten neu; spiel und schiffe entfernt (die Zahlen stehen in ECONOMY.nordsee: Revierfaktoren,
+//   Bootsarten, Startgeld), freischalten.stufe steht in ECONOMY.nordsee.start.
+// Das Spiel liest: id, name, hafenname, freischalten, kuesten, farben, licht, wasser. Die übrigen Felder
+// (vorbilder, karte, kueste, bauweise, natur, wetter, platzarten, dienste, bauprojekte, ereignisse, musik)
+// beschreiben das Revier für Ideen und Modelle, das Spiel liest sie nicht (docs/regionen.md).
+export const REVIER_FORMAT = 3;
 
 export const REVIER_REIHENFOLGE = ['ostsee', 'nordsee'];
 
@@ -44,11 +49,8 @@ export const REVIERE = {
     },
     wasser: { wellen: 0.3, farbeSchaum: '#ffffff', tide: null },
     wetter: { windMittel: 3, sturm: 0.03, nebel: 0.03, regen: 0.12 },
-    schiffe: {
-      haeufigkeit: { S1: 1.3, S2: 1.5, S4: 1.2, S5: 1.2, M2: 1.2, XL1: 1.2 },
-      abStufe: {},
-    },
-    spiel: { hafengeld: 1.0, ankuenfte: 1.0, naechte: [1, 3], abendAnteil: 0.25, startgeld: 500 },
+    // Küstentypen (render/landschaft/natur.js), aus denen ein neuer Hafen hier wählt: alle
+    kuesten: null,
     platzarten: ['fels', 'boje'],
     dienste: ['strandkorbvermietung', 'eisdiele', 'fischbroetchen', 'raeucherei', 'fahrradverleih', 'saunafloss'],
     bauprojekte: ['durchstich', 'seebruecke', 'bojenfeld'],
@@ -61,7 +63,8 @@ export const REVIERE = {
     name: 'Nordsee',
     hafenname: 'Sielhafen',
     vorbilder: ['Neuharlingersiel', 'Greetsiel', 'Büsum'],
-    freischalten: { nach: 'ostsee', stufe: 5 },
+    // Stufe und Startgeld: ECONOMY.nordsee.start (save/reviere.js)
+    freischalten: { nach: 'ostsee' },
     karte: 'nehrung',
     kueste: { typ: 'deich-watt', text: 'grüner Deich mit Schafen, Salzwiesen, Watt mit Prielen, der Hafen liegt hinter dem Siel' },
     farben: {
@@ -93,11 +96,10 @@ export const REVIERE = {
       tide: true,
     },
     wetter: { windMittel: 5, sturm: 0.07, nebel: 0.1, regen: 0.18 },
-    schiffe: {
-      haeufigkeit: { M4: 2.0, L4: 1.6, M3: 1.2, L2: 0.4, L1: 0.7, XL3: 1.5, 'Seenotrettungskreuzer': 1.5 },
-      abStufe: { M4: 1, L4: 3 },
-    },
-    spiel: { hafengeld: 1.15, ankuenfte: 0.9, naechte: [1, 3], abendAnteil: 0.25, startgeld: 1200 },
+    // Küstentypen der Nordsee (P57 Teil 6): Watt mit Halligen, Flussmündung (Sielhafen an Ems, Weser, Elbe),
+    // Nehrung (Barriereinseln wie die Ostfriesischen Inseln), Inselhafen, Strandhaken (wie der Ellenbogen auf Sylt).
+    // Schären, Förde, Bodden, Steilküste und die echten Karten 11 bis 15 gibt es nur an der Ostsee.
+    kuesten: [7, 3, 1, 10, 9],
     platzarten: ['trockenfallen'],
     dienste: ['fischbroetchen', 'krabbenverkauf', 'wattfuehrung', 'inselfaehre'],
     bauprojekte: ['schleuse', 'deichtor'],

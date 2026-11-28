@@ -8,16 +8,23 @@
 //   'region'  mit der id als Text ('ostsee' oder 'nordsee')
 //             -> Landschaft und Gebaeude faerben sich um
 import { REVIERE, REVIER_REIHENFOLGE } from '../data/regions.js';
+import { ECONOMY } from '../data/economy.js';
 
 export function revier(id) {
   return REVIERE[id] ?? REVIERE[REVIER_REIHENFOLGE[0]];
 }
 
-// Ist ein Revier frei? `stufen` = { revierId: erreichte Stufe }
+// Ist ein Revier frei? `stufen` = { revierId: erreichte Stufe }. Die Stufe steht in ECONOMY.nordsee.start
+// (im Spiel entscheidet save/reviere.js mit dem besten Stand je Gerät).
 export function istFrei(r, stufen = {}) {
   const f = r.freischalten;
   if (f.start) return true;
-  return (stufen[f.nach] ?? 0) >= f.stufe;
+  return (stufen[f.nach] ?? 0) >= (ECONOMY.nordsee?.start?.abStufe ?? 5);
+}
+
+/** Küstentypen (natur.js), aus denen ein neuer Hafen in diesem Revier wählt; null heißt alle. */
+export function kuestenFuer(id) {
+  return revier(id).kuesten ?? null;
 }
 
 function revierAusAdresse() {

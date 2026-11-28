@@ -6,7 +6,8 @@
 // rollt in eine Torkammer neben der Ostmauer. Je Haupt ein Signalmast mit Rot und Grün, ein kleines
 // Schleusenwärterhaus auf der Ostmauer. Die Tore öffnen, wenn die Schleusung läuft (schleuseOffen) oder ein
 // Boot gerade in der Schleuse oder kurz davor ist, und schließen danach langsam.
-// Nur an der Nordsee ab Stufe 3 auf Küsten mit Durchstich (engpassArt 'durchstich').
+// Nur an der Nordsee ab Stufe 3. Auf Küsten mit Durchstich (engpassArt 'durchstich') sitzt sie zwischen dessen
+// Kaimauern; an offenen Küsten ('einfahrt') bekommt sie eigene Kammerwände an derselben Stelle (Seeschleuse).
 import * as THREE from 'three';
 import { HAFEN } from '../data/harbor.js';
 import { ECONOMY } from '../data/economy.js';
@@ -39,7 +40,10 @@ export async function init(game) {
   const xW = DURCHSTICH[0] + 1, xO = DURCHSTICH[1] - 1;             // Mauerkanten (Planeinheiten)
   const breite = (xO - xW) * U;                                       // lichte Weite in Metern
   const torB = 2.2;                                                   // Torkörper (Meter, quer zur Fahrt)
-  const yBinnen = seeNord(ENGPASS_X) + 8, yAussen = 222;               // Häupter (Planeinheiten)
+  // Häupter (Planeinheiten): im Durchstich zwischen Nehrungsufer und Außenkante; an offener Küste zwischen den
+  // Molen (Stufe 3 und 4 liegen sie bei x 146 und 210, ihre Innenkanten fast genau auf den Kammerwänden)
+  const LAGE = { durchstich: [seeNord(ENGPASS_X) + 8, 222], offen: [230, 262] };
+  let yBinnen = LAGE.durchstich[0], yAussen = LAGE.durchstich[1];
   const krone = () => (game.landscape?.region === 'nordsee' ? 1.0 + 1.8 : 1.0);   // Mauerkrone (landPlus 1,8)
 
   const haeupter = [];
@@ -93,7 +97,9 @@ export async function init(game) {
   function aufbauen() {
     const s = st();
     const an = !!s && G.hatSchleuse(s) && game.landscape?.region === 'nordsee';
-    const sig = an ? `an|${krone()}|${engpassArt()}` : 'aus';
+    const offen = engpassArt() !== 'durchstich';
+    const sig = an ? `an|${krone()}|${offen}` : 'aus';
+    [yBinnen, yAussen] = offen ? LAGE.offen : LAGE.durchstich;
     root.visible = an;
     if (sig === gebaut) return;
     gebaut = sig;
@@ -109,6 +115,16 @@ export async function init(game) {
       const sig = signal(xO * U + 1.6, z + (yp === yBinnen ? 2.6 : -2.6));
       root.add(t, k, sig);
       haeupter.push({ tor: t, x0: xW * U, sig, z, auf: 0 });
+    }
+    // Offene Küste: eigene Kammerwände (Beton) von Haupt zu Haupt, etwas über beide hinaus (ab Stufe 5 liegen
+    // die Molen weiter außen, dann stehen die Wände allein)
+    if (offen) {
+      for (const x of [xW, xO]) {
+        const lang = (yAussen - yBinnen + 4) * U, tief = krone() + 7;
+        const w = new THREE.Mesh(new THREE.BoxGeometry(3.2, tief, lang), M.beton);
+        w.position.set(x * U + (x === xW ? -1.6 : 1.6), krone() - tief / 2, -((yBinnen + yAussen) / 2) * U);
+        root.add(w);
+      }
     }
     // Schleusenwärterhaus auf der Ostmauer zwischen den Häuptern
     const haus = new THREE.Group();
