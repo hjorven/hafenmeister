@@ -1,6 +1,6 @@
 # Nordsee mit Ebbe und Flut (P57)
 
-Stand: 28.11.2026. Status: **Teil 1 gebaut** (Gezeiten in den Spielregeln, Revierfaktoren). Die übrigen Teile sind in Arbeit, siehe Abschnitt 5. Die Nordsee ist für Spieler noch nicht zu erreichen (nur `?revier=nordsee&stufe=n` zum Ausprobieren), bis Teil 5 (Freischalten und Seekarte) gemergt ist.
+Stand: 28.11.2026. Status: **Teil 1 und 2 gebaut** (Gezeiten in den Spielregeln, Revierfaktoren, Tide sichtbar). Die übrigen Teile sind in Arbeit, siehe Abschnitt 6. Die Nordsee ist für Spieler noch nicht zu erreichen (nur `?revier=nordsee&stufe=n` zum Ausprobieren), bis Teil 5 (Freischalten und Seekarte) gemergt ist.
 
 Ergänzt [regionen.md](regionen.md) (Aussehen der Reviere) und Abschnitt 9 im [Spielplan](plan.md). Roadmap: P57, Punkte K2 bis K6.
 
@@ -43,7 +43,23 @@ Das Grün-Rot-Schild einer Box bleibt bei Ebbe grün: Die Box ist frei, nur die 
 
 **Neue Hooks in `sim.js`** (allgemein, auch für andere Pakete): `hold` (ankommendes Boot wartet auf etwas, ankert bei vollen Bojen) und `departAt` (Ablegezeit verschieben). Beschreibung bei `addHook`.
 
-## 3. Ausprobieren
+## 3. Was man sieht (Teil 2)
+
+| Was | Wo im Code |
+|---|---|
+| Das Wasser steigt und fällt, Platen im Watt fallen trocken | Landschaft (`game.landscape.setzePegel`), Pegel aus `features/gezeiten.js` |
+| Boote, Bojen, Schwäne und Besucherschiffe schwimmen mit dem Pegel | `render/boat-anim.js`, `render/stege.js`, `render/boat-view.js`, `render/besucher-tiere.js`, `render/services-besuch.js` |
+| Stege und Kai stehen um 1,8 m höher (über Springhochwasser), ihre Pfähle reichen bis unter Niedrigwasser; Liegeplatzflächen und Fingerstege schwimmen | `render/stege.js` (`hoch()`, `schwimmend`) |
+| Pegellatte (rot-weiß je halber Meter, dunkler Strich je Meter) neben der Wurzel von Steg A, Null bei Seekartennull | `render/stege.js` (`pegellatte`) |
+| Im Wetterknopf der Pegel: "Flut 2,4 m" (steigt) oder "Ebbe 0,8 m" (fällt), Meter über Seekartennull | `events/banner.js`, `game.gezeiten.chipText()` |
+| Im Wetterbericht oben "Gezeiten heute": Tageskurve mit Strich bei jetzt, Hoch- und Niedrigwasser bei Tageslicht, "Zufahrt jetzt bis 1,9 m Tiefgang" | `game.gezeiten.berichtZeile()` |
+| Wartet ein Boot auf die Flut, steht der Geduldsring grau-blau (ruht), sein Titel sagt, ab wann es einläuft | `ui/vorschau.js`, `bridge.js` (`geduldRuht`) |
+| Bootskarte: "Ebbe: Mit 1,9 m Tiefgang kommt es erst ab etwa 18:10 Uhr durch die Zufahrt. Bis dahin wartet es ohne Eile." Statt "kein passender Platz frei": "Sobald die Flut reicht, leuchten hier die passenden Plätze." | `ui/hud.js`, `game.gezeiten.kartenSatz()` |
+| Einmal je Spielstand erklärt eine Meldung die Tide, wenn das erste Boot auf die Flut wartet | `features/gezeiten.js` (`state.modules.gezeiten.erklaert`) |
+
+Vorschaubilder: `nordsee/teil2-*.png` in den Projektdateien.
+
+## 4. Ausprobieren
 
 ```
 http://localhost:8000/?revier=nordsee&stufe=2
@@ -59,7 +75,7 @@ node tools/balance.mjs --laeufe 10 --revier nordsee
 
 Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, Ostsee 103. Einnahmen bis Tag 30 höher (Hafengeld mal 1,15), der Aufstieg gleich lang.
 
-## 4. Entscheidungen (P57, selbst getroffen und notiert)
+## 5. Entscheidungen (P57, selbst getroffen und notiert)
 
 | Frage | Entscheidung | Warum |
 |---|---|---|
@@ -69,13 +85,13 @@ Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, O
 | Tidenzahlen in `regions.js` oder `economy.js`? | Nur in `economy.js` (`nordsee.gezeiten`), `regions.js` sagt nur noch, dass die Nordsee eine Tide hat (`REVIER_FORMAT` 2). Die zweite Gezeitenrechnung in `world/region.js` ist entfernt. | Eine Zahlendatei (Regel aus P06). |
 | `economy.js` für andere Pakete frei? | Alle Nordsee-Zahlen stehen im eigenen Block `ECONOMY.nordsee`; P57 ändert nichts außerhalb davon. | P45 und Welle 6 können parallel an `economy.js` arbeiten. |
 
-## 5. Teile
+## 6. Teile
 
 | Teil | Inhalt | Stand |
 |---|---|---|
 | 1 | Gezeiten in den Spielregeln, Zufahrt, Warten auf Flut, Abreise im Tidenfenster, Revierfaktoren, Balancing `--revier nordsee`, Reviertest im normalen Testlauf | gebaut |
-| 2 | Tide sichtbar: Boote und Schwimmstege heben und senken sich, Pegel am Kai, Anzeige Hoch-/Niedrigwasser, Bootskarte "läuft ab ... ein" | in Arbeit |
-| 3 | Trockenfallplätze (K4): billig, nur für Boote ohne Kiel, bringen Kuttern und Mehrrumpfbooten Zufriedenheit | in Arbeit |
+| 2 | Tide sichtbar: Boote und Schwimmstege heben und senken sich, Pegellatte, Pegel im Wetterknopf, Gezeiten im Wetterbericht, Bootskarte "ab etwa ... Uhr" | gebaut |
+| 3 | Trockenfallplätze (K4): das Bojenfeld liegt an der Nordsee auf einer Plate im Watt, nur für Boote ohne tiefen Kiel, Kutter liegen dort gern | in Arbeit |
 | 4 | Schleuse als Ausbau zu Stufe 3 statt Durchstich | in Arbeit |
 | 5 | Freischalten ab Ostsee Stufe 5 (K6), Seekarte zum Wechseln, eigener Spielstand je Revier, Startgeld aus dem Ruf (K5) | in Arbeit |
 | 6 | Nordsee-Küsten: eigene Auswahl an Küstentypen für die Nordsee | in Arbeit |

@@ -1885,7 +1885,10 @@ class BoatAnim {
     }
 
     const ch = Math.cos(yaw), sh = Math.sin(yaw);
-    m.position.set(px + ch * sx, heave, pz - sh * sx);
+    // Ebbe und Flut (Nordsee, P57): Boote schwimmen auf dem Wasser, das mit dem Pegel steigt und fällt
+    const pegel = this.game.landscape?.pegel ?? 0;
+    this.pegelY = pegel;
+    m.position.set(px + ch * sx, heave + pegel, pz - sh * sx);
     m.rotation.set(roll, yaw, pitch);
 
     this.applyParts(step, t, lee, rel);
@@ -1980,7 +1983,7 @@ class BoatAnim {
       const len = L * (0.9 + k * 1.6);
       const wid = B * 0.5 + len * 0.36;
       const bow = L * 0.48;
-      this.wake.position.set(this.x + ch * bow, 0.04, this.z - sh * bow);
+      this.wake.position.set(this.x + ch * bow, 0.04 + (this.pegelY ?? 0), this.z - sh * bow);
       this.wake.rotation.y = this.heading;
       this.wake.scale.set(len, 1, wid * (0.95 + Math.sin(t * 2.3 + this.ph[0]) * 0.05));
     }
@@ -1992,7 +1995,7 @@ class BoatAnim {
         if (!on) continue;
         const along = i === 0 ? L * 0.38 : -L * 0.4;
         const out = (this.berth ? -this.berth.side : 1) * this.info.beam * 0.8;
-        f.position.set(this.x + ch * along + sh * out, 0.05, this.z - sh * along + ch * out);
+        f.position.set(this.x + ch * along + sh * out, 0.05 + (this.pegelY ?? 0), this.z - sh * along + ch * out);
         const r = this.info.beam * (0.45 + 0.25 * Math.sin(t * 5 + i * 2)) * this.thrusters;
         f.scale.set(r, 1, r);
       }

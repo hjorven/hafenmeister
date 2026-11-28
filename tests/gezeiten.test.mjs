@@ -99,6 +99,11 @@ test('Zufahrt: tiefes Boot wartet bei Niedrigwasser, läuft bei Hochwasser ein; 
   assert.equal(sim.berthState(state, ctx, box.id), 'frei');
   state.clock = lo;
   assert.equal(sim.berthState(state, ctx, box.id), 'frei', 'Schild bleibt grün, auch bei Niedrigwasser');
+  // Anzeige "Zufahrt jetzt bis x m Tiefgang" passt zur Regel
+  const moeglich = G.tiefgangMoeglich(state, ctx);
+  assert.ok(moeglich < tief.draft && moeglich >= 0);
+  assert.equal(G.zufahrtOffen(state, ctx, { ...tief, draft: moeglich - 0.01 }), true);
+  assert.equal(G.tiefgangMoeglich({ ...state, region: 'ostsee' }, ctx), Infinity);
 });
 
 test('Warten auf Flut: keine Geduld verloren, danach fährt das Boot selbst ein', () => {

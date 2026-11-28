@@ -96,3 +96,12 @@ body.card-open #weather-panel { display: none; }
 @media (prefers-reduced-motion: reduce) {
   #event-banner, #weather-panel, #weather-chip.pulse { animation: none; }
 }
+
+/* Nordsee (P57): Gezeiten im Wetterbericht, Tageskurve des Wasserstands */
+#weather-panel .wp-row.wp-tide { grid-column: 1 / -1; }
+#weather-panel .wp-row.wp-tide > div { flex: 1; min-width: 0; }
+#weather-panel .wp-row svg.wp-tide-kurve, .hm-neu #weather-panel .wp-row svg.wp-tide-kurve { display: block; flex: none; width: 100%; max-width: 240px; height: 28px; margin: 4px 0 2px; }
+#weather-panel .wp-tide-wasser { fill: var(--hm-meer, #3d8fb3); opacity: 0.25; }
+#weather-panel .wp-tide-linie { fill: none; stroke: var(--hm-meer, #3d8fb3); stroke-width: 2; }
+#weather-panel .wp-tide-jetzt { fill: var(--hm-akzent, #ee6454); }
+#weather-chip .wp-tide-chip { white-space: nowrap; margin-left: 6px; }

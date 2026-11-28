@@ -74,6 +74,12 @@ export function abWasserstand(state, ctx, boat) {
   return braucht(ctx, boat) - zufahrtTiefe(state);
 }
 
+/** Größter Tiefgang, der jetzt (oder zur Uhr clock) durch die Zufahrt kommt (Meter). Ohne Tide unbegrenzt. */
+export function tiefgangMoeglich(state, ctx, clock = uhr(state), tag = state.day) {
+  if (!hatTide(state)) return Infinity;
+  return Math.max(0, zufahrtTiefe(state) + wasserstand(state, ctx, clock, tag) - unterKiel(ctx));
+}
+
 /** Kommt dieses Boot jetzt (oder zur Uhr clock des Tages tag) durch die Zufahrt? Ohne Tide immer. */
 export function zufahrtOffen(state, ctx, boat, clock = uhr(state), tag = state.day) {
   if (!hatTide(state) || !(boat?.draft > 0)) return true;
@@ -128,9 +134,11 @@ export function fitTide({ state, ctx, boat }) {
   return zufahrtOffen(state, ctx, boat) ? null : 'tide';
 }
 
-/** Hook 'hold': Dieses ankommende Boot wartet auf die Flut. */
+/** Hook 'hold': Dieses ankommende Boot (oder ein Dauerlieger auf dem Rückweg) wartet auf die Flut. */
 export function wartetAufFlut({ state, ctx, boat }) {
-  if (!hatTide(state) || ausgenommen(boat) || boat.status === 'moored') return false;
+  // Dauerlieger (stationed) auf Törn draußen (status 'away') kommen auch nur bei genug Wasser zurück
+  const draussen = boat?.stationed && boat.status === 'away' && !boat.havarie && boat.size !== 'XXL';
+  if (!hatTide(state) || (ausgenommen(boat) && !draussen) || boat.status === 'moored') return false;
   return !zufahrtOffen(state, ctx, boat);
 }
 

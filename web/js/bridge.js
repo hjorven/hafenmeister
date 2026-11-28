@@ -376,7 +376,8 @@ export async function initBridge(game) {
     geduldRuht: (boatId) => {
       const b = state.boats[boatIdOf(boatId)];
       if (!b || b.status !== 'waiting') return false;
-      return state.phase !== 'day' || (!!b.atBuoy && !sim.patienceRunning(state, ctx, b.id));
+      // Nordsee (P57): wer auf die Flut wartet (boat.flut, features/gezeiten-regeln.js), verliert keine Geduld
+      return state.phase !== 'day' || b.flut != null || (!!b.atBuoy && !sim.patienceRunning(state, ctx, b.id));
     },
     // Versorgung heute: { wc: { versorgt, kapazitaet }, ... } für gebaute Versorgung (Auslastung am Gebäude)
     auslastung: () => sim.facilityLoad(state, ctx),

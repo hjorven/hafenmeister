@@ -464,11 +464,14 @@ export function tickHook({ state, ctx, events }) {
   for (const [platzId, p] of Object.entries(dauerState(state).plaetze)) {
     // Tagestörn (H9): am Nachmittag zurück, sobald die Box frei ist (ein kurzer Halt legt vorher ab)
     if (p.tagestoern && p.boot) {
-      if (state.day > p.rueckNacht && p.zurueckUm != null && state.clock >= p.zurueckUm * ctx.rules.dayLength && sim.isFree(state, platzId)) legeAn(state, platzId, p, events);
+      // Nordsee (P57, Hook 'hold'): erst, wenn genug Wasser in der Zufahrt ist
+      if (state.day > p.rueckNacht && p.zurueckUm != null && state.clock >= p.zurueckUm * ctx.rules.dayLength && sim.isFree(state, platzId)
+        && !sim.holdsForHook(state, ctx, p.boot)) legeAn(state, platzId, p, events);
       continue;
     }
     if (!p.boot || p.frueherUm == null || state.day < p.rueckNacht) continue;
     if (!p.wartet && state.clock < p.frueherUm * ctx.rules.dayLength) continue;
+    if (sim.holdsForHook(state, ctx, p.boot)) continue;   // Nordsee (P57): wartet draußen auf die Flut
     if (sim.isFree(state, platzId)) { legeAn(state, platzId, p, events); continue; }
     if (p.wartet) continue;
     p.wartet = true;
