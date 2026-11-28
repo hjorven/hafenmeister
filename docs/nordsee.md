@@ -76,7 +76,7 @@ Ausprobieren: `?revier=nordsee&stufe=4&bojenfeld=2`. Vorschaubilder: `nordsee/te
 
 ## 5. Schleuse (Teil 4)
 
-An der Nordsee heißt der Ausbau zu Stufe 3 auf Küsten mit Durchstich "Durchstich mit Schleuse", die Stufe danach "Hafen mit Schleuse" (an offenen Küsten "Molen und Wellenbrecher" und "Hafen hinter der Mole", ohne Schleuse). Die Namen stehen in `nordsee.schleuse.namen`, `data/kuestennamen.js` wählt sie (`setzeRevier`).
+Jeder Nordsee-Hafen bekommt mit dem Ausbau zu Stufe 3 eine Schleuse. Auf Küsten mit Durchstich heißt der Ausbau "Durchstich mit Schleuse" und die Stufe danach "Hafen mit Schleuse"; an offenen Küsten "Seeschleuse zwischen den Molen" und "Hafen mit Seeschleuse". Die Namen stehen in `nordsee.schleuse.namen`, `data/kuestennamen.js` wählt sie (`setzeRevier`).
 
 | Regel | Was passiert |
 |---|---|
@@ -86,7 +86,7 @@ An der Nordsee heißt der Ausbau zu Stufe 3 auf Küsten mit Durchstich "Durchsti
 | Ausgenommen | Großschiffe (XXL), Havarist im Schlepp, Optis über den Slip: eigene Abläufe wie bei der Zufahrt. |
 | Wozu die Schleuse? | Sie hält das Hafenbecken und macht die tiefere Fahrrinne ab Stufe 3 möglich (`nordsee.zufahrt`): Ab Stufe 3 kommen auch Kielyachten den größten Teil der Tide hinein (1,4 m statt 0,5 m bei Niedrigwasser), nur eben im Takt der Schleuse. |
 
-Im Bild (`render/schleuse.js`): zwei Schiebetore quer im Durchstich (Binnen- und Außenhaupt), die in Torkammern neben der Ostmauer rollen, je Haupt ein Signalmast mit Rot und Grün, ein Schleusenwärterhaus. Stemmtore wurden verworfen: Bei der lichten Weite des Durchstichs (rund 34 m) ragten die offenen Flügel aus der kurzen Kammer heraus, und große Seeschleusen der Nordseeküste haben ohnehin Schiebetore. Die Tore öffnen zur Schleusung und bleiben offen, solange ein Boot in der Kammer oder kurz davor ist. In der Konsole: `hafenmeister.schleuse.offen()`, `hafenmeister.schleuse.naechste()`.
+Im Bild (`render/schleuse.js`): zwei Schiebetore quer im Durchstich oder, an offenen Küsten, zwischen den Molen mit eigenen Kammerwänden aus Beton (ab Stufe 5 liegen die Molen weiter außen, dann steht die Kammer im Vorhafen), die in Torkammern neben der Ostmauer rollen, je Haupt ein Signalmast mit Rot und Grün, ein Schleusenwärterhaus. Stemmtore wurden verworfen: Bei der lichten Weite des Durchstichs (rund 34 m) ragten die offenen Flügel aus der kurzen Kammer heraus, und große Seeschleusen der Nordseeküste haben ohnehin Schiebetore. Die Tore öffnen zur Schleusung und bleiben offen, solange ein Boot in der Kammer oder kurz davor ist. In der Konsole: `hafenmeister.schleuse.offen()`, `hafenmeister.schleuse.naechste()`.
 
 Ausprobieren: `?revier=nordsee&stufe=3`. Vorschaubilder: `nordsee/teil4-*.png`.
 
@@ -99,9 +99,15 @@ Ausprobieren: `?revier=nordsee&stufe=3`. Vorschaubilder: `nordsee/teil4-*.png`.
 | Seekarte | Im Fenster "Neues Spiel" steht oben eine kleine Pixelkarte mit Nord- und Ostsee. Antippen wählt das Revier; die gesperrte Nordsee sagt, ab wann sie frei ist und welche Stufe du bisher hast. |
 | Spielstand je Revier | Jeder Hafen merkt sich sein Revier (`state.region`), die Liste der Spielstände zeigt "Nordsee" vor der Stufe. Wechseln zwischen den Revieren heißt: anderen Hafen spielen. |
 | Startgeld (K5) | Ein neuer Nordsee-Hafen bekommt Startgeld aus dem Ruf des besten Ostsee-Hafens: je Anker 300 €, auf Hundert gerundet, 600 bis 1.500 € (`nordsee.start`). Bei 4,2 Ankern sind es 1.300 €. |
-| Namen | Stufe 3 heißt an der Nordsee "Hafen mit Schleuse" (offene Küste "Hafen hinter der Mole"), der Erfolg der Stufe "Zur Nordsee", der Pokal "Hafenmeister der Nordsee". Texte, die nur an der Ostsee stimmten, sind allgemein. |
+| Namen | Stufe 3 heißt an der Nordsee "Hafen mit Schleuse" (offene Küste "Hafen mit Seeschleuse"), der Erfolg der Stufe "Zur Nordsee", der Pokal "Hafenmeister der Nordsee". Texte, die nur an der Ostsee stimmten, sind allgemein. |
 
 Code: `save/reviere.js` (ohne Browser testbar, `tests/reviere.test.mjs`), Seekarte in `save/save-panel.js`, Anlegen in `save/index.js`. Vorschaubilder: `nordsee/teil5-*.png`.
+
+## 6b. Nordsee-Küsten (Teil 6)
+
+Ein neuer Nordsee-Hafen wählt nur aus Küsten, die es an der deutschen Nordsee gibt (`REVIERE.nordsee.kuesten` in `data/regions.js`): Watt (7, Halligen, Priele, Deich), Flussmündung (3, Sielhafen an Ems, Weser oder Elbe), Nehrung (1, Barriereinseln wie die Ostfriesischen Inseln), Inselhafen (10) und Strandhaken (9, wie der Ellenbogen auf Sylt). Schären, Förde, Bodden, Steilküste und die echten Karten 11 bis 15 gibt es nur an der Ostsee. Im Fenster "Neues Spiel" zeigt die Reihe "Küste" nach der Wahl auf der Seekarte nur die Küsten dieses Reviers; "Zufall" würfelt nur unter ihnen. An der Ostsee bleibt alles wie bisher (alle Küsten).
+
+Gemessen (je Küste 10 Seeds): Auf allen fünf Küsten findet das Watt Platz für mindestens 6 Trockenfallplätze, auf 46 von 50 für alle 12. Die Schleuse gibt es auf allen, im Durchstich auf 11 von 50, sonst zwischen den Molen. Test: `tests/regionen.test.mjs`.
 
 ## 7. Ausprobieren
 
@@ -132,6 +138,8 @@ Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, O
 | Schleuse als Wartezeit oder als Gewinn? | Beides: Die Schleuse ist der Grund für die tiefere Fahrrinne ab Stufe 3 (mehr Boote kommen bei jeder Tide hinein), kostet dafür kurze Wartezeiten im Takt. | Echte Sielhäfen mit Schleuse sind tideunabhängiger. Der Takt ist kurz (höchstens 9 s Wartezeit), damit es nicht nervt. |
 | Seekarte als eigenes Fenster oder im Fenster "Neues Spiel"? | Im Fenster "Neues Spiel", dazu "Nordsee" in der Liste der Spielstände. | Ein Revier wechselt man, indem man einen anderen Hafen spielt; ein eigenes Fenster hätte nur dieselben Häfen noch einmal gezeigt. |
 | Freischalten je Spielstand oder je Gerät? | Je Gerät, nur besser, nie schlechter. | Wer einmal Stufe 5 erreicht hat, soll die Nordsee nicht verlieren, wenn er den Hafen löscht. |
+| Schleuse nur im Durchstich? | An allen Nordsee-Küsten; an offenen Küsten zwischen den Molen. | Nur 11 von 50 Nordsee-Häfen hätten sonst eine Schleuse gehabt; Seeschleusen in der Hafeneinfahrt sind an der Nordsee üblich. |
+| Eigene Nordsee-Küsten neu bauen oder auswählen? | Aus den zehn freien Küstentypen die fünf auswählen, die es an der Nordsee gibt. | Jede Küste ist mit allen Features erprobt (Stegbilder, Wege, Großschiffe); eine neue hätte all das neu gebraucht. Farben, Deich und Watt kommen ohnehin aus dem Revier. |
 | `economy.js` für andere Pakete frei? | Alle Nordsee-Zahlen stehen im eigenen Block `ECONOMY.nordsee`; P57 ändert nichts außerhalb davon. | P45 und Welle 6 können parallel an `economy.js` arbeiten. |
 
 ## 9. Teile
@@ -143,4 +151,4 @@ Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, O
 | 3 | Trockenfallplätze (K4): das Bojenfeld liegt an der Nordsee auf einer Plate im Watt, nur für Boote ohne tiefen Kiel, Kutter liegen dort gern | gebaut |
 | 4 | Schleuse als Ausbau zu Stufe 3: Tor im Takt, Warten auf die Schleusung, Schiebetore im Bild, Namen an der Nordsee | gebaut |
 | 5 | Freischalten ab Ostsee Stufe 5 (K6), Seekarte im Fenster "Neues Spiel", eigener Spielstand je Revier, Startgeld aus dem Ruf (K5), Namen und Texte je Revier | gebaut |
-| 6 | Nordsee-Küsten: eigene Auswahl an Küstentypen für die Nordsee | in Arbeit |
+| 6 | Nordsee-Küsten: eigene Auswahl an Küstentypen für die Nordsee, Schleuse an allen Küsten, Revierdaten aufgeräumt | gebaut |

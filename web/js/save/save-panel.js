@@ -16,6 +16,13 @@ import { STEGBILDER } from '../data/stegbilder.js';
 import { HAFEN } from '../data/harbor.js';
 import { stufenName as kuestenStufenName } from '../data/kuestennamen.js';
 import { FORMEN } from '../render/landschaft/formen.js';
+import { REVIERE } from '../data/regions.js';
+
+/** Küstenformen, die es im Revier gibt (P57 Teil 6: die Nordsee hat ihre eigene Auswahl). */
+export function formenFuer(revier) {
+  const nr = REVIERE[revier]?.kuesten;
+  return nr ? FORMEN.filter((f) => nr.includes(f.nr)) : FORMEN;
+}
 import { flaggenBaukasten } from '../ui/hafenflagge.js';
 import { flaggeAusSeed } from '../data/hafenflagge.js';
 
@@ -608,6 +615,7 @@ export function openSavePanel(opts) {
   let neuEinstieg = null;
   let neuFlagge = null; // eigene Flagge (P44), Start: gewürfelt
   let neuRevier = 'ostsee'; // P57 Teil 5: Revier des neuen Hafens (Seekarte)
+  let kuesteNeu = null; // zeichnet die Küsten des gewählten Reviers neu
 
   function zeichneNeu() {
     titel.textContent = 'Neues Spiel';
@@ -640,6 +648,7 @@ export function openSavePanel(opts) {
         neuRevier = id;
         karte.markieren(id);
         zeigeHinweis();
+        kuesteNeu?.();
       } });
       zeigeHinweis();
       inhalt.append(el('h3', { id: 'hm-neu-revier' }, 'Revier'), karte.element, hinweis);
@@ -683,16 +692,21 @@ export function openSavePanel(opts) {
       inhalt.append(raster);
     }
 
-    // Küste (Geländeform)
-    if (FORMEN.length > 1) {
-      inhalt.append(el('h3', { id: 'hm-neu-kueste' }, 'Küste'));
+    // Küste (Geländeform), je Revier eigene Auswahl; wechselt das Revier, wird die Reihe neu gezeichnet
+    const kuesteBox = el('div', { id: 'hm-neu-kuesten' });
+    const zeichneKueste = () => {
+      const formen = formenFuer(neuRevier);
+      if (neuGelaende && !formen.some((f) => f.nr === neuGelaende)) neuGelaende = 0;
+      kuesteBox.replaceChildren();
+      if (formen.length <= 1) return;
+      kuesteBox.append(el('h3', { id: 'hm-neu-kueste' }, 'Küste'));
       const idee = el('p', { class: 'hm-sp-info', style: 'margin-top:6px' });
       const zeigeIdee = () => {
-        const f = FORMEN.find((x) => x.nr === neuGelaende);
+        const f = formen.find((x) => x.nr === neuGelaende);
         idee.textContent = f ? f.idee : 'Eine der Küstenformen wird ausgewürfelt.';
       };
       const reihe = el('div', { class: 'hm-sp-kueste', role: 'radiogroup', 'aria-labelledby': 'hm-neu-kueste' });
-      for (const f of [{ nr: 0, name: 'Zufall' }, ...FORMEN]) {
+      for (const f of [{ nr: 0, name: 'Zufall' }, ...formen]) {
         const b = knopf(f.name, () => {
           neuGelaende = f.nr;
           for (const k of reihe.children) k.setAttribute('aria-checked', String(k === b));
@@ -704,8 +718,11 @@ export function openSavePanel(opts) {
         reihe.append(b);
       }
       zeigeIdee();
-      inhalt.append(reihe, idee);
-    }
+      kuesteBox.append(reihe, idee);
+    };
+    zeichneKueste();
+    kuesteNeu = zeichneKueste;
+    inhalt.append(kuesteBox);
 
     // Einführung
     const haken = el('input', { type: 'checkbox', checked: neuEinstieg });
@@ -720,7 +737,8 @@ export function openSavePanel(opts) {
     const los = knopf('Hafen gründen', sicher(() => {
       const anz = Math.max(1, anzahl);
       const nr = neuStegbild || (anzahl ? 1 + Math.floor(Math.random() * anz) : 0);
-      const form = neuGelaende || FORMEN[Math.floor(Math.random() * FORMEN.length)]?.nr || 1;
+      const auswahl = formenFuer(neuRevier);
+      const form = neuGelaende || auswahl[Math.floor(Math.random() * auswahl.length)]?.nr || 1;
       opts.neuesSpiel({ name: P.nameSauber(neuName), stegbild: nr, gelaende: form, einstieg: neuEinstieg, flagge: neuFlagge, revier: neuRevier });
     }, 'Das neue Spiel konnte nicht angelegt werden.'), 'hm-primaer breit');
     los.id = 'hm-neu-los';

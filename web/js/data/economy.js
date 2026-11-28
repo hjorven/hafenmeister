@@ -1191,11 +1191,11 @@ export const ECONOMY = {
     // Nur Boote ohne tiefen Kiel (arten) dürfen dort liegen; sie kommen nur hin und weg, wenn über der Plate
     // genug Wasser steht (Tiefgang plus Wasser unter dem Kiel). kreisM: Schwoikreis im Watt.
     // bonus: so viel mehr Anker in der Bewertung je Bootsart (Kutter fallen gern trocken, wie zu Hause).
-    // Schleuse (Ausbau zu Stufe 3 an Küsten mit Durchstich): Das Tor öffnet im Takt. Alle takt Sekunden
+    // Schleuse (Ausbau zu Stufe 3, im Durchstich oder an offener Küste als Seeschleuse): Das Tor öffnet im Takt. Alle takt Sekunden
     // Spielzeit steht es offen Sekunden lang offen; wer ein- oder ausläuft, wartet auf die nächste Schleusung.
-    // namen: Namen der Stufe 3 und ihres Ausbaus an der Nordsee (Durchstich / offene Küste mit Molen).
+    // namen: Namen der Stufe 3 und ihres Ausbaus an der Nordsee (Küste mit Durchstich / offene Küste).
     schleuse: { abStufe: 3, takt: 16, offen: 7,
-      namen: { ausbau: 'Durchstich mit Schleuse', ausbauOffen: 'Molen und Wellenbrecher', stufe: 'Hafen mit Schleuse', stufeOffen: 'Hafen hinter der Mole' } },
+      namen: { ausbau: 'Durchstich mit Schleuse', ausbauOffen: 'Seeschleuse zwischen den Molen', stufe: 'Hafen mit Schleuse', stufeOffen: 'Hafen mit Seeschleuse' } },
     // Freischalten und Start (Teil 5): Die Nordsee wird frei, sobald ein Ostsee-Hafen Stufe abStufe erreicht.
     // Startgeld eines neuen Nordsee-Hafens aus dem Ruf des besten Ostsee-Hafens: je Anker geldJeAnker Euro,
     // auf volle Hundert gerundet, mindestens geldMin, höchstens geldMax (save/reviere.js).

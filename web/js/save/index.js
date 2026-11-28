@@ -19,9 +19,10 @@ import { hasSave, loadGame, rohText, SAVE_VERSION, requestPersistentStorage, sto
 import { startPwa } from './pwa.js';
 import {
   openSavePanel, openStart, ensureStyle, showExportReminderIfDue, showUpdateBanner, showKaputtMeldung, showOhneSpeicherMeldung,
+  formenFuer,
 } from './save-panel.js';
 import * as plaetze from './plaetze.js';
-import { neuerSeed, FORMEN } from '../render/landschaft/formen.js';
+import { neuerSeed } from '../render/landschaft/formen.js';
 import { createState, deserialize } from '../state.js';
 import { flaggeSauber } from '../data/hafenflagge.js';
 import * as reviere from './reviere.js';
@@ -162,7 +163,8 @@ export function init(game) {
     st.modules = st.modules ?? {};
     if (Number.isInteger(stegbild) && stegbild >= 1) st.modules.stegbild = { nr: stegbild };
     // Küste: gewählte Form oder eine zufällige, immer mit eigenem Seed (sonst erbte das neue Spiel die alte Küste)
-    const form = Number.isInteger(gelaende) && gelaende >= 1 && gelaende <= FORMEN.length ? gelaende : FORMEN[Math.floor(Math.random() * FORMEN.length)].nr;
+    const auswahl = formenFuer(st.region);
+    const form = Number.isInteger(gelaende) && auswahl.some((f) => f.nr === gelaende) ? gelaende : auswahl[Math.floor(Math.random() * auswahl.length)].nr;
     st.modules.gelaende = { nr: form, seed: neuerSeed(Math.random, form) };
     if (!einstieg) st.modules.einstieg = { fertig: true, erledigt: [] };
     const id = plaetze.platzAnlegen(st, { name });

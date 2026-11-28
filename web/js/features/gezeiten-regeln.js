@@ -18,13 +18,12 @@
 //   trockenfallen.platte unter dem mittleren Wasser). Nur Bootsarten ohne tiefen Kiel (Grund 'kiel'), hin und
 //   weg nur, wenn über der Plate genug Wasser steht (Grund 'platte', Ablegen im Fenster). Kutter und Motorboote
 //   bewerten die Plate besser (Hook 'rating', boat.trocken).
-// - Schleuse (Ausbau zu Stufe 3 an Küsten mit Durchstich): Das Tor öffnet im Takt (nordsee.schleuse).
+// - Schleuse (Ausbau zu Stufe 3 an der Nordsee): Das Tor öffnet im Takt (nordsee.schleuse).
 //   Ankommende warten an der Boje auf die nächste Schleusung (Grund 'schleuse', Hook 'hold'), Ablegen und
 //   Tagestörns werden auf die Schleusung gelegt (kommtDurch).
 import * as sim from '../sim.js';
 import { ECONOMY } from '../data/economy.js';
 import { uhrzeitAusUhr } from '../render/landschaft/zeit.js';
-import { engpassArt } from '../data/kuestennamen.js';
 
 export const NORDSEE = ECONOMY.nordsee ?? null;
 const G = NORDSEE?.gezeiten ?? null;
@@ -117,9 +116,12 @@ export function platzOffen(state, ctx, boat, berth, clock = uhr(state), tag = st
   return wasserstand(state, ctx, clock, tag) - plattenHoehe() >= braucht(ctx, boat) - 1e-9;
 }
 
-/** Hat dieser Hafen eine Schleuse (Nordsee, ab Stufe 3, Küste mit Durchstich)? */
+/**
+ * Hat dieser Hafen eine Schleuse (Nordsee ab Stufe 3)? Auf Küsten mit Durchstich liegt sie im Durchstich,
+ * an offenen Küsten als Seeschleuse mit eigenen Kammerwänden an derselben Stelle (render/schleuse.js).
+ */
 export function hatSchleuse(state) {
-  return !!SL && hatTide(state) && (state.stage ?? 1) >= (SL.abStufe ?? 3) && engpassArt() === 'durchstich';
+  return !!SL && hatTide(state) && (state.stage ?? 1) >= (SL.abStufe ?? 3);
 }
 
 /** Steht das Schleusentor zur Spieluhr clock offen? Ohne Schleuse immer. */
