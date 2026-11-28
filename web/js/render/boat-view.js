@@ -464,9 +464,10 @@ export function init(game) {
   }
   // Einfahrt zwischen den Molen (Einbahn-Abschnitt): so viele Boote je Richtung zugleich
   const EINFAHRT_KONVOI = 6;
-  // So viele Boote sind hoechstens zugleich im Revier am Auslaufen, bevor das naechste ablegt (gemessen
-  // Kueste 14, Tag 84 bis 88: 8 halbiert die stehenden Boote gegenueber ohne Grenze, 14 bringt wenig)
-  const AUSLAUFEND_MAX = 8;
+  // So viele Boote sind hoechstens zugleich im Revier am Auslaufen, bevor das naechste ablegt. Wer wartet,
+  // haelt seine Box besetzt: 8 loeste die Schlangen am besten, kostete aber Gaeste (Kueste 14 am Handy, ganze
+  // Spiele: Ziel an Tag 119 bis 123 statt 112). Mit 11 bleibt das Ziel bei Tag 111 und der Stau trotzdem klein.
+  const AUSLAUFEND_MAX = 11;
   // In offenem Wasser liegen die Bahnen der Ein- und der Auslaufenden so weit auseinander (Meter)
   const BAHN_ABSTAND_M = 24;
   let einfahrtNr = -1;
