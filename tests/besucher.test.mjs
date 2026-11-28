@@ -337,3 +337,39 @@ test('Ein Besucher, der keinen Platz findet, gilt als verpasst und blockiert den
   if (!state.boats[h.boatId] || state.boats[h.boatId].status !== 'moored') assert.ok(!s.heute || s.heute.tag === state.day);
   assert.ok(b || true);
 });
+
+test('Festmachen ohne vorheriges Einlaufen (Ereignis in anderem Paket): gesehen, Ehrenplatz, kein Fehler', () => {
+  // Echter Spielverlauf: Ereignisse sammeln, aber nur 'moored' auswerten (Zeitraffer, Laden mitten am Tag)
+  let fest = null, state, ctx;
+  for (const seed of [1, 2, 3, 4, 5, 6]) {
+    ({ ctx, state } = neu(seed, 4));
+    for (let i = 0; i < 60 && !fest; i++) {
+      const ev = sim.runDay(state, ctx);
+      fest = ev.find((e) => e.type === 'moored' && (state.boats[e.boatId]?.besucher || R.besState(state).heute?.boatId === e.boatId)) ?? null;
+    }
+    if (fest) break;
+  }
+  assert.ok(fest, 'ein Besucher hat festgemacht');
+  const s = R.besState(state);
+  s.gesehen = {};
+  s.neu = [];
+  let out;
+  assert.doesNotThrow(() => { out = R.verarbeite(state, ctx, [fest]); });
+  const art = out[0].art;
+  assert.equal(out[0].phase, 'fest');
+  assert.equal(out[0].neu, true);
+  assert.equal(s.gesehen[art].mal, 1, 'Festmachen zählt als gesehen');
+  assert.equal(!!s.gesehen[art].ehrenplatz, out[0].ehrenplatz);
+  assert.ok(s.neu.includes(art));
+  // Ein zweites Festmachen (Umlegen) zählt nicht noch einmal
+  R.verarbeite(state, ctx, [fest]);
+  assert.equal(s.gesehen[art].mal, 1);
+  // Direkt an den Kai, ohne je gesehen: Ehrenplatz wird vermerkt
+  const k = neu(5, 5);
+  sim.tick(k.state, k.ctx, 0);
+  const h = R.ausloesen(k.state, k.ctx, 'koenigsyacht');
+  const kai = k.ctx.berths.find((p) => p.kind === 'kai');
+  const o2 = R.verarbeite(k.state, k.ctx, [{ type: 'moored', boatId: h.boatId, berthId: kai.id }]);
+  assert.equal(o2[0].ehrenplatz, true);
+  assert.equal(R.besState(k.state).gesehen.koenigsyacht.ehrenplatz, true);
+});
