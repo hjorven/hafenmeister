@@ -1397,6 +1397,17 @@
    "geraet": "handy",
    "datum": "2026-11-28",
    "quelle": "nordsee/teil3-handy-trockenfallen-ebbe.png"
+  },
+  {
+   "datei": "p57-pr452-pc-schleuse.jpg",
+   "pakete": [
+    "P57"
+   ],
+   "titel": "Nordsee: Schleuse an der Hafeneinfahrt, Ausbau zu Stufe 3",
+   "pr": 452,
+   "geraet": "pc",
+   "datum": "2026-11-28",
+   "quelle": "nordsee/teil4-pc-schleuse-offen.png"
   }
  ]
 }
