@@ -1,23 +1,23 @@
 # Hafenregionen
 
-Stand: 12.11.2026 (Status ergänzt), Konzept vom 11.11.2026. Status: Ostsee gebaut, Nordsee **geplant** (Roadmap-Paket P57, Welle 5, nach der Ostsee). Ergänzt Abschnitt 9 im [Spielplan](plan.md). Dieses Dokument beschreibt die zwei Reviere des Spiels, Ostsee und Nordsee: was sie im Aussehen und im Spielgefühl unterscheidet, wie man sie freischaltet und wie sie als Daten beschrieben sind. Die Daten liegen in `web/js/data/regions.js`, die Rechenfunktionen (Wasserstand, Tidenfenster) in `web/js/world/region.js`.
+Stand: 12.11.2026 (Status ergänzt), Konzept vom 11.11.2026. Status 28.11.2026: Ostsee und Nordsee gebaut (Nordsee: Roadmap-Paket P57, Einzelheiten in [nordsee.md](nordsee.md)). Ergänzt Abschnitt 9 im [Spielplan](plan.md). Dieses Dokument beschreibt die zwei Reviere des Spiels, Ostsee und Nordsee: was sie im Aussehen und im Spielgefühl unterscheidet, wie man sie freischaltet und wie sie als Daten beschrieben sind. Die Daten liegen in `web/js/data/regions.js`, die Rechenfunktionen (Wasserstand, Tidenfenster) in `web/js/world/region.js`.
 
 **Entscheidung Jorven (11.11.2026):** nur zwei Regionen, keine länderspezifischen. Gebäude und Stimmung sind ein Mix aus deutschen, dänischen und schwedischen Häfen, weil sich die Hafenkulturen nicht stark genug unterscheiden, um eigene Regionen zu tragen.
 
-## Was davon gebaut ist (12.11.2026)
+## Was davon gebaut ist (28.11.2026)
 
 | Teil | Stand |
 |---|---|
-| Ostsee: Landschaft, Stufen 1 bis 6, Regeln | gebaut, das ist das Spiel |
+| Ostsee: Landschaft, Stufen 1 bis 6, Regeln | gebaut |
 | Revierdaten beider Reviere (`data/regions.js`, Test `tests/regionen.test.mjs`) | gebaut |
-| Ebbe und Flut in den Spielregeln: Zufahrt nur im Tidenfenster, Warten auf die Flut, Revierfaktoren (P57 Teil 1, [nordsee.md](nordsee.md)) | gebaut |
-| Nordsee-Landschaft mit Deich, Watt und Salzwiese zum Ansehen (`?revier=nordsee`) | gebaut, nur Bild |
-| Pegel am Kai, Boote heben und senken sich mit dem Wasser, Anzeige Hoch-/Niedrigwasser | **geplant** (P57) |
-| Trockenfallplätze, Schleuse als Bauprojekt | **geplant** (P57) |
-| Freischalten der Nordsee, eigener Spielstand je Revier, Startgeld aus dem Ostsee-Ruf | **geplant** (P57; die Bedingung in Abschnitt 4 ist noch nicht entschieden, siehe Roadmap) |
-| Revierfaktoren (`spiel`: Hafengeld, Ankünfte, Startgeld), besondere Dienste und Ereignisse je Revier | **geplant** (P57); die Regeln lesen sie heute nicht |
+| Nordsee: Ebbe und Flut in den Regeln, Zufahrt im Tidenfenster, Revierfaktoren (P57 Teil 1) | gebaut |
+| Nordsee: Pegel, Pegellatte, Boote und Schwimmstege heben und senken sich, Tidenkurve im Wetterbericht (Teil 2) | gebaut |
+| Nordsee: Trockenfallplätze im Watt (Teil 3), Schleuse als Ausbau zu Stufe 3 (Teil 4) | gebaut |
+| Nordsee freischalten ab Ostsee Stufe 5, Seekarte, Spielstand je Revier, Startgeld aus dem Ruf (Teil 5) | gebaut |
+| Eigene Auswahl an Küsten für die Nordsee (Teil 6) | gebaut |
+| Besondere Dienste, Bauprojekte und Ereignisse je Revier (`dienste`, `bauprojekte`, `ereignisse`), Wetter und Musik je Revier | Ideen, nicht im Spiel |
 
-Alles unten ab Abschnitt 2 beschreibt das Ziel. Was als geplant markiert ist, gibt es im Spiel noch nicht.
+Abschnitte 2 und 4 beschreiben die Idee; was das Spiel davon wirklich tut, steht in [nordsee.md](nordsee.md).
 
 ## 1. Die Idee
 
@@ -39,8 +39,7 @@ Die Vorbilder sind Anregungen. Die Häfen im Spiel bekommen erfundene Namen.
 - **Bauweise als Mix:** weiße Bäderarchitektur und Backstein mit roten Ziegeln (Deutschland), gelbes Fachwerk und Reetdächer (Dänemark), falunrote Holzhäuser mit weißen Ecken und Bootsschuppen in Reihe an einer Holzpromenade (Schweden). Strandkörbe in Blau-Weiß und Grün-Weiß.
 - **Natur:** Kiefern, Birken und Buchen, Kartoffelrosen, Heckenrosen, Heidekraut, Möwen, Schwäne, Eiderenten.
 - **Spielgefühl:** gemütlicher Einstieg mit vielen kleinen Booten. Holzklassiker und Traditionssegler sind etwas häufiger. Liegeplätze am Fels mit Heckanker und ein Bojenfeld sind günstige Erweiterungen.
-- **Besondere Dienste:** Strandkorbvermietung, Eisdiele, Fischbrötchen, Räucherei, Fahrradverleih, Sauna-Floß.
-- **Ereignisse:** Segelwoche (Regatta), Hafenfest, Holzbootfestival, Mittsommerfest, Sommergewitter, Kreuzfahrttag.
+- **Ideen für Dienste und Ereignisse** (nicht im Spiel, die Dienste und Ereignisse sind in beiden Revieren dieselben): Strandkorbvermietung, Eisdiele, Räucherei, Fahrradverleih, Sauna-Floß; Holzbootfestival, Mittsommerfest.
 
 ### Nordsee: Sielhafen
 
@@ -48,9 +47,8 @@ Die Vorbilder sind Anregungen. Die Häfen im Spiel bekommen erfundene Namen.
 - **Farben:** graublaues Wasser, braungraues Watt bei Ebbe, weiter Himmel, häufiger Dunst.
 - **Bauweise:** dunkelroter Klinker, Giebelhäuser, rot-weißer Leuchtturm, Krabbenkutter in Grün und Blau.
 - **Natur:** Salzwiesen, Strandflieder, Schafe am Deich, Austernfischer.
-- **Spielgefühl:** Ebbe und Flut, siehe Abschnitt 3. Krabbenkutter und Seenotretter gehören von Anfang an dazu, Inselfähren kommen ab Stufe 5. Mehr Wind und öfter Sturm.
-- **Besondere Dienste:** Fischbrötchen, Krabbenverkauf, Wattführung, Inselfähre, Schleuse als großes Bauprojekt.
-- **Ereignisse:** Sturmflut, Kutterkorso, Krabbenfest, Kreuzfahrttag.
+- **Spielgefühl:** Ebbe und Flut, siehe Abschnitt 3. Mehr Kutter und Mehrrumpfboote, weniger Kielyachten, etwas höheres Hafengeld und weniger Ankünfte (`ECONOMY.nordsee`). Schleuse als Ausbau zu Stufe 3.
+- **Ideen für Dienste und Ereignisse** (nicht im Spiel): Krabbenverkauf, Wattführung, Inselfähre; Sturmflut, Kutterkorso, Krabbenfest.
 
 ## 3. Ebbe und Flut in der Nordsee
 
@@ -58,15 +56,15 @@ Nur die Nordsee hat einen spürbaren Tidenhub. In der Ostsee schwankt der Wasser
 
 **Was der Spieler sieht und tut**
 
-- Ein Pegel am Kai zeigt Hochwasser und Niedrigwasser. Bei Ebbe fallen Watt und Hafenboden sichtbar trocken, Boote mit flachem Boden setzen sich auf, Kielyachten legen sich nicht schief, weil sie gar nicht erst an solche Plätze dürfen.
+- Eine Pegellatte am Steg und der Wetterknopf zeigen den Wasserstand, der Wetterbericht Hoch- und Niedrigwasser. Bei Ebbe fällt die Plate der Trockenfallplätze trocken, Boote ohne tiefen Kiel liegen darauf, Kielyachten dürfen gar nicht erst dorthin.
 - Boote warten vor dem Siel, bis genug Wasser da ist. Beim Antippen eines Bootes zeigt das Spiel, ab wann es einlaufen kann. Rechnen muss niemand.
-- **Trockenfallplätze** sind billig zu bauen und bringen bei Plattbodenschiffen und Kuttern Zufriedenheit.
-- **Großes Bauprojekt Schleuse:** Danach hält das Hafenbecken das Wasser, die Liegeplätze darin sind unabhängig von der Tide. Das ist das Nordsee-Gegenstück zum Durchstich der Ostsee.
+- **Trockenfallplätze** (das Bojenfeld im Watt) bringen bei Kuttern und Motorbooten eine bessere Bewertung.
+- **Großes Bauprojekt Schleuse:** gebaut als Ausbau zu Stufe 3 (P57 Teil 4): Die Zufahrt wird tiefer, dafür läuft man im Takt der Schleuse ein und aus ([nordsee.md](nordsee.md) Abschnitt 5).
 - Die Tide wechselt alle 15 Spieltage zwischen Springtide (mehr Hub) und Nipptide (weniger Hub). Das sorgt für Abwechslung, ohne dass man es planen muss.
 
-## 4. Freischalten (geplant)
+## 4. Freischalten (gebaut, P57 Teil 5)
 
-Man beginnt an der Ostsee. Sobald der Ostseehafen Stufe 5 (Küstenmarina) erreicht, wird die Nordsee frei. Stufe 6 bleibt damit freiwillig. Beide Häfen bleiben spielbar, jeder hat seinen eigenen Spielstand. Der Ruf des Ostseehafens gibt an der Nordsee ein kleines Startgeld.
+Man beginnt an der Ostsee. Sobald ein Ostseehafen Stufe 5 (Küstenmarina) erreicht, wird die Nordsee frei; im Fenster "Neues Spiel" wählt man sie auf der Seekarte. Stufe 6 bleibt damit freiwillig. Beide Häfen bleiben spielbar, jeder hat seinen eigenen Spielstand. Der Ruf des Ostseehafens gibt an der Nordsee Startgeld (600 bis 1.500 €). Einzelheiten: [nordsee.md](nordsee.md) Abschnitt 6.
 
 ## 5. Datenformat
 
@@ -77,7 +75,8 @@ Jedes Revier ist ein Objekt in `REVIERE` (`web/js/data/regions.js`). Alle Felder
 | `id` | kurzer Name, z. B. `ostsee`, wird im Spielstand gespeichert und steht als `region` in den Hafendaten |
 | `name`, `hafenname` | Anzeige: Reviername und erfundener Hafenname |
 | `vorbilder` | echte Häfen als Anregung |
-| `freischalten` | `{ start: true }` oder `{ nach, stufe }`: das Revier `nach` muss diese Stufe erreicht haben |
+| `freischalten` | `{ start: true }` oder `{ nach }`: das Revier `nach` muss Stufe `ECONOMY.nordsee.start.abStufe` erreicht haben (im Spiel: `save/reviere.js`) |
+| `kuesten` | Küstentypen (`render/landschaft/natur.js`), aus denen ein neuer Hafen hier wählt; `null` heißt alle |
 | `karte` | `id` der Hafendaten. Bis es eigene Karten gibt, nutzen alle `nehrung` aus `harbor.js` |
 | `kueste` | `typ` (`nehrung` oder `deich-watt`) und Kurzbeschreibung |
 | `farben` | `wasserTief`, `wasserFlach`, `strand`, `wiese`, `fels`, `watt` (optional), `himmel`, `dunst` |
@@ -86,13 +85,13 @@ Jedes Revier ist ein Objekt in `REVIERE` (`web/js/data/regions.js`). Alle Felder
 | `natur` | `baeume`, `pflanzen`, `tiere`, `deko`: Namen für Modelle, die die Landschaft oder Gebäude bauen |
 | `wasser` | `wellen` (0 bis 1), `farbeSchaum`, `tide` (`null` oder `true`; die Zahlen stehen seit `REVIER_FORMAT` 2 in `ECONOMY.nordsee.gezeiten`) |
 | `wetter` | `windMittel` (Beaufort), `sturm`, `nebel`, `regen`: Wahrscheinlichkeit je Spieltag |
-| `schiffe` | `haeufigkeit`: Faktor je Schiffsart (`S1` bis `XL3`, XXL mit Namen, fehlt = 1), `abStufe`: Abweichungen vom Katalog |
-| `spiel` | `hafengeld` und `ankuenfte` (Faktor), `naechte` ([min, max]), `abendAnteil` (Anteil des Abends am Spieltag), `startgeld` |
 | `platzarten` | zusätzliche Platzarten dieses Reviers (Ostsee `fels`, `boje`; Nordsee `trockenfallen`) |
 | `dienste` | besondere Dienste dieses Reviers (zusätzlich zu den allgemeinen) |
 | `bauprojekte` | besondere große Bauten (z. B. `seebruecke`, `schleuse`) |
 | `ereignisse` | Ereignisse, die es hier gibt |
 | `musik` | Hinweis für den Ton: `stimmung`, `instrumente`, `geraeusche` |
+
+Das Spiel liest `id`, `name`, `hafenname`, `freischalten`, `kuesten`, `farben`, `licht` und `wasser`. Die übrigen Felder (`vorbilder`, `karte`, `kueste`, `bauweise`, `natur`, `wetter`, `platzarten`, `dienste`, `bauprojekte`, `ereignisse`, `musik`) beschreiben das Revier für Ideen und Modelle; das Spiel liest sie nicht. Zahlen für die Regeln (Revierfaktoren, Bootsarten, Startgeld) stehen nur in `ECONOMY.nordsee` (`data/economy.js`); `spiel` und `schiffe` sind seit `REVIER_FORMAT` 3 entfernt.
 
 **Erweitern:** Neue Felder nur anhängen. Wenn sich die Bedeutung eines Feldes ändert, zählt `REVIER_FORMAT` hoch.
 

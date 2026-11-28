@@ -374,6 +374,8 @@ Stand 28.11.2026, Teil 1 (Regeln). Was die Zufahrt im Tidenfenster mit anderen F
 | Spielstände (P05), Probe-Kopie | jeder Hafen trägt sein Revier; Probe-Kopien und Testmodus schalten die Nordsee nicht frei; Verzeichnis zählt alte Stände mit | geprüft (Test, Bild) |
 | Einstieg, erstes Bauwerk geschenkt | gilt auch an der Nordsee; das Startgeld kommt dazu | im Bild geprüft |
 | Erfolge (Stufe 3, Pokal) | Titel folgen dem Revier des laufenden Spiels (`aktuellesRevier`) | im Code geprüft |
+| Küstenformen (P31/P59 Gelände) | an der Nordsee nur Küsten 1, 3, 7, 9, 10 (`REVIERE.nordsee.kuesten`); Stegbilder, Wege und Großschiffe sind auf ihnen schon erprobt; alte Spielstände behalten ihre Küste | geprüft (Test) |
+| Schleuse an offenen Küsten mit Molen (Stufe 3 und 4) und Vorhafen (ab Stufe 5) | Kammer zwischen den Molen bei y 230 bis 262, Kammerwände auf den Molen-Innenkanten; ab Stufe 5 stehen die Wände allein im Vorhafen; im Zeitraffer fuhr kein Boot durch eine Kammerwand (Küste 7 und 10, Stufe 5) | geprüft (Bild, Messung) |
 | Schleuse (Teil 4) mit Selbst-Einfahren, Hafenbüro, Funk, Päckchen | alle fragen den Hook `fit`, der bei geschlossenem Tor `schleuse` sagt; Wartende halten ohne Geduldverlust und laufen mit der nächsten Schleusung ein | geprüft (Test) |
 | Schleuse mit Dauerliegern und Tagestörn | Rückkehr nur bei offenem Tor (`wartetAufFlut`), Ablegen auf die nächste Schleusung (`kommtDurch`) | geprüft (Test) |
 | Schleuse mit Großschiffen (P84), Havarist, Optis | ausgenommen; die Tore öffnen im Bild trotzdem, sobald irgendein fahrendes Boot in der Kammer oder kurz davor ist, damit nichts durch ein Tor fährt | so entschieden |
