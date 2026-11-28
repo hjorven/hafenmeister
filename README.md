@@ -165,7 +165,7 @@ Nach der Balancing-Rechnung (P17, PR 331) dauert die Ostsee 99 bis 113 Spieltage
 
 | Paket | Titel | Status | PRs |
 |---|---|---|---|
-| [P57](https://hjorven.github.io/hafenmeister/roadmap/#paket=P57) | Nordsee mit Gezeiten spielbar machen | **erledigt** | [#177](https://github.com/hjorven/hafenmeister/pull/177) [#448](https://github.com/hjorven/hafenmeister/pull/448) [#450](https://github.com/hjorven/hafenmeister/pull/450) |
+| [P57](https://hjorven.github.io/hafenmeister/roadmap/#paket=P57) | Nordsee mit Gezeiten spielbar machen | **erledigt** | [#450](https://github.com/hjorven/hafenmeister/pull/450) [#452](https://github.com/hjorven/hafenmeister/pull/452) [#453](https://github.com/hjorven/hafenmeister/pull/453) [#455](https://github.com/hjorven/hafenmeister/pull/455) |
 | [P58](https://hjorven.github.io/hafenmeister/roadmap/#paket=P58) | Online mit Supabase | offen |  |
 
 </details>

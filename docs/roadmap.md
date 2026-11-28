@@ -164,8 +164,8 @@ Jeder Punkt wird gebaut (Paket) oder aus Plan und Doku genommen. Nichts bleibt a
 | Erfolge | plan.md 9 | bauen | P22 |
 | Endlosmodus nach Abschluss | plan.md 9, 12 | gebaut: Saisonziele (PR 156, docs/aufstieg.md) | P16 |
 | Bestenliste, Online mit Supabase | plan.md 12, README | bauen, als letzter Schritt | P58 |
-| Nordsee mit Gezeiten, Schleuse, Trockenfallplätzen | plan.md 9, regionen.md | bauen, nach der Ostsee | P57 |
-| Revierfaktoren (Hafengeld, Ankünfte, Startgeld, Schiffshäufigkeit) | economy.js `nordsee` | Hafengeld, Ankünfte, Bootsarten gebaut (P57 Teil 1, docs/nordsee.md); Startgeld mit Teil 5 | P57 |
+| Nordsee mit Gezeiten, Schleuse, Trockenfallplätzen | plan.md 9, regionen.md | erledigt (P57 Teile 1 bis 6, PR 448, 450, 452, 453, 455; docs/nordsee.md) | P57 |
+| Revierfaktoren (Hafengeld, Ankünfte, Startgeld, Schiffshäufigkeit) | economy.js `nordsee` | erledigt: Hafengeld, Ankünfte, Bootsarten (P57 Teil 1), Startgeld aus dem Ruf (Teil 5, `nordsee.start`) | P57 |
 | Bauzeit der Ausbauten, Winter-Bautempo (`bautage`, `winterBautempo`) | economy.js | erledigt (PR 232): `bautage` = Bauabschnitte, `winterBautempo` gelöscht | P18 |
 | `ECONOMY.ereignisse` (Sturm alle 10 Tage, Hafenfest 1.500 €) | economy.js | eine Quelle, Rest löschen | P06 (erledigt) |
 | Gruppen-Ankunft, Wünsche je Bootsart, `feeFactor`, `arrivalWeight` | data/boats/*.js | Wünsche, `feeFactor`, `arrivalWeight` erledigt (P19 Teil 1); Gruppen erledigt (P32) | P19, P32 (Gruppen) |
@@ -201,7 +201,7 @@ Alle Punkte gehen in die Doku (Paket P08), die ersten fünf ändern sich zusätz
 | `docs/plan.md` | teils veraltet (Meilensteine, Vorspulen, Hafenhorn, Fernglas, Vorschau, Pixel-Oberfläche fehlt) | P08, erledigt (PR 177) |
 | `docs/abnahme.md` | Ist-Stand-Tabelle veraltet | P08, erledigt (PR 177) |
 | `docs/einstieg.md` | erledigt (PR 112) | P03 |
-| `docs/regionen.md` | beschreibt Ungebautes als fertig | P08 erledigt (PR 177) (als "geplant" gekennzeichnet), P57 später |
+| `docs/regionen.md` | beschreibt Ungebautes als fertig | erledigt: P08 (PR 177), P57 Teil 6 (gebauter Stand, Ideen als "nicht im Spiel" gekennzeichnet) |
 | `docs/echter-hafen.md` | Teil B und C überholt (C1, C2, C3, C9, C10, C11 behoben) | P08, erledigt (PR 177) |
 | `docs/balancing.md` | "4x, Sonne ziehen", "18 Services" | P08, erledigt (PR 177) |
 | `docs/neue-features.md` | Dauerlieger "50 Prozent" | P01 |
@@ -478,10 +478,10 @@ Aus dem vollständigen Review (`Hafenmeister-Review-komplett.pdf`, 12.11.2026). 
 |---|---|---|---|
 | K1 | Nordsee nach der Ostsee, Doku entsprechend kennzeichnen | entschieden (Welle 5); Doku gekennzeichnet (PR 177) | P08, P57 |
 | K2 | Gezeiten als Kernidee: Tiefgang nur bei Hochwasser | erledigt (P57 Teil 1: Zufahrt nur im Tidenfenster, Warten auf die Flut, docs/nordsee.md) | P57 |
-| K3 | Kleinster spielbarer Kern: eigene Karte, Pegel, Tiefgang-Fenster, Kutter | offen | P57 |
-| K4 | Trockenfallen als Platzart | offen | P57 |
-| K5 | Seekarte zum Wechseln, Spielstand und Ruf je Hafen | offen | P57 |
-| K6 | Freischalten an einer Stelle festlegen | offen | P57 |
+| K3 | Kleinster spielbarer Kern: eigene Karte, Pegel, Tiefgang-Fenster, Kutter | erledigt (P57: Pegel und Tidenfenster Teil 1 und 2, eigene Küsten Teil 6, mehr Kutter als Revierfaktor) | P57 |
+| K4 | Trockenfallen als Platzart | erledigt (P57 Teil 3: Bojenfeld im Watt, PR 450) | P57 |
+| K5 | Seekarte zum Wechseln, Spielstand und Ruf je Hafen | erledigt (P57 Teil 5: Seekarte im Fenster Neues Spiel, Revier je Spielstand, Startgeld aus dem Ruf, PR 453) | P57 |
+| K6 | Freischalten an einer Stelle festlegen | erledigt (P57 Teil 5: `ECONOMY.nordsee.start.abStufe`, `save/reviere.js`) | P57 |
 | K7 | Nordsee-Stimmung bis dahin als Farbthema im Kreativ- oder Fotomodus | offen | P45 |
 
 ### L Hafenleben, Ton und Fotomodus
@@ -734,7 +734,7 @@ Viele Pakete ändern `web/js/sim.js`. Regel: kleine, getrennte Änderungen, vor 
 
 | Paket | Titel (Thread) | Inhalt | Thread |
 |---|---|---|---|
-| P57 | Nordsee mit Gezeiten spielbar machen | Revierfaktoren, Gezeiten, Schleuse, Trockenfallplätze, `docs/regionen.md` | läuft (Thread "Nordsee mit Gezeiten spielbar machen"): Teil 1 Gezeiten in den Regeln (PR 448), Teil 2 Tide sichtbar und Teil 3 Trockenfallplätze (PR 450) gebaut, Teile 4 bis 6 in Arbeit (docs/nordsee.md) |
+| P57 | Nordsee mit Gezeiten spielbar machen | Revierfaktoren, Gezeiten, Schleuse, Trockenfallplätze, `docs/regionen.md` | erledigt: Teil 1 Gezeiten in den Regeln (PR 448), Teil 2 Tide sichtbar und Teil 3 Trockenfallplätze (PR 450), Teil 4 Schleuse (PR 452), Teil 5 Freischalten, Seekarte, Startgeld (PR 453), Teil 6 Nordsee-Küsten (PR 455); docs/nordsee.md |
 | P58 | Online mit Supabase | Hafenname, Bestenliste, Gastboote; erst wenn alles lokal fertig ist | neu, zuletzt |
 
 ### Welle 6: Ausbau Stufe 7 bis 20 (nach Welle 4 und P57)

@@ -123,7 +123,7 @@ Balancing:
 node tools/balance.mjs --laeufe 10 --revier nordsee
 ```
 
-Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, Ostsee 103. Einnahmen bis Tag 30 höher (Hafengeld mal 1,15), der Aufstieg gleich lang.
+Messung 28.11.2026 (10 Läufe, geschickt): Nordsee 101 Tage bis zum Abschluss, Ostsee 103. Nach Teil 6 (Schleuse an allen Küsten): Nordsee 102 Tage geschickt, 122 gemütlich. Einnahmen bis Tag 30 höher (Hafengeld mal 1,15), der Aufstieg gleich lang.
 
 ## 8. Entscheidungen (P57, selbst getroffen und notiert)
 
